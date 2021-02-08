@@ -1,10 +1,16 @@
 import { applyRef } from './refs';
 import { normalizeToVNode } from '../create-element';
-import { EMPTY_ARR, MODE_HYDRATE, MODE_SUSPENDED } from '../constants';
+import {
+	COMPONENT_NODE,
+	EMPTY_ARR,
+	MODE_HYDRATE,
+	MODE_SUSPENDED
+} from '../constants';
 import { getDomSibling } from '../component';
 import { mount } from './mount';
 import { patch } from './patch';
 import { unmount } from './unmount';
+import { createInternal } from '../tree';
 
 /**
  * Diff the children of a virtual node
@@ -13,7 +19,7 @@ import { unmount } from './unmount';
  * @param {import('../internal').ComponentChildren[]} renderResult
  * @param {import('../internal').VNode} newParentVNode The new virtual node
  * whose children should be diff'ed against oldParentVNode
- * @param {import('../internal').VNode} oldParentVNode The old virtual node
+ * @param {import('../internal').Internal} internal The Internal node
  * whose children should be diff'ed against newParentVNode
  * @param {object} globalContext The current context object - modified by
  * getChildContext
@@ -27,7 +33,7 @@ export function diffChildren(
 	parentDom,
 	renderResult,
 	newParentVNode,
-	oldParentVNode,
+	internal,
 	globalContext,
 	isSvg,
 	commitQueue,
@@ -35,113 +41,122 @@ export function diffChildren(
 ) {
 	let i, j, newDom, firstChildDom, refs;
 
-	/** @type {import('../internal').VNode} */
-	let oldVNode;
+	/** @type {import('../internal').Internal} */
+	let childInternal;
 
 	/** @type {import('../internal').VNode} */
 	let childVNode;
 
-	let oldChildren = oldParentVNode._children || EMPTY_ARR;
+	let oldChildren = internal._children || EMPTY_ARR;
 	let oldChildrenLength = oldChildren.length;
 
-	newParentVNode._children = [];
+	const newChildren = [];
 	for (i = 0; i < renderResult.length; i++) {
-		childVNode = newParentVNode._children[i] = normalizeToVNode(
-			renderResult[i]
-		);
+		childVNode = normalizeToVNode(renderResult[i]);
+		//newChildren[i] = childVNode;
 
 		// Terser removes the `continue` here and wraps the loop body
 		// in a `if (childVNode) { ... } condition
 		if (childVNode == null) {
+			// @TODO: assign `newChildren[i] = null`?
 			continue;
 		}
 
-		childVNode._parent = newParentVNode;
-		childVNode._depth = newParentVNode._depth + 1;
+		// childVNode._parent = internal;
+		// childVNode._depth = newParentVNode._depth + 1;
 
 		// Check if we find a corresponding element in oldChildren.
 		// If found, delete the array item by setting to `undefined`.
 		// We use `undefined`, as `null` is reserved for empty placeholders
 		// (holes).
-		oldVNode = oldChildren[i];
+		childInternal = oldChildren[i];
 
 		if (
-			oldVNode === null ||
-			(oldVNode &&
-				childVNode.key == oldVNode.key &&
-				childVNode.type === oldVNode.type)
+			childInternal === null ||
+			(childInternal &&
+				childVNode.key == childInternal.key &&
+				childVNode.type === childInternal.type)
 		) {
 			oldChildren[i] = undefined;
 		} else {
 			// Either oldVNode === undefined or oldChildrenLength > 0,
 			// so after this loop oldVNode == null or oldVNode is a valid value.
 			for (j = 0; j < oldChildrenLength; j++) {
-				oldVNode = oldChildren[j];
+				childInternal = oldChildren[j];
 				// If childVNode is unkeyed, we only match similarly unkeyed nodes, otherwise we match by key.
 				// We always match by type (in either case).
 				if (
-					oldVNode &&
-					childVNode.key == oldVNode.key &&
-					childVNode.type === oldVNode.type
+					childInternal &&
+					childVNode.key == childInternal.key &&
+					childVNode.type === childInternal.type
 				) {
 					oldChildren[j] = undefined;
 					break;
 				}
-				oldVNode = null;
+				childInternal = null;
 			}
 		}
 
 		let oldVNodeRef;
 		let nextDomSibling;
-		if (oldVNode == null) {
+		if (childInternal == null) {
+			childInternal = createInternal(childVNode);
+
 			// We are mounting a new VNode
 			nextDomSibling = mount(
 				parentDom,
-				childVNode,
+				childInternal,
 				globalContext,
 				isSvg,
 				commitQueue,
 				startDom
 			);
 		} else if (
-			(oldVNode._mode & (MODE_HYDRATE | MODE_SUSPENDED)) ==
+			(childInternal._mode & (MODE_HYDRATE | MODE_SUSPENDED)) ==
 			(MODE_HYDRATE | MODE_SUSPENDED)
 		) {
 			// We are resuming the hydration of a VNode
-			startDom = oldVNode._dom;
+			startDom = childInternal._dom;
 			// Resume the same mode as before suspending
-			childVNode._mode = oldVNode._mode;
-			oldVNodeRef = oldVNode.ref;
+			// childVNode._mode = oldInternal._mode;
+			oldVNodeRef = childInternal.ref;
 
 			nextDomSibling = mount(
 				parentDom,
-				childVNode,
+				childInternal,
 				globalContext,
 				isSvg,
 				commitQueue,
 				startDom
 			);
 		} else {
+			// this was previously captured after patch(), which seems backwards?
+			oldVNodeRef = childInternal.ref;
+
 			// Morph the old element into the new one, but don't append it to the dom yet
 			nextDomSibling = patch(
 				parentDom,
 				childVNode,
-				oldVNode,
+				childInternal,
 				globalContext,
 				isSvg,
 				commitQueue,
 				startDom
 			);
 
-			oldVNodeRef = oldVNode.ref;
+			// oldVNodeRef = childInternal.ref;
 		}
 
-		newDom = childVNode._dom;
+		newDom = childInternal._dom;
 
 		if (childVNode.ref && oldVNodeRef != childVNode.ref) {
 			if (!refs) refs = [];
-			if (oldVNodeRef) refs.push(oldVNodeRef, null, childVNode);
-			refs.push(childVNode.ref, childVNode._component || newDom, childVNode);
+			if (oldVNodeRef) refs.push(oldVNodeRef, null, childInternal);
+			refs.push(
+				childVNode.ref,
+				childInternal._component || newDom,
+				childInternal
+			);
 		}
 
 		if (newDom != null) {
@@ -149,16 +164,19 @@ export function diffChildren(
 				firstChildDom = newDom;
 			}
 
-			if (typeof childVNode.type == 'function') {
+			if (childInternal._flags & COMPONENT_NODE) {
+				// @TODO: this needs to happen unconditionally in patch()
 				if (
-					childVNode._children != null &&
-					oldVNode != null &&
-					childVNode._children === oldVNode._children
+					childInternal != null &&
+					childVNode.props &&
+					childVNode.props.children != null &&
+					childVNode.props.children === childInternal.props.children
 				) {
-					startDom = reorderChildren(childVNode, startDom, parentDom);
+					startDom = reorderChildren(childInternal, startDom, parentDom);
 				} else {
 					startDom = nextDomSibling;
 				}
+				startDom = nextDomSibling;
 			} else if (newDom == startDom) {
 				// If the newDom and the dom we are expecting to be there are the same, then
 				// do nothing
@@ -184,29 +202,32 @@ export function diffChildren(
 			}
 		} else if (
 			startDom &&
-			oldVNode != null &&
-			oldVNode._dom == startDom &&
+			childInternal != null &&
+			childInternal._dom == startDom &&
 			startDom.parentNode != parentDom
 		) {
 			// The above condition is to handle null placeholders. See test in placeholder.test.js:
 			// `efficiently replace null placeholders in parent rerenders`
-			startDom = getDomSibling(oldVNode);
+			startDom = getDomSibling(childInternal);
 		}
+
+		newChildren[i] = childInternal;
 	}
 
-	newParentVNode._dom = firstChildDom;
+	// newParentVNode._dom = firstChildDom;
+	internal._dom = firstChildDom;
 
 	// Remove remaining oldChildren if there are any.
 	for (i = oldChildrenLength; i--; ) {
 		if (oldChildren[i] != null) {
 			if (
-				typeof newParentVNode.type == 'function' &&
-				oldChildren[i]._dom != null &&
+				internal._flags & COMPONENT_NODE &&
+				startDom != null &&
 				oldChildren[i]._dom == startDom
 			) {
 				// If the startDom points to a dom node that is about to be unmounted,
 				// then get the next sibling of that vnode and set startDom to it
-				startDom = getDomSibling(oldParentVNode, i + 1);
+				startDom = getDomSibling(internal, i + 1);
 			}
 
 			unmount(oldChildren[i], oldChildren[i]);
@@ -224,29 +245,29 @@ export function diffChildren(
 }
 
 /**
- * @param {import('../internal').VNode} childVNode
+ * @param {import('../internal').Internal} internal
  * @param {import('../internal').PreactElement} startDom
  * @param {import('../internal').PreactElement} parentDom
  */
-function reorderChildren(childVNode, startDom, parentDom) {
-	for (let tmp = 0; tmp < childVNode._children.length; tmp++) {
-		let vnode = childVNode._children[tmp];
-		if (vnode) {
+function reorderChildren(internal, startDom, parentDom) {
+	for (let tmp = 0; tmp < internal._children.length; tmp++) {
+		let childInternal = internal._children[tmp];
+		if (childInternal) {
 			// We typically enter this code path on sCU bailout, where we copy
 			// oldVNode._children to newVNode._children. If that is the case, we need
 			// to update the old children's _parent pointer to point to the newVNode
 			// (childVNode here).
-			vnode._parent = childVNode;
+			childInternal._parent = internal;
 
-			if (typeof vnode.type == 'function') {
-				startDom = reorderChildren(vnode, startDom, parentDom);
-			} else if (vnode._dom == startDom) {
+			if (typeof childInternal.type == 'function') {
+				startDom = reorderChildren(childInternal, startDom, parentDom);
+			} else if (childInternal._dom == startDom) {
 				startDom = startDom.nextSibling;
 			} else {
 				startDom = placeChild(
 					parentDom,
-					childVNode._children.length,
-					vnode._dom,
+					internal._children.length,
+					childInternal._dom,
 					startDom
 				);
 			}
