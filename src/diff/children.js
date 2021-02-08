@@ -121,10 +121,7 @@ export function diffChildren(
 				commitQueue,
 				startDom
 			);
-		} else if (
-			(childInternal._mode & (MODE_HYDRATE | MODE_SUSPENDED)) ==
-			(MODE_HYDRATE | MODE_SUSPENDED)
-		) {
+		} else if (childInternal._mode & (MODE_HYDRATE | MODE_SUSPENDED)) {
 			// We are resuming the hydration of a VNode
 			startDom = childInternal._dom;
 			// Resume the same mode as before suspending
