@@ -139,7 +139,7 @@ export interface Internal<P = {}> {
 	 * Associated DOM element for the Internal, or its nearest realized descendant.
 	 * For Fragments, this is the first DOM child.
 	 */
-	_dom: PreactElement | Text | Node;
+	_dom: PreactNode;
 	/** The component instance for which this is a backing Internal node */
 	_component: Component | null;
 	/** Bitfield containing rendering mode flags */
@@ -154,18 +154,22 @@ export interface Component<P = {}, S = {}> extends preact.Component<P, S> {
 	// When component is functional component, this is reset to functional component
 	constructor: ComponentType<P>;
 	state: S; // Override Component["state"] to not be readonly for internal use, specifically Hooks
-
+	/** @TODO this should be a mode flag */
 	_dirty: boolean;
+	/** @TODO this should be a mode flag */
 	_force?: boolean;
+	/** @TODO this should be moved to internal.data */
 	_renderCallbacks: Array<() => void>; // Only class components
 	_globalContext?: any;
-	_vnode?: VNode<P> | null;
+	/** @TODO this should be renamed to `_internal`: */
+	_vnode?: Internal<P> | null;
 	_nextState?: S | null; // Only class components
 	/** Only used in the devtools to later dirty check if state has changed */
 	_prevState?: S | null;
 	/**
 	 * Pointer to the parent dom node. This is only needed for top-level Fragment
 	 * components or array returns.
+	 * @TODO this should be moved to Internal
 	 */
 	_parentDom?: PreactElement | null;
 }
