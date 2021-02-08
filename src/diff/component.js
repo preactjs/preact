@@ -191,7 +191,8 @@ export function renderComponent(
 	if (internal._children == null) {
 		nextDomSibling = mountChildren(
 			parentDom,
-			Array.isArray(renderResult) ? renderResult : [renderResult],
+			// Array.isArray(renderResult) ? renderResult : [renderResult],
+			renderResult,
 			internal,
 			globalContext,
 			isSvg,
@@ -201,7 +202,8 @@ export function renderComponent(
 	} else {
 		nextDomSibling = diffChildren(
 			parentDom,
-			Array.isArray(renderResult) ? renderResult : [renderResult],
+			// Array.isArray(renderResult) ? renderResult : [renderResult],
+			renderResult,
 			internal,
 			globalContext,
 			isSvg,

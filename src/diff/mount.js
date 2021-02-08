@@ -189,7 +189,8 @@ function mountDOMElement(dom, internal, globalContext, isSvg, commitQueue) {
 		} else if ((i = internal.props.children) != null) {
 			mountChildren(
 				dom,
-				Array.isArray(i) ? i : [i],
+				// Array.isArray(i) ? i : [i],
+				i,
 				internal,
 				globalContext,
 				isSvg && nodeType !== 'foreignObject',
@@ -235,6 +236,17 @@ export function mountChildren(
 ) {
 	let i, childVNode, childInternal, newDom, firstChildDom, mountedNextChild;
 
+	if (typeof renderResult == 'string' || typeof renderResult == 'number') {
+		parentInternal._children = '' + renderResult;
+		if (~parentInternal._flags & MODE_HYDRATE) {
+			// parentDom.textContent = renderResult;
+			parentDom.appendChild(document.createTextNode(renderResult));
+		}
+
+		return;
+	}
+
+	renderResult = Array.isArray(renderResult) ? renderResult : [renderResult];
 	parentInternal._children = [];
 	for (i = 0; i < renderResult.length; i++) {
 		childVNode = normalizeToVNode(renderResult[i]);

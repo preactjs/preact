@@ -138,7 +138,8 @@ function patchDOMElement(
 		tmp = newVNode.props.children;
 		diffChildren(
 			dom,
-			Array.isArray(tmp) ? tmp : [tmp],
+			// Array.isArray(tmp) ? tmp : [tmp],
+			tmp,
 			internal,
 			globalContext,
 			isSvg && newType !== 'foreignObject',

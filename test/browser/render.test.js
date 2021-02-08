@@ -26,7 +26,7 @@ function getAttributes(node) {
 
 const isIE11 = /Trident\//.test(navigator.userAgent);
 
-describe('render()', () => {
+describe.only('render()', () => {
 	let scratch, rerender;
 
 	let resetAppendChild;
