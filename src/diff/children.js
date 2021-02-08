@@ -45,10 +45,32 @@ export function diffChildren(
 	/** @type {import('../internal').VNode | string} */
 	let childVNode;
 
-	let oldChildren =
-		(parentInternal._children && parentInternal._children.slice()) || EMPTY_ARR;
+	let oldChildren = parentInternal._children;
+
+	if (typeof oldChildren == 'string') {
+		if (typeof renderResult == 'string' || typeof renderResult == 'number') {
+			// single text child -> single text child!
+			if (oldChildren != renderResult) {
+				// TODO: What's the best property to set text with. Perhaps
+				// parent.textContent for mounting and replacing all children &
+				// parent.firstChild.nodeValue for updating?
+				parentInternal._children = parentDom.firstChild.nodeValue =
+					'' + renderResult;
+			}
+
+			return;
+		} else {
+			// single text -> any. Let's just remove the text child and prepare to
+			// mount the new dom.
+			parentDom.firstChild.remove();
+			oldChildren = EMPTY_ARR;
+		}
+	}
+
+	oldChildren = (oldChildren && oldChildren.slice()) || EMPTY_ARR;
 	let oldChildrenLength = oldChildren.length;
 
+	renderResult = Array.isArray(renderResult) ? renderResult : [renderResult];
 	const newChildren = [];
 	for (i = 0; i < renderResult.length; i++) {
 		childVNode = normalizeToVNode(renderResult[i]);

@@ -133,7 +133,7 @@ export interface Internal<P = {}> {
 	key: any;
 	ref: Ref<any> | null;
 	/** children Internal nodes */
-	_children: Internal[];
+	_children: null | string | Internal[];
 	/** next sibling Internal node */
 	_parent: Internal;
 	/** most recent vnode ID @TODO rename to _vnodeId */
