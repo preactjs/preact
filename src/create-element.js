@@ -1,4 +1,3 @@
-import { MODE_NONE } from './constants';
 import options from './options';
 
 /**

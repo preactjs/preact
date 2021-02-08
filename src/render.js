@@ -1,4 +1,4 @@
-import { MODE_HYDRATE, MODE_MUTATIVE_HYDRATE, MODE_NONE } from './constants';
+import { MODE_HYDRATE, MODE_MUTATIVE_HYDRATE } from './constants';
 import { commitRoot } from './diff/commit';
 import { createElement, Fragment } from './create-element';
 import options from './options';
