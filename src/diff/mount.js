@@ -1,5 +1,7 @@
 import { applyRef } from './refs';
 import {
+	COMPONENT_NODE,
+	ELEMENT_NODE,
 	MODE_HYDRATE,
 	MODE_MUTATIVE_HYDRATE,
 	MODE_NONE,
@@ -7,14 +9,14 @@ import {
 } from '../constants';
 import { normalizeToVNode } from '../create-element';
 import { setProperty } from './props';
-import { removeNode } from '../util';
-import options from '../options';
 import { renderComponent } from './component';
+import { createInternal } from '../tree';
+import options from '../options';
 
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
  * @param {import('../internal').PreactElement} parentDom The parent of the DOM element
- * @param {import('../internal').VNode} newVNode The new virtual node
+ * @param {import('../internal').Internal} internal The Internal node to mount
  * @param {object} globalContext The current context object. Modified by getChildContext
  * @param {boolean} isSvg Whether or not this element is an SVG node
  * @param {Array<import('../internal').Component>} commitQueue List of components
@@ -24,7 +26,7 @@ import { renderComponent } from './component';
  */
 export function mount(
 	parentDom,
-	newVNode,
+	internal,
 	globalContext,
 	isSvg,
 	commitQueue,
@@ -32,18 +34,18 @@ export function mount(
 ) {
 	// When passing through createElement it assigns the object
 	// constructor as undefined. This to prevent JSON-injection.
-	if (newVNode.constructor !== undefined) return null;
+	if (internal.constructor !== undefined) return null;
 
-	if (options._diff) options._diff(newVNode);
+	if (options._diff) options._diff(internal);
 
 	/** @type {import('../internal').PreactElement} */
 	let nextDomSibling;
 
 	try {
-		if (typeof newVNode.type == 'function') {
+		if (internal._flags & COMPONENT_NODE) {
 			nextDomSibling = renderComponent(
 				parentDom,
-				newVNode,
+				internal,
 				null,
 				globalContext,
 				isSvg,
@@ -52,36 +54,36 @@ export function mount(
 			);
 		} else {
 			let hydrateDom =
-				newVNode._mode & (MODE_HYDRATE | MODE_MUTATIVE_HYDRATE)
+				internal._mode & (MODE_HYDRATE | MODE_MUTATIVE_HYDRATE)
 					? startDom
 					: null;
 
-			newVNode._dom = mountDOMElement(
+			internal._dom = mountDOMElement(
 				hydrateDom,
-				newVNode,
+				internal,
 				globalContext,
 				isSvg,
 				commitQueue
 			);
 
 			// @ts-ignore Trust me TS, nextSibling is a PreactElement
-			nextDomSibling = newVNode._dom.nextSibling;
+			nextDomSibling = internal._dom.nextSibling;
 		}
 
-		if (options.diffed) options.diffed(newVNode);
+		if (options.diffed) options.diffed(internal);
 
 		// We successfully rendered this VNode, unset any stored hydration/bailout state:
-		newVNode._mode = MODE_NONE;
+		internal._mode = MODE_NONE;
 	} catch (e) {
-		newVNode._original = null;
-		newVNode._mode = newVNode._mode | MODE_SUSPENDED;
+		internal._original = null;
+		internal._mode = internal._mode | MODE_SUSPENDED;
 
-		if (newVNode._mode & MODE_HYDRATE) {
+		if (internal._mode & MODE_HYDRATE) {
 			// @ts-ignore Trust me TS, nextSibling is a PreactElement
 			nextDomSibling = startDom && startDom.nextSibling;
-			newVNode._dom = startDom; // Save our current DOM position to resume later
+			internal._dom = startDom; // Save our current DOM position to resume later
 		}
-		options._catchError(e, newVNode, newVNode);
+		options._catchError(e, internal, internal);
 	}
 
 	return nextDomSibling;
@@ -91,20 +93,21 @@ export function mount(
  * Diff two virtual nodes representing DOM element
  * @param {import('../internal').PreactElement} dom The DOM element representing
  * the virtual nodes being diffed
- * @param {import('../internal').VNode} newVNode The new virtual node
+ * @param {import('../internal').Internal} internal The Internal node to mount
  * @param {object} globalContext The current context object
  * @param {boolean} isSvg Whether or not this DOM node is an SVG node
  * @param {Array<import('../internal').Component>} commitQueue List of components
  * which have callbacks to invoke in commitRoot
  * @returns {import('../internal').PreactElement}
  */
-function mountDOMElement(dom, newVNode, globalContext, isSvg, commitQueue) {
-	let newProps = newVNode.props;
-	let nodeType = newVNode.type;
+function mountDOMElement(dom, internal, globalContext, isSvg, commitQueue) {
+	let newProps = internal.props;
+	let nodeType = internal.type;
 	/** @type {any} */
 	let i;
 
-	let isHydrating = (newVNode._mode & MODE_HYDRATE) === MODE_HYDRATE;
+	let isHydrating = internal._mode & MODE_HYDRATE;
+
 	if (isHydrating) {
 		while (
 			dom &&
@@ -141,14 +144,14 @@ function mountDOMElement(dom, newVNode, globalContext, isSvg, commitQueue) {
 			}
 
 			// we are creating a new node, so we can assume this is a new subtree (in case we are hydrating), this deopts the hydrate
-			isHydrating = false;
-			newVNode._mode = MODE_NONE;
+			isHydrating = 0;
+			internal._mode = MODE_NONE;
 		}
 
 		// @TODO: Consider removing and instructing users to instead set the desired
 		// prop for removal to undefined/null. During hydration, props are not
 		// diffed at all (including dangerouslySetInnerHTML)
-		if (newVNode._mode & MODE_MUTATIVE_HYDRATE) {
+		if (internal._mode & MODE_MUTATIVE_HYDRATE) {
 			// But, if we are in a situation where we are using existing DOM (e.g. replaceNode)
 			// we should read the existing DOM attributes to diff them
 			for (i = 0; i < dom.attributes.length; i++) {
@@ -181,14 +184,14 @@ function mountDOMElement(dom, newVNode, globalContext, isSvg, commitQueue) {
 			if (!isHydrating && newHtml.__html) {
 				dom.innerHTML = newHtml.__html;
 			}
-			newVNode._children = [];
+			internal._children = [];
 		} else {
-			i = newVNode.props.children;
+			i = internal.props.children;
 
 			mountChildren(
 				dom,
 				Array.isArray(i) ? i : [i],
-				newVNode,
+				internal,
 				globalContext,
 				isSvg && nodeType !== 'foreignObject',
 				commitQueue,
@@ -215,8 +218,7 @@ function mountDOMElement(dom, newVNode, globalContext, isSvg, commitQueue) {
  * @param {import('../internal').PreactElement} parentDom The DOM element whose
  * children are being diffed
  * @param {import('../internal').ComponentChildren[]} renderResult
- * @param {import('../internal').VNode} newParentVNode The new virtual
- * node whose children should be diffed against oldParentVNode
+ * @param {import('../internal').Internal} parentInternal The parent Internal of the given children
  * @param {object} globalContext The current context object - modified by getChildContext
  * @param {boolean} isSvg Whether or not this DOM node is an SVG node
  * @param {Array<import('../internal').Component>} commitQueue List of components
@@ -226,19 +228,19 @@ function mountDOMElement(dom, newVNode, globalContext, isSvg, commitQueue) {
 export function mountChildren(
 	parentDom,
 	renderResult,
-	newParentVNode,
+	parentInternal,
 	globalContext,
 	isSvg,
 	commitQueue,
 	startDom
 ) {
-	let i, childVNode, newDom, firstChildDom, mountedNextChild;
+	let i, childVNode, childInternal, newDom, firstChildDom, mountedNextChild;
 
-	newParentVNode._children = [];
+	parentInternal._children = [];
 	for (i = 0; i < renderResult.length; i++) {
-		childVNode = newParentVNode._children[i] = normalizeToVNode(
-			renderResult[i]
-		);
+		childVNode = normalizeToVNode(renderResult[i]);
+		childInternal = createInternal(childVNode);
+		parentInternal._children[i] = childInternal;
 
 		// Terser removes the `continue` here and wraps the loop body
 		// in a `if (childVNode) { ... } condition
@@ -246,28 +248,28 @@ export function mountChildren(
 			continue;
 		}
 
-		childVNode._parent = newParentVNode;
-		childVNode._depth = newParentVNode._depth + 1;
-		childVNode._mode = newParentVNode._mode;
+		childInternal._parent = parentInternal;
+		childInternal._depth = parentInternal._depth + 1;
+		childInternal._mode = parentInternal._mode;
 
 		// Morph the old element into the new one, but don't append it to the dom yet
 		mountedNextChild = mount(
 			parentDom,
-			childVNode,
+			childInternal,
 			globalContext,
 			isSvg,
 			commitQueue,
 			startDom
 		);
 
-		newDom = childVNode._dom;
+		newDom = childInternal._dom;
 
 		if (newDom != null) {
 			if (firstChildDom == null) {
 				firstChildDom = newDom;
 			}
 
-			if (typeof childVNode.type === 'function' || newDom == startDom) {
+			if (childInternal._flags & COMPONENT_NODE || newDom == startDom) {
 				// If the child is a Fragment-like or if it is DOM VNode and its _dom
 				// property matches the dom we are diffing (i.e. startDom), just
 				// continue with the mountedNextChild
@@ -280,17 +282,21 @@ export function mountChildren(
 			}
 		}
 
-		if (childVNode.ref) {
-			applyRef(childVNode.ref, childVNode._component || newDom, childVNode);
+		if (childInternal.ref) {
+			applyRef(
+				childInternal.ref,
+				childInternal._component || newDom,
+				childInternal
+			);
 		}
 	}
 
-	newParentVNode._dom = firstChildDom;
+	parentInternal._dom = firstChildDom;
 
 	// Remove children that are not part of any vnode.
 	if (
-		newParentVNode._mode & (MODE_HYDRATE | MODE_MUTATIVE_HYDRATE) &&
-		typeof newParentVNode.type !== 'function'
+		parentInternal._mode & (MODE_HYDRATE | MODE_MUTATIVE_HYDRATE) &&
+		parentInternal._flags & ELEMENT_NODE
 	) {
 		// TODO: Would it be simpler to just clear the pre-existing DOM in top-level
 		// render if render is called with no oldVNode & existing children & no
@@ -299,7 +305,8 @@ export function mountChildren(
 		while (startDom) {
 			i = startDom;
 			startDom = startDom.nextSibling;
-			removeNode(i);
+			// note: technically `parentInternal._dom`, but we just assigned to it above.
+			firstChildDom.removeChild(i);
 		}
 	}
 
