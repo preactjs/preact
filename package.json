@@ -163,6 +163,9 @@
 			"pre-commit": "lint-staged"
 		}
 	},
+  "babel": {
+    "extends": "./test/babel.config.js"
+  },
 	"files": [
 		"src",
 		"dist",
