@@ -64,14 +64,8 @@ export function createVNode(type, props, key, ref, original) {
 		props,
 		key,
 		ref,
-		_children: null,
-		_parent: null,
-		_depth: 0,
-		_dom: null,
-		_component: null,
 		constructor: undefined,
-		_original: original == null ? ++options._vnodeId : original,
-		_mode: MODE_NONE
+		_original: original == null ? ++options._vnodeId : original
 	};
 
 	if (options.vnode != null) options.vnode(vnode);
@@ -94,18 +88,6 @@ export function normalizeToVNode(childVNode) {
 		return createVNode(null, childVNode, null, null, childVNode);
 	} else if (Array.isArray(childVNode)) {
 		return createVNode(Fragment, { children: childVNode }, null, null, null);
-	} else if (childVNode._depth > 0) {
-		// VNode is already in use, clone it. This can happen in the following
-		// scenario:
-		//   const reuse = <div />
-		//   <div>{reuse}<span />{reuse}</div>
-		return createVNode(
-			childVNode.type,
-			childVNode.props,
-			childVNode.key,
-			null,
-			childVNode._original
-		);
 	}
 
 	return childVNode;
