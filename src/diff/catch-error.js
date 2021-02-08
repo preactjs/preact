@@ -3,21 +3,21 @@ import { MODE_ERRORED } from '../constants';
 /**
  * Find the closest error boundary to a thrown error and call it
  * @param {object} error The thrown value
- * @param {import('../internal').VNode} vnode The vnode that threw
+ * @param {import('../internal').Internal} internal The Internal node that threw
  * the error that was caught (except for unmounting when this parameter
  * is the highest parent that was being unmounted)
  */
-export function _catchError(error, vnode) {
+export function _catchError(error, internal) {
 	/** @type {import('../internal').Component} */
 	let component;
 
-	if (vnode) vnode._mode |= MODE_ERRORED;
+	internal._mode |= MODE_ERRORED;
 
-	for (; (vnode = vnode._parent); ) {
-		if ((component = vnode._component) && ~vnode._mode & MODE_ERRORED) {
+	for (; (internal = internal._parent); ) {
+		if ((component = internal._component) && ~internal._mode & MODE_ERRORED) {
 			try {
-				if (vnode.type.getDerivedStateFromError != null) {
-					component.setState(vnode.type.getDerivedStateFromError(error));
+				if (internal.type.getDerivedStateFromError != null) {
+					component.setState(internal.type.getDerivedStateFromError(error));
 				}
 
 				if (component.componentDidCatch != null) {

@@ -4,42 +4,43 @@ import { applyRef } from './refs';
 
 /**
  * Unmount a virtual node from the tree and apply DOM changes
- * @param {import('../internal').VNode} vnode The virtual node to unmount
- * @param {import('../internal').VNode} parentVNode The parent of the VNode that
+ * @param {import('../internal').Internal} internal The virtual node to unmount
+ * @param {import('../internal').Internal} parentInternal The parent of the VNode that
  * initiated the unmount
  * @param {boolean} [skipRemove] Flag that indicates that a parent node of the
  * current element is already detached from the DOM.
  */
-export function unmount(vnode, parentVNode, skipRemove) {
+export function unmount(internal, parentInternal, skipRemove) {
 	let r;
-	if (options.unmount) options.unmount(vnode);
+	if (options.unmount) options.unmount(internal);
 
-	if ((r = vnode.ref)) {
-		if (!r.current || r.current === vnode._dom) applyRef(r, null, parentVNode);
+	if ((r = internal.ref)) {
+		if (!r.current || r.current === internal._dom)
+			applyRef(r, null, parentInternal);
 	}
 
 	let dom;
-	if (!skipRemove && typeof vnode.type != 'function') {
-		skipRemove = (dom = vnode._dom) != null;
+	if (!skipRemove && typeof internal.type != 'function') {
+		skipRemove = (dom = internal._dom) != null;
 	}
 
-	vnode._dom = null;
+	internal._dom = null;
 
-	if ((r = vnode._component) != null) {
+	if ((r = internal._component) != null) {
 		if (r.componentWillUnmount) {
 			try {
 				r.componentWillUnmount();
 			} catch (e) {
-				options._catchError(e, parentVNode);
+				options._catchError(e, parentInternal);
 			}
 		}
 
 		r._parentDom = null;
 	}
 
-	if ((r = vnode._children)) {
+	if ((r = internal._children)) {
 		for (let i = 0; i < r.length; i++) {
-			if (r[i]) unmount(r[i], parentVNode, skipRemove);
+			if (r[i]) unmount(r[i], parentInternal, skipRemove);
 		}
 	}
 
