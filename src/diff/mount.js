@@ -235,14 +235,15 @@ export function mountChildren(
 	parentInternal._children = [];
 	for (i = 0; i < renderResult.length; i++) {
 		childVNode = normalizeToVNode(renderResult[i]);
-		childInternal = createInternal(childVNode);
-		parentInternal._children[i] = childInternal;
 
 		// Terser removes the `continue` here and wraps the loop body
 		// in a `if (childVNode) { ... } condition
 		if (childVNode == null) {
 			continue;
 		}
+
+		childInternal = createInternal(childVNode);
+		parentInternal._children[i] = childInternal;
 
 		childInternal._parent = parentInternal;
 		childInternal._depth = parentInternal._depth + 1;
