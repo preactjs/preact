@@ -29,6 +29,15 @@ options.unmount = function(vnode) {
 	if (component && component._onResolve) {
 		component._onResolve();
 	}
+
+	// if the component is still hydrating
+	// most likely it is because the component is suspended
+	// we set the vnode.type as `null` so that it is not a typeof function
+	// so the unmount will remove the vnode._dom
+	if (component && vnode._hydrating === true) {
+		vnode.type = null;
+	}
+
 	if (oldUnmount) oldUnmount(vnode);
 };
 
@@ -119,6 +128,7 @@ Suspense.prototype._childDidSuspend = function(promise, suspendingVNode) {
 		if (resolved) return;
 
 		resolved = true;
+		suspendingComponent._onResolve = null;
 
 		if (resolve) {
 			resolve(onSuspensionComplete);
@@ -127,10 +137,7 @@ Suspense.prototype._childDidSuspend = function(promise, suspendingVNode) {
 		}
 	};
 
-	suspendingComponent._onResolve = () => {
-		suspendingComponent._onResolve = null;
-		onResolved();
-	};
+	suspendingComponent._onResolve = onResolved;
 
 	const onSuspensionComplete = () => {
 		if (!--c._pendingSuspensionCount) {
