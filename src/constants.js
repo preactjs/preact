@@ -1,3 +1,4 @@
+// Internal._mode bitfield constants
 /** Normal mount/patch. Not hydration or side-effecting top-level render. */
 export const MODE_NONE = 0;
 /** Normal hydration that attaches to a DOM tree but does not diff it. */
