@@ -26,7 +26,7 @@ export function createInternal(vnode) {
 	if (typeof vnode === 'string') {
 		// type = null;
 		props = vnode;
-	} else if (vnode.constructor === undefined) {
+	} else if (vnode.constructor !== undefined) {
 		props = '';
 	} else {
 		type = vnode.type;
