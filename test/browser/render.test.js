@@ -82,7 +82,7 @@ describe('render()', () => {
 	it('should not render when detecting JSON-injection', () => {
 		const vnode = JSON.parse('{"type":"span","children":"Malicious"}');
 		render(vnode, scratch);
-		expect(scratch.firstChild).to.be.null;
+		expect(scratch.innerHTML).to.equal('');
 	});
 
 	it('should create empty nodes (<* />)', () => {
