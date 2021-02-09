@@ -75,7 +75,7 @@ export function diffChildren(
 
 		if (typeof childVNode === 'string') {
 			// We never move Text nodes, so we only check for an in-place match:
-			if (childInternal._flags & TEXT_NODE) {
+			if (childInternal && childInternal._flags & TEXT_NODE) {
 				oldChildren[i] = undefined;
 			} else {
 				// We're looking for a Text node, but this wasn't one: ignore it
