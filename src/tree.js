@@ -24,9 +24,11 @@ export function createInternal(vnode) {
 	let vnodeId = NaN;
 
 	if (typeof vnode === 'string') {
-		type = null;
+		// type = null;
 		props = vnode;
 	} else if (vnode.constructor === undefined) {
+		props = '';
+	} else {
 		type = vnode.type;
 		props = vnode.props;
 		key = vnode.key;
