@@ -285,22 +285,23 @@ export function initDebug() {
 		children: warn('children', 'use vnode.props.children')
 	};
 
+	// Property descriptor: preserve a property's value but make it non-enumerable:
+	const debugProps = {
+		__source: { enumerable: false },
+		__self: { enumerable: false }
+	};
+
+	// If it's acceptable to inject debug properties onto the
+	// prototype, __proto__ is faster than defineProperties():
+	// https://esbench.com/bench/6021ebd7d9c27600a7bfdba3
 	const deprecatedProto = Object.create({}, deprecatedAttributes);
 
 	options.vnode = vnode => {
 		const props = vnode.props;
-		if (
-			vnode.type !== null &&
-			props != null &&
-			('__source' in props || '__self' in props)
-		) {
-			const newProps = (vnode.props = {});
-			for (let i in props) {
-				const v = props[i];
-				if (i === '__source') vnode.__source = v;
-				else if (i === '__self') vnode.__self = v;
-				else newProps[i] = v;
-			}
+		if (props != null && ('__source' in props || '__self' in props)) {
+			Object.defineProperties(props, debugProps);
+			vnode.__source = props.__source;
+			vnode.__self = props.__self;
 		}
 
 		// eslint-disable-next-line
