@@ -228,7 +228,48 @@ export function diffChildren(
 				// If the newParentVNode.__nextDom points to a dom node that is about to
 				// be unmounted, then get the next sibling of that vnode and set
 				// _nextDom to it
-				newParentVNode._nextDom = getDomSibling(oldParentVNode, i + 1);
+
+				// getDomSibling doesn't work cuz oldParentVNode._parent._children is
+				// being cleared out as it is diffed and nodes are matched against it.
+				// So the vnode._parent._children.indexOf(vnode) line in getDomSibling
+				// will return -1 if the vnode it is searching for has already been
+				// cleared (`oldChildren[i] = undefined` line in diffChildren above)
+				// causing getDomSibling to return the wrong sibling.
+				//
+				// newParentVNode._nextDom = getDomSibling(oldParentVNode, i + 1);
+
+				// ._dom.nextSibling doesn't work cuz if oldChildren[i] is a Fragment
+				// that is about to unmounted, we want the nextSibling of it's last DOM
+				// child, not the first dom child (which is what _dom is). getDomSibling
+				// did this correctly cuz the "i + 1" argument can skip over the current
+				// Fragment and all it's dom children.
+				//
+				// newParentVNode._nextDom = oldChildren[i]._dom.nextSibling;
+
+				// If the current vnode is a Fragment-like VNode, get the next sibling
+				// of its last dom child since all of its children are about to
+				// unmounted.
+				if (typeof oldChildren[i].type == 'function') {
+					// Note: We can assume getLastDomChild won't return null here since we
+					// verified above that oldChildren[i]._dom isn't null. Since this is a
+					// Component VNode, _dom represents is firstDomChild. So its last dom
+					// child has to at least be _dom even if other children don't have DOM.
+					newParentVNode._nextDom = getLastDomChild(oldChildren[i]).nextSibling;
+				} else {
+					newParentVNode._nextDom = oldChildren[i]._dom.nextSibling;
+				}
+
+				// TODO: Understand what the impact is for all those tests this affects
+				//
+				// let sibling = getDomSibling(oldParentVNode, i + 1);
+				// let nextDom = newParentVNode._nextDom;
+				// if (nextDom != sibling) {
+				// 	console.log(
+				// 		'==== WAAAAATTT =====',
+				// 		nextDom == null ? null : nextDom.nodeType == 3 ? '#text' : nextDom,
+				// 		sibling == null ? null : sibling.nodeType == 3 ? '#text' : sibling
+				// 	);
+				// }
 			}
 
 			unmount(oldChildren[i], oldChildren[i]);
@@ -239,6 +280,38 @@ export function diffChildren(
 	if (refs) {
 		for (i = 0; i < refs.length; i++) {
 			applyRef(refs[i], refs[++i], refs[++i]);
+		}
+	}
+}
+
+/**
+ * @param {import('../internal').VNode} parentVNode
+ */
+function getLastDomChild(parentVNode) {
+	// Only calling this function in one place where we can assume _children is an
+	// array.
+	//
+	// if (!vnode._children) {
+	// 	return null;
+	// }
+
+	let i = parentVNode._children.length;
+	while (i--) {
+		let vnode = parentVNode._children[i];
+
+		if (vnode != null) {
+			if (typeof vnode.type == 'function') {
+				// Recurse into component vnodes
+				let lastChild = getLastDomChild(vnode);
+				if (lastChild != null) {
+					// If component node has a last child, then return it.
+					return lastChild;
+				}
+				// Else, try the previous sibling (i.e. keep looping backwards)
+			} else {
+				// Hooray! We found a DOM node. Return it.
+				return vnode._dom;
+			}
 		}
 	}
 }
