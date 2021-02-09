@@ -9,24 +9,65 @@
 		<div id="root"></div>
 		<script type="module">
 			import { measureName, measureMemory } from './util.js';
-			import { createRoot, createElement } from 'framework';
+			import * as framework from 'framework';
+
+			let { createRoot, createElement } = framework;
+			let createVNode = framework.createVNode;
 
 			const root = createRoot(document.getElementById('root'));
 
-			function component({ randomValue }) {
+			function component1({ randomValue }) {
 				return createElement('div', {}, [
 					createElement('h2', {}, 'Test ' + randomValue),
 					createElement('h1', {}, `===${randomValue}===`)
 				]);
 			}
 
+			function component2({ randomValue }) {
+				return createVNode(
+					'div',
+					{
+						children: [
+							createVNode(
+								'h2',
+								{ children: 'Test ' + randomValue },
+								null,
+								null,
+								null
+							),
+							createVNode(
+								'h1',
+								{ children: `===${randomValue}===` },
+								null,
+								null,
+								null
+							)
+						]
+					},
+					null,
+					null,
+					null
+				);
+			}
+
 			let result;
 
-			performance.mark('start');
-			for (let i = 0; i < 100; i++) {
-				root.render(createElement(component, { randomValue: i }));
+			if (createVNode) {
+				performance.mark('start');
+				for (let i = 0; i < 100; i++) {
+					root.render(
+						createVNode(component2, { randomValue: i }, null, null, null)
+					);
+				}
+				performance.mark('stop');
+			} else {
+				performance.mark('start');
+				for (let i = 0; i < 100; i++) {
+					root.render(createElement(component1, { randomValue: i }));
+				}
+				performance.mark('stop');
 			}
-			performance.mark('stop');
+
 			performance.measure(measureName, 'start', 'stop');
 			measureMemory();
 		</script>

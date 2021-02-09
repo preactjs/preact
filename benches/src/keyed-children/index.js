@@ -3,6 +3,7 @@ import { getComponents } from './components.js';
 /**
  * @typedef Framework
  * @property {(type: any, props?: any, ...children: any) => JSX.Element} createElement
+ * @property {(type: any, props: any, key: any, ref: any, original: any) => JSX.Element} [createVNode]
  * @property {(root: HTMLElement) => ({ render(vnode: JSX.Element): void; hydrate(vnode: JSX.Element): void; })} createRoot
  * @property {any} Component
  *

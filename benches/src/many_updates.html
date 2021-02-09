@@ -18,7 +18,10 @@
 		<div id="root"></div>
 		<script type="module">
 			import { measureName, measureMemory } from './util.js';
-			import { createRoot, createElement as h } from 'framework';
+			import * as framework from 'framework';
+
+			let { createRoot, createElement: h } = framework;
+			let h2 = framework.createVNode;
 
 			const state = {
 				msg: 'hello',
@@ -29,36 +32,147 @@
 			};
 
 			let counter = 0;
-			function App() {
-				return h(
-					'div',
-					{ id: 'app' },
-					h('p', null, '> ', ++counter, ' <'),
-					h('p', null, state.msg),
-					...state.list.map((obj, i) =>
-						h(
-							'div',
-							{ key: i, title: state.msg + i },
-							h('span', { className: state.msg }, obj.text),
-							h('span', { className: 'baz' }, 'one'),
-							h('span', { className: 'qux' }, 'two'),
+			let App;
+
+			if (h2) {
+				App = function App2() {
+					h = h2;
+					return h2('div', {
+						id: 'app',
+						children: [
+							h2('p', { children: ['> ', ++counter, ' <'] }, null, null, null),
+							h2('p', { children: state.msg }, null, null, null),
+							...state.list.map((obj, i) =>
+								h2(
+									'div',
+									{
+										title: state.msg + i,
+										children: [
+											h2(
+												'span',
+												{ className: state.msg, children: obj.text },
+												null,
+												null,
+												null
+											),
+											h2(
+												'span',
+												{ className: 'baz', children: 'one' },
+												null,
+												null,
+												null
+											),
+											h2(
+												'span',
+												{ className: 'qux', children: 'two' },
+												null,
+												null,
+												null
+											),
+											h2(
+												'div',
+												{
+													children: [
+														h2(
+															'span',
+															{ className: 'qux', children: 'three' },
+															null,
+															null,
+															null
+														),
+														h2(
+															'span',
+															{ className: 'qux', children: 'four' },
+															null,
+															null,
+															null
+														),
+														h2(
+															'span',
+															{ className: 'baz', children: 'five' },
+															null,
+															null,
+															null
+														),
+														h2(
+															'div',
+															{
+																children: [
+																	h2(
+																		'span',
+																		{ className: 'qux', children: 'six' },
+																		null,
+																		null,
+																		null
+																	),
+																	h2(
+																		'span',
+																		{ className: 'baz', children: 'seven' },
+																		null,
+																		null,
+																		null
+																	),
+																	h2(
+																		'span',
+																		{ className: state.msg, children: 'eight' },
+																		null,
+																		null,
+																		null
+																	)
+																]
+															},
+															null,
+															null,
+															null
+														)
+													]
+												},
+												null,
+												null,
+												null
+											)
+										]
+									},
+									i,
+									null,
+									null
+								)
+							)
+						]
+					});
+				};
+			} else {
+				App = function App1() {
+					return h(
+						'div',
+						{ id: 'app' },
+						h('p', null, '> ', ++counter, ' <'),
+						h('p', null, state.msg),
+						...state.list.map((obj, i) =>
 							h(
 								'div',
-								null,
-								h('span', { className: 'qux' }, 'three'),
-								h('span', { className: 'qux' }, 'four'),
-								h('span', { className: 'baz' }, 'five'),
+								{ key: i, title: state.msg + i },
+								h('span', { className: state.msg }, obj.text),
+								h('span', { className: 'baz' }, 'one'),
+								h('span', { className: 'qux' }, 'two'),
 								h(
 									'div',
 									null,
-									h('span', { className: 'qux' }, 'six'),
-									h('span', { className: 'baz' }, 'seven'),
-									h('span', { className: state.msg }, 'eight')
+									h('span', { className: 'qux' }, 'three'),
+									h('span', { className: 'qux' }, 'four'),
+									h('span', { className: 'baz' }, 'five'),
+									h(
+										'div',
+										null,
+										h('span', { className: 'qux' }, 'six'),
+										h('span', { className: 'baz' }, 'seven'),
+										h('span', { className: state.msg }, 'eight')
+									)
 								)
 							)
 						)
-					)
-				);
+					);
+				};
 			}
 
 			const root = createRoot(document.getElementById('root'));
