@@ -165,7 +165,7 @@ export function renderComponent(
 
 	let nextDomSibling;
 
-	if (isNew) {
+	if (internal._children == null) {
 		nextDomSibling = mountChildren(
 			parentDom,
 			Array.isArray(renderResult) ? renderResult : [renderResult],
