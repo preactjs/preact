@@ -184,7 +184,9 @@ function mountDOMElement(dom, internal, globalContext, isSvg, commitQueue) {
 				dom.innerHTML = newHtml.__html;
 			}
 			internal._children = [];
-		} else if ((i = internal.props.children) != internal._children) {
+		} else {
+			i = newProps.children;
+
 			mountChildren(
 				dom,
 				Array.isArray(i) ? i : [i],

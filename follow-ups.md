@@ -4,6 +4,23 @@
 
 * `[MAJOR]` Deprecated `component.base`
 
+## Backing Node follow ups
+
+- Ensure we are always doing _flags check instead of vnode.type checks
+- Add back no VNodes for string/number children
+- Address many TODOs
+- Move refs to internal renderCallbacks
+- Rewrite rerender loop to operate on internals, not components
+- Rewrite commit loop to operate on internals not components
+- rewrite hooks to operate on internals?
+- Always assign a number to _original (not null, use 0 to clear?)
+
+## Child diffing investigations
+
+- Reduce allocations for text nodes
+- Investigate skip-index tracking instead of while loop
+- Loop multiple times - recursive diff, unmount children, place child
+
 ## TODOs
 
 * Consider further removing _dom pointers from non-dom VNodes

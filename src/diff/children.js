@@ -73,15 +73,7 @@ export function diffChildren(
 		// (holes).
 		childInternal = oldChildren[i];
 
-		if (typeof childVNode === 'string') {
-			// We never move Text nodes, so we only check for an in-place match:
-			if (childInternal && childInternal._flags & TEXT_NODE) {
-				oldChildren[i] = undefined;
-			} else {
-				// We're looking for a Text node, but this wasn't one: ignore it
-				childInternal = undefined;
-			}
-		} else if (
+		if (
 			childInternal === null ||
 			(childInternal &&
 				childVNode.key == childInternal.key &&
@@ -186,7 +178,6 @@ export function diffChildren(
 				} else {
 					startDom = nextDomSibling;
 				}
-				startDom = nextDomSibling;
 			} else if (newDom == startDom) {
 				// If the newDom and the dom we are expecting to be there are the same, then
 				// do nothing
