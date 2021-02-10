@@ -26,8 +26,6 @@ export function createInternal(vnode) {
 	if (vnode.type == null) {
 		type = null;
 		props = vnode.props;
-	} else if (vnode.constructor !== undefined) {
-		props = '';
 	} else {
 		type = vnode.type;
 		props = vnode.props;

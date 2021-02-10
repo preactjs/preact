@@ -58,7 +58,7 @@ export function diffChildren(
 
 		// Terser removes the `continue` here and wraps the loop body
 		// in a `if (childVNode) { ... } condition
-		if (childVNode == null) {
+		if (childVNode == null || childVNode.constructor !== undefined) {
 			// @TODO: assign `newChildren[i] = null`?
 			newChildren[i] = null;
 			continue;
