@@ -169,17 +169,19 @@ export function diffChildren(
 			}
 
 			if (childInternal._flags & COMPONENT_NODE) {
-				// @TODO: this needs to happen unconditionally in patch()
-				if (
-					childInternal != null &&
-					childVNode.props &&
-					childVNode.props.children != null &&
-					childVNode.props.children === childInternal.props.children
-				) {
-					startDom = reorderChildren(childInternal, startDom, parentDom);
-				} else {
-					startDom = nextDomSibling;
-				}
+				// // @TODO: this needs to happen unconditionally in patch()
+				// if (
+				// 	childInternal != null &&
+				// 	childVNode.props &&
+				// 	childVNode.props.children != null &&
+				// 	childVNode.props.children === childInternal.props.children
+				// ) {
+				// 	startDom = reorderChildren(childInternal, startDom, parentDom);
+				// } else {
+				// startDom = nextDomSibling;
+				// }
+
+				startDom = nextDomSibling;
 			} else if (newDom == startDom) {
 				// If the newDom and the dom we are expecting to be there are the same, then
 				// do nothing
