@@ -15,7 +15,10 @@ import { Fragment } from './create-element';
  * @returns {import('./internal').Internal}
  */
 export function createInternal(vnode) {
-	let type, props, key, ref;
+	let type = null,
+		props,
+		key,
+		ref;
 
 	/** @type {import('./internal').InternalFlags} */
 	let flags = TEXT_NODE;
