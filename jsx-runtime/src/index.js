@@ -38,14 +38,7 @@ function createVNode(type, props, key, __source, __self) {
 		props: normalizedProps,
 		key,
 		ref: props && props.ref,
-		_children: null,
-		_parent: null,
-		_depth: 0,
-		_dom: null,
-		_component: null,
 		constructor: undefined,
-		_original: ++options._vnodeId,
-		_mode: MODE_NONE,
 		__source,
 		__self
 	};
