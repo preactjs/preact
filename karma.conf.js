@@ -279,7 +279,7 @@ module.exports = function(config) {
 			{
 				pattern:
 					config.grep ||
-					'{devtools,jsx-runtime,}/test/{browser,shared}/**/*.test.js',
+					'{devtools,hooks,test-utils,jsx-runtime,}/test/{browser,shared}/**/*.test.js',
 				watched: false,
 				type: 'js'
 			}
