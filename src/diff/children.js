@@ -20,7 +20,7 @@ import { createInternal } from '../tree';
  * @param {import('../internal').ComponentChildren[]} renderResult
  * @param {import('../internal').VNode} newParentVNode The new virtual node
  * whose children should be diff'ed against oldParentVNode
- * @param {import('../internal').Internal} internal The Internal node
+ * @param {import('../internal').Internal} parentInternal The Internal node
  * whose children should be diff'ed against newParentVNode
  * @param {object} globalContext The current context object - modified by
  * getChildContext
@@ -34,7 +34,7 @@ export function diffChildren(
 	parentDom,
 	renderResult,
 	newParentVNode,
-	internal,
+	parentInternal,
 	globalContext,
 	isSvg,
 	commitQueue,
@@ -48,7 +48,7 @@ export function diffChildren(
 	/** @type {import('../internal').VNode | string} */
 	let childVNode;
 
-	let oldChildren = internal._children || EMPTY_ARR;
+	let oldChildren = parentInternal._children || EMPTY_ARR;
 	let oldChildrenLength = oldChildren.length;
 
 	const newChildren = [];
@@ -111,7 +111,7 @@ export function diffChildren(
 		let oldVNodeRef;
 		let nextDomSibling;
 		if (childInternal == null) {
-			childInternal = createInternal(childVNode, internal);
+			childInternal = createInternal(childVNode, parentInternal);
 
 			// We are mounting a new VNode
 			nextDomSibling = mount(
@@ -196,7 +196,7 @@ export function diffChildren(
 			//
 			// To fix it we make sure to reset the inferred value, so that our own
 			// value check in `diff()` won't be skipped.
-			if (internal.type === 'option') {
+			if (parentInternal.type === 'option') {
 				// @ts-ignore We have validated that the type of parentDOM is 'option'
 				// in the above check
 				parentDom.value = '';
@@ -215,22 +215,22 @@ export function diffChildren(
 		newChildren[i] = childInternal;
 	}
 
-	internal._children = newChildren;
+	parentInternal._children = newChildren;
 
 	// newParentVNode._dom = firstChildDom;
-	internal._dom = firstChildDom;
+	parentInternal._dom = firstChildDom;
 
 	// Remove remaining oldChildren if there are any.
 	for (i = oldChildrenLength; i--; ) {
 		if (oldChildren[i] != null) {
 			if (
-				internal._flags & COMPONENT_NODE &&
+				parentInternal._flags & COMPONENT_NODE &&
 				startDom != null &&
 				oldChildren[i]._dom == startDom
 			) {
 				// If the startDom points to a dom node that is about to be unmounted,
 				// then get the next sibling of that vnode and set startDom to it
-				startDom = getDomSibling(internal, i + 1);
+				startDom = getDomSibling(parentInternal, i + 1);
 			}
 
 			unmount(oldChildren[i], oldChildren[i]);
