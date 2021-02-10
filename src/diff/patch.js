@@ -92,7 +92,7 @@ function patchDOMElement(
 	commitQueue
 ) {
 	let oldProps = internal.props;
-	let newProps = newVNode.props;
+	let newProps = (internal.props = newVNode.props);
 	let newType = newVNode.type;
 	let tmp;
 
@@ -118,8 +118,6 @@ function patchDOMElement(
 				dom.innerHTML = (newHtml && newHtml.__html) || '';
 			}
 		}
-
-		internal.props = newProps;
 
 		diffProps(dom, newProps, oldProps, isSvg);
 
