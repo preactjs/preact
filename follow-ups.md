@@ -7,7 +7,6 @@
 ## Backing Node follow ups
 
 - Ensure we are always doing _flags check instead of vnode.type checks
-- Add back no VNodes for string/number children
 - Address many TODOs
 - Move refs to internal renderCallbacks
 - Rewrite rerender loop to operate on internals, not components

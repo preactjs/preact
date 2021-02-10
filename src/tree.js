@@ -11,7 +11,7 @@ import { Fragment } from './create-element';
 
 /**
  * Create an internal tree node
- * @param {import('./internal').VNode} vnode
+ * @param {import('./internal').VNode | string} vnode
  * @param {import('./internal').Internal} parentInternal
  * @returns {import('./internal').Internal}
  */
@@ -24,9 +24,11 @@ export function createInternal(vnode, parentInternal) {
 	// Text VNodes/Internals use NaN as an ID so that two are never equal.
 	let vnodeId = NaN;
 
-	if (vnode.type == null) {
-		type = null;
-		props = vnode.props;
+	if (typeof vnode === 'string') {
+		// type = null;
+		props = vnode;
+	} else if (vnode.constructor !== undefined) {
+		props = '';
 	} else {
 		type = vnode.type;
 		props = vnode.props;

@@ -184,9 +184,7 @@ function mountDOMElement(dom, internal, globalContext, isSvg, commitQueue) {
 				dom.innerHTML = newHtml.__html;
 			}
 			internal._children = [];
-		} else {
-			i = newProps.children;
-
+		} else if ((i = internal.props.children) != internal._children) {
 			mountChildren(
 				dom,
 				Array.isArray(i) ? i : [i],
@@ -241,7 +239,7 @@ export function mountChildren(
 
 		// Terser removes the `continue` here and wraps the loop body
 		// in a `if (childVNode) { ... } condition
-		if (childVNode == null || childVNode.constructor !== undefined) {
+		if (childVNode == null) {
 			parentInternal._children[i] = null;
 			continue;
 		}

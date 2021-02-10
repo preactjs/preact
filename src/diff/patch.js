@@ -7,7 +7,7 @@ import { COMPONENT_NODE, MODE_NONE, TEXT_NODE } from '../constants';
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
  * @param {import('../internal').PreactElement} parentDom The parent of the DOM element
- * @param {import('../internal').VNode} newVNode The new virtual node
+ * @param {import('../internal').VNode | string} newVNode The new virtual node
  * @param {import('../internal').Internal} internal The Internal node to patch
  * @param {object} globalContext The current context object. Modified by getChildContext
  * @param {boolean} isSvg Whether or not this element is an SVG node
@@ -24,6 +24,14 @@ export function patch(
 	commitQueue,
 	startDom
 ) {
+	if (internal._flags & TEXT_NODE) {
+		if (newVNode !== internal.props) {
+			internal._dom.data = newVNode;
+			internal.props = newVNode;
+		}
+		return internal._dom.nextSibling;
+	}
+
 	// When passing through createElement it assigns the object
 	// constructor as undefined. This to prevent JSON-injection.
 	if (newVNode.constructor !== undefined) return null;
@@ -37,24 +45,25 @@ export function patch(
 		if (internal._flags & COMPONENT_NODE) {
 			nextDomSibling = renderComponent(
 				parentDom,
-				newVNode,
+				/** @type {import('../internal').VNode} */
+				(newVNode),
 				internal,
 				globalContext,
 				isSvg,
 				commitQueue,
 				startDom
 			);
-		} else if (newVNode._original === internal._original) {
-			nextDomSibling = internal._dom.nextSibling;
 		} else {
-			patchDOMElement(
-				internal._dom,
-				newVNode,
-				internal,
-				globalContext,
-				isSvg,
-				commitQueue
-			);
+			if (newVNode._original !== internal._original) {
+				patchDOMElement(
+					internal._dom,
+					newVNode,
+					internal,
+					globalContext,
+					isSvg,
+					commitQueue
+				);
+			}
 
 			// @ts-ignore Trust me TS, nextSibling is a PreactElement
 			nextDomSibling = internal._dom.nextSibling;
@@ -68,7 +77,7 @@ export function patch(
 		internal._original = newVNode._original;
 	} catch (e) {
 		// @TODO: assign a new VNode ID here? Or NaN?
-		newVNode._original = null;
+		// newVNode._original = null;
 		options._catchError(e, internal, internal);
 	}
 
@@ -85,7 +94,7 @@ export function patch(
  * @param {boolean} isSvg Whether or not this DOM node is an SVG node
  * @param {Array<import('../internal').Component>} commitQueue List of components
  * which have callbacks to invoke in commitRoot
- * @returns {import('../internal').PreactElement}
+ * @returns {void}
  */
 function patchDOMElement(
 	dom,
@@ -96,70 +105,66 @@ function patchDOMElement(
 	commitQueue
 ) {
 	let oldProps = internal.props;
-	let newProps = (internal.props = newVNode.props);
+	let newProps = newVNode.props;
 	let newType = newVNode.type;
 	let tmp;
 
-	if (newType === null) {
-		if (oldProps !== newProps) {
-			dom.data = newProps;
+	// Tracks entering and exiting SVG namespace when descending through the tree.
+	// @TODO this should happen when creating Internal nodes.
+	if (newType === 'svg') isSvg = true;
+
+	let oldHtml = oldProps.dangerouslySetInnerHTML;
+	let newHtml = newProps.dangerouslySetInnerHTML;
+
+	if (newHtml || oldHtml) {
+		// Avoid re-applying the same '__html' if it did not changed between re-render
+		if (
+			!newHtml ||
+			((!oldHtml || newHtml.__html != oldHtml.__html) &&
+				newHtml.__html !== dom.innerHTML)
+		) {
+			dom.innerHTML = (newHtml && newHtml.__html) || '';
 		}
+	}
+
+	internal.props = newProps;
+
+	diffProps(dom, newProps, oldProps, isSvg);
+
+	// If the new vnode didn't have dangerouslySetInnerHTML, diff its children
+	if (newHtml) {
+		internal._children = [];
 	} else {
-		// Tracks entering and exiting SVG namespace when descending through the tree.
-		// @TODO this should happen when creating Internal nodes.
-		if (newType === 'svg') isSvg = true;
+		tmp = newVNode.props.children;
+		diffChildren(
+			dom,
+			Array.isArray(tmp) ? tmp : [tmp],
+			newVNode,
+			internal,
+			globalContext,
+			isSvg && newType !== 'foreignObject',
+			commitQueue,
+			dom.firstChild
+		);
+	}
 
-		let oldHtml = oldProps.dangerouslySetInnerHTML;
-		let newHtml = newProps.dangerouslySetInnerHTML;
-
-		if (newHtml || oldHtml) {
-			// Avoid re-applying the same '__html' if it did not changed between re-render
-			if (
-				!newHtml ||
-				((!oldHtml || newHtml.__html != oldHtml.__html) &&
-					newHtml.__html !== dom.innerHTML)
-			) {
-				dom.innerHTML = (newHtml && newHtml.__html) || '';
-			}
-		}
-
-		diffProps(dom, newProps, oldProps, isSvg);
-
-		// If the new vnode didn't have dangerouslySetInnerHTML, diff its children
-		if (newHtml) {
-			internal._children = [];
-		} else {
-			tmp = newVNode.props.children;
-			diffChildren(
-				dom,
-				Array.isArray(tmp) ? tmp : [tmp],
-				newVNode,
-				internal,
-				globalContext,
-				isSvg && newType !== 'foreignObject',
-				commitQueue,
-				dom.firstChild
-			);
-		}
-
-		if (
-			'value' in newProps &&
-			(tmp = newProps.value) !== undefined &&
-			// #2756 For the <progress>-element the initial value is 0,
-			// despite the attribute not being present. When the attribute
-			// is missing the progress bar is treated as indeterminate.
-			// To fix that we'll always update it when it is 0 for progress elements
-			(tmp !== dom.value || (newType === 'progress' && !tmp))
-		) {
-			setProperty(dom, 'value', tmp, oldProps.value, false);
-		}
-		if (
-			'checked' in newProps &&
-			(tmp = newProps.checked) !== undefined &&
-			tmp !== dom.checked
-		) {
-			setProperty(dom, 'checked', tmp, oldProps.checked, false);
-		}
+	if (
+		'value' in newProps &&
+		(tmp = newProps.value) !== undefined &&
+		// #2756 For the <progress>-element the initial value is 0,
+		// despite the attribute not being present. When the attribute
+		// is missing the progress bar is treated as indeterminate.
+		// To fix that we'll always update it when it is 0 for progress elements
+		(tmp !== dom.value || (newType === 'progress' && !tmp))
+	) {
+		setProperty(dom, 'value', tmp, oldProps.value, false);
+	}
+	if (
+		'checked' in newProps &&
+		(tmp = newProps.checked) !== undefined &&
+		tmp !== dom.checked
+	) {
+		setProperty(dom, 'checked', tmp, oldProps.checked, false);
 	}
 
 	// @TODO(golf) We need to reset internal._dom to dom here. Revisit if

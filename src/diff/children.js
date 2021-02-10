@@ -58,7 +58,7 @@ export function diffChildren(
 
 		// Terser removes the `continue` here and wraps the loop body
 		// in a `if (childVNode) { ... } condition
-		if (childVNode == null || childVNode.constructor !== undefined) {
+		if (childVNode == null) {
 			// @TODO: assign `newChildren[i] = null`?
 			newChildren[i] = null;
 			continue;
@@ -73,7 +73,15 @@ export function diffChildren(
 		// (holes).
 		childInternal = oldChildren[i];
 
-		if (
+		if (typeof childVNode === 'string') {
+			// We never move Text nodes, so we only check for an in-place match:
+			if (childInternal && childInternal._flags & TEXT_NODE) {
+				oldChildren[i] = undefined;
+			} else {
+				// We're looking for a Text node, but this wasn't one: ignore it
+				childInternal = undefined;
+			}
+		} else if (
 			childInternal === null ||
 			(childInternal &&
 				childVNode.key == childInternal.key &&
