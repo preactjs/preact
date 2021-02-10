@@ -227,7 +227,7 @@ export function diffChildren(
 	internal._children = newChildren;
 
 	// newParentVNode._dom = firstChildDom;
-	// internal._dom = firstChildDom;
+	internal._dom = firstChildDom;
 
 	// Remove remaining oldChildren if there are any.
 	for (i = oldChildrenLength; i--; ) {

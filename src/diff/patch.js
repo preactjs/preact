@@ -162,4 +162,6 @@ function patchDOMElement(
 	) {
 		setProperty(dom, 'checked', tmp, oldProps.checked, false);
 	}
+
+	internal._dom = dom;
 }
