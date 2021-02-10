@@ -1,6 +1,12 @@
-import { Component, PreactElement, VNode, Options } from '../../src/internal';
+import {
+	Component,
+	PreactElement,
+	VNode,
+	Options,
+	Internal
+} from '../../src/internal';
 
-export { Component, PreactElement, VNode, Options };
+export { Component, PreactElement, VNode, Options, Internal };
 
 export interface DevtoolsInjectOptions {
 	/** 1 = DEV, 0 = production */
