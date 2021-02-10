@@ -103,11 +103,7 @@ export function diffChildren(
 		let oldVNodeRef;
 		let nextDomSibling;
 		if (childInternal == null) {
-			childInternal = createInternal(childVNode);
-			// TODO: Move this into createInternal
-			childInternal._parent = internal;
-			childInternal._depth = internal._depth + 1;
-			childInternal._mode = internal._mode;
+			childInternal = createInternal(childVNode, internal);
 
 			// We are mounting a new VNode
 			nextDomSibling = mount(

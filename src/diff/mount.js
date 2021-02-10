@@ -246,12 +246,8 @@ export function mountChildren(
 			continue;
 		}
 
-		childInternal = createInternal(childVNode);
+		childInternal = createInternal(childVNode, parentInternal);
 		parentInternal._children[i] = childInternal;
-
-		childInternal._parent = parentInternal;
-		childInternal._depth = parentInternal._depth + 1;
-		childInternal._mode = parentInternal._mode;
 
 		// Morph the old element into the new one, but don't append it to the dom yet
 		mountedNextChild = mount(
