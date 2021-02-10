@@ -169,18 +169,6 @@ export function diffChildren(
 			}
 
 			if (childInternal._flags & COMPONENT_NODE) {
-				// // @TODO: this needs to happen unconditionally in patch()
-				// if (
-				// 	childInternal != null &&
-				// 	childVNode.props &&
-				// 	childVNode.props.children != null &&
-				// 	childVNode.props.children === childInternal.props.children
-				// ) {
-				// 	startDom = reorderChildren(childInternal, startDom, parentDom);
-				// } else {
-				// startDom = nextDomSibling;
-				// }
-
 				startDom = nextDomSibling;
 			} else if (newDom == startDom) {
 				// If the newDom and the dom we are expecting to be there are the same, then
@@ -256,7 +244,7 @@ export function diffChildren(
  * @param {import('../internal').PreactElement} startDom
  * @param {import('../internal').PreactElement} parentDom
  */
-function reorderChildren(internal, startDom, parentDom) {
+export function reorderChildren(internal, startDom, parentDom) {
 	for (let tmp = 0; tmp < internal._children.length; tmp++) {
 		let childInternal = internal._children[tmp];
 		if (childInternal) {

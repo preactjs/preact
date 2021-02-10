@@ -3,7 +3,7 @@ import options from '../options';
 import { assign } from '../util';
 import { Component } from '../component';
 import { mountChildren } from './mount';
-import { diffChildren } from './children';
+import { diffChildren, reorderChildren } from './children';
 
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
@@ -121,7 +121,10 @@ export function renderComponent(
 				commitQueue.push(c);
 			}
 
-			return;
+			// TODO: Returning undefined here (i.e. return;) passes all tests. That seems
+			// like a bug. Should validate that we have test coverage for sCU that
+			// returns Fragments with multiple DOM children
+			return reorderChildren(internal, startDom, parentDom);
 		}
 
 		if (c.componentWillUpdate != null) {
