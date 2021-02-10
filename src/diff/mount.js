@@ -242,6 +242,7 @@ export function mountChildren(
 		// Terser removes the `continue` here and wraps the loop body
 		// in a `if (childVNode) { ... } condition
 		if (childVNode == null || childVNode.constructor !== undefined) {
+			parentInternal._children[i] = null;
 			continue;
 		}
 
