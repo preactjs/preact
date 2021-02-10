@@ -28,8 +28,7 @@ export function patch(
 	// constructor as undefined. This to prevent JSON-injection.
 	if (newVNode.constructor !== undefined) return null;
 
-	// @TODO newVNode is pretty useless here, it contains no tree information
-	if (options._diff) options._diff(newVNode);
+	if (options._diff) options._diff(internal);
 
 	/** @type {import('../internal').PreactNode} */
 	let nextDomSibling;
@@ -61,7 +60,7 @@ export function patch(
 			nextDomSibling = internal._dom.nextSibling;
 		}
 
-		if (options.diffed) options.diffed(newVNode);
+		if (options.diffed) options.diffed(internal);
 	} catch (e) {
 		// @TODO: assign a new VNode ID here? Or NaN?
 		newVNode._original = null;
