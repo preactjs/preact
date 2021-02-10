@@ -162,5 +162,9 @@ function patchDOMElement(
 		}
 	}
 
+	// @TODO(golf) We need to reset internal._dom to dom here. Revisit if
+	// returning dom and setting it in patch would be smaller. We have to reset
+	// the _dom pointer cuz diffChildren sets the parentInternal's _dom pointer to
+	// its first child dom.
 	internal._dom = dom;
 }
