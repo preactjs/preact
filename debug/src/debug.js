@@ -32,6 +32,7 @@ export function initDebug() {
 	let oldBeforeDiff = options._diff;
 	let oldDiffed = options.diffed;
 	let oldVnode = options.vnode;
+	let oldInternal = options._internal;
 	let oldCatchError = options._catchError;
 	let oldRoot = options._root;
 	let oldHook = options._hook;
@@ -309,29 +310,24 @@ export function initDebug() {
 		if (oldVnode) oldVnode(vnode);
 	};
 
-	options.diffed = vnode => {
-		// Check if the user passed plain objects as children. Note that we cannot
-		// move this check into `options.vnode` because components can receive
-		// children in any shape they want (e.g.
-		// `<MyJSONFormatter>{{ foo: 123, bar: "abc" }}</MyJSONFormatter>`).
-		// Putting this check in `options.diffed` ensures that
-		// `vnode._children` is set and that we only validate the children
-		// that were actually rendered.
-		if (vnode._children) {
-			vnode._children.forEach(child => {
-				if (child && child.type === undefined) {
-					// Remove internal vnode keys that will always be patched
-					delete child._parent;
-					delete child._depth;
-					const keys = Object.keys(child).join(',');
-					throw new Error(
-						`Objects are not valid as a child. Encountered an object with the keys {${keys}}.` +
-							`\n\n${getOwnerStack(vnode)}`
-					);
-				}
-			});
+	options._internal = (internal, vnode) => {
+		if (typeof vnode !== 'string') {
+			// Check if the user passed plain objects as children. Note that we cannot
+			// move this check into `options.vnode` because components can receive
+			// children in any shape they want (e.g.
+			// `<MyJSONFormatter>{{ foo: 123, bar: "abc" }}</MyJSONFormatter>`).
+			if (vnode.constructor !== undefined) {
+				const keys = Object.keys(vnode).join(',');
+				throw new Error(
+					`Objects are not valid as a child. Encountered an object with the keys {${keys}}.` +
+						`\n\n${getOwnerStack(vnode)}`
+				);
+			}
+			if (oldInternal) oldInternal(internal, vnode);
 		}
+	};
 
+	options.diffed = vnode => {
 		hooksAllowed = false;
 
 		if (oldDiffed) oldDiffed(vnode);

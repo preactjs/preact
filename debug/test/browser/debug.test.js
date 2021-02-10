@@ -106,7 +106,10 @@ describe('debug', () => {
 			fileName: 'div.jsx',
 			lineNumber: 3
 		});
-		expect(vnode.props.__source).to.be.undefined;
+
+		// Should not render __source into DOM
+		render(vnode, scratch);
+		expect(scratch.innerHTML).to.equal('<div></div>');
 	});
 
 	it('should add __self to the vnode in debug mode.', () => {
@@ -114,7 +117,10 @@ describe('debug', () => {
 			__self: {}
 		});
 		expect(vnode.__self).to.deep.equal({});
-		expect(vnode.props.__self).to.be.undefined;
+
+		// Should not render __self into DOM
+		render(vnode, scratch);
+		expect(scratch.innerHTML).to.equal('<div></div>');
 	});
 
 	it('should warn when accessing certain attributes', () => {

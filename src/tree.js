@@ -1,3 +1,4 @@
+import options from './options';
 import {
 	FUNCTION_NODE,
 	ELEMENT_NODE,
@@ -77,6 +78,8 @@ export function createInternal(vnode) {
 		_mode: MODE_NONE,
 		_depth: 0
 	};
+
+	if (options._internal) options._internal(internal, vnode);
 
 	return internal;
 }
