@@ -70,12 +70,12 @@ function isPossibleOwner(vnode) {
 
 /**
  * Return the component stack that was captured up to this point.
- * @param {import('./internal').VNode} vnode
+ * @param {import('./internal').Internal} internal
  * @returns {string}
  */
-export function getOwnerStack(vnode) {
-	const stack = [vnode];
-	let next = vnode;
+export function getOwnerStack(internal) {
+	const stack = [internal];
+	let next = internal;
 	while (next._owner != null) {
 		stack.push(next._owner);
 		next = next._owner;
@@ -84,7 +84,7 @@ export function getOwnerStack(vnode) {
 	return stack.reduce((acc, owner) => {
 		acc += `  in ${getDisplayName(owner)}`;
 
-		const source = owner.__source;
+		const source = owner.props && owner.props.__source;
 		if (source) {
 			acc += ` (at ${source.fileName}:${source.lineNumber})`;
 		} else if (!hasBabelPlugin) {
