@@ -1,4 +1,5 @@
 dist/
 results/
+logs/
 node_modules/
 proxy-packages/*/package-lock.json

@@ -21,7 +21,8 @@ export const defaultBenchOptions = {
 	// GitHub Action minutes
 	timeout: 1,
 	'window-size': '1024,768',
-	framework: IS_CI ? ['preact-master', 'preact-local'] : null
+	framework: IS_CI ? ['preact-master', 'preact-local'] : null,
+	trace: false
 };
 
 /**

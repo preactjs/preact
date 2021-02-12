@@ -1,4 +1,5 @@
 import * as path from 'path';
+import del from 'del';
 import { writeFile, stat, mkdir } from 'fs/promises';
 import { repoRoot, benchesRoot, toUrl } from './utils.js';
 import { defaultBenchOptions } from './bench.js';
@@ -8,6 +9,8 @@ const measureName = 'duration'; // Must match measureName in '../src/util.js'
 const warnings = new Set([]);
 const TACH_SCHEMA =
 	'https://raw.githubusercontent.com/Polymer/tachometer/master/config.schema.json';
+
+const traceLogDir = benchesRoot('logs');
 
 /**
  * @param {ConfigFileBenchmark["packageVersions"]["dependencies"]["framework"]} framework
@@ -32,7 +35,7 @@ async function validateFileDep(framework) {
  * @typedef {ConfigFilePackageVersion & { isValid(): Promise<boolean>; }} BenchConfig
  * @type {BenchConfig[]}
  */
-const frameworks = [
+export const frameworks = [
 	{
 		label: 'preact-v8',
 		dependencies: {
@@ -130,14 +133,14 @@ function getBaseBenchmarkConfig(benchPath) {
 	return { name, url, measurement };
 }
 
-export async function generateSingleConfig(benchFile) {
+export async function generateSingleConfig(benchFile, opts) {
 	const benchPath = await benchesRoot('src', benchFile);
 	const results = await stat(benchPath);
 	if (!results.isFile) {
 		throw new Error(`Given path is not a file: ${benchPath}`);
 	}
 
-	await generateConfig(benchPath, defaultBenchOptions);
+	await generateConfig(benchPath, { ...defaultBenchOptions, ...opts });
 }
 
 /**
@@ -165,6 +168,15 @@ export async function generateConfig(benchPath, options) {
 		}));
 	} else {
 		browser = parseBrowserOption(options.browser);
+	}
+
+	if (browser.name == 'chrome' && options.trace) {
+		await del('**/*', { cwd: traceLogDir });
+		await mkdir(traceLogDir, { recursive: true });
+
+		browser.trace = {
+			logDir: traceLogDir
+		};
 	}
 
 	/** @type {BenchConfig[]} */
