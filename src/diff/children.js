@@ -143,6 +143,9 @@ export function diffChildren(
 		} else {
 			// this was previously captured after patch(), which seems backwards?
 			oldVNodeRef = childInternal.ref;
+
+			// TODO: Figure out if there is a better way to handle the null
+			// placeholder's scenario this addresses
 			prevDom = childInternal._dom;
 
 			// Morph the old element into the new one, but don't append it to the dom yet
@@ -209,7 +212,7 @@ export function diffChildren(
 		) {
 			// The above condition is to handle null placeholders. See test in placeholder.test.js:
 			// `efficiently replace null placeholders in parent rerenders`
-			startDom = nextDomSibling; // Note: change works in restructure. Not dependent on backing tree
+			startDom = nextDomSibling;
 		}
 
 		newChildren[i] = childInternal;

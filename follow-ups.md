@@ -6,6 +6,7 @@
 
 ## Backing Node follow ups
 
+- Revisit `prevDom` code path for null placeholders
 - Ensure we are always doing _flags check instead of vnode.type checks
 - Address many TODOs
 - Move refs to internal renderCallbacks
