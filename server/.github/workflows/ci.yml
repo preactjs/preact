@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - '**'
+  push:
+    branches:
+      - master
+
+jobs:
+  build_test:
+    name: Build & Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '14.x'
+      - name: Cache node modules
+        uses: actions/cache@v1
+        env:
+          cache-name: cache-node-modules
+        with:
+          path: ~/.npm
+          # This uses the same name as the build-action so we can share the caches.
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-
+            ${{ runner.os }}-build-
+            ${{ runner.os }}-
+      - run: npm ci
+      - name: test
+        # Not using `npm test` since it rebuilds source which npm ci has already done
+        run: |
+          npm run build
+          npm run test
