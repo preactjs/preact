@@ -22,7 +22,7 @@
 		"globby": "^11.0.0",
 		"sade": "^1.7.3",
 		"strip-ansi": "^6.0.0",
-		"tachometer": "^0.5.5",
+		"tachometer": "^0.5.7",
 		"v8-deopt-viewer": "^0.2.1"
 	}
 }

@@ -10,6 +10,11 @@ const prog = sade('./scripts');
 prog
 	.command('config [bench]')
 	.describe('Generate the config for the given benchmark HTML file.')
+	.option(
+		'--trace',
+		'Enable perf tracing for browsers that support it',
+		defaultBenchOptions.trace
+	)
 	.action(generateSingleConfig);
 
 // Tests:
@@ -55,6 +60,11 @@ prog
 		'--framework, -f',
 		'Which framework(s) to bench. Specify the flag multiple times to compare specific frameworks. Default is all frameworks',
 		defaultBenchOptions.framework
+	)
+	.option(
+		'--trace',
+		'Enable perf tracing for browsers that support it',
+		defaultBenchOptions.trace
 	)
 	.action(runBenches);
 
