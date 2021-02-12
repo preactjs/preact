@@ -136,8 +136,6 @@ export interface Internal<P = {}> {
 	_children: Internal[];
 	/** next sibling Internal node */
 	_parent: Internal;
-	/** next sibling Internal node */
-	_next: Internal;
 	/** most recent vnode ID @TODO rename to _vnodeId */
 	_original: number;
 	/**
