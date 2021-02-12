@@ -35,7 +35,7 @@ async function validateFileDep(framework) {
  * @typedef {ConfigFilePackageVersion & { isValid(): Promise<boolean>; }} BenchConfig
  * @type {BenchConfig[]}
  */
-const frameworks = [
+export const frameworks = [
 	{
 		label: 'preact-v8',
 		dependencies: {

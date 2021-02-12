@@ -2,6 +2,7 @@ import sade from 'sade';
 import { generateSingleConfig } from './config.js';
 import { defaultDeoptsOptions, runDeopts } from './deopts.js';
 import { defaultBenchOptions, runBenches } from './bench.js';
+import { analyze } from './analyze.js';
 
 const prog = sade('./scripts');
 
@@ -97,5 +98,13 @@ prog
 		defaultDeoptsOptions.open
 	)
 	.action(runDeopts);
+
+prog
+	.command('analyze')
+	.describe(
+		'Analyze the trace logs created by running benchmarks with the --trace flag'
+	)
+	.example('analyze')
+	.action(analyze);
 
 prog.parse(process.argv);
