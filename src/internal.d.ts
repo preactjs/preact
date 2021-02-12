@@ -45,6 +45,7 @@ export interface Options extends preact.Options {
 	_skipEffects?: boolean;
 	/** Attach a hook that is invoked after an error is caught in a component but before calling lifecycle hooks */
 	_catchError(error: any, internal: Internal, internal?: Internal): void;
+	_internal(internal: Internal, vnode: VNode | string): void;
 }
 
 // Redefine ComponentFactory using our new internal FunctionalComponent interface above

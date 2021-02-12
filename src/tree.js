@@ -1,3 +1,4 @@
+import options from './options';
 import {
 	FUNCTION_NODE,
 	ELEMENT_NODE,
@@ -16,7 +17,10 @@ import { Fragment } from './create-element';
  * @returns {import('./internal').Internal}
  */
 export function createInternal(vnode, parentInternal) {
-	let type, props, key, ref;
+	let type = null,
+		props,
+		key,
+		ref;
 
 	/** @type {import('./internal').InternalFlags} */
 	let flags = TEXT_NODE;
@@ -75,6 +79,8 @@ export function createInternal(vnode, parentInternal) {
 		_mode: parentInternal ? parentInternal._mode : MODE_NONE,
 		_depth: parentInternal ? parentInternal._depth + 1 : 0
 	};
+
+	if (options._internal) options._internal(internal, vnode);
 
 	return internal;
 }
