@@ -28,9 +28,9 @@ let oldBeforeUnmount = options.unmount;
 const RAF_TIMEOUT = 100;
 let prevRaf;
 
-options._diff = internal => {
+options._diff = (internal, vnode) => {
 	currentComponent = null;
-	if (oldBeforeDiff) oldBeforeDiff(internal);
+	if (oldBeforeDiff) oldBeforeDiff(internal, vnode);
 };
 
 options._render = internal => {

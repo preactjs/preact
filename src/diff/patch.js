@@ -36,7 +36,7 @@ export function patch(
 	// constructor as undefined. This to prevent JSON-injection.
 	if (newVNode.constructor !== undefined) return null;
 
-	if (options._diff) options._diff(internal);
+	if (options._diff) options._diff(internal, newVNode);
 
 	/** @type {import('../internal').PreactNode} */
 	let nextDomSibling;

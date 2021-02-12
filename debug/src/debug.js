@@ -113,8 +113,8 @@ export function initDebug() {
 		if (oldRoot) oldRoot(vnode, parentNode);
 	};
 
-	options._diff = vnode => {
-		let { type, _parent: parent } = vnode;
+	options._diff = (internal, vnode) => {
+		let { type, _parent: parent } = internal;
 		let parentVNode = getClosestDomNodeParent(parent);
 
 		hooksAllowed = true;
@@ -123,18 +123,18 @@ export function initDebug() {
 			throw new Error(
 				'Undefined component passed to createElement()\n\n' +
 					'You likely forgot to export your component or might have mixed up default and named imports' +
-					serializeVNode(vnode) +
-					`\n\n${getOwnerStack(vnode)}`
+					serializeVNode(internal) +
+					`\n\n${getOwnerStack(internal)}`
 			);
 		} else if (type != null && typeof type == 'object') {
 			if (type.constructor === undefined) {
 				throw new Error(
 					`Invalid type passed to createElement(): ${type}\n\n` +
 						'Did you accidentally pass a JSX literal as JSX twice?\n\n' +
-						`  let My${getDisplayName(vnode)} = ${serializeVNode(type)};\n` +
-						`  let vnode = <My${getDisplayName(vnode)} />;\n\n` +
+						`  let My${getDisplayName(internal)} = ${serializeVNode(type)};\n` +
+						`  let vnode = <My${getDisplayName(internal)} />;\n\n` +
 						'This usually happens when you export a JSX literal and not the component.' +
-						`\n\n${getOwnerStack(vnode)}`
+						`\n\n${getOwnerStack(internal)}`
 				);
 			}
 
@@ -150,8 +150,8 @@ export function initDebug() {
 		) {
 			console.error(
 				'Improper nesting of table. Your <thead/tbody/tfoot> should have a <table> parent.' +
-					serializeVNode(vnode) +
-					`\n\n${getOwnerStack(vnode)}`
+					serializeVNode(internal) +
+					`\n\n${getOwnerStack(internal)}`
 			);
 		} else if (
 			type === 'tr' &&
@@ -162,67 +162,67 @@ export function initDebug() {
 		) {
 			console.error(
 				'Improper nesting of table. Your <tr> should have a <thead/tbody/tfoot/table> parent.' +
-					serializeVNode(vnode) +
-					`\n\n${getOwnerStack(vnode)}`
+					serializeVNode(internal) +
+					`\n\n${getOwnerStack(internal)}`
 			);
 		} else if (type === 'td' && parentVNode.type !== 'tr') {
 			console.error(
 				'Improper nesting of table. Your <td> should have a <tr> parent.' +
-					serializeVNode(vnode) +
-					`\n\n${getOwnerStack(vnode)}`
+					serializeVNode(internal) +
+					`\n\n${getOwnerStack(internal)}`
 			);
 		} else if (type === 'th' && parentVNode.type !== 'tr') {
 			console.error(
 				'Improper nesting of table. Your <th> should have a <tr>.' +
-					serializeVNode(vnode) +
-					`\n\n${getOwnerStack(vnode)}`
+					serializeVNode(internal) +
+					`\n\n${getOwnerStack(internal)}`
 			);
 		}
 
 		if (
-			vnode.ref !== undefined &&
-			typeof vnode.ref != 'function' &&
-			typeof vnode.ref != 'object' &&
-			!('$$typeof' in vnode) // allow string refs when preact-compat is installed
+			internal.ref !== undefined &&
+			typeof internal.ref != 'function' &&
+			typeof internal.ref != 'object' &&
+			!('$$typeof' in internal) // allow string refs when preact-compat is installed
 		) {
 			throw new Error(
 				`Component's "ref" property should be a function, or an object created ` +
-					`by createRef(), but got [${typeof vnode.ref}] instead\n` +
-					serializeVNode(vnode) +
-					`\n\n${getOwnerStack(vnode)}`
+					`by createRef(), but got [${typeof internal.ref}] instead\n` +
+					serializeVNode(internal) +
+					`\n\n${getOwnerStack(internal)}`
 			);
 		}
 
-		if (typeof vnode.type == 'string') {
-			for (const key in vnode.props) {
+		if (typeof internal.type == 'string') {
+			for (const key in internal.props) {
 				if (
 					key[0] === 'o' &&
 					key[1] === 'n' &&
-					typeof vnode.props[key] != 'function' &&
-					vnode.props[key] != null
+					typeof internal.props[key] != 'function' &&
+					internal.props[key] != null
 				) {
 					throw new Error(
 						`Component's "${key}" property should be a function, ` +
-							`but got [${typeof vnode.props[key]}] instead\n` +
-							serializeVNode(vnode) +
-							`\n\n${getOwnerStack(vnode)}`
+							`but got [${typeof internal.props[key]}] instead\n` +
+							serializeVNode(internal) +
+							`\n\n${getOwnerStack(internal)}`
 					);
 				}
 			}
 		}
 
 		// Check prop-types if available
-		if (typeof vnode.type == 'function' && vnode.type.propTypes) {
+		if (typeof internal.type == 'function' && internal.type.propTypes) {
 			if (
-				vnode.type.displayName === 'Lazy' &&
+				internal.type.displayName === 'Lazy' &&
 				warnedComponents &&
-				!warnedComponents.lazyPropTypes.has(vnode.type)
+				!warnedComponents.lazyPropTypes.has(internal.type)
 			) {
 				const m =
 					'PropTypes are not supported on lazy(). Use propTypes on the wrapped component itself. ';
 				try {
-					const lazyVNode = vnode.type();
-					warnedComponents.lazyPropTypes.set(vnode.type, true);
+					const lazyVNode = internal.type();
+					warnedComponents.lazyPropTypes.set(internal.type, true);
 					console.warn(
 						m + `Component wrapped in lazy() is ${getDisplayName(lazyVNode)}`
 					);
@@ -233,22 +233,23 @@ export function initDebug() {
 				}
 			}
 
-			let values = vnode.props;
-			if (vnode.type._forwarded) {
+			// If vnode is not present we're mounting
+			let values = vnode ? vnode.props : internal.props;
+			if (internal.type._forwarded) {
 				values = assign({}, values);
 				delete values.ref;
 			}
 
 			checkPropTypes(
-				vnode.type.propTypes,
+				internal.type.propTypes,
 				values,
 				'prop',
-				getDisplayName(vnode),
-				() => getOwnerStack(vnode)
+				getDisplayName(internal),
+				() => getOwnerStack(internal)
 			);
 		}
 
-		if (oldBeforeDiff) oldBeforeDiff(vnode);
+		if (oldBeforeDiff) oldBeforeDiff(internal, vnode);
 	};
 
 	options._hook = (comp, index, type) => {
@@ -323,8 +324,9 @@ export function initDebug() {
 						`\n\n${getOwnerStack(vnode)}`
 				);
 			}
-			if (oldInternal) oldInternal(internal, vnode);
 		}
+
+		if (oldInternal) oldInternal(internal, vnode);
 	};
 
 	options.diffed = vnode => {
