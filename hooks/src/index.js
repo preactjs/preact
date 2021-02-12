@@ -28,15 +28,15 @@ let oldBeforeUnmount = options.unmount;
 const RAF_TIMEOUT = 100;
 let prevRaf;
 
-options._diff = vnode => {
+options._diff = internal => {
 	currentComponent = null;
-	if (oldBeforeDiff) oldBeforeDiff(vnode);
+	if (oldBeforeDiff) oldBeforeDiff(internal);
 };
 
-options._render = vnode => {
-	if (oldBeforeRender) oldBeforeRender(vnode);
+options._render = internal => {
+	if (oldBeforeRender) oldBeforeRender(internal);
 
-	currentComponent = vnode._component;
+	currentComponent = internal._component;
 	currentIndex = 0;
 
 	const hooks = currentComponent.__hooks;
@@ -47,17 +47,17 @@ options._render = vnode => {
 	}
 };
 
-options.diffed = vnode => {
-	if (oldAfterDiff) oldAfterDiff(vnode);
+options.diffed = internal => {
+	if (oldAfterDiff) oldAfterDiff(internal);
 
-	const c = vnode._component;
+	const c = internal._component;
 	if (c && c.__hooks && c.__hooks._pendingEffects.length) {
 		afterPaint(afterPaintEffects.push(c));
 	}
 	currentComponent = previousComponent;
 };
 
-options._commit = (vnode, commitQueue) => {
+options._commit = (internal, commitQueue) => {
 	commitQueue.some(component => {
 		try {
 			component._renderCallbacks.forEach(invokeCleanup);
@@ -73,13 +73,13 @@ options._commit = (vnode, commitQueue) => {
 		}
 	});
 
-	if (oldCommit) oldCommit(vnode, commitQueue);
+	if (oldCommit) oldCommit(internal, commitQueue);
 };
 
-options.unmount = vnode => {
-	if (oldBeforeUnmount) oldBeforeUnmount(vnode);
+options.unmount = internal => {
+	if (oldBeforeUnmount) oldBeforeUnmount(internal);
 
-	const c = vnode._component;
+	const c = internal._component;
 	if (c && c.__hooks) {
 		try {
 			c.__hooks._list.forEach(invokeCleanup);

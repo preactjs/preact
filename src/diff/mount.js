@@ -240,15 +240,12 @@ export function mountChildren(
 		// Terser removes the `continue` here and wraps the loop body
 		// in a `if (childVNode) { ... } condition
 		if (childVNode == null) {
+			parentInternal._children[i] = null;
 			continue;
 		}
 
-		childInternal = createInternal(childVNode);
+		childInternal = createInternal(childVNode, parentInternal);
 		parentInternal._children[i] = childInternal;
-
-		childInternal._parent = parentInternal;
-		childInternal._depth = parentInternal._depth + 1;
-		childInternal._mode = parentInternal._mode;
 
 		// Morph the old element into the new one, but don't append it to the dom yet
 		mountedNextChild = mount(

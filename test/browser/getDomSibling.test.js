@@ -26,8 +26,10 @@ describe('getDomSibling', () => {
 			</div>,
 			scratch
 		);
-		let vnode = getRoot(scratch)._children[0]._children[0];
-		expect(getDomSibling(vnode)).to.equalNode(scratch.firstChild.childNodes[1]);
+		let internal = getRoot(scratch)._children[0]._children[0];
+		expect(getDomSibling(internal)).to.equalNode(
+			scratch.firstChild.childNodes[1]
+		);
 	});
 
 	it('should find direct text node sibling', () => {
@@ -37,8 +39,10 @@ describe('getDomSibling', () => {
 			</div>,
 			scratch
 		);
-		let vnode = getRoot(scratch)._children[0]._children[0];
-		expect(getDomSibling(vnode)).to.equalNode(scratch.firstChild.childNodes[1]);
+		let internal = getRoot(scratch)._children[0]._children[0];
+		expect(getDomSibling(internal)).to.equalNode(
+			scratch.firstChild.childNodes[1]
+		);
 	});
 
 	it('should find nested text node sibling', () => {
@@ -51,14 +55,18 @@ describe('getDomSibling', () => {
 			</div>,
 			scratch
 		);
-		let vnode = getRoot(scratch)._children[0]._children[0];
-		expect(getDomSibling(vnode)).to.equalNode(scratch.firstChild.childNodes[1]);
+		let internal = getRoot(scratch)._children[0]._children[0];
+		expect(getDomSibling(internal)).to.equalNode(
+			scratch.firstChild.childNodes[1]
+		);
 	});
 
 	it('should find text node sibling with placeholder', () => {
 		render(<div>A{null}B</div>, scratch);
-		let vnode = getRoot(scratch)._children[0]._children[0];
-		expect(getDomSibling(vnode)).to.equalNode(scratch.firstChild.childNodes[1]);
+		let internal = getRoot(scratch)._children[0]._children[0];
+		expect(getDomSibling(internal)).to.equalNode(
+			scratch.firstChild.childNodes[1]
+		);
 	});
 
 	it('should find sibling with placeholder', () => {
@@ -70,8 +78,10 @@ describe('getDomSibling', () => {
 			</div>,
 			scratch
 		);
-		let vnode = getRoot(scratch)._children[0]._children[0];
-		expect(getDomSibling(vnode)).to.equalNode(scratch.firstChild.childNodes[1]);
+		let internal = getRoot(scratch)._children[0]._children[0];
+		expect(getDomSibling(internal)).to.equalNode(
+			scratch.firstChild.childNodes[1]
+		);
 	});
 
 	it('should find sibling with nested placeholder', () => {
@@ -87,8 +97,10 @@ describe('getDomSibling', () => {
 			</div>,
 			scratch
 		);
-		let vnode = getRoot(scratch)._children[0]._children[0]._children[0];
-		expect(getDomSibling(vnode)).to.equalNode(scratch.firstChild.childNodes[1]);
+		let internal = getRoot(scratch)._children[0]._children[0]._children[0];
+		expect(getDomSibling(internal)).to.equalNode(
+			scratch.firstChild.childNodes[1]
+		);
 	});
 
 	it('should find sibling in parent', () => {
@@ -101,8 +113,10 @@ describe('getDomSibling', () => {
 			</div>,
 			scratch
 		);
-		let vnode = getRoot(scratch)._children[0]._children[0]._children[0];
-		expect(getDomSibling(vnode)).to.equalNode(scratch.firstChild.childNodes[1]);
+		let internal = getRoot(scratch)._children[0]._children[0]._children[0];
+		expect(getDomSibling(internal)).to.equalNode(
+			scratch.firstChild.childNodes[1]
+		);
 	});
 
 	it('should find unrelated sibling from a DOM VNode', () => {
@@ -131,10 +145,10 @@ describe('getDomSibling', () => {
 			scratch
 		);
 
-		let divAVNode = getRoot(scratch)._children[0]._children[0]._children[0]
+		let divAInternal = getRoot(scratch)._children[0]._children[0]._children[0]
 			._children[0]._children[0];
-		expect(divAVNode.type).to.equal('div');
-		expect(getDomSibling(divAVNode)).to.equalNode(
+		expect(divAInternal.type).to.equal('div');
+		expect(getDomSibling(divAInternal)).to.equalNode(
 			scratch.firstChild.childNodes[1]
 		);
 	});
@@ -209,9 +223,9 @@ describe('getDomSibling', () => {
 			scratch
 		);
 
-		let divAVNode = getRoot(scratch)._children[0]._children[0]._children[0];
-		expect(divAVNode.type).to.equal('div');
-		expect(getDomSibling(divAVNode)).to.equalNode(
+		let divAInternal = getRoot(scratch)._children[0]._children[0]._children[0];
+		expect(divAInternal.type).to.equal('div');
+		expect(getDomSibling(divAInternal)).to.equalNode(
 			scratch.firstChild.childNodes[1]
 		);
 	});
@@ -228,10 +242,10 @@ describe('getDomSibling', () => {
 			scratch
 		);
 
-		let divAVNode = getRoot(scratch)._children[0]._children[0];
-		expect(divAVNode.type).to.equal('div');
+		let divAInternal = getRoot(scratch)._children[0]._children[0];
+		expect(divAInternal.type).to.equal('div');
 
-		let sibling = getDomSibling(divAVNode);
+		let sibling = getDomSibling(divAInternal);
 		expect(sibling).to.equalNode(scratch.firstChild.childNodes[1]);
 	});
 
@@ -245,10 +259,10 @@ describe('getDomSibling', () => {
 			scratch
 		);
 
-		let divAVNode = getRoot(scratch)._children[0]._children[0];
-		expect(divAVNode.type).to.equal('div');
+		let divAInternal = getRoot(scratch)._children[0]._children[0];
+		expect(divAInternal.type).to.equal('div');
 
-		let sibling = getDomSibling(divAVNode);
+		let sibling = getDomSibling(divAInternal);
 		expect(sibling).to.equalNode(scratch.firstChild.childNodes[1]);
 	});
 
@@ -264,7 +278,10 @@ describe('getDomSibling', () => {
 			scratch
 		);
 
-		let sibling = getDomSibling(divAVNode);
+		let divAInternal = getRoot(scratch)._children[0]._children[0]._children[0];
+		expect(divAInternal.key).to.equal('A');
+
+		let sibling = getDomSibling(divAInternal);
 		expect(sibling).to.equalNode(scratch.firstChild.childNodes[1]);
 	});
 
@@ -284,8 +301,9 @@ describe('getDomSibling', () => {
 			scratch
 		);
 
-		const divCVNode = getRoot(scratch)._children[0]._children[2]._children[0];
-		expect(getDomSibling(divCVNode)).to.equal(null);
+		const divCInternal = getRoot(scratch)._children[0]._children[2]
+			._children[0];
+		expect(getDomSibling(divCInternal)).to.equal(null);
 	});
 
 	it('should return null if no sibling', () => {
@@ -305,9 +323,9 @@ describe('getDomSibling', () => {
 			scratch
 		);
 
-		let divAVNode = getRoot(scratch)._children[0]._children[0]._children[0]
+		let divAInternal = getRoot(scratch)._children[0]._children[0]._children[0]
 			._children[0]._children[0];
-		expect(getDomSibling(divAVNode)).to.equal(null);
+		expect(getDomSibling(divAInternal)).to.equal(null);
 	});
 
 	it('should return null if no sibling with lots of empty trees', () => {
@@ -334,9 +352,9 @@ describe('getDomSibling', () => {
 			scratch
 		);
 
-		let divAVNode = getRoot(scratch)._children[0]._children[0]._children[0]
+		let divAInternal = getRoot(scratch)._children[0]._children[0]._children[0]
 			._children[0]._children[0];
-		expect(getDomSibling(divAVNode)).to.equal(null);
+		expect(getDomSibling(divAInternal)).to.equal(null);
 	});
 
 	it('should return null if current parent has no siblings (even if parent has siblings at same level)', () => {
@@ -357,6 +375,8 @@ describe('getDomSibling', () => {
 			scratch
 		);
 
-		expect(getDomSibling(divAVNode)).to.equal(null);
+		let divAInternal = getRoot(scratch)._children[0]._children[0]._children[1];
+		expect(divAInternal.key).to.equal('A');
+		expect(getDomSibling(divAInternal)).to.equal(null);
 	});
 });

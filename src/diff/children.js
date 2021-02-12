@@ -20,7 +20,7 @@ import { createInternal } from '../tree';
  * @param {import('../internal').ComponentChildren[]} renderResult
  * @param {import('../internal').VNode} newParentVNode The new virtual node
  * whose children should be diff'ed against oldParentVNode
- * @param {import('../internal').Internal} internal The Internal node
+ * @param {import('../internal').Internal} parentInternal The Internal node
  * whose children should be diff'ed against newParentVNode
  * @param {object} globalContext The current context object - modified by
  * getChildContext
@@ -34,7 +34,7 @@ export function diffChildren(
 	parentDom,
 	renderResult,
 	newParentVNode,
-	internal,
+	parentInternal,
 	globalContext,
 	isSvg,
 	commitQueue,
@@ -48,7 +48,7 @@ export function diffChildren(
 	/** @type {import('../internal').VNode | string} */
 	let childVNode;
 
-	let oldChildren = internal._children || EMPTY_ARR;
+	let oldChildren = parentInternal._children || EMPTY_ARR;
 	let oldChildrenLength = oldChildren.length;
 
 	const newChildren = [];
@@ -107,10 +107,11 @@ export function diffChildren(
 			}
 		}
 
+		let prevDom;
 		let oldVNodeRef;
 		let nextDomSibling;
 		if (childInternal == null) {
-			childInternal = createInternal(childVNode);
+			childInternal = createInternal(childVNode, parentInternal);
 
 			// We are mounting a new VNode
 			nextDomSibling = mount(
@@ -142,6 +143,10 @@ export function diffChildren(
 		} else {
 			// this was previously captured after patch(), which seems backwards?
 			oldVNodeRef = childInternal.ref;
+
+			// TODO: Figure out if there is a better way to handle the null
+			// placeholder's scenario this addresses
+			prevDom = childInternal._dom;
 
 			// Morph the old element into the new one, but don't append it to the dom yet
 			nextDomSibling = patch(
@@ -175,17 +180,6 @@ export function diffChildren(
 			}
 
 			if (childInternal._flags & COMPONENT_NODE) {
-				// @TODO: this needs to happen unconditionally in patch()
-				if (
-					childInternal != null &&
-					childVNode.props &&
-					childVNode.props.children != null &&
-					childVNode.props.children === childInternal.props.children
-				) {
-					startDom = reorderChildren(childInternal, startDom, parentDom);
-				} else {
-					startDom = nextDomSibling;
-				}
 				startDom = nextDomSibling;
 			} else if (newDom == startDom) {
 				// If the newDom and the dom we are expecting to be there are the same, then
@@ -205,7 +199,7 @@ export function diffChildren(
 			//
 			// To fix it we make sure to reset the inferred value, so that our own
 			// value check in `diff()` won't be skipped.
-			if (internal.type === 'option') {
+			if (parentInternal.type === 'option') {
 				// @ts-ignore We have validated that the type of parentDOM is 'option'
 				// in the above check
 				parentDom.value = '';
@@ -213,33 +207,33 @@ export function diffChildren(
 		} else if (
 			startDom &&
 			childInternal != null &&
-			childInternal._dom == startDom &&
+			prevDom == startDom &&
 			startDom.parentNode != parentDom
 		) {
 			// The above condition is to handle null placeholders. See test in placeholder.test.js:
 			// `efficiently replace null placeholders in parent rerenders`
-			startDom = getDomSibling(childInternal);
+			startDom = nextDomSibling;
 		}
 
 		newChildren[i] = childInternal;
 	}
 
-	internal._children = newChildren;
+	parentInternal._children = newChildren;
 
 	// newParentVNode._dom = firstChildDom;
-	internal._dom = firstChildDom;
+	parentInternal._dom = firstChildDom;
 
 	// Remove remaining oldChildren if there are any.
 	for (i = oldChildrenLength; i--; ) {
 		if (oldChildren[i] != null) {
 			if (
-				internal._flags & COMPONENT_NODE &&
+				parentInternal._flags & COMPONENT_NODE &&
 				startDom != null &&
 				oldChildren[i]._dom == startDom
 			) {
 				// If the startDom points to a dom node that is about to be unmounted,
 				// then get the next sibling of that vnode and set startDom to it
-				startDom = getDomSibling(internal, i + 1);
+				startDom = getDomSibling(parentInternal, i + 1);
 			}
 
 			unmount(oldChildren[i], oldChildren[i]);
@@ -261,7 +255,7 @@ export function diffChildren(
  * @param {import('../internal').PreactElement} startDom
  * @param {import('../internal').PreactElement} parentDom
  */
-function reorderChildren(internal, startDom, parentDom) {
+export function reorderChildren(internal, startDom, parentDom) {
 	for (let tmp = 0; tmp < internal._children.length; tmp++) {
 		let childInternal = internal._children[tmp];
 		if (childInternal) {

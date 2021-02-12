@@ -2,7 +2,7 @@ import { diffChildren } from './children';
 import { diffProps, setProperty } from './props';
 import options from '../options';
 import { renderComponent } from './component';
-import { COMPONENT_NODE, TEXT_NODE } from '../constants';
+import { COMPONENT_NODE, MODE_NONE, TEXT_NODE } from '../constants';
 
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
@@ -36,8 +36,7 @@ export function patch(
 	// constructor as undefined. This to prevent JSON-injection.
 	if (newVNode.constructor !== undefined) return null;
 
-	// @TODO newVNode is pretty useless here, it contains no tree information
-	if (options._diff) options._diff(newVNode);
+	if (options._diff) options._diff(internal);
 
 	/** @type {import('../internal').PreactNode} */
 	let nextDomSibling;
@@ -70,11 +69,16 @@ export function patch(
 			nextDomSibling = internal._dom.nextSibling;
 		}
 
-		if (options.diffed) options.diffed(newVNode);
+		if (options.diffed) options.diffed(internal);
+
+		// We successfully rendered this VNode, unset any stored hydration/bailout state:
+		internal._mode = MODE_NONE;
+		// Once we have successfully rendered the new VNode, copy it's ID over
+		internal._original = newVNode._original;
 	} catch (e) {
 		// @TODO: assign a new VNode ID here? Or NaN?
 		// newVNode._original = null;
-		options._catchError(e, newVNode, internal);
+		options._catchError(e, internal, internal);
 	}
 
 	return nextDomSibling;
@@ -163,5 +167,9 @@ function patchDOMElement(
 		setProperty(dom, 'checked', tmp, oldProps.checked, false);
 	}
 
+	// @TODO(golf) We need to reset internal._dom to dom here. Revisit if
+	// returning dom and setting it in patch would be smaller. We have to reset
+	// the _dom pointer cuz diffChildren sets the parentInternal's _dom pointer to
+	// its first child dom.
 	internal._dom = dom;
 }

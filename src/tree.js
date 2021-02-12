@@ -13,9 +13,10 @@ import { Fragment } from './create-element';
 /**
  * Create an internal tree node
  * @param {import('./internal').VNode | string} vnode
+ * @param {import('./internal').Internal} parentInternal
  * @returns {import('./internal').Internal}
  */
-export function createInternal(vnode) {
+export function createInternal(vnode, parentInternal) {
 	let type = null,
 		props,
 		key,
@@ -69,14 +70,14 @@ export function createInternal(vnode) {
 		key,
 		ref,
 		_children: null,
-		_parent: null,
+		_parent: parentInternal,
 		_next: null,
 		_original: vnodeId,
 		_dom: null,
 		_component: null,
 		_flags: flags,
-		_mode: MODE_NONE,
-		_depth: 0
+		_mode: parentInternal ? parentInternal._mode : MODE_NONE,
+		_depth: parentInternal ? parentInternal._depth + 1 : 0
 	};
 
 	if (options._internal) options._internal(internal, vnode);

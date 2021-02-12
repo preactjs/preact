@@ -24,23 +24,27 @@ export interface DevSource {
 
 export interface Options extends preact.Options {
 	_vnodeId: number;
+	/** Attach a hook that is invoked immediately before a vnode is unmounted. */
+	unmount?(internal: Internal): void;
+	/** Attach a hook that is invoked after a vnode has rendered. */
+	diffed?(internal: Internal): void;
 	/** Attach a hook that is invoked before render, mainly to check the arguments. */
 	_root?(
 		vnode: ComponentChild,
 		parent: Element | Document | ShadowRoot | DocumentFragment
 	): void;
 	/** Attach a hook that is invoked before a vnode is diffed. */
-	_diff?(vnode: VNode): void;
+	_diff?(internal: Internal): void;
 	/** Attach a hook that is invoked after a tree was mounted or was updated. */
-	_commit?(vnode: VNode, commitQueue: Component[]): void;
+	_commit?(internal: Internal, commitQueue: Component[]): void;
 	/** Attach a hook that is invoked before a vnode has rendered. */
-	_render?(vnode: VNode): void;
+	_render?(internal: Internal): void;
 	/** Attach a hook that is invoked before a hook's state is queried. */
 	_hook?(component: Component, index: number, type: HookType): void;
 	/** Bypass effect execution. Currenty only used in devtools for hooks inspection */
 	_skipEffects?: boolean;
 	/** Attach a hook that is invoked after an error is caught in a component but before calling lifecycle hooks */
-	_catchError(error: any, vnode: VNode, oldVNode?: VNode | undefined): void;
+	_catchError(error: any, internal: Internal, internal?: Internal): void;
 	_internal(internal: Internal, vnode: VNode | string): void;
 }
 

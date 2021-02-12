@@ -3,7 +3,7 @@ import options from '../options';
 import { assign } from '../util';
 import { Component } from '../component';
 import { mountChildren } from './mount';
-import { diffChildren } from './children';
+import { diffChildren, reorderChildren } from './children';
 
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
@@ -114,12 +114,17 @@ export function renderComponent(
 			c.state = c._nextState;
 			internal.props = newProps;
 			// More info about this here: https://gist.github.com/JoviDeCroock/bec5f2ce93544d2e6070ef8e0036e4e8
-			if (newVNode && newVNode._original !== internal._original)
+			if (newVNode && newVNode._original !== internal._original) {
 				c._dirty = false;
+			}
 			if (c._renderCallbacks.length) {
 				commitQueue.push(c);
 			}
-			return;
+
+			// TODO: Returning undefined here (i.e. return;) passes all tests. That seems
+			// like a bug. Should validate that we have test coverage for sCU that
+			// returns Fragments with multiple DOM children
+			return reorderChildren(internal, startDom, parentDom);
 		}
 
 		if (c.componentWillUpdate != null) {
@@ -163,7 +168,7 @@ export function renderComponent(
 
 	let nextDomSibling;
 
-	if (isNew) {
+	if (internal._children == null) {
 		nextDomSibling = mountChildren(
 			parentDom,
 			Array.isArray(renderResult) ? renderResult : [renderResult],

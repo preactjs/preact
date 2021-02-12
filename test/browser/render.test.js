@@ -881,11 +881,17 @@ describe('render()', () => {
 		}
 
 		render(<App />, scratch);
+		expect(scratch.innerHTML).to.equal(
+			'<div><h1 class="fade-down">Hi</h1></div>'
+		);
 		clearLog();
 
 		updateState();
 		rerender();
 
+		expect(scratch.innerHTML).to.equal(
+			'<div><h1 class="fade-down">Hi, friend</h1></div>'
+		);
 		// We don't log text updates
 		expect(getLog()).to.deep.equal([]);
 	});

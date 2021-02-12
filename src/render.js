@@ -40,7 +40,8 @@ export function render(vnode, parentDom, replaceNode) {
 	} else {
 		// Store the VDOM tree root on the DOM element in a (minified) property:
 		rootInternal = (replaceNode || parentDom)._children = createInternal(
-			createElement(Fragment, null, [vnode])
+			createElement(Fragment, null, [vnode]),
+			null
 		);
 
 		// Providing a replaceNode parameter or calling `render` on a container with
