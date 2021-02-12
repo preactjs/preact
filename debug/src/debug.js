@@ -8,7 +8,7 @@ import {
 import {
 	getOwnerStack,
 	setupComponentStack,
-	getCurrentVNode,
+	getCurrentInternal,
 	getDisplayName
 } from './component-stack';
 import { assign } from './util';
@@ -371,7 +371,9 @@ Component.prototype.setState = function(update, callback) {
 			console.warn(
 				`Calling "this.setState" inside the constructor of a component is a ` +
 					`no-op and might be a bug in your application. Instead, set ` +
-					`"this.state = {}" directly.\n\n${getOwnerStack(getCurrentVNode())}`
+					`"this.state = {}" directly.\n\n${getOwnerStack(
+						getCurrentInternal()
+					)}`
 			);
 		}
 	} else if (this._parentDom == null) {
@@ -392,7 +394,7 @@ Component.prototype.forceUpdate = function(callback) {
 		console.warn(
 			`Calling "this.forceUpdate" inside the constructor of a component is a ` +
 				`no-op and might be a bug in your application.\n\n${getOwnerStack(
-					getCurrentVNode()
+					getCurrentInternal()
 				)}`
 		);
 	} else if (this._parentDom == null) {
