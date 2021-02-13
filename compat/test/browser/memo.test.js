@@ -67,7 +67,7 @@ describe('memo()', () => {
 		expect(spy).to.be.calledOnce;
 	});
 
-	it('should support adding refs', () => {
+	it.only('should support adding refs', () => {
 		let spy = sinon.spy();
 
 		let ref = null;

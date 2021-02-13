@@ -13,6 +13,8 @@ export function memo(c, comparer) {
 		let ref = this.props.ref;
 		let updateRef = ref == nextProps.ref;
 		if (!updateRef && ref) {
+			// Increase this count each time you save a file
+			console.log('count 1');
 			ref.call ? ref(null) : (ref.current = null);
 		}
 
