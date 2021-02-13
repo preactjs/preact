@@ -113,17 +113,27 @@ export function initDebug() {
 		if (oldRoot) oldRoot(vnode, parentNode);
 	};
 
-	options._diff = (internal, vnode) => {
-		let { type, _parent: parent } = internal;
-		let parentVNode = getClosestDomNodeParent(parent);
+	options._internal = (internal, vnode) => {
+		if (typeof vnode === 'string') return;
+		// Check if the user passed plain objects as children. Note that we cannot
+		// move this check into `options.vnode` because components can receive
+		// children in any shape they want (e.g.
+		// `<MyJSONFormatter>{{ foo: 123, bar: "abc" }}</MyJSONFormatter>`).
+		if (vnode.constructor !== undefined) {
+			const keys = Object.keys(vnode).join(',');
+			throw new Error(
+				`Objects are not valid as a child. Encountered an object with the keys {${keys}}.` +
+					`\n\n${getOwnerStack(internal)}`
+			);
+		}
 
-		hooksAllowed = true;
+		let { type, _parent: parent } = internal;
 
 		if (type === undefined) {
 			throw new Error(
 				'Undefined component passed to createElement()\n\n' +
 					'You likely forgot to export your component or might have mixed up default and named imports' +
-					serializeVNode(internal) +
+					serializeVNode(vnode) +
 					`\n\n${getOwnerStack(internal)}`
 			);
 		} else if (type != null && typeof type == 'object') {
@@ -143,6 +153,47 @@ export function initDebug() {
 					(Array.isArray(type) ? 'array' : type)
 			);
 		}
+
+		if (
+			internal.ref !== undefined &&
+			typeof internal.ref != 'function' &&
+			typeof internal.ref != 'object' &&
+			!('$$typeof' in vnode) // allow string refs when preact-compat is installed
+		) {
+			throw new Error(
+				`Component's "ref" property should be a function, or an object created ` +
+					`by createRef(), but got [${typeof internal.ref}] instead\n` +
+					serializeVNode(internal) +
+					`\n\n${getOwnerStack(internal)}`
+			);
+		}
+
+		if (typeof internal.type == 'string') {
+			for (const key in internal.props) {
+				if (
+					key[0] === 'o' &&
+					key[1] === 'n' &&
+					typeof internal.props[key] != 'function' &&
+					internal.props[key] != null
+				) {
+					throw new Error(
+						`Component's "${key}" property should be a function, ` +
+							`but got [${typeof internal.props[key]}] instead\n` +
+							serializeVNode(vnode) +
+							`\n\n${getOwnerStack(internal)}`
+					);
+				}
+			}
+		}
+
+		if (oldInternal) oldInternal(internal, vnode);
+	};
+
+	options._diff = (internal, vnode) => {
+		let { type, _parent: parent } = internal;
+		let parentVNode = getClosestDomNodeParent(parent);
+
+		hooksAllowed = true;
 
 		if (
 			(type === 'thead' || type === 'tfoot' || type === 'tbody') &&
@@ -177,38 +228,6 @@ export function initDebug() {
 					serializeVNode(internal) +
 					`\n\n${getOwnerStack(internal)}`
 			);
-		}
-
-		if (
-			internal.ref !== undefined &&
-			typeof internal.ref != 'function' &&
-			typeof internal.ref != 'object' &&
-			!('$$typeof' in internal) // allow string refs when preact-compat is installed
-		) {
-			throw new Error(
-				`Component's "ref" property should be a function, or an object created ` +
-					`by createRef(), but got [${typeof internal.ref}] instead\n` +
-					serializeVNode(internal) +
-					`\n\n${getOwnerStack(internal)}`
-			);
-		}
-
-		if (typeof internal.type == 'string') {
-			for (const key in internal.props) {
-				if (
-					key[0] === 'o' &&
-					key[1] === 'n' &&
-					typeof internal.props[key] != 'function' &&
-					internal.props[key] != null
-				) {
-					throw new Error(
-						`Component's "${key}" property should be a function, ` +
-							`but got [${typeof internal.props[key]}] instead\n` +
-							serializeVNode(internal) +
-							`\n\n${getOwnerStack(internal)}`
-					);
-				}
-			}
 		}
 
 		// Check prop-types if available
@@ -309,24 +328,6 @@ export function initDebug() {
 		// eslint-disable-next-line
 		vnode.__proto__ = deprecatedProto;
 		if (oldVnode) oldVnode(vnode);
-	};
-
-	options._internal = (internal, vnode) => {
-		if (typeof vnode !== 'string') {
-			// Check if the user passed plain objects as children. Note that we cannot
-			// move this check into `options.vnode` because components can receive
-			// children in any shape they want (e.g.
-			// `<MyJSONFormatter>{{ foo: 123, bar: "abc" }}</MyJSONFormatter>`).
-			if (vnode.constructor !== undefined) {
-				const keys = Object.keys(vnode).join(',');
-				throw new Error(
-					`Objects are not valid as a child. Encountered an object with the keys {${keys}}.` +
-						`\n\n${getOwnerStack(vnode)}`
-				);
-			}
-		}
-
-		if (oldInternal) oldInternal(internal, vnode);
 	};
 
 	options.diffed = vnode => {
