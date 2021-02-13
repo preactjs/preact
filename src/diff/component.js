@@ -61,9 +61,6 @@ export function renderComponent(
 		}
 		if (provider) provider.sub(c);
 
-		// @TODO: rename to c._internal
-		c._vnode = internal;
-
 		c.props = newProps;
 		if (!c.state) c.state = {};
 		c.context = componentContext;
@@ -117,6 +114,8 @@ export function renderComponent(
 			if (newVNode && newVNode._original !== internal._original) {
 				c._dirty = false;
 			}
+			// @TODO: rename to c._internal
+			c._vnode = internal;
 			if (c._renderCallbacks.length) {
 				commitQueue.push(c);
 			}
@@ -147,6 +146,8 @@ export function renderComponent(
 	if ((tmp = options._render)) tmp(internal);
 
 	c._dirty = false;
+	// @TODO: rename to c._internal
+	c._vnode = internal;
 	c._parentDom = parentDom;
 
 	tmp = c.render(c.props, c.state, c.context);
