@@ -68,7 +68,7 @@ export function render(vnode, parent, callback) {
 	preactRender(vnode, parent);
 	if (typeof callback == 'function') callback();
 
-	const internal = parent._children;
+	const internal = parent._children._children[0];
 	return internal ? internal._component : null;
 }
 
