@@ -27,10 +27,11 @@ export function render(vnode, parentDom, replaceNode) {
 	// means that we are mounting a new tree for the first time.
 	let rootInternal =
 		(replaceNode && replaceNode._children) || parentDom._children;
+	vnode = createElement(Fragment, null, [vnode]);
 	if (rootInternal) {
 		patch(
 			parentDom,
-			createElement(Fragment, null, [vnode]),
+			vnode,
 			rootInternal,
 			{},
 			parentDom.ownerSVGElement !== undefined,
@@ -40,7 +41,7 @@ export function render(vnode, parentDom, replaceNode) {
 	} else {
 		// Store the VDOM tree root on the DOM element in a (minified) property:
 		rootInternal = (replaceNode || parentDom)._children = createInternal(
-			createElement(Fragment, null, [vnode]),
+			vnode,
 			null
 		);
 
@@ -52,6 +53,7 @@ export function render(vnode, parentDom, replaceNode) {
 
 		mount(
 			parentDom,
+			vnode,
 			rootInternal, // createElement(Fragment, null, [vnode])
 			{},
 			parentDom.ownerSVGElement !== undefined,
@@ -80,13 +82,15 @@ export function hydrate(vnode, parentDom) {
 	/** @type {import('./internal').PreactElement} */
 	const hydrateDom = (parentDom.firstChild);
 
-	const rootInternal = createInternal(createElement(Fragment, null, [vnode]));
+	vnode = createElement(Fragment, null, [vnode]);
+	const rootInternal = createInternal(vnode);
 	rootInternal._mode = MODE_HYDRATE;
 	parentDom._children = rootInternal;
 
 	const commitQueue = [];
 	mount(
 		parentDom,
+		vnode,
 		rootInternal, // createElement(Fragment, null, [vnode]),
 		{},
 		parentDom.ownerSVGElement !== undefined,

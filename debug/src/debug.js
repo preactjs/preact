@@ -113,8 +113,8 @@ export function initDebug() {
 		if (oldRoot) oldRoot(vnode, parentNode);
 	};
 
-	options._internal = (internal, vnode) => {
-		if (typeof vnode === 'string') return;
+	options._diff = (internal, vnode) => {
+		if (vnode === null || typeof vnode !== 'object') return;
 		// Check if the user passed plain objects as children. Note that we cannot
 		// move this check into `options.vnode` because components can receive
 		// children in any shape they want (e.g.
@@ -154,43 +154,10 @@ export function initDebug() {
 			);
 		}
 
-		if (
-			internal.ref !== undefined &&
-			typeof internal.ref != 'function' &&
-			typeof internal.ref != 'object' &&
-			!('$$typeof' in vnode) // allow string refs when preact-compat is installed
-		) {
-			throw new Error(
-				`Component's "ref" property should be a function, or an object created ` +
-					`by createRef(), but got [${typeof internal.ref}] instead\n` +
-					serializeVNode(internal) +
-					`\n\n${getOwnerStack(internal)}`
-			);
-		}
+		// 	if (oldInternal) oldInternal(internal, vnode);
+		// };
 
-		if (typeof internal.type == 'string') {
-			for (const key in internal.props) {
-				if (
-					key[0] === 'o' &&
-					key[1] === 'n' &&
-					typeof internal.props[key] != 'function' &&
-					internal.props[key] != null
-				) {
-					throw new Error(
-						`Component's "${key}" property should be a function, ` +
-							`but got [${typeof internal.props[key]}] instead\n` +
-							serializeVNode(vnode) +
-							`\n\n${getOwnerStack(internal)}`
-					);
-				}
-			}
-		}
-
-		if (oldInternal) oldInternal(internal, vnode);
-	};
-
-	options._diff = (internal, vnode) => {
-		let { type, _parent: parent } = internal;
+		// let { type, _parent: parent } = internal;
 		let parentVNode = getClosestDomNodeParent(parent);
 
 		hooksAllowed = true;
@@ -228,6 +195,38 @@ export function initDebug() {
 					serializeVNode(internal) +
 					`\n\n${getOwnerStack(internal)}`
 			);
+		}
+
+		if (
+			internal.ref !== undefined &&
+			typeof internal.ref != 'function' &&
+			typeof internal.ref != 'object' &&
+			!('$$typeof' in vnode) // allow string refs when preact-compat is installed
+		) {
+			throw new Error(
+				`Component's "ref" property should be a function, or an object created ` +
+					`by createRef(), but got [${typeof internal.ref}] instead\n` +
+					serializeVNode(internal) +
+					`\n\n${getOwnerStack(internal)}`
+			);
+		}
+
+		if (typeof internal.type == 'string') {
+			for (const key in vnode.props) {
+				if (
+					key[0] === 'o' &&
+					key[1] === 'n' &&
+					typeof vnode.props[key] != 'function' &&
+					vnode.props[key] != null
+				) {
+					throw new Error(
+						`Component's "${key}" property should be a function, ` +
+							`but got [${typeof vnode.props[key]}] instead\n` +
+							serializeVNode(vnode) +
+							`\n\n${getOwnerStack(internal)}`
+					);
+				}
+			}
 		}
 
 		// Check prop-types if available
