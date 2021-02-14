@@ -32,7 +32,6 @@ export function initDebug() {
 	let oldBeforeDiff = options._diff;
 	let oldDiffed = options.diffed;
 	let oldVnode = options.vnode;
-	let oldInternal = options._internal;
 	let oldCatchError = options._catchError;
 	let oldRoot = options._root;
 	let oldHook = options._hook;
@@ -154,10 +153,6 @@ export function initDebug() {
 			);
 		}
 
-		// 	if (oldInternal) oldInternal(internal, vnode);
-		// };
-
-		// let { type, _parent: parent } = internal;
 		let parentVNode = getClosestDomNodeParent(parent);
 
 		hooksAllowed = true;
