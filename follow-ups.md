@@ -30,6 +30,7 @@
 	* "should correctly render nested Suspense components without intermediate DOM #2747"
 * Fix Suspense hydration tests:
 	* "should hydrate lazy components through components using shouldComponentUpdate"
+* Rebuild Suspense List to work with backing tree
 
 ## Other
 
