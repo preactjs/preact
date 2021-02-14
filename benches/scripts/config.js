@@ -228,16 +228,16 @@ export async function generateConfig(benchPath, options) {
 			continue;
 		}
 
-		if (options.prepare !== false) {
-			await prepare(framework.label);
-		}
-
 		benchmarks.push({
 			...baseBenchConfig,
 			packageVersions: framework,
 			browser,
 			expand
 		});
+	}
+
+	if (options.prepare !== false) {
+		await prepare(benchmarks.map(b => b.packageVersions.label));
 	}
 
 	/** @type {ConfigFile} */
