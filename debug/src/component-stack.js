@@ -45,10 +45,10 @@ let renderStack = [];
 let ownerStack = [];
 
 /**
- * Get the currently rendered `vnode`
- * @returns {import('./internal').VNode | null}
+ * Get the currently rendered instance
+ * @returns {import('./internal').Internal | null}
  */
-export function getCurrentVNode() {
+export function getCurrentInternal() {
 	return renderStack.length > 0 ? renderStack[renderStack.length - 1] : null;
 }
 
@@ -62,10 +62,10 @@ let hasBabelPlugin = false;
 
 /**
  * Check if a `vnode` is a possible owner.
- * @param {import('./internal').VNode} vnode
+ * @param {import('./internal').Internal} internal
  */
-function isPossibleOwner(vnode) {
-	return typeof vnode.type == 'function' && vnode.type != Fragment;
+function isPossibleOwner(internal) {
+	return typeof internal.type == 'function' && internal.type != Fragment;
 }
 
 /**
@@ -108,21 +108,22 @@ export function setupComponentStack() {
 	let oldDiffed = options.diffed;
 	let oldRoot = options._root;
 	let oldVNode = options.vnode;
+	let oldInternal = options._internal;
 	let oldRender = options._render;
 
-	options.diffed = vnode => {
-		if (isPossibleOwner(vnode)) {
+	options.diffed = internal => {
+		if (isPossibleOwner(internal)) {
 			ownerStack.pop();
 		}
 		renderStack.pop();
-		if (oldDiffed) oldDiffed(vnode);
+		if (oldDiffed) oldDiffed(internal);
 	};
 
-	options._diff = vnode => {
-		if (isPossibleOwner(vnode)) {
-			renderStack.push(vnode);
+	options._diff = (internal, vnode) => {
+		if (isPossibleOwner(internal)) {
+			renderStack.push(internal);
 		}
-		if (oldDiff) oldDiff(vnode);
+		if (oldDiff) oldDiff(internal, vnode);
 	};
 
 	options._root = (vnode, parent) => {
@@ -134,6 +135,13 @@ export function setupComponentStack() {
 		vnode._owner =
 			ownerStack.length > 0 ? ownerStack[ownerStack.length - 1] : null;
 		if (oldVNode) oldVNode(vnode);
+	};
+
+	options._internal = (internal, vnode) => {
+		if (internal.type !== null) {
+			internal._owner = vnode._owner;
+		}
+		if (oldInternal) oldInternal(internal, vnode);
 	};
 
 	options._render = vnode => {

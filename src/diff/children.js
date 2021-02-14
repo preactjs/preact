@@ -116,6 +116,7 @@ export function diffChildren(
 			// We are mounting a new VNode
 			nextDomSibling = mount(
 				parentDom,
+				childVNode,
 				childInternal,
 				globalContext,
 				isSvg,
@@ -134,6 +135,7 @@ export function diffChildren(
 
 			nextDomSibling = mount(
 				parentDom,
+				childVNode,
 				childInternal,
 				globalContext,
 				isSvg,

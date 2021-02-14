@@ -2,12 +2,12 @@ import { options } from 'preact';
 import { assign } from './util';
 
 let oldDiffHook = options._diff;
-options._diff = vnode => {
-	if (vnode.type && vnode.type._forwarded && vnode.ref) {
-		vnode.props.ref = vnode.ref;
-		vnode.ref = null;
+options._diff = (internal, vnode) => {
+	if (internal.type && internal.type._forwarded && internal.ref) {
+		internal.props.ref = internal.ref;
+		internal.ref = null;
 	}
-	if (oldDiffHook) oldDiffHook(vnode);
+	if (oldDiffHook) oldDiffHook(internal, vnode);
 };
 
 export const REACT_FORWARD_SYMBOL =

@@ -18,6 +18,7 @@ import { removeNode } from '../util';
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
  * @param {import('../internal').PreactElement} parentDom The parent of the DOM element
+ * @param {import('../internal').VNode | string} newVNode The new virtual node
  * @param {import('../internal').Internal} internal The Internal node to mount
  * @param {object} globalContext The current context object. Modified by getChildContext
  * @param {boolean} isSvg Whether or not this element is an SVG node
@@ -28,13 +29,14 @@ import { removeNode } from '../util';
  */
 export function mount(
 	parentDom,
+	newVNode,
 	internal,
 	globalContext,
 	isSvg,
 	commitQueue,
 	startDom
 ) {
-	if (options._diff) options._diff(internal);
+	if (options._diff) options._diff(internal, newVNode);
 
 	/** @type {import('../internal').PreactElement} */
 	let nextDomSibling;
@@ -250,6 +252,7 @@ export function mountChildren(
 		// Morph the old element into the new one, but don't append it to the dom yet
 		mountedNextChild = mount(
 			parentDom,
+			childVNode,
 			childInternal,
 			globalContext,
 			isSvg,
