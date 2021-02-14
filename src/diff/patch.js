@@ -139,7 +139,6 @@ function patchDOMElement(
 		diffChildren(
 			dom,
 			Array.isArray(tmp) ? tmp : [tmp],
-			newVNode,
 			internal,
 			globalContext,
 			isSvg && newType !== 'foreignObject',

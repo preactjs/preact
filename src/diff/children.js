@@ -18,8 +18,6 @@ import { createInternal } from '../tree';
  * @param {import('../internal').PreactElement} parentDom The DOM element whose
  * children are being diffed
  * @param {import('../internal').ComponentChildren[]} renderResult
- * @param {import('../internal').VNode} newParentVNode The new virtual node
- * whose children should be diff'ed against oldParentVNode
  * @param {import('../internal').Internal} parentInternal The Internal node
  * whose children should be diff'ed against newParentVNode
  * @param {object} globalContext The current context object - modified by
@@ -33,7 +31,6 @@ import { createInternal } from '../tree';
 export function diffChildren(
 	parentDom,
 	renderResult,
-	newParentVNode,
 	parentInternal,
 	globalContext,
 	isSvg,

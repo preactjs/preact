@@ -183,7 +183,6 @@ export function renderComponent(
 		nextDomSibling = diffChildren(
 			parentDom,
 			Array.isArray(renderResult) ? renderResult : [renderResult],
-			newVNode,
 			internal,
 			globalContext,
 			isSvg,
