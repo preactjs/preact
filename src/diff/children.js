@@ -45,7 +45,8 @@ export function diffChildren(
 	/** @type {import('../internal').VNode | string} */
 	let childVNode;
 
-	let oldChildren = parentInternal._children || EMPTY_ARR;
+	let oldChildren =
+		(parentInternal._children && parentInternal._children.slice()) || EMPTY_ARR;
 	let oldChildrenLength = oldChildren.length;
 
 	const newChildren = [];
