@@ -4,7 +4,6 @@ import options from '../options';
 import { renderComponent, renderFnComponent } from './component';
 import {
 	CLASS_NODE,
-	COMPONENT_NODE,
 	FRAGMENT_NODE,
 	FUNCTION_NODE,
 	RESET_MODE,
