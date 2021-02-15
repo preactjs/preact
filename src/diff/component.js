@@ -4,7 +4,7 @@ import { assign } from '../util';
 import { Component } from '../component';
 import { mountChildren } from './mount';
 import { diffChildren, reorderChildren } from './children';
-import { FORCE_UPDATE } from '../constants';
+import { DIRTY, FORCE_UPDATE } from '../constants';
 
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
@@ -66,7 +66,8 @@ export function renderComponent(
 		if (!c.state) c.state = {};
 		c.context = componentContext;
 		c._globalContext = globalContext;
-		isNew = c._dirty = true;
+		isNew = true;
+		internal._mode |= DIRTY;
 		c._renderCallbacks = [];
 	}
 
@@ -113,7 +114,7 @@ export function renderComponent(
 			internal.props = newProps;
 			// More info about this here: https://gist.github.com/JoviDeCroock/bec5f2ce93544d2e6070ef8e0036e4e8
 			if (newVNode && newVNode._original !== internal._original) {
-				c._dirty = false;
+				internal._mode &= ~DIRTY;
 			}
 			// @TODO: rename to c._internal
 			c._vnode = internal;
@@ -146,7 +147,7 @@ export function renderComponent(
 
 	if ((tmp = options._render)) tmp(internal);
 
-	c._dirty = false;
+	internal._mode &= ~DIRTY;
 	// @TODO: rename to c._internal
 	c._vnode = internal;
 	c._parentDom = parentDom;

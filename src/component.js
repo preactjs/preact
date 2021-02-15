@@ -3,7 +3,7 @@ import { commitRoot } from './diff/commit';
 import options from './options';
 import { createVNode, Fragment } from './create-element';
 import { patch } from './diff/patch';
-import { COMPONENT_NODE, FORCE_UPDATE } from './constants';
+import { COMPONENT_NODE, DIRTY, FORCE_UPDATE } from './constants';
 
 /**
  * Base Component class. Provides `setState()` and `forceUpdate()`, which
@@ -207,8 +207,8 @@ let prevDebounce;
  */
 export function enqueueRender(c) {
 	if (
-		(!c._dirty &&
-			(c._dirty = true) &&
+		(!(c._vnode._mode & DIRTY) &&
+			(c._vnode._mode |= DIRTY) &&
 			rerenderQueue.push(c) &&
 			!process._rerenderCount++) ||
 		prevDebounce !== options.debounceRendering
@@ -227,7 +227,7 @@ function process() {
 		// Don't update `renderCount` yet. Keep its value non-zero to prevent unnecessary
 		// process() calls from getting scheduled while `queue` is still being consumed.
 		queue.some(c => {
-			if (c._dirty) rerenderComponent(c);
+			if (c._vnode._mode & DIRTY) rerenderComponent(c);
 		});
 	}
 }

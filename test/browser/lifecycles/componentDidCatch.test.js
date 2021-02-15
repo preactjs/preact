@@ -629,9 +629,9 @@ describe('Lifecycle methods', () => {
 							this.setState({ b: 1 });
 						}
 					};
-					// NOTE: the above avoids setting the _dirty flag during rendering, circumventing the propagation issue.
+					// NOTE: the above avoids setting the DIRTY flag during rendering, circumventing the propagation issue.
 					// However, manually marking a component as dirty during rendering *will* prevent error propagation:
-					// this._dirty = true;
+					// this._vnode._mode |= DIRTY
 					return [<Fragment ref={markDirty} />, children];
 				}
 			}
