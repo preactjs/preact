@@ -1,7 +1,10 @@
 import { applyRef } from './refs';
 import {
+	CLASS_NODE,
 	COMPONENT_NODE,
 	ELEMENT_NODE,
+	FRAGMENT_NODE,
+	FUNCTION_NODE,
 	MODE_HYDRATE,
 	MODE_MUTATIVE_HYDRATE,
 	MODE_SUSPENDED,
@@ -10,7 +13,7 @@ import {
 } from '../constants';
 import { normalizeToVNode } from '../create-element';
 import { setProperty } from './props';
-import { renderComponent } from './component';
+import { renderComponent, renderFnComponent } from './component';
 import { createInternal } from '../tree';
 import options from '../options';
 import { removeNode } from '../util';
@@ -42,7 +45,17 @@ export function mount(
 	let nextDomSibling;
 
 	try {
-		if (internal._flags & COMPONENT_NODE) {
+		if (internal._flags & (FUNCTION_NODE | FRAGMENT_NODE)) {
+			nextDomSibling = renderFnComponent(
+				parentDom,
+				null,
+				internal,
+				globalContext,
+				isSvg,
+				commitQueue,
+				startDom
+			);
+		} else if (internal._flags & CLASS_NODE) {
 			nextDomSibling = renderComponent(
 				parentDom,
 				null,
