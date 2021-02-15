@@ -4,6 +4,7 @@ import { assign } from '../util';
 import { Component } from '../component';
 import { mountChildren } from './mount';
 import { diffChildren, reorderChildren } from './children';
+import { FORCE_UPDATE } from '../constants';
 
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
@@ -101,7 +102,7 @@ export function renderComponent(
 		}
 
 		if (
-			(!c._force &&
+			(!(internal._mode & FORCE_UPDATE) &&
 				c.shouldComponentUpdate != null &&
 				c.shouldComponentUpdate(newProps, c._nextState, componentContext) ===
 					false) ||
@@ -195,7 +196,7 @@ export function renderComponent(
 		commitQueue.push(c);
 	}
 
-	c._force = false;
+	internal._mode &= ~FORCE_UPDATE;
 
 	return nextDomSibling;
 }

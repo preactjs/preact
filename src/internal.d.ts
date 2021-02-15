@@ -159,8 +159,6 @@ export interface Component<P = {}, S = {}> extends preact.Component<P, S> {
 	state: S; // Override Component["state"] to not be readonly for internal use, specifically Hooks
 	/** @TODO this should be a mode flag */
 	_dirty: boolean;
-	/** @TODO this should be a mode flag */
-	_force?: boolean;
 	/** @TODO this should be moved to internal.data */
 	_renderCallbacks: Array<() => void>; // Only class components
 	_globalContext?: any;

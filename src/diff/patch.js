@@ -2,7 +2,7 @@ import { diffChildren } from './children';
 import { diffProps, setProperty } from './props';
 import options from '../options';
 import { renderComponent } from './component';
-import { COMPONENT_NODE, MODE_NONE, TEXT_NODE } from '../constants';
+import { COMPONENT_NODE, RESET_MODE, TEXT_NODE } from '../constants';
 
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
@@ -72,7 +72,7 @@ export function patch(
 		if (options.diffed) options.diffed(internal);
 
 		// We successfully rendered this VNode, unset any stored hydration/bailout state:
-		internal._mode = MODE_NONE;
+		internal._mode &= RESET_MODE;
 		// Once we have successfully rendered the new VNode, copy it's ID over
 		internal._original = newVNode._original;
 	} catch (e) {
