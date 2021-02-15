@@ -69,6 +69,7 @@
       "$_hook": "__h",
       "$_catchError": "__e",
       "$_unmount": "__u",
+      "$_internal": "__i",
       "$_owner": "__o",
       "$_skipEffects": "__s",
       "$_rerenderCount": "__r",
