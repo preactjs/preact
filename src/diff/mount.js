@@ -242,7 +242,7 @@ export function mountChildren(
 			parentDom.textContent = renderResult;
 		} else if (~parentInternal._flags & MODE_HYDRATE) {
 			// parentDom.textContent = renderResult;
-			parentDom.appendChild(document.createTextNode(renderResult));
+			parentDom.insertBefore(document.createTextNode(renderResult), null);
 		}
 
 		return;
