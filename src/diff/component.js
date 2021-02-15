@@ -29,7 +29,7 @@ export function renderFnComponent(
 ) {
 	/** @type {import('../internal').Component} */
 	let c;
-	let isNew, oldProps, oldState, snapshot, tmp;
+	let isNew, tmp;
 
 	/** @type {import('../internal').ComponentType} */
 	let type = (internal.type);
@@ -51,15 +51,10 @@ export function renderFnComponent(
 		c = internal._component;
 	} else {
 		// Instantiate the new component
-		if ('prototype' in type && type.prototype.render) {
-			// @ts-ignore The check above verifies that newType is suppose to be constructed
-			internal._component = c = new type(newProps, componentContext); // eslint-disable-line new-cap
-		} else {
-			// @ts-ignore Trust me, Component implements the interface we want
-			internal._component = c = new Component(newProps, componentContext);
-			c.constructor = type;
-			c.render = doRender;
-		}
+		// @ts-ignore Trust me, Component implements the interface we want
+		internal._component = c = new Component(newProps, componentContext);
+		c.constructor = type;
+		c.render = doRender;
 		if (provider) provider.sub(c);
 
 		c.props = newProps;
@@ -75,68 +70,32 @@ export function renderFnComponent(
 	if (c._nextState == null) {
 		c._nextState = c.state;
 	}
-	if (type.getDerivedStateFromProps != null) {
-		if (c._nextState == c.state) {
-			c._nextState = assign({}, c._nextState);
+
+	if (
+		(!isNew &&
+			!(internal._mode & FORCE_UPDATE) &&
+			c.shouldComponentUpdate != null &&
+			c.shouldComponentUpdate(newProps, c._nextState, componentContext) ===
+				false) ||
+		(newVNode && newVNode._original === internal._original)
+	) {
+		c.props = newProps;
+		c.state = c._nextState;
+		internal.props = newProps;
+		// More info about this here: https://gist.github.com/JoviDeCroock/bec5f2ce93544d2e6070ef8e0036e4e8
+		if (newVNode && newVNode._original !== internal._original) {
+			internal._mode &= ~DIRTY;
+		}
+		// @TODO: rename to c._internal
+		c._vnode = internal;
+		if (c._renderCallbacks.length) {
+			commitQueue.push(c);
 		}
 
-		assign(c._nextState, type.getDerivedStateFromProps(newProps, c._nextState));
-	}
-
-	oldProps = c.props;
-	oldState = c.state;
-	if (isNew) {
-		if (type.getDerivedStateFromProps == null && c.componentWillMount != null) {
-			c.componentWillMount();
-		}
-
-		if (c.componentDidMount != null) {
-			c._renderCallbacks.push(c.componentDidMount);
-		}
-	} else {
-		if (
-			type.getDerivedStateFromProps == null &&
-			newProps !== oldProps &&
-			c.componentWillReceiveProps != null
-		) {
-			c.componentWillReceiveProps(newProps, componentContext);
-		}
-
-		if (
-			(!(internal._mode & FORCE_UPDATE) &&
-				c.shouldComponentUpdate != null &&
-				c.shouldComponentUpdate(newProps, c._nextState, componentContext) ===
-					false) ||
-			(newVNode && newVNode._original === internal._original)
-		) {
-			c.props = newProps;
-			c.state = c._nextState;
-			internal.props = newProps;
-			// More info about this here: https://gist.github.com/JoviDeCroock/bec5f2ce93544d2e6070ef8e0036e4e8
-			if (newVNode && newVNode._original !== internal._original) {
-				internal._mode &= ~DIRTY;
-			}
-			// @TODO: rename to c._internal
-			c._vnode = internal;
-			if (c._renderCallbacks.length) {
-				commitQueue.push(c);
-			}
-
-			// TODO: Returning undefined here (i.e. return;) passes all tests. That seems
-			// like a bug. Should validate that we have test coverage for sCU that
-			// returns Fragments with multiple DOM children
-			return reorderChildren(internal, startDom, parentDom);
-		}
-
-		if (c.componentWillUpdate != null) {
-			c.componentWillUpdate(newProps, c._nextState, componentContext);
-		}
-
-		if (c.componentDidUpdate != null) {
-			c._renderCallbacks.push(() => {
-				c.componentDidUpdate(oldProps, oldState, snapshot);
-			});
-		}
+		// TODO: Returning undefined here (i.e. return;) passes all tests. That seems
+		// like a bug. Should validate that we have test coverage for sCU that
+		// returns Fragments with multiple DOM children
+		return reorderChildren(internal, startDom, parentDom);
 	}
 
 	c.context = componentContext;
@@ -159,10 +118,6 @@ export function renderFnComponent(
 
 	if (c.getChildContext != null) {
 		globalContext = assign(assign({}, globalContext), c.getChildContext());
-	}
-
-	if (!isNew && c.getSnapshotBeforeUpdate != null) {
-		snapshot = c.getSnapshotBeforeUpdate(oldProps, oldState);
 	}
 
 	let isTopLevelFragment =
