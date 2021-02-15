@@ -23,6 +23,25 @@ options._catchError = function(error, newVNode, oldVNode) {
 	oldCatchError(error, newVNode, oldVNode);
 };
 
+const oldUnmount = options.unmount;
+options.unmount = function(vnode) {
+	/** @type {import('./internal').Component} */
+	const component = vnode._component;
+	if (component && component._onResolve) {
+		component._onResolve();
+	}
+
+	// if the component is still hydrating most likely it is because the component
+	// is suspended we set the vnode.type as `null` so that it is not a typeof
+	// function so the unmount will remove the vnode._dom
+	const wasHydrating = (vnode._mode & MODE_HYDRATE) === MODE_HYDRATE;
+	if (component && wasHydrating) {
+		vnode.type = null;
+	}
+
+	if (oldUnmount) oldUnmount(vnode);
+};
+
 function detachedClone(vnode, detachedParent, parentDom) {
 	if (vnode) {
 		if (vnode._component && vnode._component.__hooks) {
@@ -120,8 +139,7 @@ Suspense.prototype._childDidSuspend = function(promise, suspendingVNode) {
 		if (resolved) return;
 
 		resolved = true;
-		suspendingComponent.componentWillUnmount =
-			suspendingComponent._suspendedComponentWillUnmount;
+		suspendingComponent._onResolve = null;
 
 		if (resolve) {
 			resolve(onSuspensionComplete);
@@ -130,15 +148,7 @@ Suspense.prototype._childDidSuspend = function(promise, suspendingVNode) {
 		}
 	};
 
-	suspendingComponent._suspendedComponentWillUnmount =
-		suspendingComponent.componentWillUnmount;
-	suspendingComponent.componentWillUnmount = () => {
-		onResolved();
-
-		if (suspendingComponent._suspendedComponentWillUnmount) {
-			suspendingComponent._suspendedComponentWillUnmount();
-		}
-	};
+	suspendingComponent._onResolve = onResolved;
 
 	const onSuspensionComplete = () => {
 		if (!--c._pendingSuspensionCount) {

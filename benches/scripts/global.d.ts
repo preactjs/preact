@@ -5,6 +5,7 @@ interface TachometerOptions {
 	'sample-size': number;
 	horizon: string;
 	timeout: number;
+	trace: boolean;
 }
 
 interface DeoptOptions {
