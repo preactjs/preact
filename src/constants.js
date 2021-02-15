@@ -19,6 +19,8 @@ export const RESET_MODE = ~(
 
 /** Signifies that bailout checks will be bypassed */
 export const FORCE_UPDATE = 16;
+/** Signifies that a node needs to be updated */
+export const DIRTY = 32;
 
 export const EMPTY_ARR = [];
 
