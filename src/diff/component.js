@@ -2,7 +2,7 @@ import { Fragment } from '../create-element';
 import options from '../options';
 import { assign } from '../util';
 import { Component } from '../component';
-import { mountChildren } from './mount';
+import { mountChild, mountChildren } from './mount';
 import { diffChildren, reorderChildren } from './children';
 import { DIRTY } from '../constants';
 
@@ -173,16 +173,27 @@ export function renderComponent(
 	let nextDomSibling;
 
 	if (internal._children == null) {
-		nextDomSibling = mountChildren(
-			parentDom,
-			// Array.isArray(renderResult) ? renderResult : [renderResult],
-			renderResult,
-			internal,
-			globalContext,
-			isSvg,
-			commitQueue,
-			startDom
-		);
+		if (Array.isArray(renderResult)) {
+			nextDomSibling = mountChildren(
+				parentDom,
+				renderResult,
+				internal,
+				globalContext,
+				isSvg,
+				commitQueue,
+				startDom
+			);
+		} else {
+			nextDomSibling = mountChild(
+				parentDom,
+				renderResult,
+				internal,
+				globalContext,
+				isSvg,
+				commitQueue,
+				startDom
+			);
+		}
 	} else {
 		nextDomSibling = diffChildren(
 			parentDom,

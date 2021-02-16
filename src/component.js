@@ -92,23 +92,31 @@ Component.prototype.render = Fragment;
 export function getDomSibling(internal, childIndex) {
 	if (childIndex == null) {
 		// Use childIndex==null as a signal to resume the search from the vnode's sibling
-		return internal._parent
-			? getDomSibling(
-					internal._parent,
-					internal._parent._children.indexOf(internal) + 1
-			  )
-			: null;
+		if (internal._parent) {
+			let parent = internal._parent;
+			if (Array.isArray(parent._children)) {
+				return getDomSibling(parent, parent._children.indexOf(internal) + 1);
+			} else if (parent._flags & COMPONENT_NODE) {
+				return getDomSibling(parent);
+			} else {
+				return null;
+			}
+		} else {
+			return null;
+		}
 	}
 
-	let sibling;
-	for (; childIndex < internal._children.length; childIndex++) {
-		sibling = internal._children[childIndex];
+	if (Array.isArray(internal._children)) {
+		let sibling;
+		for (; childIndex < internal._children.length; childIndex++) {
+			sibling = internal._children[childIndex];
 
-		if (sibling != null && sibling._dom != null) {
-			// Since updateParentDomPointers keeps _dom pointer correct,
-			// we can rely on _dom to tell us if this subtree contains a
-			// rendered DOM node, and what the first rendered DOM node is
-			return sibling._dom;
+			if (sibling != null && sibling._dom != null) {
+				// Since updateParentDomPointers keeps _dom pointer correct,
+				// we can rely on _dom to tell us if this subtree contains a
+				// rendered DOM node, and what the first rendered DOM node is
+				return sibling._dom;
+			}
 		}
 	}
 

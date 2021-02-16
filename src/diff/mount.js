@@ -187,16 +187,27 @@ function mountDOMElement(dom, internal, globalContext, isSvg, commitQueue) {
 			}
 			internal._children = [];
 		} else if ((i = internal.props.children) != internal._children) {
-			mountChildren(
-				dom,
-				// Array.isArray(i) ? i : [i],
-				i,
-				internal,
-				globalContext,
-				isSvg && nodeType !== 'foreignObject',
-				commitQueue,
-				dom.firstChild
-			);
+			if (Array.isArray(i)) {
+				mountChildren(
+					dom,
+					i,
+					internal,
+					globalContext,
+					isSvg && nodeType !== 'foreignObject',
+					commitQueue,
+					dom.firstChild
+				);
+			} else {
+				mountChild(
+					dom,
+					i,
+					internal,
+					globalContext,
+					isSvg && nodeType !== 'foreignObject',
+					commitQueue,
+					dom.firstChild
+				);
+			}
 		}
 
 		// (as above, don't diff props during hydration)
@@ -211,6 +222,105 @@ function mountDOMElement(dom, internal, globalContext, isSvg, commitQueue) {
 	}
 
 	return dom;
+}
+
+/**
+ * Diff the children of a virtual node
+ * @param {import('../internal').PreactElement} parentDom The DOM element whose
+ * children are being diffed
+ * @param {import('../internal').ComponentChild} renderResult
+ * @param {import('../internal').Internal} parentInternal The parent Internal of the given children
+ * @param {object} globalContext The current context object - modified by getChildContext
+ * @param {boolean} isSvg Whether or not this DOM node is an SVG node
+ * @param {Array<import('../internal').Component>} commitQueue List of components
+ * which have callbacks to invoke in commitRoot
+ * @param {import('../internal').PreactElement} startDom
+ */
+export function mountChild(
+	parentDom,
+	renderResult,
+	parentInternal,
+	globalContext,
+	isSvg,
+	commitQueue,
+	startDom
+) {
+	let i, childInternal, newDom, mountedNextChild;
+
+	renderResult = normalizeToVNode(renderResult);
+
+	if (renderResult == null) {
+		parentInternal._children = renderResult;
+		return;
+	} else if (typeof renderResult == 'string') {
+		parentInternal._children = '' + renderResult;
+		if (parentInternal._mode & MODE_MUTATIVE_HYDRATE) {
+			parentDom.textContent = renderResult;
+		} else if (~parentInternal._mode & MODE_HYDRATE) {
+			// parentDom.textContent = renderResult;
+			parentDom.insertBefore(document.createTextNode(renderResult), null);
+		}
+
+		return;
+	}
+
+	parentInternal._children = childInternal = createInternal(
+		renderResult,
+		parentInternal
+	);
+
+	// Morph the old element into the new one, but don't append it to the dom yet
+	mountedNextChild = mount(
+		parentDom,
+		renderResult,
+		childInternal,
+		globalContext,
+		isSvg,
+		commitQueue,
+		startDom
+	);
+
+	newDom = parentInternal._dom = childInternal._dom;
+
+	if (newDom != null) {
+		if (childInternal._flags & COMPONENT_NODE || newDom == startDom) {
+			// If the child is a Fragment-like or if it is DOM VNode and its _dom
+			// property matches the dom we are diffing (i.e. startDom), just
+			// continue with the mountedNextChild
+			startDom = mountedNextChild;
+		} else {
+			// The DOM the diff should begin with is now startDom (since we inserted
+			// newDom before startDom) so ignore mountedNextChild and continue with
+			// startDom
+			parentDom.insertBefore(newDom, startDom);
+		}
+	}
+
+	if (childInternal.ref) {
+		applyRef(
+			childInternal.ref,
+			childInternal._component || newDom,
+			childInternal
+		);
+	}
+
+	// Remove children that are not part of any vnode.
+	if (
+		parentInternal._mode & (MODE_HYDRATE | MODE_MUTATIVE_HYDRATE) &&
+		parentInternal._flags & ELEMENT_NODE
+	) {
+		// TODO: Would it be simpler to just clear the pre-existing DOM in top-level
+		// render if render is called with no oldVNode & existing children & no
+		// replaceNode? Instead of patching the DOM to match the VNode tree? (remove
+		// attributes & unused DOM)
+		while (startDom) {
+			i = startDom;
+			startDom = startDom.nextSibling;
+			removeNode(i);
+		}
+	}
+
+	return startDom;
 }
 
 /**
@@ -236,19 +346,6 @@ export function mountChildren(
 ) {
 	let i, childVNode, childInternal, newDom, firstChildDom, mountedNextChild;
 
-	if (typeof renderResult == 'string' || typeof renderResult == 'number') {
-		parentInternal._children = '' + renderResult;
-		if (parentInternal._mode & MODE_MUTATIVE_HYDRATE) {
-			parentDom.textContent = renderResult;
-		} else if (~parentInternal._mode & MODE_HYDRATE) {
-			// parentDom.textContent = renderResult;
-			parentDom.insertBefore(document.createTextNode(renderResult), null);
-		}
-
-		return;
-	}
-
-	renderResult = Array.isArray(renderResult) ? renderResult : [renderResult];
 	parentInternal._children = [];
 	for (i = 0; i < renderResult.length; i++) {
 		childVNode = normalizeToVNode(renderResult[i]);

@@ -19,7 +19,7 @@ import { createInternal } from '../tree';
  * children are being diffed
  * @param {import('../internal').ComponentChildren[]} renderResult
  * @param {import('../internal').Internal} parentInternal The Internal node
- * whose children should be diff'ed against newParentVNode
+ * whose children should be diffed against newParentVNode
  * @param {object} globalContext The current context object - modified by
  * getChildContext
  * @param {boolean} isSvg Whether or not this DOM node is an SVG node
@@ -67,10 +67,19 @@ export function diffChildren(
 		}
 	}
 
-	oldChildren = (oldChildren && oldChildren.slice()) || EMPTY_ARR;
+	// oldChildren = (oldChildren && oldChildren.slice()) || EMPTY_ARR;
+	if (Array.isArray(oldChildren)) {
+		oldChildren = oldChildren.slice();
+	} else if (oldChildren != null) {
+		oldChildren = [oldChildren];
+	} else {
+		oldChildren = EMPTY_ARR;
+	}
+
 	let oldChildrenLength = oldChildren.length;
 
 	renderResult = Array.isArray(renderResult) ? renderResult : [renderResult];
+
 	const newChildren = [];
 	for (i = 0; i < renderResult.length; i++) {
 		childVNode = normalizeToVNode(renderResult[i]);
@@ -240,7 +249,13 @@ export function diffChildren(
 		newChildren[i] = childInternal;
 	}
 
-	parentInternal._children = newChildren;
+	if (newChildren.length == 0) {
+		parentInternal._children = null;
+	} else if (newChildren.length == 1) {
+		parentInternal._children = newChildren[0];
+	} else {
+		parentInternal._children = newChildren;
+	}
 
 	// newParentVNode._dom = firstChildDom;
 	parentInternal._dom = firstChildDom;
