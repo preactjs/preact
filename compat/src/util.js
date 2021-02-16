@@ -21,3 +21,8 @@ export function shallowDiffers(a, b) {
 	for (let i in b) if (i !== '__source' && a[i] !== b[i]) return true;
 	return false;
 }
+
+export function removeNode(node) {
+	let parentNode = node.parentNode;
+	if (parentNode) parentNode.removeChild(node);
+}
