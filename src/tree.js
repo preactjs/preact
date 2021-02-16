@@ -63,23 +63,47 @@ export function createInternal(vnode, parentInternal) {
 				: ELEMENT_NODE;
 	}
 
-	/** @type {import('./internal').Internal} */
-	const internal = {
+	// /** @type {import('./internal').Internal} */
+	// const internal = {
+	// 	type,
+	// 	props,
+	// 	key,
+	// 	ref,
+	// 	_children: null,
+	// 	_parent: parentInternal,
+	// 	_original: vnodeId,
+	// 	_dom: null,
+	// 	_component: null,
+	// 	_flags: flags,
+	// 	_mode: parentInternal ? parentInternal._mode : MODE_NONE,
+	// 	_depth: parentInternal ? parentInternal._depth + 1 : 0
+	// };
+	const internal = new Internal(
 		type,
 		props,
 		key,
 		ref,
-		_children: null,
-		_parent: parentInternal,
-		_original: vnodeId,
-		_dom: null,
-		_component: null,
-		_flags: flags,
-		_mode: parentInternal ? parentInternal._mode : MODE_NONE,
-		_depth: parentInternal ? parentInternal._depth + 1 : 0
-	};
+		parentInternal,
+		vnodeId,
+		flags
+	);
 
 	if (options._internal) options._internal(internal, vnode);
 
 	return internal;
+}
+
+function Internal(type, props, key, ref, parentInternal, vnodeId, flags) {
+	this.type = type;
+	this.props = props;
+	this.key = key;
+	this.ref = ref;
+	this._children = null;
+	this._parent = parentInternal;
+	this._original = vnodeId;
+	this._dom = null;
+	this._component = null;
+	this._flags = flags;
+	this._mode = parentInternal ? parentInternal._mode : MODE_NONE;
+	this._depth = parentInternal ? parentInternal._depth + 1 : 0;
 }
