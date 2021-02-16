@@ -1,6 +1,7 @@
+import { existsSync } from 'fs';
 import { readFile, readdir } from 'fs/promises';
-import { frameworks } from './config.js';
-import { benchesRoot } from './utils.js';
+import prompts from 'prompts';
+import { baseTraceLogDir, frameworks } from './config.js';
 
 // @ts-ignore
 import tachometerStats from 'tachometer/lib/stats.js';
@@ -290,15 +291,43 @@ export async function analyze() {
 		'duration'
 	];
 
+	if (!existsSync(baseTraceLogDir())) {
+		console.log(
+			`Could not find log directory: "${baseTraceLogDir()}". Did you run the benchmarks?`
+		);
+		return;
+	}
+
+	const benchmarkNames = await readdir(baseTraceLogDir());
+	let selectedBench;
+	if (benchmarkNames.length == 0) {
+		console.log(`No benchmarks or results found in "${baseTraceLogDir()}".`);
+		return;
+	} else if (benchmarkNames.length == 1) {
+		selectedBench = benchmarkNames[0];
+	} else {
+		selectedBench = (
+			await prompts({
+				type: 'select',
+				name: 'value',
+				message: "Which benchmark's results would you like to analyze?",
+				choices: benchmarkNames.map(name => ({
+					title: name,
+					value: name
+				}))
+			})
+		).value;
+	}
+
 	/** @type {Map<string, ResultStats[]>} */
 	const resultStatsMap = new Map();
 	for (let framework of frameworkNames) {
-		const logDir = benchesRoot('logs', framework);
+		const logDir = baseTraceLogDir(selectedBench, framework);
 
 		let logFilePaths;
 		try {
 			logFilePaths = (await readdir(logDir)).map(fn =>
-				benchesRoot('logs', framework, fn)
+				baseTraceLogDir(selectedBench, framework, fn)
 			);
 		} catch (e) {
 			// If directory doesn't exist or we fail to read it, just skip
