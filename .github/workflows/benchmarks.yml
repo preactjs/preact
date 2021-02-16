@@ -42,6 +42,7 @@ jobs:
           npm pack --ignore-scripts
           mv preact-*.tgz preact.tgz
           tar -xzf preact.tgz
+          rm preact.tgz
       - name: Upload build output
         uses: actions/upload-artifact@v2
         with:
@@ -57,10 +58,6 @@ jobs:
         with:
           name: build-output
           path: preact.tgz
-      - name: Initialize Tachometer Results Report
-        uses: andrewiggins/tachometer-reporter-action@v2
-        with:
-          initialize: true
 
   bench_text_update:
     name: Bench text_update
@@ -89,12 +86,6 @@ jobs:
         with:
           name: results
           path: benches/results/text_update.json
-      - uses: andrewiggins/tachometer-reporter-action@v2
-        with:
-          path: benches/results/text_update.json
-          report-id: text_update
-          base-bench-name: preact-master
-          pr-bench-name: preact-local
 
   bench_many_updates:
     name: Bench many_updates
@@ -123,12 +114,6 @@ jobs:
         with:
           name: results
           path: benches/results/many_updates.json
-      - uses: andrewiggins/tachometer-reporter-action@v2
-        with:
-          path: benches/results/many_updates.json
-          report-id: many_updates
-          base-bench-name: preact-master
-          pr-bench-name: preact-local
 
   bench_02_replace1k:
     name: Bench 02_replace1k
@@ -157,13 +142,6 @@ jobs:
         with:
           name: results
           path: benches/results/02_replace1k.json
-      - uses: andrewiggins/tachometer-reporter-action@v2
-        with:
-          path: benches/results/02_replace1k.json
-          report-id: 02_replace1k
-          base-bench-name: preact-master
-          pr-bench-name: preact-local
-          summarize: 'duration, usedJSHeapSize'
 
   bench_03_update10th1k_x16:
     name: Bench 03_update10th1k_x16
@@ -192,12 +170,6 @@ jobs:
         with:
           name: results
           path: benches/results/03_update10th1k_x16.json
-      - uses: andrewiggins/tachometer-reporter-action@v2
-        with:
-          path: benches/results/03_update10th1k_x16.json
-          report-id: 03_update10th1k_x16
-          base-bench-name: preact-master
-          pr-bench-name: preact-local
 
   bench_07_create10k:
     name: Bench 07_create10k
@@ -226,12 +198,6 @@ jobs:
         with:
           name: results
           path: benches/results/07_create10k.json
-      - uses: andrewiggins/tachometer-reporter-action@v2
-        with:
-          path: benches/results/07_create10k.json
-          report-id: 07_create10k
-          base-bench-name: preact-master
-          pr-bench-name: preact-local
 
   bench_hydrate1k:
     name: Bench hydrate1k
@@ -260,12 +226,6 @@ jobs:
         with:
           name: results
           path: benches/results/hydrate1k.json
-      - uses: andrewiggins/tachometer-reporter-action@v2
-        with:
-          path: benches/results/hydrate1k.json
-          report-id: hydrate1k
-          base-bench-name: preact-master
-          pr-bench-name: preact-local
 
   bench_filter_list:
     name: Bench filter_list
@@ -294,9 +254,3 @@ jobs:
         with:
           name: results
           path: benches/results/filter_list.json
-      - uses: andrewiggins/tachometer-reporter-action@v2
-        with:
-          path: benches/results/filter_list.json
-          report-id: filter_list
-          base-bench-name: preact-master
-          pr-bench-name: preact-local

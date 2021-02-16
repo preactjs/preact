@@ -6,6 +6,7 @@
 	"description": "Benchmarks for Preact",
 	"scripts": {
 		"start": "node ./scripts config many_updates.html && tach --force-clean-npm-install --config dist/many_updates.config.json --manual",
+		"analyze": "node ./scripts analyze",
 		"bench": "node ./scripts bench",
 		"deopts": "node ./scripts deopts",
 		"help": "node ./scripts --help"
@@ -20,9 +21,10 @@
 		"escalade": "^3.0.2",
 		"escape-string-regexp": "^4.0.0",
 		"globby": "^11.0.0",
+		"prompts": "^2.4.0",
 		"sade": "^1.7.3",
 		"strip-ansi": "^6.0.0",
-		"tachometer": "^0.5.5",
+		"tachometer": "^0.5.7",
 		"v8-deopt-viewer": "^0.2.1"
 	}
 }

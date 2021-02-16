@@ -110,6 +110,14 @@ describe('compat render', () => {
 		expect(scratch.firstElementChild).to.have.property('value', 'foo');
 	});
 
+	it('should add defaultValue when value is null/undefined', () => {
+		render(<input defaultValue="foo" value={null} />, scratch);
+		expect(scratch.firstElementChild).to.have.property('value', 'foo');
+
+		render(<input defaultValue="foo" value={undefined} />, scratch);
+		expect(scratch.firstElementChild).to.have.property('value', 'foo');
+	});
+
 	it('should support defaultValue for select tag', () => {
 		function App() {
 			return (

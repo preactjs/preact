@@ -150,6 +150,9 @@ export function diff(
 					c._vnode = newVNode;
 					newVNode._dom = oldVNode._dom;
 					newVNode._children = oldVNode._children;
+					newVNode._children.forEach(vnode => {
+						if (vnode) vnode._parent = newVNode;
+					});
 
 					break outer;
 				}
@@ -315,25 +318,26 @@ function diffElementNodes(
 	commitQueue,
 	isHydrating
 ) {
-	let i;
 	let oldProps = oldVNode.props;
 	let newProps = newVNode.props;
 	let nodeType = newVNode.type;
+	let i = 0;
 
 	// Tracks entering and exiting SVG namespace when descending through the tree.
 	if (nodeType === 'svg') isSvg = true;
 
 	if (excessDomChildren != null) {
-		for (i = 0; i < excessDomChildren.length; i++) {
+		for (; i < excessDomChildren.length; i++) {
 			const child = excessDomChildren[i];
 
 			// if newVNode matches an element in excessDomChildren or the `dom`
 			// argument matches an element in excessDomChildren, remove it from
 			// excessDomChildren so it isn't later removed in diffChildren
-			//
-			// Note: This takes advantage of Text nodes having `.localName=undefined`,
-			// which is loosely equal to Text VNodes' `.type=null`. Elements use string equality.
-			if (child != null && (dom == child || child.localName == nodeType)) {
+			if (
+				child &&
+				(child === dom ||
+					(nodeType ? child.localName == nodeType : child.nodeType == 3))
+			) {
 				dom = child;
 				excessDomChildren[i] = null;
 				break;
@@ -373,9 +377,9 @@ function diffElementNodes(
 			dom.data = newProps;
 		}
 	} else {
-		if (excessDomChildren != null) {
-			excessDomChildren = EMPTY_ARR.slice.call(dom.childNodes);
-		}
+		// If excessDomChildren was not null, repopulate it with the current element's children:
+		excessDomChildren =
+			excessDomChildren && EMPTY_ARR.slice.call(dom.childNodes);
 
 		oldProps = oldVNode.props || EMPTY_OBJ;
 
