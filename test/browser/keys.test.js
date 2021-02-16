@@ -5,7 +5,7 @@ import { div } from '../_util/dom';
 
 /** @jsx createElement */
 
-describe('keys', () => {
+describe.only('keys', () => {
 	/** @type {HTMLDivElement} */
 	let scratch;
 
