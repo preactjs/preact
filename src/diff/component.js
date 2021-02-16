@@ -4,6 +4,7 @@ import { assign } from '../util';
 import { Component } from '../component';
 import { mountChildren } from './mount';
 import { diffChildren, reorderChildren } from './children';
+import { DIRTY } from '../constants';
 
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
@@ -62,11 +63,13 @@ export function renderComponent(
 		if (provider) provider.sub(c);
 
 		c.props = newProps;
-		if (!c.state) c.state = {};
+		// if (!c.state) c.state = {};
 		c.context = componentContext;
-		c._globalContext = globalContext;
-		isNew = c._dirty = true;
-		c._renderCallbacks = [];
+		// c._globalContext = globalContext;
+		// isNew = c._dirty = true;
+		// c._renderCallbacks = [];
+		isNew = true;
+		internal._mode |= DIRTY;
 	}
 
 	// Invoke getDerivedStateFromProps
@@ -89,7 +92,7 @@ export function renderComponent(
 		}
 
 		if (c.componentDidMount != null) {
-			c._renderCallbacks.push(c.componentDidMount);
+			addRenderCallback(c, c.componentDidMount);
 		}
 	} else {
 		if (
@@ -112,11 +115,11 @@ export function renderComponent(
 			internal.props = newProps;
 			// More info about this here: https://gist.github.com/JoviDeCroock/bec5f2ce93544d2e6070ef8e0036e4e8
 			if (newVNode && newVNode._original !== internal._original) {
-				c._dirty = false;
+				internal._mode &= ~DIRTY;
 			}
 			// @TODO: rename to c._internal
 			c._vnode = internal;
-			if (c._renderCallbacks.length) {
+			if (c._renderCallbacks && c._renderCallbacks.length) {
 				commitQueue.push(c);
 			}
 
@@ -131,7 +134,7 @@ export function renderComponent(
 		}
 
 		if (c.componentDidUpdate != null) {
-			c._renderCallbacks.push(() => {
+			addRenderCallback(c, () => {
 				c.componentDidUpdate(oldProps, oldState, snapshot);
 			});
 		}
@@ -145,10 +148,10 @@ export function renderComponent(
 
 	if ((tmp = options._render)) tmp(internal);
 
-	c._dirty = false;
+	internal._mode &= ~DIRTY;
 	// @TODO: rename to c._internal
 	c._vnode = internal;
-	c._parentDom = parentDom;
+	// c._parentDom = parentDom;
 
 	tmp = c.render(c.props, c.state, c.context);
 
@@ -193,11 +196,11 @@ export function renderComponent(
 		);
 	}
 
-	if (c._renderCallbacks.length) {
+	if (c._renderCallbacks && c._renderCallbacks.length) {
 		commitQueue.push(c);
 	}
 
-	c._force = false;
+	// c._force = false;
 
 	return nextDomSibling;
 }
@@ -205,4 +208,16 @@ export function renderComponent(
 /** The `.render()` method for a PFC backing instance. */
 function doRender(props, state, context) {
 	return this.constructor(props, context);
+}
+
+/**
+ * @param {import('../internal').Component} c
+ * @param {() => any} callback
+ */
+export function addRenderCallback(c, callback) {
+	if (c._renderCallbacks) {
+		c._renderCallbacks.push(callback);
+	} else {
+		c._renderCallbacks = [callback];
+	}
 }

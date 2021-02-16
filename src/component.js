@@ -3,7 +3,8 @@ import { commitRoot } from './diff/commit';
 import options from './options';
 import { createVNode, Fragment } from './create-element';
 import { patch } from './diff/patch';
-import { COMPONENT_NODE } from './constants';
+import { COMPONENT_NODE, ELEMENT_NODE, DIRTY } from './constants';
+import { addRenderCallback } from './diff/component';
 
 /**
  * Base Component class. Provides `setState()` and `forceUpdate()`, which
@@ -49,7 +50,7 @@ Component.prototype.setState = function(update, callback) {
 	if (update == null) return;
 
 	if (this._vnode) {
-		if (callback) this._renderCallbacks.push(callback);
+		if (callback) addRenderCallback(this, callback);
 		enqueueRender(this);
 	}
 };
@@ -66,7 +67,7 @@ Component.prototype.forceUpdate = function(callback) {
 		// is coming from. We need this because forceUpdate should never call
 		// shouldComponentUpdate
 		this._force = true;
-		if (callback) this._renderCallbacks.push(callback);
+		if (callback) addRenderCallback(this, callback);
 		enqueueRender(this);
 	}
 };
@@ -124,11 +125,26 @@ export function getDomSibling(internal, childIndex) {
  * @param {import('./internal').Component} component The component to rerender
  */
 function rerenderComponent(component) {
-	let internal = component._vnode,
-		startDom = internal._dom,
-		parentDom = component._parentDom;
+	// let internal = component._vnode,
+	// 	startDom = internal._dom,
+	// 	parentDom = component._parentDom;
 
-	if (parentDom) {
+	let internal = component._vnode;
+	let startDom = internal._dom;
+
+	if (internal) {
+		let parentDom = null;
+		let parent = internal._parent;
+		while (parentDom == null && parent) {
+			if (parent.props._parentDom) {
+				parentDom = parent.props._parentDom;
+			} else if (parent._flags & ELEMENT_NODE) {
+				parentDom = parent._dom;
+			} else {
+				parent = parent._parent;
+			}
+		}
+
 		const vnode = createVNode(
 			internal.type,
 			internal.props,
@@ -142,7 +158,7 @@ function rerenderComponent(component) {
 			parentDom,
 			vnode,
 			internal,
-			component._globalContext,
+			{},
 			parentDom.ownerSVGElement !== undefined,
 			commitQueue,
 			startDom == null ? getDomSibling(internal) : startDom
@@ -207,8 +223,8 @@ let prevDebounce;
  */
 export function enqueueRender(c) {
 	if (
-		(!c._dirty &&
-			(c._dirty = true) &&
+		(!(c._vnode._mode & DIRTY) &&
+			(c._vnode._mode |= DIRTY) &&
 			rerenderQueue.push(c) &&
 			!process._rerenderCount++) ||
 		prevDebounce !== options.debounceRendering
@@ -227,7 +243,7 @@ function process() {
 		// Don't update `renderCount` yet. Keep its value non-zero to prevent unnecessary
 		// process() calls from getting scheduled while `queue` is still being consumed.
 		queue.some(c => {
-			if (c._dirty) rerenderComponent(c);
+			if (c._vnode._mode & DIRTY) rerenderComponent(c);
 		});
 	}
 }
