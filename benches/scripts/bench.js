@@ -21,7 +21,8 @@ export const defaultBenchOptions = {
 	// GitHub Action minutes
 	timeout: 1,
 	'window-size': '1024,768',
-	framework: IS_CI ? ['preact-master', 'preact-local'] : null
+	framework: IS_CI ? ['preact-master', 'preact-local'] : null,
+	trace: false
 };
 
 /**
@@ -31,6 +32,14 @@ export const defaultBenchOptions = {
 export async function runBenches(bench1 = 'all', opts) {
 	const globs = bench1 === 'all' ? allBenches : [bench1].concat(opts._);
 	const benchesToRun = await globSrc(globs);
+
+	if (benchesToRun.length == 0) {
+		console.log('No benchmarks found matching patterns:', globs);
+	} else {
+		console.log('Running benchmarks:', benchesToRun.join(', '));
+		console.log();
+	}
+
 	const configFileTasks = benchesToRun.map(async (benchPath, i) => {
 		return generateConfig(benchesRoot('src', benchPath), {
 			...opts,

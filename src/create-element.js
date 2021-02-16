@@ -90,7 +90,12 @@ export function normalizeToVNode(childVNode) {
 	// If this newVNode is being reused (e.g. <div>{reuse}{reuse}</div>) in the same diff,
 	// or we are rendering a component (e.g. setState) copy the oldVNodes so it can have
 	// it's own DOM & etc. pointers
-	else if (typeof childVNode == 'string' || typeof childVNode == 'number') {
+	else if (
+		typeof childVNode == 'string' ||
+		typeof childVNode == 'number' ||
+		// eslint-disable-next-line valid-typeof
+		typeof childVNode == 'bigint'
+	) {
 		return createVNode(null, childVNode, null, null, childVNode);
 	} else if (Array.isArray(childVNode)) {
 		return createVNode(Fragment, { children: childVNode }, null, null, null);
