@@ -50,7 +50,7 @@ export function diffChildren(
 	if (typeof oldChildren == 'string') {
 		if (typeof renderResult == 'string' || typeof renderResult == 'number') {
 			// single text child -> single text child!
-			if (oldChildren != renderResult) {
+			if (oldChildren !== renderResult) {
 				// TODO: What's the best property to set text with. Perhaps
 				// parent.textContent for mounting and replacing all children &
 				// parent.firstChild.nodeValue for updating?
