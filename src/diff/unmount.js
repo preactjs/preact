@@ -40,7 +40,8 @@ export function unmount(internal, parentInternal, skipRemove) {
 
 	if ((r = internal._children)) {
 		for (let i = 0; i < r.length; i++) {
-			if (r[i]) unmount(r[i], parentInternal, skipRemove);
+			if (typeof r[i] == 'object' && r[i])
+				unmount(r[i], parentInternal, skipRemove);
 		}
 	}
 
