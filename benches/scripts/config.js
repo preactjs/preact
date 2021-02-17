@@ -47,6 +47,15 @@ export const frameworks = [
 		}
 	},
 	{
+		label: 'preact-v10',
+		dependencies: {
+			framework: 'file:' + repoRoot('benches/proxy-packages/preact-v10-proxy')
+		},
+		isValid() {
+			return validateFileDep(this.dependencies.framework);
+		}
+	},
+	{
 		label: 'preact-master',
 		dependencies: {
 			framework:
