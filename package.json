@@ -230,7 +230,7 @@
 		"csstype": "^3.0.5",
 		"diff": "^5.0.0",
 		"errorstacks": "^2.3.0",
-		"esbuild": "^0.8.45",
+		"esbuild": "^0.8.47",
 		"eslint": "5.15.1",
 		"eslint-config-developit": "^1.1.1",
 		"eslint-config-prettier": "^6.5.0",
