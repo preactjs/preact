@@ -3,24 +3,24 @@ import options from '../options';
 import { assign } from '../util';
 import { Component } from '../component';
 import { mountChildren } from './mount';
-import { diffChildren } from './children';
+import { diffChildren, reorderChildren } from './children';
 
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
  * @param {import('../internal').PreactElement} parentDom The parent of the DOM element
  * @param {import('../internal').VNode} newVNode The new virtual node
- * @param {import('../internal').VNode} oldVNode The old virtual node
+ * @param {import('../internal').Internal} internal The component's backing Internal node
  * @param {object} globalContext The current context object. Modified by getChildContext
  * @param {boolean} isSvg Whether or not this element is an SVG node
  * @param {Array<import('../internal').Component>} commitQueue List of components
  * which have callbacks to invoke in commitRoot
- * @param {import('../internal').PreactElement} startDom
- * @returns {import('../internal').PreactElement} pointer to the next DOM node (in order) to be rendered (or null)
+ * @param {import('../internal').PreactNode} startDom
+ * @returns {import('../internal').PreactNode} pointer to the next DOM node (in order) to be rendered (or null)
  */
 export function renderComponent(
 	parentDom,
 	newVNode,
-	oldVNode,
+	internal,
 	globalContext,
 	isSvg,
 	commitQueue,
@@ -31,12 +31,14 @@ export function renderComponent(
 	let isNew, oldProps, oldState, snapshot, tmp;
 
 	/** @type {import('../internal').ComponentType} */
-	let newType = newVNode.type;
-	let newProps = newVNode.props;
+	let type = (internal.type);
+
+	// @TODO split update + mount?
+	let newProps = newVNode ? newVNode.props : internal.props;
 
 	// Necessary for createContext api. Setting this property will pass
 	// the context value as `this.context` just for this component.
-	tmp = newType.contextType;
+	tmp = type.contextType;
 	let provider = tmp && globalContext[tmp._id];
 	let componentContext = tmp
 		? provider
@@ -44,17 +46,17 @@ export function renderComponent(
 			: tmp._defaultValue
 		: globalContext;
 
-	if (oldVNode && oldVNode._component) {
-		c = newVNode._component = oldVNode._component;
+	if (internal && internal._component) {
+		c = internal._component;
 	} else {
 		// Instantiate the new component
-		if ('prototype' in newType && newType.prototype.render) {
+		if ('prototype' in type && type.prototype.render) {
 			// @ts-ignore The check above verifies that newType is suppose to be constructed
-			newVNode._component = c = new newType(newProps, componentContext); // eslint-disable-line new-cap
+			internal._component = c = new type(newProps, componentContext); // eslint-disable-line new-cap
 		} else {
 			// @ts-ignore Trust me, Component implements the interface we want
-			newVNode._component = c = new Component(newProps, componentContext);
-			c.constructor = newType;
+			internal._component = c = new Component(newProps, componentContext);
+			c.constructor = type;
 			c.render = doRender;
 		}
 		if (provider) provider.sub(c);
@@ -71,24 +73,18 @@ export function renderComponent(
 	if (c._nextState == null) {
 		c._nextState = c.state;
 	}
-	if (newType.getDerivedStateFromProps != null) {
+	if (type.getDerivedStateFromProps != null) {
 		if (c._nextState == c.state) {
 			c._nextState = assign({}, c._nextState);
 		}
 
-		assign(
-			c._nextState,
-			newType.getDerivedStateFromProps(newProps, c._nextState)
-		);
+		assign(c._nextState, type.getDerivedStateFromProps(newProps, c._nextState));
 	}
 
 	oldProps = c.props;
 	oldState = c.state;
 	if (isNew) {
-		if (
-			newType.getDerivedStateFromProps == null &&
-			c.componentWillMount != null
-		) {
+		if (type.getDerivedStateFromProps == null && c.componentWillMount != null) {
 			c.componentWillMount();
 		}
 
@@ -97,7 +93,7 @@ export function renderComponent(
 		}
 	} else {
 		if (
-			newType.getDerivedStateFromProps == null &&
+			type.getDerivedStateFromProps == null &&
 			newProps !== oldProps &&
 			c.componentWillReceiveProps != null
 		) {
@@ -109,23 +105,25 @@ export function renderComponent(
 				c.shouldComponentUpdate != null &&
 				c.shouldComponentUpdate(newProps, c._nextState, componentContext) ===
 					false) ||
-			newVNode._original === oldVNode._original
+			(newVNode && newVNode._original === internal._original)
 		) {
 			c.props = newProps;
 			c.state = c._nextState;
+			internal.props = newProps;
 			// More info about this here: https://gist.github.com/JoviDeCroock/bec5f2ce93544d2e6070ef8e0036e4e8
-			if (newVNode._original !== oldVNode._original) c._dirty = false;
-			c._vnode = newVNode;
-			newVNode._dom = oldVNode._dom;
-			newVNode._children = oldVNode._children;
-			newVNode._children.forEach(vnode => {
-				if (vnode) vnode._parent = newVNode;
-			});
+			if (newVNode && newVNode._original !== internal._original) {
+				c._dirty = false;
+			}
+			// @TODO: rename to c._internal
+			c._vnode = internal;
 			if (c._renderCallbacks.length) {
 				commitQueue.push(c);
 			}
 
-			return;
+			// TODO: Returning undefined here (i.e. return;) passes all tests. That seems
+			// like a bug. Should validate that we have test coverage for sCU that
+			// returns Fragments with multiple DOM children
+			return reorderChildren(internal, startDom, parentDom);
 		}
 
 		if (c.componentWillUpdate != null) {
@@ -143,10 +141,13 @@ export function renderComponent(
 	c.props = newProps;
 	c.state = c._nextState;
 
-	if ((tmp = options._render)) tmp(newVNode);
+	internal.props = newProps;
+
+	if ((tmp = options._render)) tmp(internal);
 
 	c._dirty = false;
-	c._vnode = newVNode;
+	// @TODO: rename to c._internal
+	c._vnode = internal;
 	c._parentDom = parentDom;
 
 	tmp = c.render(c.props, c.state, c.context);
@@ -168,11 +169,11 @@ export function renderComponent(
 
 	let nextDomSibling;
 
-	if (isNew) {
+	if (internal._children == null) {
 		nextDomSibling = mountChildren(
 			parentDom,
 			Array.isArray(renderResult) ? renderResult : [renderResult],
-			newVNode,
+			internal,
 			globalContext,
 			isSvg,
 			commitQueue,
@@ -182,8 +183,7 @@ export function renderComponent(
 		nextDomSibling = diffChildren(
 			parentDom,
 			Array.isArray(renderResult) ? renderResult : [renderResult],
-			newVNode,
-			oldVNode,
+			internal,
 			globalContext,
 			isSvg,
 			commitQueue,

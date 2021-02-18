@@ -1,8 +1,9 @@
 import { assign } from './util';
 import { commitRoot } from './diff/commit';
 import options from './options';
-import { Fragment } from './create-element';
+import { createVNode, Fragment } from './create-element';
 import { patch } from './diff/patch';
+import { COMPONENT_NODE } from './constants';
 
 /**
  * Base Component class. Provides `setState()` and `forceUpdate()`, which
@@ -83,21 +84,24 @@ Component.prototype.forceUpdate = function(callback) {
 Component.prototype.render = Fragment;
 
 /**
- * @param {import('./internal').VNode} vnode
+ * @param {import('./internal').Internal} internal
  * @param {number | null} [childIndex]
- * @returns {import('./internal').PreactElement}
+ * @returns {import('./internal').PreactNode}
  */
-export function getDomSibling(vnode, childIndex) {
+export function getDomSibling(internal, childIndex) {
 	if (childIndex == null) {
 		// Use childIndex==null as a signal to resume the search from the vnode's sibling
-		return vnode._parent
-			? getDomSibling(vnode._parent, vnode._parent._children.indexOf(vnode) + 1)
+		return internal._parent
+			? getDomSibling(
+					internal._parent,
+					internal._parent._children.indexOf(internal) + 1
+			  )
 			: null;
 	}
 
 	let sibling;
-	for (; childIndex < vnode._children.length; childIndex++) {
-		sibling = vnode._children[childIndex];
+	for (; childIndex < internal._children.length; childIndex++) {
+		sibling = internal._children[childIndex];
 
 		if (sibling != null && sibling._dom != null) {
 			// Since updateParentDomPointers keeps _dom pointer correct,
@@ -112,7 +116,7 @@ export function getDomSibling(vnode, childIndex) {
 	// Only climb up and search the parent if we aren't searching through a DOM
 	// VNode (meaning we reached the DOM parent of the original vnode that began
 	// the search)
-	return typeof vnode.type == 'function' ? getDomSibling(vnode) : null;
+	return internal._flags & COMPONENT_NODE ? getDomSibling(internal) : null;
 }
 
 /**
@@ -120,47 +124,52 @@ export function getDomSibling(vnode, childIndex) {
  * @param {import('./internal').Component} component The component to rerender
  */
 function rerenderComponent(component) {
-	let vnode = component._vnode,
-		startDom = vnode._dom,
+	let internal = component._vnode,
+		startDom = internal._dom,
 		parentDom = component._parentDom;
 
 	if (parentDom) {
-		let commitQueue = [];
-		const oldVNode = assign({}, vnode);
-		oldVNode._original = vnode._original + 1;
+		const vnode = createVNode(
+			internal.type,
+			internal.props,
+			internal.key, // @TODO we shouldn't need to actually pass these
+			internal.ref, // since the mode flag should bypass key/ref handling
+			null
+		);
 
+		const commitQueue = [];
 		patch(
 			parentDom,
 			vnode,
-			oldVNode,
+			internal,
 			component._globalContext,
 			parentDom.ownerSVGElement !== undefined,
 			commitQueue,
-			startDom == null ? getDomSibling(vnode) : startDom
+			startDom == null ? getDomSibling(internal) : startDom
 		);
-		commitRoot(commitQueue, vnode);
+		commitRoot(commitQueue, internal);
 
-		if (vnode._dom != startDom) {
-			updateParentDomPointers(vnode);
+		if (internal._dom != startDom) {
+			updateParentDomPointers(internal);
 		}
 	}
 }
 
 /**
- * @param {import('./internal').VNode} vnode
+ * @param {import('./internal').Internal} internal
  */
-function updateParentDomPointers(vnode) {
-	if ((vnode = vnode._parent) != null && vnode._component != null) {
-		vnode._dom = null;
-		for (let i = 0; i < vnode._children.length; i++) {
-			let child = vnode._children[i];
+function updateParentDomPointers(internal) {
+	if ((internal = internal._parent) != null && internal._component != null) {
+		internal._dom = null;
+		for (let i = 0; i < internal._children.length; i++) {
+			let child = internal._children[i];
 			if (child != null && child._dom != null) {
-				vnode._dom = child._dom;
+				internal._dom = child._dom;
 				break;
 			}
 		}
 
-		return updateParentDomPointers(vnode);
+		return updateParentDomPointers(internal);
 	}
 }
 

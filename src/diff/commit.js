@@ -3,10 +3,10 @@ import options from '../options';
 /**
  * @param {Array<import('../internal').Component>} commitQueue List of components
  * which have callbacks to invoke in commitRoot
- * @param {import('../internal').VNode} root
+ * @param {import('../internal').Internal} rootInternal
  */
-export function commitRoot(commitQueue, root) {
-	if (options._commit) options._commit(root, commitQueue);
+export function commitRoot(commitQueue, rootInternal) {
+	if (options._commit) options._commit(rootInternal, commitQueue);
 
 	commitQueue.some(c => {
 		try {

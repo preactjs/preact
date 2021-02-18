@@ -1,4 +1,3 @@
-import { MODE_NONE } from './constants';
 import options from './options';
 
 /**
@@ -64,14 +63,8 @@ export function createVNode(type, props, key, ref, original) {
 		props,
 		key,
 		ref,
-		_children: null,
-		_parent: null,
-		_depth: 0,
-		_dom: null,
-		_component: null,
 		constructor: undefined,
-		_original: original == null ? ++options._vnodeId : original,
-		_mode: MODE_NONE
+		_original: original == null ? ++options._vnodeId : original
 	};
 
 	if (options.vnode != null) options.vnode(vnode);
@@ -81,7 +74,7 @@ export function createVNode(type, props, key, ref, original) {
 
 /**
  * @param {import('./internal').ComponentChildren} childVNode
- * @returns {import('./internal').VNode | null}
+ * @returns {import('./internal').VNode | string | null}
  */
 export function normalizeToVNode(childVNode) {
 	if (childVNode == null || typeof childVNode == 'boolean') {
@@ -91,26 +84,13 @@ export function normalizeToVNode(childVNode) {
 	// or we are rendering a component (e.g. setState) copy the oldVNodes so it can have
 	// it's own DOM & etc. pointers
 	else if (
-		typeof childVNode == 'string' ||
 		typeof childVNode == 'number' ||
 		// eslint-disable-next-line valid-typeof
 		typeof childVNode == 'bigint'
 	) {
-		return createVNode(null, childVNode, null, null, childVNode);
+		return childVNode + '';
 	} else if (Array.isArray(childVNode)) {
 		return createVNode(Fragment, { children: childVNode }, null, null, null);
-	} else if (childVNode._depth > 0) {
-		// VNode is already in use, clone it. This can happen in the following
-		// scenario:
-		//   const reuse = <div />
-		//   <div>{reuse}<span />{reuse}</div>
-		return createVNode(
-			childVNode.type,
-			childVNode.props,
-			childVNode.key,
-			null,
-			childVNode._original
-		);
 	}
 
 	return childVNode;

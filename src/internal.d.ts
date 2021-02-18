@@ -1,5 +1,7 @@
 import * as preact from './index';
 
+type CONSTANTS = typeof import('./lib/constants');
+
 export enum HookType {
 	useState = 1,
 	useReducer = 2,
@@ -22,23 +24,28 @@ export interface DevSource {
 
 export interface Options extends preact.Options {
 	_vnodeId: number;
+	/** Attach a hook that is invoked immediately before a vnode is unmounted. */
+	unmount?(internal: Internal): void;
+	/** Attach a hook that is invoked after a vnode has rendered. */
+	diffed?(internal: Internal): void;
 	/** Attach a hook that is invoked before render, mainly to check the arguments. */
 	_root?(
 		vnode: ComponentChild,
 		parent: Element | Document | ShadowRoot | DocumentFragment
 	): void;
 	/** Attach a hook that is invoked before a vnode is diffed. */
-	_diff?(vnode: VNode): void;
+	_diff?(internal: Internal, vnode?: VNode): void;
 	/** Attach a hook that is invoked after a tree was mounted or was updated. */
-	_commit?(vnode: VNode, commitQueue: Component[]): void;
+	_commit?(internal: Internal, commitQueue: Component[]): void;
 	/** Attach a hook that is invoked before a vnode has rendered. */
-	_render?(vnode: VNode): void;
+	_render?(internal: Internal): void;
 	/** Attach a hook that is invoked before a hook's state is queried. */
 	_hook?(component: Component, index: number, type: HookType): void;
 	/** Bypass effect execution. Currenty only used in devtools for hooks inspection */
 	_skipEffects?: boolean;
 	/** Attach a hook that is invoked after an error is caught in a component but before calling lifecycle hooks */
-	_catchError(error: any, vnode: VNode, oldVNode?: VNode | undefined): void;
+	_catchError(error: any, internal: Internal, internal?: Internal): void;
+	_internal(internal: Internal, vnode: VNode | string): void;
 }
 
 // Redefine ComponentFactory using our new internal FunctionalComponent interface above
@@ -81,7 +88,7 @@ export interface ComponentClass<P = {}> extends preact.ComponentClass<P> {
 export type ComponentType<P = {}> = ComponentClass<P> | FunctionComponent<P>;
 
 export interface PreactElement extends HTMLElement {
-	_children?: VNode<any> | null;
+	_children?: Internal<any> | null;
 	/** Event listeners to support event delegation */
 	_listeners?: Record<string, (e: Event) => void>;
 
@@ -93,6 +100,8 @@ export interface PreactElement extends HTMLElement {
 	data?: string | number; // From Text node
 }
 
+export type PreactNode = PreactElement | Text;
+
 // We use the `current` property to differentiate between the two kinds of Refs so
 // internally we'll define `current` on both to make TypeScript happy
 type RefObject<T> = { current: T | null };
@@ -103,36 +112,67 @@ export interface VNode<P = {}> extends preact.VNode<P> {
 	// Redefine type here using our internal ComponentType type
 	type: string | ComponentType<P>;
 	props: P & { children: ComponentChildren };
-	ref?: Ref<any> | null;
-	_children: Array<VNode<any>> | null;
-	_parent: VNode | null;
-	_depth: number | null;
-	/**
-	 * The [first (for Fragments)] DOM child of a VNode
-	 */
-	_dom: PreactElement | null;
-	_component: Component | null;
-	constructor: undefined;
 	_original: number;
-	_mode: number;
+}
+
+export type InternalFlags =
+	| CONSTANTS['TEXT_NODE']
+	| CONSTANTS['ELEMENT_NODE']
+	| CONSTANTS['CLASS_NODE']
+	| CONSTANTS['FUNCTION_NODE']
+	| CONSTANTS['COMPONENT_NODE'];
+
+/**
+ * An Internal is a persistent backing node within Preact's virtual DOM tree.
+ * Think of an Internal like a long-lived VNode with stored data and tree linkages.
+ */
+export interface Internal<P = {}> {
+	type: string | ComponentType<P>;
+	/** The props object for Elements/Components, and the string contents for Text */
+	props: (P & { children: ComponentChildren }) | string | number;
+	key: any;
+	ref: Ref<any> | null;
+	/** children Internal nodes */
+	_children: Internal[];
+	/** next sibling Internal node */
+	_parent: Internal;
+	/** most recent vnode ID @TODO rename to _vnodeId */
+	_original: number;
+	/**
+	 * Associated DOM element for the Internal, or its nearest realized descendant.
+	 * For Fragments, this is the first DOM child.
+	 */
+	_dom: PreactNode;
+	/** The component instance for which this is a backing Internal node */
+	_component: Component | null;
+	/** Bitfield containing rendering mode flags */
+	_mode: ModeFlags;
+	/** Bitfield containing information about the Internal or its component. */
+	_flags: InternalFlags;
+	/** This Internal's distance from the tree root */
+	_depth: number | null;
 }
 
 export interface Component<P = {}, S = {}> extends preact.Component<P, S> {
 	// When component is functional component, this is reset to functional component
 	constructor: ComponentType<P>;
 	state: S; // Override Component["state"] to not be readonly for internal use, specifically Hooks
-
+	/** @TODO this should be a mode flag */
 	_dirty: boolean;
+	/** @TODO this should be a mode flag */
 	_force?: boolean;
+	/** @TODO this should be moved to internal.data */
 	_renderCallbacks: Array<() => void>; // Only class components
 	_globalContext?: any;
-	_vnode?: VNode<P> | null;
+	/** @TODO this should be renamed to `_internal`: */
+	_vnode?: Internal<P> | null;
 	_nextState?: S | null; // Only class components
 	/** Only used in the devtools to later dirty check if state has changed */
 	_prevState?: S | null;
 	/**
 	 * Pointer to the parent dom node. This is only needed for top-level Fragment
 	 * components or array returns.
+	 * @TODO this should be moved to Internal
 	 */
 	_parentDom?: PreactElement | null;
 }

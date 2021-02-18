@@ -260,9 +260,9 @@ declare namespace preact {
 		/** Attach a hook that is invoked whenever a VNode is created. */
 		vnode?(vnode: VNode): void;
 		/** Attach a hook that is invoked immediately before a vnode is unmounted. */
-		unmount?(vnode: VNode): void;
+		unmount?(vnode: VNode): void; // TODO: What is the correct type for this parameter?
 		/** Attach a hook that is invoked after a vnode has rendered. */
-		diffed?(vnode: VNode): void;
+		diffed?(vnode: VNode): void; // TODO: What is the correct type for this parameter?
 		event?(e: Event): any;
 		requestAnimationFrame?: typeof requestAnimationFrame;
 		debounceRendering?(cb: () => void): void;

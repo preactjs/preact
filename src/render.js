@@ -4,6 +4,7 @@ import { createElement, Fragment } from './create-element';
 import options from './options';
 import { mount } from './diff/mount';
 import { patch } from './diff/patch';
+import { createInternal } from './tree';
 
 /**
  * Render a Preact virtual node into a DOM element
@@ -16,42 +17,44 @@ import { patch } from './diff/patch';
 export function render(vnode, parentDom, replaceNode) {
 	if (options._root) options._root(vnode, parentDom);
 
+	// List of effects that need to be called after diffing.
+	const commitQueue = [];
+
 	// To be able to support calling `render()` multiple times on the same
 	// DOM node, we need to obtain a reference to the previous tree. We do
 	// this by assigning a new `_children` property to DOM nodes which points
 	// to the last rendered tree. By default this property is not present, which
 	// means that we are mounting a new tree for the first time.
-	let oldVNode = (replaceNode && replaceNode._children) || parentDom._children;
-
-	// Determine the new vnode tree and store it on the DOM element on
-	// our custom `_children` property.
-	vnode = (replaceNode || parentDom)._children = createElement(Fragment, null, [
-		vnode
-	]);
-
-	// Set vnode._mode
-	if (replaceNode || parentDom.firstChild) {
-		// Providing a replaceNode parameter or calling `render` on a container with
-		// existing DOM elements puts the diff into mutative hydrate mode
-		vnode._mode = MODE_MUTATIVE_HYDRATE;
-	}
-
-	// List of effects that need to be called after diffing.
-	let commitQueue = [];
-	if (oldVNode) {
+	let rootInternal =
+		(replaceNode && replaceNode._children) || parentDom._children;
+	vnode = createElement(Fragment, null, [vnode]);
+	if (rootInternal) {
 		patch(
 			parentDom,
 			vnode,
-			oldVNode,
+			rootInternal,
 			{},
 			parentDom.ownerSVGElement !== undefined,
 			commitQueue,
-			oldVNode._dom
+			rootInternal._dom
 		);
 	} else {
+		// Store the VDOM tree root on the DOM element in a (minified) property:
+		rootInternal = (replaceNode || parentDom)._children = createInternal(
+			vnode,
+			null
+		);
+
+		// Providing a replaceNode parameter or calling `render` on a container with
+		// existing DOM elements puts the diff into mutative hydrate mode:
+		if (replaceNode || parentDom.firstChild) {
+			rootInternal._mode = MODE_MUTATIVE_HYDRATE;
+		}
+
 		mount(
 			parentDom,
 			vnode,
+			rootInternal, // createElement(Fragment, null, [vnode])
 			{},
 			parentDom.ownerSVGElement !== undefined,
 			commitQueue,
@@ -62,7 +65,7 @@ export function render(vnode, parentDom, replaceNode) {
 	}
 
 	// Flush all queued effects
-	commitRoot(commitQueue, vnode);
+	commitRoot(commitQueue, rootInternal);
 }
 
 /**
@@ -74,18 +77,25 @@ export function render(vnode, parentDom, replaceNode) {
 export function hydrate(vnode, parentDom) {
 	if (options._root) options._root(vnode, parentDom);
 
-	vnode = createElement(Fragment, null, [vnode]);
-	vnode._mode = MODE_HYDRATE;
+	// vnode = createElement(Fragment, null, [vnode]);
 
-	let commitQueue = [];
+	/** @type {import('./internal').PreactElement} */
+	const hydrateDom = (parentDom.firstChild);
+
+	vnode = createElement(Fragment, null, [vnode]);
+	const rootInternal = createInternal(vnode);
+	rootInternal._mode = MODE_HYDRATE;
+	parentDom._children = rootInternal;
+
+	const commitQueue = [];
 	mount(
 		parentDom,
 		vnode,
+		rootInternal, // createElement(Fragment, null, [vnode]),
 		{},
 		parentDom.ownerSVGElement !== undefined,
 		commitQueue,
-		// @ts-ignore Trust me TS, this is a PreactElement
-		parentDom.firstChild
+		hydrateDom
 	);
-	commitRoot(commitQueue, vnode);
+	commitRoot(commitQueue, rootInternal);
 }
