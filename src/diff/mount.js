@@ -1,16 +1,19 @@
 import { applyRef } from './refs';
 import {
+	CLASS_NODE,
 	COMPONENT_NODE,
 	ELEMENT_NODE,
+	FRAGMENT_NODE,
+	FUNCTION_NODE,
 	MODE_HYDRATE,
 	MODE_MUTATIVE_HYDRATE,
-	MODE_NONE,
 	MODE_SUSPENDED,
+	RESET_MODE,
 	TEXT_NODE
 } from '../constants';
 import { normalizeToVNode } from '../create-element';
 import { setProperty } from './props';
-import { renderComponent } from './component';
+import { renderComponent, renderFnComponent } from './component';
 import { createInternal } from '../tree';
 import options from '../options';
 import { removeNode } from '../util';
@@ -42,7 +45,17 @@ export function mount(
 	let nextDomSibling;
 
 	try {
-		if (internal._flags & COMPONENT_NODE) {
+		if (internal._flags & (FUNCTION_NODE | FRAGMENT_NODE)) {
+			nextDomSibling = renderFnComponent(
+				parentDom,
+				null,
+				internal,
+				globalContext,
+				isSvg,
+				commitQueue,
+				startDom
+			);
+		} else if (internal._flags & CLASS_NODE) {
 			nextDomSibling = renderComponent(
 				parentDom,
 				null,
@@ -73,10 +86,10 @@ export function mount(
 		if (options.diffed) options.diffed(internal);
 
 		// We successfully rendered this VNode, unset any stored hydration/bailout state:
-		internal._mode = MODE_NONE;
+		internal._mode &= RESET_MODE;
 	} catch (e) {
 		internal._original = null;
-		internal._mode = internal._mode | MODE_SUSPENDED;
+		internal._mode |= MODE_SUSPENDED;
 
 		if (internal._mode & MODE_HYDRATE) {
 			// @ts-ignore Trust me TS, nextSibling is a PreactElement
@@ -146,7 +159,7 @@ function mountDOMElement(dom, internal, globalContext, isSvg, commitQueue) {
 
 			// we are creating a new node, so we can assume this is a new subtree (in case we are hydrating), this deopts the hydrate
 			isHydrating = 0;
-			internal._mode = MODE_NONE;
+			internal._mode &= RESET_MODE;
 		}
 
 		// @TODO: Consider removing and instructing users to instead set the desired

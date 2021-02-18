@@ -1,8 +1,14 @@
 import { diffChildren } from './children';
 import { diffProps, setProperty } from './props';
 import options from '../options';
-import { renderComponent } from './component';
-import { COMPONENT_NODE, MODE_NONE, TEXT_NODE } from '../constants';
+import { renderComponent, renderFnComponent } from './component';
+import {
+	CLASS_NODE,
+	FRAGMENT_NODE,
+	FUNCTION_NODE,
+	RESET_MODE,
+	TEXT_NODE
+} from '../constants';
 
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
@@ -42,7 +48,18 @@ export function patch(
 	let nextDomSibling;
 
 	try {
-		if (internal._flags & COMPONENT_NODE) {
+		if (internal._flags & (FUNCTION_NODE | FRAGMENT_NODE)) {
+			nextDomSibling = renderFnComponent(
+				parentDom,
+				/** @type {import('../internal').VNode} */
+				(newVNode),
+				internal,
+				globalContext,
+				isSvg,
+				commitQueue,
+				startDom
+			);
+		} else if (internal._flags & CLASS_NODE) {
 			nextDomSibling = renderComponent(
 				parentDom,
 				/** @type {import('../internal').VNode} */
@@ -72,7 +89,7 @@ export function patch(
 		if (options.diffed) options.diffed(internal);
 
 		// We successfully rendered this VNode, unset any stored hydration/bailout state:
-		internal._mode = MODE_NONE;
+		internal._mode &= RESET_MODE;
 		// Once we have successfully rendered the new VNode, copy it's ID over
 		internal._original = newVNode._original;
 	} catch (e) {

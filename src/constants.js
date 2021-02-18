@@ -9,6 +9,18 @@ export const MODE_MUTATIVE_HYDRATE = 2;
 export const MODE_SUSPENDED = 4;
 /** Signifies this VNode errored on the previous render */
 export const MODE_ERRORED = 8;
+/** Reset all mode flags */
+export const RESET_MODE = ~(
+	MODE_HYDRATE |
+	MODE_MUTATIVE_HYDRATE |
+	MODE_SUSPENDED |
+	MODE_ERRORED
+);
+
+/** Signifies that bailout checks will be bypassed */
+export const FORCE_UPDATE = 16;
+/** Signifies that a node needs to be updated */
+export const DIRTY = 32;
 
 export const EMPTY_ARR = [];
 
