@@ -11,6 +11,9 @@ export const MODE_SUSPENDED = 4;
 export const MODE_ERRORED = 8;
 /** Signifies that bailout checks will be bypassed */
 export const FORCE_UPDATE = 16;
+/** Signifies that a node needs to be updated */
+export const DIRTY = 32;
+
 /** Reset all mode flags */
 export const RESET_MODE = ~(
 	MODE_HYDRATE |
