@@ -357,8 +357,8 @@ export function initDebug() {
 
 const setState = Component.prototype.setState;
 Component.prototype.setState = function(update, callback) {
-	if (this._vnode == null) {
-		// `this._vnode` will be `null` during componentWillMount. But it
+	if (this._internal == null) {
+		// `this._internal` will be `null` during componentWillMount. But it
 		// is perfectly valid to call `setState` during cWM. So we
 		// need an additional check to verify that we are dealing with a
 		// call inside constructor.
@@ -376,7 +376,7 @@ Component.prototype.setState = function(update, callback) {
 			`Can't call "this.setState" on an unmounted component. This is a no-op, ` +
 				`but it indicates a memory leak in your application. To fix, cancel all ` +
 				`subscriptions and asynchronous tasks in the componentWillUnmount method.` +
-				`\n\n${getOwnerStack(this._vnode)}`
+				`\n\n${getOwnerStack(this._internal)}`
 		);
 	}
 
@@ -385,7 +385,7 @@ Component.prototype.setState = function(update, callback) {
 
 const forceUpdate = Component.prototype.forceUpdate;
 Component.prototype.forceUpdate = function(callback) {
-	if (this._vnode == null) {
+	if (this._internal == null) {
 		console.warn(
 			`Calling "this.forceUpdate" inside the constructor of a component is a ` +
 				`no-op and might be a bug in your application.\n\n${getOwnerStack(
@@ -397,7 +397,7 @@ Component.prototype.forceUpdate = function(callback) {
 			`Can't call "this.forceUpdate" on an unmounted component. This is a no-op, ` +
 				`but it indicates a memory leak in your application. To fix, cancel all ` +
 				`subscriptions and asynchronous tasks in the componentWillUnmount method.` +
-				`\n\n${getOwnerStack(this._vnode)}`
+				`\n\n${getOwnerStack(this._internal)}`
 		);
 	}
 	return forceUpdate.call(this, callback);

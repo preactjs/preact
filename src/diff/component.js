@@ -107,17 +107,17 @@ export function renderComponent(
 				c.shouldComponentUpdate != null &&
 				c.shouldComponentUpdate(newProps, c._nextState, componentContext) ===
 					false) ||
-			(newVNode && newVNode._original === internal._original)
+			(newVNode && newVNode._vnodeId === internal._vnodeId)
 		) {
 			c.props = newProps;
 			c.state = c._nextState;
 			internal.props = newProps;
 			// More info about this here: https://gist.github.com/JoviDeCroock/bec5f2ce93544d2e6070ef8e0036e4e8
-			if (newVNode && newVNode._original !== internal._original) {
+			if (newVNode && newVNode._vnodeId !== internal._vnodeId) {
 				internal._mode &= ~DIRTY;
 			}
-			// @TODO: rename to c._internal
-			c._vnode = internal;
+
+			c._internal = internal;
 			if (c._renderCallbacks.length) {
 				commitQueue.push(c);
 			}
@@ -148,8 +148,7 @@ export function renderComponent(
 	if ((tmp = options._render)) tmp(internal);
 
 	internal._mode &= ~DIRTY;
-	// @TODO: rename to c._internal
-	c._vnode = internal;
+	c._internal = internal;
 	c._parentDom = parentDom;
 
 	tmp = c.render(c.props, c.state, c.context);

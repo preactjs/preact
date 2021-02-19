@@ -124,7 +124,7 @@ describe('createElement(jsx)', () => {
 	it('should support nested children', () => {
 		const m = x => {
 			const result = h(x);
-			delete result._original;
+			delete result._vnodeId;
 			return result;
 		};
 		expect(h('foo', null, m('a'), [m('b'), m('c')], m('d')))
@@ -187,12 +187,12 @@ describe('createElement(jsx)', () => {
 		const baz2 = h('baz');
 		const baz2Clone = h('baz');
 
-		delete bar._original;
-		delete barClone._original;
-		delete baz._original;
-		delete bazClone._original;
-		delete baz2._original;
-		delete baz2Clone._original;
+		delete bar._vnodeId;
+		delete barClone._vnodeId;
+		delete baz._vnodeId;
+		delete bazClone._vnodeId;
+		delete baz2._vnodeId;
+		delete baz2Clone._vnodeId;
 
 		let r = h(
 			'foo',
@@ -289,8 +289,8 @@ describe('createElement(jsx)', () => {
 			</div>
 		);
 		const childrenless = <div a>c</div>;
-		delete element._original;
-		delete childrenless._original;
+		delete element._vnodeId;
+		delete childrenless._vnodeId;
 
 		expect(element).to.eql(childrenless);
 	});

@@ -75,7 +75,7 @@ export function mount(
 		// We successfully rendered this VNode, unset any stored hydration/bailout state:
 		internal._mode &= RESET_MODE;
 	} catch (e) {
-		internal._original = null;
+		internal._vnodeId = null;
 		internal._mode |= MODE_SUSPENDED;
 
 		if (internal._mode & MODE_HYDRATE) {

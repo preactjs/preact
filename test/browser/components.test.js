@@ -1771,7 +1771,7 @@ describe('Components', () => {
 		});
 	});
 
-	it('should set component._vnode._dom when sCU returns false', () => {
+	it('should set component._internal._dom when sCU returns false', () => {
 		let parent;
 		class Parent extends Component {
 			render() {
@@ -1805,7 +1805,7 @@ describe('Components', () => {
 		// TODO: Consider rewriting test to not rely on internal properties
 		// and instead capture user-facing bug that would occur if this
 		// behavior were broken
-		const getDom = c => ('__v' in c ? c.__v.__e : c._vnode._dom);
+		const getDom = c => ('__v' in c ? c.__v.__e : c._internal._dom);
 
 		render(<App />, scratch);
 		expect(getDom(child)).to.equalNode(scratch.querySelector('.child'));

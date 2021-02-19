@@ -18,7 +18,7 @@ export function commitRoot(commitQueue, rootInternal) {
 				cb.call(c);
 			});
 		} catch (e) {
-			options._catchError(e, c._vnode);
+			options._catchError(e, c._internal);
 		}
 	});
 }

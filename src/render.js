@@ -54,7 +54,7 @@ export function render(vnode, parentDom, replaceNode) {
 		mount(
 			parentDom,
 			vnode,
-			rootInternal, // createElement(Fragment, null, [vnode])
+			rootInternal,
 			{},
 			parentDom.ownerSVGElement !== undefined,
 			commitQueue,
@@ -77,8 +77,6 @@ export function render(vnode, parentDom, replaceNode) {
 export function hydrate(vnode, parentDom) {
 	if (options._root) options._root(vnode, parentDom);
 
-	// vnode = createElement(Fragment, null, [vnode]);
-
 	/** @type {import('./internal').PreactElement} */
 	const hydrateDom = (parentDom.firstChild);
 
@@ -91,7 +89,7 @@ export function hydrate(vnode, parentDom) {
 	mount(
 		parentDom,
 		vnode,
-		rootInternal, // createElement(Fragment, null, [vnode]),
+		rootInternal,
 		{},
 		parentDom.ownerSVGElement !== undefined,
 		commitQueue,

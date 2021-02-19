@@ -13,7 +13,7 @@
 - Rewrite rerender loop to operate on internals, not components
 - Rewrite commit loop to operate on internals not components
 - rewrite hooks to operate on internals?
-- Always assign a number to `_original` (not null, use 0 to clear?)
+- Always assign a number to `_vnodeId` (not null, use 0 to clear?)
 
 ## Child diffing investigations
 

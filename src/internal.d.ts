@@ -112,7 +112,7 @@ export interface VNode<P = {}> extends preact.VNode<P> {
 	// Redefine type here using our internal ComponentType type
 	type: string | ComponentType<P>;
 	props: P & { children: ComponentChildren };
-	_original: number;
+	_vnodeId: number;
 }
 
 export type InternalFlags =
@@ -137,7 +137,7 @@ export interface Internal<P = {}> {
 	/** next sibling Internal node */
 	_parent: Internal;
 	/** most recent vnode ID @TODO rename to _vnodeId */
-	_original: number;
+	_vnodeId: number;
 	/**
 	 * Associated DOM element for the Internal, or its nearest realized descendant.
 	 * For Fragments, this is the first DOM child.
@@ -161,7 +161,7 @@ export interface Component<P = {}, S = {}> extends preact.Component<P, S> {
 	_renderCallbacks: Array<() => void>; // Only class components
 	_globalContext?: any;
 	/** @TODO this should be renamed to `_internal`: */
-	_vnode?: Internal<P> | null;
+	_internal?: Internal<P> | null;
 	_nextState?: S | null; // Only class components
 	/** Only used in the devtools to later dirty check if state has changed */
 	_prevState?: S | null;

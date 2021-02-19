@@ -59,7 +59,7 @@ SuspenseList.prototype = new Component();
 
 SuspenseList.prototype._suspended = function(child) {
 	const list = this;
-	const delegated = suspended(list._vnode);
+	const delegated = suspended(list._internal);
 
 	let node = list._map.get(child);
 	node[SUSPENDED_COUNT]++;

@@ -54,7 +54,7 @@ export function patch(
 				startDom
 			);
 		} else {
-			if (newVNode._original !== internal._original) {
+			if (newVNode._vnodeId !== internal._vnodeId) {
 				patchDOMElement(
 					internal._dom,
 					newVNode,
@@ -74,10 +74,10 @@ export function patch(
 		// We successfully rendered this VNode, unset any stored hydration/bailout state:
 		internal._mode &= RESET_MODE;
 		// Once we have successfully rendered the new VNode, copy it's ID over
-		internal._original = newVNode._original;
+		internal._vnodeId = newVNode._vnodeId;
 	} catch (e) {
 		// @TODO: assign a new VNode ID here? Or NaN?
-		// newVNode._original = null;
+		// newVNode._vnodeId = null;
 		options._catchError(e, internal, internal);
 	}
 

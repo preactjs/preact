@@ -52,18 +52,13 @@ export function diffChildren(
 	const newChildren = [];
 	for (i = 0; i < renderResult.length; i++) {
 		childVNode = normalizeToVNode(renderResult[i]);
-		//newChildren[i] = childVNode;
 
 		// Terser removes the `continue` here and wraps the loop body
 		// in a `if (childVNode) { ... } condition
 		if (childVNode == null) {
-			// @TODO: assign `newChildren[i] = null`?
 			newChildren[i] = null;
 			continue;
 		}
-
-		// childVNode._parent = internal;
-		// childVNode._depth = newParentVNode._depth + 1;
 
 		// Check if we find a corresponding element in oldChildren.
 		// If found, delete the array item by setting to `undefined`.
@@ -141,7 +136,6 @@ export function diffChildren(
 				startDom
 			);
 		} else {
-			// this was previously captured after patch(), which seems backwards?
 			oldVNodeRef = childInternal.ref;
 
 			// TODO: Figure out if there is a better way to handle the null
@@ -158,8 +152,6 @@ export function diffChildren(
 				commitQueue,
 				startDom
 			);
-
-			// oldVNodeRef = childInternal.ref;
 		}
 
 		newDom = childInternal._dom;
