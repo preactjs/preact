@@ -1,5 +1,5 @@
 import { Component, createElement, options, Fragment } from 'preact';
-import { MODE_HYDRATE } from '../../src/constants';
+import { FORCE_UPDATE, MODE_HYDRATE } from '../../src/constants';
 import { assign } from './util';
 
 const oldCatchError = options._catchError;
@@ -94,7 +94,7 @@ function removeOriginal(vnode, detachedParent, originalParent) {
 				if (vnode._dom) {
 					originalParent.insertBefore(vnode._dom, vnode._nextDom);
 				}
-				vnode._component._force = true;
+				vnode._mode |= FORCE_UPDATE;
 				vnode._component._parentDom = originalParent;
 			}
 		}

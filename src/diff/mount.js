@@ -4,8 +4,8 @@ import {
 	ELEMENT_NODE,
 	MODE_HYDRATE,
 	MODE_MUTATIVE_HYDRATE,
-	MODE_NONE,
 	MODE_SUSPENDED,
+	RESET_MODE,
 	TEXT_NODE
 } from '../constants';
 import { normalizeToVNode } from '../create-element';
@@ -73,10 +73,10 @@ export function mount(
 		if (options.diffed) options.diffed(internal);
 
 		// We successfully rendered this VNode, unset any stored hydration/bailout state:
-		internal._mode = MODE_NONE;
+		internal._mode &= RESET_MODE;
 	} catch (e) {
 		internal._original = null;
-		internal._mode = internal._mode | MODE_SUSPENDED;
+		internal._mode |= MODE_SUSPENDED;
 
 		if (internal._mode & MODE_HYDRATE) {
 			// @ts-ignore Trust me TS, nextSibling is a PreactElement
@@ -146,7 +146,7 @@ function mountDOMElement(dom, internal, globalContext, isSvg, commitQueue) {
 
 			// we are creating a new node, so we can assume this is a new subtree (in case we are hydrating), this deopts the hydrate
 			isHydrating = 0;
-			internal._mode = MODE_NONE;
+			internal._mode &= RESET_MODE;
 		}
 
 		// @TODO: Consider removing and instructing users to instead set the desired
