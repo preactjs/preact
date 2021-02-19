@@ -117,7 +117,7 @@ export function renderComponent(
 				internal._mode &= ~DIRTY;
 			}
 			// @TODO: rename to c._internal
-			c._vnode = internal;
+			c._internal = internal;
 			if (c._renderCallbacks.length) {
 				commitQueue.push(c);
 			}
@@ -149,7 +149,7 @@ export function renderComponent(
 
 	internal._mode &= ~DIRTY;
 	// @TODO: rename to c._internal
-	c._vnode = internal;
+	c._internal = internal;
 	c._parentDom = parentDom;
 
 	tmp = c.render(c.props, c.state, c.context);

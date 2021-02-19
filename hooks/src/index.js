@@ -69,7 +69,7 @@ options._commit = (internal, commitQueue) => {
 				if (c._renderCallbacks) c._renderCallbacks = [];
 			});
 			commitQueue = [];
-			options._catchError(e, component._vnode);
+			options._catchError(e, component._internal);
 		}
 	});
 
@@ -84,7 +84,7 @@ options.unmount = internal => {
 		try {
 			c.__hooks._list.forEach(invokeCleanup);
 		} catch (e) {
-			options._catchError(e, c._vnode);
+			options._catchError(e, c._internal);
 		}
 	}
 };
@@ -299,7 +299,7 @@ function flushAfterPaintEffects() {
 				component.__hooks._pendingEffects = [];
 			} catch (e) {
 				component.__hooks._pendingEffects = [];
-				options._catchError(e, component._vnode);
+				options._catchError(e, component._internal);
 			}
 		}
 	});

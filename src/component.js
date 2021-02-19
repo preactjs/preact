@@ -48,7 +48,7 @@ Component.prototype.setState = function(update, callback) {
 	// Skip update if updater function returned null
 	if (update == null) return;
 
-	if (this._vnode) {
+	if (this._internal) {
 		if (callback) this._renderCallbacks.push(callback);
 		enqueueRender(this);
 	}
@@ -61,11 +61,11 @@ Component.prototype.setState = function(update, callback) {
  * re-rendered
  */
 Component.prototype.forceUpdate = function(callback) {
-	if (this._vnode) {
+	if (this._internal) {
 		// Set render mode so that we can differentiate where the render request
 		// is coming from. We need this because forceUpdate should never call
 		// shouldComponentUpdate
-		this._vnode._mode |= FORCE_UPDATE;
+		this._internal._mode |= FORCE_UPDATE;
 		if (callback) this._renderCallbacks.push(callback);
 		enqueueRender(this);
 	}
@@ -124,7 +124,7 @@ export function getDomSibling(internal, childIndex) {
  * @param {import('./internal').Component} component The component to rerender
  */
 function rerenderComponent(component) {
-	let internal = component._vnode,
+	let internal = component._internal,
 		startDom = internal._dom,
 		parentDom = component._parentDom;
 
@@ -207,8 +207,8 @@ let prevDebounce;
  */
 export function enqueueRender(c) {
 	if (
-		(!(c._vnode._mode & DIRTY) &&
-			(c._vnode._mode |= DIRTY) &&
+		(!(c._internal._mode & DIRTY) &&
+			(c._internal._mode |= DIRTY) &&
 			rerenderQueue.push(c) &&
 			!process._rerenderCount++) ||
 		prevDebounce !== options.debounceRendering
@@ -222,12 +222,14 @@ export function enqueueRender(c) {
 function process() {
 	let queue;
 	while ((process._rerenderCount = rerenderQueue.length)) {
-		queue = rerenderQueue.sort((a, b) => a._vnode._depth - b._vnode._depth);
+		queue = rerenderQueue.sort(
+			(a, b) => a._internal._depth - b._internal._depth
+		);
 		rerenderQueue = [];
 		// Don't update `renderCount` yet. Keep its value non-zero to prevent unnecessary
 		// process() calls from getting scheduled while `queue` is still being consumed.
 		queue.some(c => {
-			if (c._vnode._mode & DIRTY) rerenderComponent(c);
+			if (c._internal._mode & DIRTY) rerenderComponent(c);
 		});
 	}
 }

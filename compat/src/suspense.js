@@ -132,7 +132,7 @@ Suspense.prototype._childDidSuspend = function(promise, suspendingVNode) {
 	}
 	c._suspenders.push(suspendingComponent);
 
-	const resolve = suspended(c._vnode);
+	const resolve = suspended(c._internal);
 
 	let resolved = false;
 	const onResolved = () => {
@@ -159,10 +159,10 @@ Suspense.prototype._childDidSuspend = function(promise, suspendingVNode) {
 				// _suspended will be unset if we are suspending while hydrating. If so
 				// the suspendedVNode is still the first child of Suspense since we
 				// never rendered the fallback
-				suspendedVNode = c._vnode._children[0];
+				suspendedVNode = c._internal._children[0];
 			}
 
-			c._vnode._children[0] = removeOriginal(
+			c._internal._children[0] = removeOriginal(
 				suspendedVNode,
 				suspendedVNode._component._parentDom,
 				suspendedVNode._component._originalParentDom
@@ -176,7 +176,7 @@ Suspense.prototype._childDidSuspend = function(promise, suspendingVNode) {
 				// component so the component instance stored by Suspense is no longer
 				// valid. Likely needs to be fixed with backing nodes and a way to
 				// trigger a rerender for backing nodes
-				if (!(suspended._vnode._mode & MODE_HYDRATE)) {
+				if (!(suspended._internal._mode & MODE_HYDRATE)) {
 					suspended.forceUpdate();
 				}
 			}
@@ -190,7 +190,9 @@ Suspense.prototype._childDidSuspend = function(promise, suspendingVNode) {
 	 */
 	const wasHydrating = (suspendingVNode._mode & MODE_HYDRATE) === MODE_HYDRATE;
 	if (!c._pendingSuspensionCount++ && !wasHydrating) {
-		c.setState({ _suspended: (c._detachOnNextRender = c._vnode._children[0]) });
+		c.setState({
+			_suspended: (c._detachOnNextRender = c._internal._children[0])
+		});
 	}
 	promise.then(onResolved, onResolved);
 };
@@ -209,10 +211,10 @@ Suspense.prototype.render = function(props, state) {
 		// When the Suspense's _vnode was created by a call to createVNode
 		// (i.e. due to a setState further up in the tree)
 		// it's _children prop is null, in this case we "forget" about the parked vnodes to detach
-		if (this._vnode._children) {
+		if (this._internal._children) {
 			const detachedParent = document.createElement('div');
-			const detachedComponent = this._vnode._children[0]._component;
-			this._vnode._children[0] = detachedClone(
+			const detachedComponent = this._internal._children[0]._component;
+			this._internal._children[0] = detachedClone(
 				this._detachOnNextRender,
 				detachedParent,
 				(detachedComponent._originalParentDom = detachedComponent._parentDom)

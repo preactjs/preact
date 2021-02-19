@@ -39,7 +39,6 @@
       "$_detachOnNextRender": "__b",
       "$_nextState": "__s",
       "$_renderCallbacks": "__h",
-      "$_vnode": "__v",
       "$_children": "__k",
       "$_pendingSuspensionCount": "__u",
       "$_childDidSuspend": "__c",
@@ -71,8 +70,7 @@
       "$_owner": "__o",
       "$_skipEffects": "__s",
       "$_rerenderCount": "__r",
-      "$_forwarded": "__f",
-      "$_isSuspended": "__i"
+      "$_forwarded": "__f"
     }
   }
 }
