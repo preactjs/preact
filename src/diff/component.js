@@ -196,8 +196,6 @@ export function renderComponent(
 		commitQueue.push(c);
 	}
 
-	internal._mode &= ~FORCE_UPDATE;
-
 	return nextDomSibling;
 }
 
