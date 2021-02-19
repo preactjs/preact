@@ -77,7 +77,7 @@ function detachedClone(vnode, detachedParent, parentDom) {
  */
 function removeOriginal(vnode, detachedParent, originalParent) {
 	if (vnode) {
-		vnode._original = null;
+		vnode._vnodeId = null;
 
 		if (vnode._children) {
 			vnode._children = vnode._children.map(child =>

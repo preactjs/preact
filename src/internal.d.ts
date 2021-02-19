@@ -112,7 +112,7 @@ export interface VNode<P = {}> extends preact.VNode<P> {
 	// Redefine type here using our internal ComponentType type
 	type: string | ComponentType<P>;
 	props: P & { children: ComponentChildren };
-	_original: number;
+	_vnodeId: number;
 }
 
 export type InternalFlags =
@@ -137,7 +137,7 @@ export interface Internal<P = {}> {
 	/** next sibling Internal node */
 	_parent: Internal;
 	/** most recent vnode ID @TODO rename to _vnodeId */
-	_original: number;
+	_vnodeId: number;
 	/**
 	 * Associated DOM element for the Internal, or its nearest realized descendant.
 	 * For Fragments, this is the first DOM child.

@@ -38,7 +38,7 @@ export function createInternal(vnode, parentInternal) {
 		props = vnode.props;
 		key = vnode.key;
 		ref = vnode.ref;
-		vnodeId = vnode._original;
+		vnodeId = vnode._vnodeId;
 
 		// @TODO re-enable this when we stop removing key+ref from VNode props
 		if (props) {
@@ -71,7 +71,7 @@ export function createInternal(vnode, parentInternal) {
 		ref,
 		_children: null,
 		_parent: parentInternal,
-		_original: vnodeId,
+		_vnodeId: vnodeId,
 		_dom: null,
 		_component: null,
 		_flags: flags,
