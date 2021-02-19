@@ -115,12 +115,12 @@ export interface VNode<P = {}> extends preact.VNode<P> {
 	_vnodeId: number;
 }
 
-export type InternalFlags =
-	| CONSTANTS['TEXT_NODE']
-	| CONSTANTS['ELEMENT_NODE']
-	| CONSTANTS['CLASS_NODE']
-	| CONSTANTS['FUNCTION_NODE']
-	| CONSTANTS['COMPONENT_NODE'];
+export type InternalTypeFlags =
+	| CONSTANTS['TYPE_TEXT']
+	| CONSTANTS['TYPE_ELEMENT']
+	| CONSTANTS['TYPE_CLASS']
+	| CONSTANTS['TYPE_FUNCTION']
+	| CONSTANTS['TYPE_COMPONENT'];
 
 /**
  * An Internal is a persistent backing node within Preact's virtual DOM tree.
@@ -145,10 +145,8 @@ export interface Internal<P = {}> {
 	_dom: PreactNode;
 	/** The component instance for which this is a backing Internal node */
 	_component: Component | null;
-	/** Bitfield containing rendering mode flags */
-	_mode: ModeFlags;
 	/** Bitfield containing information about the Internal or its component. */
-	_flags: InternalFlags;
+	_flags: number;
 	/** This Internal's distance from the tree root */
 	_depth: number | null;
 }

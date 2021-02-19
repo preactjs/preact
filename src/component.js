@@ -3,7 +3,7 @@ import { commitRoot } from './diff/commit';
 import options from './options';
 import { createVNode, Fragment } from './create-element';
 import { patch } from './diff/patch';
-import { COMPONENT_NODE, DIRTY, FORCE_UPDATE } from './constants';
+import { TYPE_COMPONENT, DIRTY_BIT, FORCE_UPDATE } from './constants';
 
 /**
  * Base Component class. Provides `setState()` and `forceUpdate()`, which
@@ -65,7 +65,7 @@ Component.prototype.forceUpdate = function(callback) {
 		// Set render mode so that we can differentiate where the render request
 		// is coming from. We need this because forceUpdate should never call
 		// shouldComponentUpdate
-		this._internal._mode |= FORCE_UPDATE;
+		this._internal._flags |= FORCE_UPDATE;
 		if (callback) this._renderCallbacks.push(callback);
 		enqueueRender(this);
 	}
@@ -116,7 +116,7 @@ export function getDomSibling(internal, childIndex) {
 	// Only climb up and search the parent if we aren't searching through a DOM
 	// VNode (meaning we reached the DOM parent of the original vnode that began
 	// the search)
-	return internal._flags & COMPONENT_NODE ? getDomSibling(internal) : null;
+	return internal._flags & TYPE_COMPONENT ? getDomSibling(internal) : null;
 }
 
 /**
@@ -207,8 +207,8 @@ let prevDebounce;
  */
 export function enqueueRender(c) {
 	if (
-		(!(c._internal._mode & DIRTY) &&
-			(c._internal._mode |= DIRTY) &&
+		(!(c._internal._flags & DIRTY_BIT) &&
+			(c._internal._flags |= DIRTY_BIT) &&
 			rerenderQueue.push(c) &&
 			!process._rerenderCount++) ||
 		prevDebounce !== options.debounceRendering
@@ -229,7 +229,7 @@ function process() {
 		// Don't update `renderCount` yet. Keep its value non-zero to prevent unnecessary
 		// process() calls from getting scheduled while `queue` is still being consumed.
 		queue.some(c => {
-			if (c._internal._mode & DIRTY) rerenderComponent(c);
+			if (c._internal._flags & DIRTY_BIT) rerenderComponent(c);
 		});
 	}
 }

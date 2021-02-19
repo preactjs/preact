@@ -45,7 +45,7 @@
       "$_suspended": "__e",
       "$_dom": "__e",
       "$_hydrating": "__h",
-      "$_mode": "__m",
+      "$_flags": "__f",
       "$_component": "__c",
       "$__html": "__html",
       "$_parent": "__",

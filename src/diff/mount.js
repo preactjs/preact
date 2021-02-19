@@ -1,12 +1,12 @@
 import { applyRef } from './refs';
 import {
-	COMPONENT_NODE,
-	ELEMENT_NODE,
+	TYPE_COMPONENT,
+	TYPE_ELEMENT,
 	MODE_HYDRATE,
 	MODE_MUTATIVE_HYDRATE,
 	MODE_SUSPENDED,
 	RESET_MODE,
-	TEXT_NODE
+	TYPE_TEXT
 } from '../constants';
 import { normalizeToVNode } from '../create-element';
 import { setProperty } from './props';
@@ -42,7 +42,7 @@ export function mount(
 	let nextDomSibling;
 
 	try {
-		if (internal._flags & COMPONENT_NODE) {
+		if (internal._flags & TYPE_COMPONENT) {
 			nextDomSibling = renderComponent(
 				parentDom,
 				null,
@@ -54,7 +54,7 @@ export function mount(
 			);
 		} else {
 			let hydrateDom =
-				internal._mode & (MODE_HYDRATE | MODE_MUTATIVE_HYDRATE)
+				internal._flags & (MODE_HYDRATE | MODE_MUTATIVE_HYDRATE)
 					? startDom
 					: null;
 
@@ -73,12 +73,12 @@ export function mount(
 		if (options.diffed) options.diffed(internal);
 
 		// We successfully rendered this VNode, unset any stored hydration/bailout state:
-		internal._mode &= RESET_MODE;
+		internal._flags &= RESET_MODE;
 	} catch (e) {
 		internal._vnodeId = null;
-		internal._mode |= MODE_SUSPENDED;
+		internal._flags |= MODE_SUSPENDED;
 
-		if (internal._mode & MODE_HYDRATE) {
+		if (internal._flags & MODE_HYDRATE) {
 			// @ts-ignore Trust me TS, nextSibling is a PreactElement
 			nextDomSibling = startDom && startDom.nextSibling;
 			internal._dom = startDom; // Save our current DOM position to resume later
@@ -106,10 +106,10 @@ function mountDOMElement(dom, internal, globalContext, isSvg, commitQueue) {
 	/** @type {any} */
 	let i;
 
-	let isHydrating = internal._mode & MODE_HYDRATE;
+	let isHydrating = internal._flags & MODE_HYDRATE;
 
 	// if hydrating (hydrate() or render() with replaceNode), find the matching child:
-	if (internal._mode & (MODE_HYDRATE | MODE_MUTATIVE_HYDRATE)) {
+	if (internal._flags & (MODE_HYDRATE | MODE_MUTATIVE_HYDRATE)) {
 		while (
 			dom &&
 			(nodeType ? dom.localName !== nodeType : dom.nodeType !== 3)
@@ -118,7 +118,7 @@ function mountDOMElement(dom, internal, globalContext, isSvg, commitQueue) {
 		}
 	}
 
-	if (internal._flags & TEXT_NODE) {
+	if (internal._flags & TYPE_TEXT) {
 		if (dom == null) {
 			// @ts-ignore createTextNode returns Text, we expect PreactElement
 			dom = document.createTextNode(newProps);
@@ -146,13 +146,13 @@ function mountDOMElement(dom, internal, globalContext, isSvg, commitQueue) {
 
 			// we are creating a new node, so we can assume this is a new subtree (in case we are hydrating), this deopts the hydrate
 			isHydrating = 0;
-			internal._mode &= RESET_MODE;
+			internal._flags &= RESET_MODE;
 		}
 
 		// @TODO: Consider removing and instructing users to instead set the desired
 		// prop for removal to undefined/null. During hydration, props are not
 		// diffed at all (including dangerouslySetInnerHTML)
-		if (internal._mode & MODE_MUTATIVE_HYDRATE) {
+		if (internal._flags & MODE_MUTATIVE_HYDRATE) {
 			// But, if we are in a situation where we are using existing DOM (e.g. replaceNode)
 			// we should read the existing DOM attributes to diff them
 			for (i = 0; i < dom.attributes.length; i++) {
@@ -267,7 +267,7 @@ export function mountChildren(
 				firstChildDom = newDom;
 			}
 
-			if (childInternal._flags & COMPONENT_NODE || newDom == startDom) {
+			if (childInternal._flags & TYPE_COMPONENT || newDom == startDom) {
 				// If the child is a Fragment-like or if it is DOM VNode and its _dom
 				// property matches the dom we are diffing (i.e. startDom), just
 				// continue with the mountedNextChild
@@ -293,8 +293,8 @@ export function mountChildren(
 
 	// Remove children that are not part of any vnode.
 	if (
-		parentInternal._mode & (MODE_HYDRATE | MODE_MUTATIVE_HYDRATE) &&
-		parentInternal._flags & ELEMENT_NODE
+		parentInternal._flags & (MODE_HYDRATE | MODE_MUTATIVE_HYDRATE) &&
+		parentInternal._flags & TYPE_ELEMENT
 	) {
 		// TODO: Would it be simpler to just clear the pre-existing DOM in top-level
 		// render if render is called with no oldVNode & existing children & no

@@ -1,5 +1,4 @@
 import { options, Fragment } from 'preact';
-import { MODE_NONE } from '../../src/constants';
 
 /** @typedef {import('preact').VNode} VNode */
 

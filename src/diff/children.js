@@ -1,11 +1,11 @@
 import { applyRef } from './refs';
 import { normalizeToVNode } from '../create-element';
 import {
-	COMPONENT_NODE,
-	EMPTY_ARR,
+	TYPE_COMPONENT,
+	TYPE_TEXT,
 	MODE_HYDRATE,
 	MODE_SUSPENDED,
-	TEXT_NODE
+	EMPTY_ARR
 } from '../constants';
 import { getDomSibling } from '../component';
 import { mount } from './mount';
@@ -68,7 +68,7 @@ export function diffChildren(
 
 		if (typeof childVNode === 'string') {
 			// We never move Text nodes, so we only check for an in-place match:
-			if (childInternal && childInternal._flags & TEXT_NODE) {
+			if (childInternal && childInternal._flags & TYPE_TEXT) {
 				oldChildren[i] = undefined;
 			} else {
 				// We're looking for a Text node, but this wasn't one: ignore it
@@ -119,11 +119,9 @@ export function diffChildren(
 		}
 		// If this node suspended during hydration, and no other flags are set:
 		// @TODO: might be better to explicitly check for MODE_ERRORED here.
-		else if ((childInternal._mode ^ (MODE_HYDRATE | MODE_SUSPENDED)) === 0) {
+		else if ((childInternal._flags ^ (MODE_HYDRATE | MODE_SUSPENDED)) === 0) {
 			// We are resuming the hydration of a VNode
 			startDom = childInternal._dom;
-			// Resume the same mode as before suspending
-			// childVNode._mode = oldInternal._mode;
 			oldVNodeRef = childInternal.ref;
 
 			nextDomSibling = mount(
@@ -171,7 +169,7 @@ export function diffChildren(
 				firstChildDom = newDom;
 			}
 
-			if (childInternal._flags & COMPONENT_NODE) {
+			if (childInternal._flags & TYPE_COMPONENT) {
 				startDom = nextDomSibling;
 			} else if (newDom == startDom) {
 				// If the newDom and the dom we are expecting to be there are the same, then
@@ -219,7 +217,7 @@ export function diffChildren(
 	for (i = oldChildrenLength; i--; ) {
 		if (oldChildren[i] != null) {
 			if (
-				parentInternal._flags & COMPONENT_NODE &&
+				parentInternal._flags & TYPE_COMPONENT &&
 				startDom != null &&
 				oldChildren[i]._dom == startDom
 			) {
