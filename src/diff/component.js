@@ -116,7 +116,7 @@ export function renderComponent(
 			if (newVNode && newVNode._vnodeId !== internal._vnodeId) {
 				internal._mode &= ~DIRTY;
 			}
-			// @TODO: rename to c._internal
+
 			c._internal = internal;
 			if (c._renderCallbacks.length) {
 				commitQueue.push(c);
@@ -148,7 +148,6 @@ export function renderComponent(
 	if ((tmp = options._render)) tmp(internal);
 
 	internal._mode &= ~DIRTY;
-	// @TODO: rename to c._internal
 	c._internal = internal;
 	c._parentDom = parentDom;
 
