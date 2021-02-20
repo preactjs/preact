@@ -1,5 +1,5 @@
 import { createElement, render, Fragment } from '../../src/';
-import { getDomSibling } from '../../src/component';
+import { getDomSibling } from '../../src/tree';
 import { setupScratch, teardown } from '../_util/helpers';
 
 /** @jsx createElement */

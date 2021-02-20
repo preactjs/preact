@@ -7,7 +7,7 @@ import {
 	MODE_SUSPENDED,
 	EMPTY_ARR
 } from '../constants';
-import { getDomSibling } from '../component';
+import { getDomSibling } from '../tree';
 import { mount } from './mount';
 import { patch } from './patch';
 import { unmount } from './unmount';

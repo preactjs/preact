@@ -5,7 +5,8 @@ import {
 	TYPE_TEXT,
 	TYPE_CLASS,
 	TYPE_FRAGMENT,
-	INHERITED_MODES
+	INHERITED_MODES,
+	TYPE_COMPONENT
 } from './constants';
 import { Fragment } from './create-element';
 
@@ -81,4 +82,58 @@ export function createInternal(vnode, parentInternal) {
 	if (options._internal) options._internal(internal, vnode);
 
 	return internal;
+}
+
+/**
+ * @param {import('./internal').Internal} internal
+ * @param {number | null} [childIndex]
+ * @returns {import('./internal').PreactNode}
+ */
+export function getDomSibling(internal, childIndex) {
+	if (childIndex == null) {
+		// Use childIndex==null as a signal to resume the search from the vnode's sibling
+		return internal._parent
+			? getDomSibling(
+					internal._parent,
+					internal._parent._children.indexOf(internal) + 1
+			  )
+			: null;
+	}
+
+	let sibling;
+	for (; childIndex < internal._children.length; childIndex++) {
+		sibling = internal._children[childIndex];
+
+		if (sibling != null && sibling._dom != null) {
+			// Since updateParentDomPointers keeps _dom pointer correct,
+			// we can rely on _dom to tell us if this subtree contains a
+			// rendered DOM node, and what the first rendered DOM node is
+			return sibling._dom;
+		}
+	}
+
+	// If we get here, we have not found a DOM node in this vnode's children.
+	// We must resume from this vnode's sibling (in it's parent _children array)
+	// Only climb up and search the parent if we aren't searching through a DOM
+	// VNode (meaning we reached the DOM parent of the original vnode that began
+	// the search)
+	return internal._flags & TYPE_COMPONENT ? getDomSibling(internal) : null;
+}
+
+/**
+ * @param {import('./internal').Internal} internal
+ */
+export function updateParentDomPointers(internal) {
+	if ((internal = internal._parent) != null && internal._component != null) {
+		internal._dom = null;
+		for (let i = 0; i < internal._children.length; i++) {
+			let child = internal._children[i];
+			if (child != null && child._dom != null) {
+				internal._dom = child._dom;
+				break;
+			}
+		}
+
+		return updateParentDomPointers(internal);
+	}
 }
