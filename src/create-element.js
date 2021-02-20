@@ -58,18 +58,29 @@ export function createElement(type, props, children) {
 export function createVNode(type, props, key, ref, original) {
 	// V8 seems to be better at detecting type shapes if the object is allocated from the same call site
 	// Do not inline into createElement and coerceToVNode!
-	const vnode = {
-		type,
-		props,
-		key,
-		ref,
-		constructor: undefined,
-		_vnodeId: original == null ? ++options._vnodeId : original
-	};
+	// const vnode = {
+	// 	type,
+	// 	props,
+	// 	key,
+	// 	ref,
+	// 	constructor: undefined,
+	// 	_vnodeId: original == null ? ++options._vnodeId : original
+	// };
+
+	const vnode = new VNode(type, props, key, ref, original);
+	vnode.constructor = undefined;
 
 	if (options.vnode != null) options.vnode(vnode);
 
 	return vnode;
+}
+
+function VNode(type, props, key, ref, vnodeId) {
+	this.type = type;
+	this.props = props;
+	this.key = key;
+	this.ref = ref;
+	this._vnodeId = vnodeId == null ? ++options._vnodeId : vnodeId;
 }
 
 /**
