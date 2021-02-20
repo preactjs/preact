@@ -1,7 +1,8 @@
 import {
 	Component as PreactComponent,
 	VNode as PreactVNode,
-	FunctionComponent as PreactFunctionComponent
+	FunctionComponent as PreactFunctionComponent,
+	Internal as PreactInternal
 } from '../../src/internal';
 import { SuspenseProps } from './suspense';
 
@@ -9,7 +10,16 @@ export { ComponentChildren } from '../..';
 
 export { PreactElement } from '../../src/internal';
 
+export interface Internal<P = {}> extends PreactInternal<P> {
+	// Override some of Internal's properties with compat types (namely _component)
+	_parent: Internal;
+	_children: Internal[];
+	_component: Component;
+}
+
 export interface Component<P = {}, S = {}> extends PreactComponent<P, S> {
+	_internal?: Internal<P> | null;
+
 	isReactComponent?: object;
 	isPureReactComponent?: true;
 	_patchedLifecycles?: true;
@@ -18,6 +28,7 @@ export interface Component<P = {}, S = {}> extends PreactComponent<P, S> {
 	_childDidSuspend?(error: Promise<void>, suspendingVNode: VNode): void;
 	_suspended: (vnode: VNode) => (unsuspend: () => void) => void;
 	_onResolve?(): void;
+	_originalParentDom?: PreactElement;
 
 	// Portal internal properties
 	_temp: any;
@@ -36,12 +47,12 @@ export interface VNode<T = any> extends PreactVNode<T> {
 }
 
 export interface SuspenseState {
-	_suspended?: null | VNode<any>;
+	_suspended?: null | Internal<any>;
 }
 
 export interface SuspenseComponent
-	extends PreactComponent<SuspenseProps, SuspenseState> {
+	extends Component<SuspenseProps, SuspenseState> {
 	_pendingSuspensionCount: number;
 	_suspenders: Component[];
-	_detachOnNextRender: null | VNode<any>;
+	_detachOnNextRender: null | Internal<any>;
 }

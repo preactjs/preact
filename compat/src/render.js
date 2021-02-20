@@ -109,6 +109,7 @@ let oldVNodeHook = options.vnode;
 options.vnode = vnode => {
 	let type = vnode.type;
 	let props = vnode.props;
+	/** @type {any} */
 	let normalizedProps = props;
 
 	// only normalize props on Element nodes
@@ -198,11 +199,11 @@ options.vnode = vnode => {
 // Only needed for react-relay
 let currentComponent;
 const oldBeforeRender = options._render;
-options._render = function(vnode) {
+options._render = function(internal) {
 	if (oldBeforeRender) {
-		oldBeforeRender(vnode);
+		oldBeforeRender(internal);
 	}
-	currentComponent = vnode._component;
+	currentComponent = internal._component;
 };
 
 // This is a very very private internal function for React it

@@ -83,7 +83,7 @@ export function mount(
 			nextDomSibling = startDom && startDom.nextSibling;
 			internal._dom = startDom; // Save our current DOM position to resume later
 		}
-		options._catchError(e, internal, internal);
+		options._catchError(e, internal);
 	}
 
 	return nextDomSibling;
