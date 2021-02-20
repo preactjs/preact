@@ -373,8 +373,7 @@ describe('Portal', () => {
 		expect(scratch.innerHTML).to.equal('<div><p>Hello</p></div>');
 	});
 
-	// TODO: Our reconciler always appends here
-	it.skip('should work with removing an element from stacked container to new one', () => {
+	it('should work with removing an element from stacked container to new one', () => {
 		let toggle, root2;
 
 		function Foo(props) {
@@ -460,8 +459,7 @@ describe('Portal', () => {
 		expect(scratch.innerHTML).to.equal('<div><p>Hello</p></div>');
 	});
 
-	// TODO: Our reconciler always appends here
-	it.skip('should support nested portals remounting #2669', () => {
+	it('should support nested portals remounting #2669', () => {
 		let setVisible;
 		let i = 0;
 
@@ -628,7 +626,7 @@ describe('Portal', () => {
 		);
 	});
 
-	it.skip('should not needlessly append siblings to Portals', () => {
+	it('should not needlessly append siblings to Portals', () => {
 		/** @type {() => void} */
 		let update;
 		function Foo(props) {

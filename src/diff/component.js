@@ -150,6 +150,7 @@ export function renderComponent(
 	// Root nodes signal that we attempt to render into a specific DOM node
 	// on the page. Root nodes can occur anywhere in the tree and not just
 	// at the top.
+	let oldStartDom = startDom;
 	if (newProps._parentDom) {
 		parentDom = newProps._parentDom;
 
@@ -211,6 +212,11 @@ export function renderComponent(
 
 	if (c._renderCallbacks.length) {
 		commitQueue.push(c);
+	}
+
+	// Resume where we left of before the Portal
+	if (newProps._parentDom) {
+		return oldStartDom;
 	}
 
 	return nextDomSibling;
