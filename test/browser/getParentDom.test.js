@@ -206,6 +206,8 @@ describe('getParentDom', () => {
 			scratch
 		);
 
+		expect(scratch.innerHTML).to.equal('<div></div>');
+
 		let internal = getRoot(scratch)._children[0]._children[0];
 		expect(internal.type).to.equal(Fragment);
 		expect(getParentDom(internal)).to.equalNode(portalParent);
@@ -226,6 +228,8 @@ describe('getParentDom', () => {
 			scratch
 		);
 
+		expect(scratch.innerHTML).to.equal('<div></div>');
+
 		let fooInternal = getRoot(scratch)._children[0]._children[0]._children[0];
 		expect(fooInternal.type).to.equal(Foo);
 		expect(getParentDom(fooInternal)).to.equalNode(portalParent);
@@ -233,5 +237,30 @@ describe('getParentDom', () => {
 		let divInternal = fooInternal._children[0];
 		expect(divInternal.type).to.equal('div');
 		expect(getParentDom(divInternal)).to.equalNode(portalParent);
+	});
+
+	// TODO: This doesn't work because Fragments returned from components are
+	// inlined/erased. Would need to give root nodes their own type, i.e. Portal
+	it.skip('should return _parentDom property of root node returned from a Component', () => {
+		const portalParent = document.createElement('div');
+
+		const Foo = () => (
+			<Fragment _parentDom={portalParent}>
+				<div>A</div>
+			</Fragment>
+		);
+
+		render(
+			<div>
+				<Foo />
+			</div>,
+			scratch
+		);
+
+		expect(scratch.innerHTML).to.equal('<div></div>');
+
+		let internal = getRoot(scratch)._children[0]._children[0]._children[0];
+		expect(internal.type).to.equal('div');
+		expect(getParentDom(internal)).to.equalNode(portalParent);
 	});
 });
