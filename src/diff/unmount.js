@@ -1,3 +1,4 @@
+import { TYPE_DOM } from '../constants';
 import options from '../options';
 import { removeNode } from '../util';
 import { applyRef } from './refs';
@@ -20,7 +21,7 @@ export function unmount(internal, parentInternal, skipRemove) {
 	}
 
 	let dom;
-	if (!skipRemove && typeof internal.type != 'function') {
+	if (!skipRemove && internal._flags & TYPE_DOM) {
 		skipRemove = (dom = internal._dom) != null;
 	}
 
