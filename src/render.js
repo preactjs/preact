@@ -28,6 +28,7 @@ export function render(vnode, parentDom, replaceNode) {
 	let rootInternal =
 		(replaceNode && replaceNode._children) || parentDom._children;
 	vnode = createElement(Fragment, { _parentDom: parentDom }, [vnode]);
+
 	if (rootInternal) {
 		patch(
 			parentDom,

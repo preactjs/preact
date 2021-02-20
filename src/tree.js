@@ -22,7 +22,7 @@ export function createInternal(vnode, parentInternal) {
 		key,
 		ref;
 
-	/** @type {import('./internal').InternalTypeFlags} */
+	/** @type {number} */
 	let flags = TYPE_TEXT;
 
 	// Text VNodes/Internals use NaN as an ID so that two are never equal.

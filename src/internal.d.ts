@@ -1,7 +1,5 @@
 import * as preact from './index';
 
-type CONSTANTS = typeof import('./lib/constants');
-
 export enum HookType {
 	useState = 1,
 	useReducer = 2,
@@ -114,13 +112,6 @@ export interface VNode<P = {}> extends preact.VNode<P> {
 	props: P & { children: ComponentChildren };
 	_vnodeId: number;
 }
-
-export type InternalTypeFlags =
-	| CONSTANTS['TYPE_TEXT']
-	| CONSTANTS['TYPE_ELEMENT']
-	| CONSTANTS['TYPE_CLASS']
-	| CONSTANTS['TYPE_FUNCTION']
-	| CONSTANTS['TYPE_COMPONENT'];
 
 /**
  * An Internal is a persistent backing node within Preact's virtual DOM tree.
