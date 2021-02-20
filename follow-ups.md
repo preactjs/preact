@@ -40,6 +40,9 @@
 - Fix Suspense hydration tests:
   - "should hydrate lazy components through components using shouldComponentUpdate"
 - Rebuild Suspense List to work with backing tree
+- Reconsider eagerly allocating `_renderCallbacks` for components
+- Reconsider defaulting `c.state` to `{}` for all components
+- Move/remove more component properties to Internal (e.g. `_parentDom`, `_dirty`, `_globalContext`)
 
 ## Other
 

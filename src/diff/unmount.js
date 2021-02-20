@@ -41,7 +41,8 @@ export function unmount(internal, parentInternal, skipRemove) {
 			}
 		}
 
-		r._parentDom = null;
+		// r._parentDom = null;
+		r._vnode = null;
 	}
 
 	if ((r = internal._children) && Array.isArray(r)) {
