@@ -24,6 +24,14 @@
 - Explore replacing children in `internal._children` as we diff instead of
   building up a new array each time
 
+## Single text node investigations
+
+- Consider adding a _flag for when `children` is a string
+- Does suspense work with just a single text child? with two text children? with
+  a Fragment with just a text node?
+- Does reorderChildren properly handle a Fragment with just a text child?
+- Can unmount be called with a string? a Fragment with just a text child?
+
 ## TODOs
 
 - Consider further removing `_dom` pointers from non-dom VNodes

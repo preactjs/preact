@@ -239,13 +239,17 @@ export function mountChildren(
 	if (typeof renderResult == 'string' || typeof renderResult == 'number') {
 		parentInternal._children = '' + renderResult;
 		if (parentInternal._flags & MODE_MUTATIVE_HYDRATE) {
+			// TODO: Errr this is probably wrong... What if parentDom has multiple
+			// Fragment children?
 			parentDom.textContent = renderResult;
 		} else if (~parentInternal._flags & MODE_HYDRATE) {
 			// parentDom.textContent = renderResult;
-			parentDom.insertBefore(document.createTextNode(renderResult), null);
+			parentInternal._dom = document.createTextNode(renderResult);
+			parentDom.insertBefore(parentInternal._dom, null);
+			return null;
 		}
 
-		return;
+		return startDom.nextSibling;
 	}
 
 	renderResult = Array.isArray(renderResult) ? renderResult : [renderResult];

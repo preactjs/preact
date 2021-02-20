@@ -98,7 +98,7 @@ describe('suspense hydration', () => {
 	});
 
 	it('should properly attach event listeners when suspending while hydrating', () => {
-		scratch.innerHTML = '<div>Hello</div><div>World</div>';
+		scratch.innerHTML = '<div>Hello</div><div>World!</div>';
 		clearLog();
 
 		const helloListener = sinon.spy();

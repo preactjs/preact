@@ -66,7 +66,7 @@ function detachedClone(internal, detachedParent, parentDom) {
 			internal._component = null;
 		}
 
-		if (internal._children) {
+		if (Array.isArray(internal._children)) {
 			internal._children = internal._children.map(child =>
 				detachedClone(child, detachedParent, parentDom)
 			);
@@ -85,7 +85,7 @@ function removeOriginal(internal, detachedParent, originalParent) {
 	if (internal) {
 		internal._vnodeId = null;
 
-		if (internal._children) {
+		if (Array.isArray(internal._children)) {
 			internal._children = internal._children.map(child =>
 				removeOriginal(child, detachedParent, originalParent)
 			);

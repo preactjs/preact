@@ -54,16 +54,26 @@ export function diffChildren(
 				// TODO: What's the best property to set text with. Perhaps
 				// parent.textContent for mounting and replacing all children &
 				// parent.firstChild.nodeValue for updating?
+
+				// TODO: does this work?? parentDom could have multiple children? For
+				// example,
+				// <div><span>A</span><Fragment>B</Fragment></div>...
 				parentInternal._children = parentDom.firstChild.nodeValue =
 					'' + renderResult;
 			}
 
-			return;
+			// TODO: Why doesn't this work?
+			// if (startDom == parentInternal._dom) {
+			// 	return startDom.nextSibling;
+			// } else {
+			// 	return placeChild(parentDom, 1, parentInternal._dom, startDom);
+			// }
+			return parentInternal._dom.nextSibling;
 		} else {
 			// single text -> any. Let's just remove the text child and prepare to
 			// mount the new dom.
-			parentDom.firstChild.remove();
-			oldChildren = EMPTY_ARR;
+			parentInternal._dom.remove();
+			oldChildren = parentInternal._children = startDom = parentInternal._dom = null;
 		}
 	}
 
@@ -268,26 +278,34 @@ export function diffChildren(
  * @param {import('../internal').PreactElement} parentDom
  */
 export function reorderChildren(internal, startDom, parentDom) {
-	for (let tmp = 0; tmp < internal._children.length; tmp++) {
-		let childInternal = internal._children[tmp];
-		if (childInternal) {
-			// We typically enter this code path on sCU bailout, where we copy
-			// oldVNode._children to newVNode._children. If that is the case, we need
-			// to update the old children's _parent pointer to point to the newVNode
-			// (childVNode here).
-			childInternal._parent = internal;
+	if (typeof internal._children == 'string') {
+		if (internal._dom == startDom) {
+			startDom = startDom.nextSibling;
+		} else {
+			startDom = placeChild(parentDom, 1, internal._dom, startDom);
+		}
+	} else {
+		for (let tmp = 0; tmp < internal._children.length; tmp++) {
+			let childInternal = internal._children[tmp];
+			if (childInternal) {
+				// We typically enter this code path on sCU bailout, where we copy
+				// oldVNode._children to newVNode._children. If that is the case, we need
+				// to update the old children's _parent pointer to point to the newVNode
+				// (childVNode here).
+				childInternal._parent = internal;
 
-			if (childInternal._flags & TYPE_COMPONENT) {
-				startDom = reorderChildren(childInternal, startDom, parentDom);
-			} else if (childInternal._dom == startDom) {
-				startDom = startDom.nextSibling;
-			} else {
-				startDom = placeChild(
-					parentDom,
-					internal._children.length,
-					childInternal._dom,
-					startDom
-				);
+				if (childInternal._flags & TYPE_COMPONENT) {
+					startDom = reorderChildren(childInternal, startDom, parentDom);
+				} else if (childInternal._dom == startDom) {
+					startDom = startDom.nextSibling;
+				} else {
+					startDom = placeChild(
+						parentDom,
+						internal._children.length,
+						childInternal._dom,
+						startDom
+					);
+				}
 			}
 		}
 	}

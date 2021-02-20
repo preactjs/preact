@@ -21,7 +21,10 @@ export function unmount(internal, parentInternal, skipRemove) {
 	}
 
 	let dom;
-	if (!skipRemove && internal._flags & TYPE_DOM) {
+	if (
+		!skipRemove &&
+		(internal._flags & TYPE_DOM || typeof internal._children == 'string')
+	) {
 		skipRemove = (dom = internal._dom) != null;
 	} else if (internal.props._parentDom) {
 		skipRemove = false;
@@ -41,10 +44,9 @@ export function unmount(internal, parentInternal, skipRemove) {
 		r._parentDom = null;
 	}
 
-	if ((r = internal._children)) {
+	if ((r = internal._children) && Array.isArray(r)) {
 		for (let i = 0; i < r.length; i++) {
-			if (typeof r[i] == 'object' && r[i])
-				unmount(r[i], parentInternal, skipRemove);
+			if (r[i]) unmount(r[i], parentInternal, skipRemove);
 		}
 	}
 
