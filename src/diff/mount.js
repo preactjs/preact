@@ -238,7 +238,9 @@ export function mountChildren(
 
 	if (typeof renderResult == 'string' || typeof renderResult == 'number') {
 		parentInternal._children = '' + renderResult;
-		if (~parentInternal._flags & MODE_HYDRATE) {
+		if (parentInternal._flags & MODE_MUTATIVE_HYDRATE) {
+			parentDom.textContent = renderResult;
+		} else if (~parentInternal._flags & MODE_HYDRATE) {
 			// parentDom.textContent = renderResult;
 			parentDom.appendChild(document.createTextNode(renderResult));
 		}
