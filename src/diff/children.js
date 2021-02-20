@@ -255,7 +255,7 @@ export function reorderChildren(internal, startDom, parentDom) {
 			// (childVNode here).
 			childInternal._parent = internal;
 
-			if (typeof childInternal.type == 'function') {
+			if (childInternal._flags & TYPE_COMPONENT) {
 				startDom = reorderChildren(childInternal, startDom, parentDom);
 			} else if (childInternal._dom == startDom) {
 				startDom = startDom.nextSibling;

@@ -1,4 +1,5 @@
 import { Component, createElement, options, Fragment } from 'preact';
+import { ELEMENT_NODE } from 'preact/debug/src/constants';
 import { FORCE_UPDATE, MODE_HYDRATE } from '../../src/constants';
 import { assign } from './util';
 
@@ -29,12 +30,13 @@ options.unmount = function(internal) {
 		component._onResolve();
 	}
 
-	// if the component is still hydrating most likely it is because the component
-	// is suspended we set the internal.type as `null` so that it is not a typeof
-	// function so the unmount will remove the internal._dom
+	// If a component suspended while it was hydrating and is now being unmounted,
+	// update it's _flags so it appears to be of TYPE_ELEMENT, causing `unmount`
+	// to remove the DOM nodes that were awaiting hydration (which are stored on
+	// this internal's _dom property).
 	const wasHydrating = (internal._flags & MODE_HYDRATE) === MODE_HYDRATE;
 	if (component && wasHydrating) {
-		internal.type = null;
+		internal._flags |= ELEMENT_NODE;
 	}
 
 	if (oldUnmount) oldUnmount(internal);

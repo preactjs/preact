@@ -5,6 +5,8 @@ export const TYPE_CLASS = 1 << 2;
 export const TYPE_FUNCTION = 1 << 3;
 export const TYPE_FRAGMENT = 1 << 4;
 
+/** Any type of internal representing DOM */
+export const TYPE_DOM = TYPE_TEXT | TYPE_ELEMENT;
 /** Any type of component */
 export const TYPE_COMPONENT = TYPE_CLASS | TYPE_FUNCTION | TYPE_FRAGMENT;
 
