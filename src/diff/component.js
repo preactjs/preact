@@ -147,6 +147,24 @@ export function renderComponent(
 
 	if ((tmp = options._render)) tmp(internal);
 
+	// Root nodes signal that we attempt to render into a specific DOM node
+	// on the page. Root nodes can occur anywhere in the tree and not just
+	// at the top.
+	let oldStartDom = startDom;
+	if (newProps._parentDom) {
+		parentDom = newProps._parentDom;
+
+		if (internal && internal._dom) {
+			startDom = internal._dom;
+		}
+
+		// The `startDom` variable might point to a node from another
+		// tree from a previous render
+		if (startDom != null && startDom.parentNode !== parentDom) {
+			startDom = null;
+		}
+	}
+
 	internal._flags &= ~DIRTY_BIT;
 	c._internal = internal;
 	c._parentDom = parentDom;
@@ -194,6 +212,11 @@ export function renderComponent(
 
 	if (c._renderCallbacks.length) {
 		commitQueue.push(c);
+	}
+
+	// Resume where we left of before the Portal
+	if (newProps._parentDom) {
+		return oldStartDom;
 	}
 
 	return nextDomSibling;

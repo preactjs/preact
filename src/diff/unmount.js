@@ -23,6 +23,8 @@ export function unmount(internal, parentInternal, skipRemove) {
 	let dom;
 	if (!skipRemove && internal._flags & TYPE_DOM) {
 		skipRemove = (dom = internal._dom) != null;
+	} else if (internal.props._parentDom) {
+		skipRemove = false;
 	}
 
 	internal._dom = null;
