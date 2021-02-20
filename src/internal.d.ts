@@ -162,12 +162,6 @@ export interface Component<P = {}, S = {}> extends preact.Component<P, S> {
 	_nextState?: S | null; // Only class components
 	/** Only used in the devtools to later dirty check if state has changed */
 	_prevState?: S | null;
-	/**
-	 * Pointer to the parent dom node. This is only needed for top-level Fragment
-	 * components or array returns.
-	 * @TODO this should be moved to Internal
-	 */
-	_parentDom?: PreactElement | null;
 }
 
 export interface PreactContext extends preact.Context<any> {

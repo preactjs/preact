@@ -3,8 +3,8 @@ import { commitRoot } from './diff/commit';
 import options from './options';
 import { createVNode, Fragment } from './create-element';
 import { patch } from './diff/patch';
-import { DIRTY_BIT, FORCE_UPDATE } from './constants';
-import { getDomSibling, updateParentDomPointers } from './tree';
+import { DIRTY_BIT, FORCE_UPDATE, MODE_UNMOUNTED } from './constants';
+import { getDomSibling, getParentDom, updateParentDomPointers } from './tree';
 
 /**
  * Base Component class. Provides `setState()` and `forceUpdate()`, which
@@ -89,11 +89,12 @@ Component.prototype.render = Fragment;
  * @param {import('./internal').Component} component The component to rerender
  */
 function rerenderComponent(component) {
-	let internal = component._internal,
-		startDom = internal._dom,
-		parentDom = component._parentDom;
+	let internal = component._internal;
 
-	if (parentDom) {
+	if (~internal._flags & MODE_UNMOUNTED && internal._flags & DIRTY_BIT) {
+		let startDom = internal._dom;
+		let parentDom = getParentDom(internal);
+
 		const vnode = createVNode(
 			internal.type,
 			internal.props,
@@ -175,9 +176,7 @@ function process() {
 		rerenderQueue = [];
 		// Don't update `renderCount` yet. Keep its value non-zero to prevent unnecessary
 		// process() calls from getting scheduled while `queue` is still being consumed.
-		queue.some(c => {
-			if (c._internal._flags & DIRTY_BIT) rerenderComponent(c);
-		});
+		queue.some(rerenderComponent);
 	}
 }
 process._rerenderCount = 0;

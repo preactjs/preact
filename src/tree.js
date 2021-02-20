@@ -137,3 +137,25 @@ export function updateParentDomPointers(internal) {
 		return updateParentDomPointers(internal);
 	}
 }
+
+/**
+ * @param {import('./internal').Internal} internal
+ * @returns {import('./internal').PreactElement}
+ */
+export function getParentDom(internal) {
+	let parentDom = internal.props._parentDom ? internal.props._parentDom : null;
+	let parent = internal._parent;
+	while (parentDom == null && parent) {
+		// TODO: Give root nodes their own type to avoid this megamorphic check on
+		// every parent internal
+		if (parent.props._parentDom) {
+			parentDom = parent.props._parentDom;
+		} else if (parent._flags & TYPE_ELEMENT) {
+			parentDom = parent._dom;
+		} else {
+			parent = parent._parent;
+		}
+	}
+
+	return parentDom;
+}

@@ -246,6 +246,10 @@ export function diffChildren(
  * @param {import('../internal').PreactElement} parentDom
  */
 export function reorderChildren(internal, startDom, parentDom) {
+	if (internal._children == null) {
+		return startDom;
+	}
+
 	for (let tmp = 0; tmp < internal._children.length; tmp++) {
 		let childInternal = internal._children[tmp];
 		if (childInternal) {

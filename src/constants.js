@@ -19,11 +19,13 @@ export const MODE_MUTATIVE_HYDRATE = 1 << 6;
 export const MODE_SUSPENDED = 1 << 7;
 /** Signifies this VNode errored on the previous render */
 export const MODE_ERRORED = 1 << 8;
+/** Signals this internal has been unmounted */
+export const MODE_UNMOUNTED = 1 << 9;
 
 /** Signifies that bailout checks will be bypassed */
-export const FORCE_UPDATE = 1 << 9;
+export const FORCE_UPDATE = 1 << 10;
 /** Signifies that a node needs to be updated */
-export const DIRTY_BIT = 1 << 10;
+export const DIRTY_BIT = 1 << 11;
 
 /** Reset all mode flags */
 export const RESET_MODE = ~(

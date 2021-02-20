@@ -27,6 +27,9 @@
 ## TODOs
 
 - Consider further removing `_dom` pointers from non-dom VNodes
+- Consider adding a TYPE_ROOT for root nodes to avoid megamorphic props check on
+  every element
+- Rewrite Suspense to use Root Nodes
 - Fix Suspense tests:
   - "should correctly render nested Suspense components without intermediate DOM #2747"
 - Fix Suspense hydration tests:

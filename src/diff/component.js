@@ -167,7 +167,6 @@ export function renderComponent(
 
 	internal._flags &= ~DIRTY_BIT;
 	c._internal = internal;
-	c._parentDom = parentDom;
 
 	tmp = c.render(c.props, c.state, c.context);
 
