@@ -630,6 +630,7 @@ describe('Portal', () => {
 		/** @type {() => void} */
 		let update;
 		function Foo(props) {
+			// eslint-disable-next-line no-unused-vars
 			const [state, setState] = useState(false);
 			update = () => setState(state => !state);
 			return (
