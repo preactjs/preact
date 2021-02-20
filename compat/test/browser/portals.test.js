@@ -6,6 +6,7 @@ import React, {
 	Component
 } from 'preact/compat';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
+import { getLog, clearLog } from '../../../test/_util/logCall';
 import { setupRerender, act } from 'preact/test-utils';
 
 /* eslint-disable react/jsx-boolean-value, react/display-name, prefer-arrow-callback */
@@ -625,5 +626,40 @@ describe('Portal', () => {
 		expect(scratch.innerHTML).to.equal(
 			'<div><div>Closed</div><button>Show</button>Closed</div>'
 		);
+	});
+
+	it.skip('should not needlessly append siblings to Portals', () => {
+		/** @type {() => void} */
+		let update;
+		function Foo(props) {
+			const [state, setState] = useState(false);
+			update = () => setState(state => !state);
+			return (
+				<div>
+					<p>Hello</p>
+					{createPortal(props.children, scratch)}
+					<p>World!</p>
+				</div>
+			);
+		}
+
+		render(
+			<Foo>
+				<div>foobar</div>
+			</Foo>,
+			scratch
+		);
+		expect(scratch.innerHTML).to.equal(
+			'<div>foobar</div><div><p>Hello</p><p>World!</p></div>'
+		);
+
+		clearLog();
+		update();
+		rerender();
+
+		expect(scratch.innerHTML).to.equal(
+			'<div>foobar</div><div><p>Hello</p><p>World!</p></div>'
+		);
+		expect(getLog()).to.deep.equal([]);
 	});
 });
