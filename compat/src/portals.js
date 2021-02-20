@@ -17,5 +17,5 @@ function Portal(props) {
  * @param {import('./internal').PreactElement} container The DOM node to continue rendering in to.
  */
 export function createPortal(vnode, container) {
-	return createElement(Portal, { _parentNode: container }, vnode);
+	return createElement(Portal, { _parentDom: container }, vnode);
 }

@@ -80,7 +80,7 @@ export function hydrate(vnode, parentDom) {
 	/** @type {import('./internal').PreactElement} */
 	const hydrateDom = (parentDom.firstChild);
 
-	vnode = createElement(Fragment, { _parentNode: parentDom }, [vnode]);
+	vnode = createElement(Fragment, { _parentDom: parentDom }, [vnode]);
 	const rootInternal = createInternal(vnode);
 	rootInternal._flags |= MODE_HYDRATE;
 	parentDom._children = rootInternal;

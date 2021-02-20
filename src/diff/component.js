@@ -150,8 +150,8 @@ export function renderComponent(
 	// Root nodes signal that we attempt to render into a specific DOM node
 	// on the page. Root nodes can occur anywhere in the tree and not just
 	// at the top.
-	if (newProps._parentNode) {
-		parentDom = newProps._parentNode;
+	if (newProps._parentDom) {
+		parentDom = newProps._parentDom;
 
 		// The `startDom` variable might point to a node from another
 		// tree from a previous render
