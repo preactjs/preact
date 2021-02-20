@@ -133,7 +133,7 @@ function patchDOMElement(
 
 	// If the new vnode didn't have dangerouslySetInnerHTML, diff its children
 	if (newHtml) {
-		internal._children = [];
+		internal._children = null;
 	} else {
 		tmp = newVNode.props.children;
 		diffChildren(
