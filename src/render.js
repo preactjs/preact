@@ -5,6 +5,8 @@ import options from './options';
 import { mount } from './diff/mount';
 import { patch } from './diff/patch';
 import { createInternal } from './tree';
+import { placeChildren } from './diff/children';
+import { getDomSibling } from './component';
 
 /**
  * Render a Preact virtual node into a DOM element
@@ -38,6 +40,8 @@ export function render(vnode, parentDom, replaceNode) {
 			commitQueue,
 			rootInternal._dom
 		);
+
+		placeChildren(parentDom, rootInternal, getDomSibling(rootInternal, 0));
 	} else {
 		// Store the VDOM tree root on the DOM element in a (minified) property:
 		rootInternal = (replaceNode || parentDom)._children = createInternal(

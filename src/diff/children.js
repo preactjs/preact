@@ -5,7 +5,9 @@ import {
 	TYPE_TEXT,
 	MODE_HYDRATE,
 	MODE_SUSPENDED,
-	EMPTY_ARR
+	EMPTY_ARR,
+	TYPE_DOM,
+	TYPE_ELEMENT
 } from '../constants';
 import { getDomSibling } from '../component';
 import { mount } from './mount';
@@ -38,10 +40,8 @@ export function diffChildren(
 	startDom
 ) {
 	let i, j, newDom, firstChildDom, refs;
-
 	/** @type {import('../internal').Internal} */
 	let childInternal;
-
 	/** @type {import('../internal').VNode | string} */
 	let childVNode;
 
@@ -107,7 +107,7 @@ export function diffChildren(
 			childInternal = createInternal(childVNode, parentInternal);
 
 			// We are mounting a new VNode
-			nextDomSibling = mount(
+			mount(
 				parentDom,
 				childVNode,
 				childInternal,
@@ -124,7 +124,7 @@ export function diffChildren(
 			startDom = childInternal._dom;
 			oldVNodeRef = childInternal.ref;
 
-			nextDomSibling = mount(
+			mount(
 				parentDom,
 				childVNode,
 				childInternal,
@@ -141,7 +141,7 @@ export function diffChildren(
 			prevDom = childInternal._dom;
 
 			// Morph the old element into the new one, but don't append it to the dom yet
-			nextDomSibling = patch(
+			patch(
 				parentDom,
 				childVNode,
 				childInternal,
@@ -154,88 +154,86 @@ export function diffChildren(
 
 		newDom = childInternal._dom;
 
-		if (childVNode.ref && oldVNodeRef != childVNode.ref) {
-			if (!refs) refs = [];
-			if (oldVNodeRef) refs.push(oldVNodeRef, null, childInternal);
-			refs.push(
-				childVNode.ref,
-				childInternal._component || newDom,
-				childInternal
-			);
-		}
+		// if (childVNode.ref && oldVNodeRef != childVNode.ref) {
+		// 	if (!refs) refs = [];
+		// 	if (oldVNodeRef) refs.push(oldVNodeRef, null, childInternal);
+		// 	refs.push(
+		// 		childVNode.ref,
+		// 		childInternal._component || newDom,
+		// 		childInternal
+		// 	);
+		// }
 
-		if (newDom != null) {
-			if (firstChildDom == null) {
-				firstChildDom = newDom;
-			}
-
-			if (childInternal._flags & TYPE_COMPONENT) {
-				startDom = nextDomSibling;
-			} else if (newDom == startDom) {
-				// If the newDom and the dom we are expecting to be there are the same, then
-				// do nothing
-				startDom = nextDomSibling;
-			} else {
-				startDom = placeChild(parentDom, oldChildrenLength, newDom, startDom);
-			}
-
-			// Browsers will infer an option's `value` from `textContent` when
-			// no value is present. This essentially bypasses our code to set it
-			// later in `diff()`. It works fine in all browsers except for IE11
-			// where it breaks setting `select.value`. There it will be always set
-			// to an empty string. Re-applying an options value will fix that, so
-			// there are probably some internal data structures that aren't
-			// updated properly.
-			//
-			// To fix it we make sure to reset the inferred value, so that our own
-			// value check in `diff()` won't be skipped.
-			if (parentInternal.type === 'option') {
-				// @ts-ignore We have validated that the type of parentDOM is 'option'
-				// in the above check
-				parentDom.value = '';
-			}
-		} else if (
-			startDom &&
-			childInternal != null &&
-			prevDom == startDom &&
-			startDom.parentNode != parentDom
-		) {
-			// The above condition is to handle null placeholders. See test in placeholder.test.js:
-			// `efficiently replace null placeholders in parent rerenders`
-			startDom = nextDomSibling;
-		}
+		// if (newDom != null) {
+		// 	if (firstChildDom == null) {
+		// 		firstChildDom = newDom;
+		// 	}
+		//
+		// 	if (childInternal._flags & TYPE_COMPONENT) {
+		// 		startDom = nextDomSibling;
+		// 	} else if (newDom == startDom) {
+		// 		// If the newDom and the dom we are expecting to be there are the same, then
+		// 		// do nothing
+		// 		startDom = nextDomSibling;
+		// 	} else {
+		// 		startDom = placeChild(parentDom, oldChildrenLength, newDom, startDom);
+		// 	}
+		//
+		// 	// Browsers will infer an option's `value` from `textContent` when
+		// 	// no value is present. This essentially bypasses our code to set it
+		// 	// later in `diff()`. It works fine in all browsers except for IE11
+		// 	// where it breaks setting `select.value`. There it will be always set
+		// 	// to an empty string. Re-applying an options value will fix that, so
+		// 	// there are probably some internal data structures that aren't
+		// 	// updated properly.
+		// 	//
+		// 	// To fix it we make sure to reset the inferred value, so that our own
+		// 	// value check in `diff()` won't be skipped.
+		// 	if (parentInternal.type === 'option') {
+		// 		// @ts-ignore We have validated that the type of parentDOM is 'option'
+		// 		// in the above check
+		// 		parentDom.value = '';
+		// 	}
+		// } else if (
+		// 	startDom &&
+		// 	childInternal != null &&
+		// 	prevDom == startDom &&
+		// 	startDom.parentNode != parentDom
+		// ) {
+		// 	// The above condition is to handle null placeholders. See test in placeholder.test.js:
+		// 	// `efficiently replace null placeholders in parent rerenders`
+		// 	startDom = nextDomSibling;
+		// }
 
 		newChildren[i] = childInternal;
 	}
 
 	parentInternal._children = newChildren;
-
-	// newParentVNode._dom = firstChildDom;
 	parentInternal._dom = firstChildDom;
 
 	// Remove remaining oldChildren if there are any.
 	for (i = oldChildrenLength; i--; ) {
 		if (oldChildren[i] != null) {
-			if (
-				parentInternal._flags & TYPE_COMPONENT &&
-				startDom != null &&
-				oldChildren[i]._dom == startDom
-			) {
-				// If the startDom points to a dom node that is about to be unmounted,
-				// then get the next sibling of that vnode and set startDom to it
-				startDom = getDomSibling(parentInternal, i + 1);
-			}
+			// if (
+			// 	parentInternal._flags & TYPE_COMPONENT &&
+			// 	startDom != null &&
+			// 	oldChildren[i]._dom == startDom
+			// ) {
+			// 	// If the startDom points to a dom node that is about to be unmounted,
+			// 	// then get the next sibling of that vnode and set startDom to it
+			// 	startDom = getDomSibling(parentInternal, i + 1);
+			// }
 
 			unmount(oldChildren[i], oldChildren[i]);
 		}
 	}
 
-	// Set refs only after unmount
-	if (refs) {
-		for (i = 0; i < refs.length; i++) {
-			applyRef(refs[i], refs[++i], refs[++i]);
-		}
-	}
+	// // Set refs only after unmount
+	// if (refs) {
+	// 	for (i = 0; i < refs.length; i++) {
+	// 		applyRef(refs[i], refs[++i], refs[++i]);
+	// 	}
+	// }
 
 	return startDom;
 }
@@ -290,6 +288,77 @@ export function toChildArray(children, out) {
 		out.push(children);
 	}
 	return out;
+}
+
+/**
+ * @param {import('../internal').PreactElement} parentDom
+ * @param {import('../internal').Internal} internal
+ * @param {import('../internal').PreactElement} startDom
+ * @returns {import('../internal').PreactElement}
+ */
+export function placeChildren(parentDom, internal, startDom) {
+	let firstChildDom;
+
+	for (let tmp = 0; tmp < internal._children.length; tmp++) {
+		let childInternal = internal._children[tmp];
+		if (childInternal == null) {
+			continue;
+		}
+
+		/** @type {import('../internal').PreactElement} */
+		let nextDomSibling;
+		if (childInternal._flags & TYPE_TEXT) {
+			nextDomSibling = childInternal._dom.nextSibling;
+		} else if (childInternal._children != null) {
+			if (childInternal._flags & TYPE_ELEMENT) {
+				placeChildren(
+					childInternal._dom,
+					childInternal,
+					childInternal._dom.firstChild
+				);
+				nextDomSibling = childInternal._dom.nextSibling;
+			} else {
+				nextDomSibling = placeChildren(parentDom, childInternal, startDom);
+			}
+		}
+
+		let newDom = childInternal._dom;
+		if (newDom != null) {
+			if (firstChildDom == null) {
+				firstChildDom = newDom;
+			}
+
+			if (childInternal._flags & TYPE_COMPONENT) {
+				startDom = nextDomSibling;
+			} else if (newDom == startDom) {
+				// If the newDom and the dom we are expecting to be there are the same, then
+				// do nothing
+				startDom = nextDomSibling;
+			} else {
+				startDom = placeChild(
+					parentDom,
+					internal._children.length,
+					newDom,
+					startDom
+				);
+			}
+			// } else if (
+			// 	startDom &&
+			// 	childInternal != null &&
+			// 	prevDom == startDom &&
+			// 	startDom.parentNode != parentDom
+			// ) {
+			// 	// The above condition is to handle null placeholders. See test in placeholder.test.js:
+			// 	// `efficiently replace null placeholders in parent rerenders`
+			// 	startDom = nextDomSibling;
+		}
+	}
+
+	if (internal._flags & TYPE_COMPONENT) {
+		internal._dom = firstChildDom;
+	}
+
+	return startDom;
 }
 
 /**

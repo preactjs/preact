@@ -3,7 +3,8 @@ import { commitRoot } from './diff/commit';
 import options from './options';
 import { createVNode, Fragment } from './create-element';
 import { patch } from './diff/patch';
-import { TYPE_COMPONENT, DIRTY_BIT, FORCE_UPDATE } from './constants';
+import { TYPE_COMPONENT, DIRTY_BIT, FORCE_UPDATE, TYPE_DOM } from './constants';
+import { placeChildren } from './diff/children';
 
 /**
  * Base Component class. Provides `setState()` and `forceUpdate()`, which
@@ -103,11 +104,15 @@ export function getDomSibling(internal, childIndex) {
 	for (; childIndex < internal._children.length; childIndex++) {
 		sibling = internal._children[childIndex];
 
-		if (sibling != null && sibling._dom != null) {
-			// Since updateParentDomPointers keeps _dom pointer correct,
-			// we can rely on _dom to tell us if this subtree contains a
-			// rendered DOM node, and what the first rendered DOM node is
-			return sibling._dom;
+		if (sibling != null) {
+			if (sibling._flags & TYPE_DOM) {
+				return sibling._dom;
+			} else if (sibling._children != null) {
+				let childDom = getDomSibling(sibling, 0);
+				if (childDom) {
+					return childDom;
+				}
+			}
 		}
 	}
 
@@ -147,6 +152,7 @@ function rerenderComponent(component) {
 			commitQueue,
 			startDom == null ? getDomSibling(internal) : startDom
 		);
+		placeChildren(parentDom, internal, startDom);
 		commitRoot(commitQueue, internal);
 
 		if (internal._dom != startDom) {
