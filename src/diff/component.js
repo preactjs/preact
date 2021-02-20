@@ -153,8 +153,8 @@ export function renderComponent(
 	if (newProps._parentDom) {
 		parentDom = newProps._parentDom;
 
-		if (oldVNode && oldVNode._dom) {
-			startDom = oldVNode._dom;
+		if (internal && internal._dom) {
+			startDom = internal._dom;
 		}
 
 		// The `startDom` variable might point to a node from another
