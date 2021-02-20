@@ -78,7 +78,7 @@ export function patch(
 	} catch (e) {
 		// @TODO: assign a new VNode ID here? Or NaN?
 		// newVNode._vnodeId = null;
-		options._catchError(e, internal, internal);
+		options._catchError(e, internal);
 	}
 
 	return nextDomSibling;

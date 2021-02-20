@@ -44,7 +44,7 @@ export interface Options extends preact.Options {
 	/** Bypass effect execution. Currenty only used in devtools for hooks inspection */
 	_skipEffects?: boolean;
 	/** Attach a hook that is invoked after an error is caught in a component but before calling lifecycle hooks */
-	_catchError(error: any, internal: Internal, internal?: Internal): void;
+	_catchError(error: any, internal: Internal): void;
 	_internal(internal: Internal, vnode: VNode | string): void;
 }
 
@@ -136,7 +136,7 @@ export interface Internal<P = {}> {
 	_children: Internal[];
 	/** next sibling Internal node */
 	_parent: Internal;
-	/** most recent vnode ID @TODO rename to _vnodeId */
+	/** most recent vnode ID */
 	_vnodeId: number;
 	/**
 	 * Associated DOM element for the Internal, or its nearest realized descendant.
@@ -158,7 +158,6 @@ export interface Component<P = {}, S = {}> extends preact.Component<P, S> {
 	/** @TODO this should be moved to internal.data */
 	_renderCallbacks: Array<() => void>; // Only class components
 	_globalContext?: any;
-	/** @TODO this should be renamed to `_internal`: */
 	_internal?: Internal<P> | null;
 	_nextState?: S | null; // Only class components
 	/** Only used in the devtools to later dirty check if state has changed */
