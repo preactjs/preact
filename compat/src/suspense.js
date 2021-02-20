@@ -34,7 +34,7 @@ options.unmount = function(vnode) {
 	// if the component is still hydrating most likely it is because the component
 	// is suspended we set the vnode.type as `null` so that it is not a typeof
 	// function so the unmount will remove the vnode._dom
-	const wasHydrating = (vnode._mode & MODE_HYDRATE) === MODE_HYDRATE;
+	const wasHydrating = (vnode._flags & MODE_HYDRATE) === MODE_HYDRATE;
 	if (component && wasHydrating) {
 		vnode.type = null;
 	}
@@ -94,7 +94,7 @@ function removeOriginal(vnode, detachedParent, originalParent) {
 				if (vnode._dom) {
 					originalParent.insertBefore(vnode._dom, vnode._nextDom);
 				}
-				vnode._mode |= FORCE_UPDATE;
+				vnode._flags |= FORCE_UPDATE;
 				vnode._component._parentDom = originalParent;
 			}
 		}
@@ -176,7 +176,7 @@ Suspense.prototype._childDidSuspend = function(promise, suspendingVNode) {
 				// component so the component instance stored by Suspense is no longer
 				// valid. Likely needs to be fixed with backing nodes and a way to
 				// trigger a rerender for backing nodes
-				if (!(suspended._internal._mode & MODE_HYDRATE)) {
+				if (!(suspended._internal._flags & MODE_HYDRATE)) {
 					suspended.forceUpdate();
 				}
 			}
@@ -188,7 +188,7 @@ Suspense.prototype._childDidSuspend = function(promise, suspendingVNode) {
 	 * to remain on screen and hydrate it when the suspense actually gets resolved.
 	 * While in non-hydration cases the usual fallback -> component flow would occur.
 	 */
-	const wasHydrating = (suspendingVNode._mode & MODE_HYDRATE) === MODE_HYDRATE;
+	const wasHydrating = (suspendingVNode._flags & MODE_HYDRATE) === MODE_HYDRATE;
 	if (!c._pendingSuspensionCount++ && !wasHydrating) {
 		c.setState({
 			_suspended: (c._detachOnNextRender = c._internal._children[0])

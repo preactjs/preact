@@ -48,7 +48,7 @@ export function render(vnode, parentDom, replaceNode) {
 		// Providing a replaceNode parameter or calling `render` on a container with
 		// existing DOM elements puts the diff into mutative hydrate mode:
 		if (replaceNode || parentDom.firstChild) {
-			rootInternal._mode = MODE_MUTATIVE_HYDRATE;
+			rootInternal._flags |= MODE_MUTATIVE_HYDRATE;
 		}
 
 		mount(
@@ -82,7 +82,7 @@ export function hydrate(vnode, parentDom) {
 
 	vnode = createElement(Fragment, null, [vnode]);
 	const rootInternal = createInternal(vnode);
-	rootInternal._mode = MODE_HYDRATE;
+	rootInternal._flags |= MODE_HYDRATE;
 	parentDom._children = rootInternal;
 
 	const commitQueue = [];

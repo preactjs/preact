@@ -1,19 +1,18 @@
 import options from './options';
 import {
-	FUNCTION_NODE,
-	ELEMENT_NODE,
-	TEXT_NODE,
-	CLASS_NODE,
-	FRAGMENT_NODE,
-	// COMPONENT_NODE,
-	MODE_NONE
+	TYPE_FUNCTION,
+	TYPE_ELEMENT,
+	TYPE_TEXT,
+	TYPE_CLASS,
+	TYPE_FRAGMENT,
+	INHERITED_MODES
 } from './constants';
 import { Fragment } from './create-element';
 
 /**
  * Create an internal tree node
  * @param {import('./internal').VNode | string} vnode
- * @param {import('./internal').Internal} parentInternal
+ * @param {import('./internal').Internal} [parentInternal]
  * @returns {import('./internal').Internal}
  */
 export function createInternal(vnode, parentInternal) {
@@ -22,8 +21,8 @@ export function createInternal(vnode, parentInternal) {
 		key,
 		ref;
 
-	/** @type {import('./internal').InternalFlags} */
-	let flags = TEXT_NODE;
+	/** @type {import('./internal').InternalTypeFlags} */
+	let flags = TYPE_TEXT;
 
 	// Text VNodes/Internals use NaN as an ID so that two are never equal.
 	let vnodeId = NaN;
@@ -55,12 +54,12 @@ export function createInternal(vnode, parentInternal) {
 		// flags = typeof type === 'function' ? COMPONENT_NODE : ELEMENT_NODE;
 		flags =
 			type === Fragment
-				? FRAGMENT_NODE
+				? TYPE_FRAGMENT
 				: typeof type === 'function'
 				? type.prototype && 'render' in type.prototype
-					? CLASS_NODE
-					: FUNCTION_NODE
-				: ELEMENT_NODE;
+					? TYPE_CLASS
+					: TYPE_FUNCTION
+				: TYPE_ELEMENT;
 	}
 
 	/** @type {import('./internal').Internal} */
@@ -74,8 +73,8 @@ export function createInternal(vnode, parentInternal) {
 		_vnodeId: vnodeId,
 		_dom: null,
 		_component: null,
-		_flags: flags,
-		_mode: parentInternal ? parentInternal._mode : MODE_NONE,
+		_flags:
+			flags | (parentInternal ? parentInternal._flags & INHERITED_MODES : 0),
 		_depth: parentInternal ? parentInternal._depth + 1 : 0
 	};
 
