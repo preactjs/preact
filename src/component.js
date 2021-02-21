@@ -3,7 +3,7 @@ import { commitRoot } from './diff/commit';
 import options from './options';
 import { createVNode, Fragment } from './create-element';
 import { patch } from './diff/patch';
-import { DIRTY_BIT, FORCE_UPDATE, MODE_UNMOUNTED } from './constants';
+import { DIRTY_BIT, FORCE_UPDATE, MODE_UNMOUNTING } from './constants';
 import { getDomSibling, getParentDom, updateParentDomPointers } from './tree';
 
 /**
@@ -91,7 +91,7 @@ Component.prototype.render = Fragment;
 function rerenderComponent(component) {
 	let internal = component._internal;
 
-	if (~internal._flags & MODE_UNMOUNTED && internal._flags & DIRTY_BIT) {
+	if (~internal._flags & MODE_UNMOUNTING && internal._flags & DIRTY_BIT) {
 		let startDom = internal._dom;
 		let parentDom = getParentDom(internal);
 

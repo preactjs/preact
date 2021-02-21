@@ -1,4 +1,4 @@
-import { MODE_UNMOUNTED, TYPE_DOM, TYPE_ROOT } from '../constants';
+import { MODE_UNMOUNTING, TYPE_DOM, TYPE_ROOT } from '../constants';
 import options from '../options';
 import { removeNode } from '../util';
 import { applyRef } from './refs';
@@ -14,7 +14,7 @@ import { applyRef } from './refs';
 export function unmount(internal, parentInternal, skipRemove) {
 	let r;
 	if (options.unmount) options.unmount(internal);
-	internal._flags |= MODE_UNMOUNTED;
+	internal._flags |= MODE_UNMOUNTING;
 
 	if ((r = internal.ref)) {
 		if (!r.current || r.current === internal._dom)

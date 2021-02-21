@@ -1,5 +1,5 @@
 import { options } from 'preact';
-import { MODE_UNMOUNTED } from '../../src/constants';
+import { MODE_UNMOUNTING } from '../../src/constants';
 
 /** @type {number} */
 let currentIndex;
@@ -293,7 +293,7 @@ export function useErrorBoundary(cb) {
  */
 function flushAfterPaintEffects() {
 	afterPaintEffects.forEach(component => {
-		if (~component._internal._flags & MODE_UNMOUNTED) {
+		if (~component._internal._flags & MODE_UNMOUNTING) {
 			try {
 				component.__hooks._pendingEffects.forEach(invokeCleanup);
 				component.__hooks._pendingEffects.forEach(invokeEffect);

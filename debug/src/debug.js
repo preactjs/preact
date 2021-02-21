@@ -12,7 +12,7 @@ import {
 	getDisplayName
 } from './component-stack';
 import { assign } from './util';
-import { MODE_UNMOUNTED } from 'preact/src/constants';
+import { MODE_UNMOUNTING } from 'preact/src/constants';
 
 const isWeakMapSupported = typeof WeakMap == 'function';
 
@@ -374,7 +374,7 @@ Component.prototype.setState = function(update, callback) {
 					)}`
 			);
 		}
-	} else if (this._internal._flags & MODE_UNMOUNTED) {
+	} else if (this._internal._flags & MODE_UNMOUNTING) {
 		console.warn(
 			`Can't call "this.setState" on an unmounted component. This is a no-op, ` +
 				`but it indicates a memory leak in your application. To fix, cancel all ` +
@@ -397,7 +397,7 @@ Component.prototype.forceUpdate = function(callback) {
 					getCurrentInternal()
 				)}`
 		);
-	} else if (this._internal._flags & MODE_UNMOUNTED) {
+	} else if (this._internal._flags & MODE_UNMOUNTING) {
 		console.warn(
 			`Can't call "this.forceUpdate" on an unmounted component. This is a no-op, ` +
 				`but it indicates a memory leak in your application. To fix, cancel all ` +

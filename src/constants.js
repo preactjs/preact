@@ -20,7 +20,7 @@ export const MODE_SUSPENDED = 1 << 7;
 /** Signifies this VNode errored on the previous render */
 export const MODE_ERRORED = 1 << 8;
 /** Signals this internal has been unmounted */
-export const MODE_UNMOUNTED = 1 << 9;
+export const MODE_UNMOUNTING = 1 << 9;
 
 /** Signifies that bailout checks will be bypassed */
 export const FORCE_UPDATE = 1 << 10;
