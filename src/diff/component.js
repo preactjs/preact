@@ -236,13 +236,22 @@ export function renderComponent(
 
 	// Resume where we left of before the Portal
 	if (internal._flags & TYPE_ROOT) {
-		if (oldStartDom && oldStartDom.parentNode == oldParentDom) {
-			return oldStartDom;
-		} else {
-			// @TODO Ensure there is suspense test with <Fragment><div><//> siblings
-			// around Suspense and suspender
-			return getDomSibling(internal);
+		if (oldStartDom) {
+			if (oldStartDom.parentNode == oldParentDom) {
+				return oldStartDom;
+			} else {
+				// @TODO Ensure there is suspense test with <Fragment><div><//> siblings
+				// around Suspense and suspender
+				//
+				// @TODO Hmmm here we are searching the internal before the newChildren
+				// are set on the internal, meaning if this root node is being mounted it
+				// won't find itself in the parent's array to begin searching siblings
+				// after itself... Think about if this could lead to bugs...
+				return getDomSibling(internal);
+			}
 		}
+
+		return oldStartDom;
 	}
 
 	return nextDomSibling;
