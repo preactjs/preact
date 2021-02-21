@@ -151,9 +151,9 @@ export function getParentDom(internal) {
 			parentDom = parent.props._parentDom;
 		} else if (parent._flags & TYPE_ELEMENT) {
 			parentDom = parent._dom;
-		} else {
-			parent = parent._parent;
 		}
+
+		parent = parent._parent;
 	}
 
 	return parentDom;
