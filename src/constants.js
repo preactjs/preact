@@ -3,6 +3,8 @@ export const TYPE_TEXT = 1 << 0;
 export const TYPE_ELEMENT = 1 << 1;
 export const TYPE_CLASS = 1 << 2;
 export const TYPE_FUNCTION = 1 << 3;
+/** Signals this internal has a _parentDom prop that should change the parent
+ * DOM node of it's children */
 export const TYPE_ROOT = 1 << 4;
 
 /** Any type of internal representing DOM */
