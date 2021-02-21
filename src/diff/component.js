@@ -161,8 +161,8 @@ export function renderComponent(
 	// Root nodes signal that we attempt to render into a specific DOM node
 	// on the page. Root nodes can occur anywhere in the tree and not just
 	// at the top.
-	let oldStartDom = startDom,
-		oldParentDom = parentDom;
+	let oldStartDom = startDom;
+	let oldParentDom = parentDom;
 	if (internal._flags & TYPE_ROOT) {
 		parentDom = newProps._parentDom || parentDom;
 
@@ -237,9 +237,25 @@ export function renderComponent(
 	// Resume where we left of before the Portal
 	if (internal._flags & TYPE_ROOT) {
 		if (oldStartDom) {
-			if (oldStartDom.parentNode == oldParentDom) {
+			// We just finished diffing a root node and have a startDom from the tree
+			// above/around the root node. Let's figure out where the diff should
+			// resume...
+			if (oldParentDom == parentDom) {
+				// If the root node rendered into the same parent DOM as its parent
+				// tree, we'll just resume from the end of the root node as if nothing
+				// happened.
+				return nextDomSibling;
+			} else if (oldStartDom.parentNode == oldParentDom) {
+				// If the previous value for start dom still has the same parent DOM has
+				// the root node's parent tree, then we can use it. This case assumes
+				// the root node rendered its children into a new parent.
 				return oldStartDom;
 			} else {
+				// Here, if the parentDoms are different and oldStartDom has moved into
+				// a new parentDom, we'll assume the root node moved oldStartDom under
+				// the new parentDom. Because of this change, we need to search the
+				// internal tree for the next DOM sibling the tree should begin with
+
 				// @TODO Ensure there is suspense test with <Fragment><div><//> siblings
 				// around Suspense and suspender
 				//
