@@ -27,13 +27,6 @@
 ## TODOs
 
 - Consider further removing `_dom` pointers from non-dom VNodes
-- Consider adding a TYPE_ROOT for root nodes to avoid megamorphic props check on
-  every element
-  - One challenge with this approach is that the VNode for the Root node can't
-    be Fragment. Top-level Fragments returned from Components are inlined/erased
-    (diff/component.js:186), meaning if a component does something like `() => <Fragment _parentDom={} />`
-		then, that Fragment gets erased and the root node is lost :(. May want to giving
-		Root nodes their own VNode type, i.e. Portal.
 - Rewrite Suspense to use Root Nodes
 - Fix Suspense tests:
   - "should correctly render nested Suspense components without intermediate DOM #2747"

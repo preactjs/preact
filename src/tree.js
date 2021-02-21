@@ -4,11 +4,10 @@ import {
 	TYPE_ELEMENT,
 	TYPE_TEXT,
 	TYPE_CLASS,
-	TYPE_FRAGMENT,
+	TYPE_ROOT,
 	INHERITED_MODES,
 	TYPE_COMPONENT
 } from './constants';
-import { Fragment } from './create-element';
 
 /**
  * Create an internal tree node
@@ -54,11 +53,11 @@ export function createInternal(vnode, parentInternal) {
 
 		// flags = typeof type === 'function' ? COMPONENT_NODE : ELEMENT_NODE;
 		flags =
-			type === Fragment
-				? TYPE_FRAGMENT
-				: typeof type === 'function'
+			typeof type === 'function'
 				? type.prototype && 'render' in type.prototype
 					? TYPE_CLASS
+					: props._parentDom
+					? TYPE_ROOT
 					: TYPE_FUNCTION
 				: TYPE_ELEMENT;
 	}
@@ -143,12 +142,12 @@ export function updateParentDomPointers(internal) {
  * @returns {import('./internal').PreactElement}
  */
 export function getParentDom(internal) {
-	let parentDom = internal.props._parentDom ? internal.props._parentDom : null;
+	let parentDom =
+		internal._flags & TYPE_ROOT ? internal.props._parentDom : null;
+
 	let parent = internal._parent;
 	while (parentDom == null && parent) {
-		// TODO: Give root nodes their own type to avoid this megamorphic check on
-		// every parent internal
-		if (parent.props._parentDom) {
+		if (parent._flags & TYPE_ROOT) {
 			parentDom = parent.props._parentDom;
 		} else if (parent._flags & TYPE_ELEMENT) {
 			parentDom = parent._dom;
