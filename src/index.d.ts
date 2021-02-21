@@ -246,7 +246,6 @@ declare namespace preact {
 	// Preact Built-in Components
 	// -----------------------------------
 
-	// TODO: Revisit what the public type of this is...
 	const Fragment: ComponentClass<{}, {}>;
 
 	//

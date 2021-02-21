@@ -27,6 +27,7 @@
 ## TODOs
 
 - Consider further removing `_dom` pointers from non-dom VNodes
+- Rewrite Suspense to use Root Nodes
 - Fix Suspense tests:
   - "should correctly render nested Suspense components without intermediate DOM #2747"
 - Fix Suspense hydration tests:

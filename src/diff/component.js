@@ -4,7 +4,7 @@ import { assign } from '../util';
 import { Component } from '../component';
 import { mountChildren } from './mount';
 import { diffChildren, reorderChildren } from './children';
-import { DIRTY_BIT, FORCE_UPDATE } from '../constants';
+import { DIRTY_BIT, FORCE_UPDATE, TYPE_ROOT } from '../constants';
 
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
@@ -151,7 +151,7 @@ export function renderComponent(
 	// on the page. Root nodes can occur anywhere in the tree and not just
 	// at the top.
 	let oldStartDom = startDom;
-	if (newProps._parentDom) {
+	if (internal._flags & TYPE_ROOT) {
 		parentDom = newProps._parentDom;
 
 		if (internal && internal._dom) {
@@ -167,7 +167,6 @@ export function renderComponent(
 
 	internal._flags &= ~DIRTY_BIT;
 	c._internal = internal;
-	c._parentDom = parentDom;
 
 	tmp = c.render(c.props, c.state, c.context);
 
@@ -215,7 +214,7 @@ export function renderComponent(
 	}
 
 	// Resume where we left of before the Portal
-	if (newProps._parentDom) {
+	if (internal._flags & TYPE_ROOT) {
 		return oldStartDom;
 	}
 

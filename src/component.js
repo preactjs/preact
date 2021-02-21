@@ -3,7 +3,8 @@ import { commitRoot } from './diff/commit';
 import options from './options';
 import { createVNode, Fragment } from './create-element';
 import { patch } from './diff/patch';
-import { TYPE_COMPONENT, DIRTY_BIT, FORCE_UPDATE } from './constants';
+import { DIRTY_BIT, FORCE_UPDATE, MODE_UNMOUNTING } from './constants';
+import { getDomSibling, getParentDom, updateParentDomPointers } from './tree';
 
 /**
  * Base Component class. Provides `setState()` and `forceUpdate()`, which
@@ -84,51 +85,16 @@ Component.prototype.forceUpdate = function(callback) {
 Component.prototype.render = Fragment;
 
 /**
- * @param {import('./internal').Internal} internal
- * @param {number | null} [childIndex]
- * @returns {import('./internal').PreactNode}
- */
-export function getDomSibling(internal, childIndex) {
-	if (childIndex == null) {
-		// Use childIndex==null as a signal to resume the search from the vnode's sibling
-		return internal._parent
-			? getDomSibling(
-					internal._parent,
-					internal._parent._children.indexOf(internal) + 1
-			  )
-			: null;
-	}
-
-	let sibling;
-	for (; childIndex < internal._children.length; childIndex++) {
-		sibling = internal._children[childIndex];
-
-		if (sibling != null && sibling._dom != null) {
-			// Since updateParentDomPointers keeps _dom pointer correct,
-			// we can rely on _dom to tell us if this subtree contains a
-			// rendered DOM node, and what the first rendered DOM node is
-			return sibling._dom;
-		}
-	}
-
-	// If we get here, we have not found a DOM node in this vnode's children.
-	// We must resume from this vnode's sibling (in it's parent _children array)
-	// Only climb up and search the parent if we aren't searching through a DOM
-	// VNode (meaning we reached the DOM parent of the original vnode that began
-	// the search)
-	return internal._flags & TYPE_COMPONENT ? getDomSibling(internal) : null;
-}
-
-/**
  * Trigger in-place re-rendering of a component.
  * @param {import('./internal').Component} component The component to rerender
  */
 function rerenderComponent(component) {
-	let internal = component._internal,
-		startDom = internal._dom,
-		parentDom = component._parentDom;
+	let internal = component._internal;
 
-	if (parentDom) {
+	if (~internal._flags & MODE_UNMOUNTING && internal._flags & DIRTY_BIT) {
+		let startDom = internal._dom;
+		let parentDom = getParentDom(internal);
+
 		const vnode = createVNode(
 			internal.type,
 			internal.props,
@@ -152,24 +118,6 @@ function rerenderComponent(component) {
 		if (internal._dom != startDom) {
 			updateParentDomPointers(internal);
 		}
-	}
-}
-
-/**
- * @param {import('./internal').Internal} internal
- */
-function updateParentDomPointers(internal) {
-	if ((internal = internal._parent) != null && internal._component != null) {
-		internal._dom = null;
-		for (let i = 0; i < internal._children.length; i++) {
-			let child = internal._children[i];
-			if (child != null && child._dom != null) {
-				internal._dom = child._dom;
-				break;
-			}
-		}
-
-		return updateParentDomPointers(internal);
 	}
 }
 
@@ -228,9 +176,7 @@ function process() {
 		rerenderQueue = [];
 		// Don't update `renderCount` yet. Keep its value non-zero to prevent unnecessary
 		// process() calls from getting scheduled while `queue` is still being consumed.
-		queue.some(c => {
-			if (c._internal._flags & DIRTY_BIT) rerenderComponent(c);
-		});
+		queue.some(rerenderComponent);
 	}
 }
 process._rerenderCount = 0;

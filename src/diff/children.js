@@ -7,11 +7,10 @@ import {
 	MODE_SUSPENDED,
 	EMPTY_ARR
 } from '../constants';
-import { getDomSibling } from '../component';
 import { mount } from './mount';
 import { patch } from './patch';
 import { unmount } from './unmount';
-import { createInternal } from '../tree';
+import { createInternal, getDomSibling } from '../tree';
 
 /**
  * Diff the children of a virtual node
@@ -246,6 +245,10 @@ export function diffChildren(
  * @param {import('../internal').PreactElement} parentDom
  */
 export function reorderChildren(internal, startDom, parentDom) {
+	if (internal._children == null) {
+		return startDom;
+	}
+
 	for (let tmp = 0; tmp < internal._children.length; tmp++) {
 		let childInternal = internal._children[tmp];
 		if (childInternal) {

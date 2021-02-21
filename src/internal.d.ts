@@ -1,7 +1,5 @@
 import * as preact from './index';
 
-type CONSTANTS = typeof import('./lib/constants');
-
 export enum HookType {
 	useState = 1,
 	useReducer = 2,
@@ -115,13 +113,6 @@ export interface VNode<P = {}> extends preact.VNode<P> {
 	_vnodeId: number;
 }
 
-export type InternalTypeFlags =
-	| CONSTANTS['TYPE_TEXT']
-	| CONSTANTS['TYPE_ELEMENT']
-	| CONSTANTS['TYPE_CLASS']
-	| CONSTANTS['TYPE_FUNCTION']
-	| CONSTANTS['TYPE_COMPONENT'];
-
 /**
  * An Internal is a persistent backing node within Preact's virtual DOM tree.
  * Think of an Internal like a long-lived VNode with stored data and tree linkages.
@@ -162,12 +153,6 @@ export interface Component<P = {}, S = {}> extends preact.Component<P, S> {
 	_nextState?: S | null; // Only class components
 	/** Only used in the devtools to later dirty check if state has changed */
 	_prevState?: S | null;
-	/**
-	 * Pointer to the parent dom node. This is only needed for top-level Fragment
-	 * components or array returns.
-	 * @TODO this should be moved to Internal
-	 */
-	_parentDom?: PreactElement | null;
 }
 
 export interface PreactContext extends preact.Context<any> {

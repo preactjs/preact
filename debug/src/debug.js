@@ -12,6 +12,7 @@ import {
 	getDisplayName
 } from './component-stack';
 import { assign } from './util';
+import { MODE_UNMOUNTING } from 'preact/src/constants';
 
 const isWeakMapSupported = typeof WeakMap == 'function';
 
@@ -356,6 +357,8 @@ export function initDebug() {
 }
 
 const setState = Component.prototype.setState;
+
+/** @this {import('../../src/internal').Component} */
 Component.prototype.setState = function(update, callback) {
 	if (this._internal == null) {
 		// `this._internal` will be `null` during componentWillMount. But it
@@ -371,7 +374,7 @@ Component.prototype.setState = function(update, callback) {
 					)}`
 			);
 		}
-	} else if (this._parentDom == null) {
+	} else if (this._internal._flags & MODE_UNMOUNTING) {
 		console.warn(
 			`Can't call "this.setState" on an unmounted component. This is a no-op, ` +
 				`but it indicates a memory leak in your application. To fix, cancel all ` +
@@ -384,6 +387,8 @@ Component.prototype.setState = function(update, callback) {
 };
 
 const forceUpdate = Component.prototype.forceUpdate;
+
+/** @this {import('../../src/internal').Component} */
 Component.prototype.forceUpdate = function(callback) {
 	if (this._internal == null) {
 		console.warn(
@@ -392,7 +397,7 @@ Component.prototype.forceUpdate = function(callback) {
 					getCurrentInternal()
 				)}`
 		);
-	} else if (this._parentDom == null) {
+	} else if (this._internal._flags & MODE_UNMOUNTING) {
 		console.warn(
 			`Can't call "this.forceUpdate" on an unmounted component. This is a no-op, ` +
 				`but it indicates a memory leak in your application. To fix, cancel all ` +
