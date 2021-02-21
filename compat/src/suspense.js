@@ -1,6 +1,5 @@
 import { Component, createElement, options, Fragment } from 'preact';
-import { ELEMENT_NODE } from 'preact/debug/src/constants';
-import { FORCE_UPDATE, MODE_HYDRATE } from '../../src/constants';
+import { TYPE_ELEMENT, FORCE_UPDATE, MODE_HYDRATE } from '../../src/constants';
 import { assign } from './util';
 
 const oldCatchError = options._catchError;
@@ -36,7 +35,7 @@ options.unmount = function(internal) {
 	// this internal's _dom property).
 	const wasHydrating = (internal._flags & MODE_HYDRATE) === MODE_HYDRATE;
 	if (component && wasHydrating) {
-		internal._flags |= ELEMENT_NODE;
+		internal._flags |= TYPE_ELEMENT;
 	}
 
 	if (oldUnmount) oldUnmount(internal);
