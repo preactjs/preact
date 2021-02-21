@@ -159,17 +159,17 @@ Suspense.prototype._childDidSuspend = function(promise, suspendingInternal) {
 
 	const onSuspensionComplete = () => {
 		if (!--c._pendingSuspensionCount) {
-			/** @type {import('./internal').Internal} */
-			let suspendedInternal;
-			if (c.state._suspended) {
-				suspendedInternal = c.state._suspended;
-			} else {
-				// _suspended will be unset if we are suspending while hydrating. If so
-				// the suspendedInternal is still the first child of Suspense since we
-				// never rendered the fallback
-				suspendedInternal = c._internal._children[0];
-			}
-
+			// /** @type {import('./internal').Internal} */
+			// let suspendedInternal;
+			// if (c.state._suspended) {
+			// 	suspendedInternal = c.state._suspended;
+			// } else {
+			// 	// _suspended will be unset if we are suspending while hydrating. If so
+			// 	// the suspendedInternal is still the first child of Suspense since we
+			// 	// never rendered the fallback
+			// 	suspendedInternal = c._internal._children[0];
+			// }
+			//
 			// c._internal._children[0] = removeOriginal(
 			// 	suspendedInternal,
 			// 	suspendedInternal._component._parentDom,

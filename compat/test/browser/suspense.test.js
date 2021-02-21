@@ -339,7 +339,7 @@ describe.only('suspense', () => {
 		});
 	});
 
-	it.only('should properly call lifecycle methods and maintain state of a delayed suspending component', () => {
+	it('should properly call lifecycle methods and maintain state of a delayed suspending component', () => {
 		/** @type {() => void} */
 		let increment;
 
@@ -421,11 +421,7 @@ describe.only('suspense', () => {
 			expect(scratch.innerHTML).to.eql(`<p>Count: 2</p>`);
 			expect(lifecycles.componentWillMount).to.have.been.calledOnce;
 			expect(lifecycles.componentDidMount).to.have.been.calledOnce;
-			// TODO: This is called thrice since the cDU queued up after the second
-			// increment is never cleared once the component suspends. So when it
-			// resumes and the component is rerendered, we queue up another cDU so
-			// cDU is called an extra time.
-			expect(lifecycles.componentDidUpdate).to.have.been.calledThrice;
+			expect(lifecycles.componentDidUpdate).to.have.been.calledTwice;
 			expect(lifecycles.componentWillUnmount).to.not.have.been.called;
 		});
 	});
@@ -772,8 +768,8 @@ describe.only('suspense', () => {
 				expect(scratch.innerHTML).to.eql(
 					`<div>Hello first 2</div><div>Hello second 2</div>`
 				);
-				expect(Suspender1.prototype.render).to.have.been.calledThrice;
-				expect(Suspender2.prototype.render).to.have.been.calledThrice;
+				expect(Suspender1.prototype.render).to.have.been.calledTwice;
+				expect(Suspender2.prototype.render).to.have.been.calledTwice;
 			});
 		});
 	});
@@ -826,8 +822,8 @@ describe.only('suspense', () => {
 				expect(scratch.innerHTML).to.eql(
 					`<div>Hello first 2</div><div><div>Hello second 2</div></div>`
 				);
-				expect(Suspender1.prototype.render).to.have.been.calledThrice;
-				expect(Suspender2.prototype.render).to.have.been.calledThrice;
+				expect(Suspender1.prototype.render).to.have.been.calledTwice;
+				expect(Suspender2.prototype.render).to.have.been.calledTwice;
 			});
 		});
 	});
