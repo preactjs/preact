@@ -106,8 +106,8 @@ describe('debug with suspense', () => {
 
 				return loader.then(() => {
 					rerender();
-					expect(console.warn).to.be.calledTwice;
-					expect(warnings[1].includes('MyLazyLoaded')).to.equal(true);
+					expect(console.warn).to.be.calledThrice;
+					expect(warnings[2].includes('MyLazyLoaded')).to.equal(true);
 					expect(serializeHtml(scratch)).to.equal('<div>Hi there</div>');
 				});
 			});
@@ -132,8 +132,8 @@ describe('debug with suspense', () => {
 
 				return loader.then(() => {
 					rerender();
-					expect(console.warn).to.be.calledTwice;
-					expect(warnings[1].includes('HelloLazy')).to.equal(true);
+					expect(console.warn).to.be.calledThrice;
+					expect(warnings[2].includes('HelloLazy')).to.equal(true);
 					expect(serializeHtml(scratch)).to.equal('<div>Hi there</div>');
 				});
 			});
@@ -159,8 +159,9 @@ describe('debug with suspense', () => {
 						// Ignore the loader's bubbling error
 					}
 
-					// Called once on initial render, and again when promise rejects
-					expect(console.warn).to.be.calledTwice;
+					// Called once on initial render, once when rendering the fallback,
+					// and again when promise rejects
+					expect(console.warn).to.be.calledThrice;
 				});
 			});
 

@@ -39,7 +39,7 @@ class Catcher extends Component {
 	}
 }
 
-describe.only('suspense', () => {
+describe('suspense', () => {
 	/** @type {HTMLDivElement} */
 	let scratch,
 		rerender,

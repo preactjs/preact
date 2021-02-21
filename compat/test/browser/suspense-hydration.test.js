@@ -17,7 +17,7 @@ import { ul, li, div } from '../../../test/_util/dom';
 import { createLazy } from './suspense-utils';
 
 /* eslint-env browser, mocha */
-describe.only('suspense hydration', () => {
+describe('suspense hydration', () => {
 	/** @type {HTMLDivElement} */
 	let scratch,
 		rerender,

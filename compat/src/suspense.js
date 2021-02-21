@@ -129,6 +129,9 @@ Suspense.prototype = new Component();
  * @param {import('./internal').Internal} suspendingInternal The suspending component
  */
 Suspense.prototype._childDidSuspend = function(promise, suspendingInternal) {
+	// @TODO Investigate what this logic does when a component throws while
+	// rendering the fallback...
+
 	const suspendingComponent = suspendingInternal._component;
 
 	/** @type {import('./internal').SuspenseComponent} */
