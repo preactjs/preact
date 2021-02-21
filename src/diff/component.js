@@ -214,7 +214,7 @@ export function renderComponent(
 	}
 
 	// Resume where we left of before the Portal
-	if (newProps._parentDom) {
+	if (internal._flags & TYPE_ROOT) {
 		return oldStartDom;
 	}
 
