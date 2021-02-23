@@ -529,6 +529,46 @@ describe('Lifecycle methods', () => {
 			expect(scratch).to.have.property('textContent', 'Error: Error!');
 		});
 
+		it('should bubble on deeply repeated errors', () => {
+			const thrownErrors = [];
+
+			class Adapter extends Component {
+				static getDerivedStateFromError(error) {
+					return { error };
+				}
+				render() {
+					// But fail at doing so and continue rendering erroring child
+					return <div>{this.props.children}</div>;
+				}
+			}
+
+			function ThrowErr() {
+				let error = new Error('Error!');
+				thrownErrors.push(error);
+				throw error;
+			}
+
+			sinon.spy(Adapter, 'getDerivedStateFromError');
+
+			render(
+				<Receiver>
+					<Adapter>
+						<ThrowErr />
+					</Adapter>
+				</Receiver>,
+				scratch
+			);
+			rerender();
+
+			expect(Adapter.getDerivedStateFromError).to.have.been.calledWith(
+				thrownErrors[0]
+			);
+			expect(Receiver.getDerivedStateFromError).to.have.been.calledWith(
+				thrownErrors[1]
+			);
+			expect(scratch).to.have.property('textContent', 'Error: Error!');
+		});
+
 		it('should bubble on ignored errors', () => {
 			class Adapter extends Component {
 				static getDerivedStateFromError(error) {

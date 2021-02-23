@@ -4,7 +4,13 @@ import { assign } from '../util';
 import { Component } from '../component';
 import { mountChildren } from './mount';
 import { diffChildren, reorderChildren } from './children';
-import { DIRTY_BIT, FORCE_UPDATE, TYPE_ROOT } from '../constants';
+import {
+	DIRTY_BIT,
+	FORCE_UPDATE,
+	MODE_PENDING_ERROR,
+	MODE_RERENDERING_ERROR,
+	TYPE_ROOT
+} from '../constants';
 
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
@@ -36,6 +42,13 @@ export function renderComponent(
 
 	// @TODO split update + mount?
 	let newProps = newVNode ? newVNode.props : internal.props;
+
+	if (internal._flags & MODE_PENDING_ERROR) {
+		// Toggle the MODE_PENDING_ERROR and MODE_RERENDERING_ERROR flags. In
+		// actuality, this should turn off the MODE_PENDING_ERROR flag and turn on
+		// the MODE_RERENDERING_ERROR flag.
+		internal._flags ^= MODE_PENDING_ERROR | MODE_RERENDERING_ERROR;
+	}
 
 	// Necessary for createContext api. Setting this property will pass
 	// the context value as `this.context` just for this component.

@@ -1,4 +1,9 @@
-import { DIRTY_BIT, MODE_ERRORED } from '../constants';
+import {
+	DIRTY_BIT,
+	MODE_RERENDERING_ERROR,
+	MODE_PENDING_ERROR,
+	TYPE_COMPONENT
+} from '../constants';
 
 /**
  * Find the closest error boundary to a thrown error and call it
@@ -8,26 +13,27 @@ import { DIRTY_BIT, MODE_ERRORED } from '../constants';
  * is the highest parent that was being unmounted)
  */
 export function _catchError(error, internal) {
-	/** @type {import('../internal').Component} */
-	let component;
-
-	internal._flags |= MODE_ERRORED;
-
-	for (; (internal = internal._parent); ) {
-		if ((component = internal._component) && ~internal._flags & MODE_ERRORED) {
+	while ((internal = internal._parent)) {
+		if (
+			internal._flags & TYPE_COMPONENT &&
+			~internal._flags & MODE_RERENDERING_ERROR
+		) {
 			try {
 				if (internal.type.getDerivedStateFromError != null) {
-					component.setState(internal.type.getDerivedStateFromError(error));
+					internal._component.setState(
+						internal.type.getDerivedStateFromError(error)
+					);
 				}
 
-				if (component.componentDidCatch != null) {
-					component.componentDidCatch(error);
+				if (internal._component.componentDidCatch != null) {
+					internal._component.componentDidCatch(error);
 				}
 
 				// NOTE: We're checking that any component in the stack got marked as dirty, even if it did so prior to this loop,
 				// which is technically incorrect. However, there is no way for a component to mark itself as dirty during rendering.
 				// The only way for a component to falsely intercept error bubbling would be to manually sets its internal dirty flag.
 				if (internal._flags & DIRTY_BIT) {
+					internal._flags |= MODE_PENDING_ERROR;
 					return;
 				}
 			} catch (e) {
