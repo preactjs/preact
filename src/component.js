@@ -136,7 +136,8 @@ function renderComponent(component) {
 			vnode._hydrating != null ? [oldDom] : null,
 			commitQueue,
 			oldDom == null ? getDomSibling(vnode) : oldDom,
-			vnode._hydrating
+			vnode._hydrating,
+			parentDom.ownerDocument
 		);
 		commitRoot(commitQueue, vnode);
 
