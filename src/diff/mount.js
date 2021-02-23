@@ -6,7 +6,8 @@ import {
 	MODE_MUTATIVE_HYDRATE,
 	MODE_SUSPENDED,
 	RESET_MODE,
-	TYPE_TEXT
+	TYPE_TEXT,
+	MODE_ERRORED
 } from '../constants';
 import { normalizeToVNode } from '../create-element';
 import { setProperty } from './props';
@@ -76,7 +77,7 @@ export function mount(
 		internal._flags &= RESET_MODE;
 	} catch (e) {
 		internal._vnodeId = null;
-		internal._flags |= MODE_SUSPENDED;
+		internal._flags |= e.then ? MODE_SUSPENDED : MODE_ERRORED;
 
 		if (internal._flags & MODE_HYDRATE) {
 			// @ts-ignore Trust me TS, nextSibling is a PreactElement

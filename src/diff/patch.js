@@ -2,7 +2,13 @@ import { diffChildren } from './children';
 import { diffProps, setProperty } from './props';
 import options from '../options';
 import { renderComponent } from './component';
-import { TYPE_COMPONENT, RESET_MODE, TYPE_TEXT } from '../constants';
+import {
+	TYPE_COMPONENT,
+	RESET_MODE,
+	TYPE_TEXT,
+	MODE_SUSPENDED,
+	MODE_ERRORED
+} from '../constants';
 
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
@@ -78,6 +84,7 @@ export function patch(
 	} catch (e) {
 		// @TODO: assign a new VNode ID here? Or NaN?
 		// newVNode._vnodeId = null;
+		internal._flags |= e.then ? MODE_SUSPENDED : MODE_ERRORED;
 		options._catchError(e, internal);
 	}
 
