@@ -918,6 +918,10 @@ export namespace JSXInternal {
 		feDisplacementMap: SVGAttributes<SVGFEDisplacementMapElement>;
 		feDropShadow: SVGAttributes<SVGFEDropShadowElement>;
 		feFlood: SVGAttributes<SVGFEFloodElement>;
+		feFuncA: SVGAttributes<SVGFEFuncAElement>;
+		feFuncB: SVGAttributes<SVGFEFuncBElement>;
+		feFuncG: SVGAttributes<SVGFEFuncGElement>;
+		feFuncR: SVGAttributes<SVGFEFuncRElement>;
 		feGaussianBlur: SVGAttributes<SVGFEGaussianBlurElement>;
 		feImage: SVGAttributes<SVGFEImageElement>;
 		feMerge: SVGAttributes<SVGFEMergeElement>;
