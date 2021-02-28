@@ -4,6 +4,7 @@ import { writeFile, stat, mkdir } from 'fs/promises';
 import { repoRoot, benchesRoot, toUrl } from './utils.js';
 import { defaultBenchOptions } from './bench.js';
 import { prepare } from './prepare.js';
+import { animConfig, tableConfig, treeConfig } from '../src/uibench/config.js';
 
 const measureName = 'duration'; // Must match measureName in '../src/util.js'
 const warnings = new Set([]);
@@ -96,7 +97,64 @@ function getBaseBenchmarkConfig(benchPath) {
 
 	/** @type {ConfigFileBenchmark["measurement"]} */
 	let measurement;
-	if (name == '02_replace1k') {
+	if (name == 'uibench_anim') {
+		// UIBench is configured through query params
+		url += animConfig;
+		measurement = [
+			expr(measureName),
+			expr('anim/100/32'),
+			expr('anim/100/16'),
+			expr('anim/100/8'),
+			expr('anim/100/4')
+		];
+	} else if (name == 'uibench_table') {
+		// UIBench is configured through query params
+		url += tableConfig;
+		measurement = [
+			expr(measureName),
+			expr('table/[100,4]/render'),
+			expr('table/[100,4]/removeAll'),
+			expr('table/[100,4]/sort/1'),
+			expr('table/[100,4]/filter/32'),
+			expr('table/[100,4]/activate/32')
+		];
+	} else if (name == 'uibench_tree') {
+		// UIBench is configured through query params
+		url += treeConfig;
+		measurement = [
+			expr(measureName),
+			expr('tree/[2,2,2,2,2,2,2,2,2,2]/render'),
+			expr('tree/[2,2,2,2,2,2,2,2,2,2]/removeAll'),
+			expr('tree/[2,2,2,2,2,2,2,2,2,2]/no_change'),
+			expr('tree/[10,10,10,10]/no_change')
+		];
+
+		const shapes = ['[50,10]', '[10,50]']; // Also [500], [5, 100]
+		const operations = [
+			'render',
+			'removeAll',
+			'[insertFirst(1)]',
+			'[insertLast(1)]',
+			'[removeFirst(1)]',
+			'[removeLast(1)]',
+			'[moveFromEndToStart(1)]',
+			'[moveFromStartToEnd(1)]'
+		];
+
+		for (let operation of operations) {
+			for (let shape of shapes) {
+				const name = `tree/${shape}/${operation}`;
+				measurement.push(expr(name));
+			}
+		}
+
+		measurement.push(
+			expr('tree/[500]/[kivi_worst_case]'),
+			expr('tree/[500]/[snabbdom_worst_case]'),
+			expr('tree/[500]/[react_worst_case]'),
+			expr('tree/[500]/[virtual_dom_worst_case]')
+		);
+	} else if (name == '02_replace1k') {
 		// MUST BE KEPT IN SYNC WITH WARMUP COUNT IN 02_replace1k.html
 		const WARMUP_COUNT = 5;
 

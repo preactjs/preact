@@ -21,7 +21,7 @@ export const toUrl = str => str.replace(/^[A-Za-z]+:/, '/').replace(/\\/g, '/');
 
 export const allBenches = '**/*.html';
 export function globSrc(patterns) {
-	return globby(patterns, { cwd: benchesRoot('src') });
+	return globby(patterns, { cwd: benchesRoot('src'), deep: 0 });
 }
 
 export async function getPkgBinPath(pkgName) {

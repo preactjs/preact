@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>UI Bench</title>
+		<link
+			href="https://localvoid.github.io/uibench-base/0.1.0/styles.css"
+			rel="stylesheet"
+		/>
+	</head>
+	<body>
+		<div id="main"></div>
+		<script type="text/javascript" src="globals.js"></script>
+		<script src="https://localvoid.github.io/uibench-base/0.1.0/uibench.js"></script>
+		<script type="module">
+			import * as framework from 'framework';
+			import { measureName } from './util.js';
+			import { createUIBenchRunner } from '../src/uibench/index.js';
+			import { tableConfig } from '../src/uibench/config.js';
+
+			if (!location.search.includes('filter=table')) {
+				location.search = tableConfig;
+			}
+
+			const container = document.getElementById('main');
+			const { onUpdate, onFinish } = createUIBenchRunner(framework, container);
+
+			// console.time('runtime');
+			uibench.init('framework', 'latest');
+			document.addEventListener('DOMContentLoaded', () => {
+				uibench.run(onUpdate, samples => {
+					onFinish(samples);
+
+					let sum = 0;
+					let lastSamples = {};
+					for (let testKey in samples) {
+						const results = samples[testKey];
+						const lastSample = results[results.length - 1];
+						lastSamples[testKey] = lastSample;
+						sum += lastSample;
+					}
+
+					// Must match the configured tachometer measurement
+					window[measureName] = sum;
+					Object.assign(window, lastSamples);
+
+					// console.log(window.runtimeSum);
+					// console.timeEnd('runtime');
+				});
+			});
+		</script>
+	</body>
+</html>
