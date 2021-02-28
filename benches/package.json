@@ -24,7 +24,7 @@
 		"prompts": "^2.4.0",
 		"sade": "^1.7.3",
 		"strip-ansi": "^6.0.0",
-		"tachometer": "^0.5.7",
+		"tachometer": "^0.5.8",
 		"v8-deopt-viewer": "^0.2.1"
 	}
 }
