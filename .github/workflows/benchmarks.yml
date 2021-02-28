@@ -254,3 +254,87 @@ jobs:
         with:
           name: results
           path: benches/results/filter_list.json
+
+  bench_uibench_anim:
+    name: Bench uibench_anim
+    runs-on: ubuntu-latest
+    needs: prepare
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '14.x'
+      - uses: actions/download-artifact@v2
+        with:
+          name: build-output
+      - name: install & build
+        run: |
+          cd benches
+          npm ci
+      - name: bench
+        run: |
+          export CHROMEDRIVER_FILEPATH=$(which chromedriver)
+          cd benches
+          npm run bench uibench_anim.html
+      - name: Upload results
+        uses: actions/upload-artifact@v2
+        with:
+          name: results
+          path: benches/results/uibench_anim.json
+
+  bench_uibench_table:
+    name: Bench uibench_table
+    runs-on: ubuntu-latest
+    needs: prepare
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '14.x'
+      - uses: actions/download-artifact@v2
+        with:
+          name: build-output
+      - name: install & build
+        run: |
+          cd benches
+          npm ci
+      - name: bench
+        run: |
+          export CHROMEDRIVER_FILEPATH=$(which chromedriver)
+          cd benches
+          npm run bench uibench_table.html
+      - name: Upload results
+        uses: actions/upload-artifact@v2
+        with:
+          name: results
+          path: benches/results/uibench_table.json
+
+  bench_uibench_tree:
+    name: Bench uibench_tree
+    runs-on: ubuntu-latest
+    needs: prepare
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '14.x'
+      - uses: actions/download-artifact@v2
+        with:
+          name: build-output
+      - name: install & build
+        run: |
+          cd benches
+          npm ci
+      - name: bench
+        run: |
+          export CHROMEDRIVER_FILEPATH=$(which chromedriver)
+          cd benches
+          npm run bench uibench_tree.html
+      - name: Upload results
+        uses: actions/upload-artifact@v2
+        with:
+          name: results
+          path: benches/results/uibench_tree.json
