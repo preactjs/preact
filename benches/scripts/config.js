@@ -80,6 +80,20 @@ function getBaseBenchmarkConfig(benchPath) {
 	let name = path.basename(benchPath).replace('.html', '');
 	let url = path.posix.relative(toUrl(benchesRoot()), toUrl(benchPath));
 
+	/** @type {(name: string) => import('tachometer/lib/types').ExpressionMeasurement} */
+	const expr = name => ({
+		name,
+		mode: 'expression',
+		expression: `window["${name}"]`
+	});
+
+	/** @type {(name: string) => import('tachometer/lib/types').PerformanceEntryMeasurement} */
+	const perfEntry = name => ({
+		name,
+		mode: 'performance',
+		entryName: name
+	});
+
 	/** @type {ConfigFileBenchmark["measurement"]} */
 	let measurement;
 	if (name == '02_replace1k') {
@@ -88,47 +102,16 @@ function getBaseBenchmarkConfig(benchPath) {
 
 		// For 02_replace1k, collect additional measurements focusing on the JS
 		// clock time for each warmup and the final duration.
-		measurement = [
-			{
-				name: 'duration',
-				mode: 'performance',
-				entryName: measureName
-			},
-			{
-				name: 'usedJSHeapSize',
-				mode: 'expression',
-				expression: 'window.usedJSHeapSize'
-			}
-		];
+		measurement = [perfEntry(measureName), expr('usedJSHeapSize')];
 
 		for (let i = 0; i < WARMUP_COUNT; i++) {
-			const entryName = `run-warmup-${i}`;
-			measurement.push({
-				name: entryName,
-				mode: 'performance',
-				entryName
-			});
+			measurement.push(perfEntry(`run-warmup-${i}`));
 		}
 
-		measurement.push({
-			name: 'run-final',
-			mode: 'performance',
-			entryName: 'run-final'
-		});
+		measurement.push(perfEntry('run-final'));
 	} else {
 		// Default measurements
-		measurement = [
-			{
-				name: 'duration',
-				mode: 'performance',
-				entryName: measureName
-			},
-			{
-				name: 'usedJSHeapSize',
-				mode: 'expression',
-				expression: 'window.usedJSHeapSize'
-			}
-		];
+		measurement = [perfEntry(measureName), expr('usedJSHeapSize')];
 	}
 
 	return { name, url, measurement };
