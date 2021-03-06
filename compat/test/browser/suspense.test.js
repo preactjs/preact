@@ -39,7 +39,7 @@ class Catcher extends Component {
 	}
 }
 
-describe('suspense', () => {
+describe.only('suspense', () => {
 	/** @type {HTMLDivElement} */
 	let scratch,
 		rerender,
@@ -339,7 +339,7 @@ describe('suspense', () => {
 		});
 	});
 
-	it('should properly call lifecycle methods and maintain state of a delayed suspending component', () => {
+	it.only('should properly call lifecycle methods and maintain state of a delayed suspending component', () => {
 		/** @type {() => void} */
 		let increment;
 

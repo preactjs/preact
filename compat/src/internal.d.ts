@@ -28,6 +28,7 @@ export interface Component<P = {}, S = {}> extends PreactComponent<P, S> {
 	_childDidSuspend?(error: Promise<void>, suspendingVNode: VNode): void;
 	_suspended: (vnode: VNode) => (unsuspend: () => void) => void;
 	_onResolve?(): void;
+	_parentDom?: PreactElement;
 	_originalParentDom?: PreactElement;
 
 	// Portal internal properties

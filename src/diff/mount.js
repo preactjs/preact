@@ -59,16 +59,13 @@ export function mount(
 					? startDom
 					: null;
 
-			internal._dom = mountDOMElement(
+			nextDomSibling = mountDOMElement(
 				hydrateDom,
 				internal,
 				globalContext,
 				isSvg,
 				commitQueue
 			);
-
-			// @ts-ignore Trust me TS, nextSibling is a PreactElement
-			nextDomSibling = internal._dom.nextSibling;
 		}
 
 		if (options.diffed) options.diffed(internal);
@@ -126,6 +123,8 @@ function mountDOMElement(dom, internal, globalContext, isSvg, commitQueue) {
 		} else if (dom.data !== newProps) {
 			dom.data = newProps;
 		}
+
+		internal._dom = dom;
 	} else {
 		// Tracks entering and exiting SVG namespace when descending through the tree.
 		if (nodeType === 'svg') isSvg = true;
@@ -181,6 +180,8 @@ function mountDOMElement(dom, internal, globalContext, isSvg, commitQueue) {
 			}
 		}
 
+		internal._dom = dom;
+
 		// If the new vnode didn't have dangerouslySetInnerHTML, diff its children
 		if (newHtml) {
 			if (!isHydrating && newHtml.__html) {
@@ -199,6 +200,9 @@ function mountDOMElement(dom, internal, globalContext, isSvg, commitQueue) {
 			);
 		}
 
+		// To override mountChildren setting _dom
+		internal._dom = dom;
+
 		// (as above, don't diff props during hydration)
 		if (!isHydrating) {
 			if (newValue != null) {
@@ -210,7 +214,8 @@ function mountDOMElement(dom, internal, globalContext, isSvg, commitQueue) {
 		}
 	}
 
-	return dom;
+	// @ts-ignore
+	return dom.nextSibling;
 }
 
 /**

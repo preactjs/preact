@@ -11,6 +11,7 @@ import {
 	MODE_RERENDERING_ERROR,
 	TYPE_ROOT
 } from '../constants';
+import { getDomSibling } from '../tree';
 
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
@@ -163,9 +164,10 @@ export function renderComponent(
 	// Root nodes signal that we attempt to render into a specific DOM node
 	// on the page. Root nodes can occur anywhere in the tree and not just
 	// at the top.
-	let oldStartDom = startDom;
+	let oldStartDom = startDom,
+		oldParentDom = parentDom;
 	if (internal._flags & TYPE_ROOT) {
-		parentDom = newProps._parentDom;
+		parentDom = newProps._parentDom || parentDom;
 
 		if (internal && internal._dom) {
 			startDom = internal._dom;
@@ -228,7 +230,13 @@ export function renderComponent(
 
 	// Resume where we left of before the Portal
 	if (internal._flags & TYPE_ROOT) {
-		return oldStartDom;
+		if (oldStartDom && oldStartDom.parentNode == oldParentDom) {
+			return oldStartDom;
+		} else {
+			// @TODO Ensure there is suspense test with <Fragment><div><//> siblings
+			// around Suspense and suspender
+			return getDomSibling(internal);
+		}
 	}
 
 	return nextDomSibling;

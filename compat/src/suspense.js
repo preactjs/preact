@@ -1,5 +1,6 @@
 import { Component, createElement, options, Fragment } from 'preact';
 import { TYPE_ELEMENT, FORCE_UPDATE, MODE_HYDRATE } from '../../src/constants';
+import { getParentDom } from '../../src/tree';
 import { assign } from './util';
 
 const oldCatchError = options._catchError;
@@ -114,6 +115,7 @@ export function Suspense() {
 	this._pendingSuspensionCount = 0;
 	this._suspenders = null;
 	this._detachOnNextRender = null;
+	this._parentDom = null;
 }
 
 // Things we do here to save some bytes but are not proper JS inheritance:
@@ -168,11 +170,11 @@ Suspense.prototype._childDidSuspend = function(promise, suspendingInternal) {
 				suspendedInternal = c._internal._children[0];
 			}
 
-			c._internal._children[0] = removeOriginal(
-				suspendedInternal,
-				suspendedInternal._component._parentDom,
-				suspendedInternal._component._originalParentDom
-			);
+			// c._internal._children[0] = removeOriginal(
+			// 	suspendedInternal,
+			// 	suspendedInternal._component._parentDom,
+			// 	suspendedInternal._component._originalParentDom
+			// );
 
 			c.setState({ _suspended: (c._detachOnNextRender = null) });
 
@@ -186,6 +188,8 @@ Suspense.prototype._childDidSuspend = function(promise, suspendingInternal) {
 					suspended.forceUpdate();
 				}
 			}
+
+			this._parentDom = null;
 		}
 	};
 
@@ -198,15 +202,18 @@ Suspense.prototype._childDidSuspend = function(promise, suspendingInternal) {
 		(suspendingInternal._flags & MODE_HYDRATE) === MODE_HYDRATE;
 
 	if (!c._pendingSuspensionCount++ && !wasHydrating) {
+		this._parentDom = document.createElement('div');
 		c.setState({
 			_suspended: (c._detachOnNextRender = c._internal._children[0])
 		});
 	}
+
 	promise.then(onResolved, onResolved);
 };
 
 Suspense.prototype.componentWillUnmount = function() {
 	this._suspenders = [];
+	this._parentDom = null;
 };
 
 /**
@@ -215,23 +222,27 @@ Suspense.prototype.componentWillUnmount = function() {
  * @param {import('./internal').SuspenseState} state
  */
 Suspense.prototype.render = function(props, state) {
-	if (this._detachOnNextRender) {
-		// @TODO Is this logic still needed with the move to backing tree?
-		// When the Suspense's _vnode was created by a call to createVNode
-		// (i.e. due to a setState further up in the tree)
-		// it's _children prop is null, in this case we "forget" about the parked vnodes to detach
-		if (this._internal._children) {
-			// @TODO: Consider rebuilding suspense detached parent logic to use root nodes
-			const detachedParent = document.createElement('div');
-			const detachedComponent = this._internal._children[0]._component;
-			this._internal._children[0] = detachedClone(
-				this._detachOnNextRender,
-				detachedParent,
-				(detachedComponent._originalParentDom = detachedComponent._parentDom)
-			);
-		}
+	// if (this._detachOnNextRender) {
+	// 	// @TODO Is this logic still needed with the move to backing tree?
+	// 	// When the Suspense's _vnode was created by a call to createVNode
+	// 	// (i.e. due to a setState further up in the tree)
+	// 	// it's _children prop is null, in this case we "forget" about the parked vnodes to detach
+	// 	if (this._internal._children) {
+	// 		// @TODO: Consider rebuilding suspense detached parent logic to use root nodes
+	// 		const detachedParent = document.createElement('div');
+	// 		const detachedComponent = this._internal._children[0]._component;
+	// 		this._internal._children[0] = detachedClone(
+	// 			this._detachOnNextRender,
+	// 			detachedParent,
+	// 			(detachedComponent._originalParentDom = detachedComponent._parentDom)
+	// 		);
+	// 	}
+	//
+	// 	this._detachOnNextRender = null;
+	// }
 
-		this._detachOnNextRender = null;
+	if (this._parentDom == null) {
+		this._parentDom = getParentDom(this._internal);
 	}
 
 	// Wrap fallback tree in a VNode that prevents itself from being marked as aborting mid-hydration:
@@ -239,9 +250,7 @@ Suspense.prototype.render = function(props, state) {
 		state._suspended && createElement(Fragment, null, props.fallback);
 
 	return [
-		// Wrap with a Fragment to prevent the current reconciler from
-		// picking the wrong DOM node.
-		state._suspended ? null : createElement(Fragment, null, props.children),
+		createElement(Fragment, { _parentDom: this._parentDom }, props.children),
 		fallback
 	];
 };

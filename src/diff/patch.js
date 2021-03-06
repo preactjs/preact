@@ -138,6 +138,8 @@ function patchDOMElement(
 
 	diffProps(dom, newProps, oldProps, isSvg);
 
+	internal._dom = dom;
+
 	// If the new vnode didn't have dangerouslySetInnerHTML, diff its children
 	if (newHtml) {
 		internal._children = null;
