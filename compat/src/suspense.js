@@ -45,7 +45,9 @@ options.unmount = function(internal) {
 export function Suspense() {
 	// we do not call super here to golf some bytes...
 	this._pendingSuspensionCount = 0;
+	/** @type {Array<import('./internal').Internal>} */
 	this._suspenders = null;
+	/** @type {import('./internal').PreactElement} */
 	this._parentDom = null;
 }
 
