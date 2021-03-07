@@ -1,7 +1,6 @@
 import { Component, createElement, options, Fragment } from 'preact';
-import { TYPE_ELEMENT, FORCE_UPDATE, MODE_HYDRATE } from '../../src/constants';
+import { TYPE_ELEMENT, MODE_HYDRATE } from '../../src/constants';
 import { getParentDom } from '../../src/tree';
-import { assign } from './util';
 
 const oldCatchError = options._catchError;
 /** @type {(error: any, internal: import('./internal').Internal) => void} */
@@ -41,73 +40,6 @@ options.unmount = function(internal) {
 
 	if (oldUnmount) oldUnmount(internal);
 };
-
-/**
- *
- * @param {import('./internal').Internal} internal
- * @param {import('./internal').PreactElement} detachedParent
- * @param {import('./internal').PreactElement} parentDom
- */
-function detachedClone(internal, detachedParent, parentDom) {
-	if (internal) {
-		if (internal._component && internal._component.__hooks) {
-			internal._component.__hooks._list.forEach(effect => {
-				if (typeof effect._cleanup == 'function') effect._cleanup();
-			});
-
-			internal._component.__hooks = null;
-		}
-
-		internal = assign({}, internal);
-		if (internal._component != null) {
-			if (internal._component._parentDom === parentDom) {
-				internal._component._parentDom = detachedParent;
-			}
-			internal._component = null;
-		}
-
-		if (internal._children) {
-			internal._children = internal._children.map(child =>
-				detachedClone(child, detachedParent, parentDom)
-			);
-		}
-	}
-
-	return internal;
-}
-
-/**
- * @param {import('./internal').Internal} internal
- * @param {import('./internal').PreactElement} detachedParent
- * @param {import('./internal').PreactElement} originalParent
- */
-function removeOriginal(internal, detachedParent, originalParent) {
-	if (internal) {
-		internal._vnodeId = null;
-
-		if (internal._children) {
-			internal._children = internal._children.map(child =>
-				removeOriginal(child, detachedParent, originalParent)
-			);
-		}
-
-		if (internal._component) {
-			// originalParent will be undefined if a node suspended during hydration
-			if (
-				originalParent != null &&
-				internal._component._parentDom === detachedParent
-			) {
-				if (internal._dom) {
-					originalParent.insertBefore(internal._dom, internal._nextDom);
-				}
-				internal._flags |= FORCE_UPDATE;
-				internal._component._parentDom = originalParent;
-			}
-		}
-	}
-
-	return internal;
-}
 
 // having custom inheritance instead of a class here saves a lot of bytes
 export function Suspense() {
@@ -162,23 +94,6 @@ Suspense.prototype._childDidSuspend = function(promise, suspendingInternal) {
 
 	const onSuspensionComplete = () => {
 		if (!--c._pendingSuspensionCount) {
-			// /** @type {import('./internal').Internal} */
-			// let suspendedInternal;
-			// if (c.state._suspended) {
-			// 	suspendedInternal = c.state._suspended;
-			// } else {
-			// 	// _suspended will be unset if we are suspending while hydrating. If so
-			// 	// the suspendedInternal is still the first child of Suspense since we
-			// 	// never rendered the fallback
-			// 	suspendedInternal = c._internal._children[0];
-			// }
-			//
-			// c._internal._children[0] = removeOriginal(
-			// 	suspendedInternal,
-			// 	suspendedInternal._component._parentDom,
-			// 	suspendedInternal._component._originalParentDom
-			// );
-
 			c.setState({ _suspended: (c._detachOnNextRender = null) });
 
 			let suspended;
@@ -225,25 +140,6 @@ Suspense.prototype.componentWillUnmount = function() {
  * @param {import('./internal').SuspenseState} state
  */
 Suspense.prototype.render = function(props, state) {
-	// if (this._detachOnNextRender) {
-	// 	// @TODO Is this logic still needed with the move to backing tree?
-	// 	// When the Suspense's _vnode was created by a call to createVNode
-	// 	// (i.e. due to a setState further up in the tree)
-	// 	// it's _children prop is null, in this case we "forget" about the parked vnodes to detach
-	// 	if (this._internal._children) {
-	// 		// @TODO: Consider rebuilding suspense detached parent logic to use root nodes
-	// 		const detachedParent = document.createElement('div');
-	// 		const detachedComponent = this._internal._children[0]._component;
-	// 		this._internal._children[0] = detachedClone(
-	// 			this._detachOnNextRender,
-	// 			detachedParent,
-	// 			(detachedComponent._originalParentDom = detachedComponent._parentDom)
-	// 		);
-	// 	}
-	//
-	// 	this._detachOnNextRender = null;
-	// }
-
 	if (this._parentDom == null) {
 		this._parentDom = getParentDom(this._internal);
 	}
