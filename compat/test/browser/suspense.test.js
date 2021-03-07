@@ -5,10 +5,7 @@ import React, {
 	Component,
 	Suspense,
 	Fragment,
-	createContext,
-	useState,
-	useEffect,
-	useLayoutEffect
+	createContext
 } from 'preact/compat';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { createLazy, createSuspender } from './suspense-utils';
@@ -112,101 +109,6 @@ describe('suspense', () => {
 		return resolve(() => <div>resolved</div>).then(() => {
 			rerender();
 			expect(scratch.innerHTML).to.equal(`<div>resolved</div>`);
-		});
-	});
-
-	it('should reset hooks of components', () => {
-		const [Lazy, resolve] = createLazy();
-		const LazyResult = ({ name }) => <div>Hello from {name}</div>;
-
-		/** @type {(value: boolean) => void} */
-		let set;
-		const Parent = ({ children }) => {
-			const [state, setState] = useState(false);
-			set = setState;
-
-			return (
-				<div>
-					<p>hi</p>
-					{state && children}
-				</div>
-			);
-		};
-
-		render(
-			<Suspense fallback={<div>Suspended...</div>}>
-				<Parent>
-					<Lazy name="LazyComp" />
-				</Parent>
-			</Suspense>,
-			scratch
-		);
-		expect(scratch.innerHTML).to.eql(`<div><p>hi</p></div>`);
-
-		set(true);
-		rerender();
-
-		expect(scratch.innerHTML).to.eql('<div>Suspended...</div>');
-
-		return resolve(LazyResult).then(() => {
-			rerender();
-			expect(scratch.innerHTML).to.eql(`<div><p>hi</p></div>`);
-		});
-	});
-
-	it('should call effect cleanups', () => {
-		const [Lazy, resolve] = createLazy();
-		const LazyResult = ({ name }) => <div>Hello from {name}</div>;
-
-		/** @type {(value: boolean) => void} */
-		let set;
-		const effectSpy = sinon.spy();
-		const layoutEffectSpy = sinon.spy();
-
-		const Parent = ({ children }) => {
-			const [state, setState] = useState(false);
-			set = setState;
-			useEffect(() => {
-				return () => {
-					effectSpy();
-				};
-			}, []);
-
-			useLayoutEffect(() => {
-				return () => {
-					layoutEffectSpy();
-				};
-			}, []);
-
-			return state ? (
-				<div>{children}</div>
-			) : (
-				<div>
-					<p>hi</p>
-				</div>
-			);
-		};
-
-		render(
-			<Suspense fallback={<div>Suspended...</div>}>
-				<Parent>
-					<Lazy name="LazyComp" />
-				</Parent>
-			</Suspense>,
-			scratch
-		);
-
-		set(true);
-		rerender();
-		expect(scratch.innerHTML).to.eql('<div>Suspended...</div>');
-		expect(effectSpy).to.be.calledOnce;
-		expect(layoutEffectSpy).to.be.calledOnce;
-
-		return resolve(LazyResult).then(() => {
-			rerender();
-			expect(effectSpy).to.be.calledOnce;
-			expect(layoutEffectSpy).to.be.calledOnce;
-			expect(scratch.innerHTML).to.eql(`<div><p>hi</p></div>`);
 		});
 	});
 
