@@ -5,7 +5,8 @@ import React, {
 	Component,
 	Suspense,
 	Fragment,
-	createContext
+	createContext,
+	useState
 } from 'preact/compat';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { createLazy, createSuspender } from './suspense-utils';
@@ -508,7 +509,52 @@ describe('suspense', () => {
 		});
 	});
 
-	it('should allow children to update state while suspending', () => {
+	it('should keep hook state of siblings when suspending', () => {
+		/** @type {(state: string ) => void} */
+		let setState;
+		function Stateful() {
+			const [state, _setState] = useState('initial');
+			setState = _setState;
+
+			return <div>Stateful: {state}</div>;
+		}
+
+		const [Suspender, suspend] = createSuspender(() => <div>Suspense</div>);
+
+		render(
+			<Suspense fallback={<div>Suspended...</div>}>
+				<Suspender />
+				<Stateful />
+			</Suspense>,
+			scratch
+		);
+
+		expect(scratch.innerHTML).to.eql(
+			`<div>Suspense</div><div>Stateful: initial</div>`
+		);
+
+		setState('first');
+		rerender();
+
+		expect(scratch.innerHTML).to.eql(
+			`<div>Suspense</div><div>Stateful: first</div>`
+		);
+
+		const [resolve] = suspend();
+
+		rerender();
+
+		expect(scratch.innerHTML).to.eql(`<div>Suspended...</div>`);
+
+		return resolve(() => <div>Suspense 2</div>).then(() => {
+			rerender();
+			expect(scratch.innerHTML).to.eql(
+				`<div>Suspense 2</div><div>Stateful: first</div>`
+			);
+		});
+	});
+
+	it('should allow sibling to suspender to update state while suspending', () => {
 		/** @type {(state: { s: string }) => void} */
 		let setState;
 		class Stateful extends Component {
@@ -549,6 +595,54 @@ describe('suspense', () => {
 		expect(scratch.innerHTML).to.eql(`<div>Suspended...</div>`);
 
 		setState({ s: 'second' });
+		rerender();
+
+		expect(scratch.innerHTML).to.eql(`<div>Suspended...</div>`);
+
+		return resolve(() => <div>Suspense 2</div>).then(() => {
+			rerender();
+			expect(scratch.innerHTML).to.eql(
+				`<div>Suspense 2</div><div>Stateful: second</div>`
+			);
+		});
+	});
+
+	it('should allow sibling to suspender to update hook state while suspending', () => {
+		/** @type {(state: string) => void} */
+		let setState;
+		function Stateful() {
+			const [state, _setState] = useState('initial');
+			setState = _setState;
+			return <div>Stateful: {state}</div>;
+		}
+
+		const [Suspender, suspend] = createSuspender(() => <div>Suspense</div>);
+
+		render(
+			<Suspense fallback={<div>Suspended...</div>}>
+				<Suspender />
+				<Stateful />
+			</Suspense>,
+			scratch
+		);
+
+		expect(scratch.innerHTML).to.eql(
+			`<div>Suspense</div><div>Stateful: initial</div>`
+		);
+
+		setState('first');
+		rerender();
+
+		expect(scratch.innerHTML).to.eql(
+			`<div>Suspense</div><div>Stateful: first</div>`
+		);
+
+		const [resolve] = suspend();
+		rerender();
+
+		expect(scratch.innerHTML).to.eql(`<div>Suspended...</div>`);
+
+		setState('second');
 		rerender();
 
 		expect(scratch.innerHTML).to.eql(`<div>Suspended...</div>`);
@@ -1440,7 +1534,7 @@ describe('suspense', () => {
 		expect(scratch.innerHTML).to.eql('<div>conditional hide</div>');
 	});
 
-	it('should support updating state while suspended', async () => {
+	it('should support updating parent of suspender state while suspended', async () => {
 		const [Suspender, suspend] = createSuspender(() => <div>Suspender</div>);
 
 		/** @type {() => void} */
@@ -1464,6 +1558,53 @@ describe('suspense', () => {
 					</div>
 				);
 			}
+		}
+
+		render(
+			<Suspense fallback={<div>Suspended...</div>}>
+				<Updater />
+			</Suspense>,
+			scratch
+		);
+
+		expect(scratch.innerHTML).to.eql(`<div>i: 0<div>Suspender</div></div>`);
+		expect(Suspender.prototype.render).to.have.been.calledOnce;
+
+		const [resolve] = suspend();
+		rerender();
+
+		expect(scratch.innerHTML).to.eql(`<div>Suspended...</div>`);
+
+		increment();
+		rerender();
+
+		expect(scratch.innerHTML).to.eql(`<div>Suspended...</div>`);
+
+		await resolve(() => <div>Resolved</div>);
+		rerender();
+
+		expect(scratch.innerHTML).to.equal(`<div>i: 1<div>Resolved</div></div>`);
+
+		increment();
+		rerender();
+
+		expect(scratch.innerHTML).to.equal(`<div>i: 2<div>Resolved</div></div>`);
+	});
+
+	it('should support updating parent of suspender hook state while suspended', async () => {
+		const [Suspender, suspend] = createSuspender(() => <div>Suspender</div>);
+
+		/** @type {() => void} */
+		let increment;
+		function Updater() {
+			const [i, setState] = useState(0);
+			increment = () => setState(i => i + 1);
+			return (
+				<div>
+					i: {i}
+					<Suspender />
+				</div>
+			);
 		}
 
 		render(
