@@ -91,6 +91,30 @@ describe('suspense', () => {
 		});
 	});
 
+	it('should support suspending after initial render', () => {
+		const [Suspender, suspend] = createSuspender(() => <div>initial</div>);
+
+		function App() {
+			return (
+				<Suspense fallback={<div>Suspended...</div>}>
+					<Suspender />
+				</Suspense>
+			);
+		}
+
+		render(<App />, scratch);
+		expect(scratch.innerHTML).to.equal(`<div>initial</div>`);
+
+		const [resolve] = suspend();
+		rerender();
+		expect(scratch.innerHTML).to.equal(`<div>Suspended...</div>`);
+
+		return resolve(() => <div>resolved</div>).then(() => {
+			rerender();
+			expect(scratch.innerHTML).to.equal(`<div>resolved</div>`);
+		});
+	});
+
 	it('should reset hooks of components', () => {
 		const [Lazy, resolve] = createLazy();
 		const LazyResult = ({ name }) => <div>Hello from {name}</div>;
