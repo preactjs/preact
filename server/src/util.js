@@ -1,21 +1,17 @@
 // DOM properties that should NOT have "px" added when numeric
 export const IS_NON_DIMENSIONAL = /acit|ex(?:s|g|n|p|$)|rph|grid|ows|mnc|ntw|ine[ch]|zoo|^ord|^--/i;
 
+const HTML_ENTITY_REG = /[&<>"]/g;
+const tagsToReplace = {
+	'&': '&amp;',
+	'<': '&lt;',
+	'>': '&gt;',
+	'"': '&quot;'
+};
+const replaceTag = (tag) => tagsToReplace[tag] || tag;
 export function encodeEntities(s) {
 	if (typeof s !== 'string') s = String(s);
-	let out = '';
-	for (let i = 0; i < s.length; i++) {
-		let ch = s[i];
-		// prettier-ignore
-		switch (ch) {
-			case '<': out += '&lt;'; break;
-			case '>': out += '&gt;'; break;
-			case '"': out += '&quot;'; break;
-			case '&': out += '&amp;'; break;
-			default: out += ch;
-		}
-	}
-	return out;
+	return s.replace(HTML_ENTITY_REG, replaceTag);
 }
 
 export let indent = (s, char) =>
