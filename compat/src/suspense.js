@@ -62,10 +62,12 @@ Suspense.prototype = new Component();
  * @param {import('./internal').Internal} suspendingInternal The suspending component
  */
 Suspense.prototype._childDidSuspend = function(promise, suspendingInternal) {
-	// @TODO Investigate what this logic does when a component throws while
-	// rendering the fallback...
-
 	const suspendingComponent = suspendingInternal._component;
+	if (suspendingComponent._onResolve != null) {
+		// This component has already been handled by a Suspense component. Do
+		// nothing
+		return;
+	}
 
 	/** @type {import('./internal').SuspenseComponent} */
 	const c = this;
@@ -73,8 +75,8 @@ Suspense.prototype._childDidSuspend = function(promise, suspendingInternal) {
 	if (c._suspenders == null) {
 		c._suspenders = [];
 	}
-	c._suspenders.push(suspendingComponent);
 
+	c._suspenders.push(suspendingComponent);
 	const resolve = suspended(c._internal);
 
 	let resolved = false;
