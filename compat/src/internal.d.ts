@@ -48,7 +48,7 @@ export interface VNode<T = any> extends PreactVNode<T> {
 }
 
 export interface SuspenseState {
-	_suspended?: null | Internal<any>;
+	_suspended?: boolean;
 }
 
 export interface SuspenseComponent

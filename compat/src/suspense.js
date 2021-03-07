@@ -46,7 +46,6 @@ export function Suspense() {
 	// we do not call super here to golf some bytes...
 	this._pendingSuspensionCount = 0;
 	this._suspenders = null;
-	this._detachOnNextRender = null;
 	this._parentDom = null;
 }
 
@@ -94,7 +93,8 @@ Suspense.prototype._childDidSuspend = function(promise, suspendingInternal) {
 
 	const onSuspensionComplete = () => {
 		if (!--c._pendingSuspensionCount) {
-			c.setState({ _suspended: (c._detachOnNextRender = null) });
+			this._parentDom = null;
+			c.setState({ _suspended: false });
 
 			let suspended;
 			while ((suspended = c._suspenders.pop())) {
@@ -106,8 +106,6 @@ Suspense.prototype._childDidSuspend = function(promise, suspendingInternal) {
 					suspended.forceUpdate();
 				}
 			}
-
-			this._parentDom = null;
 		}
 	};
 
@@ -121,9 +119,7 @@ Suspense.prototype._childDidSuspend = function(promise, suspendingInternal) {
 
 	if (!c._pendingSuspensionCount++ && !wasHydrating) {
 		this._parentDom = document.createElement('div');
-		c.setState({
-			_suspended: (c._detachOnNextRender = c._internal._children[0])
-		});
+		c.setState({ _suspended: true });
 	}
 
 	promise.then(onResolved, onResolved);

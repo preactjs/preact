@@ -164,7 +164,7 @@ export function renderComponent(
 	let oldStartDom = startDom;
 	let oldParentDom = parentDom;
 	if (internal._flags & TYPE_ROOT) {
-		parentDom = newProps._parentDom || parentDom;
+		parentDom = newProps._parentDom;
 
 		if (internal && internal._dom) {
 			startDom = internal._dom;
