@@ -4,7 +4,6 @@ import React, {
 	render,
 	Component,
 	Suspense,
-	lazy,
 	Fragment,
 	createContext,
 	useState,
@@ -73,20 +72,8 @@ describe('suspense', () => {
 	});
 
 	it('should support lazy', () => {
-		const LazyComp = ({ name }) => <div>Hello from {name}</div>;
-
-		/** @type {() => Promise<void>} */
-		let resolve;
-		const Lazy = lazy(() => {
-			const p = new Promise(res => {
-				resolve = () => {
-					res({ default: LazyComp });
-					return p;
-				};
-			});
-
-			return p;
-		});
+		const [Lazy, resolve] = createLazy();
+		const LazyResult = ({ name }) => <div>Hello from {name}</div>;
 
 		render(
 			<Suspense fallback={<div>Suspended...</div>}>
@@ -98,29 +85,18 @@ describe('suspense', () => {
 
 		expect(scratch.innerHTML).to.eql(`<div>Suspended...</div>`);
 
-		return resolve().then(() => {
+		return resolve(LazyResult).then(() => {
 			rerender();
 			expect(scratch.innerHTML).to.eql(`<div>Hello from LazyComp</div>`);
 		});
 	});
 
 	it('should reset hooks of components', () => {
+		const [Lazy, resolve] = createLazy();
+		const LazyResult = ({ name }) => <div>Hello from {name}</div>;
+
+		/** @type {(value: boolean) => void} */
 		let set;
-		const LazyComp = ({ name }) => <div>Hello from {name}</div>;
-
-		/** @type {() => Promise<void>} */
-		let resolve;
-		const Lazy = lazy(() => {
-			const p = new Promise(res => {
-				resolve = () => {
-					res({ default: LazyComp });
-					return p;
-				};
-			});
-
-			return p;
-		});
-
 		const Parent = ({ children }) => {
 			const [state, setState] = useState(false);
 			set = setState;
@@ -148,30 +124,20 @@ describe('suspense', () => {
 
 		expect(scratch.innerHTML).to.eql('<div>Suspended...</div>');
 
-		return resolve().then(() => {
+		return resolve(LazyResult).then(() => {
 			rerender();
 			expect(scratch.innerHTML).to.eql(`<div><p>hi</p></div>`);
 		});
 	});
 
 	it('should call effect cleanups', () => {
+		const [Lazy, resolve] = createLazy();
+		const LazyResult = ({ name }) => <div>Hello from {name}</div>;
+
+		/** @type {(value: boolean) => void} */
 		let set;
 		const effectSpy = sinon.spy();
 		const layoutEffectSpy = sinon.spy();
-		const LazyComp = ({ name }) => <div>Hello from {name}</div>;
-
-		/** @type {() => Promise<void>} */
-		let resolve;
-		const Lazy = lazy(() => {
-			const p = new Promise(res => {
-				resolve = () => {
-					res({ default: LazyComp });
-					return p;
-				};
-			});
-
-			return p;
-		});
 
 		const Parent = ({ children }) => {
 			const [state, setState] = useState(false);
@@ -212,7 +178,7 @@ describe('suspense', () => {
 		expect(effectSpy).to.be.calledOnce;
 		expect(layoutEffectSpy).to.be.calledOnce;
 
-		return resolve().then(() => {
+		return resolve(LazyResult).then(() => {
 			rerender();
 			expect(effectSpy).to.be.calledOnce;
 			expect(layoutEffectSpy).to.be.calledOnce;
@@ -221,22 +187,10 @@ describe('suspense', () => {
 	});
 
 	it('should support a call to setState before rendering the fallback', () => {
-		const LazyComp = ({ name }) => <div>Hello from {name}</div>;
+		const [Lazy, resolve] = createLazy();
+		const LazyResult = ({ name }) => <div>Hello from {name}</div>;
 
-		/** @type {() => Promise<void>} */
-		let resolve;
-		const Lazy = lazy(() => {
-			const p = new Promise(res => {
-				resolve = () => {
-					res({ default: LazyComp });
-					return p;
-				};
-			});
-
-			return p;
-		});
-
-		/** @type {(Object) => void} */
+		/** @type {(arg: object) => void} */
 		let setState;
 		class App extends Component {
 			constructor(props) {
@@ -262,28 +216,16 @@ describe('suspense', () => {
 
 		expect(scratch.innerHTML).to.eql(`<div>Suspended...</div>`);
 
-		return resolve().then(() => {
+		return resolve(LazyResult).then(() => {
 			rerender();
 			expect(scratch.innerHTML).to.eql(`<div>Hello from LazyComp</div>`);
 		});
 	});
 
 	it('lazy should forward refs', () => {
-		const LazyComp = () => <div>Hello from LazyComp</div>;
-		let ref = {};
-
-		/** @type {() => Promise<void>} */
-		let resolve;
-		const Lazy = lazy(() => {
-			const p = new Promise(res => {
-				resolve = () => {
-					res({ default: LazyComp });
-					return p;
-				};
-			});
-
-			return p;
-		});
+		const [Lazy, resolve] = createLazy();
+		const LazyResult = () => <div>Hello from LazyComp</div>;
+		let ref = { current: null };
 
 		render(
 			<Suspense fallback={<div>Suspended...</div>}>
@@ -293,9 +235,9 @@ describe('suspense', () => {
 		);
 		rerender();
 
-		return resolve().then(() => {
+		return resolve(LazyResult).then(() => {
 			rerender();
-			expect(ref.current.constructor).to.equal(LazyComp);
+			expect(ref.current.constructor).to.equal(LazyResult);
 		});
 	});
 
@@ -339,10 +281,6 @@ describe('suspense', () => {
 	});
 
 	it('should not call lifecycle methods of an initially suspending component', () => {
-		let componentWillMount = sinon.spy();
-		let componentDidMount = sinon.spy();
-		let componentWillUnmount = sinon.spy();
-
 		/** @type {() => Promise<void>} */
 		let resolve;
 		let resolved = false;
@@ -361,16 +299,16 @@ describe('suspense', () => {
 				}
 				return <div>Lifecycle</div>;
 			}
-			componentWillMount() {
-				componentWillMount();
-			}
-			componentDidMount() {
-				componentDidMount();
-			}
-			componentWillUnmount() {
-				componentWillUnmount();
-			}
+
+			componentWillMount() {}
+			componentDidMount() {}
+			componentWillUnmount() {}
 		}
+
+		const lifecycles = LifecycleSuspender.prototype;
+		sinon.spy(lifecycles, 'componentWillMount');
+		sinon.spy(lifecycles, 'componentDidMount');
+		sinon.spy(lifecycles, 'componentWillUnmount');
 
 		render(
 			<Suspense fallback={<div>Suspended...</div>}>
@@ -380,33 +318,28 @@ describe('suspense', () => {
 		);
 
 		expect(scratch.innerHTML).to.eql(``);
-		expect(componentWillMount).to.have.been.calledOnce;
-		expect(componentDidMount).to.not.have.been.called;
-		expect(componentWillUnmount).to.not.have.been.called;
+		expect(lifecycles.componentWillMount).to.have.been.calledOnce;
+		expect(lifecycles.componentDidMount).to.not.have.been.called;
+		expect(lifecycles.componentWillUnmount).to.not.have.been.called;
 
 		rerender();
 
 		expect(scratch.innerHTML).to.eql(`<div>Suspended...</div>`);
-		expect(componentWillMount).to.have.been.calledOnce;
-		expect(componentDidMount).to.not.have.been.called;
-		expect(componentWillUnmount).to.not.have.been.called;
+		expect(lifecycles.componentWillMount).to.have.been.calledOnce;
+		expect(lifecycles.componentDidMount).to.not.have.been.called;
+		expect(lifecycles.componentWillUnmount).to.not.have.been.called;
 
 		return resolve().then(() => {
 			rerender();
 			expect(scratch.innerHTML).to.eql(`<div>Lifecycle</div>`);
 
-			expect(componentWillMount).to.have.been.calledOnce;
-			expect(componentDidMount).to.have.been.calledOnce;
-			expect(componentWillUnmount).to.not.have.been.called;
+			expect(lifecycles.componentWillMount).to.have.been.calledOnce;
+			expect(lifecycles.componentDidMount).to.have.been.calledOnce;
+			expect(lifecycles.componentWillUnmount).to.not.have.been.called;
 		});
 	});
 
 	it('should properly call lifecycle methods and maintain state of a delayed suspending component', () => {
-		let componentWillMount = sinon.spy();
-		let componentDidMount = sinon.spy();
-		let componentDidUpdate = sinon.spy();
-		let componentWillUnmount = sinon.spy();
-
 		/** @type {() => void} */
 		let increment;
 
@@ -439,19 +372,17 @@ describe('suspense', () => {
 					</Fragment>
 				);
 			}
-			componentWillMount() {
-				componentWillMount();
-			}
-			componentDidMount() {
-				componentDidMount();
-			}
-			componentWillUnmount() {
-				componentWillUnmount();
-			}
-			componentDidUpdate() {
-				componentDidUpdate();
-			}
+			componentWillMount() {}
+			componentDidMount() {}
+			componentWillUnmount() {}
+			componentDidUpdate() {}
 		}
+
+		const lifecycles = LifecycleSuspender.prototype;
+		sinon.spy(lifecycles, 'componentWillMount');
+		sinon.spy(lifecycles, 'componentDidMount');
+		sinon.spy(lifecycles, 'componentDidUpdate');
+		sinon.spy(lifecycles, 'componentWillUnmount');
 
 		render(
 			<Suspense fallback={<div>Suspended...</div>}>
@@ -461,62 +392,58 @@ describe('suspense', () => {
 		);
 
 		expect(scratch.innerHTML).to.eql(`<p>Count: 0</p>`);
-		expect(componentWillMount).to.have.been.calledOnce;
-		expect(componentDidMount).to.have.been.calledOnce;
-		expect(componentDidUpdate).to.not.have.been.called;
-		expect(componentWillUnmount).to.not.have.been.called;
+		expect(lifecycles.componentWillMount).to.have.been.calledOnce;
+		expect(lifecycles.componentDidMount).to.have.been.calledOnce;
+		expect(lifecycles.componentDidUpdate).to.not.have.been.called;
+		expect(lifecycles.componentWillUnmount).to.not.have.been.called;
 
 		increment();
 		rerender();
 
 		expect(scratch.innerHTML).to.eql(`<p>Count: 1</p>`);
-		expect(componentWillMount).to.have.been.calledOnce;
-		expect(componentDidMount).to.have.been.calledOnce;
-		expect(componentDidUpdate).to.have.been.calledOnce;
-		expect(componentWillUnmount).to.not.have.been.called;
+		expect(lifecycles.componentWillMount).to.have.been.calledOnce;
+		expect(lifecycles.componentDidMount).to.have.been.calledOnce;
+		expect(lifecycles.componentDidUpdate).to.have.been.calledOnce;
+		expect(lifecycles.componentWillUnmount).to.not.have.been.called;
 
 		increment();
 		rerender();
 
 		expect(scratch.innerHTML).to.eql(`<div>Suspended...</div>`);
-		expect(componentWillMount).to.have.been.calledOnce;
-		expect(componentDidMount).to.have.been.calledOnce;
-		expect(componentDidUpdate).to.have.been.calledOnce;
-		expect(componentWillUnmount).to.not.have.been.called;
+		expect(lifecycles.componentWillMount).to.have.been.calledOnce;
+		expect(lifecycles.componentDidMount).to.have.been.calledOnce;
+		expect(lifecycles.componentDidUpdate).to.have.been.calledOnce;
+		expect(lifecycles.componentWillUnmount).to.not.have.been.called;
 
 		return resolve().then(() => {
 			rerender();
 
 			expect(scratch.innerHTML).to.eql(`<p>Count: 2</p>`);
-			expect(componentWillMount).to.have.been.calledOnce;
-			expect(componentDidMount).to.have.been.calledOnce;
+			expect(lifecycles.componentWillMount).to.have.been.calledOnce;
+			expect(lifecycles.componentDidMount).to.have.been.calledOnce;
 			// TODO: This is called thrice since the cDU queued up after the second
 			// increment is never cleared once the component suspends. So when it
 			// resumes and the component is rerendered, we queue up another cDU so
 			// cDU is called an extra time.
-			expect(componentDidUpdate).to.have.been.calledThrice;
-			expect(componentWillUnmount).to.not.have.been.called;
+			expect(lifecycles.componentDidUpdate).to.have.been.calledThrice;
+			expect(lifecycles.componentWillUnmount).to.not.have.been.called;
 		});
 	});
 
 	it('should not call lifecycle methods when a sibling suspends', () => {
-		let componentWillMount = sinon.spy();
-		let componentDidMount = sinon.spy();
-		let componentWillUnmount = sinon.spy();
 		class LifecycleLogger extends Component {
 			render() {
 				return <div>Lifecycle</div>;
 			}
-			componentWillMount() {
-				componentWillMount();
-			}
-			componentDidMount() {
-				componentDidMount();
-			}
-			componentWillUnmount() {
-				componentWillUnmount();
-			}
+			componentWillMount() {}
+			componentDidMount() {}
+			componentWillUnmount() {}
 		}
+
+		const lifecyles = LifecycleLogger.prototype;
+		sinon.spy(lifecyles, 'componentWillMount');
+		sinon.spy(lifecyles, 'componentDidMount');
+		sinon.spy(lifecyles, 'componentWillUnmount');
 
 		const [Suspender, suspend] = createSuspender(() => <div>Suspense</div>);
 
@@ -529,18 +456,18 @@ describe('suspense', () => {
 		);
 
 		expect(scratch.innerHTML).to.eql(`<div>Suspense</div><div>Lifecycle</div>`);
-		expect(componentWillMount).to.have.been.calledOnce;
-		expect(componentDidMount).to.have.been.calledOnce;
-		expect(componentWillUnmount).to.not.have.been.called;
+		expect(lifecyles.componentWillMount).to.have.been.calledOnce;
+		expect(lifecyles.componentDidMount).to.have.been.calledOnce;
+		expect(lifecyles.componentWillUnmount).to.not.have.been.called;
 
 		const [resolve] = suspend();
 
 		rerender();
 
 		expect(scratch.innerHTML).to.eql(`<div>Suspended...</div>`);
-		expect(componentWillMount).to.have.been.calledOnce;
-		expect(componentDidMount).to.have.been.calledOnce;
-		expect(componentWillUnmount).to.not.have.been.called;
+		expect(lifecyles.componentWillMount).to.have.been.calledOnce;
+		expect(lifecyles.componentDidMount).to.have.been.calledOnce;
+		expect(lifecyles.componentWillUnmount).to.not.have.been.called;
 
 		return resolve(() => <div>Suspense 2</div>).then(() => {
 			rerender();
@@ -548,9 +475,9 @@ describe('suspense', () => {
 				`<div>Suspense 2</div><div>Lifecycle</div>`
 			);
 
-			expect(componentWillMount).to.have.been.calledOnce;
-			expect(componentDidMount).to.have.been.calledOnce;
-			expect(componentWillUnmount).to.not.have.been.called;
+			expect(lifecyles.componentWillMount).to.have.been.calledOnce;
+			expect(lifecyles.componentDidMount).to.have.been.calledOnce;
+			expect(lifecyles.componentWillUnmount).to.not.have.been.called;
 		});
 	});
 
@@ -1021,18 +948,7 @@ describe('suspense', () => {
 	});
 
 	it("should throw when lazy's loader throws", () => {
-		/** @type {() => Promise<any>} */
-		let reject;
-		const ThrowingLazy = lazy(() => {
-			const prom = new Promise((res, rej) => {
-				reject = () => {
-					rej(new Error("Thrown in lazy's loader..."));
-					return prom;
-				};
-			});
-
-			return prom;
-		});
+		const [ThrowingLazy, _, reject] = createLazy();
 
 		render(
 			<Suspense fallback={<div>Suspended...</div>}>
@@ -1046,7 +962,7 @@ describe('suspense', () => {
 
 		expect(scratch.innerHTML).to.eql(`<div>Suspended...</div>`);
 
-		return reject().then(
+		return reject(new Error("Thrown in lazy's loader...")).then(
 			() => {
 				expect.fail('Suspended promises resolved instead of rejected.');
 			},
@@ -1366,6 +1282,7 @@ describe('suspense', () => {
 	it('should un-suspend when suspender unmounts', () => {
 		const [Suspender, suspend] = createSuspender(() => <div>Suspender</div>);
 
+		/** @type {() => void} */
 		let hide;
 
 		class Conditional extends Component {
@@ -1419,7 +1336,8 @@ describe('suspense', () => {
 			<div>Suspender 2</div>
 		));
 
-		let hide, resolve;
+		/** @type {() => void} */
+		let hide;
 
 		class Conditional extends Component {
 			constructor(props) {
@@ -1451,7 +1369,7 @@ describe('suspense', () => {
 			'<div>conditional show<div>Suspender 1</div><div>Suspender 2</div></div>'
 		);
 
-		resolve = suspend1()[0];
+		let resolve = suspend1()[0];
 		rerender();
 		expect(scratch.innerHTML).to.eql('<div>conditional showSuspended</div>');
 
@@ -1487,7 +1405,10 @@ describe('suspense', () => {
 			return <div>{`Lazy ${value}`}</div>;
 		}
 
-		let hide, setValue;
+		/** @type {() => void} */
+		let hide;
+		/** @type {(value: string) => void} */
+		let setValue;
 
 		class Conditional extends Component {
 			constructor(props) {
@@ -1552,7 +1473,8 @@ describe('suspense', () => {
 	it('should allow resolve suspense promise after unmounts', async () => {
 		const [Suspender, suspend] = createSuspender(() => <div>Suspender</div>);
 
-		let hide, resolve;
+		/** @type {() => void} */
+		let hide;
 
 		class Conditional extends Component {
 			constructor(props) {
@@ -1583,7 +1505,7 @@ describe('suspense', () => {
 			'<div>conditional show<div>Suspender</div></div>'
 		);
 
-		resolve = suspend()[0];
+		let resolve = suspend()[0];
 		rerender();
 		expect(scratch.innerHTML).to.eql('<div>conditional showSuspended</div>');
 
@@ -1599,6 +1521,7 @@ describe('suspense', () => {
 	it('should support updating state while suspended', async () => {
 		const [Suspender, suspend] = createSuspender(() => <div>Suspender</div>);
 
+		/** @type {() => void} */
 		let increment;
 
 		class Updater extends Component {
@@ -1653,17 +1576,18 @@ describe('suspense', () => {
 	});
 
 	it('should call componentWillUnmount on a suspended component', () => {
-		const cWUSpy = sinon.spy();
-
 		// eslint-disable-next-line react/require-render-return
 		class Suspender extends Component {
+			componentWillUnmount() {}
+			/** @returns {import('../../src/internal').ComponentChildren} */
 			render() {
 				throw new Promise(() => {});
 			}
 		}
 
-		Suspender.prototype.componentWillUnmount = cWUSpy;
+		const cWUSpy = sinon.spy(Suspender.prototype, 'componentWillUnmount');
 
+		/** @type {() => void} */
 		let hide;
 
 		let suspender = null;
@@ -1762,6 +1686,7 @@ describe('suspense', () => {
 			}
 		}
 
+		/** @type {{ unsuspend(): void }} */
 		let suspender;
 		class Suspender extends Component {
 			constructor(props) {
@@ -1814,6 +1739,7 @@ describe('suspense', () => {
 	// when a suspended component has rerendered and trigger a rerender on the
 	// parent Suspense
 	it.skip('should allow multiple suspended children to update', () => {
+		/** @returns {[(content: any) => void, import('preact/src/index').ComponentClass]} */
 		function createSuspender() {
 			let suspender;
 			class Suspender extends Component {
@@ -1888,6 +1814,7 @@ describe('suspense', () => {
 			return content;
 		}
 
+		/** @type {Component} */
 		let parent;
 		class Parent extends Component {
 			constructor(props) {

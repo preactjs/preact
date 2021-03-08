@@ -126,7 +126,7 @@
 				2,
 				{
 					"args": "none",
-					"varsIgnorePattern": "^h|React$"
+					"varsIgnorePattern": "^h|React|_$"
 				}
 			],
 			"prefer-rest-params": 0,
