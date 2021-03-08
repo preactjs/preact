@@ -73,19 +73,25 @@ describe('suspense', () => {
 		const [Lazy, resolve] = createLazy();
 		const LazyResult = ({ name }) => <div>Hello from {name}</div>;
 
+		// Render initial state
 		render(
 			<Suspense fallback={<div>Suspended...</div>}>
 				<Lazy name="LazyComp" />
 			</Suspense>,
 			scratch
-		); // Render initial state
-		rerender(); // Re-render with fallback cuz lazy threw
+		);
+		expect(Lazy).to.have.been.calledOnce;
 
+		// Re-render fallback cuz lazy threw
+		rerender();
 		expect(scratch.innerHTML).to.eql(`<div>Suspended...</div>`);
+		expect(Lazy).to.have.been.calledTwice;
 
 		return resolve(LazyResult).then(() => {
+			// Re-render result
 			rerender();
 			expect(scratch.innerHTML).to.eql(`<div>Hello from LazyComp</div>`);
+			expect(Lazy).to.have.been.calledThrice;
 		});
 	});
 
@@ -103,13 +109,17 @@ describe('suspense', () => {
 		render(<App />, scratch);
 		expect(scratch.innerHTML).to.equal(`<div>initial</div>`);
 
-		const [resolve] = suspend();
+		const [resolve, _, Lazy] = suspend();
 		rerender();
 		expect(scratch.innerHTML).to.equal(`<div>Suspended...</div>`);
+		// Lazy is called once during the first render when it throws, and again
+		// when the fallback is rendered
+		expect(Lazy).to.have.been.calledTwice;
 
 		return resolve(() => <div>resolved</div>).then(() => {
 			rerender();
 			expect(scratch.innerHTML).to.equal(`<div>resolved</div>`);
+			expect(Lazy).to.have.been.calledThrice;
 		});
 	});
 
@@ -766,32 +776,39 @@ describe('suspense', () => {
 		expect(Suspender1.prototype.render).to.have.been.calledOnce;
 		expect(Suspender2.prototype.render).to.have.been.calledOnce;
 
-		const [resolve1] = suspend1();
-		const [resolve2] = suspend2();
-		expect(Suspender1.prototype.render).to.have.been.calledOnce;
-		expect(Suspender2.prototype.render).to.have.been.calledOnce;
+		const [resolve1, _1, Lazy1] = suspend1();
+		const [resolve2, _2, Lazy2] = suspend2();
+		expect(Lazy1).not.to.have.been.called;
+		expect(Lazy2).not.to.have.been.called;
 
 		rerender();
 
+		// Lazy is only called once cuz vnode equality prevents re-rendering for the
+		// <Catcher /> component's children
 		expect(scratch.innerHTML).to.eql(`<div>Suspended...</div>`);
-		expect(Suspender1.prototype.render).to.have.been.calledTwice;
-		expect(Suspender2.prototype.render).to.have.been.calledTwice;
+		expect(Lazy1).to.have.been.calledOnce;
+		expect(Lazy2).to.have.been.calledOnce;
 
-		return resolve1(() => <div>Hello first 2</div>).then(() => {
-			rerender();
-			expect(scratch.innerHTML).to.eql(`<div>Suspended...</div>`);
-			expect(Suspender1.prototype.render).to.have.been.calledTwice;
-			expect(Suspender2.prototype.render).to.have.been.calledTwice;
-
-			return resolve2(() => <div>Hello second 2</div>).then(() => {
-				rerender();
-				expect(scratch.innerHTML).to.eql(
-					`<div>Hello first 2</div><div>Hello second 2</div>`
-				);
-				expect(Suspender1.prototype.render).to.have.been.calledTwice;
-				expect(Suspender2.prototype.render).to.have.been.calledTwice;
-			});
-		});
+		return (
+			// Resolve the first Suspender
+			resolve1(() => <div>Hello first 2</div>)
+				.then(() => {
+					rerender();
+					expect(scratch.innerHTML).to.eql(`<div>Suspended...</div>`);
+					expect(Lazy1).to.have.been.calledOnce;
+					expect(Lazy2).to.have.been.calledOnce;
+				})
+				// Resolve the second Suspender
+				.then(() => resolve2(() => <div>Hello second 2</div>))
+				.then(() => {
+					rerender();
+					expect(scratch.innerHTML).to.eql(
+						`<div>Hello first 2</div><div>Hello second 2</div>`
+					);
+					expect(Lazy1).to.have.been.calledTwice;
+					expect(Lazy2).to.have.been.calledTwice;
+				})
+		);
 	});
 
 	it('should call multiple nested sibling suspending components render in one go', () => {
@@ -820,32 +837,39 @@ describe('suspense', () => {
 		expect(Suspender1.prototype.render).to.have.been.calledOnce;
 		expect(Suspender2.prototype.render).to.have.been.calledOnce;
 
-		const [resolve1] = suspend1();
-		const [resolve2] = suspend2();
-		expect(Suspender1.prototype.render).to.have.been.calledOnce;
-		expect(Suspender2.prototype.render).to.have.been.calledOnce;
+		const [resolve1, _1, Lazy1] = suspend1();
+		const [resolve2, _2, Lazy2] = suspend2();
+		expect(Lazy1).not.to.have.been.called;
+		expect(Lazy2).not.to.have.been.called;
 
 		rerender();
 
+		// Lazy is only called once cuz vnode equality prevents re-rendering for the
+		// <Catcher /> component's children
 		expect(scratch.innerHTML).to.eql(`<div>Suspended...</div>`);
-		expect(Suspender1.prototype.render).to.have.been.calledTwice;
-		expect(Suspender2.prototype.render).to.have.been.calledTwice;
+		expect(Lazy1).to.have.been.calledOnce;
+		expect(Lazy2).to.have.been.calledOnce;
 
-		return resolve1(() => <div>Hello first 2</div>).then(() => {
-			rerender();
-			expect(scratch.innerHTML).to.eql(`<div>Suspended...</div>`);
-			expect(Suspender1.prototype.render).to.have.been.calledTwice;
-			expect(Suspender2.prototype.render).to.have.been.calledTwice;
-
-			return resolve2(() => <div>Hello second 2</div>).then(() => {
-				rerender();
-				expect(scratch.innerHTML).to.eql(
-					`<div>Hello first 2</div><div><div>Hello second 2</div></div>`
-				);
-				expect(Suspender1.prototype.render).to.have.been.calledTwice;
-				expect(Suspender2.prototype.render).to.have.been.calledTwice;
-			});
-		});
+		// Resolve first suspender
+		return (
+			resolve1(() => <div>Hello first 2</div>)
+				.then(() => {
+					rerender();
+					expect(scratch.innerHTML).to.eql(`<div>Suspended...</div>`);
+					expect(Lazy1).to.have.been.calledOnce;
+					expect(Lazy2).to.have.been.calledOnce;
+				})
+				// Resolve second suspender
+				.then(() => resolve2(() => <div>Hello second 2</div>))
+				.then(() => {
+					rerender();
+					expect(scratch.innerHTML).to.eql(
+						`<div>Hello first 2</div><div><div>Hello second 2</div></div>`
+					);
+					expect(Lazy1).to.have.been.calledTwice;
+					expect(Lazy2).to.have.been.calledTwice;
+				})
+		);
 	});
 
 	it('should support text directly under Suspense', () => {

@@ -27,8 +27,9 @@ const h = React.createElement;
  * 	expect(scratch.innerHTML).to.equal(`<div>Hello</div>`);
  * });
  *
+ * @typedef {import('preact/compat').FunctionComponent} FunctionComponent
  * @typedef {import('../../../src').ComponentType<any>} ComponentType
- * @returns {[typeof Component, (c: ComponentType) => Promise<void>, (e: Error) => Promise<void>]}
+ * @returns {[FunctionComponent, (c: ComponentType) => Promise<void>, (e: Error) => Promise<void>]}
  */
 export function createLazy() {
 	/** @type {(c: ComponentType) => Promise<void>} */
@@ -49,7 +50,8 @@ export function createLazy() {
 		return promise;
 	});
 
-	return [Lazy, c => resolver(c), e => rejecter(e)];
+	const LazySpy = sinon.spy(Lazy);
+	return [LazySpy, c => resolver(c), e => rejecter(e)];
 }
 
 /**
@@ -81,12 +83,12 @@ export function createLazy() {
  * });
  *
  * @typedef {Component<{}, any>} Suspender
- * @typedef {[(c: ComponentType) => Promise<void>, (error: Error) => Promise<void>]} Resolvers
+ * @typedef {[(c: ComponentType) => Promise<void>, (error: Error) => Promise<void>, FunctionComponent]} Resolvers
  * @param {ComponentType} DefaultComponent
  * @returns {[typeof Suspender, () => Resolvers]}
  */
 export function createSuspender(DefaultComponent) {
-	/** @type {(lazy: typeof Component) => void} */
+	/** @type {(lazy: FunctionComponent) => void} */
 	let renderLazy;
 	class Suspender extends Component {
 		constructor(props, context) {
@@ -103,13 +105,11 @@ export function createSuspender(DefaultComponent) {
 
 	sinon.spy(Suspender.prototype, 'render');
 
-	/**
-	 * @returns {Resolvers}
-	 */
+	/** @returns {Resolvers} */
 	function suspend() {
 		const [Lazy, resolve, reject] = createLazy();
 		renderLazy(Lazy);
-		return [resolve, reject];
+		return [resolve, reject, Lazy];
 	}
 
 	return [Suspender, suspend];
