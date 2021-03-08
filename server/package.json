@@ -23,7 +23,7 @@
 	},
 	"scripts": {
 		"build": "npm run -s transpile && npm run -s transpile:jsx && npm run -s copy-typescript-definition",
-		"postbuild": "node ./config/node-13-exports.js",
+		"postbuild": "node ./config/node-13-exports.js && node ./config/node-commonjs.js",
 		"transpile": "microbundle src/index.js -f es,umd --target web --external preact",
 		"transpile:jsx": "microbundle src/jsx.js -o dist/jsx.js --target web --external none && microbundle dist/jsx.js -o dist/jsx.js -f cjs",
 		"copy-typescript-definition": "copyfiles -f src/*.d.ts dist",
