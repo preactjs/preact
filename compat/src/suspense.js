@@ -76,8 +76,8 @@ Suspense.prototype._childDidSuspend = function(promise, suspendingInternal) {
 	if (c._suspenders == null) {
 		c._suspenders = [];
 	}
-
 	c._suspenders.push(suspendingComponent);
+
 	const resolve = suspended(c._internal);
 
 	let resolved = false;

@@ -256,8 +256,9 @@ export function renderComponent(
 		// the root node's parent tree, then we can use it. This case assumes
 		// the root node rendered its children into a new parent.
 		return oldStartDom;
+
+		// eslint-disable-next-line no-else-return
 	} else {
-		// eslint-disable-line no-else-return
 		// Here, if the parentDoms are different and oldStartDom has moved into
 		// a new parentDom, we'll assume the root node moved oldStartDom under
 		// the new parentDom. Because of this change, we need to search the
