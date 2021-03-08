@@ -166,14 +166,16 @@ export function renderComponent(
 	if (internal._flags & TYPE_ROOT) {
 		parentDom = newProps._parentDom;
 
-		if (internal && internal._dom) {
-			startDom = internal._dom;
-		}
+		if (parentDom !== oldParentDom) {
+			if (internal && internal._dom) {
+				startDom = internal._dom;
+			}
 
-		// The `startDom` variable might point to a node from another
-		// tree from a previous render
-		if (startDom != null && startDom.parentNode !== parentDom) {
-			startDom = null;
+			// The `startDom` variable might point to a node from another
+			// tree from a previous render
+			if (startDom != null && startDom.parentNode !== parentDom) {
+				startDom = null;
+			}
 		}
 	}
 
@@ -264,13 +266,11 @@ export function renderComponent(
 		// the new parentDom. Because of this change, we need to search the
 		// internal tree for the next DOM sibling the tree should begin with
 
-		// @TODO Ensure there is suspense test with <Fragment><div><//> siblings
-		// around Suspense and suspender
-		//
-		// @TODO Hmmm here we are searching the internal before the newChildren
-		// are set on the internal, meaning if this root node is being mounted it
-		// won't find itself in the parent's array to begin searching siblings
-		// after itself... Think about if this could lead to bugs...
+		// @TODO Hmmm here we are searching the internal before the newChildren are
+		// set on the internal, meaning if this root node is being mounted it won't
+		// find itself in the parent's array to begin searching siblings after
+		// itself... Think about if this could lead to bugs... Add tests for
+		// mounting Suspense after initial render?
 		return getDomSibling(internal);
 	}
 }

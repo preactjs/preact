@@ -9,6 +9,7 @@ import React, {
 	useState
 } from 'preact/compat';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
+import { div } from '../../../test/_util/dom';
 import { createLazy, createSuspender } from './suspense-utils';
 
 const h = React.createElement;
@@ -116,9 +117,16 @@ describe('suspense', () => {
 		// when the fallback is rendered
 		expect(Lazy).to.have.been.calledTwice;
 
-		return resolve(() => <div>resolved</div>).then(() => {
+		return resolve(() => (
+			<Fragment>
+				<div>resolved 1</div>
+				<div>resolved 2</div>
+			</Fragment>
+		)).then(() => {
 			rerender();
-			expect(scratch.innerHTML).to.equal(`<div>resolved</div>`);
+			expect(scratch.innerHTML).to.equal(
+				`<div>resolved 1</div><div>resolved 2</div>`
+			);
 			expect(Lazy).to.have.been.calledThrice;
 		});
 	});
@@ -2159,6 +2167,62 @@ describe('suspense', () => {
 		return resolve(props => <div>{props.value}</div>).then(() => {
 			rerender();
 			expect(scratch.innerHTML).to.eql(`<div>123</div>`);
+		});
+	});
+
+	it('should support suspending around Fragments', () => {
+		const [Suspender, suspend] = createSuspender(() => <div>initial</div>);
+
+		function App() {
+			return (
+				<Fragment>
+					<Fragment>
+						<div>0</div>
+					</Fragment>
+					<Suspense fallback={<div>Suspended...</div>}>
+						<Fragment>
+							<div>1</div>
+						</Fragment>
+						<Suspender />
+						<Fragment>
+							<div>2</div>
+						</Fragment>
+					</Suspense>
+					<Fragment>
+						<div>3</div>
+					</Fragment>
+				</Fragment>
+			);
+		}
+
+		render(<App />, scratch);
+		expect(scratch.innerHTML).to.equal(
+			[div(0), div(1), div('initial'), div(2), div(3)].join('')
+		);
+
+		const [resolve] = suspend();
+		rerender();
+		expect(scratch.innerHTML).to.equal(
+			[div(0), div('Suspended...'), div(3)].join('')
+		);
+
+		return resolve(() => (
+			<Fragment>
+				<div>resolved A</div>
+				<div>resolved B</div>
+			</Fragment>
+		)).then(() => {
+			rerender();
+			expect(scratch.innerHTML).to.equal(
+				[
+					div(0),
+					div(1),
+					div('resolved A'),
+					div('resolved B'),
+					div(2),
+					div(3)
+				].join('')
+			);
 		});
 	});
 });

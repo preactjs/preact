@@ -7,7 +7,8 @@ import {
 	MODE_SUSPENDED,
 	RESET_MODE,
 	TYPE_TEXT,
-	MODE_ERRORED
+	MODE_ERRORED,
+	TYPE_ROOT
 } from '../constants';
 import { normalizeToVNode } from '../create-element';
 import { setProperty } from './props';
@@ -266,7 +267,10 @@ export function mountChildren(
 		newDom = childInternal._dom;
 
 		if (newDom != null) {
-			if (firstChildDom == null) {
+			if (
+				firstChildDom == null &&
+				(!(childInternal._flags & TYPE_ROOT) || newDom.parentNode == parentDom)
+			) {
 				firstChildDom = newDom;
 			}
 

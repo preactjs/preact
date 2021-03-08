@@ -5,7 +5,8 @@ import {
 	TYPE_TEXT,
 	MODE_HYDRATE,
 	MODE_SUSPENDED,
-	EMPTY_ARR
+	EMPTY_ARR,
+	TYPE_ROOT
 } from '../constants';
 import { mount } from './mount';
 import { patch } from './patch';
@@ -163,7 +164,12 @@ export function diffChildren(
 			);
 		}
 
-		if (newDom != null) {
+		if (
+			childInternal._flags & TYPE_ROOT &&
+			(newDom == null || newDom.parentNode != parentDom)
+		) {
+			startDom = nextDomSibling;
+		} else if (newDom != null) {
 			if (firstChildDom == null) {
 				firstChildDom = newDom;
 			}

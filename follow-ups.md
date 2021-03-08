@@ -4,6 +4,21 @@
 
 - `[MAJOR]` Deprecated `component.base`
 
+## Root node follow ups
+
+- Add specific tests for root nodes
+  - initial mount with same/different parentDOM as parent
+  - mounting on rerender with same/different parentDOM as parent
+  - diffing with same/different parentDOM as parent (inert portal node & normal portal node)
+  - diffing and switching between same <-> different
+  - toggling siblings to root nodes with same/different parentDOM
+  - Ensure interesting sibling/children patterns
+    - text children and text siblings
+    - dom children and dom siblings
+    - null children and null siblings
+    - multiple Fragment children & multiple Fragment siblings
+  - Check out portals.test.js for inspiration
+
 ## Backing Node follow ups
 
 - Revisit `prevDom` code path for null placeholders
@@ -13,6 +28,12 @@
 - Rewrite commit loop to operate on internals not components
 - rewrite hooks to operate on internals?
 - Always assign a number to `_vnodeId` (not null, use 0 to clear?)
+- Consider converting Fragment (and other special nodes, e.g. root, Portal,
+  context?) to be numbers instead of functions with special diff handling
+  - One benefit of using numbers for Roots/Portals is that a portal could be
+    created with a `null` \_parentDOM prop and still be marked as a root type.
+    Particularly, this is useful for Suspense and would remove the need for the
+    call to `getParentDom` in `Suspense.render`
 
 ## Child diffing investigations
 
@@ -27,6 +48,9 @@
 ## TODOs
 
 - Consider further removing `_dom` pointers from non-dom VNodes
+  - Ensure all tree traversal functions handle root nodes with different
+    parentDOM. For example, getChildDom & getDomSibling should skip over root
+    nodes iif they have different parentDOMs.
 - Rewrite Suspense to use Root Nodes
 - Fix Suspense tests:
   - "should correctly render nested Suspense components without intermediate DOM #2747"
