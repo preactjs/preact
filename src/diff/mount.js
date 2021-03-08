@@ -200,9 +200,6 @@ function mountDOMElement(dom, internal, globalContext, isSvg, commitQueue) {
 			);
 		}
 
-		// To override mountChildren setting _dom
-		internal._dom = dom;
-
 		// (as above, don't diff props during hydration)
 		if (!isHydrating) {
 			if (newValue != null) {
@@ -295,7 +292,9 @@ export function mountChildren(
 		}
 	}
 
-	parentInternal._dom = firstChildDom;
+	if (parentInternal._flags & TYPE_COMPONENT) {
+		parentInternal._dom = firstChildDom;
+	}
 
 	// Remove children that are not part of any vnode.
 	if (

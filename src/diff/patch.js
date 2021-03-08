@@ -59,18 +59,16 @@ export function patch(
 				commitQueue,
 				startDom
 			);
+		} else if (newVNode._vnodeId !== internal._vnodeId) {
+			nextDomSibling = patchDOMElement(
+				internal._dom,
+				newVNode,
+				internal,
+				globalContext,
+				isSvg,
+				commitQueue
+			);
 		} else {
-			if (newVNode._vnodeId !== internal._vnodeId) {
-				patchDOMElement(
-					internal._dom,
-					newVNode,
-					internal,
-					globalContext,
-					isSvg,
-					commitQueue
-				);
-			}
-
 			// @ts-ignore Trust me TS, nextSibling is a PreactElement
 			nextDomSibling = internal._dom.nextSibling;
 		}
@@ -107,7 +105,7 @@ export function patch(
  * @param {boolean} isSvg Whether or not this DOM node is an SVG node
  * @param {Array<import('../internal').Component>} commitQueue List of components
  * which have callbacks to invoke in commitRoot
- * @returns {void}
+ * @returns {import('../internal').PreactElement}
  */
 function patchDOMElement(
 	dom,
@@ -181,9 +179,6 @@ function patchDOMElement(
 		setProperty(dom, 'checked', tmp, oldProps.checked, false);
 	}
 
-	// @TODO(golf) We need to reset internal._dom to dom here. Revisit if
-	// returning dom and setting it in patch would be smaller. We have to reset
-	// the _dom pointer cuz diffChildren sets the parentInternal's _dom pointer to
-	// its first child dom.
-	internal._dom = dom;
+	// @ts-ignore Trust me TS, nextSibling is a PreactElement
+	return dom.nextSibling;
 }
