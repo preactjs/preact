@@ -6,9 +6,7 @@ import React, {
 	Suspense,
 	Fragment,
 	createContext,
-	useState,
-	useEffect,
-	useLayoutEffect
+	useState
 } from 'preact/compat';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { createLazy, createSuspender } from './suspense-utils';
@@ -75,114 +73,53 @@ describe('suspense', () => {
 		const [Lazy, resolve] = createLazy();
 		const LazyResult = ({ name }) => <div>Hello from {name}</div>;
 
+		// Render initial state
 		render(
 			<Suspense fallback={<div>Suspended...</div>}>
 				<Lazy name="LazyComp" />
 			</Suspense>,
 			scratch
-		); // Render initial state
-		rerender(); // Re-render with fallback cuz lazy threw
+		);
+		expect(Lazy).to.have.been.calledOnce;
 
+		// Re-render fallback cuz lazy threw
+		rerender();
 		expect(scratch.innerHTML).to.eql(`<div>Suspended...</div>`);
+		expect(Lazy).to.have.been.calledTwice;
 
 		return resolve(LazyResult).then(() => {
+			// Re-render result
 			rerender();
 			expect(scratch.innerHTML).to.eql(`<div>Hello from LazyComp</div>`);
+			expect(Lazy).to.have.been.calledThrice;
 		});
 	});
 
-	it('should reset hooks of components', () => {
-		const [Lazy, resolve] = createLazy();
-		const LazyResult = ({ name }) => <div>Hello from {name}</div>;
+	it('should support suspending after initial render', () => {
+		const [Suspender, suspend] = createSuspender(() => <div>initial</div>);
 
-		/** @type {(value: boolean) => void} */
-		let set;
-		const Parent = ({ children }) => {
-			const [state, setState] = useState(false);
-			set = setState;
-
+		function App() {
 			return (
-				<div>
-					<p>hi</p>
-					{state && children}
-				</div>
+				<Suspense fallback={<div>Suspended...</div>}>
+					<Suspender />
+				</Suspense>
 			);
-		};
+		}
 
-		render(
-			<Suspense fallback={<div>Suspended...</div>}>
-				<Parent>
-					<Lazy name="LazyComp" />
-				</Parent>
-			</Suspense>,
-			scratch
-		);
-		expect(scratch.innerHTML).to.eql(`<div><p>hi</p></div>`);
+		render(<App />, scratch);
+		expect(scratch.innerHTML).to.equal(`<div>initial</div>`);
 
-		set(true);
+		const [resolve, _, Lazy] = suspend();
 		rerender();
+		expect(scratch.innerHTML).to.equal(`<div>Suspended...</div>`);
+		// Lazy is called once during the first render when it throws, and again
+		// when the fallback is rendered
+		expect(Lazy).to.have.been.calledTwice;
 
-		expect(scratch.innerHTML).to.eql('<div>Suspended...</div>');
-
-		return resolve(LazyResult).then(() => {
+		return resolve(() => <div>resolved</div>).then(() => {
 			rerender();
-			expect(scratch.innerHTML).to.eql(`<div><p>hi</p></div>`);
-		});
-	});
-
-	it('should call effect cleanups', () => {
-		const [Lazy, resolve] = createLazy();
-		const LazyResult = ({ name }) => <div>Hello from {name}</div>;
-
-		/** @type {(value: boolean) => void} */
-		let set;
-		const effectSpy = sinon.spy();
-		const layoutEffectSpy = sinon.spy();
-
-		const Parent = ({ children }) => {
-			const [state, setState] = useState(false);
-			set = setState;
-			useEffect(() => {
-				return () => {
-					effectSpy();
-				};
-			}, []);
-
-			useLayoutEffect(() => {
-				return () => {
-					layoutEffectSpy();
-				};
-			}, []);
-
-			return state ? (
-				<div>{children}</div>
-			) : (
-				<div>
-					<p>hi</p>
-				</div>
-			);
-		};
-
-		render(
-			<Suspense fallback={<div>Suspended...</div>}>
-				<Parent>
-					<Lazy name="LazyComp" />
-				</Parent>
-			</Suspense>,
-			scratch
-		);
-
-		set(true);
-		rerender();
-		expect(scratch.innerHTML).to.eql('<div>Suspended...</div>');
-		expect(effectSpy).to.be.calledOnce;
-		expect(layoutEffectSpy).to.be.calledOnce;
-
-		return resolve(LazyResult).then(() => {
-			rerender();
-			expect(effectSpy).to.be.calledOnce;
-			expect(layoutEffectSpy).to.be.calledOnce;
-			expect(scratch.innerHTML).to.eql(`<div><p>hi</p></div>`);
+			expect(scratch.innerHTML).to.equal(`<div>resolved</div>`);
+			expect(Lazy).to.have.been.calledThrice;
 		});
 	});
 
@@ -421,11 +358,7 @@ describe('suspense', () => {
 			expect(scratch.innerHTML).to.eql(`<p>Count: 2</p>`);
 			expect(lifecycles.componentWillMount).to.have.been.calledOnce;
 			expect(lifecycles.componentDidMount).to.have.been.calledOnce;
-			// TODO: This is called thrice since the cDU queued up after the second
-			// increment is never cleared once the component suspends. So when it
-			// resumes and the component is rerendered, we queue up another cDU so
-			// cDU is called an extra time.
-			expect(lifecycles.componentDidUpdate).to.have.been.calledThrice;
+			expect(lifecycles.componentDidUpdate).to.have.been.calledTwice;
 			expect(lifecycles.componentWillUnmount).to.not.have.been.called;
 		});
 	});
@@ -586,7 +519,52 @@ describe('suspense', () => {
 		});
 	});
 
-	it('should allow children to update state while suspending', () => {
+	it('should keep hook state of siblings when suspending', () => {
+		/** @type {(state: string ) => void} */
+		let setState;
+		function Stateful() {
+			const [state, _setState] = useState('initial');
+			setState = _setState;
+
+			return <div>Stateful: {state}</div>;
+		}
+
+		const [Suspender, suspend] = createSuspender(() => <div>Suspense</div>);
+
+		render(
+			<Suspense fallback={<div>Suspended...</div>}>
+				<Suspender />
+				<Stateful />
+			</Suspense>,
+			scratch
+		);
+
+		expect(scratch.innerHTML).to.eql(
+			`<div>Suspense</div><div>Stateful: initial</div>`
+		);
+
+		setState('first');
+		rerender();
+
+		expect(scratch.innerHTML).to.eql(
+			`<div>Suspense</div><div>Stateful: first</div>`
+		);
+
+		const [resolve] = suspend();
+
+		rerender();
+
+		expect(scratch.innerHTML).to.eql(`<div>Suspended...</div>`);
+
+		return resolve(() => <div>Suspense 2</div>).then(() => {
+			rerender();
+			expect(scratch.innerHTML).to.eql(
+				`<div>Suspense 2</div><div>Stateful: first</div>`
+			);
+		});
+	});
+
+	it('should allow sibling to suspender to update state while suspending', () => {
 		/** @type {(state: { s: string }) => void} */
 		let setState;
 		class Stateful extends Component {
@@ -627,6 +605,54 @@ describe('suspense', () => {
 		expect(scratch.innerHTML).to.eql(`<div>Suspended...</div>`);
 
 		setState({ s: 'second' });
+		rerender();
+
+		expect(scratch.innerHTML).to.eql(`<div>Suspended...</div>`);
+
+		return resolve(() => <div>Suspense 2</div>).then(() => {
+			rerender();
+			expect(scratch.innerHTML).to.eql(
+				`<div>Suspense 2</div><div>Stateful: second</div>`
+			);
+		});
+	});
+
+	it('should allow sibling to suspender to update hook state while suspending', () => {
+		/** @type {(state: string) => void} */
+		let setState;
+		function Stateful() {
+			const [state, _setState] = useState('initial');
+			setState = _setState;
+			return <div>Stateful: {state}</div>;
+		}
+
+		const [Suspender, suspend] = createSuspender(() => <div>Suspense</div>);
+
+		render(
+			<Suspense fallback={<div>Suspended...</div>}>
+				<Suspender />
+				<Stateful />
+			</Suspense>,
+			scratch
+		);
+
+		expect(scratch.innerHTML).to.eql(
+			`<div>Suspense</div><div>Stateful: initial</div>`
+		);
+
+		setState('first');
+		rerender();
+
+		expect(scratch.innerHTML).to.eql(
+			`<div>Suspense</div><div>Stateful: first</div>`
+		);
+
+		const [resolve] = suspend();
+		rerender();
+
+		expect(scratch.innerHTML).to.eql(`<div>Suspended...</div>`);
+
+		setState('second');
 		rerender();
 
 		expect(scratch.innerHTML).to.eql(`<div>Suspended...</div>`);
@@ -750,32 +776,39 @@ describe('suspense', () => {
 		expect(Suspender1.prototype.render).to.have.been.calledOnce;
 		expect(Suspender2.prototype.render).to.have.been.calledOnce;
 
-		const [resolve1] = suspend1();
-		const [resolve2] = suspend2();
-		expect(Suspender1.prototype.render).to.have.been.calledOnce;
-		expect(Suspender2.prototype.render).to.have.been.calledOnce;
+		const [resolve1, _1, Lazy1] = suspend1();
+		const [resolve2, _2, Lazy2] = suspend2();
+		expect(Lazy1).not.to.have.been.called;
+		expect(Lazy2).not.to.have.been.called;
 
 		rerender();
 
+		// Lazy is only called once cuz vnode equality prevents re-rendering for the
+		// <Catcher /> component's children
 		expect(scratch.innerHTML).to.eql(`<div>Suspended...</div>`);
-		expect(Suspender1.prototype.render).to.have.been.calledTwice;
-		expect(Suspender2.prototype.render).to.have.been.calledTwice;
+		expect(Lazy1).to.have.been.calledOnce;
+		expect(Lazy2).to.have.been.calledOnce;
 
-		return resolve1(() => <div>Hello first 2</div>).then(() => {
-			rerender();
-			expect(scratch.innerHTML).to.eql(`<div>Suspended...</div>`);
-			expect(Suspender1.prototype.render).to.have.been.calledTwice;
-			expect(Suspender2.prototype.render).to.have.been.calledTwice;
-
-			return resolve2(() => <div>Hello second 2</div>).then(() => {
-				rerender();
-				expect(scratch.innerHTML).to.eql(
-					`<div>Hello first 2</div><div>Hello second 2</div>`
-				);
-				expect(Suspender1.prototype.render).to.have.been.calledThrice;
-				expect(Suspender2.prototype.render).to.have.been.calledThrice;
-			});
-		});
+		return (
+			// Resolve the first Suspender
+			resolve1(() => <div>Hello first 2</div>)
+				.then(() => {
+					rerender();
+					expect(scratch.innerHTML).to.eql(`<div>Suspended...</div>`);
+					expect(Lazy1).to.have.been.calledOnce;
+					expect(Lazy2).to.have.been.calledOnce;
+				})
+				// Resolve the second Suspender
+				.then(() => resolve2(() => <div>Hello second 2</div>))
+				.then(() => {
+					rerender();
+					expect(scratch.innerHTML).to.eql(
+						`<div>Hello first 2</div><div>Hello second 2</div>`
+					);
+					expect(Lazy1).to.have.been.calledTwice;
+					expect(Lazy2).to.have.been.calledTwice;
+				})
+		);
 	});
 
 	it('should call multiple nested sibling suspending components render in one go', () => {
@@ -804,32 +837,39 @@ describe('suspense', () => {
 		expect(Suspender1.prototype.render).to.have.been.calledOnce;
 		expect(Suspender2.prototype.render).to.have.been.calledOnce;
 
-		const [resolve1] = suspend1();
-		const [resolve2] = suspend2();
-		expect(Suspender1.prototype.render).to.have.been.calledOnce;
-		expect(Suspender2.prototype.render).to.have.been.calledOnce;
+		const [resolve1, _1, Lazy1] = suspend1();
+		const [resolve2, _2, Lazy2] = suspend2();
+		expect(Lazy1).not.to.have.been.called;
+		expect(Lazy2).not.to.have.been.called;
 
 		rerender();
 
+		// Lazy is only called once cuz vnode equality prevents re-rendering for the
+		// <Catcher /> component's children
 		expect(scratch.innerHTML).to.eql(`<div>Suspended...</div>`);
-		expect(Suspender1.prototype.render).to.have.been.calledTwice;
-		expect(Suspender2.prototype.render).to.have.been.calledTwice;
+		expect(Lazy1).to.have.been.calledOnce;
+		expect(Lazy2).to.have.been.calledOnce;
 
-		return resolve1(() => <div>Hello first 2</div>).then(() => {
-			rerender();
-			expect(scratch.innerHTML).to.eql(`<div>Suspended...</div>`);
-			expect(Suspender1.prototype.render).to.have.been.calledTwice;
-			expect(Suspender2.prototype.render).to.have.been.calledTwice;
-
-			return resolve2(() => <div>Hello second 2</div>).then(() => {
-				rerender();
-				expect(scratch.innerHTML).to.eql(
-					`<div>Hello first 2</div><div><div>Hello second 2</div></div>`
-				);
-				expect(Suspender1.prototype.render).to.have.been.calledThrice;
-				expect(Suspender2.prototype.render).to.have.been.calledThrice;
-			});
-		});
+		// Resolve first suspender
+		return (
+			resolve1(() => <div>Hello first 2</div>)
+				.then(() => {
+					rerender();
+					expect(scratch.innerHTML).to.eql(`<div>Suspended...</div>`);
+					expect(Lazy1).to.have.been.calledOnce;
+					expect(Lazy2).to.have.been.calledOnce;
+				})
+				// Resolve second suspender
+				.then(() => resolve2(() => <div>Hello second 2</div>))
+				.then(() => {
+					rerender();
+					expect(scratch.innerHTML).to.eql(
+						`<div>Hello first 2</div><div><div>Hello second 2</div></div>`
+					);
+					expect(Lazy1).to.have.been.calledTwice;
+					expect(Lazy2).to.have.been.calledTwice;
+				})
+		);
 	});
 
 	it('should support text directly under Suspense', () => {
@@ -1518,7 +1558,7 @@ describe('suspense', () => {
 		expect(scratch.innerHTML).to.eql('<div>conditional hide</div>');
 	});
 
-	it('should support updating state while suspended', async () => {
+	it('should support updating parent of suspender state while suspended', async () => {
 		const [Suspender, suspend] = createSuspender(() => <div>Suspender</div>);
 
 		/** @type {() => void} */
@@ -1542,6 +1582,53 @@ describe('suspense', () => {
 					</div>
 				);
 			}
+		}
+
+		render(
+			<Suspense fallback={<div>Suspended...</div>}>
+				<Updater />
+			</Suspense>,
+			scratch
+		);
+
+		expect(scratch.innerHTML).to.eql(`<div>i: 0<div>Suspender</div></div>`);
+		expect(Suspender.prototype.render).to.have.been.calledOnce;
+
+		const [resolve] = suspend();
+		rerender();
+
+		expect(scratch.innerHTML).to.eql(`<div>Suspended...</div>`);
+
+		increment();
+		rerender();
+
+		expect(scratch.innerHTML).to.eql(`<div>Suspended...</div>`);
+
+		await resolve(() => <div>Resolved</div>);
+		rerender();
+
+		expect(scratch.innerHTML).to.equal(`<div>i: 1<div>Resolved</div></div>`);
+
+		increment();
+		rerender();
+
+		expect(scratch.innerHTML).to.equal(`<div>i: 2<div>Resolved</div></div>`);
+	});
+
+	it('should support updating parent of suspender hook state while suspended', async () => {
+		const [Suspender, suspend] = createSuspender(() => <div>Suspender</div>);
+
+		/** @type {() => void} */
+		let increment;
+		function Updater() {
+			const [i, setState] = useState(0);
+			increment = () => setState(i => i + 1);
+			return (
+				<div>
+					i: {i}
+					<Suspender />
+				</div>
+			);
 		}
 
 		render(

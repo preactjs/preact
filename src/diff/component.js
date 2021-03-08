@@ -11,6 +11,7 @@ import {
 	MODE_RERENDERING_ERROR,
 	TYPE_ROOT
 } from '../constants';
+import { getDomSibling } from '../tree';
 
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
@@ -104,6 +105,9 @@ export function renderComponent(
 		}
 
 		if (c.componentDidMount != null) {
+			// If the component was constructed, queue up componentDidMount so the
+			// first time this internal commits (regardless of suspense or not) it
+			// will be called
 			c._renderCallbacks.push(c.componentDidMount);
 		}
 	} else {
@@ -144,12 +148,6 @@ export function renderComponent(
 		if (c.componentWillUpdate != null) {
 			c.componentWillUpdate(newProps, c._nextState, componentContext);
 		}
-
-		if (c.componentDidUpdate != null) {
-			c._renderCallbacks.push(() => {
-				c.componentDidUpdate(oldProps, oldState, snapshot);
-			});
-		}
 	}
 
 	c.context = componentContext;
@@ -164,6 +162,7 @@ export function renderComponent(
 	// on the page. Root nodes can occur anywhere in the tree and not just
 	// at the top.
 	let oldStartDom = startDom;
+	let oldParentDom = parentDom;
 	if (internal._flags & TYPE_ROOT) {
 		parentDom = newProps._parentDom;
 
@@ -190,8 +189,17 @@ export function renderComponent(
 		globalContext = assign(assign({}, globalContext), c.getChildContext());
 	}
 
-	if (!isNew && c.getSnapshotBeforeUpdate != null) {
-		snapshot = c.getSnapshotBeforeUpdate(oldProps, oldState);
+	if (!isNew) {
+		if (c.getSnapshotBeforeUpdate != null) {
+			snapshot = c.getSnapshotBeforeUpdate(oldProps, oldState);
+		}
+
+		// Only schedule componentDidUpdate if the component successfully rendered
+		if (c.componentDidUpdate != null) {
+			c._renderCallbacks.push(() => {
+				c.componentDidUpdate(oldProps, oldState, snapshot);
+			});
+		}
 	}
 
 	let isTopLevelFragment =
@@ -226,12 +234,45 @@ export function renderComponent(
 		commitQueue.push(c);
 	}
 
-	// Resume where we left of before the Portal
-	if (internal._flags & TYPE_ROOT) {
+	// Determine which dom node the diff should continue with. If we just finished
+	// diffing a root node and have a startDom from the tree above/around the root
+	// node (oldStartDom !== null), then we'll do a couple more check to determine
+	// the diff should resume.
+	if (!(internal._flags & TYPE_ROOT)) {
+		// This internal is not a Root/Portal so continue with the sibling returned
+		// by mount/diffChildren
+		return nextDomSibling;
+	} else if (oldStartDom == null) {
+		// We are diffing a root node that didn't have a startDom to begin with, so
+		// we can just return null
 		return oldStartDom;
-	}
+	} else if (oldParentDom == parentDom) {
+		// If the root node rendered into the same parent DOM as its parent
+		// tree, we'll just resume from the end of the root node as if nothing
+		// happened.
+		return nextDomSibling;
+	} else if (oldStartDom.parentNode == oldParentDom) {
+		// If the previous value for start dom still has the same parent DOM has
+		// the root node's parent tree, then we can use it. This case assumes
+		// the root node rendered its children into a new parent.
+		return oldStartDom;
 
-	return nextDomSibling;
+		// eslint-disable-next-line no-else-return
+	} else {
+		// Here, if the parentDoms are different and oldStartDom has moved into
+		// a new parentDom, we'll assume the root node moved oldStartDom under
+		// the new parentDom. Because of this change, we need to search the
+		// internal tree for the next DOM sibling the tree should begin with
+
+		// @TODO Ensure there is suspense test with <Fragment><div><//> siblings
+		// around Suspense and suspender
+		//
+		// @TODO Hmmm here we are searching the internal before the newChildren
+		// are set on the internal, meaning if this root node is being mounted it
+		// won't find itself in the parent's array to begin searching siblings
+		// after itself... Think about if this could lead to bugs...
+		return getDomSibling(internal);
+	}
 }
 
 /** The `.render()` method for a PFC backing instance. */

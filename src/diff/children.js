@@ -209,8 +209,9 @@ export function diffChildren(
 
 	parentInternal._children = newChildren;
 
-	// newParentVNode._dom = firstChildDom;
-	parentInternal._dom = firstChildDom;
+	if (parentInternal._flags & TYPE_COMPONENT) {
+		parentInternal._dom = firstChildDom;
+	}
 
 	// Remove remaining oldChildren if there are any.
 	for (i = oldChildrenLength; i--; ) {

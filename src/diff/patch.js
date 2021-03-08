@@ -1,4 +1,4 @@
-import { diffChildren } from './children';
+import { diffChildren, reorderChildren } from './children';
 import { diffProps, setProperty } from './props';
 import options from '../options';
 import { renderComponent } from './component';
@@ -59,18 +59,16 @@ export function patch(
 				commitQueue,
 				startDom
 			);
+		} else if (newVNode._vnodeId !== internal._vnodeId) {
+			nextDomSibling = patchDOMElement(
+				internal._dom,
+				newVNode,
+				internal,
+				globalContext,
+				isSvg,
+				commitQueue
+			);
 		} else {
-			if (newVNode._vnodeId !== internal._vnodeId) {
-				patchDOMElement(
-					internal._dom,
-					newVNode,
-					internal,
-					globalContext,
-					isSvg,
-					commitQueue
-				);
-			}
-
 			// @ts-ignore Trust me TS, nextSibling is a PreactElement
 			nextDomSibling = internal._dom.nextSibling;
 		}
@@ -82,6 +80,12 @@ export function patch(
 		// Once we have successfully rendered the new VNode, copy it's ID over
 		internal._vnodeId = newVNode._vnodeId;
 	} catch (e) {
+		if (e.then) {
+			// If a promise was thrown, reorderChildren in case this component is
+			// being hidden or moved
+			reorderChildren(internal, startDom, parentDom);
+		}
+
 		// @TODO: assign a new VNode ID here? Or NaN?
 		// newVNode._vnodeId = null;
 		internal._flags |= e.then ? MODE_SUSPENDED : MODE_ERRORED;
@@ -101,7 +105,7 @@ export function patch(
  * @param {boolean} isSvg Whether or not this DOM node is an SVG node
  * @param {Array<import('../internal').Component>} commitQueue List of components
  * which have callbacks to invoke in commitRoot
- * @returns {void}
+ * @returns {import('../internal').PreactElement}
  */
 function patchDOMElement(
 	dom,
@@ -138,6 +142,8 @@ function patchDOMElement(
 
 	diffProps(dom, newProps, oldProps, isSvg);
 
+	internal._dom = dom;
+
 	// If the new vnode didn't have dangerouslySetInnerHTML, diff its children
 	if (newHtml) {
 		internal._children = null;
@@ -173,9 +179,6 @@ function patchDOMElement(
 		setProperty(dom, 'checked', tmp, oldProps.checked, false);
 	}
 
-	// @TODO(golf) We need to reset internal._dom to dom here. Revisit if
-	// returning dom and setting it in patch would be smaller. We have to reset
-	// the _dom pointer cuz diffChildren sets the parentInternal's _dom pointer to
-	// its first child dom.
-	internal._dom = dom;
+	// @ts-ignore Trust me TS, nextSibling is a PreactElement
+	return dom.nextSibling;
 }
