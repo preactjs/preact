@@ -257,6 +257,7 @@ export function renderComponent(
 		// the root node rendered its children into a new parent.
 		return oldStartDom;
 	} else {
+		// eslint-disable-line no-else-return
 		// Here, if the parentDoms are different and oldStartDom has moved into
 		// a new parentDom, we'll assume the root node moved oldStartDom under
 		// the new parentDom. Because of this change, we need to search the
