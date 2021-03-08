@@ -1,6 +1,7 @@
 import { Component, createElement, options, Fragment } from 'preact';
 import { TYPE_ELEMENT, MODE_HYDRATE } from '../../src/constants';
 import { getParentDom } from '../../src/tree';
+import { createPortal } from './portals';
 
 const oldCatchError = options._catchError;
 /** @type {(error: any, internal: import('./internal').Internal) => void} */
@@ -148,10 +149,7 @@ Suspense.prototype.render = function(props, state) {
 	const fallback =
 		state._suspended && createElement(Fragment, null, props.fallback);
 
-	return [
-		createElement(Fragment, { _parentDom: this._parentDom }, props.children),
-		fallback
-	];
+	return [createPortal(props.children, this._parentDom), fallback];
 };
 
 /**
