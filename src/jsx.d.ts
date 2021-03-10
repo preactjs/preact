@@ -656,6 +656,7 @@ export namespace JSXInternal {
 		disabled?: boolean;
 		disableRemotePlayback?: boolean;
 		download?: any;
+		decoding?: 'sync' | 'async' | 'auto';
 		draggable?: boolean;
 		encType?: string;
 		form?: string;
