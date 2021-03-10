@@ -15,6 +15,8 @@ const UNNAMED = [];
 
 const VOID_ELEMENTS = /^(area|base|br|col|embed|hr|img|input|link|meta|param|source|track|wbr)$/;
 
+const UNSAFE_NAME = /[\s\n\\/='"\0<>]/;
+
 const noop = () => {};
 
 /** Render Preact JSX + Components to an HTML string.
@@ -291,12 +293,12 @@ function _renderToString(vnode, context, opts, inner, isSvgMode, selectValue) {
 	}
 
 	s = `<${nodeName}${s}>`;
-	if (String(nodeName).match(/[\s\n\\/='"\0<>]/))
+	if (UNSAFE_NAME.test(String(nodeName)))
 		throw new Error(`${nodeName} is not a valid HTML tag name in ${s}`);
 
 	let isVoid =
-		String(nodeName).match(VOID_ELEMENTS) ||
-		(opts.voidElements && String(nodeName).match(opts.voidElements));
+		VOID_ELEMENTS.test(String(nodeName)) ||
+		(opts.voidElements && opts.voidElements.test(String(nodeName)));
 	let pieces = [];
 
 	let children;
