@@ -258,6 +258,13 @@ describe('render', () => {
 			expect(rendered).to.equal(expected);
 		});
 
+		it('should ignore empty css value', () => {
+			let rendered = render(<div style={{ color: '' }} />);
+			let expected = `<div></div>`;
+
+			expect(rendered).to.equal(expected);
+		});
+
 		it('should render SVG elements', () => {
 			let rendered = render(
 				<svg>
