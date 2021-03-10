@@ -51,7 +51,7 @@ export function styleObjToCss(s) {
 	let str = '';
 	for (let prop in s) {
 		let val = s[prop];
-		if (val != null) {
+		if (val != null && val !== '') {
 			if (str) str += ' ';
 			// str += jsToCss(prop);
 			str +=
