@@ -811,6 +811,7 @@ export namespace JSXInternal {
 		dd: HTMLAttributes<HTMLElement>;
 		del: HTMLAttributes<HTMLModElement>;
 		details: HTMLAttributes<HTMLDetailsElement>;
+		decoding: HTMLAttributes<HTMLImageElement>;
 		dfn: HTMLAttributes<HTMLElement>;
 		dialog: HTMLAttributes<HTMLDialogElement>;
 		div: HTMLAttributes<HTMLDivElement>;
