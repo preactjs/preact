@@ -22,6 +22,7 @@
 		"./": "./"
 	},
 	"scripts": {
+		"bench": "node -r @babel/register benchmarks index.js",
 		"build": "npm run -s transpile && npm run -s transpile:jsx && npm run -s copy-typescript-definition",
 		"postbuild": "node ./config/node-13-exports.js && node ./config/node-commonjs.js",
 		"transpile": "microbundle src/index.js -f es,umd --target web --external preact",
@@ -89,6 +90,7 @@
 		"@babel/plugin-transform-react-jsx": "^7.12.12",
 		"@babel/preset-env": "^7.12.11",
 		"@babel/register": "^7.12.10",
+		"benchmarkjs-pretty": "^2.0.1",
 		"chai": "^4.2.0",
 		"copyfiles": "^2.4.1",
 		"eslint": "^7.16.0",
