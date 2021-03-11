@@ -265,12 +265,6 @@ export function renderComponent(
 		// a new parentDom, we'll assume the root node moved oldStartDom under
 		// the new parentDom. Because of this change, we need to search the
 		// internal tree for the next DOM sibling the tree should begin with
-
-		// @TODO Hmmm here we are searching the internal before the newChildren are
-		// set on the internal, meaning if this root node is being mounted it won't
-		// find itself in the parent's array to begin searching siblings after
-		// itself... Think about if this could lead to bugs... Add tests for
-		// mounting Suspense after initial render?
 		return getDomSibling(internal);
 	}
 }

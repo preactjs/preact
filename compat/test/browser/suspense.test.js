@@ -2225,4 +2225,60 @@ describe('suspense', () => {
 			);
 		});
 	});
+
+	it('should support mounting Suspense after initial render', () => {
+		const [Lazy, resolve] = createLazy();
+
+		function App({ mount }) {
+			return (
+				<Fragment>
+					<Fragment>
+						<div>0</div>
+					</Fragment>
+					{mount && (
+						<Suspense fallback={<div>Suspended...</div>}>
+							<Fragment>
+								<div>1</div>
+							</Fragment>
+							<Lazy />
+							<Fragment>
+								<div>2</div>
+							</Fragment>
+						</Suspense>
+					)}
+					<Fragment>
+						<div>3</div>
+					</Fragment>
+				</Fragment>
+			);
+		}
+
+		render(<App mount={false} />, scratch);
+		expect(scratch.innerHTML).to.equal([div(0), div(3)].join(''));
+
+		render(<App mount={true} />, scratch); // Render suspense
+		rerender(); // Render fallback
+		expect(scratch.innerHTML).to.equal(
+			[div(0), div('Suspended...'), div(3)].join('')
+		);
+
+		return resolve(() => (
+			<Fragment>
+				<div>resolved A</div>
+				<div>resolved B</div>
+			</Fragment>
+		)).then(() => {
+			rerender();
+			expect(scratch.innerHTML).to.equal(
+				[
+					div(0),
+					div(1),
+					div('resolved A'),
+					div('resolved B'),
+					div(2),
+					div(3)
+				].join('')
+			);
+		});
+	});
 });

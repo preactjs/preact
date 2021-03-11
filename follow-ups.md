@@ -35,6 +35,14 @@
     Particularly, this is useful for Suspense and would remove the need for the
     call to `getParentDom` in `Suspense.render`
 
+## Suspense follow ups
+
+- Can we use vnode equality to avoid rerendering a tree that just suspended?
+  
+  Perhaps reuse the same Portal VNodeId from the render that suspended to avoid
+  rerendering the portals children. Though the setting up of the parentDOM logic
+  needs to happen before/after the bailout. We can't bailout of that logic.
+
 ## Child diffing investigations
 
 - Reduce allocations for text nodes
