@@ -1,20 +1,3 @@
-/**
- * @template T
- * @param {T} fn
- * @returns {T}
- */
-function memoize(fn) {
-	const cache = new Map();
-	return (arg) => {
-		let res = cache.get(arg);
-		if (!res) {
-			res = fn(arg);
-			cache.set(arg, res);
-		}
-		return res;
-	};
-}
-
 // DOM properties that should NOT have "px" added when numeric
 export const IS_NON_DIMENSIONAL = /acit|ex(?:s|g|n|p|$)|rph|grid|ows|mnc|ntw|ine[ch]|zoo|^ord|^--/i;
 
@@ -26,15 +9,10 @@ const tagsToReplace = {
 	'"': '&quot;'
 };
 const replaceTag = (tag) => tagsToReplace[tag] || tag;
-
-/**
- * @param {any} s
- * @returns {string}
- */
-export const encodeEntities = memoize((s) => {
+export function encodeEntities(s) {
 	if (typeof s !== 'string') s = String(s);
 	return s.replace(HTML_ENTITY_REG, replaceTag);
-});
+}
 
 export let indent = (s, char) =>
 	String(s).replace(/(\n+)/g, '$1' + (char || '\t'));
