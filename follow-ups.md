@@ -59,7 +59,6 @@
   - Ensure all tree traversal functions handle root nodes with different
     parentDOM. For example, getChildDom & getDomSibling should skip over root
     nodes iif they have different parentDOMs.
-- Rewrite Suspense to use Root Nodes
 - Fix Suspense tests:
   - "should correctly render nested Suspense components without intermediate DOM #2747"
 - Fix Suspense hydration tests:
