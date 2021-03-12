@@ -59,7 +59,8 @@
 			"import": "./jsx-runtime/dist/jsxRuntime.mjs"
 		},
 		"./compat/server": {
-			"default": "./compat/server.js"
+			"require": "./compat/server.js",
+			"import": "./compat/server.mjs"
 		},
 		"./package.json": "./package.json",
 		"./": "./"
@@ -169,6 +170,7 @@
 		"compat/dist",
 		"compat/src",
 		"compat/server.js",
+		"compat/server.mjs",
 		"compat/test-utils.js",
 		"compat/jsx-runtime.js",
 		"compat/jsx-runtime.mjs",
