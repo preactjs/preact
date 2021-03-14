@@ -1145,18 +1145,20 @@ describe('render()', () => {
 
 	// #3060
 	it('should reset tabindex on undefined/null', () => {
+		const defaultValue = isIE11 ? 0 : -1;
+
 		render(<div tabIndex={0} />, scratch);
 		expect(scratch.firstChild.tabIndex).to.equal(0);
 		render(<div tabIndex={undefined} />, scratch);
-		expect(scratch.firstChild.tabIndex).to.equal(-1);
+		expect(scratch.firstChild.tabIndex).to.equal(defaultValue);
 		render(<div tabIndex={null} />, scratch);
-		expect(scratch.firstChild.tabIndex).to.equal(-1);
+		expect(scratch.firstChild.tabIndex).to.equal(defaultValue);
 
 		render(<div tabindex={0} />, scratch);
 		expect(scratch.firstChild.tabIndex).to.equal(0);
 		render(<div tabindex={undefined} />, scratch);
-		expect(scratch.firstChild.tabIndex).to.equal(-1);
+		expect(scratch.firstChild.tabIndex).to.equal(defaultValue);
 		render(<div tabindex={null} />, scratch);
-		expect(scratch.firstChild.tabIndex).to.equal(-1);
+		expect(scratch.firstChild.tabIndex).to.equal(defaultValue);
 	});
 });
