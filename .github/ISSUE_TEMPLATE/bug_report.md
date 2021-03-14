@@ -7,7 +7,7 @@ assignees: ''
 
 ---
 
-- [ ] Check if updating to the latest Preact version resolve the issue
+- [ ] Check if updating to the latest Preact version resolves the issue
 
 **Describe the bug**
 A clear and concise description of what the bug is.
