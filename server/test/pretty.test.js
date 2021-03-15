@@ -1,10 +1,8 @@
 import { render as basicRender } from '../src';
 import { render } from '../src/jsx';
 import { h, Fragment } from 'preact';
-import chai, { expect } from 'chai';
-import sinonChai from 'sinon-chai';
-import { dedent } from './jsx';
-chai.use(sinonChai);
+import { expect } from 'chai';
+import { dedent } from './utils';
 
 describe('pretty', () => {
 	let prettyRender = (jsx) => render(jsx, {}, { pretty: true });

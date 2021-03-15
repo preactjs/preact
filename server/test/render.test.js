@@ -1,10 +1,8 @@
 import { render, shallowRender } from '../src';
 import { h, Component, createContext, Fragment, options } from 'preact';
 import { useState, useContext, useEffect, useLayoutEffect } from 'preact/hooks';
-import chai, { expect } from 'chai';
+import { expect } from 'chai';
 import { spy, stub, match } from 'sinon';
-import sinonChai from 'sinon-chai';
-chai.use(sinonChai);
 
 describe('render', () => {
 	describe('Basic JSX', () => {
