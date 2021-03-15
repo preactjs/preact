@@ -33,6 +33,7 @@
 - Fix Suspense hydration tests:
   - "should hydrate lazy components through components using shouldComponentUpdate"
 - Rebuild Suspense List to work with backing tree
+- Find a way to avoid re-rendering suspending trees when swapping to fallback (follow-up to #3053)
 
 ## Other
 
@@ -60,7 +61,7 @@
 - Use a special VNode (e.g. Root node) that reparents all children into a new
   DOM node (like Portals). Currently suspense manually does this but I think it
   is buggy in that it doesn't properly reset all dom pointers we currently
-  maintain lol.
+  maintain (implemented in #3053)
 - Need a way to trigger updates on VNodes that may need mounting or patching.
   I'm thinking backing nodes will help here so when a node suspends, we can
   maintain its suspended state on the backing node and not the component which
