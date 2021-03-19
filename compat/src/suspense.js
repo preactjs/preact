@@ -105,13 +105,7 @@ Suspense.prototype._childDidSuspend = function(promise, suspendingInternal) {
 
 			let suspended;
 			while ((suspended = c._suspenders.pop())) {
-				// TODO: If the component that suspended was hydrating, we remount the
-				// component so the component instance stored by Suspense is no longer
-				// valid. Likely needs to be fixed with backing nodes and a way to
-				// trigger a rerender for backing nodes
-				if (!(suspended._internal._flags & MODE_HYDRATE)) {
-					suspended.forceUpdate();
-				}
+				suspended.forceUpdate();
 			}
 		}
 	};
