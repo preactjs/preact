@@ -165,6 +165,10 @@ export function diffChildren(
 		}
 
 		if (
+			// TODO: Revisit (remove?) this conditional block when we remove _dom
+			// pointers on component internals. Note, we only need to skip bubbling up
+			// newDom value if this root node/Portal introduces a new parentDom (i.e.
+			// newDom.parentNode !== parentDom)
 			childInternal._flags & TYPE_ROOT &&
 			(newDom == null || newDom.parentNode != parentDom)
 		) {

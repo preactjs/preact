@@ -61,6 +61,8 @@
   - Ensure all tree traversal functions handle root nodes with different
     parentDOM. For example, getChildDom & getDomSibling should skip over root
     nodes iif they have different parentDOMs.
+  - Remove TYPE_ROOT special handling in mountChildren/diffChildren related to
+    skipping set \_dom on parent Internals through Portal/root nodes
 - Fix Suspense tests:
   - "should correctly render nested Suspense components without intermediate DOM #2747"
 - Fix Suspense hydration tests:

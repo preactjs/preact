@@ -291,6 +291,10 @@ export function mountChildren(
 		if (newDom != null) {
 			if (
 				firstChildDom == null &&
+				// TODO: Revisit (remove?) this condition when we remove _dom pointers
+				// on component internals. Note, the parentNode == parentDom check is
+				// cuz if this Portal is a passthrough (_parentDom prop matches
+				// parentDom) then we should look at the dom it returns and bubble it up
 				(!(childInternal._flags & TYPE_ROOT) || newDom.parentNode == parentDom)
 			) {
 				firstChildDom = newDom;
