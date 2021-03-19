@@ -3,3 +3,4 @@
 /npm-debug.log
 .DS_Store
 /src/preact-render-to-string-tests.d.ts
+/benchmarks/.v8.modern.js
