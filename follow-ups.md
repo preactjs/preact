@@ -37,11 +37,13 @@
 
 ## Suspense follow ups
 
-- Can we use vnode equality to avoid rerendering a tree that just suspended?
-  
-  Perhaps reuse the same Portal VNodeId from the render that suspended to avoid
-  rerendering the portals children. Though the setting up of the parentDOM logic
-  needs to happen before/after the bailout. We can't bailout of that logic.
+- Consider simply rerendering all Suspense children when one of its Promises
+  resolves. Might simplify the suspense tracking by avoiding the need to track
+  pendingSuspensionCount and suspenders list.
+
+  With the approach above, consider maybe syncing unsuspending on the
+  "nextFrame" to gather all Promises that resolved in this microtask/frame and
+  rerendering them in one pass
 
 ## Child diffing investigations
 

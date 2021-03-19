@@ -55,5 +55,5 @@ export interface SuspenseComponent
 	extends Component<SuspenseProps, SuspenseState> {
 	_pendingSuspensionCount: number;
 	_suspenders: Component[];
-	_detachOnNextRender: null | Internal<any>;
+	_portalVNodeId: number | null;
 }

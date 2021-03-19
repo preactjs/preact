@@ -86,13 +86,13 @@ describe('suspense', () => {
 		// Re-render fallback cuz lazy threw
 		rerender();
 		expect(scratch.innerHTML).to.eql(`<div>Suspended...</div>`);
-		expect(Lazy).to.have.been.calledTwice;
+		expect(Lazy).to.have.been.calledOnce;
 
 		return resolve(LazyResult).then(() => {
 			// Re-render result
 			rerender();
 			expect(scratch.innerHTML).to.eql(`<div>Hello from LazyComp</div>`);
-			expect(Lazy).to.have.been.calledThrice;
+			expect(Lazy).to.have.been.calledTwice;
 		});
 	});
 
@@ -113,9 +113,8 @@ describe('suspense', () => {
 		const [resolve, _, Lazy] = suspend();
 		rerender();
 		expect(scratch.innerHTML).to.equal(`<div>Suspended...</div>`);
-		// Lazy is called once during the first render when it throws, and again
-		// when the fallback is rendered
-		expect(Lazy).to.have.been.calledTwice;
+		// Lazy is called once during the first render when it throws
+		expect(Lazy).to.have.been.calledOnce;
 
 		return resolve(() => (
 			<Fragment>
@@ -127,7 +126,7 @@ describe('suspense', () => {
 			expect(scratch.innerHTML).to.equal(
 				`<div>resolved 1</div><div>resolved 2</div>`
 			);
-			expect(Lazy).to.have.been.calledThrice;
+			expect(Lazy).to.have.been.calledTwice;
 		});
 	});
 
@@ -2256,7 +2255,7 @@ describe('suspense', () => {
 		render(<App mount={false} />, scratch);
 		expect(scratch.innerHTML).to.equal([div(0), div(3)].join(''));
 
-		render(<App mount={true} />, scratch); // Render suspense
+		render(<App mount />, scratch); // Render suspense
 		rerender(); // Render fallback
 		expect(scratch.innerHTML).to.equal(
 			[div(0), div('Suspended...'), div(3)].join('')
