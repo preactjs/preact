@@ -1771,63 +1771,6 @@ describe('Components', () => {
 		});
 	});
 
-	it('should set component._internal._dom when sCU returns false', () => {
-		let parent;
-		class Parent extends Component {
-			render() {
-				parent = this;
-				return <Child />;
-			}
-		}
-
-		let renderChildDiv = false;
-
-		let child;
-		class Child extends Component {
-			shouldComponentUpdate() {
-				return false;
-			}
-			render() {
-				child = this;
-				if (!renderChildDiv) return null;
-				return <div class="child" />;
-			}
-		}
-
-		let app;
-		class App extends Component {
-			render() {
-				app = this;
-				return <Parent />;
-			}
-		}
-
-		// TODO: Consider rewriting test to not rely on internal properties
-		// and instead capture user-facing bug that would occur if this
-		// behavior were broken
-		const getDom = c => ('__v' in c ? c.__v.__e : c._internal._dom);
-
-		render(<App />, scratch);
-		expect(getDom(child)).to.equalNode(scratch.querySelector('.child'));
-
-		app.forceUpdate();
-		expect(getDom(child)).to.equalNode(scratch.querySelector('.child'));
-
-		parent.setState({});
-		renderChildDiv = true;
-		child.forceUpdate();
-		expect(getDom(child)).to.equalNode(scratch.querySelector('.child'));
-		rerender();
-
-		expect(getDom(child)).to.equalNode(scratch.querySelector('.child'));
-
-		renderChildDiv = false;
-		app.setState({});
-		child.forceUpdate();
-		rerender();
-		expect(getDom(child)).to.equalNode(scratch.querySelector('.child'));
-	});
-
 	// preact/#1323
 	it('should handle hoisted component vnodes without DOM', () => {
 		let x = 0;

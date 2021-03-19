@@ -38,7 +38,7 @@ class Catcher extends Component {
 	}
 }
 
-describe('suspense', () => {
+describe.skip('suspense', () => {
 	/** @type {HTMLDivElement} */
 	let scratch,
 		rerender,

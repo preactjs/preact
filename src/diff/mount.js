@@ -259,7 +259,7 @@ export function mountChildren(
 	commitQueue,
 	startDom
 ) {
-	let i, childVNode, childInternal, newDom, firstChildDom, mountedNextChild;
+	let i, childVNode, childInternal, newDom, mountedNextChild;
 
 	parentInternal._children = [];
 	for (i = 0; i < renderResult.length; i++) {
@@ -288,29 +288,16 @@ export function mountChildren(
 
 		newDom = childInternal._dom;
 
-		if (newDom != null) {
-			if (
-				firstChildDom == null &&
-				// TODO: Revisit (remove?) this condition when we remove _dom pointers
-				// on component internals. Note, the parentNode == parentDom check is
-				// cuz if this Portal is a passthrough (_parentDom prop matches
-				// parentDom) then we should look at the dom it returns and bubble it up
-				(!(childInternal._flags & TYPE_ROOT) || newDom.parentNode == parentDom)
-			) {
-				firstChildDom = newDom;
-			}
-
-			if (childInternal._flags & TYPE_COMPONENT || newDom == startDom) {
-				// If the child is a Fragment-like or if it is DOM VNode and its _dom
-				// property matches the dom we are diffing (i.e. startDom), just
-				// continue with the mountedNextChild
-				startDom = mountedNextChild;
-			} else {
-				// The DOM the diff should begin with is now startDom (since we inserted
-				// newDom before startDom) so ignore mountedNextChild and continue with
-				// startDom
-				parentDom.insertBefore(newDom, startDom);
-			}
+		if (childInternal._flags & TYPE_COMPONENT || newDom == startDom) {
+			// If the child is a Fragment-like or if it is DOM VNode and its _dom
+			// property matches the dom we are diffing (i.e. startDom), just
+			// continue with the mountedNextChild
+			startDom = mountedNextChild;
+		} else if (newDom != null) {
+			// The DOM the diff should begin with is now startDom (since we inserted
+			// newDom before startDom) so ignore mountedNextChild and continue with
+			// startDom
+			parentDom.insertBefore(newDom, startDom);
 		}
 
 		if (childInternal.ref) {
@@ -320,10 +307,6 @@ export function mountChildren(
 				childInternal
 			);
 		}
-	}
-
-	if (parentInternal._flags & TYPE_COMPONENT) {
-		parentInternal._dom = firstChildDom;
 	}
 
 	// Remove children that are not part of any vnode.
