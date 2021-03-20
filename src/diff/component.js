@@ -8,10 +8,8 @@ import {
 	DIRTY_BIT,
 	FORCE_UPDATE,
 	MODE_PENDING_ERROR,
-	MODE_RERENDERING_ERROR,
-	TYPE_ROOT
+	MODE_RERENDERING_ERROR
 } from '../constants';
-import { getDomSibling } from '../tree';
 
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
@@ -158,25 +156,6 @@ export function renderComponent(
 
 	if ((tmp = options._render)) tmp(internal);
 
-	// Root nodes signal that we attempt to render into a specific DOM node
-	// on the page. Root nodes can occur anywhere in the tree and not just
-	// at the top.
-	let oldStartDom = startDom;
-	let oldParentDom = parentDom;
-	if (internal._flags & TYPE_ROOT) {
-		parentDom = newProps._parentDom;
-
-		if (internal && internal._dom) {
-			startDom = internal._dom;
-		}
-
-		// The `startDom` variable might point to a node from another
-		// tree from a previous render
-		if (startDom != null && startDom.parentNode !== parentDom) {
-			startDom = null;
-		}
-	}
-
 	internal._flags &= ~DIRTY_BIT;
 	c._internal = internal;
 
@@ -234,45 +213,7 @@ export function renderComponent(
 		commitQueue.push(c);
 	}
 
-	// Determine which dom node the diff should continue with. If we just finished
-	// diffing a root node and have a startDom from the tree above/around the root
-	// node (oldStartDom !== null), then we'll do a couple more check to determine
-	// the diff should resume.
-	if (!(internal._flags & TYPE_ROOT)) {
-		// This internal is not a Root/Portal so continue with the sibling returned
-		// by mount/diffChildren
-		return nextDomSibling;
-	} else if (oldStartDom == null) {
-		// We are diffing a root node that didn't have a startDom to begin with, so
-		// we can just return null
-		return oldStartDom;
-	} else if (oldParentDom == parentDom) {
-		// If the root node rendered into the same parent DOM as its parent
-		// tree, we'll just resume from the end of the root node as if nothing
-		// happened.
-		return nextDomSibling;
-	} else if (oldStartDom.parentNode == oldParentDom) {
-		// If the previous value for start dom still has the same parent DOM has
-		// the root node's parent tree, then we can use it. This case assumes
-		// the root node rendered its children into a new parent.
-		return oldStartDom;
-
-		// eslint-disable-next-line no-else-return
-	} else {
-		// Here, if the parentDoms are different and oldStartDom has moved into
-		// a new parentDom, we'll assume the root node moved oldStartDom under
-		// the new parentDom. Because of this change, we need to search the
-		// internal tree for the next DOM sibling the tree should begin with
-
-		// @TODO Ensure there is suspense test with <Fragment><div><//> siblings
-		// around Suspense and suspender
-		//
-		// @TODO Hmmm here we are searching the internal before the newChildren
-		// are set on the internal, meaning if this root node is being mounted it
-		// won't find itself in the parent's array to begin searching siblings
-		// after itself... Think about if this could lead to bugs...
-		return getDomSibling(internal);
-	}
+	return nextDomSibling;
 }
 
 /** The `.render()` method for a PFC backing instance. */

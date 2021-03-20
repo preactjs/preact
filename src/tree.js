@@ -123,7 +123,10 @@ export function getDomSibling(internal, childIndex) {
  * @param {import('./internal').Internal} internal
  */
 export function updateParentDomPointers(internal) {
-	if ((internal = internal._parent) != null && internal._component != null) {
+	if (
+		(internal = internal._parent) != null &&
+		internal._flags & TYPE_COMPONENT
+	) {
 		internal._dom = null;
 		for (let i = 0; i < internal._children.length; i++) {
 			let child = internal._children[i];
@@ -133,7 +136,9 @@ export function updateParentDomPointers(internal) {
 			}
 		}
 
-		return updateParentDomPointers(internal);
+		if (!(internal._flags & TYPE_ROOT)) {
+			return updateParentDomPointers(internal);
+		}
 	}
 }
 

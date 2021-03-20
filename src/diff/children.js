@@ -5,7 +5,8 @@ import {
 	TYPE_TEXT,
 	MODE_HYDRATE,
 	MODE_SUSPENDED,
-	EMPTY_ARR
+	EMPTY_ARR,
+	TYPE_ROOT
 } from '../constants';
 import { mount } from './mount';
 import { patch } from './patch';
@@ -163,7 +164,16 @@ export function diffChildren(
 			);
 		}
 
-		if (newDom != null) {
+		if (
+			// TODO: Revisit (remove?) this conditional block when we remove _dom
+			// pointers on component internals. Note, we only need to skip bubbling up
+			// newDom value if this root node/Portal introduces a new parentDom (i.e.
+			// newDom.parentNode !== parentDom)
+			childInternal._flags & TYPE_ROOT &&
+			(newDom == null || newDom.parentNode != parentDom)
+		) {
+			startDom = nextDomSibling;
+		} else if (newDom != null) {
 			if (firstChildDom == null) {
 				firstChildDom = newDom;
 			}

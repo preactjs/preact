@@ -9,6 +9,7 @@ import React, {
 	useState
 } from 'preact/compat';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
+import { div } from '../../../test/_util/dom';
 import { createLazy, createSuspender } from './suspense-utils';
 
 const h = React.createElement;
@@ -85,13 +86,13 @@ describe('suspense', () => {
 		// Re-render fallback cuz lazy threw
 		rerender();
 		expect(scratch.innerHTML).to.eql(`<div>Suspended...</div>`);
-		expect(Lazy).to.have.been.calledTwice;
+		expect(Lazy).to.have.been.calledOnce;
 
 		return resolve(LazyResult).then(() => {
 			// Re-render result
 			rerender();
 			expect(scratch.innerHTML).to.eql(`<div>Hello from LazyComp</div>`);
-			expect(Lazy).to.have.been.calledThrice;
+			expect(Lazy).to.have.been.calledTwice;
 		});
 	});
 
@@ -112,14 +113,20 @@ describe('suspense', () => {
 		const [resolve, _, Lazy] = suspend();
 		rerender();
 		expect(scratch.innerHTML).to.equal(`<div>Suspended...</div>`);
-		// Lazy is called once during the first render when it throws, and again
-		// when the fallback is rendered
-		expect(Lazy).to.have.been.calledTwice;
+		// Lazy is called once during the first render when it throws
+		expect(Lazy).to.have.been.calledOnce;
 
-		return resolve(() => <div>resolved</div>).then(() => {
+		return resolve(() => (
+			<Fragment>
+				<div>resolved 1</div>
+				<div>resolved 2</div>
+			</Fragment>
+		)).then(() => {
 			rerender();
-			expect(scratch.innerHTML).to.equal(`<div>resolved</div>`);
-			expect(Lazy).to.have.been.calledThrice;
+			expect(scratch.innerHTML).to.equal(
+				`<div>resolved 1</div><div>resolved 2</div>`
+			);
+			expect(Lazy).to.have.been.calledTwice;
 		});
 	});
 
@@ -2159,6 +2166,118 @@ describe('suspense', () => {
 		return resolve(props => <div>{props.value}</div>).then(() => {
 			rerender();
 			expect(scratch.innerHTML).to.eql(`<div>123</div>`);
+		});
+	});
+
+	it('should support suspending around Fragments', () => {
+		const [Suspender, suspend] = createSuspender(() => <div>initial</div>);
+
+		function App() {
+			return (
+				<Fragment>
+					<Fragment>
+						<div>0</div>
+					</Fragment>
+					<Suspense fallback={<div>Suspended...</div>}>
+						<Fragment>
+							<div>1</div>
+						</Fragment>
+						<Suspender />
+						<Fragment>
+							<div>2</div>
+						</Fragment>
+					</Suspense>
+					<Fragment>
+						<div>3</div>
+					</Fragment>
+				</Fragment>
+			);
+		}
+
+		render(<App />, scratch);
+		expect(scratch.innerHTML).to.equal(
+			[div(0), div(1), div('initial'), div(2), div(3)].join('')
+		);
+
+		const [resolve] = suspend();
+		rerender();
+		expect(scratch.innerHTML).to.equal(
+			[div(0), div('Suspended...'), div(3)].join('')
+		);
+
+		return resolve(() => (
+			<Fragment>
+				<div>resolved A</div>
+				<div>resolved B</div>
+			</Fragment>
+		)).then(() => {
+			rerender();
+			expect(scratch.innerHTML).to.equal(
+				[
+					div(0),
+					div(1),
+					div('resolved A'),
+					div('resolved B'),
+					div(2),
+					div(3)
+				].join('')
+			);
+		});
+	});
+
+	it('should support mounting Suspense after initial render', () => {
+		const [Lazy, resolve] = createLazy();
+
+		function App({ mount }) {
+			return (
+				<Fragment>
+					<Fragment>
+						<div>0</div>
+					</Fragment>
+					{mount && (
+						<Suspense fallback={<div>Suspended...</div>}>
+							<Fragment>
+								<div>1</div>
+							</Fragment>
+							<Lazy />
+							<Fragment>
+								<div>2</div>
+							</Fragment>
+						</Suspense>
+					)}
+					<Fragment>
+						<div>3</div>
+					</Fragment>
+				</Fragment>
+			);
+		}
+
+		render(<App mount={false} />, scratch);
+		expect(scratch.innerHTML).to.equal([div(0), div(3)].join(''));
+
+		render(<App mount />, scratch); // Render suspense
+		rerender(); // Render fallback
+		expect(scratch.innerHTML).to.equal(
+			[div(0), div('Suspended...'), div(3)].join('')
+		);
+
+		return resolve(() => (
+			<Fragment>
+				<div>resolved A</div>
+				<div>resolved B</div>
+			</Fragment>
+		)).then(() => {
+			rerender();
+			expect(scratch.innerHTML).to.equal(
+				[
+					div(0),
+					div(1),
+					div('resolved A'),
+					div('resolved B'),
+					div(2),
+					div(3)
+				].join('')
+			);
 		});
 	});
 });

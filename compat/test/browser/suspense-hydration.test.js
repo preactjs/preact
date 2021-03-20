@@ -587,8 +587,64 @@ describe('suspense hydration', () => {
 		});
 	});
 
-	// TODO: Fix this test
-	it.skip('should hydrate lazy components through components using shouldComponentUpdate', () => {
+	it('should hydrate lazy components through components using shouldComponentUpdate', () => {
+		const originalHtml = '<b><i>a</i><i>b</i><i>c</i></b>';
+		scratch.innerHTML = originalHtml;
+
+		const listeners = [sinon.spy(), sinon.spy()];
+
+		const [Lazy1, resolve1] = createLazy();
+
+		class Blocker extends Component {
+			shouldComponentUpdate() {
+				return false;
+			}
+			render(props) {
+				return (
+					<b>
+						<i onClick={listeners[0]}>a</i>
+						{props.children}
+						<i>c</i>
+					</b>
+				);
+			}
+		}
+
+		clearLog();
+
+		hydrate(
+			<Suspense>
+				<Blocker>
+					<Lazy1 />
+				</Blocker>
+			</Suspense>,
+			scratch
+		);
+		rerender();
+		expect(scratch.innerHTML).to.equal(originalHtml);
+		expect(getLog()).to.deep.equal([]);
+		clearLog();
+
+		scratch.querySelector('i:first-child').dispatchEvent(createEvent('click'));
+		expect(listeners[0]).to.have.been.calledOnce;
+
+		return resolve1(() => <i onClick={listeners[1]}>b</i>).then(() => {
+			rerender();
+			expect(scratch.innerHTML).to.equal(originalHtml);
+			expect(getLog()).to.deep.equal([]);
+			clearLog();
+
+			scratch
+				.querySelector('i:nth-child(2)')
+				.dispatchEvent(createEvent('click'));
+			expect(listeners[1]).to.have.been.calledOnce;
+		});
+	});
+
+	// Currently not supported since we wait to rerender suspended nodes until all
+	// suspender's promises have resolved. So Lazy1 won't be hydrated until both
+	// Lazy1 and Lazy2 resolve
+	it.skip('should individually hydrate lazy components as they resolve through components using shouldComponentUpdate', () => {
 		const originalHtml = '<b><i>a</i><i>b</i><i>c</i><i>d</i></b>';
 		scratch.innerHTML = originalHtml;
 

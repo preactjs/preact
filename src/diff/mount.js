@@ -7,7 +7,8 @@ import {
 	MODE_SUSPENDED,
 	RESET_MODE,
 	TYPE_TEXT,
-	MODE_ERRORED
+	MODE_ERRORED,
+	TYPE_ROOT
 } from '../constants';
 import { normalizeToVNode } from '../create-element';
 import { setProperty } from './props';
@@ -44,6 +45,19 @@ export function mount(
 
 	try {
 		if (internal._flags & TYPE_COMPONENT) {
+			// Root nodes signal that an attempt to render into a specific DOM node on
+			// the page. Root nodes can occur anywhere in the tree and not just at the
+			// top.
+			let prevStartDom = startDom;
+			let prevParentDom = parentDom;
+			if (internal._flags & TYPE_ROOT) {
+				parentDom = newVNode.props._parentDom;
+
+				if (parentDom !== prevParentDom) {
+					startDom = null;
+				}
+			}
+
 			nextDomSibling = renderComponent(
 				parentDom,
 				null,
@@ -53,6 +67,15 @@ export function mount(
 				commitQueue,
 				startDom
 			);
+
+			if (internal._flags & TYPE_ROOT && prevParentDom !== parentDom) {
+				// If we just mounted a root node/Portal, and it changed the parentDom
+				// of it's children, then we need to resume the diff from it's previous
+				// startDom element, which could be null if we are mounting an entirely
+				// new tree, or the portal's nextSibling if we are mounting a Portal in
+				// an existing tree.
+				nextDomSibling = prevStartDom;
+			}
 		} else {
 			let hydrateDom =
 				internal._flags & (MODE_HYDRATE | MODE_MUTATIVE_HYDRATE)
@@ -266,7 +289,14 @@ export function mountChildren(
 		newDom = childInternal._dom;
 
 		if (newDom != null) {
-			if (firstChildDom == null) {
+			if (
+				firstChildDom == null &&
+				// TODO: Revisit (remove?) this condition when we remove _dom pointers
+				// on component internals. Note, the parentNode == parentDom check is
+				// cuz if this Portal is a passthrough (_parentDom prop matches
+				// parentDom) then we should look at the dom it returns and bubble it up
+				(!(childInternal._flags & TYPE_ROOT) || newDom.parentNode == parentDom)
+			) {
 				firstChildDom = newDom;
 			}
 

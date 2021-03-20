@@ -50,6 +50,8 @@ export function Suspense() {
 	this._suspenders = null;
 	/** @type {import('./internal').PreactElement} */
 	this._parentDom = null;
+	/** @type {number | null} */
+	this._portalVNodeId = null;
 }
 
 // Things we do here to save some bytes but are not proper JS inheritance:
@@ -103,13 +105,7 @@ Suspense.prototype._childDidSuspend = function(promise, suspendingInternal) {
 
 			let suspended;
 			while ((suspended = c._suspenders.pop())) {
-				// TODO: If the component that suspended was hydrating, we remount the
-				// component so the component instance stored by Suspense is no longer
-				// valid. Likely needs to be fixed with backing nodes and a way to
-				// trigger a rerender for backing nodes
-				if (!(suspended._internal._flags & MODE_HYDRATE)) {
-					suspended.forceUpdate();
-				}
+				suspended.forceUpdate();
 			}
 		}
 	};
@@ -149,7 +145,16 @@ Suspense.prototype.render = function(props, state) {
 	const fallback =
 		state._suspended && createElement(Fragment, null, props.fallback);
 
-	return [createPortal(props.children, this._parentDom), fallback];
+	const portal = createPortal(props.children, this._parentDom);
+	if (state._suspended) {
+		// If we are suspended, don't rerender all of the portal's children. Instead
+		// just reorder the Portal's children
+		portal._vnodeId = this._portalVNodeId;
+	} else {
+		this._portalVNodeId = portal._vnodeId;
+	}
+
+	return [portal, fallback];
 };
 
 /**
