@@ -6,7 +6,6 @@ import {
 	MODE_HYDRATE,
 	MODE_SUSPENDED,
 	EMPTY_ARR,
-	TYPE_ROOT,
 	TYPE_DOM
 } from '../constants';
 import { mount } from './mount';

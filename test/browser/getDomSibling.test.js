@@ -513,7 +513,7 @@ describe('getDomSibling', () => {
 		expect(getDomSibling(internal)).to.equal(null);
 	});
 
-	it('should not recurse upwards through a Portal with a different parentDom than its parent', () => {
+	it('should find siblings of children of Portals with different parentDoms than its parent', () => {
 		const portalParent = document.createElement('div');
 
 		render(
