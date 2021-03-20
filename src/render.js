@@ -37,7 +37,7 @@ export function render(vnode, parentDom, replaceNode) {
 			{},
 			parentDom.ownerSVGElement !== undefined,
 			commitQueue,
-			getChildDom(rootInternal, 0) // TODO: could this just be parentDom.firstChild
+			getChildDom(rootInternal, 0) // TODO: could this just be parentDom.firstChild? Probably once we drop replaceNode
 		);
 	} else {
 		// Store the VDOM tree root on the DOM element in a (minified) property:
