@@ -3,7 +3,13 @@ import { commitRoot } from './diff/commit';
 import options from './options';
 import { createVNode, Fragment } from './create-element';
 import { patch } from './diff/patch';
-import { DIRTY_BIT, FORCE_UPDATE, MODE_UNMOUNTING } from './constants';
+import {
+	DIRTY_BIT,
+	FORCE_UPDATE,
+	MODE_HYDRATE,
+	MODE_SUSPENDED,
+	MODE_UNMOUNTING
+} from './constants';
 import { getDomSibling, getParentDom } from './tree';
 
 /**
@@ -92,8 +98,12 @@ function rerenderComponent(component) {
 	let internal = component._internal;
 
 	if (~internal._flags & MODE_UNMOUNTING && internal._flags & DIRTY_BIT) {
-		let startDom = getDomSibling(internal, 0);
 		let parentDom = getParentDom(internal);
+		let startDom =
+			(internal._flags & (MODE_HYDRATE | MODE_SUSPENDED)) ===
+			(MODE_HYDRATE | MODE_SUSPENDED)
+				? internal._dom
+				: getDomSibling(internal, 0);
 
 		const vnode = createVNode(
 			internal.type,

@@ -120,7 +120,10 @@ export function diffChildren(
 		}
 		// If this node suspended during hydration, and no other flags are set:
 		// @TODO: might be better to explicitly check for MODE_ERRORED here.
-		else if ((childInternal._flags ^ (MODE_HYDRATE | MODE_SUSPENDED)) === 0) {
+		else if (
+			(childInternal._flags & (MODE_HYDRATE | MODE_SUSPENDED)) ===
+			(MODE_HYDRATE | MODE_SUSPENDED)
+		) {
 			// We are resuming the hydration of a VNode
 			startDom = childInternal._dom;
 			oldVNodeRef = childInternal.ref;
