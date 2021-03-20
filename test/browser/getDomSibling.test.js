@@ -428,7 +428,7 @@ describe('getDomSibling', () => {
 			scratch
 		);
 
-		let internal = getRoot(scratch)._children[0]._children[0]._children[0];
+		let internal = getRoot(scratch)._children[0]._children[0];
 		expect(internal.key).to.equal('A');
 		expect(getDomSibling(internal)).to.equalNode(scratch.childNodes[1]);
 	});
@@ -447,7 +447,7 @@ describe('getDomSibling', () => {
 			scratch
 		);
 
-		let internal = getRoot(scratch)._children[0]._children[0]._children[0];
+		let internal = getRoot(scratch)._children[0]._children[0];
 		expect(internal.key).to.equal('A');
 		expect(getDomSibling(internal)).to.equalNode(scratch.childNodes[1]);
 	});
@@ -487,7 +487,7 @@ describe('getDomSibling', () => {
 			scratch
 		);
 
-		let internal = getRoot(scratch)._children[0]._children[1];
+		let internal = getRoot(scratch)._children[1];
 		expect(internal.props._parentDom).to.equal(scratch);
 		expect(getDomSibling(internal)).to.equalNode(scratch.lastChild);
 	});
@@ -508,7 +508,7 @@ describe('getDomSibling', () => {
 			scratch
 		);
 
-		let internal = getRoot(scratch)._children[0]._children[1]._children[0];
+		let internal = getRoot(scratch)._children[1]._children[0];
 		expect(internal.key).to.equal('B');
 		expect(getDomSibling(internal)).to.equal(null);
 	});
@@ -537,7 +537,7 @@ describe('getDomSibling', () => {
 			scratch
 		);
 
-		let internal = getRoot(scratch)._children[0]._children[1]._children[0];
+		let internal = getRoot(scratch)._children[1]._children[0];
 		expect(internal.key).to.equal('B');
 		expect(getDomSibling(internal)).to.equal(portalParent.lastChild);
 	});
@@ -556,7 +556,7 @@ describe('getDomSibling', () => {
 			scratch
 		);
 
-		let internal = getRoot(scratch)._children[0]._children[1]._children[0];
+		let internal = getRoot(scratch)._children[1]._children[0];
 		expect(internal.key).to.equal('B');
 		expect(getDomSibling(internal)).to.equalNode(scratch.lastChild);
 	});

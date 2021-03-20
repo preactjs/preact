@@ -27,7 +27,7 @@ export function render(vnode, parentDom, replaceNode) {
 	// means that we are mounting a new tree for the first time.
 	let rootInternal =
 		(replaceNode && replaceNode._children) || parentDom._children;
-	vnode = createElement(Fragment, { _parentDom: parentDom }, [vnode]);
+	vnode = createElement(Fragment, { _parentDom: parentDom }, vnode);
 
 	if (rootInternal) {
 		patch(
@@ -78,7 +78,7 @@ export function render(vnode, parentDom, replaceNode) {
 export function hydrate(vnode, parentDom) {
 	if (options._root) options._root(vnode, parentDom);
 
-	vnode = createElement(Fragment, { _parentDom: parentDom }, [vnode]);
+	vnode = createElement(Fragment, { _parentDom: parentDom }, vnode);
 	const rootInternal = createInternal(vnode);
 	rootInternal._flags |= MODE_HYDRATE;
 	parentDom._children = rootInternal;

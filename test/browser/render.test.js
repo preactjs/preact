@@ -1151,4 +1151,15 @@ describe('render()', () => {
 		expect(scratch.firstChild.contentEditable).to.equal('true');
 		expect(scratch.querySelector('p').contentEditable).to.equal('false');
 	});
+
+	it('should handle unmounting top-level elements in an array', () => {
+		render(
+			[<div key="A">A</div>, <div key="B">B</div>, <div key="C">C</div>],
+			scratch
+		);
+		expect(scratch.innerHTML).to.equal('<div>A</div><div>B</div><div>C</div>');
+
+		render([<div key="B">B</div>], scratch);
+		expect(scratch.innerHTML).to.equal('<div>B</div>');
+	});
 });
