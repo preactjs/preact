@@ -32,6 +32,7 @@ import {
 	REACT_ELEMENT_TYPE,
 	__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED
 } from './render';
+import { getChildDom } from '../../src/tree';
 export * from './scheduler';
 
 const version = '16.8.0'; // trick libraries to think we are react
@@ -84,12 +85,13 @@ function unmountComponentAtNode(container) {
  * @returns {import('./internal').PreactElement | null}
  */
 function findDOMNode(component) {
-	return (
-		(component &&
-			((component._internal && component._internal._dom) ||
-				(component.nodeType === 1 && component))) ||
-		null
-	);
+	if (component == null) {
+		return null;
+	} else if (component.nodeType == 1) {
+		return component;
+	}
+
+	return getChildDom(component._internal);
 }
 
 /**
