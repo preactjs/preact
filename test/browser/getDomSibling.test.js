@@ -10,11 +10,17 @@ describe('getDomSibling', () => {
 
 	const getRoot = dom => dom._children;
 
+	const Root = props => props.children;
+	const createPortal = (vnode, parent) => (
+		<Root _parentDom={parent}>{vnode}</Root>
+	);
+
 	beforeEach(() => {
 		scratch = setupScratch();
 	});
 
 	afterEach(() => {
+		// @ts-ignore
 		teardown(scratch);
 	});
 
@@ -250,7 +256,7 @@ describe('getDomSibling', () => {
 	});
 
 	it('should find sibling rendered in Components without JSX children', () => {
-		const Foo = props => <p key="p">A paragraph</p>;
+		const Foo = () => <p key="p">A paragraph</p>;
 		render(
 			<div key="0">
 				<div key="A">A</div>
@@ -267,8 +273,7 @@ describe('getDomSibling', () => {
 	});
 
 	it('should climb through Components without JSX children', () => {
-		const divAVNode = <div key="A">A</div>;
-		const Foo = () => divAVNode;
+		const Foo = () => <div key="A">A</div>;
 
 		render(
 			<div key="0">
@@ -358,13 +363,11 @@ describe('getDomSibling', () => {
 	});
 
 	it('should return null if current parent has no siblings (even if parent has siblings at same level)', () => {
-		let divAVNode = <div key="A">A</div>;
-
 		render(
 			<div key="0">
 				<div key="0.0">
 					<div key="0.0.0" />
-					{divAVNode}
+					<div key="A">A</div>
 					<Fragment key="0.1.2" />
 				</div>
 				<div key="0.1">
@@ -378,5 +381,183 @@ describe('getDomSibling', () => {
 		let divAInternal = getRoot(scratch)._children[0]._children[0]._children[1];
 		expect(divAInternal.key).to.equal('A');
 		expect(getDomSibling(divAInternal)).to.equal(null);
+	});
+
+	it("should return null if it's the only child", () => {
+		render(<div key="A">A</div>, scratch);
+
+		let internal = getRoot(scratch)._children[0];
+		expect(internal.key).to.equal('A');
+		expect(getDomSibling(internal)).to.be.null;
+	});
+
+	it('should skip over portals with different parentDom', () => {
+		const portalParent = document.createElement('div');
+
+		render(
+			<div>
+				<Fragment>
+					<div key="A">A</div>
+				</Fragment>
+				{createPortal(<div key="B">B</div>, portalParent)}
+				<Fragment>
+					<div key="C">C</div>
+				</Fragment>
+			</div>,
+			scratch
+		);
+
+		let internal = getRoot(scratch)._children[0]._children[0]._children[0];
+		expect(internal.key).to.equal('A');
+		expect(getDomSibling(internal)).to.equalNode(
+			scratch.firstChild.childNodes[1]
+		);
+	});
+
+	it('should recurse into portals with same parentDom', () => {
+		render(
+			<Fragment>
+				<Fragment>
+					<div key="A">A</div>
+				</Fragment>
+				{createPortal(<div key="B">B</div>, scratch)}
+				<Fragment>
+					<div key="C">C</div>
+				</Fragment>
+			</Fragment>,
+			scratch
+		);
+
+		let internal = getRoot(scratch)._children[0]._children[0]._children[0];
+		expect(internal.key).to.equal('A');
+		expect(getDomSibling(internal)).to.equalNode(scratch.childNodes[1]);
+	});
+
+	it('should recurse into portals with a text child with same parentDom', () => {
+		render(
+			<Fragment>
+				<Fragment>
+					<div key="A">A</div>
+				</Fragment>
+				{createPortal('B', scratch)}
+				<Fragment>
+					<div key="C">C</div>
+				</Fragment>
+			</Fragment>,
+			scratch
+		);
+
+		let internal = getRoot(scratch)._children[0]._children[0]._children[0];
+		expect(internal.key).to.equal('A');
+		expect(getDomSibling(internal)).to.equalNode(scratch.childNodes[1]);
+	});
+
+	it('should skip over root nodes with a different parentDom than its parent', () => {
+		const portalParent = document.createElement('div');
+
+		render(
+			<div>
+				<Fragment>
+					<div key="A">A</div>
+				</Fragment>
+				{createPortal(<div key="B">B</div>, portalParent)}
+				<Fragment>
+					<div key="C">C</div>
+				</Fragment>
+			</div>,
+			scratch
+		);
+
+		let internal = getRoot(scratch)._children[0]._children[1];
+		expect(internal.props._parentDom).to.equal(portalParent);
+		expect(getDomSibling(internal)).to.equalNode(scratch.firstChild.lastChild);
+	});
+
+	it('should return a sibling for root nodes with the same parentDom as its parent', () => {
+		render(
+			<Fragment>
+				<Fragment>
+					<div key="A">A</div>
+				</Fragment>
+				{createPortal(<div key="B">B</div>, scratch)}
+				<Fragment>
+					<div key="C">C</div>
+				</Fragment>
+			</Fragment>,
+			scratch
+		);
+
+		let internal = getRoot(scratch)._children[0]._children[1];
+		expect(internal.props._parentDom).to.equal(scratch);
+		expect(getDomSibling(internal)).to.equalNode(scratch.lastChild);
+	});
+
+	it('should not recurse upwards through a Portal with a different parentDom than its parent', () => {
+		const portalParent = document.createElement('div');
+
+		render(
+			<Fragment>
+				<Fragment>
+					<div key="A">A</div>
+				</Fragment>
+				{createPortal(<div key="B">B</div>, portalParent)}
+				<Fragment>
+					<div key="C">C</div>
+				</Fragment>
+			</Fragment>,
+			scratch
+		);
+
+		let internal = getRoot(scratch)._children[0]._children[1]._children[0];
+		expect(internal.key).to.equal('B');
+		expect(getDomSibling(internal)).to.equal(null);
+	});
+
+	it('should not recurse upwards through a Portal with a different parentDom than its parent', () => {
+		const portalParent = document.createElement('div');
+
+		render(
+			<Fragment>
+				<Fragment>
+					<div key="A">A</div>
+				</Fragment>
+				{createPortal(
+					[
+						<div key="B">B</div>,
+						<Fragment>
+							<div key="B2">B2</div>
+						</Fragment>
+					],
+					portalParent
+				)}
+				<Fragment>
+					<div key="C">C</div>
+				</Fragment>
+			</Fragment>,
+			scratch
+		);
+
+		let internal = getRoot(scratch)._children[0]._children[1]._children[0];
+		expect(internal.key).to.equal('B');
+		expect(getDomSibling(internal)).to.equal(portalParent.lastChild);
+	});
+
+	it('should find siblings of Portals when the Portal has the same parentDom as its parent', () => {
+		render(
+			<Fragment>
+				<Fragment>
+					<div key="A">A</div>
+				</Fragment>
+				{createPortal(<div key="B">B</div>, scratch)}
+				<Fragment>
+					<div key="C">C</div>
+				</Fragment>
+			</Fragment>,
+			scratch
+		);
+
+		let internal = getRoot(scratch)._children[0]._children[1]._children[0];
+		expect(internal.key).to.equal('B');
+		expect(getDomSibling(internal)).to.equalNode(scratch.lastChild);
 	});
 });

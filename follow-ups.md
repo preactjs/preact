@@ -30,10 +30,14 @@
 - Always assign a number to `_vnodeId` (not null, use 0 to clear?)
 - Consider converting Fragment (and other special nodes, e.g. root, Portal,
   context?) to be numbers instead of functions with special diff handling
-  - One benefit of using numbers for Roots/Portals is that a portal could be
-    created with a `null` \_parentDOM prop and still be marked as a root type.
-    Particularly, this is useful for Suspense and would remove the need for the
-    call to `getParentDom` in `Suspense.render`
+
+  One benefit of using numbers for Roots/Portals is that a portal could be
+  created with a `null` \_parentDOM prop and still be marked as a root type.
+  Particularly, this is useful for Suspense and would remove the need for the
+  call to `getParentDom` in `Suspense.render`
+  
+  With the above suggestion, remember to update getParentDom, getDomSibling,
+  etc. to handle a `null` `_parentDom`
 
 ## Suspense follow ups
 

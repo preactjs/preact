@@ -84,6 +84,11 @@ export function createInternal(vnode, parentInternal) {
 	return internal;
 }
 
+const shouldSearchComponent = internal =>
+	internal._flags & TYPE_COMPONENT &&
+	(!(internal._flags & TYPE_ROOT) ||
+		internal.props._parentDom == getParentDom(internal._parent));
+
 /**
  * @param {import('./internal').Internal} internal
  * @param {number | null} [childIndex]
@@ -92,12 +97,10 @@ export function createInternal(vnode, parentInternal) {
 export function getDomSibling(internal, childIndex) {
 	if (childIndex == null) {
 		// Use childIndex==null as a signal to resume the search from the vnode's sibling
-		return internal._parent
-			? getDomSibling(
-					internal._parent,
-					internal._parent._children.indexOf(internal) + 1
-			  )
-			: null;
+		return getDomSibling(
+			internal._parent,
+			internal._parent._children.indexOf(internal) + 1
+		);
 	}
 
 	let childDom = getChildDom(internal, childIndex);
@@ -105,12 +108,15 @@ export function getDomSibling(internal, childIndex) {
 		return childDom;
 	}
 
-	// If we get here, we have not found a DOM node in this vnode's children.
-	// We must resume from this vnode's sibling (in it's parent _children array)
+	// If we get here, we have not found a DOM node in this vnode's children. We
+	// must resume from this vnode's sibling (in it's parent _children array).
 	// Only climb up and search the parent if we aren't searching through a DOM
 	// VNode (meaning we reached the DOM parent of the original vnode that began
-	// the search)
-	return internal._flags & TYPE_COMPONENT ? getDomSibling(internal) : null;
+	// the search). Note, the top of the tree has _parent == null so avoiding that
+	// here.
+	return internal._parent && shouldSearchComponent(internal)
+		? getDomSibling(internal)
+		: null;
 }
 
 /**
@@ -119,8 +125,6 @@ export function getDomSibling(internal, childIndex) {
  * @returns {import('./internal').PreactElement}
  */
 export function getChildDom(internal, i) {
-	// TODO: Handle Root Nodes here
-
 	if (internal._children == null) {
 		return null;
 	}
@@ -132,9 +136,11 @@ export function getChildDom(internal, i) {
 				return child._dom;
 			}
 
-			let childDom = getChildDom(child);
-			if (childDom) {
-				return childDom;
+			if (shouldSearchComponent(child)) {
+				let childDom = getChildDom(child);
+				if (childDom) {
+					return childDom;
+				}
 			}
 		}
 	}

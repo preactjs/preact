@@ -10,11 +10,17 @@ describe('getParentDom', () => {
 
 	const getRoot = dom => dom._children;
 
+	const Root = props => props.children;
+	const createPortal = (vnode, parent) => (
+		<Root _parentDom={parent}>{vnode}</Root>
+	);
+
 	beforeEach(() => {
 		scratch = setupScratch();
 	});
 
 	afterEach(() => {
+		// @ts-ignore
 		teardown(scratch);
 	});
 
@@ -191,17 +197,18 @@ describe('getParentDom', () => {
 		expect(getParentDom(internal)).to.equal(scratch);
 	});
 
-	it('should return _parentDom property of root node', () => {
+	it('should return parentDom of root node', () => {
 		const portalParent = document.createElement('div');
 
 		const Foo = props => props.children;
 		render(
 			<div>
-				<Fragment _parentDom={portalParent}>
+				{createPortal(
 					<Foo>
 						<div>A</div>
-					</Foo>
-				</Fragment>
+					</Foo>,
+					portalParent
+				)}
 			</div>,
 			scratch
 		);
@@ -209,21 +216,22 @@ describe('getParentDom', () => {
 		expect(scratch.innerHTML).to.equal('<div></div>');
 
 		let internal = getRoot(scratch)._children[0]._children[0];
-		expect(internal.type).to.equal(Fragment);
+		expect(internal.type).to.equal(Root);
 		expect(getParentDom(internal)).to.equalNode(portalParent);
 	});
 
-	it('should return _parentDom property of root node if ancestors contain a root node', () => {
+	it('should return parentDom of root node if ancestors contain a root node', () => {
 		const portalParent = document.createElement('div');
 
 		const Foo = props => props.children;
 		render(
 			<div>
-				<Fragment _parentDom={portalParent}>
+				{createPortal(
 					<Foo>
 						<div>A</div>
-					</Foo>
-				</Fragment>
+					</Foo>,
+					portalParent
+				)}
 			</div>,
 			scratch
 		);
@@ -239,14 +247,9 @@ describe('getParentDom', () => {
 		expect(getParentDom(divInternal)).to.equalNode(portalParent);
 	});
 
-	it('should return _parentDom property of root node returned from a Component', () => {
+	it('should return parentDom of root node returned from a Component', () => {
 		const portalParent = document.createElement('div');
-		const Root = props => props.children;
-		const Foo = () => (
-			<Root _parentDom={portalParent}>
-				<div>A</div>
-			</Root>
-		);
+		const Foo = () => createPortal(<div>A</div>, portalParent);
 
 		render(
 			<div>
