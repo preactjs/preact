@@ -6,7 +6,8 @@ import {
 	TYPE_CLASS,
 	TYPE_ROOT,
 	INHERITED_MODES,
-	TYPE_COMPONENT
+	TYPE_COMPONENT,
+	TYPE_DOM
 } from './constants';
 
 /**
@@ -83,6 +84,11 @@ export function createInternal(vnode, parentInternal) {
 	return internal;
 }
 
+const shouldSearchComponent = internal =>
+	internal._flags & TYPE_COMPONENT &&
+	(!(internal._flags & TYPE_ROOT) ||
+		internal.props._parentDom == getParentDom(internal._parent));
+
 /**
  * @param {import('./internal').Internal} internal
  * @param {number | null} [childIndex]
@@ -91,55 +97,55 @@ export function createInternal(vnode, parentInternal) {
 export function getDomSibling(internal, childIndex) {
 	if (childIndex == null) {
 		// Use childIndex==null as a signal to resume the search from the vnode's sibling
-		return internal._parent
-			? getDomSibling(
-					internal._parent,
-					internal._parent._children.indexOf(internal) + 1
-			  )
-			: null;
+		return getDomSibling(
+			internal._parent,
+			internal._parent._children.indexOf(internal) + 1
+		);
 	}
 
-	let sibling;
-	for (; childIndex < internal._children.length; childIndex++) {
-		sibling = internal._children[childIndex];
-
-		if (sibling != null && sibling._dom != null) {
-			// Since updateParentDomPointers keeps _dom pointer correct,
-			// we can rely on _dom to tell us if this subtree contains a
-			// rendered DOM node, and what the first rendered DOM node is
-			return sibling._dom;
-		}
+	let childDom = getChildDom(internal, childIndex);
+	if (childDom) {
+		return childDom;
 	}
 
-	// If we get here, we have not found a DOM node in this vnode's children.
-	// We must resume from this vnode's sibling (in it's parent _children array)
+	// If we get here, we have not found a DOM node in this vnode's children. We
+	// must resume from this vnode's sibling (in it's parent _children array).
 	// Only climb up and search the parent if we aren't searching through a DOM
 	// VNode (meaning we reached the DOM parent of the original vnode that began
-	// the search)
-	return internal._flags & TYPE_COMPONENT ? getDomSibling(internal) : null;
+	// the search). Note, the top of the tree has _parent == null so avoiding that
+	// here.
+	return internal._parent && shouldSearchComponent(internal)
+		? getDomSibling(internal)
+		: null;
 }
 
 /**
  * @param {import('./internal').Internal} internal
+ * @param {number} [i]
+ * @returns {import('./internal').PreactElement}
  */
-export function updateParentDomPointers(internal) {
-	if (
-		(internal = internal._parent) != null &&
-		internal._flags & TYPE_COMPONENT
-	) {
-		internal._dom = null;
-		for (let i = 0; i < internal._children.length; i++) {
-			let child = internal._children[i];
-			if (child != null && child._dom != null) {
-				internal._dom = child._dom;
-				break;
+export function getChildDom(internal, i) {
+	if (internal._children == null) {
+		return null;
+	}
+
+	for (i = i || 0; i < internal._children.length; i++) {
+		let child = internal._children[i];
+		if (child != null) {
+			if (child._flags & TYPE_DOM) {
+				return child._dom;
+			}
+
+			if (shouldSearchComponent(child)) {
+				let childDom = getChildDom(child);
+				if (childDom) {
+					return childDom;
+				}
 			}
 		}
-
-		if (!(internal._flags & TYPE_ROOT)) {
-			return updateParentDomPointers(internal);
-		}
 	}
+
+	return null;
 }
 
 /**

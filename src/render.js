@@ -4,7 +4,7 @@ import { createElement, Fragment } from './create-element';
 import options from './options';
 import { mount } from './diff/mount';
 import { patch } from './diff/patch';
-import { createInternal } from './tree';
+import { createInternal, getChildDom } from './tree';
 
 /**
  * Render a Preact virtual node into a DOM element
@@ -37,7 +37,7 @@ export function render(vnode, parentDom, replaceNode) {
 			{},
 			parentDom.ownerSVGElement !== undefined,
 			commitQueue,
-			rootInternal._dom
+			getChildDom(rootInternal, 0) // TODO: could this just be parentDom.firstChild? Probably once we drop replaceNode
 		);
 	} else {
 		// Store the VDOM tree root on the DOM element in a (minified) property:
@@ -78,9 +78,6 @@ export function render(vnode, parentDom, replaceNode) {
 export function hydrate(vnode, parentDom) {
 	if (options._root) options._root(vnode, parentDom);
 
-	/** @type {import('./internal').PreactElement} */
-	const hydrateDom = (parentDom.firstChild);
-
 	vnode = createElement(Fragment, { _parentDom: parentDom }, [vnode]);
 	const rootInternal = createInternal(vnode);
 	rootInternal._flags |= MODE_HYDRATE;
@@ -94,7 +91,7 @@ export function hydrate(vnode, parentDom) {
 		{},
 		parentDom.ownerSVGElement !== undefined,
 		commitQueue,
-		hydrateDom
+		parentDom.firstChild
 	);
 	commitRoot(commitQueue, rootInternal);
 }

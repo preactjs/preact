@@ -10,7 +10,7 @@ import {
 	MODE_ERRORED,
 	TYPE_ROOT
 } from '../constants';
-import { getDomSibling } from '../tree';
+import { getChildDom, getDomSibling } from '../tree';
 
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
@@ -60,8 +60,9 @@ export function patch(
 				parentDom = newVNode.props._parentDom;
 
 				if (parentDom !== prevParentDom) {
-					if (internal && internal._dom) {
-						startDom = internal._dom;
+					let newStartDom = getChildDom(internal);
+					if (newStartDom) {
+						startDom = newStartDom;
 					}
 
 					// The `startDom` variable might point to a node from another

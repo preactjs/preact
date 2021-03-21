@@ -6,6 +6,7 @@
 
 ## Root node follow ups
 
+- Investigate if the return value of `createRoot()` can be re-used as a root Node...
 - Add specific tests for root nodes
   - initial mount with same/different parentDOM as parent
   - mounting on rerender with same/different parentDOM as parent
@@ -30,10 +31,14 @@
 - Always assign a number to `_vnodeId` (not null, use 0 to clear?)
 - Consider converting Fragment (and other special nodes, e.g. root, Portal,
   context?) to be numbers instead of functions with special diff handling
-  - One benefit of using numbers for Roots/Portals is that a portal could be
-    created with a `null` \_parentDOM prop and still be marked as a root type.
-    Particularly, this is useful for Suspense and would remove the need for the
-    call to `getParentDom` in `Suspense.render`
+
+  One benefit of using numbers for Roots/Portals is that a portal could be
+  created with a `null` \_parentDOM prop and still be marked as a root type.
+  Particularly, this is useful for Suspense and would remove the need for the
+  call to `getParentDom` in `Suspense.render`
+
+  With the above suggestion, remember to update getParentDom, getDomSibling,
+  etc. to handle a `null` `_parentDom`
 
 ## Suspense follow ups
 
@@ -57,18 +62,18 @@
 
 ## TODOs
 
-- Consider further removing `_dom` pointers from non-dom VNodes
-  - Ensure all tree traversal functions handle root nodes with different
-    parentDOM. For example, getChildDom & getDomSibling should skip over root
-    nodes iif they have different parentDOMs.
-  - Remove TYPE_ROOT special handling in mountChildren/diffChildren related to
-    skipping set \_dom on parent Internals through Portal/root nodes
+- Logic to begin (re)rendering an internal is sorta scattered around (top level
+  render/hydrate, rerenderComponent, diffChildren), particularly the logic to
+  resume suspended hydration. Could we consolidate this logic into a single
+  function?
+
+  Perhaps reuse this function in the new extensible Component API?
+
 - Fix Suspense tests:
   - "should correctly render nested Suspense components without intermediate DOM #2747"
 - Fix Suspense hydration tests:
   - "should hydrate lazy components through components using shouldComponentUpdate"
 - Rebuild Suspense List to work with backing tree
-- Find a way to avoid re-rendering suspending trees when swapping to fallback (follow-up to #3053)
 
 ## Other
 

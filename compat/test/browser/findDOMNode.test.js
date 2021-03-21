@@ -21,9 +21,14 @@ describe('findDOMNode()', () => {
 		teardown(scratch);
 	});
 
-	it.skip('should return DOM Node if render is not false nor null', () => {
-		const helper = React.render(<Helper />, scratch);
-		expect(findDOMNode(helper)).to.be.instanceof(Node);
+	it('should return DOM Node if render is not false nor null', () => {
+		const helper = React.render(
+			<React.Fragment>
+				<Helper something />
+			</React.Fragment>,
+			scratch
+		);
+		expect(findDOMNode(helper)).to.equalNode(scratch.firstChild);
 	});
 
 	it('should return null if given null', () => {
