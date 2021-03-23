@@ -80,7 +80,7 @@ export function renderComponent(
 		c._globalContext = globalContext;
 		isNew = true;
 		internal._flags |= DIRTY_BIT;
-		c._renderCallbacks = [];
+		c._commitCallbacks = [];
 	}
 
 	// Invoke getDerivedStateFromProps
@@ -106,7 +106,7 @@ export function renderComponent(
 			// If the component was constructed, queue up componentDidMount so the
 			// first time this internal commits (regardless of suspense or not) it
 			// will be called
-			c._renderCallbacks.push(c.componentDidMount);
+			c._commitCallbacks.push(c.componentDidMount);
 		}
 	} else {
 		if (
@@ -133,7 +133,7 @@ export function renderComponent(
 			}
 
 			c._internal = internal;
-			if (c._renderCallbacks.length) {
+			if (c._commitCallbacks.length) {
 				commitQueue.push(c);
 			}
 
@@ -175,7 +175,7 @@ export function renderComponent(
 
 		// Only schedule componentDidUpdate if the component successfully rendered
 		if (c.componentDidUpdate != null) {
-			c._renderCallbacks.push(() => {
+			c._commitCallbacks.push(() => {
 				c.componentDidUpdate(oldProps, oldState, snapshot);
 			});
 		}
@@ -209,7 +209,7 @@ export function renderComponent(
 		);
 	}
 
-	if (c._renderCallbacks.length) {
+	if (c._commitCallbacks.length) {
 		commitQueue.push(c);
 	}
 

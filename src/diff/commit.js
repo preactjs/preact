@@ -1,5 +1,13 @@
 import options from '../options';
 
+export function addCommitCallback(internal, callback) {
+	if (internal._commitCallbacks == null) {
+		internal._commitCallbacks = [];
+	}
+
+	internal._commitCallbacks.push(callback);
+}
+
 /**
  * @param {Array<import('../internal').Component>} commitQueue List of components
  * which have callbacks to invoke in commitRoot
@@ -11,8 +19,8 @@ export function commitRoot(commitQueue, rootInternal) {
 	commitQueue.some(c => {
 		try {
 			// @ts-ignore Reuse the commitQueue variable here so the type changes
-			commitQueue = c._renderCallbacks;
-			c._renderCallbacks = [];
+			commitQueue = c._commitCallbacks;
+			c._commitCallbacks = [];
 			commitQueue.some(cb => {
 				// @ts-ignore See above ts-ignore on commitQueue
 				cb.call(c);

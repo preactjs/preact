@@ -61,13 +61,13 @@ options.diffed = internal => {
 options._commit = (internal, commitQueue) => {
 	commitQueue.some(component => {
 		try {
-			component._renderCallbacks.forEach(invokeCleanup);
-			component._renderCallbacks = component._renderCallbacks.filter(cb =>
+			component._commitCallbacks.forEach(invokeCleanup);
+			component._commitCallbacks = component._commitCallbacks.filter(cb =>
 				cb._value ? invokeEffect(cb) : true
 			);
 		} catch (e) {
 			commitQueue.some(c => {
-				if (c._renderCallbacks) c._renderCallbacks = [];
+				if (c._commitCallbacks) c._commitCallbacks = [];
 			});
 			commitQueue = [];
 			options._catchError(e, component._internal);
@@ -183,7 +183,7 @@ export function useLayoutEffect(callback, args) {
 		state._value = callback;
 		state._args = args;
 
-		currentComponent._renderCallbacks.push(state);
+		currentComponent._commitCallbacks.push(state);
 	}
 }
 

@@ -147,7 +147,7 @@ export interface Component<P = {}, S = {}> extends preact.Component<P, S> {
 	constructor: ComponentType<P>;
 	state: S; // Override Component["state"] to not be readonly for internal use, specifically Hooks
 	/** @TODO this should be moved to internal.data */
-	_renderCallbacks: Array<() => void>; // Only class components
+	_commitCallbacks: Array<() => void>; // Only class components
 	_globalContext?: any;
 	_internal?: Internal<P> | null;
 	_nextState?: S | null; // Only class components
