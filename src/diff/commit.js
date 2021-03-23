@@ -1,15 +1,7 @@
 import options from '../options';
 
-export function addCommitCallback(internal, callback) {
-	if (internal._commitCallbacks == null) {
-		internal._commitCallbacks = [];
-	}
-
-	internal._commitCallbacks.push(callback);
-}
-
 /**
- * @param {Array<import('../internal').Component>} commitQueue List of components
+ * @param {import('../internal').CommitQueue} commitQueue List of components
  * which have callbacks to invoke in commitRoot
  * @param {import('../internal').Internal} rootInternal
  */

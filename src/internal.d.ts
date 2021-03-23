@@ -34,7 +34,7 @@ export interface Options extends preact.Options {
 	/** Attach a hook that is invoked before a vnode is diffed. */
 	_diff?(internal: Internal, vnode?: VNode): void;
 	/** Attach a hook that is invoked after a tree was mounted or was updated. */
-	_commit?(internal: Internal, commitQueue: Component[]): void;
+	_commit?(internal: Internal, commitQueue: CommitQueue): void;
 	/** Attach a hook that is invoked before a vnode has rendered. */
 	_render?(internal: Internal): void;
 	/** Attach a hook that is invoked before a hook's state is queried. */
@@ -45,6 +45,8 @@ export interface Options extends preact.Options {
 	_catchError(error: any, internal: Internal): void;
 	_internal(internal: Internal, vnode: VNode | string): void;
 }
+
+export type CommitQueue = Component[];
 
 // Redefine ComponentFactory using our new internal FunctionalComponent interface above
 export type ComponentFactory<P> =

@@ -19,7 +19,7 @@ import { getChildDom, getDomSibling } from '../tree';
  * @param {import('../internal').Internal} internal The Internal node to patch
  * @param {object} globalContext The current context object. Modified by getChildContext
  * @param {boolean} isSvg Whether or not this element is an SVG node
- * @param {Array<import('../internal').Component>} commitQueue List of components
+ * @param {import('../internal').CommitQueue} commitQueue List of components
  * which have callbacks to invoke in commitRoot
  * @param {import('../internal').PreactNode} startDom
  */
@@ -148,7 +148,7 @@ export function patch(
  * @param {import('../internal').Internal} internal The Internal node to patch
  * @param {object} globalContext The current context object
  * @param {boolean} isSvg Whether or not this DOM node is an SVG node
- * @param {Array<import('../internal').Component>} commitQueue List of components
+ * @param {import('../internal').CommitQueue} commitQueue List of components
  * which have callbacks to invoke in commitRoot
  * @returns {import('../internal').PreactElement}
  */

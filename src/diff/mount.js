@@ -24,7 +24,7 @@ import { removeNode } from '../util';
  * @param {import('../internal').Internal} internal The Internal node to mount
  * @param {object} globalContext The current context object. Modified by getChildContext
  * @param {boolean} isSvg Whether or not this element is an SVG node
- * @param {Array<import('../internal').Component>} commitQueue List of components
+ * @param {import('../internal').CommitQueue} commitQueue List of components
  * which have callbacks to invoke in commitRoot
  * @param {import('../internal').PreactElement} startDom
  * @returns {import('../internal').PreactElement | null} pointer to the next DOM node to be hydrated (or null)
@@ -117,7 +117,7 @@ export function mount(
  * @param {import('../internal').Internal} internal The Internal node to mount
  * @param {object} globalContext The current context object
  * @param {boolean} isSvg Whether or not this DOM node is an SVG node
- * @param {Array<import('../internal').Component>} commitQueue List of components
+ * @param {import('../internal').CommitQueue} commitQueue List of components
  * which have callbacks to invoke in commitRoot
  * @returns {import('../internal').PreactElement}
  */
@@ -246,7 +246,7 @@ function mountDOMElement(dom, internal, globalContext, isSvg, commitQueue) {
  * @param {import('../internal').Internal} parentInternal The parent Internal of the given children
  * @param {object} globalContext The current context object - modified by getChildContext
  * @param {boolean} isSvg Whether or not this DOM node is an SVG node
- * @param {Array<import('../internal').Component>} commitQueue List of components
+ * @param {import('../internal').CommitQueue} commitQueue List of components
  * which have callbacks to invoke in commitRoot
  * @param {import('../internal').PreactElement} startDom
  */

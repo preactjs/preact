@@ -18,7 +18,7 @@ import {
  * @param {import('../internal').Internal} internal The component's backing Internal node
  * @param {object} globalContext The current context object. Modified by getChildContext
  * @param {boolean} isSvg Whether or not this element is an SVG node
- * @param {Array<import('../internal').Component>} commitQueue List of components
+ * @param {import('../internal').CommitQueue} commitQueue List of components
  * which have callbacks to invoke in commitRoot
  * @param {import('../internal').PreactNode} startDom
  * @returns {import('../internal').PreactNode} pointer to the next DOM node (in order) to be rendered (or null)
