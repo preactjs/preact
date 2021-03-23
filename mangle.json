@@ -44,7 +44,6 @@
       "$_onResolve": "__R",
       "$_suspended": "__e",
       "$_dom": "__e",
-      "$_hydrating": "__h",
       "$_flags": "__f",
       "$_component": "__c",
       "$__html": "__html",
