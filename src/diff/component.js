@@ -10,6 +10,7 @@ import {
 	MODE_PENDING_ERROR,
 	MODE_RERENDERING_ERROR
 } from '../constants';
+import { addCommitCallback } from './commit';
 
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
@@ -80,7 +81,6 @@ export function renderComponent(
 		c._globalContext = globalContext;
 		isNew = true;
 		internal._flags |= DIRTY_BIT;
-		c._commitCallbacks = [];
 	}
 
 	// Invoke getDerivedStateFromProps
@@ -106,7 +106,7 @@ export function renderComponent(
 			// If the component was constructed, queue up componentDidMount so the
 			// first time this internal commits (regardless of suspense or not) it
 			// will be called
-			c._commitCallbacks.push(c.componentDidMount);
+			addCommitCallback(internal, () => c.componentDidMount());
 		}
 	} else {
 		if (
@@ -133,8 +133,11 @@ export function renderComponent(
 			}
 
 			c._internal = internal;
-			if (c._commitCallbacks.length) {
-				commitQueue.push(c);
+			if (
+				internal._commitCallbacks != null &&
+				internal._commitCallbacks.length
+			) {
+				commitQueue.push(internal);
 			}
 
 			// TODO: Returning undefined here (i.e. return;) passes all tests. That seems
@@ -175,7 +178,7 @@ export function renderComponent(
 
 		// Only schedule componentDidUpdate if the component successfully rendered
 		if (c.componentDidUpdate != null) {
-			c._commitCallbacks.push(() => {
+			addCommitCallback(internal, () => {
 				c.componentDidUpdate(oldProps, oldState, snapshot);
 			});
 		}
@@ -209,8 +212,8 @@ export function renderComponent(
 		);
 	}
 
-	if (c._commitCallbacks.length) {
-		commitQueue.push(c);
+	if (internal._commitCallbacks != null && internal._commitCallbacks.length) {
+		commitQueue.push(internal);
 	}
 
 	return nextDomSibling;

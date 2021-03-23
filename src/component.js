@@ -1,5 +1,5 @@
 import { assign } from './util';
-import { commitRoot } from './diff/commit';
+import { addCommitCallback, commitRoot } from './diff/commit';
 import options from './options';
 import { createVNode, Fragment } from './create-element';
 import { patch } from './diff/patch';
@@ -56,7 +56,7 @@ Component.prototype.setState = function(update, callback) {
 	if (update == null) return;
 
 	if (this._internal) {
-		if (callback) this._commitCallbacks.push(callback);
+		if (callback) addCommitCallback(this._internal, () => callback.call(this));
 		enqueueRender(this);
 	}
 };
@@ -73,7 +73,7 @@ Component.prototype.forceUpdate = function(callback) {
 		// is coming from. We need this because forceUpdate should never call
 		// shouldComponentUpdate
 		this._internal._flags |= FORCE_UPDATE;
-		if (callback) this._commitCallbacks.push(callback);
+		if (callback) addCommitCallback(this._internal, () => callback.call(this));
 		enqueueRender(this);
 	}
 };

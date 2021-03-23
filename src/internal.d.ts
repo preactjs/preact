@@ -46,7 +46,7 @@ export interface Options extends preact.Options {
 	_internal(internal: Internal, vnode: VNode | string): void;
 }
 
-export type CommitQueue = Component[];
+export type CommitQueue = Internal[];
 
 // Redefine ComponentFactory using our new internal FunctionalComponent interface above
 export type ComponentFactory<P> =
@@ -142,6 +142,8 @@ export interface Internal<P = {}> {
 	_flags: number;
 	/** This Internal's distance from the tree root */
 	_depth: number | null;
+	/** Callbacks to invoke when this internal commits */
+	_commitCallbacks: Array<() => void>;
 }
 
 export interface Component<P = {}, S = {}> extends preact.Component<P, S> {
@@ -149,7 +151,6 @@ export interface Component<P = {}, S = {}> extends preact.Component<P, S> {
 	constructor: ComponentType<P>;
 	state: S; // Override Component["state"] to not be readonly for internal use, specifically Hooks
 	/** @TODO this should be moved to internal.data */
-	_commitCallbacks: Array<() => void>; // Only class components
 	_globalContext?: any;
 	_internal?: Internal<P> | null;
 	_nextState?: S | null; // Only class components
