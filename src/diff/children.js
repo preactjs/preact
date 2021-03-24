@@ -120,9 +120,9 @@ export function diffChildren(
 				// If childVNode is unkeyed, we only match similarly unkeyed nodes, otherwise we match by key.
 				// We always match by type (in either case).
 				if (
-					oldVNode &&
-					(childVNode.key && childVNode.key == oldVNode.key) ||
-					childVNode.type === oldVNode.type
+					oldVNode && childVNode &&
+					((childVNode.key && childVNode.key == oldVNode.key) ||
+					childVNode.type === oldVNode.type)
 				) {
 					oldChildren[j] = undefined;
 					break;
