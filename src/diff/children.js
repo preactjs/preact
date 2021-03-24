@@ -108,7 +108,7 @@ export function diffChildren(
 		if (
 			oldVNode === null ||
 			(oldVNode &&
-				childVNode.key == oldVNode.key &&
+				(childVNode.key && childVNode.key == oldVNode.key) ||
 				childVNode.type === oldVNode.type)
 		) {
 			oldChildren[i] = undefined;
@@ -121,7 +121,7 @@ export function diffChildren(
 				// We always match by type (in either case).
 				if (
 					oldVNode &&
-					childVNode.key == oldVNode.key &&
+					(childVNode.key && childVNode.key == oldVNode.key) ||
 					childVNode.type === oldVNode.type
 				) {
 					oldChildren[j] = undefined;
