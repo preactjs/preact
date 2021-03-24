@@ -4,20 +4,20 @@ import { MODE_UNMOUNTING } from '../../src/constants';
 /** @type {number} */
 let currentIndex;
 
-/** @type {import('./internal').Component} */
-let currentComponent;
+/** @type {import('./internal').Internal} */
+let currentInternal;
 /**
- * Keep track of the previous component so that we can set
- * `currentComponent` to `null` and throw when a hook is invoked
+ * Keep track of the previous internal so that we can set
+ * `currentInternal` to `null` and throw when a hook is invoked
  * outside of render
- * @type {import('./internal').Component}
+ * @type {import('./internal').Internal}
  */
-let previousComponent;
+let previousInternal;
 
 /** @type {number} */
 let currentHook = 0;
 
-/** @type {Array<import('./internal').Component>} */
+/** @type {Array<import('./internal').Internal>} */
 let afterPaintEffects = [];
 
 let oldBeforeDiff = options._diff;
@@ -30,17 +30,17 @@ const RAF_TIMEOUT = 100;
 let prevRaf;
 
 options._diff = (internal, vnode) => {
-	currentComponent = null;
+	currentInternal = null;
 	if (oldBeforeDiff) oldBeforeDiff(internal, vnode);
 };
 
 options._render = internal => {
 	if (oldBeforeRender) oldBeforeRender(internal);
 
-	currentComponent = internal._component;
+	currentInternal = internal._component;
 	currentIndex = 0;
 
-	const hooks = currentComponent.__hooks;
+	const hooks = currentInternal.__hooks;
 	if (hooks) {
 		hooks._pendingEffects.forEach(invokeCleanup);
 		hooks._pendingEffects.forEach(invokeEffect);
@@ -51,11 +51,10 @@ options._render = internal => {
 options.diffed = internal => {
 	if (oldAfterDiff) oldAfterDiff(internal);
 
-	const c = internal._component;
-	if (c && c.__hooks && c.__hooks._pendingEffects.length) {
-		afterPaint(afterPaintEffects.push(c));
+	if (internal.__hooks && internal.__hooks._pendingEffects.length) {
+		afterPaint(afterPaintEffects.push(internal));
 	}
-	currentComponent = previousComponent;
+	currentInternal = previousInternal;
 };
 
 options._commit = (internal, commitQueue) => {
@@ -80,26 +79,26 @@ options._commit = (internal, commitQueue) => {
 options.unmount = internal => {
 	if (oldBeforeUnmount) oldBeforeUnmount(internal);
 
-	const c = internal._component;
-	if (c && c.__hooks) {
+	if (internal.__hooks) {
 		try {
-			c.__hooks._list.forEach(invokeCleanup);
+			internal.__hooks._list.forEach(invokeCleanup);
 		} catch (e) {
-			options._catchError(e, c._internal);
+			options._catchError(e, internal);
 		}
 	}
 };
 
 /**
- * Get a hook's state from the currentComponent
+ * Get a hook's state from the currentInternal
  * @param {number} index The index of the hook to get
  * @param {number} type The index of the hook to get
  * @returns {any}
  */
 function getHookState(index, type) {
 	if (options._hook) {
-		options._hook(currentComponent, index, currentHook || type);
+		options._hook(currentInternal, index, currentHook || type);
 	}
+
 	currentHook = 0;
 
 	// Largely inspired by:
@@ -108,8 +107,8 @@ function getHookState(index, type) {
 	// Other implementations to look at:
 	// * https://codesandbox.io/s/mnox05qp8
 	const hooks =
-		currentComponent.__hooks ||
-		(currentComponent.__hooks = {
+		currentInternal.__hooks ||
+		(currentInternal.__hooks = {
 			_list: [],
 			_pendingEffects: []
 		});
@@ -151,7 +150,7 @@ export function useReducer(reducer, initialState, init) {
 			}
 		];
 
-		hookState._component = currentComponent;
+		hookState._component = currentInternal._component;
 	}
 
 	return hookState._value;
@@ -168,7 +167,7 @@ export function useEffect(callback, args) {
 		state._value = callback;
 		state._args = args;
 
-		currentComponent.__hooks._pendingEffects.push(state);
+		currentInternal.__hooks._pendingEffects.push(state);
 	}
 }
 
@@ -183,10 +182,10 @@ export function useLayoutEffect(callback, args) {
 		state._value = callback;
 		state._args = args;
 
-		if (currentComponent._internal._commitCallbacks == null) {
-			currentComponent._internal._commitCallbacks = [];
+		if (currentInternal._internal._commitCallbacks == null) {
+			currentInternal._internal._commitCallbacks = [];
 		}
-		currentComponent._internal._commitCallbacks.push(state);
+		currentInternal._internal._commitCallbacks.push(state);
 	}
 }
 
@@ -240,7 +239,7 @@ export function useCallback(callback, args) {
  * @param {import('./internal').PreactContext} context
  */
 export function useContext(context) {
-	const provider = currentComponent.context[context._id];
+	const provider = currentInternal.context[context._id];
 	// We could skip this call here, but than we'd not call
 	// `options._hook`. We need to do that in order to make
 	// the devtools aware of this hook.
@@ -254,7 +253,7 @@ export function useContext(context) {
 	// This is probably not safe to convert to "!"
 	if (state._value == null) {
 		state._value = true;
-		provider.sub(currentComponent);
+		provider.sub(currentInternal);
 	}
 	return provider.props.value;
 }
@@ -277,8 +276,8 @@ export function useErrorBoundary(cb) {
 	const state = getHookState(currentIndex++, 10);
 	const errState = useState();
 	state._value = cb;
-	if (!currentComponent.componentDidCatch) {
-		currentComponent.componentDidCatch = err => {
+	if (!currentInternal._component.componentDidCatch) {
+		currentInternal._component.componentDidCatch = err => {
 			if (state._value) state._value(err);
 			errState[1](err);
 		};
@@ -295,15 +294,15 @@ export function useErrorBoundary(cb) {
  * After paint effects consumer.
  */
 function flushAfterPaintEffects() {
-	afterPaintEffects.forEach(component => {
-		if (~component._internal._flags & MODE_UNMOUNTING) {
+	afterPaintEffects.forEach(internal => {
+		if (~internal._flags & MODE_UNMOUNTING) {
 			try {
-				component.__hooks._pendingEffects.forEach(invokeCleanup);
-				component.__hooks._pendingEffects.forEach(invokeEffect);
-				component.__hooks._pendingEffects = [];
+				internal.__hooks._pendingEffects.forEach(invokeCleanup);
+				internal.__hooks._pendingEffects.forEach(invokeEffect);
+				internal.__hooks._pendingEffects = [];
 			} catch (e) {
-				component.__hooks._pendingEffects = [];
-				options._catchError(e, component._internal);
+				internal.__hooks._pendingEffects = [];
+				options._catchError(e, internal);
 			}
 		}
 	});
@@ -356,9 +355,9 @@ function afterPaint(newQueueLength) {
 function invokeCleanup(hook) {
 	// A hook cleanup can introduce a call to render which creates a new root, this will call options.vnode
 	// and move the currentComponent away.
-	const comp = currentComponent;
+	const internal = currentInternal;
 	if (typeof hook._cleanup == 'function') hook._cleanup();
-	currentComponent = comp;
+	currentInternal = internal;
 }
 
 /**
@@ -368,9 +367,9 @@ function invokeCleanup(hook) {
 function invokeEffect(hook) {
 	// A hook call can introduce a call to render which creates a new root, this will call options.vnode
 	// and move the currentComponent away.
-	const comp = currentComponent;
+	const internal = currentInternal;
 	hook._cleanup = hook._value();
-	currentComponent = comp;
+	currentInternal = internal;
 }
 
 /**
