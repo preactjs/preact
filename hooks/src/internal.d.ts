@@ -1,5 +1,5 @@
 import {
-	Component as PreactComponent,
+	Internal as PreactInternal,
 	PreactContext
 } from '../../src/internal';
 import { Reducer } from '.';
@@ -25,15 +25,15 @@ export type Hook = (...args: HookArgs[]) => HookReturnValue;
 
 // Hook tracking
 
-export interface ComponentHooks {
-	/** The list of hooks a component uses */
+export interface InternalHooks {
+	/** The list of hooks an internal uses */
 	_list: HookState[];
 	/** List of Effects to be invoked after the next frame is rendered */
 	_pendingEffects: EffectHookState[];
 }
 
-export interface Component extends PreactComponent<any, any> {
-	__hooks?: ComponentHooks;
+export interface Internal extends PreactInternal<any, any> {
+	__hooks?: InternalHooks;
 }
 
 export type HookState =
@@ -60,7 +60,7 @@ export interface MemoHookState {
 
 export interface ReducerHookState {
 	_value?: any;
-	_component?: Component;
+	_internal?: PreactInternal;
 	_reducer?: Reducer<any, any>;
 }
 
