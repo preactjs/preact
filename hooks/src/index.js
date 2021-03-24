@@ -59,18 +59,18 @@ options.diffed = internal => {
 };
 
 options._commit = (internal, commitQueue) => {
-	commitQueue.some(component => {
+	commitQueue.some(internal => {
 		try {
-			component._renderCallbacks.forEach(invokeCleanup);
-			component._renderCallbacks = component._renderCallbacks.filter(cb =>
+			internal._commitCallbacks.forEach(invokeCleanup);
+			internal._commitCallbacks = internal._commitCallbacks.filter(cb =>
 				cb._value ? invokeEffect(cb) : true
 			);
 		} catch (e) {
-			commitQueue.some(c => {
-				if (c._renderCallbacks) c._renderCallbacks = [];
+			commitQueue.some(i => {
+				if (i._commitCallbacks) i._commitCallbacks = [];
 			});
 			commitQueue = [];
-			options._catchError(e, component._internal);
+			options._catchError(e, internal);
 		}
 	});
 
@@ -183,7 +183,10 @@ export function useLayoutEffect(callback, args) {
 		state._value = callback;
 		state._args = args;
 
-		currentComponent._renderCallbacks.push(state);
+		if (currentComponent._internal._commitCallbacks == null) {
+			currentComponent._internal._commitCallbacks = [];
+		}
+		currentComponent._internal._commitCallbacks.push(state);
 	}
 }
 

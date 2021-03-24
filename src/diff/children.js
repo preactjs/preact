@@ -23,7 +23,7 @@ import { createInternal, getDomSibling, getChildDom } from '../tree';
  * @param {object} globalContext The current context object - modified by
  * getChildContext
  * @param {boolean} isSvg Whether or not this DOM node is an SVG node
- * @param {Array<import('../internal').Component>} commitQueue List of
+ * @param {import('../internal').CommitQueue} commitQueue List of
  * components which have callbacks to invoke in commitRoot
  * @param {import('../internal').PreactElement} startDom The dom node
  * diffChildren should begin diffing with.

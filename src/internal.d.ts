@@ -34,7 +34,7 @@ export interface Options extends preact.Options {
 	/** Attach a hook that is invoked before a vnode is diffed. */
 	_diff?(internal: Internal, vnode?: VNode): void;
 	/** Attach a hook that is invoked after a tree was mounted or was updated. */
-	_commit?(internal: Internal, commitQueue: Component[]): void;
+	_commit?(internal: Internal, commitQueue: CommitQueue): void;
 	/** Attach a hook that is invoked before a vnode has rendered. */
 	_render?(internal: Internal): void;
 	/** Attach a hook that is invoked before a hook's state is queried. */
@@ -45,6 +45,8 @@ export interface Options extends preact.Options {
 	_catchError(error: any, internal: Internal): void;
 	_internal(internal: Internal, vnode: VNode | string): void;
 }
+
+export type CommitQueue = Internal[];
 
 // Redefine ComponentFactory using our new internal FunctionalComponent interface above
 export type ComponentFactory<P> =
@@ -140,6 +142,8 @@ export interface Internal<P = {}> {
 	_flags: number;
 	/** This Internal's distance from the tree root */
 	_depth: number | null;
+	/** Callbacks to invoke when this internal commits */
+	_commitCallbacks: Array<() => void>;
 }
 
 export interface Component<P = {}, S = {}> extends preact.Component<P, S> {
@@ -147,7 +151,6 @@ export interface Component<P = {}, S = {}> extends preact.Component<P, S> {
 	constructor: ComponentType<P>;
 	state: S; // Override Component["state"] to not be readonly for internal use, specifically Hooks
 	/** @TODO this should be moved to internal.data */
-	_renderCallbacks: Array<() => void>; // Only class components
 	_globalContext?: any;
 	_internal?: Internal<P> | null;
 	_nextState?: S | null; // Only class components
