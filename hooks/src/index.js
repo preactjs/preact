@@ -51,7 +51,7 @@ options._render = internal => {
 options.diffed = internal => {
 	if (oldAfterDiff) oldAfterDiff(internal);
 
-	if (internal.__hooks && internal.__hooks._pendingEffects.length) {
+	if (internal && internal.__hooks && internal.__hooks._pendingEffects.length) {
 		afterPaint(afterPaintEffects.push(internal));
 	}
 	currentInternal = previousInternal;
@@ -79,7 +79,7 @@ options._commit = (internal, commitQueue) => {
 options.unmount = internal => {
 	if (oldBeforeUnmount) oldBeforeUnmount(internal);
 
-	if (internal.__hooks) {
+	if (internal && internal.__hooks) {
 		try {
 			internal.__hooks._list.forEach(invokeCleanup);
 		} catch (e) {
@@ -182,10 +182,10 @@ export function useLayoutEffect(callback, args) {
 		state._value = callback;
 		state._args = args;
 
-		if (currentInternal._internal._commitCallbacks == null) {
-			currentInternal._internal._commitCallbacks = [];
+		if (currentInternal._commitCallbacks == null) {
+			currentInternal._commitCallbacks = [];
 		}
-		currentInternal._internal._commitCallbacks.push(state);
+		currentInternal._commitCallbacks.push(state);
 	}
 }
 
@@ -239,7 +239,7 @@ export function useCallback(callback, args) {
  * @param {import('./internal').PreactContext} context
  */
 export function useContext(context) {
-	const provider = currentInternal.context[context._id];
+	const provider = currentInternal._component.context[context._id];
 	// We could skip this call here, but than we'd not call
 	// `options._hook`. We need to do that in order to make
 	// the devtools aware of this hook.
