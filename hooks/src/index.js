@@ -37,7 +37,7 @@ options._diff = (internal, vnode) => {
 options._render = internal => {
 	if (oldBeforeRender) oldBeforeRender(internal);
 
-	currentInternal = internal._component;
+	currentInternal = internal;
 	currentIndex = 0;
 
 	const hooks = currentInternal.__hooks;
@@ -137,7 +137,7 @@ export function useReducer(reducer, initialState, init) {
 	/** @type {import('./internal').ReducerHookState} */
 	const hookState = getHookState(currentIndex++, 2);
 	hookState._reducer = reducer;
-	if (!hookState._component) {
+	if (!hookState._internal) {
 		hookState._value = [
 			!init ? invokeOrReturn(undefined, initialState) : init(initialState),
 
@@ -145,12 +145,12 @@ export function useReducer(reducer, initialState, init) {
 				const nextValue = hookState._reducer(hookState._value[0], action);
 				if (hookState._value[0] !== nextValue) {
 					hookState._value = [nextValue, hookState._value[1]];
-					hookState._component.setState({});
+					hookState._internal._component.setState({});
 				}
 			}
 		];
 
-		hookState._component = currentInternal._component;
+		hookState._internal = currentInternal;
 	}
 
 	return hookState._value;
