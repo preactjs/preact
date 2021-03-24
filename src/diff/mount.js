@@ -16,6 +16,7 @@ import { renderComponent } from './component';
 import { createInternal } from '../tree';
 import options from '../options';
 import { removeNode } from '../util';
+import { addCommitCallback } from './commit';
 
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
@@ -89,6 +90,16 @@ export function mount(
 				isSvg,
 				commitQueue
 			);
+		}
+
+		if (internal.ref) {
+			addCommitCallback(internal, () => {
+				applyRef(internal.ref, internal._component || internal._dom, internal);
+			});
+		}
+
+		if (internal._commitCallbacks && internal._commitCallbacks.length) {
+			commitQueue.push(internal);
 		}
 
 		if (options.diffed) options.diffed(internal);
@@ -298,14 +309,6 @@ export function mountChildren(
 			// newDom before startDom) so ignore mountedNextChild and continue with
 			// startDom
 			parentDom.insertBefore(newDom, startDom);
-		}
-
-		if (childInternal.ref) {
-			applyRef(
-				childInternal.ref,
-				childInternal._component || newDom,
-				childInternal
-			);
 		}
 	}
 

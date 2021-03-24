@@ -101,7 +101,7 @@ export function diffChildren(
 		}
 
 		let prevDom;
-		let oldVNodeRef;
+		// let oldVNodeRef;
 		let nextDomSibling;
 		if (childInternal == null) {
 			childInternal = createInternal(childVNode, parentInternal);
@@ -125,7 +125,7 @@ export function diffChildren(
 		) {
 			// We are resuming the hydration of a VNode
 			startDom = childInternal._dom;
-			oldVNodeRef = childInternal.ref;
+			// oldVNodeRef = childInternal.ref;
 
 			nextDomSibling = mount(
 				parentDom,
@@ -137,7 +137,7 @@ export function diffChildren(
 				startDom
 			);
 		} else {
-			oldVNodeRef = childInternal.ref;
+			// oldVNodeRef = childInternal.ref;
 
 			// TODO: Figure out if there is a better way to handle the null
 			// placeholder's scenario this addresses
@@ -157,15 +157,15 @@ export function diffChildren(
 
 		newDom = childInternal._dom;
 
-		if (childVNode.ref && oldVNodeRef != childVNode.ref) {
-			if (!refs) refs = [];
-			if (oldVNodeRef) refs.push(oldVNodeRef, null, childInternal);
-			refs.push(
-				childVNode.ref,
-				childInternal._component || newDom,
-				childInternal
-			);
-		}
+		// if (childVNode.ref && oldVNodeRef != childVNode.ref) {
+		// 	if (!refs) refs = [];
+		// 	if (oldVNodeRef) refs.push(oldVNodeRef, null, childInternal);
+		// 	refs.push(
+		// 		childVNode.ref,
+		// 		childInternal._component || newDom,
+		// 		childInternal
+		// 	);
+		// }
 
 		if (childInternal._flags & TYPE_COMPONENT) {
 			startDom = nextDomSibling;
@@ -226,12 +226,12 @@ export function diffChildren(
 		}
 	}
 
-	// Set refs only after unmount
-	if (refs) {
-		for (i = 0; i < refs.length; i++) {
-			applyRef(refs[i], refs[++i], refs[++i]);
-		}
-	}
+	// // Set refs only after unmount
+	// if (refs) {
+	// 	for (i = 0; i < refs.length; i++) {
+	// 		applyRef(refs[i], refs[++i], refs[++i]);
+	// 	}
+	// }
 
 	return startDom;
 }

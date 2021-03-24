@@ -212,10 +212,6 @@ export function renderComponent(
 		);
 	}
 
-	if (internal._commitCallbacks != null && internal._commitCallbacks.length) {
-		commitQueue.push(internal);
-	}
-
 	return nextDomSibling;
 }
 

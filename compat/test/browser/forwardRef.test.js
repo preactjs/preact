@@ -177,6 +177,8 @@ describe('forwardRef', () => {
 	});
 
 	it('should support useImperativeHandle', () => {
+		// Per React: https://codesandbox.io/s/dom-refs-and-useimperativehandle-refs-k69yzf
+
 		let setValue;
 		const Foo = forwardRef((props, ref) => {
 			const result = useState('');

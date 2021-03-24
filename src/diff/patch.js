@@ -11,6 +11,8 @@ import {
 	TYPE_ROOT
 } from '../constants';
 import { getChildDom, getDomSibling } from '../tree';
+import { applyRef } from './refs';
+import { addCommitCallback } from './commit';
 
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
@@ -116,6 +118,23 @@ export function patch(
 		} else {
 			// @ts-ignore Trust me TS, nextSibling is a PreactElement
 			nextDomSibling = internal._dom.nextSibling;
+		}
+
+		if (newVNode.ref && newVNode.ref != internal.ref) {
+			if (internal.ref) {
+				addCommitCallback(internal, () => {
+					applyRef(internal.ref, null, internal);
+				});
+			}
+
+			addCommitCallback(internal, () => {
+				applyRef(newVNode.ref, internal._component || internal._dom, internal);
+				internal.ref = newVNode.ref;
+			});
+		}
+
+		if (internal._commitCallbacks && internal._commitCallbacks.length) {
+			commitQueue.push(internal);
 		}
 
 		if (options.diffed) options.diffed(internal);
