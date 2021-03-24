@@ -27,7 +27,6 @@
 - Move refs to internal renderCallbacks
 - Rewrite rerender loop to operate on internals, not components
   - Need to figure out how what to do about `component._globalContext`
-- Rewrite commit loop to operate on internals not components
 - rewrite hooks to operate on internals?
 - Always assign a number to `_vnodeId` (not null, use 0 to clear?)
 - Consider converting Fragment (and other special nodes, e.g. root, Portal,
