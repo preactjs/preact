@@ -6,7 +6,7 @@ import {
 	assign,
 	getChildren
 } from './util';
-import { options } from 'preact';
+import { options, Fragment } from 'preact';
 
 /** @typedef {import('preact').VNode} VNode */
 
@@ -68,7 +68,6 @@ function _renderToString(vnode, context, opts, inner, isSvgMode, selectValue) {
 	let pretty = opts.pretty,
 		indentChar = pretty && typeof pretty === 'string' ? pretty : '\t';
 
-	// wrap array nodes in Fragment
 	if (Array.isArray(vnode)) {
 		let rendered = '';
 		for (let i = 0; i < vnode.length; i++) {
@@ -94,6 +93,17 @@ function _renderToString(vnode, context, opts, inner, isSvgMode, selectValue) {
 		isComponent = true;
 		if (opts.shallow && (inner || opts.renderRootComponent === false)) {
 			nodeName = getComponentName(nodeName);
+		} else if (nodeName === Fragment) {
+			const children = [];
+			getChildren(children, vnode.props.children);
+			return _renderToString(
+				children,
+				context,
+				opts,
+				opts.shallowHighOrder !== false,
+				isSvgMode,
+				selectValue
+			);
 		} else {
 			let rendered;
 
