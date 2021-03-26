@@ -123,6 +123,7 @@ function createEsbuildPlugin() {
 		'preact/debug': subPkgPath('./debug/'),
 		'preact/devtools': subPkgPath('./devtools/'),
 		'preact/compat': subPkgPath('./compat/'),
+		'preact/dom': subPkgPath('./dom/'),
 		'preact/hooks': subPkgPath('./hooks/'),
 		'preact/test-utils': subPkgPath('./test-utils/'),
 		'preact/jsx-runtime': subPkgPath('./jsx-runtime/'),
@@ -142,8 +143,16 @@ function createEsbuildPlugin() {
 				};
 			});
 
-			build.onResolve({ filter: /^(react|react-dom)$/ }, args => {
+			build.onResolve({ filter: /^react$/ }, args => {
 				const pkg = alias['preact/compat'];
+				return {
+					path: pkg,
+					namespace: 'preact'
+				};
+			});
+
+			build.onResolve({ filter: /^react-dom$/ }, args => {
+				const pkg = alias['preact/dom'];
 				return {
 					path: pkg,
 					namespace: 'preact'
@@ -278,7 +287,7 @@ module.exports = function(config) {
 			{
 				pattern:
 					config.grep ||
-					'{debug,devtools,hooks,compat,test-utils,jsx-runtime,}/test/{browser,shared}/**/*.test.js',
+					'{debug,devtools,hooks,compat,dom,test-utils,jsx-runtime,}/test/{browser,shared}/**/*.test.js',
 				watched: false,
 				type: 'js'
 			}
@@ -289,7 +298,7 @@ module.exports = function(config) {
 		},
 
 		preprocessors: {
-			'{debug,devtools,hooks,compat,test-utils,jsx-runtime,}/test/**/*': [
+			'{debug,devtools,hooks,compat,dom,test-utils,jsx-runtime,}/test/**/*': [
 				'esbuild',
 				'sourcemap'
 			]

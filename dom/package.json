@@ -1,0 +1,20 @@
+{
+  "name": "preact-dom",
+  "amdName": "preactDom",
+  "version": "0.1.0",
+  "private": true,
+  "description": "DOM addon for Preact to mirror react-dom",
+  "main": "dist/dom.js",
+  "module": "dist/dom.module.js",
+  "umd:main": "dist/dom.umd.js",
+  "source": "src/index.js",
+  "license": "MIT",
+  "types": "src/index.d.ts",
+  "scripts": {
+    "build": "microbundle build --raw",
+    "dev": "microbundle watch --raw --format cjs"
+  },
+  "peerDependencies": {
+    "preact": "^10.0.0"
+  }
+}

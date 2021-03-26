@@ -4,6 +4,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 const preact = path.join(__dirname, '..', 'src');
 const compat = path.join(__dirname, '..', 'compat', 'src');
+const dom = path.join(__dirname, '..', 'dom', 'src');
 
 module.exports = {
 	context: __dirname,
@@ -18,7 +19,7 @@ module.exports = {
 			['preact/hooks']: path.join(__dirname, '..', 'hooks', 'src'),
 			preact: preact,
 			react: compat,
-			'react-dom': compat
+			'react-dom': dom
 		},
 		extensions: ['.tsx', '.ts', '.js']
 	},
