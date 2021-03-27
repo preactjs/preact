@@ -7,7 +7,8 @@ import {
 	TYPE_ROOT,
 	INHERITED_MODES,
 	TYPE_COMPONENT,
-	TYPE_DOM
+	TYPE_DOM,
+	MODE_SVG
 } from './constants';
 
 /**
@@ -78,6 +79,15 @@ export function createInternal(vnode, parentInternal) {
 			flags | (parentInternal ? parentInternal._flags & INHERITED_MODES : 0),
 		_depth: parentInternal ? parentInternal._depth + 1 : 0
 	};
+
+	if (internal._flags & TYPE_ELEMENT && type === 'svg') {
+		internal._flags |= MODE_SVG;
+	} else if (
+		internal._flags & MODE_SVG &&
+		parentInternal.type === 'foreignObject'
+	) {
+		internal._flags &= ~MODE_SVG;
+	}
 
 	if (options._internal) options._internal(internal, vnode);
 

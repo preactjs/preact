@@ -1,4 +1,4 @@
-import { MODE_HYDRATE, MODE_MUTATIVE_HYDRATE } from './constants';
+import { MODE_HYDRATE, MODE_MUTATIVE_HYDRATE, MODE_SVG } from './constants';
 import { commitRoot } from './diff/commit';
 import { createElement, Fragment } from './create-element';
 import options from './options';
@@ -35,7 +35,6 @@ export function render(vnode, parentDom, replaceNode) {
 			vnode,
 			rootInternal,
 			{},
-			parentDom.ownerSVGElement !== undefined,
 			commitQueue,
 			getChildDom(rootInternal, 0) // TODO: could this just be parentDom.firstChild? Probably once we drop replaceNode
 		);
@@ -45,6 +44,10 @@ export function render(vnode, parentDom, replaceNode) {
 			vnode,
 			null
 		);
+
+		if (parentDom.ownerSVGElement !== undefined) {
+			rootInternal._flags |= MODE_SVG;
+		}
 
 		// Providing a replaceNode parameter or calling `render` on a container with
 		// existing DOM elements puts the diff into mutative hydrate mode:
@@ -57,7 +60,6 @@ export function render(vnode, parentDom, replaceNode) {
 			vnode,
 			rootInternal,
 			{},
-			parentDom.ownerSVGElement !== undefined,
 			commitQueue,
 			// Start the diff at the replaceNode or the parentDOM.firstChild if any.
 			// Will be null if the parentDom is empty
@@ -83,15 +85,11 @@ export function hydrate(vnode, parentDom) {
 	rootInternal._flags |= MODE_HYDRATE;
 	parentDom._children = rootInternal;
 
+	if (parentDom.ownerSVGElement !== undefined) {
+		rootInternal._flags |= MODE_SVG;
+	}
+
 	const commitQueue = [];
-	mount(
-		parentDom,
-		vnode,
-		rootInternal,
-		{},
-		parentDom.ownerSVGElement !== undefined,
-		commitQueue,
-		parentDom.firstChild
-	);
+	mount(parentDom, vnode, rootInternal, {}, commitQueue, parentDom.firstChild);
 	commitRoot(commitQueue, rootInternal);
 }

@@ -119,7 +119,6 @@ function rerenderComponent(component) {
 			vnode,
 			internal,
 			component._globalContext,
-			parentDom.ownerSVGElement !== undefined,
 			commitQueue,
 			startDom
 		);

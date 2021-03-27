@@ -38,11 +38,13 @@ export const MODE_PENDING_ERROR = 1 << 9;
 export const MODE_RERENDERING_ERROR = 1 << 10;
 /** Signals this internal has been unmounted */
 export const MODE_UNMOUNTING = 1 << 11;
+/** This Internal is rendered in an SVG tree */
+export const MODE_SVG = 1 << 12;
 
 /** Signifies that bailout checks will be bypassed */
-export const FORCE_UPDATE = 1 << 12;
+export const FORCE_UPDATE = 1 << 13;
 /** Signifies that a node needs to be updated */
-export const DIRTY_BIT = 1 << 13;
+export const DIRTY_BIT = 1 << 14;
 
 /** Reset all mode flags */
 export const RESET_MODE = ~(
@@ -55,7 +57,7 @@ export const RESET_MODE = ~(
 );
 
 /** Modes a child internal inherits from their parent */
-export const INHERITED_MODES = MODE_HYDRATE | MODE_MUTATIVE_HYDRATE;
+export const INHERITED_MODES = MODE_HYDRATE | MODE_MUTATIVE_HYDRATE | MODE_SVG;
 
 export const EMPTY_ARR = [];
 
