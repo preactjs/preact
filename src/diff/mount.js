@@ -195,13 +195,7 @@ function mountDOMElement(dom, internal, globalContext, commitQueue) {
 				(!isHydrating || typeof newProps[i] == 'function') &&
 				newProps[i] != null
 			) {
-				setProperty(
-					dom,
-					i,
-					newProps[i],
-					null,
-					(internal._flags & MODE_SVG) !== 0
-				);
+				setProperty(dom, i, newProps[i], null, internal._flags & MODE_SVG);
 			}
 		}
 

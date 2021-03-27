@@ -170,7 +170,7 @@ function patchDOMElement(dom, newVNode, internal, globalContext, commitQueue) {
 
 	internal.props = newProps;
 
-	diffProps(dom, newProps, oldProps, (internal._flags & MODE_SVG) !== 0);
+	diffProps(dom, newProps, oldProps, internal._flags & MODE_SVG);
 
 	internal._dom = dom;
 
