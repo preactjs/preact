@@ -1,8 +1,14 @@
 // DOM properties that should NOT have "px" added when numeric
 export const IS_NON_DIMENSIONAL = /acit|ex(?:s|g|n|p|$)|rph|grid|ows|mnc|ntw|ine[ch]|zoo|^ord|^--/i;
 
-export function encodeEntities(s) {
-	return String(s)
+const ENCODED_ENTITIES = /[&<>"]/;
+
+export function encodeEntities(input) {
+	const s = String(input);
+	if (!ENCODED_ENTITIES.test(s)) {
+		return s;
+	}
+	return s
 		.replace(/&/g, '&amp;')
 		.replace(/</g, '&lt;')
 		.replace(/>/g, '&gt;')
