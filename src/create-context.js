@@ -18,6 +18,7 @@ export function createContext(defaultValue, contextId) {
 		/** @type {import('./internal').FunctionComponent} */
 		Provider(props) {
 			if (!this.getChildContext) {
+				/** @type {import('./internal').Internal[]} */
 				let subs = [];
 				let ctx = {};
 				ctx[contextId] = this;
@@ -44,13 +45,16 @@ export function createContext(defaultValue, contextId) {
 					}
 				};
 
-				this.sub = c => {
-					subs.push(c);
-					let old = c.componentWillUnmount;
-					c.componentWillUnmount = () => {
-						subs.splice(subs.indexOf(c), 1);
-						if (old) old.call(c);
-					};
+				/** @type {(i: import('./internal').Internal) => void} */
+				this.sub = i => {
+					subs.push(i);
+					if (i._component) {
+						let old = i._component.componentWillUnmount;
+						i._component.componentWillUnmount = () => {
+							subs.splice(subs.indexOf(i), 1);
+							if (old) old.call(i._component);
+						};
+					}
 				};
 			}
 

@@ -57,7 +57,7 @@ Component.prototype.setState = function(update, callback) {
 
 	if (this._internal) {
 		if (callback) addCommitCallback(this._internal, () => callback.call(this));
-		enqueueRender(this);
+		enqueueRender(this._internal);
 	}
 };
 
@@ -74,7 +74,7 @@ Component.prototype.forceUpdate = function(callback) {
 		// shouldComponentUpdate
 		this._internal._flags |= FORCE_UPDATE;
 		if (callback) addCommitCallback(this._internal, () => callback.call(this));
-		enqueueRender(this);
+		enqueueRender(this._internal);
 	}
 };
 
@@ -92,11 +92,9 @@ Component.prototype.render = Fragment;
 
 /**
  * Trigger in-place re-rendering of a component.
- * @param {import('./internal').Component} component The component to rerender
+ * @param {import('./internal').Internal} internal The Internal to rerender
  */
-function rerenderComponent(component) {
-	let internal = component._internal;
-
+function rerender(internal) {
 	if (~internal._flags & MODE_UNMOUNTING && internal._flags & DIRTY_BIT) {
 		let parentDom = getParentDom(internal);
 		let startDom =
@@ -118,7 +116,8 @@ function rerenderComponent(component) {
 			parentDom,
 			vnode,
 			internal,
-			component._globalContext,
+			// TODO: May need to move _globalContext to internals...
+			internal._component && internal._component._globalContext,
 			parentDom.ownerSVGElement !== undefined,
 			commitQueue,
 			startDom
@@ -129,7 +128,7 @@ function rerenderComponent(component) {
 
 /**
  * The render queue
- * @type {Array<import('./internal').Component>}
+ * @type {Array<import('./internal').Internal>}
  */
 let rerenderQueue = [];
 
@@ -156,14 +155,14 @@ const defer =
 let prevDebounce;
 
 /**
- * Enqueue a rerender of a component
- * @param {import('./internal').Component} c The component to rerender
+ * Enqueue a rerender of an internal
+ * @param {import('./internal').Internal} internal The Internal to rerender
  */
-export function enqueueRender(c) {
+export function enqueueRender(internal) {
 	if (
-		(!(c._internal._flags & DIRTY_BIT) &&
-			(c._internal._flags |= DIRTY_BIT) &&
-			rerenderQueue.push(c) &&
+		(!(internal._flags & DIRTY_BIT) &&
+			(internal._flags |= DIRTY_BIT) &&
+			rerenderQueue.push(internal) &&
 			!process._rerenderCount++) ||
 		prevDebounce !== options.debounceRendering
 	) {
@@ -172,17 +171,15 @@ export function enqueueRender(c) {
 	}
 }
 
-/** Flush the render queue by rerendering all queued components */
+/** Flush the render queue by rerendering all queued internals */
 function process() {
 	let queue;
 	while ((process._rerenderCount = rerenderQueue.length)) {
-		queue = rerenderQueue.sort(
-			(a, b) => a._internal._depth - b._internal._depth
-		);
+		queue = rerenderQueue.sort((a, b) => a._depth - b._depth);
 		rerenderQueue = [];
 		// Don't update `renderCount` yet. Keep its value non-zero to prevent unnecessary
 		// process() calls from getting scheduled while `queue` is still being consumed.
-		queue.some(rerenderComponent);
+		queue.some(rerender);
 	}
 }
 process._rerenderCount = 0;
