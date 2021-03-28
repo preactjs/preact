@@ -104,7 +104,7 @@ export function renderComponent(
 			// If the component was constructed, queue up componentDidMount so the
 			// first time this internal commits (regardless of suspense or not) it
 			// will be called
-			addCommitCallback(internal, () => c.componentDidMount());
+			addCommitCallback(internal, c.componentDidMount);
 		}
 	} else {
 		if (
