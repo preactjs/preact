@@ -24,37 +24,39 @@ export function createInternal(vnode, parentInternal) {
 		ref;
 
 	/** @type {number} */
-	let flags = TYPE_TEXT;
+	let flags = parentInternal ? parentInternal._flags & INHERITED_MODES : 0;
 
 	// Text VNodes/Internals use NaN as an ID so that two are never equal.
 	let vnodeId = NaN;
 
 	if (typeof vnode === 'string') {
 		// type = null;
+		flags |= TYPE_TEXT;
 		props = vnode;
 	} else if (vnode.constructor !== undefined) {
+		flags |= TYPE_TEXT;
 		props = '';
 	} else {
 		type = vnode.type;
-		props = vnode.props;
+		props = vnode.props || {};
 		key = vnode.key;
 		ref = vnode.ref;
 		vnodeId = vnode._vnodeId;
 
 		// @TODO re-enable this when we stop removing key+ref from VNode props
-		if (props) {
-			// if ((key = props.key) != null) {
-			// 	props.key = undefined;
-			// }
-			// if (typeof type !== 'function' && (ref = props.ref) != null) {
-			// 	props.ref = undefined;
-			// }
-		} else {
-			props = {};
-		}
+		// if (props) {
+		// 	if ((key = props.key) != null) {
+		// 		props.key = undefined;
+		// 	}
+		// 	if (typeof type !== 'function' && (ref = props.ref) != null) {
+		// 		props.ref = undefined;
+		// 	}
+		// } else {
+		// 	props = {};
+		// }
 
 		// flags = typeof type === 'function' ? COMPONENT_NODE : ELEMENT_NODE;
-		flags =
+		flags |=
 			typeof type === 'function'
 				? type.prototype && 'render' in type.prototype
 					? TYPE_CLASS
@@ -62,6 +64,16 @@ export function createInternal(vnode, parentInternal) {
 					? TYPE_ROOT
 					: TYPE_FUNCTION
 				: TYPE_ELEMENT;
+
+		if (flags & TYPE_ELEMENT && type === 'svg') {
+			flags |= MODE_SVG;
+		} else if (
+			parentInternal &&
+			parentInternal._flags & MODE_SVG &&
+			parentInternal.type === 'foreignObject'
+		) {
+			flags &= ~MODE_SVG;
+		}
 	}
 
 	/** @type {import('./internal').Internal} */
@@ -75,19 +87,9 @@ export function createInternal(vnode, parentInternal) {
 		_vnodeId: vnodeId,
 		_dom: null,
 		_component: null,
-		_flags:
-			flags | (parentInternal ? parentInternal._flags & INHERITED_MODES : 0),
+		_flags: flags,
 		_depth: parentInternal ? parentInternal._depth + 1 : 0
 	};
-
-	if (internal._flags & TYPE_ELEMENT && type === 'svg') {
-		internal._flags |= MODE_SVG;
-	} else if (
-		internal._flags & MODE_SVG &&
-		parentInternal.type === 'foreignObject'
-	) {
-		internal._flags &= ~MODE_SVG;
-	}
 
 	if (options._internal) options._internal(internal, vnode);
 
