@@ -47,10 +47,21 @@ const EMPTY_ARR = [];
 function renderToString(vnode, context, opts) {
 	context = context || {};
 	opts = opts || {};
+
+	// Performance optimization: `renderToString` is synchronous and we
+	// therefore don't execute any effects. To do that we pass an empty
+	// array to `options._commit` (`__c`). But we can go one step further
+	// and avoid a lot of dirty checks and allocations by setting
+	// `options._skipEffects` (`__s`) too.
+	const previousSkipEffects = options.__s;
+	options.__s = true;
+
 	const res = _renderToString(vnode, context, opts);
+
 	// options._commit, we don't schedule any effects in this library right now,
 	// so we can pass an empty queue to this hook.
 	if (options.__c) options.__c(vnode, EMPTY_ARR);
+	options.__s = previousSkipEffects;
 	return res;
 }
 
