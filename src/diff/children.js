@@ -22,7 +22,6 @@ import { createInternal, getDomSibling, getChildDom } from '../tree';
  * whose children should be diff'ed against newParentVNode
  * @param {object} globalContext The current context object - modified by
  * getChildContext
- * @param {boolean} isSvg Whether or not this DOM node is an SVG node
  * @param {import('../internal').CommitQueue} commitQueue List of
  * components which have callbacks to invoke in commitRoot
  * @param {import('../internal').PreactElement} startDom The dom node
@@ -33,7 +32,6 @@ export function diffChildren(
 	renderResult,
 	parentInternal,
 	globalContext,
-	isSvg,
 	commitQueue,
 	startDom
 ) {
@@ -112,7 +110,6 @@ export function diffChildren(
 				childVNode,
 				childInternal,
 				globalContext,
-				isSvg,
 				commitQueue,
 				startDom
 			);
@@ -132,7 +129,6 @@ export function diffChildren(
 				childVNode,
 				childInternal,
 				globalContext,
-				isSvg,
 				commitQueue,
 				startDom
 			);
@@ -149,7 +145,6 @@ export function diffChildren(
 				childVNode,
 				childInternal,
 				globalContext,
-				isSvg,
 				commitQueue,
 				startDom
 			);

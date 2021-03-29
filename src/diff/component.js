@@ -18,7 +18,6 @@ import { addCommitCallback } from './commit';
  * @param {import('../internal').VNode} newVNode The new virtual node
  * @param {import('../internal').Internal} internal The component's backing Internal node
  * @param {object} globalContext The current context object. Modified by getChildContext
- * @param {boolean} isSvg Whether or not this element is an SVG node
  * @param {import('../internal').CommitQueue} commitQueue List of components
  * which have callbacks to invoke in commitRoot
  * @param {import('../internal').PreactNode} startDom
@@ -29,7 +28,6 @@ export function renderComponent(
 	newVNode,
 	internal,
 	globalContext,
-	isSvg,
 	commitQueue,
 	startDom
 ) {
@@ -196,7 +194,6 @@ export function renderComponent(
 			Array.isArray(renderResult) ? renderResult : [renderResult],
 			internal,
 			globalContext,
-			isSvg,
 			commitQueue,
 			startDom
 		);
@@ -206,7 +203,6 @@ export function renderComponent(
 			Array.isArray(renderResult) ? renderResult : [renderResult],
 			internal,
 			globalContext,
-			isSvg,
 			commitQueue,
 			startDom
 		);

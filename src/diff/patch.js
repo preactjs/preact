@@ -8,7 +8,8 @@ import {
 	TYPE_TEXT,
 	MODE_SUSPENDED,
 	MODE_ERRORED,
-	TYPE_ROOT
+	TYPE_ROOT,
+	MODE_SVG
 } from '../constants';
 import { getChildDom, getDomSibling } from '../tree';
 
@@ -18,7 +19,6 @@ import { getChildDom, getDomSibling } from '../tree';
  * @param {import('../internal').VNode | string} newVNode The new virtual node
  * @param {import('../internal').Internal} internal The Internal node to patch
  * @param {object} globalContext The current context object. Modified by getChildContext
- * @param {boolean} isSvg Whether or not this element is an SVG node
  * @param {import('../internal').CommitQueue} commitQueue List of components
  * which have callbacks to invoke in commitRoot
  * @param {import('../internal').PreactNode} startDom
@@ -28,7 +28,6 @@ export function patch(
 	newVNode,
 	internal,
 	globalContext,
-	isSvg,
 	commitQueue,
 	startDom
 ) {
@@ -79,7 +78,6 @@ export function patch(
 				(newVNode),
 				internal,
 				globalContext,
-				isSvg,
 				commitQueue,
 				startDom
 			);
@@ -110,7 +108,6 @@ export function patch(
 				newVNode,
 				internal,
 				globalContext,
-				isSvg,
 				commitQueue
 			);
 		} else {
@@ -147,27 +144,15 @@ export function patch(
  * @param {import('../internal').VNode} newVNode The new virtual node
  * @param {import('../internal').Internal} internal The Internal node to patch
  * @param {object} globalContext The current context object
- * @param {boolean} isSvg Whether or not this DOM node is an SVG node
  * @param {import('../internal').CommitQueue} commitQueue List of components
  * which have callbacks to invoke in commitRoot
  * @returns {import('../internal').PreactElement}
  */
-function patchDOMElement(
-	dom,
-	newVNode,
-	internal,
-	globalContext,
-	isSvg,
-	commitQueue
-) {
+function patchDOMElement(dom, newVNode, internal, globalContext, commitQueue) {
 	let oldProps = internal.props;
 	let newProps = newVNode.props;
 	let newType = newVNode.type;
 	let tmp;
-
-	// Tracks entering and exiting SVG namespace when descending through the tree.
-	// @TODO this should happen when creating Internal nodes.
-	if (newType === 'svg') isSvg = true;
 
 	let oldHtml = oldProps.dangerouslySetInnerHTML;
 	let newHtml = newProps.dangerouslySetInnerHTML;
@@ -185,7 +170,7 @@ function patchDOMElement(
 
 	internal.props = newProps;
 
-	diffProps(dom, newProps, oldProps, isSvg);
+	diffProps(dom, newProps, oldProps, internal._flags & MODE_SVG);
 
 	internal._dom = dom;
 
@@ -199,7 +184,6 @@ function patchDOMElement(
 			Array.isArray(tmp) ? tmp : [tmp],
 			internal,
 			globalContext,
-			isSvg && newType !== 'foreignObject',
 			commitQueue,
 			dom.firstChild
 		);
