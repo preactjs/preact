@@ -33,7 +33,9 @@ export interface InternalHooks {
 }
 
 export interface Internal extends PreactInternal<any, any> {
-	__hooks?: InternalHooks;
+	_data: {
+		__hooks?: InternalHooks;
+	}
 }
 
 export type HookState =

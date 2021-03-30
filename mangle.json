@@ -28,6 +28,7 @@
       "$_vnodeId": "__v",
       "$_cleanup": "__c",
       "$_afterPaintQueued": "__a",
+      "$_data": "__d",
       "$__hooks": "__H",
       "$_list": "__",
       "$_pendingEffects": "__h",

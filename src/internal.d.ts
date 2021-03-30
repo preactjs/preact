@@ -144,6 +144,8 @@ export interface Internal<P = {}> {
 	_depth: number | null;
 	/** Callbacks to invoke when this internal commits */
 	_commitCallbacks: Array<() => void>;
+	/** Used to store extensions to the internal like __hooks */
+	_data: object;
 }
 
 export interface Component<P = {}, S = {}> extends preact.Component<P, S> {
