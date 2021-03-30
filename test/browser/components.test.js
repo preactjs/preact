@@ -867,10 +867,10 @@ describe('Components', () => {
 			expect(scratch.innerHTML).to.equal('<div></div>');
 		});
 
-		it('should be undefined with null as a child', () => {
+		it('should be null with null as a child', () => {
 			render(<Foo>{null}</Foo>, scratch);
 
-			expect(children).to.be.undefined;
+			expect(children).to.be.null;
 			expect(scratch.innerHTML).to.equal('<div></div>');
 		});
 
