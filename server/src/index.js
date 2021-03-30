@@ -61,6 +61,7 @@ function renderToString(vnode, context, opts) {
 	// options._commit, we don't schedule any effects in this library right now,
 	// so we can pass an empty queue to this hook.
 	if (options.__c) options.__c(vnode, EMPTY_ARR);
+	EMPTY_ARR.length = 0;
 	options.__s = previousSkipEffects;
 	return res;
 }
