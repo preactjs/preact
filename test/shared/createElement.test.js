@@ -161,13 +161,15 @@ describe('createElement(jsx)', () => {
 			.that.equals('textstuff');
 	});
 
-	it('should NOT set children prop when null', () => {
-		let r = h('foo', { foo: 'bar' }, null);
+	it('should override children if null is provided as an argument', () => {
+		let r = h('foo', { foo: 'bar', children: 'baz' }, null);
 
 		expect(r)
 			.to.be.an('object')
-			.to.have.nested.property('props.foo')
-			.not.to.have.nested.property('props.children');
+			.to.deep.nested.include({
+				'props.foo': 'bar',
+				'props.children': null
+			});
 	});
 
 	it('should NOT set children prop when unspecified', () => {
