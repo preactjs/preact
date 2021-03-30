@@ -69,6 +69,7 @@ export function createInternal(vnode, parentInternal) {
 		props,
 		key,
 		ref,
+		_data: {},
 		_children: null,
 		_parent: parentInternal,
 		_vnodeId: vnodeId,

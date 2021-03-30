@@ -40,7 +40,7 @@ options._render = internal => {
 	currentInternal = internal;
 	currentIndex = 0;
 
-	const hooks = currentInternal.__hooks;
+	const hooks = currentInternal._data.__hooks;
 	if (hooks) {
 		hooks._pendingEffects.forEach(invokeCleanup);
 		hooks._pendingEffects.forEach(invokeEffect);
@@ -51,7 +51,7 @@ options._render = internal => {
 options.diffed = internal => {
 	if (oldAfterDiff) oldAfterDiff(internal);
 
-	if (internal && internal.__hooks && internal.__hooks._pendingEffects.length) {
+	if (internal && internal._data.__hooks && internal._data.__hooks._pendingEffects.length) {
 		afterPaint(afterPaintEffects.push(internal));
 	}
 	currentInternal = previousInternal;
@@ -79,9 +79,9 @@ options._commit = (internal, commitQueue) => {
 options.unmount = internal => {
 	if (oldBeforeUnmount) oldBeforeUnmount(internal);
 
-	if (internal && internal.__hooks) {
+	if (internal && internal._data.__hooks) {
 		try {
-			internal.__hooks._list.forEach(invokeCleanup);
+			internal._data.__hooks._list.forEach(invokeCleanup);
 		} catch (e) {
 			options._catchError(e, internal);
 		}
@@ -107,8 +107,8 @@ function getHookState(index, type) {
 	// Other implementations to look at:
 	// * https://codesandbox.io/s/mnox05qp8
 	const hooks =
-		currentInternal.__hooks ||
-		(currentInternal.__hooks = {
+		currentInternal._data.__hooks ||
+		(currentInternal._data.__hooks = {
 			_list: [],
 			_pendingEffects: []
 		});
@@ -167,7 +167,7 @@ export function useEffect(callback, args) {
 		state._value = callback;
 		state._args = args;
 
-		currentInternal.__hooks._pendingEffects.push(state);
+		currentInternal._data.__hooks._pendingEffects.push(state);
 	}
 }
 
@@ -297,11 +297,11 @@ function flushAfterPaintEffects() {
 	afterPaintEffects.forEach(internal => {
 		if (~internal._flags & MODE_UNMOUNTING) {
 			try {
-				internal.__hooks._pendingEffects.forEach(invokeCleanup);
-				internal.__hooks._pendingEffects.forEach(invokeEffect);
-				internal.__hooks._pendingEffects = [];
+				internal._data.__hooks._pendingEffects.forEach(invokeCleanup);
+				internal._data.__hooks._pendingEffects.forEach(invokeEffect);
+				internal._data.__hooks._pendingEffects = [];
 			} catch (e) {
-				internal.__hooks._pendingEffects = [];
+				internal._data.__hooks._pendingEffects = [];
 				options._catchError(e, internal);
 			}
 		}
