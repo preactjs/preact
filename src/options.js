@@ -11,7 +11,7 @@ import { _catchError } from './diff/catch-error';
  */
 const options = {
 	_catchError,
-	_vnodeId: 0
+	_vnodeId: 1
 };
 
 export default options;

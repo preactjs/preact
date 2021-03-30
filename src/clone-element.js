@@ -34,6 +34,6 @@ export function cloneElement(vnode, props, children) {
 		normalizedProps,
 		key || vnode.key,
 		ref || vnode.ref,
-		null
+		0
 	);
 }
