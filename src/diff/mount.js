@@ -8,7 +8,8 @@ import {
 	RESET_MODE,
 	TYPE_TEXT,
 	MODE_ERRORED,
-	TYPE_ROOT
+	TYPE_ROOT,
+	MODE_SVG
 } from '../constants';
 import { normalizeToVNode } from '../create-element';
 import { setProperty } from './props';
@@ -23,7 +24,6 @@ import { removeNode } from '../util';
  * @param {import('../internal').VNode | string} newVNode The new virtual node
  * @param {import('../internal').Internal} internal The Internal node to mount
  * @param {object} globalContext The current context object. Modified by getChildContext
- * @param {boolean} isSvg Whether or not this element is an SVG node
  * @param {import('../internal').CommitQueue} commitQueue List of components
  * which have callbacks to invoke in commitRoot
  * @param {import('../internal').PreactElement} startDom
@@ -34,7 +34,6 @@ export function mount(
 	newVNode,
 	internal,
 	globalContext,
-	isSvg,
 	commitQueue,
 	startDom
 ) {
@@ -63,7 +62,6 @@ export function mount(
 				null,
 				internal,
 				globalContext,
-				isSvg,
 				commitQueue,
 				startDom
 			);
@@ -86,7 +84,6 @@ export function mount(
 				hydrateDom,
 				internal,
 				globalContext,
-				isSvg,
 				commitQueue
 			);
 		}
@@ -116,12 +113,11 @@ export function mount(
  * the virtual nodes being diffed
  * @param {import('../internal').Internal} internal The Internal node to mount
  * @param {object} globalContext The current context object
- * @param {boolean} isSvg Whether or not this DOM node is an SVG node
  * @param {import('../internal').CommitQueue} commitQueue List of components
  * which have callbacks to invoke in commitRoot
  * @returns {import('../internal').PreactElement}
  */
-function mountDOMElement(dom, internal, globalContext, isSvg, commitQueue) {
+function mountDOMElement(dom, internal, globalContext, commitQueue) {
 	let newProps = internal.props;
 	let nodeType = internal.type;
 	/** @type {any} */
@@ -150,10 +146,10 @@ function mountDOMElement(dom, internal, globalContext, isSvg, commitQueue) {
 		internal._dom = dom;
 	} else {
 		// Tracks entering and exiting SVG namespace when descending through the tree.
-		if (nodeType === 'svg') isSvg = true;
+		// if (nodeType === 'svg') internal._flags |= MODE_SVG;
 
 		if (dom == null) {
-			if (isSvg) {
+			if (internal._flags & MODE_SVG) {
 				dom = document.createElementNS(
 					'http://www.w3.org/2000/svg',
 					// @ts-ignore We know `newVNode.type` is a string
@@ -199,7 +195,7 @@ function mountDOMElement(dom, internal, globalContext, isSvg, commitQueue) {
 				(!isHydrating || typeof newProps[i] == 'function') &&
 				newProps[i] != null
 			) {
-				setProperty(dom, i, newProps[i], null, isSvg);
+				setProperty(dom, i, newProps[i], null, internal._flags & MODE_SVG);
 			}
 		}
 
@@ -217,7 +213,6 @@ function mountDOMElement(dom, internal, globalContext, isSvg, commitQueue) {
 				Array.isArray(i) ? i : [i],
 				internal,
 				globalContext,
-				isSvg && nodeType !== 'foreignObject',
 				commitQueue,
 				dom.firstChild
 			);
@@ -245,7 +240,6 @@ function mountDOMElement(dom, internal, globalContext, isSvg, commitQueue) {
  * @param {import('../internal').ComponentChildren[]} renderResult
  * @param {import('../internal').Internal} parentInternal The parent Internal of the given children
  * @param {object} globalContext The current context object - modified by getChildContext
- * @param {boolean} isSvg Whether or not this DOM node is an SVG node
  * @param {import('../internal').CommitQueue} commitQueue List of components
  * which have callbacks to invoke in commitRoot
  * @param {import('../internal').PreactElement} startDom
@@ -255,7 +249,6 @@ export function mountChildren(
 	renderResult,
 	parentInternal,
 	globalContext,
-	isSvg,
 	commitQueue,
 	startDom
 ) {
@@ -281,7 +274,6 @@ export function mountChildren(
 			childVNode,
 			childInternal,
 			globalContext,
-			isSvg,
 			commitQueue,
 			startDom
 		);
