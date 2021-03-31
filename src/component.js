@@ -110,7 +110,7 @@ function rerenderComponent(component) {
 			internal.props,
 			internal.key, // @TODO we shouldn't need to actually pass these
 			internal.ref, // since the mode flag should bypass key/ref handling
-			null
+			0
 		);
 
 		const commitQueue = [];

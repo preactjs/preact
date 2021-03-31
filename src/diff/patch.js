@@ -129,7 +129,7 @@ export function patch(
 		}
 
 		// @TODO: assign a new VNode ID here? Or NaN?
-		// newVNode._vnodeId = null;
+		// newVNode._vnodeId = 0;
 		internal._flags |= e.then ? MODE_SUSPENDED : MODE_ERRORED;
 		options._catchError(e, internal);
 	}

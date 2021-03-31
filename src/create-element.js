@@ -40,7 +40,7 @@ export function createElement(type, props, children) {
 		}
 	}
 
-	return createVNode(type, normalizedProps, key, ref, null);
+	return createVNode(type, normalizedProps, key, ref, 0);
 }
 
 /**
@@ -64,7 +64,7 @@ export function createVNode(type, props, key, ref, original) {
 		key,
 		ref,
 		constructor: undefined,
-		_vnodeId: original == null ? ++options._vnodeId : original
+		_vnodeId: original === 0 ? ++options._vnodeId : original
 	};
 
 	if (options.vnode != null) options.vnode(vnode);
@@ -90,7 +90,7 @@ export function normalizeToVNode(childVNode) {
 	) {
 		return childVNode + '';
 	} else if (Array.isArray(childVNode)) {
-		return createVNode(Fragment, { children: childVNode }, null, null, null);
+		return createVNode(Fragment, { children: childVNode }, null, null, 0);
 	}
 
 	return childVNode;

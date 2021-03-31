@@ -50,8 +50,8 @@ export function Suspense() {
 	this._suspenders = null;
 	/** @type {import('./internal').PreactElement} */
 	this._parentDom = null;
-	/** @type {number | null} */
-	this._portalVNodeId = null;
+	/** @type {number} */
+	this._portalVNodeId = 0;
 }
 
 // Things we do here to save some bytes but are not proper JS inheritance:
