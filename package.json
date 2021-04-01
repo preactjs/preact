@@ -1,7 +1,7 @@
 {
 	"name": "preact",
 	"amdName": "preact",
-	"version": "10.5.12",
+	"version": "10.5.13",
 	"private": false,
 	"description": "Fast 3kb React-compatible Virtual DOM library.",
 	"main": "dist/preact.js",
@@ -59,7 +59,8 @@
 			"import": "./jsx-runtime/dist/jsxRuntime.mjs"
 		},
 		"./compat/server": {
-			"default": "./compat/server.js"
+			"require": "./compat/server.js",
+			"import": "./compat/server.mjs"
 		},
 		"./package.json": "./package.json",
 		"./": "./"
@@ -169,6 +170,7 @@
 		"compat/dist",
 		"compat/src",
 		"compat/server.js",
+		"compat/server.mjs",
 		"compat/test-utils.js",
 		"compat/jsx-runtime.js",
 		"compat/jsx-runtime.mjs",
@@ -230,7 +232,7 @@
 		"csstype": "^3.0.5",
 		"diff": "^5.0.0",
 		"errorstacks": "^2.3.0",
-		"esbuild": "^0.8.45",
+		"esbuild": "^0.8.47",
 		"eslint": "5.15.1",
 		"eslint-config-developit": "^1.1.1",
 		"eslint-config-prettier": "^6.5.0",

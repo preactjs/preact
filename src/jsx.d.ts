@@ -656,6 +656,7 @@ export namespace JSXInternal {
 		disabled?: boolean;
 		disableRemotePlayback?: boolean;
 		download?: any;
+		decoding?: 'sync' | 'async' | 'auto';
 		draggable?: boolean;
 		encType?: string;
 		form?: string;
@@ -918,6 +919,10 @@ export namespace JSXInternal {
 		feDisplacementMap: SVGAttributes<SVGFEDisplacementMapElement>;
 		feDropShadow: SVGAttributes<SVGFEDropShadowElement>;
 		feFlood: SVGAttributes<SVGFEFloodElement>;
+		feFuncA: SVGAttributes<SVGFEFuncAElement>;
+		feFuncB: SVGAttributes<SVGFEFuncBElement>;
+		feFuncG: SVGAttributes<SVGFEFuncGElement>;
+		feFuncR: SVGAttributes<SVGFEFuncRElement>;
 		feGaussianBlur: SVGAttributes<SVGFEGaussianBlurElement>;
 		feImage: SVGAttributes<SVGFEImageElement>;
 		feMerge: SVGAttributes<SVGFEMergeElement>;
