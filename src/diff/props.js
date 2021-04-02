@@ -12,9 +12,11 @@ import options from '../options';
 export function diffProps(dom, newProps, oldProps, isSvg) {
 	let i;
 
+	const isCustomComponent = dom.tagName.indexOf('-') !== -1 || typeof newProps.is === 'string';
+
 	for (i in oldProps) {
 		if (i !== 'children' && i !== 'key' && !(i in newProps)) {
-			setProperty(dom, i, null, oldProps[i], isSvg);
+			setProperty(dom, i, null, oldProps[i], isSvg, isCustomComponent);
 		}
 	}
 
@@ -26,7 +28,7 @@ export function diffProps(dom, newProps, oldProps, isSvg) {
 			i !== 'checked' &&
 			oldProps[i] !== newProps[i]
 		) {
-			setProperty(dom, i, newProps[i], oldProps[i], isSvg);
+			setProperty(dom, i, newProps[i], oldProps[i], isSvg, isCustomComponent);
 		}
 	}
 }
@@ -51,7 +53,7 @@ function setStyle(style, key, value) {
  * @param {*} oldValue The old value the property had
  * @param {number} isSvg 0 if not an SVG element, else it is an SVG element
  */
-export function setProperty(dom, name, value, oldValue, isSvg) {
+export function setProperty(dom, name, value, oldValue, isSvg, isCustomComponent) {
 	let useCapture;
 
 	if (name === 'style') {
@@ -105,6 +107,14 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
 			// - xlink:href / xlinkHref --> href (xlink:href was removed from SVG and isn't needed)
 			// - className --> class
 			name = name.replace(/xlink[H:h]/, 'h').replace(/sName$/, 's');
+		} else if (
+			name == 'value' || isCustomComponent
+		) {
+			try {
+				dom[name] = value == null ? '' : value;
+				// labelled break is 1b smaller here than a return statement (sorry)
+				break o;
+			} catch (e) {}
 		}
 
 		// ARIA-attributes have a different notion of boolean values.
@@ -117,6 +127,7 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
 		if (typeof value === 'function') {
 			// never serialize functions as attribute values
 		} else if (
+			name !== 'className' &&
 			value != null &&
 			(value !== false || (name[0] === 'a' && name[1] === 'r'))
 		) {
