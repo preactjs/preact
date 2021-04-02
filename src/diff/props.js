@@ -54,7 +54,7 @@ function setStyle(style, key, value) {
 export function setProperty(dom, name, value, oldValue, isSvg) {
 	let useCapture;
 
-	o: if (name === 'style') {
+	if (name === 'style') {
 		if (typeof value == 'string') {
 			dom.style.cssText = value;
 		} else {
@@ -115,11 +115,8 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
 			name !== 'download' &&
 			name in dom
 		) {
-			try {
-				dom[name] = value == null ? '' : value;
-				// labelled break is 1b smaller here than a return statement (sorry)
-				break o;
-			} catch (e) {}
+			dom[name] = value == null ? '' : value;
+			return;
 		}
 
 		// ARIA-attributes have a different notion of boolean values.
