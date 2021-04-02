@@ -25,7 +25,7 @@ export function _catchError(error, internal) {
 					);
 				}
 
-				if (internal._component.componentDidCatch != null) {
+				if (internal._component && internal._component.componentDidCatch != null) {
 					internal._component.componentDidCatch(error);
 				}
 
