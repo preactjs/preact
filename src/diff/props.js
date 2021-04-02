@@ -127,7 +127,6 @@ export function setProperty(dom, name, value, oldValue, isSvg, isCustomComponent
 		if (typeof value === 'function') {
 			// never serialize functions as attribute values
 		} else if (
-			name in dom &&
 			name !== 'className' &&
 			value != null &&
 			(value !== false || (name[0] === 'a' && name[1] === 'r'))
