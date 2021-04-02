@@ -224,8 +224,7 @@ declare namespace preact {
 
 	function render(
 		vnode: ComponentChild,
-		parent: Element | Document | ShadowRoot | DocumentFragment,
-		replaceNode?: Element | Text
+		parent: Element | Document | ShadowRoot | DocumentFragment
 	): void;
 	function hydrate(
 		vnode: ComponentChild,
