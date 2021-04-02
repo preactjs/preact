@@ -79,7 +79,6 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
 			}
 		}
 	}
-	else if (name === 'className') break o;
 	// Benchmark for comparison: https://esbench.com/bench/574c954bdb965b9a00965ac6
 	else if (name[0] === 'o' && name[1] === 'n') {
 		useCapture = name !== (name = name.replace(/Capture$/, ''));
@@ -117,6 +116,7 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
 			name in dom
 		) {
 			try {
+				if (name === 'className') break o;
 				dom[name] = value == null ? '' : value;
 				// labelled break is 1b smaller here than a return statement (sorry)
 				break o;
