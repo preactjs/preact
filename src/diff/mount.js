@@ -168,6 +168,20 @@ function mountDOMElement(dom, internal, globalContext, commitQueue) {
 			internal._flags &= RESET_MODE;
 		}
 
+		// @TODO: Consider removing and instructing users to instead set the desired
+		// prop for removal to undefined/null. During hydration, props are not
+		// diffed at all (including dangerouslySetInnerHTML)
+		if (internal._flags & MODE_MUTATIVE_HYDRATE) {
+			// But, if we are in a situation where we are using existing DOM (e.g. replaceNode)
+			// we should read the existing DOM attributes to diff them
+			for (i = 0; i < dom.attributes.length; i++) {
+				const name = dom.attributes[i].name;
+				if (!(name in newProps)) {
+					dom.removeAttribute(name);
+				}
+			}
+		}
+
 		let newHtml, newValue, newChecked;
 		for (i in newProps) {
 			if (i === 'key' || i === 'children') {
@@ -288,7 +302,10 @@ export function mountChildren(
 	}
 
 	// Remove children that are not part of any vnode.
-	if (parentInternal._flags & MODE_HYDRATE && parentInternal._flags & TYPE_ELEMENT) {
+	if (
+		parentInternal._flags & (MODE_HYDRATE | MODE_MUTATIVE_HYDRATE) &&
+		parentInternal._flags & TYPE_ELEMENT
+	) {
 		// TODO: Would it be simpler to just clear the pre-existing DOM in top-level
 		// render if render is called with no oldVNode & existing children & no
 		// replaceNode? Instead of patching the DOM to match the VNode tree? (remove
