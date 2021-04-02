@@ -11,6 +11,13 @@ import {
 	MODE_RERENDERING_ERROR
 } from '../constants';
 import { addCommitCallback } from './commit';
+import { renderReactComponent } from './reactComponents';
+
+export const SKIP = {};
+
+let currentGlobalContext;
+export const setCurrentGlobalContext = newGlobalContext =>
+	(currentGlobalContext = newGlobalContext);
 
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
@@ -31,16 +38,6 @@ export function renderComponent(
 	commitQueue,
 	startDom
 ) {
-	/** @type {import('../internal').Component} */
-	let c;
-	let isNew, oldProps, oldState, snapshot, tmp;
-
-	/** @type {import('../internal').ComponentType} */
-	let type = (internal.type);
-
-	// @TODO split update + mount?
-	let newProps = newVNode ? newVNode.props : internal.props;
-
 	if (internal._flags & MODE_PENDING_ERROR) {
 		// Toggle the MODE_PENDING_ERROR and MODE_RERENDERING_ERROR flags. In
 		// actuality, this should turn off the MODE_PENDING_ERROR flag and turn on
@@ -48,147 +45,20 @@ export function renderComponent(
 		internal._flags ^= MODE_PENDING_ERROR | MODE_RERENDERING_ERROR;
 	}
 
-	// Necessary for createContext api. Setting this property will pass
-	// the context value as `this.context` just for this component.
-	tmp = type.contextType;
-	let provider = tmp && globalContext[tmp._id];
-	let componentContext = tmp
-		? provider
-			? provider.props.value
-			: tmp._defaultValue
-		: globalContext;
+	currentGlobalContext = globalContext;
 
-	if (internal && internal._component) {
-		c = internal._component;
-	} else {
-		// Instantiate the new component
-		if ('prototype' in type && type.prototype.render) {
-			// @ts-ignore The check above verifies that newType is suppose to be constructed
-			internal._component = c = new type(newProps, componentContext); // eslint-disable-line new-cap
-		} else {
-			// @ts-ignore Trust me, Component implements the interface we want
-			internal._component = c = new Component(newProps, componentContext);
-			c.constructor = type;
-			c.render = doRender;
-		}
-		if (provider) provider.sub(c);
+	const renderResult = renderReactComponent(newVNode, internal, globalContext);
 
-		c.props = newProps;
-		if (!c.state) c.state = {};
-		c.context = componentContext;
-		c._globalContext = globalContext;
-		isNew = true;
-		internal._flags |= DIRTY_BIT;
-	}
-
-	// Invoke getDerivedStateFromProps
-	if (c._nextState == null) {
-		c._nextState = c.state;
-	}
-	if (type.getDerivedStateFromProps != null) {
-		if (c._nextState == c.state) {
-			c._nextState = assign({}, c._nextState);
-		}
-
-		assign(c._nextState, type.getDerivedStateFromProps(newProps, c._nextState));
-	}
-
-	oldProps = c.props;
-	oldState = c.state;
-	if (isNew) {
-		if (type.getDerivedStateFromProps == null && c.componentWillMount != null) {
-			c.componentWillMount();
-		}
-
-		if (c.componentDidMount != null) {
-			// If the component was constructed, queue up componentDidMount so the
-			// first time this internal commits (regardless of suspense or not) it
-			// will be called
-			addCommitCallback(internal, c.componentDidMount);
-		}
-	} else {
-		if (
-			type.getDerivedStateFromProps == null &&
-			newProps !== oldProps &&
-			c.componentWillReceiveProps != null
-		) {
-			c.componentWillReceiveProps(newProps, componentContext);
-		}
-
-		if (
-			(!(internal._flags & FORCE_UPDATE) &&
-				c.shouldComponentUpdate != null &&
-				c.shouldComponentUpdate(newProps, c._nextState, componentContext) ===
-					false) ||
-			(newVNode && newVNode._vnodeId === internal._vnodeId)
-		) {
-			c.props = newProps;
-			c.state = c._nextState;
-			internal.props = newProps;
-			// More info about this here: https://gist.github.com/JoviDeCroock/bec5f2ce93544d2e6070ef8e0036e4e8
-			if (newVNode && newVNode._vnodeId !== internal._vnodeId) {
-				internal._flags &= ~DIRTY_BIT;
-			}
-
-			c._internal = internal;
-			if (
-				internal._commitCallbacks != null &&
-				internal._commitCallbacks.length
-			) {
-				commitQueue.push(internal);
-			}
-
-			// TODO: Returning undefined here (i.e. return;) passes all tests. That seems
-			// like a bug. Should validate that we have test coverage for sCU that
-			// returns Fragments with multiple DOM children
-			return reorderChildren(internal, startDom, parentDom);
-		}
-
-		if (c.componentWillUpdate != null) {
-			c.componentWillUpdate(newProps, c._nextState, componentContext);
-		}
-	}
-
-	c.context = componentContext;
-	c.props = newProps;
-	c.state = c._nextState;
-
-	internal.props = newProps;
-
-	if ((tmp = options._render)) tmp(internal);
-
-	internal._flags &= ~DIRTY_BIT;
-	c._internal = internal;
-
-	tmp = c.render(c.props, c.state, c.context);
-
-	// Handle setState called in render, see #2553
-	c.state = c._nextState;
-
-	if (c.getChildContext != null) {
-		globalContext = assign(assign({}, globalContext), c.getChildContext());
-	}
-
-	if (!isNew) {
-		if (c.getSnapshotBeforeUpdate != null) {
-			snapshot = c.getSnapshotBeforeUpdate(oldProps, oldState);
-		}
-
-		// Only schedule componentDidUpdate if the component successfully rendered
-		if (c.componentDidUpdate != null) {
-			addCommitCallback(internal, () => {
-				c.componentDidUpdate(oldProps, oldState, snapshot);
-			});
-		}
-	}
-
-	let isTopLevelFragment =
-		tmp != null && tmp.type === Fragment && tmp.key == null;
-	let renderResult = isTopLevelFragment ? tmp.props.children : tmp;
+	globalContext = currentGlobalContext;
 
 	let nextDomSibling;
 
-	if (internal._children == null) {
+	if (renderResult == SKIP) {
+		// TODO: Returning undefined here (i.e. return;) passes all tests. That seems
+		// like a bug. Should validate that we have test coverage for sCU that
+		// returns Fragments with multiple DOM children
+		nextDomSibling = reorderChildren(internal, startDom, parentDom);
+	} else if (internal._children == null) {
 		nextDomSibling = mountChildren(
 			parentDom,
 			Array.isArray(renderResult) ? renderResult : [renderResult],
@@ -213,9 +83,4 @@ export function renderComponent(
 	}
 
 	return nextDomSibling;
-}
-
-/** The `.render()` method for a PFC backing instance. */
-function doRender(props, state, context) {
-	return this.constructor(props, context);
 }
