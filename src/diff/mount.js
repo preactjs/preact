@@ -125,8 +125,8 @@ function mountDOMElement(dom, internal, globalContext, commitQueue) {
 
 	let isHydrating = internal._flags & MODE_HYDRATE;
 
-	// if hydrating, find the matching child:
-	if (internal._flags & MODE_HYDRATE) {
+	// if hydrating (hydrate() or render() with replaceNode), find the matching child:
+	if (internal._flags & (MODE_HYDRATE | MODE_MUTATIVE_HYDRATE)) {
 		while (
 			dom &&
 			(nodeType ? dom.localName !== nodeType : dom.nodeType !== 3)
