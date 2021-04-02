@@ -51,6 +51,7 @@ export function renderComponent(
 	// Necessary for createContext api. Setting this property will pass
 	// the context value as `this.context` just for this component.
 	tmp = type.contextType;
+	let nextDomSibling;
 	let provider = tmp && globalContext[tmp._id];
 	let componentContext = tmp
 		? provider
@@ -63,8 +64,6 @@ export function renderComponent(
 		let isTopLevelFragment =
 			tmp != null && tmp.type === Fragment && tmp.key == null;
 		let renderResult = isTopLevelFragment ? tmp.props.children : tmp;
-
-		let nextDomSibling;
 
 		if (internal._children == null) {
 			nextDomSibling = mountChildren(
@@ -213,8 +212,6 @@ export function renderComponent(
 		let isTopLevelFragment =
 			tmp != null && tmp.type === Fragment && tmp.key == null;
 		let renderResult = isTopLevelFragment ? tmp.props.children : tmp;
-
-		let nextDomSibling;
 
 		if (internal._children == null) {
 			nextDomSibling = mountChildren(
