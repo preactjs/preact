@@ -56,7 +56,7 @@ function setStyle(style, key, value) {
 export function setProperty(dom, name, value, oldValue, isSvg, isCustomComponent) {
 	let useCapture;
 
-	if (name === 'style') {
+	o: if (name === 'style') {
 		if (typeof value == 'string') {
 			dom.style.cssText = value;
 		} else {
