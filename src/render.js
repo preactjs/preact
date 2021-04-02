@@ -33,7 +33,7 @@ export function render(vnode, parentDom) {
 			rootInternal,
 			{},
 			commitQueue,
-			getChildDom(rootInternal, 0) // TODO: could this just be parentDom.firstChild? Probably once we drop replaceNode
+			parentDom.firstChild
 		);
 	} else {
 		// Store the VDOM tree root on the DOM element in a (minified) property:
