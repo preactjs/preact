@@ -54,7 +54,7 @@ function setStyle(style, key, value) {
 export function setProperty(dom, name, value, oldValue, isSvg) {
 	let useCapture;
 
-	o: if (name === 'style') {
+	if (name === 'style') {
 		if (typeof value == 'string') {
 			dom.style.cssText = value;
 		} else {
@@ -105,21 +105,6 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
 			// - xlink:href / xlinkHref --> href (xlink:href was removed from SVG and isn't needed)
 			// - className --> class
 			name = name.replace(/xlink[H:h]/, 'h').replace(/sName$/, 's');
-		} else if (
-			name !== 'href' &&
-			name !== 'list' &&
-			name !== 'form' &&
-			// Default value in browsers is `-1` and an empty string is
-			// cast to `0` instead
-			name !== 'tabIndex' &&
-			name !== 'download' &&
-			name in dom
-		) {
-			try {
-				dom[name] = value == null ? '' : value;
-				// labelled break is 1b smaller here than a return statement (sorry)
-				break o;
-			} catch (e) {}
 		}
 
 		// ARIA-attributes have a different notion of boolean values.
@@ -132,10 +117,9 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
 		if (typeof value === 'function') {
 			// never serialize functions as attribute values
 		} else if (
-			value != null &&
 			(value !== false || (name[0] === 'a' && name[1] === 'r'))
 		) {
-			dom.setAttribute(name, value);
+			dom.setAttribute(name,  value == null ? '' : value);
 		} else {
 			dom.removeAttribute(name);
 		}
