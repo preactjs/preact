@@ -3,6 +3,7 @@
 ## DONE
 
 - `[MAJOR]` Deprecated `component.base`
+- `[MAJOR]` Remove `replaceNode`, [use this technique instead](https://gist.github.com/developit/f321a9ef092ad39f54f8d7c8f99eb29a))
 
 ## Root node follow ups
 
@@ -83,10 +84,6 @@
   queue of effects for that node while a global queue contains the internal
   nodes that have effects.
 - Feature: Top-level render handles Fragment root
-- Figure out a way to externally support the use case of "start rendering at
-  this child of parentDom" (in other words, remove all that code from core &
-  recommend folks use
-  [this technique](https://gist.github.com/developit/f321a9ef092ad39f54f8d7c8f99eb29a))
 - Golf everything! Look for @TODO(golf)
 - Look for ways to optimize DOM element diffing, specifically how we diff props
   - Investigate diffing props before or after children

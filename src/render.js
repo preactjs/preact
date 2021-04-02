@@ -11,10 +11,8 @@ import { createInternal, getChildDom } from './tree';
  * @param {import('./internal').ComponentChild} vnode The virtual node to render
  * @param {import('./internal').PreactElement} parentDom The DOM element to
  * render into
- * @param {import('./internal').PreactElement | object} [replaceNode] Optional: Attempt to re-use an
- * existing DOM tree rooted at `replaceNode`
  */
-export function render(vnode, parentDom, replaceNode) {
+export function render(vnode, parentDom) {
 	if (options._root) options._root(vnode, parentDom);
 
 	// List of effects that need to be called after diffing.
@@ -25,8 +23,7 @@ export function render(vnode, parentDom, replaceNode) {
 	// this by assigning a new `_children` property to DOM nodes which points
 	// to the last rendered tree. By default this property is not present, which
 	// means that we are mounting a new tree for the first time.
-	let rootInternal =
-		(replaceNode && replaceNode._children) || parentDom._children;
+	let rootInternal = parentDom._children;
 	vnode = createElement(Fragment, { _parentDom: parentDom }, [vnode]);
 
 	if (rootInternal) {
@@ -40,7 +37,7 @@ export function render(vnode, parentDom, replaceNode) {
 		);
 	} else {
 		// Store the VDOM tree root on the DOM element in a (minified) property:
-		rootInternal = (replaceNode || parentDom)._children = createInternal(
+		rootInternal = parentDom._children = createInternal(
 			vnode,
 			null
 		);
@@ -49,9 +46,8 @@ export function render(vnode, parentDom, replaceNode) {
 			rootInternal._flags |= MODE_SVG;
 		}
 
-		// Providing a replaceNode parameter or calling `render` on a container with
-		// existing DOM elements puts the diff into mutative hydrate mode:
-		if (replaceNode || parentDom.firstChild) {
+		// Calling `render` on a container with existing DOM elements puts the diff into mutative hydrate mode:
+		if (parentDom.firstChild) {
 			rootInternal._flags |= MODE_MUTATIVE_HYDRATE;
 		}
 
@@ -63,7 +59,7 @@ export function render(vnode, parentDom, replaceNode) {
 			commitQueue,
 			// Start the diff at the replaceNode or the parentDOM.firstChild if any.
 			// Will be null if the parentDom is empty
-			replaceNode || parentDom.firstChild
+			parentDom.firstChild
 		);
 	}
 
