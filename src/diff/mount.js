@@ -59,7 +59,7 @@ export function mount(
 
 			nextDomSibling = renderComponent(
 				parentDom,
-				null,
+				newVNode,
 				internal,
 				globalContext,
 				commitQueue,

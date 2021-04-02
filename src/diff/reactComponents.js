@@ -20,7 +20,7 @@ export function renderReactComponent(newVNode, internal, globalContext) {
 	let type = (internal.type);
 
 	// @TODO split update + mount?
-	let newProps = newVNode ? newVNode.props : internal.props;
+	let newProps = newVNode.props;
 
 	// Necessary for createContext api. Setting this property will pass
 	// the context value as `this.context` just for this component.
@@ -94,13 +94,13 @@ export function renderReactComponent(newVNode, internal, globalContext) {
 				c.shouldComponentUpdate != null &&
 				c.shouldComponentUpdate(newProps, c._nextState, componentContext) ===
 					false) ||
-			(newVNode && newVNode._vnodeId === internal._vnodeId)
+			newVNode._vnodeId === internal._vnodeId
 		) {
 			c.props = newProps;
 			c.state = c._nextState;
 			internal.props = newProps;
 			// More info about this here: https://gist.github.com/JoviDeCroock/bec5f2ce93544d2e6070ef8e0036e4e8
-			if (newVNode && newVNode._vnodeId !== internal._vnodeId) {
+			if (newVNode._vnodeId !== internal._vnodeId) {
 				internal._flags &= ~DIRTY_BIT;
 			}
 
