@@ -4,7 +4,7 @@ import { createElement, Fragment } from './create-element';
 import options from './options';
 import { mount } from './diff/mount';
 import { patch } from './diff/patch';
-import { createInternal, getChildDom } from './tree';
+import { createInternal } from './tree';
 
 /**
  * Render a Preact virtual node into a DOM element
