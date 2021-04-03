@@ -49,6 +49,7 @@ export function renderComponent(
 	currentGlobalContext = globalContext;
 
 	const renderResult = renderReactComponent(newVNode, internal, globalContext);
+	internal.props = newVNode.props;
 
 	globalContext = currentGlobalContext;
 

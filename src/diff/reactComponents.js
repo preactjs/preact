@@ -98,16 +98,6 @@ export function renderReactComponent(newVNode, internal, globalContext) {
 		) {
 			c.props = newProps;
 			c.state = c._nextState;
-			internal.props = newProps;
-
-			c._internal = internal;
-			// if (
-			// 	internal._commitCallbacks != null &&
-			// 	internal._commitCallbacks.length
-			// ) {
-			// 	commitQueue.push(internal);
-			// }
-
 			return SKIP;
 		}
 
@@ -119,8 +109,6 @@ export function renderReactComponent(newVNode, internal, globalContext) {
 	c.context = componentContext;
 	c.props = newProps;
 	c.state = c._nextState;
-
-	internal.props = newProps;
 
 	if ((tmp = options._render)) tmp(internal);
 
