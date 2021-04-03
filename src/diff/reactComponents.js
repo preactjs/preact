@@ -98,10 +98,7 @@ export function renderReactComponent(newVNode, internal, globalContext) {
 			c.props = newProps;
 			c.state = c._nextState;
 			internal.props = newProps;
-			// More info about this here: https://gist.github.com/JoviDeCroock/bec5f2ce93544d2e6070ef8e0036e4e8
-			if (newVNode._vnodeId !== internal._vnodeId) {
-				internal._flags &= ~DIRTY_BIT;
-			}
+			internal._flags &= ~DIRTY_BIT;
 
 			c._internal = internal;
 			// if (
