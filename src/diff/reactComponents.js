@@ -1,6 +1,8 @@
 import { Fragment, Component, options } from '../index';
 import { assign } from '../util';
-import { DIRTY_BIT, FORCE_UPDATE } from '../constants';
+
+// TODO: Investigate moving usage of these internals outside of this function
+import { FORCE_UPDATE } from '../constants';
 import { addCommitCallback } from './commit';
 import { SKIP, setCurrentGlobalContext } from './component';
 
@@ -52,7 +54,6 @@ export function renderReactComponent(newVNode, internal, globalContext) {
 		c.context = componentContext;
 		c._globalContext = globalContext;
 		isNew = true;
-		internal._flags |= DIRTY_BIT;
 	}
 
 	// Invoke getDerivedStateFromProps
@@ -98,7 +99,6 @@ export function renderReactComponent(newVNode, internal, globalContext) {
 			c.props = newProps;
 			c.state = c._nextState;
 			internal.props = newProps;
-			internal._flags &= ~DIRTY_BIT;
 
 			c._internal = internal;
 			// if (
@@ -124,7 +124,6 @@ export function renderReactComponent(newVNode, internal, globalContext) {
 
 	if ((tmp = options._render)) tmp(internal);
 
-	internal._flags &= ~DIRTY_BIT;
 	c._internal = internal;
 
 	tmp = c.render(c.props, c.state, c.context);

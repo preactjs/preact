@@ -38,6 +38,7 @@ export function renderComponent(
 	commitQueue,
 	startDom
 ) {
+	internal._flags &= ~DIRTY_BIT;
 	if (internal._flags & MODE_PENDING_ERROR) {
 		// Toggle the MODE_PENDING_ERROR and MODE_RERENDERING_ERROR flags. In
 		// actuality, this should turn off the MODE_PENDING_ERROR flag and turn on
@@ -52,7 +53,6 @@ export function renderComponent(
 	globalContext = currentGlobalContext;
 
 	let nextDomSibling;
-
 	if (renderResult == SKIP) {
 		// TODO: Returning undefined here (i.e. return;) passes all tests. That seems
 		// like a bug. Should validate that we have test coverage for sCU that
