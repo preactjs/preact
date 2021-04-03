@@ -47,7 +47,20 @@ export function renderComponent(
 
 	currentGlobalContext = globalContext;
 
-	const renderResult = renderReactComponent(newVNode, internal, globalContext);
+	let renderResult = SKIP;
+	if (internal._component && internal._vnodeId == newVNode._vnodeId) {
+		// internal._component.props = newVNode.props;
+		// internal._component.state = internal._component._nextState;
+		internal.props = newVNode.props;
+
+		// if (newVNode._vnodeId !== internal._vnodeId) {
+		// 	internal._flags &= ~DIRTY_BIT;
+		// }
+
+		// c._internal = internal;
+	} else {
+		renderResult = renderReactComponent(newVNode, internal, globalContext);
+	}
 
 	globalContext = currentGlobalContext;
 

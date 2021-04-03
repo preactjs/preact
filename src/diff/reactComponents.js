@@ -90,11 +90,10 @@ export function renderReactComponent(newVNode, internal, globalContext) {
 		}
 
 		if (
-			(!(internal._flags & FORCE_UPDATE) &&
-				c.shouldComponentUpdate != null &&
-				c.shouldComponentUpdate(newProps, c._nextState, componentContext) ===
-					false) ||
-			newVNode._vnodeId === internal._vnodeId
+			!(internal._flags & FORCE_UPDATE) &&
+			c.shouldComponentUpdate != null &&
+			c.shouldComponentUpdate(newProps, c._nextState, componentContext) ===
+				false
 		) {
 			c.props = newProps;
 			c.state = c._nextState;
