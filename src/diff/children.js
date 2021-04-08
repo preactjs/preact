@@ -136,7 +136,7 @@ export function diffChildren(
 
 			// TODO: Figure out if there is a better way to handle the null
 			// placeholder's scenario this addresses
-			prevDom = childInternal._component;
+			prevDom = childInternal._instance;
 
 			// Morph the old element into the new one, but don't append it to the dom yet
 			nextDomSibling = patch(
@@ -149,17 +149,12 @@ export function diffChildren(
 			);
 		}
 
-		newDom = childInternal._component;
+		newDom = childInternal._instance;
 
 		if (childVNode.ref && oldVNodeRef != childVNode.ref) {
 			if (!refs) refs = [];
 			if (oldVNodeRef) refs.push(oldVNodeRef, null, childInternal);
-			refs.push(
-				childVNode.ref,
-				// childInternal._component || newDom,
-				childInternal._component,
-				childInternal
-			);
+			refs.push(childVNode.ref, childInternal._instance, childInternal);
 		}
 
 		if (childInternal._flags & TYPE_COMPONENT) {
@@ -209,7 +204,7 @@ export function diffChildren(
 				parentInternal._flags & TYPE_COMPONENT &&
 				startDom != null &&
 				((oldChildren[i]._flags & TYPE_DOM &&
-					oldChildren[i]._component == startDom) ||
+					oldChildren[i]._instance == startDom) ||
 					getChildDom(oldChildren[i]) == startDom)
 			) {
 				// If the startDom points to a dom node that is about to be unmounted,
@@ -252,13 +247,13 @@ export function reorderChildren(internal, startDom, parentDom) {
 
 			if (childInternal._flags & TYPE_COMPONENT) {
 				startDom = reorderChildren(childInternal, startDom, parentDom);
-			} else if (childInternal._component == startDom) {
+			} else if (childInternal._instance == startDom) {
 				startDom = startDom.nextSibling;
 			} else {
 				startDom = placeChild(
 					parentDom,
 					internal._children.length,
-					childInternal._component,
+					childInternal._instance,
 					startDom
 				);
 			}

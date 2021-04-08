@@ -58,16 +58,16 @@ export function renderComponent(
 			: tmp._defaultValue
 		: globalContext;
 
-	if (internal && internal._component) {
-		c = internal._component;
+	if (internal && internal._instance) {
+		c = internal._instance;
 	} else {
 		// Instantiate the new component
 		if ('prototype' in type && type.prototype.render) {
 			// @ts-ignore The check above verifies that newType is suppose to be constructed
-			internal._component = c = new type(newProps, componentContext); // eslint-disable-line new-cap
+			internal._instance = c = new type(newProps, componentContext); // eslint-disable-line new-cap
 		} else {
 			// @ts-ignore Trust me, Component implements the interface we want
-			internal._component = c = new Component(newProps, componentContext);
+			internal._instance = c = new Component(newProps, componentContext);
 			c.constructor = type;
 			c.render = doRender;
 		}

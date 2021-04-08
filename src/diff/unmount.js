@@ -25,13 +25,13 @@ export function unmount(internal, parentInternal, skipRemove) {
 
 	if ((r = internal.ref)) {
 		// TODO: Why check for current == _dom
-		if (!r.current || r.current === internal._component)
+		if (!r.current || r.current === internal._instance)
 			applyRef(r, null, parentInternal);
 	}
 
 	let dom;
 	if (!skipRemove && internal._flags & TYPE_DOM) {
-		skipRemove = (dom = internal._component) != null;
+		skipRemove = (dom = internal._instance) != null;
 	} else if (
 		!skipRemove &&
 		(internal._flags & MODE_SUSPENDED_HYDRATION) === MODE_SUSPENDED_HYDRATION
@@ -41,7 +41,7 @@ export function unmount(internal, parentInternal, skipRemove) {
 		skipRemove = false;
 	}
 
-	if ((r = internal._component) != null) {
+	if ((r = internal._instance) != null) {
 		if (r.componentWillUnmount) {
 			try {
 				r.componentWillUnmount();
@@ -51,7 +51,7 @@ export function unmount(internal, parentInternal, skipRemove) {
 		}
 	}
 
-	internal._component = null;
+	internal._instance = null;
 
 	if ((r = internal._children)) {
 		for (let i = 0; i < r.length; i++) {

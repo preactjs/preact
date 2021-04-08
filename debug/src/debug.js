@@ -46,7 +46,7 @@ export function initDebug() {
 	const deprecations = [];
 
 	options._catchError = (error, vnode, oldVNode) => {
-		let component = vnode && vnode._component;
+		let component = vnode && vnode._instance;
 		if (component && typeof error.then == 'function') {
 			const promise = error;
 			error = new Error(
@@ -55,7 +55,7 @@ export function initDebug() {
 
 			let parent = vnode;
 			for (; parent; parent = parent._parent) {
-				if (parent._component && parent._component._childDidSuspend) {
+				if (parent._instance && parent._instance._childDidSuspend) {
 					error = promise;
 					break;
 				}

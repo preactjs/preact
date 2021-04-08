@@ -69,14 +69,14 @@ export function render(vnode, parent, callback) {
 	if (typeof callback == 'function') callback();
 
 	const internal = parent._children._children[0];
-	return internal ? internal._component : null;
+	return internal ? internal._instance : null;
 }
 
 export function hydrate(vnode, parent, callback) {
 	preactHydrate(vnode, parent);
 	if (typeof callback == 'function') callback();
 
-	return vnode ? vnode._component : null;
+	return vnode ? vnode._instance : null;
 }
 
 let oldEventHook = options.event;
@@ -203,7 +203,7 @@ options._render = function(internal) {
 	if (oldBeforeRender) {
 		oldBeforeRender(internal);
 	}
-	currentComponent = internal._component;
+	currentComponent = internal._instance;
 };
 
 // This is a very very private internal function for React it

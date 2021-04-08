@@ -26,7 +26,7 @@ export function commitRoot(commitQueue, rootInternal) {
 			commitQueue = internal._commitCallbacks;
 			internal._commitCallbacks = [];
 			commitQueue.some(cb => {
-				cb.call(internal._component);
+				cb.call(internal._instance);
 			});
 		} catch (e) {
 			options._catchError(e, internal);

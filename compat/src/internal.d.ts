@@ -11,10 +11,10 @@ export { ComponentChildren } from '../..';
 export { PreactElement } from '../../src/internal';
 
 export interface Internal<P = {}> extends PreactInternal<P> {
-	// Override some of Internal's properties with compat types (namely _component)
+	// Override some of Internal's properties with compat types (namely _instance)
 	_parent: Internal;
 	_children: Internal[];
-	_component: Component;
+	_instance: Component;
 }
 
 export interface Component<P = {}, S = {}> extends PreactComponent<P, S> {

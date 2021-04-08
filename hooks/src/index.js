@@ -37,7 +37,7 @@ options._diff = (internal, vnode) => {
 options._render = internal => {
 	if (oldBeforeRender) oldBeforeRender(internal);
 
-	currentComponent = internal._component;
+	currentComponent = internal._instance;
 	currentIndex = 0;
 
 	const hooks = currentComponent.__hooks;
@@ -51,7 +51,7 @@ options._render = internal => {
 options.diffed = internal => {
 	if (oldAfterDiff) oldAfterDiff(internal);
 
-	const c = internal._component;
+	const c = internal._instance;
 	if (c && c.__hooks && c.__hooks._pendingEffects.length) {
 		afterPaint(afterPaintEffects.push(c));
 	}
@@ -80,7 +80,7 @@ options._commit = (internal, commitQueue) => {
 options.unmount = internal => {
 	if (oldBeforeUnmount) oldBeforeUnmount(internal);
 
-	const c = internal._component;
+	const c = internal._instance;
 	if (c && c.__hooks) {
 		try {
 			c.__hooks._list.forEach(invokeCleanup);

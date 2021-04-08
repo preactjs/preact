@@ -12,7 +12,7 @@ options._catchError = function(error, internal) {
 		let handler = internal;
 
 		for (; (handler = handler._parent); ) {
-			if ((component = handler._component) && component._childDidSuspend) {
+			if ((component = handler._instance) && component._childDidSuspend) {
 				// Don't call oldCatchError if we found a Suspense
 				return component._childDidSuspend(error, internal);
 			}
@@ -25,7 +25,7 @@ const oldUnmount = options.unmount;
 /** @type {(internal: import('./internal').Internal) => void} */
 options.unmount = function(internal) {
 	/** @type {import('./internal').Component} */
-	const component = internal._component;
+	const component = internal._instance;
 	if (component && component._onResolve) {
 		component._onResolve();
 	}
@@ -56,7 +56,7 @@ Suspense.prototype = new Component();
  * @param {import('./internal').Internal} suspendingInternal The suspending component
  */
 Suspense.prototype._childDidSuspend = function(promise, suspendingInternal) {
-	const suspendingComponent = suspendingInternal._component;
+	const suspendingComponent = suspendingInternal._instance;
 	if (suspendingComponent._onResolve != null) {
 		// This component has already been handled by a Suspense component. Do
 		// nothing
@@ -166,7 +166,7 @@ Suspense.prototype.render = function(props, state) {
  * @returns {((unsuspend: () => void) => void)?}
  */
 export function suspended(internal) {
-	let component = internal._parent._component;
+	let component = internal._parent._instance;
 	return component && component._suspended && component._suspended(internal);
 }
 

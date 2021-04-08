@@ -20,13 +20,13 @@ export function _catchError(error, internal) {
 		) {
 			try {
 				if (internal.type.getDerivedStateFromError != null) {
-					internal._component.setState(
+					internal._instance.setState(
 						internal.type.getDerivedStateFromError(error)
 					);
 				}
 
-				if (internal._component.componentDidCatch != null) {
-					internal._component.componentDidCatch(error);
+				if (internal._instance.componentDidCatch != null) {
+					internal._instance.componentDidCatch(error);
 				}
 
 				// NOTE: We're checking that any component in the stack got marked as dirty, even if it did so prior to this loop,

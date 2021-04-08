@@ -143,7 +143,7 @@ function mountDOMElement(dom, internal, globalContext, commitQueue) {
 			dom.data = newProps;
 		}
 
-		internal._component = dom;
+		internal._instance = dom;
 	} else {
 		// Tracks entering and exiting SVG namespace when descending through the tree.
 		// if (nodeType === 'svg') internal._flags |= MODE_SVG;
@@ -199,7 +199,7 @@ function mountDOMElement(dom, internal, globalContext, commitQueue) {
 			}
 		}
 
-		internal._component = dom;
+		internal._instance = dom;
 
 		// If the new vnode didn't have dangerouslySetInnerHTML, diff its children
 		if (newHtml) {
@@ -278,12 +278,12 @@ export function mountChildren(
 			startDom
 		);
 
-		newDom = childInternal._component;
+		newDom = childInternal._instance;
 
 		if (childInternal._flags & TYPE_COMPONENT || newDom == startDom) {
-			// If the child is a Fragment-like or if it is DOM VNode and its
-			// _component property matches the dom we are diffing (i.e. startDom),
-			// just continue with the mountedNextChild
+			// If the child is a Fragment-like or if it is DOM VNode and its _instance
+			// property matches the dom we are diffing (i.e. startDom), just continue
+			// with the mountedNextChild
 			startDom = mountedNextChild;
 		} else if (newDom != null) {
 			// The DOM the diff should begin with is now startDom (since we inserted
@@ -295,7 +295,7 @@ export function mountChildren(
 		if (childInternal.ref) {
 			applyRef(
 				childInternal.ref,
-				childInternal._component || newDom,
+				childInternal._instance || newDom,
 				childInternal
 			);
 		}

@@ -85,7 +85,7 @@ export function createInternal(vnode, parentInternal) {
 		_children: null,
 		_parent: parentInternal,
 		_vnodeId: vnodeId,
-		_component: null,
+		_instance: null,
 		_flags: flags,
 		_depth: parentInternal ? parentInternal._depth + 1 : 0,
 
@@ -147,7 +147,7 @@ export function getChildDom(internal, i) {
 		let child = internal._children[i];
 		if (child != null) {
 			if (child._flags & TYPE_DOM) {
-				return child._component;
+				return child._instance;
 			}
 
 			if (shouldSearchComponent(child)) {
@@ -175,7 +175,7 @@ export function getParentDom(internal) {
 		if (parent._flags & TYPE_ROOT) {
 			parentDom = parent.props._parentDom;
 		} else if (parent._flags & TYPE_ELEMENT) {
-			parentDom = parent._component;
+			parentDom = parent._instance;
 		}
 
 		parent = parent._parent;

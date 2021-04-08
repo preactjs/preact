@@ -44,7 +44,7 @@
       "$_onResolve": "__R",
       "$_suspended": "__e",
       "$_flags": "__f",
-      "$_component": "__c",
+      "$_instance": "__c",
       "$__html": "__html",
       "$_parent": "__",
       "$_globalContext": "__n",

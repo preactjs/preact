@@ -131,8 +131,8 @@ export interface Internal<P = {}> {
 	_parent: Internal;
 	/** most recent vnode ID */
 	_vnodeId: number;
-	/** The component instance for which this is a backing Internal node */
-	_component: Component | PreactNode | null;
+	/** Either the DOM node for DOM internals or Component object for Component internals */
+	_instance: Component | PreactNode | null;
 	/** Bitfield containing information about the Internal or its component. */
 	_flags: number;
 	/** This Internal's distance from the tree root */
