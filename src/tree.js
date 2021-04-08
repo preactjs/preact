@@ -83,11 +83,15 @@ export function createInternal(vnode, parentInternal) {
 		key,
 		ref,
 		_children: null,
-		_parent: parentInternal,
 		_vnodeId: vnodeId,
 		_instance: null,
 		_flags: flags,
 		_depth: parentInternal ? parentInternal._depth + 1 : 0,
+
+		// Tree pointers
+		_parent: parentInternal,
+		_firstChild: null,
+		_nextSibling: null,
 
 		// For suspended hydration
 		_parkedDom: null

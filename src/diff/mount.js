@@ -252,7 +252,7 @@ export function mountChildren(
 	commitQueue,
 	startDom
 ) {
-	let i, childVNode, childInternal, newDom, mountedNextChild;
+	let i, childVNode, childInternal, newDom, mountedNextChild, prevSibling;
 
 	parentInternal._children = [];
 	for (i = 0; i < renderResult.length; i++) {
@@ -291,6 +291,14 @@ export function mountChildren(
 			// startDom
 			parentDom.insertBefore(newDom, startDom);
 		}
+
+		if (prevSibling) {
+			prevSibling._nextSibling = childInternal;
+		} else {
+			parentInternal._firstChild = childInternal;
+		}
+
+		prevSibling = childInternal;
 
 		if (childInternal.ref) {
 			applyRef(
