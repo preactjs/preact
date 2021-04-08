@@ -30,15 +30,6 @@ options.unmount = function(internal) {
 		component._onResolve();
 	}
 
-	// If a component suspended while it was hydrating and is now being unmounted,
-	// update it's _flags so it appears to be of TYPE_ELEMENT, causing `unmount`
-	// to remove the DOM nodes that were awaiting hydration (which are stored on
-	// this internal's _dom property).
-	const wasHydrating = (internal._flags & MODE_HYDRATE) === MODE_HYDRATE;
-	if (component && wasHydrating) {
-		internal._flags |= TYPE_ELEMENT;
-	}
-
 	if (oldUnmount) oldUnmount(internal);
 };
 

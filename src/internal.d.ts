@@ -131,19 +131,16 @@ export interface Internal<P = {}> {
 	_parent: Internal;
 	/** most recent vnode ID */
 	_vnodeId: number;
-	/**
-	 * Associated DOM element for the Internal, or its nearest realized descendant.
-	 * For Fragments, this is the first DOM child.
-	 */
-	_dom: PreactNode;
 	/** The component instance for which this is a backing Internal node */
-	_component: Component | null;
+	_component: Component | PreactNode | null;
 	/** Bitfield containing information about the Internal or its component. */
 	_flags: number;
 	/** This Internal's distance from the tree root */
 	_depth: number | null;
 	/** Callbacks to invoke when this internal commits */
 	_commitCallbacks: Array<() => void>;
+	/** The dom a diff should resume a suspended hydration with */
+	_parkedDom: PreactNode;
 }
 
 export interface Component<P = {}, S = {}> extends preact.Component<P, S> {

@@ -6,8 +6,7 @@ import { patch } from './diff/patch';
 import {
 	DIRTY_BIT,
 	FORCE_UPDATE,
-	MODE_HYDRATE,
-	MODE_SUSPENDED,
+	MODE_SUSPENDED_HYDRATION,
 	MODE_UNMOUNTING
 } from './constants';
 import { getDomSibling, getParentDom } from './tree';
@@ -100,9 +99,8 @@ function rerenderComponent(component) {
 	if (~internal._flags & MODE_UNMOUNTING && internal._flags & DIRTY_BIT) {
 		let parentDom = getParentDom(internal);
 		let startDom =
-			(internal._flags & (MODE_HYDRATE | MODE_SUSPENDED)) ===
-			(MODE_HYDRATE | MODE_SUSPENDED)
-				? internal._dom
+			(internal._flags & MODE_SUSPENDED_HYDRATION) === MODE_SUSPENDED_HYDRATION
+				? internal._parkedDom
 				: getDomSibling(internal, 0);
 
 		const vnode = createVNode(

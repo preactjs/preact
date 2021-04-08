@@ -33,10 +33,10 @@ export function patch(
 ) {
 	if (internal._flags & TYPE_TEXT) {
 		if (newVNode !== internal.props) {
-			internal._dom.data = newVNode;
+			internal._component.data = newVNode;
 			internal.props = newVNode;
 		}
-		return internal._dom.nextSibling;
+		return internal._component.nextSibling;
 	}
 
 	// When passing through createElement it assigns the object
@@ -104,7 +104,7 @@ export function patch(
 			}
 		} else if (newVNode._vnodeId !== internal._vnodeId) {
 			nextDomSibling = patchDOMElement(
-				internal._dom,
+				internal._component,
 				newVNode,
 				internal,
 				globalContext,
@@ -112,7 +112,7 @@ export function patch(
 			);
 		} else {
 			// @ts-ignore Trust me TS, nextSibling is a PreactElement
-			nextDomSibling = internal._dom.nextSibling;
+			nextDomSibling = internal._component.nextSibling;
 		}
 
 		if (options.diffed) options.diffed(internal);
@@ -172,7 +172,7 @@ function patchDOMElement(dom, newVNode, internal, globalContext, commitQueue) {
 
 	diffProps(dom, newProps, oldProps, internal._flags & MODE_SVG);
 
-	internal._dom = dom;
+	internal._component = dom;
 
 	// If the new vnode didn't have dangerouslySetInnerHTML, diff its children
 	if (newHtml) {

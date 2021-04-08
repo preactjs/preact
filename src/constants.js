@@ -19,6 +19,8 @@ export const MODE_HYDRATE = 1 << 5;
 export const MODE_MUTATIVE_HYDRATE = 1 << 6;
 /** Signifies this VNode suspended on the previous render */
 export const MODE_SUSPENDED = 1 << 7;
+/** Signifies this internal suspended while hydrating */
+export const MODE_SUSPENDED_HYDRATION = MODE_HYDRATE | MODE_SUSPENDED;
 /** Signifies this VNode errored on the previous render */
 export const MODE_ERRORED = 1 << 8;
 /** Signifies an error has been thrown and this component will be attempting to

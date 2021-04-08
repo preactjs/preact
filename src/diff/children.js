@@ -3,10 +3,9 @@ import { normalizeToVNode } from '../create-element';
 import {
 	TYPE_COMPONENT,
 	TYPE_TEXT,
-	MODE_HYDRATE,
-	MODE_SUSPENDED,
 	EMPTY_ARR,
-	TYPE_DOM
+	TYPE_DOM,
+	MODE_SUSPENDED_HYDRATION
 } from '../constants';
 import { mount } from './mount';
 import { patch } from './patch';
@@ -117,11 +116,11 @@ export function diffChildren(
 		// If this node suspended during hydration, and no other flags are set:
 		// @TODO: might be better to explicitly check for MODE_ERRORED here.
 		else if (
-			(childInternal._flags & (MODE_HYDRATE | MODE_SUSPENDED)) ===
-			(MODE_HYDRATE | MODE_SUSPENDED)
+			(childInternal._flags & MODE_SUSPENDED_HYDRATION) ===
+			MODE_SUSPENDED_HYDRATION
 		) {
 			// We are resuming the hydration of a VNode
-			startDom = childInternal._dom;
+			startDom = childInternal._parkedDom;
 			oldVNodeRef = childInternal.ref;
 
 			nextDomSibling = mount(
@@ -137,7 +136,7 @@ export function diffChildren(
 
 			// TODO: Figure out if there is a better way to handle the null
 			// placeholder's scenario this addresses
-			prevDom = childInternal._dom;
+			prevDom = childInternal._component;
 
 			// Morph the old element into the new one, but don't append it to the dom yet
 			nextDomSibling = patch(
@@ -150,14 +149,15 @@ export function diffChildren(
 			);
 		}
 
-		newDom = childInternal._dom;
+		newDom = childInternal._component;
 
 		if (childVNode.ref && oldVNodeRef != childVNode.ref) {
 			if (!refs) refs = [];
 			if (oldVNodeRef) refs.push(oldVNodeRef, null, childInternal);
 			refs.push(
 				childVNode.ref,
-				childInternal._component || newDom,
+				// childInternal._component || newDom,
+				childInternal._component,
 				childInternal
 			);
 		}
@@ -209,7 +209,7 @@ export function diffChildren(
 				parentInternal._flags & TYPE_COMPONENT &&
 				startDom != null &&
 				((oldChildren[i]._flags & TYPE_DOM &&
-					oldChildren[i]._dom == startDom) ||
+					oldChildren[i]._component == startDom) ||
 					getChildDom(oldChildren[i]) == startDom)
 			) {
 				// If the startDom points to a dom node that is about to be unmounted,
@@ -252,13 +252,13 @@ export function reorderChildren(internal, startDom, parentDom) {
 
 			if (childInternal._flags & TYPE_COMPONENT) {
 				startDom = reorderChildren(childInternal, startDom, parentDom);
-			} else if (childInternal._dom == startDom) {
+			} else if (childInternal._component == startDom) {
 				startDom = startDom.nextSibling;
 			} else {
 				startDom = placeChild(
 					parentDom,
 					internal._children.length,
-					childInternal._dom,
+					childInternal._component,
 					startDom
 				);
 			}

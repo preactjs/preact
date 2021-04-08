@@ -1,4 +1,11 @@
-import { MODE_UNMOUNTING, TYPE_DOM, TYPE_ROOT } from '../constants';
+import {
+	MODE_HYDRATE,
+	MODE_SUSPENDED,
+	MODE_SUSPENDED_HYDRATION,
+	MODE_UNMOUNTING,
+	TYPE_DOM,
+	TYPE_ROOT
+} from '../constants';
 import options from '../options';
 import { removeNode } from '../util';
 import { applyRef } from './refs';
@@ -17,18 +24,22 @@ export function unmount(internal, parentInternal, skipRemove) {
 	internal._flags |= MODE_UNMOUNTING;
 
 	if ((r = internal.ref)) {
-		if (!r.current || r.current === internal._dom)
+		// TODO: Why check for current == _dom
+		if (!r.current || r.current === internal._component)
 			applyRef(r, null, parentInternal);
 	}
 
 	let dom;
 	if (!skipRemove && internal._flags & TYPE_DOM) {
-		skipRemove = (dom = internal._dom) != null;
+		skipRemove = (dom = internal._component) != null;
+	} else if (
+		!skipRemove &&
+		(internal._flags & MODE_SUSPENDED_HYDRATION) === MODE_SUSPENDED_HYDRATION
+	) {
+		skipRemove = (dom = internal._parkedDom) != null;
 	} else if (internal._flags & TYPE_ROOT) {
 		skipRemove = false;
 	}
-
-	internal._dom = null;
 
 	if ((r = internal._component) != null) {
 		if (r.componentWillUnmount) {
@@ -39,6 +50,8 @@ export function unmount(internal, parentInternal, skipRemove) {
 			}
 		}
 	}
+
+	internal._component = null;
 
 	if ((r = internal._children)) {
 		for (let i = 0; i < r.length; i++) {

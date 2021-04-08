@@ -85,10 +85,12 @@ export function createInternal(vnode, parentInternal) {
 		_children: null,
 		_parent: parentInternal,
 		_vnodeId: vnodeId,
-		_dom: null,
 		_component: null,
 		_flags: flags,
-		_depth: parentInternal ? parentInternal._depth + 1 : 0
+		_depth: parentInternal ? parentInternal._depth + 1 : 0,
+
+		// For suspended hydration
+		_parkedDom: null
 	};
 
 	if (options._internal) options._internal(internal, vnode);
@@ -145,7 +147,7 @@ export function getChildDom(internal, i) {
 		let child = internal._children[i];
 		if (child != null) {
 			if (child._flags & TYPE_DOM) {
-				return child._dom;
+				return child._component;
 			}
 
 			if (shouldSearchComponent(child)) {
@@ -173,7 +175,7 @@ export function getParentDom(internal) {
 		if (parent._flags & TYPE_ROOT) {
 			parentDom = parent.props._parentDom;
 		} else if (parent._flags & TYPE_ELEMENT) {
-			parentDom = parent._dom;
+			parentDom = parent._component;
 		}
 
 		parent = parent._parent;
