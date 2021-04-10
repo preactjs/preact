@@ -2,7 +2,6 @@ import { Fragment, Component, options } from '../index';
 import { assign } from '../util';
 
 // TODO: Investigate moving usage of these internals outside of this function
-import { FORCE_UPDATE } from '../constants';
 import { addCommitCallback } from './commit';
 
 /**
@@ -91,7 +90,7 @@ export function renderReactComponent(newVNode, internal, rendererState) {
 		}
 
 		if (
-			!(internal._flags & FORCE_UPDATE) &&
+			!rendererState.force &&
 			c.shouldComponentUpdate != null &&
 			c.shouldComponentUpdate(newProps, c._nextState, componentContext) ===
 				false

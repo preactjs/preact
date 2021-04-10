@@ -16,7 +16,8 @@ import { renderReactComponent } from './reactComponents';
 /** @type {import('../internal').RendererState} */
 export const rendererState = {
 	context: {},
-	skip: false
+	skip: false,
+	force: false
 };
 
 /**
@@ -46,6 +47,7 @@ export function renderComponent(
 
 	let prevContext = rendererState.context;
 	rendererState.skip = false;
+	rendererState.force = (internal._flags & FORCE_UPDATE) == FORCE_UPDATE;
 
 	const renderResult = renderReactComponent(newVNode, internal, rendererState);
 

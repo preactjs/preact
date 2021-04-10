@@ -52,6 +52,7 @@ export interface RendererState {
 	/** The current shared global context for this sub tree */
 	context: Record<string, any>;
 	skip: boolean;
+	force: boolean;
 }
 
 // Redefine ComponentFactory using our new internal FunctionalComponent interface above
