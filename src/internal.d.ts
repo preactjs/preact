@@ -51,8 +51,13 @@ export type CommitQueue = Internal[];
 export interface RendererState {
 	/** The current shared global context for this sub tree */
 	context: Record<string, any>;
+	/** Set to true when this component's children do not need to be diffed */
 	skip: boolean;
+	/** Indicates that this component must rerender and skip anything like memo or sCU */
 	force: boolean;
+	/** Indicates this component should be added to the commit queue and should
+	 * have the commit option invoked on it */
+	commit: boolean;
 }
 
 // Redefine ComponentFactory using our new internal FunctionalComponent interface above
@@ -149,8 +154,6 @@ export interface Internal<P = {}> {
 	_flags: number;
 	/** This Internal's distance from the tree root */
 	_depth: number | null;
-	/** Callbacks to invoke when this internal commits */
-	_commitCallbacks: Array<() => void>;
 	_context: any;
 }
 
@@ -163,6 +166,8 @@ export interface Component<P = {}, S = {}> extends preact.Component<P, S> {
 	_nextState?: S | null; // Only class components
 	/** Only used in the devtools to later dirty check if state has changed */
 	_prevState?: S | null;
+	/** Callbacks to invoke when this internal commits */
+	_commitCallbacks: Array<() => void>;
 }
 
 export interface PreactContext extends preact.Context<any> {

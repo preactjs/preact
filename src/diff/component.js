@@ -12,7 +12,8 @@ import { renderReactComponent } from './reactComponents';
 export const rendererState = {
 	context: {},
 	skip: false,
-	force: false
+	force: false,
+	commit: false
 };
 
 /**
@@ -42,11 +43,13 @@ export function renderComponent(
 
 	let prevContext = rendererState.context;
 	rendererState.skip = false;
+	rendererState.commit = false;
 	rendererState.force = (internal._flags & FORCE_UPDATE) == FORCE_UPDATE;
 
 	const renderResult = renderReactComponent(newVNode, internal, rendererState);
 
 	internal.props = newVNode.props;
+	let committed = rendererState.commit;
 	if (prevContext != rendererState.context) {
 		internal._context = rendererState.context;
 	}
@@ -75,7 +78,7 @@ export function renderComponent(
 		);
 	}
 
-	if (internal._commitCallbacks != null && internal._commitCallbacks.length) {
+	if (committed) {
 		commitQueue.push(internal);
 	}
 

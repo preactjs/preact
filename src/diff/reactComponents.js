@@ -1,9 +1,6 @@
 import { Fragment, Component, options } from '../index';
 import { assign } from '../util';
 
-// TODO: Investigate moving usage of these internals outside of this function
-import { addCommitCallback } from './commit';
-
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
  * @param {import('../internal').VNode} newVNode The new virtual node
@@ -78,7 +75,7 @@ export function renderReactComponent(newVNode, internal, rendererState) {
 			// If the component was constructed, queue up componentDidMount so the
 			// first time this internal commits (regardless of suspense or not) it
 			// will be called
-			addCommitCallback(internal, c.componentDidMount);
+			addCommitCallback(c, c.componentDidMount);
 		}
 	} else {
 		if (
@@ -97,6 +94,13 @@ export function renderReactComponent(newVNode, internal, rendererState) {
 		) {
 			c.props = newProps;
 			c.state = c._nextState;
+			if (c._commitCallbacks != null && c._commitCallbacks.length) {
+				// TODO: We could avoid this check if setState could set a COMMIT flag
+				// on the internal whenever it is called with a callback. This check is
+				// to ensure the setState callback is invoked even when sCU blocks
+				// rerendering.
+				rendererState.commit = true;
+			}
 			rendererState.skip = true;
 			return;
 		}
@@ -138,15 +142,41 @@ export function renderReactComponent(newVNode, internal, rendererState) {
 
 		// Only schedule componentDidUpdate if the component successfully rendered
 		if (c.componentDidUpdate != null) {
-			addCommitCallback(internal, () => {
+			addCommitCallback(c, () => {
 				c.componentDidUpdate(oldProps, oldState, snapshot);
 			});
 		}
 	}
 
+	if (c._commitCallbacks != null && c._commitCallbacks.length) {
+		rendererState.commit = true;
+	}
+
 	let isTopLevelFragment =
 		tmp != null && tmp.type === Fragment && tmp.key == null;
 	return isTopLevelFragment ? tmp.props.children : tmp;
+}
+
+/**
+ * @param {import('../internal').Component} component
+ * @param {() => void} callback
+ */
+export function addCommitCallback(component, callback) {
+	if (component._commitCallbacks == null) {
+		component._commitCallbacks = [];
+	}
+
+	component._commitCallbacks.push(callback);
+}
+
+/** @param {import('../internal').Internal} internal */
+export function commitReactComponent(internal) {
+	// @ts-ignore Reuse the commitQueue variable here so the type changes
+	let callbacks = internal._component._commitCallbacks;
+	internal._component._commitCallbacks = [];
+	callbacks.some(cb => {
+		cb.call(internal._component);
+	});
 }
 
 /** The `.render()` method for a PFC backing instance. */
