@@ -13,11 +13,10 @@ import {
 import { addCommitCallback } from './commit';
 import { renderReactComponent } from './reactComponents';
 
-export const SKIP = {};
-
 /** @type {import('../internal').RendererState} */
 export const rendererState = {
-	context: {}
+	context: {},
+	skip: false
 };
 
 /**
@@ -46,6 +45,7 @@ export function renderComponent(
 	}
 
 	let prevContext = rendererState.context;
+	rendererState.skip = false;
 
 	const renderResult = renderReactComponent(newVNode, internal, rendererState);
 
@@ -55,7 +55,7 @@ export function renderComponent(
 	}
 
 	let nextDomSibling;
-	if (renderResult == SKIP) {
+	if (rendererState.skip) {
 		// TODO: Returning undefined here (i.e. return;) passes all tests. That seems
 		// like a bug. Should validate that we have test coverage for sCU that
 		// returns Fragments with multiple DOM children

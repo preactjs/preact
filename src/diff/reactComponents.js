@@ -4,7 +4,6 @@ import { assign } from '../util';
 // TODO: Investigate moving usage of these internals outside of this function
 import { FORCE_UPDATE } from '../constants';
 import { addCommitCallback } from './commit';
-import { SKIP } from './component';
 
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
@@ -99,7 +98,8 @@ export function renderReactComponent(newVNode, internal, rendererState) {
 		) {
 			c.props = newProps;
 			c.state = c._nextState;
-			return SKIP;
+			rendererState.skip = true;
+			return;
 		}
 
 		if (c.componentWillUpdate != null) {
@@ -123,6 +123,9 @@ export function renderReactComponent(newVNode, internal, rendererState) {
 	if (c.getChildContext != null) {
 		// TODO: is this right?? Or should this component have its own property off
 		// of rendererState.context?
+
+		// The code below is a condensed form of:
+		// rendererState.context = { ...rendererState.context, ...c.getChildContext() };
 		rendererState.context = assign(
 			assign({}, rendererState.context),
 			c.getChildContext()
