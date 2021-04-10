@@ -48,6 +48,11 @@ export interface Options extends preact.Options {
 
 export type CommitQueue = Internal[];
 
+export interface RendererState {
+	/** The current shared global context for this sub tree */
+	context: Record<string, any>;
+}
+
 // Redefine ComponentFactory using our new internal FunctionalComponent interface above
 export type ComponentFactory<P> =
 	| preact.ComponentClass<P>
@@ -144,6 +149,7 @@ export interface Internal<P = {}> {
 	_depth: number | null;
 	/** Callbacks to invoke when this internal commits */
 	_commitCallbacks: Array<() => void>;
+	_context: any;
 }
 
 export interface Component<P = {}, S = {}> extends preact.Component<P, S> {
@@ -151,7 +157,6 @@ export interface Component<P = {}, S = {}> extends preact.Component<P, S> {
 	constructor: ComponentType<P>;
 	state: S; // Override Component["state"] to not be readonly for internal use, specifically Hooks
 	/** @TODO this should be moved to internal.data */
-	_globalContext?: any;
 	_internal?: Internal<P> | null;
 	_nextState?: S | null; // Only class components
 	/** Only used in the devtools to later dirty check if state has changed */

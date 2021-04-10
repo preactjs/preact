@@ -4,16 +4,18 @@ import { assign } from '../util';
 // TODO: Investigate moving usage of these internals outside of this function
 import { FORCE_UPDATE } from '../constants';
 import { addCommitCallback } from './commit';
-import { SKIP, setCurrentGlobalContext } from './component';
+import { SKIP } from './component';
 
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
  * @param {import('../internal').VNode} newVNode The new virtual node
  * @param {import('../internal').Internal} internal The component's backing Internal node
- * @param {object} globalContext The current context object. Modified by getChildContext
+ * @param {import('../internal').RendererState} rendererState An object
+ * containing the current state of the renderer. See comments in the
+ * RendererState interface.
  * @returns {import('../internal').PreactNode} pointer to the next DOM node (in order) to be rendered (or null)
  */
-export function renderReactComponent(newVNode, internal, globalContext) {
+export function renderReactComponent(newVNode, internal, rendererState) {
 	/** @type {import('../internal').Component} */
 	let c;
 	let isNew, oldProps, oldState, snapshot, tmp;
@@ -27,12 +29,12 @@ export function renderReactComponent(newVNode, internal, globalContext) {
 	// Necessary for createContext api. Setting this property will pass
 	// the context value as `this.context` just for this component.
 	tmp = type.contextType;
-	let provider = tmp && globalContext[tmp._id];
+	let provider = tmp && rendererState.context[tmp._id];
 	let componentContext = tmp
 		? provider
 			? provider.props.value
 			: tmp._defaultValue
-		: globalContext;
+		: rendererState.context;
 
 	if (internal && internal._component) {
 		c = internal._component;
@@ -52,7 +54,6 @@ export function renderReactComponent(newVNode, internal, globalContext) {
 		c.props = newProps;
 		if (!c.state) c.state = {};
 		c.context = componentContext;
-		c._globalContext = globalContext;
 		isNew = true;
 	}
 
@@ -120,8 +121,11 @@ export function renderReactComponent(newVNode, internal, globalContext) {
 	c.state = c._nextState;
 
 	if (c.getChildContext != null) {
-		setCurrentGlobalContext(
-			assign(assign({}, globalContext), c.getChildContext())
+		// TODO: is this right?? Or should this component have its own property off
+		// of rendererState.context?
+		rendererState.context = assign(
+			assign({}, rendererState.context),
+			c.getChildContext()
 		);
 	}
 

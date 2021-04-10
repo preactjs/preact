@@ -10,7 +10,8 @@ import {
 	MODE_SUSPENDED,
 	MODE_UNMOUNTING
 } from './constants';
-import { getDomSibling, getParentDom } from './tree';
+import { getDomSibling, getParentContext, getParentDom } from './tree';
+import { rendererState } from './diff/component';
 
 /**
  * Base Component class. Provides `setState()` and `forceUpdate()`, which
@@ -114,14 +115,8 @@ function rerenderComponent(component) {
 		);
 
 		const commitQueue = [];
-		patch(
-			parentDom,
-			vnode,
-			internal,
-			component._globalContext,
-			commitQueue,
-			startDom
-		);
+		rendererState.context = getParentContext(internal);
+		patch(parentDom, vnode, internal, commitQueue, startDom);
 		commitRoot(commitQueue, internal);
 	}
 }

@@ -15,16 +15,16 @@ import { renderReactComponent } from './reactComponents';
 
 export const SKIP = {};
 
-let currentGlobalContext;
-export const setCurrentGlobalContext = newGlobalContext =>
-	(currentGlobalContext = newGlobalContext);
+/** @type {import('../internal').RendererState} */
+export const rendererState = {
+	context: {}
+};
 
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
  * @param {import('../internal').PreactElement} parentDom The parent of the DOM element
  * @param {import('../internal').VNode} newVNode The new virtual node
  * @param {import('../internal').Internal} internal The component's backing Internal node
- * @param {object} globalContext The current context object. Modified by getChildContext
  * @param {import('../internal').CommitQueue} commitQueue List of components
  * which have callbacks to invoke in commitRoot
  * @param {import('../internal').PreactNode} startDom
@@ -34,7 +34,6 @@ export function renderComponent(
 	parentDom,
 	newVNode,
 	internal,
-	globalContext,
 	commitQueue,
 	startDom
 ) {
@@ -46,12 +45,14 @@ export function renderComponent(
 		internal._flags ^= MODE_PENDING_ERROR | MODE_RERENDERING_ERROR;
 	}
 
-	currentGlobalContext = globalContext;
+	let prevContext = rendererState.context;
 
-	const renderResult = renderReactComponent(newVNode, internal, globalContext);
+	const renderResult = renderReactComponent(newVNode, internal, rendererState);
+
 	internal.props = newVNode.props;
-
-	globalContext = currentGlobalContext;
+	if (prevContext != rendererState.context) {
+		internal._context = rendererState.context;
+	}
 
 	let nextDomSibling;
 	if (renderResult == SKIP) {
@@ -64,7 +65,6 @@ export function renderComponent(
 			parentDom,
 			Array.isArray(renderResult) ? renderResult : [renderResult],
 			internal,
-			globalContext,
 			commitQueue,
 			startDom
 		);
@@ -73,7 +73,6 @@ export function renderComponent(
 			parentDom,
 			Array.isArray(renderResult) ? renderResult : [renderResult],
 			internal,
-			globalContext,
 			commitQueue,
 			startDom
 		);
@@ -82,6 +81,10 @@ export function renderComponent(
 	if (internal._commitCallbacks != null && internal._commitCallbacks.length) {
 		commitQueue.push(internal);
 	}
+
+	// In the event this subtree creates a new context for its children, restore
+	// the previous context for its siblings
+	rendererState.context = prevContext;
 
 	return nextDomSibling;
 }

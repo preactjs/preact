@@ -27,20 +27,11 @@ export function render(vnode, parentDom) {
 	vnode = createElement(Fragment, { _parentDom: parentDom }, [vnode]);
 
 	if (rootInternal) {
-		patch(
-			parentDom,
-			vnode,
-			rootInternal,
-			{},
-			commitQueue,
-			parentDom.firstChild
-		);
+		patch(parentDom, vnode, rootInternal, commitQueue, parentDom.firstChild);
 	} else {
 		// Store the VDOM tree root on the DOM element in a (minified) property:
-		rootInternal = parentDom._children = createInternal(
-			vnode,
-			null
-		);
+		rootInternal = parentDom._children = createInternal(vnode, null);
+		rootInternal._context = {};
 
 		if (parentDom.ownerSVGElement !== undefined) {
 			rootInternal._flags |= MODE_SVG;
@@ -55,7 +46,6 @@ export function render(vnode, parentDom) {
 			parentDom,
 			vnode,
 			rootInternal,
-			{},
 			commitQueue,
 			// Start the diff at the replaceNode or the parentDOM.firstChild if any.
 			// Will be null if the parentDom is empty
@@ -78,6 +68,7 @@ export function hydrate(vnode, parentDom) {
 
 	vnode = createElement(Fragment, { _parentDom: parentDom }, [vnode]);
 	const rootInternal = createInternal(vnode);
+	rootInternal._context = {};
 	rootInternal._flags |= MODE_HYDRATE;
 	parentDom._children = rootInternal;
 
@@ -86,6 +77,6 @@ export function hydrate(vnode, parentDom) {
 	}
 
 	const commitQueue = [];
-	mount(parentDom, vnode, rootInternal, {}, commitQueue, parentDom.firstChild);
+	mount(parentDom, vnode, rootInternal, commitQueue, parentDom.firstChild);
 	commitRoot(commitQueue, rootInternal);
 }

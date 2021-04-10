@@ -18,19 +18,11 @@ import { getChildDom, getDomSibling } from '../tree';
  * @param {import('../internal').PreactElement} parentDom The parent of the DOM element
  * @param {import('../internal').VNode | string} newVNode The new virtual node
  * @param {import('../internal').Internal} internal The Internal node to patch
- * @param {object} globalContext The current context object. Modified by getChildContext
  * @param {import('../internal').CommitQueue} commitQueue List of components
  * which have callbacks to invoke in commitRoot
  * @param {import('../internal').PreactNode} startDom
  */
-export function patch(
-	parentDom,
-	newVNode,
-	internal,
-	globalContext,
-	commitQueue,
-	startDom
-) {
+export function patch(parentDom, newVNode, internal, commitQueue, startDom) {
 	if (internal._flags & TYPE_TEXT) {
 		if (newVNode !== internal.props) {
 			internal._dom.data = newVNode;
@@ -86,7 +78,6 @@ export function patch(
 				/** @type {import('../internal').VNode} */
 				(newVNode),
 				internal,
-				globalContext,
 				commitQueue,
 				startDom
 			);
@@ -95,7 +86,6 @@ export function patch(
 				internal._dom,
 				newVNode,
 				internal,
-				globalContext,
 				commitQueue
 			);
 		}
@@ -149,12 +139,11 @@ export function patch(
  * the virtual nodes being diffed
  * @param {import('../internal').VNode} newVNode The new virtual node
  * @param {import('../internal').Internal} internal The Internal node to patch
- * @param {object} globalContext The current context object
  * @param {import('../internal').CommitQueue} commitQueue List of components
  * which have callbacks to invoke in commitRoot
  * @returns {import('../internal').PreactElement}
  */
-function patchDOMElement(dom, newVNode, internal, globalContext, commitQueue) {
+function patchDOMElement(dom, newVNode, internal, commitQueue) {
 	let oldProps = internal.props;
 	let newProps = newVNode.props;
 	let newType = newVNode.type;
@@ -189,7 +178,6 @@ function patchDOMElement(dom, newVNode, internal, globalContext, commitQueue) {
 			dom,
 			Array.isArray(tmp) ? tmp : [tmp],
 			internal,
-			globalContext,
 			commitQueue,
 			dom.firstChild
 		);

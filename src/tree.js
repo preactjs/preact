@@ -88,7 +88,8 @@ export function createInternal(vnode, parentInternal) {
 		_dom: null,
 		_component: null,
 		_flags: flags,
-		_depth: parentInternal ? parentInternal._depth + 1 : 0
+		_depth: parentInternal ? parentInternal._depth + 1 : 0,
+		_context: null
 	};
 
 	if (options._internal) options._internal(internal, vnode);
@@ -180,4 +181,19 @@ export function getParentDom(internal) {
 	}
 
 	return parentDom;
+}
+
+/**
+ * @param {import('./internal').Internal} internal
+ * @returns {any}
+ */
+export function getParentContext(internal) {
+	let context = internal._context;
+	let parent = internal._parent;
+	while (context == null && parent) {
+		context = parent._context;
+		parent = parent._parent;
+	}
+
+	return context;
 }
