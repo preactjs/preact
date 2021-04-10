@@ -78,7 +78,8 @@ export function createVNode(type, props, key, ref, original) {
 		_original: original == null ? ++options._vnodeId : original
 	};
 
-	if (options.vnode != null) options.vnode(vnode);
+	// Only invoke the vnode hook if this was *not* a direct copy:
+	if (original == null && options.vnode != null) options.vnode(vnode);
 
 	return vnode;
 }
