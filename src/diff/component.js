@@ -1,7 +1,3 @@
-import { Fragment } from '../create-element';
-import options from '../options';
-import { assign } from '../util';
-import { Component } from '../component';
 import { mountChildren } from './mount';
 import { diffChildren, reorderChildren } from './children';
 import {
@@ -10,7 +6,6 @@ import {
 	MODE_PENDING_ERROR,
 	MODE_RERENDERING_ERROR
 } from '../constants';
-import { addCommitCallback } from './commit';
 import { renderReactComponent } from './reactComponents';
 
 /** @type {import('../internal').RendererState} */
