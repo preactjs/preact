@@ -4,15 +4,13 @@ import {
 	COMMIT_COMPONENT,
 	DIRTY_BIT,
 	MODE_PENDING_ERROR,
-	MODE_RERENDERING_ERROR
+	MODE_RERENDERING_ERROR,
+	SKIP_CHILDREN
 } from '../constants';
 import { renderReactComponent } from './reactComponents';
 
 /** @type {import('../internal').RendererState} */
-export const rendererState = {
-	context: {},
-	skip: false
-};
+export const rendererState = { context: {} };
 
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
@@ -40,7 +38,6 @@ export function renderComponent(
 	}
 
 	let prevContext = rendererState.context;
-	rendererState.skip = false;
 
 	const renderResult = renderReactComponent(newVNode, internal, rendererState);
 
@@ -50,7 +47,7 @@ export function renderComponent(
 	}
 
 	let nextDomSibling;
-	if (rendererState.skip) {
+	if (internal.flags & SKIP_CHILDREN) {
 		// TODO: Returning undefined here (i.e. return;) passes all tests. That seems
 		// like a bug. Should validate that we have test coverage for sCU that
 		// returns Fragments with multiple DOM children

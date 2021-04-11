@@ -51,8 +51,6 @@ export type CommitQueue = Internal[];
 export interface RendererState {
 	/** The current shared global context for this sub tree */
 	context: Record<string, any>;
-	/** Set to true when this component's children do not need to be diffed */
-	skip: boolean;
 }
 
 // Redefine ComponentFactory using our new internal FunctionalComponent interface above

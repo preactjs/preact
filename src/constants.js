@@ -44,9 +44,10 @@ export const MODE_SVG = 1 << 12;
 export const FORCE_UPDATE = 1 << 13;
 /** Signifies that a node needs to be updated */
 export const DIRTY_BIT = 1 << 14;
+export const SKIP_CHILDREN = 1 << 15;
 
 /** Signifies a component has lifecycles to commit */
-export const COMMIT_COMPONENT = 1 << 15;
+export const COMMIT_COMPONENT = 1 << 16;
 
 /** Reset all mode flags */
 export const RESET_MODE = ~(
@@ -55,7 +56,8 @@ export const RESET_MODE = ~(
 	MODE_SUSPENDED |
 	MODE_ERRORED |
 	MODE_RERENDERING_ERROR |
-	FORCE_UPDATE
+	FORCE_UPDATE |
+	SKIP_CHILDREN
 );
 
 /** Modes a child internal inherits from their parent */

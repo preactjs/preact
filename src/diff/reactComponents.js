@@ -1,6 +1,6 @@
 import { Fragment, Component, options } from '../index';
 import { assign } from '../util';
-import { COMMIT_COMPONENT, FORCE_UPDATE } from '../constants';
+import { COMMIT_COMPONENT, FORCE_UPDATE, SKIP_CHILDREN } from '../constants';
 
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
@@ -95,7 +95,12 @@ export function renderReactComponent(newVNode, internal, rendererState) {
 		) {
 			c.props = newProps;
 			c.state = c._nextState;
-			rendererState.skip = true;
+
+			// TODO: Evaluate if using the SKIP_CHILDREN flag is the API we want.
+			// Consider if there is a way we could reuse the VNodeID/VNode equality
+			// logic here. Or return something like `internal._children` to signal
+			// that these children should be skipped.
+			internal.flags |= SKIP_CHILDREN;
 			return;
 		}
 
