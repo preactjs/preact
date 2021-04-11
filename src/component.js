@@ -4,6 +4,7 @@ import options from './options';
 import { createVNode, Fragment } from './create-element';
 import { patch } from './diff/patch';
 import {
+	COMMIT_COMPONENT,
 	DIRTY_BIT,
 	FORCE_UPDATE,
 	MODE_HYDRATE,
@@ -58,7 +59,10 @@ Component.prototype.setState = function(update, callback) {
 	if (update == null) return;
 
 	if (this._internal) {
-		if (callback) addCommitCallback(this, callback);
+		if (callback) {
+			this._internal.flags |= COMMIT_COMPONENT;
+			addCommitCallback(this, callback);
+		}
 		enqueueRender(this);
 	}
 };
@@ -75,7 +79,10 @@ Component.prototype.forceUpdate = function(callback) {
 		// is coming from. We need this because forceUpdate should never call
 		// shouldComponentUpdate
 		this._internal.flags |= FORCE_UPDATE;
-		if (callback) addCommitCallback(this, callback);
+		if (callback) {
+			this._internal.flags |= COMMIT_COMPONENT;
+			addCommitCallback(this, callback);
+		}
 		enqueueRender(this);
 	}
 };

@@ -1,6 +1,6 @@
 import { Fragment, Component, options } from '../index';
 import { assign } from '../util';
-import { FORCE_UPDATE } from '../constants';
+import { COMMIT_COMPONENT, FORCE_UPDATE } from '../constants';
 
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
@@ -95,13 +95,6 @@ export function renderReactComponent(newVNode, internal, rendererState) {
 		) {
 			c.props = newProps;
 			c.state = c._nextState;
-			if (c._commitCallbacks != null && c._commitCallbacks.length) {
-				// TODO: We could avoid this check if setState could set a COMMIT flag
-				// on the internal whenever it is called with a callback. This check is
-				// to ensure the setState callback is invoked even when sCU blocks
-				// rerendering.
-				rendererState.commit = true;
-			}
 			rendererState.skip = true;
 			return;
 		}
@@ -150,7 +143,7 @@ export function renderReactComponent(newVNode, internal, rendererState) {
 	}
 
 	if (c._commitCallbacks != null && c._commitCallbacks.length) {
-		rendererState.commit = true;
+		internal.flags |= COMMIT_COMPONENT;
 	}
 
 	let isTopLevelFragment =

@@ -45,6 +45,9 @@ export const FORCE_UPDATE = 1 << 13;
 /** Signifies that a node needs to be updated */
 export const DIRTY_BIT = 1 << 14;
 
+/** Signifies a component has lifecycles to commit */
+export const COMMIT_COMPONENT = 1 << 15;
+
 /** Reset all mode flags */
 export const RESET_MODE = ~(
 	MODE_HYDRATE |

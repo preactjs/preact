@@ -1,6 +1,7 @@
 import { mountChildren } from './mount';
 import { diffChildren, reorderChildren } from './children';
 import {
+	COMMIT_COMPONENT,
 	DIRTY_BIT,
 	MODE_PENDING_ERROR,
 	MODE_RERENDERING_ERROR
@@ -10,8 +11,7 @@ import { renderReactComponent } from './reactComponents';
 /** @type {import('../internal').RendererState} */
 export const rendererState = {
 	context: {},
-	skip: false,
-	commit: false
+	skip: false
 };
 
 /**
@@ -41,12 +41,10 @@ export function renderComponent(
 
 	let prevContext = rendererState.context;
 	rendererState.skip = false;
-	rendererState.commit = false;
 
 	const renderResult = renderReactComponent(newVNode, internal, rendererState);
 
 	internal.props = newVNode.props;
-	let committed = rendererState.commit;
 	if (prevContext != rendererState.context) {
 		internal._context = rendererState.context;
 	}
@@ -75,7 +73,7 @@ export function renderComponent(
 		);
 	}
 
-	if (committed) {
+	if (internal.flags & COMMIT_COMPONENT) {
 		commitQueue.push(internal);
 	}
 
