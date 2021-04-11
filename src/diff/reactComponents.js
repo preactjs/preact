@@ -1,5 +1,6 @@
 import { Fragment, Component, options } from '../index';
 import { assign } from '../util';
+import { FORCE_UPDATE } from '../constants';
 
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
@@ -87,7 +88,7 @@ export function renderReactComponent(newVNode, internal, rendererState) {
 		}
 
 		if (
-			!rendererState.force &&
+			~internal.flags & FORCE_UPDATE &&
 			c.shouldComponentUpdate != null &&
 			c.shouldComponentUpdate(newProps, c._nextState, componentContext) ===
 				false

@@ -2,7 +2,6 @@ import { mountChildren } from './mount';
 import { diffChildren, reorderChildren } from './children';
 import {
 	DIRTY_BIT,
-	FORCE_UPDATE,
 	MODE_PENDING_ERROR,
 	MODE_RERENDERING_ERROR
 } from '../constants';
@@ -12,7 +11,6 @@ import { renderReactComponent } from './reactComponents';
 export const rendererState = {
 	context: {},
 	skip: false,
-	force: false,
 	commit: false
 };
 
@@ -44,7 +42,6 @@ export function renderComponent(
 	let prevContext = rendererState.context;
 	rendererState.skip = false;
 	rendererState.commit = false;
-	rendererState.force = (internal.flags & FORCE_UPDATE) == FORCE_UPDATE;
 
 	const renderResult = renderReactComponent(newVNode, internal, rendererState);
 

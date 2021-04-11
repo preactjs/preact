@@ -53,8 +53,6 @@ export interface RendererState {
 	context: Record<string, any>;
 	/** Set to true when this component's children do not need to be diffed */
 	skip: boolean;
-	/** Indicates that this component must rerender and skip anything like memo or sCU */
-	force: boolean;
 	/** Indicates this component should be added to the commit queue and should
 	 * have the commit option invoked on it */
 	commit: boolean;
