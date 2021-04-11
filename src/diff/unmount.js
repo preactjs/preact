@@ -1,6 +1,12 @@
-import { MODE_UNMOUNTING, TYPE_DOM, TYPE_ROOT } from '../constants';
+import {
+	MODE_UNMOUNTING,
+	TYPE_COMPONENT,
+	TYPE_DOM,
+	TYPE_ROOT
+} from '../constants';
 import options from '../options';
 import { removeNode } from '../util';
+import { unmountReactComponent } from './reactComponents';
 import { applyRef } from './refs';
 
 /**
@@ -30,13 +36,15 @@ export function unmount(internal, parentInternal, skipRemove) {
 
 	internal._dom = null;
 
-	if ((r = internal._component) != null) {
-		if (r.componentWillUnmount) {
-			try {
-				r.componentWillUnmount();
-			} catch (e) {
-				options._catchError(e, parentInternal);
-			}
+	// TODO: May need to consider a way to check that this component has
+	// successfully mounted as well (e.g. if it threw while mounting and a parent
+	// error boundary is rendering error UI and so is attempting to unmount this
+	// component)
+	if (internal._flags & TYPE_COMPONENT) {
+		try {
+			unmountReactComponent(internal);
+		} catch (e) {
+			options._catchError(e, parentInternal);
 		}
 	}
 
