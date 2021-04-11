@@ -97,6 +97,7 @@ export function createInternal(vnode, parentInternal) {
 	return internal;
 }
 
+/** @type {(internal: import('./internal').Internal) => boolean} */
 const shouldSearchComponent = internal =>
 	internal._flags & TYPE_COMPONENT &&
 	(!(internal._flags & TYPE_ROOT) ||

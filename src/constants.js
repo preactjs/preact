@@ -26,8 +26,7 @@ export const MODE_ERRORED = 1 << 8;
  * render of this component, unset this mode and set the MODE_RERENDERING_ERROR.
  * This flag is distinct from MODE_RERENDERING_ERROR so that a component can
  * catch multiple errors thrown by its children in one render pass (see test
- * "should handle double child throws").
- */
+ * "should handle double child throws"). */
 export const MODE_PENDING_ERROR = 1 << 9;
 /** Signifies this Internal is attempting to "handle" an error and is
  * rerendering. This mode tracks that a component's last rerender was trying to

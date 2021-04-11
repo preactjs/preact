@@ -40,6 +40,7 @@ export function diffChildren(
 	/** @type {import('../internal').VNode | string} */
 	let childVNode;
 
+	/** @type {import('../internal').Internal[]} */
 	let oldChildren =
 		(parentInternal._children && parentInternal._children.slice()) || EMPTY_ARR;
 	let oldChildrenLength = oldChildren.length;
