@@ -1,6 +1,6 @@
 import { enqueueRender } from './component';
 
-export let i = 0;
+let i = 0;
 
 export function createContext(defaultValue, contextId) {
 	contextId = '__cC' + i++;
