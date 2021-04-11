@@ -10,6 +10,7 @@ import {
 import { renderReactComponent } from './reactComponents';
 
 /** @type {import('../internal').RendererState} */
+// TODO: Now that context is the only thing in rendererState, do we really need it?
 export const rendererState = { context: {} };
 
 /**
