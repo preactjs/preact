@@ -7,6 +7,13 @@ import {
 	TYPE_ERROR_BOUNDARY
 } from '../constants';
 
+/*
+What about:
+- Hooking into devtools (e.g. _hook, useDebugValue)?
+- SSR (e.g. skipEffects)?
+- HMR (e.g. Prefresh)
+*/
+
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
  * @param {import('../internal').VNode} newVNode The new virtual node
