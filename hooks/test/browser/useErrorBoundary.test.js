@@ -5,7 +5,7 @@ import { setupRerender } from 'preact/test-utils';
 
 /** @jsx createElement */
 
-describe('errorBoundary', () => {
+describe('useErrorBoundary', () => {
 	/** @type {HTMLDivElement} */
 	let scratch, rerender;
 

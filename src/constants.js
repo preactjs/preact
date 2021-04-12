@@ -1,8 +1,8 @@
 // Internal.flags bitfield constants
 export const TYPE_TEXT = 1 << 0;
 export const TYPE_ELEMENT = 1 << 1;
-export const TYPE_CLASS = 1 << 2;
-export const TYPE_FUNCTION = 1 << 3;
+export const TYPE_FUNCTION = 1 << 2;
+export const TYPE_ERROR_BOUNDARY = 1 << 3;
 /** Signals this internal has a _parentDom prop that should change the parent
  * DOM node of it's children */
 export const TYPE_ROOT = 1 << 4;
@@ -10,7 +10,7 @@ export const TYPE_ROOT = 1 << 4;
 /** Any type of internal representing DOM */
 export const TYPE_DOM = TYPE_TEXT | TYPE_ELEMENT;
 /** Any type of component */
-export const TYPE_COMPONENT = TYPE_CLASS | TYPE_FUNCTION | TYPE_ROOT;
+export const TYPE_COMPONENT = TYPE_FUNCTION | TYPE_ROOT | TYPE_ERROR_BOUNDARY;
 
 // Modes of rendering
 /** Normal hydration that attaches to a DOM tree but does not diff it. */

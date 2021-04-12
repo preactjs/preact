@@ -3,7 +3,6 @@ import {
 	TYPE_FUNCTION,
 	TYPE_ELEMENT,
 	TYPE_TEXT,
-	TYPE_CLASS,
 	TYPE_ROOT,
 	INHERITED_MODES,
 	TYPE_COMPONENT,
@@ -58,9 +57,7 @@ export function createInternal(vnode, parentInternal) {
 		// flags = typeof type === 'function' ? COMPONENT_NODE : ELEMENT_NODE;
 		flags |=
 			typeof type === 'function'
-				? type.prototype && 'render' in type.prototype
-					? TYPE_CLASS
-					: props._parentDom
+				? props._parentDom
 					? TYPE_ROOT
 					: TYPE_FUNCTION
 				: TYPE_ELEMENT;

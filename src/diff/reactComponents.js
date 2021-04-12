@@ -1,6 +1,11 @@
 import { Fragment, Component, options } from '../index';
 import { assign } from '../util';
-import { COMMIT_COMPONENT, FORCE_UPDATE, SKIP_CHILDREN } from '../constants';
+import {
+	COMMIT_COMPONENT,
+	FORCE_UPDATE,
+	SKIP_CHILDREN,
+	TYPE_ERROR_BOUNDARY
+} from '../constants';
 
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
@@ -46,6 +51,10 @@ export function renderReactComponent(newVNode, internal, rendererState) {
 			c.render = doRender;
 		}
 		if (provider) provider.sub(c);
+
+		if (c.componentDidCatch || type.getDerivedStateFromError) {
+			internal.flags |= TYPE_ERROR_BOUNDARY;
+		}
 
 		c.props = newProps;
 		if (!c.state) c.state = {};
@@ -185,6 +194,23 @@ export function unmountReactComponent(internal) {
 	// and so doesn't have an instance.
 	if (internal._component && internal._component.componentWillUnmount) {
 		internal._component.componentWillUnmount();
+	}
+}
+
+/**
+ * @param {import('../internal').Internal} internal The Error Boundary that is
+ * handling this error
+ * @param {Error} error The thrown error
+ * @param {import('../internal').Internal} throwingInternal The Internal that
+ * threw the error
+ */
+export function handleErrorReact(internal, error, throwingInternal) {
+	if (internal.type.getDerivedStateFromError != null) {
+		internal._component.setState(internal.type.getDerivedStateFromError(error));
+	}
+
+	if (internal._component.componentDidCatch != null) {
+		internal._component.componentDidCatch(error);
 	}
 }
 
