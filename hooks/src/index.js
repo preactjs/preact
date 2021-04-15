@@ -4,15 +4,15 @@ import { MODE_UNMOUNTING } from '../../src/constants';
 /** @type {number} */
 let currentIndex;
 
-/** @type {import('./internal').Component} */
-let currentComponent;
+/** @type {import('./internal').Internal} */
+let currentInternal;
 /**
  * Keep track of the previous component so that we can set
  * `currentComponent` to `null` and throw when a hook is invoked
  * outside of render
- * @type {import('./internal').Component}
+ * @type {import('./internal').Internal}
  */
-let previousComponent;
+let previousInternal;
 
 /** @type {number} */
 let currentHook = 0;
@@ -30,17 +30,17 @@ const RAF_TIMEOUT = 100;
 let prevRaf;
 
 options._diff = (internal, vnode) => {
-	currentComponent = null;
+	currentInternal = null;
 	if (oldBeforeDiff) oldBeforeDiff(internal, vnode);
 };
 
 options._render = internal => {
 	if (oldBeforeRender) oldBeforeRender(internal);
 
-	currentComponent = internal._component;
+	currentInternal = internal;
 	currentIndex = 0;
 
-	const hooks = currentComponent.__hooks;
+	const hooks = currentInternal._component.__hooks;
 	if (hooks) {
 		hooks._pendingEffects.forEach(invokeCleanup);
 		hooks._pendingEffects.forEach(invokeEffect);
@@ -55,7 +55,7 @@ options.diffed = internal => {
 	if (c && c.__hooks && c.__hooks._pendingEffects.length) {
 		afterPaint(afterPaintEffects.push(c));
 	}
-	currentComponent = previousComponent;
+	currentInternal = previousInternal;
 };
 
 options._commit = (internal, commitQueue) => {
@@ -98,7 +98,11 @@ options.unmount = internal => {
  */
 function getHookState(index, type) {
 	if (options._hook) {
-		options._hook(currentComponent, index, currentHook || type);
+		options._hook(
+			currentInternal && currentInternal._component,
+			index,
+			currentHook || type
+		);
 	}
 	currentHook = 0;
 
@@ -108,8 +112,8 @@ function getHookState(index, type) {
 	// Other implementations to look at:
 	// * https://codesandbox.io/s/mnox05qp8
 	const hooks =
-		currentComponent.__hooks ||
-		(currentComponent.__hooks = {
+		currentInternal._component.__hooks ||
+		(currentInternal._component.__hooks = {
 			_list: [],
 			_pendingEffects: []
 		});
@@ -138,7 +142,7 @@ export function useReducer(reducer, initialState, init) {
 	/** @type {import('./internal').ReducerHookState} */
 	const hookState = getHookState(currentIndex++, 2);
 	hookState._reducer = reducer;
-	if (!hookState._component) {
+	if (!hookState._internal) {
 		hookState._value = [
 			!init ? invokeOrReturn(undefined, initialState) : init(initialState),
 
@@ -146,12 +150,12 @@ export function useReducer(reducer, initialState, init) {
 				const nextValue = hookState._reducer(hookState._value[0], action);
 				if (hookState._value[0] !== nextValue) {
 					hookState._value = [nextValue, hookState._value[1]];
-					hookState._component.setState({});
+					hookState._internal._component.setState({});
 				}
 			}
 		];
 
-		hookState._component = currentComponent;
+		hookState._internal = currentInternal;
 	}
 
 	return hookState._value;
@@ -168,7 +172,7 @@ export function useEffect(callback, args) {
 		state._value = callback;
 		state._args = args;
 
-		currentComponent.__hooks._pendingEffects.push(state);
+		currentInternal._component.__hooks._pendingEffects.push(state);
 	}
 }
 
@@ -183,10 +187,10 @@ export function useLayoutEffect(callback, args) {
 		state._value = callback;
 		state._args = args;
 
-		if (currentComponent._internal._commitCallbacks == null) {
-			currentComponent._internal._commitCallbacks = [];
+		if (currentInternal._commitCallbacks == null) {
+			currentInternal._commitCallbacks = [];
 		}
-		currentComponent._internal._commitCallbacks.push(state);
+		currentInternal._commitCallbacks.push(state);
 	}
 }
 
@@ -240,7 +244,7 @@ export function useCallback(callback, args) {
  * @param {import('./internal').PreactContext} context
  */
 export function useContext(context) {
-	const provider = currentComponent.context[context._id];
+	const provider = currentInternal._component.context[context._id];
 	// We could skip this call here, but than we'd not call
 	// `options._hook`. We need to do that in order to make
 	// the devtools aware of this hook.
@@ -254,7 +258,7 @@ export function useContext(context) {
 	// This is probably not safe to convert to "!"
 	if (state._value == null) {
 		state._value = true;
-		provider.sub(currentComponent);
+		provider.sub(currentInternal._component);
 	}
 	return provider.props.value;
 }
@@ -277,8 +281,8 @@ export function useErrorBoundary(cb) {
 	const state = getHookState(currentIndex++, 10);
 	const errState = useState();
 	state._value = cb;
-	if (!currentComponent.componentDidCatch) {
-		currentComponent.componentDidCatch = err => {
+	if (!currentInternal._component.componentDidCatch) {
+		currentInternal._component.componentDidCatch = err => {
 			if (state._value) state._value(err);
 			errState[1](err);
 		};
@@ -355,10 +359,10 @@ function afterPaint(newQueueLength) {
  */
 function invokeCleanup(hook) {
 	// A hook cleanup can introduce a call to render which creates a new root, this will call options.vnode
-	// and move the currentComponent away.
-	const comp = currentComponent;
+	// and move the currentInternal away.
+	const internal = currentInternal;
 	if (typeof hook._cleanup == 'function') hook._cleanup();
-	currentComponent = comp;
+	currentInternal = internal;
 }
 
 /**
@@ -367,10 +371,10 @@ function invokeCleanup(hook) {
  */
 function invokeEffect(hook) {
 	// A hook call can introduce a call to render which creates a new root, this will call options.vnode
-	// and move the currentComponent away.
-	const comp = currentComponent;
+	// and move the currentInternal away.
+	const internal = currentInternal;
 	hook._cleanup = hook._value();
-	currentComponent = comp;
+	currentInternal = internal;
 }
 
 /**
