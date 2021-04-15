@@ -309,7 +309,7 @@ function placeChild(parentDom, oldChildrenLength, newDom, startDom) {
 	for (
 		let sibDom = startDom, j = 0;
 		(sibDom = sibDom.nextSibling) && j < oldChildrenLength;
-		j += 2
+		j += 1
 	) {
 		if (sibDom == newDom) {
 			return newDom.nextSibling;
