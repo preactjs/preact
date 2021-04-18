@@ -211,19 +211,14 @@ export function enqueueRender(c) {
 
 /** Flush the render queue by rerendering all queued components */
 function process() {
-	// let queue;
 	while ((process._rerenderCount = rerenderQueue.length)) {
-		// queue = rerenderQueue.sort((a, b) => a._vnode._depth - b._vnode._depth);
-		// rerenderQueue = [];
-		// // Don't update `renderCount` yet. Keep its value non-zero to prevent unnecessary
-		// // process() calls from getting scheduled while `queue` is still being consumed.
-		// queue.some(c => {
-		// 	if (c._dirty) renderComponent(c);
-		// });
-
 		rerenderQueue.sort((a, b) => a._vnode._depth - b._vnode._depth);
-		let c;
-		while ((c = rerenderQueue.shift())) {
+
+		// Don't update `renderCount` yet. Keep its value non-zero to prevent unnecessary
+		// process() calls from getting scheduled while `queue` is still being consumed.
+		let len = rerenderQueue.length;
+		while (len--) {
+			let c = rerenderQueue.shift();
 			if (c._dirty) {
 				renderComponent(c);
 			}
