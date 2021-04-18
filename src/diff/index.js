@@ -267,12 +267,17 @@ export function commitRoot(commitQueue, root) {
 	commitQueue.some(c => {
 		try {
 			// @ts-ignore Reuse the commitQueue variable here so the type changes
-			commitQueue = c._renderCallbacks;
-			c._renderCallbacks = [];
-			commitQueue.some(cb => {
-				// @ts-ignore See above ts-ignore on commitQueue
+			// commitQueue = c._renderCallbacks;
+			// c._renderCallbacks = [];
+			// commitQueue.some(cb => {
+			// 	// @ts-ignore See above ts-ignore on commitQueue
+			// 	cb.call(c);
+			// });
+
+			let cb;
+			while ((cb = c._renderCallbacks.shift())) {
 				cb.call(c);
-			});
+			}
 		} catch (e) {
 			options._catchError(e, c._vnode);
 		}
