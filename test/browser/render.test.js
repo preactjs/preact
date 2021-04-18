@@ -1170,4 +1170,19 @@ describe('render()', () => {
 		render(<div tabindex={null} />, scratch);
 		expect(scratch.firstChild.tabIndex).to.equal(defaultValue);
 	});
+
+	it('should only remove the highest parent when unmounting a tree of DOM', () => {
+		render(
+			<ul>
+				<li>Hello</li>
+				<li>World</li>
+			</ul>,
+			scratch
+		);
+
+		clearLog();
+		render(null, scratch);
+
+		expect(getLog()).to.deep.equal(['<ul>HelloWorld.remove()']);
+	});
 });

@@ -8,7 +8,7 @@ import { applyRef } from './refs';
  * @param {import('../internal').Internal} internal The virtual node to unmount
  * @param {import('../internal').Internal} parentInternal The parent of the VNode that
  * initiated the unmount
- * @param {boolean} [skipRemove] Flag that indicates that a parent node of the
+ * @param {number} [skipRemove] Flag that indicates that a parent node of the
  * current element is already detached from the DOM.
  */
 export function unmount(internal, parentInternal, skipRemove) {
@@ -20,15 +20,6 @@ export function unmount(internal, parentInternal, skipRemove) {
 		if (!r.current || r.current === internal._dom)
 			applyRef(r, null, parentInternal);
 	}
-
-	let dom;
-	if (!skipRemove && internal._flags & TYPE_DOM) {
-		skipRemove = (dom = internal._dom) != null;
-	} else if (internal._flags & TYPE_ROOT) {
-		skipRemove = false;
-	}
-
-	internal._dom = null;
 
 	if ((r = internal._component) != null) {
 		if (r.componentWillUnmount) {
@@ -42,9 +33,19 @@ export function unmount(internal, parentInternal, skipRemove) {
 
 	if ((r = internal._children)) {
 		for (let i = 0; i < r.length; i++) {
-			if (r[i]) unmount(r[i], parentInternal, skipRemove);
+			if (r[i]) {
+				unmount(
+					r[i],
+					parentInternal,
+					~internal._flags & TYPE_ROOT && internal._flags & TYPE_DOM
+				);
+			}
 		}
 	}
 
-	if (dom != null) removeNode(dom);
+	if (internal._flags & TYPE_DOM && !skipRemove) {
+		removeNode(internal._dom);
+	}
+
+	internal._dom = null;
 }
