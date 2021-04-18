@@ -47,14 +47,13 @@ export function diffChildren(
 		(parentInternal._children && parentInternal._children.slice()) || EMPTY_ARR;
 	let oldChildrenLength = oldChildren.length;
 
-	const newChildren = [];
 	for (i = 0; i < renderResult.length; i++) {
 		childVNode = normalizeToVNode(renderResult[i]);
 
 		// Terser removes the `continue` here and wraps the loop body
 		// in a `if (childVNode) { ... } condition
 		if (childVNode == null) {
-			newChildren[i] = null;
+			parentInternal._children[i] = null;
 			continue;
 		}
 
@@ -197,10 +196,8 @@ export function diffChildren(
 			parentDom.value = '';
 		}
 
-		newChildren[i] = childInternal;
+		parentInternal._children[i] = childInternal;
 	}
-
-	parentInternal._children = newChildren;
 
 	// Remove remaining oldChildren if there are any.
 	for (i = oldChildrenLength; i--; ) {
