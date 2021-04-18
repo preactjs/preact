@@ -122,7 +122,7 @@ function renderComponent(component) {
 		oldDom = vnode._dom,
 		parentDom = component._parentDom;
 
-	if (parentDom) {
+	if (component._dirty && parentDom) {
 		let commitQueue = [];
 		const oldVNode = assign({}, vnode);
 		oldVNode._original = vnode._original + 1;
@@ -218,10 +218,7 @@ function process() {
 		// process() calls from getting scheduled while `queue` is still being consumed.
 		let len = rerenderQueue.length;
 		while (len--) {
-			let c = rerenderQueue.shift();
-			if (c._dirty) {
-				renderComponent(c);
-			}
+			renderComponent(rerenderQueue.shift());
 		}
 	}
 }
