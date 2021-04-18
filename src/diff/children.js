@@ -47,6 +47,8 @@ export function diffChildren(
 		(parentInternal._children && parentInternal._children.slice()) || EMPTY_ARR;
 	let oldChildrenLength = oldChildren.length;
 
+	if (!parentInternal._children) parentInternal._children = [];
+
 	for (i = 0; i < renderResult.length; i++) {
 		childVNode = normalizeToVNode(renderResult[i]);
 
