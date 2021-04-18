@@ -53,7 +53,7 @@ export function diff(
 
 	try {
 		outer: if (typeof newType == 'function') {
-			let c, isNew, oldProps, oldState, snapshot, clearProcessingException;
+			let c, oldProps, oldState, snapshot, clearProcessingException;
 			let newProps = newVNode.props;
 
 			// Necessary for createContext api. Setting this property will pass
@@ -70,63 +70,20 @@ export function diff(
 			if (oldVNode._component) {
 				c = newVNode._component = oldVNode._component;
 				clearProcessingException = c._processingException = c._pendingError;
-			} else {
-				// Instantiate the new component
-				if ('prototype' in newType && newType.prototype.render) {
-					// @ts-ignore The check above verifies that newType is suppose to be constructed
-					newVNode._component = c = new newType(newProps, componentContext); // eslint-disable-line new-cap
-				} else {
-					// @ts-ignore Trust me, Component implements the interface we want
-					newVNode._component = c = new Component(newProps, componentContext);
-					c.constructor = newType;
-					c.render = doRender;
-				}
-				if (provider) provider.sub(c);
 
-				c.props = newProps;
-				if (!c.state) c.state = {};
-				c.context = componentContext;
-				c._globalContext = globalContext;
-				isNew = c._dirty = true;
-				c._renderCallbacks = [];
-			}
+				oldProps = c.props;
+				oldState = c.state;
 
-			// Invoke getDerivedStateFromProps
-			if (c._nextState == null) {
-				c._nextState = c.state;
-			}
-			if (newType.getDerivedStateFromProps != null) {
-				if (c._nextState == c.state) {
-					c._nextState = assign({}, c._nextState);
-				}
+				if (newType.getDerivedStateFromProps != null) {
+					if (c._nextState == c.state) {
+						c._nextState = assign({}, c._nextState);
+					}
 
-				assign(
-					c._nextState,
-					newType.getDerivedStateFromProps(newProps, c._nextState)
-				);
-			}
-
-			oldProps = c.props;
-			oldState = c.state;
-
-			// Invoke pre-render lifecycle methods
-			if (isNew) {
-				if (
-					newType.getDerivedStateFromProps == null &&
-					c.componentWillMount != null
-				) {
-					c.componentWillMount();
-				}
-
-				if (c.componentDidMount != null) {
-					c._renderCallbacks.push(c.componentDidMount);
-				}
-			} else {
-				if (
-					newType.getDerivedStateFromProps == null &&
-					newProps !== oldProps &&
-					c.componentWillReceiveProps != null
-				) {
+					assign(
+						c._nextState,
+						newType.getDerivedStateFromProps(newProps, c._nextState)
+					);
+				} else if (newProps !== oldProps && c.componentWillReceiveProps) {
 					c.componentWillReceiveProps(newProps, componentContext);
 				}
 
@@ -157,7 +114,7 @@ export function diff(
 					break outer;
 				}
 
-				if (c.componentWillUpdate != null) {
+				if (c.componentWillUpdate) {
 					c.componentWillUpdate(newProps, c._nextState, componentContext);
 				}
 
@@ -165,6 +122,43 @@ export function diff(
 					c._renderCallbacks.push(() => {
 						c.componentDidUpdate(oldProps, oldState, snapshot);
 					});
+				}
+			} else {
+				// Instantiate the new component
+				if ('prototype' in newType && newType.prototype.render) {
+					// @ts-ignore The check above verifies that newType is suppose to be constructed
+					newVNode._component = c = new newType(newProps, componentContext); // eslint-disable-line new-cap
+				} else {
+					// @ts-ignore Trust me, Component implements the interface we want
+					newVNode._component = c = new Component(newProps, componentContext);
+					c.constructor = newType;
+					c.render = doRender;
+				}
+				if (provider) provider.sub(c);
+
+				c.props = newProps;
+				if (!c.state) c.state = {};
+				c._nextState = c.state;
+				c.context = componentContext;
+				c._globalContext = globalContext;
+				c._dirty = true;
+				c._renderCallbacks = [];
+
+				if (newType.getDerivedStateFromProps != null) {
+					if (c._nextState == c.state) {
+						c._nextState = assign({}, c._nextState);
+					}
+
+					assign(
+						c._nextState,
+						newType.getDerivedStateFromProps(newProps, c._nextState)
+					);
+				} else if (c.componentWillMount) {
+					c.componentWillMount();
+				}
+
+				if (c.componentDidMount != null) {
+					c._renderCallbacks.push(c.componentDidMount);
 				}
 			}
 
@@ -187,7 +181,7 @@ export function diff(
 				globalContext = assign(assign({}, globalContext), c.getChildContext());
 			}
 
-			if (!isNew && c.getSnapshotBeforeUpdate != null) {
+			if (oldVNode._component && c.getSnapshotBeforeUpdate != null) {
 				snapshot = c.getSnapshotBeforeUpdate(oldProps, oldState);
 			}
 
