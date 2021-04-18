@@ -214,8 +214,8 @@ function process() {
 	while ((process._rerenderCount = rerenderQueue.length)) {
 		rerenderQueue.sort((a, b) => a._vnode._depth - b._vnode._depth);
 
-		// Don't update `renderCount` yet. Keep its value non-zero to prevent unnecessary
-		// process() calls from getting scheduled while `queue` is still being consumed.
+		// Don't update `_rerenderCount` yet. Keep its value non-zero to prevent unnecessary
+		// process() calls from getting scheduled while `rerenderQueue` is still being consumed.
 		let len = rerenderQueue.length;
 		while (len--) {
 			renderComponent(rerenderQueue.shift());
