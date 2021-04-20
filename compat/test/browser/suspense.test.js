@@ -148,7 +148,7 @@ describe('suspense', () => {
 
 		return resolve().then(() => {
 			rerender();
-			expect(scratch.innerHTML).to.eql(`<div><p>hi</p></div>`);
+			expect(scratch.innerHTML).to.eql(`<div><p>hi</p><div>Hello from {name}</div></div>`);
 		});
 	});
 
