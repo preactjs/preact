@@ -102,7 +102,7 @@ describe('suspense', () => {
 		});
 	});
 
-	it('should reset hooks of components', () => {
+	it('should set state correctly', () => {
 		let set;
 		const LazyComp = ({ name }) => <div>Hello from {name}</div>;
 
@@ -148,7 +148,7 @@ describe('suspense', () => {
 
 		return resolve().then(() => {
 			rerender();
-			expect(scratch.innerHTML).to.eql(`<div><p>hi</p><div>Hello from {name}</div></div>`);
+			expect(scratch.innerHTML).to.eql(`<div><p>hi</p><div>Hello from LazyComp</div></div>`);
 		});
 	});
 
