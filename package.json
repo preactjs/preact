@@ -40,6 +40,12 @@
 			"require": "./hooks/dist/hooks.js",
 			"import": "./hooks/dist/hooks.mjs"
 		},
+		"./dom": {
+			"browser": "./dom/dist/dom.module.js",
+			"umd": "./dom/dist/dom.umd.js",
+			"require": "./dom/dist/dom.js",
+			"import": "./dom/dist/dom.mjs"
+		},
 		"./test-utils": {
 			"browser": "./test-utils/dist/testUtils.module.js",
 			"umd": "./test-utils/dist/testUtils.umd.js",
@@ -80,12 +86,14 @@
 		"build:devtools": "microbundle build --raw --cwd devtools",
 		"build:hooks": "microbundle build --raw --cwd hooks",
 		"build:test-utils": "microbundle build --raw --cwd test-utils",
-		"build:compat": "microbundle build --raw --cwd compat --globals 'preact/hooks=preactHooks'",
+		"build:compat": "microbundle build --raw --cwd compat --globals 'preact/cmp=preactHooks'",
+		"build:dom": "microbundle build --raw --cwd dom --globals 'preact/compat=preactCompat'",
 		"build:jsx": "microbundle build --raw --cwd jsx-runtime",
 		"postbuild": "node ./config/node-13-exports.js && node ./config/compat-entries.js",
 		"dev": "microbundle watch --raw --format cjs",
 		"dev:hooks": "microbundle watch --raw --format cjs --cwd hooks",
 		"dev:compat": "microbundle watch --raw --format cjs --cwd compat --globals 'preact/hooks=preactHooks'",
+		"dev:dom": "microbundle watch --raw --format cjs --cwd dom --globals 'preact/compat=preactCompat'",
 		"test": "npm-run-all build lint test:unit",
 		"test:unit": "run-p test:mocha test:karma:minify test:ts",
 		"test:ts": "run-p test:ts:*",
@@ -100,7 +108,7 @@
 		"test:karma:test-utils": "cross-env PERFORMANCE=false COVERAGE=false BABEL_NO_MODULES=true karma start karma.conf.js --grep=test-utils/test/shared/**.js --no-single-run",
 		"test:karma:bench": "cross-env PERFORMANCE=true COVERAGE=false BABEL_NO_MODULES=true karma start karma.conf.js --grep=test/benchmarks/**.js --single-run",
 		"benchmark": "npm run test:karma:bench -- no-single-run",
-		"lint": "eslint src test debug compat hooks test-utils"
+		"lint": "eslint src test debug compat dom hooks test-utils"
 	},
 	"eslintConfig": {
 		"extends": [
@@ -183,6 +191,9 @@
 		"devtools/dist",
 		"devtools/src",
 		"devtools/package.json",
+		"dom/dist",
+		"dom/src",
+		"dom/package.json",
 		"hooks/dist",
 		"hooks/src",
 		"hooks/package.json",
