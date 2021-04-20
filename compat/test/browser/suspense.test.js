@@ -8,8 +8,6 @@ import React, {
 	Fragment,
 	createContext,
 	useState,
-	useEffect,
-	useLayoutEffect
 } from 'preact/compat';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { createLazy, createSuspender } from './suspense-utils';
