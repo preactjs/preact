@@ -43,17 +43,8 @@ options.unmount = function(vnode) {
 
 function detachedClone(vnode, detachedParent, parentDom) {
 	if (vnode) {
-		if (vnode._component && vnode._component.__hooks) {
-			vnode._component.__hooks._list.forEach(memoOrEffect => {
-				if (memoOrEffect._factory && memoOrEffect._args) {
-					memoOrEffect._args = undefined;
-				}
-
-				if (typeof memoOrEffect._cleanup == 'function') {
-					memoOrEffect._args = undefined;
-					memoOrEffect._cleanup();
-				}
-			});
+		if (vnode._component && vnode._component.__hooks && !vnode._dom) {
+			vnode._component.__hooks = null;
 		}
 
 		vnode = assign({}, vnode);
