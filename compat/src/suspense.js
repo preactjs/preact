@@ -45,6 +45,14 @@ function detachedClone(vnode, detachedParent, parentDom) {
 	if (vnode) {
 		if (vnode._component && vnode._component.__hooks && !vnode._dom) {
 			vnode._component.__hooks = null;
+		} else if (vnode._component && vnode._component.__hooks) {
+			if (vnode._component._renderCallbacks.length) {
+				vnode._component._renderCallbacks = [];
+			}
+
+			if (vnode._component.__hooks._pendingEffects.length) {
+				vnode._component.__hooks._pendingEffects = [];
+			}
 		}
 
 		vnode = assign({}, vnode);
