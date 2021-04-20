@@ -71,7 +71,7 @@ export function diff(
 				c = newVNode._component = oldVNode._component;
 				clearProcessingException = c._processingException = c._pendingError;
 			} else {
-				// Instantiate the nFew component
+				// Instantiate the new component
 				if ('prototype' in newType && newType.prototype.render) {
 					// @ts-ignore The check above verifies that newType is suppose to be constructed
 					newVNode._component = c = new newType(newProps, componentContext); // eslint-disable-line new-cap
