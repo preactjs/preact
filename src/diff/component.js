@@ -1,6 +1,5 @@
 import { Fragment } from '../create-element';
 import options from '../options';
-import { assign } from '../util';
 import { Component } from '../component';
 import { mountChildren } from './mount';
 import { diffChildren, reorderChildren } from './children';
@@ -87,10 +86,10 @@ export function renderComponent(
 	}
 	if (type.getDerivedStateFromProps != null) {
 		if (c._nextState == c.state) {
-			c._nextState = assign({}, c._nextState);
+			c._nextState = Object.assign({}, c._nextState);
 		}
 
-		assign(c._nextState, type.getDerivedStateFromProps(newProps, c._nextState));
+		Object.assign(c._nextState, type.getDerivedStateFromProps(newProps, c._nextState));
 	}
 
 	oldProps = c.props;
@@ -166,7 +165,7 @@ export function renderComponent(
 	c.state = c._nextState;
 
 	if (c.getChildContext != null) {
-		globalContext = assign(assign({}, globalContext), c.getChildContext());
+		globalContext = Object.assign({}, globalContext, c.getChildContext());
 	}
 
 	if (!isNew) {

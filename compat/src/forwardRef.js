@@ -1,5 +1,4 @@
 import { options } from 'preact';
-import { assign } from './util';
 
 let oldDiffHook = options._diff;
 options._diff = (internal, vnode) => {
@@ -29,7 +28,7 @@ export function forwardRef(fn) {
 	// mobx-react. It will call this function directly
 	// and always pass ref as the second argument.
 	function Forwarded(props, ref) {
-		let clone = assign({}, props);
+		let clone = Object.assign({}, props);
 		delete clone.ref;
 		ref = props.ref || ref;
 		return fn(

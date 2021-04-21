@@ -4,18 +4,6 @@ import { teardown as testUtilTeardown } from 'preact/test-utils';
 
 /** @jsx createElement */
 
-/**
- * Assign properties from `props` to `obj`
- * @template O, P The obj and props types
- * @param {O} obj The object to copy properties to
- * @param {P} props The object to copy properties from
- * @returns {O & P}
- */
-function assign(obj, props) {
-	for (let i in props) obj[i] = props[i];
-	return /** @type {O & P} */ (obj);
-}
-
 export function supportsPassiveEvents() {
 	let supported = false;
 	try {
@@ -194,7 +182,7 @@ export function setupScratch() {
 
 let oldOptions = null;
 export function clearOptions() {
-	oldOptions = assign({}, options);
+	oldOptions = Object.assign({}, options);
 	delete options.vnode;
 	delete options.diffed;
 	delete options.unmount;
@@ -211,7 +199,7 @@ export function teardown(scratch) {
 	}
 
 	if (oldOptions != null) {
-		assign(options, oldOptions);
+		Object.assign(options, oldOptions);
 		oldOptions = null;
 	}
 

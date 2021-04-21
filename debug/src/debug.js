@@ -11,7 +11,6 @@ import {
 	getCurrentInternal,
 	getDisplayName
 } from './component-stack';
-import { assign } from './util';
 import { MODE_UNMOUNTING } from 'preact/src/constants';
 
 const isWeakMapSupported = typeof WeakMap == 'function';
@@ -250,7 +249,7 @@ export function initDebug() {
 			// If vnode is not present we're mounting
 			let values = vnode ? vnode.props : internal.props;
 			if (internal.type._forwarded) {
-				values = assign({}, values);
+				values = Object.assign({}, values);
 				delete values.ref;
 			}
 
