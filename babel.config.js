@@ -25,7 +25,7 @@ module.exports = function(api) {
 					modules: noModules ? false : 'auto',
 					exclude: ['@babel/plugin-transform-typeof-symbol'],
 					targets: {
-						browsers: ['last 2 versions', 'not IE 11']
+						esmodules: true
 					}
 				}
 			]
