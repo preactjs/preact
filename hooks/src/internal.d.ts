@@ -49,6 +49,7 @@ export type Cleanup = () => void;
 export interface EffectHookState {
 	_value?: Effect;
 	_args?: any[];
+	_pendingArgs?: any[]
 	_cleanup?: Cleanup | void;
 }
 

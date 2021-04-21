@@ -165,7 +165,7 @@ export function useEffect(callback, args) {
 	const state = getHookState(currentIndex++, 3);
 	if (!options._skipEffects && argsChanged(state._args, args)) {
 		state._value = callback;
-		state._args = args;
+		state._pendingArgs = args;
 
 		currentComponent.__hooks._pendingEffects.push(state);
 	}
@@ -180,7 +180,7 @@ export function useLayoutEffect(callback, args) {
 	const state = getHookState(currentIndex++, 4);
 	if (!options._skipEffects && argsChanged(state._args, args)) {
 		state._value = callback;
-		state._args = args;
+		state._pendingArgs = args;
 
 		currentComponent._renderCallbacks.push(state);
 	}
@@ -366,6 +366,8 @@ function invokeEffect(hook) {
 	// and move the currentComponent away.
 	const comp = currentComponent;
 	hook._cleanup = hook._value();
+	hook._args = hook._pendingArgs;
+	hook._pendingArgs = undefined;
 	currentComponent = comp;
 }
 
