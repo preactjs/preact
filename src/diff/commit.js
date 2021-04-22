@@ -25,9 +25,10 @@ export function commitRoot(commitQueue, rootInternal) {
 			// @ts-ignore Reuse the commitQueue variable here so the type changes
 			commitQueue = internal._commitCallbacks;
 			internal._commitCallbacks = [];
-			commitQueue.some(cb => {
+			for (let cb of commitQueue) {
 				cb.call(internal._component);
-			});
+			}
+
 		} catch (e) {
 			options._catchError(e, internal);
 		}
