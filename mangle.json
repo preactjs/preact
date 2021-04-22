@@ -19,7 +19,19 @@
     },
     "compress": {
       "hoist_vars": true,
-      "reduce_funcs": false
+      "reduce_funcs": false,
+      "unsafe": true,
+      "unsafe_arrows": true,
+      "unsafe_methods": true,
+      "unsafe_comps": true,
+      "unsafe_math": true,
+      "unsafe_undefined": true,
+      "unsafe_regexp": true,
+      "pure_getters": true,
+      "keep_fargs": false,
+      "toplevel": true,
+      "module": true,
+      "ecma": "2017"
     }
   },
   "props": {
