@@ -41,8 +41,8 @@ export function unmount(internal, parentInternal, skipRemove) {
 	}
 
 	if ((r = internal._children)) {
-		for (let i = 0; i < r.length; i++) {
-			if (r[i]) unmount(r[i], parentInternal, skipRemove);
+		for (let node of r) {
+			if (node) unmount(node, parentInternal, skipRemove);
 		}
 	}
 
