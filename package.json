@@ -10,7 +10,8 @@
 	"unpkg": "dist/preact.min.js",
   "source": "src/index.js",
   "browserslist": [
-    "last 2 versions",
+    "all",
+    "not op_mini"
     "not IE 11",
     "not dead"
   ],
