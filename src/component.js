@@ -180,7 +180,7 @@ function process() {
 		rerenderQueue = [];
 		// Don't update `renderCount` yet. Keep its value non-zero to prevent unnecessary
 		// process() calls from getting scheduled while `queue` is still being consumed.
-		for (let c of rerenderQueue) {
+		for (let c of queue) {
 			rerenderComponent(c);
 		}
 	}
