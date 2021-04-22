@@ -8,13 +8,19 @@
 	"module": "dist/preact.module.js",
 	"umd:main": "dist/preact.umd.js",
 	"unpkg": "dist/preact.min.js",
-  "source": "src/index.js",
-  "browserslist": [
-    "all",
-    "not op_mini"
-    "not IE 11",
-    "not dead"
-  ],
+	"source": "src/index.js",
+	"browserslist": [
+		"Firefox>=60",
+		"chrome>=61",
+		"and_chr>=61",
+		"Safari>=10.1",
+		"iOS>=10.3",
+		"edge>=16",
+		"opera>=48",
+		"op_mob>=48",
+		"Samsung>=8.2",
+		"not dead"
+	],
 	"exports": {
 		".": {
 			"browser": "./dist/preact.module.js",
