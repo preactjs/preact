@@ -225,8 +225,7 @@ export function reorderChildren(internal, startDom, parentDom) {
 		return startDom;
 	}
 
-	for (let tmp = 0; tmp < internal._children.length; tmp++) {
-		let childInternal = internal._children[tmp];
+	for (let childInternal of internal._children) {
 		if (childInternal) {
 			// We typically enter this code path on sCU bailout, where we copy
 			// oldVNode._children to newVNode._children. If that is the case, we need
