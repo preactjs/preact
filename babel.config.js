@@ -25,18 +25,7 @@ module.exports = function(api) {
 					modules: noModules ? false : 'auto',
 					exclude: ['@babel/plugin-transform-typeof-symbol'],
 					targets: {
-						browsers: [
-							"Firefox >= 60",
-							"chrome >= 61",
-							"Safari >= 10.1",
-							"iOS >= 10.3",
-							"edge >= 16",
-							"opera >= 48",
-							"op_mob >= 48",
-							"Samsung >= 8.2",
-							"not dead",
-							"not IE 11",
-						]
+						browsers: ['not dead', 'last 2 versions', 'not IE 11']
 					}
 				}
 			]
