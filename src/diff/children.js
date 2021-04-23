@@ -261,12 +261,13 @@ export function toChildArray(children, out) {
 	out = out || [];
 	if (children == null || typeof children == 'boolean') {
 	} else if (Array.isArray(children)) {
-		children.some(child => {
+		for (let child of children) {
 			toChildArray(child, out);
-		});
+		}
 	} else {
 		out.push(children);
 	}
+
 	return out;
 }
 
