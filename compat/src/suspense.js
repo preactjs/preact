@@ -48,7 +48,10 @@ function detachedClone(vnode, detachedParent, parentDom) {
 				if (typeof effect._cleanup == 'function') effect._cleanup();
 			});
 
-			vnode._component.__hooks = null;
+			vnode._component.__hooks = {
+				_list: [],
+				_pendingEffects: []
+			};
 		}
 
 		vnode = assign({}, vnode);
