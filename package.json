@@ -62,6 +62,10 @@
 			"require": "./compat/server.js",
 			"import": "./compat/server.mjs"
 		},
+		"./compat/scheduler": {
+			"require": "./compat/dist/scheduler.js",
+			"import": "./compat/dist/scheduler.mjs"
+		},
 		"./package.json": "./package.json",
 		"./": "./"
 	},
