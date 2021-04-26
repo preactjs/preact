@@ -84,7 +84,7 @@
 		"build:devtools": "microbundle build --raw --cwd devtools",
 		"build:hooks": "microbundle build --raw --cwd hooks",
 		"build:test-utils": "microbundle build --raw --cwd test-utils",
-		"build:compat": "microbundle build --raw --cwd compat --globals 'preact/hooks=preactHooks'",
+		"build:compat": "microbundle build src/index.js src/scheduler.js --raw --cwd compat --globals 'preact/hooks=preactHooks'",
 		"build:jsx": "microbundle build --raw --cwd jsx-runtime",
 		"postbuild": "node ./config/node-13-exports.js && node ./config/compat-entries.js",
 		"dev": "microbundle watch --raw --format cjs",
