@@ -32,7 +32,6 @@ import {
 	REACT_ELEMENT_TYPE,
 	__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED
 } from './render';
-export * from './scheduler';
 
 const version = '16.8.0'; // trick libraries to think we are react
 
