@@ -63,8 +63,8 @@
 			"import": "./compat/server.mjs"
 		},
 		"./compat/scheduler": {
-			"require": "./compat/dist/scheduler.js",
-			"import": "./compat/dist/scheduler.mjs"
+			"require": "./compat/scheduler.js",
+			"import": "./compat/scheduler.mjs"
 		},
 		"./package.json": "./package.json",
 		"./": "./"
@@ -175,6 +175,8 @@
 		"compat/src",
 		"compat/server.js",
 		"compat/server.mjs",
+		"compat/scheduler.js",
+		"compat/scheduler.mjs",
 		"compat/test-utils.js",
 		"compat/jsx-runtime.js",
 		"compat/jsx-runtime.mjs",
