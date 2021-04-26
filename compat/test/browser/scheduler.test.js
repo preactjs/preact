@@ -6,7 +6,7 @@ import {
 	unstable_UserBlockingPriority,
 	unstable_ImmediatePriority,
 	unstable_now
-} from 'preact/compat/scheduler';
+} from '../../src/scheduler';
 
 describe('scheduler', () => {
 	describe('runWithPriority', () => {
