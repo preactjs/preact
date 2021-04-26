@@ -38,8 +38,7 @@ export function unmount(internal, parentInternal, skipRemove) {
 				unmount(
 					r[i],
 					parentInternal,
-					(skipRemove & internal._flags & ~TYPE_ROOT) |
-						(internal._flags & TYPE_DOM)
+					skipRemove ? ~internal._flags & TYPE_ROOT : internal._flags & TYPE_DOM
 				);
 			}
 		}
