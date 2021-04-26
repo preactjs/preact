@@ -18,7 +18,4 @@ export function unstable_runWithPriority(priority, callback) {
 	return callback();
 }
 
-export const unstable_now =
-	typeof performance === 'object' && typeof performance.now === 'function'
-		? performance.now.bind(performance)
-		: () => Date.now();
+export const unstable_now = () => performance.now();
