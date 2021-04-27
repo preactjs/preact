@@ -46,7 +46,6 @@ export function diffChildren(
 	let oldChildren =
 		(parentInternal._children && parentInternal._children.slice()) || EMPTY_ARR;
 	let oldChildrenLength = oldChildren.length;
-	let savedOldChildren = [...oldChildren];
 
 	const newChildren = [];
 	for (i = 0; i < renderResult.length; i++) {
@@ -59,29 +58,18 @@ export function diffChildren(
 			continue;
 		}
 
-		childInternal = findMatchingInternal(
+		/// TODO: Reconsider if we should bring back the "not moving text nodes" logic?
+		let matchingIndex = findMatchingIndex(
 			childVNode,
 			oldChildren,
 			i,
 			oldChildrenLength
 		);
-
-		let matchingIndex = findMatchingIndex(
-			childVNode,
-			savedOldChildren,
-			i,
-			oldChildrenLength
-		);
-		if (savedOldChildren[matchingIndex] == childInternal) {
-			savedOldChildren[matchingIndex] = undefined;
+		if (matchingIndex === -1) {
+			childInternal = undefined;
 		} else {
-			let matchedChild = savedOldChildren[matchingIndex];
-			console.log(
-				matchingIndex,
-				matchedChild && { type: matchedChild.type, key: matchedChild.key },
-				childInternal && { type: childInternal.type, key: childInternal.key }
-			);
-			throw 'poop';
+			childInternal = oldChildren[matchingIndex];
+			oldChildren[matchingIndex] = undefined;
 		}
 
 		let oldVNodeRef;
@@ -195,56 +183,56 @@ export function diffChildren(
 	return startDom;
 }
 
-/**
- * @param {import('../internal').VNode | string} childVNode
- * @param {import('../internal').Internal[]} oldChildren
- * @param {number} i
- * @param {number} oldChildrenLength
- * @returns {import('../internal').Internal}
- */
-function findMatchingInternal(childVNode, oldChildren, i, oldChildrenLength) {
-	// Check if we find a corresponding element in oldChildren.
-	// If found, delete the array item by setting to `undefined`.
-	// We use `undefined`, as `null` is reserved for empty placeholders
-	// (holes).
-	let childInternal = oldChildren[i];
-
-	if (typeof childVNode === 'string') {
-		// We never move Text nodes, so we only check for an in-place match:
-		if (childInternal && childInternal._flags & TYPE_TEXT) {
-			oldChildren[i] = undefined;
-		} else {
-			// We're looking for a Text node, but this wasn't one: ignore it
-			childInternal = undefined;
-		}
-	} else if (
-		childInternal === null ||
-		(childInternal &&
-			childVNode.key == childInternal.key &&
-			childVNode.type === childInternal.type)
-	) {
-		oldChildren[i] = undefined;
-	} else {
-		// Either oldVNode === undefined or oldChildrenLength > 0,
-		// so after this loop oldVNode == null or oldVNode is a valid value.
-		for (let j = 0; j < oldChildrenLength; j++) {
-			childInternal = oldChildren[j];
-			// If childVNode is unkeyed, we only match similarly unkeyed nodes, otherwise we match by key.
-			// We always match by type (in either case).
-			if (
-				childInternal &&
-				childVNode.key == childInternal.key &&
-				childVNode.type === childInternal.type
-			) {
-				oldChildren[j] = undefined;
-				break;
-			}
-			childInternal = null;
-		}
-	}
-
-	return childInternal;
-}
+// /**
+//  * @param {import('../internal').VNode | string} childVNode
+//  * @param {import('../internal').Internal[]} oldChildren
+//  * @param {number} i
+//  * @param {number} oldChildrenLength
+//  * @returns {import('../internal').Internal}
+//  */
+// function findMatchingInternal(childVNode, oldChildren, i, oldChildrenLength) {
+// 	// Check if we find a corresponding element in oldChildren.
+// 	// If found, delete the array item by setting to `undefined`.
+// 	// We use `undefined`, as `null` is reserved for empty placeholders
+// 	// (holes).
+// 	let childInternal = oldChildren[i];
+//
+// 	if (typeof childVNode === 'string') {
+// 		// We never move Text nodes, so we only check for an in-place match:
+// 		if (childInternal && childInternal._flags & TYPE_TEXT) {
+// 			oldChildren[i] = undefined;
+// 		} else {
+// 			// We're looking for a Text node, but this wasn't one: ignore it
+// 			childInternal = undefined;
+// 		}
+// 	} else if (
+// 		childInternal === null ||
+// 		(childInternal &&
+// 			childVNode.key == childInternal.key &&
+// 			childVNode.type === childInternal.type)
+// 	) {
+// 		oldChildren[i] = undefined;
+// 	} else {
+// 		// Either oldVNode === undefined or oldChildrenLength > 0,
+// 		// so after this loop oldVNode == null or oldVNode is a valid value.
+// 		for (let j = 0; j < oldChildrenLength; j++) {
+// 			childInternal = oldChildren[j];
+// 			// If childVNode is unkeyed, we only match similarly unkeyed nodes, otherwise we match by key.
+// 			// We always match by type (in either case).
+// 			if (
+// 				childInternal &&
+// 				childVNode.key == childInternal.key &&
+// 				childVNode.type === childInternal.type
+// 			) {
+// 				oldChildren[j] = undefined;
+// 				break;
+// 			}
+// 			childInternal = null;
+// 		}
+// 	}
+//
+// 	return childInternal;
+// }
 
 /**
  * @param {import('../internal').VNode | string} childVNode
