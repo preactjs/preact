@@ -1170,4 +1170,43 @@ describe('render()', () => {
 		render(<div tabindex={null} />, scratch);
 		expect(scratch.firstChild.tabIndex).to.equal(defaultValue);
 	});
+
+	it('should only remove the highest parent when unmounting a tree of DOM', () => {
+		render(
+			<ul>
+				<li>Hello</li>
+				<li>World</li>
+			</ul>,
+			scratch
+		);
+
+		clearLog();
+		render(null, scratch);
+
+		expect(getLog()).to.deep.equal(['<ul>HelloWorld.remove()']);
+	});
+
+	it('should only remove the highest parent when unmounting a tree with components', () => {
+		const List = props => props.children;
+		const Item = props => <li>{props.children}</li>;
+		render(
+			<ul>
+				<List>
+					<Item>Hello</Item>
+					<Item>World</Item>
+				</List>
+			</ul>,
+			scratch
+		);
+
+		const items = scratch.querySelectorAll('li');
+
+		clearLog();
+		render(null, scratch);
+
+		expect(getLog()).to.deep.equal(['<ul>HelloWorld.remove()']);
+
+		expect(items[0]).to.have.property('parentNode').that.should.exist;
+		expect(items[1]).to.have.property('parentNode').that.should.exist;
+	});
 });
