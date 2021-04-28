@@ -985,6 +985,7 @@ describe('Fragment', () => {
 	});
 
 	it('should reorder Fragment children', () => {
+		/** @type {() => void} */
 		let updateState;
 
 		class App extends Component {
@@ -1592,7 +1593,7 @@ describe('Fragment', () => {
 
 	it('should correctly append children with siblings', () => {
 		/**
-		 * @type {(props: { values: Array<string | number>}) => JSX.Element}
+		 * @type {import('preact').FunctionComponent<{ values: Array<string|number> }>}
 		 */
 		const Foo = ({ values }) => (
 			<ol>
@@ -1875,6 +1876,8 @@ describe('Fragment', () => {
 
 	it('should properly render Fragments whose last child is a component returning null', () => {
 		let Noop = () => null;
+
+		/** @type {() => void} */
 		let update;
 		class App extends Component {
 			constructor(props) {
@@ -1920,6 +1923,7 @@ describe('Fragment', () => {
 	});
 
 	it('should replace node in-between children', () => {
+		/** @type {() => void} */
 		let update;
 		class SetState extends Component {
 			constructor(props) {
@@ -1960,6 +1964,7 @@ describe('Fragment', () => {
 	});
 
 	it('should replace Fragment in-between children', () => {
+		/** @type {() => void} */
 		let update;
 		class SetState extends Component {
 			constructor(props) {
@@ -2013,6 +2018,7 @@ describe('Fragment', () => {
 	});
 
 	it('should insert in-between children', () => {
+		/** @type {() => void} */
 		let update;
 		class SetState extends Component {
 			constructor(props) {
@@ -2050,6 +2056,7 @@ describe('Fragment', () => {
 	});
 
 	it('should insert in-between Fragments', () => {
+		/** @type {() => void} */
 		let update;
 		class SetState extends Component {
 			constructor(props) {
@@ -2089,6 +2096,7 @@ describe('Fragment', () => {
 	});
 
 	it('should insert in-between null children', () => {
+		/** @type {() => void} */
 		let update;
 		class SetState extends Component {
 			constructor(props) {
@@ -2128,6 +2136,7 @@ describe('Fragment', () => {
 	});
 
 	it('should insert Fragment in-between null children', () => {
+		/** @type {() => void} */
 		let update;
 		class SetState extends Component {
 			constructor(props) {
@@ -2174,6 +2183,7 @@ describe('Fragment', () => {
 	});
 
 	it('should insert in-between nested null children', () => {
+		/** @type {() => void} */
 		let update;
 		class SetState extends Component {
 			constructor(props) {
@@ -2217,6 +2227,7 @@ describe('Fragment', () => {
 	});
 
 	it('should insert Fragment in-between nested null children', () => {
+		/** @type {() => void} */
 		let update;
 		class SetState extends Component {
 			constructor(props) {
@@ -2267,6 +2278,7 @@ describe('Fragment', () => {
 	});
 
 	it('should update at correct place', () => {
+		/** @type {() => void} */
 		let updateA;
 		class A extends Component {
 			constructor(props) {
@@ -2328,6 +2340,7 @@ describe('Fragment', () => {
 	});
 
 	it('should update Fragment at correct place', () => {
+		/** @type {() => void} */
 		let updateA;
 		class A extends Component {
 			constructor(props) {
@@ -2549,6 +2562,7 @@ describe('Fragment', () => {
 	});
 
 	it('should properly place conditional elements around strictly equal vnodes', () => {
+		/** @type {() => void} */
 		let set;
 
 		const Children = () => (
