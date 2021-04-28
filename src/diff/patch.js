@@ -1,4 +1,4 @@
-import { diffChildren } from './children';
+import { diffChildren, insertComponentDom } from './children';
 import { diffProps, setProperty } from './props';
 import options from '../options';
 import { renderComponent } from './component';
@@ -11,7 +11,7 @@ import {
 	TYPE_ROOT,
 	MODE_SVG
 } from '../constants';
-import { getChildDom, getDomSibling } from '../tree';
+import { getDomSibling } from '../tree';
 
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
@@ -50,26 +50,20 @@ export function patch(
 
 	try {
 		if (internal._flags & TYPE_COMPONENT) {
-			// Root nodes signal that an attempt to render into a specific DOM node on
-			// the page. Root nodes can occur anywhere in the tree and not just at the
-			// top.
-			let prevStartDom = startDom;
+			let prevProps = internal.props;
 			let prevParentDom = parentDom;
 			if (internal._flags & TYPE_ROOT) {
 				parentDom = newVNode.props._parentDom;
 
-				if (parentDom !== prevParentDom) {
-					let newStartDom = getChildDom(internal);
-					if (newStartDom) {
-						startDom = newStartDom;
-					}
+				// TODO: Investigate if we could consolidate the logic below to here.
+				// Might be related to the mountChildren/startDom usage in
+				// renderComponent
 
-					// The `startDom` variable might point to a node from another
-					// tree from a previous render
-					if (startDom != null && startDom.parentNode !== parentDom) {
-						startDom = null;
-					}
-				}
+				// if (internal.props._parentDom !== newVNode.props._parentDom) {
+				// 	let nextSibling =
+				// 		parentDom == prevParentDom ? getDomSibling(internal) : null;
+				// 	insertComponentDom(internal, nextSibling, parentDom);
+				// }
 			}
 
 			nextDomSibling = renderComponent(
@@ -82,25 +76,16 @@ export function patch(
 				startDom
 			);
 
-			if (internal._flags & TYPE_ROOT && prevParentDom !== parentDom) {
-				// If this is a root node/Portal, and it changed the parentDom it's
-				// children, then we need to determine which dom node the diff should
-				// continue with.
-				if (prevStartDom == null || prevStartDom.parentNode == prevParentDom) {
-					// If prevStartDom == null, then we are diffing a root node that
-					// didn't have a startDom to begin with, so we can just return null.
-					//
-					// Or, if the previous value for start dom still has the same parent
-					// DOM has the root node's parent tree, then we can use it. This case
-					// assumes the root node rendered its children into a new parent.
-					nextDomSibling = prevStartDom;
-				} else {
-					// Here, if the parentDoms are different and prevStartDom has moved into
-					// a new parentDom, we'll assume the root node moved prevStartDom under
-					// the new parentDom. Because of this change, we need to search the
-					// internal tree for the next DOM sibling the tree should begin with
-					nextDomSibling = getDomSibling(internal);
-				}
+			if (internal._flags & TYPE_ROOT && prevProps._parentDom !== parentDom) {
+				// If this Root node's _parentDom prop has changed, reparent its
+				// children under the new parentDom.
+				//
+				// If the new parentDom is the same as the root node's parentDom (in
+				// other words, this root node should behave like a Fragment), then find
+				// the root node's sibling to insert its children before
+				let nextSibling =
+					parentDom == prevParentDom ? getDomSibling(internal) : null;
+				insertComponentDom(internal, nextSibling, parentDom);
 			}
 		} else if (newVNode._vnodeId !== internal._vnodeId) {
 			nextDomSibling = patchDOMElement(

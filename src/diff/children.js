@@ -367,7 +367,7 @@ function findMatchingIndex(
  * @param {import('../internal').PreactNode} nextSibling
  * @param {import('../internal').PreactNode} parentDom
  */
-function insertComponentDom(internal, nextSibling, parentDom) {
+export function insertComponentDom(internal, nextSibling, parentDom) {
 	if (internal._children == null) {
 		return;
 	}
