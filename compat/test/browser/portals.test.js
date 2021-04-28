@@ -11,7 +11,7 @@ import { setupRerender, act } from 'preact/test-utils';
 
 /* eslint-disable react/jsx-boolean-value, react/display-name, prefer-arrow-callback */
 
-describe('Portal', () => {
+describe.skip('Portal', () => {
 	/** @type {HTMLDivElement} */
 	let scratch;
 	let rerender;
