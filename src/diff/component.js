@@ -3,7 +3,7 @@ import options from '../options';
 import { assign } from '../util';
 import { Component } from '../component';
 import { mountChildren } from './mount';
-import { diffChildren, reorderChildren } from './children';
+import { diffChildren } from './children';
 import {
 	DIRTY_BIT,
 	FORCE_UPDATE,
@@ -141,7 +141,7 @@ export function renderComponent(
 			// TODO: Returning undefined here (i.e. return;) passes all tests. That seems
 			// like a bug. Should validate that we have test coverage for sCU that
 			// returns Fragments with multiple DOM children
-			return reorderChildren(internal, startDom, parentDom);
+			return;
 		}
 
 		if (c.componentWillUpdate != null) {

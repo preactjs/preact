@@ -387,43 +387,6 @@ function insertComponentDom(internal, nextSibling, parentDom) {
 }
 
 /**
- * @param {import('../internal').Internal} internal
- * @param {import('../internal').PreactElement} startDom
- * @param {import('../internal').PreactElement} parentDom
- */
-export function reorderChildren(internal, startDom, parentDom) {
-	if (internal._children == null) {
-		return startDom;
-	}
-
-	for (let tmp = 0; tmp < internal._children.length; tmp++) {
-		let childInternal = internal._children[tmp];
-		if (childInternal) {
-			// We typically enter this code path on sCU bailout, where we copy
-			// oldVNode._children to newVNode._children. If that is the case, we need
-			// to update the old children's _parent pointer to point to the newVNode
-			// (childVNode here).
-			childInternal._parent = internal;
-
-			if (childInternal._flags & TYPE_COMPONENT) {
-				startDom = reorderChildren(childInternal, startDom, parentDom);
-			} else if (childInternal._dom == startDom) {
-				startDom = startDom.nextSibling;
-			} else {
-				startDom = placeChild(
-					parentDom,
-					internal._children.length,
-					childInternal._dom,
-					startDom
-				);
-			}
-		}
-	}
-
-	return startDom;
-}
-
-/**
  * Flatten and loop through the children of a virtual node
  * @param {import('../index').ComponentChildren} children The unflattened
  * children of a virtual node
@@ -440,36 +403,4 @@ export function toChildArray(children, out) {
 		out.push(children);
 	}
 	return out;
-}
-
-/**
- * @param {import('../internal').PreactElement} parentDom
- * @param {number} oldChildrenLength
- * @param {import('../internal').PreactElement} newDom
- * @param {import('../internal').PreactElement} startDom
- * @returns {import('../internal').PreactElement}
- */
-function placeChild(parentDom, oldChildrenLength, newDom, startDom) {
-	if (startDom == null || newDom.parentNode == null) {
-		// "startDom == null": The diff has finished with existing DOM children and
-		// we are appending new ones.
-		//
-		// newDom.parentNode == null: newDom is a brand new unconnected DOM node. Go
-		// ahead and mount it here.
-		parentDom.insertBefore(newDom, startDom);
-		return startDom;
-	}
-
-	// `j<oldChildrenLength; j+=2` is an alternative to `j++<oldChildrenLength/2`
-	for (
-		let sibDom = startDom, j = 0;
-		(sibDom = sibDom.nextSibling) && j < oldChildrenLength;
-		j += 2
-	) {
-		if (sibDom == newDom) {
-			return newDom.nextSibling;
-		}
-	}
-	parentDom.insertBefore(newDom, startDom);
-	return startDom;
 }
