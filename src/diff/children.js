@@ -147,7 +147,12 @@ export function diffChildren(
 		// fragments. keyed did not handle this and just searched for the next
 		// non-null child (I think)
 		go: if (mountingChild) {
-			skew--;
+			if (matchingIndex == -1) {
+				// ### Change from keyed:
+				// If we are mounting a new child that doesn't have a match (it could've
+				// matched a `null` placeholder), then adjust our skew accordingly
+				skew--;
+			}
 
 			// Perform insert of new dom
 			if (childInternal._flags & TYPE_DOM) {
