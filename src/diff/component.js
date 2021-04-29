@@ -7,10 +7,12 @@ import { diffChildren } from './children';
 import {
 	DIRTY_BIT,
 	FORCE_UPDATE,
+	MODE_HYDRATE,
 	MODE_PENDING_ERROR,
 	MODE_RERENDERING_ERROR
 } from '../constants';
 import { addCommitCallback } from './commit';
+import { getDomSibling } from '../tree';
 
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
@@ -195,7 +197,10 @@ export function renderComponent(
 			internal,
 			globalContext,
 			commitQueue,
-			startDom
+			// TODO: Mounting and hydration still use the startDom param
+			isNew || internal._flags & MODE_HYDRATE
+				? startDom
+				: getDomSibling(internal)
 		);
 	} else {
 		nextDomSibling = diffChildren(

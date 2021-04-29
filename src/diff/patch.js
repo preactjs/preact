@@ -50,20 +50,15 @@ export function patch(
 
 	try {
 		if (internal._flags & TYPE_COMPONENT) {
-			let prevProps = internal.props;
 			let prevParentDom = parentDom;
 			if (internal._flags & TYPE_ROOT) {
 				parentDom = newVNode.props._parentDom;
 
-				// TODO: Investigate if we could consolidate the logic below to here.
-				// Might be related to the mountChildren/startDom usage in
-				// renderComponent
-
-				// if (internal.props._parentDom !== newVNode.props._parentDom) {
-				// 	let nextSibling =
-				// 		parentDom == prevParentDom ? getDomSibling(internal) : null;
-				// 	insertComponentDom(internal, nextSibling, parentDom);
-				// }
+				if (internal.props._parentDom !== newVNode.props._parentDom) {
+					let nextSibling =
+						parentDom == prevParentDom ? getDomSibling(internal) : null;
+					insertComponentDom(internal, nextSibling, parentDom);
+				}
 			}
 
 			nextDomSibling = renderComponent(
@@ -75,18 +70,6 @@ export function patch(
 				commitQueue,
 				startDom
 			);
-
-			if (internal._flags & TYPE_ROOT && prevProps._parentDom !== parentDom) {
-				// If this Root node's _parentDom prop has changed, reparent its
-				// children under the new parentDom.
-				//
-				// If the new parentDom is the same as the root node's parentDom (in
-				// other words, this root node should behave like a Fragment), then find
-				// the root node's sibling to insert its children before
-				let nextSibling =
-					parentDom == prevParentDom ? getDomSibling(internal) : null;
-				insertComponentDom(internal, nextSibling, parentDom);
-			}
 		} else if (newVNode._vnodeId !== internal._vnodeId) {
 			nextDomSibling = patchDOMElement(
 				internal._dom,
