@@ -24,7 +24,6 @@
 
 ## Backing Node follow ups
 
-- Revisit `prevDom` code path for null placeholders
 - Address many TODOs
 - Move refs to internal renderCallbacks
 - Rewrite rerender loop to operate on internals, not components
