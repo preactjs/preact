@@ -98,7 +98,6 @@ export function diffChildren(
 			}
 		}
 
-		let prevDom;
 		let oldVNodeRef;
 		let nextDomSibling;
 		if (childInternal == null) {
@@ -135,10 +134,6 @@ export function diffChildren(
 		} else {
 			oldVNodeRef = childInternal.ref;
 
-			// TODO: Figure out if there is a better way to handle the null
-			// placeholder's scenario this addresses
-			prevDom = childInternal._dom;
-
 			// Morph the old element into the new one, but don't append it to the dom yet
 			nextDomSibling = patch(
 				parentDom,
@@ -173,7 +168,6 @@ export function diffChildren(
 		} else if (
 			startDom &&
 			childInternal != null &&
-			prevDom == startDom &&
 			startDom.parentNode != parentDom
 		) {
 			// The above condition is to handle null placeholders. See test in placeholder.test.js:
