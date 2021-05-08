@@ -2,7 +2,6 @@ import { applyRef } from './refs';
 import { normalizeToVNode } from '../create-element';
 import {
 	TYPE_COMPONENT,
-	TYPE_TEXT,
 	MODE_HYDRATE,
 	MODE_SUSPENDED,
 	EMPTY_ARR,
@@ -11,7 +10,7 @@ import {
 import { mount } from './mount';
 import { patch } from './patch';
 import { unmount } from './unmount';
-import { createInternal, getDomSibling, getChildDom } from '../tree';
+import { createInternal, getDomSibling } from '../tree';
 
 /**
  * Diff the children of a virtual node
@@ -24,16 +23,13 @@ import { createInternal, getDomSibling, getChildDom } from '../tree';
  * getChildContext
  * @param {import('../internal').CommitQueue} commitQueue List of
  * components which have callbacks to invoke in commitRoot
- * @param {import('../internal').PreactElement} startDom The dom node
- * diffChildren should begin diffing with.
  */
 export function diffChildren(
 	parentDom,
 	renderResult,
 	parentInternal,
 	globalContext,
-	commitQueue,
-	startDom
+	commitQueue
 ) {
 	let i, newDom, refs;
 	let skew = 0;
@@ -80,12 +76,11 @@ export function diffChildren(
 		let mountingChild = childInternal == null;
 
 		let oldVNodeRef;
-		let nextDomSibling;
 		if (childInternal == null) {
 			childInternal = createInternal(childVNode, parentInternal);
 
 			// We are mounting a new VNode
-			nextDomSibling = mount(
+			mount(
 				parentDom,
 				childVNode,
 				childInternal,
@@ -102,29 +97,21 @@ export function diffChildren(
 			(MODE_HYDRATE | MODE_SUSPENDED)
 		) {
 			// We are resuming the hydration of a VNode
-			startDom = childInternal._dom;
 			oldVNodeRef = childInternal.ref;
 
-			nextDomSibling = mount(
+			mount(
 				parentDom,
 				childVNode,
 				childInternal,
 				globalContext,
 				commitQueue,
-				startDom // TODO: What to do here...
+				childInternal._dom
 			);
 		} else {
 			oldVNodeRef = childInternal.ref;
 
 			// Morph the old element into the new one, but don't append it to the dom yet
-			nextDomSibling = patch(
-				parentDom,
-				childVNode,
-				childInternal,
-				globalContext,
-				commitQueue,
-				startDom // TODO: What to do here...
-			);
+			patch(parentDom, childVNode, childInternal, globalContext, commitQueue);
 		}
 
 		newDom = childInternal._dom;
@@ -159,11 +146,6 @@ export function diffChildren(
 				let nextSibling = getDomSibling(parentInternal, skewedIndex);
 				parentDom.insertBefore(childInternal._dom, nextSibling);
 			}
-			// If we just mounted a component, its DOM has already been inserted in mount
-			//
-			// else {
-			// 	insertComponentDom(childInternal, nextSibling, parentDom);
-			// }
 		} else if (matchingIndex !== skewedIndex) {
 			// Move this DOM into its correct place
 			if (matchingIndex === skewedIndex + 1) {
@@ -199,24 +181,6 @@ export function diffChildren(
 			}
 		}
 
-		// if (childInternal._flags & TYPE_COMPONENT) {
-		// 	startDom = nextDomSibling;
-		// } else if (newDom && newDom == startDom) {
-		// 	// If the newDom and the dom we are expecting to be there are the same, then
-		// 	// do nothing
-		// 	startDom = nextDomSibling;
-		// } else if (newDom) {
-		// 	startDom = placeChild(parentDom, oldChildrenLength, newDom, startDom);
-		// } else if (
-		// 	startDom &&
-		// 	childInternal != null &&
-		// 	startDom.parentNode != parentDom
-		// ) {
-		// 	// The above condition is to handle null placeholders. See test in placeholder.test.js:
-		// 	// `efficiently replace null placeholders in parent rerenders`
-		// 	startDom = nextDomSibling;
-		// }
-
 		newChildren[i] = childInternal;
 	}
 
@@ -226,18 +190,6 @@ export function diffChildren(
 	if (remainingOldChildren > 0) {
 		for (i = oldChildrenLength; i--; ) {
 			if (oldChildren[i] != null) {
-				if (
-					parentInternal._flags & TYPE_COMPONENT &&
-					startDom != null &&
-					((oldChildren[i]._flags & TYPE_DOM &&
-						oldChildren[i]._dom == startDom) ||
-						getChildDom(oldChildren[i]) == startDom)
-				) {
-					// If the startDom points to a dom node that is about to be unmounted,
-					// then get the next sibling of that vnode and set startDom to it
-					startDom = getDomSibling(parentInternal, i + 1);
-				}
-
 				unmount(oldChildren[i], oldChildren[i]);
 			}
 		}
@@ -249,60 +201,7 @@ export function diffChildren(
 			applyRef(refs[i], refs[++i], refs[++i]);
 		}
 	}
-
-	return startDom;
 }
-
-// /**
-//  * @param {import('../internal').VNode | string} childVNode
-//  * @param {import('../internal').Internal[]} oldChildren
-//  * @param {number} i
-//  * @param {number} oldChildrenLength
-//  * @returns {import('../internal').Internal}
-//  */
-// function findMatchingInternal(childVNode, oldChildren, i, oldChildrenLength) {
-// 	// Check if we find a corresponding element in oldChildren.
-// 	// If found, delete the array item by setting to `undefined`.
-// 	// We use `undefined`, as `null` is reserved for empty placeholders
-// 	// (holes).
-// 	let childInternal = oldChildren[i];
-//
-// 	if (typeof childVNode === 'string') {
-// 		// We never move Text nodes, so we only check for an in-place match:
-// 		if (childInternal && childInternal._flags & TYPE_TEXT) {
-// 			oldChildren[i] = undefined;
-// 		} else {
-// 			// We're looking for a Text node, but this wasn't one: ignore it
-// 			childInternal = undefined;
-// 		}
-// 	} else if (
-// 		childInternal === null ||
-// 		(childInternal &&
-// 			childVNode.key == childInternal.key &&
-// 			childVNode.type === childInternal.type)
-// 	) {
-// 		oldChildren[i] = undefined;
-// 	} else {
-// 		// Either oldVNode === undefined or oldChildrenLength > 0,
-// 		// so after this loop oldVNode == null or oldVNode is a valid value.
-// 		for (let j = 0; j < oldChildrenLength; j++) {
-// 			childInternal = oldChildren[j];
-// 			// If childVNode is unkeyed, we only match similarly unkeyed nodes, otherwise we match by key.
-// 			// We always match by type (in either case).
-// 			if (
-// 				childInternal &&
-// 				childVNode.key == childInternal.key &&
-// 				childVNode.type === childInternal.type
-// 			) {
-// 				oldChildren[j] = undefined;
-// 				break;
-// 			}
-// 			childInternal = null;
-// 		}
-// 	}
-//
-// 	return childInternal;
-// }
 
 /**
  * @param {import('../internal').VNode | string} childVNode
@@ -337,6 +236,7 @@ function findMatchingIndex(
 	}
 	// If there are any unused children left (ignoring an available in-place child which we just checked)
 	else if (remainingOldChildren > (oldChild != null ? 1 : 0)) {
+		// eslint-disable-next-line no-constant-condition
 		while (true) {
 			if (x >= 0) {
 				oldChild = oldChildren[x];

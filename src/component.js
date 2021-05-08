@@ -3,14 +3,8 @@ import { addCommitCallback, commitRoot } from './diff/commit';
 import options from './options';
 import { createVNode, Fragment } from './create-element';
 import { patch } from './diff/patch';
-import {
-	DIRTY_BIT,
-	FORCE_UPDATE,
-	MODE_HYDRATE,
-	MODE_SUSPENDED,
-	MODE_UNMOUNTING
-} from './constants';
-import { getDomSibling, getParentDom } from './tree';
+import { DIRTY_BIT, FORCE_UPDATE, MODE_UNMOUNTING } from './constants';
+import { getParentDom } from './tree';
 
 /**
  * Base Component class. Provides `setState()` and `forceUpdate()`, which
@@ -99,12 +93,6 @@ function rerenderComponent(component) {
 
 	if (~internal._flags & MODE_UNMOUNTING && internal._flags & DIRTY_BIT) {
 		let parentDom = getParentDom(internal);
-		let startDom =
-			(internal._flags & (MODE_HYDRATE | MODE_SUSPENDED)) ===
-			(MODE_HYDRATE | MODE_SUSPENDED)
-				? internal._dom
-				: getDomSibling(internal, 0);
-
 		const vnode = createVNode(
 			internal.type,
 			internal.props,
@@ -114,14 +102,7 @@ function rerenderComponent(component) {
 		);
 
 		const commitQueue = [];
-		patch(
-			parentDom,
-			vnode,
-			internal,
-			component._globalContext,
-			commitQueue,
-			startDom
-		);
+		patch(parentDom, vnode, internal, component._globalContext, commitQueue);
 		commitRoot(commitQueue, internal);
 	}
 }

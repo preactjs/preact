@@ -9,7 +9,8 @@ import {
 	FORCE_UPDATE,
 	MODE_HYDRATE,
 	MODE_PENDING_ERROR,
-	MODE_RERENDERING_ERROR
+	MODE_RERENDERING_ERROR,
+	MODE_SUSPENDED
 } from '../constants';
 import { addCommitCallback } from './commit';
 import { getDomSibling } from '../tree';
@@ -198,7 +199,10 @@ export function renderComponent(
 			globalContext,
 			commitQueue,
 			// TODO: Mounting and hydration still use the startDom param
-			isNew || internal._flags & MODE_HYDRATE
+			(internal._flags & (MODE_HYDRATE | MODE_SUSPENDED)) ===
+				(MODE_HYDRATE | MODE_SUSPENDED)
+				? internal._dom
+				: isNew || internal._flags & MODE_HYDRATE
 				? startDom
 				: getDomSibling(internal)
 		);

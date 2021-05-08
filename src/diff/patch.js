@@ -21,22 +21,19 @@ import { getDomSibling } from '../tree';
  * @param {object} globalContext The current context object. Modified by getChildContext
  * @param {import('../internal').CommitQueue} commitQueue List of components
  * which have callbacks to invoke in commitRoot
- * @param {import('../internal').PreactNode} startDom
  */
 export function patch(
 	parentDom,
 	newVNode,
 	internal,
 	globalContext,
-	commitQueue,
-	startDom
+	commitQueue
 ) {
 	if (internal._flags & TYPE_TEXT) {
 		if (newVNode !== internal.props) {
 			internal._dom.data = newVNode;
 			internal.props = newVNode;
 		}
-		return internal._dom.nextSibling;
 	}
 
 	// When passing through createElement it assigns the object
@@ -44,9 +41,6 @@ export function patch(
 	if (newVNode.constructor !== undefined) return null;
 
 	if (options._diff) options._diff(internal, newVNode);
-
-	/** @type {import('../internal').PreactNode} */
-	let nextDomSibling;
 
 	try {
 		if (internal._flags & TYPE_COMPONENT) {
@@ -61,26 +55,23 @@ export function patch(
 				}
 			}
 
-			nextDomSibling = renderComponent(
+			renderComponent(
 				parentDom,
 				/** @type {import('../internal').VNode} */
 				(newVNode),
 				internal,
 				globalContext,
 				commitQueue,
-				startDom
+				null
 			);
 		} else if (newVNode._vnodeId !== internal._vnodeId) {
-			nextDomSibling = patchDOMElement(
+			patchDOMElement(
 				internal._dom,
 				newVNode,
 				internal,
 				globalContext,
 				commitQueue
 			);
-		} else {
-			// @ts-ignore Trust me TS, nextSibling is a PreactElement
-			nextDomSibling = internal._dom.nextSibling;
 		}
 
 		if (options.diffed) options.diffed(internal);
@@ -95,8 +86,6 @@ export function patch(
 		internal._flags |= e.then ? MODE_SUSPENDED : MODE_ERRORED;
 		options._catchError(e, internal);
 	}
-
-	return nextDomSibling;
 }
 
 /**
@@ -108,7 +97,6 @@ export function patch(
  * @param {object} globalContext The current context object
  * @param {import('../internal').CommitQueue} commitQueue List of components
  * which have callbacks to invoke in commitRoot
- * @returns {import('../internal').PreactElement}
  */
 function patchDOMElement(dom, newVNode, internal, globalContext, commitQueue) {
 	let oldProps = internal.props;
@@ -169,7 +157,4 @@ function patchDOMElement(dom, newVNode, internal, globalContext, commitQueue) {
 	) {
 		setProperty(dom, 'checked', tmp, oldProps.checked, false);
 	}
-
-	// @ts-ignore Trust me TS, nextSibling is a PreactElement
-	return dom.nextSibling;
 }
