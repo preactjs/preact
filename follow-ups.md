@@ -8,15 +8,21 @@
 
 ## Component plugin prep follow ups
 
-- Consider exposing flags to replace various bools in `rendererState`
-	- Move setting COMMIT_FLAG to `setState`/`forceUpdate`
-- Consider adding TYPE_ERROR_BOUNDARY
-
+- Consider how we expect component plugins to interact with the flags field?
+  - Should we expose the relevant flag constants through a `preact/core` package?
+  - Should we expose helper functions and make flags internal (e.g. `markForCommit(internal)`, `setSkipChildren(internal)`, `setForceUpdate(internal)`, etc.)
+- Evaluate if using the `SKIP_CHILDREN` flag is the API we want to signal to not diff a component's children.
+  - Consider if there is a way we could reuse the VNodeID/VNode equality logic here.
+  - Or return something like `internal._children` to signal that these children should be skipped.
+- Add test that asserts the COMMIT flag is unset before committing a component (what's the observable failure if we don't do this?)
 - Re-evaluate how components interact with context.
-	- Should each component plugin have its own "namespaced" property off of `globalContext`
-	- How should components update context? Update `rendererState`? Set it directly on `internal._context`?
+  - Do we still need the `rendererState` if context is the only thing in it?
+  - Should each component plugin have its own "namespaced" property off of `globalContext`
+  - How should components update context? Update `rendererState`? Set it directly on `internal._context`?
 - Rework compat's `readContext` to use future updated `render` plugin
 - Explore if we are missing a test for `.nextSibling` call in VNode equality check in patch
+
+- Consider how component plugins can plug into devtools, SSR, HMR
 
 ## Root node follow ups
 
