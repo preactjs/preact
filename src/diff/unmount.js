@@ -28,10 +28,6 @@ export function unmount(internal, parentInternal, skipRemove) {
 			applyRef(r, null, parentInternal);
 	}
 
-	// TODO: May need to consider a way to check that this component has
-	// successfully mounted as well (e.g. if it threw while mounting and a parent
-	// error boundary is rendering error UI and so is attempting to unmount this
-	// component)
 	if (internal._flags & TYPE_COMPONENT) {
 		try {
 			unmountReactComponent(internal);

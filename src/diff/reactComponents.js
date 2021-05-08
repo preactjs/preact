@@ -181,11 +181,9 @@ export function commitReactComponent(internal) {
 
 /** @param {import('../internal').Internal} internal */
 export function unmountReactComponent(internal) {
-	// TODO: This _component existence check is weird. But it is necessary because
+	// This _component existence check may seem weird but it is necessary because
 	// if a component throws in its constructor, then the component never mounted
-	// and so doesn't have an instance. Would it be better here to have a flag set
-	// when a component successfully mounted and only call unmount on it if it
-	// successfully mounted (has the MOUNTED) flag set
+	// and so doesn't have an instance.
 	if (internal._component && internal._component.componentWillUnmount) {
 		internal._component.componentWillUnmount();
 	}
