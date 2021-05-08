@@ -118,12 +118,6 @@ export function patch(parentDom, newVNode, internal, commitQueue, startDom) {
 		// Once we have successfully rendered the new VNode, copy it's ID over
 		internal._vnodeId = newVNode._vnodeId;
 	} catch (e) {
-		if (e.then) {
-			// If a promise was thrown, reorderChildren in case this component is
-			// being hidden or moved
-			reorderChildren(internal, startDom, parentDom);
-		}
-
 		// @TODO: assign a new VNode ID here? Or NaN?
 		// newVNode._vnodeId = 0;
 		internal._flags |= e.then ? MODE_SUSPENDED : MODE_ERRORED;

@@ -14,11 +14,12 @@ import { applyRef } from './refs';
  * @param {import('../internal').Internal} internal The virtual node to unmount
  * @param {import('../internal').Internal} parentInternal The parent of the VNode that
  * initiated the unmount
- * @param {boolean} [skipRemove] Flag that indicates that a parent node of the
+ * @param {number} [skipRemove] Flag that indicates that a parent node of the
  * current element is already detached from the DOM.
  */
 export function unmount(internal, parentInternal, skipRemove) {
-	let r;
+	let r,
+		i = 0;
 	if (options.unmount) options.unmount(internal);
 	internal._flags |= MODE_UNMOUNTING;
 
@@ -26,15 +27,6 @@ export function unmount(internal, parentInternal, skipRemove) {
 		if (!r.current || r.current === internal._dom)
 			applyRef(r, null, parentInternal);
 	}
-
-	let dom;
-	if (!skipRemove && internal._flags & TYPE_DOM) {
-		skipRemove = (dom = internal._dom) != null;
-	} else if (internal._flags & TYPE_ROOT) {
-		skipRemove = false;
-	}
-
-	internal._dom = null;
 
 	// TODO: May need to consider a way to check that this component has
 	// successfully mounted as well (e.g. if it threw while mounting and a parent
@@ -49,10 +41,20 @@ export function unmount(internal, parentInternal, skipRemove) {
 	}
 
 	if ((r = internal._children)) {
-		for (let i = 0; i < r.length; i++) {
-			if (r[i]) unmount(r[i], parentInternal, skipRemove);
+		for (; i < r.length; i++) {
+			if (r[i]) {
+				unmount(
+					r[i],
+					parentInternal,
+					skipRemove ? ~internal._flags & TYPE_ROOT : internal._flags & TYPE_DOM
+				);
+			}
 		}
 	}
 
-	if (dom != null) removeNode(dom);
+	if (!skipRemove && internal._flags & TYPE_DOM) {
+		removeNode(internal._dom);
+	}
+
+	internal._dom = null;
 }
