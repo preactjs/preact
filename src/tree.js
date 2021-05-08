@@ -24,7 +24,7 @@ export function createInternal(vnode, parentInternal) {
 		ref;
 
 	/** @type {number} */
-	let flags = parentInternal ? parentInternal._flags & INHERITED_MODES : 0;
+	let flags = parentInternal ? parentInternal.flags & INHERITED_MODES : 0;
 
 	// Text VNodes/Internals use NaN as an ID so that two are never equal.
 	let vnodeId = NaN;
@@ -69,7 +69,7 @@ export function createInternal(vnode, parentInternal) {
 			flags |= MODE_SVG;
 		} else if (
 			parentInternal &&
-			parentInternal._flags & MODE_SVG &&
+			parentInternal.flags & MODE_SVG &&
 			parentInternal.type === 'foreignObject'
 		) {
 			flags &= ~MODE_SVG;
@@ -82,12 +82,12 @@ export function createInternal(vnode, parentInternal) {
 		props,
 		key,
 		ref,
+		flags,
 		_children: null,
 		_parent: parentInternal,
 		_vnodeId: vnodeId,
 		_dom: null,
 		_component: null,
-		_flags: flags,
 		_depth: parentInternal ? parentInternal._depth + 1 : 0,
 		_context: null
 	};
@@ -99,8 +99,8 @@ export function createInternal(vnode, parentInternal) {
 
 /** @type {(internal: import('./internal').Internal) => boolean} */
 const shouldSearchComponent = internal =>
-	internal._flags & TYPE_COMPONENT &&
-	(!(internal._flags & TYPE_ROOT) ||
+	internal.flags & TYPE_COMPONENT &&
+	(!(internal.flags & TYPE_ROOT) ||
 		internal.props._parentDom == getParentDom(internal._parent));
 
 /**
@@ -146,7 +146,7 @@ export function getChildDom(internal, i) {
 	for (i = i || 0; i < internal._children.length; i++) {
 		let child = internal._children[i];
 		if (child != null) {
-			if (child._flags & TYPE_DOM) {
+			if (child.flags & TYPE_DOM) {
 				return child._dom;
 			}
 
@@ -167,14 +167,13 @@ export function getChildDom(internal, i) {
  * @returns {import('./internal').PreactElement}
  */
 export function getParentDom(internal) {
-	let parentDom =
-		internal._flags & TYPE_ROOT ? internal.props._parentDom : null;
+	let parentDom = internal.flags & TYPE_ROOT ? internal.props._parentDom : null;
 
 	let parent = internal._parent;
 	while (parentDom == null && parent) {
-		if (parent._flags & TYPE_ROOT) {
+		if (parent.flags & TYPE_ROOT) {
 			parentDom = parent.props._parentDom;
-		} else if (parent._flags & TYPE_ELEMENT) {
+		} else if (parent.flags & TYPE_ELEMENT) {
 			parentDom = parent._dom;
 		}
 

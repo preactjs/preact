@@ -35,13 +35,13 @@ export function mount(parentDom, newVNode, internal, commitQueue, startDom) {
 	let nextDomSibling;
 
 	try {
-		if (internal._flags & TYPE_COMPONENT) {
+		if (internal.flags & TYPE_COMPONENT) {
 			// Root nodes signal that an attempt to render into a specific DOM node on
 			// the page. Root nodes can occur anywhere in the tree and not just at the
 			// top.
 			let prevStartDom = startDom;
 			let prevParentDom = parentDom;
-			if (internal._flags & TYPE_ROOT) {
+			if (internal.flags & TYPE_ROOT) {
 				parentDom = newVNode.props._parentDom;
 
 				if (parentDom !== prevParentDom) {
@@ -57,7 +57,7 @@ export function mount(parentDom, newVNode, internal, commitQueue, startDom) {
 				startDom
 			);
 
-			if (internal._flags & TYPE_ROOT && prevParentDom !== parentDom) {
+			if (internal.flags & TYPE_ROOT && prevParentDom !== parentDom) {
 				// If we just mounted a root node/Portal, and it changed the parentDom
 				// of it's children, then we need to resume the diff from it's previous
 				// startDom element, which could be null if we are mounting an entirely
@@ -67,7 +67,7 @@ export function mount(parentDom, newVNode, internal, commitQueue, startDom) {
 			}
 		} else {
 			let hydrateDom =
-				internal._flags & (MODE_HYDRATE | MODE_MUTATIVE_HYDRATE)
+				internal.flags & (MODE_HYDRATE | MODE_MUTATIVE_HYDRATE)
 					? startDom
 					: null;
 
@@ -77,12 +77,12 @@ export function mount(parentDom, newVNode, internal, commitQueue, startDom) {
 		if (options.diffed) options.diffed(internal);
 
 		// We successfully rendered this VNode, unset any stored hydration/bailout state:
-		internal._flags &= RESET_MODE;
+		internal.flags &= RESET_MODE;
 	} catch (e) {
 		internal._vnodeId = 0;
-		internal._flags |= e.then ? MODE_SUSPENDED : MODE_ERRORED;
+		internal.flags |= e.then ? MODE_SUSPENDED : MODE_ERRORED;
 
-		if (internal._flags & MODE_HYDRATE) {
+		if (internal.flags & MODE_HYDRATE) {
 			// @ts-ignore Trust me TS, nextSibling is a PreactElement
 			nextDomSibling = startDom && startDom.nextSibling;
 			internal._dom = startDom; // Save our current DOM position to resume later
@@ -108,10 +108,10 @@ function mountDOMElement(dom, internal, commitQueue) {
 	/** @type {any} */
 	let i;
 
-	let isHydrating = internal._flags & MODE_HYDRATE;
+	let isHydrating = internal.flags & MODE_HYDRATE;
 
 	// if hydrating (hydrate() or render() with replaceNode), find the matching child:
-	if (internal._flags & (MODE_HYDRATE | MODE_MUTATIVE_HYDRATE)) {
+	if (internal.flags & (MODE_HYDRATE | MODE_MUTATIVE_HYDRATE)) {
 		while (
 			dom &&
 			(nodeType ? dom.localName !== nodeType : dom.nodeType !== 3)
@@ -120,7 +120,7 @@ function mountDOMElement(dom, internal, commitQueue) {
 		}
 	}
 
-	if (internal._flags & TYPE_TEXT) {
+	if (internal.flags & TYPE_TEXT) {
 		if (dom == null) {
 			// @ts-ignore createTextNode returns Text, we expect PreactElement
 			dom = document.createTextNode(newProps);
@@ -131,10 +131,10 @@ function mountDOMElement(dom, internal, commitQueue) {
 		internal._dom = dom;
 	} else {
 		// Tracks entering and exiting SVG namespace when descending through the tree.
-		// if (nodeType === 'svg') internal._flags |= MODE_SVG;
+		// if (nodeType === 'svg') internal.flags |= MODE_SVG;
 
 		if (dom == null) {
-			if (internal._flags & MODE_SVG) {
+			if (internal.flags & MODE_SVG) {
 				dom = document.createElementNS(
 					'http://www.w3.org/2000/svg',
 					// @ts-ignore We know `newVNode.type` is a string
@@ -150,13 +150,13 @@ function mountDOMElement(dom, internal, commitQueue) {
 
 			// we are creating a new node, so we can assume this is a new subtree (in case we are hydrating), this deopts the hydrate
 			isHydrating = 0;
-			internal._flags &= RESET_MODE;
+			internal.flags &= RESET_MODE;
 		}
 
 		// @TODO: Consider removing and instructing users to instead set the desired
 		// prop for removal to undefined/null. During hydration, props are not
 		// diffed at all (including dangerouslySetInnerHTML)
-		if (internal._flags & MODE_MUTATIVE_HYDRATE) {
+		if (internal.flags & MODE_MUTATIVE_HYDRATE) {
 			// But, if we are in a situation where we are using existing DOM (e.g. replaceNode)
 			// we should read the existing DOM attributes to diff them
 			for (i = 0; i < dom.attributes.length; i++) {
@@ -180,7 +180,7 @@ function mountDOMElement(dom, internal, commitQueue) {
 				(!isHydrating || typeof newProps[i] == 'function') &&
 				newProps[i] != null
 			) {
-				setProperty(dom, i, newProps[i], null, internal._flags & MODE_SVG);
+				setProperty(dom, i, newProps[i], null, internal.flags & MODE_SVG);
 			}
 		}
 
@@ -261,7 +261,7 @@ export function mountChildren(
 
 		newDom = childInternal._dom;
 
-		if (childInternal._flags & TYPE_COMPONENT || newDom == startDom) {
+		if (childInternal.flags & TYPE_COMPONENT || newDom == startDom) {
 			// If the child is a Fragment-like or if it is DOM VNode and its _dom
 			// property matches the dom we are diffing (i.e. startDom), just
 			// continue with the mountedNextChild
@@ -284,8 +284,8 @@ export function mountChildren(
 
 	// Remove children that are not part of any vnode.
 	if (
-		parentInternal._flags & (MODE_HYDRATE | MODE_MUTATIVE_HYDRATE) &&
-		parentInternal._flags & TYPE_ELEMENT
+		parentInternal.flags & (MODE_HYDRATE | MODE_MUTATIVE_HYDRATE) &&
+		parentInternal.flags & TYPE_ELEMENT
 	) {
 		// TODO: Would it be simpler to just clear the pre-existing DOM in top-level
 		// render if render is called with no oldVNode & existing children & no

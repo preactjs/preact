@@ -74,7 +74,7 @@ Component.prototype.forceUpdate = function(callback) {
 		// Set render mode so that we can differentiate where the render request
 		// is coming from. We need this because forceUpdate should never call
 		// shouldComponentUpdate
-		this._internal._flags |= FORCE_UPDATE;
+		this._internal.flags |= FORCE_UPDATE;
 		if (callback) addCommitCallback(this, callback);
 		enqueueRender(this);
 	}
@@ -99,10 +99,10 @@ Component.prototype.render = Fragment;
 function rerenderComponent(component) {
 	let internal = component._internal;
 
-	if (~internal._flags & MODE_UNMOUNTING && internal._flags & DIRTY_BIT) {
+	if (~internal.flags & MODE_UNMOUNTING && internal.flags & DIRTY_BIT) {
 		let parentDom = getParentDom(internal);
 		let startDom =
-			(internal._flags & (MODE_HYDRATE | MODE_SUSPENDED)) ===
+			(internal.flags & (MODE_HYDRATE | MODE_SUSPENDED)) ===
 			(MODE_HYDRATE | MODE_SUSPENDED)
 				? internal._dom
 				: getDomSibling(internal, 0);
@@ -156,8 +156,8 @@ let prevDebounce;
  */
 export function enqueueRender(c) {
 	if (
-		(!(c._internal._flags & DIRTY_BIT) &&
-			(c._internal._flags |= DIRTY_BIT) &&
+		(!(c._internal.flags & DIRTY_BIT) &&
+			(c._internal.flags |= DIRTY_BIT) &&
 			rerenderQueue.push(c) &&
 			!process._rerenderCount++) ||
 		prevDebounce !== options.debounceRendering

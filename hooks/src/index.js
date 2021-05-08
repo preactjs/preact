@@ -296,7 +296,7 @@ export function useErrorBoundary(cb) {
  */
 function flushAfterPaintEffects() {
 	afterPaintEffects.forEach(component => {
-		if (~component._internal._flags & MODE_UNMOUNTING) {
+		if (~component._internal.flags & MODE_UNMOUNTING) {
 			try {
 				component.__hooks._pendingEffects.forEach(invokeCleanup);
 				component.__hooks._pendingEffects.forEach(invokeEffect);

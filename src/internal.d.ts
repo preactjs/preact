@@ -137,6 +137,8 @@ export interface Internal<P = {}> {
 	props: (P & { children: ComponentChildren }) | string | number;
 	key: any;
 	ref: Ref<any> | null;
+	/** Bitfield containing information about the Internal or its component. */
+	flags: number;
 	/** children Internal nodes */
 	_children: Internal[];
 	/** next sibling Internal node */
@@ -150,8 +152,6 @@ export interface Internal<P = {}> {
 	_dom: PreactNode;
 	/** The component instance for which this is a backing Internal node */
 	_component: Component | null;
-	/** Bitfield containing information about the Internal or its component. */
-	_flags: number;
 	/** This Internal's distance from the tree root */
 	_depth: number | null;
 	_context: any;
