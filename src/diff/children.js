@@ -46,6 +46,7 @@ export function diffChildren(
 	let oldChildren =
 		(parentInternal._children && parentInternal._children.slice()) || EMPTY_ARR;
 	let oldChildrenLength = oldChildren.length;
+	let savedOldChildren = [...oldChildren];
 
 	const newChildren = [];
 	for (i = 0; i < renderResult.length; i++) {
@@ -64,6 +65,24 @@ export function diffChildren(
 			i,
 			oldChildrenLength
 		);
+
+		let matchingIndex = findMatchingIndex(
+			childVNode,
+			savedOldChildren,
+			i,
+			oldChildrenLength
+		);
+		if (savedOldChildren[matchingIndex] == childInternal) {
+			savedOldChildren[matchingIndex] = undefined;
+		} else {
+			let matchedChild = savedOldChildren[matchingIndex];
+			console.log(
+				matchingIndex,
+				matchedChild && { type: matchedChild.type, key: matchedChild.key },
+				childInternal && { type: childInternal.type, key: childInternal.key }
+			);
+			throw 'poop';
+		}
 
 		let oldVNodeRef;
 		let nextDomSibling;
@@ -225,6 +244,64 @@ function findMatchingInternal(childVNode, oldChildren, i, oldChildrenLength) {
 	}
 
 	return childInternal;
+}
+
+/**
+ * @param {import('../internal').VNode | string} childVNode
+ * @param {import('../internal').Internal[]} oldChildren
+ * @param {number} skewedIndex
+ * @param {number} remainingOldChildren
+ * @returns {number}
+ */
+function findMatchingIndex(
+	childVNode,
+	oldChildren,
+	skewedIndex,
+	remainingOldChildren
+) {
+	const type = typeof childVNode === 'string' ? null : childVNode.type;
+	// ### Change from keyed: key is stored directly on vnode
+	// const key =
+	// 	(type !== null && childVNode.props != null && childVNode.props.key) ||
+	// 	undefined;
+	const key = type !== null ? childVNode.key : undefined;
+	let match = -1;
+	let x = skewedIndex - 1; // i - 1;
+	let y = skewedIndex + 1; // i + 1;
+	let oldChild = oldChildren[skewedIndex]; // i
+
+	if (
+		// ### Change from keyed: support for matching null placeholders
+		oldChild === null ||
+		(oldChild != null && oldChild.type === type && oldChild.key == key)
+	) {
+		match = skewedIndex; // i
+	}
+	// If there are any unused children left (ignoring an available in-place child which we just checked)
+	else if (remainingOldChildren > (oldChild != null ? 1 : 0)) {
+		while (true) {
+			if (x >= 0) {
+				oldChild = oldChildren[x];
+				if (oldChild != null && oldChild.type === type && oldChild.key == key) {
+					match = x;
+					break;
+				}
+				x--;
+			}
+			if (y < oldChildren.length) {
+				oldChild = oldChildren[y];
+				if (oldChild != null && oldChild.type === type && oldChild.key == key) {
+					match = y;
+					break;
+				}
+				y++;
+			} else if (x < 0) {
+				break;
+			}
+		}
+	}
+
+	return match;
 }
 
 /**
