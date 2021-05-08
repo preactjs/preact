@@ -36,6 +36,7 @@ export function diffChildren(
 	startDom
 ) {
 	let i, newDom, refs;
+	let skew = 0;
 
 	/** @type {import('../internal').Internal} */
 	let childInternal;
@@ -46,6 +47,7 @@ export function diffChildren(
 	let oldChildren =
 		(parentInternal._children && parentInternal._children.slice()) || EMPTY_ARR;
 	let oldChildrenLength = oldChildren.length;
+	let remainingOldChildren = oldChildrenLength;
 
 	const newChildren = [];
 	for (i = 0; i < renderResult.length; i++) {
@@ -58,19 +60,24 @@ export function diffChildren(
 			continue;
 		}
 
+		let skewedIndex = i + skew;
+
 		/// TODO: Reconsider if we should bring back the "not moving text nodes" logic?
 		let matchingIndex = findMatchingIndex(
 			childVNode,
 			oldChildren,
-			i,
-			oldChildrenLength
+			skewedIndex,
+			remainingOldChildren
 		);
 		if (matchingIndex === -1) {
 			childInternal = undefined;
 		} else {
 			childInternal = oldChildren[matchingIndex];
 			oldChildren[matchingIndex] = undefined;
+			remainingOldChildren--;
 		}
+
+		let mountingChild = childInternal == null;
 
 		let oldVNodeRef;
 		let nextDomSibling;
@@ -84,7 +91,8 @@ export function diffChildren(
 				childInternal,
 				globalContext,
 				commitQueue,
-				startDom
+				// TODO: Find some better way to track this instead of constantly recomputing it
+				getDomSibling(parentInternal, skewedIndex)
 			);
 		}
 		// If this node suspended during hydration, and no other flags are set:
@@ -103,7 +111,7 @@ export function diffChildren(
 				childInternal,
 				globalContext,
 				commitQueue,
-				startDom
+				startDom // TODO: What to do here...
 			);
 		} else {
 			oldVNodeRef = childInternal.ref;
@@ -115,7 +123,7 @@ export function diffChildren(
 				childInternal,
 				globalContext,
 				commitQueue,
-				startDom
+				startDom // TODO: What to do here...
 			);
 		}
 
@@ -131,23 +139,78 @@ export function diffChildren(
 			);
 		}
 
-		if (childInternal._flags & TYPE_COMPONENT) {
-			startDom = nextDomSibling;
-		} else if (newDom && newDom == startDom) {
-			// If the newDom and the dom we are expecting to be there are the same, then
-			// do nothing
-			startDom = nextDomSibling;
-		} else if (newDom) {
-			startDom = placeChild(parentDom, oldChildrenLength, newDom, startDom);
-		} else if (
-			startDom &&
-			childInternal != null &&
-			startDom.parentNode != parentDom
-		) {
-			// The above condition is to handle null placeholders. See test in placeholder.test.js:
-			// `efficiently replace null placeholders in parent rerenders`
-			startDom = nextDomSibling;
+		// ### Change from keyed: I'm dropping re-parenting/replaceChild feature from
+		// keyed as well as the _currentOffset fragment handling and am instead
+		// recursing through fragments and moving their children as they occur
+		//
+		// I'm also using getDomSibling to get the next dom sibling through
+		// fragments. keyed did not handle this and just searched for the next
+		// non-null child (I think)
+		go: if (mountingChild) {
+			skew--;
+
+			// Perform insert of new dom
+			if (childInternal._flags & TYPE_DOM) {
+				let nextSibling = getDomSibling(parentInternal, skewedIndex);
+				parentDom.insertBefore(childInternal._dom, nextSibling);
+			}
+			// If we just mounted a component, its DOM has already been inserted in mount
+			//
+			// else {
+			// 	insertComponentDom(childInternal, nextSibling, parentDom);
+			// }
+		} else if (matchingIndex !== skewedIndex) {
+			// Move this DOM into its correct place
+			if (matchingIndex === skewedIndex + 1) {
+				skew++;
+				break go;
+			} else if (matchingIndex > skewedIndex) {
+				if (remainingOldChildren > renderResult.length - skewedIndex) {
+					skew += matchingIndex - skewedIndex;
+					break go;
+				} else {
+					// ### Change from keyed: I think this was missing from the algo...
+					skew--;
+				}
+			} else if (matchingIndex < skewedIndex) {
+				if (matchingIndex == skewedIndex - 1) {
+					skew = matchingIndex - skewedIndex;
+				} else {
+					skew = 0;
+				}
+			} else {
+				skew = 0;
+			}
+
+			skewedIndex = i + skew;
+
+			if (matchingIndex == i) break go;
+
+			let nextSibling = getDomSibling(parentInternal, skewedIndex + 1);
+			if (childInternal._flags & TYPE_DOM) {
+				parentDom.insertBefore(childInternal._dom, nextSibling);
+			} else {
+				insertComponentDom(childInternal, nextSibling, parentDom);
+			}
 		}
+
+		// if (childInternal._flags & TYPE_COMPONENT) {
+		// 	startDom = nextDomSibling;
+		// } else if (newDom && newDom == startDom) {
+		// 	// If the newDom and the dom we are expecting to be there are the same, then
+		// 	// do nothing
+		// 	startDom = nextDomSibling;
+		// } else if (newDom) {
+		// 	startDom = placeChild(parentDom, oldChildrenLength, newDom, startDom);
+		// } else if (
+		// 	startDom &&
+		// 	childInternal != null &&
+		// 	startDom.parentNode != parentDom
+		// ) {
+		// 	// The above condition is to handle null placeholders. See test in placeholder.test.js:
+		// 	// `efficiently replace null placeholders in parent rerenders`
+		// 	startDom = nextDomSibling;
+		// }
 
 		newChildren[i] = childInternal;
 	}
@@ -155,21 +218,23 @@ export function diffChildren(
 	parentInternal._children = newChildren;
 
 	// Remove remaining oldChildren if there are any.
-	for (i = oldChildrenLength; i--; ) {
-		if (oldChildren[i] != null) {
-			if (
-				parentInternal._flags & TYPE_COMPONENT &&
-				startDom != null &&
-				((oldChildren[i]._flags & TYPE_DOM &&
-					oldChildren[i]._dom == startDom) ||
-					getChildDom(oldChildren[i]) == startDom)
-			) {
-				// If the startDom points to a dom node that is about to be unmounted,
-				// then get the next sibling of that vnode and set startDom to it
-				startDom = getDomSibling(parentInternal, i + 1);
-			}
+	if (remainingOldChildren > 0) {
+		for (i = oldChildrenLength; i--; ) {
+			if (oldChildren[i] != null) {
+				if (
+					parentInternal._flags & TYPE_COMPONENT &&
+					startDom != null &&
+					((oldChildren[i]._flags & TYPE_DOM &&
+						oldChildren[i]._dom == startDom) ||
+						getChildDom(oldChildren[i]) == startDom)
+				) {
+					// If the startDom points to a dom node that is about to be unmounted,
+					// then get the next sibling of that vnode and set startDom to it
+					startDom = getDomSibling(parentInternal, i + 1);
+				}
 
-			unmount(oldChildren[i], oldChildren[i]);
+				unmount(oldChildren[i], oldChildren[i]);
+			}
 		}
 	}
 
@@ -290,6 +355,30 @@ function findMatchingIndex(
 	}
 
 	return match;
+}
+
+/**
+ * @param {import('../internal').Internal} internal
+ * @param {import('../internal').PreactNode} nextSibling
+ * @param {import('../internal').PreactNode} parentDom
+ */
+function insertComponentDom(internal, nextSibling, parentDom) {
+	if (internal._children == null) {
+		return;
+	}
+
+	for (let i = 0; i < internal._children.length; i++) {
+		let childInternal = internal._children[i];
+		if (childInternal) {
+			childInternal._parent = internal;
+
+			if (childInternal._flags & TYPE_COMPONENT) {
+				insertComponentDom(childInternal, nextSibling, parentDom);
+			} else if (childInternal._dom != nextSibling) {
+				parentDom.insertBefore(childInternal._dom, nextSibling);
+			}
+		}
+	}
 }
 
 /**

@@ -3,6 +3,8 @@ import { setupScratch, teardown } from '../_util/helpers';
 import { logCall, clearLog, getLog } from '../_util/logCall';
 import { div } from '../_util/dom';
 
+// TODO: Add dom op assertions for all these tests
+
 /** @jsx createElement */
 
 describe('keys', () => {
@@ -341,11 +343,11 @@ describe('keys', () => {
 			'<ol>jabcdefghi.insertBefore(<li>i, <li>a)',
 			'<ol>jiabcdefgh.insertBefore(<li>h, <li>a)',
 			'<ol>jihabcdefg.insertBefore(<li>g, <li>a)',
-			'<ol>jihgabcdef.insertBefore(<li>e, Null)',
-			'<ol>jihgabcdfe.insertBefore(<li>d, Null)',
-			'<ol>jihgabcfed.insertBefore(<li>c, Null)',
-			'<ol>jihgabfedc.insertBefore(<li>b, Null)',
-			'<ol>jihgafedcb.insertBefore(<li>a, Null)'
+			'<ol>jihgabcdef.insertBefore(<li>f, <li>a)',
+			'<ol>jihgfabcde.insertBefore(<li>e, <li>a)',
+			'<ol>jihgfeabcd.insertBefore(<li>d, <li>a)',
+			'<ol>jihgfedabc.insertBefore(<li>c, <li>a)',
+			'<ol>jihgfedcab.insertBefore(<li>a, Null)'
 		]);
 	});
 
