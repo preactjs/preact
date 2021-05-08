@@ -26,7 +26,7 @@ What about:
 export function renderReactComponent(newVNode, internal, rendererState) {
 	/** @type {import('../internal').Component} */
 	let c;
-	let isNew, oldProps, oldState, snapshot, tmp;
+	let oldProps, oldState, snapshot, tmp;
 
 	/** @type {import('../internal').ComponentType} */
 	let type = (internal.type);
@@ -44,62 +44,22 @@ export function renderReactComponent(newVNode, internal, rendererState) {
 			: tmp._defaultValue
 		: rendererState.context;
 
-	if (internal && internal._component) {
+	if (internal._component) {
 		c = internal._component;
-	} else {
-		// Instantiate the new component
-		if ('prototype' in type && type.prototype.render) {
-			// @ts-ignore The check above verifies that newType is suppose to be constructed
-			internal._component = c = new type(newProps, componentContext); // eslint-disable-line new-cap
-		} else {
-			// @ts-ignore Trust me, Component implements the interface we want
-			internal._component = c = new Component(newProps, componentContext);
-			c.constructor = type;
-			c.render = doRender;
-		}
-		if (provider) provider.sub(c);
 
-		if (c.componentDidCatch || type.getDerivedStateFromError) {
-			internal.flags |= TYPE_ERROR_BOUNDARY;
-		}
+		oldProps = c.props;
+		oldState = c.state;
 
-		c.props = newProps;
-		if (!c.state) c.state = {};
-		c.context = componentContext;
-		isNew = true;
-	}
+		if (type.getDerivedStateFromProps != null) {
+			if (c._nextState == c.state) {
+				c._nextState = assign({}, c._nextState);
+			}
 
-	// Invoke getDerivedStateFromProps
-	if (c._nextState == null) {
-		c._nextState = c.state;
-	}
-	if (type.getDerivedStateFromProps != null) {
-		if (c._nextState == c.state) {
-			c._nextState = assign({}, c._nextState);
-		}
-
-		assign(c._nextState, type.getDerivedStateFromProps(newProps, c._nextState));
-	}
-
-	oldProps = c.props;
-	oldState = c.state;
-	if (isNew) {
-		if (type.getDerivedStateFromProps == null && c.componentWillMount != null) {
-			c.componentWillMount();
-		}
-
-		if (c.componentDidMount != null) {
-			// If the component was constructed, queue up componentDidMount so the
-			// first time this internal commits (regardless of suspense or not) it
-			// will be called
-			addCommitCallback(c, c.componentDidMount);
-		}
-	} else {
-		if (
-			type.getDerivedStateFromProps == null &&
-			newProps !== oldProps &&
-			c.componentWillReceiveProps != null
-		) {
+			assign(
+				c._nextState,
+				type.getDerivedStateFromProps(newProps, c._nextState)
+			);
+		} else if (newProps !== oldProps && c.componentWillReceiveProps != null) {
 			c.componentWillReceiveProps(newProps, componentContext);
 		}
 
@@ -122,6 +82,47 @@ export function renderReactComponent(newVNode, internal, rendererState) {
 
 		if (c.componentWillUpdate != null) {
 			c.componentWillUpdate(newProps, c._nextState, componentContext);
+		}
+	} else {
+		// Instantiate the new component
+		if ('prototype' in type && type.prototype.render) {
+			// @ts-ignore The check above verifies that newType is suppose to be constructed
+			internal._component = c = new type(newProps, componentContext); // eslint-disable-line new-cap
+		} else {
+			// @ts-ignore Trust me, Component implements the interface we want
+			internal._component = c = new Component(newProps, componentContext);
+			c.constructor = type;
+			c.render = doRender;
+		}
+		if (provider) provider.sub(c);
+
+		if (c.componentDidCatch || type.getDerivedStateFromError) {
+			internal.flags |= TYPE_ERROR_BOUNDARY;
+		}
+
+		c.props = newProps;
+		if (!c.state) c.state = {};
+		c._nextState = c.state;
+		c.context = componentContext;
+
+		if (type.getDerivedStateFromProps != null) {
+			if (c._nextState == c.state) {
+				c._nextState = assign({}, c._nextState);
+			}
+
+			assign(
+				c._nextState,
+				type.getDerivedStateFromProps(newProps, c._nextState)
+			);
+		} else if (c.componentWillMount != null) {
+			c.componentWillMount();
+		}
+
+		if (c.componentDidMount != null) {
+			// If the component was constructed, queue up componentDidMount so the
+			// first time this internal commits (regardless of suspense or not) it
+			// will be called
+			addCommitCallback(c, c.componentDidMount);
 		}
 	}
 
@@ -150,7 +151,7 @@ export function renderReactComponent(newVNode, internal, rendererState) {
 		);
 	}
 
-	if (!isNew) {
+	if (oldProps) {
 		if (c.getSnapshotBeforeUpdate != null) {
 			snapshot = c.getSnapshotBeforeUpdate(oldProps, oldState);
 		}
