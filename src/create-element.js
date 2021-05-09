@@ -19,15 +19,10 @@ export function createElement(type, props, children) {
 		else normalizedProps[i] = props[i];
 	}
 
-	if (arguments.length > 3) {
-		children = [children];
-		// https://github.com/preactjs/preact/issues/1916
-		for (i = 3; i < arguments.length; i++) {
-			children.push(arguments[i]);
-		}
-	}
-	if (arguments.length > 2) {
-		normalizedProps.children = children;
+	i = arguments.length;
+	if (i > 2) {
+		normalizedProps.children =
+			i > 3 ? Array.prototype.slice.call(arguments, 2) : children;
 	}
 
 	// If a Component VNode, check for and apply defaultProps
