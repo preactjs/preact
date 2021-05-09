@@ -19,10 +19,11 @@ export function cloneElement(vnode, props, children) {
 		else normalizedProps[i] = props[i];
 	}
 
-	i = arguments.length;
-	if (i > 2) {
+	if (arguments.length > 2) {
 		normalizedProps.children =
-			i > 3 ? Array.prototype.slice.call(arguments, 2) : children;
+			arguments.length > 3
+				? Array.prototype.slice.call(arguments, 2)
+				: children;
 	}
 
 	return createVNode(

@@ -19,10 +19,11 @@ export function createElement(type, props, children) {
 		else normalizedProps[i] = props[i];
 	}
 
-	i = arguments.length;
-	if (i > 2) {
+	if (arguments.length > 2) {
 		normalizedProps.children =
-			i > 3 ? Array.prototype.slice.call(arguments, 2) : children;
+			arguments.length > 3
+				? Array.prototype.slice.call(arguments, 2)
+				: children;
 	}
 
 	// If a Component VNode, check for and apply defaultProps
