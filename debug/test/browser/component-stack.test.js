@@ -1,10 +1,13 @@
 import { createElement, render, Component } from 'preact';
+import { withTemporaryOptions } from './temporaryOptionsHooks';
 import 'preact/debug';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 
 /** @jsx createElement */
 
 describe('component stack', () => {
+	withTemporaryOptions();
+
 	/** @type {HTMLDivElement} */
 	let scratch;
 

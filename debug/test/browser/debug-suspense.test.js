@@ -1,4 +1,5 @@
 import { createElement, render, lazy, Suspense } from 'preact/compat';
+import { withTemporaryOptions } from './temporaryOptionsHooks';
 import 'preact/debug';
 import { setupRerender } from 'preact/test-utils';
 import {
@@ -10,6 +11,8 @@ import {
 /** @jsx createElement */
 
 describe('debug with suspense', () => {
+	withTemporaryOptions();
+
 	/** @type {HTMLDivElement} */
 	let scratch;
 	let rerender;

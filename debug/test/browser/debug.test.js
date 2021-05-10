@@ -5,6 +5,7 @@ import {
 	serializeHtml
 } from '../../../test/_util/helpers';
 import './fakeDevTools';
+import { withTemporaryOptions } from './temporaryOptionsHooks';
 import 'preact/debug';
 import * as PropTypes from 'prop-types';
 
@@ -15,6 +16,8 @@ const h = createElement;
 /** @jsx createElement */
 
 describe('debug', () => {
+	withTemporaryOptions();
+
 	let scratch;
 	let errors = [];
 	let warnings = [];
