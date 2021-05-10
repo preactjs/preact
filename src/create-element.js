@@ -1,3 +1,4 @@
+import { slice } from './util';
 import options from './options';
 
 /**
@@ -21,9 +22,7 @@ export function createElement(type, props, children) {
 
 	if (arguments.length > 2) {
 		normalizedProps.children =
-			arguments.length > 3
-				? Array.prototype.slice.call(arguments, 2)
-				: children;
+			arguments.length > 3 ? slice.call(arguments, 2) : children;
 	}
 
 	// If a Component VNode, check for and apply defaultProps

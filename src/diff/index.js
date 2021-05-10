@@ -1,9 +1,9 @@
-import { EMPTY_OBJ, EMPTY_ARR } from '../constants';
+import { EMPTY_OBJ } from '../constants';
 import { Component } from '../component';
 import { Fragment } from '../create-element';
 import { diffChildren } from './children';
 import { diffProps, setProperty } from './props';
-import { assign, removeNode } from '../util';
+import { assign, removeNode, slice } from '../util';
 import options from '../options';
 
 /**
@@ -363,8 +363,7 @@ function diffElementNodes(
 		}
 	} else {
 		// If excessDomChildren was not null, repopulate it with the current element's children:
-		excessDomChildren =
-			excessDomChildren && EMPTY_ARR.slice.call(dom.childNodes);
+		excessDomChildren = excessDomChildren && slice.call(dom.childNodes);
 
 		oldProps = oldVNode.props || EMPTY_OBJ;
 

@@ -1,4 +1,4 @@
-import { assign } from './util';
+import { assign, slice } from './util';
 import { createVNode } from './create-element';
 
 /**
@@ -21,9 +21,7 @@ export function cloneElement(vnode, props, children) {
 
 	if (arguments.length > 2) {
 		normalizedProps.children =
-			arguments.length > 3
-				? Array.prototype.slice.call(arguments, 2)
-				: children;
+			arguments.length > 3 ? slice.call(arguments, 2) : children;
 	}
 
 	return createVNode(
