@@ -147,6 +147,9 @@ export function diff(
 					c._vnode = newVNode;
 					newVNode._dom = oldVNode._dom;
 					newVNode._children = oldVNode._children;
+					newVNode._children.forEach(vnode => {
+						if (vnode) vnode._parent = newVNode;
+					});
 					if (c._renderCallbacks.length) {
 						commitQueue.push(c);
 					}
@@ -477,15 +480,6 @@ export function unmount(vnode, parentVNode, skipRemove) {
 		if (!r.current || r.current === vnode._dom) applyRef(r, null, parentVNode);
 	}
 
-	let dom;
-	if (!skipRemove && typeof vnode.type != 'function') {
-		skipRemove = (dom = vnode._dom) != null;
-	}
-
-	// Must be set to `undefined` to properly clean up `_nextDom`
-	// for which `null` is a valid value. See comment in `create-element.js`
-	vnode._dom = vnode._nextDom = undefined;
-
 	if ((r = vnode._component) != null) {
 		if (r.componentWillUnmount) {
 			try {
@@ -500,11 +494,17 @@ export function unmount(vnode, parentVNode, skipRemove) {
 
 	if ((r = vnode._children)) {
 		for (let i = 0; i < r.length; i++) {
-			if (r[i]) unmount(r[i], parentVNode, skipRemove);
+			if (r[i]) {
+				unmount(r[i], parentVNode, typeof vnode.type != 'function');
+			}
 		}
 	}
 
-	if (dom != null) removeNode(dom);
+	if (!skipRemove && vnode._dom != null) removeNode(vnode._dom);
+
+	// Must be set to `undefined` to properly clean up `_nextDom`
+	// for which `null` is a valid value. See comment in `create-element.js`
+	vnode._dom = vnode._nextDom = undefined;
 }
 
 /** The `.render()` method for a PFC backing instance. */

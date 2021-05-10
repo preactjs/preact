@@ -182,6 +182,140 @@ describe('suspense hydration', () => {
 		});
 	});
 
+	it('should allow parents to update around suspense boundary and unmount', async () => {
+		scratch.innerHTML = '<div>Count: 0</div><div>Hello</div>';
+		clearLog();
+
+		const [Lazy, resolve] = createLazy();
+
+		/** @type {() => void} */
+		let increment;
+		function Counter() {
+			const [count, setCount] = useState(0);
+			increment = () => setCount(c => c + 1);
+			return (
+				<Fragment>
+					<div>Count: {count}</div>
+					<Suspense>
+						<Lazy />
+					</Suspense>
+				</Fragment>
+			);
+		}
+
+		let hide;
+		function Component() {
+			const [show, setShow] = useState(true);
+			hide = () => setShow(false);
+
+			return show ? <Counter /> : null;
+		}
+
+		hydrate(<Component />, scratch);
+		rerender(); // Flush rerender queue to mimic what preact will really do
+		expect(scratch.innerHTML).to.equal('<div>Count: 0</div><div>Hello</div>');
+		// Re: DOM OP below - Known issue with hydrating merged text nodes
+		expect(getLog()).to.deep.equal(['<div>Count: .appendChild(#text)']);
+		clearLog();
+
+		increment();
+		rerender();
+
+		expect(scratch.innerHTML).to.equal('<div>Count: 1</div><div>Hello</div>');
+		expect(getLog()).to.deep.equal([]);
+		clearLog();
+
+		await resolve(() => <div>Hello</div>);
+		rerender();
+		expect(scratch.innerHTML).to.equal('<div>Count: 1</div><div>Hello</div>');
+		expect(getLog()).to.deep.equal([]);
+		clearLog();
+
+		hide();
+		rerender();
+		expect(scratch.innerHTML).to.equal('');
+	});
+
+	it('should allow parents to update around suspense boundary and unmount before resolves', async () => {
+		scratch.innerHTML = '<div>Count: 0</div><div>Hello</div>';
+		clearLog();
+
+		const [Lazy] = createLazy();
+
+		/** @type {() => void} */
+		let increment;
+		function Counter() {
+			const [count, setCount] = useState(0);
+			increment = () => setCount(c => c + 1);
+			return (
+				<Fragment>
+					<div>Count: {count}</div>
+					<Suspense>
+						<Lazy />
+					</Suspense>
+				</Fragment>
+			);
+		}
+
+		let hide;
+		function Component() {
+			const [show, setShow] = useState(true);
+			hide = () => setShow(false);
+
+			return show ? <Counter /> : null;
+		}
+
+		hydrate(<Component />, scratch);
+		rerender(); // Flush rerender queue to mimic what preact will really do
+		expect(scratch.innerHTML).to.equal('<div>Count: 0</div><div>Hello</div>');
+		// Re: DOM OP below - Known issue with hydrating merged text nodes
+		expect(getLog()).to.deep.equal(['<div>Count: .appendChild(#text)']);
+		clearLog();
+
+		increment();
+		rerender();
+
+		expect(scratch.innerHTML).to.equal('<div>Count: 1</div><div>Hello</div>');
+		expect(getLog()).to.deep.equal([]);
+		clearLog();
+
+		hide();
+		rerender();
+		expect(scratch.innerHTML).to.equal('');
+	});
+
+	it('should allow parents to unmount before resolves', async () => {
+		scratch.innerHTML = '<div>Count: 0</div><div>Hello</div>';
+
+		const [Lazy] = createLazy();
+
+		function Counter() {
+			return (
+				<Fragment>
+					<div>Count: 0</div>
+					<Suspense>
+						<Lazy />
+					</Suspense>
+				</Fragment>
+			);
+		}
+
+		let hide;
+		function Component() {
+			const [show, setShow] = useState(true);
+			hide = () => setShow(false);
+
+			return show ? <Counter /> : null;
+		}
+
+		hydrate(<Component />, scratch);
+		rerender(); // Flush rerender queue to mimic what preact will really do
+
+		hide();
+		rerender();
+		expect(scratch.innerHTML).to.equal('');
+	});
+
 	it('should properly hydrate when there is DOM and Components between Suspense and suspender', () => {
 		scratch.innerHTML = '<div><div>Hello</div></div>';
 		clearLog();

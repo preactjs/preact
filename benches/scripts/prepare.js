@@ -7,16 +7,22 @@ import { repoRoot } from './utils.js';
 const npmCmd = process.platform == 'win32' ? 'npm.cmd' : 'npm';
 
 /**
- * @param {TachometerOptions["framework"]} framework
+ * @param {string[]} frameworks
  */
-export async function prepare(framework) {
+export async function prepare(frameworks) {
 	const proxyRoot = repoRoot('benches/proxy-packages');
-	for (let dirname of await readdir(proxyRoot)) {
-		if (!framework.includes(dirname.replace(/-proxy/g, ''))) {
+	const proxyDirs = (await readdir(proxyRoot)).map(dirname =>
+		dirname.replace(/-proxy$/, '')
+	);
+
+	for (let framework of frameworks) {
+		const dirname = proxyDirs.find(dir => dir == framework);
+		if (dirname == null) {
 			continue;
 		}
 
-		const proxyDir = (...args) => path.join(proxyRoot, dirname, ...args);
+		const proxyDir = (...args) =>
+			path.join(proxyRoot, dirname + '-proxy', ...args);
 
 		// It appears from ad-hoc testing (npm v6.14.9 on Windows), npm will cache
 		// any locally referenced tarball files (e.g. "file:../../../preact.tgz") in

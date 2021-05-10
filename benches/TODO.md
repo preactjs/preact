@@ -8,4 +8,3 @@
 * Add bench mimicking speedometer
 * Add a realworld-like bench?
 * Add a specialized bench that hits certain code paths other's miss (e.g. style attribute handling?)
-* Add analyze script and PR to add --trace to tachometer

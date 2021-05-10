@@ -2,6 +2,7 @@ import sade from 'sade';
 import { generateSingleConfig } from './config.js';
 import { defaultDeoptsOptions, runDeopts } from './deopts.js';
 import { defaultBenchOptions, runBenches } from './bench.js';
+import { analyze } from './analyze.js';
 
 const prog = sade('./scripts');
 
@@ -10,6 +11,11 @@ const prog = sade('./scripts');
 prog
 	.command('config [bench]')
 	.describe('Generate the config for the given benchmark HTML file.')
+	.option(
+		'--trace',
+		'Enable perf tracing for browsers that support it',
+		defaultBenchOptions.trace
+	)
 	.action(generateSingleConfig);
 
 // Tests:
@@ -56,6 +62,11 @@ prog
 		'Which framework(s) to bench. Specify the flag multiple times to compare specific frameworks. Default is all frameworks',
 		defaultBenchOptions.framework
 	)
+	.option(
+		'--trace',
+		'Enable perf tracing for browsers that support it',
+		defaultBenchOptions.trace
+	)
 	.action(runBenches);
 
 // Tests:
@@ -87,5 +98,13 @@ prog
 		defaultDeoptsOptions.open
 	)
 	.action(runDeopts);
+
+prog
+	.command('analyze')
+	.describe(
+		'Analyze the trace logs created by running benchmarks with the --trace flag'
+	)
+	.example('analyze')
+	.action(analyze);
 
 prog.parse(process.argv);

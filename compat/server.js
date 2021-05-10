@@ -1,15 +1,12 @@
 /* eslint-disable */
 var renderToString;
 try {
-	renderToString = dep(require('preact-render-to-string'));
+	const mod = require('preact-render-to-string');
+	renderToString = mod.default || mod.renderToString || mod;
 } catch (e) {
 	throw Error(
 		'renderToString() error: missing "preact-render-to-string" dependency.'
 	);
-}
-
-function dep(obj) {
-	return obj['default'] || obj;
 }
 
 module.exports = {

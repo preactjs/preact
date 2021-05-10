@@ -256,6 +256,17 @@ describe('render()', () => {
 		expect(scratch.innerHTML).to.equal('42');
 	});
 
+	it('should render bigint as text content', () => {
+		// Skip in browsers not supporting big integers
+		if (typeof BigInt === 'undefined') {
+			return;
+		}
+
+		// eslint-disable-next-line no-undef, new-cap
+		render(BigInt(4), scratch);
+		expect(scratch.innerHTML).to.equal('4');
+	});
+
 	it('should render strings as text content', () => {
 		render('Testing, huh! How is it going?', scratch);
 		expect(scratch.innerHTML).to.equal('Testing, huh! How is it going?');
@@ -1130,5 +1141,24 @@ describe('render()', () => {
 
 		expect(scratch.firstChild.contentEditable).to.equal('true');
 		expect(scratch.querySelector('p').contentEditable).to.equal('false');
+	});
+
+	// #3060
+	it('should reset tabindex on undefined/null', () => {
+		const defaultValue = isIE11 ? 0 : -1;
+
+		render(<div tabIndex={0} />, scratch);
+		expect(scratch.firstChild.tabIndex).to.equal(0);
+		render(<div tabIndex={undefined} />, scratch);
+		expect(scratch.firstChild.tabIndex).to.equal(defaultValue);
+		render(<div tabIndex={null} />, scratch);
+		expect(scratch.firstChild.tabIndex).to.equal(defaultValue);
+
+		render(<div tabindex={0} />, scratch);
+		expect(scratch.firstChild.tabIndex).to.equal(0);
+		render(<div tabindex={undefined} />, scratch);
+		expect(scratch.firstChild.tabIndex).to.equal(defaultValue);
+		render(<div tabindex={null} />, scratch);
+		expect(scratch.firstChild.tabIndex).to.equal(defaultValue);
 	});
 });

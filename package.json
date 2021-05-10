@@ -1,7 +1,7 @@
 {
 	"name": "preact",
 	"amdName": "preact",
-	"version": "10.5.12",
+	"version": "10.5.13",
 	"private": false,
 	"description": "Fast 3kb React-compatible Virtual DOM library.",
 	"main": "dist/preact.js",
@@ -59,7 +59,12 @@
 			"import": "./jsx-runtime/dist/jsxRuntime.mjs"
 		},
 		"./compat/server": {
-			"default": "./compat/server.js"
+			"require": "./compat/server.js",
+			"import": "./compat/server.mjs"
+		},
+		"./compat/scheduler": {
+			"require": "./compat/scheduler.js",
+			"import": "./compat/scheduler.mjs"
 		},
 		"./package.json": "./package.json",
 		"./": "./"
@@ -79,7 +84,7 @@
 		"build:devtools": "microbundle build --raw --cwd devtools",
 		"build:hooks": "microbundle build --raw --cwd hooks",
 		"build:test-utils": "microbundle build --raw --cwd test-utils",
-		"build:compat": "microbundle build --raw --cwd compat --globals 'preact/hooks=preactHooks'",
+		"build:compat": "microbundle build src/index.js src/scheduler.js --raw --cwd compat --globals 'preact/hooks=preactHooks'",
 		"build:jsx": "microbundle build --raw --cwd jsx-runtime",
 		"postbuild": "node ./config/node-13-exports.js && node ./config/compat-entries.js",
 		"dev": "microbundle watch --raw --format cjs",
@@ -169,6 +174,9 @@
 		"compat/dist",
 		"compat/src",
 		"compat/server.js",
+		"compat/server.mjs",
+		"compat/scheduler.js",
+		"compat/scheduler.mjs",
 		"compat/test-utils.js",
 		"compat/jsx-runtime.js",
 		"compat/jsx-runtime.mjs",
@@ -229,8 +237,8 @@
 		"cross-env": "^7.0.2",
 		"csstype": "^3.0.5",
 		"diff": "^5.0.0",
-		"errorstacks": "^2.0.0",
-		"esbuild": "^0.8.32",
+		"errorstacks": "^2.3.0",
+		"esbuild": "^0.8.47",
 		"eslint": "5.15.1",
 		"eslint-config-developit": "^1.1.1",
 		"eslint-config-prettier": "^6.5.0",
@@ -240,7 +248,7 @@
 		"karma-chai-sinon": "^0.1.5",
 		"karma-chrome-launcher": "^3.1.0",
 		"karma-coverage": "^2.0.3",
-		"karma-esbuild": "^1.1.1",
+		"karma-esbuild": "^1.1.4",
 		"karma-mocha": "^2.0.1",
 		"karma-mocha-reporter": "^2.2.5",
 		"karma-sauce-launcher": "^4.3.4",

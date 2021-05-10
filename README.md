@@ -133,6 +133,8 @@ Support us with a monthly donation and help us continue our activities. [[Become
 <a href="https://opencollective.com/preact/backer/27/website" target="_blank"><img src="https://opencollective.com/preact/backer/27/avatar.svg"></a>
 <a href="https://opencollective.com/preact/backer/28/website" target="_blank"><img src="https://opencollective.com/preact/backer/28/avatar.svg"></a>
 <a href="https://opencollective.com/preact/backer/29/website" target="_blank"><img src="https://opencollective.com/preact/backer/29/avatar.svg"></a>
+<a href="https://github.com/guardian" target="_blank"><img src="https://github.com/guardian.png?size=64"></a>
+
 
 
 ## Sponsors

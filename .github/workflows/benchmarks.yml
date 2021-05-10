@@ -42,6 +42,7 @@ jobs:
           npm pack --ignore-scripts
           mv preact-*.tgz preact.tgz
           tar -xzf preact.tgz
+          rm preact.tgz
       - name: Upload build output
         uses: actions/upload-artifact@v2
         with:
