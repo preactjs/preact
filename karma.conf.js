@@ -297,7 +297,7 @@ module.exports = function(config) {
 		},
 
 		esbuild: {
-			target: 'es5',
+			target: 'es2017',
 			define: {
 				COVERAGE: coverage,
 				'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || ''),
