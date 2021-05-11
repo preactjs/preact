@@ -150,9 +150,9 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
  * @private
  */
 function eventProxy(e) {
-	this._listeners[e.type + false](options.event ? options.event(e) : e).call(e.currentTarget);
+	this._listeners[e.type + false].call(e.currentTarget, options.event ? options.event(e) : e);
 }
 
 function eventProxyCapture(e) {
-	this._listeners[e.type + true](options.event ? options.event(e) : e).call(e.currentTarget);
+	this._listeners[e.type + true].call(e.currentTarget, options.event ? options.event(e) : e);
 }
