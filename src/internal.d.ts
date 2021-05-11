@@ -21,7 +21,6 @@ export interface DevSource {
 }
 
 export interface Options extends preact.Options {
-	_vnodeId: number;
 	/** Attach a hook that is invoked immediately before a vnode is unmounted. */
 	unmount?(internal: Internal): void;
 	/** Attach a hook that is invoked after a vnode has rendered. */
@@ -42,8 +41,8 @@ export interface Options extends preact.Options {
 	/** Bypass effect execution. Currenty only used in devtools for hooks inspection */
 	_skipEffects?: boolean;
 	/** Attach a hook that is invoked after an error is caught in a component but before calling lifecycle hooks */
-	_catchError(error: any, internal: Internal): void;
-	_internal(internal: Internal, vnode: VNode | string): void;
+	_catchError?(error: any, internal: Internal): void;
+	_internal?(internal: Internal, vnode: VNode | string): void;
 }
 
 export type CommitQueue = Internal[];
@@ -112,6 +111,11 @@ export interface VNode<P = {}> extends preact.VNode<P> {
 	// Redefine type here using our internal ComponentType type
 	type: string | ComponentType<P>;
 	props: P & { children: ComponentChildren };
+	/**
+	 * Internal GUID for this VNode, used for fast equality checks.
+	 * Note: h() allocates monotonic positive integer IDs, jsx() allocates negative.
+	 * @private
+	 */
 	_vnodeId: number;
 }
 
