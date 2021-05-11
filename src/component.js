@@ -1,5 +1,5 @@
 import { assign } from './util';
-import { addCommitCallback, commitRoot } from './diff/commit';
+import { commitRoot } from './diff/commit';
 import options from './options';
 import { createVNode, Fragment } from './create-element';
 import { patch } from './diff/patch';
@@ -10,7 +10,9 @@ import {
 	MODE_SUSPENDED,
 	MODE_UNMOUNTING
 } from './constants';
-import { getDomSibling, getParentDom } from './tree';
+import { getDomSibling, getParentContext, getParentDom } from './tree';
+import { rendererState } from './diff/component';
+import { addCommitCallback } from './diff/reactComponents';
 
 /**
  * Base Component class. Provides `setState()` and `forceUpdate()`, which
@@ -56,7 +58,7 @@ Component.prototype.setState = function(update, callback) {
 	if (update == null) return;
 
 	if (this._internal) {
-		if (callback) addCommitCallback(this._internal, callback);
+		if (callback) addCommitCallback(this, callback);
 		enqueueRender(this);
 	}
 };
@@ -73,7 +75,7 @@ Component.prototype.forceUpdate = function(callback) {
 		// is coming from. We need this because forceUpdate should never call
 		// shouldComponentUpdate
 		this._internal._flags |= FORCE_UPDATE;
-		if (callback) addCommitCallback(this._internal, callback);
+		if (callback) addCommitCallback(this, callback);
 		enqueueRender(this);
 	}
 };
@@ -114,14 +116,8 @@ function rerenderComponent(component) {
 		);
 
 		const commitQueue = [];
-		patch(
-			parentDom,
-			vnode,
-			internal,
-			component._globalContext,
-			commitQueue,
-			startDom
-		);
+		rendererState.context = getParentContext(internal);
+		patch(parentDom, vnode, internal, commitQueue, startDom);
 		commitRoot(commitQueue, internal);
 	}
 }

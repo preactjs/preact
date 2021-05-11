@@ -1,4 +1,4 @@
-import { diffChildren } from './children';
+import { diffChildren, reorderChildren } from './children';
 import { diffProps, setProperty } from './props';
 import options from '../options';
 import { renderComponent } from './component';
@@ -18,19 +18,11 @@ import { getChildDom, getDomSibling } from '../tree';
  * @param {import('../internal').PreactElement} parentDom The parent of the DOM element
  * @param {import('../internal').VNode | string} newVNode The new virtual node
  * @param {import('../internal').Internal} internal The Internal node to patch
- * @param {object} globalContext The current context object. Modified by getChildContext
  * @param {import('../internal').CommitQueue} commitQueue List of components
  * which have callbacks to invoke in commitRoot
  * @param {import('../internal').PreactNode} startDom
  */
-export function patch(
-	parentDom,
-	newVNode,
-	internal,
-	globalContext,
-	commitQueue,
-	startDom
-) {
+export function patch(parentDom, newVNode, internal, commitQueue, startDom) {
 	if (internal._flags & TYPE_TEXT) {
 		if (newVNode !== internal.props) {
 			internal._dom.data = newVNode;
@@ -48,71 +40,75 @@ export function patch(
 	/** @type {import('../internal').PreactNode} */
 	let nextDomSibling;
 
-	try {
-		if (internal._flags & TYPE_COMPONENT) {
-			// Root nodes signal that an attempt to render into a specific DOM node on
-			// the page. Root nodes can occur anywhere in the tree and not just at the
-			// top.
-			let prevStartDom = startDom;
-			let prevParentDom = parentDom;
-			if (internal._flags & TYPE_ROOT) {
-				parentDom = newVNode.props._parentDom;
+	// Root nodes signal that an attempt to render into a specific DOM node on
+	// the page. Root nodes can occur anywhere in the tree and not just at the
+	// top.
+	let prevStartDom = startDom;
+	let prevParentDom = parentDom;
+	if (internal._flags & TYPE_ROOT) {
+		parentDom = newVNode.props._parentDom;
 
-				if (parentDom !== prevParentDom) {
-					let newStartDom = getChildDom(internal);
-					if (newStartDom) {
-						startDom = newStartDom;
-					}
-
-					// The `startDom` variable might point to a node from another
-					// tree from a previous render
-					if (startDom != null && startDom.parentNode !== parentDom) {
-						startDom = null;
-					}
-				}
+		if (parentDom !== prevParentDom) {
+			let newStartDom = getChildDom(internal);
+			if (newStartDom) {
+				startDom = newStartDom;
 			}
 
+			// The `startDom` variable might point to a node from another
+			// tree from a previous render
+			if (startDom != null && startDom.parentNode !== parentDom) {
+				startDom = null;
+			}
+		}
+	}
+
+	try {
+		if (internal._vnodeId == newVNode._vnodeId) {
+			internal.props = newVNode.props;
+			if (internal._flags & TYPE_COMPONENT) {
+				nextDomSibling = reorderChildren(internal, startDom, parentDom);
+			} else {
+				// TODO: No test fails if I comment the line below. We are likely
+				// missing a test for this, probably around asserting DOM operations.
+				nextDomSibling = internal._dom.nextSibling;
+			}
+		} else if (internal._flags & TYPE_COMPONENT) {
 			nextDomSibling = renderComponent(
 				parentDom,
 				/** @type {import('../internal').VNode} */
 				(newVNode),
 				internal,
-				globalContext,
 				commitQueue,
 				startDom
 			);
-
-			if (internal._flags & TYPE_ROOT && prevParentDom !== parentDom) {
-				// If this is a root node/Portal, and it changed the parentDom it's
-				// children, then we need to determine which dom node the diff should
-				// continue with.
-				if (prevStartDom == null || prevStartDom.parentNode == prevParentDom) {
-					// If prevStartDom == null, then we are diffing a root node that
-					// didn't have a startDom to begin with, so we can just return null.
-					//
-					// Or, if the previous value for start dom still has the same parent
-					// DOM has the root node's parent tree, then we can use it. This case
-					// assumes the root node rendered its children into a new parent.
-					nextDomSibling = prevStartDom;
-				} else {
-					// Here, if the parentDoms are different and prevStartDom has moved into
-					// a new parentDom, we'll assume the root node moved prevStartDom under
-					// the new parentDom. Because of this change, we need to search the
-					// internal tree for the next DOM sibling the tree should begin with
-					nextDomSibling = getDomSibling(internal);
-				}
-			}
-		} else if (newVNode._vnodeId !== internal._vnodeId) {
+		} else {
 			nextDomSibling = patchDOMElement(
 				internal._dom,
 				newVNode,
 				internal,
-				globalContext,
 				commitQueue
 			);
-		} else {
-			// @ts-ignore Trust me TS, nextSibling is a PreactElement
-			nextDomSibling = internal._dom.nextSibling;
+		}
+
+		if (internal._flags & TYPE_ROOT && prevParentDom !== parentDom) {
+			// If this is a root node/Portal, and it changed the parentDom it's
+			// children, then we need to determine which dom node the diff should
+			// continue with.
+			if (prevStartDom == null || prevStartDom.parentNode == prevParentDom) {
+				// If prevStartDom == null, then we are diffing a root node that
+				// didn't have a startDom to begin with, so we can just return null.
+				//
+				// Or, if the previous value for start dom still has the same parent
+				// DOM has the root node's parent tree, then we can use it. This case
+				// assumes the root node rendered its children into a new parent.
+				nextDomSibling = prevStartDom;
+			} else {
+				// Here, if the parentDoms are different and prevStartDom has moved into
+				// a new parentDom, we'll assume the root node moved prevStartDom under
+				// the new parentDom. Because of this change, we need to search the
+				// internal tree for the next DOM sibling the tree should begin with
+				nextDomSibling = getDomSibling(internal);
+			}
 		}
 
 		if (options.diffed) options.diffed(internal);
@@ -137,12 +133,11 @@ export function patch(
  * the virtual nodes being diffed
  * @param {import('../internal').VNode} newVNode The new virtual node
  * @param {import('../internal').Internal} internal The Internal node to patch
- * @param {object} globalContext The current context object
  * @param {import('../internal').CommitQueue} commitQueue List of components
  * which have callbacks to invoke in commitRoot
  * @returns {import('../internal').PreactElement}
  */
-function patchDOMElement(dom, newVNode, internal, globalContext, commitQueue) {
+function patchDOMElement(dom, newVNode, internal, commitQueue) {
 	let oldProps = internal.props;
 	let newProps = newVNode.props;
 	let newType = newVNode.type;
@@ -177,7 +172,6 @@ function patchDOMElement(dom, newVNode, internal, globalContext, commitQueue) {
 			dom,
 			Array.isArray(tmp) ? tmp : [tmp],
 			internal,
-			globalContext,
 			commitQueue,
 			dom.firstChild
 		);

@@ -1,16 +1,5 @@
 import options from '../options';
-
-/**
- * @param {import('../internal').Internal} internal
- * @param {() => void} callback
- */
-export function addCommitCallback(internal, callback) {
-	if (internal._commitCallbacks == null) {
-		internal._commitCallbacks = [];
-	}
-
-	internal._commitCallbacks.push(callback);
-}
+import { commitReactComponent } from './reactComponents';
 
 /**
  * @param {import('../internal').CommitQueue} commitQueue List of components
@@ -22,12 +11,7 @@ export function commitRoot(commitQueue, rootInternal) {
 
 	commitQueue.some(internal => {
 		try {
-			// @ts-ignore Reuse the commitQueue variable here so the type changes
-			commitQueue = internal._commitCallbacks;
-			internal._commitCallbacks = [];
-			commitQueue.some(cb => {
-				cb.call(internal._component);
-			});
+			commitReactComponent(internal);
 		} catch (e) {
 			options._catchError(e, internal);
 		}

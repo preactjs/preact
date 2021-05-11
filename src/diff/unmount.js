@@ -1,6 +1,12 @@
-import { MODE_UNMOUNTING, TYPE_DOM, TYPE_ROOT } from '../constants';
+import {
+	MODE_UNMOUNTING,
+	TYPE_COMPONENT,
+	TYPE_DOM,
+	TYPE_ROOT
+} from '../constants';
 import options from '../options';
 import { removeNode } from '../util';
+import { unmountReactComponent } from './reactComponents';
 import { applyRef } from './refs';
 
 /**
@@ -22,13 +28,11 @@ export function unmount(internal, parentInternal, skipRemove) {
 			applyRef(r, null, parentInternal);
 	}
 
-	if ((r = internal._component) != null) {
-		if (r.componentWillUnmount) {
-			try {
-				r.componentWillUnmount();
-			} catch (e) {
-				options._catchError(e, parentInternal);
-			}
+	if (internal._flags & TYPE_COMPONENT) {
+		try {
+			unmountReactComponent(internal);
+		} catch (e) {
+			options._catchError(e, parentInternal);
 		}
 	}
 

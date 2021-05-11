@@ -6,6 +6,18 @@
 - `[MAJOR]` Remove `replaceNode`, [use this technique instead](https://gist.github.com/developit/f321a9ef092ad39f54f8d7c8f99eb29a))
 - `[MAJOR]` Removed select `<option>` fix for IE11, using select in IE11 will always require you to specify a `value` attribute
 
+## Component plugin prep follow ups
+
+- Consider exposing flags to replace various bools in `rendererState`
+	- Move setting COMMIT_FLAG to `setState`/`forceUpdate`
+- Consider adding TYPE_ERROR_BOUNDARY
+
+- Re-evaluate how components interact with context.
+	- Should each component plugin have its own "namespaced" property off of `globalContext`
+	- How should components update context? Update `rendererState`? Set it directly on `internal._context`?
+- Rework compat's `readContext` to use future updated `render` plugin
+- Explore if we are missing a test for `.nextSibling` call in VNode equality check in patch
+
 ## Root node follow ups
 
 - Investigate if the return value of `createRoot()` can be re-used as a root Node...

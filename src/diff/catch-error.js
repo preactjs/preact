@@ -13,6 +13,8 @@ import {
  * is the highest parent that was being unmounted)
  */
 export function _catchError(error, internal) {
+	// TODO: If we introduce a TYPE_ERROR_BOUNDARY, then we could simplify this to
+	// (internal._flags & (TYPE_ERROR_BOUNDARY | MODE_RERENDERING_ERROR)) == TYPE_ERROR_BOUNDARY
 	while ((internal = internal._parent)) {
 		if (
 			internal._flags & TYPE_COMPONENT &&
