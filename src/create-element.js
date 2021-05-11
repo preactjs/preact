@@ -28,7 +28,7 @@ export function createElement(type, props, children) {
 			children.push(arguments[i]);
 		}
 	}
-	if (arguments.length > 2) {
+	if (children !== undefined) {
 		normalizedProps.children = children;
 	}
 
