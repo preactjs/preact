@@ -1,9 +1,9 @@
-import { EMPTY_OBJ, EMPTY_ARR } from '../constants';
+import { EMPTY_OBJ } from '../constants';
 import { Component } from '../component';
 import { Fragment } from '../create-element';
 import { diffChildren } from './children';
 import { diffProps, setProperty } from './props';
-import { assign, removeNode } from '../util';
+import { assign, removeNode, slice } from '../util';
 import options from '../options';
 
 /**
@@ -363,8 +363,7 @@ function diffElementNodes(
 		}
 	} else {
 		// If excessDomChildren was not null, repopulate it with the current element's children:
-		excessDomChildren =
-			excessDomChildren && EMPTY_ARR.slice.call(dom.childNodes);
+		excessDomChildren = excessDomChildren && slice.call(dom.childNodes);
 
 		oldProps = oldVNode.props || EMPTY_OBJ;
 
@@ -480,15 +479,6 @@ export function unmount(vnode, parentVNode, skipRemove) {
 		if (!r.current || r.current === vnode._dom) applyRef(r, null, parentVNode);
 	}
 
-	let dom;
-	if (!skipRemove && typeof vnode.type != 'function') {
-		skipRemove = (dom = vnode._dom) != null;
-	}
-
-	// Must be set to `undefined` to properly clean up `_nextDom`
-	// for which `null` is a valid value. See comment in `create-element.js`
-	vnode._dom = vnode._nextDom = undefined;
-
 	if ((r = vnode._component) != null) {
 		if (r.componentWillUnmount) {
 			try {
@@ -503,11 +493,17 @@ export function unmount(vnode, parentVNode, skipRemove) {
 
 	if ((r = vnode._children)) {
 		for (let i = 0; i < r.length; i++) {
-			if (r[i]) unmount(r[i], parentVNode, skipRemove);
+			if (r[i]) {
+				unmount(r[i], parentVNode, typeof vnode.type != 'function');
+			}
 		}
 	}
 
-	if (dom != null) removeNode(dom);
+	if (!skipRemove && vnode._dom != null) removeNode(vnode._dom);
+
+	// Must be set to `undefined` to properly clean up `_nextDom`
+	// for which `null` is a valid value. See comment in `create-element.js`
+	vnode._dom = vnode._nextDom = undefined;
 }
 
 /** The `.render()` method for a PFC backing instance. */

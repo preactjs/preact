@@ -105,7 +105,7 @@ declare namespace React {
 
 	export function forwardRef<R, P = {}>(
 		fn: ForwardFn<P, R>
-	): preact.FunctionalComponent<P>;
+	): preact.FunctionalComponent<Omit<P, 'ref'> & { ref?: preact.RefObject<R> }>;
 
 	export function unstable_batchedUpdates(
 		callback: (arg?: any) => void,

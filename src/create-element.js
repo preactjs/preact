@@ -1,4 +1,7 @@
+import { slice } from './util';
 import options from './options';
+
+let vnodeId = 0;
 
 /**
  * Create an virtual node (used for JSX)
@@ -19,15 +22,9 @@ export function createElement(type, props, children) {
 		else normalizedProps[i] = props[i];
 	}
 
-	if (arguments.length > 3) {
-		children = [children];
-		// https://github.com/preactjs/preact/issues/1916
-		for (i = 3; i < arguments.length; i++) {
-			children.push(arguments[i]);
-		}
-	}
-	if (children != null) {
-		normalizedProps.children = children;
+	if (arguments.length > 2) {
+		normalizedProps.children =
+			arguments.length > 3 ? slice.call(arguments, 2) : children;
 	}
 
 	// If a Component VNode, check for and apply defaultProps
@@ -75,7 +72,7 @@ export function createVNode(type, props, key, ref, original) {
 		_component: null,
 		_hydrating: null,
 		constructor: undefined,
-		_original: original == null ? ++options._vnodeId : original
+		_original: original == null ? ++vnodeId : original
 	};
 
 	if (options.vnode != null) options.vnode(vnode);
