@@ -50,7 +50,7 @@ export function createContext(defaultValue, contextId) {
 						// 	c.context[contextId] = _props.value;
 						// 	enqueueRender(c);
 						// });
-						subs.some(enqueueRender);
+						subs.forEach(enqueueRender);
 					}
 				};
 
