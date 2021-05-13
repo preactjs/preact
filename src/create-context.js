@@ -18,9 +18,18 @@ export function createContext(defaultValue, contextId) {
 		/** @type {import('./internal').FunctionComponent} */
 		Provider(props) {
 			if (!this.getChildContext) {
-				let subs = [];
+				let subs = new Set();
 				let ctx = {};
 				ctx[contextId] = this;
+
+				const oldUnmount = options.unmount;
+				options.unmount = internal => {
+					if (subs.has(internal._component)) {
+						subs.delete(internal._component);
+					}
+
+					if (oldUnmount) oldUnmount(internal)
+				}
 
 				this.getChildContext = () => ctx;
 
@@ -45,12 +54,7 @@ export function createContext(defaultValue, contextId) {
 				};
 
 				this.sub = c => {
-					subs.push(c);
-					let old = c.componentWillUnmount;
-					c.componentWillUnmount = () => {
-						subs.splice(subs.indexOf(c), 1);
-						if (old) old.call(c);
-					};
+					subs.add(c);
 				};
 			}
 
