@@ -66,12 +66,6 @@ var sauceLabsLaunchers = {
 		browserName: 'MicrosoftEdge',
 		platform: 'Windows 10'
 	},
-	sl_ie_11: {
-		base: 'SauceLabs',
-		browserName: 'internet explorer',
-		version: '11.0',
-		platform: 'Windows 7'
-	}
 };
 
 var localLaunchers = {
@@ -297,7 +291,7 @@ module.exports = function(config) {
 		},
 
 		esbuild: {
-			target: 'es5',
+			target: 'es6',
 			define: {
 				COVERAGE: coverage,
 				'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || ''),
