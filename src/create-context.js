@@ -1,5 +1,5 @@
 import { enqueueRender } from './component';
-import options from '../options';
+import options from './options';
 
 export let i = 0;
 
