@@ -4,6 +4,7 @@
 
 - `[MAJOR]` Deprecated `component.base`
 - `[MAJOR]` Remove `replaceNode`, [use this technique instead](https://gist.github.com/developit/f321a9ef092ad39f54f8d7c8f99eb29a))
+- `[MAJOR]` Removed select `<option>` fix for IE11, using select in IE11 will always require you to specify a `value` attribute
 
 ## Root node follow ups
 
@@ -23,7 +24,6 @@
 
 ## Backing Node follow ups
 
-- Revisit `prevDom` code path for null placeholders
 - Address many TODOs
 - Move refs to internal renderCallbacks
 - Rewrite rerender loop to operate on internals, not components
@@ -77,9 +77,6 @@
 
 ## Other
 
-- `[MAJOR]` Remove select `<option>` IE11 fix in diffChildren and tell users to
-  always specify a value attribute for `<option>`. History:
-  https://github.com/preactjs/preact/pull/1838
 - One possible implementation for effect queues: Internal nodes can have a local
   queue of effects for that node while a global queue contains the internal
   nodes that have effects.

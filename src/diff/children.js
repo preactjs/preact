@@ -35,7 +35,7 @@ export function diffChildren(
 	commitQueue,
 	startDom
 ) {
-	let i, j, newDom, refs;
+	let i, newDom, refs;
 
 	/** @type {import('../internal').Internal} */
 	let childInternal;
@@ -58,47 +58,13 @@ export function diffChildren(
 			continue;
 		}
 
-		// Check if we find a corresponding element in oldChildren.
-		// If found, delete the array item by setting to `undefined`.
-		// We use `undefined`, as `null` is reserved for empty placeholders
-		// (holes).
-		childInternal = oldChildren[i];
+		childInternal = findMatchingInternal(
+			childVNode,
+			oldChildren,
+			i,
+			oldChildrenLength
+		);
 
-		if (typeof childVNode === 'string') {
-			// We never move Text nodes, so we only check for an in-place match:
-			if (childInternal && childInternal._flags & TYPE_TEXT) {
-				oldChildren[i] = undefined;
-			} else {
-				// We're looking for a Text node, but this wasn't one: ignore it
-				childInternal = undefined;
-			}
-		} else if (
-			childInternal === null ||
-			(childInternal &&
-				childVNode.key == childInternal.key &&
-				childVNode.type === childInternal.type)
-		) {
-			oldChildren[i] = undefined;
-		} else {
-			// Either oldVNode === undefined or oldChildrenLength > 0,
-			// so after this loop oldVNode == null or oldVNode is a valid value.
-			for (j = 0; j < oldChildrenLength; j++) {
-				childInternal = oldChildren[j];
-				// If childVNode is unkeyed, we only match similarly unkeyed nodes, otherwise we match by key.
-				// We always match by type (in either case).
-				if (
-					childInternal &&
-					childVNode.key == childInternal.key &&
-					childVNode.type === childInternal.type
-				) {
-					oldChildren[j] = undefined;
-					break;
-				}
-				childInternal = null;
-			}
-		}
-
-		let prevDom;
 		let oldVNodeRef;
 		let nextDomSibling;
 		if (childInternal == null) {
@@ -135,10 +101,6 @@ export function diffChildren(
 		} else {
 			oldVNodeRef = childInternal.ref;
 
-			// TODO: Figure out if there is a better way to handle the null
-			// placeholder's scenario this addresses
-			prevDom = childInternal._dom;
-
 			// Morph the old element into the new one, but don't append it to the dom yet
 			nextDomSibling = patch(
 				parentDom,
@@ -173,28 +135,11 @@ export function diffChildren(
 		} else if (
 			startDom &&
 			childInternal != null &&
-			prevDom == startDom &&
 			startDom.parentNode != parentDom
 		) {
 			// The above condition is to handle null placeholders. See test in placeholder.test.js:
 			// `efficiently replace null placeholders in parent rerenders`
 			startDom = nextDomSibling;
-		}
-
-		// Browsers will infer an option's `value` from `textContent` when
-		// no value is present. This essentially bypasses our code to set it
-		// later in `diff()`. It works fine in all browsers except for IE11
-		// where it breaks setting `select.value`. There it will be always set
-		// to an empty string. Re-applying an options value will fix that, so
-		// there are probably some internal data structures that aren't
-		// updated properly.
-		//
-		// To fix it we make sure to reset the inferred value, so that our own
-		// value check in `diff()` won't be skipped.
-		if (parentInternal.type === 'option') {
-			// @ts-ignore We have validated that the type of parentDOM is 'option'
-			// in the above check
-			parentDom.value = '';
 		}
 
 		newChildren[i] = childInternal;
@@ -229,6 +174,57 @@ export function diffChildren(
 	}
 
 	return startDom;
+}
+
+/**
+ * @param {import('../internal').VNode | string} childVNode
+ * @param {import('../internal').Internal[]} oldChildren
+ * @param {number} i
+ * @param {number} oldChildrenLength
+ * @returns {import('../internal').Internal}
+ */
+function findMatchingInternal(childVNode, oldChildren, i, oldChildrenLength) {
+	// Check if we find a corresponding element in oldChildren.
+	// If found, delete the array item by setting to `undefined`.
+	// We use `undefined`, as `null` is reserved for empty placeholders
+	// (holes).
+	let childInternal = oldChildren[i];
+
+	if (typeof childVNode === 'string') {
+		// We never move Text nodes, so we only check for an in-place match:
+		if (childInternal && childInternal._flags & TYPE_TEXT) {
+			oldChildren[i] = undefined;
+		} else {
+			// We're looking for a Text node, but this wasn't one: ignore it
+			childInternal = undefined;
+		}
+	} else if (
+		childInternal === null ||
+		(childInternal &&
+			childVNode.key == childInternal.key &&
+			childVNode.type === childInternal.type)
+	) {
+		oldChildren[i] = undefined;
+	} else {
+		// Either oldVNode === undefined or oldChildrenLength > 0,
+		// so after this loop oldVNode == null or oldVNode is a valid value.
+		for (let j = 0; j < oldChildrenLength; j++) {
+			childInternal = oldChildren[j];
+			// If childVNode is unkeyed, we only match similarly unkeyed nodes, otherwise we match by key.
+			// We always match by type (in either case).
+			if (
+				childInternal &&
+				childVNode.key == childInternal.key &&
+				childVNode.type === childInternal.type
+			) {
+				oldChildren[j] = undefined;
+				break;
+			}
+			childInternal = null;
+		}
+	}
+
+	return childInternal;
 }
 
 /**

@@ -2,6 +2,8 @@ import { options, Fragment } from 'preact';
 
 /** @typedef {import('preact').VNode} VNode */
 
+let vnodeId = 0;
+
 /**
  * @fileoverview
  * This file exports various methods that implement Babel's "automatic" JSX runtime API:
@@ -38,6 +40,7 @@ function createVNode(type, props, key, __source, __self) {
 		key,
 		ref: props && props.ref,
 		constructor: undefined,
+		_vnodeId: --vnodeId,
 		__source,
 		__self
 	};
