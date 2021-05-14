@@ -65,7 +65,7 @@ var sauceLabsLaunchers = {
 		base: 'SauceLabs',
 		browserName: 'MicrosoftEdge',
 		platform: 'Windows 10'
-	},
+	}
 };
 
 var localLaunchers = {
@@ -141,6 +141,33 @@ function createEsbuildPlugin() {
 				return {
 					path: pkg,
 					namespace: 'preact'
+				};
+			});
+
+			// Transpile node_modules that are es2015+ to es5 for IE11
+			build.onLoad({ filter: /kolorist/ }, async args => {
+				const contents = await fs.readFile(args.path, 'utf-8');
+
+				const tmp = await babel.transformAsync(contents, {
+					filename: args.path,
+					presets: [
+						[
+							'@babel/preset-env',
+							{
+								loose: true,
+								modules: false,
+								targets: {
+									browsers: ['last 2 versions', 'IE >= 9']
+								}
+							}
+						]
+					]
+				});
+
+				return {
+					contents: tmp.code,
+					resolveDir: path.dirname(args.path),
+					loader: 'js'
 				};
 			});
 
@@ -285,12 +312,12 @@ module.exports = function(config) {
 
 		preprocessors: {
 			'{debug,devtools,hooks,compat,test-utils,jsx-runtime,}/test/**/*': [
-				'esbuild',
-				'sourcemap'
+				'esbuild'
 			]
 		},
 
 		esbuild: {
+			singleBundle: false,
 			target: 'es2017',
 			define: {
 				COVERAGE: coverage,
