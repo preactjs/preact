@@ -145,7 +145,7 @@ function createEsbuildPlugin() {
 			});
 
 			// Transpile node_modules that are es2015+ to es5 for IE11
-			build.onLoad({ filter: /kolorist/ }, async args => {
+			build.onLoad({ filter: /kolorist|sinon/ }, async args => {
 				const contents = await fs.readFile(args.path, 'utf-8');
 
 				const tmp = await babel.transformAsync(contents, {
