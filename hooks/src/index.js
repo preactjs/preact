@@ -254,7 +254,7 @@ export function useContext(context) {
 	// This is probably not safe to convert to "!"
 	if (state._value == null) {
 		state._value = true;
-		provider.sub(currentComponent);
+		provider._subs.add(currentComponent);
 	}
 	return provider.props.value;
 }
