@@ -25,9 +25,7 @@ export function createContext(defaultValue, contextId) {
 
 				const oldUnmount = options.unmount;
 				options.unmount = internal => {
-					if (subs.has(internal._component)) {
-						subs.delete(internal._component);
-					}
+					subs.delete(internal._component);
 
 					if (oldUnmount) oldUnmount(internal)
 				}
