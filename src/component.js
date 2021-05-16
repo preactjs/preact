@@ -142,6 +142,8 @@ let rerenderQueue = [];
 
 let prevDebounce;
 
+const defer = Promise.prototype.then.bind(Promise.resolve());
+
 /**
  * Enqueue a rerender of a component
  * @param {import('./internal').Component} c The component to rerender
@@ -155,7 +157,7 @@ export function enqueueRender(c) {
 		prevDebounce !== options.debounceRendering
 	) {
 		prevDebounce = options.debounceRendering;
-		(prevDebounce || Promise.resolve().then)(process);
+		(prevDebounce || defer)(process);
 	}
 }
 

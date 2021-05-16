@@ -647,7 +647,9 @@ describe('createContext', () => {
 	it('should not rerender consumers that have been unmounted', () => {
 		const { Provider, Consumer } = createContext(0);
 
-		const Inner = sinon.spy(props => <div>{props.value}</div>);
+		const Inner = sinon.spy(function Inner(props) {
+			return <div>{props.value}</div>;
+		});
 
 		let toggleConsumer;
 		let changeValue;

@@ -214,7 +214,9 @@ describe('context', () => {
 	it('should pass context through Fragments', () => {
 		const context = { foo: 'bar' };
 
-		const Foo = sinon.spy(() => <div />);
+		const Foo = sinon.spy(function Foo() {
+			return <div />;
+		});
 
 		class Wrapper extends Component {
 			getChildContext() {
