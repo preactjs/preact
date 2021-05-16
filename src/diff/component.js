@@ -61,7 +61,7 @@ export function renderComponent(
 		c = internal._component;
 	} else {
 		// Instantiate the new component
-		if ('prototype' in type && type.prototype.render) {
+		if (type.prototype && 'render' in type.prototype) {
 			// @ts-ignore The check above verifies that newType is suppose to be constructed
 			internal._component = c = new type(newProps, componentContext); // eslint-disable-line new-cap
 		} else {
@@ -89,7 +89,10 @@ export function renderComponent(
 			c._nextState = Object.assign({}, c._nextState);
 		}
 
-		Object.assign(c._nextState, type.getDerivedStateFromProps(newProps, c._nextState));
+		Object.assign(
+			c._nextState,
+			type.getDerivedStateFromProps(newProps, c._nextState)
+		);
 	}
 
 	oldProps = c.props;
