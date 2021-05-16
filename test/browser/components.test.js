@@ -68,7 +68,9 @@ describe('Components', () => {
 		});
 
 		it('should render functional components', () => {
-			const C3 = sinon.spy(props => <div {...props} />);
+			const C3 = sinon.spy(function C3(props) {
+				return <div {...props} />;
+			});
 
 			render(<C3 {...PROPS} />, scratch);
 
@@ -234,9 +236,9 @@ describe('Components', () => {
 				instance = this;
 				this.state = STATE;
 			}
-			Foo.prototype.render = sinon.spy((props, state) => (
-				<div {...props}>{state.text}</div>
-			));
+			Foo.prototype.render = sinon.spy(function RenderFoo(props, state) {
+				return <div {...props}>{state.text}</div>;
+			});
 
 			render(<Foo {...PROPS} />, scratch);
 
@@ -345,9 +347,9 @@ describe('Components', () => {
 			function Wrapper() {
 				instance = this;
 				this.state = STATE;
-				this.render = sinon.spy((props, state) => (
-					<div {...props}>{state.text}</div>
-				));
+				this.render = sinon.spy(function Wrapper(props, state) {
+					return <div {...props}>{state.text}</div>;
+				});
 			}
 			(Wrapper.prototype = new Component()).constructor = Wrapper;
 
@@ -373,9 +375,9 @@ describe('Components', () => {
 				this.state = STATE;
 			}
 			Foo.prototype = Object.create(Component);
-			Foo.prototype.render = sinon.spy((props, state) => (
-				<div {...props}>{state.text}</div>
-			));
+			Foo.prototype.render = sinon.spy(function Foo(props, state) {
+				return <div {...props}>{state.text}</div>;
+			});
 
 			render(<Foo {...PROPS} />, scratch);
 
@@ -445,9 +447,9 @@ describe('Components', () => {
 				instance = this;
 				this.state = STATE;
 			}
-			Provider.prototype.render = sinon.spy((props, state) => (
-				<div {...PROPS}>{state.text}</div>
-			));
+			Provider.prototype.render = sinon.spy(function Provider(props, state) {
+				return <div {...PROPS}>{state.text}</div>;
+			});
 
 			render(<Provider {...PROPS} />, scratch);
 
@@ -1052,9 +1054,13 @@ describe('Components', () => {
 		it('should render nested functional components', () => {
 			const PROPS = { foo: 'bar', onBaz: () => {} };
 
-			const Outer = sinon.spy(props => <Inner {...props} />);
+			const Outer = sinon.spy(function Outer(props) {
+				return <Inner {...props} />;
+			});
 
-			const Inner = sinon.spy(props => <div {...props}>inner</div>);
+			const Inner = sinon.spy(function Inner(props) {
+				return <div {...props}>inner</div>;
+			});
 
 			render(<Outer {...PROPS} />, scratch);
 
@@ -1095,11 +1101,13 @@ describe('Components', () => {
 			sinon.spy(Outer.prototype, 'componentWillUnmount');
 
 			let j = 0;
-			const Inner = sinon.spy(props => (
-				<div j={++j} {...props}>
-					inner
-				</div>
-			));
+			const Inner = sinon.spy(function Inner(props) {
+				return (
+					<div j={++j} {...props}>
+						inner
+					</div>
+				);
+			});
 
 			render(<Outer foo="bar" />, scratch);
 
@@ -1484,7 +1492,10 @@ describe('Components', () => {
 			return C;
 		};
 
-		let createFunction = () => sinon.spy(({ children }) => children);
+		let createFunction = () =>
+			sinon.spy(function CreatedFunction({ children }) {
+				return children;
+			});
 
 		let F1 = createFunction();
 		let F2 = createFunction();

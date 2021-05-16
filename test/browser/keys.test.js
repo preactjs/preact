@@ -81,7 +81,9 @@ describe('keys', () => {
 
 	// https://fb.me/react-special-props
 	it('should not pass key in props', () => {
-		const Foo = sinon.spy(() => null);
+		const Foo = sinon.spy(function Foo() {
+			return null;
+		});
 		render(<Foo key="foo" />, scratch);
 		expect(Foo.args[0][0]).to.deep.equal({});
 	});

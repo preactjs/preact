@@ -55,7 +55,7 @@ describe('useState', () => {
 		let lastState;
 		let doSetState;
 
-		const Comp = sinon.spy(() => {
+		const Comp = sinon.spy(function Comp() {
 			const [state, setState] = useState(0);
 			lastState = state;
 			doSetState = setState;
@@ -81,7 +81,7 @@ describe('useState', () => {
 		let lastState;
 		let doSetState;
 
-		const Comp = sinon.spy(() => {
+		const Comp = sinon.spy(function Comp() {
 			const [state, setState] = useState(0);
 			lastState = state;
 			doSetState = setState;
