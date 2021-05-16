@@ -36,7 +36,7 @@ export function unmount(internal, parentInternal, skipRemove) {
 		for (let node of r) {
 			if (node) {
 				unmount(
-					r[i],
+					node,
 					parentInternal,
 					skipRemove ? ~internal._flags & TYPE_ROOT : internal._flags & TYPE_DOM
 				);
