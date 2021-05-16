@@ -1,6 +1,5 @@
 import { createElement, render, Component } from 'preact';
 import { useState, useEffect } from 'preact/hooks';
-import { withTemporaryOptions } from './temporaryOptionsHooks';
 import 'preact/debug';
 import { act } from 'preact/test-utils';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
@@ -8,8 +7,6 @@ import { setupScratch, teardown } from '../../../test/_util/helpers';
 /** @jsx createElement */
 
 describe('debug with hooks', () => {
-	withTemporaryOptions();
-
 	let scratch;
 	let errors = [];
 	let warnings = [];

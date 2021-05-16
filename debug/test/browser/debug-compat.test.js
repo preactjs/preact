@@ -1,7 +1,6 @@
 import { createElement, render, createRef } from 'preact';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import './fakeDevTools';
-import { withTemporaryOptions } from './temporaryOptionsHooks';
 import 'preact/debug';
 import * as PropTypes from 'prop-types';
 
@@ -13,8 +12,6 @@ const h = createElement;
 /** @jsx createElement */
 
 describe('debug compat', () => {
-	withTemporaryOptions();
-
 	let scratch;
 	let root;
 	let errors = [];

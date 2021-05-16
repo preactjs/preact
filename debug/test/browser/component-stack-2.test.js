@@ -1,5 +1,4 @@
 import { createElement, render, Component } from 'preact';
-import { withTemporaryOptions } from './temporaryOptionsHooks';
 import 'preact/debug';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 
@@ -9,8 +8,6 @@ import { setupScratch, teardown } from '../../../test/_util/helpers';
 // transpiled with '@babel/plugin-transform-react-jsx-source' enabled.
 
 describe('component stack', () => {
-	withTemporaryOptions();
-
 	/** @type {HTMLDivElement} */
 	let scratch;
 
