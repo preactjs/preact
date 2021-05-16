@@ -23,7 +23,17 @@ function getClosestDomNodeParent(parent) {
 	return parent;
 }
 
+let teardown;
+
+export function uninstallDebug() {
+	if (teardown) teardown();
+	teardown = null;
+}
+
 export function initDebug() {
+	// don't set up twice:
+	if (teardown) return;
+
 	setupComponentStack();
 
 	let hooksAllowed = false;
@@ -35,7 +45,7 @@ export function initDebug() {
 	let oldCatchError = options._catchError;
 	let oldRoot = options._root;
 	let oldHook = options._hook;
-	const warnedComponents = !isWeakMapSupported
+	let warnedComponents = !isWeakMapSupported
 		? null
 		: {
 				useEffect: new WeakMap(),
@@ -43,6 +53,18 @@ export function initDebug() {
 				lazyPropTypes: new WeakMap()
 		  };
 	const deprecations = [];
+
+	teardown = () => {
+		// this doesn't work because the properties may have been modified after init, resetting overwrites this.
+		options._diff = oldBeforeDiff;
+		options.diffed = oldDiffed;
+		options.vnode = oldVnode;
+		options._catchError = oldCatchError;
+		options._root = oldRoot;
+		options._hook = oldHook;
+		warnedComponents = null;
+		deprecations.length = 0;
+	};
 
 	options._catchError = (error, vnode, oldVNode) => {
 		let component = vnode && vnode._component;
