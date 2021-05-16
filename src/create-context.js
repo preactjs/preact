@@ -1,10 +1,18 @@
 import { enqueueRender } from './component';
-import options from './options';
 
-export let i = 0;
+export let nextContextId = 0;
 
-export function createContext(defaultValue, contextId) {
-	contextId = '__cC' + i++;
+const providers = new Set();
+
+export const unsubscribeFromContext = component => {
+	// if this was a context provider, delete() returns true and we exit:
+	if (providers.delete(component)) return;
+	// ... otherwise, unsubscribe from any contexts:
+	providers.forEach(p => p._subs.delete(component));
+};
+
+export const createContext = (defaultValue, contextId) => {
+	contextId = '__cC' + nextContextId++;
 
 	const context = {
 		_id: contextId,
@@ -17,45 +25,19 @@ export function createContext(defaultValue, contextId) {
 			return props.children(contextValue);
 		},
 		/** @type {import('./internal').FunctionComponent} */
-		Provider(props) {
-			if (!this.getChildContext) {
-				let subs = new Set();
-				let ctx = {};
+		Provider(props, ctx) {
+			// initial setup:
+			if (!this._subs) {
+				this._subs = new Set();
+				ctx = {};
 				ctx[contextId] = this;
-
-				const oldUnmount = options.unmount;
-				options.unmount = internal => {
-					subs.delete(internal._component);
-
-					if (oldUnmount) oldUnmount(internal)
-				}
-
 				this.getChildContext = () => ctx;
-
-				this.shouldComponentUpdate = function(_props) {
-					if (this.props.value !== _props.value) {
-						// I think the forced value propagation here was only needed when `options.debounceRendering` was being bypassed:
-						// https://github.com/preactjs/preact/commit/4d339fb803bea09e9f198abf38ca1bf8ea4b7771#diff-54682ce380935a717e41b8bfc54737f6R358
-						// In those cases though, even with the value corrected, we're double-rendering all nodes.
-						// It might be better to just tell folks not to use force-sync mode.
-						// Currently, using `useContext()` in a class component will overwrite its `this.context` value.
-						// subs.some(c => {
-						// 	c.context = _props.value;
-						// 	enqueueRender(c);
-						// });
-
-						// subs.some(c => {
-						// 	c.context[contextId] = _props.value;
-						// 	enqueueRender(c);
-						// });
-						subs.forEach(enqueueRender);
-					}
-				};
-
-				this.sub = c => {
-					subs.add(c);
-				};
 			}
+			// re-render subscribers in response to value change
+			else if (props.value !== this._prev) {
+				this._subs.forEach(enqueueRender);
+			}
+			this._prev = props.value;
 
 			return props.children;
 		}
@@ -68,4 +50,4 @@ export function createContext(defaultValue, contextId) {
 	// https://reactjs.org/docs/context.html#contextdisplayname
 
 	return (context.Provider._contextRef = context.Consumer.contextType = context);
-}
+};

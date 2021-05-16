@@ -71,7 +71,7 @@ export function renderComponent(
 			c.constructor = type;
 			c.render = doRender;
 		}
-		if (provider) provider.sub(c);
+		if (provider) provider._subs.add(c);
 
 		c.props = newProps;
 		if (!c.state) c.state = {};

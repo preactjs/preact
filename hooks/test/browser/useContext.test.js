@@ -193,7 +193,7 @@ describe('useContext', () => {
 			</Context.Provider>,
 			scratch
 		);
-		subSpy = sinon.spy(provider, 'sub');
+		subSpy = sinon.spy(provider._subs, 'add');
 
 		render(
 			<Context.Provider value={69}>
