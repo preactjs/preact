@@ -26,16 +26,16 @@ module.exports = function(api) {
 					exclude: ['@babel/plugin-transform-typeof-symbol'],
 					targets: {
 						browsers: [
-							"Firefox>=60",
-							"chrome>=61",
-							"and_chr>=61",
-							"Safari>=10.1",
-							"iOS>=10.3",
-							"edge>=16",
-							"opera>=48",
-							"op_mob>=48",
-							"Samsung>=8.2",
-							"not dead"
+							'Firefox>=60',
+							'chrome>=61',
+							'and_chr>=61',
+							'Safari>=10.1',
+							'iOS>=10.3',
+							'edge>=16',
+							'opera>=48',
+							'op_mob>=48',
+							'Samsung>=8.2',
+							'not dead'
 						]
 					}
 				}
