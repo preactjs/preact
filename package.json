@@ -240,7 +240,6 @@
 		"benchmark": "^2.1.4",
 		"chai": "^4.1.2",
 		"check-export-map": "^1.0.1",
-		"core-js": "^2.6.12",
 		"coveralls": "^3.0.0",
 		"cross-env": "^7.0.2",
 		"csstype": "^3.0.5",
