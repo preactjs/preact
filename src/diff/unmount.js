@@ -12,8 +12,7 @@ import { applyRef } from './refs';
  * current element is already detached from the DOM.
  */
 export function unmount(internal, parentInternal, skipRemove) {
-	let r,
-		i = 0;
+	let r;
 	if (options.unmount) options.unmount(internal);
 	internal._flags |= MODE_UNMOUNTING;
 
