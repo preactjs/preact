@@ -29,7 +29,8 @@ export const createContext = (defaultValue, contextId) => {
 			// initial setup:
 			if (!this._subs) {
 				this._subs = new Set();
-				ctx = { [contextId]: this };
+				ctx = {};
+				ctx[contextId] = this;
 				this.getChildContext = () => ctx;
 			}
 			// re-render subscribers in response to value change
