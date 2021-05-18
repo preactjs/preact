@@ -32,27 +32,20 @@ describe('Fragment', () => {
 	let resetInsertBefore;
 	let resetAppendChild;
 	let resetRemoveChild;
+	let resetRemoveText;
 
 	before(() => {
 		resetInsertBefore = logCall(Element.prototype, 'insertBefore');
 		resetAppendChild = logCall(Element.prototype, 'appendChild');
 		resetRemoveChild = logCall(Element.prototype, 'removeChild');
-		// logCall(CharacterData.prototype, 'remove');
-		// TODO: Consider logging setting set data
-		// ```
-		// var orgData = Object.getOwnPropertyDescriptor(CharacterData.prototype, 'data')
-		// Object.defineProperty(CharacterData.prototype, 'data', {
-		// 	...orgData,
-		// 	get() { return orgData.get.call(this) },
-		// 	set(value) { console.log('setData', value); orgData.set.call(this, value); }
-		// });
-		// ```
+		resetRemoveText = logCall(Text.prototype, 'remove');
 	});
 
 	after(() => {
 		resetInsertBefore();
 		resetAppendChild();
 		resetRemoveChild();
+		resetRemoveText();
 	});
 
 	beforeEach(() => {
