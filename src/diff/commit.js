@@ -20,17 +20,16 @@ export function addCommitCallback(internal, callback) {
 export function commitRoot(commitQueue, rootInternal) {
 	if (options._commit) options._commit(rootInternal, commitQueue);
 
-	for (let internal of commitQueue) {
+	commitQueue.some(internal => {
 		try {
 			// @ts-ignore Reuse the commitQueue variable here so the type changes
 			commitQueue = internal._commitCallbacks;
 			internal._commitCallbacks = [];
-			for (let cb of commitQueue) {
+			commitQueue.some(cb => {
 				cb.call(internal._component);
-			}
-
+			});
 		} catch (e) {
 			options._catchError(e, internal);
 		}
-	}
+	});
 }

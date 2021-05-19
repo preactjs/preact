@@ -237,7 +237,8 @@ export function reorderChildren(internal, startDom, parentDom) {
 		return startDom;
 	}
 
-	for (let childInternal of internal._children) {
+	for (let tmp = 0; tmp < internal._children.length; tmp++) {
+		let childInternal = internal._children[tmp];
 		if (childInternal) {
 			// We typically enter this code path on sCU bailout, where we copy
 			// oldVNode._children to newVNode._children. If that is the case, we need
@@ -273,9 +274,9 @@ export function toChildArray(children, out) {
 	out = out || [];
 	if (children == null || typeof children == 'boolean') {
 	} else if (Array.isArray(children)) {
-		for (let child of children) {
+		children.some(child => {
 			toChildArray(child, out);
-		}
+		});
 	} else {
 		out.push(children);
 	}
