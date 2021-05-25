@@ -79,22 +79,19 @@ export function createVNode(type, props, key, ref, original) {
  * @returns {import('./internal').VNode | string | null}
  */
 export function normalizeToVNode(childVNode) {
-	if (childVNode == null || typeof childVNode == 'boolean') {
+	if (childVNode == null || childVNode === true || childVNode === false) {
 		return null;
 	}
-	// If this newVNode is being reused (e.g. <div>{reuse}{reuse}</div>) in the same diff,
-	// or we are rendering a component (e.g. setState) copy the oldVNodes so it can have
-	// it's own DOM & etc. pointers
-	else if (
-		typeof childVNode == 'number' ||
-		// eslint-disable-next-line valid-typeof
-		typeof childVNode == 'bigint'
-	) {
+	const type = typeof childVNode;
+	if (type === 'string' || type === 'function') {
+		return childVNode;
+	}
+	if (type !== 'object') {
 		return childVNode + '';
-	} else if (Array.isArray(childVNode)) {
+	}
+	if (Array.isArray(childVNode)) {
 		return createVNode(Fragment, { children: childVNode }, null, null, 0);
 	}
-
 	return childVNode;
 }
 
