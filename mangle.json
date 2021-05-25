@@ -55,7 +55,7 @@
       "$_pendingError": "__E",
       "$_processingException": "__",
       "$_globalContext": "__n",
-      "$_context": "__c",
+      "$_context": "c",
       "$_defaultValue": "__",
       "$_id": "__c",
       "$_contextRef": "__",
