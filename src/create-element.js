@@ -79,20 +79,17 @@ export function createVNode(type, props, key, ref, original) {
  * @returns {import('./internal').VNode | string | null}
  */
 export function normalizeToVNode(childVNode) {
-	if (childVNode == null || childVNode === true || childVNode === false) {
-		return null;
+	switch (typeof childVNode) {
+		case 'boolean':
+			return null;
+		case 'object':
+		case 'function':
+			if (Array.isArray(childVNode)) {
+				return createVNode(Fragment, { children: childVNode }, null, null, 0);
+			}
+			return childVNode;
 	}
-	const type = typeof childVNode;
-	if (type === 'string' || type === 'function') {
-		return childVNode;
-	}
-	if (type !== 'object') {
-		return childVNode + '';
-	}
-	if (Array.isArray(childVNode)) {
-		return createVNode(Fragment, { children: childVNode }, null, null, 0);
-	}
-	return childVNode;
+	return childVNode + '';
 }
 
 export function createRef() {
