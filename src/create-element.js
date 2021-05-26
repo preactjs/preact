@@ -24,7 +24,7 @@ export function createElement(type, props, children) {
 
 	i = arguments.length;
 	if (i > 2) {
-		normalizedProps.children = i > 3 ? slice.call(arguments, 2) : children;
+		normalizedProps.children = i === 3 ? children : slice.call(arguments, 2);
 	}
 
 	// If a Component VNode, check for and apply defaultProps
