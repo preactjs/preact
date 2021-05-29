@@ -40,9 +40,7 @@ export function createContext(defaultValue, contextId) {
 						// 	c.context[contextId] = _props.value;
 						// 	enqueueRender(c);
 						// });
-						for (let sub of subs) {
-							enqueueRender(sub);
-						}
+						subs.some(enqueueRender);
 					}
 				};
 
