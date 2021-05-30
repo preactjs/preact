@@ -17,14 +17,12 @@ export function unmount(internal, parentInternal, skipRemove) {
 	if (options.unmount) options.unmount(internal);
 	internal._flags |= MODE_UNMOUNTING;
 
-	r = internal.ref;
-	if (r) {
+	if ((r = internal.ref)) {
 		if (!r.current || r.current === internal._dom)
 			applyRef(r, null, parentInternal);
 	}
 
-	r = internal._component;
-	if (r != null) {
+	if ((r = internal._component)) {
 		if (r.componentWillUnmount) {
 			try {
 				r.componentWillUnmount();

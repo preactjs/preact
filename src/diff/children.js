@@ -274,9 +274,9 @@ export function toChildArray(children, out) {
 	out = out || [];
 	if (children == null || typeof children == 'boolean') {
 	} else if (Array.isArray(children)) {
-		children.some(child => {
-			toChildArray(child, out);
-		});
+		for (children of children) {
+			toChildArray(children, out);
+		}
 	} else {
 		out.push(children);
 	}

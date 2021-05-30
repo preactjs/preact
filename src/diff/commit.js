@@ -22,12 +22,12 @@ export function commitRoot(commitQueue, rootInternal) {
 
 	commitQueue.some(internal => {
 		try {
-			// @ts-ignore Reuse the commitQueue variable here so the type changes
-			commitQueue = internal._commitCallbacks;
-			internal._commitCallbacks = [];
-			commitQueue.some(cb => {
-				cb.call(internal._component);
-			});
+			// @ts-ignore Reuse the root variable here so the type changes
+			commitQueue = internal._commitCallbacks.length;
+			// @ts-ignore See above ts-ignore comment
+			while (commitQueue--) {
+				internal._commitCallbacks.shift().call(internal._component);
+			}
 		} catch (e) {
 			options._catchError(e, internal);
 		}
