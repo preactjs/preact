@@ -1,10 +1,15 @@
 import {
 	Component as PreactComponent,
-	PreactContext
+	PreactContext,
+	Internal as PreactInternal
 } from '../../src/internal';
 import { Reducer } from '.';
 
 export { PreactContext };
+
+export type Internal = PreactInternal & {
+	_component: Component;
+};
 
 /**
  * The type of arguments passed to a Hook function. While this type is not
@@ -60,7 +65,7 @@ export interface MemoHookState {
 
 export interface ReducerHookState {
 	_value?: any;
-	_component?: Component;
+	_internal?: Internal;
 	_reducer?: Reducer<any, any>;
 }
 
