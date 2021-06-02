@@ -1,6 +1,5 @@
 import { MODE_UNMOUNTING, TYPE_DOM, TYPE_ROOT } from '../constants';
 import options from '../options';
-import { removeNode } from '../util';
 import { applyRef } from './refs';
 
 /**
@@ -45,7 +44,7 @@ export function unmount(internal, parentInternal, skipRemove) {
 	}
 
 	if (!skipRemove && internal._flags & TYPE_DOM) {
-		removeNode(internal._dom);
+		internal._dom.remove();
 	}
 
 	internal._dom = null;
