@@ -5,6 +5,7 @@ import {
 	toChildArray,
 	Component
 } from 'preact';
+import { IS_NON_DIMENSIONAL } from './util';
 
 export const REACT_ELEMENT_TYPE =
 	(typeof Symbol != 'undefined' && Symbol.for && Symbol.for('react.element')) ||
@@ -107,6 +108,7 @@ let classNameDescriptor = {
 
 let oldVNodeHook = options.vnode;
 options.vnode = vnode => {
+	let i;
 	let type = vnode.type;
 	let props = vnode.props;
 	/** @type {any} */
@@ -116,7 +118,16 @@ options.vnode = vnode => {
 	if (typeof type === 'string') {
 		normalizedProps = {};
 
-		for (let i in props) {
+		let style = props.style;
+		if (typeof style === 'object') {
+			for (i in style) {
+				if (typeof style[i] === 'number' && !IS_NON_DIMENSIONAL.test(i)) {
+					style[i] += 'px';
+				}
+			}
+		}
+
+		for (i in props) {
 			let value = props[i];
 
 			if (i === 'value' && 'defaultValue' in props && value == null) {

@@ -13,6 +13,7 @@ import {
 } from './component-stack';
 import { assign } from './util';
 import { MODE_UNMOUNTING } from 'preact/src/constants';
+import { IS_NON_DIMENSIONAL } from 'preact/compat/src/util';
 
 const isWeakMapSupported = typeof WeakMap == 'function';
 
@@ -192,12 +193,12 @@ export function initDebug() {
 					`\n\n${getOwnerStack(internal)}`
 			);
 		}
-
+		let isCompatNode = '$$typeof' in vnode;
 		if (
 			internal.ref !== undefined &&
 			typeof internal.ref != 'function' &&
 			typeof internal.ref != 'object' &&
-			!('$$typeof' in vnode) // allow string refs when preact-compat is installed
+			!isCompatNode // allow string refs when preact-compat is installed
 		) {
 			throw new Error(
 				`Component's "ref" property should be a function, or an object created ` +
@@ -221,6 +222,22 @@ export function initDebug() {
 							serializeVNode(vnode) +
 							`\n\n${getOwnerStack(internal)}`
 					);
+				}else if (
+					!isCompatNode &&
+					key === 'style' &&
+					vnode.props[key] !== null &&
+					typeof vnode.props[key] === 'object'
+				) {
+					const style = vnode.props[key];
+					for (let i in style) {
+						if (typeof style[i] === 'number' && !IS_NON_DIMENSIONAL.test(i)) {
+							console.warn(
+								`Inline CSS value is missing a unit like "rem" or "px: "${i}: ${style[i]}"\n` +
+									serializeVNode(vnode) +
+									`\n\n${getOwnerStack(vnode)}`
+							);
+						}
+					}
 				}
 			}
 		}
