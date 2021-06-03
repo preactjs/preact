@@ -232,7 +232,7 @@ export function initDebug() {
 					for (let i in style) {
 						if (typeof style[i] === 'number' && !IS_NON_DIMENSIONAL.test(i)) {
 							console.warn(
-								`Inline CSS value is missing a unit like "rem" or "px: "${i}: ${style[i]}"\n` +
+								`Numeric CSS property value is missing a "px" unit: ${i}: ${style[i]}"\n` +
 									serializeVNode(vnode) +
 									`\n\n${getOwnerStack(vnode)}`
 							);
