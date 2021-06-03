@@ -205,3 +205,6 @@ function patchDOMElement(dom, newVNode, internal, globalContext, commitQueue) {
 	// @ts-ignore Trust me TS, nextSibling is a PreactElement
 	return dom.nextSibling;
 }
+
+// @TODO: remove this once Terser is updated to re-enable `reduce_funcs:false`:
+patchDOMElement.bind();

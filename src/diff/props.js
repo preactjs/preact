@@ -31,6 +31,9 @@ export function diffProps(dom, newProps, oldProps, isSvg) {
 	}
 }
 
+// @TODO: remove this once Terser is updated to re-enable `reduce_funcs:false`:
+diffProps.bind();
+
 function setStyle(style, key, value) {
 	if (key[0] === '-') {
 		style.setProperty(key, value);

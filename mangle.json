@@ -28,10 +28,7 @@
       "unsafe_undefined": true,
       "unsafe_regexp": true,
       "pure_getters": true,
-      "keep_fargs": false,
-      "toplevel": true,
-      "module": true,
-      "ecma": "2017"
+      "keep_fargs": false
     }
   },
   "props": {
