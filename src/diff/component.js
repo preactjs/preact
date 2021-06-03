@@ -7,8 +7,7 @@ import {
 	DIRTY_BIT,
 	FORCE_UPDATE,
 	MODE_PENDING_ERROR,
-	MODE_RERENDERING_ERROR,
-	TYPE_CLASS
+	MODE_RERENDERING_ERROR
 } from '../constants';
 import { addCommitCallback } from './commit';
 
@@ -62,7 +61,7 @@ export function renderComponent(
 		c = internal._component;
 	} else {
 		// Instantiate the new component
-		if (internal._flags & TYPE_CLASS) {
+		if (type.prototype && 'render' in type.prototype) {
 			// @ts-ignore The check above verifies that newType is suppose to be constructed
 			internal._component = c = new type(newProps, componentContext); // eslint-disable-line new-cap
 		} else {
