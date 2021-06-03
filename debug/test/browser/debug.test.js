@@ -38,6 +38,12 @@ describe('debug', () => {
 		expect(window.__PREACT_DEVTOOLS__.attachPreact).to.have.been.called;
 	});
 
+	it('should warn on invalid unitless inline CSS value', () => {
+		render(<div style={{ padding: 5 }} />, scratch);
+		expect(console.warn).to.be.calledOnce;
+		expect(console.warn.args[0][0]).to.match(/Numeric CSS property value is missing a "px" unit/);
+	});
+
 	it('should print an error on rendering on undefined parent', () => {
 		let fn = () => render(<div />, undefined);
 		expect(fn).to.throw(/render/);
