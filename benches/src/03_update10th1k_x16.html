@@ -13,7 +13,7 @@
 				display: none;
 			}
 			.glyphicon-remove:before {
-				content: "⨯";
+				content: '⨯';
 			}
 		</style>
 	</head>
@@ -27,7 +27,9 @@
 				afterFrameAsync,
 				getRowLinkSel,
 				testElement,
-				testElementTextContains
+				testElementTextContains,
+				forceLayout,
+				tick
 			} from './util.js';
 			import * as framework from 'framework';
 			import { render } from '../src/keyed-children/index.js';
@@ -63,8 +65,8 @@
 			async function run() {
 				performance.mark('start');
 				update();
-
-				await afterFrameAsync();
+				await tick();
+				await forceLayout();
 				testElementTextContains(getRowLinkSel(991), repeat(' !!!', 3 + 1));
 				performance.mark('stop');
 				performance.measure(measureName, 'start', 'stop');

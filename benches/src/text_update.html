@@ -8,7 +8,13 @@
 	<body>
 		<div id="root"></div>
 		<script type="module">
-			import { measureName, measureMemory } from './util.js';
+			import {
+				measureName,
+				measureMemory,
+				forceLayout,
+				tick,
+				raf
+			} from './util.js';
 			import { createRoot, createElement } from 'framework';
 
 			const root = createRoot(document.getElementById('root'));
@@ -22,13 +28,18 @@
 
 			let result;
 
-			performance.mark('start');
-			for (let i = 0; i < 100; i++) {
-				root.render(createElement(component, { randomValue: i }));
-			}
-			performance.mark('stop');
-			performance.measure(measureName, 'start', 'stop');
-			measureMemory();
+			(async () => {
+				performance.mark('start');
+				for (let i = 0; i < 100; i++) {
+					root.render(createElement(component, { randomValue: i }));
+				}
+				await tick();
+				await forceLayout();
+				performance.mark('stop');
+				performance.measure(measureName, 'start', 'stop');
+				await raf();
+				measureMemory();
+			})();
 		</script>
 	</body>
 </html>

@@ -22,7 +22,8 @@
 				measureMemory,
 				testElementText,
 				afterFrame,
-				afterFrameAsync
+				afterFrameAsync,
+				forceLayout
 			} from './util.js';
 			import * as framework from 'framework';
 			import { getComponents } from '../src/keyed-children/components.js';
@@ -112,19 +113,18 @@
 			}
 
 			function timedRun() {
-				afterFrame(function () {
-					performance.mark('stop');
-					performance.measure(measureName, 'start', 'stop');
-
-					measureMemory();
-				});
-
 				const hydrateRoot = setupHydrateRoot();
 				const store = new Store();
 				store.data = baseStore.data.slice();
 
 				performance.mark('start');
 				createRoot(hydrateRoot).hydrate(createElement(Main, { store }));
+				forceLayout();
+				performance.mark('stop');
+				performance.measure(measureName, 'start', 'stop');
+				afterFrame(function() {
+					measureMemory();
+				});
 			}
 
 			async function main() {

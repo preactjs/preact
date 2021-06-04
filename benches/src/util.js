@@ -19,6 +19,11 @@ export function afterFrameAsync() {
 	return promise;
 }
 
+export const raf = () => new Promise(requestAnimationFrame);
+export const forceLayout = () =>
+	(document.body._height = document.body.getBoundingClientRect().height);
+export const tick = () => new Promise(resolve => setTimeout(resolve, 0));
+
 export function measureMemory() {
 	if ('gc' in window && 'memory' in performance) {
 		// Report results in MBs

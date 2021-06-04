@@ -21,7 +21,10 @@
 				measureName,
 				measureMemory,
 				testElementText,
-				afterFrame
+				afterFrame,
+				forceLayout,
+				raf,
+				tick
 			} from './util.js';
 			import * as framework from 'framework';
 			import { render } from '../src/keyed-children/index.js';
@@ -33,14 +36,15 @@
 
 				performance.mark('start');
 				runLots();
+				await tick();
+				await forceLayout();
 
-				afterFrame(() => {
-					testElementText(elementSelector, '10000');
-					performance.mark('stop');
-					performance.measure(measureName, 'start', 'stop');
+				testElementText(elementSelector, '10000');
+				performance.mark('stop');
+				performance.measure(measureName, 'start', 'stop');
 
-					measureMemory();
-				});
+				await raf();
+				measureMemory();
 			}
 
 			main();
