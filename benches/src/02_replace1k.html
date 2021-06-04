@@ -6,6 +6,9 @@
 		<title>replace all rows</title>
 		<meta name="description" content="updating all 1,000 rows" />
 		<style>
+			table {
+				table-layout: fixed;
+			}
 			.preloadicon {
 				display: none;
 			}
@@ -25,8 +28,7 @@
 				afterFrameAsync,
 				markRunStart,
 				markRunEnd,
-				forceLayout,
-				tick,
+				mutateAndLayout,
 				raf
 			} from './util.js';
 			import * as framework from 'framework';
@@ -52,12 +54,10 @@
 
 				markRunStart('final');
 				performance.mark('start');
-				run();
-				await tick();
-				await forceLayout();
+				await mutateAndLayout(run);
+				performance.mark('stop');
 				await markRunEnd('final');
 				testElementText(elementSelector, WARMUP_COUNT + '001');
-				performance.mark('stop');
 				performance.measure(measureName, 'start', 'stop');
 
 				await raf();

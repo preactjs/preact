@@ -11,8 +11,8 @@
 			import {
 				measureName,
 				measureMemory,
-				forceLayout,
-				tick,
+				afterFrameAsync,
+				mutateAndLayout,
 				raf
 			} from './util.js';
 			import { createRoot, createElement } from 'framework';
@@ -28,15 +28,23 @@
 
 			let result;
 
+			let i = 0;
+			function runPatch() {
+				root.render(createElement(component, { randomValue: ++i }));
+			}
+
 			(async () => {
+				await mutateAndLayout(runPatch, 1000);
+
+				await afterFrameAsync();
+
 				performance.mark('start');
-				for (let i = 0; i < 100; i++) {
-					root.render(createElement(component, { randomValue: i }));
+				for (let i = 19; i--; ) {
+					await mutateAndLayout(runPatch, 1000);
 				}
-				await tick();
-				await forceLayout();
 				performance.mark('stop');
 				performance.measure(measureName, 'start', 'stop');
+
 				await raf();
 				measureMemory();
 			})();

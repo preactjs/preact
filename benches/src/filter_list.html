@@ -31,9 +31,9 @@
 			import {
 				measureName,
 				measureMemory,
-				forceLayout,
-				raf,
-				tick
+				afterFrameAsync,
+				mutateAndLayout,
+				raf
 			} from './util.js';
 			import { createRoot, createElement as h, Component } from 'framework';
 
@@ -75,32 +75,19 @@
 				root.render(h(App, { items }));
 			}
 
-			function warmup() {
-				const count = 10;
-
-				for (let i = 0; i < count; i++) {
-					runPatch();
-				}
-			}
-
 			(async () => {
 				for (let i = 5; i--; ) {
-					warmup();
-					await raf();
-					await forceLayout();
+					await mutateAndLayout(runPatch, 10);
 				}
 
-				await raf();
+				await afterFrameAsync();
 
 				performance.mark('start');
-				runPatch();
-				await tick();
-				await forceLayout();
+				await mutateAndLayout(runPatch, 50);
 				performance.mark('stop');
 				performance.measure(measureName, 'start', 'stop');
 
 				await raf();
-
 				measureMemory();
 			})();
 		</script>

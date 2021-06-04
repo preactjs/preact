@@ -6,6 +6,9 @@
 		<title>hydrate 1k table rows</title>
 		<meta name="description" content="hydrating 1,000 rows" />
 		<style>
+			table {
+				table-layout: fixed;
+			}
 			.preloadicon {
 				display: none;
 			}
@@ -23,7 +26,7 @@
 				testElementText,
 				afterFrame,
 				afterFrameAsync,
-				forceLayout
+				mutateAndLayout
 			} from './util.js';
 			import * as framework from 'framework';
 			import { getComponents } from '../src/keyed-children/components.js';
@@ -112,31 +115,28 @@
 				await clickRemove(hydrateRoot, `WARMUP ${i} - posthydrate`, 1000, 999);
 			}
 
-			function timedRun() {
+			async function timedRun() {
 				const hydrateRoot = setupHydrateRoot();
 				const store = new Store();
 				store.data = baseStore.data.slice();
 
 				performance.mark('start');
-				createRoot(hydrateRoot).hydrate(createElement(Main, { store }));
-				forceLayout();
+				await mutateAndLayout(() => {
+					createRoot(hydrateRoot).hydrate(createElement(Main, { store }));
+				});
 				performance.mark('stop');
 				performance.measure(measureName, 'start', 'stop');
-				afterFrame(function() {
-					measureMemory();
-				});
 			}
 
 			async function main() {
-				// const WARMUP_COUNT = 5;
-				const WARMUP_COUNT = 5;
-				for (let i = 0; i < WARMUP_COUNT; i++) {
-					await warmupRun(i);
-				}
+				await mutateAndLayout(warmupRun, 5);
 
 				await afterFrameAsync();
 
-				timedRun();
+				await timedRun();
+
+				await raf();
+				measureMemory();
 			}
 
 			initializeTemplate().then(main);

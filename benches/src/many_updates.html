@@ -20,9 +20,9 @@
 			import {
 				measureName,
 				measureMemory,
-				raf,
-				tick,
-				forceLayout
+				afterFrameAsync,
+				mutateAndLayout,
+				raf
 			} from './util.js';
 			import { createRoot, createElement as h } from 'framework';
 
@@ -83,44 +83,19 @@
 				// patchResults.push(performance.now() - s);
 			}
 
-			function warmup() {
-				// const count = 100;
-				const count = 10;
-
-				for (let i = 0; i < count; i++) {
-					runPatch();
-				}
-
-				// let fastest = Infinity;
-				// const total = patchResults.reduce((all, cur) => {
-				// 	if (cur < fastest) {
-				// 		fastest = cur;
-				// 	}
-				// 	return all + cur;
-				// }, 0);
-
-				// console.log(`${count} runs average: ${(total / count).toFixed(2)}ms`);
-				// console.log(`fastest run: ${fastest.toFixed(2)}ms`);
-			}
-
 			(async () => {
 				for (let i = 5; i--; ) {
-					warmup();
-					await raf();
-					await forceLayout();
+					await mutateAndLayout(runPatch, 10);
 				}
 
-				await raf();
+				await afterFrameAsync();
 
 				performance.mark('start');
-				runPatch();
-				await tick();
-				await forceLayout();
+				await mutateAndLayout(runPatch, 11);
 				performance.mark('stop');
 				performance.measure(measureName, 'start', 'stop');
 
 				await raf();
-
 				measureMemory();
 			})();
 		</script>
