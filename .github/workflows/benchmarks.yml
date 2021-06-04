@@ -7,12 +7,16 @@ on:
       - '**'
     paths:
       - 'src/**.js'
+      - 'benches/**.html'
+      - 'mangle.json'
   push:
     branches:
       - master
       - restructure
     paths:
       - 'src/**.js'
+      - 'benches/**.html'
+      - 'mangle.json'
 
 jobs:
   prepare:
