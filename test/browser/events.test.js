@@ -1,4 +1,4 @@
-import { createElement, Component } from 'preact';
+import { createElement, Component, render } from 'preact';
 import { setupRerender } from 'preact/test-utils';
 import {
 	setupScratch,
