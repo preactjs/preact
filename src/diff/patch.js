@@ -190,16 +190,27 @@ function patchDOMElement(dom, newVNode, internal, globalContext, commitQueue) {
 		// despite the attribute not being present. When the attribute
 		// is missing the progress bar is treated as indeterminate.
 		// To fix that we'll always update it when it is 0 for progress elements
-		(tmp !== dom.value || (newType === 'progress' && !tmp))
+		(newType === 'progress' && !tmp)
 	) {
-		setProperty(dom, 'value', tmp, oldProps.value, false);
+		if ('onInput' in newProps) {
+			dom._prevValue = tmp;
+		}
+
+		if (tmp !== dom.value) {
+			setProperty(dom, 'value', tmp, oldProps.value, false);
+		}
 	}
 	if (
 		'checked' in newProps &&
-		(tmp = newProps.checked) !== undefined &&
-		tmp !== dom.checked
+		(tmp = newProps.checked) !== undefined
 	) {
-		setProperty(dom, 'checked', tmp, oldProps.checked, false);
+		if ('onChange' in newProps) {
+			dom._prevValue = tmp;
+		}
+
+		if (tmp !== dom.checked) {
+			setProperty(dom, 'checked', tmp, oldProps.checked, false);
+		}
 	}
 
 	// @ts-ignore Trust me TS, nextSibling is a PreactElement

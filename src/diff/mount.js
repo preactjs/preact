@@ -160,6 +160,10 @@ function mountDOMElement(dom, internal, globalContext, commitQueue) {
 					nodeType,
 					newProps.is && newProps
 				);
+
+				if (internal.type === 'input') {
+					dom._isControlled = newProps.checked != null || newProps.value != null;
+				}
 			}
 
 			// we are creating a new node, so we can assume this is a new subtree (in case we are hydrating), this deopts the hydrate
