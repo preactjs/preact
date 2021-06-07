@@ -87,7 +87,7 @@
 		"build:test-utils": "npm run -s _bundle -- --cwd test-utils",
 		"build:compat": "npm run -s _bundle -- --cwd compat --globals 'preact/hooks=preactHooks'",
 		"build:jsx": "npm run -s _bundle -- --cwd jsx-runtime",
-		"postbuild": "node ./config/node-13-exports.js && node ./config/compat-entries.js",
+		"postbuild": "node ./config/compat-entries.js",
 		"dev": "microbundle watch --raw --format cjs --no-generateTypes",
 		"dev:hooks": "microbundle watch --raw --format cjs --cwd hooks --no-generateTypes",
 		"dev:compat": "microbundle watch --raw --format cjs --cwd compat --globals 'preact/hooks=preactHooks' --no-generateTypes",
