@@ -7,6 +7,7 @@
   "main": "dist/debug.js",
   "module": "dist/debug.module.js",
   "umd:main": "dist/debug.umd.js",
+  "exports": "./dist/debug.mjs",
   "source": "src/index.js",
   "license": "MIT",
   "mangle": {

@@ -7,6 +7,7 @@
 	"main": "dist/jsxRuntime.js",
 	"module": "dist/jsxRuntime.module.js",
 	"umd:main": "dist/jsxRuntime.umd.js",
+	"exports": "./dist/jsxRuntime.mjs",
 	"source": "src/index.js",
 	"types": "src/index.d.ts",
 	"license": "MIT",
