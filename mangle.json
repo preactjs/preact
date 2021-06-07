@@ -17,10 +17,9 @@
         ]
       }
     },
-    "//NOTE": "reduce_funcs was removed in Terser 5, but will be added back in 5.2.2 or 5.3. In the meantime, we have to disable reduce_vars despite the large size cost.",
     "compress": {
       "hoist_vars": true,
-      "reduce_vars": false,
+      "reduce_vars": true,
       "reduce_funcs": false,
       "unsafe": true,
       "unsafe_arrows": true,
