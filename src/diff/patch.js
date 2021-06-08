@@ -164,7 +164,26 @@ function patchDOMElement(dom, newVNode, internal, globalContext, commitQueue) {
 
 	internal.props = newProps;
 
-	diffProps(dom, newProps, oldProps, internal._flags & MODE_SVG);
+	// diffProps:
+	let i;
+	const isSvg = internal._flags & MODE_SVG;
+	for (i in oldProps) {
+		if (i !== 'children' && i !== 'key' && !(i in newProps)) {
+			setProperty(dom, i, null, oldProps[i], isSvg);
+		}
+	}
+
+	for (i in newProps) {
+		if (
+			i !== 'children' &&
+			i !== 'key' &&
+			i !== 'value' &&
+			i !== 'checked' &&
+			oldProps[i] !== newProps[i]
+		) {
+			setProperty(dom, i, newProps[i], oldProps[i], isSvg);
+		}
+	}
 
 	internal._dom = dom;
 

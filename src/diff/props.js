@@ -1,36 +1,6 @@
 import { IS_NON_DIMENSIONAL } from '../constants';
 import options from '../options';
 
-/**
- * Diff the old and new properties of a VNode and apply changes to the DOM node
- * @param {import('../internal').PreactElement} dom The DOM node to apply
- * changes to
- * @param {object} newProps The new props
- * @param {object} oldProps The old props
- * @param {number} isSvg 0 if not an SVG element, else it is an SVG element
- */
-export function diffProps(dom, newProps, oldProps, isSvg) {
-	let i;
-
-	for (i in oldProps) {
-		if (i !== 'children' && i !== 'key' && !(i in newProps)) {
-			setProperty(dom, i, null, oldProps[i], isSvg);
-		}
-	}
-
-	for (i in newProps) {
-		if (
-			i !== 'children' &&
-			i !== 'key' &&
-			i !== 'value' &&
-			i !== 'checked' &&
-			oldProps[i] !== newProps[i]
-		) {
-			setProperty(dom, i, newProps[i], oldProps[i], isSvg);
-		}
-	}
-}
-
 function setStyle(style, key, value) {
 	if (key[0] === '-') {
 		style.setProperty(key, value);
