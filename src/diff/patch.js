@@ -1,5 +1,5 @@
 import { diffChildren } from './children';
-import { diffProps, setProperty } from './props';
+import { setProperty } from './props';
 import options from '../options';
 import { renderComponent } from './component';
 import {
