@@ -4,10 +4,10 @@
   "version": "1.0.0",
   "private": true,
   "description": "Preact extensions for development",
-  "main": "dist/debug.js",
-  "module": "dist/debug.module.js",
-  "umd:main": "dist/debug.umd.js",
   "exports": "./dist/debug.mjs",
+  "module": "dist/debug.mjs",
+  "main": "dist/debug.js",
+  "umd:main": "dist/debug.umd.js",
   "source": "src/index.js",
   "license": "MIT",
   "mangle": {
