@@ -1,6 +1,6 @@
 import { EMPTY_OBJ } from './constants';
 import { commitRoot, diff } from './diff/index';
-import { createElement, Fragment } from './create-element';
+import { createVNode, Fragment } from './create-element';
 import options from './options';
 import { slice } from './util';
 
@@ -15,10 +15,12 @@ import { slice } from './util';
 export function render(vnode, parentDom, replaceNode) {
 	if (options._root) options._root(vnode, parentDom);
 
+	// List of effects that need to be called after diffing.
+	let commitQueue = [];
+
 	// We abuse the `replaceNode` parameter in `hydrate()` to signal if we are in
-	// hydration mode or not by passing the `hydrate` function instead of a DOM
-	// element..
-	let isHydrating = typeof replaceNode === 'function';
+	// hydration mode or not by passing `false` instead of a DOM element..
+	let isHydrating = replaceNode === false;
 
 	// To be able to support calling `render()` multiple times on the same
 	// DOM node, we need to obtain a reference to the previous tree. We do
@@ -29,13 +31,13 @@ export function render(vnode, parentDom, replaceNode) {
 		? null
 		: (replaceNode && replaceNode._children) || parentDom._children;
 
-	vnode = (
-		(!isHydrating && replaceNode) ||
-		parentDom
-	)._children = createElement(Fragment, null, [vnode]);
+	vnode = (replaceNode || parentDom)._children = createVNode(
+		Fragment,
+		{ children: [vnode] },
+		null,
+		null
+	);
 
-	// List of effects that need to be called after diffing.
-	let commitQueue = [];
 	diff(
 		parentDom,
 		// Determine the new vnode tree and store it on the DOM element on
@@ -44,7 +46,7 @@ export function render(vnode, parentDom, replaceNode) {
 		oldVNode || EMPTY_OBJ,
 		EMPTY_OBJ,
 		parentDom.ownerSVGElement !== undefined,
-		!isHydrating && replaceNode
+		replaceNode
 			? [replaceNode]
 			: oldVNode
 			? null
@@ -52,11 +54,7 @@ export function render(vnode, parentDom, replaceNode) {
 			? slice.call(parentDom.childNodes)
 			: null,
 		commitQueue,
-		!isHydrating && replaceNode
-			? replaceNode
-			: oldVNode
-			? oldVNode._dom
-			: parentDom.firstChild,
+		replaceNode || (oldVNode ? oldVNode._dom : parentDom.firstChild),
 		isHydrating
 	);
 
@@ -71,5 +69,5 @@ export function render(vnode, parentDom, replaceNode) {
  * update
  */
 export function hydrate(vnode, parentDom) {
-	render(vnode, parentDom, hydrate);
+	render(vnode, parentDom, false);
 }
