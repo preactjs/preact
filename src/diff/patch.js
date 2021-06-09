@@ -200,6 +200,7 @@ function patchDOMElement(dom, newVNode, internal, globalContext, commitQueue) {
 			setProperty(dom, 'value', tmp, oldProps.value, false);
 		}
 	}
+
 	if (
 		'checked' in newProps &&
 		(tmp = newProps.checked) !== undefined

@@ -160,10 +160,6 @@ function mountDOMElement(dom, internal, globalContext, commitQueue) {
 					nodeType,
 					newProps.is && newProps
 				);
-
-				if (internal.type === 'input') {
-					dom._isControlled = newProps.checked != null || newProps.value != null;
-				}
 			}
 
 			// we are creating a new node, so we can assume this is a new subtree (in case we are hydrating), this deopts the hydrate
@@ -204,6 +200,10 @@ function mountDOMElement(dom, internal, globalContext, commitQueue) {
 
 		internal._dom = dom;
 
+		if (internal.type === 'input') {
+			dom._isControlled = newProps.checked != null || newProps.value != null;
+		}
+
 		// If the new vnode didn't have dangerouslySetInnerHTML, diff its children
 		if (newHtml) {
 			if (!isHydrating && newHtml.__html) {
@@ -224,9 +224,11 @@ function mountDOMElement(dom, internal, globalContext, commitQueue) {
 		// (as above, don't diff props during hydration)
 		if (!isHydrating) {
 			if (newValue != null) {
+				dom._prevValue = newValue;
 				setProperty(dom, 'value', newValue, null, false);
 			}
 			if (newChecked != null) {
+				dom._prevValue = newValue;
 				setProperty(dom, 'checked', newChecked, null, false);
 			}
 		}
