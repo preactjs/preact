@@ -149,9 +149,9 @@ function eventProxy(e) {
 	if (
 		this._isControlled &&
 		(e.type === 'input' || e.type === 'change') &&
-		this._prevValue
+		this._prevValue != null
 	) {
-		if (this.checked != null && this.type === 'checkbox')
+		if (this.type === 'checkbox')
 			this.checked = this._prevValue;
 		else if (this.value != null) this.value = this._prevValue;
 	}
