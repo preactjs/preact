@@ -114,10 +114,10 @@ export function diffChildren(
 
 		newDom = childInternal._dom;
 
-		if (childVNode.ref && oldVNodeRef != childVNode.ref) {
+		if (childVNode.ref) {
 			if (!refs) refs = [];
-			if (oldVNodeRef) refs.push(oldVNodeRef, null, childInternal);
 			refs.push(
+				oldVNodeRef,
 				childVNode.ref,
 				childInternal._component || newDom,
 				childInternal
@@ -169,7 +169,7 @@ export function diffChildren(
 	// Set refs only after unmount
 	if (refs) {
 		for (i = 0; i < refs.length; i++) {
-			applyRef(refs[i], refs[++i], refs[++i]);
+			applyRef(refs[i], refs[++i], refs[++i], refs[++i]);
 		}
 	}
 

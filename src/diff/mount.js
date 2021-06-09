@@ -293,6 +293,7 @@ export function mountChildren(
 
 		if (childInternal.ref) {
 			applyRef(
+				null,
 				childInternal.ref,
 				childInternal._component || newDom,
 				childInternal
