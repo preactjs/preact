@@ -60,4 +60,4 @@ export const RESET_MODE = ~(
 export const INHERITED_MODES = MODE_HYDRATE | MODE_MUTATIVE_HYDRATE | MODE_SVG;
 
 export const EMPTY_ARR = [];
-export let UNDEFINED;
+export let UNDEFINED = undefined;
