@@ -8,7 +8,8 @@ import {
 	INHERITED_MODES,
 	TYPE_COMPONENT,
 	TYPE_DOM,
-	MODE_SVG
+	MODE_SVG,
+	UNDEFINED
 } from './constants';
 
 /**
@@ -33,7 +34,7 @@ export function createInternal(vnode, parentInternal) {
 		// type = null;
 		flags |= TYPE_TEXT;
 		props = vnode;
-	} else if (vnode.constructor !== undefined) {
+	} else if (vnode.constructor !== UNDEFINED) {
 		flags |= TYPE_TEXT;
 		props = '';
 	} else {
@@ -46,10 +47,10 @@ export function createInternal(vnode, parentInternal) {
 		// @TODO re-enable this when we stop removing key+ref from VNode props
 		// if (props) {
 		// 	if ((key = props.key) != null) {
-		// 		props.key = undefined;
+		// 		props.key = UNDEFINED;
 		// 	}
 		// 	if (typeof type !== 'function' && (ref = props.ref) != null) {
-		// 		props.ref = undefined;
+		// 		props.ref = UNDEFINED;
 		// 	}
 		// } else {
 		// 	props = {};
