@@ -19,7 +19,7 @@ export function unmount(internal, parentInternal, skipRemove) {
 
 	if ((r = internal.ref)) {
 		if (!r.current || r.current === internal._dom)
-			applyRef(r, null, parentInternal);
+			applyRef(null, r, null, parentInternal);
 	}
 
 	if ((r = internal._component) != null) {
