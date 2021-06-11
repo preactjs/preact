@@ -6,7 +6,8 @@ import {
 	MODE_HYDRATE,
 	MODE_SUSPENDED,
 	EMPTY_ARR,
-	TYPE_DOM
+	TYPE_DOM,
+	UNDEFINED
 } from '../constants';
 import { mount } from './mount';
 import { patch } from './patch';
@@ -114,10 +115,10 @@ export function diffChildren(
 
 		newDom = childInternal._dom;
 
-		if (childVNode.ref && oldVNodeRef != childVNode.ref) {
+		if (childVNode.ref) {
 			if (!refs) refs = [];
-			if (oldVNodeRef) refs.push(oldVNodeRef, null, childInternal);
 			refs.push(
+				oldVNodeRef,
 				childVNode.ref,
 				childInternal._component || newDom,
 				childInternal
@@ -169,7 +170,7 @@ export function diffChildren(
 	// Set refs only after unmount
 	if (refs) {
 		for (i = 0; i < refs.length; i++) {
-			applyRef(refs[i], refs[++i], refs[++i]);
+			applyRef(refs[i], refs[++i], refs[++i], refs[++i]);
 		}
 	}
 
@@ -193,10 +194,10 @@ function findMatchingInternal(childVNode, oldChildren, i, oldChildrenLength) {
 	if (typeof childVNode === 'string') {
 		// We never move Text nodes, so we only check for an in-place match:
 		if (childInternal && childInternal._flags & TYPE_TEXT) {
-			oldChildren[i] = undefined;
+			oldChildren[i] = UNDEFINED;
 		} else {
 			// We're looking for a Text node, but this wasn't one: ignore it
-			childInternal = undefined;
+			childInternal = UNDEFINED;
 		}
 	} else if (
 		childInternal === null ||
@@ -204,7 +205,7 @@ function findMatchingInternal(childVNode, oldChildren, i, oldChildrenLength) {
 			childVNode.key == childInternal.key &&
 			childVNode.type === childInternal.type)
 	) {
-		oldChildren[i] = undefined;
+		oldChildren[i] = UNDEFINED;
 	} else {
 		// Either oldVNode === undefined or oldChildrenLength > 0,
 		// so after this loop oldVNode == null or oldVNode is a valid value.
@@ -217,7 +218,7 @@ function findMatchingInternal(childVNode, oldChildren, i, oldChildrenLength) {
 				childVNode.key == childInternal.key &&
 				childVNode.type === childInternal.type
 			) {
-				oldChildren[j] = undefined;
+				oldChildren[j] = UNDEFINED;
 				break;
 			}
 			childInternal = null;

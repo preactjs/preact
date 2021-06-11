@@ -1,3 +1,4 @@
+import { UNDEFINED } from './constants';
 import options from './options';
 
 let vnodeId = 0;
@@ -36,7 +37,7 @@ export function createElement(type, props, children) {
 	// Note: type may be undefined in development, must never error here.
 	if (typeof type == 'function' && type.defaultProps != null) {
 		for (i in type.defaultProps) {
-			if (normalizedProps[i] === undefined) {
+			if (normalizedProps[i] === UNDEFINED) {
 				normalizedProps[i] = type.defaultProps[i];
 			}
 		}
@@ -112,4 +113,4 @@ export function Fragment(props) {
  * @returns {vnode is import('./internal').VNode}
  */
 export const isValidElement = vnode =>
-	vnode != null && vnode.constructor === undefined;
+	vnode != null && vnode.constructor === UNDEFINED;
