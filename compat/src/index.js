@@ -33,7 +33,7 @@ import {
 	__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED
 } from './render';
 
-const version = '16.8.0'; // trick libraries to think we are react
+const version = '17.0.2'; // trick libraries to think we are react
 
 /**
  * Legacy version of createElement.
