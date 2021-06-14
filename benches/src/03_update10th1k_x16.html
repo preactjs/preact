@@ -9,11 +9,14 @@
 			content="updating every 10th row for 1,000 rows (3 warmup runs). 16x CPU slowdown."
 		/>
 		<style>
+			table {
+				table-layout: fixed;
+			}
 			.preloadicon {
 				display: none;
 			}
 			.glyphicon-remove:before {
-				content: "⨯";
+				content: '⨯';
 			}
 		</style>
 	</head>
@@ -27,7 +30,9 @@
 				afterFrameAsync,
 				getRowLinkSel,
 				testElement,
-				testElementTextContains
+				testElementTextContains,
+				mutateAndLayout,
+				raf
 			} from './util.js';
 			import * as framework from 'framework';
 			import { render } from '../src/keyed-children/index.js';
@@ -61,14 +66,16 @@
 			}
 
 			async function run() {
-				performance.mark('start');
-				update();
-
 				await afterFrameAsync();
-				testElementTextContains(getRowLinkSel(991), repeat(' !!!', 3 + 1));
+
+				const REPEAT = 50;
+				performance.mark('start');
+				await mutateAndLayout(update, REPEAT);
+				testElementTextContains(getRowLinkSel(991), repeat(' !!!', 3 + REPEAT));
 				performance.mark('stop');
 				performance.measure(measureName, 'start', 'stop');
 
+				await raf();
 				measureMemory();
 			}
 
