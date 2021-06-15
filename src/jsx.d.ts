@@ -755,8 +755,8 @@ export namespace JSXInternal {
 		wrap?: string;
 
 		// Non-standard Attributes
-		autocapitalize?: string;
-		autoCapitalize?: string;
+		autocapitalize?: 'off' | 'none' | 'on' | 'sentences' | 'words' | 'characters';
+		autoCapitalize?: 'off' | 'none' | 'on' | 'sentences' | 'words' | 'characters';
 
 		// RDFa Attributes
 		about?: string;
