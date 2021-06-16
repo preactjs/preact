@@ -9,7 +9,7 @@ export function _catchError(error, vnode) {
 	/** @type {import('../internal').Component} */
 	let component, ctor, handled;
 
-	for (; (vnode = vnode._parent); ) {
+	while (vnode = vnode._parent) {
 		if ((component = vnode._component) && !component._processingException) {
 			try {
 				ctor = component.constructor;
