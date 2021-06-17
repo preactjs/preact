@@ -377,7 +377,7 @@ function diffElementNodes(
 			// we should read the existing DOM attributes to diff them
 			if (excessDomChildren != null) {
 				oldProps = {};
-				for (let i = 0; i < dom.attributes.length; i++) {
+				for (i = 0; i < dom.attributes.length; i++) {
 					oldProps[dom.attributes[i].name] = dom.attributes[i].value;
 				}
 			}
