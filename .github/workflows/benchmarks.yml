@@ -258,3 +258,31 @@ jobs:
         with:
           name: results
           path: benches/results/filter_list.json
+
+  bench_todo:
+    name: Bench todo
+    runs-on: ubuntu-latest
+    needs: prepare
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '14.x'
+      - uses: actions/download-artifact@v2
+        with:
+          name: build-output
+      - name: install & build
+        run: |
+          cd benches
+          npm ci
+      - name: bench
+        run: |
+          export CHROMEDRIVER_FILEPATH=$(which chromedriver)
+          cd benches
+          npm run bench todo.html
+      - name: Upload results
+        uses: actions/upload-artifact@v2
+        with:
+          name: results
+          path: benches/results/todo.json
