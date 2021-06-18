@@ -67,7 +67,7 @@ export function createRoot(parentDom) {
 			if (options._root) options._root(vnode, parentDom);
 
 			vnode = createElement(Fragment, { _parentDom: parentDom }, [vnode]);
-			const rootInternal = createInternal(vnode);
+			rootInternal = createInternal(vnode);
 			rootInternal._flags |= MODE_HYDRATE;
 			parentDom._children = rootInternal;
 
