@@ -24,7 +24,7 @@ export function createContext(defaultValue, contextId) {
 
 				this.getChildContext = () => ctx;
 
-				this.shouldComponentUpdate = function(_props) {
+				this.shouldComponentUpdate = _props => {
 					if (this.props.value !== _props.value) {
 						// I think the forced value propagation here was only needed when `options.debounceRendering` was being bypassed:
 						// https://github.com/preactjs/preact/commit/4d339fb803bea09e9f198abf38ca1bf8ea4b7771#diff-54682ce380935a717e41b8bfc54737f6R358
