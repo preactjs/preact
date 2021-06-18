@@ -1672,13 +1672,11 @@ describe('createRoot()', () => {
 
 		beforeEach(() => {
 			scratch = setupScratch();
-			attributesSpy = spyOnElementAttributes();
 			root = createRoot(scratch);
 		});
 
 		afterEach(() => {
 			teardown(scratch);
-			clearLog();
 		});
 
 		it('can reuse a root', () => {
