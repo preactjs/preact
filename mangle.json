@@ -19,7 +19,6 @@
     },
     "compress": {
       "hoist_vars": true,
-      "reduce_vars": true,
       "reduce_funcs": false,
       "unsafe": true,
       "unsafe_arrows": true,
