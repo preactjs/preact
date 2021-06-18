@@ -103,15 +103,16 @@ export function patch(
 					nextDomSibling = getDomSibling(internal);
 				}
 			}
-		} else if (newVNode._vnodeId !== internal._vnodeId) {
-			nextDomSibling = patchDOMElement(
-				internal._dom,
-				newVNode,
-				internal,
-				globalContext,
-				commitQueue
-			);
 		} else {
+			if (newVNode._vnodeId !== internal._vnodeId) {
+				patchDOMElement(
+					internal._dom,
+					newVNode,
+					internal,
+					globalContext,
+					commitQueue
+				);
+			}
 			// @ts-ignore Trust me TS, nextSibling is a PreactElement
 			nextDomSibling = internal._dom.nextSibling;
 		}
@@ -141,61 +142,61 @@ export function patch(
  * @param {object} globalContext The current context object
  * @param {import('../internal').CommitQueue} commitQueue List of components
  * which have callbacks to invoke in commitRoot
- * @returns {import('../internal').PreactElement}
  */
 function patchDOMElement(dom, newVNode, internal, globalContext, commitQueue) {
-	let oldProps = internal.props;
-	let newProps = newVNode.props;
-	let newType = newVNode.type;
-	let tmp;
+	let oldProps = internal.props,
+		newProps = (internal.props = newVNode.props),
+		isSvg = internal._flags & MODE_SVG,
+		i,
+		value,
+		tmp,
+		newHtml,
+		oldHtml,
+		newValue,
+		newChecked,
+		newChildren;
 
-	let oldHtml = oldProps.dangerouslySetInnerHTML;
-	let newHtml = newProps.dangerouslySetInnerHTML;
-
-	if (newHtml || oldHtml) {
-		// Avoid re-applying the same '__html' if it did not changed between re-render
-		if (
-			!newHtml ||
-			((!oldHtml || newHtml.__html != oldHtml.__html) &&
-				newHtml.__html !== dom.innerHTML)
-		) {
-			dom.innerHTML = (newHtml && newHtml.__html) || '';
-		}
-	}
-
-	internal.props = newProps;
-
-	// diffProps:
-	let i;
-	const isSvg = internal._flags & MODE_SVG;
 	for (i in oldProps) {
-		if (i !== 'children' && i !== 'key' && !(i in newProps)) {
-			setProperty(dom, i, null, oldProps[i], isSvg);
+		value = oldProps[i];
+		if (i === 'dangerouslySetInnerHTML') {
+			oldHtml = value;
+		} else if (i !== 'children' && i !== 'key' && !(i in newProps)) {
+			setProperty(dom, i, null, value, isSvg);
 		}
 	}
 
 	for (i in newProps) {
-		if (
-			i !== 'children' &&
-			i !== 'key' &&
-			i !== 'value' &&
-			i !== 'checked' &&
-			oldProps[i] !== newProps[i]
-		) {
-			setProperty(dom, i, newProps[i], oldProps[i], isSvg);
+		value = newProps[i];
+		if (i === 'key') {
+		} else if (i === 'children') {
+			newChildren = value;
+		} else if (i === 'dangerouslySetInnerHTML') {
+			newHtml = value;
+		} else if (i === 'value' && 'value' in dom) {
+			newValue = value;
+		} else if (i === 'checked' && 'checked' in dom) {
+			newChecked = value;
+		} else if (value !== (tmp = oldProps[i])) {
+			setProperty(dom, i, value, tmp, isSvg);
 		}
 	}
 
-	internal._dom = dom;
-
 	// If the new vnode didn't have dangerouslySetInnerHTML, diff its children
 	if (newHtml) {
+		// Avoid re-applying the same '__html' if it did not changed between re-render
+		if (
+			!oldHtml ||
+			(newHtml.__html !== oldHtml.__html && newHtml.__html !== dom.innerHTML)
+		) {
+			dom.innerHTML = newHtml && newHtml.__html;
+		}
 		internal._children = null;
 	} else {
-		tmp = newVNode.props.children;
+		if (oldHtml) dom.innerHTML = '';
+
 		diffChildren(
 			dom,
-			Array.isArray(tmp) ? tmp : [tmp],
+			Array.isArray(newChildren) ? newChildren : [newChildren],
 			internal,
 			globalContext,
 			commitQueue,
@@ -203,25 +204,10 @@ function patchDOMElement(dom, newVNode, internal, globalContext, commitQueue) {
 		);
 	}
 
-	if (
-		'value' in newProps &&
-		(tmp = newProps.value) !== UNDEFINED &&
-		// #2756 For the <progress>-element the initial value is 0,
-		// despite the attribute not being present. When the attribute
-		// is missing the progress bar is treated as indeterminate.
-		// To fix that we'll always update it when it is 0 for progress elements
-		(tmp !== dom.value || (newType === 'progress' && !tmp))
-	) {
-		setProperty(dom, 'value', tmp, oldProps.value, false);
+	if (newValue !== UNDEFINED && dom.value !== newValue) {
+		setProperty(dom, 'value', newValue, null, 0);
 	}
-	if (
-		'checked' in newProps &&
-		(tmp = newProps.checked) !== UNDEFINED &&
-		tmp !== dom.checked
-	) {
-		setProperty(dom, 'checked', tmp, oldProps.checked, false);
+	if (newChecked !== UNDEFINED && dom.checked !== newChecked) {
+		setProperty(dom, 'checked', newValue, null, 0);
 	}
-
-	// @ts-ignore Trust me TS, nextSibling is a PreactElement
-	return dom.nextSibling;
 }

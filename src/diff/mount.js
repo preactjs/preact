@@ -120,12 +120,15 @@ function mountDOMElement(dom, internal, globalContext, commitQueue) {
 	let newProps = internal.props;
 	let nodeType = internal.type;
 	/** @type {any} */
-	let i;
+	let i, value;
 
-	let isHydrating = internal._flags & MODE_HYDRATE;
+	let flags = internal._flags;
+	let isSvg = flags & MODE_SVG;
+
+	let isHydrating = flags & MODE_HYDRATE;
 
 	// if hydrating (hydrate() or render() with replaceNode), find the matching child:
-	if (internal._flags & (MODE_HYDRATE | MODE_MUTATIVE_HYDRATE)) {
+	if (flags & (MODE_HYDRATE | MODE_MUTATIVE_HYDRATE)) {
 		while (
 			dom &&
 			(nodeType ? dom.localName !== nodeType : dom.nodeType !== 3)
@@ -134,7 +137,7 @@ function mountDOMElement(dom, internal, globalContext, commitQueue) {
 		}
 	}
 
-	if (internal._flags & TYPE_TEXT) {
+	if (flags & TYPE_TEXT) {
 		if (dom == null) {
 			// @ts-ignore createTextNode returns Text, we expect PreactElement
 			dom = document.createTextNode(newProps);
@@ -148,7 +151,7 @@ function mountDOMElement(dom, internal, globalContext, commitQueue) {
 		// if (nodeType === 'svg') internal._flags |= MODE_SVG;
 
 		if (dom == null) {
-			if (internal._flags & MODE_SVG) {
+			if (isSvg) {
 				dom = document.createElementNS(
 					'http://www.w3.org/2000/svg',
 					// @ts-ignore We know `newVNode.type` is a string
@@ -170,31 +173,34 @@ function mountDOMElement(dom, internal, globalContext, commitQueue) {
 		// @TODO: Consider removing and instructing users to instead set the desired
 		// prop for removal to undefined/null. During hydration, props are not
 		// diffed at all (including dangerouslySetInnerHTML)
-		if (internal._flags & MODE_MUTATIVE_HYDRATE) {
+		if (flags & MODE_MUTATIVE_HYDRATE) {
 			// But, if we are in a situation where we are using existing DOM (e.g. replaceNode)
 			// we should read the existing DOM attributes to diff them
 			for (i = 0; i < dom.attributes.length; i++) {
-				const name = dom.attributes[i].name;
-				if (!(name in newProps)) {
-					dom.removeAttribute(name);
+				value = dom.attributes[i].name;
+				if (!(value in newProps)) {
+					dom.removeAttribute(value);
 				}
 			}
 		}
 
-		let newHtml, newValue, newChecked;
+		let newHtml, newValue, newChecked, newChildren;
 		for (i in newProps) {
-			if (i === 'key' || i === 'children') {
+			value = newProps[i];
+			if (i === 'children') {
+				newChildren = value;
 			} else if (i === 'dangerouslySetInnerHTML') {
-				newHtml = newProps[i];
+				newHtml = value;
 			} else if (i === 'value') {
-				newValue = newProps[i];
+				newValue = value;
 			} else if (i === 'checked') {
-				newChecked = newProps[i];
+				newChecked = value;
 			} else if (
-				(!isHydrating || typeof newProps[i] == 'function') &&
-				newProps[i] != null
+				i !== 'key' &&
+				value != null &&
+				(!isHydrating || typeof value === 'function')
 			) {
-				setProperty(dom, i, newProps[i], null, internal._flags & MODE_SVG);
+				setProperty(dom, i, value, null, isSvg);
 			}
 		}
 
@@ -206,10 +212,10 @@ function mountDOMElement(dom, internal, globalContext, commitQueue) {
 				dom.innerHTML = newHtml.__html;
 			}
 			internal._children = null;
-		} else if ((i = internal.props.children) != null) {
+		} else if (newChildren != null) {
 			mountChildren(
 				dom,
-				Array.isArray(i) ? i : [i],
+				Array.isArray(newChildren) ? newChildren : [newChildren],
 				internal,
 				globalContext,
 				commitQueue,
@@ -220,10 +226,10 @@ function mountDOMElement(dom, internal, globalContext, commitQueue) {
 		// (as above, don't diff props during hydration)
 		if (!isHydrating) {
 			if (newValue != null) {
-				setProperty(dom, 'value', newValue, null, false);
+				setProperty(dom, 'value', newValue, null, 0);
 			}
 			if (newChecked != null) {
-				setProperty(dom, 'checked', newChecked, null, false);
+				setProperty(dom, 'checked', newChecked, null, 0);
 			}
 		}
 	}
