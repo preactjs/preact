@@ -1668,7 +1668,6 @@ describe('createRoot()', () => {
 	describe('root', () => {
 		/** @type {HTMLElement} */
 		let scratch;
-		let attributesSpy;
 		let root;
 
 		beforeEach(() => {
