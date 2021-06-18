@@ -1,5 +1,5 @@
 import { setupRerender } from 'preact/test-utils';
-import { createElement, Component, options, createRoot } from 'preact';
+import { createElement, Component, options, createRoot, Fragment } from 'preact';
 import {
 	setupScratch,
 	teardown,
@@ -13,6 +13,7 @@ import {
 } from '../_util/helpers';
 import { clearLog, getLog, logCall } from '../_util/logCall';
 import { useState } from 'preact/hooks';
+import { ul, li, div } from '../_util/dom';
 
 /** @jsx createElement */
 
