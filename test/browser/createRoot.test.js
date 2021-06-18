@@ -1,5 +1,11 @@
 import { setupRerender } from 'preact/test-utils';
-import { createElement, Component, options, createRoot, Fragment } from 'preact';
+import {
+	createElement,
+	Component,
+	options,
+	createRoot,
+	Fragment
+} from 'preact';
 import {
 	setupScratch,
 	teardown,
@@ -96,6 +102,7 @@ describe('createRoot()', () => {
 
 			scratch.parentNode.removeChild(scratch);
 			scratch = document.createElement('div');
+			render = createRoot(scratch).render;
 			(document.body || document.documentElement).appendChild(scratch);
 
 			render(<span />);
@@ -115,6 +122,7 @@ describe('createRoot()', () => {
 			scratch.parentNode.removeChild(scratch);
 			scratch = document.createElement('div');
 			(document.body || document.documentElement).appendChild(scratch);
+			render = createRoot(scratch).render;
 
 			render(<x-bar />);
 			expect(scratch.childNodes).to.have.length(1);
@@ -342,9 +350,7 @@ describe('createRoot()', () => {
 		});
 
 		it('should set value inside the specified range', () => {
-			render(
-				<input type="range" value={0.5} min="0" max="1" step="0.05" />
-			);
+			render(<input type="range" value={0.5} min="0" max="1" step="0.05" />);
 			expect(scratch.firstChild.value).to.equal('0.5');
 		});
 
@@ -676,7 +682,9 @@ describe('createRoot()', () => {
 
 				let html = scratch.firstElementChild.firstElementChild.outerHTML;
 				expect(sortAttributes(html)).to.equal(
-					sortAttributes('<input type="range" min="0" max="100" list="steplist">')
+					sortAttributes(
+						'<input type="range" min="0" max="100" list="steplist">'
+					)
 				);
 			});
 		}
@@ -729,7 +737,11 @@ describe('createRoot()', () => {
 								</span>,
 								<br />
 							])}
-							<input value={text} onInput={this.setText} ref={i => (input = i)} />
+							<input
+								value={text}
+								onInput={this.setText}
+								ref={i => (input = i)}
+							/>
 						</div>
 					);
 				}
@@ -1120,9 +1132,7 @@ describe('createRoot()', () => {
 			).to.not.throw();
 			expect(scratch.firstChild.contentEditable).to.equal('inherit');
 
-			expect(() =>
-				render(<p contentEditable={null}>foo</p>)
-			).to.not.throw();
+			expect(() => render(<p contentEditable={null}>foo</p>)).to.not.throw();
 			expect(scratch.firstChild.contentEditable).to.equal('inherit');
 		});
 
@@ -1230,6 +1240,8 @@ describe('createRoot()', () => {
 			resetRemove();
 			resetSetAttribute();
 			resetRemoveAttribute();
+			if (Element.prototype.addEventListener.restore)
+				Element.prototype.addEventListener.restore();
 		});
 
 		beforeEach(() => {
@@ -1263,7 +1275,9 @@ describe('createRoot()', () => {
 			expect(getLog()).to.deep.equal([]);
 			expect(onClickSpy).not.to.have.been.called;
 
-			scratch.querySelector('li:last-child').dispatchEvent(createEvent('click'));
+			scratch
+				.querySelector('li:last-child')
+				.dispatchEvent(createEvent('click'));
 
 			expect(onClickSpy).to.have.been.called.calledOnce;
 		});
@@ -1288,7 +1302,9 @@ describe('createRoot()', () => {
 			expect(getLog()).to.deep.equal([]);
 			expect(onClickSpy).not.to.have.been.called;
 
-			scratch.querySelector('li:last-child').dispatchEvent(createEvent('click'));
+			scratch
+				.querySelector('li:last-child')
+				.dispatchEvent(createEvent('click'));
 
 			expect(onClickSpy).to.have.been.called.calledOnce;
 		});
@@ -1318,7 +1334,9 @@ describe('createRoot()', () => {
 			expect(proto.addEventListener).to.have.been.calledThrice;
 			expect(clickHandlers[2]).not.to.have.been.called;
 
-			scratch.querySelector('li:last-child').dispatchEvent(createEvent('click'));
+			scratch
+				.querySelector('li:last-child')
+				.dispatchEvent(createEvent('click'));
 			expect(clickHandlers[2]).to.have.been.calledOnce;
 		});
 
@@ -1404,7 +1422,12 @@ describe('createRoot()', () => {
 			scratch.innerHTML = html;
 			clearLog();
 
-			const clickHandlers = [sinon.spy(), sinon.spy(), sinon.spy(), sinon.spy()];
+			const clickHandlers = [
+				sinon.spy(),
+				sinon.spy(),
+				sinon.spy(),
+				sinon.spy()
+			];
 
 			hydrate(
 				<List>
@@ -1604,12 +1627,12 @@ describe('createRoot()', () => {
 			scratch.innerHTML = '<div id="test"><p class="hi">hello bar</p></div>';
 			const Component = props => <p class="hi">hello {props.foo}</p>;
 			const element = document.getElementById('test');
+			hydrate = createRoot(element).hydrate;
 			hydrate(
 				<Fragment>
 					<Component foo="bar" />
 					<Component foo="baz" />
-				</Fragment>,
-				element
+				</Fragment>
 			);
 			expect(element.innerHTML).to.equal(
 				'<p class="hi">hello bar</p><p class="hi">hello baz</p>'
@@ -1620,12 +1643,12 @@ describe('createRoot()', () => {
 			scratch.innerHTML = '<div id="test"><p class="hi">hello bar</p></div>';
 			const Component = props => <p class="hi">hello {props.foo}</p>;
 			const element = document.getElementById('test');
+			hydrate = createRoot(element).hydrate;
 			hydrate(
 				<Fragment>
 					<Component foo="baz" />
 					<Component foo="bar" />
-				</Fragment>,
-				element
+				</Fragment>
 			);
 			expect(element.innerHTML).to.equal(
 				'<p class="hi">hello baz</p><p class="hi">hello bar</p>'
@@ -1696,6 +1719,6 @@ describe('createRoot()', () => {
 				</div>
 			);
 			expect(scratch.innerHTML).to.equal('<div><i>0</i><b>1</b></div>');
-		})
-	})
+		});
+	});
 });
