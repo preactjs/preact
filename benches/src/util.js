@@ -19,6 +19,20 @@ export function afterFrameAsync() {
 	return promise;
 }
 
+export const raf = () => new Promise(requestAnimationFrame);
+export const forceLayout = () =>
+	(document.body._height = document.body.getBoundingClientRect().height);
+export const tick = () => new Promise(r => Promise.resolve().then(r));
+
+export async function mutateAndLayout(mutation, times = 1) {
+	// await afterFrameAsync();
+	for (let i = 0; i < times; i++) {
+		await mutation(i);
+	}
+	await tick();
+	await forceLayout();
+}
+
 export function measureMemory() {
 	if ('gc' in window && 'memory' in performance) {
 		// Report results in MBs

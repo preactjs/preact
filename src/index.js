@@ -6,6 +6,7 @@ export {
 	createRef,
 	isValidElement
 } from './create-element';
+export { createRoot } from './create-root';
 export { Component } from './component';
 export { cloneElement } from './clone-element';
 export { createContext } from './create-context';

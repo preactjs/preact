@@ -60,5 +60,4 @@ export const RESET_MODE = ~(
 export const INHERITED_MODES = MODE_HYDRATE | MODE_MUTATIVE_HYDRATE | MODE_SVG;
 
 export const EMPTY_ARR = [];
-
-export const IS_NON_DIMENSIONAL = /acit|ex(?:s|g|n|p|$)|rph|grid|ows|mnc|ntw|ine[ch]|zoo|^ord|itera/i;
+export const UNDEFINED = undefined;

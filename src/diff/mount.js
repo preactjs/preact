@@ -16,7 +16,6 @@ import { setProperty } from './props';
 import { renderComponent } from './component';
 import { createInternal } from '../tree';
 import options from '../options';
-import { removeNode } from '../util';
 
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
@@ -294,6 +293,7 @@ export function mountChildren(
 
 		if (childInternal.ref) {
 			applyRef(
+				null,
 				childInternal.ref,
 				childInternal._component || newDom,
 				childInternal
@@ -313,7 +313,7 @@ export function mountChildren(
 		while (startDom) {
 			i = startDom;
 			startDom = startDom.nextSibling;
-			removeNode(i);
+			i.remove();
 		}
 	}
 

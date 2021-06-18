@@ -106,6 +106,7 @@ describe('debug with hooks', () => {
 			act(() => {
 				render(<Foo>Hello!</Foo>, scratch);
 			});
+
 		expect(fn).to.throw(/Hook can only be invoked from render/);
 	});
 });

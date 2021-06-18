@@ -9,7 +9,8 @@ import {
 	MODE_SUSPENDED,
 	MODE_ERRORED,
 	TYPE_ROOT,
-	MODE_SVG
+	MODE_SVG,
+	UNDEFINED
 } from '../constants';
 import { getChildDom, getDomSibling } from '../tree';
 
@@ -41,7 +42,7 @@ export function patch(
 
 	// When passing through createElement it assigns the object
 	// constructor as undefined. This to prevent JSON-injection.
-	if (newVNode.constructor !== undefined) return null;
+	if (newVNode.constructor !== UNDEFINED) return null;
 
 	if (options._diff) options._diff(internal, newVNode);
 
@@ -204,7 +205,7 @@ function patchDOMElement(dom, newVNode, internal, globalContext, commitQueue) {
 
 	if (
 		'value' in newProps &&
-		(tmp = newProps.value) !== undefined &&
+		(tmp = newProps.value) !== UNDEFINED &&
 		// #2756 For the <progress>-element the initial value is 0,
 		// despite the attribute not being present. When the attribute
 		// is missing the progress bar is treated as indeterminate.
@@ -215,7 +216,7 @@ function patchDOMElement(dom, newVNode, internal, globalContext, commitQueue) {
 	}
 	if (
 		'checked' in newProps &&
-		(tmp = newProps.checked) !== undefined &&
+		(tmp = newProps.checked) !== UNDEFINED &&
 		tmp !== dom.checked
 	) {
 		setProperty(dom, 'checked', tmp, oldProps.checked, false);

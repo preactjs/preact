@@ -1,6 +1,6 @@
 import { MODE_UNMOUNTING, TYPE_DOM, TYPE_ROOT } from '../constants';
+import { unsubscribeFromContext } from '../create-context';
 import options from '../options';
-import { removeNode } from '../util';
 import { applyRef } from './refs';
 
 /**
@@ -19,10 +19,12 @@ export function unmount(internal, parentInternal, skipRemove) {
 
 	if ((r = internal.ref)) {
 		if (!r.current || r.current === internal._dom)
-			applyRef(r, null, parentInternal);
+			applyRef(null, r, null, parentInternal);
 	}
 
 	if ((r = internal._component)) {
+		unsubscribeFromContext(r);
+
 		if (r.componentWillUnmount) {
 			try {
 				r.componentWillUnmount();
@@ -45,7 +47,7 @@ export function unmount(internal, parentInternal, skipRemove) {
 	}
 
 	if (!skipRemove && internal._flags & TYPE_DOM) {
-		removeNode(internal._dom);
+		internal._dom.remove();
 	}
 
 	internal._dom = null;

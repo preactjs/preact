@@ -58,8 +58,10 @@ describe('null placeholders', () => {
 	let resetInsertBefore;
 	let resetRemoveChild;
 	let resetRemove;
+	let resetRemoveText;
 
 	before(() => {
+		resetRemoveText = logCall(Text.prototype, 'remove');
 		resetAppendChild = logCall(Element.prototype, 'appendChild');
 		resetInsertBefore = logCall(Element.prototype, 'insertBefore');
 		resetRemoveChild = logCall(Element.prototype, 'removeChild');
@@ -71,6 +73,7 @@ describe('null placeholders', () => {
 		resetInsertBefore();
 		resetRemoveChild();
 		resetRemove();
+		resetRemoveText();
 	});
 
 	beforeEach(() => {
@@ -299,10 +302,6 @@ describe('null placeholders', () => {
 		toggle();
 		rerender();
 		expect(scratch.innerHTML).to.equal(div([div('false'), div('the middle')]));
-		expect(getLog()).to.deep.equal([
-			'#text.remove()',
-			// '<div>falsethe middleNullable 2.appendChild(<div>the middle)',
-			'#text.remove()'
-		]);
+		expect(getLog()).to.deep.equal(['#text.remove()', '#text.remove()']);
 	});
 });

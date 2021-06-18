@@ -241,6 +241,13 @@ declare namespace preact {
 		...children: ComponentChildren[]
 	): VNode<P>;
 
+	function createRoot(
+		parent: Element | Document | ShadowRoot | DocumentFragment
+	): {
+		render(vnode: ComponentChild): void;
+		hydrate(vnode: ComponentChild): void;
+	};
+
 	//
 	// Preact Built-in Components
 	// -----------------------------------
