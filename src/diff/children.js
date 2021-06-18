@@ -53,7 +53,7 @@ export function diffChildren(
 		// If this newVNode is being reused (e.g. <div>{reuse}{reuse}</div>) in the same diff,
 		// or we are rendering a component (e.g. setState) copy the oldVNodes so it can have
 		// it's own DOM & etc. pointers
-		else if (['string', 'number', 'bigint'].includes(typeof childVNode)) {
+		else if (['string', 'number', 'bigint'].indexOf(typeof childVNode) !== -1) {
 			childVNode = newParentVNode._children[i] = createVNode(
 				null,
 				childVNode,
