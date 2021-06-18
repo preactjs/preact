@@ -5,7 +5,8 @@ import {
 	createRef,
 	Component,
 	createContext,
-	Fragment
+	Fragment,
+	createRoot
 } from 'preact';
 import {
 	useState,
@@ -136,7 +137,8 @@ export {
 	Suspense,
 	SuspenseList,
 	lazy,
-	__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED
+	__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED,
+	createRoot
 };
 
 // React copies the named exports to the default one.
@@ -174,5 +176,6 @@ export default {
 	Suspense,
 	SuspenseList,
 	lazy,
-	__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED
+	__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED,
+	createRoot
 };
