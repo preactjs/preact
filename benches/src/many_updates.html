@@ -17,7 +17,13 @@
 	<body>
 		<div id="root"></div>
 		<script type="module">
-			import { measureName, measureMemory } from './util.js';
+			import {
+				measureName,
+				measureMemory,
+				afterFrameAsync,
+				mutateAndLayout,
+				raf
+			} from './util.js';
 			import { createRoot, createElement as h } from 'framework';
 
 			const state = {
@@ -77,36 +83,21 @@
 				// patchResults.push(performance.now() - s);
 			}
 
-			async function warmup() {
-				// const count = 100;
-				const count = 25;
-
-				for (let i = 0; i < count; i++) {
-					runPatch();
-					await new Promise(r => requestAnimationFrame(r));
+			(async () => {
+				for (let i = 5; i--; ) {
+					await mutateAndLayout(runPatch, 10);
 				}
 
-				// let fastest = Infinity;
-				// const total = patchResults.reduce((all, cur) => {
-				// 	if (cur < fastest) {
-				// 		fastest = cur;
-				// 	}
-				// 	return all + cur;
-				// }, 0);
+				await afterFrameAsync();
 
-				// console.log(`${count} runs average: ${(total / count).toFixed(2)}ms`);
-				// console.log(`fastest run: ${fastest.toFixed(2)}ms`);
-			}
-
-			warmup().then(async () => {
 				performance.mark('start');
-				runPatch();
-				await new Promise(r => requestAnimationFrame(r));
+				await mutateAndLayout(runPatch, 11);
 				performance.mark('stop');
 				performance.measure(measureName, 'start', 'stop');
 
+				await raf();
 				measureMemory();
-			});
+			})();
 		</script>
 	</body>
 </html>
