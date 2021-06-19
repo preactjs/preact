@@ -87,7 +87,7 @@ export function diffChildren(
 				childVNode._original
 			);
 		} else {
-			childVNode = newParentVNode._children[i] = childVNode;
+			newParentVNode._children[i] = childVNode;
 		}
 
 		// Terser removes the `continue` here and wraps the loop body
