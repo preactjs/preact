@@ -1,3 +1,5 @@
+/* eslint no-fallthrough: "off" */
+
 import { diffChildren } from './children';
 import { setProperty } from './props';
 import options from '../options';
