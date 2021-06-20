@@ -1,5 +1,3 @@
-/* eslint no-fallthrough: "off" */
-
 import { diffChildren } from './children';
 import { setProperty } from './props';
 import options from '../options';
@@ -161,9 +159,11 @@ function patchDOMElement(dom, newVNode, internal, globalContext, commitQueue) {
 	for (i in oldProps) {
 		value = oldProps[i];
 		switch (i) {
+			case 'key':
+				break;
 			case 'dangerouslySetInnerHTML':
 				oldHtml = value;
-			case 'key':
+				break;
 			case 'children':
 				break;
 			default:
@@ -174,11 +174,13 @@ function patchDOMElement(dom, newVNode, internal, globalContext, commitQueue) {
 	for (i in newProps) {
 		value = newProps[i];
 		switch (i) {
-			case 'children':
-				newChildren = value;
+			case 'key':
+				break;
 			case 'dangerouslySetInnerHTML':
 				newHtml = value;
-			case 'key':
+				break;
+			case 'children':
+				newChildren = value;
 				break;
 			default:
 				if (value !== (tmp = oldProps[i]))
