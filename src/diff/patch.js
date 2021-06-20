@@ -208,6 +208,6 @@ function patchDOMElement(dom, newVNode, internal, globalContext, commitQueue) {
 		setProperty(dom, 'value', newValue, null, 0);
 	}
 	if (newChecked !== UNDEFINED && dom.checked !== newChecked) {
-		setProperty(dom, 'checked', newValue, null, 0);
+		setProperty(dom, 'checked', newChecked, null, 0);
 	}
 }
