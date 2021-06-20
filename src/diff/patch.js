@@ -157,26 +157,24 @@ function patchDOMElement(dom, newVNode, internal, globalContext, commitQueue) {
 		newChildren;
 
 	for (i in oldProps) {
-		value = oldProps[i];
 		if (i === 'dangerouslySetInnerHTML') {
-			oldHtml = value;
+			oldHtml = oldProps[i];
 		} else if (i !== 'children' && i !== 'key' && !(i in newProps)) {
-			setProperty(dom, i, null, value, isSvg);
+			setProperty(dom, i, null, oldProps[i], isSvg);
 		}
 	}
 
 	for (i in newProps) {
-		value = newProps[i];
 		if (i === 'key') {
 		} else if (i === 'children') {
-			newChildren = value;
+			newChildren = newProps[i];
 		} else if (i === 'dangerouslySetInnerHTML') {
-			newHtml = value;
+			newHtml = newProps[i];
 		} else if (i === 'value' && 'value' in dom) {
-			newValue = value;
+			newValue = newProps[i];
 		} else if (i === 'checked' && 'checked' in dom) {
-			newChecked = value;
-		} else if (value !== (tmp = oldProps[i])) {
+			newChecked = newProps[i];
+		} else if ((value = newProps[i]) !== (tmp = oldProps[i])) {
 			setProperty(dom, i, value, tmp, isSvg);
 		}
 	}
