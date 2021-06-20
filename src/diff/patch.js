@@ -3,9 +3,9 @@ import { setProperty } from './props';
 import options from '../options';
 import { renderComponent } from './component';
 import {
-	TYPE_COMPONENT,
 	RESET_MODE,
 	TYPE_TEXT,
+	TYPE_ELEMENT,
 	MODE_SUSPENDED,
 	MODE_ERRORED,
 	TYPE_ROOT,
@@ -37,6 +37,7 @@ export function patch(
 			internal._dom.data = newVNode;
 			internal.props = newVNode;
 		}
+
 		return internal._dom.nextSibling;
 	}
 
@@ -46,75 +47,82 @@ export function patch(
 
 	if (options._diff) options._diff(internal, newVNode);
 
+	if (internal._flags & TYPE_ELEMENT) {
+		if (newVNode._vnodeId !== internal._vnodeId) {
+			patchDOMElement(
+				internal._dom,
+				newVNode,
+				internal,
+				globalContext,
+				commitQueue
+			);
+		}
+
+		if (options.diffed) options.diffed(internal);
+
+		// We successfully rendered this VNode, unset any stored hydration/bailout state:
+		internal._flags &= RESET_MODE;
+		// Once we have successfully rendered the new VNode, copy it's ID over
+		internal._vnodeId = newVNode._vnodeId;
+
+		return internal._dom.nextSibling;
+	}
+
 	/** @type {import('../internal').PreactNode} */
 	let nextDomSibling;
 
 	try {
-		if (internal._flags & TYPE_COMPONENT) {
-			// Root nodes signal that an attempt to render into a specific DOM node on
-			// the page. Root nodes can occur anywhere in the tree and not just at the
-			// top.
-			let prevStartDom = startDom;
-			let prevParentDom = parentDom;
-			if (internal._flags & TYPE_ROOT) {
-				parentDom = newVNode.props._parentDom;
+		// Root nodes signal that an attempt to render into a specific DOM node on
+		// the page. Root nodes can occur anywhere in the tree and not just at the
+		// top.
+		let prevStartDom = startDom;
+		let prevParentDom = parentDom;
+		if (internal._flags & TYPE_ROOT) {
+			parentDom = newVNode.props._parentDom;
 
-				if (parentDom !== prevParentDom) {
-					let newStartDom = getChildDom(internal);
-					if (newStartDom) {
-						startDom = newStartDom;
-					}
+			if (parentDom !== prevParentDom) {
+				let newStartDom = getChildDom(internal);
+				if (newStartDom) {
+					startDom = newStartDom;
+				}
 
-					// The `startDom` variable might point to a node from another
-					// tree from a previous render
-					if (startDom != null && startDom.parentNode !== parentDom) {
-						startDom = null;
-					}
+				// The `startDom` variable might point to a node from another
+				// tree from a previous render
+				if (startDom != null && startDom.parentNode !== parentDom) {
+					startDom = null;
 				}
 			}
+		}
 
-			nextDomSibling = renderComponent(
-				parentDom,
-				/** @type {import('../internal').VNode} */
-				(newVNode),
-				internal,
-				globalContext,
-				commitQueue,
-				startDom
-			);
+		nextDomSibling = renderComponent(
+			parentDom,
+			/** @type {import('../internal').VNode} */
+			(newVNode),
+			internal,
+			globalContext,
+			commitQueue,
+			startDom
+		);
 
-			if (internal._flags & TYPE_ROOT && prevParentDom !== parentDom) {
-				// If this is a root node/Portal, and it changed the parentDom it's
-				// children, then we need to determine which dom node the diff should
-				// continue with.
-				if (prevStartDom == null || prevStartDom.parentNode == prevParentDom) {
-					// If prevStartDom == null, then we are diffing a root node that
-					// didn't have a startDom to begin with, so we can just return null.
-					//
-					// Or, if the previous value for start dom still has the same parent
-					// DOM has the root node's parent tree, then we can use it. This case
-					// assumes the root node rendered its children into a new parent.
-					nextDomSibling = prevStartDom;
-				} else {
-					// Here, if the parentDoms are different and prevStartDom has moved into
-					// a new parentDom, we'll assume the root node moved prevStartDom under
-					// the new parentDom. Because of this change, we need to search the
-					// internal tree for the next DOM sibling the tree should begin with
-					nextDomSibling = getDomSibling(internal);
-				}
+		if (internal._flags & TYPE_ROOT && prevParentDom !== parentDom) {
+			// If this is a root node/Portal, and it changed the parentDom it's
+			// children, then we need to determine which dom node the diff should
+			// continue with.
+			if (prevStartDom == null || prevStartDom.parentNode == prevParentDom) {
+				// If prevStartDom == null, then we are diffing a root node that
+				// didn't have a startDom to begin with, so we can just return null.
+				//
+				// Or, if the previous value for start dom still has the same parent
+				// DOM has the root node's parent tree, then we can use it. This case
+				// assumes the root node rendered its children into a new parent.
+				nextDomSibling = prevStartDom;
+			} else {
+				// Here, if the parentDoms are different and prevStartDom has moved into
+				// a new parentDom, we'll assume the root node moved prevStartDom under
+				// the new parentDom. Because of this change, we need to search the
+				// internal tree for the next DOM sibling the tree should begin with
+				nextDomSibling = getDomSibling(internal);
 			}
-		} else {
-			if (newVNode._vnodeId !== internal._vnodeId) {
-				patchDOMElement(
-					internal._dom,
-					newVNode,
-					internal,
-					globalContext,
-					commitQueue
-				);
-			}
-			// @ts-ignore Trust me TS, nextSibling is a PreactElement
-			nextDomSibling = internal._dom.nextSibling;
 		}
 
 		if (options.diffed) options.diffed(internal);
