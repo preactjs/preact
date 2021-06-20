@@ -152,8 +152,6 @@ function patchDOMElement(dom, newVNode, internal, globalContext, commitQueue) {
 		tmp,
 		newHtml,
 		oldHtml,
-		// newValue,
-		// newChecked,
 		newChildren;
 
 	for (i in oldProps) {
@@ -211,6 +209,7 @@ function patchDOMElement(dom, newVNode, internal, globalContext, commitQueue) {
 		);
 	}
 
+	// Note: this is an unrolled loop - keep the two "iterations" identical for compression reasons.
 	i = 'value';
 	value = newProps[i];
 	if (value !== UNDEFINED && i in dom && value !== dom[i]) {
