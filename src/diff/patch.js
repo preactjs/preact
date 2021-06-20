@@ -152,30 +152,35 @@ function patchDOMElement(dom, newVNode, internal, globalContext, commitQueue) {
 		tmp,
 		newHtml,
 		oldHtml,
-		newValue,
-		newChecked,
+		// newValue,
+		// newChecked,
 		newChildren;
 
 	for (i in oldProps) {
-		if (i === 'dangerouslySetInnerHTML') {
-			oldHtml = oldProps[i];
-		} else if (i !== 'children' && i !== 'key' && !(i in newProps)) {
-			setProperty(dom, i, null, oldProps[i], isSvg);
+		value = oldProps[i];
+		switch (i) {
+			case 'dangerouslySetInnerHTML':
+				oldHtml = value;
+			case 'key':
+			case 'children':
+				break;
+			default:
+				if (!(i in newProps)) setProperty(dom, i, null, value, isSvg);
 		}
 	}
 
 	for (i in newProps) {
-		if (i === 'key') {
-		} else if (i === 'children') {
-			newChildren = newProps[i];
-		} else if (i === 'dangerouslySetInnerHTML') {
-			newHtml = newProps[i];
-		} else if (i === 'value' && 'value' in dom) {
-			newValue = newProps[i];
-		} else if (i === 'checked' && 'checked' in dom) {
-			newChecked = newProps[i];
-		} else if ((value = newProps[i]) !== (tmp = oldProps[i])) {
-			setProperty(dom, i, value, tmp, isSvg);
+		value = newProps[i];
+		switch (i) {
+			case 'children':
+				newChildren = value;
+			case 'dangerouslySetInnerHTML':
+				newHtml = value;
+			case 'key':
+				break;
+			default:
+				if (value !== (tmp = oldProps[i]))
+					setProperty(dom, i, value, tmp, isSvg);
 		}
 	}
 
@@ -202,10 +207,14 @@ function patchDOMElement(dom, newVNode, internal, globalContext, commitQueue) {
 		);
 	}
 
-	if (newValue !== UNDEFINED && dom.value !== newValue) {
-		setProperty(dom, 'value', newValue, null, 0);
+	i = 'value';
+	value = newProps[i];
+	if (value !== UNDEFINED && i in dom && value !== dom[i]) {
+		setProperty(dom, i, value, null, 0);
 	}
-	if (newChecked !== UNDEFINED && dom.checked !== newChecked) {
-		setProperty(dom, 'checked', newChecked, null, 0);
+	i = 'checked';
+	value = newProps[i];
+	if (value !== UNDEFINED && i in dom && value !== dom[i]) {
+		setProperty(dom, i, value, null, 0);
 	}
 }
