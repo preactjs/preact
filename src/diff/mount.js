@@ -215,7 +215,7 @@ function mountDOMElement(dom, internal, globalContext, commitQueue) {
 		} else if (newChildren != null) {
 			mountChildren(
 				dom,
-				Array.isArray(newChildren) ? newChildren : [newChildren],
+				newChildren && Array.isArray(newChildren) ? newChildren : [newChildren],
 				internal,
 				globalContext,
 				commitQueue,

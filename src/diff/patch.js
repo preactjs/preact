@@ -193,7 +193,7 @@ function patchDOMElement(dom, newVNode, internal, globalContext, commitQueue) {
 
 		diffChildren(
 			dom,
-			Array.isArray(newChildren) ? newChildren : [newChildren],
+			newChildren && Array.isArray(newChildren) ? newChildren : [newChildren],
 			internal,
 			globalContext,
 			commitQueue,
