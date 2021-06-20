@@ -125,7 +125,8 @@ function mountDOMElement(dom, internal, globalContext, commitQueue) {
 	let flags = internal._flags;
 	let isSvg = flags & MODE_SVG;
 
-	let isHydrating = flags & MODE_HYDRATE;
+	// Are we *not* hydrating? (a top-level render() or mutative hydration):
+	let isFullRender = ~flags & MODE_HYDRATE;
 
 	// if hydrating (hydrate() or render() with replaceNode), find the matching child:
 	if (flags & (MODE_HYDRATE | MODE_MUTATIVE_HYDRATE)) {
@@ -166,8 +167,8 @@ function mountDOMElement(dom, internal, globalContext, commitQueue) {
 			}
 
 			// we are creating a new node, so we can assume this is a new subtree (in case we are hydrating), this deopts the hydrate
-			isHydrating = 0;
 			internal._flags &= RESET_MODE;
+			isFullRender = 1;
 		}
 
 		// @TODO: Consider removing and instructing users to instead set the desired
@@ -192,10 +193,12 @@ function mountDOMElement(dom, internal, globalContext, commitQueue) {
 				newChildren = value;
 			} else if (i === 'dangerouslySetInnerHTML') {
 				newHtml = value;
-			} else if (isHydrating && typeof value !== 'function') {
 			} else if (i === 'value') {
 				newValue = value;
-			} else if (value != null) {
+			} else if (
+				value != null &&
+				(isFullRender || typeof value === 'function')
+			) {
 				setProperty(dom, i, value, null, isSvg);
 			}
 		}
@@ -204,7 +207,7 @@ function mountDOMElement(dom, internal, globalContext, commitQueue) {
 
 		// If the new vnode didn't have dangerouslySetInnerHTML, diff its children
 		if (newHtml) {
-			if (!isHydrating && newHtml.__html) {
+			if (isFullRender && newHtml.__html) {
 				dom.innerHTML = newHtml.__html;
 			}
 			internal._children = null;
@@ -220,7 +223,7 @@ function mountDOMElement(dom, internal, globalContext, commitQueue) {
 		}
 
 		// (as above, don't diff props during hydration)
-		if (newValue != null) {
+		if (isFullRender && newValue != null) {
 			setProperty(dom, 'value', newValue, null, 0);
 		}
 	}
