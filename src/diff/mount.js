@@ -184,22 +184,18 @@ function mountDOMElement(dom, internal, globalContext, commitQueue) {
 			}
 		}
 
-		let newHtml, newValue, newChecked, newChildren;
+		let newHtml, newValue, newChildren;
 		for (i in newProps) {
 			value = newProps[i];
-			if (i === 'children') {
+			if (i === 'key') {
+			} else if (i === 'children') {
 				newChildren = value;
 			} else if (i === 'dangerouslySetInnerHTML') {
 				newHtml = value;
+			} else if (isHydrating && typeof value !== 'function') {
 			} else if (i === 'value') {
 				newValue = value;
-			} else if (i === 'checked') {
-				newChecked = value;
-			} else if (
-				i !== 'key' &&
-				value != null &&
-				(!isHydrating || typeof value === 'function')
-			) {
+			} else if (value != null) {
 				setProperty(dom, i, value, null, isSvg);
 			}
 		}
@@ -224,13 +220,8 @@ function mountDOMElement(dom, internal, globalContext, commitQueue) {
 		}
 
 		// (as above, don't diff props during hydration)
-		if (!isHydrating) {
-			if (newValue != null) {
-				setProperty(dom, 'value', newValue, null, 0);
-			}
-			if (newChecked != null) {
-				setProperty(dom, 'checked', newChecked, null, 0);
-			}
+		if (newValue != null) {
+			setProperty(dom, 'value', newValue, null, 0);
 		}
 	}
 
