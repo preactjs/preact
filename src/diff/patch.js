@@ -47,6 +47,28 @@ export function patch(
 
 	if (options._diff) options._diff(internal, newVNode);
 
+	/** @type {import('../internal').PreactNode} */
+	let nextDomSibling;
+
+	// Root nodes signal that an attempt to render into a specific DOM node on
+	// the page. Root nodes can occur anywhere in the tree and not just at the
+	// top.
+	let prevStartDom = startDom;
+	let prevParentDom = parentDom;
+	if (internal._flags & TYPE_ROOT) {
+		parentDom = newVNode.props._parentDom;
+
+		if (parentDom !== prevParentDom) {
+			startDom = getChildDom(internal) || startDom;
+
+			// The `startDom` variable might point to a node from another
+			// tree from a previous render
+			if (startDom != null && startDom.parentNode !== parentDom) {
+				startDom = null;
+			}
+		}
+	}
+
 	if (internal._flags & TYPE_ELEMENT) {
 		if (newVNode._vnodeId !== internal._vnodeId) {
 			patchDOMElement(
@@ -58,85 +80,56 @@ export function patch(
 			);
 		}
 
-		if (options.diffed) options.diffed(internal);
+		// @ts-ignore
+		nextDomSibling = internal._dom.nextSibling;
+	} else {
+		try {
+			nextDomSibling = renderComponent(
+				parentDom,
+				/** @type {import('../internal').VNode} */
+				(newVNode),
+				internal,
+				globalContext,
+				commitQueue,
+				startDom
+			);
+		} catch (e) {
+			// @TODO: assign a new VNode ID here? Or NaN?
+			// newVNode._vnodeId = 0;
+			internal._flags |= e.then ? MODE_SUSPENDED : MODE_ERRORED;
+			options._catchError(e, internal);
 
-		// We successfully rendered this VNode, unset any stored hydration/bailout state:
-		internal._flags &= RESET_MODE;
-		// Once we have successfully rendered the new VNode, copy it's ID over
-		internal._vnodeId = newVNode._vnodeId;
-
-		return internal._dom.nextSibling;
+			return nextDomSibling;
+		}
 	}
 
-	/** @type {import('../internal').PreactNode} */
-	let nextDomSibling;
-
-	try {
-		// Root nodes signal that an attempt to render into a specific DOM node on
-		// the page. Root nodes can occur anywhere in the tree and not just at the
-		// top.
-		let prevStartDom = startDom;
-		let prevParentDom = parentDom;
-		if (internal._flags & TYPE_ROOT) {
-			parentDom = newVNode.props._parentDom;
-
-			if (parentDom !== prevParentDom) {
-				let newStartDom = getChildDom(internal);
-				if (newStartDom) {
-					startDom = newStartDom;
-				}
-
-				// The `startDom` variable might point to a node from another
-				// tree from a previous render
-				if (startDom != null && startDom.parentNode !== parentDom) {
-					startDom = null;
-				}
-			}
+	if (prevParentDom !== parentDom) {
+		// If this is a root node/Portal, and it changed the parentDom it's
+		// children, then we need to determine which dom node the diff should
+		// continue with.
+		if (prevStartDom == null || prevStartDom.parentNode == prevParentDom) {
+			// If prevStartDom == null, then we are diffing a root node that
+			// didn't have a startDom to begin with, so we can just return null.
+			//
+			// Or, if the previous value for start dom still has the same parent
+			// DOM has the root node's parent tree, then we can use it. This case
+			// assumes the root node rendered its children into a new parent.
+			nextDomSibling = prevStartDom;
+		} else {
+			// Here, if the parentDoms are different and prevStartDom has moved into
+			// a new parentDom, we'll assume the root node moved prevStartDom under
+			// the new parentDom. Because of this change, we need to search the
+			// internal tree for the next DOM sibling the tree should begin with
+			nextDomSibling = getDomSibling(internal);
 		}
-
-		nextDomSibling = renderComponent(
-			parentDom,
-			/** @type {import('../internal').VNode} */
-			(newVNode),
-			internal,
-			globalContext,
-			commitQueue,
-			startDom
-		);
-
-		if (internal._flags & TYPE_ROOT && prevParentDom !== parentDom) {
-			// If this is a root node/Portal, and it changed the parentDom it's
-			// children, then we need to determine which dom node the diff should
-			// continue with.
-			if (prevStartDom == null || prevStartDom.parentNode == prevParentDom) {
-				// If prevStartDom == null, then we are diffing a root node that
-				// didn't have a startDom to begin with, so we can just return null.
-				//
-				// Or, if the previous value for start dom still has the same parent
-				// DOM has the root node's parent tree, then we can use it. This case
-				// assumes the root node rendered its children into a new parent.
-				nextDomSibling = prevStartDom;
-			} else {
-				// Here, if the parentDoms are different and prevStartDom has moved into
-				// a new parentDom, we'll assume the root node moved prevStartDom under
-				// the new parentDom. Because of this change, we need to search the
-				// internal tree for the next DOM sibling the tree should begin with
-				nextDomSibling = getDomSibling(internal);
-			}
-		}
-
-		if (options.diffed) options.diffed(internal);
-
-		// We successfully rendered this VNode, unset any stored hydration/bailout state:
-		internal._flags &= RESET_MODE;
-		// Once we have successfully rendered the new VNode, copy it's ID over
-		internal._vnodeId = newVNode._vnodeId;
-	} catch (e) {
-		// @TODO: assign a new VNode ID here? Or NaN?
-		// newVNode._vnodeId = 0;
-		internal._flags |= e.then ? MODE_SUSPENDED : MODE_ERRORED;
-		options._catchError(e, internal);
 	}
+
+	if (options.diffed) options.diffed(internal);
+
+	// We successfully rendered this VNode, unset any stored hydration/bailout state:
+	internal._flags &= RESET_MODE;
+	// Once we have successfully rendered the new VNode, copy it's ID over
+	internal._vnodeId = newVNode._vnodeId;
 
 	return nextDomSibling;
 }
