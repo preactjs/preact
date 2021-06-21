@@ -32,13 +32,15 @@ export function patch(
 	commitQueue,
 	startDom
 ) {
+	let dom = internal._dom;
+
 	if (internal._flags & TYPE_TEXT) {
 		if (newVNode !== internal.props) {
-			internal._dom.data = newVNode;
+			dom.data = newVNode;
 			internal.props = newVNode;
 		}
 
-		return internal._dom.nextSibling;
+		return dom.nextSibling;
 	}
 
 	// When passing through createElement it assigns the object
@@ -46,6 +48,22 @@ export function patch(
 	if (newVNode.constructor !== UNDEFINED) return null;
 
 	if (options._diff) options._diff(internal, newVNode);
+
+	if (internal._flags & TYPE_ELEMENT) {
+		if (newVNode._vnodeId !== internal._vnodeId) {
+			// @ts-ignore dom is a PreactElement here
+			patchDOMElement(dom, newVNode, internal, globalContext, commitQueue);
+			// Once we have successfully rendered the new VNode, copy it's ID over
+			internal._vnodeId = newVNode._vnodeId;
+		}
+
+		if (options.diffed) options.diffed(internal);
+
+		// We successfully rendered this VNode, unset any stored hydration/bailout state:
+		internal._flags &= RESET_MODE;
+
+		return dom.nextSibling;
+	}
 
 	/** @type {import('../internal').PreactNode} */
 	let nextDomSibling;
@@ -69,38 +87,23 @@ export function patch(
 		}
 	}
 
-	if (internal._flags & TYPE_ELEMENT) {
-		if (newVNode._vnodeId !== internal._vnodeId) {
-			patchDOMElement(
-				internal._dom,
-				newVNode,
-				internal,
-				globalContext,
-				commitQueue
-			);
-		}
+	try {
+		nextDomSibling = renderComponent(
+			parentDom,
+			/** @type {import('../internal').VNode} */
+			(newVNode),
+			internal,
+			globalContext,
+			commitQueue,
+			startDom
+		);
+	} catch (e) {
+		// @TODO: assign a new VNode ID here? Or NaN?
+		// newVNode._vnodeId = 0;
+		internal._flags |= e.then ? MODE_SUSPENDED : MODE_ERRORED;
+		options._catchError(e, internal);
 
-		// @ts-ignore
-		nextDomSibling = internal._dom.nextSibling;
-	} else {
-		try {
-			nextDomSibling = renderComponent(
-				parentDom,
-				/** @type {import('../internal').VNode} */
-				(newVNode),
-				internal,
-				globalContext,
-				commitQueue,
-				startDom
-			);
-		} catch (e) {
-			// @TODO: assign a new VNode ID here? Or NaN?
-			// newVNode._vnodeId = 0;
-			internal._flags |= e.then ? MODE_SUSPENDED : MODE_ERRORED;
-			options._catchError(e, internal);
-
-			return nextDomSibling;
-		}
+		return nextDomSibling;
 	}
 
 	if (prevParentDom !== parentDom) {
