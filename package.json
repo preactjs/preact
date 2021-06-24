@@ -87,7 +87,7 @@
 	"scripts": {
 		"prepare": "run-s build && check-export-map",
 		"build": "npm-run-all --parallel build:*",
-		"_bundle": "microbundle build --raw -f modern,cjs,umd --no-generateTypes",
+		"_bundle": "microbundle build --raw -f es,cjs,umd --no-generateTypes",
 		"build:core": "npm run -s _bundle",
 		"build:core-min": "microbundle build --raw -f iife src/cjs.js -o dist/preact.min.js --no-generateTypes",
 		"build:debug": "npm run -s _bundle -- --cwd debug",
