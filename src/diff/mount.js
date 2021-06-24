@@ -138,8 +138,10 @@ function mountDOMElement(dom, internal, globalContext, commitQueue) {
 		}
 	}
 
+	let isNew = dom == null;
+
 	if (flags & TYPE_TEXT) {
-		if (dom == null) {
+		if (isNew) {
 			// @ts-ignore createTextNode returns Text, we expect PreactElement
 			dom = document.createTextNode(newProps);
 		} else if (dom.data !== newProps) {
@@ -151,7 +153,7 @@ function mountDOMElement(dom, internal, globalContext, commitQueue) {
 		// Tracks entering and exiting SVG namespace when descending through the tree.
 		// if (nodeType === 'svg') internal._flags |= MODE_SVG;
 
-		if (dom == null) {
+		if (isNew) {
 			if (isSvg) {
 				dom = document.createElementNS(
 					'http://www.w3.org/2000/svg',
@@ -167,7 +169,7 @@ function mountDOMElement(dom, internal, globalContext, commitQueue) {
 			}
 
 			// we are creating a new node, so we can assume this is a new subtree (in case we are hydrating), this deopts the hydrate
-			internal._flags &= RESET_MODE;
+			internal._flags = flags &= RESET_MODE;
 			isFullRender = 1;
 		}
 
@@ -218,7 +220,7 @@ function mountDOMElement(dom, internal, globalContext, commitQueue) {
 				internal,
 				globalContext,
 				commitQueue,
-				dom.firstChild
+				isNew ? null : dom.firstChild
 			);
 		}
 
@@ -229,7 +231,7 @@ function mountDOMElement(dom, internal, globalContext, commitQueue) {
 	}
 
 	// @ts-ignore
-	return dom.nextSibling;
+	return isNew ? null : dom.nextSibling;
 }
 
 /**
@@ -251,21 +253,25 @@ export function mountChildren(
 	commitQueue,
 	startDom
 ) {
-	let i, childVNode, childInternal, newDom, mountedNextChild;
+	let internalChildren = (parentInternal._children = []),
+		i,
+		childVNode,
+		childInternal,
+		newDom,
+		mountedNextChild;
 
-	parentInternal._children = [];
 	for (i = 0; i < renderResult.length; i++) {
 		childVNode = normalizeToVNode(renderResult[i]);
 
 		// Terser removes the `continue` here and wraps the loop body
 		// in a `if (childVNode) { ... } condition
 		if (childVNode == null) {
-			parentInternal._children[i] = null;
+			internalChildren[i] = null;
 			continue;
 		}
 
 		childInternal = createInternal(childVNode, parentInternal);
-		parentInternal._children[i] = childInternal;
+		internalChildren[i] = childInternal;
 
 		// Morph the old element into the new one, but don't append it to the dom yet
 		mountedNextChild = mount(
