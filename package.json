@@ -23,46 +23,55 @@
 	],
 	"exports": {
 		".": {
+			"module": "./dist/preact.mjs",
 			"import": "./dist/preact.mjs",
 			"require": "./dist/preact.js",
 			"umd": "./dist/preact.umd.js"
 		},
 		"./compat": {
+			"module": "./compat/dist/compat.mjs",
 			"import": "./compat/dist/compat.mjs",
 			"require": "./compat/dist/compat.js",
 			"umd": "./compat/dist/compat.umd.js"
 		},
 		"./debug": {
+			"module": "./debug/dist/debug.mjs",
 			"import": "./debug/dist/debug.mjs",
 			"require": "./debug/dist/debug.js",
 			"umd": "./debug/dist/debug.umd.js"
 		},
 		"./devtools": {
+			"module": "./devtools/dist/devtools.mjs",
 			"import": "./devtools/dist/devtools.mjs",
 			"require": "./devtools/dist/devtools.js",
 			"umd": "./devtools/dist/devtools.umd.js"
 		},
 		"./hooks": {
+			"module": "./hooks/dist/hooks.mjs",
 			"import": "./hooks/dist/hooks.mjs",
 			"require": "./hooks/dist/hooks.js",
 			"umd": "./hooks/dist/hooks.umd.js"
 		},
 		"./test-utils": {
+			"module": "./test-utils/dist/testUtils.mjs",
 			"import": "./test-utils/dist/testUtils.mjs",
 			"require": "./test-utils/dist/testUtils.js",
 			"umd": "./test-utils/dist/testUtils.umd.js"
 		},
 		"./jsx-runtime": {
+			"module": "./jsx-runtime/dist/jsxRuntime.mjs",
 			"import": "./jsx-runtime/dist/jsxRuntime.mjs",
 			"require": "./jsx-runtime/dist/jsxRuntime.js",
 			"umd": "./jsx-runtime/dist/jsxRuntime.umd.js"
 		},
 		"./jsx-dev-runtime": {
+			"module": "./jsx-runtime/dist/jsxRuntime.mjs",
 			"import": "./jsx-runtime/dist/jsxRuntime.mjs",
 			"require": "./jsx-runtime/dist/jsxRuntime.js",
 			"umd": "./jsx-runtime/dist/jsxRuntime.umd.js"
 		},
 		"./compat/server": {
+			"module": "./compat/server.mjs",
 			"import": "./compat/server.mjs",
 			"require": "./compat/server.js"
 		},

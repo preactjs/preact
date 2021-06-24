@@ -125,7 +125,8 @@ function mountDOMElement(dom, internal, globalContext, commitQueue) {
 	let flags = internal._flags;
 	let isSvg = flags & MODE_SVG;
 
-	let isHydrating = flags & MODE_HYDRATE;
+	// Are we *not* hydrating? (a top-level render() or mutative hydration):
+	let isFullRender = ~flags & MODE_HYDRATE;
 
 	// if hydrating (hydrate() or render() with replaceNode), find the matching child:
 	if (flags & (MODE_HYDRATE | MODE_MUTATIVE_HYDRATE)) {
@@ -137,8 +138,10 @@ function mountDOMElement(dom, internal, globalContext, commitQueue) {
 		}
 	}
 
+	let isNew = dom == null;
+
 	if (flags & TYPE_TEXT) {
-		if (dom == null) {
+		if (isNew) {
 			// @ts-ignore createTextNode returns Text, we expect PreactElement
 			dom = document.createTextNode(newProps);
 		} else if (dom.data !== newProps) {
@@ -150,7 +153,7 @@ function mountDOMElement(dom, internal, globalContext, commitQueue) {
 		// Tracks entering and exiting SVG namespace when descending through the tree.
 		// if (nodeType === 'svg') internal._flags |= MODE_SVG;
 
-		if (dom == null) {
+		if (isNew) {
 			if (isSvg) {
 				dom = document.createElementNS(
 					'http://www.w3.org/2000/svg',
@@ -166,8 +169,8 @@ function mountDOMElement(dom, internal, globalContext, commitQueue) {
 			}
 
 			// we are creating a new node, so we can assume this is a new subtree (in case we are hydrating), this deopts the hydrate
-			isHydrating = 0;
-			internal._flags &= RESET_MODE;
+			internal._flags = flags &= RESET_MODE;
+			isFullRender = 1;
 		}
 
 		// @TODO: Consider removing and instructing users to instead set the desired
@@ -184,21 +187,19 @@ function mountDOMElement(dom, internal, globalContext, commitQueue) {
 			}
 		}
 
-		let newHtml, newValue, newChecked, newChildren;
+		let newHtml, newValue, newChildren;
 		for (i in newProps) {
 			value = newProps[i];
-			if (i === 'children') {
+			if (i === 'key') {
+			} else if (i === 'children') {
 				newChildren = value;
 			} else if (i === 'dangerouslySetInnerHTML') {
 				newHtml = value;
 			} else if (i === 'value') {
 				newValue = value;
-			} else if (i === 'checked') {
-				newChecked = value;
 			} else if (
-				i !== 'key' &&
 				value != null &&
-				(!isHydrating || typeof value === 'function')
+				(isFullRender || typeof value === 'function')
 			) {
 				setProperty(dom, i, value, null, isSvg);
 			}
@@ -208,34 +209,29 @@ function mountDOMElement(dom, internal, globalContext, commitQueue) {
 
 		// If the new vnode didn't have dangerouslySetInnerHTML, diff its children
 		if (newHtml) {
-			if (!isHydrating && newHtml.__html) {
+			if (isFullRender && newHtml.__html) {
 				dom.innerHTML = newHtml.__html;
 			}
 			internal._children = null;
 		} else if (newChildren != null) {
 			mountChildren(
 				dom,
-				Array.isArray(newChildren) ? newChildren : [newChildren],
+				newChildren && Array.isArray(newChildren) ? newChildren : [newChildren],
 				internal,
 				globalContext,
 				commitQueue,
-				dom.firstChild
+				isNew ? null : dom.firstChild
 			);
 		}
 
 		// (as above, don't diff props during hydration)
-		if (!isHydrating) {
-			if (newValue != null) {
-				setProperty(dom, 'value', newValue, null, 0);
-			}
-			if (newChecked != null) {
-				setProperty(dom, 'checked', newChecked, null, 0);
-			}
+		if (isFullRender && newValue != null) {
+			setProperty(dom, 'value', newValue, null, 0);
 		}
 	}
 
 	// @ts-ignore
-	return dom.nextSibling;
+	return isNew ? null : dom.nextSibling;
 }
 
 /**
@@ -257,21 +253,25 @@ export function mountChildren(
 	commitQueue,
 	startDom
 ) {
-	let i, childVNode, childInternal, newDom, mountedNextChild;
+	let internalChildren = (parentInternal._children = []),
+		i,
+		childVNode,
+		childInternal,
+		newDom,
+		mountedNextChild;
 
-	parentInternal._children = [];
 	for (i = 0; i < renderResult.length; i++) {
 		childVNode = normalizeToVNode(renderResult[i]);
 
 		// Terser removes the `continue` here and wraps the loop body
 		// in a `if (childVNode) { ... } condition
 		if (childVNode == null) {
-			parentInternal._children[i] = null;
+			internalChildren[i] = null;
 			continue;
 		}
 
 		childInternal = createInternal(childVNode, parentInternal);
-		parentInternal._children[i] = childInternal;
+		internalChildren[i] = childInternal;
 
 		// Morph the old element into the new one, but don't append it to the dom yet
 		mountedNextChild = mount(
