@@ -9,11 +9,19 @@ import options from '../options';
 export function applyRef(oldRef, ref, value, internal) {
 	if (oldRef === ref) return;
 
-	if (oldRef) applyRef(null, oldRef, null, internal);
-	try {
-		if (typeof ref == 'function') ref(value);
-		else ref.current = value;
-	} catch (e) {
-		options._catchError(e, internal);
-	}
+	if (typeof oldRef == 'function') {
+		try {
+			oldRef(null);
+		} catch (e) {
+			options._catchError(e, internal);
+		}
+	} else if (oldRef) oldRef.current = null;
+
+	if (typeof ref == 'function') {
+		try {
+			ref(value);
+		} catch (e) {
+			options._catchError(e, internal);
+		}
+	} else ref.current = value;
 }
