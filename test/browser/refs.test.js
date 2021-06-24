@@ -274,7 +274,9 @@ describe('refs', () => {
 				return <div />;
 			}
 		}
-		const Bar = spy('Bar', () => <div />);
+		const Bar = spy('Bar', function Bar() {
+			return <div />;
+		});
 
 		sinon.spy(Foo.prototype, 'render');
 

@@ -1,4 +1,3 @@
-import { assign } from './util';
 import { addCommitCallback, commitRoot } from './diff/commit';
 import options from './options';
 import { createVNode, Fragment } from './create-element';
@@ -39,17 +38,17 @@ Component.prototype.setState = function(update, callback) {
 	if (this._nextState != null && this._nextState !== this.state) {
 		s = this._nextState;
 	} else {
-		s = this._nextState = assign({}, this.state);
+		s = this._nextState = Object.assign({}, this.state);
 	}
 
 	if (typeof update == 'function') {
 		// Some libraries like `immer` mark the current state as readonly,
 		// preventing us from mutating it, so we need to clone it. See #2716
-		update = update(assign({}, s), this.props);
+		update = update(Object.assign({}, s), this.props);
 	}
 
 	if (update) {
-		assign(s, update);
+		Object.assign(s, update);
 	}
 
 	// Skip update if updater function returned null
@@ -132,17 +131,6 @@ function rerenderComponent(component) {
  */
 let rerenderQueue = [];
 
-/**
- * Asynchronously schedule a callback
- * @type {(cb: () => void) => void}
- */
-/* istanbul ignore next */
-// Note the following line isn't tree-shaken by rollup cuz of rollup/rollup#2566
-const defer =
-	typeof Promise == 'function'
-		? Promise.prototype.then.bind(Promise.resolve())
-		: setTimeout;
-
 /*
  * The value of `Component.debounce` must asynchronously invoke the passed in callback. It is
  * important that contributors to Preact can consistently reason about what calls to `setState`, etc.
@@ -153,6 +141,8 @@ const defer =
  */
 
 let prevDebounce;
+
+const defer = Promise.prototype.then.bind(Promise.resolve());
 
 /**
  * Enqueue a rerender of a component
@@ -173,15 +163,11 @@ export function enqueueRender(c) {
 
 /** Flush the render queue by rerendering all queued components */
 function process() {
-	let queue;
-	while ((process._rerenderCount = rerenderQueue.length)) {
-		queue = rerenderQueue.sort(
-			(a, b) => a._internal._depth - b._internal._depth
-		);
-		rerenderQueue = [];
-		// Don't update `renderCount` yet. Keep its value non-zero to prevent unnecessary
-		// process() calls from getting scheduled while `queue` is still being consumed.
-		queue.some(rerenderComponent);
+	while ((len = process._rerenderCount = rerenderQueue.length)) {
+		rerenderQueue.sort((a, b) => a._internal._depth - b._internal._depth);
+		while (len--) {
+			rerenderComponent(rerenderQueue.shift());
+		}
 	}
 }
-process._rerenderCount = 0;
+let len = (process._rerenderCount = 0);

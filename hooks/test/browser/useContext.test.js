@@ -264,7 +264,7 @@ describe('useContext', () => {
 		const context = createContext(0);
 		const Provider = context.Provider;
 
-		const Inner = sinon.spy(() => {
+		const Inner = sinon.spy(function Inner() {
 			const value = useContext(context);
 			return <div>{value}</div>;
 		});

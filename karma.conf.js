@@ -65,12 +65,6 @@ var sauceLabsLaunchers = {
 		base: 'SauceLabs',
 		browserName: 'MicrosoftEdge',
 		platform: 'Windows 10'
-	},
-	sl_ie_11: {
-		base: 'SauceLabs',
-		browserName: 'internet explorer',
-		version: '11.0',
-		platform: 'Windows 7'
 	}
 };
 
@@ -99,7 +93,8 @@ const subPkgPath = pkgName => {
 	const stripped = pkgName.replace(/[/\\./]/g, '');
 	const pkgJson = path.join(__dirname, 'package.json');
 	const pkgExports = require(pkgJson).exports;
-	const file = pkgExports[stripped ? `./${stripped}` : '.'].browser;
+	const exportMapping = pkgExports[stripped ? `./${stripped}` : '.'];
+	const file = exportMapping.import;
 	return path.join(__dirname, file);
 };
 
@@ -150,8 +145,35 @@ function createEsbuildPlugin() {
 				};
 			});
 
+			// Transpile node_modules that are es2015+ to es5 for IE11
+			build.onLoad({ filter: /kolorist|sinon/ }, async args => {
+				const contents = await fs.readFile(args.path, 'utf-8');
+
+				const tmp = await babel.transformAsync(contents, {
+					filename: args.path,
+					presets: [
+						[
+							'@babel/preset-env',
+							{
+								loose: true,
+								modules: false,
+								targets: {
+									browsers: ['last 2 versions', 'IE >= 9']
+								}
+							}
+						]
+					]
+				});
+
+				return {
+					contents: tmp.code,
+					resolveDir: path.dirname(args.path),
+					loader: 'js'
+				};
+			});
+
 			// Apply babel pass whenever we load a .js file
-			build.onLoad({ filter: /\.js$/ }, async args => {
+			build.onLoad({ filter: /\.m?js$/ }, async args => {
 				const contents = await fs.readFile(args.path, 'utf-8');
 
 				// Using a cache is crucial as babel is 30x slower than esbuild
@@ -179,7 +201,9 @@ function createEsbuildPlugin() {
 							coverage && [
 								'istanbul',
 								{
-									include: minify ? '**/dist/**/*.js' : '**/src/**/*.js'
+									include: minify
+										? '**/dist/**/*.{mjs,js}'
+										: '**/src/**/*.{mjs,js}'
 								}
 							]
 						].filter(Boolean)
@@ -286,18 +310,18 @@ module.exports = function(config) {
 		],
 
 		mime: {
-			'text/javascript': ['js', 'jsx']
+			'text/javascript': ['js', 'mjs', 'jsx']
 		},
 
 		preprocessors: {
 			'{debug,devtools,hooks,compat,test-utils,jsx-runtime,}/test/**/*': [
-				'esbuild',
-				'sourcemap'
+				'esbuild'
 			]
 		},
 
 		esbuild: {
-			target: 'es5',
+			singleBundle: false,
+			target: 'es2017',
 			define: {
 				COVERAGE: coverage,
 				'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || ''),

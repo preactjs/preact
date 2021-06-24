@@ -19,13 +19,13 @@ export function _catchError(error, internal) {
 			~internal._flags & MODE_RERENDERING_ERROR
 		) {
 			try {
-				if (internal.type.getDerivedStateFromError != null) {
+				if (internal.type.getDerivedStateFromError) {
 					internal._component.setState(
 						internal.type.getDerivedStateFromError(error)
 					);
 				}
 
-				if (internal._component.componentDidCatch != null) {
+				if (internal._component.componentDidCatch) {
 					internal._component.componentDidCatch(error);
 				}
 

@@ -1,6 +1,5 @@
 import { Fragment } from '../create-element';
 import options from '../options';
-import { assign } from '../util';
 import { Component } from '../component';
 import { mountChildren } from './mount';
 import { diffChildren, reorderChildren } from './children';
@@ -8,7 +7,8 @@ import {
 	DIRTY_BIT,
 	FORCE_UPDATE,
 	MODE_PENDING_ERROR,
-	MODE_RERENDERING_ERROR
+	MODE_RERENDERING_ERROR,
+	TYPE_CLASS
 } from '../constants';
 import { addCommitCallback } from './commit';
 
@@ -62,7 +62,7 @@ export function renderComponent(
 		c = internal._component;
 	} else {
 		// Instantiate the new component
-		if ('prototype' in type && type.prototype.render) {
+		if (internal._flags & TYPE_CLASS) {
 			// @ts-ignore The check above verifies that newType is suppose to be constructed
 			internal._component = c = new type(newProps, componentContext); // eslint-disable-line new-cap
 		} else {
@@ -87,10 +87,13 @@ export function renderComponent(
 	}
 	if (type.getDerivedStateFromProps != null) {
 		if (c._nextState == c.state) {
-			c._nextState = assign({}, c._nextState);
+			c._nextState = Object.assign({}, c._nextState);
 		}
 
-		assign(c._nextState, type.getDerivedStateFromProps(newProps, c._nextState));
+		Object.assign(
+			c._nextState,
+			type.getDerivedStateFromProps(newProps, c._nextState)
+		);
 	}
 
 	oldProps = c.props;
@@ -166,7 +169,7 @@ export function renderComponent(
 	c.state = c._nextState;
 
 	if (c.getChildContext != null) {
-		globalContext = assign(assign({}, globalContext), c.getChildContext());
+		globalContext = Object.assign({}, globalContext, c.getChildContext());
 	}
 
 	if (!isNew) {

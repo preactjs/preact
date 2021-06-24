@@ -246,7 +246,7 @@ declare namespace preact {
 	): {
 		render(vnode: ComponentChild): void;
 		hydrate(vnode: ComponentChild): void;
-	}
+	};
 
 	//
 	// Preact Built-in Components

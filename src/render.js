@@ -1,4 +1,9 @@
-import { MODE_HYDRATE, MODE_MUTATIVE_HYDRATE, MODE_SVG, UNDEFINED } from './constants';
+import {
+	MODE_HYDRATE,
+	MODE_MUTATIVE_HYDRATE,
+	MODE_SVG,
+	UNDEFINED
+} from './constants';
 import { commitRoot } from './diff/commit';
 import { createElement, Fragment } from './create-element';
 import options from './options';
@@ -37,10 +42,7 @@ export function render(vnode, parentDom) {
 		);
 	} else {
 		// Store the VDOM tree root on the DOM element in a (minified) property:
-		rootInternal = parentDom._children = createInternal(
-			vnode,
-			null
-		);
+		rootInternal = parentDom._children = createInternal(vnode, null);
 
 		if (parentDom.ownerSVGElement !== UNDEFINED) {
 			rootInternal._flags |= MODE_SVG;

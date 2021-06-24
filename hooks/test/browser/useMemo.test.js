@@ -77,11 +77,11 @@ describe('useMemo', () => {
 	});
 
 	it('short circuits diffing for memoized components', () => {
-		const X = sinon.spy(({ count }) => {
+		const X = sinon.spy(function X({ count }) {
 			return <span>{count}</span>;
 		});
 
-		const Y = sinon.spy(({ count }) => {
+		const Y = sinon.spy(function Y({ count }) {
 			return <p>{count}</p>;
 		});
 
