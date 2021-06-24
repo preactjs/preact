@@ -93,7 +93,8 @@ const subPkgPath = pkgName => {
 	const stripped = pkgName.replace(/[/\\./]/g, '');
 	const pkgJson = path.join(__dirname, 'package.json');
 	const pkgExports = require(pkgJson).exports;
-	const file = pkgExports[stripped ? `./${stripped}` : '.'].browser;
+	const exportMapping = pkgExports[stripped ? `./${stripped}` : '.'];
+	const file = exportMapping.import;
 	return path.join(__dirname, file);
 };
 
@@ -172,7 +173,7 @@ function createEsbuildPlugin() {
 			});
 
 			// Apply babel pass whenever we load a .js file
-			build.onLoad({ filter: /\.js$/ }, async args => {
+			build.onLoad({ filter: /\.m?js$/ }, async args => {
 				const contents = await fs.readFile(args.path, 'utf-8');
 
 				// Using a cache is crucial as babel is 30x slower than esbuild
@@ -200,7 +201,9 @@ function createEsbuildPlugin() {
 							coverage && [
 								'istanbul',
 								{
-									include: minify ? '**/dist/**/*.js' : '**/src/**/*.js'
+									include: minify
+										? '**/dist/**/*.{mjs,js}'
+										: '**/src/**/*.{mjs,js}'
 								}
 							]
 						].filter(Boolean)
@@ -307,7 +310,7 @@ module.exports = function(config) {
 		],
 
 		mime: {
-			'text/javascript': ['js', 'jsx']
+			'text/javascript': ['js', 'mjs', 'jsx']
 		},
 
 		preprocessors: {

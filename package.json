@@ -5,8 +5,7 @@
 	"private": false,
 	"description": "Fast 3kb React-compatible Virtual DOM library.",
 	"main": "dist/preact.js",
-	"module": "dist/preact.module.js",
-	"modern": "dist/preact.module.js",
+	"module": "dist/preact.mjs",
 	"umd:main": "dist/preact.umd.js",
 	"unpkg": "dist/preact.min.js",
 	"source": "src/index.js",
@@ -24,56 +23,57 @@
 	],
 	"exports": {
 		".": {
-			"browser": "./dist/preact.module.js",
-			"umd": "./dist/preact.umd.js",
+			"module": "./dist/preact.mjs",
 			"import": "./dist/preact.mjs",
-			"require": "./dist/preact.js"
+			"require": "./dist/preact.js",
+			"umd": "./dist/preact.umd.js"
 		},
 		"./compat": {
-			"browser": "./compat/dist/compat.module.js",
-			"umd": "./compat/dist/compat.umd.js",
+			"module": "./compat/dist/compat.mjs",
+			"import": "./compat/dist/compat.mjs",
 			"require": "./compat/dist/compat.js",
-			"import": "./compat/dist/compat.mjs"
+			"umd": "./compat/dist/compat.umd.js"
 		},
 		"./debug": {
-			"browser": "./debug/dist/debug.module.js",
-			"umd": "./debug/dist/debug.umd.js",
+			"module": "./debug/dist/debug.mjs",
+			"import": "./debug/dist/debug.mjs",
 			"require": "./debug/dist/debug.js",
-			"import": "./debug/dist/debug.mjs"
+			"umd": "./debug/dist/debug.umd.js"
 		},
 		"./devtools": {
-			"browser": "./devtools/dist/devtools.module.js",
-			"umd": "./devtools/dist/devtools.umd.js",
+			"module": "./devtools/dist/devtools.mjs",
+			"import": "./devtools/dist/devtools.mjs",
 			"require": "./devtools/dist/devtools.js",
-			"import": "./devtools/dist/devtools.mjs"
+			"umd": "./devtools/dist/devtools.umd.js"
 		},
 		"./hooks": {
-			"browser": "./hooks/dist/hooks.module.js",
-			"umd": "./hooks/dist/hooks.umd.js",
+			"module": "./hooks/dist/hooks.mjs",
+			"import": "./hooks/dist/hooks.mjs",
 			"require": "./hooks/dist/hooks.js",
-			"import": "./hooks/dist/hooks.mjs"
+			"umd": "./hooks/dist/hooks.umd.js"
 		},
 		"./test-utils": {
-			"browser": "./test-utils/dist/testUtils.module.js",
-			"umd": "./test-utils/dist/testUtils.umd.js",
+			"module": "./test-utils/dist/testUtils.mjs",
+			"import": "./test-utils/dist/testUtils.mjs",
 			"require": "./test-utils/dist/testUtils.js",
-			"import": "./test-utils/dist/testUtils.mjs"
+			"umd": "./test-utils/dist/testUtils.umd.js"
 		},
 		"./jsx-runtime": {
-			"browser": "./jsx-runtime/dist/jsxRuntime.module.js",
-			"umd": "./jsx-runtime/dist/jsxRuntime.umd.js",
+			"module": "./jsx-runtime/dist/jsxRuntime.mjs",
+			"import": "./jsx-runtime/dist/jsxRuntime.mjs",
 			"require": "./jsx-runtime/dist/jsxRuntime.js",
-			"import": "./jsx-runtime/dist/jsxRuntime.mjs"
+			"umd": "./jsx-runtime/dist/jsxRuntime.umd.js"
 		},
 		"./jsx-dev-runtime": {
-			"browser": "./jsx-runtime/dist/jsxRuntime.module.js",
-			"umd": "./jsx-runtime/dist/jsxRuntime.umd.js",
+			"module": "./jsx-runtime/dist/jsxRuntime.mjs",
+			"import": "./jsx-runtime/dist/jsxRuntime.mjs",
 			"require": "./jsx-runtime/dist/jsxRuntime.js",
-			"import": "./jsx-runtime/dist/jsxRuntime.mjs"
+			"umd": "./jsx-runtime/dist/jsxRuntime.umd.js"
 		},
 		"./compat/server": {
-			"require": "./compat/server.js",
-			"import": "./compat/server.mjs"
+			"module": "./compat/server.mjs",
+			"import": "./compat/server.mjs",
+			"require": "./compat/server.js"
 		},
 		"./package.json": "./package.json",
 		"./": "./"
@@ -87,15 +87,16 @@
 	"scripts": {
 		"prepare": "run-s build && check-export-map",
 		"build": "npm-run-all --parallel build:*",
-		"build:core": "microbundle build --raw -f modern,cjs,umd --no-generateTypes && mv dist/preact.modern.js dist/preact.module.js && mv dist/preact.modern.js.map dist/preact.module.js.map",
+		"_bundle": "microbundle build --raw -f modern,cjs,umd --no-generateTypes",
+		"build:core": "npm run -s _bundle",
 		"build:core-min": "microbundle build --raw -f iife src/cjs.js -o dist/preact.min.js --no-generateTypes",
-		"build:debug": "microbundle build --raw --cwd debug --no-generateTypes",
-		"build:devtools": "microbundle build --raw --cwd devtools --no-generateTypes",
-		"build:hooks": "microbundle build --raw --cwd hooks --no-generateTypes",
-		"build:test-utils": "microbundle build --raw --cwd test-utils --no-generateTypes",
-		"build:compat": "microbundle build --raw --cwd compat --globals 'preact/hooks=preactHooks' --no-generateTypes",
-		"build:jsx": "microbundle build --raw --cwd jsx-runtime --no-generateTypes",
-		"postbuild": "node ./config/node-13-exports.js && node ./config/compat-entries.js",
+		"build:debug": "npm run -s _bundle -- --cwd debug",
+		"build:devtools": "npm run -s _bundle -- --cwd devtools",
+		"build:hooks": "npm run -s _bundle -- --cwd hooks",
+		"build:test-utils": "npm run -s _bundle -- --cwd test-utils",
+		"build:compat": "npm run -s _bundle -- --cwd compat --globals 'preact/hooks=preactHooks'",
+		"build:jsx": "npm run -s _bundle -- --cwd jsx-runtime",
+		"postbuild": "node ./config/compat-entries.js",
 		"dev": "microbundle watch --raw --format cjs --no-generateTypes",
 		"dev:hooks": "microbundle watch --raw --format cjs --cwd hooks --no-generateTypes",
 		"dev:compat": "microbundle watch --raw --format cjs --cwd compat --globals 'preact/hooks=preactHooks' --no-generateTypes",
@@ -264,7 +265,7 @@
 		"kolorist": "^1.2.10",
 		"lint-staged": "^10.5.2",
 		"lodash": "^4.17.20",
-		"microbundle": "^0.13.1",
+		"microbundle": "^0.13.3",
 		"mocha": "^8.2.1",
 		"npm-merge-driver-install": "^1.1.1",
 		"npm-run-all": "^4.0.0",
