@@ -33,8 +33,9 @@ export function patch(
 	startDom
 ) {
 	let dom = internal._dom;
+	let flags = internal._flags;
 
-	if (internal._flags & TYPE_TEXT) {
+	if (flags & TYPE_TEXT) {
 		if (newVNode !== internal.props) {
 			dom.data = newVNode;
 			internal.props = newVNode;
@@ -49,7 +50,7 @@ export function patch(
 
 	if (options._diff) options._diff(internal, newVNode);
 
-	if (internal._flags & TYPE_ELEMENT) {
+	if (flags & TYPE_ELEMENT) {
 		if (newVNode._vnodeId !== internal._vnodeId) {
 			// @ts-ignore dom is a PreactElement here
 			patchDOMElement(dom, newVNode, internal, globalContext, commitQueue);
@@ -73,7 +74,7 @@ export function patch(
 	// top.
 	let prevStartDom = startDom;
 	let prevParentDom = parentDom;
-	if (internal._flags & TYPE_ROOT) {
+	if (flags & TYPE_ROOT) {
 		parentDom = newVNode.props._parentDom;
 
 		if (parentDom !== prevParentDom) {
