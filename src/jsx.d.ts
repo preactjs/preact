@@ -733,6 +733,7 @@ export namespace JSXInternal {
 		slot?: string;
 		span?: number;
 		spellcheck?: boolean;
+		spellCheck?: boolean;
 		src?: string;
 		srcset?: string;
 		srcDoc?: string;
@@ -752,6 +753,10 @@ export namespace JSXInternal {
 		width?: number | string;
 		wmode?: string;
 		wrap?: string;
+
+		// Non-standard Attributes
+		autocapitalize?: 'off' | 'none' | 'on' | 'sentences' | 'words' | 'characters';
+		autoCapitalize?: 'off' | 'none' | 'on' | 'sentences' | 'words' | 'characters';
 
 		// RDFa Attributes
 		about?: string;
