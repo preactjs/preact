@@ -8,8 +8,6 @@ function setStyle(dom, key, value) {
 	}
 }
 
-// const BEFORE_UPPERCASE = /(?=[A-Z])/g;
-
 /**
  * Set a property value on a DOM node
  * @param {import('../internal').PreactElement} dom The DOM node to modify
@@ -22,24 +20,6 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
 	let useCapture;
 
 	o: if (name === 'style') {
-		// if (typeof value !== 'string') {
-		// 	let css = '';
-		// 	for (name in value) {
-		// 		// css += name.replace(BEFORE_UPPERCASE, '-');
-		// 		// css += ':';
-		// 		// css += value[name] || '';
-		// 		// css += ';';
-		// 		css =
-		// 			css +
-		// 			name.replace(BEFORE_UPPERCASE, '-') +
-		// 			':' +
-		// 			(value[name] || '') +
-		// 			';';
-		// 	}
-		// 	dom.style.cssText = css;
-		// 	// dom.setAttribute('style', css);
-		// }
-
 		if (typeof value == 'string') {
 			setStyle(dom, 'cssText', value);
 		} else {
@@ -56,9 +36,8 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
 			}
 
 			for (name in value) {
-				useCapture = value[name];
-				if (!oldValue || useCapture !== oldValue[name]) {
-					setStyle(dom, name, useCapture);
+				if (!oldValue || value[name] !== oldValue[name]) {
+					setStyle(dom, name, value[name]);
 				}
 			}
 		}
