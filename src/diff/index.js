@@ -412,9 +412,7 @@ function diffElementNodes(
 				commitQueue,
 				excessDomChildren
 					? excessDomChildren[0]
-					: oldVNode._children && oldVNode._children.length
-					? getDomSibling(oldVNode, 0)
-					: null,
+					: oldVNode._children && getDomSibling(oldVNode, 0),
 				isHydrating
 			);
 
