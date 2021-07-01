@@ -1,5 +1,5 @@
 import { EMPTY_OBJ } from '../constants';
-import { Component } from '../component';
+import { Component, getDomSibling } from '../component';
 import { Fragment } from '../create-element';
 import { diffChildren } from './children';
 import { diffProps, setProperty } from './props';
@@ -410,7 +410,9 @@ function diffElementNodes(
 				isSvg && nodeType !== 'foreignObject',
 				excessDomChildren,
 				commitQueue,
-				dom.firstChild,
+				excessDomChildren
+					? excessDomChildren[0]
+					: oldVNode._children && getDomSibling(oldVNode, 0),
 				isHydrating
 			);
 
