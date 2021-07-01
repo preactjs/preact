@@ -1,5 +1,5 @@
 import { EMPTY_OBJ } from '../constants';
-import { Component } from '../component';
+import { Component, getDomSibling } from '../component';
 import { Fragment } from '../create-element';
 import { diffChildren } from './children';
 import { diffProps, setProperty } from './props';
@@ -410,9 +410,20 @@ function diffElementNodes(
 				isSvg && nodeType !== 'foreignObject',
 				excessDomChildren,
 				commitQueue,
-				EMPTY_OBJ,
+				excessDomChildren
+					? excessDomChildren[0]
+					: oldVNode._children && oldVNode._children.length
+					? getDomSibling(oldVNode, 0)
+					: null,
 				isHydrating
 			);
+
+			// Remove children that are not part of any vnode.
+			if (excessDomChildren) {
+				for (i = excessDomChildren.length; i--; ) {
+					if (excessDomChildren[i] != null) removeNode(excessDomChildren[i]);
+				}
+			}
 		}
 
 		// (as above, don't diff props during hydration)

@@ -52,7 +52,11 @@ export function render(vnode, parentDom, replaceNode) {
 			? slice.call(parentDom.childNodes)
 			: null,
 		commitQueue,
-		(!isHydrating && replaceNode) || EMPTY_OBJ,
+		!isHydrating && replaceNode
+			? replaceNode
+			: oldVNode
+			? oldVNode._dom
+			: parentDom.firstChild,
 		isHydrating
 	);
 
