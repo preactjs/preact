@@ -48,7 +48,7 @@ export function render(vnode, parentDom, replaceNode) {
 			? [replaceNode]
 			: oldVNode
 			? null
-			: parentDom.childNodes.length
+			: parentDom.firstChild
 			? slice.call(parentDom.childNodes)
 			: null,
 		commitQueue,
