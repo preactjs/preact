@@ -86,7 +86,6 @@ options.unmount = vnode => {
 		} catch (e) {
 			options._catchError(e, c._vnode);
 		}
-		c.__hooks = undefined;
 	}
 };
 
