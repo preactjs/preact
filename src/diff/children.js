@@ -159,6 +159,7 @@ export function diffChildren(
 				firstChildDom = newDom;
 			}
 
+			const parentDomValueBeforeChildPlaced = parentDom.value;
 			if (
 				typeof childVNode.type == 'function' &&
 				childVNode._children != null && // Can be null if childVNode suspended
@@ -190,7 +191,11 @@ export function diffChildren(
 			//
 			// To fix it we make sure to reset the inferred value, so that our own
 			// value check in `diff()` won't be skipped.
-			if (!isHydrating && newParentVNode.type === 'option') {
+			if (
+				!isHydrating &&
+				newParentVNode.type === 'option' &&
+				parentDom.value !== parentDomValueBeforeChildPlaced
+			) {
 				// @ts-ignore We have validated that the type of parentDOM is 'option'
 				// in the above check
 				parentDom.value = '';
