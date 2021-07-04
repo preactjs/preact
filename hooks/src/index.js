@@ -186,7 +186,7 @@ export function useLayoutEffect(callback, args) {
 	}
 }
 
-export function useRef(initialValue) {
+export function useRef(initialValue = null) {
 	currentHook = 5;
 	return useMemo(() => ({ current: initialValue }), []);
 }
