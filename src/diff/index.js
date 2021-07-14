@@ -427,6 +427,7 @@ function diffElementNodes(
 		// (as above, don't diff props during hydration)
 		if (!isHydrating) {
 			if (
+				nodeType !== 'option' &&
 				'value' in newProps &&
 				(i = newProps.value) !== undefined &&
 				// #2756 For the <progress>-element the initial value is 0,
