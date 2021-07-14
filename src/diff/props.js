@@ -24,7 +24,7 @@ export function diffProps(dom, newProps, oldProps, isSvg, hydrate) {
 			(!hydrate || typeof newProps[i] == 'function') &&
 			i !== 'children' &&
 			i !== 'key' &&
-			i !== 'value' &&
+			(i !== 'value' && dom.tagName !== 'OPTION') &&
 			i !== 'checked' &&
 			oldProps[i] !== newProps[i]
 		) {
