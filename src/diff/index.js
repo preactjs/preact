@@ -427,9 +427,9 @@ function diffElementNodes(
 		// (as above, don't diff props during hydration)
 		if (!isHydrating) {
 			if (
-				nodeType !== 'option' &&
 				'value' in newProps &&
 				(i = newProps.value) !== undefined &&
+				(nodeType !== 'option' || oldProps.value !== newProps.value) &&
 				// #2756 For the <progress>-element the initial value is 0,
 				// despite the attribute not being present. When the attribute
 				// is missing the progress bar is treated as indeterminate.
