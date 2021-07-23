@@ -16,12 +16,12 @@ export function _catchError(error, vnode) {
 
 				if (ctor && ctor.getDerivedStateFromError != null) {
 					component.setState(ctor.getDerivedStateFromError(error));
-					handled = component._dirty;
+					handled = true;
 				}
 
 				if (component.componentDidCatch != null) {
 					component.componentDidCatch(error);
-					handled = component._dirty;
+					handled = true;
 				}
 
 				// This is an error boundary. Mark it as having bailed out, and whether it was mid-hydration.
