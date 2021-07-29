@@ -433,8 +433,9 @@ function go() {
 				} else if (flags & TYPE_ELEMENT) {
 					if (!skipRemove) {
 						skipRemove = true;
-						// dom.remove();
-						remove.call(dom);
+						dom.remove();
+						// TODO: This breaks logCall in tests
+						// remove.call(dom);
 						if (flags & HAS_LISTENERS) {
 							const listeners = EVENT_LISTENERS.get(dom);
 							EVENT_LISTENERS.delete(dom);
@@ -891,9 +892,9 @@ function go() {
 				}
 
 				if (flags & (TYPE_TEXT | TYPE_ELEMENT)) {
-					// console.log('inserting', internal.dom, before);
-					// parent.insertBefore(dom, before);
-					insertBefore.call(parent, dom, before);
+					parent.insertBefore(dom, before);
+					// TODO: This breaks logCalls in tests
+					// insertBefore.call(parent, dom, before);
 				} else {
 					// Inserting a Component/Fragment inserts its outermost DOM children:
 					// let roots = [];
@@ -992,9 +993,10 @@ function go() {
 	}
 }
 
-const insertBefore = Element.prototype.insertBefore;
-const remove = Element.prototype.remove;
-const removeText = Text.prototype.remove;
+// TODO: These break logCall in tests
+// const insertBefore = Element.prototype.insertBefore;
+// const remove = Element.prototype.remove;
+// const removeText = Text.prototype.remove;
 
 // const componentWillUnmount = 'componentWillUnmount';
 function unmountClassComponent(inst) {
@@ -1045,8 +1047,9 @@ const _set = new Function('dom', 's', 'dom.style.cssText = s');
 // Insert the outermost DOM elements rooted at a given Internal before an element
 function insertDomRoots(internal, parent, before) {
 	if (internal.flags & (TYPE_TEXT | TYPE_ELEMENT)) {
-		// parent.insertBefore(internal.dom, before);
-		insertBefore.call(parent, internal.dom, before);
+		parent.insertBefore(internal.dom, before);
+		// TODO: This breaks logCalls in tests
+		// insertBefore.call(parent, internal.dom, before);
 	} else {
 		let child = internal.child;
 		while (child) {
