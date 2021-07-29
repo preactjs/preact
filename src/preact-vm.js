@@ -990,10 +990,21 @@ function go() {
 				// Finally, set as an attribute. This means either we're in SVG mode,
 				// or the prop name wasn't defined as a property of the element, or assigning to it threw.
 				if (typeof data !== 'function') {
-					if (data == null || data === false) dom.removeAttribute(name);
-					else dom.setAttribute(name, data);
-					// if (data == null || data === false) removeAttribute.call(dom, name);
-					// else setAttribute.call(dom, name, data);
+					if (extra === 'dangerouslySetInnerHTML') {
+						if (data) {
+							const value = data.__html;
+							if (
+								!oldData ||
+								(value !== oldData.__html && value !== dom.innerHTML)
+							) {
+								dom.innerHTML = value;
+							}
+						} else if (oldData) {
+							dom.innerHTML = '';
+						}
+					} else if (data == null || data === false) {
+						dom.removeAttribute(name);
+					} else dom.setAttribute(name, data);
 				}
 				break;
 			}
