@@ -79,7 +79,7 @@ export const isValidElement = vnode =>
  * @param {Record<string, any> | null} props
  * @param {null | *} [c]
  */
-function createElement(type, props, c) {
+export function createElement(type, props, c) {
 	if (arguments.length > 3) {
 		c = slice.call(arguments, 2);
 	}
@@ -193,12 +193,12 @@ class Internal {
 }
 
 function Root() {}
-function Fragment(props) {
+export function Fragment(props) {
 	return props.children;
 }
 
 /** @param {ParentNode} parent */
-function createRoot(parent) {
+export function createRoot(parent) {
 	const root = new Internal(createElement(Root, { parent }), null);
 
 	// @ts-ignore we use this for detection
@@ -217,11 +217,14 @@ function createRoot(parent) {
 }
 
 /** @param {VNode} vnode @param {ParentNode} parent */
-// @ts-ignore
-const render = (vnode, parent) =>
+export const render = (vnode, parent) =>
+	// @ts-ignore
 	(parent.__k || (parent.__k = createRoot(parent))).render(vnode);
 
-class Component {
+export const hydrate = (vnode, parent) =>
+	(parent.__k || (parent.__k = createRoot(parent))).hydrate(vnode);
+
+export class Component {
 	constructor(props, context) {
 		this._internal = null; // this just keeps TypeScript happy
 		this.props = props;
@@ -1135,5 +1138,4 @@ function _normalize(children) {
 	}
 }
 
-const options = {};
-export { render, createElement, Fragment, createRoot, Component, options };
+export const options = {};

@@ -1,14 +1,15 @@
-export { render, hydrate } from './render';
 export {
+	render,
+	hydrate,
 	createElement,
 	createElement as h,
 	Fragment,
 	Component,
 	createRoot,
 	createRef,
-	isValidElement
+	isValidElement,
+	options
 } from './preact-vm';
 export { cloneElement } from './clone-element';
 export { createContext } from './create-context';
 export { toChildArray } from './diff/children';
-export { default as options } from './options';
