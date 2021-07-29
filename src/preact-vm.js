@@ -914,21 +914,25 @@ function go() {
 				props[extra] = data;
 
 				if (name === 'style' && typeof data !== 'string') {
-					// setStyle(dom, data);
-					let style = '',
-						sep = '',
-						spacer = ' ';
-					for (let i in data) {
-						let v = data[i];
-						if (typeof v === 'number') v = String(v);
-						if (v) {
-							const n =
-								i in nmap ? nmap[i] : (nmap[i] = i.replace(/(?=[A-Z])/g, '-'));
-							style = style + sep + n + ':' + v + ';';
-							sep = spacer;
+					if (typeof oldData == 'string') {
+						dom.style.cssText = oldData = '';
+					}
+
+					if (oldData) {
+						for (name in oldData) {
+							if (!(data && name in data)) {
+								setStyle(dom.style, name, '');
+							}
 						}
 					}
-					_set(dom, style);
+
+					if (data) {
+						for (name in data) {
+							if (!oldData || data[name] !== oldData[name]) {
+								setStyle(dom.style, name, data[name]);
+							}
+						}
+					}
 					break;
 				}
 
@@ -1042,7 +1046,20 @@ function callMethod(inst, method, a, b) {
 const CSSPROP = /(?=[A-Z])/g;
 const nmap = { __proto__: null };
 
-const _set = new Function('dom', 's', 'dom.style.cssText = s');
+/**
+ * @param {*} style
+ * @param {string} key
+ * @param {string | number | null | undefined} value
+ */
+function setStyle(style, key, value) {
+	if (key[0] === '-') {
+		style.setProperty(key, value);
+	} else if (value == null) {
+		style[key] = '';
+	} else {
+		style[key] = value;
+	}
+}
 
 // Insert the outermost DOM elements rooted at a given Internal before an element
 function insertDomRoots(internal, parent, before) {
