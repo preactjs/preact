@@ -106,7 +106,17 @@ export function createElement(type, props, c) {
 		}
 	}
 
-	return { id: ++vnodeIdCounter, type, props, key, constructor: undefined };
+	const vnode = {
+		id: ++vnodeIdCounter,
+		type,
+		props,
+		key,
+		constructor: undefined
+	};
+
+	if (options.vnode != null) options.vnode(vnode);
+
+	return vnode;
 }
 const slice = [].slice;
 
@@ -402,7 +412,7 @@ function go() {
 				let prev;
 				for (let i = 0; i < children.length; i++) {
 					const vnode = children[i];
-					if (vnode) {
+					if (vnode != null) {
 						const child = new Internal(vnode, internal);
 						child.prev = prev;
 						if (prev) prev.next = child;
@@ -1135,7 +1145,13 @@ let j = 0,
 	buf = EMPTY_ARR;
 function normalizeChildren(children, normalized) {
 	if (!Array.isArray(children)) {
-		if (children != null) normalized.push(children);
+		if (children != null) {
+			// TODO: Test bigint and booleans
+			if (typeof children !== 'object') {
+				children = String(children);
+			}
+			normalized.push(children);
+		}
 		return;
 	}
 	buf = normalized;
