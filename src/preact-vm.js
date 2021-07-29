@@ -1154,6 +1154,8 @@ function _normalize(children) {
 		const isText = c != null && typeof c !== 'object';
 		if (isText && prev) buf[j] += String(c);
 		else if (Array.isArray(c)) _normalize(c);
+		// Function children are invalid during rendering
+		else if (typeof c === 'function') continue;
 		else buf[++j] = (prev = isText) ? String(c) : c;
 	}
 }
