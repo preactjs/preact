@@ -119,7 +119,7 @@ options.vnode = vnode => {
 		for (let i in props) {
 			let value = props[i];
 
-			if (i === 'children' && type === 'noscript') {
+			if (IS_DOM && i === 'children' && type === 'noscript') {
 				// Emulate React's behavior of not rendering the contents of noscript tags on the client.
 				continue;
 			}
