@@ -235,6 +235,7 @@ export function Fragment(props) {
 /** @param {ParentNode} parent */
 export function createRoot(parent) {
 	const root = new Internal(createElement(Root, { parent }), null);
+	root.context = {};
 
 	// @ts-ignore we use this for detection
 	parent.__k = root;
