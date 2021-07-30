@@ -403,6 +403,10 @@ function go() {
 					let callMount = false;
 					if (contextType) context = context[contextType.id];
 					if (flags & TYPE_CLASS) {
+						const defaultProps = internal.type.defaultProps;
+						if (defaultProps != null) {
+							props = Object.assign(Object.assign({}, defaultProps), props);
+						}
 						inst = new internal.type(props, context);
 						// internal.component = inst;
 						// inst._internal = internal;
