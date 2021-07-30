@@ -7,9 +7,9 @@ export {
 	Component,
 	createRoot,
 	createRef,
-	isValidElement,
-	options
+	isValidElement
 } from './preact-vm';
+export { default as options } from './options';
 export { cloneElement } from './clone-element';
 export { createContext } from './create-context';
 export { toChildArray } from './diff/children';

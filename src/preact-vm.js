@@ -9,6 +9,7 @@ import {
 	FORCE_UPDATE,
 	MODE_SVG
 } from './constants';
+import { default as options } from './options';
 import { DOMRenderer } from './preact-dom';
 
 export const HAS_LISTENERS = 1 << 9;
@@ -1069,5 +1070,3 @@ function _normalize(children) {
 		else buf[++j] = (prev = isText) ? String(c) : c;
 	}
 }
-
-export const options = {};
