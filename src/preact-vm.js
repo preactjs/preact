@@ -149,6 +149,11 @@ class Internal {
 			// type = '';
 			props = vnode;
 			flags |= TYPE_TEXT;
+		}
+		// Prevent JSON injection
+		else if (vnode.constructor !== undefined) {
+			props = '';
+			flags |= TYPE_TEXT;
 		} else {
 			vnodeId = vnode.id;
 			type = vnode.type;
