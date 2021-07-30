@@ -169,6 +169,7 @@ export interface PreactContext extends preact.Context<any> {
 
 export interface Renderer {
 	createInstance(internal: Internal): void;
+	createElement(internal: Internal): any;
 	updateText(internal: Internal, value: string): void;
 	insertBefore(internal: Internal, parent: any, before: any): void;
 	setProperty(
