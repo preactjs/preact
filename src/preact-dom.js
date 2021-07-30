@@ -1,4 +1,5 @@
 import { MODE_SVG, TYPE_ELEMENT } from './constants';
+import options from './options';
 import { HAS_LISTENERS } from './preact-vm';
 
 const EVENT_LISTENERS = new WeakMap();
@@ -9,7 +10,9 @@ const EMPTY_ELEMENT = document.createElement('template');
  * @returns {*}
  */
 function eventProxy(e) {
-	return EVENT_LISTENERS.get(this)[e.type](e);
+	return EVENT_LISTENERS.get(this)[e.type](
+		options.event ? options.event(e) : e
+	);
 }
 
 /**
