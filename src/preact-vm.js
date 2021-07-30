@@ -540,7 +540,7 @@ function go() {
 				// const nextProps = internal.props;
 				const prevProps = internal.props;
 				const prevState = inst.state;
-				const nextProps = data.props;
+				const nextProps = data.props || {};
 				internal.props = nextProps;
 				// @TODO: do we need to propagate `props.key` to `internal.key` here?
 				const nextState = inst._nextState || inst.state;
