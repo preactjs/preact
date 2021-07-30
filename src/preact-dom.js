@@ -47,8 +47,17 @@ export class DOMRenderer {
 		internal.dom.data = value;
 	}
 
-	createElement(type) {
-		return document.createElement(type);
+	createElement(internal) {
+		return internal.flags & MODE_SVG
+			? document.createElementNS(
+					'http://www.w3.org/2000/svg',
+					// @ts-ignore We know `newVNode.type` is a string
+					internal.type
+			  )
+			: document.createElement(
+					internal.type,
+					internal.props && internal.props.is && internal.props
+			  );
 	}
 
 	remove(internal, skipRemove) {
@@ -150,7 +159,9 @@ export class DOMRenderer {
 				}
 			} else if (value == null || value === false) {
 				dom.removeAttribute(name);
-			} else dom.setAttribute(name, value);
+			} else {
+				dom.setAttribute(name, value);
+			}
 		}
 	}
 }

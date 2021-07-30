@@ -6,7 +6,8 @@ import {
 	TYPE_ROOT,
 	TYPE_TEXT,
 	INHERITED_MODES as FLAGS_DESCEND,
-	FORCE_UPDATE
+	FORCE_UPDATE,
+	MODE_SVG
 } from './constants';
 import { DOMRenderer } from './preact-dom';
 
@@ -165,6 +166,17 @@ class Internal {
 						: TYPE_COMPONENT |
 						  (type.prototype && type.prototype.render ? TYPE_CLASS : 0)
 					: TYPE_ELEMENT;
+
+			if (flags & TYPE_ELEMENT && type === 'svg') {
+				flags |= MODE_SVG;
+			} else if (
+				parent &&
+				parent.flags & MODE_SVG &&
+				parent.type === 'foreignObject'
+			) {
+				flags &= ~MODE_SVG;
+			}
+
 			props = {};
 			// props = Object.create(null);
 			// We clone props here so that mutating `internal.props` doesn't mutate the VNode's props.
@@ -366,7 +378,7 @@ function go() {
 					if (flags & TYPE_TEXT) {
 						internal.dom = renderer.createText(props);
 					} else {
-						internal.dom = renderer.createElement(internal.type);
+						internal.dom = renderer.createElement(internal);
 						let children;
 						for (let i in props) {
 							if (i === 'key') {
