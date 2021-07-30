@@ -79,6 +79,16 @@ export function createRef() {
 export const isValidElement = vnode =>
 	vnode != null && vnode.constructor === undefined;
 
+export function createVNode(type, props, key) {
+	return {
+		id: ++vnodeIdCounter,
+		type,
+		props,
+		key,
+		constructor: undefined
+	};
+}
+
 /**
  * For JSX.
  * @param {*} type
@@ -112,14 +122,7 @@ export function createElement(type, props, c) {
 		}
 	}
 
-	const vnode = {
-		id: ++vnodeIdCounter,
-		type,
-		props,
-		key,
-		constructor: undefined
-	};
-
+	const vnode = createVNode(type, props, key);
 	if (options.vnode != null) options.vnode(vnode);
 
 	return vnode;

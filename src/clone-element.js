@@ -1,11 +1,11 @@
-import { createVNode } from './create-element';
+import { createVNode } from './preact-vm';
 
 /**
  * Clones the given VNode, optionally adding attributes/props and replacing its children.
  * @param {import('./internal').VNode} vnode The virtual DOM element to clone
  * @param {object} props Attributes/props to add when cloning
  * @param {Array<import('./internal').ComponentChildren>} rest Any additional arguments will be used as replacement children.
- * @returns {import('./internal').VNode}
+ * @returns {import('./preact-vm').VNode}
  */
 export function cloneElement(vnode, props, children) {
 	let normalizedProps = Object.assign({}, vnode.props),
@@ -31,8 +31,7 @@ export function cloneElement(vnode, props, children) {
 	return createVNode(
 		vnode.type,
 		normalizedProps,
-		key || vnode.key,
-		ref || vnode.ref,
-		0
+		key || vnode.key
+		// ref || vnode.ref
 	);
 }
