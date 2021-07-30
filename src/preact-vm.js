@@ -269,7 +269,9 @@ export class Component {
 	}
 	setState(update, callback) {
 		let s = this._nextState;
-		if (!s) this._nextState = s = Object.assign({}, this.state);
+		if (!s) {
+			this._nextState = s = Object.assign({}, this.state);
+		}
 
 		if (typeof update == 'function') {
 			// Some libraries like `immer` mark the current state as readonly,
@@ -380,6 +382,8 @@ function go() {
 				break;
 
 			case OP_MOUNT:
+				if (options._diff) options._diff(internal, null);
+
 				if (flags & (TYPE_TEXT | TYPE_ELEMENT)) {
 					if (flags & TYPE_TEXT) {
 						internal.dom = renderer.createText(props);
@@ -408,6 +412,9 @@ function go() {
 					let context = internal.context;
 					let callMount = false;
 					if (contextType) context = context[contextType.id];
+
+					if (options._render) options._render(internal);
+
 					if (flags & TYPE_CLASS) {
 						const defaultProps = internal.type.defaultProps;
 						if (defaultProps != null) {
@@ -446,6 +453,8 @@ function go() {
 				if (internal.ref) {
 					op(OP_SET_REF, internal, internal.ref, null);
 				}
+
+				if (options.diffed) options.diffed(internal);
 
 				break;
 
@@ -518,6 +527,8 @@ function go() {
 					break;
 				}
 
+				if (options._diff) options._diff(internal, data);
+
 				internal.vnodeId = data.id;
 				const newProps = data.props || {};
 
@@ -558,6 +569,8 @@ function go() {
 					if (children != null || internal.child) {
 						op(OP_PATCH_CHILDREN, internal, children);
 					}
+
+					if (options.diffed) options.diffed(internal);
 					break;
 				}
 				let renderResult;
@@ -580,6 +593,8 @@ function go() {
 				inst.props = newProps;
 				inst.state = nextState;
 				// console.log('rendering component', inst.type, internal.key);
+				if (options._render) options._render(internal);
+
 				if (flags & TYPE_CLASS) {
 					// if (typeof inst.render === 'function') {
 					//   const r = inst.render;
@@ -599,6 +614,8 @@ function go() {
 						inst.getChildContext()
 					);
 				op(OP_PATCH_CHILDREN, internal, renderResult, childContext);
+
+				if (options.diffed) options.diffed(internal);
 				break;
 			}
 
