@@ -57,7 +57,8 @@ export const RESET_MODE = ~(
 );
 
 /** Modes a child internal inherits from their parent */
-export const INHERITED_MODES = MODE_HYDRATE | MODE_MUTATIVE_HYDRATE | MODE_SVG;
+export const INHERITED_MODES =
+	MODE_HYDRATE | MODE_MUTATIVE_HYDRATE | MODE_SVG | FORCE_UPDATE;
 
 export const EMPTY_ARR = [];
 export const UNDEFINED = undefined;

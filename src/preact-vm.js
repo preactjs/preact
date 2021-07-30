@@ -1,13 +1,16 @@
-const TYPE_TEXT = 1 << 1;
-const TYPE_ELEMENT = 1 << 2;
-const TYPE_ROOT = 1 << 3;
+import {
+	MODE_HYDRATE,
+	TYPE_CLASS,
+	TYPE_ELEMENT,
+	TYPE_ROOT,
+	TYPE_TEXT,
+	INHERITED_MODES as FLAGS_DESCEND,
+	FORCE_UPDATE
+} from './constants';
+import { DOMRenderer } from './preact-dom';
+
 const TYPE_COMPONENT = 1 << 4;
-const TYPE_CLASS = 1 << 5;
-const MODE_SVG = 1 << 6;
-const MODE_HYDRATING = 1 << 7;
-const MODE_FORCE = 1 << 8;
-const FLAGS_DESCEND = MODE_SVG | MODE_HYDRATING | MODE_FORCE;
-const HAS_LISTENERS = 1 << 9;
+export const HAS_LISTENERS = 1 << 9;
 const IS_MISMATCHED = 1 << 10;
 
 // Used for generating monotonic IDs
@@ -187,7 +190,6 @@ class Internal {
 		this.vnodeId = vnodeId;
 		this.component = EMPTY_COMPONENT;
 		this.context = parent && parent.context;
-		this.dom = EMPTY_ELEMENT;
 		this.parent = parent;
 		// used during diffing to bypass insertions for nodes that are already in-position after removals are processed
 		this.nextOp = null;
@@ -199,6 +201,7 @@ class Internal {
 		// this was meant to pressupply the type for these same-map fields, but it doesn't appear to have any effect on performance:
 		// this.child = this.next = this.prev = this.nextSeq = this;
 		this.child = this.next = this.prev = this.nextSeq = undefined;
+		renderer.createInstance(this);
 	}
 }
 
@@ -220,7 +223,7 @@ export function createRoot(parent) {
 		},
 		/** @param {VNode} vnode */
 		hydrate(vnode) {
-			root.flags |= MODE_HYDRATING;
+			root.flags |= MODE_HYDRATE;
 			op(OP_RENDER, root, vnode);
 		}
 	};
@@ -255,7 +258,7 @@ export class Component {
 	forceUpdate(callback) {
 		const internal = this._internal;
 		if (internal) {
-			internal.flags |= MODE_FORCE;
+			internal.flags |= FORCE_UPDATE;
 			op(OP_PATCH, internal, createElement(internal.type, internal.props));
 		}
 		// if (callback) op(OP_CALLBACK, callback);
@@ -270,8 +273,9 @@ export class Component {
 	render() {}
 }
 
+const renderer = new DOMRenderer();
+
 const EMPTY_COMPONENT = new Component();
-const EMPTY_ELEMENT = document.createElement('template');
 
 const OP_RENDER = 1;
 const OP_ROOT = 2;
@@ -300,10 +304,6 @@ const OP_INSERT = 9;
 let ops;
 let currentOp;
 
-let count = 0;
-
-const NOOP = {};
-
 /** Starts the main run loop, exits when there is no work left. */
 function go() {
 	// const start = Date.now();
@@ -313,7 +313,6 @@ function go() {
 		let internal = _op.internal;
 		let data = _op.data;
 		let extra = _op.extra;
-		let dom = internal.dom;
 		let props = internal.props;
 		let flags = internal.flags;
 
@@ -346,9 +345,9 @@ function go() {
 			case OP_MOUNT:
 				if (flags & (TYPE_TEXT | TYPE_ELEMENT)) {
 					if (flags & TYPE_TEXT) {
-						internal.dom = document.createTextNode(props);
+						internal.dom = renderer.createText(props);
 					} else {
-						internal.dom = document.createElement(internal.type);
+						internal.dom = renderer.createElement(internal.type);
 						let children;
 						for (let i in props) {
 							if (i === 'key') {
@@ -440,27 +439,8 @@ function go() {
 					inst._internal = undefined;
 					// internal.component = undefined;
 					internal.component = EMPTY_COMPONENT;
-				} else if (flags & TYPE_ELEMENT) {
-					if (!skipRemove) {
-						skipRemove = true;
-						dom.remove();
-						// TODO: This breaks logCall in tests
-						// remove.call(dom);
-						if (flags & HAS_LISTENERS) {
-							const listeners = EVENT_LISTENERS.get(dom);
-							EVENT_LISTENERS.delete(dom);
-							for (let i in listeners) {
-								dom.removeEventListener(i, eventProxy);
-								// listeners[i] = undefined;
-							}
-						}
-					}
-
-					internal.dom = EMPTY_ELEMENT;
 				} else {
-					// Must be a Text
-					if (!skipRemove) dom.remove();
-					internal.dom = EMPTY_ELEMENT;
+					renderer.remove(internal, skipRemove);
 				}
 
 				let child = internal.child;
@@ -478,12 +458,12 @@ function go() {
 				if (!internal.parent) break;
 				if (flags & TYPE_TEXT) {
 					if (props !== data) {
-						dom.data = internal.props = data;
+						renderer.updateText(internal, (internal.props = data));
 					}
 					break;
 				}
 				// If the vnode is referentially-equal to the previous render, stop diffing (unless its a forced update):
-				if ((flags & MODE_FORCE) === 0 && data.id === internal.vnodeId) {
+				if ((flags & FORCE_UPDATE) === 0 && data.id === internal.vnodeId) {
 					// console.log('equality bailout', internal, data);
 					break;
 				}
@@ -902,14 +882,9 @@ function go() {
 				}
 
 				if (flags & (TYPE_TEXT | TYPE_ELEMENT)) {
-					parent.insertBefore(dom, before);
-					// TODO: This breaks logCalls in tests
-					// insertBefore.call(parent, dom, before);
+					renderer.insertBefore(internal, parent, before);
 				} else {
 					// Inserting a Component/Fragment inserts its outermost DOM children:
-					// let roots = [];
-					// getDomRoots(internal, roots);
-					// console.log('inserting', internal, roots, before);
 					insertDomRoots(internal, parent, before);
 				}
 				break;
@@ -917,95 +892,9 @@ function go() {
 
 			case OP_SET_PROP: {
 				// Note: for SET_PROP, `extra` is the prop name, `data` is the value.
-				let name = extra === 'class' ? 'className' : extra;
-
-				// @TODO: weirdly never ended up needing the old value:
-				let oldData = props[extra];
+				let oldValue = props[extra];
 				props[extra] = data;
-
-				if (name === 'style' && typeof data !== 'string') {
-					if (typeof oldData == 'string') {
-						dom.style.cssText = oldData = '';
-					}
-
-					if (oldData) {
-						for (name in oldData) {
-							if (!(data && name in data)) {
-								setStyle(dom.style, name, '');
-							}
-						}
-					}
-
-					if (data) {
-						for (name in data) {
-							if (!oldData || data[name] !== oldData[name]) {
-								setStyle(dom.style, name, data[name]);
-							}
-						}
-					}
-					break;
-				}
-
-				if (name[0] === 'o' && name[1] === 'n') {
-					// If the lower-cased event name is defined as a property, we use that name instead:
-					// (`onClick` --> 'onclick' in dom === true --> use 'click')
-					let lc = name.toLowerCase();
-					name = lc in dom ? lc.slice(2) : name.slice(2);
-
-					if (!oldData) {
-						dom.addEventListener(name, eventProxy);
-						// dom.removeEventListener(name, oldData);
-					} else if (!data) {
-						dom.removeEventListener(name, eventProxy);
-						// dom.addEventListener(name, data);
-					}
-
-					// getListeners(dom)[name] = data;
-					// dom.l[name] = data;
-					let listeners = EVENT_LISTENERS.get(dom);
-					if (!listeners) {
-						listeners = {};
-						EVENT_LISTENERS.set(dom, listeners);
-					}
-					listeners[name] = data;
-					break;
-				}
-
-				if (flags & MODE_SVG) {
-					// Normalize xlinkHref and className to class
-					name = name.replace(/xlink[H:h]/, 'h').replace(/sName$/, 's');
-				}
-				// else if (name === 'className') {
-				// 	dom.className = data;
-				// }
-				else if (name in dom) {
-					// Note that we don't take this branch for SVG (we always set attributes)
-					if (setUserProperty(dom, name, data)) break;
-					// try {
-					//   // if setting as a property succeeds, we're done:
-					//   dom[name] = data;
-					//   break;
-					// } catch (e) {}
-				}
-				// Finally, set as an attribute. This means either we're in SVG mode,
-				// or the prop name wasn't defined as a property of the element, or assigning to it threw.
-				if (typeof data !== 'function') {
-					if (extra === 'dangerouslySetInnerHTML') {
-						if (data) {
-							const value = data.__html;
-							if (
-								!oldData ||
-								(value !== oldData.__html && value !== dom.innerHTML)
-							) {
-								dom.innerHTML = value;
-							}
-						} else if (oldData) {
-							dom.innerHTML = '';
-						}
-					} else if (data == null || data === false) {
-						dom.removeAttribute(name);
-					} else dom.setAttribute(name, data);
-				}
+				renderer.setProperty(internal, extra, data, oldValue);
 				break;
 			}
 		}
@@ -1017,11 +906,6 @@ function go() {
 		// reclaimOp(old);
 	}
 }
-
-// TODO: These break logCall in tests
-// const insertBefore = Element.prototype.insertBefore;
-// const remove = Element.prototype.remove;
-// const removeText = Text.prototype.remove;
 
 // const componentWillUnmount = 'componentWillUnmount';
 function unmountClassComponent(inst) {
@@ -1035,16 +919,6 @@ function unmountClassComponent(inst) {
 	//     inst[componentWillUnmount]();
 	//   }
 	// } catch (e) {}
-}
-
-let set = false;
-function setUserProperty(dom, property, value) {
-	set = false;
-	try {
-		dom[property] = value;
-		set = true;
-	} catch (e) {}
-	return set;
 }
 
 let _method;
@@ -1067,27 +941,10 @@ function callMethod(inst, method, a, b) {
 const CSSPROP = /(?=[A-Z])/g;
 const nmap = { __proto__: null };
 
-/**
- * @param {*} style
- * @param {string} key
- * @param {string | number | null | undefined} value
- */
-function setStyle(style, key, value) {
-	if (key[0] === '-') {
-		style.setProperty(key, value);
-	} else if (value == null) {
-		style[key] = '';
-	} else {
-		style[key] = value;
-	}
-}
-
 // Insert the outermost DOM elements rooted at a given Internal before an element
 function insertDomRoots(internal, parent, before) {
 	if (internal.flags & (TYPE_TEXT | TYPE_ELEMENT)) {
-		parent.insertBefore(internal.dom, before);
-		// TODO: This breaks logCalls in tests
-		// insertBefore.call(parent, internal.dom, before);
+		renderer.insertBefore(internal, parent, before);
 	} else {
 		let child = internal.child;
 		while (child) {
@@ -1140,15 +997,6 @@ function getFirstDom(internal) {
 		return getFirstDom(next);
 	}
 }
-
-// const getListeners = new Function('dom', 'return dom.l || (dom.l={})');
-
-const EVENT_LISTENERS = new WeakMap();
-
-function eventProxy(e) {
-	return EVENT_LISTENERS.get(this)[e.type](e);
-}
-// function eventProxy(e) { return this.l[e.type](e) }
 
 const EMPTY_ARR = [];
 let j = 0,
