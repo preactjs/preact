@@ -2,6 +2,7 @@ import {
 	MODE_HYDRATE,
 	TYPE_CLASS,
 	TYPE_ELEMENT,
+	TYPE_COMPONENT,
 	TYPE_ROOT,
 	TYPE_TEXT,
 	INHERITED_MODES as FLAGS_DESCEND,
@@ -9,7 +10,6 @@ import {
 } from './constants';
 import { DOMRenderer } from './preact-dom';
 
-const TYPE_COMPONENT = 1 << 4;
 export const HAS_LISTENERS = 1 << 9;
 const IS_MISMATCHED = 1 << 10;
 
