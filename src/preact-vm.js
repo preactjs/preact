@@ -248,12 +248,26 @@ export class Component {
 	setState(update, callback) {
 		let s = this._nextState;
 		if (!s) this._nextState = s = Object.assign({}, this.state);
-		Object.assign(s, typeof update === 'function' ? update(s) : update);
+
+		if (typeof update == 'function') {
+			// Some libraries like `immer` mark the current state as readonly,
+			// preventing us from mutating it, so we need to clone it. See #2716
+			update = update(Object.assign({}, s), this.props);
+		}
+
+		if (update) {
+			Object.assign(s, update);
+		}
+
+		// Skip update if updater function returned null
+		if (update == null) return;
+
 		const internal = this._internal;
 		if (internal) {
 			op(OP_PATCH, internal, createElement(internal.type, internal.props));
+			// TODO
+			// if (callback) op(OP_CALLBACK, callback);
 		}
-		// if (callback) op(OP_CALLBACK, callback);
 	}
 	forceUpdate(callback) {
 		const internal = this._internal;
