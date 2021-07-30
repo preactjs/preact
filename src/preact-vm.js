@@ -10,6 +10,7 @@ import {
 	MODE_SVG
 } from './constants';
 import { default as options } from './options';
+import { applyRef } from './diff/refs';
 import { DOMRenderer } from './preact-dom';
 
 export const HAS_LISTENERS = 1 << 9;
@@ -318,6 +319,7 @@ const OP_MOUNT_CHILDREN = 6;
 const OP_UNMOUNT = 7;
 const OP_SET_PROP = 8;
 const OP_INSERT = 9;
+const OP_SET_REF = 10;
 
 // for debugging
 // const OP_NAMES = [
@@ -438,6 +440,10 @@ function go() {
 				// if (internal.parent.flags & (TYPE_ELEMENT | TYPE_ROOT)) {
 				//   op(OP_INSERT, internal, internal.prev);
 				// }
+				if (internal.ref) {
+					op(OP_SET_REF, internal, internal.ref, null);
+				}
+
 				break;
 
 			case OP_MOUNT_CHILDREN: {
@@ -462,6 +468,11 @@ function go() {
 			case OP_UNMOUNT: {
 				let skipRemove = data || false;
 				// console.log(`${skipRemove?'unmount':'remove'} <${internal.type} key=${internal.key}>`);
+				let ref = internal.ref;
+				if (ref != null && (!ref.current || ref.current === internal.dom)) {
+					op(OP_SET_REF, internal.parent, ref, null);
+				}
+
 				if (flags & TYPE_COMPONENT) {
 					const inst = internal.component;
 					if (flags & TYPE_CLASS) {
@@ -503,9 +514,15 @@ function go() {
 					// console.log('equality bailout', internal, data);
 					break;
 				}
+
 				internal.vnodeId = data.id;
+				const newProps = data.props || {};
+
+				if (newProps.ref) {
+					op(OP_SET_REF, internal, newProps.ref, internal.ref);
+				}
+
 				if (flags & TYPE_ELEMENT) {
-					const newProps = data.props;
 					// internal.props = newProps;
 					for (let i in props) {
 						if (!(newProps && i in newProps)) {
@@ -545,30 +562,29 @@ function go() {
 				// const nextProps = internal.props;
 				const prevProps = internal.props;
 				const prevState = inst.state;
-				const nextProps = data.props || {};
-				internal.props = nextProps;
+				internal.props = newProps;
 				// @TODO: do we need to propagate `props.key` to `internal.key` here?
 				const nextState = inst._nextState || inst.state;
 				let contextType = internal.type.contextType;
 				let context = internal.context;
 				if (contextType) context = context[contextType.id];
-				callMethod(inst, 'shouldComponentUpdate', nextProps, nextState);
-				// if (inst.shouldComponentUpdate && !inst.shouldComponentUpdate(nextProps, nextState)) {
+				callMethod(inst, 'shouldComponentUpdate', newProps, nextState);
+				// if (inst.shouldComponentUpdate && !inst.shouldComponentUpdate(newProps, nextState)) {
 				//   break;
 				// }
 				if (inst.componentWillUpdate)
-					inst.componentWillUpdate(nextProps, nextState);
-				inst.props = nextProps;
+					inst.componentWillUpdate(newProps, nextState);
+				inst.props = newProps;
 				inst.state = nextState;
 				// console.log('rendering component', inst.type, internal.key);
 				if (flags & TYPE_CLASS) {
 					// if (typeof inst.render === 'function') {
 					//   const r = inst.render;
-					//   renderResult = r.call(inst, nextProps, nextState, context);
+					//   renderResult = r.call(inst, newProps, nextState, context);
 					// }
-					renderResult = inst.render(nextProps, nextState, context);
+					renderResult = inst.render(newProps, nextState, context);
 				} else {
-					renderResult = internal.type.call(inst, nextProps, context);
+					renderResult = internal.type.call(inst, newProps, context);
 				}
 				if (inst.componentDidUpdate)
 					inst.componentDidUpdate(prevProps, prevState);
@@ -829,6 +845,10 @@ function go() {
 							if (incomingContext) child.context = incomingContext;
 							op(OP_PATCH, child, vnode);
 
+							if (props.ref) {
+								op(OP_SET_REF, internal, props.ref, null);
+							}
+
 							// If the match is in the wrong spot, insert it into the right one.
 							// Note: we walk backwards over any mismatched internals here that haven't yet been put in-place.
 							// At this point, any earlier mismatched items are either removed or have been moved to later in the list.
@@ -931,6 +951,17 @@ function go() {
 				let oldValue = props[extra];
 				props[extra] = data;
 				renderer.setProperty(internal, extra, data, oldValue);
+				break;
+			}
+
+			case OP_SET_REF: {
+				// data is ref, extra is oldRef
+				applyRef(
+					extra,
+					data,
+					internal.flags & TYPE_COMPONENT ? internal.component : internal.dom,
+					internal
+				);
 				break;
 			}
 		}
