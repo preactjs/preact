@@ -16,6 +16,16 @@ function eventProxy(e) {
 }
 
 /**
+ * @param {Event} e
+ * @returns {*}
+ */
+function eventProxyCapture(e) {
+	return EVENT_LISTENERS.get(this)[e.type + 'c'](
+		options.event ? options.event(e) : e
+	);
+}
+
+/**
  * @param {*} style
  * @param {string} key
  * @param {string | number | null | undefined} value
@@ -119,15 +129,19 @@ export class DOMRenderer {
 		}
 
 		if (name[0] === 'o' && name[1] === 'n') {
+			let useCapture = name !== (name = name.replace(/Capture$/, ''));
 			// If the lower-cased event name is defined as a property, we use that name instead:
 			let lc = name.toLowerCase();
 			name = lc in dom ? lc.slice(2) : name.slice(2);
 
-			if (!oldValue) {
-				dom.addEventListener(name, eventProxy);
+			const handler = useCapture ? eventProxyCapture : eventProxy;
+			if (!oldValue && value) {
+				dom.addEventListener(name, handler, useCapture);
 			} else if (!value) {
-				dom.removeEventListener(name, eventProxy);
+				dom.removeEventListener(name, handler, useCapture);
 			}
+
+			name = useCapture ? name + 'c' : name;
 
 			let listeners = EVENT_LISTENERS.get(dom);
 			if (!listeners) {
