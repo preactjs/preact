@@ -80,13 +80,17 @@ export const isValidElement = vnode =>
 	vnode != null && vnode.constructor === undefined;
 
 export function createVNode(type, props, key) {
-	return {
+	let vnode = {
 		id: ++vnodeIdCounter,
 		type,
 		props,
 		key,
 		constructor: undefined
 	};
+
+	if (options.vnode != null) options.vnode(vnode);
+
+	return vnode;
 }
 
 /**
@@ -122,10 +126,7 @@ export function createElement(type, props, c) {
 		}
 	}
 
-	const vnode = createVNode(type, props, key);
-	if (options.vnode != null) options.vnode(vnode);
-
-	return vnode;
+	return createVNode(type, props, key);
 }
 const slice = [].slice;
 
