@@ -260,6 +260,13 @@ export const render = (vnode, parent) =>
 export const hydrate = (vnode, parent) =>
 	(parent.__k || (parent.__k = createRoot(parent))).hydrate(vnode);
 
+/**
+ * @param {Internal} internal
+ */
+export function enqueueRender(internal) {
+	op(OP_PATCH, internal, createElement(internal.type, internal.props));
+}
+
 export class Component {
 	constructor(props, context) {
 		this._internal = null; // this just keeps TypeScript happy
@@ -289,7 +296,7 @@ export class Component {
 
 		const internal = this._internal;
 		if (internal) {
-			op(OP_PATCH, internal, createElement(internal.type, internal.props));
+			enqueueRender(internal);
 			// TODO
 			// if (callback) op(OP_CALLBACK, callback);
 		}
@@ -298,7 +305,7 @@ export class Component {
 		const internal = this._internal;
 		if (internal) {
 			internal.flags |= FORCE_UPDATE;
-			op(OP_PATCH, internal, createElement(internal.type, internal.props));
+			enqueueRender(internal);
 		}
 		// if (callback) op(OP_CALLBACK, callback);
 	}
@@ -376,12 +383,13 @@ function go() {
 					// internal.child = undefined;
 					// op(OP_MOUNT_CHILDREN, internal, data);
 				}
-				// else {
-				//   op(OP_PATCH_CHILDREN, internal, data);
-				// }
 				op(operation, internal, data);
 				break;
 
+			/**
+			 * @param {VNode} data VNode
+			 * @param {Record<string, any>} extra Context
+			 */
 			case OP_MOUNT:
 				if (options._diff) options._diff(internal, null);
 
@@ -402,7 +410,7 @@ function go() {
 							}
 						}
 						if (children != null) {
-							op(OP_MOUNT_CHILDREN, internal, children);
+							op(OP_MOUNT_CHILDREN, internal, children, internal.context);
 						}
 					}
 					op(OP_INSERT, internal, internal.prev);
@@ -411,8 +419,13 @@ function go() {
 					let renderResult;
 					let contextType = internal.type.contextType;
 					let context = internal.context;
-					let callMount = false;
-					if (contextType) context = context[contextType.id];
+
+					let provider = contextType && context[contextType._id];
+					let componentContext = contextType
+						? provider
+							? provider.props.value
+							: contextType._defaultValue
+						: context;
 
 					if (options._render) options._render(internal);
 
@@ -421,27 +434,34 @@ function go() {
 						if (defaultProps != null) {
 							props = Object.assign(Object.assign({}, defaultProps), props);
 						}
-						inst = new internal.type(props, context);
+						inst = new internal.type(props, componentContext);
 						// internal.component = inst;
 						// inst._internal = internal;
 						inst.props = props;
-						inst.context = context;
+						inst.context = componentContext;
 						if (!inst.state) inst.state = {};
 						if (inst.componentWillMount) inst.componentWillMount();
-						renderResult = inst.render(props, inst.state, context);
-						callMount = true;
+						renderResult = inst.render(props, inst.state, componentContext);
+						if (inst.componentDidMount) inst.componentDidMount();
 					} else {
-						inst = new Component(props, context);
+						inst = new Component(props, componentContext);
 						// internal.component = inst;
 						// inst._internal = internal;
 						inst.state = {};
-						renderResult = internal.type.call(inst, props, context);
+						renderResult = internal.type.call(inst, props, componentContext);
 					}
+
+					if (provider) provider._subs.add(inst);
+
+					if (inst.getChildContext) {
+						context = Object.assign({}, context, inst.getChildContext());
+					}
+
 					internal.component = inst;
 					inst._internal = internal;
-					if (callMount && inst.componentDidMount) inst.componentDidMount();
+
 					if (renderResult != null) {
-						op(OP_MOUNT_CHILDREN, internal, renderResult);
+						op(OP_MOUNT_CHILDREN, internal, renderResult, context);
 					}
 				}
 				// If mounting into a DOM parent, insert into the DOM.
@@ -459,15 +479,24 @@ function go() {
 
 				break;
 
+			/**
+			 * @param {VNode} data VNode
+			 * @param {Record<string, any>} extra Context
+			 */
 			case OP_MOUNT_CHILDREN: {
 				if (data == null) break;
 				let children = [];
 				normalizeChildren(data, children);
+
 				let prev;
 				for (let i = 0; i < children.length; i++) {
 					const vnode = children[i];
 					if (vnode != null) {
 						const child = new Internal(vnode, internal);
+
+						// Update any newly set context from parent
+						if (extra) child.context = extra;
+
 						child.prev = prev;
 						if (prev) prev.next = child;
 						else prev = internal.child = child;
@@ -514,6 +543,9 @@ function go() {
 				break;
 			}
 
+			/**
+			 * @param {[OP_PATCH, Internal, VNode | string]} patch
+			 */
 			case OP_PATCH: {
 				if (!internal.parent) break;
 				if (flags & TYPE_TEXT) {
@@ -607,13 +639,16 @@ function go() {
 				}
 				if (inst.componentDidUpdate)
 					inst.componentDidUpdate(prevProps, prevState);
+
 				let childContext = internal.context;
-				if (inst.getChildContext)
+				if (inst.getChildContext) {
 					childContext = Object.assign(
 						{},
 						childContext,
 						inst.getChildContext()
 					);
+				}
+
 				op(OP_PATCH_CHILDREN, internal, renderResult, childContext);
 
 				if (options.diffed) options.diffed(internal);
