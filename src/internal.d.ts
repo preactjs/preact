@@ -144,6 +144,7 @@ export interface Internal<P = {}> {
 	_component: Component | null;
 	/** Bitfield containing information about the Internal or its component. */
 	_flags: number;
+	_effectFlags: number;
 	/** This Internal's distance from the tree root */
 	_depth: number | null;
 	/** Callbacks to invoke when this internal commits */
@@ -165,4 +166,12 @@ export interface Component<P = {}, S = {}> extends preact.Component<P, S> {
 export interface PreactContext extends preact.Context<any> {
 	_id: string;
 	_defaultValue: any;
+}
+
+export interface Operation {
+	op: number;
+	internal: Internal;
+	next: Operation | undefined;
+	data: any;
+	extra: any;
 }

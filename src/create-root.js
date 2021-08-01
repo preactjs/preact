@@ -23,6 +23,7 @@ export function createRoot(parentDom) {
 
 		// List of effects that need to be called after diffing.
 		const commitQueue = [];
+		const refs = [];
 
 		vnode = createElement(Fragment, { _parentDom: parentDom }, [vnode]);
 
@@ -33,6 +34,7 @@ export function createRoot(parentDom) {
 				rootInternal,
 				{},
 				commitQueue,
+				refs,
 				parentDom.firstChild
 			);
 		} else {
@@ -54,6 +56,7 @@ export function createRoot(parentDom) {
 				rootInternal,
 				{},
 				commitQueue,
+				refs,
 				// Start the diff at the replaceNode or the parentDOM.firstChild if any.
 				// Will be null if the parentDom is empty
 				parentDom.firstChild
@@ -61,7 +64,7 @@ export function createRoot(parentDom) {
 		}
 
 		// Flush all queued effects
-		commitRoot(commitQueue, vnode);
+		commitRoot(commitQueue, refs, vnode);
 	}
 
 	return {
@@ -78,15 +81,17 @@ export function createRoot(parentDom) {
 			}
 
 			const commitQueue = [];
+			const refs = [];
 			mount(
 				parentDom,
 				vnode,
 				rootInternal,
 				{},
 				commitQueue,
+				refs,
 				parentDom.firstChild
 			);
-			commitRoot(commitQueue, rootInternal);
+			commitRoot(commitQueue, refs, rootInternal);
 		},
 		render
 	};

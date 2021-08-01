@@ -13,6 +13,7 @@ import { mount } from './mount';
 import { patch } from './patch';
 import { unmount } from './unmount';
 import { createInternal, getDomSibling, getChildDom } from '../tree';
+import { op, OP_CREATE_ELEMENT, OP_CREATE_TEXT, OP_INSERT } from './commit';
 
 /**
  * Diff the children of a virtual node
@@ -25,6 +26,7 @@ import { createInternal, getDomSibling, getChildDom } from '../tree';
  * getChildContext
  * @param {import('../internal').CommitQueue} commitQueue List of
  * components which have callbacks to invoke in commitRoot
+ * @param {any[]} commitQueue List of refs
  * @param {import('../internal').PreactElement} startDom The dom node
  * diffChildren should begin diffing with.
  */
@@ -34,9 +36,10 @@ export function diffChildren(
 	parentInternal,
 	globalContext,
 	commitQueue,
+	refs,
 	startDom
 ) {
-	let i, newDom, refs;
+	let i, newDom;
 
 	/** @type {import('../internal').Internal} */
 	let childInternal;
@@ -78,6 +81,7 @@ export function diffChildren(
 				childInternal,
 				globalContext,
 				commitQueue,
+				refs,
 				startDom
 			);
 		}
@@ -97,6 +101,7 @@ export function diffChildren(
 				childInternal,
 				globalContext,
 				commitQueue,
+				refs,
 				startDom
 			);
 		} else {
@@ -109,6 +114,7 @@ export function diffChildren(
 				childInternal,
 				globalContext,
 				commitQueue,
+				refs,
 				startDom
 			);
 		}
@@ -116,13 +122,7 @@ export function diffChildren(
 		newDom = childInternal._dom;
 
 		if (childVNode.ref) {
-			if (!refs) refs = [];
-			refs.push(
-				oldVNodeRef,
-				childVNode.ref,
-				childInternal._component || newDom,
-				childInternal
-			);
+			refs.push(oldVNodeRef, childVNode.ref, childInternal);
 		}
 
 		if (childInternal._flags & TYPE_COMPONENT) {
@@ -131,8 +131,12 @@ export function diffChildren(
 			// If the newDom and the dom we are expecting to be there are the same, then
 			// do nothing
 			startDom = nextDomSibling;
-		} else if (newDom) {
-			startDom = placeChild(parentDom, oldChildrenLength, newDom, startDom);
+		} else if (
+			newDom ||
+			childInternal._effectFlags & (OP_CREATE_ELEMENT | OP_CREATE_TEXT)
+		) {
+			op(OP_INSERT, childInternal, undefined, undefined);
+			// startDom = placeChild(parentDom, oldChildrenLength, newDom, startDom);
 		} else if (
 			startDom &&
 			childInternal != null &&
@@ -164,13 +168,6 @@ export function diffChildren(
 			}
 
 			unmount(oldChildren[i], oldChildren[i]);
-		}
-	}
-
-	// Set refs only after unmount
-	if (refs) {
-		for (i = 0; i < refs.length; i++) {
-			applyRef(refs[i], refs[++i], refs[++i], refs[++i]);
 		}
 	}
 

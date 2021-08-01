@@ -89,6 +89,7 @@ export function createInternal(vnode, parentInternal) {
 		_dom: null,
 		_component: null,
 		_flags: flags,
+		_effectFlags: 0,
 		_depth: parentInternal ? parentInternal._depth + 1 : 0
 	};
 

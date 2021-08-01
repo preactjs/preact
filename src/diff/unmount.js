@@ -1,6 +1,7 @@
 import { MODE_UNMOUNTING, TYPE_DOM, TYPE_ROOT } from '../constants';
 import { unsubscribeFromContext } from '../create-context';
 import options from '../options';
+import { op, OP_REMOVE } from './commit';
 import { applyRef } from './refs';
 
 /**
@@ -47,7 +48,7 @@ export function unmount(internal, parentInternal, skipRemove) {
 	}
 
 	if (!skipRemove && internal._flags & TYPE_DOM) {
-		internal._dom.remove();
+		op(OP_REMOVE, internal, internal._dom, undefined);
 	}
 
 	internal._dom = null;

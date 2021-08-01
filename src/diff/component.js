@@ -20,6 +20,7 @@ import { addCommitCallback } from './commit';
  * @param {object} globalContext The current context object. Modified by getChildContext
  * @param {import('../internal').CommitQueue} commitQueue List of components
  * which have callbacks to invoke in commitRoot
+ * @param {any[]} refs
  * @param {import('../internal').PreactNode} startDom
  * @returns {import('../internal').PreactNode} pointer to the next DOM node (in order) to be rendered (or null)
  */
@@ -29,6 +30,7 @@ export function renderComponent(
 	internal,
 	globalContext,
 	commitQueue,
+	refs,
 	startDom
 ) {
 	/** @type {import('../internal').Component} */
@@ -198,6 +200,7 @@ export function renderComponent(
 			internal,
 			globalContext,
 			commitQueue,
+			refs,
 			startDom
 		);
 	} else {
@@ -207,6 +210,7 @@ export function renderComponent(
 			internal,
 			globalContext,
 			commitQueue,
+			refs,
 			startDom
 		);
 	}

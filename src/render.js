@@ -31,6 +31,8 @@ export function render(vnode, parentDom) {
 	let rootInternal = parentDom._children;
 	vnode = createElement(Fragment, { _parentDom: parentDom }, [vnode]);
 
+	const refs = [];
+
 	if (rootInternal) {
 		patch(
 			parentDom,
@@ -38,11 +40,13 @@ export function render(vnode, parentDom) {
 			rootInternal,
 			{},
 			commitQueue,
+			refs,
 			parentDom.firstChild
 		);
 	} else {
 		// Store the VDOM tree root on the DOM element in a (minified) property:
 		rootInternal = parentDom._children = createInternal(vnode, null);
+		rootInternal._dom = parentDom;
 
 		if (parentDom.ownerSVGElement !== UNDEFINED) {
 			rootInternal._flags |= MODE_SVG;
@@ -59,6 +63,7 @@ export function render(vnode, parentDom) {
 			rootInternal,
 			{},
 			commitQueue,
+			refs,
 			// Start the diff at the replaceNode or the parentDOM.firstChild if any.
 			// Will be null if the parentDom is empty
 			parentDom.firstChild
@@ -66,7 +71,7 @@ export function render(vnode, parentDom) {
 	}
 
 	// Flush all queued effects
-	commitRoot(commitQueue, rootInternal);
+	commitRoot(commitQueue, refs, rootInternal);
 }
 
 /**
@@ -88,6 +93,7 @@ export function hydrate(vnode, parentDom) {
 	}
 
 	const commitQueue = [];
+	const refs = [];
 	mount(parentDom, vnode, rootInternal, {}, commitQueue, parentDom.firstChild);
-	commitRoot(commitQueue, rootInternal);
+	commitRoot(commitQueue, refs, rootInternal);
 }

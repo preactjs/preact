@@ -12,10 +12,20 @@ import {
 	MODE_SVG
 } from '../constants';
 import { normalizeToVNode } from '../create-element';
-import { setProperty } from './props';
 import { renderComponent } from './component';
 import { createInternal } from '../tree';
 import options from '../options';
+import {
+	op,
+	OP_CREATE_ELEMENT,
+	OP_CREATE_TEXT,
+	OP_INSERT,
+	OP_REMOVE,
+	OP_REMOVE_PROP,
+	OP_SET_HTML,
+	OP_SET_PROP,
+	OP_SET_TEXT
+} from './commit';
 
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
@@ -25,6 +35,7 @@ import options from '../options';
  * @param {object} globalContext The current context object. Modified by getChildContext
  * @param {import('../internal').CommitQueue} commitQueue List of components
  * which have callbacks to invoke in commitRoot
+ * @param {any[]} refs List of refs
  * @param {import('../internal').PreactElement} startDom
  * @returns {import('../internal').PreactElement | null} pointer to the next DOM node to be hydrated (or null)
  */
@@ -34,6 +45,7 @@ export function mount(
 	internal,
 	globalContext,
 	commitQueue,
+	refs,
 	startDom
 ) {
 	if (options._diff) options._diff(internal, newVNode);
@@ -62,6 +74,7 @@ export function mount(
 				internal,
 				globalContext,
 				commitQueue,
+				refs,
 				startDom
 			);
 
@@ -83,7 +96,8 @@ export function mount(
 				hydrateDom,
 				internal,
 				globalContext,
-				commitQueue
+				commitQueue,
+				refs
 			);
 		}
 
@@ -114,9 +128,10 @@ export function mount(
  * @param {object} globalContext The current context object
  * @param {import('../internal').CommitQueue} commitQueue List of components
  * which have callbacks to invoke in commitRoot
+ * @param {any[]} refs List of refs
  * @returns {import('../internal').PreactElement}
  */
-function mountDOMElement(dom, internal, globalContext, commitQueue) {
+function mountDOMElement(dom, internal, globalContext, commitQueue, refs) {
 	let newProps = internal.props;
 	let nodeType = internal.type;
 	/** @type {any} */
@@ -143,30 +158,34 @@ function mountDOMElement(dom, internal, globalContext, commitQueue) {
 	if (flags & TYPE_TEXT) {
 		if (isNew) {
 			// @ts-ignore createTextNode returns Text, we expect PreactElement
-			dom = document.createTextNode(newProps);
+			// dom = document.createTextNode(newProps);
+			op(OP_CREATE_TEXT, internal, newProps, undefined);
 		} else if (dom.data !== newProps) {
-			dom.data = newProps;
+			// dom.data = newProps;
+			op(OP_SET_TEXT, internal, newProps, dom);
 		}
 
-		internal._dom = dom;
+		// internal._dom = dom;
 	} else {
 		// Tracks entering and exiting SVG namespace when descending through the tree.
 		// if (nodeType === 'svg') internal._flags |= MODE_SVG;
 
 		if (isNew) {
-			if (isSvg) {
-				dom = document.createElementNS(
-					'http://www.w3.org/2000/svg',
-					// @ts-ignore We know `newVNode.type` is a string
-					nodeType
-				);
-			} else {
-				dom = document.createElement(
-					// @ts-ignore We know `newVNode.type` is a string
-					nodeType,
-					newProps.is && newProps
-				);
-			}
+			op(OP_CREATE_ELEMENT, internal, nodeType, newProps);
+			dom = internal._dom;
+			// if (isSvg) {
+			// 	dom = document.createElementNS(
+			// 		'http://www.w3.org/2000/svg',
+			// 		// @ts-ignore We know `newVNode.type` is a string
+			// 		nodeType
+			// 	);
+			// } else {
+			// 	dom = document.createElement(
+			// 		// @ts-ignore We know `newVNode.type` is a string
+			// 		nodeType,
+			// 		newProps.is && newProps
+			// 	);
+			// }
 
 			// we are creating a new node, so we can assume this is a new subtree (in case we are hydrating), this deopts the hydrate
 			internal._flags = flags &= RESET_MODE;
@@ -182,7 +201,8 @@ function mountDOMElement(dom, internal, globalContext, commitQueue) {
 			for (i = 0; i < dom.attributes.length; i++) {
 				value = dom.attributes[i].name;
 				if (!(value in newProps)) {
-					dom.removeAttribute(value);
+					op(OP_REMOVE_PROP, internal, dom, value);
+					// dom.removeAttribute(value);
 				}
 			}
 		}
@@ -201,7 +221,8 @@ function mountDOMElement(dom, internal, globalContext, commitQueue) {
 				value != null &&
 				(isFullRender || typeof value === 'function')
 			) {
-				setProperty(dom, i, value, null, isSvg);
+				// setProperty(dom, i, value, null, isSvg);
+				op(OP_SET_PROP, internal, i, value);
 			}
 		}
 
@@ -210,7 +231,8 @@ function mountDOMElement(dom, internal, globalContext, commitQueue) {
 		// If the new vnode didn't have dangerouslySetInnerHTML, diff its children
 		if (newHtml) {
 			if (isFullRender && newHtml.__html) {
-				dom.innerHTML = newHtml.__html;
+				op(OP_SET_HTML, internal, newHtml.__html);
+				// dom.innerHTML = newHtml.__html;
 			}
 			internal._children = null;
 		} else if (newChildren != null) {
@@ -220,13 +242,15 @@ function mountDOMElement(dom, internal, globalContext, commitQueue) {
 				internal,
 				globalContext,
 				commitQueue,
+				refs,
 				isNew ? null : dom.firstChild
 			);
 		}
 
 		// (as above, don't diff props during hydration)
 		if (isFullRender && newValue != null) {
-			setProperty(dom, 'value', newValue, null, 0);
+			op(OP_SET_PROP, internal, 'value', newValue, null);
+			// setProperty(dom, 'value', newValue, null, 0);
 		}
 	}
 
@@ -243,6 +267,7 @@ function mountDOMElement(dom, internal, globalContext, commitQueue) {
  * @param {object} globalContext The current context object - modified by getChildContext
  * @param {import('../internal').CommitQueue} commitQueue List of components
  * which have callbacks to invoke in commitRoot
+ * @param {any[]} refs List of refs
  * @param {import('../internal').PreactElement} startDom
  */
 export function mountChildren(
@@ -251,6 +276,7 @@ export function mountChildren(
 	parentInternal,
 	globalContext,
 	commitQueue,
+	refs,
 	startDom
 ) {
 	let internalChildren = (parentInternal._children = []),
@@ -280,30 +306,34 @@ export function mountChildren(
 			childInternal,
 			globalContext,
 			commitQueue,
+			refs,
 			startDom
 		);
 
 		newDom = childInternal._dom;
 
-		if (childInternal._flags & TYPE_COMPONENT || newDom == startDom) {
+		const flags = childInternal._flags;
+		if (flags & TYPE_COMPONENT) {
 			// If the child is a Fragment-like or if it is DOM VNode and its _dom
 			// property matches the dom we are diffing (i.e. startDom), just
 			// continue with the mountedNextChild
 			startDom = mountedNextChild;
-		} else if (newDom != null) {
+		} else if (flags & (TYPE_ELEMENT | TYPE_TEXT)) {
 			// The DOM the diff should begin with is now startDom (since we inserted
 			// newDom before startDom) so ignore mountedNextChild and continue with
 			// startDom
-			parentDom.insertBefore(newDom, startDom);
+			op(OP_INSERT, childInternal, undefined, undefined);
+			// parentDom.insertBefore(newDom, startDom);
 		}
 
 		if (childInternal.ref) {
-			applyRef(
-				null,
-				childInternal.ref,
-				childInternal._component || newDom,
-				childInternal
-			);
+			refs.push(null, childInternal.ref, childInternal);
+			// applyRef(
+			// 	null,
+			// 	childInternal.ref,
+			// 	childInternal._component || newDom,
+			// 	childInternal
+			// );
 		}
 	}
 
@@ -319,7 +349,7 @@ export function mountChildren(
 		while (startDom) {
 			i = startDom;
 			startDom = startDom.nextSibling;
-			i.remove();
+			op(OP_REMOVE, parentInternal, i, undefined);
 		}
 	}
 
