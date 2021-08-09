@@ -28,21 +28,6 @@ function eventProxyCapture(e) {
 	);
 }
 
-// /**
-//  * @param {*} style
-//  * @param {string} key
-//  * @param {string | number | null | undefined} value
-//  */
-// function setStyle(style, key, value) {
-// 	if (key[0] === '-') {
-// 		style.setProperty(key, value);
-// 	} else if (value == null) {
-// 		style[key] = '';
-// 	} else {
-// 		style[key] = value;
-// 	}
-// }
-
 /**
  * @type {import('./internal').Renderer}
  */
@@ -53,7 +38,6 @@ export class DOMRenderer {
 
 	insertBefore(internal, parent, before) {
 		parent.insertBefore(internal.dom, before);
-		// insertBefore.call(parent, internal.dom, before);
 	}
 
 	createText(value) {
@@ -95,7 +79,6 @@ export class DOMRenderer {
 		} else {
 			// Must be a Text
 			dom.remove();
-			// removeText(dom);
 		}
 
 		internal.dom = EMPTY_ELEMENT;
@@ -151,7 +134,6 @@ export class DOMRenderer {
 			}
 
 			if (useCapture) name += 'c';
-			// name = useCapture ? name + 'c' : name;
 
 			let listeners = EVENT_LISTENERS.get(dom);
 			if (!listeners) {
@@ -167,7 +149,6 @@ export class DOMRenderer {
 			name = name.replace(/xlink[H:h]/, 'h').replace(/sName$/, 's');
 		} else if (name in dom) {
 			// Note that we don't take this branch for SVG (we always set attributes)
-			// if (setUserProperty(dom, name, value)) return;
 			try {
 				dom[name] = value;
 				return;
@@ -183,24 +164,3 @@ export class DOMRenderer {
 		}
 	}
 }
-
-// let set = false;
-// /**
-//  *
-//  * @param {*} dom
-//  * @param {string} property
-//  * @param {any} value
-//  * @returns {boolean}
-//  */
-// function setUserProperty(dom, property, value) {
-// 	set = false;
-// 	try {
-// 		dom[property] = value;
-// 		set = true;
-// 	} catch (e) {}
-// 	return set;
-// }
-
-// const insertBefore = Element.prototype.insertBefore;
-// const removeElement = Element.prototype.remove;
-// const removeText = Text.prototype.remove;

@@ -398,20 +398,8 @@ function go() {
 				if (flags & (TYPE_TEXT | TYPE_ELEMENT)) {
 					if (flags & TYPE_TEXT) {
 						internal.dom = renderer.createText(props);
-						// internal.dom = document.createTextNode(props);
 					} else {
 						internal.dom = renderer.createElement(internal);
-						// if (flags & MODE_SVG) {
-						// 	internal.dom = document.createElementNS(
-						// 		'http://www.w3.org/2000/svg',
-						// 		internal.type
-						// 	);
-						// } else {
-						// 	internal.dom = document.createElement(
-						// 		internal.type,
-						// 		props && props.is && props
-						// 	);
-						// }
 						let children;
 						for (let i in props) {
 							if (i === 'key') {
@@ -449,8 +437,6 @@ function go() {
 							props = Object.assign(Object.assign({}, defaultProps), props);
 						}
 						inst = new internal.type(props, componentContext);
-						// internal.component = inst;
-						// inst._internal = internal;
 						inst.props = props;
 						inst.context = componentContext;
 						if (!inst.state) inst.state = {};
@@ -459,8 +445,6 @@ function go() {
 						if (inst.componentDidMount) inst.componentDidMount();
 					} else {
 						inst = new Component(props, componentContext);
-						// internal.component = inst;
-						// inst._internal = internal;
 						inst.state = {};
 						renderResult = internal.type.call(inst, props, componentContext);
 					}
@@ -543,29 +527,6 @@ function go() {
 					// internal.component = undefined;
 					internal.component = EMPTY_COMPONENT;
 				} else {
-					// const dom = internal.dom;
-					// if (flags & TYPE_ELEMENT) {
-					// 	if (!skipRemove) {
-					// 		skipRemove = true;
-					// 		dom.remove();
-
-					// 		if (flags & HAS_LISTENERS) {
-					// 			const listeners = EVENT_LISTENERS.get(dom);
-					// 			EVENT_LISTENERS.delete(dom);
-
-					// 			for (let i in listeners) {
-					// 				dom.removeEventListener(i, eventProxy);
-					// 			}
-					// 		}
-					// 	}
-					// } else {
-					// 	// Must be a Text
-					// 	dom.remove();
-					// }
-
-					// internal.dom = EMPTY_ELEMENT;
-
-					// renderer.remove(internal, skipRemove);
 					if (!skipRemove) {
 						renderer.remove(internal);
 					}
@@ -657,22 +618,21 @@ function go() {
 				let contextType = internal.type.contextType;
 				let context = internal.context;
 				if (contextType) context = context[contextType.id];
-				callMethod(inst, 'shouldComponentUpdate', newProps, nextState);
-				// if (inst.shouldComponentUpdate && !inst.shouldComponentUpdate(newProps, nextState)) {
-				//   break;
-				// }
-				if (inst.componentWillUpdate)
+				if (
+					callMethod(inst, 'shouldComponentUpdate', newProps, nextState) ===
+					false
+				) {
+					break;
+				}
+				if (inst.componentWillUpdate) {
 					inst.componentWillUpdate(newProps, nextState);
+				}
 				inst.props = newProps;
 				inst.state = nextState;
 				// console.log('rendering component', inst.type, internal.key);
 				if (options._render) options._render(internal);
 
 				if (flags & TYPE_CLASS) {
-					// if (typeof inst.render === 'function') {
-					//   const r = inst.render;
-					//   renderResult = r.call(inst, newProps, nextState, context);
-					// }
 					renderResult = inst.render(newProps, nextState, context);
 				} else {
 					renderResult = internal.type.call(inst, newProps, context);
@@ -1071,20 +1031,6 @@ function go() {
 	}
 }
 
-// const componentWillUnmount = 'componentWillUnmount';
-function unmountClassComponent(inst) {
-	try {
-		if (typeof inst.componentWillUnmount !== 'undefined') {
-			inst.componentWillUnmount();
-		}
-	} catch (e) {}
-	// try {
-	//   if (inst instanceof Component && inst[componentWillUnmount]) {
-	//     inst[componentWillUnmount]();
-	//   }
-	// } catch (e) {}
-}
-
 let _method;
 function callMethod(inst, method, a, b) {
 	_method = String(method);
@@ -1092,18 +1038,6 @@ function callMethod(inst, method, a, b) {
 		return inst[_method](a, b);
 	}
 }
-
-/**
- * Style property application
- * Optimization Attempts:
- *   - create memoized property setters for each new style object key
- *   - create global property setters for each name in CSSStyleDeclaration
- *   - the above two, but using `new Function()`+globals instead of closures+arguments
- *   - calling CSSStyleDeclaration.setProperty as a generic
- */
-
-const CSSPROP = /(?=[A-Z])/g;
-const nmap = { __proto__: null };
 
 // Insert the outermost DOM elements rooted at a given Internal before an element
 function insertDomRoots(internal, parent, before) {
@@ -1135,30 +1069,6 @@ function getLastDom(internal) {
 	if (prev) {
 		const d = getLastDom(prev);
 		if (d) return d;
-	}
-}
-
-function getDomParent(internal) {
-	while ((internal = internal.parent)) {
-		if (internal.flags & (TYPE_ELEMENT | TYPE_ROOT)) {
-			// return internal.dom;
-			return internal;
-		}
-	}
-}
-
-function getFirstDom(internal) {
-	if (internal.flags & (TYPE_TEXT | TYPE_ELEMENT)) {
-		return internal.dom;
-	}
-	const child = internal.child;
-	if (child) {
-		const d = getFirstDom(child);
-		if (d) return d;
-	}
-	const next = internal.next;
-	if (next) {
-		return getFirstDom(next);
 	}
 }
 
