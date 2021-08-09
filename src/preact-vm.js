@@ -212,6 +212,7 @@ class Internal {
 		this.ref = ref;
 		this.vnodeId = vnodeId;
 		this.component = EMPTY_COMPONENT;
+		this.dom = undefined;
 		this.context = parent && parent.context;
 		this.parent = parent;
 		// used during diffing to bypass insertions for nodes that are already in-position after removals are processed
@@ -397,8 +398,20 @@ function go() {
 				if (flags & (TYPE_TEXT | TYPE_ELEMENT)) {
 					if (flags & TYPE_TEXT) {
 						internal.dom = renderer.createText(props);
+						// internal.dom = document.createTextNode(props);
 					} else {
 						internal.dom = renderer.createElement(internal);
+						// if (flags & MODE_SVG) {
+						// 	internal.dom = document.createElementNS(
+						// 		'http://www.w3.org/2000/svg',
+						// 		internal.type
+						// 	);
+						// } else {
+						// 	internal.dom = document.createElement(
+						// 		internal.type,
+						// 		props && props.is && props
+						// 	);
+						// }
 						let children;
 						for (let i in props) {
 							if (i === 'key') {
@@ -530,7 +543,33 @@ function go() {
 					// internal.component = undefined;
 					internal.component = EMPTY_COMPONENT;
 				} else {
-					renderer.remove(internal, skipRemove);
+					// const dom = internal.dom;
+					// if (flags & TYPE_ELEMENT) {
+					// 	if (!skipRemove) {
+					// 		skipRemove = true;
+					// 		dom.remove();
+
+					// 		if (flags & HAS_LISTENERS) {
+					// 			const listeners = EVENT_LISTENERS.get(dom);
+					// 			EVENT_LISTENERS.delete(dom);
+
+					// 			for (let i in listeners) {
+					// 				dom.removeEventListener(i, eventProxy);
+					// 			}
+					// 		}
+					// 	}
+					// } else {
+					// 	// Must be a Text
+					// 	dom.remove();
+					// }
+
+					// internal.dom = EMPTY_ELEMENT;
+
+					// renderer.remove(internal, skipRemove);
+					if (!skipRemove) {
+						renderer.remove(internal);
+					}
+					skipRemove = true;
 				}
 
 				let child = internal.child;
@@ -996,6 +1035,7 @@ function go() {
 
 				if (flags & (TYPE_TEXT | TYPE_ELEMENT)) {
 					renderer.insertBefore(internal, parent, before);
+					// parent.insertBefore(internal.dom, before);
 				} else {
 					// Inserting a Component/Fragment inserts its outermost DOM children:
 					insertDomRoots(internal, parent, before);
@@ -1130,9 +1170,9 @@ function normalizeChildren(children, normalized) {
 	if (!Array.isArray(children)) {
 		if (children != null) {
 			// TODO: Test bigint and booleans
-			if (typeof children !== 'object') {
-				children = String(children);
-			}
+			// if (typeof children !== 'object') {
+			// 	children = String(children);
+			// }
 			normalized.push(children);
 		}
 		return;
@@ -1153,8 +1193,8 @@ function _normalize(children) {
 		const isText = c != null && typeof c !== 'object';
 		if (isText && prev) buf[j] += String(c);
 		else if (Array.isArray(c)) _normalize(c);
-		// Function children are invalid during rendering
-		else if (typeof c === 'function') continue;
+		// Function children are invalid during rendering (JM- functions are stringifed here)
+		// else if (typeof c === 'function') continue;
 		else buf[++j] = (prev = isText) ? String(c) : c;
 	}
 }

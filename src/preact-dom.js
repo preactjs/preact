@@ -5,6 +5,9 @@ import { HAS_LISTENERS } from './preact-vm';
 const EVENT_LISTENERS = new WeakMap();
 const EMPTY_ELEMENT = document.createElement('template');
 
+const CSSPROP = /(?=[A-Z])/g;
+const nmap = {};
+
 /**
  * @param {Event} e
  * @returns {*}
@@ -25,20 +28,20 @@ function eventProxyCapture(e) {
 	);
 }
 
-/**
- * @param {*} style
- * @param {string} key
- * @param {string | number | null | undefined} value
- */
-function setStyle(style, key, value) {
-	if (key[0] === '-') {
-		style.setProperty(key, value);
-	} else if (value == null) {
-		style[key] = '';
-	} else {
-		style[key] = value;
-	}
-}
+// /**
+//  * @param {*} style
+//  * @param {string} key
+//  * @param {string | number | null | undefined} value
+//  */
+// function setStyle(style, key, value) {
+// 	if (key[0] === '-') {
+// 		style.setProperty(key, value);
+// 	} else if (value == null) {
+// 		style[key] = '';
+// 	} else {
+// 		style[key] = value;
+// 	}
+// }
 
 /**
  * @type {import('./internal').Renderer}
@@ -50,6 +53,7 @@ export class DOMRenderer {
 
 	insertBefore(internal, parent, before) {
 		parent.insertBefore(internal.dom, before);
+		// insertBefore.call(parent, internal.dom, before);
 	}
 
 	createText(value) {
@@ -61,39 +65,37 @@ export class DOMRenderer {
 	}
 
 	createElement(internal) {
-		return internal.flags & MODE_SVG
-			? document.createElementNS(
-					'http://www.w3.org/2000/svg',
-					// @ts-ignore We know `newVNode.type` is a string
-					internal.type
-			  )
-			: document.createElement(
-					internal.type,
-					internal.props && internal.props.is && internal.props
-			  );
+		if (internal.flags & MODE_SVG) {
+			return document.createElementNS(
+				'http://www.w3.org/2000/svg',
+				internal.type
+			);
+		}
+		if (internal.props && internal.props.is) {
+			return document.createElement(internal.type, internal.props);
+		}
+		return document.createElement(internal.type);
 	}
 
-	remove(internal, skipRemove) {
+	remove(internal) {
 		const dom = internal.dom;
 		const flags = internal.flags;
 
 		if (flags & TYPE_ELEMENT) {
-			if (!skipRemove) {
-				skipRemove = true;
-				dom.remove();
+			dom.remove();
 
-				if (flags & HAS_LISTENERS) {
-					const listeners = EVENT_LISTENERS.get(dom);
-					EVENT_LISTENERS.delete(dom);
+			if (flags & HAS_LISTENERS) {
+				const listeners = EVENT_LISTENERS.get(dom);
+				EVENT_LISTENERS.delete(dom);
 
-					for (let i in listeners) {
-						dom.removeEventListener(i, eventProxy);
-					}
+				for (let i in listeners) {
+					dom.removeEventListener(i, eventProxy);
 				}
 			}
 		} else {
 			// Must be a Text
 			dom.remove();
+			// removeText(dom);
 		}
 
 		internal.dom = EMPTY_ELEMENT;
@@ -106,24 +108,31 @@ export class DOMRenderer {
 		name = name === 'class' ? 'className' : name;
 
 		if (name === 'style' && typeof value !== 'string') {
-			if (typeof oldValue == 'string') {
-				dom.style.cssText = oldValue = '';
-			}
-
-			if (oldValue) {
-				for (name in oldValue) {
-					if (!(value && name in value)) {
-						setStyle(dom.style, name, '');
-					}
+			let style = '',
+				sep = '',
+				spacer = ' ';
+			for (let i in value) {
+				let v = value[i];
+				if (typeof v === 'number') v = String(v);
+				if (v) {
+					const n = i in nmap ? nmap[i] : (nmap[i] = i.replace(CSSPROP, '-'));
+					style = style + sep + n + ':' + v + ';';
+					sep = spacer;
 				}
 			}
+			dom.style.cssText = style;
 
+			return;
+		}
+
+		if (name === 'dangerouslySetInnerHTML') {
 			if (value) {
-				for (name in value) {
-					if (!oldValue || value[name] !== oldValue[name]) {
-						setStyle(dom.style, name, value[name]);
-					}
+				const html = value.__html;
+				if (!oldValue || (html !== oldValue.__html && html !== dom.innerHTML)) {
+					dom.innerHTML = value;
 				}
+			} else if (oldValue) {
+				dom.innerHTML = '';
 			}
 			return;
 		}
@@ -132,7 +141,7 @@ export class DOMRenderer {
 			let useCapture = name !== (name = name.replace(/Capture$/, ''));
 			// If the lower-cased event name is defined as a property, we use that name instead:
 			let lc = name.toLowerCase();
-			name = lc in dom ? lc.slice(2) : name.slice(2);
+			name = (lc in dom ? lc : name).slice(2);
 
 			const handler = useCapture ? eventProxyCapture : eventProxy;
 			if (!oldValue && value) {
@@ -141,7 +150,8 @@ export class DOMRenderer {
 				dom.removeEventListener(name, handler, useCapture);
 			}
 
-			name = useCapture ? name + 'c' : name;
+			if (useCapture) name += 'c';
+			// name = useCapture ? name + 'c' : name;
 
 			let listeners = EVENT_LISTENERS.get(dom);
 			if (!listeners) {
@@ -157,45 +167,40 @@ export class DOMRenderer {
 			name = name.replace(/xlink[H:h]/, 'h').replace(/sName$/, 's');
 		} else if (name in dom) {
 			// Note that we don't take this branch for SVG (we always set attributes)
-			if (setUserProperty(dom, name, value)) return;
+			// if (setUserProperty(dom, name, value)) return;
+			try {
+				dom[name] = value;
+				return;
+			} catch (e) {}
 		}
+
 		// Finally, set as an attribute. This means either we're in SVG mode,
 		// or the prop name wasn't defined as a property of the element, or assigning to it threw.
-		if (typeof value !== 'function') {
-			if (name === 'dangerouslySetInnerHTML') {
-				if (value) {
-					const html = value.__html;
-					if (
-						!oldValue ||
-						(html !== oldValue.__html && html !== dom.innerHTML)
-					) {
-						dom.innerHTML = value;
-					}
-				} else if (oldValue) {
-					dom.innerHTML = '';
-				}
-			} else if (value == null || value === false) {
-				dom.removeAttribute(name);
-			} else {
-				dom.setAttribute(name, value);
-			}
+		if (value == null || value === false) {
+			dom.removeAttribute(name);
+		} else if (typeof value !== 'function') {
+			dom.setAttribute(name, value);
 		}
 	}
 }
 
-let set = false;
-/**
- *
- * @param {*} dom
- * @param {string} property
- * @param {any} value
- * @returns {boolean}
- */
-function setUserProperty(dom, property, value) {
-	set = false;
-	try {
-		dom[property] = value;
-		set = true;
-	} catch (e) {}
-	return set;
-}
+// let set = false;
+// /**
+//  *
+//  * @param {*} dom
+//  * @param {string} property
+//  * @param {any} value
+//  * @returns {boolean}
+//  */
+// function setUserProperty(dom, property, value) {
+// 	set = false;
+// 	try {
+// 		dom[property] = value;
+// 		set = true;
+// 	} catch (e) {}
+// 	return set;
+// }
+
+// const insertBefore = Element.prototype.insertBefore;
+// const removeElement = Element.prototype.remove;
+// const removeText = Text.prototype.remove;
