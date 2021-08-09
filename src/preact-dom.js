@@ -61,24 +61,26 @@ export class DOMRenderer {
 		return document.createElement(internal.type);
 	}
 
-	remove(internal) {
+	remove(internal, skipRemove) {
 		const dom = internal.dom;
 		const flags = internal.flags;
 
-		if (flags & TYPE_ELEMENT) {
+		if (!skipRemove) {
 			dom.remove();
+		}
 
-			if (flags & HAS_LISTENERS) {
-				const listeners = EVENT_LISTENERS.get(dom);
-				EVENT_LISTENERS.delete(dom);
+		if (flags & HAS_LISTENERS) {
+			const listeners = EVENT_LISTENERS.get(dom);
+			EVENT_LISTENERS.delete(dom);
 
-				for (let i in listeners) {
-					dom.removeEventListener(i, eventProxy);
-				}
+			for (let i in listeners) {
+				let useCapture = i !== (i = i.replace(/Capture$/, ''));
+				dom.removeEventListener(
+					i,
+					useCapture ? eventProxyCapture : eventProxy,
+					useCapture
+				);
 			}
-		} else {
-			// Must be a Text
-			dom.remove();
 		}
 
 		internal.dom = EMPTY_ELEMENT;
@@ -133,7 +135,7 @@ export class DOMRenderer {
 				dom.removeEventListener(name, handler, useCapture);
 			}
 
-			if (useCapture) name += 'c';
+			if (useCapture) name += 'Capture';
 
 			let listeners = EVENT_LISTENERS.get(dom);
 			if (!listeners) {

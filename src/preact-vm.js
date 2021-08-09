@@ -527,9 +527,7 @@ function go() {
 					// internal.component = undefined;
 					internal.component = EMPTY_COMPONENT;
 				} else {
-					if (!skipRemove) {
-						renderer.remove(internal);
-					}
+					renderer.remove(internal, skipRemove);
 					skipRemove = true;
 				}
 
@@ -1080,9 +1078,10 @@ function normalizeChildren(children, normalized) {
 	if (!Array.isArray(children)) {
 		if (children != null) {
 			// TODO: Test bigint and booleans
-			// if (typeof children !== 'object') {
-			// 	children = String(children);
-			// }
+			const type = typeof children;
+			if (type !== 'object' && type !== 'string') {
+				children = String(children);
+			}
 			normalized.push(children);
 		}
 		return;
