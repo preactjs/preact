@@ -355,15 +355,25 @@ let currentOp;
 
 /** Starts the main run loop, exits when there is no work left. */
 function go() {
+	if (ops === undefined) return;
+
+	let _op = ops;
+	let opcode = _op.op;
+	let internal = _op.internal;
+	let data = _op.data;
+	let extra = _op.extra;
+	let props = internal.props;
+	let flags = internal.flags;
+
 	// const start = Date.now();
 	while (ops !== undefined) {
-		const _op = ops;
-		let opcode = _op.op;
-		let internal = _op.internal;
-		let data = _op.data;
-		let extra = _op.extra;
-		let props = internal.props;
-		let flags = internal.flags;
+		_op = ops;
+		opcode = _op.op;
+		internal = _op.internal;
+		data = _op.data;
+		extra = _op.extra;
+		props = internal.props;
+		flags = internal.flags;
 
 		currentOp = _op;
 		switch (opcode) {
