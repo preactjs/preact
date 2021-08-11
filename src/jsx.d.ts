@@ -621,6 +621,7 @@ export namespace JSXInternal {
 		acceptCharset?: string;
 		accessKey?: string;
 		action?: string;
+		allow?: string;
 		allowFullScreen?: boolean;
 		allowTransparency?: boolean;
 		alt?: string;
@@ -639,6 +640,7 @@ export namespace JSXInternal {
 		charSet?: string;
 		challenge?: string;
 		checked?: boolean;
+		cite?: string;
 		class?: string;
 		className?: string;
 		cols?: number;
@@ -661,6 +663,7 @@ export namespace JSXInternal {
 		decoding?: 'sync' | 'async' | 'auto';
 		draggable?: boolean;
 		encType?: string;
+		enterkeyhint?: 'enter' | 'done' | 'go' | 'next' | 'previous' | 'search' | 'send';
 		form?: string;
 		formAction?: string;
 		formEncType?: string;
@@ -704,11 +707,13 @@ export namespace JSXInternal {
 		multiple?: boolean;
 		muted?: boolean;
 		name?: string;
+		nomodule?: boolean;
 		nonce?: string;
 		noValidate?: boolean;
 		open?: boolean;
 		optimum?: number;
 		pattern?: string;
+		ping?: string;
 		placeholder?: string;
 		playsInline?: boolean;
 		poster?: string;
@@ -716,8 +721,10 @@ export namespace JSXInternal {
 		radioGroup?: string;
 		readonly?: boolean;
 		readOnly?: boolean;
+		referrerpolicy?: 'no-referrer' | 'no-referrer-when-downgrade' | 'origin' | 'origin-when-cross-origin' | 'same-origin' | 'strict-origin' | 'strict-origin-when-cross-origin' | 'unsafe-url';
 		rel?: string;
 		required?: boolean;
+		reversed?: boolean;
 		role?: string;
 		rows?: number;
 		rowSpan?: number;
@@ -757,6 +764,9 @@ export namespace JSXInternal {
 		// Non-standard Attributes
 		autocapitalize?: 'off' | 'none' | 'on' | 'sentences' | 'words' | 'characters';
 		autoCapitalize?: 'off' | 'none' | 'on' | 'sentences' | 'words' | 'characters';
+		disablePictureInPicture?: boolean;
+		results?: number;
+		translate?: 'yes' | 'no';
 
 		// RDFa Attributes
 		about?: string;
