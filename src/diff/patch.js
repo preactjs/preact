@@ -205,4 +205,17 @@ function patchDOMElement(dom, newVNode, internal, globalContext, commitQueue) {
 			dom.firstChild
 		);
 	}
+
+	if ('value' in newProps && dom._isControlled) {
+		dom._prevValue = newProps.value;
+
+		if (newProps.value !== dom.value) {
+			setProperty(dom, 'value', i, oldProps.value, 0);
+		}
+	} else if ('checked' in newProps && dom._isControlled) {
+		dom._prevValue = newProps.checked;
+		if (newProps.checked !== dom.checked) {
+			setProperty(dom, 'checked', i, oldProps.checked, 0);
+		}
+	}
 }
