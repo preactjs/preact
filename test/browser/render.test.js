@@ -588,7 +588,6 @@ describe('render()', () => {
 				}
 			}
 
-			let thing;
 			render(<Thing />, scratch);
 
 			let firstInnerHTMLChild = scratch.firstChild.firstChild;
@@ -801,7 +800,6 @@ describe('render()', () => {
 	it('should always diff `checked` and `value` properties against the DOM', () => {
 		// See https://github.com/preactjs/preact/issues/1324
 
-		let inputs;
 		let text;
 		let checkbox;
 		let forceUpdate;
@@ -987,7 +985,7 @@ describe('render()', () => {
 				return (
 					<div>
 						{this.state.i === 0 && <X />}
-						<X ref={node => (ref = node)} />
+						<X />
 					</div>
 				);
 			}

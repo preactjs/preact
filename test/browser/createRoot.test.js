@@ -974,7 +974,6 @@ describe('createRoot()', () => {
 				}
 			}
 
-			let ref;
 			let updateApp;
 			class App extends Component {
 				constructor() {
