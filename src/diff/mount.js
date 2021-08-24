@@ -189,9 +189,10 @@ function mountDOMElement(dom, internal, globalContext, commitQueue) {
 
 		let newHtml, newValue, newChildren;
 		if (
-			internal.type === 'input' ||
-			internal.type === 'textarea' ||
-			internal.type === 'select'
+			(internal.type === 'input' ||
+				internal.type === 'textarea' ||
+				internal.type === 'select') &&
+			(newProps.onInput || newProps.onChange)
 		) {
 			if (newProps.value != null) {
 				dom._isControlled = true;
