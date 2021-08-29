@@ -143,6 +143,10 @@
 			"react/sort-comp": 0,
 			"jest/valid-expect": 0,
 			"jest/no-disabled-tests": 0,
+			"jest/no-test-callback": 0,
+			"jest/expect-expect": 0,
+			"jest/no-standalone-expect": 0,
+			"jest/no-export": 0,
 			"react/no-find-dom-node": 0
 		}
 	},
@@ -238,13 +242,13 @@
 		"csstype": "^3.0.5",
 		"diff": "^5.0.0",
 		"errorstacks": "^2.3.0",
-		"esbuild": "^0.8.47",
+		"esbuild": "^0.12.24",
 		"eslint": "5.15.1",
 		"eslint-config-developit": "^1.1.1",
 		"eslint-config-prettier": "^6.5.0",
 		"eslint-plugin-react": "7.12.4",
 		"husky": "^4.3.0",
-		"karma": "^5.2.3",
+		"karma": "^6.3.4",
 		"karma-chai-sinon": "^0.1.5",
 		"karma-chrome-launcher": "^3.1.0",
 		"karma-coverage": "^2.0.3",
@@ -265,6 +269,6 @@
 		"prop-types": "^15.7.2",
 		"sinon": "^9.2.3",
 		"sinon-chai": "^3.5.0",
-		"typescript": "3.5.3"
+		"typescript": "4.4.2"
 	}
 }
