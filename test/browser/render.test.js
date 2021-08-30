@@ -574,7 +574,12 @@ describe('render()', () => {
 		});
 
 		it('should avoid reapplying innerHTML when __html property of dangerouslySetInnerHTML attr remains unchanged', () => {
+			let forceUpdate;
 			class Thing extends Component {
+				constructor(props) {
+					super(props);
+					forceUpdate = this.forceUpdate.bind(this);
+				}
 				render() {
 					// eslint-disable-next-line react/no-danger
 					return (
@@ -583,13 +588,12 @@ describe('render()', () => {
 				}
 			}
 
-			let thing;
-			render(<Thing ref={r => (thing = r)} />, scratch);
+			render(<Thing />, scratch);
 
 			let firstInnerHTMLChild = scratch.firstChild.firstChild;
 
 			// Re-render
-			thing.forceUpdate();
+			forceUpdate();
 
 			expect(firstInnerHTMLChild).to.equalNode(scratch.firstChild.firstChild);
 		});
@@ -796,11 +800,16 @@ describe('render()', () => {
 	it('should always diff `checked` and `value` properties against the DOM', () => {
 		// See https://github.com/preactjs/preact/issues/1324
 
-		let inputs;
 		let text;
 		let checkbox;
+		let forceUpdate;
 
 		class Inputs extends Component {
+			constructor(props) {
+				super(props);
+				forceUpdate = this.forceUpdate.bind(this);
+			}
+
 			render() {
 				return (
 					<div>
@@ -811,7 +820,7 @@ describe('render()', () => {
 			}
 		}
 
-		render(<Inputs ref={x => (inputs = x)} />, scratch);
+		render(<Inputs />, scratch);
 
 		expect(text.value).to.equal('Hello');
 		expect(checkbox.checked).to.equal(true);
@@ -819,7 +828,7 @@ describe('render()', () => {
 		text.value = 'World';
 		checkbox.checked = false;
 
-		inputs.forceUpdate();
+		forceUpdate();
 		rerender();
 
 		expect(text.value).to.equal('Hello');
@@ -943,10 +952,12 @@ describe('render()', () => {
 
 	// see preact/#1327
 	it('should not reuse unkeyed components', () => {
+		let update;
 		class X extends Component {
 			constructor() {
 				super();
 				this.state = { i: 0 };
+				update = this.update.bind(this);
 			}
 
 			update() {
@@ -962,7 +973,6 @@ describe('render()', () => {
 			}
 		}
 
-		let ref;
 		let updateApp;
 		class App extends Component {
 			constructor() {
@@ -975,7 +985,7 @@ describe('render()', () => {
 				return (
 					<div>
 						{this.state.i === 0 && <X />}
-						<X ref={node => (ref = node)} />
+						<X />
 					</div>
 				);
 			}
@@ -984,7 +994,7 @@ describe('render()', () => {
 		render(<App />, scratch);
 		expect(scratch.textContent).to.equal('00');
 
-		ref.update();
+		update();
 		updateApp();
 		rerender();
 		expect(scratch.textContent).to.equal('1');
