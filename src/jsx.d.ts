@@ -453,6 +453,8 @@ export namespace JSXInternal {
 		onChangeCapture?: GenericEventHandler<Target>;
 		onInput?: GenericEventHandler<Target>;
 		onInputCapture?: GenericEventHandler<Target>;
+		onBeforeInput?: GenericEventHandler<Target>;
+		onBeforeInputCapture?: GenericEventHandler<Target>;
 		onSearch?: GenericEventHandler<Target>;
 		onSearchCapture?: GenericEventHandler<Target>;
 		onSubmit?: GenericEventHandler<Target>;
@@ -663,7 +665,14 @@ export namespace JSXInternal {
 		decoding?: 'sync' | 'async' | 'auto';
 		draggable?: boolean;
 		encType?: string;
-		enterkeyhint?: 'enter' | 'done' | 'go' | 'next' | 'previous' | 'search' | 'send';
+		enterkeyhint?:
+			| 'enter'
+			| 'done'
+			| 'go'
+			| 'next'
+			| 'previous'
+			| 'search'
+			| 'send';
 		form?: string;
 		formAction?: string;
 		formEncType?: string;
@@ -721,7 +730,15 @@ export namespace JSXInternal {
 		radioGroup?: string;
 		readonly?: boolean;
 		readOnly?: boolean;
-		referrerpolicy?: 'no-referrer' | 'no-referrer-when-downgrade' | 'origin' | 'origin-when-cross-origin' | 'same-origin' | 'strict-origin' | 'strict-origin-when-cross-origin' | 'unsafe-url';
+		referrerpolicy?:
+			| 'no-referrer'
+			| 'no-referrer-when-downgrade'
+			| 'origin'
+			| 'origin-when-cross-origin'
+			| 'same-origin'
+			| 'strict-origin'
+			| 'strict-origin-when-cross-origin'
+			| 'unsafe-url';
 		rel?: string;
 		required?: boolean;
 		reversed?: boolean;
@@ -762,8 +779,20 @@ export namespace JSXInternal {
 		wrap?: string;
 
 		// Non-standard Attributes
-		autocapitalize?: 'off' | 'none' | 'on' | 'sentences' | 'words' | 'characters';
-		autoCapitalize?: 'off' | 'none' | 'on' | 'sentences' | 'words' | 'characters';
+		autocapitalize?:
+			| 'off'
+			| 'none'
+			| 'on'
+			| 'sentences'
+			| 'words'
+			| 'characters';
+		autoCapitalize?:
+			| 'off'
+			| 'none'
+			| 'on'
+			| 'sentences'
+			| 'words'
+			| 'characters';
 		disablePictureInPicture?: boolean;
 		results?: number;
 		translate?: 'yes' | 'no';
