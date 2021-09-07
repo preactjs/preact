@@ -445,6 +445,10 @@ export namespace JSXInternal {
 		// Focus Events
 		onFocus?: FocusEventHandler<Target>;
 		onFocusCapture?: FocusEventHandler<Target>;
+		onfocusin?: FocusEventHandler<Target>;
+		onfocusinCapture?: FocusEventHandler<Target>;
+		onfocusout?: FocusEventHandler<Target>;
+		onfocusoutCapture?: FocusEventHandler<Target>;
 		onBlur?: FocusEventHandler<Target>;
 		onBlurCapture?: FocusEventHandler<Target>;
 
