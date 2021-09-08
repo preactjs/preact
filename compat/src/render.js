@@ -109,10 +109,10 @@ options.vnode = vnode => {
 	let type = vnode.type;
 	let props = vnode.props;
 	let normalizedProps = props;
-	const nonCustomElement = type.indexOf('-') === -1;
 
 	// only normalize props on Element nodes
 	if (typeof type === 'string') {
+		const nonCustomElement = type.indexOf('-') === -1;
 		normalizedProps = {};
 
 		for (let i in props) {
