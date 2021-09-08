@@ -1,4 +1,4 @@
-import { PreactContext, Ref as PreactRef } from '../..';
+import { PreactContext, Ref as PreactRef, RefObject } from '../..';
 
 type Inputs = ReadonlyArray<unknown>;
 
@@ -8,6 +8,11 @@ export type StateUpdater<S> = (value: S | ((prevState: S) => S)) => void;
  * @param initialState The initial value (or a function that returns the initial value)
  */
 export function useState<S>(initialState: S | (() => S)): [S, StateUpdater<S>];
+
+export function useState<S = undefined>(): [
+	S | undefined,
+	StateUpdater<S | undefined>
+];
 
 export type Reducer<S, A> = (prevState: S, action: A) => S;
 /**
@@ -40,6 +45,7 @@ export function useReducer<S, A, I>(
 	init: (arg: I) => S
 ): [S, (action: A) => void];
 
+/** @deprecated Use the `Ref` type instead. */
 type PropRef<T> = { current: T };
 type Ref<T> = { current: T };
 
@@ -49,15 +55,12 @@ type Ref<T> = { current: T };
  *
  * Note that `useRef()` is useful for more than the `ref` attribute. It’s handy for keeping any mutable
  * value around similar to how you’d use instance fields in classes.
+ *
+ * @param initialValue the initial value to store in the ref object
  */
-export function useRef<T>(initialValue?: T | null): Ref<T>;
-
-/**
- * `useRef` without an initial value is the special case handling `ref` props.
- * If you want a non prop-based, mutable ref, you can explicitly give it an initial value of undefined/null/etc.
- * You should explicitly set the type parameter for the expected ref value to either a DOM Element like `HTMLInputElement` or a `Component`
- */
-export function useRef<T = unknown>(): PropRef<T>;
+export function useRef<T>(initialValue: null): RefObject<T>;
+export function useRef<T>(initialValue: T): Ref<T>;
+export function useRef<T>(): Ref<T | undefined>;
 
 type EffectCallback = () => void | (() => void);
 /**
