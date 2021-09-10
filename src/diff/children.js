@@ -229,9 +229,9 @@ export function diffChildren(
 }
 
 function reorderChildren(childVNode, oldDom, parentDom) {
-	if (!childVNode._children) return;
-	for (let tmp = 0; tmp < childVNode._children.length; tmp++) {
-		let vnode = childVNode._children[tmp];
+	// Note: VNodes in nested suspended trees may be missing _children.
+	for (let tmp = 0, c = childVNode._children || EMPTY_ARR; tmp < c.length; tmp++) {
+		let vnode = c[tmp];
 		if (vnode) {
 			// We typically enter this code path on sCU bailout, where we copy
 			// oldVNode._children to newVNode._children. If that is the case, we need
@@ -246,7 +246,7 @@ function reorderChildren(childVNode, oldDom, parentDom) {
 					parentDom,
 					vnode,
 					vnode,
-					childVNode._children,
+					c,
 					vnode._dom,
 					oldDom
 				);
