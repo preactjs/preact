@@ -161,7 +161,6 @@ export function diffChildren(
 
 			if (
 				typeof childVNode.type == 'function' &&
-				childVNode._children != null && // Can be null if childVNode suspended
 				childVNode._children === oldVNode._children
 			) {
 				childVNode._nextDom = oldDom = reorderChildren(
@@ -230,6 +229,7 @@ export function diffChildren(
 }
 
 function reorderChildren(childVNode, oldDom, parentDom) {
+	if (!childVNode._children) return;
 	for (let tmp = 0; tmp < childVNode._children.length; tmp++) {
 		let vnode = childVNode._children[tmp];
 		if (vnode) {
