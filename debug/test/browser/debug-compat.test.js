@@ -6,13 +6,14 @@ import * as PropTypes from 'prop-types';
 
 // eslint-disable-next-line no-duplicate-imports
 import { resetPropWarnings } from 'preact/debug';
-import { forwardRef } from 'preact/compat';
+import { forwardRef, createPortal } from 'preact/compat';
 
 const h = createElement;
 /** @jsx createElement */
 
 describe('debug compat', () => {
 	let scratch;
+	let root;
 	let errors = [];
 	let warnings = [];
 
@@ -22,6 +23,9 @@ describe('debug compat', () => {
 		scratch = setupScratch();
 		sinon.stub(console, 'error').callsFake(e => errors.push(e));
 		sinon.stub(console, 'warn').callsFake(w => warnings.push(w));
+
+		root = document.createElement('div');
+		document.body.appendChild(root);
 	});
 
 	afterEach(() => {
@@ -29,6 +33,17 @@ describe('debug compat', () => {
 		(console.error).restore();
 		console.warn.restore();
 		teardown(scratch);
+
+		document.body.removeChild(root);
+	});
+
+	describe('portals', () => {
+		it('should not throw an invalid render argument for a portal.', () => {
+			function Foo(props) {
+				return <div>{createPortal(props.children, root)}</div>;
+			}
+			expect(() => render(<Foo>foobar</Foo>, scratch)).not.to.throw();
+		});
 	});
 
 	describe('PropTypes', () => {

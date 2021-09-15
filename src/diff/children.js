@@ -1,14 +1,13 @@
 import { diff, unmount, applyRef } from './index';
 import { createVNode, Fragment } from '../create-element';
 import { EMPTY_OBJ, EMPTY_ARR } from '../constants';
-import { removeNode } from '../util';
 import { getDomSibling } from '../component';
 
 /**
  * Diff the children of a virtual node
  * @param {import('../internal').PreactElement} parentDom The DOM element whose
  * children are being diffed
- * @param {import('../index').ComponentChildren[]} renderResult
+ * @param {import('../internal').ComponentChildren[]} renderResult
  * @param {import('../internal').VNode} newParentVNode The new virtual
  * node whose children should be diff'ed against oldParentVNode
  * @param {import('../internal').VNode} oldParentVNode The old virtual
@@ -18,7 +17,7 @@ import { getDomSibling } from '../component';
  * @param {Array<import('../internal').PreactElement>} excessDomChildren
  * @param {Array<import('../internal').Component>} commitQueue List of components
  * which have callbacks to invoke in commitRoot
- * @param {Node | Text} oldDom The current attached DOM
+ * @param {import('../internal').PreactElement} oldDom The current attached DOM
  * element any new dom elements should be placed around. Likely `null` on first
  * render (except when hydrating). Can be a sibling DOM element when diffing
  * Fragments that have siblings. In most cases, it starts out as `oldChildren[0]._dom`.
@@ -44,20 +43,6 @@ export function diffChildren(
 
 	let oldChildrenLength = oldChildren.length;
 
-	// Only in very specific places should this logic be invoked (top level `render` and `diffElementNodes`).
-	// I'm using `EMPTY_OBJ` to signal when `diffChildren` is invoked in these situations. I can't use `null`
-	// for this purpose, because `null` is a valid value for `oldDom` which can mean to skip to this logic
-	// (e.g. if mounting a new tree in which the old DOM should be ignored (usually for Fragments).
-	if (oldDom == EMPTY_OBJ) {
-		if (excessDomChildren != null) {
-			oldDom = excessDomChildren[0];
-		} else if (oldChildrenLength) {
-			oldDom = getDomSibling(oldParentVNode, 0);
-		} else {
-			oldDom = null;
-		}
-	}
-
 	newParentVNode._children = [];
 	for (i = 0; i < renderResult.length; i++) {
 		childVNode = renderResult[i];
@@ -68,7 +53,12 @@ export function diffChildren(
 		// If this newVNode is being reused (e.g. <div>{reuse}{reuse}</div>) in the same diff,
 		// or we are rendering a component (e.g. setState) copy the oldVNodes so it can have
 		// it's own DOM & etc. pointers
-		else if (typeof childVNode == 'string' || typeof childVNode == 'number') {
+		else if (
+			typeof childVNode == 'string' ||
+			typeof childVNode == 'number' ||
+			// eslint-disable-next-line valid-typeof
+			typeof childVNode == 'bigint'
+		) {
 			childVNode = newParentVNode._children[i] = createVNode(
 				null,
 				childVNode,
@@ -84,7 +74,11 @@ export function diffChildren(
 				null,
 				null
 			);
-		} else if (childVNode._dom != null || childVNode._component != null) {
+		} else if (childVNode._depth > 0) {
+			// VNode is already in use, clone it. This can happen in the following
+			// scenario:
+			//   const reuse = <div />
+			//   <div>{reuse}<span />{reuse}</div>
 			childVNode = newParentVNode._children[i] = createVNode(
 				childVNode.type,
 				childVNode.props,
@@ -167,6 +161,7 @@ export function diffChildren(
 
 			if (
 				typeof childVNode.type == 'function' &&
+				childVNode._children != null && // Can be null if childVNode suspended
 				childVNode._children === oldVNode._children
 			) {
 				childVNode._nextDom = oldDom = reorderChildren(
@@ -180,25 +175,12 @@ export function diffChildren(
 					childVNode,
 					oldVNode,
 					oldChildren,
-					excessDomChildren,
 					newDom,
 					oldDom
 				);
 			}
 
-			// Browsers will infer an option's `value` from `textContent` when
-			// no value is present. This essentially bypasses our code to set it
-			// later in `diff()`. It works fine in all browsers except for IE11
-			// where it breaks setting `select.value`. There it will be always set
-			// to an empty string. Re-applying an options value will fix that, so
-			// there are probably some internal data structures that aren't
-			// updated properly.
-			//
-			// To fix it we make sure to reset the inferred value, so that our own
-			// value check in `diff()` won't be skipped.
-			if (!isHydrating && newParentVNode.type === 'option') {
-				parentDom.value = '';
-			} else if (typeof newParentVNode.type == 'function') {
+			if (typeof newParentVNode.type == 'function') {
 				// Because the newParentVNode is Fragment-like, we need to set it's
 				// _nextDom property to the nextSibling of its last child DOM node.
 				//
@@ -221,16 +203,22 @@ export function diffChildren(
 
 	newParentVNode._dom = firstChildDom;
 
-	// Remove children that are not part of any vnode.
-	if (excessDomChildren != null && typeof newParentVNode.type != 'function') {
-		for (i = excessDomChildren.length; i--; ) {
-			if (excessDomChildren[i] != null) removeNode(excessDomChildren[i]);
-		}
-	}
-
 	// Remove remaining oldChildren if there are any.
 	for (i = oldChildrenLength; i--; ) {
-		if (oldChildren[i] != null) unmount(oldChildren[i], oldChildren[i]);
+		if (oldChildren[i] != null) {
+			if (
+				typeof newParentVNode.type == 'function' &&
+				oldChildren[i]._dom != null &&
+				oldChildren[i]._dom == newParentVNode._nextDom
+			) {
+				// If the newParentVNode.__nextDom points to a dom node that is about to
+				// be unmounted, then get the next sibling of that vnode and set
+				// _nextDom to it
+				newParentVNode._nextDom = getDomSibling(oldParentVNode, i + 1);
+			}
+
+			unmount(oldChildren[i], oldChildren[i]);
+		}
 	}
 
 	// Set refs only after unmount
@@ -245,17 +233,20 @@ function reorderChildren(childVNode, oldDom, parentDom) {
 	for (let tmp = 0; tmp < childVNode._children.length; tmp++) {
 		let vnode = childVNode._children[tmp];
 		if (vnode) {
+			// We typically enter this code path on sCU bailout, where we copy
+			// oldVNode._children to newVNode._children. If that is the case, we need
+			// to update the old children's _parent pointer to point to the newVNode
+			// (childVNode here).
 			vnode._parent = childVNode;
 
 			if (typeof vnode.type == 'function') {
-				reorderChildren(vnode, oldDom, parentDom);
+				oldDom = reorderChildren(vnode, oldDom, parentDom);
 			} else {
 				oldDom = placeChild(
 					parentDom,
 					vnode,
 					vnode,
 					childVNode._children,
-					null,
 					vnode._dom,
 					oldDom
 				);
@@ -290,7 +281,6 @@ function placeChild(
 	childVNode,
 	oldVNode,
 	oldChildren,
-	excessDomChildren,
 	newDom,
 	oldDom
 ) {
@@ -307,14 +297,10 @@ function placeChild(
 		// can clean up the property
 		childVNode._nextDom = undefined;
 	} else if (
-		excessDomChildren == oldVNode ||
+		oldVNode == null ||
 		newDom != oldDom ||
 		newDom.parentNode == null
 	) {
-		// NOTE: excessDomChildren==oldVNode above:
-		// This is a compression of excessDomChildren==null && oldVNode==null!
-		// The values only have the same type when `null`.
-
 		outer: if (oldDom == null || oldDom.parentNode !== parentDom) {
 			parentDom.appendChild(newDom);
 			nextDom = null;

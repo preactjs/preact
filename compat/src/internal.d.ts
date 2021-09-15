@@ -1,7 +1,7 @@
 import {
 	Component as PreactComponent,
 	VNode as PreactVNode,
-	FunctionalComponent as PreactFunctionalComponent
+	FunctionComponent as PreactFunctionComponent
 } from '../../src/internal';
 import { SuspenseProps } from './suspense';
 
@@ -14,13 +14,17 @@ export interface Component<P = {}, S = {}> extends PreactComponent<P, S> {
 	isPureReactComponent?: true;
 	_patchedLifecycles?: true;
 
+	// Suspense internal properties
 	_childDidSuspend?(error: Promise<void>, suspendingVNode: VNode): void;
 	_suspended: (vnode: VNode) => (unsuspend: () => void) => void;
-	_suspendedComponentWillUnmount?(): void;
+	_onResolve?(): void;
+
+	// Portal internal properties
+	_temp: any;
+	_container: PreactElement;
 }
 
-export interface FunctionalComponent<P = {}>
-	extends PreactFunctionalComponent<P> {
+export interface FunctionComponent<P = {}> extends PreactFunctionComponent<P> {
 	shouldComponentUpdate?(nextProps: Readonly<P>): boolean;
 	_forwarded?: boolean;
 	_patchedLifecycles?: true;

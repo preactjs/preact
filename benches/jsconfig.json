@@ -1,0 +1,8 @@
+{
+	"compilerOptions": {
+		"target": "es2020",
+		"checkJs": true,
+		"moduleResolution": "node"
+	},
+	"exclude": ["node_modules", "dist"]
+}

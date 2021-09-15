@@ -90,6 +90,7 @@ export function initDebug() {
 					'Check if the element is available in the DOM/has the correct id.'
 			);
 		}
+
 		let isValid;
 		switch (parentNode.nodeType) {
 			case ELEMENT_NODE:
@@ -328,24 +329,6 @@ export function initDebug() {
 					);
 				}
 			});
-		}
-
-		/** @type {import('./internal').Component} */
-		const component = vnode._component;
-		if (component && component.__hooks) {
-			let hooks = component.__hooks;
-			if (Array.isArray(hooks._list)) {
-				hooks._list.forEach(hook => {
-					if (hook._factory && (!hook._args || !Array.isArray(hook._args))) {
-						let componentName = getDisplayName(vnode);
-						console.warn(
-							`In ${componentName} you are calling useMemo/useCallback without passing arguments.\n` +
-								`This is a noop since it will not be able to memoize, it will execute it every render.` +
-								`\n\n${getOwnerStack(vnode)}`
-						);
-					}
-				});
-			}
 		}
 
 		hooksAllowed = false;

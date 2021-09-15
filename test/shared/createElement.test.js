@@ -161,13 +161,15 @@ describe('createElement(jsx)', () => {
 			.that.equals('textstuff');
 	});
 
-	it('should NOT set children prop when null', () => {
-		let r = h('foo', { foo: 'bar' }, null);
+	it('should override children if null is provided as an argument', () => {
+		let r = h('foo', { foo: 'bar', children: 'baz' }, null);
 
 		expect(r)
 			.to.be.an('object')
-			.to.have.nested.property('props.foo')
-			.not.to.have.nested.property('props.children');
+			.to.deep.nested.include({
+				'props.foo': 'bar',
+				'props.children': null
+			});
 	});
 
 	it('should NOT set children prop when unspecified', () => {
@@ -268,6 +270,18 @@ describe('createElement(jsx)', () => {
 			.to.be.an('object')
 			.with.nested.property('props.children')
 			.that.deep.equals(['x', 'y']);
+	});
+
+	it('should respect defaultProps', () => {
+		const Component = ({ children }) => children;
+		Component.defaultProps = { foo: 'bar' };
+		expect(h(Component).props).to.deep.equal({ foo: 'bar' });
+	});
+
+	it('should override defaultProps', () => {
+		const Component = ({ children }) => children;
+		Component.defaultProps = { foo: 'default' };
+		expect(h(Component, { foo: 'bar' }).props).to.deep.equal({ foo: 'bar' });
 	});
 
 	it('should ignore props.children if children are manually specified', () => {

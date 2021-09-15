@@ -1,5 +1,6 @@
 {
 	"name": "preact-v8-proxy",
+	"private": true,
 	"version": "0.0.0",
 	"type": "module",
 	"main": "index.js",

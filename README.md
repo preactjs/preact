@@ -52,7 +52,7 @@ You can find some awesome libraries in the [awesome-preact list](https://github.
 
 > 💁 _**Note:** You [don't need ES2015 to use Preact](https://github.com/developit/preact-in-es3)... but give it a try!_
 
-The easiest way to get started with Preact is to install [Preact CLI](https://github.com/preactjs/preact-cli). This simple command-line tool wraps up the best possible tooling for you, and even keeps things like Webpack and Babel up-to-date as they change. Best of all, it's easy to understand! Start a project or compile for production in a single command (`preact build`), with no configuration needed and best practices baked in! 🙌
+The easiest way to get started with Preact is to use [Preact CLI](https://github.com/preactjs/preact-cli). This simple command-line tool wraps up the best possible tooling for you, and even keeps things like Webpack and Babel up-to-date as they change. Best of all, it's easy to understand! Start a project or compile for production in a single command (`preact build`), with no configuration needed and best practices baked in! 🙌
 
 #### Tutorial: Building UI with Preact
 
@@ -133,6 +133,8 @@ Support us with a monthly donation and help us continue our activities. [[Become
 <a href="https://opencollective.com/preact/backer/27/website" target="_blank"><img src="https://opencollective.com/preact/backer/27/avatar.svg"></a>
 <a href="https://opencollective.com/preact/backer/28/website" target="_blank"><img src="https://opencollective.com/preact/backer/28/avatar.svg"></a>
 <a href="https://opencollective.com/preact/backer/29/website" target="_blank"><img src="https://opencollective.com/preact/backer/29/avatar.svg"></a>
+<a href="https://github.com/guardian" target="_blank"><img src="https://github.com/guardian.png?size=64"></a>
+
 
 
 ## Sponsors

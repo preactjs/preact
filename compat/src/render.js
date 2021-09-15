@@ -112,12 +112,21 @@ options.vnode = vnode => {
 
 	// only normalize props on Element nodes
 	if (typeof type === 'string') {
+		const nonCustomElement = type.indexOf('-') === -1;
 		normalizedProps = {};
 
 		for (let i in props) {
 			let value = props[i];
 
-			if (i === 'defaultValue' && 'value' in props && props.value == null) {
+			if (i === 'value' && 'defaultValue' in props && value == null) {
+				// Skip applying value if it is null/undefined and we already set
+				// a default value
+				continue;
+			} else if (
+				i === 'defaultValue' &&
+				'value' in props &&
+				props.value == null
+			) {
 				// `defaultValue` is treated as a fallback `value` when a value prop is present but null/undefined.
 				// `defaultValue` for Elements with no value prop is the same as the DOM defaultValue property.
 				i = 'value';
@@ -137,7 +146,7 @@ options.vnode = vnode => {
 				i = 'oninput';
 			} else if (/^on(Ani|Tra|Tou|BeforeInp)/.test(i)) {
 				i = i.toLowerCase();
-			} else if (CAMEL_PROPS.test(i)) {
+			} else if (nonCustomElement && CAMEL_PROPS.test(i)) {
 				i = i.replace(/[A-Z0-9]/, '-$&').toLowerCase();
 			} else if (value === null) {
 				value = undefined;

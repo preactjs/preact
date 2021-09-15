@@ -93,7 +93,7 @@ options.unmount = vnode => {
  * Get a hook's state from the currentComponent
  * @param {number} index The index of the hook to get
  * @param {number} type The index of the hook to get
- * @returns {import('./internal').HookState}
+ * @returns {any}
  */
 function getHookState(index, type) {
 	if (options._hook) {
@@ -120,7 +120,7 @@ function getHookState(index, type) {
 }
 
 /**
- * @param {import('./index').StateUpdater<any>} initialState
+ * @param {import('./index').StateUpdater<any>} [initialState]
  */
 export function useState(initialState) {
 	currentHook = 1;
@@ -240,6 +240,7 @@ export function useContext(context) {
 	// We could skip this call here, but than we'd not call
 	// `options._hook`. We need to do that in order to make
 	// the devtools aware of this hook.
+	/** @type {import('./internal').ContextHookState} */
 	const state = getHookState(currentIndex++, 9);
 	// The devtools needs access to the context object to
 	// be able to pull of the default value when no provider
@@ -264,7 +265,11 @@ export function useDebugValue(value, formatter) {
 	}
 }
 
+/**
+ * @param {(error: any) => void} cb
+ */
 export function useErrorBoundary(cb) {
+	/** @type {import('./internal').ErrorBoundaryHookState} */
 	const state = getHookState(currentIndex++, 10);
 	const errState = useState();
 	state._value = cb;

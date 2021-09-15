@@ -1,0 +1,256 @@
+name: Benchmarks
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - '**'
+    paths:
+      - 'src/**.js'
+  push:
+    branches:
+      - master
+      - restructure
+    paths:
+      - 'src/**.js'
+
+jobs:
+  prepare:
+    name: Prepare benchmarks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '14.x'
+      - name: Cache node modules
+        uses: actions/cache@v1
+        env:
+          cache-name: cache-node-modules
+        with:
+          path: ~/.npm
+          # This uses the same name as the build-action so we can share the caches.
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-
+            ${{ runner.os }}-build-
+            ${{ runner.os }}-
+      - run: npm ci
+      - name: Package
+        # Use --ignore-scripts here to avoid re-building again before pack
+        run: |
+          npm pack --ignore-scripts
+          mv preact-*.tgz preact.tgz
+          tar -xzf preact.tgz
+          rm preact.tgz
+      - name: Upload build output
+        uses: actions/upload-artifact@v2
+        with:
+          name: build-output
+          path: package/
+      - uses: andrewiggins/download-base-artifact@v1
+        with:
+          artifact: npm-package
+          workflow: ci.yml
+          required: false
+      - name: Upload base preact package
+        uses: actions/upload-artifact@v2
+        with:
+          name: build-output
+          path: preact.tgz
+
+  bench_text_update:
+    name: Bench text_update
+    runs-on: ubuntu-latest
+    needs: prepare
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '14.x'
+      - uses: actions/download-artifact@v2
+        with:
+          name: build-output
+      - name: install & build
+        run: |
+          cd benches
+          npm ci
+      - name: bench
+        run: |
+          export CHROMEDRIVER_FILEPATH=$(which chromedriver)
+          cd benches
+          npm run bench text_update.html
+      - name: Upload results
+        uses: actions/upload-artifact@v2
+        with:
+          name: results
+          path: benches/results/text_update.json
+
+  bench_many_updates:
+    name: Bench many_updates
+    runs-on: ubuntu-latest
+    needs: prepare
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '14.x'
+      - uses: actions/download-artifact@v2
+        with:
+          name: build-output
+      - name: install & build
+        run: |
+          cd benches
+          npm ci
+      - name: bench
+        run: |
+          export CHROMEDRIVER_FILEPATH=$(which chromedriver)
+          cd benches
+          npm run bench many_updates.html
+      - name: Upload results
+        uses: actions/upload-artifact@v2
+        with:
+          name: results
+          path: benches/results/many_updates.json
+
+  bench_02_replace1k:
+    name: Bench 02_replace1k
+    runs-on: ubuntu-latest
+    needs: prepare
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '14.x'
+      - uses: actions/download-artifact@v2
+        with:
+          name: build-output
+      - name: install & build
+        run: |
+          cd benches
+          npm ci
+      - name: bench
+        run: |
+          export CHROMEDRIVER_FILEPATH=$(which chromedriver)
+          cd benches
+          npm run bench 02_replace1k.html
+      - name: Upload results
+        uses: actions/upload-artifact@v2
+        with:
+          name: results
+          path: benches/results/02_replace1k.json
+
+  bench_03_update10th1k_x16:
+    name: Bench 03_update10th1k_x16
+    runs-on: ubuntu-latest
+    needs: prepare
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '14.x'
+      - uses: actions/download-artifact@v2
+        with:
+          name: build-output
+      - name: install & build
+        run: |
+          cd benches
+          npm ci
+      - name: bench
+        run: |
+          export CHROMEDRIVER_FILEPATH=$(which chromedriver)
+          cd benches
+          npm run bench 03_update10th1k_x16.html
+      - name: Upload results
+        uses: actions/upload-artifact@v2
+        with:
+          name: results
+          path: benches/results/03_update10th1k_x16.json
+
+  bench_07_create10k:
+    name: Bench 07_create10k
+    runs-on: ubuntu-latest
+    needs: prepare
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '14.x'
+      - uses: actions/download-artifact@v2
+        with:
+          name: build-output
+      - name: install & build
+        run: |
+          cd benches
+          npm ci
+      - name: bench
+        run: |
+          export CHROMEDRIVER_FILEPATH=$(which chromedriver)
+          cd benches
+          npm run bench 07_create10k.html
+      - name: Upload results
+        uses: actions/upload-artifact@v2
+        with:
+          name: results
+          path: benches/results/07_create10k.json
+
+  bench_hydrate1k:
+    name: Bench hydrate1k
+    runs-on: ubuntu-latest
+    needs: prepare
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '14.x'
+      - uses: actions/download-artifact@v2
+        with:
+          name: build-output
+      - name: install & build
+        run: |
+          cd benches
+          npm ci
+      - name: bench
+        run: |
+          export CHROMEDRIVER_FILEPATH=$(which chromedriver)
+          cd benches
+          npm run bench hydrate1k.html
+      - name: Upload results
+        uses: actions/upload-artifact@v2
+        with:
+          name: results
+          path: benches/results/hydrate1k.json
+
+  bench_filter_list:
+    name: Bench filter_list
+    runs-on: ubuntu-latest
+    needs: prepare
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '14.x'
+      - uses: actions/download-artifact@v2
+        with:
+          name: build-output
+      - name: install & build
+        run: |
+          cd benches
+          npm ci
+      - name: bench
+        run: |
+          export CHROMEDRIVER_FILEPATH=$(which chromedriver)
+          cd benches
+          npm run bench filter_list.html
+      - name: Upload results
+        uses: actions/upload-artifact@v2
+        with:
+          name: results
+          path: benches/results/filter_list.json

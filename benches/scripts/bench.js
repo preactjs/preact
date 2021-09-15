@@ -21,7 +21,8 @@ export const defaultBenchOptions = {
 	// GitHub Action minutes
 	timeout: 1,
 	'window-size': '1024,768',
-	framework: IS_CI ? ['preact-master', 'preact-local'] : null
+	framework: IS_CI ? ['preact-master', 'preact-local'] : null,
+	trace: false
 };
 
 /**
@@ -31,8 +32,19 @@ export const defaultBenchOptions = {
 export async function runBenches(bench1 = 'all', opts) {
 	const globs = bench1 === 'all' ? allBenches : [bench1].concat(opts._);
 	const benchesToRun = await globSrc(globs);
-	const configFileTasks = benchesToRun.map(async benchPath => {
-		return generateConfig(benchesRoot('src', benchPath), opts);
+
+	if (benchesToRun.length == 0) {
+		console.log('No benchmarks found matching patterns:', globs);
+	} else {
+		console.log('Running benchmarks:', benchesToRun.join(', '));
+		console.log();
+	}
+
+	const configFileTasks = benchesToRun.map(async (benchPath, i) => {
+		return generateConfig(benchesRoot('src', benchPath), {
+			...opts,
+			prepare: i === 0 // Only run prepare script for first config
+		});
 	});
 
 	await mkdir(resultsPath(), { recursive: true });
@@ -41,6 +53,7 @@ export async function runBenches(bench1 = 'all', opts) {
 	for (const { name, configPath } of configFiles) {
 		const args = [
 			benchesRoot('node_modules/tachometer/bin/tach.js'),
+			'--force-clean-npm-install',
 			'--config',
 			configPath,
 			'--json-file',
