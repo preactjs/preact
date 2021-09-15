@@ -217,6 +217,18 @@ describe('compat render', () => {
 		expect(document.activeElement.nodeName).to.equal('INPUT');
 	});
 
+	it('should transform react-style camel cased attributes', () => {
+		render(
+			<text dominantBaseline="middle" fontWeight="30px">
+				foo
+			</text>,
+			scratch
+		);
+		expect(scratch.innerHTML).to.equal(
+			'<text dominant-baseline="middle" font-weight="30px">foo</text>'
+		);
+	});
+
 	it('should normalize class+className even on components', () => {
 		function Foo(props) {
 			return (
