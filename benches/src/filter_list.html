@@ -89,6 +89,8 @@
 
 				await raf();
 				measureMemory();
+				await raf();
+				root.render(null);
 			})();
 		</script>
 	</body>

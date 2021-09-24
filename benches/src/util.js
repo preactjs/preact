@@ -23,14 +23,19 @@ export const raf = () => new Promise(requestAnimationFrame);
 export const forceLayout = () =>
 	(document.body._height = document.body.getBoundingClientRect().height);
 export const tick = () => new Promise(r => Promise.resolve().then(r));
+export const wait = t => new Promise(r => setTimeout(r, t));
 
-export async function mutateAndLayout(mutation, times = 1) {
-	// await afterFrameAsync();
-	for (let i = 0; i < times; i++) {
-		await mutation(i);
+export function mutateAndLayout(mutation, times = 1) {
+	let i = 0;
+	function next() {
+		return Promise.resolve(mutation(i++))
+			.then(tick)
+			.then(forceLayout)
+			.then(() => {
+				if (i < times) return next();
+			});
 	}
-	await tick();
-	await forceLayout();
+	return next();
 }
 
 export function measureMemory() {

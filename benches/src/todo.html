@@ -47,7 +47,12 @@
 	<body>
 		<div id="app"></div>
 		<script type="module">
-			import { measureName, measureMemory } from './util.js';
+			import {
+				measureName,
+				measureMemory,
+				mutateAndLayout,
+				afterFrameAsync
+			} from './util.js';
 			import { createRoot, createElement as h, Component } from 'framework';
 
 			// Number of warmup runs of the benchmark to execute before the timed run
@@ -218,20 +223,20 @@
 
 			async function warmup() {
 				for (let i = 0; i < WARMUP_COUNT; i++) {
-					await runPatch();
-					await new Promise(r => requestAnimationFrame(r));
+					await mutateAndLayout(runPatch);
 				}
 			}
 
-			warmup().then(async () => {
+			(async () => {
+				await warmup();
+
 				performance.mark('start');
-				await runPatch();
-				await new Promise(r => requestAnimationFrame(r));
+				await mutateAndLayout(runPatch);
 				performance.mark('stop');
 				performance.measure(measureName, 'start', 'stop');
 
 				measureMemory();
-			});
+			})();
 		</script>
 	</body>
 </html>
