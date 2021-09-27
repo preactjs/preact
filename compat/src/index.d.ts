@@ -87,10 +87,10 @@ declare namespace React {
 	}
 
 	export function memo<P = {}>(
-		component: preact.FunctionalComponent<P>,
+		component: preact.FunctionComponent<P>,
 		comparer?: (prev: P, next: P) => boolean
 	): preact.FunctionComponent<P>;
-	export function memo<C extends preact.FunctionalComponent<any>>(
+	export function memo<C extends preact.FunctionComponent<any>>(
 		component: C,
 		comparer?: (
 			prev: preact.ComponentProps<C>,
@@ -105,7 +105,7 @@ declare namespace React {
 
 	export function forwardRef<R, P = {}>(
 		fn: ForwardFn<P, R>
-	): preact.FunctionalComponent<Omit<P, 'ref'> & { ref?: preact.RefObject<R> }>;
+	): preact.FunctionComponent<Omit<P, 'ref'> & { ref?: preact.RefObject<R> }>;
 
 	export function unstable_batchedUpdates(
 		callback: (arg?: any) => void,
