@@ -49,6 +49,7 @@ export function diffChildren(
 	let oldChildrenLength = oldChildren.length;
 
 	const newChildren = [];
+	let prevInternal;
 	for (i = 0; i < renderResult.length; i++) {
 		childVNode = normalizeToVNode(renderResult[i]);
 
@@ -143,7 +144,12 @@ export function diffChildren(
 			startDom = nextDomSibling;
 		}
 
-		newChildren[i] = childInternal;
+		if (prevInternal) {
+			childInternal.prevSibling = prevInternal;
+			prevInternal.nextSibling = childInternal;
+		}
+
+		newChildren[i] = prevInternal = childInternal;
 	}
 
 	parentInternal._children = newChildren;

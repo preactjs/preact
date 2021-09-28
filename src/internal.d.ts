@@ -129,6 +129,8 @@ export interface Internal<P = {}> {
 	props: (P & { children: ComponentChildren }) | string | number;
 	key: any;
 	ref: Ref<any> | null;
+	prevSibling: Internal | null;
+	nextSibling: Internal | null;
 	/** children Internal nodes */
 	_children: Internal[];
 	/** next sibling Internal node */

@@ -273,7 +273,8 @@ export function mountChildren(
 		childVNode,
 		childInternal,
 		newDom,
-		mountedNextChild;
+		mountedNextChild,
+		prevInternal;
 
 	for (i = 0; i < renderResult.length; i++) {
 		childVNode = normalizeToVNode(renderResult[i]);
@@ -320,6 +321,13 @@ export function mountChildren(
 				childInternal
 			);
 		}
+
+		if (prevInternal) {
+			childInternal.prevSibling = prevInternal;
+			prevInternal.nextSibling = childInternal;
+		}
+
+		prevInternal = childInternal;
 	}
 
 	// Remove children that are not part of any vnode.
