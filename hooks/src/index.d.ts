@@ -62,7 +62,7 @@ export function useRef<T>(initialValue: null): RefObject<T>;
 export function useRef<T>(initialValue: T): Ref<T>;
 export function useRef<T>(): Ref<T | undefined>;
 
-type EffectCallback = () => void | (() => void);
+type EffectCallback = () => void | Promise<void> | (() => void);
 /**
  * Accepts a function that contains imperative, possibly effectful code.
  * The effects run after browser paint, without blocking it.
