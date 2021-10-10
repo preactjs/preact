@@ -10,7 +10,14 @@ import options from '../options';
  * @param {boolean} isSvg Whether or not this node is an SVG node
  * @param {boolean} hydrate Whether or not we are in hydration mode
  */
-export function diffProps(dom, newProps, oldProps, isSvg, hydrate, isCustomElement) {
+export function diffProps(
+	dom,
+	newProps,
+	oldProps,
+	isSvg,
+	hydrate,
+	isCustomElement
+) {
 	let i;
 
 	for (i in oldProps) {
@@ -53,7 +60,14 @@ function setStyle(style, key, value) {
  * @param {*} oldValue The old value the property had
  * @param {boolean} isSvg Whether or not this DOM node is an SVG node or not
  */
-export function setProperty(dom, name, value, oldValue, isSvg, isCustomElement) {
+export function setProperty(
+	dom,
+	name,
+	value,
+	oldValue,
+	isSvg,
+	isCustomElement
+) {
 	let useCapture;
 
 	o: if (name === 'style') {
@@ -118,7 +132,7 @@ export function setProperty(dom, name, value, oldValue, isSvg, isCustomElement) 
 			name in dom
 		) {
 			try {
-				dom[name] = !isCustomElement && value == null ? '' : value;
+				dom[name] = value == null ? '' : value;
 				// labelled break is 1b smaller here than a return statement (sorry)
 				break o;
 			} catch (e) {}
@@ -134,7 +148,7 @@ export function setProperty(dom, name, value, oldValue, isSvg, isCustomElement) 
 		if (typeof value === 'function') {
 			// never serialize functions as attribute values
 		} else if (
-			value != null &&
+			((value != null && !isCustomElement) || isCustomElement) &&
 			(value !== false || (name[0] === 'a' && name[1] === 'r'))
 		) {
 			dom.setAttribute(name, value);
