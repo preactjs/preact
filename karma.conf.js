@@ -326,7 +326,7 @@ module.exports = function(config) {
 			singleBundle: false,
 
 			// esbuild options
-			target: 'es5',
+			target: 'es2015',
 			define: {
 				COVERAGE: coverage,
 				'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || ''),
