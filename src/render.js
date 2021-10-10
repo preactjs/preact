@@ -1,15 +1,3 @@
-import {
-	MODE_HYDRATE,
-	MODE_MUTATIVE_HYDRATE,
-	MODE_SVG,
-	UNDEFINED
-} from './constants';
-import { commitRoot } from './diff/commit';
-import { createElement, Fragment } from './create-element';
-import options from './options';
-import { mount } from './diff/mount';
-import { patch } from './diff/patch';
-import { createInternal } from './tree';
 import { createRoot } from './create-root';
 
 /**
