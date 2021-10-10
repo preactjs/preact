@@ -117,6 +117,13 @@ describe('render()', () => {
 		expect(scratch.firstChild).to.have.property('nodeName', 'X-BAR');
 	});
 
+	it('should not set empty string for null props in custom attributes', () => {
+		render(<x-bar val={null} />, scratch);
+		expect(scratch.innerHTML).to.equal(
+			'<x-bar val="null"></x-bar>'
+		);
+	});
+
 	it('should support the form attribute', () => {
 		render(
 			<div>

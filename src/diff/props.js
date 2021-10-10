@@ -10,12 +10,12 @@ import options from '../options';
  * @param {boolean} isSvg Whether or not this node is an SVG node
  * @param {boolean} hydrate Whether or not we are in hydration mode
  */
-export function diffProps(dom, newProps, oldProps, isSvg, hydrate) {
+export function diffProps(dom, newProps, oldProps, isSvg, hydrate, isCustomElement) {
 	let i;
 
 	for (i in oldProps) {
 		if (i !== 'children' && i !== 'key' && !(i in newProps)) {
-			setProperty(dom, i, null, oldProps[i], isSvg);
+			setProperty(dom, i, null, oldProps[i], isSvg, isCustomElement);
 		}
 	}
 
@@ -28,7 +28,7 @@ export function diffProps(dom, newProps, oldProps, isSvg, hydrate) {
 			i !== 'checked' &&
 			oldProps[i] !== newProps[i]
 		) {
-			setProperty(dom, i, newProps[i], oldProps[i], isSvg);
+			setProperty(dom, i, newProps[i], oldProps[i], isSvg, isCustomElement);
 		}
 	}
 }
@@ -53,7 +53,7 @@ function setStyle(style, key, value) {
  * @param {*} oldValue The old value the property had
  * @param {boolean} isSvg Whether or not this DOM node is an SVG node or not
  */
-export function setProperty(dom, name, value, oldValue, isSvg) {
+export function setProperty(dom, name, value, oldValue, isSvg, isCustomElement) {
 	let useCapture;
 
 	o: if (name === 'style') {
@@ -118,7 +118,7 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
 			name in dom
 		) {
 			try {
-				dom[name] = value == null ? '' : value;
+				dom[name] = !isCustomElement && value == null ? '' : value;
 				// labelled break is 1b smaller here than a return statement (sorry)
 				break o;
 			} catch (e) {}
