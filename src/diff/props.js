@@ -132,7 +132,7 @@ export function setProperty(
 			name in dom
 		) {
 			try {
-				dom[name] = value == null ? '' : value;
+				dom[name] = (!isCustomElement && value == null) ? '' : value;
 				// labelled break is 1b smaller here than a return statement (sorry)
 				break o;
 			} catch (e) {}
