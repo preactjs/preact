@@ -9,6 +9,11 @@ export type StateUpdater<S> = (value: S | ((prevState: S) => S)) => void;
  */
 export function useState<S>(initialState: S | (() => S)): [S, StateUpdater<S>];
 
+export function useState<S = undefined>(): [
+	S | undefined,
+	StateUpdater<S | undefined>
+];
+
 export type Reducer<S, A> = (prevState: S, action: A) => S;
 /**
  * An alternative to `useState`.

@@ -1,7 +1,6 @@
 module.exports = function(api) {
 	api.cache(true);
 
-	const minify = String(process.env.MINIFY) === 'true';
 	const noModules = String(process.env.BABEL_NO_MODULES) === 'true';
 
 	const rename = {};

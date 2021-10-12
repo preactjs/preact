@@ -1,7 +1,7 @@
 {
 	"name": "preact",
 	"amdName": "preact",
-	"version": "10.5.13",
+	"version": "10.5.14",
 	"private": false,
 	"description": "Fast 3kb React-compatible Virtual DOM library.",
 	"main": "dist/preact.js",
@@ -62,6 +62,10 @@
 			"require": "./compat/server.js",
 			"import": "./compat/server.mjs"
 		},
+		"./compat/scheduler": {
+			"require": "./compat/scheduler.js",
+			"import": "./compat/scheduler.mjs"
+		},
 		"./package.json": "./package.json",
 		"./": "./"
 	},
@@ -80,7 +84,7 @@
 		"build:devtools": "microbundle build --raw --cwd devtools",
 		"build:hooks": "microbundle build --raw --cwd hooks",
 		"build:test-utils": "microbundle build --raw --cwd test-utils",
-		"build:compat": "microbundle build --raw --cwd compat --globals 'preact/hooks=preactHooks'",
+		"build:compat": "microbundle build src/index.js src/scheduler.js --raw --cwd compat --globals 'preact/hooks=preactHooks'",
 		"build:jsx": "microbundle build --raw --cwd jsx-runtime",
 		"postbuild": "node ./config/node-13-exports.js && node ./config/compat-entries.js",
 		"dev": "microbundle watch --raw --format cjs",
@@ -139,6 +143,10 @@
 			"react/sort-comp": 0,
 			"jest/valid-expect": 0,
 			"jest/no-disabled-tests": 0,
+			"jest/no-test-callback": 0,
+			"jest/expect-expect": 0,
+			"jest/no-standalone-expect": 0,
+			"jest/no-export": 0,
 			"react/no-find-dom-node": 0
 		}
 	},
@@ -171,6 +179,8 @@
 		"compat/src",
 		"compat/server.js",
 		"compat/server.mjs",
+		"compat/scheduler.js",
+		"compat/scheduler.mjs",
 		"compat/test-utils.js",
 		"compat/jsx-runtime.js",
 		"compat/jsx-runtime.mjs",
@@ -232,17 +242,17 @@
 		"csstype": "^3.0.5",
 		"diff": "^5.0.0",
 		"errorstacks": "^2.3.0",
-		"esbuild": "^0.8.47",
+		"esbuild": "^0.12.24",
 		"eslint": "5.15.1",
 		"eslint-config-developit": "^1.1.1",
 		"eslint-config-prettier": "^6.5.0",
 		"eslint-plugin-react": "7.12.4",
 		"husky": "^4.3.0",
-		"karma": "^5.2.3",
+		"karma": "^6.3.4",
 		"karma-chai-sinon": "^0.1.5",
 		"karma-chrome-launcher": "^3.1.0",
 		"karma-coverage": "^2.0.3",
-		"karma-esbuild": "^1.1.4",
+		"karma-esbuild": "^2.2.0",
 		"karma-mocha": "^2.0.1",
 		"karma-mocha-reporter": "^2.2.5",
 		"karma-sauce-launcher": "^4.3.4",
@@ -259,6 +269,6 @@
 		"prop-types": "^15.7.2",
 		"sinon": "^9.2.3",
 		"sinon-chai": "^3.5.0",
-		"typescript": "3.5.3"
+		"typescript": "4.4.2"
 	}
 }
