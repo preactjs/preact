@@ -40,7 +40,7 @@ function createVNode(type, props, key, __source, __self) {
 		key,
 		ref: props && props.ref,
 		constructor: undefined,
-		_vnodeId: --vnodeId,
+		id: --vnodeId,
 		__source,
 		__self
 	};

@@ -32,12 +32,13 @@
 				testElement,
 				testElementTextContains,
 				mutateAndLayout,
+				wait,
 				raf
 			} from './util.js';
 			import * as framework from 'framework';
 			import { render } from '../src/keyed-children/index.js';
 
-			const { run: mount, update } = render(
+			const { run: mount, update, cleanup } = render(
 				framework,
 				document.getElementById('main')
 			);
@@ -52,22 +53,19 @@
 			}
 
 			async function init() {
-				mount();
+				mutateAndLayout(mount);
+				await wait();
 
-				await afterFrameAsync();
 				testElement(getRowLinkSel(1000));
 
 				for (let i = 0; i < 3; i++) {
-					update();
+					await mutateAndLayout(update);
 
-					await afterFrameAsync();
 					testElementTextContains(getRowLinkSel(991), repeat(' !!!', i + 1));
 				}
 			}
 
 			async function run() {
-				await afterFrameAsync();
-
 				const REPEAT = 50;
 				performance.mark('start');
 				await mutateAndLayout(update, REPEAT);
@@ -77,6 +75,8 @@
 
 				await raf();
 				measureMemory();
+				await raf();
+				cleanup();
 			}
 
 			init().then(run);

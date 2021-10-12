@@ -130,20 +130,20 @@ export interface Internal<P = {}> {
 	key: any;
 	ref: Ref<any> | null;
 	/** children Internal nodes */
-	_children: Internal[];
+	child: Internal;
 	/** next sibling Internal node */
-	_parent: Internal;
+	parent: Internal;
 	/** most recent vnode ID */
 	_vnodeId: number;
 	/**
 	 * Associated DOM element for the Internal, or its nearest realized descendant.
 	 * For Fragments, this is the first DOM child.
 	 */
-	_dom: PreactNode;
+	dom: PreactNode;
 	/** The component instance for which this is a backing Internal node */
 	_component: Component | null;
 	/** Bitfield containing information about the Internal or its component. */
-	_flags: number;
+	flags: number;
 	/** This Internal's distance from the tree root */
 	_depth: number | null;
 	/** Callbacks to invoke when this internal commits */
@@ -165,4 +165,18 @@ export interface Component<P = {}, S = {}> extends preact.Component<P, S> {
 export interface PreactContext extends preact.Context<any> {
 	_id: string;
 	_defaultValue: any;
+}
+
+export interface Renderer {
+	createInstance(internal: Internal): void;
+	createElement(internal: Internal): any;
+	updateText(internal: Internal, value: string): void;
+	insertBefore(internal: Internal, parent: any, before: any): void;
+	setProperty(
+		internal: Internal,
+		string: name,
+		value: any,
+		oldValue: any
+	): void;
+	remove(internal: Internal, skipRemove?: boolean): void;
 }

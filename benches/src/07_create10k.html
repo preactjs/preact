@@ -31,7 +31,10 @@
 			import * as framework from 'framework';
 			import { render } from '../src/keyed-children/index.js';
 
-			const { runLots } = render(framework, document.getElementById('main'));
+			const { runLots, cleanup } = render(
+				framework,
+				document.getElementById('main')
+			);
 
 			async function main() {
 				await afterFrameAsync();
@@ -47,6 +50,8 @@
 
 				await raf();
 				measureMemory();
+				await raf();
+				cleanup();
 			}
 
 			main();

@@ -34,7 +34,10 @@
 			import * as framework from 'framework';
 			import { render } from '../src/keyed-children/index.js';
 
-			const { run } = render(framework, document.getElementById('main'));
+			const { run, cleanup } = render(
+				framework,
+				document.getElementById('main')
+			);
 
 			async function main() {
 				const elementSelector = 'tr:first-child > td:first-child';
@@ -43,25 +46,29 @@
 				const WARMUP_COUNT = 5;
 				for (let i = 0; i < WARMUP_COUNT; i++) {
 					markRunStart(`warmup-${i}`);
-					run();
+					await mutateAndLayout(run, 2);
 					await markRunEnd(`warmup-${i}`);
 
-					await afterFrameAsync();
-					testElementText(elementSelector, (i * 1000 + 1).toFixed());
+					testElementText(elementSelector, (i * 2000 + 1001).toFixed());
+					await new Promise(r => setTimeout(r, 25));
 				}
 
+				// await new Promise(r => setTimeout(r, 200));
 				await afterFrameAsync();
 
 				markRunStart('final');
 				performance.mark('start');
-				await mutateAndLayout(run);
+				await run();
+				// await mutateAndLayout(run);
 				performance.mark('stop');
 				await markRunEnd('final');
-				testElementText(elementSelector, WARMUP_COUNT + '001');
+				testElementText(elementSelector, WARMUP_COUNT * 2000 + 1);
 				performance.measure(measureName, 'start', 'stop');
 
 				await raf();
 				measureMemory();
+				cleanup();
+				await new Promise(r => setTimeout(r, 50));
 			}
 
 			afterFrame(main);

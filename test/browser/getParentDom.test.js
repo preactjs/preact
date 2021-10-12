@@ -4,7 +4,7 @@ import { setupScratch, teardown } from '../_util/helpers';
 
 /** @jsx createElement */
 
-describe('getParentDom', () => {
+describe.skip('getParentDom', () => {
 	/** @type {import('../../src/internal').PreactElement} */
 	let scratch;
 

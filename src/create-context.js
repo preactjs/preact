@@ -1,4 +1,4 @@
-import { enqueueRender } from './component';
+import { enqueueRender } from './preact-vm';
 
 export let nextContextId = 0;
 
@@ -19,9 +19,6 @@ export const createContext = (defaultValue, contextId) => {
 		_defaultValue: defaultValue,
 		/** @type {import('./internal').FunctionComponent} */
 		Consumer(props, contextValue) {
-			// return props.children(
-			// 	context[contextId] ? context[contextId].props.value : defaultValue
-			// );
 			return props.children(contextValue);
 		},
 		/** @type {import('./internal').FunctionComponent} */
