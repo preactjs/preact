@@ -34,12 +34,12 @@ export function render(vnode, parentDom) {
 		rootInternal._context = {};
 
 		if (parentDom.ownerSVGElement !== undefined) {
-			rootInternal._flags |= MODE_SVG;
+			rootInternal.flags |= MODE_SVG;
 		}
 
 		// Calling `render` on a container with existing DOM elements puts the diff into mutative hydrate mode:
 		if (parentDom.firstChild) {
-			rootInternal._flags |= MODE_MUTATIVE_HYDRATE;
+			rootInternal.flags |= MODE_MUTATIVE_HYDRATE;
 		}
 
 		mount(
@@ -69,11 +69,11 @@ export function hydrate(vnode, parentDom) {
 	vnode = createElement(Fragment, { _parentDom: parentDom }, [vnode]);
 	const rootInternal = createInternal(vnode);
 	rootInternal._context = {};
-	rootInternal._flags |= MODE_HYDRATE;
+	rootInternal.flags |= MODE_HYDRATE;
 	parentDom._children = rootInternal;
 
 	if (parentDom.ownerSVGElement !== undefined) {
-		rootInternal._flags |= MODE_SVG;
+		rootInternal.flags |= MODE_SVG;
 	}
 
 	const commitQueue = [];

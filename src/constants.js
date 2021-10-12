@@ -1,8 +1,8 @@
-// Internal._flags bitfield constants
+// Internal.flags bitfield constants
 export const TYPE_TEXT = 1 << 0;
 export const TYPE_ELEMENT = 1 << 1;
-export const TYPE_CLASS = 1 << 2;
-export const TYPE_FUNCTION = 1 << 3;
+export const TYPE_FUNCTION = 1 << 2;
+export const TYPE_ERROR_BOUNDARY = 1 << 3;
 /** Signals this internal has a _parentDom prop that should change the parent
  * DOM node of it's children */
 export const TYPE_ROOT = 1 << 4;
@@ -10,7 +10,7 @@ export const TYPE_ROOT = 1 << 4;
 /** Any type of internal representing DOM */
 export const TYPE_DOM = TYPE_TEXT | TYPE_ELEMENT;
 /** Any type of component */
-export const TYPE_COMPONENT = TYPE_CLASS | TYPE_FUNCTION | TYPE_ROOT;
+export const TYPE_COMPONENT = TYPE_FUNCTION | TYPE_ROOT | TYPE_ERROR_BOUNDARY;
 
 // Modes of rendering
 /** Normal hydration that attaches to a DOM tree but does not diff it. */
@@ -44,6 +44,10 @@ export const MODE_SVG = 1 << 12;
 export const FORCE_UPDATE = 1 << 13;
 /** Signifies that a node needs to be updated */
 export const DIRTY_BIT = 1 << 14;
+export const SKIP_CHILDREN = 1 << 15;
+
+/** Signifies a component has lifecycles to commit */
+export const COMMIT_COMPONENT = 1 << 16;
 
 /** Reset all mode flags */
 export const RESET_MODE = ~(
@@ -52,7 +56,8 @@ export const RESET_MODE = ~(
 	MODE_SUSPENDED |
 	MODE_ERRORED |
 	MODE_RERENDERING_ERROR |
-	FORCE_UPDATE
+	FORCE_UPDATE |
+	SKIP_CHILDREN
 );
 
 /** Modes a child internal inherits from their parent */

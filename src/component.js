@@ -4,6 +4,7 @@ import options from './options';
 import { createVNode, Fragment } from './create-element';
 import { patch } from './diff/patch';
 import {
+	COMMIT_COMPONENT,
 	DIRTY_BIT,
 	FORCE_UPDATE,
 	MODE_HYDRATE,
@@ -58,7 +59,10 @@ Component.prototype.setState = function(update, callback) {
 	if (update == null) return;
 
 	if (this._internal) {
-		if (callback) addCommitCallback(this, callback);
+		if (callback) {
+			this._internal.flags |= COMMIT_COMPONENT;
+			addCommitCallback(this, callback);
+		}
 		enqueueRender(this);
 	}
 };
@@ -74,8 +78,11 @@ Component.prototype.forceUpdate = function(callback) {
 		// Set render mode so that we can differentiate where the render request
 		// is coming from. We need this because forceUpdate should never call
 		// shouldComponentUpdate
-		this._internal._flags |= FORCE_UPDATE;
-		if (callback) addCommitCallback(this, callback);
+		this._internal.flags |= FORCE_UPDATE;
+		if (callback) {
+			this._internal.flags |= COMMIT_COMPONENT;
+			addCommitCallback(this, callback);
+		}
 		enqueueRender(this);
 	}
 };
@@ -99,10 +106,10 @@ Component.prototype.render = Fragment;
 function rerenderComponent(component) {
 	let internal = component._internal;
 
-	if (~internal._flags & MODE_UNMOUNTING && internal._flags & DIRTY_BIT) {
+	if (~internal.flags & MODE_UNMOUNTING && internal.flags & DIRTY_BIT) {
 		let parentDom = getParentDom(internal);
 		let startDom =
-			(internal._flags & (MODE_HYDRATE | MODE_SUSPENDED)) ===
+			(internal.flags & (MODE_HYDRATE | MODE_SUSPENDED)) ===
 			(MODE_HYDRATE | MODE_SUSPENDED)
 				? internal._dom
 				: getDomSibling(internal, 0);
@@ -156,8 +163,8 @@ let prevDebounce;
  */
 export function enqueueRender(c) {
 	if (
-		(!(c._internal._flags & DIRTY_BIT) &&
-			(c._internal._flags |= DIRTY_BIT) &&
+		(!(c._internal.flags & DIRTY_BIT) &&
+			(c._internal.flags |= DIRTY_BIT) &&
 			rerenderQueue.push(c) &&
 			!process._rerenderCount++) ||
 		prevDebounce !== options.debounceRendering

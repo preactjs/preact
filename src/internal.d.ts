@@ -51,13 +51,6 @@ export type CommitQueue = Internal[];
 export interface RendererState {
 	/** The current shared global context for this sub tree */
 	context: Record<string, any>;
-	/** Set to true when this component's children do not need to be diffed */
-	skip: boolean;
-	/** Indicates that this component must rerender and skip anything like memo or sCU */
-	force: boolean;
-	/** Indicates this component should be added to the commit queue and should
-	 * have the commit option invoked on it */
-	commit: boolean;
 }
 
 // Redefine ComponentFactory using our new internal FunctionalComponent interface above
@@ -137,6 +130,8 @@ export interface Internal<P = {}> {
 	props: (P & { children: ComponentChildren }) | string | number;
 	key: any;
 	ref: Ref<any> | null;
+	/** Bitfield containing information about the Internal or its component. */
+	flags: number;
 	/** children Internal nodes */
 	_children: Internal[];
 	/** next sibling Internal node */
@@ -150,8 +145,6 @@ export interface Internal<P = {}> {
 	_dom: PreactNode;
 	/** The component instance for which this is a backing Internal node */
 	_component: Component | null;
-	/** Bitfield containing information about the Internal or its component. */
-	_flags: number;
 	/** This Internal's distance from the tree root */
 	_depth: number | null;
 	_context: any;

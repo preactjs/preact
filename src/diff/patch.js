@@ -23,7 +23,7 @@ import { getChildDom, getDomSibling } from '../tree';
  * @param {import('../internal').PreactNode} startDom
  */
 export function patch(parentDom, newVNode, internal, commitQueue, startDom) {
-	if (internal._flags & TYPE_TEXT) {
+	if (internal.flags & TYPE_TEXT) {
 		if (newVNode !== internal.props) {
 			internal._dom.data = newVNode;
 			internal.props = newVNode;
@@ -45,7 +45,7 @@ export function patch(parentDom, newVNode, internal, commitQueue, startDom) {
 	// top.
 	let prevStartDom = startDom;
 	let prevParentDom = parentDom;
-	if (internal._flags & TYPE_ROOT) {
+	if (internal.flags & TYPE_ROOT) {
 		parentDom = newVNode.props._parentDom;
 
 		if (parentDom !== prevParentDom) {
@@ -65,14 +65,14 @@ export function patch(parentDom, newVNode, internal, commitQueue, startDom) {
 	try {
 		if (internal._vnodeId == newVNode._vnodeId) {
 			internal.props = newVNode.props;
-			if (internal._flags & TYPE_COMPONENT) {
+			if (internal.flags & TYPE_COMPONENT) {
 				nextDomSibling = reorderChildren(internal, startDom, parentDom);
 			} else {
 				// TODO: No test fails if I comment the line below. We are likely
 				// missing a test for this, probably around asserting DOM operations.
 				nextDomSibling = internal._dom.nextSibling;
 			}
-		} else if (internal._flags & TYPE_COMPONENT) {
+		} else if (internal.flags & TYPE_COMPONENT) {
 			nextDomSibling = renderComponent(
 				parentDom,
 				/** @type {import('../internal').VNode} */
@@ -90,7 +90,7 @@ export function patch(parentDom, newVNode, internal, commitQueue, startDom) {
 			);
 		}
 
-		if (internal._flags & TYPE_ROOT && prevParentDom !== parentDom) {
+		if (internal.flags & TYPE_ROOT && prevParentDom !== parentDom) {
 			// If this is a root node/Portal, and it changed the parentDom it's
 			// children, then we need to determine which dom node the diff should
 			// continue with.
@@ -114,13 +114,13 @@ export function patch(parentDom, newVNode, internal, commitQueue, startDom) {
 		if (options.diffed) options.diffed(internal);
 
 		// We successfully rendered this VNode, unset any stored hydration/bailout state:
-		internal._flags &= RESET_MODE;
+		internal.flags &= RESET_MODE;
 		// Once we have successfully rendered the new VNode, copy it's ID over
 		internal._vnodeId = newVNode._vnodeId;
 	} catch (e) {
 		// @TODO: assign a new VNode ID here? Or NaN?
 		// newVNode._vnodeId = 0;
-		internal._flags |= e.then ? MODE_SUSPENDED : MODE_ERRORED;
+		internal.flags |= e.then ? MODE_SUSPENDED : MODE_ERRORED;
 		options._catchError(e, internal);
 	}
 
@@ -159,7 +159,7 @@ function patchDOMElement(dom, newVNode, internal, commitQueue) {
 
 	internal.props = newProps;
 
-	diffProps(dom, newProps, oldProps, internal._flags & MODE_SVG);
+	diffProps(dom, newProps, oldProps, internal.flags & MODE_SVG);
 
 	internal._dom = dom;
 

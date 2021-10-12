@@ -1,20 +1,17 @@
 import { mountChildren } from './mount';
 import { diffChildren, reorderChildren } from './children';
 import {
+	COMMIT_COMPONENT,
 	DIRTY_BIT,
-	FORCE_UPDATE,
 	MODE_PENDING_ERROR,
-	MODE_RERENDERING_ERROR
+	MODE_RERENDERING_ERROR,
+	SKIP_CHILDREN
 } from '../constants';
 import { renderReactComponent } from './reactComponents';
 
 /** @type {import('../internal').RendererState} */
-export const rendererState = {
-	context: {},
-	skip: false,
-	force: false,
-	commit: false
-};
+// TODO: Now that context is the only thing in rendererState, do we really need it?
+export const rendererState = { context: {} };
 
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
@@ -33,29 +30,25 @@ export function renderComponent(
 	commitQueue,
 	startDom
 ) {
-	internal._flags &= ~DIRTY_BIT;
-	if (internal._flags & MODE_PENDING_ERROR) {
+	internal.flags &= ~DIRTY_BIT;
+	if (internal.flags & MODE_PENDING_ERROR) {
 		// Toggle the MODE_PENDING_ERROR and MODE_RERENDERING_ERROR flags. In
 		// actuality, this should turn off the MODE_PENDING_ERROR flag and turn on
 		// the MODE_RERENDERING_ERROR flag.
-		internal._flags ^= MODE_PENDING_ERROR | MODE_RERENDERING_ERROR;
+		internal.flags ^= MODE_PENDING_ERROR | MODE_RERENDERING_ERROR;
 	}
 
 	let prevContext = rendererState.context;
-	rendererState.skip = false;
-	rendererState.commit = false;
-	rendererState.force = (internal._flags & FORCE_UPDATE) == FORCE_UPDATE;
 
 	const renderResult = renderReactComponent(newVNode, internal, rendererState);
 
 	internal.props = newVNode.props;
-	let committed = rendererState.commit;
 	if (prevContext != rendererState.context) {
 		internal._context = rendererState.context;
 	}
 
 	let nextDomSibling;
-	if (rendererState.skip) {
+	if (internal.flags & SKIP_CHILDREN) {
 		// TODO: Returning undefined here (i.e. return;) passes all tests. That seems
 		// like a bug. Should validate that we have test coverage for sCU that
 		// returns Fragments with multiple DOM children
@@ -78,7 +71,7 @@ export function renderComponent(
 		);
 	}
 
-	if (committed) {
+	if (internal.flags & COMMIT_COMPONENT) {
 		commitQueue.push(internal);
 	}
 

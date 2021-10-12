@@ -1,5 +1,18 @@
 import { Fragment, Component, options } from '../index';
 import { assign } from '../util';
+import {
+	COMMIT_COMPONENT,
+	FORCE_UPDATE,
+	SKIP_CHILDREN,
+	TYPE_ERROR_BOUNDARY
+} from '../constants';
+
+/*
+What about:
+- Hooking into devtools (e.g. _hook, useDebugValue)?
+- SSR (e.g. skipEffects)?
+- HMR (e.g. Prefresh)
+*/
 
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
@@ -46,6 +59,10 @@ export function renderReactComponent(newVNode, internal, rendererState) {
 		}
 		if (provider) provider.sub(c);
 
+		if (c.componentDidCatch || type.getDerivedStateFromError) {
+			internal.flags |= TYPE_ERROR_BOUNDARY;
+		}
+
 		c.props = newProps;
 		if (!c.state) c.state = {};
 		c.context = componentContext;
@@ -87,21 +104,19 @@ export function renderReactComponent(newVNode, internal, rendererState) {
 		}
 
 		if (
-			!rendererState.force &&
+			~internal.flags & FORCE_UPDATE &&
 			c.shouldComponentUpdate != null &&
 			c.shouldComponentUpdate(newProps, c._nextState, componentContext) ===
 				false
 		) {
 			c.props = newProps;
 			c.state = c._nextState;
-			if (c._commitCallbacks != null && c._commitCallbacks.length) {
-				// TODO: We could avoid this check if setState could set a COMMIT flag
-				// on the internal whenever it is called with a callback. This check is
-				// to ensure the setState callback is invoked even when sCU blocks
-				// rerendering.
-				rendererState.commit = true;
-			}
-			rendererState.skip = true;
+
+			// TODO: Evaluate if using the SKIP_CHILDREN flag is the API we want.
+			// Consider if there is a way we could reuse the VNodeID/VNode equality
+			// logic here. Or return something like `internal._children` to signal
+			// that these children should be skipped.
+			internal.flags |= SKIP_CHILDREN;
 			return;
 		}
 
@@ -149,7 +164,7 @@ export function renderReactComponent(newVNode, internal, rendererState) {
 	}
 
 	if (c._commitCallbacks != null && c._commitCallbacks.length) {
-		rendererState.commit = true;
+		internal.flags |= COMMIT_COMPONENT;
 	}
 
 	let isTopLevelFragment =
@@ -186,6 +201,23 @@ export function unmountReactComponent(internal) {
 	// and so doesn't have an instance.
 	if (internal._component && internal._component.componentWillUnmount) {
 		internal._component.componentWillUnmount();
+	}
+}
+
+/**
+ * @param {import('../internal').Internal} internal The Error Boundary that is
+ * handling this error
+ * @param {Error} error The thrown error
+ * @param {import('../internal').Internal} throwingInternal The Internal that
+ * threw the error
+ */
+export function handleErrorReact(internal, error, throwingInternal) {
+	if (internal.type.getDerivedStateFromError != null) {
+		internal._component.setState(internal.type.getDerivedStateFromError(error));
+	}
+
+	if (internal._component.componentDidCatch != null) {
+		internal._component.componentDidCatch(error);
 	}
 }
 

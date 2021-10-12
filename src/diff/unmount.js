@@ -21,14 +21,14 @@ export function unmount(internal, parentInternal, skipRemove) {
 	let r,
 		i = 0;
 	if (options.unmount) options.unmount(internal);
-	internal._flags |= MODE_UNMOUNTING;
+	internal.flags |= MODE_UNMOUNTING;
 
 	if ((r = internal.ref)) {
 		if (!r.current || r.current === internal._dom)
 			applyRef(r, null, parentInternal);
 	}
 
-	if (internal._flags & TYPE_COMPONENT) {
+	if (internal.flags & TYPE_COMPONENT) {
 		try {
 			unmountReactComponent(internal);
 		} catch (e) {
@@ -42,13 +42,13 @@ export function unmount(internal, parentInternal, skipRemove) {
 				unmount(
 					r[i],
 					parentInternal,
-					skipRemove ? ~internal._flags & TYPE_ROOT : internal._flags & TYPE_DOM
+					skipRemove ? ~internal.flags & TYPE_ROOT : internal.flags & TYPE_DOM
 				);
 			}
 		}
 	}
 
-	if (!skipRemove && internal._flags & TYPE_DOM) {
+	if (!skipRemove && internal.flags & TYPE_DOM) {
 		removeNode(internal._dom);
 	}
 
