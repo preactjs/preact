@@ -202,6 +202,11 @@ options.vnode = vnode => {
 		Object.defineProperty(normalizedProps, 'className', classNameDescriptor);
 	}
 
+	if (typeof type === 'function' && props.ref) {
+		vnode.ref = props.ref;
+		delete props.ref;
+	}
+
 	vnode.$$typeof = REACT_ELEMENT_TYPE;
 
 	if (oldVNodeHook) oldVNodeHook(vnode);

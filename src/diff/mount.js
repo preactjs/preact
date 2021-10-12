@@ -188,6 +188,21 @@ function mountDOMElement(dom, internal, globalContext, commitQueue) {
 		}
 
 		let newHtml, newValue, newChildren;
+		if (
+			(internal.type === 'input' ||
+				internal.type === 'textarea' ||
+				internal.type === 'select') &&
+			(newProps.onInput || newProps.onChange)
+		) {
+			if (newProps.value != null) {
+				dom._isControlled = true;
+				dom._prevValue = newProps.value;
+			} else if (newProps.checked != null) {
+				dom._isControlled = true;
+				dom._prevValue = newProps.checked;
+			}
+		}
+
 		for (i in newProps) {
 			value = newProps[i];
 			if (i === 'key') {

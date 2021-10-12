@@ -324,7 +324,7 @@ describe('Lifecycle methods', () => {
 		});
 
 		it('should be called when applying a Component ref', () => {
-			const Foo = () => <div />;
+			const Foo = ({ ref }) => <div ref={ref} />;
 
 			const ref = value => {
 				if (value) {
@@ -673,7 +673,7 @@ describe('Lifecycle methods', () => {
 					// NOTE: the above avoids setting the DIRTY flag during rendering, circumventing the propagation issue.
 					// However, manually marking a component as dirty during rendering *will* prevent error propagation:
 					// this._internal._flags |= DIRTY
-					return [<Fragment ref={markDirty} />, children];
+					return [<div ref={markDirty} />, children];
 				}
 			}
 			sinon.spy(Middle.prototype, 'render');
