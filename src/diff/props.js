@@ -148,7 +148,7 @@ export function setProperty(
 		if (typeof value === 'function') {
 			// never serialize functions as attribute values
 		} else if (
-			((value != null && !isCustomElement) || isCustomElement) &&
+			value != null &&
 			(value !== false || (name[0] === 'a' && name[1] === 'r'))
 		) {
 			dom.setAttribute(name, value);
