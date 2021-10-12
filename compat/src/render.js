@@ -69,7 +69,7 @@ export function render(vnode, parent, callback) {
 	preactRender(vnode, parent);
 	if (typeof callback == 'function') callback();
 
-	const internal = parent._children._children[0];
+	const internal = parent._children;
 	return internal ? internal._component : null;
 }
 
@@ -111,95 +111,98 @@ options.vnode = vnode => {
 	let i;
 	let type = vnode.type;
 	let props = vnode.props;
-	/** @type {any} */
-	let normalizedProps = props;
 
-	// only normalize props on Element nodes
-	if (typeof type === 'string') {
-		normalizedProps = {};
+	if (props) {
+		/** @type {any} */
+		let normalizedProps = props;
 
-		let style = props.style;
-		if (typeof style === 'object') {
-			for (i in style) {
-				if (typeof style[i] === 'number' && !IS_NON_DIMENSIONAL.test(i)) {
-					style[i] += 'px';
+		// only normalize props on Element nodes
+		if (typeof type === 'string') {
+			normalizedProps = {};
+
+			let style = props.style;
+			if (typeof style === 'object') {
+				for (i in style) {
+					if (typeof style[i] === 'number' && !IS_NON_DIMENSIONAL.test(i)) {
+						style[i] += 'px';
+					}
 				}
 			}
-		}
 
-		for (i in props) {
-			let value = props[i];
+			for (i in props) {
+				let value = props[i];
 
-			if (i === 'value' && 'defaultValue' in props && value == null) {
-				// Skip applying value if it is null/undefined and we already set
-				// a default value
-				continue;
-			} else if (
-				i === 'defaultValue' &&
-				'value' in props &&
-				props.value == null
-			) {
-				// `defaultValue` is treated as a fallback `value` when a value prop is present but null/undefined.
-				// `defaultValue` for Elements with no value prop is the same as the DOM defaultValue property.
-				i = 'value';
-			} else if (i === 'download' && value === true) {
-				// Calling `setAttribute` with a truthy value will lead to it being
-				// passed as a stringified value, e.g. `download="true"`. React
-				// converts it to an empty string instead, otherwise the attribute
-				// value will be used as the file name and the file will be called
-				// "true" upon downloading it.
-				value = '';
-			} else if (/ondoubleclick/i.test(i)) {
-				i = 'ondblclick';
-			} else if (
-				/^onchange(textarea|input)/i.test(i + type) &&
-				!onChangeInputType(props.type)
-			) {
-				i = 'oninput';
-			} else if (/^on(Ani|Tra|Tou|BeforeInp)/.test(i)) {
-				i = i.toLowerCase();
-			} else if (CAMEL_PROPS.test(i)) {
-				i = i.replace(/[A-Z0-9]/, '-$&').toLowerCase();
-			} else if (value === null) {
-				value = undefined;
+				if (i === 'value' && 'defaultValue' in props && value == null) {
+					// Skip applying value if it is null/undefined and we already set
+					// a default value
+					continue;
+				} else if (
+					i === 'defaultValue' &&
+					'value' in props &&
+					props.value == null
+				) {
+					// `defaultValue` is treated as a fallback `value` when a value prop is present but null/undefined.
+					// `defaultValue` for Elements with no value prop is the same as the DOM defaultValue property.
+					i = 'value';
+				} else if (i === 'download' && value === true) {
+					// Calling `setAttribute` with a truthy value will lead to it being
+					// passed as a stringified value, e.g. `download="true"`. React
+					// converts it to an empty string instead, otherwise the attribute
+					// value will be used as the file name and the file will be called
+					// "true" upon downloading it.
+					value = '';
+				} else if (/ondoubleclick/i.test(i)) {
+					i = 'ondblclick';
+				} else if (
+					/^onchange(textarea|input)/i.test(i + type) &&
+					!onChangeInputType(props.type)
+				) {
+					i = 'oninput';
+				} else if (/^on(Ani|Tra|Tou|BeforeInp)/.test(i)) {
+					i = i.toLowerCase();
+				} else if (CAMEL_PROPS.test(i)) {
+					i = i.replace(/[A-Z0-9]/, '-$&').toLowerCase();
+				} else if (value === null) {
+					value = undefined;
+				}
+
+				normalizedProps[i] = value;
 			}
 
-			normalizedProps[i] = value;
-		}
-
-		// Add support for array select values: <select multiple value={[]} />
-		if (
-			type == 'select' &&
-			normalizedProps.multiple &&
-			Array.isArray(normalizedProps.value)
-		) {
-			// forEach() always returns undefined, which we abuse here to unset the value prop.
-			normalizedProps.value = toChildArray(props.children).forEach(child => {
-				child.props.selected =
-					normalizedProps.value.indexOf(child.props.value) != -1;
-			});
-		}
-
-		// Adding support for defaultValue in select tag
-		if (type == 'select' && normalizedProps.defaultValue != null) {
-			normalizedProps.value = toChildArray(props.children).forEach(child => {
-				if (normalizedProps.multiple) {
+			// Add support for array select values: <select multiple value={[]} />
+			if (
+				type == 'select' &&
+				normalizedProps.multiple &&
+				Array.isArray(normalizedProps.value)
+			) {
+				// forEach() always returns undefined, which we abuse here to unset the value prop.
+				normalizedProps.value = toChildArray(props.children).forEach(child => {
 					child.props.selected =
-						normalizedProps.defaultValue.indexOf(child.props.value) != -1;
-				} else {
-					child.props.selected =
-						normalizedProps.defaultValue == child.props.value;
-				}
-			});
+						normalizedProps.value.indexOf(child.props.value) != -1;
+				});
+			}
+
+			// Adding support for defaultValue in select tag
+			if (type == 'select' && normalizedProps.defaultValue != null) {
+				normalizedProps.value = toChildArray(props.children).forEach(child => {
+					if (normalizedProps.multiple) {
+						child.props.selected =
+							normalizedProps.defaultValue.indexOf(child.props.value) != -1;
+					} else {
+						child.props.selected =
+							normalizedProps.defaultValue == child.props.value;
+					}
+				});
+			}
+
+			vnode.props = normalizedProps;
 		}
 
-		vnode.props = normalizedProps;
-	}
-
-	if (type && props.class != props.className) {
-		classNameDescriptor.enumerable = 'className' in props;
-		if (props.className != null) normalizedProps.class = props.className;
-		Object.defineProperty(normalizedProps, 'className', classNameDescriptor);
+		if (type && props.class != props.className) {
+			classNameDescriptor.enumerable = 'className' in props;
+			if (props.className != null) normalizedProps.class = props.className;
+			Object.defineProperty(normalizedProps, 'className', classNameDescriptor);
+		}
 	}
 
 	if (typeof type === 'function' && props.ref) {

@@ -42,9 +42,8 @@ describe('event handling', () => {
 
 		expect(scratch.childNodes[0].attributes.length).to.equal(0);
 
-		expect(
-			proto.addEventListener
-		).to.have.been.calledOnce.and.to.have.been.calledWithExactly(
+		expect(proto.addEventListener).to.be.calledOnce;
+		expect(proto.addEventListener).to.be.calledWithExactly(
 			'click',
 			sinon.match.func,
 			false
@@ -204,9 +203,8 @@ describe('event handling', () => {
 
 		render(<div onClick={falsyHandler} onOtherClick={fooHandler} />, scratch);
 
-		expect(
-			proto.addEventListener
-		).to.have.been.calledOnce.and.to.have.been.calledWithExactly(
+		expect(proto.addEventListener).to.be.calledOnce;
+		expect(proto.addEventListener).to.be.calledWithExactly(
 			'OtherClick',
 			sinon.match.func,
 			false

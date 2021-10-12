@@ -54,14 +54,14 @@ describe('Children', () => {
 			expect(actual).to.equal('foo');
 		});
 
-		it('should throw if no children are passed', () => {
+		it.skip('should throw if no children are passed', () => {
 			// eslint-disable-next-line prefer-arrow-callback
 			expect(function() {
 				render(<Foo />, scratch);
 			}).to.throw();
 		});
 
-		it('should throw if more children are passed', () => {
+		it.skip('should throw if more children are passed', () => {
 			// eslint-disable-next-line prefer-arrow-callback
 			expect(function() {
 				render(

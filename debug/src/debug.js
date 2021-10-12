@@ -433,6 +433,10 @@ export function serializeVNode(vnode) {
 	let { props } = vnode;
 	let name = getDisplayName(vnode);
 
+	if (props === null) {
+		return `<${name} />`;
+	}
+
 	let attrs = '';
 	for (let prop in props) {
 		if (props.hasOwnProperty(prop) && prop !== 'children') {

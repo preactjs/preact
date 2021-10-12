@@ -278,7 +278,7 @@ describe('createContext', () => {
 			scratch
 		);
 
-		expect(Inner.prototype.render).to.have.been.calledOnce;
+		expect(Inner.prototype.render).to.be.calledOnce;
 
 		render(
 			<div>
@@ -291,7 +291,7 @@ describe('createContext', () => {
 			scratch
 		);
 
-		expect(Inner.prototype.render).to.have.been.calledOnce;
+		expect(Inner.prototype.render).to.be.calledOnce;
 	});
 
 	it('should preserve provider context through nested components', () => {
