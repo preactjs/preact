@@ -1,4 +1,3 @@
-import { createElement as preactH } from 'preact';
 import React, { createElement, render, cloneElement } from 'preact/compat';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 

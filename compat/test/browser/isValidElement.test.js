@@ -1,4 +1,3 @@
-import { createElement as preactCreateElement } from 'preact';
 import React, { isValidElement } from 'preact/compat';
 
 describe('isValidElement', () => {
