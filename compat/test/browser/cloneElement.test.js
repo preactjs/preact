@@ -1,4 +1,4 @@
-import React, { createElement, render, cloneElement } from 'preact/compat';
+import React, { createElement, cloneElement } from 'preact/compat';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 
 describe('compat cloneElement', () => {

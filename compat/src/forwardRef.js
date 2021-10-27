@@ -14,9 +14,6 @@ export const applyForwarding = () => {
 	}
 };
 
-// TODO: We can't extract this into forwardRef yet due to some tests relying on this
-// normalization
-
 export const REACT_FORWARD_SYMBOL =
 	(typeof Symbol != 'undefined' &&
 		Symbol.for &&

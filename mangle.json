@@ -25,7 +25,7 @@
   "props": {
     "cname": 6,
     "props": {
-      "$_forwarding": "__p",
+      "$_forwarding": "__f",
       "$_suspense": "__p",
       "$_cleanup": "__c",
       "$_afterPaintQueued": "__a",
