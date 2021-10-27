@@ -3,7 +3,8 @@ import {
 	hydrate as preactHydrate,
 	options,
 	toChildArray,
-	Component
+	Component,
+	h
 } from 'preact';
 
 export const REACT_ELEMENT_TYPE =
@@ -106,8 +107,7 @@ let classNameDescriptor = {
 	}
 };
 
-let oldVNodeHook = options.vnode;
-options.vnode = vnode => {
+export const applyReactRules = vnode => {
 	let type = vnode.type;
 	let props = vnode.props;
 	let normalizedProps = props;
@@ -123,8 +123,7 @@ options.vnode = vnode => {
 			if (IS_DOM && i === 'children' && type === 'noscript') {
 				// Emulate React's behavior of not rendering the contents of noscript tags on the client.
 				continue;
-			}
-			else if (i === 'value' && 'defaultValue' in props && value == null) {
+			} else if (i === 'value' && 'defaultValue' in props && value == null) {
 				// Skip applying value if it is null/undefined and we already set
 				// a default value
 				continue;
@@ -198,8 +197,12 @@ options.vnode = vnode => {
 
 	vnode.$$typeof = REACT_ELEMENT_TYPE;
 
-	if (oldVNodeHook) oldVNodeHook(vnode);
+	return vnode;
 };
+
+export function createElement() {
+	return applyReactRules(h(...arguments));
+}
 
 // Only needed for react-relay
 let currentComponent;

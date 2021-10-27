@@ -1,6 +1,8 @@
 import { options } from 'preact';
 import { assign } from './util';
 
+// TODO: We can't extract this into forwardRef yet due to some tests relying on this
+// normalization
 let oldDiffHook = options._diff;
 options._diff = vnode => {
 	if (vnode.type && vnode.type._forwarded && vnode.ref) {

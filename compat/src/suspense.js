@@ -1,46 +1,6 @@
 import { Component, createElement, options, Fragment } from 'preact';
 import { assign } from './util';
 
-const oldCatchError = options._catchError;
-options._catchError = function(error, newVNode, oldVNode) {
-	if (error.then) {
-		/** @type {import('./internal').Component} */
-		let component;
-		let vnode = newVNode;
-
-		for (; (vnode = vnode._parent); ) {
-			if ((component = vnode._component) && component._childDidSuspend) {
-				if (newVNode._dom == null) {
-					newVNode._dom = oldVNode._dom;
-					newVNode._children = oldVNode._children;
-				}
-				// Don't call oldCatchError if we found a Suspense
-				return component._childDidSuspend(error, newVNode);
-			}
-		}
-	}
-	oldCatchError(error, newVNode, oldVNode);
-};
-
-const oldUnmount = options.unmount;
-options.unmount = function(vnode) {
-	/** @type {import('./internal').Component} */
-	const component = vnode._component;
-	if (component && component._onResolve) {
-		component._onResolve();
-	}
-
-	// if the component is still hydrating
-	// most likely it is because the component is suspended
-	// we set the vnode.type as `null` so that it is not a typeof function
-	// so the unmount will remove the vnode._dom
-	if (component && vnode._hydrating === true) {
-		vnode.type = null;
-	}
-
-	if (oldUnmount) oldUnmount(vnode);
-};
-
 function detachedClone(vnode, detachedParent, parentDom) {
 	if (vnode) {
 		if (vnode._component && vnode._component.__hooks) {
@@ -94,6 +54,48 @@ function removeOriginal(vnode, detachedParent, originalParent) {
 
 // having custom inheritance instead of a class here saves a lot of bytes
 export function Suspense() {
+	if (!options._suspense) {
+		options._suspense = true;
+		const oldCatchError = options._catchError;
+		const oldUnmount = options.unmount;
+		options._catchError = function(error, newVNode, oldVNode) {
+			if (error.then) {
+				/** @type {import('./internal').Component} */
+				let component;
+				let vnode = newVNode;
+
+				for (; (vnode = vnode._parent); ) {
+					if ((component = vnode._component) && component._childDidSuspend) {
+						if (newVNode._dom == null) {
+							newVNode._dom = oldVNode._dom;
+							newVNode._children = oldVNode._children;
+						}
+						// Don't call oldCatchError if we found a Suspense
+						return component._childDidSuspend(error, newVNode);
+					}
+				}
+			}
+			oldCatchError(error, newVNode, oldVNode);
+		};
+
+		options.unmount = function(vnode) {
+			/** @type {import('./internal').Component} */
+			const component = vnode._component;
+			if (component && component._onResolve) {
+				component._onResolve();
+			}
+
+			// if the component is still hydrating
+			// most likely it is because the component is suspended
+			// we set the vnode.type as `null` so that it is not a typeof function
+			// so the unmount will remove the vnode._dom
+			if (component && vnode._hydrating === true) {
+				vnode.type = null;
+			}
+
+			if (oldUnmount) oldUnmount(vnode);
+		};
+	}
 	// we do not call super here to golf some bytes...
 	this._pendingSuspensionCount = 0;
 	this._suspenders = null;

@@ -1,5 +1,4 @@
 import {
-	createElement,
 	render as preactRender,
 	cloneElement as preactCloneElement,
 	createRef,
@@ -27,6 +26,8 @@ import { Suspense, lazy } from './suspense';
 import { SuspenseList } from './suspense-list';
 import { createPortal } from './portals';
 import {
+	createElement,
+	applyReactRules,
 	hydrate,
 	render,
 	REACT_ELEMENT_TYPE,
@@ -61,7 +62,7 @@ function isValidElement(element) {
  */
 function cloneElement(element) {
 	if (!isValidElement(element)) return element;
-	return preactCloneElement.apply(null, arguments);
+	return applyReactRules(preactCloneElement.apply(null, arguments));
 }
 
 /**

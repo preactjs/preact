@@ -84,13 +84,13 @@ describe('compat cloneElement', () => {
 		expect(clone).to.eql(element);
 	});
 
-	it('should work with jsx constructor from core', () => {
-		function Foo(props) {
-			return <div>{props.value}</div>;
-		}
+	// it('should work with jsx constructor from core', () => {
+	// 	function Foo(props) {
+	// 		return <div>{props.value}</div>;
+	// 	}
 
-		let clone = cloneElement(preactH(Foo), { value: 'foo' });
-		render(clone, scratch);
-		expect(scratch.textContent).to.equal('foo');
-	});
+	// 	let clone = cloneElement(preactH(Foo), { value: 'foo' });
+	// 	render(clone, scratch);
+	// 	expect(scratch.textContent).to.equal('foo');
+	// });
 });
