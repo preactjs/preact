@@ -1,4 +1,5 @@
 import { createElement } from 'preact';
+import { applyForwarding } from './forwardRef';
 import { shallowDiffers } from './util';
 
 /**
@@ -9,6 +10,7 @@ import { shallowDiffers } from './util';
  * @returns {import('./internal').FunctionComponent}
  */
 export function memo(c, comparer) {
+	applyForwarding();
 	function shouldUpdate(nextProps) {
 		let ref = this.props.ref;
 		let updateRef = ref == nextProps.ref;

@@ -1,4 +1,5 @@
 import { Component, createElement, options, Fragment } from 'preact';
+import { applyForwarding } from './forwardRef';
 import { assign } from './util';
 
 function detachedClone(vnode, detachedParent, parentDom) {
@@ -238,6 +239,7 @@ export function suspended(vnode) {
 }
 
 export function lazy(loader) {
+	applyForwarding();
 	let prom;
 	let component;
 	let error;
