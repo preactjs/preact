@@ -117,8 +117,17 @@ const flushSync = (callback, arg) => callback(arg);
  */
 const StrictMode = Fragment;
 
-export * from 'preact/hooks';
 export {
+	useState,
+	useReducer,
+	useEffect,
+	useLayoutEffect,
+	useRef,
+	useImperativeHandle,
+	useMemo,
+	useCallback,
+	useContext,
+	useDebugValue
 	version,
 	Children,
 	render,
