@@ -127,7 +127,7 @@ export {
 	useMemo,
 	useCallback,
 	useContext,
-	useDebugValue
+	useDebugValue,
 	version,
 	Children,
 	render,
