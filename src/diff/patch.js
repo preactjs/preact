@@ -33,7 +33,7 @@ export function patch(
 	startDom
 ) {
 	let dom = internal._dom;
-	let flags = internal._flags;
+	let flags = internal.flags;
 
 	if (flags & TYPE_TEXT) {
 		if (newVNode !== internal.props) {
@@ -61,7 +61,7 @@ export function patch(
 		if (options.diffed) options.diffed(internal);
 
 		// We successfully rendered this VNode, unset any stored hydration/bailout state:
-		internal._flags &= RESET_MODE;
+		internal.flags &= RESET_MODE;
 
 		return dom.nextSibling;
 	}
@@ -101,7 +101,7 @@ export function patch(
 	} catch (e) {
 		// @TODO: assign a new VNode ID here? Or NaN?
 		// newVNode._vnodeId = 0;
-		internal._flags |= e.then ? MODE_SUSPENDED : MODE_ERRORED;
+		internal.flags |= e.then ? MODE_SUSPENDED : MODE_ERRORED;
 		options._catchError(e, internal);
 
 		return nextDomSibling;
@@ -131,7 +131,7 @@ export function patch(
 	if (options.diffed) options.diffed(internal);
 
 	// We successfully rendered this VNode, unset any stored hydration/bailout state:
-	internal._flags &= RESET_MODE;
+	internal.flags &= RESET_MODE;
 	// Once we have successfully rendered the new VNode, copy it's ID over
 	internal._vnodeId = newVNode._vnodeId;
 
@@ -151,7 +151,7 @@ export function patch(
 function patchDOMElement(dom, newVNode, internal, globalContext, commitQueue) {
 	let oldProps = internal.props,
 		newProps = (internal.props = newVNode.props),
-		isSvg = internal._flags & MODE_SVG,
+		isSvg = internal.flags & MODE_SVG,
 		i,
 		value,
 		tmp,
