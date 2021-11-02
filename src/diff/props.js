@@ -1,12 +1,10 @@
 import options from '../options';
 
-function setStyle(style, key, value) {
+function setStyle(dom, key, value) {
 	if (key[0] === '-') {
-		style.setProperty(key, value);
-	} else if (value == null) {
-		style[key] = '';
+		dom.style.setProperty(key, value);
 	} else {
-		style[key] = value;
+		dom.style[key] = value == null ? '' : value;
 	}
 }
 
@@ -23,25 +21,23 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
 
 	o: if (name === 'style') {
 		if (typeof value == 'string') {
-			dom.style.cssText = value;
+			setStyle(dom, 'cssText', value);
 		} else {
 			if (typeof oldValue == 'string') {
-				dom.style.cssText = oldValue = '';
+				setStyle(dom, 'cssText', (oldValue = ''));
 			}
 
 			if (oldValue) {
 				for (name in oldValue) {
-					if (!(value && name in value)) {
-						setStyle(dom.style, name, '');
+					if (!value || !(name in value)) {
+						setStyle(dom, name, '');
 					}
 				}
 			}
 
-			if (value) {
-				for (name in value) {
-					if (!oldValue || value[name] !== oldValue[name]) {
-						setStyle(dom.style, name, value[name]);
-					}
+			for (name in value) {
+				if (!oldValue || value[name] !== oldValue[name]) {
+					setStyle(dom, name, value[name]);
 				}
 			}
 		}
