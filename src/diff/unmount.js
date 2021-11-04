@@ -15,7 +15,7 @@ export function unmount(internal, parentInternal, skipRemove) {
 	let r,
 		i = 0;
 	if (options.unmount) options.unmount(internal);
-	internal._flags |= MODE_UNMOUNTING;
+	internal.flags |= MODE_UNMOUNTING;
 
 	if ((r = internal.ref)) {
 		if (!r.current || r.current === internal._dom)
@@ -40,13 +40,13 @@ export function unmount(internal, parentInternal, skipRemove) {
 				unmount(
 					r[i],
 					parentInternal,
-					skipRemove ? ~internal._flags & TYPE_ROOT : internal._flags & TYPE_DOM
+					skipRemove ? ~internal.flags & TYPE_ROOT : internal.flags & TYPE_DOM
 				);
 			}
 		}
 	}
 
-	if (!skipRemove && internal._flags & TYPE_DOM) {
+	if (!skipRemove && internal.flags & TYPE_DOM) {
 		internal._dom.remove();
 	}
 

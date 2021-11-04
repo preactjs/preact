@@ -143,7 +143,7 @@ export interface Internal<P = {}> {
 	/** The component instance for which this is a backing Internal node */
 	_component: Component | null;
 	/** Bitfield containing information about the Internal or its component. */
-	_flags: number;
+	flags: number;
 	/** This Internal's distance from the tree root */
 	_depth: number | null;
 	/** Callbacks to invoke when this internal commits */
