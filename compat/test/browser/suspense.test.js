@@ -1670,7 +1670,7 @@ describe('suspense', () => {
 		expect(scratch.innerHTML).to.equal(`<div>i: 2<div>Resolved</div></div>`);
 	});
 
-	it('should support updating parent of suspender hook state while suspended', async () => {
+	it('should  clear hooks correctly', async () => {
 		const cleanup = sinon.spy()
 		const invoke = sinon.spy()
 		let resolve;
@@ -1683,8 +1683,6 @@ describe('suspense', () => {
 			return <div>Suspender</div>
 		});
 
-		/** @type {() => void} */
-		let increment;
 		function Updater() {
 			useEffect(function() {
 				invoke()
@@ -1703,6 +1701,50 @@ describe('suspense', () => {
 		expect(scratch.innerHTML).to.eql(`<div>Suspended...</div>`);
 		expect(invoke).to.not.be.called
 		expect(cleanup).to.not.be.called
+
+		await resolve(() => <div>Resolved</div>);
+		rerender();
+
+		expect(scratch.innerHTML).to.equal(`<div>Resolved</div>`);
+		expect(invoke).to.be.calledTwice
+		expect(cleanup).to.not.be.called
+	});
+
+	it('should keep hooks around correctly', async () => {
+		const cleanup = sinon.spy()
+		const invoke = sinon.spy()
+		const [Suspender, suspend] = createSuspender(() => {
+			useEffect(function() {
+				invoke()
+				return cleanup
+			}, [])
+			return <div>Suspender</div>
+		});
+
+		function Updater() {
+			useEffect(function() {
+				invoke()
+				return cleanup
+			}, [])
+			return <Suspender />
+		}
+
+		render(
+			<Suspense fallback={<div>Suspended...</div>}>
+				<Updater />
+			</Suspense>,
+			scratch
+		);
+
+		expect(scratch.innerHTML).to.eql(`<div>Suspender</div>`);
+		expect(Suspender.prototype.render).to.have.been.calledOnce;
+		expect(invoke).to.be.calledTwice
+		expect(cleanup).to.not.be.called
+
+		const [resolve] = suspend();
+		rerender();
+
+		expect(scratch.innerHTML).to.eql(`<div>Suspended...</div>`);
 
 		await resolve(() => <div>Resolved</div>);
 		rerender();
