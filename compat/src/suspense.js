@@ -11,7 +11,18 @@ options._catchError = function(error, internal) {
 		let component;
 		let handler = internal;
 
+		internal._commitCallbacks = []
+		if (!internal._dom) {
+			internal._component.__hooks = undefined;
+		}
 		for (; (handler = handler._parent); ) {
+			if (typeof handler.type === 'function') {
+				handler._commitCallbacks = []
+				if (!handler._dom) {
+					internal._component.__hooks = undefined;
+				}
+			}
+
 			if ((component = handler._component) && component._childDidSuspend) {
 				// Don't call oldCatchError if we found a Suspense
 				return component._childDidSuspend(error, internal);

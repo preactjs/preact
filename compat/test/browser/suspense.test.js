@@ -6,7 +6,8 @@ import React, {
 	Suspense,
 	Fragment,
 	createContext,
-	useState
+	useState,
+	useEffect
 } from 'preact/compat';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { div } from '../../../test/_util/dom';
@@ -1667,6 +1668,48 @@ describe('suspense', () => {
 		rerender();
 
 		expect(scratch.innerHTML).to.equal(`<div>i: 2<div>Resolved</div></div>`);
+	});
+
+	it('should support updating parent of suspender hook state while suspended', async () => {
+		const cleanup = sinon.spy()
+		const invoke = sinon.spy()
+		let resolve;
+		const [Suspender, suspend] = createSuspender(() => {
+			resolve = suspend()
+			useEffect(function() {
+				invoke()
+				return cleanup
+			}, [])
+			return <div>Suspender</div>
+		});
+
+		/** @type {() => void} */
+		let increment;
+		function Updater() {
+			useEffect(function() {
+				invoke()
+				return cleanup
+			}, [])
+			return <Suspender />
+		}
+
+		render(
+			<Suspense fallback={<div>Suspended...</div>}>
+				<Updater />
+			</Suspense>,
+			scratch
+		);
+
+		expect(scratch.innerHTML).to.eql(`<div>Suspended...</div>`);
+		expect(invoke).to.not.be.called
+		expect(cleanup).to.not.be.called
+
+		await resolve(() => <div>Resolved</div>);
+		rerender();
+
+		expect(scratch.innerHTML).to.equal(`<div>Resolved</div>`);
+		expect(invoke).to.be.calledTwice
+		expect(cleanup).to.not.be.called
 	});
 
 	it('should call componentWillUnmount on a suspended component', () => {
