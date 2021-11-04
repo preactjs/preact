@@ -39,7 +39,7 @@ function getSuspendableComponent(text) {
 	return LifecycleSuspender;
 }
 
-describe.skip('suspense-list', () => {
+describe('suspense-list', () => {
 	/** @type {HTMLDivElement} */
 	let scratch,
 		rerender,
@@ -302,7 +302,7 @@ describe.skip('suspense-list', () => {
 		);
 	});
 
-	it('should make components appear together if revealOrder=together and first one resolves others', async () => {
+	it.skip('should make components appear together if revealOrder=together and first one resolves others', async () => {
 		const [resolver1, resolver2, resolver3] = getSuspenseList('together');
 
 		rerender(); // Re-render with fallback cuz lazy threw
@@ -329,7 +329,7 @@ describe.skip('suspense-list', () => {
 		);
 	});
 
-	it('should make components appear together if revealOrder=together and second one resolves before others', async () => {
+	it.skip('should make components appear together if revealOrder=together and second one resolves before others', async () => {
 		const [resolver1, resolver2, resolver3] = getSuspenseList('together');
 
 		rerender(); // Re-render with fallback cuz lazy threw
@@ -461,7 +461,7 @@ describe.skip('suspense-list', () => {
 		);
 	});
 
-	it('should make sure nested SuspenseList works with together', async () => {
+	it.skip('should make sure nested SuspenseList works with together', async () => {
 		const [resolveA, resolveB, resolveC, resolveD] = getNestedSuspenseList(
 			'together',
 			'forwards'
@@ -519,7 +519,7 @@ describe.skip('suspense-list', () => {
 		expect(scratch.innerHTML).to.eql(`<div></div><span>A</span>`);
 	});
 
-	it('should work with together even when a <Suspense> child does not suspend', async () => {
+	it.skip('should work with together even when a <Suspense> child does not suspend', async () => {
 		const Component = getSuspendableComponent('A');
 
 		render(
@@ -542,7 +542,7 @@ describe.skip('suspense-list', () => {
 		expect(scratch.innerHTML).to.eql(`<div></div><span>A</span>`);
 	});
 
-	it('should not suspend resolved children if a new suspense comes in between', async () => {
+	it.skip('should not suspend resolved children if a new suspense comes in between', async () => {
 		const ComponentA = getSuspendableComponent('A');
 		const ComponentB = getSuspendableComponent('B');
 

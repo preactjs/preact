@@ -1,5 +1,4 @@
 import { Component, toChildArray } from 'preact';
-import { suspended } from './suspense.js';
 
 // Indexes to linked list nodes (nodes are stored as arrays to save bytes).
 const SUSPENDED_COUNT = 0;
@@ -23,7 +22,7 @@ const resolve = (list, child, node) => {
 		// mark the child as completely resolved by deleting it from ._map.
 		// This is used to figure out when *all* children have been completely
 		// resolved when revealOrder is 'together'.
-		list._map.delete(child);
+		list._map.delete(child._vnodeId);
 	}
 
 	// If revealOrder is falsy then we can do an early exit, as the
@@ -59,9 +58,10 @@ SuspenseList.prototype = new Component();
 
 SuspenseList.prototype._suspended = function(child) {
 	const list = this;
-	const delegated = suspended(list._internal);
-
-	let node = list._map.get(child);
+	const component = list._internal._parent._component;
+	const delegated =
+		component && component._suspended && component._suspended(list._internal);
+	const node = list._map.get(child._vnodeId);
 	node[SUSPENDED_COUNT]++;
 
 	return unsuspend => {
@@ -108,7 +108,7 @@ SuspenseList.prototype.render = function(props) {
 		//
 		// Pending callbacks are added to the end of the node:
 		// 	[suspended_count, resolved_count, next_node, callback_0, callback_1, ...]
-		this._map.set(children[i], (this._next = [1, 0, this._next]));
+		this._map.set(children[i]._vnodeId, (this._next = [1, 0, this._next]));
 	}
 	return props.children;
 };
