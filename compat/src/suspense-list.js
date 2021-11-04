@@ -1,4 +1,5 @@
 import { Component, toChildArray } from 'preact';
+import { suspended } from './suspense';
 
 // Indexes to linked list nodes (nodes are stored as arrays to save bytes).
 const SUSPENDED_COUNT = 0;
@@ -58,9 +59,7 @@ SuspenseList.prototype = new Component();
 
 SuspenseList.prototype._suspended = function(child) {
 	const list = this;
-	const component = list._internal._parent._component;
-	const delegated =
-		component && component._suspended && component._suspended(list._internal);
+	const delegated = suspended(list._internal);
 	const node = list._map.get(child.props);
 	node[SUSPENDED_COUNT]++;
 
@@ -75,6 +74,7 @@ SuspenseList.prototype._suspended = function(child) {
 				resolve(list, child, node);
 			}
 		};
+
 		if (delegated) {
 			delegated(wrappedUnsuspend);
 		} else {
@@ -121,6 +121,6 @@ SuspenseList.prototype.componentDidUpdate = SuspenseList.prototype.componentDidM
 	// 2. Handle nodes that might have gotten resolved between render and
 	//    componentDidMount.
 	this._map.forEach((node, child) => {
-		resolve(this, child, node);
+		resolve(this, { props: child }, node);
 	});
 };
