@@ -302,7 +302,7 @@ describe('suspense-list', () => {
 		);
 	});
 
-	it.skip('should make components appear together if revealOrder=together and first one resolves others', async () => {
+	it('should make components appear together if revealOrder=together and first one resolves others', async () => {
 		const [resolver1, resolver2, resolver3] = getSuspenseList('together');
 
 		rerender(); // Re-render with fallback cuz lazy threw
@@ -329,7 +329,7 @@ describe('suspense-list', () => {
 		);
 	});
 
-	it.skip('should make components appear together if revealOrder=together and second one resolves before others', async () => {
+	it('should make components appear together if revealOrder=together and second one resolves before others', async () => {
 		const [resolver1, resolver2, resolver3] = getSuspenseList('together');
 
 		rerender(); // Re-render with fallback cuz lazy threw
@@ -461,7 +461,7 @@ describe('suspense-list', () => {
 		);
 	});
 
-	it.skip('should make sure nested SuspenseList works with together', async () => {
+	it('should make sure nested SuspenseList works with together', async () => {
 		const [resolveA, resolveB, resolveC, resolveD] = getNestedSuspenseList(
 			'together',
 			'forwards'
