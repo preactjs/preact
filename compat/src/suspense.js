@@ -31,12 +31,12 @@ options.unmount = function(internal) {
 	}
 
 	// If a component suspended while it was hydrating and is now being unmounted,
-	// update it's _flags so it appears to be of TYPE_ELEMENT, causing `unmount`
+	// update it's flags so it appears to be of TYPE_ELEMENT, causing `unmount`
 	// to remove the DOM nodes that were awaiting hydration (which are stored on
 	// this internal's _dom property).
-	const wasHydrating = (internal._flags & MODE_HYDRATE) === MODE_HYDRATE;
+	const wasHydrating = (internal.flags & MODE_HYDRATE) === MODE_HYDRATE;
 	if (component && wasHydrating) {
-		internal._flags |= TYPE_ELEMENT;
+		internal.flags |= TYPE_ELEMENT;
 	}
 
 	if (oldUnmount) oldUnmount(internal);
@@ -116,7 +116,7 @@ Suspense.prototype._childDidSuspend = function(promise, suspendingInternal) {
 	 * While in non-hydration cases the usual fallback -> component flow would occur.
 	 */
 	const wasHydrating =
-		(suspendingInternal._flags & MODE_HYDRATE) === MODE_HYDRATE;
+		(suspendingInternal.flags & MODE_HYDRATE) === MODE_HYDRATE;
 
 	if (!c._pendingSuspensionCount++ && !wasHydrating) {
 		this._parentDom = document.createElement('div');

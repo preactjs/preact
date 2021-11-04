@@ -1,4 +1,4 @@
-// Internal._flags bitfield constants
+// Internal.flags bitfield constants
 export const TYPE_TEXT = 1 << 0;
 export const TYPE_ELEMENT = 1 << 1;
 export const TYPE_CLASS = 1 << 2;
