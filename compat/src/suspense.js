@@ -13,17 +13,18 @@ options._catchError = function(error, internal) {
 
 		internal._commitCallbacks = []
 		if (!internal._dom) {
-			internal._component.__hooks = undefined;
+			internal._component = undefined;
 		}
 		for (; (handler = handler._parent); ) {
+			component = handler._component
 			if (typeof handler.type === 'function') {
 				handler._commitCallbacks = []
-				if (!handler._dom) {
-					internal._component.__hooks = undefined;
+				if (!handler._dom && component && !component._childDidSuspend) {
+					handler._component = undefined;
 				}
 			}
 
-			if ((component = handler._component) && component._childDidSuspend) {
+			if (component && component._childDidSuspend) {
 				// Don't call oldCatchError if we found a Suspense
 				return component._childDidSuspend(error, internal);
 			}
