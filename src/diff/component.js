@@ -41,11 +41,11 @@ export function renderComponent(
 	// @TODO split update + mount?
 	let newProps = newVNode ? newVNode.props : internal.props;
 
-	if (internal._flags & MODE_PENDING_ERROR) {
+	if (internal.flags & MODE_PENDING_ERROR) {
 		// Toggle the MODE_PENDING_ERROR and MODE_RERENDERING_ERROR flags. In
 		// actuality, this should turn off the MODE_PENDING_ERROR flag and turn on
 		// the MODE_RERENDERING_ERROR flag.
-		internal._flags ^= MODE_PENDING_ERROR | MODE_RERENDERING_ERROR;
+		internal.flags ^= MODE_PENDING_ERROR | MODE_RERENDERING_ERROR;
 	}
 
 	// Necessary for createContext api. Setting this property will pass
@@ -62,7 +62,7 @@ export function renderComponent(
 		c = internal._component;
 	} else {
 		// Instantiate the new component
-		if (internal._flags & TYPE_CLASS) {
+		if (internal.flags & TYPE_CLASS) {
 			// @ts-ignore The check above verifies that newType is suppose to be constructed
 			internal._component = c = new type(newProps, componentContext); // eslint-disable-line new-cap
 		} else {
@@ -78,7 +78,7 @@ export function renderComponent(
 		c.context = componentContext;
 		c._globalContext = globalContext;
 		isNew = true;
-		internal._flags |= DIRTY_BIT;
+		internal.flags |= DIRTY_BIT;
 	}
 
 	// Invoke getDerivedStateFromProps
@@ -119,7 +119,7 @@ export function renderComponent(
 		}
 
 		if (
-			(!(internal._flags & FORCE_UPDATE) &&
+			(!(internal.flags & FORCE_UPDATE) &&
 				c.shouldComponentUpdate != null &&
 				c.shouldComponentUpdate(newProps, c._nextState, componentContext) ===
 					false) ||
@@ -130,7 +130,7 @@ export function renderComponent(
 			internal.props = newProps;
 			// More info about this here: https://gist.github.com/JoviDeCroock/bec5f2ce93544d2e6070ef8e0036e4e8
 			if (newVNode && newVNode._vnodeId !== internal._vnodeId) {
-				internal._flags &= ~DIRTY_BIT;
+				internal.flags &= ~DIRTY_BIT;
 			}
 
 			c._internal = internal;
@@ -160,7 +160,7 @@ export function renderComponent(
 
 	if ((tmp = options._render)) tmp(internal);
 
-	internal._flags &= ~DIRTY_BIT;
+	internal.flags &= ~DIRTY_BIT;
 	c._internal = internal;
 
 	tmp = c.render(c.props, c.state, c.context);

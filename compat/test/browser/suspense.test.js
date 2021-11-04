@@ -1173,7 +1173,7 @@ describe('suspense', () => {
 			});
 	});
 
-	it.skip('should correctly render nested Suspense components without intermediate DOM #2747', () => {
+	it('should correctly render nested Suspense components without intermediate DOM #2747', () => {
 		const [ProfileDetails, resolveDetails] = createLazy();
 		const [ProfileTimeline, resolveTimeline] = createLazy();
 

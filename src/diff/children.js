@@ -84,7 +84,7 @@ export function diffChildren(
 		// If this node suspended during hydration, and no other flags are set:
 		// @TODO: might be better to explicitly check for MODE_ERRORED here.
 		else if (
-			(childInternal._flags & (MODE_HYDRATE | MODE_SUSPENDED)) ===
+			(childInternal.flags & (MODE_HYDRATE | MODE_SUSPENDED)) ===
 			(MODE_HYDRATE | MODE_SUSPENDED)
 		) {
 			// We are resuming the hydration of a VNode
@@ -125,7 +125,7 @@ export function diffChildren(
 			);
 		}
 
-		if (childInternal._flags & TYPE_COMPONENT) {
+		if (childInternal.flags & TYPE_COMPONENT) {
 			startDom = nextDomSibling;
 		} else if (newDom && newDom == startDom) {
 			// If the newDom and the dom we are expecting to be there are the same, then
@@ -152,9 +152,9 @@ export function diffChildren(
 	for (i = oldChildrenLength; i--; ) {
 		if (oldChildren[i] != null) {
 			if (
-				parentInternal._flags & TYPE_COMPONENT &&
+				parentInternal.flags & TYPE_COMPONENT &&
 				startDom != null &&
-				((oldChildren[i]._flags & TYPE_DOM &&
+				((oldChildren[i].flags & TYPE_DOM &&
 					oldChildren[i]._dom == startDom) ||
 					getChildDom(oldChildren[i]) == startDom)
 			) {
@@ -193,7 +193,7 @@ function findMatchingInternal(childVNode, oldChildren, i, oldChildrenLength) {
 
 	if (typeof childVNode === 'string') {
 		// We never move Text nodes, so we only check for an in-place match:
-		if (childInternal && childInternal._flags & TYPE_TEXT) {
+		if (childInternal && childInternal.flags & TYPE_TEXT) {
 			oldChildren[i] = UNDEFINED;
 		} else {
 			// We're looking for a Text node, but this wasn't one: ignore it
@@ -247,7 +247,7 @@ export function reorderChildren(internal, startDom, parentDom) {
 			// (childVNode here).
 			childInternal._parent = internal;
 
-			if (childInternal._flags & TYPE_COMPONENT) {
+			if (childInternal.flags & TYPE_COMPONENT) {
 				startDom = reorderChildren(childInternal, startDom, parentDom);
 			} else if (childInternal._dom == startDom) {
 				startDom = startDom.nextSibling;

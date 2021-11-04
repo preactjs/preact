@@ -39,7 +39,7 @@ function getSuspendableComponent(text) {
 	return LifecycleSuspender;
 }
 
-describe.skip('suspense-list', () => {
+describe('suspense-list', () => {
 	/** @type {HTMLDivElement} */
 	let scratch,
 		rerender,
@@ -519,7 +519,7 @@ describe.skip('suspense-list', () => {
 		expect(scratch.innerHTML).to.eql(`<div></div><span>A</span>`);
 	});
 
-	it('should work with together even when a <Suspense> child does not suspend', async () => {
+	it.skip('should work with together even when a <Suspense> child does not suspend', async () => {
 		const Component = getSuspendableComponent('A');
 
 		render(
@@ -542,7 +542,7 @@ describe.skip('suspense-list', () => {
 		expect(scratch.innerHTML).to.eql(`<div></div><span>A</span>`);
 	});
 
-	it('should not suspend resolved children if a new suspense comes in between', async () => {
+	it.skip('should not suspend resolved children if a new suspense comes in between', async () => {
 		const ComponentA = getSuspendableComponent('A');
 		const ComponentB = getSuspendableComponent('B');
 
