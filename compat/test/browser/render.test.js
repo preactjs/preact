@@ -431,6 +431,18 @@ describe('compat render', () => {
 		expect(updateSpy).to.not.be.calledOnce;
 	});
 
+	it('should transform react-style camel cased attributes', () => {
+		render(
+			<text dominantBaseline="middle" fontWeight="30px">
+				foo
+			</text>,
+			scratch
+		);
+		expect(scratch.innerHTML).to.equal(
+			'<text dominant-baseline="middle" font-weight="30px">foo</text>'
+		);
+	});
+
 	it("should support react-relay's usage of __SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED", () => {
 		const Ctx = createContext('foo');
 

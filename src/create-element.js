@@ -33,7 +33,8 @@ export function createElement(type, props, children) {
 			children.push(arguments[i]);
 		}
 	}
-	if (children != null) {
+
+	if (arguments.length > 2) {
 		normalizedProps.children = children;
 	}
 

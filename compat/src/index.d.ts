@@ -49,6 +49,8 @@ declare namespace React {
 	export import StrictMode = preact.Fragment;
 	export const version: string;
 
+	export function flushSync(cb: (arg: any) => any, arg: any): void;
+
 	export function createPortal(
 		vnode: preact.VNode,
 		container: Element
@@ -105,7 +107,7 @@ declare namespace React {
 
 	export function forwardRef<R, P = {}>(
 		fn: ForwardFn<P, R>
-	): preact.FunctionalComponent<P>;
+	): preact.FunctionalComponent<Omit<P, 'ref'> & { ref?: preact.Ref<R> }>;
 
 	export function unstable_batchedUpdates(
 		callback: (arg?: any) => void,
