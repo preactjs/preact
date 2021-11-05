@@ -6,6 +6,21 @@
 - `[MAJOR]` Remove `replaceNode`, [use this technique instead](https://gist.github.com/developit/f321a9ef092ad39f54f8d7c8f99eb29a))
 - `[MAJOR]` Removed select `<option>` fix for IE11, using select in IE11 will always require you to specify a `value` attribute
 
+## To verify
+
+PR's that weren't backported yet, do they work?
+
+- https://github.com/preactjs/preact/pull/3210
+- https://github.com/preactjs/preact/pull/3143
+- https://github.com/preactjs/preact/pull/3091
+- https://github.com/preactjs/preact/pull/3238
+- https://github.com/preactjs/preact/pull/3260
+- https://github.com/preactjs/preact/pull/2859
+- https://github.com/preactjs/preact/pull/3226
+- https://github.com/preactjs/preact/pull/3280
+- https://github.com/preactjs/preact/pull/3222
+
+
 ## Root node follow ups
 
 - Investigate if the return value of `createRoot()` can be re-used as a root Node...

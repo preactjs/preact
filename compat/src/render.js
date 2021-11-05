@@ -116,6 +116,7 @@ options.vnode = vnode => {
 
 	// only normalize props on Element nodes
 	if (typeof type === 'string') {
+		const nonCustomElement = type.indexOf('-') === -1;
 		normalizedProps = {};
 
 		let style = props.style;
@@ -158,7 +159,7 @@ options.vnode = vnode => {
 				i = 'oninput';
 			} else if (/^on(Ani|Tra|Tou|BeforeInp)/.test(i)) {
 				i = i.toLowerCase();
-			} else if (CAMEL_PROPS.test(i)) {
+			} else if (nonCustomElement &&CAMEL_PROPS.test(i)) {
 				i = i.replace(/[A-Z0-9]/, '-$&').toLowerCase();
 			} else if (value === null) {
 				value = undefined;

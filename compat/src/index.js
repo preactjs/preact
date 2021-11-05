@@ -36,7 +36,7 @@ import {
 import { getChildDom } from '../../src/tree';
 export * from './scheduler';
 
-const version = '16.8.0'; // trick libraries to think we are react
+const version = '17.0.2'; // trick libraries to think we are react
 
 /**
  * Legacy version of createElement.
@@ -111,11 +111,23 @@ const unstable_batchedUpdates = (callback, arg) => callback(arg);
  */
 const StrictMode = Fragment;
 
+/**
+ * In React, `flushSync` flushes the entire tree and forces a rerender. It's
+ * implmented here as a no-op.
+ * @template Arg
+ * @template Result
+ * @param {(arg: Arg) => Result} callback function that runs before the flush
+ * @param {Arg} [arg] Optional arugment that can be passed to the callback
+ * @returns
+ */
+const flushSync = (callback, arg) => callback(arg)
+
 export * from 'preact/hooks';
 export {
 	version,
 	Children,
 	render,
+	flushSync,
 	hydrate,
 	unmountComponentAtNode,
 	createPortal,
@@ -145,6 +157,7 @@ export {
 export default {
 	useState,
 	useReducer,
+	flushSync,
 	useEffect,
 	useLayoutEffect,
 	useRef,
