@@ -10,15 +10,12 @@
 
 PR's that weren't backported yet, do they work?
 
-- https://github.com/preactjs/preact/pull/3210
-- https://github.com/preactjs/preact/pull/3143
-- https://github.com/preactjs/preact/pull/3091
-- https://github.com/preactjs/preact/pull/3238
-- https://github.com/preactjs/preact/pull/3260
-- https://github.com/preactjs/preact/pull/2859
-- https://github.com/preactjs/preact/pull/3226
-- https://github.com/preactjs/preact/pull/3280
-- https://github.com/preactjs/preact/pull/3222
+- Verify with sandbox https://github.com/preactjs/preact/pull/3210
+- Possible perf improvement https://github.com/preactjs/preact/pull/3143
+- I don't know how to test this yet https://github.com/preactjs/preact/pull/3260
+- Verify in browser https://github.com/preactjs/preact/pull/3226
+- https://github.com/preactjs/preact/pull/3280 Not merged yet need some input
+- https://github.com/preactjs/preact/pull/3222 Same as above
 
 
 ## Root node follow ups

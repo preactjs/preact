@@ -33,7 +33,8 @@ export function createElement(type, props, children) {
 			children.push(arguments[i]);
 		}
 	}
-	if (children != null) {
+
+	if (arguments.length > 2) {
 		normalizedProps.children = children;
 	}
 
@@ -74,7 +75,7 @@ export function createVNode(type, props, key, ref, original) {
 		_vnodeId: original || ++vnodeId
 	};
 
-	if (original == null && options.vnode != null) options.vnode(vnode);
+	if (options.vnode != null) options.vnode(vnode);
 
 	return vnode;
 }
