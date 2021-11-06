@@ -5,13 +5,16 @@
 - `[MAJOR]` Deprecated `component.base`
 - `[MAJOR]` Remove `replaceNode`, [use this technique instead](https://gist.github.com/developit/f321a9ef092ad39f54f8d7c8f99eb29a))
 - `[MAJOR]` Removed select `<option>` fix for IE11, using select in IE11 will always require you to specify a `value` attribute
+- `[MAJOR]` Removed automatic suffixing of `px` to dimensional style attributes
+- `[MAJOR]` Forward ref by default on functional components (this is not the case for compat)
+- `[MINOR]` Add truely controlled components
+- `[MINOR]` Add `createRoot` API
 
 ## To verify
 
 PR's that weren't backported yet, do they work?
 
 - Verify with sandbox https://github.com/preactjs/preact/pull/3210
-- Possible perf improvement https://github.com/preactjs/preact/pull/3143
 - I don't know how to test this yet https://github.com/preactjs/preact/pull/3260
 - Verify in browser https://github.com/preactjs/preact/pull/3226
 - https://github.com/preactjs/preact/pull/3280 Not merged yet need some input
@@ -81,12 +84,6 @@ PR's that weren't backported yet, do they work?
   function?
 
   Perhaps reuse this function in the new extensible Component API?
-
-- Fix Suspense tests:
-  - "should correctly render nested Suspense components without intermediate DOM #2747"
-- Fix Suspense hydration tests:
-  - "should hydrate lazy components through components using shouldComponentUpdate"
-- Rebuild Suspense List to work with backing tree
 
 ## Other
 
