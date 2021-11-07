@@ -38,7 +38,7 @@ export function createRoot(parentDom) {
 		} else {
 			// Store the VDOM tree root on the DOM element in a (minified) property:
 			rootInternal = parentDom._children = createInternal(vnode, null);
-
+			rootInternal._context = {};
 			if (parentDom.ownerSVGElement !== UNDEFINED) {
 				rootInternal.flags |= MODE_SVG;
 			}
@@ -70,6 +70,7 @@ export function createRoot(parentDom) {
 
 			vnode = createElement(Fragment, { _parentDom: parentDom }, [vnode]);
 			rootInternal = createInternal(vnode);
+			rootInternal._context = {};
 			rootInternal.flags |= MODE_HYDRATE;
 			parentDom._children = rootInternal;
 

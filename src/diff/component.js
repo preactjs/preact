@@ -157,6 +157,7 @@ export function renderComponent(
 	c.state = c._nextState;
 
 	internal.props = newProps;
+	internal._context = componentContext;
 
 	if ((tmp = options._render)) tmp(internal);
 
