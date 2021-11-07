@@ -6,7 +6,6 @@ import {
 	Component
 } from 'preact';
 import { IS_NON_DIMENSIONAL } from './util';
-import { getParentContext } from '../../src/tree';
 
 export const REACT_ELEMENT_TYPE =
 	(typeof Symbol != 'undefined' && Symbol.for && Symbol.for('react.element')) ||
@@ -227,6 +226,21 @@ options._render = function(internal) {
 	}
 	currentContext = getParentContext(internal);
 };
+
+/**
+ * @param {import('./internal').Internal} internal
+ * @returns {any}
+ */
+function getParentContext(internal) {
+	let context = internal._context;
+	let parent = internal._parent;
+	while (context == null && parent) {
+		context = parent._context;
+		parent = parent._parent;
+	}
+
+	return context;
+}
 
 // This is a very very private internal function for React it
 // is used to sort-of do runtime dependency injection. So far

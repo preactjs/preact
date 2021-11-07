@@ -182,18 +182,3 @@ export function getParentDom(internal) {
 
 	return parentDom;
 }
-
-/**
- * @param {import('./internal').Internal} internal
- * @returns {any}
- */
-export function getParentContext(internal) {
-	let context = internal._context;
-	let parent = internal._parent;
-	while (context == null && parent) {
-		context = parent._context;
-		parent = parent._parent;
-	}
-
-	return context;
-}
