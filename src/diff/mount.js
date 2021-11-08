@@ -22,20 +22,12 @@ import options from '../options';
  * @param {import('../internal').PreactElement} parentDom The parent of the DOM element
  * @param {import('../internal').VNode | string} newVNode The new virtual node
  * @param {import('../internal').Internal} internal The Internal node to mount
- * @param {object} globalContext The current context object. Modified by getChildContext
  * @param {import('../internal').CommitQueue} commitQueue List of components
  * which have callbacks to invoke in commitRoot
  * @param {import('../internal').PreactElement} startDom
  * @returns {import('../internal').PreactElement | null} pointer to the next DOM node to be hydrated (or null)
  */
-export function mount(
-	parentDom,
-	newVNode,
-	internal,
-	globalContext,
-	commitQueue,
-	startDom
-) {
+export function mount(parentDom, newVNode, internal, commitQueue, startDom) {
 	if (options._diff) options._diff(internal, newVNode);
 
 	/** @type {import('../internal').PreactElement} */
@@ -60,7 +52,6 @@ export function mount(
 				parentDom,
 				null,
 				internal,
-				globalContext,
 				commitQueue,
 				startDom
 			);
@@ -79,12 +70,7 @@ export function mount(
 					? startDom
 					: null;
 
-			nextDomSibling = mountDOMElement(
-				hydrateDom,
-				internal,
-				globalContext,
-				commitQueue
-			);
+			nextDomSibling = mountDOMElement(hydrateDom, internal, commitQueue);
 		}
 
 		if (options.diffed) options.diffed(internal);
@@ -111,12 +97,11 @@ export function mount(
  * @param {import('../internal').PreactElement} dom The DOM element representing
  * the virtual nodes being diffed
  * @param {import('../internal').Internal} internal The Internal node to mount
- * @param {object} globalContext The current context object
  * @param {import('../internal').CommitQueue} commitQueue List of components
  * which have callbacks to invoke in commitRoot
  * @returns {import('../internal').PreactElement}
  */
-function mountDOMElement(dom, internal, globalContext, commitQueue) {
+function mountDOMElement(dom, internal, commitQueue) {
 	let newProps = internal.props;
 	let nodeType = internal.type;
 	/** @type {any} */
@@ -233,7 +218,6 @@ function mountDOMElement(dom, internal, globalContext, commitQueue) {
 				dom,
 				newChildren && Array.isArray(newChildren) ? newChildren : [newChildren],
 				internal,
-				globalContext,
 				commitQueue,
 				isNew ? null : dom.firstChild
 			);
@@ -255,7 +239,6 @@ function mountDOMElement(dom, internal, globalContext, commitQueue) {
  * children are being diffed
  * @param {import('../internal').ComponentChildren[]} renderResult
  * @param {import('../internal').Internal} parentInternal The parent Internal of the given children
- * @param {object} globalContext The current context object - modified by getChildContext
  * @param {import('../internal').CommitQueue} commitQueue List of components
  * which have callbacks to invoke in commitRoot
  * @param {import('../internal').PreactElement} startDom
@@ -264,7 +247,6 @@ export function mountChildren(
 	parentDom,
 	renderResult,
 	parentInternal,
-	globalContext,
 	commitQueue,
 	startDom
 ) {
@@ -293,7 +275,6 @@ export function mountChildren(
 			parentDom,
 			childVNode,
 			childInternal,
-			globalContext,
 			commitQueue,
 			startDom
 		);

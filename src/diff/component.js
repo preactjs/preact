@@ -11,13 +11,13 @@ import {
 	TYPE_CLASS
 } from '../constants';
 import { addCommitCallback } from './commit';
+import { getParentContext } from '../tree';
 
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
  * @param {import('../internal').PreactElement} parentDom The parent of the DOM element
  * @param {import('../internal').VNode} newVNode The new virtual node
  * @param {import('../internal').Internal} internal The component's backing Internal node
- * @param {object} globalContext The current context object. Modified by getChildContext
  * @param {import('../internal').CommitQueue} commitQueue List of components
  * which have callbacks to invoke in commitRoot
  * @param {import('../internal').PreactNode} startDom
@@ -27,7 +27,6 @@ export function renderComponent(
 	parentDom,
 	newVNode,
 	internal,
-	globalContext,
 	commitQueue,
 	startDom
 ) {
@@ -48,15 +47,17 @@ export function renderComponent(
 		internal.flags ^= MODE_PENDING_ERROR | MODE_RERENDERING_ERROR;
 	}
 
+	const context = getParentContext(internal);
+
 	// Necessary for createContext api. Setting this property will pass
 	// the context value as `this.context` just for this component.
 	tmp = type.contextType;
-	let provider = tmp && globalContext[tmp._id];
+	let provider = tmp && context[tmp._id];
 	let componentContext = tmp
 		? provider
 			? provider.props.value
 			: tmp._defaultValue
-		: globalContext;
+		: context;
 
 	if (internal && internal._component) {
 		c = internal._component;
@@ -76,7 +77,6 @@ export function renderComponent(
 		c.props = newProps;
 		if (!c.state) c.state = {};
 		c.context = componentContext;
-		c._globalContext = globalContext;
 		isNew = true;
 		internal.flags |= DIRTY_BIT;
 	}
@@ -157,7 +157,6 @@ export function renderComponent(
 	c.state = c._nextState;
 
 	internal.props = newProps;
-	internal._context = componentContext;
 
 	if ((tmp = options._render)) tmp(internal);
 
@@ -170,7 +169,7 @@ export function renderComponent(
 	c.state = c._nextState;
 
 	if (c.getChildContext != null) {
-		globalContext = Object.assign({}, globalContext, c.getChildContext());
+		internal._context = Object.assign({}, context, c.getChildContext());
 	}
 
 	if (!isNew) {
@@ -197,7 +196,6 @@ export function renderComponent(
 			parentDom,
 			Array.isArray(renderResult) ? renderResult : [renderResult],
 			internal,
-			globalContext,
 			commitQueue,
 			startDom
 		);
@@ -206,7 +204,6 @@ export function renderComponent(
 			parentDom,
 			Array.isArray(renderResult) ? renderResult : [renderResult],
 			internal,
-			globalContext,
 			commitQueue,
 			startDom
 		);

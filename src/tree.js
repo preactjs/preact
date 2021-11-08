@@ -161,6 +161,20 @@ export function getChildDom(internal, i) {
 
 	return null;
 }
+/**
+ * @param {import('./internal').Internal} internal
+ * @returns {any}
+ */
+export function getParentContext(internal) {
+	let context = internal._context;
+	let parent = internal._parent;
+	while (context == null && parent) {
+		context = parent._context;
+		parent = parent._parent;
+	}
+
+	return context;
+}
 
 /**
  * @param {import('./internal').Internal} internal

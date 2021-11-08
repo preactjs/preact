@@ -113,14 +113,7 @@ function rerenderComponent(component) {
 		);
 
 		const commitQueue = [];
-		patch(
-			parentDom,
-			vnode,
-			internal,
-			component._globalContext,
-			commitQueue,
-			startDom
-		);
+		patch(parentDom, vnode, internal, commitQueue, startDom);
 		commitRoot(commitQueue, internal);
 	}
 }
