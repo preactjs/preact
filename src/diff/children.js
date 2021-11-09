@@ -21,8 +21,6 @@ import { createInternal, getDomSibling, getChildDom } from '../tree';
  * @param {import('../internal').ComponentChildren[]} renderResult
  * @param {import('../internal').Internal} parentInternal The Internal node
  * whose children should be diff'ed against newParentVNode
- * @param {object} globalContext The current context object - modified by
- * getChildContext
  * @param {import('../internal').CommitQueue} commitQueue List of
  * components which have callbacks to invoke in commitRoot
  * @param {import('../internal').PreactElement} startDom The dom node
@@ -32,7 +30,6 @@ export function diffChildren(
 	parentDom,
 	renderResult,
 	parentInternal,
-	globalContext,
 	commitQueue,
 	startDom
 ) {
@@ -76,7 +73,6 @@ export function diffChildren(
 				parentDom,
 				childVNode,
 				childInternal,
-				globalContext,
 				commitQueue,
 				startDom
 			);
@@ -95,7 +91,6 @@ export function diffChildren(
 				parentDom,
 				childVNode,
 				childInternal,
-				globalContext,
 				commitQueue,
 				startDom
 			);
@@ -107,7 +102,6 @@ export function diffChildren(
 				parentDom,
 				childVNode,
 				childInternal,
-				globalContext,
 				commitQueue,
 				startDom
 			);
@@ -154,8 +148,7 @@ export function diffChildren(
 			if (
 				parentInternal.flags & TYPE_COMPONENT &&
 				startDom != null &&
-				((oldChildren[i].flags & TYPE_DOM &&
-					oldChildren[i]._dom == startDom) ||
+				((oldChildren[i].flags & TYPE_DOM && oldChildren[i]._dom == startDom) ||
 					getChildDom(oldChildren[i]) == startDom)
 			) {
 				// If the startDom points to a dom node that is about to be unmounted,

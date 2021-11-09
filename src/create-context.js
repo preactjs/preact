@@ -1,6 +1,6 @@
 import { enqueueRender } from './component';
 
-export let nextContextId = 0;
+let nextContextId = 0;
 
 const providers = new Set();
 

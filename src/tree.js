@@ -89,6 +89,7 @@ export function createInternal(vnode, parentInternal) {
 		_dom: null,
 		_component: null,
 		flags,
+		_context: null,
 		_depth: parentInternal ? parentInternal._depth + 1 : 0
 	};
 
@@ -160,14 +161,27 @@ export function getChildDom(internal, i) {
 
 	return null;
 }
+/**
+ * @param {import('./internal').Internal} internal
+ * @returns {any}
+ */
+export function getParentContext(internal) {
+	let context = internal._context;
+	let parent = internal._parent;
+	while (context == null && parent) {
+		context = parent._context;
+		parent = parent._parent;
+	}
+
+	return context;
+}
 
 /**
  * @param {import('./internal').Internal} internal
  * @returns {import('./internal').PreactElement}
  */
 export function getParentDom(internal) {
-	let parentDom =
-		internal.flags & TYPE_ROOT ? internal.props._parentDom : null;
+	let parentDom = internal.flags & TYPE_ROOT ? internal.props._parentDom : null;
 
 	let parent = internal._parent;
 	while (parentDom == null && parent) {

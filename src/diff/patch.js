@@ -19,19 +19,11 @@ import { getChildDom, getDomSibling } from '../tree';
  * @param {import('../internal').PreactElement} parentDom The parent of the DOM element
  * @param {import('../internal').VNode | string} newVNode The new virtual node
  * @param {import('../internal').Internal} internal The Internal node to patch
- * @param {object} globalContext The current context object. Modified by getChildContext
  * @param {import('../internal').CommitQueue} commitQueue List of components
  * which have callbacks to invoke in commitRoot
  * @param {import('../internal').PreactNode} startDom
  */
-export function patch(
-	parentDom,
-	newVNode,
-	internal,
-	globalContext,
-	commitQueue,
-	startDom
-) {
+export function patch(parentDom, newVNode, internal, commitQueue, startDom) {
 	let dom = internal._dom;
 	let flags = internal.flags;
 
@@ -53,7 +45,7 @@ export function patch(
 	if (flags & TYPE_ELEMENT) {
 		if (newVNode._vnodeId !== internal._vnodeId) {
 			// @ts-ignore dom is a PreactElement here
-			patchDOMElement(dom, newVNode, internal, globalContext, commitQueue);
+			patchDOMElement(dom, newVNode, internal, commitQueue);
 			// Once we have successfully rendered the new VNode, copy it's ID over
 			internal._vnodeId = newVNode._vnodeId;
 		}
@@ -94,7 +86,6 @@ export function patch(
 			/** @type {import('../internal').VNode} */
 			(newVNode),
 			internal,
-			globalContext,
 			commitQueue,
 			startDom
 		);
@@ -144,11 +135,10 @@ export function patch(
  * the virtual nodes being diffed
  * @param {import('../internal').VNode} newVNode The new virtual node
  * @param {import('../internal').Internal} internal The Internal node to patch
- * @param {object} globalContext The current context object
  * @param {import('../internal').CommitQueue} commitQueue List of components
  * which have callbacks to invoke in commitRoot
  */
-function patchDOMElement(dom, newVNode, internal, globalContext, commitQueue) {
+function patchDOMElement(dom, newVNode, internal, commitQueue) {
 	let oldProps = internal.props,
 		newProps = (internal.props = newVNode.props),
 		isSvg = internal.flags & MODE_SVG,
@@ -200,7 +190,6 @@ function patchDOMElement(dom, newVNode, internal, globalContext, commitQueue) {
 			dom,
 			newChildren && Array.isArray(newChildren) ? newChildren : [newChildren],
 			internal,
-			globalContext,
 			commitQueue,
 			dom.firstChild
 		);

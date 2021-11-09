@@ -5,6 +5,7 @@ import {
 	toChildArray,
 	Component
 } from 'preact';
+import { getParentContext } from '../../src/tree';
 import { IS_NON_DIMENSIONAL } from './util';
 
 export const REACT_ELEMENT_TYPE =
@@ -218,13 +219,13 @@ options.vnode = vnode => {
 };
 
 // Only needed for react-relay
-let currentComponent;
+let currentContext;
 const oldBeforeRender = options._render;
 options._render = function(internal) {
 	if (oldBeforeRender) {
 		oldBeforeRender(internal);
 	}
-	currentComponent = internal._component;
+	currentContext = getParentContext(internal);
 };
 
 // This is a very very private internal function for React it
@@ -235,7 +236,7 @@ export const __SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED = {
 	ReactCurrentDispatcher: {
 		current: {
 			readContext(context) {
-				return currentComponent._globalContext[context._id].props.value;
+				return currentContext[context._id].props.value;
 			}
 		}
 	}
