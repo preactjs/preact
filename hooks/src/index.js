@@ -41,7 +41,7 @@ options._render = internal => {
 	currentInternal = internal;
 	currentIndex = 0;
 
-	const hooks = currentInternal.data.__hooks;
+	const hooks = currentInternal.data && currentInternal.data.__hooks;
 	if (hooks) {
 		hooks._pendingEffects.forEach(invokeCleanup);
 		hooks._pendingEffects.forEach(invokeEffect);
@@ -53,7 +53,7 @@ options.diffed = internal => {
 	if (oldAfterDiff) oldAfterDiff(internal);
 
 	const data = internal.data;
-	if (data.__hooks && data.__hooks._pendingEffects.length) {
+	if (data && data.__hooks && data.__hooks._pendingEffects.length) {
 		afterPaint(afterPaintEffects.push(internal));
 	}
 	currentInternal = previousInternal;
