@@ -1,4 +1,5 @@
 import { options } from 'preact';
+import { getParentContext } from 'preact/src/tree';
 import { MODE_UNMOUNTING } from '../../src/constants';
 
 /** @type {number} */
@@ -40,7 +41,7 @@ options._render = internal => {
 	currentInternal = internal;
 	currentIndex = 0;
 
-	const hooks = currentInternal._component.__hooks;
+	const hooks = currentInternal.data.__hooks;
 	if (hooks) {
 		hooks._pendingEffects.forEach(invokeCleanup);
 		hooks._pendingEffects.forEach(invokeEffect);
@@ -51,9 +52,9 @@ options._render = internal => {
 options.diffed = internal => {
 	if (oldAfterDiff) oldAfterDiff(internal);
 
-	const c = internal._component;
-	if (c && c.__hooks && c.__hooks._pendingEffects.length) {
-		afterPaint(afterPaintEffects.push(c));
+	const data = internal.data;
+	if (data.__hooks && data.__hooks._pendingEffects.length) {
+		afterPaint(afterPaintEffects.push(internal));
 	}
 	currentInternal = previousInternal;
 };
@@ -80,12 +81,12 @@ options._commit = (internal, commitQueue) => {
 options.unmount = internal => {
 	if (oldBeforeUnmount) oldBeforeUnmount(internal);
 
-	const c = internal._component;
-	if (c && c.__hooks) {
+	const data = internal.data;
+	if (data && data.__hooks) {
 		try {
-			c.__hooks._list.forEach(invokeCleanup);
+			data.__hooks._list.forEach(invokeCleanup);
 		} catch (e) {
-			options._catchError(e, c._internal);
+			options._catchError(e, internal);
 		}
 	}
 };
@@ -112,8 +113,8 @@ function getHookState(index, type) {
 	// Other implementations to look at:
 	// * https://codesandbox.io/s/mnox05qp8
 	const hooks =
-		currentInternal._component.__hooks ||
-		(currentInternal._component.__hooks = {
+		currentInternal.data.__hooks ||
+		(currentInternal.data.__hooks = {
 			_list: [],
 			_pendingEffects: []
 		});
@@ -150,6 +151,8 @@ export function useReducer(reducer, initialState, init) {
 				const nextValue = hookState._reducer(hookState._value[0], action);
 				if (hookState._value[0] !== nextValue) {
 					hookState._value = [nextValue, hookState._value[1]];
+
+					// TODO: this needs to change to a rerender mechanism not on "_component"
 					hookState._internal._component.setState({});
 				}
 			}
@@ -172,7 +175,7 @@ export function useEffect(callback, args) {
 		state._value = callback;
 		state._args = args;
 
-		currentInternal._component.__hooks._pendingEffects.push(state);
+		currentInternal.data.__hooks._pendingEffects.push(state);
 	}
 }
 
@@ -244,7 +247,7 @@ export function useCallback(callback, args) {
  * @param {import('./internal').PreactContext} context
  */
 export function useContext(context) {
-	const provider = currentInternal._component.context[context._id];
+	const provider = getParentContext(currentInternal)[context._id];
 	// We could skip this call here, but than we'd not call
 	// `options._hook`. We need to do that in order to make
 	// the devtools aware of this hook.
@@ -281,6 +284,8 @@ export function useErrorBoundary(cb) {
 	const state = getHookState(currentIndex++, 10);
 	const errState = useState();
 	state._value = cb;
+
+	// TODO: this needs to move to a flag
 	if (!currentInternal._component.componentDidCatch) {
 		currentInternal._component.componentDidCatch = err => {
 			if (state._value) state._value(err);
@@ -299,15 +304,15 @@ export function useErrorBoundary(cb) {
  * After paint effects consumer.
  */
 function flushAfterPaintEffects() {
-	afterPaintEffects.forEach(component => {
-		if (~component._internal.flags & MODE_UNMOUNTING) {
+	afterPaintEffects.forEach(internal => {
+		if (~internal.flags & MODE_UNMOUNTING) {
 			try {
-				component.__hooks._pendingEffects.forEach(invokeCleanup);
-				component.__hooks._pendingEffects.forEach(invokeEffect);
-				component.__hooks._pendingEffects = [];
+				internal.data.__hooks._pendingEffects.forEach(invokeCleanup);
+				internal.data.__hooks._pendingEffects.forEach(invokeEffect);
+				internal.data.__hooks._pendingEffects = [];
 			} catch (e) {
-				component.__hooks._pendingEffects = [];
-				options._catchError(e, component._internal);
+				internal.data.__hooks._pendingEffects = [];
+				options._catchError(e, internal);
 			}
 		}
 	});
