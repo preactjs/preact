@@ -7,13 +7,6 @@ let currentIndex;
 
 /** @type {import('./internal').Internal} */
 let currentInternal;
-/**
- * Keep track of the previous component so that we can set
- * `currentComponent` to `null` and throw when a hook is invoked
- * outside of render
- * @type {import('./internal').Internal}
- */
-let previousInternal;
 
 /** @type {number} */
 let currentHook = 0;
@@ -41,22 +34,23 @@ options._render = internal => {
 	currentInternal = internal;
 	currentIndex = 0;
 
-	const hooks = currentInternal.data && currentInternal.data.__hooks;
-	if (hooks) {
-		hooks._pendingEffects.forEach(invokeCleanup);
-		hooks._pendingEffects.forEach(invokeEffect);
-		hooks._pendingEffects = [];
+	if (currentInternal.data) {
+		currentInternal.data._pendingEffects.forEach(invokeCleanup);
+		currentInternal.data._pendingEffects.forEach(invokeEffect);
+		currentInternal.data._pendingEffects = [];
 	}
 };
 
 options.diffed = internal => {
 	if (oldAfterDiff) oldAfterDiff(internal);
 
-	const data = internal.data;
-	if (data && data.__hooks && data.__hooks._pendingEffects.length) {
+	if (
+		internal.data &&
+		internal.data.__hooks &&
+		internal.data.__hooks._pendingEffects.length
+	) {
 		afterPaint(afterPaintEffects.push(internal));
 	}
-	currentInternal = previousInternal;
 };
 
 options._commit = (internal, commitQueue) => {
@@ -81,10 +75,9 @@ options._commit = (internal, commitQueue) => {
 options.unmount = internal => {
 	if (oldBeforeUnmount) oldBeforeUnmount(internal);
 
-	const data = internal.data;
-	if (data && data.__hooks) {
+	if (internal.data && internal.data.__hooks) {
 		try {
-			data.__hooks._list.forEach(invokeCleanup);
+			internal.data.__hooks._list.forEach(invokeCleanup);
 		} catch (e) {
 			options._catchError(e, internal);
 		}
