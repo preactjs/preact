@@ -34,10 +34,10 @@ options._render = internal => {
 	currentInternal = internal;
 	currentIndex = 0;
 
-	if (currentInternal.data) {
-		currentInternal.data._pendingEffects.forEach(invokeCleanup);
-		currentInternal.data._pendingEffects.forEach(invokeEffect);
-		currentInternal.data._pendingEffects = [];
+	if (currentInternal.data && currentInternal.data.__hooks) {
+		currentInternal.data.__hooks._pendingEffects.forEach(invokeCleanup);
+		currentInternal.data.__hooks._pendingEffects.forEach(invokeEffect);
+		currentInternal.data.__hooks._pendingEffects = [];
 	}
 };
 

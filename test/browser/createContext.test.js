@@ -815,7 +815,7 @@ describe('createContext', () => {
 			expect(spy.getCall(0).args[0]).to.equal(instance);
 		});
 
-		it.only('should order updates correctly', () => {
+		it('should order updates correctly', () => {
 			const events = [];
 			let update;
 			const Store = createContext();
