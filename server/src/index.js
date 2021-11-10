@@ -240,12 +240,13 @@ function _renderToString(vnode, context, opts, inner, isSvgMode, selectValue) {
 				(name === 'key' ||
 					name === 'ref' ||
 					name === '__self' ||
-					name === '__source' ||
-					name === 'defaultValue')
+					name === '__source')
 			)
 				continue;
 
-			if (name === 'className') {
+			if (name === 'defaultValue') {
+				name = 'value';
+			} else if (name === 'className') {
 				if (props.class) continue;
 				name = 'class';
 			} else if (isSvgMode && name.match(/^xlink:?./)) {

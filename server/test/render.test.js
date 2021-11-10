@@ -82,9 +82,9 @@ describe('render', () => {
 			expect(rendered).to.equal(expected);
 		});
 
-		it('should omit defaultValue attribute', () => {
+		it('should serialize defaultValue props to the value attribute', () => {
 			let rendered = render(<div defaultValue="test" />),
-				expected = `<div></div>`;
+				expected = `<div value="test"></div>`;
 
 			expect(rendered).to.equal(expected);
 		});
