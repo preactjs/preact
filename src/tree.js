@@ -83,7 +83,7 @@ export function createInternal(vnode, parentInternal) {
 		props,
 		key,
 		ref,
-		data: typeof type === 'function' ? {} : undefined,
+		data: {},
 		flags,
 		_children: null,
 		_parent: parentInternal,
