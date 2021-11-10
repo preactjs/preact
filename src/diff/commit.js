@@ -26,7 +26,7 @@ export function commitRoot(commitQueue, rootInternal) {
 			commitQueue = internal._commitCallbacks.length;
 			// @ts-ignore See above ts-ignore comment
 			while (commitQueue--) {
-				internal._commitCallbacks.shift().call(internal._component);
+				internal._commitCallbacks.shift()();
 			}
 		} catch (e) {
 			options._catchError(e, internal);
