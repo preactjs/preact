@@ -83,7 +83,6 @@ export function createInternal(vnode, parentInternal) {
 		props,
 		key,
 		ref,
-		// TODO: we can probably do better by selectively initializing this
 		data: typeof type == 'function' ? {} : null,
 		flags,
 		_children: null,
