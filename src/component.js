@@ -56,7 +56,7 @@ Component.prototype.setState = function(update, callback) {
 
 	if (this._internal) {
 		if (callback) addCommitCallback(this._internal, callback.bind(this));
-		enqueueRender(this);
+		enqueueRender(this._internal);
 	}
 };
 
@@ -73,7 +73,7 @@ Component.prototype.forceUpdate = function(callback) {
 		// shouldComponentUpdate
 		this._internal.flags |= FORCE_UPDATE;
 		if (callback) addCommitCallback(this._internal, callback.bind(this));
-		enqueueRender(this);
+		enqueueRender(this._internal);
 	}
 };
 
@@ -90,12 +90,9 @@ Component.prototype.forceUpdate = function(callback) {
 Component.prototype.render = Fragment;
 
 /**
- * Trigger in-place re-rendering of a component.
- * @param {import('./internal').Component} component The component to rerender
+ * @param {import('./internal').Component} internal The internal to rerender
  */
-function rerenderComponent(component) {
-	let internal = component._internal;
-
+function rerenderComponent(internal) {
 	if (~internal.flags & MODE_UNMOUNTING && internal.flags & DIRTY_BIT) {
 		let parentDom = getParentDom(internal);
 		let startDom =
@@ -139,13 +136,13 @@ const defer = Promise.prototype.then.bind(Promise.resolve());
 
 /**
  * Enqueue a rerender of a component
- * @param {import('./internal').Component} c The component to rerender
+ * @param {import('./internal').Component} internal The internal to rerender
  */
-export function enqueueRender(c) {
+export function enqueueRender(internal) {
 	if (
-		(!(c._internal.flags & DIRTY_BIT) &&
-			(c._internal.flags |= DIRTY_BIT) &&
-			rerenderQueue.push(c) &&
+		(!(internal.flags & DIRTY_BIT) &&
+			(internal.flags |= DIRTY_BIT) &&
+			rerenderQueue.push(internal) &&
 			!process._rerenderCount++) ||
 		prevDebounce !== options.debounceRendering
 	) {
@@ -157,7 +154,7 @@ export function enqueueRender(c) {
 /** Flush the render queue by rerendering all queued components */
 function process() {
 	while ((len = process._rerenderCount = rerenderQueue.length)) {
-		rerenderQueue.sort((a, b) => a._internal._depth - b._internal._depth);
+		rerenderQueue.sort((a, b) => a._depth - b._depth);
 		while (len--) {
 			rerenderComponent(rerenderQueue.shift());
 		}

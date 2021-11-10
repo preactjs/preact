@@ -35,9 +35,7 @@ export const createContext = (defaultValue, contextId) => {
 			}
 			// re-render subscribers in response to value change
 			else if (props.value !== this._prev) {
-				this._subs.forEach(internal => {
-					enqueueRender(internal._component);
-				});
+				this._subs.forEach(enqueueRender);
 			}
 			this._prev = props.value;
 
