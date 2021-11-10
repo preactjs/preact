@@ -9,6 +9,7 @@
 - `[MAJOR]` Forward ref by default on functional components (this is not the case for compat)
 - `[MINOR]` Add truely controlled components
 - `[MINOR]` Add `createRoot` API
+- `[MAJOR]` Change `options._hook` to get an internal passed in (devtools)
 
 ## To verify
 

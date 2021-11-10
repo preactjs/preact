@@ -99,11 +99,7 @@ options.unmount = internal => {
  */
 function getHookState(index, type) {
 	if (options._hook) {
-		options._hook(
-			currentInternal && currentInternal._component,
-			index,
-			currentHook || type
-		);
+		options._hook(currentInternal, index, currentHook || type);
 	}
 	currentHook = 0;
 
