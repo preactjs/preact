@@ -154,8 +154,6 @@ export interface Component<P = {}, S = {}> extends preact.Component<P, S> {
 	// When component is functional component, this is reset to functional component
 	constructor: ComponentType<P>;
 	state: S; // Override Component["state"] to not be readonly for internal use, specifically Hooks
-	/** @TODO this should be moved to internal.data */
-	_globalContext?: any;
 	_internal?: Internal<P> | null;
 	_nextState?: S | null; // Only class components
 	/** Only used in the devtools to later dirty check if state has changed */
