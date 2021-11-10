@@ -5,11 +5,12 @@ let nextContextId = 0;
 const providers = new Set();
 
 export const unsubscribeFromContext = internal => {
-	console.log(providers);
 	// if this was a context provider, delete() returns true and we exit:
 	if (providers.delete(internal)) return;
 	// ... otherwise, unsubscribe from any contexts:
-	providers.forEach(p => p._component._subs.delete(internal));
+	providers.forEach(p => {
+		p._component._subs.delete(internal);
+	});
 };
 
 export const createContext = (defaultValue, contextId) => {
