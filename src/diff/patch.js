@@ -1,4 +1,4 @@
-import { diffChildren } from './children';
+import { diffChildren, reorderChildren } from './children';
 import { setProperty } from './props';
 import options from '../options';
 import { renderClassComponent, renderFunctionComponent } from './component';
@@ -13,9 +13,12 @@ import {
 	MODE_SVG,
 	UNDEFINED,
 	MODE_PENDING_ERROR,
-	MODE_RERENDERING_ERROR
+	MODE_RERENDERING_ERROR,
+	SKIP_CHILDREN
 } from '../constants';
 import { getChildDom, getDomSibling } from '../tree';
+import { Fragment } from '..';
+import { mountChildren } from './mount';
 
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
@@ -107,6 +110,40 @@ export function patch(parentDom, newVNode, internal, commitQueue, startDom) {
 				commitQueue,
 				startDom
 			);
+		}
+
+		if (internal.flags & SKIP_CHILDREN) {
+			internal.flags &= ~SKIP_CHILDREN;
+			// TODO: Returning undefined here (i.e. return;) passes all tests. That seems
+			// like a bug. Should validate that we have test coverage for sCU that
+			// returns Fragments with multiple DOM children
+			nextDomSibling = reorderChildren(internal, startDom, parentDom);
+		} else {
+			let isTopLevelFragment =
+				nextDomSibling != null &&
+				nextDomSibling.type === Fragment &&
+				nextDomSibling.key == null;
+			let renderResult = isTopLevelFragment
+				? nextDomSibling.props.children
+				: nextDomSibling;
+
+			if (internal._children == null) {
+				nextDomSibling = mountChildren(
+					parentDom,
+					Array.isArray(renderResult) ? renderResult : [renderResult],
+					internal,
+					commitQueue,
+					startDom
+				);
+			} else {
+				nextDomSibling = diffChildren(
+					parentDom,
+					Array.isArray(renderResult) ? renderResult : [renderResult],
+					internal,
+					commitQueue,
+					startDom
+				);
+			}
 		}
 
 		if (internal._commitCallbacks != null && internal._commitCallbacks.length) {

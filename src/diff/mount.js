@@ -17,6 +17,8 @@ import { setProperty } from './props';
 import { renderClassComponent, renderFunctionComponent } from './component';
 import { createInternal } from '../tree';
 import options from '../options';
+import { Fragment } from '..';
+import { diffChildren } from './children';
 
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
@@ -61,6 +63,32 @@ export function mount(parentDom, newVNode, internal, commitQueue, startDom) {
 				nextDomSibling = renderFunctionComponent(
 					parentDom,
 					null,
+					internal,
+					commitQueue,
+					startDom
+				);
+			}
+
+			let isTopLevelFragment =
+				nextDomSibling != null &&
+				nextDomSibling.type === Fragment &&
+				nextDomSibling.key == null;
+			let renderResult = isTopLevelFragment
+				? nextDomSibling.props.children
+				: nextDomSibling;
+
+			if (internal._children == null) {
+				nextDomSibling = mountChildren(
+					parentDom,
+					Array.isArray(renderResult) ? renderResult : [renderResult],
+					internal,
+					commitQueue,
+					startDom
+				);
+			} else {
+				nextDomSibling = diffChildren(
+					parentDom,
+					Array.isArray(renderResult) ? renderResult : [renderResult],
 					internal,
 					commitQueue,
 					startDom

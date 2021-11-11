@@ -1,8 +1,5 @@
-import { Fragment } from '../create-element';
 import options from '../options';
-import { mountChildren } from './mount';
-import { diffChildren, reorderChildren } from './children';
-import { DIRTY_BIT, FORCE_UPDATE } from '../constants';
+import { DIRTY_BIT, FORCE_UPDATE, SKIP_CHILDREN } from '../constants';
 import { addCommitCallback } from './commit';
 import { getParentContext } from '../tree';
 
@@ -52,10 +49,8 @@ export function renderFunctionComponent(
 	if (newVNode && newVNode._vnodeId === internal._vnodeId) {
 		internal.props = c.props = newProps;
 		c._internal = internal;
-		// TODO: Returning undefined here (i.e. return;) passes all tests. That seems
-		// like a bug. Should validate that we have test coverage for sCU that
-		// returns Fragments with multiple DOM children
-		return reorderChildren(internal, startDom, parentDom);
+		internal.flags |= SKIP_CHILDREN;
+		return;
 	}
 
 	c.context = componentContext;
@@ -72,31 +67,7 @@ export function renderFunctionComponent(
 		internal._context = Object.assign({}, context, c.getChildContext());
 	}
 
-	let isTopLevelFragment =
-		tmp != null && tmp.type === Fragment && tmp.key == null;
-	let renderResult = isTopLevelFragment ? tmp.props.children : tmp;
-
-	let nextDomSibling;
-
-	if (internal._children == null) {
-		nextDomSibling = mountChildren(
-			parentDom,
-			Array.isArray(renderResult) ? renderResult : [renderResult],
-			internal,
-			commitQueue,
-			startDom
-		);
-	} else {
-		nextDomSibling = diffChildren(
-			parentDom,
-			Array.isArray(renderResult) ? renderResult : [renderResult],
-			internal,
-			commitQueue,
-			startDom
-		);
-	}
-
-	return nextDomSibling;
+	return tmp;
 }
 
 /**
@@ -203,11 +174,12 @@ export function renderClassComponent(
 			}
 
 			c._internal = internal;
+			internal.flags |= SKIP_CHILDREN;
 
 			// TODO: Returning undefined here (i.e. return;) passes all tests. That seems
 			// like a bug. Should validate that we have test coverage for sCU that
 			// returns Fragments with multiple DOM children
-			return reorderChildren(internal, startDom, parentDom);
+			return undefined;
 		}
 
 		if (c.componentWillUpdate != null) {
@@ -246,29 +218,5 @@ export function renderClassComponent(
 		}
 	}
 
-	let isTopLevelFragment =
-		tmp != null && tmp.type === Fragment && tmp.key == null;
-	let renderResult = isTopLevelFragment ? tmp.props.children : tmp;
-
-	let nextDomSibling;
-
-	if (internal._children == null) {
-		nextDomSibling = mountChildren(
-			parentDom,
-			Array.isArray(renderResult) ? renderResult : [renderResult],
-			internal,
-			commitQueue,
-			startDom
-		);
-	} else {
-		nextDomSibling = diffChildren(
-			parentDom,
-			Array.isArray(renderResult) ? renderResult : [renderResult],
-			internal,
-			commitQueue,
-			startDom
-		);
-	}
-
-	return nextDomSibling;
+	return tmp;
 }
