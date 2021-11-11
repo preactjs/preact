@@ -1,14 +1,15 @@
 import options from '../options';
 import { DIRTY_BIT, FORCE_UPDATE, SKIP_CHILDREN } from '../constants';
 import { addCommitCallback } from './commit';
-import { getParentContext } from '../tree';
 
 export function renderFunctionComponent(
 	parentDom,
 	newVNode,
 	internal,
 	commitQueue,
-	startDom
+	startDom,
+	context,
+	componentContext
 ) {
 	/** @type {import('../internal').Component} */
 	let c;
@@ -20,18 +21,6 @@ export function renderFunctionComponent(
 	// @TODO split update + mount?
 	let newProps = newVNode ? newVNode.props : internal.props;
 
-	const context = getParentContext(internal);
-
-	// Necessary for createContext api. Setting this property will pass
-	// the context value as `this.context` just for this component.
-	tmp = type.contextType;
-	let provider = tmp && context[tmp._id];
-	let componentContext = tmp
-		? provider
-			? provider.props.value
-			: tmp._defaultValue
-		: context;
-
 	if (internal && internal._component) {
 		c = internal._component;
 	} else {
@@ -41,14 +30,11 @@ export function renderFunctionComponent(
 			forceUpdate: internal.rerender.bind(null, internal)
 		};
 
-		if (provider) provider._subs.add(internal);
-
 		internal.flags |= DIRTY_BIT;
 	}
 
 	if (newVNode && newVNode._vnodeId === internal._vnodeId) {
-		internal.props = c.props = newProps;
-		c._internal = internal;
+		c.props = newProps;
 		internal.flags |= SKIP_CHILDREN;
 		return;
 	}
@@ -85,7 +71,9 @@ export function renderClassComponent(
 	newVNode,
 	internal,
 	commitQueue,
-	startDom
+	startDom,
+	context,
+	componentContext
 ) {
 	/** @type {import('../internal').Component} */
 	let c;
@@ -97,25 +85,11 @@ export function renderClassComponent(
 	// @TODO split update + mount?
 	let newProps = newVNode ? newVNode.props : internal.props;
 
-	const context = getParentContext(internal);
-
-	// Necessary for createContext api. Setting this property will pass
-	// the context value as `this.context` just for this component.
-	tmp = type.contextType;
-	let provider = tmp && context[tmp._id];
-	let componentContext = tmp
-		? provider
-			? provider.props.value
-			: tmp._defaultValue
-		: context;
-
 	if (internal && internal._component) {
 		c = internal._component;
 	} else {
 		// @ts-ignore The check above verifies that newType is suppose to be constructed
 		internal._component = c = new type(newProps, componentContext); // eslint-disable-line new-cap
-
-		if (provider) provider._subs.add(internal);
 
 		if (!c.state) c.state = {};
 		isNew = true;
@@ -166,20 +140,10 @@ export function renderClassComponent(
 					false) ||
 			(newVNode && newVNode._vnodeId === internal._vnodeId)
 		) {
-			internal.props = c.props = newProps;
+			c.props = newProps;
 			c.state = c._nextState;
-			// More info about this here: https://gist.github.com/JoviDeCroock/bec5f2ce93544d2e6070ef8e0036e4e8
-			if (newVNode && newVNode._vnodeId !== internal._vnodeId) {
-				internal.flags &= ~DIRTY_BIT;
-			}
-
-			c._internal = internal;
 			internal.flags |= SKIP_CHILDREN;
-
-			// TODO: Returning undefined here (i.e. return;) passes all tests. That seems
-			// like a bug. Should validate that we have test coverage for sCU that
-			// returns Fragments with multiple DOM children
-			return undefined;
+			return;
 		}
 
 		if (c.componentWillUpdate != null) {
