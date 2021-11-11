@@ -1,7 +1,7 @@
 import { diffChildren } from './children';
 import { setProperty } from './props';
 import options from '../options';
-import { renderComponent } from './component';
+import { renderClassComponent, renderFunctionComponent } from './component';
 import {
 	RESET_MODE,
 	TYPE_TEXT,
@@ -9,6 +9,7 @@ import {
 	MODE_SUSPENDED,
 	MODE_ERRORED,
 	TYPE_ROOT,
+	TYPE_CLASS,
 	MODE_SVG,
 	UNDEFINED
 } from '../constants';
@@ -81,14 +82,23 @@ export function patch(parentDom, newVNode, internal, commitQueue, startDom) {
 	}
 
 	try {
-		nextDomSibling = renderComponent(
-			parentDom,
-			/** @type {import('../internal').VNode} */
-			(newVNode),
-			internal,
-			commitQueue,
-			startDom
-		);
+		if (internal.flags & TYPE_CLASS) {
+			nextDomSibling = renderClassComponent(
+				parentDom,
+				newVNode,
+				internal,
+				commitQueue,
+				startDom
+			);
+		} else {
+			nextDomSibling = renderFunctionComponent(
+				parentDom,
+				newVNode,
+				internal,
+				commitQueue,
+				startDom
+			);
+		}
 	} catch (e) {
 		// @TODO: assign a new VNode ID here? Or NaN?
 		// newVNode._vnodeId = 0;
