@@ -56,7 +56,7 @@ Component.prototype.setState = function(update, callback) {
 
 	if (this._internal) {
 		if (callback) addCommitCallback(this._internal, callback.bind(this));
-		this._internal.rerender();
+		this._internal.rerender(this._internal);
 	}
 };
 
@@ -73,7 +73,7 @@ Component.prototype.forceUpdate = function(callback) {
 		// shouldComponentUpdate
 		this._internal.flags |= FORCE_UPDATE;
 		if (callback) addCommitCallback(this._internal, callback.bind(this));
-		this._internal.rerender();
+		this._internal.rerender(this._internal);
 	}
 };
 

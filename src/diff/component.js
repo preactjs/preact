@@ -41,7 +41,7 @@ export function renderFunctionComponent(
 		internal._component = c = {
 			props: newProps,
 			context: componentContext,
-			forceUpdate: internal.rerender
+			forceUpdate: internal.rerender.bind(null, internal)
 		};
 
 		if (provider) provider._subs.add(internal);
