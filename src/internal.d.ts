@@ -129,6 +129,14 @@ export interface Internal<P = {}> {
 	props: (P & { children: ComponentChildren }) | string | number;
 	key: any;
 	ref: Ref<any> | null;
+
+	/** Bitfield containing information about the Internal or its component. */
+	flags: number;
+	/** Polymorphic property to store extensions like hooks on */
+	data: object;
+	/** The function that triggers in-place re-renders for an internal */
+	rerender: () => void;
+
 	/** children Internal nodes */
 	_children: Internal[];
 	/** next sibling Internal node */
@@ -142,8 +150,6 @@ export interface Internal<P = {}> {
 	_dom: PreactNode;
 	/** The component instance for which this is a backing Internal node */
 	_component: Component | null;
-	/** Bitfield containing information about the Internal or its component. */
-	flags: number;
 	/** This Internal's distance from the tree root */
 	_depth: number | null;
 	/** Callbacks to invoke when this internal commits */
