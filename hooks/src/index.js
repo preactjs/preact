@@ -140,8 +140,6 @@ export function useReducer(reducer, initialState, init) {
 				const nextValue = hookState._reducer(hookState._value[0], action);
 				if (hookState._value[0] !== nextValue) {
 					hookState._value = [nextValue, hookState._value[1]];
-
-					// TODO: this needs to change to a rerender mechanism not on "_component"
 					hookState._internal.rerender();
 				}
 			}
@@ -265,6 +263,23 @@ export function useDebugValue(value, formatter) {
 	}
 }
 
+const oldCatchError = options._catchError;
+// TODO: this double traverses now in combination with the root _catchError
+// however when we split Component up this shouldn't be needed
+// there can be a better solution to this if we just do a single iteration
+// as a combination of suspsense + hooks + component (compat) would be 3 tree-iterations
+options._catchError = function(error, internal) {
+	/** @type {import('./internal').Component} */
+	let handler = internal;
+	for (; (handler = handler._parent); ) {
+		if (handler.data && handler.data._catchError) {
+			return handler.data._catchError(error, internal);
+		}
+	}
+
+	oldCatchError(error, internal);
+};
+
 /**
  * @param {(error: any) => void} cb
  */
@@ -274,9 +289,8 @@ export function useErrorBoundary(cb) {
 	const errState = useState();
 	state._value = cb;
 
-	// TODO: this needs to move to a flag
-	if (!currentInternal._component.componentDidCatch) {
-		currentInternal._component.componentDidCatch = err => {
+	if (!currentInternal.data._catchError) {
+		currentInternal.data._catchError = err => {
 			if (state._value) state._value(err);
 			errState[1](err);
 		};
