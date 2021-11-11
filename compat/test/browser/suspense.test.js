@@ -181,7 +181,7 @@ describe('suspense', () => {
 
 		return resolve(LazyResult).then(() => {
 			rerender();
-			expect(ref.current.constructor).to.equal(LazyResult);
+			expect(ref.current._internal.type).to.equal(LazyResult);
 		});
 	});
 

@@ -56,9 +56,6 @@ export function renderFunctionComponent(
 		if (provider) provider._subs.add(internal);
 
 		c.props = newProps;
-		c.context = componentContext;
-		c.constructor = type;
-		c.render = doRender;
 		internal.flags |= DIRTY_BIT;
 		isNew = true;
 	}
@@ -66,9 +63,9 @@ export function renderFunctionComponent(
 	if (
 		(!isNew &&
 			!(internal.flags & FORCE_UPDATE) &&
-				c.shouldComponentUpdate != null &&
-				c.shouldComponentUpdate(newProps, c._nextState, componentContext) ===
-					false) ||
+			c.shouldComponentUpdate != null &&
+			c.shouldComponentUpdate(newProps, c._nextState, componentContext) ===
+				false) ||
 		(newVNode && newVNode._vnodeId === internal._vnodeId)
 	) {
 		internal.props = c.props = newProps;
@@ -96,7 +93,7 @@ export function renderFunctionComponent(
 	internal.flags &= ~DIRTY_BIT;
 	c._internal = internal;
 
-	tmp = c.render(c.props, c.state, c.context);
+	tmp = type.call(c, c.props, c.context);
 
 	if (c.getChildContext != null) {
 		internal._context = Object.assign({}, context, c.getChildContext());
@@ -189,7 +186,6 @@ export function renderClassComponent(
 
 		c.props = newProps;
 		if (!c.state) c.state = {};
-		c.context = componentContext;
 		isNew = true;
 		internal.flags |= DIRTY_BIT;
 	}
@@ -324,9 +320,4 @@ export function renderClassComponent(
 	}
 
 	return nextDomSibling;
-}
-
-/** The `.render()` method for a PFC backing instance. */
-function doRender(props, state, context) {
-	return this.constructor(props, context);
 }
