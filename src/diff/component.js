@@ -15,7 +15,7 @@ export function renderFunctionComponent(
 ) {
 	/** @type {import('../internal').Component} */
 	let c;
-	let tmp, isNew;
+	let tmp;
 
 	/** @type {import('../internal').ComponentType} */
 	let type = (internal.type);
@@ -47,25 +47,11 @@ export function renderFunctionComponent(
 		if (provider) provider._subs.add(internal);
 
 		internal.flags |= DIRTY_BIT;
-		isNew = true;
 	}
 
-	if (
-		(!isNew &&
-			!(internal.flags & FORCE_UPDATE) &&
-			c.shouldComponentUpdate != null &&
-			c.shouldComponentUpdate(newProps, c._nextState, componentContext) ===
-				false) ||
-		(newVNode && newVNode._vnodeId === internal._vnodeId)
-	) {
+	if (newVNode && newVNode._vnodeId === internal._vnodeId) {
 		internal.props = c.props = newProps;
-		// More info about this here: https://gist.github.com/JoviDeCroock/bec5f2ce93544d2e6070ef8e0036e4e8
-		if (newVNode && newVNode._vnodeId !== internal._vnodeId) {
-			internal.flags &= ~DIRTY_BIT;
-		}
-
 		c._internal = internal;
-
 		// TODO: Returning undefined here (i.e. return;) passes all tests. That seems
 		// like a bug. Should validate that we have test coverage for sCU that
 		// returns Fragments with multiple DOM children

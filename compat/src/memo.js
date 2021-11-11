@@ -1,4 +1,4 @@
-import { createElement } from 'preact';
+import { createElement, Component } from 'preact';
 import { shallowDiffers } from './util';
 
 /**
@@ -9,7 +9,16 @@ import { shallowDiffers } from './util';
  * @returns {import('./internal').FunctionComponent}
  */
 export function memo(c, comparer) {
-	function shouldUpdate(nextProps) {
+	function Memoed() {}
+
+	Memoed.prototype = new Component();
+	Memoed.displayName = 'Memo(' + (c.displayName || c.name) + ')';
+	// eslint-disable-next-line
+	Memoed.prototype.render = function(props) {
+		return createElement(c, props);
+	};
+
+	Memoed.prototype.shouldComponentUpdate = function(nextProps) {
 		let ref = this.props.ref;
 		let updateRef = ref == nextProps.ref;
 		if (!updateRef && ref) {
@@ -21,13 +30,8 @@ export function memo(c, comparer) {
 		}
 
 		return !comparer(this.props, nextProps) || !updateRef;
-	}
+	};
 
-	function Memoed(props) {
-		this.shouldComponentUpdate = shouldUpdate;
-		return createElement(c, props);
-	}
-	Memoed.displayName = 'Memo(' + (c.displayName || c.name) + ')';
 	Memoed.prototype.isReactComponent = true;
 	Memoed._forwarded = true;
 	return Memoed;
