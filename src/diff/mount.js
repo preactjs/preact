@@ -12,14 +12,11 @@ import {
 	TYPE_ROOT,
 	MODE_SVG
 } from '../constants';
-import { normalizeToVNode } from '../create-element';
+import { normalizeToVNode, Fragment } from '../create-element';
 import { setProperty } from './props';
 import { renderClassComponent, renderFunctionComponent } from './component';
 import { createInternal, getParentContext } from '../tree';
 import options from '../options';
-import { Fragment } from '..';
-import { diffChildren } from './children';
-
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
  * @param {import('../internal').PreactElement} parentDom The parent of the DOM element
@@ -91,27 +88,18 @@ export function mount(parentDom, newVNode, internal, commitQueue, startDom) {
 				nextDomSibling != null &&
 				nextDomSibling.type === Fragment &&
 				nextDomSibling.key == null;
+
 			let renderResult = isTopLevelFragment
 				? nextDomSibling.props.children
 				: nextDomSibling;
 
-			if (internal._children == null) {
-				nextDomSibling = mountChildren(
-					parentDom,
-					Array.isArray(renderResult) ? renderResult : [renderResult],
-					internal,
-					commitQueue,
-					startDom
-				);
-			} else {
-				nextDomSibling = diffChildren(
-					parentDom,
-					Array.isArray(renderResult) ? renderResult : [renderResult],
-					internal,
-					commitQueue,
-					startDom
-				);
-			}
+			nextDomSibling = mountChildren(
+				parentDom,
+				Array.isArray(renderResult) ? renderResult : [renderResult],
+				internal,
+				commitQueue,
+				startDom
+			);
 
 			if (
 				internal._commitCallbacks != null &&

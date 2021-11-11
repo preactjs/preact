@@ -18,8 +18,8 @@ import {
 	DIRTY_BIT
 } from '../constants';
 import { getChildDom, getDomSibling, getParentContext } from '../tree';
-import { Fragment } from '..';
 import { mountChildren } from './mount';
+import { Fragment } from '../create-element';
 
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
