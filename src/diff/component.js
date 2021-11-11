@@ -1,6 +1,5 @@
 import { Fragment } from '../create-element';
 import options from '../options';
-import { Component } from '../component';
 import { mountChildren } from './mount';
 import { diffChildren, reorderChildren } from './children';
 import {
@@ -51,11 +50,14 @@ export function renderFunctionComponent(
 	if (internal && internal._component) {
 		c = internal._component;
 	} else {
-		internal._component = c = new Component(newProps, componentContext);
+		internal._component = c = {
+			props: newProps,
+			context: componentContext,
+			forceUpdate: internal.rerender
+		};
 
 		if (provider) provider._subs.add(internal);
 
-		c.props = newProps;
 		internal.flags |= DIRTY_BIT;
 		isNew = true;
 	}
@@ -184,7 +186,6 @@ export function renderClassComponent(
 
 		if (provider) provider._subs.add(internal);
 
-		c.props = newProps;
 		if (!c.state) c.state = {};
 		isNew = true;
 		internal.flags |= DIRTY_BIT;

@@ -142,7 +142,7 @@ export function useReducer(reducer, initialState, init) {
 					hookState._value = [nextValue, hookState._value[1]];
 
 					// TODO: this needs to change to a rerender mechanism not on "_component"
-					hookState._internal._component.setState({});
+					hookState._internal.rerender();
 				}
 			}
 		];

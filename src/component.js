@@ -56,7 +56,7 @@ Component.prototype.setState = function(update, callback) {
 
 	if (this._internal) {
 		if (callback) addCommitCallback(this._internal, callback.bind(this));
-		enqueueRender(this._internal);
+		this._internal.rerender();
 	}
 };
 
@@ -73,7 +73,7 @@ Component.prototype.forceUpdate = function(callback) {
 		// shouldComponentUpdate
 		this._internal.flags |= FORCE_UPDATE;
 		if (callback) addCommitCallback(this._internal, callback.bind(this));
-		enqueueRender(this._internal);
+		this._internal.rerender();
 	}
 };
 
@@ -92,7 +92,7 @@ Component.prototype.render = Fragment;
 /**
  * @param {import('./internal').Component} internal The internal to rerender
  */
-function rerenderComponent(internal) {
+function rerender(internal) {
 	if (~internal.flags & MODE_UNMOUNTING && internal.flags & DIRTY_BIT) {
 		let parentDom = getParentDom(internal);
 		let startDom =
@@ -156,7 +156,7 @@ function process() {
 	while ((len = process._rerenderCount = rerenderQueue.length)) {
 		rerenderQueue.sort((a, b) => a._depth - b._depth);
 		while (len--) {
-			rerenderComponent(rerenderQueue.shift());
+			rerender(rerenderQueue.shift());
 		}
 	}
 }
