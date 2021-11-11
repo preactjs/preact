@@ -11,6 +11,7 @@ import {
 	MODE_SVG,
 	UNDEFINED
 } from './constants';
+import { enqueueRender } from './component';
 
 /**
  * Create an internal tree node
@@ -83,12 +84,14 @@ export function createInternal(vnode, parentInternal) {
 		props,
 		key,
 		ref,
+		data: typeof type == 'function' ? {} : null,
+		rerender: enqueueRender,
+		flags,
 		_children: null,
 		_parent: parentInternal,
 		_vnodeId: vnodeId,
 		_dom: null,
 		_component: null,
-		flags,
 		_context: null,
 		_depth: parentInternal ? parentInternal._depth + 1 : 0
 	};

@@ -23,7 +23,7 @@ export function unmount(internal, parentInternal, skipRemove) {
 	}
 
 	if ((r = internal._component)) {
-		unsubscribeFromContext(r);
+		unsubscribeFromContext(internal);
 
 		if (r.componentWillUnmount) {
 			try {

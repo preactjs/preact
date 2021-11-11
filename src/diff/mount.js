@@ -7,13 +7,14 @@ import {
 	MODE_SUSPENDED,
 	RESET_MODE,
 	TYPE_TEXT,
+	TYPE_CLASS,
 	MODE_ERRORED,
 	TYPE_ROOT,
 	MODE_SVG
 } from '../constants';
 import { normalizeToVNode } from '../create-element';
 import { setProperty } from './props';
-import { renderComponent } from './component';
+import { renderClassComponent, renderFunctionComponent } from './component';
 import { createInternal } from '../tree';
 import options from '../options';
 
@@ -48,13 +49,30 @@ export function mount(parentDom, newVNode, internal, commitQueue, startDom) {
 				}
 			}
 
-			nextDomSibling = renderComponent(
-				parentDom,
-				null,
-				internal,
-				commitQueue,
-				startDom
-			);
+			if (internal.flags & TYPE_CLASS) {
+				nextDomSibling = renderClassComponent(
+					parentDom,
+					null,
+					internal,
+					commitQueue,
+					startDom
+				);
+			} else {
+				nextDomSibling = renderFunctionComponent(
+					parentDom,
+					null,
+					internal,
+					commitQueue,
+					startDom
+				);
+			}
+
+			if (
+				internal._commitCallbacks != null &&
+				internal._commitCallbacks.length
+			) {
+				commitQueue.push(internal);
+			}
 
 			if (internal.flags & TYPE_ROOT && prevParentDom !== parentDom) {
 				// If we just mounted a root node/Portal, and it changed the parentDom

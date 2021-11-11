@@ -282,12 +282,12 @@ export function initDebug() {
 		if (oldBeforeDiff) oldBeforeDiff(internal, vnode);
 	};
 
-	options._hook = (comp, index, type) => {
-		if (!comp || !hooksAllowed) {
+	options._hook = (internal, index, type) => {
+		if (!internal || !hooksAllowed) {
 			throw new Error('Hook can only be invoked from render methods.');
 		}
 
-		if (oldHook) oldHook(comp, index, type);
+		if (oldHook) oldHook(internal, index, type);
 	};
 
 	// Ideally we'd want to print a warning once per component, but we

@@ -9,6 +9,7 @@
 - `[MAJOR]` Forward ref by default on functional components (this is not the case for compat)
 - `[MINOR]` Add truely controlled components
 - `[MINOR]` Add `createRoot` API
+- `[MAJOR]` Change `options._hook` to get an internal passed in (devtools)
 
 ## To verify
 
@@ -42,7 +43,6 @@ PR's that weren't backported yet, do they work?
 
 - Address many TODOs
 - Move refs to internal renderCallbacks
-- Rewrite rerender loop to operate on internals, not components
 - Consider converting Fragment (and other special nodes, e.g. root, Portal,
   context?) to be numbers instead of functions with special diff handling
 

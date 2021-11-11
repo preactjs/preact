@@ -75,6 +75,8 @@ describe('useEffect', () => {
 			return <p>Test</p>;
 		};
 		act(() => render(<App i={0} />, scratch));
+		expect(executionOrder).to.deep.equal(['action1', 'action2']);
+
 		act(() => render(<App i={2} />, scratch));
 		expect(executionOrder).to.deep.equal([
 			'cleanup1',

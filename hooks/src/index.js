@@ -1,4 +1,5 @@
 import { options } from 'preact';
+import { getParentContext } from 'preact/src/tree';
 import { MODE_UNMOUNTING } from '../../src/constants';
 
 /** @type {number} */
@@ -6,13 +7,6 @@ let currentIndex;
 
 /** @type {import('./internal').Internal} */
 let currentInternal;
-/**
- * Keep track of the previous component so that we can set
- * `currentComponent` to `null` and throw when a hook is invoked
- * outside of render
- * @type {import('./internal').Internal}
- */
-let previousInternal;
 
 /** @type {number} */
 let currentHook = 0;
@@ -40,22 +34,23 @@ options._render = internal => {
 	currentInternal = internal;
 	currentIndex = 0;
 
-	const hooks = currentInternal._component.__hooks;
-	if (hooks) {
-		hooks._pendingEffects.forEach(invokeCleanup);
-		hooks._pendingEffects.forEach(invokeEffect);
-		hooks._pendingEffects = [];
+	if (currentInternal.data && currentInternal.data.__hooks) {
+		currentInternal.data.__hooks._pendingEffects.forEach(invokeCleanup);
+		currentInternal.data.__hooks._pendingEffects.forEach(invokeEffect);
+		currentInternal.data.__hooks._pendingEffects = [];
 	}
 };
 
 options.diffed = internal => {
 	if (oldAfterDiff) oldAfterDiff(internal);
 
-	const c = internal._component;
-	if (c && c.__hooks && c.__hooks._pendingEffects.length) {
-		afterPaint(afterPaintEffects.push(c));
+	if (
+		internal.data &&
+		internal.data.__hooks &&
+		internal.data.__hooks._pendingEffects.length
+	) {
+		afterPaint(afterPaintEffects.push(internal));
 	}
-	currentInternal = previousInternal;
 };
 
 options._commit = (internal, commitQueue) => {
@@ -80,12 +75,11 @@ options._commit = (internal, commitQueue) => {
 options.unmount = internal => {
 	if (oldBeforeUnmount) oldBeforeUnmount(internal);
 
-	const c = internal._component;
-	if (c && c.__hooks) {
+	if (internal.data && internal.data.__hooks) {
 		try {
-			c.__hooks._list.forEach(invokeCleanup);
+			internal.data.__hooks._list.forEach(invokeCleanup);
 		} catch (e) {
-			options._catchError(e, c._internal);
+			options._catchError(e, internal);
 		}
 	}
 };
@@ -98,11 +92,7 @@ options.unmount = internal => {
  */
 function getHookState(index, type) {
 	if (options._hook) {
-		options._hook(
-			currentInternal && currentInternal._component,
-			index,
-			currentHook || type
-		);
+		options._hook(currentInternal, index, currentHook || type);
 	}
 	currentHook = 0;
 
@@ -112,8 +102,8 @@ function getHookState(index, type) {
 	// Other implementations to look at:
 	// * https://codesandbox.io/s/mnox05qp8
 	const hooks =
-		currentInternal._component.__hooks ||
-		(currentInternal._component.__hooks = {
+		currentInternal.data.__hooks ||
+		(currentInternal.data.__hooks = {
 			_list: [],
 			_pendingEffects: []
 		});
@@ -150,7 +140,7 @@ export function useReducer(reducer, initialState, init) {
 				const nextValue = hookState._reducer(hookState._value[0], action);
 				if (hookState._value[0] !== nextValue) {
 					hookState._value = [nextValue, hookState._value[1]];
-					hookState._internal._component.setState({});
+					hookState._internal.rerender(hookState._internal);
 				}
 			}
 		];
@@ -172,7 +162,7 @@ export function useEffect(callback, args) {
 		state._value = callback;
 		state._args = args;
 
-		currentInternal._component.__hooks._pendingEffects.push(state);
+		currentInternal.data.__hooks._pendingEffects.push(state);
 	}
 }
 
@@ -244,7 +234,7 @@ export function useCallback(callback, args) {
  * @param {import('./internal').PreactContext} context
  */
 export function useContext(context) {
-	const provider = currentInternal._component.context[context._id];
+	const provider = getParentContext(currentInternal)[context._id];
 	// We could skip this call here, but than we'd not call
 	// `options._hook`. We need to do that in order to make
 	// the devtools aware of this hook.
@@ -258,7 +248,7 @@ export function useContext(context) {
 	// This is probably not safe to convert to "!"
 	if (state._value == null) {
 		state._value = true;
-		provider._subs.add(currentInternal._component);
+		provider._subs.add(currentInternal);
 	}
 	return provider.props.value;
 }
@@ -273,6 +263,23 @@ export function useDebugValue(value, formatter) {
 	}
 }
 
+const oldCatchError = options._catchError;
+// TODO: this double traverses now in combination with the root _catchError
+// however when we split Component up this shouldn't be needed
+// there can be a better solution to this if we just do a single iteration
+// as a combination of suspsense + hooks + component (compat) would be 3 tree-iterations
+options._catchError = function(error, internal) {
+	/** @type {import('./internal').Component} */
+	let handler = internal;
+	for (; (handler = handler._parent); ) {
+		if (handler.data && handler.data._catchError) {
+			return handler.data._catchError(error, internal);
+		}
+	}
+
+	oldCatchError(error, internal);
+};
+
 /**
  * @param {(error: any) => void} cb
  */
@@ -281,8 +288,9 @@ export function useErrorBoundary(cb) {
 	const state = getHookState(currentIndex++, 10);
 	const errState = useState();
 	state._value = cb;
-	if (!currentInternal._component.componentDidCatch) {
-		currentInternal._component.componentDidCatch = err => {
+
+	if (!currentInternal.data._catchError) {
+		currentInternal.data._catchError = err => {
 			if (state._value) state._value(err);
 			errState[1](err);
 		};
@@ -299,15 +307,15 @@ export function useErrorBoundary(cb) {
  * After paint effects consumer.
  */
 function flushAfterPaintEffects() {
-	afterPaintEffects.forEach(component => {
-		if (~component._internal.flags & MODE_UNMOUNTING) {
+	afterPaintEffects.forEach(internal => {
+		if (~internal.flags & MODE_UNMOUNTING) {
 			try {
-				component.__hooks._pendingEffects.forEach(invokeCleanup);
-				component.__hooks._pendingEffects.forEach(invokeEffect);
-				component.__hooks._pendingEffects = [];
+				internal.data.__hooks._pendingEffects.forEach(invokeCleanup);
+				internal.data.__hooks._pendingEffects.forEach(invokeEffect);
+				internal.data.__hooks._pendingEffects = [];
 			} catch (e) {
-				component.__hooks._pendingEffects = [];
-				options._catchError(e, component._internal);
+				internal.data.__hooks._pendingEffects = [];
+				options._catchError(e, internal);
 			}
 		}
 	});
