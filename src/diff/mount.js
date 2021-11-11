@@ -67,6 +67,13 @@ export function mount(parentDom, newVNode, internal, commitQueue, startDom) {
 				);
 			}
 
+			if (
+				internal._commitCallbacks != null &&
+				internal._commitCallbacks.length
+			) {
+				commitQueue.push(internal);
+			}
+
 			if (internal.flags & TYPE_ROOT && prevParentDom !== parentDom) {
 				// If we just mounted a root node/Portal, and it changed the parentDom
 				// of it's children, then we need to resume the diff from it's previous

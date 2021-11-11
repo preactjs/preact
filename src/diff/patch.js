@@ -11,7 +11,9 @@ import {
 	TYPE_ROOT,
 	TYPE_CLASS,
 	MODE_SVG,
-	UNDEFINED
+	UNDEFINED,
+	MODE_PENDING_ERROR,
+	MODE_RERENDERING_ERROR
 } from '../constants';
 import { getChildDom, getDomSibling } from '../tree';
 
@@ -82,6 +84,13 @@ export function patch(parentDom, newVNode, internal, commitQueue, startDom) {
 	}
 
 	try {
+		if (internal.flags & MODE_PENDING_ERROR) {
+			// Toggle the MODE_PENDING_ERROR and MODE_RERENDERING_ERROR flags. In
+			// actuality, this should turn off the MODE_PENDING_ERROR flag and turn on
+			// the MODE_RERENDERING_ERROR flag.
+			internal.flags ^= MODE_PENDING_ERROR | MODE_RERENDERING_ERROR;
+		}
+
 		if (internal.flags & TYPE_CLASS) {
 			nextDomSibling = renderClassComponent(
 				parentDom,
@@ -98,6 +107,10 @@ export function patch(parentDom, newVNode, internal, commitQueue, startDom) {
 				commitQueue,
 				startDom
 			);
+		}
+
+		if (internal._commitCallbacks != null && internal._commitCallbacks.length) {
+			commitQueue.push(internal);
 		}
 	} catch (e) {
 		// @TODO: assign a new VNode ID here? Or NaN?

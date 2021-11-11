@@ -2,12 +2,7 @@ import { Fragment } from '../create-element';
 import options from '../options';
 import { mountChildren } from './mount';
 import { diffChildren, reorderChildren } from './children';
-import {
-	DIRTY_BIT,
-	FORCE_UPDATE,
-	MODE_PENDING_ERROR,
-	MODE_RERENDERING_ERROR
-} from '../constants';
+import { DIRTY_BIT, FORCE_UPDATE } from '../constants';
 import { addCommitCallback } from './commit';
 import { getParentContext } from '../tree';
 
@@ -27,13 +22,6 @@ export function renderFunctionComponent(
 
 	// @TODO split update + mount?
 	let newProps = newVNode ? newVNode.props : internal.props;
-
-	if (internal.flags & MODE_PENDING_ERROR) {
-		// Toggle the MODE_PENDING_ERROR and MODE_RERENDERING_ERROR flags. In
-		// actuality, this should turn off the MODE_PENDING_ERROR flag and turn on
-		// the MODE_RERENDERING_ERROR flag.
-		internal.flags ^= MODE_PENDING_ERROR | MODE_RERENDERING_ERROR;
-	}
 
 	const context = getParentContext(internal);
 
@@ -77,9 +65,6 @@ export function renderFunctionComponent(
 		}
 
 		c._internal = internal;
-		if (internal._commitCallbacks != null && internal._commitCallbacks.length) {
-			commitQueue.push(internal);
-		}
 
 		// TODO: Returning undefined here (i.e. return;) passes all tests. That seems
 		// like a bug. Should validate that we have test coverage for sCU that
@@ -125,10 +110,6 @@ export function renderFunctionComponent(
 		);
 	}
 
-	if (internal._commitCallbacks != null && internal._commitCallbacks.length) {
-		commitQueue.push(internal);
-	}
-
 	return nextDomSibling;
 }
 
@@ -158,13 +139,6 @@ export function renderClassComponent(
 
 	// @TODO split update + mount?
 	let newProps = newVNode ? newVNode.props : internal.props;
-
-	if (internal.flags & MODE_PENDING_ERROR) {
-		// Toggle the MODE_PENDING_ERROR and MODE_RERENDERING_ERROR flags. In
-		// actuality, this should turn off the MODE_PENDING_ERROR flag and turn on
-		// the MODE_RERENDERING_ERROR flag.
-		internal.flags ^= MODE_PENDING_ERROR | MODE_RERENDERING_ERROR;
-	}
 
 	const context = getParentContext(internal);
 
@@ -243,12 +217,6 @@ export function renderClassComponent(
 			}
 
 			c._internal = internal;
-			if (
-				internal._commitCallbacks != null &&
-				internal._commitCallbacks.length
-			) {
-				commitQueue.push(internal);
-			}
 
 			// TODO: Returning undefined here (i.e. return;) passes all tests. That seems
 			// like a bug. Should validate that we have test coverage for sCU that
@@ -314,10 +282,6 @@ export function renderClassComponent(
 			commitQueue,
 			startDom
 		);
-	}
-
-	if (internal._commitCallbacks != null && internal._commitCallbacks.length) {
-		commitQueue.push(internal);
 	}
 
 	return nextDomSibling;
