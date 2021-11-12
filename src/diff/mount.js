@@ -12,12 +12,11 @@ import {
 	TYPE_ROOT,
 	MODE_SVG
 } from '../constants';
-import { normalizeToVNode } from '../create-element';
+import { normalizeToVNode, Fragment } from '../create-element';
 import { setProperty } from './props';
 import { renderClassComponent, renderFunctionComponent } from './component';
-import { createInternal } from '../tree';
+import { createInternal, getParentContext } from '../tree';
 import options from '../options';
-
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
  * @param {import('../internal').PreactElement} parentDom The parent of the DOM element
@@ -49,13 +48,29 @@ export function mount(parentDom, newVNode, internal, commitQueue, startDom) {
 				}
 			}
 
+			const context = getParentContext(internal);
+
+			// Necessary for createContext api. Setting this property will pass
+			// the context value as `this.context` just for this component.
+			let tmp = newVNode.type.contextType;
+			let provider = tmp && context[tmp._id];
+			let componentContext = tmp
+				? provider
+					? provider.props.value
+					: tmp._defaultValue
+				: context;
+
+			if (provider) provider._subs.add(internal);
+
 			if (internal.flags & TYPE_CLASS) {
 				nextDomSibling = renderClassComponent(
 					parentDom,
 					null,
 					internal,
 					commitQueue,
-					startDom
+					startDom,
+					context,
+					componentContext
 				);
 			} else {
 				nextDomSibling = renderFunctionComponent(
@@ -63,9 +78,28 @@ export function mount(parentDom, newVNode, internal, commitQueue, startDom) {
 					null,
 					internal,
 					commitQueue,
-					startDom
+					startDom,
+					context,
+					componentContext
 				);
 			}
+
+			let isTopLevelFragment =
+				nextDomSibling != null &&
+				nextDomSibling.type === Fragment &&
+				nextDomSibling.key == null;
+
+			let renderResult = isTopLevelFragment
+				? nextDomSibling.props.children
+				: nextDomSibling;
+
+			nextDomSibling = mountChildren(
+				parentDom,
+				Array.isArray(renderResult) ? renderResult : [renderResult],
+				internal,
+				commitQueue,
+				startDom
+			);
 
 			if (
 				internal._commitCallbacks != null &&

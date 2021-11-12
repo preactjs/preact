@@ -1,4 +1,4 @@
-import { diffChildren } from './children';
+import { diffChildren, reorderChildren } from './children';
 import { setProperty } from './props';
 import options from '../options';
 import { renderClassComponent, renderFunctionComponent } from './component';
@@ -13,9 +13,13 @@ import {
 	MODE_SVG,
 	UNDEFINED,
 	MODE_PENDING_ERROR,
-	MODE_RERENDERING_ERROR
+	MODE_RERENDERING_ERROR,
+	SKIP_CHILDREN,
+	DIRTY_BIT
 } from '../constants';
-import { getChildDom, getDomSibling } from '../tree';
+import { getChildDom, getDomSibling, getParentContext } from '../tree';
+import { mountChildren } from './mount';
+import { Fragment } from '../create-element';
 
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
@@ -91,13 +95,27 @@ export function patch(parentDom, newVNode, internal, commitQueue, startDom) {
 			internal.flags ^= MODE_PENDING_ERROR | MODE_RERENDERING_ERROR;
 		}
 
+		const context = getParentContext(internal);
+
+		// Necessary for createContext api. Setting this property will pass
+		// the context value as `this.context` just for this component.
+		let tmp = newVNode.type.contextType;
+		let provider = tmp && context[tmp._id];
+		let componentContext = tmp
+			? provider
+				? provider.props.value
+				: tmp._defaultValue
+			: context;
+
 		if (internal.flags & TYPE_CLASS) {
 			nextDomSibling = renderClassComponent(
 				parentDom,
 				newVNode,
 				internal,
 				commitQueue,
-				startDom
+				startDom,
+				context,
+				componentContext
 			);
 		} else {
 			nextDomSibling = renderFunctionComponent(
@@ -105,8 +123,49 @@ export function patch(parentDom, newVNode, internal, commitQueue, startDom) {
 				newVNode,
 				internal,
 				commitQueue,
-				startDom
+				startDom,
+				context,
+				componentContext
 			);
+		}
+
+		if (internal.flags & SKIP_CHILDREN) {
+			internal.props = newVNode.props;
+			internal.flags &= ~SKIP_CHILDREN;
+			// More info about this here: https://gist.github.com/JoviDeCroock/bec5f2ce93544d2e6070ef8e0036e4e8
+			if (newVNode && newVNode._vnodeId !== internal._vnodeId) {
+				internal.flags &= ~DIRTY_BIT;
+			}
+			// TODO: Returning undefined here (i.e. return;) passes all tests. That seems
+			// like a bug. Should validate that we have test coverage for sCU that
+			// returns Fragments with multiple DOM children
+			nextDomSibling = reorderChildren(internal, startDom, parentDom);
+		} else {
+			let isTopLevelFragment =
+				nextDomSibling != null &&
+				nextDomSibling.type === Fragment &&
+				nextDomSibling.key == null;
+			let renderResult = isTopLevelFragment
+				? nextDomSibling.props.children
+				: nextDomSibling;
+
+			if (internal._children == null) {
+				nextDomSibling = mountChildren(
+					parentDom,
+					Array.isArray(renderResult) ? renderResult : [renderResult],
+					internal,
+					commitQueue,
+					startDom
+				);
+			} else {
+				nextDomSibling = diffChildren(
+					parentDom,
+					Array.isArray(renderResult) ? renderResult : [renderResult],
+					internal,
+					commitQueue,
+					startDom
+				);
+			}
 		}
 
 		if (internal._commitCallbacks != null && internal._commitCallbacks.length) {
