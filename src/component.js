@@ -11,6 +11,8 @@ import {
 } from './constants';
 import { getDomSibling, getParentDom } from './tree';
 
+export let ENABLE_CLASSES = false;
+
 /**
  * Base Component class. Provides `setState()` and `forceUpdate()`, which
  * trigger rendering
@@ -19,6 +21,7 @@ import { getDomSibling, getParentDom } from './tree';
  * getChildContext
  */
 export function Component(props, context) {
+	ENABLE_CLASSES = true;
 	this.props = props;
 	this.context = context;
 }

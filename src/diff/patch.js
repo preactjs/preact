@@ -20,6 +20,7 @@ import {
 import { getChildDom, getDomSibling, getParentContext } from '../tree';
 import { mountChildren } from './mount';
 import { Fragment } from '../create-element';
+import { ENABLE_CLASSES } from '../component';
 
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
@@ -107,7 +108,7 @@ export function patch(parentDom, newVNode, internal, commitQueue, startDom) {
 				: tmp._defaultValue
 			: context;
 
-		if (internal.flags & TYPE_CLASS) {
+		if (ENABLE_CLASSES && internal.flags & TYPE_CLASS) {
 			nextDomSibling = renderClassComponent(
 				parentDom,
 				newVNode,

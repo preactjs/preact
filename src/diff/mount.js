@@ -17,6 +17,7 @@ import { setProperty } from './props';
 import { renderClassComponent, renderFunctionComponent } from './component';
 import { createInternal, getParentContext } from '../tree';
 import options from '../options';
+import { ENABLE_CLASSES } from '../component';
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
  * @param {import('../internal').PreactElement} parentDom The parent of the DOM element
@@ -62,7 +63,7 @@ export function mount(parentDom, newVNode, internal, commitQueue, startDom) {
 
 			if (provider) provider._subs.add(internal);
 
-			if (internal.flags & TYPE_CLASS) {
+			if (ENABLE_CLASSES && internal.flags & TYPE_CLASS) {
 				nextDomSibling = renderClassComponent(
 					parentDom,
 					null,
