@@ -108,6 +108,9 @@ let classNameDescriptor = {
 	}
 };
 
+// TODO: do we consider this inevitable?
+// the problem here being that if folks only want memo/forwardRef/...
+// we'll subject them to onChange --> onInput stuff
 let oldVNodeHook = options.vnode;
 options.vnode = vnode => {
 	let i;

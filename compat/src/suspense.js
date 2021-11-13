@@ -3,47 +3,52 @@ import { TYPE_ELEMENT, MODE_HYDRATE } from '../../src/constants';
 import { getParentDom } from '../../src/tree';
 import { createPortal } from './portals';
 
-const oldCatchError = options._catchError;
-/** @type {(error: any, internal: import('./internal').Internal) => void} */
-options._catchError = function(error, internal) {
-	if (error.then) {
-		/** @type {import('./internal').Component} */
-		let component;
-		let handler = internal;
-
-		for (; (handler = handler._parent); ) {
-			if ((component = handler._component) && component._childDidSuspend) {
-				// Don't call oldCatchError if we found a Suspense
-				return component._childDidSuspend(error, internal);
-			}
-		}
-	}
-	oldCatchError(error, internal);
-};
-
-const oldUnmount = options.unmount;
-/** @type {(internal: import('./internal').Internal) => void} */
-options.unmount = function(internal) {
-	/** @type {import('./internal').Component} */
-	const component = internal._component;
-	if (component && component._onResolve) {
-		component._onResolve();
-	}
-
-	// If a component suspended while it was hydrating and is now being unmounted,
-	// update it's flags so it appears to be of TYPE_ELEMENT, causing `unmount`
-	// to remove the DOM nodes that were awaiting hydration (which are stored on
-	// this internal's _dom property).
-	const wasHydrating = (internal.flags & MODE_HYDRATE) === MODE_HYDRATE;
-	if (component && wasHydrating) {
-		internal.flags |= TYPE_ELEMENT;
-	}
-
-	if (oldUnmount) oldUnmount(internal);
-};
+let initialized = false;
 
 // having custom inheritance instead of a class here saves a lot of bytes
 export function Suspense() {
+	if (!initialized) {
+		initialized = true;
+		const oldCatchError = options._catchError;
+		/** @type {(error: any, internal: import('./internal').Internal) => void} */
+		options._catchError = function(error, internal) {
+			if (error.then) {
+				/** @type {import('./internal').Component} */
+				let component;
+				let handler = internal;
+
+				for (; (handler = handler._parent); ) {
+					if ((component = handler._component) && component._childDidSuspend) {
+						// Don't call oldCatchError if we found a Suspense
+						return component._childDidSuspend(error, internal);
+					}
+				}
+			}
+			oldCatchError(error, internal);
+		};
+
+		const oldUnmount = options.unmount;
+		/** @type {(internal: import('./internal').Internal) => void} */
+		options.unmount = function(internal) {
+			/** @type {import('./internal').Component} */
+			const component = internal._component;
+			if (component && component._onResolve) {
+				component._onResolve();
+			}
+
+			// If a component suspended while it was hydrating and is now being unmounted,
+			// update it's flags so it appears to be of TYPE_ELEMENT, causing `unmount`
+			// to remove the DOM nodes that were awaiting hydration (which are stored on
+			// this internal's _dom property).
+			const wasHydrating = (internal.flags & MODE_HYDRATE) === MODE_HYDRATE;
+			if (component && wasHydrating) {
+				internal.flags |= TYPE_ELEMENT;
+			}
+
+			if (oldUnmount) oldUnmount(internal);
+		};
+	}
+
 	// we do not call super here to golf some bytes...
 	this._pendingSuspensionCount = 0;
 	/** @type {Array<import('./internal').Internal>} */

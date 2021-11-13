@@ -23,6 +23,10 @@ let oldBeforeUnmount = options.unmount;
 const RAF_TIMEOUT = 100;
 let prevRaf;
 
+// TODO: these options hooks are also still side-effects and we
+// should minimize side-effects wherever we can, currently compat
+// imports this whole file resulting in a lot of side-effects, would
+// it be better for that reason to integrate hooks into core?
 options._diff = (internal, vnode) => {
 	currentInternal = null;
 	if (oldBeforeDiff) oldBeforeDiff(internal, vnode);

@@ -1,4 +1,5 @@
 import { createElement, Component } from 'preact';
+import { forwardRefInitialized, initializeForwardRef } from './forwardRef';
 import { shallowDiffers } from './util';
 
 /**
@@ -9,6 +10,9 @@ import { shallowDiffers } from './util';
  * @returns {import('./internal').FunctionComponent}
  */
 export function memo(c, comparer) {
+	if (!forwardRefInitialized) {
+		initializeForwardRef();
+	}
 	function Memoed() {}
 
 	Memoed.prototype = new Component();

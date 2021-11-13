@@ -1,13 +1,17 @@
 import { options } from 'preact';
 
-let oldDiffHook = options._diff;
-options._diff = (internal, vnode) => {
-	if (internal.type && internal.type._forwarded && vnode.ref) {
-		vnode.props.ref = vnode.ref;
-		vnode.ref = null;
-		internal.ref = null;
-	}
-	if (oldDiffHook) oldDiffHook(internal, vnode);
+export let forwardRefInitialized = false;
+export const initializeForwardRef = () => {
+	forwardRefInitialized = true;
+	let oldDiffHook = options._diff;
+	options._diff = (internal, vnode) => {
+		if (internal.type && internal.type._forwarded && vnode.ref) {
+			vnode.props.ref = vnode.ref;
+			vnode.ref = null;
+			internal.ref = null;
+		}
+		if (oldDiffHook) oldDiffHook(internal, vnode);
+	};
 };
 
 export const REACT_FORWARD_SYMBOL =
@@ -24,6 +28,9 @@ export const REACT_FORWARD_SYMBOL =
  * @returns {import('./internal').FunctionComponent}
  */
 export function forwardRef(fn) {
+	if (!forwardRefInitialized) {
+		initializeForwardRef();
+	}
 	// We always have ref in props.ref, except for
 	// mobx-react. It will call this function directly
 	// and always pass ref as the second argument.
