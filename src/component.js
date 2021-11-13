@@ -11,7 +11,7 @@ import {
 } from './constants';
 import { getDomSibling, getParentDom } from './tree';
 
-export let ENABLE_CLASSES = false;
+export let ENABLE_CLASSES;
 
 /**
  * Base Component class. Provides `setState()` and `forceUpdate()`, which
