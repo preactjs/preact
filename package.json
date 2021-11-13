@@ -58,9 +58,17 @@
 			"require": "./jsx-runtime/dist/jsxRuntime.js",
 			"import": "./jsx-runtime/dist/jsxRuntime.mjs"
 		},
-		"./compat/server": {
+    "./compat/server": {
 			"require": "./compat/server.js",
 			"import": "./compat/server.mjs"
+		},
+		"./compat/jsx-runtime": {
+			"require": "./compat/jsx-runtime.js",
+			"import": "./compat/jsx-runtime.mjs"
+		},
+    "./compat/jsx-dev-runtime": {
+			"require": "./compat/jsx-dev-runtime.js",
+			"import": "./compat/jsx-dev-runtime.mjs"
 		},
 		"./compat/scheduler": {
 			"require": "./compat/scheduler.js",
