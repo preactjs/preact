@@ -39,6 +39,7 @@ declare namespace React {
 	export import Fragment = preact.Fragment;
 	export import createElement = preact.createElement;
 	export import cloneElement = preact.cloneElement;
+	export import ComponentProps = preact.ComponentProps;
 
 	// Suspense
 	export import Suspense = _Suspense.Suspense;
