@@ -58,16 +58,23 @@
 			"require": "./jsx-runtime/dist/jsxRuntime.js",
 			"import": "./jsx-runtime/dist/jsxRuntime.mjs"
 		},
-		"./compat/server": {
+    "./compat/server": {
 			"require": "./compat/server.js",
 			"import": "./compat/server.mjs"
+		},
+		"./compat/jsx-runtime": {
+			"require": "./compat/jsx-runtime.js",
+			"import": "./compat/jsx-runtime.mjs"
+		},
+    "./compat/jsx-dev-runtime": {
+			"require": "./compat/jsx-dev-runtime.js",
+			"import": "./compat/jsx-dev-runtime.mjs"
 		},
 		"./compat/scheduler": {
 			"require": "./compat/scheduler.js",
 			"import": "./compat/scheduler.mjs"
 		},
-		"./package.json": "./package.json",
-		"./": "./"
+		"./package.json": "./package.json"
 	},
 	"license": "MIT",
 	"funding": {
@@ -236,7 +243,7 @@
 		"babel-plugin-transform-rename-properties": "0.1.0",
 		"benchmark": "^2.1.4",
 		"chai": "^4.1.2",
-		"check-export-map": "^1.0.1",
+		"check-export-map": "^1.2.0",
 		"coveralls": "^3.0.0",
 		"cross-env": "^7.0.2",
 		"csstype": "^3.0.5",
