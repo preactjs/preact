@@ -99,13 +99,6 @@ function isDefaultPrevented() {
 	return this.defaultPrevented;
 }
 
-let classNameDescriptor = {
-	configurable: true,
-	get() {
-		return this.class;
-	}
-};
-
 let oldVNodeHook = options.vnode;
 options.vnode = vnode => {
 	let type = vnode.type;
