@@ -74,6 +74,14 @@ export function render(vnode, parent, callback) {
 }
 
 export function hydrate(vnode, parent, callback) {
+	if (parent === document) {
+		parent = {
+			childNodes: [document.documentElement],
+			firstChild: document.documentElement,
+			insertBefore: n => document.replaceChild(n, document.documentElement),
+			appendChild: n => document.replaceChild(n, document.documentElement)	  
+	  	}
+	}
 	preactHydrate(vnode, parent);
 	if (typeof callback == 'function') callback();
 
