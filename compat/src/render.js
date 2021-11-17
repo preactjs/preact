@@ -86,7 +86,7 @@ if (typeof document !== 'undefined') {
 	let oldDiff = options._diff;
 	options._diff = vnode => {
 		if (vnode.type === 'script') Object.defineProperty(vnode, '_dom', SCRIPT);
-		if (oldDiff) diff(oldDiff);
+		if (oldDiff) oldDiff(oldDiff);
 	};
 }
 
