@@ -168,9 +168,6 @@ export function diffChildren(
 					oldDom,
 					parentDom
 				);
-			} else if (oldDom != null && i === renderResult.length - 1) {
-				parentDom.replaceChild(newDom, oldDom);
-				oldDom = newDom.nextSibling;
 			} else {
 				oldDom = placeChild(
 					parentDom,
@@ -311,17 +308,19 @@ function placeChild(
 			nextDom = null;
 		} else {
 			// `j<oldChildrenLength; j+=2` is an alternative to `j++<oldChildrenLength/2`
-			for (
-				let sibDom = oldDom, j = 0;
-				(sibDom = sibDom.nextSibling) && j < oldChildren.length;
-				j += 2
-			) {
+			let sibDom = oldDom, j = 0;
+			for ( ; (sibDom = sibDom.nextSibling) && j < oldChildren.length; j += 2) {
 				if (sibDom == newDom) {
 					break outer;
 				}
 			}
-			parentDom.insertBefore(newDom, oldDom);
-			nextDom = oldDom;
+			if (j === 0) {
+				parentDom.replaceChild(newDom, oldDom);
+				nextDom = null;
+			} else {
+				parentDom.insertBefore(newDom, oldDom);
+				nextDom = oldDom;
+			}
 		}
 	}
 
