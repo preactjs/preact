@@ -18,7 +18,6 @@ import {
 	DIRTY_BIT
 } from '../constants';
 import { getChildDom, getDomSibling, getParentContext } from '../tree';
-import { mountChildren } from './mount';
 import { Fragment } from '../create-element';
 
 /**
@@ -149,23 +148,13 @@ export function patch(parentDom, newVNode, internal, commitQueue, startDom) {
 				? nextDomSibling.props.children
 				: nextDomSibling;
 
-			if (internal._children == null) {
-				nextDomSibling = mountChildren(
-					parentDom,
-					Array.isArray(renderResult) ? renderResult : [renderResult],
-					internal,
-					commitQueue,
-					startDom
-				);
-			} else {
-				nextDomSibling = diffChildren(
-					parentDom,
-					Array.isArray(renderResult) ? renderResult : [renderResult],
-					internal,
-					commitQueue,
-					startDom
-				);
-			}
+			nextDomSibling = diffChildren(
+				parentDom,
+				Array.isArray(renderResult) ? renderResult : [renderResult],
+				internal,
+				commitQueue,
+				startDom
+			);
 		}
 
 		if (internal._commitCallbacks != null && internal._commitCallbacks.length) {
