@@ -79,13 +79,13 @@ if (typeof document !== 'undefined') {
 	const SCRIPT = {
 	configurable:true,
 		set() {
-			Object.defineProperty(this, '_dom', { writable:true, value:s.cloneNode() });
+			Object.defineProperty(this, '__e', { writable:true, value:s.cloneNode() });
 		}
 	};
 
 	let oldDiff = options._diff;
 	options._diff = vnode => {
-		if (vnode.type === 'script') Object.defineProperty(vnode, '_dom', SCRIPT);
+		if (vnode.type === 'script') Object.defineProperty(vnode, '__e', SCRIPT);
 		if (oldDiff) oldDiff(oldDiff);
 	};
 }
