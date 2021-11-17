@@ -176,7 +176,7 @@ export function diffChildren(
 					oldChildren,
 					newDom,
 					oldDom,
-					i === renderResult.length - 1
+					!isHydrating && i === renderResult.length - 1
 				);
 			}
 
