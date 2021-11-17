@@ -1,13 +1,13 @@
-export { render, hydrate } from './render';
+export { render, hydrate } from './render.js';
 export {
 	createElement,
 	createElement as h,
 	Fragment,
 	createRef,
 	isValidElement
-} from './create-element';
-export { Component } from './component';
-export { cloneElement } from './clone-element';
-export { createContext } from './create-context';
-export { toChildArray } from './diff/children';
-export { default as options } from './options';
+} from './create-element.js';
+export { Component } from './component.js';
+export { cloneElement } from './clone-element.js';
+export { createContext } from './create-context.js';
+export { toChildArray } from './diff/children.js';
+export { default as options } from './options.js';

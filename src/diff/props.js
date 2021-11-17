@@ -1,5 +1,5 @@
-import { IS_NON_DIMENSIONAL } from '../constants';
-import options from '../options';
+import { IS_NON_DIMENSIONAL } from '../constants.js';
+import options from '../options.js';
 
 /**
  * Diff the old and new properties of a VNode and apply changes to the DOM node
@@ -81,6 +81,9 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
 			}
 		}
 	}
+	else if (name == 'data') {
+		dom.data = value;
+	}
 	// Benchmark for comparison: https://esbench.com/bench/574c954bdb965b9a00965ac6
 	else if (name[0] === 'o' && name[1] === 'n') {
 		useCapture = name !== (name = name.replace(/Capture$/, ''));
@@ -90,7 +93,7 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
 		else name = name.slice(2);
 
 		if (!dom._listeners) dom._listeners = {};
-		dom._listeners[name + useCapture] = value;
+		dom._listeners[name + useCapture] = value.handleEvent ? value.handleEvent.bind(value) : value;
 
 		if (value) {
 			if (!oldValue) {
@@ -106,7 +109,7 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
 			// Normalize incorrect prop usage for SVG:
 			// - xlink:href / xlinkHref --> href (xlink:href was removed from SVG and isn't needed)
 			// - className --> class
-			name = name.replace(/xlink[H:h]/, 'h').replace(/sName$/, 's');
+			name = name.replace(/xlink[:H]h?/, 'h').replace(/sName$/, 's');
 		} else if (
 			name !== 'href' &&
 			name !== 'list' &&
