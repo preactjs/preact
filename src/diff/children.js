@@ -313,7 +313,6 @@ function placeChild(
 			nextDom = null;
 		} else {
 			// `j<oldChildrenLength; j+=2` is an alternative to `j++<oldChildrenLength/2`
-			
 			for (
 				let sibDom = oldDom, j = 0;
 				(sibDom = sibDom.nextSibling) && j < oldChildren.length;
