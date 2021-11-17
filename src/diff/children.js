@@ -168,6 +168,9 @@ export function diffChildren(
 					oldDom,
 					parentDom
 				);
+			} else if (i === renderResult.length - 1) {
+				parentDom.replaceChild(newDom, oldDom);
+				oldDom = newDom.nextSibling;
 			} else {
 				oldDom = placeChild(
 					parentDom,
