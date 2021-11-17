@@ -73,6 +73,23 @@ export function render(vnode, parent, callback) {
 	return vnode ? vnode._component : null;
 }
 
+// React makes scripts inert while we're on the client
+if (typeof document !== 'undefined') {
+	const s = Object.assign(document.createElement('a'),{innerHTML:'<script>'}).firstChild;
+	const SCRIPT = {
+	configurable:true,
+		set() {
+			Object.defineProperty(this, '__e', {writable:true,value:s.cloneNode()});
+		}
+	};
+
+	let diff = options.__b;
+	options.__b = vnode => {
+		if (vnode.type === 'script') Object.defineProperty(vnode, '__e', SCRIPT);
+		if (diff) diff(vnode);
+	};
+}
+
 export function hydrate(vnode, parent, callback) {
 	if (parent === document) {
 		parent = {
