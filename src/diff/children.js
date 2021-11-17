@@ -175,7 +175,8 @@ export function diffChildren(
 					oldVNode,
 					oldChildren,
 					newDom,
-					oldDom
+					oldDom,
+					i === renderResult.length - 1
 				);
 			}
 
@@ -284,7 +285,8 @@ function placeChild(
 	oldVNode,
 	oldChildren,
 	newDom,
-	oldDom
+	oldDom,
+	replace
 ) {
 	let nextDom;
 	if (childVNode._nextDom !== undefined) {
@@ -306,21 +308,23 @@ function placeChild(
 		outer: if (oldDom == null || oldDom.parentNode !== parentDom) {
 			parentDom.appendChild(newDom);
 			nextDom = null;
+		} else if (replace) {
+			parentDom.replaceChild(newDom, oldDom);
+			nextDom = null;
 		} else {
 			// `j<oldChildrenLength; j+=2` is an alternative to `j++<oldChildrenLength/2`
-			let sibDom = oldDom, j = 0;
-			for ( ; (sibDom = sibDom.nextSibling) && j < oldChildren.length; j += 2) {
+			
+			for (
+				let sibDom = oldDom, j = 0;
+				(sibDom = sibDom.nextSibling) && j < oldChildren.length;
+				j += 2
+			) {
 				if (sibDom == newDom) {
 					break outer;
 				}
 			}
-			if (j === 0) {
-				parentDom.replaceChild(newDom, oldDom);
-				nextDom = null;
-			} else {
-				parentDom.insertBefore(newDom, oldDom);
-				nextDom = oldDom;
-			}
+			parentDom.insertBefore(newDom, oldDom);
+			nextDom = oldDom;
 		}
 	}
 
