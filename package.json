@@ -1,7 +1,7 @@
 {
 	"name": "preact",
 	"amdName": "preact",
-	"version": "10.5.13",
+	"version": "10.5.15",
 	"private": false,
 	"description": "Fast 3kb React-compatible Virtual DOM library.",
 	"main": "dist/preact.js",
@@ -58,16 +58,23 @@
 			"require": "./jsx-runtime/dist/jsxRuntime.js",
 			"import": "./jsx-runtime/dist/jsxRuntime.mjs"
 		},
-		"./compat/server": {
+    "./compat/server": {
 			"require": "./compat/server.js",
 			"import": "./compat/server.mjs"
+		},
+		"./compat/jsx-runtime": {
+			"require": "./compat/jsx-runtime.js",
+			"import": "./compat/jsx-runtime.mjs"
+		},
+    "./compat/jsx-dev-runtime": {
+			"require": "./compat/jsx-dev-runtime.js",
+			"import": "./compat/jsx-dev-runtime.mjs"
 		},
 		"./compat/scheduler": {
 			"require": "./compat/scheduler.js",
 			"import": "./compat/scheduler.mjs"
 		},
-		"./package.json": "./package.json",
-		"./": "./"
+		"./package.json": "./package.json"
 	},
 	"license": "MIT",
 	"funding": {
@@ -143,6 +150,10 @@
 			"react/sort-comp": 0,
 			"jest/valid-expect": 0,
 			"jest/no-disabled-tests": 0,
+			"jest/no-test-callback": 0,
+			"jest/expect-expect": 0,
+			"jest/no-standalone-expect": 0,
+			"jest/no-export": 0,
 			"react/no-find-dom-node": 0
 		}
 	},
@@ -232,19 +243,19 @@
 		"babel-plugin-transform-rename-properties": "0.1.0",
 		"benchmark": "^2.1.4",
 		"chai": "^4.1.2",
-		"check-export-map": "^1.0.1",
+		"check-export-map": "^1.2.0",
 		"coveralls": "^3.0.0",
 		"cross-env": "^7.0.2",
 		"csstype": "^3.0.5",
 		"diff": "^5.0.0",
 		"errorstacks": "^2.3.0",
-		"esbuild": "^0.8.47",
+		"esbuild": "^0.12.24",
 		"eslint": "5.15.1",
 		"eslint-config-developit": "^1.1.1",
 		"eslint-config-prettier": "^6.5.0",
 		"eslint-plugin-react": "7.12.4",
 		"husky": "^4.3.0",
-		"karma": "^5.2.3",
+		"karma": "^6.3.4",
 		"karma-chai-sinon": "^0.1.5",
 		"karma-chrome-launcher": "^3.1.0",
 		"karma-coverage": "^2.0.3",
@@ -265,6 +276,6 @@
 		"prop-types": "^15.7.2",
 		"sinon": "^9.2.3",
 		"sinon-chai": "^3.5.0",
-		"typescript": "3.5.3"
+		"typescript": "4.4.2"
 	}
 }

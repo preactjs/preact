@@ -39,6 +39,7 @@ declare namespace React {
 	export import Fragment = preact.Fragment;
 	export import createElement = preact.createElement;
 	export import cloneElement = preact.cloneElement;
+	export import ComponentProps = preact.ComponentProps;
 
 	// Suspense
 	export import Suspense = _Suspense.Suspense;
@@ -105,7 +106,7 @@ declare namespace React {
 
 	export function forwardRef<R, P = {}>(
 		fn: ForwardFn<P, R>
-	): preact.FunctionalComponent<Omit<P, 'ref'> & { ref?: preact.RefObject<R> }>;
+	): preact.FunctionalComponent<Omit<P, 'ref'> & { ref?: preact.Ref<R> }>;
 
 	export function unstable_batchedUpdates(
 		callback: (arg?: any) => void,

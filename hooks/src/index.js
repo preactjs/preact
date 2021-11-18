@@ -5,13 +5,6 @@ let currentIndex;
 
 /** @type {import('./internal').Component} */
 let currentComponent;
-/**
- * Keep track of the previous component so that we can set
- * `currentComponent` to `null` and throw when a hook is invoked
- * outside of render
- * @type {import('./internal').Component}
- */
-let previousComponent;
 
 /** @type {number} */
 let currentHook = 0;
@@ -54,7 +47,7 @@ options.diffed = vnode => {
 	if (c && c.__hooks && c.__hooks._pendingEffects.length) {
 		afterPaint(afterPaintEffects.push(c));
 	}
-	currentComponent = previousComponent;
+	currentComponent = null;
 };
 
 options._commit = (vnode, commitQueue) => {
