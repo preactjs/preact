@@ -229,6 +229,21 @@ describe('compat render', () => {
 		);
 	});
 
+	it('should correctly allow for "className"', () => {
+		const Foo = props => {
+			const { className, ...rest } = props;
+			return (
+				<div class={className}>
+					<p {...rest}>Foo</p>
+				</div>
+			);
+		};
+
+		render(<Foo className="foo" />, scratch);
+		expect(scratch.firstChild.className).to.equal('foo');
+		expect(scratch.firstChild.firstChild.className).to.equal('');
+	});
+
 	it('should normalize class+className even on components', () => {
 		function Foo(props) {
 			return (
