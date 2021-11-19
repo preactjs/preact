@@ -188,12 +188,12 @@ options.vnode = vnode => {
 		}
 
 		vnode.props = normalizedProps;
-	}
 
-	if (type && props.class != props.className) {
-		classNameDescriptor.enumerable = 'className' in props;
-		if (props.className != null) normalizedProps.class = props.className;
-		Object.defineProperty(normalizedProps, 'className', classNameDescriptor);
+		if (props.class != props.className) {
+			classNameDescriptor.enumerable = 'className' in props;
+			if (props.className != null) normalizedProps.class = props.className;
+			Object.defineProperty(normalizedProps, 'className', classNameDescriptor);
+		}
 	}
 
 	vnode.$$typeof = REACT_ELEMENT_TYPE;
