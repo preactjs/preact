@@ -1,6 +1,7 @@
 import { Component, createElement, options, Fragment } from 'preact';
 import { TYPE_ELEMENT, MODE_HYDRATE } from '../../src/constants';
 import { getParentDom } from '../../src/tree';
+import { forwardRefInitialized, initializeForwardRef } from './forwardRef';
 import { createPortal } from './portals';
 
 let initialized = false;
@@ -185,6 +186,10 @@ export function suspended(internal) {
 }
 
 export function lazy(loader) {
+	if (!forwardRefInitialized) {
+		initializeForwardRef();
+	}
+
 	let prom;
 	let component;
 	let error;
