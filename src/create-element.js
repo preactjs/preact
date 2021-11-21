@@ -88,20 +88,17 @@ export function normalizeToVNode(childVNode) {
 	if (childVNode == null || typeof childVNode == 'boolean') {
 		return null;
 	}
+
+	if (typeof childVNode === 'object') {
+		return Array.isArray(childVNode)
+			? createVNode(Fragment, { children: childVNode }, null, null, 0)
+			: childVNode;
+	}
+
 	// If this newVNode is being reused (e.g. <div>{reuse}{reuse}</div>) in the same diff,
 	// or we are rendering a component (e.g. setState) copy the oldVNodes so it can have
 	// it's own DOM & etc. pointers
-	else if (
-		typeof childVNode == 'number' ||
-		// eslint-disable-next-line valid-typeof
-		typeof childVNode == 'bigint'
-	) {
-		return childVNode + '';
-	} else if (Array.isArray(childVNode)) {
-		return createVNode(Fragment, { children: childVNode }, null, null, 0);
-	}
-
-	return childVNode;
+	return typeof childVNode === 'function' ? childVNode : childVNode + '';
 }
 
 export function createRef() {
