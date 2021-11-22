@@ -311,15 +311,6 @@ function diffElementNodes(
 	// Tracks entering and exiting SVG namespace when descending through the tree.
 	if (nodeType === 'svg') isSvg = true;
 
-	if (isHydrating) {
-		while (
-			dom &&
-			(nodeType ? dom.localName !== nodeType : dom.nodeType !== 3)
-		) {
-			dom = dom.nextSibling;
-		}
-	}
-
 	if (excessDomChildren != null) {
 		for (; i < excessDomChildren.length; i++) {
 			const child = excessDomChildren[i];
@@ -329,8 +320,7 @@ function diffElementNodes(
 			// excessDomChildren so it isn't later removed in diffChildren
 			if (
 				child &&
-				(child === dom ||
-					(nodeType ? child.localName == nodeType : child.nodeType == 3))
+				(nodeType ? child.localName == nodeType : child.nodeType == 3)
 			) {
 				dom = child;
 				excessDomChildren[i] = null;
