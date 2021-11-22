@@ -49,7 +49,7 @@ export function render(vnode, parentDom, replaceNode) {
 			: oldVNode
 			? null
 			: parentDom.firstChild
-			? slice.call(parentDom.childNodes)
+			? slice.call(parentDom.childNodes).filter(n => n.nodeType <= 3)
 			: null,
 		commitQueue,
 		!isHydrating && replaceNode
