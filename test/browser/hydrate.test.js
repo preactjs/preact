@@ -83,7 +83,9 @@ describe('hydrate()', () => {
 	});
 
 	it('should skip comment nodes between dom nodes', () => {
-		scratch.innerHTML = '<p><i>0</i><!-- c --><b>1</b></p>';
+		const html = '<p><i>0</i><!-- c --><b>1</b></p>';
+		scratch.innerHTML = html;
+		clearLog();
 		hydrate(
 			<p>
 				<i>0</i>
@@ -91,7 +93,8 @@ describe('hydrate()', () => {
 			</p>,
 			scratch
 		);
-		expect(scratch.innerHTML).to.equal('<p><i>0</i><b>1</b></p>');
+		expect(getLog()).to.deep.equal([]);
+		expect(scratch.innerHTML).to.equal(html);
 	});
 
 	it('should reuse existing DOM when given components', () => {
@@ -459,8 +462,11 @@ describe('hydrate()', () => {
 	});
 
 	it('should skip comment nodes', () => {
-		scratch.innerHTML = '<p>hello <!-- c -->foo</p>';
+		const html = '<p>hello <!-- c -->foo</p>';
+		scratch.innerHTML = html;
+		clearLog();
 		hydrate(<p>hello {'foo'}</p>, scratch);
-		expect(scratch.innerHTML).to.equal('<p>hello foo</p>');
+		expect(getLog()).to.deep.equal([]);
+		expect(scratch.innerHTML).to.equal(html);
 	});
 });
