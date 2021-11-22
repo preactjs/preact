@@ -3,7 +3,7 @@ import { Component, getDomSibling } from '../component';
 import { Fragment } from '../create-element';
 import { diffChildren } from './children';
 import { diffProps, setProperty } from './props';
-import { assign, removeNode, slice } from '../util';
+import { assign, removeNode } from '../util';
 import options from '../options';
 
 /**
@@ -361,7 +361,10 @@ function diffElementNodes(
 		// If excessDomChildren was not null, repopulate it with the current element's children:
 		excessDomChildren =
 			excessDomChildren &&
-			slice.call(dom.childNodes).filter(n => n.nodeType <= 3);
+			excessDomChildren.filter.call(
+				dom.childNodes,
+				n => 'localName' in n || n.nodeType === 3
+			);
 
 		oldProps = oldVNode.props || EMPTY_OBJ;
 

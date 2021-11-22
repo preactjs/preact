@@ -332,6 +332,10 @@ function placeChild(
  */
 function getNextDomSibling(node) {
 	// skip past comment/cdata/doctype/etc nodes
-	while ((node = node.nextSibling) && node.nodeType > 3);
+	while ((node = node.nextSibling)) {
+		if ('localName' in node || node.nodeType === 3) {
+			break;
+		}
+	}
 	return node;
 }
