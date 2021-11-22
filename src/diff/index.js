@@ -318,11 +318,7 @@ function diffElementNodes(
 			// if newVNode matches an element in excessDomChildren or the `dom`
 			// argument matches an element in excessDomChildren, remove it from
 			// excessDomChildren so it isn't later removed in diffChildren
-			if (
-				child &&
-				'localName' in child === !!nodeType &&
-				(nodeType ? child.localName === nodeType : child.nodeType === 3)
-			) {
+			if (child && child.localName == nodeType) {
 				dom = child;
 				excessDomChildren[i] = null;
 				break;
@@ -363,7 +359,9 @@ function diffElementNodes(
 		}
 	} else {
 		// If excessDomChildren was not null, repopulate it with the current element's children:
-		excessDomChildren = excessDomChildren && slice.call(dom.childNodes);
+		excessDomChildren =
+			excessDomChildren &&
+			slice.call(dom.childNodes).filter(n => n.nodeType <= 3);
 
 		oldProps = oldVNode.props || EMPTY_OBJ;
 
