@@ -1,27 +1,8 @@
 import { options } from 'preact';
 import { assign } from './util';
 
-const s = assign(document.createElement('a'), {
-	innerHTML: '<script>'
-}).firstChild;
-
-const SCRIPT = {
-	configurable: true,
-	set() {
-		Object.defineProperty(this, '__e', {
-			writable: true,
-			value: s.cloneNode()
-		});
-	}
-};
-
 let oldDiffHook = options._diff;
 options._diff = vnode => {
-	// React makes scripts inert while we're on the client
-	if (typeof document != 'undefined') {
-		if (vnode.type == 'script') Object.defineProperty(vnode, '__e', SCRIPT);
-	}
-
 	if (vnode.type && vnode.type._forwarded && vnode.ref) {
 		vnode.props.ref = vnode.ref;
 		vnode.ref = null;
