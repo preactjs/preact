@@ -244,14 +244,7 @@ function reorderChildren(childVNode, oldDom, parentDom) {
 			if (typeof vnode.type == 'function') {
 				oldDom = reorderChildren(vnode, oldDom, parentDom);
 			} else {
-				oldDom = placeChild(
-					parentDom,
-					vnode,
-					vnode,
-					c,
-					vnode._dom,
-					oldDom
-				);
+				oldDom = placeChild(parentDom, vnode, vnode, c, vnode._dom, oldDom);
 			}
 		}
 	}
@@ -310,7 +303,7 @@ function placeChild(
 			// `j<oldChildrenLength; j+=2` is an alternative to `j++<oldChildrenLength/2`
 			for (
 				let sibDom = oldDom, j = 0;
-				(sibDom = sibDom.nextSibling) && j < oldChildren.length;
+				(sibDom = getNextDomSibling(sibDom)) && j < oldChildren.length;
 				j += 2
 			) {
 				if (sibDom == newDom) {
@@ -328,8 +321,17 @@ function placeChild(
 	if (nextDom !== undefined) {
 		oldDom = nextDom;
 	} else {
-		oldDom = newDom.nextSibling;
+		oldDom = getNextDomSibling(newDom);
 	}
 
 	return oldDom;
+}
+
+/**
+ * Get the next Text or Element sibling for a given node.
+ */
+function getNextDomSibling(node) {
+	// skip past comment/cdata/doctype/etc nodes
+	while ((node = node.nextSibling) && node.nodeType > 3);
+	return node;
 }
