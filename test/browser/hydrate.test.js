@@ -1,4 +1,4 @@
-import { createElement, hydrate, Fragment } from 'preact';
+import { createElement, hydrate, Fragment } from 'preact/compat';
 import {
 	setupScratch,
 	teardown,
@@ -451,4 +451,23 @@ describe('hydrate()', () => {
 		hydrate(<p>hello {'foo'}</p>, scratch);
 		expect(scratch.innerHTML).to.equal('<p>hello foo</p>');
 	});
+});
+
+it('should hydrate from document', () => {
+	const doc = new DOMParser().parseFromString(
+		'<!DOCTYPE html><html><body><h1>hello</h1></body></html>',
+		'text/html'
+	);
+
+	hydrate(
+		<html>
+			<body>
+				<h1>hello</h1>
+			</body>
+		</html>,
+		document
+	);
+	expect(doc.documentElement.outerHTML).to.equal(
+		'<html><head></head><body><h1>hello</h1></body></html>'
+	);
 });
