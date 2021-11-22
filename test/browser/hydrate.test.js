@@ -82,6 +82,21 @@ describe('hydrate()', () => {
 		expect(onClickSpy).to.have.been.called.calledOnce;
 	});
 
+	it('should skip comment nodes between dom nodes', () => {
+		const html = '<p><i>0</i><!-- c --><b>1</b></p>';
+		scratch.innerHTML = html;
+		clearLog();
+		hydrate(
+			<p>
+				<i>0</i>
+				<b>1</b>
+			</p>,
+			scratch
+		);
+		expect(getLog()).to.deep.equal([]);
+		expect(scratch.innerHTML).to.equal(html);
+	});
+
 	it('should reuse existing DOM when given components', () => {
 		const onClickSpy = sinon.spy();
 		const html = ul([li('1'), li('2'), li('3')]);
@@ -447,8 +462,11 @@ describe('hydrate()', () => {
 	});
 
 	it('should skip comment nodes', () => {
-		scratch.innerHTML = '<p>hello <!-- c -->foo</p>';
+		const html = '<p>hello <!-- c -->foo</p>';
+		scratch.innerHTML = html;
+		clearLog();
 		hydrate(<p>hello {'foo'}</p>, scratch);
-		expect(scratch.innerHTML).to.equal('<p>hello foo</p>');
+		expect(getLog()).to.deep.equal([]);
+		expect(scratch.innerHTML).to.equal(html);
 	});
 });

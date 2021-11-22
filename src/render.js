@@ -2,7 +2,6 @@ import { EMPTY_OBJ } from './constants';
 import { commitRoot, diff } from './diff/index';
 import { createElement, Fragment } from './create-element';
 import options from './options';
-import { slice } from './util';
 
 /**
  * Render a Preact virtual node into a DOM element
@@ -49,7 +48,10 @@ export function render(vnode, parentDom, replaceNode) {
 			: oldVNode
 			? null
 			: parentDom.firstChild
-			? slice.call(parentDom.childNodes)
+			? commitQueue.filter.call(
+					parentDom.childNodes,
+					n => 'localName' in n || n.nodeType === 3
+			  )
 			: null,
 		commitQueue,
 		!isHydrating && replaceNode
