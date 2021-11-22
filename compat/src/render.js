@@ -73,31 +73,16 @@ export function render(vnode, parent, callback) {
 	return vnode ? vnode._component : null;
 }
 
-// React makes scripts inert while we're on the client
-if (typeof document !== 'undefined') {
-	const s = Object.assign(document.createElement('a'),{innerHTML:'<script>'}).firstChild;
-	const SCRIPT = {
-	configurable:true,
-		set() {
-			Object.defineProperty(this, '__e', { writable:true, value:s.cloneNode() });
-		}
-	};
-
-	let oldDiff = options._diff;
-	options._diff = vnode => {
-		if (vnode.type === 'script') Object.defineProperty(vnode, '__e', SCRIPT);
-		if (oldDiff) oldDiff(vnode);
-	};
-}
-
 export function hydrate(vnode, parent, callback) {
 	if (parent === document) {
+		const documentElement = parent.documentElement;
+		const apply = n => document.replaceChild(n, documentElement);
 		parent = {
-			childNodes: [document.documentElement],
-			firstChild: document.documentElement,
-			insertBefore: n => document.replaceChild(n, document.documentElement),
-			appendChild: n => document.replaceChild(n, document.documentElement)	  
-	  	}
+			childNodes: [documentElement],
+			firstChild: documentElement,
+			insertBefore: apply,
+			appendChild: apply
+		};
 	}
 	preactHydrate(vnode, parent);
 	if (typeof callback == 'function') callback();
@@ -148,8 +133,7 @@ options.vnode = vnode => {
 			if (IS_DOM && i === 'children' && type === 'noscript') {
 				// Emulate React's behavior of not rendering the contents of noscript tags on the client.
 				continue;
-			}
-			else if (i === 'value' && 'defaultValue' in props && value == null) {
+			} else if (i === 'value' && 'defaultValue' in props && value == null) {
 				// Skip applying value if it is null/undefined and we already set
 				// a default value
 				continue;
