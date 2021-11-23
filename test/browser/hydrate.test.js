@@ -82,6 +82,18 @@ describe('hydrate()', () => {
 		expect(onClickSpy).to.have.been.called.calledOnce;
 	});
 
+	it('should skip comment nodes between dom nodes', () => {
+		scratch.innerHTML = '<p><i>0</i><!-- c --><b>1</b></p>';
+		hydrate(
+			<p>
+				<i>0</i>
+				<b>1</b>
+			</p>,
+			scratch
+		);
+		expect(scratch.innerHTML).to.equal('<p><i>0</i><b>1</b></p>');
+	});
+
 	it('should reuse existing DOM when given components', () => {
 		const onClickSpy = sinon.spy();
 		const html = ul([li('1'), li('2'), li('3')]);
