@@ -320,7 +320,7 @@ function diffElementNodes(
 			// excessDomChildren so it isn't later removed in diffChildren
 			if (
 				child &&
-				'localName' in child === !!nodeType &&
+				'setAttribute' in child === !!nodeType &&
 				(nodeType ? child.localName === nodeType : child.nodeType === 3)
 			) {
 				dom = child;
