@@ -22,6 +22,7 @@
 			"require": "./compat/dist/compat.js",
 			"import": "./compat/dist/compat.mjs"
 		},
+    "./compat/package.json": "./compat/package.json",
 		"./debug": {
 			"browser": "./debug/dist/debug.module.js",
 			"umd": "./debug/dist/debug.umd.js",
