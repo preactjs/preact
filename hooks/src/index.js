@@ -23,6 +23,41 @@ let prevRaf;
 
 options._diff = vnode => {
 	currentComponent = null;
+
+	if (vnode._component && vnode._component.__hooks) {
+		const hasNextStates = vnode._component.__hooks._list.some(
+			hookState => hookState._nextValue
+		);
+		let hasBail = false;
+		let hasDiff = false;
+		vnode._component.__hooks._list.forEach(hookState => {
+			console.log(
+				hookState._nextValue && hookState._nextValue[0],
+				hookState._value[0]
+			);
+			if (
+				hookState._nextValue &&
+				hookState._nextValue[0] === hookState._value[0]
+			) {
+				hasBail = true;
+			} else if (
+				hookState._nextValue &&
+				hookState._nextValue[0] !== hookState._value[0]
+			) {
+				hookState._value = hookState._nextValue;
+				hookState._nextValue = undefined;
+				hasDiff = true;
+			}
+		});
+
+		console.log('hasBail', hasBail);
+		console.log('hasDiff', hasDiff);
+		console.log('hasNext', hasNextStates);
+		if (hasBail && !hasDiff && hasNextStates) {
+			console.log(vnode._original, vnode._component._vnode._original);
+			vnode._original = vnode._component._vnode._original;
+		}
+	}
 	if (oldBeforeDiff) oldBeforeDiff(vnode);
 };
 
@@ -139,9 +174,12 @@ export function useReducer(reducer, initialState, init) {
 			!init ? invokeOrReturn(undefined, initialState) : init(initialState),
 
 			action => {
-				const nextValue = hookState._reducer(hookState._value[0], action);
-				if (hookState._value[0] !== nextValue) {
-					hookState._value = [nextValue, hookState._value[1]];
+				const value = hookState._nextValue
+					? hookState._nextValue[0]
+					: hookState._value[0];
+				const nextValue = hookState._reducer(value, action);
+				if (value !== nextValue) {
+					hookState._nextValue = [nextValue, hookState._value[1]];
 					hookState._component.setState({});
 				}
 			}

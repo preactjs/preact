@@ -49,6 +49,10 @@ export function diff(
 		excessDomChildren = [oldDom];
 	}
 
+	if (typeof newType === 'function' && oldVNode._component) {
+		newVNode._component = oldVNode._component;
+	}
+
 	if ((tmp = options._diff)) tmp(newVNode);
 
 	try {
@@ -130,6 +134,7 @@ export function diff(
 					c.componentWillReceiveProps(newProps, componentContext);
 				}
 
+				console.log(newVNode.type, newVNode._original === oldVNode._original);
 				if (
 					(!c._force &&
 						c.shouldComponentUpdate != null &&
