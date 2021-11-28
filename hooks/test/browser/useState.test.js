@@ -1,8 +1,7 @@
-import { setupRerender } from 'preact/test-utils';
+import { setupRerender, act } from 'preact/test-utils';
 import { createContext, createElement, render } from 'preact';
 import { useContext, useEffect, useState } from 'preact/hooks';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
-import { act } from 'preact/test-utils/dist/testUtils.module';
 
 /** @jsx createElement */
 
@@ -213,66 +212,55 @@ describe('useState', () => {
 		expect(scratch.innerHTML).to.equal('');
 	});
 
-	// TODO: this is currently resulting in a loop
-	// it.only('does not loop when states are equal after batches', () => {
-	// 	const mountSpy = sinon.spy()
-	// 	const unmountSpy = sinon.spy()
-	// 	const renderSpy = sinon.spy()
-	// 	const Context = createContext(null);
+	it('does not loop when states are equal after batches', () => {
+		const renderSpy = sinon.spy();
+		const Context = createContext(null);
 
-	// 	function ModalProvider(props) {
-	// 		let [modalCount, setModalCount] = useState(0);
-	// 		console.log('render', modalCount)
-	// 		renderSpy(modalCount)
-	// 		let context = {
-	// 			modalCount,
-	// 			addModal() {
-	// 				console.log('add')
-	// 				setModalCount((count) => count + 1);
-	// 			},
-	// 			removeModal() {
-	// 				console.log('remove')
-	// 				setModalCount((count) => count - 1);
-	// 			}
-	// 		};
+		function ModalProvider(props) {
+			let [modalCount, setModalCount] = useState(0);
+			renderSpy(modalCount);
+			let context = {
+				modalCount,
+				addModal() {
+					setModalCount(count => count + 1);
+				},
+				removeModal() {
+					setModalCount(count => count - 1);
+				}
+			};
 
-	// 		return <Context.Provider value={context}>{props.children}</Context.Provider>;
-	// 	}
+			return (
+				<Context.Provider value={context}>{props.children}</Context.Provider>
+			);
+		}
 
-	// 	function useModal() {
-	// 		let context = useContext(Context);
-	// 		useEffect(() => {
-	// 			console.log('mount')
-	// 			mountSpy()
+		function useModal() {
+			let context = useContext(Context);
+			useEffect(() => {
+				context.addModal();
+				return () => {
+					context.removeModal();
+				};
+			}, [context]);
+		}
 
-	// 			context.addModal();
-	// 			return () => {
-	// 				console.log('unmount')
-	// 				unmountSpy();
-	// 				context.removeModal();
-	// 			};
-	// 		}, [context]);
-	// 	}
+		function Popover() {
+			useModal();
+			return <div>Popover</div>;
+		}
 
-	// 	function Popover() {
-	// 		useModal();
-	// 		return <div>Popover</div>;
-	// 	}
+		function App() {
+			return (
+				<ModalProvider>
+					<Popover />
+				</ModalProvider>
+			);
+		}
 
-	// 	function App() {
-	// 		return (
-	// 			<ModalProvider>
-	// 				<Popover />
-	// 			</ModalProvider>
-	// 		);
-	// 	}
+		act(() => {
+			render(<App />, scratch);
+		});
 
-	// 	act(() => {
-	// 		render(<App />, scratch)
-	// 	})
-
-	// 	expect(mountSpy).to.be.calledOnce
-	// 	expect(unmountSpy).to.be.calledOnce
-	// 	expect(renderSpy).to.be.calledOnce
-	// })
+		expect(renderSpy).to.be.calledTwice;
+	});
 });

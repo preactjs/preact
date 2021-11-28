@@ -53,7 +53,7 @@ export function diff(
 		newVNode._component = oldVNode._component;
 	}
 
-	if ((tmp = options._diff)) tmp(newVNode);
+	if ((tmp = options._diff)) tmp(newVNode, oldVNode);
 
 	try {
 		outer: if (typeof newType == 'function') {
@@ -134,7 +134,6 @@ export function diff(
 					c.componentWillReceiveProps(newProps, componentContext);
 				}
 
-				console.log(newVNode.type, newVNode._original === oldVNode._original);
 				if (
 					(!c._force &&
 						c.shouldComponentUpdate != null &&
