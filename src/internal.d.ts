@@ -31,7 +31,7 @@ export interface Options extends preact.Options {
 		parent: Element | Document | ShadowRoot | DocumentFragment
 	): void;
 	/** Attach a hook that is invoked before a vnode is diffed. */
-	_diff?(vnode: VNode): void;
+	_diff?(vnode: VNode, oldVNode: VNode): void;
 	/** Attach a hook that is invoked after a tree was mounted or was updated. */
 	_commit?(vnode: VNode, commitQueue: Component[]): void;
 	/** Attach a hook that is invoked before a vnode has rendered. */

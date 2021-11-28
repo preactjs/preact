@@ -40,6 +40,7 @@
       "$_detachOnNextRender": "__b",
       "$_force": "__e",
       "$_nextState": "__s",
+      "$_nextValue": "__s",
       "$_renderCallbacks": "__h",
       "$_vnode": "__v",
       "$_children": "__k",
