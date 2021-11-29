@@ -350,8 +350,8 @@ function invokeCleanup(hook) {
 	// A hook cleanup can introduce a call to render which creates a new root, this will call options.vnode
 	// and move the currentComponent away.
 	const comp = currentComponent;
-	let cleanup;
-	if (typeof (cleanup = hook._cleanup) == 'function') {
+	let cleanup = hook._cleanup;
+	if (typeof cleanup == 'function') {
 		hook._cleanup = undefined;
 		cleanup();
 	}
