@@ -310,7 +310,7 @@ function placeChild(
 			nextDom = null;
 		} else if (replace && oldDom) {
 			parentDom.replaceChild(newDom, oldDom);
-			nextDom = newDom;
+			nextDom = oldDom;
 		} else {
 			// `j<oldChildrenLength; j+=2` is an alternative to `j++<oldChildrenLength/2`
 			for (
