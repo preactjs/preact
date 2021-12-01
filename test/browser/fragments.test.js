@@ -32,11 +32,13 @@ describe('Fragment', () => {
 	let resetInsertBefore;
 	let resetAppendChild;
 	let resetRemoveChild;
+	let resetReplaceChild;
 
 	before(() => {
 		resetInsertBefore = logCall(Element.prototype, 'insertBefore');
 		resetAppendChild = logCall(Element.prototype, 'appendChild');
 		resetRemoveChild = logCall(Element.prototype, 'removeChild');
+		resetReplaceChild = logCall(Element.prototype, 'replaceChild');
 		// logCall(CharacterData.prototype, 'remove');
 		// TODO: Consider logging setting set data
 		// ```
@@ -53,6 +55,7 @@ describe('Fragment', () => {
 		resetInsertBefore();
 		resetAppendChild();
 		resetRemoveChild();
+		resetReplaceChild();
 	});
 
 	beforeEach(() => {
