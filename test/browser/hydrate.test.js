@@ -465,7 +465,7 @@ it('should hydrate from document', () => {
 				<h1>hello</h1>
 			</body>
 		</html>,
-		document.documentElement
+		document
 	);
 	expect(doc.documentElement.outerHTML).to.equal(
 		'<html><head></head><body><h1>hello</h1></body></html>'
