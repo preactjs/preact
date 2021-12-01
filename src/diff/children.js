@@ -176,7 +176,10 @@ export function diffChildren(
 					oldChildren,
 					newDom,
 					oldDom,
-					!isHydrating && parentDom.childNodes.length == 1
+					!isHydrating &&
+						parentDom.childNodes.length == 1 &&
+						oldChildrenLength == 1 &&
+						renderResult.length == 1
 				);
 			}
 
@@ -245,14 +248,7 @@ function reorderChildren(childVNode, oldDom, parentDom) {
 			if (typeof vnode.type == 'function') {
 				oldDom = reorderChildren(vnode, oldDom, parentDom);
 			} else {
-				oldDom = placeChild(
-					parentDom,
-					vnode,
-					vnode,
-					c,
-					vnode._dom,
-					oldDom
-				);
+				oldDom = placeChild(parentDom, vnode, vnode, c, vnode._dom, oldDom);
 			}
 		}
 	}
@@ -308,7 +304,8 @@ function placeChild(
 		outer: if (oldDom == null || oldDom.parentNode !== parentDom) {
 			parentDom.appendChild(newDom);
 			nextDom = null;
-		} else if (replace && oldDom) {
+		} else if (replace) {
+			console.log('replacing', newDom, oldDom);
 			parentDom.replaceChild(newDom, oldDom);
 			nextDom = null;
 		} else {
