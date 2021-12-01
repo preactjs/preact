@@ -304,8 +304,7 @@ function placeChild(
 		outer: if (oldDom == null || oldDom.parentNode !== parentDom) {
 			parentDom.appendChild(newDom);
 			nextDom = null;
-		} else if (replace) {
-			console.log('replacing', newDom, oldDom);
+		} else if (replace && oldVNode._dom) {
 			parentDom.replaceChild(newDom, oldDom);
 			nextDom = null;
 		} else {
