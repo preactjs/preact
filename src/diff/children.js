@@ -308,9 +308,9 @@ function placeChild(
 		outer: if (oldDom == null || oldDom.parentNode !== parentDom) {
 			parentDom.appendChild(newDom);
 			nextDom = null;
-		} else if (replace) {
+		} else if (replace && oldDom) {
 			parentDom.replaceChild(newDom, oldDom);
-			nextDom = oldDom;
+			nextDom = newDom;
 		} else {
 			// `j<oldChildrenLength; j+=2` is an alternative to `j++<oldChildrenLength/2`
 			for (
