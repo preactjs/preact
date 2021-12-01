@@ -175,11 +175,7 @@ export function diffChildren(
 					oldVNode,
 					oldChildren,
 					newDom,
-					oldDom,
-					!isHydrating &&
-						parentDom.childNodes.length == 1 &&
-						oldChildrenLength == 1 &&
-						renderResult.length == 1
+					oldDom
 				);
 			}
 
@@ -281,8 +277,7 @@ function placeChild(
 	oldVNode,
 	oldChildren,
 	newDom,
-	oldDom,
-	replace
+	oldDom
 ) {
 	let nextDom;
 	if (childVNode._nextDom !== undefined) {
@@ -304,7 +299,7 @@ function placeChild(
 		outer: if (oldDom == null || oldDom.parentNode !== parentDom) {
 			parentDom.appendChild(newDom);
 			nextDom = null;
-		} else if (replace && oldVNode._dom) {
+		} else if (parentDom.childNodes.length == 1 && oldVNode._dom) {
 			parentDom.replaceChild(newDom, oldDom);
 			nextDom = null;
 		} else {
