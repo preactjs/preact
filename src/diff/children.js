@@ -176,7 +176,7 @@ export function diffChildren(
 					oldChildren,
 					newDom,
 					oldDom,
-					!isHydrating && oldChildrenLength == 1
+					!isHydrating && parentDom.childNodes.length == 1
 				);
 			}
 
