@@ -176,7 +176,7 @@ export function diffChildren(
 					oldChildren,
 					newDom,
 					oldDom,
-					!isHydrating && oldChildrenLength === 1
+					!isHydrating && oldChildrenLength == 1
 				);
 			}
 
@@ -310,7 +310,7 @@ function placeChild(
 			nextDom = null;
 		} else if (replace) {
 			parentDom.replaceChild(newDom, oldDom);
-			nextDom = null;
+			nextDom = oldDom;
 		} else {
 			// `j<oldChildrenLength; j+=2` is an alternative to `j++<oldChildrenLength/2`
 			for (
