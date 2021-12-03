@@ -16,11 +16,13 @@ export function _catchError(error, vnode) {
 
 				if (ctor && ctor.getDerivedStateFromError != null) {
 					component.setState(ctor.getDerivedStateFromError(error));
+					if (!component._dirty) component.forceUpdate();
 					handled = true;
 				}
 
 				if (component.componentDidCatch != null) {
 					component.componentDidCatch(error);
+					if (!component._dirty) component.forceUpdate();
 					handled = true;
 				}
 

@@ -531,7 +531,7 @@ describe('Lifecycle methods', () => {
 
 		it('should bubble on ignored errors', () => {
 			class Adapter extends Component {
-				static getDerivedStateFromError(error) {
+				static getDerivedStateFromError() {
 					// Ignore the error
 					return null;
 				}
@@ -554,9 +554,11 @@ describe('Lifecycle methods', () => {
 				</Receiver>,
 				scratch
 			);
-			rerender();
 
+			rerender();
 			expect(Adapter.getDerivedStateFromError).to.have.been.called;
+
+			rerender();
 			expect(Receiver.getDerivedStateFromError).to.have.been.called;
 			expect(scratch).to.have.property('textContent', 'Error: Error!');
 		});
