@@ -150,9 +150,9 @@ options.vnode = vnode => {
 				!onChangeInputType(props.type)
 			) {
 				i = 'oninput';
-			} else if (/onfocus/i.test(i)) {
+			} else if (i === 'onFocus') {
 				i = 'onfocusin';
-			} else if (/onblur/i.test(i)) {
+			} else if (i === 'onBlur') {
 				i = 'onfocusout';
 			} else if (/^on(Ani|Tra|Tou|BeforeInp)/.test(i)) {
 				i = i.toLowerCase();
