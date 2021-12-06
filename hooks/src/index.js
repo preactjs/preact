@@ -288,19 +288,18 @@ export function useErrorBoundary(cb) {
  * After paint effects consumer.
  */
 function flushAfterPaintEffects() {
-	afterPaintEffects.forEach(component => {
-		if (component._parentDom) {
-			try {
-				component.__hooks._pendingEffects.forEach(invokeCleanup);
-				component.__hooks._pendingEffects.forEach(invokeEffect);
-				component.__hooks._pendingEffects = [];
-			} catch (e) {
-				component.__hooks._pendingEffects = [];
-				options._catchError(e, component._vnode);
-			}
+	let component;
+	while (component = afterPaintEffects.pop()) {
+		if (!component._parentDom) continue;
+		try {
+			component.__hooks._pendingEffects.forEach(invokeCleanup);
+			component.__hooks._pendingEffects.forEach(invokeEffect);
+			component.__hooks._pendingEffects = [];
+		} catch (e) {
+			component.__hooks._pendingEffects = [];
+			options._catchError(e, component._vnode);
 		}
-	});
-	afterPaintEffects = [];
+	}
 }
 
 let HAS_RAF = typeof requestAnimationFrame == 'function';
