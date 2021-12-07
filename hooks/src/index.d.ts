@@ -1,4 +1,4 @@
-import { PreactContext, Ref as PreactRef, RefObject } from '../..';
+import { PreactContext, Ref as PreactRef } from '../..';
 
 type Inputs = ReadonlyArray<unknown>;
 
@@ -46,8 +46,14 @@ export function useReducer<S, A, I>(
 ): [S, (action: A) => void];
 
 /** @deprecated Use the `Ref` type instead. */
-type PropRef<T> = { current: T };
-type Ref<T> = { current: T };
+type PropRef<T> = MutableRef<T>;
+interface Ref<T> {
+	readonly current: T | null;
+}
+
+interface MutableRef<T> {
+	current: T;
+}
 
 /**
  * `useRef` returns a mutable ref object whose `.current` property is initialized to the passed argument
@@ -58,9 +64,9 @@ type Ref<T> = { current: T };
  *
  * @param initialValue the initial value to store in the ref object
  */
-export function useRef<T>(initialValue: null): RefObject<T>;
-export function useRef<T>(initialValue: T): Ref<T>;
-export function useRef<T>(): Ref<T | undefined>;
+export function useRef<T>(initialValue: T): MutableRef<T>;
+export function useRef<T>(initialValue: T | null): Ref<T>;
+export function useRef<T = undefined>(): MutableRef<T | undefined>;
 
 type EffectCallback = () => void | (() => void);
 /**
