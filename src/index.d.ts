@@ -265,7 +265,7 @@ export interface Options {
 	/** Attach a hook that is invoked after a vnode has rendered. */
 	diffed?(vnode: VNode): void;
 	event?(e: Event): any;
-	requestAnimationFrame?: typeof requestAnimationFrame;
+	requestAnimationFrame?(callback: () => void): void;
 	debounceRendering?(cb: () => void): void;
 	useDebugValue?(value: string | number): void;
 	_addHookName?(name: string | number): void;
