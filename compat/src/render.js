@@ -150,6 +150,10 @@ options.vnode = vnode => {
 				!onChangeInputType(props.type)
 			) {
 				i = 'oninput';
+			} else if (/^onfocus$/i.test(i)) {
+				i = 'onfocusin';
+			} else if (/^onblur$/i.test(i)) {
+				i = 'onfocusout';
 			} else if (/^on(Ani|Tra|Tou|BeforeInp)/.test(i)) {
 				i = i.toLowerCase();
 			} else if (nonCustomElement && CAMEL_PROPS.test(i)) {
