@@ -76,11 +76,15 @@ options.unmount = internal => {
 	if (oldBeforeUnmount) oldBeforeUnmount(internal);
 
 	if (internal.data && internal.data.__hooks) {
-		try {
-			internal.data.__hooks._list.forEach(invokeCleanup);
-		} catch (e) {
-			options._catchError(e, internal);
-		}
+		let hasErrored;
+		internal.data.__hooks._list.forEach(s => {
+			try {
+				invokeCleanup(s);
+			} catch (e) {
+				hasErrored = e;
+			}
+		});
+		if (hasErrored) options._catchError(hasErrored, internal);
 	}
 };
 
@@ -369,7 +373,11 @@ function invokeCleanup(hook) {
 	// A hook cleanup can introduce a call to render which creates a new root, this will call options.vnode
 	// and move the currentInternal away.
 	const internal = currentInternal;
-	if (typeof hook._cleanup == 'function') hook._cleanup();
+	let cleanup = hook._cleanup;
+	if (typeof cleanup == 'function') {
+		hook._cleanup = undefined;
+		cleanup();
+	}
 	currentInternal = internal;
 }
 
