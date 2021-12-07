@@ -76,7 +76,12 @@
 			"require": "./compat/server.js"
 		},
 		"./package.json": "./package.json",
-		"./": "./"
+		"./compat/package.json": "./compat/package.json",
+		"./debug/package.json": "./debug/package.json",
+		"./devtools/package.json": "./devtools/package.json",
+		"./hooks/package.json": "./hooks/package.json",
+		"./test-utils/package.json": "./test-utils/package.json",
+		"./jsx-runtime/package.json": "./jsx-runtime/package.json"
 	},
 	"license": "MIT",
 	"funding": {
