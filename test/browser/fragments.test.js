@@ -1272,10 +1272,10 @@ describe('Fragment', () => {
 			'rendering from true to false'
 		);
 		expectDomLogToBe([
-			'<ol>012345.insertBefore(<li>4, <li>0)',
-			'<ol>401235.insertBefore(<li>5, <li>0)',
-			// TODO: Hmmm why does this extra append happen?
-			'<ol>453012.insertBefore(<li>3, Null)'
+			'<ol>002345.insertBefore(<li>0, Null)',
+			'<ol>013450.insertBefore(<li>1, Null)',
+			'<ol>024501.insertBefore(<li>2, Null)',
+			'<ol>345012.insertBefore(<li>3, Null)'
 		]);
 
 		clearLog();
@@ -1576,9 +1576,10 @@ describe('Fragment', () => {
 		);
 		expectDomLogToBe(
 			[
-				'<div>beepbeepbeepHellofoo.insertBefore(<div>foo, <div>beep)',
-				'<div>foobeepbeepbeepHello.insertBefore(<div>Hello, <div>beep)',
-				'<div>fooHelloboopboopboop.insertBefore(<div>boop, Null)'
+				'<div>beepbeepbeepHellofoo.insertBefore(<div>Hello, Null)',
+				'<div>beepboopbeepfooHello.insertBefore(<div>boop, Null)',
+				'<div>beepboopfooHelloboop.insertBefore(<div>boop, Null)',
+				'<div>boopfooHelloboopboop.insertBefore(<div>boop, Null)'
 			],
 			'rendering from false to true'
 		);

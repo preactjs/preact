@@ -722,8 +722,7 @@ describe('keys', () => {
 		});
 	});
 
-	// TODO: not working yet but would be huge optimization
-	it.skip('should effectively iterate on large component lists', done => {
+	it('should effectively iterate on large component lists', done => {
 		const newItems = () =>
 			Array(100)
 				.fill(0)
