@@ -1,5 +1,5 @@
 import { options } from 'preact';
-import { getParentContext } from 'preact/src/tree';
+import { getParentContext } from '../../src/tree';
 import { MODE_UNMOUNTING } from '../../src/constants';
 
 /** @type {number} */
