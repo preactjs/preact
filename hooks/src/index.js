@@ -311,7 +311,9 @@ export function useErrorBoundary(cb) {
  * After paint effects consumer.
  */
 function flushAfterPaintEffects() {
-	afterPaintEffects.forEach(internal => {
+	let internal;
+	afterPaintEffects.sort((a, b) => a._depth - b._depth);
+	while ((internal = afterPaintEffects.pop())) {
 		if (~internal.flags & MODE_UNMOUNTING) {
 			try {
 				internal.data.__hooks._pendingEffects.forEach(invokeCleanup);
@@ -322,8 +324,7 @@ function flushAfterPaintEffects() {
 				options._catchError(e, internal);
 			}
 		}
-	});
-	afterPaintEffects = [];
+	}
 }
 
 let HAS_RAF = typeof requestAnimationFrame == 'function';
