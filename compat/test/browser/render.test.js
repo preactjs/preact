@@ -258,6 +258,21 @@ describe('compat render', () => {
 		expect(scratch.firstChild.className).to.equal('new');
 	});
 
+	it('should correctly allow for "className"', () => {
+		const Foo = props => {
+			const { className, ...rest } = props;
+			return (
+				<div class={className}>
+					<p {...rest}>Foo</p>
+				</div>
+			);
+		};
+
+		render(<Foo className="foo" />, scratch);
+		expect(scratch.firstChild.className).to.equal('foo');
+		expect(scratch.firstChild.firstChild.className).to.equal('');
+	});
+
 	it('should give precedence to last-applied class/className prop', () => {
 		render(<ul className="from className" class="from class" />, scratch);
 		expect(scratch.firstChild.className).to.equal('from className');
