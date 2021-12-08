@@ -8,7 +8,7 @@ on:
   push:
     branches:
       - master
-      - restructure
+      - main
 
 jobs:
   build_test:

@@ -12,7 +12,7 @@ on:
   push:
     branches:
       - master
-      - restructure
+      - main
     paths:
       - 'src/**.js'
       - 'benches/**.html'
