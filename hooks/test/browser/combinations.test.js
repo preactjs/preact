@@ -6,7 +6,8 @@ import {
 	useReducer,
 	useEffect,
 	useLayoutEffect,
-	useRef
+	useRef,
+	useMemo
 } from 'preact/hooks';
 import { scheduleEffectAssert } from '../_util/useEffectUtil';
 
@@ -297,5 +298,48 @@ describe('combinations', () => {
 			'effect outer dispose <span>hello 2</span>',
 			'effect outer call <span>hello 2</span>'
 		]);
+	});
+
+	it('should run effects child-first even for children separated by memoization', () => {
+		let ops = [];
+
+		/** @type {() => void} */
+		let updateChild;
+		/** @type {() => void} */
+		let updateParent;
+
+		function Child() {
+			const [_, setCount] = useState(0);
+			updateChild = () => setCount(c => c + 1);
+			useEffect(() => {
+				ops.push('child effect');
+			});
+			return <div>Child</div>;
+		}
+
+		function Parent() {
+			const [_, setCount] = useState(0);
+			updateParent = () => setCount(c => c + 1);
+			const memoedChild = useMemo(() => <Child />, []);
+			useEffect(() => {
+				ops.push('parent effect');
+			});
+			return (
+				<div>
+					<div>Parent</div>
+					{memoedChild}
+				</div>
+			);
+		}
+
+		act(() => render(<Parent />, scratch));
+		expect(ops).to.deep.equal(['child effect', 'parent effect']);
+
+		ops = [];
+		updateChild();
+		updateParent();
+		act(() => rerender());
+
+		expect(ops).to.deep.equal(['child effect', 'parent effect']);
 	});
 });
