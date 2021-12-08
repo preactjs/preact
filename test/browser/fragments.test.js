@@ -687,8 +687,8 @@ describe('Fragment', () => {
 		expect(scratch.innerHTML).to.equal(htmlForFalse);
 		expectDomLogToBe(
 			[
-				'<div>fooHellobeep.insertBefore(<div>beep, <div>foo)',
-				'<div>beepbarHello.appendChild(<div>bar)'
+				'<div>fooHellobeep.appendChild(<div>Hello)',
+				'<div>barbeepHello.appendChild(<div>bar)'
 			],
 			'rendering true to false'
 		);
@@ -700,8 +700,8 @@ describe('Fragment', () => {
 		expect(scratch.innerHTML).to.equal(htmlForTrue);
 		expectDomLogToBe(
 			[
-				'<div>beepHellofoo.insertBefore(<div>foo, <div>beep)',
-				'<div>fooboopHello.appendChild(<div>boop)'
+				'<div>beepHellofoo.appendChild(<div>Hello)',
+				'<div>boopfooHello.appendChild(<div>boop)'
 			],
 			'rendering false to true'
 		);
@@ -742,7 +742,6 @@ describe('Fragment', () => {
 			'<div>1Hello2.insertBefore(<span>1, <span>1)',
 			'<div>.appendChild(#text)',
 			'<div>11Hello2.insertBefore(<div>Hello, <span>1)',
-			'<div>1Hello1Hello2.insertBefore(<span>2, <span>1)',
 			'<span>1.remove()',
 			'<div>Hello.remove()'
 		]);
@@ -757,7 +756,6 @@ describe('Fragment', () => {
 			'<div>1Hello2.insertBefore(<span>1, <span>1)',
 			'<div>.appendChild(#text)',
 			'<div>11Hello2.insertBefore(<div>Hello, <span>1)',
-			'<div>1Hello1Hello2.insertBefore(<span>2, <span>1)',
 			'<span>1.remove()',
 			'<div>Hello.remove()'
 		]);
@@ -1278,10 +1276,10 @@ describe('Fragment', () => {
 			'rendering from true to false'
 		);
 		expectDomLogToBe([
-			'<ol>012345.insertBefore(<li>4, <li>0)',
-			'<ol>401235.insertBefore(<li>5, <li>0)',
-			// TODO: Hmmm why does this extra append happen?
-			'<ol>453012.appendChild(<li>3)'
+			'<ol>002345.appendChild(<li>0)',
+			'<ol>013450.appendChild(<li>1)',
+			'<ol>024501.appendChild(<li>2)',
+			'<ol>345012.appendChild(<li>3)'
 		]);
 
 		clearLog();
@@ -1497,8 +1495,8 @@ describe('Fragment', () => {
 		);
 		expectDomLogToBe(
 			[
-				'<div>beepHellofoo.insertBefore(<div>foo, <div>beep)',
-				'<div>fooboopHello.appendChild(<div>boop)',
+				'<div>beepHellofoo.appendChild(<div>Hello)',
+				'<div>boopfooHello.appendChild(<div>boop)',
 				'<div>.appendChild(#text)',
 				'<div>fooHelloboop.appendChild(<div>boop)'
 			],
@@ -1582,9 +1580,10 @@ describe('Fragment', () => {
 		);
 		expectDomLogToBe(
 			[
-				'<div>beepbeepbeepHellofoo.insertBefore(<div>foo, <div>beep)',
-				'<div>foobeepbeepbeepHello.insertBefore(<div>Hello, <div>beep)',
-				'<div>fooHelloboopboopboop.appendChild(<div>boop)'
+				'<div>beepbeepbeepHellofoo.appendChild(<div>Hello)',
+				'<div>beepboopbeepfooHello.appendChild(<div>boop)',
+				'<div>beepboopfooHelloboop.appendChild(<div>boop)',
+				'<div>boopfooHelloboopboop.appendChild(<div>boop)'
 			],
 			'rendering from false to true'
 		);
