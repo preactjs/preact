@@ -309,7 +309,7 @@ describe('combinations', () => {
 		let updateParent;
 
 		function Child() {
-			const [_, setCount] = useState(0);
+			const [, setCount] = useState(0);
 			updateChild = () => setCount(c => c + 1);
 			useEffect(() => {
 				ops.push('child effect');
@@ -318,7 +318,7 @@ describe('combinations', () => {
 		}
 
 		function Parent() {
-			const [_, setCount] = useState(0);
+			const [, setCount] = useState(0);
 			updateParent = () => setCount(c => c + 1);
 			const memoedChild = useMemo(() => <Child />, []);
 			useEffect(() => {
