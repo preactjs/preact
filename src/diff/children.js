@@ -290,16 +290,13 @@ function placeChild(parentDom, newDom, startDom) {
 		return startDom;
 	}
 
-	const domNodesLength = parentDom.childNodes.length;
-	for (
-		let sibDom = startDom, j = 0;
-		(sibDom = sibDom.nextSibling) && j < domNodesLength;
-		j++
-	) {
+	let sibDom = startDom;
+	while ((sibDom = sibDom.nextSibling)) {
 		if (sibDom == newDom) {
 			return newDom.nextSibling;
 		}
 	}
+
 	parentDom.insertBefore(newDom, startDom);
 	return startDom;
 }
