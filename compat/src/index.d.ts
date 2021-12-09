@@ -4,6 +4,17 @@ import { JSXInternal } from '../../src/jsx';
 import * as _Suspense from './suspense';
 import * as _SuspenseList from './suspense-list';
 
+declare module 'preact' {
+	export namespace preact {
+		interface FunctionComponent<P = {}> {
+			defaultProps?: Partial<P>;
+		}
+		interface ComponentClass<P = {}, S = {}> {
+			defaultProps?: Partial<P>;
+		}
+	}
+}
+
 // export default React;
 export = React;
 export as namespace React;
