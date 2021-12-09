@@ -17,45 +17,6 @@ import { createInternal } from './tree';
  */
 export function createRoot(parentDom) {
 	let rootInternal = null;
-
-	function render(vnode) {
-		if (options._root) options._root(vnode, parentDom);
-
-		// List of effects that need to be called after diffing.
-		const commitQueue = [];
-
-		vnode = createElement(Fragment, { _parentDom: parentDom }, [vnode]);
-
-		if (rootInternal) {
-			patch(parentDom, vnode, rootInternal, commitQueue, parentDom.firstChild);
-		} else {
-			// Store the VDOM tree root on the DOM element in a (minified) property:
-			rootInternal = parentDom._children = createInternal(vnode, null);
-			rootInternal._context = {};
-			if (parentDom.ownerSVGElement !== UNDEFINED) {
-				rootInternal.flags |= MODE_SVG;
-			}
-
-			// Calling `render` on a container with existing DOM elements puts the diff into mutative hydrate mode:
-			if (parentDom.firstChild) {
-				rootInternal.flags |= MODE_MUTATIVE_HYDRATE;
-			}
-
-			mount(
-				parentDom,
-				vnode,
-				rootInternal,
-				commitQueue,
-				// Start the diff at the replaceNode or the parentDOM.firstChild if any.
-				// Will be null if the parentDom is empty
-				parentDom.firstChild
-			);
-		}
-
-		// Flush all queued effects
-		commitRoot(commitQueue, vnode);
-	}
-
 	return {
 		hydrate(vnode) {
 			if (options._root) options._root(vnode, parentDom);
@@ -74,6 +35,48 @@ export function createRoot(parentDom) {
 			mount(parentDom, vnode, rootInternal, commitQueue, parentDom.firstChild);
 			commitRoot(commitQueue, rootInternal);
 		},
-		render
+		render(vnode) {
+			if (options._root) options._root(vnode, parentDom);
+
+			// List of effects that need to be called after diffing.
+			const commitQueue = [];
+
+			vnode = createElement(Fragment, { _parentDom: parentDom }, [vnode]);
+
+			if (rootInternal) {
+				patch(
+					parentDom,
+					vnode,
+					rootInternal,
+					commitQueue,
+					parentDom.firstChild
+				);
+			} else {
+				// Store the VDOM tree root on the DOM element in a (minified) property:
+				rootInternal = parentDom._children = createInternal(vnode, null);
+				rootInternal._context = {};
+				if (parentDom.ownerSVGElement !== UNDEFINED) {
+					rootInternal.flags |= MODE_SVG;
+				}
+
+				// Calling `render` on a container with existing DOM elements puts the diff into mutative hydrate mode:
+				if (parentDom.firstChild) {
+					rootInternal.flags |= MODE_MUTATIVE_HYDRATE;
+				}
+
+				mount(
+					parentDom,
+					vnode,
+					rootInternal,
+					commitQueue,
+					// Start the diff at the replaceNode or the parentDOM.firstChild if any.
+					// Will be null if the parentDom is empty
+					parentDom.firstChild
+				);
+			}
+
+			// Flush all queued effects
+			commitRoot(commitQueue, vnode);
+		}
 	};
 }
