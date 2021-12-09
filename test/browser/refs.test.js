@@ -109,13 +109,13 @@ describe('refs', () => {
 		]);
 	});
 
-	it('should pass rendered DOM from functional components to ref functions', () => {
+	it('should pass functional components to ref functions', () => {
 		let ref = spy('ref');
 
 		const Foo = () => <div />;
 
 		render(<Foo ref={ref} />, scratch);
-		expect(ref).to.have.been.calledWith(scratch.firstElementChild);
+		expect(ref).to.have.been.calledOnce;
 
 		ref.resetHistory();
 		render(<Foo ref={ref} />, scratch);
