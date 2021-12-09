@@ -574,8 +574,12 @@ describe('render()', () => {
 		});
 
 		it('should avoid reapplying innerHTML when __html property of dangerouslySetInnerHTML attr remains unchanged', () => {
+			let thing;
+
 			class Thing extends Component {
 				render() {
+					thing = this;
+
 					// eslint-disable-next-line react/no-danger
 					return (
 						<div dangerouslySetInnerHTML={{ __html: '<span>same</span>' }} />
@@ -583,8 +587,7 @@ describe('render()', () => {
 				}
 			}
 
-			let thing;
-			render(<Thing ref={r => (thing = r)} />, scratch);
+			render(<Thing />, scratch);
 
 			let firstInnerHTMLChild = scratch.firstChild.firstChild;
 
@@ -802,6 +805,8 @@ describe('render()', () => {
 
 		class Inputs extends Component {
 			render() {
+				inputs = this;
+
 				return (
 					<div>
 						<input value={'Hello'} ref={el => (text = el)} />
@@ -811,7 +816,7 @@ describe('render()', () => {
 			}
 		}
 
-		render(<Inputs ref={x => (inputs = x)} />, scratch);
+		render(<Inputs />, scratch);
 
 		expect(text.value).to.equal('Hello');
 		expect(checkbox.checked).to.equal(true);
