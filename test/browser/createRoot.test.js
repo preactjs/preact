@@ -572,8 +572,12 @@ describe('createRoot()', () => {
 			});
 
 			it('should avoid reapplying innerHTML when __html property of dangerouslySetInnerHTML attr remains unchanged', () => {
+				let thing;
+
 				class Thing extends Component {
 					render() {
+						thing = this;
+
 						// eslint-disable-next-line react/no-danger
 						return (
 							<div dangerouslySetInnerHTML={{ __html: '<span>same</span>' }} />
@@ -581,8 +585,7 @@ describe('createRoot()', () => {
 					}
 				}
 
-				let thing;
-				render(<Thing ref={r => (thing = r)} />);
+				render(<Thing />);
 
 				let firstInnerHTMLChild = scratch.firstChild.firstChild;
 
@@ -804,6 +807,8 @@ describe('createRoot()', () => {
 
 			class Inputs extends Component {
 				render() {
+					inputs = this;
+
 					return (
 						<div>
 							<input value={'Hello'} ref={el => (text = el)} />
@@ -813,7 +818,7 @@ describe('createRoot()', () => {
 				}
 			}
 
-			render(<Inputs ref={x => (inputs = x)} />);
+			render(<Inputs />);
 
 			expect(text.value).to.equal('Hello');
 			expect(checkbox.checked).to.equal(true);
