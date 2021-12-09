@@ -126,7 +126,7 @@ export function diffChildren(
 			// do nothing
 			startDom = nextDomSibling;
 		} else if (newDom) {
-			startDom = placeChild(parentDom, oldChildrenLength, newDom, startDom);
+			startDom = placeChild(parentDom, newDom, startDom);
 		} else if (
 			startDom &&
 			childInternal != null &&
@@ -245,12 +245,7 @@ export function reorderChildren(internal, startDom, parentDom) {
 			} else if (childInternal._dom == startDom) {
 				startDom = startDom.nextSibling;
 			} else {
-				startDom = placeChild(
-					parentDom,
-					internal._children.length,
-					childInternal._dom,
-					startDom
-				);
+				startDom = placeChild(parentDom, childInternal._dom, startDom);
 			}
 		}
 	}
@@ -280,12 +275,11 @@ export function toChildArray(children, out) {
 
 /**
  * @param {import('../internal').PreactElement} parentDom
- * @param {number} oldChildrenLength
  * @param {import('../internal').PreactElement} newDom
  * @param {import('../internal').PreactElement} startDom
  * @returns {import('../internal').PreactElement}
  */
-function placeChild(parentDom, oldChildrenLength, newDom, startDom) {
+function placeChild(parentDom, newDom, startDom) {
 	if (startDom == null || newDom.parentNode == null) {
 		// "startDom == null": The diff has finished with existing DOM children and
 		// we are appending new ones.
@@ -296,16 +290,13 @@ function placeChild(parentDom, oldChildrenLength, newDom, startDom) {
 		return startDom;
 	}
 
-	// `j<oldChildrenLength; j+=2` is an alternative to `j++<oldChildrenLength/2`
-	for (
-		let sibDom = startDom, j = 0;
-		(sibDom = sibDom.nextSibling) && j < oldChildrenLength;
-		j += 2
-	) {
+	let sibDom = startDom;
+	while ((sibDom = sibDom.nextSibling)) {
 		if (sibDom == newDom) {
 			return newDom.nextSibling;
 		}
 	}
+
 	parentDom.insertBefore(newDom, startDom);
 	return startDom;
 }

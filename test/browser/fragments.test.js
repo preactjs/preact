@@ -683,8 +683,8 @@ describe('Fragment', () => {
 		expect(scratch.innerHTML).to.equal(htmlForFalse);
 		expectDomLogToBe(
 			[
-				'<div>fooHellobeep.insertBefore(<div>beep, <div>foo)',
-				'<div>beepbarHello.insertBefore(<div>bar, Null)'
+				'<div>fooHellobeep.insertBefore(<div>Hello, Null)',
+				'<div>barbeepHello.insertBefore(<div>bar, Null)'
 			],
 			'rendering true to false'
 		);
@@ -696,8 +696,8 @@ describe('Fragment', () => {
 		expect(scratch.innerHTML).to.equal(htmlForTrue);
 		expectDomLogToBe(
 			[
-				'<div>beepHellofoo.insertBefore(<div>foo, <div>beep)',
-				'<div>fooboopHello.insertBefore(<div>boop, Null)'
+				'<div>beepHellofoo.insertBefore(<div>Hello, Null)',
+				'<div>boopfooHello.insertBefore(<div>boop, Null)'
 			],
 			'rendering false to true'
 		);
@@ -738,7 +738,6 @@ describe('Fragment', () => {
 			'<div>1Hello2.insertBefore(<span>1, <span>1)',
 			'<div>.insertBefore(#text, Null)',
 			'<div>11Hello2.insertBefore(<div>Hello, <span>1)',
-			'<div>1Hello1Hello2.insertBefore(<span>2, <span>1)',
 			'<span>1.remove()',
 			'<div>Hello.remove()'
 		]);
@@ -753,7 +752,6 @@ describe('Fragment', () => {
 			'<div>1Hello2.insertBefore(<span>1, <span>1)',
 			'<div>.insertBefore(#text, Null)',
 			'<div>11Hello2.insertBefore(<div>Hello, <span>1)',
-			'<div>1Hello1Hello2.insertBefore(<span>2, <span>1)',
 			'<span>1.remove()',
 			'<div>Hello.remove()'
 		]);
@@ -1274,10 +1272,10 @@ describe('Fragment', () => {
 			'rendering from true to false'
 		);
 		expectDomLogToBe([
-			'<ol>012345.insertBefore(<li>4, <li>0)',
-			'<ol>401235.insertBefore(<li>5, <li>0)',
-			// TODO: Hmmm why does this extra append happen?
-			'<ol>453012.insertBefore(<li>3, Null)'
+			'<ol>002345.insertBefore(<li>0, Null)',
+			'<ol>013450.insertBefore(<li>1, Null)',
+			'<ol>024501.insertBefore(<li>2, Null)',
+			'<ol>345012.insertBefore(<li>3, Null)'
 		]);
 
 		clearLog();
@@ -1493,8 +1491,8 @@ describe('Fragment', () => {
 		);
 		expectDomLogToBe(
 			[
-				'<div>beepHellofoo.insertBefore(<div>foo, <div>beep)',
-				'<div>fooboopHello.insertBefore(<div>boop, Null)',
+				'<div>beepHellofoo.insertBefore(<div>Hello, Null)',
+				'<div>boopfooHello.insertBefore(<div>boop, Null)',
 				'<div>.insertBefore(#text, Null)',
 				'<div>fooHelloboop.insertBefore(<div>boop, Null)'
 			],
@@ -1578,9 +1576,10 @@ describe('Fragment', () => {
 		);
 		expectDomLogToBe(
 			[
-				'<div>beepbeepbeepHellofoo.insertBefore(<div>foo, <div>beep)',
-				'<div>foobeepbeepbeepHello.insertBefore(<div>Hello, <div>beep)',
-				'<div>fooHelloboopboopboop.insertBefore(<div>boop, Null)'
+				'<div>beepbeepbeepHellofoo.insertBefore(<div>Hello, Null)',
+				'<div>beepboopbeepfooHello.insertBefore(<div>boop, Null)',
+				'<div>beepboopfooHelloboop.insertBefore(<div>boop, Null)',
+				'<div>boopfooHelloboopboop.insertBefore(<div>boop, Null)'
 			],
 			'rendering from false to true'
 		);

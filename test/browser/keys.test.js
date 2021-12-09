@@ -1,4 +1,5 @@
-import { createElement, Component, render } from 'preact';
+import { createElement, Component, render, createRef } from 'preact';
+import { setupRerender } from 'preact/test-utils';
 import { setupScratch, teardown } from '../_util/helpers';
 import { logCall, clearLog, getLog } from '../_util/logCall';
 import { div } from '../_util/dom';
@@ -8,6 +9,8 @@ import { div } from '../_util/dom';
 describe('keys', () => {
 	/** @type {HTMLDivElement} */
 	let scratch;
+
+	let rerender;
 
 	/** @type {string[]} */
 	let ops;
@@ -97,6 +100,7 @@ describe('keys', () => {
 
 	beforeEach(() => {
 		scratch = setupScratch();
+		rerender = setupRerender();
 		ops = [];
 	});
 
@@ -347,7 +351,11 @@ describe('keys', () => {
 		render(<List values={values} />, scratch);
 		expect(scratch.textContent).to.equal('abcd', 'move to beginning');
 		expect(getLog()).to.deep.equal(
-			['<ol>bcda.insertBefore(<li>a, <li>b)'],
+			[
+				'<ol>bcda.insertBefore(<li>b, Null)',
+				'<ol>cdab.insertBefore(<li>c, Null)',
+				'<ol>dabc.insertBefore(<li>d, Null)'
+			],
 			'move to beginning'
 		);
 	});
@@ -365,15 +373,15 @@ describe('keys', () => {
 		render(<List values={values} />, scratch);
 		expect(scratch.textContent).to.equal(values.join(''));
 		expect(getLog()).to.deep.equal([
-			'<ol>abcdefghij.insertBefore(<li>j, <li>a)',
-			'<ol>jabcdefghi.insertBefore(<li>i, <li>a)',
-			'<ol>jiabcdefgh.insertBefore(<li>h, <li>a)',
-			'<ol>jihabcdefg.insertBefore(<li>g, <li>a)',
-			'<ol>jihgabcdef.insertBefore(<li>e, Null)',
-			'<ol>jihgabcdfe.insertBefore(<li>d, Null)',
-			'<ol>jihgabcfed.insertBefore(<li>c, Null)',
-			'<ol>jihgabfedc.insertBefore(<li>b, Null)',
-			'<ol>jihgafedcb.insertBefore(<li>a, Null)'
+			'<ol>abcdefghij.insertBefore(<li>i, Null)',
+			'<ol>abcdefghji.insertBefore(<li>h, Null)',
+			'<ol>abcdefgjih.insertBefore(<li>g, Null)',
+			'<ol>abcdefjihg.insertBefore(<li>f, Null)',
+			'<ol>abcdejihgf.insertBefore(<li>e, Null)',
+			'<ol>abcdjihgfe.insertBefore(<li>d, Null)',
+			'<ol>abcjihgfed.insertBefore(<li>c, Null)',
+			'<ol>abjihgfedc.insertBefore(<li>b, Null)',
+			'<ol>ajihgfedcb.insertBefore(<li>a, Null)'
 		]);
 	});
 
@@ -651,5 +659,129 @@ describe('keys', () => {
 		]);
 		expect(Stateful1Ref).to.not.equal(Stateful1MovedRef);
 		expect(Stateful2Ref).to.not.equal(Stateful2MovedRef);
+	});
+
+	it('should effectively iterate on large lists', done => {
+		const newItems = () =>
+			Array(100)
+				.fill(0)
+				.map((item, i) => i);
+
+		let set,
+			mutatedNodes = [];
+
+		class App extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { items: newItems() };
+				set = this.set = this.set.bind(this);
+				this.ref = createRef();
+			}
+
+			componentDidMount() {
+				const observer = new MutationObserver(listener);
+				observer.observe(this.ref.current, { childList: true });
+
+				function listener(mutations) {
+					for (const { addedNodes } of mutations) {
+						for (const node of addedNodes) {
+							mutatedNodes.push(node);
+						}
+					}
+				}
+			}
+
+			set() {
+				const currentItems = this.state.items;
+				const items = newItems().filter(id => {
+					const isVisible = currentItems.includes(id);
+					return id >= 20 && id <= 80 ? !isVisible : isVisible;
+				});
+				this.setState({ items });
+			}
+
+			render() {
+				return (
+					<div ref={this.ref}>
+						{this.state.items.map(i => (
+							<div key={i}>{i}</div>
+						))}
+					</div>
+				);
+			}
+		}
+
+		render(<App />, scratch);
+
+		set();
+		rerender();
+
+		setTimeout(() => {
+			expect(mutatedNodes.length).to.equal(0);
+			done();
+		});
+	});
+
+	it('should effectively iterate on large component lists', done => {
+		const newItems = () =>
+			Array(100)
+				.fill(0)
+				.map((item, i) => i);
+
+		let set,
+			mutatedNodes = [];
+
+		const Row = ({ i }) => <p>{i}</p>;
+
+		class App extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { items: newItems() };
+				set = this.set = this.set.bind(this);
+				this.ref = createRef();
+			}
+
+			componentDidMount() {
+				const observer = new MutationObserver(listener);
+				observer.observe(this.ref.current, { childList: true });
+
+				function listener(mutations) {
+					for (const { addedNodes } of mutations) {
+						for (const node of addedNodes) {
+							mutatedNodes.push(node);
+						}
+					}
+				}
+			}
+
+			set() {
+				const currentItems = this.state.items;
+				const items = newItems().filter(id => {
+					const isVisible = currentItems.includes(id);
+					return id >= 20 && id <= 80 ? !isVisible : isVisible;
+				});
+				this.setState({ items });
+			}
+
+			render() {
+				return (
+					<div ref={this.ref}>
+						{this.state.items.map(i => (
+							<Row key={i} i={i} />
+						))}
+					</div>
+				);
+			}
+		}
+
+		render(<App />, scratch);
+
+		set();
+		rerender();
+
+		setTimeout(() => {
+			expect(mutatedNodes.length).to.equal(0);
+			done();
+		});
 	});
 });
