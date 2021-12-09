@@ -270,12 +270,6 @@ describe('createElement(jsx)', () => {
 			.that.deep.equals(['x', 'y']);
 	});
 
-	it('should respect defaultProps', () => {
-		const Component = ({ children }) => children;
-		Component.defaultProps = { foo: 'bar' };
-		expect(h(Component).props).to.deep.equal({ foo: 'bar' });
-	});
-
 	it('should override defaultProps', () => {
 		const Component = ({ children }) => children;
 		Component.defaultProps = { foo: 'default' };
