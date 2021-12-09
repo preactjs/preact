@@ -115,7 +115,7 @@ describe('refs', () => {
 		const Foo = () => <div />;
 
 		render(<Foo ref={ref} />, scratch);
-		expect(ref).to.have.been.calledOnce;
+		expect(ref).to.have.been.calledWith(scratch.firstElementChild);
 
 		ref.resetHistory();
 		render(<Foo ref={ref} />, scratch);
