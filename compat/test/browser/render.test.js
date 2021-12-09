@@ -431,6 +431,13 @@ describe('compat render', () => {
 		expect(mountSpy).to.be.calledOnce;
 		expect(updateSpy).to.not.be.calledOnce;
 
+		// we need to clear the root in order to simulate a real hydration rather than an update
+		let html = scratch.innerHTML;
+		teardown(scratch);
+		scratch = setupScratch();
+		rerender = setupRerender();
+		scratch.innerHTML = html;
+
 		act(() => {
 			hydrate(
 				<StaticContent staticMode>
