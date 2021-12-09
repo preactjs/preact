@@ -210,7 +210,7 @@ options.vnode = vnode => {
 			if (props.className != null) normalizedProps.class = props.className;
 			Object.defineProperty(normalizedProps, 'className', classNameDescriptor);
 		}
-	} else if (type.defaultProps != null) {
+	} else if (typeof type === 'function' && type.defaultProps) {
 		for (i in type.defaultProps) {
 			if (normalizedProps[i] === undefined) {
 				normalizedProps[i] = type.defaultProps[i];
