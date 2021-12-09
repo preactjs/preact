@@ -12,6 +12,7 @@ export function cloneElement(vnode, props, children) {
 		key,
 		ref,
 		i;
+
 	for (i in props) {
 		if (i == 'key') key = props[i];
 		else if (i == 'ref') ref = props[i];
