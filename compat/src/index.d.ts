@@ -41,7 +41,8 @@ declare namespace React {
 		extends preact.FunctionComponent<P> {
 		defaultProps?: Partial<P>;
 	}
-	export import FC = FunctionComponent;
+	export interface FunctionalComponent<P = {}> extends FunctionComponent<P> {}
+	export interface FC<P = {}> extends FunctionComponent<P> {}
 	export import createContext = preact.createContext;
 	export import createRef = preact.createRef;
 	export import Fragment = preact.Fragment;
