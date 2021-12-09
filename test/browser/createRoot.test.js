@@ -573,10 +573,6 @@ describe('createRoot()', () => {
 
 			it('should avoid reapplying innerHTML when __html property of dangerouslySetInnerHTML attr remains unchanged', () => {
 				class Thing extends Component {
-					constructor(props) {
-						super(props);
-						props.ref(this);
-					}
 					render() {
 						// eslint-disable-next-line react/no-danger
 						return (
@@ -807,10 +803,6 @@ describe('createRoot()', () => {
 			let checkbox;
 
 			class Inputs extends Component {
-				constructor(props) {
-					super(props);
-					props.ref(this);
-				}
 				render() {
 					return (
 						<div>
@@ -953,11 +945,9 @@ describe('createRoot()', () => {
 
 		// see preact/#1327
 		it('should not reuse unkeyed components', () => {
-			let forceUpdate;
 			class X extends Component {
-				constructor(props) {
-					super(props);
-					forceUpdate = this.update.bind(this);
+				constructor() {
+					super();
 					this.state = { i: 0 };
 				}
 
@@ -974,6 +964,7 @@ describe('createRoot()', () => {
 				}
 			}
 
+			let ref;
 			let updateApp;
 			class App extends Component {
 				constructor() {
@@ -986,7 +977,7 @@ describe('createRoot()', () => {
 					return (
 						<div>
 							{this.state.i === 0 && <X />}
-							<X />
+							<X ref={node => (ref = node)} />
 						</div>
 					);
 				}
@@ -995,7 +986,7 @@ describe('createRoot()', () => {
 			render(<App />);
 			expect(scratch.textContent).to.equal('00');
 
-			forceUpdate();
+			ref.update();
 			updateApp();
 			rerender();
 			expect(scratch.textContent).to.equal('1');
