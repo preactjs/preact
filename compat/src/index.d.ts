@@ -4,6 +4,15 @@ import { JSXInternal } from '../../src/jsx';
 import * as _Suspense from './suspense';
 import * as _SuspenseList from './suspense-list';
 
+namespace preact {
+	interface FunctionComponent<P = {}> {
+		defaultProps?: Partial<P>;
+	}
+	interface ComponentClass<P = {}, S = {}> {
+		defaultProps?: Partial<P>;
+	}
+}
+
 // export default React;
 export = React;
 export as namespace React;
@@ -31,18 +40,9 @@ declare namespace React {
 	export import useState = _hooks.useState;
 
 	// Preact Defaults
-	export abstract class Component<P = {}, S = {}> extends preact.Component<
-		P,
-		S
-	> {
-		static defaultProps?: any;
-	}
-	export interface FunctionComponent<P = {}>
-		extends preact.FunctionComponent<P> {
-		defaultProps?: Partial<P>;
-	}
-	export interface FunctionalComponent<P = {}> extends FunctionComponent<P> {}
-	export interface FC<P = {}> extends FunctionComponent<P> {}
+	export import Component = preact.Component;
+	export import FunctionComponent = preact.FunctionComponent;
+	export import FC = preact.FunctionComponent;
 	export import createContext = preact.createContext;
 	export import createRef = preact.createRef;
 	export import Fragment = preact.Fragment;
@@ -89,17 +89,20 @@ declare namespace React {
 		...children: preact.ComponentChildren[]
 	) => preact.VNode<any>;
 	export function isValidElement(element: any): boolean;
-	export function findDOMNode(component: Component): Element | null;
+	export function findDOMNode(component: preact.Component): Element | null;
 
-	export abstract class PureComponent<P = {}, S = {}> extends Component<P, S> {
+	export abstract class PureComponent<P = {}, S = {}> extends preact.Component<
+		P,
+		S
+	> {
 		isPureReactComponent: boolean;
 	}
 
 	export function memo<P = {}>(
-		component: FunctionalComponent<P>,
+		component: preact.FunctionalComponent<P>,
 		comparer?: (prev: P, next: P) => boolean
 	): preact.FunctionComponent<P>;
-	export function memo<C extends FunctionalComponent<any>>(
+	export function memo<C extends preact.FunctionalComponent<any>>(
 		component: C,
 		comparer?: (
 			prev: preact.ComponentProps<C>,
@@ -114,7 +117,7 @@ declare namespace React {
 
 	export function forwardRef<R, P = {}>(
 		fn: ForwardFn<P, R>
-	): FunctionalComponent<Omit<P, 'ref'> & { ref?: preact.Ref<R> }>;
+	): preact.FunctionalComponent<Omit<P, 'ref'> & { ref?: preact.Ref<R> }>;
 
 	export function unstable_batchedUpdates(
 		callback: (arg?: any) => void,
