@@ -31,7 +31,10 @@ declare namespace React {
 	export import useState = _hooks.useState;
 
 	// Preact Defaults
-	export interface Component<P = {}, S = {}> extends preact.Component<P, S> {
+	export abstract class Component<P = {}, S = {}> extends preact.Component<
+		P,
+		S
+	> {
 		static defaultProps?: any;
 	}
 	export interface FunctionComponent<P = {}>
