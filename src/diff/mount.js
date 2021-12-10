@@ -64,21 +64,15 @@ export function mount(parentDom, newVNode, internal, commitQueue, startDom) {
 
 			if (internal.flags & TYPE_CLASS) {
 				nextDomSibling = renderClassComponent(
-					parentDom,
 					null,
 					internal,
-					commitQueue,
-					startDom,
 					context,
 					componentContext
 				);
 			} else {
 				nextDomSibling = renderFunctionComponent(
-					parentDom,
 					null,
 					internal,
-					commitQueue,
-					startDom,
 					context,
 					componentContext
 				);

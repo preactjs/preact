@@ -3,11 +3,8 @@ import { DIRTY_BIT, FORCE_UPDATE, SKIP_CHILDREN } from '../constants';
 import { addCommitCallback } from './commit';
 
 export function renderFunctionComponent(
-	parentDom,
 	newVNode,
 	internal,
-	commitQueue,
-	startDom,
 	context,
 	componentContext
 ) {
@@ -58,20 +55,13 @@ export function renderFunctionComponent(
 
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
- * @param {import('../internal').PreactElement} parentDom The parent of the DOM element
  * @param {import('../internal').VNode} newVNode The new virtual node
  * @param {import('../internal').Internal} internal The component's backing Internal node
- * @param {import('../internal').CommitQueue} commitQueue List of components
- * which have callbacks to invoke in commitRoot
- * @param {import('../internal').PreactNode} startDom
  * @returns {import('../internal').PreactNode} pointer to the next DOM node (in order) to be rendered (or null)
  */
 export function renderClassComponent(
-	parentDom,
 	newVNode,
 	internal,
-	commitQueue,
-	startDom,
 	context,
 	componentContext
 ) {

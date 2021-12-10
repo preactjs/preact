@@ -109,21 +109,15 @@ export function patch(parentDom, newVNode, internal, commitQueue, startDom) {
 
 		if (internal.flags & TYPE_CLASS) {
 			nextDomSibling = renderClassComponent(
-				parentDom,
 				newVNode,
 				internal,
-				commitQueue,
-				startDom,
 				context,
 				componentContext
 			);
 		} else {
 			nextDomSibling = renderFunctionComponent(
-				parentDom,
 				newVNode,
 				internal,
-				commitQueue,
-				startDom,
 				context,
 				componentContext
 			);
