@@ -210,11 +210,12 @@ options.vnode = vnode => {
 			if (props.className != null) normalizedProps.class = props.className;
 			Object.defineProperty(normalizedProps, 'className', classNameDescriptor);
 		}
-	}
-
-	if (typeof type === 'function' && props.ref) {
-		vnode.ref = props.ref;
-		delete props.ref;
+	} else if (typeof type === 'function' && type.defaultProps) {
+		for (i in type.defaultProps) {
+			if (normalizedProps[i] === undefined) {
+				normalizedProps[i] = type.defaultProps[i];
+			}
+		}
 	}
 
 	vnode.$$typeof = REACT_ELEMENT_TYPE;

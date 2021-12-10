@@ -17,13 +17,9 @@ export function createElement(type, props, children) {
 		ref,
 		i;
 	for (i in props) {
-		if (!(i === 'key' || (typeof type !== 'function' && i === 'ref')))
-			normalizedProps[i] = props[i];
-		else if (i === 'ref') {
-			ref = props[i];
-		} else if (i === 'key') {
-			key = props[i];
-		}
+		if (i == 'key') key = props[i];
+		else if (i == 'ref') ref = props[i];
+		else normalizedProps[i] = props[i];
 	}
 
 	if (arguments.length > 3) {
@@ -36,16 +32,6 @@ export function createElement(type, props, children) {
 
 	if (arguments.length > 2) {
 		normalizedProps.children = children;
-	}
-
-	// If a Component VNode, check for and apply defaultProps
-	// Note: type may be undefined in development, must never error here.
-	if (typeof type == 'function' && type.defaultProps != null) {
-		for (i in type.defaultProps) {
-			if (normalizedProps[i] === UNDEFINED) {
-				normalizedProps[i] = type.defaultProps[i];
-			}
-		}
 	}
 
 	return createVNode(type, normalizedProps, key, ref, 0);

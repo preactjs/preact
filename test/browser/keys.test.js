@@ -17,36 +17,10 @@ describe('keys', () => {
 
 	function createStateful(name) {
 		return class Stateful extends Component {
-			constructor(props) {
-				super(props);
-				if (props.ref) {
-					if (typeof props.ref === 'function') {
-						props.ref(this);
-					} else {
-						props.ref.current = this;
-					}
-				}
-			}
 			componentDidUpdate() {
-				const { props } = this;
-				if (props.ref) {
-					if (typeof props.ref === 'function') {
-						props.ref(this);
-					} else {
-						props.ref.current = this;
-					}
-				}
 				ops.push(`Update ${name}`);
 			}
 			componentDidMount() {
-				const { props } = this;
-				if (props.ref) {
-					if (typeof props.ref === 'function') {
-						props.ref(this);
-					} else {
-						props.ref.current = this;
-					}
-				}
 				ops.push(`Mount ${name}`);
 			}
 			componentWillUnmount() {

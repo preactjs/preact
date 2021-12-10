@@ -572,12 +572,12 @@ describe('createRoot()', () => {
 			});
 
 			it('should avoid reapplying innerHTML when __html property of dangerouslySetInnerHTML attr remains unchanged', () => {
+				let thing;
+
 				class Thing extends Component {
-					constructor(props) {
-						super(props);
-						props.ref(this);
-					}
 					render() {
+						thing = this;
+
 						// eslint-disable-next-line react/no-danger
 						return (
 							<div dangerouslySetInnerHTML={{ __html: '<span>same</span>' }} />
@@ -585,8 +585,7 @@ describe('createRoot()', () => {
 					}
 				}
 
-				let thing;
-				render(<Thing ref={r => (thing = r)} />);
+				render(<Thing />);
 
 				let firstInnerHTMLChild = scratch.firstChild.firstChild;
 
@@ -807,11 +806,9 @@ describe('createRoot()', () => {
 			let checkbox;
 
 			class Inputs extends Component {
-				constructor(props) {
-					super(props);
-					props.ref(this);
-				}
 				render() {
+					inputs = this;
+
 					return (
 						<div>
 							<input value={'Hello'} ref={el => (text = el)} />
@@ -821,7 +818,7 @@ describe('createRoot()', () => {
 				}
 			}
 
-			render(<Inputs ref={x => (inputs = x)} />);
+			render(<Inputs />);
 
 			expect(text.value).to.equal('Hello');
 			expect(checkbox.checked).to.equal(true);
@@ -953,11 +950,9 @@ describe('createRoot()', () => {
 
 		// see preact/#1327
 		it('should not reuse unkeyed components', () => {
-			let forceUpdate;
 			class X extends Component {
-				constructor(props) {
-					super(props);
-					forceUpdate = this.update.bind(this);
+				constructor() {
+					super();
 					this.state = { i: 0 };
 				}
 
@@ -974,6 +969,7 @@ describe('createRoot()', () => {
 				}
 			}
 
+			let ref;
 			let updateApp;
 			class App extends Component {
 				constructor() {
@@ -986,7 +982,7 @@ describe('createRoot()', () => {
 					return (
 						<div>
 							{this.state.i === 0 && <X />}
-							<X />
+							<X ref={node => (ref = node)} />
 						</div>
 					);
 				}
@@ -995,7 +991,7 @@ describe('createRoot()', () => {
 			render(<App />);
 			expect(scratch.textContent).to.equal('00');
 
-			forceUpdate();
+			ref.update();
 			updateApp();
 			rerender();
 			expect(scratch.textContent).to.equal('1');

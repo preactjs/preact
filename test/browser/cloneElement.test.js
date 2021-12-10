@@ -63,16 +63,14 @@ describe('cloneElement', () => {
 	it('should override ref if specified', () => {
 		function a() {}
 		function b() {}
-		function Foo(props) {
-			expect(props.ref).to.equal(a);
-		}
+		function Foo() {}
 		const instance = <Foo ref={a}>hello</Foo>;
 
 		let clone = cloneElement(instance);
-		expect(clone.props.ref).to.equal(a);
+		expect(clone.ref).to.equal(a);
 
 		clone = cloneElement(instance, { ref: b });
-		expect(clone.props.ref).to.equal(b);
+		expect(clone.ref).to.equal(b);
 	});
 
 	it('should normalize props (ref)', () => {
