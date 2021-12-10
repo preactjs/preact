@@ -16,63 +16,53 @@ import { createInternal } from './tree';
  * @param {import('./internal').PreactElement} parentDom The DOM element to
  */
 export function createRoot(parentDom) {
-	let rootInternal = null;
+	let rootInternal,
+		commitQueue,
+		firstChild,
+		flags = 0;
 
 	function render(vnode) {
 		if (options._root) options._root(vnode, parentDom);
 
-		// List of effects that need to be called after diffing.
-		const commitQueue = [];
-
 		vnode = createElement(Fragment, { _parentDom: parentDom }, [vnode]);
 
+		firstChild =
+			/** @type {import('./internal').PreactElement} */ (parentDom.firstChild);
+
+		// List of effects that need to be called after diffing:
+		commitQueue = [];
+
 		if (rootInternal) {
-			patch(parentDom, vnode, rootInternal, commitQueue, parentDom.firstChild);
+			patch(parentDom, vnode, rootInternal, commitQueue, firstChild);
 		} else {
+			rootInternal = createInternal(vnode);
+
 			// Store the VDOM tree root on the DOM element in a (minified) property:
-			rootInternal = parentDom._children = createInternal(vnode, null);
-			rootInternal._context = {};
+			parentDom._children = rootInternal;
+
+			// Calling createRoot().render() on an Element with existing children triggers mutative hydrate mode:
+			if (firstChild) {
+				flags = flags || MODE_MUTATIVE_HYDRATE;
+			}
+			// If the parent of this tree is within an inline SVG, the tree should start off in SVG mode:
 			if (parentDom.ownerSVGElement !== UNDEFINED) {
-				rootInternal.flags |= MODE_SVG;
+				flags |= MODE_SVG;
 			}
+			rootInternal.flags |= flags;
 
-			// Calling `render` on a container with existing DOM elements puts the diff into mutative hydrate mode:
-			if (parentDom.firstChild) {
-				rootInternal.flags |= MODE_MUTATIVE_HYDRATE;
-			}
+			rootInternal._context = {};
 
-			mount(
-				parentDom,
-				vnode,
-				rootInternal,
-				commitQueue,
-				// Start the diff at the replaceNode or the parentDOM.firstChild if any.
-				// Will be null if the parentDom is empty
-				parentDom.firstChild
-			);
+			mount(parentDom, vnode, rootInternal, commitQueue, firstChild);
 		}
 
 		// Flush all queued effects
-		commitRoot(commitQueue, vnode);
+		commitRoot(commitQueue, rootInternal);
 	}
 
 	return {
 		hydrate(vnode) {
-			if (options._root) options._root(vnode, parentDom);
-
-			vnode = createElement(Fragment, { _parentDom: parentDom }, [vnode]);
-			rootInternal = createInternal(vnode);
-			rootInternal._context = {};
-			rootInternal.flags |= MODE_HYDRATE;
-			parentDom._children = rootInternal;
-
-			if (parentDom.ownerSVGElement !== UNDEFINED) {
-				rootInternal.flags |= MODE_SVG;
-			}
-
-			const commitQueue = [];
-			mount(parentDom, vnode, rootInternal, commitQueue, parentDom.firstChild);
-			commitRoot(commitQueue, rootInternal);
+			flags |= MODE_HYDRATE;
+			render(vnode);
 		},
 		render
 	};

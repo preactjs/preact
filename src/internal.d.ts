@@ -150,6 +150,8 @@ export interface Internal<P = {}> {
 	_dom: PreactNode;
 	/** The component instance for which this is a backing Internal node */
 	_component: Component | null;
+	/** most recent context object passed down to this Internal from its parent */
+	_context: any;
 	/** This Internal's distance from the tree root */
 	_depth: number | null;
 	/** Callbacks to invoke when this internal commits */
