@@ -30,7 +30,8 @@
 		"transpile:jsx": "microbundle src/jsx.js -o dist/jsx.js --target web --external preact && microbundle dist/jsx.js -o dist/jsx.js -f cjs --external preact",
 		"copy-typescript-definition": "copyfiles -f src/*.d.ts dist",
 		"test": "eslint src test && tsc && npm run test:mocha && npm run bench",
-		"test:mocha": "BABEL_ENV=test mocha -r @babel/register -r test/setup.js test/**/*.test.js",
+		"test:mocha": "BABEL_ENV=test mocha -r @babel/register -r test/setup.js test/**/[!compat]*.test.js && npm run test:mocha:compat",
+		"test:mocha:compat": "BABEL_ENV=test mocha -r @babel/register -r test/setup.js test/compat.test.js",
 		"format": "prettier src/**/*.{d.ts,js} test/**/*.js --write",
 		"prepublishOnly": "npm run build",
 		"release": "npm run build && git commit -am $npm_package_version && git tag $npm_package_version && git push && git push --tags && npm publish"
