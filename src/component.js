@@ -122,10 +122,10 @@ function rerender(internal) {
 }
 
 /**
- * The render queue
- * @type {Array<import('./internal').Component>}
+ * A queue of Internals to be rendered in the next batch.
+ * @type {Array<import('./internal').Internal>}
  */
-let rerenderQueue = [];
+let renderQueue = [];
 
 /*
  * The value of `Component.debounce` must asynchronously invoke the passed in callback. It is
@@ -155,22 +155,22 @@ export function enqueueRender(callback) {
 	if (
 		(!(internal.flags & DIRTY_BIT) &&
 			(internal.flags |= DIRTY_BIT) &&
-			rerenderQueue.push(internal) &&
-			!process._rerenderCount++) ||
+			renderQueue.push(internal) &&
+			!processRenderQueue._rerenderCount++) ||
 		prevDebounce !== options.debounceRendering
 	) {
 		prevDebounce = options.debounceRendering;
-		(prevDebounce || defer)(process);
+		(prevDebounce || defer)(processRenderQueue);
 	}
 }
 
 /** Flush the render queue by rerendering all queued components */
-function process() {
-	while ((len = process._rerenderCount = rerenderQueue.length)) {
-		rerenderQueue.sort((a, b) => a._depth - b._depth);
+function processRenderQueue() {
+	while ((len = processRenderQueue._rerenderCount = renderQueue.length)) {
+		renderQueue.sort((a, b) => a._depth - b._depth);
 		while (len--) {
 			rerender(rerenderQueue.shift());
 		}
 	}
 }
-let len = (process._rerenderCount = 0);
+let len = (processRenderQueue._rerenderCount = 0);
