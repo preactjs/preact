@@ -77,7 +77,7 @@ export function patch(parentDom, newVNode, internal, commitQueue, startDom) {
 		parentDom = newVNode.props._parentDom;
 
 		if (parentDom !== prevParentDom) {
-			startDom = getChildDom(internal) || startDom;
+			startDom = getChildDom(internal, 0) || startDom;
 
 			// The `startDom` variable might point to a node from another
 			// tree from a previous render
