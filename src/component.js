@@ -1,4 +1,4 @@
-import { addCommitCallback, commitRoot } from './diff/commit';
+import { commitRoot } from './diff/commit';
 import options from './options';
 import { createVNode, Fragment } from './create-element';
 import { patch } from './diff/patch';
@@ -54,28 +54,34 @@ Component.prototype.setState = function(update, callback) {
 	// Skip update if updater function returned null
 	if (update == null) return;
 
-	if (this._internal) {
-		if (callback) addCommitCallback(this._internal, callback.bind(this));
-		this._internal.rerender(this._internal);
-	}
+	// The 0 flag value here prevents FORCE_UPDATE from being set
+	renderComponentInstance.call(this, callback, 0);
 };
 
 /**
  * Immediately perform a synchronous re-render of the component
+ * @param {() => void} [callback] A function to call after re-rendering completes
  * @this {import('./internal').Component}
- * @param {() => void} [callback] A function to be called after component is
- * re-rendered
  */
-Component.prototype.forceUpdate = function(callback) {
+Component.prototype.forceUpdate = renderComponentInstance;
+
+/**
+ * Immediately perform a synchronous re-render of the component.
+ * This method is the implementation of forceUpdate() for class components.
+ * @param {() => void} [callback] A function to call after rendering completes
+ * @param {number} [flags = FORCE_UPDATE] Flags to set. Defaults to FORCE_UPDATE.
+ * @this {import('./internal').Component}
+ */
+export function renderComponentInstance(callback, flags) {
 	if (this._internal) {
 		// Set render mode so that we can differentiate where the render request
-		// is coming from. We need this because forceUpdate should never call
-		// shouldComponentUpdate
-		this._internal.flags |= FORCE_UPDATE;
-		if (callback) addCommitCallback(this._internal, callback.bind(this));
-		this._internal.rerender(this._internal);
+		// is coming from (eg: forceUpdate should never call shouldComponentUpdate).
+		this._internal.flags |= flags == null ? FORCE_UPDATE : flags;
+		this._internal.render(callback);
+		// Note: the above is equivalent to invoking enqueueRender:
+		// enqueueRender.call(this._internal, callback);
 	}
-};
+}
 
 /**
  * Accepts `props` and `state`, and returns a new Virtual DOM tree to build.
@@ -136,9 +142,16 @@ const defer = Promise.prototype.then.bind(Promise.resolve());
 
 /**
  * Enqueue a rerender of a component
- * @param {import('./internal').Component} internal The internal to rerender
+ * @this {import('./internal').Internal} internal The internal to rerender
  */
-export function enqueueRender(internal) {
+export function enqueueRender(callback) {
+	let internal = this;
+	if (callback) {
+		if (internal._commitCallbacks == null) {
+			internal._commitCallbacks = [];
+		}
+		internal._commitCallbacks.push(callback);
+	}
 	if (
 		(!(internal.flags & DIRTY_BIT) &&
 			(internal.flags |= DIRTY_BIT) &&

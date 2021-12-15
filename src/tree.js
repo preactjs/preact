@@ -93,6 +93,7 @@ export function createInternal(vnode, parentInternal) {
 		_dom: null,
 		_component: null,
 		_context: null,
+		_commitCallbacks: null,
 		_depth: parentInternal ? parentInternal._depth + 1 : 0
 	};
 
