@@ -1,4 +1,4 @@
-import { UNDEFINED } from './constants';
+import { UNDEFINED, EMPTY_ARR } from './constants';
 import options from './options';
 
 let vnodeId = 0;
@@ -12,53 +12,34 @@ let vnodeId = 0;
  * @returns {import('./internal').VNode}
  */
 export function createElement(type, props, children) {
-	let normalizedProps = {},
-		key,
-		ref,
-		i;
-	for (i in props) {
-		if (i == 'key') key = props[i];
-		else if (i == 'ref') ref = props[i];
-		else normalizedProps[i] = props[i];
-	}
+	let normalizedProps = {};
+	// let key;
+	// let ref;
 
-	if (arguments.length > 3) {
-		children = [children];
-		// https://github.com/preactjs/preact/issues/1916
-		for (i = 3; i < arguments.length; i++) {
-			children.push(arguments[i]);
+	for (let i in props) {
+		if (i === 'key') {
+			// key = props[i];
+		} else if (i === 'ref') {
+			// ref = props[i];
+		} else {
+			normalizedProps[i] = props[i];
 		}
 	}
 
-	if (arguments.length > 2) {
+	if (arguments.length > 3) {
+		children = EMPTY_ARR.slice.call(arguments, 2);
+	}
+	if (children !== undefined) {
 		normalizedProps.children = children;
 	}
 
-	return createVNode(type, normalizedProps, key, ref, 0);
-}
-
-/**
- * Create a VNode (used internally by Preact)
- * @param {import('./internal').VNode["type"]} type The node name or Component
- * Constructor for this virtual node
- * @param {object | string | number | null} props The properties of this virtual node.
- * If this virtual node represents a text node, this is the text of the node (string or number).
- * @param {string | number | null} key The key for this virtual node, used when
- * diffing it against its children
- * @param {import('./internal').VNode["ref"]} ref The ref property that will
- * receive a reference to its created child
- * @returns {import('./internal').VNode}
- */
-export function createVNode(type, props, key, ref, original) {
-	// V8 seems to be better at detecting type shapes if the object is allocated from the same call site
-	// Do not inline into createElement and coerceToVNode!
 	const vnode = {
 		type,
-		props,
-		key,
-		ref,
+		props: normalizedProps,
+		key: props && props.key,
+		ref: props && props.ref,
 		constructor: undefined,
-		_vnodeId: original || ++vnodeId
+		_vnodeId: ++vnodeId
 	};
 
 	if (options.vnode != null) options.vnode(vnode);
@@ -77,7 +58,7 @@ export function normalizeToVNode(childVNode) {
 
 	if (typeof childVNode === 'object') {
 		return Array.isArray(childVNode)
-			? createVNode(Fragment, { children: childVNode }, null, null, 0)
+			? createElement(Fragment, null, childVNode)
 			: childVNode;
 	}
 
