@@ -7,7 +7,7 @@ export const unsubscribeFromContext = internal => {
 	if (providers.delete(internal)) return;
 	// ... otherwise, unsubscribe from any contexts:
 	providers.forEach(p => {
-		p._component._subs.delete(internal);
+		p._subs.delete(internal);
 	});
 };
 
@@ -19,9 +19,6 @@ export const createContext = (defaultValue, contextId) => {
 		_defaultValue: defaultValue,
 		/** @type {import('./internal').FunctionComponent} */
 		Consumer(props, contextValue) {
-			// return props.children(
-			// 	context[contextId] ? context[contextId].props.value : defaultValue
-			// );
 			return props.children(contextValue);
 		},
 		/** @type {import('./internal').FunctionComponent} */
@@ -32,7 +29,7 @@ export const createContext = (defaultValue, contextId) => {
 				ctx = {};
 				ctx[contextId] = this;
 				this.getChildContext = () => ctx;
-				providers.add(this._internal);
+				providers.add(this);
 			}
 			// re-render subscribers in response to value change
 			else if (props.value !== this._prev) {
