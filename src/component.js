@@ -1,6 +1,6 @@
 import { commitRoot } from './diff/commit';
 import options from './options';
-import { createVNode, Fragment } from './create-element';
+import { createElement, Fragment } from './create-element';
 import { patch } from './diff/patch';
 import {
 	DIRTY_BIT,
@@ -47,9 +47,7 @@ Component.prototype.setState = function(update, callback) {
 		update = update(Object.assign({}, s), this.props);
 	}
 
-	if (update) {
-		Object.assign(s, update);
-	}
+	Object.assign(s, update);
 
 	// Skip update if updater function returned null
 	if (update == null) return;
@@ -96,30 +94,31 @@ export function renderComponentInstance(callback, flags) {
 Component.prototype.render = Fragment;
 
 /**
- * @param {import('./internal').Component} internal The internal to rerender
+ * Render an Internal that has been marked
+ * @param {import('./internal').Internal} internal The internal to rerender
  */
-function rerender(internal) {
-	if (~internal.flags & MODE_UNMOUNTING && internal.flags & DIRTY_BIT) {
-		let parentDom = getParentDom(internal);
-		let startDom =
-			(internal.flags & (MODE_HYDRATE | MODE_SUSPENDED)) ===
-			(MODE_HYDRATE | MODE_SUSPENDED)
-				? internal._dom
-				: getDomSibling(internal, 0);
+const renderDirtyInternal = internal => {
+	const commitQueue = [];
 
-		const vnode = createVNode(
-			internal.type,
-			internal.props,
-			internal.key, // @TODO we shouldn't need to actually pass these
-			internal.ref, // since the mode flag should bypass key/ref handling
-			0
-		);
+	const vnode = createElement(internal.type);
+	vnode.props = internal.props;
 
-		const commitQueue = [];
-		patch(parentDom, vnode, internal, commitQueue, startDom);
-		commitRoot(commitQueue, internal);
-	}
-}
+	// Don't render unmounting/unmounted trees:
+	if (internal.flags & MODE_UNMOUNTING) return;
+
+	// Don't render trees already rendered in this pass:
+	if (!(internal.flags & DIRTY_BIT)) return;
+
+	let parentDom = getParentDom(internal);
+	let startDom =
+		(internal.flags & (MODE_HYDRATE | MODE_SUSPENDED)) ===
+		(MODE_HYDRATE | MODE_SUSPENDED)
+			? internal._dom
+			: getDomSibling(internal, 0);
+
+	patch(parentDom, vnode, internal, commitQueue, startDom);
+	commitRoot(commitQueue, internal);
+};
 
 /**
  * A queue of Internals to be rendered in the next batch.
@@ -169,7 +168,7 @@ function processRenderQueue() {
 	while ((len = processRenderQueue._rerenderCount = renderQueue.length)) {
 		renderQueue.sort((a, b) => a._depth - b._depth);
 		while (len--) {
-			rerender(rerenderQueue.shift());
+			renderDirtyInternal(renderQueue.shift());
 		}
 	}
 }
