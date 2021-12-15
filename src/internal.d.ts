@@ -87,7 +87,9 @@ export interface ComponentClass<P = {}> extends preact.ComponentClass<P> {
 export type ComponentType<P = {}> = ComponentClass<P> | FunctionComponent<P>;
 
 export interface PreactElement extends HTMLElement {
+	/** The root Internal of a tree, if one exists (minified to `__k`) */
 	_children?: Internal<any> | null;
+
 	/** Event listeners to support event delegation */
 	_listeners?: Record<string, (e: Event) => void>;
 
@@ -171,4 +173,9 @@ export interface Component<P = {}, S = {}> extends preact.Component<P, S> {
 export interface PreactContext extends preact.Context<any> {
 	_id: string;
 	_defaultValue: any;
+}
+
+export interface PreactRoot<any> {
+	render(VNode: vnode): void;
+	hydrate(VNode: vnode): void;
 }
