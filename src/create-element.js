@@ -13,16 +13,18 @@ let vnodeId = 0;
  */
 export function createElement(type, props, children) {
 	let normalizedProps = {};
-	// let key;
-	// let ref;
+	let key;
+	let ref;
 
-	for (let i in props) {
-		if (i === 'key') {
-			// key = props[i];
-		} else if (i === 'ref') {
-			// ref = props[i];
-		} else {
-			normalizedProps[i] = props[i];
+	if (props != null) {
+		for (let i in props) {
+			if (i === 'key') {
+				key = props[i];
+			} else if (i === 'ref') {
+				ref = props[i];
+			} else {
+				normalizedProps[i] = props[i];
+			}
 		}
 	}
 
@@ -36,8 +38,8 @@ export function createElement(type, props, children) {
 	const vnode = {
 		type,
 		props: normalizedProps,
-		key: props && props.key,
-		ref: props && props.ref,
+		key,
+		ref,
 		constructor: undefined,
 		_vnodeId: ++vnodeId
 	};
