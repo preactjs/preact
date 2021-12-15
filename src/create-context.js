@@ -1,5 +1,3 @@
-import { enqueueRender } from './component';
-
 let nextContextId = 0;
 
 const providers = new Set();
@@ -38,7 +36,7 @@ export const createContext = (defaultValue, contextId) => {
 			}
 			// re-render subscribers in response to value change
 			else if (props.value !== this._prev) {
-				this._subs.forEach(enqueueRender);
+				this._subs.forEach(i => i.render());
 			}
 			this._prev = props.value;
 

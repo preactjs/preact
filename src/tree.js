@@ -85,7 +85,7 @@ export function createInternal(vnode, parentInternal) {
 		key,
 		ref,
 		data: typeof type == 'function' ? {} : null,
-		rerender: enqueueRender,
+		render: enqueueRender,
 		flags,
 		_children: null,
 		_parent: parentInternal,

@@ -135,7 +135,7 @@ export interface Internal<P = {}> {
 	/** Polymorphic property to store extensions like hooks on */
 	data: object;
 	/** The function that triggers in-place re-renders for an internal */
-	rerender: () => void;
+	render: (callback?: () => void) => void;
 
 	/** children Internal nodes */
 	_children: Internal[];
