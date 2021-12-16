@@ -13,12 +13,11 @@ let vnodeId = 0;
  */
 export function createElement(type, props, children) {
 	/** @type {import('./internal').VNode['props']} */
-	let normalizedProps = null;
+	let normalizedProps = {};
 	let key;
 	let ref;
 
 	if (props != null) {
-		normalizedProps = {};
 		for (let i in props) {
 			if (i === 'key') {
 				key = props[i];
@@ -31,10 +30,13 @@ export function createElement(type, props, children) {
 	}
 
 	if (arguments.length > 3) {
-		children = EMPTY_ARR.slice.call(arguments, 2);
+		children = [children];
+		// https://github.com/preactjs/preact/issues/1916
+		for (let i = 3; i < arguments.length; i++) {
+			children.push(arguments[i]);
+		}
 	}
 	if (children !== undefined) {
-		if (normalizedProps == null) normalizedProps = {};
 		normalizedProps.children = children;
 	}
 
