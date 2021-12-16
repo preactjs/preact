@@ -12,11 +12,13 @@ let vnodeId = 0;
  * @returns {import('./internal').VNode}
  */
 export function createElement(type, props, children) {
-	let normalizedProps = {};
+	/** @type {import('./internal').VNode['props']} */
+	let normalizedProps = null;
 	let key;
 	let ref;
 
 	if (props != null) {
+		normalizedProps = {};
 		for (let i in props) {
 			if (i === 'key') {
 				key = props[i];
@@ -32,6 +34,7 @@ export function createElement(type, props, children) {
 		children = EMPTY_ARR.slice.call(arguments, 2);
 	}
 	if (children !== undefined) {
+		if (normalizedProps == null) normalizedProps = {};
 		normalizedProps.children = children;
 	}
 
