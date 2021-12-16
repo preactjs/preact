@@ -15,7 +15,8 @@ const SHALLOW = { shallow: true };
 // components without names, kept as a hash for later comparison to return consistent UnnamedComponentXX names.
 const UNNAMED = [];
 
-const VOID_ELEMENTS = /^(area|base|br|col|embed|hr|img|input|link|meta|param|source|track|wbr)$/;
+const VOID_ELEMENTS =
+	/^(area|base|br|col|embed|hr|img|input|link|meta|param|source|track|wbr)$/;
 
 const UNSAFE_NAME = /[\s\n\\/='"\0<>]/;
 
@@ -247,7 +248,7 @@ function _renderToString(vnode, context, opts, inner, isSvgMode, selectValue) {
 			if (name === 'defaultValue') {
 				name = 'value';
 			} else if (name === 'className') {
-				if (props.class) continue;
+				if (typeof props.class !== 'undefined') continue;
 				name = 'class';
 			} else if (isSvgMode && name.match(/^xlink:?./)) {
 				name = name.toLowerCase().replace(/^xlink:?/, 'xlink:');
