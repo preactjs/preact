@@ -1,4 +1,4 @@
-import { UNDEFINED, EMPTY_ARR } from './constants';
+import { UNDEFINED } from './constants';
 import options from './options';
 
 let vnodeId = 0;
