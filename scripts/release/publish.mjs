@@ -11,51 +11,10 @@ const log = {
 };
 
 /**
- * Parse HTTP Link headers into an array of [rel_name, uri] tuples.
- * This implementation only looks for one parameter named "rel".
- * https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Link
- * @param {string} linkHeader
- * @returns {Array<[string, string]>}
- */
-function parseLinkHeader(linkHeader) {
-	log.debug('raw link:', linkHeader);
-
-	/** @type {Array<[string, string]>} */
-	const result = [];
-	const uris = linkHeader.split(/,\s*</);
-
-	for (let uri of uris) {
-		// We assume each link uri only has one param and the param key is "rel"
-		// The first "<" may get stripped off by the split call above
-		const match = uri.match(/<?([^>]*)>\s*;\s*rel="?([^"]*)"?/);
-
-		// 1st group: URI, 2nd group: rel name
-		result.push([match[2], match[1]]);
-	}
-
-	log.debug('parsed:', result);
-	return result;
-}
-
-/**
- * AsyncGenerator for all GitHub releases in this repo, yielding each page of results
  * @typedef {import('@octokit/openapi-types').components["schemas"]["release"]} Release
- * @returns {AsyncGenerator<Release[]>}
+ * @param {string} tag
+ * @param {any} opts
  */
-async function* getReleases() {
-	let nextUrl = 'https://api.github.com/repos/preactjs/preact/releases';
-	while (nextUrl) {
-		log.debug('Fetching', nextUrl);
-
-		const response = await fetch(nextUrl);
-		const linkHeader = response.headers.get('Link');
-		const links = linkHeader ? parseLinkHeader(linkHeader) : null;
-
-		nextUrl = links?.find(link => link[0] == 'next')?.[1];
-		yield /** @type {Release[]} */ (await response.json());
-	}
-}
-
 async function main(tag, opts) {
 	DEBUG = opts.debug;
 
@@ -63,16 +22,21 @@ async function main(tag, opts) {
 	log.debug('Options:', opts);
 
 	// 1. Find a release with the matching tag
-	/** @type {Release} */
-	let release;
-
-	for await (let releasePage of getReleases()) {
-		release = releasePage.find(release => release.tag_name == tag);
-		if (release) {
-			break;
-		}
+	const getReleaseByTagUrl = `https://api.github.com/repos/preactjs/preact/releases/tags/${tag}`;
+	const response = await fetch(getReleaseByTagUrl);
+	if (response.status == 404) {
+		log.error(
+			`Could not find the GitHub release for tag ${tag}. Has the release workflow finished and the GitHub release published?`
+		);
+		process.exit(1);
+	} else if (!response.ok) {
+		log.error('GitHub API returned an error:');
+		log.error(`${response.status} ${response.statusText}`);
+		log.error(await response.text());
+		process.exit(1);
 	}
 
+	const release = /** @type {Release} */ (await response.json());
 	log.debug('Release:', release);
 	if (release) {
 		log.info('Found release', release.id, 'at', release.html_url);
