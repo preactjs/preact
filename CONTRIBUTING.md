@@ -182,7 +182,7 @@ rights to publish new releases on npm.
 7. Run the publish script with the tag you created
 	1. `node ./scripts/release/publish.mjs 10.0.0`
    2. Make sure you have 2FA enabled in npm, otherwise the above command will fail.
-   3. If you're doing a pre-release add `--tag next` to the `publish.mjs` command to publish it under a different tag (default is `latest`)
+   3. If you're doing a pre-release add `--npm-tag next` to the `publish.mjs` command to publish it under a different tag (default is `latest`)
 8. Tweet it out
 
 ## Legacy Releases (8.x)
