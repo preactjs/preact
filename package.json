@@ -58,7 +58,7 @@
 			"require": "./jsx-runtime/dist/jsxRuntime.js",
 			"import": "./jsx-runtime/dist/jsxRuntime.mjs"
 		},
-    "./compat/server": {
+		"./compat/server": {
 			"require": "./compat/server.js",
 			"import": "./compat/server.mjs"
 		},
@@ -66,7 +66,7 @@
 			"require": "./compat/jsx-runtime.js",
 			"import": "./compat/jsx-runtime.mjs"
 		},
-    "./compat/jsx-dev-runtime": {
+		"./compat/jsx-dev-runtime": {
 			"require": "./compat/jsx-dev-runtime.js",
 			"import": "./compat/jsx-dev-runtime.mjs"
 		},
@@ -235,6 +235,8 @@
 	"bugs": "https://github.com/preactjs/preact/issues",
 	"homepage": "https://preactjs.com",
 	"devDependencies": {
+		"@actions/github": "^5.0.0",
+		"@actions/glob": "^0.2.0",
 		"@babel/core": "^7.7.0",
 		"@babel/plugin-proposal-object-rest-spread": "^7.6.2",
 		"@babel/plugin-transform-react-jsx": "^7.7.0",
@@ -280,8 +282,10 @@
 		"npm-run-all": "^4.0.0",
 		"prettier": "^1.18.2",
 		"prop-types": "^15.7.2",
+		"sade": "^1.7.4",
 		"sinon": "^9.2.3",
 		"sinon-chai": "^3.5.0",
-		"typescript": "4.4.2"
+		"typescript": "4.4.2",
+		"undici": "^4.12.0"
 	}
 }

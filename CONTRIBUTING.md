@@ -170,6 +170,27 @@ We closely watch our issues and have a pretty active [Slack workspace](https://c
 This guide is intended for core team members that have the necessary
 rights to publish new releases on npm.
 
+1. Make a PR where **only** the version number is incremented in `package.json` (note: We follow `SemVer` conventions)
+2. Wait until the PR is approved and merged.
+3. Switch back to the `master` branch and pull the merged PR
+4. Create and push a tag for the new version you want to publish:
+	1. `git tag 10.0.0`
+	2. `git push --tags`
+5. Wait for the Release workflow to complete
+	- It'll create a draft release and upload the built npm package as an asset to the release
+6. [Fill in the release notes](#writing-release-notes) in GitHub and publish them
+7. Run the publish script with the tag you created
+	1. `node ./scripts/release/publish.mjs 10.0.0`
+   2. Make sure you have 2FA enabled in npm, otherwise the above command will fail.
+   3. If you're doing a pre-release add `--tag next` to the `publish.mjs` command to publish it under a different tag (default is `latest`)
+8. Tweet it out
+
+## Legacy Releases (8.x)
+
+> **ATTENTION:** Make sure that you've cleared the project correctly
+> when switching from a 10.x branch.
+
+0. Run `rm -rf dist node_modules && npm i` to make sure to have the correct dependencies.
 1. [Write the release notes](#writing-release-notes) and keep them as a draft in GitHub
    1. I'd recommend writing them in an offline editor because each edit to a draft will change the URL in GitHub.
 2. Make a PR where **only** the version number is incremented in `package.json` (note: We follow `SemVer` conventions)
@@ -180,15 +201,6 @@ rights to publish new releases on npm.
    2. If you're doing a pre-release add `--tag next` to the `npm publish` command to publish it under a different tag (default is `latest`)
 6. Publish the release notes and create the correct git tag.
 7. Tweet it out
-
-## Legacy Releases (8.x)
-
-> **ATTENTION:** Make sure that you've cleared the project correctly
-> when switching from a 10.x branch.
-
-0. Run `rm -rf dist node_modules && npm i` to make sure to have the correct dependencies.
-
-Apart from that it's the same as above.
 
 ## Writing release notes
 

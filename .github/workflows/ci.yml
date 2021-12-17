@@ -9,6 +9,7 @@ on:
     branches:
       - master
       - restructure
+  workflow_call:
 
 jobs:
   build_test:
