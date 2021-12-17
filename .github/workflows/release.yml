@@ -19,11 +19,11 @@ jobs:
         uses: actions/github-script@v5
         with:
           script: |
-            const script = require('./scripts/release/create-gh-release.cjs')
+            const script = require('./scripts/release/create-gh-release.js')
             return script({ github, context })
       - name: Upload release artifact
         uses: actions/github-script@v5
         with:
           script: |
-            const script = require('./scripts/release/upload-gh-asset.cjs')
+            const script = require('./scripts/release/upload-gh-asset.js')
             return script({ require, github, context, glob, release: ${{ steps.create-release.outputs.result }} })
