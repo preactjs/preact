@@ -24,22 +24,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
+      - uses: actions/setup-node@v2
         with:
-          node-version: '14.x'
-      - name: Cache node modules
-        uses: actions/cache@v1
-        env:
-          cache-name: cache-node-modules
-        with:
-          path: ~/.npm
-          # This uses the same name as the build-action so we can share the caches.
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-build-${{ env.cache-name }}-
-            ${{ runner.os }}-build-
-            ${{ runner.os }}-
+          node-version: 14.x
+          cache: npm
       - run: npm ci
+      - run: pushd benches && npm ci; popd # Prime benchmark npm cache
       - name: Package
         # Use --ignore-scripts here to avoid re-building again before pack
         run: |
@@ -70,9 +60,10 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
+      - uses: actions/setup-node@v2
         with:
-          node-version: '14.x'
+          node-version: 14.x
+          cache: npm
       - uses: actions/download-artifact@v2
         with:
           name: build-output
@@ -98,9 +89,10 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
+      - uses: actions/setup-node@v2
         with:
-          node-version: '14.x'
+          node-version: 14.x
+          cache: npm
       - uses: actions/download-artifact@v2
         with:
           name: build-output
@@ -126,9 +118,10 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
+      - uses: actions/setup-node@v2
         with:
-          node-version: '14.x'
+          node-version: 14.x
+          cache: npm
       - uses: actions/download-artifact@v2
         with:
           name: build-output
@@ -154,9 +147,10 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
+      - uses: actions/setup-node@v2
         with:
-          node-version: '14.x'
+          node-version: 14.x
+          cache: npm
       - uses: actions/download-artifact@v2
         with:
           name: build-output
@@ -182,9 +176,10 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
+      - uses: actions/setup-node@v2
         with:
-          node-version: '14.x'
+          node-version: 14.x
+          cache: npm
       - uses: actions/download-artifact@v2
         with:
           name: build-output
@@ -210,9 +205,10 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
+      - uses: actions/setup-node@v2
         with:
-          node-version: '14.x'
+          node-version: 14.x
+          cache: npm
       - uses: actions/download-artifact@v2
         with:
           name: build-output
@@ -238,9 +234,10 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
+      - uses: actions/setup-node@v2
         with:
-          node-version: '14.x'
+          node-version: 14.x
+          cache: npm
       - uses: actions/download-artifact@v2
         with:
           name: build-output
@@ -266,9 +263,10 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
+      - uses: actions/setup-node@v2
         with:
-          node-version: '14.x'
+          node-version: 14.x
+          cache: npm
       - uses: actions/download-artifact@v2
         with:
           name: build-output
