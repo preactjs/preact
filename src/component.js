@@ -1,6 +1,6 @@
 import { commitRoot } from './diff/commit';
 import options from './options';
-import { createElement, Fragment } from './create-element';
+import { createVNode, Fragment } from './create-element';
 import { patch } from './diff/patch';
 import {
 	DIRTY_BIT,
@@ -100,8 +100,7 @@ Component.prototype.render = Fragment;
 const renderDirtyInternal = internal => {
 	const commitQueue = [];
 
-	const vnode = createElement(internal.type);
-	vnode.props = internal.props;
+	const vnode = createVNode(internal.type, internal.props);
 
 	// Don't render unmounting/unmounted trees:
 	if (internal.flags & MODE_UNMOUNTING) return;

@@ -40,9 +40,13 @@ export function createElement(type, props, children) {
 		normalizedProps.children = children;
 	}
 
+	return createVNode(type, normalizedProps, key, ref);
+}
+
+export function createVNode(type, props, key, ref) {
 	const vnode = {
 		type,
-		props: normalizedProps,
+		props,
 		key,
 		ref,
 		constructor: undefined,
