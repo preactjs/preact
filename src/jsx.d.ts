@@ -622,7 +622,7 @@ export namespace JSXInternal {
 		alt?: string;
 		as?: string;
 		async?: boolean;
-		autoCapitalize?: "off" | "none" | "on" | "sentences" | "words" | "characters";
+		autoCapitalize?: 'off' | 'none' | 'on' | 'sentences' | 'words' | 'characters';
 		autocomplete?: string;
 		autoComplete?: string;
 		autocorrect?: string;
