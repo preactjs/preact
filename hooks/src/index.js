@@ -5,13 +5,6 @@ let currentIndex;
 
 /** @type {import('./internal').Component} */
 let currentComponent;
-/**
- * Keep track of the previous component so that we can set
- * `currentComponent` to `null` and throw when a hook is invoked
- * outside of render
- * @type {import('./internal').Component}
- */
-let previousComponent;
 
 /** @type {number} */
 let currentHook = 0;
@@ -54,7 +47,7 @@ options.diffed = vnode => {
 	if (c && c.__hooks && c.__hooks._pendingEffects.length) {
 		afterPaint(afterPaintEffects.push(c));
 	}
-	currentComponent = previousComponent;
+	currentComponent = null;
 };
 
 options._commit = (vnode, commitQueue) => {
@@ -81,11 +74,15 @@ options.unmount = vnode => {
 
 	const c = vnode._component;
 	if (c && c.__hooks) {
-		try {
-			c.__hooks._list.forEach(invokeCleanup);
-		} catch (e) {
-			options._catchError(e, c._vnode);
-		}
+		let hasErrored;
+		c.__hooks._list.forEach(s => {
+			try {
+				invokeCleanup(s);
+			} catch (e) {
+				hasErrored = e;
+			}
+		});
+		if (hasErrored) options._catchError(hasErrored, c._vnode);
 	}
 };
 
@@ -93,7 +90,7 @@ options.unmount = vnode => {
  * Get a hook's state from the currentComponent
  * @param {number} index The index of the hook to get
  * @param {number} type The index of the hook to get
- * @returns {import('./internal').HookState}
+ * @returns {any}
  */
 function getHookState(index, type) {
 	if (options._hook) {
@@ -120,7 +117,7 @@ function getHookState(index, type) {
 }
 
 /**
- * @param {import('./index').StateUpdater<any>} initialState
+ * @param {import('./index').StateUpdater<any>} [initialState]
  */
 export function useState(initialState) {
 	currentHook = 1;
@@ -240,6 +237,7 @@ export function useContext(context) {
 	// We could skip this call here, but than we'd not call
 	// `options._hook`. We need to do that in order to make
 	// the devtools aware of this hook.
+	/** @type {import('./internal').ContextHookState} */
 	const state = getHookState(currentIndex++, 9);
 	// The devtools needs access to the context object to
 	// be able to pull of the default value when no provider
@@ -264,7 +262,11 @@ export function useDebugValue(value, formatter) {
 	}
 }
 
+/**
+ * @param {(error: any) => void} cb
+ */
 export function useErrorBoundary(cb) {
+	/** @type {import('./internal').ErrorBoundaryHookState} */
 	const state = getHookState(currentIndex++, 10);
 	const errState = useState();
 	state._value = cb;
@@ -286,19 +288,20 @@ export function useErrorBoundary(cb) {
  * After paint effects consumer.
  */
 function flushAfterPaintEffects() {
-	afterPaintEffects.forEach(component => {
-		if (component._parentDom) {
-			try {
-				component.__hooks._pendingEffects.forEach(invokeCleanup);
-				component.__hooks._pendingEffects.forEach(invokeEffect);
-				component.__hooks._pendingEffects = [];
-			} catch (e) {
-				component.__hooks._pendingEffects = [];
-				options._catchError(e, component._vnode);
-			}
+	let component;
+	// sort the queue by depth (outermost to innermost)
+	afterPaintEffects.sort((a, b) => a._vnode._depth - b._vnode._depth);
+	while (component = afterPaintEffects.pop()) {
+		if (!component._parentDom) continue;
+		try {
+			component.__hooks._pendingEffects.forEach(invokeCleanup);
+			component.__hooks._pendingEffects.forEach(invokeEffect);
+			component.__hooks._pendingEffects = [];
+		} catch (e) {
+			component.__hooks._pendingEffects = [];
+			options._catchError(e, component._vnode);
 		}
-	});
-	afterPaintEffects = [];
+	}
 }
 
 let HAS_RAF = typeof requestAnimationFrame == 'function';
@@ -348,7 +351,11 @@ function invokeCleanup(hook) {
 	// A hook cleanup can introduce a call to render which creates a new root, this will call options.vnode
 	// and move the currentComponent away.
 	const comp = currentComponent;
-	if (typeof hook._cleanup == 'function') hook._cleanup();
+	let cleanup = hook._cleanup;
+	if (typeof cleanup == 'function') {
+		hook._cleanup = undefined;
+		cleanup();
+	}
 	currentComponent = comp;
 }
 

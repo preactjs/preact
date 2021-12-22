@@ -10,7 +10,9 @@ export const REACT_ELEMENT_TYPE =
 	(typeof Symbol != 'undefined' && Symbol.for && Symbol.for('react.element')) ||
 	0xeac7;
 
-const CAMEL_PROPS = /^(?:accent|alignment|arabic|baseline|cap|clip(?!PathU)|color|fill|flood|font|glyph(?!R)|horiz|marker(?!H|W|U)|overline|paint|stop|strikethrough|stroke|text(?!L)|underline|unicode|units|v|vector|vert|word|writing|x(?!C))[A-Z]/;
+const CAMEL_PROPS = /^(?:accent|alignment|arabic|baseline|cap|clip(?!PathU)|color|dominant|fill|flood|font|glyph(?!R)|horiz|marker(?!H|W|U)|overline|paint|stop|strikethrough|stroke|text(?!L)|underline|unicode|units|v|vector|vert|word|writing|x(?!C))[A-Z]/;
+
+const IS_DOM = typeof document !== 'undefined';
 
 // Input types for which onchange should not be converted to oninput.
 // type="file|checkbox|radio", plus "range" in IE11.
@@ -112,12 +114,25 @@ options.vnode = vnode => {
 
 	// only normalize props on Element nodes
 	if (typeof type === 'string') {
+		const nonCustomElement = type.indexOf('-') === -1;
 		normalizedProps = {};
 
 		for (let i in props) {
 			let value = props[i];
 
-			if (i === 'defaultValue' && 'value' in props && props.value == null) {
+			if (IS_DOM && i === 'children' && type === 'noscript') {
+				// Emulate React's behavior of not rendering the contents of noscript tags on the client.
+				continue;
+			}
+			else if (i === 'value' && 'defaultValue' in props && value == null) {
+				// Skip applying value if it is null/undefined and we already set
+				// a default value
+				continue;
+			} else if (
+				i === 'defaultValue' &&
+				'value' in props &&
+				props.value == null
+			) {
 				// `defaultValue` is treated as a fallback `value` when a value prop is present but null/undefined.
 				// `defaultValue` for Elements with no value prop is the same as the DOM defaultValue property.
 				i = 'value';
@@ -135,9 +150,13 @@ options.vnode = vnode => {
 				!onChangeInputType(props.type)
 			) {
 				i = 'oninput';
+			} else if (/^onfocus$/i.test(i)) {
+				i = 'onfocusin';
+			} else if (/^onblur$/i.test(i)) {
+				i = 'onfocusout';
 			} else if (/^on(Ani|Tra|Tou|BeforeInp)/.test(i)) {
 				i = i.toLowerCase();
-			} else if (CAMEL_PROPS.test(i)) {
+			} else if (nonCustomElement && CAMEL_PROPS.test(i)) {
 				i = i.replace(/[A-Z0-9]/, '-$&').toLowerCase();
 			} else if (value === null) {
 				value = undefined;
@@ -159,13 +178,26 @@ options.vnode = vnode => {
 			});
 		}
 
-		vnode.props = normalizedProps;
-	}
+		// Adding support for defaultValue in select tag
+		if (type == 'select' && normalizedProps.defaultValue != null) {
+			normalizedProps.value = toChildArray(props.children).forEach(child => {
+				if (normalizedProps.multiple) {
+					child.props.selected =
+						normalizedProps.defaultValue.indexOf(child.props.value) != -1;
+				} else {
+					child.props.selected =
+						normalizedProps.defaultValue == child.props.value;
+				}
+			});
+		}
 
-	if (type && props.class != props.className) {
-		classNameDescriptor.enumerable = 'className' in props;
-		if (props.className != null) normalizedProps.class = props.className;
-		Object.defineProperty(normalizedProps, 'className', classNameDescriptor);
+		vnode.props = normalizedProps;
+
+		if (props.class != props.className) {
+			classNameDescriptor.enumerable = 'className' in props;
+			if (props.className != null) normalizedProps.class = props.className;
+			Object.defineProperty(normalizedProps, 'className', classNameDescriptor);
+		}
 	}
 
 	vnode.$$typeof = REACT_ELEMENT_TYPE;

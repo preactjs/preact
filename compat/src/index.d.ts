@@ -39,6 +39,7 @@ declare namespace React {
 	export import Fragment = preact.Fragment;
 	export import createElement = preact.createElement;
 	export import cloneElement = preact.cloneElement;
+	export import ComponentProps = preact.ComponentProps;
 
 	// Suspense
 	export import Suspense = _Suspense.Suspense;
@@ -105,7 +106,7 @@ declare namespace React {
 
 	export function forwardRef<R, P = {}>(
 		fn: ForwardFn<P, R>
-	): preact.FunctionalComponent<P>;
+	): preact.FunctionalComponent<Omit<P, 'ref'> & { ref?: preact.Ref<R> }>;
 
 	export function unstable_batchedUpdates(
 		callback: (arg?: any) => void,
@@ -125,4 +126,16 @@ declare namespace React {
 		only: (children: preact.ComponentChildren) => preact.ComponentChild;
 		toArray: (children: preact.ComponentChildren) => preact.VNode<{}>[];
 	};
+
+	// scheduler
+	export const unstable_ImmediatePriority: number;
+	export const unstable_UserBlockingPriority: number;
+	export const unstable_NormalPriority: number;
+	export const unstable_LowPriority: number;
+	export const unstable_IdlePriority: number;
+	export function unstable_runWithPriority(
+		priority: number,
+		callback: () => void
+	): void;
+	export const unstable_now: () => number;
 }

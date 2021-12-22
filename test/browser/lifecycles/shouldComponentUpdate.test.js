@@ -857,4 +857,60 @@ describe('Lifecycle methods', () => {
 		// 	'<table>id: 3a: 25b: 1000id: 1a: 5id: 2a: 50b: 10b: 100.insertBefore(<div>b: 100, <div>id: 2)'
 		// ]);
 	});
+
+	it('should maintain the order if memoised component initially rendered empty content', () => {
+		let showText, updateParent;
+		class Child extends Component {
+			constructor(props) {
+				super(props);
+				this.state = {
+					show: false
+				};
+				showText = () => this.setState({ show: true });
+			}
+			render(props, { show }) {
+				if (!show) return null;
+
+				return <div>Component</div>;
+			}
+		}
+
+		class Memoized extends Component {
+			shouldComponentUpdate() {
+				return false;
+			}
+			render() {
+				return <Child />;
+			}
+		}
+		class Parent extends Component {
+			constructor(props) {
+				super(props);
+				updateParent = () => this.setState({});
+			}
+			render() {
+				return (
+					<Fragment>
+						<div>Before</div>
+						<Memoized />
+						<div>After</div>
+					</Fragment>
+				);
+			}
+		}
+
+		render(<Parent />, scratch);
+		expect(scratch.innerHTML).to.equal(`<div>Before</div><div>After</div>`);
+
+		updateParent();
+		rerender();
+		expect(scratch.innerHTML).to.equal(`<div>Before</div><div>After</div>`);
+
+		showText();
+		rerender();
+
+		expect(scratch.innerHTML).to.equal(
+			`<div>Before</div><div>Component</div><div>After</div>`
+		);
+	});
 });

@@ -110,6 +110,49 @@ describe('compat render', () => {
 		expect(scratch.firstElementChild).to.have.property('value', 'foo');
 	});
 
+	it('should add defaultValue when value is null/undefined', () => {
+		render(<input defaultValue="foo" value={null} />, scratch);
+		expect(scratch.firstElementChild).to.have.property('value', 'foo');
+
+		render(<input defaultValue="foo" value={undefined} />, scratch);
+		expect(scratch.firstElementChild).to.have.property('value', 'foo');
+	});
+
+	it('should support defaultValue for select tag', () => {
+		function App() {
+			return (
+				<select defaultValue="2">
+					<option value="1">Picked 1</option>
+					<option value="2">Picked 2</option>
+					<option value="3">Picked 3</option>
+				</select>
+			);
+		}
+
+		render(<App />, scratch);
+		const options = scratch.firstChild.children;
+		expect(options[0]).to.have.property('selected', false);
+		expect(options[1]).to.have.property('selected', true);
+	});
+
+	it('should support defaultValue for select tag when using multi selection', () => {
+		function App() {
+			return (
+				<select multiple defaultValue={['1', '3']}>
+					<option value="1">Picked 1</option>
+					<option value="2">Picked 2</option>
+					<option value="3">Picked 3</option>
+				</select>
+			);
+		}
+
+		render(<App />, scratch);
+		const options = scratch.firstChild.children;
+		expect(options[0]).to.have.property('selected', true);
+		expect(options[1]).to.have.property('selected', false);
+		expect(options[2]).to.have.property('selected', true);
+	});
+
 	it('should ignore defaultValue when value is 0', () => {
 		render(<input defaultValue={2} value={0} />, scratch);
 		expect(scratch.firstElementChild.value).to.equal('0');
@@ -172,6 +215,33 @@ describe('compat render', () => {
 		child.focus();
 		render(<input />, scratch);
 		expect(document.activeElement.nodeName).to.equal('INPUT');
+	});
+
+	it('should transform react-style camel cased attributes', () => {
+		render(
+			<text dominantBaseline="middle" fontWeight="30px">
+				foo
+			</text>,
+			scratch
+		);
+		expect(scratch.innerHTML).to.equal(
+			'<text dominant-baseline="middle" font-weight="30px">foo</text>'
+		);
+	});
+
+	it('should correctly allow for "className"', () => {
+		const Foo = props => {
+			const { className, ...rest } = props;
+			return (
+				<div class={className}>
+					<p {...rest}>Foo</p>
+				</div>
+			);
+		};
+
+		render(<Foo className="foo" />, scratch);
+		expect(scratch.firstChild.className).to.equal('foo');
+		expect(scratch.firstChild.firstChild.className).to.equal('');
 	});
 
 	it('should normalize class+className even on components', () => {

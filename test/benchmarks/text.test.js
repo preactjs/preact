@@ -1,4 +1,4 @@
-/*global coverage, ENABLE_PERFORMANCE */
+/*global COVERAGE, ENABLE_PERFORMANCE */
 /*eslint no-console:0*/
 /** @jsx createElement */
 
@@ -6,7 +6,7 @@ import { setupScratch, teardown } from '../_util/helpers';
 import bench from '../_util/bench';
 import preact8 from '../fixtures/preact';
 import * as preactX from '../../dist/preact.module';
-const MULTIPLIER = ENABLE_PERFORMANCE ? (coverage ? 5 : 1) : 999999;
+const MULTIPLIER = ENABLE_PERFORMANCE ? (COVERAGE ? 5 : 1) : 999999;
 
 describe('benchmarks', function() {
 	let scratch;
@@ -15,7 +15,7 @@ describe('benchmarks', function() {
 
 	before(function() {
 		if (!ENABLE_PERFORMANCE) this.skip();
-		if (coverage) {
+		if (COVERAGE) {
 			console.warn(
 				'WARNING: Code coverage is enabled, which dramatically reduces performance. Do not pay attention to these numbers.'
 			);
