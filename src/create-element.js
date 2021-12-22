@@ -1,7 +1,9 @@
-import { UNDEFINED } from './constants';
+import { EMPTY_ARR, UNDEFINED } from './constants';
 import options from './options';
 
 let vnodeId = 0;
+
+const slice = EMPTY_ARR.slice;
 
 /**
  * Create an virtual node (used for JSX)
@@ -30,11 +32,7 @@ export function createElement(type, props, children) {
 	}
 
 	if (arguments.length > 3) {
-		children = [children];
-		// https://github.com/preactjs/preact/issues/1916
-		for (let i = 3; i < arguments.length; i++) {
-			children.push(arguments[i]);
-		}
+		children = slice.call(arguments, 2);
 	}
 	if (children !== undefined) {
 		normalizedProps.children = children;
