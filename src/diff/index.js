@@ -21,8 +21,6 @@ import options from '../options';
  * render (except when hydrating). Can be a sibling DOM element when diffing
  * Fragments that have siblings. In most cases, it starts out as `oldChildren[0]._dom`.
  * @param {boolean} [isHydrating] Whether or not we are in hydration
- * @param deadline IdleDeadline oject in browser. Used to fetch the amount of time
- * left in the time quota given to us from idle callback using deadline.timeRemaining()
  */
 export async function diff(
 	parentDom,
@@ -33,9 +31,13 @@ export async function diff(
 	excessDomChildren,
 	commitQueue,
 	oldDom,
-	isHydrating,
-	deadline
+	isHydrating
 ) {
+
+	// if we're running out of deadline, yield and get back as browser allows us
+	if (typeof window !== 'undefined' && (!window._preactDeadline || Date.now() > window._preactDeadline))
+		await new Promise(resolve => requestIdleCallback(deadline => { window._preactDeadline = Date.now() + deadline.timeRemaining(); resolve(); }));
+
 	let tmp,
 		newType = newVNode.type;
 
@@ -208,8 +210,7 @@ export async function diff(
 				excessDomChildren,
 				commitQueue,
 				oldDom,
-				isHydrating,
-				deadline
+				isHydrating
 			);
 
 			c.base = newVNode._dom;
@@ -241,8 +242,7 @@ export async function diff(
 				isSvg,
 				excessDomChildren,
 				commitQueue,
-				isHydrating,
-				deadline
+				isHydrating
 			);
 		}
 
@@ -296,8 +296,6 @@ export function commitRoot(commitQueue, root) {
  * @param {Array<import('../internal').Component>} commitQueue List of components
  * which have callbacks to invoke in commitRoot
  * @param {boolean} isHydrating Whether or not we are in hydration
- * @param deadline IdleDeadline oject in browser. Used to fetch the amount of time
- * left in the time quota given to us from idle callback using deadline.timeRemaining()
  * @returns {import('../internal').PreactElement}
  */
 async function diffElementNodes(
@@ -308,8 +306,7 @@ async function diffElementNodes(
 	isSvg,
 	excessDomChildren,
 	commitQueue,
-	isHydrating,
-	deadline
+	isHydrating
 ) {
 	let oldProps = oldVNode.props;
 	let newProps = newVNode.props;
@@ -421,8 +418,7 @@ async function diffElementNodes(
 				excessDomChildren
 					? excessDomChildren[0]
 					: oldVNode._children && getDomSibling(oldVNode, 0),
-				isHydrating,
-				deadline
+				isHydrating
 			);
 
 			// Remove children that are not part of any vnode.
