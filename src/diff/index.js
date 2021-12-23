@@ -21,8 +21,10 @@ import options from '../options';
  * render (except when hydrating). Can be a sibling DOM element when diffing
  * Fragments that have siblings. In most cases, it starts out as `oldChildren[0]._dom`.
  * @param {boolean} [isHydrating] Whether or not we are in hydration
+ * @param deadline IdleDeadline oject in browser. Used to fetch the amount of time
+ * left in the time quota given to us from idle callback using deadline.timeRemaining()
  */
-export function diff(
+export async function diff(
 	parentDom,
 	newVNode,
 	oldVNode,
@@ -31,7 +33,8 @@ export function diff(
 	excessDomChildren,
 	commitQueue,
 	oldDom,
-	isHydrating
+	isHydrating,
+	deadline
 ) {
 	let tmp,
 		newType = newVNode.type;
@@ -195,7 +198,7 @@ export function diff(
 				tmp != null && tmp.type === Fragment && tmp.key == null;
 			let renderResult = isTopLevelFragment ? tmp.props.children : tmp;
 
-			diffChildren(
+			await diffChildren(
 				parentDom,
 				Array.isArray(renderResult) ? renderResult : [renderResult],
 				newVNode,
@@ -205,7 +208,8 @@ export function diff(
 				excessDomChildren,
 				commitQueue,
 				oldDom,
-				isHydrating
+				isHydrating,
+				deadline
 			);
 
 			c.base = newVNode._dom;
@@ -229,7 +233,7 @@ export function diff(
 			newVNode._children = oldVNode._children;
 			newVNode._dom = oldVNode._dom;
 		} else {
-			newVNode._dom = diffElementNodes(
+			newVNode._dom = await diffElementNodes(
 				oldVNode._dom,
 				newVNode,
 				oldVNode,
@@ -237,7 +241,8 @@ export function diff(
 				isSvg,
 				excessDomChildren,
 				commitQueue,
-				isHydrating
+				isHydrating,
+				deadline
 			);
 		}
 
@@ -291,9 +296,11 @@ export function commitRoot(commitQueue, root) {
  * @param {Array<import('../internal').Component>} commitQueue List of components
  * which have callbacks to invoke in commitRoot
  * @param {boolean} isHydrating Whether or not we are in hydration
+ * @param deadline IdleDeadline oject in browser. Used to fetch the amount of time
+ * left in the time quota given to us from idle callback using deadline.timeRemaining()
  * @returns {import('../internal').PreactElement}
  */
-function diffElementNodes(
+async function diffElementNodes(
 	dom,
 	newVNode,
 	oldVNode,
@@ -301,7 +308,8 @@ function diffElementNodes(
 	isSvg,
 	excessDomChildren,
 	commitQueue,
-	isHydrating
+	isHydrating,
+	deadline
 ) {
 	let oldProps = oldVNode.props;
 	let newProps = newVNode.props;
@@ -401,7 +409,7 @@ function diffElementNodes(
 			newVNode._children = [];
 		} else {
 			i = newVNode.props.children;
-			diffChildren(
+			await diffChildren(
 				dom,
 				Array.isArray(i) ? i : [i],
 				newVNode,
@@ -413,7 +421,8 @@ function diffElementNodes(
 				excessDomChildren
 					? excessDomChildren[0]
 					: oldVNode._children && getDomSibling(oldVNode, 0),
-				isHydrating
+				isHydrating,
+				deadline
 			);
 
 			// Remove children that are not part of any vnode.

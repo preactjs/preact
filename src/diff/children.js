@@ -22,8 +22,10 @@ import { getDomSibling } from '../component';
  * render (except when hydrating). Can be a sibling DOM element when diffing
  * Fragments that have siblings. In most cases, it starts out as `oldChildren[0]._dom`.
  * @param {boolean} isHydrating Whether or not we are in hydration
+ * @param deadline IdleDeadline oject in browser. Used to fetch the amount of time
+ * left in the time quota given to us from idle callback using deadline.timeRemaining()
  */
-export function diffChildren(
+export async function diffChildren(
 	parentDom,
 	renderResult,
 	newParentVNode,
@@ -33,7 +35,8 @@ export function diffChildren(
 	excessDomChildren,
 	commitQueue,
 	oldDom,
-	isHydrating
+	isHydrating,
+	deadline
 ) {
 	let i, j, oldVNode, childVNode, newDom, firstChildDom, refs;
 
@@ -42,6 +45,24 @@ export function diffChildren(
 	let oldChildren = (oldParentVNode && oldParentVNode._children) || EMPTY_ARR;
 
 	let oldChildrenLength = oldChildren.length;
+
+	/*
+  	let currentChildNo = 0;
+		// execute tasks with cooperative scheduling
+		const executeRenderTasks = deadline => {
+
+			// execute tasks
+			for (; currentTaskNo < tasks.length && deadline.timeRemaining() > 0; currentTaskNo++) {
+				tasks[currentTaskNo].execute();
+			}
+
+			// continue on to next tasks if not finished
+			if (currentTaskNo < tasks.length) window.requestIdleCallback(executeRenderTasks);
+		}
+
+		// start the work
+		window.requestIdleCallback(executeRenderTasks);
+	*/
 
 	newParentVNode._children = [];
 	for (i = 0; i < renderResult.length; i++) {
@@ -134,7 +155,7 @@ export function diffChildren(
 		oldVNode = oldVNode || EMPTY_OBJ;
 
 		// Morph the old element into the new one, but don't append it to the dom yet
-		diff(
+		await diff(
 			parentDom,
 			childVNode,
 			oldVNode,
@@ -143,7 +164,8 @@ export function diffChildren(
 			excessDomChildren,
 			commitQueue,
 			oldDom,
-			isHydrating
+			isHydrating,
+			deadline
 		);
 
 		newDom = childVNode._dom;
