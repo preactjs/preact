@@ -57,8 +57,7 @@ export async function render(vnode, parentDom, replaceNode) {
 			: oldVNode
 			? oldVNode._dom
 			: parentDom.firstChild,
-		isHydrating,
-		null
+		isHydrating
 	);
 
 	// Flush all queued effects
