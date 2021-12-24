@@ -34,6 +34,12 @@ export async function render(vnode, parentDom, replaceNode) {
 		parentDom
 	)._children = createElement(Fragment, null, [vnode]);
 
+	// request idle callback polyfill for async rendering for Safari - using 16ms to get 60fps
+	if (options.asyncRendering) window.requestIdleCallback = window.requestIdleCallback || function(handler) {
+		let startTime = Date.now();
+		return setTimeout(function() { handler({ timeRemaining: function() { return Math.max(0, 16.0 - (Date.now() - startTime)); } }); }, 1);
+	}
+
 	// List of effects that need to be called after diffing.
 	let commitQueue = [];
 	const diffArguments = [
