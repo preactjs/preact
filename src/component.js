@@ -173,17 +173,6 @@ function updateParentDomPointers(vnode) {
  */
 let rerenderQueue = [];
 
-/**
- * Asynchronously schedule a callback
- * @type {(cb: () => void) => void}
- */
-/* istanbul ignore next */
-// Note the following line isn't tree-shaken by rollup cuz of rollup/rollup#2566
-const defer =
-	typeof Promise == 'function'
-		? Promise.prototype.then.bind(Promise.resolve())
-		: setTimeout;
-
 /*
  * The value of `Component.debounce` must asynchronously invoke the passed in callback. It is
  * important that contributors to Preact can consistently reason about what calls to `setState`, etc.
@@ -209,7 +198,8 @@ export async function enqueueRender(c) {
 	) {
 		prevDebounce = options.debounceRendering;
 		if (options.asyncRendering) await process();
-		else (prevDebounce || defer)(process);
+		else if (prevDebounce) prevDebounce(process);
+		else process();
 	}
 }
 
