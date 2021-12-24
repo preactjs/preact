@@ -34,8 +34,8 @@ export async function diff(
 	isHydrating
 ) {
 
-	// if we're running out of deadline, yield and get back as browser allows us
-	if (typeof window !== 'undefined' && (!window._preactDeadline || Date.now() > window._preactDeadline))
+	// for async rendering, if we're running out of deadline, yield and get back as browser allows us
+	if (options.asyncRendering && typeof window !== 'undefined' && (!window._preactDeadline || Date.now() > window._preactDeadline))
 		await new Promise(resolve => requestIdleCallback(deadline => { window._preactDeadline = Date.now() + deadline.timeRemaining(); resolve(); }));
 
 	let tmp,
@@ -200,7 +200,7 @@ export async function diff(
 				tmp != null && tmp.type === Fragment && tmp.key == null;
 			let renderResult = isTopLevelFragment ? tmp.props.children : tmp;
 
-			await diffChildren(
+			const diffChildrenArgs = [
 				parentDom,
 				Array.isArray(renderResult) ? renderResult : [renderResult],
 				newVNode,
@@ -211,7 +211,8 @@ export async function diff(
 				commitQueue,
 				oldDom,
 				isHydrating
-			);
+			];
+			if (options.asyncRendering) await diffChildren(...diffChildrenArgs); else diffChildren(...diffChildrenArgs);
 
 			c.base = newVNode._dom;
 
@@ -234,7 +235,7 @@ export async function diff(
 			newVNode._children = oldVNode._children;
 			newVNode._dom = oldVNode._dom;
 		} else {
-			newVNode._dom = await diffElementNodes(
+			const diffElementNodesArgs = [
 				oldVNode._dom,
 				newVNode,
 				oldVNode,
@@ -243,7 +244,8 @@ export async function diff(
 				excessDomChildren,
 				commitQueue,
 				isHydrating
-			);
+			];
+			if (options.asyncRendering) await diffElementNodes(...diffElementNodesArgs); else diffElementNodes(...diffElementNodesArgs);
 		}
 
 		if ((tmp = options.diffed)) tmp(newVNode);
@@ -338,7 +340,7 @@ async function diffElementNodes(
 	if (dom == null) {
 		if (nodeType === null) {
 			// @ts-ignore createTextNode returns Text, we expect PreactElement
-			return document.createTextNode(newProps);
+			newVNode._dom = document.createTextNode(newProps); return;
 		}
 
 		if (isSvg) {
@@ -406,7 +408,7 @@ async function diffElementNodes(
 			newVNode._children = [];
 		} else {
 			i = newVNode.props.children;
-			await diffChildren(
+			const diffChildrenArgs = [
 				dom,
 				Array.isArray(i) ? i : [i],
 				newVNode,
@@ -419,7 +421,8 @@ async function diffElementNodes(
 					? excessDomChildren[0]
 					: oldVNode._children && getDomSibling(oldVNode, 0),
 				isHydrating
-			);
+			];
+			if (options.asyncRendering) await diffChildren(...diffChildrenArgs); else diffChildren(...diffChildrenArgs);
 
 			// Remove children that are not part of any vnode.
 			if (excessDomChildren != null) {
@@ -454,7 +457,7 @@ async function diffElementNodes(
 		}
 	}
 
-	return dom;
+	newVNode._dom = dom;
 }
 
 /**

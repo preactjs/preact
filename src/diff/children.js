@@ -2,6 +2,7 @@ import { diff, unmount, applyRef } from './index';
 import { createVNode, Fragment } from '../create-element';
 import { EMPTY_OBJ, EMPTY_ARR } from '../constants';
 import { getDomSibling } from '../component';
+import options from '../options';
 
 /**
  * Diff the children of a virtual node
@@ -134,7 +135,7 @@ export async function diffChildren(
 		oldVNode = oldVNode || EMPTY_OBJ;
 
 		// Morph the old element into the new one, but don't append it to the dom yet
-		await diff(
+		const diffArgs = [
 			parentDom,
 			childVNode,
 			oldVNode,
@@ -144,7 +145,8 @@ export async function diffChildren(
 			commitQueue,
 			oldDom,
 			isHydrating
-		);
+		];
+		if (options.asyncRendering) await diff(...diffArgs); else diff(...diffArgs);
 
 		newDom = childVNode._dom;
 

@@ -36,7 +36,7 @@ export async function render(vnode, parentDom, replaceNode) {
 
 	// List of effects that need to be called after diffing.
 	let commitQueue = [];
-	await diff(
+	const diffArguments = [
 		parentDom,
 		// Determine the new vnode tree and store it on the DOM element on
 		// our custom `_children` property.
@@ -58,7 +58,8 @@ export async function render(vnode, parentDom, replaceNode) {
 			? oldVNode._dom
 			: parentDom.firstChild,
 		isHydrating
-	);
+	];
+	if (options.asyncRendering) await diff(...diffArguments); else diff(...diffArguments);
 
 	// Flush all queued effects
 	commitRoot(commitQueue, vnode);

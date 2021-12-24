@@ -1,5 +1,6 @@
 import { assign } from './util';
 import { diff, commitRoot } from './diff/index';
+import options from './options';
 import { Fragment } from './create-element';
 import 'regenerator-runtime/runtime';
 
@@ -48,7 +49,7 @@ Component.prototype.setState = async function(update, callback) {
 
 	if (this._vnode) {
 		if (callback) this._renderCallbacks.push(callback);
-		await enqueueRender(this);
+		if (options.asyncRendering) await enqueueRender(this); else enqueueRender(this);
 	}
 };
 
@@ -65,7 +66,7 @@ Component.prototype.forceUpdate = async function(callback) {
 		// shouldComponentUpdate
 		this._force = true;
 		if (callback) this._renderCallbacks.push(callback);
-		await enqueueRender(this);
+		if (options.asyncRendering) await enqueueRender(this); else enqueueRender(this);
 	}
 };
 
@@ -127,7 +128,7 @@ async function renderComponent(component) {
 		const oldVNode = assign({}, vnode);
 		oldVNode._original = vnode._original + 1;
 
-		await diff(
+		const diffArguments = [
 			parentDom,
 			vnode,
 			oldVNode,
@@ -136,9 +137,10 @@ async function renderComponent(component) {
 			vnode._hydrating != null ? [oldDom] : null,
 			commitQueue,
 			oldDom == null ? getDomSibling(vnode) : oldDom,
-			vnode._hydrating,
-			null
-		);
+			vnode._hydrating
+		];
+		if (options.asyncRendering) await diff(...diffArguments); else diff(...diffArguments);
+
 		commitRoot(commitQueue, vnode);
 
 		if (vnode._dom != oldDom) {
@@ -171,6 +173,17 @@ function updateParentDomPointers(vnode) {
  */
 let rerenderQueue = [];
 
+/**
+ * Asynchronously schedule a callback
+ * @type {(cb: () => void) => void}
+ */
+/* istanbul ignore next */
+// Note the following line isn't tree-shaken by rollup cuz of rollup/rollup#2566
+const defer =
+	typeof Promise == 'function'
+		? Promise.prototype.then.bind(Promise.resolve())
+		: setTimeout;
+
 /*
  * The value of `Component.debounce` must asynchronously invoke the passed in callback. It is
  * important that contributors to Preact can consistently reason about what calls to `setState`, etc.
@@ -180,12 +193,30 @@ let rerenderQueue = [];
  * * [Callbacks synchronous and asynchronous](https://blog.ometer.com/2011/07/24/callbacks-synchronous-and-asynchronous/)
  */
 
+let prevDebounce;
+
 /**
  * Enqueue a rerender of a component
  * @param {import('./internal').Component} c The component to rerender
  */
 export async function enqueueRender(c) {
-	if (!c._dirty && (c._dirty = true) && rerenderQueue.push(c) && !process._rerenderCount++) await process();
+
+	if (prevDebounce !== options.debounceRendering) {
+		prevDebounce = options.debounceRendering;
+		prevDebounce(process);
+		return;
+	}
+
+	if (!c._dirty && (c._dirty = true) && rerenderQueue.push(c) && !process._rerenderCount++) {
+
+		if (options.debounceRendering) {
+			options.debounceRendering(process);
+			prevDebounce = options.debounceRendering;
+			return;
+		}
+
+		if (options.asyncRendering) await process(); else defer(process);
+	}
 }
 
 /** Flush the render queue by rerendering all queued components */
@@ -196,9 +227,9 @@ async function process() {
 		rerenderQueue = [];
 		// Don't update `renderCount` yet. Keep its value non-zero to prevent unnecessary
 		// process() calls from getting scheduled while `queue` is still being consumed.
-
-		// non-concurrent rendering in case concurrent rendering does not work: for (const c of queue) if (c._dirty) await renderComponent(c);
-		await Promise.all(queue.filter(c => c._dirty).map(renderComponent));
+		for (const c of queue.filter(c => c._dirty)) {
+			if (options.asyncRendering) await renderComponent(c); else renderComponent(c);
+		}
 	}
 }
 process._rerenderCount = 0;

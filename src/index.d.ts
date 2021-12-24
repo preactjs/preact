@@ -258,6 +258,7 @@ export const Fragment: ComponentClass<{}, {}>;
  * Global options for preact
  */
 export interface Options {
+	asyncRendering: boolean;
 	/** Attach a hook that is invoked whenever a VNode is created. */
 	vnode?(vnode: VNode): void;
 	/** Attach a hook that is invoked immediately before a vnode is unmounted. */
