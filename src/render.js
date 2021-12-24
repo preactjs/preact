@@ -65,12 +65,7 @@ export async function render(vnode, parentDom, replaceNode) {
 			: parentDom.firstChild,
 		isHydrating
 	];
-	if (!options.asyncRendering) diff(...diffArguments).next();
-	else {
-		const generator = diff(...diffArguments);
-		let nextValue = generator.next();
-		while (!nextValue.done) { if (nextValue.value && nextValue.value.then) await nextValue.value; nextValue = generator.next(); }
-	}
+	if (options.asyncRendering) await diff(...diffArguments); else diff(...diffArguments);
 
 	// Flush all queued effects
 	commitRoot(commitQueue, vnode);

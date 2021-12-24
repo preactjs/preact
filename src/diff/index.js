@@ -22,7 +22,7 @@ import options from '../options';
  * Fragments that have siblings. In most cases, it starts out as `oldChildren[0]._dom`.
  * @param {boolean} [isHydrating] Whether or not we are in hydration
  */
-export function* diff(
+export async function diff(
 	parentDom,
 	newVNode,
 	oldVNode,
@@ -36,7 +36,7 @@ export function* diff(
 
 	// for async rendering, if we're running out of deadline, yield and get back as browser allows us
 	if (options.asyncRendering && typeof window !== 'undefined' && (!window._preactDeadline || Date.now() > window._preactDeadline))
-		yield new Promise(resolve => requestIdleCallback(deadline => { window._preactDeadline = Date.now() + deadline.timeRemaining(); resolve(); }));
+		await new Promise(resolve => requestIdleCallback(deadline => { window._preactDeadline = Date.now() + deadline.timeRemaining(); resolve(); }));
 
 	let tmp,
 		newType = newVNode.type;
@@ -212,12 +212,7 @@ export function* diff(
 				oldDom,
 				isHydrating
 			];
-			if (!options.asyncRendering) diffChildren(...diffChildrenArgs).next();
-			else {
-				const generator = diffChildren(...diffChildrenArgs);
-				let nextValue = generator.next();
-				while (!nextValue.done) { if (nextValue.value && nextValue.value.then) yield nextValue.value; nextValue = generator.next(); }
-			}
+			if (options.asyncRendering) await diffChildren(...diffChildrenArgs); else diffChildren(...diffChildrenArgs);
 
 			c.base = newVNode._dom;
 
@@ -250,12 +245,7 @@ export function* diff(
 				commitQueue,
 				isHydrating
 			];
-			if (!options.asyncRendering) diffElementNodes(...diffElementNodesArgs).next();
-			else {
-				const generator = diffElementNodes(...diffElementNodesArgs);
-				let nextValue = generator.next();
-				while (!nextValue.done) { if (nextValue.value && nextValue.value.then) yield nextValue.value; nextValue = generator.next(); }
-			}
+			if (options.asyncRendering) await diffElementNodes(...diffElementNodesArgs); else diffElementNodes(...diffElementNodesArgs);
 		}
 
 		if ((tmp = options.diffed)) tmp(newVNode);
@@ -310,7 +300,7 @@ export function commitRoot(commitQueue, root) {
  * @param {boolean} isHydrating Whether or not we are in hydration
  * @returns {import('../internal').PreactElement}
  */
-function* diffElementNodes(
+async function diffElementNodes(
 	dom,
 	newVNode,
 	oldVNode,
@@ -432,12 +422,7 @@ function* diffElementNodes(
 					: oldVNode._children && getDomSibling(oldVNode, 0),
 				isHydrating
 			];
-			if (!options.asyncRendering) diffChildren(...diffChildrenArgs).next();
-			else {
-				const generator = diffChildren(...diffChildrenArgs);
-				let nextValue = generator.next();
-				while (!nextValue.done) { if (nextValue.value && nextValue.value.then) yield nextValue.value; nextValue = generator.next(); }
-			}
+			if (options.asyncRendering) await diffChildren(...diffChildrenArgs); else diffChildren(...diffChildrenArgs);
 
 			// Remove children that are not part of any vnode.
 			if (excessDomChildren != null) {
