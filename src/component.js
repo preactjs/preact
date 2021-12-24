@@ -200,22 +200,16 @@ let prevDebounce;
  * @param {import('./internal').Component} c The component to rerender
  */
 export async function enqueueRender(c) {
-
-	if (prevDebounce !== options.debounceRendering) {
+	if (
+		(!c._dirty &&
+			(c._dirty = true) &&
+			rerenderQueue.push(c) &&
+			!process._rerenderCount++) ||
+		prevDebounce !== options.debounceRendering
+	) {
 		prevDebounce = options.debounceRendering;
-		prevDebounce(process);
-		return;
-	}
-
-	if (!c._dirty && (c._dirty = true) && rerenderQueue.push(c) && !process._rerenderCount++) {
-
-		if (options.debounceRendering) {
-			options.debounceRendering(process);
-			prevDebounce = options.debounceRendering;
-			return;
-		}
-
-		if (options.asyncRendering) await process(); else defer(process);
+		if (options.asyncRendering) await process();
+		else (prevDebounce || defer)(process);
 	}
 }
 
