@@ -232,6 +232,15 @@ export function hydrate(
 	vnode: ComponentChild,
 	parent: Element | Document | ShadowRoot | DocumentFragment
 ): void;
+export function renderAsync(
+	vnode: ComponentChild,
+	parent: Element | Document | ShadowRoot | DocumentFragment,
+	replaceNode?: Element | Text
+): Promise;
+export function hydrateAsync(
+	vnode: ComponentChild,
+	parent: Element | Document | ShadowRoot | DocumentFragment
+): Promise;
 export function cloneElement(
 	vnode: VNode<any>,
 	props?: any,
