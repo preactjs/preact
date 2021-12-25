@@ -1,4 +1,5 @@
 export { render, hydrate } from './render';
+export { renderAsync, hydrateAsync } from './renderAsync';
 export {
 	createElement,
 	createElement as h,

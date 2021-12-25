@@ -1,5 +1,6 @@
 import { EMPTY_OBJ } from './constants';
-import { commitRoot, diff } from './diff/index';
+import { diffAsync } from './diff/async';
+import { commitRoot } from './diff/index';
 import { createElement, Fragment } from './create-element';
 import { runHook } from './options';
 import { slice } from './util';
@@ -12,7 +13,7 @@ import { slice } from './util';
  * @param {import('./internal').PreactElement | object} [replaceNode] Optional: Attempt to re-use an
  * existing DOM tree rooted at `replaceNode`
  */
-export function render(vnode, parentDom, replaceNode) {
+export async function renderAsync(vnode, parentDom, replaceNode) {
 	runHook('_root', vnode, parentDom);
 
 	// We abuse the `replaceNode` parameter in `hydrate()` to signal if we are in
@@ -34,9 +35,15 @@ export function render(vnode, parentDom, replaceNode) {
 		parentDom
 	)._children = createElement(Fragment, null, [vnode]);
 
+	// request idle callback polyfill for async rendering for Safari - using 16ms to get 60fps
+	if (options.asyncRendering) window.requestIdleCallback = window.requestIdleCallback || function(handler) {
+		let startTime = Date.now();
+		return setTimeout(function() { handler({ timeRemaining: function() { return Math.max(0, 16.0 - (Date.now() - startTime)); } }); }, 1);
+	}
+
 	// List of effects that need to be called after diffing.
 	let commitQueue = [];
-	diff(
+	await diffAsync(
 		parentDom,
 		// Determine the new vnode tree and store it on the DOM element on
 		// our custom `_children` property.
@@ -70,6 +77,6 @@ export function render(vnode, parentDom, replaceNode) {
  * @param {import('./internal').PreactElement} parentDom The DOM element to
  * update
  */
-export function hydrate(vnode, parentDom) {
-	render(vnode, parentDom, hydrate);
+export function hydrateAsync(vnode, parentDom) {
+	return renderAsync(vnode, parentDom, hydrateAsync);
 }

@@ -1,5 +1,4 @@
 import { enqueueRender } from './component';
-import options from './options';
 
 export let i = 0;
 
@@ -25,7 +24,7 @@ export function createContext(defaultValue, contextId) {
 
 				this.getChildContext = () => ctx;
 
-				this.shouldComponentUpdate = async function(_props) {
+				this.shouldComponentUpdate = function(_props) {
 					if (this.props.value !== _props.value) {
 						// I think the forced value propagation here was only needed when `options.debounceRendering` was being bypassed:
 						// https://github.com/preactjs/preact/commit/4d339fb803bea09e9f198abf38ca1bf8ea4b7771#diff-54682ce380935a717e41b8bfc54737f6R358
@@ -41,9 +40,7 @@ export function createContext(defaultValue, contextId) {
 						// 	c.context[contextId] = _props.value;
 						// 	enqueueRender(c);
 						// });
-						for (const c of subs) {
-							if (options.asyncRendering) await enqueueRender(c); else enqueueRender(c);
-						}
+						subs.some(enqueueRender);
 					}
 				};
 
