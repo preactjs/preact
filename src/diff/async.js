@@ -1,8 +1,7 @@
-import options from '../options';
-import { diffChildren, getChildNewVNode, getChildOldVNode, addChildRef, updateChildDom, removeOldChildren, applyChildRefs } from './children';
-import { diffable, recoverErrorDiff, diffComponentNodes, diffElementNodes, saveComponentDiff, noDiff, equalizeNodes, handleDiffError } from './index';
 import { runHook } from '../options';
-import { EMPTY_ARR } from 'preact/src/constants';
+import { EMPTY_ARR } from '../constants';
+import { getChildNewVNode, getChildOldVNode, addChildRef, updateChildDom, removeOldChildren, applyChildRefs } from './children';
+import { diffable, recoverErrorDiff, diffComponentNodes, diffElementNodes, saveComponentDiff, noDiff, equalizeNodes, handleDiffError } from './index';
 
 /**
  * Diff two virtual nodes and apply proper changes to the DOM - async version
@@ -20,7 +19,7 @@ export async function diffAsync(
 ) {
 
 	// for async rendering, if we're running out of deadline, yield and get back as browser allows us
-	if (options.asyncRendering && typeof window !== 'undefined' && (!window._preactDeadline || Date.now() > window._preactDeadline))
+	if (typeof window !== 'undefined' && (!window._preactDeadline || Date.now() > window._preactDeadline))
 		await new Promise(resolve => requestIdleCallback(deadline => { window._preactDeadline = Date.now() + deadline.timeRemaining(); resolve(); }));
 
 	if (!diffable(newVNode)) return null;
@@ -83,7 +82,7 @@ export async function diffAsync(
 /**
  * Diff the children of a virtual node - async version
  */
-export async function diffChildren(
+async function diffChildren(
 	parentDom,
 	renderResult,
 	newParentVNode,
