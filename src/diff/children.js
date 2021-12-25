@@ -35,103 +35,19 @@ export function diffChildren(
 	oldDom,
 	isHydrating
 ) {
-	let i, j, oldVNode, childVNode, newDom, firstChildDom, refs;
+	let i, oldVNode, childVNode, firstChildDom, refs;
 
 	// This is a compression of oldParentVNode!=null && oldParentVNode != EMPTY_OBJ && oldParentVNode._children || EMPTY_ARR
 	// as EMPTY_OBJ._children should be `undefined`.
 	let oldChildren = (oldParentVNode && oldParentVNode._children) || EMPTY_ARR;
 
-	let oldChildrenLength = oldChildren.length;
-
 	newParentVNode._children = [];
 	for (i = 0; i < renderResult.length; i++) {
-		childVNode = renderResult[i];
 
-		if (childVNode == null || typeof childVNode == 'boolean') {
-			childVNode = newParentVNode._children[i] = null;
-		}
-		// If this newVNode is being reused (e.g. <div>{reuse}{reuse}</div>) in the same diff,
-		// or we are rendering a component (e.g. setState) copy the oldVNodes so it can have
-		// it's own DOM & etc. pointers
-		else if (
-			typeof childVNode == 'string' ||
-			typeof childVNode == 'number' ||
-			// eslint-disable-next-line valid-typeof
-			typeof childVNode == 'bigint'
-		) {
-			childVNode = newParentVNode._children[i] = createVNode(
-				null,
-				childVNode,
-				null,
-				null,
-				childVNode
-			);
-		} else if (Array.isArray(childVNode)) {
-			childVNode = newParentVNode._children[i] = createVNode(
-				Fragment,
-				{ children: childVNode },
-				null,
-				null,
-				null
-			);
-		} else if (childVNode._depth > 0) {
-			// VNode is already in use, clone it. This can happen in the following
-			// scenario:
-			//   const reuse = <div />
-			//   <div>{reuse}<span />{reuse}</div>
-			childVNode = newParentVNode._children[i] = createVNode(
-				childVNode.type,
-				childVNode.props,
-				childVNode.key,
-				null,
-				childVNode._original
-			);
-		} else {
-			childVNode = newParentVNode._children[i] = childVNode;
-		}
+		childVNode = getChildNewVNode(renderResult[i], newParentVNode, i);
+		if (!childVNode) continue;
 
-		// Terser removes the `continue` here and wraps the loop body
-		// in a `if (childVNode) { ... } condition
-		if (childVNode == null) {
-			continue;
-		}
-
-		childVNode._parent = newParentVNode;
-		childVNode._depth = newParentVNode._depth + 1;
-
-		// Check if we find a corresponding element in oldChildren.
-		// If found, delete the array item by setting to `undefined`.
-		// We use `undefined`, as `null` is reserved for empty placeholders
-		// (holes).
-		oldVNode = oldChildren[i];
-
-		if (
-			oldVNode === null ||
-			(oldVNode &&
-				childVNode.key == oldVNode.key &&
-				childVNode.type === oldVNode.type)
-		) {
-			oldChildren[i] = undefined;
-		} else {
-			// Either oldVNode === undefined or oldChildrenLength > 0,
-			// so after this loop oldVNode == null or oldVNode is a valid value.
-			for (j = 0; j < oldChildrenLength; j++) {
-				oldVNode = oldChildren[j];
-				// If childVNode is unkeyed, we only match similarly unkeyed nodes, otherwise we match by key.
-				// We always match by type (in either case).
-				if (
-					oldVNode &&
-					childVNode.key == oldVNode.key &&
-					childVNode.type === oldVNode.type
-				) {
-					oldChildren[j] = undefined;
-					break;
-				}
-				oldVNode = null;
-			}
-		}
-
-		oldVNode = oldVNode || EMPTY_OBJ;
+		oldVNode = getChildOldVNode(childVNode, oldChildren, i);
 
 		// Morph the old element into the new one, but don't append it to the dom yet
 		diff(
@@ -146,64 +62,190 @@ export function diffChildren(
 			isHydrating
 		);
 
-		newDom = childVNode._dom;
+		if (childVNode._dom && !firstChildDom) firstChildDom = childVNode._dom;
 
-		if ((j = childVNode.ref) && oldVNode.ref != j) {
+		if (oldVNode.ref != childVNode.ref) {
 			if (!refs) refs = [];
-			if (oldVNode.ref) refs.push(oldVNode.ref, null, childVNode);
-			refs.push(j, childVNode._component || newDom, childVNode);
+			addChildRef(refs, childVNode, oldVNode);
 		}
 
-		if (newDom != null) {
-			if (firstChildDom == null) {
-				firstChildDom = newDom;
-			}
-
-			if (
-				typeof childVNode.type == 'function' &&
-				childVNode._children === oldVNode._children
-			) {
-				childVNode._nextDom = oldDom = reorderChildren(
-					childVNode,
-					oldDom,
-					parentDom
-				);
-			} else {
-				oldDom = placeChild(
-					parentDom,
-					childVNode,
-					oldVNode,
-					oldChildren,
-					newDom,
-					oldDom
-				);
-			}
-
-			if (typeof newParentVNode.type == 'function') {
-				// Because the newParentVNode is Fragment-like, we need to set it's
-				// _nextDom property to the nextSibling of its last child DOM node.
-				//
-				// `oldDom` contains the correct value here because if the last child
-				// is a Fragment-like, then oldDom has already been set to that child's _nextDom.
-				// If the last child is a DOM VNode, then oldDom will be set to that DOM
-				// node's nextSibling.
-				newParentVNode._nextDom = oldDom;
-			}
-		} else if (
-			oldDom &&
-			oldVNode._dom == oldDom &&
-			oldDom.parentNode != parentDom
-		) {
-			// The above condition is to handle null placeholders. See test in placeholder.test.js:
-			// `efficiently replace null placeholders in parent rerenders`
-			oldDom = getDomSibling(oldVNode);
-		}
+		oldDom = updateChildDom(parentDom, newParentVNode, oldChildren, childVNode, childVNode._dom, oldVNode, oldDom);
 	}
 
 	newParentVNode._dom = firstChildDom;
 
+	removeOldChildren(oldChildren, oldParentVNode, newParentVNode);
+
+	applyChildRefs(refs);
+}
+
+/**
+ * returns child new virtual node
+ */
+export function getChildNewVNode(renderResult, newParentVNode, childNo) {
+	let childVNode = renderResult;
+
+	if (childVNode == null || typeof childVNode == 'boolean') {
+		childVNode = newParentVNode._children[childNo] = null;
+	}
+		// If this newVNode is being reused (e.g. <div>{reuse}{reuse}</div>) in the same diff,
+		// or we are rendering a component (e.g. setState) copy the oldVNodes so it can have
+	// it's own DOM & etc. pointers
+	else if (
+		typeof childVNode == 'string' ||
+		typeof childVNode == 'number' ||
+		// eslint-disable-next-line valid-typeof
+		typeof childVNode == 'bigint'
+	) {
+		childVNode = newParentVNode._children[childNo] = createVNode(
+			null,
+			childVNode,
+			null,
+			null,
+			childVNode
+		);
+	} else if (Array.isArray(childVNode)) {
+		childVNode = newParentVNode._children[childNo] = createVNode(
+			Fragment,
+			{ children: childVNode },
+			null,
+			null,
+			null
+		);
+	} else if (childVNode._depth > 0) {
+		// VNode is already in use, clone it. This can happen in the following
+		// scenario:
+		//   const reuse = <div />
+		//   <div>{reuse}<span />{reuse}</div>
+		childVNode = newParentVNode._children[childNo] = createVNode(
+			childVNode.type,
+			childVNode.props,
+			childVNode.key,
+			null,
+			childVNode._original
+		);
+	} else {
+		childVNode = newParentVNode._children[childNo] = childVNode;
+	}
+
+	// Terser removes the `continue` here and wraps the loop body
+	// in a `if (childVNode) { ... } condition
+	if (childVNode == null) {
+		return null;
+	}
+
+	childVNode._parent = newParentVNode;
+	childVNode._depth = newParentVNode._depth + 1;
+	return childVNode;
+}
+
+/**
+ * returns child old virtual node
+ */
+export function getChildOldVNode(childVNode, oldChildren, childNo) {
+
+	// Check if we find a corresponding element in oldChildren.
+	// If found, delete the array item by setting to `undefined`.
+	// We use `undefined`, as `null` is reserved for empty placeholders
+	// (holes).
+	let oldVNode = oldChildren[childNo];
+
+	if (
+		oldVNode === null ||
+		(oldVNode &&
+			childVNode.key == oldVNode.key &&
+			childVNode.type === oldVNode.type)
+	) {
+		oldChildren[childNo] = undefined;
+	} else {
+		// Either oldVNode === undefined or oldChildrenLength > 0,
+		// so after this loop oldVNode == null or oldVNode is a valid value.
+		for (let j = 0; j < oldChildren.length; j++) {
+			oldVNode = oldChildren[j];
+			// If childVNode is unkeyed, we only match similarly unkeyed nodes, otherwise we match by key.
+			// We always match by type (in either case).
+			if (
+				oldVNode &&
+				childVNode.key == oldVNode.key &&
+				childVNode.type === oldVNode.type
+			) {
+				oldChildren[j] = undefined;
+				break;
+			}
+			oldVNode = null;
+		}
+	}
+
+	return oldVNode || EMPTY_OBJ;
+}
+
+/**
+ * adds child ref to the refs when applicable
+ * @param refs
+ * @param childVNode
+ * @param oldVNode
+ */
+export function addChildRef(refs, childVNode, oldVNode) {
+	if (oldVNode.ref) refs.push(oldVNode.ref, null, childVNode);
+	refs.push(childVNode.ref, childVNode._component || childVNode._dom, childVNode);
+}
+
+/**
+ * updates child dom
+ */
+export function updateChildDom(parentDom, newParentVNode, oldChildren, childVNode, newDom, oldVNode, oldDom) {
+	if (newDom != null) {
+		let childDom;
+
+		if (
+			typeof childVNode.type == 'function' &&
+			childVNode._children === oldVNode._children
+		) {
+			childVNode._nextDom = childDom = reorderChildren(
+				childVNode,
+				oldDom,
+				parentDom
+			);
+		} else {
+			childDom = placeChild(
+				parentDom,
+				childVNode,
+				oldVNode,
+				oldChildren,
+				newDom,
+				oldDom
+			);
+		}
+
+		if (typeof newParentVNode.type == 'function') {
+			// Because the newParentVNode is Fragment-like, we need to set it's
+			// _nextDom property to the nextSibling of its last child DOM node.
+			//
+			// `oldDom` contains the correct value here because if the last child
+			// is a Fragment-like, then oldDom has already been set to that child's _nextDom.
+			// If the last child is a DOM VNode, then oldDom will be set to that DOM
+			// node's nextSibling.
+			newParentVNode._nextDom = childDom;
+		}
+
+		return childDom;
+	} else if (
+		oldDom &&
+		oldVNode._dom == oldDom &&
+		oldDom.parentNode != parentDom
+	) {
+		// The above condition is to handle null placeholders. See test in placeholder.test.js:
+		// `efficiently replace null placeholders in parent rerenders`
+		return getDomSibling(oldVNode);
+	}
+}
+
+/**
+ * removes old children
+ */
+export function removeOldChildren(oldChildren, oldParentVNode, newParentVNode) {
 	// Remove remaining oldChildren if there are any.
-	for (i = oldChildrenLength; i--; ) {
+	for (let i = oldChildren.length; i--; ) {
 		if (oldChildren[i] != null) {
 			if (
 				typeof newParentVNode.type == 'function' &&
@@ -219,10 +261,15 @@ export function diffChildren(
 			unmount(oldChildren[i], oldChildren[i]);
 		}
 	}
+}
 
+/**
+ * applies child refs
+ */
+export function applyChildRefs(refs) {
 	// Set refs only after unmount
 	if (refs) {
-		for (i = 0; i < refs.length; i++) {
+		for (let i = 0; i < refs.length; i++) {
 			applyRef(refs[i], refs[++i], refs[++i]);
 		}
 	}
