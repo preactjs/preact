@@ -14,3 +14,10 @@ const options = {
 };
 
 export default options;
+
+/**
+ * runs an option hook when applicable
+ */
+export function runHook(hook, ...args) {
+	if (options[hook]) options[hook](...args);
+}

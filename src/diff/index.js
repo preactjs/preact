@@ -4,7 +4,7 @@ import { Fragment } from '../create-element';
 import { diffChildren } from './children';
 import { diffProps, setProperty } from './props';
 import { assign, removeNode, slice } from '../util';
-import options from '../options';
+import { runHook } from '../options';
 
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
@@ -36,14 +36,15 @@ export function diff(
 
 	if (!diffable(newVNode)) return null;
 
-	recoverBailedDiff(newVNode, oldVNode, excessDomChildren, oldDom, isHydrating);
+	const { recover, update } = recoverErrorDiff(newVNode, oldVNode, excessDomChildren, oldDom, isHydrating);
+	if (recover) { isHydrating = update.isHydrating; excessDomChildren = update.excessDomChildren; oldDom = update.oldDom; }
 
 	runHook('_diff', newVNode);
 
 	try {
 		if (typeof newVNode.type == 'function') {
 
-			let { commitPushed, renderResult, c, clearProcessingException, newGlobalContext } = diffComponentNodes(
+			const { updateCancelled, renderResult, c, clearProcessingException, newGlobalContext } = diffComponentNodes(
 				parentDom,
 				newVNode,
 				oldVNode,
@@ -53,7 +54,7 @@ export function diff(
 				commitQueue
 			);
 
-			if (!commitPushed) {
+			if (!updateCancelled) {
 				globalContext = newGlobalContext;
 				diffChildren(
 					parentDom,
@@ -91,66 +92,25 @@ export function diff(
 }
 
 /**
- * runs an option hook when applicable
- */
-export function runHook(hook, arg) {
-	if (options[hook]) options[hook](arg);
-}
-
-/**
- * makes vnodes identical
- */
-export function equalizeNodes(newVNode, oldVNode) {
-	newVNode._children = oldVNode._children;
-	newVNode._dom = oldVNode._dom;
-}
-
-/**
- * returns if there is no diff for a given vnode
- */
-export function noDiff(newVNode, oldVNode, excessDomChildren) {
-	return excessDomChildren == null && newVNode._original === oldVNode._original
-}
-
-/**
- * When passing through createElement it assigns the object
- * constructor as undefined. This to prevent JSON-injection.
+ * returns if vnode is diffable
  */
 export function diffable(newVNode) {
+	// When passing through createElement it assigns the object
+	// constructor as undefined. This to prevent JSON-injection.
 	return newVNode.constructor === undefined;
-}
-
-/**
- * saves the component diff in the commit queue
- */
-export function saveComponentDiff(c, newVNode, clearProcessingException, commitQueue) {
-	c.base = newVNode._dom;
-
-	// We successfully rendered this VNode, unset any stored hydration/bailout state:
-	newVNode._hydrating = null;
-
-	if (c._renderCallbacks.length) {
-		commitQueue.push(c);
-	}
-
-	if (clearProcessingException) {
-		c._pendingError = c._processingException = null;
-	}
-
-	c._force = false;
 }
 
 /**
  * If the previous diff bailed out, resume creating/hydrating.
  */
-export function recoverBailedDiff(newVNode, oldVNode, excessDomChildren, oldDom, isHydrating) {
+export function recoverErrorDiff(newVNode, oldVNode) {
 	if (oldVNode._hydrating != null) {
-		isHydrating = oldVNode._hydrating;
-		oldDom = newVNode._dom = oldVNode._dom;
+		newVNode._dom = oldVNode._dom;
 		// if we resume, we want the tree to be "unlocked"
 		newVNode._hydrating = null;
-		excessDomChildren = [ oldDom ];
+		return { recover: true, update: { isHydrating: oldVNode._hydrating, excessDomChildren: [ oldVNode._dom ], oldDom: newVNode._dom } };
 	}
+	return { recover: false };
 }
 
 /**
@@ -165,8 +125,7 @@ export function diffComponentNodes(
 	excessDomChildren,
 	commitQueue
 ) {
-	let c, clearProcessingException;
-	let isNew, oldProps, oldState, snapshot;
+	let c, isNew, oldProps, oldState, snapshot, clearProcessingException;
 	let newProps = newVNode.props;
 
 	// Necessary for createContext api. Setting this property will pass
@@ -174,7 +133,11 @@ export function diffComponentNodes(
 	let newType = newVNode.type;
 	let tmp = newType.contextType;
 	let provider = tmp && globalContext[tmp._id];
-	let componentContext = tmp ? (provider ? provider.props.value : tmp._defaultValue) : globalContext;
+			let componentContext = tmp
+				? provider
+					? provider.props.value
+					: tmp._defaultValue
+				: globalContext;
 
 	// Get component and set it to `c`
 	if (oldVNode._component) {
@@ -264,7 +227,7 @@ export function diffComponentNodes(
 				commitQueue.push(c);
 			}
 
-			return { commitPushed: true };
+			return { updateCancelled: true };
 		}
 
 		if (c.componentWillUpdate != null) {
@@ -303,7 +266,44 @@ export function diffComponentNodes(
 		tmp != null && tmp.type === Fragment && tmp.key == null;
 	let renderResult = isTopLevelFragment ? tmp.props.children : tmp;
 
-	return { commitPushed: false, renderResult, c, clearProcessingException, newGlobalContext };
+	return { updateCancelled: false, renderResult, c, clearProcessingException, newGlobalContext };
+}
+
+/**
+ * saves the component diff in the commit queue
+ */
+export function saveComponentDiff(c, newVNode, clearProcessingException, commitQueue) {
+	c.base = newVNode._dom;
+
+	// We successfully rendered this VNode, unset any stored hydration/bailout state:
+	newVNode._hydrating = null;
+
+	if (c._renderCallbacks.length) {
+		commitQueue.push(c);
+	}
+
+	if (clearProcessingException) {
+		c._pendingError = c._processingException = null;
+	}
+
+	c._force = false;
+}
+
+/**
+ * returns if there is no diff for a given vnode
+ */
+export function noDiff(newVNode, oldVNode, excessDomChildren) {
+	return
+		excessDomChildren == null &&
+		newVNode._original === oldVNode._original
+}
+
+/**
+ * makes vnodes identical
+ */
+export function equalizeNodes(newVNode, oldVNode) {
+	newVNode._children = oldVNode._children;
+	newVNode._dom = oldVNode._dom;
 }
 
 /**
@@ -319,7 +319,7 @@ export function handleDiffError(e, newVNode, oldVNode, excessDomChildren, oldDom
 		// ^ could possibly be simplified to:
 		// excessDomChildren.length = 0;
 	}
-	options._catchError(e, newVNode, oldVNode);
+	runHook('_catchError', e, newVNode, oldVNode);
 }
 
 /**
@@ -328,7 +328,7 @@ export function handleDiffError(e, newVNode, oldVNode, excessDomChildren, oldDom
  * @param {import('../internal').VNode} root
  */
 export function commitRoot(commitQueue, root) {
-	if (options._commit) options._commit(root, commitQueue);
+	runHook('_commit', root, commitQueue);
 
 	commitQueue.some(c => {
 		try {
@@ -340,7 +340,7 @@ export function commitRoot(commitQueue, root) {
 				cb.call(c);
 			});
 		} catch (e) {
-			options._catchError(e, c._vnode);
+			runHook('_catchError', e, c._vnode);
 		}
 	});
 }
@@ -529,7 +529,7 @@ export function applyRef(ref, value, vnode) {
 		if (typeof ref == 'function') ref(value);
 		else ref.current = value;
 	} catch (e) {
-		options._catchError(e, vnode);
+		runHook('_catchError', e, vnode);
 	}
 }
 
@@ -543,7 +543,7 @@ export function applyRef(ref, value, vnode) {
  */
 export function unmount(vnode, parentVNode, skipRemove) {
 	let r;
-	if (options.unmount) options.unmount(vnode);
+	runHook('unmount', vnode);
 
 	if ((r = vnode.ref)) {
 		if (!r.current || r.current === vnode._dom) applyRef(r, null, parentVNode);
@@ -554,7 +554,7 @@ export function unmount(vnode, parentVNode, skipRemove) {
 			try {
 				r.componentWillUnmount();
 			} catch (e) {
-				options._catchError(e, parentVNode);
+				runHook('_catchError', e, parentVNode);
 			}
 		}
 
