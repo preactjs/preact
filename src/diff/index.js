@@ -357,6 +357,7 @@ export function commitRoot(commitQueue, root) {
  * @param {Array<import('../internal').Component>} commitQueue List of components
  * which have callbacks to invoke in commitRoot
  * @param {boolean} isHydrating Whether or not we are in hydration
+ * @returns {import('../internal').PreactElement}
  */
 export function diffElementNodes(
 	dom,
@@ -426,125 +427,95 @@ export function diffElementNodes(
 		if (oldProps !== newProps && (!isHydrating || dom.data !== newProps)) {
 			dom.data = newProps;
 		}
-		newVNode._dom = dom;
-		return;
+	} else {
+		// If excessDomChildren was not null, repopulate it with the current element's children:
+		excessDomChildren = excessDomChildren && slice.call(dom.childNodes);
+
+		oldProps = oldVNode.props || EMPTY_OBJ;
+
+		let oldHtml = oldProps.dangerouslySetInnerHTML;
+		let newHtml = newProps.dangerouslySetInnerHTML;
+
+		// During hydration, props are not diffed at all (including dangerouslySetInnerHTML)
+		// @TODO we should warn in debug mode when props don't match here.
+		if (!isHydrating) {
+			// But, if we are in a situation where we are using existing DOM (e.g. replaceNode)
+			// we should read the existing DOM attributes to diff them
+			if (excessDomChildren != null) {
+				oldProps = {};
+				for (i = 0; i < dom.attributes.length; i++) {
+					oldProps[dom.attributes[i].name] = dom.attributes[i].value;
+				}
+			}
+
+			if (newHtml || oldHtml) {
+				// Avoid re-applying the same '__html' if it did not changed between re-render
+				if (
+					!newHtml ||
+					((!oldHtml || newHtml.__html != oldHtml.__html) &&
+						newHtml.__html !== dom.innerHTML)
+				) {
+					dom.innerHTML = (newHtml && newHtml.__html) || '';
+				}
+			}
+		}
+
+		diffProps(dom, newProps, oldProps, isSvg, isHydrating);
+
+		// If the new vnode didn't have dangerouslySetInnerHTML, diff its children
+		if (newHtml) {
+			newVNode._children = [];
+		} else {
+			i = newVNode.props.children;
+			diffChildren(
+				dom,
+				Array.isArray(i) ? i : [i],
+				newVNode,
+				oldVNode,
+				globalContext,
+				isSvg && nodeType !== 'foreignObject',
+				excessDomChildren,
+				commitQueue,
+				excessDomChildren
+					? excessDomChildren[0]
+					: oldVNode._children && getDomSibling(oldVNode, 0),
+				isHydrating
+			);
+
+			// Remove children that are not part of any vnode.
+			if (excessDomChildren != null) {
+				for (i = excessDomChildren.length; i--; ) {
+					if (excessDomChildren[i] != null) removeNode(excessDomChildren[i]);
+				}
+			}
+		}
+
+		// (as above, don't diff props during hydration)
+		if (!isHydrating) {
+			if (
+				'value' in newProps &&
+				(i = newProps.value) !== undefined &&
+				// #2756 For the <progress>-element the initial value is 0,
+				// despite the attribute not being present. When the attribute
+				// is missing the progress bar is treated as indeterminate.
+				// To fix that we'll always update it when it is 0 for progress elements
+				(i !== oldProps.value ||
+					i !== dom.value ||
+					(nodeType === 'progress' && !i))
+			) {
+				setProperty(dom, 'value', i, oldProps.value, false);
+			}
+			if (
+				'checked' in newProps &&
+				(i = newProps.checked) !== undefined &&
+				i !== dom.checked
+			) {
+				setProperty(dom, 'checked', i, oldProps.checked, false);
+			}
+		}
 	}
-
-	// If excessDomChildren was not null, repopulate it with the current element's children:
-	excessDomChildren = excessDomChildren && slice.call(dom.childNodes);
-
-	oldProps = oldVNode.props || EMPTY_OBJ;
-
-	// During hydration, props are not diffed at all (including dangerouslySetInnerHTML)
-	// @TODO we should warn in debug mode when props don't match here.
-	if (!isHydrating) {
-		// But, if we are in a situation where we are using existing DOM (e.g. replaceNode)
-		// we should read the existing DOM attributes to diff them
-		if (excessDomChildren != null) oldProps = getElementNodeProps(dom);
-
-		updateElementNodeHtml(newProps.dangerouslySetInnerHTML, oldProps.dangerouslySetInnerHTML, dom);
-	}
-
-	diffProps(dom, newProps, oldProps, isSvg, isHydrating);
-
-	// If the new vnode didn't have dangerouslySetInnerHTML, diff its children
-	if (newProps.dangerouslySetInnerHTML) {
-		newVNode._children = [];
-		updateElementNode(newProps, oldProps, dom, nodeType, isHydrating);
-		newVNode._dom = dom;
-		return;
-	}
-
-	i = newVNode.props.children;
-	diffChildren(
-		dom,
-		Array.isArray(i) ? i : [i],
-		newVNode,
-		oldVNode,
-		globalContext,
-		isSvg && nodeType !== 'foreignObject',
-		excessDomChildren,
-		commitQueue,
-		excessDomChildren
-			? excessDomChildren[0]
-			: oldVNode._children && getDomSibling(oldVNode, 0),
-		isHydrating
-	);
-
-	removeElementNodeChildren(excessDomChildren);
-
-	updateElementNode(newProps, oldProps, dom, nodeType, isHydrating);
 
 	newVNode._dom = dom;
-}
-
-/**
- * returns existing DOM attributes for props
- */
-export function getElementNodeProps(dom) {
-	let oldProps = {};
-	for (let i = 0; i < dom.attributes.length; i++) {
-		oldProps[dom.attributes[i].name] = dom.attributes[i].value;
-	}
-	return oldProps;
-}
-
-/**
- * updates element node html if needed
- */
-export function updateElementNodeHtml(newHtml, oldHtml, dom) {
-	if (newHtml || oldHtml) {
-		// Avoid re-applying the same '__html' if it did not changed between re-render
-		if (
-			!newHtml ||
-			((!oldHtml || newHtml.__html != oldHtml.__html) &&
-				newHtml.__html !== dom.innerHTML)
-		) {
-			dom.innerHTML = (newHtml && newHtml.__html) || '';
-		}
-	}
-}
-
-/**
- * removes element node children if needed
- */
-export function removeElementNodeChildren(excessDomChildren) {
-	// Remove children that are not part of any vnode.
-	if (excessDomChildren != null) {
-		for (let i = excessDomChildren.length; i--; ) {
-			if (excessDomChildren[i] != null) removeNode(excessDomChildren[i]);
-		}
-	}
-}
-
-/**
- * updates properties of a node after diff
- */
-export function updateElementNode(newProps, oldProps, dom, nodeType, isHydrating) {
-	let i;
-	// (as above, don't diff props during hydration)
-	if (!isHydrating) {
-		if (
-			'value' in newProps &&
-			(i = newProps.value) !== undefined &&
-			// #2756 For the <progress>-element the initial value is 0,
-			// despite the attribute not being present. When the attribute
-			// is missing the progress bar is treated as indeterminate.
-			// To fix that we'll always update it when it is 0 for progress elements
-			(i !== oldProps.value ||
-				i !== dom.value ||
-				(nodeType === 'progress' && !i))
-		) {
-			setProperty(dom, 'value', i, oldProps.value, false);
-		}
-		if (
-			'checked' in newProps &&
-			(i = newProps.checked) !== undefined &&
-			i !== dom.checked
-		) {
-			setProperty(dom, 'checked', i, oldProps.checked, false);
-		}
-	}
 }
 
 /**
