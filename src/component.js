@@ -2,6 +2,7 @@ import { assign } from './util';
 import { diff, commitRoot } from './diff/index';
 import options from './options';
 import { Fragment } from './create-element';
+import 'regenerator-runtime/runtime';
 
 /**
  * Base Component class. Provides `setState()` and `forceUpdate()`, which
@@ -24,7 +25,7 @@ export function Component(props, context) {
  * @param {() => void} [callback] A function to be called once component state is
  * updated
  */
-Component.prototype.setState = function(update, callback) {
+Component.prototype.setState = async function(update, callback) {
 	// only clone state when copying to nextState the first time.
 	let s;
 	if (this._nextState != null && this._nextState !== this.state) {
@@ -48,7 +49,7 @@ Component.prototype.setState = function(update, callback) {
 
 	if (this._vnode) {
 		if (callback) this._renderCallbacks.push(callback);
-		enqueueRender(this);
+		if (options.asyncRendering) await enqueueRender(this); else enqueueRender(this);
 	}
 };
 
@@ -58,14 +59,14 @@ Component.prototype.setState = function(update, callback) {
  * @param {() => void} [callback] A function to be called after component is
  * re-rendered
  */
-Component.prototype.forceUpdate = function(callback) {
+Component.prototype.forceUpdate = async function(callback) {
 	if (this._vnode) {
 		// Set render mode so that we can differentiate where the render request
 		// is coming from. We need this because forceUpdate should never call
 		// shouldComponentUpdate
 		this._force = true;
 		if (callback) this._renderCallbacks.push(callback);
-		enqueueRender(this);
+		if (options.asyncRendering) await enqueueRender(this); else enqueueRender(this);
 	}
 };
 
@@ -117,7 +118,7 @@ export function getDomSibling(vnode, childIndex) {
  * Trigger in-place re-rendering of a component.
  * @param {import('./internal').Component} component The component to rerender
  */
-function renderComponent(component) {
+async function renderComponent(component) {
 	let vnode = component._vnode,
 		oldDom = vnode._dom,
 		parentDom = component._parentDom;
@@ -127,7 +128,7 @@ function renderComponent(component) {
 		const oldVNode = assign({}, vnode);
 		oldVNode._original = vnode._original + 1;
 
-		diff(
+		const diffArguments = [
 			parentDom,
 			vnode,
 			oldVNode,
@@ -137,7 +138,9 @@ function renderComponent(component) {
 			commitQueue,
 			oldDom == null ? getDomSibling(vnode) : oldDom,
 			vnode._hydrating
-		);
+		];
+		if (options.asyncRendering) await diff(...diffArguments); else diff(...diffArguments);
+
 		commitRoot(commitQueue, vnode);
 
 		if (vnode._dom != oldDom) {
@@ -170,17 +173,6 @@ function updateParentDomPointers(vnode) {
  */
 let rerenderQueue = [];
 
-/**
- * Asynchronously schedule a callback
- * @type {(cb: () => void) => void}
- */
-/* istanbul ignore next */
-// Note the following line isn't tree-shaken by rollup cuz of rollup/rollup#2566
-const defer =
-	typeof Promise == 'function'
-		? Promise.prototype.then.bind(Promise.resolve())
-		: setTimeout;
-
 /*
  * The value of `Component.debounce` must asynchronously invoke the passed in callback. It is
  * important that contributors to Preact can consistently reason about what calls to `setState`, etc.
@@ -196,7 +188,7 @@ let prevDebounce;
  * Enqueue a rerender of a component
  * @param {import('./internal').Component} c The component to rerender
  */
-export function enqueueRender(c) {
+export async function enqueueRender(c) {
 	if (
 		(!c._dirty &&
 			(c._dirty = true) &&
@@ -205,21 +197,23 @@ export function enqueueRender(c) {
 		prevDebounce !== options.debounceRendering
 	) {
 		prevDebounce = options.debounceRendering;
-		(prevDebounce || defer)(process);
+		if (options.asyncRendering) await process();
+		else if (prevDebounce) prevDebounce(process);
+		else process();
 	}
 }
 
 /** Flush the render queue by rerendering all queued components */
-function process() {
+async function process() {
 	let queue;
 	while ((process._rerenderCount = rerenderQueue.length)) {
 		queue = rerenderQueue.sort((a, b) => a._vnode._depth - b._vnode._depth);
 		rerenderQueue = [];
 		// Don't update `renderCount` yet. Keep its value non-zero to prevent unnecessary
 		// process() calls from getting scheduled while `queue` is still being consumed.
-		queue.some(c => {
-			if (c._dirty) renderComponent(c);
-		});
+		for (const c of queue.filter(c => c._dirty)) {
+			if (options.asyncRendering) await renderComponent(c); else renderComponent(c);
+		}
 	}
 }
 process._rerenderCount = 0;
