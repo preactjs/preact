@@ -1,6 +1,8 @@
 import options from '../options';
-import { diffChildren } from './children';
-import { diffable, recoverBailedDiff, runHook, diffComponentNodes, diffElementNodes, saveComponentDiff, noDiff, equalizeNodes, handleDiffError } from './index';
+import { diffChildren, getChildNewVNode, getChildOldVNode, addChildRef, updateChildDom, removeOldChildren, applyChildRefs } from './children';
+import { diffable, recoverErrorDiff, diffComponentNodes, diffElementNodes, saveComponentDiff, noDiff, equalizeNodes, handleDiffError } from './index';
+import { runHook } from '../options';
+import { EMPTY_ARR } from 'preact/src/constants';
 
 /**
  * Diff two virtual nodes and apply proper changes to the DOM - async version
@@ -23,7 +25,8 @@ export async function diffAsync(
 
 	if (!diffable(newVNode)) return null;
 
-	recoverBailedDiff(newVNode, oldVNode, excessDomChildren, oldDom, isHydrating);
+	const { recover, update } = recoverErrorDiff(newVNode, oldVNode, excessDomChildren, oldDom, isHydrating);
+	if (recover) { isHydrating = update.isHydrating; excessDomChildren = update.excessDomChildren; oldDom = update.oldDom; }
 
 	runHook('_diff', newVNode);
 
@@ -75,5 +78,64 @@ export async function diffAsync(
 	} catch (e) {
 		handleDiffError(e, newVNode, oldVNode, excessDomChildren, oldDom, isHydrating);
 	}
+}
+
+/**
+ * Diff the children of a virtual node - async version
+ */
+export async function diffChildren(
+	parentDom,
+	renderResult,
+	newParentVNode,
+	oldParentVNode,
+	globalContext,
+	isSvg,
+	excessDomChildren,
+	commitQueue,
+	oldDom,
+	isHydrating
+) {
+	let i, oldVNode, childVNode, firstChildDom, refs;
+
+	// This is a compression of oldParentVNode!=null && oldParentVNode != EMPTY_OBJ && oldParentVNode._children || EMPTY_ARR
+	// as EMPTY_OBJ._children should be `undefined`.
+	let oldChildren = (oldParentVNode && oldParentVNode._children) || EMPTY_ARR;
+
+	newParentVNode._children = [];
+	for (i = 0; i < renderResult.length; i++) {
+
+		childVNode = getChildNewVNode(renderResult[i], newParentVNode, i);
+		if (!childVNode) continue;
+
+		oldVNode = getChildOldVNode(childVNode, oldChildren, i);
+
+		// Morph the old element into the new one, but don't append it to the dom yet
+		await diffAsync(
+			parentDom,
+			childVNode,
+			oldVNode,
+			globalContext,
+			isSvg,
+			excessDomChildren,
+			commitQueue,
+			oldDom,
+			isHydrating
+		);
+
+		if (childVNode._dom && !firstChildDom) firstChildDom = childVNode._dom;
+
+		if (oldVNode.ref != childVNode.ref) {
+			if (!refs) refs = [];
+			addChildRef(refs, childVNode, oldVNode);
+		}
+
+		oldDom = updateChildDom(parentDom, newParentVNode, oldChildren, childVNode, childVNode._dom, oldVNode, oldDom);
+	}
+
+	newParentVNode._dom = firstChildDom;
+
+	removeOldChildren(oldChildren, oldParentVNode, newParentVNode);
+
+	applyChildRefs(refs);
 }
 
