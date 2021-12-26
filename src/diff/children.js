@@ -24,7 +24,7 @@ import options from '../options';
  * Fragments that have siblings. In most cases, it starts out as `oldChildren[0]._dom`.
  * @param {boolean} isHydrating Whether or not we are in hydration
  */
-export async function diffChildren(
+export function* diffChildren(
 	parentDom,
 	renderResult,
 	newParentVNode,
@@ -146,7 +146,12 @@ export async function diffChildren(
 			oldDom,
 			isHydrating
 		];
-		if (options.asyncRendering) await diff(...diffArgs); else diff(...diffArgs);
+		if (!options.asyncRendering) diff(...diffArgs).next();
+		else {
+			const generator = diff(...diffArgs);
+			let nextValue = generator.next();
+			while (!nextValue.done) { if (nextValue.value && nextValue.value.then) yield nextValue.value; nextValue = generator.next(); }
+		}
 
 		newDom = childVNode._dom;
 

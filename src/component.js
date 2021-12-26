@@ -25,7 +25,7 @@ export function Component(props, context) {
  * @param {() => void} [callback] A function to be called once component state is
  * updated
  */
-Component.prototype.setState = async function(update, callback) {
+Component.prototype.setState = function(update, callback) {
 	// only clone state when copying to nextState the first time.
 	let s;
 	if (this._nextState != null && this._nextState !== this.state) {
@@ -49,7 +49,7 @@ Component.prototype.setState = async function(update, callback) {
 
 	if (this._vnode) {
 		if (callback) this._renderCallbacks.push(callback);
-		if (options.asyncRendering) await enqueueRender(this); else enqueueRender(this);
+		enqueueRender(this);
 	}
 };
 
@@ -59,14 +59,14 @@ Component.prototype.setState = async function(update, callback) {
  * @param {() => void} [callback] A function to be called after component is
  * re-rendered
  */
-Component.prototype.forceUpdate = async function(callback) {
+Component.prototype.forceUpdate = function(callback) {
 	if (this._vnode) {
 		// Set render mode so that we can differentiate where the render request
 		// is coming from. We need this because forceUpdate should never call
 		// shouldComponentUpdate
 		this._force = true;
 		if (callback) this._renderCallbacks.push(callback);
-		if (options.asyncRendering) await enqueueRender(this); else enqueueRender(this);
+		enqueueRender(this);
 	}
 };
 
@@ -139,7 +139,12 @@ async function renderComponent(component) {
 			oldDom == null ? getDomSibling(vnode) : oldDom,
 			vnode._hydrating
 		];
-		if (options.asyncRendering) await diff(...diffArguments); else diff(...diffArguments);
+		if (!options.asyncRendering) diff(...diffArguments).next();
+		else {
+			const generator = diff(...diffArguments);
+			let nextValue = generator.next();
+			while (!nextValue.done) { if (nextValue.value && nextValue.value.then) await nextValue.value; nextValue = generator.next(); }
+		}
 
 		commitRoot(commitQueue, vnode);
 
@@ -188,7 +193,7 @@ let prevDebounce;
  * Enqueue a rerender of a component
  * @param {import('./internal').Component} c The component to rerender
  */
-export async function enqueueRender(c) {
+export function enqueueRender(c) {
 	if (
 		(!c._dirty &&
 			(c._dirty = true) &&
@@ -197,9 +202,7 @@ export async function enqueueRender(c) {
 		prevDebounce !== options.debounceRendering
 	) {
 		prevDebounce = options.debounceRendering;
-		if (options.asyncRendering) await process();
-		else if (prevDebounce) prevDebounce(process);
-		else process();
+		(prevDebounce || setTimeout)(process);
 	}
 }
 
