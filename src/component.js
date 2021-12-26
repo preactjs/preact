@@ -1,7 +1,9 @@
 import { assign } from './util';
 import { diff, commitRoot } from './diff/index';
-import options from './options';
+import { diffAsync } from './diff/async';
+import { diffDeps } from './diff/deps';
 import { Fragment } from './create-element';
+import options from './options';
 import 'regenerator-runtime/runtime';
 
 /**
@@ -137,16 +139,17 @@ async function renderComponent(component) {
 			vnode._hydrating != null ? [oldDom] : null,
 			commitQueue,
 			oldDom == null ? getDomSibling(vnode) : oldDom,
-			vnode._hydrating
+			vnode._hydrating,
+			diffDeps()
 		];
-		if (!options.asyncRendering) diff(...diffArguments).next();
+		if (!options.asyncRendering) diff(...diffArguments);
 		else {
-			const generator = diff(...diffArguments);
+			const generator = diffAsync(...diffArguments);
 			let nextValue = generator.next();
 			while (!nextValue.done) { if (nextValue.value && nextValue.value.then) await nextValue.value; nextValue = generator.next(); }
 		}
 
-		commitRoot(commitQueue, vnode);
+		commitRoot(commitQueue, vnode, options);
 
 		if (vnode._dom != oldDom) {
 			updateParentDomPointers(vnode);

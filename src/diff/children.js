@@ -1,9 +1,3 @@
-import { diff, unmount, applyRef } from './index';
-import { createVNode, Fragment } from '../create-element';
-import { EMPTY_OBJ, EMPTY_ARR } from '../constants';
-import { getDomSibling } from '../component';
-import options from '../options';
-
 /**
  * Diff the children of a virtual node
  * @param {import('../internal').PreactElement} parentDom The DOM element whose
@@ -23,8 +17,9 @@ import options from '../options';
  * render (except when hydrating). Can be a sibling DOM element when diffing
  * Fragments that have siblings. In most cases, it starts out as `oldChildren[0]._dom`.
  * @param {boolean} isHydrating Whether or not we are in hydration
+ * @param {object} [deps] Dependencies parametrized to be able to generate async functions
  */
-export function* diffChildren(
+export function diffChildren(
 	parentDom,
 	renderResult,
 	newParentVNode,
@@ -34,13 +29,14 @@ export function* diffChildren(
 	excessDomChildren,
 	commitQueue,
 	oldDom,
-	isHydrating
+	isHydrating,
+	deps
 ) {
 	let i, j, oldVNode, childVNode, newDom, firstChildDom, refs;
 
 	// This is a compression of oldParentVNode!=null && oldParentVNode != EMPTY_OBJ && oldParentVNode._children || EMPTY_ARR
 	// as EMPTY_OBJ._children should be `undefined`.
-	let oldChildren = (oldParentVNode && oldParentVNode._children) || EMPTY_ARR;
+	let oldChildren = (oldParentVNode && oldParentVNode._children) || deps.EMPTY_ARR;
 
 	let oldChildrenLength = oldChildren.length;
 
@@ -60,7 +56,7 @@ export function* diffChildren(
 			// eslint-disable-next-line valid-typeof
 			typeof childVNode == 'bigint'
 		) {
-			childVNode = newParentVNode._children[i] = createVNode(
+			childVNode = newParentVNode._children[i] = deps.createVNode(
 				null,
 				childVNode,
 				null,
@@ -68,8 +64,8 @@ export function* diffChildren(
 				childVNode
 			);
 		} else if (Array.isArray(childVNode)) {
-			childVNode = newParentVNode._children[i] = createVNode(
-				Fragment,
+			childVNode = newParentVNode._children[i] = deps.createVNode(
+				deps.Fragment,
 				{ children: childVNode },
 				null,
 				null,
@@ -80,7 +76,7 @@ export function* diffChildren(
 			// scenario:
 			//   const reuse = <div />
 			//   <div>{reuse}<span />{reuse}</div>
-			childVNode = newParentVNode._children[i] = createVNode(
+			childVNode = newParentVNode._children[i] = deps.createVNode(
 				childVNode.type,
 				childVNode.props,
 				childVNode.key,
@@ -132,10 +128,10 @@ export function* diffChildren(
 			}
 		}
 
-		oldVNode = oldVNode || EMPTY_OBJ;
+		oldVNode = oldVNode || deps.EMPTY_OBJ;
 
 		// Morph the old element into the new one, but don't append it to the dom yet
-		const diffArgs = [
+		deps.diff(
 			parentDom,
 			childVNode,
 			oldVNode,
@@ -144,14 +140,9 @@ export function* diffChildren(
 			excessDomChildren,
 			commitQueue,
 			oldDom,
-			isHydrating
-		];
-		if (!options.asyncRendering) diff(...diffArgs).next();
-		else {
-			const generator = diff(...diffArgs);
-			let nextValue = generator.next();
-			while (!nextValue.done) { if (nextValue.value && nextValue.value.then) yield nextValue.value; nextValue = generator.next(); }
-		}
+			isHydrating,
+			deps
+		);
 
 		newDom = childVNode._dom;
 
@@ -170,13 +161,14 @@ export function* diffChildren(
 				typeof childVNode.type == 'function' &&
 				childVNode._children === oldVNode._children
 			) {
-				childVNode._nextDom = oldDom = reorderChildren(
+				childVNode._nextDom = oldDom = deps.reorderChildren(
 					childVNode,
 					oldDom,
-					parentDom
+					parentDom,
+					deps.placeChild
 				);
 			} else {
-				oldDom = placeChild(
+				oldDom = deps.placeChild(
 					parentDom,
 					childVNode,
 					oldVNode,
@@ -203,7 +195,7 @@ export function* diffChildren(
 		) {
 			// The above condition is to handle null placeholders. See test in placeholder.test.js:
 			// `efficiently replace null placeholders in parent rerenders`
-			oldDom = getDomSibling(oldVNode);
+			oldDom = deps.getDomSibling(oldVNode);
 		}
 	}
 
@@ -220,22 +212,22 @@ export function* diffChildren(
 				// If the newParentVNode.__nextDom points to a dom node that is about to
 				// be unmounted, then get the next sibling of that vnode and set
 				// _nextDom to it
-				newParentVNode._nextDom = getDomSibling(oldParentVNode, i + 1);
+				newParentVNode._nextDom = deps.getDomSibling(oldParentVNode, i + 1);
 			}
 
-			unmount(oldChildren[i], oldChildren[i]);
+			deps.unmount(oldChildren[i], oldChildren[i], false, deps.removeNode, deps.options);
 		}
 	}
 
 	// Set refs only after unmount
 	if (refs) {
 		for (i = 0; i < refs.length; i++) {
-			applyRef(refs[i], refs[++i], refs[++i]);
+			deps.applyRef(refs[i], refs[++i], refs[++i], deps.options);
 		}
 	}
 }
 
-function reorderChildren(childVNode, oldDom, parentDom) {
+export function reorderChildren(childVNode, oldDom, parentDom, placeChild) {
 	// Note: VNodes in nested suspended trees may be missing _children.
 	let c = childVNode._children;
 	let tmp = 0;
@@ -249,7 +241,7 @@ function reorderChildren(childVNode, oldDom, parentDom) {
 			vnode._parent = childVNode;
 
 			if (typeof vnode.type == 'function') {
-				oldDom = reorderChildren(vnode, oldDom, parentDom);
+				oldDom = reorderChildren(vnode, oldDom, parentDom, placeChild);
 			} else {
 				oldDom = placeChild(
 					parentDom,
@@ -285,7 +277,7 @@ export function toChildArray(children, out) {
 	return out;
 }
 
-function placeChild(
+export function placeChild(
 	parentDom,
 	childVNode,
 	oldVNode,

@@ -1,8 +1,10 @@
 import { EMPTY_OBJ } from './constants';
 import { commitRoot, diff } from './diff/index';
+import { diffAsync } from './diff/async';
 import { createElement, Fragment } from './create-element';
-import options from './options';
 import { slice } from './util';
+import { diffDeps } from './diff/deps';
+import options from './options';
 
 /**
  * Render a Preact virtual node into a DOM element
@@ -63,17 +65,18 @@ export async function render(vnode, parentDom, replaceNode) {
 			: oldVNode
 			? oldVNode._dom
 			: parentDom.firstChild,
-		isHydrating
+		isHydrating,
+		diffDeps()
 	];
-	if (!options.asyncRendering) diff(...diffArguments).next();
+	if (!options.asyncRendering) diff(...diffArguments);
 	else {
-		const generator = diff(...diffArguments);
+		const generator = diffAsync(...diffArguments);
 		let nextValue = generator.next();
 		while (!nextValue.done) { if (nextValue.value && nextValue.value.then) await nextValue.value; nextValue = generator.next(); }
 	}
 
 	// Flush all queued effects
-	commitRoot(commitQueue, vnode);
+	commitRoot(commitQueue, vnode, options);
 }
 
 /**
