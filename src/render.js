@@ -1,10 +1,9 @@
 import { EMPTY_OBJ } from './constants';
-import { commitRoot, diff } from './diff/index';
-import { diffAsync } from './diff/async';
+import { commitRoot } from './diff/index';
 import { createElement, Fragment } from './create-element';
-import { slice } from './util';
-import { diffDeps } from './diff/deps';
 import options from './options';
+import { slice } from './util';
+import { optionalAsyncDiff } from './diff/async';
 
 /**
  * Render a Preact virtual node into a DOM element
@@ -44,7 +43,7 @@ export async function render(vnode, parentDom, replaceNode) {
 
 	// List of effects that need to be called after diffing.
 	let commitQueue = [];
-	const diffArguments = [
+	await optionalAsyncDiff(
 		parentDom,
 		// Determine the new vnode tree and store it on the DOM element on
 		// our custom `_children` property.
@@ -65,15 +64,8 @@ export async function render(vnode, parentDom, replaceNode) {
 			: oldVNode
 			? oldVNode._dom
 			: parentDom.firstChild,
-		isHydrating,
-		diffDeps()
-	];
-	if (!options.asyncRendering) diff(...diffArguments);
-	else {
-		const generator = diffAsync(...diffArguments);
-		let nextValue = generator.next();
-		while (!nextValue.done) { if (nextValue.value && nextValue.value.then) await nextValue.value; nextValue = generator.next(); }
-	}
+		isHydrating
+	);
 
 	// Flush all queued effects
 	commitRoot(commitQueue, vnode, options);

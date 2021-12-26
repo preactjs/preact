@@ -1,12 +1,7 @@
 import { diff, diffElementNodes } from './index';
 import { diffChildren } from './children';
-
-/**
- * calls either the serial function or its generator/async version and waits for interrupts from the JS engine when they come up
- */
-export async function callAsync(func) {
-
-}
+import { diffDeps } from './deps';
+import options from '../options';
 
 /**
  * returns generator function type because it is not exposed by default
@@ -28,7 +23,7 @@ function generateAsyncDiffChildren() {
 	const diffBody = diffChildren.toString();
 
 	// extract the function arguments - async version will have the same arguments
-	const argMatches = diffBody.match(/function\s+\w+\(([^\)]*)\)/);
+	const argMatches = diffBody.match(/function\s+\w+\(([^)]*)\)/);
 	if (!argMatches || !argMatches[1]) throw new Error(`Invalid function arguments: ${diffBody}`);
 	const args = argMatches[1];
 
@@ -66,7 +61,7 @@ function generateAsyncDiffElementNodes() {
 	const diffBody = diffElementNodes.toString();
 
 	// extract the function arguments - async version will have the same arguments
-	const argMatches = diffBody.match(/function\s+\w+\(([^\)]*)\)/);
+	const argMatches = diffBody.match(/function\s+\w+\(([^)]*)\)/);
 	if (!argMatches || !argMatches[1]) throw new Error(`Invalid function arguments: ${diffBody}`);
 	const args = argMatches[1];
 
@@ -103,7 +98,7 @@ function generateAsyncDiff() {
 	const diffBody = diff.toString();
 
 	// extract the function arguments - async version will have the same arguments
-	const argMatches = diffBody.match(/function\s+\w+\(([^\)]*)\)/);
+	const argMatches = diffBody.match(/function\s+\w+\(([^)]*)\)/);
 	if (!argMatches || !argMatches[1]) throw new Error(`Invalid function arguments: ${diffBody}`);
 	const args = argMatches[1];
 
@@ -144,3 +139,15 @@ function generateAsyncDiff() {
 	return window.diffAsync;
 }
 export const diffAsync = generateAsyncDiff();
+
+/**
+ * calls either the serial function or its generator/async version and waits for interrupts from the JS engine when they come up
+ */
+export async function optionalAsyncDiff(...args) {
+	if (!options.asyncRendering) diff(...args, diffDeps());
+	else {
+		const generator = diffAsync(...args, diffDeps());
+		let nextValue = generator.next();
+		while (!nextValue.done) { if (nextValue.value && nextValue.value.then) await nextValue.value; nextValue = generator.next(); }
+	}
+}

@@ -1,9 +1,8 @@
 import { assign } from './util';
-import { diff, commitRoot } from './diff/index';
-import { diffAsync } from './diff/async';
-import { diffDeps } from './diff/deps';
-import { Fragment } from './create-element';
+import { commitRoot } from './diff/index';
 import options from './options';
+import { Fragment } from './create-element';
+import { optionalAsyncDiff } from './diff/async';
 import 'regenerator-runtime/runtime';
 
 /**
@@ -130,7 +129,7 @@ async function renderComponent(component) {
 		const oldVNode = assign({}, vnode);
 		oldVNode._original = vnode._original + 1;
 
-		const diffArguments = [
+		await optionalAsyncDiff(
 			parentDom,
 			vnode,
 			oldVNode,
@@ -139,15 +138,8 @@ async function renderComponent(component) {
 			vnode._hydrating != null ? [oldDom] : null,
 			commitQueue,
 			oldDom == null ? getDomSibling(vnode) : oldDom,
-			vnode._hydrating,
-			diffDeps()
-		];
-		if (!options.asyncRendering) diff(...diffArguments);
-		else {
-			const generator = diffAsync(...diffArguments);
-			let nextValue = generator.next();
-			while (!nextValue.done) { if (nextValue.value && nextValue.value.then) await nextValue.value; nextValue = generator.next(); }
-		}
+			vnode._hydrating
+		);
 
 		commitRoot(commitQueue, vnode, options);
 
