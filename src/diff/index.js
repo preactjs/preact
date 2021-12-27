@@ -415,7 +415,8 @@ export function diffElementNodes(
 				excessDomChildren
 					? excessDomChildren[0]
 					: oldVNode._children && deps.getDomSibling(oldVNode, 0),
-				isHydrating
+				isHydrating,
+				deps
 			);
 			deps.yieldNextValue(generator); // this call will be transformed by the async call generators
 
