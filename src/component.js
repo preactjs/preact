@@ -3,7 +3,6 @@ import { commitRoot } from './diff/index';
 import options from './options';
 import { Fragment } from './create-element';
 import { optionalAsyncDiff } from './diff/async';
-import 'regenerator-runtime/runtime';
 
 /**
  * Base Component class. Provides `setState()` and `forceUpdate()`, which
