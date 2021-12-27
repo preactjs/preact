@@ -1,6 +1,8 @@
 import { EMPTY_OBJ } from './constants';
 import { commitRoot } from './diff/index';
 import { optionalAsyncDiff } from './diff/async';
+import { diffDeps } from './diff/deps';
+import { Component, getDomSibling } from './component';
 import { createElement, Fragment } from './create-element';
 import options from './options';
 import { slice } from './util';
@@ -36,10 +38,19 @@ export async function render(vnode, parentDom, replaceNode) {
 	)._children = createElement(Fragment, null, [vnode]);
 
 	// request idle callback polyfill for async rendering for Safari - using 16ms to get 60fps
-	if (options.asyncRendering) window.requestIdleCallback = window.requestIdleCallback || function(handler) {
-		let startTime = Date.now();
-		return setTimeout(function() { handler({ timeRemaining: function() { return Math.max(0, 16.0 - (Date.now() - startTime)); } }); }, 1);
-	}
+	if (options.asyncRendering)
+		window.requestIdleCallback =
+			window.requestIdleCallback ||
+			function(handler) {
+				let startTime = Date.now();
+				return setTimeout(function() {
+					handler({
+						timeRemaining: function() {
+							return Math.max(0, 16.0 - (Date.now() - startTime));
+						}
+					});
+				}, 1);
+			};
 
 	// List of effects that need to be called after diffing.
 	let commitQueue = [];
@@ -64,7 +75,8 @@ export async function render(vnode, parentDom, replaceNode) {
 			: oldVNode
 			? oldVNode._dom
 			: parentDom.firstChild,
-		isHydrating
+		isHydrating,
+		diffDeps(Component, getDomSibling)
 	);
 
 	// Flush all queued effects

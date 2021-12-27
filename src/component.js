@@ -1,6 +1,7 @@
 import { assign } from './util';
 import { commitRoot } from './diff/index';
 import { optionalAsyncDiff } from './diff/async';
+import { diffDeps } from './diff/deps';
 import options from './options';
 import { Fragment } from './create-element';
 
@@ -137,7 +138,8 @@ async function renderComponent(component) {
 			vnode._hydrating != null ? [oldDom] : null,
 			commitQueue,
 			oldDom == null ? getDomSibling(vnode) : oldDom,
-			vnode._hydrating
+			vnode._hydrating,
+			diffDeps(Component, getDomSibling)
 		);
 
 		commitRoot(commitQueue, vnode, options);
@@ -209,7 +211,8 @@ async function process() {
 		// Don't update `renderCount` yet. Keep its value non-zero to prevent unnecessary
 		// process() calls from getting scheduled while `queue` is still being consumed.
 		for (const c of queue.filter(c => c._dirty)) {
-			if (options.asyncRendering) await renderComponent(c); else renderComponent(c);
+			if (options.asyncRendering) await renderComponent(c);
+			else renderComponent(c);
 		}
 	}
 }
