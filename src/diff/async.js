@@ -38,9 +38,9 @@ function generateAsyncDiffFunction(syncFunction, asyncFunctionName, interruptabl
 	body = body.replaceAll(/(\w+\.yieldNextValue)/g, `yield * $1`);
 
 	// add the code to make the diff asynchronous if requested - we only add it for the main diff function - start of recursion
-	// if we're running out of deadline, yield and get back as browser allows us - give a few milliseconds buffer to stay within allotted time
+	// if we're running out of deadline, yield and get back as browser allows us - give a millisecond buffer to stay within allotted time
 	if (interruptable) body = `
-		if (typeof window !== 'undefined' && (!window._preactDeadline || Date.now() > (window._preactDeadline - 2))) {
+		if (typeof window !== 'undefined' && (!window._preactDeadline || Date.now() > (window._preactDeadline - 1))) {
 			yield new Promise(resolve => requestIdleCallback(deadline => { window._preactDeadline = Date.now() + deadline.timeRemaining(); resolve(); }));
 		}
 		${body}
