@@ -1,8 +1,8 @@
 import { assign } from './util';
 import { commitRoot } from './diff/index';
+import { optionalAsyncDiff } from './diff/async';
 import options from './options';
 import { Fragment } from './create-element';
-import { optionalAsyncDiff } from './diff/async';
 
 /**
  * Base Component class. Provides `setState()` and `forceUpdate()`, which

@@ -188,12 +188,11 @@ export function diff(
 			let isTopLevelFragment =
 				tmp != null && tmp.type === deps.Fragment && tmp.key == null;
 			let renderResult = isTopLevelFragment ? tmp.props.children : tmp;
-			if (!Array.isArray(renderResult)) renderResult = [renderResult];
 
 			// in async mode, this call returns a generator - otherwise it's void/undefined
 			const generator = deps.diffChildren(
 				parentDom,
-				renderResult,
+				Array.isArray(renderResult) ? renderResult : [renderResult],
 				newVNode,
 				oldVNode,
 				globalContext,
@@ -403,21 +402,20 @@ export function diffElementNodes(
 			newVNode._children = [];
 		} else {
 			i = newVNode.props.children;
-			const renres = Array.isArray(i) ? i : [i];
-			const oldDom = excessDomChildren ? excessDomChildren[0] : oldVNode._children && deps.getDomSibling(oldVNode, 0);
 			// in async mode, this call returns a generator - otherwise it's void/undefined
 			const generator = deps.diffChildren(
 				dom,
-				renres,
+				Array.isArray(i) ? i : [i],
 				newVNode,
 				oldVNode,
 				globalContext,
 				isSvg && nodeType !== 'foreignObject',
 				excessDomChildren,
 				commitQueue,
-				oldDom,
-				isHydrating,
-				deps
+				excessDomChildren
+					? excessDomChildren[0]
+					: oldVNode._children && getDomSibling(oldVNode, 0),
+				isHydrating
 			);
 			deps.yieldNextValue(generator); // this call will be transformed by the async call generators
 

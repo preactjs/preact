@@ -1,9 +1,9 @@
 import { EMPTY_OBJ } from './constants';
 import { commitRoot } from './diff/index';
+import { optionalAsyncDiff } from './diff/async';
 import { createElement, Fragment } from './create-element';
 import options from './options';
 import { slice } from './util';
-import { optionalAsyncDiff } from './diff/async';
 
 /**
  * Render a Preact virtual node into a DOM element
