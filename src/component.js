@@ -132,7 +132,8 @@ let rerenderQueue = [];
 
 let prevDebounce;
 
-const defer = Promise.prototype.then.bind(Promise.resolve());
+// TODO: we'll have to fallback to Promise/... for Node/Safari
+const defer = window.requestIdleCallback
 
 /**
  * Enqueue a rerender of a component
