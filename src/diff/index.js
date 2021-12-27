@@ -190,8 +190,8 @@ export function diff(
 			let renderResult = isTopLevelFragment ? tmp.props.children : tmp;
 			if (!Array.isArray(renderResult)) renderResult = [renderResult];
 
-			// make sure there are no complex expressions in arguments - would cause errors in async version generation
-			deps.diffChildren(
+			// in async mode, this call returns a generator - otherwise it's void/undefined
+			const generator = deps.diffChildren(
 				parentDom,
 				renderResult,
 				newVNode,
@@ -204,6 +204,16 @@ export function diff(
 				isHydrating,
 				deps
 			);
+			if (deps.options.asyncRendering) {
+				let nextValue = generator.next();
+				while (!nextValue.done) {
+					// if we get a promise, yield it - since this is dynamically generated generator function, we can't use yield
+					// we use eval instead but it does not really execute - the only reason for using eval is so that minifier will
+					// not change it - we get rid of the eval when we create the generator function code from this
+					if (nextValue.value && nextValue.value.then) yield_nextValue.value;
+					nextValue = generator.next();
+				}
+			}
 
 			c.base = newVNode._dom;
 
@@ -226,8 +236,8 @@ export function diff(
 			newVNode._children = oldVNode._children;
 			newVNode._dom = oldVNode._dom;
 		} else {
-			// make sure there are no complex expressions in arguments - would cause errors in async version generation
-			diffElementNodes(
+			// in async mode, this call returns a generator - otherwise it's void/undefined
+			const generator = deps.diffElementNodes(
 				oldVNode._dom,
 				newVNode,
 				oldVNode,
@@ -238,6 +248,16 @@ export function diff(
 				isHydrating,
 				deps
 			);
+			if (deps.options.asyncRendering) {
+				let nextValue = generator.next();
+				while (!nextValue.done) {
+					// if we get a promise, yield it - since this is dynamically generated generator function, we can't use yield
+					// we use eval instead but it does not really execute - the only reason for using eval is so that minifier will
+					// not change it - we get rid of the eval when we create the generator function code from this
+					if (nextValue.value && nextValue.value.then) yield_nextValue.value;
+					nextValue = generator.next();
+				}
+			}
 		}
 
 		if ((tmp = deps.options.diffed)) tmp(newVNode);
@@ -403,7 +423,8 @@ export function diffElementNodes(
 			i = newVNode.props.children;
 			const renres = Array.isArray(i) ? i : [i];
 			const oldDom = excessDomChildren ? excessDomChildren[0] : oldVNode._children && deps.getDomSibling(oldVNode, 0);
-			deps.diffChildren(
+			// in async mode, this call returns a generator - otherwise it's void/undefined
+			const generator = deps.diffChildren(
 				dom,
 				renres,
 				newVNode,
@@ -416,6 +437,16 @@ export function diffElementNodes(
 				isHydrating,
 				deps
 			);
+			if (deps.options.asyncRendering) {
+				let nextValue = generator.next();
+				while (!nextValue.done) {
+					// if we get a promise, yield it - since this is dynamically generated generator function, we can't use yield
+					// we use eval instead but it does not really execute - the only reason for using eval is so that minifier will
+					// not change it - we get rid of the eval when we create the generator function code from this
+					if (nextValue.value && nextValue.value.then) yield_nextValue.value;
+					nextValue = generator.next();
+				}
+			}
 
 			// Remove children that are not part of any vnode.
 			if (excessDomChildren != null) {

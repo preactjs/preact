@@ -34,12 +34,8 @@ function generateAsyncDiffChildren() {
 	if (lastCharacter !== '}') throw new Error(`Invalid function end bracket: ${diffBody}`);
 	let body = diffBody.slice(bracketPosition + 1, -1);
 
-	// console.log(diffChildren.name, window.diffChildrenAsync.name, diffElementNodes.name, window.diffElementNodesAsync.name, body);
-	body = body.replace(new RegExp(`deps\.diff\\(([^)]+)\\)`), `
-		const generator = deps.diff($1);
-		let nextValue = generator.next();
-		while (!nextValue.done) { if (nextValue.value && nextValue.value.then) yield nextValue.value; nextValue = generator.next(); }
-	`);
+	// replace pseudo yield calls
+	body = body.replaceAll('yield_nextValue.value', 'yield nextValue.value');
 
 	window.diffChildrenAsync = new GeneratorFunction(args, body);
 	return window.diffChildrenAsync;
@@ -72,11 +68,8 @@ function generateAsyncDiffElementNodes() {
 	if (lastCharacter !== '}') throw new Error(`Invalid function end bracket: ${diffBody}`);
 	let body = diffBody.slice(bracketPosition + 1, -1);
 
-	body = body.replace(new RegExp(`deps.diffChildren\\(([^)]+)\\)`), `
-		const generator = deps.diffChildren($1);
-		let nextValue = generator.next();
-		while (!nextValue.done) { if (nextValue.value && nextValue.value.then) yield nextValue.value; nextValue = generator.next(); }
-	`);
+	// replace pseudo yield calls
+	body = body.replaceAll('yield_nextValue.value', 'yield nextValue.value');
 
 	window.diffElementNodesAsync = new GeneratorFunction(args, body);
 	return window.diffElementNodesAsync;
@@ -109,23 +102,8 @@ function generateAsyncDiff() {
 	if (lastCharacter !== '}') throw new Error(`Invalid function end bracket: ${diffBody}`);
 	let body = diffBody.slice(bracketPosition + 1, -1);
 
-	body = body.replace(new RegExp(`deps.diffChildren\\(([^)]+)\\)`), `
-		const generator = deps.diffChildren($1);
-		let nextValue = generator.next();
-		while (!nextValue.done) {
-			if (nextValue.value && nextValue.value.then) yield nextValue.value;
-			nextValue = generator.next();
-		}
-	`);
-
-	body = body.replace(new RegExp(`${diffElementNodes.name}\\(([^)]+)\\)`), `
-		const generator = diffElementNodesAsync($1);
-		let nextValue = generator.next();
-		while (!nextValue.done) {
-			if (nextValue.value && nextValue.value.then) yield nextValue.value;
-			nextValue = generator.next();
-		}
-	`);
+	// replace pseudo yield calls
+	body = body.replaceAll('yield_nextValue.value', 'yield nextValue.value');
 
 	// add the code to make the diff asynchronous - if we're running out of deadline, yield and get back as browser allows us - give a few milliseconds buffer to stay within allotted time
 	body = `

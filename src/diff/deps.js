@@ -1,9 +1,9 @@
 import { EMPTY_OBJ, EMPTY_ARR } from '../constants';
 import { assign, removeNode, slice } from '../util';
-import { diff, unmount, applyRef, doRender } from './index';
+import { diff, diffElementNodes, unmount, applyRef, doRender } from './index';
 import { diffProps, setProperty } from './props';
 import { diffChildren, reorderChildren, placeChild } from './children';
-import { diffAsync, diffChildrenAsync } from './async';
+import { diffAsync, diffChildrenAsync, diffElementNodesAsync } from './async';
 import { Component, getDomSibling } from '../component';
 import { createVNode, Fragment } from '../create-element';
 import options from '../options';
@@ -20,6 +20,7 @@ export function diffDeps() {
 		Fragment,
 		diff: options.asyncRendering ? diffAsync : diff,
 		diffChildren: options.asyncRendering ? diffChildrenAsync : diffChildren,
+		diffElementNodes: options.asyncRendering ? diffElementNodesAsync : diffElementNodes,
 		diffProps,
 		setProperty,
 		createVNode,

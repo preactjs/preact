@@ -131,7 +131,8 @@ export function diffChildren(
 		oldVNode = oldVNode || deps.EMPTY_OBJ;
 
 		// Morph the old element into the new one, but don't append it to the dom yet
-		deps.diff(
+		// in async mode, this call returns a generator - otherwise it's void/undefined
+		const generator = deps.diff(
 			parentDom,
 			childVNode,
 			oldVNode,
@@ -143,6 +144,16 @@ export function diffChildren(
 			isHydrating,
 			deps
 		);
+		if (deps.options.asyncRendering) {
+			let nextValue = generator.next();
+			while (!nextValue.done) {
+				// if we get a promise, yield it - since this is dynamically generated generator function, we can't use yield
+				// we use eval instead but it does not really execute - the only reason for using eval is so that minifier will
+				// not change it - we get rid of the eval when we create the generator function code from this
+				if (nextValue.value && nextValue.value.then) yield_nextValue.value;
+				nextValue = generator.next();
+			}
+		}
 
 		newDom = childVNode._dom;
 
