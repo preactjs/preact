@@ -204,16 +204,7 @@ export function diff(
 				isHydrating,
 				deps
 			);
-			if (deps.options.asyncRendering) {
-				let nextValue = generator.next();
-				while (!nextValue.done) {
-					// if we get a promise, yield it - since this is dynamically generated generator function, we can't use yield
-					// we use eval instead but it does not really execute - the only reason for using eval is so that minifier will
-					// not change it - we get rid of the eval when we create the generator function code from this
-					if (nextValue.value && nextValue.value.then) yield_nextValue.value;
-					nextValue = generator.next();
-				}
-			}
+			deps.yieldNextValue(generator); // this call will be transformed by the async call generators
 
 			c.base = newVNode._dom;
 
@@ -248,16 +239,7 @@ export function diff(
 				isHydrating,
 				deps
 			);
-			if (deps.options.asyncRendering) {
-				let nextValue = generator.next();
-				while (!nextValue.done) {
-					// if we get a promise, yield it - since this is dynamically generated generator function, we can't use yield
-					// we use eval instead but it does not really execute - the only reason for using eval is so that minifier will
-					// not change it - we get rid of the eval when we create the generator function code from this
-					if (nextValue.value && nextValue.value.then) yield_nextValue.value;
-					nextValue = generator.next();
-				}
-			}
+			deps.yieldNextValue(generator); // this call will be transformed by the async call generators
 		}
 
 		if ((tmp = deps.options.diffed)) tmp(newVNode);
@@ -437,16 +419,7 @@ export function diffElementNodes(
 				isHydrating,
 				deps
 			);
-			if (deps.options.asyncRendering) {
-				let nextValue = generator.next();
-				while (!nextValue.done) {
-					// if we get a promise, yield it - since this is dynamically generated generator function, we can't use yield
-					// we use eval instead but it does not really execute - the only reason for using eval is so that minifier will
-					// not change it - we get rid of the eval when we create the generator function code from this
-					if (nextValue.value && nextValue.value.then) yield_nextValue.value;
-					nextValue = generator.next();
-				}
-			}
+			deps.yieldNextValue(generator); // this call will be transformed by the async call generators
 
 			// Remove children that are not part of any vnode.
 			if (excessDomChildren != null) {
