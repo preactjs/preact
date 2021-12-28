@@ -118,7 +118,8 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
 			name in dom
 		) {
 			try {
-				dom[name] = value == null ? '' : value;
+				const newValue = value == null ? '' : value;
+				if (dom[name] !== newValue) dom[name] = newValue;
 				// labelled break is 1b smaller here than a return statement (sorry)
 				break o;
 			} catch (e) {}
