@@ -118,7 +118,9 @@ export function diffChildren(
 			refs.push(
 				oldVNodeRef,
 				childVNode.ref,
-				childInternal._component || newDom,
+				typeof childInternal.type === 'function'
+					? childInternal._component || newDom
+					: newDom,
 				childInternal
 			);
 		}

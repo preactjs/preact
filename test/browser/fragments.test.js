@@ -683,7 +683,9 @@ describe('Fragment', () => {
 		expect(scratch.innerHTML).to.equal(htmlForFalse);
 		expectDomLogToBe(
 			[
-				'<div>fooHellobeep.insertBefore(<div>Hello, Null)',
+				'<div>barHellobeep.insertBefore(<div>bar, <div>beep)',
+				'<div>Hellobarbeep.insertBefore(<div>Hello, Null)',
+				// TODO: does one operation too many here
 				'<div>barbeepHello.insertBefore(<div>bar, Null)'
 			],
 			'rendering true to false'
@@ -1272,10 +1274,8 @@ describe('Fragment', () => {
 			'rendering from true to false'
 		);
 		expectDomLogToBe([
-			'<ol>002345.insertBefore(<li>0, Null)',
-			'<ol>013450.insertBefore(<li>1, Null)',
-			'<ol>024501.insertBefore(<li>2, Null)',
-			'<ol>345012.insertBefore(<li>3, Null)'
+			'<ol>012345.insertBefore(<li>4, <li>0)',
+			'<ol>401235.insertBefore(<li>5, <li>0)'
 		]);
 
 		clearLog();
@@ -1474,7 +1474,9 @@ describe('Fragment', () => {
 		);
 		expectDomLogToBe(
 			[
-				'<div>fooHellobeepboop.insertBefore(<div>Hello, <div>boop)',
+				// TODO: this operation is too much
+				'<div>barHellobeepboop.insertBefore(<div>bar, <div>beep)',
+				'<div>Hellobarbeepboop.insertBefore(<div>Hello, <div>boop)',
 				'<div>barbeepHelloboop.insertBefore(<div>bar, <div>boop)',
 				'<div>boop.remove()'
 			],
@@ -1560,7 +1562,8 @@ describe('Fragment', () => {
 		);
 		expectDomLogToBe(
 			[
-				'<div>fooHellobeepbeepbeep.insertBefore(<div>Hello, Null)',
+				'<div>barHellobeepbeepbeep.insertBefore(<div>bar, <div>beep)',
+				'<div>Hellobarbeepbeepbeep.insertBefore(<div>Hello, Null)',
 				'<div>barbeepbeepbeepHello.insertBefore(<div>bar, Null)'
 			],
 			'rendering from true to false'
@@ -1577,9 +1580,8 @@ describe('Fragment', () => {
 		expectDomLogToBe(
 			[
 				'<div>beepbeepbeepHellofoo.insertBefore(<div>Hello, Null)',
-				'<div>beepboopbeepfooHello.insertBefore(<div>boop, Null)',
-				'<div>beepboopfooHelloboop.insertBefore(<div>boop, Null)',
-				'<div>boopfooHelloboopboop.insertBefore(<div>boop, Null)'
+				'<div>beepbeepbeepfooHello.insertBefore(<div>foo, <div>beep)',
+				'<div>foobeepbeepbeepHello.insertBefore(<div>Hello, <div>beep)'
 			],
 			'rendering from false to true'
 		);
