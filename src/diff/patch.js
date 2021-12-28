@@ -160,8 +160,6 @@ export function patch(parentDom, newVNode, internal, commitQueue) {
 		// newVNode._vnodeId = 0;
 		internal.flags |= e.then ? MODE_SUSPENDED : MODE_ERRORED;
 		options._catchError(e, internal);
-
-		return;
 	}
 
 	if (options.diffed) options.diffed(internal);
