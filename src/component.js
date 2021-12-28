@@ -95,11 +95,6 @@ Component.prototype.render = Fragment;
 function rerender(internal) {
 	if (~internal.flags & MODE_UNMOUNTING && internal.flags & DIRTY_BIT) {
 		let parentDom = getParentDom(internal);
-		let startDom =
-			(internal.flags & (MODE_HYDRATE | MODE_SUSPENDED)) ===
-			(MODE_HYDRATE | MODE_SUSPENDED)
-				? internal._dom
-				: getDomSibling(internal, 0);
 
 		const vnode = createVNode(
 			internal.type,
@@ -110,7 +105,7 @@ function rerender(internal) {
 		);
 
 		const commitQueue = [];
-		patch(parentDom, vnode, internal, commitQueue, startDom);
+		patch(parentDom, vnode, internal, commitQueue);
 		commitRoot(commitQueue, internal);
 	}
 }

@@ -2,7 +2,6 @@ import { applyRef } from './refs';
 import { normalizeToVNode } from '../create-element';
 import {
 	TYPE_COMPONENT,
-	TYPE_TEXT,
 	MODE_HYDRATE,
 	MODE_SUSPENDED,
 	EMPTY_ARR,
@@ -12,7 +11,7 @@ import {
 import { mount } from './mount';
 import { patch } from './patch';
 import { unmount } from './unmount';
-import { createInternal, getDomSibling, getChildDom } from '../tree';
+import { createInternal, getDomSibling } from '../tree';
 
 /**
  * Diff the children of a virtual node
@@ -23,17 +22,18 @@ import { createInternal, getDomSibling, getChildDom } from '../tree';
  * whose children should be diff'ed against newParentVNode
  * @param {import('../internal').CommitQueue} commitQueue List of
  * components which have callbacks to invoke in commitRoot
- * @param {import('../internal').PreactElement} startDom The dom node
- * diffChildren should begin diffing with.
  */
 export function diffChildren(
 	parentDom,
 	renderResult,
 	parentInternal,
-	commitQueue,
-	startDom
+	commitQueue
 ) {
-	let i, newDom, refs;
+	let i,
+		newDom,
+		refs,
+		skew = 0,
+		remainingOldChildren;
 
 	/** @type {import('../internal').Internal} */
 	let childInternal;
@@ -43,7 +43,7 @@ export function diffChildren(
 
 	let oldChildren =
 		(parentInternal._children && parentInternal._children.slice()) || EMPTY_ARR;
-	let oldChildrenLength = oldChildren.length;
+	let oldChildrenLength = (remainingOldChildren = oldChildren.length);
 
 	const newChildren = [];
 	for (i = 0; i < renderResult.length; i++) {
@@ -56,25 +56,36 @@ export function diffChildren(
 			continue;
 		}
 
-		childInternal = findMatchingInternal(
+		let skewedIndex = i + skew;
+
+		/// TODO: Reconsider if we should bring back the "not moving text nodes" logic?
+		let matchingIndex = findMatchingIndex(
 			childVNode,
 			oldChildren,
-			i,
-			oldChildrenLength
+			skewedIndex,
+			remainingOldChildren
 		);
+		if (matchingIndex === -1) {
+			childInternal = UNDEFINED;
+		} else {
+			childInternal = oldChildren[matchingIndex];
+			oldChildren[matchingIndex] = UNDEFINED;
+			remainingOldChildren--;
+		}
+
+		let mountingChild = childInternal == null;
 
 		let oldVNodeRef;
-		let nextDomSibling;
 		if (childInternal == null) {
 			childInternal = createInternal(childVNode, parentInternal);
 
 			// We are mounting a new VNode
-			nextDomSibling = mount(
+			mount(
 				parentDom,
 				childVNode,
 				childInternal,
 				commitQueue,
-				startDom
+				getDomSibling(parentInternal, skewedIndex)
 			);
 		}
 		// If this node suspended during hydration, and no other flags are set:
@@ -84,27 +95,20 @@ export function diffChildren(
 			(MODE_HYDRATE | MODE_SUSPENDED)
 		) {
 			// We are resuming the hydration of a VNode
-			startDom = childInternal._dom;
 			oldVNodeRef = childInternal.ref;
 
-			nextDomSibling = mount(
+			mount(
 				parentDom,
 				childVNode,
 				childInternal,
 				commitQueue,
-				startDom
+				childInternal._dom
 			);
 		} else {
 			oldVNodeRef = childInternal.ref;
 
 			// Morph the old element into the new one, but don't append it to the dom yet
-			nextDomSibling = patch(
-				parentDom,
-				childVNode,
-				childInternal,
-				commitQueue,
-				startDom
-			);
+			patch(parentDom, childVNode, childInternal, commitQueue);
 		}
 
 		newDom = childInternal._dom;
@@ -119,22 +123,59 @@ export function diffChildren(
 			);
 		}
 
-		if (childInternal.flags & TYPE_COMPONENT) {
-			startDom = nextDomSibling;
-		} else if (newDom && newDom == startDom) {
-			// If the newDom and the dom we are expecting to be there are the same, then
-			// do nothing
-			startDom = nextDomSibling;
-		} else if (newDom) {
-			startDom = placeChild(parentDom, newDom, startDom);
-		} else if (
-			startDom &&
-			childInternal != null &&
-			startDom.parentNode != parentDom
-		) {
-			// The above condition is to handle null placeholders. See test in placeholder.test.js:
-			// `efficiently replace null placeholders in parent rerenders`
-			startDom = nextDomSibling;
+		// ### Change from keyed: I'm dropping re-parenting/replaceChild feature from
+		// keyed as well as the _currentOffset fragment handling and am instead
+		// recursing through fragments and moving their children as they occur
+		//
+		// I'm also using getDomSibling to get the next dom sibling through
+		// fragments. keyed did not handle this and just searched for the next
+		// non-null child (I think)
+		go: if (mountingChild) {
+			if (matchingIndex == -1) {
+				// ### Change from keyed:
+				// If we are mounting a new child that doesn't have a match (it could've
+				// matched a `null` placeholder), then adjust our skew accordingly
+				skew--;
+			}
+
+			// Perform insert of new dom
+			if (childInternal.flags & TYPE_DOM) {
+				let nextSibling = getDomSibling(parentInternal, skewedIndex);
+				parentDom.insertBefore(childInternal._dom, nextSibling);
+			}
+		} else if (matchingIndex !== skewedIndex) {
+			// Move this DOM into its correct place
+			if (matchingIndex === skewedIndex + 1) {
+				skew++;
+				break go;
+			} else if (matchingIndex > skewedIndex) {
+				if (remainingOldChildren > renderResult.length - skewedIndex) {
+					skew += matchingIndex - skewedIndex;
+					break go;
+				} else {
+					// ### Change from keyed: I think this was missing from the algo...
+					skew--;
+				}
+			} else if (matchingIndex < skewedIndex) {
+				if (matchingIndex == skewedIndex - 1) {
+					skew = matchingIndex - skewedIndex;
+				} else {
+					skew = 0;
+				}
+			} else {
+				skew = 0;
+			}
+
+			skewedIndex = i + skew;
+
+			if (matchingIndex == i) break go;
+
+			let nextSibling = getDomSibling(parentInternal, skewedIndex + 1);
+			if (childInternal.flags & TYPE_DOM) {
+				parentDom.insertBefore(childInternal._dom, nextSibling);
+			} else {
+				insertComponentDom(childInternal, nextSibling, parentDom);
+			}
 		}
 
 		newChildren[i] = childInternal;
@@ -143,20 +184,11 @@ export function diffChildren(
 	parentInternal._children = newChildren;
 
 	// Remove remaining oldChildren if there are any.
-	for (i = oldChildrenLength; i--; ) {
-		if (oldChildren[i] != null) {
-			if (
-				parentInternal.flags & TYPE_COMPONENT &&
-				startDom != null &&
-				((oldChildren[i].flags & TYPE_DOM && oldChildren[i]._dom == startDom) ||
-					getChildDom(oldChildren[i]) == startDom)
-			) {
-				// If the startDom points to a dom node that is about to be unmounted,
-				// then get the next sibling of that vnode and set startDom to it
-				startDom = getDomSibling(parentInternal, i + 1);
+	if (remainingOldChildren > 0) {
+		for (i = oldChildrenLength; i--; ) {
+			if (oldChildren[i] != null) {
+				unmount(oldChildren[i], oldChildren[i]);
 			}
-
-			unmount(oldChildren[i], oldChildren[i]);
 		}
 	}
 
@@ -166,91 +198,85 @@ export function diffChildren(
 			applyRef(refs[i], refs[++i], refs[++i], refs[++i]);
 		}
 	}
-
-	return startDom;
 }
 
 /**
  * @param {import('../internal').VNode | string} childVNode
  * @param {import('../internal').Internal[]} oldChildren
- * @param {number} i
- * @param {number} oldChildrenLength
- * @returns {import('../internal').Internal}
+ * @param {number} skewedIndex
+ * @param {number} remainingOldChildren
+ * @returns {number}
  */
-function findMatchingInternal(childVNode, oldChildren, i, oldChildrenLength) {
-	// Check if we find a corresponding element in oldChildren.
-	// If found, delete the array item by setting to `undefined`.
-	// We use `undefined`, as `null` is reserved for empty placeholders
-	// (holes).
-	let childInternal = oldChildren[i];
+function findMatchingIndex(
+	childVNode,
+	oldChildren,
+	skewedIndex,
+	remainingOldChildren
+) {
+	const type = typeof childVNode === 'string' ? null : childVNode.type;
+	const key = type !== null ? childVNode.key : UNDEFINED;
+	let match = -1;
+	let x = skewedIndex - 1; // i - 1;
+	let y = skewedIndex + 1; // i + 1;
+	let oldChild = oldChildren[skewedIndex]; // i
 
-	if (typeof childVNode === 'string') {
-		// We never move Text nodes, so we only check for an in-place match:
-		if (childInternal && childInternal.flags & TYPE_TEXT) {
-			oldChildren[i] = UNDEFINED;
-		} else {
-			// We're looking for a Text node, but this wasn't one: ignore it
-			childInternal = UNDEFINED;
-		}
-	} else if (
-		childInternal === null ||
-		(childInternal &&
-			childVNode.key == childInternal.key &&
-			childVNode.type === childInternal.type)
+	if (
+		// ### Change from keyed: support for matching null placeholders
+		oldChild === null ||
+		(oldChild != null && oldChild.type === type && oldChild.key == key)
 	) {
-		oldChildren[i] = UNDEFINED;
-	} else {
-		// Either oldVNode === undefined or oldChildrenLength > 0,
-		// so after this loop oldVNode == null or oldVNode is a valid value.
-		for (let j = 0; j < oldChildrenLength; j++) {
-			childInternal = oldChildren[j];
-			// If childVNode is unkeyed, we only match similarly unkeyed nodes, otherwise we match by key.
-			// We always match by type (in either case).
-			if (
-				childInternal &&
-				childVNode.key == childInternal.key &&
-				childVNode.type === childInternal.type
-			) {
-				oldChildren[j] = UNDEFINED;
+		match = skewedIndex; // i
+	}
+	// If there are any unused children left (ignoring an available in-place child which we just checked)
+	else if (remainingOldChildren > (oldChild != null ? 1 : 0)) {
+		// eslint-disable-next-line no-constant-condition
+		while (true) {
+			if (x >= 0) {
+				oldChild = oldChildren[x];
+				if (oldChild != null && oldChild.type === type && oldChild.key == key) {
+					match = x;
+					break;
+				}
+				x--;
+			}
+			if (y < oldChildren.length) {
+				oldChild = oldChildren[y];
+				if (oldChild != null && oldChild.type === type && oldChild.key == key) {
+					match = y;
+					break;
+				}
+				y++;
+			} else if (x < 0) {
 				break;
 			}
-			childInternal = null;
 		}
 	}
 
-	return childInternal;
+	return match;
 }
 
 /**
  * @param {import('../internal').Internal} internal
- * @param {import('../internal').PreactElement} startDom
- * @param {import('../internal').PreactElement} parentDom
+ * @param {import('../internal').PreactNode} nextSibling
+ * @param {import('../internal').PreactNode} parentDom
  */
-export function reorderChildren(internal, startDom, parentDom) {
+export function insertComponentDom(internal, nextSibling, parentDom) {
 	if (internal._children == null) {
-		return startDom;
+		return;
 	}
 
-	for (let tmp = 0; tmp < internal._children.length; tmp++) {
-		let childInternal = internal._children[tmp];
+	for (let i = 0; i < internal._children.length; i++) {
+		let childInternal = internal._children[i];
 		if (childInternal) {
-			// We typically enter this code path on sCU bailout, where we copy
-			// oldVNode._children to newVNode._children. If that is the case, we need
-			// to update the old children's _parent pointer to point to the newVNode
-			// (childVNode here).
 			childInternal._parent = internal;
 
 			if (childInternal.flags & TYPE_COMPONENT) {
-				startDom = reorderChildren(childInternal, startDom, parentDom);
-			} else if (childInternal._dom == startDom) {
-				startDom = startDom.nextSibling;
-			} else {
-				startDom = placeChild(parentDom, childInternal._dom, startDom);
+				insertComponentDom(childInternal, nextSibling, parentDom);
+			} else if (childInternal._dom != nextSibling) {
+				parentDom.insertBefore(childInternal._dom, nextSibling);
 			}
 		}
 	}
-
-	return startDom;
 }
 
 /**
@@ -269,34 +295,5 @@ export function toChildArray(children, out) {
 	} else {
 		out.push(children);
 	}
-
 	return out;
-}
-
-/**
- * @param {import('../internal').PreactElement} parentDom
- * @param {import('../internal').PreactElement} newDom
- * @param {import('../internal').PreactElement} startDom
- * @returns {import('../internal').PreactElement}
- */
-function placeChild(parentDom, newDom, startDom) {
-	if (startDom == null || newDom.parentNode == null) {
-		// "startDom == null": The diff has finished with existing DOM children and
-		// we are appending new ones.
-		//
-		// newDom.parentNode == null: newDom is a brand new unconnected DOM node. Go
-		// ahead and mount it here.
-		parentDom.insertBefore(newDom, startDom);
-		return startDom;
-	}
-
-	let sibDom = startDom;
-	while ((sibDom = sibDom.nextSibling)) {
-		if (sibDom == newDom) {
-			return newDom.nextSibling;
-		}
-	}
-
-	parentDom.insertBefore(newDom, startDom);
-	return startDom;
 }

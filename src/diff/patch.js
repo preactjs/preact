@@ -1,4 +1,4 @@
-import { diffChildren, reorderChildren } from './children';
+import { diffChildren, insertComponentDom } from './children';
 import { setProperty } from './props';
 import options from '../options';
 import { renderClassComponent, renderFunctionComponent } from './component';
@@ -12,12 +12,13 @@ import {
 	TYPE_CLASS,
 	MODE_SVG,
 	UNDEFINED,
+	MODE_HYDRATE,
 	MODE_PENDING_ERROR,
 	MODE_RERENDERING_ERROR,
 	SKIP_CHILDREN,
 	DIRTY_BIT
 } from '../constants';
-import { getChildDom, getDomSibling, getParentContext } from '../tree';
+import { getDomSibling, getParentContext } from '../tree';
 import { mountChildren } from './mount';
 import { Fragment } from '../create-element';
 
@@ -28,19 +29,14 @@ import { Fragment } from '../create-element';
  * @param {import('../internal').Internal} internal The Internal node to patch
  * @param {import('../internal').CommitQueue} commitQueue List of components
  * which have callbacks to invoke in commitRoot
- * @param {import('../internal').PreactNode} startDom
  */
-export function patch(parentDom, newVNode, internal, commitQueue, startDom) {
+export function patch(parentDom, newVNode, internal, commitQueue) {
 	let dom = internal._dom;
 	let flags = internal.flags;
 
-	if (flags & TYPE_TEXT) {
-		if (newVNode !== internal.props) {
-			dom.data = newVNode;
-			internal.props = newVNode;
-		}
-
-		return dom.nextSibling;
+	if (flags & TYPE_TEXT && newVNode !== internal.props) {
+		dom.data = newVNode;
+		internal.props = newVNode;
 	}
 
 	// When passing through createElement it assigns the object
@@ -61,8 +57,6 @@ export function patch(parentDom, newVNode, internal, commitQueue, startDom) {
 
 		// We successfully rendered this VNode, unset any stored hydration/bailout state:
 		internal.flags &= RESET_MODE;
-
-		return dom.nextSibling;
 	}
 
 	/** @type {import('../internal').PreactNode} */
@@ -71,19 +65,14 @@ export function patch(parentDom, newVNode, internal, commitQueue, startDom) {
 	// Root nodes signal that an attempt to render into a specific DOM node on
 	// the page. Root nodes can occur anywhere in the tree and not just at the
 	// top.
-	let prevStartDom = startDom;
 	let prevParentDom = parentDom;
 	if (flags & TYPE_ROOT) {
 		parentDom = newVNode.props._parentDom;
 
-		if (parentDom !== prevParentDom) {
-			startDom = getChildDom(internal) || startDom;
-
-			// The `startDom` variable might point to a node from another
-			// tree from a previous render
-			if (startDom != null && startDom.parentNode !== parentDom) {
-				startDom = null;
-			}
+		if (internal.props._parentDom !== newVNode.props._parentDom) {
+			let nextSibling =
+				parentDom == prevParentDom ? getDomSibling(internal) : null;
+			insertComponentDom(internal, nextSibling, parentDom);
 		}
 	}
 
@@ -106,6 +95,7 @@ export function patch(parentDom, newVNode, internal, commitQueue, startDom) {
 				? provider.props.value
 				: tmp._defaultValue
 			: context;
+		let isNew = !internal || !internal._component;
 
 		if (internal.flags & TYPE_CLASS) {
 			nextDomSibling = renderClassComponent(
@@ -130,10 +120,6 @@ export function patch(parentDom, newVNode, internal, commitQueue, startDom) {
 			if (newVNode && newVNode._vnodeId !== internal._vnodeId) {
 				internal.flags &= ~DIRTY_BIT;
 			}
-			// TODO: Returning undefined here (i.e. return;) passes all tests. That seems
-			// like a bug. Should validate that we have test coverage for sCU that
-			// returns Fragments with multiple DOM children
-			nextDomSibling = reorderChildren(internal, startDom, parentDom);
 		} else {
 			let isTopLevelFragment =
 				nextDomSibling != null &&
@@ -144,20 +130,24 @@ export function patch(parentDom, newVNode, internal, commitQueue, startDom) {
 				: nextDomSibling;
 
 			if (internal._children == null) {
-				nextDomSibling = mountChildren(
+				mountChildren(
 					parentDom,
 					Array.isArray(renderResult) ? renderResult : [renderResult],
 					internal,
 					commitQueue,
-					startDom
+					(internal._flags & (MODE_HYDRATE | MODE_SUSPENDED)) ===
+						(MODE_HYDRATE | MODE_SUSPENDED)
+						? internal._dom
+						: isNew || internal._flags & MODE_HYDRATE
+						? null
+						: getDomSibling(internal)
 				);
 			} else {
-				nextDomSibling = diffChildren(
+				diffChildren(
 					parentDom,
 					Array.isArray(renderResult) ? renderResult : [renderResult],
 					internal,
-					commitQueue,
-					startDom
+					commitQueue
 				);
 			}
 		}
@@ -171,28 +161,7 @@ export function patch(parentDom, newVNode, internal, commitQueue, startDom) {
 		internal.flags |= e.then ? MODE_SUSPENDED : MODE_ERRORED;
 		options._catchError(e, internal);
 
-		return nextDomSibling;
-	}
-
-	if (prevParentDom !== parentDom) {
-		// If this is a root node/Portal, and it changed the parentDom it's
-		// children, then we need to determine which dom node the diff should
-		// continue with.
-		if (prevStartDom == null || prevStartDom.parentNode == prevParentDom) {
-			// If prevStartDom == null, then we are diffing a root node that
-			// didn't have a startDom to begin with, so we can just return null.
-			//
-			// Or, if the previous value for start dom still has the same parent
-			// DOM has the root node's parent tree, then we can use it. This case
-			// assumes the root node rendered its children into a new parent.
-			nextDomSibling = prevStartDom;
-		} else {
-			// Here, if the parentDoms are different and prevStartDom has moved into
-			// a new parentDom, we'll assume the root node moved prevStartDom under
-			// the new parentDom. Because of this change, we need to search the
-			// internal tree for the next DOM sibling the tree should begin with
-			nextDomSibling = getDomSibling(internal);
-		}
+		return;
 	}
 
 	if (options.diffed) options.diffed(internal);
@@ -201,8 +170,6 @@ export function patch(parentDom, newVNode, internal, commitQueue, startDom) {
 	internal.flags &= RESET_MODE;
 	// Once we have successfully rendered the new VNode, copy it's ID over
 	internal._vnodeId = newVNode._vnodeId;
-
-	return nextDomSibling;
 }
 
 /**
