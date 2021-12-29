@@ -135,10 +135,10 @@ export function patch(parentDom, newVNode, internal, commitQueue) {
 					Array.isArray(renderResult) ? renderResult : [renderResult],
 					internal,
 					commitQueue,
-					(internal._flags & (MODE_HYDRATE | MODE_SUSPENDED)) ===
+					(internal.flags & (MODE_HYDRATE | MODE_SUSPENDED)) ===
 						(MODE_HYDRATE | MODE_SUSPENDED)
 						? internal._dom
-						: isNew || internal._flags & MODE_HYDRATE
+						: isNew || internal.flags & MODE_HYDRATE
 						? null
 						: getDomSibling(internal)
 				);
