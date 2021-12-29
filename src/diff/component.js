@@ -2,6 +2,12 @@ import options from '../options';
 import { DIRTY_BIT, FORCE_UPDATE, SKIP_CHILDREN } from '../constants';
 import { addCommitCallback } from './commit';
 
+/**
+ * Diff two virtual nodes and apply proper changes to the DOM
+ * @param {import('../internal').VNode} newVNode The new virtual node
+ * @param {import('../internal').Internal} internal The component's backing Internal node
+ * @returns {import('../index').ComponentChild} pointer to the next DOM node (in order) to be rendered (or null)
+ */
 export function renderFunctionComponent(
 	newVNode,
 	internal,
@@ -57,7 +63,7 @@ export function renderFunctionComponent(
  * Diff two virtual nodes and apply proper changes to the DOM
  * @param {import('../internal').VNode} newVNode The new virtual node
  * @param {import('../internal').Internal} internal The component's backing Internal node
- * @returns {import('../internal').PreactNode} pointer to the next DOM node (in order) to be rendered (or null)
+ * @returns {import('../index').ComponentChild} pointer to the next DOM node (in order) to be rendered (or null)
  */
 export function renderClassComponent(
 	newVNode,

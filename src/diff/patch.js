@@ -59,7 +59,7 @@ export function patch(parentDom, newVNode, internal, commitQueue) {
 		internal.flags &= RESET_MODE;
 	}
 
-	/** @type {import('../internal').PreactNode} */
+	/** @type {import('../index').ComponentChild} */
 	let nextDomSibling;
 
 	// Root nodes signal that an attempt to render into a specific DOM node on

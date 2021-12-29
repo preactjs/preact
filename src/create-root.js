@@ -14,6 +14,7 @@ import { createInternal } from './tree';
 /**
  *
  * @param {import('./internal').PreactElement} parentDom The DOM element to
+ * @returns {import('./internal').Root}
  */
 export function createRoot(parentDom) {
 	let rootInternal,
@@ -33,7 +34,7 @@ export function createRoot(parentDom) {
 		commitQueue = [];
 
 		if (rootInternal) {
-			patch(parentDom, vnode, rootInternal, commitQueue, firstChild);
+			patch(parentDom, vnode, rootInternal, commitQueue);
 		} else {
 			rootInternal = createInternal(vnode);
 

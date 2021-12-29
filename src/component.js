@@ -84,7 +84,7 @@ Component.prototype.forceUpdate = function(callback) {
 Component.prototype.render = Fragment;
 
 /**
- * @param {import('./internal').Component} internal The internal to rerender
+ * @param {import('./internal').Internal} internal The internal to rerender
  */
 function rerender(internal) {
 	if (~internal.flags & MODE_UNMOUNTING && internal.flags & DIRTY_BIT) {
@@ -106,7 +106,7 @@ function rerender(internal) {
 
 /**
  * The render queue
- * @type {Array<import('./internal').Component>}
+ * @type {Array<import('./internal').Internal>}
  */
 let rerenderQueue = [];
 
@@ -124,8 +124,8 @@ let prevDebounce;
 const defer = Promise.prototype.then.bind(Promise.resolve());
 
 /**
- * Enqueue a rerender of a component
- * @param {import('./internal').Component} internal The internal to rerender
+ * Enqueue a rerender of an internal
+ * @param {import('./internal').Internal} internal The internal to rerender
  */
 export function enqueueRender(internal) {
 	if (

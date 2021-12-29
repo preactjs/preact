@@ -86,8 +86,14 @@ export interface ComponentClass<P = {}> extends preact.ComponentClass<P> {
 // Redefine ComponentType using our new internal FunctionComponent interface above
 export type ComponentType<P = {}> = ComponentClass<P> | FunctionComponent<P>;
 
+export type Root = {
+	render: preact.render;
+	hydrate: preact.hydrate;
+};
+
 export interface PreactElement extends HTMLElement {
 	_children?: Internal<any> | null;
+	_root?: Root | null;
 	/** Event listeners to support event delegation */
 	_listeners?: Record<string, (e: Event) => void>;
 
@@ -135,7 +141,7 @@ export interface Internal<P = {}> {
 	/** Polymorphic property to store extensions like hooks on */
 	data: object;
 	/** The function that triggers in-place re-renders for an internal */
-	rerender: () => void;
+	rerender: (internal: Internal) => void;
 
 	/** children Internal nodes */
 	_children: Internal[];

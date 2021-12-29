@@ -125,18 +125,8 @@ export function diffChildren(
 			);
 		}
 
-		// ### Change from keyed: I'm dropping re-parenting/replaceChild feature from
-		// keyed as well as the _currentOffset fragment handling and am instead
-		// recursing through fragments and moving their children as they occur
-		//
-		// I'm also using getDomSibling to get the next dom sibling through
-		// fragments. keyed did not handle this and just searched for the next
-		// non-null child (I think)
 		go: if (mountingChild) {
 			if (matchingIndex == -1) {
-				// ### Change from keyed:
-				// If we are mounting a new child that doesn't have a match (it could've
-				// matched a `null` placeholder), then adjust our skew accordingly
 				skew--;
 			}
 
