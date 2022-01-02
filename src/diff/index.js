@@ -71,7 +71,10 @@ export function diff(
 					newVNode._component = c = new newType(newProps, componentContext); // eslint-disable-line new-cap
 				} else {
 					// @ts-ignore Trust me, Component implements the interface we want
-					newVNode._component = c = new deps.Component(newProps, componentContext);
+					newVNode._component = c = new deps.Component(
+						newProps,
+						componentContext
+					);
 					c.constructor = newType;
 					c.render = deps.doRender;
 				}
@@ -178,7 +181,10 @@ export function diff(
 			c.state = c._nextState;
 
 			if (c.getChildContext != null) {
-				globalContext = deps.assign(deps.assign({}, globalContext), c.getChildContext());
+				globalContext = deps.assign(
+					deps.assign({}, globalContext),
+					c.getChildContext()
+				);
 			}
 
 			if (!isNew && c.getSnapshotBeforeUpdate != null) {
@@ -260,6 +266,7 @@ export function diff(
  * @param {Array<import('../internal').Component>} commitQueue List of components
  * which have callbacks to invoke in commitRoot
  * @param {import('../internal').VNode} root
+ * @param options used to handle errors
  */
 export function commitRoot(commitQueue, root, options) {
 	if (options._commit) options._commit(root, commitQueue);
@@ -318,7 +325,7 @@ export function diffElementNodes(
 
 			// if newVNode matches an element in excessDomChildren or the `dom`
 			// argument matches an element in excessDomChildren, remove it from
-			// excessDomChildren so it isn't later removed in diffChildrenRef
+			// excessDomChildren so it isn't later removed in diffChildren
 			if (
 				child &&
 				'setAttribute' in child === !!nodeType &&
@@ -334,7 +341,8 @@ export function diffElementNodes(
 	if (dom == null) {
 		if (nodeType === null) {
 			// @ts-ignore createTextNode returns Text, we expect PreactElement
-			newVNode._dom = document.createTextNode(newProps); return;
+			newVNode._dom = document.createTextNode(newProps);
+			return;
 		}
 
 		if (isSvg) {
@@ -423,7 +431,8 @@ export function diffElementNodes(
 			// Remove children that are not part of any vnode.
 			if (excessDomChildren != null) {
 				for (i = excessDomChildren.length; i--; ) {
-					if (excessDomChildren[i] != null) deps.removeNode(excessDomChildren[i]);
+					if (excessDomChildren[i] != null)
+						deps.removeNode(excessDomChildren[i]);
 				}
 			}
 		}
@@ -461,6 +470,7 @@ export function diffElementNodes(
  * @param {object|function} ref
  * @param {any} value
  * @param {import('../internal').VNode} vnode
+ * @param options used to handle errors
  */
 export function applyRef(ref, value, vnode, options) {
 	try {
@@ -478,13 +488,16 @@ export function applyRef(ref, value, vnode, options) {
  * initiated the unmount
  * @param {boolean} [skipRemove] Flag that indicates that a parent node of the
  * current element is already detached from the DOM.
+ * @param removeNode dependency function to remove a node
+ * @param options used to handle errors and unmount hooks
  */
 export function unmount(vnode, parentVNode, skipRemove, removeNode, options) {
 	let r;
 	if (options.unmount) options.unmount(vnode);
 
 	if ((r = vnode.ref)) {
-		if (!r.current || r.current === vnode._dom) applyRef(r, null, parentVNode, options);
+		if (!r.current || r.current === vnode._dom)
+			applyRef(r, null, parentVNode, options);
 	}
 
 	if ((r = vnode._component) != null) {
@@ -502,7 +515,13 @@ export function unmount(vnode, parentVNode, skipRemove, removeNode, options) {
 	if ((r = vnode._children)) {
 		for (let i = 0; i < r.length; i++) {
 			if (r[i]) {
-				unmount(r[i], parentVNode, typeof vnode.type != 'function', removeNode, options);
+				unmount(
+					r[i],
+					parentVNode,
+					typeof vnode.type != 'function',
+					removeNode,
+					options
+				);
 			}
 		}
 	}

@@ -1,11 +1,5 @@
-import { EMPTY_OBJ } from './constants';
-import { commitRoot } from './diff/index';
-import { optionalAsyncDiff } from './diff/async';
 import { diffDeps } from './diff/deps';
-import { Component, getDomSibling } from './component';
-import { createElement, Fragment } from './create-element';
-import options from './options';
-import { slice } from './util';
+import { Component, getDomSibling, updateParentDomPointers } from './component';
 
 /**
  * Render a Preact virtual node into a DOM element
@@ -15,8 +9,22 @@ import { slice } from './util';
  * @param {import('./internal').PreactElement | object} [replaceNode] Optional: Attempt to re-use an
  * existing DOM tree rooted at `replaceNode`
  */
-export async function render(vnode, parentDom, replaceNode) {
-	if (options._root) options._root(vnode, parentDom);
+export function render(vnode, parentDom, replaceNode) {
+	renderCore(vnode, parentDom, replaceNode, getRenderDeps());
+}
+
+/**
+ * returns dependencies for rendering - isolated so that we can generate async render function
+ */
+export function getRenderDeps() {
+	return diffDeps(Component, getDomSibling, updateParentDomPointers);
+}
+
+/**
+ * Render a Preact virtual node into a DOM element without dependencies - this is used as basis for the async rendering
+ */
+export function renderCore(vnode, parentDom, replaceNode, deps) {
+	if (deps.options._root) deps.options._root(vnode, parentDom);
 
 	// We abuse the `replaceNode` parameter in `hydrate()` to signal if we are in
 	// hydration mode or not by passing the `hydrate` function instead of a DOM
@@ -35,39 +43,24 @@ export async function render(vnode, parentDom, replaceNode) {
 	vnode = (
 		(!isHydrating && replaceNode) ||
 		parentDom
-	)._children = createElement(Fragment, null, [vnode]);
-
-	// request idle callback polyfill for async rendering for Safari - using 16ms to get 60fps
-	if (options.asyncRendering)
-		window.requestIdleCallback =
-			window.requestIdleCallback ||
-			function(handler) {
-				let startTime = Date.now();
-				return setTimeout(function() {
-					handler({
-						timeRemaining: function() {
-							return Math.max(0, 16.0 - (Date.now() - startTime));
-						}
-					});
-				}, 1);
-			};
+	)._children = deps.createElement(deps.Fragment, null, [vnode]);
 
 	// List of effects that need to be called after diffing.
 	let commitQueue = [];
-	await optionalAsyncDiff(
+	const generator = deps.diff(
 		parentDom,
 		// Determine the new vnode tree and store it on the DOM element on
 		// our custom `_children` property.
 		vnode,
-		oldVNode || EMPTY_OBJ,
-		EMPTY_OBJ,
+		oldVNode || deps.EMPTY_OBJ,
+		deps.EMPTY_OBJ,
 		parentDom.ownerSVGElement !== undefined,
 		!isHydrating && replaceNode
 			? [replaceNode]
 			: oldVNode
 			? null
 			: parentDom.firstChild
-			? slice.call(parentDom.childNodes)
+			? deps.slice.call(parentDom.childNodes)
 			: null,
 		commitQueue,
 		!isHydrating && replaceNode
@@ -76,11 +69,12 @@ export async function render(vnode, parentDom, replaceNode) {
 			? oldVNode._dom
 			: parentDom.firstChild,
 		isHydrating,
-		diffDeps(Component, getDomSibling)
+		deps
 	);
+	deps.awaitNextValue(generator);
 
 	// Flush all queued effects
-	commitRoot(commitQueue, vnode, options);
+	deps.commitRoot(commitQueue, vnode, deps.options);
 }
 
 /**
@@ -90,5 +84,5 @@ export async function render(vnode, parentDom, replaceNode) {
  * update
  */
 export function hydrate(vnode, parentDom) {
-	return render(vnode, parentDom, hydrate);
+	render(vnode, parentDom, hydrate);
 }

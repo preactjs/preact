@@ -1,39 +1,36 @@
 import { EMPTY_OBJ, EMPTY_ARR } from '../constants';
 import { assign, removeNode, slice } from '../util';
-import { diff, diffElementNodes, unmount, applyRef, doRender } from './index';
+import {
+	diff,
+	diffElementNodes,
+	unmount,
+	applyRef,
+	doRender,
+	commitRoot
+} from './index';
 import { diffProps, setProperty } from './props';
 import { diffChildren, reorderChildren, placeChild } from './children';
-import {
-	diffAsync,
-	diffChildrenAsync,
-	diffElementNodesAsync,
-	GeneratorFunction
-} from './async';
-import { createVNode, Fragment } from '../create-element';
+import { createVNode, Fragment, createElement } from '../create-element';
 import options from '../options';
-
-/**
- * yields the next value for a given generator
- */
-const yieldNextValue = new GeneratorFunction(
-	'generator',
-	'for (let nextValue = generator.next(); !nextValue.done; nextValue = generator.next()) if (nextValue.value && nextValue.value.then) yield nextValue.value;'
-);
 
 /**
  * returns the dependencies used by diff functions
  */
-export function diffDeps(Component, getDomSibling) {
+export function diffDeps(Component, getDomSibling, updateParentDomPointers) {
 	return {
 		EMPTY_OBJ,
 		EMPTY_ARR,
 		Component,
 		getDomSibling,
+		updateParentDomPointers,
 		Fragment,
-		diff: options.asyncRendering ? diffAsync : diff,
-		diffChildren: options.asyncRendering ? diffChildrenAsync : diffChildren,
-		diffElementNodes: options.asyncRendering
-			? diffElementNodesAsync
+		createElement,
+		diff: options._generateDiff ? options._generateDiff(diff) : diff,
+		diffChildren: options._generateDiffChildren
+			? options._generateDiffChildren(diffChildren)
+			: diffChildren,
+		diffElementNodes: options._generateDiffElementNodes
+			? options._generateDiffElementNodes(diffElementNodes)
 			: diffElementNodes,
 		diffProps,
 		setProperty,
@@ -47,7 +44,8 @@ export function diffDeps(Component, getDomSibling) {
 		reorderChildren,
 		placeChild,
 		doRender,
-		// empty function that's used as a place holder for sync versions - we add a dynamic yield* in generators
-		yieldNextValue: options.asyncRendering ? yieldNextValue : () => {}
+		commitRoot,
+		yieldNextValue: options._yieldNextValue,
+		awaitNextValue: options._awaitNextValue
 	};
 }

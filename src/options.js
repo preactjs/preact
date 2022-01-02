@@ -10,7 +10,11 @@ import { _catchError } from './diff/catch-error';
  * @type {import('./internal').Options}
  */
 const options = {
-	_catchError
+	_catchError,
+	// empty function that's used as a place holder for sync versions - we add a dynamic yield* in generators
+	_yieldNextValue: () => {},
+	// empty function that's used as a place holder for sync versions - we add a dynamic await in generators
+	_awaitNextValue: () => {}
 };
 
 export default options;

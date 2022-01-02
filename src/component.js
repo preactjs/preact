@@ -1,6 +1,4 @@
 import { assign } from './util';
-import { commitRoot } from './diff/index';
-import { optionalAsyncDiff } from './diff/async';
 import { diffDeps } from './diff/deps';
 import options from './options';
 import { Fragment } from './create-element';
@@ -118,18 +116,19 @@ export function getDomSibling(vnode, childIndex) {
 /**
  * Trigger in-place re-rendering of a component.
  * @param {import('./internal').Component} component The component to rerender
+ * @param deps dependencies needed for the render
  */
-async function renderComponent(component) {
+function renderComponent(component, deps) {
 	let vnode = component._vnode,
 		oldDom = vnode._dom,
 		parentDom = component._parentDom;
 
 	if (parentDom) {
 		let commitQueue = [];
-		const oldVNode = assign({}, vnode);
+		const oldVNode = deps.assign({}, vnode);
 		oldVNode._original = vnode._original + 1;
 
-		await optionalAsyncDiff(
+		const generator = deps.diff(
 			parentDom,
 			vnode,
 			oldVNode,
@@ -137,15 +136,16 @@ async function renderComponent(component) {
 			parentDom.ownerSVGElement !== undefined,
 			vnode._hydrating != null ? [oldDom] : null,
 			commitQueue,
-			oldDom == null ? getDomSibling(vnode) : oldDom,
+			oldDom == null ? deps.getDomSibling(vnode) : oldDom,
 			vnode._hydrating,
-			diffDeps(Component, getDomSibling)
+			deps
 		);
+		deps.awaitNextValue(generator);
 
-		commitRoot(commitQueue, vnode, options);
+		deps.commitRoot(commitQueue, vnode, deps.options);
 
 		if (vnode._dom != oldDom) {
-			updateParentDomPointers(vnode);
+			deps.updateParentDomPointers(vnode);
 		}
 	}
 }
@@ -153,7 +153,7 @@ async function renderComponent(component) {
 /**
  * @param {import('./internal').VNode} vnode
  */
-function updateParentDomPointers(vnode) {
+export function updateParentDomPointers(vnode) {
 	if ((vnode = vnode._parent) != null && vnode._component != null) {
 		vnode._dom = vnode._component.base = null;
 		for (let i = 0; i < vnode._children.length; i++) {
@@ -186,6 +186,18 @@ let rerenderQueue = [];
 let prevDebounce;
 
 /**
+ * standard implementation for adding a component to the render queue
+ */
+function addRenderQueue(c) {
+	// add the component to the render queue
+	rerenderQueue.push(c);
+
+	// if the previous value was 0 (queue was empty) this will return 0 and negation will make it true, which means we should process the render queue now
+	// if the previous value was greater (queue was not empty, there were other elements to render), we won't process the render queue now because it should be processed by previous call
+	return !process._rerenderCount++;
+}
+
+/**
  * Enqueue a rerender of a component
  * @param {import('./internal').Component} c The component to rerender
  */
@@ -193,27 +205,29 @@ export function enqueueRender(c) {
 	if (
 		(!c._dirty &&
 			(c._dirty = true) &&
-			rerenderQueue.push(c) &&
-			!process._rerenderCount++) ||
+			(options._addRenderQueue || addRenderQueue)(c)) ||
 		prevDebounce !== options.debounceRendering
 	) {
 		prevDebounce = options.debounceRendering;
-		(prevDebounce || setTimeout)(process);
+		(prevDebounce || setTimeout)(function() {
+			(
+				options._processRenderQueue || process
+			)(renderComponent, diffDeps(Component, getDomSibling, updateParentDomPointers));
+		});
 	}
 }
 
 /** Flush the render queue by rerendering all queued components */
-async function process() {
+function process(renderComponent, deps) {
 	let queue;
 	while ((process._rerenderCount = rerenderQueue.length)) {
 		queue = rerenderQueue.sort((a, b) => a._vnode._depth - b._vnode._depth);
 		rerenderQueue = [];
 		// Don't update `renderCount` yet. Keep its value non-zero to prevent unnecessary
 		// process() calls from getting scheduled while `queue` is still being consumed.
-		for (const c of queue.filter(c => c._dirty)) {
-			if (options.asyncRendering) await renderComponent(c);
-			else renderComponent(c);
-		}
+		queue.some(c => {
+			if (c._dirty) renderComponent(c, deps);
+		});
 	}
 }
 process._rerenderCount = 0;
