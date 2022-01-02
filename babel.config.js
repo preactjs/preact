@@ -22,7 +22,11 @@ module.exports = function(api) {
 					loose: true,
 					// Don't transform modules when using esbuild
 					modules: noModules ? false : 'auto',
-					exclude: ['@babel/plugin-transform-typeof-symbol'],
+					exclude: [
+						'@babel/plugin-transform-typeof-symbol',
+						'@babel/plugin-transform-async-to-generator',
+						'@babel/plugin-transform-regenerator'
+					],
 					targets: {
 						browsers: ['last 2 versions', 'IE >= 9']
 					}

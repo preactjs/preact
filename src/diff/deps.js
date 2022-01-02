@@ -3,9 +3,22 @@ import { assign, removeNode, slice } from '../util';
 import { diff, diffElementNodes, unmount, applyRef, doRender } from './index';
 import { diffProps, setProperty } from './props';
 import { diffChildren, reorderChildren, placeChild } from './children';
-import { diffAsync, diffChildrenAsync, diffElementNodesAsync } from './async';
+import {
+	diffAsync,
+	diffChildrenAsync,
+	diffElementNodesAsync,
+	GeneratorFunction
+} from './async';
 import { createVNode, Fragment } from '../create-element';
 import options from '../options';
+
+/**
+ * yields the next value for a given generator
+ */
+const yieldNextValue = new GeneratorFunction(
+	'generator',
+	'for (let nextValue = generator.next(); !nextValue.done; nextValue = generator.next()) if (nextValue.value && nextValue.value.then) yield nextValue.value;'
+);
 
 /**
  * returns the dependencies used by diff functions
@@ -37,16 +50,4 @@ export function diffDeps(Component, getDomSibling) {
 		// empty function that's used as a place holder for sync versions - we add a dynamic yield* in generators
 		yieldNextValue: options.asyncRendering ? yieldNextValue : () => {}
 	};
-}
-
-/**
- * yields the next value for a given generator
- */
-function* yieldNextValue(generator) {
-	for (
-		let nextValue = generator.next();
-		!nextValue.done;
-		nextValue = generator.next()
-	)
-		if (nextValue.value && nextValue.value.then) yield nextValue.value;
 }

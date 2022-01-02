@@ -5,8 +5,10 @@ import options from '../options';
 /**
  * returns generator function type because it is not exposed by default
  */
-export const GeneratorFunction = Object.getPrototypeOf(function*() {})
-	.constructor;
+const getGeneratorFunction = new Function(
+	'return Object.getPrototypeOf(function*(){}).constructor'
+);
+export const GeneratorFunction = getGeneratorFunction();
 
 /**
  * returns async diff function based on an existing sync diff function
