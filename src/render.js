@@ -3,7 +3,6 @@ import { commitRoot, diff } from './diff/index';
 import { createElement, Fragment } from './create-element';
 import options from './options';
 import { slice } from './util';
-import { awaitNextValue } from './async';
 
 /**
  * Render a Preact virtual node into a DOM element
@@ -37,7 +36,7 @@ export function render(vnode, parentDom, replaceNode) {
 
 	// List of effects that need to be called after diffing.
 	let commitQueue = [];
-	const generator = diff(
+	diff(
 		parentDom,
 		// Determine the new vnode tree and store it on the DOM element on
 		// our custom `_children` property.
@@ -60,7 +59,6 @@ export function render(vnode, parentDom, replaceNode) {
 			: parentDom.firstChild,
 		isHydrating
 	);
-	awaitNextValue(generator); // this gets replaced by await at async function generation
 
 	// Flush all queued effects
 	commitRoot(commitQueue, vnode);

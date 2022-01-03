@@ -2,7 +2,6 @@ import { assign } from './util';
 import { diff, commitRoot } from './diff/index';
 import options from './options';
 import { Fragment } from './create-element';
-import { awaitNextValue } from './async';
 
 /**
  * Base Component class. Provides `setState()` and `forceUpdate()`, which
@@ -128,7 +127,7 @@ function renderComponent(component) {
 		const oldVNode = assign({}, vnode);
 		oldVNode._original = vnode._original + 1;
 
-		const generator = diff(
+		diff(
 			parentDom,
 			vnode,
 			oldVNode,
@@ -139,8 +138,6 @@ function renderComponent(component) {
 			oldDom == null ? getDomSibling(vnode) : oldDom,
 			vnode._hydrating
 		);
-		awaitNextValue(generator); // this gets replaced by await at async function generation
-
 		commitRoot(commitQueue, vnode);
 
 		if (vnode._dom != oldDom) {

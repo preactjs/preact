@@ -2,7 +2,6 @@ import { diff, unmount, applyRef } from './index';
 import { createVNode, Fragment } from '../create-element';
 import { EMPTY_OBJ, EMPTY_ARR } from '../constants';
 import { getDomSibling } from '../component';
-import { yieldNextValue } from '../async';
 
 /**
  * Diff the children of a virtual node
@@ -135,8 +134,7 @@ export function diffChildren(
 		oldVNode = oldVNode || EMPTY_OBJ;
 
 		// Morph the old element into the new one, but don't append it to the dom yet
-		// in async mode, this call returns a generator - otherwise it's void/undefined
-		const generator = diff(
+		diff(
 			parentDom,
 			childVNode,
 			oldVNode,
@@ -147,7 +145,6 @@ export function diffChildren(
 			oldDom,
 			isHydrating
 		);
-		yieldNextValue(generator); // this call will be transformed by the async call generators
 
 		newDom = childVNode._dom;
 

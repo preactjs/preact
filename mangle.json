@@ -28,9 +28,7 @@
         "reorderChildren",
         "placeChild",
         "doRender",
-        "commitRoot",
-        "yieldNextValue",
-        "awaitNextValue"
+        "commitRoot"
       ],
       "properties": {
         "regex": "^_[^_]",

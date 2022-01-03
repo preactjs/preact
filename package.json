@@ -96,6 +96,7 @@
 		"build:debug": "microbundle build --raw --cwd debug",
 		"build:devtools": "microbundle build --raw --cwd devtools",
 		"build:hooks": "microbundle build --raw --cwd hooks",
+    "build:async": "microbundle build --raw --cwd async",
 		"build:test-utils": "microbundle build --raw --cwd test-utils",
 		"build:compat": "microbundle build src/index.js src/scheduler.js --raw --cwd compat --globals 'preact/hooks=preactHooks'",
 		"build:jsx": "microbundle build --raw --cwd jsx-runtime",

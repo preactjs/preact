@@ -5,7 +5,6 @@ import { diffChildren } from './children';
 import { diffProps, setProperty } from './props';
 import { assign, removeNode, slice } from '../util';
 import options from '../options';
-import { yieldNextValue } from '../async';
 
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
@@ -196,8 +195,7 @@ export function diff(
 				tmp != null && tmp.type === Fragment && tmp.key == null;
 			let renderResult = isTopLevelFragment ? tmp.props.children : tmp;
 
-			// in async mode, this call returns a generator - otherwise it's void/undefined
-			const generator = diffChildren(
+			diffChildren(
 				parentDom,
 				Array.isArray(renderResult) ? renderResult : [renderResult],
 				newVNode,
@@ -209,7 +207,6 @@ export function diff(
 				oldDom,
 				isHydrating
 			);
-			yieldNextValue(generator); // this call will be transformed by the async call generators
 
 			c.base = newVNode._dom;
 
@@ -232,8 +229,7 @@ export function diff(
 			newVNode._children = oldVNode._children;
 			newVNode._dom = oldVNode._dom;
 		} else {
-			// in async mode, this call returns a generator - otherwise it's void/undefined
-			const generator = diffElementNodes(
+			newVNode._dom = diffElementNodes(
 				oldVNode._dom,
 				newVNode,
 				oldVNode,
@@ -243,7 +239,6 @@ export function diff(
 				commitQueue,
 				isHydrating
 			);
-			yieldNextValue(generator); // this call will be transformed by the async call generators
 		}
 
 		if ((tmp = options.diffed)) tmp(newVNode);
@@ -407,8 +402,7 @@ export function diffElementNodes(
 			newVNode._children = [];
 		} else {
 			i = newVNode.props.children;
-			// in async mode, this call returns a generator - otherwise it's void/undefined
-			const generator = diffChildren(
+			diffChildren(
 				dom,
 				Array.isArray(i) ? i : [i],
 				newVNode,
@@ -422,7 +416,6 @@ export function diffElementNodes(
 					: oldVNode._children && getDomSibling(oldVNode, 0),
 				isHydrating
 			);
-			yieldNextValue(generator); // this call will be transformed by the async call generators
 
 			// Remove children that are not part of any vnode.
 			if (excessDomChildren != null) {
