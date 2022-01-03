@@ -1,4 +1,4 @@
-import { addCommitCallback, commitRoot } from './diff/commit';
+import { commitRoot } from './diff/commit';
 import options from './options';
 import { createVNode, Fragment } from './create-element';
 import { patch } from './diff/patch';
@@ -47,35 +47,39 @@ Component.prototype.setState = function(update, callback) {
 		update = update(Object.assign({}, s), this.props);
 	}
 
-	if (update) {
-		Object.assign(s, update);
-	}
+	Object.assign(s, update);
 
 	// Skip update if updater function returned null
 	if (update == null) return;
 
-	if (this._internal) {
-		if (callback) addCommitCallback(this._internal, callback.bind(this));
-		this._internal.rerender(this._internal);
-	}
+	// The 0 flag value here prevents FORCE_UPDATE from being set
+	renderComponentInstance.call(this, callback, 0);
 };
 
 /**
  * Immediately perform a synchronous re-render of the component
+ * @param {() => void} [callback] A function to call after re-rendering completes
  * @this {import('./internal').Component}
- * @param {() => void} [callback] A function to be called after component is
- * re-rendered
  */
-Component.prototype.forceUpdate = function(callback) {
+Component.prototype.forceUpdate = renderComponentInstance;
+
+/**
+ * Immediately perform a synchronous re-render of the component.
+ * This method is the implementation of forceUpdate() for class components.
+ * @param {() => void} [callback] A function to call after rendering completes
+ * @param {number} [flags = FORCE_UPDATE] Flags to set. Defaults to FORCE_UPDATE.
+ * @this {import('./internal').Component}
+ */
+export function renderComponentInstance(callback, flags) {
 	if (this._internal) {
 		// Set render mode so that we can differentiate where the render request
-		// is coming from. We need this because forceUpdate should never call
-		// shouldComponentUpdate
-		this._internal.flags |= FORCE_UPDATE;
-		if (callback) addCommitCallback(this._internal, callback.bind(this));
-		this._internal.rerender(this._internal);
+		// is coming from (eg: forceUpdate should never call shouldComponentUpdate).
+		this._internal.flags |= flags == null ? FORCE_UPDATE : flags;
+		this._internal.render(callback);
+		// Note: the above is equivalent to invoking enqueueRender:
+		// enqueueRender.call(this._internal, callback);
 	}
-};
+}
 
 /**
  * Accepts `props` and `state`, and returns a new Virtual DOM tree to build.
@@ -90,36 +94,36 @@ Component.prototype.forceUpdate = function(callback) {
 Component.prototype.render = Fragment;
 
 /**
- * @param {import('./internal').Component} internal The internal to rerender
+ * Render an Internal that has been marked
+ * @param {import('./internal').Internal} internal The internal to rerender
  */
-function rerender(internal) {
-	if (~internal.flags & MODE_UNMOUNTING && internal.flags & DIRTY_BIT) {
-		let parentDom = getParentDom(internal);
-		let startDom =
-			(internal.flags & (MODE_HYDRATE | MODE_SUSPENDED)) ===
-			(MODE_HYDRATE | MODE_SUSPENDED)
-				? internal._dom
-				: getDomSibling(internal, 0);
+const renderQueuedInternal = internal => {
+	const commitQueue = [];
 
-		const vnode = createVNode(
-			internal.type,
-			internal.props,
-			internal.key, // @TODO we shouldn't need to actually pass these
-			internal.ref, // since the mode flag should bypass key/ref handling
-			0
-		);
+	const vnode = createVNode(internal.type, internal.props);
 
-		const commitQueue = [];
-		patch(parentDom, vnode, internal, commitQueue, startDom);
-		commitRoot(commitQueue, internal);
-	}
-}
+	// Don't render unmounting/unmounted trees:
+	if (internal.flags & MODE_UNMOUNTING) return;
+
+	// Don't render trees already rendered in this pass:
+	if (!(internal.flags & DIRTY_BIT)) return;
+
+	let parentDom = getParentDom(internal);
+	let startDom =
+		(internal.flags & (MODE_HYDRATE | MODE_SUSPENDED)) ===
+		(MODE_HYDRATE | MODE_SUSPENDED)
+			? internal._dom
+			: getDomSibling(internal, 0);
+
+	patch(parentDom, vnode, internal, commitQueue, startDom);
+	commitRoot(commitQueue, internal);
+};
 
 /**
- * The render queue
- * @type {Array<import('./internal').Component>}
+ * A queue of Internals to be rendered in the next batch.
+ * @type {Array<import('./internal').Internal>}
  */
-let rerenderQueue = [];
+let renderQueue = [];
 
 /*
  * The value of `Component.debounce` must asynchronously invoke the passed in callback. It is
@@ -136,28 +140,35 @@ const defer = Promise.prototype.then.bind(Promise.resolve());
 
 /**
  * Enqueue a rerender of a component
- * @param {import('./internal').Component} internal The internal to rerender
+ * @this {import('./internal').Internal} internal The internal to rerender
  */
-export function enqueueRender(internal) {
+export function enqueueRender(callback) {
+	let internal = this;
+	if (callback) {
+		if (internal._commitCallbacks == null) {
+			internal._commitCallbacks = [];
+		}
+		internal._commitCallbacks.push(callback);
+	}
 	if (
 		(!(internal.flags & DIRTY_BIT) &&
 			(internal.flags |= DIRTY_BIT) &&
-			rerenderQueue.push(internal) &&
-			!process._rerenderCount++) ||
+			renderQueue.push(internal) &&
+			!processRenderQueue._rerenderCount++) ||
 		prevDebounce !== options.debounceRendering
 	) {
 		prevDebounce = options.debounceRendering;
-		(prevDebounce || defer)(process);
+		(prevDebounce || defer)(processRenderQueue);
 	}
 }
 
 /** Flush the render queue by rerendering all queued components */
-function process() {
-	while ((len = process._rerenderCount = rerenderQueue.length)) {
-		rerenderQueue.sort((a, b) => a._depth - b._depth);
+function processRenderQueue() {
+	while ((len = processRenderQueue._rerenderCount = renderQueue.length)) {
+		renderQueue.sort((a, b) => a._depth - b._depth);
 		while (len--) {
-			rerender(rerenderQueue.shift());
+			renderQueuedInternal(renderQueue.shift());
 		}
 	}
 }
-let len = (process._rerenderCount = 0);
+let len = (processRenderQueue._rerenderCount = 0);

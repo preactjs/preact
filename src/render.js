@@ -7,12 +7,7 @@ import { createRoot } from './create-root';
  * render into
  */
 export function render(vnode, parentDom) {
-	let root = parentDom && parentDom._root;
-	if (!root) {
-		root = createRoot(parentDom);
-	}
-	root.render(vnode);
-	parentDom._root = root;
+	createRoot(parentDom, parentDom && parentDom._children).render(vnode);
 }
 
 /**
@@ -22,10 +17,5 @@ export function render(vnode, parentDom) {
  * update
  */
 export function hydrate(vnode, parentDom) {
-	let root = parentDom && parentDom._root;
-	if (!root) {
-		root = createRoot(parentDom);
-	}
-	root.hydrate(vnode);
-	parentDom._root = root;
+	createRoot(parentDom, parentDom && parentDom._children).hydrate(vnode);
 }

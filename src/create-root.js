@@ -12,12 +12,12 @@ import { patch } from './diff/patch';
 import { createInternal } from './tree';
 
 /**
- *
- * @param {import('./internal').PreactElement} parentDom The DOM element to
+ * @param {import('./internal').PreactElement} parentDom A parent DOM element to render within.
+ * @param {import('./internal').Internal} [rootInternal] (do not use)
+ * @returns {import('./internal').PreactRoot}
  */
-export function createRoot(parentDom) {
-	let rootInternal,
-		commitQueue,
+export function createRoot(parentDom, rootInternal) {
+	let commitQueue,
 		firstChild,
 		flags = 0;
 

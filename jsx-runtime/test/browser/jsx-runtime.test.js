@@ -31,7 +31,8 @@ describe('Babel jsx/jsxDEV', () => {
 		expect(vnode.key).to.equal('foo');
 	});
 
-	it('should apply defaultProps', () => {
+	// We no longer support defaultProps.
+	it.skip('should apply defaultProps', () => {
 		class Foo extends Component {
 			render() {
 				return <div />;
@@ -48,7 +49,7 @@ describe('Babel jsx/jsxDEV', () => {
 		});
 	});
 
-	it('should keep props over defaultProps', () => {
+	it.skip('should keep props over defaultProps', () => {
 		class Foo extends Component {
 			render() {
 				return <div />;
@@ -81,6 +82,7 @@ describe('Babel jsx/jsxDEV', () => {
 		delete jsxVNode.__source;
 		delete jsxVNode._vnodeId;
 		delete elementVNode._vnodeId;
+		// expect(jsxVNode.constructor).to.equal(elementVNode.constructor);
 		expect(jsxVNode).to.deep.equal(elementVNode);
 	});
 

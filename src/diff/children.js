@@ -149,7 +149,7 @@ export function diffChildren(
 				parentInternal.flags & TYPE_COMPONENT &&
 				startDom != null &&
 				((oldChildren[i].flags & TYPE_DOM && oldChildren[i]._dom == startDom) ||
-					getChildDom(oldChildren[i]) == startDom)
+					getChildDom(oldChildren[i], 0) == startDom)
 			) {
 				// If the startDom points to a dom node that is about to be unmounted,
 				// then get the next sibling of that vnode and set startDom to it

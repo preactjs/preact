@@ -144,7 +144,7 @@ export function useReducer(reducer, initialState, init) {
 				const nextValue = hookState._reducer(hookState._value[0], action);
 				if (hookState._value[0] !== nextValue) {
 					hookState._value = [nextValue, hookState._value[1]];
-					hookState._internal.rerender(hookState._internal);
+					hookState._internal.render();
 				}
 			}
 		];

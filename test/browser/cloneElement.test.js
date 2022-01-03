@@ -38,7 +38,7 @@ describe('cloneElement', () => {
 		expect(clone.props.children).to.deep.equal(['world', '!']);
 	});
 
-	it('should override children if null is provided as an argument', () => {
+	it('should override children if undefined is provided as an argument', () => {
 		function Foo() {}
 		const instance = <Foo>foo</Foo>;
 		const clone = cloneElement(instance, { children: 'bar' }, null);
@@ -46,7 +46,7 @@ describe('cloneElement', () => {
 		expect(clone.prototype).to.equal(instance.prototype);
 		expect(clone.type).to.equal(instance.type);
 		expect(clone.props).not.to.equal(instance.props);
-		expect(clone.props.children).to.be.null;
+		expect(clone.props.children).to.equal(null);
 	});
 
 	it('should override key if specified', () => {

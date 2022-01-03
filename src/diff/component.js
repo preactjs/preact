@@ -1,6 +1,6 @@
 import options from '../options';
 import { DIRTY_BIT, FORCE_UPDATE, SKIP_CHILDREN } from '../constants';
-import { addCommitCallback } from './commit';
+import { renderComponentInstance } from '../component';
 
 export function renderFunctionComponent(
 	newVNode,
@@ -24,7 +24,7 @@ export function renderFunctionComponent(
 		internal._component = c = {
 			props: newProps,
 			context: componentContext,
-			forceUpdate: internal.rerender.bind(null, internal)
+			forceUpdate: renderComponentInstance
 		};
 
 		internal.flags |= DIRTY_BIT;
@@ -112,7 +112,10 @@ export function renderClassComponent(
 			// If the component was constructed, queue up componentDidMount so the
 			// first time this internal commits (regardless of suspense or not) it
 			// will be called
-			addCommitCallback(internal, c.componentDidMount.bind(c));
+			if (internal._commitCallbacks == null) {
+				internal._commitCallbacks = [];
+			}
+			internal._commitCallbacks.push(c.componentDidMount);
 		}
 	} else {
 		if (
@@ -166,7 +169,10 @@ export function renderClassComponent(
 
 		// Only schedule componentDidUpdate if the component successfully rendered
 		if (c.componentDidUpdate != null) {
-			addCommitCallback(internal, () => {
+			if (internal._commitCallbacks == null) {
+				internal._commitCallbacks = [];
+			}
+			internal._commitCallbacks.push(() => {
 				c.componentDidUpdate(oldProps, oldState, snapshot);
 			});
 		}
