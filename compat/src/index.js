@@ -120,7 +120,7 @@ const StrictMode = Fragment;
  * @param {Arg} [arg] Optional arugment that can be passed to the callback
  * @returns
  */
-const flushSync = (callback, arg) => callback(arg)
+const flushSync = (callback, arg) => callback(arg);
 
 export * from 'preact/hooks';
 export {

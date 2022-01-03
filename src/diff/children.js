@@ -29,21 +29,20 @@ export function diffChildren(
 	parentInternal,
 	commitQueue
 ) {
-	let i,
-		newDom,
-		refs,
-		skew = 0,
-		remainingOldChildren;
+	let oldChildren =
+		(parentInternal._children && parentInternal._children.slice()) || EMPTY_ARR;
+
+	let oldChildrenLength = oldChildren.length;
+	let remainingOldChildren = oldChildrenLength;
+
+	let skew = 0;
+	let i, newDom, refs;
 
 	/** @type {import('../internal').Internal} */
 	let childInternal;
 
 	/** @type {import('../internal').VNode | string} */
 	let childVNode;
-
-	let oldChildren =
-		(parentInternal._children && parentInternal._children.slice()) || EMPTY_ARR;
-	let oldChildrenLength = (remainingOldChildren = oldChildren.length);
 
 	const newChildren = [];
 	for (i = 0; i < renderResult.length; i++) {
@@ -55,6 +54,8 @@ export function diffChildren(
 			newChildren[i] = null;
 			continue;
 		}
+
+		let oldVNodeRef;
 
 		let skewedIndex = i + skew;
 
@@ -75,8 +76,7 @@ export function diffChildren(
 
 		let mountingChild = childInternal == null;
 
-		let oldVNodeRef;
-		if (childInternal == null) {
+		if (mountingChild) {
 			childInternal = createInternal(childVNode, parentInternal);
 
 			// We are mounting a new VNode
