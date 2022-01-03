@@ -1,3 +1,12 @@
+import { EMPTY_OBJ } from '../constants';
+import { Component, getDomSibling } from '../component';
+import { Fragment } from '../create-element';
+import { diffChildren } from './children';
+import { diffProps, setProperty } from './props';
+import { assign, removeNode, slice } from '../util';
+import options from '../options';
+import { yieldNextValue } from '../async';
+
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
  * @param {import('../internal').PreactElement} parentDom The parent of the DOM element
@@ -13,7 +22,6 @@
  * render (except when hydrating). Can be a sibling DOM element when diffing
  * Fragments that have siblings. In most cases, it starts out as `oldChildren[0]._dom`.
  * @param {boolean} [isHydrating] Whether or not we are in hydration
- * @param {object} [deps] Dependencies parametrized to be able to generate async functions
  */
 export function diff(
 	parentDom,
@@ -24,8 +32,7 @@ export function diff(
 	excessDomChildren,
 	commitQueue,
 	oldDom,
-	isHydrating,
-	deps
+	isHydrating
 ) {
 	let tmp,
 		newType = newVNode.type;
@@ -43,7 +50,7 @@ export function diff(
 		excessDomChildren = [oldDom];
 	}
 
-	if ((tmp = deps.options._diff)) tmp(newVNode);
+	if ((tmp = options._diff)) tmp(newVNode);
 
 	try {
 		outer: if (typeof newType == 'function') {
@@ -71,12 +78,9 @@ export function diff(
 					newVNode._component = c = new newType(newProps, componentContext); // eslint-disable-line new-cap
 				} else {
 					// @ts-ignore Trust me, Component implements the interface we want
-					newVNode._component = c = new deps.Component(
-						newProps,
-						componentContext
-					);
+					newVNode._component = c = new Component(newProps, componentContext);
 					c.constructor = newType;
-					c.render = deps.doRender;
+					c.render = doRender;
 				}
 				if (provider) provider.sub(c);
 
@@ -94,10 +98,10 @@ export function diff(
 			}
 			if (newType.getDerivedStateFromProps != null) {
 				if (c._nextState == c.state) {
-					c._nextState = deps.assign({}, c._nextState);
+					c._nextState = assign({}, c._nextState);
 				}
 
-				deps.assign(
+				assign(
 					c._nextState,
 					newType.getDerivedStateFromProps(newProps, c._nextState)
 				);
@@ -169,7 +173,7 @@ export function diff(
 			c.props = newProps;
 			c.state = c._nextState;
 
-			if ((tmp = deps.options._render)) tmp(newVNode);
+			if ((tmp = options._render)) tmp(newVNode);
 
 			c._dirty = false;
 			c._vnode = newVNode;
@@ -181,10 +185,7 @@ export function diff(
 			c.state = c._nextState;
 
 			if (c.getChildContext != null) {
-				globalContext = deps.assign(
-					deps.assign({}, globalContext),
-					c.getChildContext()
-				);
+				globalContext = assign(assign({}, globalContext), c.getChildContext());
 			}
 
 			if (!isNew && c.getSnapshotBeforeUpdate != null) {
@@ -192,11 +193,11 @@ export function diff(
 			}
 
 			let isTopLevelFragment =
-				tmp != null && tmp.type === deps.Fragment && tmp.key == null;
+				tmp != null && tmp.type === Fragment && tmp.key == null;
 			let renderResult = isTopLevelFragment ? tmp.props.children : tmp;
 
 			// in async mode, this call returns a generator - otherwise it's void/undefined
-			const generator = deps.diffChildren(
+			const generator = diffChildren(
 				parentDom,
 				Array.isArray(renderResult) ? renderResult : [renderResult],
 				newVNode,
@@ -206,10 +207,9 @@ export function diff(
 				excessDomChildren,
 				commitQueue,
 				oldDom,
-				isHydrating,
-				deps
+				isHydrating
 			);
-			deps.yieldNextValue(generator); // this call will be transformed by the async call generators
+			yieldNextValue(generator); // this call will be transformed by the async call generators
 
 			c.base = newVNode._dom;
 
@@ -233,7 +233,7 @@ export function diff(
 			newVNode._dom = oldVNode._dom;
 		} else {
 			// in async mode, this call returns a generator - otherwise it's void/undefined
-			const generator = deps.diffElementNodes(
+			const generator = diffElementNodes(
 				oldVNode._dom,
 				newVNode,
 				oldVNode,
@@ -241,13 +241,12 @@ export function diff(
 				isSvg,
 				excessDomChildren,
 				commitQueue,
-				isHydrating,
-				deps
+				isHydrating
 			);
-			deps.yieldNextValue(generator); // this call will be transformed by the async call generators
+			yieldNextValue(generator); // this call will be transformed by the async call generators
 		}
 
-		if ((tmp = deps.options.diffed)) tmp(newVNode);
+		if ((tmp = options.diffed)) tmp(newVNode);
 	} catch (e) {
 		newVNode._original = null;
 		// if hydrating or creating initial tree, bailout preserves DOM:
@@ -258,7 +257,7 @@ export function diff(
 			// ^ could possibly be simplified to:
 			// excessDomChildren.length = 0;
 		}
-		deps.options._catchError(e, newVNode, oldVNode);
+		options._catchError(e, newVNode, oldVNode);
 	}
 }
 
@@ -266,9 +265,8 @@ export function diff(
  * @param {Array<import('../internal').Component>} commitQueue List of components
  * which have callbacks to invoke in commitRoot
  * @param {import('../internal').VNode} root
- * @param options used to handle errors
  */
-export function commitRoot(commitQueue, root, options) {
+export function commitRoot(commitQueue, root) {
 	if (options._commit) options._commit(root, commitQueue);
 
 	commitQueue.some(c => {
@@ -298,7 +296,7 @@ export function commitRoot(commitQueue, root, options) {
  * @param {Array<import('../internal').Component>} commitQueue List of components
  * which have callbacks to invoke in commitRoot
  * @param {boolean} isHydrating Whether or not we are in hydration
- * @param {object} [deps] Dependencies parametrized to be able to generate async functions
+ * @returns {import('../internal').PreactElement}
  */
 export function diffElementNodes(
 	dom,
@@ -308,8 +306,7 @@ export function diffElementNodes(
 	isSvg,
 	excessDomChildren,
 	commitQueue,
-	isHydrating,
-	deps
+	isHydrating
 ) {
 	let oldProps = oldVNode.props;
 	let newProps = newVNode.props;
@@ -372,9 +369,9 @@ export function diffElementNodes(
 		}
 	} else {
 		// If excessDomChildren was not null, repopulate it with the current element's children:
-		excessDomChildren = excessDomChildren && deps.slice.call(dom.childNodes);
+		excessDomChildren = excessDomChildren && slice.call(dom.childNodes);
 
-		oldProps = oldVNode.props || deps.EMPTY_OBJ;
+		oldProps = oldVNode.props || EMPTY_OBJ;
 
 		let oldHtml = oldProps.dangerouslySetInnerHTML;
 		let newHtml = newProps.dangerouslySetInnerHTML;
@@ -403,7 +400,7 @@ export function diffElementNodes(
 			}
 		}
 
-		deps.diffProps(dom, newProps, oldProps, isSvg, isHydrating);
+		diffProps(dom, newProps, oldProps, isSvg, isHydrating);
 
 		// If the new vnode didn't have dangerouslySetInnerHTML, diff its children
 		if (newHtml) {
@@ -411,7 +408,7 @@ export function diffElementNodes(
 		} else {
 			i = newVNode.props.children;
 			// in async mode, this call returns a generator - otherwise it's void/undefined
-			const generator = deps.diffChildren(
+			const generator = diffChildren(
 				dom,
 				Array.isArray(i) ? i : [i],
 				newVNode,
@@ -422,17 +419,15 @@ export function diffElementNodes(
 				commitQueue,
 				excessDomChildren
 					? excessDomChildren[0]
-					: oldVNode._children && deps.getDomSibling(oldVNode, 0),
-				isHydrating,
-				deps
+					: oldVNode._children && getDomSibling(oldVNode, 0),
+				isHydrating
 			);
-			deps.yieldNextValue(generator); // this call will be transformed by the async call generators
+			yieldNextValue(generator); // this call will be transformed by the async call generators
 
 			// Remove children that are not part of any vnode.
 			if (excessDomChildren != null) {
 				for (i = excessDomChildren.length; i--; ) {
-					if (excessDomChildren[i] != null)
-						deps.removeNode(excessDomChildren[i]);
+					if (excessDomChildren[i] != null) removeNode(excessDomChildren[i]);
 				}
 			}
 		}
@@ -450,14 +445,14 @@ export function diffElementNodes(
 					i !== dom.value ||
 					(nodeType === 'progress' && !i))
 			) {
-				deps.setProperty(dom, 'value', i, oldProps.value, false);
+				setProperty(dom, 'value', i, oldProps.value, false);
 			}
 			if (
 				'checked' in newProps &&
 				(i = newProps.checked) !== undefined &&
 				i !== dom.checked
 			) {
-				deps.setProperty(dom, 'checked', i, oldProps.checked, false);
+				setProperty(dom, 'checked', i, oldProps.checked, false);
 			}
 		}
 	}
@@ -470,9 +465,8 @@ export function diffElementNodes(
  * @param {object|function} ref
  * @param {any} value
  * @param {import('../internal').VNode} vnode
- * @param options used to handle errors
  */
-export function applyRef(ref, value, vnode, options) {
+export function applyRef(ref, value, vnode) {
 	try {
 		if (typeof ref == 'function') ref(value);
 		else ref.current = value;
@@ -488,16 +482,13 @@ export function applyRef(ref, value, vnode, options) {
  * initiated the unmount
  * @param {boolean} [skipRemove] Flag that indicates that a parent node of the
  * current element is already detached from the DOM.
- * @param removeNode dependency function to remove a node
- * @param options used to handle errors and unmount hooks
  */
-export function unmount(vnode, parentVNode, skipRemove, removeNode, options) {
+export function unmount(vnode, parentVNode, skipRemove) {
 	let r;
 	if (options.unmount) options.unmount(vnode);
 
 	if ((r = vnode.ref)) {
-		if (!r.current || r.current === vnode._dom)
-			applyRef(r, null, parentVNode, options);
+		if (!r.current || r.current === vnode._dom) applyRef(r, null, parentVNode);
 	}
 
 	if ((r = vnode._component) != null) {
@@ -515,13 +506,7 @@ export function unmount(vnode, parentVNode, skipRemove, removeNode, options) {
 	if ((r = vnode._children)) {
 		for (let i = 0; i < r.length; i++) {
 			if (r[i]) {
-				unmount(
-					r[i],
-					parentVNode,
-					typeof vnode.type != 'function',
-					removeNode,
-					options
-				);
+				unmount(r[i], parentVNode, typeof vnode.type != 'function');
 			}
 		}
 	}

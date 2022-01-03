@@ -1,5 +1,9 @@
-import { diffDeps } from './diff/deps';
-import { Component, getDomSibling, updateParentDomPointers } from './component';
+import { EMPTY_OBJ } from './constants';
+import { commitRoot, diff } from './diff/index';
+import { createElement, Fragment } from './create-element';
+import options from './options';
+import { slice } from './util';
+import { awaitNextValue } from './async';
 
 /**
  * Render a Preact virtual node into a DOM element
@@ -10,21 +14,7 @@ import { Component, getDomSibling, updateParentDomPointers } from './component';
  * existing DOM tree rooted at `replaceNode`
  */
 export function render(vnode, parentDom, replaceNode) {
-	renderCore(vnode, parentDom, replaceNode, getRenderDeps());
-}
-
-/**
- * returns dependencies for rendering - isolated so that we can generate async render function
- */
-export function getRenderDeps() {
-	return diffDeps(Component, getDomSibling, updateParentDomPointers);
-}
-
-/**
- * Render a Preact virtual node into a DOM element without dependencies - this is used as basis for the async rendering
- */
-export function renderCore(vnode, parentDom, replaceNode, deps) {
-	if (deps.options._root) deps.options._root(vnode, parentDom);
+	if (options._root) options._root(vnode, parentDom);
 
 	// We abuse the `replaceNode` parameter in `hydrate()` to signal if we are in
 	// hydration mode or not by passing the `hydrate` function instead of a DOM
@@ -43,24 +33,24 @@ export function renderCore(vnode, parentDom, replaceNode, deps) {
 	vnode = (
 		(!isHydrating && replaceNode) ||
 		parentDom
-	)._children = deps.createElement(deps.Fragment, null, [vnode]);
+	)._children = createElement(Fragment, null, [vnode]);
 
 	// List of effects that need to be called after diffing.
 	let commitQueue = [];
-	const generator = deps.diff(
+	const generator = diff(
 		parentDom,
 		// Determine the new vnode tree and store it on the DOM element on
 		// our custom `_children` property.
 		vnode,
-		oldVNode || deps.EMPTY_OBJ,
-		deps.EMPTY_OBJ,
+		oldVNode || EMPTY_OBJ,
+		EMPTY_OBJ,
 		parentDom.ownerSVGElement !== undefined,
 		!isHydrating && replaceNode
 			? [replaceNode]
 			: oldVNode
 			? null
 			: parentDom.firstChild
-			? deps.slice.call(parentDom.childNodes)
+			? slice.call(parentDom.childNodes)
 			: null,
 		commitQueue,
 		!isHydrating && replaceNode
@@ -68,13 +58,12 @@ export function renderCore(vnode, parentDom, replaceNode, deps) {
 			: oldVNode
 			? oldVNode._dom
 			: parentDom.firstChild,
-		isHydrating,
-		deps
+		isHydrating
 	);
-	deps.awaitNextValue(generator);
+	awaitNextValue(generator); // this gets replaced by await at async function generation
 
 	// Flush all queued effects
-	deps.commitRoot(commitQueue, vnode, deps.options);
+	commitRoot(commitQueue, vnode);
 }
 
 /**

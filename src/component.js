@@ -1,7 +1,8 @@
 import { assign } from './util';
-import { diffDeps } from './diff/deps';
+import { diff, commitRoot } from './diff/index';
 import options from './options';
 import { Fragment } from './create-element';
+import { awaitNextValue } from './async';
 
 /**
  * Base Component class. Provides `setState()` and `forceUpdate()`, which
@@ -116,19 +117,18 @@ export function getDomSibling(vnode, childIndex) {
 /**
  * Trigger in-place re-rendering of a component.
  * @param {import('./internal').Component} component The component to rerender
- * @param deps dependencies needed for the render
  */
-function renderComponent(component, deps) {
+function renderComponent(component) {
 	let vnode = component._vnode,
 		oldDom = vnode._dom,
 		parentDom = component._parentDom;
 
 	if (parentDom) {
 		let commitQueue = [];
-		const oldVNode = deps.assign({}, vnode);
+		const oldVNode = assign({}, vnode);
 		oldVNode._original = vnode._original + 1;
 
-		const generator = deps.diff(
+		const generator = diff(
 			parentDom,
 			vnode,
 			oldVNode,
@@ -136,16 +136,15 @@ function renderComponent(component, deps) {
 			parentDom.ownerSVGElement !== undefined,
 			vnode._hydrating != null ? [oldDom] : null,
 			commitQueue,
-			oldDom == null ? deps.getDomSibling(vnode) : oldDom,
-			vnode._hydrating,
-			deps
+			oldDom == null ? getDomSibling(vnode) : oldDom,
+			vnode._hydrating
 		);
-		deps.awaitNextValue(generator);
+		awaitNextValue(generator); // this gets replaced by await at async function generation
 
-		deps.commitRoot(commitQueue, vnode, deps.options);
+		commitRoot(commitQueue, vnode);
 
 		if (vnode._dom != oldDom) {
-			deps.updateParentDomPointers(vnode);
+			updateParentDomPointers(vnode);
 		}
 	}
 }
@@ -173,6 +172,17 @@ export function updateParentDomPointers(vnode) {
  * @type {Array<import('./internal').Component>}
  */
 let rerenderQueue = [];
+
+/**
+ * Asynchronously schedule a callback
+ * @type {(cb: () => void) => void}
+ */
+/* istanbul ignore next */
+// Note the following line isn't tree-shaken by rollup cuz of rollup/rollup#2566
+const defer =
+	typeof Promise == 'function'
+		? Promise.prototype.then.bind(Promise.resolve())
+		: setTimeout;
 
 /*
  * The value of `Component.debounce` must asynchronously invoke the passed in callback. It is
@@ -205,20 +215,18 @@ export function enqueueRender(c) {
 	if (
 		(!c._dirty &&
 			(c._dirty = true) &&
-			(options._addRenderQueue || addRenderQueue)(c)) ||
+			(options.addRenderQueue || addRenderQueue)(c)) ||
 		prevDebounce !== options.debounceRendering
 	) {
 		prevDebounce = options.debounceRendering;
-		(prevDebounce || setTimeout)(function() {
-			(
-				options._processRenderQueue || process
-			)(renderComponent, diffDeps(Component, getDomSibling, updateParentDomPointers));
+		(prevDebounce || defer)(function() {
+			(options.processRenderQueue || process)();
 		});
 	}
 }
 
 /** Flush the render queue by rerendering all queued components */
-function process(renderComponent, deps) {
+function process() {
 	let queue;
 	while ((process._rerenderCount = rerenderQueue.length)) {
 		queue = rerenderQueue.sort((a, b) => a._vnode._depth - b._vnode._depth);
@@ -226,7 +234,7 @@ function process(renderComponent, deps) {
 		// Don't update `renderCount` yet. Keep its value non-zero to prevent unnecessary
 		// process() calls from getting scheduled while `queue` is still being consumed.
 		queue.some(c => {
-			if (c._dirty) renderComponent(c, deps);
+			if (c._dirty) renderComponent(c);
 		});
 	}
 }

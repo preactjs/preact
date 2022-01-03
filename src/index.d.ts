@@ -228,13 +228,6 @@ export function render(
 	parent: Element | Document | ShadowRoot | DocumentFragment,
 	replaceNode?: Element | Text
 ): void;
-export function getRenderDeps(): any;
-export function renderCore(
-	vnode: ComponentChild,
-	parent: Element | Document | ShadowRoot | DocumentFragment,
-	replaceNode?: Element | Text,
-	deps: any
-): void;
 export function hydrate(
 	vnode: ComponentChild,
 	parent: Element | Document | ShadowRoot | DocumentFragment
@@ -266,16 +259,8 @@ export const Fragment: ComponentClass<{}, {}>;
  */
 export interface Options {
 	/** async function hooks */
-	_generateDiff?(diff: any): () => any;
-	_generateDiffChildren?(diff: any): () => any;
-	_generateDiffElementNodes?(diff: any): () => any;
-	_addRenderQueue: (c: Component<any, any>) => boolean;
-	_processRenderQueue: (
-		renderComponent: (component, deps) => void,
-		deps: any
-	) => void;
-	_yieldNextValue(generator: any): void;
-	_awaitNextValue(generator: any): void;
+	addRenderQueue: (c: Component<any, any>) => boolean;
+	processRenderQueue: (renderComponent: (component, deps) => void) => void;
 	/** Attach a hook that is invoked whenever a VNode is created. */
 	vnode?(vnode: VNode): void;
 	/** Attach a hook that is invoked immediately before a vnode is unmounted. */

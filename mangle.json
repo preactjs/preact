@@ -5,6 +5,33 @@
   },
   "minify": {
     "mangle": {
+      "reserved": [
+        "EMPTY_OBJ",
+        "EMPTY_ARR",
+        "Component",
+        "getDomSibling",
+        "updateParentDomPointers",
+        "Fragment",
+        "createElement",
+        "diff",
+        "diffChildren",
+        "diffElementNodes",
+        "diffProps",
+        "setProperty",
+        "createVNode",
+        "unmount",
+        "applyRef",
+        "assign",
+        "removeNode",
+        "slice",
+        "options",
+        "reorderChildren",
+        "placeChild",
+        "doRender",
+        "commitRoot",
+        "yieldNextValue",
+        "awaitNextValue"
+      ],
       "properties": {
         "regex": "^_[^_]",
         "reserved": [
