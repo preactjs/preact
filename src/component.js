@@ -97,7 +97,7 @@ Component.prototype.render = Fragment;
  * Render an Internal that has been marked
  * @param {import('./internal').Internal} internal The internal to rerender
  */
-const renderDirtyInternal = internal => {
+const renderQueuedInternal = internal => {
 	const commitQueue = [];
 
 	const vnode = createVNode(internal.type, internal.props);
@@ -167,7 +167,7 @@ function processRenderQueue() {
 	while ((len = processRenderQueue._rerenderCount = renderQueue.length)) {
 		renderQueue.sort((a, b) => a._depth - b._depth);
 		while (len--) {
-			renderDirtyInternal(renderQueue.shift());
+			renderQueuedInternal(renderQueue.shift());
 		}
 	}
 }
