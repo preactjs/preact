@@ -34,9 +34,13 @@ export function patch(parentDom, newVNode, internal, commitQueue) {
 	let dom = internal._dom;
 	let flags = internal.flags;
 
-	if (flags & TYPE_TEXT && newVNode !== internal.props) {
-		dom.data = newVNode;
-		internal.props = newVNode;
+	if (flags & TYPE_TEXT) {
+		if (newVNode !== internal.props) {
+			dom.data = newVNode;
+			internal.props = newVNode;
+		}
+
+		return;
 	}
 
 	// When passing through createElement it assigns the object
