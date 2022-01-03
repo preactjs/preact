@@ -11,11 +11,7 @@
   "license": "MIT",
   "types": "src/index.d.ts",
   "scripts": {
-    "build": "microbundle build --raw",
-    "dev": "microbundle watch --raw --format cjs",
-    "test": "npm-run-all build --parallel test:karma",
-    "test:karma": "karma start test/karma.conf.js --single-run",
-    "test:karma:watch": "karma start test/karma.conf.js --no-single-run"
+    "build": "microbundle build --raw"
   },
   "peerDependencies": {
     "preact": "^10.6.4"

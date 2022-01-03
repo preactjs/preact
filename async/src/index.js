@@ -39,6 +39,37 @@ window.requestIdleCallback =
 		);
 	});
 
+// initialize global namespace to keep async functions and regular references
+// because of microbundle we are forced to use global space here because it
+// always transforms the generators and async functions and we escape that
+// by creating them with dynamic constructors, which limit their scope
+window._preactAsync = {
+	render,
+	options,
+	createElement,
+	Component,
+	createVNode,
+	Fragment,
+	EMPTY_OBJ,
+	EMPTY_ARR,
+	getDomSibling,
+	updateParentDomPointers,
+	diff,
+	diffChildren,
+	diffElementNodes,
+	diffProps,
+	setProperty,
+	unmount,
+	applyRef,
+	assign,
+	removeNode,
+	slice,
+	reorderChildren,
+	placeChild,
+	doRender,
+	commitRoot
+};
+
 /**
  * parses function and returns arguments and body separately
  */
@@ -93,7 +124,8 @@ function generateAsyncFunction(
 	breakCode
 ) {
 	// if we previously generated the function, used it from global
-	if (window[asyncFunctionName]) return window[asyncFunctionName];
+	if (window._preactAsync[asyncFunctionName])
+		return window._preactAsync[asyncFunctionName];
 
 	// parse function and get its arguments and body
 	let { args, body } = parseFunction(syncFunction, deps);
@@ -119,14 +151,14 @@ function generateAsyncFunction(
 	);
 
 	const functionType = generator ? GeneratorFunction : AsyncFunction;
-	window[asyncFunctionName] = new functionType(args, body);
-	return window[asyncFunctionName];
+	window._preactAsync[asyncFunctionName] = new functionType(args, body);
+	return window._preactAsync[asyncFunctionName];
 }
 
 /**
  * generate the diff generator function from its regular version
  */
-const diffGenerator = generateAsyncFunction(
+window._preactAsync.diffGenerator = generateAsyncFunction(
 	diff,
 	'diffGenerator',
 	true,
@@ -149,17 +181,17 @@ const diffGenerator = generateAsyncFunction(
 /**
  * runner routine around the diff generator to yield when there is a result and pass the dependencies
  */
-const diffRunner = function*() {
+window._preactAsync.diffRunner = new GeneratorFunction(`
 	// call the diff children generator with its dependencies and get the generator back
-	const generator = diffGenerator(
+	const generator = window._preactAsync.diffGenerator(
 		...arguments,
-		options,
-		doRender,
-		assign,
-		Component,
-		Fragment,
-		diffChildrenRunner,
-		diffElementNodesRunner
+		window._preactAsync.options,
+		window._preactAsync.doRender,
+		window._preactAsync.assign,
+		window._preactAsync.Component,
+		window._preactAsync.Fragment,
+		window._preactAsync.diffChildrenRunner,
+		window._preactAsync.diffElementNodesRunner
 	);
 
 	// get the next result from generator until there is a promise - then yield it
@@ -169,22 +201,22 @@ const diffRunner = function*() {
 		nextValue = generator.next()
 	)
 		if (nextValue.value && nextValue.value.then) yield nextValue.value;
-};
+`);
 
 /**
  * async routine around the diff generator - awaits promise when there is one - this is the part where we really break up the blocking code
  * @returns {Promise<void>}
  */
-const diffAsync = async function() {
-	const generator = diffGenerator(
+window._preactAsync.diffAsync = new AsyncFunction(`
+	const generator = window._preactAsync.diffGenerator(
 		...arguments,
-		options,
-		doRender,
-		assign,
-		Component,
-		Fragment,
-		diffChildrenRunner,
-		diffElementNodesRunner
+		window._preactAsync.options,
+		window._preactAsync.doRender,
+		window._preactAsync.assign,
+		window._preactAsync.Component,
+		window._preactAsync.Fragment,
+		window._preactAsync.diffChildrenRunner,
+		window._preactAsync.diffElementNodesRunner
 	);
 	for (
 		let nextValue = generator.next();
@@ -192,12 +224,12 @@ const diffAsync = async function() {
 		nextValue = generator.next()
 	)
 		if (nextValue.value && nextValue.value.then) await nextValue.value;
-};
+`);
 
 /**
  * generate the diff children function from its regular version
  */
-const diffChildrenGenerator = generateAsyncFunction(
+window._preactAsync.diffChildrenGenerator = generateAsyncFunction(
 	diffChildren,
 	'diffChildrenGenerator',
 	true,
@@ -217,18 +249,18 @@ const diffChildrenGenerator = generateAsyncFunction(
 /**
  * runner routine around the children generator to yield when there is a result and pass the dependencies
  */
-const diffChildrenRunner = function*() {
+window._preactAsync.diffChildrenRunner = new GeneratorFunction(`
 	// call the diff children generator with its dependencies and get the generator back
-	const generator = diffChildrenGenerator(
+	const generator = window._preactAsync.diffChildrenGenerator(
 		...arguments,
-		diffRunner,
-		unmount,
-		applyRef,
-		createVNode,
-		Fragment,
-		EMPTY_OBJ,
-		EMPTY_ARR,
-		getDomSibling
+		window._preactAsync.diffRunner,
+		window._preactAsync.unmount,
+		window._preactAsync.applyRef,
+		window._preactAsync.createVNode,
+		window._preactAsync.Fragment,
+		window._preactAsync.EMPTY_OBJ,
+		window._preactAsync.EMPTY_ARR,
+		window._preactAsync.getDomSibling
 	);
 
 	// get the next result from generator until there is a promise - then yield it
@@ -238,12 +270,12 @@ const diffChildrenRunner = function*() {
 		nextValue = generator.next()
 	)
 		if (nextValue.value && nextValue.value.then) yield nextValue.value;
-};
+`);
 
 /**
  * generate the diff element nodes function from its regular version
  */
-const diffElementNodesGenerator = generateAsyncFunction(
+window._preactAsync.diffElementNodesGenerator = generateAsyncFunction(
 	diffElementNodes,
 	'diffElementNodesGenerator',
 	true,
@@ -257,24 +289,24 @@ const diffElementNodesGenerator = generateAsyncFunction(
 		'slice',
 		'diffChildren'
 	],
-	['diff']
+	['diffChildren']
 );
 
 /**
  * runner routine around the element nodes generator to yield when there is a result and pass the dependencies
  */
-const diffElementNodesRunner = function*() {
+window._preactAsync.diffElementNodesRunner = new GeneratorFunction(`
 	// call the diff element nodes generator with its dependencies and get the generator back
-	const generator = diffElementNodesGenerator(
+	const generator = window._preactAsync.diffElementNodesGenerator(
 		...arguments,
-		EMPTY_OBJ,
-		getDomSibling,
-		diffProps,
-		setProperty,
-		assign,
-		removeNode,
-		slice,
-		diffChildrenRunner
+		window._preactAsync.EMPTY_OBJ,
+		window._preactAsync.getDomSibling,
+		window._preactAsync.diffProps,
+		window._preactAsync.setProperty,
+		window._preactAsync.assign,
+		window._preactAsync.removeNode,
+		window._preactAsync.slice,
+		window._preactAsync.diffChildrenRunner
 	);
 
 	// get the next result from generator until there is a promise - then yield it
@@ -284,7 +316,7 @@ const diffElementNodesRunner = function*() {
 		nextValue = generator.next()
 	)
 		if (nextValue.value && nextValue.value.then) yield nextValue.value;
-};
+`);
 
 // generate the main render routine and create its async version that we will use for initial render
 const renderAsyncCore = generateAsyncFunction(
@@ -335,7 +367,7 @@ export const renderAsync = (vnode, parentDom, replaceNode) => {
 		Fragment,
 		EMPTY_OBJ,
 		slice,
-		diffAsync,
+		window._preactAsync.diffAsync,
 		commitRoot
 	);
 };
