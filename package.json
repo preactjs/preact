@@ -40,6 +40,13 @@
 			"require": "./hooks/dist/hooks.js",
 			"import": "./hooks/dist/hooks.mjs"
 		},
+    "./async": {
+      "browser": "./async/dist/async.module.js",
+      "umd": "./async/dist/async.umd.js",
+      "require": "./async/dist/async.js",
+      "import": "./async/dist/async.module.js"
+    },
+    "./async/reserved": "./async/mangle.json",
 		"./test-utils": {
 			"browser": "./test-utils/dist/testUtils.module.js",
 			"umd": "./test-utils/dist/testUtils.umd.js",
