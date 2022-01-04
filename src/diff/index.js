@@ -229,7 +229,7 @@ export function diff(
 			newVNode._children = oldVNode._children;
 			newVNode._dom = oldVNode._dom;
 		} else {
-			newVNode._dom = diffElementNodes(
+			diffElementNodes(
 				oldVNode._dom,
 				newVNode,
 				oldVNode,

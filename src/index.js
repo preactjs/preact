@@ -7,7 +7,12 @@ export {
 	createRef,
 	isValidElement
 } from './create-element';
-export { Component, getDomSibling, updateParentDomPointers } from './component';
+export {
+	Component,
+	getDomSibling,
+	updateParentDomPointers,
+	renderComponent
+} from './component';
 export { cloneElement } from './clone-element';
 export { createContext } from './create-context';
 export {

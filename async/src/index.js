@@ -3,6 +3,7 @@ import {
 	options,
 	createElement,
 	Component,
+	renderComponent,
 	createVNode,
 	Fragment,
 	EMPTY_OBJ,
@@ -25,49 +26,14 @@ import {
 	commitRoot
 } from 'preact';
 
-// request idle callback polyfill for async rendering for Safari - using 16ms to get 60fps
-window.requestIdleCallback =
-	window.requestIdleCallback ||
-	(handler => {
-		let startTime = Date.now();
-		setTimeout(
-			() =>
-				handler({
-					timeRemaining: () => Math.max(0, 16.0 - (Date.now() - startTime))
-				}),
-			1
-		);
-	});
-
-// initialize global namespace to keep async functions and regular references
-// because of microbundle we are forced to use global space here because it
-// always transforms the generators and async functions and we escape that
-// by creating them with dynamic constructors, which limit their scope
-window._preactAsync = {
-	render,
-	options,
-	createElement,
-	Component,
-	createVNode,
-	Fragment,
-	EMPTY_OBJ,
-	EMPTY_ARR,
-	getDomSibling,
-	updateParentDomPointers,
-	diff,
-	diffChildren,
-	diffElementNodes,
-	diffProps,
-	setProperty,
-	unmount,
-	applyRef,
-	assign,
-	removeNode,
-	slice,
-	reorderChildren,
-	placeChild,
-	doRender,
-	commitRoot
+/**
+ * returns if async is supported in the execution environment
+ * @returns {boolean}
+ */
+const asyncSupported = () => {
+	if (typeof window === 'undefined') return false;
+	if (typeof AsyncFunction !== 'function') return false;
+	return typeof GeneratorFunction === 'function';
 };
 
 /**
@@ -123,9 +89,8 @@ function generateAsyncFunction(
 	asyncCalls,
 	breakCode
 ) {
-	// if we previously generated the function, used it from global
-	if (window._preactAsync[asyncFunctionName])
-		return window._preactAsync[asyncFunctionName];
+	// if we previously generated the function, nothing to do
+	if (window._preactAsync[asyncFunctionName]) return;
 
 	// parse function and get its arguments and body
 	let { args, body } = parseFunction(syncFunction, deps);
@@ -143,207 +108,281 @@ function generateAsyncFunction(
 	// add the break code if requested - this is the break point at which render will stop and check to see if there is enough time - if not, wait until we do
 	if (breakCode) body = `${breakCode}${body}`;
 
-	console.log(
-		'async/generator function generated',
-		asyncFunctionName,
-		args,
-		body
-	);
-
+	// generate the async/generator function
 	const functionType = generator ? GeneratorFunction : AsyncFunction;
 	window._preactAsync[asyncFunctionName] = new functionType(args, body);
-	return window._preactAsync[asyncFunctionName];
 }
 
 /**
- * generate the diff generator function from its regular version
+ * initializes the async rendering global namespace - because of microbundle
+ * we are forced to use global space here because it always transforms the
+ * generators and async functions and we escape that by creating them with
+ * dynamic constructors, which limit their scope and we use global
  */
-window._preactAsync.diffGenerator = generateAsyncFunction(
-	diff,
-	'diffGenerator',
-	true,
-	[
-		'options',
-		'doRender',
-		'assign',
-		'Component',
-		'Fragment',
-		'diffChildren',
-		'diffElementNodes'
-	],
-	['diffChildren', 'diffElementNodes'],
-	// we only add this for the main diff function - start of recursion - if we're running out of deadline, yield and get back as browser allows us
-	`if (typeof window !== 'undefined' && (!window._preactDeadline || Date.now() > (window._preactDeadline - 1))) {
-		yield new Promise(resolve => requestIdleCallback(deadline => { window._preactDeadline = Date.now() + deadline.timeRemaining(); resolve(); }));
-	}`
-);
+const initializeAsyncRendering = () => {
+	// no need to initialize again if done before
+	if (window._preactAsync && window._preactAsync.initialized) return;
 
-/**
- * runner routine around the diff generator to yield when there is a result and pass the dependencies
- */
-window._preactAsync.diffRunner = new GeneratorFunction(`
-	// call the diff children generator with its dependencies and get the generator back
-	const generator = window._preactAsync.diffGenerator(
-		...arguments,
-		window._preactAsync.options,
-		window._preactAsync.doRender,
-		window._preactAsync.assign,
-		window._preactAsync.Component,
-		window._preactAsync.Fragment,
-		window._preactAsync.diffChildrenRunner,
-		window._preactAsync.diffElementNodesRunner
+	// request idle callback polyfill for async rendering for Safari - using 16ms to get 60fps
+	window.requestIdleCallback =
+		window.requestIdleCallback ||
+		(handler => {
+			let startTime = Date.now();
+			setTimeout(
+				() =>
+					handler({
+						timeRemaining: () => Math.max(0, 16.0 - (Date.now() - startTime))
+					}),
+				1
+			);
+		});
+
+	// initialize global namespace to keep async functions and regular references
+	window._preactAsync = {
+		initialized: true, // keep it here to prevent initialization again
+		render,
+		options,
+		createElement,
+		Component,
+		createVNode,
+		Fragment,
+		EMPTY_OBJ,
+		EMPTY_ARR,
+		getDomSibling,
+		updateParentDomPointers,
+		diff,
+		diffChildren,
+		diffElementNodes,
+		diffProps,
+		setProperty,
+		unmount,
+		applyRef,
+		assign,
+		removeNode,
+		slice,
+		reorderChildren,
+		placeChild,
+		doRender,
+		commitRoot
+	};
+
+	// generate the diff generator function from its regular version
+	generateAsyncFunction(
+		diff,
+		'diffGenerator',
+		true,
+		[
+			'options',
+			'doRender',
+			'assign',
+			'Component',
+			'Fragment',
+			'diffChildren',
+			'diffElementNodes'
+		],
+		['diffChildren', 'diffElementNodes'],
+		// we only add this for the main diff function - start of recursion - if we're running out of deadline, yield and get back as browser allows us
+		`if (typeof window !== 'undefined' && (!window._preactDeadline || Date.now() > (window._preactDeadline - 1))) {
+			yield new Promise(resolve => requestIdleCallback(deadline => { window._preactDeadline = Date.now() + deadline.timeRemaining(); resolve(); }));
+		}`
 	);
 
-	// get the next result from generator until there is a promise - then yield it
-	for (
-		let nextValue = generator.next();
-		!nextValue.done;
-		nextValue = generator.next()
-	)
-		if (nextValue.value && nextValue.value.then) yield nextValue.value;
-`);
+	// runner routine around the diff generator to yield when there is a result and pass the dependencies
+	window._preactAsync.diffRunner = new GeneratorFunction(`
+		// call the diff children generator with its dependencies and get the generator back
+		const generator = window._preactAsync.diffGenerator(
+			...arguments,
+			window._preactAsync.options,
+			window._preactAsync.doRender,
+			window._preactAsync.assign,
+			window._preactAsync.Component,
+			window._preactAsync.Fragment,
+			window._preactAsync.diffChildrenRunner,
+			window._preactAsync.diffElementNodesRunner
+		);
 
-/**
- * async routine around the diff generator - awaits promise when there is one - this is the part where we really break up the blocking code
- * @returns {Promise<void>}
- */
-window._preactAsync.diffAsync = new AsyncFunction(`
-	const generator = window._preactAsync.diffGenerator(
-		...arguments,
-		window._preactAsync.options,
-		window._preactAsync.doRender,
-		window._preactAsync.assign,
-		window._preactAsync.Component,
-		window._preactAsync.Fragment,
-		window._preactAsync.diffChildrenRunner,
-		window._preactAsync.diffElementNodesRunner
-	);
-	for (
-		let nextValue = generator.next();
-		!nextValue.done;
-		nextValue = generator.next()
-	)
-		if (nextValue.value && nextValue.value.then) await nextValue.value;
-`);
+		// get the next result from generator until there is a promise - then yield it
+		for (
+			let nextValue = generator.next();
+			!nextValue.done;
+			nextValue = generator.next()
+		)
+			if (nextValue.value && nextValue.value.then) yield nextValue.value;
+	`);
 
-/**
- * generate the diff children function from its regular version
- */
-window._preactAsync.diffChildrenGenerator = generateAsyncFunction(
-	diffChildren,
-	'diffChildrenGenerator',
-	true,
-	[
-		'diff',
-		'unmount',
-		'applyRef',
-		'createVNode',
-		'Fragment',
-		'EMPTY_OBJ',
-		'EMPTY_ARR',
-		'getDomSibling'
-	],
-	['diff']
-);
+	// async routine around the diff generator - awaits promise when there is one - this is the part where we really break up the blocking code
+	window._preactAsync.diffAsync = new AsyncFunction(`
+		const generator = window._preactAsync.diffGenerator(
+			...arguments,
+			window._preactAsync.options,
+			window._preactAsync.doRender,
+			window._preactAsync.assign,
+			window._preactAsync.Component,
+			window._preactAsync.Fragment,
+			window._preactAsync.diffChildrenRunner,
+			window._preactAsync.diffElementNodesRunner
+		);
+		for (let nextValue = generator.next(); !nextValue.done; nextValue = generator.next())
+  		if (nextValue.value && nextValue.value.then) await nextValue.value;
+	`);
 
-/**
- * runner routine around the children generator to yield when there is a result and pass the dependencies
- */
-window._preactAsync.diffChildrenRunner = new GeneratorFunction(`
-	// call the diff children generator with its dependencies and get the generator back
-	const generator = window._preactAsync.diffChildrenGenerator(
-		...arguments,
-		window._preactAsync.diffRunner,
-		window._preactAsync.unmount,
-		window._preactAsync.applyRef,
-		window._preactAsync.createVNode,
-		window._preactAsync.Fragment,
-		window._preactAsync.EMPTY_OBJ,
-		window._preactAsync.EMPTY_ARR,
-		window._preactAsync.getDomSibling
+	// generate the diff children function from its regular version
+	generateAsyncFunction(
+		diffChildren,
+		'diffChildrenGenerator',
+		true,
+		[
+			'diff',
+			'unmount',
+			'applyRef',
+			'createVNode',
+			'Fragment',
+			'EMPTY_OBJ',
+			'EMPTY_ARR',
+			'getDomSibling',
+			'placeChild',
+			'reorderChildren'
+		],
+		['diff']
 	);
 
-	// get the next result from generator until there is a promise - then yield it
-	for (
-		let nextValue = generator.next();
-		!nextValue.done;
-		nextValue = generator.next()
-	)
-		if (nextValue.value && nextValue.value.then) yield nextValue.value;
-`);
+	// runner routine around the children generator to yield when there is a result and pass the dependencies
+	window._preactAsync.diffChildrenRunner = new GeneratorFunction(`
+		// call the diff children generator with its dependencies and get the generator back
+		const generator = window._preactAsync.diffChildrenGenerator(
+			...arguments,
+			window._preactAsync.diffRunner,
+			window._preactAsync.unmount,
+			window._preactAsync.applyRef,
+			window._preactAsync.createVNode,
+			window._preactAsync.Fragment,
+			window._preactAsync.EMPTY_OBJ,
+			window._preactAsync.EMPTY_ARR,
+			window._preactAsync.getDomSibling,
+			window._preactAsync.placeChild,
+			window._preactAsync.reorderChildren
+		);
 
-/**
- * generate the diff element nodes function from its regular version
- */
-window._preactAsync.diffElementNodesGenerator = generateAsyncFunction(
-	diffElementNodes,
-	'diffElementNodesGenerator',
-	true,
-	[
-		'EMPTY_OBJ',
-		'getDomSibling',
-		'diffProps',
-		'setProperty',
-		'assign',
-		'removeNode',
-		'slice',
-		'diffChildren'
-	],
-	['diffChildren']
-);
+		// get the next result from generator until there is a promise - then yield it
+		for (
+			let nextValue = generator.next();
+			!nextValue.done;
+			nextValue = generator.next()
+		)
+			if (nextValue.value && nextValue.value.then) yield nextValue.value;
+	`);
 
-/**
- * runner routine around the element nodes generator to yield when there is a result and pass the dependencies
- */
-window._preactAsync.diffElementNodesRunner = new GeneratorFunction(`
-	// call the diff element nodes generator with its dependencies and get the generator back
-	const generator = window._preactAsync.diffElementNodesGenerator(
-		...arguments,
-		window._preactAsync.EMPTY_OBJ,
-		window._preactAsync.getDomSibling,
-		window._preactAsync.diffProps,
-		window._preactAsync.setProperty,
-		window._preactAsync.assign,
-		window._preactAsync.removeNode,
-		window._preactAsync.slice,
-		window._preactAsync.diffChildrenRunner
+	// generate the diff element nodes function from its regular version
+	generateAsyncFunction(
+		diffElementNodes,
+		'diffElementNodesGenerator',
+		true,
+		[
+			'EMPTY_OBJ',
+			'getDomSibling',
+			'diffProps',
+			'setProperty',
+			'assign',
+			'removeNode',
+			'slice',
+			'diffChildren'
+		],
+		['diffChildren']
 	);
 
-	// get the next result from generator until there is a promise - then yield it
-	for (
-		let nextValue = generator.next();
-		!nextValue.done;
-		nextValue = generator.next()
-	)
-		if (nextValue.value && nextValue.value.then) yield nextValue.value;
-`);
+	// runner routine around the element nodes generator to yield when there is a result and pass the dependencies
+	window._preactAsync.diffElementNodesRunner = new GeneratorFunction(`
+		// call the diff element nodes generator with its dependencies and get the generator back
+		const generator = window._preactAsync.diffElementNodesGenerator(
+			...arguments,
+			window._preactAsync.EMPTY_OBJ,
+			window._preactAsync.getDomSibling,
+			window._preactAsync.diffProps,
+			window._preactAsync.setProperty,
+			window._preactAsync.assign,
+			window._preactAsync.removeNode,
+			window._preactAsync.slice,
+			window._preactAsync.diffChildrenRunner
+		);
 
-// generate the main render routine and create its async version that we will use for initial render
-const renderAsyncCore = generateAsyncFunction(
-	render,
-	'renderAsync',
-	false,
-	[
-		'options',
-		'createElement',
-		'Fragment',
-		'EMPTY_OBJ',
-		'slice',
-		'diff',
-		'commitRoot'
-	],
-	['diff']
-);
+		// get the next result from generator until there is a promise - then yield it
+		for (
+			let nextValue = generator.next();
+			!nextValue.done;
+			nextValue = generator.next()
+		)
+			if (nextValue.value && nextValue.value.then) yield nextValue.value;
+	`);
 
-/**
- * returns if async is supported in the execution environment
- * @returns {boolean}
- */
-const asyncSupported = () => {
-	if (typeof window === 'undefined') return false;
-	if (typeof AsyncFunction !== 'function') return false;
-	if (typeof GeneratorFunction !== 'function') return false;
-	return true;
+	// generate the main render routine and create its async version that we will use for initial render
+	generateAsyncFunction(
+		render,
+		'renderAsync',
+		false,
+		[
+			'options',
+			'createElement',
+			'Fragment',
+			'EMPTY_OBJ',
+			'slice',
+			'diff',
+			'commitRoot'
+		],
+		['diff']
+	);
+
+	// async implementation of adding component to render queue
+	options.addRenderQueue = c => {
+		// initialize render queue variables in global space
+		if (window._preactAsync.queue === undefined) window._preactAsync.queue = [];
+		if (window._preactAsync.queueCount === undefined)
+			window._preactAsync.queueCount = 0;
+
+		// add the component to the render queue
+		window._preactAsync.queue.push(c);
+
+		// if the previous value was 0 (queue was empty) this will return 0 and negation will make it true, which means we should process the render queue now
+		// if the previous value was greater (queue was not empty, there were other elements to render), we won't process the render queue now because it should be processed by previous call
+		return !window._preactAsync.queueCount++;
+	};
+
+	// generate async component render routine if not done before
+	generateAsyncFunction(
+		renderComponent,
+		'renderComponentAsync',
+		false,
+		[
+			'assign',
+			'diff',
+			'getDomSibling',
+			'commitRoot',
+			'updateParentDomPointers'
+		],
+		['diff']
+	);
+
+	// async implementation of processing render queue
+	// note that we are awaiting for each component render here
+	// if we had not, this would be "concurrent rendering" but that
+	// does not work at all - double rendering issues - not a good idea
+	// __v is mangled property of _vnode, __b => _depth, __d => _dirty
+	window._preactAsync.processRenderQueue = new AsyncFunction(`
+		let queue;
+		while ((window._preactAsync.queueCount = window._preactAsync.queue.length)) {
+			queue = window._preactAsync.queue.sort((a, b) => a.__v.__b - b.__v.__b);
+			window._preactAsync.queue = [];
+			for (const c of queue.filter(c => c.__d))
+				await window._preactAsync.renderComponentAsync(
+					c,
+					window._preactAsync.assign,
+					window._preactAsync.diffAsync,
+					window._preactAsync.getDomSibling,
+					window._preactAsync.commitRoot,
+					window._preactAsync.updateParentDomPointers
+				);
+		}
+	`);
+	options.processRenderQueue = () => window._preactAsync.processRenderQueue(); // wrap it in a regular function so that caller will not wait for promise
 };
 
 /**
@@ -357,8 +396,14 @@ export const renderAsync = (vnode, parentDom, replaceNode) => {
 	// default to regular render if async is not supported
 	if (!asyncSupported()) return render(vnode, parentDom, replaceNode);
 
-	console.log('running render async core');
-	return renderAsyncCore(
+	// initialize the async rendering global namespace if needed
+	// note that this will update the options, making it impossible for the regular
+	// rendering to run - users would need to reset option hooks for that to work
+	// but there may be weird issues with it - best to try to avoid that scenario
+	initializeAsyncRendering();
+
+	// start the async render
+	return window._preactAsync.renderAsync(
 		vnode,
 		parentDom,
 		replaceNode,
@@ -378,41 +423,5 @@ export const renderAsync = (vnode, parentDom, replaceNode) => {
  * @param parentDom
  * @returns {void|*}
  */
-const hydrateAsync = (vnode, parentDom) =>
+export const hydrateAsync = (vnode, parentDom) =>
 	renderAsync(vnode, parentDom, () => {});
-
-/*
-// async implementation of adding component to render queue
-options.addRenderQueue = c => {
-
-	// initialize render queue variables in global space
-	if (window._preactQueue === undefined) window._preactQueue = [];
-	if (window._preactQueueCount === undefined) window._preactQueueCount = 0;
-
-	// add the component to the render queue
-	window._preactQueue.push(c);
-
-	// if the previous value was 0 (queue was empty) this will return 0 and negation will make it true, which means we should process the render queue now
-	// if the previous value was greater (queue was not empty, there were other elements to render), we won't process the render queue now because it should be processed by previous call
-	return !window._preactQueueCount++;
-};
-
-// async implementation of processing render queue
-const processRenderQueue = async () => {
-
-	// generate async component render routine if not done before
-	const renderComponentAsync = generateAsyncFunction(renderComponent, 'renderComponentAsync');
-
-	// render the components in render queue
-	let queue;
-	while ((window._preactQueueCount = window._preactQueue.length)) {
-		queue = window._preactQueue.sort((a, b) => a._vnode._depth - b._vnode._depth);
-		window._preactQueue = [];
-		// Don't update `renderCount` yet. Keep its value non-zero to prevent unnecessary
-		// process() calls from getting scheduled while `queue` is still being consumed.
-		for (const c of queue.filter(c => c._dirty)) await renderComponentAsync(c, deps);
-	}
-};
-options.processRenderQueue = () => processRenderQueue(); // wrap it in a regular function so that caller will not wait for promise
-
-*/
