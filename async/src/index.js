@@ -1,30 +1,40 @@
+// importing the dependencies from their source codes because if we put these exports in the main
+// bundle it increases its size significantly - this means we are repeating the same source code
+// in another bundle - inefficient but better than increasing core bundle size
+import { EMPTY_OBJ, EMPTY_ARR } from '../../src/constants';
+import { render, hydrate } from '../../src/index';
+import options from '../../src/options';
 import {
-	render,
-	options,
-	createElement,
 	Component,
+	getDomSibling,
 	renderComponent,
+	updateParentDomPointers
+} from '../../src/component';
+import {
+	createElement,
 	createVNode,
 	Fragment,
-	EMPTY_OBJ,
-	EMPTY_ARR,
-	getDomSibling,
-	updateParentDomPointers,
+	createRef,
+	isValidElement
+} from '../../src/create-element';
+import { assign, removeNode, slice } from '../../src/util';
+import {
 	diff,
-	diffChildren,
 	diffElementNodes,
-	diffProps,
-	setProperty,
+	doRender,
 	unmount,
 	applyRef,
-	assign,
-	removeNode,
-	slice,
+	commitRoot
+} from '../../src/diff/index';
+import {
+	diffChildren,
 	reorderChildren,
 	placeChild,
-	doRender,
-	commitRoot
-} from 'preact';
+	toChildArray
+} from '../../src/diff/children';
+import { diffProps, setProperty } from '../../src/diff/props';
+import { cloneElement } from '../../src/clone-element';
+import { createContext } from '../../src/create-context';
 
 /**
  * returns if async is supported in the execution environment
@@ -425,3 +435,21 @@ export const renderAsync = (vnode, parentDom, replaceNode) => {
  */
 export const hydrateAsync = (vnode, parentDom) =>
 	renderAsync(vnode, parentDom, () => {});
+
+/**
+ * export standard preact functions as well in case the user needs to run serial rendering
+ */
+export {
+	render,
+	hydrate,
+	createElement,
+	createElement as h,
+	createRef,
+	isValidElement,
+	Component,
+	Fragment,
+	cloneElement,
+	createContext,
+	toChildArray,
+	options
+};
