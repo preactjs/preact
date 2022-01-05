@@ -85,6 +85,7 @@
 		"./debug/package.json": "./debug/package.json",
 		"./devtools/package.json": "./devtools/package.json",
 		"./hooks/package.json": "./hooks/package.json",
+    "./async/package.json": "./async/package.json",
 		"./test-utils/package.json": "./test-utils/package.json",
 		"./jsx-runtime/package.json": "./jsx-runtime/package.json"
 	},
@@ -216,6 +217,9 @@
 		"hooks/dist",
 		"hooks/src",
 		"hooks/package.json",
+    "async/dist",
+    "async/src",
+    "async/package.json",
 		"jsx-runtime/dist",
 		"jsx-runtime/src",
 		"jsx-runtime/package.json",
