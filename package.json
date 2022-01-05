@@ -219,6 +219,7 @@
 		"hooks/package.json",
     "async/dist",
     "async/src",
+    "async/mangle.json",
     "async/package.json",
 		"jsx-runtime/dist",
 		"jsx-runtime/src",
