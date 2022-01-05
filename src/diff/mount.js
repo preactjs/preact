@@ -30,7 +30,7 @@ import options from '../options';
 export function mount(parentDom, newVNode, internal, commitQueue, startDom) {
 	if (options._diff) options._diff(internal, newVNode);
 
-	/** @type {import('../internal').PreactElement} */
+	/** @type {import('../index').ComponentChild} */
 	let nextDomSibling;
 
 	try {

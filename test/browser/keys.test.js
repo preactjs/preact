@@ -325,11 +325,7 @@ describe('keys', () => {
 		render(<List values={values} />, scratch);
 		expect(scratch.textContent).to.equal('abcd', 'move to beginning');
 		expect(getLog()).to.deep.equal(
-			[
-				'<ol>bcda.insertBefore(<li>b, Null)',
-				'<ol>cdab.insertBefore(<li>c, Null)',
-				'<ol>dabc.insertBefore(<li>d, Null)'
-			],
+			['<ol>bcda.insertBefore(<li>a, <li>b)'],
 			'move to beginning'
 		);
 	});
@@ -347,15 +343,15 @@ describe('keys', () => {
 		render(<List values={values} />, scratch);
 		expect(scratch.textContent).to.equal(values.join(''));
 		expect(getLog()).to.deep.equal([
-			'<ol>abcdefghij.insertBefore(<li>i, Null)',
-			'<ol>abcdefghji.insertBefore(<li>h, Null)',
-			'<ol>abcdefgjih.insertBefore(<li>g, Null)',
-			'<ol>abcdefjihg.insertBefore(<li>f, Null)',
-			'<ol>abcdejihgf.insertBefore(<li>e, Null)',
-			'<ol>abcdjihgfe.insertBefore(<li>d, Null)',
-			'<ol>abcjihgfed.insertBefore(<li>c, Null)',
-			'<ol>abjihgfedc.insertBefore(<li>b, Null)',
-			'<ol>ajihgfedcb.insertBefore(<li>a, Null)'
+			'<ol>abcdefghij.insertBefore(<li>j, <li>a)',
+			'<ol>jabcdefghi.insertBefore(<li>i, <li>a)',
+			'<ol>jiabcdefgh.insertBefore(<li>h, <li>a)',
+			'<ol>jihabcdefg.insertBefore(<li>g, <li>a)',
+			'<ol>jihgabcdef.insertBefore(<li>f, <li>a)',
+			'<ol>jihgfabcde.insertBefore(<li>e, <li>a)',
+			'<ol>jihgfeabcd.insertBefore(<li>d, <li>a)',
+			'<ol>jihgfedabc.insertBefore(<li>c, <li>a)',
+			'<ol>jihgfedcab.insertBefore(<li>a, Null)'
 		]);
 	});
 

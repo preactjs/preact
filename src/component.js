@@ -2,14 +2,8 @@ import { addCommitCallback, commitRoot } from './diff/commit';
 import options from './options';
 import { createVNode, Fragment } from './create-element';
 import { patch } from './diff/patch';
-import {
-	DIRTY_BIT,
-	FORCE_UPDATE,
-	MODE_HYDRATE,
-	MODE_SUSPENDED,
-	MODE_UNMOUNTING
-} from './constants';
-import { getDomSibling, getParentDom } from './tree';
+import { DIRTY_BIT, FORCE_UPDATE, MODE_UNMOUNTING } from './constants';
+import { getParentDom } from './tree';
 
 /**
  * Base Component class. Provides `setState()` and `forceUpdate()`, which
@@ -90,16 +84,11 @@ Component.prototype.forceUpdate = function(callback) {
 Component.prototype.render = Fragment;
 
 /**
- * @param {import('./internal').Component} internal The internal to rerender
+ * @param {import('./internal').Internal} internal The internal to rerender
  */
 function rerender(internal) {
 	if (~internal.flags & MODE_UNMOUNTING && internal.flags & DIRTY_BIT) {
 		let parentDom = getParentDom(internal);
-		let startDom =
-			(internal.flags & (MODE_HYDRATE | MODE_SUSPENDED)) ===
-			(MODE_HYDRATE | MODE_SUSPENDED)
-				? internal._dom
-				: getDomSibling(internal, 0);
 
 		const vnode = createVNode(
 			internal.type,
@@ -110,14 +99,14 @@ function rerender(internal) {
 		);
 
 		const commitQueue = [];
-		patch(parentDom, vnode, internal, commitQueue, startDom);
+		patch(parentDom, vnode, internal, commitQueue);
 		commitRoot(commitQueue, internal);
 	}
 }
 
 /**
  * The render queue
- * @type {Array<import('./internal').Component>}
+ * @type {Array<import('./internal').Internal>}
  */
 let rerenderQueue = [];
 
@@ -135,8 +124,8 @@ let prevDebounce;
 const defer = Promise.prototype.then.bind(Promise.resolve());
 
 /**
- * Enqueue a rerender of a component
- * @param {import('./internal').Component} internal The internal to rerender
+ * Enqueue a rerender of an internal
+ * @param {import('./internal').Internal} internal The internal to rerender
  */
 export function enqueueRender(internal) {
 	if (
