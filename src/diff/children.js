@@ -66,6 +66,7 @@ export function diffChildren(
 			skewedIndex,
 			remainingOldChildren
 		);
+
 		if (matchingIndex === -1) {
 			childInternal = UNDEFINED;
 		} else {
@@ -265,7 +266,10 @@ export function insertComponentDom(internal, nextSibling, parentDom) {
 			if (childInternal.flags & TYPE_COMPONENT) {
 				insertComponentDom(childInternal, nextSibling, parentDom);
 			} else if (childInternal._dom != nextSibling) {
+				let shouldFocus;
+				if (childInternal._dom === document.activeElement) shouldFocus = true
 				parentDom.insertBefore(childInternal._dom, nextSibling);
+				if (shouldFocus) childInternal._dom.focus()
 			}
 		}
 	}
