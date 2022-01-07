@@ -115,6 +115,7 @@ export function diffChildren(
 
 		if (childVNode.ref) {
 			if (!refs) refs = [];
+			childInternal.ref = childVNode.ref
 			refs.push(
 				oldVNodeRef,
 				childVNode.ref,

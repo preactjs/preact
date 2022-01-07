@@ -435,6 +435,26 @@ describe('refs', () => {
 		expect(ref.current).to.not.be.null;
 	});
 
+	it('should correctly unmount refs', () => {
+		const called = []
+		const mock = (x) => {
+			called.push(x);
+		}
+
+		const App = ({ withRef, unmount }) => {
+			return unmount ? null : <div ref={withRef ? mock : undefined}>hi</div>
+		}
+
+		render(<App />, scratch);
+		expect(called.length).to.be.equal(0);
+
+		render(<App withRef />, scratch);
+		expect(called.length).to.be.equal(1);
+
+		render(<App withRef unmount />, scratch);
+		expect(called.length).to.be.equal(2);
+	});
+
 	it('should correctly call child refs for un-keyed children on re-render', () => {
 		let el = null;
 		let ref = e => {
