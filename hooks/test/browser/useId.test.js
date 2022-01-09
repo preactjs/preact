@@ -47,9 +47,9 @@ describe('useId', () => {
 		}
 
 		render(<Comp />, scratch);
-		expect(scratch.innerHTML).to.equal('<div id="11"><div id="31"><span id="32">h</span></div></div>')
+		expect(scratch.innerHTML).to.equal('<div id="711"><div id="931"><span id="932">h</span></div></div>')
 
 		render(<Comp />, scratch);
-		expect(scratch.innerHTML).to.equal('<div id="11"><div id="31"><span id="32">h</span></div></div>')
+		expect(scratch.innerHTML).to.equal('<div id="711"><div id="931"><span id="932">h</span></div></div>')
 	});
 });

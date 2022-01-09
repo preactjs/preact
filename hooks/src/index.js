@@ -316,7 +316,7 @@ export function useId() {
 	const state = getHookState(currentIndex++, 11);
 	if (!state._id) {
 		currentIdCounter++;
-		state._id = '' + currentInternal._depth + currentIdCounter
+		state._id = '' + currentInternal._vnodeId + currentInternal._depth + currentIdCounter
 	}
 	return state._id;
 }
