@@ -11,6 +11,9 @@ let currentInternal;
 /** @type {number} */
 let currentHook = 0;
 
+/** @type {number} */
+let currentIdCounter;
+
 /** @type {Array<import('./internal').Component>} */
 let afterPaintEffects = [];
 
@@ -32,6 +35,7 @@ options._render = internal => {
 	if (oldBeforeRender) oldBeforeRender(internal);
 
 	currentInternal = internal;
+	currentIdCounter = 0;
 	currentIndex = 0;
 
 	if (currentInternal.data && currentInternal.data.__hooks) {
@@ -305,6 +309,16 @@ export function useErrorBoundary(cb) {
 			errState[1](undefined);
 		}
 	];
+}
+
+
+export function useId() {
+	const state = getHookState(currentIndex++, 11);
+	if (!state._id) {
+		currentIdCounter++;
+		state._id = '' + currentInternal._depth + currentIdCounter
+	}
+	return state._id;
 }
 
 /**
