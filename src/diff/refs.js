@@ -12,7 +12,7 @@ export function applyRef(oldRef, ref, value, internal) {
 	if (oldRef) applyRef(null, oldRef, null, internal);
 	try {
 		if (typeof ref == 'function') ref(value);
-		else ref.current = value;
+		else if (ref) ref.current = value;
 	} catch (e) {
 		options._catchError(e, internal);
 	}

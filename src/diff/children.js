@@ -113,9 +113,9 @@ export function diffChildren(
 
 		newDom = childInternal._dom;
 
-		if (childVNode.ref) {
+		if (childVNode.ref || childInternal.ref) {
 			if (!refs) refs = [];
-			childInternal.ref = childVNode.ref
+			childInternal.ref = childVNode.ref;
 			refs.push(
 				oldVNodeRef,
 				childVNode.ref,
@@ -124,6 +124,8 @@ export function diffChildren(
 					: newDom,
 				childInternal
 			);
+		} else if (childInternal.ref) {
+			childInternal.ref = childVNode.ref;
 		}
 
 		go: if (mountingChild) {
