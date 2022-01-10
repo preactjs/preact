@@ -30,7 +30,7 @@ describe('useId', () => {
 		expect(scratch.firstChild.getAttribute('id')).to.equal(id)
 	});
 
-	it('ids are unique according to depth', () => {
+	it('ids are unique according to dom-depth', () => {
 		function Child() {
 			const id = useId()
 			const spanId = useId()
@@ -47,9 +47,9 @@ describe('useId', () => {
 		}
 
 		render(<Comp />, scratch);
-		expect(scratch.innerHTML).to.equal('<div id="711"><div id="931"><span id="932">h</span></div></div>')
+		expect(scratch.innerHTML).to.equal('<div id="001"><div id="011"><span id="012">h</span></div></div>')
 
 		render(<Comp />, scratch);
-		expect(scratch.innerHTML).to.equal('<div id="711"><div id="931"><span id="932">h</span></div></div>')
+		expect(scratch.innerHTML).to.equal('<div id="001"><div id="011"><span id="012">h</span></div></div>')
 	});
 });
