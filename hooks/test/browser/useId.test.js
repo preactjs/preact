@@ -52,4 +52,29 @@ describe('useId', () => {
 		render(<Comp />, scratch);
 		expect(scratch.innerHTML).to.equal('<div id="001"><div id="011"><span id="012">h</span></div></div>')
 	});
+
+	// TODO: ensure uniqueness across siblings (could do so by checking the index of the internal within the parentChildren)
+	it.skip('ids are unique across siblings', () => {
+		function Child() {
+			const id = useId()
+			return <span id={id}>h</span>
+		}
+
+		function Comp() {
+			const id = useId()
+			return (
+				<div id={id}>
+					<Child />
+					<Child />
+					<Child />
+				</div>
+			);
+		}
+
+		render(<Comp />, scratch);
+		expect(scratch.innerHTML).to.equal('')
+
+		render(<Comp />, scratch);
+		expect(scratch.innerHTML).to.equal('')
+	});
 });
