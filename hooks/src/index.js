@@ -12,7 +12,7 @@ let currentInternal;
 let currentHook = 0;
 
 /** @type {number} */
-let currentIdCounter;
+let currentIdCounter = 0;
 
 /** @type {Array<import('./internal').Component>} */
 let afterPaintEffects = [];
