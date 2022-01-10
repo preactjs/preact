@@ -158,8 +158,12 @@ export interface Internal<P = {}> {
 	_component: Component | null;
 	/** most recent context object passed down to this Internal from its parent */
 	_context: any;
-	/** This Internal's distance from the tree root */
+	/** This Internal's distance from the tree root counted in vdom-nodes */
 	_depth: number | null;
+	/** This Internal's distance from the tree root counted in dom-nodes */
+	_domDepth: number | null;
+	/** The id of the root */
+	_rootId: number | null;
 	/** Callbacks to invoke when this internal commits */
 	_commitCallbacks: Array<() => void>;
 }

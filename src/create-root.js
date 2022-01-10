@@ -11,6 +11,8 @@ import { mount } from './diff/mount';
 import { patch } from './diff/patch';
 import { createInternal } from './tree';
 
+let rootId = 0;
+
 /**
  *
  * @param {import('./internal').PreactElement} parentDom The DOM element to
@@ -36,7 +38,7 @@ export function createRoot(parentDom) {
 		if (rootInternal) {
 			patch(parentDom, vnode, rootInternal, commitQueue);
 		} else {
-			rootInternal = createInternal(vnode);
+			rootInternal = createInternal(vnode, undefined, rootId);
 
 			// Store the VDOM tree root on the DOM element in a (minified) property:
 			parentDom._children = rootInternal;
