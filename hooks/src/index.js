@@ -35,7 +35,6 @@ options._render = internal => {
 	if (oldBeforeRender) oldBeforeRender(internal);
 
 	currentInternal = internal;
-	currentIdCounter = 0;
 	currentIndex = 0;
 
 	if (currentInternal.data && currentInternal.data.__hooks) {
