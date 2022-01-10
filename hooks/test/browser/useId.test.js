@@ -47,10 +47,10 @@ describe('useId', () => {
 		}
 
 		render(<Comp />, scratch);
-		expect(scratch.innerHTML).to.equal('<div id="001"><div id="011"><span id="012">h</span></div></div>')
+		expect(scratch.innerHTML).to.equal('<div id="2"><div id="4"><span id="5">h</span></div></div>')
 
 		render(<Comp />, scratch);
-		expect(scratch.innerHTML).to.equal('<div id="001"><div id="011"><span id="012">h</span></div></div>')
+		expect(scratch.innerHTML).to.equal('<div id="2"><div id="4"><span id="5">h</span></div></div>')
 	});
 
 	it('ids are unique across siblings', () => {
@@ -71,9 +71,9 @@ describe('useId', () => {
 		}
 
 		render(<Comp />, scratch);
-		expect(scratch.innerHTML).to.equal('')
+		expect(scratch.innerHTML).to.equal('<div id="5"><span id="7">h</span><span id="8">h</span><span id="9">h</span></div>')
 
 		render(<Comp />, scratch);
-		expect(scratch.innerHTML).to.equal('')
+		expect(scratch.innerHTML).to.equal('<div id="5"><span id="7">h</span><span id="8">h</span><span id="9">h</span></div>')
 	});
 });
