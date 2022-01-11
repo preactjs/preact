@@ -6,7 +6,8 @@ import {
 	Component,
 	createContext,
 	Fragment,
-	createRoot
+	createRoot,
+	createPortal
 } from 'preact';
 import {
 	useState,
@@ -26,7 +27,6 @@ import { forwardRef } from './forwardRef';
 import { Children } from './Children';
 import { Suspense, lazy } from './suspense';
 import { SuspenseList } from './suspense-list';
-import { createPortal } from './portals';
 import {
 	hydrate,
 	render,
