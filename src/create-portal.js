@@ -1,4 +1,4 @@
-import { createElement } from 'preact';
+import { createElement } from './create-element';
 
 /**
  * Portal component
