@@ -1,15 +1,15 @@
-import React, {
+import {
 	createElement,
 	render,
 	createPortal,
-	useState,
 	Component
-} from 'preact/compat';
-import { setupScratch, teardown } from '../../../test/_util/helpers';
-import { getLog, clearLog } from '../../../test/_util/logCall';
+} from 'preact';
+import { useState } from 'preact/hooks';
 import { setupRerender, act } from 'preact/test-utils';
+import { setupScratch, teardown } from '../_util/helpers';
+import { getLog, clearLog } from '../_util/logCall';
 
-/* eslint-disable react/jsx-boolean-value, react/display-name, prefer-arrow-callback */
+/** @jsx createElement */
 
 describe('Portal', () => {
 	/** @type {HTMLDivElement} */
