@@ -322,16 +322,16 @@ function parseBrowserOption(str, options) {
 		const mem = options.memory !== false;
 		config.addArguments = [
 			`--js-flags="${mem ? '--expose-gc ' : ''}--random-seed=1157259157"`,
-			mem && '--enable-precise-memory-info'
-			// '--disable-ipc-flooding-protection',
-			// '--disable-renderer-backgrounding',
-			// '--disable-background-timer-throttling',
-			// '--disable-backgrounding-occluded-windows',
-			// '--disable-hang-monitor',
-			// '--disable-device-discovery-notifications',
-			// '--disable-extensions',
-			// '--incognito',
-			// '--deterministic-mode',
+			mem && '--enable-precise-memory-info',
+			'--disable-ipc-flooding-protection',
+			'--disable-renderer-backgrounding',
+			'--disable-background-timer-throttling',
+			'--disable-backgrounding-occluded-windows',
+			'--disable-hang-monitor',
+			'--disable-device-discovery-notifications',
+			'--disable-extensions',
+			'--incognito',
+			'--deterministic-mode'
 			// '--no-sandbox'
 		].filter(Boolean);
 	}
