@@ -307,7 +307,12 @@ function parseBrowserOption(str, options) {
 	const name = str;
 
 	/** @type {BrowserConfigs} */
-	const config = { name, headless };
+	const config = { name };
+
+	if (config.name === 'chrome' || config.name === 'firefox') {
+		config.headless = headless;
+	}
+
 	if (remoteUrl !== undefined) {
 		config.remoteUrl = remoteUrl;
 	}
