@@ -327,12 +327,12 @@ function parseBrowserOption(str, options) {
 			'--disable-renderer-backgrounding',
 			'--disable-background-timer-throttling',
 			'--disable-backgrounding-occluded-windows',
-			'--disable-hang-monitor',
-			'--deterministic-mode'
+			// '--disable-hang-monitor',
 			// '--disable-device-discovery-notifications',
-			// '--disable-extensions',
-			// '--incognito',
-			// '--no-sandbox'
+			'--disable-extensions',
+			'--incognito',
+			'--no-sandbox'
+			// '--deterministic-mode'
 		].filter(Boolean);
 	}
 
