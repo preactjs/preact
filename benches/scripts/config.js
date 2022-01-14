@@ -328,10 +328,10 @@ function parseBrowserOption(str, options) {
 			'--disable-background-timer-throttling',
 			'--disable-backgrounding-occluded-windows',
 			'--disable-hang-monitor',
-			'--disable-device-discovery-notifications',
-			'--disable-extensions',
-			'--incognito',
 			'--deterministic-mode'
+			// '--disable-device-discovery-notifications',
+			// '--disable-extensions',
+			// '--incognito',
 			// '--no-sandbox'
 		].filter(Boolean);
 	}
