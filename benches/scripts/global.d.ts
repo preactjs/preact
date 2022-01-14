@@ -6,6 +6,7 @@ interface TachometerOptions {
 	horizon: string;
 	timeout: number;
 	trace: boolean;
+	memory: boolean;
 }
 
 interface DeoptOptions {
