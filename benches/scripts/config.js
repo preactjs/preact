@@ -321,18 +321,19 @@ function parseBrowserOption(str, options) {
 	if (config.name == 'chrome') {
 		const mem = options.memory !== false;
 		config.addArguments = [
-			`--js-flags="${mem ? '--expose-gc ' : ''}--random-seed=1157259157"`,
+			// Quoted values don't seem to work with WebDriver :(
+			// `--js-flags="${mem ? '--expose-gc ' : ''}--random-seed=1157259157"`,
+			mem && '--js-flags=--expose-gc',
 			mem && '--enable-precise-memory-info',
 			'--disable-ipc-flooding-protection',
 			'--disable-renderer-backgrounding',
 			'--disable-background-timer-throttling',
 			'--disable-backgrounding-occluded-windows',
-			// '--disable-hang-monitor',
-			// '--disable-device-discovery-notifications',
+			'--disable-hang-monitor',
+			'--disable-device-discovery-notifications',
 			'--disable-extensions',
 			'--incognito',
 			'--no-sandbox'
-			// '--deterministic-mode'
 		].filter(Boolean);
 	}
 
