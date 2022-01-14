@@ -321,8 +321,18 @@ function parseBrowserOption(str, options) {
 	if (config.name == 'chrome') {
 		const mem = options.memory !== false;
 		config.addArguments = [
-			`--js-flags="${mem ? '--expose-gc' : ''}"`,
-			mem && '--enable-precise-memory-info'
+			`--js-flags="${mem ? '--expose-gc ' : ''}--random-seed=1157259157"`,
+			'--disable-extensions',
+			mem && '--enable-precise-memory-info',
+			'--disable-ipc-flooding-protection',
+			'--disable-renderer-backgrounding',
+			'--disable-background-timer-throttling',
+			'--disable-backgrounding-occluded-windows',
+			'--disable-hang-monitor',
+			'--disable-device-discovery-notifications',
+			'--incognito',
+			'--deterministic-mode',
+			'--no-sandbox'
 		].filter(Boolean);
 	}
 
