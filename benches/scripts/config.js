@@ -84,7 +84,7 @@ function getBaseBenchmarkConfig(benchPath, options) {
 	let measurement;
 	if (name == '02_replace1k') {
 		// MUST BE KEPT IN SYNC WITH WARMUP COUNT IN 02_replace1k.html
-		const WARMUP_COUNT = 5;
+		const WARMUP_COUNT = 3;
 
 		// For 02_replace1k, collect additional measurements focusing on the JS
 		// clock time for each warmup and the final duration.
