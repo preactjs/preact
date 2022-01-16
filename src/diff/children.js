@@ -113,8 +113,9 @@ export function diffChildren(
 
 		newDom = childInternal._dom;
 
-		if (childVNode.ref) {
+		if (childVNode.ref || oldVNodeRef) {
 			if (!refs) refs = [];
+			childInternal.ref = childVNode.ref;
 			refs.push(
 				oldVNodeRef,
 				childVNode.ref,

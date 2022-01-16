@@ -1,7 +1,6 @@
-import { Component, createElement, options, Fragment } from 'preact';
+import { Component, createElement, options, Fragment, createPortal } from 'preact';
 import { TYPE_ELEMENT, MODE_HYDRATE } from '../../src/constants';
 import { getParentDom } from '../../src/tree';
-import { createPortal } from './portals';
 
 const oldCatchError = options._catchError;
 /** @type {(error: any, internal: import('./internal').Internal) => void} */
