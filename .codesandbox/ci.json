@@ -1,5 +1,5 @@
 {
   "sandboxes": ["preact-x-preact-cli-3-starter-vj285y2rn3"],
   "silent": true,
-  "node": "12"
+  "node": "14"
 }
