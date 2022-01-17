@@ -13,7 +13,7 @@ import {
 } from './constants';
 import { enqueueRender } from './component';
 
-const STUB_DOM = document.createElement('p');
+const STUB_DOM = typeof document === 'undefined' ? null : document.createElement('p');
 
 /**
  * Create an internal tree node
