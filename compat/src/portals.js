@@ -57,11 +57,18 @@ function Portal(props) {
 			};
 		}
 
-		// Render our wrapping element into temp.
-		render(
-			createElement(ContextProvider, { context: _this.context }, props._vnode),
-			_this._temp
+		const vnode = createElement(
+			ContextProvider,
+			{ context: _this.context },
+			props._vnode
 		);
+		Object.defineProperty(vnode, '__b', {
+			get: () => _this._vnode._depth + 1,
+			set: Object
+		});
+
+		// Render our wrapping element into temp.
+		render(vnode, _this._temp);
 	}
 	// When we come from a conditional render, on a mounted
 	// portal we should clear the DOM.
