@@ -13,6 +13,8 @@ import {
 } from './constants';
 import { enqueueRender } from './component';
 
+const STUB_DOM = document.createElement('p');
+
 /**
  * Create an internal tree node
  * @param {import('./internal').VNode | string} vnode
@@ -87,10 +89,10 @@ export function createInternal(vnode, parentInternal) {
 		data: typeof type == 'function' ? {} : null,
 		rerender: enqueueRender,
 		flags,
-		_children: null,
+		_children: [],
 		_parent: parentInternal,
 		_vnodeId: vnodeId,
-		_dom: null,
+		_dom: STUB_DOM,
 		_component: null,
 		_context: null,
 		_depth: parentInternal ? parentInternal._depth + 1 : 0
