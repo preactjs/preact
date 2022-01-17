@@ -291,11 +291,11 @@ function flushAfterPaintEffects() {
 	let component;
 	// sort the queue by depth (outermost to innermost)
 	afterPaintEffects.sort((a, b) => {
-		if (a._vnode._depth !== b._vnode._depth)
-			return a._vnode._depth - b._vnode._depth;
-		return (
-			b._vnode._parent._children.indexOf(b._vnode) -
-			a._vnode._parent._children.indexOf(a._vnode)
+		let vnodeA = a._vnode;
+		let vnodeB = b._vnode;
+		return (vnodeA._depth - vnodeB._depth) || (
+			vnodeB._parent._children.indexOf(vnodeB) -
+			vnodeA._parent._children.indexOf(vnodeA)
 		);
 	});
 	while ((component = afterPaintEffects.pop())) {
