@@ -3,10 +3,12 @@ import React, {
 	render,
 	createPortal,
 	useState,
-	Component
+	Component,
+	useEffect
 } from 'preact/compat';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { setupRerender, act } from 'preact/test-utils';
+import { expect } from 'chai';
 
 /* eslint-disable react/jsx-boolean-value, react/display-name, prefer-arrow-callback */
 
@@ -623,5 +625,43 @@ describe('Portal', () => {
 		expect(scratch.innerHTML).to.equal(
 			'<div><div>Closed</div><button>Show</button>Closed</div>'
 		);
+	});
+
+	it('should order effects well', () => {
+		const calls = [];
+		const Modal = ({ children }) => {
+			useEffect(() => {
+				calls.push('Modal');
+			}, []);
+			return createPortal(<div className="modal">{children}</div>, scratch);
+		};
+
+		const ModalButton = ({ i }) => {
+			useEffect(() => {
+				calls.push(`Button ${i}`);
+			}, []);
+
+			return <button>Action</button>;
+		};
+
+		const App = () => {
+			useEffect(() => {
+				calls.push('App');
+			}, []);
+
+			return (
+				<Modal>
+					<ModalButton i="1" />
+					<ModalButton i="2" />
+				</Modal>
+			);
+		};
+
+		act(() => {
+			render(<App />, scratch);
+		});
+		rerender();
+
+		expect(calls).to.deep.equal(['Button 1', 'Button 2', 'Modal', 'App']);
 	});
 });
