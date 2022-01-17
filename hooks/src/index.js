@@ -290,14 +290,11 @@ export function useErrorBoundary(cb) {
 function flushAfterPaintEffects() {
 	let component;
 	// sort the queue by depth (outermost to innermost)
-	afterPaintEffects.sort((a, b) => {
-		if (a._vnode._depth !== b._vnode._depth)
-			return a._vnode._depth - b._vnode._depth;
-		return (
+	afterPaintEffects.sort((a, b) => (a._vnode._depth - b._vnode._depth) || (
 			a._vnode._parent._children.indexOf(a._vnode) -
 			b._vnode._parent._children.indexOf(b._vnode)
 		);
-	});
+	);
 	while ((component = afterPaintEffects.pop())) {
 		if (!component._parentDom) continue;
 		try {
