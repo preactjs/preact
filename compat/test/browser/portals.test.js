@@ -659,8 +659,67 @@ describe('Portal', () => {
 		act(() => {
 			render(<App />, scratch);
 		});
-		rerender();
 
 		expect(calls).to.deep.equal(['Button 1', 'Button 2', 'Modal', 'App']);
+	});
+
+	it('should order complex effects well', () => {
+		const calls = [];
+		const Parent = ({ children, isPortal }) => {
+			useEffect(() => {
+				calls.push(`${isPortal ? 'Portal ' : ''}Parent`);
+			}, [isPortal]);
+
+			return <div>{children}</div>;
+		};
+
+		const Child = ({ index, isPortal }) => {
+			useEffect(() => {
+				calls.push(`${isPortal ? 'Portal ' : ''}Child ${index}`);
+			}, [index, isPortal]);
+
+			return <div>{index}</div>;
+		};
+
+		const Portal = () => {
+			const content = [1, 2, 3].map(index => (
+				<Child key={index} index={index} isPortal />
+			));
+
+			useEffect(() => {
+				calls.push('Portal');
+			}, []);
+
+			return createPortal(<Parent isPortal>{content}</Parent>, document.body);
+		};
+
+		const App = () => {
+			const content = [1, 2, 3].map(index => (
+				<Child key={index} index={index} />
+			));
+
+			return (
+				<React.Fragment>
+					<Parent>{content}</Parent>
+					<Portal />
+				</React.Fragment>
+			);
+		};
+
+		act(() => {
+			render(<App />, scratch);
+		});
+
+		expect(calls).to.deep.equal([
+			'Child 1',
+			'Child 2',
+			'Child 3',
+			'Parent',
+			'Portal Child 1',
+			'Portal Child 2',
+			'Portal Child 3',
+			'Portal Parent',
+			'Portal'
+		]);
 	});
 });
