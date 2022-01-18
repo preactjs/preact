@@ -293,8 +293,8 @@ function flushAfterPaintEffects() {
 	afterPaintEffects.sort(
 		(a, b) =>
 			a._vnode._depth - b._vnode._depth ||
-			a._vnode._parent._children.indexOf(a._vnode) -
-				b._vnode._parent._children.indexOf(b._vnode)
+			b._vnode._parent._children.indexOf(b._vnode) -
+				a._vnode._parent._children.indexOf(a._vnode)
 	);
 	while ((component = afterPaintEffects.pop())) {
 		if (!component._parentDom) continue;

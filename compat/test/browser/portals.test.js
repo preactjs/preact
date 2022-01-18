@@ -661,6 +661,6 @@ describe('Portal', () => {
 		});
 		rerender();
 
-		expect(calls).to.deep.equal(['Button 2', 'Button 1', 'Modal', 'App']);
+		expect(calls).to.deep.equal(['Button 1', 'Button 2', 'Modal', 'App']);
 	});
 });
