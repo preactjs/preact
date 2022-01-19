@@ -436,14 +436,14 @@ describe('refs', () => {
 	});
 
 	it('should correctly unmount refs', () => {
-		const called = []
-		const mock = (x) => {
+		const called = [];
+		const mock = x => {
 			called.push(x);
-		}
+		};
 
 		const App = ({ withRef, unmount }) => {
-			return unmount ? null : <div ref={withRef ? mock : undefined}>hi</div>
-		}
+			return unmount ? null : <div ref={withRef ? mock : undefined}>hi</div>;
+		};
 
 		render(<App />, scratch);
 		expect(called.length).to.be.equal(0);
@@ -477,5 +477,36 @@ describe('refs', () => {
 
 		render(<App />, scratch);
 		expect(el).to.not.be.equal(null);
+	});
+
+	it('should correctly (un)mount refs', () => {
+		let el = [];
+		let ref = { current: null };
+		let refFunc = e => {
+			el = e;
+		};
+
+		class App extends Component {
+			render({ apply }) {
+				return (
+					<div>
+						<div ref={apply ? ref : undefined}>Foo</div>
+						<div ref={apply ? refFunc : undefined}>Bar</div>
+					</div>
+				);
+			}
+		}
+
+		render(<App apply />, scratch);
+		expect(el.innerHTML).to.be.equal('Bar');
+		expect(ref.current.innerHTML).to.be.equal('Foo');
+
+		render(<App apply={false} />, scratch);
+		expect(el).to.be.equal(null);
+		expect(ref.current).to.be.equal(null);
+
+		render(<App apply />, scratch);
+		expect(el.innerHTML).to.be.equal('Bar');
+		expect(ref.current.innerHTML).to.be.equal('Foo');
 	});
 });
