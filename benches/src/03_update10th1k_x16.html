@@ -26,12 +26,12 @@
 			import {
 				measureName,
 				measureMemory,
-				afterFrame,
 				afterFrameAsync,
 				getRowLinkSel,
 				testElement,
 				testElementTextContains,
-				mutateAndLayout,
+				mutateAndLayoutAsync,
+				sleep,
 				raf
 			} from './util.js';
 			import * as framework from 'framework';
@@ -66,14 +66,17 @@
 			}
 
 			async function run() {
-				await afterFrameAsync();
+				await sleep(100);
 
 				const REPEAT = 50;
-				performance.mark('start');
-				await mutateAndLayout(update, REPEAT);
-				testElementTextContains(getRowLinkSel(991), repeat(' !!!', 3 + REPEAT));
+				await mutateAndLayoutAsync(iteration => {
+					if (iteration === 0) performance.mark('start');
+					update();
+				}, REPEAT);
 				performance.mark('stop');
 				performance.measure(measureName, 'start', 'stop');
+
+				testElementTextContains(getRowLinkSel(991), repeat(' !!!', 3 + REPEAT));
 
 				await raf();
 				measureMemory();
