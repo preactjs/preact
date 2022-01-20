@@ -6,6 +6,7 @@ on:
       - '**'
     paths:
       - '**/src/**.js'
+      - '**/pacakge.json'
 
 jobs:
   build:
