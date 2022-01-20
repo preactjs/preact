@@ -478,4 +478,24 @@ describe('compat render', () => {
 
 		expect(scratch.textContent).to.equal('foo');
 	});
+
+	it("should support mui's usage of __SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED", () => {
+		const {
+			ReactCurrentOwner
+		} = React.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
+
+		function Bar() {
+			expect(ReactCurrentOwner.current.type.name).to.equal('Bar');
+			return 'hi';
+		}
+
+		function Foo() {
+			expect(ReactCurrentOwner.current.type.name).to.equal('Foo');
+			return <Bar />;
+		}
+
+		React.render(<Foo />, scratch);
+
+		expect(scratch.textContent).to.equal('hi');
+	});
 });

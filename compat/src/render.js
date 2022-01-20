@@ -123,8 +123,7 @@ options.vnode = vnode => {
 			if (IS_DOM && i === 'children' && type === 'noscript') {
 				// Emulate React's behavior of not rendering the contents of noscript tags on the client.
 				continue;
-			}
-			else if (i === 'value' && 'defaultValue' in props && value == null) {
+			} else if (i === 'value' && 'defaultValue' in props && value == null) {
 				// Skip applying value if it is null/undefined and we already set
 				// a default value
 				continue;
@@ -212,6 +211,8 @@ options._render = function(vnode) {
 	if (oldBeforeRender) {
 		oldBeforeRender(vnode);
 	}
+
+	__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED.ReactCurrentOwner.current = vnode;
 	currentComponent = vnode._component;
 };
 
@@ -220,6 +221,9 @@ options._render = function(vnode) {
 // only `react-relay` makes use of it. It uses it to read the
 // context value.
 export const __SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED = {
+	ReactCurrentOwner: {
+		current: null
+	},
 	ReactCurrentDispatcher: {
 		current: {
 			readContext(context) {
