@@ -2,9 +2,10 @@ import {
 	createElement,
 	render,
 	createPortal,
-	Component
+	Component,
+	Fragment
 } from 'preact';
-import { useState } from 'preact/hooks';
+import { useState, useEffect } from 'preact/hooks';
 import { setupRerender, act } from 'preact/test-utils';
 import { setupScratch, teardown } from '../_util/helpers';
 import { getLog, clearLog } from '../_util/logCall';
@@ -660,5 +661,102 @@ describe('Portal', () => {
 			'<div>foobar</div><div><p>Hello</p><p>World!</p></div>'
 		);
 		expect(getLog()).to.deep.equal([]);
+	});
+
+	it('should order effects well', () => {
+		const calls = [];
+		const Modal = ({ children }) => {
+			useEffect(() => {
+				calls.push('Modal');
+			}, []);
+			return createPortal(<div className="modal">{children}</div>, scratch);
+		};
+
+		const ModalButton = ({ i }) => {
+			useEffect(() => {
+				calls.push(`Button ${i}`);
+			}, []);
+
+			return <button>Action</button>;
+		};
+
+		const App = () => {
+			useEffect(() => {
+				calls.push('App');
+			}, []);
+
+			return (
+				<Modal>
+					<ModalButton i="1" />
+					<ModalButton i="2" />
+				</Modal>
+			);
+		};
+
+		act(() => {
+			render(<App />, scratch);
+		});
+
+		expect(calls).to.deep.equal(['Button 1', 'Button 2', 'Modal', 'App']);
+	});
+
+	it('should order complex effects well', () => {
+		const calls = [];
+		const Parent = ({ children, isPortal }) => {
+			useEffect(() => {
+				calls.push(`${isPortal ? 'Portal ' : ''}Parent`);
+			}, [isPortal]);
+
+			return <div>{children}</div>;
+		};
+
+		const Child = ({ index, isPortal }) => {
+			useEffect(() => {
+				calls.push(`${isPortal ? 'Portal ' : ''}Child ${index}`);
+			}, [index, isPortal]);
+
+			return <div>{index}</div>;
+		};
+
+		const Portal = () => {
+			const content = [1, 2, 3].map(index => (
+				<Child key={index} index={index} isPortal />
+			));
+
+			useEffect(() => {
+				calls.push('Portal');
+			}, []);
+
+			return createPortal(<Parent isPortal>{content}</Parent>, document.body);
+		};
+
+		const App = () => {
+			const content = [1, 2, 3].map(index => (
+				<Child key={index} index={index} />
+			));
+
+			return (
+				<Fragment>
+					<Parent>{content}</Parent>
+					<Portal />
+				</Fragment>
+			);
+		};
+
+		act(() => {
+			render(<App />, scratch);
+		});
+
+		expect(calls).to.deep.equal([
+			'Child 1',
+			'Child 2',
+			'Child 3',
+			'Parent',
+			'Portal Child 1',
+			'Portal Child 2',
+			'Portal Child 3',
+			'Portal Parent',
+			'Portal'
+		]);
 	});
 });

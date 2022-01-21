@@ -312,8 +312,7 @@ export function useErrorBoundary(cb) {
  */
 function flushAfterPaintEffects() {
 	let internal;
-	afterPaintEffects.sort((a, b) => a._depth - b._depth);
-	while ((internal = afterPaintEffects.pop())) {
+	while ((internal = afterPaintEffects.shift())) {
 		if (~internal.flags & MODE_UNMOUNTING) {
 			try {
 				internal.data.__hooks._pendingEffects.forEach(invokeCleanup);
