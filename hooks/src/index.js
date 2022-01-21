@@ -45,7 +45,7 @@ options.diffed = vnode => {
 
 	const c = vnode._component;
 	if (c && c.__hooks && c.__hooks._pendingEffects.length) {
-		afterPaint(afterPaintEffects.push(c));
+		afterPaint(afterPaintEffects.unshift(c));
 	}
 	currentComponent = null;
 };
@@ -289,13 +289,6 @@ export function useErrorBoundary(cb) {
  */
 function flushAfterPaintEffects() {
 	let component;
-	// sort the queue by depth (outermost to innermost)
-	afterPaintEffects.sort(
-		(a, b) =>
-			a._vnode._depth - b._vnode._depth ||
-			b._vnode._parent._children.indexOf(b._vnode) -
-				a._vnode._parent._children.indexOf(a._vnode)
-	);
 	while ((component = afterPaintEffects.pop())) {
 		if (!component._parentDom) continue;
 		try {
