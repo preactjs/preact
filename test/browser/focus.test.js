@@ -150,29 +150,6 @@ describe('focus', () => {
 		teardown(scratch);
 	});
 
-	it.skip('should maintain focus when swapping elements', () => {
-		render(
-			<List>
-				<Input />
-				<ListItem>fooo</ListItem>
-			</List>,
-			scratch
-		);
-
-		const input = focusInput();
-		expect(scratch.innerHTML).to.equal(getListHtml([], ['fooo']));
-
-		render(
-			<List>
-				<ListItem>fooo</ListItem>
-				<Input />
-			</List>,
-			scratch
-		);
-		validateFocus(input);
-		expect(scratch.innerHTML).to.equal(getListHtml(['fooo'], []));
-	});
-
 	it('should maintain focus when moving the input around', () => {
 		function App({ showFirst, showLast }) {
 			return (

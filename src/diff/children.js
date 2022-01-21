@@ -66,6 +66,7 @@ export function diffChildren(
 			skewedIndex,
 			remainingOldChildren
 		);
+
 		if (matchingIndex === -1) {
 			childInternal = UNDEFINED;
 		} else {
