@@ -45,7 +45,7 @@ options.diffed = vnode => {
 
 	const c = vnode._component;
 	if (c && c.__hooks && c.__hooks._pendingEffects.length) {
-		afterPaint(afterPaintEffects.unshift(c));
+		afterPaint(afterPaintEffects.push(c));
 	}
 	currentComponent = null;
 };
@@ -289,7 +289,7 @@ export function useErrorBoundary(cb) {
  */
 function flushAfterPaintEffects() {
 	let component;
-	while ((component = afterPaintEffects.pop())) {
+	while ((component = afterPaintEffects.shift())) {
 		if (!component._parentDom) continue;
 		try {
 			component.__hooks._pendingEffects.forEach(invokeCleanup);
