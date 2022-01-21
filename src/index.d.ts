@@ -248,7 +248,7 @@ export function cloneElement<P>(
 // -----------------------------------
 
 // TODO: Revisit what the public type of this is...
-export const Fragment: ComponentClass<{}, {}>;
+export const Fragment: FunctionComponent<{}>;
 
 //
 // Preact options
