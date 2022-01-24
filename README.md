@@ -33,6 +33,7 @@
 [![coveralls](https://img.shields.io/coveralls/preactjs/preact/master.svg)](https://coveralls.io/github/preactjs/preact)
 [![gzip size](http://img.badgesize.io/https://unpkg.com/preact/dist/preact.min.js?compression=gzip&label=gzip)](https://unpkg.com/preact/dist/preact.min.js)
 [![brotli size](http://img.badgesize.io/https://unpkg.com/preact/dist/preact.min.js?compression=brotli&label=brotli)](https://unpkg.com/preact/dist/preact.min.js)
+[![Maintainability](https://cloud.quality-gate.com/dashboard/api/badge?projectName=preactjs_preact&branchName=master)](https://cloud.quality-gate.com/dashboard/branches/494355#overview)
 </td>
 <td>
 
