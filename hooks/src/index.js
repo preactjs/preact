@@ -289,9 +289,7 @@ export function useErrorBoundary(cb) {
  */
 function flushAfterPaintEffects() {
 	let component;
-	// sort the queue by depth (outermost to innermost)
-	afterPaintEffects.sort((a, b) => a._vnode._depth - b._vnode._depth);
-	while (component = afterPaintEffects.pop()) {
+	while ((component = afterPaintEffects.shift())) {
 		if (!component._parentDom) continue;
 		try {
 			component.__hooks._pendingEffects.forEach(invokeCleanup);
