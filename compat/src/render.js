@@ -166,7 +166,7 @@ options.vnode = vnode => {
 				i = 'onfocusin';
 			} else if (/^onblur$/i.test(i)) {
 				i = 'onfocusout';
-			} else if (/^on(Ani|Tra|Tou|BeforeInp)/.test(i)) {
+			} else if (/^on(Ani|Tra|Tou|BeforeInp|Compo)/.test(i)) {
 				i = i.toLowerCase();
 			} else if (nonCustomElement && CAMEL_PROPS.test(i)) {
 				i = i.replace(/[A-Z0-9]/, '-$&').toLowerCase();
