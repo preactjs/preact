@@ -203,7 +203,7 @@ export function useLayoutEffect(callback, args) {
 
 export function useRef(initialValue) {
 	currentHook = 5;
-	return useState({ current: initialValue })[0];
+	return useReducer(invokeEffect, { current: initialValue })[0];
 }
 
 /**
