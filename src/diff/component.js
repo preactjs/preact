@@ -46,13 +46,14 @@ export function renderFunctionComponent(
 	internal.props = c.props = newProps;
 
 	c._internal = internal;
-	// eslint-disable-next-line
-	while (1) {
+	let counter = 0;
+	while (counter < 25) {
+		counter++;
 		internal.flags &= ~DIRTY_BIT;
 		if ((tmp = options._render)) tmp(internal);
 		tmp = type.call(c, c.props, c.context);
 		if (!(internal.flags & DIRTY_BIT)) {
-			break;
+			counter = 25;
 		}
 	}
 
