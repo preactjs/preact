@@ -9,17 +9,12 @@ import {
 	TYPE_COMPONENT,
 	TYPE_DOM,
 	MODE_SVG,
-	UNDEFINED
+	UNDEFINED,
+	EMPTY_ELEMENT
 } from './constants';
 import { enqueueRender } from './component';
 
-/**
- * Create an internal tree node
- * @param {import('./internal').VNode | string} vnode
- * @param {import('./internal').Internal} [parentInternal]
- * @returns {import('./internal').Internal}
- */
-export function createInternal(vnode, parentInternal) {
+function Internal(vnode, parentInternal) {
 	let type = null,
 		props,
 		key,
@@ -78,26 +73,33 @@ export function createInternal(vnode, parentInternal) {
 		}
 	}
 
-	/** @type {import('./internal').Internal} */
-	const internal = {
-		type,
-		props,
-		key,
-		ref,
-		data: typeof type == 'function' ? {} : null,
-		rerender: enqueueRender,
-		flags,
-		_children: null,
-		_parent: parentInternal,
-		_vnodeId: vnodeId,
-		_dom: null,
-		_component: null,
-		_context: null,
-		_depth: parentInternal ? parentInternal._depth + 1 : 0
-	};
+	this.type = type;
+	this.props = props;
+	this.key = key;
+	this.ref = ref;
+	this.rerender = enqueueRender;
+	this.flags = flags;
+	this.data = typeof type == 'function' ? {} : null;
 
-	if (options._internal) options._internal(internal, vnode);
+	this._commitCallbacks = [];
+	this._children = null;
+	this._component = null;
+	this._context = null;
+	this._depth = parentInternal ? parentInternal._depth + 1 : 0;
+	this._parent = parentInternal;
+	this._dom = EMPTY_ELEMENT;
+	this._vnodeId = vnodeId;
+}
 
+/**
+ * Create an internal tree node
+ * @param {import('./internal').VNode | string} vnode
+ * @param {import('./internal').Internal} [parentInternal]
+ * @returns {import('./internal').Internal}
+ */
+export function createInternal(vnode, parentInternal) {
+	const internal = new Internal(vnode, parentInternal);
+	if (options._internal) options._internal(this, vnode);
 	return internal;
 }
 
