@@ -9,8 +9,7 @@ import {
 	TYPE_COMPONENT,
 	TYPE_DOM,
 	MODE_SVG,
-	UNDEFINED,
-	EMPTY_ELEMENT
+	UNDEFINED
 } from './constants';
 import { enqueueRender } from './component';
 
@@ -85,11 +84,13 @@ function Internal(vnode, parentInternal) {
 	this._children = null;
 	this._component = null;
 	this._context = null;
+	this._dom = null;
 
 	this._depth = parentInternal ? parentInternal._depth + 1 : 0;
 	this._parent = parentInternal;
-	this._dom = EMPTY_ELEMENT;
 	this._vnodeId = vnodeId;
+
+	if (options._internal) options._internal(this, vnode);
 }
 
 /**
@@ -99,9 +100,7 @@ function Internal(vnode, parentInternal) {
  * @returns {import('./internal').Internal}
  */
 export function createInternal(vnode, parentInternal) {
-	const internal = new Internal(vnode, parentInternal);
-	if (options._internal) options._internal(internal, vnode);
-	return internal;
+	return new Internal(vnode, parentInternal);
 }
 
 const shouldSearchComponent = internal =>

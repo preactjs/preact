@@ -64,4 +64,3 @@ export const INHERITED_MODES = MODE_HYDRATE | MODE_MUTATIVE_HYDRATE | MODE_SVG;
 
 export const EMPTY_ARR = [];
 export const UNDEFINED = undefined;
-export const EMPTY_ELEMENT = document.createElement('template');
