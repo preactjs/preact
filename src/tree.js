@@ -81,10 +81,11 @@ function Internal(vnode, parentInternal) {
 	this.flags = flags;
 	this.data = typeof type == 'function' ? {} : null;
 
-	this._commitCallbacks = [];
+	this._commitCallbacks = null;
 	this._children = null;
 	this._component = null;
 	this._context = null;
+
 	this._depth = parentInternal ? parentInternal._depth + 1 : 0;
 	this._parent = parentInternal;
 	this._dom = EMPTY_ELEMENT;
@@ -99,7 +100,7 @@ function Internal(vnode, parentInternal) {
  */
 export function createInternal(vnode, parentInternal) {
 	const internal = new Internal(vnode, parentInternal);
-	if (options._internal) options._internal(this, vnode);
+	if (options._internal) options._internal(internal, vnode);
 	return internal;
 }
 

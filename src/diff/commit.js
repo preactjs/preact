@@ -5,6 +5,10 @@ import options from '../options';
  * @param {() => void} callback
  */
 export function addCommitCallback(internal, callback) {
+	if (internal._commitCallbacks == null) {
+		internal._commitCallbacks = [];
+	}
+
 	internal._commitCallbacks.push(callback);
 }
 
