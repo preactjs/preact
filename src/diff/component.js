@@ -56,6 +56,7 @@ export function renderFunctionComponent(
 			counter = 25;
 		}
 	}
+	internal.flags &= ~DIRTY_BIT;
 
 	if (c.getChildContext != null) {
 		internal._context = Object.assign({}, context, c.getChildContext());
