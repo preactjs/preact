@@ -13,7 +13,13 @@ import {
 } from './constants';
 import { enqueueRender } from './component';
 
-function Internal(vnode, parentInternal) {
+/**
+ * Create an internal tree node
+ * @param {import('./internal').VNode | string} vnode
+ * @param {import('./internal').Internal} [parentInternal]
+ * @returns {import('./internal').Internal}
+ */
+export function createInternal(vnode, parentInternal) {
 	let type = null,
 		props,
 		key,
@@ -72,35 +78,28 @@ function Internal(vnode, parentInternal) {
 		}
 	}
 
-	this.type = type;
-	this.props = props;
-	this.key = key;
-	this.ref = ref;
-	this.rerender = enqueueRender;
-	this.flags = flags;
-	this.data = typeof type == 'function' ? {} : null;
+	/** @type {import('./internal').Internal} */
+	const internal = {
+		type,
+		props,
+		key,
+		ref,
+		data: typeof type == 'function' ? {} : null,
+		rerender: enqueueRender,
+		flags,
+		_parent: parentInternal,
+		_vnodeId: vnodeId,
+		_renderCallbacks: null,
+		_children: null,
+		_dom: null,
+		_component: null,
+		_context: null,
+		_depth: parentInternal ? parentInternal._depth + 1 : 0
+	};
 
-	this._commitCallbacks = null;
-	this._children = null;
-	this._component = null;
-	this._context = null;
-	this._dom = null;
+	if (options._internal) options._internal(internal, vnode);
 
-	this._depth = parentInternal ? parentInternal._depth + 1 : 0;
-	this._parent = parentInternal;
-	this._vnodeId = vnodeId;
-
-	if (options._internal) options._internal(this, vnode);
-}
-
-/**
- * Create an internal tree node
- * @param {import('./internal').VNode | string} vnode
- * @param {import('./internal').Internal} [parentInternal]
- * @returns {import('./internal').Internal}
- */
-export function createInternal(vnode, parentInternal) {
-	return new Internal(vnode, parentInternal);
+	return internal;
 }
 
 const shouldSearchComponent = internal =>

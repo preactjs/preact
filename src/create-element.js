@@ -37,6 +37,19 @@ export function createElement(type, props, children) {
 	return createVNode(type, normalizedProps, key, ref, 0);
 }
 
+function VNode(type, props, key, ref, original) {
+	// V8 seems to be better at detecting type shapes if the object is allocated from the same call site
+	// Do not inline into createElement and coerceToVNode!
+	this.type = type;
+	this.props = props;
+	this.key = key;
+	this.ref = ref;
+	this.constructor = undefined;
+	this._vnodeId = original || ++vnodeId;
+
+	if (options.vnode != null) options.vnode(this);
+}
+
 /**
  * Create a VNode (used internally by Preact)
  * @param {import('./internal').VNode["type"]} type The node name or Component
@@ -50,20 +63,7 @@ export function createElement(type, props, children) {
  * @returns {import('./internal').VNode}
  */
 export function createVNode(type, props, key, ref, original) {
-	// V8 seems to be better at detecting type shapes if the object is allocated from the same call site
-	// Do not inline into createElement and coerceToVNode!
-	const vnode = {
-		type,
-		props,
-		key,
-		ref,
-		constructor: undefined,
-		_vnodeId: original || ++vnodeId
-	};
-
-	if (options.vnode != null) options.vnode(vnode);
-
-	return vnode;
+	return new VNode(type, props, key, ref, original);
 }
 
 /**
