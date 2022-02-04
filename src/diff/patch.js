@@ -20,7 +20,7 @@ import {
 } from '../constants';
 import { getDomSibling, getParentContext } from '../tree';
 import { mountChildren } from './mount';
-import { Fragment } from '../create-element';
+import { Fragment, VNode } from '../create-element';
 
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
@@ -45,7 +45,7 @@ export function patch(parentDom, newVNode, internal, commitQueue) {
 
 	// When passing through createElement it assigns the object
 	// constructor as undefined. This to prevent JSON-injection.
-	if (newVNode.constructor !== UNDEFINED) return null;
+	if (newVNode.constructor !== VNode) return null;
 
 	if (options._diff) options._diff(internal, newVNode);
 

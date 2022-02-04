@@ -37,14 +37,12 @@ export function createElement(type, props, children) {
 	return createVNode(type, normalizedProps, key, ref, 0);
 }
 
-function VNode(type, props, key, ref, original) {
-	// V8 seems to be better at detecting type shapes if the object is allocated from the same call site
-	// Do not inline into createElement and coerceToVNode!
+export function VNode(type, props, key, ref, original) {
 	this.type = type;
 	this.props = props;
 	this.key = key;
 	this.ref = ref;
-	this.constructor = undefined;
+	this.constructor = VNode;
 	this._vnodeId = original || ++vnodeId;
 
 	if (options.vnode != null) options.vnode(this);
@@ -101,4 +99,4 @@ export function Fragment(props) {
  * @returns {vnode is import('./internal').VNode}
  */
 export const isValidElement = vnode =>
-	vnode != null && vnode.constructor === UNDEFINED;
+	vnode != null && vnode.constructor === VNode;

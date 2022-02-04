@@ -12,6 +12,7 @@ import {
 	UNDEFINED
 } from './constants';
 import { enqueueRender } from './component';
+import { VNode } from './create-element';
 
 /**
  * Create an internal tree node
@@ -35,7 +36,7 @@ export function createInternal(vnode, parentInternal) {
 		// type = null;
 		flags |= TYPE_TEXT;
 		props = vnode;
-	} else if (vnode.constructor !== UNDEFINED) {
+	} else if (vnode.constructor !== VNode) {
 		flags |= TYPE_TEXT;
 		props = '';
 	} else {

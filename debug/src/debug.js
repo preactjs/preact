@@ -1,5 +1,5 @@
 import { checkPropTypes } from './check-props';
-import { options, Component } from 'preact';
+import { options, Component, createElement } from 'preact';
 import {
 	ELEMENT_NODE,
 	DOCUMENT_NODE,
@@ -14,6 +14,7 @@ import {
 import { MODE_UNMOUNTING } from 'preact/src/constants';
 import { IS_NON_DIMENSIONAL } from 'preact/compat/src/util';
 
+const el = createElement('p', {});
 const isWeakMapSupported = typeof WeakMap == 'function';
 
 function getClosestDomNodeParent(parent) {
@@ -119,7 +120,7 @@ export function initDebug() {
 		// move this check into `options.vnode` because components can receive
 		// children in any shape they want (e.g.
 		// `<MyJSONFormatter>{{ foo: 123, bar: "abc" }}</MyJSONFormatter>`).
-		if (vnode.constructor !== undefined) {
+		if (vnode.constructor !== el.constructor) {
 			const keys = Object.keys(vnode).join(',');
 			throw new Error(
 				`Objects are not valid as a child. Encountered an object with the keys {${keys}}.` +
@@ -137,7 +138,7 @@ export function initDebug() {
 					`\n\n${getOwnerStack(internal)}`
 			);
 		} else if (type != null && typeof type == 'object') {
-			if (type.constructor === undefined) {
+			if (type.constructor === el.constructor) {
 				throw new Error(
 					`Invalid type passed to createElement(): ${type}\n\n` +
 						'Did you accidentally pass a JSX literal as JSX twice?\n\n' +

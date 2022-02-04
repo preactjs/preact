@@ -1,5 +1,6 @@
 import { createElement } from '../../';
 import { expect } from 'chai';
+import { VNode } from 'preact/src/create-element';
 
 const h = createElement;
 /** @jsx createElement */
@@ -35,7 +36,7 @@ describe('createElement(jsx)', () => {
 
 	it('should set VNode.constructor property to prevent json injection', () => {
 		const vnode = <span />;
-		expect(vnode.constructor).to.equal(undefined);
+		expect(vnode.constructor).to.equal(VNode);
 	});
 
 	it('should set VNode#props property', () => {
