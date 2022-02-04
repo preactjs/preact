@@ -42,9 +42,22 @@ options._render = internal => {
 			currentInternal.data.__hooks._pendingEffects = [];
 			currentInternal._commitCallbacks = [];
 			currentInternal.data.__hooks._list.forEach(hookItem => {
-				if (hookItem._args) hookItem._args = undefined;
+				if (hookItem._pendingArgs) hookItem._pendingArgs = undefined;
 			});
 		} else {
+			if (internal.data && internal.data.__hooks) {
+				internal.data &&
+					internal.data.__hooks._list.forEach(hookItem => {
+						if (hookItem._pendingArgs) {
+							hookItem._args = hookItem._pendingArgs;
+							hookItem._pendingArgs = undefined;
+						}
+						if (hookItem._pendingValue) {
+							hookItem._value = hookItem._pendingValue;
+							hookItem._pendingValue = undefined;
+						}
+					});
+			}
 			currentInternal.data.__hooks._pendingEffects.forEach(invokeCleanup);
 			currentInternal.data.__hooks._pendingEffects.forEach(invokeEffect);
 			currentInternal.data.__hooks._pendingEffects = [];
@@ -69,6 +82,19 @@ options.diffed = internal => {
 options._commit = (internal, commitQueue) => {
 	commitQueue.some(internal => {
 		try {
+			if (internal.data && internal.data.__hooks) {
+				internal.data &&
+					internal.data.__hooks._list.forEach(hookItem => {
+						if (hookItem._pendingArgs) {
+							hookItem._args = hookItem._pendingArgs;
+							hookItem._pendingArgs = undefined;
+						}
+						if (hookItem._pendingValue) {
+							hookItem._value = hookItem._pendingValue;
+							hookItem._pendingValue = undefined;
+						}
+					});
+			}
 			internal._commitCallbacks.forEach(invokeCleanup);
 			internal._commitCallbacks = internal._commitCallbacks.filter(cb =>
 				cb._value ? invokeEffect(cb) : true
@@ -177,7 +203,7 @@ export function useEffect(callback, args) {
 	const state = getHookState(currentIndex++, 3);
 	if (!options._skipEffects && argsChanged(state._args, args)) {
 		state._value = callback;
-		state._args = args;
+		state._pendingArgs = args;
 
 		currentInternal.data.__hooks._pendingEffects.push(state);
 	}
@@ -192,7 +218,7 @@ export function useLayoutEffect(callback, args) {
 	const state = getHookState(currentIndex++, 4);
 	if (!options._skipEffects && argsChanged(state._args, args)) {
 		state._value = callback;
-		state._args = args;
+		state._pendingArgs = args;
 
 		if (currentInternal._commitCallbacks == null) {
 			currentInternal._commitCallbacks = [];
@@ -230,9 +256,10 @@ export function useMemo(factory, args) {
 	/** @type {import('./internal').MemoHookState} */
 	const state = getHookState(currentIndex++, 7);
 	if (argsChanged(state._args, args)) {
-		state._value = factory();
-		state._args = args;
+		state._pendingValue = factory();
+		state._pendingArgs = args;
 		state._factory = factory;
+		return state._pendingValue;
 	}
 
 	return state._value;
