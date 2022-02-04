@@ -8,6 +8,9 @@ let currentIndex;
 /** @type {import('./internal').Internal} */
 let currentInternal;
 
+/** @type {import('./internal').Internal} */
+let previousInternal;
+
 /** @type {number} */
 let currentHook = 0;
 
@@ -35,15 +38,25 @@ options._render = internal => {
 	currentIndex = 0;
 
 	if (currentInternal.data && currentInternal.data.__hooks) {
-		currentInternal.data.__hooks._pendingEffects.forEach(invokeCleanup);
-		currentInternal.data.__hooks._pendingEffects.forEach(invokeEffect);
-		currentInternal.data.__hooks._pendingEffects = [];
+		if (previousInternal === currentInternal) {
+			currentInternal.data.__hooks._pendingEffects = [];
+			currentInternal._commitCallbacks = [];
+			currentInternal.data.__hooks._list.forEach(hookItem => {
+				if (hookItem._args) hookItem._args = undefined;
+			});
+		} else {
+			currentInternal.data.__hooks._pendingEffects.forEach(invokeCleanup);
+			currentInternal.data.__hooks._pendingEffects.forEach(invokeEffect);
+			currentInternal.data.__hooks._pendingEffects = [];
+		}
 	}
+	previousInternal = internal;
 };
 
 options.diffed = internal => {
 	if (oldAfterDiff) oldAfterDiff(internal);
 
+	previousInternal = undefined;
 	if (
 		internal.data &&
 		internal.data.__hooks &&
@@ -190,7 +203,7 @@ export function useLayoutEffect(callback, args) {
 
 export function useRef(initialValue) {
 	currentHook = 5;
-	return useMemo(() => ({ current: initialValue }), []);
+	return useReducer(invokeEffect, { current: initialValue })[0];
 }
 
 /**

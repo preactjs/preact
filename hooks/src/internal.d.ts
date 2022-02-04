@@ -7,9 +7,11 @@ import { Reducer } from '.';
 
 export { PreactContext };
 
-export type Internal = PreactInternal & {
-	_component: Component;
-};
+export interface Internal extends PreactInternal {
+	data: PreactInternal.data & {
+		__hooks: ComponentHooks;
+	};
+}
 
 /**
  * The type of arguments passed to a Hook function. While this type is not

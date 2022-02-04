@@ -45,12 +45,18 @@ export function renderFunctionComponent(
 	c.context = componentContext;
 	internal.props = c.props = newProps;
 
-	if ((tmp = options._render)) tmp(internal);
-
-	internal.flags &= ~DIRTY_BIT;
 	c._internal = internal;
-
-	tmp = type.call(c, c.props, c.context);
+	let counter = 0;
+	while (counter < 25) {
+		counter++;
+		internal.flags &= ~DIRTY_BIT;
+		if ((tmp = options._render)) tmp(internal);
+		tmp = type.call(c, c.props, c.context);
+		if (!(internal.flags & DIRTY_BIT)) {
+			counter = 25;
+		}
+	}
+	internal.flags &= ~DIRTY_BIT;
 
 	if (c.getChildContext != null) {
 		internal._context = Object.assign({}, context, c.getChildContext());
