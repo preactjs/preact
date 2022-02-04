@@ -43,6 +43,7 @@ options._render = internal => {
 			currentInternal._commitCallbacks = [];
 			currentInternal.data.__hooks._list.forEach(hookItem => {
 				if (hookItem._pendingArgs) hookItem._pendingArgs = undefined;
+				if (hookItem._pendingValue) hookItem._pendingValue = undefined;
 			});
 		} else {
 			if (internal.data && internal.data.__hooks) {
