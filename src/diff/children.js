@@ -303,8 +303,11 @@ function placeChild(
 		newDom != oldDom ||
 		newDom.parentNode == null
 	) {
+		let target =
+			parentDom.nodeName === 'TEMPLATE' ? parentDom.content : parentDom;
+
 		outer: if (oldDom == null || oldDom.parentNode !== parentDom) {
-			parentDom.appendChild(newDom);
+			target.appendChild(newDom);
 			nextDom = null;
 		} else {
 			// `j<oldChildrenLength; j+=2` is an alternative to `j++<oldChildrenLength/2`
@@ -317,7 +320,7 @@ function placeChild(
 					break outer;
 				}
 			}
-			parentDom.insertBefore(newDom, oldDom);
+			target.insertBefore(newDom, oldDom);
 			nextDom = oldDom;
 		}
 	}

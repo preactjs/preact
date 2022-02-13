@@ -138,6 +138,18 @@ describe('render()', () => {
 		}
 	});
 
+	it('should append to .content for <template>-elements', () => {
+		render(
+			<template>
+				<h1>foo</h1>
+			</template>,
+			scratch
+		);
+
+		const tpl = scratch.firstChild;
+		expect(tpl.content.firstChild.outerHTML).to.equal(`<h1>foo</h1>`);
+	});
+
 	it('should allow VNode reuse', () => {
 		let reused = <div class="reuse">Hello World!</div>;
 		render(
