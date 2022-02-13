@@ -433,9 +433,9 @@ function diffElementNodes(
 				// despite the attribute not being present. When the attribute
 				// is missing the progress bar is treated as indeterminate.
 				// To fix that we'll always update it when it is 0 for progress elements
-				(i !== oldProps.value ||
-					i !== dom.value ||
-					(nodeType === 'progress' && !i))
+				// - Don't compare with `oldProps` value, otherwise Safari
+				//   resets input cursor position #1502
+				(i !== dom.value || (nodeType === 'progress' && !i))
 			) {
 				setProperty(dom, 'value', i, oldProps.value, false);
 			}
