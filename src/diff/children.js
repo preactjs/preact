@@ -303,8 +303,7 @@ function placeChild(
 		newDom != oldDom ||
 		newDom.parentNode == null
 	) {
-		let target =
-			parentDom.nodeName === 'TEMPLATE' ? parentDom.content : parentDom;
+		let target = 'content' in parentDom ? parentDom.content : parentDom;
 
 		outer: if (oldDom == null || oldDom.parentNode !== parentDom) {
 			target.appendChild(newDom);
