@@ -668,5 +668,36 @@ describe('Lifecycle methods', () => {
 
 			expect(scratch.innerHTML).to.equal('<div>Error: Error!</div>');
 		});
+
+		it('should pass errorInfo on render error', () => {
+			let info;
+			class Receiver extends Component {
+				constructor(props) {
+					super(props);
+					this.state = { error: null };
+				}
+				componentDidCatch(error, errorInfo) {
+					info = errorInfo;
+					this.setState({ error });
+				}
+				render() {
+					if (this.state.error) return <div />;
+					return this.props.children;
+				}
+			}
+
+			function ThrowErr() {
+				throw new Error('fail');
+			}
+
+			render(
+				<Receiver>
+					<ThrowErr />
+				</Receiver>,
+				scratch
+			);
+
+			expect(info).to.deep.equal({});
+		});
 	});
 });
