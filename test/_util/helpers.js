@@ -183,11 +183,12 @@ export function sortCss(cssText) {
 
 /**
  * Setup the test environment
+ * @param {string} [id]
  * @returns {HTMLDivElement}
  */
-export function setupScratch() {
+export function setupScratch(id) {
 	const scratch = document.createElement('div');
-	scratch.id = 'scratch';
+	scratch.id = id || 'scratch';
 	(document.body || document.documentElement).appendChild(scratch);
 	return scratch;
 }
