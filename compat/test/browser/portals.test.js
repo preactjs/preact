@@ -14,15 +14,20 @@ import { setupRerender, act } from 'preact/test-utils';
 describe('Portal', () => {
 	/** @type {HTMLDivElement} */
 	let scratch;
+	/** @type {HTMLDivElement} */
+	let scratch2;
+
 	let rerender;
 
 	beforeEach(() => {
 		scratch = setupScratch();
+		scratch2 = setupScratch('scratch-2');
 		rerender = setupRerender();
 	});
 
 	afterEach(() => {
 		teardown(scratch);
+		teardown(scratch2);
 	});
 
 	it('should render into a different root node', () => {
@@ -690,7 +695,7 @@ describe('Portal', () => {
 				calls.push('Portal');
 			}, []);
 
-			return createPortal(<Parent isPortal>{content}</Parent>, document.body);
+			return createPortal(<Parent isPortal>{content}</Parent>, scratch2);
 		};
 
 		const App = () => {
