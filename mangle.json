@@ -40,6 +40,8 @@
       "$__hooks": "__H",
       "$_list": "__",
       "$_pendingEffects": "__h",
+      "$_pendingArgs": "__a",
+      "$_pendingValue": "__v",
       "$_value": "__",
       "$_args": "__H",
       "$_factory": "__h",
