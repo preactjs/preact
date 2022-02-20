@@ -4,8 +4,10 @@
  * @param {import('../internal').VNode} vnode The vnode that threw
  * the error that was caught (except for unmounting when this parameter
  * is the highest parent that was being unmounted)
+ * @param {import('../internal').VNode} [oldVNode]
+ * @param {import('../internal').ErrorInfo} [errorInfo]
  */
-export function _catchError(error, vnode) {
+export function _catchError(error, vnode, oldVNode, errorInfo) {
 	/** @type {import('../internal').Component} */
 	let component, ctor, handled;
 
@@ -20,7 +22,7 @@ export function _catchError(error, vnode) {
 				}
 
 				if (component.componentDidCatch != null) {
-					component.componentDidCatch(error);
+					component.componentDidCatch(error, errorInfo || {});
 					handled = component._dirty;
 				}
 
