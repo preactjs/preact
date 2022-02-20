@@ -254,7 +254,6 @@
 		"check-export-map": "^1.2.0",
 		"coveralls": "^3.0.0",
 		"cross-env": "^7.0.2",
-		"csstype": "^3.0.5",
 		"diff": "^5.0.0",
 		"errorstacks": "^2.3.0",
 		"esbuild": "^0.12.24",
