@@ -21,7 +21,7 @@ declare namespace React {
 	export import StateUpdater = _hooks.StateUpdater;
 	export import useCallback = _hooks.useCallback;
 	export import useContext = _hooks.useContext;
-	export import useDebugValue = _hooks.useDebugValue;
+	export import ContextType = preact.ContextType;
 	export import useEffect = _hooks.useEffect;
 	export import useImperativeHandle = _hooks.useImperativeHandle;
 	export import useLayoutEffect = _hooks.useLayoutEffect;
@@ -35,6 +35,7 @@ declare namespace React {
 	export import FunctionComponent = preact.FunctionComponent;
 	export import FC = preact.FunctionComponent;
 	export import createContext = preact.createContext;
+	export import RefObject = preact.RefObject;
 	export import createRef = preact.createRef;
 	export import Fragment = preact.Fragment;
 	export import createElement = preact.createElement;
@@ -46,6 +47,14 @@ declare namespace React {
 	export import lazy = _Suspense.lazy;
 	export import SuspenseList = _SuspenseList.SuspenseList;
 
+	export import HTMLAttributes = JSXInternal.HTMLAttributes;
+	export import DetailedHTMLProps = JSXInternal.DetailedHTMLProps;
+	export import CSSProperties = JSXInternal.CSSProperties;
+
+	// Events
+	export import TargetedEvent = JSXInternal.TargetedEvent;
+	export import ChangeEvent = JSXInternal.TargetedEvent;
+	export import ChangeEventHandler = JSXInternal.GenericEventHandler;
 	// Compat
 	export import StrictMode = preact.Fragment;
 	export const version: string;
@@ -78,7 +87,9 @@ declare namespace React {
 		...children: preact.ComponentChildren[]
 	) => preact.VNode<any>;
 	export function isValidElement(element: any): boolean;
-	export function findDOMNode(component: preact.Component): Element | null;
+	export function findDOMNode(
+		component: preact.Component | Element
+	): Element | null;
 
 	export abstract class PureComponent<P = {}, S = {}> extends preact.Component<
 		P,
