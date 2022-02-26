@@ -40,6 +40,12 @@
 			"require": "./hooks/dist/hooks.js",
 			"import": "./hooks/dist/hooks.mjs"
 		},
+		"./reactive": {
+			"browser": "./reactive/dist/reactive.module.js",
+			"umd": "./reactive/dist/reactive.umd.js",
+			"require": "./reactive/dist/reactive.js",
+			"import": "./reactive/dist/reactive.mjs"
+		},
 		"./test-utils": {
 			"browser": "./test-utils/dist/testUtils.module.js",
 			"umd": "./test-utils/dist/testUtils.umd.js",
@@ -79,6 +85,7 @@
 		"./debug/package.json": "./debug/package.json",
 		"./devtools/package.json": "./devtools/package.json",
 		"./hooks/package.json": "./hooks/package.json",
+		"./reactive/package.json": "./reactive/package.json",
 		"./test-utils/package.json": "./test-utils/package.json",
 		"./jsx-runtime/package.json": "./jsx-runtime/package.json"
 	},
@@ -96,6 +103,7 @@
 		"build:debug": "microbundle build --raw --cwd debug",
 		"build:devtools": "microbundle build --raw --cwd devtools",
 		"build:hooks": "microbundle build --raw --cwd hooks",
+		"build:reactive": "microbundle build --raw --cwd reactive",
 		"build:test-utils": "microbundle build --raw --cwd test-utils",
 		"build:compat": "microbundle build src/index.js src/scheduler.js --raw --cwd compat --globals 'preact/hooks=preactHooks'",
 		"build:jsx": "microbundle build --raw --cwd jsx-runtime",

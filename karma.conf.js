@@ -126,6 +126,7 @@ function createEsbuildPlugin() {
 		'preact/devtools': subPkgPath('./devtools/'),
 		'preact/compat': subPkgPath('./compat/'),
 		'preact/hooks': subPkgPath('./hooks/'),
+		'preact/reactive': subPkgPath('./reactive/'),
 		'preact/test-utils': subPkgPath('./test-utils/'),
 		'preact/jsx-runtime': subPkgPath('./jsx-runtime/'),
 		'preact/jsx-dev-runtime': subPkgPath('./jsx-runtime/'),
@@ -319,7 +320,7 @@ module.exports = function(config) {
 			{
 				pattern:
 					config.grep ||
-					'{debug,devtools,hooks,compat,test-utils,jsx-runtime,}/test/{browser,shared}/**/*.test.js',
+					'{debug,devtools,hooks,compat,reactive,test-utils,jsx-runtime,}/test/{browser,shared}/**/*.test.js',
 				watched: false,
 				type: 'js'
 			}
@@ -330,7 +331,7 @@ module.exports = function(config) {
 		},
 
 		preprocessors: {
-			'{debug,devtools,hooks,compat,test-utils,jsx-runtime,}/test/**/*': [
+			'{debug,devtools,hooks,compat,reactive,test-utils,jsx-runtime,}/test/**/*': [
 				'esbuild'
 			]
 		},
