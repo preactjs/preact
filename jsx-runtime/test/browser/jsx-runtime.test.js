@@ -66,7 +66,7 @@ describe('Babel jsx/jsxDEV', () => {
 	});
 
 	it('should set __source and __self', () => {
-		const vnode = jsx('div', { class: 'foo' }, 'key', 'source', 'self');
+		const vnode = jsx('div', { class: 'foo' }, 'key', 'self', 'source');
 		expect(vnode.__source).to.equal('source');
 		expect(vnode.__self).to.equal('self');
 	});

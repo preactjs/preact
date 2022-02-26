@@ -25,6 +25,9 @@ describe('debug options', () => {
 	/** @type {(count: number) => void} */
 	let setCount;
 
+	/** @type {import('sinon').SinonFakeTimers | undefined} */
+	let clock;
+
 	beforeEach(() => {
 		scratch = setupScratch();
 		rerender = setupRerender();
@@ -39,6 +42,7 @@ describe('debug options', () => {
 
 	afterEach(() => {
 		teardown(scratch);
+		if (clock) clock.restore();
 	});
 
 	class ClassApp extends Component {
@@ -119,7 +123,7 @@ describe('debug options', () => {
 			}
 		}
 
-		const clock = sinon.useFakeTimers();
+		clock = sinon.useFakeTimers();
 
 		render(<ErrorApp />, scratch);
 		rerender();
@@ -129,7 +133,5 @@ describe('debug options', () => {
 		// we expect to throw after setTimeout to trigger a window.onerror
 		// this is to ensure react compat (i.e. with next.js' dev overlay)
 		expect(() => clock.tick(0)).to.throw(e);
-
-		clock.restore();
 	});
 });

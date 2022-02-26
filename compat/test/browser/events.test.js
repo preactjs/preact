@@ -275,4 +275,11 @@ describe('preact/compat events', () => {
 		scratch.firstChild.dispatchEvent(createEvent('beforeinput'));
 		expect(spy).to.be.calledOnce;
 	});
+
+	it('should normalize compositionstart event listener', () => {
+		let spy = sinon.spy();
+		render(<input onCompositionStart={spy} />, scratch);
+		scratch.firstChild.dispatchEvent(createEvent('compositionstart'));
+		expect(spy).to.be.calledOnce;
+	});
 });

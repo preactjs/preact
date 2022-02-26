@@ -44,7 +44,7 @@ export function initDebug() {
 		  };
 	const deprecations = [];
 
-	options._catchError = (error, vnode, oldVNode) => {
+	options._catchError = (error, vnode, oldVNode, errorInfo) => {
 		let component = vnode && vnode._component;
 		if (component && typeof error.then == 'function') {
 			const promise = error;
@@ -68,7 +68,9 @@ export function initDebug() {
 		}
 
 		try {
-			oldCatchError(error, vnode, oldVNode);
+			errorInfo = errorInfo || {};
+			errorInfo.componentStack = getOwnerStack(vnode);
+			oldCatchError(error, vnode, oldVNode, errorInfo);
 
 			// when an error was handled by an ErrorBoundary we will nontheless emit an error
 			// event on the window object. This is to make up for react compatibility in dev mode

@@ -68,6 +68,10 @@ export interface PreactDOMAttributes {
 	};
 }
 
+export interface ErrorInfo {
+	componentStack?: string;
+}
+
 export type RenderableProps<P, RefType = any> = P &
 	Readonly<Attributes & { children?: ComponentChildren; ref?: Ref<RefType> }>;
 
@@ -130,7 +134,7 @@ export interface Component<P = {}, S = {}> {
 		previousState: Readonly<S>,
 		snapshot: any
 	): void;
-	componentDidCatch?(error: any, errorInfo: any): void;
+	componentDidCatch?(error: any, errorInfo: ErrorInfo): void;
 }
 
 export abstract class Component<P, S> {
@@ -248,7 +252,7 @@ export function cloneElement<P>(
 // -----------------------------------
 
 // TODO: Revisit what the public type of this is...
-export const Fragment: ComponentClass<{}, {}>;
+export const Fragment: FunctionComponent<{}>;
 
 //
 // Preact options

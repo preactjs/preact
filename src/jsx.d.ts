@@ -661,6 +661,8 @@ export namespace JSXInternal {
 		data?: string;
 		dateTime?: string;
 		default?: boolean;
+		defaultChecked?: boolean;
+		defaultValue?: string;
 		defer?: boolean;
 		dir?: 'auto' | 'rtl' | 'ltr';
 		disabled?: boolean;

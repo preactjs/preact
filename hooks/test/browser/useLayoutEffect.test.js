@@ -323,4 +323,67 @@ describe('useLayoutEffect', () => {
 		expect(spy).to.be.calledOnce;
 		expect(scratch.innerHTML).to.equal('<p>Error</p>');
 	});
+
+	it('orders effects effectively', () => {
+		const calls = [];
+		const GrandChild = ({ id }) => {
+			useLayoutEffect(() => {
+				calls.push(`${id} - Effect`);
+				return () => {
+					calls.push(`${id} - Cleanup`);
+				};
+			}, [id]);
+			return <p>{id}</p>;
+		};
+
+		const Child = ({ id }) => {
+			useLayoutEffect(() => {
+				calls.push(`${id} - Effect`);
+				return () => {
+					calls.push(`${id} - Cleanup`);
+				};
+			}, [id]);
+			return (
+				<Fragment>
+					<GrandChild id={`${id}-GrandChild-1`} />
+					<GrandChild id={`${id}-GrandChild-2`} />
+				</Fragment>
+			);
+		};
+
+		function Parent() {
+			useLayoutEffect(() => {
+				calls.push('Parent - Effect');
+				return () => {
+					calls.push('Parent - Cleanup');
+				};
+			}, []);
+			return (
+				<div className="App">
+					<Child id="Child-1" />
+					<div>
+						<Child id="Child-2" />
+					</div>
+					<Child id="Child-3" />
+				</div>
+			);
+		}
+
+		act(() => {
+			render(<Parent />, scratch);
+		});
+
+		expect(calls).to.deep.equal([
+			'Child-1-GrandChild-1 - Effect',
+			'Child-1-GrandChild-2 - Effect',
+			'Child-1 - Effect',
+			'Child-2-GrandChild-1 - Effect',
+			'Child-2-GrandChild-2 - Effect',
+			'Child-2 - Effect',
+			'Child-3-GrandChild-1 - Effect',
+			'Child-3-GrandChild-2 - Effect',
+			'Child-3 - Effect',
+			'Parent - Effect'
+		]);
+	});
 });

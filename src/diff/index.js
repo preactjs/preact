@@ -433,9 +433,12 @@ function diffElementNodes(
 				// despite the attribute not being present. When the attribute
 				// is missing the progress bar is treated as indeterminate.
 				// To fix that we'll always update it when it is 0 for progress elements
-				(i !== oldProps.value ||
-					i !== dom.value ||
-					(nodeType === 'progress' && !i))
+				(i !== dom.value ||
+					(nodeType === 'progress' && !i) ||
+					// This is only for IE 11 to fix <select> value not being updated.
+					// To avoid a stale select value we need to set the option.value
+					// again, which triggers IE11 to re-evaluate the select value
+					(nodeType === 'option' && i !== oldProps.value))
 			) {
 				setProperty(dom, 'value', i, oldProps.value, false);
 			}
