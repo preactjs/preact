@@ -39,20 +39,12 @@ options.unmount = vnode => {
 
 const NOOP = () => {};
 
-function newSubState(component) {
-	return {
-		_unsubscribe: NOOP,
-		_value: undefined,
-		_component: component
-	};
-}
-
 /**
  *
  * @param {*} component
  * @returns {import('./internal').Component["__reactive"]}
  */
-function getRefs(component) {
+function getReactiveState(component) {
 	return (
 		component.__reactive ||
 		(component.__reactive = { _atoms: new Map(), _prevAtoms: new Map() })
@@ -68,7 +60,11 @@ function getRefs(component) {
 function subscribeToAtom(refs, atom, component) {
 	let sub = refs._prevAtoms.get(atom);
 	if (!sub) {
-		sub = newSubState(component);
+		sub = {
+			_unsubscribe: NOOP,
+			_value: undefined,
+			_component: component
+		};
 		sub._unsubscribe = atom.subscribe(v => {
 			if (sub._value !== v) {
 				sub._value = v;
@@ -88,13 +84,8 @@ function subscribeToAtom(refs, atom, component) {
  * @type {import('./index').$}
  */
 export function $(atom) {
-	const refs = getRefs(currentComponent);
+	const refs = getReactiveState(currentComponent);
 	return subscribeToAtom(refs, atom, currentComponent);
-}
-
-function get(component) {
-	const refs = getRefs(component);
-	return atom => subscribeToAtom(refs, atom, component);
 }
 
 /**
@@ -102,9 +93,12 @@ function get(component) {
  */
 export function component(fn) {
 	return function Reactive(props) {
-		let view =
-			this.__reactiveView || (this.__reactiveView = fn(props, get(this)));
-		const refs = getRefs(this);
+		const refs = getReactiveState(this);
+		const view =
+			this.__reactiveView ||
+			(this.__reactiveView = fn(props, atom =>
+				subscribeToAtom(refs, atom, this)
+			));
 
 		// TODO: Check if memory optimizations are worth it
 		refs._prevAtoms = refs._atoms;
