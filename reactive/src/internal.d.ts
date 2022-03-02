@@ -1,12 +1,6 @@
 import { Component as PreactComponent } from '../../src/internal';
 import { Subscribeable } from './index';
 
-export interface Subscription {
-	_unsubscribe: () => void;
-	_value: any;
-	_component: Component;
-}
-
 export enum AtomKind {
 	SOURCE = 1,
 	COMPUTED = 2,
