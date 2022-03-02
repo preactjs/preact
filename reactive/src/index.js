@@ -99,7 +99,6 @@ function createAtom(initialValue, kind, displayName = '') {
 		displayName: displayName + '_' + String(atomHash++),
 		kind,
 		_onUpdate: NOOP,
-		_onActivate: NOOP,
 		_value: initialValue,
 		get value() {
 			tracking.add(state);

@@ -19,7 +19,6 @@ export interface Atom<T = any> {
 	value: T;
 	_value: T;
 	_onUpdate: () => void;
-	_onActivate: () => void;
 }
 
 export interface Graph {
