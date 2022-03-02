@@ -84,6 +84,46 @@ describe('Reactive', () => {
 			expect(scratch.innerHTML).to.equal('<div>bar</div>');
 		});
 
+		it('should drop reactions on unmount', () => {
+			let updateName;
+			let count = 0;
+			const Inner = component(() => {
+				const [name, setName] = signal('foo');
+				updateName = setName;
+
+				return () => {
+					count++;
+					return <div>{name.value}</div>;
+				};
+			});
+
+			let updateOuter;
+			class Outer extends Component {
+				constructor(props) {
+					super(props);
+					updateOuter = v => this.setState({ v });
+					this.state = { v: 0 };
+				}
+
+				render() {
+					return this.state.v % 2 === 0 ? <Inner /> : <i>bar</i>;
+				}
+			}
+
+			render(<Outer />, scratch);
+			expect(scratch.textContent).to.equal('foo');
+			expect(count).to.equal(1);
+
+			updateOuter();
+			rerender();
+			expect(scratch.textContent).to.equal('bar');
+			expect(count).to.equal(1);
+
+			updateName('hehe');
+			rerender();
+			expect(count).to.equal(1);
+		});
+
 		describe('displayName', () => {
 			it('should set default if none specified', () => {
 				const App = component(() => {

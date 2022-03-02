@@ -44,10 +44,11 @@ options.unmount = vnode => {
 
 	/** @type {import('./internal').Component | null} */
 	const c = vnode._component;
-	if (c) {
-		const state = c.__reactive;
-		if (state) {
-			unsubscribe(state._atom);
+	if (c && c.__reactive) {
+		const list = c.__reactive._list;
+		let i = list.length;
+		while (i--) {
+			destroy(list[i]);
 		}
 	}
 };
@@ -158,12 +159,17 @@ function unlinkDep(atom, dep) {
 /**
  * @param {import('./internal').Atom} atom
  */
-function unsubscribe(atom) {
-	console.log('UNSUBSCRIBE', atom);
+function destroy(atom) {
 	const stack = [atom];
 	let item;
 	while ((item = stack.pop()) !== undefined) {
-		// const subs = graph.subs.get(atom)
+		const deps = graph.deps.get(item);
+		if (deps) {
+			deps.forEach(dep => {
+				unlinkDep(item, dep);
+				stack.push(dep);
+			});
+		}
 	}
 }
 
