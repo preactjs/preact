@@ -17,7 +17,7 @@ export function signal<T>(
 	initialValue: T,
 	displayName?: string
 ): [Reactive<T>, StateUpdater<T>];
-export function computed<T>(fn: () => T): Reactive<T>;
+export function computed<T>(fn: () => T, displayName?: string): Reactive<T>;
 
 export function component<P = {}>(
 	fn: (props: P) => () => ComponentChild

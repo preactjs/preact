@@ -289,7 +289,7 @@ export function component(fn) {
 		return reactive(
 			view,
 			() => this.setState({}),
-			this.displayName || this.name || 'Component'
+			this.displayName || fn.name || 'ReactiveComponent'
 		);
 	};
 }
