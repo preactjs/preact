@@ -15,6 +15,13 @@ let oldBeforeRender = options._render;
 let oldAfterDiff = options.diffed;
 let oldBeforeUnmount = options.unmount;
 
+/** @type {import('./internal').AtomKind.SOURCE} */
+const KIND_SOURCE = 1;
+/** @type {import('./internal').AtomKind.COMPUTED} */
+const KIND_COMPUTED = 2;
+/** @type {import('./internal').AtomKind.REACTION} */
+const KIND_REACTION = 3;
+
 options._diff = vnode => {
 	currentComponent = null;
 	if (oldBeforeDiff) oldBeforeDiff(vnode);
@@ -191,7 +198,12 @@ function isUpdater(x) {
  * @returns {[import('./index').Reactive<T>,import('./index').StateUpdater<T>]}
  */
 export function signal(initialValue, displayName) {
-	const atom = getAtomState(currentIndex++, initialValue, 1, displayName);
+	const atom = getAtomState(
+		currentIndex++,
+		initialValue,
+		KIND_SOURCE,
+		displayName
+	);
 
 	/** @type {import('./index').StateUpdater<T>} */
 	const updater = value => {
@@ -250,7 +262,12 @@ function track(atom, fn) {
  * @returns {import('./internal').Atom<T>}
  */
 export function computed(fn, displayName) {
-	const state = getAtomState(currentIndex++, undefined, 2, displayName);
+	const state = getAtomState(
+		currentIndex++,
+		undefined,
+		KIND_COMPUTED,
+		displayName
+	);
 	state._onUpdate = () => track(state, fn);
 	return state;
 }
@@ -263,7 +280,12 @@ export function computed(fn, displayName) {
  * @returns {T}
  */
 function reactive(fn, cb, displayName) {
-	const atom = getAtomState(currentIndex++, undefined, 3, displayName);
+	const atom = getAtomState(
+		currentIndex++,
+		undefined,
+		KIND_REACTION,
+		displayName
+	);
 	atom._onUpdate = () => {
 		track(atom, fn);
 		cb(atom._value);
