@@ -1,7 +1,14 @@
 import { options } from 'preact';
 
+/** @type {number} */
+let currentIndex;
+
 /** @type {import('./internal').Component} */
 let currentComponent;
+
+// TODO: Process writes in a queue similar to
+// component state updates (would add batching by default)
+// Is this bad for inputs?
 
 let oldBeforeDiff = options._diff;
 let oldBeforeRender = options._render;
@@ -15,7 +22,9 @@ options._diff = vnode => {
 
 options._render = vnode => {
 	if (oldBeforeRender) oldBeforeRender(vnode);
+
 	currentComponent = vnode._component;
+	currentIndex = 0;
 };
 
 options.diffed = vnode => {
@@ -29,89 +38,258 @@ options.unmount = vnode => {
 	/** @type {import('./internal').Component | null} */
 	const c = vnode._component;
 	if (c) {
-		const refs = c.__reactive;
-		if (refs) {
-			refs._atoms.forEach(value => value._unsubscribe());
-			refs._atoms.clear();
+		const state = c.__reactive;
+		if (state) {
+			unsubscribe(state._atom);
 		}
 	}
 };
 
-const NOOP = () => {};
-
-/**
- *
- * @param {*} component
- * @returns {import('./internal').Component["__reactive"]}
- */
-function getReactiveState(component) {
+function getReactiveState() {
 	return (
-		component.__reactive ||
-		(component.__reactive = { _atoms: new Map(), _prevAtoms: new Map() })
+		currentComponent.__reactive ||
+		(currentComponent.__reactive = {
+			_list: []
+		})
 	);
 }
 
 /**
- *
- * @param {import('./internal').Component["__reactive"]} refs
- * @param {import('./index').Atom<any>} atom
- * @returns
+ * @template T
+ * @param {T} initialState
+ * @param {number} index
+ * @param {import('./internal').AtomKind} kind
+ * @param {string} [displayName]
+ * @returns {import('./internal').Atom<T>}
  */
-function subscribeToAtom(refs, atom, component) {
-	let sub = refs._prevAtoms.get(atom);
-	if (!sub) {
-		sub = {
-			_unsubscribe: NOOP,
-			_value: undefined,
-			_component: component
-		};
-		sub._unsubscribe = atom.subscribe(v => {
-			if (sub._value !== v) {
-				sub._value = v;
-				if (sub._unsubscribe !== NOOP) {
-					sub._component.setState({});
-				}
-			}
-		});
-		refs._atoms.set(atom, sub);
+function getAtomState(index, initialState, kind, displayName) {
+	const reactive = getReactiveState();
+
+	if (index >= reactive._list.length) {
+		reactive._list.push(createAtom(initialState, kind, displayName));
+	}
+	return reactive._list[index];
+}
+
+/**
+ * @type {import('./internal').Graph}
+ */
+const graph = {
+	deps: new Map(),
+	subs: new Map()
+};
+
+/**
+ * @type {Set<import('./internal').Atom>}
+ */
+let tracking = new Set();
+
+const NOOP = () => {};
+
+let atomHash = 0;
+
+/**
+ * @template T
+ * @param {T} initialValue
+ * @param {import('./internal').AtomKind} kind
+ * @returns {import('./internal').Atom<T>}
+ */
+function createAtom(initialValue, kind, displayName = '') {
+	const state = {
+		displayName: displayName + '_' + String(atomHash++),
+		kind,
+		_onUpdate: NOOP,
+		_onActivate: NOOP,
+		_value: initialValue,
+		get value() {
+			tracking.add(state);
+			return this._value;
+		}
+	};
+
+	return state;
+}
+
+/**
+ * Set up reactive graph, but don't subscribe to it
+ * @param {import('./internal').Atom} atom
+ * @param {import('./internal').Atom} dep
+ */
+function linkDep(atom, dep) {
+	let subs = graph.subs.get(dep);
+	if (!subs) {
+		subs = new Set();
+		graph.subs.set(dep, subs);
 	}
 
-	return sub._value;
+	subs.add(atom);
+
+	let deps = graph.deps.get(atom);
+	if (!deps) {
+		deps = new Set();
+		graph.deps.set(atom, deps);
+	}
+
+	deps.add(dep);
 }
 
 /**
- * Subscribe to RxJS-style observables
- * @type {import('./index').$}
+ * @param {import('./internal').Atom} atom
+ * @param {import('./internal').Atom} dep
  */
-export function $(atom) {
-	const refs = getReactiveState(currentComponent);
-	return subscribeToAtom(refs, atom, currentComponent);
+function unlinkDep(atom, dep) {
+	const subs = graph.subs.get(dep);
+	if (subs) {
+		subs.delete(atom);
+	}
+
+	const deps = graph.deps.get(atom);
+	if (deps) {
+		deps.delete(dep);
+	}
 }
 
 /**
- * @type {import('./index').component}
+ * @param {import('./internal').Atom} atom
+ */
+function unsubscribe(atom) {
+	console.log('UNSUBSCRIBE', atom);
+	const stack = [atom];
+	let item;
+	while ((item = stack.pop()) !== undefined) {
+		// const subs = graph.subs.get(atom)
+	}
+}
+
+/**
+ * @template T
+ * @param {import('./internal').Atom<T>} atom
+ */
+function invalidate(atom) {
+	if (atom._onUpdate !== NOOP) {
+		atom._onUpdate();
+	}
+
+	const subs = graph.subs.get(atom);
+	if (subs) {
+		subs.forEach(invalidate);
+	}
+}
+
+/**
+ * @param {*} x
+ * @returns {x is import('./index').StateUpdater<any>}
+ */
+function isUpdater(x) {
+	// Will be inlined by terser
+	return typeof x === 'function';
+}
+
+/**
+ * @template T
+ * @param {T} initialValue
+ * @param {string} [displayName]
+ * @returns {[import('./index').Reactive<T>,import('./index').StateUpdater<T>]}
+ */
+export function signal(initialValue, displayName) {
+	const atom = getAtomState(currentIndex++, initialValue, 1, displayName);
+
+	/** @type {import('./index').StateUpdater<T>} */
+	const updater = value => {
+		if (isUpdater(value)) {
+			const res = value(atom._value);
+			if (res !== null && res !== atom._value) {
+				atom._value = res;
+				invalidate(atom);
+			}
+		} else {
+			atom._value = value;
+			invalidate(atom);
+		}
+	};
+
+	return [atom, updater];
+}
+
+/**
+ * @template T
+ * @param {import('./internal').Atom<T>} atom
+ * @param {() => T} fn
+ * @returns {T}
+ */
+function track(atom, fn) {
+	let tmp = tracking;
+	tracking = new Set();
+
+	try {
+		const res = fn();
+		atom._value = res;
+		return res;
+	} finally {
+		let deps = graph.deps.get(atom);
+
+		// Subscribe to new subscriptions
+		tracking.forEach(dep => {
+			linkDep(atom, dep);
+		});
+
+		// Remove old subscriptions
+		deps.forEach(dep => {
+			if (!tracking.has(dep)) {
+				unlinkDep(atom, dep);
+			}
+		});
+
+		tracking = tmp;
+	}
+}
+
+/**
+ * @template T
+ * @param {() => T} fn
+ * @param {string} [displayName]
+ * @returns {import('./internal').Atom<T>}
+ */
+export function computed(fn, displayName) {
+	const state = getAtomState(currentIndex++, undefined, 2, displayName);
+	state._onUpdate = () => track(state, fn);
+	return state;
+}
+
+/**
+ * @template T
+ * @param {() => T} fn
+ * @param {(value: T) => void} cb
+ * @param {string} [displayName]
+ * @returns {T}
+ */
+function reactive(fn, cb, displayName) {
+	const atom = getAtomState(currentIndex++, undefined, 3, displayName);
+	atom._onUpdate = () => {
+		track(atom, fn);
+		cb(atom._value);
+	};
+
+	if (!graph.deps.has(atom)) {
+		graph.deps.set(atom, new Set());
+		atom._onUpdate();
+	}
+
+	return atom._value;
+}
+
+/**
+ * @template P
+ * @param {(props: P) => () => import('../../src/index').ComponentChild} fn
+ * @returns {import('../../src/index').ComponentChild}
  */
 export function component(fn) {
 	return function Reactive(props) {
-		const refs = getReactiveState(this);
-		const view =
-			this.__reactiveView ||
-			(this.__reactiveView = fn(props, atom =>
-				subscribeToAtom(refs, atom, this)
-			));
-
-		// TODO: Check if memory optimizations are worth it
-		refs._prevAtoms = refs._atoms;
-		refs._atoms = new Map();
-
-		const ui = view(props, this);
-
-		refs._prevAtoms.forEach((s, atom) => {
-			if (!refs._atoms.has(atom)) {
-				s._unsubscribe();
-			}
-		});
-
-		return ui;
+		const view = fn(props);
+		return reactive(
+			view,
+			() => this.setState({}),
+			this.displayName || this.name || 'Component'
+		);
 	};
 }

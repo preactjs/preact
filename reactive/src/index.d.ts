@@ -5,16 +5,20 @@ import {
 	ComponentChildren,
 	FunctionComponent,
 	VNode,
-	Attributes
+	Attributes,
+	ComponentClass
 } from '../../';
-import { JSXInternal } from '../../src/jsx';
 
-export interface Atom<T> {
-	subscribe(fn: (value: T) => void): () => void;
+export interface Reactive<T> {
+	value: T;
 }
-
-export function $<T>(atom: Atom<T>): T;
+export type StateUpdater<S> = (value: S | ((prevState: S) => S)) => void;
+export function signal<T>(
+	initialValue: T,
+	displayName?: string
+): [Reactive<T>, StateUpdater<T>];
+export function computed<T>(fn: () => T): Reactive<T>;
 
 export function component<P = {}>(
-	fn: (initialProps: P, get: <T>(atom: Atom<T>) => T) => FunctionComponent<P>
-): any;
+	fn: (props: P) => () => ComponentChild
+): FunctionComponent<P>;
