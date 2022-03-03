@@ -6,6 +6,9 @@ let currentIndex;
 /** @type {import('./internal').Atom} */
 let currentAtom;
 
+/** @type {import('./internal').Component} */
+let currentComponent;
+
 // TODO: Process writes in a queue similar to
 // component state updates (would add batching by default)
 // Is this bad for inputs?
@@ -83,9 +86,15 @@ function createAtom(initialValue, kind, displayName = '') {
 		_onUpdate: NOOP,
 		_value: initialValue,
 		_owner: null,
+		_component: currentComponent,
 		_children: [], // TODO: Use empty array for signals?
 		get value() {
 			tracking.add(atom);
+
+			if (kind !== KIND_SOURCE && !graph.deps.has(atom)) {
+				atom._onUpdate();
+			}
+
 			return this._value;
 		}
 	};
@@ -214,9 +223,10 @@ export function signal(initialValue, displayName) {
  * @template T
  * @param {import('./internal').Atom<T>} atom
  * @param {() => T} fn
+ * @param {import('./internal').Component} c
  * @returns {T}
  */
-function track(atom, fn) {
+function track(atom, fn, c) {
 	let tmp = tracking;
 	tracking = new Set();
 	let tmpAtom = currentAtom;
@@ -228,6 +238,8 @@ function track(atom, fn) {
 		const res = fn();
 		atom._value = res;
 		return res;
+	} catch (e) {
+		options._catchError(e, atom._component._vnode);
 	} finally {
 		let deps = graph.deps.get(atom);
 		if (!deps) {
@@ -266,7 +278,7 @@ export function computed(fn, displayName) {
 		KIND_COMPUTED,
 		displayName
 	);
-	state._onUpdate = () => track(state, fn);
+	state._onUpdate = () => track(state, fn, currentComponent);
 	return state;
 }
 
@@ -277,6 +289,8 @@ export function computed(fn, displayName) {
  */
 export function component(fn) {
 	return function Reactive(props) {
+		let prevCurrentComponent = currentComponent;
+		currentComponent = this;
 		// Similar to reaction(), but the difference is that we
 		// attach the atom to the component instance.
 		const atom =
@@ -291,6 +305,10 @@ export function component(fn) {
 			this.setState({});
 		};
 
-		return track(atom, () => fn(props));
+		try {
+			return track(atom, () => fn(props), this);
+		} finally {
+			currentComponent = prevCurrentComponent;
+		}
 	};
 }

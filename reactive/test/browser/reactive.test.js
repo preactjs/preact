@@ -120,6 +120,50 @@ describe('Reactive', () => {
 			expect(count).to.equal(1);
 		});
 
+		it('should throw errors as part of render context', () => {
+			let updateName;
+			const Inner = component(() => {
+				const [name, setName] = signal('foo');
+				updateName = setName;
+
+				const foo = computed(() => {
+					if (name.value === 'fail') {
+						throw new Error('errored');
+					}
+
+					return name.value;
+				});
+
+				return <div>{foo.value}</div>;
+			});
+
+			class Outer extends Component {
+				constructor(props) {
+					super(props);
+					this.state = { error: null };
+				}
+
+				componentDidCatch(error) {
+					this.setState({ error });
+				}
+
+				render() {
+					return this.state.error ? (
+						<div>{this.state.error.message}</div>
+					) : (
+						<Inner />
+					);
+				}
+			}
+
+			render(<Outer />, scratch);
+			expect(scratch.innerHTML).to.equal('<div>foo</div>');
+
+			updateName('fail');
+			rerender();
+			expect(scratch.innerHTML).to.equal('<div>errored</div>');
+		});
+
 		describe('displayName', () => {
 			it('should set default if none specified', () => {
 				const App = component(() => {

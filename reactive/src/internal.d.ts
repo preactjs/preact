@@ -14,6 +14,7 @@ export interface Atom<T = any> {
 	_value: T;
 	_owner: Atom | null;
 	_children: Atom[];
+	_component: Component | null;
 	_onUpdate: () => void;
 }
 
