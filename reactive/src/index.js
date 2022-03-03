@@ -3,17 +3,12 @@ import { options } from 'preact';
 /** @type {number} */
 let currentIndex;
 
-/** @type {import('./internal').Component} */
-let currentComponent;
+/** @type {import('./internal').Atom} */
+let currentAtom;
 
 // TODO: Process writes in a queue similar to
 // component state updates (would add batching by default)
 // Is this bad for inputs?
-
-let oldBeforeDiff = options._diff;
-let oldBeforeRender = options._render;
-let oldAfterDiff = options.diffed;
-let oldBeforeUnmount = options.unmount;
 
 /** @type {import('./internal').AtomKind.SOURCE} */
 const KIND_SOURCE = 1;
@@ -22,45 +17,20 @@ const KIND_COMPUTED = 2;
 /** @type {import('./internal').AtomKind.REACTION} */
 const KIND_REACTION = 3;
 
-options._diff = vnode => {
-	currentComponent = null;
-	if (oldBeforeDiff) oldBeforeDiff(vnode);
-};
-
-options._render = vnode => {
-	if (oldBeforeRender) oldBeforeRender(vnode);
-
-	currentComponent = vnode._component;
-	currentIndex = 0;
-};
-
-options.diffed = vnode => {
-	if (oldAfterDiff) oldAfterDiff(vnode);
-	currentComponent = null;
-};
-
+let oldBeforeUnmount = options.unmount;
 options.unmount = vnode => {
 	if (oldBeforeUnmount) oldBeforeUnmount(vnode);
 
 	/** @type {import('./internal').Component | null} */
 	const c = vnode._component;
 	if (c && c.__reactive) {
-		const list = c.__reactive._list;
+		const list = c.__reactive._children;
 		let i = list.length;
 		while (i--) {
 			destroy(list[i]);
 		}
 	}
 };
-
-function getReactiveState() {
-	return (
-		currentComponent.__reactive ||
-		(currentComponent.__reactive = {
-			_list: []
-		})
-	);
-}
 
 /**
  * @template T
@@ -71,12 +41,15 @@ function getReactiveState() {
  * @returns {import('./internal').Atom<T>}
  */
 function getAtomState(index, initialState, kind, displayName) {
-	const reactive = getReactiveState();
+	const reactive = currentAtom;
 
-	if (index >= reactive._list.length) {
-		reactive._list.push(createAtom(initialState, kind, displayName));
+	if (index >= reactive._children.length) {
+		const atom = createAtom(initialState, kind, displayName);
+		reactive._children.push(atom);
+		atom._owner = currentAtom;
 	}
-	return reactive._list[index];
+
+	return reactive._children[index];
 }
 
 /**
@@ -103,18 +76,21 @@ let atomHash = 0;
  * @returns {import('./internal').Atom<T>}
  */
 function createAtom(initialValue, kind, displayName = '') {
-	const state = {
+	/** @type {import('./internal').Atom<T>} */
+	const atom = {
 		displayName: displayName + '_' + String(atomHash++),
 		kind,
 		_onUpdate: NOOP,
 		_value: initialValue,
+		_owner: null,
+		_children: [], // TODO: Use empty array for signals?
 		get value() {
-			tracking.add(state);
+			tracking.add(atom);
 			return this._value;
 		}
 	};
 
-	return state;
+	return atom;
 }
 
 /**
@@ -163,12 +139,18 @@ function destroy(atom) {
 	const stack = [atom];
 	let item;
 	while ((item = stack.pop()) !== undefined) {
+		item._owner = null;
+
 		const deps = graph.deps.get(item);
 		if (deps) {
 			deps.forEach(dep => {
 				unlinkDep(item, dep);
 				stack.push(dep);
 			});
+		}
+
+		if (item._children.length > 0) {
+			stack.push(...item._children);
 		}
 	}
 }
@@ -237,6 +219,10 @@ export function signal(initialValue, displayName) {
 function track(atom, fn) {
 	let tmp = tracking;
 	tracking = new Set();
+	let tmpAtom = currentAtom;
+	currentAtom = atom;
+	let prevIndex = currentIndex;
+	currentIndex = 0;
 
 	try {
 		const res = fn();
@@ -244,6 +230,10 @@ function track(atom, fn) {
 		return res;
 	} finally {
 		let deps = graph.deps.get(atom);
+		if (!deps) {
+			deps = new Set();
+			graph.deps.set(atom, deps);
+		}
 
 		// Subscribe to new subscriptions
 		tracking.forEach(dep => {
@@ -257,7 +247,9 @@ function track(atom, fn) {
 			}
 		});
 
+		currentAtom = tmpAtom;
 		tracking = tmp;
+		currentIndex = prevIndex;
 	}
 }
 
@@ -279,44 +271,26 @@ export function computed(fn, displayName) {
 }
 
 /**
- * @template T
- * @param {() => T} fn
- * @param {(value: T) => void} cb
- * @param {string} [displayName]
- * @returns {T}
- */
-function reactive(fn, cb, displayName) {
-	const atom = getAtomState(
-		currentIndex++,
-		undefined,
-		KIND_REACTION,
-		displayName
-	);
-	atom._onUpdate = () => {
-		track(atom, fn);
-		cb(atom._value);
-	};
-
-	if (!graph.deps.has(atom)) {
-		graph.deps.set(atom, new Set());
-		atom._onUpdate();
-	}
-
-	return atom._value;
-}
-
-/**
  * @template P
  * @param {(props: P) => () => import('../../src/index').ComponentChild} fn
  * @returns {import('../../src/index').ComponentChild}
  */
 export function component(fn) {
 	return function Reactive(props) {
-		const view = fn(props);
-		return reactive(
-			view,
-			() => this.setState({}),
-			this.displayName || fn.name || 'ReactiveComponent'
-		);
+		// Similar to reaction(), but the difference is that we
+		// attach the atom to the component instance.
+		const atom =
+			this.__reactive ||
+			(this.__reactive = createAtom(
+				null,
+				KIND_REACTION,
+				this.displayName || fn.name || 'ReactiveComponent'
+			));
+
+		atom._onUpdate = () => {
+			this.setState({});
+		};
+
+		return track(atom, () => fn(props));
 	};
 }

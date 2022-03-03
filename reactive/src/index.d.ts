@@ -20,5 +20,5 @@ export function signal<T>(
 export function computed<T>(fn: () => T, displayName?: string): Reactive<T>;
 
 export function component<P = {}>(
-	fn: (props: P) => () => ComponentChild
+	fn: (props: P) => ComponentChild
 ): FunctionComponent<P>;

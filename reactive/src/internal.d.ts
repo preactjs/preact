@@ -12,6 +12,8 @@ export interface Atom<T = any> {
 	kind: AtomKind;
 	value: T;
 	_value: T;
+	_owner: Atom | null;
+	_children: Atom[];
 	_onUpdate: () => void;
 }
 
@@ -21,7 +23,5 @@ export interface Graph {
 }
 
 export interface Component extends PreactComponent<any, any> {
-	__reactive?: {
-		_list: Atom[];
-	};
+	__reactive?: Atom;
 }

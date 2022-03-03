@@ -27,7 +27,7 @@ describe('Reactive', () => {
 			let usedProps;
 			const App = component(props => {
 				usedProps = props;
-				return () => <div />;
+				return <div />;
 			});
 
 			render(<App foo="foo" />, scratch);
@@ -41,7 +41,7 @@ describe('Reactive', () => {
 			let count = 0;
 			const App = component(() => {
 				computed(() => count++);
-				return () => <div />;
+				return <div />;
 			});
 
 			render(<App />, scratch);
@@ -64,11 +64,9 @@ describe('Reactive', () => {
 				update = setNum;
 				updateFoo = setFoo;
 
-				return () => {
-					count++;
-					const v = num.value % 2 === 0 ? foo.value : bar.value;
-					return <div>{v}</div>;
-				};
+				count++;
+				const v = num.value % 2 === 0 ? foo.value : bar.value;
+				return <div>{v}</div>;
 			});
 
 			render(<App />, scratch);
@@ -91,10 +89,8 @@ describe('Reactive', () => {
 				const [name, setName] = signal('foo');
 				updateName = setName;
 
-				return () => {
-					count++;
-					return <div>{name.value}</div>;
-				};
+				count++;
+				return <div>{name.value}</div>;
 			});
 
 			let updateOuter;
@@ -127,35 +123,32 @@ describe('Reactive', () => {
 		describe('displayName', () => {
 			it('should set default if none specified', () => {
 				const App = component(() => {
-					return () => <div>foo</div>;
+					return <div>foo</div>;
 				});
 
 				render(<App />, scratch);
-				const atom =
-					scratch._children._children[0]._component.__reactive._list[0];
+				const atom = scratch._children._children[0]._component.__reactive;
 				expect(atom.displayName).to.match(/^ReactiveComponent_\d+$/);
 			});
 
 			it('should use function name', () => {
 				const App = component(function Foo() {
-					return () => <div>foo</div>;
+					return <div>foo</div>;
 				});
 
 				render(<App />, scratch);
-				const atom =
-					scratch._children._children[0]._component.__reactive._list[0];
+				const atom = scratch._children._children[0]._component.__reactive;
 				expect(atom.displayName).to.match(/^Foo_\d+$/);
 			});
 
 			it('should use component displayName', () => {
 				const App = component(function Foo() {
-					return () => <div>foo</div>;
+					return <div>foo</div>;
 				});
 				App.displayName = 'App';
 
 				render(<App />, scratch);
-				const atom =
-					scratch._children._children[0]._component.__reactive._list[0];
+				const atom = scratch._children._children[0]._component.__reactive;
 				expect(atom.displayName).to.match(/^Foo_\d+$/);
 			});
 		});
@@ -165,7 +158,7 @@ describe('Reactive', () => {
 		it('should render signal value', () => {
 			const App = component(() => {
 				const [name] = signal('foo');
-				return () => <div>{name.value}</div>;
+				return <div>{name.value}</div>;
 			});
 
 			render(<App />, scratch);
@@ -178,7 +171,7 @@ describe('Reactive', () => {
 				const App = component(() => {
 					const [name] = signal('foo');
 					atom = name;
-					return () => <div>{name.value}</div>;
+					return <div>{name.value}</div>;
 				});
 
 				render(<App />, scratch);
@@ -190,7 +183,7 @@ describe('Reactive', () => {
 				const App = component(() => {
 					const [name] = signal('foo', 'foo');
 					atom = name;
-					return () => <div>{name.value}</div>;
+					return <div>{name.value}</div>;
 				});
 
 				render(<App />, scratch);
@@ -204,7 +197,7 @@ describe('Reactive', () => {
 				const App = component(() => {
 					const [name, setName] = signal('foo');
 					update = setName;
-					return () => <div>{name.value}</div>;
+					return <div>{name.value}</div>;
 				});
 
 				render(<App />, scratch);
@@ -213,12 +206,37 @@ describe('Reactive', () => {
 				expect(scratch.innerHTML).to.equal('<div>bar</div>');
 			});
 
+			it('should NOT update when signal is not used', () => {
+				let update;
+
+				const Inner = component(props => {
+					return <div>{props.name.value}</div>;
+				});
+
+				let count = 0;
+				const App = component(() => {
+					const [name, setName] = signal('foo');
+					update = setName;
+					count++;
+					return <Inner name={name} />;
+				});
+
+				render(<App />, scratch);
+				expect(scratch.innerHTML).to.equal('<div>foo</div>');
+				expect(count).to.equal(1);
+
+				update('bar');
+				rerender();
+				expect(scratch.innerHTML).to.equal('<div>bar</div>');
+				expect(count).to.equal(1);
+			});
+
 			it('should update signal via updater function', () => {
 				let update;
 				const App = component(() => {
 					const [name, setName] = signal('foo');
 					update = setName;
-					return () => <div>{name.value}</div>;
+					return <div>{name.value}</div>;
 				});
 
 				render(<App />, scratch);
@@ -232,7 +250,7 @@ describe('Reactive', () => {
 				const App = component(() => {
 					const [name, setName] = signal('foo');
 					update = setName;
-					return () => <div>{name.value}</div>;
+					return <div>{name.value}</div>;
 				});
 
 				render(<App />, scratch);
@@ -251,7 +269,7 @@ describe('Reactive', () => {
 					const [name] = signal('foo');
 					const bar = computed(() => name.value);
 					atom = bar;
-					return () => <div>{bar.value}</div>;
+					return <div>{bar.value}</div>;
 				});
 
 				render(<App />, scratch);
@@ -264,7 +282,7 @@ describe('Reactive', () => {
 					const [name] = signal('foo');
 					const bar = computed(() => name.value, 'bar');
 					atom = bar;
-					return () => <div>{bar.value}</div>;
+					return <div>{bar.value}</div>;
 				});
 
 				render(<App />, scratch);
