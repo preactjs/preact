@@ -43,7 +43,7 @@ options.unmount = vnode => {
  * @param {string} [displayName]
  * @returns {import('./internal').Atom<T>}
  */
-function getAtomState(index, initialState, kind, displayName) {
+function getAtom(index, initialState, kind, displayName) {
 	const reactive = currentAtom;
 
 	if (index >= reactive._children.length) {
@@ -234,12 +234,7 @@ function isUpdater(x) {
  * @returns {[import('./index').Reactive<T>,import('./index').StateUpdater<T>]}
  */
 export function signal(initialValue, displayName) {
-	const atom = getAtomState(
-		currentIndex++,
-		initialValue,
-		KIND_SOURCE,
-		displayName
-	);
+	const atom = getAtom(currentIndex++, initialValue, KIND_SOURCE, displayName);
 
 	/** @type {import('./index').StateUpdater<T>} */
 	const updater = value => {
@@ -322,14 +317,9 @@ function track(atom, fn) {
  * @returns {import('./internal').Atom<T>}
  */
 export function computed(fn, displayName) {
-	const state = getAtomState(
-		currentIndex++,
-		undefined,
-		KIND_COMPUTED,
-		displayName
-	);
-	state._onUpdate = () => track(state, fn);
-	return state;
+	const atom = getAtom(currentIndex++, undefined, KIND_COMPUTED, displayName);
+	atom._onUpdate = () => track(atom, fn);
+	return atom;
 }
 
 /**
@@ -338,7 +328,7 @@ export function computed(fn, displayName) {
  * @returns {import('./internal').Atom<T>}
  */
 export function inject(context) {
-	const atom = getAtomState(
+	const atom = getAtom(
 		currentIndex++,
 		undefined,
 		KIND_COMPUTED,
