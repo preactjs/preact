@@ -83,6 +83,7 @@ function createAtom(initialValue, kind, displayName = '') {
 	const atom = {
 		displayName: displayName + '_' + String(atomHash++),
 		kind,
+		_pending: 0,
 		_onUpdate: NOOP,
 		_value: initialValue,
 		_owner: null,
@@ -166,18 +167,43 @@ function destroy(atom) {
 }
 
 /**
+ * @param {import('./internal').Atom} atom
+ */
+function flagUpdate(atom) {
+	if (++atom._pending === 1) {
+		const subs = graph.subs.get(atom);
+		if (subs !== undefined) {
+			subs.forEach(flagUpdate);
+		}
+	}
+}
+
+/**
+ * @param {import('./internal').Atom} atom
+ */
+function processUpdate(atom) {
+	if (--atom._pending === 0) {
+		if (atom._onUpdate !== NOOP) {
+			atom._onUpdate();
+		}
+
+		const subs = graph.subs.get(atom);
+		if (subs) {
+			subs.forEach(processUpdate);
+		}
+	}
+}
+
+/**
+ * Prevent so-called "glitches" where an atom could be derived from stale
+ * dependencies by sorting them. The algorithm is taken from MobX and is
+ * explained here: https://youtu.be/NBYbBbjZeX4?t=2979
  * @template T
  * @param {import('./internal').Atom<T>} atom
  */
 function invalidate(atom) {
-	if (atom._onUpdate !== NOOP) {
-		atom._onUpdate();
-	}
-
-	const subs = graph.subs.get(atom);
-	if (subs) {
-		subs.forEach(invalidate);
-	}
+	flagUpdate(atom);
+	processUpdate(atom);
 }
 
 /**

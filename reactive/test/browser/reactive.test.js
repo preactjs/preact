@@ -332,6 +332,30 @@ describe('Reactive', () => {
 			expect(scratch.innerHTML).to.equal('<div>bar</div>');
 		});
 
+		it('should only update once', () => {
+			let update;
+			let count = 0;
+			const App = component(() => {
+				const [name, updateName] = signal('foo');
+				update = updateName;
+				const a = computed(() => name.value + 'A');
+				const b = computed(() => name.value + 'B');
+				const c = computed(() => {
+					count++;
+					return a.value + ' ' + b.value;
+				});
+
+				return <div>{c.value}</div>;
+			});
+
+			render(<App />, scratch);
+			expect(count).to.equal(1);
+
+			update('bar');
+			rerender();
+			expect(count).to.equal(2);
+		});
+
 		it('should throw when a signal is updated inside computed', () => {
 			const App = component(() => {
 				const [name] = signal('foo');

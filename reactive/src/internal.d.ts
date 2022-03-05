@@ -11,6 +11,7 @@ export interface Atom<T = any> {
 	displayName: string;
 	kind: AtomKind;
 	value: T;
+	_pending: number;
 	_value: T;
 	_owner: Atom | null;
 	_children: Atom[];
