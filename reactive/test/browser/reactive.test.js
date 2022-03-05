@@ -1,7 +1,13 @@
 /* eslint-disable react/display-name */
-import { createElement, render, Component, createContext } from 'preact';
-import { component, signal, computed, inject } from 'preact/reactive';
-import { setupRerender } from 'preact/test-utils';
+import {
+	createElement,
+	render,
+	Component,
+	createContext,
+	options
+} from 'preact';
+import { component, signal, computed, inject, effect } from 'preact/reactive';
+import { act, setupRerender } from 'preact/test-utils';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 
 /** @jsx createElement */
@@ -171,7 +177,7 @@ describe('Reactive', () => {
 				});
 
 				render(<App />, scratch);
-				const atom = scratch._children._children[0]._component.__reactive;
+				const atom = scratch._children._children[0]._component.__reactive._atom;
 				expect(atom.displayName).to.match(/^ReactiveComponent_\d+$/);
 			});
 
@@ -181,7 +187,7 @@ describe('Reactive', () => {
 				});
 
 				render(<App />, scratch);
-				const atom = scratch._children._children[0]._component.__reactive;
+				const atom = scratch._children._children[0]._component.__reactive._atom;
 				expect(atom.displayName).to.match(/^Foo_\d+$/);
 			});
 
@@ -192,7 +198,7 @@ describe('Reactive', () => {
 				App.displayName = 'App';
 
 				render(<App />, scratch);
-				const atom = scratch._children._children[0]._component.__reactive;
+				const atom = scratch._children._children[0]._component.__reactive._atom;
 				expect(atom.displayName).to.match(/^Foo_\d+$/);
 			});
 		});
@@ -441,6 +447,90 @@ describe('Reactive', () => {
 				render(<App />, scratch);
 				expect(atom.displayName).to.match(/^bar_\d+$/);
 			});
+		});
+	});
+
+	describe('effect', () => {
+		it('should call effect', () => {
+			let spy = sinon.spy();
+			const App = component(() => {
+				effect(spy);
+				return null;
+			});
+
+			act(() => {
+				render(<App />, scratch);
+			});
+			expect(spy).to.be.called;
+		});
+
+		it('should be called when dependency changes', () => {
+			let spy = sinon.spy();
+			let renderSpy = sinon.spy();
+			const Inner = component(props => {
+				effect(() => {
+					spy(props.name.value);
+				});
+
+				renderSpy();
+				return null;
+			});
+
+			let update;
+			const App = component(() => {
+				const [name, setName] = signal('foo');
+				update = setName;
+				return <Inner name={name} />;
+			});
+
+			act(() => {
+				render(<App />, scratch);
+			});
+			expect(spy).to.be.calledOnce;
+			expect(spy).to.be.calledWith('foo');
+			expect(renderSpy).to.be.calledOnce;
+
+			act(() => {
+				update('bar');
+			});
+			expect(spy).to.be.calledTwice;
+			expect(renderSpy).to.be.calledOnce;
+		});
+
+		it.skip('should call unmount function', () => {
+			let spy = sinon.spy();
+			const App = component(() => {
+				effect(() => spy);
+				return null;
+			});
+
+			act(() => {
+				render(<App />, scratch);
+			});
+			act(() => {
+				render(null, scratch);
+			});
+			expect(spy).to.be.called;
+		});
+
+		it('should not be called if options._skipEffect is set', () => {
+			const tmp = options._skipEffects;
+			options._skipEffects = true;
+			try {
+				let spy = sinon.spy();
+
+				const App = component(() => {
+					effect(spy);
+					return null;
+				});
+
+				act(() => {
+					render(<App />, scratch);
+				});
+				expect(spy).not.to.be.called;
+			} finally {
+				options._skipEffects = tmp;
+			}
 		});
 	});
 

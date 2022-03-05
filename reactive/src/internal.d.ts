@@ -26,5 +26,8 @@ export interface Graph {
 }
 
 export interface Component extends PreactComponent<any, any> {
-	__reactive?: Atom;
+	__reactive?: {
+		_atom: Atom;
+		_pendingEffects: any[];
+	};
 }

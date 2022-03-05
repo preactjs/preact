@@ -9,6 +9,9 @@ let currentAtom;
 /** @type {import('./internal').Component} */
 let currentComponent;
 
+/** @type {Array<import('./internal').Component>} */
+let afterPaintEffects = [];
+
 // TODO: Process writes in a queue similar to
 // component state updates (would add batching by default)
 // Is this bad for inputs?
@@ -20,14 +23,41 @@ const KIND_COMPUTED = 2;
 /** @type {import('./internal').AtomKind.REACTION} */
 const KIND_REACTION = 3;
 
+let oldDiff = options._diff;
+let oldRender = options._render;
+let oldDiffed = options.diffed;
 let oldBeforeUnmount = options.unmount;
+
+options._diff = vnode => {
+	currentComponent = null;
+	if (oldDiff) oldDiff(vnode);
+};
+
+options._render = vnode => {
+	if (oldRender) oldRender(vnode);
+
+	currentComponent = vnode._component;
+	currentIndex = 0;
+};
+
+options.diffed = vnode => {
+	if (oldDiffed) oldDiffed(vnode);
+
+	const c = vnode._component;
+	if (c && c.__reactive && c.__reactive._pendingEffects.length) {
+		afterPaint(afterPaintEffects.push(c));
+	}
+
+	currentComponent = null;
+};
+
 options.unmount = vnode => {
 	if (oldBeforeUnmount) oldBeforeUnmount(vnode);
 
 	/** @type {import('./internal').Component | null} */
 	const c = vnode._component;
 	if (c && c.__reactive) {
-		const list = c.__reactive._children;
+		const list = c.__reactive._atom._children;
 		let i = list.length;
 		while (i--) {
 			destroy(list[i]);
@@ -323,6 +353,98 @@ export function computed(fn, displayName) {
 }
 
 /**
+ *
+ * @param {{_atom: import('./internal').Atom, _fn: () => any}} data
+ */
+function invokeEffect(data) {
+	const atom = data._atom;
+	track(atom, data._fn);
+}
+
+/**
+ * After paint effects consumer.
+ */
+function flushAfterPaintEffects() {
+	let component;
+	while ((component = afterPaintEffects.shift())) {
+		if (!component._parentDom) continue;
+		try {
+			// component.__reactive._pendingEffects.forEach(invokeCleanup);
+			component.__reactive._pendingEffects.forEach(invokeEffect);
+			component.__reactive._pendingEffects = [];
+		} catch (e) {
+			component.__reactive._pendingEffects = [];
+			options._catchError(e, component._vnode);
+		}
+	}
+}
+
+const RAF_TIMEOUT = 100;
+let prevRaf;
+let HAS_RAF = typeof requestAnimationFrame == 'function';
+
+/**
+ * Schedule a callback to be invoked after the browser has a chance to paint a new frame.
+ * Do this by combining requestAnimationFrame (rAF) + setTimeout to invoke a callback after
+ * the next browser frame.
+ *
+ * Also, schedule a timeout in parallel to the the rAF to ensure the callback is invoked
+ * even if RAF doesn't fire (for example if the browser tab is not visible)
+ *
+ * @param {() => void} callback
+ */
+function afterNextFrame(callback) {
+	const done = () => {
+		clearTimeout(timeout);
+		if (HAS_RAF) cancelAnimationFrame(raf);
+		setTimeout(callback);
+	};
+	const timeout = setTimeout(done, RAF_TIMEOUT);
+
+	let raf;
+	if (HAS_RAF) {
+		raf = requestAnimationFrame(done);
+	}
+}
+
+/**
+ * Schedule afterPaintEffects flush after the browser paints
+ * @param {number} newQueueLength
+ */
+function afterPaint(newQueueLength) {
+	if (newQueueLength === 1 || prevRaf !== options.requestAnimationFrame) {
+		prevRaf = options.requestAnimationFrame;
+		(prevRaf || afterNextFrame)(flushAfterPaintEffects);
+	}
+}
+
+/**
+ *
+ * @param {() => any} fn
+ * @param {string} [displayName]
+ * @returns {void}
+ */
+export function effect(fn, displayName) {
+	const atom = getAtom(currentIndex++, undefined, KIND_REACTION, displayName);
+
+	if (!options._skipEffects) {
+		atom._onUpdate = () => {
+			atom._component.__reactive._pendingEffects.push({
+				_atom: atom,
+				_fn: fn
+			});
+
+			// We assume tha the effect is triggered by a reaction
+			if (currentComponent == null) {
+				atom._component.setState({});
+				atom._component.shouldComponentUpdate = () => false;
+			}
+		};
+		atom._onUpdate();
+	}
+}
+
+/**
  * @template T
  * @param {import('preact').Context<T>} context
  * @returns {import('./internal').Atom<T>}
@@ -387,13 +509,18 @@ export function component(fn) {
 		currentComponent = this;
 		// Similar to reaction(), but the difference is that we
 		// attach the atom to the component instance.
-		const atom =
+		const reactive =
 			this.__reactive ||
-			(this.__reactive = createAtom(
-				null,
-				KIND_REACTION,
-				this.displayName || fn.name || 'ReactiveComponent'
-			));
+			(this.__reactive = {
+				_atom: createAtom(
+					null,
+					KIND_REACTION,
+					this.displayName || fn.name || 'ReactiveComponent'
+				),
+				_pendingEffects: []
+			});
+
+		const atom = reactive._atom;
 
 		atom._onUpdate = () => {
 			this.setState({});
