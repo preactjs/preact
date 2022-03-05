@@ -405,9 +405,7 @@ describe('Reactive', () => {
 			expect(scratch.innerHTML).to.equal('<div>bar</div>');
 		});
 
-		// TODO: Currently the component always updates, even if
-		// nobody subscribe to the context atom
-		it.skip('should only update if context value is used', () => {
+		it('should only update if context value is used', () => {
 			const Ctx = createContext('foo');
 
 			let count = 0;
@@ -416,13 +414,23 @@ describe('Reactive', () => {
 				return <div>{count++}</div>;
 			});
 
+			class Blocker extends Component {
+				shouldComponentUpdate() {
+					return false;
+				}
+
+				render() {
+					return <Inner />;
+				}
+			}
+
 			let update;
 			const App = component(() => {
 				const [ctx, setCtx] = signal('foo');
 				update = setCtx;
 				return (
 					<Ctx.Provider value={ctx.value}>
-						<Inner />
+						<Blocker />
 					</Ctx.Provider>
 				);
 			});

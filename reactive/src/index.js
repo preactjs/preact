@@ -1,4 +1,4 @@
-import { options } from 'preact';
+import { options, Component, h } from 'preact';
 
 /** @type {number} */
 let currentIndex;
@@ -86,6 +86,7 @@ function createAtom(initialValue, kind, displayName = '') {
 		_onUpdate: NOOP,
 		_value: initialValue,
 		_owner: null,
+		_context: null,
 		_component: currentComponent,
 		_children: [], // TODO: Use empty array for signals?
 		get value() {
@@ -307,10 +308,30 @@ export function inject(context) {
 
 	// This is probably not safe to convert to "!"
 	if (atom._value == null) {
-		provider.sub(currentComponent);
-	}
+		atom._value = provider.props.value;
 
-	atom._value = provider.props.value;
+		class InjectedContext extends Component {
+			render() {
+				atom._value = provider.props.value;
+				const subs = graph.subs.get(atom);
+				if (subs && subs.size > 0) {
+					invalidate(atom);
+				}
+				return null;
+			}
+		}
+
+		const vnode = h(InjectedContext, {});
+
+		const c = new InjectedContext({});
+		c._force = false;
+		c._vnode = vnode;
+		c._parentDom = currentComponent._parentDom;
+		c._children = [];
+		c._renderCallbacks = [];
+		vnode._component = c;
+		provider.sub(c);
+	}
 
 	return atom;
 }

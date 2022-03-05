@@ -1,4 +1,5 @@
 import { Component as PreactComponent } from '../../src/internal';
+import { Context } from '../../src/index';
 import { Subscribeable } from './index';
 
 export enum AtomKind {
@@ -16,6 +17,7 @@ export interface Atom<T = any> {
 	_children: Atom[];
 	_component: Component | null;
 	_onUpdate: () => void;
+	_context: Context<T> | null;
 }
 
 export interface Graph {
