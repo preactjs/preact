@@ -1,6 +1,5 @@
 import { Component as PreactComponent } from '../../src/internal';
 import { Context } from '../../src/index';
-import { Subscribeable } from './index';
 
 export enum AtomKind {
 	SOURCE = 1,
