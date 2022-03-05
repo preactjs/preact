@@ -356,7 +356,7 @@ describe('Reactive', () => {
 			expect(count).to.equal(2);
 		});
 
-		it('should skip updates if nothing changed', () => {
+		it('should skip updates if signal value did not change', () => {
 			let update;
 			let count = 0;
 			const App = component(() => {
@@ -374,6 +374,29 @@ describe('Reactive', () => {
 			expect(count).to.equal(1);
 
 			update(0);
+			rerender();
+			expect(count).to.equal(1);
+		});
+
+		it('should skip updates if computed result did not change', () => {
+			let update;
+			let count = 0;
+			const App = component(() => {
+				const [i, setI] = signal(0, 'i');
+				update = setI;
+				const tmp = computed(() => (i.value > 10 ? 'foo' : 'bar'), 'tmp');
+				const sum = computed(() => {
+					count++;
+					return tmp.value;
+				}, 'sum');
+
+				return <div>{sum.value}</div>;
+			});
+
+			render(<App />, scratch);
+			expect(count).to.equal(1);
+
+			update(1);
 			rerender();
 			expect(count).to.equal(1);
 		});

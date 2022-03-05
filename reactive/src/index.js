@@ -181,6 +181,18 @@ function flagUpdate(atom) {
 /**
  * @param {import('./internal').Atom} atom
  */
+function unflagUpdate(atom) {
+	if (--atom._pending === 0) {
+		const subs = graph.subs.get(atom);
+		if (subs !== undefined) {
+			subs.forEach(unflagUpdate);
+		}
+	}
+}
+
+/**
+ * @param {import('./internal').Atom} atom
+ */
 function processUpdate(atom) {
 	if (--atom._pending === 0) {
 		if (atom._onUpdate !== NOOP) {
@@ -213,16 +225,6 @@ function invalidate(atom) {
 function isUpdater(x) {
 	// Will be inlined by terser
 	return typeof x === 'function';
-}
-
-/**
- *
- * @param {*} a
- * @param {*} b
- * @returns {boolean}
- */
-function shouldUpdate(a, b) {
-	return a !== b || (a !== null && typeof a === 'object');
 }
 
 /**
@@ -277,6 +279,13 @@ function track(atom, fn) {
 
 	try {
 		const res = fn();
+		if (atom._value === res) {
+			const subs = graph.subs.get(atom);
+			if (subs !== undefined) {
+				subs.forEach(unflagUpdate);
+			}
+		}
+
 		atom._value = res;
 		return res;
 	} catch (e) {
