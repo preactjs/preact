@@ -1,6 +1,6 @@
 /* eslint-disable react/display-name */
-import { createElement, render, Component } from 'preact';
-import { component, signal, computed } from 'preact/reactive';
+import { createElement, render, Component, createContext } from 'preact';
+import { component, signal, computed, inject } from 'preact/reactive';
 import { setupRerender } from 'preact/test-utils';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 
@@ -332,6 +332,107 @@ describe('Reactive', () => {
 				render(<App />, scratch);
 				expect(atom.displayName).to.match(/^bar_\d+$/);
 			});
+		});
+	});
+
+	describe('inject', () => {
+		it('should read default value from context', () => {
+			const Ctx = createContext('foo');
+
+			const App = component(() => {
+				const name = inject(Ctx);
+				return <div>{name.value}</div>;
+			});
+
+			render(<App />, scratch);
+			expect(scratch.innerHTML).to.equal('<div>foo</div>');
+		});
+
+		it('should read from context', () => {
+			const Ctx = createContext('foo');
+
+			const Inner = component(() => {
+				const name = inject(Ctx);
+				return <div>{name.value}</div>;
+			});
+
+			function App() {
+				return (
+					<Ctx.Provider value="bar">
+						<Inner />
+					</Ctx.Provider>
+				);
+			}
+
+			render(<App />, scratch);
+			expect(scratch.innerHTML).to.equal('<div>bar</div>');
+		});
+
+		it('should subscribe to updates from context', () => {
+			const Ctx = createContext('foo');
+
+			const Inner = component(() => {
+				const name = inject(Ctx);
+				return <div>{name.value}</div>;
+			});
+
+			class Blocker extends Component {
+				shouldComponentUpdate() {
+					return false;
+				}
+
+				render() {
+					return <Inner />;
+				}
+			}
+
+			let update;
+			const App = component(() => {
+				const [ctx, setCtx] = signal('foo');
+				update = setCtx;
+				return (
+					<Ctx.Provider value={ctx.value}>
+						<Blocker />
+					</Ctx.Provider>
+				);
+			});
+
+			render(<App />, scratch);
+			expect(scratch.innerHTML).to.equal('<div>foo</div>');
+
+			update('bar');
+			rerender();
+			expect(scratch.innerHTML).to.equal('<div>bar</div>');
+		});
+
+		// TODO: Currently the component always updates, even if
+		// nobody subscribe to the context atom
+		it.skip('should only update if context value is used', () => {
+			const Ctx = createContext('foo');
+
+			let count = 0;
+			const Inner = component(() => {
+				inject(Ctx); // unused
+				return <div>{count++}</div>;
+			});
+
+			let update;
+			const App = component(() => {
+				const [ctx, setCtx] = signal('foo');
+				update = setCtx;
+				return (
+					<Ctx.Provider value={ctx.value}>
+						<Inner />
+					</Ctx.Provider>
+				);
+			});
+
+			render(<App />, scratch);
+			expect(scratch.innerHTML).to.equal('<div>0</div>');
+
+			update('bar');
+			rerender();
+			expect(scratch.innerHTML).to.equal('<div>0</div>');
 		});
 	});
 });

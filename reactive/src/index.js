@@ -283,6 +283,40 @@ export function computed(fn, displayName) {
 }
 
 /**
+ * @template T
+ * @param {import('preact').Context<T>} context
+ * @returns {import('./internal').Atom<T>}
+ */
+export function inject(context) {
+	const atom = getAtomState(
+		currentIndex++,
+		undefined,
+		KIND_COMPUTED,
+		'inject_' + (context.displayName || 'unknown')
+	);
+
+	const provider = currentComponent.context[context._id];
+
+	// The devtools needs access to the context object to
+	// be able to pull of the default value when no provider
+	// is present in the tree.
+	atom._context = context;
+	if (!provider) {
+		atom._value = context._defaultValue;
+		return atom;
+	}
+
+	// This is probably not safe to convert to "!"
+	if (atom._value == null) {
+		provider.sub(currentComponent);
+	}
+
+	atom._value = provider.props.value;
+
+	return atom;
+}
+
+/**
  * @template P
  * @param {(props: P) => () => import('../../src/index').ComponentChild} fn
  * @returns {import('../../src/index').ComponentChild}

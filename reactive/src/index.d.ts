@@ -6,7 +6,8 @@ import {
 	FunctionComponent,
 	VNode,
 	Attributes,
-	ComponentClass
+	ComponentClass,
+	Context
 } from '../../';
 
 export interface Reactive<T> {
@@ -18,6 +19,7 @@ export function signal<T>(
 	displayName?: string
 ): [Reactive<T>, StateUpdater<T>];
 export function computed<T>(fn: () => T, displayName?: string): Reactive<T>;
+export function inject<T>(ctx: Context<T>): Reactive<T>;
 
 export function component<P = {}>(
 	fn: (props: P) => ComponentChild
