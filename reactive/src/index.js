@@ -216,6 +216,16 @@ function isUpdater(x) {
 }
 
 /**
+ *
+ * @param {*} a
+ * @param {*} b
+ * @returns {boolean}
+ */
+function shouldUpdate(a, b) {
+	return a !== b || (a !== null && typeof a === 'object');
+}
+
+/**
  * @template T
  * @param {T} initialValue
  * @param {string} [displayName]
@@ -242,7 +252,7 @@ export function signal(initialValue, displayName) {
 				atom._value = res;
 				invalidate(atom);
 			}
-		} else {
+		} else if (atom._value !== value) {
 			atom._value = value;
 			invalidate(atom);
 		}

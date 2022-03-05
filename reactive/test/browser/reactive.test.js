@@ -356,6 +356,28 @@ describe('Reactive', () => {
 			expect(count).to.equal(2);
 		});
 
+		it('should skip updates if nothing changed', () => {
+			let update;
+			let count = 0;
+			const App = component(() => {
+				const [i, setI] = signal(0);
+				update = setI;
+				const sum = computed(() => {
+					count++;
+					return i.value;
+				});
+
+				return <div>{sum.value}</div>;
+			});
+
+			render(<App />, scratch);
+			expect(count).to.equal(1);
+
+			update(0);
+			rerender();
+			expect(count).to.equal(1);
+		});
+
 		it('should throw when a signal is updated inside computed', () => {
 			const App = component(() => {
 				const [name] = signal('foo');
