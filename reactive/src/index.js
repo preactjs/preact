@@ -223,10 +223,9 @@ export function signal(initialValue, displayName) {
  * @template T
  * @param {import('./internal').Atom<T>} atom
  * @param {() => T} fn
- * @param {import('./internal').Component} c
  * @returns {T}
  */
-function track(atom, fn, c) {
+function track(atom, fn) {
 	let tmp = tracking;
 	tracking = new Set();
 	let tmpAtom = currentAtom;
@@ -278,7 +277,7 @@ export function computed(fn, displayName) {
 		KIND_COMPUTED,
 		displayName
 	);
-	state._onUpdate = () => track(state, fn, currentComponent);
+	state._onUpdate = () => track(state, fn);
 	return state;
 }
 
@@ -340,7 +339,7 @@ export function component(fn) {
 		};
 
 		try {
-			return track(atom, () => fn(props), this);
+			return track(atom, () => fn(props));
 		} finally {
 			currentComponent = prevCurrentComponent;
 		}
