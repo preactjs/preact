@@ -306,6 +306,46 @@ describe('Reactive', () => {
 	});
 
 	describe('computed', () => {
+		it('should return atom', () => {
+			const App = component(() => {
+				const [name] = signal('foo');
+				const bar = computed(() => name.value);
+				return <div>{bar.value}</div>;
+			});
+
+			render(<App />, scratch);
+			expect(scratch.innerHTML).to.equal('<div>foo</div>');
+		});
+
+		it('should rerun on update', () => {
+			let update;
+			const App = component(() => {
+				const [name, updateName] = signal('foo');
+				update = updateName;
+				const bar = computed(() => name.value);
+				return <div>{bar.value}</div>;
+			});
+
+			render(<App />, scratch);
+			update('bar');
+			rerender();
+			expect(scratch.innerHTML).to.equal('<div>bar</div>');
+		});
+
+		it('should throw when a signal is updated inside computed', () => {
+			const App = component(() => {
+				const [name] = signal('foo');
+				const [_, setNope] = signal('foo');
+				const bar = computed(() => {
+					setNope(name.value);
+					return name.value;
+				});
+				return <div>{bar.value}</div>;
+			});
+
+			expect(() => render(<App />, scratch)).to.throw(/Must not/);
+		});
+
 		describe('displayName', () => {
 			it('should use default if not specified', () => {
 				let atom;

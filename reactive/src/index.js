@@ -205,6 +205,11 @@ export function signal(initialValue, displayName) {
 
 	/** @type {import('./index').StateUpdater<T>} */
 	const updater = value => {
+		// TODO: Extract to preact/debug?
+		if (currentAtom !== undefined && currentAtom.kind === KIND_COMPUTED) {
+			throw new Error('Must not update signal inside computed.');
+		}
+
 		if (isUpdater(value)) {
 			const res = value(atom._value);
 			if (res !== null && res !== atom._value) {
