@@ -119,6 +119,9 @@ function getReactive(component) {
 
 		component.__reactive._atom._tracking = new Set();
 		component.__reactive._atom._onUpdate = () => {
+			if (component._skipRender) {
+				component._skipRender = false;
+			}
 			component.setState({});
 		};
 	}
@@ -481,6 +484,7 @@ function afterPaint(newQueueLength) {
  * @returns {void}
  */
 export function effect(fn, displayName) {
+	const isNew = !currentComponent.__reactive;
 	const atom = getAtom(currentIndex++, undefined, KIND_REACTION, displayName);
 
 	if (!options._skipEffects) {
@@ -490,13 +494,18 @@ export function effect(fn, displayName) {
 				_fn: fn
 			});
 
-			// We assume tha the effect is triggered by a reaction
-			if (currentComponent == null) {
-				atom._component.setState({});
-				atom._component.shouldComponentUpdate = () => false;
-			}
+			// Ensure that effects are scheduled based on the component tree,
+			// similar to how it's done for hooks
+			atom._component._skipRender = true;
+			atom._component.setState({});
+			atom._component.shouldComponentUpdate = () => {
+				return !atom._component._skipRender;
+			};
 		};
-		atom._onUpdate();
+
+		if (isNew) {
+			atom._onUpdate();
+		}
 	}
 }
 
