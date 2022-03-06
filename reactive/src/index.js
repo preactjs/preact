@@ -12,6 +12,18 @@ let currentComponent;
 /** @type {Array<import('./internal').Component>} */
 let afterPaintEffects = [];
 
+/**
+ * @type {import('./internal').Graph}
+ */
+const graph = {
+	deps: new Map(),
+	subs: new Map()
+};
+
+const NOOP = () => {};
+
+let atomHash = 0;
+
 // TODO: Process writes in a queue similar to
 // component state updates (would add batching by default)
 // Is this bad for inputs?
@@ -44,8 +56,30 @@ options.diffed = vnode => {
 	if (oldDiffed) oldDiffed(vnode);
 
 	const c = vnode._component;
-	if (c && c.__reactive && c.__reactive._pendingEffects.length) {
-		afterPaint(afterPaintEffects.push(c));
+	if (c && c.__reactive) {
+		const atom = c.__reactive._atom;
+
+		let deps = graph.deps.get(atom);
+		if (!deps) {
+			deps = new Set();
+			graph.deps.set(atom, deps);
+		}
+
+		// Subscribe to new subscriptions
+		atom._tracking.forEach(dep => {
+			linkDep(atom, dep);
+		});
+
+		// Remove old subscriptions
+		deps.forEach(dep => {
+			if (!atom._tracking.has(dep)) {
+				unlinkDep(atom, dep);
+			}
+		});
+
+		if (c.__reactive._pendingEffects.length) {
+			afterPaint(afterPaintEffects.push(c));
+		}
 	}
 
 	currentComponent = null;
@@ -66,6 +100,33 @@ options.unmount = vnode => {
 };
 
 /**
+ * @param {import('./internal').Component} component
+ * @returns {Required<import('./internal').Component>["__reactive"]}
+ */
+function getReactive(component) {
+	if (!component.__reactive) {
+		component.__reactive = {
+			_atom: createAtom(
+				null,
+				KIND_REACTION,
+				undefined,
+				component.constructor.displayName ||
+					component.constructor.name ||
+					'ReactiveComponent'
+			),
+			_pendingEffects: []
+		};
+
+		component.__reactive._atom._tracking = new Set();
+		component.__reactive._atom._onUpdate = () => {
+			component.setState({});
+		};
+	}
+
+	return component.__reactive;
+}
+
+/**
  * @template T
  * @param {T} initialState
  * @param {number} index
@@ -74,41 +135,29 @@ options.unmount = vnode => {
  * @returns {import('./internal').Atom<T>}
  */
 function getAtom(index, initialState, kind, displayName) {
-	const reactive = currentAtom;
+	const reactive = getReactive(currentComponent);
 
-	if (index >= reactive._children.length) {
-		const atom = createAtom(initialState, kind, displayName);
-		reactive._children.push(atom);
-		atom._owner = currentAtom;
+	if (index === 0) {
+		currentAtom = reactive._atom;
+		currentAtom._tracking = new Set();
 	}
 
-	return reactive._children[index];
+	if (index >= currentAtom._children.length) {
+		const atom = createAtom(initialState, kind, currentAtom, displayName);
+		currentAtom._children.push(atom);
+	}
+
+	return currentAtom._children[index];
 }
-
-/**
- * @type {import('./internal').Graph}
- */
-const graph = {
-	deps: new Map(),
-	subs: new Map()
-};
-
-/**
- * @type {Set<import('./internal').Atom>}
- */
-let tracking = new Set();
-
-const NOOP = () => {};
-
-let atomHash = 0;
 
 /**
  * @template T
  * @param {T} initialValue
  * @param {import('./internal').AtomKind} kind
+ * @param {import('./internal').Atom | undefined} owner
  * @returns {import('./internal').Atom<T>}
  */
-function createAtom(initialValue, kind, displayName = '') {
+function createAtom(initialValue, kind, owner, displayName = '') {
 	/** @type {import('./internal').Atom<T>} */
 	const atom = {
 		displayName: displayName + '_' + String(atomHash++),
@@ -116,12 +165,20 @@ function createAtom(initialValue, kind, displayName = '') {
 		_pending: 0,
 		_onUpdate: NOOP,
 		_value: initialValue,
-		_owner: null,
-		_context: null,
+		_tracking: undefined,
+		_owner: owner,
+		_context: undefined,
 		_component: currentComponent,
 		_children: [], // TODO: Use empty array for signals?
 		get value() {
-			tracking.add(atom);
+			// We're rendering a component which only reads atoms
+			if (currentComponent && !currentComponent.__reactive) {
+				const reactive = getReactive(currentComponent);
+				currentAtom = reactive._atom;
+			}
+
+			// May be set by component or by owning reaction
+			currentAtom._tracking.add(atom);
 
 			if (kind !== KIND_SOURCE && !graph.deps.has(atom)) {
 				atom._onUpdate();
@@ -180,7 +237,7 @@ function destroy(atom) {
 	const stack = [atom];
 	let item;
 	while ((item = stack.pop()) !== undefined) {
-		item._owner = null;
+		item._owner = undefined;
 
 		const deps = graph.deps.get(item);
 		if (deps) {
@@ -295,8 +352,7 @@ export function signal(initialValue, displayName) {
  * @returns {T}
  */
 function track(atom, fn) {
-	let tmp = tracking;
-	tracking = new Set();
+	atom._tracking = new Set();
 	let tmpAtom = currentAtom;
 	currentAtom = atom;
 	let prevIndex = currentIndex;
@@ -323,19 +379,19 @@ function track(atom, fn) {
 		}
 
 		// Subscribe to new subscriptions
-		tracking.forEach(dep => {
+		atom._tracking.forEach(dep => {
 			linkDep(atom, dep);
 		});
 
 		// Remove old subscriptions
 		deps.forEach(dep => {
-			if (!tracking.has(dep)) {
+			if (!atom._tracking.has(dep)) {
 				unlinkDep(atom, dep);
 			}
 		});
 
 		currentAtom = tmpAtom;
-		tracking = tmp;
+		atom._tracking = undefined;
 		currentIndex = prevIndex;
 	}
 }
@@ -496,40 +552,4 @@ export function inject(context) {
 	}
 
 	return atom;
-}
-
-/**
- * @template P
- * @param {(props: P) => () => import('../../src/index').ComponentChild} fn
- * @returns {import('../../src/index').ComponentChild}
- */
-export function component(fn) {
-	return function Reactive(props) {
-		let prevCurrentComponent = currentComponent;
-		currentComponent = this;
-		// Similar to reaction(), but the difference is that we
-		// attach the atom to the component instance.
-		const reactive =
-			this.__reactive ||
-			(this.__reactive = {
-				_atom: createAtom(
-					null,
-					KIND_REACTION,
-					this.displayName || fn.name || 'ReactiveComponent'
-				),
-				_pendingEffects: []
-			});
-
-		const atom = reactive._atom;
-
-		atom._onUpdate = () => {
-			this.setState({});
-		};
-
-		try {
-			return track(atom, () => fn(props));
-		} finally {
-			currentComponent = prevCurrentComponent;
-		}
-	};
 }

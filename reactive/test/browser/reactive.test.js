@@ -6,7 +6,7 @@ import {
 	createContext,
 	options
 } from 'preact';
-import { component, signal, computed, inject, effect } from 'preact/reactive';
+import { signal, computed, inject, effect } from 'preact/reactive';
 import { act, setupRerender } from 'preact/test-utils';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 
@@ -31,10 +31,10 @@ describe('Reactive', () => {
 	describe('component', () => {
 		it('should pass props', () => {
 			let usedProps;
-			const App = component(props => {
+			function App(props) {
 				usedProps = props;
 				return <div />;
-			});
+			}
 
 			render(<App foo="foo" />, scratch);
 			expect(usedProps).to.deep.equal({ foo: 'foo' });
@@ -45,10 +45,10 @@ describe('Reactive', () => {
 
 		it('should not call unsubscribed computed atoms', () => {
 			let count = 0;
-			const App = component(() => {
+			function App() {
 				computed(() => count++);
 				return <div />;
-			});
+			}
 
 			render(<App />, scratch);
 			expect(count).to.equal(0);
@@ -62,7 +62,7 @@ describe('Reactive', () => {
 			let updateFoo;
 
 			let count = 0;
-			const App = component(() => {
+			function App() {
 				const [num, setNum] = signal(0, 'num');
 				const [foo, setFoo] = signal('foo', 'foo');
 				const [bar] = signal('bar', 'bar');
@@ -73,7 +73,7 @@ describe('Reactive', () => {
 				count++;
 				const v = num.value % 2 === 0 ? foo.value : bar.value;
 				return <div>{v}</div>;
-			});
+			}
 
 			render(<App />, scratch);
 			expect(scratch.innerHTML).to.equal('<div>foo</div>');
@@ -91,13 +91,13 @@ describe('Reactive', () => {
 		it('should drop reactions on unmount', () => {
 			let updateName;
 			let count = 0;
-			const Inner = component(() => {
+			function Inner() {
 				const [name, setName] = signal('foo');
 				updateName = setName;
 
 				count++;
 				return <div>{name.value}</div>;
-			});
+			}
 
 			let updateOuter;
 			class Outer extends Component {
@@ -128,7 +128,7 @@ describe('Reactive', () => {
 
 		it('should throw errors as part of render context', () => {
 			let updateName;
-			const Inner = component(() => {
+			function Inner() {
 				const [name, setName] = signal('foo');
 				updateName = setName;
 
@@ -141,7 +141,7 @@ describe('Reactive', () => {
 				});
 
 				return <div>{foo.value}</div>;
-			});
+			}
 
 			class Outer extends Component {
 				constructor(props) {
@@ -169,47 +169,14 @@ describe('Reactive', () => {
 			rerender();
 			expect(scratch.innerHTML).to.equal('<div>errored</div>');
 		});
-
-		describe('displayName', () => {
-			it('should set default if none specified', () => {
-				const App = component(() => {
-					return <div>foo</div>;
-				});
-
-				render(<App />, scratch);
-				const atom = scratch._children._children[0]._component.__reactive._atom;
-				expect(atom.displayName).to.match(/^ReactiveComponent_\d+$/);
-			});
-
-			it('should use function name', () => {
-				const App = component(function Foo() {
-					return <div>foo</div>;
-				});
-
-				render(<App />, scratch);
-				const atom = scratch._children._children[0]._component.__reactive._atom;
-				expect(atom.displayName).to.match(/^Foo_\d+$/);
-			});
-
-			it('should use component displayName', () => {
-				const App = component(function Foo() {
-					return <div>foo</div>;
-				});
-				App.displayName = 'App';
-
-				render(<App />, scratch);
-				const atom = scratch._children._children[0]._component.__reactive._atom;
-				expect(atom.displayName).to.match(/^Foo_\d+$/);
-			});
-		});
 	});
 
 	describe('signals', () => {
 		it('should render signal value', () => {
-			const App = component(() => {
+			function App() {
 				const [name] = signal('foo');
 				return <div>{name.value}</div>;
-			});
+			}
 
 			render(<App />, scratch);
 			expect(scratch.innerHTML).to.equal('<div>foo</div>');
@@ -218,11 +185,11 @@ describe('Reactive', () => {
 		describe('displayName', () => {
 			it('should set default if none specified', () => {
 				let atom;
-				const App = component(() => {
+				function App() {
 					const [name] = signal('foo');
 					atom = name;
 					return <div>{name.value}</div>;
-				});
+				}
 
 				render(<App />, scratch);
 				expect(atom.displayName).to.match(/^_\d+$/);
@@ -230,11 +197,11 @@ describe('Reactive', () => {
 
 			it('should use passed value', () => {
 				let atom;
-				const App = component(() => {
+				function App() {
 					const [name] = signal('foo', 'foo');
 					atom = name;
 					return <div>{name.value}</div>;
-				});
+				}
 
 				render(<App />, scratch);
 				expect(atom.displayName).to.match(/^foo_\d+$/);
@@ -244,11 +211,11 @@ describe('Reactive', () => {
 		describe('updater', () => {
 			it('should update signal value', () => {
 				let update;
-				const App = component(() => {
+				function App() {
 					const [name, setName] = signal('foo');
 					update = setName;
 					return <div>{name.value}</div>;
-				});
+				}
 
 				render(<App />, scratch);
 				update('bar');
@@ -259,17 +226,17 @@ describe('Reactive', () => {
 			it('should NOT update when signal is not used', () => {
 				let update;
 
-				const Inner = component(props => {
+				function Inner(props) {
 					return <div>{props.name.value}</div>;
-				});
+				}
 
 				let count = 0;
-				const App = component(() => {
+				function App() {
 					const [name, setName] = signal('foo');
 					update = setName;
 					count++;
 					return <Inner name={name} />;
-				});
+				}
 
 				render(<App />, scratch);
 				expect(scratch.innerHTML).to.equal('<div>foo</div>');
@@ -283,11 +250,11 @@ describe('Reactive', () => {
 
 			it('should update signal via updater function', () => {
 				let update;
-				const App = component(() => {
+				function App() {
 					const [name, setName] = signal('foo');
 					update = setName;
 					return <div>{name.value}</div>;
-				});
+				}
 
 				render(<App />, scratch);
 				update(prev => prev + 'bar');
@@ -297,11 +264,11 @@ describe('Reactive', () => {
 
 			it('should abort signal update in updater function', () => {
 				let update;
-				const App = component(() => {
+				function App() {
 					const [name, setName] = signal('foo');
 					update = setName;
 					return <div>{name.value}</div>;
-				});
+				}
 
 				render(<App />, scratch);
 				update(() => null);
@@ -313,11 +280,11 @@ describe('Reactive', () => {
 
 	describe('computed', () => {
 		it('should return atom', () => {
-			const App = component(() => {
+			function App() {
 				const [name] = signal('foo');
 				const bar = computed(() => name.value);
 				return <div>{bar.value}</div>;
-			});
+			}
 
 			render(<App />, scratch);
 			expect(scratch.innerHTML).to.equal('<div>foo</div>');
@@ -325,12 +292,12 @@ describe('Reactive', () => {
 
 		it('should rerun on update', () => {
 			let update;
-			const App = component(() => {
+			function App() {
 				const [name, updateName] = signal('foo');
 				update = updateName;
 				const bar = computed(() => name.value);
 				return <div>{bar.value}</div>;
-			});
+			}
 
 			render(<App />, scratch);
 			update('bar');
@@ -341,7 +308,7 @@ describe('Reactive', () => {
 		it('should only update once', () => {
 			let update;
 			let count = 0;
-			const App = component(() => {
+			function App() {
 				const [name, updateName] = signal('foo');
 				update = updateName;
 				const a = computed(() => name.value + 'A');
@@ -352,7 +319,7 @@ describe('Reactive', () => {
 				});
 
 				return <div>{c.value}</div>;
-			});
+			}
 
 			render(<App />, scratch);
 			expect(count).to.equal(1);
@@ -365,7 +332,7 @@ describe('Reactive', () => {
 		it('should skip updates if signal value did not change', () => {
 			let update;
 			let count = 0;
-			const App = component(() => {
+			function App() {
 				const [i, setI] = signal(0);
 				update = setI;
 				const sum = computed(() => {
@@ -374,7 +341,7 @@ describe('Reactive', () => {
 				});
 
 				return <div>{sum.value}</div>;
-			});
+			}
 
 			render(<App />, scratch);
 			expect(count).to.equal(1);
@@ -387,7 +354,7 @@ describe('Reactive', () => {
 		it('should skip updates if computed result did not change', () => {
 			let update;
 			let count = 0;
-			const App = component(() => {
+			function App() {
 				const [i, setI] = signal(0, 'i');
 				update = setI;
 				const tmp = computed(() => (i.value > 10 ? 'foo' : 'bar'), 'tmp');
@@ -397,7 +364,7 @@ describe('Reactive', () => {
 				}, 'sum');
 
 				return <div>{sum.value}</div>;
-			});
+			}
 
 			render(<App />, scratch);
 			expect(count).to.equal(1);
@@ -408,7 +375,7 @@ describe('Reactive', () => {
 		});
 
 		it('should throw when a signal is updated inside computed', () => {
-			const App = component(() => {
+			function App() {
 				const [name] = signal('foo');
 				const [_, setNope] = signal('foo');
 				const bar = computed(() => {
@@ -416,7 +383,7 @@ describe('Reactive', () => {
 					return name.value;
 				});
 				return <div>{bar.value}</div>;
-			});
+			}
 
 			expect(() => render(<App />, scratch)).to.throw(/Must not/);
 		});
@@ -424,12 +391,12 @@ describe('Reactive', () => {
 		describe('displayName', () => {
 			it('should use default if not specified', () => {
 				let atom;
-				const App = component(() => {
+				function App() {
 					const [name] = signal('foo');
 					const bar = computed(() => name.value);
 					atom = bar;
 					return <div>{bar.value}</div>;
-				});
+				}
 
 				render(<App />, scratch);
 				expect(atom.displayName).to.match(/^_\d+$/);
@@ -437,12 +404,12 @@ describe('Reactive', () => {
 
 			it('should use passed name', () => {
 				let atom;
-				const App = component(() => {
+				function App() {
 					const [name] = signal('foo');
 					const bar = computed(() => name.value, 'bar');
 					atom = bar;
 					return <div>{bar.value}</div>;
-				});
+				}
 
 				render(<App />, scratch);
 				expect(atom.displayName).to.match(/^bar_\d+$/);
@@ -453,10 +420,10 @@ describe('Reactive', () => {
 	describe('effect', () => {
 		it('should call effect', () => {
 			let spy = sinon.spy();
-			const App = component(() => {
+			function App() {
 				effect(spy);
 				return null;
-			});
+			}
 
 			act(() => {
 				render(<App />, scratch);
@@ -467,21 +434,21 @@ describe('Reactive', () => {
 		it('should be called when dependency changes', () => {
 			let spy = sinon.spy();
 			let renderSpy = sinon.spy();
-			const Inner = component(props => {
+			function Inner(props) {
 				effect(() => {
 					spy(props.name.value);
 				});
 
 				renderSpy();
 				return null;
-			});
+			}
 
 			let update;
-			const App = component(() => {
+			function App() {
 				const [name, setName] = signal('foo');
 				update = setName;
 				return <Inner name={name} />;
-			});
+			}
 
 			act(() => {
 				render(<App />, scratch);
@@ -499,10 +466,10 @@ describe('Reactive', () => {
 
 		it.skip('should call unmount function', () => {
 			let spy = sinon.spy();
-			const App = component(() => {
+			function App() {
 				effect(() => spy);
 				return null;
-			});
+			}
 
 			act(() => {
 				render(<App />, scratch);
@@ -516,14 +483,14 @@ describe('Reactive', () => {
 		it('should not be called if options._skipEffect is set', () => {
 			const tmp = options._skipEffects;
 			options._skipEffects = true;
+			let spy = sinon.spy();
+
+			function App() {
+				effect(spy);
+				return null;
+			}
+
 			try {
-				let spy = sinon.spy();
-
-				const App = component(() => {
-					effect(spy);
-					return null;
-				});
-
 				act(() => {
 					render(<App />, scratch);
 				});
@@ -538,10 +505,10 @@ describe('Reactive', () => {
 		it('should read default value from context', () => {
 			const Ctx = createContext('foo');
 
-			const App = component(() => {
+			function App() {
 				const name = inject(Ctx);
 				return <div>{name.value}</div>;
-			});
+			}
 
 			render(<App />, scratch);
 			expect(scratch.innerHTML).to.equal('<div>foo</div>');
@@ -550,10 +517,10 @@ describe('Reactive', () => {
 		it('should read from context', () => {
 			const Ctx = createContext('foo');
 
-			const Inner = component(() => {
+			function Inner() {
 				const name = inject(Ctx);
 				return <div>{name.value}</div>;
-			});
+			}
 
 			function App() {
 				return (
@@ -570,10 +537,10 @@ describe('Reactive', () => {
 		it('should subscribe to updates from context', () => {
 			const Ctx = createContext('foo');
 
-			const Inner = component(() => {
+			function Inner() {
 				const name = inject(Ctx);
 				return <div>{name.value}</div>;
-			});
+			}
 
 			class Blocker extends Component {
 				shouldComponentUpdate() {
@@ -586,7 +553,7 @@ describe('Reactive', () => {
 			}
 
 			let update;
-			const App = component(() => {
+			function App() {
 				const [ctx, setCtx] = signal('foo');
 				update = setCtx;
 				return (
@@ -594,7 +561,7 @@ describe('Reactive', () => {
 						<Blocker />
 					</Ctx.Provider>
 				);
-			});
+			}
 
 			render(<App />, scratch);
 			expect(scratch.innerHTML).to.equal('<div>foo</div>');
@@ -608,10 +575,10 @@ describe('Reactive', () => {
 			const Ctx = createContext('foo');
 
 			let count = 0;
-			const Inner = component(() => {
+			function Inner() {
 				inject(Ctx); // unused
 				return <div>{count++}</div>;
-			});
+			}
 
 			class Blocker extends Component {
 				shouldComponentUpdate() {
@@ -624,7 +591,7 @@ describe('Reactive', () => {
 			}
 
 			let update;
-			const App = component(() => {
+			function App() {
 				const [ctx, setCtx] = signal('foo');
 				update = setCtx;
 				return (
@@ -632,7 +599,7 @@ describe('Reactive', () => {
 						<Blocker />
 					</Ctx.Provider>
 				);
-			});
+			}
 
 			render(<App />, scratch);
 			expect(scratch.innerHTML).to.equal('<div>0</div>');

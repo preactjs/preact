@@ -13,11 +13,12 @@ export interface Atom<T = any> {
 	value: T;
 	_pending: number;
 	_value: T;
-	_owner: Atom | null;
+	_tracking: Set<Atom> | undefined;
+	_owner: Atom | undefined;
 	_children: Atom[];
-	_component: Component | null;
+	_component: Component | undefined;
 	_onUpdate: () => void;
-	_context: Context<T> | null;
+	_context: Context<T> | undefined;
 }
 
 export interface Graph {
