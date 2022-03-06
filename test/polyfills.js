@@ -200,6 +200,9 @@ function serialize(value, mode, indent, seen) {
 	if (value instanceof Element) {
 		return value.outerHTML;
 	}
+	if (value instanceof Error) {
+		return value.stack;
+	}
 
 	seen.add(value);
 
