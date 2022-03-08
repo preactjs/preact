@@ -12,6 +12,17 @@ import { setupScratch, teardown } from '../../../test/_util/helpers';
 
 /** @jsx createElement */
 
+function scheduleEffectAssert(assertFn) {
+	return new Promise(resolve => {
+		requestAnimationFrame(() =>
+			setTimeout(() => {
+				assertFn();
+				resolve();
+			}, 0)
+		);
+	});
+}
+
 describe('Reactive', () => {
 	/** @type {HTMLDivElement} */
 	let scratch;
@@ -478,20 +489,96 @@ describe('Reactive', () => {
 			expect(renderSpy).to.be.calledOnce;
 		});
 
-		it.skip('should call unmount function', () => {
-			let spy = sinon.spy();
+		it('should call unmount function', () => {
+			const cleanup = sinon.spy();
+			const callback = sinon.spy(() => cleanup);
+
 			function App() {
-				effect(() => spy);
+				effect(callback);
 				return null;
 			}
 
-			act(() => {
-				render(<App />, scratch);
+			act(() => render(<App />, scratch));
+			expect(cleanup).not.to.be.called;
+			expect(callback).to.be.calledOnce;
+
+			act(() => render(null, scratch));
+			expect(cleanup).to.be.calledOnce;
+		});
+
+		it('cancels the effect when the component get unmounted before it had the chance to run it', () => {
+			const cleanupFunction = sinon.spy();
+			const callback = sinon.spy(() => cleanupFunction);
+
+			function Comp() {
+				effect(callback);
+				return null;
+			}
+
+			render(<Comp />, scratch);
+			render(null, scratch);
+
+			return scheduleEffectAssert(() => {
+				expect(cleanupFunction).to.not.be.called;
+				expect(callback).to.not.be.called;
 			});
-			act(() => {
-				render(null, scratch);
-			});
-			expect(spy).to.be.called;
+		});
+
+		it('should not be called on rerendering', () => {
+			let executionOrder = [];
+			const App = ({ i }) => {
+				executionOrder = [];
+				effect(() => {
+					executionOrder.push('action1');
+					return () => executionOrder.push('cleanup1');
+				});
+				effect(() => {
+					executionOrder.push('action2');
+					return () => executionOrder.push('cleanup2');
+				});
+				return <p>Test {i}</p>;
+			};
+			act(() => render(<App i={0} />, scratch));
+			expect(executionOrder).to.deep.equal(['action1', 'action2']);
+
+			act(() => render(<App i={2} />, scratch));
+			expect(executionOrder).to.deep.equal([]);
+		});
+
+		it('should execute multiple effects in same component in the right order', () => {
+			let update;
+			let executionOrder = [];
+			const App = () => {
+				const [$i, setI] = signal(0);
+				update = setI;
+
+				effect(() => {
+					$i.value;
+					executionOrder.push('action1');
+					return () => {
+						executionOrder.push('cleanup1');
+					};
+				});
+				effect(() => {
+					$i.value;
+					executionOrder.push('action2');
+					return () => {
+						executionOrder.push('cleanup2');
+					};
+				});
+				return <p>Test</p>;
+			};
+			act(() => render(<App />, scratch));
+			expect(executionOrder).to.deep.equal(['action1', 'action2']);
+
+			executionOrder = [];
+			act(() => update(2));
+			expect(executionOrder).to.deep.equal([
+				'cleanup1',
+				'cleanup2',
+				'action1',
+				'action2'
+			]);
 		});
 
 		it('should not be called if options._skipEffect is set', () => {

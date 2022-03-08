@@ -50,6 +50,11 @@ options._render = vnode => {
 
 	currentComponent = vnode._component;
 	currentIndex = 0;
+
+	const reactive = currentComponent.__reactive;
+	if (reactive) {
+		reactive._pendingEffects.forEach(invokeCleanup);
+	}
 };
 
 options.diffed = vnode => {
@@ -91,6 +96,10 @@ options.unmount = vnode => {
 	/** @type {import('./internal').Component | null} */
 	const c = vnode._component;
 	if (c && c.__reactive) {
+		// Cleanup in progress effects
+		c.__reactive._pendingEffects.forEach(invokeCleanup);
+
+		// TODO: This part is messy
 		const list = c.__reactive._atom._children;
 		let i = list.length;
 		while (i--) {
@@ -167,6 +176,7 @@ function createAtom(initialValue, kind, owner, displayName = '') {
 		kind,
 		_pending: 0,
 		_onUpdate: NOOP,
+		_onCleanup: NOOP,
 		_value: initialValue,
 		_tracking: undefined,
 		_owner: owner,
@@ -248,6 +258,10 @@ function destroy(atom) {
 				unlinkDep(item, dep);
 				stack.push(dep);
 			});
+		}
+
+		if (item._onCleanup !== NOOP) {
+			item._onCleanup();
 		}
 
 		if (item._children.length > 0) {
@@ -412,12 +426,24 @@ export function computed(fn, displayName) {
 }
 
 /**
- *
- * @param {{_atom: import('./internal').Atom, _fn: () => any}} data
+ * @param {import('./internal').EffectState} data
  */
 function invokeEffect(data) {
-	const atom = data._atom;
-	track(atom, data._fn);
+	const res = track(data._atom, data._fn);
+	if (typeof res === 'function') {
+		data._atom._onCleanup = res;
+	}
+}
+
+/**
+ * @param {import('./internal').EffectState} data
+ */
+function invokeCleanup(data) {
+	const cleanup = data._atom._onCleanup;
+	if (cleanup !== NOOP) {
+		cleanup();
+		data._atom._onCleanup = NOOP;
+	}
 }
 
 /**
@@ -428,7 +454,7 @@ function flushAfterPaintEffects() {
 	while ((component = afterPaintEffects.shift())) {
 		if (!component._parentDom) continue;
 		try {
-			// component.__reactive._pendingEffects.forEach(invokeCleanup);
+			component.__reactive._pendingEffects.forEach(invokeCleanup);
 			component.__reactive._pendingEffects.forEach(invokeEffect);
 			component.__reactive._pendingEffects = [];
 		} catch (e) {
@@ -484,7 +510,9 @@ function afterPaint(newQueueLength) {
  * @returns {void}
  */
 export function effect(fn, displayName) {
-	const isNew = !currentComponent.__reactive;
+	const reactive = getReactive(currentComponent);
+	const isNew = reactive._atom._children.length <= currentIndex;
+
 	const atom = getAtom(currentIndex++, undefined, KIND_REACTION, displayName);
 
 	if (!options._skipEffects) {
@@ -497,15 +525,22 @@ export function effect(fn, displayName) {
 			// Ensure that effects are scheduled based on the component tree,
 			// similar to how it's done for hooks
 			atom._component._skipRender = true;
-			atom._component.setState({});
 			atom._component.shouldComponentUpdate = () => {
 				return !atom._component._skipRender;
 			};
+
+			// Only re-schedule if we're not rendering the current component
+			if (atom._component !== currentComponent) {
+				atom._component.setState({});
+			}
 		};
 
 		if (isNew) {
 			atom._onUpdate();
 		}
+
+		// Don't skip rendering if we're currently rendering
+		atom._component._skipRender = false;
 	}
 }
 
