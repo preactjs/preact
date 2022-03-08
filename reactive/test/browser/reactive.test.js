@@ -6,7 +6,14 @@ import {
 	createContext,
 	options
 } from 'preact';
-import { signal, computed, inject, effect, ref } from 'preact/reactive';
+import {
+	signal,
+	computed,
+	inject,
+	effect,
+	readonly,
+	ref
+} from 'preact/reactive';
 import { act, setupRerender } from 'preact/test-utils';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 
@@ -300,6 +307,45 @@ describe('Reactive', () => {
 				rerender();
 				expect(scratch.innerHTML).to.equal('<div>foo</div>');
 			});
+		});
+	});
+
+	describe('readonly', () => {
+		it('should turn into atom', () => {
+			let count = 0;
+			function App({ foo }) {
+				const $foo = readonly(foo);
+				count++;
+				return <div>{$foo.value}</div>;
+			}
+
+			render(<App foo={0} />, scratch);
+			expect(scratch.innerHTML).to.equal('<div>0</div>');
+			expect(count).to.equal(1);
+		});
+
+		it('should react to new values', () => {
+			let count = 0;
+			let computedCount = 0;
+			function App({ foo }) {
+				const $foo = readonly(foo);
+				const c = computed(() => {
+					computedCount++;
+					return $foo.value;
+				});
+				count++;
+				return <div>{c.value}</div>;
+			}
+
+			render(<App foo={0} />, scratch);
+			expect(scratch.innerHTML).to.equal('<div>0</div>');
+			expect(count).to.equal(1);
+			expect(computedCount).to.equal(1);
+
+			render(<App foo={1} />, scratch);
+			expect(scratch.innerHTML).to.equal('<div>1</div>');
+			expect(count).to.equal(2);
+			expect(computedCount).to.equal(2);
 		});
 	});
 

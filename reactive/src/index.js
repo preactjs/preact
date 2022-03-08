@@ -546,6 +546,23 @@ export function effect(fn, displayName) {
 
 /**
  * @template T
+ * @param {T} value
+ * @param {string} [displayName]
+ * @returns {import('./internal').Atom<T>}
+ */
+export function readonly(value, displayName) {
+	const atom = getAtom(currentIndex++, value, KIND_SOURCE, displayName);
+
+	if (atom._value !== value) {
+		atom._value = value;
+		invalidate(atom);
+	}
+
+	return atom;
+}
+
+/**
+ * @template T
  * @param {import('preact').Context<T>} context
  * @returns {import('./internal').Atom<T>}
  */
