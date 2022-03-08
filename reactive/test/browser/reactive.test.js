@@ -6,7 +6,7 @@ import {
 	createContext,
 	options
 } from 'preact';
-import { signal, computed, inject, effect } from 'preact/reactive';
+import { signal, computed, inject, effect, ref } from 'preact/reactive';
 import { act, setupRerender } from 'preact/test-utils';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 
@@ -168,6 +168,20 @@ describe('Reactive', () => {
 			updateName('fail');
 			rerender();
 			expect(scratch.innerHTML).to.equal('<div>errored</div>');
+		});
+	});
+
+	describe('ref', () => {
+		it('should set element', () => {
+			let refValue;
+			function App() {
+				const myRef = ref(null);
+				refValue = myRef;
+				return <div ref={myRef} />;
+			}
+
+			render(<App />, scratch);
+			expect(refValue).to.deep.equal({ current: scratch.firstChild });
 		});
 	});
 

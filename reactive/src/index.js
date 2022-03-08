@@ -562,3 +562,16 @@ export function inject(context) {
 
 	return atom;
 }
+
+/**
+ * @template T
+ * @param {T} initialValue
+ * @returns {{ current: T}}
+ */
+export function ref(initialValue) {
+	const atom = getAtom(currentIndex++, undefined, KIND_SOURCE);
+	if (atom._value === undefined) {
+		atom._value = { current: initialValue };
+	}
+	return atom._value;
+}

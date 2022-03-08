@@ -21,3 +21,7 @@ export function signal<T>(
 export function computed<T>(fn: () => T, displayName?: string): Reactive<T>;
 export function effect(fn: () => T, displayName?: string): void;
 export function inject<T>(ctx: Context<T>): Reactive<T>;
+
+export function ref<T>(initialValue: T): MutableRef<T>;
+export function ref<T>(initialValue: T | null): Ref<T>;
+export function ref<T = undefined>(): MutableRef<T | undefined>;
