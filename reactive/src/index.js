@@ -24,10 +24,6 @@ const NOOP = () => {};
 
 let atomHash = 0;
 
-// TODO: Process writes in a queue similar to
-// component state updates (would add batching by default)
-// Is this bad for inputs?
-
 /** @type {import('./internal').AtomKind.SOURCE} */
 const KIND_SOURCE = 1;
 /** @type {import('./internal').AtomKind.COMPUTED} */
