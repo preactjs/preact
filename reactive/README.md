@@ -210,6 +210,28 @@ function App(props) {
 
 Due to the nature of the system of being able to track signal reads, we can better show in devtools why a value was updated and how state relates to each component. This work has not yet started.
 
+### Error handling
+
+Errors can be caught via typicall Error boundaries. Since we track the component context a signal was created in, we rethrow the error on that component.
+
+```js
+function Foo() {
+	const [foo, setFoo] = signal('foo');
+
+	const text = computed(() => {
+		if (foo.value !== 'foo') {
+			// Errors thrown inside a computed signal can be caught
+			// with error boundaries
+			throw new Error('fail');
+		}
+
+		return foo.value;
+	});
+
+	// ...
+}
+```
+
 ## Drawbacks
 
 With hooks developers had to learn about closures in depth. With a reactive system one needs to now about how variables are passed around in JavaScript (pass by value vs by reference).
