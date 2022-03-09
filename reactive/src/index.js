@@ -124,9 +124,7 @@ function getReactive(component) {
 
 		component.__reactive._atom._tracking = new Set();
 		component.__reactive._atom._onUpdate = () => {
-			if (component._skipRender) {
-				component._skipRender = false;
-			}
+			component._skipRender = false;
 			component.setState({});
 		};
 	}
