@@ -200,10 +200,19 @@ function serialize(value, mode, indent, seen) {
 	if (value instanceof Element) {
 		return value.outerHTML;
 	}
+	if (value instanceof Error) {
+		return value.stack;
+	}
 
 	seen.add(value);
 
 	const props = Object.keys(value).map(key => {
+		// Skip calling getters
+		const desc = Object.getOwnPropertyDescriptor(value, key);
+		if (typeof desc.get === 'function') {
+			return `get ${key}()`;
+		}
+
 		const v = serialize(value[key], mode, indent + 1, seen);
 		return `${key}: ${v}`;
 	});
