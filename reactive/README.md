@@ -216,6 +216,51 @@ With hooks developers had to learn about closures in depth. With a reactive syst
 
 Similar to hooks the callsite order must be consistent. This means that you cannot conditionally create signals on the fly.
 
+## Alternatives
+
+Libraries like [`MobX`](https://github.com/mobxjs/mobx) track read access of observables via getters.
+
+```js
+// Psuedo code:
+// Turns object properties into observables
+const obj = reactive({ foo: 1, bar: true });
+
+// Read access is tracked via getters
+const text = computed(() => obj.foo);
+```
+
+Whilst tracking reactivity via getters makes the code more brief, it poses a few considerable downsides. For them to work one must preserve the getters and destructuring prevents reads from being registered properly.
+
+```js
+// Pseudo code
+// Turns object properties into observables
+const { foo } = reactive({ foo: 1, bar: true });
+
+// This breaks...
+const text = computed(() => foo);
+```
+
+Consider the use case of reacting to changes to `props`. Making them reactive would only be possible by keeping `props` as an object.
+
+```jsx
+// This would work
+function App(props) {
+	const $props = reactive(props);
+	// ...
+}
+
+// But how to track this? This is much better solved by readonly()
+function App({ foo = 1, bar = true }) {
+	// ...
+}
+```
+
+Another use case to consider are other types than `Objects`. In a system based on tracking read access via getters we'd need to support `.entries()`, `.values()` and other iterable methods. And not just for objects, but also collection primitives like `Array`, `Map` and `Set` have to be intercepted.
+
+Debugging is also made a bit trickier, because from the output of `console.log` can easily lead to infinite loop due to invoking all getters, if the collection object is not serialized manually beforehand.
+
+I think this approach would introduce too many rabbit holes and complex issues, that I'd rather avoid entirely.
+
 ## Adoption Strategy
 
 With the addition of the new addon developers can introduce reactive components on a component bases in their existing projects. Adoption can therefore happen incrementally and the system happily co-exists with all current solutions.
