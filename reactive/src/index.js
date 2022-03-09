@@ -581,20 +581,21 @@ export function inject(context) {
 		return atom;
 	}
 
+	function InjectedContext(props) {}
+	// @ts-ignore
+	InjectedContext.prototype = new Component();
+	InjectedContext.prototype.render = function() {
+		atom._value = provider.props.value;
+		const subs = graph.subs.get(atom);
+		if (subs && subs.size > 0) {
+			invalidate(atom);
+		}
+		return null;
+	};
+
 	// This is probably not safe to convert to "!"
 	if (atom._value == null) {
 		atom._value = provider.props.value;
-
-		class InjectedContext extends Component {
-			render() {
-				atom._value = provider.props.value;
-				const subs = graph.subs.get(atom);
-				if (subs && subs.size > 0) {
-					invalidate(atom);
-				}
-				return null;
-			}
-		}
 
 		const vnode = h(InjectedContext, {});
 
