@@ -30,6 +30,20 @@ function scheduleEffectAssert(assertFn) {
 	});
 }
 
+class ErrorBoundary extends Component {
+	static getDerivedStateFromError(err) {
+		return { err };
+	}
+
+	render() {
+		if (this.state.err) {
+			return <p>{this.state.err.message}</p>;
+		}
+
+		return this.props.children;
+	}
+}
+
 describe('Reactive', () => {
 	/** @type {HTMLDivElement} */
 	let scratch;
@@ -625,6 +639,86 @@ describe('Reactive', () => {
 				'action1',
 				'action2'
 			]);
+		});
+
+		it('should catch errors in callback during mount', () => {
+			const App = () => {
+				effect(() => {
+					throw new Error('fail');
+				});
+				return <p>Test</p>;
+			};
+
+			act(() =>
+				render(
+					<ErrorBoundary>
+						<App />
+					</ErrorBoundary>,
+					scratch
+				)
+			);
+
+			expect(scratch.textContent).to.equal('fail');
+		});
+
+		it('should catch errors in callback by reaction', () => {
+			let update;
+			const App = () => {
+				const [foo, setFoo] = signal(0);
+				update = setFoo;
+
+				effect(() => {
+					if (foo.value > 0) {
+						throw new Error('fail');
+					}
+				});
+				return <p>Test</p>;
+			};
+
+			act(() =>
+				render(
+					<ErrorBoundary>
+						<App />
+					</ErrorBoundary>,
+					scratch
+				)
+			);
+
+			expect(scratch.textContent).to.equal('Test');
+
+			act(() => update(2));
+			expect(scratch.textContent).to.equal('fail');
+		});
+
+		it.skip('should catch errors in cleanup', () => {
+			let update;
+			const App = () => {
+				const [foo, setFoo] = signal(0, 'foo');
+				update = setFoo;
+
+				effect(() => {
+					// Trigger read
+					foo.value;
+					return () => {
+						throw new Error('fail');
+					};
+				}, 'effect');
+				return <p>Test</p>;
+			};
+
+			act(() =>
+				render(
+					<ErrorBoundary>
+						<App />
+					</ErrorBoundary>,
+					scratch
+				)
+			);
+			expect(scratch.textContent).to.equal('Test');
+
+			act(() => update(2));
+
+			expect(scratch.textContent).to.equal('fail');
 		});
 
 		it('should not be called if options._skipEffect is set', () => {
