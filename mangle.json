@@ -33,6 +33,8 @@
       "$_value": "__",
       "$_original": "__v",
       "$_args": "__H",
+      "$__reactive": "__R",
+      "$_atom": "__t",
       "$_factory": "__h",
       "$_depth": "__b",
       "$_nextDom": "__d",
