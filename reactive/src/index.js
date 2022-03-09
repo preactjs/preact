@@ -212,13 +212,8 @@ function linkDep(atom, dep) {
 
 	subs.add(atom);
 
-	let deps = graph.deps.get(atom);
-	if (!deps) {
-		deps = new Set();
-		graph.deps.set(atom, deps);
-	}
-
-	deps.add(dep);
+	// Deps Set() is created before this function
+	graph.deps.get(atom).add(dep);
 }
 
 /**
