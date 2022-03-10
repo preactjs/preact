@@ -139,16 +139,14 @@ function createEsbuildPlugin() {
 			build.onResolve({ filter: /^preact.*/ }, args => {
 				const pkg = alias[args.path];
 				return {
-					path: pkg,
-					namespace: 'preact'
+					path: pkg
 				};
 			});
 
 			build.onResolve({ filter: /^(react|react-dom)$/ }, args => {
 				const pkg = alias['preact/compat'];
 				return {
-					path: pkg,
-					namespace: 'preact'
+					path: pkg
 				};
 			});
 
