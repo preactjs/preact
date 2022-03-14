@@ -30,11 +30,13 @@ export function createRoot(parentDom) {
 		firstChild =
 			/** @type {import('./internal').PreactElement} */ (parentDom.firstChild);
 
+		rendererState._context = {};
 		// List of effects that need to be called after diffing:
 		rendererState._commitQueue = [];
+		rendererState._parentDom = parentDom;
 
 		if (rootInternal) {
-			patch(rootInternal, vnode, parentDom);
+			patch(rootInternal, vnode);
 		} else {
 			rootInternal = createInternal(vnode);
 
@@ -53,7 +55,7 @@ export function createRoot(parentDom) {
 
 			rootInternal._context = {};
 
-			mount(rootInternal, vnode, parentDom, firstChild);
+			mount(rootInternal, vnode, firstChild);
 		}
 
 		// Flush all queued effects

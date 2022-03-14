@@ -10,6 +10,7 @@ import { getParentContext, getParentDom } from './tree';
  * @type {import('./internal').RendererState}
  */
 export const rendererState = {
+	_parentDom: null,
 	_context: {},
 	_commitQueue: []
 };
@@ -109,7 +110,8 @@ function rerender(internal) {
 
 		rendererState._context = getParentContext(internal);
 		rendererState._commitQueue = [];
-		patch(internal, vnode, getParentDom(internal));
+		rendererState._parentDom = getParentDom(internal);
+		patch(internal, vnode);
 		commitRoot(internal);
 	}
 }

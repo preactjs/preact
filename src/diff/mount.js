@@ -22,11 +22,10 @@ import { rendererState } from '../component';
  * Diff two virtual nodes and apply proper changes to the DOM
  * @param {import('../internal').Internal} internal The Internal node to mount
  * @param {import('../internal').VNode | string} newVNode The new virtual node
- * @param {import('../internal').PreactElement} parentDom The parent of the DOM element
  * @param {import('../internal').PreactNode} startDom
  * @returns {import('../internal').PreactNode | null} pointer to the next DOM node to be hydrated (or null)
  */
-export function mount(internal, newVNode, parentDom, startDom) {
+export function mount(internal, newVNode, startDom) {
 	if (options._diff) options._diff(internal, newVNode);
 
 	/** @type {import('../internal').PreactNode} */
@@ -38,12 +37,12 @@ export function mount(internal, newVNode, parentDom, startDom) {
 			// the page. Root nodes can occur anywhere in the tree and not just at the
 			// top.
 			let prevStartDom = startDom;
-			let prevParentDom = parentDom;
+			let prevParentDom = rendererState._parentDom;
 			if (internal.flags & TYPE_ROOT) {
-				parentDom = newVNode.props._parentDom;
+				rendererState._parentDom = newVNode.props._parentDom;
 
 				// Note: this is likely always true because we are inside mount()
-				if (parentDom !== prevParentDom) {
+				if (rendererState._parentDom !== prevParentDom) {
 					startDom = null;
 				}
 			}
@@ -95,7 +94,6 @@ export function mount(internal, newVNode, parentDom, startDom) {
 				nextDomSibling = mountChildren(
 					internal,
 					renderResult,
-					parentDom,
 					startDom
 				);
 			}
@@ -107,7 +105,10 @@ export function mount(internal, newVNode, parentDom, startDom) {
 				rendererState._commitQueue.push(internal);
 			}
 
-			if (internal.flags & TYPE_ROOT && prevParentDom !== parentDom) {
+			if (
+				internal.flags & TYPE_ROOT &&
+				prevParentDom !== rendererState._parentDom
+			) {
 				// If we just mounted a root node/Portal, and it changed the parentDom
 				// of it's children, then we need to resume the diff from it's previous
 				// startDom element, which could be null if we are mounting an entirely
@@ -116,6 +117,7 @@ export function mount(internal, newVNode, parentDom, startDom) {
 				nextDomSibling = prevStartDom;
 			}
 
+			rendererState._parentDom = prevParentDom;
 			// In the event this subtree creates a new context for its children, restore
 			// the previous context for its siblings
 			rendererState._context = prevContext;
@@ -267,12 +269,14 @@ function mountElement(internal, dom) {
 				dom.innerHTML = newHtml.__html;
 			}
 		} else if (newChildren != null) {
+			const prevParentDom = rendererState._parentDom;
+			rendererState._parentDom = dom;
 			mountChildren(
 				internal,
 				Array.isArray(newChildren) ? newChildren : [newChildren],
-				dom,
 				isNew ? null : dom.firstChild
 			);
+			rendererState._parentDom = prevParentDom;
 		}
 
 		// (as above, don't diff props during hydration)
@@ -289,14 +293,11 @@ function mountElement(internal, dom) {
  * Mount all children of an Internal
  * @param {import('../internal').Internal} internal The parent Internal of the given children
  * @param {import('../internal').ComponentChild[]} children
- * @param {import('../internal').PreactElement} parentDom The DOM element whose children are being diffed
- * which have callbacks to invoke in commitRoot
  * @param {import('../internal').PreactNode} startDom
  */
 export function mountChildren(
 	internal,
 	children,
-	parentDom,
 	startDom
 ) {
 	let internalChildren = (internal._children = []),
@@ -323,7 +324,6 @@ export function mountChildren(
 		mountedNextChild = mount(
 			childInternal,
 			childVNode,
-			parentDom,
 			startDom
 		);
 
@@ -338,7 +338,7 @@ export function mountChildren(
 			// The DOM the diff should begin with is now startDom (since we inserted
 			// newDom before startDom) so ignore mountedNextChild and continue with
 			// startDom
-			parentDom.insertBefore(newDom, startDom);
+			rendererState._parentDom.insertBefore(newDom, startDom);
 		}
 
 		if (childInternal.ref) {
