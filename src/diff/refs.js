@@ -6,10 +6,7 @@ import options from '../options';
  * @param {any} value
  * @param {import('../internal').Internal} internal
  */
-export function applyRef(oldRef, ref, value, internal) {
-	if (oldRef === ref) return;
-
-	if (oldRef) applyRef(null, oldRef, null, internal);
+export function applyRef(ref, value, internal) {
 	try {
 		if (typeof ref == 'function') ref(value);
 		else if (ref) ref.current = value;

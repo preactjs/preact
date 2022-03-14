@@ -19,18 +19,18 @@ import { createInternal, getParentContext } from '../tree';
 import options from '../options';
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
- * @param {import('../internal').PreactElement} parentDom The parent of the DOM element
- * @param {import('../internal').VNode | string} newVNode The new virtual node
  * @param {import('../internal').Internal} internal The Internal node to mount
+ * @param {import('../internal').VNode | string} newVNode The new virtual node
  * @param {import('../internal').CommitQueue} commitQueue List of components
  * which have callbacks to invoke in commitRoot
- * @param {import('../internal').PreactElement} startDom
- * @returns {import('../internal').PreactElement | null} pointer to the next DOM node to be hydrated (or null)
+ * @param {import('../internal').PreactElement} parentDom The parent of the DOM element
+ * @param {import('../internal').PreactNode} startDom
+ * @returns {import('../internal').PreactNode | null} pointer to the next DOM node to be hydrated (or null)
  */
-export function mount(parentDom, newVNode, internal, commitQueue, startDom) {
+export function mount(internal, newVNode, commitQueue, parentDom, startDom) {
 	if (options._diff) options._diff(internal, newVNode);
 
-	/** @type {import('../index').ComponentChild} */
+	/** @type {import('../internal').PreactNode} */
 	let nextDomSibling;
 
 	try {
@@ -43,6 +43,7 @@ export function mount(parentDom, newVNode, internal, commitQueue, startDom) {
 			if (internal.flags & TYPE_ROOT) {
 				parentDom = newVNode.props._parentDom;
 
+				// Note: this is likely always true because we are inside mount()
 				if (parentDom !== prevParentDom) {
 					startDom = null;
 				}
@@ -62,38 +63,47 @@ export function mount(parentDom, newVNode, internal, commitQueue, startDom) {
 
 			if (provider) provider._subs.add(internal);
 
+			let renderResult;
+
 			if (internal.flags & TYPE_CLASS) {
-				nextDomSibling = renderClassComponent(
-					null,
+				renderResult = renderClassComponent(
 					internal,
+					null,
 					context,
 					componentContext
 				);
 			} else {
-				nextDomSibling = renderFunctionComponent(
-					null,
+				renderResult = renderFunctionComponent(
 					internal,
+					null,
 					context,
 					componentContext
 				);
 			}
 
-			let isTopLevelFragment =
-				nextDomSibling != null &&
-				nextDomSibling.type === Fragment &&
-				nextDomSibling.key == null;
+			if (renderResult == null) {
+				nextDomSibling = startDom;
+			} else {
+				if (typeof renderResult === 'object') {
+					// dissolve unkeyed root fragments:
+					if (renderResult.type === Fragment && renderResult.key == null) {
+						renderResult = renderResult.props.children;
+					}
+					if (!Array.isArray(renderResult)) {
+						renderResult = [renderResult];
+					}
+				} else {
+					renderResult = [renderResult];
+				}
 
-			let renderResult = isTopLevelFragment
-				? nextDomSibling.props.children
-				: nextDomSibling;
-
-			nextDomSibling = mountChildren(
-				parentDom,
-				Array.isArray(renderResult) ? renderResult : [renderResult],
-				internal,
-				commitQueue,
-				startDom
-			);
+				nextDomSibling = mountChildren(
+					internal,
+					renderResult,
+					commitQueue,
+					parentDom,
+					startDom
+				);
+			}
 
 			if (
 				internal._commitCallbacks != null &&
@@ -111,12 +121,13 @@ export function mount(parentDom, newVNode, internal, commitQueue, startDom) {
 				nextDomSibling = prevStartDom;
 			}
 		} else {
+			// @TODO: we could just assign this as internal.dom here
 			let hydrateDom =
 				internal.flags & (MODE_HYDRATE | MODE_MUTATIVE_HYDRATE)
 					? startDom
 					: null;
 
-			nextDomSibling = mountDOMElement(hydrateDom, internal, commitQueue);
+			nextDomSibling = mountElement(internal, hydrateDom, commitQueue);
 		}
 
 		if (options.diffed) options.diffed(internal);
@@ -139,25 +150,25 @@ export function mount(parentDom, newVNode, internal, commitQueue, startDom) {
 }
 
 /**
- * Diff two virtual nodes representing DOM element
- * @param {import('../internal').PreactElement} dom The DOM element representing
- * the virtual nodes being diffed
- * @param {import('../internal').Internal} internal The Internal node to mount
- * @param {import('../internal').CommitQueue} commitQueue List of components
- * which have callbacks to invoke in commitRoot
- * @returns {import('../internal').PreactElement}
+ * Construct (or select, if hydrating) a new DOM element for the given Internal.
+ * @param {import('../internal').Internal} internal
+ * @param {import('../internal').PreactNode} dom A DOM node to attempt to re-use during hydration
+ * @param {import('../internal').CommitQueue} commitQueue
+ * @returns {import('../internal').PreactNode}
  */
-function mountDOMElement(dom, internal, commitQueue) {
+function mountElement(internal, dom, commitQueue) {
 	let newProps = internal.props;
 	let nodeType = internal.type;
-	/** @type {any} */
-	let i, value;
-
 	let flags = internal.flags;
+
+	// Are we rendering within an inline SVG?
 	let isSvg = flags & MODE_SVG;
 
 	// Are we *not* hydrating? (a top-level render() or mutative hydration):
 	let isFullRender = ~flags & MODE_HYDRATE;
+
+	/** @type {any} */
+	let i, value;
 
 	// if hydrating (hydrate() or render() with replaceNode), find the matching child:
 	if (flags & (MODE_HYDRATE | MODE_MUTATIVE_HYDRATE)) {
@@ -220,9 +231,9 @@ function mountDOMElement(dom, internal, commitQueue) {
 
 		let newHtml, newValue, newChildren;
 		if (
-			(internal.type === 'input' ||
-				internal.type === 'textarea' ||
-				internal.type === 'select') &&
+			(nodeType === 'input' ||
+				nodeType === 'textarea' ||
+				nodeType === 'select') &&
 			(newProps.onInput || newProps.onChange)
 		) {
 			if (newProps.value != null) {
@@ -236,8 +247,7 @@ function mountDOMElement(dom, internal, commitQueue) {
 
 		for (i in newProps) {
 			value = newProps[i];
-			if (i === 'key') {
-			} else if (i === 'children') {
+			if (i === 'children') {
 				newChildren = value;
 			} else if (i === 'dangerouslySetInnerHTML') {
 				newHtml = value;
@@ -258,13 +268,12 @@ function mountDOMElement(dom, internal, commitQueue) {
 			if (isFullRender && newHtml.__html) {
 				dom.innerHTML = newHtml.__html;
 			}
-			internal._children = null;
 		} else if (newChildren != null) {
 			mountChildren(
-				dom,
-				newChildren && Array.isArray(newChildren) ? newChildren : [newChildren],
 				internal,
+				Array.isArray(newChildren) ? newChildren : [newChildren],
 				commitQueue,
+				dom,
 				isNew ? null : dom.firstChild
 			);
 		}
@@ -280,31 +289,30 @@ function mountDOMElement(dom, internal, commitQueue) {
 }
 
 /**
- * Diff the children of a virtual node
- * @param {import('../internal').PreactElement} parentDom The DOM element whose
- * children are being diffed
- * @param {import('../internal').ComponentChildren[]} renderResult
- * @param {import('../internal').Internal} parentInternal The parent Internal of the given children
+ * Mount all children of an Internal
+ * @param {import('../internal').Internal} internal The parent Internal of the given children
+ * @param {import('../internal').ComponentChild[]} children
  * @param {import('../internal').CommitQueue} commitQueue List of components
+ * @param {import('../internal').PreactElement} parentDom The DOM element whose children are being diffed
  * which have callbacks to invoke in commitRoot
- * @param {import('../internal').PreactElement} startDom
+ * @param {import('../internal').PreactNode} startDom
  */
 export function mountChildren(
-	parentDom,
-	renderResult,
-	parentInternal,
+	internal,
+	children,
 	commitQueue,
+	parentDom,
 	startDom
 ) {
-	let internalChildren = (parentInternal._children = []),
+	let internalChildren = (internal._children = []),
 		i,
 		childVNode,
 		childInternal,
 		newDom,
 		mountedNextChild;
 
-	for (i = 0; i < renderResult.length; i++) {
-		childVNode = normalizeToVNode(renderResult[i]);
+	for (i = 0; i < children.length; i++) {
+		childVNode = normalizeToVNode(children[i]);
 
 		// Terser removes the `continue` here and wraps the loop body
 		// in a `if (childVNode) { ... } condition
@@ -313,15 +321,15 @@ export function mountChildren(
 			continue;
 		}
 
-		childInternal = createInternal(childVNode, parentInternal);
+		childInternal = createInternal(childVNode, internal);
 		internalChildren[i] = childInternal;
 
 		// Morph the old element into the new one, but don't append it to the dom yet
 		mountedNextChild = mount(
-			parentDom,
-			childVNode,
 			childInternal,
+			childVNode,
 			commitQueue,
+			parentDom,
 			startDom
 		);
 
@@ -341,7 +349,6 @@ export function mountChildren(
 
 		if (childInternal.ref) {
 			applyRef(
-				null,
 				childInternal.ref,
 				childInternal._component || newDom,
 				childInternal
@@ -351,8 +358,8 @@ export function mountChildren(
 
 	// Remove children that are not part of any vnode.
 	if (
-		parentInternal.flags & (MODE_HYDRATE | MODE_MUTATIVE_HYDRATE) &&
-		parentInternal.flags & TYPE_ELEMENT
+		internal.flags & (MODE_HYDRATE | MODE_MUTATIVE_HYDRATE) &&
+		internal.flags & TYPE_ELEMENT
 	) {
 		// TODO: Would it be simpler to just clear the pre-existing DOM in top-level
 		// render if render is called with no oldVNode & existing children & no
