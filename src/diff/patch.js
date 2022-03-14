@@ -27,10 +27,9 @@ import { rendererState } from '../component';
  * Diff two virtual nodes and apply proper changes to the DOM
  * @param {import('../internal').Internal} internal The Internal node to patch
  * @param {import('../internal').VNode | string} vnode The new virtual node
- * @param {import('../internal').CommitQueue} commitQueue
  * @param {import('../internal').PreactElement} parentDom The parent DOM element for insertion/deletions
  */
-export function patch(internal, vnode, commitQueue, parentDom) {
+export function patch(internal, vnode, parentDom) {
 	let flags = internal.flags;
 
 	if (flags & TYPE_TEXT) {
@@ -66,7 +65,7 @@ export function patch(internal, vnode, commitQueue, parentDom) {
 	if (flags & TYPE_ELEMENT) {
 		if (vnode._vnodeId !== internal._vnodeId) {
 			// @ts-ignore dom is a PreactElement here
-			patchElement(internal, vnode, commitQueue);
+			patchElement(internal, vnode);
 		}
 	} else {
 		try {
@@ -137,19 +136,18 @@ export function patch(internal, vnode, commitQueue, parentDom) {
 				mountChildren(
 					internal,
 					renderResult,
-					commitQueue,
 					parentDom,
 					siblingDom
 				);
 			} else {
-				patchChildren(internal, renderResult, commitQueue, parentDom);
+				patchChildren(internal, renderResult, parentDom);
 			}
 
 			if (
 				internal._commitCallbacks != null &&
 				internal._commitCallbacks.length
 			) {
-				commitQueue.push(internal);
+				rendererState._commitQueue.push(internal);
 			}
 
 			// In the event this subtree creates a new context for its children, restore
@@ -179,9 +177,8 @@ export function patch(internal, vnode, commitQueue, parentDom) {
  * Update an internal and its associated DOM element based on a new VNode
  * @param {import('../internal').Internal} internal
  * @param {import('../internal').VNode} vnode A VNode with props to compare and apply
- * @param {import('../internal').CommitQueue} commitQueue
  */
-function patchElement(internal, vnode, commitQueue) {
+function patchElement(internal, vnode) {
 	let dom = /** @type {import('../internal').PreactElement} */ (internal._dom),
 		oldProps = internal.props,
 		newProps = (internal.props = vnode.props),
@@ -231,7 +228,6 @@ function patchElement(internal, vnode, commitQueue) {
 		patchChildren(
 			internal,
 			newChildren && Array.isArray(newChildren) ? newChildren : [newChildren],
-			commitQueue,
 			dom
 		);
 	}

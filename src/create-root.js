@@ -10,6 +10,7 @@ import options from './options';
 import { mount } from './diff/mount';
 import { patch } from './diff/patch';
 import { createInternal } from './tree';
+import { rendererState } from './component';
 
 /**
  *
@@ -18,7 +19,6 @@ import { createInternal } from './tree';
  */
 export function createRoot(parentDom) {
 	let rootInternal,
-		commitQueue,
 		firstChild,
 		flags = 0;
 
@@ -31,10 +31,10 @@ export function createRoot(parentDom) {
 			/** @type {import('./internal').PreactElement} */ (parentDom.firstChild);
 
 		// List of effects that need to be called after diffing:
-		commitQueue = [];
+		rendererState._commitQueue = [];
 
 		if (rootInternal) {
-			patch(rootInternal, vnode, commitQueue, parentDom);
+			patch(rootInternal, vnode, parentDom);
 		} else {
 			rootInternal = createInternal(vnode);
 
@@ -53,11 +53,11 @@ export function createRoot(parentDom) {
 
 			rootInternal._context = {};
 
-			mount(rootInternal, vnode, commitQueue, parentDom, firstChild);
+			mount(rootInternal, vnode, parentDom, firstChild);
 		}
 
 		// Flush all queued effects
-		commitRoot(rootInternal, commitQueue);
+		commitRoot(rootInternal);
 	}
 
 	return {

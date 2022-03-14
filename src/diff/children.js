@@ -17,10 +17,9 @@ import { createInternal, getDomSibling } from '../tree';
  * Update an internal with new children.
  * @param {import('../internal').Internal} internal The internal whose children should be patched
  * @param {import('../internal').ComponentChild[]} children The new children, represented as VNodes
- * @param {import('../internal').CommitQueue} commitQueue
  * @param {import('../internal').PreactElement} parentDom
  */
-export function patchChildren(internal, children, commitQueue, parentDom) {
+export function patchChildren(internal, children, parentDom) {
 	let oldChildren =
 		(internal._children && internal._children.slice()) || EMPTY_ARR;
 
@@ -76,7 +75,6 @@ export function patchChildren(internal, children, commitQueue, parentDom) {
 			mount(
 				childInternal,
 				childVNode,
-				commitQueue,
 				parentDom,
 				getDomSibling(internal, skewedIndex)
 			);
@@ -91,13 +89,12 @@ export function patchChildren(internal, children, commitQueue, parentDom) {
 			mount(
 				childInternal,
 				childVNode,
-				commitQueue,
 				parentDom,
 				childInternal._dom
 			);
 		} else {
 			// Morph the old element into the new one, but don't append it to the dom yet
-			patch(childInternal, childVNode, commitQueue, parentDom);
+			patch(childInternal, childVNode, parentDom);
 		}
 
 		go: if (mountingChild) {
