@@ -3,7 +3,11 @@ import options from './options';
 import { createVNode, Fragment } from './create-element';
 import { patch } from './diff/patch';
 import { DIRTY_BIT, FORCE_UPDATE, MODE_UNMOUNTING } from './constants';
-import { getParentDom } from './tree';
+import { getParentContext, getParentDom } from './tree';
+
+export const rendererState = {
+	_context: {}
+};
 
 /**
  * Base Component class. Provides `setState()` and `forceUpdate()`, which
@@ -99,6 +103,7 @@ function rerender(internal) {
 		);
 
 		const commitQueue = [];
+		rendererState._context = getParentContext(internal);
 		patch(internal, vnode, commitQueue, getParentDom(internal));
 		commitRoot(internal, commitQueue);
 	}
