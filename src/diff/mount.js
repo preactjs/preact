@@ -15,7 +15,7 @@ import {
 import { normalizeToVNode, Fragment } from '../create-element';
 import { setProperty } from './props';
 import { renderClassComponent, renderFunctionComponent } from './component';
-import { createInternal, getParentContext } from '../tree';
+import { createInternal } from '../tree';
 import options from '../options';
 import { rendererState } from '../component';
 /**
