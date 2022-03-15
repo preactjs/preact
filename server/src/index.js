@@ -21,25 +21,27 @@ const UNSAFE_NAME = /[\s\n\\/='"\0<>]/;
 
 const noop = () => {};
 
-/** Render Preact JSX + Components to an HTML string.
- *	@name render
- *	@function
- *	@param {VNode} vnode	JSX VNode to render.
- *	@param {Object} [context={}]	Optionally pass an initial context object through the render path.
- *	@param {Object} [options={}]	Rendering options
- *	@param {Boolean} [options.shallow=false]	If `true`, renders nested Components as HTML elements (`<Foo a="b" />`).
- *	@param {Boolean} [options.xml=false]		If `true`, uses self-closing tags for elements without children.
- *	@param {Boolean} [options.pretty=false]		If `true`, adds whitespace for readability
- *	@param {RegExp|undefined} [options.voidElements]       RegeEx that matches elements that are considered void (self-closing)
+/**
+ * Render Preact JSX + Components to an HTML string.
+ * @name render
+ * @function
+ * @param {VNode} vnode	JSX VNode to render.
+ * @param {Object} [context={}]	Optionally pass an initial context object through the render path.
+ * @param {Object} [options={}]	Rendering options
+ * @param {Boolean} [options.shallow=false]	If `true`, renders nested Components as HTML elements (`<Foo a="b" />`).
+ * @param {Boolean} [options.xml=false]		If `true`, uses self-closing tags for elements without children.
+ * @param {Boolean} [options.pretty=false]		If `true`, adds whitespace for readability
+ * @param {RegExp|undefined} [options.voidElements]       RegeEx that matches elements that are considered void (self-closing)
  */
 renderToString.render = renderToString;
 
-/** Only render elements, leaving Components inline as `<ComponentName ... />`.
+/**
+ * Only render elements, leaving Components inline as `<ComponentName ... />`.
  *	This method is just a convenience alias for `render(vnode, context, { shallow:true })`
- *	@name shallow
- *	@function
- *	@param {VNode} vnode	JSX VNode to render.
- *	@param {Object} [context={}]	Optionally pass an initial context object through the render path.
+ * @name shallow
+ * @function
+ * @param {VNode} vnode	JSX VNode to render.
+ * @param {Object} [context={}]	Optionally pass an initial context object through the render path.
  */
 let shallowRender = (vnode, context) => renderToString(vnode, context, SHALLOW);
 
