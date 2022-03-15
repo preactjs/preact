@@ -1,5 +1,12 @@
 import { render, shallowRender } from '../src';
-import { h, Component, createContext, Fragment, options } from 'preact';
+import {
+	createElement,
+	createElement as h,
+	Component,
+	createContext,
+	Fragment,
+	options
+} from 'preact';
 import { useState, useContext, useEffect, useLayoutEffect } from 'preact/hooks';
 import { expect } from 'chai';
 import { spy, stub, match } from 'sinon';
@@ -149,7 +156,7 @@ describe('render', () => {
 		});
 
 		it('should omit functions', () => {
-			let rendered = render(<div a={() => {}} b={function () {}} />),
+			let rendered = render(<div a={() => {}} b={function() {}} />),
 				expected = `<div></div>`;
 
 			expect(rendered).to.equal(expected);
@@ -324,7 +331,7 @@ describe('render', () => {
 		});
 
 		it('should apply defaultProps', () => {
-			const Test = (props) => <div {...props} />;
+			const Test = props => <div {...props} />;
 			Test.defaultProps = {
 				foo: 'default foo',
 				bar: 'default bar'
@@ -820,7 +827,7 @@ describe('render', () => {
 	});
 
 	describe('xml:true', () => {
-		let renderXml = (jsx) => render(jsx, null, { xml: true });
+		let renderXml = jsx => render(jsx, null, { xml: true });
 
 		it('should render end-tags', () => {
 			expect(renderXml(<div />)).to.equal(`<div />`);
@@ -982,7 +989,7 @@ describe('render', () => {
 			}
 
 			// eslint-disable-next-line prefer-arrow-callback
-			expect(function () {
+			expect(function() {
 				render(<Foo />);
 			}).to.not.throw();
 		});
@@ -1001,7 +1008,7 @@ describe('render', () => {
 			}
 
 			// eslint-disable-next-line prefer-arrow-callback
-			expect(function () {
+			expect(function() {
 				render(<Foo />);
 			}).to.not.throw();
 		});

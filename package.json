@@ -119,6 +119,7 @@
 		"test:ts:compat": "tsc -p compat/test/ts/",
 		"test:mocha": "mocha --recursive --require \"@babel/register\" test/shared test/node",
 		"test:mocha:watch": "npm run test:mocha -- --watch",
+		"test:mocha:server": "SERVER=true BABEL_ENV=test mocha -r @babel/register -r server/test/setup.js server/test/**/*.test.js --watch-ignore='benches/**'",
 		"test:karma": "cross-env COVERAGE=true BABEL_NO_MODULES=true karma start karma.conf.js --single-run",
 		"test:karma:minify": "cross-env COVERAGE=true MINIFY=true BABEL_NO_MODULES=true karma start karma.conf.js --single-run",
 		"test:karma:watch": "cross-env BABEL_NO_MODULES=true karma start karma.conf.js --no-single-run",
@@ -250,6 +251,7 @@
 		"@types/mocha": "^5.0.0",
 		"@types/node": "^14.14.10",
 		"babel-plugin-istanbul": "^6.0.0",
+		"babel-plugin-module-resolver": "^4.1.0",
 		"babel-plugin-transform-async-to-promises": "^0.8.15",
 		"babel-plugin-transform-rename-properties": "0.1.0",
 		"benchmark": "^2.1.4",
@@ -288,5 +290,8 @@
 		"sinon": "^9.2.3",
 		"sinon-chai": "^3.7.0",
 		"typescript": "3.5.3"
+	},
+	"dependencies": {
+		"pretty-format": "^27.5.1"
 	}
 }

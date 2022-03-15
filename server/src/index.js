@@ -15,8 +15,7 @@ const SHALLOW = { shallow: true };
 // components without names, kept as a hash for later comparison to return consistent UnnamedComponentXX names.
 const UNNAMED = [];
 
-const VOID_ELEMENTS =
-	/^(area|base|br|col|embed|hr|img|input|link|meta|param|source|track|wbr)$/;
+const VOID_ELEMENTS = /^(area|base|br|col|embed|hr|img|input|link|meta|param|source|track|wbr)$/;
 
 const UNSAFE_NAME = /[\s\n\\/='"\0<>]/;
 
@@ -54,16 +53,17 @@ function renderToString(vnode, context, opts) {
 	// array to `options._commit` (`__c`). But we can go one step further
 	// and avoid a lot of dirty checks and allocations by setting
 	// `options._skipEffects` (`__s`) too.
-	const previousSkipEffects = options.__s;
-	options.__s = true;
+	const previousSkipEffects = options._skipEffects || options.__s;
+	options._skipEffects = options.__s = true;
 
 	const res = _renderToString(vnode, context, opts);
 
 	// options._commit, we don't schedule any effects in this library right now,
 	// so we can pass an empty queue to this hook.
-	if (options.__c) options.__c(vnode, EMPTY_ARR);
+	const onCommit = options._commit || options.__c;
+	if (onCommit) onCommit(vnode, EMPTY_ARR);
 	EMPTY_ARR.length = 0;
-	options.__s = previousSkipEffects;
+	options._skipEffects = options.__s = previousSkipEffects;
 	return res;
 }
 
@@ -132,10 +132,12 @@ function _renderToString(vnode, context, opts, inner, isSvgMode, selectValue) {
 			});
 
 			// options._diff
-			if (options.__b) options.__b(vnode);
+			const onDiff = options._diff || options.__b;
+			if (onDiff) onDiff(vnode);
 
 			// options._render
-			if (options.__r) options.__r(vnode);
+			const onRender = options._render || options.__r;
+			if (onRender) onRender(vnode);
 
 			if (
 				!nodeName.prototype ||

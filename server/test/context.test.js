@@ -1,5 +1,5 @@
 import render from '../src/jsx';
-import { h, createContext, Component } from 'preact';
+import { createElement, createContext, Component } from 'preact';
 import { expect } from 'chai';
 import { dedent } from './utils';
 
@@ -32,7 +32,7 @@ describe('context', () => {
 		const { Provider, Consumer } = createContext();
 		let rendered = renderJsx(
 			<Provider value="correct">
-				<Consumer>{(value) => <section>value is: {value}</section>}</Consumer>
+				<Consumer>{value => <section>value is: {value}</section>}</Consumer>
 			</Provider>
 		);
 
@@ -46,7 +46,7 @@ describe('context', () => {
 		let rendered = renderJsx(
 			<Provider value="wrong">
 				<Provider value="correct">
-					<Consumer>{(value) => <section>value is: {value}</section>}</Consumer>
+					<Consumer>{value => <section>value is: {value}</section>}</Consumer>
 				</Provider>
 			</Provider>
 		);
@@ -60,7 +60,7 @@ describe('context', () => {
 		const { Provider, Consumer } = createContext();
 		let rendered = renderJsx(
 			<Provider value={null}>
-				<Consumer>{(value) => <section>value is: {value}</section>}</Consumer>
+				<Consumer>{value => <section>value is: {value}</section>}</Consumer>
 			</Provider>
 		);
 
@@ -72,7 +72,7 @@ describe('context', () => {
 	it('should support default context value with absent provider', () => {
 		const { Consumer } = createContext('correct');
 		let rendered = renderJsx(
-			<Consumer>{(value) => <section>value is: {value}</section>}</Consumer>
+			<Consumer>{value => <section>value is: {value}</section>}</Consumer>
 		);
 
 		expect(rendered).to.equal(dedent`

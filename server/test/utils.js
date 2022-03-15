@@ -1,7 +1,7 @@
 /**
  * tag to remove leading whitespace from tagged template
  * literal.
- * @param {TemplateStringsArray}
+ * @param {TemplateStringsArray} s
  * @returns {string}
  */
 export function dedent([str]) {

@@ -1,5 +1,5 @@
 import render from '../src/jsx';
-import { h } from 'preact';
+import { createElement } from 'preact';
 import { expect } from 'chai';
 import { dedent } from './utils';
 

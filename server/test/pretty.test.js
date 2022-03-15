@@ -1,11 +1,11 @@
 import { render as basicRender } from '../src';
 import { render } from '../src/jsx';
-import { h, Fragment } from 'preact';
+import { createElement, Fragment } from 'preact';
 import { expect } from 'chai';
 import { dedent } from './utils';
 
 describe('pretty', () => {
-	let prettyRender = (jsx) => render(jsx, {}, { pretty: true });
+	let prettyRender = jsx => render(jsx, {}, { pretty: true });
 
 	it('should render no whitespace by default', () => {
 		let rendered = basicRender(

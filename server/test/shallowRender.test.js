@@ -1,5 +1,5 @@
 import { shallowRender } from '../src';
-import { h, Fragment } from 'preact';
+import { createElement, Fragment } from 'preact';
 import { expect } from 'chai';
 import { spy } from 'sinon';
 
