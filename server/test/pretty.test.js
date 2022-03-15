@@ -3,6 +3,7 @@ import { render } from '../src/jsx';
 import { createElement, Fragment } from 'preact';
 import { expect } from 'chai';
 import { dedent } from './utils';
+import './setup';
 
 describe('pretty', () => {
 	let prettyRender = jsx => render(jsx, {}, { pretty: true });

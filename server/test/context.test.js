@@ -2,6 +2,7 @@ import render from '../src/jsx';
 import { createElement, createContext, Component } from 'preact';
 import { expect } from 'chai';
 import { dedent } from './utils';
+import './setup';
 
 describe('context', () => {
 	let renderJsx = (jsx, opts) => render(jsx, null, opts).replace(/ {2}/g, '\t');

@@ -2,6 +2,7 @@ import { shallowRender } from '../src';
 import { createElement, Fragment } from 'preact';
 import { expect } from 'chai';
 import { spy } from 'sinon';
+import './setup';
 
 describe('shallowRender()', () => {
 	it('should not render nested components', () => {

@@ -5,6 +5,7 @@ import renderToString, {
 	renderToString as _renderToString
 } from '../src';
 import { expect } from 'chai';
+import './setup';
 
 describe('render-to-string', () => {
 	describe('exports', () => {
