@@ -113,7 +113,7 @@
 		"dev:hooks": "microbundle watch --raw --format cjs --cwd hooks --no-generateTypes",
 		"dev:compat": "microbundle watch --raw --format cjs --cwd compat --globals 'preact/hooks=preactHooks' --no-generateTypes",
 		"test": "npm-run-all build lint test:unit",
-		"test:unit": "run-p test:mocha test:karma:minify test:ts",
+		"test:unit": "run-p test:mocha test:mocha:server test:karma:minify test:ts",
 		"test:ts": "run-p test:ts:*",
 		"test:ts:core": "tsc -p test/ts/ && mocha --require \"@babel/register\" test/ts/**/*-test.js",
 		"test:ts:compat": "tsc -p compat/test/ts/",
