@@ -1,0 +1,142 @@
+{
+	"name": "preact-render-to-string",
+	"amdName": "preactRenderToString",
+	"version": "5.1.20",
+	"description": "Render JSX to an HTML string, with support for Preact components.",
+	"main": "dist/index.js",
+	"umd:main": "dist/index.js",
+	"module": "dist/index.module.js",
+	"jsnext:main": "dist/index.module.js",
+	"exports": {
+		".": {
+			"import": "./dist/index.mjs",
+			"browser": "./dist/index.module.js",
+			"require": "./dist/index.js"
+		},
+		"./jsx": {
+			"import": "./dist/jsx.mjs",
+			"browser": "./dist/jsx.module.js",
+			"require": "./dist/jsx.js"
+		},
+		"./package.json": "./package.json",
+		"./": "./"
+	},
+	"scripts": {
+		"bench": "BABEL_ENV=test node -r @babel/register benchmarks index.js",
+		"bench:v8": "BABEL_ENV=test microbundle benchmarks/index.js -f modern --alias benchmarkjs-pretty=benchmarks/lib/benchmark-lite.js --external none --target node --no-compress --no-sourcemap --raw -o benchmarks/.v8.js && v8 --module benchmarks/.v8.modern.js",
+		"build": "npm run -s transpile && npm run -s transpile:jsx && npm run -s copy-typescript-definition",
+		"postbuild": "node ./config/node-13-exports.js && node ./config/node-commonjs.js",
+		"transpile": "microbundle src/index.js -f es,umd --target web --external preact",
+		"transpile:jsx": "microbundle src/jsx.js -o dist/jsx.js --target web --external preact && microbundle dist/jsx.js -o dist/jsx.js -f cjs --external preact",
+		"copy-typescript-definition": "copyfiles -f src/*.d.ts dist",
+		"test": "eslint src test && tsc && npm run test:mocha && npm run bench",
+		"test:mocha": "BABEL_ENV=test mocha -r @babel/register -r test/setup.js test/**/[!compat]*.test.js && npm run test:mocha:compat",
+		"test:mocha:compat": "BABEL_ENV=test mocha -r @babel/register -r test/setup.js test/compat.test.js",
+		"format": "prettier src/**/*.{d.ts,js} test/**/*.js --write",
+		"prepublishOnly": "npm run build",
+		"release": "npm run build && git commit -am $npm_package_version && git tag $npm_package_version && git push && git push --tags && npm publish"
+	},
+	"keywords": [
+		"preact",
+		"render",
+		"universal",
+		"isomorphic"
+	],
+	"files": [
+		"src",
+		"dist",
+		"jsx.js",
+		"typings.json"
+	],
+	"eslintConfig": {
+		"extends": "developit",
+		"rules": {
+			"react/prefer-stateless-function": 0,
+			"react/jsx-no-bind": 0,
+			"react/no-danger": 0,
+			"jest/valid-expect": 0,
+			"new-cap": 0,
+			"curly": "off",
+			"brace-style": "off",
+			"indent": "off"
+		},
+		"settings": {
+			"react": {
+				"version": "16.8"
+			}
+		}
+	},
+	"babel": {
+		"env": {
+			"test": {
+				"presets": [
+					[
+						"@babel/preset-env",
+						{
+							"targets": {
+								"node": true
+							}
+						}
+					]
+				],
+				"plugins": [
+					[
+						"@babel/plugin-transform-react-jsx",
+						{
+							"pragma": "h"
+						}
+					]
+				]
+			}
+		}
+	},
+	"author": "Jason Miller <jason@developit.ca>",
+	"license": "MIT",
+	"typings": "src/index.d.ts",
+	"repository": "developit/preact-render-to-string",
+	"bugs": "https://github.com/developit/preact-render-to-string/issues",
+	"homepage": "https://github.com/developit/preact-render-to-string",
+	"peerDependencies": {
+		"preact": ">=10"
+	},
+	"devDependencies": {
+		"@babel/plugin-transform-react-jsx": "^7.12.12",
+		"@babel/preset-env": "^7.12.11",
+		"@babel/register": "^7.12.10",
+		"@changesets/cli": "^2.18.0",
+		"@changesets/changelog-github": "^0.4.1",
+		"benchmarkjs-pretty": "^2.0.1",
+		"chai": "^4.2.0",
+		"copyfiles": "^2.4.1",
+		"eslint": "^7.16.0",
+		"eslint-config-developit": "^1.2.0",
+		"husky": "^4.3.6",
+		"lint-staged": "^10.5.3",
+		"microbundle": "^0.13.0",
+		"mocha": "^8.2.1",
+		"preact": "^10.5.7",
+		"prettier": "^2.2.1",
+		"sinon": "^9.2.2",
+		"sinon-chai": "^3.5.0",
+		"typescript": "^4.1.3"
+	},
+	"dependencies": {
+		"pretty-format": "^3.8.0"
+	},
+	"prettier": {
+		"singleQuote": true,
+		"trailingComma": "none",
+		"useTabs": true,
+		"tabWidth": 2
+	},
+	"lint-staged": {
+		"**/*.{js,jsx,ts,tsx,yml}": [
+			"prettier --write"
+		]
+	},
+	"husky": {
+		"hooks": {
+			"pre-commit": "lint-staged"
+		}
+	}
+}
