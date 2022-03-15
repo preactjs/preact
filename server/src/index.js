@@ -53,17 +53,16 @@ function renderToString(vnode, context, opts) {
 	// array to `options._commit` (`__c`). But we can go one step further
 	// and avoid a lot of dirty checks and allocations by setting
 	// `options._skipEffects` (`__s`) too.
-	const previousSkipEffects = options._skipEffects || options.__s;
-	options._skipEffects = options.__s = true;
+	const previousSkipEffects = options._skipEffects;
+	options._skipEffects = true;
 
 	const res = _renderToString(vnode, context, opts);
 
 	// options._commit, we don't schedule any effects in this library right now,
 	// so we can pass an empty queue to this hook.
-	const onCommit = options._commit || options.__c;
-	if (onCommit) onCommit(vnode, EMPTY_ARR);
+	if (options._commit) options._commit(vnode, EMPTY_ARR);
 	EMPTY_ARR.length = 0;
-	options._skipEffects = options.__s = previousSkipEffects;
+	options._skipEffects = previousSkipEffects;
 	return res;
 }
 
@@ -120,24 +119,24 @@ function _renderToString(vnode, context, opts, inner, isSvgMode, selectValue) {
 		} else {
 			let rendered;
 
-			let c = (vnode.__c = {
-				__v: vnode,
+			vnode._context = context;
+			vnode.data = {
+				_hooks: []
+			};
+
+			let c = (vnode._component = {
 				context,
 				props: vnode.props,
 				// silently drop state updates
 				setState: noop,
-				forceUpdate: noop,
-				// hooks
-				__h: []
+				forceUpdate: noop
 			});
 
 			// options._diff
-			const onDiff = options._diff || options.__b;
-			if (onDiff) onDiff(vnode);
+			if (options._diff) options._diff(vnode);
 
 			// options._render
-			const onRender = options._render || options.__r;
-			if (onRender) onRender(vnode);
+			if (options._render) options._render(vnode);
 
 			if (
 				!nodeName.prototype ||
@@ -146,37 +145,36 @@ function _renderToString(vnode, context, opts, inner, isSvgMode, selectValue) {
 				// Necessary for createContext api. Setting this property will pass
 				// the context value as `this.context` just for this component.
 				let cxType = nodeName.contextType;
-				let provider = cxType && context[cxType.__c];
+				let provider = cxType && context[cxType._id];
 				let cctx =
 					cxType != null
 						? provider
 							? provider.props.value
-							: cxType.__
+							: cxType._defaultValue
 						: context;
 
 				// stateless functional components
-				rendered = nodeName.call(vnode.__c, props, cctx);
+				rendered = nodeName.call(vnode._component, props, cctx);
 			} else {
 				// class-based components
 				let cxType = nodeName.contextType;
-				let provider = cxType && context[cxType.__c];
+				let provider = cxType && context[cxType._id];
 				let cctx =
 					cxType != null
 						? provider
 							? provider.props.value
-							: cxType.__
+							: cxType._defaultValue
 						: context;
 
 				// c = new nodeName(props, context);
-				c = vnode.__c = new nodeName(props, cctx);
-				c.__v = vnode;
+				c = vnode._component = new nodeName(props, cctx);
 				// turn off stateful re-rendering:
-				c._dirty = c.__d = true;
+				c._dirty = true;
 				c.props = props;
 				if (c.state == null) c.state = {};
 
-				if (c._nextState == null && c.__s == null) {
-					c._nextState = c.__s = c.state;
+				if (c._nextState == null) {
+					c._nextState = c.state;
 				}
 
 				c.context = cctx;
@@ -190,12 +188,7 @@ function _renderToString(vnode, context, opts, inner, isSvgMode, selectValue) {
 
 					// If the user called setState in cWM we need to flush pending,
 					// state updates. This is the same behaviour in React.
-					c.state =
-						c._nextState !== c.state
-							? c._nextState
-							: c.__s !== c.state
-							? c.__s
-							: c.state;
+					c.state = c._nextState !== c.state ? c._nextState : c.state;
 				}
 
 				rendered = c.render(c.props, c.state, c.context);

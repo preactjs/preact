@@ -58,8 +58,7 @@ describe('jsx', () => {
 		`);
 	});
 
-	// FIXME
-	it.skip('should render JSX attributes as multiline if complex', () => {
+	it('should render JSX attributes as multiline if complex', () => {
 		expect(renderJsx(<a b={['a', 'b', 'c', 'd']}>bar</a>)).to.equal(dedent`
 			<a
 				b={
@@ -67,7 +66,7 @@ describe('jsx', () => {
 						"a",
 						"b",
 						"c",
-						"d"
+						"d",
 					]
 				}
 			>
@@ -82,8 +81,7 @@ describe('jsx', () => {
 		expect(renderJsx(<a b={undefined}>bar</a>)).to.equal(`<a>bar</a>`);
 	});
 
-	// FIXME
-	it.skip('should render attributes containing VNodes', () => {
+	it('should render attributes containing VNodes', () => {
 		expect(renderJsx(<a b={<c />}>bar</a>)).to.equal(dedent`
 			<a b={<c></c>}>bar</a>
 		`);
@@ -93,7 +91,7 @@ describe('jsx', () => {
 				b={
 					Array [
 						<c></c>,
-						<d f="g"></d>
+						<d f="g"></d>,
 					]
 				}
 			>

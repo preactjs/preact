@@ -860,7 +860,7 @@ describe('render', () => {
 	});
 
 	describe('state locking', () => {
-		it('should set _dirty and __d to true', () => {
+		it('should set _dirty to true', () => {
 			let inst;
 			class Foo extends Component {
 				constructor(props, context) {
@@ -873,9 +873,7 @@ describe('render', () => {
 			}
 
 			expect(render(<Foo />)).to.equal('<div></div>');
-
 			expect(inst).to.have.property('_dirty', true);
-			expect(inst).to.have.property('__d', true);
 		});
 
 		it('should prevent re-rendering', () => {
@@ -983,8 +981,7 @@ describe('render', () => {
 		});
 	});
 
-	// FIXME
-	describe.skip('hooks', () => {
+	describe('hooks', () => {
 		it('should not crash with hooks', () => {
 			function Foo() {
 				let [v, setter] = useState(0);
