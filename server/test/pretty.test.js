@@ -1,5 +1,5 @@
 import { render as basicRender } from '../src';
-import { render } from '../src/jsx';
+import { renderToJsxString as render } from '../src/jsx';
 import { createElement, Fragment } from 'preact';
 import { expect } from 'chai';
 import { dedent } from './utils';

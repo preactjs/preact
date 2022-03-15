@@ -6,6 +6,7 @@ import {
 	assign,
 	getChildren
 } from './util';
+import { renderToJsxString } from './jsx';
 import { options, Fragment } from 'preact';
 
 /** @typedef {import('preact').VNode} VNode */
@@ -425,13 +426,11 @@ function getFallbackComponentName(component) {
 	}
 	return name;
 }
-renderToString.shallowRender = shallowRender;
-
-export default renderToString;
 
 export {
 	renderToString as render,
 	renderToString as renderToStaticMarkup,
 	renderToString,
+	renderToJsxString,
 	shallowRender
 };

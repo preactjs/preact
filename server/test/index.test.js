@@ -1,6 +1,7 @@
-import renderToString, {
+import {
 	render,
 	shallowRender,
+	renderToString,
 	renderToStaticMarkup,
 	renderToString as _renderToString
 } from '../src';
@@ -9,10 +10,6 @@ import './setup';
 
 describe('render-to-string', () => {
 	describe('exports', () => {
-		it('exposes renderToString as default', () => {
-			expect(renderToString).to.be.a('function');
-		});
-
 		it('exposes render as a named export', () => {
 			expect(render).to.be.a('function');
 			expect(render).to.equal(renderToString);
