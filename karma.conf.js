@@ -132,16 +132,14 @@ function createEsbuildPlugin() {
 			build.onResolve({ filter: /^preact.*/ }, args => {
 				const pkg = alias[args.path];
 				return {
-					path: pkg,
-					namespace: 'preact'
+					path: pkg
 				};
 			});
 
 			build.onResolve({ filter: /^(react|react-dom)$/ }, args => {
 				const pkg = alias['preact/compat'];
 				return {
-					path: pkg,
-					namespace: 'preact'
+					path: pkg
 				};
 			});
 
@@ -158,7 +156,7 @@ function createEsbuildPlugin() {
 								loose: true,
 								modules: false,
 								targets: {
-									browsers: ['last 2 versions', 'IE >= 9']
+									browsers: ['last 2 versions', 'IE >= 11']
 								}
 							}
 						]
@@ -173,7 +171,7 @@ function createEsbuildPlugin() {
 			});
 
 			// Apply babel pass whenever we load a .js file
-			build.onLoad({ filter: /\.m?js$/ }, async args => {
+			build.onLoad({ filter: /\.[mc]?js$/ }, async args => {
 				const contents = await fs.readFile(args.path, 'utf-8');
 
 				// Using a cache is crucial as babel is 30x slower than esbuild
@@ -320,7 +318,10 @@ module.exports = function(config) {
 		},
 
 		esbuild: {
+			// karma-esbuild options
 			singleBundle: false,
+
+			// esbuild options
 			target: 'es2017',
 			define: {
 				COVERAGE: coverage,
