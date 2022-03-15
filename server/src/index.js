@@ -23,20 +23,6 @@ const UNSAFE_NAME = /[\s\n\\/='"\0<>]/;
 const noop = () => {};
 
 /**
- * Render Preact JSX + Components to an HTML string.
- * @name render
- * @function
- * @param {VNode} vnode	JSX VNode to render.
- * @param {Object} [context={}]	Optionally pass an initial context object through the render path.
- * @param {Object} [options={}]	Rendering options
- * @param {Boolean} [options.shallow=false]	If `true`, renders nested Components as HTML elements (`<Foo a="b" />`).
- * @param {Boolean} [options.xml=false]		If `true`, uses self-closing tags for elements without children.
- * @param {Boolean} [options.pretty=false]		If `true`, adds whitespace for readability
- * @param {RegExp|undefined} [options.voidElements]       RegeEx that matches elements that are considered void (self-closing)
- */
-renderToString.render = renderToString;
-
-/**
  * Only render elements, leaving Components inline as `<ComponentName ... />`.
  *	This method is just a convenience alias for `render(vnode, context, { shallow:true })`
  * @name shallow
@@ -47,6 +33,19 @@ renderToString.render = renderToString;
 let shallowRender = (vnode, context) => renderToString(vnode, context, SHALLOW);
 
 const EMPTY_ARR = [];
+
+/**
+ * Render Preact JSX + Components to an HTML string.
+ * @name render
+ * @function
+ * @param {VNode} vnode	JSX VNode to render.
+ * @param {Object} [context={}] Optionally pass an initial context object through the render path.
+ * @param {Object} [opts={}] Rendering options
+ * @param {Boolean} [opts.shallow=false] If `true`, renders nested Components as HTML elements (`<Foo a="b" />`).
+ * @param {Boolean} [opts.xml=false] If `true`, uses self-closing tags for elements without children.
+ * @param {Boolean} [opts.pretty=false] If `true`, adds whitespace for readability
+ * @param {RegExp|undefined} [opts.voidElements] RegeEx that matches elements that are considered void (self-closing)
+ */
 function renderToString(vnode, context, opts) {
 	context = context || {};
 	opts = opts || {};
