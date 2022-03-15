@@ -70,6 +70,12 @@
 			"require": "./jsx-runtime/dist/jsxRuntime.js",
 			"umd": "./jsx-runtime/dist/jsxRuntime.umd.js"
 		},
+		"./server": {
+			"module": "./server/dist/server.mjs",
+			"import": "./server/dist/server.mjs",
+			"require": "./server/dist/server.js",
+			"umd": "./server/dist/server.umd.js"
+		},
 		"./compat/server": {
 			"module": "./compat/server.mjs",
 			"import": "./compat/server.mjs",
@@ -101,6 +107,7 @@
 		"build:test-utils": "npm run -s _bundle -- --cwd test-utils",
 		"build:compat": "npm run -s _bundle -- --cwd compat --globals 'preact/hooks=preactHooks'",
 		"build:jsx": "npm run -s _bundle -- --cwd jsx-runtime",
+		"build:server": "npm run -s _bundle -- --cwd server",
 		"postbuild": "node ./config/compat-entries.js",
 		"dev": "microbundle watch --raw --format cjs --no-generateTypes",
 		"dev:hooks": "microbundle watch --raw --format cjs --cwd hooks --no-generateTypes",

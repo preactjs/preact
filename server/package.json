@@ -1,26 +1,14 @@
 {
-	"name": "preact-render-to-string",
-	"amdName": "preactRenderToString",
+	"name": "preact-server",
+	"amdName": "preactServer",
 	"version": "5.1.20",
+	"private": true,
 	"description": "Render JSX to an HTML string, with support for Preact components.",
-	"main": "dist/index.js",
-	"umd:main": "dist/index.js",
-	"module": "dist/index.module.js",
-	"jsnext:main": "dist/index.module.js",
-	"exports": {
-		".": {
-			"import": "./dist/index.mjs",
-			"browser": "./dist/index.module.js",
-			"require": "./dist/index.js"
-		},
-		"./jsx": {
-			"import": "./dist/jsx.mjs",
-			"browser": "./dist/jsx.module.js",
-			"require": "./dist/jsx.js"
-		},
-		"./package.json": "./package.json",
-		"./": "./"
-	},
+	"exports": "./dist/server.mjs",
+	"module": "dist/server.mjs",
+	"main": "dist/server.js",
+	"umd:main": "dist/server.umd.js",
+	"types": "src/index.d.ts",
 	"scripts": {
 		"bench": "BABEL_ENV=test node -r @babel/register benchmarks index.js",
 		"bench:v8": "BABEL_ENV=test microbundle benchmarks/index.js -f modern --alias benchmarkjs-pretty=benchmarks/lib/benchmark-lite.js --external none --target node --no-compress --no-sourcemap --raw -o benchmarks/.v8.js && v8 --module benchmarks/.v8.modern.js",
