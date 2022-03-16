@@ -1,6 +1,6 @@
 const { renderToString } = require('preact/server');
 
 module.exports = {
-	renderToString: renderToString,
+	renderToString,
 	renderToStaticMarkup: renderToString
 };
