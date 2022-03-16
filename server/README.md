@@ -1,7 +1,4 @@
-# preact-render-to-string
-
-[![NPM](http://img.shields.io/npm/v/preact-render-to-string.svg)](https://www.npmjs.com/package/preact-render-to-string)
-[![Build status](https://github.com/preactjs/preact-render-to-string/actions/workflows/ci.yml/badge.svg)](https://github.com/preactjs/preact-render-to-string/actions/workflows/ci.yml)
+# preact/server
 
 Render JSX and [Preact] components to an HTML string.
 
