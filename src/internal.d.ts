@@ -31,7 +31,7 @@ export interface Options extends preact.Options {
 		parent: Element | Document | ShadowRoot | DocumentFragment
 	): void;
 	/** Attach a hook that is invoked before a vnode is diffed. */
-	_diff?(internal: Internal, vnode?: VNode): void;
+	_diff?(internal: Internal, vnode?: VNode | string): void;
 	/** Attach a hook that is invoked after a tree was mounted or was updated. */
 	_commit?(internal: Internal, commitQueue: CommitQueue): void;
 	/** Attach a hook that is invoked before a vnode has rendered. */
@@ -56,6 +56,7 @@ export type ComponentChild =
 	| VNode<any>
 	| string
 	| number
+	| bigint
 	| boolean
 	| null
 	| undefined;
@@ -135,6 +136,7 @@ export interface Internal<P = {}> {
 	props: (P & { children: ComponentChildren }) | string | number;
 	key: any;
 	ref: Ref<any> | null;
+	_prevRef: Ref<any> | null;
 
 	/** Bitfield containing information about the Internal or its component. */
 	flags: number;

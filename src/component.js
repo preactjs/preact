@@ -1,4 +1,4 @@
-import { addCommitCallback, commitRoot } from './diff/commit';
+import { commitRoot } from './diff/commit';
 import options from './options';
 import { createVNode, Fragment } from './create-element';
 import { patch } from './diff/patch';
@@ -48,9 +48,10 @@ Component.prototype.setState = function(update, callback) {
 	// Skip update if updater function returned null
 	if (update == null) return;
 
-	if (this._internal) {
-		if (callback) addCommitCallback(this._internal, callback.bind(this));
-		this._internal.rerender(this._internal);
+	const internal = this._internal;
+	if (update != null && internal) {
+		if (callback) internal._commitCallbacks.push(callback.bind(this));
+		internal.rerender(internal);
 	}
 };
 
@@ -61,13 +62,14 @@ Component.prototype.setState = function(update, callback) {
  * re-rendered
  */
 Component.prototype.forceUpdate = function(callback) {
-	if (this._internal) {
+	const internal = this._internal;
+	if (internal) {
 		// Set render mode so that we can differentiate where the render request
 		// is coming from. We need this because forceUpdate should never call
 		// shouldComponentUpdate
-		this._internal.flags |= FORCE_UPDATE;
-		if (callback) addCommitCallback(this._internal, callback.bind(this));
-		this._internal.rerender(this._internal);
+		internal.flags |= FORCE_UPDATE;
+		if (callback) internal._commitCallbacks.push(callback.bind(this));
+		internal.rerender(internal);
 	}
 };
 
@@ -88,8 +90,6 @@ Component.prototype.render = Fragment;
  */
 function rerender(internal) {
 	if (~internal.flags & MODE_UNMOUNTING && internal.flags & DIRTY_BIT) {
-		let parentDom = getParentDom(internal);
-
 		const vnode = createVNode(
 			internal.type,
 			internal.props,
@@ -99,8 +99,8 @@ function rerender(internal) {
 		);
 
 		const commitQueue = [];
-		patch(parentDom, vnode, internal, commitQueue);
-		commitRoot(commitQueue, internal);
+		patch(internal, vnode, commitQueue, getParentDom(internal));
+		commitRoot(internal, commitQueue);
 	}
 }
 

@@ -22,7 +22,6 @@ PR's that weren't backported yet, do they work?
 - https://github.com/preactjs/preact/pull/3222 Same as above
 - Make this work https://github.com/preactjs/preact/pull/3306
 
-
 ## Root node follow ups
 
 - Investigate if the return value of `createRoot()` can be re-used as a root Node...
@@ -82,6 +81,17 @@ PR's that weren't backported yet, do they work?
   function?
 
   Perhaps reuse this function in the new extensible Component API?
+
+- Could `addCommitCallback()` use the same `push()===1` technique as the commit queue to enqueue the given Internal in `commitCallback`?
+  `if (internal._commitCallbacks.push(callback) === 1) commitQueue.push(internal);`
+
+- Controlled components could be implemented by keeping a WeakMap of DOM to Internal, rather than hanging underscore properties off of DOM nodes.
+
+- Decide if we actually want to support silent reparenting via `_parentDom` during patch. We don't reparent without destroying+recreating a tree anywhere else, and createPortal likely should support that in the first place. Plus, supporting this is likely a few bytes that could be removed if not explicitly necessary.
+
+- Add a ref queue, and re-enable the [global shared refs tests](https://github.com/preactjs/preact/blob/f682369d10bddb701d689b3ca6f721d68115d7c9/test/browser/refs.test.js#L419) when the queue orders all unmounts before all mounts.
+
+- `TYPE_FUNCTION` could instead be `TYPE_COMPONENT`, right now its duplicative of `TYPE_CLASS`
 
 ## Other
 

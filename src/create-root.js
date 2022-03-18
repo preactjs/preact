@@ -34,7 +34,7 @@ export function createRoot(parentDom) {
 		commitQueue = [];
 
 		if (rootInternal) {
-			patch(parentDom, vnode, rootInternal, commitQueue);
+			patch(rootInternal, vnode, commitQueue, parentDom);
 		} else {
 			rootInternal = createInternal(vnode);
 
@@ -53,11 +53,11 @@ export function createRoot(parentDom) {
 
 			rootInternal._context = {};
 
-			mount(parentDom, vnode, rootInternal, commitQueue, firstChild);
+			mount(rootInternal, vnode, commitQueue, parentDom, firstChild);
 		}
 
 		// Flush all queued effects
-		commitRoot(commitQueue, rootInternal);
+		commitRoot(rootInternal, commitQueue);
 	}
 
 	return {
