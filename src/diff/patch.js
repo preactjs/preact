@@ -18,18 +18,17 @@ import {
 	SKIP_CHILDREN,
 	DIRTY_BIT
 } from '../constants';
-import { getDomSibling, getParentContext } from '../tree';
+import { getDomSibling } from '../tree';
 import { mountChildren } from './mount';
 import { Fragment } from '../create-element';
+import { rendererState } from '../component';
 
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
  * @param {import('../internal').Internal} internal The Internal node to patch
  * @param {import('../internal').VNode | string} vnode The new virtual node
- * @param {import('../internal').CommitQueue} commitQueue
- * @param {import('../internal').PreactElement} parentDom The parent DOM element for insertion/deletions
  */
-export function patch(internal, vnode, commitQueue, parentDom) {
+export function patch(internal, vnode) {
 	let flags = internal.flags;
 
 	if (flags & TYPE_TEXT) {
@@ -51,21 +50,23 @@ export function patch(internal, vnode, commitQueue, parentDom) {
 	// Root nodes render their children into a specific parent DOM element.
 	// They can occur anywhere in the tree, can be nested, and currently allow reparenting during patches.
 	// @TODO: Decide if we actually want to support silent reparenting during patch - is it worth the bytes?
-	let prevParentDom = parentDom;
+	let prevParentDom = rendererState._parentDom;
 	if (flags & TYPE_ROOT) {
-		parentDom = vnode.props._parentDom;
+		rendererState._parentDom = vnode.props._parentDom;
 
 		if (internal.props._parentDom !== vnode.props._parentDom) {
 			let nextSibling =
-				parentDom == prevParentDom ? getDomSibling(internal) : null;
-			insertComponentDom(internal, nextSibling, parentDom);
+				rendererState._parentDom == prevParentDom
+					? getDomSibling(internal)
+					: null;
+			insertComponentDom(internal, nextSibling, rendererState._parentDom);
 		}
 	}
 
 	if (flags & TYPE_ELEMENT) {
 		if (vnode._vnodeId !== internal._vnodeId) {
 			// @ts-ignore dom is a PreactElement here
-			patchElement(internal, vnode, commitQueue);
+			patchElement(internal, vnode);
 		}
 	} else {
 		try {
@@ -76,17 +77,16 @@ export function patch(internal, vnode, commitQueue, parentDom) {
 				internal.flags ^= MODE_PENDING_ERROR | MODE_RERENDERING_ERROR;
 			}
 
-			const context = getParentContext(internal);
-
+			let prevContext = rendererState._context;
 			// Necessary for createContext api. Setting this property will pass
 			// the context value as `this.context` just for this component.
 			let tmp = vnode.type.contextType;
-			let provider = tmp && context[tmp._id];
+			let provider = tmp && rendererState._context[tmp._id];
 			let componentContext = tmp
 				? provider
 					? provider.props.value
 					: tmp._defaultValue
-				: context;
+				: rendererState._context;
 			let isNew = !internal || !internal._component;
 
 			let renderResult;
@@ -95,14 +95,12 @@ export function patch(internal, vnode, commitQueue, parentDom) {
 				renderResult = renderClassComponent(
 					internal,
 					vnode,
-					context,
 					componentContext
 				);
 			} else {
 				renderResult = renderFunctionComponent(
 					internal,
 					vnode,
-					context,
 					componentContext
 				);
 			}
@@ -139,20 +137,23 @@ export function patch(internal, vnode, commitQueue, parentDom) {
 				mountChildren(
 					internal,
 					renderResult,
-					commitQueue,
-					parentDom,
 					siblingDom
 				);
 			} else {
-				patchChildren(internal, renderResult, commitQueue, parentDom);
+				patchChildren(internal, renderResult);
 			}
 
 			if (
 				internal._commitCallbacks != null &&
 				internal._commitCallbacks.length
 			) {
-				commitQueue.push(internal);
+				rendererState._commitQueue.push(internal);
 			}
+
+			rendererState._parentDom = prevParentDom;
+			// In the event this subtree creates a new context for its children, restore
+			// the previous context for its siblings
+			rendererState._context = prevContext;
 		} catch (e) {
 			// @TODO: assign a new VNode ID here? Or NaN?
 			// newVNode._vnodeId = 0;
@@ -177,9 +178,8 @@ export function patch(internal, vnode, commitQueue, parentDom) {
  * Update an internal and its associated DOM element based on a new VNode
  * @param {import('../internal').Internal} internal
  * @param {import('../internal').VNode} vnode A VNode with props to compare and apply
- * @param {import('../internal').CommitQueue} commitQueue
  */
-function patchElement(internal, vnode, commitQueue) {
+function patchElement(internal, vnode) {
 	let dom = /** @type {import('../internal').PreactElement} */ (internal._dom),
 		oldProps = internal.props,
 		newProps = (internal.props = vnode.props),
@@ -225,13 +225,13 @@ function patchElement(internal, vnode, commitQueue) {
 		internal._children = null;
 	} else {
 		if (oldHtml) dom.innerHTML = '';
-
+		const prevParentDom = rendererState._parentDom;
+		rendererState._parentDom = dom;
 		patchChildren(
 			internal,
 			newChildren && Array.isArray(newChildren) ? newChildren : [newChildren],
-			commitQueue,
-			dom
 		);
+		rendererState._parentDom = prevParentDom;
 	}
 
 	if (newProps.checked != null && dom._isControlled) {

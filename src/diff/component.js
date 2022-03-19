@@ -1,5 +1,6 @@
 import options from '../options';
 import { DIRTY_BIT, FORCE_UPDATE, SKIP_CHILDREN } from '../constants';
+import { rendererState } from '../component';
 
 /**
  * Render a function component
@@ -10,7 +11,6 @@ import { DIRTY_BIT, FORCE_UPDATE, SKIP_CHILDREN } from '../constants';
 export function renderFunctionComponent(
 	internal,
 	newVNode,
-	context,
 	componentContext
 ) {
 	/** @type {import('../internal').Component} */
@@ -46,15 +46,18 @@ export function renderFunctionComponent(
 	while (counter++ < 25) {
 		internal.flags &= ~DIRTY_BIT;
 		if (renderHook) renderHook(internal);
-		renderResult = type.call(c, c.props, c.context);
+		renderResult = type.call(c, c.props, componentContext);
 		if (!(internal.flags & DIRTY_BIT)) {
 			break;
 		}
 	}
 	internal.flags &= ~DIRTY_BIT;
-
 	if (c.getChildContext != null) {
-		internal._context = Object.assign({}, context, c.getChildContext());
+		rendererState._context = internal._context = Object.assign(
+			{},
+			rendererState._context,
+			c.getChildContext()
+		);
 	}
 
 	return renderResult;
@@ -69,7 +72,6 @@ export function renderFunctionComponent(
 export function renderClassComponent(
 	internal,
 	newVNode,
-	context,
 	componentContext
 ) {
 	/** @type {import('../internal').Component} */
@@ -161,7 +163,11 @@ export function renderClassComponent(
 	c.state = c._nextState;
 
 	if (c.getChildContext != null) {
-		internal._context = Object.assign({}, context, c.getChildContext());
+		rendererState._context = internal._context = Object.assign(
+			{},
+			rendererState._context,
+			c.getChildContext()
+		);
 	}
 
 	if (!isNew) {

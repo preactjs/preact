@@ -15,19 +15,17 @@ import {
 import { normalizeToVNode, Fragment } from '../create-element';
 import { setProperty } from './props';
 import { renderClassComponent, renderFunctionComponent } from './component';
-import { createInternal, getParentContext } from '../tree';
+import { createInternal } from '../tree';
 import options from '../options';
+import { rendererState } from '../component';
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
  * @param {import('../internal').Internal} internal The Internal node to mount
  * @param {import('../internal').VNode | string} newVNode The new virtual node
- * @param {import('../internal').CommitQueue} commitQueue List of components
- * which have callbacks to invoke in commitRoot
- * @param {import('../internal').PreactElement} parentDom The parent of the DOM element
  * @param {import('../internal').PreactNode} startDom
  * @returns {import('../internal').PreactNode | null} pointer to the next DOM node to be hydrated (or null)
  */
-export function mount(internal, newVNode, commitQueue, parentDom, startDom) {
+export function mount(internal, newVNode, startDom) {
 	if (options._diff) options._diff(internal, newVNode);
 
 	/** @type {import('../internal').PreactNode} */
@@ -39,27 +37,26 @@ export function mount(internal, newVNode, commitQueue, parentDom, startDom) {
 			// the page. Root nodes can occur anywhere in the tree and not just at the
 			// top.
 			let prevStartDom = startDom;
-			let prevParentDom = parentDom;
+			let prevParentDom = rendererState._parentDom;
 			if (internal.flags & TYPE_ROOT) {
-				parentDom = newVNode.props._parentDom;
+				rendererState._parentDom = newVNode.props._parentDom;
 
 				// Note: this is likely always true because we are inside mount()
-				if (parentDom !== prevParentDom) {
+				if (rendererState._parentDom !== prevParentDom) {
 					startDom = null;
 				}
 			}
 
-			const context = getParentContext(internal);
-
+			let prevContext = rendererState._context;
 			// Necessary for createContext api. Setting this property will pass
 			// the context value as `this.context` just for this component.
 			let tmp = newVNode.type.contextType;
-			let provider = tmp && context[tmp._id];
+			let provider = tmp && rendererState._context[tmp._id];
 			let componentContext = tmp
 				? provider
 					? provider.props.value
 					: tmp._defaultValue
-				: context;
+				: rendererState._context;
 
 			if (provider) provider._subs.add(internal);
 
@@ -69,14 +66,12 @@ export function mount(internal, newVNode, commitQueue, parentDom, startDom) {
 				renderResult = renderClassComponent(
 					internal,
 					null,
-					context,
 					componentContext
 				);
 			} else {
 				renderResult = renderFunctionComponent(
 					internal,
 					null,
-					context,
 					componentContext
 				);
 			}
@@ -99,8 +94,6 @@ export function mount(internal, newVNode, commitQueue, parentDom, startDom) {
 				nextDomSibling = mountChildren(
 					internal,
 					renderResult,
-					commitQueue,
-					parentDom,
 					startDom
 				);
 			}
@@ -109,10 +102,13 @@ export function mount(internal, newVNode, commitQueue, parentDom, startDom) {
 				internal._commitCallbacks != null &&
 				internal._commitCallbacks.length
 			) {
-				commitQueue.push(internal);
+				rendererState._commitQueue.push(internal);
 			}
 
-			if (internal.flags & TYPE_ROOT && prevParentDom !== parentDom) {
+			if (
+				internal.flags & TYPE_ROOT &&
+				prevParentDom !== rendererState._parentDom
+			) {
 				// If we just mounted a root node/Portal, and it changed the parentDom
 				// of it's children, then we need to resume the diff from it's previous
 				// startDom element, which could be null if we are mounting an entirely
@@ -120,6 +116,11 @@ export function mount(internal, newVNode, commitQueue, parentDom, startDom) {
 				// an existing tree.
 				nextDomSibling = prevStartDom;
 			}
+
+			rendererState._parentDom = prevParentDom;
+			// In the event this subtree creates a new context for its children, restore
+			// the previous context for its siblings
+			rendererState._context = prevContext;
 		} else {
 			// @TODO: we could just assign this as internal.dom here
 			let hydrateDom =
@@ -127,7 +128,7 @@ export function mount(internal, newVNode, commitQueue, parentDom, startDom) {
 					? startDom
 					: null;
 
-			nextDomSibling = mountElement(internal, hydrateDom, commitQueue);
+			nextDomSibling = mountElement(internal, hydrateDom);
 		}
 
 		if (options.diffed) options.diffed(internal);
@@ -153,10 +154,9 @@ export function mount(internal, newVNode, commitQueue, parentDom, startDom) {
  * Construct (or select, if hydrating) a new DOM element for the given Internal.
  * @param {import('../internal').Internal} internal
  * @param {import('../internal').PreactNode} dom A DOM node to attempt to re-use during hydration
- * @param {import('../internal').CommitQueue} commitQueue
  * @returns {import('../internal').PreactNode}
  */
-function mountElement(internal, dom, commitQueue) {
+function mountElement(internal, dom) {
 	let newProps = internal.props;
 	let nodeType = internal.type;
 	let flags = internal.flags;
@@ -269,13 +269,14 @@ function mountElement(internal, dom, commitQueue) {
 				dom.innerHTML = newHtml.__html;
 			}
 		} else if (newChildren != null) {
+			const prevParentDom = rendererState._parentDom;
+			rendererState._parentDom = dom;
 			mountChildren(
 				internal,
 				Array.isArray(newChildren) ? newChildren : [newChildren],
-				commitQueue,
-				dom,
 				isNew ? null : dom.firstChild
 			);
+			rendererState._parentDom = prevParentDom;
 		}
 
 		// (as above, don't diff props during hydration)
@@ -292,16 +293,11 @@ function mountElement(internal, dom, commitQueue) {
  * Mount all children of an Internal
  * @param {import('../internal').Internal} internal The parent Internal of the given children
  * @param {import('../internal').ComponentChild[]} children
- * @param {import('../internal').CommitQueue} commitQueue List of components
- * @param {import('../internal').PreactElement} parentDom The DOM element whose children are being diffed
- * which have callbacks to invoke in commitRoot
  * @param {import('../internal').PreactNode} startDom
  */
 export function mountChildren(
 	internal,
 	children,
-	commitQueue,
-	parentDom,
 	startDom
 ) {
 	let internalChildren = (internal._children = []),
@@ -328,8 +324,6 @@ export function mountChildren(
 		mountedNextChild = mount(
 			childInternal,
 			childVNode,
-			commitQueue,
-			parentDom,
 			startDom
 		);
 
@@ -344,7 +338,7 @@ export function mountChildren(
 			// The DOM the diff should begin with is now startDom (since we inserted
 			// newDom before startDom) so ignore mountedNextChild and continue with
 			// startDom
-			parentDom.insertBefore(newDom, startDom);
+			rendererState._parentDom.insertBefore(newDom, startDom);
 		}
 
 		if (childInternal.ref) {
