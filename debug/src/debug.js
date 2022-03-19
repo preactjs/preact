@@ -391,13 +391,6 @@ Component.prototype.setState = function(update, callback) {
 					)}`
 			);
 		}
-	} else if (this._internal.flags & MODE_UNMOUNTING) {
-		console.warn(
-			`Can't call "this.setState" on an unmounted component. This is a no-op, ` +
-				`but it indicates a memory leak in your application. To fix, cancel all ` +
-				`subscriptions and asynchronous tasks in the componentWillUnmount method.` +
-				`\n\n${getOwnerStack(this._internal)}`
-		);
 	}
 
 	return setState.call(this, update, callback);
