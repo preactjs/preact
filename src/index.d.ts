@@ -101,10 +101,7 @@ export interface ComponentClass<P = {}, S = {}> {
 export interface ComponentConstructor<P = {}, S = {}>
 	extends ComponentClass<P, S> {}
 
-export function createPortal(
-	vnode: VNode,
-	container: Element
-): VNode<any>;
+export function createPortal(vnode: VNode, container: Element): VNode<any>;
 
 // Type alias for a component instance considered generally, whether stateless or stateful.
 export type AnyComponent<P = {}, S = {}> =
@@ -178,7 +175,7 @@ export abstract class Component<P, S> {
 		props?: RenderableProps<P>,
 		state?: Readonly<S>,
 		context?: any
-	): ComponentChild;
+	): ComponentChildren;
 }
 
 //

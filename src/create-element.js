@@ -30,7 +30,7 @@ export function createElement(type, props, children) {
 		}
 	}
 
-	if (arguments.length > 2) {
+	if (children !== undefined) {
 		normalizedProps.children = children;
 	}
 
@@ -71,20 +71,18 @@ export function createVNode(type, props, key, ref, original) {
  * @returns {import('./internal').VNode | string | null}
  */
 export function normalizeToVNode(childVNode) {
-	if (childVNode == null || typeof childVNode == 'boolean') {
+	let type = typeof childVNode;
+	if (childVNode == null || type === 'boolean') {
 		return null;
 	}
-
-	if (typeof childVNode === 'object') {
-		return Array.isArray(childVNode)
-			? createVNode(Fragment, { children: childVNode }, null, null, 0)
-			: childVNode;
+	if (type === 'object') {
+		if (Array.isArray(childVNode)) {
+			return createVNode(Fragment, { children: childVNode }, null, null, 0);
+		}
+	} else if (type !== 'string' && type !== 'function') {
+		return String(childVNode);
 	}
-
-	// If this newVNode is being reused (e.g. <div>{reuse}{reuse}</div>) in the same diff,
-	// or we are rendering a component (e.g. setState) copy the oldVNodes so it can have
-	// it's own DOM & etc. pointers
-	return typeof childVNode === 'function' ? childVNode : childVNode + '';
+	return childVNode;
 }
 
 export function createRef() {

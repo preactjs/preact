@@ -415,7 +415,8 @@ describe('refs', () => {
 		expect(input.value).to.equal('foo');
 	});
 
-	it('should correctly set nested child refs', () => {
+	// @TODO: re-enable these tests when we add a ref queue
+	it.skip('should correctly set nested child refs', () => {
 		const ref = createRef();
 		const App = ({ open }) =>
 			open ? (
@@ -433,6 +434,32 @@ describe('refs', () => {
 
 		render(<App open />, scratch);
 		expect(ref.current).to.not.be.null;
+	});
+
+	it.skip('should correctly set nested child function refs', () => {
+		const ref = sinon.spy();
+		const App = ({ open }) =>
+			open ? (
+				<div class="open" key="open">
+					<div ref={ref} />
+				</div>
+			) : (
+				<div class="closes" key="closed">
+					<div ref={ref} />
+				</div>
+			);
+
+		render(<App />, scratch);
+		expect(ref).to.have.been.calledOnce.and.calledWith(
+			scratch.firstElementChild.firstElementChild
+		);
+
+		ref.resetHistory();
+
+		render(<App open />, scratch);
+		expect(ref).to.have.been.calledOnce.and.calledWith(
+			scratch.firstElementChild.firstElementChild
+		);
 	});
 
 	it('should correctly unmount refs', () => {
