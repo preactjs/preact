@@ -81,7 +81,6 @@ export function createInternal(vnode, parentInternal, rootId) {
 		}
 	}
 
-	const parentDomDepth = parentInternal ? parentInternal._domDepth : 0;
 	/** @type {import('./internal').Internal} */
 	const internal = {
 		type,
@@ -100,8 +99,7 @@ export function createInternal(vnode, parentInternal, rootId) {
 		_component: null,
 		_context: null,
 		_depth: parentInternal ? parentInternal._depth + 1 : 0,
-		_rootId: rootId || (parentInternal && parentInternal._rootId || 0),
-		_domDepth: typeof type == 'function' ? parentDomDepth : parentDomDepth + 1
+		_rootId: rootId || ((parentInternal && parentInternal._rootId) || 0)
 	};
 
 	if (options._internal) options._internal(internal, vnode);

@@ -168,8 +168,6 @@ export interface Internal<P = {}> {
 	_context: any;
 	/** This Internal's distance from the tree root counted in vdom-nodes */
 	_depth: number | null;
-	/** This Internal's distance from the tree root counted in dom-nodes */
-	_domDepth: number | null;
 	/** The id of the root */
 	_rootId: number | null;
 	/** Callbacks to invoke when this internal commits */

@@ -351,12 +351,18 @@ export function useErrorBoundary(cb) {
 	];
 }
 
-
 export function useId() {
 	const state = getHookState(currentIndex++, 11);
 	if (!state._id) {
 		currentIdCounter++;
-		state._id = (currentInternal._rootId + currentInternal._domDepth + currentIdCounter).toString(32)
+
+		state._id =
+			'_P' +
+			(
+				currentInternal._rootId +
+				currentInternal._parent._children.indexOf(currentInternal) +
+				currentIdCounter
+			).toString(32);
 	}
 	return state._id;
 }

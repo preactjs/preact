@@ -44,7 +44,6 @@
       "$_args": "__H",
       "$_factory": "__h",
       "$_depth": "__b",
-      "$_domDepth": "__dd",
       "$_detachOnNextRender": "__b",
       "$_nextState": "__s",
       "$_commitCallbacks": "__h",
