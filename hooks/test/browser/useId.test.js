@@ -52,12 +52,12 @@ describe('useId', () => {
 
 		render(<Comp />, scratch);
 		expect(scratch.innerHTML).to.equal(
-			'<div id="_P3"><div id="_P4"><span id="_P5">h</span></div></div>'
+			'<div id="_P13"><div id="_P16"><span id="_P17">h</span></div></div>'
 		);
 
 		render(<Comp />, scratch);
 		expect(scratch.innerHTML).to.equal(
-			'<div id="_P3"><div id="_P4"><span id="_P5">h</span></div></div>'
+			'<div id="_P13"><div id="_P16"><span id="_P17">h</span></div></div>'
 		);
 	});
 
@@ -80,12 +80,12 @@ describe('useId', () => {
 
 		render(<Comp />, scratch);
 		expect(scratch.innerHTML).to.equal(
-			'<div id="_P6"><span id="_P7">h</span><span id="_P9">h</span><span id="_Pb">h</span></div>'
+			'<div id="_P16"><span id="_P19">h</span><span id="_P111">h</span><span id="_P113">h</span></div>'
 		);
 
 		render(<Comp />, scratch);
 		expect(scratch.innerHTML).to.equal(
-			'<div id="_P6"><span id="_P7">h</span><span id="_P9">h</span><span id="_Pb">h</span></div>'
+			'<div id="_P16"><span id="_P19">h</span><span id="_P111">h</span><span id="_P113">h</span></div>'
 		);
 	});
 });

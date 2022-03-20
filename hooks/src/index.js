@@ -358,11 +358,10 @@ export function useId() {
 
 		state._id =
 			'_P' +
-			(
-				currentInternal._rootId +
-				currentInternal._parent._children.indexOf(currentInternal) +
-				currentIdCounter
-			).toString(32);
+			currentInternal._rootId +
+			(currentInternal._parent._children.indexOf(currentInternal) +
+				currentInternal._depth +
+				currentIdCounter);
 	}
 	return state._id;
 }
