@@ -99,7 +99,7 @@ export function createInternal(vnode, parentInternal, rootId) {
 		_component: null,
 		_context: null,
 		_depth: parentInternal ? parentInternal._depth + 1 : 0,
-		_rootId: rootId || ((parentInternal && parentInternal._rootId) || 0)
+		_rootId: rootId || (parentInternal && parentInternal._rootId)
 	};
 
 	if (options._internal) options._internal(internal, vnode);

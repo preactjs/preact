@@ -12,7 +12,7 @@ import { patch } from './diff/patch';
 import { createInternal } from './tree';
 import { rendererState } from './component';
 
-let rootId = 0;
+let rootId = 1;
 
 /**
  *
