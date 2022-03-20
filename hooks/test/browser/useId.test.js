@@ -4,7 +4,7 @@ import { useId } from 'preact/hooks';
 
 /** @jsx createElement */
 
-describe.only('useId', () => {
+describe('useId', () => {
 	/** @type {HTMLDivElement} */
 	let scratch;
 
