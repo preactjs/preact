@@ -31,8 +31,8 @@
 			import {
 				measureName,
 				measureMemory,
-				afterFrameAsync,
-				mutateAndLayout,
+				mutateAndLayoutAsync,
+				sleep,
 				raf
 			} from './util.js';
 			import { createRoot, createElement as h, Component } from 'framework';
@@ -76,14 +76,16 @@
 			}
 
 			(async () => {
-				for (let i = 5; i--; ) {
-					await mutateAndLayout(runPatch, 10);
+				for (let i = 3; i--; ) {
+					await mutateAndLayoutAsync(runPatch, 11);
 				}
 
-				await afterFrameAsync();
+				await sleep(100);
 
-				performance.mark('start');
-				await mutateAndLayout(runPatch, 50);
+				await mutateAndLayoutAsync(iteration => {
+					if (iteration === 0) performance.mark('start');
+					runPatch();
+				}, 111);
 				performance.mark('stop');
 				performance.measure(measureName, 'start', 'stop');
 

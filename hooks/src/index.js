@@ -8,6 +8,9 @@ let currentIndex;
 /** @type {import('./internal').Internal} */
 let currentInternal;
 
+/** @type {import('./internal').Internal} */
+let previousInternal;
+
 /** @type {number} */
 let currentHook = 0;
 
@@ -38,15 +41,39 @@ options._render = internal => {
 	currentIndex = 0;
 
 	if (currentInternal.data && currentInternal.data.__hooks) {
-		currentInternal.data.__hooks._pendingEffects.forEach(invokeCleanup);
-		currentInternal.data.__hooks._pendingEffects.forEach(invokeEffect);
-		currentInternal.data.__hooks._pendingEffects = [];
+		if (previousInternal === currentInternal) {
+			currentInternal.data.__hooks._pendingEffects = [];
+			currentInternal._commitCallbacks = [];
+			currentInternal.data.__hooks._list.forEach(hookItem => {
+				if (hookItem._pendingArgs) hookItem._pendingArgs = undefined;
+				if (hookItem._pendingValue) hookItem._pendingValue = undefined;
+			});
+		} else {
+			if (internal.data && internal.data.__hooks) {
+				internal.data &&
+					internal.data.__hooks._list.forEach(hookItem => {
+						if (hookItem._pendingArgs) {
+							hookItem._args = hookItem._pendingArgs;
+							hookItem._pendingArgs = undefined;
+						}
+						if (hookItem._pendingValue) {
+							hookItem._value = hookItem._pendingValue;
+							hookItem._pendingValue = undefined;
+						}
+					});
+			}
+			currentInternal.data.__hooks._pendingEffects.forEach(invokeCleanup);
+			currentInternal.data.__hooks._pendingEffects.forEach(invokeEffect);
+			currentInternal.data.__hooks._pendingEffects = [];
+		}
 	}
+	previousInternal = internal;
 };
 
 options.diffed = internal => {
 	if (oldAfterDiff) oldAfterDiff(internal);
 
+	previousInternal = undefined;
 	if (
 		internal.data &&
 		internal.data.__hooks &&
@@ -59,6 +86,19 @@ options.diffed = internal => {
 options._commit = (internal, commitQueue) => {
 	commitQueue.some(internal => {
 		try {
+			if (internal.data && internal.data.__hooks) {
+				internal.data &&
+					internal.data.__hooks._list.forEach(hookItem => {
+						if (hookItem._pendingArgs) {
+							hookItem._args = hookItem._pendingArgs;
+							hookItem._pendingArgs = undefined;
+						}
+						if (hookItem._pendingValue) {
+							hookItem._value = hookItem._pendingValue;
+							hookItem._pendingValue = undefined;
+						}
+					});
+			}
 			internal._commitCallbacks.forEach(invokeCleanup);
 			internal._commitCallbacks = internal._commitCallbacks.filter(cb =>
 				cb._value ? invokeEffect(cb) : true
@@ -167,7 +207,7 @@ export function useEffect(callback, args) {
 	const state = getHookState(currentIndex++, 3);
 	if (!options._skipEffects && argsChanged(state._args, args)) {
 		state._value = callback;
-		state._args = args;
+		state._pendingArgs = args;
 
 		currentInternal.data.__hooks._pendingEffects.push(state);
 	}
@@ -182,7 +222,7 @@ export function useLayoutEffect(callback, args) {
 	const state = getHookState(currentIndex++, 4);
 	if (!options._skipEffects && argsChanged(state._args, args)) {
 		state._value = callback;
-		state._args = args;
+		state._pendingArgs = args;
 
 		if (currentInternal._commitCallbacks == null) {
 			currentInternal._commitCallbacks = [];
@@ -193,7 +233,7 @@ export function useLayoutEffect(callback, args) {
 
 export function useRef(initialValue) {
 	currentHook = 5;
-	return useMemo(() => ({ current: initialValue }), []);
+	return useReducer(invokeEffect, { current: initialValue })[0];
 }
 
 /**
@@ -220,9 +260,10 @@ export function useMemo(factory, args) {
 	/** @type {import('./internal').MemoHookState} */
 	const state = getHookState(currentIndex++, 7);
 	if (argsChanged(state._args, args)) {
-		state._value = factory();
-		state._args = args;
+		state._pendingValue = factory();
+		state._pendingArgs = args;
 		state._factory = factory;
+		return state._pendingValue;
 	}
 
 	return state._value;
@@ -325,8 +366,7 @@ export function useId() {
  */
 function flushAfterPaintEffects() {
 	let internal;
-	afterPaintEffects.sort((a, b) => a._depth - b._depth);
-	while ((internal = afterPaintEffects.pop())) {
+	while ((internal = afterPaintEffects.shift())) {
 		if (~internal.flags & MODE_UNMOUNTING) {
 			try {
 				internal.data.__hooks._pendingEffects.forEach(invokeCleanup);

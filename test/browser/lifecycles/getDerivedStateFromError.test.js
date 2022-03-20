@@ -677,23 +677,5 @@ describe('Lifecycle methods', () => {
 				expectedError
 			);
 		});
-
-		it.skip('should successfully unmount constantly throwing ref', () => {
-			const buggyRef = throwExpectedError;
-
-			function ThrowErr() {
-				return <div ref={buggyRef}>ThrowErr</div>;
-			}
-
-			render(
-				<Receiver>
-					<ThrowErr />
-				</Receiver>,
-				scratch
-			);
-			rerender();
-
-			expect(scratch.innerHTML).to.equal('<div>Error: Error!</div>');
-		});
 	});
 });

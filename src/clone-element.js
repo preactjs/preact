@@ -26,7 +26,7 @@ export function cloneElement(vnode, props, children) {
 		}
 	}
 
-	if (arguments.length > 2) {
+	if (children !== undefined) {
 		normalizedProps.children = children;
 	}
 

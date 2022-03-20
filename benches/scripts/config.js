@@ -22,9 +22,8 @@ async function validateFileDep(framework) {
 		if (typeof framework === 'string') {
 			await stat(framework.replace(/^file:/, ''));
 			return true;
-		} else {
-			return false;
 		}
+		return false;
 	} catch (e) {
 		console.log('Stat error:', e);
 		return false;
@@ -74,9 +73,10 @@ export const frameworks = [
 
 /**
  * @param {string} benchPath
+ * @param {TachometerOptions} options
  * @returns {Pick<ConfigFileBenchmark, "name" | "url" | "measurement">}
  */
-function getBaseBenchmarkConfig(benchPath) {
+function getBaseBenchmarkConfig(benchPath, options) {
 	let name = path.basename(benchPath).replace('.html', '');
 	let url = path.posix.relative(toUrl(benchesRoot()), toUrl(benchPath));
 
@@ -84,7 +84,7 @@ function getBaseBenchmarkConfig(benchPath) {
 	let measurement;
 	if (name == '02_replace1k') {
 		// MUST BE KEPT IN SYNC WITH WARMUP COUNT IN 02_replace1k.html
-		const WARMUP_COUNT = 5;
+		const WARMUP_COUNT = 3;
 
 		// For 02_replace1k, collect additional measurements focusing on the JS
 		// clock time for each warmup and the final duration.
@@ -100,6 +100,9 @@ function getBaseBenchmarkConfig(benchPath) {
 				expression: 'window.usedJSHeapSize'
 			}
 		];
+		if (options.memory === false) {
+			measurement.pop();
+		}
 
 		for (let i = 0; i < WARMUP_COUNT; i++) {
 			const entryName = `run-warmup-${i}`;
@@ -129,6 +132,9 @@ function getBaseBenchmarkConfig(benchPath) {
 				expression: 'window.usedJSHeapSize'
 			}
 		];
+		if (options.memory === false) {
+			measurement.pop();
+		}
 	}
 
 	return { name, url, measurement };
@@ -159,16 +165,16 @@ export async function generateConfig(benchPath, options) {
 	/** @type {BrowserConfigs} */
 	let browser;
 
-	const baseBenchConfig = getBaseBenchmarkConfig(benchPath);
+	const baseBenchConfig = getBaseBenchmarkConfig(benchPath, options);
 
 	// See https://www.npmjs.com/package/tachometer#browsers
 	// and https://www.npmjs.com/package/tachometer#config-file
 	if (Array.isArray(options.browser)) {
 		expand = options.browser.map(browserOpt => ({
-			browser: parseBrowserOption(browserOpt)
+			browser: parseBrowserOption(browserOpt, options)
 		}));
 	} else {
-		browser = parseBrowserOption(options.browser);
+		browser = parseBrowserOption(options.browser, options);
 	}
 
 	if (browser.name == 'chrome' && options.trace) {
@@ -280,9 +286,10 @@ async function writeConfig(name, config) {
 /**
  * @typedef {Exclude<ConfigFileBenchmark["browser"], string>} BrowserConfigs
  * @param {string} str
+ * @param {TachometerOptions} options
  * @returns {BrowserConfigs}
  */
-function parseBrowserOption(str) {
+function parseBrowserOption(str, options) {
 	// Source: https://github.com/Polymer/tachometer/blob/d4d5116acb2d7df18035ddc36f0a3a1730841a23/src/browser.ts#L100
 	let remoteUrl;
 	const at = str.indexOf('@');
@@ -300,17 +307,34 @@ function parseBrowserOption(str) {
 	const name = str;
 
 	/** @type {BrowserConfigs} */
-	const config = { name, headless };
+	const config = { name };
+
+	if (config.name === 'chrome' || config.name === 'firefox') {
+		config.headless = headless;
+	}
+
 	if (remoteUrl !== undefined) {
 		config.remoteUrl = remoteUrl;
 	}
 
 	// Custom browser options
 	if (config.name == 'chrome') {
+		const mem = options.memory !== false;
 		config.addArguments = [
-			'--js-flags=--expose-gc',
-			'--enable-precise-memory-info'
-		];
+			// Quoted values don't seem to work with WebDriver :(
+			// `--js-flags="${mem ? '--expose-gc ' : ''}--random-seed=1157259157"`,
+			mem && '--js-flags=--expose-gc',
+			mem && '--enable-precise-memory-info',
+			'--disable-ipc-flooding-protection',
+			'--disable-renderer-backgrounding',
+			'--disable-background-timer-throttling',
+			'--disable-backgrounding-occluded-windows',
+			'--disable-hang-monitor',
+			'--disable-device-discovery-notifications',
+			'--disable-extensions',
+			'--incognito',
+			'--no-sandbox'
+		].filter(Boolean);
 	}
 
 	return config;

@@ -8,6 +8,8 @@
 		<style>
 			table {
 				table-layout: fixed;
+				border-collapse: collapse;
+				overflow: hidden;
 			}
 			.preloadicon {
 				display: none;
@@ -24,28 +26,49 @@
 				measureName,
 				measureMemory,
 				testElementText,
-				afterFrameAsync,
-				mutateAndLayout,
+				mutateAndLayoutAsync,
+				sleep,
+				tick,
 				raf
 			} from './util.js';
 			import * as framework from 'framework';
 			import { render } from '../src/keyed-children/index.js';
 
-			const { runLots } = render(framework, document.getElementById('main'));
+			const clone = document.getElementById('main').cloneNode(true);
+			const { clear, run, runLots } = render(
+				framework,
+				document.getElementById('main')
+			);
+
+			async function warmup() {
+				for (let i = 5; i--; ) {
+					runLots();
+					await tick();
+					clear();
+					await raf();
+				}
+			}
 
 			async function main() {
-				await afterFrameAsync();
+				document.getElementById('main').replaceWith(clone);
+				const { clear, runLots } = render(framework, clone);
 
 				const elementSelector = 'tr:last-child > td:first-child';
 
+				// Note: unlike the other benches, we *don't* wait for layout here!
+				// Layout for 10000 table rows takes 5x longer than the JS workload
+				// we're trying to benchmark, which buries real performance changes.
+
 				performance.mark('start');
-				await mutateAndLayout(runLots);
+				runLots();
+				await sleep(10); // just long enough for setState to commit, but not layout
 				performance.mark('stop');
 				performance.measure(measureName, 'start', 'stop');
 
 				testElementText(elementSelector, '10000');
-
+				clear();
 				await raf();
+
 				measureMemory();
 			}
 

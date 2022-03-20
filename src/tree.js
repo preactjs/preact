@@ -29,19 +29,21 @@ export function createInternal(vnode, parentInternal, rootId) {
 	/** @type {number} */
 	let flags = parentInternal ? parentInternal.flags & INHERITED_MODES : 0;
 
-	// Text VNodes/Internals use NaN as an ID so that two are never equal.
-	let vnodeId = NaN;
+	// Text VNodes/Internals have an ID of 0 that is never used:
+	let vnodeId = 0;
 
 	if (typeof vnode === 'string') {
 		// type = null;
 		flags |= TYPE_TEXT;
 		props = vnode;
-	} else if (vnode.constructor !== UNDEFINED) {
+	}
+	// Prevent JSON injection by rendering injected objects as empty Text nodes
+	else if (vnode.constructor !== UNDEFINED) {
 		flags |= TYPE_TEXT;
 		props = '';
 	} else {
 		type = vnode.type;
-		props = vnode.props || {};
+		props = vnode.props;
 		key = vnode.key;
 		ref = vnode.ref;
 		vnodeId = vnode._vnodeId;
@@ -61,7 +63,7 @@ export function createInternal(vnode, parentInternal, rootId) {
 		// flags = typeof type === 'function' ? COMPONENT_NODE : ELEMENT_NODE;
 		flags |=
 			typeof type === 'function'
-				? type.prototype && 'render' in type.prototype
+				? type.prototype && type.prototype.render
 					? TYPE_CLASS
 					: props._parentDom
 					? TYPE_ROOT
@@ -86,7 +88,9 @@ export function createInternal(vnode, parentInternal, rootId) {
 		props,
 		key,
 		ref,
-		data: typeof type == 'function' ? {} : null,
+		_prevRef: null,
+		data: flags & TYPE_COMPONENT ? {} : null,
+		_commitCallbacks: flags & TYPE_COMPONENT ? [] : null,
 		rerender: enqueueRender,
 		flags,
 		_children: null,
@@ -173,14 +177,13 @@ export function getChildDom(internal, i) {
  * @returns {any}
  */
 export function getParentContext(internal) {
-	let context = internal._context;
-	let parent = internal._parent;
-	while (context == null && parent) {
-		context = parent._context;
-		parent = parent._parent;
-	}
+	// @TODO: compare performance of recursion here (it's 11b smaller, but may be slower for deep trees)
+	return internal._context || getParentContext(internal._parent);
 
-	return context;
+	// while ((internal = internal._parent)) {
+	// 	let context = internal._context;
+	// 	if (context != null) return context;
+	// }
 }
 
 /**
@@ -188,18 +191,19 @@ export function getParentContext(internal) {
  * @returns {import('./internal').PreactElement}
  */
 export function getParentDom(internal) {
-	let parentDom = internal.flags & TYPE_ROOT ? internal.props._parentDom : null;
+	let parent = internal;
 
-	let parent = internal._parent;
-	while (parentDom == null && parent) {
-		if (parent.flags & TYPE_ROOT) {
-			parentDom = parent.props._parentDom;
-		} else if (parent.flags & TYPE_ELEMENT) {
-			parentDom = parent._dom;
-		}
-
-		parent = parent._parent;
+	// if this is a Root internal, return its parent DOM:
+	if (parent.flags & TYPE_ROOT) {
+		return parent.props._parentDom;
 	}
 
-	return parentDom;
+	// walk up the tree to find the nearest DOM or Root Internal:
+	while ((parent = parent._parent)) {
+		if (parent.flags & TYPE_ROOT) {
+			return parent.props._parentDom;
+		} else if (parent.flags & TYPE_ELEMENT) {
+			return parent._dom;
+		}
+	}
 }

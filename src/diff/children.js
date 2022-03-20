@@ -12,41 +12,34 @@ import { mount } from './mount';
 import { patch } from './patch';
 import { unmount } from './unmount';
 import { createInternal, getDomSibling } from '../tree';
+import { rendererState } from '../component';
 
 /**
- * Diff the children of a virtual node
- * @param {import('../internal').PreactElement} parentDom The DOM element whose
- * children are being diffed
- * @param {import('../internal').ComponentChildren[]} renderResult
- * @param {import('../internal').Internal} parentInternal The Internal node
- * whose children should be diff'ed against newParentVNode
- * @param {import('../internal').CommitQueue} commitQueue List of
- * components which have callbacks to invoke in commitRoot
+ * Update an internal with new children.
+ * @param {import('../internal').Internal} internal The internal whose children should be patched
+ * @param {import('../internal').ComponentChild[]} children The new children, represented as VNodes
  */
-export function diffChildren(
-	parentDom,
-	renderResult,
-	parentInternal,
-	commitQueue
-) {
+export function patchChildren(internal, children) {
 	let oldChildren =
-		(parentInternal._children && parentInternal._children.slice()) || EMPTY_ARR;
+		(internal._children && internal._children.slice()) || EMPTY_ARR;
 
 	let oldChildrenLength = oldChildren.length;
 	let remainingOldChildren = oldChildrenLength;
 
 	let skew = 0;
-	let i, newDom, refs;
+	let i;
 
 	/** @type {import('../internal').Internal} */
 	let childInternal;
 
-	/** @type {import('../internal').VNode | string} */
+	/** @type {import('../internal').ComponentChild} */
 	let childVNode;
 
+	/** @type {import('../internal').Internal[]} */
 	const newChildren = [];
-	for (i = 0; i < renderResult.length; i++) {
-		childVNode = normalizeToVNode(renderResult[i]);
+
+	for (i = 0; i < children.length; i++) {
+		childVNode = normalizeToVNode(children[i]);
 
 		// Terser removes the `continue` here and wraps the loop body
 		// in a `if (childVNode) { ... } condition
@@ -54,8 +47,6 @@ export function diffChildren(
 			newChildren[i] = null;
 			continue;
 		}
-
-		let oldVNodeRef;
 
 		let skewedIndex = i + skew;
 
@@ -66,6 +57,7 @@ export function diffChildren(
 			skewedIndex,
 			remainingOldChildren
 		);
+
 		if (matchingIndex === -1) {
 			childInternal = UNDEFINED;
 		} else {
@@ -77,15 +69,13 @@ export function diffChildren(
 		let mountingChild = childInternal == null;
 
 		if (mountingChild) {
-			childInternal = createInternal(childVNode, parentInternal);
+			childInternal = createInternal(childVNode, internal);
 
 			// We are mounting a new VNode
 			mount(
-				parentDom,
-				childVNode,
 				childInternal,
-				commitQueue,
-				getDomSibling(parentInternal, skewedIndex)
+				childVNode,
+				getDomSibling(internal, skewedIndex)
 			);
 		}
 		// If this node suspended during hydration, and no other flags are set:
@@ -95,35 +85,14 @@ export function diffChildren(
 			(MODE_HYDRATE | MODE_SUSPENDED)
 		) {
 			// We are resuming the hydration of a VNode
-			oldVNodeRef = childInternal.ref;
-
 			mount(
-				parentDom,
-				childVNode,
 				childInternal,
-				commitQueue,
+				childVNode,
 				childInternal._dom
 			);
 		} else {
-			oldVNodeRef = childInternal.ref;
-
 			// Morph the old element into the new one, but don't append it to the dom yet
-			patch(parentDom, childVNode, childInternal, commitQueue);
-		}
-
-		newDom = childInternal._dom;
-
-		if (childVNode.ref || oldVNodeRef) {
-			if (!refs) refs = [];
-			childInternal.ref = childVNode.ref;
-			refs.push(
-				oldVNodeRef,
-				childVNode.ref,
-				childInternal.flags & TYPE_COMPONENT
-					? childInternal._component || newDom
-					: newDom,
-				childInternal
-			);
+			patch(childInternal, childVNode);
 		}
 
 		go: if (mountingChild) {
@@ -133,8 +102,10 @@ export function diffChildren(
 
 			// Perform insert of new dom
 			if (childInternal.flags & TYPE_DOM) {
-				let nextSibling = getDomSibling(parentInternal, skewedIndex);
-				parentDom.insertBefore(childInternal._dom, nextSibling);
+				rendererState._parentDom.insertBefore(
+					childInternal._dom,
+					getDomSibling(internal, skewedIndex)
+				);
 			}
 		} else if (matchingIndex !== skewedIndex) {
 			// Move this DOM into its correct place
@@ -142,7 +113,7 @@ export function diffChildren(
 				skew++;
 				break go;
 			} else if (matchingIndex > skewedIndex) {
-				if (remainingOldChildren > renderResult.length - skewedIndex) {
+				if (remainingOldChildren > children.length - skewedIndex) {
 					skew += matchingIndex - skewedIndex;
 					break go;
 				} else {
@@ -163,18 +134,22 @@ export function diffChildren(
 
 			if (matchingIndex == i) break go;
 
-			let nextSibling = getDomSibling(parentInternal, skewedIndex + 1);
+			let nextSibling = getDomSibling(internal, skewedIndex + 1);
 			if (childInternal.flags & TYPE_DOM) {
-				parentDom.insertBefore(childInternal._dom, nextSibling);
+				rendererState._parentDom.insertBefore(childInternal._dom, nextSibling);
 			} else {
-				insertComponentDom(childInternal, nextSibling, parentDom);
+				insertComponentDom(
+					childInternal,
+					nextSibling,
+					rendererState._parentDom
+				);
 			}
 		}
 
 		newChildren[i] = childInternal;
 	}
 
-	parentInternal._children = newChildren;
+	internal._children = newChildren;
 
 	// Remove remaining oldChildren if there are any.
 	if (remainingOldChildren > 0) {
@@ -186,9 +161,19 @@ export function diffChildren(
 	}
 
 	// Set refs only after unmount
-	if (refs) {
-		for (i = 0; i < refs.length; i++) {
-			applyRef(refs[i], refs[++i], refs[++i], refs[++i]);
+	for (i = 0; i < newChildren.length; i++) {
+		childInternal = newChildren[i];
+		if (childInternal) {
+			let oldRef = childInternal._prevRef;
+			if (childInternal.ref != oldRef) {
+				if (oldRef) applyRef(oldRef, null, childInternal);
+				if (childInternal.ref)
+					applyRef(
+						childInternal.ref,
+						childInternal._component || childInternal._dom,
+						childInternal
+					);
+			}
 		}
 	}
 }

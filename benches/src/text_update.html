@@ -11,8 +11,8 @@
 			import {
 				measureName,
 				measureMemory,
-				afterFrameAsync,
-				mutateAndLayout,
+				mutateAndLayoutAsync,
+				sleep,
 				raf
 			} from './util.js';
 			import { createRoot, createElement } from 'framework';
@@ -34,14 +34,22 @@
 			}
 
 			(async () => {
-				await mutateAndLayout(runPatch, 1000);
-
-				await afterFrameAsync();
-
-				performance.mark('start');
-				for (let i = 19; i--; ) {
-					await mutateAndLayout(runPatch, 1000);
+				for (let i = 5; i--; ) {
+					for (let j = 1000; j--; ) runPatch();
+					await raf();
 				}
+
+				await sleep(200);
+
+				// This triggers a rAF, then runs a synchronous benchmark followed by one "tick",
+				// which should include the cost of layout in all current browsers.
+				await mutateAndLayoutAsync(() => {
+					performance.mark('start');
+					for (let i = 19000; i--; ) {
+						runPatch();
+					}
+				});
+
 				performance.mark('stop');
 				performance.measure(measureName, 'start', 'stop');
 

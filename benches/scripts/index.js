@@ -63,6 +63,11 @@ prog
 		defaultBenchOptions.framework
 	)
 	.option(
+		'--memory',
+		'Measure and report memory consumption',
+		defaultBenchOptions.memory
+	)
+	.option(
 		'--trace',
 		'Enable perf tracing for browsers that support it',
 		defaultBenchOptions.trace
