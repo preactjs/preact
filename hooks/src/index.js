@@ -197,8 +197,13 @@ export function useImperativeHandle(ref, createHandle, args) {
 	currentHook = 6;
 	useLayoutEffect(
 		() => {
-			if (typeof ref == 'function') ref(createHandle());
-			else if (ref) ref.current = createHandle();
+			if (typeof ref == 'function') {
+				ref(createHandle());
+				return () => ref(null);
+			} else if (ref) {
+				ref.current = createHandle();
+				return () => ref.current = null;
+			}
 		},
 		args == null ? args : args.concat(ref)
 	);
