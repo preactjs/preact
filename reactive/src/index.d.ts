@@ -1,8 +1,9 @@
 export interface Reactive<T> {
 	value: T;
+	setValue: StateUpdater<T>;
 }
 
-export type StateUpdater<S> = (value: S | ((prevState: S) => S)) => void;
+export type StateUpdater<S> = (value: S | ((prevState: S) => S | null)) => void;
 
 /**
  * Returns a signal that holds the value and can be subscribed to in order to

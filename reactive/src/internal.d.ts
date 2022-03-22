@@ -7,10 +7,13 @@ export enum AtomKind {
 	REACTION = 3
 }
 
+export type UpdateFn<T> = (value: T) => T | null;
+
 export interface Atom<T = any> {
 	displayName: string;
 	kind: AtomKind;
 	value: T;
+	setValue(value: T | UpdateFn<T>): void;
 	_pending: number;
 	_value: T;
 	_tracking: Set<Atom> | undefined;

@@ -192,6 +192,23 @@ function createAtom(initialValue, kind, owner, displayName = '') {
 			}
 
 			return this._value;
+		},
+		setValue(value) {
+			// TODO: Extract to preact/debug?
+			if (currentAtom !== undefined && currentAtom.kind === KIND_COMPUTED) {
+				throw new Error('Must not update signal inside computed.');
+			}
+
+			if (isUpdater(value)) {
+				const res = value(atom._value);
+				if (res !== null && res !== atom._value) {
+					atom._value = res;
+					invalidate(atom);
+				}
+			} else if (atom._value !== value) {
+				atom._value = value;
+				invalidate(atom);
+			}
 		}
 	};
 
@@ -313,7 +330,7 @@ function invalidate(atom) {
 
 /**
  * @param {*} x
- * @returns {x is import('./index').StateUpdater<any>}
+ * @returns {x is import('./internal').UpdateFn<any>}
  */
 function isUpdater(x) {
 	// Will be inlined by terser
@@ -328,27 +345,7 @@ function isUpdater(x) {
  */
 export function signal(initialValue, displayName) {
 	const atom = getAtom(currentIndex++, initialValue, KIND_SOURCE, displayName);
-
-	/** @type {import('./index').StateUpdater<T>} */
-	const updater = value => {
-		// TODO: Extract to preact/debug?
-		if (currentAtom !== undefined && currentAtom.kind === KIND_COMPUTED) {
-			throw new Error('Must not update signal inside computed.');
-		}
-
-		if (isUpdater(value)) {
-			const res = value(atom._value);
-			if (res !== null && res !== atom._value) {
-				atom._value = res;
-				invalidate(atom);
-			}
-		} else if (atom._value !== value) {
-			atom._value = value;
-			invalidate(atom);
-		}
-	};
-
-	return [atom, updater];
+	return [atom, atom.setValue];
 }
 
 /**
