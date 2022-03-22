@@ -110,20 +110,22 @@ options.unmount = vnode => {
  */
 function getReactive(component) {
 	if (!component.__reactive) {
+		const atom = createAtom(
+			null,
+			KIND_REACTION,
+			undefined,
+			component.constructor.displayName ||
+				component.constructor.name ||
+				'ReactiveComponent'
+		);
+
 		component.__reactive = {
-			_atom: createAtom(
-				null,
-				KIND_REACTION,
-				undefined,
-				component.constructor.displayName ||
-					component.constructor.name ||
-					'ReactiveComponent'
-			),
+			_atom: atom,
 			_pendingEffects: []
 		};
 
-		component.__reactive._atom._tracking = new Set();
-		component.__reactive._atom._onUpdate = () => {
+		atom._tracking = new Set();
+		atom._onUpdate = () => {
 			component._skipRender = false;
 			component.setState({});
 		};
