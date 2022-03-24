@@ -19,60 +19,60 @@
 		"./compat": {
 			"browser": "./compat/dist/compat.module.js",
 			"umd": "./compat/dist/compat.umd.js",
-			"require": "./compat/dist/compat.js",
-			"import": "./compat/dist/compat.mjs"
+			"import": "./compat/dist/compat.mjs",
+			"require": "./compat/dist/compat.js"
 		},
 		"./debug": {
 			"browser": "./debug/dist/debug.module.js",
 			"umd": "./debug/dist/debug.umd.js",
-			"require": "./debug/dist/debug.js",
-			"import": "./debug/dist/debug.mjs"
+			"import": "./debug/dist/debug.mjs",
+			"require": "./debug/dist/debug.js"
 		},
 		"./devtools": {
 			"browser": "./devtools/dist/devtools.module.js",
 			"umd": "./devtools/dist/devtools.umd.js",
-			"require": "./devtools/dist/devtools.js",
-			"import": "./devtools/dist/devtools.mjs"
+			"import": "./devtools/dist/devtools.mjs",
+			"require": "./devtools/dist/devtools.js"
 		},
 		"./hooks": {
 			"browser": "./hooks/dist/hooks.module.js",
 			"umd": "./hooks/dist/hooks.umd.js",
-			"require": "./hooks/dist/hooks.js",
-			"import": "./hooks/dist/hooks.mjs"
+			"import": "./hooks/dist/hooks.mjs",
+			"require": "./hooks/dist/hooks.js"
 		},
 		"./test-utils": {
 			"browser": "./test-utils/dist/testUtils.module.js",
 			"umd": "./test-utils/dist/testUtils.umd.js",
-			"require": "./test-utils/dist/testUtils.js",
-			"import": "./test-utils/dist/testUtils.mjs"
+			"import": "./test-utils/dist/testUtils.mjs",
+			"require": "./test-utils/dist/testUtils.js"
 		},
 		"./jsx-runtime": {
 			"browser": "./jsx-runtime/dist/jsxRuntime.module.js",
 			"umd": "./jsx-runtime/dist/jsxRuntime.umd.js",
-			"require": "./jsx-runtime/dist/jsxRuntime.js",
-			"import": "./jsx-runtime/dist/jsxRuntime.mjs"
+			"import": "./jsx-runtime/dist/jsxRuntime.mjs",
+			"require": "./jsx-runtime/dist/jsxRuntime.js"
 		},
 		"./jsx-dev-runtime": {
 			"browser": "./jsx-runtime/dist/jsxRuntime.module.js",
 			"umd": "./jsx-runtime/dist/jsxRuntime.umd.js",
-			"require": "./jsx-runtime/dist/jsxRuntime.js",
-			"import": "./jsx-runtime/dist/jsxRuntime.mjs"
+			"import": "./jsx-runtime/dist/jsxRuntime.mjs",
+			"require": "./jsx-runtime/dist/jsxRuntime.js"
 		},
 		"./compat/server": {
-			"require": "./compat/server.js",
-			"import": "./compat/server.mjs"
+			"import": "./compat/server.mjs",
+			"require": "./compat/server.js"
 		},
 		"./compat/jsx-runtime": {
-			"require": "./compat/jsx-runtime.js",
-			"import": "./compat/jsx-runtime.mjs"
+			"import": "./compat/jsx-runtime.mjs",
+			"require": "./compat/jsx-runtime.js"
 		},
 		"./compat/jsx-dev-runtime": {
-			"require": "./compat/jsx-dev-runtime.js",
-			"import": "./compat/jsx-dev-runtime.mjs"
+			"import": "./compat/jsx-dev-runtime.mjs",
+			"require": "./compat/jsx-dev-runtime.js"
 		},
 		"./compat/scheduler": {
-			"require": "./compat/scheduler.js",
-			"import": "./compat/scheduler.mjs"
+			"import": "./compat/scheduler.mjs",
+			"require": "./compat/scheduler.js"
 		},
 		"./package.json": "./package.json",
 		"./compat/package.json": "./compat/package.json",
@@ -251,7 +251,7 @@
 		"babel-plugin-transform-rename-properties": "0.1.0",
 		"benchmark": "^2.1.4",
 		"chai": "^4.1.2",
-		"check-export-map": "^1.2.0",
+		"check-export-map": "^1.3.0",
 		"coveralls": "^3.0.0",
 		"cross-env": "^7.0.2",
 		"diff": "^5.0.0",
