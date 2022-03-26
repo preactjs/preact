@@ -1,4 +1,4 @@
-import { setupRerender } from 'preact/test-utils';
+import { setupRerender, act } from 'preact/test-utils';
 import React, {
 	createElement,
 	render,
@@ -12,8 +12,6 @@ import React, {
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { div } from '../../../test/_util/dom';
 import { createLazy, createSuspender } from './suspense-utils';
-import { expect } from 'chai';
-import { act } from 'preact/test-utils/dist/testUtils.mjs';
 
 const h = React.createElement;
 /* eslint-env browser, mocha */
