@@ -6,11 +6,14 @@ import React, {
 	Suspense,
 	Fragment,
 	createContext,
-	useState
+	useState,
+	useEffect
 } from 'preact/compat';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { div } from '../../../test/_util/dom';
 import { createLazy, createSuspender } from './suspense-utils';
+import { expect } from 'chai';
+import { act } from 'preact/test-utils/dist/testUtils.mjs';
 
 const h = React.createElement;
 /* eslint-env browser, mocha */
@@ -2278,6 +2281,53 @@ describe('suspense', () => {
 					div(3)
 				].join('')
 			);
+		});
+	});
+
+	it('should cleanup pending effects', () => {
+		const [Lazy, resolve] = createLazy();
+		const effects = [];
+		const cleanups = [];
+
+		const Intermediary = props => {
+			useEffect(() => {
+				effects.push('');
+				return () => {
+					cleanups.push('');
+				};
+			}, [props]);
+
+			return props.children;
+		};
+		function App({ activated }) {
+			return (
+				<Suspense fallback="loading...">
+					<Intermediary>{activated ? <Lazy /> : null}</Intermediary>
+				</Suspense>
+			);
+		}
+
+		act(() => {
+			render(<App activated={false} />, scratch);
+		});
+		expect(effects.length).to.equal(1);
+		expect(cleanups.length).to.equal(0);
+		expect(scratch.innerHTML).to.equal('');
+
+		act(() => {
+			render(<App activated />, scratch);
+		});
+		// TODO: this should actually be 1 but "act" synchronously flushes
+		expect(effects.length).to.equal(2);
+		expect(cleanups.length).to.equal(1);
+		expect(scratch.innerHTML).to.equal('loading...');
+
+		return resolve(() => <div>resolved A</div>).then(() => {
+			rerender();
+			// TODO: at this time it should be 2-1
+			expect(effects.length).to.equal(2);
+			expect(cleanups.length).to.equal(1);
+			expect(scratch.innerHTML).to.equal('<div>resolved A</div>');
 		});
 	});
 });

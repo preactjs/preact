@@ -1,4 +1,10 @@
-import { Component, createElement, options, Fragment, createPortal } from 'preact';
+import {
+	Component,
+	createElement,
+	options,
+	Fragment,
+	createPortal
+} from 'preact';
 import { TYPE_ELEMENT, MODE_HYDRATE } from '../../src/constants';
 import { getParentDom } from '../../src/tree';
 
@@ -58,6 +64,31 @@ export function Suspense() {
 // - do not set `Suspense.prototype.constructor` to `Suspense`
 Suspense.prototype = new Component();
 
+function invokeCleanup(hook) {
+	let cleanup = hook._cleanup;
+	if (typeof cleanup == 'function') {
+		hook._cleanup = undefined;
+		cleanup();
+	}
+}
+
+function discardWipState(internal) {
+	do {
+		if (internal.data && internal.data.__hooks) {
+			internal.data.__hooks._list.forEach(hook => {
+				hook._pendingArgs = undefined;
+				hook._pendingValue = undefined;
+			});
+			internal.data.__hooks._pendingEffects.forEach(invokeCleanup);
+			internal.data.__hooks._pendingEffects = [];
+			internal._commitCallbacks.forEach(invokeCleanup);
+			internal._commitCallbacks = internal._commitCallbacks.filter(
+				cb => !cb._value
+			);
+		}
+	} while ((internal = internal._parent && !internal._childDidSuspend));
+}
+
 /**
  * @this {import('./internal').SuspenseComponent}
  * @param {Promise} promise The thrown promise
@@ -80,6 +111,7 @@ Suspense.prototype._childDidSuspend = function(promise, suspendingInternal) {
 	c._suspenders.push(suspendingComponent);
 
 	const resolve = suspended(c._internal);
+	discardWipState(c._internal);
 
 	let resolved = false;
 	const onResolved = () => {
