@@ -81,12 +81,13 @@ function discardWipState(internal) {
 
 	if (internal.data && internal.data.__hooks) {
 		internal.data.__hooks._list.forEach(invokeCleanup);
-		internal.data.__hooks._pendingEffects.forEach(invokeCleanup);
-		internal.data.__hooks._pendingEffects = [];
-		internal._commitCallbacks.forEach(invokeCleanup);
-		internal._commitCallbacks = internal._commitCallbacks.filter(
-			cb => !cb._value
+		internal.data.__hooks._pendingEffects = internal.data.__hooks._pendingEffects.filter(
+			invokeCleanup
 		);
+		internal._commitCallbacks = internal._commitCallbacks.filter(cb => {
+			invokeCleanup(cb);
+			return !cb._value;
+		});
 	}
 
 	if (internal._parent) {
