@@ -2282,16 +2282,17 @@ describe('suspense', () => {
 		});
 	});
 
-	it('should cleanup pending effects', () => {
+	it.only('should cleanup pending effects', () => {
 		const [Lazy, resolve] = createLazy();
 		const effects = [];
 		const cleanups = [];
 
+		let count = 0;
 		const Intermediary = props => {
 			useEffect(() => {
-				effects.push('');
+				effects.push(props.count);
 				return () => {
-					cleanups.push('');
+					cleanups.push(props.count);
 				};
 			}, [props]);
 
@@ -2300,7 +2301,9 @@ describe('suspense', () => {
 		function App({ activated }) {
 			return (
 				<Suspense fallback="loading...">
-					<Intermediary>{activated ? <Lazy /> : null}</Intermediary>
+					<Intermediary count={count++}>
+						{activated ? <Lazy /> : null}
+					</Intermediary>
 				</Suspense>
 			);
 		}
@@ -2315,14 +2318,14 @@ describe('suspense', () => {
 		act(() => {
 			render(<App activated />, scratch);
 		});
-		// TODO: this should actually be 1 but "act" synchronously flushes
-		expect(effects.length).to.equal(2);
+		expect(effects.length).to.equal(1);
 		expect(cleanups.length).to.equal(1);
 		expect(scratch.innerHTML).to.equal('loading...');
 
 		return resolve(() => <div>resolved A</div>).then(() => {
-			rerender();
-			// TODO: at this time it should be 2-1
+			act(() => {
+				rerender();
+			});
 			expect(effects.length).to.equal(2);
 			expect(cleanups.length).to.equal(1);
 			expect(scratch.innerHTML).to.equal('<div>resolved A</div>');

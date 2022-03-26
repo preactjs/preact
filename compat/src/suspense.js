@@ -3,8 +3,10 @@ import {
 	createElement,
 	options,
 	Fragment,
-	createPortal
+	createPortal,
+	cloneElement
 } from 'preact';
+import { Children } from './Children';
 import { TYPE_ELEMENT, MODE_HYDRATE } from '../../src/constants';
 import { getParentDom } from '../../src/tree';
 
@@ -66,6 +68,8 @@ Suspense.prototype = new Component();
 
 function invokeCleanup(hook) {
 	let cleanup = hook._cleanup;
+	hook._pendingArgs = undefined;
+	hook._pendingValue = undefined;
 	if (typeof cleanup == 'function') {
 		hook._cleanup = undefined;
 		cleanup();
@@ -73,20 +77,19 @@ function invokeCleanup(hook) {
 }
 
 function discardWipState(internal) {
-	do {
-		if (internal.data && internal.data.__hooks) {
-			internal.data.__hooks._list.forEach(hook => {
-				hook._pendingArgs = undefined;
-				hook._pendingValue = undefined;
-			});
-			internal.data.__hooks._pendingEffects.forEach(invokeCleanup);
-			internal.data.__hooks._pendingEffects = [];
-			internal._commitCallbacks.forEach(invokeCleanup);
-			internal._commitCallbacks = internal._commitCallbacks.filter(
-				cb => !cb._value
-			);
-		}
-	} while ((internal = internal._parent && !internal._childDidSuspend));
+	if (internal.data && internal.data.__hooks) {
+		internal.data.__hooks._list.forEach(invokeCleanup);
+		internal.data.__hooks._pendingEffects.forEach(invokeCleanup);
+		internal.data.__hooks._pendingEffects = [];
+		internal._commitCallbacks.forEach(invokeCleanup);
+		internal._commitCallbacks = internal._commitCallbacks.filter(
+			cb => !cb._value
+		);
+	}
+
+	if (internal._parent && !internal._parent._component._childDidSuspend) {
+		discardWipState(internal._parent);
+	}
 }
 
 /**
@@ -111,7 +114,7 @@ Suspense.prototype._childDidSuspend = function(promise, suspendingInternal) {
 	c._suspenders.push(suspendingComponent);
 
 	const resolve = suspended(c._internal);
-	discardWipState(c._internal);
+	discardWipState(suspendingInternal);
 
 	let resolved = false;
 	const onResolved = () => {
@@ -176,7 +179,11 @@ Suspense.prototype.render = function(props, state) {
 	const fallback =
 		state._suspended && createElement(Fragment, null, props.fallback);
 
-	const portal = createPortal(props.children, this._parentDom);
+	const children = Children.map(props.children, el =>
+		cloneElement(el, el.props)
+	);
+	const portal = createPortal(children, this._parentDom);
+
 	if (state._suspended) {
 		// If we are suspended, don't rerender all of the portal's children. Instead
 		// just reorder the Portal's children
