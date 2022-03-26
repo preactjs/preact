@@ -2294,7 +2294,7 @@ describe('suspense', () => {
 				return () => {
 					cleanups.push(props.count);
 				};
-			}, [props]);
+			}, [props.count]);
 
 			return props.children;
 		};

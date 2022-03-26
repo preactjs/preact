@@ -77,6 +77,8 @@ function invokeCleanup(hook) {
 }
 
 function discardWipState(internal) {
+	if (internal._component && internal._component._childDidSuspend) return;
+
 	if (internal.data && internal.data.__hooks) {
 		internal.data.__hooks._list.forEach(invokeCleanup);
 		internal.data.__hooks._pendingEffects.forEach(invokeCleanup);
@@ -87,7 +89,7 @@ function discardWipState(internal) {
 		);
 	}
 
-	if (internal._parent && !internal._parent._component._childDidSuspend) {
+	if (internal._parent) {
 		discardWipState(internal._parent);
 	}
 }
@@ -180,7 +182,7 @@ Suspense.prototype.render = function(props, state) {
 		state._suspended && createElement(Fragment, null, props.fallback);
 
 	const children = Children.map(props.children, el =>
-		cloneElement(el, el.props)
+		typeof el === 'object' ? cloneElement(el, el.props) : el
 	);
 	const portal = createPortal(children, this._parentDom);
 
