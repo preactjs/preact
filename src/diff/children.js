@@ -72,11 +72,7 @@ export function patchChildren(internal, children) {
 			childInternal = createInternal(childVNode, internal);
 
 			// We are mounting a new VNode
-			mount(
-				childInternal,
-				childVNode,
-				getDomSibling(internal, skewedIndex)
-			);
+			mount(childInternal, childVNode, getDomSibling(internal, skewedIndex));
 		}
 		// If this node suspended during hydration, and no other flags are set:
 		// @TODO: might be better to explicitly check for MODE_ERRORED here.
@@ -85,11 +81,7 @@ export function patchChildren(internal, children) {
 			(MODE_HYDRATE | MODE_SUSPENDED)
 		) {
 			// We are resuming the hydration of a VNode
-			mount(
-				childInternal,
-				childVNode,
-				childInternal._dom
-			);
+			mount(childInternal, childVNode, childInternal._dom);
 		} else {
 			// Morph the old element into the new one, but don't append it to the dom yet
 			patch(childInternal, childVNode);
@@ -158,6 +150,11 @@ export function patchChildren(internal, children) {
 				unmount(oldChildren[i], oldChildren[i]);
 			}
 		}
+	}
+
+	let ref;
+	while ((ref = rendererState._refQueue.shift())) {
+		applyRef(ref.internal.ref, ref.target, ref.internal);
 	}
 
 	// Set refs only after unmount

@@ -416,7 +416,7 @@ describe('refs', () => {
 	});
 
 	// @TODO: re-enable these tests when we add a ref queue
-	it.skip('should correctly set nested child refs', () => {
+	it('should correctly set nested child refs', () => {
 		const ref = createRef();
 		const App = ({ open }) =>
 			open ? (
@@ -436,7 +436,7 @@ describe('refs', () => {
 		expect(ref.current).to.not.be.null;
 	});
 
-	it.skip('should correctly set nested child function refs', () => {
+	it('should correctly set nested child function refs', () => {
 		const ref = sinon.spy();
 		const App = ({ open }) =>
 			open ? (
@@ -457,9 +457,10 @@ describe('refs', () => {
 		ref.resetHistory();
 
 		render(<App open />, scratch);
-		expect(ref).to.have.been.calledOnce.and.calledWith(
-			scratch.firstElementChild.firstElementChild
-		);
+		expect(ref.args).to.deep.equal([
+			[null],
+			[scratch.firstElementChild.firstElementChild]
+		]);
 	});
 
 	it('should correctly unmount refs', () => {

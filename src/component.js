@@ -12,7 +12,8 @@ import { getParentContext, getParentDom } from './tree';
 export const rendererState = {
 	_parentDom: null,
 	_context: {},
-	_commitQueue: []
+	_commitQueue: [],
+	_refQueue: []
 };
 
 /**

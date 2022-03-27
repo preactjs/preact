@@ -11,6 +11,7 @@ import { mount } from './diff/mount';
 import { patch } from './diff/patch';
 import { createInternal } from './tree';
 import { rendererState } from './component';
+import { applyRef } from './diff/refs';
 
 /**
  *
@@ -56,6 +57,10 @@ export function createRoot(parentDom) {
 			rootInternal._context = {};
 
 			mount(rootInternal, vnode, firstChild);
+			let ref;
+			while ((ref = rendererState._refQueue.shift())) {
+				applyRef(ref.internal.ref, ref.target, ref.internal);
+			}
 		}
 
 		// Flush all queued effects
