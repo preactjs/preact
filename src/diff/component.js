@@ -8,11 +8,7 @@ import { rendererState } from '../component';
  * @param {import('../internal').VNode} newVNode The new virtual node
  * @returns {import('../internal').ComponentChildren} the component's children
  */
-export function renderFunctionComponent(
-	internal,
-	newVNode,
-	componentContext
-) {
+export function renderFunctionComponent(internal, newVNode, componentContext) {
 	/** @type {import('../internal').Component} */
 	let c;
 
@@ -69,11 +65,7 @@ export function renderFunctionComponent(
  * @param {import('../internal').VNode} newVNode The new virtual node
  * @returns {import('../internal').ComponentChildren} the component's children
  */
-export function renderClassComponent(
-	internal,
-	newVNode,
-	componentContext
-) {
+export function renderClassComponent(internal, newVNode, componentContext) {
 	/** @type {import('../internal').Component} */
 	let c;
 	let isNew, oldProps, oldState, snapshot;

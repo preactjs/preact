@@ -92,11 +92,7 @@ export function patch(internal, vnode) {
 			let renderResult;
 
 			if (internal.flags & TYPE_CLASS) {
-				renderResult = renderClassComponent(
-					internal,
-					vnode,
-					componentContext
-				);
+				renderResult = renderClassComponent(internal, vnode, componentContext);
 			} else {
 				renderResult = renderFunctionComponent(
 					internal,
@@ -134,11 +130,7 @@ export function patch(internal, vnode) {
 						? null
 						: getDomSibling(internal);
 
-				mountChildren(
-					internal,
-					renderResult,
-					siblingDom
-				);
+				mountChildren(internal, renderResult, siblingDom);
 			} else {
 				patchChildren(internal, renderResult);
 			}
@@ -229,7 +221,7 @@ function patchElement(internal, vnode) {
 		rendererState._parentDom = dom;
 		patchChildren(
 			internal,
-			newChildren && Array.isArray(newChildren) ? newChildren : [newChildren],
+			newChildren && Array.isArray(newChildren) ? newChildren : [newChildren]
 		);
 		rendererState._parentDom = prevParentDom;
 	}

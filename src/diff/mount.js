@@ -1,4 +1,3 @@
-import { applyRef } from './refs';
 import {
 	TYPE_COMPONENT,
 	TYPE_ELEMENT,
