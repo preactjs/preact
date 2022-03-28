@@ -154,7 +154,7 @@ export function patchChildren(internal, children) {
 
 	let ref;
 	while ((ref = rendererState._refQueue.shift())) {
-		applyRef(ref.internal.ref, ref.target, ref.internal);
+		applyRef(ref._internal.ref, ref._target, ref._internal);
 	}
 
 	// Set refs only after unmount

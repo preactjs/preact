@@ -59,7 +59,7 @@ export function createRoot(parentDom) {
 			mount(rootInternal, vnode, firstChild);
 			let ref;
 			while ((ref = rendererState._refQueue.shift())) {
-				applyRef(ref.internal.ref, ref.target, ref.internal);
+				applyRef(ref._internal.ref, ref._target, ref._internal);
 			}
 		}
 

@@ -326,8 +326,8 @@ export function mountChildren(internal, children, startDom) {
 
 		if (childInternal.ref) {
 			rendererState._refQueue.push({
-				internal: childInternal,
-				target: childInternal._component || newDom
+				_internal: childInternal,
+				_target: childInternal._component || newDom
 			});
 		}
 	}
