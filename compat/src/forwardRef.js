@@ -27,16 +27,10 @@ export function forwardRef(fn) {
 	// We always have ref in props.ref, except for
 	// mobx-react. It will call this function directly
 	// and always pass ref as the second argument.
-	function Forwarded(props, ref) {
+	function Forwarded(props) {
 		let clone = assign({}, props);
 		delete clone.ref;
-		ref = props.ref || ref;
-		return fn(
-			clone,
-			!ref || (typeof ref === 'object' && Object.keys(ref).length === 0)
-				? null
-				: ref
-		);
+		return fn(clone, props.ref);
 	}
 
 	// mobx-react checks for this being present
