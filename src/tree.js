@@ -187,19 +187,9 @@ export function getParentContext(internal) {
  * @returns {import('./internal').PreactElement}
  */
 export function getParentDom(internal) {
-	let parent = internal;
-
-	// if this is a Root internal, return its parent DOM:
-	if (parent.flags & TYPE_ROOT) {
-		return parent.props._parentDom;
-	}
-
-	// walk up the tree to find the nearest DOM or Root Internal:
-	while ((parent = parent._parent)) {
-		if (parent.flags & TYPE_ROOT) {
-			return parent.props._parentDom;
-		} else if (parent.flags & TYPE_ELEMENT) {
-			return parent._dom;
-		}
-	}
+	let parent = internal._parent;
+	if (internal.flags & TYPE_ROOT) return internal.props._parentDom;
+	return (
+		parent && (parent.flags & TYPE_ELEMENT ? parent._dom : getParentDom(parent))
+	);
 }
