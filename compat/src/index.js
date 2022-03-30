@@ -134,12 +134,41 @@ const useDeferredValue = val => {
 	return value.current;
 };
 
+const useSyncExternalStore = (subscribe, getSnapshot) => {
+	const value = getSnapshot();
+
+	const [state, setState] = useState(getSnapshot);
+
+	const newState = getSnapshot();
+	if (state !== newState) {
+		setState(newState);
+	}
+
+	useLayoutEffect(() => {
+		if (value !== state) {
+			setState(state);
+		}
+	}, [value, getSnapshot]);
+
+	useEffect(() => {
+		return subscribe(() => {
+			const newValue = getSnapshot();
+			if (newValue !== state) {
+				setState(newValue);
+			}
+		});
+	}, [subscribe, getSnapshot, state]);
+
+	return state;
+};
+
 export * from 'preact/hooks';
 export {
 	useDeferredValue,
+	useSyncExternalStore,
 	useTransition,
 	startTransition,
-	// Missing: useId, useSyncExternalStore and useInsertionEffect
+	// Missing: useId and useInsertionEffect
 	version,
 	Children,
 	render,
@@ -171,9 +200,10 @@ export {
 // React copies the named exports to the default one.
 export default {
 	useDeferredValue,
+	useSyncExternalStore,
 	useTransition,
 	startTransition,
-	// Missing: useId, useSyncExternalStore and useInsertionEffect
+	// Missing: useId and useInsertionEffect
 	useState,
 	useReducer,
 	useEffect,
