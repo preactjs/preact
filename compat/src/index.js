@@ -117,8 +117,29 @@ const flushSync = (callback, arg) => callback(arg);
  */
 const StrictMode = Fragment;
 
+const startTransition = callback => callback();
+const useTransition = () => {
+	const [isPending, setIsPending] = useState(false);
+
+	const start = cb => {
+		setIsPending(true);
+		cb();
+		setIsPending(false);
+	};
+	return [isPending, start];
+};
+
+const useDeferredValue = val => {
+	const value = useRef(val);
+	return value.current;
+};
+
 export * from 'preact/hooks';
 export {
+	useDeferredValue,
+	useTransition,
+	startTransition,
+	// Missing: useId, useSyncExternalStore and useInsertionEffect
 	version,
 	Children,
 	render,
@@ -149,6 +170,10 @@ export {
 
 // React copies the named exports to the default one.
 export default {
+	useDeferredValue,
+	useTransition,
+	startTransition,
+	// Missing: useId, useSyncExternalStore and useInsertionEffect
 	useState,
 	useReducer,
 	useEffect,
