@@ -8,7 +8,8 @@ import React, {
 	useState,
 	useRef,
 	useImperativeHandle,
-	createPortal
+	createPortal,
+	Component
 } from 'preact/compat';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { setupRerender, act } from 'preact/test-utils';
@@ -455,6 +456,46 @@ describe('forwardRef', () => {
 
 		// eslint-disable-next-line new-cap
 		render(App({}, null), scratch);
+		expect(actual).to.equal(null);
+	});
+
+	// Issue #3483
+	it('should allow for multiple refs', () => {
+		let actual;
+		const App = forwardRef((_, ref) => {
+			actual = ref;
+			return <div />;
+		});
+
+		const ref = { a: createRef(), b: createRef() };
+		// eslint-disable-next-line new-cap
+		render(<App ref={ref} />, scratch);
+		expect(actual).to.equal(ref);
+	});
+
+	it('should not leak context into refs', () => {
+		class Provider extends Component {
+			getChildContext() {
+				return { foo: 2 };
+			}
+			render() {
+				return this.props.children;
+			}
+		}
+
+		let actual;
+		const Forwarded = forwardRef((_, ref) => {
+			actual = ref;
+			return <div />;
+		});
+
+		render(
+			<Provider>
+				<Forwarded />
+			</Provider>,
+			scratch
+		);
+
 		expect(actual).to.equal(null);
 	});
 });
