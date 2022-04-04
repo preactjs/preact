@@ -1,4 +1,4 @@
-import Preact, { render, hydrate } from 'preact/compat'
+import { render, hydrate } from 'preact/compat'
 
 export function createRoot(container) {
 	return {
@@ -11,6 +11,3 @@ export function createRoot(container) {
 export function hydrateRoot(container, children) {
 	return hydrate(children, container);
 }
-
-export default Preact;
-export * from 'preact/compat';

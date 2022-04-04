@@ -11,5 +11,3 @@ exports.createRoot = function(container) {
 exports.hydrateRoot = function(container, children) {
 	return hydrate(children, container);
 };
-
-module.exports = require('preact/compat');
