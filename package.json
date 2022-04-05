@@ -58,6 +58,10 @@
 			"import": "./jsx-runtime/dist/jsxRuntime.mjs",
 			"require": "./jsx-runtime/dist/jsxRuntime.js"
 		},
+		"./compat/client": {
+			"import": "./compat/client.mjs",
+			"require": "./compat/client.js"
+		},
 		"./compat/server": {
 			"import": "./compat/server.mjs",
 			"require": "./compat/server.js"
@@ -190,6 +194,8 @@
 		"dist",
 		"compat/dist",
 		"compat/src",
+		"compat/client.js",
+		"compat/client.mjs",
 		"compat/server.js",
 		"compat/server.mjs",
 		"compat/scheduler.js",
