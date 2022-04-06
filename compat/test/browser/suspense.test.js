@@ -2282,7 +2282,7 @@ describe('suspense', () => {
 		});
 	});
 
-	it.only('should cleanup pending effects', () => {
+	it('should cleanup pending effects', () => {
 		const [Lazy, resolve] = createLazy();
 		const effects = [];
 		const cleanups = [];
