@@ -19,6 +19,12 @@ import {
 	useContext,
 	useDebugValue
 } from 'preact/hooks';
+import {
+	useDeferredValue,
+	useInsertionEffect,
+	useSyncExternalStore,
+	useTransition
+} from './react-18-hooks';
 import { PureComponent } from './PureComponent';
 import { memo } from './memo';
 import { forwardRef } from './forwardRef';
@@ -119,6 +125,10 @@ const StrictMode = Fragment;
 
 export * from 'preact/hooks';
 export {
+	useDeferredValue,
+	useInsertionEffect,
+	useSyncExternalStore,
+	useTransition,
 	version,
 	Children,
 	render,
@@ -149,6 +159,10 @@ export {
 
 // React copies the named exports to the default one.
 export default {
+	useDeferredValue,
+	useInsertionEffect,
+	useSyncExternalStore,
+	useTransition,
 	useState,
 	useReducer,
 	useEffect,
