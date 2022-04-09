@@ -139,8 +139,8 @@ declare namespace React {
 	): void;
 	export const unstable_now: () => number;
 
-	export function useDefferedValue<T = any>(val: T): T;
-	export function useInsertionEffect(cb: () => void, deps: any[]): void;
+	export function useDeferredValue<T = any>(val: T): T;
+	export function useInsertionEffect(cb: () => void, deps?: any[]): void;
 	export function useTransition(): [boolean, (cb: () => void) => void];
 	export function useSyncExternalStore<T = any>(
 		subscribe: () => () => void,
