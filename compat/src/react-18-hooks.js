@@ -34,24 +34,18 @@ export const useInsertionEffect = useEffect;
 export function useSyncExternalStore(subscribe, getSnapshot) {
 	const [state, setState] = useState(getSnapshot);
 	const value = getSnapshot();
-	if (state !== value) {
-		setState(value);
-	}
 
 	useLayoutEffect(() => {
 		if (value !== state) {
-			setState(state);
+			setState(value);
 		}
 	}, [value]);
 
 	useEffect(() => {
 		return subscribe(() => {
-			const newValue = getSnapshot();
-			if (newValue !== state) {
-				setState(newValue);
-			}
+			setState(getSnapshot());
 		});
-	}, [subscribe, getSnapshot, state]);
+	}, [subscribe, getSnapshot]);
 
 	return state;
 }
