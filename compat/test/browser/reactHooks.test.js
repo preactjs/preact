@@ -97,5 +97,60 @@ describe('React-18-hooks', () => {
 			expect(subscribe).to.be.calledOnce;
 			expect(getSnapshot).to.be.calledTwice;
 		});
+
+		it('subscribes and rerenders when called', () => {
+			let flush;
+			const subscribe = sinon.spy(cb => {
+				flush = cb;
+			});
+			let called = false;
+			const getSnapshot = sinon.spy(() => {
+				if (called) {
+					return 'hello new world';
+				}
+
+				return 'hello world';
+			});
+
+			const App = () => {
+				const value = useSyncExternalStore(subscribe, getSnapshot);
+				return <p>{value}</p>;
+			};
+
+			act(() => {
+				render(<App />, scratch);
+			});
+			expect(scratch.innerHTML).to.equal('<p>hello world</p>');
+			expect(subscribe).to.be.calledOnce;
+			expect(getSnapshot).to.be.calledTwice;
+
+			called = true;
+			flush();
+			rerender();
+
+			expect(scratch.innerHTML).to.equal('<p>hello new world</p>');
+		});
+
+		it('uses new value if the first one is changed', () => {
+			const subscribe = sinon.spy();
+			let calls = 0;
+			const getSnapshot = sinon.spy(() => {
+				if (calls === 0) {
+					calls++;
+					return 'hello earth';
+				}
+				return 'hello world';
+			});
+
+			const App = () => {
+				const value = useSyncExternalStore(subscribe, getSnapshot);
+				return <p>{value}</p>;
+			};
+
+			act(() => {
+				render(<App />, scratch);
+			});
+			expect(scratch.innerHTML).to.equal('<p>hello world</p>');
+		});
 	});
 });
