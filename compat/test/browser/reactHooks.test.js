@@ -56,7 +56,7 @@ describe('React-18-hooks', () => {
 	});
 
 	describe('useTransition', () => {
-		it('runs transitions', async () => {
+		it('runs transitions', () => {
 			const spy = sinon.spy();
 
 			let go;
@@ -72,10 +72,6 @@ describe('React-18-hooks', () => {
 			go(spy);
 			rerender();
 			expect(spy).to.be.calledOnce;
-			expect(scratch.innerHTML).to.equal('<p>Pending: yes</p>');
-
-			await new Promise(res => setTimeout(res, 10));
-			rerender();
 			expect(scratch.innerHTML).to.equal('<p>Pending: no</p>');
 		});
 	});
