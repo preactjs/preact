@@ -1,32 +1,11 @@
-import { useState, useLayoutEffect, useEffect } from 'preact/hooks';
-
-/**
- * Asynchronously schedule a callback
- * @type {(cb: () => void) => void}
- */
-/* istanbul ignore next */
-// Note the following line isn't tree-shaken by rollup cuz of rollup/rollup#2566
-const defer =
-	typeof Promise == 'function'
-		? Promise.prototype.then.bind(Promise.resolve())
-		: setTimeout;
+import { useState, useLayoutEffect, useEffect, useCallback } from 'preact/hooks';
 
 export function useDeferredValue(val) {
 	return val;
 }
 
 export function useTransition() {
-	const [isPending, setIsPending] = useState(false);
-
-	const start = cb => {
-		setIsPending(true);
-		cb();
-		defer(() => {
-			setIsPending(false);
-		});
-	};
-
-	return [isPending, start];
+  return [false, useCallback(cb => { cb(); }, [])];
 }
 
 export const useInsertionEffect = useEffect;
