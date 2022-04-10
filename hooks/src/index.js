@@ -172,6 +172,8 @@ export function useState(initialState) {
  * @param {(initialState: any) => void} [init]
  * @returns {[ any, (state: any) => void ]}
  */
+// TODO: make this interruptable, have a pending state which can be reset
+// same for the initial value during mount
 export function useReducer(reducer, initialState, init) {
 	/** @type {import('./internal').ReducerHookState} */
 	const hookState = getHookState(currentIndex++, 2);
