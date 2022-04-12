@@ -12,7 +12,7 @@ import { mount } from './mount';
 import { patch } from './patch';
 import { unmount } from './unmount';
 import { createInternal, getDomSibling } from '../tree';
-import { rendererState } from '../component';
+import { getCurrentParentDom } from './renderer';
 
 /**
  * Update an internal with new children.
@@ -72,11 +72,7 @@ export function patchChildren(internal, children) {
 			childInternal = createInternal(childVNode, internal);
 
 			// We are mounting a new VNode
-			mount(
-				childInternal,
-				childVNode,
-				getDomSibling(internal, skewedIndex)
-			);
+			mount(childInternal, childVNode, getDomSibling(internal, skewedIndex));
 		}
 		// If this node suspended during hydration, and no other flags are set:
 		// @TODO: might be better to explicitly check for MODE_ERRORED here.
@@ -85,11 +81,7 @@ export function patchChildren(internal, children) {
 			(MODE_HYDRATE | MODE_SUSPENDED)
 		) {
 			// We are resuming the hydration of a VNode
-			mount(
-				childInternal,
-				childVNode,
-				childInternal._dom
-			);
+			mount(childInternal, childVNode, childInternal._dom);
 		} else {
 			// Morph the old element into the new one, but don't append it to the dom yet
 			patch(childInternal, childVNode);
@@ -102,7 +94,7 @@ export function patchChildren(internal, children) {
 
 			// Perform insert of new dom
 			if (childInternal.flags & TYPE_DOM) {
-				rendererState._parentDom.insertBefore(
+				getCurrentParentDom().insertBefore(
 					childInternal._dom,
 					getDomSibling(internal, skewedIndex)
 				);
@@ -136,13 +128,9 @@ export function patchChildren(internal, children) {
 
 			let nextSibling = getDomSibling(internal, skewedIndex + 1);
 			if (childInternal.flags & TYPE_DOM) {
-				rendererState._parentDom.insertBefore(childInternal._dom, nextSibling);
+				getCurrentParentDom().insertBefore(childInternal._dom, nextSibling);
 			} else {
-				insertComponentDom(
-					childInternal,
-					nextSibling,
-					rendererState._parentDom
-				);
+				insertComponentDom(childInternal, nextSibling, getCurrentParentDom());
 			}
 		}
 

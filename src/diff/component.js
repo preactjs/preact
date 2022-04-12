@@ -1,6 +1,6 @@
 import options from '../options';
 import { DIRTY_BIT, FORCE_UPDATE, SKIP_CHILDREN } from '../constants';
-import { rendererState } from '../component';
+import { getCurrentContext, setCurrentContext } from './renderer';
 
 /**
  * Render a function component
@@ -8,11 +8,7 @@ import { rendererState } from '../component';
  * @param {import('../internal').VNode} newVNode The new virtual node
  * @returns {import('../internal').ComponentChildren} the component's children
  */
-export function renderFunctionComponent(
-	internal,
-	newVNode,
-	componentContext
-) {
+export function renderFunctionComponent(internal, newVNode, componentContext) {
 	/** @type {import('../internal').Component} */
 	let c;
 
@@ -53,10 +49,12 @@ export function renderFunctionComponent(
 	}
 	internal.flags &= ~DIRTY_BIT;
 	if (c.getChildContext != null) {
-		rendererState._context = internal._context = Object.assign(
-			{},
-			rendererState._context,
-			c.getChildContext()
+		setCurrentContext(
+			(internal._context = Object.assign(
+				{},
+				getCurrentContext(),
+				c.getChildContext()
+			))
 		);
 	}
 
@@ -69,11 +67,7 @@ export function renderFunctionComponent(
  * @param {import('../internal').VNode} newVNode The new virtual node
  * @returns {import('../internal').ComponentChildren} the component's children
  */
-export function renderClassComponent(
-	internal,
-	newVNode,
-	componentContext
-) {
+export function renderClassComponent(internal, newVNode, componentContext) {
 	/** @type {import('../internal').Component} */
 	let c;
 	let isNew, oldProps, oldState, snapshot;
@@ -163,10 +157,12 @@ export function renderClassComponent(
 	c.state = c._nextState;
 
 	if (c.getChildContext != null) {
-		rendererState._context = internal._context = Object.assign(
-			{},
-			rendererState._context,
-			c.getChildContext()
+		setCurrentContext(
+			(internal._context = Object.assign(
+				{},
+				getCurrentContext(),
+				c.getChildContext()
+			))
 		);
 	}
 

@@ -21,7 +21,13 @@ import {
 import { getDomSibling } from '../tree';
 import { mountChildren } from './mount';
 import { Fragment } from '../create-element';
-import { rendererState } from '../component';
+import {
+	commitQueue,
+	getCurrentContext,
+	getCurrentParentDom,
+	setCurrentContext,
+	setCurrentParentDom
+} from './renderer';
 
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
@@ -50,16 +56,15 @@ export function patch(internal, vnode) {
 	// Root nodes render their children into a specific parent DOM element.
 	// They can occur anywhere in the tree, can be nested, and currently allow reparenting during patches.
 	// @TODO: Decide if we actually want to support silent reparenting during patch - is it worth the bytes?
-	let prevParentDom = rendererState._parentDom;
+	let prevParentDom = getCurrentParentDom();
 	if (flags & TYPE_ROOT) {
-		rendererState._parentDom = vnode.props._parentDom;
+		let newParentDom = vnode.props._parentDom;
+		setCurrentParentDom(newParentDom);
 
 		if (internal.props._parentDom !== vnode.props._parentDom) {
 			let nextSibling =
-				rendererState._parentDom == prevParentDom
-					? getDomSibling(internal)
-					: null;
-			insertComponentDom(internal, nextSibling, rendererState._parentDom);
+				newParentDom == prevParentDom ? getDomSibling(internal) : null;
+			insertComponentDom(internal, nextSibling, newParentDom);
 		}
 	}
 
@@ -77,26 +82,22 @@ export function patch(internal, vnode) {
 				internal.flags ^= MODE_PENDING_ERROR | MODE_RERENDERING_ERROR;
 			}
 
-			let prevContext = rendererState._context;
+			let prevContext = getCurrentContext();
 			// Necessary for createContext api. Setting this property will pass
 			// the context value as `this.context` just for this component.
 			let tmp = vnode.type.contextType;
-			let provider = tmp && rendererState._context[tmp._id];
+			let provider = tmp && prevContext[tmp._id];
 			let componentContext = tmp
 				? provider
 					? provider.props.value
 					: tmp._defaultValue
-				: rendererState._context;
+				: prevContext;
 			let isNew = !internal || !internal._component;
 
 			let renderResult;
 
 			if (internal.flags & TYPE_CLASS) {
-				renderResult = renderClassComponent(
-					internal,
-					vnode,
-					componentContext
-				);
+				renderResult = renderClassComponent(internal, vnode, componentContext);
 			} else {
 				renderResult = renderFunctionComponent(
 					internal,
@@ -134,11 +135,7 @@ export function patch(internal, vnode) {
 						? null
 						: getDomSibling(internal);
 
-				mountChildren(
-					internal,
-					renderResult,
-					siblingDom
-				);
+				mountChildren(internal, renderResult, siblingDom);
 			} else {
 				patchChildren(internal, renderResult);
 			}
@@ -147,13 +144,13 @@ export function patch(internal, vnode) {
 				internal._commitCallbacks != null &&
 				internal._commitCallbacks.length
 			) {
-				rendererState._commitQueue.push(internal);
+				commitQueue.push(internal);
 			}
 
-			rendererState._parentDom = prevParentDom;
+			setCurrentParentDom(prevParentDom);
 			// In the event this subtree creates a new context for its children, restore
 			// the previous context for its siblings
-			rendererState._context = prevContext;
+			setCurrentContext(prevContext);
 		} catch (e) {
 			// @TODO: assign a new VNode ID here? Or NaN?
 			// newVNode._vnodeId = 0;
@@ -225,13 +222,13 @@ function patchElement(internal, vnode) {
 		internal._children = null;
 	} else {
 		if (oldHtml) dom.innerHTML = '';
-		const prevParentDom = rendererState._parentDom;
-		rendererState._parentDom = dom;
+		const prevParentDom = getCurrentParentDom();
+		setCurrentParentDom(dom);
 		patchChildren(
 			internal,
-			newChildren && Array.isArray(newChildren) ? newChildren : [newChildren],
+			newChildren && Array.isArray(newChildren) ? newChildren : [newChildren]
 		);
-		rendererState._parentDom = prevParentDom;
+		setCurrentParentDom(prevParentDom);
 	}
 
 	if (newProps.checked != null && dom._isControlled) {

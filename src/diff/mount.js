@@ -17,7 +17,14 @@ import { setProperty } from './props';
 import { renderClassComponent, renderFunctionComponent } from './component';
 import { createInternal } from '../tree';
 import options from '../options';
-import { rendererState } from '../component';
+import {
+	commitQueue,
+	getCurrentContext,
+	getCurrentParentDom,
+	setCurrentContext,
+	setCurrentParentDom
+} from './renderer';
+
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
  * @param {import('../internal').Internal} internal The Internal node to mount
@@ -37,37 +44,34 @@ export function mount(internal, newVNode, startDom) {
 			// the page. Root nodes can occur anywhere in the tree and not just at the
 			// top.
 			let prevStartDom = startDom;
-			let prevParentDom = rendererState._parentDom;
+			let prevParentDom = getCurrentParentDom();
 			if (internal.flags & TYPE_ROOT) {
-				rendererState._parentDom = newVNode.props._parentDom;
+				let newParentDom = newVNode.props._parentDom;
+				setCurrentParentDom(newParentDom);
 
 				// Note: this is likely always true because we are inside mount()
-				if (rendererState._parentDom !== prevParentDom) {
+				if (newParentDom !== prevParentDom) {
 					startDom = null;
 				}
 			}
 
-			let prevContext = rendererState._context;
+			let prevContext = getCurrentContext();
 			// Necessary for createContext api. Setting this property will pass
 			// the context value as `this.context` just for this component.
 			let tmp = newVNode.type.contextType;
-			let provider = tmp && rendererState._context[tmp._id];
+			let provider = tmp && prevContext[tmp._id];
 			let componentContext = tmp
 				? provider
 					? provider.props.value
 					: tmp._defaultValue
-				: rendererState._context;
+				: prevContext;
 
 			if (provider) provider._subs.add(internal);
 
 			let renderResult;
 
 			if (internal.flags & TYPE_CLASS) {
-				renderResult = renderClassComponent(
-					internal,
-					null,
-					componentContext
-				);
+				renderResult = renderClassComponent(internal, null, componentContext);
 			} else {
 				renderResult = renderFunctionComponent(
 					internal,
@@ -91,23 +95,19 @@ export function mount(internal, newVNode, startDom) {
 					renderResult = [renderResult];
 				}
 
-				nextDomSibling = mountChildren(
-					internal,
-					renderResult,
-					startDom
-				);
+				nextDomSibling = mountChildren(internal, renderResult, startDom);
 			}
 
 			if (
 				internal._commitCallbacks != null &&
 				internal._commitCallbacks.length
 			) {
-				rendererState._commitQueue.push(internal);
+				commitQueue.push(internal);
 			}
 
 			if (
 				internal.flags & TYPE_ROOT &&
-				prevParentDom !== rendererState._parentDom
+				prevParentDom !== getCurrentParentDom()
 			) {
 				// If we just mounted a root node/Portal, and it changed the parentDom
 				// of it's children, then we need to resume the diff from it's previous
@@ -117,10 +117,10 @@ export function mount(internal, newVNode, startDom) {
 				nextDomSibling = prevStartDom;
 			}
 
-			rendererState._parentDom = prevParentDom;
+			setCurrentParentDom(prevParentDom);
 			// In the event this subtree creates a new context for its children, restore
 			// the previous context for its siblings
-			rendererState._context = prevContext;
+			setCurrentContext(prevContext);
 		} else {
 			// @TODO: we could just assign this as internal.dom here
 			let hydrateDom =
@@ -269,14 +269,14 @@ function mountElement(internal, dom) {
 				dom.innerHTML = newHtml.__html;
 			}
 		} else if (newChildren != null) {
-			const prevParentDom = rendererState._parentDom;
-			rendererState._parentDom = dom;
+			const prevParentDom = getCurrentParentDom();
+			setCurrentParentDom(dom);
 			mountChildren(
 				internal,
 				Array.isArray(newChildren) ? newChildren : [newChildren],
 				isNew ? null : dom.firstChild
 			);
-			rendererState._parentDom = prevParentDom;
+			setCurrentParentDom(prevParentDom);
 		}
 
 		// (as above, don't diff props during hydration)
@@ -295,11 +295,7 @@ function mountElement(internal, dom) {
  * @param {import('../internal').ComponentChild[]} children
  * @param {import('../internal').PreactNode} startDom
  */
-export function mountChildren(
-	internal,
-	children,
-	startDom
-) {
+export function mountChildren(internal, children, startDom) {
 	let internalChildren = (internal._children = []),
 		i,
 		childVNode,
@@ -321,11 +317,7 @@ export function mountChildren(
 		internalChildren[i] = childInternal;
 
 		// Morph the old element into the new one, but don't append it to the dom yet
-		mountedNextChild = mount(
-			childInternal,
-			childVNode,
-			startDom
-		);
+		mountedNextChild = mount(childInternal, childVNode, startDom);
 
 		newDom = childInternal._dom;
 
@@ -338,7 +330,7 @@ export function mountChildren(
 			// The DOM the diff should begin with is now startDom (since we inserted
 			// newDom before startDom) so ignore mountedNextChild and continue with
 			// startDom
-			rendererState._parentDom.insertBefore(newDom, startDom);
+			getCurrentParentDom().insertBefore(newDom, startDom);
 		}
 
 		if (childInternal.ref) {

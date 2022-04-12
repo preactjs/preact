@@ -1,19 +1,13 @@
-import { commitRoot } from './diff/commit';
+import {
+	commitRoot,
+	setCurrentContext,
+	setCurrentParentDom
+} from './diff/renderer';
 import options from './options';
 import { createVNode, Fragment } from './create-element';
 import { patch } from './diff/patch';
 import { DIRTY_BIT, FORCE_UPDATE, MODE_UNMOUNTING } from './constants';
 import { getParentContext, getParentDom } from './tree';
-
-/**
- * The render queue
- * @type {import('./internal').RendererState}
- */
-export const rendererState = {
-	_parentDom: null,
-	_context: {},
-	_commitQueue: []
-};
 
 /**
  * Base Component class. Provides `setState()` and `forceUpdate()`, which
@@ -108,9 +102,10 @@ function rerender(internal) {
 			0
 		);
 
-		rendererState._context = getParentContext(internal);
-		rendererState._commitQueue = [];
-		rendererState._parentDom = getParentDom(internal);
+		// set up renderer state
+		setCurrentContext(getParentContext(internal));
+		setCurrentParentDom(getParentDom(internal));
+
 		patch(internal, vnode);
 		commitRoot(internal);
 	}
