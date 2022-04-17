@@ -34,6 +34,7 @@ export function diff(
 	isHydrating
 ) {
 	let tmp,
+		c,
 		newType = newVNode.type;
 
 	// When passing through createElement it assigns the object
@@ -49,15 +50,15 @@ export function diff(
 		excessDomChildren = [oldDom];
 	}
 
-	if (typeof newType === 'function' && oldVNode._component) {
-		newVNode._component = oldVNode._component;
+	if (oldVNode._component) {
+		c = newVNode._component = oldVNode._component;
 	}
 
 	if ((tmp = options._diff)) tmp(newVNode, oldVNode);
 
 	try {
 		outer: if (typeof newType == 'function') {
-			let c, isNew, oldProps, oldState, snapshot, clearProcessingException;
+			let isNew, oldProps, oldState, snapshot, clearProcessingException;
 			let newProps = newVNode.props;
 
 			// Necessary for createContext api. Setting this property will pass
@@ -72,7 +73,6 @@ export function diff(
 
 			// Get component and set it to `c`
 			if (oldVNode._component) {
-				c = newVNode._component = oldVNode._component;
 				clearProcessingException = c._processingException = c._pendingError;
 			} else {
 				// Instantiate the new component
