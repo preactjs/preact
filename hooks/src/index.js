@@ -25,29 +25,23 @@ options._diff = (vnode, oldVNode) => {
 	currentComponent = null;
 
 	if (vnode._component && vnode._component.__hooks) {
-		const hasNextStates = vnode._component.__hooks._list.some(
-			hookState => hookState._nextValue
-		);
 		let hasBail = false;
 		let hasDiff = false;
+
 		vnode._component.__hooks._list.forEach(hookState => {
 			if (
 				hookState._nextValue &&
 				hookState._nextValue[0] === hookState._value[0]
 			) {
-				hookState._nextValue = undefined;
 				hasBail = true;
-			} else if (
-				hookState._nextValue &&
-				hookState._nextValue[0] !== hookState._value[0]
-			) {
+			} else if (hookState._nextValue) {
 				hookState._value = hookState._nextValue;
-				hookState._nextValue = undefined;
 				hasDiff = true;
 			}
+			hookState._nextValue = undefined;
 		});
 
-		if (hasBail && !hasDiff && hasNextStates && oldVNode) {
+		if (hasBail && !hasDiff && oldVNode) {
 			vnode._original = oldVNode._original;
 		}
 	}
@@ -233,7 +227,7 @@ export function useImperativeHandle(ref, createHandle, args) {
 				return () => ref(null);
 			} else if (ref) {
 				ref.current = createHandle();
-				return () => ref.current = null;
+				return () => (ref.current = null);
 			}
 		},
 		args == null ? args : args.concat(ref)
