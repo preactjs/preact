@@ -216,6 +216,9 @@
 		"jsx-runtime/dist",
 		"jsx-runtime/src",
 		"jsx-runtime/package.json",
+		"server/src",
+		"server/package.json",
+		"server/dist",
 		"test-utils/src",
 		"test-utils/package.json",
 		"test-utils/dist"
