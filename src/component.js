@@ -1,13 +1,9 @@
-import {
-	commitRoot,
-	setCurrentContext,
-	setCurrentParentDom
-} from './diff/renderer';
+import { commitRoot } from './diff/renderer';
 import options from './options';
 import { createVNode, Fragment } from './create-element';
 import { patch } from './diff/patch';
 import { DIRTY_BIT, FORCE_UPDATE, MODE_UNMOUNTING } from './constants';
-import { getParentContext, getParentDom } from './tree';
+import { getParentDom } from './tree';
 
 /**
  * Base Component class. Provides `setState()` and `forceUpdate()`, which
@@ -102,11 +98,7 @@ function rerender(internal) {
 			0
 		);
 
-		// set up renderer state
-		setCurrentContext(getParentContext(internal));
-		setCurrentParentDom(getParentDom(internal));
-
-		patch(internal, vnode);
+		patch(internal, vnode, getParentDom(internal));
 		commitRoot(internal);
 	}
 }

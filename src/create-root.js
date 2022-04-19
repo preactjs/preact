@@ -4,11 +4,7 @@ import {
 	MODE_SVG,
 	UNDEFINED
 } from './constants';
-import {
-	commitRoot,
-	setCurrentContext,
-	setCurrentParentDom
-} from './diff/renderer';
+import { commitRoot } from './diff/renderer';
 import { createElement, Fragment } from './create-element';
 import options from './options';
 import { mount } from './diff/mount';
@@ -33,11 +29,8 @@ export function createRoot(parentDom) {
 		firstChild =
 			/** @type {import('./internal').PreactElement} */ (parentDom.firstChild);
 
-		setCurrentContext({});
-		setCurrentParentDom(parentDom);
-
 		if (rootInternal) {
-			patch(rootInternal, vnode);
+			patch(rootInternal, vnode, parentDom);
 		} else {
 			rootInternal = createInternal(vnode);
 
@@ -56,7 +49,7 @@ export function createRoot(parentDom) {
 
 			rootInternal._context = {};
 
-			mount(rootInternal, vnode, firstChild);
+			mount(rootInternal, vnode, parentDom, firstChild);
 		}
 
 		// Flush all queued effects
