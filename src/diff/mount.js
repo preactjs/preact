@@ -10,151 +10,233 @@ import {
 	TYPE_CLASS,
 	MODE_ERRORED,
 	TYPE_ROOT,
-	MODE_SVG
+	MODE_SVG,
+	DIRTY_BIT
 } from '../constants';
 import options from '../options';
 import { normalizeToVNode, Fragment } from '../create-element';
 import { setProperty } from './props';
-import { renderClassComponent, renderFunctionComponent } from './component';
 import { createInternal, getParentContext } from '../tree';
 import { commitQueue } from './renderer';
 
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
  * @param {import('../internal').Internal} internal The Internal node to mount
- * @param {import('../internal').VNode | string} newVNode The new virtual node
+ * @param {import('../internal').VNode | string} vnode The new virtual node
  * @param {import('../internal').PreactElement} parentDom The element into which this subtree should be inserted
  * @param {import('../internal').PreactNode} startDom
  * @returns {import('../internal').PreactNode | null} pointer to the next DOM node to be hydrated (or null)
  */
-export function mount(internal, newVNode, parentDom, startDom) {
-	if (options._diff) options._diff(internal, newVNode);
+export function mount(internal, vnode, parentDom, startDom) {
+	if (options._diff) options._diff(internal, vnode);
+
+	let flags = internal.flags;
+	let props = internal.props;
 
 	/** @type {import('../internal').PreactNode} */
 	let nextDomSibling;
 
-	try {
-		if (internal.flags & TYPE_COMPONENT) {
-			// Root nodes signal that an attempt to render into a specific DOM node on
-			// the page. Root nodes can occur anywhere in the tree and not just at the
-			// top.
-			let prevStartDom = startDom;
-			let prevParentDom = parentDom;
-			if (internal.flags & TYPE_ROOT) {
-				parentDom = newVNode.props._parentDom;
+	// @TODO: could just assign this as internal.dom here?
+	let hydrateDom =
+		flags & (MODE_HYDRATE | MODE_MUTATIVE_HYDRATE) ? startDom : null;
 
-				// Note: this is likely always true because we are inside mount()
-				if (parentDom !== prevParentDom) {
-					startDom = null;
+	// Root nodes signal that an attempt to render into a specific DOM node on
+	// the page. Root nodes can occur anywhere in the tree and not just at the
+	// top.
+	let prevStartDom;
+	let prevParentDom = parentDom;
+	if (flags & TYPE_ROOT) {
+		parentDom = props._parentDom;
+
+		if (parentDom !== prevParentDom) {
+			prevStartDom = startDom;
+			startDom = null;
+		}
+	}
+
+	if (flags & TYPE_TEXT) {
+		// if hydrating (hydrate() or render() with replaceNode), find the matching child:
+		while (hydrateDom) {
+			nextDomSibling = hydrateDom.nextSibling;
+			if (hydrateDom.nodeType === 3) {
+				// if hydrating a Text node, ensure its text content is correct:
+				if (hydrateDom.data != props) {
+					hydrateDom.data = props;
 				}
+				break;
 			}
+			hydrateDom = nextDomSibling;
+		}
 
-			let context = getParentContext(internal);
-
-			// Necessary for createContext api. Setting this property will pass
-			// the context value as `this.context` just for this component.
-			let tmp = newVNode.type.contextType;
-			let provider = tmp && context[tmp._id];
-			let componentContext = tmp
-				? provider
-					? provider.props.value
-					: tmp._defaultValue
-				: context;
-
-			if (provider) provider._subs.add(internal);
-
-			let renderResult;
-
-			if (internal.flags & TYPE_CLASS) {
-				renderResult = renderClassComponent(
-					internal,
-					null,
-					context,
-					componentContext
-				);
-			} else {
-				renderResult = renderFunctionComponent(
-					internal,
-					null,
-					context,
-					componentContext
-				);
-			}
-
-			if (renderResult == null) {
-				nextDomSibling = startDom;
-			} else {
-				if (typeof renderResult === 'object') {
-					// dissolve unkeyed root fragments:
-					if (renderResult.type === Fragment && renderResult.key == null) {
-						renderResult = renderResult.props.children;
-					}
-					if (!Array.isArray(renderResult)) {
-						renderResult = [renderResult];
-					}
-				} else {
-					renderResult = [renderResult];
-				}
-
-				nextDomSibling = mountChildren(
-					internal,
-					renderResult,
-					parentDom,
-					startDom
-				);
-			}
+		// @ts-ignore createTextNode returns Text, we expect PreactElement
+		internal._dom = hydrateDom || document.createTextNode(props);
+		internal.flags &= RESET_MODE;
+	} else if (flags & TYPE_ELEMENT) {
+		nextDomSibling = mountElement(internal, hydrateDom);
+		internal.flags &= RESET_MODE;
+	} else {
+		try {
+			nextDomSibling = mountComponent(
+				internal,
+				props,
+				parentDom,
+				startDom,
+				flags
+			);
 
 			if (internal._commitCallbacks.length) {
 				commitQueue.push(internal);
 			}
 
-			if (internal.flags & TYPE_ROOT && prevParentDom !== parentDom) {
-				// If we just mounted a root node/Portal, and it changed the parentDom
-				// of it's children, then we need to resume the diff from it's previous
-				// startDom element, which could be null if we are mounting an entirely
-				// new tree, or the portal's nextSibling if we are mounting a Portal in
-				// an existing tree.
-				nextDomSibling = prevStartDom;
+			// We successfully rendered this VNode, unset any stored hydration/bailout state:
+			internal.flags &= RESET_MODE;
+		} catch (e) {
+			internal._vnodeId = 0;
+			internal.flags |= e.then ? MODE_SUSPENDED : MODE_ERRORED;
+
+			if (flags & MODE_HYDRATE) {
+				// @ts-ignore Trust me TS, nextSibling is a PreactElement
+				nextDomSibling = startDom && startDom.nextSibling;
+				internal._dom = startDom; // Save our current DOM position to resume later
 			}
-		} else {
-			// @TODO: we could just assign this as internal.dom here
-			let hydrateDom =
-				internal.flags & (MODE_HYDRATE | MODE_MUTATIVE_HYDRATE)
-					? startDom
-					: null;
-
-			nextDomSibling = mountElement(internal, hydrateDom);
+			options._catchError(e, internal);
 		}
-
-		if (options.diffed) options.diffed(internal);
-
-		// We successfully rendered this VNode, unset any stored hydration/bailout state:
-		internal.flags &= RESET_MODE;
-	} catch (e) {
-		internal._vnodeId = 0;
-		internal.flags |= e.then ? MODE_SUSPENDED : MODE_ERRORED;
-
-		if (internal.flags & MODE_HYDRATE) {
-			// @ts-ignore Trust me TS, nextSibling is a PreactElement
-			nextDomSibling = startDom && startDom.nextSibling;
-			internal._dom = startDom; // Save our current DOM position to resume later
-		}
-		options._catchError(e, internal);
 	}
 
-	return nextDomSibling;
+	// internal.flags &= RESET_MODE;
+
+	if (options.diffed) options.diffed(internal);
+
+	// If we just mounted a root node/Portal, and it changed the parentDom
+	// of it's children, then we need to resume the diff from it's previous
+	// startDom element, which could be null if we are mounting an entirely
+	// new tree, or the portal's nextSibling if we are mounting a Portal in
+	// an existing tree.
+	return prevStartDom || nextDomSibling;
+}
+
+/**
+ * @param {import('../internal').Internal} internal
+ * @param {any} props
+ * @param {import('../internal').PreactElement} parentDom
+ * @param {import('../internal').PreactNode} startDom
+ * @param {import('../internal').Internal['flags']} flags
+ */
+function mountComponent(internal, props, parentDom, startDom, flags) {
+	let type = /** @type {import('../internal').ComponentType} */ (internal.type);
+
+	let context = getParentContext(internal);
+
+	// Necessary for createContext api. Setting this property will pass
+	// the context value as `this.context` just for this component.
+	let tmp = type.contextType;
+	let provider = tmp && context[tmp._id];
+	let componentContext = tmp
+		? provider
+			? provider.props.value
+			: tmp._defaultValue
+		: context;
+	// inst.context = componentContext;
+
+	if (provider) provider._subs.add(internal);
+
+	let inst;
+	if (flags & TYPE_CLASS) {
+		// @ts-ignore `type` is a class component constructor
+		inst = new type(props, componentContext);
+	} else {
+		inst = {
+			props,
+			context: componentContext,
+			forceUpdate: internal.rerender.bind(null, internal)
+		};
+	}
+	inst._internal = internal;
+	internal._component = inst;
+	internal.flags |= DIRTY_BIT;
+
+	if (!inst.state) inst.state = {};
+	if (inst._nextState == null) inst._nextState = inst.state;
+
+	if (type.getDerivedStateFromProps != null) {
+		if (inst._nextState == inst.state) {
+			inst._nextState = Object.assign({}, inst._nextState);
+		}
+
+		Object.assign(
+			inst._nextState,
+			type.getDerivedStateFromProps(props, inst._nextState)
+		);
+	} else if (inst.componentWillMount != null) {
+		inst.componentWillMount();
+	}
+
+	// Enqueue componentDidMount to run the first time this internal commits
+	if (inst.componentDidMount != null) {
+		internal._commitCallbacks.push(inst.componentDidMount.bind(inst));
+	}
+
+	inst.context = componentContext;
+	inst.props = props;
+	inst.state = inst._nextState;
+
+	let renderHook = options._render;
+	let renderResult;
+
+	let counter = 0;
+	while (counter++ < 25) {
+		// mark as clean:
+		internal.flags &= ~DIRTY_BIT;
+		if (renderHook) renderHook(internal);
+		if (flags & TYPE_CLASS) {
+			renderResult = inst.render(inst.props, inst.state, inst.context);
+			// note: disable repeat render invocation for class components
+			break;
+		} else {
+			renderResult = type.call(inst, inst.props, inst.context);
+		}
+		// re-render if marked as dirty:
+		if (!(internal.flags & DIRTY_BIT)) {
+			break;
+		}
+	}
+	// internal.flags &= ~DIRTY_BIT;
+
+	// Handle setState called in render, see #2553
+	inst.state = inst._nextState;
+
+	if (inst.getChildContext != null) {
+		internal._context = Object.assign({}, context, inst.getChildContext());
+	}
+
+	if (renderResult == null) {
+		return startDom;
+	}
+
+	if (typeof renderResult === 'object') {
+		if (renderResult.type === Fragment && renderResult.key == null) {
+			renderResult = renderResult.props.children;
+		}
+		if (!Array.isArray(renderResult)) {
+			renderResult = [renderResult];
+		}
+	} else {
+		renderResult = [renderResult];
+	}
+
+	return mountChildren(internal, renderResult, parentDom, startDom);
 }
 
 /**
  * Construct (or select, if hydrating) a new DOM element for the given Internal.
  * @param {import('../internal').Internal} internal
- * @param {import('../internal').PreactNode} dom A DOM node to attempt to re-use during hydration
+ * @param {import('../internal').PreactElement} dom A DOM node to attempt to re-use during hydration
  * @returns {import('../internal').PreactNode}
  */
 function mountElement(internal, dom) {
-	let newProps = internal.props;
 	let nodeType = internal.type;
 	let flags = internal.flags;
+	let newProps = internal.props;
 
 	// Are we rendering within an inline SVG?
 	let isSvg = flags & MODE_SVG;
@@ -162,124 +244,114 @@ function mountElement(internal, dom) {
 	// Are we *not* hydrating? (a top-level render() or mutative hydration):
 	let isFullRender = ~flags & MODE_HYDRATE;
 
-	/** @type {any} */
-	let i, value;
+	let hydrateChild = null;
+	let nextDomSibling;
 
-	// if hydrating (hydrate() or render() with replaceNode), find the matching child:
+	// If hydrating (hydrate() or render() with replaceNode), find the matching child:
+	// Note: this flag guard is redundant, since `dom` is only non-null when hydrating.
+	// It has been left here purely for filesize reasons, as it saves 5b.
 	if (flags & (MODE_HYDRATE | MODE_MUTATIVE_HYDRATE)) {
-		while (
-			dom &&
-			(nodeType ? dom.localName !== nodeType : dom.nodeType !== 3)
-		) {
-			dom = dom.nextSibling;
+		while (dom) {
+			if (dom.localName === nodeType) {
+				hydrateChild = dom.firstChild;
+				nextDomSibling = dom.nextSibling;
+
+				if (flags & MODE_MUTATIVE_HYDRATE) {
+					// "Mutative Hydration":
+					// When hydrating an existing DOM tree within a full render, we diff attributes.
+					// This happens when a `replaceNode` value is passed to render().
+					//
+					// @TODO: Consider removing and recommending setting changed props after initial hydration.
+					// During normal hydration, no props are diffed - only event handlers are applied.
+					for (let i = 0; i < dom.attributes.length; i++) {
+						let value = dom.attributes[i].name;
+						if (!(value in newProps)) {
+							dom.removeAttribute(value);
+						}
+					}
+				}
+				break;
+			}
+			dom = dom.nextElementSibling;
 		}
 	}
 
-	let isNew = dom == null;
-
-	if (flags & TYPE_TEXT) {
-		if (isNew) {
-			// @ts-ignore createTextNode returns Text, we expect PreactElement
-			dom = document.createTextNode(newProps);
-		} else if (dom.data !== newProps) {
-			dom.data = newProps;
-		}
-
-		internal._dom = dom;
-	} else {
-		// Tracks entering and exiting SVG namespace when descending through the tree.
-		// if (nodeType === 'svg') internal.flags |= MODE_SVG;
-
-		if (isNew) {
-			if (isSvg) {
-				dom = document.createElementNS(
-					'http://www.w3.org/2000/svg',
-					// @ts-ignore We know `newVNode.type` is a string
-					nodeType
-				);
-			} else {
-				dom = document.createElement(
-					// @ts-ignore We know `newVNode.type` is a string
-					nodeType,
-					newProps.is && newProps
-				);
-			}
-
-			// we are creating a new node, so we can assume this is a new subtree (in case we are hydrating), this deopts the hydrate
-			internal.flags = flags &= RESET_MODE;
-			isFullRender = 1;
-		}
-
-		// @TODO: Consider removing and instructing users to instead set the desired
-		// prop for removal to undefined/null. During hydration, props are not
-		// diffed at all (including dangerouslySetInnerHTML)
-		if (flags & MODE_MUTATIVE_HYDRATE) {
-			// But, if we are in a situation where we are using existing DOM (e.g. replaceNode)
-			// we should read the existing DOM attributes to diff them
-			for (i = 0; i < dom.attributes.length; i++) {
-				value = dom.attributes[i].name;
-				if (!(value in newProps)) {
-					dom.removeAttribute(value);
-				}
-			}
-		}
-
-		let newHtml, newValue, newChildren;
-		if (
-			(nodeType === 'input' ||
-				nodeType === 'textarea' ||
-				nodeType === 'select') &&
-			(newProps.onInput || newProps.onChange)
-		) {
-			if (newProps.value != null) {
-				dom._isControlled = true;
-				dom._prevValue = newProps.value;
-			} else if (newProps.checked != null) {
-				dom._isControlled = true;
-				dom._prevValue = newProps.checked;
-			}
-		}
-
-		for (i in newProps) {
-			value = newProps[i];
-			if (i === 'children') {
-				newChildren = value;
-			} else if (i === 'dangerouslySetInnerHTML') {
-				newHtml = value;
-			} else if (i === 'value') {
-				newValue = value;
-			} else if (
-				value != null &&
-				(isFullRender || typeof value === 'function')
-			) {
-				setProperty(dom, i, value, null, isSvg);
-			}
-		}
-
-		internal._dom = dom;
-
-		// If the new vnode didn't have dangerouslySetInnerHTML, diff its children
-		if (newHtml) {
-			if (isFullRender && newHtml.__html) {
-				dom.innerHTML = newHtml.__html;
-			}
-		} else if (newChildren != null) {
-			mountChildren(
-				internal,
-				Array.isArray(newChildren) ? newChildren : [newChildren],
-				dom,
-				isNew ? null : dom.firstChild
+	if (dom == null) {
+		if (isSvg) {
+			dom = document.createElementNS(
+				'http://www.w3.org/2000/svg',
+				// @ts-ignore We know `newVNode.type` is a string
+				nodeType
+			);
+		} else {
+			dom = document.createElement(
+				// @ts-ignore We know `newVNode.type` is a string
+				nodeType,
+				newProps.is && newProps
 			);
 		}
 
-		// (as above, don't diff props during hydration)
-		if (isFullRender && newValue != null) {
-			setProperty(dom, 'value', newValue, null, 0);
+		// We're creating a new node, which means its subtree is also new.
+		// If we were hydrating, this "deopts" the subtree into normal rendering mode.
+		internal.flags = flags &= RESET_MODE;
+		isFullRender = 1;
+	}
+
+	internal._dom = dom;
+
+	// Apply props
+	let newHtml, newValue, newChildren;
+	for (let i in newProps) {
+		let value = newProps[i];
+		if (i === 'children') {
+			newChildren = value;
+		} else if (i === 'dangerouslySetInnerHTML') {
+			newHtml = value;
+		} else if (i === 'value') {
+			newValue = value;
+		} else if (value != null && (isFullRender || typeof value === 'function')) {
+			setProperty(dom, i, value, null, isSvg);
 		}
 	}
 
+	// Install controlled input markers
+	if (
+		(nodeType === 'input' ||
+			nodeType === 'textarea' ||
+			nodeType === 'select') &&
+		(newProps.onInput || newProps.onChange)
+	) {
+		if (newValue != null) {
+			dom._isControlled = true;
+			dom._prevValue = newValue;
+		} else if (newProps.checked != null) {
+			dom._isControlled = true;
+			dom._prevValue = newProps.checked;
+		}
+	}
+
+	// If the new vnode didn't have dangerouslySetInnerHTML, diff its children
+	if (newHtml) {
+		if (isFullRender && newHtml.__html) {
+			dom.innerHTML = newHtml.__html;
+		}
+	} else if (newChildren != null) {
+		mountChildren(
+			internal,
+			Array.isArray(newChildren) ? newChildren : [newChildren],
+			dom,
+			hydrateChild // isNew ? null : dom.firstChild
+		);
+	}
+
+	// (as above, don't diff props during hydration)
+	if (isFullRender && newValue != null) {
+		setProperty(dom, 'value', newValue, null, 0);
+	}
+
 	// @ts-ignore
-	return isNew ? null : dom.nextSibling;
+	return nextDomSibling;
+	// return isNew ? null : dom.nextSibling;
 }
 
 /**
