@@ -36,6 +36,7 @@ export function renderFunctionComponent(
 	if (newVNode && newVNode._vnodeId === internal._vnodeId) {
 		c.props = newProps;
 		internal.flags |= SKIP_CHILDREN;
+		internal.flags &= ~DIRTY_BIT;
 		return;
 	}
 
@@ -141,6 +142,7 @@ export function renderClassComponent(
 			c.props = newProps;
 			c.state = c._nextState;
 			internal.flags |= SKIP_CHILDREN;
+			internal.flags &= ~DIRTY_BIT;
 			return;
 		}
 

@@ -55,7 +55,7 @@ export function patch(internal, vnode, parentDom) {
 	if (flags & TYPE_ROOT) {
 		parentDom = vnode.props._parentDom;
 
-		if (internal.props._parentDom !== vnode.props._parentDom) {
+		if (internal.props._parentDom !== parentDom) {
 			let nextSibling =
 				parentDom == prevParentDom ? getDomSibling(internal) : null;
 			insertComponentDom(internal, nextSibling, parentDom);
@@ -65,74 +65,76 @@ export function patch(internal, vnode, parentDom) {
 	if (flags & TYPE_ELEMENT) {
 		if (vnode._vnodeId !== internal._vnodeId) {
 			// @ts-ignore dom is a PreactElement here
-			patchElement(internal, vnode);
+			patchElement(internal, internal.props, vnode.props, flags);
+			internal.props = vnode.props;
 		}
 	} else {
+		if (internal.flags & MODE_PENDING_ERROR) {
+			// Toggle the MODE_PENDING_ERROR and MODE_RERENDERING_ERROR flags. In
+			// actuality, this should turn off the MODE_PENDING_ERROR flag and turn on
+			// the MODE_RERENDERING_ERROR flag.
+			internal.flags ^= MODE_PENDING_ERROR | MODE_RERENDERING_ERROR;
+		}
+
 		try {
-			if (internal.flags & MODE_PENDING_ERROR) {
-				// Toggle the MODE_PENDING_ERROR and MODE_RERENDERING_ERROR flags. In
-				// actuality, this should turn off the MODE_PENDING_ERROR flag and turn on
-				// the MODE_RERENDERING_ERROR flag.
-				internal.flags ^= MODE_PENDING_ERROR | MODE_RERENDERING_ERROR;
-			}
-
-			let context = getParentContext(internal);
-
-			// Necessary for createContext api. Setting this property will pass
-			// the context value as `this.context` just for this component.
-			let tmp = vnode.type.contextType;
-			let provider = tmp && context[tmp._id];
-			let componentContext = tmp
-				? provider
-					? provider.props.value
-					: tmp._defaultValue
-				: context;
-			let isNew = !internal || !internal._component;
-
 			let renderResult;
-
-			if (internal.flags & TYPE_CLASS) {
-				renderResult = renderClassComponent(
-					internal,
-					vnode,
-					context,
-					componentContext
-				);
+			if (vnode._vnodeId === internal._vnodeId) {
+				internal.flags |= SKIP_CHILDREN;
 			} else {
-				renderResult = renderFunctionComponent(
-					internal,
-					vnode,
-					context,
-					componentContext
-				);
-			}
+				let context = getParentContext(internal);
 
-			if (renderResult == null) {
-				renderResult = [];
-			} else if (typeof renderResult === 'object') {
-				if (renderResult.type === Fragment && renderResult.key == null) {
-					renderResult = renderResult.props.children;
+				// Necessary for createContext api. Setting this property will pass
+				// the context value as `this.context` just for this component.
+				let tmp = vnode.type.contextType;
+				let provider = tmp && context[tmp._id];
+				let componentContext = tmp
+					? provider
+						? provider.props.value
+						: tmp._defaultValue
+					: context;
+
+				if (internal.flags & TYPE_CLASS) {
+					renderResult = renderClassComponent(
+						internal,
+						vnode,
+						context,
+						componentContext
+					);
+				} else {
+					renderResult = renderFunctionComponent(
+						internal,
+						vnode,
+						context,
+						componentContext
+					);
 				}
-				if (!Array.isArray(renderResult)) {
+
+				if (renderResult == null) {
+					renderResult = [];
+				} else if (typeof renderResult === 'object') {
+					if (renderResult.type === Fragment && renderResult.key == null) {
+						renderResult = renderResult.props.children;
+					}
+					if (!Array.isArray(renderResult)) {
+						renderResult = [renderResult];
+					}
+				} else {
 					renderResult = [renderResult];
 				}
-			} else {
-				renderResult = [renderResult];
 			}
 
+			// handle sCU bailout. See https://gist.github.com/JoviDeCroock/bec5f2ce93544d2e6070ef8e0036e4e8
 			if (internal.flags & SKIP_CHILDREN) {
+				// Note: SKIP_CHILDREN gets unset by the `RESET_MODE` inversion below.
+				// internal.flags &= ~SKIP_CHILDREN;
 				internal.props = vnode.props;
-				internal.flags &= ~SKIP_CHILDREN;
-				// More info about this here: https://gist.github.com/JoviDeCroock/bec5f2ce93544d2e6070ef8e0036e4e8
-				if (vnode && vnode._vnodeId !== internal._vnodeId) {
-					internal.flags &= ~DIRTY_BIT;
-				}
+				internal._component.props = vnode.props;
 			} else if (internal._children == null) {
 				let siblingDom =
 					(internal.flags & (MODE_HYDRATE | MODE_SUSPENDED)) ===
 					(MODE_HYDRATE | MODE_SUSPENDED)
 						? internal._dom
-						: isNew || internal.flags & MODE_HYDRATE
+						: internal.flags & MODE_HYDRATE
 						? null
 						: getDomSibling(internal);
 
@@ -167,13 +169,13 @@ export function patch(internal, vnode, parentDom) {
 /**
  * Update an internal and its associated DOM element based on a new VNode
  * @param {import('../internal').Internal} internal
- * @param {import('../internal').VNode} vnode A VNode with props to compare and apply
+ * @param {any} oldProps
+ * @param {any} newProps
+ * @param {import('../internal').Internal['flags']} flags
  */
-function patchElement(internal, vnode) {
+function patchElement(internal, oldProps, newProps, flags) {
 	let dom = /** @type {import('../internal').PreactElement} */ (internal._dom),
-		oldProps = internal.props,
-		newProps = (internal.props = vnode.props),
-		isSvg = internal.flags & MODE_SVG,
+		isSvg = flags & MODE_SVG,
 		i,
 		value,
 		tmp,
