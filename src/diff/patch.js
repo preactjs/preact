@@ -15,8 +15,7 @@ import {
 	MODE_HYDRATE,
 	MODE_PENDING_ERROR,
 	MODE_RERENDERING_ERROR,
-	SKIP_CHILDREN,
-	DIRTY_BIT
+	SKIP_CHILDREN
 } from '../constants';
 import { getDomSibling, getParentContext } from '../tree';
 import { mountChildren } from './mount';
