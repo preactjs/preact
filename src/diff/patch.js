@@ -10,7 +10,6 @@ import {
 	TYPE_ROOT,
 	TYPE_CLASS,
 	MODE_SVG,
-	UNDEFINED,
 	MODE_HYDRATE,
 	MODE_PENDING_ERROR,
 	MODE_RERENDERING_ERROR,
@@ -21,7 +20,7 @@ import {
 import { getDomSibling } from '../tree';
 import { mountChildren } from './mount';
 import { Fragment } from '../create-element';
-import { rendererState } from '../component';
+import { rendererState } from './commit';
 
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
@@ -31,7 +30,9 @@ import { rendererState } from '../component';
 export function patch(internal, vnode) {
 	if (options._diff) options._diff(internal, vnode);
 
-	if (internal.flags & TYPE_TEXT) {
+	let flags = internal.flags;
+
+	if (flags & TYPE_TEXT) {
 		if (vnode !== internal.props) {
 			// @ts-ignore We know that newVNode is string/number/bigint, and internal._dom is Text
 			internal.props = internal._dom.data = vnode;
@@ -42,7 +43,7 @@ export function patch(internal, vnode) {
 		// They can occur anywhere in the tree, can be nested, and currently allow reparenting during patches.
 		// @TODO: Decide if we actually want to support silent reparenting during patch - is it worth the bytes?
 		let prevParentDom = rendererState._parentDom;
-		if (internal.flags & TYPE_ROOT) {
+		if (flags & TYPE_ROOT) {
 			rendererState._parentDom = vnode.props._parentDom;
 
 			if (internal.props._parentDom !== vnode.props._parentDom) {
@@ -54,7 +55,7 @@ export function patch(internal, vnode) {
 			}
 		}
 
-		if (internal.flags & TYPE_ELEMENT) {
+		if (flags & TYPE_ELEMENT) {
 			if (vnode._vnodeId !== internal._vnodeId) {
 				// @ts-ignore dom is a PreactElement here
 				patchElement(internal, vnode);
@@ -62,9 +63,8 @@ export function patch(internal, vnode) {
 			internal.flags &= RESET_MODE;
 		} else {
 			// Switch from MODE_PENDING_ERROR to MODE_RERENDERING_ERROR:
-			if (internal.flags & MODE_PENDING_ERROR) {
-				internal.flags = internal.flags ^=
-					MODE_PENDING_ERROR | MODE_RERENDERING_ERROR;
+			if (flags & MODE_PENDING_ERROR) {
+				internal.flags ^= MODE_PENDING_ERROR | MODE_RERENDERING_ERROR;
 			}
 
 			try {
@@ -78,7 +78,6 @@ export function patch(internal, vnode) {
 						? provider.props.value
 						: tmp._defaultValue
 					: rendererState._context;
-				let isNew = !internal || !internal._component;
 
 				let renderResult = patchComponent(internal, vnode, componentContext);
 
@@ -104,10 +103,10 @@ export function patch(internal, vnode) {
 					}
 				} else if (internal._children == null) {
 					let siblingDom =
-						(internal.flags & (MODE_HYDRATE | MODE_SUSPENDED)) ===
+						(flags & (MODE_HYDRATE | MODE_SUSPENDED)) ===
 						(MODE_HYDRATE | MODE_SUSPENDED)
 							? internal._dom
-							: isNew || internal.flags & MODE_HYDRATE
+							: flags & MODE_HYDRATE
 							? null
 							: getDomSibling(internal);
 

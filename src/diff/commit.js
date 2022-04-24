@@ -1,5 +1,14 @@
-import { rendererState } from '../component';
 import options from '../options';
+
+/**
+ * The render queue
+ * @type {import('../internal').RendererState}
+ */
+export const rendererState = {
+	_parentDom: null,
+	_context: {},
+	_commitQueue: []
+};
 
 /**
  * @param {import('../internal').Internal} rootInternal
