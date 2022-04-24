@@ -29,21 +29,15 @@ import { rendererState } from '../component';
  * @param {import('../internal').VNode | string} vnode The new virtual node
  */
 export function patch(internal, vnode) {
+	if (options._diff) options._diff(internal, vnode);
 	let flags = internal.flags;
 
 	if (flags & TYPE_TEXT) {
-		if (options._diff) options._diff(internal, vnode);
 		if (vnode !== internal.props) {
 			// @ts-ignore We know that newVNode is string/number/bigint, and internal._dom is Text
 			internal.props = internal._dom.data = vnode;
 		}
-	} else if (vnode.constructor !== UNDEFINED) {
-		// When passing through createElement it assigns the object
-		// constructor as undefined. This to prevent JSON-injection.
-		return;
 	} else {
-		if (options._diff) options._diff(internal, vnode);
-
 		// Root nodes render their children into a specific parent DOM element.
 		// They can occur anywhere in the tree, can be nested, and currently allow reparenting during patches.
 		// @TODO: Decide if we actually want to support silent reparenting during patch - is it worth the bytes?
