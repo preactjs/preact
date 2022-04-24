@@ -63,11 +63,7 @@ export function mount(internal, newVNode, startDom) {
 			let renderResult;
 
 			if (internal.flags & TYPE_CLASS) {
-				renderResult = renderClassComponent(
-					internal,
-					null,
-					componentContext
-				);
+				renderResult = renderClassComponent(internal, null, componentContext);
 			} else {
 				renderResult = renderFunctionComponent(
 					internal,
@@ -91,17 +87,10 @@ export function mount(internal, newVNode, startDom) {
 					renderResult = [renderResult];
 				}
 
-				nextDomSibling = mountChildren(
-					internal,
-					renderResult,
-					startDom
-				);
+				nextDomSibling = mountChildren(internal, renderResult, startDom);
 			}
 
-			if (
-				internal._commitCallbacks != null &&
-				internal._commitCallbacks.length
-			) {
+			if (internal._commitCallbacks.length) {
 				rendererState._commitQueue.push(internal);
 			}
 
@@ -295,11 +284,7 @@ function mountElement(internal, dom) {
  * @param {import('../internal').ComponentChild[]} children
  * @param {import('../internal').PreactNode} startDom
  */
-export function mountChildren(
-	internal,
-	children,
-	startDom
-) {
+export function mountChildren(internal, children, startDom) {
 	let internalChildren = (internal._children = []),
 		i,
 		childVNode,
@@ -321,11 +306,7 @@ export function mountChildren(
 		internalChildren[i] = childInternal;
 
 		// Morph the old element into the new one, but don't append it to the dom yet
-		mountedNextChild = mount(
-			childInternal,
-			childVNode,
-			startDom
-		);
+		mountedNextChild = mount(childInternal, childVNode, startDom);
 
 		newDom = childInternal._dom;
 
