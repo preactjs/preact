@@ -1,7 +1,6 @@
 import { patchChildren, insertComponentDom } from './children';
 import { setProperty } from './props';
 import options from '../options';
-import { renderClassComponent, renderFunctionComponent } from './component';
 import {
 	RESET_MODE,
 	TYPE_TEXT,
@@ -16,7 +15,8 @@ import {
 	MODE_PENDING_ERROR,
 	MODE_RERENDERING_ERROR,
 	SKIP_CHILDREN,
-	DIRTY_BIT
+	DIRTY_BIT,
+	FORCE_UPDATE
 } from '../constants';
 import { getDomSibling } from '../tree';
 import { mountChildren } from './mount';
@@ -89,21 +89,7 @@ export function patch(internal, vnode) {
 				: rendererState._context;
 			let isNew = !internal || !internal._component;
 
-			let renderResult;
-
-			if (internal.flags & TYPE_CLASS) {
-				renderResult = renderClassComponent(
-					internal,
-					vnode,
-					componentContext
-				);
-			} else {
-				renderResult = renderFunctionComponent(
-					internal,
-					vnode,
-					componentContext
-				);
-			}
+			let renderResult = patchComponent(internal, vnode, componentContext);
 
 			if (renderResult == null) {
 				renderResult = [];
@@ -134,11 +120,7 @@ export function patch(internal, vnode) {
 						? null
 						: getDomSibling(internal);
 
-				mountChildren(
-					internal,
-					renderResult,
-					siblingDom
-				);
+				mountChildren(internal, renderResult, siblingDom);
 			} else {
 				patchChildren(internal, renderResult);
 			}
@@ -229,7 +211,7 @@ function patchElement(internal, vnode) {
 		rendererState._parentDom = dom;
 		patchChildren(
 			internal,
-			newChildren && Array.isArray(newChildren) ? newChildren : [newChildren],
+			newChildren && Array.isArray(newChildren) ? newChildren : [newChildren]
 		);
 		rendererState._parentDom = prevParentDom;
 	}
@@ -239,4 +221,109 @@ function patchElement(internal, vnode) {
 	} else if (newProps.value != null && dom._isControlled) {
 		dom._prevValue = newProps.value;
 	}
+}
+
+/**
+ * Render a class component
+ * @param {import('../internal').Internal} internal The component's backing Internal node
+ * @param {import('../internal').VNode} newVNode The new virtual node
+ * @param {any} componentContext The aggregated context for htis component
+ * @returns {import('../internal').ComponentChildren} the component's children
+ */
+function patchComponent(internal, newVNode, componentContext) {
+	let type = /** @type {import('../internal').ComponentType} */ (internal.type);
+	let snapshot,
+		c = internal._component,
+		newProps = newVNode.props;
+
+	if (c._nextState == null) {
+		c._nextState = c.state;
+	}
+
+	if (type.getDerivedStateFromProps != null) {
+		if (c._nextState == c.state) {
+			c._nextState = Object.assign({}, c._nextState);
+		}
+
+		Object.assign(
+			c._nextState,
+			type.getDerivedStateFromProps(newProps, c._nextState)
+		);
+	}
+
+	let oldProps = c.props;
+	let oldState = c.state;
+
+	if (
+		type.getDerivedStateFromProps == null &&
+		newProps !== oldProps &&
+		c.componentWillReceiveProps != null
+	) {
+		c.componentWillReceiveProps(newProps, componentContext);
+	}
+
+	if (
+		(!(internal.flags & FORCE_UPDATE) &&
+			c.shouldComponentUpdate != null &&
+			c.shouldComponentUpdate(newProps, c._nextState, componentContext) ===
+				false) ||
+		(newVNode && newVNode._vnodeId === internal._vnodeId)
+	) {
+		c.props = newProps;
+		c.state = c._nextState;
+		internal.flags |= SKIP_CHILDREN;
+		return;
+	}
+
+	if (c.componentWillUpdate != null) {
+		c.componentWillUpdate(newProps, c._nextState, componentContext);
+	}
+
+	c.context = componentContext;
+	internal.props = c.props = newProps;
+	c.state = c._nextState;
+
+	let renderHook = options._render;
+	if (renderHook) renderHook(internal);
+
+	let counter = 0,
+		renderResult;
+	while (counter++ < 25) {
+		internal.flags &= ~DIRTY_BIT;
+		if (renderHook) renderHook(internal);
+		if (internal.flags & TYPE_CLASS) {
+			renderResult = c.render(c.props, c.state, c.context);
+			// note: disable repeat render invocation for class components
+			break;
+		} else {
+			renderResult = type.call(c, c.props, c.context);
+		}
+		if (!(internal.flags & DIRTY_BIT)) {
+			break;
+		}
+	}
+
+	// Handle setState called in render, see #2553
+	c.state = c._nextState;
+
+	if (c.getChildContext != null) {
+		rendererState._context = internal._context = Object.assign(
+			{},
+			rendererState._context,
+			c.getChildContext()
+		);
+	}
+
+	if (c.getSnapshotBeforeUpdate != null) {
+		snapshot = c.getSnapshotBeforeUpdate(oldProps, oldState);
+	}
+
+	// Only schedule componentDidUpdate if the component successfully rendered
+	if (c.componentDidUpdate != null) {
+		internal._commitCallbacks.push(() => {
+			c.componentDidUpdate(oldProps, oldState, snapshot);
+		});
+	}
+
+	return renderResult;
 }

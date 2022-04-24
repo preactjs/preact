@@ -10,11 +10,11 @@ import {
 	TYPE_CLASS,
 	MODE_ERRORED,
 	TYPE_ROOT,
-	MODE_SVG
+	MODE_SVG,
+	DIRTY_BIT
 } from '../constants';
 import { normalizeToVNode, Fragment } from '../create-element';
 import { setProperty } from './props';
-import { renderClassComponent, renderFunctionComponent } from './component';
 import { createInternal } from '../tree';
 import options from '../options';
 import { rendererState } from '../component';
@@ -60,21 +60,7 @@ export function mount(internal, newVNode, startDom) {
 
 			if (provider) provider._subs.add(internal);
 
-			let renderResult;
-
-			if (internal.flags & TYPE_CLASS) {
-				renderResult = renderClassComponent(
-					internal,
-					null,
-					componentContext
-				);
-			} else {
-				renderResult = renderFunctionComponent(
-					internal,
-					null,
-					componentContext
-				);
-			}
+			let renderResult = mountComponent(internal, componentContext);
 
 			if (renderResult == null) {
 				nextDomSibling = startDom;
@@ -91,11 +77,7 @@ export function mount(internal, newVNode, startDom) {
 					renderResult = [renderResult];
 				}
 
-				nextDomSibling = mountChildren(
-					internal,
-					renderResult,
-					startDom
-				);
+				nextDomSibling = mountChildren(internal, renderResult, startDom);
 			}
 
 			if (
@@ -148,6 +130,97 @@ export function mount(internal, newVNode, startDom) {
 	}
 
 	return nextDomSibling;
+}
+
+/**
+ * Render a function component
+ * @param {import('../internal').Internal} internal The component's backing Internal node
+ * @param {any} componentContext The aggregated context
+ * @returns {import('../internal').ComponentChildren} the component's children
+ */
+function mountComponent(internal, componentContext) {
+	/** @type {import('../internal').Component} */
+	let c;
+
+	let type = /** @type {import('../internal').ComponentType} */ (internal.type);
+	let newProps = internal.props;
+
+	if (internal.flags & TYPE_CLASS) {
+		// @ts-ignore `type` is a class component constructor
+		c = new type(newProps, componentContext);
+	} else {
+		c = {
+			props: newProps,
+			context: componentContext,
+			forceUpdate: internal.rerender.bind(null, internal)
+		};
+	}
+
+	c._internal = internal;
+	internal._component = c;
+	internal.flags |= DIRTY_BIT;
+
+	if (!c.state) c.state = {};
+	if (c._nextState == null) c._nextState = c.state;
+
+	if (type.getDerivedStateFromProps != null) {
+		if (c._nextState == c.state) {
+			c._nextState = Object.assign({}, c._nextState);
+		}
+
+		Object.assign(
+			c._nextState,
+			type.getDerivedStateFromProps(newProps, c._nextState)
+		);
+	}
+
+	if (type.getDerivedStateFromProps == null && c.componentWillMount != null) {
+		c.componentWillMount();
+	}
+
+	if (c.componentDidMount != null) {
+		// If the component was constructed, queue up componentDidMount so the
+		// first time this internal commits (regardless of suspense or not) it
+		// will be called
+		internal._commitCallbacks.push(c.componentDidMount.bind(c));
+	}
+
+	c.context = componentContext;
+	internal.props = c.props = newProps;
+	c.state = c._nextState;
+
+	let renderHook = options._render;
+	if (renderHook) renderHook(internal);
+
+	let counter = 0,
+		renderResult;
+	while (counter++ < 25) {
+		internal.flags &= ~DIRTY_BIT;
+		if (renderHook) renderHook(internal);
+		if (internal.flags & TYPE_CLASS) {
+			renderResult = c.render(c.props, c.state, c.context);
+			// note: disable repeat render invocation for class components
+			break;
+		} else {
+			renderResult = type.call(c, c.props, c.context);
+		}
+		if (!(internal.flags & DIRTY_BIT)) {
+			break;
+		}
+	}
+
+	// Handle setState called in render, see #2553
+	c.state = c._nextState;
+
+	if (c.getChildContext != null) {
+		rendererState._context = internal._context = Object.assign(
+			{},
+			rendererState._context,
+			c.getChildContext()
+		);
+	}
+
+	return renderResult;
 }
 
 /**
@@ -295,11 +368,7 @@ function mountElement(internal, dom) {
  * @param {import('../internal').ComponentChild[]} children
  * @param {import('../internal').PreactNode} startDom
  */
-export function mountChildren(
-	internal,
-	children,
-	startDom
-) {
+export function mountChildren(internal, children, startDom) {
 	let internalChildren = (internal._children = []),
 		i,
 		childVNode,
@@ -321,11 +390,7 @@ export function mountChildren(
 		internalChildren[i] = childInternal;
 
 		// Morph the old element into the new one, but don't append it to the dom yet
-		mountedNextChild = mount(
-			childInternal,
-			childVNode,
-			startDom
-		);
+		mountedNextChild = mount(childInternal, childVNode, startDom);
 
 		newDom = childInternal._dom;
 
