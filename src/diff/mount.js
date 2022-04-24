@@ -29,24 +29,47 @@ export function mount(internal, newVNode, startDom) {
 	if (options._diff) options._diff(internal, newVNode);
 
 	/** @type {import('../internal').PreactNode} */
-	let nextDomSibling;
+	let nextDomSibling, prevStartDom;
 
-	try {
-		if (internal.flags & TYPE_COMPONENT) {
-			// Root nodes signal that an attempt to render into a specific DOM node on
-			// the page. Root nodes can occur anywhere in the tree and not just at the
-			// top.
-			let prevStartDom = startDom;
-			let prevParentDom = rendererState._parentDom;
-			if (internal.flags & TYPE_ROOT) {
-				rendererState._parentDom = newVNode.props._parentDom;
+	// @TODO: could just assign this as internal.dom here?
+	let hydrateDom =
+		internal.flags & (MODE_HYDRATE | MODE_MUTATIVE_HYDRATE) ? startDom : null;
 
-				// Note: this is likely always true because we are inside mount()
-				if (rendererState._parentDom !== prevParentDom) {
-					startDom = null;
+	// Root nodes signal that an attempt to render into a specific DOM node on
+	// the page. Root nodes can occur anywhere in the tree and not just at the
+	// top.
+	let prevParentDom = rendererState._parentDom;
+	if (internal.flags & TYPE_ROOT) {
+		rendererState._parentDom = newVNode.props._parentDom;
+
+		// Note: this is likely always true because we are inside mount()
+		if (rendererState._parentDom !== prevParentDom) {
+			startDom = null;
+		}
+	}
+
+	if (internal.flags & TYPE_TEXT) {
+		// if hydrating (hydrate() or render() with replaceNode), find the matching child:
+		while (hydrateDom) {
+			nextDomSibling = hydrateDom.nextSibling;
+			if (hydrateDom.nodeType === 3) {
+				// if hydrating a Text node, ensure its text content is correct:
+				if (hydrateDom.data != internal.props) {
+					hydrateDom.data = internal.props;
 				}
+				break;
 			}
+			hydrateDom = nextDomSibling;
+		}
 
+		// @ts-ignore createTextNode returns Text, we expect PreactElement
+		internal._dom = hydrateDom || document.createTextNode(internal.props);
+		internal.flags &= RESET_MODE;
+	} else if (internal.flags & TYPE_ELEMENT) {
+		nextDomSibling = mountElement(internal, hydrateDom);
+		internal.flags &= RESET_MODE;
+	} else {
+		try {
 			let prevContext = rendererState._context;
 			// Necessary for createContext api. Setting this property will pass
 			// the context value as `this.context` just for this component.
@@ -103,33 +126,24 @@ export function mount(internal, newVNode, startDom) {
 			// In the event this subtree creates a new context for its children, restore
 			// the previous context for its siblings
 			rendererState._context = prevContext;
-		} else {
-			// @TODO: we could just assign this as internal.dom here
-			let hydrateDom =
-				internal.flags & (MODE_HYDRATE | MODE_MUTATIVE_HYDRATE)
-					? startDom
-					: null;
+			// We successfully rendered this VNode, unset any stored hydration/bailout state:
+			internal.flags &= RESET_MODE;
+		} catch (e) {
+			internal._vnodeId = 0;
+			internal.flags |= e.then ? MODE_SUSPENDED : MODE_ERRORED;
 
-			nextDomSibling = mountElement(internal, hydrateDom);
+			if (internal.flags & MODE_HYDRATE) {
+				// @ts-ignore Trust me TS, nextSibling is a PreactElement
+				nextDomSibling = startDom && startDom.nextSibling;
+				internal._dom = startDom; // Save our current DOM position to resume later
+			}
+			options._catchError(e, internal);
 		}
-
-		if (options.diffed) options.diffed(internal);
-
-		// We successfully rendered this VNode, unset any stored hydration/bailout state:
-		internal.flags &= RESET_MODE;
-	} catch (e) {
-		internal._vnodeId = 0;
-		internal.flags |= e.then ? MODE_SUSPENDED : MODE_ERRORED;
-
-		if (internal.flags & MODE_HYDRATE) {
-			// @ts-ignore Trust me TS, nextSibling is a PreactElement
-			nextDomSibling = startDom && startDom.nextSibling;
-			internal._dom = startDom; // Save our current DOM position to resume later
-		}
-		options._catchError(e, internal);
 	}
 
-	return nextDomSibling;
+	if (options.diffed) options.diffed(internal);
+
+	return prevStartDom || nextDomSibling;
 }
 
 /**

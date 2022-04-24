@@ -30,19 +30,19 @@ import { rendererState } from '../component';
  */
 export function patch(internal, vnode) {
 	if (options._diff) options._diff(internal, vnode);
-	let flags = internal.flags;
 
-	if (flags & TYPE_TEXT) {
+	if (internal.flags & TYPE_TEXT) {
 		if (vnode !== internal.props) {
 			// @ts-ignore We know that newVNode is string/number/bigint, and internal._dom is Text
 			internal.props = internal._dom.data = vnode;
 		}
+		internal.flags &= RESET_MODE;
 	} else {
 		// Root nodes render their children into a specific parent DOM element.
 		// They can occur anywhere in the tree, can be nested, and currently allow reparenting during patches.
 		// @TODO: Decide if we actually want to support silent reparenting during patch - is it worth the bytes?
 		let prevParentDom = rendererState._parentDom;
-		if (flags & TYPE_ROOT) {
+		if (internal.flags & TYPE_ROOT) {
 			rendererState._parentDom = vnode.props._parentDom;
 
 			if (internal.props._parentDom !== vnode.props._parentDom) {
@@ -59,10 +59,12 @@ export function patch(internal, vnode) {
 				// @ts-ignore dom is a PreactElement here
 				patchElement(internal, vnode);
 			}
+			internal.flags &= RESET_MODE;
 		} else {
 			// Switch from MODE_PENDING_ERROR to MODE_RERENDERING_ERROR:
-			if (flags & MODE_PENDING_ERROR) {
-				flags = internal.flags ^= MODE_PENDING_ERROR | MODE_RERENDERING_ERROR;
+			if (internal.flags & MODE_PENDING_ERROR) {
+				internal.flags = internal.flags ^=
+					MODE_PENDING_ERROR | MODE_RERENDERING_ERROR;
 			}
 
 			try {
@@ -125,6 +127,7 @@ export function patch(internal, vnode) {
 				// In the event this subtree creates a new context for its children, restore
 				// the previous context for its siblings
 				rendererState._context = prevContext;
+				internal.flags &= RESET_MODE;
 			} catch (e) {
 				// @TODO: assign a new VNode ID here? Or NaN?
 				// newVNode._vnodeId = 0;
@@ -141,9 +144,6 @@ export function patch(internal, vnode) {
 	}
 
 	if (options.diffed) options.diffed(internal);
-
-	// We successfully rendered this VNode, unset any stored hydration/bailout state:
-	internal.flags &= RESET_MODE;
 }
 
 /**
