@@ -227,16 +227,13 @@ function patchComponent(internal, inst, prevProps, newProps, parentDom, flags) {
 			renderResult = [renderResult];
 		}
 
-		// patchChildren(internal, renderResult, parentDom);
-
 		if (internal._children == null) {
-			let siblingDom =
-				(flags & (MODE_HYDRATE | MODE_SUSPENDED)) ===
-				(MODE_HYDRATE | MODE_SUSPENDED)
-					? internal._dom
-					: flags & MODE_HYDRATE // : isNew || internal.flags & MODE_HYDRATE
-					? null
-					: getDomSibling(internal);
+			let siblingDom;
+			if (flags & MODE_HYDRATE) {
+				siblingDom = flags & MODE_SUSPENDED ? internal._dom : null;
+			} else {
+				siblingDom = getDomSibling(internal);
+			}
 
 			mountChildren(internal, renderResult, parentDom, siblingDom);
 		} else {
