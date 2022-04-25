@@ -72,38 +72,7 @@ export function mount(internal, newVNode, startDom) {
 		internal.flags &= RESET_MODE;
 	} else {
 		try {
-			let prevContext = rendererState._context;
-			// Necessary for createContext api. Setting this property will pass
-			// the context value as `this.context` just for this component.
-			let tmp = newVNode.type.contextType;
-			let provider = tmp && rendererState._context[tmp._id];
-			let componentContext = tmp
-				? provider
-					? provider.props.value
-					: tmp._defaultValue
-				: rendererState._context;
-
-			if (provider) provider._subs.add(internal);
-
-			let renderResult = mountComponent(internal, componentContext);
-
-			if (renderResult == null) {
-				nextDomSibling = startDom;
-			} else {
-				if (typeof renderResult === 'object') {
-					// dissolve unkeyed root fragments:
-					if (renderResult.type === Fragment && renderResult.key == null) {
-						renderResult = renderResult.props.children;
-					}
-					if (!Array.isArray(renderResult)) {
-						renderResult = [renderResult];
-					}
-				} else {
-					renderResult = [renderResult];
-				}
-
-				nextDomSibling = mountChildren(internal, renderResult, startDom);
-			}
+			nextDomSibling = mountComponent(internal, startDom);
 
 			if (
 				internal._commitCallbacks != null &&
@@ -113,9 +82,6 @@ export function mount(internal, newVNode, startDom) {
 			}
 
 			rendererState._parentDom = prevParentDom;
-			// In the event this subtree creates a new context for its children, restore
-			// the previous context for its siblings
-			rendererState._context = prevContext;
 			// We successfully rendered this VNode, unset any stored hydration/bailout state:
 			internal.flags &= RESET_MODE;
 		} catch (e) {
@@ -148,15 +114,28 @@ export function mount(internal, newVNode, startDom) {
 /**
  * Render a function component
  * @param {import('../internal').Internal} internal The component's backing Internal node
- * @param {any} componentContext The aggregated context
+ * @param {any} startDom The aggregated context
  * @returns {import('../internal').ComponentChildren} the component's children
  */
-function mountComponent(internal, componentContext) {
+function mountComponent(internal, startDom) {
 	/** @type {import('../internal').Component} */
 	let c;
 
 	let type = /** @type {import('../internal').ComponentType} */ (internal.type);
 	let newProps = internal.props;
+
+	let prevContext = rendererState._context;
+	// Necessary for createContext api. Setting this property will pass
+	// the context value as `this.context` just for this component.
+	let tmp = type.contextType;
+	let provider = tmp && rendererState._context[tmp._id];
+	let componentContext = tmp
+		? provider
+			? provider.props.value
+			: tmp._defaultValue
+		: rendererState._context;
+
+	if (provider) provider._subs.add(internal);
 
 	if (internal.flags & TYPE_CLASS) {
 		// @ts-ignore `type` is a class component constructor
@@ -233,7 +212,28 @@ function mountComponent(internal, componentContext) {
 		);
 	}
 
-	return renderResult;
+	if (renderResult == null) {
+		return startDom;
+	}
+	if (typeof renderResult === 'object') {
+		// dissolve unkeyed root fragments:
+		if (renderResult.type === Fragment && renderResult.key == null) {
+			renderResult = renderResult.props.children;
+		}
+		if (!Array.isArray(renderResult)) {
+			renderResult = [renderResult];
+		}
+	} else {
+		renderResult = [renderResult];
+	}
+
+	const result = mountChildren(internal, renderResult, startDom);
+
+	// In the event this subtree creates a new context for its children, restore
+	// the previous context for its siblings
+	rendererState._context = prevContext;
+
+	return result;
 }
 
 /**
