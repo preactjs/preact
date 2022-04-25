@@ -129,13 +129,12 @@ export function patch(internal, vnode, parentDom) {
 				internal.props = vnode.props;
 				internal._component.props = vnode.props;
 			} else if (internal._children == null) {
-				let siblingDom =
-					(internal.flags & (MODE_HYDRATE | MODE_SUSPENDED)) ===
-					(MODE_HYDRATE | MODE_SUSPENDED)
-						? internal._dom
-						: internal.flags & MODE_HYDRATE
-						? null
-						: getDomSibling(internal);
+				let siblingDom;
+				if (flags & MODE_HYDRATE) {
+					siblingDom = flags & MODE_SUSPENDED ? internal._dom : null;
+				} else {
+					siblingDom = getDomSibling(internal);
+				}
 
 				mountChildren(internal, renderResult, parentDom, siblingDom);
 			} else {
