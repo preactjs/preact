@@ -53,7 +53,7 @@ export function mount(internal, newVNode, parentDom, startDom) {
 
 			// Necessary for createContext api. Setting this property will pass
 			// the context value as `this.context` just for this component.
-			let tmp = newVNode.type.contextType;
+			let tmp = internal.type.contextType;
 			let provider = tmp && context[tmp._id];
 			let componentContext = tmp
 				? provider

@@ -84,7 +84,7 @@ export function patch(internal, vnode, parentDom) {
 
 				// Necessary for createContext api. Setting this property will pass
 				// the context value as `this.context` just for this component.
-				let tmp = vnode.type.contextType;
+				let tmp = internal.type.contextType;
 				let provider = tmp && context[tmp._id];
 				let componentContext = tmp
 					? provider
