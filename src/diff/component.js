@@ -8,11 +8,7 @@ import { rendererState } from '../component';
  * @param {import('../internal').VNode} newVNode The new virtual node
  * @returns {import('../internal').ComponentChildren} the component's children
  */
-export function renderFunctionComponent(
-	internal,
-	newVNode,
-	componentContext
-) {
+export function renderFunctionComponent(internal, newVNode, componentContext) {
 	/** @type {import('../internal').Component} */
 	let c;
 
@@ -29,12 +25,6 @@ export function renderFunctionComponent(
 		};
 		c._internal = internal;
 		internal.flags |= DIRTY_BIT;
-	}
-
-	if (newVNode && newVNode._vnodeId === internal._vnodeId) {
-		c.props = newProps;
-		internal.flags |= SKIP_CHILDREN;
-		return;
 	}
 
 	c.context = componentContext;
@@ -69,11 +59,7 @@ export function renderFunctionComponent(
  * @param {import('../internal').VNode} newVNode The new virtual node
  * @returns {import('../internal').ComponentChildren} the component's children
  */
-export function renderClassComponent(
-	internal,
-	newVNode,
-	componentContext
-) {
+export function renderClassComponent(internal, newVNode, componentContext) {
 	/** @type {import('../internal').Component} */
 	let c;
 	let isNew, oldProps, oldState, snapshot;
@@ -131,13 +117,11 @@ export function renderClassComponent(
 		}
 
 		if (
-			(!(internal.flags & FORCE_UPDATE) &&
-				c.shouldComponentUpdate != null &&
-				c.shouldComponentUpdate(newProps, c._nextState, componentContext) ===
-					false) ||
-			(newVNode && newVNode._vnodeId === internal._vnodeId)
+			!(internal.flags & FORCE_UPDATE) &&
+			c.shouldComponentUpdate != null &&
+			c.shouldComponentUpdate(newProps, c._nextState, componentContext) ===
+				false
 		) {
-			c.props = newProps;
 			c.state = c._nextState;
 			internal.flags |= SKIP_CHILDREN;
 			return;

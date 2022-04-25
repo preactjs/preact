@@ -67,62 +67,63 @@ export function patch(internal, vnode) {
 		if (vnode._vnodeId !== internal._vnodeId) {
 			// @ts-ignore dom is a PreactElement here
 			patchElement(internal, vnode);
+			internal.props = vnode.props;
 		}
 	} else {
+		if (flags & MODE_PENDING_ERROR) {
+			// Toggle the MODE_PENDING_ERROR and MODE_RERENDERING_ERROR flags. In
+			// actuality, this should turn off the MODE_PENDING_ERROR flag and turn on
+			// the MODE_RERENDERING_ERROR flag.
+			internal.flags ^= MODE_PENDING_ERROR | MODE_RERENDERING_ERROR;
+		}
+
 		try {
-			if (internal.flags & MODE_PENDING_ERROR) {
-				// Toggle the MODE_PENDING_ERROR and MODE_RERENDERING_ERROR flags. In
-				// actuality, this should turn off the MODE_PENDING_ERROR flag and turn on
-				// the MODE_RERENDERING_ERROR flag.
-				internal.flags ^= MODE_PENDING_ERROR | MODE_RERENDERING_ERROR;
-			}
-
-			let prevContext = rendererState._context;
-			// Necessary for createContext api. Setting this property will pass
-			// the context value as `this.context` just for this component.
-			let tmp = vnode.type.contextType;
-			let provider = tmp && rendererState._context[tmp._id];
-			let componentContext = tmp
-				? provider
-					? provider.props.value
-					: tmp._defaultValue
-				: rendererState._context;
-			let isNew = !internal || !internal._component;
-
 			let renderResult;
-
-			if (internal.flags & TYPE_CLASS) {
-				renderResult = renderClassComponent(
-					internal,
-					vnode,
-					componentContext
-				);
+			let prevContext = rendererState._context;
+			if (internal._vnodeId === vnode._vnodeId) {
+				internal.flags |= SKIP_CHILDREN;
 			} else {
-				renderResult = renderFunctionComponent(
-					internal,
-					vnode,
-					componentContext
-				);
-			}
+				// Necessary for createContext api. Setting this property will pass
+				// the context value as `this.context` just for this component.
+				let tmp = vnode.type.contextType;
+				let provider = tmp && rendererState._context[tmp._id];
+				let componentContext = tmp
+					? provider
+						? provider.props.value
+						: tmp._defaultValue
+					: rendererState._context;
 
-			if (renderResult == null) {
-				renderResult = [];
-			} else if (typeof renderResult === 'object') {
-				if (renderResult.type === Fragment && renderResult.key == null) {
-					renderResult = renderResult.props.children;
+				if (flags & TYPE_CLASS) {
+					renderResult = renderClassComponent(
+						internal,
+						vnode,
+						componentContext
+					);
+				} else {
+					renderResult = renderFunctionComponent(
+						internal,
+						vnode,
+						componentContext
+					);
 				}
-				if (!Array.isArray(renderResult)) {
+
+				if (renderResult == null) {
+					renderResult = [];
+				} else if (typeof renderResult === 'object') {
+					if (renderResult.type === Fragment && renderResult.key == null) {
+						renderResult = renderResult.props.children;
+					}
+					if (!Array.isArray(renderResult)) {
+						renderResult = [renderResult];
+					}
+				} else {
 					renderResult = [renderResult];
 				}
-			} else {
-				renderResult = [renderResult];
 			}
 
 			if (internal.flags & SKIP_CHILDREN) {
-				internal.props = vnode.props;
-				internal.flags &= ~SKIP_CHILDREN;
-				// More info about this here: https://gist.github.com/JoviDeCroock/bec5f2ce93544d2e6070ef8e0036e4e8
-				if (vnode && vnode._vnodeId !== internal._vnodeId) {
+				internal._component.props = internal.props = vnode.props;
+				if (vnode._vnodeId !== internal._vnodeId) {
 					internal.flags &= ~DIRTY_BIT;
 				}
 			} else if (internal._children == null) {
@@ -130,23 +131,16 @@ export function patch(internal, vnode) {
 					(internal.flags & (MODE_HYDRATE | MODE_SUSPENDED)) ===
 					(MODE_HYDRATE | MODE_SUSPENDED)
 						? internal._dom
-						: isNew || internal.flags & MODE_HYDRATE
+						: internal.flags & MODE_HYDRATE
 						? null
 						: getDomSibling(internal);
 
-				mountChildren(
-					internal,
-					renderResult,
-					siblingDom
-				);
+				mountChildren(internal, renderResult, siblingDom);
 			} else {
 				patchChildren(internal, renderResult);
 			}
 
-			if (
-				internal._commitCallbacks != null &&
-				internal._commitCallbacks.length
-			) {
+			if (internal._commitCallbacks.length) {
 				rendererState._commitQueue.push(internal);
 			}
 
@@ -182,7 +176,7 @@ export function patch(internal, vnode) {
 function patchElement(internal, vnode) {
 	let dom = /** @type {import('../internal').PreactElement} */ (internal._dom),
 		oldProps = internal.props,
-		newProps = (internal.props = vnode.props),
+		newProps = vnode.props,
 		isSvg = internal.flags & MODE_SVG,
 		i,
 		value,
@@ -229,7 +223,7 @@ function patchElement(internal, vnode) {
 		rendererState._parentDom = dom;
 		patchChildren(
 			internal,
-			newChildren && Array.isArray(newChildren) ? newChildren : [newChildren],
+			newChildren && Array.isArray(newChildren) ? newChildren : [newChildren]
 		);
 		rendererState._parentDom = prevParentDom;
 	}
