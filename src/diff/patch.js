@@ -131,7 +131,7 @@ export function patch(internal, vnode) {
 					(internal.flags & (MODE_HYDRATE | MODE_SUSPENDED)) ===
 					(MODE_HYDRATE | MODE_SUSPENDED)
 						? internal._dom
-						: !internal || !internal._component || internal.flags & MODE_HYDRATE
+						: internal.flags & MODE_HYDRATE
 						? null
 						: getDomSibling(internal);
 
