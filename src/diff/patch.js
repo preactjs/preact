@@ -70,7 +70,7 @@ export function patch(internal, vnode) {
 			internal.props = vnode.props;
 		}
 	} else {
-		if (internal.flags & MODE_PENDING_ERROR) {
+		if (flags & MODE_PENDING_ERROR) {
 			// Toggle the MODE_PENDING_ERROR and MODE_RERENDERING_ERROR flags. In
 			// actuality, this should turn off the MODE_PENDING_ERROR flag and turn on
 			// the MODE_RERENDERING_ERROR flag.
@@ -93,7 +93,7 @@ export function patch(internal, vnode) {
 						: tmp._defaultValue
 					: rendererState._context;
 
-				if (internal.flags & TYPE_CLASS) {
+				if (flags & TYPE_CLASS) {
 					renderResult = renderClassComponent(
 						internal,
 						vnode,
