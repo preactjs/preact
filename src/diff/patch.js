@@ -140,10 +140,7 @@ function patchComponent(internal, inst, prevProps, newProps, parentDom, flags) {
 				inst._nextState,
 				type.getDerivedStateFromProps(newProps, inst._nextState)
 			);
-		}
-
-		if (
-			type.getDerivedStateFromProps == null &&
+		} else if (
 			newProps !== prevProps &&
 			inst.componentWillReceiveProps != null
 		) {
@@ -177,24 +174,24 @@ function patchComponent(internal, inst, prevProps, newProps, parentDom, flags) {
 		inst.state = inst._nextState;
 
 		let renderHook = options._render;
-
 		let renderResult;
 
-		let counter = 0;
-		while (counter++ < 25) {
-			// mark as clean:
+		// note: disable repeat render invocation for class components
+		if (flags & TYPE_CLASS) {
 			internal.flags &= ~DIRTY_BIT;
 			if (renderHook) renderHook(internal);
-			if (flags & TYPE_CLASS) {
-				renderResult = inst.render(inst.props, inst.state, inst.context);
-				// note: disable repeat render invocation for class components
-				break;
-			} else {
+			renderResult = inst.render(inst.props, inst.state, inst.context);
+		} else {
+			let counter = 0;
+			while (counter++ < 25) {
+				// mark as clean:
+				internal.flags &= ~DIRTY_BIT;
+				if (renderHook) renderHook(internal);
 				renderResult = type.call(inst, inst.props, inst.context);
-			}
-			// re-render if marked as dirty:
-			if (!(internal.flags & DIRTY_BIT)) {
-				break;
+				// re-render if marked as dirty:
+				if (!(internal.flags & DIRTY_BIT)) {
+					break;
+				}
 			}
 		}
 

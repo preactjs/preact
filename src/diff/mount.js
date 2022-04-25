@@ -183,24 +183,24 @@ function mountComponent(internal, props, parentDom, startDom, flags) {
 	let renderHook = options._render;
 	let renderResult;
 
-	let counter = 0;
-	while (counter++ < 25) {
-		// mark as clean:
+	// note: disable repeat render invocation for class components
+	if (flags & TYPE_CLASS) {
 		internal.flags &= ~DIRTY_BIT;
 		if (renderHook) renderHook(internal);
-		if (flags & TYPE_CLASS) {
-			renderResult = inst.render(inst.props, inst.state, inst.context);
-			// note: disable repeat render invocation for class components
-			break;
-		} else {
+		renderResult = inst.render(inst.props, inst.state, inst.context);
+	} else {
+		let counter = 0;
+		while (counter++ < 25) {
+			// mark as clean:
+			internal.flags &= ~DIRTY_BIT;
+			if (renderHook) renderHook(internal);
 			renderResult = type.call(inst, inst.props, inst.context);
-		}
-		// re-render if marked as dirty:
-		if (!(internal.flags & DIRTY_BIT)) {
-			break;
+			// re-render if marked as dirty:
+			if (!(internal.flags & DIRTY_BIT)) {
+				break;
+			}
 		}
 	}
-	// internal.flags &= ~DIRTY_BIT;
 
 	// Handle setState called in render, see #2553
 	inst.state = inst._nextState;
