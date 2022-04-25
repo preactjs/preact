@@ -229,6 +229,9 @@ function patchComponent(internal, newVNode, componentContext) {
 		c._nextState = c.state;
 	}
 
+	let oldProps = c.props;
+	let oldState = c.state;
+
 	if (type.getDerivedStateFromProps != null) {
 		if (c._nextState == c.state) {
 			c._nextState = Object.assign({}, c._nextState);
@@ -238,13 +241,7 @@ function patchComponent(internal, newVNode, componentContext) {
 			c._nextState,
 			type.getDerivedStateFromProps(newProps, c._nextState)
 		);
-	}
-
-	let oldProps = c.props;
-	let oldState = c.state;
-
-	if (
-		type.getDerivedStateFromProps == null &&
+	} else if (
 		newProps !== oldProps &&
 		c.componentWillReceiveProps != null
 	) {
@@ -275,20 +272,22 @@ function patchComponent(internal, newVNode, componentContext) {
 	let renderHook = options._render;
 	if (renderHook) renderHook(internal);
 
-	let counter = 0,
-		renderResult;
-	while (counter++ < 25) {
+	// note: disable repeat render invocation for class components
+	if (flags & TYPE_CLASS) {
 		internal.flags &= ~DIRTY_BIT;
 		if (renderHook) renderHook(internal);
-		if (internal.flags & TYPE_CLASS) {
-			renderResult = c.render(c.props, c.state, c.context);
-			// note: disable repeat render invocation for class components
-			break;
-		} else {
-			renderResult = type.call(c, c.props, c.context);
-		}
-		if (!(internal.flags & DIRTY_BIT)) {
-			break;
+		renderResult = inst.render(inst.props, inst.state, inst.context);
+	} else {
+		let counter = 0;
+		while (counter++ < 25) {
+			// mark as clean:
+			internal.flags &= ~DIRTY_BIT;
+			if (renderHook) renderHook(internal);
+			renderResult = type.call(inst, inst.props, inst.context);
+			// re-render if marked as dirty:
+			if (!(internal.flags & DIRTY_BIT)) {
+				break;
+			}
 		}
 	}
 

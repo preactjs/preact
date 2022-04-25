@@ -184,18 +184,21 @@ function mountComponent(internal, startDom) {
 	let renderHook = options._render;
 	if (renderHook) renderHook(internal);
 
-	let counter = 0,
-		renderResult;
-	while (counter++ < 25) {
+	// note: disable repeat render invocation for class components
+	if (flags & TYPE_CLASS) {
 		internal.flags &= ~DIRTY_BIT;
 		if (renderHook) renderHook(internal);
-		if (internal.flags & TYPE_CLASS) {
-			renderResult = c.render(c.props, c.state, c.context);
-			// note: disable repeat render invocation for class components
-			break;
-		} else {
-			renderResult = type.call(c, c.props, c.context);
+		renderResult = inst.render(inst.props, inst.state, inst.context);
+	} else {
+		let counter = 0;
+		while (counter++ < 25) {
+			// mark as clean:
+			internal.flags &= ~DIRTY_BIT;
+			if (renderHook) renderHook(internal);
+			renderResult = type.call(inst, inst.props, inst.context);
+			// re-render if marked as dirty:
 		}
+	}
 		if (!(internal.flags & DIRTY_BIT)) {
 			break;
 		}
