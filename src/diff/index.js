@@ -181,11 +181,12 @@ export function diff(
 			do {
 				c._dirty = false;
 				if (renderHook) renderHook(newVNode);
-				tmp = c.render(c.props, c.state, c.context);
-			} while (c._dirty && ++count < 25);
 
-			// Handle setState called in render, see #2553
-			c.state = c._nextState;
+				tmp = c.render(c.props, c.state, c.context);
+
+				// Handle setState called in render, see #2553
+				c.state = c._nextState;
+			} while (c._dirty && ++count < 25);
 
 			if (c.getChildContext != null) {
 				globalContext = assign(assign({}, globalContext), c.getChildContext());
