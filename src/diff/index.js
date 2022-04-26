@@ -178,11 +178,11 @@ export function diff(
 			let renderHook = options._render;
 
 			let count = 0;
-			while (c._dirty && count++ < 25) {
+			do {
 				c._dirty = false;
 				if (renderHook) renderHook(newVNode);
 				tmp = c.render(c.props, c.state, c.context);
-			}
+			} while (c._dirty && ++count < 25);
 
 			// Handle setState called in render, see #2553
 			c.state = c._nextState;
