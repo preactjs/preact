@@ -172,13 +172,17 @@ export function diff(
 			c.props = newProps;
 			c.state = c._nextState;
 
-			if ((tmp = options._render)) tmp(newVNode);
-
-			c._dirty = false;
 			c._vnode = newVNode;
 			c._parentDom = parentDom;
 
-			tmp = c.render(c.props, c.state, c.context);
+			let renderHook = options._render;
+
+			let count = 0;
+			while (c._dirty && count++ < 25) {
+				c._dirty = false;
+				if (renderHook) renderHook(newVNode);
+				tmp = c.render(c.props, c.state, c.context);
+			}
 
 			// Handle setState called in render, see #2553
 			c.state = c._nextState;
