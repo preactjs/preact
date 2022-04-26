@@ -17,7 +17,7 @@ import {
 	DIRTY_BIT,
 	FORCE_UPDATE
 } from '../constants';
-import { getDomSibling, getParentContext } from '../tree';
+import { getDomSibling, getParentContext, getParentDom } from '../tree';
 import { mountChildren } from './mount';
 import { Fragment } from '../create-element';
 import { commitQueue } from './renderer';
@@ -26,9 +26,8 @@ import { commitQueue } from './renderer';
  * Diff two virtual nodes and apply proper changes to the DOM
  * @param {import('../internal').Internal} internal The Internal node to patch
  * @param {import('../internal').VNode | string} vnode The new virtual node
- * @param {import('../internal').PreactElement} parentDom The element into which this subtree is rendered
  */
-export function patch(internal, vnode, parentDom) {
+export function patch(internal, vnode) {
 	if (options._diff) options._diff(internal, vnode);
 
 	let flags = internal.flags;
@@ -50,13 +49,16 @@ export function patch(internal, vnode, parentDom) {
 		// Root nodes render their children into a specific parent DOM element.
 		// They can occur anywhere in the tree, can be nested, and currently allow reparenting during patches.
 		// @TODO: Decide if we actually want to support silent reparenting during patch - is it worth the bytes?
-		let prevParentDom = parentDom;
 		if (flags & TYPE_ROOT) {
-			parentDom = newProps._parentDom;
+			let parentDom = newProps._parentDom;
 
 			if (parentDom !== prevProps._parentDom) {
+				// Suspended trees are re-parented into the same parent so they can be inserted/removed without diffing.
+				// For that to work, when createPortal is used to render into the nearest element parent, we insert in-order.
 				let nextSibling =
-					parentDom == prevParentDom ? getDomSibling(internal) : null;
+					parentDom == getParentDom(internal._parent)
+						? getDomSibling(internal)
+						: null;
 				insertComponentDom(internal, nextSibling, parentDom);
 			}
 		}
@@ -76,7 +78,6 @@ export function patch(internal, vnode, parentDom) {
 					internal._component,
 					prevProps,
 					newProps,
-					parentDom,
 					flags
 				);
 
@@ -104,10 +105,9 @@ export function patch(internal, vnode, parentDom) {
  * @param {import('../internal').Component} inst
  * @param {any} prevProps
  * @param {any} newProps
- * @param {import('../internal').PreactElement} parentDom
  * @param {import('../internal').Internal['flags']} flags
  */
-function patchComponent(internal, inst, prevProps, newProps, parentDom, flags) {
+function patchComponent(internal, inst, prevProps, newProps, flags) {
 	let type = /** @type {import('../internal').ComponentType} */ (internal.type);
 
 	let context = getParentContext(internal);
@@ -235,9 +235,9 @@ function patchComponent(internal, inst, prevProps, newProps, parentDom, flags) {
 				siblingDom = getDomSibling(internal);
 			}
 
-			mountChildren(internal, renderResult, parentDom, siblingDom);
+			mountChildren(internal, renderResult, siblingDom);
 		} else {
-			patchChildren(internal, renderResult, parentDom);
+			patchChildren(internal, renderResult);
 		}
 	} catch (e) {
 		// @TODO: assign a new VNode ID here? Or NaN?
@@ -302,8 +302,7 @@ function patchElement(internal, oldProps, newProps, flags) {
 		if (oldHtml) dom.innerHTML = '';
 		patchChildren(
 			internal,
-			newChildren && Array.isArray(newChildren) ? newChildren : [newChildren],
-			dom
+			newChildren && Array.isArray(newChildren) ? newChildren : [newChildren]
 		);
 	}
 

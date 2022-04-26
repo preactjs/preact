@@ -16,18 +16,17 @@ import {
 import options from '../options';
 import { normalizeToVNode, Fragment } from '../create-element';
 import { setProperty } from './props';
-import { createInternal, getParentContext } from '../tree';
+import { createInternal, getParentContext, getParentDom } from '../tree';
 import { commitQueue } from './renderer';
 
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
  * @param {import('../internal').Internal} internal The Internal node to mount
  * @param {import('../internal').VNode | string} vnode The new virtual node
- * @param {import('../internal').PreactElement} parentDom The element into which this subtree should be inserted
  * @param {import('../internal').PreactNode} startDom
  * @returns {import('../internal').PreactNode | null} pointer to the next DOM node to be hydrated (or null)
  */
-export function mount(internal, vnode, parentDom, startDom) {
+export function mount(internal, vnode, startDom) {
 	if (options._diff) options._diff(internal, vnode);
 
 	let flags = internal.flags;
@@ -44,11 +43,12 @@ export function mount(internal, vnode, parentDom, startDom) {
 	// the page. Root nodes can occur anywhere in the tree and not just at the
 	// top.
 	let prevStartDom;
-	let prevParentDom = parentDom;
 	if (flags & TYPE_ROOT) {
-		parentDom = props._parentDom;
+		// Normally, the DOM parent for insertions is the parent internal's DOM.
+		// However, the root Internal in a tree has no _parent, an inserts into props._parentDom.
+		let implicitParentDom = getParentDom(internal._parent || internal);
 
-		if (parentDom !== prevParentDom) {
+		if (props._parentDom !== implicitParentDom) {
 			prevStartDom = startDom;
 			startDom = null;
 		}
@@ -76,13 +76,7 @@ export function mount(internal, vnode, parentDom, startDom) {
 		internal.flags &= RESET_MODE;
 	} else {
 		try {
-			nextDomSibling = mountComponent(
-				internal,
-				props,
-				parentDom,
-				startDom,
-				flags
-			);
+			nextDomSibling = mountComponent(internal, props, startDom, flags);
 
 			if (internal._commitCallbacks.length) {
 				commitQueue.push(internal);
@@ -118,11 +112,10 @@ export function mount(internal, vnode, parentDom, startDom) {
 /**
  * @param {import('../internal').Internal} internal
  * @param {any} props
- * @param {import('../internal').PreactElement} parentDom
  * @param {import('../internal').PreactNode} startDom
  * @param {import('../internal').Internal['flags']} flags
  */
-function mountComponent(internal, props, parentDom, startDom, flags) {
+function mountComponent(internal, props, startDom, flags) {
 	let type = /** @type {import('../internal').ComponentType} */ (internal.type);
 
 	let context = getParentContext(internal);
@@ -224,7 +217,7 @@ function mountComponent(internal, props, parentDom, startDom, flags) {
 		renderResult = [renderResult];
 	}
 
-	return mountChildren(internal, renderResult, parentDom, startDom);
+	return mountChildren(internal, renderResult, startDom);
 }
 
 /**
@@ -244,7 +237,9 @@ function mountElement(internal, dom) {
 	// Are we *not* hydrating? (a top-level render() or mutative hydration):
 	let isFullRender = ~flags & MODE_HYDRATE;
 
+	/** @type {import('../internal').PreactNode} */
 	let hydrateChild = null;
+	/** @type {import('../internal').PreactNode} */
 	let nextDomSibling;
 
 	// If hydrating (hydrate() or render() with replaceNode), find the matching child:
@@ -253,7 +248,9 @@ function mountElement(internal, dom) {
 	if (flags & (MODE_HYDRATE | MODE_MUTATIVE_HYDRATE)) {
 		while (dom) {
 			if (dom.localName === nodeType) {
+				// @ts-ignore-next ChildNode ~= PreactNode
 				hydrateChild = dom.firstChild;
+				// @ts-ignore-next ChildNode ~= PreactNode
 				nextDomSibling = dom.nextSibling;
 
 				if (flags & MODE_MUTATIVE_HYDRATE) {
@@ -339,8 +336,7 @@ function mountElement(internal, dom) {
 		mountChildren(
 			internal,
 			Array.isArray(newChildren) ? newChildren : [newChildren],
-			dom,
-			hydrateChild // isNew ? null : dom.firstChild
+			hydrateChild
 		);
 	}
 
@@ -349,25 +345,23 @@ function mountElement(internal, dom) {
 		setProperty(dom, 'value', newValue, null, 0);
 	}
 
-	// @ts-ignore
 	return nextDomSibling;
-	// return isNew ? null : dom.nextSibling;
 }
 
 /**
  * Mount all children of an Internal
  * @param {import('../internal').Internal} internal The parent Internal of the given children
  * @param {import('../internal').ComponentChild[]} children
- * @param {import('../internal').PreactElement} parentDom The element into which this subtree should be inserted
  * @param {import('../internal').PreactNode} startDom
  */
-export function mountChildren(internal, children, parentDom, startDom) {
+export function mountChildren(internal, children, startDom) {
 	let internalChildren = (internal._children = []),
 		i,
 		childVNode,
 		childInternal,
 		newDom,
-		mountedNextChild;
+		mountedNextChild,
+		parentDom;
 
 	for (i = 0; i < children.length; i++) {
 		childVNode = normalizeToVNode(children[i]);
@@ -383,7 +377,7 @@ export function mountChildren(internal, children, parentDom, startDom) {
 		internalChildren[i] = childInternal;
 
 		// Morph the old element into the new one, but don't append it to the dom yet
-		mountedNextChild = mount(childInternal, childVNode, parentDom, startDom);
+		mountedNextChild = mount(childInternal, childVNode, startDom);
 
 		newDom = childInternal._dom;
 
@@ -393,10 +387,12 @@ export function mountChildren(internal, children, parentDom, startDom) {
 			// continue with the mountedNextChild
 			startDom = mountedNextChild;
 		} else if (newDom != null) {
+			let parent = parentDom || (parentDom = getParentDom(internal));
+
 			// The DOM the diff should begin with is now startDom (since we inserted
 			// newDom before startDom) so ignore mountedNextChild and continue with
 			// startDom
-			parentDom.insertBefore(newDom, startDom);
+			parent.insertBefore(newDom, startDom);
 		}
 
 		if (childInternal.ref) {

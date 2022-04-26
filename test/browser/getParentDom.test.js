@@ -37,7 +37,7 @@ describe('getParentDom', () => {
 		let domInternals = getRoot(scratch)._children[0]._children;
 		for (let internal of domInternals) {
 			expect(internal.type).to.equal('div');
-			expect(getParentDom(internal)).to.equalNode(scratch.firstChild);
+			expect(getParentDom(internal._parent)).to.equalNode(scratch.firstChild);
 		}
 	});
 
@@ -53,7 +53,9 @@ describe('getParentDom', () => {
 		let expectedTypes = ['div', null, 'div'];
 		for (let i = 0; i < domInternals.length; i++) {
 			expect(domInternals[i].type).to.equal(expectedTypes[i]);
-			expect(getParentDom(domInternals[i])).to.equalNode(scratch.firstChild);
+			expect(getParentDom(domInternals[i]._parent)).to.equalNode(
+				scratch.firstChild
+			);
 		}
 	});
 
@@ -76,7 +78,9 @@ describe('getParentDom', () => {
 		let expectedTypes = ['div', null];
 		for (let i = 0; i < domInternals.length; i++) {
 			expect(domInternals[i].type).to.equal(expectedTypes[i]);
-			expect(getParentDom(domInternals[i])).to.equalNode(scratch.firstChild);
+			expect(getParentDom(domInternals[i]._parent)).to.equalNode(
+				scratch.firstChild
+			);
 		}
 	});
 
@@ -104,7 +108,9 @@ describe('getParentDom', () => {
 		let expectedTypes = ['div', null];
 		for (let i = 0; i < domInternals.length; i++) {
 			expect(domInternals[i].type).to.equal(expectedTypes[i]);
-			expect(getParentDom(domInternals[i])).to.equalNode(scratch.firstChild);
+			expect(getParentDom(domInternals[i]._parent)).to.equalNode(
+				scratch.firstChild
+			);
 		}
 	});
 
@@ -134,7 +140,9 @@ describe('getParentDom', () => {
 		let expectedTypes = [Foo, Fragment];
 		for (let i = 0; i < domInternals.length; i++) {
 			expect(domInternals[i].type).to.equal(expectedTypes[i]);
-			expect(getParentDom(domInternals[i])).to.equalNode(scratch.firstChild);
+			expect(getParentDom(domInternals[i]._parent)).to.equalNode(
+				scratch.firstChild
+			);
 		}
 	});
 
@@ -152,7 +160,7 @@ describe('getParentDom', () => {
 
 		let internal = getRoot(scratch)._children[0]._children[1]._children[0]
 			._children[0];
-		let parentDom = getParentDom(internal);
+		let parentDom = getParentDom(internal._parent);
 
 		expect(internal.type).to.equal('span');
 		expect(scratch.firstChild.childNodes[1].nodeName).to.equal('P');
@@ -177,7 +185,7 @@ describe('getParentDom', () => {
 
 		let internal = getRoot(scratch)._children[0]._children[0]._children[0]
 			._children[0];
-		let parent = getParentDom(internal);
+		let parent = getParentDom(internal._parent);
 
 		expect(internal.type).to.equal('p');
 		expect(parent).to.equalNode(scratch.firstChild);
@@ -194,7 +202,7 @@ describe('getParentDom', () => {
 
 		const internal = getRoot(scratch)._children[0];
 		expect(internal.type).to.equal(Foo);
-		expect(getParentDom(internal)).to.equal(scratch);
+		expect(getParentDom(internal._parent)).to.equal(scratch);
 	});
 
 	it('should return parentDom of root node', () => {
@@ -240,11 +248,11 @@ describe('getParentDom', () => {
 
 		let fooInternal = getRoot(scratch)._children[0]._children[0]._children[0];
 		expect(fooInternal.type).to.equal(Foo);
-		expect(getParentDom(fooInternal)).to.equalNode(portalParent);
+		expect(getParentDom(fooInternal._parent)).to.equalNode(portalParent);
 
 		let divInternal = fooInternal._children[0];
 		expect(divInternal.type).to.equal('div');
-		expect(getParentDom(divInternal)).to.equalNode(portalParent);
+		expect(getParentDom(divInternal._parent)).to.equalNode(portalParent);
 	});
 
 	it('should return parentDom of root node returned from a Component', () => {
@@ -263,6 +271,6 @@ describe('getParentDom', () => {
 		let internal = getRoot(scratch)._children[0]._children[0]._children[0]
 			._children[0];
 		expect(internal.type).to.equal('div');
-		expect(getParentDom(internal)).to.equalNode(portalParent);
+		expect(getParentDom(internal._parent)).to.equalNode(portalParent);
 	});
 });

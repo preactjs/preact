@@ -183,23 +183,31 @@ export function getParentContext(internal) {
 }
 
 /**
+ * Returns the nearest DOM element for a given internal.
+ *  - Component internal: returns its nearest Element parent.
+ *  - Root internal: returns the its `_parentDom` prop.
+ *  - Element internal: returns its associated DOM element.
  * @param {import('./internal').Internal} internal
  * @returns {import('./internal').PreactElement}
  */
 export function getParentDom(internal) {
-	let parent = internal;
-
-	// if this is a Root internal, return its parent DOM:
-	if (parent.flags & TYPE_ROOT) {
-		return parent.props._parentDom;
+	if (internal.flags & TYPE_ROOT) {
+		return internal.props._parentDom;
 	}
-
-	// walk up the tree to find the nearest DOM or Root Internal:
-	while ((parent = parent._parent)) {
-		if (parent.flags & TYPE_ROOT) {
-			return parent.props._parentDom;
-		} else if (parent.flags & TYPE_ELEMENT) {
-			return parent._dom;
-		}
+	if (internal.flags & TYPE_ELEMENT) {
+		// @ts-ignore-next the flag guard ensures _dom is a PreactElement
+		return internal._dom;
 	}
+	return internal._parent && getParentDom(internal._parent);
+
+	// while (internal) {
+	// 	if (internal.flags & TYPE_ROOT) {
+	// 		return internal.props._parentDom;
+	// 	}
+	// 	if (internal.flags & TYPE_ELEMENT) {
+	// 		// @ts-ignore-next the flag guard ensures _dom is a PreactElement
+	// 		return internal._dom;
+	// 	}
+	// 	internal = internal._parent;
+	// }
 }

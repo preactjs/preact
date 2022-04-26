@@ -30,7 +30,7 @@ export function createRoot(parentDom) {
 			/** @type {import('./internal').PreactElement} */ (parentDom.firstChild);
 
 		if (rootInternal) {
-			patch(rootInternal, vnode, parentDom);
+			patch(rootInternal, vnode);
 		} else {
 			rootInternal = createInternal(vnode);
 
@@ -49,7 +49,7 @@ export function createRoot(parentDom) {
 
 			rootInternal._context = {};
 
-			mount(rootInternal, vnode, parentDom, firstChild);
+			mount(rootInternal, vnode, firstChild);
 		}
 
 		// Flush all queued effects
