@@ -71,7 +71,14 @@ export function patch(internal, vnode) {
 		let isSameVNode = vnode._vnodeId === internal._vnodeId;
 		if (!isSameVNode || (flags & FORCE_UPDATE) !== 0) {
 			if (flags & TYPE_ELEMENT) {
-				patchElement(internal, prevProps, newProps, flags);
+				patchElement(
+					internal,
+					// @ts-ignore _dom is a PreactElement here
+					internal._dom,
+					prevProps,
+					newProps,
+					flags
+				);
 			} else {
 				patchComponent(
 					internal,
@@ -250,15 +257,13 @@ function patchComponent(internal, inst, prevProps, newProps, flags) {
 /**
  * Update an internal and its associated DOM element based on a new VNode
  * @param {import('../internal').Internal} internal
+ * @param {import('../internal').PreactElement} dom
  * @param {any} oldProps
  * @param {any} newProps
  * @param {import('../internal').Internal['flags']} flags
  */
-function patchElement(internal, oldProps, newProps, flags) {
-	let dom = /** @type {import('../internal').PreactElement} */ (internal._dom),
-		// oldProps = internal.props,
-		// newProps = (internal.props = vnode.props),
-		isSvg = flags & MODE_SVG,
+function patchElement(internal, dom, oldProps, newProps, flags) {
+	let isSvg = flags & MODE_SVG,
 		i,
 		value,
 		tmp,
