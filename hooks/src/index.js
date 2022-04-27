@@ -29,13 +29,12 @@ options._diff = (vnode, oldVNode) => {
 		let hasDiff = false;
 
 		vnode._component.__hooks._list.forEach(hookState => {
-			if (
-				hookState._nextValue &&
-				hookState._nextValue[0] === hookState._value[0]
-			) {
+			let nextValue = hookState._nextValue;
+			if (!nextValue) return;
+			if (nextValue[0] === hookState._value[0]) {
 				hasBail = true;
-			} else if (hookState._nextValue) {
-				hookState._value = hookState._nextValue;
+			} else {
+				hookState._value = nextValue;
 				hasDiff = true;
 			}
 			hookState._nextValue = undefined;
