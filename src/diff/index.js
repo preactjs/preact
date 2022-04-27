@@ -50,8 +50,8 @@ export function diff(
 		excessDomChildren = [oldDom];
 	}
 
-	if (oldVNode._component) {
-		c = newVNode._component = oldVNode._component;
+	if (c) {
+		newVNode._component = c;
 	}
 
 	if ((tmp = options._diff)) tmp(newVNode, oldVNode);
