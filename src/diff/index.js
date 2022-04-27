@@ -34,7 +34,7 @@ export function diff(
 	isHydrating
 ) {
 	let tmp,
-		c,
+		c = oldVNode._component,
 		newType = newVNode.type;
 
 	// When passing through createElement it assigns the object
