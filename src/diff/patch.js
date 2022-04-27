@@ -28,7 +28,8 @@ import { commitQueue } from './renderer';
  * @param {import('../internal').VNode | string} vnode The new virtual node
  */
 export function patch(internal, vnode) {
-	if (options._diff) options._diff(internal, vnode);
+	let diffHook;
+	if ((diffHook = options._diff)) diffHook(internal, vnode);
 
 	let flags = internal.flags;
 	let prevProps = internal.props;
@@ -104,7 +105,7 @@ export function patch(internal, vnode) {
 	// We successfully rendered this VNode, unset any stored hydration/bailout state:
 	internal.flags &= RESET_MODE;
 
-	if (options.diffed) options.diffed(internal);
+	if ((diffHook = options.diffed)) diffHook(internal);
 }
 
 /**
