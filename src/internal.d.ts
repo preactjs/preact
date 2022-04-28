@@ -45,13 +45,9 @@ export interface Options extends preact.Options {
 	_internal?(internal: Internal, vnode: VNode | string): void;
 }
 
-export type RendererState = {
-	_context: Record<string, any>;
-	_commitQueue: CommitQueue;
-	_parentDom: Element | Document | ShadowRoot | DocumentFragment;
-};
-
 export type CommitQueue = Internal[];
+
+export type DOMParent = Element | Document | ShadowRoot | DocumentFragment;
 
 // Redefine ComponentFactory using our new internal FunctionalComponent interface above
 export type ComponentFactory<P> =

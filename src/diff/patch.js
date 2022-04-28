@@ -15,20 +15,20 @@ import {
 	MODE_HYDRATE,
 	MODE_PENDING_ERROR,
 	MODE_RERENDERING_ERROR,
-	SKIP_CHILDREN,
-	DIRTY_BIT
+	SKIP_CHILDREN
 } from '../constants';
-import { getDomSibling } from '../tree';
+import { getDomSibling, getParentContext } from '../tree';
 import { mountChildren } from './mount';
 import { Fragment } from '../create-element';
-import { rendererState } from '../component';
+import { commitQueue } from './renderer';
 
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
  * @param {import('../internal').Internal} internal The Internal node to patch
  * @param {import('../internal').VNode | string} vnode The new virtual node
+ * @param {import('../internal').PreactElement} parentDom The element into which this subtree is rendered
  */
-export function patch(internal, vnode) {
+export function patch(internal, vnode, parentDom) {
 	let flags = internal.flags;
 
 	if (flags & TYPE_TEXT) {
@@ -50,23 +50,21 @@ export function patch(internal, vnode) {
 	// Root nodes render their children into a specific parent DOM element.
 	// They can occur anywhere in the tree, can be nested, and currently allow reparenting during patches.
 	// @TODO: Decide if we actually want to support silent reparenting during patch - is it worth the bytes?
-	let prevParentDom = rendererState._parentDom;
+	let prevParentDom = parentDom;
 	if (flags & TYPE_ROOT) {
-		rendererState._parentDom = vnode.props._parentDom;
+		parentDom = vnode.props._parentDom;
 
-		if (internal.props._parentDom !== vnode.props._parentDom) {
+		if (internal.props._parentDom !== parentDom) {
 			let nextSibling =
-				rendererState._parentDom == prevParentDom
-					? getDomSibling(internal)
-					: null;
-			insertComponentDom(internal, nextSibling, rendererState._parentDom);
+				parentDom == prevParentDom ? getDomSibling(internal) : null;
+			insertComponentDom(internal, nextSibling, parentDom);
 		}
 	}
 
 	if (flags & TYPE_ELEMENT) {
 		if (vnode._vnodeId !== internal._vnodeId) {
 			// @ts-ignore dom is a PreactElement here
-			patchElement(internal, vnode);
+			patchElement(internal, internal.props, vnode.props, flags);
 			internal.props = vnode.props;
 		}
 	} else {
@@ -79,30 +77,33 @@ export function patch(internal, vnode) {
 
 		try {
 			let renderResult;
-			let prevContext = rendererState._context;
-			if (internal._vnodeId === vnode._vnodeId) {
+			if (vnode._vnodeId === internal._vnodeId) {
 				internal.flags |= SKIP_CHILDREN;
 			} else {
+				let context = getParentContext(internal);
+
 				// Necessary for createContext api. Setting this property will pass
 				// the context value as `this.context` just for this component.
-				let tmp = vnode.type.contextType;
-				let provider = tmp && rendererState._context[tmp._id];
+				let tmp = internal.type.contextType;
+				let provider = tmp && context[tmp._id];
 				let componentContext = tmp
 					? provider
 						? provider.props.value
 						: tmp._defaultValue
-					: rendererState._context;
+					: context;
 
-				if (flags & TYPE_CLASS) {
+				if (internal.flags & TYPE_CLASS) {
 					renderResult = renderClassComponent(
 						internal,
 						vnode,
+						context,
 						componentContext
 					);
 				} else {
 					renderResult = renderFunctionComponent(
 						internal,
 						vnode,
+						context,
 						componentContext
 					);
 				}
@@ -121,33 +122,28 @@ export function patch(internal, vnode) {
 				}
 			}
 
+			// handle sCU bailout. See https://gist.github.com/JoviDeCroock/bec5f2ce93544d2e6070ef8e0036e4e8
 			if (internal.flags & SKIP_CHILDREN) {
-				internal._component.props = internal.props = vnode.props;
-				if (vnode._vnodeId !== internal._vnodeId) {
-					internal.flags &= ~DIRTY_BIT;
-				}
+				// Note: SKIP_CHILDREN gets unset by the `RESET_MODE` inversion below.
+				// internal.flags &= ~SKIP_CHILDREN;
+				internal.props = vnode.props;
+				internal._component.props = vnode.props;
 			} else if (internal._children == null) {
-				let siblingDom =
-					(internal.flags & (MODE_HYDRATE | MODE_SUSPENDED)) ===
-					(MODE_HYDRATE | MODE_SUSPENDED)
-						? internal._dom
-						: internal.flags & MODE_HYDRATE
-						? null
-						: getDomSibling(internal);
+				let siblingDom;
+				if (flags & MODE_HYDRATE) {
+					siblingDom = flags & MODE_SUSPENDED ? internal._dom : null;
+				} else {
+					siblingDom = getDomSibling(internal);
+				}
 
-				mountChildren(internal, renderResult, siblingDom);
+				mountChildren(internal, renderResult, parentDom, siblingDom);
 			} else {
-				patchChildren(internal, renderResult);
+				patchChildren(internal, renderResult, parentDom);
 			}
 
 			if (internal._commitCallbacks.length) {
-				rendererState._commitQueue.push(internal);
+				commitQueue.push(internal);
 			}
-
-			rendererState._parentDom = prevParentDom;
-			// In the event this subtree creates a new context for its children, restore
-			// the previous context for its siblings
-			rendererState._context = prevContext;
 		} catch (e) {
 			// @TODO: assign a new VNode ID here? Or NaN?
 			// newVNode._vnodeId = 0;
@@ -171,13 +167,13 @@ export function patch(internal, vnode) {
 /**
  * Update an internal and its associated DOM element based on a new VNode
  * @param {import('../internal').Internal} internal
- * @param {import('../internal').VNode} vnode A VNode with props to compare and apply
+ * @param {any} oldProps
+ * @param {any} newProps
+ * @param {import('../internal').Internal['flags']} flags
  */
-function patchElement(internal, vnode) {
+function patchElement(internal, oldProps, newProps, flags) {
 	let dom = /** @type {import('../internal').PreactElement} */ (internal._dom),
-		oldProps = internal.props,
-		newProps = vnode.props,
-		isSvg = internal.flags & MODE_SVG,
+		isSvg = flags & MODE_SVG,
 		i,
 		value,
 		tmp,
@@ -219,13 +215,11 @@ function patchElement(internal, vnode) {
 		internal._children = null;
 	} else {
 		if (oldHtml) dom.innerHTML = '';
-		const prevParentDom = rendererState._parentDom;
-		rendererState._parentDom = dom;
 		patchChildren(
 			internal,
-			newChildren && Array.isArray(newChildren) ? newChildren : [newChildren]
+			newChildren && Array.isArray(newChildren) ? newChildren : [newChildren],
+			dom
 		);
-		rendererState._parentDom = prevParentDom;
 	}
 
 	if (newProps.checked != null && dom._isControlled) {

@@ -4,13 +4,12 @@ import {
 	MODE_SVG,
 	UNDEFINED
 } from './constants';
-import { commitRoot } from './diff/commit';
+import { commitRoot } from './diff/renderer';
 import { createElement, Fragment } from './create-element';
 import options from './options';
 import { mount } from './diff/mount';
 import { patch } from './diff/patch';
 import { createInternal } from './tree';
-import { rendererState } from './component';
 
 /**
  *
@@ -30,13 +29,8 @@ export function createRoot(parentDom) {
 		firstChild =
 			/** @type {import('./internal').PreactElement} */ (parentDom.firstChild);
 
-		rendererState._context = {};
-		// List of effects that need to be called after diffing:
-		rendererState._commitQueue = [];
-		rendererState._parentDom = parentDom;
-
 		if (rootInternal) {
-			patch(rootInternal, vnode);
+			patch(rootInternal, vnode, parentDom);
 		} else {
 			rootInternal = createInternal(vnode);
 
@@ -55,7 +49,7 @@ export function createRoot(parentDom) {
 
 			rootInternal._context = {};
 
-			mount(rootInternal, vnode, firstChild);
+			mount(rootInternal, vnode, parentDom, firstChild);
 		}
 
 		// Flush all queued effects
