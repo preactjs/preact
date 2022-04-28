@@ -36,7 +36,6 @@ export function mount(internal, newVNode, startDom) {
 			// Root nodes signal that an attempt to render into a specific DOM node on
 			// the page. Root nodes can occur anywhere in the tree and not just at the
 			// top.
-			let prevStartDom = startDom;
 			let prevParentDom = rendererState._parentDom;
 			if (internal.flags & TYPE_ROOT) {
 				rendererState._parentDom = newVNode.props._parentDom;
