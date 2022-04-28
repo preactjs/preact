@@ -1,7 +1,6 @@
 import { patchChildren, insertComponentDom } from './children';
 import { setProperty } from './props';
 import options from '../options';
-import { renderClassComponent, renderFunctionComponent } from './component';
 import {
 	RESET_MODE,
 	TYPE_TEXT,
@@ -16,7 +15,8 @@ import {
 	MODE_PENDING_ERROR,
 	MODE_RERENDERING_ERROR,
 	SKIP_CHILDREN,
-	DIRTY_BIT
+	DIRTY_BIT,
+	FORCE_UPDATE
 } from '../constants';
 import { getDomSibling } from '../tree';
 import { mountChildren } from './mount';
@@ -83,29 +83,7 @@ export function patch(internal, vnode) {
 			if (internal._vnodeId === vnode._vnodeId) {
 				internal.flags |= SKIP_CHILDREN;
 			} else {
-				// Necessary for createContext api. Setting this property will pass
-				// the context value as `this.context` just for this component.
-				let tmp = vnode.type.contextType;
-				let provider = tmp && rendererState._context[tmp._id];
-				let componentContext = tmp
-					? provider
-						? provider.props.value
-						: tmp._defaultValue
-					: rendererState._context;
-
-				if (flags & TYPE_CLASS) {
-					renderResult = renderClassComponent(
-						internal,
-						vnode,
-						componentContext
-					);
-				} else {
-					renderResult = renderFunctionComponent(
-						internal,
-						vnode,
-						componentContext
-					);
-				}
+				renderResult = patchComponent(internal, vnode);
 
 				if (renderResult == null) {
 					renderResult = [];
@@ -233,4 +211,115 @@ function patchElement(internal, vnode) {
 	} else if (newProps.value != null && dom._isControlled) {
 		dom._prevValue = newProps.value;
 	}
+}
+
+/**
+ * @param {import('../internal').Internal} internal The component's backing Internal node
+ * @param {import('../internal').VNode} newVNode The new virtual node
+ * @returns {import('../internal').ComponentChildren} the component's children
+ */
+function patchComponent(internal, newVNode) {
+	let type = /** @type {import('../internal').ComponentType} */ (internal.type);
+	let snapshot,
+		c = internal._component,
+		newProps = newVNode.props;
+
+	// Necessary for createContext api. Setting this property will pass
+	// the context value as `this.context` just for this component.
+	let tmp = newVNode.type.contextType;
+	let provider = tmp && rendererState._context[tmp._id];
+	let componentContext = tmp
+		? provider
+			? provider.props.value
+			: tmp._defaultValue
+		: rendererState._context;
+
+	if (c._nextState == null) {
+		c._nextState = c.state;
+	}
+
+	if (type.getDerivedStateFromProps != null) {
+		if (c._nextState == c.state) {
+			c._nextState = Object.assign({}, c._nextState);
+		}
+
+		Object.assign(
+			c._nextState,
+			type.getDerivedStateFromProps(newProps, c._nextState)
+		);
+	}
+
+	let oldProps = c.props;
+	let oldState = c.state;
+
+	if (
+		type.getDerivedStateFromProps == null &&
+		newProps !== oldProps &&
+		c.componentWillReceiveProps != null
+	) {
+		c.componentWillReceiveProps(newProps, componentContext);
+	}
+
+	if (
+		!(internal.flags & FORCE_UPDATE) &&
+		c.shouldComponentUpdate != null &&
+		c.shouldComponentUpdate(newProps, c._nextState, componentContext) === false
+	) {
+		c.props = newProps;
+		c.state = c._nextState;
+		internal.flags |= SKIP_CHILDREN;
+		return;
+	}
+
+	if (c.componentWillUpdate != null) {
+		c.componentWillUpdate(newProps, c._nextState, componentContext);
+	}
+
+	c.context = componentContext;
+	internal.props = c.props = newProps;
+	c.state = c._nextState;
+
+	let renderHook = options._render;
+	if (renderHook) renderHook(internal);
+
+	let counter = 0,
+		renderResult;
+	while (counter++ < 25) {
+		internal.flags &= ~DIRTY_BIT;
+		if (renderHook) renderHook(internal);
+		if (internal.flags & TYPE_CLASS) {
+			renderResult = c.render(c.props, c.state, c.context);
+			// note: disable repeat render invocation for class components
+			break;
+		} else {
+			renderResult = type.call(c, c.props, c.context);
+		}
+		if (!(internal.flags & DIRTY_BIT)) {
+			break;
+		}
+	}
+
+	// Handle setState called in render, see #2553
+	c.state = c._nextState;
+
+	if (c.getChildContext != null) {
+		rendererState._context = internal._context = Object.assign(
+			{},
+			rendererState._context,
+			c.getChildContext()
+		);
+	}
+
+	if (c.getSnapshotBeforeUpdate != null) {
+		snapshot = c.getSnapshotBeforeUpdate(oldProps, oldState);
+	}
+
+	// Only schedule componentDidUpdate if the component successfully rendered
+	if (c.componentDidUpdate != null) {
+		internal._commitCallbacks.push(() => {
+			c.componentDidUpdate(oldProps, oldState, snapshot);
+		});
+	}
+
+	return renderResult;
 }
