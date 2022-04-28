@@ -3,7 +3,6 @@ import options from './options';
 import { createVNode, Fragment } from './create-element';
 import { patch } from './diff/patch';
 import { DIRTY_BIT, FORCE_UPDATE, MODE_UNMOUNTING } from './constants';
-import { getParentDom } from './tree';
 
 /**
  * Base Component class. Provides `setState()` and `forceUpdate()`, which
@@ -98,7 +97,7 @@ function rerender(internal) {
 			0
 		);
 
-		patch(internal, vnode, getParentDom(internal));
+		patch(internal, vnode);
 		commitRoot(internal);
 	}
 }

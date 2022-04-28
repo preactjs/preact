@@ -19,6 +19,7 @@ import { createInternal, getDomSibling, getParentDom } from '../tree';
  * @param {import('../internal').ComponentChild[]} children The new children, represented as VNodes
  */
 export function patchChildren(internal, children) {
+	/** @type {import('../internal').Internal[]} */
 	let oldChildren =
 		(internal._children && internal._children.slice()) || EMPTY_ARR;
 
@@ -192,8 +193,12 @@ function findMatchingIndex(
 	skewedIndex,
 	remainingOldChildren
 ) {
-	const type = typeof childVNode === 'string' ? null : childVNode.type;
-	const key = type !== null ? childVNode.key : UNDEFINED;
+	let type = null;
+	let key;
+	if (typeof childVNode !== 'string') {
+		type = childVNode.type;
+		key = childVNode.key;
+	}
 	let match = -1;
 	let x = skewedIndex - 1; // i - 1;
 	let y = skewedIndex + 1; // i + 1;

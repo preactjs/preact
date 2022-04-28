@@ -44,6 +44,7 @@ export function patch(internal, vnode) {
 	// When passing through createElement it assigns the object
 	// constructor as undefined. This to prevent JSON-injection.
 	else if (vnode.constructor === UNDEFINED) {
+		// @ts-ignore vnode is never a string here
 		let newProps = vnode.props;
 		internal.props = newProps;
 
@@ -69,7 +70,9 @@ export function patch(internal, vnode) {
 			flags = internal.flags ^= MODE_PENDING_ERROR | MODE_RERENDERING_ERROR;
 		}
 
+		// @ts-ignore vnode is never a string here
 		let isSameVNode = vnode._vnodeId === internal._vnodeId;
+
 		if (!isSameVNode || (flags & FORCE_UPDATE) !== 0) {
 			if (flags & TYPE_ELEMENT) {
 				patchElement(
@@ -95,9 +98,11 @@ export function patch(internal, vnode) {
 			}
 
 			// Once we have successfully rendered the new VNode, copy it's ID over
+			// @ts-ignore vnode is never a string here
 			internal._vnodeId = vnode._vnodeId;
 
 			internal._prevRef = internal.ref;
+			// @ts-ignore vnode is never a string here
 			internal.ref = vnode.ref;
 		}
 	}

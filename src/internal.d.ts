@@ -120,6 +120,10 @@ export interface VNode<P = {}> extends preact.VNode<P> {
 	// Redefine type here using our internal ComponentType type
 	type: string | ComponentType<P>;
 	props: P & { children: ComponentChildren };
+
+	// the ref types are duplicated internally, and we want to use the internal one here.
+	ref?: Ref<any> | null;
+
 	/**
 	 * Internal GUID for this VNode, used for fast equality checks.
 	 * Note: h() allocates monotonic positive integer IDs, jsx() allocates negative.

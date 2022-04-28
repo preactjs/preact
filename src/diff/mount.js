@@ -57,6 +57,7 @@ export function mount(internal, vnode, startDom) {
 	if (flags & TYPE_TEXT) {
 		// if hydrating (hydrate() or render() with replaceNode), find the matching child:
 		while (hydrateDom) {
+			// @ts-ignore-next-line ChildNode ~= PreactNode
 			nextDomSibling = hydrateDom.nextSibling;
 			if (hydrateDom.nodeType === 3) {
 				// if hydrating a Text node, ensure its text content is correct:
@@ -72,7 +73,10 @@ export function mount(internal, vnode, startDom) {
 		internal._dom = hydrateDom || document.createTextNode(props);
 		internal.flags &= RESET_MODE;
 	} else if (flags & TYPE_ELEMENT) {
-		nextDomSibling = mountElement(internal, hydrateDom);
+		nextDomSibling = mountElement(
+			internal,
+			/** @type {import('../internal').PreactElement} */ (hydrateDom)
+		);
 		internal.flags &= RESET_MODE;
 	} else {
 		try {
@@ -269,6 +273,7 @@ function mountElement(internal, dom) {
 				}
 				break;
 			}
+			// @ts-ignore-next-line Element ~= PreactElement
 			dom = dom.nextElementSibling;
 		}
 	}
@@ -415,6 +420,7 @@ export function mountChildren(internal, children, startDom) {
 		// attributes & unused DOM)
 		while (startDom) {
 			i = startDom;
+			// @ts-ignore-next-line ChildNode ~= PreactNode
 			startDom = startDom.nextSibling;
 			i.remove();
 		}
