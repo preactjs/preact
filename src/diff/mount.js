@@ -49,25 +49,7 @@ export function mount(internal, newVNode, startDom) {
 
 			let prevContext = rendererState._context;
 
-			let renderResult = mountComponent(internal);
-
-			if (renderResult == null) {
-				nextDomSibling = startDom;
-			} else {
-				if (typeof renderResult === 'object') {
-					// dissolve unkeyed root fragments:
-					if (renderResult.type === Fragment && renderResult.key == null) {
-						renderResult = renderResult.props.children;
-					}
-					if (!Array.isArray(renderResult)) {
-						renderResult = [renderResult];
-					}
-				} else {
-					renderResult = [renderResult];
-				}
-
-				nextDomSibling = mountChildren(internal, renderResult, startDom);
-			}
+			nextDomSibling = mountComponent(internal, startDom);
 
 			if (internal._commitCallbacks.length) {
 				rendererState._commitQueue.push(internal);
@@ -331,9 +313,10 @@ export function mountChildren(internal, children, startDom) {
 
 /**
  * @param {import('../internal').Internal} internal The component's backing Internal node
- * @returns {import('../internal').ComponentChildren} the component's children
+ * @param {import('../internal').PreactNode} startDom the preceding node
+ * @returns {import('../internal').PreactNode} the component's children
  */
-function mountComponent(internal) {
+function mountComponent(internal, startDom) {
 	/** @type {import('../internal').Component} */
 	let c;
 	let type = /** @type {import('../internal').ComponentType} */ (internal.type);
@@ -428,5 +411,20 @@ function mountComponent(internal) {
 		);
 	}
 
-	return renderResult;
+	if (renderResult == null) {
+		return startDom;
+	}
+	if (typeof renderResult === 'object') {
+		// dissolve unkeyed root fragments:
+		if (renderResult.type === Fragment && renderResult.key == null) {
+			renderResult = renderResult.props.children;
+		}
+		if (!Array.isArray(renderResult)) {
+			renderResult = [renderResult];
+		}
+	} else {
+		renderResult = [renderResult];
+	}
+
+	return mountChildren(internal, renderResult, startDom);
 }

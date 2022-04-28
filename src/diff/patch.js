@@ -84,19 +84,6 @@ export function patch(internal, vnode) {
 				internal.flags |= SKIP_CHILDREN;
 			} else {
 				renderResult = patchComponent(internal, vnode);
-
-				if (renderResult == null) {
-					renderResult = [];
-				} else if (typeof renderResult === 'object') {
-					if (renderResult.type === Fragment && renderResult.key == null) {
-						renderResult = renderResult.props.children;
-					}
-					if (!Array.isArray(renderResult)) {
-						renderResult = [renderResult];
-					}
-				} else {
-					renderResult = [renderResult];
-				}
 			}
 
 			if (internal.flags & SKIP_CHILDREN) {
@@ -319,6 +306,19 @@ function patchComponent(internal, newVNode) {
 		internal._commitCallbacks.push(() => {
 			c.componentDidUpdate(oldProps, oldState, snapshot);
 		});
+	}
+
+	if (renderResult == null) {
+		renderResult = [];
+	} else if (typeof renderResult === 'object') {
+		if (renderResult.type === Fragment && renderResult.key == null) {
+			renderResult = renderResult.props.children;
+		}
+		if (!Array.isArray(renderResult)) {
+			renderResult = [renderResult];
+		}
+	} else {
+		renderResult = [renderResult];
 	}
 
 	return renderResult;
