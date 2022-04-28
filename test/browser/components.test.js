@@ -341,7 +341,7 @@ describe('Components', () => {
 		});
 
 		it("should render components that don't pass args into the Component constructor (unistore pattern)", () => {
-			// Pattern unistore uses for connect: https://git.io/fxRqu
+			// Pattern unistore uses for connect: https://github.com/developit/unistore/blob/1df7cf60ac6fa1a70859d745fbaea7ea3f1b8d30/src/integrations/preact.js#L23
 			function Wrapper() {
 				instance = this;
 				this.state = STATE;
@@ -440,7 +440,7 @@ describe('Components', () => {
 		});
 
 		it("should render components that don't inherit from Component (unistore pattern)", () => {
-			// Pattern unistore uses for Provider: https://git.io/fxRqR
+			// Pattern unistore uses for Provider: https://github.com/developit/unistore/blob/1df7cf60ac6fa1a70859d745fbaea7ea3f1b8d30/src/integrations/preact.js#L59
 			function Provider() {
 				instance = this;
 				this.state = STATE;
