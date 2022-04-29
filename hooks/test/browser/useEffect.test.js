@@ -510,7 +510,6 @@ describe('useEffect', () => {
 		const calls = [];
 		const App = () => {
 			const [greeting, setGreeting] = useState('bye');
-
 			useEffect(() => {
 				calls.push('doing effect' + greeting);
 				return () => {

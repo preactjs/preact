@@ -68,6 +68,11 @@ Suspense.prototype = new Component();
 
 function invokeCleanup(hook) {
 	let cleanup = hook._cleanup;
+
+	if (hook._internal && hook._isMountingStateHook) {
+		hook._internal = undefined;
+		hook._isMountingStateHook = false;
+	}
 	hook._pendingArgs = undefined;
 	hook._pendingValue = undefined;
 	if (typeof cleanup == 'function') {

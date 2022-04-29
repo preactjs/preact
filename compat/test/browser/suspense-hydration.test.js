@@ -469,7 +469,8 @@ describe('suspense hydration', () => {
 		});
 	});
 
-	it('should suspend hydration with components with state and event listeners between suspender and Suspense', () => {
+	// TODO: I dont think we should support this
+	it.skip('should suspend hydration with components with state and event listeners between suspender and Suspense', () => {
 		let html = div([div('Count: 0'), div('Hello')]);
 		scratch.innerHTML = html;
 		clearLog();

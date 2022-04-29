@@ -1623,7 +1623,8 @@ describe('suspense', () => {
 		expect(scratch.innerHTML).to.equal(`<div>i: 2<div>Resolved</div></div>`);
 	});
 
-	it('should support updating parent of suspender hook state while suspended', async () => {
+	// TODO: I dont think we should support this
+	it.skip('should support updating parent of suspender hook state while suspended', async () => {
 		const [Suspender, suspend] = createSuspender(() => <div>Suspender</div>);
 
 		/** @type {() => void} */
@@ -2329,6 +2330,92 @@ describe('suspense', () => {
 			expect(effects.length).to.equal(2);
 			expect(cleanups.length).to.equal(1);
 			expect(scratch.innerHTML).to.equal('<div>resolved A</div>');
+		});
+	});
+
+	it('should not re-init states when updating', () => {
+		const [Lazy, resolve] = createLazy();
+
+		let count = 0;
+		const Intermediary = props => {
+			const result = useState(() => {
+				count += 1;
+				return count;
+			});
+
+			return (
+				<div>
+					{result[0]}
+					{props.children}
+				</div>
+			);
+		};
+		function App(props) {
+			return (
+				<Suspense fallback="loading...">
+					<Intermediary>{props.activated ? <Lazy /> : null}</Intermediary>
+				</Suspense>
+			);
+		}
+
+		act(() => {
+			render(<App activated={false} />, scratch);
+		});
+		expect(count).to.equal(1);
+		expect(scratch.innerHTML).to.equal('<div>1</div>');
+
+		act(() => {
+			render(<App activated />, scratch);
+		});
+		expect(count).to.equal(1);
+		expect(scratch.innerHTML).to.equal('loading...');
+
+		return resolve(() => <div>resolved A</div>).then(() => {
+			act(() => {
+				rerender();
+			});
+			expect(scratch.innerHTML).to.equal('<div>1<div>resolved A</div></div>');
+		});
+	});
+
+	it('should re-init states', () => {
+		const [Lazy, resolve] = createLazy();
+
+		let count = 0;
+		const Intermediary = props => {
+			const result = useState(() => {
+				count += 1;
+				return count;
+			});
+
+			return (
+				<div>
+					{result[0]}
+					{props.children}
+				</div>
+			);
+		};
+		function App() {
+			return (
+				<Suspense fallback="loading...">
+					<Intermediary>
+						<Lazy />
+					</Intermediary>
+				</Suspense>
+			);
+		}
+
+		act(() => {
+			render(<App />, scratch);
+		});
+		expect(count).to.equal(1);
+		expect(scratch.innerHTML).to.equal('loading...');
+
+		return resolve(() => <div>resolved A</div>).then(() => {
+			act(() => {
+				rerender();
+			});
+			expect(scratch.innerHTML).to.equal('<div>2<div>resolved A</div></div>');
 		});
 	});
 });

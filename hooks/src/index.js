@@ -49,6 +49,9 @@ options._render = internal => {
 			if (internal.data && internal.data.__hooks) {
 				internal.data &&
 					internal.data.__hooks._list.forEach(hookItem => {
+						if (hookItem._isMountingStateHook)
+							hookItem._isMountingStateHook = false;
+
 						if (hookItem._pendingArgs) {
 							hookItem._args = hookItem._pendingArgs;
 							hookItem._pendingArgs = undefined;
@@ -86,6 +89,8 @@ options._commit = (internal, commitQueue) => {
 			if (internal.data && internal.data.__hooks) {
 				internal.data &&
 					internal.data.__hooks._list.forEach(hookItem => {
+						if (hookItem._isMountingStateHook)
+							hookItem._isMountingStateHook = false;
 						if (hookItem._pendingArgs) {
 							hookItem._args = hookItem._pendingArgs;
 							hookItem._pendingArgs = undefined;
@@ -172,13 +177,12 @@ export function useState(initialState) {
  * @param {(initialState: any) => void} [init]
  * @returns {[ any, (state: any) => void ]}
  */
-// TODO: make this interruptable, have a pending state which can be reset
-// same for the initial value during mount
 export function useReducer(reducer, initialState, init) {
 	/** @type {import('./internal').ReducerHookState} */
 	const hookState = getHookState(currentIndex++, 2);
 	hookState._reducer = reducer;
 	if (!hookState._internal) {
+		hookState._isMountingStateHook = true;
 		hookState._value = [
 			!init ? invokeOrReturn(undefined, initialState) : init(initialState),
 
