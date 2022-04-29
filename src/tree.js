@@ -17,10 +17,9 @@ import { enqueueRender } from './component';
  * Create an internal tree node
  * @param {import('./internal').VNode | string} vnode
  * @param {import('./internal').Internal} [parentInternal]
- * @param {number} [rootId]
  * @returns {import('./internal').Internal}
  */
-export function createInternal(vnode, parentInternal, rootId) {
+export function createInternal(vnode, parentInternal) {
 	let type = null,
 		props,
 		key,
@@ -98,8 +97,7 @@ export function createInternal(vnode, parentInternal, rootId) {
 		_dom: null,
 		_component: null,
 		_context: null,
-		_depth: parentInternal ? parentInternal._depth + 1 : 0,
-		_rootId: rootId || (parentInternal && parentInternal._rootId)
+		_depth: parentInternal ? parentInternal._depth + 1 : 0
 	};
 
 	if (options._internal) options._internal(internal, vnode);

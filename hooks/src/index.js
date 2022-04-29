@@ -363,7 +363,6 @@ export function useId() {
 
 		state._id =
 			'_P' +
-			currentInternal._rootId +
 			(currentInternal._parent._children.indexOf(currentInternal) +
 				currentInternal._depth +
 				currentIdCounter);
