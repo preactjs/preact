@@ -1,5 +1,5 @@
 import './polyfills';
-import { renderToString } from './index';
+import renderToString from './index';
 import { indent, encodeEntities, assign } from './util';
 import prettyFormat from 'pretty-format';
 
@@ -67,7 +67,10 @@ let defaultOpts = {
 	pretty: '  '
 };
 
-export function renderToJsxString(vnode, context, opts, inner) {
+function renderToJsxString(vnode, context, opts, inner) {
 	opts = assign(assign({}, defaultOpts), opts || {});
 	return renderToString(vnode, context, opts, inner);
 }
+
+export default renderToJsxString;
+export { renderToJsxString as render };

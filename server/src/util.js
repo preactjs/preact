@@ -76,3 +76,15 @@ export function getChildren(accumulator, children) {
 	}
 	return accumulator;
 }
+
+export function createInternalFromVnode(vnode, context, parent, depth) {
+	return {
+		type: vnode.type,
+		props: vnode.props,
+		data: {},
+		c: context,
+		_children: [],
+		_parent: parent,
+		_depth: parent._depth + 1
+	};
+}

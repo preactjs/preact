@@ -4,9 +4,10 @@ import {
 	isLargeString,
 	styleObjToCss,
 	assign,
-	getChildren
+	getChildren,
+	createInternalFromVnode
 } from './util';
-import { renderToJsxString } from './jsx';
+import renderToJsxString from './jsx';
 import { options, Fragment } from 'preact';
 
 /** @typedef {import('preact').VNode} VNode */
@@ -22,30 +23,29 @@ const UNSAFE_NAME = /[\s\n\\/='"\0<>]/;
 
 const noop = () => {};
 
-/**
- * Only render elements, leaving Components inline as `<ComponentName ... />`.
+/** Render Preact JSX + Components to an HTML string.
+ *	@name render
+ *	@function
+ *	@param {VNode} vnode	JSX VNode to render.
+ *	@param {Object} [context={}]	Optionally pass an initial context object through the render path.
+ *	@param {Object} [options={}]	Rendering options
+ *	@param {Boolean} [options.shallow=false]	If `true`, renders nested Components as HTML elements (`<Foo a="b" />`).
+ *	@param {Boolean} [options.xml=false]		If `true`, uses self-closing tags for elements without children.
+ *	@param {Boolean} [options.pretty=false]		If `true`, adds whitespace for readability
+ *	@param {RegExp|undefined} [options.voidElements]       RegeEx that matches elements that are considered void (self-closing)
+ */
+renderToString.render = renderToString;
+
+/** Only render elements, leaving Components inline as `<ComponentName ... />`.
  *	This method is just a convenience alias for `render(vnode, context, { shallow:true })`
- * @name shallow
- * @function
- * @param {VNode} vnode	JSX VNode to render.
- * @param {Object} [context={}]	Optionally pass an initial context object through the render path.
+ *	@name shallow
+ *	@function
+ *	@param {VNode} vnode	JSX VNode to render.
+ *	@param {Object} [context={}]	Optionally pass an initial context object through the render path.
  */
 let shallowRender = (vnode, context) => renderToString(vnode, context, SHALLOW);
 
 const EMPTY_ARR = [];
-
-/**
- * Render Preact JSX + Components to an HTML string.
- * @name render
- * @function
- * @param {VNode} vnode	JSX VNode to render.
- * @param {Object} [context={}] Optionally pass an initial context object through the render path.
- * @param {Object} [opts={}] Rendering options
- * @param {Boolean} [opts.shallow=false] If `true`, renders nested Components as HTML elements (`<Foo a="b" />`).
- * @param {Boolean} [opts.xml=false] If `true`, uses self-closing tags for elements without children.
- * @param {Boolean} [opts.pretty=false] If `true`, adds whitespace for readability
- * @param {RegExp|undefined} [opts.voidElements] RegeEx that matches elements that are considered void (self-closing)
- */
 function renderToString(vnode, context, opts) {
 	context = context || {};
 	opts = opts || {};
@@ -55,21 +55,38 @@ function renderToString(vnode, context, opts) {
 	// array to `options._commit` (`__c`). But we can go one step further
 	// and avoid a lot of dirty checks and allocations by setting
 	// `options._skipEffects` (`__s`) too.
-	const previousSkipEffects = options._skipEffects;
-	options._skipEffects = true;
+	const previousSkipEffects = options.__s;
+	options.__s = true;
 
-	const res = _renderToString(vnode, context, opts);
+	const internal = { _children: [], _depth: 1 };
+	const res = _renderToString(
+		vnode,
+		context,
+		opts,
+		undefined,
+		undefined,
+		undefined,
+		internal
+	);
 
 	// options._commit, we don't schedule any effects in this library right now,
 	// so we can pass an empty queue to this hook.
-	if (options._commit) options._commit(vnode, EMPTY_ARR);
+	if (options.__c) options.__c(vnode, EMPTY_ARR);
 	EMPTY_ARR.length = 0;
-	options._skipEffects = previousSkipEffects;
+	options.__s = previousSkipEffects;
 	return res;
 }
 
 /** The default export is an alias of `render()`. */
-function _renderToString(vnode, context, opts, inner, isSvgMode, selectValue) {
+function _renderToString(
+	vnode,
+	context,
+	opts,
+	inner,
+	isSvgMode,
+	selectValue,
+	parent
+) {
 	if (vnode == null || typeof vnode === 'boolean') {
 		return '';
 	}
@@ -86,13 +103,16 @@ function _renderToString(vnode, context, opts, inner, isSvgMode, selectValue) {
 		let rendered = '';
 		for (let i = 0; i < vnode.length; i++) {
 			if (pretty && i > 0) rendered += '\n';
+			const internal = createInternalFromVnode(vnode, context, parent);
+			parent._children.push(internal);
 			rendered += _renderToString(
 				vnode[i],
 				context,
 				opts,
 				inner,
 				isSvgMode,
-				selectValue
+				selectValue,
+				internal
 			);
 		}
 		return rendered;
@@ -110,35 +130,39 @@ function _renderToString(vnode, context, opts, inner, isSvgMode, selectValue) {
 		} else if (nodeName === Fragment) {
 			const children = [];
 			getChildren(children, vnode.props.children);
+			const internal = createInternalFromVnode(vnode, context, parent);
+			parent._children.push(internal);
 			return _renderToString(
 				children,
 				context,
 				opts,
 				opts.shallowHighOrder !== false,
 				isSvgMode,
-				selectValue
+				selectValue,
+				internal
 			);
 		} else {
 			let rendered;
 
-			vnode._context = context;
-			vnode.data = {
-				_hooks: []
-			};
-
-			let c = (vnode._component = {
+			let c = (vnode.__c = {
+				__v: vnode,
 				context,
 				props: vnode.props,
 				// silently drop state updates
 				setState: noop,
-				forceUpdate: noop
+				forceUpdate: noop,
+				// hooks
+				data: {}
 			});
 
 			// options._diff
-			if (options._diff) options._diff(vnode);
+			if (options.__b) options.__b(vnode);
+
+			const internal = createInternalFromVnode(vnode, context, parent);
+			parent._children.push(internal);
 
 			// options._render
-			if (options._render) options._render(vnode);
+			if (options.__r) options.__r(internal);
 
 			if (
 				!nodeName.prototype ||
@@ -147,36 +171,37 @@ function _renderToString(vnode, context, opts, inner, isSvgMode, selectValue) {
 				// Necessary for createContext api. Setting this property will pass
 				// the context value as `this.context` just for this component.
 				let cxType = nodeName.contextType;
-				let provider = cxType && context[cxType._id];
+				let provider = cxType && context[cxType.__c];
 				let cctx =
 					cxType != null
 						? provider
 							? provider.props.value
-							: cxType._defaultValue
+							: cxType.__
 						: context;
 
 				// stateless functional components
-				rendered = nodeName.call(vnode._component, props, cctx);
+				rendered = nodeName.call(vnode.__c, props, cctx);
 			} else {
 				// class-based components
 				let cxType = nodeName.contextType;
-				let provider = cxType && context[cxType._id];
+				let provider = cxType && context[cxType.__c];
 				let cctx =
 					cxType != null
 						? provider
 							? provider.props.value
-							: cxType._defaultValue
+							: cxType.__
 						: context;
 
 				// c = new nodeName(props, context);
-				c = vnode._component = new nodeName(props, cctx);
+				c = vnode.__c = new nodeName(props, cctx);
+				c.__v = vnode;
 				// turn off stateful re-rendering:
-				c._dirty = true;
+				c._dirty = c.__d = true;
 				c.props = props;
 				if (c.state == null) c.state = {};
 
-				if (c._nextState == null) {
-					c._nextState = c.state;
+				if (c._nextState == null && c.__s == null) {
+					c._nextState = c.__s = c.state;
 				}
 
 				c.context = cctx;
@@ -190,7 +215,12 @@ function _renderToString(vnode, context, opts, inner, isSvgMode, selectValue) {
 
 					// If the user called setState in cWM we need to flush pending,
 					// state updates. This is the same behaviour in React.
-					c.state = c._nextState !== c.state ? c._nextState : c.state;
+					c.state =
+						c._nextState !== c.state
+							? c._nextState
+							: c.__s !== c.state
+							? c.__s
+							: c.state;
 				}
 
 				rendered = c.render(c.props, c.state, c.context);
@@ -207,7 +237,8 @@ function _renderToString(vnode, context, opts, inner, isSvgMode, selectValue) {
 				opts,
 				opts.shallowHighOrder !== false,
 				isSvgMode,
-				selectValue
+				selectValue,
+				internal
 			);
 		}
 	}
@@ -337,6 +368,8 @@ function _renderToString(vnode, context, opts, inner, isSvgMode, selectValue) {
 			let child = children[i];
 
 			if (child != null && child !== false) {
+				const internal = createInternalFromVnode(vnode, context, parent);
+				parent._children.push(internal);
 				let childSvgMode =
 						nodeName === 'svg'
 							? true
@@ -349,7 +382,8 @@ function _renderToString(vnode, context, opts, inner, isSvgMode, selectValue) {
 						opts,
 						true,
 						childSvgMode,
-						selectValue
+						selectValue,
+						internal
 					);
 
 				if (pretty && !hasLarge && isLargeString(ret)) hasLarge = true;
@@ -425,11 +459,14 @@ function getFallbackComponentName(component) {
 	}
 	return name;
 }
+renderToString.shallowRender = shallowRender;
+
+export default renderToString;
 
 export {
 	renderToString as render,
 	renderToString as renderToStaticMarkup,
-	renderToString,
 	renderToJsxString,
+	renderToString,
 	shallowRender
 };

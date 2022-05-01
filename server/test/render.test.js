@@ -7,7 +7,13 @@ import {
 	Fragment,
 	options
 } from 'preact';
-import { useState, useContext, useEffect, useLayoutEffect } from 'preact/hooks';
+import {
+	useState,
+	useContext,
+	useEffect,
+	useLayoutEffect,
+	useId
+} from 'preact/hooks';
 import { expect } from 'chai';
 import { spy, stub, match } from 'sinon';
 import './setup';
@@ -1188,5 +1194,61 @@ describe('render', () => {
 		expect(res).to.equal(
 			'<select><option selected value="2">2</option></select>'
 		);
+	});
+
+	describe('useId', () => {
+		it.only('ids are unique according to dom-depth', () => {
+			function Child() {
+				const id = useId();
+				const spanId = useId();
+				return (
+					<div id={id}>
+						<span id={spanId}>h</span>
+					</div>
+				);
+			}
+
+			function Comp() {
+				const id = useId();
+				return (
+					<div id={id}>
+						<Child />
+					</div>
+				);
+			}
+
+			let res = render(<Comp />);
+			expect(res).to.equal(
+				'<div id="_P3"><div id="_P6"><span id="_P7">h</span></div></div>'
+			);
+
+			res = render(<Comp />);
+			expect(res).to.equal(
+				'<div id="_P3"><div id="_P6"><span id="_P7">h</span></div></div>'
+			);
+		});
+
+		it('ids are unique across siblings', () => {
+			function Child() {
+				const id = useId();
+				return <span id={id}>h</span>;
+			}
+
+			function Comp() {
+				const id = useId();
+				return (
+					<div id={id}>
+						<Child />
+						<Child />
+						<Child />
+					</div>
+				);
+			}
+
+			const res = render(<Comp />);
+			expect(res).to.equal(
+				'<div id="_P6"><span id="_P9">h</span><span id="_P11">h</span><span id="_P13">h</span></div>'
+			);
+		});
 	});
 });

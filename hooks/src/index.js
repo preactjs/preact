@@ -361,6 +361,10 @@ export function useId() {
 	if (!state._id) {
 		currentIdCounter++;
 
+		console.log(
+			currentInternal,
+			currentInternal._parent._children.indexOf(currentInternal)
+		);
 		state._id =
 			'_P' +
 			(currentInternal._parent._children.indexOf(currentInternal) +

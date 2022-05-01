@@ -1,1 +1,1 @@
-module.exports = require('./dist/jsx'); // eslint-disable-line
+module.exports = require('./dist/server'); // eslint-disable-line
