@@ -303,6 +303,9 @@ export interface Provider<T>
 		children: ComponentChildren;
 	}> {}
 export interface PreactProvider<T> extends Provider<T> {}
+export type ContextType<C extends Context<any>> = C extends Context<infer T>
+	? T
+	: never;
 
 export interface Context<T> {
 	Consumer: Consumer<T>;
