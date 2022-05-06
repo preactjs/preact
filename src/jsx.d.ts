@@ -821,6 +821,11 @@ export namespace JSXInternal {
 		itemRef?: string;
 	}
 
+	export type DetailedHTMLProps<
+		HA extends HTMLAttributes<RefType>,
+		RefType extends EventTarget = EventTarget
+	> = HA;
+
 	export interface HTMLMarqueeElement extends HTMLElement {
 		behavior?: 'scroll' | 'slide' | 'alternate';
 		bgColor?: string;
@@ -890,7 +895,7 @@ export namespace JSXInternal {
 		i: HTMLAttributes<HTMLElement>;
 		iframe: HTMLAttributes<HTMLIFrameElement>;
 		img: HTMLAttributes<HTMLImageElement>;
-		input: HTMLAttributes<HTMLInputElement>;
+		input: HTMLAttributes<HTMLInputElement> & { defaultValue?: string };
 		ins: HTMLAttributes<HTMLModElement>;
 		kbd: HTMLAttributes<HTMLElement>;
 		keygen: HTMLAttributes<HTMLUnknownElement>;
