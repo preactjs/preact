@@ -3,12 +3,13 @@ import {
 	render,
 	createPortal,
 	Component,
-	Fragment
+	Fragment,
+	hydrate
 } from 'preact';
 import { useState, useEffect } from 'preact/hooks';
 import { setupRerender, act } from 'preact/test-utils';
 import { setupScratch, teardown } from '../_util/helpers';
-import { getLog, clearLog } from '../_util/logCall';
+import { getLog, clearLog, logCall } from '../_util/logCall';
 
 /** @jsx createElement */
 
@@ -16,6 +17,10 @@ describe('Portal', () => {
 	/** @type {HTMLDivElement} */
 	let scratch;
 	let rerender;
+	let resetAppendChild;
+	let resetInsertBefore;
+	let resetRemoveChild;
+	let resetRemove;
 
 	beforeEach(() => {
 		scratch = setupScratch();
@@ -24,6 +29,20 @@ describe('Portal', () => {
 
 	afterEach(() => {
 		teardown(scratch);
+	});
+
+	before(() => {
+		resetAppendChild = logCall(Element.prototype, 'appendChild');
+		resetInsertBefore = logCall(Element.prototype, 'insertBefore');
+		resetRemoveChild = logCall(Element.prototype, 'removeChild');
+		resetRemove = logCall(Element.prototype, 'remove');
+	});
+
+	after(() => {
+		resetAppendChild();
+		resetInsertBefore();
+		resetRemoveChild();
+		resetRemove();
 	});
 
 	it('should render into a different root node', () => {
@@ -38,6 +57,79 @@ describe('Portal', () => {
 		expect(root.innerHTML).to.equal('foobar');
 
 		root.parentNode.removeChild(root);
+	});
+
+	it('should preserve mount order of non-portal siblings', () => {
+		let portals = document.createElement('portals');
+		scratch.appendChild(portals);
+
+		let main = document.createElement('main');
+		scratch.appendChild(main);
+
+		function Foo(props) {
+			return [
+				<h1>A</h1>,
+				createPortal(<h2>B</h2>, portals),
+				<h3>C</h3>,
+				createPortal(<h4>D</h4>, portals),
+				<h5>E</h5>
+			];
+		}
+
+		render([<replace />, <after />], main);
+		clearLog();
+		render([<Foo />, <after />], main);
+
+		expect(main.innerHTML).to.equal(
+			'<h1>A</h1><h3>C</h3><h5>E</h5><after></after>'
+		);
+		expect(portals.innerHTML).to.equal('<h2>B</h2><h4>D</h4>');
+
+		// ignore Text node insertions:
+		const log = getLog().filter(t => !/#text/.test(t));
+
+		expect(log).to.deep.equal([
+			'<main>.insertBefore(<h1>A, <replace>)',
+			'<portals>.insertBefore(<h2>B, Null)',
+			'<main>A.insertBefore(<h3>C, <replace>)',
+			'<portals>B.insertBefore(<h4>D, Null)',
+			'<main>AC.insertBefore(<h5>E, <replace>)',
+			'<replace>.remove()'
+		]);
+	});
+
+	it('should preserve hydration order of non-portal siblings', () => {
+		let portals = document.createElement('portals');
+		scratch.appendChild(portals);
+
+		let main = document.createElement('main');
+		scratch.appendChild(main);
+
+		main.innerHTML = '<h1>A</h1><h3>C</h3><h5>E</h5>';
+
+		function Foo(props) {
+			return [
+				<h1>A</h1>,
+				createPortal(<h2>B</h2>, portals),
+				<h3>C</h3>,
+				createPortal(<h4>D</h4>, portals),
+				<h5>E</h5>
+			];
+		}
+
+		clearLog();
+		hydrate(<Foo />, main);
+
+		expect(main.innerHTML).to.equal('<h1>A</h1><h3>C</h3><h5>E</h5>');
+		expect(portals.innerHTML).to.equal('<h2>B</h2><h4>D</h4>');
+
+		// ignore Text node insertions:
+		const log = getLog().filter(t => !/#text/.test(t));
+
+		expect(log).to.deep.equal([
+			'<portals>.insertBefore(<h2>B, Null)',
+			'<portals>B.insertBefore(<h4>D, Null)'
+		]);
 	});
 
 	it('should insert the portal', () => {

@@ -89,10 +89,7 @@ export function mount(internal, newVNode, startDom) {
 				nextDomSibling = mountChildren(internal, renderResult, startDom);
 			}
 
-			if (
-				internal._commitCallbacks != null &&
-				internal._commitCallbacks.length
-			) {
+			if (internal._commitCallbacks.length) {
 				rendererState._commitQueue.push(internal);
 			}
 

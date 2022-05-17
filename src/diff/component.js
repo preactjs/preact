@@ -27,12 +27,6 @@ export function renderFunctionComponent(internal, newVNode, componentContext) {
 		internal.flags |= DIRTY_BIT;
 	}
 
-	if (newVNode && newVNode._vnodeId === internal._vnodeId) {
-		c.props = newProps;
-		internal.flags |= SKIP_CHILDREN;
-		return;
-	}
-
 	c.context = componentContext;
 	internal.props = c.props = newProps;
 
@@ -123,13 +117,11 @@ export function renderClassComponent(internal, newVNode, componentContext) {
 		}
 
 		if (
-			(!(internal.flags & FORCE_UPDATE) &&
-				c.shouldComponentUpdate != null &&
-				c.shouldComponentUpdate(newProps, c._nextState, componentContext) ===
-					false) ||
-			(newVNode && newVNode._vnodeId === internal._vnodeId)
+			!(internal.flags & FORCE_UPDATE) &&
+			c.shouldComponentUpdate != null &&
+			c.shouldComponentUpdate(newProps, c._nextState, componentContext) ===
+				false
 		) {
-			c.props = newProps;
 			c.state = c._nextState;
 			internal.flags |= SKIP_CHILDREN;
 			return;
