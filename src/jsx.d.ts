@@ -1006,8 +1006,8 @@ export namespace JSXInternal {
 		stop: SVGAttributes<SVGStopElement>;
 		symbol: SVGAttributes<SVGSymbolElement>;
 		text: SVGAttributes<SVGTextElement>;
+		textPath: SVGAttributes<SVGTextPathElement>;
 		tspan: SVGAttributes<SVGTSpanElement>;
 		use: SVGAttributes<SVGUseElement>;
-		textPath: SVGAttributes<SVGTextPathElement>;
 	}
 }
