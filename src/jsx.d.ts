@@ -1008,5 +1008,6 @@ export namespace JSXInternal {
 		text: SVGAttributes<SVGTextElement>;
 		tspan: SVGAttributes<SVGTSpanElement>;
 		use: SVGAttributes<SVGUseElement>;
+		textPath: SVGAttributes<SVGTextPathElement>;
 	}
 }
