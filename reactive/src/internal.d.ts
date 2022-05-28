@@ -12,8 +12,8 @@ export type UpdateFn<T> = (value: T) => T | null;
 export interface Atom<T = any> {
 	displayName: string;
 	kind: AtomKind;
-	getValue(): T;
-	setValue(value: T | UpdateFn<T>): void;
+	read(): T;
+	write(value: T | UpdateFn<T>): void;
 	_pending: number;
 	_value: T;
 	_tracking: Set<Atom> | undefined;

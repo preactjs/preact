@@ -179,7 +179,7 @@ function createAtom(initialValue, kind, owner, displayName = '') {
 		_context: undefined,
 		_component: currentComponent,
 		_children: [], // TODO: Use empty array for signals?
-		getValue() {
+		read() {
 			// We're rendering a component which only reads atoms
 			if (currentComponent && !currentComponent.__reactive) {
 				const reactive = getReactive(currentComponent);
@@ -195,7 +195,7 @@ function createAtom(initialValue, kind, owner, displayName = '') {
 
 			return this._value;
 		},
-		setValue(value) {
+		write(value) {
 			// TODO: Extract to preact/debug?
 			if (currentAtom !== undefined && currentAtom.kind === KIND_COMPUTED) {
 				throw new Error('Must not update signal inside computed.');
@@ -347,7 +347,7 @@ function isUpdater(x) {
  */
 export function signal(initialValue, displayName) {
 	const atom = getAtom(currentIndex++, initialValue, KIND_SOURCE, displayName);
-	return [atom.getValue, atom.setValue];
+	return [atom.read, atom.write];
 }
 
 /**
@@ -546,7 +546,7 @@ export function readonly(value, displayName) {
 		invalidate(atom);
 	}
 
-	return atom.getValue;
+	return atom.read;
 }
 
 /**
