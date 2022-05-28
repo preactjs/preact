@@ -25,7 +25,7 @@ export interface Atom<T = any> {
 	_context: Context<T> | undefined;
 }
 
-export interface Graph {
+export interface DAGraph {
 	deps: Map<Atom, Set<Atom>>;
 	subs: Map<Atom, Set<Atom>>;
 }

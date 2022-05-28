@@ -12,7 +12,8 @@ import {
 	inject,
 	effect,
 	readonly,
-	ref
+	ref,
+	$
 } from 'preact/reactive';
 import { act, setupRerender } from 'preact/test-utils';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
@@ -49,7 +50,7 @@ class ErrorBoundary extends Component {
 	}
 }
 
-describe('Reactive', () => {
+describe.only('Reactive', () => {
 	/** @type {HTMLDivElement} */
 	let scratch;
 
@@ -66,18 +67,31 @@ describe('Reactive', () => {
 	});
 
 	describe('component', () => {
-		it('should pass props', () => {
-			let usedProps;
-			function App(props) {
-				usedProps = props;
-				return <div />;
+		it('should return signal value', () => {
+			function App() {
+				const [foo] = signal('foo');
+				return <div>{foo()}</div>;
 			}
 
-			render(<App foo="foo" />, scratch);
-			expect(usedProps).to.deep.equal({ foo: 'foo' });
+			render(<App />, scratch);
+			expect(scratch.textContent).to.equal('foo');
+		});
 
-			render(<App bar="bar" />, scratch);
-			expect(usedProps).to.deep.equal({ bar: 'bar' });
+		it.only('should trigger state update', () => {
+			/** @type {Updater<string>} */
+			let update;
+			function App() {
+				const [foo, setFoo] = signal('foo');
+				update = setFoo;
+				return $(() => <div>{foo()}</div>);
+			}
+
+			render(<App />, scratch);
+
+			console.log('================================');
+			update('bar');
+			rerender();
+			expect(scratch.textContent).to.equal('bar');
 		});
 
 		it('should not call unsubscribed computed atoms', () => {

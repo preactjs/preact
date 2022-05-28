@@ -1,4 +1,6 @@
 import { options, Component, h } from 'preact';
+import { useRef } from 'preact/hooks';
+import { createEffect, createMemo, createSignal, newAtom } from './lib';
 
 /** @type {number} */
 let currentIndex;
@@ -13,7 +15,7 @@ let currentComponent;
 let afterPaintEffects = [];
 
 /**
- * @type {import('./internal').Graph}
+ * @type {import('./internal').DAGraph}
  */
 const graph = {
 	deps: new Map(),
@@ -43,300 +45,41 @@ options._diff = vnode => {
 
 options._render = vnode => {
 	if (oldRender) oldRender(vnode);
-
 	currentComponent = vnode._component;
-	currentIndex = 0;
-
-	const reactive = currentComponent.__reactive;
-	if (reactive) {
-		reactive._pendingEffects.forEach(invokeCleanup);
-	}
 };
 
 options.diffed = vnode => {
 	if (oldDiffed) oldDiffed(vnode);
-
-	const c = vnode._component;
-	if (c && c.__reactive) {
-		const atom = c.__reactive._atom;
-
-		let deps = graph.deps.get(atom);
-		if (!deps) {
-			deps = new Set();
-			graph.deps.set(atom, deps);
-		}
-
-		// Subscribe to new subscriptions
-		atom._tracking.forEach(dep => {
-			linkDep(atom, dep);
-		});
-
-		// Remove old subscriptions
-		deps.forEach(dep => {
-			if (!atom._tracking.has(dep)) {
-				unlinkDep(atom, dep);
-			}
-		});
-
-		if (c.__reactive._pendingEffects.length) {
-			afterPaint(afterPaintEffects.push(c));
-		}
-	}
-
 	currentComponent = null;
 };
 
-options.unmount = vnode => {
-	if (oldBeforeUnmount) oldBeforeUnmount(vnode);
-
-	/** @type {import('./internal').Component | null} */
-	const c = vnode._component;
-	if (c && c.__reactive) {
-		// Cleanup in progress effects
-		c.__reactive._pendingEffects.forEach(invokeCleanup);
-
-		// TODO: This part is messy
-		const list = c.__reactive._atom._children;
-		let i = list.length;
-		while (i--) {
-			destroy(list[i]);
-		}
-	}
-};
-
-/**
- * @param {import('./internal').Component} component
- * @returns {Required<import('./internal').Component>["__reactive"]}
- */
-function getReactive(component) {
-	if (!component.__reactive) {
-		const atom = createAtom(
-			null,
-			KIND_REACTION,
-			undefined,
-			component.constructor.displayName ||
-				component.constructor.name ||
-				'ReactiveComponent'
-		);
-
-		component.__reactive = {
-			_atom: atom,
-			_pendingEffects: []
+export function $(fn) {
+	const c = currentComponent;
+	if (!c.__reactive) {
+		c.__reactive = {
+			_view: null,
+			_scheduled: false
 		};
 
-		atom._tracking = new Set();
-		atom._onUpdate = () => {
-			component._skipRender = false;
-			component.setState({});
-		};
+		const v = createMemo(fn);
+		const a = createEffect(() => {
+			c.__reactive._view = v();
+		});
+
+		// a._execute = () => {
+		// 	const r = a._execute();
+		// 	if (!c.__reactive._scheduled) {
+		// 		c.__reactive._scheduled = true;
+		// 		console.log('call');
+		// 		// c.forceUpdate();
+		// 	}
+		// 	return r;
+		// };
 	}
 
-	return component.__reactive;
-}
-
-/**
- * @template T
- * @param {T} initialState
- * @param {number} index
- * @param {import('./internal').AtomKind} kind
- * @param {string} [displayName]
- * @returns {import('./internal').Atom<T>}
- */
-function getAtom(index, initialState, kind, displayName) {
-	const reactive = getReactive(currentComponent);
-
-	if (index === 0) {
-		currentAtom = reactive._atom;
-		currentAtom._tracking = new Set();
-	}
-
-	if (index >= currentAtom._children.length) {
-		const atom = createAtom(initialState, kind, currentAtom, displayName);
-		currentAtom._children.push(atom);
-	}
-
-	return currentAtom._children[index];
-}
-
-/**
- * @template T
- * @param {T} initialValue
- * @param {import('./internal').AtomKind} kind
- * @param {import('./internal').Atom | undefined} owner
- * @returns {import('./internal').Atom<T>}
- */
-function createAtom(initialValue, kind, owner, displayName = '') {
-	/** @type {import('./internal').Atom<T>} */
-	const atom = {
-		displayName: displayName + '_' + String(atomHash++),
-		kind,
-		_pending: 0,
-		_onUpdate: NOOP,
-		_onCleanup: NOOP,
-		_value: initialValue,
-		_tracking: undefined,
-		_owner: owner,
-		_context: undefined,
-		_component: currentComponent,
-		_children: [], // TODO: Use empty array for signals?
-		read() {
-			// We're rendering a component which only reads atoms
-			if (currentComponent && !currentComponent.__reactive) {
-				const reactive = getReactive(currentComponent);
-				currentAtom = reactive._atom;
-			}
-
-			// May be set by component or by owning reaction
-			currentAtom._tracking.add(atom);
-
-			if (kind !== KIND_SOURCE && !graph.deps.has(atom)) {
-				atom._onUpdate();
-			}
-
-			return this._value;
-		},
-		write(value) {
-			// TODO: Extract to preact/debug?
-			if (currentAtom !== undefined && currentAtom.kind === KIND_COMPUTED) {
-				throw new Error('Must not update signal inside computed.');
-			}
-
-			if (isUpdater(value)) {
-				const res = value(atom._value);
-				if (res !== null && res !== atom._value) {
-					atom._value = res;
-					invalidate(atom);
-				}
-			} else if (atom._value !== value) {
-				atom._value = value;
-				invalidate(atom);
-			}
-		}
-	};
-
-	return atom;
-}
-
-/**
- * Set up reactive graph, but don't subscribe to it
- * @param {import('./internal').Atom} atom
- * @param {import('./internal').Atom} dep
- */
-function linkDep(atom, dep) {
-	let subs = graph.subs.get(dep);
-	if (!subs) {
-		subs = new Set();
-		graph.subs.set(dep, subs);
-	}
-
-	subs.add(atom);
-
-	// Deps Set() is created before this function
-	graph.deps.get(atom).add(dep);
-}
-
-/**
- * @param {import('./internal').Atom} atom
- * @param {import('./internal').Atom} dep
- */
-function unlinkDep(atom, dep) {
-	const subs = graph.subs.get(dep);
-	if (subs) {
-		subs.delete(atom);
-	}
-
-	const deps = graph.deps.get(atom);
-	if (deps) {
-		deps.delete(dep);
-	}
-}
-
-/**
- * @param {import('./internal').Atom} atom
- */
-function destroy(atom) {
-	const stack = [atom];
-	let item;
-	while ((item = stack.pop()) !== undefined) {
-		item._owner = undefined;
-
-		const deps = graph.deps.get(item);
-		if (deps) {
-			deps.forEach(dep => {
-				unlinkDep(item, dep);
-				stack.push(dep);
-			});
-		}
-
-		if (item._onCleanup !== NOOP) {
-			item._onCleanup();
-		}
-
-		if (item._children.length > 0) {
-			stack.push(...item._children);
-		}
-	}
-}
-
-/**
- * @param {import('./internal').Atom} atom
- */
-function flagUpdate(atom) {
-	if (++atom._pending === 1) {
-		const subs = graph.subs.get(atom);
-		if (subs !== undefined) {
-			subs.forEach(flagUpdate);
-		}
-	}
-}
-
-/**
- * @param {import('./internal').Atom} atom
- */
-function unflagUpdate(atom) {
-	if (--atom._pending === 0) {
-		const subs = graph.subs.get(atom);
-		if (subs !== undefined) {
-			subs.forEach(unflagUpdate);
-		}
-	}
-}
-
-/**
- * @param {import('./internal').Atom} atom
- */
-function processUpdate(atom) {
-	if (--atom._pending === 0) {
-		if (atom._onUpdate !== NOOP) {
-			atom._onUpdate();
-		}
-
-		const subs = graph.subs.get(atom);
-		if (subs) {
-			subs.forEach(processUpdate);
-		}
-	}
-}
-
-/**
- * Prevent so-called "glitches" where an atom could be derived from stale
- * dependencies by sorting them. The algorithm is taken from MobX and is
- * explained here: https://youtu.be/NBYbBbjZeX4?t=2979
- * @template T
- * @param {import('./internal').Atom<T>} atom
- */
-function invalidate(atom) {
-	flagUpdate(atom);
-	processUpdate(atom);
-}
-
-/**
- * @param {*} x
- * @returns {x is import('./internal').UpdateFn<any>}
- */
-function isUpdater(x) {
-	// Will be inlined by terser
-	return typeof x === 'function';
+	console.log('RENDER', c.__reactive._view);
+	c.__reactive._scheduled = false;
+	return c.__reactive._view;
 }
 
 /**
@@ -346,59 +89,8 @@ function isUpdater(x) {
  * @returns {[import('./index').ReadReactive<T>, import('./index').StateUpdater<T>]}
  */
 export function signal(initialValue, displayName) {
-	const atom = getAtom(currentIndex++, initialValue, KIND_SOURCE, displayName);
-	return [atom.read, atom.write];
-}
-
-/**
- * @template T
- * @param {import('./internal').Atom<T>} atom
- * @param {() => T} fn
- * @returns {T}
- */
-function track(atom, fn) {
-	atom._tracking = new Set();
-	let tmpAtom = currentAtom;
-	currentAtom = atom;
-	let prevIndex = currentIndex;
-	currentIndex = 0;
-
-	try {
-		const res = fn();
-		if (atom._value === res) {
-			const subs = graph.subs.get(atom);
-			if (subs !== undefined) {
-				subs.forEach(unflagUpdate);
-			}
-		}
-
-		atom._value = res;
-		return res;
-	} catch (e) {
-		options._catchError(e, atom._component._vnode);
-	} finally {
-		let deps = graph.deps.get(atom);
-		if (!deps) {
-			deps = new Set();
-			graph.deps.set(atom, deps);
-		}
-
-		// Subscribe to new subscriptions
-		atom._tracking.forEach(dep => {
-			linkDep(atom, dep);
-		});
-
-		// Remove old subscriptions
-		deps.forEach(dep => {
-			if (!atom._tracking.has(dep)) {
-				unlinkDep(atom, dep);
-			}
-		});
-
-		currentAtom = tmpAtom;
-		atom._tracking = undefined;
-		currentIndex = prevIndex;
-	}
+	const ref = useRef(null);
+	return ref.current || (ref.current = createSignal(initialValue));
 }
 
 /**
@@ -408,87 +100,11 @@ function track(atom, fn) {
  * @returns {import('./internal').Atom<T>}
  */
 export function computed(fn, displayName) {
-	const atom = getAtom(currentIndex++, undefined, KIND_COMPUTED, displayName);
-	atom._onUpdate = () => track(atom, fn);
-	return atom;
-}
-
-/**
- * @param {import('./internal').EffectState} data
- */
-function invokeEffect(data) {
-	const res = track(data._atom, data._fn);
-	if (typeof res === 'function') {
-		data._atom._onCleanup = res;
+	const ref = useRef(null);
+	if (ref.current === null) {
+		ref.current = createMemo(fn);
 	}
-}
-
-/**
- * @param {import('./internal').EffectState} data
- */
-function invokeCleanup(data) {
-	const cleanup = data._atom._onCleanup;
-	if (cleanup !== NOOP) {
-		cleanup();
-		data._atom._onCleanup = NOOP;
-	}
-}
-
-/**
- * After paint effects consumer.
- */
-function flushAfterPaintEffects() {
-	let component;
-	while ((component = afterPaintEffects.shift())) {
-		if (!component._parentDom) continue;
-		try {
-			component.__reactive._pendingEffects.forEach(invokeCleanup);
-			component.__reactive._pendingEffects.forEach(invokeEffect);
-			component.__reactive._pendingEffects = [];
-		} catch (e) {
-			component.__reactive._pendingEffects = [];
-			options._catchError(e, component._vnode);
-		}
-	}
-}
-
-const RAF_TIMEOUT = 100;
-let prevRaf;
-let HAS_RAF = typeof requestAnimationFrame == 'function';
-
-/**
- * Schedule a callback to be invoked after the browser has a chance to paint a new frame.
- * Do this by combining requestAnimationFrame (rAF) + setTimeout to invoke a callback after
- * the next browser frame.
- *
- * Also, schedule a timeout in parallel to the the rAF to ensure the callback is invoked
- * even if RAF doesn't fire (for example if the browser tab is not visible)
- *
- * @param {() => void} callback
- */
-function afterNextFrame(callback) {
-	const done = () => {
-		clearTimeout(timeout);
-		if (HAS_RAF) cancelAnimationFrame(raf);
-		setTimeout(callback);
-	};
-	const timeout = setTimeout(done, RAF_TIMEOUT);
-
-	let raf;
-	if (HAS_RAF) {
-		raf = requestAnimationFrame(done);
-	}
-}
-
-/**
- * Schedule afterPaintEffects flush after the browser paints
- * @param {number} newQueueLength
- */
-function afterPaint(newQueueLength) {
-	if (newQueueLength === 1 || prevRaf !== options.requestAnimationFrame) {
-		prevRaf = options.requestAnimationFrame;
-		(prevRaf || afterNextFrame)(flushAfterPaintEffects);
-	}
+	return ref.current;
 }
 
 /**
@@ -497,40 +113,7 @@ function afterPaint(newQueueLength) {
  * @param {string} [displayName]
  * @returns {void}
  */
-export function effect(fn, displayName) {
-	const reactive = getReactive(currentComponent);
-	const isNew = reactive._atom._children.length <= currentIndex;
-
-	const atom = getAtom(currentIndex++, undefined, KIND_REACTION, displayName);
-
-	if (!options._skipEffects) {
-		atom._onUpdate = () => {
-			atom._component.__reactive._pendingEffects.push({
-				_atom: atom,
-				_fn: fn
-			});
-
-			// Ensure that effects are scheduled based on the component tree,
-			// similar to how it's done for hooks
-			atom._component._skipRender = true;
-			atom._component.shouldComponentUpdate = () => {
-				return !atom._component._skipRender;
-			};
-
-			// Only re-schedule if we're not rendering the current component
-			if (atom._component !== currentComponent) {
-				atom._component.setState({});
-			}
-		};
-
-		if (isNew) {
-			atom._onUpdate();
-		}
-
-		// Don't skip rendering if we're currently rendering
-		atom._component._skipRender = false;
-	}
-}
+export function effect(fn, displayName) {}
 
 /**
  * @template T
