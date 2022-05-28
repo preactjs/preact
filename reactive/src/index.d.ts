@@ -4,6 +4,7 @@ export interface Reactive<T> {
 }
 
 export type StateUpdater<S> = (value: S | ((prevState: S) => S | null)) => void;
+export type ReadReactive<T> = () => T;
 
 /**
  * Returns a signal that holds the value and can be subscribed to in order to
@@ -14,7 +15,7 @@ export type StateUpdater<S> = (value: S | ((prevState: S) => S | null)) => void;
 export function signal<T>(
 	initialValue: T,
 	displayName?: string
-): [Reactive<T>, StateUpdater<T>];
+): [ReadReactive<T>, StateUpdater<T>];
 
 /**
  * Create a derived signal from other signals. It tracks every signal that is
@@ -22,7 +23,7 @@ export function signal<T>(
  * @param fn Function that tracks signal reads
  * @param displayName Optional: Label for signal to use for debugging
  */
-export function computed<T>(fn: () => T, displayName?: string): Reactive<T>;
+export function computed<T>(fn: () => T, displayName?: string): ReadReactive<T>;
 
 /**
  * Turn the passed `value` into a signal. Whenever a new value is passed to
@@ -30,7 +31,7 @@ export function computed<T>(fn: () => T, displayName?: string): Reactive<T>;
  * @param value
  * @param displayName Optional: Label for signal to use for debugging
  */
-export function readonly<T>(value: T, displayName?: string): Atom<T>;
+export function readonly<T>(value: T, displayName?: string): ReadReactive<T>;
 
 /**
  * Accepts a function that contains imperative, possibly effectful code.

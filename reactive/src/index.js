@@ -179,7 +179,7 @@ function createAtom(initialValue, kind, owner, displayName = '') {
 		_context: undefined,
 		_component: currentComponent,
 		_children: [], // TODO: Use empty array for signals?
-		get value() {
+		getValue() {
 			// We're rendering a component which only reads atoms
 			if (currentComponent && !currentComponent.__reactive) {
 				const reactive = getReactive(currentComponent);
@@ -343,11 +343,11 @@ function isUpdater(x) {
  * @template T
  * @param {T} initialValue
  * @param {string} [displayName]
- * @returns {[import('./index').Reactive<T>,import('./index').StateUpdater<T>]}
+ * @returns {[import('./index').ReadReactive<T>, import('./index').StateUpdater<T>]}
  */
 export function signal(initialValue, displayName) {
 	const atom = getAtom(currentIndex++, initialValue, KIND_SOURCE, displayName);
-	return [atom, atom.setValue];
+	return [atom.getValue, atom.setValue];
 }
 
 /**
@@ -536,7 +536,7 @@ export function effect(fn, displayName) {
  * @template T
  * @param {T} value
  * @param {string} [displayName]
- * @returns {import('./internal').Atom<T>}
+ * @returns {import('./index').ReadReactive<T>}
  */
 export function readonly(value, displayName) {
 	const atom = getAtom(currentIndex++, value, KIND_SOURCE, displayName);
@@ -546,7 +546,7 @@ export function readonly(value, displayName) {
 		invalidate(atom);
 	}
 
-	return atom;
+	return atom.getValue;
 }
 
 /**

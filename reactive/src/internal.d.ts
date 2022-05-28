@@ -12,7 +12,7 @@ export type UpdateFn<T> = (value: T) => T | null;
 export interface Atom<T = any> {
 	displayName: string;
 	kind: AtomKind;
-	value: T;
+	getValue(): T;
 	setValue(value: T | UpdateFn<T>): void;
 	_pending: number;
 	_value: T;

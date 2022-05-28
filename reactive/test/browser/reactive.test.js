@@ -112,7 +112,7 @@ describe('Reactive', () => {
 				updateFoo = setFoo;
 
 				count++;
-				const v = num.value % 2 === 0 ? foo.value : bar.value;
+				const v = num() % 2 === 0 ? foo() : bar();
 				return <div>{v}</div>;
 			}
 
@@ -138,7 +138,7 @@ describe('Reactive', () => {
 				updateName = setName;
 
 				count++;
-				return <div>{name.value}</div>;
+				return <div>{name()}</div>;
 			}
 
 			/** @type {Updater<void>} */
@@ -177,14 +177,14 @@ describe('Reactive', () => {
 				updateName = setName;
 
 				const foo = computed(() => {
-					if (name.value === 'fail') {
+					if (name() === 'fail') {
 						throw new Error('errored');
 					}
 
-					return name.value;
+					return name();
 				});
 
-				return <div>{foo.value}</div>;
+				return <div>{foo()}</div>;
 			}
 
 			class Outer extends Component {
@@ -233,37 +233,11 @@ describe('Reactive', () => {
 		it('should render signal value', () => {
 			function App() {
 				const [name] = signal('foo');
-				return <div>{name.value}</div>;
+				return <div>{name()}</div>;
 			}
 
 			render(<App />, scratch);
 			expect(scratch.innerHTML).to.equal('<div>foo</div>');
-		});
-
-		describe('displayName', () => {
-			it('should set default if none specified', () => {
-				let atom;
-				function App() {
-					const [name] = signal('foo');
-					atom = name;
-					return <div>{name.value}</div>;
-				}
-
-				render(<App />, scratch);
-				expect(atom.displayName).to.match(/^_\d+$/);
-			});
-
-			it('should use passed value', () => {
-				let atom;
-				function App() {
-					const [name] = signal('foo', 'foo');
-					atom = name;
-					return <div>{name.value}</div>;
-				}
-
-				render(<App />, scratch);
-				expect(atom.displayName).to.match(/^foo_\d+$/);
-			});
 		});
 
 		describe('updater', () => {
@@ -273,7 +247,7 @@ describe('Reactive', () => {
 				function App() {
 					const [name, setName] = signal('foo');
 					update = setName;
-					return <div>{name.value}</div>;
+					return <div>{name()}</div>;
 				}
 
 				render(<App />, scratch);
@@ -314,7 +288,7 @@ describe('Reactive', () => {
 				function App() {
 					const [name, setName] = signal('foo');
 					update = setName;
-					return <div>{name.value}</div>;
+					return <div>{name()}</div>;
 				}
 
 				render(<App />, scratch);
@@ -329,7 +303,7 @@ describe('Reactive', () => {
 				function App() {
 					const [name, setName] = signal('foo');
 					update = setName;
-					return <div>{name.value}</div>;
+					return <div>{name()}</div>;
 				}
 
 				render(<App />, scratch);
@@ -346,7 +320,7 @@ describe('Reactive', () => {
 			function App({ foo }) {
 				const $foo = readonly(foo);
 				count++;
-				return <div>{$foo.value}</div>;
+				return <div>{$foo()}</div>;
 			}
 
 			render(<App foo={0} />, scratch);
@@ -361,10 +335,10 @@ describe('Reactive', () => {
 				const $foo = readonly(foo);
 				const c = computed(() => {
 					computedCount++;
-					return $foo.value;
+					return $foo();
 				});
 				count++;
-				return <div>{c.value}</div>;
+				return <div>{c()}</div>;
 			}
 
 			render(<App foo={0} />, scratch);
@@ -383,8 +357,8 @@ describe('Reactive', () => {
 		it('should return atom', () => {
 			function App() {
 				const [name] = signal('foo');
-				const bar = computed(() => name.value);
-				return <div>{bar.value}</div>;
+				const bar = computed(() => name());
+				return <div>{bar()}</div>;
 			}
 
 			render(<App />, scratch);
@@ -397,8 +371,8 @@ describe('Reactive', () => {
 			function App() {
 				const [name, updateName] = signal('foo');
 				update = updateName;
-				const bar = computed(() => name.value);
-				return <div>{bar.value}</div>;
+				const bar = computed(() => name());
+				return <div>{bar()}</div>;
 			}
 
 			render(<App />, scratch);
@@ -414,14 +388,14 @@ describe('Reactive', () => {
 			function App() {
 				const [name, updateName] = signal('foo');
 				update = updateName;
-				const a = computed(() => name.value + 'A');
-				const b = computed(() => name.value + 'B');
+				const a = computed(() => name() + 'A');
+				const b = computed(() => name() + 'B');
 				const c = computed(() => {
 					count++;
-					return a.value + ' ' + b.value;
+					return a() + ' ' + b();
 				});
 
-				return <div>{c.value}</div>;
+				return <div>{c()}</div>;
 			}
 
 			render(<App />, scratch);
@@ -441,10 +415,10 @@ describe('Reactive', () => {
 				update = setI;
 				const sum = computed(() => {
 					count++;
-					return i.value;
+					return i();
 				});
 
-				return <div>{sum.value}</div>;
+				return <div>{sum()}</div>;
 			}
 
 			render(<App />, scratch);
@@ -462,13 +436,13 @@ describe('Reactive', () => {
 			function App() {
 				const [i, setI] = signal(0, 'i');
 				update = setI;
-				const tmp = computed(() => (i.value > 10 ? 'foo' : 'bar'), 'tmp');
+				const tmp = computed(() => (i() > 10 ? 'foo' : 'bar'), 'tmp');
 				const sum = computed(() => {
 					count++;
-					return tmp.value;
+					return tmp();
 				}, 'sum');
 
-				return <div>{sum.value}</div>;
+				return <div>{sum()}</div>;
 			}
 
 			render(<App />, scratch);
@@ -482,43 +456,15 @@ describe('Reactive', () => {
 		it('should throw when a signal is updated inside computed', () => {
 			function App() {
 				const [name] = signal('foo');
-				const [_, setNope] = signal('foo');
+				const [, setNope] = signal('foo');
 				const bar = computed(() => {
-					setNope(name.value);
-					return name.value;
+					setNope(name());
+					return name();
 				});
-				return <div>{bar.value}</div>;
+				return <div>{bar()}</div>;
 			}
 
 			expect(() => render(<App />, scratch)).to.throw(/Must not/);
-		});
-
-		describe('displayName', () => {
-			it('should use default if not specified', () => {
-				let atom;
-				function App() {
-					const [name] = signal('foo');
-					const bar = computed(() => name.value);
-					atom = bar;
-					return <div>{bar.value}</div>;
-				}
-
-				render(<App />, scratch);
-				expect(atom.displayName).to.match(/^_\d+$/);
-			});
-
-			it('should use passed name', () => {
-				let atom;
-				function App() {
-					const [name] = signal('foo');
-					const bar = computed(() => name.value, 'bar');
-					atom = bar;
-					return <div>{bar.value}</div>;
-				}
-
-				render(<App />, scratch);
-				expect(atom.displayName).to.match(/^bar_\d+$/);
-			});
 		});
 	});
 
@@ -633,14 +579,14 @@ describe('Reactive', () => {
 				update = setI;
 
 				effect(() => {
-					$i.value;
+					$i();
 					executionOrder.push('action1');
 					return () => {
 						executionOrder.push('cleanup1');
 					};
 				});
 				effect(() => {
-					$i.value;
+					$i();
 					executionOrder.push('action2');
 					return () => {
 						executionOrder.push('cleanup2');
@@ -688,7 +634,7 @@ describe('Reactive', () => {
 				update = setFoo;
 
 				effect(() => {
-					if (foo.value > 0) {
+					if (foo() > 0) {
 						throw new Error('fail');
 					}
 				});
@@ -718,7 +664,7 @@ describe('Reactive', () => {
 
 				effect(() => {
 					// Trigger read
-					foo.value;
+					foo();
 					return () => {
 						throw new Error('fail');
 					};
@@ -819,7 +765,7 @@ describe('Reactive', () => {
 				const [ctx, setCtx] = signal('foo');
 				update = setCtx;
 				return (
-					<Ctx.Provider value={ctx.value}>
+					<Ctx.Provider value={ctx()}>
 						<Blocker />
 					</Ctx.Provider>
 				);
@@ -858,7 +804,7 @@ describe('Reactive', () => {
 				const [ctx, setCtx] = signal('foo');
 				update = setCtx;
 				return (
-					<Ctx.Provider value={ctx.value}>
+					<Ctx.Provider value={ctx()}>
 						<Blocker />
 					</Ctx.Provider>
 				);
