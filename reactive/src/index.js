@@ -58,27 +58,24 @@ export function $(fn) {
 	if (!c.__reactive) {
 		c.__reactive = {
 			_view: null,
-			_scheduled: false
+			_init: true,
+			_scheduled: true
 		};
 
 		const v = createMemo(fn);
-		const a = createEffect(() => {
+		createEffect(() => {
 			c.__reactive._view = v();
-		});
 
-		// a._execute = () => {
-		// 	const r = a._execute();
-		// 	if (!c.__reactive._scheduled) {
-		// 		c.__reactive._scheduled = true;
-		// 		console.log('call');
-		// 		// c.forceUpdate();
-		// 	}
-		// 	return r;
-		// };
+			if (!c.__reactive._scheduled) {
+				console.log('EFFECT', v().props);
+				c.forceUpdate();
+			}
+		});
 	}
 
-	console.log('RENDER', c.__reactive._view);
+	console.log('RENDER', c.__reactive._view.props);
 	c.__reactive._scheduled = false;
+	c.__reactive._init = false;
 	return c.__reactive._view;
 }
 
@@ -101,10 +98,7 @@ export function signal(initialValue, displayName) {
  */
 export function computed(fn, displayName) {
 	const ref = useRef(null);
-	if (ref.current === null) {
-		ref.current = createMemo(fn);
-	}
-	return ref.current;
+	return ref.current || (ref.current = createMemo(fn));
 }
 
 /**

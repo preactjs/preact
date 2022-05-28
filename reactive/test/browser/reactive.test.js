@@ -88,9 +88,11 @@ describe.only('Reactive', () => {
 
 			render(<App />, scratch);
 
+			console.log(scratch.innerHTML);
 			console.log('================================');
 			update('bar');
 			rerender();
+			console.log(scratch.innerHTML);
 			expect(scratch.textContent).to.equal('bar');
 		});
 

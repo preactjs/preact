@@ -45,6 +45,7 @@ let prevDebounce;
 function enqueueUpdate(atom: Atom) {
 	if (updateQueue.push(atom) || prevDebounce !== options.debounceRendering) {
 		prevDebounce = options.debounceRendering;
+		console.log('--> debounce reactive', prevDebounce || defer);
 		(prevDebounce || defer)(processUpdate);
 	}
 }
@@ -101,6 +102,7 @@ export function createSignal<T>(value: T): [Reader<T>, Updater<T>] {
 	const write = nextValue => {
 		if (atom._value !== nextValue) {
 			atom._nextValue = nextValue;
+			console.log('ENQUEUE', atom._value, nextValue);
 			enqueueUpdate(atom);
 		}
 	};
@@ -117,17 +119,6 @@ function cleanup(atom: Atom) {
 		}
 	});
 	atom._dependencies.clear();
-}
-
-export function startTrack(atom: Atom) {
-	cleanup(atom);
-	const tmp = running;
-	running = atom;
-	return tmp;
-}
-
-export function restoreTrack(tmp: Atom) {
-	running = tmp;
 }
 
 function trackFn<T>(atom: Atom<T>, fn: () => T) {
@@ -148,7 +139,6 @@ export function createEffect(fn: () => void) {
 	};
 	const atom = newAtom<void>(execute, FLAG_KIND_REACTION);
 	execute();
-	return atom;
 }
 
 export function createMemo<T>(fn: () => T): Reader<T> {
