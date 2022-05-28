@@ -19,6 +19,11 @@ import { setupScratch, teardown } from '../../../test/_util/helpers';
 
 /** @jsx createElement */
 
+/**
+ * @template T
+ * @typedef {import('preact/reactive').StateUpdater<T>} Updater
+ */
+
 function scheduleEffectAssert(assertFn) {
 	return new Promise(resolve => {
 		requestAnimationFrame(() =>
@@ -77,7 +82,9 @@ describe('Reactive', () => {
 
 		it('should not call unsubscribed computed atoms', () => {
 			let count = 0;
-			function App() {
+
+			/** @type {(props: { foo?: string }) => any} */
+			function App(props) {
 				computed(() => count++);
 				return <div />;
 			}
@@ -90,7 +97,9 @@ describe('Reactive', () => {
 		});
 
 		it('should unsubscribe from stale subscriptions', () => {
+			/** @type {Updater<number>} */
 			let update;
+			/** @type {Updater<string>} */
 			let updateFoo;
 
 			let count = 0;
@@ -121,6 +130,7 @@ describe('Reactive', () => {
 		});
 
 		it('should drop reactions on unmount', () => {
+			/** @type {Updater<string>} */
 			let updateName;
 			let count = 0;
 			function Inner() {
@@ -131,6 +141,7 @@ describe('Reactive', () => {
 				return <div>{name.value}</div>;
 			}
 
+			/** @type {Updater<void>} */
 			let updateOuter;
 			class Outer extends Component {
 				constructor(props) {
@@ -159,6 +170,7 @@ describe('Reactive', () => {
 		});
 
 		it('should throw errors as part of render context', () => {
+			/** @type {Updater<string>} */
 			let updateName;
 			function Inner() {
 				const [name, setName] = signal('foo');
@@ -256,6 +268,7 @@ describe('Reactive', () => {
 
 		describe('updater', () => {
 			it('should update signal value', () => {
+				/** @type {Updater<string>} */
 				let update;
 				function App() {
 					const [name, setName] = signal('foo');
@@ -270,6 +283,7 @@ describe('Reactive', () => {
 			});
 
 			it('should NOT update when signal is not used', () => {
+				/** @type {Updater<string>} */
 				let update;
 
 				function Inner(props) {
@@ -295,6 +309,7 @@ describe('Reactive', () => {
 			});
 
 			it('should update signal via updater function', () => {
+				/** @type {Updater<string>} */
 				let update;
 				function App() {
 					const [name, setName] = signal('foo');
@@ -309,6 +324,7 @@ describe('Reactive', () => {
 			});
 
 			it('should abort signal update in updater function', () => {
+				/** @type {Updater<string>} */
 				let update;
 				function App() {
 					const [name, setName] = signal('foo');
@@ -376,6 +392,7 @@ describe('Reactive', () => {
 		});
 
 		it('should rerun on update', () => {
+			/** @type {(s: string) => void} */
 			let update;
 			function App() {
 				const [name, updateName] = signal('foo');
@@ -391,6 +408,7 @@ describe('Reactive', () => {
 		});
 
 		it('should only update once', () => {
+			/** @type {Updater<string>} */
 			let update;
 			let count = 0;
 			function App() {
@@ -415,6 +433,7 @@ describe('Reactive', () => {
 		});
 
 		it('should skip updates if signal value did not change', () => {
+			/** @type {Updater<number>} */
 			let update;
 			let count = 0;
 			function App() {
@@ -437,6 +456,7 @@ describe('Reactive', () => {
 		});
 
 		it('should skip updates if computed result did not change', () => {
+			/** @type {Updater<number>} */
 			let update;
 			let count = 0;
 			function App() {
@@ -793,6 +813,7 @@ describe('Reactive', () => {
 				}
 			}
 
+			/** @type {Updater<string>} */
 			let update;
 			function App() {
 				const [ctx, setCtx] = signal('foo');
@@ -831,6 +852,7 @@ describe('Reactive', () => {
 				}
 			}
 
+			/** @type {Updater<string>} */
 			let update;
 			function App() {
 				const [ctx, setCtx] = signal('foo');
