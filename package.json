@@ -69,6 +69,7 @@
 			"require": "./compat/client.js"
 		},
 		"./compat/server": {
+			"browser": "./compat/server.browser.js",
 			"import": "./compat/server.mjs",
 			"require": "./compat/server.js"
 		},
@@ -202,6 +203,7 @@
 		"compat/src",
 		"compat/client.js",
 		"compat/client.mjs",
+		"compat/server.browser.js",
 		"compat/server.js",
 		"compat/server.mjs",
 		"compat/scheduler.js",
