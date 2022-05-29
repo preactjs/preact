@@ -106,6 +106,9 @@ export interface PreactElement extends HTMLElement {
 	// style: HTMLElement["style"]; // From HTMLElement
 
 	data?: string | number; // From Text node
+
+	_isControlled?: boolean;
+	_prevValue?: any;
 }
 
 export type PreactNode = PreactElement | Text;

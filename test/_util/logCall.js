@@ -29,6 +29,11 @@ export function logCall(obj, method) {
 			c += serialize(args[i]);
 		}
 
+		// insertBefore(x, null) === insertBefore(x, undefined)
+		if (method === 'insertBefore' && args[1] === undefined) {
+			args[1] = null;
+		}
+
 		// Normalize removeChild -> remove to keep output clean and readable
 		const operation =
 			method != 'removeChild'
