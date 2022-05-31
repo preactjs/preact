@@ -1,6 +1,6 @@
 import { options, Component, h } from 'preact';
 import { useRef } from 'preact/hooks';
-import { createEffect, createMemo, createSignal, newAtom } from './lib';
+import { createEffect, createMemo, createSignal } from './lib';
 
 /** @type {number} */
 let currentIndex;
@@ -13,25 +13,6 @@ let currentComponent;
 
 /** @type {Array<import('./internal').Component>} */
 let afterPaintEffects = [];
-
-/**
- * @type {import('./internal').DAGraph}
- */
-const graph = {
-	deps: new Map(),
-	subs: new Map()
-};
-
-const NOOP = () => {};
-
-let atomHash = 0;
-
-/** @type {import('./internal').AtomKind.SOURCE} */
-const KIND_SOURCE = 1;
-/** @type {import('./internal').AtomKind.COMPUTED} */
-const KIND_COMPUTED = 2;
-/** @type {import('./internal').AtomKind.REACTION} */
-const KIND_REACTION = 3;
 
 let oldDiff = options._diff;
 let oldRender = options._render;
@@ -56,36 +37,24 @@ options.diffed = vnode => {
 export function $(fn) {
 	const c = currentComponent;
 	if (!c.__reactive) {
-		c.__reactive = {
-			_view: null,
-			_init: true,
-			_scheduled: true
-		};
+		c.__reactive = null;
 
 		const v = createMemo(fn);
 		createEffect(() => {
-			c.__reactive._view = v();
-
-			if (!c.__reactive._scheduled) {
-				console.log('EFFECT', v().props);
-				c.forceUpdate();
-			}
+			c.__reactive = v();
+			c.setState({});
 		});
 	}
 
-	console.log('RENDER', c.__reactive._view.props);
-	c.__reactive._scheduled = false;
-	c.__reactive._init = false;
-	return c.__reactive._view;
+	return c.__reactive;
 }
 
 /**
  * @template T
  * @param {T} initialValue
- * @param {string} [displayName]
  * @returns {[import('./index').ReadReactive<T>, import('./index').StateUpdater<T>]}
  */
-export function signal(initialValue, displayName) {
+export function signal(initialValue) {
 	const ref = useRef(null);
 	return ref.current || (ref.current = createSignal(initialValue));
 }
@@ -93,21 +62,18 @@ export function signal(initialValue, displayName) {
 /**
  * @template T
  * @param {() => T} fn
- * @param {string} [displayName]
  * @returns {import('./internal').Atom<T>}
  */
-export function computed(fn, displayName) {
+export function computed(fn) {
 	const ref = useRef(null);
 	return ref.current || (ref.current = createMemo(fn));
 }
 
 /**
- *
  * @param {() => any} fn
- * @param {string} [displayName]
  * @returns {void}
  */
-export function effect(fn, displayName) {}
+export function effect(fn) {}
 
 /**
  * @template T

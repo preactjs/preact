@@ -118,7 +118,6 @@ export function getDomSibling(vnode, childIndex) {
  * @param {import('./internal').Component} component The component to rerender
  */
 function renderComponent(component) {
-	console.log('RENDER Comp', component._vnode.type);
 	let vnode = component._vnode,
 		oldDom = vnode._dom,
 		parentDom = component._parentDom;
@@ -206,7 +205,6 @@ export function enqueueRender(c) {
 		prevDebounce !== options.debounceRendering
 	) {
 		prevDebounce = options.debounceRendering;
-		console.log('--> debounce comp', prevDebounce || defer);
 		(prevDebounce || defer)(process);
 	}
 }

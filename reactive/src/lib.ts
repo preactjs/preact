@@ -1,5 +1,3 @@
-import { options } from 'preact';
-
 export type Reader<T> = () => T;
 export type Updater<T> = (nextValue: T | ((prev: T) => T | null)) => void;
 
@@ -41,12 +39,9 @@ const ROOT = newAtom(NOOP, FLAG_KIND_MEMO);
 let running: Atom = ROOT;
 let updateQueue: Atom[] = [];
 
-let prevDebounce;
 function enqueueUpdate(atom: Atom) {
-	if (updateQueue.push(atom) || prevDebounce !== options.debounceRendering) {
-		prevDebounce = options.debounceRendering;
-		console.log('--> debounce reactive', prevDebounce || defer);
-		(prevDebounce || defer)(processUpdate);
+	if (updateQueue.push(atom)) {
+		processUpdate();
 	}
 }
 
@@ -102,7 +97,6 @@ export function createSignal<T>(value: T): [Reader<T>, Updater<T>] {
 	const write = nextValue => {
 		if (atom._value !== nextValue) {
 			atom._nextValue = nextValue;
-			console.log('ENQUEUE', atom._value, nextValue);
 			enqueueUpdate(atom);
 		}
 	};

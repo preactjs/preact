@@ -77,7 +77,7 @@ describe.only('Reactive', () => {
 			expect(scratch.textContent).to.equal('foo');
 		});
 
-		it.only('should trigger state update', () => {
+		it('should trigger state update', () => {
 			/** @type {Updater<string>} */
 			let update;
 			function App() {
@@ -88,11 +88,8 @@ describe.only('Reactive', () => {
 
 			render(<App />, scratch);
 
-			console.log(scratch.innerHTML);
-			console.log('================================');
 			update('bar');
 			rerender();
-			console.log(scratch.innerHTML);
 			expect(scratch.textContent).to.equal('bar');
 		});
 

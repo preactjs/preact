@@ -32,9 +32,7 @@ describe('Reactive (Library)', () => {
 			const [a, setA] = createSignal('a');
 			setA('aa');
 
-			await waitFor(() => {
-				expect(a()).to.equal('aa');
-			});
+			expect(a()).to.equal('aa');
 		});
 
 		it('should not trigger an update if value is the same', () => {
@@ -63,9 +61,7 @@ describe('Reactive (Library)', () => {
 
 			setA('aa');
 
-			await waitFor(() => {
-				expect(log).to.deep.equal(['a', 'aa']);
-			});
+			expect(log).to.deep.equal(['a', 'aa']);
 		});
 
 		it('should unsubscribe from conditionals', async () => {
@@ -77,19 +73,13 @@ describe('Reactive (Library)', () => {
 			createEffect(() => spy(cond() ? a() : b()));
 
 			setB('bb');
-			await waitFor(() => {
-				expect(spy).to.be.calledOnce;
-			});
+			expect(spy).to.be.calledOnce;
 
 			setCond(false);
-			await waitFor(() => {
-				expect(spy).to.be.calledTwice;
-			});
+			expect(spy).to.be.calledTwice;
 
 			setA('aa');
-			await waitFor(() => {
-				expect(spy).to.be.calledTwice;
-			});
+			expect(spy).to.be.calledTwice;
 		});
 	});
 
@@ -110,9 +100,7 @@ describe('Reactive (Library)', () => {
 			expect(c()).to.equal('ab');
 
 			setA('aa');
-			await waitFor(() => {
-				expect(c()).to.equal('aab');
-			});
+			expect(c()).to.equal('aab');
 		});
 
 		it('should only be called once on update', async () => {
@@ -127,11 +115,7 @@ describe('Reactive (Library)', () => {
 			expect(spy).to.be.calledOnce;
 
 			setA('aa');
-
-			await waitFor(() => {
-				expect(d()).to.equal('aaaa');
-			});
-
+			expect(d()).to.equal('aaaa');
 			expect(spy).to.be.calledTwice;
 		});
 
@@ -147,11 +131,7 @@ describe('Reactive (Library)', () => {
 			expect(spy).to.be.calledOnce;
 
 			setA('aa');
-
-			await waitFor(() => {
-				expect(d()).to.equal('yeah');
-			});
-
+			expect(d()).to.equal('yeah');
 			expect(spy).to.be.calledOnce;
 		});
 	});
