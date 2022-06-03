@@ -170,15 +170,29 @@ export function diff(
 
 			c.context = componentContext;
 			c.props = newProps;
-			c.state = c._nextState;
-
-			if ((tmp = options._render)) tmp(newVNode);
-
-			c._dirty = false;
 			c._vnode = newVNode;
 			c._parentDom = parentDom;
 
-			tmp = c.render(c.props, c.state, c.context);
+			let renderHook = options._render,
+				count = 0;
+			if ('prototype' in newType && newType.prototype.render) {
+				c.state = c._nextState;
+				c._dirty = false;
+
+				if (renderHook) renderHook(newVNode);
+
+				tmp = c.render(c.props, c.state, c.context);
+			} else {
+				do {
+					c._dirty = false;
+					if (renderHook) renderHook(newVNode);
+
+					tmp = c.render(c.props, c.state, c.context);
+
+					// Handle setState called in render, see #2553
+					c.state = c._nextState;
+				} while (c._dirty && ++count < 25);
+			}
 
 			// Handle setState called in render, see #2553
 			c.state = c._nextState;

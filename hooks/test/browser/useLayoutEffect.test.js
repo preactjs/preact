@@ -386,4 +386,30 @@ describe('useLayoutEffect', () => {
 			'Parent - Effect'
 		]);
 	});
+
+	it('should cancel effects from a disposed render', () => {
+		const calls = [];
+		const App = () => {
+			const [greeting, setGreeting] = useState('bye');
+
+			useLayoutEffect(() => {
+				calls.push('doing effect' + greeting);
+				return () => {
+					calls.push('cleaning up' + greeting);
+				};
+			}, [greeting]);
+
+			if (greeting === 'bye') {
+				setGreeting('hi');
+			}
+
+			return <p>{greeting}</p>;
+		};
+
+		act(() => {
+			render(<App />, scratch);
+		});
+		expect(calls.length).to.equal(1);
+		expect(calls).to.deep.equal(['doing effecthi']);
+	});
 });
