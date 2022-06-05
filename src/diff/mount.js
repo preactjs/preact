@@ -10,11 +10,11 @@ import {
 	TYPE_CLASS,
 	MODE_ERRORED,
 	TYPE_ROOT,
-	MODE_SVG
+	MODE_SVG,
+	DIRTY_BIT
 } from '../constants';
 import { normalizeToVNode, Fragment } from '../create-element';
 import { setProperty } from './props';
-import { renderClassComponent, renderFunctionComponent } from './component';
 import { createInternal } from '../tree';
 import options from '../options';
 import { rendererState } from '../component';
@@ -48,47 +48,8 @@ export function mount(internal, newVNode, startDom) {
 			}
 
 			let prevContext = rendererState._context;
-			// Necessary for createContext api. Setting this property will pass
-			// the context value as `this.context` just for this component.
-			let tmp = newVNode.type.contextType;
-			let provider = tmp && rendererState._context[tmp._id];
-			let componentContext = tmp
-				? provider
-					? provider.props.value
-					: tmp._defaultValue
-				: rendererState._context;
 
-			if (provider) provider._subs.add(internal);
-
-			let renderResult;
-
-			if (internal.flags & TYPE_CLASS) {
-				renderResult = renderClassComponent(internal, null, componentContext);
-			} else {
-				renderResult = renderFunctionComponent(
-					internal,
-					null,
-					componentContext
-				);
-			}
-
-			if (renderResult == null) {
-				nextDomSibling = startDom;
-			} else {
-				if (typeof renderResult === 'object') {
-					// dissolve unkeyed root fragments:
-					if (renderResult.type === Fragment && renderResult.key == null) {
-						renderResult = renderResult.props.children;
-					}
-					if (!Array.isArray(renderResult)) {
-						renderResult = [renderResult];
-					}
-				} else {
-					renderResult = [renderResult];
-				}
-
-				nextDomSibling = mountChildren(internal, renderResult, startDom);
-			}
+			nextDomSibling = mountComponent(internal, startDom);
 
 			if (internal._commitCallbacks.length) {
 				rendererState._commitQueue.push(internal);
@@ -336,4 +297,122 @@ export function mountChildren(internal, children, startDom) {
 	}
 
 	return startDom;
+}
+
+/**
+ * @param {import('../internal').Internal} internal The component's backing Internal node
+ * @param {import('../internal').PreactNode} startDom the preceding node
+ * @returns {import('../internal').PreactNode} the component's children
+ */
+function mountComponent(internal, startDom) {
+	/** @type {import('../internal').Component} */
+	let c;
+	let type = /** @type {import('../internal').ComponentType} */ (internal.type);
+	let newProps = internal.props;
+
+	// Necessary for createContext api. Setting this property will pass
+	// the context value as `this.context` just for this component.
+	let tmp = type.contextType;
+	let provider = tmp && rendererState._context[tmp._id];
+	let componentContext = tmp
+		? provider
+			? provider.props.value
+			: tmp._defaultValue
+		: rendererState._context;
+
+	if (provider) provider._subs.add(internal);
+
+	if (internal.flags & TYPE_CLASS) {
+		// @ts-ignore `type` is a class component constructor
+		c = new type(newProps, componentContext);
+	} else {
+		c = {
+			props: newProps,
+			context: componentContext,
+			forceUpdate: internal.rerender.bind(null, internal)
+		};
+	}
+
+	c._internal = internal;
+	internal._component = c;
+	internal.flags |= DIRTY_BIT;
+
+	if (!c.state) c.state = {};
+	if (c._nextState == null) c._nextState = c.state;
+
+	if (type.getDerivedStateFromProps != null) {
+		if (c._nextState == c.state) {
+			c._nextState = Object.assign({}, c._nextState);
+		}
+
+		Object.assign(
+			c._nextState,
+			type.getDerivedStateFromProps(newProps, c._nextState)
+		);
+	}
+
+	if (type.getDerivedStateFromProps == null && c.componentWillMount != null) {
+		c.componentWillMount();
+	}
+
+	if (c.componentDidMount != null) {
+		// If the component was constructed, queue up componentDidMount so the
+		// first time this internal commits (regardless of suspense or not) it
+		// will be called
+		internal._commitCallbacks.push(c.componentDidMount.bind(c));
+	}
+
+	c.context = componentContext;
+	internal.props = c.props = newProps;
+	c.state = c._nextState;
+
+	let renderHook = options._render;
+	if (renderHook) renderHook(internal);
+
+	let counter = 0,
+		renderResult;
+
+	while (counter++ < 25) {
+		internal.flags &= ~DIRTY_BIT;
+		if (renderHook) renderHook(internal);
+		if (internal.flags & TYPE_CLASS) {
+			renderResult = c.render(c.props, c.state, c.context);
+			// note: disable repeat render invocation for class components
+			break;
+		} else {
+			renderResult = type.call(c, c.props, c.context);
+		}
+
+		if (!(internal.flags & DIRTY_BIT)) {
+			break;
+		}
+	}
+
+	// Handle setState called in render, see #2553
+	c.state = c._nextState;
+
+	if (c.getChildContext != null) {
+		rendererState._context = internal._context = Object.assign(
+			{},
+			rendererState._context,
+			c.getChildContext()
+		);
+	}
+
+	if (renderResult == null) {
+		return startDom;
+	}
+	if (typeof renderResult === 'object') {
+		// dissolve unkeyed root fragments:
+		if (renderResult.type === Fragment && renderResult.key == null) {
+			renderResult = renderResult.props.children;
+		}
+		if (!Array.isArray(renderResult)) {
+			renderResult = [renderResult];
+		}
+	} else {
+		renderResult = [renderResult];
+	}
+
+	return mountChildren(internal, renderResult, startDom);
 }
