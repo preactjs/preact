@@ -29,20 +29,20 @@ export function mount(internal, newVNode, startDom) {
 	if (options._diff) options._diff(internal, newVNode);
 
 	/** @type {import('../internal').PreactNode} */
-	let nextDomSibling;
+	let nextDomSibling, prevStartDom;
 
 	try {
 		if (internal.flags & TYPE_COMPONENT) {
 			// Root nodes signal that an attempt to render into a specific DOM node on
 			// the page. Root nodes can occur anywhere in the tree and not just at the
 			// top.
-			let prevStartDom = startDom;
 			let prevParentDom = rendererState._parentDom;
 			if (internal.flags & TYPE_ROOT) {
 				rendererState._parentDom = newVNode.props._parentDom;
 
 				// Note: this is likely always true because we are inside mount()
 				if (rendererState._parentDom !== prevParentDom) {
+					prevStartDom = startDom;
 					startDom = null;
 				}
 			}
@@ -53,18 +53,6 @@ export function mount(internal, newVNode, startDom) {
 
 			if (internal._commitCallbacks.length) {
 				rendererState._commitQueue.push(internal);
-			}
-
-			if (
-				internal.flags & TYPE_ROOT &&
-				prevParentDom !== rendererState._parentDom
-			) {
-				// If we just mounted a root node/Portal, and it changed the parentDom
-				// of it's children, then we need to resume the diff from it's previous
-				// startDom element, which could be null if we are mounting an entirely
-				// new tree, or the portal's nextSibling if we are mounting a Portal in
-				// an existing tree.
-				nextDomSibling = prevStartDom;
 			}
 
 			rendererState._parentDom = prevParentDom;
@@ -97,7 +85,7 @@ export function mount(internal, newVNode, startDom) {
 		options._catchError(e, internal);
 	}
 
-	return nextDomSibling;
+	return prevStartDom || nextDomSibling;
 }
 
 /**
