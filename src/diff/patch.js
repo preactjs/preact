@@ -114,6 +114,70 @@ export function patch(internal, vnode) {
 }
 
 /**
+ * Update an internal and its associated DOM element based on a new VNode
+ * @param {import('../internal').Internal} internal
+ * @param {import('../internal').PreactElement} dom
+ * @param {any} oldProps
+ * @param {any} newProps
+ * @param {import('../internal').Internal['flags']} flags
+ */
+function patchElement(internal, dom, oldProps, newProps, flags) {
+	let isSvg = flags & MODE_SVG,
+		i,
+		value,
+		tmp,
+		newHtml,
+		oldHtml,
+		newChildren;
+
+	for (i in oldProps) {
+		value = oldProps[i];
+		if (i === 'children') {
+		} else if (i === 'dangerouslySetInnerHTML') {
+			oldHtml = value;
+		} else if (!(i in newProps)) {
+			setProperty(dom, i, null, value, isSvg);
+		}
+	}
+
+	for (i in newProps) {
+		value = newProps[i];
+		if (i === 'children') {
+			newChildren = value;
+		} else if (i === 'dangerouslySetInnerHTML') {
+			newHtml = value;
+		} else if (
+			value !== (tmp = oldProps[i]) ||
+			((i === 'checked' || i === 'value') && value != null && value !== dom[i])
+		) {
+			setProperty(dom, i, value, tmp, isSvg);
+		}
+	}
+
+	// If the new vnode didn't have dangerouslySetInnerHTML, diff its children
+	if (newHtml) {
+		value = newHtml.__html;
+		// Avoid re-applying the same '__html' if it did not changed between re-render
+		if (!oldHtml || (value !== oldHtml.__html && value !== dom.innerHTML)) {
+			dom.innerHTML = value;
+		}
+		internal._children = null;
+	} else {
+		if (oldHtml) dom.innerHTML = '';
+		patchChildren(
+			internal,
+			newChildren && Array.isArray(newChildren) ? newChildren : [newChildren]
+		);
+	}
+
+	if (newProps.checked != null && dom._isControlled) {
+		dom._prevValue = newProps.checked;
+	} else if (newProps.value != null && dom._isControlled) {
+		dom._prevValue = newProps.value;
+	}
+}
+
+/**
  * @param {import('../internal').Internal} internal
  * @param {import('../internal').Component} inst
  * @param {any} prevProps
@@ -257,69 +321,5 @@ function patchComponent(internal, inst, prevProps, newProps, flags) {
 		// newVNode._vnodeId = 0;
 		internal.flags |= e.then ? MODE_SUSPENDED : MODE_ERRORED;
 		options._catchError(e, internal);
-	}
-}
-
-/**
- * Update an internal and its associated DOM element based on a new VNode
- * @param {import('../internal').Internal} internal
- * @param {import('../internal').PreactElement} dom
- * @param {any} oldProps
- * @param {any} newProps
- * @param {import('../internal').Internal['flags']} flags
- */
-function patchElement(internal, dom, oldProps, newProps, flags) {
-	let isSvg = flags & MODE_SVG,
-		i,
-		value,
-		tmp,
-		newHtml,
-		oldHtml,
-		newChildren;
-
-	for (i in oldProps) {
-		value = oldProps[i];
-		if (i === 'children') {
-		} else if (i === 'dangerouslySetInnerHTML') {
-			oldHtml = value;
-		} else if (!(i in newProps)) {
-			setProperty(dom, i, null, value, isSvg);
-		}
-	}
-
-	for (i in newProps) {
-		value = newProps[i];
-		if (i === 'children') {
-			newChildren = value;
-		} else if (i === 'dangerouslySetInnerHTML') {
-			newHtml = value;
-		} else if (
-			value !== (tmp = oldProps[i]) ||
-			((i === 'checked' || i === 'value') && value != null && value !== dom[i])
-		) {
-			setProperty(dom, i, value, tmp, isSvg);
-		}
-	}
-
-	// If the new vnode didn't have dangerouslySetInnerHTML, diff its children
-	if (newHtml) {
-		value = newHtml.__html;
-		// Avoid re-applying the same '__html' if it did not changed between re-render
-		if (!oldHtml || (value !== oldHtml.__html && value !== dom.innerHTML)) {
-			dom.innerHTML = value;
-		}
-		internal._children = null;
-	} else {
-		if (oldHtml) dom.innerHTML = '';
-		patchChildren(
-			internal,
-			newChildren && Array.isArray(newChildren) ? newChildren : [newChildren]
-		);
-	}
-
-	if (newProps.checked != null && dom._isControlled) {
-		dom._prevValue = newProps.checked;
-	} else if (newProps.value != null && dom._isControlled) {
-		dom._prevValue = newProps.value;
 	}
 }
