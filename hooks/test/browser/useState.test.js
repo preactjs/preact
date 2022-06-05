@@ -226,7 +226,9 @@ describe('useState', () => {
 			return <p>{greeting}</p>;
 		};
 
-		render(<App />, scratch);
+		act(() => {
+			render(<App />, scratch);
+		});
 		expect(calls.length).to.equal(2);
 		expect(calls).to.deep.equal(['bye', 'hi']);
 		expect(scratch.textContent).to.equal('hi');
