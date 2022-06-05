@@ -212,6 +212,29 @@ describe('useState', () => {
 		expect(scratch.innerHTML).to.equal('');
 	});
 
+	it('should render a second time when the render function updates state', () => {
+		const calls = [];
+		const App = () => {
+			const [greeting, setGreeting] = useState('bye');
+
+			if (greeting === 'bye') {
+				setGreeting('hi');
+			}
+
+			calls.push(greeting);
+
+			return <p>{greeting}</p>;
+		};
+
+		act(() => {
+			render(<App />, scratch);
+		});
+
+		expect(calls.length).to.equal(2);
+		expect(calls).to.deep.equal(['bye', 'hi']);
+		expect(scratch.textContent).to.equal('hi');
+	});
+
 	it('does not loop when states are equal after batches', () => {
 		const renderSpy = sinon.spy();
 		const Context = createContext(null);

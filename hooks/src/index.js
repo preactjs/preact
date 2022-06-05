@@ -6,6 +6,9 @@ let currentIndex;
 /** @type {import('./internal').Component} */
 let currentComponent;
 
+/** @type {import('./internal').Component} */
+let previousComponent;
+
 /** @type {number} */
 let currentHook = 0;
 
@@ -55,10 +58,19 @@ options._render = vnode => {
 
 	const hooks = currentComponent.__hooks;
 	if (hooks) {
-		hooks._pendingEffects.forEach(invokeCleanup);
-		hooks._pendingEffects.forEach(invokeEffect);
-		hooks._pendingEffects = [];
+		if (previousComponent === currentComponent) {
+			hooks._pendingEffects = [];
+			currentComponent._renderCallbacks = [];
+			hooks._list.forEach(hookItem => {
+				if (hookItem._args) hookItem._args = undefined;
+			});
+		} else {
+			hooks._pendingEffects.forEach(invokeCleanup);
+			hooks._pendingEffects.forEach(invokeEffect);
+			hooks._pendingEffects = [];
+		}
 	}
+	previousComponent = currentComponent;
 };
 
 options.diffed = vnode => {
@@ -69,6 +81,7 @@ options.diffed = vnode => {
 		afterPaint(afterPaintEffects.push(c));
 	}
 	currentComponent = null;
+	previousComponent = null;
 };
 
 options._commit = (vnode, commitQueue) => {
