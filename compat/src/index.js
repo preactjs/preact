@@ -117,6 +117,39 @@ const flushSync = (callback, arg) => callback(arg);
  */
 const StrictMode = Fragment;
 
+export function startTransition(cb) {
+	cb();
+}
+
+export function useDeferredValue(val) {
+	return val;
+}
+
+export function useTransition() {
+	return [startTransition, false];
+}
+
+export const useInsertionEffect = useLayoutEffect;
+
+export function useSyncExternalStore(subscribe, getSnapshot) {
+	const [state, setState] = useState(getSnapshot);
+	const value = getSnapshot();
+
+	useLayoutEffect(() => {
+		if (value !== state) {
+			setState(value);
+		}
+	}, [value]);
+
+	useEffect(() => {
+		return subscribe(() => {
+			setState(getSnapshot());
+		});
+	}, [subscribe, getSnapshot]);
+
+	return state;
+}
+
 export * from 'preact/hooks';
 export {
 	version,
@@ -153,6 +186,11 @@ export default {
 	useReducer,
 	useEffect,
 	useLayoutEffect,
+	useInsertionEffect,
+	useTransition,
+	useDeferredValue,
+	useSyncExternalStore,
+	startTransition,
 	useRef,
 	useImperativeHandle,
 	useMemo,
