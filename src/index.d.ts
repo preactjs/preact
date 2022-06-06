@@ -253,6 +253,9 @@ export function cloneElement<P>(
 
 // TODO: Revisit what the public type of this is...
 export const Fragment: FunctionComponent<{}>;
+export const createStatic: (
+	fn: () => null | HTMLElement | Array<null | HTMLElement>
+) => FunctionComponent<{}>;
 
 //
 // Preact options

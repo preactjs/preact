@@ -344,6 +344,7 @@ function diffElementNodes(
 		}
 	}
 
+	let isStatic = false;
 	if (dom == null) {
 		if (nodeType === null) {
 			// @ts-ignore createTextNode returns Text, we expect PreactElement
@@ -356,6 +357,9 @@ function diffElementNodes(
 				// @ts-ignore We know `newVNode.type` is a string
 				nodeType
 			);
+		} else if (newProps._static) {
+			isStatic = true;
+			dom = newVNode._dom;
 		} else {
 			dom = document.createElement(
 				// @ts-ignore We know `newVNode.type` is a string
@@ -375,7 +379,7 @@ function diffElementNodes(
 		if (oldProps !== newProps && (!isHydrating || dom.data !== newProps)) {
 			dom.data = newProps;
 		}
-	} else {
+	} else if (!isStatic) {
 		// If excessDomChildren was not null, repopulate it with the current element's children:
 		excessDomChildren = excessDomChildren && slice.call(dom.childNodes);
 

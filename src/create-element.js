@@ -1,4 +1,4 @@
-import { slice } from './util';
+import { removeNode, slice } from './util';
 import options from './options';
 
 let vnodeId = 0;
@@ -88,6 +88,20 @@ export function createRef() {
 export function Fragment(props) {
 	return props.children;
 }
+
+export const createStatic = fn =>
+	function Static() {
+		this.shouldComponentUpdate = this.shouldComponentUpdate || (() => false);
+
+		const result = fn();
+		return (Array.isArray(result) ? result : [result]).map(dom => {
+			if (dom == null) return null;
+			const vnode = createElement(dom.localName, { _static: true });
+			vnode._dom = dom;
+
+			return vnode;
+		});
+	};
 
 /**
  * Check if a the argument is a valid Preact VNode.
