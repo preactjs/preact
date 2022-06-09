@@ -3,7 +3,7 @@ import { Component, getDomSibling } from '../component';
 import { Fragment } from '../create-element';
 import { diffChildren } from './children';
 import { diffProps, setProperty } from './props';
-import { assign, removeNode, slice } from '../util';
+import { assign, slice } from '../util';
 import options from '../options';
 
 /**
@@ -433,7 +433,9 @@ function diffElementNodes(
 			// Remove children that are not part of any vnode.
 			if (excessDomChildren != null) {
 				for (i = excessDomChildren.length; i--; ) {
-					if (excessDomChildren[i] != null) removeNode(excessDomChildren[i]);
+					if (excessDomChildren[i] != null) {
+						excessDomChildren[i].remove();
+					}
 				}
 			}
 		}
@@ -447,12 +449,7 @@ function diffElementNodes(
 				// despite the attribute not being present. When the attribute
 				// is missing the progress bar is treated as indeterminate.
 				// To fix that we'll always update it when it is 0 for progress elements
-				(i !== dom.value ||
-					(nodeType === 'progress' && !i) ||
-					// This is only for IE 11 to fix <select> value not being updated.
-					// To avoid a stale select value we need to set the option.value
-					// again, which triggers IE11 to re-evaluate the select value
-					(nodeType === 'option' && i !== oldProps.value))
+				(i !== dom.value || (nodeType === 'progress' && !i))
 			) {
 				setProperty(dom, 'value', i, oldProps.value, false);
 			}
@@ -520,7 +517,7 @@ export function unmount(vnode, parentVNode, skipRemove) {
 		}
 	}
 
-	if (!skipRemove && vnode._dom != null) removeNode(vnode._dom);
+	if (!skipRemove && vnode._dom != null) vnode._dom.remove();
 
 	// Must be set to `undefined` to properly clean up `_nextDom`
 	// for which `null` is a valid value. See comment in `create-element.js`
