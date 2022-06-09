@@ -3,7 +3,7 @@ import { Component, getDomSibling } from '../component';
 import { Fragment } from '../create-element';
 import { diffChildren } from './children';
 import { diffProps, setProperty } from './props';
-import { assign, slice } from '../util';
+import { slice } from '../util';
 import options from '../options';
 
 /**
@@ -97,10 +97,10 @@ export function diff(
 			}
 			if (newType.getDerivedStateFromProps != null) {
 				if (c._nextState == c.state) {
-					c._nextState = assign({}, c._nextState);
+					c._nextState = Object.assign({}, c._nextState);
 				}
 
-				assign(
+				Object.assign(
 					c._nextState,
 					newType.getDerivedStateFromProps(newProps, c._nextState)
 				);
@@ -198,7 +198,7 @@ export function diff(
 			c.state = c._nextState;
 
 			if (c.getChildContext != null) {
-				globalContext = assign(assign({}, globalContext), c.getChildContext());
+				globalContext = Object.assign({}, globalContext, c.getChildContext());
 			}
 
 			if (!isNew && c.getSnapshotBeforeUpdate != null) {

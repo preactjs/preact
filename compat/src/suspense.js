@@ -1,5 +1,4 @@
 import { Component, createElement, options, Fragment } from 'preact';
-import { assign } from './util';
 
 const oldCatchError = options._catchError;
 options._catchError = function(error, newVNode, oldVNode, errorInfo) {
@@ -51,7 +50,7 @@ function detachedClone(vnode, detachedParent, parentDom) {
 			vnode._component.__hooks = null;
 		}
 
-		vnode = assign({}, vnode);
+		vnode = Object.assign({}, vnode);
 		if (vnode._component != null) {
 			if (vnode._component._parentDom === parentDom) {
 				vnode._component._parentDom = detachedParent;

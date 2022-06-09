@@ -1,4 +1,4 @@
-import { assign, slice } from './util';
+import { slice } from './util';
 import { createVNode } from './create-element';
 
 /**
@@ -9,7 +9,7 @@ import { createVNode } from './create-element';
  * @returns {import('./internal').VNode}
  */
 export function cloneElement(vnode, props, children) {
-	let normalizedProps = assign({}, vnode.props),
+	let normalizedProps = Object.assign({}, vnode.props),
 		key,
 		ref,
 		i;

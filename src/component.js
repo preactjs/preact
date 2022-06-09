@@ -1,4 +1,3 @@
-import { assign } from './util';
 import { diff, commitRoot } from './diff/index';
 import options from './options';
 import { Fragment } from './create-element';
@@ -30,17 +29,17 @@ Component.prototype.setState = function(update, callback) {
 	if (this._nextState != null && this._nextState !== this.state) {
 		s = this._nextState;
 	} else {
-		s = this._nextState = assign({}, this.state);
+		s = this._nextState = Object.assign({}, this.state);
 	}
 
 	if (typeof update == 'function') {
 		// Some libraries like `immer` mark the current state as readonly,
 		// preventing us from mutating it, so we need to clone it. See #2716
-		update = update(assign({}, s), this.props);
+		update = update(Object.assign({}, s), this.props);
 	}
 
 	if (update) {
-		assign(s, update);
+		Object.assign(s, update);
 	}
 
 	// Skip update if updater function returned null
@@ -124,7 +123,7 @@ function renderComponent(component) {
 
 	if (parentDom) {
 		let commitQueue = [];
-		const oldVNode = assign({}, vnode);
+		const oldVNode = Object.assign({}, vnode);
 		oldVNode._original = vnode._original + 1;
 
 		diff(
