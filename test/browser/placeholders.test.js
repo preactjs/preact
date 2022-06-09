@@ -56,7 +56,6 @@ describe('null placeholders', () => {
 
 	let resetAppendChild;
 	let resetInsertBefore;
-	let resetRemoveChild;
 	let resetRemove;
 
 	before(() => {

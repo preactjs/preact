@@ -24,7 +24,6 @@ describe('hydrate()', () => {
 
 	let resetAppendChild;
 	let resetInsertBefore;
-	let resetRemoveChild;
 	let resetRemove;
 	let resetSetAttribute;
 	let resetRemoveAttribute;
@@ -32,7 +31,6 @@ describe('hydrate()', () => {
 	before(() => {
 		resetAppendChild = logCall(Element.prototype, 'appendChild');
 		resetInsertBefore = logCall(Element.prototype, 'insertBefore');
-		resetRemoveChild = logCall(Element.prototype, 'removeChild');
 		resetRemove = logCall(Element.prototype, 'remove');
 		resetSetAttribute = logCall(Element.prototype, 'setAttribute');
 		resetRemoveAttribute = logCall(Element.prototype, 'removeAttribute');
@@ -41,7 +39,6 @@ describe('hydrate()', () => {
 	after(() => {
 		resetAppendChild();
 		resetInsertBefore();
-		resetRemoveChild();
 		resetRemove();
 		resetSetAttribute();
 		resetRemoveAttribute();
