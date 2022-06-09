@@ -31,12 +31,12 @@ describe('Fragment', () => {
 
 	let resetInsertBefore;
 	let resetAppendChild;
-	let resetRemoveChild;
+	let resetRemove;
 
 	before(() => {
 		resetInsertBefore = logCall(Element.prototype, 'insertBefore');
 		resetAppendChild = logCall(Element.prototype, 'appendChild');
-		resetRemoveChild = logCall(Element.prototype, 'removeChild');
+		resetRemove = logCall(Element.prototype, 'remove');
 		// logCall(CharacterData.prototype, 'remove');
 		// TODO: Consider logging setting set data
 		// ```
@@ -52,7 +52,7 @@ describe('Fragment', () => {
 	after(() => {
 		resetInsertBefore();
 		resetAppendChild();
-		resetRemoveChild();
+		resetRemove();
 	});
 
 	beforeEach(() => {
@@ -821,11 +821,7 @@ describe('Fragment', () => {
 		);
 
 		expect(scratch.innerHTML).to.equal('foobar');
-		expectDomLogToBe([
-			'<div>spamfoobar.insertBefore(#text, #text)',
-			'#text.remove()',
-			'#text.remove()'
-		]);
+		expectDomLogToBe(['<div>spamfoobar.insertBefore(#text, #text)']);
 	});
 
 	it('should render nested Fragments with siblings', () => {
@@ -1677,7 +1673,6 @@ describe('Fragment', () => {
 				'<div>1.insertBefore(<div>3, #text)',
 				'<div>.appendChild(#text)',
 				'<div>31.insertBefore(<div>4, #text)',
-				'#text.remove()',
 				'<div>2.remove()'
 			],
 			'rendering from true to false'
