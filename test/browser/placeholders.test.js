@@ -107,11 +107,7 @@ describe('null placeholders', () => {
 
 		render(<Foo />, scratch);
 		expect(scratch.innerHTML).to.equal('<div><div>Hello</div></div>');
-		expect(getLog()).to.deep.equal([
-			// TODO: find out why these are duplicated
-			'<div>bar.remove()',
-			'<div>bar.remove()'
-		]);
+		expect(getLog()).to.deep.equal(['<div>bar.remove()']);
 	});
 
 	it('should preserve state of Components when using null or booleans as placeholders', () => {
