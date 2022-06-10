@@ -1,13 +1,19 @@
-const { render, hydrate } = require('preact/compat');
+const { render, hydrate, unmountComponentAtNode } = require('preact/compat');
 
-exports.createRoot = function(container) {
+function createRoot(container) {
 	return {
 		render(children) {
-			return render(children, container);
+			render(children, container);
+		},
+		unmount() {
+			unmountComponentAtNode(container);
 		}
 	};
-};
+}
+
+exports.createRoot = createRoot;
 
 exports.hydrateRoot = function(container, children) {
-	return hydrate(children, container);
+	hydrate(children, container);
+	return createRoot(container);
 };
