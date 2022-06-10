@@ -23,7 +23,7 @@ export function signal<T>(
  * @param fn Function that tracks signal reads
  * @param displayName Optional: Label for signal to use for debugging
  */
-export function computed<T>(fn: () => T, displayName?: string): ReadReactive<T>;
+export function memoized<T>(fn: () => T, displayName?: string): ReadReactive<T>;
 
 /**
  * Turn the passed `value` into a signal. Whenever a new value is passed to

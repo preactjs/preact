@@ -8,7 +8,7 @@ import {
 } from 'preact';
 import {
 	signal,
-	computed,
+	memoized,
 	inject,
 	effect,
 	readonly,
@@ -50,7 +50,7 @@ class ErrorBoundary extends Component {
 	}
 }
 
-describe.only('Reactive', () => {
+describe('Reactive', () => {
 	/** @type {HTMLDivElement} */
 	let scratch;
 
@@ -98,7 +98,7 @@ describe.only('Reactive', () => {
 
 			/** @type {(props: { foo?: string }) => any} */
 			function App(props) {
-				computed(() => count++);
+				memoized(() => count++);
 				return <div />;
 			}
 
@@ -189,7 +189,7 @@ describe.only('Reactive', () => {
 				const [name, setName] = signal('foo');
 				updateName = setName;
 
-				const foo = computed(() => {
+				const foo = memoized(() => {
 					if (name() === 'fail') {
 						throw new Error('errored');
 					}
@@ -346,7 +346,7 @@ describe.only('Reactive', () => {
 			let computedCount = 0;
 			function App({ foo }) {
 				const $foo = readonly(foo);
-				const c = computed(() => {
+				const c = memoized(() => {
 					computedCount++;
 					return $foo();
 				});
@@ -370,7 +370,7 @@ describe.only('Reactive', () => {
 		it('should return atom', () => {
 			function App() {
 				const [name] = signal('foo');
-				const bar = computed(() => name());
+				const bar = memoized(() => name());
 				return <div>{bar()}</div>;
 			}
 
@@ -384,7 +384,7 @@ describe.only('Reactive', () => {
 			function App() {
 				const [name, updateName] = signal('foo');
 				update = updateName;
-				const bar = computed(() => name());
+				const bar = memoized(() => name());
 				return <div>{bar()}</div>;
 			}
 
@@ -401,9 +401,9 @@ describe.only('Reactive', () => {
 			function App() {
 				const [name, updateName] = signal('foo');
 				update = updateName;
-				const a = computed(() => name() + 'A');
-				const b = computed(() => name() + 'B');
-				const c = computed(() => {
+				const a = memoized(() => name() + 'A');
+				const b = memoized(() => name() + 'B');
+				const c = memoized(() => {
 					count++;
 					return a() + ' ' + b();
 				});
@@ -426,7 +426,7 @@ describe.only('Reactive', () => {
 			function App() {
 				const [i, setI] = signal(0);
 				update = setI;
-				const sum = computed(() => {
+				const sum = memoized(() => {
 					count++;
 					return i();
 				});
@@ -449,8 +449,8 @@ describe.only('Reactive', () => {
 			function App() {
 				const [i, setI] = signal(0, 'i');
 				update = setI;
-				const tmp = computed(() => (i() > 10 ? 'foo' : 'bar'), 'tmp');
-				const sum = computed(() => {
+				const tmp = memoized(() => (i() > 10 ? 'foo' : 'bar'), 'tmp');
+				const sum = memoized(() => {
 					count++;
 					return tmp();
 				}, 'sum');
@@ -470,7 +470,7 @@ describe.only('Reactive', () => {
 			function App() {
 				const [name] = signal('foo');
 				const [, setNope] = signal('foo');
-				const bar = computed(() => {
+				const bar = memoized(() => {
 					setNope(name());
 					return name();
 				});

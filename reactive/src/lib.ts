@@ -1,4 +1,9 @@
-export type Reader<T> = () => T;
+import { AtomKind } from './internal';
+
+export interface Reader<T> {
+	(): T;
+	_atom: Atom<T>;
+}
 export type Updater<T> = (nextValue: T | ((prev: T) => T | null)) => void;
 
 export interface Atom<T = unknown> {
@@ -94,6 +99,7 @@ export function createSignal<T>(value: T): [Reader<T>, Updater<T>] {
 		subscribe(atom);
 		return atom._value;
 	};
+	read._atom = atom;
 
 	const write = nextValue => {
 		if (atom._value !== nextValue) {
@@ -150,7 +156,7 @@ export function createMemo<T>(fn: () => T): Reader<T> {
 	const atom = newAtom<T>(execute, FLAG_KIND_MEMO);
 	atom._flags |= FLAG_STALE;
 
-	return () => {
+	const read = () => {
 		subscribe(atom);
 		if (atom._flags & FLAG_STALE) {
 			atom._flags ^= FLAG_STALE;
@@ -158,6 +164,8 @@ export function createMemo<T>(fn: () => T): Reader<T> {
 		}
 		return atom._value;
 	};
+	read._atom = atom;
+	return read;
 }
 
 export function untrack<T>(fn: () => T): T {
@@ -173,4 +181,61 @@ export function batch(fn: () => void): void {
 	fn();
 	batchMode = false;
 	processUpdate();
+}
+
+function isPromise(x: any): x is Promise<unknown> {
+	return typeof x === 'object' && typeof x.then === 'function';
+}
+
+export function getResource<T, V = unknown>(
+	signal: Reader<T>,
+	fn: (value: T, controller: AbortController) => V | Promise<V>
+) {
+	let controller: AbortController | undefined;
+
+	const execute = () => {
+		if (controller !== undefined) {
+			controller.abort();
+		}
+
+		controller = new AbortController();
+
+		try {
+			const p = fn(signal(), controller);
+			if (isPromise(p)) {
+				p.then(res => {
+					if (!controller.signal.aborted) {
+						atom._nextValue = res;
+						enqueueUpdate(atom);
+					}
+				}).catch(err => {
+					if (!(err instanceof Error) || err.name === 'AbortError') {
+						// FIXME: Bubble up
+					}
+				});
+			} else if (!controller.signal.aborted) {
+				atom._nextValue = p;
+				enqueueUpdate(atom);
+			}
+		} catch (err) {
+			// FIXME
+		}
+
+		return false;
+	};
+
+	const atom = newAtom<V>(execute, FLAG_KIND_MEMO);
+	signal._atom._subscriptions.add(atom);
+	atom._dependencies.add(signal._atom);
+
+	atom._flags |= FLAG_STALE;
+
+	return () => {
+		subscribe(atom);
+		if (atom._flags & FLAG_STALE) {
+			atom._flags ^= FLAG_STALE;
+			execute();
+		}
+		return atom._value;
+	};
 }

@@ -1,4 +1,10 @@
-import { createSignal, createMemo, createEffect, batch } from '../../src/lib';
+import {
+	createSignal,
+	createMemo,
+	createEffect,
+	batch,
+	getResource
+} from '../../src/lib';
 
 const wait = async ms => new Promise(r => setTimeout(r, ms));
 
@@ -161,6 +167,21 @@ describe.only('Reactive (Library)', () => {
 
 			expect(a()).to.equal('aa');
 			expect(b()).to.equal('bb');
+		});
+	});
+
+	describe('resource()', () => {
+		it('should only update after batch is completed', () => {
+			const spy = sinon.spy(() => 'it works!');
+			const [a, setA] = createSignal('a');
+			const res = getResource(a, spy);
+
+			batch(() => {
+				setA('aa');
+				expect(a()).to.equal('a');
+			});
+
+			expect(a()).to.equal('aa');
 		});
 	});
 });

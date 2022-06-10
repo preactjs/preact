@@ -64,7 +64,7 @@ export function signal(initialValue) {
  * @param {() => T} fn
  * @returns {import('./internal').Atom<T>}
  */
-export function computed(fn) {
+export function memoized(fn) {
 	const ref = useRef(null);
 	return ref.current || (ref.current = createMemo(fn));
 }
@@ -78,18 +78,11 @@ export function effect(fn) {}
 /**
  * @template T
  * @param {T} value
- * @param {string} [displayName]
  * @returns {import('./index').ReadReactive<T>}
  */
-export function readonly(value, displayName) {
-	const atom = getAtom(currentIndex++, value, KIND_SOURCE, displayName);
-
-	if (atom._value !== value) {
-		atom._value = value;
-		invalidate(atom);
-	}
-
-	return atom.read;
+export function readonly(value) {
+	const ref = useRef(null);
+	return ref.current || (ref.current = createSignal(value));
 }
 
 /**
