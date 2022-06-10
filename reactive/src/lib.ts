@@ -37,10 +37,11 @@ const FLAG_STALE = 1 << 2;
 
 const ROOT = newAtom(NOOP, FLAG_KIND_MEMO);
 let running: Atom = ROOT;
+let batchMode = false;
 let updateQueue: Atom[] = [];
 
 function enqueueUpdate(atom: Atom) {
-	if (updateQueue.push(atom)) {
+	if (updateQueue.push(atom) && !batchMode) {
 		processUpdate();
 	}
 }
@@ -165,4 +166,11 @@ export function untrack<T>(fn: () => T): T {
 	const value = fn();
 	running = tmp;
 	return value;
+}
+
+export function batch(fn: () => void): void {
+	batchMode = true;
+	fn();
+	batchMode = false;
+	processUpdate();
 }

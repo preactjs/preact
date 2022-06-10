@@ -1,4 +1,4 @@
-import { createSignal, createMemo, createEffect } from '../../src/lib';
+import { createSignal, createMemo, createEffect, batch } from '../../src/lib';
 
 const wait = async ms => new Promise(r => setTimeout(r, ms));
 
@@ -21,7 +21,7 @@ async function waitFor(fn) {
 	}
 }
 
-describe('Reactive (Library)', () => {
+describe.only('Reactive (Library)', () => {
 	describe('signal', () => {
 		it('should read value', () => {
 			const [a] = createSignal('a');
@@ -133,6 +133,34 @@ describe('Reactive (Library)', () => {
 			setA('aa');
 			expect(d()).to.equal('yeah');
 			expect(spy).to.be.calledOnce;
+		});
+	});
+
+	describe('batch()', () => {
+		it('should only update after batch is completed', () => {
+			const [a, setA] = createSignal('a');
+
+			batch(() => {
+				setA('aa');
+				expect(a()).to.equal('a');
+			});
+
+			expect(a()).to.equal('aa');
+		});
+
+		it('should batch multiple writes', () => {
+			const [a, setA] = createSignal('a');
+			const [b, setB] = createSignal('b');
+
+			batch(() => {
+				setA('aa');
+				setB('bb');
+				expect(a()).to.equal('a');
+				expect(b()).to.equal('b');
+			});
+
+			expect(a()).to.equal('aa');
+			expect(b()).to.equal('bb');
 		});
 	});
 });
