@@ -190,8 +190,14 @@ function isPromise(x: any): x is Promise<unknown> {
 export function getResource<T, V = unknown>(
 	signal: Reader<T>,
 	fn: (value: T, controller: AbortController) => V | Promise<V>
-) {
+): {
+	value: Reader<V | null>;
+	loading: Reader<boolean>;
+	error: Reader<Error | null>;
+} {
 	let controller: AbortController | undefined;
+	const [loading, setLoading] = createSignal(false);
+	const [error, setError] = createSignal<Error | null>(null);
 
 	const execute = () => {
 		if (controller !== undefined) {
@@ -199,18 +205,23 @@ export function getResource<T, V = unknown>(
 		}
 
 		controller = new AbortController();
+		console.log(new Error().stack);
+		console.log('exec');
 
 		try {
-			const p = fn(signal(), controller);
+			const p = fn(signal._atom._value, controller);
 			if (isPromise(p)) {
+				setLoading(true);
 				p.then(res => {
+					setLoading(false);
 					if (!controller.signal.aborted) {
 						atom._nextValue = res;
 						enqueueUpdate(atom);
 					}
 				}).catch(err => {
+					setLoading(false);
 					if (!(err instanceof Error) || err.name === 'AbortError') {
-						// FIXME: Bubble up
+						setError(err);
 					}
 				});
 			} else if (!controller.signal.aborted) {
@@ -218,19 +229,20 @@ export function getResource<T, V = unknown>(
 				enqueueUpdate(atom);
 			}
 		} catch (err) {
-			// FIXME
+			setError(err);
 		}
 
 		return false;
 	};
 
 	const atom = newAtom<V>(execute, FLAG_KIND_MEMO);
-	signal._atom._subscriptions.add(atom);
-	atom._dependencies.add(signal._atom);
+	atom._value = null;
+	// signal._atom._subscriptions.add(atom);
+	// atom._dependencies.add(signal._atom);
 
 	atom._flags |= FLAG_STALE;
 
-	return () => {
+	const reader: Reader<V | null> = () => {
 		subscribe(atom);
 		if (atom._flags & FLAG_STALE) {
 			atom._flags ^= FLAG_STALE;
@@ -238,4 +250,6 @@ export function getResource<T, V = unknown>(
 		}
 		return atom._value;
 	};
+	reader._atom = atom;
+	return { loading, value: reader, error };
 }

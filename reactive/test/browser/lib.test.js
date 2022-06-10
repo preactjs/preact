@@ -170,18 +170,13 @@ describe.only('Reactive (Library)', () => {
 		});
 	});
 
-	describe('resource()', () => {
+	describe.only('resource()', () => {
 		it('should only update after batch is completed', () => {
 			const spy = sinon.spy(() => 'it works!');
-			const [a, setA] = createSignal('a');
-			const res = getResource(a, spy);
+			const [a] = createSignal('a');
+			const { value } = getResource(a, spy);
 
-			batch(() => {
-				setA('aa');
-				expect(a()).to.equal('a');
-			});
-
-			expect(a()).to.equal('aa');
+			expect(value()).to.equal('it works!');
 		});
 	});
 });
