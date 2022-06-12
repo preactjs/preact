@@ -1,13 +1,17 @@
-import { render, hydrate } from 'preact/compat'
+import { render, hydrate, unmountComponentAtNode } from 'preact/compat'
 
 export function createRoot(container) {
 	return {
 		render(children) {
-			return render(children, container)
+			render(children, container)
+		},
+		unmount() {
+			unmountComponentAtNode(container)
 		}
 	}
 }
 
 export function hydrateRoot(container, children) {
-	return hydrate(children, container);
+	hydrate(children, container)
+	return createRoot(container)
 }
