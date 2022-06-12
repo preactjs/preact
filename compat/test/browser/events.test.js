@@ -67,12 +67,12 @@ describe('preact/compat events', () => {
 
 	it('should normalize onChange for textarea', () => {
 		let vnode = <textarea onChange={() => null} />;
-		expect(vnode.props).to.haveOwnProperty('oninput');
-		expect(vnode.props).to.not.haveOwnProperty('onchange');
+		expect(vnode.props).to.haveOwnProperty('onchangecompat');
+		expect(vnode.props).to.not.haveOwnProperty('oninput');
 
 		vnode = <textarea oninput={() => null} onChange={() => null} />;
 		expect(vnode.props).to.haveOwnProperty('oninput');
-		expect(vnode.props).to.not.haveOwnProperty('onchange');
+		expect(vnode.props).to.haveOwnProperty('onchangecompat');
 	});
 
 	it('should normalize onChange for range, except in IE11', () => {
@@ -233,8 +233,10 @@ describe('preact/compat events', () => {
 		function expectToBeNormalized(vnode, desc) {
 			expect(vnode, desc)
 				.to.have.property('props')
-				.with.all.keys(['oninput'].concat(vnode.props.type ? 'type' : []))
-				.and.property('oninput')
+				.with.all.keys(
+					['onchangecompat'].concat(vnode.props.type ? 'type' : [])
+				)
+				.and.property('onchangecompat')
 				.that.is.a('function');
 		}
 

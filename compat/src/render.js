@@ -148,7 +148,7 @@ options.vnode = vnode => {
 				/^onchange(textarea|input)/i.test(i + type) &&
 				!onChangeInputType(props.type)
 			) {
-				i = 'oninput';
+				i = 'onchangecompat';
 			} else if (/^onfocus$/i.test(i)) {
 				i = 'onfocusin';
 			} else if (/^onblur$/i.test(i)) {
@@ -226,4 +226,12 @@ export const __SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED = {
 			}
 		}
 	}
+};
+
+options.beforeSetEventProperty = name => {
+	if (name === 'onchangecompat') {
+		return 'oninput';
+	}
+
+	return name;
 };

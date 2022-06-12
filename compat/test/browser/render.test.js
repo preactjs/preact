@@ -158,6 +158,28 @@ describe('compat render', () => {
 		expect(scratch.firstElementChild.value).to.equal('0');
 	});
 
+	it('should call onChange and onInput when input event is dispatched', () => {
+		const onChange = sinon.spy();
+		const onInput = sinon.spy();
+
+		class Input extends Component {
+			render() {
+				return <textarea onInput={onInput} onChange={onChange} />;
+			}
+		}
+
+		render(<Input />, scratch);
+
+		scratch.firstChild.focus();
+		scratch.firstChild.value = 'foo';
+		scratch.firstChild.dispatchEvent(createEvent('input'));
+
+		rerender();
+
+		expect(onChange).to.be.calledOnce;
+		expect(onInput).to.be.calledOnce;
+	});
+
 	it('should keep value of uncontrolled inputs using defaultValue', () => {
 		// See https://github.com/preactjs/preact/issues/2391
 

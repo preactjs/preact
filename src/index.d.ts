@@ -268,6 +268,8 @@ export interface Options {
 	unmount?(vnode: VNode): void;
 	/** Attach a hook that is invoked after a vnode has rendered. */
 	diffed?(vnode: VNode): void;
+	/** Attach a hook that is invoked before setProperty */
+	beforeSetEventProperty?(name: string): string;
 	event?(e: Event): any;
 	requestAnimationFrame?(callback: () => void): void;
 	debounceRendering?(cb: () => void): void;
