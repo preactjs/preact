@@ -161,20 +161,26 @@ options.vnode = vnode => {
 				value = undefined;
 			}
 
-			if (/^oninput$/i.test(i) && normalizedProps.oninput) {
-				const first = normalizedProps.oninput;
-				const next = value;
-				value = function onInput(evt) {
-					[first, next].forEach(callback => {
-						try {
-							callback(evt);
-						} catch (e) {
-							setTimeout(() => {
-								throw e;
-							}, 0);
-						}
-					});
-				};
+			// Add support for onInput and onChange, see #3561
+			if (/^oninput/i.test(i)) {
+				i = i.toLowerCase();
+				const first = normalizedProps[i];
+
+				// if a oninput prop is already defined, we need to combine them
+				if (first) {
+					const next = value;
+					value = function onInput(evt) {
+						[first, next].forEach(callback => {
+							try {
+								callback(evt);
+							} catch (e) {
+								setTimeout(() => {
+									throw e;
+								}, 0);
+							}
+						});
+					};
+				}
 			}
 
 			normalizedProps[i] = value;

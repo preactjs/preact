@@ -164,8 +164,17 @@ describe('compat render', () => {
 
 		render(<input onChange={onChange} onInput={onInput} />, scratch);
 
-		scratch.firstChild.focus();
-		scratch.firstChild.value = 'foo';
+		scratch.firstChild.dispatchEvent(createEvent('input'));
+
+		expect(onChange).to.be.calledOnce;
+		expect(onInput).to.be.calledOnce;
+
+		onChange.resetHistory();
+		onInput.resetHistory();
+
+		// change props order
+		render(<input onInput={onInput} onChange={onChange} />, scratch);
+
 		scratch.firstChild.dispatchEvent(createEvent('input'));
 
 		expect(onChange).to.be.calledOnce;
@@ -180,8 +189,6 @@ describe('compat render', () => {
 
 		render(<input onChange={onChange} onInput={onInput} />, scratch);
 
-		scratch.firstChild.focus();
-		scratch.firstChild.value = 'foo';
 		scratch.firstChild.dispatchEvent(createEvent('input'));
 
 		expect(onChange).to.be.calledOnce;
