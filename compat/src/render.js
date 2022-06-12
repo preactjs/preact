@@ -161,11 +161,12 @@ options.vnode = vnode => {
 				value = undefined;
 			}
 
-			if (i === 'oninput' && normalizedProps[i]) {
-				const prevOnInputValue = normalizedProps[i];
-				value = function() {
+			if (/^oninput$/i.test(i) && normalizedProps.oninput) {
+				const first = normalizedProps.oninput;
+				const next = value;
+				value = function onInput() {
 					const eventHandlerArguments = arguments;
-					[prevOnInputValue, value].forEach(callback => {
+					[first, next].forEach(callback => {
 						try {
 							callback(eventHandlerArguments);
 						} catch (e) {

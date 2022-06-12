@@ -158,23 +158,31 @@ describe('compat render', () => {
 		expect(scratch.firstElementChild.value).to.equal('0');
 	});
 
-	it('should call onChange and onInput when input event is dispatched', () => {
+	it.only('should call onChange and onInput when input event is dispatched', () => {
 		const onChange = sinon.spy();
 		const onInput = sinon.spy();
 
-		class Input extends Component {
-			render() {
-				return <textarea onInput={onInput} onChange={onChange} />;
-			}
-		}
-
-		render(<Input />, scratch);
+		render(<input onChange={onChange} onInput={onInput} />, scratch);
 
 		scratch.firstChild.focus();
 		scratch.firstChild.value = 'foo';
 		scratch.firstChild.dispatchEvent(createEvent('input'));
 
-		rerender();
+		expect(onChange).to.be.calledOnce;
+		expect(onInput).to.be.calledOnce;
+	});
+
+	it.only('should call onChange and onInput even when one of the callbacks failed', () => {
+		const onChange = sinon.spy(() => {
+			throw new Error();
+		});
+		const onInput = sinon.spy();
+
+		render(<input onChange={onChange} onInput={onInput} />, scratch);
+
+		scratch.firstChild.focus();
+		scratch.firstChild.value = 'foo';
+		scratch.firstChild.dispatchEvent(createEvent('input'));
 
 		expect(onChange).to.be.calledOnce;
 		expect(onInput).to.be.calledOnce;
