@@ -158,7 +158,7 @@ describe('compat render', () => {
 		expect(scratch.firstElementChild.value).to.equal('0');
 	});
 
-	it.only('should call onChange and onInput when input event is dispatched', () => {
+	it('should call onChange and onInput when input event is dispatched', () => {
 		const onChange = sinon.spy();
 		const onInput = sinon.spy();
 
@@ -172,7 +172,7 @@ describe('compat render', () => {
 		expect(onInput).to.be.calledOnce;
 	});
 
-	it.only('should call onChange and onInput even when one of the callbacks failed', () => {
+	it('should call onChange and onInput even when one of the callbacks failed', () => {
 		const onChange = sinon.spy(() => {
 			throw new Error();
 		});
