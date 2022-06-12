@@ -148,7 +148,7 @@ options.vnode = vnode => {
 				/^onchange(textarea|input)/i.test(i + type) &&
 				!onChangeInputType(props.type)
 			) {
-				i = 'onchangecompat';
+				i = 'oninput';
 			} else if (/^onfocus$/i.test(i)) {
 				i = 'onfocusin';
 			} else if (/^onblur$/i.test(i)) {
@@ -159,6 +159,20 @@ options.vnode = vnode => {
 				i = i.replace(/[A-Z0-9]/, '-$&').toLowerCase();
 			} else if (value === null) {
 				value = undefined;
+			}
+
+			if (i === 'oninput' && normalizedProps[i]) {
+				const prevOnInputValue = normalizedProps[i];
+				value = function() {
+					const eventHandlerArguments = arguments;
+					[prevOnInputValue, value].forEach(callback => {
+						try {
+							callback(eventHandlerArguments);
+						} catch (e) {
+							Promise.reject(e);
+						}
+					});
+				};
 			}
 
 			normalizedProps[i] = value;
@@ -226,12 +240,4 @@ export const __SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED = {
 			}
 		}
 	}
-};
-
-options.beforeSetEventProperty = name => {
-	if (name === 'onchangecompat') {
-		return 'oninput';
-	}
-
-	return name;
 };

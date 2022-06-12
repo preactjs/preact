@@ -83,9 +83,6 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
 	}
 	// Benchmark for comparison: https://esbench.com/bench/574c954bdb965b9a00965ac6
 	else if (name[0] === 'o' && name[1] === 'n') {
-		name = options.beforeSetEventProperty
-			? options.beforeSetEventProperty(name)
-			: name;
 		useCapture = name !== (name = name.replace(/Capture$/, ''));
 
 		// Infer correct casing for DOM built-in events:
