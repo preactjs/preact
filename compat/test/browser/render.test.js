@@ -12,7 +12,6 @@ import {
 	serializeHtml,
 	createEvent
 } from '../../../test/_util/helpers';
-import Mocha from 'mocha';
 
 describe('compat render', () => {
 	/** @type {HTMLDivElement} */
@@ -180,38 +179,6 @@ describe('compat render', () => {
 
 		expect(onChange).to.be.calledOnce;
 		expect(onInput).to.be.calledOnce;
-	});
-
-	let uncaughtExceptionListeners;
-	before(() => {
-		uncaughtExceptionListeners = Mocha.process.listeners('uncaughtException');
-		// allow uncaught exceptions removing mocha listeners
-		Mocha.process.removeAllListeners('uncaughtException');
-	});
-
-	it('should call onChange and onInput even when one of the callbacks failed', done => {
-		const onChange = sinon.spy(() => {
-			throw new Error();
-		});
-		const onInput = sinon.spy();
-
-		render(<input onChange={onChange} onInput={onInput} />, scratch);
-
-		scratch.firstChild.dispatchEvent(createEvent('input'));
-
-		// push this to the message queue to wait until the callback throwing the exception was executed
-		setTimeout(() => {
-			expect(onChange).to.be.calledOnce;
-			expect(onInput).to.be.calledOnce;
-			done();
-		}, 0);
-	});
-
-	after(() => {
-		// add uncaughtException listeners back
-		uncaughtExceptionListeners.forEach(function(listener) {
-			Mocha.process.on('uncaughtException', listener);
-		});
 	});
 
 	it('should keep value of uncontrolled inputs using defaultValue', () => {

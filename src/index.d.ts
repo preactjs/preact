@@ -268,7 +268,7 @@ export interface Options {
 	unmount?(vnode: VNode): void;
 	/** Attach a hook that is invoked after a vnode has rendered. */
 	diffed?(vnode: VNode): void;
-	event?(e: Event): any;
+	event?(e: Event, useCapture?: boolean): any;
 	requestAnimationFrame?(callback: () => void): void;
 	debounceRendering?(cb: () => void): void;
 	useDebugValue?(value: string | number): void;
