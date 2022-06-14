@@ -14,5 +14,13 @@
   },
   "peerDependencies": {
     "preact": "^10.0.0"
+  },
+  "exports": {
+    ".": {
+			"browser": "./dist/debug.module.js",
+			"umd": "./dist/debug.umd.js",
+			"import": "./dist/debug.mjs",
+			"require": "./dist/debug.js"
+		}
   }
 }
