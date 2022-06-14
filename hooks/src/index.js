@@ -195,7 +195,7 @@ export function useEffect(callback, args) {
 	/** @type {import('./internal').EffectHookState} */
 	const state = getHookState(currentIndex++, 3);
 	if (!options._skipEffects && argsChanged(state._args, args)) {
-		state._pendingValue = callback;
+		state._value = callback;
 		state._pendingArgs = args;
 
 		currentComponent.__hooks._pendingEffects.push(state);
@@ -210,7 +210,7 @@ export function useLayoutEffect(callback, args) {
 	/** @type {import('./internal').EffectHookState} */
 	const state = getHookState(currentIndex++, 4);
 	if (!options._skipEffects && argsChanged(state._args, args)) {
-		state._pendingValue = callback;
+		state._value = callback;
 		state._pendingArgs = args;
 
 		currentComponent._renderCallbacks.push(state);
