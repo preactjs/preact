@@ -41,19 +41,17 @@ options._render = vnode => {
 			hooks._pendingEffects = [];
 			currentComponent._renderCallbacks = [];
 			hooks._list.forEach(hookItem => {
-				if (hookItem._pendingArgs) hookItem._pendingArgs = undefined;
-				if (hookItem._pendingValue) hookItem._pendingValue = undefined;
+				hookItem._pendingValue = hookItem._pendingArgs = undefined;
 			});
 		} else {
 			hooks._list.forEach(hookItem => {
 				if (hookItem._pendingArgs) {
 					hookItem._args = hookItem._pendingArgs;
-					hookItem._pendingArgs = undefined;
 				}
 				if (hookItem._pendingValue) {
 					hookItem._value = hookItem._pendingValue;
-					hookItem._pendingValue = undefined;
 				}
+				hookItem._pendingValue = hookItem._pendingArgs = undefined;
 			});
 			hooks._pendingEffects.forEach(invokeCleanup);
 			hooks._pendingEffects.forEach(invokeEffect);
@@ -81,12 +79,11 @@ options._commit = (vnode, commitQueue) => {
 				component.__hooks._list.forEach(hookItem => {
 					if (hookItem._pendingArgs) {
 						hookItem._args = hookItem._pendingArgs;
-						hookItem._pendingArgs = undefined;
 					}
 					if (hookItem._pendingValue) {
 						hookItem._value = hookItem._pendingValue;
-						hookItem._pendingValue = undefined;
 					}
+					hookItem._pendingValue = hookItem._pendingArgs = undefined;
 				});
 			}
 
