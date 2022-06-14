@@ -74,8 +74,7 @@
       "$_skipEffects": "__s",
       "$_rerenderCount": "__r",
       "$_forwarded": "__f",
-      "$_isSuspended": "__i",
-      "$_listeners": "__l"
+      "$_isSuspended": "__i"
     }
   }
 }

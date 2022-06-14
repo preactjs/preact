@@ -81,12 +81,8 @@ export function hydrate(vnode, parent, callback) {
 }
 
 let oldEventHook = options.event;
-options.event = (e, useCapture) => {
+options.event = e => {
 	if (oldEventHook) e = oldEventHook(e);
-	if (e.type === 'input') {
-		let c = e.currentTarget._listeners['compatchange' + useCapture];
-		if (c) c.call(this, e);
-	}
 	e.persist = empty;
 	e.isPropagationStopped = isPropagationStopped;
 	e.isDefaultPrevented = isDefaultPrevented;
@@ -166,11 +162,11 @@ options.vnode = vnode => {
 			}
 
 			// Add support for onInput and onChange, see #3561
-			// if we have an oninput prop already we defined oncompatchange
+			// if we have an oninput prop already change it to oninputCapture
 			if (/^oninput/i.test(i)) {
 				i = i.toLowerCase();
 				if (normalizedProps[i]) {
-					i = 'oncompatchange';
+					i = 'oninputCapture';
 				}
 			}
 
