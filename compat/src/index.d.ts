@@ -29,6 +29,14 @@ declare namespace React {
 	export import useReducer = _hooks.useReducer;
 	export import useRef = _hooks.useRef;
 	export import useState = _hooks.useState;
+	// React 18 hooks
+	export const useTransition = () => [startTransition, false];
+	export const useDeferredValue = <T = any>(val: T) => T;
+	export const useInsertionEffect = _hooks.useLayoutEffect;
+	export const useSyncExternalStore = <T>(
+		subscribe: () => () => void,
+		getSnapshot: () => T
+	) => T;
 
 	// Preact Defaults
 	export import ContextType = preact.ContextType;
@@ -51,6 +59,7 @@ declare namespace React {
 	// Compat
 	export import StrictMode = preact.Fragment;
 	export const version: string;
+	export const startTransition: (cb: () => void) => void;
 
 	// HTML
 	export import HTMLAttributes = JSXInternal.HTMLAttributes;
