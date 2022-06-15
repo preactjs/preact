@@ -129,6 +129,8 @@ export function useTransition() {
 	return [startTransition, false];
 }
 
+// TODO: in theory this should be done after a VNode is diffed as we want to insert
+// styles/... before it attaches
 export const useInsertionEffect = useLayoutEffect;
 
 export function useSyncExternalStore(subscribe, getSnapshot) {
