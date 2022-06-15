@@ -126,7 +126,7 @@ export function useDeferredValue(val) {
 }
 
 export function useTransition() {
-	return [startTransition, false];
+	return [false, startTransition];
 }
 
 // TODO: in theory this should be done after a VNode is diffed as we want to insert

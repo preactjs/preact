@@ -30,7 +30,7 @@ declare namespace React {
 	export import useRef = _hooks.useRef;
 	export import useState = _hooks.useState;
 	// React 18 hooks
-	export const useTransition = () => [startTransition, false];
+	export const useTransition = () => [false, startTransition];
 	export const useDeferredValue = <T = any>(val: T) => T;
 	export const useInsertionEffect = _hooks.useLayoutEffect;
 	export const useSyncExternalStore = <T>(

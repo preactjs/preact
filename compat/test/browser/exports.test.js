@@ -22,10 +22,10 @@ describe('compat exports', () => {
 		expect(Compat.useMemo).to.be.a('function');
 		expect(Compat.useCallback).to.be.a('function');
 		expect(Compat.useContext).to.be.a('function');
-		expect(Compat.useSyncExternalStoer).to.be.a('function');
+		expect(Compat.useSyncExternalStore).to.be.a('function');
 		expect(Compat.useInsertionEffect).to.be.a('function');
 		expect(Compat.useTransition).to.be.a('function');
-		expect(Compat.useDeferredvalue).to.be.a('function');
+		expect(Compat.useDeferredValue).to.be.a('function');
 
 		// Suspense
 		expect(Compat.Suspense).to.be.a('function');
