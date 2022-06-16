@@ -41,9 +41,18 @@ options._render = vnode => {
 			hooks._pendingEffects = [];
 			currentComponent._renderCallbacks = [];
 			hooks._list.forEach(hookItem => {
-				if (hookItem._args) hookItem._args = undefined;
+				hookItem._pendingValue = hookItem._pendingArgs = undefined;
 			});
 		} else {
+			hooks._list.forEach(hookItem => {
+				if (hookItem._pendingArgs) {
+					hookItem._args = hookItem._pendingArgs;
+				}
+				if (hookItem._pendingValue) {
+					hookItem._value = hookItem._pendingValue;
+				}
+				hookItem._pendingValue = hookItem._pendingArgs = undefined;
+			});
 			hooks._pendingEffects.forEach(invokeCleanup);
 			hooks._pendingEffects.forEach(invokeEffect);
 			hooks._pendingEffects = [];
@@ -66,6 +75,18 @@ options.diffed = vnode => {
 options._commit = (vnode, commitQueue) => {
 	commitQueue.some(component => {
 		try {
+			if (component.__hooks) {
+				component.__hooks._list.forEach(hookItem => {
+					if (hookItem._pendingArgs) {
+						hookItem._args = hookItem._pendingArgs;
+					}
+					if (hookItem._pendingValue) {
+						hookItem._value = hookItem._pendingValue;
+					}
+					hookItem._pendingValue = hookItem._pendingArgs = undefined;
+				});
+			}
+
 			component._renderCallbacks.forEach(invokeCleanup);
 			component._renderCallbacks = component._renderCallbacks.filter(cb =>
 				cb._value ? invokeEffect(cb) : true
@@ -175,7 +196,7 @@ export function useEffect(callback, args) {
 	const state = getHookState(currentIndex++, 3);
 	if (!options._skipEffects && argsChanged(state._args, args)) {
 		state._value = callback;
-		state._args = args;
+		state._pendingArgs = args;
 
 		currentComponent.__hooks._pendingEffects.push(state);
 	}
@@ -190,7 +211,7 @@ export function useLayoutEffect(callback, args) {
 	const state = getHookState(currentIndex++, 4);
 	if (!options._skipEffects && argsChanged(state._args, args)) {
 		state._value = callback;
-		state._args = args;
+		state._pendingArgs = args;
 
 		currentComponent._renderCallbacks.push(state);
 	}
@@ -230,9 +251,10 @@ export function useMemo(factory, args) {
 	/** @type {import('./internal').MemoHookState} */
 	const state = getHookState(currentIndex++, 7);
 	if (argsChanged(state._args, args)) {
-		state._value = factory();
-		state._args = args;
+		state._pendingValue = factory();
+		state._pendingArgs = args;
 		state._factory = factory;
+		return state._pendingValue;
 	}
 
 	return state._value;
