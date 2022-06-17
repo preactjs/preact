@@ -529,4 +529,68 @@ describe('useEffect', () => {
 		expect(calls.length).to.equal(1);
 		expect(calls).to.deep.equal(['doing effecthi']);
 	});
+
+	it('should not rerun committed effects', () => {
+		const calls = [];
+		const App = ({ i }) => {
+			const [greeting, setGreeting] = useState('hi');
+
+			useEffect(() => {
+				calls.push('doing effect' + greeting);
+				return () => {
+					calls.push('cleaning up' + greeting);
+				};
+			}, []);
+
+			if (i === 2) {
+				setGreeting('bye');
+			}
+
+			return <p>{greeting}</p>;
+		};
+
+		act(() => {
+			render(<App />, scratch);
+		});
+		expect(calls.length).to.equal(1);
+		expect(calls).to.deep.equal(['doing effecthi']);
+
+		act(() => {
+			render(<App i={2} />, scratch);
+		});
+	});
+
+	it('should not schedule effects that have no change', () => {
+		const calls = [];
+		let set;
+		const App = ({ i }) => {
+			const [greeting, setGreeting] = useState('hi');
+			set = setGreeting;
+
+			useEffect(() => {
+				calls.push('doing effect' + greeting);
+				return () => {
+					calls.push('cleaning up' + greeting);
+				};
+			}, [greeting]);
+
+			if (greeting === 'bye') {
+				setGreeting('hi');
+			}
+
+			return <p>{greeting}</p>;
+		};
+
+		act(() => {
+			render(<App />, scratch);
+		});
+		expect(calls.length).to.equal(1);
+		expect(calls).to.deep.equal(['doing effecthi']);
+
+		act(() => {
+			set('bye');
+		});
+		expect(calls.length).to.equal(1);
+		expect(calls).to.deep.equal(['doing effecthi']);
+	});
 });
