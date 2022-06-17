@@ -139,16 +139,14 @@ function createEsbuildPlugin() {
 			build.onResolve({ filter: /^preact.*/ }, args => {
 				const pkg = alias[args.path];
 				return {
-					path: pkg,
-					namespace: 'preact'
+					path: pkg
 				};
 			});
 
 			build.onResolve({ filter: /^(react|react-dom)$/ }, args => {
 				const pkg = alias['preact/compat'];
 				return {
-					path: pkg,
-					namespace: 'preact'
+					path: pkg
 				};
 			});
 
@@ -342,7 +340,7 @@ module.exports = function(config) {
 			singleBundle: false,
 
 			// esbuild options
-			target: 'es5',
+			target: downlevel ? 'es5' : 'es2015',
 			define: {
 				COVERAGE: coverage,
 				'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || ''),

@@ -6,6 +6,9 @@ let currentIndex;
 /** @type {import('./internal').Component} */
 let currentComponent;
 
+/** @type {import('./internal').Component} */
+let previousComponent;
+
 /** @type {number} */
 let currentHook = 0;
 
@@ -34,10 +37,28 @@ options._render = vnode => {
 
 	const hooks = currentComponent.__hooks;
 	if (hooks) {
-		hooks._pendingEffects.forEach(invokeCleanup);
-		hooks._pendingEffects.forEach(invokeEffect);
-		hooks._pendingEffects = [];
+		if (previousComponent === currentComponent) {
+			hooks._pendingEffects = [];
+			currentComponent._renderCallbacks = [];
+			hooks._list.forEach(hookItem => {
+				hookItem._pendingValue = hookItem._pendingArgs = undefined;
+			});
+		} else {
+			hooks._list.forEach(hookItem => {
+				if (hookItem._pendingArgs) {
+					hookItem._args = hookItem._pendingArgs;
+				}
+				if (hookItem._pendingValue) {
+					hookItem._value = hookItem._pendingValue;
+				}
+				hookItem._pendingValue = hookItem._pendingArgs = undefined;
+			});
+			hooks._pendingEffects.forEach(invokeCleanup);
+			hooks._pendingEffects.forEach(invokeEffect);
+			hooks._pendingEffects = [];
+		}
 	}
+	previousComponent = currentComponent;
 };
 
 options.diffed = vnode => {
@@ -48,11 +69,24 @@ options.diffed = vnode => {
 		afterPaint(afterPaintEffects.push(c));
 	}
 	currentComponent = null;
+	previousComponent = null;
 };
 
 options._commit = (vnode, commitQueue) => {
 	commitQueue.some(component => {
 		try {
+			if (component.__hooks) {
+				component.__hooks._list.forEach(hookItem => {
+					if (hookItem._pendingArgs) {
+						hookItem._args = hookItem._pendingArgs;
+					}
+					if (hookItem._pendingValue) {
+						hookItem._value = hookItem._pendingValue;
+					}
+					hookItem._pendingValue = hookItem._pendingArgs = undefined;
+				});
+			}
+
 			component._renderCallbacks.forEach(invokeCleanup);
 			component._renderCallbacks = component._renderCallbacks.filter(cb =>
 				cb._value ? invokeEffect(cb) : true
@@ -74,11 +108,15 @@ options.unmount = vnode => {
 
 	const c = vnode._component;
 	if (c && c.__hooks) {
-		try {
-			c.__hooks._list.forEach(invokeCleanup);
-		} catch (e) {
-			options._catchError(e, c._vnode);
-		}
+		let hasErrored;
+		c.__hooks._list.forEach(s => {
+			try {
+				invokeCleanup(s);
+			} catch (e) {
+				hasErrored = e;
+			}
+		});
+		if (hasErrored) options._catchError(hasErrored, c._vnode);
 	}
 };
 
@@ -158,7 +196,7 @@ export function useEffect(callback, args) {
 	const state = getHookState(currentIndex++, 3);
 	if (!options._skipEffects && argsChanged(state._args, args)) {
 		state._value = callback;
-		state._args = args;
+		state._pendingArgs = args;
 
 		currentComponent.__hooks._pendingEffects.push(state);
 	}
@@ -173,7 +211,7 @@ export function useLayoutEffect(callback, args) {
 	const state = getHookState(currentIndex++, 4);
 	if (!options._skipEffects && argsChanged(state._args, args)) {
 		state._value = callback;
-		state._args = args;
+		state._pendingArgs = args;
 
 		currentComponent._renderCallbacks.push(state);
 	}
@@ -193,8 +231,13 @@ export function useImperativeHandle(ref, createHandle, args) {
 	currentHook = 6;
 	useLayoutEffect(
 		() => {
-			if (typeof ref == 'function') ref(createHandle());
-			else if (ref) ref.current = createHandle();
+			if (typeof ref == 'function') {
+				ref(createHandle());
+				return () => ref(null);
+			} else if (ref) {
+				ref.current = createHandle();
+				return () => (ref.current = null);
+			}
 		},
 		args == null ? args : args.concat(ref)
 	);
@@ -208,9 +251,10 @@ export function useMemo(factory, args) {
 	/** @type {import('./internal').MemoHookState} */
 	const state = getHookState(currentIndex++, 7);
 	if (argsChanged(state._args, args)) {
-		state._value = factory();
-		state._args = args;
+		state._pendingValue = factory();
+		state._pendingArgs = args;
 		state._factory = factory;
+		return state._pendingValue;
 	}
 
 	return state._value;
@@ -284,19 +328,18 @@ export function useErrorBoundary(cb) {
  * After paint effects consumer.
  */
 function flushAfterPaintEffects() {
-	afterPaintEffects.forEach(component => {
-		if (component._parentDom) {
-			try {
-				component.__hooks._pendingEffects.forEach(invokeCleanup);
-				component.__hooks._pendingEffects.forEach(invokeEffect);
-				component.__hooks._pendingEffects = [];
-			} catch (e) {
-				component.__hooks._pendingEffects = [];
-				options._catchError(e, component._vnode);
-			}
+	let component;
+	while ((component = afterPaintEffects.shift())) {
+		if (!component._parentDom) continue;
+		try {
+			component.__hooks._pendingEffects.forEach(invokeCleanup);
+			component.__hooks._pendingEffects.forEach(invokeEffect);
+			component.__hooks._pendingEffects = [];
+		} catch (e) {
+			component.__hooks._pendingEffects = [];
+			options._catchError(e, component._vnode);
 		}
-	});
-	afterPaintEffects = [];
+	}
 }
 
 let HAS_RAF = typeof requestAnimationFrame == 'function';
@@ -346,7 +389,11 @@ function invokeCleanup(hook) {
 	// A hook cleanup can introduce a call to render which creates a new root, this will call options.vnode
 	// and move the currentComponent away.
 	const comp = currentComponent;
-	if (typeof hook._cleanup == 'function') hook._cleanup();
+	let cleanup = hook._cleanup;
+	if (typeof cleanup == 'function') {
+		hook._cleanup = undefined;
+		cleanup();
+	}
 	currentComponent = comp;
 }
 

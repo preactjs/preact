@@ -3,7 +3,8 @@ import React, {
 	render,
 	createPortal,
 	useState,
-	Component
+	Component,
+	useEffect
 } from 'preact/compat';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { setupRerender, act } from 'preact/test-utils';
@@ -13,15 +14,20 @@ import { setupRerender, act } from 'preact/test-utils';
 describe('Portal', () => {
 	/** @type {HTMLDivElement} */
 	let scratch;
+	/** @type {HTMLDivElement} */
+	let scratch2;
+
 	let rerender;
 
 	beforeEach(() => {
 		scratch = setupScratch();
+		scratch2 = setupScratch('scratch-2');
 		rerender = setupRerender();
 	});
 
 	afterEach(() => {
 		teardown(scratch);
+		teardown(scratch2);
 	});
 
 	it('should render into a different root node', () => {
@@ -623,5 +629,125 @@ describe('Portal', () => {
 		expect(scratch.innerHTML).to.equal(
 			'<div><div>Closed</div><button>Show</button>Closed</div>'
 		);
+	});
+
+	it('should order effects well', () => {
+		const calls = [];
+		const Modal = ({ children }) => {
+			useEffect(() => {
+				calls.push('Modal');
+			}, []);
+			return createPortal(<div className="modal">{children}</div>, scratch);
+		};
+
+		const ModalButton = ({ i }) => {
+			useEffect(() => {
+				calls.push(`Button ${i}`);
+			}, []);
+
+			return <button>Action</button>;
+		};
+
+		const App = () => {
+			useEffect(() => {
+				calls.push('App');
+			}, []);
+
+			return (
+				<Modal>
+					<ModalButton i="1" />
+					<ModalButton i="2" />
+				</Modal>
+			);
+		};
+
+		act(() => {
+			render(<App />, scratch);
+		});
+
+		expect(calls).to.deep.equal(['Button 1', 'Button 2', 'Modal', 'App']);
+	});
+
+	it('should include containerInfo', () => {
+		let root = document.createElement('div');
+		document.body.appendChild(root);
+
+		const A = () => <span>A</span>;
+
+		let portal;
+		function Foo(props) {
+			portal = createPortal(props.children, root);
+			return <div>{portal}</div>;
+		}
+		render(
+			<Foo>
+				<A />
+			</Foo>,
+			scratch
+		);
+
+		expect(portal.containerInfo).to.equal(root);
+
+		root.parentNode.removeChild(root);
+	});
+
+	it('should order complex effects well', () => {
+		const calls = [];
+		const Parent = ({ children, isPortal }) => {
+			useEffect(() => {
+				calls.push(`${isPortal ? 'Portal ' : ''}Parent`);
+			}, [isPortal]);
+
+			return <div>{children}</div>;
+		};
+
+		const Child = ({ index, isPortal }) => {
+			useEffect(() => {
+				calls.push(`${isPortal ? 'Portal ' : ''}Child ${index}`);
+			}, [index, isPortal]);
+
+			return <div>{index}</div>;
+		};
+
+		const Portal = () => {
+			const content = [1, 2, 3].map(index => (
+				<Child key={index} index={index} isPortal />
+			));
+
+			useEffect(() => {
+				calls.push('Portal');
+			}, []);
+
+			return createPortal(<Parent isPortal>{content}</Parent>, scratch2);
+		};
+
+		const App = () => {
+			const content = [1, 2, 3].map(index => (
+				<Child key={index} index={index} />
+			));
+
+			return (
+				<React.Fragment>
+					<Parent>{content}</Parent>
+					<Portal />
+				</React.Fragment>
+			);
+		};
+
+		act(() => {
+			render(<App />, scratch);
+		});
+
+		expect(calls).to.deep.equal([
+			'Child 1',
+			'Child 2',
+			'Child 3',
+			'Parent',
+			'Portal Child 1',
+			'Portal Child 2',
+			'Portal Child 3',
+			'Portal Parent',
+			'Portal'
+		]);
 	});
 });

@@ -170,15 +170,29 @@ export function diff(
 
 			c.context = componentContext;
 			c.props = newProps;
-			c.state = c._nextState;
-
-			if ((tmp = options._render)) tmp(newVNode);
-
-			c._dirty = false;
 			c._vnode = newVNode;
 			c._parentDom = parentDom;
 
-			tmp = c.render(c.props, c.state, c.context);
+			let renderHook = options._render,
+				count = 0;
+			if ('prototype' in newType && newType.prototype.render) {
+				c.state = c._nextState;
+				c._dirty = false;
+
+				if (renderHook) renderHook(newVNode);
+
+				tmp = c.render(c.props, c.state, c.context);
+			} else {
+				do {
+					c._dirty = false;
+					if (renderHook) renderHook(newVNode);
+
+					tmp = c.render(c.props, c.state, c.context);
+
+					// Handle setState called in render, see #2553
+					c.state = c._nextState;
+				} while (c._dirty && ++count < 25);
+			}
 
 			// Handle setState called in render, see #2553
 			c.state = c._nextState;
@@ -320,7 +334,7 @@ function diffElementNodes(
 			// excessDomChildren so it isn't later removed in diffChildren
 			if (
 				child &&
-				'localName' in child === !!nodeType &&
+				'setAttribute' in child === !!nodeType &&
 				(nodeType ? child.localName === nodeType : child.nodeType === 3)
 			) {
 				dom = child;
@@ -433,9 +447,12 @@ function diffElementNodes(
 				// despite the attribute not being present. When the attribute
 				// is missing the progress bar is treated as indeterminate.
 				// To fix that we'll always update it when it is 0 for progress elements
-				(i !== oldProps.value ||
-					i !== dom.value ||
-					(nodeType === 'progress' && !i))
+				(i !== dom.value ||
+					(nodeType === 'progress' && !i) ||
+					// This is only for IE 11 to fix <select> value not being updated.
+					// To avoid a stale select value we need to set the option.value
+					// again, which triggers IE11 to re-evaluate the select value
+					(nodeType === 'option' && i !== oldProps.value))
 			) {
 				setProperty(dom, 'value', i, oldProps.value, false);
 			}
