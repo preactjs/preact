@@ -1,9 +1,9 @@
-import { EMPTY_OBJ, EMPTY_ARR } from '../constants';
-import { Component } from '../component';
+import { EMPTY_OBJ } from '../constants';
+import { Component, getDomSibling } from '../component';
 import { Fragment } from '../create-element';
 import { diffChildren } from './children';
 import { diffProps, setProperty } from './props';
-import { assign, removeNode } from '../util';
+import { assign, removeNode, slice } from '../util';
 import options from '../options';
 
 /**
@@ -172,15 +172,29 @@ export function diff(
 
 			c.context = componentContext;
 			c.props = newProps;
-			c.state = c._nextState;
-
-			if ((tmp = options._render)) tmp(newVNode);
-
-			c._dirty = false;
 			c._vnode = newVNode;
 			c._parentDom = parentDom;
 
-			tmp = c.render(c.props, c.state, c.context);
+			let renderHook = options._render,
+				count = 0;
+			if ('prototype' in newType && newType.prototype.render) {
+				c.state = c._nextState;
+				c._dirty = false;
+
+				if (renderHook) renderHook(newVNode);
+
+				tmp = c.render(c.props, c.state, c.context);
+			} else {
+				do {
+					c._dirty = false;
+					if (renderHook) renderHook(newVNode);
+
+					tmp = c.render(c.props, c.state, c.context);
+
+					// Handle setState called in render, see #2553
+					c.state = c._nextState;
+				} while (c._dirty && ++count < 25);
+			}
 
 			// Handle setState called in render, see #2553
 			c.state = c._nextState;
@@ -326,8 +340,8 @@ function diffElementNodes(
 			// excessDomChildren so it isn't later removed in diffChildren
 			if (
 				child &&
-				(child === dom ||
-					(nodeType ? child.localName == nodeType : child.nodeType == 3))
+				'setAttribute' in child === !!nodeType &&
+				(nodeType ? child.localName === nodeType : child.nodeType === 3)
 			) {
 				dom = child;
 				excessDomChildren[i] = null;
@@ -369,8 +383,7 @@ function diffElementNodes(
 		}
 	} else {
 		// If excessDomChildren was not null, repopulate it with the current element's children:
-		excessDomChildren =
-			excessDomChildren && EMPTY_ARR.slice.call(dom.childNodes);
+		excessDomChildren = excessDomChildren && slice.call(dom.childNodes);
 
 		oldProps = oldVNode.props || EMPTY_OBJ;
 
@@ -384,7 +397,7 @@ function diffElementNodes(
 			// we should read the existing DOM attributes to diff them
 			if (excessDomChildren != null) {
 				oldProps = {};
-				for (let i = 0; i < dom.attributes.length; i++) {
+				for (i = 0; i < dom.attributes.length; i++) {
 					oldProps[dom.attributes[i].name] = dom.attributes[i].value;
 				}
 			}
@@ -417,7 +430,9 @@ function diffElementNodes(
 				isSvg && nodeType !== 'foreignObject',
 				excessDomChildren,
 				commitQueue,
-				dom.firstChild,
+				excessDomChildren
+					? excessDomChildren[0]
+					: oldVNode._children && getDomSibling(oldVNode, 0),
 				isHydrating,
 				doc
 			);
@@ -439,7 +454,12 @@ function diffElementNodes(
 				// despite the attribute not being present. When the attribute
 				// is missing the progress bar is treated as indeterminate.
 				// To fix that we'll always update it when it is 0 for progress elements
-				(i !== dom.value || (nodeType === 'progress' && !i))
+				(i !== dom.value ||
+					(nodeType === 'progress' && !i) ||
+					// This is only for IE 11 to fix <select> value not being updated.
+					// To avoid a stale select value we need to set the option.value
+					// again, which triggers IE11 to re-evaluate the select value
+					(nodeType === 'option' && i !== oldProps.value))
 			) {
 				setProperty(dom, 'value', i, oldProps.value, false);
 			}
@@ -487,15 +507,6 @@ export function unmount(vnode, parentVNode, skipRemove) {
 		if (!r.current || r.current === vnode._dom) applyRef(r, null, parentVNode);
 	}
 
-	let dom;
-	if (!skipRemove && typeof vnode.type != 'function') {
-		skipRemove = (dom = vnode._dom) != null;
-	}
-
-	// Must be set to `undefined` to properly clean up `_nextDom`
-	// for which `null` is a valid value. See comment in `create-element.js`
-	vnode._dom = vnode._nextDom = undefined;
-
 	if ((r = vnode._component) != null) {
 		if (r.componentWillUnmount) {
 			try {
@@ -510,11 +521,17 @@ export function unmount(vnode, parentVNode, skipRemove) {
 
 	if ((r = vnode._children)) {
 		for (let i = 0; i < r.length; i++) {
-			if (r[i]) unmount(r[i], parentVNode, skipRemove);
+			if (r[i]) {
+				unmount(r[i], parentVNode, typeof vnode.type != 'function');
+			}
 		}
 	}
 
-	if (dom != null) removeNode(dom);
+	if (!skipRemove && vnode._dom != null) removeNode(vnode._dom);
+
+	// Must be set to `undefined` to properly clean up `_nextDom`
+	// for which `null` is a valid value. See comment in `create-element.js`
+	vnode._dom = vnode._nextDom = undefined;
 }
 
 /** The `.render()` method for a PFC backing instance. */

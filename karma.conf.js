@@ -4,6 +4,8 @@ var coverage = String(process.env.COVERAGE) === 'true',
 	minify = String(process.env.MINIFY) === 'true',
 	ci = String(process.env.CI).match(/^(1|true)$/gi),
 	sauceLabs = ci && String(process.env.RUN_SAUCE_LABS) === 'true',
+	// always downlevel to ES5 for saucelabs:
+	downlevel = sauceLabs || String(process.env.DOWNLEVEL) === 'true',
 	performance = !coverage && String(process.env.PERFORMANCE) !== 'false',
 	path = require('path'),
 	errorstacks = require('errorstacks'),
@@ -137,21 +139,46 @@ function createEsbuildPlugin() {
 			build.onResolve({ filter: /^preact.*/ }, args => {
 				const pkg = alias[args.path];
 				return {
-					path: pkg,
-					namespace: 'preact'
+					path: pkg
 				};
 			});
 
 			build.onResolve({ filter: /^(react|react-dom)$/ }, args => {
 				const pkg = alias['preact/compat'];
 				return {
-					path: pkg,
-					namespace: 'preact'
+					path: pkg
+				};
+			});
+
+			// Transpile node_modules that are es2015+ to es5 for IE11
+			build.onLoad({ filter: /kolorist/ }, async args => {
+				const contents = await fs.readFile(args.path, 'utf-8');
+
+				const tmp = await babel.transformAsync(contents, {
+					filename: args.path,
+					presets: [
+						[
+							'@babel/preset-env',
+							{
+								loose: true,
+								modules: false,
+								targets: {
+									browsers: ['last 2 versions', 'IE >= 11']
+								}
+							}
+						]
+					]
+				});
+
+				return {
+					contents: tmp.code,
+					resolveDir: path.dirname(args.path),
+					loader: 'js'
 				};
 			});
 
 			// Apply babel pass whenever we load a .js file
-			build.onLoad({ filter: /\.js$/ }, async args => {
+			build.onLoad({ filter: /\.[mc]?js$/ }, async args => {
 				const contents = await fs.readFile(args.path, 'utf-8');
 
 				// Using a cache is crucial as babel is 30x slower than esbuild
@@ -175,6 +202,20 @@ function createEsbuildPlugin() {
 					const tmp = await babel.transformAsync(result, {
 						filename: args.path,
 						sourceMaps: 'inline',
+						presets: downlevel
+							? [
+									[
+										'@babel/preset-env',
+										{
+											loose: true,
+											modules: false,
+											targets: {
+												browsers: ['last 2 versions', 'IE >= 11']
+											}
+										}
+									]
+							  ]
+							: [],
 						plugins: [
 							coverage && [
 								'istanbul',
@@ -290,13 +331,16 @@ module.exports = function(config) {
 
 		preprocessors: {
 			'{debug,devtools,hooks,compat,test-utils,jsx-runtime,}/test/**/*': [
-				'esbuild',
-				'sourcemap'
+				'esbuild'
 			]
 		},
 
 		esbuild: {
-			target: 'es5',
+			// karma-esbuild options
+			singleBundle: false,
+
+			// esbuild options
+			target: downlevel ? 'es5' : 'es2015',
 			define: {
 				COVERAGE: coverage,
 				'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || ''),

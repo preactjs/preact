@@ -1,4 +1,4 @@
-import { setupRerender } from 'preact/test-utils';
+import { setupRerender, act } from 'preact/test-utils';
 import { createElement, render } from 'preact';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { useState } from 'preact/hooks';
@@ -210,5 +210,27 @@ describe('useState', () => {
 		text.click();
 		rerender();
 		expect(scratch.innerHTML).to.equal('');
+	});
+
+	it('should render a second time when the render function updates state', () => {
+		const calls = [];
+		const App = () => {
+			const [greeting, setGreeting] = useState('bye');
+
+			if (greeting === 'bye') {
+				setGreeting('hi');
+			}
+
+			calls.push(greeting);
+
+			return <p>{greeting}</p>;
+		};
+
+		act(() => {
+			render(<App />, scratch);
+		});
+		expect(calls.length).to.equal(2);
+		expect(calls).to.deep.equal(['bye', 'hi']);
+		expect(scratch.textContent).to.equal('hi');
 	});
 });

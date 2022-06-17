@@ -2,7 +2,7 @@ import { Component, createElement, options, Fragment } from 'preact';
 import { assign } from './util';
 
 const oldCatchError = options._catchError;
-options._catchError = function(error, newVNode, oldVNode) {
+options._catchError = function(error, newVNode, oldVNode, errorInfo) {
 	if (error.then) {
 		/** @type {import('./internal').Component} */
 		let component;
@@ -19,7 +19,7 @@ options._catchError = function(error, newVNode, oldVNode) {
 			}
 		}
 	}
-	oldCatchError(error, newVNode, oldVNode);
+	oldCatchError(error, newVNode, oldVNode, errorInfo);
 };
 
 const oldUnmount = options.unmount;

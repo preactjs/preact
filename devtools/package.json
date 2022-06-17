@@ -12,5 +12,14 @@
 	"types": "src/index.d.ts",
 	"peerDependencies": {
 		"preact": "^10.0.0"
+	},
+	"exports": {
+		".": {
+			"types": "./src/index.d.ts",
+			"browser": "./dist/devtools.module.js",
+			"umd": "./dist/devtools.umd.js",
+			"import": "./dist/devtools.mjs",
+			"require": "./dist/devtools.js"
+		}
 	}
 }

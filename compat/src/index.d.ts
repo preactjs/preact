@@ -31,6 +31,8 @@ declare namespace React {
 	export import useState = _hooks.useState;
 
 	// Preact Defaults
+	export import ContextType = preact.ContextType;
+	export import RefObject = preact.RefObject;
 	export import Component = preact.Component;
 	export import FunctionComponent = preact.FunctionComponent;
 	export import FC = preact.FunctionComponent;
@@ -39,6 +41,7 @@ declare namespace React {
 	export import Fragment = preact.Fragment;
 	export import createElement = preact.createElement;
 	export import cloneElement = preact.cloneElement;
+	export import ComponentProps = preact.ComponentProps;
 
 	// Suspense
 	export import Suspense = _Suspense.Suspense;
@@ -48,6 +51,16 @@ declare namespace React {
 	// Compat
 	export import StrictMode = preact.Fragment;
 	export const version: string;
+
+	// HTML
+	export import HTMLAttributes = JSXInternal.HTMLAttributes;
+	export import DetailedHTMLProps = JSXInternal.DetailedHTMLProps;
+	export import CSSProperties = JSXInternal.CSSProperties;
+
+	// Events
+	export import TargetedEvent = JSXInternal.TargetedEvent;
+	export import ChangeEvent = JSXInternal.TargetedEvent;
+	export import ChangeEventHandler = JSXInternal.GenericEventHandler;
 
 	export function createPortal(
 		vnode: preact.VNode,
@@ -77,7 +90,9 @@ declare namespace React {
 		...children: preact.ComponentChildren[]
 	) => preact.VNode<any>;
 	export function isValidElement(element: any): boolean;
-	export function findDOMNode(component: preact.Component): Element | null;
+	export function findDOMNode(
+		component: preact.Component | Element
+	): Element | null;
 
 	export abstract class PureComponent<P = {}, S = {}> extends preact.Component<
 		P,
@@ -105,7 +120,7 @@ declare namespace React {
 
 	export function forwardRef<R, P = {}>(
 		fn: ForwardFn<P, R>
-	): preact.FunctionalComponent<P>;
+	): preact.FunctionalComponent<Omit<P, 'ref'> & { ref?: preact.Ref<R> }>;
 
 	export function unstable_batchedUpdates(
 		callback: (arg?: any) => void,

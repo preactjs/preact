@@ -158,6 +158,29 @@ describe('compat render', () => {
 		expect(scratch.firstElementChild.value).to.equal('0');
 	});
 
+	it('should call onChange and onInput when input event is dispatched', () => {
+		const onChange = sinon.spy();
+		const onInput = sinon.spy();
+
+		render(<input onChange={onChange} onInput={onInput} />, scratch);
+
+		scratch.firstChild.dispatchEvent(createEvent('input'));
+
+		expect(onChange).to.be.calledOnce;
+		expect(onInput).to.be.calledOnce;
+
+		onChange.resetHistory();
+		onInput.resetHistory();
+
+		// change props order
+		render(<input onInput={onInput} onChange={onChange} />, scratch);
+
+		scratch.firstChild.dispatchEvent(createEvent('input'));
+
+		expect(onChange).to.be.calledOnce;
+		expect(onInput).to.be.calledOnce;
+	});
+
 	it('should keep value of uncontrolled inputs using defaultValue', () => {
 		// See https://github.com/preactjs/preact/issues/2391
 
@@ -215,6 +238,33 @@ describe('compat render', () => {
 		child.focus();
 		render(<input />, scratch);
 		expect(document.activeElement.nodeName).to.equal('INPUT');
+	});
+
+	it('should transform react-style camel cased attributes', () => {
+		render(
+			<text dominantBaseline="middle" fontWeight="30px">
+				foo
+			</text>,
+			scratch
+		);
+		expect(scratch.innerHTML).to.equal(
+			'<text dominant-baseline="middle" font-weight="30px">foo</text>'
+		);
+	});
+
+	it('should correctly allow for "className"', () => {
+		const Foo = props => {
+			const { className, ...rest } = props;
+			return (
+				<div class={className}>
+					<p {...rest}>Foo</p>
+				</div>
+			);
+		};
+
+		render(<Foo className="foo" />, scratch);
+		expect(scratch.firstChild.className).to.equal('foo');
+		expect(scratch.firstChild.firstChild.className).to.equal('');
 	});
 
 	it('should normalize class+className even on components', () => {

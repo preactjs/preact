@@ -25,7 +25,6 @@
   "props": {
     "cname": 6,
     "props": {
-      "$_vnodeId": "__v",
       "$_cleanup": "__c",
       "$_afterPaintQueued": "__a",
       "$__hooks": "__H",
@@ -56,7 +55,7 @@
       "$_pendingError": "__E",
       "$_processingException": "__",
       "$_globalContext": "__n",
-      "$_context": "__c",
+      "$_context": "c",
       "$_defaultValue": "__",
       "$_id": "__c",
       "$_contextRef": "__",

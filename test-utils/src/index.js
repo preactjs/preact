@@ -61,11 +61,12 @@ export function act(cb) {
 				toFlush();
 				rerender();
 			}
-			teardown();
 		} catch (e) {
 			if (!err) {
 				err = e;
 			}
+		} finally {
+			teardown();
 		}
 
 		options.requestAnimationFrame = previousRequestAnimationFrame;

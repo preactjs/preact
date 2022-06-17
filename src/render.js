@@ -1,7 +1,8 @@
-import { EMPTY_OBJ, EMPTY_ARR } from './constants';
+import { EMPTY_OBJ } from './constants';
 import { commitRoot, diff } from './diff/index';
 import { createElement, Fragment } from './create-element';
 import options from './options';
+import { slice } from './util';
 
 /**
  * Render a Preact virtual node into a DOM element
@@ -48,7 +49,7 @@ export function render(vnode, parentDom, replaceNode) {
 			: oldVNode
 			? null
 			: parentDom.firstChild
-			? EMPTY_ARR.slice.call(parentDom.childNodes)
+			? slice.call(parentDom.childNodes)
 			: null,
 		commitQueue,
 		!isHydrating && replaceNode
