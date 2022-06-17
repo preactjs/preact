@@ -163,7 +163,7 @@ options.vnode = vnode => {
 
 			// Add support for onInput and onChange, see #3561
 			// if we have an oninput prop already change it to oninputCapture
-			if (/^oninput/i.test(i)) {
+			if (/^oninput$/i.test(i)) {
 				i = i.toLowerCase();
 				if (normalizedProps[i]) {
 					i = 'oninputCapture';
