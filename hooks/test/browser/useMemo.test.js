@@ -187,4 +187,18 @@ describe('useMemo', () => {
 
 		expect(scratch.textContent).to.equal('0');
 	});
+
+	it('should promote undefined value after a skipped render', () => {
+		let value;
+		function Comp({ all }) {
+			const result = (value = useMemo(() => (all ? 5 : undefined), [all]));
+			return result;
+		}
+		render(<Comp all />, scratch);
+		expect(value).to.equal(5);
+		render(<Comp all={false} />, scratch);
+		expect(value).to.equal(undefined);
+		render(<Comp all={false} />, scratch);
+		expect(value).to.equal(undefined);
+	});
 });

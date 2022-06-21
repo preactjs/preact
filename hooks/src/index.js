@@ -15,6 +15,8 @@ let currentHook = 0;
 /** @type {Array<import('./internal').Component>} */
 let afterPaintEffects = [];
 
+let EMPTY = [];
+
 let oldBeforeDiff = options._diff;
 let oldBeforeRender = options._render;
 let oldAfterDiff = options.diffed;
@@ -41,7 +43,8 @@ options._render = vnode => {
 			hooks._pendingEffects = [];
 			currentComponent._renderCallbacks = [];
 			hooks._list.forEach(hookItem => {
-				hookItem._pendingValue = hookItem._pendingArgs = undefined;
+				hookItem._pendingValue = EMPTY;
+				hookItem._pendingArgs = undefined;
 			});
 		} else {
 			hooks._pendingEffects.forEach(invokeCleanup);
@@ -62,10 +65,11 @@ options.diffed = vnode => {
 			if (hookItem._pendingArgs) {
 				hookItem._args = hookItem._pendingArgs;
 			}
-			if (hookItem._pendingValue !== undefined) {
+			if (hookItem._pendingValue !== EMPTY) {
 				hookItem._value = hookItem._pendingValue;
 			}
-			hookItem._pendingValue = hookItem._pendingArgs = undefined;
+			hookItem._pendingArgs = undefined;
+			hookItem._pendingValue = EMPTY;
 		});
 	}
 	previousComponent = currentComponent = null;
@@ -132,7 +136,7 @@ function getHookState(index, type) {
 		});
 
 	if (index >= hooks._list.length) {
-		hooks._list.push({});
+		hooks._list.push({ _pendingValue: EMPTY });
 	}
 	return hooks._list[index];
 }
