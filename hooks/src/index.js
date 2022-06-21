@@ -65,28 +65,24 @@ options.diffed = vnode => {
 	if (oldAfterDiff) oldAfterDiff(vnode);
 
 	const c = vnode._component;
-	if (c && c.__hooks && c.__hooks._pendingEffects.length) {
-		afterPaint(afterPaintEffects.push(c));
+	if (c && c.__hooks) {
+		if (c.__hooks._pendingEffects.length) afterPaint(afterPaintEffects.push(c));
+		c.__hooks._list.forEach(hookItem => {
+			if (hookItem._pendingArgs) {
+				hookItem._args = hookItem._pendingArgs;
+			}
+			if (hookItem._pendingValue) {
+				hookItem._value = hookItem._pendingValue;
+			}
+			hookItem._pendingValue = hookItem._pendingArgs = undefined;
+		});
 	}
-	currentComponent = null;
-	previousComponent = null;
+	previousComponent = currentComponent = null;
 };
 
 options._commit = (vnode, commitQueue) => {
 	commitQueue.some(component => {
 		try {
-			if (component.__hooks) {
-				component.__hooks._list.forEach(hookItem => {
-					if (hookItem._pendingArgs) {
-						hookItem._args = hookItem._pendingArgs;
-					}
-					if (hookItem._pendingValue) {
-						hookItem._value = hookItem._pendingValue;
-					}
-					hookItem._pendingValue = hookItem._pendingArgs = undefined;
-				});
-			}
-
 			component._renderCallbacks.forEach(invokeCleanup);
 			component._renderCallbacks = component._renderCallbacks.filter(cb =>
 				cb._value ? invokeEffect(cb) : true
