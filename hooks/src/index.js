@@ -26,15 +26,45 @@ let oldBeforeUnmount = options.unmount;
 const RAF_TIMEOUT = 100;
 let prevRaf;
 
+let mask = 0;
+let localIdCounter = 0;
+
 options._diff = vnode => {
+	if (typeof vnode.type === 'function' && !vnode._mask) {
+		vnode._mask =
+			vnode._parent && vnode._parent._mask
+				? vnode._parent && vnode._parent._mask + 1
+				: mask++;
+	}
 	currentComponent = null;
 	if (oldBeforeDiff) oldBeforeDiff(vnode);
+};
+
+options.diffed = vnode => {
+	if (oldAfterDiff) oldAfterDiff(vnode);
+
+	const c = vnode._component;
+	if (c && c.__hooks) {
+		if (c.__hooks._pendingEffects.length) afterPaint(afterPaintEffects.push(c));
+		c.__hooks._list.forEach(hookItem => {
+			if (hookItem._pendingArgs) {
+				hookItem._args = hookItem._pendingArgs;
+			}
+			if (hookItem._pendingValue !== EMPTY) {
+				hookItem._value = hookItem._pendingValue;
+			}
+			hookItem._pendingArgs = undefined;
+			hookItem._pendingValue = EMPTY;
+		});
+	}
+	previousComponent = currentComponent = null;
 };
 
 options._render = vnode => {
 	if (oldBeforeRender) oldBeforeRender(vnode);
 
 	currentComponent = vnode._component;
+	localIdCounter = 0;
 	currentIndex = 0;
 
 	const hooks = currentComponent.__hooks;
@@ -58,27 +88,8 @@ options._render = vnode => {
 	previousComponent = currentComponent;
 };
 
-options.diffed = vnode => {
-	if (oldAfterDiff) oldAfterDiff(vnode);
-
-	const c = vnode._component;
-	if (c && c.__hooks) {
-		if (c.__hooks._pendingEffects.length) afterPaint(afterPaintEffects.push(c));
-		c.__hooks._list.forEach(hookItem => {
-			if (hookItem._pendingArgs) {
-				hookItem._args = hookItem._pendingArgs;
-			}
-			if (hookItem._pendingValue !== EMPTY) {
-				hookItem._value = hookItem._pendingValue;
-			}
-			hookItem._pendingArgs = undefined;
-			hookItem._pendingValue = EMPTY;
-		});
-	}
-	previousComponent = currentComponent = null;
-};
-
 options._commit = (vnode, commitQueue) => {
+	mask = 0;
 	commitQueue.some(component => {
 		try {
 			component._renderCallbacks.forEach(invokeCleanup);
@@ -364,6 +375,15 @@ export function useErrorBoundary(cb) {
 			errState[1](undefined);
 		}
 	];
+}
+
+export function useId() {
+	const state = getHookState(currentIndex++, 11);
+	if (!state._value) {
+		state._value = '_P' + currentComponent._vnode._mask + localIdCounter++;
+	}
+
+	return state._value;
 }
 
 /**
