@@ -364,6 +364,21 @@ function diffElementNodes(
 			);
 		}
 
+		if (
+			(nodeType === 'input' ||
+				nodeType === 'textarea' ||
+				nodeType === 'select') &&
+			(newProps.onInput || newProps.onChange)
+		) {
+			if (newProps.value != null) {
+				dom._isControlled = true;
+				dom._prevValue = newProps.value;
+			} else if (newProps.checked != null) {
+				dom._isControlled = true;
+				dom._prevValue = newProps.checked;
+			}
+		}
+
 		// we created a new parent, so none of the previously attached children can be reused:
 		excessDomChildren = null;
 		// we are creating a new node, so we can assume this is a new subtree (in case we are hydrating), this deopts the hydrate
@@ -436,6 +451,12 @@ function diffElementNodes(
 					if (excessDomChildren[i] != null) removeNode(excessDomChildren[i]);
 				}
 			}
+		}
+
+		if (newProps.value != null && dom._isControlled) {
+			dom._prevValue = newProps.value;
+		} else if (newProps.checked != null && dom._isControlled) {
+			dom._prevValue = newProps.checked;
 		}
 
 		// (as above, don't diff props during hydration)

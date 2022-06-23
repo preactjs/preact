@@ -1,4 +1,5 @@
-import { createElement, render } from 'preact';
+import { createElement, render, Component } from 'preact';
+import { setupRerender } from 'preact/test-utils';
 import {
 	setupScratch,
 	teardown,
@@ -8,7 +9,7 @@ import {
 /** @jsx createElement */
 
 describe('event handling', () => {
-	let scratch, proto;
+	let scratch, proto, rerender;
 
 	function fireEvent(on, type) {
 		let e = document.createEvent('Event');
@@ -18,6 +19,7 @@ describe('event handling', () => {
 
 	beforeEach(() => {
 		scratch = setupScratch();
+		rerender = setupRerender();
 
 		proto = document.createElement('div').constructor.prototype;
 
@@ -47,6 +49,153 @@ describe('event handling', () => {
 			sinon.match.func,
 			false
 		);
+	});
+
+	it('should support controlled inputs', () => {
+		const calls = [];
+		class Input extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { text: '' };
+				this.onInput = this.onInput.bind(this);
+			}
+
+			onInput(e) {
+				calls.push(e.target.value);
+				if (e.target.value.length > 3) return;
+				this.setState({ text: e.target.value });
+			}
+
+			render() {
+				return <input onInput={this.onInput} value={this.state.text} />;
+			}
+		}
+
+		render(<Input />, scratch);
+
+		scratch.firstChild.value = 'hii';
+		fireEvent(scratch.firstChild, 'input');
+		rerender();
+		expect(calls).to.deep.equal(['hii']);
+		expect(scratch.firstChild.value).to.equal('hii');
+
+		scratch.firstChild.value = 'hiii';
+		fireEvent(scratch.firstChild, 'input');
+		rerender();
+		expect(calls).to.deep.equal(['hii', 'hiii']);
+		expect(scratch.firstChild.value).to.equal('hii');
+	});
+
+	it('should support controlled textareas', () => {
+		const calls = [];
+		class Input extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { text: '' };
+				this.onInput = this.onInput.bind(this);
+			}
+
+			onInput(e) {
+				calls.push(e.target.value);
+				if (e.target.value.length > 3) return;
+				this.setState({ text: e.target.value });
+			}
+
+			render() {
+				return <textarea onInput={this.onInput} value={this.state.text} />;
+			}
+		}
+
+		render(<Input />, scratch);
+
+		scratch.firstChild.value = 'hii';
+		fireEvent(scratch.firstChild, 'input');
+		rerender();
+		expect(calls).to.deep.equal(['hii']);
+		expect(scratch.firstChild.value).to.equal('hii');
+
+		scratch.firstChild.value = 'hiii';
+		fireEvent(scratch.firstChild, 'input');
+		rerender();
+		expect(calls).to.deep.equal(['hii', 'hiii']);
+		expect(scratch.firstChild.value).to.equal('hii');
+	});
+
+	it('should support controlled selects', () => {
+		const calls = [];
+		class Input extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { value: 'B' };
+				this.onChange = this.onChange.bind(this);
+			}
+
+			onChange(e) {
+				calls.push(e.target.value);
+				if (e.target.value === 'C') return;
+
+				this.setState({ value: e.target.value });
+			}
+
+			render() {
+				return (
+					<select value={this.state.value} onChange={this.onChange}>
+						<option value="A">A</option>
+						<option value="B">B</option>
+						<option value="C">C</option>
+					</select>
+				);
+			}
+		}
+
+		render(<Input />, scratch);
+
+		scratch.firstChild.value = 'A';
+		fireEvent(scratch.firstChild, 'change');
+		rerender();
+		expect(calls).to.deep.equal(['A']);
+		expect(scratch.firstChild.value).to.equal('A');
+
+		scratch.firstChild.value = 'C';
+		fireEvent(scratch.firstChild, 'change');
+		rerender();
+		expect(calls).to.deep.equal(['A', 'C']);
+		expect(scratch.firstChild.value).to.equal('A');
+	});
+
+	it('should support controlled checkboxes', () => {
+		const calls = [];
+		class Input extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { checked: true };
+				this.onInput = this.onInput.bind(this);
+			}
+
+			onInput(e) {
+				calls.push(e.target.checked);
+				if (e.target.checked === false) return;
+				this.setState({ checked: e.target.checked });
+			}
+
+			render() {
+				return (
+					<input
+						type="checkbox"
+						onChange={this.onInput}
+						checked={this.state.checked}
+					/>
+				);
+			}
+		}
+
+		render(<Input />, scratch);
+
+		scratch.firstChild.checked = false;
+		fireEvent(scratch.firstChild, 'change');
+		rerender();
+		expect(calls).to.deep.equal([false]);
+		expect(scratch.firstChild.checked).to.equal(true);
 	});
 
 	it('should only register truthy values as handlers', () => {
