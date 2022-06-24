@@ -157,7 +157,7 @@ function eventProxy(e) {
 			const start = this.selectionStart;
 			const end = this.selectionEnd;
 			this.value = this._prevValue;
-			this.setSelectionRange(start, end, direction);
+			if (start != null) this.setSelectionRange(start, end, direction);
 		}
 		if (this.checked != null && e.type === 'change') {
 			this.checked = this._prevValue;
