@@ -3,6 +3,7 @@ import { commitRoot, diff } from './diff/index';
 import { createElement, Fragment } from './create-element';
 import options from './options';
 import { slice } from './util';
+import { rendererState } from './component';
 
 /**
  * Render a Preact virtual node into a DOM element
@@ -35,7 +36,7 @@ export function render(vnode, parentDom, replaceNode) {
 	)._children = createElement(Fragment, null, [vnode]);
 
 	// List of effects that need to be called after diffing.
-	let commitQueue = [];
+	rendererState._commitQueue = [];
 	diff(
 		parentDom,
 		// Determine the new vnode tree and store it on the DOM element on
@@ -51,7 +52,6 @@ export function render(vnode, parentDom, replaceNode) {
 			: parentDom.firstChild
 			? slice.call(parentDom.childNodes)
 			: null,
-		commitQueue,
 		!isHydrating && replaceNode
 			? replaceNode
 			: oldVNode
@@ -61,7 +61,7 @@ export function render(vnode, parentDom, replaceNode) {
 	);
 
 	// Flush all queued effects
-	commitRoot(commitQueue, vnode);
+	commitRoot(vnode);
 }
 
 /**

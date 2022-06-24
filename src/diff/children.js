@@ -15,8 +15,6 @@ import { getDomSibling } from '../component';
  * @param {object} globalContext The current context object - modified by getChildContext
  * @param {boolean} isSvg Whether or not this DOM node is an SVG node
  * @param {Array<import('../internal').PreactElement>} excessDomChildren
- * @param {Array<import('../internal').Component>} commitQueue List of components
- * which have callbacks to invoke in commitRoot
  * @param {import('../internal').PreactElement} oldDom The current attached DOM
  * element any new dom elements should be placed around. Likely `null` on first
  * render (except when hydrating). Can be a sibling DOM element when diffing
@@ -31,7 +29,6 @@ export function diffChildren(
 	globalContext,
 	isSvg,
 	excessDomChildren,
-	commitQueue,
 	oldDom,
 	isHydrating
 ) {
@@ -141,7 +138,6 @@ export function diffChildren(
 			globalContext,
 			isSvg,
 			excessDomChildren,
-			commitQueue,
 			oldDom,
 			isHydrating
 		);
@@ -244,14 +240,7 @@ function reorderChildren(childVNode, oldDom, parentDom) {
 			if (typeof vnode.type == 'function') {
 				oldDom = reorderChildren(vnode, oldDom, parentDom);
 			} else {
-				oldDom = placeChild(
-					parentDom,
-					vnode,
-					vnode,
-					c,
-					vnode._dom,
-					oldDom
-				);
+				oldDom = placeChild(parentDom, vnode, vnode, c, vnode._dom, oldDom);
 			}
 		}
 	}

@@ -4,6 +4,16 @@ import options from './options';
 import { Fragment } from './create-element';
 
 /**
+ * The render queue
+ * @type {import('./internal').RendererState}
+ */
+export const rendererState = {
+	_parentDom: null,
+	_context: {},
+	_commitQueue: []
+};
+
+/**
  * Base Component class. Provides `setState()` and `forceUpdate()`, which
  * trigger rendering
  * @param {object} props The initial component props
@@ -123,10 +133,9 @@ function renderComponent(component) {
 		parentDom = component._parentDom;
 
 	if (parentDom) {
-		let commitQueue = [];
 		const oldVNode = assign({}, vnode);
 		oldVNode._original = vnode._original + 1;
-
+		rendererState._commitQueue = [];
 		diff(
 			parentDom,
 			vnode,
@@ -134,11 +143,10 @@ function renderComponent(component) {
 			component._globalContext,
 			parentDom.ownerSVGElement !== undefined,
 			vnode._hydrating != null ? [oldDom] : null,
-			commitQueue,
 			oldDom == null ? getDomSibling(vnode) : oldDom,
 			vnode._hydrating
 		);
-		commitRoot(commitQueue, vnode);
+		commitRoot(vnode);
 
 		if (vnode._dom != oldDom) {
 			updateParentDomPointers(vnode);

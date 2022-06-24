@@ -24,6 +24,10 @@ export interface ErrorInfo {
 	componentStack?: string;
 }
 
+export type RendererState = {
+	_commitQueue: CommitQueue;
+};
+
 export interface Options extends preact.Options {
 	/** Attach a hook that is invoked before render, mainly to check the arguments. */
 	_root?(

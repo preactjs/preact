@@ -1,5 +1,5 @@
 import { EMPTY_OBJ } from '../constants';
-import { Component, getDomSibling } from '../component';
+import { Component, getDomSibling, rendererState } from '../component';
 import { Fragment } from '../create-element';
 import { diffChildren } from './children';
 import { diffProps, setProperty } from './props';
@@ -14,8 +14,6 @@ import options from '../options';
  * @param {object} globalContext The current context object. Modified by getChildContext
  * @param {boolean} isSvg Whether or not this element is an SVG node
  * @param {Array<import('../internal').PreactElement>} excessDomChildren
- * @param {Array<import('../internal').Component>} commitQueue List of components
- * which have callbacks to invoke in commitRoot
  * @param {import('../internal').PreactElement} oldDom The current attached DOM
  * element any new dom elements should be placed around. Likely `null` on first
  * render (except when hydrating). Can be a sibling DOM element when diffing
@@ -29,7 +27,6 @@ export function diff(
 	globalContext,
 	isSvg,
 	excessDomChildren,
-	commitQueue,
 	oldDom,
 	isHydrating
 ) {
@@ -151,7 +148,7 @@ export function diff(
 						if (vnode) vnode._parent = newVNode;
 					});
 					if (c._renderCallbacks.length) {
-						commitQueue.push(c);
+						rendererState._commitQueue.push(c);
 					}
 
 					break outer;
@@ -217,7 +214,6 @@ export function diff(
 				globalContext,
 				isSvg,
 				excessDomChildren,
-				commitQueue,
 				oldDom,
 				isHydrating
 			);
@@ -228,7 +224,7 @@ export function diff(
 			newVNode._hydrating = null;
 
 			if (c._renderCallbacks.length) {
-				commitQueue.push(c);
+				rendererState._commitQueue.push(c);
 			}
 
 			if (clearProcessingException) {
@@ -250,7 +246,6 @@ export function diff(
 				globalContext,
 				isSvg,
 				excessDomChildren,
-				commitQueue,
 				isHydrating
 			);
 		}
@@ -271,11 +266,12 @@ export function diff(
 }
 
 /**
- * @param {Array<import('../internal').Component>} commitQueue List of components
- * which have callbacks to invoke in commitRoot
  * @param {import('../internal').VNode} root
  */
-export function commitRoot(commitQueue, root) {
+export function commitRoot(root) {
+	let commitQueue = [].concat(rendererState._commitQueue);
+	rendererState._commitQueue = [];
+
 	if (options._commit) options._commit(root, commitQueue);
 
 	commitQueue.some(c => {
@@ -302,8 +298,6 @@ export function commitRoot(commitQueue, root) {
  * @param {object} globalContext The current context object
  * @param {boolean} isSvg Whether or not this DOM node is an SVG node
  * @param {*} excessDomChildren
- * @param {Array<import('../internal').Component>} commitQueue List of components
- * which have callbacks to invoke in commitRoot
  * @param {boolean} isHydrating Whether or not we are in hydration
  * @returns {import('../internal').PreactElement}
  */
@@ -314,7 +308,6 @@ function diffElementNodes(
 	globalContext,
 	isSvg,
 	excessDomChildren,
-	commitQueue,
 	isHydrating
 ) {
 	let oldProps = oldVNode.props;
@@ -423,7 +416,6 @@ function diffElementNodes(
 				globalContext,
 				isSvg && nodeType !== 'foreignObject',
 				excessDomChildren,
-				commitQueue,
 				excessDomChildren
 					? excessDomChildren[0]
 					: oldVNode._children && getDomSibling(oldVNode, 0),
