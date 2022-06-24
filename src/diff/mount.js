@@ -168,21 +168,6 @@ function mountElement(internal, dom) {
 		}
 
 		let newHtml, newValue, newChildren;
-		if (
-			(nodeType === 'input' ||
-				nodeType === 'textarea' ||
-				nodeType === 'select') &&
-			(newProps.onInput || newProps.onChange)
-		) {
-			if (newProps.value != null) {
-				dom._isControlled = true;
-				dom._prevValue = newProps.value;
-			} else if (newProps.checked != null) {
-				dom._isControlled = true;
-				dom._prevValue = newProps.checked;
-			}
-		}
-
 		for (i in newProps) {
 			value = newProps[i];
 			if (i === 'children') {

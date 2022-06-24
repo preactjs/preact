@@ -192,12 +192,6 @@ function patchElement(internal, vnode) {
 		);
 		rendererState._parentDom = prevParentDom;
 	}
-
-	if (newProps.checked != null && dom._isControlled) {
-		dom._prevValue = newProps.checked;
-	} else if (newProps.value != null && dom._isControlled) {
-		dom._prevValue = newProps.value;
-	}
 }
 
 /**
