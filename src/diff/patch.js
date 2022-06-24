@@ -14,14 +14,13 @@ import {
 	MODE_HYDRATE,
 	MODE_PENDING_ERROR,
 	MODE_RERENDERING_ERROR,
-	SKIP_CHILDREN,
 	DIRTY_BIT,
 	FORCE_UPDATE
 } from '../constants';
-import { getDomSibling } from '../tree';
+import { getDomSibling, getParentContext, getParentDom } from '../tree';
 import { mountChildren } from './mount';
 import { Fragment } from '../create-element';
-import { rendererState } from '../component';
+import { commitQueue } from './renderer';
 
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
@@ -29,120 +28,101 @@ import { rendererState } from '../component';
  * @param {import('../internal').VNode | string} vnode The new virtual node
  */
 export function patch(internal, vnode) {
+	let diffHook;
+	if ((diffHook = options._diff)) diffHook(internal, vnode);
+
 	let flags = internal.flags;
+	let prevProps = internal.props;
 
 	if (flags & TYPE_TEXT) {
-		if (vnode !== internal.props) {
+		if (prevProps !== vnode) {
+			internal.props = vnode;
 			// @ts-ignore We know that newVNode is string/number/bigint, and internal._dom is Text
 			internal._dom.data = vnode;
-			internal.props = vnode;
 		}
-
-		return;
 	}
-
 	// When passing through createElement it assigns the object
 	// constructor as undefined. This to prevent JSON-injection.
-	if (vnode.constructor !== UNDEFINED) return;
+	else if (vnode.constructor === UNDEFINED) {
+		// @ts-ignore vnode is never a string here
+		let newProps = vnode.props;
+		internal.props = newProps;
 
-	if (options._diff) options._diff(internal, vnode);
+		// Root nodes render their children into a specific parent DOM element.
+		// They can occur anywhere in the tree, can be nested, and currently allow reparenting during patches.
+		// @TODO: Decide if we actually want to support silent reparenting during patch - is it worth the bytes?
+		if (flags & TYPE_ROOT) {
+			let parentDom = newProps._parentDom;
 
-	// Root nodes render their children into a specific parent DOM element.
-	// They can occur anywhere in the tree, can be nested, and currently allow reparenting during patches.
-	// @TODO: Decide if we actually want to support silent reparenting during patch - is it worth the bytes?
-	let prevParentDom = rendererState._parentDom;
-	if (flags & TYPE_ROOT) {
-		rendererState._parentDom = vnode.props._parentDom;
-
-		if (internal.props._parentDom !== vnode.props._parentDom) {
-			let nextSibling =
-				rendererState._parentDom == prevParentDom
-					? getDomSibling(internal)
-					: null;
-			insertComponentDom(internal, nextSibling, rendererState._parentDom);
+			if (parentDom !== prevProps._parentDom) {
+				// Suspended trees are re-parented into the same parent so they can be inserted/removed without diffing.
+				// For that to work, when createPortal is used to render into the nearest element parent, we insert in-order.
+				let nextSibling =
+					parentDom == getParentDom(internal._parent)
+						? getDomSibling(internal)
+						: null;
+				insertComponentDom(internal, nextSibling, parentDom);
+			}
 		}
-	}
 
-	if (flags & TYPE_ELEMENT) {
-		if (vnode._vnodeId !== internal._vnodeId) {
-			// @ts-ignore dom is a PreactElement here
-			patchElement(internal, vnode);
-			internal.props = vnode.props;
-		}
-	} else {
+		// Switch from MODE_PENDING_ERROR to MODE_RERENDERING_ERROR:
 		if (flags & MODE_PENDING_ERROR) {
-			// Toggle the MODE_PENDING_ERROR and MODE_RERENDERING_ERROR flags. In
-			// actuality, this should turn off the MODE_PENDING_ERROR flag and turn on
-			// the MODE_RERENDERING_ERROR flag.
-			internal.flags ^= MODE_PENDING_ERROR | MODE_RERENDERING_ERROR;
+			flags = internal.flags ^= MODE_PENDING_ERROR | MODE_RERENDERING_ERROR;
 		}
 
-		try {
-			let renderResult;
-			let prevContext = rendererState._context;
-			if (internal._vnodeId === vnode._vnodeId) {
-				internal.flags |= SKIP_CHILDREN;
-			} else {
-				renderResult = patchComponent(internal, vnode);
-			}
+		// @ts-ignore vnode is never a string here
+		let isSameVNode = vnode._vnodeId === internal._vnodeId;
 
-			if (internal.flags & SKIP_CHILDREN) {
-				internal._component.props = internal.props = vnode.props;
-				if (vnode._vnodeId !== internal._vnodeId) {
-					internal.flags &= ~DIRTY_BIT;
+		if (!isSameVNode || (flags & FORCE_UPDATE) !== 0) {
+			if (flags & TYPE_ELEMENT) {
+				patchElement(
+					internal,
+					// @ts-ignore _dom is a PreactElement here
+					internal._dom,
+					prevProps,
+					newProps,
+					flags
+				);
+			} else {
+				patchComponent(
+					internal,
+					internal._component,
+					prevProps,
+					newProps,
+					flags
+				);
+
+				if (internal._commitCallbacks.length) {
+					commitQueue.push(internal);
 				}
-			} else if (internal._children == null) {
-				let siblingDom =
-					(internal.flags & (MODE_HYDRATE | MODE_SUSPENDED)) ===
-					(MODE_HYDRATE | MODE_SUSPENDED)
-						? internal._dom
-						: internal.flags & MODE_HYDRATE
-						? null
-						: getDomSibling(internal);
-
-				mountChildren(internal, renderResult, siblingDom);
-			} else {
-				patchChildren(internal, renderResult);
 			}
 
-			if (internal._commitCallbacks.length) {
-				rendererState._commitQueue.push(internal);
-			}
+			// Once we have successfully rendered the new VNode, copy it's ID over
+			// @ts-ignore vnode is never a string here
+			internal._vnodeId = vnode._vnodeId;
 
-			rendererState._parentDom = prevParentDom;
-			// In the event this subtree creates a new context for its children, restore
-			// the previous context for its siblings
-			rendererState._context = prevContext;
-		} catch (e) {
-			// @TODO: assign a new VNode ID here? Or NaN?
-			// newVNode._vnodeId = 0;
-			internal.flags |= e.then ? MODE_SUSPENDED : MODE_ERRORED;
-			options._catchError(e, internal);
+			internal._prevRef = internal.ref;
+			// @ts-ignore vnode is never a string here
+			internal.ref = vnode.ref;
 		}
 	}
-
-	if (options.diffed) options.diffed(internal);
 
 	// We successfully rendered this VNode, unset any stored hydration/bailout state:
 	internal.flags &= RESET_MODE;
 
-	// Once we have successfully rendered the new VNode, copy it's ID over
-	internal._vnodeId = vnode._vnodeId;
-
-	internal._prevRef = internal.ref;
-	internal.ref = vnode.ref;
+	if ((diffHook = options.diffed)) diffHook(internal);
 }
 
 /**
  * Update an internal and its associated DOM element based on a new VNode
  * @param {import('../internal').Internal} internal
- * @param {import('../internal').VNode} vnode A VNode with props to compare and apply
+ * @param {import('../internal').PreactElement} dom
+ * @param {any} oldProps
+ * @param {any} newProps
+ * @param {import('../internal').Internal['flags']} flags
  */
-function patchElement(internal, vnode) {
-	let dom = /** @type {import('../internal').PreactElement} */ (internal._dom),
-		oldProps = internal.props,
-		newProps = vnode.props,
-		isSvg = internal.flags & MODE_SVG,
+function patchElement(internal, dom, oldProps, newProps, flags) {
+	let isSvg = flags & MODE_SVG,
 		i,
 		value,
 		tmp,
@@ -184,13 +164,10 @@ function patchElement(internal, vnode) {
 		internal._children = null;
 	} else {
 		if (oldHtml) dom.innerHTML = '';
-		const prevParentDom = rendererState._parentDom;
-		rendererState._parentDom = dom;
 		patchChildren(
 			internal,
 			newChildren && Array.isArray(newChildren) ? newChildren : [newChildren]
 		);
-		rendererState._parentDom = prevParentDom;
 	}
 
 	if (newProps.checked != null && dom._isControlled) {
@@ -201,125 +178,148 @@ function patchElement(internal, vnode) {
 }
 
 /**
- * @param {import('../internal').Internal} internal The component's backing Internal node
- * @param {import('../internal').VNode} newVNode The new virtual node
- * @returns {import('../internal').ComponentChildren} the component's children
+ * @param {import('../internal').Internal} internal
+ * @param {import('../internal').Component} inst
+ * @param {any} prevProps
+ * @param {any} newProps
+ * @param {import('../internal').Internal['flags']} flags
  */
-function patchComponent(internal, newVNode) {
+function patchComponent(internal, inst, prevProps, newProps, flags) {
 	let type = /** @type {import('../internal').ComponentType} */ (internal.type);
-	let snapshot,
-		c = internal._component,
-		newProps = newVNode.props;
+
+	let context = getParentContext(internal);
+
+	let snapshot;
+
+	let prevState = inst.state;
+	if (inst._nextState == null) {
+		inst._nextState = prevState;
+	}
 
 	// Necessary for createContext api. Setting this property will pass
 	// the context value as `this.context` just for this component.
-	let tmp = newVNode.type.contextType;
-	let provider = tmp && rendererState._context[tmp._id];
+	let tmp = type.contextType;
+	let provider = tmp && context[tmp._id];
 	let componentContext = tmp
 		? provider
 			? provider.props.value
 			: tmp._defaultValue
-		: rendererState._context;
+		: context;
+	// inst.context = componentContext;
 
-	if (c._nextState == null) {
-		c._nextState = c.state;
-	}
+	try {
+		if (type.getDerivedStateFromProps != null) {
+			if (inst._nextState === prevState) {
+				inst._nextState = Object.assign({}, inst._nextState);
+			}
 
-	if (type.getDerivedStateFromProps != null) {
-		if (c._nextState == c.state) {
-			c._nextState = Object.assign({}, c._nextState);
+			Object.assign(
+				inst._nextState,
+				type.getDerivedStateFromProps(newProps, inst._nextState)
+			);
+		} else if (
+			newProps !== prevProps &&
+			inst.componentWillReceiveProps != null
+		) {
+			inst.componentWillReceiveProps(newProps, componentContext);
 		}
 
-		Object.assign(
-			c._nextState,
-			type.getDerivedStateFromProps(newProps, c._nextState)
-		);
-	}
+		if (
+			!(flags & FORCE_UPDATE) &&
+			inst.shouldComponentUpdate != null &&
+			inst.shouldComponentUpdate(
+				newProps,
+				inst._nextState,
+				componentContext
+			) === false
+		) {
+			inst.state = inst._nextState;
+			inst._nextState = null;
+			inst.props = newProps;
 
-	let oldProps = c.props;
-	let oldState = c.state;
+			// @TODO: should this really be flipped?
+			internal.flags &= ~DIRTY_BIT;
+			return;
+		}
 
-	if (
-		type.getDerivedStateFromProps == null &&
-		newProps !== oldProps &&
-		c.componentWillReceiveProps != null
-	) {
-		c.componentWillReceiveProps(newProps, componentContext);
-	}
+		if (inst.componentWillUpdate != null) {
+			inst.componentWillUpdate(newProps, inst._nextState, componentContext);
+		}
 
-	if (
-		!(internal.flags & FORCE_UPDATE) &&
-		c.shouldComponentUpdate != null &&
-		c.shouldComponentUpdate(newProps, c._nextState, componentContext) === false
-	) {
-		c.props = newProps;
-		c.state = c._nextState;
-		internal.flags |= SKIP_CHILDREN;
-		return;
-	}
+		inst.context = componentContext;
+		inst.props = newProps;
+		inst.state = inst._nextState;
 
-	if (c.componentWillUpdate != null) {
-		c.componentWillUpdate(newProps, c._nextState, componentContext);
-	}
+		let renderHook = options._render;
+		let renderResult;
 
-	c.context = componentContext;
-	internal.props = c.props = newProps;
-	c.state = c._nextState;
-
-	let renderHook = options._render;
-	if (renderHook) renderHook(internal);
-
-	let counter = 0,
-		renderResult;
-	while (counter++ < 25) {
-		internal.flags &= ~DIRTY_BIT;
-		if (renderHook) renderHook(internal);
-		if (internal.flags & TYPE_CLASS) {
-			renderResult = c.render(c.props, c.state, c.context);
-			// note: disable repeat render invocation for class components
-			break;
+		// note: disable repeat render invocation for class components
+		if (flags & TYPE_CLASS) {
+			internal.flags &= ~DIRTY_BIT;
+			if (renderHook) renderHook(internal);
+			renderResult = inst.render(inst.props, inst.state, inst.context);
 		} else {
-			renderResult = type.call(c, c.props, c.context);
+			let counter = 0;
+			while (counter++ < 25) {
+				// mark as clean:
+				internal.flags &= ~DIRTY_BIT;
+				if (renderHook) renderHook(internal);
+				renderResult = type.call(inst, inst.props, inst.context);
+				// re-render if marked as dirty:
+				if (!(internal.flags & DIRTY_BIT)) {
+					break;
+				}
+			}
 		}
-		if (!(internal.flags & DIRTY_BIT)) {
-			break;
+
+		// Handle setState called in render, see #2553
+		inst.state = inst._nextState;
+		// inst._nextState = null;
+
+		if (inst.getChildContext != null) {
+			internal._context = Object.assign({}, context, inst.getChildContext());
 		}
-	}
 
-	// Handle setState called in render, see #2553
-	c.state = c._nextState;
-
-	if (c.getChildContext != null) {
-		rendererState._context = internal._context = Object.assign(
-			{},
-			rendererState._context,
-			c.getChildContext()
-		);
-	}
-
-	if (c.getSnapshotBeforeUpdate != null) {
-		snapshot = c.getSnapshotBeforeUpdate(oldProps, oldState);
-	}
-
-	// Only schedule componentDidUpdate if the component successfully rendered
-	if (c.componentDidUpdate != null) {
-		internal._commitCallbacks.push(() => {
-			c.componentDidUpdate(oldProps, oldState, snapshot);
-		});
-	}
-
-	if (renderResult == null) {
-		renderResult = [];
-	} else if (typeof renderResult === 'object') {
-		if (renderResult.type === Fragment && renderResult.key == null) {
-			renderResult = renderResult.props.children;
+		if (inst.getSnapshotBeforeUpdate != null) {
+			snapshot = inst.getSnapshotBeforeUpdate(prevProps, prevState);
 		}
-		if (!Array.isArray(renderResult)) {
+
+		// Only schedule componentDidUpdate if the component successfully rendered
+		if (inst.componentDidUpdate != null) {
+			internal._commitCallbacks.push(() => {
+				inst.componentDidUpdate(prevProps, prevState, snapshot);
+			});
+		}
+
+		if (renderResult == null) {
+			renderResult = [];
+		} else if (typeof renderResult === 'object') {
+			if (renderResult.type === Fragment && renderResult.key == null) {
+				renderResult = renderResult.props.children;
+			}
+			if (!Array.isArray(renderResult)) {
+				renderResult = [renderResult];
+			}
+		} else {
 			renderResult = [renderResult];
 		}
-	} else {
-		renderResult = [renderResult];
-	}
 
-	return renderResult;
+		if (internal._children == null) {
+			let siblingDom;
+			if (flags & MODE_HYDRATE) {
+				siblingDom = flags & MODE_SUSPENDED ? internal._dom : null;
+			} else {
+				siblingDom = getDomSibling(internal);
+			}
+
+			mountChildren(internal, renderResult, siblingDom);
+		} else {
+			patchChildren(internal, renderResult);
+		}
+	} catch (e) {
+		// @TODO: assign a new VNode ID here? Or NaN?
+		// newVNode._vnodeId = 0;
+		internal.flags |= e.then ? MODE_SUSPENDED : MODE_ERRORED;
+		options._catchError(e, internal);
+	}
 }

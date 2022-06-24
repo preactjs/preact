@@ -11,8 +11,7 @@ import {
 import { mount } from './mount';
 import { patch } from './patch';
 import { unmount } from './unmount';
-import { createInternal, getDomSibling } from '../tree';
-import { rendererState } from '../component';
+import { createInternal, getDomSibling, getParentDom } from '../tree';
 
 /**
  * Update an internal with new children.
@@ -20,11 +19,19 @@ import { rendererState } from '../component';
  * @param {import('../internal').ComponentChild[]} children The new children, represented as VNodes
  */
 export function patchChildren(internal, children) {
+	/** @type {import('../internal').Internal[]} */
 	let oldChildren =
 		(internal._children && internal._children.slice()) || EMPTY_ARR;
 
 	let oldChildrenLength = oldChildren.length;
 	let remainingOldChildren = oldChildrenLength;
+
+	/**
+	 * This is the result of `getParentDom(internal)`,
+	 * but lazily-computed only only on insertion.
+	 * @type {import('../internal').PreactElement}
+	 */
+	let parentDom;
 
 	let skew = 0;
 	let i;
@@ -72,11 +79,7 @@ export function patchChildren(internal, children) {
 			childInternal = createInternal(childVNode, internal);
 
 			// We are mounting a new VNode
-			mount(
-				childInternal,
-				childVNode,
-				getDomSibling(internal, skewedIndex)
-			);
+			mount(childInternal, childVNode, getDomSibling(internal, skewedIndex));
 		}
 		// If this node suspended during hydration, and no other flags are set:
 		// @TODO: might be better to explicitly check for MODE_ERRORED here.
@@ -85,11 +88,7 @@ export function patchChildren(internal, children) {
 			(MODE_HYDRATE | MODE_SUSPENDED)
 		) {
 			// We are resuming the hydration of a VNode
-			mount(
-				childInternal,
-				childVNode,
-				childInternal._dom
-			);
+			mount(childInternal, childVNode, childInternal._dom);
 		} else {
 			// Morph the old element into the new one, but don't append it to the dom yet
 			patch(childInternal, childVNode);
@@ -102,7 +101,7 @@ export function patchChildren(internal, children) {
 
 			// Perform insert of new dom
 			if (childInternal.flags & TYPE_DOM) {
-				rendererState._parentDom.insertBefore(
+				(parentDom || (parentDom = getParentDom(internal))).insertBefore(
 					childInternal._dom,
 					getDomSibling(internal, skewedIndex)
 				);
@@ -136,12 +135,15 @@ export function patchChildren(internal, children) {
 
 			let nextSibling = getDomSibling(internal, skewedIndex + 1);
 			if (childInternal.flags & TYPE_DOM) {
-				rendererState._parentDom.insertBefore(childInternal._dom, nextSibling);
+				(parentDom || (parentDom = getParentDom(internal))).insertBefore(
+					childInternal._dom,
+					nextSibling
+				);
 			} else {
 				insertComponentDom(
 					childInternal,
 					nextSibling,
-					rendererState._parentDom
+					parentDom || (parentDom = getParentDom(internal))
 				);
 			}
 		}
@@ -191,8 +193,12 @@ function findMatchingIndex(
 	skewedIndex,
 	remainingOldChildren
 ) {
-	const type = typeof childVNode === 'string' ? null : childVNode.type;
-	const key = type !== null ? childVNode.key : UNDEFINED;
+	let type = null;
+	let key;
+	if (typeof childVNode !== 'string') {
+		type = childVNode.type;
+		key = childVNode.key;
+	}
 	let match = -1;
 	let x = skewedIndex - 1; // i - 1;
 	let y = skewedIndex + 1; // i + 1;

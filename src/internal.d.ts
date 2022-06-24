@@ -45,13 +45,9 @@ export interface Options extends preact.Options {
 	_internal?(internal: Internal, vnode: VNode | string): void;
 }
 
-export type RendererState = {
-	_context: Record<string, any>;
-	_commitQueue: CommitQueue;
-	_parentDom: Element | Document | ShadowRoot | DocumentFragment;
-};
-
 export type CommitQueue = Internal[];
+
+export type DOMParent = Element | Document | ShadowRoot | DocumentFragment;
 
 // Redefine ComponentFactory using our new internal FunctionalComponent interface above
 export type ComponentFactory<P> =
@@ -110,6 +106,9 @@ export interface PreactElement extends HTMLElement {
 	// style: HTMLElement["style"]; // From HTMLElement
 
 	data?: string | number; // From Text node
+
+	_isControlled?: boolean;
+	_prevValue?: any;
 }
 
 export type PreactNode = PreactElement | Text;
@@ -124,6 +123,10 @@ export interface VNode<P = {}> extends preact.VNode<P> {
 	// Redefine type here using our internal ComponentType type
 	type: string | ComponentType<P>;
 	props: P & { children: ComponentChildren };
+
+	// the ref types are duplicated internally, and we want to use the internal one here.
+	ref?: Ref<any> | null;
+
 	/**
 	 * Internal GUID for this VNode, used for fast equality checks.
 	 * Note: h() allocates monotonic positive integer IDs, jsx() allocates negative.

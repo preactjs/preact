@@ -169,6 +169,7 @@
 					"varsIgnorePattern": "^h|React|_[0-9]?$"
 				}
 			],
+      "new-cap": 0,
 			"prefer-rest-params": 0,
 			"prefer-spread": 0,
 			"no-cond-assign": 0,
