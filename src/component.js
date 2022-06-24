@@ -8,8 +8,6 @@ import { Fragment } from './create-element';
  * @type {import('./internal').RendererState}
  */
 export const rendererState = {
-	_parentDom: null,
-	_context: {},
 	_commitQueue: []
 };
 
