@@ -77,6 +77,7 @@
 			"umd": "./server/dist/server.umd.js"
 		},
 		"./compat/server": {
+      "browser": "./compat/server.browser.js",
 			"module": "./compat/server.mjs",
 			"import": "./compat/server.mjs",
 			"require": "./compat/server.js"
@@ -197,6 +198,7 @@
 		"compat/dist",
 		"compat/src",
 		"compat/server.js",
+		"compat/server.browser.js",
 		"compat/server.mjs",
 		"compat/test-utils.js",
 		"compat/jsx-runtime.js",
