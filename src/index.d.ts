@@ -304,5 +304,8 @@ export interface Context<T> {
 	displayName?: string;
 }
 export interface PreactContext<T> extends Context<T> {}
+export type ContextType<C extends Context<any>> = C extends Context<infer T>
+	? T
+	: never;
 
 export function createContext<T>(defaultValue: T): Context<T>;
