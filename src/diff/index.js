@@ -296,8 +296,6 @@ export function commitRoot(root) {
 
 /**
  * Diff two virtual nodes representing DOM element
- * @param {import('../internal').PreactElement} dom The DOM element representing
- * the virtual nodes being diffed
  * @param {import('../internal').VNode} newVNode The new virtual node
  * @param {import('../internal').VNode} oldVNode The old virtual node
  * @param {object} globalContext The current context object
