@@ -153,7 +153,11 @@ function eventProxy(e) {
 	this._listeners[e.type + false](options.event ? options.event(e) : e);
 	if (this._isControlled) {
 		if (this.value != null && (e.type === 'input' || e.type === 'change')) {
+			const direction = this.selectionDirection;
+			const start = this.selectionStart;
+			const end = this.selectionEnd;
 			this.value = this._prevValue;
+			this.setSelectionRange(start, end, direction);
 		}
 		if (this.checked != null && e.type === 'change') {
 			this.checked = this._prevValue;
