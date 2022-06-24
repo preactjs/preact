@@ -780,7 +780,13 @@ export namespace JSXInternal {
 		wrap?: string;
 
 		// Non-standard Attributes
-		autocapitalize?: 'off' | 'none' | 'on' | 'sentences' | 'words' | 'characters';
+		autocapitalize?:
+			| 'off'
+			| 'none'
+			| 'on'
+			| 'sentences'
+			| 'words'
+			| 'characters';
 		disablePictureInPicture?: boolean;
 		results?: number;
 		translate?: 'yes' | 'no';
@@ -983,6 +989,7 @@ export namespace JSXInternal {
 		stop: SVGAttributes<SVGStopElement>;
 		symbol: SVGAttributes<SVGSymbolElement>;
 		text: SVGAttributes<SVGTextElement>;
+		textPath: SVGAttributes<SVGTextPathElement>;
 		tspan: SVGAttributes<SVGTSpanElement>;
 		use: SVGAttributes<SVGUseElement>;
 	}
