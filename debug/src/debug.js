@@ -11,8 +11,6 @@ import {
 	getCurrentInternal,
 	getDisplayName
 } from './component-stack';
-// these constants get inlined at build time:
-import { MODE_UNMOUNTING } from '../../src/constants';
 import { IS_NON_DIMENSIONAL } from '../../compat/src/util';
 
 const isWeakMapSupported = typeof WeakMap == 'function';
