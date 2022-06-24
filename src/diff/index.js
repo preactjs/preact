@@ -268,7 +268,7 @@ export function diff(
  * A list of components with effects that need to be run at the end of the current render pass.
  * @type {import('../internal').Component[]}
  */
-export let _commitQueue = [];
+let _commitQueue = [];
 
 /**
  * @param {import('../internal').VNode} root
