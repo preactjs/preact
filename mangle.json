@@ -47,7 +47,7 @@
       "$_pendingSuspensionCount": "__u",
       "$_childDidSuspend": "__c",
       "$_onResolve": "__R",
-      "$_suspended": "__e",
+      "$_suspended": "__a",
       "$_dom": "__e",
       "$_hydrating": "__h",
       "$_component": "__c",
