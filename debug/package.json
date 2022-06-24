@@ -4,7 +4,6 @@
   "version": "1.0.0",
   "private": true,
   "description": "Preact extensions for development",
-  "exports": "./dist/debug.mjs",
   "module": "dist/debug.mjs",
   "main": "dist/debug.js",
   "umd:main": "dist/debug.umd.js",
@@ -15,5 +14,13 @@
   },
   "peerDependencies": {
     "preact": "^10.0.0"
-  }
+  },
+  "exports": {
+		".": {
+			"browser": "./dist/debug.module.js",
+			"umd": "./dist/debug.umd.js",
+			"import": "./dist/debug.mjs",
+			"require": "./dist/debug.js"
+		}
+	}
 }

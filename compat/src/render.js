@@ -8,21 +8,13 @@ import {
 import { getParentContext } from '../../src/tree';
 import { IS_NON_DIMENSIONAL } from './util';
 
-export const REACT_ELEMENT_TYPE =
-	(typeof Symbol != 'undefined' && Symbol.for && Symbol.for('react.element')) ||
-	0xeac7;
+export const REACT_ELEMENT_TYPE = Symbol.for('react.element');
 
-const CAMEL_PROPS = /^(?:accent|alignment|arabic|baseline|cap|clip(?!PathU)|color|dominant|fill|flood|font|glyph(?!R)|horiz|marker(?!H|W|U)|overline|paint|stop|strikethrough|stroke|text(?!L)|underline|unicode|units|v|vector|vert|word|writing|x(?!C))[A-Z]/;
+const CAMEL_PROPS = /^(?:accent|alignment|arabic|baseline|cap|clip(?!PathU)|color|dominant|fill|flood|font|glyph(?!R)|horiz|marker(?!H|W|U)|overline|paint|shape|stop|strikethrough|stroke|text(?!L)|underline|unicode|units|v|vector|vert|word|writing|x(?!C))[A-Z]/;
 const IS_DOM = typeof document !== 'undefined';
 
-// Input types for which onchange should not be converted to oninput.
-// type="file|checkbox|radio", plus "range" in IE11.
-// (IE11 doesn't support Symbol, which we use here to turn `rad` into `ra` which matches "range")
-const onChangeInputType = type =>
-	(typeof Symbol != 'undefined' && typeof Symbol() == 'symbol'
-		? /fil|che|rad/i
-		: /fil|che|ra/i
-	).test(type);
+// type="file|checkbox|radio".
+const onChangeInputType = type => /fil|che|rad/i.test(type);
 
 // Some libraries like `react-virtualized` explicitly check for this.
 Component.prototype.isReactComponent = {};
@@ -172,6 +164,15 @@ options.vnode = vnode => {
 				i = i.replace(/[A-Z0-9]/, '-$&').toLowerCase();
 			} else if (value === null) {
 				value = undefined;
+			}
+
+			// Add support for onInput and onChange, see #3561
+			// if we have an oninput prop already change it to oninputCapture
+			if (/^oninput$/i.test(i)) {
+				i = i.toLowerCase();
+				if (normalizedProps[i]) {
+					i = 'oninputCapture';
+				}
 			}
 
 			normalizedProps[i] = value;
