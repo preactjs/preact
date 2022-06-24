@@ -476,4 +476,20 @@ describe('act', () => {
 			});
 		});
 	});
+
+	it('should restore custom `debounceRendering` hook', () => {
+		const prevDebounce = options.debounceRendering;
+		const tempDebounce = () => {};
+		options.debounceRendering = tempDebounce;
+
+		try {
+			renderBrokenEffect();
+		} catch (e) {}
+
+		try {
+			expect(options.debounceRendering).to.equal(tempDebounce);
+		} finally {
+			options.debounceRendering = prevDebounce;
+		}
+	});
 });
