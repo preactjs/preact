@@ -4,14 +4,6 @@ import options from './options';
 import { Fragment } from './create-element';
 
 /**
- * The render queue
- * @type {import('./internal').RendererState}
- */
-export const rendererState = {
-	_commitQueue: []
-};
-
-/**
  * Base Component class. Provides `setState()` and `forceUpdate()`, which
  * trigger rendering
  * @param {object} props The initial component props
@@ -133,7 +125,6 @@ function renderComponent(component) {
 	if (parentDom) {
 		const oldVNode = assign({}, vnode);
 		oldVNode._original = vnode._original + 1;
-		rendererState._commitQueue = [];
 		diff(
 			parentDom,
 			vnode,

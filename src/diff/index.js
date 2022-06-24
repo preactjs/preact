@@ -1,5 +1,5 @@
 import { EMPTY_OBJ } from '../constants';
-import { Component, getDomSibling, rendererState } from '../component';
+import { Component, getDomSibling } from '../component';
 import { Fragment } from '../create-element';
 import { diffChildren } from './children';
 import { diffProps, setProperty } from './props';
@@ -148,7 +148,7 @@ export function diff(
 						if (vnode) vnode._parent = newVNode;
 					});
 					if (c._renderCallbacks.length) {
-						rendererState._commitQueue.push(c);
+						_commitQueue.push(c);
 					}
 
 					break outer;
@@ -224,7 +224,7 @@ export function diff(
 			newVNode._hydrating = null;
 
 			if (c._renderCallbacks.length) {
-				rendererState._commitQueue.push(c);
+				_commitQueue.push(c);
 			}
 
 			if (clearProcessingException) {
@@ -240,7 +240,6 @@ export function diff(
 			newVNode._dom = oldVNode._dom;
 		} else {
 			newVNode._dom = diffElementNodes(
-				oldVNode._dom,
 				newVNode,
 				oldVNode,
 				globalContext,
@@ -266,11 +265,17 @@ export function diff(
 }
 
 /**
+ * A list of components with effects that need to be run at the end of the current render pass.
+ * @type {import('../internal').Component[]}
+ */
+export let _commitQueue = [];
+
+/**
  * @param {import('../internal').VNode} root
  */
 export function commitRoot(root) {
-	let commitQueue = [].concat(rendererState._commitQueue);
-	rendererState._commitQueue = [];
+	let commitQueue = [].concat(_commitQueue);
+	_commitQueue = [];
 
 	if (options._commit) options._commit(root, commitQueue);
 
@@ -302,7 +307,6 @@ export function commitRoot(root) {
  * @returns {import('../internal').PreactElement}
  */
 function diffElementNodes(
-	dom,
 	newVNode,
 	oldVNode,
 	globalContext,
@@ -310,6 +314,7 @@ function diffElementNodes(
 	excessDomChildren,
 	isHydrating
 ) {
+	let dom = oldVNode._dom;
 	let oldProps = oldVNode.props;
 	let newProps = newVNode.props;
 	let nodeType = newVNode.type;
