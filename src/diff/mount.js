@@ -322,7 +322,7 @@ function mountComponent(internal, startDom) {
 
 	if (provider) provider._subs.add(internal);
 
-	if (ENABLE_CLASSES && internal.flags & TYPE_CLASS) {
+	if (internal.flags & TYPE_CLASS) {
 		// @ts-ignore `type` is a class component constructor
 		c = new type(newProps, componentContext);
 	} else {
