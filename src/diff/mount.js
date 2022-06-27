@@ -17,7 +17,7 @@ import { normalizeToVNode, Fragment } from '../create-element';
 import { setProperty } from './props';
 import { createInternal } from '../tree';
 import options from '../options';
-import { rendererState } from '../component';
+import { ENABLE_CLASSES, rendererState } from '../component';
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
  * @param {import('../internal').Internal} internal The Internal node to mount
@@ -322,7 +322,7 @@ function mountComponent(internal, startDom) {
 
 	if (provider) provider._subs.add(internal);
 
-	if (internal.flags & TYPE_CLASS) {
+	if (ENABLE_CLASSES && internal.flags & TYPE_CLASS) {
 		// @ts-ignore `type` is a class component constructor
 		c = new type(newProps, componentContext);
 	} else {
@@ -340,26 +340,28 @@ function mountComponent(internal, startDom) {
 	if (!c.state) c.state = {};
 	if (c._nextState == null) c._nextState = c.state;
 
-	if (type.getDerivedStateFromProps != null) {
-		if (c._nextState == c.state) {
-			c._nextState = Object.assign({}, c._nextState);
+	if (ENABLE_CLASSES) {
+		if (type.getDerivedStateFromProps != null) {
+			if (c._nextState == c.state) {
+				c._nextState = Object.assign({}, c._nextState);
+			}
+
+			Object.assign(
+				c._nextState,
+				type.getDerivedStateFromProps(newProps, c._nextState)
+			);
 		}
 
-		Object.assign(
-			c._nextState,
-			type.getDerivedStateFromProps(newProps, c._nextState)
-		);
-	}
+		if (type.getDerivedStateFromProps == null && c.componentWillMount != null) {
+			c.componentWillMount();
+		}
 
-	if (type.getDerivedStateFromProps == null && c.componentWillMount != null) {
-		c.componentWillMount();
-	}
-
-	if (c.componentDidMount != null) {
-		// If the component was constructed, queue up componentDidMount so the
-		// first time this internal commits (regardless of suspense or not) it
-		// will be called
-		internal._commitCallbacks.push(c.componentDidMount.bind(c));
+		if (c.componentDidMount != null) {
+			// If the component was constructed, queue up componentDidMount so the
+			// first time this internal commits (regardless of suspense or not) it
+			// will be called
+			internal._commitCallbacks.push(c.componentDidMount.bind(c));
+		}
 	}
 
 	c.context = componentContext;
@@ -375,7 +377,7 @@ function mountComponent(internal, startDom) {
 	while (counter++ < 25) {
 		internal.flags &= ~DIRTY_BIT;
 		if (renderHook) renderHook(internal);
-		if (internal.flags & TYPE_CLASS) {
+		if (ENABLE_CLASSES && internal.flags & TYPE_CLASS) {
 			renderResult = c.render(c.props, c.state, c.context);
 			// note: disable repeat render invocation for class components
 			break;

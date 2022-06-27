@@ -21,6 +21,13 @@
 		"Samsung>=8.2",
 		"not dead"
 	],
+  "sideEffects": [
+    "./compat/**/*",
+    "./debug/**/*",
+    "./devtools/**/*",
+    "./hooks/**/*",
+    "./test-utils/**/*"
+  ],
 	"exports": {
 		".": {
       "types": "./src/index.d.ts",
