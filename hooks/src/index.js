@@ -15,6 +15,8 @@ let currentHook = 0;
 /** @type {Array<import('./internal').Component>} */
 let afterPaintEffects = [];
 
+let EMPTY = [];
+
 let oldBeforeDiff = options._diff;
 let oldBeforeRender = options._render;
 let oldAfterDiff = options.diffed;
@@ -41,18 +43,10 @@ options._render = vnode => {
 			hooks._pendingEffects = [];
 			currentComponent._renderCallbacks = [];
 			hooks._list.forEach(hookItem => {
-				hookItem._pendingValue = hookItem._pendingArgs = undefined;
+				hookItem._pendingValue = EMPTY;
+				hookItem._pendingArgs = undefined;
 			});
 		} else {
-			hooks._list.forEach(hookItem => {
-				if (hookItem._pendingArgs) {
-					hookItem._args = hookItem._pendingArgs;
-				}
-				if (hookItem._pendingValue) {
-					hookItem._value = hookItem._pendingValue;
-				}
-				hookItem._pendingValue = hookItem._pendingArgs = undefined;
-			});
 			hooks._pendingEffects.forEach(invokeCleanup);
 			hooks._pendingEffects.forEach(invokeEffect);
 			hooks._pendingEffects = [];
@@ -65,28 +59,25 @@ options.diffed = vnode => {
 	if (oldAfterDiff) oldAfterDiff(vnode);
 
 	const c = vnode._component;
-	if (c && c.__hooks && c.__hooks._pendingEffects.length) {
-		afterPaint(afterPaintEffects.push(c));
+	if (c && c.__hooks) {
+		if (c.__hooks._pendingEffects.length) afterPaint(afterPaintEffects.push(c));
+		c.__hooks._list.forEach(hookItem => {
+			if (hookItem._pendingArgs) {
+				hookItem._args = hookItem._pendingArgs;
+			}
+			if (hookItem._pendingValue !== EMPTY) {
+				hookItem._value = hookItem._pendingValue;
+			}
+			hookItem._pendingArgs = undefined;
+			hookItem._pendingValue = EMPTY;
+		});
 	}
-	currentComponent = null;
-	previousComponent = null;
+	previousComponent = currentComponent = null;
 };
 
 options._commit = (vnode, commitQueue) => {
 	commitQueue.some(component => {
 		try {
-			if (component.__hooks) {
-				component.__hooks._list.forEach(hookItem => {
-					if (hookItem._pendingArgs) {
-						hookItem._args = hookItem._pendingArgs;
-					}
-					if (hookItem._pendingValue) {
-						hookItem._value = hookItem._pendingValue;
-					}
-					hookItem._pendingValue = hookItem._pendingArgs = undefined;
-				});
-			}
-
 			component._renderCallbacks.forEach(invokeCleanup);
 			component._renderCallbacks = component._renderCallbacks.filter(cb =>
 				cb._value ? invokeEffect(cb) : true
@@ -145,7 +136,7 @@ function getHookState(index, type) {
 		});
 
 	if (index >= hooks._list.length) {
-		hooks._list.push({});
+		hooks._list.push({ _pendingValue: EMPTY });
 	}
 	return hooks._list[index];
 }

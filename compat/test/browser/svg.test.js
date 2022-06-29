@@ -74,6 +74,7 @@ describe('svg', () => {
 				clipRule="value"
 				clipPathUnits="value"
 				glyphOrientationHorizontal="value"
+				shapeRendering="crispEdges"
 				glyphRef="value"
 				markerStart="value"
 				markerHeight="value"
@@ -87,7 +88,7 @@ describe('svg', () => {
 
 		expect(serializeHtml(scratch)).to.eql(
 			sortAttributes(
-				'<svg clip-path="value" clip-rule="value" clipPathUnits="value" glyph-orientationhorizontal="value" glyphRef="value" marker-start="value" markerHeight="value" markerUnits="value" markerWidth="value" x1="value" xChannelSelector="value"></svg>'
+				'<svg clip-path="value" clip-rule="value" clipPathUnits="value" glyph-orientationhorizontal="value" shape-rendering="crispEdges" glyphRef="value" marker-start="value" markerHeight="value" markerUnits="value" markerWidth="value" x1="value" xChannelSelector="value"></svg>'
 			)
 		);
 	});
