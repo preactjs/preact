@@ -2,6 +2,7 @@ import { MODE_UNMOUNTING, TYPE_DOM, TYPE_ROOT } from '../constants';
 import { unsubscribeFromContext } from '../create-context';
 import options from '../options';
 import { applyRef } from './refs';
+import { ENABLE_CLASSES } from '../component';
 
 /**
  * Unmount a virtual node from the tree and apply DOM changes
@@ -24,7 +25,7 @@ export function unmount(internal, parentInternal, skipRemove) {
 	if ((r = internal._component)) {
 		unsubscribeFromContext(internal);
 
-		if (r.componentWillUnmount) {
+		if (ENABLE_CLASSES && r.componentWillUnmount) {
 			try {
 				r.componentWillUnmount();
 			} catch (e) {
