@@ -727,6 +727,7 @@ export namespace JSXInternal {
 		noValidate?: boolean;
 		open?: boolean;
 		optimum?: number;
+		part?: string;
 		pattern?: string;
 		ping?: string;
 		placeholder?: string;
