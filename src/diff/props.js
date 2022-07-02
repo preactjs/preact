@@ -90,16 +90,24 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
 		else name = name.slice(2);
 
 		if (!dom._listeners) dom._listeners = {};
-		dom._listeners[name + useCapture] = value;
+		if (!dom._listeners[name]) dom._listeners[name] = [];
+
+		dom._listeners[name][useCapture ? 1 : 0] = value;
 
 		if (value) {
 			if (!oldValue) {
-				const handler = useCapture ? eventProxyCapture : eventProxy;
-				dom.addEventListener(name, handler, useCapture);
+				dom.addEventListener(
+					name,
+					useCapture ? eventProxyCapture : eventProxy,
+					useCapture
+				);
 			}
 		} else {
-			const handler = useCapture ? eventProxyCapture : eventProxy;
-			dom.removeEventListener(name, handler, useCapture);
+			dom.removeEventListener(
+				name,
+				useCapture ? eventProxyCapture : eventProxy,
+				useCapture
+			);
 		}
 	} else if (name !== 'dangerouslySetInnerHTML') {
 		if (isSvg) {
@@ -150,9 +158,9 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
  * @private
  */
 function eventProxy(e) {
-	this._listeners[e.type + false](options.event ? options.event(e) : e);
+	this._listeners[e.type][0](options.event ? options.event(e) : e);
 }
 
 function eventProxyCapture(e) {
-	this._listeners[e.type + true](options.event ? options.event(e) : e);
+	this._listeners[e.type][1](options.event ? options.event(e) : e);
 }
