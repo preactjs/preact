@@ -4,6 +4,7 @@ import {
 	MODE_PENDING_ERROR,
 	TYPE_COMPONENT
 } from '../constants';
+import { ENABLE_CLASSES } from '../component';
 
 /**
  * Find the closest error boundary to a thrown error and call it
@@ -19,13 +20,13 @@ export function _catchError(error, internal) {
 			~internal.flags & MODE_RERENDERING_ERROR
 		) {
 			try {
-				if (internal.type.getDerivedStateFromError) {
+				if (ENABLE_CLASSES && internal.type.getDerivedStateFromError) {
 					internal._component.setState(
 						internal.type.getDerivedStateFromError(error)
 					);
 				}
 
-				if (internal._component.componentDidCatch) {
+				if (ENABLE_CLASSES && internal._component.componentDidCatch) {
 					internal._component.componentDidCatch(error);
 				}
 
