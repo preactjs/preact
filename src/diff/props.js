@@ -1,6 +1,8 @@
 import { IS_NON_DIMENSIONAL } from '../constants';
 import options from '../options';
 
+const makeDict = () => Object.create(null);
+
 /**
  * Diff the old and new properties of a VNode and apply changes to the DOM node
  * @param {import('../internal').PreactElement} dom The DOM node to apply
@@ -89,10 +91,10 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
 		if (name.toLowerCase() in dom) name = name.toLowerCase().slice(2);
 		else name = name.slice(2);
 
-		if (!dom._listeners) dom._listeners = {};
-		if (!dom._listeners[name]) dom._listeners[name] = [];
+		if (!dom._listeners) dom._listeners = makeDict();
+		if (!dom._listeners[name]) dom._listeners[name] = makeDict();
 
-		dom._listeners[name][useCapture ? 1 : 0] = value;
+		dom._listeners[name][useCapture] = value;
 
 		if (value) {
 			if (!oldValue) {
@@ -158,9 +160,9 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
  * @private
  */
 function eventProxy(e) {
-	this._listeners[e.type][0](options.event ? options.event(e) : e);
+	this._listeners[e.type][false](options.event ? options.event(e) : e);
 }
 
 function eventProxyCapture(e) {
-	this._listeners[e.type][1](options.event ? options.event(e) : e);
+	this._listeners[e.type][true](options.event ? options.event(e) : e);
 }
