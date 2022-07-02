@@ -17,6 +17,8 @@ let currentHook = 0;
 /** @type {Array<import('./internal').Component>} */
 let afterPaintEffects = [];
 
+let EMPTY = [];
+
 let oldBeforeDiff = options._diff;
 let oldBeforeRender = options._render;
 let oldAfterDiff = options.diffed;
@@ -42,23 +44,10 @@ options._render = internal => {
 			currentInternal.data.__hooks._pendingEffects = [];
 			currentInternal._commitCallbacks = [];
 			currentInternal.data.__hooks._list.forEach(hookItem => {
-				if (hookItem._pendingArgs) hookItem._pendingArgs = undefined;
-				if (hookItem._pendingValue) hookItem._pendingValue = undefined;
+				hookItem._pendingValue = EMPTY;
+				hookItem._pendingArgs = undefined;
 			});
 		} else {
-			if (internal.data && internal.data.__hooks) {
-				internal.data &&
-					internal.data.__hooks._list.forEach(hookItem => {
-						if (hookItem._pendingArgs) {
-							hookItem._args = hookItem._pendingArgs;
-							hookItem._pendingArgs = undefined;
-						}
-						if (hookItem._pendingValue) {
-							hookItem._value = hookItem._pendingValue;
-							hookItem._pendingValue = undefined;
-						}
-					});
-			}
 			currentInternal.data.__hooks._pendingEffects.forEach(invokeCleanup);
 			currentInternal.data.__hooks._pendingEffects.forEach(invokeEffect);
 			currentInternal.data.__hooks._pendingEffects = [];
@@ -71,31 +60,26 @@ options.diffed = internal => {
 	if (oldAfterDiff) oldAfterDiff(internal);
 
 	previousInternal = undefined;
-	if (
-		internal.data &&
-		internal.data.__hooks &&
-		internal.data.__hooks._pendingEffects.length
-	) {
-		afterPaint(afterPaintEffects.push(internal));
+	if (internal.data && internal.data.__hooks) {
+		if (internal.data.__hooks._pendingEffects.length)
+			afterPaint(afterPaintEffects.push(internal));
+
+		internal.data.__hooks._list.forEach(hookItem => {
+			if (hookItem._pendingArgs) {
+				hookItem._args = hookItem._pendingArgs;
+			}
+			if (hookItem._pendingValue !== EMPTY) {
+				hookItem._value = hookItem._pendingValue;
+			}
+			hookItem._pendingArgs = undefined;
+			hookItem._pendingValue = EMPTY;
+		});
 	}
 };
 
 options._commit = (internal, commitQueue) => {
 	commitQueue.some(internal => {
 		try {
-			if (internal.data && internal.data.__hooks) {
-				internal.data &&
-					internal.data.__hooks._list.forEach(hookItem => {
-						if (hookItem._pendingArgs) {
-							hookItem._args = hookItem._pendingArgs;
-							hookItem._pendingArgs = undefined;
-						}
-						if (hookItem._pendingValue) {
-							hookItem._value = hookItem._pendingValue;
-							hookItem._pendingValue = undefined;
-						}
-					});
-			}
 			internal._commitCallbacks.forEach(invokeCleanup);
 			internal._commitCallbacks = internal._commitCallbacks.filter(cb =>
 				cb._value ? invokeEffect(cb) : true
@@ -153,7 +137,7 @@ function getHookState(index, type) {
 		});
 
 	if (index >= hooks._list.length) {
-		hooks._list.push({});
+		hooks._list.push({ _pendingValue: EMPTY });
 	}
 	return hooks._list[index];
 }

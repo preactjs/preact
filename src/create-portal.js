@@ -28,5 +28,7 @@ export function createPortal(vnode, container) {
 	//
 	// So the simplest solution seems to be just to use an unique type for Portal
 	// to skip the Fragment collapsing logic when diffing components
-	return createElement(Portal, { _parentDom: container }, vnode);
+	const el = createElement(Portal, { _parentDom: container }, vnode);
+	el.containerInfo = container;
+	return el;
 }

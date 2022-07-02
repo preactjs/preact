@@ -851,4 +851,27 @@ describe('Portal', () => {
 			'Portal'
 		]);
 	});
+
+	it('should include containerInfo', () => {
+		let root = document.createElement('div');
+		document.body.appendChild(root);
+
+		const A = () => <span>A</span>;
+
+		let portal;
+		function Foo(props) {
+			portal = createPortal(props.children, root);
+			return <div>{portal}</div>;
+		}
+		render(
+			<Foo>
+				<A />
+			</Foo>,
+			scratch
+		);
+
+		expect(portal.containerInfo).to.equal(root);
+
+		root.parentNode.removeChild(root);
+	});
 });

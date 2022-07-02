@@ -4,7 +4,6 @@
   "version": "4.0.0",
   "private": true,
   "description": "A React compatibility layer for Preact",
-  "exports": "./dist/compat.mjs",
   "module": "dist/compat.mjs",
   "main": "dist/compat.js",
   "umd:main": "dist/compat.umd.js",
@@ -16,5 +15,35 @@
   },
   "peerDependencies": {
     "preact": "^10.0.0"
-  }
+  },
+  "exports": {
+		".": {
+			"types": "./src/index.d.ts",
+			"browser": "./dist/compat.module.js",
+			"umd": "./dist/compat.umd.js",
+			"import": "./dist/compat.mjs",
+			"require": "./dist/compat.js"
+		},
+		"./client": {
+			"import": "./client.mjs",
+			"require": "./client.js"
+		},
+		"./server": {
+			"browser": "./server.browser.js",
+			"import": "./server.mjs",
+			"require": "./server.js"
+		},
+		"./jsx-runtime": {
+			"import": "./jsx-runtime.mjs",
+			"require": "./jsx-runtime.js"
+		},
+		"./jsx-dev-runtime": {
+			"import": "./jsx-dev-runtime.mjs",
+			"require": "./jsx-dev-runtime.js"
+		},
+		"./scheduler": {
+			"import": "./scheduler.mjs",
+			"require": "./scheduler.js"
+		}
+	}
 }

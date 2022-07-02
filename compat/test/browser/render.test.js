@@ -32,6 +32,42 @@ describe('compat render', () => {
 		teardown(scratch);
 	});
 
+	it('should by pass onInputCapture normalization for custom onInputAction when using it along with onChange', () => {
+		const onInputAction = () => null;
+		const onChange = () => null;
+
+		let vnode = <textarea onChange={onChange} onInputAction={onInputAction} />;
+
+		expect(vnode.props).to.haveOwnProperty('onInputAction');
+		expect(vnode.props.onInputAction).to.equal(onInputAction);
+		expect(vnode.props).to.haveOwnProperty('oninput');
+		expect(vnode.props.oninput).to.equal(onChange);
+		expect(vnode.props).to.not.haveOwnProperty('oninputCapture');
+	});
+
+	it('should call onChange and onInput when input event is dispatched', () => {
+		const onChange = sinon.spy();
+		const onInput = sinon.spy();
+
+		render(<input onChange={onChange} onInput={onInput} />, scratch);
+
+		scratch.firstChild.dispatchEvent(createEvent('input'));
+
+		expect(onChange).to.be.calledOnce;
+		expect(onInput).to.be.calledOnce;
+
+		onChange.resetHistory();
+		onInput.resetHistory();
+
+		// change props order
+		render(<input onInput={onInput} onChange={onChange} />, scratch);
+
+		scratch.firstChild.dispatchEvent(createEvent('input'));
+
+		expect(onChange).to.be.calledOnce;
+		expect(onInput).to.be.calledOnce;
+	});
+
 	it('should render react-style jsx', () => {
 		let jsx = (
 			<div className="foo bar" data-foo="bar">

@@ -204,46 +204,6 @@ describe('debug', () => {
 		expect(console.warn).to.not.be.called;
 	});
 
-	it('should warn when calling forceUpdate inside the constructor', () => {
-		class Foo extends Component {
-			constructor(props) {
-				super(props);
-				this.forceUpdate();
-			}
-			render() {
-				return <div>foo</div>;
-			}
-		}
-
-		render(<Foo />, scratch);
-		expect(console.warn).to.be.calledOnce;
-		expect(console.warn.args[0]).to.match(/no-op/);
-	});
-
-	it('should warn when calling forceUpdate on an unmounted Component', () => {
-		let forceUpdate;
-
-		class Foo extends Component {
-			constructor(props) {
-				super(props);
-				forceUpdate = () => this.forceUpdate();
-			}
-			render() {
-				return <div>foo</div>;
-			}
-		}
-
-		render(<Foo />, scratch);
-		forceUpdate();
-		expect(console.warn).to.not.be.called;
-
-		render(null, scratch);
-
-		forceUpdate();
-		expect(console.warn).to.be.calledOnce;
-		expect(console.warn.args[0]).to.match(/no-op/);
-	});
-
 	it('should print an error when child is a plain object', () => {
 		let fn = () => render(<div>{{}}</div>, scratch);
 		expect(fn).to.throw(/not valid/);
