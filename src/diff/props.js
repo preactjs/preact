@@ -92,9 +92,8 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
 		else name = name.slice(2);
 
 		if (!dom._listeners) dom._listeners = makeDict();
-		if (!dom._listeners[name]) dom._listeners[name] = makeDict();
 
-		dom._listeners[name][useCapture] = value;
+		dom._listeners[name + useCapture] = value;
 
 		if (value) {
 			if (!oldValue) {
@@ -160,9 +159,9 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
  * @private
  */
 function eventProxy(e) {
-	this._listeners[e.type][false](options.event ? options.event(e) : e);
+	this._listeners[e.type + false](options.event ? options.event(e) : e);
 }
 
 function eventProxyCapture(e) {
-	this._listeners[e.type][true](options.event ? options.event(e) : e);
+	this._listeners[e.type + true](options.event ? options.event(e) : e);
 }
