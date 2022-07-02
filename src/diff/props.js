@@ -8,6 +8,8 @@ function setStyle(dom, key, value) {
 	}
 }
 
+const createDict = () => Object.create(null);
+
 /**
  * Set a property value on a DOM node
  * @param {import('../internal').PreactElement} dom The DOM node to modify
@@ -50,10 +52,8 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
 		if (name.toLowerCase() in dom) name = name.toLowerCase().slice(2);
 		else name = name.slice(2);
 
-		if (!dom._listeners) dom._listeners = {};
-		if (!dom._listeners[name]) dom._listeners[name] = [];
-
-		dom._listeners[name][useCapture ? 1 : 0] = value;
+		if (!dom._listeners) dom._listeners = createDict();
+		dom._listeners[name + useCapture] = value;
 
 		if (value) {
 			if (!oldValue) {
@@ -119,7 +119,7 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
  * @private
  */
 function eventProxy(e) {
-	this._listeners[e.type][0](options.event ? options.event(e) : e);
+	this._listeners[e.type + false](options.event ? options.event(e) : e);
 	if (this._isControlled) {
 		if (this.value != null && (e.type === 'input' || e.type === 'change')) {
 			this.value = this._prevValue;
@@ -136,5 +136,5 @@ function eventProxy(e) {
  * @private
  */
 function eventProxyCapture(e) {
-	this._listeners[e.type][1](options.event ? options.event(e) : e);
+	this._listeners[e.type + true](options.event ? options.event(e) : e);
 }
