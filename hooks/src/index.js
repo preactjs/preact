@@ -383,13 +383,11 @@ export function useErrorBoundary(cb) {
 	];
 }
 
-function hash(s) {
-	let h = 0,
-		i = s.length;
-	while (i > 0) {
-		h = ((h << 5) - h + s.charCodeAt(--i)) | 0;
-	}
-	return h;
+function hash(str) {
+	let i = 0,
+		out = 11;
+	while (i < str.length) out = (101 * out + str.charCodeAt(i++)) >>> 0;
+	return out;
 }
 
 export function useId() {
