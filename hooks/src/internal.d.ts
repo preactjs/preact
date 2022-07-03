@@ -1,7 +1,8 @@
 import {
 	Component as PreactComponent,
 	PreactContext,
-	ErrorInfo
+	ErrorInfo,
+	VNode as PreactVNode
 } from '../../src/internal';
 import { Reducer } from '.';
 
@@ -35,6 +36,10 @@ export interface ComponentHooks {
 
 export interface Component extends PreactComponent<any, any> {
 	__hooks?: ComponentHooks;
+}
+
+export interface VNode extends PreactVNode {
+	_mask?: string;
 }
 
 export type HookState =
