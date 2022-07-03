@@ -26,8 +26,6 @@ let oldBeforeUnmount = options.unmount;
 const RAF_TIMEOUT = 100;
 let prevRaf;
 
-let localIdCounter = 0;
-
 options._diff = vnode => {
 	if (vnode.type === Fragment) {
 		// Skip so we don't have to ensure wrapping fragments in RTS and prepass
@@ -51,7 +49,6 @@ options._render = vnode => {
 	if (oldBeforeRender) oldBeforeRender(vnode);
 
 	currentComponent = vnode._component;
-	localIdCounter = 0;
 	currentIndex = 0;
 
 	const hooks = currentComponent.__hooks;
@@ -393,7 +390,7 @@ function hash(str) {
 export function useId() {
 	const state = getHookState(currentIndex++, 11);
 	if (!state._value) {
-		state._value = 'P' + hash(currentComponent._vnode._mask) + localIdCounter++;
+		state._value = 'P' + hash(currentComponent._vnode._mask + currentIndex);
 	}
 
 	return state._value;
