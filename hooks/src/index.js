@@ -96,7 +96,6 @@ options._render = vnode => {
 };
 
 options._commit = (vnode, commitQueue) => {
-	mask = 0;
 	commitQueue.some(component => {
 		try {
 			component._renderCallbacks.forEach(invokeCleanup);
