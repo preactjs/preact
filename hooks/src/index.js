@@ -29,7 +29,10 @@ let prevRaf;
 let localIdCounter = 0;
 
 options._diff = vnode => {
-	if (typeof vnode.type === 'function' && !vnode._mask) {
+	if (vnode.type === Fragment) {
+		// Skip so we don't have to ensure wrapping fragments in RTS and prepass
+		vnode._mask = '';
+	} else if (typeof vnode.type === 'function' && !vnode._mask) {
 		const parentMask =
 			vnode._parent && vnode._parent._mask ? vnode._parent._mask : '';
 		const position =
@@ -385,7 +388,7 @@ export function useId() {
 	const state = getHookState(currentIndex++, 11);
 	if (!state._value) {
 		state._value =
-			'_P' + currentComponent._vnode._mask.toString(32) + localIdCounter++;
+			'P' + currentComponent._vnode._mask.toString(32) + localIdCounter++;
 	}
 
 	return state._value;
