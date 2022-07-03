@@ -40,7 +40,7 @@ options._diff = vnode => {
 				? vnode._parent._children.indexOf(vnode)
 				: 0;
 		vnode._mask = parentMask + position;
-	} else {
+	} else if (!vnode._mask) {
 		vnode._mask = vnode._parent._mask;
 	}
 	currentComponent = null;
