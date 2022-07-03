@@ -383,11 +383,19 @@ export function useErrorBoundary(cb) {
 	];
 }
 
+function hash(s) {
+	let h = 0,
+		i = s.length;
+	while (i > 0) {
+		h = ((h << 5) - h + s.charCodeAt(--i)) | 0;
+	}
+	return h;
+}
+
 export function useId() {
 	const state = getHookState(currentIndex++, 11);
 	if (!state._value) {
-		state._value =
-			'P' + currentComponent._vnode._mask.toString(32) + localIdCounter++;
+		state._value = 'P' + hash(currentComponent._vnode._mask) + localIdCounter++;
 	}
 
 	return state._value;
