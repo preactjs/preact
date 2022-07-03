@@ -47,26 +47,6 @@ options._diff = vnode => {
 	if (oldBeforeDiff) oldBeforeDiff(vnode);
 };
 
-options.diffed = vnode => {
-	if (oldAfterDiff) oldAfterDiff(vnode);
-
-	const c = vnode._component;
-	if (c && c.__hooks) {
-		if (c.__hooks._pendingEffects.length) afterPaint(afterPaintEffects.push(c));
-		c.__hooks._list.forEach(hookItem => {
-			if (hookItem._pendingArgs) {
-				hookItem._args = hookItem._pendingArgs;
-			}
-			if (hookItem._pendingValue !== EMPTY) {
-				hookItem._value = hookItem._pendingValue;
-			}
-			hookItem._pendingArgs = undefined;
-			hookItem._pendingValue = EMPTY;
-		});
-	}
-	previousComponent = currentComponent = null;
-};
-
 options._render = vnode => {
 	if (oldBeforeRender) oldBeforeRender(vnode);
 
@@ -93,6 +73,26 @@ options._render = vnode => {
 		}
 	}
 	previousComponent = currentComponent;
+};
+
+options.diffed = vnode => {
+	if (oldAfterDiff) oldAfterDiff(vnode);
+
+	const c = vnode._component;
+	if (c && c.__hooks) {
+		if (c.__hooks._pendingEffects.length) afterPaint(afterPaintEffects.push(c));
+		c.__hooks._list.forEach(hookItem => {
+			if (hookItem._pendingArgs) {
+				hookItem._args = hookItem._pendingArgs;
+			}
+			if (hookItem._pendingValue !== EMPTY) {
+				hookItem._value = hookItem._pendingValue;
+			}
+			hookItem._pendingArgs = undefined;
+			hookItem._pendingValue = EMPTY;
+		});
+	}
+	previousComponent = currentComponent = null;
 };
 
 options._commit = (vnode, commitQueue) => {
