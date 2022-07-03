@@ -5,6 +5,7 @@ import {
 	toChildArray,
 	Component
 } from 'preact';
+import { unmountComponentAtNode } from '.';
 import { getParentContext } from '../../src/tree';
 import { IS_NON_DIMENSIONAL } from './util';
 

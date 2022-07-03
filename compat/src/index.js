@@ -6,7 +6,6 @@ import {
 	Component,
 	createContext,
 	Fragment,
-	createRoot,
 	createPortal
 } from 'preact';
 import {
@@ -149,8 +148,7 @@ export {
 	Suspense,
 	SuspenseList,
 	lazy,
-	__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED,
-	createRoot
+	__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED
 };
 
 // React copies the named exports to the default one.
@@ -189,6 +187,5 @@ export default {
 	Suspense,
 	SuspenseList,
 	lazy,
-	__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED,
-	createRoot
+	__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED
 };
