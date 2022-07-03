@@ -1,4 +1,4 @@
-import { options } from 'preact';
+import { Fragment, options } from 'preact';
 
 /** @type {number} */
 let currentIndex;
@@ -26,15 +26,19 @@ let oldBeforeUnmount = options.unmount;
 const RAF_TIMEOUT = 100;
 let prevRaf;
 
-let mask = 0;
 let localIdCounter = 0;
 
 options._diff = vnode => {
 	if (typeof vnode.type === 'function' && !vnode._mask) {
-		vnode._mask =
-			vnode._parent && vnode._parent._mask
-				? vnode._parent && vnode._parent._mask + 1
-				: mask++;
+		const parentMask =
+			vnode._parent && vnode._parent._mask ? vnode._parent._mask : '';
+		const position =
+			vnode._parent && vnode._parent._children
+				? vnode._parent._children.indexOf(vnode)
+				: 0;
+		vnode._mask = parentMask + position;
+	} else {
+		vnode._mask = vnode._parent._mask;
 	}
 	currentComponent = null;
 	if (oldBeforeDiff) oldBeforeDiff(vnode);
@@ -380,7 +384,8 @@ export function useErrorBoundary(cb) {
 export function useId() {
 	const state = getHookState(currentIndex++, 11);
 	if (!state._value) {
-		state._value = '_P' + currentComponent._vnode._mask + localIdCounter++;
+		state._value =
+			'_P' + currentComponent._vnode._mask.toString(32) + localIdCounter++;
 	}
 
 	return state._value;
