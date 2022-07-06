@@ -122,6 +122,37 @@ const StrictMode = Fragment;
  */
 const flushSync = (callback, arg) => callback(arg);
 
+export function startTransition(cb) {
+	cb();
+}
+
+export function useDeferredValue(val) {
+	return val;
+}
+
+export function useTransition() {
+	return [false, startTransition];
+}
+
+// TODO: in theory this should be done after a VNode is diffed as we want to insert
+// styles/... before it attaches
+export const useInsertionEffect = useLayoutEffect;
+
+export function useSyncExternalStore(subscribe, getSnapshot) {
+	const [state, setState] = useState(getSnapshot);
+
+	// TODO: in suspense for data we could have a discrepancy here because Preact won't re-init the "useState"
+	// when this unsuspends which could lead to stale state as the subscription is torn down.
+
+	useEffect(() => {
+		return subscribe(() => {
+			setState(getSnapshot());
+		});
+	}, [subscribe, getSnapshot]);
+
+	return state;
+}
+
 export * from 'preact/hooks';
 export {
 	version,
@@ -166,6 +197,11 @@ export default {
 	useCallback,
 	useContext,
 	useDebugValue,
+	useInsertionEffect,
+	useTransition,
+	useDeferredValue,
+	useSyncExternalStore,
+	startTransition,
 	version,
 	Children,
 	render,
