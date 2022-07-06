@@ -16,7 +16,7 @@
   "exports": {
 		".": {
 			"types": "./src/index.d.ts",
-			"browser": "./dist/devtools.module.js",
+			"browser": "./dist/devtools.mjs",
 			"umd": "./dist/devtools.umd.js",
 			"import": "./dist/devtools.mjs",
 			"require": "./dist/devtools.js"
