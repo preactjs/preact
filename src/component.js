@@ -5,6 +5,8 @@ import { patch } from './diff/patch';
 import { DIRTY_BIT, FORCE_UPDATE, MODE_UNMOUNTING } from './constants';
 import { getParentContext, getParentDom } from './tree';
 
+export let ENABLE_CLASSES = false;
+
 /**
  * The render queue
  * @type {import('./internal').RendererState}
@@ -23,6 +25,7 @@ export const rendererState = {
  * getChildContext
  */
 export function Component(props, context) {
+	ENABLE_CLASSES = true;
 	this.props = props;
 	this.context = context;
 }

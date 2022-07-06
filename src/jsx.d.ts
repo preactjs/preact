@@ -728,6 +728,7 @@ export namespace JSXInternal {
 		pattern?: string;
 		ping?: string;
 		placeholder?: string;
+		part?: string;
 		playsInline?: boolean;
 		poster?: string;
 		preload?: string;

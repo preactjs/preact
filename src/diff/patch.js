@@ -21,7 +21,7 @@ import {
 import { getDomSibling } from '../tree';
 import { mountChildren } from './mount';
 import { Fragment } from '../create-element';
-import { rendererState } from '../component';
+import { ENABLE_CLASSES, rendererState } from '../component';
 
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
@@ -219,41 +219,44 @@ function patchComponent(internal, newVNode) {
 		c._nextState = c.state;
 	}
 
-	if (type.getDerivedStateFromProps != null) {
-		if (c._nextState == c.state) {
-			c._nextState = Object.assign({}, c._nextState);
-		}
-
-		Object.assign(
-			c._nextState,
-			type.getDerivedStateFromProps(newProps, c._nextState)
-		);
-	}
-
 	let oldProps = c.props;
 	let oldState = c.state;
 
-	if (
-		type.getDerivedStateFromProps == null &&
-		newProps !== oldProps &&
-		c.componentWillReceiveProps != null
-	) {
-		c.componentWillReceiveProps(newProps, componentContext);
-	}
+	if (ENABLE_CLASSES) {
+		if (type.getDerivedStateFromProps != null) {
+			if (c._nextState == c.state) {
+				c._nextState = Object.assign({}, c._nextState);
+			}
 
-	if (
-		!(internal.flags & FORCE_UPDATE) &&
-		c.shouldComponentUpdate != null &&
-		c.shouldComponentUpdate(newProps, c._nextState, componentContext) === false
-	) {
-		c.props = newProps;
-		c.state = c._nextState;
-		internal.flags |= SKIP_CHILDREN;
-		return;
-	}
+			Object.assign(
+				c._nextState,
+				type.getDerivedStateFromProps(newProps, c._nextState)
+			);
+		}
 
-	if (c.componentWillUpdate != null) {
-		c.componentWillUpdate(newProps, c._nextState, componentContext);
+		if (
+			type.getDerivedStateFromProps == null &&
+			newProps !== oldProps &&
+			c.componentWillReceiveProps != null
+		) {
+			c.componentWillReceiveProps(newProps, componentContext);
+		}
+
+		if (
+			!(internal.flags & FORCE_UPDATE) &&
+			c.shouldComponentUpdate != null &&
+			c.shouldComponentUpdate(newProps, c._nextState, componentContext) ===
+				false
+		) {
+			c.props = newProps;
+			c.state = c._nextState;
+			internal.flags |= SKIP_CHILDREN;
+			return;
+		}
+
+		if (c.componentWillUpdate != null) {
+			c.componentWillUpdate(newProps, c._nextState, componentContext);
+		}
 	}
 
 	c.context = componentContext;
@@ -268,7 +271,7 @@ function patchComponent(internal, newVNode) {
 	while (counter++ < 25) {
 		internal.flags &= ~DIRTY_BIT;
 		if (renderHook) renderHook(internal);
-		if (internal.flags & TYPE_CLASS) {
+		if (ENABLE_CLASSES && internal.flags & TYPE_CLASS) {
 			renderResult = c.render(c.props, c.state, c.context);
 			// note: disable repeat render invocation for class components
 			break;
@@ -291,15 +294,17 @@ function patchComponent(internal, newVNode) {
 		);
 	}
 
-	if (c.getSnapshotBeforeUpdate != null) {
-		snapshot = c.getSnapshotBeforeUpdate(oldProps, oldState);
-	}
+	if (ENABLE_CLASSES) {
+		if (c.getSnapshotBeforeUpdate != null) {
+			snapshot = c.getSnapshotBeforeUpdate(oldProps, oldState);
+		}
 
-	// Only schedule componentDidUpdate if the component successfully rendered
-	if (c.componentDidUpdate != null) {
-		internal._commitCallbacks.push(() => {
-			c.componentDidUpdate(oldProps, oldState, snapshot);
-		});
+		// Only schedule componentDidUpdate if the component successfully rendered
+		if (c.componentDidUpdate != null) {
+			internal._commitCallbacks.push(() => {
+				c.componentDidUpdate(oldProps, oldState, snapshot);
+			});
+		}
 	}
 
 	if (renderResult == null) {
