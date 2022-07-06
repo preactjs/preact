@@ -19,7 +19,7 @@
   "exports": {
 		".": {
 			"types": "./src/index.d.ts",
-			"browser": "./dist/compat.module.js",
+			"browser": "./dist/compat.mjs",
 			"umd": "./dist/compat.umd.js",
 			"import": "./dist/compat.mjs",
 			"require": "./dist/compat.js"
