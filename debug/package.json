@@ -17,7 +17,7 @@
   },
   "exports": {
 		".": {
-			"browser": "./dist/debug.module.js",
+			"browser": "./dist/debug.mjs",
 			"umd": "./dist/debug.umd.js",
 			"import": "./dist/debug.mjs",
 			"require": "./dist/debug.js"

@@ -19,7 +19,7 @@
   "exports": {
 		".": {
 			"types": "./src/index.d.ts",
-			"browser": "./dist/testUtils.module.js",
+			"browser": "./dist/testUtils.mjs",
 			"umd": "./dist/testUtils.umd.js",
 			"import": "./dist/testUtils.mjs",
 			"require": "./dist/testUtils.js"
