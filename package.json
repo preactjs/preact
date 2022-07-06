@@ -44,6 +44,12 @@
 			"import": "./hooks/dist/hooks.mjs",
 			"require": "./hooks/dist/hooks.js"
 		},
+    "./async": {
+      "browser": "./async/dist/async.module.js",
+      "umd": "./async/dist/async.umd.js",
+      "require": "./async/dist/async.js"
+    },
+    "./async/reserved": "./async/mangle.json",
 		"./test-utils": {
 			"types": "./test-utils/src/index.d.ts",
 			"browser": "./test-utils/dist/testUtils.module.js",
@@ -90,6 +96,7 @@
 		"./debug/package.json": "./debug/package.json",
 		"./devtools/package.json": "./devtools/package.json",
 		"./hooks/package.json": "./hooks/package.json",
+    "./async/package.json": "./async/package.json",
 		"./test-utils/package.json": "./test-utils/package.json",
 		"./jsx-runtime/package.json": "./jsx-runtime/package.json"
 	},
@@ -107,6 +114,7 @@
 		"build:debug": "microbundle build --raw --cwd debug",
 		"build:devtools": "microbundle build --raw --cwd devtools",
 		"build:hooks": "microbundle build --raw --cwd hooks",
+		"build:async": "microbundle build --raw --cwd async",
 		"build:test-utils": "microbundle build --raw --cwd test-utils",
 		"build:compat": "microbundle build src/index.js src/scheduler.js --raw --cwd compat --globals 'preact/hooks=preactHooks'",
 		"build:jsx": "microbundle build --raw --cwd jsx-runtime",
@@ -223,6 +231,10 @@
 		"hooks/dist",
 		"hooks/src",
 		"hooks/package.json",
+    "async/dist",
+    "async/src",
+    "async/mangle.json",
+    "async/package.json",
 		"jsx-runtime/dist",
 		"jsx-runtime/src",
 		"jsx-runtime/package.json",

@@ -262,6 +262,9 @@ export const Fragment: FunctionComponent<{}>;
  * Global options for preact
  */
 export interface Options {
+	/** async function hooks */
+	addRenderQueue(c: Component<any, any>): boolean;
+	processRenderQueue(): void;
 	/** Attach a hook that is invoked whenever a VNode is created. */
 	vnode?(vnode: VNode): void;
 	/** Attach a hook that is invoked immediately before a vnode is unmounted. */

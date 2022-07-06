@@ -117,7 +117,7 @@ export function getDomSibling(vnode, childIndex) {
  * Trigger in-place re-rendering of a component.
  * @param {import('./internal').Component} component The component to rerender
  */
-function renderComponent(component) {
+export function renderComponent(component) {
 	let vnode = component._vnode,
 		oldDom = vnode._dom,
 		parentDom = component._parentDom;
@@ -149,7 +149,7 @@ function renderComponent(component) {
 /**
  * @param {import('./internal').VNode} vnode
  */
-function updateParentDomPointers(vnode) {
+export function updateParentDomPointers(vnode) {
 	if ((vnode = vnode._parent) != null && vnode._component != null) {
 		vnode._dom = vnode._component.base = null;
 		for (let i = 0; i < vnode._children.length; i++) {
@@ -193,6 +193,18 @@ const defer =
 let prevDebounce;
 
 /**
+ * standard implementation for adding a component to the render queue
+ */
+function addRenderQueue(c) {
+	// add the component to the render queue
+	rerenderQueue.push(c);
+
+	// if the previous value was 0 (queue was empty) this will return 0 and negation will make it true, which means we should process the render queue now
+	// if the previous value was greater (queue was not empty, there were other elements to render), we won't process the render queue now because it should be processed by previous call
+	return !process._rerenderCount++;
+}
+
+/**
  * Enqueue a rerender of a component
  * @param {import('./internal').Component} c The component to rerender
  */
@@ -200,12 +212,13 @@ export function enqueueRender(c) {
 	if (
 		(!c._dirty &&
 			(c._dirty = true) &&
-			rerenderQueue.push(c) &&
-			!process._rerenderCount++) ||
+			(options.addRenderQueue || addRenderQueue)(c)) ||
 		prevDebounce !== options.debounceRendering
 	) {
 		prevDebounce = options.debounceRendering;
-		(prevDebounce || defer)(process);
+		(prevDebounce || defer)(function() {
+			(options.processRenderQueue || process)();
+		});
 	}
 }
 

@@ -228,7 +228,7 @@ export function diffChildren(
 	}
 }
 
-function reorderChildren(childVNode, oldDom, parentDom) {
+export function reorderChildren(childVNode, oldDom, parentDom) {
 	// Note: VNodes in nested suspended trees may be missing _children.
 	let c = childVNode._children;
 	let tmp = 0;
@@ -244,14 +244,7 @@ function reorderChildren(childVNode, oldDom, parentDom) {
 			if (typeof vnode.type == 'function') {
 				oldDom = reorderChildren(vnode, oldDom, parentDom);
 			} else {
-				oldDom = placeChild(
-					parentDom,
-					vnode,
-					vnode,
-					c,
-					vnode._dom,
-					oldDom
-				);
+				oldDom = placeChild(parentDom, vnode, vnode, c, vnode._dom, oldDom);
 			}
 		}
 	}
@@ -278,7 +271,7 @@ export function toChildArray(children, out) {
 	return out;
 }
 
-function placeChild(
+export function placeChild(
 	parentDom,
 	childVNode,
 	oldVNode,

@@ -243,7 +243,7 @@ export function diff(
 			newVNode._children = oldVNode._children;
 			newVNode._dom = oldVNode._dom;
 		} else {
-			newVNode._dom = diffElementNodes(
+			diffElementNodes(
 				oldVNode._dom,
 				newVNode,
 				oldVNode,
@@ -307,7 +307,7 @@ export function commitRoot(commitQueue, root) {
  * @param {boolean} isHydrating Whether or not we are in hydration
  * @returns {import('../internal').PreactElement}
  */
-function diffElementNodes(
+export function diffElementNodes(
 	dom,
 	newVNode,
 	oldVNode,
@@ -347,7 +347,8 @@ function diffElementNodes(
 	if (dom == null) {
 		if (nodeType === null) {
 			// @ts-ignore createTextNode returns Text, we expect PreactElement
-			return document.createTextNode(newProps);
+			newVNode._dom = document.createTextNode(newProps);
+			return;
 		}
 
 		if (isSvg) {
@@ -466,7 +467,7 @@ function diffElementNodes(
 		}
 	}
 
-	return dom;
+	newVNode._dom = dom;
 }
 
 /**
@@ -528,6 +529,6 @@ export function unmount(vnode, parentVNode, skipRemove) {
 }
 
 /** The `.render()` method for a PFC backing instance. */
-function doRender(props, state, context) {
+export function doRender(props, state, context) {
 	return this.constructor(props, context);
 }
