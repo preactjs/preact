@@ -54,6 +54,8 @@ Component.prototype.isReactComponent = {};
  * @returns {import('./internal').Component | null} The root component reference or null
  */
 export function render(vnode, parent, callback) {
+	if (!options._setupCompat) setupCompat()
+
 	// React destroys any existing DOM nodes, see #1727
 	// ...but only on the first render, see #1828
 	if (parent._children == null) {
@@ -68,20 +70,35 @@ export function render(vnode, parent, callback) {
 }
 
 export function hydrate(vnode, parent, callback) {
+	if (!options._setupCompat) setupCompat()
+
 	preactHydrate(vnode, parent);
 	if (typeof callback == 'function') callback();
 
 	return vnode ? vnode._component : null;
 }
 
-let oldEventHook = options.event;
-options.event = e => {
-	if (oldEventHook) e = oldEventHook(e);
-	e.persist = empty;
-	e.isPropagationStopped = isPropagationStopped;
-	e.isDefaultPrevented = isDefaultPrevented;
-	return (e.nativeEvent = e);
-};
+function setupCompat() {
+	let oldEventHook = options.event;
+	options.event = e => {
+		if (oldEventHook) e = oldEventHook(e);
+		e.persist = empty;
+		e.isPropagationStopped = isPropagationStopped;
+		e.isDefaultPrevented = isDefaultPrevented;
+		return (e.nativeEvent = e);
+	};
+
+	// Only needed for react-relay
+	const oldBeforeRender = options._render;
+	options._render = function(internal) {
+		if (oldBeforeRender) {
+			oldBeforeRender(internal);
+		}
+		currentContext = getParentContext(internal);
+	};
+}
+
+let currentContext;
 
 function empty() {}
 
@@ -100,6 +117,7 @@ let classNameDescriptor = {
 	}
 };
 
+// TODO:  this needs to be part of jsx() and createElement() instead
 let oldVNodeHook = options.vnode;
 options.vnode = vnode => {
 	let i;
@@ -222,17 +240,7 @@ options.vnode = vnode => {
 	vnode.$$typeof = REACT_ELEMENT_TYPE;
 
 	if (oldVNodeHook) oldVNodeHook(vnode);
-};
-
-// Only needed for react-relay
-let currentContext;
-const oldBeforeRender = options._render;
-options._render = function(internal) {
-	if (oldBeforeRender) {
-		oldBeforeRender(internal);
-	}
-	currentContext = getParentContext(internal);
-};
+	};
 
 // This is a very very private internal function for React it
 // is used to sort-of do runtime dependency injection. So far

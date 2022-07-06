@@ -1,4 +1,5 @@
-import { createElement, Component } from 'preact';
+import { createElement, Component, options } from 'preact';
+import { setupRefForwarding } from './forwardRef';
 import { shallowDiffers } from './util';
 
 /**
@@ -9,6 +10,8 @@ import { shallowDiffers } from './util';
  * @returns {import('./internal').FunctionComponent}
  */
 export function memo(c, comparer) {
+	if (!options._forwardingRefs) setupRefForwarding()
+
 	function Memoed() {}
 
 	Memoed.prototype = new Component();

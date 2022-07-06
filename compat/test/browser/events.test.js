@@ -1,4 +1,4 @@
-import { render } from 'preact';
+import { render } from '../../src';
 import {
 	setupScratch,
 	teardown,

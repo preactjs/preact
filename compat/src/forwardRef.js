@@ -1,14 +1,18 @@
 import { options } from 'preact';
 
-let oldDiffHook = options._diff;
-options._diff = (internal, vnode) => {
-	if (internal.type && internal.type._forwarded && vnode.ref) {
-		vnode.props.ref = vnode.ref;
-		vnode.ref = null;
-		internal.ref = null;
-	}
-	if (oldDiffHook) oldDiffHook(internal, vnode);
-};
+export function setupRefForwarding() {
+	options._fowardingRefs = true;
+	let oldDiffHook = options._diff;
+	options._diff = (internal, vnode) => {
+		if (internal.type && internal.type._forwarded && vnode.ref) {
+			vnode.props.ref = vnode.ref;
+			vnode.ref = null;
+			internal.ref = null;
+		}
+		if (oldDiffHook) oldDiffHook(internal, vnode);
+	};
+}
+
 
 export const REACT_FORWARD_SYMBOL = Symbol.for('react.forward_ref');
 
@@ -20,6 +24,8 @@ export const REACT_FORWARD_SYMBOL = Symbol.for('react.forward_ref');
  * @returns {import('./internal').FunctionComponent}
  */
 export function forwardRef(fn) {
+	if (!options._forwardingRefs) setupRefForwarding()
+
 	function Forwarded(props) {
 		let clone = Object.assign({}, props);
 		delete clone.ref;

@@ -22,7 +22,6 @@
 		"not dead"
 	],
   "sideEffects": [
-    "./compat/**/*",
     "./debug/**/*",
     "./devtools/**/*",
     "./hooks/**/*",

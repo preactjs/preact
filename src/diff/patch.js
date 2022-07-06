@@ -241,22 +241,23 @@ function patchComponent(internal, newVNode) {
 		) {
 			c.componentWillReceiveProps(newProps, componentContext);
 		}
+	}
 
-		if (
-			!(internal.flags & FORCE_UPDATE) &&
-			c.shouldComponentUpdate != null &&
-			c.shouldComponentUpdate(newProps, c._nextState, componentContext) ===
-				false
-		) {
-			c.props = newProps;
-			c.state = c._nextState;
-			internal.flags |= SKIP_CHILDREN;
-			return;
-		}
+	if (
+		!(internal.flags & FORCE_UPDATE) &&
+		c.shouldComponentUpdate != null &&
+		c.shouldComponentUpdate(newProps, c._nextState, componentContext) ===
+			false
+	) {
+		c.props = newProps;
+		c.state = c._nextState;
+		internal.flags |= SKIP_CHILDREN;
+		internal.flags &= ~DIRTY_BIT;
+		return;
+	}
 
-		if (c.componentWillUpdate != null) {
-			c.componentWillUpdate(newProps, c._nextState, componentContext);
-		}
+	if (ENABLE_CLASSES && c.componentWillUpdate != null) {
+		c.componentWillUpdate(newProps, c._nextState, componentContext);
 	}
 
 	c.context = componentContext;
