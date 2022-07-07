@@ -149,7 +149,7 @@ export function enqueueRender(internal) {
 		prevDebounce !== options.debounceRendering
 	) {
 		prevDebounce = options.debounceRendering;
-		(prevDebounce || queueMicrotask)(process);
+		(prevDebounce || setTimeout)(process);
 	}
 }
 
