@@ -39,6 +39,8 @@
     "react-router": "^5.0.1",
     "react-router-dom": "^5.0.1",
     "redux": "^4.0.1",
-    "styled-components": "^4.2.0"
+    "styled-components": "^4.2.0",
+    "zustand": "^4.0.0-rc.0",
+    "@reduxjs/toolkit": "^1.8.1"
   }
 }
