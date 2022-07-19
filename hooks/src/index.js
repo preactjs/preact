@@ -43,8 +43,11 @@ options._render = vnode => {
 			hooks._pendingEffects = [];
 			currentComponent._renderCallbacks = [];
 			hooks._list.forEach(hookItem => {
+				if (hookItem._nextValue) {
+					hookItem._value = hookItem._nextValue;
+				}
 				hookItem._pendingValue = EMPTY;
-				hookItem._pendingArgs = undefined;
+				hookItem._nextValue = hookItem._pendingArgs = undefined;
 			});
 		} else {
 			hooks._pendingEffects.forEach(invokeCleanup);
@@ -164,18 +167,35 @@ export function useReducer(reducer, initialState, init) {
 			!init ? invokeOrReturn(undefined, initialState) : init(initialState),
 
 			action => {
-				const nextValue = hookState._reducer(hookState._value[0], action);
-				if (hookState._value[0] !== nextValue) {
-					hookState._value = [nextValue, hookState._value[1]];
+				const currentValue = hookState._nextValue
+					? hookState._nextValue[0]
+					: hookState._value[0];
+				const nextValue = hookState._reducer(currentValue, action);
+
+				if (currentValue !== nextValue) {
+					hookState._nextValue = [
+						hookState._reducer(currentValue, action),
+						hookState._value[1]
+					];
 					hookState._component.setState({});
 				}
 			}
 		];
 
 		hookState._component = currentComponent;
+
+		hookState._component.shouldComponentUpdate = () => {
+			if (!hookState._nextValue) return true;
+
+			const currentValue = hookState._value[0];
+			hookState._value = hookState._nextValue;
+			hookState._nextValue = undefined;
+
+			return currentValue !== hookState._value[0];
+		};
 	}
 
-	return hookState._value;
+	return hookState._nextValue || hookState._value;
 }
 
 /**
@@ -385,6 +405,7 @@ function invokeCleanup(hook) {
 		hook._cleanup = undefined;
 		cleanup();
 	}
+
 	currentComponent = comp;
 }
 
