@@ -43,8 +43,11 @@ options._render = vnode => {
 			hooks._pendingEffects = [];
 			currentComponent._renderCallbacks = [];
 			hooks._list.forEach(hookItem => {
+				if (hookItem._nextValue) {
+					hookItem._value = hookItem._nextValue;
+				}
 				hookItem._pendingValue = EMPTY;
-				hookItem._pendingArgs = undefined;
+				hookItem._nextValue = hookItem._pendingArgs = undefined;
 			});
 		} else {
 			hooks._pendingEffects.forEach(invokeCleanup);
