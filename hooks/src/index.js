@@ -174,7 +174,7 @@ export function useReducer(reducer, initialState, init) {
 
 				if (currentValue !== nextValue) {
 					hookState._nextValue = [
-						hookState._reducer(currentValue, action),
+						nextValue,
 						hookState._value[1]
 					];
 					hookState._component.setState({});
