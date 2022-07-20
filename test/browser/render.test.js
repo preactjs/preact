@@ -99,6 +99,13 @@ describe('render()', () => {
 		expect(scratch.childNodes[0].nodeName).to.equal('SPAN');
 	});
 
+	it('should merge adjacent text-nodes', () => {
+		const text = 'world'
+		render(<div>Hello {text} <span>ignore me</span> merge {'us'}</div>, scratch);
+		expect(scratch.innerHTML).to.equal('<div>Hello world <span>ignore me</span> merge us</div>');
+		expect(scratch.firstChild.childNodes.length).to.equal(3)
+	});
+
 	it('should not throw error in IE11 with type date', () => {
 		expect(() => render(<input type="date" />, scratch)).to.not.throw();
 	});

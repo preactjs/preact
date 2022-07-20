@@ -30,7 +30,18 @@ export function createElement(type, props, children) {
 		}
 	}
 
-	if (children !== undefined) {
+	if (Array.isArray(children)) {
+		normalizedProps.children = [];
+		for (i = 0; i < children.length; i++) {
+			normalizedProps.children.push(children[i]);
+			let currentIndex = normalizedProps.children.length - 1, j = i + 1;
+			while (children[i] && children[j] && typeof children[i] !== 'object' && typeof children[j] !== 'object') {
+				normalizedProps.children[currentIndex] += '' + children[j]
+				j++
+			}
+			i = j - 1
+		}
+	} else if (children !== undefined) {
 		normalizedProps.children = children;
 	}
 

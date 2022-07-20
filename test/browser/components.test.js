@@ -967,7 +967,17 @@ describe('Components', () => {
 			render(<Foo>{mixedArray}</Foo>, scratch);
 
 			expect(children).to.be.an('array');
-			expect(children).to.deep.equal(mixedArray);
+			expect(children).to.deep.equal([
+				0,
+				'ab',
+				mixedArray[3],
+				mixedArray[4],
+				mixedArray[5],
+				mixedArray[6],
+				mixedArray[7],
+				mixedArray[8],
+				mixedArray[9],
+			]);
 			expect(scratch.innerHTML).to.equal(`<div>${mixedArrayHTML}</div>`);
 		});
 
