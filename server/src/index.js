@@ -94,6 +94,14 @@ function _renderToString(vnode, context, opts, inner, isSvgMode, selectValue) {
 				isSvgMode,
 				selectValue
 			);
+			if (
+				vnode[i + 1] != null &&
+				vnode[i] != null &&
+				typeof vnode[i] !== 'object' &&
+				typeof vnode[i + 1] !== 'object'
+			) {
+				rendered += '<!-- -->';
+			}
 		}
 		return rendered;
 	}
@@ -370,6 +378,15 @@ function _renderToString(vnode, context, opts, inner, isSvgMode, selectValue) {
 						lastWasText = isText;
 					} else {
 						pieces.push(ret);
+					}
+
+					if (
+						children[i + 1] != null &&
+						children[i] != null &&
+						typeof children[i] !== 'object' &&
+						typeof children[i + 1] !== 'object'
+					) {
+						pieces.push('<!-- -->');
 					}
 				}
 			}

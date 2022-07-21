@@ -21,23 +21,23 @@
 		"Samsung>=8.2",
 		"not dead"
 	],
-  "sideEffects": [
-    "./compat/**/*",
-    "./debug/**/*",
-    "./devtools/**/*",
-    "./hooks/**/*",
-    "./test-utils/**/*"
-  ],
+	"sideEffects": [
+		"./compat/**/*",
+		"./debug/**/*",
+		"./devtools/**/*",
+		"./hooks/**/*",
+		"./test-utils/**/*"
+	],
 	"exports": {
 		".": {
-      "types": "./src/index.d.ts",
+			"types": "./src/index.d.ts",
 			"module": "./dist/preact.mjs",
 			"import": "./dist/preact.mjs",
 			"require": "./dist/preact.js",
 			"umd": "./dist/preact.umd.js"
 		},
 		"./compat": {
-      "types": "./compat/src/index.d.ts",
+			"types": "./compat/src/index.d.ts",
 			"module": "./compat/dist/compat.mjs",
 			"import": "./compat/dist/compat.mjs",
 			"require": "./compat/dist/compat.js",
@@ -50,35 +50,35 @@
 			"umd": "./debug/dist/debug.umd.js"
 		},
 		"./devtools": {
-      "types": "./devtools/src/index.d.ts",
+			"types": "./devtools/src/index.d.ts",
 			"module": "./devtools/dist/devtools.mjs",
 			"import": "./devtools/dist/devtools.mjs",
 			"require": "./devtools/dist/devtools.js",
 			"umd": "./devtools/dist/devtools.umd.js"
 		},
 		"./hooks": {
-      "types": "./hooks/src/index.d.ts",
+			"types": "./hooks/src/index.d.ts",
 			"module": "./hooks/dist/hooks.mjs",
 			"import": "./hooks/dist/hooks.mjs",
 			"require": "./hooks/dist/hooks.js",
 			"umd": "./hooks/dist/hooks.umd.js"
 		},
 		"./test-utils": {
-      "types": "./test-utils/src/index.d.ts",
+			"types": "./test-utils/src/index.d.ts",
 			"module": "./test-utils/dist/testUtils.mjs",
 			"import": "./test-utils/dist/testUtils.mjs",
 			"require": "./test-utils/dist/testUtils.js",
 			"umd": "./test-utils/dist/testUtils.umd.js"
 		},
 		"./jsx-runtime": {
-      "types": "./jsx-runtime/src/index.d.ts",
+			"types": "./jsx-runtime/src/index.d.ts",
 			"module": "./jsx-runtime/dist/jsxRuntime.mjs",
 			"import": "./jsx-runtime/dist/jsxRuntime.mjs",
 			"require": "./jsx-runtime/dist/jsxRuntime.js",
 			"umd": "./jsx-runtime/dist/jsxRuntime.umd.js"
 		},
 		"./jsx-dev-runtime": {
-      "types": "./jsx-runtime/src/index.d.ts",
+			"types": "./jsx-runtime/src/index.d.ts",
 			"module": "./jsx-runtime/dist/jsxRuntime.mjs",
 			"import": "./jsx-runtime/dist/jsxRuntime.mjs",
 			"require": "./jsx-runtime/dist/jsxRuntime.js",
@@ -90,12 +90,12 @@
 			"require": "./server/dist/server.js",
 			"umd": "./server/dist/server.umd.js"
 		},
-    "./compat/client": {
+		"./compat/client": {
 			"import": "./compat/client.mjs",
 			"require": "./compat/client.js"
 		},
 		"./compat/server": {
-      "browser": "./compat/server.browser.js",
+			"browser": "./compat/server.browser.js",
 			"module": "./compat/server.mjs",
 			"import": "./compat/server.mjs",
 			"require": "./compat/server.js"
@@ -126,7 +126,7 @@
 		"build:test-utils": "npm run -s _bundle -- --cwd test-utils",
 		"build:compat": "npm run -s _bundle -- --cwd compat --globals 'preact/hooks=preactHooks'",
 		"build:jsx": "npm run -s _bundle -- --cwd jsx-runtime",
-		"build:server": "npm run -s _bundle -- --cwd server",
+		"build:server": "cd server && npm run build",
 		"postbuild": "node ./config/compat-entries.js",
 		"dev": "microbundle watch --raw --format cjs --no-generateTypes",
 		"dev:hooks": "microbundle watch --raw --format cjs --cwd hooks --no-generateTypes",
@@ -138,7 +138,7 @@
 		"test:ts:compat": "tsc -p compat/test/ts/",
 		"test:mocha": "mocha --recursive --require \"@babel/register\" test/shared test/node",
 		"test:mocha:watch": "npm run test:mocha -- --watch",
-		"test:mocha:server": "SERVER=true BABEL_ENV=test mocha -r @babel/register -r server/test/setup.js server/test/**/*.test.js --watch-ignore='benches/**'",
+		"test:mocha:server": "cross-env SERVER=true BABEL_ENV=test mocha -r @babel/register -r server/test/setup.js server/test/**/*.test.js --watch-ignore='benches/**'",
 		"test:karma": "cross-env COVERAGE=true BABEL_NO_MODULES=true karma start karma.conf.js --single-run",
 		"test:karma:minify": "cross-env COVERAGE=true MINIFY=true BABEL_NO_MODULES=true karma start karma.conf.js --single-run",
 		"test:karma:watch": "cross-env BABEL_NO_MODULES=true karma start karma.conf.js --no-single-run",
@@ -218,7 +218,7 @@
 		"compat/server.js",
 		"compat/server.browser.js",
 		"compat/server.mjs",
-    "compat/client.js",
+		"compat/client.js",
 		"compat/client.mjs",
 		"compat/test-utils.js",
 		"compat/jsx-runtime.js",
@@ -282,6 +282,7 @@
 		"benchmark": "^2.1.4",
 		"chai": "^4.3.6",
 		"check-export-map": "^1.2.0",
+		"copyfiles": "^2.4.1",
 		"coveralls": "^3.1.1",
 		"cross-env": "^7.0.3",
 		"csstype": "^3.0.5",

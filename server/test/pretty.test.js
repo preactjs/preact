@@ -123,7 +123,9 @@ describe('pretty', () => {
 			<div>hello{' '} <b /></div>
 		)).to.equal(dedent`
 			<div>
-				hello  
+				hello
+				<!-- --> 
+				<!-- --> 
 				<b></b>
 			</div>
 		`);
@@ -133,9 +135,12 @@ describe('pretty', () => {
 			<div>hello{' '} <b />{'a'}{'b'}</div>
 		)).to.equal(dedent`
 			<div>
-				hello  
+				hello
+				<!-- --> 
+				<!-- --> 
 				<b></b>
-				ab
+				a
+				<!-- -->b
 			</div>
 		`);
 	});
@@ -146,7 +151,9 @@ describe('pretty', () => {
 			<div><Fragment>foo</Fragment>bar{' '} <b /></div>
 		)).to.equal(dedent`
 			<div>
-				foobar  
+				foobar
+				<!-- --> 
+				<!-- --> 
 				<b></b>
 			</div>
 		`);
@@ -189,6 +196,7 @@ describe('pretty', () => {
 		).to.equal(dedent`
 			<p>
 				a
+				<!-- -->
 				<a>b</a>
 			</p>
 		`);
@@ -219,7 +227,8 @@ describe('pretty', () => {
 		).to.equal(dedent`
 			<p>
 				<b></b>
-				\ a\ 
+				 a
+				<!-- --> 
 			</p>
 		`);
 	});

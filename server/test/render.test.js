@@ -21,6 +21,13 @@ describe('render', () => {
 			expect(rendered).to.equal(expected);
 		});
 
+		describe('text-nodes', () => {
+			it('separates adjacent text-nodes', () => {
+				let rendered = render(<div>bar {'xd'}</div>);
+				expect(rendered).to.equal(`<div>bar <!-- -->xd</div>`);
+			});
+		});
+
 		describe('whitespace', () => {
 			it('should omit whitespace between elements', () => {
 				let children = [];
@@ -197,7 +204,7 @@ describe('render', () => {
 						{null}|{undefined}|{false}
 					</div>
 				),
-				expected = `<div>||</div>`;
+				expected = `<div>|<!-- -->|</div>`;
 
 			expect(rendered).to.equal(expected);
 		});

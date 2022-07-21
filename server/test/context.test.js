@@ -25,7 +25,7 @@ describe('context', () => {
 		);
 
 		expect(rendered).to.equal(dedent`
-			<section>value is: correct</section>
+			<section>value is: <!-- -->correct</section>
 		`);
 	});
 
@@ -38,7 +38,7 @@ describe('context', () => {
 		);
 
 		expect(rendered).to.equal(dedent`
-			<section>value is: correct</section>
+			<section>value is: <!-- -->correct</section>
 		`);
 	});
 
@@ -53,7 +53,7 @@ describe('context', () => {
 		);
 
 		expect(rendered).to.equal(dedent`
-			<section>value is: correct</section>
+			<section>value is: <!-- -->correct</section>
 		`);
 	});
 
@@ -77,7 +77,7 @@ describe('context', () => {
 		);
 
 		expect(rendered).to.equal(dedent`
-			<section>value is: correct</section>
+			<section>value is: <!-- -->correct</section>
 		`);
 	});
 });
