@@ -138,7 +138,7 @@
 		"test:ts:compat": "tsc -p compat/test/ts/",
 		"test:mocha": "mocha --recursive --require \"@babel/register\" test/shared test/node",
 		"test:mocha:watch": "npm run test:mocha -- --watch",
-		"test:mocha:server": "cross-env SERVER=true BABEL_ENV=test mocha -r @babel/register -r server/test/setup.js server/test/**/*.test.js --watch-ignore='benches/**'",
+		"test:mocha:server": "SERVER=true BABEL_ENV=test mocha -r @babel/register -r server/test/setup.js server/test/**/*.test.js --watch-ignore='benches/**'",
 		"test:karma": "cross-env COVERAGE=true BABEL_NO_MODULES=true karma start karma.conf.js --single-run",
 		"test:karma:minify": "cross-env COVERAGE=true MINIFY=true BABEL_NO_MODULES=true karma start karma.conf.js --single-run",
 		"test:karma:watch": "cross-env BABEL_NO_MODULES=true karma start karma.conf.js --no-single-run",
