@@ -44,8 +44,11 @@ options._render = internal => {
 			currentInternal.data.__hooks._pendingEffects = [];
 			currentInternal._commitCallbacks = [];
 			currentInternal.data.__hooks._list.forEach(hookItem => {
+				if (hookItem._nextValue) {
+					hookItem._value = hookItem._nextValue;
+				}
 				hookItem._pendingValue = EMPTY;
-				hookItem._pendingArgs = undefined;
+				hookItem._nextValue = hookItem._pendingArgs = undefined;
 			});
 		} else {
 			currentInternal.data.__hooks._pendingEffects.forEach(invokeCleanup);
@@ -165,18 +168,31 @@ export function useReducer(reducer, initialState, init) {
 			!init ? invokeOrReturn(undefined, initialState) : init(initialState),
 
 			action => {
-				const nextValue = hookState._reducer(hookState._value[0], action);
-				if (hookState._value[0] !== nextValue) {
-					hookState._value = [nextValue, hookState._value[1]];
+				const currentValue = hookState._nextValue
+					? hookState._nextValue[0]
+					: hookState._value[0];
+				const nextValue = hookState._reducer(currentValue, action);
+				if (currentValue !== nextValue) {
+					hookState._nextValue = [nextValue, hookState._value[1]];
 					hookState._internal.rerender(hookState._internal);
 				}
 			}
 		];
 
 		hookState._internal = currentInternal;
+		currentInternal._component.shouldComponentUpdate = () => {
+			if (!hookState._nextValue) return true;
+
+			const currentValue = hookState._value[0];
+			hookState._value = hookState._nextValue;
+			hookState._nextValue = undefined;
+
+			return currentValue !== hookState._value[0];
+		};
+
 	}
 
-	return hookState._value;
+	return hookState._nextValue || hookState._value;
 }
 
 /**
