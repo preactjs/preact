@@ -141,7 +141,7 @@ export function useSyncExternalStore(subscribe, getSnapshot) {
 
 	useEffect(() => {
 		return subscribe(() => {
-			setState(getSnapshot());
+			setState(() => getSnapshot());
 		});
 	}, [subscribe, getSnapshot]);
 
