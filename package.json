@@ -270,7 +270,7 @@
 		"cross-env": "^7.0.2",
 		"diff": "^5.0.0",
 		"errorstacks": "^2.4.0",
-		"esbuild": "^0.14.25",
+		"esbuild": "^0.14.50",
 		"eslint": "5.15.1",
 		"eslint-config-developit": "^1.1.1",
 		"eslint-config-prettier": "^6.5.0",
