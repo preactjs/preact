@@ -89,4 +89,62 @@ describe('errorBoundary', () => {
 		expect(spy2).to.be.calledOnce;
 		expect(spy2).to.be.calledWith(error);
 	});
+
+	it('ensures referential stability of `reset`', () => {
+		const resets = [];
+
+		const Test = () => {
+			const [, reset] = useErrorBoundary();
+
+			resets.push(reset);
+			return null;
+		};
+
+		render(<Test />, scratch);
+		rerender();
+		render(<Test />, scratch);
+		rerender();
+
+		expect(resets[0]).to.equal(resets[1]);
+	});
+
+	it('can be called multiple times in a single component, idependently', () => {
+		const spy = sinon.spy(),
+			spy2 = sinon.spy();
+		let resetErr;
+		const error = new Error('test');
+		const Throws = () => {
+			throw error;
+		};
+
+		const App = props => {
+			const [err, reset] = useErrorBoundary(props.onError);
+			const [err2] = useErrorBoundary(props.onError2);
+			resetErr = reset;
+
+			return (
+				<div>
+					{err && <p>Error</p>}
+					{err2 && <p>Error2</p>}
+					{err || err2 ? null : <Throws />}
+				</div>
+			);
+		};
+
+		render(<App onError={spy} onError2={spy2} />, scratch);
+		rerender();
+		expect(scratch.innerHTML).to.equal('<div><p>Error</p><p>Error2</p></div>');
+		expect(spy).to.be.calledOnce;
+		expect(spy).to.be.calledWith(error);
+		expect(spy2).to.be.calledOnce;
+		expect(spy2).to.be.calledWith(error);
+
+		resetErr();
+		rerender();
+		expect(scratch.innerHTML).to.equal('<div><p>Error2</p></div>');
+		expect(spy).to.be.calledOnce;
+		expect(spy).to.be.calledWith(error);
+		expect(spy2).to.be.calledOnce;
+		expect(spy2).to.be.calledWith(error);
+	});
 });
