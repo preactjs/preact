@@ -173,10 +173,7 @@ export function useReducer(reducer, initialState, init) {
 				const nextValue = hookState._reducer(currentValue, action);
 
 				if (currentValue !== nextValue) {
-					hookState._nextValue = [
-						nextValue,
-						hookState._value[1]
-					];
+					hookState._nextValue = [nextValue, hookState._value[1]];
 					hookState._component.setState({});
 				}
 			}
@@ -341,7 +338,7 @@ export function useErrorBoundary(cb) {
 function flushAfterPaintEffects() {
 	let component;
 	while ((component = afterPaintEffects.shift())) {
-		if (!component._parentDom) continue;
+		if (!component._parentDom || !component.__hooks) continue;
 		try {
 			component.__hooks._pendingEffects.forEach(invokeCleanup);
 			component.__hooks._pendingEffects.forEach(invokeEffect);
