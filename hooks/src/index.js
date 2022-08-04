@@ -68,7 +68,7 @@ options.diffed = vnode => {
 			if (hookItem._pendingArgs) {
 				hookItem._args = hookItem._pendingArgs;
 			}
-			if (hookItem._pendingValue !== EMPTY && !hookItem._component) {
+			if (hookItem._pendingValue !== EMPTY) {
 				hookItem._value = hookItem._pendingValue;
 			}
 			hookItem._pendingArgs = undefined;
