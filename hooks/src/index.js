@@ -68,7 +68,7 @@ options.diffed = vnode => {
 			if (hookItem._pendingArgs) {
 				hookItem._args = hookItem._pendingArgs;
 			}
-			if (hookItem._pendingValue !== EMPTY) {
+			if (hookItem._pendingValue !== EMPTY && !hookItem._component) {
 				hookItem._value = hookItem._pendingValue;
 			}
 			hookItem._pendingArgs = undefined;
@@ -181,15 +181,33 @@ export function useReducer(reducer, initialState, init) {
 
 		hookState._component = currentComponent;
 
-		hookState._component.shouldComponentUpdate = () => {
-			if (!hookState._nextValue) return true;
+		if (!hookState._component._hasScuFromHooks) {
+			hookState._component.__hooks._hasScuFromHooks = true;
+			const prevScu = hookState._component.shouldComponentUpdate;
+			hookState._component.shouldComponentUpdate = (p, s, c) => {
+				const stateHooks = hookState._component.__hooks._list.filter(
+					x => x._component
+				);
+				const allHooksEmpty = stateHooks.every(x => !x._nextValue);
+				if (allHooksEmpty) {
+					return prevScu ? prevScu(p, s, c) : true;
+				}
 
-			const currentValue = hookState._value[0];
-			hookState._value = hookState._nextValue;
-			hookState._nextValue = undefined;
+				const shouldSkipUpdating = stateHooks.every(hookItem => {
+					if (!hookItem._nextValue) return true;
+					const currentValue = hookItem._value[0];
+					hookItem._value = hookItem._nextValue;
+					hookItem._nextValue = undefined;
+					return currentValue === hookItem._value[0];
+				});
 
-			return currentValue !== hookState._value[0];
-		};
+				if (!shouldSkipUpdating) {
+					return prevScu ? prevScu(p, s, c) : true;
+				}
+
+				return false;
+			};
+		}
 	}
 
 	return hookState._nextValue || hookState._value;
