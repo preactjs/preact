@@ -181,15 +181,43 @@ export function useReducer(reducer, initialState, init) {
 
 		hookState._component = currentComponent;
 
-		hookState._component.shouldComponentUpdate = () => {
-			if (!hookState._nextValue) return true;
+		if (!hookState._component._hasScuFromHooks) {
+			hookState._component.__hooks._hasScuFromHooks = true;
+			const prevScu = hookState._component.shouldComponentUpdate;
+			hookState._component.shouldComponentUpdate = (p, s, c) => {
+				const stateHooks = hookState._component.__hooks._list.filter(
+					x => x._component
+				);
+				const allHooksEmpty = stateHooks.every(x => !x._nextValue);
+				// When we have no updated hooks in the component we invoke the previous SCU or
+				// traverse the VDOM tree further.
+				if (allHooksEmpty) {
+					return prevScu ? prevScu(p, s, c) : true;
+				}
 
-			const currentValue = hookState._value[0];
-			hookState._value = hookState._nextValue;
-			hookState._nextValue = undefined;
+				// We check whether we have components with a nextValue set that
+				// have values that aren't equal to one another this pushes
+				// us to update further down the tree
+				const shouldSkipUpdating = stateHooks.every(hookItem => {
+					if (!hookItem._nextValue) return true;
+					const currentValue = hookItem._value[0];
+					hookItem._value = hookItem._nextValue;
+					hookItem._nextValue = undefined;
+					return currentValue === hookItem._value[0];
+				});
 
-			return currentValue !== hookState._value[0];
-		};
+				if (!shouldSkipUpdating) {
+					return prevScu ? prevScu(p, s, c) : true;
+				}
+
+				// When all set nextValues are equal to their original value
+				// we bail out of updating.
+				// Thinking: would this be dangerous with a batch of updates where
+				// Comp1 updates --> Comp2 updated in same batch twice but has same eventual state --> this leads to us
+				// not diving into Comp3
+				return false;
+			};
+		}
 	}
 
 	return hookState._nextValue || hookState._value;
