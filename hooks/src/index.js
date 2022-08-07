@@ -185,6 +185,7 @@ export function useReducer(reducer, initialState, init) {
 			hookState._component.__hooks._hasScuFromHooks = true;
 			const prevScu = hookState._component.shouldComponentUpdate;
 			hookState._component.shouldComponentUpdate = (p, s, c) => {
+				if (!hookState._component.__hooks) return true;
 				const stateHooks = hookState._component.__hooks._list.filter(
 					x => x._component
 				);

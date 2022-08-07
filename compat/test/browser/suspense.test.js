@@ -2088,4 +2088,29 @@ describe('suspense', () => {
 			expect(scratch.innerHTML).to.eql(`<div>123</div>`);
 		});
 	});
+
+	it('should not crash due to suspending a component with useState', () => {
+		const [Suspender, suspend] = createSuspender(() => {
+			const [state] = useState('hello world');
+			return <p>{state}</p>;
+		});
+
+		const suspense = (
+			<Suspense fallback={<div>Suspended...</div>}>
+				<Suspender />
+			</Suspense>
+		);
+
+		render(suspense, scratch);
+		expect(scratch.innerHTML).to.equal('<p>hello world</p>');
+
+		const [resolve] = suspend();
+		rerender();
+		expect(scratch.innerHTML).to.equal(`<div>Suspended...</div>`);
+
+		return resolve(() => <p>hello new world</p>).then(() => {
+			rerender();
+			expect(scratch.innerHTML).to.eql(`<p>hello new world</p>`);
+		});
+	});
 });
