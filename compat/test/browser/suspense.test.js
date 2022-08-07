@@ -2089,7 +2089,7 @@ describe('suspense', () => {
 		});
 	});
 
-	it('should not crash due to suspending a ', () => {
+	it('should not crash due to suspending a component with useState', () => {
 		const [Suspender, suspend] = createSuspender(() => {
 			const [state] = useState('hello world');
 			return <p>{state}</p>;
