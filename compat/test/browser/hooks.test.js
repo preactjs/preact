@@ -160,7 +160,7 @@ describe('React-18-hooks', () => {
 			expect(scratch.innerHTML).to.equal('<p>value: 1</p>');
 		});
 
-		it.only('works with useCallback', () => {
+		it('works with useCallback', () => {
 			let toggle;
 			const App = () => {
 				const [state, setState] = useState(true);
