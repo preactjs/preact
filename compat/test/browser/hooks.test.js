@@ -4,7 +4,9 @@ import React, {
 	useInsertionEffect,
 	useSyncExternalStore,
 	useTransition,
-	render
+	render,
+	useState,
+	useCallback
 } from 'preact/compat';
 import { setupRerender, act } from 'preact/test-utils';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
@@ -156,6 +158,33 @@ describe('React-18-hooks', () => {
 			rerender();
 
 			expect(scratch.innerHTML).to.equal('<p>value: 1</p>');
+		});
+
+		it.only('works with useCallback', () => {
+			let toggle;
+			const App = () => {
+				const [state, setState] = useState(true);
+				toggle = setState.bind(this, () => false);
+
+				const value = useSyncExternalStore(
+					useCallback(() => {
+						return () => {};
+					}, [state]),
+					() => (state ? 'yep' : 'nope')
+				);
+
+				return <p>{value}</p>;
+			};
+
+			act(() => {
+				render(<App />, scratch);
+			});
+			expect(scratch.innerHTML).to.equal('<p>yep</p>');
+
+			toggle();
+			rerender();
+
+			expect(scratch.innerHTML).to.equal('<p>nope</p>');
 		});
 	});
 });
