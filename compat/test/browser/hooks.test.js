@@ -93,7 +93,7 @@ describe('React-18-hooks', () => {
 			});
 			expect(scratch.innerHTML).to.equal('<p>hello world</p>');
 			expect(subscribe).to.be.calledOnce;
-			expect(getSnapshot).to.be.calledOnce;
+			expect(getSnapshot).to.be.calledTwice;
 		});
 
 		it('subscribes and rerenders when called', () => {
@@ -121,7 +121,7 @@ describe('React-18-hooks', () => {
 			});
 			expect(scratch.innerHTML).to.equal('<p>hello world</p>');
 			expect(subscribe).to.be.calledOnce;
-			expect(getSnapshot).to.be.calledOnce;
+			expect(getSnapshot).to.be.calledTwice;
 
 			called = true;
 			flush();
@@ -137,9 +137,11 @@ describe('React-18-hooks', () => {
 				return () => {};
 			});
 
+			const func = () => 'value: ' + i++;
+
 			let i = 0;
 			const getSnapshot = sinon.spy(() => {
-				return () => 'value: ' + i++;
+				return func;
 			});
 
 			const App = () => {
@@ -152,12 +154,12 @@ describe('React-18-hooks', () => {
 			});
 			expect(scratch.innerHTML).to.equal('<p>value: 0</p>');
 			expect(subscribe).to.be.calledOnce;
-			expect(getSnapshot).to.be.calledOnce;
+			expect(getSnapshot).to.be.calledTwice;
 
 			flush();
 			rerender();
 
-			expect(scratch.innerHTML).to.equal('<p>value: 1</p>');
+			expect(scratch.innerHTML).to.equal('<p>value: 0</p>');
 		});
 
 		it('works with useCallback', () => {

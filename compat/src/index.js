@@ -140,7 +140,7 @@ export function useSyncExternalStore(subscribe, getSnapshot) {
 
 	useLayoutEffect(() => {
 		if (value !== state) {
-			setState(value);
+			setState(() => value);
 		}
 	}, [subscribe, value, getSnapshot]);
 
