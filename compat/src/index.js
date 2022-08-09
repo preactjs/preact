@@ -136,8 +136,13 @@ export const useInsertionEffect = useLayoutEffect;
 export function useSyncExternalStore(subscribe, getSnapshot) {
 	const [state, setState] = useState(getSnapshot);
 
-	// TODO: in suspense for data we could have a discrepancy here because Preact won't re-init the "useState"
-	// when this unsuspends which could lead to stale state as the subscription is torn down.
+	const value = getSnapshot();
+
+	useLayoutEffect(() => {
+		if (value !== state) {
+			setState(() => value);
+		}
+	}, [subscribe, value, getSnapshot]);
 
 	useEffect(() => {
 		return subscribe(() => {
