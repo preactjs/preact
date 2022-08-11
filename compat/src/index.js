@@ -140,27 +140,27 @@ export const useInsertionEffect = useLayoutEffect;
 export function useSyncExternalStore(subscribe, getSnapshot) {
 	const value = getSnapshot();
 
-	const [{ inst }, forceUpdate] = useState({ inst: { value, getSnapshot } });
+	const [{ _instance }, forceUpdate] = useState({
+		_instance: { _value: value, _getSnapshot: getSnapshot }
+	});
 
 	useLayoutEffect(() => {
-		inst.value = value;
-		inst.getSnapshot = getSnapshot;
+		_instance._value = value;
+		_instance._getSnapshot = getSnapshot;
 
-		if (inst.value !== getSnapshot()) {
-			forceUpdate({ inst });
+		if (_instance._value !== getSnapshot()) {
+			forceUpdate({ _instance });
 		}
 	}, [subscribe, value, getSnapshot]);
 
 	useEffect(() => {
-		const newValue = inst.getSnapshot();
-		if (inst.value !== newValue) {
-			forceUpdate({ inst });
+		if (_instance._value !== _instance._getSnapshot()) {
+			forceUpdate({ _instance });
 		}
 
 		return subscribe(() => {
-			const newValue = inst.getSnapshot();
-			if (inst.value !== newValue) {
-				forceUpdate({ inst });
+			if (_instance._value !== _instance._getSnapshot()) {
+				forceUpdate({ _instance });
 			}
 		});
 	}, [subscribe]);

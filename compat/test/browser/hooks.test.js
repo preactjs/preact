@@ -162,6 +162,34 @@ describe('React-18-hooks', () => {
 			expect(scratch.innerHTML).to.equal('<p>value: 0</p>');
 		});
 
+		it('should work with changing getSnapshot', () => {
+			let flush;
+			const subscribe = sinon.spy(cb => {
+				flush = cb;
+				return () => {};
+			});
+
+			let i = 0;
+			const App = () => {
+				const value = useSyncExternalStore(subscribe, () => {
+					return i;
+				});
+				return <p>value: {value}</p>;
+			};
+
+			act(() => {
+				render(<App />, scratch);
+			});
+			expect(scratch.innerHTML).to.equal('<p>value: 0</p>');
+			expect(subscribe).to.be.calledOnce;
+
+			i++;
+			flush();
+			rerender();
+
+			expect(scratch.innerHTML).to.equal('<p>value: 1</p>');
+		});
+
 		it('works with useCallback', () => {
 			let toggle;
 			const App = () => {
