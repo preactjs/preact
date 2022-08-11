@@ -93,7 +93,7 @@ describe('React-18-hooks', () => {
 			});
 			expect(scratch.innerHTML).to.equal('<p>hello world</p>');
 			expect(subscribe).to.be.calledOnce;
-			expect(getSnapshot).to.be.calledTwice;
+			expect(getSnapshot).to.be.calledThrice;
 		});
 
 		it('subscribes and rerenders when called', () => {
@@ -121,7 +121,7 @@ describe('React-18-hooks', () => {
 			});
 			expect(scratch.innerHTML).to.equal('<p>hello world</p>');
 			expect(subscribe).to.be.calledOnce;
-			expect(getSnapshot).to.be.calledTwice;
+			expect(getSnapshot).to.be.calledThrice;
 
 			called = true;
 			flush();
@@ -154,7 +154,7 @@ describe('React-18-hooks', () => {
 			});
 			expect(scratch.innerHTML).to.equal('<p>value: 0</p>');
 			expect(subscribe).to.be.calledOnce;
-			expect(getSnapshot).to.be.calledTwice;
+			expect(getSnapshot).to.be.calledThrice;
 
 			flush();
 			rerender();

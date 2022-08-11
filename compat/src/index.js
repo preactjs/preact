@@ -133,28 +133,32 @@ export function useTransition() {
 // styles/... before it attaches
 export const useInsertionEffect = useLayoutEffect;
 
+/**
+ * This is taken from https://github.com/facebook/react/blob/main/packages/use-sync-external-store/src/useSyncExternalStoreShimClient.js#L84
+ * on a high level this cuts out the warnings, ... and attempts a smaller implementation
+ */
 export function useSyncExternalStore(subscribe, getSnapshot) {
 	const value = getSnapshot();
+
 	const [{ inst }, forceUpdate] = useState({ inst: { value, getSnapshot } });
 
 	useLayoutEffect(() => {
 		inst.value = value;
 		inst.getSnapshot = getSnapshot;
 
-		const newValue = getSnapshot();
-		if (inst.value !== newValue) {
+		if (inst.value !== getSnapshot()) {
 			forceUpdate({ inst });
 		}
 	}, [subscribe, value, getSnapshot]);
 
 	useEffect(() => {
-		const newValue = getSnapshot();
+		const newValue = inst.getSnapshot();
 		if (inst.value !== newValue) {
 			forceUpdate({ inst });
 		}
 
 		return subscribe(() => {
-			const newValue = getSnapshot();
+			const newValue = inst.getSnapshot();
 			if (inst.value !== newValue) {
 				forceUpdate({ inst });
 			}
