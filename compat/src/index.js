@@ -134,23 +134,34 @@ export function useTransition() {
 export const useInsertionEffect = useLayoutEffect;
 
 export function useSyncExternalStore(subscribe, getSnapshot) {
-	const [state, setState] = useState(getSnapshot);
-
 	const value = getSnapshot();
+	const [{ inst }, forceUpdate] = useState({ inst: { value, getSnapshot } });
 
 	useLayoutEffect(() => {
-		if (value !== state) {
-			setState(() => value);
+		inst.value = value;
+		inst.getSnapshot = getSnapshot;
+
+		const newValue = getSnapshot();
+		if (inst.value !== newValue) {
+			forceUpdate({ inst });
 		}
 	}, [subscribe, value, getSnapshot]);
 
 	useEffect(() => {
-		return subscribe(() => {
-			setState(() => getSnapshot());
-		});
-	}, [subscribe, getSnapshot]);
+		const newValue = getSnapshot();
+		if (inst.value !== newValue) {
+			forceUpdate({ inst });
+		}
 
-	return state;
+		return subscribe(() => {
+			const newValue = getSnapshot();
+			if (inst.value !== newValue) {
+				forceUpdate({ inst });
+			}
+		});
+	}, [subscribe]);
+
+	return value;
 }
 
 export * from 'preact/hooks';
