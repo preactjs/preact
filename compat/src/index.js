@@ -133,24 +133,39 @@ export function useTransition() {
 // styles/... before it attaches
 export const useInsertionEffect = useLayoutEffect;
 
+/**
+ * This is taken from https://github.com/facebook/react/blob/main/packages/use-sync-external-store/src/useSyncExternalStoreShimClient.js#L84
+ * on a high level this cuts out the warnings, ... and attempts a smaller implementation
+ */
 export function useSyncExternalStore(subscribe, getSnapshot) {
-	const [state, setState] = useState(getSnapshot);
-
 	const value = getSnapshot();
 
+	const [{ _instance }, forceUpdate] = useState({
+		_instance: { _value: value, _getSnapshot: getSnapshot }
+	});
+
 	useLayoutEffect(() => {
-		if (value !== state) {
-			setState(() => value);
+		_instance._value = value;
+		_instance._getSnapshot = getSnapshot;
+
+		if (_instance._value !== getSnapshot()) {
+			forceUpdate({ _instance });
 		}
 	}, [subscribe, value, getSnapshot]);
 
 	useEffect(() => {
-		return subscribe(() => {
-			setState(() => getSnapshot());
-		});
-	}, [subscribe, getSnapshot]);
+		if (_instance._value !== _instance._getSnapshot()) {
+			forceUpdate({ _instance });
+		}
 
-	return state;
+		return subscribe(() => {
+			if (_instance._value !== _instance._getSnapshot()) {
+				forceUpdate({ _instance });
+			}
+		});
+	}, [subscribe]);
+
+	return value;
 }
 
 export * from 'preact/hooks';
