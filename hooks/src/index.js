@@ -193,7 +193,7 @@ export function useReducer(reducer, initialState, init) {
 				// When we have no updated hooks in the component we invoke the previous SCU or
 				// traverse the VDOM tree further.
 				if (allHooksEmpty) {
-					return prevScu ? prevScu(p, s, c) : true;
+					return prevScu ? prevScu.call(this, p, s, c) : true;
 				}
 
 				// We check whether we have components with a nextValue set that
@@ -208,7 +208,7 @@ export function useReducer(reducer, initialState, init) {
 				});
 
 				if (!shouldSkipUpdating) {
-					return prevScu ? prevScu(p, s, c) : true;
+					return prevScu ? prevScu.call(this, p, s, c) : true;
 				}
 
 				// When all set nextValues are equal to their original value
