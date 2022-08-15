@@ -234,6 +234,32 @@ describe('useState', () => {
 		expect(scratch.textContent).to.equal('hi');
 	});
 
+	// https://github.com/preactjs/preact/issues/3669
+	it('correctly updates with multiple state updates', () => {
+		let simulateClick;
+		function TestWidget() {
+			const [saved, setSaved] = useState(false);
+			const [, setSaving] = useState(false);
+
+			simulateClick = () => {
+				setSaving(true);
+				setSaved(true);
+				setSaving(false);
+			};
+
+			return <div>{saved ? 'Saved!' : 'Unsaved!'}</div>;
+		}
+
+		render(<TestWidget />, scratch);
+		expect(scratch.innerHTML).to.equal('<div>Unsaved!</div>');
+
+		act(() => {
+			simulateClick();
+		});
+
+		expect(scratch.innerHTML).to.equal('<div>Saved!</div>');
+	});
+
 	it('does not loop when states are equal after batches', () => {
 		const renderSpy = sinon.spy();
 		const Context = createContext(null);
