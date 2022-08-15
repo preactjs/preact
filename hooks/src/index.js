@@ -43,11 +43,8 @@ options._render = vnode => {
 			hooks._pendingEffects = [];
 			currentComponent._renderCallbacks = [];
 			hooks._list.forEach(hookItem => {
-				if (hookItem._nextValue) {
-					hookItem._value = hookItem._nextValue;
-				}
 				hookItem._pendingValue = EMPTY;
-				hookItem._nextValue = hookItem._pendingArgs = undefined;
+				hookItem._pendingArgs = undefined;
 			});
 		} else {
 			hooks._pendingEffects.forEach(invokeCleanup);
@@ -181,10 +178,10 @@ export function useReducer(reducer, initialState, init) {
 
 		hookState._component = currentComponent;
 
-		if (!hookState._component._hasScuFromHooks) {
-			hookState._component.__hooks._hasScuFromHooks = true;
-			const prevScu = hookState._component.shouldComponentUpdate;
-			hookState._component.shouldComponentUpdate = (p, s, c) => {
+		if (!currentComponent._hasScuFromHooks) {
+			currentComponent._hasScuFromHooks = true;
+			const prevScu = currentComponent.shouldComponentUpdate;
+			currentComponent.shouldComponentUpdate = (p, s, c) => {
 				if (!hookState._component.__hooks) return true;
 				const stateHooks = hookState._component.__hooks._list.filter(
 					x => x._component
