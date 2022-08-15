@@ -234,6 +234,7 @@ describe('useState', () => {
 		expect(scratch.textContent).to.equal('hi');
 	});
 
+	// https://github.com/preactjs/preact/issues/3669
 	it('correctly updates with multiple state updates', () => {
 		let simulateClick;
 		function TestWidget() {
