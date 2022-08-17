@@ -29,7 +29,13 @@ export namespace JSXInternal {
 		key?: any;
 	}
 
-	export type Element = VNode<any> | ComponentChild;
+	export type ElementType<P = any> =
+		| {
+				[K in keyof JSX.IntrinsicElements]: P extends JSX.IntrinsicElements[K]
+					? K
+					: never;
+		  }[keyof JSX.IntrinsicElements]
+		| ComponentType<P>;
 	export type ElementClass = Component<any, any> | FunctionComponent<any>;
 
 	export interface ElementAttributesProperty {
