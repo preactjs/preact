@@ -31,10 +31,10 @@ export namespace JSXInternal {
 
 	export type ElementType<P = any> =
 		| {
-				[K in keyof JSX.IntrinsicElements]: P extends JSX.IntrinsicElements[K]
+				[K in keyof IntrinsicElements]: P extends IntrinsicElements[K]
 					? K
 					: never;
-		  }[keyof JSX.IntrinsicElements]
+		  }[keyof IntrinsicElements]
 		| ComponentType<P>;
 	export type ElementClass = Component<any, any> | FunctionComponent<any>;
 
