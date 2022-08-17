@@ -186,6 +186,7 @@ export function useReducer(reducer, initialState, init) {
 			const prevScu = currentComponent.shouldComponentUpdate;
 			currentComponent.shouldComponentUpdate = function(p, s, c) {
 				if (!hookState._component.__hooks) return true;
+
 				const stateHooks = hookState._component.__hooks._list.filter(
 					x => x._component
 				);
@@ -201,23 +202,19 @@ export function useReducer(reducer, initialState, init) {
 				// us to update further down the tree
 				let shouldUpdate = false;
 				stateHooks.forEach(hookItem => {
-					if (!hookItem._nextValue) return;
-					const currentValue = hookItem._value[0];
-					hookItem._value = hookItem._nextValue;
-					hookItem._nextValue = undefined;
-					if (currentValue !== hookItem._value[0]) shouldUpdate = true;
+					if (hookItem._nextValue) {
+						const currentValue = hookItem._value[0];
+						hookItem._value = hookItem._nextValue;
+						hookItem._nextValue = undefined;
+						if (currentValue !== hookItem._value[0]) shouldUpdate = true;
+					}
 				});
 
-				if (shouldUpdate) {
-					return prevScu ? prevScu.call(this, p, s, c) : true;
-				}
-
-				// When all set nextValues are equal to their original value
-				// we bail out of updating.
-				// Thinking: would this be dangerous with a batch of updates where
-				// Comp1 updates --> Comp2 updated in same batch twice but has same eventual state --> this leads to us
-				// not diving into Comp3
-				return false;
+				return shouldUpdate
+					? prevScu
+						? prevScu.call(this, p, s, c)
+						: true
+					: false;
 			};
 		}
 	}
