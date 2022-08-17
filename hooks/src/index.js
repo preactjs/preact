@@ -184,6 +184,13 @@ export function useReducer(reducer, initialState, init) {
 		if (!currentComponent._hasScuFromHooks) {
 			currentComponent._hasScuFromHooks = true;
 			const prevScu = currentComponent.shouldComponentUpdate;
+
+			// This SCU has the purpose of bailing out after repeated updates
+			// to stateful hooks.
+			// we store the next value in _nextValue[0] and keep doing that for all
+			// state setters, if we have next states and
+			// all next states within a component end up being equal to their original state
+			// we are safe to bail out for this specific component.
 			currentComponent.shouldComponentUpdate = function(p, s, c) {
 				if (!hookState._component.__hooks) return true;
 
