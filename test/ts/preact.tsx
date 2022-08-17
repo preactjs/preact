@@ -102,6 +102,10 @@ const UseOfComponentWithChildren = () => {
 	);
 };
 
+const DummyChildren: FunctionalComponent = ({ children }) => {
+	return children;
+};
+
 // using ref and or jsx
 class ComponentUsingRef extends Component<any, any> {
 	private array: string[];
