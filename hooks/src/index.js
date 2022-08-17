@@ -184,7 +184,7 @@ export function useReducer(reducer, initialState, init) {
 		if (!currentComponent._hasScuFromHooks) {
 			currentComponent._hasScuFromHooks = true;
 			const prevScu = currentComponent.shouldComponentUpdate;
-			currentComponent.shouldComponentUpdate = function (p, s, c) {
+			currentComponent.shouldComponentUpdate = function(p, s, c) {
 				if (!hookState._component.__hooks) return true;
 				const stateHooks = hookState._component.__hooks._list.filter(
 					x => x._component
@@ -199,15 +199,16 @@ export function useReducer(reducer, initialState, init) {
 				// We check whether we have components with a nextValue set that
 				// have values that aren't equal to one another this pushes
 				// us to update further down the tree
-				const shouldSkipUpdating = stateHooks.every(hookItem => {
-					if (!hookItem._nextValue) return true;
+				let shouldUpdate = false;
+				stateHooks.forEach(hookItem => {
+					if (!hookItem._nextValue) return;
 					const currentValue = hookItem._value[0];
 					hookItem._value = hookItem._nextValue;
 					hookItem._nextValue = undefined;
-					return currentValue === hookItem._value[0];
+					if (currentValue !== hookItem._value[0]) shouldUpdate = true;
 				});
 
-				if (!shouldSkipUpdating) {
+				if (shouldUpdate) {
 					return prevScu ? prevScu.call(this, p, s, c) : true;
 				}
 
