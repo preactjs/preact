@@ -184,8 +184,16 @@ export function useReducer(reducer, initialState, init) {
 		if (!currentComponent._hasScuFromHooks) {
 			currentComponent._hasScuFromHooks = true;
 			const prevScu = currentComponent.shouldComponentUpdate;
-			currentComponent.shouldComponentUpdate = function (p, s, c) {
+
+			// This SCU has the purpose of bailing out after repeated updates
+			// to stateful hooks.
+			// we store the next value in _nextValue[0] and keep doing that for all
+			// state setters, if we have next states and
+			// all next states within a component end up being equal to their original state
+			// we are safe to bail out for this specific component.
+			currentComponent.shouldComponentUpdate = function(p, s, c) {
 				if (!hookState._component.__hooks) return true;
+
 				const stateHooks = hookState._component.__hooks._list.filter(
 					x => x._component
 				);
@@ -199,24 +207,21 @@ export function useReducer(reducer, initialState, init) {
 				// We check whether we have components with a nextValue set that
 				// have values that aren't equal to one another this pushes
 				// us to update further down the tree
-				const shouldSkipUpdating = stateHooks.every(hookItem => {
-					if (!hookItem._nextValue) return true;
-					const currentValue = hookItem._value[0];
-					hookItem._value = hookItem._nextValue;
-					hookItem._nextValue = undefined;
-					return currentValue === hookItem._value[0];
+				let shouldUpdate = false;
+				stateHooks.forEach(hookItem => {
+					if (hookItem._nextValue) {
+						const currentValue = hookItem._value[0];
+						hookItem._value = hookItem._nextValue;
+						hookItem._nextValue = undefined;
+						if (currentValue !== hookItem._value[0]) shouldUpdate = true;
+					}
 				});
 
-				if (!shouldSkipUpdating) {
-					return prevScu ? prevScu.call(this, p, s, c) : true;
-				}
-
-				// When all set nextValues are equal to their original value
-				// we bail out of updating.
-				// Thinking: would this be dangerous with a batch of updates where
-				// Comp1 updates --> Comp2 updated in same batch twice but has same eventual state --> this leads to us
-				// not diving into Comp3
-				return false;
+				return shouldUpdate
+					? prevScu
+						? prevScu.call(this, p, s, c)
+						: true
+					: false;
 			};
 		}
 	}
