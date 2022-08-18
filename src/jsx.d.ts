@@ -4,6 +4,9 @@
 import {
 	ClassAttributes,
 	Component,
+	ComponentChild,
+	ComponentType,
+	FunctionComponent,
 	PreactDOMAttributes,
 	VNode
 } from './index';
@@ -26,9 +29,14 @@ export namespace JSXInternal {
 		key?: any;
 	}
 
-	export interface Element extends VNode<any> {}
-
-	export interface ElementClass extends Component<any, any> {}
+	export type ElementType<P = any> =
+		| {
+				[K in keyof IntrinsicElements]: P extends IntrinsicElements[K]
+					? K
+					: never;
+		  }[keyof IntrinsicElements]
+		| ComponentType<P>;
+	export type ElementClass = Component<any, any> | FunctionComponent<any>;
 
 	export interface ElementAttributesProperty {
 		props: any;
