@@ -27,16 +27,20 @@ const RAF_TIMEOUT = 100;
 let prevRaf;
 
 options._diff = vnode => {
-	if (typeof vnode.type === "function" && !vnode._mask && vnode.type !== Fragment) {
+	if (
+		typeof vnode.type === 'function' &&
+		!vnode._mask &&
+		vnode.type !== Fragment
+	) {
 		const parentMask =
-		vnode[PARENT] && vnode[PARENT]._mask ? vnode[PARENT]._mask : "";
+			vnode._parent && vnode._parent._mask ? vnode._parent._mask : '';
 		const position =
-		vnode[PARENT] && vnode[PARENT][CHILDREN]
-			? vnode[PARENT][CHILDREN].indexOf(vnode)
-			: 0;
+			vnode._parent && vnode._parent._children
+				? vnode._parent._children.indexOf(vnode)
+				: 0;
 		vnode._mask = parentMask + position;
 	} else if (!vnode._mask) {
-		vnode._mask = vnode[PARENT] ? vnode[PARENT]._mask : "";
+		vnode._mask = vnode._parent ? vnode._parent._mask : '';
 	}
 	currentComponent = null;
 	if (oldBeforeDiff) oldBeforeDiff(vnode);
