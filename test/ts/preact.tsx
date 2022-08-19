@@ -312,3 +312,5 @@ let elementProps: ComponentProps<'button'> = {
 // Typing of style property
 const acceptsNumberAsLength = <div style={{ marginTop: 20 }} />;
 const acceptsStringAsLength = <div style={{ marginTop: '20px' }} />;
+
+const ReturnNull: FunctionalComponent = () => null;
