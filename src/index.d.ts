@@ -87,7 +87,7 @@ export type ComponentProps<
 	: never;
 
 export interface FunctionComponent<P = {}> {
-	(props: RenderableProps<P>, context?: any): ComponentChild;
+	(props: RenderableProps<P>, context?: any): VNode<any>;
 	displayName?: string;
 	defaultProps?: Partial<P>;
 }
