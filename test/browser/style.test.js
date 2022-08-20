@@ -157,6 +157,35 @@ describe('style attribute', () => {
 		expect(scratch.firstChild.style.backgroundColor).to.equal('blue');
 	});
 
+	it('should handle grid properties', () => {
+		render(<div style={{ gap: 1 }} />, scratch);
+		expect(scratch.firstChild.style.gap).to.equal('1px');
+
+		render(<div style={{ rowGap: 2, columnGap: 2 }} />, scratch);
+		expect(scratch.firstChild.style.rowGap).to.equal('2px');
+		expect(scratch.firstChild.style.columnGap).to.equal('2px');
+
+		render(
+			<div
+				style={{
+					gridRowGap: 3,
+					gridColumnGap: 3,
+					gridTemplateColumns: 4,
+					gridTemplateRows: 4
+				}}
+			/>,
+			scratch
+		);
+		expect(scratch.firstChild.style.rowGap).to.equal('3px');
+		expect(scratch.firstChild.style.columnGap).to.equal('3px');
+		expect(scratch.firstChild.style.gridTemplateColumns).to.equal('4px');
+		expect(scratch.firstChild.style.gridTemplateRows).to.equal('4px');
+
+		render(<div style={{ gridAutoColumns: 4, gridAutoRows: 4 }} />, scratch);
+		expect(scratch.firstChild.style.gridAutoColumns).to.equal('4px');
+		expect(scratch.firstChild.style.gridAutoRows).to.equal('4px');
+	});
+
 	// Issue #1850
 	it('should remove empty styles', () => {
 		render(<div style={{ visibility: 'hidden' }} />, scratch);
