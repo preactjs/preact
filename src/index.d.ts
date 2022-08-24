@@ -187,6 +187,11 @@ export abstract class Component<P, S> {
 // Preact createElement
 // -----------------------------------
 
+export function createElement(
+	type: 'input',
+	props: (DOMAttributes<'input'> & ClassAttributes<T>) | null,
+	...children: ComponentChildren[]
+): VNode<any>;
 export function createElement<
 	P extends JSXInternal.HTMLAttributes<T>,
 	T extends HTMLElement
@@ -221,6 +226,11 @@ export namespace createElement {
 	export import JSX = JSXInternal;
 }
 
+export function h(
+	type: 'input',
+	props: (DOMAttributes<'input'> & ClassAttributes<T>) | null,
+	...children: ComponentChildren[]
+): VNode<any>;
 export function h<
 	P extends JSXInternal.HTMLAttributes<T>,
 	T extends HTMLElement
