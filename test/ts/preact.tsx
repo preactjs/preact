@@ -319,3 +319,8 @@ const ReturnNull: FunctionalComponent = () => null;
 const ref = createRef<HTMLDivElement>();
 createElement('div', { ref: ref }, 'hi');
 h('div', { ref: ref }, 'hi');
+
+const functionRef = createRef();
+const RefComponentTest = () => <p>hi</p>;
+createElement(RefComponentTest, { ref: functionRef }, 'hi');
+h(RefComponentTest, { ref: functionRef }, 'hi');
