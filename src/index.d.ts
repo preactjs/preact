@@ -219,7 +219,7 @@ export function createElement<T extends HTMLElement>(
 ): VNode<any>;
 export function createElement<P>(
 	type: ComponentType<P>,
-	props: (ClassAttributes & P) | null,
+	props: (Attributes & P) | null,
 	...children: ComponentChildren[]
 ): VNode<any>;
 export namespace createElement {
@@ -258,7 +258,7 @@ export function h<T extends HTMLElement>(
 ): VNode<any>;
 export function h<P>(
 	type: ComponentType<P>,
-	props: (ClassAttributes & P) | null,
+	props: (Attributes & P) | null,
 	...children: ComponentChildren[]
 ): VNode<any>;
 export namespace h {
