@@ -187,36 +187,68 @@ export abstract class Component<P, S> {
 // Preact createElement
 // -----------------------------------
 
-export function createElement(
+export function createElement<
+	P extends JSXInternal.HTMLAttributes<T>,
+	T extends HTMLElement
+>(
+	type: keyof JSXInternal.IntrinsicElements,
+	props: (ClassAttributes<T> & P) | null,
+	...children: ComponentChildren[]
+): VNode<any>;
+export function createElement<
+	P extends JSXInternal.HTMLAttributes<T>,
+	T extends HTMLElement
+>(
+	type: keyof JSXInternal.IntrinsicElements,
+	props: (ClassAttributes<T> & P) | null,
+	...children: ComponentChildren[]
+): VNode<any>;
+export function createElement<T extends HTMLElement>(
 	type: string,
 	props:
-		| (JSXInternal.HTMLAttributes &
-				JSXInternal.SVGAttributes &
-				Record<string, any>)
+		| (ClassAttributes<T> &
+				JSXInternal.HTMLAttributes &
+				JSXInternal.SVGAttributes)
 		| null,
 	...children: ComponentChildren[]
 ): VNode<any>;
 export function createElement<P>(
 	type: ComponentType<P>,
-	props: (Attributes & P) | null,
+	props: (ClassAttributes & P) | null,
 	...children: ComponentChildren[]
 ): VNode<any>;
 export namespace createElement {
 	export import JSX = JSXInternal;
 }
 
-export function h(
+export function h<
+	P extends JSXInternal.HTMLAttributes<T>,
+	T extends HTMLElement
+>(
+	type: keyof JSXInternal.IntrinsicElements,
+	props: (ClassAttributes<T> & P) | null,
+	...children: ComponentChildren[]
+): VNode<any>;
+export function h<
+	P extends JSXInternal.HTMLAttributes<T>,
+	T extends HTMLElement
+>(
+	type: keyof JSXInternal.IntrinsicElements,
+	props: (ClassAttributes<T> & P) | null,
+	...children: ComponentChildren[]
+): VNode<any>;
+export function h<T extends HTMLElement>(
 	type: string,
 	props:
-		| (JSXInternal.HTMLAttributes &
-				JSXInternal.SVGAttributes &
-				Record<string, any>)
+		| (ClassAttributes<T> &
+				JSXInternal.HTMLAttributes &
+				JSXInternal.SVGAttributes)
 		| null,
 	...children: ComponentChildren[]
 ): VNode<any>;
 export function h<P>(
 	type: ComponentType<P>,
-	props: (Attributes & P) | null,
+	props: (ClassAttributes & P) | null,
 	...children: ComponentChildren[]
 ): VNode<any>;
 export namespace h {

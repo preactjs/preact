@@ -5,7 +5,8 @@ import {
 	ComponentProps,
 	FunctionalComponent,
 	AnyComponent,
-	h
+	h,
+	createRef
 } from '../../';
 
 interface DummyProps {
@@ -314,3 +315,7 @@ const acceptsNumberAsLength = <div style={{ marginTop: 20 }} />;
 const acceptsStringAsLength = <div style={{ marginTop: '20px' }} />;
 
 const ReturnNull: FunctionalComponent = () => null;
+
+const ref = createRef<HTMLDivElement>();
+createElement('div', { ref: ref }, 'hi');
+h('div', { ref: ref }, 'hi');
