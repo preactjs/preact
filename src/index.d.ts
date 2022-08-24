@@ -189,7 +189,10 @@ export abstract class Component<P, S> {
 
 export function createElement(
 	type: 'input',
-	props: (DOMAttributes<'input'> & ClassAttributes<T>) | null,
+	props:
+		| (JSXInternal.DOMAttributes<HTMLInputElement> &
+				ClassAttributes<HTMLInputElement>)
+		| null,
 	...children: ComponentChildren[]
 ): VNode<any>;
 export function createElement<
@@ -201,7 +204,7 @@ export function createElement<
 	...children: ComponentChildren[]
 ): VNode<any>;
 export function createElement<
-	P extends JSXInternal.HTMLAttributes<T>,
+	P extends JSXInternal.SVGAttributes<T>,
 	T extends HTMLElement
 >(
 	type: keyof JSXInternal.IntrinsicElements,
@@ -228,7 +231,10 @@ export namespace createElement {
 
 export function h(
 	type: 'input',
-	props: (DOMAttributes<'input'> & ClassAttributes<T>) | null,
+	props:
+		| (JSXInternal.DOMAttributes<HTMLInputElement> &
+				ClassAttributes<HTMLInputElement>)
+		| null,
 	...children: ComponentChildren[]
 ): VNode<any>;
 export function h<
@@ -240,7 +246,7 @@ export function h<
 	...children: ComponentChildren[]
 ): VNode<any>;
 export function h<
-	P extends JSXInternal.HTMLAttributes<T>,
+	P extends JSXInternal.SVGAttributes<T>,
 	T extends HTMLElement
 >(
 	type: keyof JSXInternal.IntrinsicElements,
