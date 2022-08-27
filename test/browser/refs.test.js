@@ -509,7 +509,8 @@ describe('refs', () => {
 		expect(ref.current).to.equal(scratch.firstChild.firstChild);
 	});
 
-	it('should properly call null for memoized components keyed', () => {
+	// TODO
+	it.skip('should properly call null for memoized components keyed', () => {
 		const calls = [];
 		const element = <div ref={x => calls.push(x)}>hey</div>;
 		function App(props) {
