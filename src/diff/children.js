@@ -83,7 +83,7 @@ export function diffChildren(
 				childVNode.type,
 				childVNode.props,
 				childVNode.key,
-				childVNode.ref,
+				childVNode.ref ? childVNode.ref : null,
 				childVNode._original
 			);
 		} else {
