@@ -517,13 +517,16 @@ describe('refs', () => {
 		}
 
 		render(<App count={0} />, scratch);
-		expect(calls[0]).to.equal(scratch.firstChild.firstChild);
 		render(<App count={1} />, scratch);
-		expect(calls[1]).to.equal(null);
-		expect(calls[2]).to.equal(scratch.firstChild.firstChild);
 		render(<App count={2} />, scratch);
-		expect(calls[3]).to.equal(null);
-		expect(calls[4]).to.equal(scratch.firstChild.firstChild);
+		expect(calls.length).to.equal(5);
+		expect(calls).to.deep.equal([
+			scratch.firstChild.firstChild,
+			null,
+			scratch.firstChild.firstChild,
+			null,
+			scratch.firstChild.firstChild
+		]);
 	});
 
 	it('should properly call null for memoized components unkeyed', () => {
@@ -534,12 +537,9 @@ describe('refs', () => {
 		}
 
 		render(<App count={0} />, scratch);
-		expect(calls[0]).to.equal(scratch.firstChild.firstChild);
 		render(<App count={1} />, scratch);
-		expect(calls[1]).to.equal(null);
-		expect(calls[2]).to.equal(scratch.firstChild.firstChild);
 		render(<App count={2} />, scratch);
-		expect(calls[3]).to.equal(null);
-		expect(calls[4]).to.equal(scratch.firstChild.firstChild);
+		expect(calls.length).to.equal(1);
+		expect(calls[0]).to.equal(scratch.firstChild.firstChild);
 	});
 });
