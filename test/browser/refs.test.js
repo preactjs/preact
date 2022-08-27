@@ -478,4 +478,34 @@ describe('refs', () => {
 		render(<App />, scratch);
 		expect(el).to.not.be.equal(null);
 	});
+
+	it('should not remove refs for memoized components keyed', () => {
+		const ref = createRef();
+		const element = <div ref={ref}>hey</div>;
+		function App(props) {
+			return <div key={props.count}>{element}</div>;
+		}
+
+		render(<App count={0} />, scratch);
+		expect(ref.current).to.equal(scratch.firstChild.firstChild);
+		render(<App count={1} />, scratch);
+		expect(ref.current).to.equal(scratch.firstChild.firstChild);
+		render(<App count={2} />, scratch);
+		expect(ref.current).to.equal(scratch.firstChild.firstChild);
+	});
+
+	it('should not remove refs for memoized components unkeyed', () => {
+		const ref = createRef();
+		const element = <div ref={ref}>hey</div>;
+		function App(props) {
+			return <div>{element}</div>;
+		}
+
+		render(<App count={0} />, scratch);
+		expect(ref.current).to.equal(scratch.firstChild.firstChild);
+		render(<App count={1} />, scratch);
+		expect(ref.current).to.equal(scratch.firstChild.firstChild);
+		render(<App count={2} />, scratch);
+		expect(ref.current).to.equal(scratch.firstChild.firstChild);
+	});
 });
