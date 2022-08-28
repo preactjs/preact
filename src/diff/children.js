@@ -83,7 +83,7 @@ export function diffChildren(
 				childVNode.type,
 				childVNode.props,
 				childVNode.key,
-				null,
+				childVNode.ref ? childVNode.ref : null,
 				childVNode._original
 			);
 		} else {
@@ -244,14 +244,7 @@ function reorderChildren(childVNode, oldDom, parentDom) {
 			if (typeof vnode.type == 'function') {
 				oldDom = reorderChildren(vnode, oldDom, parentDom);
 			} else {
-				oldDom = placeChild(
-					parentDom,
-					vnode,
-					vnode,
-					c,
-					vnode._dom,
-					oldDom
-				);
+				oldDom = placeChild(parentDom, vnode, vnode, c, vnode._dom, oldDom);
 			}
 		}
 	}
