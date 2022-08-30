@@ -277,9 +277,13 @@ export namespace h {
 
 export function render(
 	vnode: ComponentChild,
-	parent: Element | Document | ShadowRoot | DocumentFragment,
+	parent: Element | Document | ShadowRoot | DocumentFragment
 ): void;
-/** @deprecated Will be removed in v11. */
+/**
+ * @deprecated Will be removed in v11.
+ *
+ * Replacement Preact 10+ implementation can be found here: https://gist.github.com/developit/f4c67a2ede71dc2fab7f357f39cff28c
+ */
 export function render(
 	vnode: ComponentChild,
 	parent: Element | Document | ShadowRoot | DocumentFragment,
