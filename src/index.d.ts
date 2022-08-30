@@ -225,7 +225,6 @@ export namespace h {
 export function render(
 	vnode: ComponentChild,
 	parent: Element | Document | ShadowRoot | DocumentFragment,
-	replaceNode?: Element | Text
 ): void;
 export function hydrate(
 	vnode: ComponentChild,
