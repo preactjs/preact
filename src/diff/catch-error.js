@@ -20,14 +20,16 @@ export function _catchError(error, internal) {
 			~internal.flags & MODE_RERENDERING_ERROR
 		) {
 			try {
-				if (ENABLE_CLASSES && internal.type.getDerivedStateFromError) {
-					internal._component.setState(
-						internal.type.getDerivedStateFromError(error)
-					);
-				}
+				if (ENABLE_CLASSES) {
+					if (internal.type.getDerivedStateFromError) {
+						internal._component.setState(
+							internal.type.getDerivedStateFromError(error)
+						);
+					}
 
-				if (ENABLE_CLASSES && internal._component.componentDidCatch) {
-					internal._component.componentDidCatch(error);
+					if (internal._component.componentDidCatch) {
+						internal._component.componentDidCatch(error);
+					}
 				}
 
 				// NOTE: We're checking that any component in the stack got marked as dirty, even if it did so prior to this loop,

@@ -25,7 +25,6 @@ import { memo } from './memo';
 import { forwardRef } from './forwardRef';
 import { Children } from './Children';
 import { Suspense, lazy } from './suspense';
-import { SuspenseList } from './suspense-list';
 import {
 	hydrate,
 	render,
@@ -177,7 +176,6 @@ export {
 	unstable_batchedUpdates,
 	StrictMode,
 	Suspense,
-	SuspenseList,
 	lazy,
 	__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED
 };
@@ -221,7 +219,6 @@ export default {
 	unstable_batchedUpdates,
 	StrictMode,
 	Suspense,
-	SuspenseList,
 	lazy,
 	__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED
 };

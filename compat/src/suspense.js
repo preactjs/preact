@@ -1,4 +1,10 @@
-import { Component, createElement, options, Fragment, createPortal } from 'preact';
+import {
+	Component,
+	createElement,
+	options,
+	Fragment,
+	createPortal
+} from 'preact';
 import { TYPE_ELEMENT, MODE_HYDRATE } from '../../src/constants';
 import { getParentDom } from '../../src/tree';
 
@@ -79,8 +85,6 @@ Suspense.prototype._childDidSuspend = function(promise, suspendingInternal) {
 	}
 	c._suspenders.push(suspendingComponent);
 
-	const resolve = suspended(c._internal);
-
 	let resolved = false;
 	const onResolved = () => {
 		if (resolved) return;
@@ -88,11 +92,7 @@ Suspense.prototype._childDidSuspend = function(promise, suspendingInternal) {
 		resolved = true;
 		suspendingComponent._onResolve = null;
 
-		if (resolve) {
-			resolve(onSuspensionComplete);
-		} else {
-			onSuspensionComplete();
-		}
+		onSuspensionComplete();
 	};
 
 	suspendingComponent._onResolve = onResolved;
@@ -155,28 +155,6 @@ Suspense.prototype.render = function(props, state) {
 
 	return [portal, fallback];
 };
-
-/**
- * Checks and calls the parent component's _suspended method, passing in the
- * suspended Internal. This is a way for a parent (e.g. SuspenseList) to get
- * notified that one of its children/descendants suspended.
- *
- * The parent MAY return a callback. The callback will get called when the
- * suspension resolves, notifying the parent of the fact. Moreover, the callback
- * gets function `unsuspend` as a parameter. The resolved child descendant will
- * not actually get unsuspended until `unsuspend` gets called. This is a way for
- * the parent to delay unsuspending.
- *
- * If the parent does not return a callback then the resolved Internal gets
- * unsuspended immediately when it resolves.
- *
- * @param {import('./internal').Internal} internal
- * @returns {((unsuspend: () => void) => void)?}
- */
-export function suspended(internal) {
-	let component = internal._parent._component;
-	return component && component._suspended && component._suspended(internal);
-}
 
 export function lazy(loader) {
 	let prom;

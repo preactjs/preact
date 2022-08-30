@@ -41,6 +41,7 @@
       "$_list": "__",
       "$_pendingEffects": "__h",
       "$_pendingValue": "__V",
+      "$_nextValue": "__N",
       "$_value": "__",
       "$_args": "__H",
       "$_factory": "__h",

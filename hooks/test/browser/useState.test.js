@@ -1,7 +1,7 @@
-import { setupRerender } from 'preact/test-utils';
-import { createElement, render } from 'preact';
+import { act, setupRerender } from 'preact/test-utils';
+import { createElement, render, createContext } from 'preact';
+import { useState, useContext, useEffect } from 'preact/hooks';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
-import { useState } from 'preact/hooks';
 
 /** @jsx createElement */
 
@@ -230,5 +230,57 @@ describe('useState', () => {
 		text.click();
 		rerender();
 		expect(scratch.innerHTML).to.equal('');
+	});
+
+	it('does not loop when states are equal after batches', () => {
+		const renderSpy = sinon.spy();
+		const Context = createContext(null);
+
+		function ModalProvider(props) {
+			let [modalCount, setModalCount] = useState(0);
+			renderSpy(modalCount);
+			let context = {
+				modalCount,
+				addModal() {
+					setModalCount(count => count + 1);
+				},
+				removeModal() {
+					setModalCount(count => count - 1);
+				}
+			};
+
+			return (
+				<Context.Provider value={context}>{props.children}</Context.Provider>
+			);
+		}
+
+		function useModal() {
+			let context = useContext(Context);
+			useEffect(() => {
+				context.addModal();
+				return () => {
+					context.removeModal();
+				};
+			}, [context]);
+		}
+
+		function Popover() {
+			useModal();
+			return <div>Popover</div>;
+		}
+
+		function App() {
+			return (
+				<ModalProvider>
+					<Popover />
+				</ModalProvider>
+			);
+		}
+
+		act(() => {
+			render(<App />, scratch);
+		});
+
+		expect(renderSpy).to.be.calledTwice;
 	});
 });
