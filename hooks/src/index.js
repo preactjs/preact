@@ -397,6 +397,7 @@ export function useErrorBoundary(cb) {
 export function useId() {
 	const state = getHookState(currentIndex++, 11);
 	if (!state._value) {
+		// TODO: consider Number(currentComponent._vnode._mask + currentIndex).toString(36)
 		state._value = 'P' + currentComponent._vnode._mask + '-' + currentIndex;
 	}
 
