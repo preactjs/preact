@@ -26,23 +26,31 @@ let oldBeforeUnmount = options.unmount;
 const RAF_TIMEOUT = 100;
 let prevRaf;
 
+// the current ID prefix
+let mask = '';
+
+// tracks component depth (only for the current render, so may be subtree depth)
+let depth = 0;
+
 options._diff = vnode => {
-	if (
-		typeof vnode.type === 'function' &&
-		!vnode._mask &&
-		vnode.type !== Fragment
-	) {
-		const parentMask =
-			vnode._parent && vnode._parent._mask ? vnode._parent._mask : '';
-		const position =
-			vnode._parent && vnode._parent._children
-				? vnode._parent._children.indexOf(vnode)
-				: 0;
-		vnode._mask = parentMask + position;
-	} else if (!vnode._mask) {
-		vnode._mask = vnode._parent ? vnode._parent._mask : '';
+	if (typeof vnode.type === 'function' && vnode.type !== Fragment) {
+		if (vnode._mask) {
+			// already visited, pick up where we left off: (fixes subtree updates)
+			mask = vnode._mask;
+		} else if (depth === 0) {
+			// this is the first component rendered and hasn't been seen, it's a root:
+			vnode._mask = mask = '';
+		} else {
+			// replace mask[depth] with the next character: (basically *mask[depth-1]++)
+			const offset = Number(mask[depth - 1]) + 1;
+			vnode._mask = mask = mask.slice(0, depth - 1) + offset;
+		}
+		// we're about to render the children of this component, push a new level onto the mask:
+		depth++;
+		mask += '0'; // next level starts off at the base character (code 65) again
 	}
 	currentComponent = null;
+
 	if (oldBeforeDiff) oldBeforeDiff(vnode);
 };
 
@@ -75,6 +83,12 @@ options._render = vnode => {
 
 options.diffed = vnode => {
 	if (oldAfterDiff) oldAfterDiff(vnode);
+
+	if (typeof vnode.type === 'function' && vnode.type !== Fragment) {
+		// jump back up the stack, remove the last char from the mask:
+		depth--;
+		mask = mask.slice(0, -1);
+	}
 
 	const c = vnode._component;
 	if (c && c.__hooks) {
@@ -381,17 +395,10 @@ export function useErrorBoundary(cb) {
 	];
 }
 
-function hash(str) {
-	let i = 0,
-		out = 11;
-	while (i < str.length) out = (101 * out + str.charCodeAt(i++)) >>> 0;
-	return out;
-}
-
 export function useId() {
 	const state = getHookState(currentIndex++, 11);
 	if (!state._value) {
-		state._value = 'P' + hash(currentComponent._vnode._mask + currentIndex);
+		state._value = 'P' + currentComponent._vnode._mask + '-' + currentIndex;
 	}
 
 	return state._value;
