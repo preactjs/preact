@@ -9,6 +9,7 @@ import {
 } from 'preact';
 import {
 	useState,
+	useId,
 	useReducer,
 	useEffect,
 	useLayoutEffect,
@@ -201,6 +202,7 @@ export {
 // React copies the named exports to the default one.
 export default {
 	useState,
+	useId,
 	useReducer,
 	useEffect,
 	useLayoutEffect,
