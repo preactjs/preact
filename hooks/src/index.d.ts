@@ -138,4 +138,4 @@ export function useErrorBoundary(
 	callback?: (error: any, errorInfo: ErrorInfo) => Promise<void> | void
 ): [any, () => void];
 
-export function useId<T>(): string;
+export function useId(): string;

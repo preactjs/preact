@@ -41,13 +41,13 @@ options._diff = vnode => {
 			// this is the first component rendered and hasn't been seen, it's a root:
 			vnode._mask = mask = '';
 		} else {
-			// replace mask[depth] with the next character: (basically *mask[depth-1]++)
+			// replace mask[depth] with the next: (basically *mask[depth-1]++)
 			const offset = Number(mask[depth - 1]) + 1;
 			vnode._mask = mask = mask.slice(0, depth - 1) + offset;
 		}
-		// we're about to render the children of this component, push a new level onto the mask:
+
 		depth++;
-		mask += '0'; // next level starts off at the base character (code 65) again
+		mask += '0';
 	}
 	currentComponent = null;
 
@@ -85,7 +85,6 @@ options.diffed = vnode => {
 	if (oldAfterDiff) oldAfterDiff(vnode);
 
 	if (typeof vnode.type === 'function' && vnode.type !== Fragment) {
-		// jump back up the stack, remove the last char from the mask:
 		depth--;
 		mask = mask.slice(0, -1);
 	}
