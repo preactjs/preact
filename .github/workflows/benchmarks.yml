@@ -12,7 +12,7 @@ on:
   push:
     branches:
       - master
-      - main
+      - v11
     paths:
       - 'src/**.js'
       - 'benches/**.html'
