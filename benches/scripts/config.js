@@ -69,6 +69,15 @@ export const frameworks = [
 		isValid() {
 			return validateFileDep(this.dependencies.framework);
 		}
+	},
+	{
+		label: 'preact-hooks',
+		dependencies: {
+			framework: 'file:' + repoRoot('benches/proxy-packages/preact-hooks-proxy')
+		},
+		isValid() {
+			return validateFileDep(this.dependencies.framework);
+		}
 	}
 ];
 
