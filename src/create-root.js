@@ -10,7 +10,6 @@ import options from './options';
 import { mount } from './diff/mount';
 import { patch } from './diff/patch';
 import { createInternal } from './tree';
-import { rendererState } from './component';
 
 /**
  *
@@ -29,8 +28,6 @@ export function createRoot(parentDom) {
 
 		firstChild =
 			/** @type {import('./internal').PreactElement} */ (parentDom.firstChild);
-
-		rendererState._context = {};
 
 		if (rootInternal) {
 			patch(rootInternal, vnode, parentDom);

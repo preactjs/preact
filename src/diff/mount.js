@@ -15,9 +15,9 @@ import {
 } from '../constants';
 import { normalizeToVNode, Fragment } from '../create-element';
 import { setProperty } from './props';
-import { createInternal } from '../tree';
+import { createInternal, getParentContext } from '../tree';
 import options from '../options';
-import { ENABLE_CLASSES, rendererState } from '../component';
+import { ENABLE_CLASSES } from '../component';
 import { commitQueue } from './commit';
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
@@ -49,8 +49,6 @@ export function mount(internal, newVNode, parentDom, startDom) {
 				}
 			}
 
-			let prevContext = rendererState._context;
-
 			const renderResult = mountComponent(internal, startDom);
 			if (renderResult === startDom) {
 				nextDomSibling = startDom;
@@ -66,10 +64,6 @@ export function mount(internal, newVNode, parentDom, startDom) {
 			if (internal._commitCallbacks.length) {
 				commitQueue.push(internal);
 			}
-
-			// In the event this subtree creates a new context for its children, restore
-			// the previous context for its siblings
-			rendererState._context = prevContext;
 		} else {
 			// @TODO: we could just assign this as internal.dom here
 			let hydrateDom =
@@ -306,13 +300,14 @@ function mountComponent(internal, startDom) {
 
 	// Necessary for createContext api. Setting this property will pass
 	// the context value as `this.context` just for this component.
+	let context = getParentContext(internal);
 	let tmp = type.contextType;
-	let provider = tmp && rendererState._context[tmp._id];
+	let provider = tmp && context[tmp._id];
 	let componentContext = tmp
 		? provider
 			? provider.props.value
 			: tmp._defaultValue
-		: rendererState._context;
+		: context;
 
 	if (provider) provider._subs.add(internal);
 
@@ -388,11 +383,7 @@ function mountComponent(internal, startDom) {
 	c.state = c._nextState;
 
 	if (c.getChildContext != null) {
-		rendererState._context = internal._context = Object.assign(
-			{},
-			rendererState._context,
-			c.getChildContext()
-		);
+		internal._context = Object.assign({}, context, c.getChildContext());
 	}
 
 	if (renderResult == null) {

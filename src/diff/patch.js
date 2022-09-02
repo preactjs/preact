@@ -18,10 +18,10 @@ import {
 	DIRTY_BIT,
 	FORCE_UPDATE
 } from '../constants';
-import { getDomSibling } from '../tree';
+import { getDomSibling, getParentContext } from '../tree';
 import { mountChildren } from './mount';
 import { Fragment } from '../create-element';
-import { ENABLE_CLASSES, rendererState } from '../component';
+import { ENABLE_CLASSES } from '../component';
 import { commitQueue } from './commit';
 
 /**
@@ -78,7 +78,6 @@ export function patch(internal, vnode, parentDom) {
 
 		try {
 			let renderResult;
-			let prevContext = rendererState._context;
 			if (internal._vnodeId === vnode._vnodeId) {
 				internal.flags |= SKIP_CHILDREN;
 			} else {
@@ -107,10 +106,6 @@ export function patch(internal, vnode, parentDom) {
 			if (internal._commitCallbacks.length) {
 				commitQueue.push(internal);
 			}
-
-			// In the event this subtree creates a new context for its children, restore
-			// the previous context for its siblings
-			rendererState._context = prevContext;
 		} catch (e) {
 			// @TODO: assign a new VNode ID here? Or NaN?
 			// newVNode._vnodeId = 0;
@@ -203,13 +198,14 @@ function patchComponent(internal, newVNode) {
 
 	// Necessary for createContext api. Setting this property will pass
 	// the context value as `this.context` just for this component.
+	let context = getParentContext(internal);
 	let tmp = newVNode.type.contextType;
-	let provider = tmp && rendererState._context[tmp._id];
+	let provider = tmp && context[tmp._id];
 	let componentContext = tmp
 		? provider
 			? provider.props.value
 			: tmp._defaultValue
-		: rendererState._context;
+		: context;
 
 	if (c._nextState == null) {
 		c._nextState = c.state;
@@ -282,11 +278,7 @@ function patchComponent(internal, newVNode) {
 	c.state = c._nextState;
 
 	if (c.getChildContext != null) {
-		rendererState._context = internal._context = Object.assign(
-			{},
-			rendererState._context,
-			c.getChildContext()
-		);
+		internal._context = Object.assign({}, context, c.getChildContext());
 	}
 
 	if (ENABLE_CLASSES) {
