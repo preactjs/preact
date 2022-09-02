@@ -37,7 +37,7 @@ export function createElement(type, props, children) {
 		}
 	}
 
-	return createVNode(type, normalizedProps, key, ref, null);
+	return { type, props: normalizedProps, key, ref, constructor: undefined };
 }
 
 /**
