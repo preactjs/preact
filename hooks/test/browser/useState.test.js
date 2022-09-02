@@ -1,4 +1,4 @@
-import { act, setupRerender } from 'preact/test-utils';
+import { setupRerender, act } from 'preact/test-utils';
 import { createElement, render, createContext } from 'preact';
 import { useState, useContext, useEffect } from 'preact/hooks';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
@@ -55,7 +55,7 @@ describe('useState', () => {
 		let lastState;
 		let doSetState;
 
-		const Comp = sinon.spy(function Comp() {
+		const Comp = sinon.spy(() => {
 			const [state, setState] = useState(0);
 			lastState = state;
 			doSetState = setState;
@@ -81,7 +81,7 @@ describe('useState', () => {
 		let lastState;
 		let doSetState;
 
-		const Comp = sinon.spy(function Comp() {
+		const Comp = sinon.spy(() => {
 			const [state, setState] = useState(0);
 			lastState = state;
 			doSetState = setState;
@@ -176,26 +176,6 @@ describe('useState', () => {
 		expect(scratch.innerHTML).to.equal('<p>hi</p>');
 	});
 
-	it('should render a second time when the render function updates state', () => {
-		const calls = [];
-		const App = () => {
-			const [greeting, setGreeting] = useState('bye');
-
-			if (greeting === 'bye') {
-				setGreeting('hi');
-			}
-
-			calls.push(greeting);
-
-			return <p>{greeting}</p>;
-		};
-
-		render(<App />, scratch);
-		expect(calls.length).to.equal(2);
-		expect(calls).to.deep.equal(['bye', 'hi']);
-		expect(scratch.textContent).to.equal('hi');
-	});
-
 	it('should handle queued useState', () => {
 		function Message({ message, onClose }) {
 			const [isVisible, setVisible] = useState(Boolean(message));
@@ -230,6 +210,89 @@ describe('useState', () => {
 		text.click();
 		rerender();
 		expect(scratch.innerHTML).to.equal('');
+	});
+
+	it('should render a second time when the render function updates state', () => {
+		const calls = [];
+		const App = () => {
+			const [greeting, setGreeting] = useState('bye');
+
+			if (greeting === 'bye') {
+				setGreeting('hi');
+			}
+
+			calls.push(greeting);
+
+			return <p>{greeting}</p>;
+		};
+
+		act(() => {
+			render(<App />, scratch);
+		});
+		expect(calls.length).to.equal(2);
+		expect(calls).to.deep.equal(['bye', 'hi']);
+		expect(scratch.textContent).to.equal('hi');
+	});
+
+	// https://github.com/preactjs/preact/issues/3669
+	it('correctly updates with multiple state updates', () => {
+		let simulateClick;
+		function TestWidget() {
+			const [saved, setSaved] = useState(false);
+			const [, setSaving] = useState(false);
+
+			simulateClick = () => {
+				setSaving(true);
+				setSaved(true);
+				setSaving(false);
+			};
+
+			return <div>{saved ? 'Saved!' : 'Unsaved!'}</div>;
+		}
+
+		render(<TestWidget />, scratch);
+		expect(scratch.innerHTML).to.equal('<div>Unsaved!</div>');
+
+		act(() => {
+			simulateClick();
+		});
+
+		expect(scratch.innerHTML).to.equal('<div>Saved!</div>');
+	});
+
+	// https://github.com/preactjs/preact/issues/3674
+	it('ensure we iterate over all hooks', () => {
+		let open, close;
+
+		function TestWidget() {
+			const [, setCounter] = useState(0);
+			const [isOpen, setOpen] = useState(false);
+
+			open = () => {
+				setCounter(42);
+				setOpen(true);
+			};
+
+			close = () => {
+				setOpen(false);
+			};
+
+			return <div>{isOpen ? 'open' : 'closed'}</div>;
+		}
+
+		render(<TestWidget />, scratch);
+		expect(scratch.innerHTML).to.equal('<div>closed</div>');
+
+		act(() => {
+			open();
+		});
+
+		expect(scratch.innerHTML).to.equal('<div>open</div>');
+
+		act(() => {
+			close();
+		});
+		expect(scratch.innerHTML).to.equal('<div>closed</div>');
 	});
 
 	it('does not loop when states are equal after batches', () => {
