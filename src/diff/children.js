@@ -48,7 +48,7 @@ export function diffChildren(
 		childVNode = renderResult[i];
 
 		if (childVNode == null || typeof childVNode == 'boolean') {
-			childVNode = newParentVNode._children[i] = null;
+			childVNode = null;
 		}
 		// If this newVNode is being reused (e.g. <div>{reuse}{reuse}</div>) in the same diff,
 		// or we are rendering a component (e.g. setState) copy the oldVNodes so it can have
@@ -59,7 +59,7 @@ export function diffChildren(
 			// eslint-disable-next-line valid-typeof
 			typeof childVNode == 'bigint'
 		) {
-			childVNode = newParentVNode._children[i] = createVNode(
+			childVNode = createVNode(
 				null,
 				childVNode,
 				null,
@@ -67,28 +67,28 @@ export function diffChildren(
 				childVNode
 			);
 		} else if (Array.isArray(childVNode)) {
-			childVNode = newParentVNode._children[i] = createVNode(
+			childVNode = createVNode(
 				Fragment,
 				{ children: childVNode },
 				null,
 				null,
 				null
 			);
-		} else if (childVNode._depth > 0) {
-			// VNode is already in use, clone it. This can happen in the following
-			// scenario:
+		} else {
+			// Always clone VNodes to ensure our own copy within the tree.
+			// This avoids clobbering VNodes used in multiple places:
 			//   const reuse = <div />
 			//   <div>{reuse}<span />{reuse}</div>
-			childVNode = newParentVNode._children[i] = createVNode(
+			childVNode = createVNode(
 				childVNode.type,
 				childVNode.props,
 				childVNode.key,
 				childVNode.ref ? childVNode.ref : null,
 				childVNode._original
 			);
-		} else {
-			childVNode = newParentVNode._children[i] = childVNode;
 		}
+		
+		newParentVNode._children[i] = childVNode;
 
 		// Terser removes the `continue` here and wraps the loop body
 		// in a `if (childVNode) { ... } condition
