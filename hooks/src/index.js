@@ -110,6 +110,7 @@ options.unmount = vnode => {
 				hasErrored = e;
 			}
 		});
+		c.__hooks = undefined;
 		if (hasErrored) options._catchError(hasErrored, c._vnode);
 	}
 };
