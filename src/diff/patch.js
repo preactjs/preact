@@ -28,6 +28,7 @@ import { commitQueue } from './commit';
  * Diff two virtual nodes and apply proper changes to the DOM
  * @param {import('../internal').Internal} internal The Internal node to patch
  * @param {import('../internal').VNode | string} vnode The new virtual node
+ * @param {import('../internal').PreactElement} parentDom The element into which this subtree is rendered
  */
 export function patch(internal, vnode, parentDom) {
 	let flags = internal.flags;

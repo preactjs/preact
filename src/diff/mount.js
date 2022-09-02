@@ -38,15 +38,13 @@ export function mount(internal, newVNode, parentDom, startDom) {
 			// Root nodes signal that an attempt to render into a specific DOM node on
 			// the page. Root nodes can occur anywhere in the tree and not just at the
 			// top.
-			let prevParentDom = parentDom;
-			if (internal.flags & TYPE_ROOT) {
+			if (
+				internal.flags & TYPE_ROOT &&
+				newVNode.props._parentDom !== parentDom
+			) {
 				parentDom = newVNode.props._parentDom;
-
-				// Note: this is likely always true because we are inside mount()
-				if (parentDom !== prevParentDom) {
-					prevStartDom = startDom;
-					startDom = null;
-				}
+				prevStartDom = startDom;
+				startDom = null;
 			}
 
 			const renderResult = mountComponent(internal, startDom);
@@ -219,6 +217,7 @@ function mountElement(internal, dom) {
  * Mount all children of an Internal
  * @param {import('../internal').Internal} internal The parent Internal of the given children
  * @param {import('../internal').ComponentChild[]} children
+ * @param {import('../internal').PreactElement} parentDom The element into which this subtree is rendered
  * @param {import('../internal').PreactNode} startDom
  */
 export function mountChildren(internal, children, parentDom, startDom) {
