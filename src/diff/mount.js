@@ -170,17 +170,24 @@ function mountElement(internal, dom) {
 		let newHtml, newValue, newChildren;
 		for (i in newProps) {
 			value = newProps[i];
-			if (i === 'children') {
-				newChildren = value;
-			} else if (i === 'dangerouslySetInnerHTML') {
-				newHtml = value;
-			} else if (i === 'value') {
-				newValue = value;
-			} else if (
-				value != null &&
-				(isFullRender || typeof value === 'function')
-			) {
-				setProperty(dom, i, value, null, isSvg);
+			switch (i) {
+				case 'children': {
+					newChildren = value;
+					break;
+				}
+				case 'dangerouslySetInnerHTML': {
+					newHtml = value;
+					break;
+				}
+				case 'value': {
+					newValue = value;
+					break;
+				}
+				default: {
+					if (value != null && (isFullRender || typeof value === 'function')) {
+						setProperty(dom, i, value, null, isSvg);
+					}
+				}
 			}
 		}
 
