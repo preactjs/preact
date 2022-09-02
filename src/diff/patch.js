@@ -22,6 +22,7 @@ import { getDomSibling } from '../tree';
 import { mountChildren } from './mount';
 import { Fragment } from '../create-element';
 import { ENABLE_CLASSES, rendererState } from '../component';
+import { commitQueue } from './commit';
 
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
@@ -104,7 +105,7 @@ export function patch(internal, vnode, parentDom) {
 			}
 
 			if (internal._commitCallbacks.length) {
-				rendererState._commitQueue.push(internal);
+				commitQueue.push(internal);
 			}
 
 			// In the event this subtree creates a new context for its children, restore

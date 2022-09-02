@@ -18,6 +18,7 @@ import { setProperty } from './props';
 import { createInternal } from '../tree';
 import options from '../options';
 import { ENABLE_CLASSES, rendererState } from '../component';
+import { commitQueue } from './commit';
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
  * @param {import('../internal').Internal} internal The Internal node to mount
@@ -63,7 +64,7 @@ export function mount(internal, newVNode, parentDom, startDom) {
 			}
 
 			if (internal._commitCallbacks.length) {
-				rendererState._commitQueue.push(internal);
+				commitQueue.push(internal);
 			}
 
 			// In the event this subtree creates a new context for its children, restore

@@ -12,9 +12,7 @@ export let ENABLE_CLASSES = false;
  * @type {import('./internal').RendererState}
  */
 export const rendererState = {
-	_parentDom: null,
-	_context: {},
-	_commitQueue: []
+	_context: {}
 };
 
 /**
@@ -112,7 +110,6 @@ function rerender(internal) {
 		);
 
 		rendererState._context = getParentContext(internal);
-		rendererState._commitQueue = [];
 		patch(internal, vnode, getParentDom(internal));
 		commitRoot(internal);
 	}
