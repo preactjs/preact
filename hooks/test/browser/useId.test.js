@@ -1,15 +1,17 @@
 import { createElement, render } from 'preact';
+import { useId, useState } from 'preact/hooks';
+import { setupRerender } from 'preact/test-utils';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
-import { useId } from 'preact/hooks';
 
 /** @jsx createElement */
 
 describe('useId', () => {
 	/** @type {HTMLDivElement} */
-	let scratch;
+	let scratch, rerender;
 
 	beforeEach(() => {
 		scratch = setupScratch();
+		rerender = setupRerender();
 	});
 
 	afterEach(() => {
@@ -86,6 +88,45 @@ describe('useId', () => {
 		render(<Comp />, scratch);
 		expect(scratch.innerHTML).to.equal(
 			'<div id="P-1"><span id="P1-1">h</span><span id="P2-1">h</span><span id="P3-1">h</span></div>'
+		);
+	});
+
+	it('correctly handles new elements', () => {
+		let set;
+		function Child() {
+			const id = useId();
+			return <span id={id}>h</span>;
+		}
+
+		function Stateful() {
+			const [state, setState] = useState(false);
+			set = setState;
+			return (
+				<div>
+					<Child />
+					{state && <Child />}
+				</div>
+			);
+		}
+
+		function Comp() {
+			const id = useId();
+			return (
+				<div id={id}>
+					<Stateful />
+				</div>
+			);
+		}
+
+		render(<Comp />, scratch);
+		expect(scratch.innerHTML).to.equal(
+			'<div id="P-1"><div><span id="P11-1">h</span></div></div>'
+		);
+
+		set(true);
+		rerender();
+		expect(scratch.innerHTML).to.equal(
+			'<div id="P-1"><div><span id="P11-1">h</span><span id="P2-1">h</span></div></div>'
 		);
 	});
 });
