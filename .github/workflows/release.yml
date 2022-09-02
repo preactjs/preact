@@ -3,7 +3,7 @@ name: Version or Publish
 on:
   push:
     branches:
-      - main
+      - v11
 
 jobs:
   changesets:
