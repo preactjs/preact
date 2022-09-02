@@ -37,7 +37,15 @@ export function createElement(type, props, children) {
 		}
 	}
 
-	return { type, props: normalizedProps, key, ref, constructor: undefined };
+	const vnode = {
+		type,
+		props: normalizedProps,
+		key,
+		ref,
+		constructor: undefined
+	};
+	if (options.vnode) options.vnode(vnode);
+	return vnode;
 }
 
 /**
@@ -74,9 +82,6 @@ export function createVNode(type, props, key, ref, original) {
 		constructor: undefined,
 		_original: original == null ? ++vnodeId : original
 	};
-
-	// Only invoke the vnode hook if this was *not* a direct copy:
-	if (original == null && options.vnode != null) options.vnode(vnode);
 
 	return vnode;
 }
