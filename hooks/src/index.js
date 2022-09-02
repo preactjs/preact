@@ -14,7 +14,7 @@ let previousInternal;
 /** @type {number} */
 let currentHook = 0;
 
-/** @type {Array<import('./internal').Component>} */
+/** @type {Array<import('./internal').Internal>} */
 let afterPaintEffects = [];
 
 let EMPTY = [];
@@ -189,7 +189,6 @@ export function useReducer(reducer, initialState, init) {
 
 			return currentValue !== hookState._value[0];
 		};
-
 	}
 
 	return hookState._nextValue || hookState._value;
@@ -359,6 +358,7 @@ export function useErrorBoundary(cb) {
 function flushAfterPaintEffects() {
 	let internal;
 	while ((internal = afterPaintEffects.shift())) {
+		if (!internal.data.__hooks) continue;
 		if (~internal.flags & MODE_UNMOUNTING) {
 			try {
 				internal.data.__hooks._pendingEffects.forEach(invokeCleanup);
