@@ -37,18 +37,22 @@ options._diff = vnode => {
 		if (vnode._mask) {
 			// already visited, pick up where we left off: (fixes subtree updates)
 			mask = vnode._mask;
+			depth = vnode._maskDepth;
 		} else if (depth === 0) {
 			// this is the first component rendered and hasn't been seen, it's a root:
 			vnode._mask = mask = '';
+			vnode._maskDepth = depth;
 		} else {
 			// replace mask[depth] with the next: (basically *mask[depth-1]++)
 			const offset = Number(mask[depth - 1]) + 1;
 			vnode._mask = mask = mask.slice(0, depth - 1) + offset;
+			vnode._maskDepth = depth;
 		}
 
 		depth++;
 		mask += '0';
 	}
+
 	currentComponent = null;
 
 	if (oldBeforeDiff) oldBeforeDiff(vnode);

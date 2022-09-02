@@ -126,7 +126,7 @@ describe('useId', () => {
 		set(true);
 		rerender();
 		expect(scratch.innerHTML).to.equal(
-			'<div id="P-1"><div><span id="P11-1">h</span><span id="P2-1">h</span></div></div>'
+			'<div id="P-1"><div><span id="P11-1">h</span><span id="P12-1">h</span></div></div>'
 		);
 	});
 });
