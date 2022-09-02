@@ -28,7 +28,7 @@ import { ENABLE_CLASSES, rendererState } from '../component';
  * @param {import('../internal').Internal} internal The Internal node to patch
  * @param {import('../internal').VNode | string} vnode The new virtual node
  */
-export function patch(internal, vnode) {
+export function patch(internal, vnode, parentDom) {
 	let flags = internal.flags;
 
 	if (flags & TYPE_TEXT) {
@@ -50,16 +50,14 @@ export function patch(internal, vnode) {
 	// Root nodes render their children into a specific parent DOM element.
 	// They can occur anywhere in the tree, can be nested, and currently allow reparenting during patches.
 	// @TODO: Decide if we actually want to support silent reparenting during patch - is it worth the bytes?
-	let prevParentDom = rendererState._parentDom;
+	let prevParentDom = parentDom;
 	if (flags & TYPE_ROOT) {
-		rendererState._parentDom = vnode.props._parentDom;
+		parentDom = vnode.props._parentDom;
 
 		if (internal.props._parentDom !== vnode.props._parentDom) {
 			let nextSibling =
-				rendererState._parentDom == prevParentDom
-					? getDomSibling(internal)
-					: null;
-			insertComponentDom(internal, nextSibling, rendererState._parentDom);
+				parentDom == prevParentDom ? getDomSibling(internal) : null;
+			insertComponentDom(internal, nextSibling, parentDom);
 		}
 	}
 
@@ -100,16 +98,15 @@ export function patch(internal, vnode) {
 						? null
 						: getDomSibling(internal);
 
-				mountChildren(internal, renderResult, siblingDom);
+				mountChildren(internal, renderResult, parentDom, siblingDom);
 			} else {
-				patchChildren(internal, renderResult);
+				patchChildren(internal, renderResult, parentDom);
 			}
 
 			if (internal._commitCallbacks.length) {
 				rendererState._commitQueue.push(internal);
 			}
 
-			rendererState._parentDom = prevParentDom;
 			// In the event this subtree creates a new context for its children, restore
 			// the previous context for its siblings
 			rendererState._context = prevContext;
@@ -184,13 +181,11 @@ function patchElement(internal, vnode) {
 		internal._children = null;
 	} else {
 		if (oldHtml) dom.innerHTML = '';
-		const prevParentDom = rendererState._parentDom;
-		rendererState._parentDom = dom;
 		patchChildren(
 			internal,
-			newChildren && Array.isArray(newChildren) ? newChildren : [newChildren]
+			newChildren && Array.isArray(newChildren) ? newChildren : [newChildren],
+			dom
 		);
-		rendererState._parentDom = prevParentDom;
 	}
 }
 
@@ -246,8 +241,7 @@ function patchComponent(internal, newVNode) {
 	if (
 		!(internal.flags & FORCE_UPDATE) &&
 		c.shouldComponentUpdate != null &&
-		c.shouldComponentUpdate(newProps, c._nextState, componentContext) ===
-			false
+		c.shouldComponentUpdate(newProps, c._nextState, componentContext) === false
 	) {
 		c.props = newProps;
 		c.state = c._nextState;

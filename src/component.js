@@ -113,8 +113,7 @@ function rerender(internal) {
 
 		rendererState._context = getParentContext(internal);
 		rendererState._commitQueue = [];
-		rendererState._parentDom = getParentDom(internal);
-		patch(internal, vnode);
+		patch(internal, vnode, getParentDom(internal));
 		commitRoot(internal);
 	}
 }

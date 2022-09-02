@@ -22,10 +22,11 @@ import { ENABLE_CLASSES, rendererState } from '../component';
  * Diff two virtual nodes and apply proper changes to the DOM
  * @param {import('../internal').Internal} internal The Internal node to mount
  * @param {import('../internal').VNode | string} newVNode The new virtual node
+ * @param {import('../internal').PreactElement} parentDom The element into which this subtree is rendered
  * @param {import('../internal').PreactNode} startDom
  * @returns {import('../internal').PreactNode | null} pointer to the next DOM node to be hydrated (or null)
  */
-export function mount(internal, newVNode, startDom) {
+export function mount(internal, newVNode, parentDom, startDom) {
 	if (options._diff) options._diff(internal, newVNode);
 
 	/** @type {import('../internal').PreactNode} */
@@ -36,12 +37,12 @@ export function mount(internal, newVNode, startDom) {
 			// Root nodes signal that an attempt to render into a specific DOM node on
 			// the page. Root nodes can occur anywhere in the tree and not just at the
 			// top.
-			let prevParentDom = rendererState._parentDom;
+			let prevParentDom = parentDom;
 			if (internal.flags & TYPE_ROOT) {
-				rendererState._parentDom = newVNode.props._parentDom;
+				parentDom = newVNode.props._parentDom;
 
 				// Note: this is likely always true because we are inside mount()
-				if (rendererState._parentDom !== prevParentDom) {
+				if (parentDom !== prevParentDom) {
 					prevStartDom = startDom;
 					startDom = null;
 				}
@@ -49,13 +50,12 @@ export function mount(internal, newVNode, startDom) {
 
 			let prevContext = rendererState._context;
 
-			nextDomSibling = mountComponent(internal, startDom);
+			nextDomSibling = mountComponent(internal, parentDom, startDom);
 
 			if (internal._commitCallbacks.length) {
 				rendererState._commitQueue.push(internal);
 			}
 
-			rendererState._parentDom = prevParentDom;
 			// In the event this subtree creates a new context for its children, restore
 			// the previous context for its siblings
 			rendererState._context = prevContext;
@@ -199,14 +199,12 @@ function mountElement(internal, dom) {
 				dom.innerHTML = newHtml.__html;
 			}
 		} else if (newChildren != null) {
-			const prevParentDom = rendererState._parentDom;
-			rendererState._parentDom = dom;
 			mountChildren(
 				internal,
 				Array.isArray(newChildren) ? newChildren : [newChildren],
+				dom,
 				isNew ? null : dom.firstChild
 			);
-			rendererState._parentDom = prevParentDom;
 		}
 
 		// (as above, don't diff props during hydration)
@@ -225,7 +223,7 @@ function mountElement(internal, dom) {
  * @param {import('../internal').ComponentChild[]} children
  * @param {import('../internal').PreactNode} startDom
  */
-export function mountChildren(internal, children, startDom) {
+export function mountChildren(internal, children, parentDom, startDom) {
 	let internalChildren = (internal._children = []),
 		i,
 		childVNode,
@@ -247,7 +245,7 @@ export function mountChildren(internal, children, startDom) {
 		internalChildren[i] = childInternal;
 
 		// Morph the old element into the new one, but don't append it to the dom yet
-		mountedNextChild = mount(childInternal, childVNode, startDom);
+		mountedNextChild = mount(childInternal, childVNode, parentDom, startDom);
 
 		newDom = childInternal._dom;
 
@@ -260,7 +258,7 @@ export function mountChildren(internal, children, startDom) {
 			// The DOM the diff should begin with is now startDom (since we inserted
 			// newDom before startDom) so ignore mountedNextChild and continue with
 			// startDom
-			rendererState._parentDom.insertBefore(newDom, startDom);
+			parentDom.insertBefore(newDom, startDom);
 		}
 
 		if (childInternal.ref) {
@@ -296,7 +294,7 @@ export function mountChildren(internal, children, startDom) {
  * @param {import('../internal').PreactNode} startDom the preceding node
  * @returns {import('../internal').PreactNode} the component's children
  */
-function mountComponent(internal, startDom) {
+function mountComponent(internal, parentDom, startDom) {
 	/** @type {import('../internal').Component} */
 	let c;
 	let type = /** @type {import('../internal').ComponentType} */ (internal.type);
@@ -408,5 +406,5 @@ function mountComponent(internal, startDom) {
 		renderResult = [renderResult];
 	}
 
-	return mountChildren(internal, renderResult, startDom);
+	return mountChildren(internal, renderResult, parentDom, startDom);
 }

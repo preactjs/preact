@@ -48,7 +48,6 @@ export interface Options extends preact.Options {
 export type RendererState = {
 	_context: Record<string, any>;
 	_commitQueue: CommitQueue;
-	_parentDom: Element | Document | ShadowRoot | DocumentFragment;
 };
 
 export type CommitQueue = Internal[];

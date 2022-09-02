@@ -33,10 +33,9 @@ export function createRoot(parentDom) {
 		rendererState._context = {};
 		// List of effects that need to be called after diffing:
 		rendererState._commitQueue = [];
-		rendererState._parentDom = parentDom;
 
 		if (rootInternal) {
-			patch(rootInternal, vnode);
+			patch(rootInternal, vnode, parentDom);
 		} else {
 			rootInternal = createInternal(vnode);
 
@@ -55,7 +54,7 @@ export function createRoot(parentDom) {
 
 			rootInternal._context = {};
 
-			mount(rootInternal, vnode, firstChild);
+			mount(rootInternal, vnode, parentDom, firstChild);
 		}
 
 		// Flush all queued effects
