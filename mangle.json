@@ -25,6 +25,7 @@
   "props": {
     "cname": 6,
     "props": {
+      "$_listeners": "l",
       "$_cleanup": "__c",
       "$__hooks": "__H",
       "$_list": "__",
