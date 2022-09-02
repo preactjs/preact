@@ -50,7 +50,17 @@ export function mount(internal, newVNode, parentDom, startDom) {
 
 			let prevContext = rendererState._context;
 
-			nextDomSibling = mountComponent(internal, parentDom, startDom);
+			const renderResult = mountComponent(internal, startDom);
+			if (renderResult === startDom) {
+				nextDomSibling = startDom;
+			} else {
+				nextDomSibling = mountChildren(
+					internal,
+					renderResult,
+					parentDom,
+					startDom
+				);
+			}
 
 			if (internal._commitCallbacks.length) {
 				rendererState._commitQueue.push(internal);
@@ -294,7 +304,7 @@ export function mountChildren(internal, children, parentDom, startDom) {
  * @param {import('../internal').PreactNode} startDom the preceding node
  * @returns {import('../internal').PreactNode} the component's children
  */
-function mountComponent(internal, parentDom, startDom) {
+function mountComponent(internal, startDom) {
 	/** @type {import('../internal').Component} */
 	let c;
 	let type = /** @type {import('../internal').ComponentType} */ (internal.type);
@@ -406,5 +416,5 @@ function mountComponent(internal, parentDom, startDom) {
 		renderResult = [renderResult];
 	}
 
-	return mountChildren(internal, renderResult, parentDom, startDom);
+	return renderResult;
 }
