@@ -43,17 +43,9 @@ function createVNode(type, props, key, __self, __source) {
 		props: normalizedProps,
 		key,
 		ref,
-		_children: null,
-		_parent: null,
-		_depth: 0,
-		_dom: null,
-		_nextDom: undefined,
-		_component: null,
-		_hydrating: null,
-		constructor: undefined,
-		_original: --vnodeId,
 		__source,
-		__self
+		__self,
+		constructor: undefined
 	};
 
 	// If a Component VNode, check for and apply defaultProps.
