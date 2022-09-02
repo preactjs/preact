@@ -211,4 +211,5 @@ function process() {
 		});
 	}
 }
+
 process._rerenderCount = 0;
