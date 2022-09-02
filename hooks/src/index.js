@@ -26,35 +26,21 @@ let oldBeforeUnmount = options.unmount;
 const RAF_TIMEOUT = 100;
 let prevRaf;
 
-// the current ID prefix
-let mask = '';
-
-// tracks component depth (only for the current render, so may be subtree depth)
-let depth = 0;
-
 options._diff = vnode => {
-	if (typeof vnode.type === 'function' && vnode.type !== Fragment) {
-		if (vnode._mask) {
-			// already visited, pick up where we left off: (fixes subtree updates)
-			mask = vnode._mask;
-			depth = vnode._maskDepth;
-		} else if (depth === 0) {
-			// this is the first component rendered and hasn't been seen, it's a root:
-			vnode._mask = mask = '';
-			vnode._maskDepth = depth;
-		} else {
-			// replace mask[depth] with the next: (basically *mask[depth-1]++)
-			const offset = Number(mask[depth - 1]) + 1;
-			vnode._mask = mask = mask.slice(0, depth - 1) + offset;
-			vnode._maskDepth = depth;
-		}
-
-		depth++;
-		mask += '0';
+	if (vnode.type === Fragment) {
+		// Skip so we don't have to ensure wrapping fragments in RTS and prepass
+		vnode._mask = '';
+	} else if (typeof vnode.type === 'function' && !vnode._mask) {
+		vnode._mask =
+			(vnode._parent && vnode._parent._mask ? vnode._parent._mask : '') +
+			(vnode._parent && vnode._parent._children
+				? vnode._parent._children.indexOf(vnode)
+				: 0);
+	} else {
+		vnode._mask = vnode._parent._mask;
 	}
 
 	currentComponent = null;
-
 	if (oldBeforeDiff) oldBeforeDiff(vnode);
 };
 
@@ -87,11 +73,6 @@ options._render = vnode => {
 
 options.diffed = vnode => {
 	if (oldAfterDiff) oldAfterDiff(vnode);
-
-	if (typeof vnode.type === 'function' && vnode.type !== Fragment) {
-		depth--;
-		mask = mask.slice(0, -1);
-	}
 
 	const c = vnode._component;
 	if (c && c.__hooks) {
@@ -398,16 +379,23 @@ export function useErrorBoundary(cb) {
 	];
 }
 
+function hash(s) {
+	let h = 0,
+		i = s.length;
+	while (i > 0) {
+		h = ((h << 5) - h + s.charCodeAt(--i)) | 0;
+	}
+	return h;
+}
+
 export function useId() {
 	const state = getHookState(currentIndex++, 11);
 	if (!state._value) {
-		// TODO: consider Number(currentComponent._vnode._mask + currentIndex).toString(36)
-		state._value = 'P' + currentComponent._vnode._mask + '-' + currentIndex;
+		state._value = 'P' + hash(currentComponent._vnode._mask) + currentIndex;
 	}
 
 	return state._value;
 }
-
 /**
  * After paint effects consumer.
  */
