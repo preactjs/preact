@@ -96,3 +96,35 @@ export function testElementTextContains(selector, expectedText) {
 		);
 	}
 }
+
+let count = 0;
+const channel = new MessageChannel();
+const callbacks = new Map();
+channel.port1.onmessage = e => {
+	let id = e.data;
+	let fn = callbacks.get(id);
+	callbacks.delete(id);
+	fn();
+};
+let pm = function(callback) {
+	let id = ++count;
+	callbacks.set(id, callback);
+	this.postMessage(id);
+}.bind(channel.port2);
+
+export function nextTick() {
+	return new Promise(r => pm(r));
+}
+
+export function mutateAndLayoutAsync(mutation, times = 1) {
+	return new Promise(resolve => {
+		requestAnimationFrame(() => {
+			for (let i = 0; i < times; i++) {
+				mutation(i);
+			}
+			pm(resolve);
+		});
+	});
+}
+
+export const sleep = ms => new Promise(r => setTimeout(r, ms));
