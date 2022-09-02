@@ -21,6 +21,7 @@ PR's that weren't backported yet, do they work?
 - https://github.com/preactjs/preact/pull/3280 Not merged yet need some input
 - https://github.com/preactjs/preact/pull/3222 Same as above
 - Make this work https://github.com/preactjs/preact/pull/3306
+- https://github.com/preactjs/preact/pull/3696
 
 ## Root node follow ups
 
