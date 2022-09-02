@@ -127,5 +127,35 @@ describe('React-18-hooks', () => {
 
 			expect(scratch.innerHTML).to.equal('<p>hello new world</p>');
 		});
+
+		it('should not call function values on subscription', () => {
+			let flush;
+			const subscribe = sinon.spy(cb => {
+				flush = cb;
+				return () => {};
+			});
+
+			let i = 0;
+			const getSnapshot = sinon.spy(() => {
+				return () => 'value: ' + i++;
+			});
+
+			const App = () => {
+				const value = useSyncExternalStore(subscribe, getSnapshot);
+				return <p>{value()}</p>;
+			};
+
+			act(() => {
+				render(<App />, scratch);
+			});
+			expect(scratch.innerHTML).to.equal('<p>value: 0</p>');
+			expect(subscribe).to.be.calledOnce;
+			expect(getSnapshot).to.be.calledOnce;
+
+			flush();
+			rerender();
+
+			expect(scratch.innerHTML).to.equal('<p>value: 1</p>');
+		});
 	});
 });
