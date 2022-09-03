@@ -12,14 +12,14 @@ import { mount } from './mount';
 import { patch } from './patch';
 import { unmount } from './unmount';
 import { createInternal, getDomSibling } from '../tree';
-import { rendererState } from '../component';
 
 /**
  * Update an internal with new children.
  * @param {import('../internal').Internal} internal The internal whose children should be patched
  * @param {import('../internal').ComponentChild[]} children The new children, represented as VNodes
+ * @param {import('../internal').PreactElement} parentDom The element into which this subtree is rendered
  */
-export function patchChildren(internal, children) {
+export function patchChildren(internal, children, parentDom) {
 	let oldChildren =
 		(internal._children && internal._children.slice()) || EMPTY_ARR;
 
@@ -75,6 +75,7 @@ export function patchChildren(internal, children) {
 			mount(
 				childInternal,
 				childVNode,
+				parentDom,
 				getDomSibling(internal, skewedIndex)
 			);
 		}
@@ -85,14 +86,10 @@ export function patchChildren(internal, children) {
 			(MODE_HYDRATE | MODE_SUSPENDED)
 		) {
 			// We are resuming the hydration of a VNode
-			mount(
-				childInternal,
-				childVNode,
-				childInternal._dom
-			);
+			mount(childInternal, childVNode, parentDom, childInternal._dom);
 		} else {
 			// Morph the old element into the new one, but don't append it to the dom yet
-			patch(childInternal, childVNode);
+			patch(childInternal, childVNode, parentDom);
 		}
 
 		go: if (mountingChild) {
@@ -102,7 +99,7 @@ export function patchChildren(internal, children) {
 
 			// Perform insert of new dom
 			if (childInternal.flags & TYPE_DOM) {
-				rendererState._parentDom.insertBefore(
+				parentDom.insertBefore(
 					childInternal._dom,
 					getDomSibling(internal, skewedIndex)
 				);
@@ -136,13 +133,9 @@ export function patchChildren(internal, children) {
 
 			let nextSibling = getDomSibling(internal, skewedIndex + 1);
 			if (childInternal.flags & TYPE_DOM) {
-				rendererState._parentDom.insertBefore(childInternal._dom, nextSibling);
+				parentDom.insertBefore(childInternal._dom, nextSibling);
 			} else {
-				insertComponentDom(
-					childInternal,
-					nextSibling,
-					rendererState._parentDom
-				);
+				insertComponentDom(childInternal, nextSibling, parentDom);
 			}
 		}
 
