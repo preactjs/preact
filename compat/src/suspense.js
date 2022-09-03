@@ -143,7 +143,7 @@ Suspense.prototype._childDidSuspend = function(promise, suspendingVNode) {
 		if (!--c._pendingSuspensionCount) {
 			// If the suspension was during hydration we don't need to restore the
 			// suspended children into the _children array
-			if (c.state._suspended) {
+			if (c.state._suspended && c._vnode._children) {
 				const suspendedVNode = c.state._suspended;
 				c._vnode._children[0] = removeOriginal(
 					suspendedVNode,
