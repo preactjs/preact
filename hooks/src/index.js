@@ -1,4 +1,4 @@
-import { options } from 'preact';
+import { Fragment, options } from 'preact';
 
 /** @type {number} */
 let currentIndex;
@@ -27,6 +27,21 @@ const RAF_TIMEOUT = 100;
 let prevRaf;
 
 options._diff = vnode => {
+	if (
+		typeof vnode.type === 'function' &&
+		!vnode._mask &&
+		vnode.type !== Fragment
+	) {
+		vnode._mask =
+			(vnode._parent && vnode._parent._mask ? vnode._parent._mask : '') +
+			(vnode._parent && vnode._parent._children
+				? vnode._parent._children.indexOf(vnode)
+				: 0);
+	} else if (!vnode._mask) {
+		vnode._mask =
+			vnode._parent && vnode._parent._mask ? vnode._parent._mask : '';
+	}
+
 	currentComponent = null;
 	if (oldBeforeDiff) oldBeforeDiff(vnode);
 };
@@ -367,6 +382,23 @@ export function useErrorBoundary(cb) {
 	];
 }
 
+function hash(s) {
+	let h = 0,
+		i = s.length;
+	while (i > 0) {
+		h = ((h << 5) - h + s.charCodeAt(--i)) | 0;
+	}
+	return h;
+}
+
+export function useId() {
+	const state = getHookState(currentIndex++, 11);
+	if (!state._value) {
+		state._value = 'P' + hash(currentComponent._vnode._mask) + currentIndex;
+	}
+
+	return state._value;
+}
 /**
  * After paint effects consumer.
  */

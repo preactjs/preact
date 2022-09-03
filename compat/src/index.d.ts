@@ -24,6 +24,7 @@ declare namespace React {
 	export import useDebugValue = _hooks.useDebugValue;
 	export import useEffect = _hooks.useEffect;
 	export import useImperativeHandle = _hooks.useImperativeHandle;
+	export import useId = _hooks.useId;
 	export import useLayoutEffect = _hooks.useLayoutEffect;
 	export import useMemo = _hooks.useMemo;
 	export import useReducer = _hooks.useReducer;
