@@ -528,7 +528,6 @@ export function unmount(vnode, parentVNode, skipRemove) {
 
 	// Must be set to `undefined` to properly clean up `_nextDom`
 	// for which `null` is a valid value. See comment in `create-element.js`
-	if (vnode._dom) vnode._dom._listeners = undefined
 	vnode._children = vnode._dom = vnode._parent = vnode._dom = vnode._nextDom = undefined;
 }
 
