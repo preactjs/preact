@@ -27,17 +27,19 @@ const RAF_TIMEOUT = 100;
 let prevRaf;
 
 options._diff = vnode => {
-	if (vnode.type === Fragment) {
-		// Skip so we don't have to ensure wrapping fragments in RTS and prepass
-		vnode._mask = '';
-	} else if (typeof vnode.type === 'function' && !vnode._mask) {
+	if (
+		typeof vnode.type === 'function' &&
+		!vnode._mask &&
+		vnode.type !== Fragment
+	) {
 		vnode._mask =
 			(vnode._parent && vnode._parent._mask ? vnode._parent._mask : '') +
 			(vnode._parent && vnode._parent._children
 				? vnode._parent._children.indexOf(vnode)
 				: 0);
-	} else {
-		vnode._mask = vnode._parent._mask;
+	} else if (!vnode._mask) {
+		vnode._mask =
+			vnode._parent && vnode._parent._mask ? vnode._parent._mask : '';
 	}
 
 	currentComponent = null;
