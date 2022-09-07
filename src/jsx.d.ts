@@ -656,8 +656,8 @@ export namespace JSXInternal {
 		challenge?: string;
 		checked?: boolean;
 		cite?: string;
-		class?: string;
-		className?: string;
+		class?: string | undefined;
+		className?: string | undefined;
 		cols?: number;
 		colSpan?: number;
 		content?: string;
