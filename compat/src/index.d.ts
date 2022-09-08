@@ -143,6 +143,10 @@ declare namespace React {
 		arg?: any
 	): void;
 
+	export type PropsWithChildren<P = unknown> = P & {
+		children?: preact.ComponentChild | undefined
+	};
+	
 	export const Children: {
 		map<T extends preact.ComponentChild, R>(
 			children: T | T[],
