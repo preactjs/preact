@@ -529,7 +529,7 @@ export function unmount(vnode, parentVNode, skipRemove) {
 
 	// Must be set to `undefined` to properly clean up `_nextDom`
 	// for which `null` is a valid value. See comment in `create-element.js`
-	vnode._children = vnode._parent = vnode._dom = vnode._nextDom = undefined;
+	vnode._parent = vnode._dom = vnode._nextDom = undefined;
 }
 
 /** The `.render()` method for a PFC backing instance. */
