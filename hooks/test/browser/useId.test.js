@@ -1,4 +1,4 @@
-import { createElement, Fragment, render } from 'preact';
+import { createElement, Fragment, hydrate, render } from 'preact';
 import { useId, useReducer, useState } from 'preact/hooks';
 import { setupRerender } from 'preact/test-utils';
 import { render as rts } from 'preact-render-to-string';
@@ -199,6 +199,79 @@ describe('useId', () => {
 
 		const rtsOutput = rts(<Component />);
 		render(<Component />, scratch);
+		expect(rtsOutput === scratch.innerHTML).to.equal(true);
+	});
+
+	it('matches with rts after hydration', () => {
+		const ChildFragmentReturn = ({ children }) => {
+			return <Fragment>{children}</Fragment>;
+		};
+
+		const ChildReturn = ({ children }) => {
+			return children;
+		};
+
+		const SomeMessage = ({ msg }) => {
+			const id = useId();
+			return (
+				<p>
+					{msg} {id}
+				</p>
+			);
+		};
+
+		const Stateful = () => {
+			const [count, add] = useReducer(c => c + 1, 0);
+			const id = useId();
+			return (
+				<div>
+					id: {id}, count: {count}
+					<button onClick={add}>+1</button>
+				</div>
+			);
+		};
+
+		const Component = ({ showStateful = false }) => {
+			const rootId = useId();
+			const paragraphId = useId();
+
+			return (
+				<main>
+					ID: {rootId}
+					<p>Hello world id: {paragraphId}</p>
+					{showStateful ? (
+						<Stateful />
+					) : (
+						<ChildReturn>
+							<SomeMessage msg="child-return" />
+							<ChildReturn>
+								<SomeMessage msg="child-return" />
+								<ChildReturn>
+									<SomeMessage msg="child-return" />
+								</ChildReturn>
+							</ChildReturn>
+						</ChildReturn>
+					)}
+					<ChildFragmentReturn>
+						<SomeMessage msg="child-fragment-return" />
+						<SomeMessage msg="child-fragment-return-2" />
+						<SomeMessage msg="child-fragment-return-3" />
+						<SomeMessage msg="child-fragment-return-4" />
+						<ChildReturn>
+							<SomeMessage msg="child-return" />
+							<ChildFragmentReturn>
+								<SomeMessage msg="child-fragment-return" />
+							</ChildFragmentReturn>
+						</ChildReturn>
+					</ChildFragmentReturn>
+				</main>
+			);
+		};
+
+		const rtsOutput = rts(<Component />);
+
+		scratch.innerHTML = rtsOutput;
+		hydrate(<Component />, scratch);
 		expect(rtsOutput === scratch.innerHTML).to.equal(true);
 	});
 });
