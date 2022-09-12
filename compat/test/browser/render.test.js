@@ -475,6 +475,16 @@ describe('compat render', () => {
 		expect(updateSpy).to.not.be.calledOnce;
 	});
 
+	it('should support false aria-* attributes', () => {
+		render(<div aria-checked={false} />, scratch);
+		expect(scratch.firstChild.getAttribute('aria-checked')).to.equal('false');
+	});
+
+	it('should support false data-* attributes', () => {
+		render(<div data-checked={false} />, scratch);
+		expect(scratch.firstChild.getAttribute('data-checked')).to.equal('false');
+	});
+
 	it("should support react-relay's usage of __SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED", () => {
 		const Ctx = createContext('foo');
 
