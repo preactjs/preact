@@ -58,8 +58,8 @@ class SimpleComponent extends Component {
 							// arrow function
 							console.log(this.componentProp);
 
-							// Validate `currentTarget` is HTMLElement
-							console.log('clicked ', e.currentTarget.style.display);
+							// Validate `target` is HTMLElement
+							console.log('clicked ', e.target.style.display);
 						}}
 					></clickable-ce>
 					<color-picker space="rgb" dir="rtl"></color-picker>
