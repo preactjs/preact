@@ -25,6 +25,7 @@
 			"require": "./compat/dist/compat.js"
 		},
 		"./debug": {
+			"types": "./debug/src/index.d.ts",
 			"browser": "./debug/dist/debug.module.js",
 			"umd": "./debug/dist/debug.umd.js",
 			"import": "./debug/dist/debug.mjs",
