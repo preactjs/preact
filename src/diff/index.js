@@ -516,9 +516,10 @@ export function unmount(vnode, parentVNode, skipRemove) {
 	}
 
 	if ((r = vnode._children)) {
+		let skipRemoveChild = skipRemove || typeof vnode.type != 'function';
 		for (let i = 0; i < r.length; i++) {
 			if (r[i]) {
-				unmount(r[i], parentVNode, skipRemove || typeof vnode.type != 'function');
+				unmount(r[i], parentVNode, skipRemoveChild);
 			}
 		}
 	}
