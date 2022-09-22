@@ -47,7 +47,9 @@ Component.prototype.setState = function(update, callback) {
 	if (update == null) return;
 
 	if (this._vnode) {
-		if (callback) this._renderCallbacks.push(callback);
+		if (callback) {
+			this._stateCallbacks.push(callback);
+		}
 		enqueueRender(this);
 	}
 };

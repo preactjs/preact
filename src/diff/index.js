@@ -89,6 +89,7 @@ export function diff(
 				c._globalContext = globalContext;
 				isNew = c._dirty = true;
 				c._renderCallbacks = [];
+				c._stateCallbacks = [];
 			}
 
 			// Invoke getDerivedStateFromProps
@@ -108,6 +109,11 @@ export function diff(
 
 			oldProps = c.props;
 			oldState = c.state;
+
+			if (c._stateCallbacks.length) {
+				c._renderCallbacks.push(...c._stateCallbacks);
+				c._stateCallbacks = [];
+			}
 
 			// Invoke pre-render lifecycle methods
 			if (isNew) {
