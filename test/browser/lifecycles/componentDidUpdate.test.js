@@ -404,6 +404,7 @@ describe('Lifecycle methods', () => {
 				}
 
 				componentDidMount() {
+					// eslint-disable-next-line
 					this.setState({ show: true });
 				}
 

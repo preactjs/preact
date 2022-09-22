@@ -110,8 +110,8 @@ export function diff(
 			oldProps = c.props;
 			oldState = c.state;
 
-			if (c._stateCallbacks.length) {
-				c._renderCallbacks.push(...c._stateCallbacks);
+			for (tmp = 0; tmp < c._stateCallbacks.length; tmp++) {
+				c._renderCallbacks.push(c._stateCallbacks[tmp]);
 				c._stateCallbacks = [];
 			}
 
