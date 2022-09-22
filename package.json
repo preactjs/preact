@@ -1,7 +1,7 @@
 {
 	"name": "preact",
 	"amdName": "preact",
-	"version": "10.10.6",
+	"version": "10.11.0",
 	"private": false,
 	"description": "Fast 3kb React-compatible Virtual DOM library.",
 	"main": "dist/preact.js",
@@ -25,6 +25,7 @@
 			"require": "./compat/dist/compat.js"
 		},
 		"./debug": {
+			"types": "./debug/src/index.d.ts",
 			"browser": "./debug/dist/debug.module.js",
 			"umd": "./debug/dist/debug.umd.js",
 			"import": "./debug/dist/debug.mjs",
@@ -293,6 +294,7 @@
 		"mocha": "^8.2.1",
 		"npm-merge-driver-install": "^1.1.1",
 		"npm-run-all": "^4.0.0",
+		"preact-render-to-string": "^5.2.4",
 		"prettier": "^1.18.2",
 		"prop-types": "^15.7.2",
 		"sade": "^1.7.4",
