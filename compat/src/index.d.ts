@@ -124,7 +124,7 @@ declare namespace React {
 	): C;
 
 	export interface ForwardFn<P = {}, T = any> {
-		(props: P, ref: Ref<T>): preact.ComponentChild;
+		(props: P, ref: ForwardedRef<T>): preact.ComponentChild;
 		displayName?: string;
 	}
 
@@ -132,11 +132,21 @@ declare namespace React {
 		fn: ForwardFn<P, R>
 	): preact.FunctionalComponent<Omit<P, 'ref'> & { ref?: preact.Ref<R> }>;
 
+	interface MutableRefObject<T> {
+		current: T;
+	}
+	
+	export type ForwardedRef<T> = ((instance: T | null) => void) | MutableRefObject<T | null> | null;
+
 	export function unstable_batchedUpdates(
 		callback: (arg?: any) => void,
 		arg?: any
 	): void;
 
+	export type PropsWithChildren<P = unknown> = P & {
+		children?: preact.ComponentChild | undefined
+	};
+	
 	export const Children: {
 		map<T extends preact.ComponentChild, R>(
 			children: T | T[],
