@@ -331,15 +331,12 @@ export namespace JSXInternal {
 		readonly currentTarget: Target;
 	};
 
-	export type TargetedAnimationEvent<
-		Target extends EventTarget
-	> = TargetedEvent<Target, AnimationEvent>;
-	export type TargetedClipboardEvent<
-		Target extends EventTarget
-	> = TargetedEvent<Target, ClipboardEvent>;
-	export type TargetedCompositionEvent<
-		Target extends EventTarget
-	> = TargetedEvent<Target, CompositionEvent>;
+	export type TargetedAnimationEvent<Target extends EventTarget> =
+		TargetedEvent<Target, AnimationEvent>;
+	export type TargetedClipboardEvent<Target extends EventTarget> =
+		TargetedEvent<Target, ClipboardEvent>;
+	export type TargetedCompositionEvent<Target extends EventTarget> =
+		TargetedEvent<Target, CompositionEvent>;
 	export type TargetedDragEvent<Target extends EventTarget> = TargetedEvent<
 		Target,
 		DragEvent
@@ -364,9 +361,8 @@ export namespace JSXInternal {
 		Target,
 		TouchEvent
 	>;
-	export type TargetedTransitionEvent<
-		Target extends EventTarget
-	> = TargetedEvent<Target, TransitionEvent>;
+	export type TargetedTransitionEvent<Target extends EventTarget> =
+		TargetedEvent<Target, TransitionEvent>;
 	export type TargetedUIEvent<Target extends EventTarget> = TargetedEvent<
 		Target,
 		UIEvent
@@ -390,9 +386,8 @@ export namespace JSXInternal {
 	export type ClipboardEventHandler<Target extends EventTarget> = EventHandler<
 		TargetedClipboardEvent<Target>
 	>;
-	export type CompositionEventHandler<
-		Target extends EventTarget
-	> = EventHandler<TargetedCompositionEvent<Target>>;
+	export type CompositionEventHandler<Target extends EventTarget> =
+		EventHandler<TargetedCompositionEvent<Target>>;
 	export type DragEventHandler<Target extends EventTarget> = EventHandler<
 		TargetedDragEvent<Target>
 	>;
@@ -831,8 +826,7 @@ export namespace JSXInternal {
 		itemRef?: string;
 	}
 
-	type LowerCaseProps<T> = {[P in keyof T as Lowercase<string & P>]: T[P] };
-
+	type LowerCaseProps<T> = { [P in keyof T as Lowercase<string & P>]: T[P] };
 
 	export type ReferrerPolicy =
 		| 'no-referrer'
@@ -842,9 +836,9 @@ export namespace JSXInternal {
 		| 'same-origin'
 		| 'strict-origin'
 		| 'strict-origin-when-cross-origin'
-		| 'unsafe-url'
+		| 'unsafe-url';
 
-	export type TargetValue = '_self' | '_blank' |'_parent' | '_top'
+	export type TargetValue = '_self' | '_blank' | '_parent' | '_top';
 
 	// <a>
 	export interface SpecialAnchorHTMLAttributes {
@@ -859,7 +853,9 @@ export namespace JSXInternal {
 	}
 
 	export interface AnchorHTMLAttributes
-		extends SpecialAnchorHTMLAttributes, LowerCaseProps<SpecialAnchorHTMLAttributes>, HTMLAttributes<HTMLAnchorElement> {}
+		extends SpecialAnchorHTMLAttributes,
+			LowerCaseProps<SpecialAnchorHTMLAttributes>,
+			HTMLAttributes<HTMLAnchorElement> {}
 
 	// <abbr> has no special attributes
 	// <acronym> - DEPRECATED
@@ -886,7 +882,7 @@ export namespace JSXInternal {
 		autoPlay?: boolean;
 		controls?: boolean;
 		controlsList?: string;
-		crossOrigin?: "anonymous" | "use-credentials";
+		crossOrigin?: 'anonymous' | 'use-credentials';
 		disableRemotePlayback?: boolean;
 		loop?: boolean;
 		muted?: boolean;
@@ -907,7 +903,7 @@ export namespace JSXInternal {
 
 	// <bdo>
 	export interface BdoHTMLAttributes extends HTMLAttributes {
-		dir: 'ltr' | 'rtl'
+		dir: 'ltr' | 'rtl';
 	}
 
 	// <bgsound> - DEPRECATED
@@ -1023,7 +1019,19 @@ export namespace JSXInternal {
 		height?: number;
 		name?: string;
 		referrerpolicy?: ReferrerPolicy;
-		sandbox?: 'allow-downloads' | 'allow-forms' | 'allow-modals' | 'allow-orientation-lock' | 'allow-pointer-lock' | 'allow-popups' | 'allow-popups-to-escape-sandbox' | 'allow-presentation' | 'allow-same-origin' | 'allow-scripts' | 'allow-top-navigation' | 'allow-top-navigation-by-user-activation';
+		sandbox?:
+			| 'allow-downloads'
+			| 'allow-forms'
+			| 'allow-modals'
+			| 'allow-orientation-lock'
+			| 'allow-pointer-lock'
+			| 'allow-popups'
+			| 'allow-popups-to-escape-sandbox'
+			| 'allow-presentation'
+			| 'allow-same-origin'
+			| 'allow-scripts'
+			| 'allow-top-navigation'
+			| 'allow-top-navigation-by-user-activation';
 		src?: string;
 		srcDoc?: string;
 		width?: number;
@@ -1078,9 +1086,31 @@ export namespace JSXInternal {
 		size?: number;
 		src?: string;
 		step?: number | string;
-		tabindex?: any // FIXME
-		title?: string // FIXME
-		type?: 'button' | 'checkbox' | 'color' | 'date' | 'datetime-local' | 'email' | 'file' | 'hidden' | 'image' | 'month' | 'number' | 'password' | 'radio' | 'range' | 'reset' | 'search' | 'submit' | 'tel' | 'text' | 'time' | 'url' | 'week';
+		tabindex?: any; // FIXME
+		title?: string; // FIXME
+		type?:
+			| 'button'
+			| 'checkbox'
+			| 'color'
+			| 'date'
+			| 'datetime-local'
+			| 'email'
+			| 'file'
+			| 'hidden'
+			| 'image'
+			| 'month'
+			| 'number'
+			| 'password'
+			| 'radio'
+			| 'range'
+			| 'reset'
+			| 'search'
+			| 'submit'
+			| 'tel'
+			| 'text'
+			| 'time'
+			| 'url'
+			| 'week';
 		width?: number;
 
 		// Non-standard
@@ -1115,7 +1145,7 @@ export namespace JSXInternal {
 	// <link>
 	export interface LinkHTMLAttributes {
 		as?: string;
-		crossOrigin?: "anonymous" | "use-credentials";
+		crossOrigin?: 'anonymous' | 'use-credentials';
 		href?: string;
 		hrefLang?: string;
 		imageSizes?: string;
@@ -1216,7 +1246,8 @@ export namespace JSXInternal {
 	}
 
 	// <q>
-	export interface QuoteHTMLAttributes extends HTMLAttributes<HTMLQuoteElement> {
+	export interface QuoteHTMLAttributes
+		extends HTMLAttributes<HTMLQuoteElement> {
 		cite?: string;
 	}
 
@@ -1231,7 +1262,7 @@ export namespace JSXInternal {
 	// <script>
 	export interface ScriptHTMLAttributes {
 		async?: boolean;
-		crossOrigin?: "anonymous" | "use-credentials";
+		crossOrigin?: 'anonymous' | 'use-credentials';
 		defer?: boolean;
 		integrity?: string;
 		noModule?: boolean;
