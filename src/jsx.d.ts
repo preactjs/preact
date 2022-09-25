@@ -831,6 +831,371 @@ export namespace JSXInternal {
 		itemRef?: string;
 	}
 
+	type LowerCaseProps<T> = {[P in keyof T as Lowercase<string & P>]: T[P] };
+
+
+	export type ReferrerPolicy =
+		| 'no-referrer'
+		| 'no-referrer-when-downgrade'
+		| 'origin'
+		| 'origin-when-cross-origin'
+		| 'same-origin'
+		| 'strict-origin'
+		| 'strict-origin-when-cross-origin'
+		| 'unsafe-url'
+
+	export type TargetValue = '_self' | '_blank' |'_parent' | '_top'
+
+	// <a>
+	export interface SpecialAnchorHTMLAttributes {
+		download?: string;
+		href?: string;
+		hreflang?: string;
+		ping?: string;
+		referrerpolicy?: ReferrerPolicy;
+		rel?: string;
+		target?: TargetValue;
+		type?: string;
+
+		/** @deprecated */
+		charset?: string;
+		/** @deprecated */
+		coords?: string;
+		/** @deprecated */
+		name?: string;
+		/** @deprecated */
+		rev?: string;
+		/** @deprecated */
+		shape?: string;
+	}
+
+	export interface AnchorHTMLAttributes
+		extends SpecialAnchorHTMLAttributes, LowerCaseProps<SpecialAnchorHTMLAttributes>, HTMLAttributes<HTMLAnchorElement> {}
+
+	// <abbr> has no special attributes
+	// <acronym> - DEPRECATED
+	// <address> has no special attributes
+	// <applet> - DEPRECATED
+
+	export interface AreaHTMLAttributes {
+		alt?: string;
+		coords?: string;
+		download?: string;
+		href?: string;
+		/** @deprecated */
+		hrefLang?: string;
+		ping?: string;
+		referrerpolicy?: ReferrerPolicy;
+		rel?: string;
+		target?: TargetValue;
+		type?: string;
+
+		/** @deprecated */
+		name?: string;
+		/** @deprecated */
+		nohref?: boolean;
+		/** @deprecated */
+		type?: string;
+	}
+
+	// <article> has no special attributes
+	// <aside> has no special attributes
+
+	// <audio>
+	export interface AudioHTMLAttributes {
+		autoPlay?: boolean;
+		controls?: boolean;
+		controlsList?: string;
+		crossOrigin?: "anonymous" | "use-credentials";
+		disableRemotePlayback?: boolean;
+		loop?: boolean;
+		muted?: boolean;
+		preload?: string;
+		src?: string;
+	}
+
+	// <b> has no special attributes
+
+	// <base>
+	export interface BaseHTMLAttributes {
+		href?: string;
+		target?: TargetValue;
+	}
+
+	// <basefont> - DEPRECATED
+	// <bdi> has no special attributes
+
+	// <bdo>
+	export interface BdoHTMLAttributes extends HTMLAttributes {
+		dir: 'ltr' | 'rtl'
+	}
+
+	// <bgsound> - DEPRECATED
+	// <big> - DEPRECATED
+	// <blink> - DEPRECATED
+
+	// <blockquote>
+	export interface BlockquoteHTMLAttributes {
+		cite?: string;
+	}
+
+	// <body> - The body element is not created by Preact, so skip that
+
+	// <br>
+	export interface BrHTMLAttributes extends HTMLAttributes<HTMLBRElement> {
+		/** @deprecated */
+		clear?: string
+	}
+
+	export interface ButtonHTMLAttributes {
+		autoFocus?: boolean;
+		autoComplete?: boolean;
+		disabled?: boolean;
+		form?: string;
+		formAction?: string;
+		formEncType?: string;
+		formMethod?: 'post' | 'get';
+		formNoValidate?: boolean;
+		formTarget?: TargetValue;
+		name?: string;
+		type?: 'submit' | 'reset' | 'button';
+		value?: string;
+	}
+
+	export interface CanvasHTMLAttributes {
+		height?: number;
+		width?: number;
+	}
+
+	// <caption> has no special attributes
+	// <center> - DEPRECATED
+	// <cite> has no special attributes
+	// <code> has no special attributes
+
+	export interface ColHTMLAttributes {
+		span?: number;
+	}
+
+	export interface ColGroupHTMLAttributes {
+		span?: number;
+	}
+
+	// <content> - DEPRECATED
+
+	// <data>
+	export interface DataHTMLAttributes extends HTMLAttributes<HTMLDataElement> {
+		value?: string;
+	}
+
+	// <datalist> has no special attributes
+	// <dd> has no special attributes
+
+	// <del>
+	export interface DelHTMLAttributes {
+		cite?: string;
+		dateTime?: string;
+	}
+
+	// <details>
+	export interface DetailsHTMLAttributes {
+		open?: boolean;
+	}
+
+	// <dfn> has no special attributes
+
+	// <dialog>
+	export interface DialogHTMLAttributes {
+		// TOOD: Disable tabindex somehow?
+		open?: boolean;
+	}
+
+	// <dir> - DEPRECATED
+	// <div> has no special attributes
+	// <dl> has no special attributes
+	// <dt> has no special attributes
+	// <em> has no special attributes
+
+	// <embed>
+	export interface EmbedHTMLAttributes {
+		height?: number;
+		src?: string;
+		type?: string;
+		width?: number;
+	}
+
+	// <fieldset>
+	export interface FieldsetHTMLAttributes {
+		disabled?: boolean;
+		form?: string;
+		name?: string;
+	}
+
+	// <figcaption> has no special attributes
+	// <figure> has no special attributes
+	// <hr> has no special attributes
+	// <html> - The body element is not created by Preact, so skip that
+	// <i> has no special attributes
+
+	// <iframe>
+	export interface IframeHTMLAttributes {
+		allow?: string;
+		allowFullScreen?: boolean;
+		height?: number;
+		name?: string;
+		referrerpolicy?: ReferrerPolicy;
+		sandbox?: 'allow-downloads' | 'allow-forms' | 'allow-modals' | 'allow-orientation-lock' | 'allow-pointer-lock' | 'allow-popups' | 'allow-popups-to-escape-sandbox' | 'allow-presentation' | 'allow-same-origin' | 'allow-scripts' | 'allow-top-navigation' | 'allow-top-navigation-by-user-activation';
+		src?: string;
+		srcDoc?: string;
+		width?: number;
+	}
+
+	// <img>
+	export interface ImgHTMLAttributes {
+		alt?: string;
+		crossOrigin?: 'anonymous' | 'use-credentials';
+		decoding?: 'sync' | 'async' | 'auto';
+		height?: number;
+		isMap?: boolean;
+		loading?: 'eager' | 'lazy';
+		referrerpolicy?: ReferrerPolicy;
+		sizes?: string;
+		src?: string;
+		srcSet?: string;
+		width?: number;
+		useMap?: string;
+	}
+
+	// <input> FIXME
+
+	// <ins>
+	export interface InsHTMLAttributes {
+		cite?: string;
+		dateTime?: string;
+	}
+
+	// <kbd> has no special attributes
+	// <keygen> - DEPRECATED
+
+	// <label>
+	export interface LabelHTMLAttributes {
+		for?: string;
+		htmlFor?: string;
+	}
+
+	// <legend> has no special attributes
+
+	// <li>
+	export interface LiHTMLAttributes {
+		value?: number;
+	}
+
+	// <linK> FIXME
+
+	// <main> has no special attributes
+
+	// <map>
+	export interface MapHTMLAttributes {
+		name?: string;
+	}
+
+	// <mark> has no special attributes
+	// <marquee> - DEPRECATED but we have to add it :)
+	// <menu> has no special attributes
+	// <menuitem> - DEPRECATED
+
+	// <meta> FIXME
+	// <meter> FIXME
+
+	// <nav> has no special attributes
+	// <nobr> - DEPRECATED
+	// <noframes> - DEPRECATED
+	// <noscript> has no special attributes
+
+	// <object> FIXME
+	// <ol> FIXME
+	// <optgroup> FIXME
+	// <option> FIXME
+	// <output> FIXME
+
+	// <p> has no special attributes
+	// <param> - DEPRECATED
+
+	// <picture> FIXME
+
+	// <plaintext> - DEPRECATED
+	// <pre> has no special attributes
+
+	// <progress> FIXME
+
+	// <q>
+	export interface QuoteHTMLAttributes extends HTMLAttributes<HTMLQuoteElement> {
+		cite?: string;
+	}
+
+	// <rp> has no special attributes
+	// <rt> has no special attributes
+	// <rtc> - DEPRECATED
+	// <ruby> has no special attributes
+
+	// <s> has no special attributes
+	// <samp> has no special attributes
+
+	// <script> FIXME
+
+	// <section> has no special attributes
+
+	// <select> FIXME
+
+	// <shadow> - DEPRECATED
+
+	// <slot> FIXME
+
+	// <small> has no special attributes
+
+	// <source> FIXME
+
+	// <spacer> - DEPRECATED
+	// <span> has no special attributes
+	// <strike> - DEPRECATED
+	// <strong> has no special attributes
+
+	// <style> FIXME
+
+	// <sub> has no special attributes
+	// <summary> has no special attributes
+	// <sup> has no special attributes
+	// <table> has no special attributes
+	// <tbody> has no special attributes
+
+	// <td> FIXME
+
+	// <template> has no special attributes
+
+	// <textarea> FIXME
+
+	// <tfoot> has no special attributes
+
+	// <th> FIXME
+
+	// <thead> has no special attributes
+
+	// <time> FIXME
+
+	// <title> - The title element is not created by Preact, so skip that
+	// <tr> has no special attributes
+
+	// <track> FIXME
+
+	// <tt> - DEPRECATED
+	// <u> has no special attributes
+	// <ul> has no special attributes
+	// <var> has no special attributes
+
+	// <video> FIXME
+
+	// <wbr> has no special attributes
+	// <xmp> - DEPRECATED
+
 	export type DetailedHTMLProps<
 		HA extends HTMLAttributes<RefType>,
 		RefType extends EventTarget = EventTarget
