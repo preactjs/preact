@@ -871,19 +871,10 @@ export namespace JSXInternal {
 		coords?: string;
 		download?: string;
 		href?: string;
-		/** @deprecated */
-		hrefLang?: string;
 		ping?: string;
 		referrerpolicy?: ReferrerPolicy;
 		rel?: string;
 		target?: TargetValue;
-		type?: string;
-
-		/** @deprecated */
-		name?: string;
-		/** @deprecated */
-		nohref?: boolean;
-		/** @deprecated */
 		type?: string;
 	}
 
@@ -1054,7 +1045,7 @@ export namespace JSXInternal {
 		useMap?: string;
 	}
 
-	// <input> FIXME
+	// <input>
 	export interface InputHTMLAttributes {
 		accept?: string;
 		alt?: string;
