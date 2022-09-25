@@ -295,7 +295,7 @@
 		"npm-merge-driver-install": "^1.1.1",
 		"npm-run-all": "^4.0.0",
 		"preact-render-to-string": "^5.2.4",
-		"prettier": "^1.18.2",
+		"prettier": "^2.7.1",
 		"prop-types": "^15.7.2",
 		"sade": "^1.7.4",
 		"sinon": "^9.2.3",
