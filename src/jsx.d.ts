@@ -856,17 +856,6 @@ export namespace JSXInternal {
 		rel?: string;
 		target?: TargetValue;
 		type?: string;
-
-		/** @deprecated */
-		charset?: string;
-		/** @deprecated */
-		coords?: string;
-		/** @deprecated */
-		name?: string;
-		/** @deprecated */
-		rev?: string;
-		/** @deprecated */
-		shape?: string;
 	}
 
 	export interface AnchorHTMLAttributes
@@ -941,15 +930,12 @@ export namespace JSXInternal {
 
 	// <body> - The body element is not created by Preact, so skip that
 
-	// <br>
-	export interface BrHTMLAttributes extends HTMLAttributes<HTMLBRElement> {
-		/** @deprecated */
-		clear?: string
-	}
+	// <br> has no special attributes
 
+	// <button>
 	export interface ButtonHTMLAttributes {
-		autoFocus?: boolean;
 		autoComplete?: boolean;
+		autoFocus?: boolean;
 		disabled?: boolean;
 		form?: string;
 		formAction?: string;
@@ -962,6 +948,7 @@ export namespace JSXInternal {
 		value?: string;
 	}
 
+	// <canvas>
 	export interface CanvasHTMLAttributes {
 		height?: number;
 		width?: number;
@@ -972,10 +959,12 @@ export namespace JSXInternal {
 	// <cite> has no special attributes
 	// <code> has no special attributes
 
+	// <col>
 	export interface ColHTMLAttributes {
 		span?: number;
 	}
 
+	// <colgroup>
 	export interface ColGroupHTMLAttributes {
 		span?: number;
 	}
@@ -1066,6 +1055,49 @@ export namespace JSXInternal {
 	}
 
 	// <input> FIXME
+	export interface InputHTMLAttributes {
+		accept?: string;
+		alt?: string;
+		autoComplete?: string;
+		autoFocus?: boolean;
+		capture?: boolean | string;
+		checked?: boolean;
+		dirname?: string;
+		disabled?: boolean;
+		form?: string;
+		formAction?: string;
+		formEncType?: string;
+		formMethod?: string;
+		formNoValidate?: boolean;
+		formTarget?: TargetValue;
+		height?: number;
+		id?: string; // FIXME
+		inputMode?: string;
+		list?: string;
+		max?: number | string;
+		maxLength?: number;
+		min?: number | string;
+		minLength?: number;
+		multiple?: boolean;
+		name?: string;
+		pattern?: string;
+		placeholder?: string;
+		readOnly?: boolean;
+		required?: boolean;
+		size?: number;
+		src?: string;
+		step?: number | string;
+		tabindex?: any // FIXME
+		title?: string // FIXME
+		type?: 'button' | 'checkbox' | 'color' | 'date' | 'datetime-local' | 'email' | 'file' | 'hidden' | 'image' | 'month' | 'number' | 'password' | 'radio' | 'range' | 'reset' | 'search' | 'submit' | 'tel' | 'text' | 'time' | 'url' | 'week';
+		width?: number;
+
+		// Non-standard
+		autoCorrect?: 'on' | 'off';
+		incremental?: boolean;
+		orient?: 'horizontal' | 'vertical';
+		results?: number;
+	}
 
 	// <ins>
 	export interface InsHTMLAttributes {
@@ -1089,7 +1121,22 @@ export namespace JSXInternal {
 		value?: number;
 	}
 
-	// <linK> FIXME
+	// <link>
+	export interface LinkHTMLAttributes {
+		as?: string;
+		crossOrigin?: "anonymous" | "use-credentials";
+		href?: string;
+		hrefLang?: string;
+		imageSizes?: string;
+		imageSrcSet?: string;
+		integrity?: string;
+		media?: string;
+		referrerpolicy?: ReferrerPolicy;
+		rel?: string;
+		sizes?: string;
+		title?: string;
+		type?: string;
+	}
 
 	// <main> has no special attributes
 
@@ -1103,29 +1150,79 @@ export namespace JSXInternal {
 	// <menu> has no special attributes
 	// <menuitem> - DEPRECATED
 
-	// <meta> FIXME
+	// <meta>
+	export interface MetaHTMLAttributes {
+		charSet?: string;
+		content?: string;
+		httpEquiv?: string;
+		name?: string;
+	}
+
 	// <meter> FIXME
+	export interface MeterHTMLAttribute {
+		min?: number;
+		max?: number;
+		low?: number;
+		high?: number;
+		optimum?: number;
+	}
 
 	// <nav> has no special attributes
 	// <nobr> - DEPRECATED
 	// <noframes> - DEPRECATED
 	// <noscript> has no special attributes
 
-	// <object> FIXME
-	// <ol> FIXME
-	// <optgroup> FIXME
-	// <option> FIXME
-	// <output> FIXME
+	// <object>
+	export interface ObjectHTMLAttributes {
+		data?: string;
+		form?: string;
+		height?: number;
+		name?: string;
+		type?: string;
+		useMap?: string;
+		width?: number;
+	}
+
+	// <ol>
+	export interface OlHTMLAttributes {
+		reversed?: boolean;
+		start?: number;
+		type?: 'a' | 'A' | 'i' | 'I' | '1';
+	}
+
+	// <optgroup>
+	export interface OptGroupHTMLAttributes {
+		disabled?: boolean;
+		label?: string;
+	}
+
+	// <option>
+	export interface OptionHTMLAttributes {
+		disabled?: boolean;
+		label?: string;
+		selected?: boolean;
+		value?: string;
+	}
+
+	// <output>
+	export interface OutputHTMLAttributes {
+		for?: string;
+		htmlFor?: string; // FIXME
+		form?: string;
+		name?: string;
+	}
 
 	// <p> has no special attributes
 	// <param> - DEPRECATED
-
-	// <picture> FIXME
-
+	// <picture> has no special attributes
 	// <plaintext> - DEPRECATED
 	// <pre> has no special attributes
 
-	// <progress> FIXME
+	// <progress>
+	export interface ProgressHTMLAttributes {
+		max?: number;
+		value?: number;
+	}
 
 	// <q>
 	export interface QuoteHTMLAttributes extends HTMLAttributes<HTMLQuoteElement> {
@@ -1140,11 +1237,27 @@ export namespace JSXInternal {
 	// <s> has no special attributes
 	// <samp> has no special attributes
 
-	// <script> FIXME
+	// <script>
+	export interface ScriptHTMLAttributes {
+		async?: boolean;
+		crossOrigin?: "anonymous" | "use-credentials";
+		defer?: boolean;
+		integrity?: string;
+		noModule?: boolean;
+		nonce?: string;
+		referrerpolicy?: ReferrerPolicy;
+		src?: string;
+		type?: string;
+	}
 
 	// <section> has no special attributes
 
 	// <select> FIXME
+	export interface SelectHTMLAttributes {
+		autoComplete?: boolean;
+		autoFocus?: boolean;
+		disabled?: boolean;
+	}
 
 	// <shadow> - DEPRECATED
 
