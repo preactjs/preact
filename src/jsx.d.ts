@@ -826,7 +826,15 @@ export namespace JSXInternal {
 		itemRef?: string;
 	}
 
-	type LowerCaseProps<T> = { [P in keyof T as Lowercase<string & P>]: T[P] };
+	type WithLowerCase<T> = { [P in keyof T as Lowercase<string & P>]: T[P] } & T;
+
+	export interface Signal<T> {
+		readonly value: T;
+		peek(): T;
+		subscribe(fn: (value: T) => void): () => void;
+	}
+
+	export type WithSignals<T> = { [P in keyof T]: Signal<T[P]> } & T;
 
 	export type ReferrerPolicy =
 		| 'no-referrer'
@@ -840,8 +848,12 @@ export namespace JSXInternal {
 
 	export type TargetValue = '_self' | '_blank' | '_parent' | '_top';
 
+	export type CrossOrigin = 'anonymous' | 'use-credentials';
+
+	export type ControlsList = 'nodownload' | 'nofullscreen' | 'noremoteplayback';
+
 	// <a>
-	export interface SpecialAnchorHTMLAttributes {
+	export interface AnchorHTMLAttributes {
 		download?: string;
 		href?: string;
 		hreflang?: string;
@@ -851,11 +863,6 @@ export namespace JSXInternal {
 		target?: TargetValue;
 		type?: string;
 	}
-
-	export interface AnchorHTMLAttributes
-		extends SpecialAnchorHTMLAttributes,
-			LowerCaseProps<SpecialAnchorHTMLAttributes>,
-			HTMLAttributes<HTMLAnchorElement> {}
 
 	// <abbr> has no special attributes
 	// <acronym> - DEPRECATED
@@ -881,8 +888,8 @@ export namespace JSXInternal {
 	export interface AudioHTMLAttributes {
 		autoPlay?: boolean;
 		controls?: boolean;
-		controlsList?: string;
-		crossOrigin?: 'anonymous' | 'use-credentials';
+		controlsList?: ControlsList;
+		crossOrigin?: CrossOrigin;
 		disableRemotePlayback?: boolean;
 		loop?: boolean;
 		muted?: boolean;
@@ -1008,8 +1015,18 @@ export namespace JSXInternal {
 
 	// <figcaption> has no special attributes
 	// <figure> has no special attributes
+	// <footer> has no special attributes
+
+	// <form> FIXME
+	// <frame> DEPRECATED
+	// <frameset> DEPRECATED
+	// <frameset> DEPRECATED
+	// <h1>-<h6> have no special attributes
+	// <head> has no special attributes
+	// <header> has no special attributes
+	// <hgroup> has no special attributes
 	// <hr> has no special attributes
-	// <html> - The body element is not created by Preact, so skip that
+	// <html> - The body element is not created by Preact, so skip that FIXME
 	// <i> has no special attributes
 
 	// <iframe>
@@ -1040,7 +1057,7 @@ export namespace JSXInternal {
 	// <img>
 	export interface ImgHTMLAttributes {
 		alt?: string;
-		crossOrigin?: 'anonymous' | 'use-credentials';
+		crossOrigin?: CrossOrigin;
 		decoding?: 'sync' | 'async' | 'auto';
 		height?: number;
 		isMap?: boolean;
@@ -1145,7 +1162,7 @@ export namespace JSXInternal {
 	// <link>
 	export interface LinkHTMLAttributes {
 		as?: string;
-		crossOrigin?: 'anonymous' | 'use-credentials';
+		crossOrigin?: CrossOrigin;
 		href?: string;
 		hrefLang?: string;
 		imageSizes?: string;
@@ -1168,6 +1185,20 @@ export namespace JSXInternal {
 
 	// <mark> has no special attributes
 	// <marquee> - DEPRECATED but we have to add it :)
+	export interface MarqueeHTMLAttributes {
+		behavior?: 'scroll' | 'slide' | 'alternate';
+		bgColor?: string;
+		direction?: 'left' | 'right' | 'up' | 'down';
+		height?: number | string;
+		hspace?: number | string;
+		loop?: number | string;
+		scrollAmount?: number | string;
+		scrollDelay?: number | string;
+		trueSpeed?: boolean;
+		vspace?: number | string;
+		width?: number | string;
+	}
+
 	// <menu> has no special attributes
 	// <menuitem> - DEPRECATED
 
@@ -1179,7 +1210,7 @@ export namespace JSXInternal {
 		name?: string;
 	}
 
-	// <meter> FIXME
+	// <meter>
 	export interface MeterHTMLAttribute {
 		min?: number;
 		max?: number;
@@ -1262,7 +1293,7 @@ export namespace JSXInternal {
 	// <script>
 	export interface ScriptHTMLAttributes {
 		async?: boolean;
-		crossOrigin?: 'anonymous' | 'use-credentials';
+		crossOrigin?: CrossOrigin;
 		defer?: boolean;
 		integrity?: string;
 		noModule?: boolean;
@@ -1274,27 +1305,49 @@ export namespace JSXInternal {
 
 	// <section> has no special attributes
 
-	// <select> FIXME
+	// <select>
 	export interface SelectHTMLAttributes {
 		autoComplete?: boolean;
 		autoFocus?: boolean;
 		disabled?: boolean;
+		form?: string;
+		multiple?: boolean;
+		name?: string;
+		required?: boolean;
+		size?: number;
 	}
 
 	// <shadow> - DEPRECATED
 
-	// <slot> FIXME
+	// <slot>
+	export interface SlotHTMLAttributes {
+		name?: string;
+	}
 
 	// <small> has no special attributes
 
-	// <source> FIXME
+	// <source>
+	export interface SourceHTMLAttributes {
+		type?: string;
+		src?: string;
+		srcSet?: string;
+		sizes?: string;
+		media?: string;
+		height?: number;
+		width?: number;
+	}
 
 	// <spacer> - DEPRECATED
 	// <span> has no special attributes
 	// <strike> - DEPRECATED
 	// <strong> has no special attributes
 
-	// <style> FIXME
+	// <style>
+	export interface StyleHTMLAttributes {
+		media?: string;
+		nonce?: string;
+		title?: string;
+	}
 
 	// <sub> has no special attributes
 	// <summary> has no special attributes
@@ -1302,31 +1355,89 @@ export namespace JSXInternal {
 	// <table> has no special attributes
 	// <tbody> has no special attributes
 
-	// <td> FIXME
+	// <td>
+	export interface TdHTMLAttributes {
+		colSpan?: number;
+		headers?: string;
+		rowSpan?: number;
+	}
 
 	// <template> has no special attributes
 
-	// <textarea> FIXME
+	// <textarea>
+	export interface TextAreHTMLAttributes {
+		autoComplete?: boolean;
+		autoFocus?: boolean;
+		cols?: number;
+		disabled?: boolean;
+		form?: string;
+		maxLength?: number;
+		minLength?: number;
+		name?: string;
+		placeholder?: string;
+		readOnly?: boolean;
+		required?: boolean;
+		rows?: number;
+		spellCheck?: boolean;
+		wrap?: 'wrap' | 'soft' | 'off';
+
+		// Non-standard
+		autoCorrect?: 'on' | 'off';
+	}
 
 	// <tfoot> has no special attributes
 
-	// <th> FIXME
+	// <th>
+	export interface ThHTMLAttributes {
+		abbr?: string;
+		colSpan?: number;
+		headers?: string;
+		rowSpan?: number;
+		scope?: 'row' | 'col' | 'rowgroup' | 'colgroup';
+	}
 
 	// <thead> has no special attributes
 
-	// <time> FIXME
+	// <time>
+	export interface TimeHTMLAttributes {
+		datetime?: string;
+	}
 
 	// <title> - The title element is not created by Preact, so skip that
 	// <tr> has no special attributes
 
-	// <track> FIXME
+	// <track>
+	export interface TrackHTMLAttributes {
+		default?: boolean;
+		kind?: 'subtitles' | 'captions' | 'descriptions' | 'chapters' | 'metadata';
+		label?: string;
+		src?: string;
+		srcLang?: string;
+	}
 
 	// <tt> - DEPRECATED
 	// <u> has no special attributes
 	// <ul> has no special attributes
 	// <var> has no special attributes
 
-	// <video> FIXME
+	// <video>
+	export interface VideoHTMLAttributes {
+		autoPlay?: boolean;
+		controls?: boolean;
+		controlsList?: ControlsList;
+		height?: number;
+		loop?: boolean;
+		muted?: boolean;
+		playsInline?: boolean;
+		poster?: string;
+		preload?: string;
+		src?: string;
+		width?: number;
+
+		// Non-standard
+		disablePictureInPicture?: boolean;
+		disableRemotePlayback?: boolean;
+	}
 
 	// <wbr> has no special attributes
 	// <xmp> - DEPRECATED
@@ -1336,75 +1447,66 @@ export namespace JSXInternal {
 		RefType extends EventTarget = EventTarget
 	> = HA;
 
-	export interface HTMLMarqueeElement extends HTMLElement {
-		behavior?: 'scroll' | 'slide' | 'alternate';
-		bgColor?: string;
-		direction?: 'left' | 'right' | 'up' | 'down';
-		height?: number | string;
-		hspace?: number | string;
-		loop?: number | string;
-		scrollAmount?: number | string;
-		scrollDelay?: number | string;
-		trueSpeed?: boolean;
-		vspace?: number | string;
-		width?: number | string;
-	}
+	export type Foo<T extends EventTarget = EventTarget, U = {}> = WithSignals<
+		WithLowerCase<U & HTMLAttributes<T>>
+	>;
 
 	export interface IntrinsicElements {
 		// HTML
-		a: HTMLAttributes<HTMLAnchorElement>;
-		abbr: HTMLAttributes<HTMLElement>;
-		address: HTMLAttributes<HTMLElement>;
-		area: HTMLAttributes<HTMLAreaElement>;
-		article: HTMLAttributes<HTMLElement>;
-		aside: HTMLAttributes<HTMLElement>;
-		audio: HTMLAttributes<HTMLAudioElement>;
-		b: HTMLAttributes<HTMLElement>;
-		base: HTMLAttributes<HTMLBaseElement>;
-		bdi: HTMLAttributes<HTMLElement>;
-		bdo: HTMLAttributes<HTMLElement>;
-		big: HTMLAttributes<HTMLElement>;
-		blockquote: HTMLAttributes<HTMLQuoteElement>;
-		body: HTMLAttributes<HTMLBodyElement>;
-		br: HTMLAttributes<HTMLBRElement>;
-		button: HTMLAttributes<HTMLButtonElement>;
-		canvas: HTMLAttributes<HTMLCanvasElement>;
-		caption: HTMLAttributes<HTMLTableCaptionElement>;
-		cite: HTMLAttributes<HTMLElement>;
-		code: HTMLAttributes<HTMLElement>;
-		col: HTMLAttributes<HTMLTableColElement>;
-		colgroup: HTMLAttributes<HTMLTableColElement>;
-		data: HTMLAttributes<HTMLDataElement>;
-		datalist: HTMLAttributes<HTMLDataListElement>;
-		dd: HTMLAttributes<HTMLElement>;
-		del: HTMLAttributes<HTMLModElement>;
-		details: HTMLAttributes<HTMLDetailsElement>;
-		dfn: HTMLAttributes<HTMLElement>;
-		dialog: HTMLAttributes<HTMLDialogElement>;
-		div: HTMLAttributes<HTMLDivElement>;
-		dl: HTMLAttributes<HTMLDListElement>;
-		dt: HTMLAttributes<HTMLElement>;
-		em: HTMLAttributes<HTMLElement>;
-		embed: HTMLAttributes<HTMLEmbedElement>;
-		fieldset: HTMLAttributes<HTMLFieldSetElement>;
-		figcaption: HTMLAttributes<HTMLElement>;
-		figure: HTMLAttributes<HTMLElement>;
-		footer: HTMLAttributes<HTMLElement>;
-		form: HTMLAttributes<HTMLFormElement>;
-		h1: HTMLAttributes<HTMLHeadingElement>;
-		h2: HTMLAttributes<HTMLHeadingElement>;
-		h3: HTMLAttributes<HTMLHeadingElement>;
-		h4: HTMLAttributes<HTMLHeadingElement>;
-		h5: HTMLAttributes<HTMLHeadingElement>;
-		h6: HTMLAttributes<HTMLHeadingElement>;
-		head: HTMLAttributes<HTMLHeadElement>;
-		header: HTMLAttributes<HTMLElement>;
-		hgroup: HTMLAttributes<HTMLElement>;
-		hr: HTMLAttributes<HTMLHRElement>;
-		html: HTMLAttributes<HTMLHtmlElement>;
-		i: HTMLAttributes<HTMLElement>;
-		iframe: HTMLAttributes<HTMLIFrameElement>;
-		img: HTMLAttributes<HTMLImageElement>;
+		a: Foo<HTMLAnchorElement, AnchorHTMLAttributes>;
+		abbr: Foo<HTMLElement>;
+		address: Foo<HTMLElement>;
+		area: Foo<HTMLAreaElement, AreaHTMLAttributes>;
+		article: Foo<HTMLElement>;
+		aside: Foo<HTMLElement>;
+		audio: Foo<HTMLAudioElement, AudioHTMLAttributes>;
+		b: Foo<HTMLElement>;
+		base: Foo<HTMLBaseElement, BaseHTMLAttributes>;
+		bdi: Foo<HTMLElement>;
+		bdo: Foo<HTMLElement, BdoHTMLAttributes>;
+		/** @deprecated */
+		big: Foo<HTMLElement>;
+		blockquote: Foo<HTMLQuoteElement, BlockquoteHTMLAttributes>;
+		body: Foo<HTMLBodyElement>;
+		br: Foo<HTMLBRElement>;
+		button: Foo<HTMLButtonElement, ButtonHTMLAttributes>;
+		canvas: Foo<HTMLCanvasElement, CanvasHTMLAttributes>;
+		caption: Foo<HTMLTableCaptionElement>;
+		cite: Foo<HTMLElement>;
+		code: Foo<HTMLElement>;
+		col: Foo<HTMLTableColElement, ColHTMLAttributes>;
+		colgroup: Foo<HTMLTableColElement, ColGroupHTMLAttributes>;
+		data: Foo<HTMLDataElement, DataHTMLAttributes>;
+		datalist: Foo<HTMLDataListElement>;
+		dd: Foo<HTMLElement>;
+		del: Foo<HTMLModElement, DelHTMLAttributes>;
+		details: Foo<HTMLDetailsElement, DetailsHTMLAttributes>;
+		dfn: Foo<HTMLElement>;
+		dialog: Foo<HTMLDialogElement, DialogHTMLAttributes>;
+		div: Foo<HTMLDivElement>;
+		dl: Foo<HTMLDListElement>;
+		dt: Foo<HTMLElement>;
+		em: Foo<HTMLElement>;
+		embed: Foo<HTMLEmbedElement, EmbedHTMLAttributes>;
+		fieldset: Foo<HTMLFieldSetElement, FieldsetHTMLAttributes>;
+		figcaption: Foo<HTMLElement>;
+		figure: Foo<HTMLElement>;
+		footer: Foo<HTMLElement>;
+		form: Foo<HTMLFormElement>;
+		h1: Foo<HTMLHeadingElement>;
+		h2: Foo<HTMLHeadingElement>;
+		h3: Foo<HTMLHeadingElement>;
+		h4: Foo<HTMLHeadingElement>;
+		h5: Foo<HTMLHeadingElement>;
+		h6: Foo<HTMLHeadingElement>;
+		head: Foo<HTMLHeadElement>;
+		header: Foo<HTMLElement>;
+		hgroup: Foo<HTMLElement>;
+		hr: Foo<HTMLHRElement>;
+		html: Foo<HTMLHtmlElement>;
+		i: Foo<HTMLElement>;
+		iframe: Foo<HTMLIFrameElement, IframeHTMLAttributes>;
+		img: Foo<HTMLImageElement, ImgHTMLAttributes>;
 		input: HTMLAttributes<HTMLInputElement> & { defaultValue?: string };
 		ins: HTMLAttributes<HTMLModElement>;
 		kbd: HTMLAttributes<HTMLElement>;
