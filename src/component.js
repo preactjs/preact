@@ -84,9 +84,14 @@ Component.prototype.render = Fragment;
 /**
  * @param {import('./internal').VNode} vnode
  * @param {number | null} [childIndex]
+ * @returns {import('./internal').PreactElement}
  */
 export function getDomSibling(vnode, childIndex) {
 	if (childIndex == null) {
+		// if (vnode._parent && vnode._parent._children.indexOf(vnode) == -1) {
+		// 	console.log('=== NOT IN PARENT ARRAY ===');
+		// }
+
 		// Use childIndex==null as a signal to resume the search from the vnode's sibling
 		return vnode._parent
 			? getDomSibling(vnode._parent, vnode._parent._children.indexOf(vnode) + 1)

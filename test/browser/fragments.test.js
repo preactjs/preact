@@ -2802,4 +2802,97 @@ describe('Fragment', () => {
 			'<div>1.remove()'
 		]);
 	});
+
+	it('should properly unmount Fragment children around an unmounting null placeholder #2987', () => {
+		const arrayOf = (n, fill = 0) => new Array(n).fill(fill);
+
+		class App extends Component {
+			constructor(props) {
+				super(props);
+
+				this.state = {
+					renderFirstElement: true,
+					renderLastElement: true,
+					childrenProps: [
+						{
+							arrayData: arrayOf(10).map((_, index) => ({
+								key: index + 5,
+								text: index + 5
+							}))
+						},
+						{
+							arrayData: arrayOf(10).map((_, index) => ({
+								key: index + 15,
+								text: index + 15
+							}))
+						}
+					]
+				};
+			}
+
+			componentDidMount() {
+				// eslint-disable-next-line react/no-did-mount-set-state
+				this.setState({
+					renderFirstElement: false,
+					renderLastElement: true,
+					childrenProps: [
+						{
+							arrayData: arrayOf(15).map((_, index) => ({
+								key: index,
+								text: index
+							}))
+						},
+						{
+							arrayData: arrayOf(5).map((_, index) => ({
+								key: index + 15,
+								text: index + 15
+							}))
+						}
+					]
+				});
+			}
+
+			render() {
+				const {
+					renderFirstElement,
+					renderLastElement,
+					childrenProps
+				} = this.state;
+				return (
+					<div>
+						{renderFirstElement && <div>This is the first div</div>}
+						{childrenProps.map(({ arrayData }) => {
+							return arrayData.map(({ key, text }) => (
+								<div key={key}>{text}</div>
+							));
+						})}
+						{renderLastElement && <div>This is the last div</div>}
+					</div>
+				);
+			}
+		}
+
+		render(<App />, scratch);
+		expect(scratch.innerHTML).to.equal(
+			div([
+				div('This is the first div'),
+				arrayOf(20)
+					.map((_, i) => div(i + 5)) // 5 - 24
+					.join(''),
+				div('This is the last div')
+			])
+		);
+
+		// Flush CDM setState call
+		rerender();
+		expect(scratch.innerHTML).to.equal(
+			div([
+				// "This is the first div" is unmounted using a null placeholder pattern
+				arrayOf(20)
+					.map((_, i) => div(i)) // 0 - 19 (0 - 4 are inserted, 20 - 24 are unmounted)
+					.join(''),
+				div('This is the last div')
+			])
+		);
+	});
 });
