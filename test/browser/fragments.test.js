@@ -237,7 +237,9 @@ describe('Fragment', () => {
 		expectDomLogToBe([
 			'<div>.appendChild(#text)',
 			'<div>122.insertBefore(<div>1, <span>1)',
-			'<span>1.remove()'
+			'<span>1.remove()',
+			'<div>122.appendChild(<span>2)',
+			'<div>122.appendChild(<span>2)'
 		]);
 	});
 
@@ -2658,7 +2660,7 @@ describe('Fragment', () => {
 		render(<App condition={false} />, scratch);
 
 		expect(scratch.innerHTML).to.equal(div([div(1), div('A')]));
-		expectDomLogToBe(['<div>2.remove()']);
+		expectDomLogToBe(['<div>2.remove()', '<div>1A.appendChild(<div>A)']);
 	});
 
 	it('should efficiently unmount nested Fragment children', () => {
@@ -2702,7 +2704,12 @@ describe('Fragment', () => {
 		render(<App condition={false} />, scratch);
 
 		expect(scratch.innerHTML).to.equal(div([div(1), div('A'), div('B')]));
-		expectDomLogToBe(['<div>2.remove()', '<div>3.remove()']);
+		expectDomLogToBe([
+			'<div>2.remove()',
+			'<div>3.remove()',
+			'<div>1AB.appendChild(<div>A)',
+			'<div>1BA.appendChild(<div>B)'
+		]);
 	});
 
 	it('should efficiently place new children and unmount nested Fragment children', () => {
@@ -2751,7 +2758,9 @@ describe('Fragment', () => {
 			'<div>.appendChild(#text)',
 			'<div>123AB.insertBefore(<div>4, <div>2)',
 			'<div>2.remove()',
-			'<div>3.remove()'
+			'<div>3.remove()',
+			'<div>14AB.appendChild(<div>A)',
+			'<div>14BA.appendChild(<div>B)'
 		]);
 	});
 
@@ -2799,7 +2808,66 @@ describe('Fragment', () => {
 			'<div>123AB.insertBefore(<span>1, <div>1)',
 			'<div>2.remove()',
 			'<div>3.remove()',
-			'<div>1.remove()'
+			'<div>1.remove()',
+			'<div>1AB.appendChild(<div>A)',
+			'<div>1BA.appendChild(<div>B)'
 		]);
+	});
+
+	it('should swap nested fragments correctly', () => {
+		let swap;
+		class App extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { first: true };
+			}
+
+			render() {
+				if (this.state.first) {
+					return (
+						<Fragment>
+							{
+								<Fragment>
+									<p>1. Original item first paragraph</p>
+								</Fragment>
+							}
+							<p>2. Original item second paragraph</p>
+							<button onClick={(swap = () => this.setState({ first: false }))}>
+								Click me
+							</button>
+						</Fragment>
+					);
+				}
+				return (
+					<Fragment>
+						<p>1. Second item first paragraph</p>
+						<Fragment>
+							<p>2. Second item second paragraph</p>
+							<div />
+						</Fragment>
+						<button onClick={(swap = () => this.setState({ first: true }))}>
+							Click me
+						</button>
+					</Fragment>
+				);
+			}
+		}
+
+		render(<App />, scratch);
+		expect(scratch.innerHTML).to.equal(
+			'<p>1. Original item first paragraph</p><p>2. Original item second paragraph</p><button>Click me</button>'
+		);
+
+		swap();
+		rerender();
+		expect(scratch.innerHTML).to.equal(
+			'<p>1. Second item first paragraph</p><p>2. Second item second paragraph</p><div></div><button>Click me</button>'
+		);
+
+		swap();
+		rerender();
+		expect(scratch.innerHTML).to.equal(
+			'<p>1. Original item first paragraph</p><p>2. Original item second paragraph</p><button>Click me</button>'
+		);
 	});
 });
