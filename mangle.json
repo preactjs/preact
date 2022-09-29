@@ -44,6 +44,7 @@
       "$_force": "__e",
       "$_nextState": "__s",
       "$_renderCallbacks": "__h",
+      "$_stateCallbacks": "_sb",
       "$_vnode": "__v",
       "$_children": "__k",
       "$_pendingSuspensionCount": "__u",
