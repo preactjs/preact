@@ -45,9 +45,6 @@
 			"import": "./scheduler.mjs",
 			"require": "./scheduler.js"
 		},
-		"./package.json": {
-			"import": "./package.json",
-			"require": "./package.json"
-		}
+		"./package.json": "./package.json"
 	}
 }
