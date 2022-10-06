@@ -1,4 +1,4 @@
-import { Fragment, options } from 'preact';
+import { options } from 'preact';
 
 /** @type {number} */
 let currentIndex;
@@ -30,7 +30,8 @@ options._diff = vnode => {
 	if (
 		typeof vnode.type === 'function' &&
 		!vnode._mask &&
-		vnode.type !== Fragment
+		// Ignore root Fragment node
+		vnode._parent !== null
 	) {
 		vnode._mask =
 			(vnode._parent && vnode._parent._mask ? vnode._parent._mask : '') +
