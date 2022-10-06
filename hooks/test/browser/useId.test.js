@@ -326,4 +326,30 @@ describe('useId', () => {
 		hydrate(<App />, scratch);
 		expect(rtsOutput).to.equal(scratch.innerHTML);
 	});
+
+	it('should skip component top level Fragment child', () => {
+		const Wrapper = ({ children }) => {
+			return <Fragment>{children}</Fragment>;
+		};
+
+		function Foo() {
+			const id = useId();
+			return <p>{id}</p>;
+		}
+
+		function App() {
+			const id = useId();
+			return (
+				<div>
+					<p>{id}</p>
+					<Wrapper>
+						<Foo />
+					</Wrapper>
+				</div>
+			);
+		}
+
+		render(<App />, scratch);
+		expect(scratch.innerHTML).to.equal('<div><p>P481</p><p>P476951</p></div>');
+	});
 });
