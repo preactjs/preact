@@ -272,6 +272,58 @@ describe('useId', () => {
 
 		scratch.innerHTML = rtsOutput;
 		hydrate(<Component />, scratch);
-		expect(rtsOutput === scratch.innerHTML).to.equal(true);
+		expect(rtsOutput).to.equal(scratch.innerHTML);
+	});
+
+	it('should be unique across Fragments', () => {
+		const ids = [];
+		function Foo() {
+			const id = useId();
+			ids.push(id);
+			return <p>{id}</p>;
+		}
+
+		function App() {
+			return (
+				<div>
+					<Foo />
+					<Fragment>
+						<Foo />
+					</Fragment>
+				</div>
+			);
+		}
+
+		render(<App />, scratch);
+
+		expect(ids[0]).not.to.equal(ids[1]);
+	});
+
+	it('should match implicite Fragments with RTS', () => {
+		function Foo() {
+			const id = useId();
+			return <p>{id}</p>;
+		}
+
+		function Bar(props) {
+			return props.children;
+		}
+
+		function App() {
+			return (
+				<Bar>
+					<Foo />
+					<Fragment>
+						<Foo />
+					</Fragment>
+				</Bar>
+			);
+		}
+
+		const rtsOutput = rts(<App />);
+
+		scratch.innerHTML = rtsOutput;
+		hydrate(<App />, scratch);
+		expect(rtsOutput).to.equal(scratch.innerHTML);
 	});
 });
