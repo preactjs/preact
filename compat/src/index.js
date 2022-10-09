@@ -39,15 +39,9 @@ const requestIdleCallbackPreact =
 		self.requestIdleCallback &&
 		self.requestIdleCallback.bind(window)) ||
 	function (cb) {
-		let start = Date.now()
-		return setTimeout(function () {
-			cb({
-				didTimeout: false,
-				timeRemaining: function () {
-					return Math.max(0, 50 - (Date.now() - start))
-				},
-			})
-		}, 3)
+		return queueMicrotask(() => {
+			cb();
+		});
 	}
 
 
