@@ -34,6 +34,23 @@ import {
 	__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED
 } from './render';
 
+const requestIdleCallbackPreact =
+	(typeof self !== 'undefined' &&
+		self.requestIdleCallback &&
+		self.requestIdleCallback.bind(window)) ||
+	function (cb) {
+		let start = Date.now()
+		return setTimeout(function () {
+			cb({
+				didTimeout: false,
+				timeRemaining: function () {
+					return Math.max(0, 50 - (Date.now() - start))
+				},
+			})
+		}, 3)
+	}
+
+
 const version = '17.0.2'; // trick libraries to think we are react
 
 /**
@@ -119,7 +136,9 @@ const flushSync = (callback, arg) => callback(arg);
 const StrictMode = Fragment;
 
 export function startTransition(cb) {
-	cb();
+	requestIdleCallbackPreact(() => {
+		cb();
+	});
 }
 
 export function useDeferredValue(val) {
