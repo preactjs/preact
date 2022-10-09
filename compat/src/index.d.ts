@@ -32,7 +32,7 @@ declare namespace React {
 	export import useState = _hooks.useState;
 	// React 18 hooks
 	export import useInsertionEffect = _hooks.useLayoutEffect;
-	export function useTransition(): [false, typeof startTransition];
+	export function useTransition(): [boolean, typeof startTransition];
 	export function useDeferredValue<T = any>(val: T): T;
 	export function useSyncExternalStore<T>(
 		subscribe: (flush: () => void) => () => void,

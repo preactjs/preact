@@ -35,14 +35,14 @@ import {
 } from './render';
 
 const requestIdleCallbackPreact =
-	(typeof self !== 'undefined' &&
+	(typeof self !== "undefined" &&
 		self.requestIdleCallback &&
 		self.requestIdleCallback.bind(window)) ||
 	function (cb) {
 		return queueMicrotask(() => {
 			cb();
 		});
-	}
+	};
 
 
 const version = '17.0.2'; // trick libraries to think we are react
@@ -140,7 +140,17 @@ export function useDeferredValue(val) {
 }
 
 export function useTransition() {
-	return [false, startTransition];
+	const [isTransitionPending, setIsTransitionPending] = useState(false);
+
+	const startTransitionFunction = (cb) => {
+		setIsTransitionPending(true);
+		requestIdleCallbackPreact(() => {
+			cb();
+			setIsTransitionPending(false);
+		});
+	};
+
+	return [isTransitionPending, startTransitionFunction];
 }
 
 // TODO: in theory this should be done after a VNode is diffed as we want to insert
