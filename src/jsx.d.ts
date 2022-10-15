@@ -977,7 +977,7 @@ export namespace JSXInternal {
 		i: HTMLAttributes<HTMLElement>;
 		iframe: HTMLAttributes<HTMLIFrameElement>;
 		img: HTMLAttributes<HTMLImageElement>;
-		input: HTMLAttributes<HTMLInputElement> & { defaultValue?: string };
+		input: HTMLAttributes<HTMLInputElement>;
 		ins: HTMLAttributes<HTMLModElement>;
 		kbd: HTMLAttributes<HTMLElement>;
 		keygen: HTMLAttributes<HTMLUnknownElement>;
