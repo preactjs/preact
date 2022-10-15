@@ -54,7 +54,7 @@ function setStyle(style, key, value) {
  * @param {boolean} isSvg Whether or not this DOM node is an SVG node or not
  */
 export function setProperty(dom, name, value, oldValue, isSvg) {
-	let useCapture;
+	let useCapture, eventOptions;
 
 	o: if (name === 'style') {
 		if (typeof value == 'string') {
@@ -90,12 +90,17 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
 		else name = name.slice(2);
 
 		if (!dom._listeners) dom._listeners = {};
+		if (!useCapture && Array.isArray(value)) {
+			eventOptions = value[1];
+			value = value[0];
+			useCapture = eventOptions.capture || useCapture;
+		}
 		dom._listeners[name + useCapture] = value;
 
 		if (value) {
 			if (!oldValue) {
 				const handler = useCapture ? eventProxyCapture : eventProxy;
-				dom.addEventListener(name, handler, useCapture);
+				dom.addEventListener(name, handler, eventOptions || useCapture);
 			}
 		} else {
 			const handler = useCapture ? eventProxyCapture : eventProxy;

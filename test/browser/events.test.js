@@ -198,5 +198,97 @@ describe('event handling', () => {
 			expect(clickCapture, 'click').to.have.been.calledOnce;
 			expect(click, 'click').to.have.been.calledOnce;
 		});
+
+		describe('options', () => {
+			it('supports capture option', () => {
+				let click = sinon.spy();
+
+				render(
+					<div onClick={[click, { capture: true }]}>
+						<button />
+					</div>,
+					scratch
+				);
+
+				let root = scratch.firstChild;
+				root.firstElementChild.click();
+
+				expect(click, 'click').to.have.been.calledOnce;
+
+				// IE doesn't set it
+				if (!/Edge/.test(navigator.userAgent)) {
+					expect(click).to.have.been.calledWithMatch({ eventPhase: 0 }); // capturing
+				}
+			});
+
+			if (supportsPassiveEvents()) {
+				it('supports passive option', () => {
+					let isPassive = false;
+					let click = sinon.spy(e => {
+						e.preventDefault();
+						isPassive = !e.defaultPrevented;
+					});
+
+					render(
+						<div onClick={[click, { passive: true }]}>
+							<button />
+						</div>,
+						scratch
+					);
+
+					let root = scratch.firstChild;
+					root.firstElementChild.click();
+
+					expect(click, 'click').to.have.been.calledOnce;
+					expect(isPassive).to.equal(true);
+				});
+			}
+
+			if (supportsPassiveEvents()) {
+				it('supports once option', () => {
+					let click = sinon.spy();
+
+					render(
+						<div onClick={[click, { once: true }]}>
+							<button />
+						</div>,
+						scratch
+					);
+
+					let root = scratch.firstChild;
+					root.firstElementChild.click();
+
+					expect(click, 'click').to.have.been.calledOnce;
+
+					root.firstElementChild.click();
+					expect(click, 'click').to.have.been.calledOnce;
+				});
+			}
+
+			// IE doesn't support AbortSignal
+			if (typeof AbortController !== 'undefined') {
+				it('supports signal option', () => {
+					let click = sinon.spy();
+					let controller = new AbortController();
+
+					render(
+						<div onClick={[click, { signal: controller.signal }]}>
+							<button />
+						</div>,
+						scratch
+					);
+
+					let root = scratch.firstChild;
+					root.firstElementChild.click();
+
+					expect(click, 'click').to.have.been.calledOnce;
+
+					controller.abort();
+					root.firstElementChild.click();
+
+					expect(click, 'click').to.have.been.calledOnce;
+				});
+			}
+		});
 	}
 });
