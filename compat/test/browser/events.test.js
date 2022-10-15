@@ -175,13 +175,19 @@ describe('preact/compat events', () => {
 		expect(proto.addEventListener.args.length).to.eql(4);
 		expect(proto.addEventListener.args[0].length).to.eql(3);
 		expect(proto.addEventListener.args[0][0]).to.eql('touchstart');
-		expect(proto.addEventListener.args[0][2]).to.eql(false);
+		expect(proto.addEventListener.args[0][2]).to.eql({
+			passive: true,
+			capture: false
+		});
 		expect(proto.addEventListener.args[1].length).to.eql(3);
 		expect(proto.addEventListener.args[1][0]).to.eql('touchend');
 		expect(proto.addEventListener.args[1][2]).to.eql(false);
 		expect(proto.addEventListener.args[2].length).to.eql(3);
 		expect(proto.addEventListener.args[2][0]).to.eql('touchmove');
-		expect(proto.addEventListener.args[2][2]).to.eql(false);
+		expect(proto.addEventListener.args[2][2]).to.eql({
+			passive: true,
+			capture: false
+		});
 		expect(proto.addEventListener.args[3].length).to.eql(3);
 		expect(proto.addEventListener.args[3][0]).to.eql('touchcancel');
 		expect(proto.addEventListener.args[3][2]).to.eql(false);
@@ -213,6 +219,41 @@ describe('preact/compat events', () => {
 		expect(proto.removeEventListener.args[3].length).to.eql(3);
 		expect(proto.removeEventListener.args[3][0]).to.eql('touchcancel');
 		expect(proto.removeEventListener.args[3][2]).to.eql(false);
+	});
+
+	it('should makie touchstart, touchemove and wheel events passive', () => {
+		const onTouchStart = sinon.spy();
+		const onTouchMove = sinon.spy();
+		const onWheel = sinon.spy();
+
+		render(
+			<div
+				onTouchStart={onTouchStart}
+				onTouchMove={onTouchMove}
+				onWheel={onWheel}
+			/>,
+			scratch
+		);
+
+		scratch.firstChild.dispatchEvent(createEvent('touchstart'));
+		scratch.firstChild.dispatchEvent(createEvent('touchmove'));
+		scratch.firstChild.dispatchEvent(createEvent('wheel'));
+
+		expect(proto.addEventListener.args[0][0]).to.eql('touchstart');
+		expect(proto.addEventListener.args[0][2]).to.eql({
+			passive: true,
+			capture: false
+		});
+		expect(proto.addEventListener.args[1][0]).to.eql('touchmove');
+		expect(proto.addEventListener.args[1][2]).to.eql({
+			passive: true,
+			capture: false
+		});
+		expect(proto.addEventListener.args[2][0]).to.eql('wheel');
+		expect(proto.addEventListener.args[2][2]).to.eql({
+			passive: true,
+			capture: false
+		});
 	});
 
 	it('should support onTransitionEnd', () => {

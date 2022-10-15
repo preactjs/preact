@@ -153,6 +153,11 @@ options.vnode = vnode => {
 				i = 'onfocusin';
 			} else if (/^onblur$/i.test(i)) {
 				i = 'onfocusout';
+			}
+			// See: https://github.com/facebook/react/blob/54f0e0f7308b4d0d51e52e149d3f7e5a207991ee/packages/react-dom-bindings/src/events/DOMPluginEventSystem.js#L432-L447
+			else if (/^on(Touch[MS]|Wh)/.test(i)) {
+				i = i.toLowerCase();
+				value = [value, { passive: true, capture: /Capture$/.test(i) }];
 			} else if (/^on(Ani|Tra|Tou|BeforeInp|Compo)/.test(i)) {
 				i = i.toLowerCase();
 			} else if (nonCustomElement && CAMEL_PROPS.test(i)) {
