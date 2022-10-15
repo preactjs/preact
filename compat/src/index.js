@@ -34,16 +34,30 @@ import {
 	__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED
 } from './render';
 
+
 const requestIdleCallbackPreact =
-	(typeof self !== "undefined" &&
+	(typeof self !== 'undefined' &&
 		self.requestIdleCallback &&
 		self.requestIdleCallback.bind(window)) ||
 	function (cb) {
-		return queueMicrotask(() => {
-			cb();
-		});
-	};
+		let start = Date.now()
+		return setTimeout(function () {
+			cb({
+				didTimeout: false,
+				timeRemaining: function () {
+					return Math.max(0, 50 - (Date.now() - start))
+				},
+			})
+		}, 3)
+	}
 
+const cancelIdleCallbackPreact =
+	(typeof self !== 'undefined' &&
+		self.cancelIdleCallback &&
+		self.cancelIdleCallback.bind(window)) ||
+	function (id) {
+		return clearTimeout(id)
+	}
 
 const version = '17.0.2'; // trick libraries to think we are react
 
@@ -130,9 +144,16 @@ const flushSync = (callback, arg) => callback(arg);
 const StrictMode = Fragment;
 
 export function startTransition(cb) {
-	requestIdleCallbackPreact(() => {
+
+	const preactIdleTask = requestIdleCallbackPreact(() => {
 		cb();
 	});
+
+	useEffect(() => {
+		return () => {
+			cancelIdleCallbackPreact(preactIdleTask);
+		}
+	}, [preactIdleTask]);
 }
 
 export function useDeferredValue(val) {
