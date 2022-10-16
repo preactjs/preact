@@ -328,6 +328,12 @@ function placeChild(
 		oldDom = newDom.nextSibling;
 	}
 
+	// Skip over comment nodes. Will be removed right after calling diffChildren
+	// in diff so that the vnode tree matches the DOM tree again.
+	while (oldDom !== null && oldDom.nodeType === 8) {
+		oldDom = oldDom.nextSibling;
+	}
+
 	return oldDom;
 }
 
