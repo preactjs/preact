@@ -50,11 +50,11 @@ describe('hydrate()', () => {
 	beforeEach(() => {
 		scratch = setupScratch();
 		attributesSpy = spyOnElementAttributes();
+		clearLog();
 	});
 
 	afterEach(() => {
 		teardown(scratch);
-		clearLog();
 	});
 
 	it('should reuse existing DOM', () => {
