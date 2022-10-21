@@ -55,12 +55,12 @@ describe('useId', () => {
 
 		render(<Comp />, scratch);
 		expect(scratch.innerHTML).to.equal(
-			'<div id="P481"><div id="P15361"><span id="P15362">h</span></div></div>'
+			'<div id="P481"><div id="P491"><span id="P502">h</span></div></div>'
 		);
 
 		render(<Comp />, scratch);
 		expect(scratch.innerHTML).to.equal(
-			'<div id="P481"><div id="P15361"><span id="P15362">h</span></div></div>'
+			'<div id="P481"><div id="P491"><span id="P502">h</span></div></div>'
 		);
 	});
 
@@ -83,12 +83,12 @@ describe('useId', () => {
 
 		render(<Comp />, scratch);
 		expect(scratch.innerHTML).to.equal(
-			'<div id="P481"><span id="P15361">h</span><span id="P15671">h</span><span id="P15981">h</span></div>'
+			'<div id="P481"><span id="P491">h</span><span id="P501">h</span><span id="P511">h</span></div>'
 		);
 
 		render(<Comp />, scratch);
 		expect(scratch.innerHTML).to.equal(
-			'<div id="P481"><span id="P15361">h</span><span id="P15671">h</span><span id="P15981">h</span></div>'
+			'<div id="P481"><span id="P491">h</span><span id="P501">h</span><span id="P511">h</span></div>'
 		);
 	});
 
@@ -121,13 +121,13 @@ describe('useId', () => {
 
 		render(<Comp />, scratch);
 		expect(scratch.innerHTML).to.equal(
-			'<div id="P481"><div><span id="P476641">h</span></div></div>'
+			'<div id="P481"><div><span id="P15671">h</span></div></div>'
 		);
 
 		set(true);
 		rerender();
 		expect(scratch.innerHTML).to.equal(
-			'<div id="P481"><div><span id="P476641">h</span><span id="P486251">h</span></div></div>'
+			'<div id="P481"><div><span id="P15671">h</span><span id="P15981">h</span></div></div>'
 		);
 	});
 
@@ -350,6 +350,32 @@ describe('useId', () => {
 		}
 
 		render(<App />, scratch);
-		expect(scratch.innerHTML).to.equal('<div><p>P481</p><p>P476951</p></div>');
+		expect(scratch.innerHTML).to.equal('<div><p>P481</p><p>P15671</p></div>');
+	});
+
+	it('should skip over HTML', () => {
+		const ids = [];
+
+		function Foo() {
+			const id = useId();
+			ids.push(id);
+			return <p>{id}</p>;
+		}
+
+		function App() {
+			return (
+				<div>
+					<span>
+						<Foo />
+					</span>
+					<span>
+						<Foo />
+					</span>
+				</div>
+			);
+		}
+
+		render(<App />, scratch);
+		expect(ids).to.deep.equal(['P491', 'P501']);
 	});
 });

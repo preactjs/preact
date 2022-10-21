@@ -1,4 +1,4 @@
-import { options } from 'preact';
+import { Fragment, options } from 'preact';
 
 /** @type {number} */
 let currentIndex;
@@ -27,22 +27,6 @@ const RAF_TIMEOUT = 100;
 let prevRaf;
 
 options._diff = vnode => {
-	if (
-		typeof vnode.type === 'function' &&
-		!vnode._mask &&
-		// Ignore root Fragment node
-		vnode._parent !== null
-	) {
-		vnode._mask =
-			(vnode._parent && vnode._parent._mask ? vnode._parent._mask : '') +
-			(vnode._parent && vnode._parent._children
-				? vnode._parent._children.indexOf(vnode)
-				: 0);
-	} else if (!vnode._mask) {
-		vnode._mask =
-			vnode._parent && vnode._parent._mask ? vnode._parent._mask : '';
-	}
-
 	currentComponent = null;
 	if (oldBeforeDiff) oldBeforeDiff(vnode);
 };
@@ -395,7 +379,29 @@ function hash(s) {
 export function useId() {
 	const state = getHookState(currentIndex++, 11);
 	if (!state._value) {
-		state._value = 'P' + hash(currentComponent._vnode._mask) + currentIndex;
+		// Traverse the tree upwards and count the components until we reach
+		// the root node.
+		let root = currentComponent._vnode;
+		let parent = root._parent;
+		let i = 0;
+		while (parent !== null) {
+			if (parent.type !== Fragment && typeof parent.type === 'function') {
+				i++;
+			}
+
+			root = parent;
+			parent = parent._parent;
+		}
+
+		// Attach the id usage array to the root node and resize it to fit
+		let ids = root._ids || (root._ids = [0]);
+		while (ids.length < i) {
+			ids.push(0);
+		}
+
+		// Increase the current component depth pointer
+		ids[i - 1]++;
+		state._value = 'P' + hash(ids.join('')) + currentIndex;
 	}
 
 	return state._value;
