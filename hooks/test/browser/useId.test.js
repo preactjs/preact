@@ -378,4 +378,31 @@ describe('useId', () => {
 		render(<App />, scratch);
 		expect(ids).to.deep.equal(['P491', 'P501']);
 	});
+
+	it('should reset for each renderToString roots', () => {
+		const ids = [];
+
+		function Foo() {
+			const id = useId();
+			ids.push(id);
+			return <p>{id}</p>;
+		}
+
+		function App() {
+			return (
+				<div>
+					<span>
+						<Foo />
+					</span>
+					<span>
+						<Foo />
+					</span>
+				</div>
+			);
+		}
+
+		const res1 = rts(<App />);
+		const res2 = rts(<App />);
+		expect(res1).to.equal(res2);
+	});
 });
