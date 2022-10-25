@@ -405,4 +405,29 @@ describe('useId', () => {
 		const res2 = rts(<App />);
 		expect(res1).to.equal(res2);
 	});
+
+	it('should work with conditional components', () => {
+		function Foo() {
+			const id = useId();
+			return <p>{id}</p>;
+		}
+		function Bar() {
+			const id = useId();
+			return <p>{id}</p>;
+		}
+
+		let update;
+		function App() {
+			const [v, setV] = useState(false);
+			update = setV;
+			return <div>{!v ? <Foo /> : <Bar />}</div>;
+		}
+
+		render(<App />, scratch);
+		const first = scratch.innerHTML;
+
+		update(v => !v);
+		rerender();
+		expect(first).not.to.equal(scratch.innerHTML);
+	});
 });
