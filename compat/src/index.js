@@ -27,6 +27,7 @@ import { Children } from './Children';
 import { Suspense, lazy } from './suspense';
 import { SuspenseList } from './suspense-list';
 import { createPortal } from './portals';
+import { is } from './util';
 import {
 	hydrate,
 	render,
@@ -149,18 +150,18 @@ export function useSyncExternalStore(subscribe, getSnapshot) {
 		_instance._value = value;
 		_instance._getSnapshot = getSnapshot;
 
-		if (_instance._value !== getSnapshot()) {
+		if (!is(_instance._value, getSnapshot())) {
 			forceUpdate({ _instance });
 		}
 	}, [subscribe, value, getSnapshot]);
 
 	useEffect(() => {
-		if (_instance._value !== _instance._getSnapshot()) {
+		if (!is(_instance._value, _instance._getSnapshot())) {
 			forceUpdate({ _instance });
 		}
 
 		return subscribe(() => {
-			if (_instance._value !== _instance._getSnapshot()) {
+			if (!is(_instance._value, _instance._getSnapshot())) {
 				forceUpdate({ _instance });
 			}
 		});

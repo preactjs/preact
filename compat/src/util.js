@@ -26,3 +26,13 @@ export function removeNode(node) {
 	let parentNode = node.parentNode;
 	if (parentNode) parentNode.removeChild(node);
 }
+
+/**
+ * Check if two values are the same value
+ * @param {*} x
+ * @param {*} y
+ * @returns {boolean}
+ */
+export function is(x, y) {
+	return (x === y && (x !== 0 || 1 / x === 1 / y)) || (x !== x && y !== y);
+}
