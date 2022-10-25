@@ -378,7 +378,7 @@ export function useId() {
 		}
 
 		let mask = root._mask || (root._mask = [0, 0]);
-		state._value = 'P' + mask[0] + mask[1]++ + currentIndex;
+		state._value = 'P' + mask[0] + '-' + mask[1]++;
 	}
 
 	return state._value;
