@@ -1,4 +1,4 @@
-import { Fragment, options } from 'preact';
+import { options } from 'preact';
 
 /** @type {number} */
 let currentIndex;
@@ -374,26 +374,15 @@ export function useId() {
 		// the root node.
 		/** @type {import('./internal.d').VNode} */
 		let root = currentComponent._vnode;
-		let parent = root._parent;
-		let i = 0;
-		while (parent !== null) {
-			if (parent.type !== Fragment && typeof parent.type === 'function') {
-				i++;
-			}
-
-			root = parent;
-			parent = parent._parent;
+		while (root !== null && root._parent !== null) {
+			root = root._parent;
 		}
 
 		// Attach the id usage array to the root node and resize it to fit
-		let ids = root._mask || (root._mask = [0]);
-		while (ids.length < i) {
-			ids.push(0);
-		}
+		let mask = root._mask || (root._mask = [0, 0]);
 
 		// Increase the current component depth pointer
-		ids[i - 1]++;
-		state._value = 'P' + ids.join('') + currentIndex;
+		state._value = 'P' + mask[0] + mask[1]++ + currentIndex;
 	}
 
 	return state._value;

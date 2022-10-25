@@ -55,12 +55,12 @@ describe('useId', () => {
 
 		render(<Comp />, scratch);
 		expect(scratch.innerHTML).to.equal(
-			'<div id="P01"><div id="P11"><span id="P22">h</span></div></div>'
+			'<div id="P001"><div id="P011"><span id="P022">h</span></div></div>'
 		);
 
 		render(<Comp />, scratch);
 		expect(scratch.innerHTML).to.equal(
-			'<div id="P01"><div id="P11"><span id="P22">h</span></div></div>'
+			'<div id="P001"><div id="P011"><span id="P022">h</span></div></div>'
 		);
 	});
 
@@ -83,12 +83,12 @@ describe('useId', () => {
 
 		render(<Comp />, scratch);
 		expect(scratch.innerHTML).to.equal(
-			'<div id="P01"><span id="P11">h</span><span id="P21">h</span><span id="P31">h</span></div>'
+			'<div id="P001"><span id="P011">h</span><span id="P021">h</span><span id="P031">h</span></div>'
 		);
 
 		render(<Comp />, scratch);
 		expect(scratch.innerHTML).to.equal(
-			'<div id="P01"><span id="P11">h</span><span id="P21">h</span><span id="P31">h</span></div>'
+			'<div id="P001"><span id="P011">h</span><span id="P021">h</span><span id="P031">h</span></div>'
 		);
 	});
 
@@ -121,13 +121,13 @@ describe('useId', () => {
 
 		render(<Comp />, scratch);
 		expect(scratch.innerHTML).to.equal(
-			'<div id="P01"><div><span id="P011">h</span></div></div>'
+			'<div id="P001"><div><span id="P011">h</span></div></div>'
 		);
 
 		set(true);
 		rerender();
 		expect(scratch.innerHTML).to.equal(
-			'<div id="P01"><div><span id="P011">h</span><span id="P021">h</span></div></div>'
+			'<div id="P001"><div><span id="P011">h</span><span id="P021">h</span></div></div>'
 		);
 	});
 
@@ -332,13 +332,16 @@ describe('useId', () => {
 			return <Fragment>{children}</Fragment>;
 		};
 
+		const ids = [];
 		function Foo() {
 			const id = useId();
+			ids.push(id);
 			return <p>{id}</p>;
 		}
 
 		function App() {
 			const id = useId();
+			ids.push(id);
 			return (
 				<div>
 					<p>{id}</p>
@@ -350,7 +353,7 @@ describe('useId', () => {
 		}
 
 		render(<App />, scratch);
-		expect(scratch.innerHTML).to.equal('<div><p>P01</p><p>P011</p></div>');
+		expect(ids[0]).not.to.equal(ids[1]);
 	});
 
 	it('should skip over HTML', () => {
@@ -376,7 +379,7 @@ describe('useId', () => {
 		}
 
 		render(<App />, scratch);
-		expect(ids).to.deep.equal(['P11', 'P21']);
+		expect(ids[0]).not.to.equal(ids[1]);
 	});
 
 	it('should reset for each renderToString roots', () => {

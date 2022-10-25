@@ -39,7 +39,7 @@ export interface Component extends PreactComponent<any, any> {
 }
 
 export interface VNode extends PreactVNode {
-	_mask?: number[];
+	_mask?: [number, number];
 }
 
 export type HookState =
