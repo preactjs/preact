@@ -367,15 +367,6 @@ export function useErrorBoundary(cb) {
 	];
 }
 
-function hash(s) {
-	let h = 0,
-		i = s.length;
-	while (i > 0) {
-		h = ((h << 5) - h + s.charCodeAt(--i)) | 0;
-	}
-	return h;
-}
-
 export function useId() {
 	const state = getHookState(currentIndex++, 11);
 	if (!state._value) {
@@ -401,7 +392,7 @@ export function useId() {
 
 		// Increase the current component depth pointer
 		ids[i - 1]++;
-		state._value = 'P' + hash(ids.join('')) + currentIndex;
+		state._value = 'P' + ids.join('') + currentIndex;
 	}
 
 	return state._value;

@@ -55,12 +55,12 @@ describe('useId', () => {
 
 		render(<Comp />, scratch);
 		expect(scratch.innerHTML).to.equal(
-			'<div id="P481"><div id="P491"><span id="P502">h</span></div></div>'
+			'<div id="P01"><div id="P11"><span id="P22">h</span></div></div>'
 		);
 
 		render(<Comp />, scratch);
 		expect(scratch.innerHTML).to.equal(
-			'<div id="P481"><div id="P491"><span id="P502">h</span></div></div>'
+			'<div id="P01"><div id="P11"><span id="P22">h</span></div></div>'
 		);
 	});
 
@@ -83,12 +83,12 @@ describe('useId', () => {
 
 		render(<Comp />, scratch);
 		expect(scratch.innerHTML).to.equal(
-			'<div id="P481"><span id="P491">h</span><span id="P501">h</span><span id="P511">h</span></div>'
+			'<div id="P01"><span id="P11">h</span><span id="P21">h</span><span id="P31">h</span></div>'
 		);
 
 		render(<Comp />, scratch);
 		expect(scratch.innerHTML).to.equal(
-			'<div id="P481"><span id="P491">h</span><span id="P501">h</span><span id="P511">h</span></div>'
+			'<div id="P01"><span id="P11">h</span><span id="P21">h</span><span id="P31">h</span></div>'
 		);
 	});
 
@@ -121,13 +121,13 @@ describe('useId', () => {
 
 		render(<Comp />, scratch);
 		expect(scratch.innerHTML).to.equal(
-			'<div id="P481"><div><span id="P15671">h</span></div></div>'
+			'<div id="P01"><div><span id="P011">h</span></div></div>'
 		);
 
 		set(true);
 		rerender();
 		expect(scratch.innerHTML).to.equal(
-			'<div id="P481"><div><span id="P15671">h</span><span id="P15981">h</span></div></div>'
+			'<div id="P01"><div><span id="P011">h</span><span id="P021">h</span></div></div>'
 		);
 	});
 
@@ -350,7 +350,7 @@ describe('useId', () => {
 		}
 
 		render(<App />, scratch);
-		expect(scratch.innerHTML).to.equal('<div><p>P481</p><p>P15671</p></div>');
+		expect(scratch.innerHTML).to.equal('<div><p>P01</p><p>P011</p></div>');
 	});
 
 	it('should skip over HTML', () => {
@@ -376,7 +376,7 @@ describe('useId', () => {
 		}
 
 		render(<App />, scratch);
-		expect(ids).to.deep.equal(['P491', 'P501']);
+		expect(ids).to.deep.equal(['P11', 'P21']);
 	});
 
 	it('should reset for each renderToString roots', () => {
