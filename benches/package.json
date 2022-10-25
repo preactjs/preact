@@ -26,5 +26,8 @@
 		"strip-ansi": "^6.0.0",
 		"tachometer": "^0.5.7",
 		"v8-deopt-viewer": "^0.2.1"
+	},
+  "volta": {
+		"extends": "../package.json"
 	}
 }

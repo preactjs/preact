@@ -302,5 +302,8 @@
 		"sinon-chai": "^3.5.0",
 		"typescript": "4.4.2",
 		"undici": "^4.12.0"
+	},
+	"volta": {
+		"node": "16.18.0"
 	}
 }
