@@ -372,6 +372,7 @@ export function useId() {
 	if (!state._value) {
 		// Traverse the tree upwards and count the components until we reach
 		// the root node.
+		/** @type {import('./internal.d').VNode} */
 		let root = currentComponent._vnode;
 		let parent = root._parent;
 		let i = 0;
@@ -385,7 +386,7 @@ export function useId() {
 		}
 
 		// Attach the id usage array to the root node and resize it to fit
-		let ids = root._ids || (root._ids = [0]);
+		let ids = root._mask || (root._mask = [0]);
 		while (ids.length < i) {
 			ids.push(0);
 		}
