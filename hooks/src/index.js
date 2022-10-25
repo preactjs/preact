@@ -370,18 +370,14 @@ export function useErrorBoundary(cb) {
 export function useId() {
 	const state = getHookState(currentIndex++, 11);
 	if (!state._value) {
-		// Traverse the tree upwards and count the components until we reach
-		// the root node.
+		// Grab either the root node or the nearest async boundary node.
 		/** @type {import('./internal.d').VNode} */
 		let root = currentComponent._vnode;
-		while (root !== null && root._parent !== null) {
+		while (root !== null && !root._mask && root._parent !== null) {
 			root = root._parent;
 		}
 
-		// Attach the id usage array to the root node and resize it to fit
 		let mask = root._mask || (root._mask = [0, 0]);
-
-		// Increase the current component depth pointer
 		state._value = 'P' + mask[0] + mask[1]++ + currentIndex;
 	}
 
