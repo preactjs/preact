@@ -536,4 +536,69 @@ describe('refs', () => {
 		expect(el.innerHTML).to.be.equal('Bar');
 		expect(ref.current.innerHTML).to.be.equal('Foo');
 	});
+
+	it.skip('should not remove refs for memoized components keyed', () => {
+		const ref = createRef();
+		const element = <div ref={ref}>hey</div>;
+		function App(props) {
+			return <div key={props.count}>{element}</div>;
+		}
+
+		render(<App count={0} />, scratch);
+		expect(ref.current).to.equal(scratch.firstChild.firstChild);
+		render(<App count={1} />, scratch);
+		expect(ref.current).to.equal(scratch.firstChild.firstChild);
+		render(<App count={2} />, scratch);
+		expect(ref.current).to.equal(scratch.firstChild.firstChild);
+	});
+
+	it('should not remove refs for memoized components unkeyed', () => {
+		const ref = createRef();
+		const element = <div ref={ref}>hey</div>;
+		function App(props) {
+			return <div>{element}</div>;
+		}
+
+		render(<App count={0} />, scratch);
+		expect(ref.current).to.equal(scratch.firstChild.firstChild);
+		render(<App count={1} />, scratch);
+		expect(ref.current).to.equal(scratch.firstChild.firstChild);
+		render(<App count={2} />, scratch);
+		expect(ref.current).to.equal(scratch.firstChild.firstChild);
+	});
+
+	// TODO
+	it.skip('should properly call null for memoized components keyed', () => {
+		const calls = [];
+		const element = <div ref={x => calls.push(x)}>hey</div>;
+		function App(props) {
+			return <div key={props.count}>{element}</div>;
+		}
+
+		render(<App count={0} />, scratch);
+		render(<App count={1} />, scratch);
+		render(<App count={2} />, scratch);
+		expect(calls.length).to.equal(5);
+		expect(calls).to.deep.equal([
+			scratch.firstChild.firstChild,
+			null,
+			scratch.firstChild.firstChild,
+			null,
+			scratch.firstChild.firstChild
+		]);
+	});
+
+	it('should properly call null for memoized components unkeyed', () => {
+		const calls = [];
+		const element = <div ref={x => calls.push(x)}>hey</div>;
+		function App(props) {
+			return <div>{element}</div>;
+		}
+
+		render(<App count={0} />, scratch);
+		render(<App count={1} />, scratch);
+		render(<App count={2} />, scratch);
+		expect(calls.length).to.equal(1);
+		expect(calls[0]).to.equal(scratch.firstChild.firstChild);
+	});
 });
