@@ -164,6 +164,7 @@ export interface Internal<P = {}> {
 	_depth: number | null;
 	/** Callbacks to invoke when this internal commits */
 	_commitCallbacks: Array<() => void>;
+	_stateCallbacks: Array<() => void>; // Only class components
 }
 
 export interface Component<P = {}, S = {}> extends preact.Component<P, S> {
