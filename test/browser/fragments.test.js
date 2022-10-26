@@ -689,8 +689,8 @@ describe('Fragment', () => {
 		expect(scratch.innerHTML).to.equal(htmlForFalse);
 		expectDomLogToBe(
 			[
-				'<div>fooHellobeep.insertBefore(<div>beep, <div>foo)',
-				'<div>beepbarHello.appendChild(<div>bar)'
+				'<div>fooHellobeep.appendChild(<div>Hello)',
+				'<div>barbeepHello.appendChild(<div>bar)'
 			],
 			'rendering true to false'
 		);
@@ -702,8 +702,8 @@ describe('Fragment', () => {
 		expect(scratch.innerHTML).to.equal(htmlForTrue);
 		expectDomLogToBe(
 			[
-				'<div>beepHellofoo.insertBefore(<div>foo, <div>beep)',
-				'<div>fooboopHello.appendChild(<div>boop)'
+				'<div>beepHellofoo.appendChild(<div>Hello)',
+				'<div>boopfooHello.appendChild(<div>boop)'
 			],
 			'rendering false to true'
 		);
@@ -744,7 +744,6 @@ describe('Fragment', () => {
 			'<div>1Hello2.insertBefore(<span>1, <span>1)',
 			'<div>.appendChild(#text)',
 			'<div>11Hello2.insertBefore(<div>Hello, <span>1)',
-			'<div>1Hello1Hello2.insertBefore(<span>2, <span>1)',
 			'<span>1.remove()',
 			'<div>Hello.remove()'
 		]);
@@ -759,7 +758,6 @@ describe('Fragment', () => {
 			'<div>1Hello2.insertBefore(<span>1, <span>1)',
 			'<div>.appendChild(#text)',
 			'<div>11Hello2.insertBefore(<div>Hello, <span>1)',
-			'<div>1Hello1Hello2.insertBefore(<span>2, <span>1)',
 			'<span>1.remove()',
 			'<div>Hello.remove()'
 		]);
@@ -1499,8 +1497,8 @@ describe('Fragment', () => {
 		);
 		expectDomLogToBe(
 			[
-				'<div>beepHellofoo.insertBefore(<div>foo, <div>beep)',
-				'<div>fooboopHello.appendChild(<div>boop)',
+				'<div>beepHellofoo.appendChild(<div>Hello)',
+				'<div>boopfooHello.appendChild(<div>boop)',
 				'<div>.appendChild(#text)',
 				'<div>fooHelloboop.appendChild(<div>boop)'
 			],
@@ -2761,6 +2759,57 @@ describe('Fragment', () => {
 			'<div>3.remove()',
 			'<div>14AB.appendChild(<div>A)',
 			'<div>14BA.appendChild(<div>B)'
+		]);
+	});
+
+	it('should not remove keyed elements', () => {
+		let deleteItem = () => {};
+		const Element = ({ item, deleteItem }) => (
+			<Fragment>
+				<div>Item: {item}</div>
+				{''} {/* If you delete this, it works fine. */}
+			</Fragment>
+		);
+
+		class App extends Component {
+			constructor(props) {
+				super(props);
+				this.state = {
+					items: Array(10)
+						.fill()
+						.map((_, i) => i)
+				};
+			}
+
+			render(_props, state) {
+				deleteItem = () => {
+					this.setState({
+						items: this.state.items.filter(i => i !== this.state.items[2])
+					});
+				};
+
+				return state.items.map(item => (
+					<Element item={item} deleteItem={deleteItem} key={item} />
+				));
+			}
+		}
+
+		render(<App />, scratch);
+		expect(scratch.innerHTML).to.equal(
+			'<div>Item: 0</div> <div>Item: 1</div> <div>Item: 2</div> <div>Item: 3</div> <div>Item: 4</div> <div>Item: 5</div> <div>Item: 6</div> <div>Item: 7</div> <div>Item: 8</div> <div>Item: 9</div> '
+		);
+
+		clearLog();
+		deleteItem();
+		rerender();
+
+		expect(scratch.innerHTML).to.equal(
+			'<div>Item: 0</div> <div>Item: 1</div> <div>Item: 3</div> <div>Item: 4</div> <div>Item: 5</div> <div>Item: 6</div> <div>Item: 7</div> <div>Item: 8</div> <div>Item: 9</div> '
+		);
+		expectDomLogToBe([
+			'<div>Item: 2.remove()',
+			'#text.remove()',
+			'#text.remove()'
 		]);
 	});
 
