@@ -52,6 +52,7 @@
       "$_children": "__k",
       "$_pendingSuspensionCount": "__u",
       "$_childDidSuspend": "__c",
+      "$_stateCallbacks": "_sb",
       "$_onResolve": "__R",
       "$_suspended": "__e",
       "$_dom": "__e",
