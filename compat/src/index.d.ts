@@ -134,9 +134,22 @@ declare namespace React {
 	): C;
 
 	export interface ForwardFn<P = {}, T = any> {
-		(props: P, ref: Ref<T>): preact.ComponentChild;
+		(props: P, ref: ForwardedRef<T>): preact.ComponentChild;
 		displayName?: string;
 	}
+
+	interface MutableRefObject<T> {
+		current: T;
+	}
+
+	export type ForwardedRef<T> =
+		| ((instance: T | null) => void)
+		| MutableRefObject<T | null>
+		| null;
+
+	export type PropsWithChildren<P = unknown> = P & {
+		children?: preact.ComponentChild | undefined;
+	};
 
 	export function forwardRef<R, P = {}>(
 		fn: ForwardFn<P, R>
