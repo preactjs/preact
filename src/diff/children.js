@@ -169,14 +169,7 @@ export function diffChildren(
 					parentDom
 				);
 			} else {
-				oldDom = placeChild(
-					parentDom,
-					childVNode,
-					oldVNode,
-					oldChildren,
-					newDom,
-					oldDom
-				);
+				oldDom = placeChild(parentDom, childVNode, oldVNode, newDom, oldDom);
 			}
 
 			if (typeof newParentVNode.type == 'function') {
@@ -233,7 +226,7 @@ function reorderChildren(childVNode, oldDom, parentDom) {
 			if (typeof vnode.type == 'function') {
 				oldDom = reorderChildren(vnode, oldDom, parentDom);
 			} else {
-				oldDom = placeChild(parentDom, vnode, vnode, c, vnode._dom, oldDom);
+				oldDom = placeChild(parentDom, vnode, vnode, vnode._dom, oldDom);
 			}
 		}
 	}
@@ -260,14 +253,15 @@ export function toChildArray(children, out) {
 	return out;
 }
 
-function placeChild(
-	parentDom,
-	childVNode,
-	oldVNode,
-	oldChildren,
-	newDom,
-	oldDom
-) {
+/**
+ * @param {import('../internal').PreactElement} parentDom
+ * @param {import('../internal').VNode} childVNode
+ * @param {import('../internal').VNode} oldVNode
+ * @param {Node} newDom
+ * @param {Node} oldDom
+ * @returns {Node}
+ */
+function placeChild(parentDom, childVNode, oldVNode, newDom, oldDom) {
 	let nextDom;
 	if (childVNode._nextDom !== undefined) {
 		// Only Fragments or components that return Fragment like VNodes will
@@ -291,9 +285,11 @@ function placeChild(
 		} else {
 			// `j<oldChildrenLength; j+=2` is an alternative to `j++<oldChildrenLength/2`
 			for (
-				let sibDom = oldDom, j = 0;
-				(sibDom = sibDom.nextSibling) && j < oldChildren.length;
-				j += 1
+				let sibDom = oldDom,
+					j = 0,
+					domChildrenLength = parentDom.childNodes.length;
+				(sibDom = sibDom.nextSibling) && j < domChildrenLength;
+				j += 2
 			) {
 				if (sibDom == newDom) {
 					break outer;

@@ -2767,7 +2767,8 @@ describe('Fragment', () => {
 		const Element = ({ item, deleteItem }) => (
 			<Fragment>
 				<div>Item: {item}</div>
-				{''} {/* If you delete this, it works fine. */}
+				{/* If you delete the following line, it works fine without the fix. */}
+				{item}
 			</Fragment>
 		);
 
@@ -2796,7 +2797,7 @@ describe('Fragment', () => {
 
 		render(<App />, scratch);
 		expect(scratch.innerHTML).to.equal(
-			'<div>Item: 0</div> <div>Item: 1</div> <div>Item: 2</div> <div>Item: 3</div> <div>Item: 4</div> <div>Item: 5</div> <div>Item: 6</div> <div>Item: 7</div> <div>Item: 8</div> <div>Item: 9</div> '
+			'<div>Item: 0</div>0<div>Item: 1</div>1<div>Item: 2</div>2<div>Item: 3</div>3<div>Item: 4</div>4<div>Item: 5</div>5<div>Item: 6</div>6<div>Item: 7</div>7<div>Item: 8</div>8<div>Item: 9</div>9'
 		);
 
 		clearLog();
@@ -2804,13 +2805,9 @@ describe('Fragment', () => {
 		rerender();
 
 		expect(scratch.innerHTML).to.equal(
-			'<div>Item: 0</div> <div>Item: 1</div> <div>Item: 3</div> <div>Item: 4</div> <div>Item: 5</div> <div>Item: 6</div> <div>Item: 7</div> <div>Item: 8</div> <div>Item: 9</div> '
+			'<div>Item: 0</div>0<div>Item: 1</div>1<div>Item: 3</div>3<div>Item: 4</div>4<div>Item: 5</div>5<div>Item: 6</div>6<div>Item: 7</div>7<div>Item: 8</div>8<div>Item: 9</div>9'
 		);
-		expectDomLogToBe([
-			'<div>Item: 2.remove()',
-			'#text.remove()',
-			'#text.remove()'
-		]);
+		expectDomLogToBe(['<div>Item: 2.remove()', '#text.remove()']);
 	});
 
 	it('should efficiently unmount nested Fragment children when changing node type', () => {
