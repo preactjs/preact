@@ -1502,6 +1502,63 @@ describe('Fragment', () => {
 		);
 	});
 
+	it('should swap nested fragments correctly', () => {
+		let swap;
+		class App extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { first: true };
+			}
+
+			render() {
+				if (this.state.first) {
+					return (
+						<Fragment>
+							{
+								<Fragment>
+									<p>1. Original item first paragraph</p>
+								</Fragment>
+							}
+							<p>2. Original item second paragraph</p>
+							<button onClick={(swap = () => this.setState({ first: false }))}>
+								Click me
+							</button>
+						</Fragment>
+					);
+				}
+				return (
+					<Fragment>
+						<p>1. Second item first paragraph</p>
+						<Fragment>
+							<p>2. Second item second paragraph</p>
+							<div />
+						</Fragment>
+						<button onClick={(swap = () => this.setState({ first: true }))}>
+							Click me
+						</button>
+					</Fragment>
+				);
+			}
+		}
+
+		render(<App />, scratch);
+		expect(scratch.innerHTML).to.equal(
+			'<p>1. Original item first paragraph</p><p>2. Original item second paragraph</p><button>Click me</button>'
+		);
+
+		swap();
+		rerender();
+		expect(scratch.innerHTML).to.equal(
+			'<p>1. Second item first paragraph</p><p>2. Second item second paragraph</p><div></div><button>Click me</button>'
+		);
+
+		swap();
+		rerender();
+		expect(scratch.innerHTML).to.equal(
+			'<p>1. Original item first paragraph</p><p>2. Original item second paragraph</p><button>Click me</button>'
+		);
+	});
+
 	it('should preserve state with reordering in multiple levels with lots of Fragment siblings', () => {
 		// Also fails if the # of divs outside the Fragment equals or exceeds
 		// the # inside the Fragment for both conditions
