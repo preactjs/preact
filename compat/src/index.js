@@ -138,6 +138,16 @@ export function useTransition() {
 export const useInsertionEffect = useLayoutEffect;
 
 /**
+ * Check if two values are the same value
+ * @param {*} x
+ * @param {*} y
+ * @returns {boolean}
+ */
+function is(x, y) {
+	return (x === y && (x !== 0 || 1 / x === 1 / y)) || (x !== x && y !== y);
+}
+
+/**
  * This is taken from https://github.com/facebook/react/blob/main/packages/use-sync-external-store/src/useSyncExternalStoreShimClient.js#L84
  * on a high level this cuts out the warnings, ... and attempts a smaller implementation
  */
@@ -152,18 +162,18 @@ export function useSyncExternalStore(subscribe, getSnapshot) {
 		_instance._value = value;
 		_instance._getSnapshot = getSnapshot;
 
-		if (_instance._value !== getSnapshot()) {
+		if (!is(_instance._value, getSnapshot())) {
 			forceUpdate({ _instance });
 		}
 	}, [subscribe, value, getSnapshot]);
 
 	useEffect(() => {
-		if (_instance._value !== _instance._getSnapshot()) {
+		if (!is(_instance._value, _instance._getSnapshot())) {
 			forceUpdate({ _instance });
 		}
 
 		return subscribe(() => {
-			if (_instance._value !== _instance._getSnapshot()) {
+			if (!is(_instance._value, _instance._getSnapshot())) {
 				forceUpdate({ _instance });
 			}
 		});
