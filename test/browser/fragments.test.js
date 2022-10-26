@@ -84,6 +84,57 @@ describe('Fragment', () => {
 		]);
 	});
 
+	it('should not remove keyed elements', () => {
+		let deleteItem = () => {};
+		const Element = ({ item, deleteItem }) => (
+			<Fragment>
+				<div>Item: {item}</div>
+				{''} {/* If you delete this, it works fine. */}
+			</Fragment>
+		);
+
+		class App extends Component {
+			constructor(props) {
+				super(props);
+				this.state = {
+					items: Array(10)
+						.fill()
+						.map((_, i) => i)
+				};
+			}
+
+			render(_props, state) {
+				deleteItem = () => {
+					this.setState({
+						items: this.state.items.filter(i => i !== this.state.items[2])
+					});
+				};
+
+				return state.items.map(item => (
+					<Element item={item} deleteItem={deleteItem} key={item} />
+				));
+			}
+		}
+
+		render(<App />, scratch);
+		expect(scratch.innerHTML).to.equal(
+			'<div>Item: 0</div> <div>Item: 1</div> <div>Item: 2</div> <div>Item: 3</div> <div>Item: 4</div> <div>Item: 5</div> <div>Item: 6</div> <div>Item: 7</div> <div>Item: 8</div> <div>Item: 9</div> '
+		);
+
+		clearLog();
+		deleteItem();
+		rerender();
+
+		expect(scratch.innerHTML).to.equal(
+			'<div>Item: 0</div> <div>Item: 1</div> <div>Item: 3</div> <div>Item: 4</div> <div>Item: 5</div> <div>Item: 6</div> <div>Item: 7</div> <div>Item: 8</div> <div>Item: 9</div> '
+		);
+		expectDomLogToBe([
+			'<div>Item: 2.remove()',
+			'#text.remove()',
+			'#text.remove()'
+		]);
+	});
+
 	it('should render multiple children via noop renderer', () => {
 		render(
 			<Fragment>
