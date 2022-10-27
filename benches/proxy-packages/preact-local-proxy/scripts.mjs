@@ -1,7 +1,7 @@
 import { existsSync } from 'fs';
 import { readFile, writeFile } from 'fs/promises';
 import path from 'path';
-import { fileURLToPath, pathToFileURL } from 'url';
+import { fileURLToPath } from 'url';
 import { repoRoot } from '../../scripts/utils.js';
 
 // @ts-ignore
@@ -31,7 +31,8 @@ export async function preinstall(
 
 		const pkgJsonPath = pkgRoot('package.json');
 		const pkgJson = JSON.parse(await readFile(pkgJsonPath, 'utf-8'));
-		pkgJson.dependencies.preact = pathToFileURL(preactLocalTgz).toString();
+		pkgJson.dependencies.preact =
+			'file:' + path.relative(pkgRoot(), preactLocalTgz);
 
 		await writeFile(pkgJsonPath, JSON.stringify(pkgJson, null, 2), 'utf8');
 	} else {
@@ -39,4 +40,20 @@ export async function preinstall(
 			`${prefix}preact-local.tgz not found. Leaving preact-local-proxy/package.json unmodified`
 		);
 	}
+}
+
+export async function postinstall(
+	pkgRoot = (...args) => path.join(__dirname, ...args),
+	prefix = `[preact-local postinstall] `
+) {
+	const pkgJsonPath = pkgRoot('package.json');
+	const pkgJson = JSON.parse(await readFile(pkgJsonPath, 'utf-8'));
+
+	const localBuild = "file:../../../";
+	if (pkgJson.dependencies.preact !== localBuild) {
+		console.log(`${prefix}Resetting preact dep back to local build (${localBuild}) from "${pkgJson.dependencies.preact}" now that bench install is done.`);
+		pkgJson.dependencies.preact = localBuild;
+	}
+
+	await writeFile(pkgJsonPath, JSON.stringify(pkgJson, null, 2), 'utf8');
 }

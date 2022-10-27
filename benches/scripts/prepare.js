@@ -26,8 +26,9 @@ export async function prepare(frameworks) {
 			path.join(proxyRoot, dirname + '-proxy', ...args);
 
 		const packageScripts = proxyDir('scripts.mjs');
-		if (existsSync(packageScripts)) {
-			await import(packageScripts).then(m => m.preinstall());
+		const hasScripts = existsSync(packageScripts);
+		if (hasScripts) {
+			await import(packageScripts).then(m => m.preinstall?.());
 		}
 
 		// It appears from ad-hoc testing (npm v6.14.9 on Windows), npm will cache
@@ -46,5 +47,9 @@ export async function prepare(frameworks) {
 
 		console.log(`Preparing ${dirname}: Running "npm i" in ${proxyDir()}...`);
 		execFileSync(npmCmd, ['i'], { cwd: proxyDir(), stdio: 'inherit' });
+
+		if (hasScripts) {
+			await import(packageScripts).then(m => m.postinstall?.());
+		}
 	}
 }
