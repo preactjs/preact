@@ -30,24 +30,23 @@ jobs:
         # Use --ignore-scripts here to avoid re-building again before pack
         run: |
           npm pack --ignore-scripts
-          mv preact-*.tgz preact.tgz
-          tar -xzf preact.tgz
-          rm preact.tgz
+          mv preact-*.tgz preact-local.tgz
       - name: Upload build output
         uses: actions/upload-artifact@v3
         with:
           name: build-output
-          path: package/
+          path: preact-local.tgz
       - uses: andrewiggins/download-base-artifact@v2
         with:
           artifact: npm-package
           workflow: ci.yml
           required: false
+      - run: mv preact.tgz preact-master.tgz
       - name: Upload base preact package
         uses: actions/upload-artifact@v3
         with:
           name: build-output
-          path: preact.tgz
+          path: preact-master.tgz
 
   bench_todo:
     name: Bench todo

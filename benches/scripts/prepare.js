@@ -3,6 +3,7 @@ import path from 'path';
 import { execFileSync } from 'child_process';
 import del from 'del';
 import { repoRoot } from './utils.js';
+import { existsSync } from 'fs';
 
 const npmCmd = process.platform == 'win32' ? 'npm.cmd' : 'npm';
 
@@ -23,6 +24,11 @@ export async function prepare(frameworks) {
 
 		const proxyDir = (...args) =>
 			path.join(proxyRoot, dirname + '-proxy', ...args);
+
+		const packageScripts = proxyDir('scripts.mjs');
+		if (existsSync(packageScripts)) {
+			await import(packageScripts).then(m => m.preinstall());
+		}
 
 		// It appears from ad-hoc testing (npm v6.14.9 on Windows), npm will cache
 		// any locally referenced tarball files (e.g. "file:../../../preact.tgz") in
