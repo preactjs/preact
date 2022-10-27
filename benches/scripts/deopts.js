@@ -1,4 +1,3 @@
-import * as path from 'path';
 import { mkdir } from 'fs/promises';
 import { spawn } from 'child_process';
 import { Transform } from 'stream';
@@ -18,7 +17,7 @@ import { defaultBenchOptions } from './bench.js';
 export const defaultDeoptsOptions = {
 	framework: 'preact-local',
 	timeout: 5,
-	open: IS_CI ? false : true
+	open: !IS_CI
 };
 
 const getResultDir = (benchmark, framework) =>
@@ -64,7 +63,7 @@ async function onExit(childProcess) {
  * @returns {Promise<TachURL[]>}
  */
 async function getTachometerURLs(tachProcess, tachConfig, timeoutMs = 60e3) {
-	return new Promise(async (resolve, reject) => {
+	return new Promise((resolve, reject) => {
 		let timeout;
 		if (timeoutMs > 0) {
 			timeout = setTimeout(() => {
