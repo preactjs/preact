@@ -19,45 +19,34 @@ jobs:
     name: Prepare benchmarks
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
         with:
-          node-version: '14.x'
-      - name: Cache node modules
-        uses: actions/cache@v1
-        env:
-          cache-name: cache-node-modules
-        with:
-          path: ~/.npm
-          # This uses the same name as the build-action so we can share the caches.
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-build-${{ env.cache-name }}-
-            ${{ runner.os }}-build-
-            ${{ runner.os }}-
+          node-version-file: 'package.json'
+          cache: 'npm'
+          cache-dependency-path: '**/package-lock.json'
       - run: npm ci
       - name: Package
         # Use --ignore-scripts here to avoid re-building again before pack
         run: |
           npm pack --ignore-scripts
-          mv preact-*.tgz preact.tgz
-          tar -xzf preact.tgz
-          rm preact.tgz
+          mv preact-*.tgz preact-local.tgz
       - name: Upload build output
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: build-output
-          path: package/
-      - uses: andrewiggins/download-base-artifact@v1
+          path: preact-local.tgz
+      - uses: andrewiggins/download-base-artifact@v2
         with:
           artifact: npm-package
           workflow: ci.yml
           required: false
+      - run: mv preact.tgz preact-master.tgz
       - name: Upload base preact package
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: build-output
-          path: preact.tgz
+          path: preact-master.tgz
 
   bench_todo:
     name: Bench todo
@@ -65,11 +54,13 @@ jobs:
     needs: prepare
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
         with:
-          node-version: '14.x'
-      - uses: actions/download-artifact@v2
+          node-version-file: 'package.json'
+          cache: 'npm'
+          cache-dependency-path: '**/package-lock.json'
+      - uses: actions/download-artifact@v3
         with:
           name: build-output
       - name: install & build
@@ -82,7 +73,7 @@ jobs:
           cd benches
           npm run bench todo.html
       - name: Upload results
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: results
           path: benches/results/todo.json
@@ -93,11 +84,13 @@ jobs:
     needs: prepare
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
         with:
-          node-version: '14.x'
-      - uses: actions/download-artifact@v2
+          node-version-file: 'package.json'
+          cache: 'npm'
+          cache-dependency-path: '**/package-lock.json'
+      - uses: actions/download-artifact@v3
         with:
           name: build-output
       - name: install & build
@@ -110,7 +103,7 @@ jobs:
           cd benches
           npm run bench text_update.html
       - name: Upload results
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: results
           path: benches/results/text_update.json
@@ -121,11 +114,13 @@ jobs:
     needs: prepare
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
         with:
-          node-version: '14.x'
-      - uses: actions/download-artifact@v2
+          node-version-file: 'package.json'
+          cache: 'npm'
+          cache-dependency-path: '**/package-lock.json'
+      - uses: actions/download-artifact@v3
         with:
           name: build-output
       - name: install & build
@@ -138,7 +133,7 @@ jobs:
           cd benches
           npm run bench many_updates.html
       - name: Upload results
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: results
           path: benches/results/many_updates.json
@@ -149,11 +144,13 @@ jobs:
     needs: prepare
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
         with:
-          node-version: '14.x'
-      - uses: actions/download-artifact@v2
+          node-version-file: 'package.json'
+          cache: 'npm'
+          cache-dependency-path: '**/package-lock.json'
+      - uses: actions/download-artifact@v3
         with:
           name: build-output
       - name: install & build
@@ -166,7 +163,7 @@ jobs:
           cd benches
           npm run bench 02_replace1k.html
       - name: Upload results
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: results
           path: benches/results/02_replace1k.json
@@ -177,11 +174,13 @@ jobs:
     needs: prepare
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
         with:
-          node-version: '14.x'
-      - uses: actions/download-artifact@v2
+          node-version-file: 'package.json'
+          cache: 'npm'
+          cache-dependency-path: '**/package-lock.json'
+      - uses: actions/download-artifact@v3
         with:
           name: build-output
       - name: install & build
@@ -194,7 +193,7 @@ jobs:
           cd benches
           npm run bench 03_update10th1k_x16.html
       - name: Upload results
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: results
           path: benches/results/03_update10th1k_x16.json
@@ -205,11 +204,13 @@ jobs:
     needs: prepare
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
         with:
-          node-version: '14.x'
-      - uses: actions/download-artifact@v2
+          node-version-file: 'package.json'
+          cache: 'npm'
+          cache-dependency-path: '**/package-lock.json'
+      - uses: actions/download-artifact@v3
         with:
           name: build-output
       - name: install & build
@@ -222,7 +223,7 @@ jobs:
           cd benches
           npm run bench 07_create10k.html
       - name: Upload results
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: results
           path: benches/results/07_create10k.json
@@ -233,11 +234,13 @@ jobs:
     needs: prepare
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
         with:
-          node-version: '14.x'
-      - uses: actions/download-artifact@v2
+          node-version-file: 'package.json'
+          cache: 'npm'
+          cache-dependency-path: '**/package-lock.json'
+      - uses: actions/download-artifact@v3
         with:
           name: build-output
       - name: install & build
@@ -250,7 +253,7 @@ jobs:
           cd benches
           npm run bench hydrate1k.html
       - name: Upload results
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: results
           path: benches/results/hydrate1k.json
@@ -261,11 +264,13 @@ jobs:
     needs: prepare
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
         with:
-          node-version: '14.x'
-      - uses: actions/download-artifact@v2
+          node-version-file: 'package.json'
+          cache: 'npm'
+          cache-dependency-path: '**/package-lock.json'
+      - uses: actions/download-artifact@v3
         with:
           name: build-output
       - name: install & build
@@ -278,7 +283,7 @@ jobs:
           cd benches
           npm run bench filter_list.html
       - name: Upload results
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: results
           path: benches/results/filter_list.json

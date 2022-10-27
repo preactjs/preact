@@ -54,7 +54,7 @@ export const frameworks = [
 		},
 		async isValid() {
 			try {
-				await stat(repoRoot('preact.tgz'));
+				await stat(repoRoot('preact-master.tgz'));
 				return validateFileDep(this.dependencies.framework);
 			} catch (e) {
 				return false;
