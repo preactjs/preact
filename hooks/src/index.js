@@ -216,7 +216,7 @@ export function useReducer(reducer, initialState, init) {
 					}
 				});
 
-				return shouldUpdate
+				return shouldUpdate || hookState._internal.props !== p
 					? prevScu
 						? prevScu.call(this, p, s, c)
 						: true

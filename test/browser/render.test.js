@@ -462,9 +462,19 @@ describe('render()', () => {
 		expect(scratch.childNodes[0]).to.have.property('className', 'bar');
 	});
 
-	it('should support false aria-* attributes', () => {
+	it('should support false string aria-* attributes', () => {
 		render(<div aria-checked="false" />, scratch);
 		expect(scratch.firstChild.getAttribute('aria-checked')).to.equal('false');
+	});
+
+	it('should support false aria-* attributes', () => {
+		render(<div aria-checked={false} />, scratch);
+		expect(scratch.firstChild.getAttribute('aria-checked')).to.equal('false');
+	});
+
+	it('should support false data-* attributes', () => {
+		render(<div data-checked={false} />, scratch);
+		expect(scratch.firstChild.getAttribute('data-checked')).to.equal('false');
 	});
 
 	it('should set checked attribute on custom elements without checked property', () => {

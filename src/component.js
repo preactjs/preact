@@ -53,7 +53,7 @@ Component.prototype.setState = function(update, callback) {
 
 	const internal = this._internal;
 	if (update != null && internal) {
-		if (callback) internal._commitCallbacks.push(callback.bind(this));
+		if (callback) internal._stateCallbacks.push(callback.bind(this));
 		internal.rerender(internal);
 	}
 };

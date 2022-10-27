@@ -89,6 +89,7 @@ export function createInternal(vnode, parentInternal) {
 		_prevRef: null,
 		data: flags & TYPE_COMPONENT ? {} : null,
 		_commitCallbacks: flags & TYPE_COMPONENT ? [] : null,
+		_stateCallbacks: flags & TYPE_COMPONENT ? [] : null,
 		rerender: enqueueRender,
 		flags,
 		_children: null,

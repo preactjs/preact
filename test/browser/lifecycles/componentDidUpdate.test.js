@@ -381,5 +381,55 @@ describe('Lifecycle methods', () => {
 			expect(Inner.prototype.componentDidUpdate).to.have.been.called;
 			expect(outerChildText).to.equal(`Outer: ${newValue.toString()}`);
 		});
+
+		it('should not interfere with setState callbacks', () => {
+			let invocation;
+
+			class Child extends Component {
+				componentDidMount() {
+					this.props.setValue(10);
+				}
+				render() {
+					return <p>Hello world</p>;
+				}
+			}
+
+			class App extends Component {
+				constructor(props) {
+					super(props);
+					this.state = {
+						show: false,
+						count: null
+					};
+				}
+
+				componentDidMount() {
+					// eslint-disable-next-line
+					this.setState({ show: true });
+				}
+
+				componentDidUpdate() {}
+
+				render() {
+					if (this.state.show) {
+						return (
+							<Child
+								setValue={i =>
+									this.setState({ count: i }, () => {
+										invocation = this.state;
+									})
+								}
+							/>
+						);
+					}
+					return null;
+				}
+			}
+
+			render(<App />, scratch);
+
+			rerender();
+			expect(invocation.count).to.equal(10);
+		});
 	});
 });

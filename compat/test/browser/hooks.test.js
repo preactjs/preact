@@ -130,6 +130,40 @@ describe('React-18-hooks', () => {
 			expect(scratch.innerHTML).to.equal('<p>hello new world</p>');
 		});
 
+		it('getSnapshot can return NaN without causing infinite loop', () => {
+			let flush;
+			const subscribe = sinon.spy(cb => {
+				flush = cb;
+				return () => {};
+			});
+			let called = false;
+			const getSnapshot = sinon.spy(() => {
+				if (called) {
+					return NaN;
+				}
+
+				return 1;
+			});
+
+			const App = () => {
+				const value = useSyncExternalStore(subscribe, getSnapshot);
+				return <p>{value}</p>;
+			};
+
+			act(() => {
+				render(<App />, scratch);
+			});
+			expect(scratch.innerHTML).to.equal('<p>1</p>');
+			expect(subscribe).to.be.calledOnce;
+			expect(getSnapshot).to.be.calledThrice;
+
+			called = true;
+			flush();
+			rerender();
+
+			expect(scratch.innerHTML).to.equal('<p>NaN</p>');
+		});
+
 		it('should not call function values on subscription', () => {
 			let flush;
 			const subscribe = sinon.spy(cb => {

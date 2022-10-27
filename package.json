@@ -44,6 +44,7 @@
 			"umd": "./compat/dist/compat.umd.js"
 		},
 		"./debug": {
+      "types": "./debug/src/index.d.ts",
 			"module": "./debug/dist/debug.mjs",
 			"import": "./debug/dist/debug.mjs",
 			"require": "./debug/dist/debug.js",
