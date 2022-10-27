@@ -1583,8 +1583,9 @@ describe('Fragment', () => {
 		expectDomLogToBe(
 			[
 				'<div>beepbeepbeepHellofoo.insertBefore(<div>foo, <div>beep)',
-				'<div>foobeepbeepbeepHello.insertBefore(<div>Hello, <div>beep)',
-				'<div>fooHelloboopboopboop.appendChild(<div>boop)'
+				'<div>foobeepboopbeepHello.appendChild(<div>boop)',
+				'<div>foobeepboopHelloboop.appendChild(<div>boop)',
+				'<div>fooboopHelloboopboop.appendChild(<div>boop)'
 			],
 			'rendering from false to true'
 		);
