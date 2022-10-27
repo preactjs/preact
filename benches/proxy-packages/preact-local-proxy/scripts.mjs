@@ -6,9 +6,6 @@ import { repoRoot } from '../../scripts/utils.js';
 
 // @ts-ignore
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const pkgRoot = (...args) => path.join(__dirname, ...args);
-const prefix = `[preact-local preinstall] `;
-const preactLocalTgz = repoRoot('preact-local.tgz');
 
 /**
  * Support installing a local build from either a tarball (preact-local.tgz) or
@@ -21,8 +18,12 @@ const preactLocalTgz = repoRoot('preact-local.tgz');
  * the repo in every benchmark, we copy the prebuilt .tgz file to each job and
  * use that to avoid rebuilding. See preactjs/preact#3777 for the motivation.
  */
-export async function preinstall() {
-	console.log(`${prefix}Searching for preact-local.tgz at ${preactLocalTgz}`)
+export async function preinstall(
+	pkgRoot = (...args) => path.join(__dirname, ...args),
+	prefix = `[preact-local preinstall] `,
+	preactLocalTgz = repoRoot('preact-local.tgz')
+) {
+	console.log(`${prefix}Searching for preact-local.tgz at ${preactLocalTgz}`);
 	if (existsSync(preactLocalTgz)) {
 		console.log(
 			`${prefix}preact-local.tgz found! Updating preact-local-proxy/package.json to install that tarball`
