@@ -27,22 +27,6 @@ const RAF_TIMEOUT = 100;
 let prevRaf;
 
 options._diff = vnode => {
-	if (
-		typeof vnode.type === 'function' &&
-		!vnode._mask &&
-		// Ignore root Fragment node
-		vnode._parent !== null
-	) {
-		vnode._mask =
-			(vnode._parent && vnode._parent._mask ? vnode._parent._mask : '') +
-			(vnode._parent && vnode._parent._children
-				? vnode._parent._children.indexOf(vnode)
-				: 0);
-	} else if (!vnode._mask) {
-		vnode._mask =
-			vnode._parent && vnode._parent._mask ? vnode._parent._mask : '';
-	}
-
 	currentComponent = null;
 	if (oldBeforeDiff) oldBeforeDiff(vnode);
 };
@@ -383,19 +367,18 @@ export function useErrorBoundary(cb) {
 	];
 }
 
-function hash(s) {
-	let h = 0,
-		i = s.length;
-	while (i > 0) {
-		h = ((h << 5) - h + s.charCodeAt(--i)) | 0;
-	}
-	return h;
-}
-
 export function useId() {
 	const state = getHookState(currentIndex++, 11);
 	if (!state._value) {
-		state._value = 'P' + hash(currentComponent._vnode._mask) + currentIndex;
+		// Grab either the root node or the nearest async boundary node.
+		/** @type {import('./internal.d').VNode} */
+		let root = currentComponent._vnode;
+		while (root !== null && !root._mask && root._parent !== null) {
+			root = root._parent;
+		}
+
+		let mask = root._mask || (root._mask = [0, 0]);
+		state._value = 'P' + mask[0] + '-' + mask[1]++;
 	}
 
 	return state._value;

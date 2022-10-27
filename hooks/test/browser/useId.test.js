@@ -55,12 +55,12 @@ describe('useId', () => {
 
 		render(<Comp />, scratch);
 		expect(scratch.innerHTML).to.equal(
-			'<div id="P481"><div id="P15361"><span id="P15362">h</span></div></div>'
+			'<div id="P0-0"><div id="P0-1"><span id="P0-2">h</span></div></div>'
 		);
 
 		render(<Comp />, scratch);
 		expect(scratch.innerHTML).to.equal(
-			'<div id="P481"><div id="P15361"><span id="P15362">h</span></div></div>'
+			'<div id="P0-0"><div id="P0-1"><span id="P0-2">h</span></div></div>'
 		);
 	});
 
@@ -83,12 +83,12 @@ describe('useId', () => {
 
 		render(<Comp />, scratch);
 		expect(scratch.innerHTML).to.equal(
-			'<div id="P481"><span id="P15361">h</span><span id="P15671">h</span><span id="P15981">h</span></div>'
+			'<div id="P0-0"><span id="P0-1">h</span><span id="P0-2">h</span><span id="P0-3">h</span></div>'
 		);
 
 		render(<Comp />, scratch);
 		expect(scratch.innerHTML).to.equal(
-			'<div id="P481"><span id="P15361">h</span><span id="P15671">h</span><span id="P15981">h</span></div>'
+			'<div id="P0-0"><span id="P0-1">h</span><span id="P0-2">h</span><span id="P0-3">h</span></div>'
 		);
 	});
 
@@ -121,13 +121,13 @@ describe('useId', () => {
 
 		render(<Comp />, scratch);
 		expect(scratch.innerHTML).to.equal(
-			'<div id="P481"><div><span id="P476641">h</span></div></div>'
+			'<div id="P0-0"><div><span id="P0-1">h</span></div></div>'
 		);
 
 		set(true);
 		rerender();
 		expect(scratch.innerHTML).to.equal(
-			'<div id="P481"><div><span id="P476641">h</span><span id="P486251">h</span></div></div>'
+			'<div id="P0-0"><div><span id="P0-1">h</span><span id="P0-2">h</span></div></div>'
 		);
 	});
 
@@ -332,13 +332,16 @@ describe('useId', () => {
 			return <Fragment>{children}</Fragment>;
 		};
 
+		const ids = [];
 		function Foo() {
 			const id = useId();
+			ids.push(id);
 			return <p>{id}</p>;
 		}
 
 		function App() {
 			const id = useId();
+			ids.push(id);
 			return (
 				<div>
 					<p>{id}</p>
@@ -350,6 +353,84 @@ describe('useId', () => {
 		}
 
 		render(<App />, scratch);
-		expect(scratch.innerHTML).to.equal('<div><p>P481</p><p>P476951</p></div>');
+		expect(ids[0]).not.to.equal(ids[1]);
+	});
+
+	it('should skip over HTML', () => {
+		const ids = [];
+
+		function Foo() {
+			const id = useId();
+			ids.push(id);
+			return <p>{id}</p>;
+		}
+
+		function App() {
+			return (
+				<div>
+					<span>
+						<Foo />
+					</span>
+					<span>
+						<Foo />
+					</span>
+				</div>
+			);
+		}
+
+		render(<App />, scratch);
+		expect(ids[0]).not.to.equal(ids[1]);
+	});
+
+	it('should reset for each renderToString roots', () => {
+		const ids = [];
+
+		function Foo() {
+			const id = useId();
+			ids.push(id);
+			return <p>{id}</p>;
+		}
+
+		function App() {
+			return (
+				<div>
+					<span>
+						<Foo />
+					</span>
+					<span>
+						<Foo />
+					</span>
+				</div>
+			);
+		}
+
+		const res1 = rts(<App />);
+		const res2 = rts(<App />);
+		expect(res1).to.equal(res2);
+	});
+
+	it('should work with conditional components', () => {
+		function Foo() {
+			const id = useId();
+			return <p>{id}</p>;
+		}
+		function Bar() {
+			const id = useId();
+			return <p>{id}</p>;
+		}
+
+		let update;
+		function App() {
+			const [v, setV] = useState(false);
+			update = setV;
+			return <div>{!v ? <Foo /> : <Bar />}</div>;
+		}
+
+		render(<App />, scratch);
+		const first = scratch.innerHTML;
+
+		update(v => !v);
+		rerender();
+		expect(first).not.to.equal(scratch.innerHTML);
 	});
 });
