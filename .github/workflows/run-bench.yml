@@ -1,0 +1,64 @@
+name: Run Benchmark
+
+# Expectations:
+#
+# This workflow expects calling workflows to have uploaded an artifact named
+# "bench-environment" that contains any built artifacts required to run the
+# benchmark. This typically is the dist/ folder that running `npm run build`
+# produces and/or a tarball of a previous build to bench the local build against
+
+on:
+  workflow_call:
+    inputs:
+      benchmark:
+        description: 'The name of the benchmark to run. Should be name of an HTML file without the .html extension'
+        type: string
+        required: true
+      trace:
+        description: 'Whether to capture browser traces for this benchmark run'
+        type: boolean
+        required: false
+        default: false
+      timeout:
+        description: 'How many minutes to give the benchmark to run before timing out and failing'
+        type: number
+        required: false
+        default: 20
+
+jobs:
+  run_bench:
+    name: Bench ${{ inputs.benchmark }}
+    runs-on: ubuntu-latest
+    timeout-minutes: ${{ inputs.timeout }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version-file: 'package.json'
+          cache: 'npm'
+          cache-dependency-path: '**/package-lock.json'
+      - uses: actions/download-artifact@v3
+        with:
+          name: bench-environment
+      - name: Install deps
+        working-directory: benches
+        run: npm ci
+      - name: Run benchmark
+        working-directory: benches
+        run: |
+          export CHROMEDRIVER_FILEPATH=$(which chromedriver)
+          npm run bench ${{ inputs.benchmark }}.html -- --trace=${{ inputs.trace }}
+      - name: Upload results
+        uses: actions/upload-artifact@v3
+        with:
+          name: results
+          path: benches/results/${{ inputs.benchmark }}.json
+      - name: Tar logs if present
+        working-directory: benches
+        run: '[ -d logs ] && tar -zcvf ${{ inputs.benchmark}}_logs.tgz logs || echo "No logs found"'
+      - name: Upload logs
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ inputs.benchmark}}_logs
+          path: benches/${{ inputs.benchmark}}_logs.tgz
+          if-no-files-found: ignore

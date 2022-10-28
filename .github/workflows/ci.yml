@@ -2,6 +2,7 @@ name: CI
 
 on:
   workflow_dispatch:
+  workflow_call:
   pull_request:
     branches:
       - '**'
@@ -9,7 +10,6 @@ on:
     branches:
       - master
       - restructure
-  workflow_call:
 
 jobs:
   build_test:
