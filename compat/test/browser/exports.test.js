@@ -1,8 +1,23 @@
 import Compat from 'preact/compat';
+import CompatClient from 'preact/compat/client';
 // eslint-disable-next-line no-duplicate-imports
 import * as Named from 'preact/compat';
+// eslint-disable-next-line no-duplicate-imports
+import * as NamedClient from 'preact/compat/client';
 
 describe('compat exports', () => {
+	describe('client', () => {
+		it('should have a default export', () => {
+			expect(CompatClient.createRoot).to.be.a('function');
+			expect(CompatClient.hydrateRoot).to.be.a('function');
+		});
+
+		it('should have named exports', () => {
+			expect(NamedClient.createRoot).to.be.a('function');
+			expect(NamedClient.hydrateRoot).to.be.a('function');
+		});
+	});
+
 	it('should have a default export', () => {
 		expect(Compat.createElement).to.be.a('function');
 		expect(Compat.Component).to.be.a('function');
