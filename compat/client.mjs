@@ -15,3 +15,8 @@ export function hydrateRoot(container, children) {
 	hydrate(children, container)
 	return createRoot(container)
 }
+
+export default {
+	createRoot,
+	hydrateRoot
+}
