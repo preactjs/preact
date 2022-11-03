@@ -16,10 +16,24 @@ describe('parentDom.ownerDocument', () => {
 	});
 
 	it('should reference the correct document from the parent node', () => {
-		function Foo() {
-			return <div>A</div>;
-		}
-		render(<Foo />, scratch);
-		expect(scratch.ownerDocument).to.equal(document);
+		let iframe = document.createElement('iframe');
+
+		scratch.appendChild(iframe);
+
+		let iframeDoc = iframe.contentDocument;
+
+		iframeDoc.write(
+			'<!DOCTYPE html><html><head></head><body><div></div></body></html>'
+		);
+
+		iframeDoc.close();
+
+		let iframeRootNode = iframeDoc.querySelector('div');
+
+		render('Hello', iframeRootNode);
+
+		expect(iframeRootNode.textContent).to.be.equal('Hello');
+		expect(iframeRootNode.ownerDocument).to.be.equal(iframeDoc);
+		expect(iframeRootNode.ownerDocument).to.not.be.equal(document);
 	});
 });
