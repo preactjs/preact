@@ -53,7 +53,8 @@ function Portal(props) {
 				removeChild(child) {
 					this.childNodes.splice(this.childNodes.indexOf(child) >>> 1, 1);
 					_this._container.removeChild(child);
-				}
+				},
+				ownerDocument: container.ownerDocument
 			};
 		}
 
