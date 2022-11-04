@@ -377,13 +377,6 @@ Component.prototype.setState = function(update, callback) {
 					`"this.state = {}" directly.\n\n${getOwnerStack(getCurrentVNode())}`
 			);
 		}
-	} else if (this._parentDom == null) {
-		console.warn(
-			`Can't call "this.setState" on an unmounted component. This is a no-op, ` +
-				`but it indicates a memory leak in your application. To fix, cancel all ` +
-				`subscriptions and asynchronous tasks in the componentWillUnmount method.` +
-				`\n\n${getOwnerStack(this._vnode)}`
-		);
 	}
 
 	return setState.call(this, update, callback);

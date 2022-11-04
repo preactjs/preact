@@ -160,4 +160,45 @@ describe('useMemo', () => {
 			'render hi'
 		]);
 	});
+
+	it('should promote falsy value after a skipped render', () => {
+		let update;
+
+		function App() {
+			const [v, set] = useState(0);
+			update = set;
+			const res = useMemo(() => 0, [v > 1]);
+
+			if (v === 0) {
+				set(v + 1);
+			}
+			return <p>{res}</p>;
+		}
+
+		render(<App />, scratch);
+		expect(scratch.textContent).to.equal('0');
+
+		act(() => {
+			update(v => v + 1);
+		});
+		act(() => {
+			update(v => v + 1);
+		});
+
+		expect(scratch.textContent).to.equal('0');
+	});
+
+	it('should promote undefined value after a skipped render', () => {
+		let value;
+		function Comp({ all }) {
+			const result = (value = useMemo(() => (all ? 5 : undefined), [all]));
+			return result;
+		}
+		render(<Comp all />, scratch);
+		expect(value).to.equal(5);
+		render(<Comp all={false} />, scratch);
+		expect(value).to.equal(undefined);
+		render(<Comp all={false} />, scratch);
+		expect(value).to.equal(undefined);
+	});
 });

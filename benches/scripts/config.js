@@ -1,5 +1,5 @@
 import * as path from 'path';
-import del from 'del';
+import { deleteAsync } from 'del';
 import { writeFile, stat, mkdir } from 'fs/promises';
 import { repoRoot, benchesRoot, toUrl } from './utils.js';
 import { defaultBenchOptions } from './bench.js';
@@ -9,6 +9,8 @@ const measureName = 'duration'; // Must match measureName in '../src/util.js'
 const warnings = new Set([]);
 const TACH_SCHEMA =
 	'https://raw.githubusercontent.com/Polymer/tachometer/master/config.schema.json';
+
+const configDir = (...args) => benchesRoot('dist', ...args);
 
 export const baseTraceLogDir = (...args) =>
 	path.join(benchesRoot('logs'), ...args);
@@ -22,11 +24,11 @@ async function validateFileDep(framework) {
 		if (typeof framework === 'string') {
 			await stat(framework.replace(/^file:/, ''));
 			return true;
-		} else {
-			return false;
 		}
+
+		return false;
 	} catch (e) {
-		console.log('Stat error:', e);
+		// console.log('Stat error:', e);
 		return false;
 	}
 }
@@ -54,7 +56,7 @@ export const frameworks = [
 		},
 		async isValid() {
 			try {
-				await stat(repoRoot('preact.tgz'));
+				await stat(repoRoot('preact-master.tgz'));
 				return validateFileDep(this.dependencies.framework);
 			} catch (e) {
 				return false;
@@ -69,6 +71,15 @@ export const frameworks = [
 		isValid() {
 			return validateFileDep(this.dependencies.framework);
 		}
+	},
+	{
+		label: 'preact-hooks',
+		dependencies: {
+			framework: 'file:' + repoRoot('benches/proxy-packages/preact-hooks-proxy')
+		},
+		isValid() {
+			return validateFileDep(this.dependencies.framework);
+		}
 	}
 ];
 
@@ -78,7 +89,7 @@ export const frameworks = [
  */
 function getBaseBenchmarkConfig(benchPath) {
 	let name = path.basename(benchPath).replace('.html', '');
-	let url = path.posix.relative(toUrl(benchesRoot()), toUrl(benchPath));
+	let url = path.posix.relative(toUrl(configDir()), toUrl(benchPath));
 
 	/** @type {ConfigFileBenchmark["measurement"]} */
 	let measurement;
@@ -173,7 +184,7 @@ export async function generateConfig(benchPath, options) {
 
 	if (browser.name == 'chrome' && options.trace) {
 		const traceLogDir = baseTraceLogDir(baseBenchConfig.name);
-		await del('**/*', { cwd: traceLogDir });
+		await deleteAsync('**/*', { cwd: traceLogDir });
 		await mkdir(traceLogDir, { recursive: true });
 
 		browser.trace = {
@@ -245,9 +256,10 @@ export async function generateConfig(benchPath, options) {
 	/** @type {ConfigFile} */
 	const config = {
 		$schema: TACH_SCHEMA,
+		root: path.relative(configDir(), benchesRoot()),
 		sampleSize: options['sample-size'],
 		timeout: options.timeout,
-		horizons: options.horizon.split(','),
+		autoSampleConditions: options.horizon.split(','),
 		benchmarks
 	};
 
@@ -270,7 +282,7 @@ export async function generateConfig(benchPath, options) {
 }
 
 async function writeConfig(name, config) {
-	const configPath = benchesRoot('dist', name + '.config.json');
+	const configPath = configDir(name + '.config.json');
 	await mkdir(path.dirname(configPath), { recursive: true });
 	await writeFile(configPath, JSON.stringify(config, null, 2), 'utf8');
 

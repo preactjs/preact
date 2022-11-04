@@ -91,12 +91,14 @@ export function diff(
 				c._globalContext = globalContext;
 				isNew = c._dirty = true;
 				c._renderCallbacks = [];
+				c._stateCallbacks = [];
 			}
 
 			// Invoke getDerivedStateFromProps
 			if (c._nextState == null) {
 				c._nextState = c.state;
 			}
+
 			if (newType.getDerivedStateFromProps != null) {
 				if (c._nextState == c.state) {
 					c._nextState = assign({}, c._nextState);
@@ -152,6 +154,12 @@ export function diff(
 					newVNode._children.forEach(vnode => {
 						if (vnode) vnode._parent = newVNode;
 					});
+
+					for (let i = 0; i < c._stateCallbacks.length; i++) {
+						c._renderCallbacks.push(c._stateCallbacks[i]);
+					}
+					c._stateCallbacks = [];
+
 					if (c._renderCallbacks.length) {
 						commitQueue.push(c);
 					}
@@ -184,6 +192,11 @@ export function diff(
 				if (renderHook) renderHook(newVNode);
 
 				tmp = c.render(c.props, c.state, c.context);
+
+				for (let i = 0; i < c._stateCallbacks.length; i++) {
+					c._renderCallbacks.push(c._stateCallbacks[i]);
+				}
+				c._stateCallbacks = [];
 			} else {
 				do {
 					c._dirty = false;
@@ -504,7 +517,9 @@ export function unmount(vnode, parentVNode, skipRemove) {
 	if (options.unmount) options.unmount(vnode);
 
 	if ((r = vnode.ref)) {
-		if (!r.current || r.current === vnode._dom) applyRef(r, null, parentVNode);
+		if (!r.current || r.current === vnode._dom) {
+			applyRef(r, null, parentVNode);
+		}
 	}
 
 	if ((r = vnode._component) != null) {
@@ -517,21 +532,28 @@ export function unmount(vnode, parentVNode, skipRemove) {
 		}
 
 		r.base = r._parentDom = null;
+		vnode._component = undefined;
 	}
 
 	if ((r = vnode._children)) {
 		for (let i = 0; i < r.length; i++) {
 			if (r[i]) {
-				unmount(r[i], parentVNode, typeof vnode.type != 'function');
+				unmount(
+					r[i],
+					parentVNode,
+					skipRemove || typeof vnode.type !== 'function'
+				);
 			}
 		}
 	}
 
-	if (!skipRemove && vnode._dom != null) removeNode(vnode._dom);
+	if (!skipRemove && vnode._dom != null) {
+		removeNode(vnode._dom);
+	}
 
 	// Must be set to `undefined` to properly clean up `_nextDom`
 	// for which `null` is a valid value. See comment in `create-element.js`
-	vnode._dom = vnode._nextDom = undefined;
+	vnode._parent = vnode._dom = vnode._nextDom = undefined;
 }
 
 /** The `.render()` method for a PFC backing instance. */

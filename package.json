@@ -1,7 +1,7 @@
 {
 	"name": "preact",
 	"amdName": "preact",
-	"version": "10.8.1",
+	"version": "10.11.2",
 	"private": false,
 	"description": "Fast 3kb React-compatible Virtual DOM library.",
 	"main": "dist/preact.js",
@@ -25,6 +25,7 @@
 			"require": "./compat/dist/compat.js"
 		},
 		"./debug": {
+			"types": "./debug/src/index.d.ts",
 			"browser": "./debug/dist/debug.module.js",
 			"umd": "./debug/dist/debug.umd.js",
 			"import": "./debug/dist/debug.mjs",
@@ -102,18 +103,18 @@
 	"scripts": {
 		"prepare": "run-s build && check-export-map",
 		"build": "npm-run-all --parallel build:*",
-		"build:core": "microbundle build --raw",
-		"build:core-min": "microbundle build --raw -f iife src/cjs.js -o dist/preact.min.js",
-		"build:debug": "microbundle build --raw --cwd debug",
-		"build:devtools": "microbundle build --raw --cwd devtools",
-		"build:hooks": "microbundle build --raw --cwd hooks",
-		"build:test-utils": "microbundle build --raw --cwd test-utils",
-		"build:compat": "microbundle build src/index.js src/scheduler.js --raw --cwd compat --globals 'preact/hooks=preactHooks'",
-		"build:jsx": "microbundle build --raw --cwd jsx-runtime",
+		"build:core": "microbundle build --raw --no-generateTypes -f cjs,esm,umd",
+		"build:core-min": "microbundle build --raw --no-generateTypes -f cjs,esm,umd,iife src/cjs.js -o dist/preact.min.js",
+		"build:debug": "microbundle build --raw --no-generateTypes -f cjs,esm,umd --cwd debug",
+		"build:devtools": "microbundle build --raw --no-generateTypes -f cjs,esm,umd --cwd devtools",
+		"build:hooks": "microbundle build --raw --no-generateTypes -f cjs,esm,umd --cwd hooks",
+		"build:test-utils": "microbundle build --raw --no-generateTypes -f cjs,esm,umd --cwd test-utils",
+		"build:compat": "microbundle build src/index.js src/scheduler.js --raw --no-generateTypes -f cjs,esm,umd --cwd compat --globals 'preact/hooks=preactHooks'",
+		"build:jsx": "microbundle build --raw --no-generateTypes -f cjs,esm,umd --cwd jsx-runtime",
 		"postbuild": "node ./config/node-13-exports.js && node ./config/compat-entries.js",
-		"dev": "microbundle watch --raw --format cjs",
-		"dev:hooks": "microbundle watch --raw --format cjs --cwd hooks",
-		"dev:compat": "microbundle watch --raw --format cjs --cwd compat --globals 'preact/hooks=preactHooks'",
+		"dev": "microbundle watch --raw --no-generateTypes --format cjs",
+		"dev:hooks": "microbundle watch --raw --no-generateTypes --format cjs --cwd hooks",
+		"dev:compat": "microbundle watch --raw --no-generateTypes --format cjs --cwd compat --globals 'preact/hooks=preactHooks'",
 		"test": "npm-run-all build lint test:unit",
 		"test:unit": "run-p test:mocha test:karma:minify test:ts",
 		"test:ts": "run-p test:ts:*",
@@ -270,7 +271,7 @@
 		"cross-env": "^7.0.2",
 		"diff": "^5.0.0",
 		"errorstacks": "^2.4.0",
-		"esbuild": "^0.14.25",
+		"esbuild": "^0.14.50",
 		"eslint": "5.15.1",
 		"eslint-config-developit": "^1.1.1",
 		"eslint-config-prettier": "^6.5.0",
@@ -289,10 +290,11 @@
 		"kolorist": "^1.2.10",
 		"lint-staged": "^10.5.2",
 		"lodash": "^4.17.20",
-		"microbundle": "^0.11.0",
+		"microbundle": "^0.15.1",
 		"mocha": "^8.2.1",
 		"npm-merge-driver-install": "^1.1.1",
 		"npm-run-all": "^4.0.0",
+		"preact-render-to-string": "^5.2.5",
 		"prettier": "^1.18.2",
 		"prop-types": "^15.7.2",
 		"sade": "^1.7.4",
@@ -300,5 +302,8 @@
 		"sinon-chai": "^3.5.0",
 		"typescript": "4.4.2",
 		"undici": "^4.12.0"
+	},
+	"volta": {
+		"node": "16.18.0"
 	}
 }

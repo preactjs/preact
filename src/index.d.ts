@@ -39,7 +39,7 @@ export type Key = string | number | any;
 
 export type RefObject<T> = { current: T | null };
 export type RefCallback<T> = (instance: T | null) => void;
-export type Ref<T> = RefObject<T> | RefCallback<T>;
+export type Ref<T> = RefObject<T> | RefCallback<T> | null;
 
 export type ComponentChild =
 	| VNode<any>
@@ -188,11 +188,35 @@ export abstract class Component<P, S> {
 // -----------------------------------
 
 export function createElement(
+	type: 'input',
+	props:
+		| (JSXInternal.DOMAttributes<HTMLInputElement> &
+				ClassAttributes<HTMLInputElement>)
+		| null,
+	...children: ComponentChildren[]
+): VNode<any>;
+export function createElement<
+	P extends JSXInternal.HTMLAttributes<T>,
+	T extends HTMLElement
+>(
+	type: keyof JSXInternal.IntrinsicElements,
+	props: (ClassAttributes<T> & P) | null,
+	...children: ComponentChildren[]
+): VNode<any>;
+export function createElement<
+	P extends JSXInternal.SVGAttributes<T>,
+	T extends HTMLElement
+>(
+	type: keyof JSXInternal.IntrinsicElements,
+	props: (ClassAttributes<T> & P) | null,
+	...children: ComponentChildren[]
+): VNode<any>;
+export function createElement<T extends HTMLElement>(
 	type: string,
 	props:
-		| (JSXInternal.HTMLAttributes &
-				JSXInternal.SVGAttributes &
-				Record<string, any>)
+		| (ClassAttributes<T> &
+				JSXInternal.HTMLAttributes &
+				JSXInternal.SVGAttributes)
 		| null,
 	...children: ComponentChildren[]
 ): VNode<any>;
@@ -206,11 +230,35 @@ export namespace createElement {
 }
 
 export function h(
+	type: 'input',
+	props:
+		| (JSXInternal.DOMAttributes<HTMLInputElement> &
+				ClassAttributes<HTMLInputElement>)
+		| null,
+	...children: ComponentChildren[]
+): VNode<any>;
+export function h<
+	P extends JSXInternal.HTMLAttributes<T>,
+	T extends HTMLElement
+>(
+	type: keyof JSXInternal.IntrinsicElements,
+	props: (ClassAttributes<T> & P) | null,
+	...children: ComponentChildren[]
+): VNode<any>;
+export function h<
+	P extends JSXInternal.SVGAttributes<T>,
+	T extends HTMLElement
+>(
+	type: keyof JSXInternal.IntrinsicElements,
+	props: (ClassAttributes<T> & P) | null,
+	...children: ComponentChildren[]
+): VNode<any>;
+export function h<T extends HTMLElement>(
 	type: string,
 	props:
-		| (JSXInternal.HTMLAttributes &
-				JSXInternal.SVGAttributes &
-				Record<string, any>)
+		| (ClassAttributes<T> &
+				JSXInternal.HTMLAttributes &
+				JSXInternal.SVGAttributes)
 		| null,
 	...children: ComponentChildren[]
 ): VNode<any>;
@@ -227,6 +275,15 @@ export namespace h {
 // Preact render
 // -----------------------------------
 
+export function render(
+	vnode: ComponentChild,
+	parent: Element | Document | ShadowRoot | DocumentFragment
+): void;
+/**
+ * @deprecated Will be removed in v11.
+ *
+ * Replacement Preact 10+ implementation can be found here: https://gist.github.com/developit/f4c67a2ede71dc2fab7f357f39cff28c
+ */
 export function render(
 	vnode: ComponentChild,
 	parent: Element | Document | ShadowRoot | DocumentFragment,

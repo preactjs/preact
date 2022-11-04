@@ -57,7 +57,25 @@ describe('errorBoundary', () => {
 		rerender();
 		expect(scratch.innerHTML).to.equal('<p>Error</p>');
 		expect(spy).to.be.calledOnce;
-		expect(spy).to.be.calledWith(error);
+		expect(spy).to.be.calledWith(error, {});
+	});
+
+	it('returns error', () => {
+		const error = new Error('test');
+		const Throws = () => {
+			throw error;
+		};
+
+		let returned;
+		const App = () => {
+			const [err] = useErrorBoundary();
+			returned = err;
+			return err ? <p>Error</p> : <Throws />;
+		};
+
+		render(<App />, scratch);
+		rerender();
+		expect(returned).to.equal(error);
 	});
 
 	it('does not leave a stale closure', () => {
@@ -84,9 +102,9 @@ describe('errorBoundary', () => {
 		resetErr();
 		render(<App onError={spy2} />, scratch);
 		rerender();
-		expect(scratch.innerHTML).to.equal('<p>Error</p>');
 		expect(spy).to.be.calledOnce;
 		expect(spy2).to.be.calledOnce;
 		expect(spy2).to.be.calledWith(error);
+		expect(scratch.innerHTML).to.equal('<p>Error</p>');
 	});
 });

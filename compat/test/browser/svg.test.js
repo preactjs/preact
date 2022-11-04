@@ -73,12 +73,22 @@ describe('svg', () => {
 				clipPath="value"
 				clipRule="value"
 				clipPathUnits="value"
+				colorInterpolationFilters="auto"
+				fontSizeAdjust="value"
 				glyphOrientationHorizontal="value"
+				glyphOrientationVertical="value"
+				shapeRendering="crispEdges"
 				glyphRef="value"
+				horizAdvX="value"
+				horizOriginX="value"
 				markerStart="value"
 				markerHeight="value"
 				markerUnits="value"
 				markerWidth="value"
+				unitsPerEm="value"
+				vertAdvY="value"
+				vertOriginX="value"
+				vertOriginY="value"
 				x1="value"
 				xChannelSelector="value"
 			/>,
@@ -87,7 +97,7 @@ describe('svg', () => {
 
 		expect(serializeHtml(scratch)).to.eql(
 			sortAttributes(
-				'<svg clip-path="value" clip-rule="value" clipPathUnits="value" glyph-orientationhorizontal="value" glyphRef="value" marker-start="value" markerHeight="value" markerUnits="value" markerWidth="value" x1="value" xChannelSelector="value"></svg>'
+				'<svg clip-path="value" clip-rule="value" clipPathUnits="value" color-interpolation-filters="auto" font-size-adjust="value" glyph-orientation-horizontal="value" glyph-orientation-vertical="value" shape-rendering="crispEdges" glyphRef="value" horiz-adv-x="value" horiz-origin-x="value" marker-start="value" markerHeight="value" markerUnits="value" markerWidth="value" units-per-em="value" vert-adv-y="value" vert-origin-x="value" vert-origin-y="value" x1="value" xChannelSelector="value"></svg>'
 			)
 		);
 	});

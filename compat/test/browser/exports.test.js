@@ -1,8 +1,23 @@
 import Compat from 'preact/compat';
+import CompatClient from 'preact/compat/client';
 // eslint-disable-next-line no-duplicate-imports
 import * as Named from 'preact/compat';
+// eslint-disable-next-line no-duplicate-imports
+import * as NamedClient from 'preact/compat/client';
 
 describe('compat exports', () => {
+	describe('client', () => {
+		it('should have a default export', () => {
+			expect(CompatClient.createRoot).to.be.a('function');
+			expect(CompatClient.hydrateRoot).to.be.a('function');
+		});
+
+		it('should have named exports', () => {
+			expect(NamedClient.createRoot).to.be.a('function');
+			expect(NamedClient.hydrateRoot).to.be.a('function');
+		});
+	});
+
 	it('should have a default export', () => {
 		expect(Compat.createElement).to.be.a('function');
 		expect(Compat.Component).to.be.a('function');
@@ -22,6 +37,10 @@ describe('compat exports', () => {
 		expect(Compat.useMemo).to.be.a('function');
 		expect(Compat.useCallback).to.be.a('function');
 		expect(Compat.useContext).to.be.a('function');
+		expect(Compat.useSyncExternalStore).to.be.a('function');
+		expect(Compat.useInsertionEffect).to.be.a('function');
+		expect(Compat.useTransition).to.be.a('function');
+		expect(Compat.useDeferredValue).to.be.a('function');
 
 		// Suspense
 		expect(Compat.Suspense).to.be.a('function');
@@ -41,6 +60,7 @@ describe('compat exports', () => {
 		expect(Compat.unmountComponentAtNode).to.exist.and.be.a('function');
 		expect(Compat.unstable_batchedUpdates).to.exist.and.be.a('function');
 		expect(Compat.version).to.exist.and.be.a('string');
+		expect(Compat.startTransition).to.be.a('function');
 	});
 
 	it('should have named exports', () => {
