@@ -1,4 +1,4 @@
-import { render } from 'preact';
+import { createElement, render } from 'preact';
 import { setupScratch, teardown } from '../_util/helpers';
 
 /** @jsx createElement */
@@ -28,13 +28,20 @@ describe('parentDom.ownerDocument', () => {
 
 		iframeDoc.close();
 
-		let spy = sinon.spy(iframeDoc, 'createTextNode');
+		let rootTextSpy = sinon.spy(document, 'createTextNode');
+		let rootElementSpy = sinon.spy(document, 'createElement');
+
+		let iframeTextSpy = sinon.spy(iframeDoc, 'createTextNode');
+		let iframeElementSpy = sinon.spy(iframeDoc, 'createElement');
 
 		let iframeRootNode = iframeDoc.querySelector('div');
 
-		render('Hello', iframeRootNode);
+		render(<span>Hello</span>, iframeRootNode);
 
-		expect(spy).to.be.called;
+		expect(rootTextSpy).not.to.be.called;
+		expect(rootElementSpy).not.to.be.called;
+		expect(iframeTextSpy).to.be.called;
+		expect(iframeElementSpy).to.be.called;
 
 		expect(iframeRootNode.textContent).to.be.equal('Hello');
 		expect(iframeRootNode.firstChild.ownerDocument).to.be.equal(iframeDoc);
