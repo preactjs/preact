@@ -143,23 +143,23 @@ export function getDomSibling(internal, childIndex) {
 
 /**
  * @param {import('./internal').Internal} internal
- * @param {number} [i]
+ * @param {number} offset
  * @returns {import('./internal').PreactElement}
  */
-export function getChildDom(internal, i) {
+export function getChildDom(internal, offset) {
 	if (internal._children == null) {
 		return null;
 	}
 
-	for (i = i || 0; i < internal._children.length; i++) {
-		let child = internal._children[i];
+	for (; offset < internal._children.length; offset++) {
+		let child = internal._children[offset];
 		if (child != null) {
 			if (child.flags & TYPE_DOM) {
 				return child._dom;
 			}
 
 			if (shouldSearchComponent(child)) {
-				let childDom = getChildDom(child);
+				let childDom = getChildDom(child, 0);
 				if (childDom) {
 					return childDom;
 				}
