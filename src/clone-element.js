@@ -1,4 +1,5 @@
-import { createVNode } from './create-element';
+import { EMPTY_ARR } from './constants';
+import { createElement } from './create-element';
 
 /**
  * Clones the given VNode, optionally adding attributes/props and replacing its children.
@@ -8,33 +9,15 @@ import { createVNode } from './create-element';
  * @returns {import('./internal').VNode}
  */
 export function cloneElement(vnode, props, children) {
-	let normalizedProps = Object.assign({}, vnode.props),
-		key,
-		ref,
-		i;
-
-	for (i in props) {
-		if (i == 'key') key = props[i];
-		else if (i == 'ref') ref = props[i];
-		else normalizedProps[i] = props[i];
-	}
-
 	if (arguments.length > 3) {
-		children = [children];
-		for (i = 3; i < arguments.length; i++) {
-			children.push(arguments[i]);
-		}
+		children = EMPTY_ARR.slice.call(arguments, 2);
 	}
 
-	if (children !== undefined) {
-		normalizedProps.children = children;
-	}
-
-	return createVNode(
-		vnode.type,
-		normalizedProps,
-		key || vnode.key,
-		ref || vnode.ref,
-		0
+	const clonedProps = Object.assign(
+		{ key: vnode.key, ref: vnode.ref },
+		vnode.props,
+		props
 	);
+
+	return createElement(vnode.type, clonedProps, children);
 }
