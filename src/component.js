@@ -1,6 +1,6 @@
 import { commitRoot } from './diff/commit';
 import options from './options';
-import { createVNode, Fragment } from './create-element';
+import { createElement, Fragment } from './create-element';
 import { patch } from './diff/patch';
 import { DIRTY_BIT, FORCE_UPDATE, MODE_UNMOUNTING } from './constants';
 import { getParentDom } from './tree';
@@ -93,13 +93,8 @@ Component.prototype.render = Fragment;
  */
 function rerender(internal) {
 	if (~internal.flags & MODE_UNMOUNTING && internal.flags & DIRTY_BIT) {
-		const vnode = createVNode(
-			internal.type,
-			internal.props,
-			internal.key, // @TODO we shouldn't need to actually pass these
-			internal.ref, // since the mode flag should bypass key/ref handling
-			0
-		);
+		const vnode = createElement(internal.type, internal.props);
+		vnode.props = internal.props;
 
 		patch(internal, vnode, getParentDom(internal));
 		commitRoot(internal);
