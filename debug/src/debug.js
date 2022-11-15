@@ -318,12 +318,9 @@ export function initDebug() {
 		// Putting this check in `options.diffed` ensures that
 		// `vnode._children` is set and that we only validate the children
 		// that were actually rendered.
-		if (vnode._children) {
+		if (typeof vnode.type === 'string' && vnode._children) {
 			vnode._children.forEach(child => {
-				if (child && child.type === undefined) {
-					// Remove internal vnode keys that will always be patched
-					delete child._parent;
-					delete child._depth;
+				if (typeof child === 'object' && child && child.type === undefined) {
 					const keys = Object.keys(child).join(',');
 					throw new Error(
 						`Objects are not valid as a child. Encountered an object with the keys {${keys}}.` +
