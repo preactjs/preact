@@ -109,6 +109,7 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
 			name = name.replace(/xlink(H|:h)/, 'h').replace(/sName$/, 's');
 		} else if (
 			name !== 'href' &&
+			name !== 'translate' &&
 			name !== 'list' &&
 			name !== 'form' &&
 			// Default value in browsers is `-1` and an empty string is
