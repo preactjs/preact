@@ -318,7 +318,7 @@ export function initDebug() {
 		// Putting this check in `options.diffed` ensures that
 		// `vnode._children` is set and that we only validate the children
 		// that were actually rendered.
-		if (typeof vnode.type === 'string' && vnode._children) {
+		if (vnode._children) {
 			vnode._children.forEach(child => {
 				if (typeof child === 'object' && child && child.type === undefined) {
 					const keys = Object.keys(child).join(',');
