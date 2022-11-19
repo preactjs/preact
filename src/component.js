@@ -1,6 +1,6 @@
 import { commitRoot } from './diff/commit';
 import options from './options';
-import { createVNode, Fragment } from './create-element';
+import { createElement, Fragment } from './create-element';
 import { patch } from './diff/patch';
 import { DIRTY_BIT, FORCE_UPDATE, MODE_UNMOUNTING } from './constants';
 import { getParentDom } from './tree';
@@ -91,26 +91,25 @@ Component.prototype.render = Fragment;
 /**
  * @param {import('./internal').Internal} internal The internal to rerender
  */
-function rerender(internal) {
-	if (~internal.flags & MODE_UNMOUNTING && internal.flags & DIRTY_BIT) {
-		const vnode = createVNode(
-			internal.type,
-			internal.props,
-			internal.key, // @TODO we shouldn't need to actually pass these
-			internal.ref, // since the mode flag should bypass key/ref handling
-			0
-		);
+function renderQueuedInternal(internal) {
+	// Don't render unmounting/unmounted trees:
+	if (internal.flags & MODE_UNMOUNTING) return;
 
-		patch(internal, vnode, getParentDom(internal));
-		commitRoot(internal);
-	}
+	// Don't render trees already rendered in this pass:
+	if (!(internal.flags & DIRTY_BIT)) return;
+
+	const vnode = createElement(internal.type, internal.props);
+	vnode.props = internal.props;
+
+	patch(internal, vnode, getParentDom(internal));
+	commitRoot(internal);
 }
 
 /**
  * The render queue
  * @type {Array<import('./internal').Internal>}
  */
-let rerenderQueue = [];
+let renderQueue = [];
 
 /*
  * The value of `Component.debounce` must asynchronously invoke the passed in callback. It is
@@ -131,22 +130,22 @@ export function enqueueRender(internal) {
 	if (
 		(!(internal.flags & DIRTY_BIT) &&
 			(internal.flags |= DIRTY_BIT) &&
-			rerenderQueue.push(internal) &&
-			!process._rerenderCount++) ||
+			renderQueue.push(internal) &&
+			!processRenderQueue._rerenderCount++) ||
 		prevDebounce !== options.debounceRendering
 	) {
 		prevDebounce = options.debounceRendering;
-		(prevDebounce || setTimeout)(process);
+		(prevDebounce || setTimeout)(processRenderQueue);
 	}
 }
 
 /** Flush the render queue by rerendering all queued components */
-function process() {
-	while ((len = process._rerenderCount = rerenderQueue.length)) {
-		rerenderQueue.sort((a, b) => a._depth - b._depth);
+function processRenderQueue() {
+	while ((len = processRenderQueue._rerenderCount = renderQueue.length)) {
+		renderQueue.sort((a, b) => a._depth - b._depth);
 		while (len--) {
-			rerender(rerenderQueue.shift());
+			renderQueuedInternal(renderQueue.shift());
 		}
 	}
 }
-let len = (process._rerenderCount = 0);
+let len = (processRenderQueue._rerenderCount = 0);

@@ -4,6 +4,7 @@ let nextContextId = 0;
 
 const providers = new Set();
 
+/** @param {import('./internal').Internal} internal */
 export const unsubscribeFromContext = internal => {
 	// if this was a context provider, delete() returns true and we exit:
 	if (providers.delete(internal)) return;

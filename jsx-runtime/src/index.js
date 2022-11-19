@@ -27,9 +27,12 @@ function createVNode(type, props, key, __source, __self) {
 	// We'll want to preserve `ref` in props to get rid of the need for
 	// forwardRef components in the future, but that should happen via
 	// a separate PR.
+	let ref;
 	let normalizedProps = {};
 	for (let i in props) {
-		if (i != 'ref') {
+		if (i === 'ref') {
+			ref = props[i];
+		} else {
 			normalizedProps[i] = props[i];
 		}
 	}
@@ -38,22 +41,12 @@ function createVNode(type, props, key, __source, __self) {
 		type,
 		props: normalizedProps,
 		key,
-		ref: props && props.ref,
+		ref,
 		constructor: undefined,
 		_vnodeId: --vnodeId,
 		__source,
 		__self
 	};
-
-	// If a Component VNode, check for and apply defaultProps.
-	// Note: `type` is often a String, and can be `undefined` in development.
-	let defaults, i;
-	if (typeof type === 'function' && (defaults = type.defaultProps)) {
-		for (i in defaults)
-			if (normalizedProps[i] === undefined) {
-				normalizedProps[i] = defaults[i];
-			}
-	}
 
 	if (options.vnode) options.vnode(vnode);
 	return vnode;

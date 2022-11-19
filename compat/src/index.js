@@ -91,7 +91,7 @@ function findDOMNode(component) {
 		return component;
 	}
 
-	return getChildDom(component._internal);
+	return getChildDom(component._internal, 0);
 }
 
 /**
