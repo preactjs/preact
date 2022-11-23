@@ -332,7 +332,7 @@ function diffElementNodes(
 	let oldProps = oldVNode.props;
 	let newProps = newVNode.props;
 	let nodeType = newVNode.type;
-	let isCustomElement = ('' + newVNode.type).includes('-');
+	let isCustomElement = ('' + newVNode.type).indexOf('-') > -1;
 
 	let i = 0;
 
