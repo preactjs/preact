@@ -152,6 +152,19 @@ describe('event handling', () => {
 		);
 	});
 
+	it('should not throw an exception if the listeners array is cleared', () => {
+		render(
+			<div onClick={() => {}}>
+				<button />
+			</div>,
+			scratch
+		);
+
+		let root = scratch.firstChild;
+		root._listeners = undefined;
+		root.firstElementChild.click();
+	});
+
 	// Skip test if browser doesn't support passive events
 	if (supportsPassiveEvents()) {
 		it('should use capturing for event props ending with *Capture', () => {
@@ -197,6 +210,19 @@ describe('event handling', () => {
 
 			expect(clickCapture, 'click').to.have.been.calledOnce;
 			expect(click, 'click').to.have.been.calledOnce;
+		});
+
+		it('should not throw an exception if the listeners array is cleared on capture event', () => {
+			render(
+				<div onClickCapture={() => {}}>
+					<button />
+				</div>,
+				scratch
+			);
+
+			let root = scratch.firstChild;
+			root._listeners = undefined;
+			root.firstElementChild.click();
 		});
 	}
 });
