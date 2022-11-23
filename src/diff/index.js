@@ -332,6 +332,8 @@ function diffElementNodes(
 	let oldProps = oldVNode.props;
 	let newProps = newVNode.props;
 	let nodeType = newVNode.type;
+	let isCustomElement = ('' + newVNode.type).includes('-');
+
 	let i = 0;
 
 	// Tracks entering and exiting SVG namespace when descending through the tree.
@@ -420,7 +422,7 @@ function diffElementNodes(
 			}
 		}
 
-		diffProps(dom, newProps, oldProps, isSvg, isHydrating);
+		diffProps(dom, newProps, oldProps, isSvg, isHydrating, isCustomElement);
 
 		// If the new vnode didn't have dangerouslySetInnerHTML, diff its children
 		if (newHtml) {

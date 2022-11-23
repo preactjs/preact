@@ -9,8 +9,16 @@ import options from '../options';
  * @param {object} oldProps The old props
  * @param {boolean} isSvg Whether or not this node is an SVG node
  * @param {boolean} hydrate Whether or not we are in hydration mode
+ * @param {boolean} isCustomElement Whether or not we are diffing a custom element.
  */
-export function diffProps(dom, newProps, oldProps, isSvg, hydrate) {
+export function diffProps(
+	dom,
+	newProps,
+	oldProps,
+	isSvg,
+	hydrate,
+	isCustomElement
+) {
 	let i;
 
 	for (i in oldProps) {
@@ -24,8 +32,7 @@ export function diffProps(dom, newProps, oldProps, isSvg, hydrate) {
 			(!hydrate || typeof newProps[i] == 'function') &&
 			i !== 'children' &&
 			i !== 'key' &&
-			i !== 'value' &&
-			i !== 'checked' &&
+			(isCustomElement || (i !== 'value' && i !== 'checked')) &&
 			oldProps[i] !== newProps[i]
 		) {
 			setProperty(dom, i, newProps[i], oldProps[i], isSvg);

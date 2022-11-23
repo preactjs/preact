@@ -489,6 +489,59 @@ describe('render()', () => {
 		expect(scratch.innerHTML).to.equal('<o-input value="test"></o-input>');
 	});
 
+	describe('Custom elements properties', () => {
+		// Properties set to null/undefined are cleared in the DOM through an empty string.
+		const clearedPropertyValue = '';
+
+		class TestComponent extends HTMLElement {
+			constructor() {
+				super();
+				this.value = {};
+				this.checked = undefined;
+			}
+		}
+		customElements.define('test-component', TestComponent);
+
+		it(`should set complex value property`, () => {
+			const value = { foo: 'bar' };
+			render(<test-component value={value} />, scratch);
+
+			expect(scratch.querySelector('test-component').value).to.equal(value);
+		});
+
+		it(`should set checked property`, () => {
+			let initialValue = true;
+			render(<test-component checked={initialValue} />, scratch);
+			expect(scratch.querySelector('test-component').checked).to.equal(true);
+		});
+
+		clearPropertyWith(null);
+		clearPropertyWith(undefined);
+
+		function clearPropertyWith(clearValue) {
+			it(`should clear existing value property with ${clearValue}`, () => {
+				render(<test-component value={{ foo: 'bar' }} />, scratch);
+
+				render(<test-component value={clearValue} />, scratch);
+
+				expect(scratch.querySelector('test-component').value).to.equal(
+					clearedPropertyValue
+				);
+			});
+
+			it(`should clear existing checked property with ${clearValue}`, () => {
+				let initialValue = true;
+				render(<test-component checked={initialValue} />, scratch);
+
+				render(<test-component checked={clearValue} />, scratch);
+
+				expect(scratch.querySelector('test-component').checked).to.equal(
+					clearedPropertyValue
+				);
+			});
+		}
+	});
+
 	it('should mask value on password input elements', () => {
 		render(<input value="xyz" type="password" />, scratch);
 		expect(scratch.innerHTML).to.equal('<input type="password">');
