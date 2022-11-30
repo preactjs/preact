@@ -1,6 +1,6 @@
 <p align="center">
 <a href="https://preactjs.com" target="_blank">
-	
+
 ![Preact](https://raw.githubusercontent.com/preactjs/preact/8b0bcc927995c188eca83cba30fbc83491cc0b2f/logo.svg?sanitize=true "Preact")
 
 </a>
@@ -15,7 +15,6 @@
 - Highly optimized diff algorithm and seamless hydration from Server Side Rendering
 - Supports all modern browsers and IE11
 - Transparent asynchronous rendering with a pluggable scheduler
-- **Instant production-grade app setup with [Preact CLI](https://github.com/preactjs/preact-cli)**
 
 ### 💁 More information at the [Preact Website ➞](https://preactjs.com)
 
@@ -51,8 +50,6 @@ You can find some awesome libraries in the [awesome-preact list](https://github.
 ## Getting Started
 
 > 💁 _**Note:** You [don't need ES2015 to use Preact](https://github.com/developit/preact-in-es3)... but give it a try!_
-
-The easiest way to get started with Preact is to use [Preact CLI](https://github.com/preactjs/preact-cli). This simple command-line tool wraps up the best possible tooling for you, and even keeps things like Webpack and Babel up-to-date as they change. Best of all, it's easy to understand! Start a project or compile for production in a single command (`preact build`), with no configuration needed and best practices baked in! 🙌
 
 #### Tutorial: Building UI with Preact
 
