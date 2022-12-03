@@ -110,6 +110,7 @@ export function diff(
 
 			oldProps = c.props;
 			oldState = c.state;
+			c._vnode = newVNode;
 
 			// Invoke pre-render lifecycle methods
 			if (isNew) {
@@ -146,7 +147,6 @@ export function diff(
 					c.state = c._nextState;
 					// More info about this here: https://gist.github.com/JoviDeCroock/bec5f2ce93544d2e6070ef8e0036e4e8
 					if (newVNode._original !== oldVNode._original) c._dirty = false;
-					c._vnode = newVNode;
 					newVNode._dom = oldVNode._dom;
 					newVNode._children = oldVNode._children;
 					newVNode._children.forEach(vnode => {
@@ -178,7 +178,6 @@ export function diff(
 
 			c.context = componentContext;
 			c.props = newProps;
-			c._vnode = newVNode;
 			c._parentDom = parentDom;
 
 			let renderHook = options._render,
