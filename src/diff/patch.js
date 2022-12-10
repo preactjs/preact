@@ -122,9 +122,6 @@ export function patch(internal, vnode, parentDom) {
 
 	// Once we have successfully rendered the new VNode, copy it's ID over
 	internal._vnodeId = vnode._vnodeId;
-
-	internal._prevRef = internal.ref;
-	internal.ref = vnode.ref;
 }
 
 /**

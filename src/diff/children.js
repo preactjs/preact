@@ -157,7 +157,8 @@ export function patchChildren(internal, children, parentDom) {
 	for (i = 0; i < newChildren.length; i++) {
 		childInternal = newChildren[i];
 		if (childInternal) {
-			let oldRef = childInternal._prevRef;
+			let oldRef = childInternal.ref;
+			childInternal.ref = normalizeToVNode(children[i]).ref;
 			if (childInternal.ref != oldRef) {
 				if (oldRef) applyRef(oldRef, null, childInternal);
 				if (childInternal.ref)

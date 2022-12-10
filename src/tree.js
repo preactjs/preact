@@ -86,7 +86,6 @@ export function createInternal(vnode, parentInternal) {
 		props,
 		key,
 		ref,
-		_prevRef: null,
 		data: flags & TYPE_COMPONENT ? {} : null,
 		_commitCallbacks: flags & TYPE_COMPONENT ? [] : null,
 		_stateCallbacks: flags & TYPE_COMPONENT ? [] : null,
