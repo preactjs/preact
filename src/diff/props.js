@@ -50,8 +50,8 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
 		if (name.toLowerCase() in dom) name = name.toLowerCase().slice(2);
 		else name = name.slice(2);
 
-		if (!dom._listeners) dom._listeners = {};
-		dom._listeners[name + useCapture] = value;
+		if (!dom._listeners) dom._listeners = { [name + useCapture]: value };
+		else dom._listeners[name + useCapture] = value;
 
 		if (value) {
 			if (!oldValue) {

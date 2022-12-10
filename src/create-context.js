@@ -18,13 +18,11 @@ export const createContext = (defaultValue, contextId) => {
 	contextId = '__cC' + nextContextId++;
 
 	const context = {
+		[contextId]: this,
 		_id: contextId,
 		_defaultValue: defaultValue,
 		/** @type {import('./internal').FunctionComponent} */
 		Consumer(props, contextValue) {
-			// return props.children(
-			// 	context[contextId] ? context[contextId].props.value : defaultValue
-			// );
 			return props.children(contextValue);
 		},
 		/** @type {import('./internal').FunctionComponent} */
@@ -32,8 +30,9 @@ export const createContext = (defaultValue, contextId) => {
 			// initial setup:
 			if (!this._subs) {
 				this._subs = new Set();
-				ctx = {};
-				ctx[contextId] = this;
+				ctx = {
+					[contextId]: this
+				};
 				this.getChildContext = () => ctx;
 				providers.add(this._internal);
 			}
