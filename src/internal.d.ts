@@ -20,6 +20,10 @@ export interface DevSource {
 	lineNumber: number;
 }
 
+export interface ErrorInfo {
+	componentStack?: string;
+}
+
 export interface Options extends preact.Options {
 	/** Attach a hook that is invoked before render, mainly to check the arguments. */
 	_root?(
@@ -37,7 +41,12 @@ export interface Options extends preact.Options {
 	/** Bypass effect execution. Currenty only used in devtools for hooks inspection */
 	_skipEffects?: boolean;
 	/** Attach a hook that is invoked after an error is caught in a component but before calling lifecycle hooks */
-	_catchError(error: any, vnode: VNode, oldVNode?: VNode | undefined): void;
+	_catchError(
+		error: any,
+		vnode: VNode,
+		oldVNode: VNode | undefined,
+		errorInfo: ErrorInfo | undefined
+	): void;
 }
 
 export type ComponentChild =
@@ -124,6 +133,7 @@ export interface Component<P = {}, S = {}> extends preact.Component<P, S> {
 	_dirty: boolean;
 	_force?: boolean;
 	_renderCallbacks: Array<() => void>; // Only class components
+	_stateCallbacks: Array<() => void>; // Only class components
 	_globalContext?: any;
 	_vnode?: VNode<P> | null;
 	_nextState?: S | null; // Only class components

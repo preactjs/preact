@@ -44,7 +44,7 @@ export function initDebug() {
 		  };
 	const deprecations = [];
 
-	options._catchError = (error, vnode, oldVNode) => {
+	options._catchError = (error, vnode, oldVNode, errorInfo) => {
 		let component = vnode && vnode._component;
 		if (component && typeof error.then == 'function') {
 			const promise = error;
@@ -68,7 +68,9 @@ export function initDebug() {
 		}
 
 		try {
-			oldCatchError(error, vnode, oldVNode);
+			errorInfo = errorInfo || {};
+			errorInfo.componentStack = getOwnerStack(vnode);
+			oldCatchError(error, vnode, oldVNode, errorInfo);
 
 			// when an error was handled by an ErrorBoundary we will nontheless emit an error
 			// event on the window object. This is to make up for react compatibility in dev mode
@@ -318,10 +320,7 @@ export function initDebug() {
 		// that were actually rendered.
 		if (vnode._children) {
 			vnode._children.forEach(child => {
-				if (child && child.type === undefined) {
-					// Remove internal vnode keys that will always be patched
-					delete child._parent;
-					delete child._depth;
+				if (typeof child === 'object' && child && child.type === undefined) {
 					const keys = Object.keys(child).join(',');
 					throw new Error(
 						`Objects are not valid as a child. Encountered an object with the keys {${keys}}.` +
@@ -375,13 +374,6 @@ Component.prototype.setState = function(update, callback) {
 					`"this.state = {}" directly.\n\n${getOwnerStack(getCurrentVNode())}`
 			);
 		}
-	} else if (this._parentDom == null) {
-		console.warn(
-			`Can't call "this.setState" on an unmounted component. This is a no-op, ` +
-				`but it indicates a memory leak in your application. To fix, cancel all ` +
-				`subscriptions and asynchronous tasks in the componentWillUnmount method.` +
-				`\n\n${getOwnerStack(this._vnode)}`
-		);
 	}
 
 	return setState.call(this, update, callback);

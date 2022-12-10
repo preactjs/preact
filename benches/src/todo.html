@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>ToDo List</title>
+		<style>
+			body {
+				padding: 20px;
+				font-family: system-ui;
+			}
+			a {
+				opacity: 0.5;
+			}
+			h1 {
+				margin-top: 0;
+				font-size: 150%;
+				font-weight: inherit;
+			}
+			ul {
+				list-style: none;
+				padding: 0;
+			}
+			li {
+				display: flex;
+				padding: 0 10px;
+				align-items: center;
+			}
+			li:nth-child(odd) {
+				background-color: #f0f6ff;
+			}
+			li > * {
+				display: inline-block;
+				flex: 0;
+				padding: 5px;
+				margin: 0;
+			}
+			li p {
+				flex: 1;
+			}
+			li[done] p {
+				opacity: 0.5;
+				text-decoration: line-through;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="app"></div>
+		<script type="module">
+			import {
+				mutateAndLayoutAsync,
+				sleep,
+				measureName,
+				measureMemory
+			} from './util.js';
+			import { createRoot, createElement as h, Component } from 'framework';
+
+			// Number of warmup runs of the benchmark to execute before the timed run
+			const WARMUP_COUNT = 5;
+
+			// Number of ToDo list items to render/toggle/delete
+			// NOTE: *must* be divisible by 4.
+			const NUM_ITEMS = 40;
+
+			const freshState = () => ({ counter: 0, text: '', todos: [] });
+			let state = freshState();
+
+			function mutation(fn) {
+				return e => {
+					rerender((state = Object.assign({}, state, fn(state, e))));
+				};
+			}
+
+			const add = mutation(({ counter, text, todos }, e) => {
+				e.preventDefault();
+				const id = ++counter;
+				return { counter, text: '', todos: todos.concat({ text, id }) };
+			});
+
+			const setText = mutation((state, e) => ({ text: e.target.value }));
+
+			const toggle = mutation(({ todos }, e) => {
+				const id = e.currentTarget.getAttribute('data-todo');
+				todos = todos.map(todo =>
+					todo.id == id ? { ...todo, done: !todo.done } : todo
+				);
+				return { todos };
+			});
+
+			const remove = mutation(({ todos }, e) => {
+				const id = e.currentTarget.getAttribute('data-todo');
+				todos = todos.filter(todo => todo.id != id);
+				return { todos };
+			});
+
+			function TodoItem({ todo }) {
+				return h(
+					'li',
+					{
+						done: todo.done,
+						'data-todo': todo.id,
+						onClick: toggle
+					},
+					h('input', {
+						type: 'checkbox',
+						checked: todo.done,
+						readonly: true
+					}),
+					h('p', null, todo.text),
+					h('a', { 'data-todo': todo.id, onClick: remove }, '✕')
+				);
+			}
+
+			function App({ text, todos }) {
+				return h(
+					'div',
+					null,
+					h(
+						'form',
+						{ onSubmit: add },
+						h('input', {
+							value: text,
+							onInput: setText,
+							placeholder: 'Enter a new to-do item...'
+						}),
+						h('button', { type: 'submit', disabled: !text }, 'Add')
+					),
+					h(
+						'ul',
+						null,
+						todos.map(todo => h(TodoItem, { key: todo.id, todo }))
+					)
+				);
+			}
+
+			const root = createRoot(document.getElementById('app'));
+			function rerender() {
+				root.render(h(App, state));
+			}
+			rerender();
+
+			const BUBBLING_EVENT = {};
+			function type(el, text) {
+				const OPTS = {
+					inputType: 'inserting',
+					data: '',
+					bubbles: true,
+					cancelable: true
+				};
+				let value = '';
+				for (let i = 0; i < text.length; i++) {
+					const ch = text[i];
+					value += ch;
+					OPTS.data = ch;
+					el.value = value;
+					el.dispatchEvent(new InputEvent('input', OPTS));
+				}
+				el.dispatchEvent(new InputEvent('change', OPTS));
+			}
+			const $ = sel => document.querySelector(sel);
+
+			function runPatch() {
+				state = freshState();
+				rerender();
+				const input = $('input');
+				const form = $('form');
+				const list = $('ul');
+				const button = $('button');
+				for (let i = 1; i <= NUM_ITEMS; i++) {
+					type(input, `Item ${i}`);
+					button.click();
+					const itemsInDom = list.children.length;
+					if (itemsInDom !== i) {
+						throw Error(`Expected ${i} ToDo list items, got ${itemsInDom}.`);
+					}
+				}
+				// this check also forces layout in order to include that time in test measured time:
+				if (list.offsetHeight < NUM_ITEMS * 5) {
+					throw Error(
+						`Expected list to have height > ${NUM_ITEMS * 5}, got ${
+							list.offsetHeight
+						}.`
+					);
+				}
+				const items = [].slice.call(list.children);
+				for (let i = 0; i < items.length; i++) {
+					items[i].click();
+				}
+				if (!items.every(item => item.hasAttribute('done'))) {
+					throw Error(`Expected all items to have [done] attribute.`);
+				}
+				for (let i = 0; i < items.length; i++) {
+					items[i].click();
+				}
+				if (items.some(item => item.hasAttribute('done'))) {
+					throw Error(
+						`Expected [done] attribute to be removed from all items.`
+					);
+				}
+				const count = NUM_ITEMS / 4;
+				for (let i = count; i < count * 3; i++) {
+					items[i].lastElementChild.click();
+				}
+				for (let i = 0; i < count; i++) {
+					items[i].lastElementChild.click();
+				}
+				for (let i = count * 4; i-- > count * 3; ) {
+					items[i].lastElementChild.click();
+				}
+				if (items.some(item => item.isConnected)) {
+					throw Error(`Expected all items to be removed from the DOM.`);
+				}
+				if (list.offsetHeight > 10) {
+					throw Error(
+						`Expected empty list to have a height of approximately 0px.`
+					);
+				}
+				root.render(null);
+				if ($('#app').children.length > 0) {
+					throw Error(`Expected entire application to be un-rendered.`);
+				}
+			}
+
+			async function warmup() {
+				for (let i = 0; i < WARMUP_COUNT; i++) {
+					await runPatch();
+					await new Promise(r => requestAnimationFrame(r));
+				}
+			}
+
+			warmup().then(async () => {
+				await sleep(200);
+
+				// This triggers a rAF, then runs a synchronous benchmark followed by one "tick",
+				// which should include the cost of layout in all current browsers.
+				await mutateAndLayoutAsync(() => {
+					performance.mark('start');
+					runPatch();
+				});
+				performance.mark('stop');
+				performance.measure(measureName, 'start', 'stop');
+
+				measureMemory();
+			});
+		</script>
+	</body>
+</html>

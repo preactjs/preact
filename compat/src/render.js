@@ -10,7 +10,7 @@ export const REACT_ELEMENT_TYPE =
 	(typeof Symbol != 'undefined' && Symbol.for && Symbol.for('react.element')) ||
 	0xeac7;
 
-const CAMEL_PROPS = /^(?:accent|alignment|arabic|baseline|cap|clip(?!PathU)|color|dominant|fill|flood|font|glyph(?!R)|horiz|marker(?!H|W|U)|overline|paint|stop|strikethrough|stroke|text(?!L)|underline|unicode|units|v|vector|vert|word|writing|x(?!C))[A-Z]/;
+const CAMEL_PROPS = /^(?:accent|alignment|arabic|baseline|cap|clip(?!PathU)|color|dominant|fill|flood|font|glyph(?!R)|horiz|image|letter|lighting|marker(?!H|W|U)|overline|paint|pointer|shape|stop|strikethrough|stroke|text(?!L)|transform|underline|unicode|units|v|vector|vert|word|writing|x(?!C))[A-Z]/;
 
 const IS_DOM = typeof document !== 'undefined';
 
@@ -123,8 +123,7 @@ options.vnode = vnode => {
 			if (IS_DOM && i === 'children' && type === 'noscript') {
 				// Emulate React's behavior of not rendering the contents of noscript tags on the client.
 				continue;
-			}
-			else if (i === 'value' && 'defaultValue' in props && value == null) {
+			} else if (i === 'value' && 'defaultValue' in props && value == null) {
 				// Skip applying value if it is null/undefined and we already set
 				// a default value
 				continue;
@@ -154,12 +153,21 @@ options.vnode = vnode => {
 				i = 'onfocusin';
 			} else if (/^onblur$/i.test(i)) {
 				i = 'onfocusout';
-			} else if (/^on(Ani|Tra|Tou|BeforeInp)/.test(i)) {
+			} else if (/^on(Ani|Tra|Tou|BeforeInp|Compo)/.test(i)) {
 				i = i.toLowerCase();
 			} else if (nonCustomElement && CAMEL_PROPS.test(i)) {
-				i = i.replace(/[A-Z0-9]/, '-$&').toLowerCase();
+				i = i.replace(/[A-Z0-9]/g, '-$&').toLowerCase();
 			} else if (value === null) {
 				value = undefined;
+			}
+
+			// Add support for onInput and onChange, see #3561
+			// if we have an oninput prop already change it to oninputCapture
+			if (/^oninput$/i.test(i)) {
+				i = i.toLowerCase();
+				if (normalizedProps[i]) {
+					i = 'oninputCapture';
+				}
 			}
 
 			normalizedProps[i] = value;

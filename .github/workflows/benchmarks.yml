@@ -15,242 +15,95 @@ on:
       - 'src/**.js'
 
 jobs:
+  build_test:
+    name: Build & Test
+    uses: ./.github/workflows/ci.yml
+
   prepare:
-    name: Prepare benchmarks
+    name: Prepare environment
     runs-on: ubuntu-latest
+    needs: build_test
+    timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
+      - name: Download locally built preact package
+        uses: actions/download-artifact@v3
         with:
-          node-version: '14.x'
-      - name: Cache node modules
-        uses: actions/cache@v1
-        env:
-          cache-name: cache-node-modules
+          name: npm-package
+      - run: mv preact.tgz preact-local.tgz
+      - name: Upload locally built preact package
+        uses: actions/upload-artifact@v3
         with:
-          path: ~/.npm
-          # This uses the same name as the build-action so we can share the caches.
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-build-${{ env.cache-name }}-
-            ${{ runner.os }}-build-
-            ${{ runner.os }}-
-      - run: npm ci
-      - name: Package
-        # Use --ignore-scripts here to avoid re-building again before pack
-        run: |
-          npm pack --ignore-scripts
-          mv preact-*.tgz preact.tgz
-          tar -xzf preact.tgz
-          rm preact.tgz
-      - name: Upload build output
-        uses: actions/upload-artifact@v2
-        with:
-          name: build-output
-          path: package/
-      - uses: andrewiggins/download-base-artifact@v1
+          name: bench-environment
+          path: preact-local.tgz
+      - name: Download base package
+        uses: andrewiggins/download-base-artifact@v2
         with:
           artifact: npm-package
           workflow: ci.yml
           required: false
+      - run: mv preact.tgz preact-master.tgz
       - name: Upload base preact package
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
-          name: build-output
-          path: preact.tgz
+          name: bench-environment
+          path: preact-master.tgz
+
+  bench_todo:
+    name: Bench todo
+    uses: ./.github/workflows/run-bench.yml
+    needs: prepare
+    with:
+      benchmark: todo
+      timeout: 10
 
   bench_text_update:
     name: Bench text_update
-    runs-on: ubuntu-latest
+    uses: ./.github/workflows/run-bench.yml
     needs: prepare
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
-        with:
-          node-version: '14.x'
-      - uses: actions/download-artifact@v2
-        with:
-          name: build-output
-      - name: install & build
-        run: |
-          cd benches
-          npm ci
-      - name: bench
-        run: |
-          export CHROMEDRIVER_FILEPATH=$(which chromedriver)
-          cd benches
-          npm run bench text_update.html
-      - name: Upload results
-        uses: actions/upload-artifact@v2
-        with:
-          name: results
-          path: benches/results/text_update.json
+    with:
+      benchmark: text_update
+      timeout: 10
 
   bench_many_updates:
     name: Bench many_updates
-    runs-on: ubuntu-latest
+    uses: ./.github/workflows/run-bench.yml
     needs: prepare
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
-        with:
-          node-version: '14.x'
-      - uses: actions/download-artifact@v2
-        with:
-          name: build-output
-      - name: install & build
-        run: |
-          cd benches
-          npm ci
-      - name: bench
-        run: |
-          export CHROMEDRIVER_FILEPATH=$(which chromedriver)
-          cd benches
-          npm run bench many_updates.html
-      - name: Upload results
-        uses: actions/upload-artifact@v2
-        with:
-          name: results
-          path: benches/results/many_updates.json
+    with:
+      benchmark: many_updates
+      timeout: 10
 
   bench_02_replace1k:
     name: Bench 02_replace1k
-    runs-on: ubuntu-latest
+    uses: ./.github/workflows/run-bench.yml
     needs: prepare
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
-        with:
-          node-version: '14.x'
-      - uses: actions/download-artifact@v2
-        with:
-          name: build-output
-      - name: install & build
-        run: |
-          cd benches
-          npm ci
-      - name: bench
-        run: |
-          export CHROMEDRIVER_FILEPATH=$(which chromedriver)
-          cd benches
-          npm run bench 02_replace1k.html
-      - name: Upload results
-        uses: actions/upload-artifact@v2
-        with:
-          name: results
-          path: benches/results/02_replace1k.json
+    with:
+      benchmark: 02_replace1k
 
   bench_03_update10th1k_x16:
     name: Bench 03_update10th1k_x16
-    runs-on: ubuntu-latest
+    uses: ./.github/workflows/run-bench.yml
     needs: prepare
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
-        with:
-          node-version: '14.x'
-      - uses: actions/download-artifact@v2
-        with:
-          name: build-output
-      - name: install & build
-        run: |
-          cd benches
-          npm ci
-      - name: bench
-        run: |
-          export CHROMEDRIVER_FILEPATH=$(which chromedriver)
-          cd benches
-          npm run bench 03_update10th1k_x16.html
-      - name: Upload results
-        uses: actions/upload-artifact@v2
-        with:
-          name: results
-          path: benches/results/03_update10th1k_x16.json
+    with:
+      benchmark: 03_update10th1k_x16
 
   bench_07_create10k:
     name: Bench 07_create10k
-    runs-on: ubuntu-latest
+    uses: ./.github/workflows/run-bench.yml
     needs: prepare
-    timeout-minutes: 20
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
-        with:
-          node-version: '14.x'
-      - uses: actions/download-artifact@v2
-        with:
-          name: build-output
-      - name: install & build
-        run: |
-          cd benches
-          npm ci
-      - name: bench
-        run: |
-          export CHROMEDRIVER_FILEPATH=$(which chromedriver)
-          cd benches
-          npm run bench 07_create10k.html
-      - name: Upload results
-        uses: actions/upload-artifact@v2
-        with:
-          name: results
-          path: benches/results/07_create10k.json
+    with:
+      benchmark: 07_create10k
 
   bench_hydrate1k:
     name: Bench hydrate1k
-    runs-on: ubuntu-latest
+    uses: ./.github/workflows/run-bench.yml
     needs: prepare
-    timeout-minutes: 20
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
-        with:
-          node-version: '14.x'
-      - uses: actions/download-artifact@v2
-        with:
-          name: build-output
-      - name: install & build
-        run: |
-          cd benches
-          npm ci
-      - name: bench
-        run: |
-          export CHROMEDRIVER_FILEPATH=$(which chromedriver)
-          cd benches
-          npm run bench hydrate1k.html
-      - name: Upload results
-        uses: actions/upload-artifact@v2
-        with:
-          name: results
-          path: benches/results/hydrate1k.json
+    with:
+      benchmark: hydrate1k
 
   bench_filter_list:
     name: Bench filter_list
-    runs-on: ubuntu-latest
+    uses: ./.github/workflows/run-bench.yml
     needs: prepare
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
-        with:
-          node-version: '14.x'
-      - uses: actions/download-artifact@v2
-        with:
-          name: build-output
-      - name: install & build
-        run: |
-          cd benches
-          npm ci
-      - name: bench
-        run: |
-          export CHROMEDRIVER_FILEPATH=$(which chromedriver)
-          cd benches
-          npm run bench filter_list.html
-      - name: Upload results
-        uses: actions/upload-artifact@v2
-        with:
-          name: results
-          path: benches/results/filter_list.json
+    with:
+      benchmark: filter_list
+      timeout: 10

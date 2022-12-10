@@ -1,6 +1,8 @@
 import {
 	Component as PreactComponent,
-	PreactContext
+	PreactContext,
+	ErrorInfo,
+	VNode as PreactVNode
 } from '../../src/internal';
 import { Reducer } from '.';
 
@@ -36,6 +38,10 @@ export interface Component extends PreactComponent<any, any> {
 	__hooks?: ComponentHooks;
 }
 
+export interface VNode extends PreactVNode {
+	_mask?: [number, number];
+}
+
 export type HookState =
 	| EffectHookState
 	| MemoHookState
@@ -49,16 +55,20 @@ export type Cleanup = () => void;
 export interface EffectHookState {
 	_value?: Effect;
 	_args?: any[];
+	_pendingArgs?: any[];
 	_cleanup?: Cleanup | void;
 }
 
 export interface MemoHookState {
 	_value?: any;
+	_pendingValue?: any;
 	_args?: any[];
+	_pendingArgs?: any[];
 	_factory?: () => any;
 }
 
 export interface ReducerHookState {
+	_nextValue?: any;
 	_value?: any;
 	_component?: Component;
 	_reducer?: Reducer<any, any>;
@@ -71,5 +81,5 @@ export interface ContextHookState {
 }
 
 export interface ErrorBoundaryHookState {
-	_value?: (error: any) => void;
+	_value?: (error: any, errorInfo: ErrorInfo) => void;
 }

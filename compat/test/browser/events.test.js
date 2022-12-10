@@ -75,6 +75,19 @@ describe('preact/compat events', () => {
 		expect(vnode.props).to.not.haveOwnProperty('onchange');
 	});
 
+	it('should by pass onInputCapture normalization for custom onInputAction when using it along with onChange', () => {
+		const onInputAction = () => null;
+		const onChange = () => null;
+
+		let vnode = <textarea onChange={onChange} onInputAction={onInputAction} />;
+
+		expect(vnode.props).to.haveOwnProperty('onInputAction');
+		expect(vnode.props.onInputAction).to.equal(onInputAction);
+		expect(vnode.props).to.haveOwnProperty('oninput');
+		expect(vnode.props.oninput).to.equal(onChange);
+		expect(vnode.props).to.not.haveOwnProperty('oninputCapture');
+	});
+
 	it('should normalize onChange for range, except in IE11', () => {
 		// NOTE: we don't normalize `onchange` for range inputs in IE11.
 		const eventType = /Trident\//.test(navigator.userAgent)
@@ -273,6 +286,13 @@ describe('preact/compat events', () => {
 		let spy = sinon.spy();
 		render(<input onBeforeInput={spy} />, scratch);
 		scratch.firstChild.dispatchEvent(createEvent('beforeinput'));
+		expect(spy).to.be.calledOnce;
+	});
+
+	it('should normalize compositionstart event listener', () => {
+		let spy = sinon.spy();
+		render(<input onCompositionStart={spy} />, scratch);
+		scratch.firstChild.dispatchEvent(createEvent('compositionstart'));
 		expect(spy).to.be.calledOnce;
 	});
 });

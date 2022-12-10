@@ -24,13 +24,24 @@ declare namespace React {
 	export import useDebugValue = _hooks.useDebugValue;
 	export import useEffect = _hooks.useEffect;
 	export import useImperativeHandle = _hooks.useImperativeHandle;
+	export import useId = _hooks.useId;
 	export import useLayoutEffect = _hooks.useLayoutEffect;
 	export import useMemo = _hooks.useMemo;
 	export import useReducer = _hooks.useReducer;
 	export import useRef = _hooks.useRef;
 	export import useState = _hooks.useState;
+	// React 18 hooks
+	export import useInsertionEffect = _hooks.useLayoutEffect;
+	export function useTransition(): [false, typeof startTransition];
+	export function useDeferredValue<T = any>(val: T): T;
+	export function useSyncExternalStore<T>(
+		subscribe: (flush: () => void) => () => void,
+		getSnapshot: () => T
+	): T;
 
 	// Preact Defaults
+	export import ContextType = preact.ContextType;
+	export import RefObject = preact.RefObject;
 	export import Component = preact.Component;
 	export import FunctionComponent = preact.FunctionComponent;
 	export import FC = preact.FunctionComponent;
@@ -49,6 +60,17 @@ declare namespace React {
 	// Compat
 	export import StrictMode = preact.Fragment;
 	export const version: string;
+	export function startTransition(cb: () => void): void;
+
+	// HTML
+	export import HTMLAttributes = JSXInternal.HTMLAttributes;
+	export import DetailedHTMLProps = JSXInternal.DetailedHTMLProps;
+	export import CSSProperties = JSXInternal.CSSProperties;
+
+	// Events
+	export import TargetedEvent = JSXInternal.TargetedEvent;
+	export import ChangeEvent = JSXInternal.TargetedEvent;
+	export import ChangeEventHandler = JSXInternal.GenericEventHandler;
 
 	export function createPortal(
 		vnode: preact.VNode,
@@ -78,7 +100,9 @@ declare namespace React {
 		...children: preact.ComponentChildren[]
 	) => preact.VNode<any>;
 	export function isValidElement(element: any): boolean;
-	export function findDOMNode(component: preact.Component): Element | null;
+	export function findDOMNode(
+		component: preact.Component | Element
+	): Element | null;
 
 	export abstract class PureComponent<P = {}, S = {}> extends preact.Component<
 		P,
@@ -100,7 +124,7 @@ declare namespace React {
 	): C;
 
 	export interface ForwardFn<P = {}, T = any> {
-		(props: P, ref: Ref<T>): preact.ComponentChild;
+		(props: P, ref: ForwardedRef<T>): preact.ComponentChild;
 		displayName?: string;
 	}
 
@@ -108,11 +132,21 @@ declare namespace React {
 		fn: ForwardFn<P, R>
 	): preact.FunctionalComponent<Omit<P, 'ref'> & { ref?: preact.Ref<R> }>;
 
+	interface MutableRefObject<T> {
+		current: T;
+	}
+	
+	export type ForwardedRef<T> = ((instance: T | null) => void) | MutableRefObject<T | null> | null;
+
 	export function unstable_batchedUpdates(
 		callback: (arg?: any) => void,
 		arg?: any
 	): void;
 
+	export type PropsWithChildren<P = unknown> = P & {
+		children?: preact.ComponentChild | undefined
+	};
+	
 	export const Children: {
 		map<T extends preact.ComponentChild, R>(
 			children: T | T[],

@@ -83,7 +83,7 @@ export function diffChildren(
 				childVNode.type,
 				childVNode.props,
 				childVNode.key,
-				null,
+				childVNode.ref ? childVNode.ref : null,
 				childVNode._original
 			);
 		} else {
@@ -205,17 +205,6 @@ export function diffChildren(
 	// Remove remaining oldChildren if there are any.
 	for (i = oldChildrenLength; i--; ) {
 		if (oldChildren[i] != null) {
-			if (
-				typeof newParentVNode.type == 'function' &&
-				oldChildren[i]._dom != null &&
-				oldChildren[i]._dom == newParentVNode._nextDom
-			) {
-				// If the newParentVNode.__nextDom points to a dom node that is about to
-				// be unmounted, then get the next sibling of that vnode and set
-				// _nextDom to it
-				newParentVNode._nextDom = getDomSibling(oldParentVNode, i + 1);
-			}
-
 			unmount(oldChildren[i], oldChildren[i]);
 		}
 	}
@@ -244,14 +233,7 @@ function reorderChildren(childVNode, oldDom, parentDom) {
 			if (typeof vnode.type == 'function') {
 				oldDom = reorderChildren(vnode, oldDom, parentDom);
 			} else {
-				oldDom = placeChild(
-					parentDom,
-					vnode,
-					vnode,
-					c,
-					vnode._dom,
-					oldDom
-				);
+				oldDom = placeChild(parentDom, vnode, vnode, c, vnode._dom, oldDom);
 			}
 		}
 	}
@@ -311,7 +293,7 @@ function placeChild(
 			for (
 				let sibDom = oldDom, j = 0;
 				(sibDom = sibDom.nextSibling) && j < oldChildren.length;
-				j += 2
+				j += 1
 			) {
 				if (sibDom == newDom) {
 					break outer;

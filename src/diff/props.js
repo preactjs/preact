@@ -106,7 +106,7 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
 			// Normalize incorrect prop usage for SVG:
 			// - xlink:href / xlinkHref --> href (xlink:href was removed from SVG and isn't needed)
 			// - className --> class
-			name = name.replace(/xlink[H:h]/, 'h').replace(/sName$/, 's');
+			name = name.replace(/xlink(H|:h)/, 'h').replace(/sName$/, 's');
 		} else if (
 			name !== 'href' &&
 			name !== 'list' &&
@@ -133,10 +133,7 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
 
 		if (typeof value === 'function') {
 			// never serialize functions as attribute values
-		} else if (
-			value != null &&
-			(value !== false || (name[0] === 'a' && name[1] === 'r'))
-		) {
+		} else if (value != null && (value !== false || name.indexOf('-') != -1)) {
 			dom.setAttribute(name, value);
 		} else {
 			dom.removeAttribute(name);
@@ -150,9 +147,9 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
  * @private
  */
 function eventProxy(e) {
-	this._listeners[e.type + false](options.event ? options.event(e) : e);
+	return this._listeners[e.type + false](options.event ? options.event(e) : e);
 }
 
 function eventProxyCapture(e) {
-	this._listeners[e.type + true](options.event ? options.event(e) : e);
+	return this._listeners[e.type + true](options.event ? options.event(e) : e);
 }

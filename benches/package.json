@@ -17,14 +17,17 @@
 	},
 	"devDependencies": {
 		"@kristoferbaxter/async": "^1.0.0",
-		"del": "^6.0.0",
-		"escalade": "^3.0.2",
-		"escape-string-regexp": "^4.0.0",
-		"globby": "^11.0.0",
-		"prompts": "^2.4.0",
-		"sade": "^1.7.3",
-		"strip-ansi": "^6.0.0",
-		"tachometer": "^0.5.7",
+		"del": "^7.0.0",
+		"escalade": "^3.1.1",
+		"escape-string-regexp": "^5.0.0",
+		"globby": "^13.1.2",
+		"prompts": "^2.4.2",
+		"sade": "^1.8.1",
+		"strip-ansi": "^7.0.1",
+		"tachometer": "^0.7.0",
 		"v8-deopt-viewer": "^0.2.1"
+	},
+  "volta": {
+		"extends": "../package.json"
 	}
 }

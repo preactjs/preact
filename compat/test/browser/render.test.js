@@ -158,6 +158,29 @@ describe('compat render', () => {
 		expect(scratch.firstElementChild.value).to.equal('0');
 	});
 
+	it('should call onChange and onInput when input event is dispatched', () => {
+		const onChange = sinon.spy();
+		const onInput = sinon.spy();
+
+		render(<input onChange={onChange} onInput={onInput} />, scratch);
+
+		scratch.firstChild.dispatchEvent(createEvent('input'));
+
+		expect(onChange).to.be.calledOnce;
+		expect(onInput).to.be.calledOnce;
+
+		onChange.resetHistory();
+		onInput.resetHistory();
+
+		// change props order
+		render(<input onInput={onInput} onChange={onChange} />, scratch);
+
+		scratch.firstChild.dispatchEvent(createEvent('input'));
+
+		expect(onChange).to.be.calledOnce;
+		expect(onInput).to.be.calledOnce;
+	});
+
 	it('should keep value of uncontrolled inputs using defaultValue', () => {
 		// See https://github.com/preactjs/preact/issues/2391
 
@@ -450,6 +473,16 @@ describe('compat render', () => {
 		expect(renderSpy).to.be.calledOnce;
 		expect(mountSpy).to.be.calledOnce;
 		expect(updateSpy).to.not.be.calledOnce;
+	});
+
+	it('should support false aria-* attributes', () => {
+		render(<div aria-checked={false} />, scratch);
+		expect(scratch.firstChild.getAttribute('aria-checked')).to.equal('false');
+	});
+
+	it('should support false data-* attributes', () => {
+		render(<div data-checked={false} />, scratch);
+		expect(scratch.firstChild.getAttribute('data-checked')).to.equal('false');
 	});
 
 	it("should support react-relay's usage of __SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED", () => {

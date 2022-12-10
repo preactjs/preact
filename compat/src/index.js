@@ -9,6 +9,7 @@ import {
 } from 'preact';
 import {
 	useState,
+	useId,
 	useReducer,
 	useEffect,
 	useLayoutEffect,
@@ -26,6 +27,7 @@ import { Children } from './Children';
 import { Suspense, lazy } from './suspense';
 import { SuspenseList } from './suspense-list';
 import { createPortal } from './portals';
+import { is } from './util';
 import {
 	hydrate,
 	render,
@@ -117,6 +119,57 @@ const flushSync = (callback, arg) => callback(arg);
  */
 const StrictMode = Fragment;
 
+export function startTransition(cb) {
+	cb();
+}
+
+export function useDeferredValue(val) {
+	return val;
+}
+
+export function useTransition() {
+	return [false, startTransition];
+}
+
+// TODO: in theory this should be done after a VNode is diffed as we want to insert
+// styles/... before it attaches
+export const useInsertionEffect = useLayoutEffect;
+
+/**
+ * This is taken from https://github.com/facebook/react/blob/main/packages/use-sync-external-store/src/useSyncExternalStoreShimClient.js#L84
+ * on a high level this cuts out the warnings, ... and attempts a smaller implementation
+ */
+export function useSyncExternalStore(subscribe, getSnapshot) {
+	const value = getSnapshot();
+
+	const [{ _instance }, forceUpdate] = useState({
+		_instance: { _value: value, _getSnapshot: getSnapshot }
+	});
+
+	useLayoutEffect(() => {
+		_instance._value = value;
+		_instance._getSnapshot = getSnapshot;
+
+		if (!is(_instance._value, getSnapshot())) {
+			forceUpdate({ _instance });
+		}
+	}, [subscribe, value, getSnapshot]);
+
+	useEffect(() => {
+		if (!is(_instance._value, _instance._getSnapshot())) {
+			forceUpdate({ _instance });
+		}
+
+		return subscribe(() => {
+			if (!is(_instance._value, _instance._getSnapshot())) {
+				forceUpdate({ _instance });
+			}
+		});
+	}, [subscribe]);
+
+	return value;
+}
+
 export * from 'preact/hooks';
 export {
 	version,
@@ -150,9 +203,15 @@ export {
 // React copies the named exports to the default one.
 export default {
 	useState,
+	useId,
 	useReducer,
 	useEffect,
 	useLayoutEffect,
+	useInsertionEffect,
+	useTransition,
+	useDeferredValue,
+	useSyncExternalStore,
+	startTransition,
 	useRef,
 	useImperativeHandle,
 	useMemo,
