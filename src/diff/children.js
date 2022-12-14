@@ -29,6 +29,7 @@ export function patchChildren(internal, children, parentDom) {
 	let skew = 0;
 	let i;
 
+	const refs = [];
 	/** @type {import('../internal').Internal} */
 	let childInternal;
 
@@ -71,6 +72,11 @@ export function patchChildren(internal, children, parentDom) {
 		if (mountingChild) {
 			childInternal = createInternal(childVNode, internal);
 
+			if (childVNode.ref) {
+				refs.push({ internal: childInternal });
+				childInternal.ref = childVNode.ref;
+			}
+
 			// We are mounting a new VNode
 			mount(
 				childInternal,
@@ -85,9 +91,19 @@ export function patchChildren(internal, children, parentDom) {
 			(childInternal.flags & (MODE_HYDRATE | MODE_SUSPENDED)) ===
 			(MODE_HYDRATE | MODE_SUSPENDED)
 		) {
+			if (childVNode.ref) {
+				refs.push({ internal: childInternal });
+				childInternal.ref = childVNode.ref;
+			}
+
 			// We are resuming the hydration of a VNode
 			mount(childInternal, childVNode, parentDom, childInternal._dom);
 		} else {
+			if (childInternal.ref != childVNode.ref) {
+				refs.push({ internal: childInternal, previous: childInternal.ref });
+				childInternal.ref = childVNode.ref;
+			}
+
 			// Morph the old element into the new one, but don't append it to the dom yet
 			patch(childInternal, childVNode, parentDom);
 		}
@@ -154,21 +170,15 @@ export function patchChildren(internal, children, parentDom) {
 	}
 
 	// Set refs only after unmount
-	for (i = 0; i < newChildren.length; i++) {
-		childInternal = newChildren[i];
-		if (childInternal) {
-			let oldRef = childInternal.ref;
-			childInternal.ref = normalizeToVNode(children[i]).ref;
-			if (childInternal.ref != oldRef) {
-				if (oldRef) applyRef(oldRef, null, childInternal);
-				if (childInternal.ref)
-					applyRef(
-						childInternal.ref,
-						childInternal._component || childInternal._dom,
-						childInternal
-					);
-			}
-		}
+	for (i = 0; i < refs.length; i++) {
+		const refObj = refs[i];
+		if (refObj.previous) applyRef(refObj.previous, null, refObj.internal);
+		if (refObj.internal && refObj.internal.ref)
+			applyRef(
+				refObj.internal.ref,
+				refObj.internal._component || refObj.internal._dom,
+				refObj.internal
+			);
 	}
 }
 
