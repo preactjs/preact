@@ -181,7 +181,7 @@ function mountElement(internal, dom) {
 				newValue = value;
 			} else if (
 				value != null &&
-				(isFullRender || typeof value === 'function')
+				(isFullRender || typeof value == 'function')
 			) {
 				setProperty(dom, i, value, null, isSvg);
 			}
@@ -392,7 +392,8 @@ function mountComponent(internal, startDom) {
 	if (renderResult == null) {
 		return startDom;
 	}
-	if (typeof renderResult === 'object') {
+
+	if (typeof renderResult == 'object') {
 		// dissolve unkeyed root fragments:
 		if (renderResult.type === Fragment && renderResult.key == null) {
 			renderResult = renderResult.props.children;

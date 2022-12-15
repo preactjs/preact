@@ -92,7 +92,7 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
 		// amount of exceptions would cost us too many bytes. On top of
 		// that other VDOM frameworks also always stringify `false`.
 
-		if (typeof value === 'function') {
+		if (typeof value == 'function') {
 			// never serialize functions as attribute values
 		} else if (value != null && (value !== false || name.indexOf('-') != -1)) {
 			dom.setAttribute(name, value);
