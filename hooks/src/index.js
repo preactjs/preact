@@ -42,7 +42,7 @@ options._render = internal => {
 	if (currentInternal.data && currentInternal.data.__hooks) {
 		if (previousInternal === currentInternal) {
 			currentInternal.data.__hooks._pendingEffects = [];
-			currentInternal._commitCallbacks = [];
+			currentInternal.data._commitCallbacks = [];
 			currentInternal.data.__hooks._list.forEach(hookItem => {
 				if (hookItem._nextValue) {
 					hookItem._value = hookItem._nextValue;
@@ -83,13 +83,13 @@ options.diffed = internal => {
 options._commit = (internal, commitQueue) => {
 	commitQueue.some(internal => {
 		try {
-			internal._commitCallbacks.forEach(invokeCleanup);
-			internal._commitCallbacks = internal._commitCallbacks.filter(cb =>
-				cb._value ? invokeEffect(cb) : true
+			internal.data._commitCallbacks.forEach(invokeCleanup);
+			internal.data._commitCallbacks = internal.data._commitCallbacks.filter(
+				cb => (cb._value ? invokeEffect(cb) : true)
 			);
 		} catch (e) {
 			commitQueue.some(i => {
-				if (i._commitCallbacks) i._commitCallbacks = [];
+				if (i.data._commitCallbacks) i.data._commitCallbacks = [];
 			});
 			commitQueue = [];
 			options._catchError(e, internal);
@@ -254,10 +254,10 @@ export function useLayoutEffect(callback, args) {
 		state._value = callback;
 		state._pendingArgs = args;
 
-		if (currentInternal._commitCallbacks == null) {
-			currentInternal._commitCallbacks = [];
+		if (currentInternal.data._commitCallbacks == null) {
+			currentInternal.data._commitCallbacks = [];
 		}
-		currentInternal._commitCallbacks.push(state);
+		currentInternal.data._commitCallbacks.push(state);
 	}
 }
 

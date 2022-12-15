@@ -59,7 +59,10 @@ export function mount(internal, newVNode, parentDom, startDom) {
 				);
 			}
 
-			if (internal._commitCallbacks.length) {
+			if (
+				internal.data._commitCallbacks &&
+				internal.data._commitCallbacks.length
+			) {
 				commitQueue.push(internal);
 			}
 		} else {
@@ -83,7 +86,7 @@ export function mount(internal, newVNode, parentDom, startDom) {
 		if (internal.flags & MODE_HYDRATE) {
 			// @ts-ignore Trust me TS, nextSibling is a PreactElement
 			nextDomSibling = startDom && startDom.nextSibling;
-			internal._dom = startDom; // Save our current DOM position to resume later
+			internal.data = startDom; // Save our current DOM position to resume later
 		}
 		options._catchError(e, internal);
 	}
@@ -131,7 +134,7 @@ function mountElement(internal, dom) {
 			dom.data = newProps;
 		}
 
-		internal._dom = dom;
+		internal.data = dom;
 	} else {
 		// Tracks entering and exiting SVG namespace when descending through the tree.
 		// if (nodeType === 'svg') internal.flags |= MODE_SVG;
@@ -187,7 +190,7 @@ function mountElement(internal, dom) {
 			}
 		}
 
-		internal._dom = dom;
+		internal.data = dom;
 
 		// If the new vnode didn't have dangerouslySetInnerHTML, diff its children
 		if (newHtml) {
@@ -244,7 +247,7 @@ export function mountChildren(internal, children, parentDom, startDom) {
 		// Morph the old element into the new one, but don't append it to the dom yet
 		mountedNextChild = mount(childInternal, childVNode, parentDom, startDom);
 
-		newDom = childInternal._dom;
+		newDom = childInternal.data;
 
 		if (childInternal.flags & TYPE_COMPONENT || newDom == startDom) {
 			// If the child is a Fragment-like or if it is DOM VNode and its _dom
@@ -348,7 +351,7 @@ function mountComponent(internal, startDom) {
 			// If the component was constructed, queue up componentDidMount so the
 			// first time this internal commits (regardless of suspense or not) it
 			// will be called
-			internal._commitCallbacks.push(c.componentDidMount.bind(c));
+			internal.data._commitCallbacks.push(c.componentDidMount.bind(c));
 		}
 	}
 
@@ -367,10 +370,10 @@ function mountComponent(internal, startDom) {
 		if (renderHook) renderHook(internal);
 		if (ENABLE_CLASSES && internal.flags & TYPE_CLASS) {
 			renderResult = c.render(c.props, c.state, c.context);
-			for (let i = 0; i < internal._stateCallbacks.length; i++) {
-				internal._commitCallbacks.push(internal._stateCallbacks[i]);
+			for (let i = 0; i < internal.data._stateCallbacks.length; i++) {
+				internal.data._commitCallbacks.push(internal.data._stateCallbacks[i]);
 			}
-			internal._stateCallbacks = [];
+			internal.data._stateCallbacks = [];
 			// note: disable repeat render invocation for class components
 			break;
 		} else {
