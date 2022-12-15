@@ -13,8 +13,6 @@ import {
 } from './constants';
 import { enqueueRender } from './component';
 
-const template = document.createElement('template');
-
 /**
  * Create an internal tree node
  * @param {import('./internal').VNode | string} vnode
@@ -92,7 +90,7 @@ export function createInternal(vnode, parentInternal) {
 		data:
 			flags & TYPE_COMPONENT
 				? { _commitCallbacks: [], _stateCallbacks: [] }
-				: template,
+				: null,
 		rerender: enqueueRender,
 		flags,
 		_children: null,
