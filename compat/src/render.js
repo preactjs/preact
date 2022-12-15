@@ -109,14 +109,14 @@ options.vnode = vnode => {
 	let normalizedProps = props;
 
 	// only normalize props on Element nodes
-	if (typeof type === 'string') {
+	if (typeof type == 'string') {
 		const nonCustomElement = type.indexOf('-') === -1;
 		normalizedProps = {};
 
 		let style = props.style;
-		if (typeof style === 'object') {
+		if (typeof style == 'object') {
 			for (i in style) {
-				if (typeof style[i] === 'number' && !IS_NON_DIMENSIONAL.test(i)) {
+				if (typeof style[i] == 'number' && !IS_NON_DIMENSIONAL.test(i)) {
 					style[i] += 'px';
 				}
 			}
@@ -211,7 +211,7 @@ options.vnode = vnode => {
 			if (props.className != null) normalizedProps.class = props.className;
 			Object.defineProperty(normalizedProps, 'className', classNameDescriptor);
 		}
-	} else if (typeof type === 'function' && type.defaultProps) {
+	} else if (typeof type == 'function' && type.defaultProps) {
 		for (i in type.defaultProps) {
 			if (normalizedProps[i] === undefined) {
 				normalizedProps[i] = type.defaultProps[i];
