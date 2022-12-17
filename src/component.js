@@ -2,6 +2,7 @@ import { assign } from './util';
 import { diff, commitRoot } from './diff/index';
 import options from './options';
 import { Fragment } from './create-element';
+import { inEvent } from './diff/props';
 
 /**
  * Base Component class. Provides `setState()` and `forceUpdate()`, which
@@ -183,6 +184,19 @@ let rerenderQueue = [];
 
 let prevDebounce;
 
+const quickDefer =
+	typeof Promise == 'function'
+		? Promise.prototype.then.bind(Promise.resolve())
+		: setTimeout;
+
+function defer(cb) {
+	if (inEvent) {
+		setTimeout(cb);
+	} else {
+		quickDefer(cb);
+	}
+}
+
 /**
  * Enqueue a rerender of a component
  * @param {import('./internal').Component} c The component to rerender
@@ -196,7 +210,7 @@ export function enqueueRender(c) {
 		prevDebounce !== options.debounceRendering
 	) {
 		prevDebounce = options.debounceRendering;
-		(prevDebounce || setTimeout)(process);
+		(prevDebounce || defer)(process);
 	}
 }
 

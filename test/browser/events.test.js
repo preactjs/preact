@@ -1,4 +1,4 @@
-import { createElement, render } from 'preact';
+import { createElement, render, Component, Fragment } from 'preact';
 import {
 	setupScratch,
 	teardown,
@@ -8,8 +8,14 @@ import {
 /** @jsx createElement */
 
 describe('event handling', () => {
-	let scratch, proto;
+	/** @type {HTMLDivElement} */
+	let scratch;
+	let proto;
 
+	/**
+	 * @param {EventTarget} on
+	 * @param {string} type
+	 */
 	function fireEvent(on, type) {
 		let e = document.createEvent('Event');
 		e.initEvent(type, true, true);
@@ -26,7 +32,7 @@ describe('event handling', () => {
 	});
 
 	afterEach(() => {
-		teardown(scratch);
+		// teardown(scratch);
 
 		proto.addEventListener.restore();
 		proto.removeEventListener.restore();
@@ -149,6 +155,64 @@ describe('event handling', () => {
 			'animationend',
 			sinon.match.func,
 			false
+		);
+	});
+
+	it.only('IDK', async () => {
+		const afterFrame = () => new Promise(r => setTimeout(r));
+
+		class ExpandablePanel extends Component {
+			constructor() {
+				super();
+				this.state = { expanded: false };
+			}
+			render({ header, content }, { expanded }) {
+				const setExpanded = expanded => this.setState({ expanded });
+				return (
+					<Fragment>
+						<div
+							className="panel"
+							onClick={() => {
+								if (!expanded) {
+									setExpanded(true);
+								}
+							}}
+						>
+							<h2>ExpandablePanel</h2>
+							{expanded && (
+								<button
+									className="close-button"
+									onClick={() => setExpanded(false)}
+								>
+									Close
+								</button>
+							)}
+							{/* {expanded && <p>{content}</p>} */}
+						</div>
+					</Fragment>
+				);
+			}
+		}
+
+		render(<ExpandablePanel />, scratch);
+		expect(scratch.innerHTML).to.equal(
+			`<div class="panel"><h2>ExpandablePanel</h2></div>`
+		);
+
+		const panel = scratch.querySelector('.panel');
+		fireEvent(panel, 'click');
+		await afterFrame();
+
+		expect(scratch.innerHTML).to.equal(
+			`<div class="panel"><h2>ExpandablePanel</h2><button class="close-button">Close</button></div>`
+		);
+
+		const close = scratch.querySelector('.close-button');
+		fireEvent(close, 'click');
+		await afterFrame();
+
+		expect(scratch.innerHTML).to.equal(
+			`<div class="panel"><h2>ExpandablePanel</h2></div>`
 		);
 	});
 
