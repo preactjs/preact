@@ -536,7 +536,7 @@ describe('refs', () => {
 		expect(ref.current.innerHTML).to.be.equal('Foo');
 	});
 
-	it.skip('should not remove refs for memoized components keyed', () => {
+	it('should not remove refs for memoized components keyed', () => {
 		const ref = createRef();
 		const element = <div ref={ref}>hey</div>;
 		function App(props) {
