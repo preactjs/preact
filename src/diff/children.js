@@ -184,7 +184,7 @@ function findMatchingIndex(
 	skewedIndex,
 	remainingOldChildren
 ) {
-	const type = typeof childVNode === 'string' ? null : childVNode.type;
+	const type = typeof childVNode == 'string' ? null : childVNode.type;
 	const key = type !== null ? childVNode.key : UNDEFINED;
 	let match = -1;
 	let x = skewedIndex - 1; // i - 1;

@@ -310,7 +310,7 @@ function patchComponent(internal, newVNode) {
 
 	if (renderResult == null) {
 		renderResult = [];
-	} else if (typeof renderResult === 'object') {
+	} else if (typeof renderResult == 'object') {
 		if (renderResult.type === Fragment && renderResult.key == null) {
 			renderResult = renderResult.props.children;
 		}

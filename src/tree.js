@@ -31,7 +31,7 @@ export function createInternal(vnode, parentInternal) {
 	// Text VNodes/Internals have an ID of 0 that is never used:
 	let vnodeId = 0;
 
-	if (typeof vnode === 'string') {
+	if (typeof vnode == 'string') {
 		// type = null;
 		flags |= TYPE_TEXT;
 		props = vnode;
@@ -61,7 +61,7 @@ export function createInternal(vnode, parentInternal) {
 
 		// flags = typeof type === 'function' ? COMPONENT_NODE : ELEMENT_NODE;
 		flags |=
-			typeof type === 'function'
+			typeof type == 'function'
 				? type.prototype && type.prototype.render
 					? TYPE_CLASS
 					: props._parentDom

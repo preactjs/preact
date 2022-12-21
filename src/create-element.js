@@ -56,17 +56,19 @@ export function createElement(type, props, children) {
  */
 export function normalizeToVNode(childVNode) {
 	let type = typeof childVNode;
-	if (childVNode == null || type === 'boolean') {
+	if (childVNode == null || type == 'boolean') {
 		return null;
 	}
-	if (type === 'object') {
+
+	if (type == 'object' || type == 'function') {
 		if (Array.isArray(childVNode)) {
 			return createElement(Fragment, null, childVNode);
 		}
-	} else if (type !== 'string' && type !== 'function') {
-		return String(childVNode);
+
+		return childVNode;
 	}
-	return childVNode;
+
+	return String(childVNode);
 }
 
 export function createRef() {
