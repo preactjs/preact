@@ -53,7 +53,7 @@ Component.prototype.setState = function(update, callback) {
 
 	const internal = this._internal;
 	if (update != null && internal) {
-		if (callback) internal._stateCallbacks.push(callback.bind(this));
+		if (callback) internal.data._stateCallbacks.push(callback.bind(this));
 		internal.rerender(internal);
 	}
 };
@@ -71,7 +71,7 @@ Component.prototype.forceUpdate = function(callback) {
 		// is coming from. We need this because forceUpdate should never call
 		// shouldComponentUpdate
 		internal.flags |= FORCE_UPDATE;
-		if (callback) internal._commitCallbacks.push(callback.bind(this));
+		if (callback) internal.data._commitCallbacks.push(callback.bind(this));
 		internal.rerender(internal);
 	}
 };

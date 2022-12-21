@@ -47,8 +47,7 @@ export function unmount(internal, parentInternal, skipRemove) {
 	}
 
 	if (!skipRemove && internal.flags & TYPE_DOM) {
-		internal._dom.remove();
+		internal.data.remove();
+		internal.data = null;
 	}
-
-	internal._dom = null;
 }

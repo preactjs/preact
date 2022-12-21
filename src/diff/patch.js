@@ -35,8 +35,8 @@ export function patch(internal, vnode, parentDom) {
 
 	if (flags & TYPE_TEXT) {
 		if (vnode !== internal.props) {
-			// @ts-ignore We know that newVNode is string/number/bigint, and internal._dom is Text
-			internal._dom.data = vnode;
+			// @ts-ignore We know that newVNode is string/number/bigint, and internal.data is Text
+			internal.data.data = vnode;
 			internal.props = vnode;
 		}
 
@@ -94,7 +94,7 @@ export function patch(internal, vnode, parentDom) {
 				let siblingDom =
 					(internal.flags & (MODE_HYDRATE | MODE_SUSPENDED)) ===
 					(MODE_HYDRATE | MODE_SUSPENDED)
-						? internal._dom
+						? internal.data
 						: internal.flags & MODE_HYDRATE
 						? null
 						: getDomSibling(internal);
@@ -104,7 +104,12 @@ export function patch(internal, vnode, parentDom) {
 				patchChildren(internal, renderResult, parentDom);
 			}
 
-			if (internal._commitCallbacks.length) {
+			// TODO: for some reason lazy-hydration stops working as .data is assigned a DOM-node
+			// for Preact.lazy
+			if (
+				internal.data._commitCallbacks &&
+				internal.data._commitCallbacks.length
+			) {
 				commitQueue.push(internal);
 			}
 		} catch (e) {
@@ -130,7 +135,7 @@ export function patch(internal, vnode, parentDom) {
  * @param {import('../internal').VNode} vnode A VNode with props to compare and apply
  */
 function patchElement(internal, vnode) {
-	let dom = /** @type {import('../internal').PreactElement} */ (internal._dom),
+	let dom = /** @type {import('../internal').PreactElement} */ (internal.data),
 		oldProps = internal.props,
 		newProps = vnode.props,
 		isSvg = internal.flags & MODE_SVG,
@@ -241,10 +246,10 @@ function patchComponent(internal, newVNode) {
 		c.props = newProps;
 		c.state = c._nextState;
 		internal.flags |= SKIP_CHILDREN;
-		for (let i = 0; i < internal._stateCallbacks.length; i++) {
-			internal._commitCallbacks.push(internal._stateCallbacks[i]);
+		for (let i = 0; i < internal.data._stateCallbacks.length; i++) {
+			internal.data._commitCallbacks.push(internal.data._stateCallbacks[i]);
 		}
-		internal._stateCallbacks = [];
+		internal.data._stateCallbacks = [];
 		return;
 	}
 
@@ -266,10 +271,10 @@ function patchComponent(internal, newVNode) {
 		if (renderHook) renderHook(internal);
 		if (ENABLE_CLASSES && internal.flags & TYPE_CLASS) {
 			renderResult = c.render(c.props, c.state, c.context);
-			for (let i = 0; i < internal._stateCallbacks.length; i++) {
-				internal._commitCallbacks.push(internal._stateCallbacks[i]);
+			for (let i = 0; i < internal.data._stateCallbacks.length; i++) {
+				internal.data._commitCallbacks.push(internal.data._stateCallbacks[i]);
 			}
-			internal._stateCallbacks = [];
+			internal.data._stateCallbacks = [];
 			// note: disable repeat render invocation for class components
 			break;
 		} else {
@@ -294,7 +299,7 @@ function patchComponent(internal, newVNode) {
 
 		// Only schedule componentDidUpdate if the component successfully rendered
 		if (c.componentDidUpdate != null) {
-			internal._commitCallbacks.push(() => {
+			internal.data._commitCallbacks.push(() => {
 				c.componentDidUpdate(oldProps, oldState, snapshot);
 			});
 		}
@@ -302,7 +307,7 @@ function patchComponent(internal, newVNode) {
 
 	if (renderResult == null) {
 		renderResult = [];
-	} else if (typeof renderResult === 'object') {
+	} else if (typeof renderResult == 'object') {
 		if (renderResult.type === Fragment && renderResult.key == null) {
 			renderResult = renderResult.props.children;
 		}

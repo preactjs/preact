@@ -97,7 +97,7 @@ export function patchChildren(internal, children, parentDom) {
 			}
 
 			// We are resuming the hydration of a VNode
-			mount(childInternal, childVNode, parentDom, childInternal._dom);
+			mount(childInternal, childVNode, parentDom, childInternal.data);
 		} else {
 			if (childInternal.ref != childVNode.ref) {
 				refs.push({ internal: childInternal, previous: childInternal.ref });
@@ -116,7 +116,7 @@ export function patchChildren(internal, children, parentDom) {
 			// Perform insert of new dom
 			if (childInternal.flags & TYPE_DOM) {
 				parentDom.insertBefore(
-					childInternal._dom,
+					childInternal.data,
 					getDomSibling(internal, skewedIndex)
 				);
 			}
@@ -149,7 +149,7 @@ export function patchChildren(internal, children, parentDom) {
 
 			let nextSibling = getDomSibling(internal, skewedIndex + 1);
 			if (childInternal.flags & TYPE_DOM) {
-				parentDom.insertBefore(childInternal._dom, nextSibling);
+				parentDom.insertBefore(childInternal.data, nextSibling);
 			} else {
 				insertComponentDom(childInternal, nextSibling, parentDom);
 			}
@@ -176,7 +176,7 @@ export function patchChildren(internal, children, parentDom) {
 		if (refObj.internal && refObj.internal.ref)
 			applyRef(
 				refObj.internal.ref,
-				refObj.internal._component || refObj.internal._dom,
+				refObj.internal._component || refObj.internal.data,
 				refObj.internal
 			);
 	}
@@ -195,7 +195,7 @@ function findMatchingIndex(
 	skewedIndex,
 	remainingOldChildren
 ) {
-	const type = typeof childVNode === 'string' ? null : childVNode.type;
+	const type = typeof childVNode == 'string' ? null : childVNode.type;
 	const key = type !== null ? childVNode.key : UNDEFINED;
 	let match = -1;
 	let x = skewedIndex - 1; // i - 1;
@@ -254,8 +254,8 @@ export function insertComponentDom(internal, nextSibling, parentDom) {
 
 			if (childInternal.flags & TYPE_COMPONENT) {
 				insertComponentDom(childInternal, nextSibling, parentDom);
-			} else if (childInternal._dom != nextSibling) {
-				parentDom.insertBefore(childInternal._dom, nextSibling);
+			} else if (childInternal.data != nextSibling) {
+				parentDom.insertBefore(childInternal.data, nextSibling);
 			}
 		}
 	}
