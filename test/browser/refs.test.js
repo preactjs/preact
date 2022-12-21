@@ -456,7 +456,7 @@ describe('refs', () => {
 		ref.resetHistory();
 
 		render(<App open />, scratch);
-		expect(ref).to.have.been.calledOnce.and.calledWith(
+		expect(ref).to.have.been.calledTwice.and.calledWith(
 			scratch.firstElementChild.firstElementChild
 		);
 	});
