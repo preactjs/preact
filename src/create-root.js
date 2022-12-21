@@ -47,7 +47,7 @@ export function createRoot(parentDom) {
 			}
 			rootInternal.flags |= flags;
 
-			rootInternal._context = {};
+			rootInternal.data._context = {};
 
 			mount(rootInternal, vnode, parentDom, firstChild);
 		}

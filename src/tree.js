@@ -89,7 +89,7 @@ export function createInternal(vnode, parentInternal) {
 		_prevRef: null,
 		data:
 			flags & TYPE_COMPONENT
-				? { _commitCallbacks: [], _stateCallbacks: [] }
+				? { _commitCallbacks: [], _context: null, _stateCallbacks: [] }
 				: null,
 		rerender: enqueueRender,
 		flags,
@@ -97,7 +97,6 @@ export function createInternal(vnode, parentInternal) {
 		_parent: parentInternal,
 		_vnodeId: vnodeId,
 		_component: null,
-		_context: null,
 		_depth: parentInternal ? parentInternal._depth + 1 : 0
 	};
 
@@ -175,7 +174,7 @@ export function getChildDom(internal, offset) {
  */
 export function getParentContext(internal) {
 	// @TODO: compare performance of recursion here (it's 11b smaller, but may be slower for deep trees)
-	return internal._context || getParentContext(internal._parent);
+	return internal.data._context || getParentContext(internal._parent);
 
 	// while ((internal = internal._parent)) {
 	// 	let context = internal._context;
