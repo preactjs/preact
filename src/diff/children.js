@@ -72,8 +72,9 @@ export function patchChildren(internal, children, parentDom) {
 		if (mountingChild) {
 			childInternal = createInternal(childVNode, internal);
 
+			if (!refs) refs = [];
+
 			if (childVNode.ref) {
-				if (!refs) refs = [];
 				refs.push({ internal: childInternal });
 				childInternal.ref = childVNode.ref;
 			}
@@ -83,7 +84,8 @@ export function patchChildren(internal, children, parentDom) {
 				childInternal,
 				childVNode,
 				parentDom,
-				getDomSibling(internal, skewedIndex)
+				getDomSibling(internal, skewedIndex),
+				refs
 			);
 		}
 		// If this node suspended during hydration, and no other flags are set:
@@ -92,8 +94,9 @@ export function patchChildren(internal, children, parentDom) {
 			(childInternal.flags & (MODE_HYDRATE | MODE_SUSPENDED)) ===
 			(MODE_HYDRATE | MODE_SUSPENDED)
 		) {
+			if (!refs) refs = [];
+
 			if (childVNode.ref) {
-				if (!refs) refs = [];
 				refs.push({ internal: childInternal });
 				childInternal.ref = childVNode.ref;
 			}

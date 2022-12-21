@@ -415,8 +415,7 @@ describe('refs', () => {
 		expect(input.value).to.equal('foo');
 	});
 
-	// @TODO: re-enable these tests when we add a ref queue
-	it.skip('should correctly set nested child refs', () => {
+	it('should correctly set nested child refs', () => {
 		const ref = createRef();
 		const App = ({ open }) =>
 			open ? (
@@ -436,7 +435,7 @@ describe('refs', () => {
 		expect(ref.current).to.not.be.null;
 	});
 
-	it.skip('should correctly set nested child function refs', () => {
+	it('should correctly set nested child function refs', () => {
 		const ref = sinon.spy();
 		const App = ({ open }) =>
 			open ? (
