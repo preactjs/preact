@@ -18,10 +18,10 @@ export function commitRoot(rootInternal) {
 	currentQueue.some(internal => {
 		try {
 			// @ts-ignore Reuse the root variable here so the type changes
-			currentQueue = internal._commitCallbacks.length;
+			currentQueue = internal.data._commitCallbacks.length;
 			// @ts-ignore See above ts-ignore comment
 			while (currentQueue--) {
-				internal._commitCallbacks.shift()();
+				internal.data._commitCallbacks.shift()();
 			}
 		} catch (e) {
 			options._catchError(e, internal);

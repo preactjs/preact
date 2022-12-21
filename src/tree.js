@@ -87,15 +87,15 @@ export function createInternal(vnode, parentInternal) {
 		key,
 		ref,
 		_prevRef: null,
-		data: flags & TYPE_COMPONENT ? {} : null,
-		_commitCallbacks: flags & TYPE_COMPONENT ? [] : null,
-		_stateCallbacks: flags & TYPE_COMPONENT ? [] : null,
+		data:
+			flags & TYPE_COMPONENT
+				? { _commitCallbacks: [], _stateCallbacks: [] }
+				: null,
 		rerender: enqueueRender,
 		flags,
 		_children: null,
 		_parent: parentInternal,
 		_vnodeId: vnodeId,
-		_dom: null,
 		_component: null,
 		_context: null,
 		_depth: parentInternal ? parentInternal._depth + 1 : 0
@@ -155,7 +155,7 @@ export function getChildDom(internal, offset) {
 		let child = internal._children[offset];
 		if (child != null) {
 			if (child.flags & TYPE_DOM) {
-				return child._dom;
+				return child.data;
 			}
 
 			if (shouldSearchComponent(child)) {
@@ -200,7 +200,7 @@ export function getParentDom(internal) {
 		if (parent.flags & TYPE_ROOT) {
 			return parent.props._parentDom;
 		} else if (parent.flags & TYPE_ELEMENT) {
-			return parent._dom;
+			return parent.data;
 		}
 	}
 }

@@ -141,7 +141,7 @@ export interface Internal<P = {}> {
 	/** Bitfield containing information about the Internal or its component. */
 	flags: number;
 	/** Polymorphic property to store extensions like hooks on */
-	data: object;
+	data: object | PreactNode;
 	/** The function that triggers in-place re-renders for an internal */
 	rerender: (internal: Internal) => void;
 
@@ -155,7 +155,6 @@ export interface Internal<P = {}> {
 	 * Associated DOM element for the Internal, or its nearest realized descendant.
 	 * For Fragments, this is the first DOM child.
 	 */
-	_dom: PreactNode;
 	/** The component instance for which this is a backing Internal node */
 	_component: Component | null;
 	/** most recent context object passed down to this Internal from its parent */

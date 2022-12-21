@@ -86,7 +86,7 @@ export function patchChildren(internal, children, parentDom) {
 			(MODE_HYDRATE | MODE_SUSPENDED)
 		) {
 			// We are resuming the hydration of a VNode
-			mount(childInternal, childVNode, parentDom, childInternal._dom);
+			mount(childInternal, childVNode, parentDom, childInternal.data);
 		} else {
 			// Morph the old element into the new one, but don't append it to the dom yet
 			patch(childInternal, childVNode, parentDom);
@@ -100,7 +100,7 @@ export function patchChildren(internal, children, parentDom) {
 			// Perform insert of new dom
 			if (childInternal.flags & TYPE_DOM) {
 				parentDom.insertBefore(
-					childInternal._dom,
+					childInternal.data,
 					getDomSibling(internal, skewedIndex)
 				);
 			}
@@ -133,7 +133,7 @@ export function patchChildren(internal, children, parentDom) {
 
 			let nextSibling = getDomSibling(internal, skewedIndex + 1);
 			if (childInternal.flags & TYPE_DOM) {
-				parentDom.insertBefore(childInternal._dom, nextSibling);
+				parentDom.insertBefore(childInternal.data, nextSibling);
 			} else {
 				insertComponentDom(childInternal, nextSibling, parentDom);
 			}
@@ -163,7 +163,7 @@ export function patchChildren(internal, children, parentDom) {
 				if (childInternal.ref)
 					applyRef(
 						childInternal.ref,
-						childInternal._component || childInternal._dom,
+						childInternal._component || childInternal.data,
 						childInternal
 					);
 			}
@@ -243,8 +243,8 @@ export function insertComponentDom(internal, nextSibling, parentDom) {
 
 			if (childInternal.flags & TYPE_COMPONENT) {
 				insertComponentDom(childInternal, nextSibling, parentDom);
-			} else if (childInternal._dom != nextSibling) {
-				parentDom.insertBefore(childInternal._dom, nextSibling);
+			} else if (childInternal.data != nextSibling) {
+				parentDom.insertBefore(childInternal.data, nextSibling);
 			}
 		}
 	}
