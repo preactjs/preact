@@ -20,11 +20,11 @@ import { createInternal, getDomSibling } from '../tree';
  * @param {import('../internal').PreactElement} parentDom The element into which this subtree is rendered
  */
 export function patchChildren(internal, children, parentDom) {
-	let oldChildren =
-		(internal._children && internal._children.slice()) || EMPTY_ARR;
+	// let oldChildren =
+	// 	(internal._children && internal._children.slice()) || EMPTY_ARR;
 
-	let oldChildrenLength = oldChildren.length;
-	let remainingOldChildren = oldChildrenLength;
+	// let oldChildrenLength = oldChildren.length;
+	// let remainingOldChildren = oldChildrenLength;
 
 	let skew = 0;
 	let i;
@@ -44,7 +44,7 @@ export function patchChildren(internal, children, parentDom) {
 		// Terser removes the `continue` here and wraps the loop body
 		// in a `if (childVNode) { ... } condition
 		if (childVNode == null) {
-			newChildren[i] = null;
+			// newChildren[i] = null;
 			continue;
 		}
 

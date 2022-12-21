@@ -93,8 +93,9 @@ export function createInternal(vnode, parentInternal) {
 				: null,
 		rerender: enqueueRender,
 		flags,
-		_children: null,
 		_parent: parentInternal,
+		_child: null,
+		_next: null,
 		_vnodeId: vnodeId,
 		_component: null,
 		_context: null,
@@ -112,20 +113,43 @@ const shouldSearchComponent = internal =>
 		internal.props._parentDom == getParentDom(internal._parent));
 
 /**
+ * Get the next DOM Internal after a given index within a parent Internal.
+ * If `childIndex` is `null`, finds the next DOM Internal sibling of the given Internal.
  * @param {import('./internal').Internal} internal
- * @param {number | null} [childIndex]
+ * @param {never} [childIndex] todo - replace parent+index with child internal reference
  * @returns {import('./internal').PreactNode}
  */
 export function getDomSibling(internal, childIndex) {
+	// basically looking for the next pointer that can be used to perform an insertBefore:
+	// @TODO inline the null case, since it's only used in patch.
 	if (childIndex == null) {
 		// Use childIndex==null as a signal to resume the search from the vnode's sibling
-		return getDomSibling(
-			internal._parent,
-			internal._parent._children.indexOf(internal) + 1
-		);
+		const next = internal._next;
+		return next && (getChildDom(next) || getDomSibling(next));
+
+		// return next && (getChildDom(next) || getDomSibling(next));
+		// let sibling = internal;
+		// while (sibling = sibling._next) {
+		// 	let domChildInternal = getChildDom(sibling);
+		// 	if (domChildInternal) return domChildInternal;
+		// }
+
+		// const parent = internal._parent;
+		// let child = parent._child;
+		// while (child) {
+		// 	if (child === internal) {
+		// 		return getDomSibling(child._next);
+		// 	}
+		// 	child = child._next;
+		// }
+
+		// return getDomSibling(
+		// 	internal._parent,
+		// 	internal._parent._children.indexOf(internal) + 1
+		// );
 	}
 
-	let childDom = getChildDom(internal, childIndex);
+	let childDom = getChildDom(internal._child);
 	if (childDom) {
 		return childDom;
 	}
@@ -142,29 +166,32 @@ export function getDomSibling(internal, childIndex) {
 }
 
 /**
- * @param {import('./internal').Internal} internal
- * @param {number} offset
+ * Get the root DOM element for a given subtree.
+ * Returns the nearest DOM element within a given Internal's subtree.
+ * If the provided Internal _is_ a DOM Internal, its DOM will be returned.
+ * @param {import('./internal').Internal} internal The internal to begin the search
  * @returns {import('./internal').PreactElement}
  */
-export function getChildDom(internal, offset) {
-	if (internal._children == null) {
-		return null;
-	}
-
-	for (; offset < internal._children.length; offset++) {
-		let child = internal._children[offset];
-		if (child != null) {
-			if (child.flags & TYPE_DOM) {
-				return child.data;
-			}
-
-			if (shouldSearchComponent(child)) {
-				let childDom = getChildDom(child, 0);
-				if (childDom) {
-					return childDom;
-				}
-			}
+export function getChildDom(internal) {
+	while (internal) {
+		// this is a DOM internal
+		if (internal.flags & TYPE_DOM) {
+			// @ts-ignore this is an Element Internal, .data is a PreactElement.
+			return internal.data;
 		}
+
+		// This is a Component internal (but might be a root/portal).
+		// Find its first DOM child, unless it's a portal:
+		// @todo - this is an inlined version of shouldSearchComponent without the type=component guard.
+		if (
+			!(internal.flags & TYPE_ROOT) ||
+			internal.props._parentDom == getParentDom(internal._parent)
+		) {
+			const childDom = getChildDom(internal._child);
+			if (childDom) return childDom;
+		}
+
+		internal = internal._next;
 	}
 
 	return null;
@@ -184,23 +211,23 @@ export function getParentContext(internal) {
 }
 
 /**
+ * Get the parent DOM for an Internal. If the Internal is a Root, returns its DOM root.
  * @param {import('./internal').Internal} internal
  * @returns {import('./internal').PreactElement}
  */
 export function getParentDom(internal) {
-	let parent = internal;
-
 	// if this is a Root internal, return its parent DOM:
-	if (parent.flags & TYPE_ROOT) {
-		return parent.props._parentDom;
+	if (internal.flags & TYPE_ROOT) {
+		return internal.props._parentDom;
 	}
 
 	// walk up the tree to find the nearest DOM or Root Internal:
-	while ((parent = parent._parent)) {
-		if (parent.flags & TYPE_ROOT) {
-			return parent.props._parentDom;
-		} else if (parent.flags & TYPE_ELEMENT) {
-			return parent.data;
+	while ((internal = internal._parent)) {
+		if (internal.flags & TYPE_ELEMENT) {
+			return internal.data;
+		}
+		if (internal.flags & TYPE_ROOT) {
+			return internal.props._parentDom;
 		}
 	}
 }

@@ -48,7 +48,8 @@ export function mount(internal, newVNode, parentDom, startDom) {
 			}
 
 			const renderResult = mountComponent(internal, startDom);
-			if (renderResult === startDom) {
+			// if (renderResult === startDom) {
+			if (renderResult === null) {
 				nextDomSibling = startDom;
 			} else {
 				nextDomSibling = mountChildren(
@@ -224,10 +225,13 @@ function mountElement(internal, dom) {
  * @param {import('../internal').PreactNode} startDom
  */
 export function mountChildren(internal, children, parentDom, startDom) {
-	let internalChildren = (internal._children = []),
-		i,
-		childVNode,
+	// let internalChildren = (internal._children = []),
+	let i,
+		/** @type {import('../internal').Internal} */
+		prevChildInternal,
+		/** @type {import('../internal').Internal} */
 		childInternal,
+		childVNode,
 		newDom,
 		mountedNextChild;
 
@@ -237,12 +241,15 @@ export function mountChildren(internal, children, parentDom, startDom) {
 		// Terser removes the `continue` here and wraps the loop body
 		// in a `if (childVNode) { ... } condition
 		if (childVNode == null) {
-			internalChildren[i] = null;
+			// @TODO - account for holes?
+			// internalChildren[i] = null;
 			continue;
 		}
 
 		childInternal = createInternal(childVNode, internal);
-		internalChildren[i] = childInternal;
+		// internalChildren[i] = childInternal;
+		if (prevChildInternal) prevChildInternal._next = childInternal;
+		else internal._child = childInternal;
 
 		// Morph the old element into the new one, but don't append it to the dom yet
 		mountedNextChild = mount(childInternal, childVNode, parentDom, startDom);
@@ -268,6 +275,8 @@ export function mountChildren(internal, children, parentDom, startDom) {
 				childInternal
 			);
 		}
+
+		prevChildInternal = childInternal;
 	}
 
 	// Remove children that are not part of any vnode.
@@ -292,7 +301,7 @@ export function mountChildren(internal, children, parentDom, startDom) {
 /**
  * @param {import('../internal').Internal} internal The component's backing Internal node
  * @param {import('../internal').PreactNode} startDom the preceding node
- * @returns {import('../internal').PreactNode} the component's children
+ * @returns {import('../internal').ComponentChild[]} the component's children
  */
 function mountComponent(internal, startDom) {
 	/** @type {import('../internal').Component} */
@@ -393,7 +402,8 @@ function mountComponent(internal, startDom) {
 	}
 
 	if (renderResult == null) {
-		return startDom;
+		// return startDom;
+		return null;
 	}
 
 	if (typeof renderResult == 'object') {

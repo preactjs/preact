@@ -72,7 +72,7 @@ function cloneElement(element) {
  * @returns {boolean}
  */
 function unmountComponentAtNode(container) {
-	if (container._children) {
+	if (container._child) {
 		preactRender(null, container);
 		return true;
 	}
@@ -112,11 +112,11 @@ const StrictMode = Fragment;
 
 /**
  * In React, `flushSync` flushes the entire tree and forces a rerender. It's
- * implmented here as a no-op.
+ * implemented here as a no-op.
  * @template Arg
  * @template Result
  * @param {(arg: Arg) => Result} callback function that runs before the flush
- * @param {Arg} [arg] Optional arugment that can be passed to the callback
+ * @param {Arg} [arg] Optional argument that can be passed to the callback
  * @returns
  */
 const flushSync = (callback, arg) => callback(arg);

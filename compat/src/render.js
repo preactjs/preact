@@ -56,14 +56,14 @@ Component.prototype.isReactComponent = {};
 export function render(vnode, parent, callback) {
 	// React destroys any existing DOM nodes, see #1727
 	// ...but only on the first render, see #1828
-	if (parent._children == null) {
+	if (parent._child == null) {
 		parent.textContent = '';
 	}
 
 	preactRender(vnode, parent);
 	if (typeof callback == 'function') callback();
 
-	const internal = parent._children._children[0];
+	const internal = parent._child._child;
 	return internal ? internal._component : null;
 }
 
