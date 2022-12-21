@@ -121,9 +121,9 @@ function _renderToString(vnode, context, opts, inner, isSvgMode, selectValue) {
 		} else {
 			let rendered;
 
-			vnode._context = context;
 			vnode.data = {
-				_hooks: []
+				_hooks: [],
+				_context: context
 			};
 
 			let c = (vnode._component = {
