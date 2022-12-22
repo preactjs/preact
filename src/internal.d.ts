@@ -131,6 +131,7 @@ export interface VNode<P = {}> extends preact.VNode<P> {
  * Think of an Internal like a long-lived VNode with stored data and tree linkages.
  */
 export interface Internal<P = {}> {
+	id: number;
 	type: string | ComponentType<P>;
 	/** The props object for Elements/Components, and the string contents for Text */
 	props: (P & { children: ComponentChildren }) | string | number;
@@ -157,8 +158,6 @@ export interface Internal<P = {}> {
 	 */
 	/** The component instance for which this is a backing Internal node */
 	_component: Component | null;
-	/** This Internal's distance from the tree root */
-	_depth: number | null;
 	/** Callbacks to invoke when this internal commits */
 	_commitCallbacks: Array<() => void>;
 	_stateCallbacks: Array<() => void>; // Only class components

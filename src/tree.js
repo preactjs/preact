@@ -82,6 +82,8 @@ export function createInternal(vnode, parentInternal) {
 
 	/** @type {import('./internal').Internal} */
 	const internal = {
+		id:
+			(vnodeId * 1000) + (parentInternal ? (parentInternal.id % 1000) + 1 : 0),
 		type,
 		props,
 		key,
@@ -96,8 +98,7 @@ export function createInternal(vnode, parentInternal) {
 		_children: null,
 		_parent: parentInternal,
 		_vnodeId: vnodeId,
-		_component: null,
-		_depth: parentInternal ? parentInternal._depth + 1 : 0
+		_component: null
 	};
 
 	if (options._internal) options._internal(internal, vnode);

@@ -142,7 +142,7 @@ export function enqueueRender(internal) {
 /** Flush the render queue by rerendering all queued components */
 function processRenderQueue() {
 	while ((len = processRenderQueue._rerenderCount = renderQueue.length)) {
-		renderQueue.sort((a, b) => a._depth - b._depth);
+		renderQueue.sort((a, b) => (a.id % 1000) - (b.id % 1000));
 		while (len--) {
 			renderQueuedInternal(renderQueue.shift());
 		}
