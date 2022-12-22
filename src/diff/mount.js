@@ -1,6 +1,5 @@
 import { applyRef } from './refs';
 import {
-	TYPE_COMPONENT,
 	TYPE_ELEMENT,
 	MODE_HYDRATE,
 	MODE_MUTATIVE_HYDRATE,
@@ -9,7 +8,6 @@ import {
 	TYPE_TEXT,
 	TYPE_CLASS,
 	MODE_ERRORED,
-	TYPE_ROOT,
 	MODE_SVG,
 	DIRTY_BIT
 } from '../constants';
@@ -19,6 +17,7 @@ import { createInternal, getParentContext } from '../tree';
 import options from '../options';
 import { ENABLE_CLASSES } from '../component';
 import { commitQueue } from './commit';
+import { isComponentInternal, isRootInternal } from '../helpers';
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
  * @param {import('../internal').Internal} internal The Internal node to mount
@@ -34,14 +33,11 @@ export function mount(internal, newVNode, parentDom, startDom) {
 	let nextDomSibling, prevStartDom;
 
 	try {
-		if (internal.flags & TYPE_COMPONENT) {
+		if (isComponentInternal(internal)) {
 			// Root nodes signal that an attempt to render into a specific DOM node on
 			// the page. Root nodes can occur anywhere in the tree and not just at the
 			// top.
-			if (
-				internal.flags & TYPE_ROOT &&
-				newVNode.props._parentDom !== parentDom
-			) {
+			if (isRootInternal(internal) && newVNode.props._parentDom !== parentDom) {
 				parentDom = newVNode.props._parentDom;
 				prevStartDom = startDom;
 				startDom = null;
@@ -59,6 +55,7 @@ export function mount(internal, newVNode, parentDom, startDom) {
 				);
 			}
 
+			//
 			if (
 				internal.data._commitCallbacks &&
 				internal.data._commitCallbacks.length
@@ -249,7 +246,7 @@ export function mountChildren(internal, children, parentDom, startDom) {
 
 		newDom = childInternal.data;
 
-		if (childInternal.flags & TYPE_COMPONENT || newDom == startDom) {
+		if (isComponentInternal(childInternal) || newDom == startDom) {
 			// If the child is a Fragment-like or if it is DOM VNode and its _dom
 			// property matches the dom we are diffing (i.e. startDom), just
 			// continue with the mountedNextChild
@@ -290,14 +287,14 @@ export function mountChildren(internal, children, parentDom, startDom) {
 }
 
 /**
- * @param {import('../internal').Internal} internal The component's backing Internal node
+ * @param {import('../internal').ComponentInternal} internal The component's backing Internal node
  * @param {import('../internal').PreactNode} startDom the preceding node
  * @returns {import('../internal').PreactNode} the component's children
  */
 function mountComponent(internal, startDom) {
 	/** @type {import('../internal').Component} */
 	let c;
-	let type = /** @type {import('../internal').ComponentType} */ (internal.type);
+	let type = internal.type;
 	let newProps = internal.props;
 
 	// Necessary for createContext api. Setting this property will pass

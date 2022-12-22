@@ -1,3 +1,6 @@
+const path = require('path');
+const fs = require('fs');
+
 module.exports = function(api) {
 	api.cache(true);
 
@@ -76,11 +79,15 @@ module.exports = function(api) {
 			}
 		]);
 
+		const inlineFile = path.join(__dirname, 'src', 'helpers.js');
+		const inlineCode = fs.readFileSync(inlineFile, 'utf-8');
+
 		plugins.push(
 			'@babel/plugin-proposal-object-rest-spread',
 			'@babel/plugin-transform-react-jsx',
 			'babel-plugin-transform-async-to-promises',
-			['babel-plugin-transform-rename-properties', { rename }]
+			['babel-plugin-transform-rename-properties', { rename }],
+			['babel-plugin-transform-inline-helpers', { inlineCode }]
 		);
 	}
 

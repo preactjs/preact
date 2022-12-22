@@ -1,10 +1,10 @@
 import {
 	DIRTY_BIT,
 	MODE_RERENDERING_ERROR,
-	MODE_PENDING_ERROR,
-	TYPE_COMPONENT
+	MODE_PENDING_ERROR
 } from '../constants';
 import { ENABLE_CLASSES } from '../component';
+import { isComponentInternal } from '../helpers';
 
 /**
  * Find the closest error boundary to a thrown error and call it
@@ -16,7 +16,7 @@ import { ENABLE_CLASSES } from '../component';
 export function _catchError(error, internal) {
 	while ((internal = internal._parent)) {
 		if (
-			internal.flags & TYPE_COMPONENT &&
+			isComponentInternal(internal) &&
 			~internal.flags & MODE_RERENDERING_ERROR
 		) {
 			try {
