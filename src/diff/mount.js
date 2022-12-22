@@ -265,7 +265,7 @@ export function mountChildren(internal, children, parentDom, startDom, refs) {
 
 		if (childInternal.ref) {
 			if (refs) {
-				refs.push({ internal: childInternal });
+				refs.push(childInternal, undefined);
 				childInternal.ref = childVNode.ref;
 			} else {
 				applyRef(

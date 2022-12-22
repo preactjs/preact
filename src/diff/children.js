@@ -75,7 +75,7 @@ export function patchChildren(internal, children, parentDom) {
 			if (!refs) refs = [];
 
 			if (childVNode.ref) {
-				refs.push({ internal: childInternal });
+				refs.push(childInternal, undefined);
 				childInternal.ref = childVNode.ref;
 			}
 
@@ -97,7 +97,7 @@ export function patchChildren(internal, children, parentDom) {
 			if (!refs) refs = [];
 
 			if (childVNode.ref) {
-				refs.push({ internal: childInternal });
+				refs.push(childInternal, undefined);
 				childInternal.ref = childVNode.ref;
 			}
 
@@ -106,7 +106,7 @@ export function patchChildren(internal, children, parentDom) {
 		} else {
 			if (childInternal.ref != childVNode.ref) {
 				if (!refs) refs = [];
-				refs.push({ internal: childInternal, previous: childInternal.ref });
+				refs.push(childInternal, childInternal.ref);
 				childInternal.ref = childVNode.ref;
 			}
 
@@ -177,15 +177,12 @@ export function patchChildren(internal, children, parentDom) {
 
 	// Set refs only after unmount
 	if (refs) {
-		for (i = 0; i < refs.length; i++) {
-			const refObj = refs[i];
-			if (refObj.previous) applyRef(refObj.previous, null, refObj.internal);
-			if (refObj.internal && refObj.internal.ref)
-				applyRef(
-					refObj.internal.ref,
-					refObj.internal._component || refObj.internal.data,
-					refObj.internal
-				);
+		for (i = 0; i < refs.length; i += 2) {
+			const internal = refs[i];
+			const previous = refs[i + 1];
+			if (previous) applyRef(previous, null, internal);
+			if (internal && internal.ref)
+				applyRef(internal.ref, internal._component || internal.data, internal);
 		}
 	}
 }
