@@ -396,7 +396,7 @@ function mountComponent(internal, startDom) {
 	c.state = c._nextState;
 
 	if (c.getChildContext != null) {
-		internal._context = Object.assign({}, context, c.getChildContext());
+		internal.data._context = Object.assign({}, context, c.getChildContext());
 	}
 
 	if (renderResult == null) {
