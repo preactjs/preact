@@ -192,7 +192,7 @@ function patchElement(internal, vnode) {
 }
 
 /**
- * @param {import('../internal').Internal} internal The component's backing Internal node
+ * @param {import('../internal').ComponentInternal} internal The component's backing Internal node
  * @param {import('../internal').VNode} newVNode The new virtual node
  * @returns {import('../internal').ComponentChildren} the component's children
  */

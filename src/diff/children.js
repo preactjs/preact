@@ -1,17 +1,16 @@
 import { applyRef } from './refs';
 import { normalizeToVNode } from '../create-element';
 import {
-	TYPE_COMPONENT,
 	MODE_HYDRATE,
 	MODE_SUSPENDED,
 	EMPTY_ARR,
-	TYPE_DOM,
 	UNDEFINED
 } from '../constants';
 import { mount } from './mount';
 import { patch } from './patch';
 import { unmount } from './unmount';
 import { createInternal, getDomSibling } from '../tree';
+import { isComponentInternal, isDomInternal } from '../helpers';
 
 /**
  * Update an internal with new children.
@@ -98,7 +97,7 @@ export function patchChildren(internal, children, parentDom) {
 			}
 
 			// Perform insert of new dom
-			if (childInternal.flags & TYPE_DOM) {
+			if (isDomInternal(childInternal)) {
 				parentDom.insertBefore(
 					childInternal.data,
 					getDomSibling(internal, skewedIndex)
@@ -132,7 +131,7 @@ export function patchChildren(internal, children, parentDom) {
 			if (matchingIndex == i) break go;
 
 			let nextSibling = getDomSibling(internal, skewedIndex + 1);
-			if (childInternal.flags & TYPE_DOM) {
+			if (isDomInternal(childInternal)) {
 				parentDom.insertBefore(childInternal.data, nextSibling);
 			} else {
 				insertComponentDom(childInternal, nextSibling, parentDom);
@@ -241,7 +240,7 @@ export function insertComponentDom(internal, nextSibling, parentDom) {
 		if (childInternal) {
 			childInternal._parent = internal;
 
-			if (childInternal.flags & TYPE_COMPONENT) {
+			if (isComponentInternal(childInternal)) {
 				insertComponentDom(childInternal, nextSibling, parentDom);
 			} else if (childInternal.data != nextSibling) {
 				parentDom.insertBefore(childInternal.data, nextSibling);

@@ -7,11 +7,16 @@ import {
 	TYPE_ROOT,
 	INHERITED_MODES,
 	TYPE_COMPONENT,
-	TYPE_DOM,
 	MODE_SVG,
 	UNDEFINED
 } from './constants';
 import { enqueueRender } from './component';
+import {
+	isComponentInternal,
+	isDomInternal,
+	isElementInternal,
+	isRootInternal
+} from './helpers';
 
 /**
  * Create an internal tree node
@@ -106,8 +111,8 @@ export function createInternal(vnode, parentInternal) {
 }
 
 const shouldSearchComponent = internal =>
-	internal.flags & TYPE_COMPONENT &&
-	(!(internal.flags & TYPE_ROOT) ||
+	isComponentInternal(internal) &&
+	(!isRootInternal(internal) ||
 		internal.props._parentDom == getParentDom(internal._parent));
 
 /**
@@ -153,7 +158,7 @@ export function getChildDom(internal, offset) {
 	for (; offset < internal._children.length; offset++) {
 		let child = internal._children[offset];
 		if (child != null) {
-			if (child.flags & TYPE_DOM) {
+			if (isDomInternal(child)) {
 				return child.data;
 			}
 
@@ -190,15 +195,15 @@ export function getParentDom(internal) {
 	let parent = internal;
 
 	// if this is a Root internal, return its parent DOM:
-	if (parent.flags & TYPE_ROOT) {
+	if (isRootInternal(parent)) {
 		return parent.props._parentDom;
 	}
 
 	// walk up the tree to find the nearest DOM or Root Internal:
 	while ((parent = parent._parent)) {
-		if (parent.flags & TYPE_ROOT) {
+		if (isRootInternal(parent)) {
 			return parent.props._parentDom;
-		} else if (parent.flags & TYPE_ELEMENT) {
+		} else if (isElementInternal(parent)) {
 			return parent.data;
 		}
 	}
