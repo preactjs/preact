@@ -139,10 +139,13 @@ export function enqueueRender(internal) {
 	}
 }
 
+/** @type {(a: import('./internal').Internal, b: import("./internal").Internal) => number} */
+const sortByDepth = (a, b) => a._depth - b._depth;
+
 /** Flush the render queue by rerendering all queued components */
 function processRenderQueue() {
 	while ((len = processRenderQueue._rerenderCount = renderQueue.length)) {
-		renderQueue.sort((a, b) => a._depth - b._depth);
+		renderQueue.sort(sortByDepth);
 		while (len--) {
 			renderQueuedInternal(renderQueue.shift());
 		}
