@@ -179,8 +179,7 @@ export function patchChildren(internal, children, parentDom) {
 	if (refs) {
 		for (i = 0; i < refs.length; i += 2) {
 			const internal = refs[i];
-			const previous = refs[i + 1];
-			if (previous) applyRef(previous, null, internal);
+			if (refs[i + 1]) applyRef(refs[i + 1], null, internal);
 			if (internal && internal.ref)
 				applyRef(internal.ref, internal._component || internal.data, internal);
 		}
