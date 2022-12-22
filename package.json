@@ -288,7 +288,7 @@
 		"csstype": "^3.0.5",
 		"diff": "^5.0.0",
 		"errorstacks": "^2.4.0",
-		"esbuild": "^0.11.21",
+		"esbuild": "^0.16.10",
 		"eslint": "5.15.1",
 		"eslint-config-developit": "^1.1.1",
 		"eslint-config-prettier": "^6.5.0",
