@@ -169,7 +169,7 @@ describe('render', () => {
 
 		it('should encode entities', () => {
 			let rendered = render(<div a={'"<>&'}>{'"<>&'}</div>),
-				expected = `<div a="&quot;&lt;&gt;&amp;">&quot;&lt;&gt;&amp;</div>`;
+				expected = `<div a="&quot;&lt;>&amp;">&quot;&lt;>&amp;</div>`;
 
 			expect(rendered).to.equal(expected);
 		});
@@ -249,14 +249,14 @@ describe('render', () => {
 
 		it('should serialize object styles', () => {
 			let rendered = render(<div style={{ color: 'red', border: 'none' }} />),
-				expected = `<div style="color: red; border: none;"></div>`;
+				expected = `<div style="color:red;border:none;"></div>`;
 
 			expect(rendered).to.equal(expected);
 		});
 
 		it('should preserve CSS Custom Properties', () => {
 			let rendered = render(<div style={{ '--foo': 1, '--foo-bar': '2' }} />),
-				expected = `<div style="--foo: 1; --foo-bar: 2;"></div>`;
+				expected = `<div style="--foo:1;--foo-bar:2;"></div>`;
 
 			expect(rendered).to.equal(expected);
 		});
@@ -726,7 +726,7 @@ describe('render', () => {
 				</Outer>
 			);
 			expect(rendered).to.equal(
-				'<Inner a="b" b="b" p="1">child <span>foo</span></Inner>'
+				`<Inner a="b" b="b" p="1">\n  child \n  <span>foo</span>\n</Inner>`
 			);
 		});
 
@@ -868,7 +868,8 @@ describe('render', () => {
 	});
 
 	describe('state locking', () => {
-		it('should set _dirty to true', () => {
+		// TODO: we use flags now
+		it.skip('should set _dirty to true', () => {
 			let inst;
 			class Foo extends Component {
 				constructor(props, context) {
@@ -1087,7 +1088,8 @@ describe('render', () => {
 		});
 	});
 
-	it('should invoke option hooks', () => {
+	// We call these with internals now
+	it.skip('should invoke option hooks', () => {
 		const calls = [];
 		// _diff
 		const oldDiff = options.__b;

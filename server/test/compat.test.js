@@ -1,4 +1,4 @@
-import { render } from '../src';
+import render from '../src';
 import { createElement } from 'preact/compat';
 import { expect } from 'chai';
 import './setup';

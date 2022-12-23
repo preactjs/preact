@@ -66,7 +66,7 @@ describe('jsx', () => {
 						"a",
 						"b",
 						"c",
-						"d"
+						"d",
 					]
 				}
 			>
@@ -91,7 +91,7 @@ describe('jsx', () => {
 				b={
 					Array [
 						<c></c>,
-						<d f="g"></d>
+						<d f="g"></d>,
 					]
 				}
 			>

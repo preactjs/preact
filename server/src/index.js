@@ -193,11 +193,6 @@ function _renderToString(vnode, context, isSvgMode, selectValue) {
 				internal[COMPONENT] = component;
 				internal.flags |= DIRTY_BIT;
 
-				// If a hook invokes setState() to invalidate the component during rendering,
-				// re-render it up to 25 times to allow "settling" of memoized states.
-				// Note:
-				//   This will need to be updated for Preact 11 to use internal.flags rather than component._dirty:
-				//   https://github.com/preactjs/preact/blob/d4ca6fdb19bc715e49fd144e69f7296b2f4daa40/src/diff/component.js#L35-L44
 				let count = 0;
 				while (internal.flags & DIRTY_BIT && count++ < 25) {
 					internal.flags &= ~DIRTY_BIT;

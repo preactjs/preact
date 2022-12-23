@@ -19,7 +19,9 @@ describe('shallowRender()', () => {
 				<Test foo={1}>
 					<span>asdf</span>
 				</Test>
-			</section>
+			</section>,
+			null,
+			{ pretty: false, jsx: false }
 		);
 
 		expect(rendered).to.equal(
@@ -27,7 +29,6 @@ describe('shallowRender()', () => {
 		);
 		expect(Test).not.to.have.been.called;
 	});
-
 	it('should always render root component', () => {
 		let Test = spy(({ foo, children }) => (
 			<div bar={foo}>
@@ -40,7 +41,9 @@ describe('shallowRender()', () => {
 		let rendered = shallowRender(
 			<Test foo={1}>
 				<span>asdf</span>
-			</Test>
+			</Test>,
+			null,
+			{ pretty: false, jsx: false }
 		);
 
 		expect(rendered).to.equal(
