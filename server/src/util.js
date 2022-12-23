@@ -1,18 +1,44 @@
 // DOM properties that should NOT have "px" added when numeric
 export const IS_NON_DIMENSIONAL = /acit|ex(?:s|g|n|p|$)|rph|grid|ows|mnc|ntw|ine[ch]|zoo|^ord|^--/i;
+export const VOID_ELEMENTS = /^(area|base|br|col|embed|hr|img|input|link|meta|param|source|track|wbr)$/;
+export const UNSAFE_NAME = /[\s\n\\/='"\0<>]/;
+export const XLINK = /^xlink:?./;
 
-const ENCODED_ENTITIES = /[&<>"]/;
+const ENCODED_ENTITIES = /["&<]/;
 
-export function encodeEntities(input) {
-	const s = String(input);
-	if (!ENCODED_ENTITIES.test(s)) {
-		return s;
+/** @param {string} str */
+export function encodeEntities(str) {
+	// Skip all work for strings with no entities needing encoding:
+	if (str.length === 0 || ENCODED_ENTITIES.test(str) === false) return str;
+
+	let last = 0,
+		i = 0,
+		out = '',
+		ch = '';
+
+	// Seek forward in str until the next entity char:
+	for (; i < str.length; i++) {
+		switch (str.charCodeAt(i)) {
+			case 34:
+				ch = '&quot;';
+				break;
+			case 38:
+				ch = '&amp;';
+				break;
+			case 60:
+				ch = '&lt;';
+				break;
+			default:
+				continue;
+		}
+		// Append skipped/buffered characters and the encoded entity:
+		if (i !== last) out += str.slice(last, i);
+		out += ch;
+		// Start the next seek/buffer after the entity's offset:
+		last = i + 1;
 	}
-	return s
-		.replace(/&/g, '&amp;')
-		.replace(/</g, '&lt;')
-		.replace(/>/g, '&gt;')
-		.replace(/"/g, '&quot;');
+	if (i !== last) out += str.slice(last, i);
+	return out;
 }
 
 export let indent = (s, char) =>
@@ -25,40 +51,30 @@ export let isLargeString = (s, length, ignoreLines) =>
 
 const JS_TO_CSS = {};
 
+const CSS_REGEX = /([A-Z])/g;
 // Convert an Object style to a CSSText string
 export function styleObjToCss(s) {
 	let str = '';
 	for (let prop in s) {
 		let val = s[prop];
 		if (val != null && val !== '') {
-			if (str) str += ' ';
-			// str += jsToCss(prop);
-			str +=
+			const name =
 				prop[0] == '-'
 					? prop
 					: JS_TO_CSS[prop] ||
-					  (JS_TO_CSS[prop] = prop.replace(/([A-Z])/g, '-$1').toLowerCase());
-			str += ': ';
-			str += val;
-			if (typeof val === 'number' && IS_NON_DIMENSIONAL.test(prop) === false) {
-				str += 'px';
-			}
-			str += ';';
+					  (JS_TO_CSS[prop] = prop.replace(CSS_REGEX, '-$1').toLowerCase());
+
+			str =
+				str +
+				name +
+				':' +
+				val +
+				(typeof val === 'number' && IS_NON_DIMENSIONAL.test(prop) === false
+					? 'px;'
+					: ';');
 		}
 	}
 	return str || undefined;
-}
-
-/**
- * Copy all properties from `props` onto `obj`.
- * @param {object} obj Object onto which properties should be copied.
- * @param {object} props Object from which to copy properties.
- * @returns {object}
- * @private
- */
-export function assign(obj, props) {
-	for (let i in props) obj[i] = props[i];
-	return obj;
 }
 
 /**
@@ -75,4 +91,15 @@ export function getChildren(accumulator, children) {
 		accumulator.push(children);
 	}
 	return accumulator;
+}
+
+export function createInternalFromVnode(vnode, context) {
+	return {
+		type: vnode.type,
+		props: vnode.props,
+		data: {
+			_hooks: [],
+			_context: context
+		}
+	};
 }

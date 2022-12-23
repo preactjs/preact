@@ -1,435 +1,369 @@
 import {
+	createInternalFromVnode,
 	encodeEntities,
-	indent,
-	isLargeString,
 	styleObjToCss,
-	assign,
-	getChildren
+	UNSAFE_NAME,
+	XLINK
 } from './util';
-import { renderToJsxString } from './jsx';
-import { options, Fragment } from 'preact';
+import { options, h, Fragment } from 'preact';
+import {
+	COMMIT,
+	COMPONENT,
+	DIFF,
+	DIFFED,
+	DIRTY,
+	NEXT_STATE,
+	RENDER,
+	SKIP_EFFECTS,
+	VNODE
+} from './constants';
+import { DIRTY_BIT } from 'preact/src/constants';
 
 /** @typedef {import('preact').VNode} VNode */
 
-const SHALLOW = { shallow: true };
-
-// components without names, kept as a hash for later comparison to return consistent UnnamedComponentXX names.
-const UNNAMED = [];
-
-const VOID_ELEMENTS = /^(area|base|br|col|embed|hr|img|input|link|meta|param|source|track|wbr)$/;
-
-const UNSAFE_NAME = /[\s\n\\/='"\0<>]/;
-
-const noop = () => {};
-
-/**
- * Only render elements, leaving Components inline as `<ComponentName ... />`.
- *	This method is just a convenience alias for `render(vnode, context, { shallow:true })`
- * @name shallow
- * @function
- * @param {VNode} vnode	JSX VNode to render.
- * @param {Object} [context={}]	Optionally pass an initial context object through the render path.
- */
-let shallowRender = (vnode, context) => renderToString(vnode, context, SHALLOW);
-
 const EMPTY_ARR = [];
+const isArray = Array.isArray;
+const assign = Object.assign;
+
+// Global state for the current render pass
+let beforeDiff, afterDiff, renderHook;
 
 /**
  * Render Preact JSX + Components to an HTML string.
- * @name render
- * @function
- * @param {VNode} vnode	JSX VNode to render.
- * @param {Object} [context={}] Optionally pass an initial context object through the render path.
- * @param {Object} [opts={}] Rendering options
- * @param {Boolean} [opts.shallow=false] If `true`, renders nested Components as HTML elements (`<Foo a="b" />`).
- * @param {Boolean} [opts.xml=false] If `true`, uses self-closing tags for elements without children.
- * @param {Boolean} [opts.pretty=false] If `true`, adds whitespace for readability
- * @param {RegExp|undefined} [opts.voidElements] RegeEx that matches elements that are considered void (self-closing)
+ * @param {VNode} vnode	JSX Element / VNode to render
+ * @param {Object} [context={}] Initial root context object
+ * @returns {string} serialized HTML
  */
-function renderToString(vnode, context, opts) {
-	context = context || {};
-	opts = opts || {};
-
+export default function renderToString(vnode, context) {
 	// Performance optimization: `renderToString` is synchronous and we
 	// therefore don't execute any effects. To do that we pass an empty
 	// array to `options._commit` (`__c`). But we can go one step further
 	// and avoid a lot of dirty checks and allocations by setting
 	// `options._skipEffects` (`__s`) too.
-	const previousSkipEffects = options._skipEffects;
-	options._skipEffects = true;
+	const previousSkipEffects = options[SKIP_EFFECTS];
+	options[SKIP_EFFECTS] = true;
 
-	const res = _renderToString(vnode, context, opts);
+	// store options hooks once before each synchronous render call
+	beforeDiff = options[DIFF];
+	afterDiff = options[DIFFED];
+	renderHook = options[RENDER];
 
-	// options._commit, we don't schedule any effects in this library right now,
-	// so we can pass an empty queue to this hook.
-	if (options._commit) options._commit(vnode, EMPTY_ARR);
-	EMPTY_ARR.length = 0;
-	options._skipEffects = previousSkipEffects;
-	return res;
+	try {
+		return _renderToString(vnode, context || {}, false, undefined);
+	} finally {
+		// options._commit, we don't schedule any effects in this library right now,
+		// so we can pass an empty queue to this hook.
+		if (options[COMMIT]) options[COMMIT](vnode, EMPTY_ARR);
+		options[SKIP_EFFECTS] = previousSkipEffects;
+		EMPTY_ARR.length = 0;
+	}
 }
 
-/** The default export is an alias of `render()`. */
-function _renderToString(vnode, context, opts, inner, isSvgMode, selectValue) {
-	if (vnode == null || typeof vnode === 'boolean') {
+// Installed as setState/forceUpdate for function components
+function markAsDirty() {
+	this.__i.flags |= DIRTY_BIT;
+}
+
+/**
+ * @param {VNode} vnode
+ * @param {Record<string, unknown>} context
+ */
+function renderClassComponent(internal, vnode, context) {
+	let type =
+		/** @type {import("preact").ComponentClass<typeof vnode.props>} */ (vnode.type);
+
+	let c = new type(vnode.props, context);
+
+	internal[COMPONENT] = c;
+	c['__i'] = internal;
+
+	c.props = vnode.props;
+	c.context = context;
+	internal.flags |= DIRTY_BIT;
+
+	if (c.state == null) c.state = {};
+
+	if (c[NEXT_STATE] == null) {
+		c[NEXT_STATE] = c.state;
+	}
+
+	if (type.getDerivedStateFromProps) {
+		c.state = assign(
+			{},
+			c.state,
+			type.getDerivedStateFromProps(c.props, c.state)
+		);
+	} else if (c.componentWillMount) {
+		c.componentWillMount();
+
+		// If the user called setState in cWM we need to flush pending,
+		// state updates. This is the same behaviour in React.
+		c.state = c[NEXT_STATE] !== c.state ? c[NEXT_STATE] : c.state;
+	}
+
+	if (renderHook) renderHook(internal);
+
+	return c.render(c.props, c.state, context);
+}
+
+/**
+ * Recursively render VNodes to HTML.
+ * @param {VNode|any} vnode
+ * @param {any} context
+ * @param {boolean} isSvgMode
+ * @param {any} selectValue
+ * @returns {string}
+ */
+function _renderToString(vnode, context, isSvgMode, selectValue) {
+	// Ignore non-rendered VNodes/values
+	if (vnode == null || vnode === true || vnode === false || vnode === '') {
 		return '';
 	}
 
-	// #text nodes
+	// Text VNodes: escape as HTML
 	if (typeof vnode !== 'object') {
-		return encodeEntities(vnode);
+		if (typeof vnode === 'function') return '';
+		return encodeEntities(vnode + '');
 	}
 
-	let pretty = opts.pretty,
-		indentChar = pretty && typeof pretty === 'string' ? pretty : '\t';
-
-	if (Array.isArray(vnode)) {
+	// Recurse into children / Arrays
+	if (isArray(vnode)) {
 		let rendered = '';
 		for (let i = 0; i < vnode.length; i++) {
-			if (pretty && i > 0) rendered += '\n';
-			rendered += _renderToString(
-				vnode[i],
-				context,
-				opts,
-				inner,
-				isSvgMode,
-				selectValue
-			);
+			let child = vnode[i];
+			if (child == null || typeof child === 'boolean') continue;
+
+			rendered =
+				rendered + _renderToString(child, context, isSvgMode, selectValue);
+
+			if (
+				typeof child === 'string' ||
+				typeof child === 'number' ||
+				typeof child === 'bigint'
+			) {
+				// @ts-ignore manually constructing a Text vnode
+				vnode[i] = h(null, null, child);
+			}
 		}
 		return rendered;
 	}
 
-	let nodeName = vnode.type,
+	// VNodes have {constructor:undefined} to prevent JSON injection:
+	if (vnode.constructor !== undefined) return '';
+
+	const internal = createInternalFromVnode(vnode, context);
+
+	if (beforeDiff) beforeDiff(internal);
+
+	let type = vnode.type,
 		props = vnode.props,
-		isComponent = false;
+		cctx = context,
+		contextType,
+		rendered,
+		component;
 
-	// components
-	if (typeof nodeName === 'function') {
-		isComponent = true;
-		if (opts.shallow && (inner || opts.renderRootComponent === false)) {
-			nodeName = getComponentName(nodeName);
-		} else if (nodeName === Fragment) {
-			const children = [];
-			getChildren(children, vnode.props.children);
-			return _renderToString(
-				children,
-				context,
-				opts,
-				opts.shallowHighOrder !== false,
-				isSvgMode,
-				selectValue
-			);
+	// Invoke rendering on Components
+	let isComponent = typeof type === 'function';
+	if (isComponent) {
+		if (type === Fragment) {
+			rendered = props.children;
 		} else {
-			let rendered;
+			contextType = type.contextType;
+			if (contextType != null) {
+				let provider = context[contextType.__c];
+				cctx = provider ? provider.props.value : contextType.__;
+			}
 
-			vnode.data = {
-				_hooks: [],
-				_context: context
-			};
-
-			let c = (vnode._component = {
-				context,
-				props: vnode.props,
-				// silently drop state updates
-				setState: noop,
-				forceUpdate: noop
-			});
-
-			// options._diff
-			if (options._diff) options._diff(vnode);
-
-			// options._render
-			if (options._render) options._render(vnode);
-
-			if (
-				!nodeName.prototype ||
-				typeof nodeName.prototype.render !== 'function'
-			) {
-				// Necessary for createContext api. Setting this property will pass
-				// the context value as `this.context` just for this component.
-				let cxType = nodeName.contextType;
-				let provider = cxType && context[cxType._id];
-				let cctx =
-					cxType != null
-						? provider
-							? provider.props.value
-							: cxType._defaultValue
-						: context;
-
-				// stateless functional components
-				rendered = nodeName.call(vnode._component, props, cctx);
+			if (type.prototype && typeof type.prototype.render === 'function') {
+				rendered = /**#__NOINLINE__**/ renderClassComponent(
+					internal,
+					vnode,
+					cctx
+				);
+				component = internal[COMPONENT];
 			} else {
-				// class-based components
-				let cxType = nodeName.contextType;
-				let provider = cxType && context[cxType._id];
-				let cctx =
-					cxType != null
-						? provider
-							? provider.props.value
-							: cxType._defaultValue
-						: context;
+				component = {
+					__v: vnode,
+					props,
+					context: cctx,
+					// silently drop state updates
+					setState: markAsDirty,
+					forceUpdate: markAsDirty,
+					__i: internal
+				};
+				internal[COMPONENT] = component;
+				internal.flags |= DIRTY_BIT;
 
-				// c = new nodeName(props, context);
-				c = vnode._component = new nodeName(props, cctx);
-				// turn off stateful re-rendering:
-				c._dirty = true;
-				c.props = props;
-				if (c.state == null) c.state = {};
+				// If a hook invokes setState() to invalidate the component during rendering,
+				// re-render it up to 25 times to allow "settling" of memoized states.
+				// Note:
+				//   This will need to be updated for Preact 11 to use internal.flags rather than component._dirty:
+				//   https://github.com/preactjs/preact/blob/d4ca6fdb19bc715e49fd144e69f7296b2f4daa40/src/diff/component.js#L35-L44
+				let count = 0;
+				while (component[DIRTY] && count++ < 25) {
+					internal.flags &= ~DIRTY_BIT;
 
-				if (c._nextState == null) {
-					c._nextState = c.state;
+					if (renderHook) renderHook(internal);
+
+					rendered = type.call(component, props, cctx);
 				}
-
-				c.context = cctx;
-				if (nodeName.getDerivedStateFromProps)
-					c.state = assign(
-						assign({}, c.state),
-						nodeName.getDerivedStateFromProps(c.props, c.state)
-					);
-				else if (c.componentWillMount) {
-					c.componentWillMount();
-
-					// If the user called setState in cWM we need to flush pending,
-					// state updates. This is the same behaviour in React.
-					c.state = c._nextState !== c.state ? c._nextState : c.state;
-				}
-
-				rendered = c.render(c.props, c.state, c.context);
+				internal.flags |= DIRTY_BIT;
 			}
 
-			if (c.getChildContext) {
-				context = assign(assign({}, context), c.getChildContext());
+			if (component.getChildContext != null) {
+				context = assign({}, context, component.getChildContext());
 			}
-
-			if (options.diffed) options.diffed(vnode);
-			return _renderToString(
-				rendered,
-				context,
-				opts,
-				opts.shallowHighOrder !== false,
-				isSvgMode,
-				selectValue
-			);
 		}
+
+		// When a component returns a Fragment node we flatten it in core, so we
+		// need to mirror that logic here too
+		let isTopLevelFragment =
+			rendered != null && rendered.type === Fragment && rendered.key == null;
+		rendered = isTopLevelFragment ? rendered.props.children : rendered;
+
+		// Recurse into children before invoking the after-diff hook
+		const str = _renderToString(rendered, context, isSvgMode, selectValue);
+
+		if (afterDiff) afterDiff(internal);
+
+		if (options.unmount) options.unmount(internal);
+
+		return str;
 	}
 
-	// render JSX to HTML
-	let s = '<' + nodeName,
-		propChildren,
-		html;
+	// Serialize Element VNodes to HTML
+	let s = '<' + type,
+		html = '',
+		children;
 
-	if (props) {
-		let attrs = Object.keys(props);
+	for (let name in props) {
+		let v = props[name];
 
-		// allow sorting lexicographically for more determinism (useful for tests, such as via preact-jsx-chai)
-		if (opts && opts.sortAttributes === true) attrs.sort();
-
-		for (let i = 0; i < attrs.length; i++) {
-			let name = attrs[i],
-				v = props[name];
-			if (name === 'children') {
-				propChildren = v;
-				continue;
-			}
-
-			if (UNSAFE_NAME.test(name)) continue;
-
-			if (
-				!(opts && opts.allAttributes) &&
-				(name === 'key' ||
-					name === 'ref' ||
-					name === '__self' ||
-					name === '__source')
-			)
+		switch (name) {
+			case 'children':
+				children = v;
 				continue;
 
-			if (name === 'defaultValue') {
-				name = 'value';
-			} else if (name === 'className') {
-				if (typeof props.class !== 'undefined') continue;
-				name = 'class';
-			} else if (isSvgMode && name.match(/^xlink:?./)) {
-				name = name.toLowerCase().replace(/^xlink:?/, 'xlink:');
-			}
+			// VDOM-specific props
+			case 'key':
+			case 'ref':
+			case '__self':
+			case '__source':
+				continue;
 
-			if (name === 'htmlFor') {
-				if (props.for) continue;
+			// prefer for/class over htmlFor/className
+			case 'htmlFor':
+				if ('for' in props) continue;
 				name = 'for';
-			}
+				break;
+			case 'className':
+				if ('class' in props) continue;
+				name = 'class';
+				break;
 
-			if (name === 'style' && v && typeof v === 'object') {
-				v = styleObjToCss(v);
-			}
+			// Form element reflected properties
+			case 'defaultChecked':
+				name = 'checked';
+				break;
+			case 'defaultSelected':
+				name = 'selected';
+				break;
 
-			// always use string values instead of booleans for aria attributes
-			// also see https://github.com/preactjs/preact/pull/2347/files
-			if (name[0] === 'a' && name['1'] === 'r' && typeof v === 'boolean') {
-				v = String(v);
-			}
-
-			let hooked =
-				opts.attributeHook &&
-				opts.attributeHook(name, v, context, opts, isComponent);
-			if (hooked || hooked === '') {
-				s += hooked;
-				continue;
-			}
-
-			if (name === 'dangerouslySetInnerHTML') {
-				html = v && v.__html;
-			} else if (nodeName === 'textarea' && name === 'value') {
-				// <textarea value="a&b"> --> <textarea>a&amp;b</textarea>
-				propChildren = v;
-			} else if ((v || v === 0 || v === '') && typeof v !== 'function') {
-				if (v === true || v === '') {
-					v = name;
-					// in non-xml mode, allow boolean attributes
-					if (!opts || !opts.xml) {
-						s += ' ' + name;
+			// Special value attribute handling
+			case 'defaultValue':
+			case 'value':
+				name = 'value';
+				switch (type) {
+					// <textarea value="a&b"> --> <textarea>a&amp;b</textarea>
+					case 'textarea':
+						children = v;
 						continue;
-					}
-				}
 
-				if (name === 'value') {
-					if (nodeName === 'select') {
+					// <select value> is serialized as a selected attribute on the matching option child
+					case 'select':
 						selectValue = v;
 						continue;
-					} else if (nodeName === 'option' && selectValue == v) {
-						s += ` selected`;
-					}
-				}
-				s += ` ${name}="${encodeEntities(v)}"`;
-			}
-		}
-	}
 
-	// account for >1 multiline attribute
-	if (pretty) {
-		let sub = s.replace(/\n\s*/, ' ');
-		if (sub !== s && !~sub.indexOf('\n')) s = sub;
-		else if (pretty && ~s.indexOf('\n')) s += '\n';
-	}
-
-	s += '>';
-
-	if (UNSAFE_NAME.test(nodeName))
-		throw new Error(`${nodeName} is not a valid HTML tag name in ${s}`);
-
-	let isVoid =
-		VOID_ELEMENTS.test(nodeName) ||
-		(opts.voidElements && opts.voidElements.test(nodeName));
-	let pieces = [];
-
-	let children;
-	if (html) {
-		// if multiline, indent.
-		if (pretty && isLargeString(html)) {
-			html = '\n' + indentChar + indent(html, indentChar);
-		}
-		s += html;
-	} else if (
-		propChildren != null &&
-		getChildren((children = []), propChildren).length
-	) {
-		let hasLarge = pretty && ~s.indexOf('\n');
-		let lastWasText = false;
-
-		for (let i = 0; i < children.length; i++) {
-			let child = children[i];
-
-			if (child != null && child !== false) {
-				let childSvgMode =
-						nodeName === 'svg'
-							? true
-							: nodeName === 'foreignObject'
-							? false
-							: isSvgMode,
-					ret = _renderToString(
-						child,
-						context,
-						opts,
-						true,
-						childSvgMode,
-						selectValue
-					);
-
-				if (pretty && !hasLarge && isLargeString(ret)) hasLarge = true;
-
-				// Skip if we received an empty string
-				if (ret) {
-					if (pretty) {
-						let isText = ret.length > 0 && ret[0] != '<';
-
-						// We merge adjacent text nodes, otherwise each piece would be printed
-						// on a new line.
-						if (lastWasText && isText) {
-							pieces[pieces.length - 1] += ret;
-						} else {
-							pieces.push(ret);
+					// Add a selected attribute to <option> if its value matches the parent <select> value
+					case 'option':
+						if (selectValue == v && !('selected' in props)) {
+							s = s + ' selected';
 						}
-
-						lastWasText = isText;
-					} else {
-						pieces.push(ret);
-					}
+						break;
 				}
-			}
-		}
-		if (pretty && hasLarge) {
-			for (let i = pieces.length; i--; ) {
-				pieces[i] = '\n' + indentChar + indent(pieces[i], indentChar);
-			}
-		}
-	}
-
-	if (pieces.length || html) {
-		s += pieces.join('');
-	} else if (opts && opts.xml) {
-		return s.substring(0, s.length - 1) + ' />';
-	}
-
-	if (isVoid && !children && !html) {
-		s = s.replace(/>$/, ' />');
-	} else {
-		if (pretty && ~s.indexOf('\n')) s += '\n';
-		s += `</${nodeName}>`;
-	}
-
-	return s;
-}
-
-function getComponentName(component) {
-	return (
-		component.displayName ||
-		(component !== Function && component.name) ||
-		getFallbackComponentName(component)
-	);
-}
-
-function getFallbackComponentName(component) {
-	let str = Function.prototype.toString.call(component),
-		name = (str.match(/^\s*function\s+([^( ]+)/) || '')[1];
-	if (!name) {
-		// search for an existing indexed name for the given component:
-		let index = -1;
-		for (let i = UNNAMED.length; i--; ) {
-			if (UNNAMED[i] === component) {
-				index = i;
 				break;
+
+			case 'dangerouslySetInnerHTML':
+				html = v && v.__html;
+				continue;
+
+			// serialize object styles to a CSS string
+			case 'style':
+				if (typeof v === 'object') {
+					v = styleObjToCss(v);
+				}
+				break;
+
+			default:
+				if (isSvgMode && XLINK.test(name)) {
+					name = name.toLowerCase().replace(/^xlink:?/, 'xlink:');
+				} else if (UNSAFE_NAME.test(name)) {
+					continue;
+				} else if (name[0] === 'a' && name[1] === 'r' && v != null) {
+					// serialize boolean aria-xyz attribute values as strings
+					v += '';
+				}
+		}
+
+		// write this attribute to the buffer
+		if (v != null && v !== false && typeof v !== 'function') {
+			if (v === true || v === '') {
+				s = s + ' ' + name;
+			} else {
+				s = s + ' ' + name + '="' + encodeEntities(v + '') + '"';
 			}
 		}
-		// not found, create a new indexed name:
-		if (index < 0) {
-			index = UNNAMED.push(component) - 1;
-		}
-		name = `UnnamedComponent${index}`;
 	}
-	return name;
-}
 
-export {
-	renderToString as render,
-	renderToString as renderToStaticMarkup,
-	renderToString,
-	renderToJsxString,
-	shallowRender
-};
+	if (UNSAFE_NAME.test(type)) {
+		throw new Error(`${type} is not a valid HTML tag name in ${s}>`);
+	}
+
+	if (html) {
+		// dangerouslySetInnerHTML defined this node's contents
+	} else if (typeof children === 'string') {
+		// single text child
+		html = encodeEntities(children);
+	} else if (children != null && children !== false && children !== true) {
+		// recurse into this element VNode's children
+		let childSvgMode =
+			type === 'svg' || (type !== 'foreignObject' && isSvgMode);
+		html = _renderToString(children, context, childSvgMode, selectValue);
+	}
+
+	if (afterDiff) afterDiff(internal);
+	if (options.unmount) options.unmount(internal);
+
+	// Emit self-closing tag for empty void elements:
+	if (!html) {
+		switch (type) {
+			case 'area':
+			case 'base':
+			case 'br':
+			case 'col':
+			case 'embed':
+			case 'hr':
+			case 'img':
+			case 'input':
+			case 'link':
+			case 'meta':
+			case 'param':
+			case 'source':
+			case 'track':
+			case 'wbr':
+				return s + ' />';
+		}
+	}
+
+	return s + '>' + html + '</' + type + '>';
+}
