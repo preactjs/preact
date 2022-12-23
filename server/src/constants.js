@@ -9,6 +9,5 @@ export const SKIP_EFFECTS = '__s';
 export const COMPONENT = '__c';
 
 // Component properties
-export const VNODE = '__v';
 export const DIRTY = '__d';
 export const NEXT_STATE = '__s';

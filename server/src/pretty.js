@@ -7,10 +7,12 @@ import {
 	createComponent,
 	UNSAFE_NAME,
 	XLINK,
-	VOID_ELEMENTS
+	VOID_ELEMENTS,
+	createInternalFromVnode
 } from './util';
 import { COMMIT, DIFF, DIFFED, RENDER, SKIP_EFFECTS } from './constants';
 import { options, Fragment } from 'preact';
+import { DIRTY_BIT } from '../../src/constants';
 
 /** @typedef {import('preact').VNode} VNode */
 
@@ -93,7 +95,9 @@ function _renderToStringPretty(
 	// VNodes have {constructor:undefined} to prevent JSON injection:
 	if (vnode.constructor !== undefined) return '';
 
-	if (options[DIFF]) options[DIFF](vnode);
+	const internal = createInternalFromVnode(vnode, context);
+
+	if (options[DIFF]) options[DIFF](internal);
 
 	let nodeName = vnode.type,
 		props = vnode.props,
@@ -117,8 +121,9 @@ function _renderToStringPretty(
 			);
 		} else {
 			let rendered;
+			internal.flags |= DIRTY_BIT;
 
-			let c = (vnode.__c = createComponent(vnode, context));
+			let c = (internal.__c = createComponent(internal, vnode, context));
 
 			let renderHook = options[RENDER];
 
@@ -140,19 +145,20 @@ function _renderToStringPretty(
 				//   https://github.com/preactjs/preact/blob/d4ca6fdb19bc715e49fd144e69f7296b2f4daa40/src/diff/component.js#L35-L44
 				let count = 0;
 				while (c.__d && count++ < 25) {
-					c.__d = false;
+					internal.flags &= ~DIRTY_BIT;
 
-					if (renderHook) renderHook(vnode);
+					if (renderHook) renderHook(internal);
 
 					// stateless functional components
-					rendered = nodeName.call(vnode.__c, props, cctx);
+					rendered = nodeName.call(internal.__c, props, cctx);
 				}
+				internal.flags |= DIRTY_BIT;
 			} else {
 				// c = new nodeName(props, context);
-				c = vnode.__c = new nodeName(props, cctx);
-				c.__v = vnode;
+				c = internal.__c = new nodeName(props, cctx);
+				c.__i = internal;
 				// turn off stateful re-rendering:
-				c._dirty = c.__d = true;
+				internal.flags |= DIRTY_BIT;
 				c.props = props;
 				if (c.state == null) c.state = {};
 
@@ -180,7 +186,7 @@ function _renderToStringPretty(
 							: c.state;
 				}
 
-				if (renderHook) renderHook(vnode);
+				if (renderHook) renderHook(internal);
 
 				rendered = c.render(c.props, c.state, c.context);
 			}
@@ -198,7 +204,7 @@ function _renderToStringPretty(
 				selectValue
 			);
 
-			if (options[DIFFED]) options[DIFFED](vnode);
+			if (options[DIFFED]) options[DIFFED](internal);
 
 			return res;
 		}

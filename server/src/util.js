@@ -103,3 +103,18 @@ export function createInternalFromVnode(vnode, context) {
 		}
 	};
 }
+
+function markAsDirty() {
+	this.__d = true;
+}
+
+export function createComponent(internal, vnode, context) {
+	return {
+		__i: internal,
+		context,
+		props: vnode.props,
+		// silently drop state updates
+		setState: markAsDirty,
+		forceUpdate: markAsDirty
+	};
+}

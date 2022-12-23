@@ -6,6 +6,7 @@ import {
 	XLINK
 } from './util';
 import { options, h, Fragment } from 'preact';
+
 import {
 	COMMIT,
 	COMPONENT,
@@ -14,10 +15,9 @@ import {
 	DIRTY,
 	NEXT_STATE,
 	RENDER,
-	SKIP_EFFECTS,
-	VNODE
+	SKIP_EFFECTS
 } from './constants';
-import { DIRTY_BIT } from 'preact/src/constants';
+import { DIRTY_BIT } from '../../src/constants';
 
 /** @typedef {import('preact').VNode} VNode */
 
@@ -75,7 +75,7 @@ function renderClassComponent(internal, vnode, context) {
 	let c = new type(vnode.props, context);
 
 	internal[COMPONENT] = c;
-	c['__i'] = internal;
+	c.__i = internal;
 
 	c.props = vnode.props;
 	c.context = context;
