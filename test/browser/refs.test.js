@@ -415,8 +415,7 @@ describe('refs', () => {
 		expect(input.value).to.equal('foo');
 	});
 
-	// @TODO: re-enable these tests when we add a ref queue
-	it.skip('should correctly set nested child refs', () => {
+	it('should correctly set nested child refs', () => {
 		const ref = createRef();
 		const App = ({ open }) =>
 			open ? (
@@ -436,7 +435,7 @@ describe('refs', () => {
 		expect(ref.current).to.not.be.null;
 	});
 
-	it.skip('should correctly set nested child function refs', () => {
+	it('should correctly set nested child function refs', () => {
 		const ref = sinon.spy();
 		const App = ({ open }) =>
 			open ? (
@@ -457,7 +456,7 @@ describe('refs', () => {
 		ref.resetHistory();
 
 		render(<App open />, scratch);
-		expect(ref).to.have.been.calledOnce.and.calledWith(
+		expect(ref).to.have.been.calledTwice.and.calledWith(
 			scratch.firstElementChild.firstElementChild
 		);
 	});
@@ -537,7 +536,7 @@ describe('refs', () => {
 		expect(ref.current.innerHTML).to.be.equal('Foo');
 	});
 
-	it.skip('should not remove refs for memoized components keyed', () => {
+	it('should not remove refs for memoized components keyed', () => {
 		const ref = createRef();
 		const element = <div ref={ref}>hey</div>;
 		function App(props) {
@@ -567,8 +566,7 @@ describe('refs', () => {
 		expect(ref.current).to.equal(scratch.firstChild.firstChild);
 	});
 
-	// TODO
-	it.skip('should properly call null for memoized components keyed', () => {
+	it('should properly call null for memoized components keyed', () => {
 		const calls = [];
 		const element = <div ref={x => calls.push(x)}>hey</div>;
 		function App(props) {
@@ -576,13 +574,15 @@ describe('refs', () => {
 		}
 
 		render(<App count={0} />, scratch);
+		const firstChildAfterFirstRender = scratch.firstChild.firstChild;
 		render(<App count={1} />, scratch);
+		const firstChildAfterSecondRender = scratch.firstChild.firstChild;
 		render(<App count={2} />, scratch);
 		expect(calls.length).to.equal(5);
 		expect(calls).to.deep.equal([
-			scratch.firstChild.firstChild,
+			firstChildAfterFirstRender,
 			null,
-			scratch.firstChild.firstChild,
+			firstChildAfterSecondRender,
 			null,
 			scratch.firstChild.firstChild
 		]);

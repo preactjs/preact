@@ -136,7 +136,6 @@ export interface Internal<P = {}> {
 	props: (P & { children: ComponentChildren }) | string | number;
 	key: any;
 	ref: Ref<any> | null;
-	_prevRef: Ref<any> | null;
 
 	/** Bitfield containing information about the Internal or its component. */
 	flags: number;

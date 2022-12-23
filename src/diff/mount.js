@@ -27,7 +27,7 @@ import { commitQueue } from './commit';
  * @param {import('../internal').PreactNode} startDom
  * @returns {import('../internal').PreactNode | null} pointer to the next DOM node to be hydrated (or null)
  */
-export function mount(internal, newVNode, parentDom, startDom) {
+export function mount(internal, newVNode, parentDom, startDom, refs) {
 	if (options._diff) options._diff(internal, newVNode);
 
 	/** @type {import('../internal').PreactNode} */
@@ -55,7 +55,8 @@ export function mount(internal, newVNode, parentDom, startDom) {
 					internal,
 					renderResult,
 					parentDom,
-					startDom
+					startDom,
+					refs
 				);
 			}
 
@@ -72,7 +73,7 @@ export function mount(internal, newVNode, parentDom, startDom) {
 					? startDom
 					: null;
 
-			nextDomSibling = mountElement(internal, hydrateDom);
+			nextDomSibling = mountElement(internal, hydrateDom, refs);
 		}
 
 		if (options.diffed) options.diffed(internal);
@@ -100,7 +101,7 @@ export function mount(internal, newVNode, parentDom, startDom) {
  * @param {import('../internal').PreactNode} dom A DOM node to attempt to re-use during hydration
  * @returns {import('../internal').PreactNode}
  */
-function mountElement(internal, dom) {
+function mountElement(internal, dom, refs) {
 	let newProps = internal.props;
 	let nodeType = internal.type;
 	let flags = internal.flags;
@@ -202,7 +203,8 @@ function mountElement(internal, dom) {
 				internal,
 				Array.isArray(newChildren) ? newChildren : [newChildren],
 				dom,
-				isNew ? null : dom.firstChild
+				isNew ? null : dom.firstChild,
+				refs
 			);
 		}
 
@@ -223,7 +225,7 @@ function mountElement(internal, dom) {
  * @param {import('../internal').PreactElement} parentDom The element into which this subtree is rendered
  * @param {import('../internal').PreactNode} startDom
  */
-export function mountChildren(internal, children, parentDom, startDom) {
+export function mountChildren(internal, children, parentDom, startDom, refs) {
 	let internalChildren = (internal._children = []),
 		i,
 		childVNode,
@@ -262,11 +264,16 @@ export function mountChildren(internal, children, parentDom, startDom) {
 		}
 
 		if (childInternal.ref) {
-			applyRef(
-				childInternal.ref,
-				childInternal._component || newDom,
-				childInternal
-			);
+			if (refs) {
+				refs.push(childInternal, undefined);
+				childInternal.ref = childVNode.ref;
+			} else {
+				applyRef(
+					childInternal.ref,
+					childInternal._component || newDom,
+					childInternal
+				);
+			}
 		}
 	}
 
