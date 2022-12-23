@@ -1,3 +1,5 @@
+import { DIRTY_BIT } from '../../src/constants';
+
 // DOM properties that should NOT have "px" added when numeric
 export const IS_NON_DIMENSIONAL = /acit|ex(?:s|g|n|p|$)|rph|grid|ows|mnc|ntw|ine[ch]|zoo|^ord|^--/i;
 export const VOID_ELEMENTS = /^(area|base|br|col|embed|hr|img|input|link|meta|param|source|track|wbr)$/;
@@ -97,6 +99,7 @@ export function createInternalFromVnode(vnode, context) {
 	return {
 		type: vnode.type,
 		props: vnode.props,
+		rerender: markAsDirtyInternal,
 		data: {
 			_hooks: [],
 			_context: context
@@ -104,8 +107,12 @@ export function createInternalFromVnode(vnode, context) {
 	};
 }
 
-function markAsDirty() {
-	this.__d = true;
+function markAsDirtyInternal() {
+	this.flags |= DIRTY_BIT;
+}
+
+function markAsDirtyComponent() {
+	this.__i.flags |= DIRTY_BIT;
 }
 
 export function createComponent(internal, vnode, context) {
@@ -114,7 +121,7 @@ export function createComponent(internal, vnode, context) {
 		context,
 		props: vnode.props,
 		// silently drop state updates
-		setState: markAsDirty,
-		forceUpdate: markAsDirty
+		setState: markAsDirtyComponent,
+		forceUpdate: markAsDirtyComponent
 	};
 }

@@ -1,6 +1,6 @@
-import { render as basicRender } from '../src';
-import { renderToJsxString as render } from '../src/jsx';
-import { createElement, Fragment } from 'preact';
+import basicRender from '../src';
+import { render } from '../src/jsx';
+import { h, Fragment } from 'preact';
 import { expect } from 'chai';
 import { dedent } from './utils';
 import './setup';
@@ -123,7 +123,7 @@ describe('pretty', () => {
 			<div>hello{' '} <b /></div>
 		)).to.equal(dedent`
 			<div>
-				hello  
+				hello
 				<b></b>
 			</div>
 		`);
@@ -133,7 +133,7 @@ describe('pretty', () => {
 			<div>hello{' '} <b />{'a'}{'b'}</div>
 		)).to.equal(dedent`
 			<div>
-				hello  
+				hello
 				<b></b>
 				ab
 			</div>
@@ -146,7 +146,7 @@ describe('pretty', () => {
 			<div><Fragment>foo</Fragment>bar{' '} <b /></div>
 		)).to.equal(dedent`
 			<div>
-				foobar  
+				foobar
 				<b></b>
 			</div>
 		`);
@@ -174,7 +174,7 @@ describe('pretty', () => {
 			)
 		).to.equal(dedent`
 			<p>
-				a 
+				a
 				<a>b</a>
 			</p>
 		`);
@@ -201,7 +201,7 @@ describe('pretty', () => {
 			)
 		).to.equal(dedent`
 			<p>
-				a\ 
+				a\
 				<a>b</a>
 			</p>
 		`);
@@ -219,7 +219,7 @@ describe('pretty', () => {
 		).to.equal(dedent`
 			<p>
 				<b></b>
-				\ a\ 
+				\ a\
 			</p>
 		`);
 	});

@@ -12,7 +12,6 @@ import {
 	COMPONENT,
 	DIFF,
 	DIFFED,
-	DIRTY,
 	NEXT_STATE,
 	RENDER,
 	SKIP_EFFECTS
@@ -200,7 +199,7 @@ function _renderToString(vnode, context, isSvgMode, selectValue) {
 				//   This will need to be updated for Preact 11 to use internal.flags rather than component._dirty:
 				//   https://github.com/preactjs/preact/blob/d4ca6fdb19bc715e49fd144e69f7296b2f4daa40/src/diff/component.js#L35-L44
 				let count = 0;
-				while (component[DIRTY] && count++ < 25) {
+				while (internal.flags & DIRTY_BIT && count++ < 25) {
 					internal.flags &= ~DIRTY_BIT;
 
 					if (renderHook) renderHook(internal);
