@@ -1,5 +1,5 @@
-import { shallowRender } from '../src';
-import { createElement, Fragment } from 'preact';
+import { shallowRender } from '../src/jsx';
+import { h, Fragment } from 'preact';
 import { expect } from 'chai';
 import { spy } from 'sinon';
 import './setup';

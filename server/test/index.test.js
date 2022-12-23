@@ -1,32 +1,22 @@
-import {
-	render,
-	shallowRender,
-	renderToString,
-	renderToStaticMarkup,
-	renderToString as _renderToString
-} from '../src';
+import renderToString from '../src';
+import { default as renderToStringPretty, shallowRender } from '../src/jsx';
 import { expect } from 'chai';
 import './setup';
 
 describe('render-to-string', () => {
 	describe('exports', () => {
-		it('exposes render as a named export', () => {
-			expect(render).to.be.a('function');
-			expect(render).to.equal(renderToString);
+		it('exposes renderToString as default', () => {
+			expect(renderToString).to.be.a('function');
 		});
+	});
+});
 
-		it('exposes renderToString as a named export', () => {
-			expect(_renderToString).to.be.a('function');
-			expect(_renderToString).to.equal(renderToString);
-		});
+describe('render-to-string/jsx', () => {
+	it('exposes renderToStringPretty as default export', () => {
+		expect(renderToStringPretty).to.be.a('function');
+	});
 
-		it('exposes renderToStaticMarkup as a named export', () => {
-			expect(renderToStaticMarkup).to.be.a('function');
-			expect(renderToStaticMarkup).to.equal(renderToStaticMarkup);
-		});
-
-		it('exposes shallowRender as a named export', () => {
-			expect(shallowRender).to.be.a('function');
-		});
+	it('exposes shallowRender as a named export', () => {
+		expect(shallowRender).to.be.a('function');
 	});
 });

@@ -1,16 +1,20 @@
-import { render, shallowRender } from '../src';
-import {
-	createElement,
-	createElement as h,
-	Component,
-	createContext,
-	Fragment,
-	options
-} from 'preact';
+import render from '../src';
+import renderToStringPretty from '../src/pretty';
+import renderToStringJSX from '../src/jsx';
+import { h, Component, createContext, Fragment, options } from 'preact';
 import { useState, useContext, useEffect, useLayoutEffect } from 'preact/hooks';
 import { expect } from 'chai';
 import { spy, stub, match } from 'sinon';
 import './setup';
+
+function shallowRender(vnode) {
+	return renderToStringJSX(vnode, context, {
+		jsx: false,
+		xml: false,
+		pretty: '  ',
+		shallow: true
+	});
+}
 
 describe('render', () => {
 	describe('Basic JSX', () => {
@@ -215,7 +219,7 @@ describe('render', () => {
 		});
 
 		it('should self-close custom void elements', () => {
-			let rendered = render(
+			let rendered = renderToStringPretty(
 					<div>
 						<hello-world />
 					</div>,
@@ -745,10 +749,10 @@ describe('render', () => {
 			let rendered = render(<Outer />);
 			expect(rendered).to.equal('<div>hi</div>');
 
-			rendered = render(<Outer />, null, { shallow: true });
+			rendered = renderToStringPretty(<Outer />, null, { shallow: true });
 			expect(rendered, '{shallow:true}').to.equal('<Middle></Middle>');
 
-			rendered = render(<Outer />, null, {
+			rendered = renderToStringPretty(<Outer />, null, {
 				shallow: true,
 				shallowHighOrder: false
 			});
@@ -821,15 +825,19 @@ describe('render', () => {
 		});
 
 		it('should sort attributes lexicographically if enabled', () => {
-			let rendered = render(<div b1="b1" c="c" a="a" b="b" />, null, {
-				sortAttributes: true
-			});
+			let rendered = renderToStringPretty(
+				<div b1="b1" c="c" a="a" b="b" />,
+				null,
+				{
+					sortAttributes: true
+				}
+			);
 			expect(rendered).to.equal('<div a="a" b="b" b1="b1" c="c"></div>');
 		});
 	});
 
 	describe('xml:true', () => {
-		let renderXml = jsx => render(jsx, null, { xml: true });
+		let renderXml = jsx => renderToStringPretty(jsx, null, { xml: true });
 
 		it('should render end-tags', () => {
 			expect(renderXml(<div />)).to.equal(`<div />`);
@@ -931,7 +939,7 @@ describe('render', () => {
 		});
 
 		it('should indent Fragment children when pretty printing', () => {
-			let html = render(
+			let html = renderToStringPretty(
 				<div>
 					<Fragment>
 						<div>foo</div>
