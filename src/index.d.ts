@@ -1,6 +1,5 @@
 export as namespace preact;
 
-import { Internal } from './internal';
 import { JSXInternal } from './jsx';
 
 export import JSX = JSXInternal;
@@ -307,9 +306,9 @@ export interface Options {
 	/** Attach a hook that is invoked whenever a VNode is created. */
 	vnode?(vnode: VNode): void;
 	/** Attach a hook that is invoked immediately before a vnode is unmounted. */
-	unmount?(internal: Internal): void;
+	unmount?(vnode: VNode): void;
 	/** Attach a hook that is invoked after a vnode has rendered. */
-	diffed?(internal: Internal): void;
+	diffed?(vnode: VNode): void;
 	event?(e: Event): any;
 	requestAnimationFrame?(callback: () => void): void;
 	debounceRendering?(cb: () => void): void;
