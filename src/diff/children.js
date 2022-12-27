@@ -1,7 +1,7 @@
-import { diff, unmount, applyRef } from './index';
-import { createVNode, Fragment } from '../create-element';
-import { EMPTY_OBJ, EMPTY_ARR } from '../constants';
-import { getDomSibling } from '../component';
+import { diff, unmount, applyRef } from './index.js';
+import { createVNode, Fragment } from '../create-element.js';
+import { EMPTY_OBJ, EMPTY_ARR } from '../constants.js';
+import { getDomSibling } from '../component.js';
 
 /**
  * Diff the children of a virtual node

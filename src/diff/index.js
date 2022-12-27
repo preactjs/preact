@@ -1,10 +1,10 @@
-import { EMPTY_OBJ } from '../constants';
-import { Component, getDomSibling } from '../component';
-import { Fragment } from '../create-element';
-import { diffChildren } from './children';
-import { diffProps, setProperty } from './props';
-import { assign, removeNode, slice } from '../util';
-import options from '../options';
+import { EMPTY_OBJ } from '../constants.js';
+import { Component, getDomSibling } from '../component.js';
+import { Fragment } from '../create-element.js';
+import { diffChildren } from './children.js';
+import { diffProps, setProperty } from './props.js';
+import { assign, removeNode, slice } from '../util.js';
+import options from '../options.js';
 
 /**
  * Diff two virtual nodes and apply proper changes to the DOM

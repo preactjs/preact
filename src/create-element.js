@@ -1,5 +1,5 @@
-import { slice } from './util';
-import options from './options';
+import { slice } from './util.js';
+import options from './options.js';
 
 let vnodeId = 0;
 

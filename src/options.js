@@ -1,4 +1,4 @@
-import { _catchError } from './diff/catch-error';
+import { _catchError } from './diff/catch-error.js';
 
 /**
  * The `option` object can potentially contain callback functions

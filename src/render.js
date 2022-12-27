@@ -1,8 +1,8 @@
-import { EMPTY_OBJ } from './constants';
-import { commitRoot, diff } from './diff/index';
-import { createElement, Fragment } from './create-element';
-import options from './options';
-import { slice } from './util';
+import { EMPTY_OBJ } from './constants.js';
+import { commitRoot, diff } from './diff/index.js';
+import { createElement, Fragment } from './create-element.js';
+import options from './options.js';
+import { slice } from './util.js';
 
 /**
  * Render a Preact virtual node into a DOM element

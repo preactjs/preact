@@ -1,7 +1,7 @@
-import { assign } from './util';
-import { diff, commitRoot } from './diff/index';
-import options from './options';
-import { Fragment } from './create-element';
+import { assign } from './util.js';
+import { diff, commitRoot } from './diff/index.js';
+import options from './options.js';
+import { Fragment } from './create-element.js';
 
 /**
  * Base Component class. Provides `setState()` and `forceUpdate()`, which

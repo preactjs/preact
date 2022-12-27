@@ -1,5 +1,5 @@
-import { assign, slice } from './util';
-import { createVNode } from './create-element';
+import { assign, slice } from './util.js';
+import { createVNode } from './create-element.js';
 
 /**
  * Clones the given VNode, optionally adding attributes/props and replacing its children.

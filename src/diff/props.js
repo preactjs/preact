@@ -1,5 +1,5 @@
-import { IS_NON_DIMENSIONAL } from '../constants';
-import options from '../options';
+import { IS_NON_DIMENSIONAL } from '../constants.js';
+import options from '../options.js';
 
 /**
  * Diff the old and new properties of a VNode and apply changes to the DOM node
