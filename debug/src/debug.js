@@ -72,7 +72,7 @@ export function initDebug() {
 			errorInfo.componentStack = getOwnerStack(vnode);
 			oldCatchError(error, vnode, oldVNode, errorInfo);
 
-			// when an error was handled by an ErrorBoundary we will nontheless emit an error
+			// when an error was handled by an ErrorBoundary we will nonetheless emit an error
 			// event on the window object. This is to make up for react compatibility in dev mode
 			// and thus make the Next.js dev overlay work.
 			if (typeof error.then != 'function') {
