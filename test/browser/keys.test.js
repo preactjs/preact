@@ -92,6 +92,32 @@ describe('keys', () => {
 		expect(Foo.args[0][0]).to.deep.equal({});
 	});
 
+	it.only('should update in-place keyed DOM nodes', () => {
+		render(
+			<ul>
+				<li key="0">a</li>
+				<li key="1">b</li>
+				<li key="2">c</li>
+			</ul>,
+			scratch
+		);
+		expect(scratch.innerHTML).to.equal(
+			'<ul><li>a</li><li>b</li><li>c</li></ul>'
+		);
+
+		render(
+			<ul>
+				<li key="0">x</li>
+				<li key="1">y</li>
+				<li key="2">z</li>
+			</ul>,
+			scratch
+		);
+		expect(scratch.innerHTML).to.equal(
+			'<ul><li>x</li><li>y</li><li>z</li></ul>'
+		);
+	});
+
 	// See preactjs/preact-compat#21
 	it('should remove orphaned keyed nodes', () => {
 		render(

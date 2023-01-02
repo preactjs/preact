@@ -151,6 +151,8 @@ export interface Internal<P = {}> {
 	_child: Internal | null;
 	/** next sibling Internal node */
 	_next: Internal | null;
+	/** offset within parent's children, accounting for holes */
+	_index: number;
 	/** most recent vnode ID */
 	_vnodeId: number;
 	/**

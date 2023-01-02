@@ -2,11 +2,13 @@ import { applyRef } from './refs';
 import { normalizeToVNode } from '../create-element';
 import {
 	TYPE_COMPONENT,
+	TYPE_TEXT,
 	MODE_HYDRATE,
 	MODE_SUSPENDED,
 	EMPTY_ARR,
 	TYPE_DOM,
-	UNDEFINED
+	UNDEFINED,
+	TYPE_ELEMENT
 } from '../constants';
 import { mount } from './mount';
 import { patch } from './patch';
@@ -14,11 +16,125 @@ import { unmount } from './unmount';
 import { createInternal, getDomSibling } from '../tree';
 
 /**
+ * Scenarios:
+ *
+ * 1. Unchanged:  no ordering changes, walk new+old children and update Internals in-place
+ * 2. All removed:  walk old child Internals and unmount
+ * 3. All added:  walk over new child vnodes and create Internals, assign `.next`, mount
+ */
+
+/** @typedef {import('../internal').Internal} Internal */
+/** @typedef {import('../internal').VNode} VNode */
+
+/**
  * Update an internal with new children.
- * @param {import('../internal').Internal} internal The internal whose children should be patched
+ * @param {Internal} parentInternal The internal whose children should be patched
  * @param {import('../internal').ComponentChild[]} children The new children, represented as VNodes
  * @param {import('../internal').PreactElement} parentDom The element into which this subtree is rendered
  */
+export function patchChildren(parentInternal, children, parentDom) {
+	/** @type {Internal} */
+	let newTail;
+	let oldHead = parentInternal._child;
+	let skewedOldHead = oldHead;
+
+	for (let index = 0; index < children.length; index++) {
+		const vnode = children[index];
+
+		// holes get accounted for in the index property:
+		if (vnode == null || vnode === true || vnode === false) continue;
+
+		let type = null;
+		let typeFlag = 0;
+		let key;
+		let normalizedVNode = /** @type {VNode | string} */ (vnode);
+
+		// text VNodes (strings, numbers, bigints, etc):
+		if (typeof vnode !== 'object') {
+			typeFlag = TYPE_TEXT;
+			normalizedVNode += '';
+		} else {
+			type = vnode.type;
+			typeFlag = typeof type === 'function' ? TYPE_COMPONENT : TYPE_ELEMENT;
+			key = vnode.key;
+		}
+
+		/** @type {Internal?} */
+		let internal;
+
+		// seek forward through the unsorted Internals list, starting at the skewed head.
+		// if we reach the end of the list, wrap around until we hit the skewed head again.
+		let match = skewedOldHead;
+
+		/** @type {Internal?} */
+		while (match) {
+			const flags = match.flags;
+			const next = match._next;
+
+			if ((flags & typeFlag) !== 0 && match.type === type && match.key == key) {
+				internal = match;
+
+				// if we are at the old head, bump it forward and reset skew:
+				if (match === oldHead) oldHead = skewedOldHead = next;
+				// otherwise just bump the skewed head:
+				else skewedOldHead = next || oldHead;
+
+				break;
+			}
+
+			// we've visited all candidates, bail out (no match):
+			if (next === skewedOldHead) break;
+			// advance forward one or wrap around:
+			match = next || oldHead;
+		}
+
+		// no match, create a new Internal:
+		if (!internal) {
+			internal = createInternal(normalizedVNode, parentInternal);
+		}
+
+		// move into place in new list
+		if (newTail) newTail._next = internal;
+		else parentInternal._child = internal;
+		newTail = internal;
+	}
+
+	let childInternal = parentInternal._child;
+	// walk over the now sorted Internal children and insert/mount/update
+	for (let index = 0; index < children.length; index++) {
+		const vnode = children[index];
+
+		// account for holes by incrementing the index:
+		if (vnode == null || vnode === true || vnode === false) continue;
+
+		let prevIndex = childInternal._index;
+		childInternal._index = index;
+		if (prevIndex === -1) {
+			// insert
+			mount(childInternal, parentDom, getDomSibling(childInternal));
+		} else {
+			// update (or move+update)
+			patch(childInternal, vnode, parentDom);
+			if (prevIndex !== index) {
+				// move
+				insertComponentDom(
+					childInternal,
+					getDomSibling(childInternal),
+					parentDom
+				);
+			}
+		}
+
+		childInternal = childInternal._next;
+	}
+
+	// walk over the unused children and unmount:
+	while (oldHead) {
+		unmount(oldHead, parentInternal, 0);
+		oldHead = oldHead._next;
+	}
+}
+/*
 export function patchChildren(internal, children, parentDom) {
 	// let oldChildren =
 	// 	(internal._children && internal._children.slice()) || EMPTY_ARR;
@@ -26,16 +142,17 @@ export function patchChildren(internal, children, parentDom) {
 	// let oldChildrenLength = oldChildren.length;
 	// let remainingOldChildren = oldChildrenLength;
 
+
 	let skew = 0;
 	let i;
 
-	/** @type {import('../internal').Internal} */
+	/** @type {import('../internal').Internal} *\/
 	let childInternal;
 
-	/** @type {import('../internal').ComponentChild} */
+	/** @type {import('../internal').ComponentChild} *\/
 	let childVNode;
 
-	/** @type {import('../internal').Internal[]} */
+	/** @type {import('../internal').Internal[]} *\/
 	const newChildren = [];
 
 	for (i = 0; i < children.length; i++) {
@@ -170,6 +287,7 @@ export function patchChildren(internal, children, parentDom) {
 		}
 	}
 }
+*/
 
 /**
  * @param {import('../internal').VNode | string} childVNode
@@ -178,6 +296,7 @@ export function patchChildren(internal, children, parentDom) {
  * @param {number} remainingOldChildren
  * @returns {number}
  */
+/*
 function findMatchingIndex(
 	childVNode,
 	oldChildren,
@@ -225,6 +344,7 @@ function findMatchingIndex(
 
 	return match;
 }
+*/
 
 /**
  * @param {import('../internal').Internal} internal

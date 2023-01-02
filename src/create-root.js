@@ -49,7 +49,7 @@ export function createRoot(parentDom) {
 
 			rootInternal._context = {};
 
-			mount(rootInternal, vnode, parentDom, firstChild);
+			mount(rootInternal, parentDom, firstChild);
 		}
 
 		// Flush all queued effects
