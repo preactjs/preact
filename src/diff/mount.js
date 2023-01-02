@@ -242,7 +242,6 @@ export function mountChildren(parentInternal, children, parentDom, startDom) {
 		const normalizedVNode = typeof vnode === 'object' ? vnode : String(vnode);
 
 		internal = createInternal(normalizedVNode, parentInternal);
-		internal._index = i;
 
 		if (prevInternal) prevInternal._next = internal;
 		else parentInternal._child = internal;

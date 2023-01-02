@@ -1,4 +1,4 @@
-import { patchChildren, insertComponentDom } from './children';
+import { patchChildren, insert } from './children';
 import { setProperty } from './props';
 import options from '../options';
 import {
@@ -56,10 +56,13 @@ export function patch(internal, vnode, parentDom) {
 	if (flags & TYPE_ROOT) {
 		parentDom = vnode.props._parentDom;
 
-		if (internal.props._parentDom !== vnode.props._parentDom) {
+		if (internal.props._parentDom !== parentDom) {
+			// let nextSibling =
+			// 	parentDom == prevParentDom ? getDomSibling(internal) : null;
+			// insert(internal, nextSibling, parentDom);
 			let nextSibling =
 				parentDom == prevParentDom ? getDomSibling(internal) : null;
-			insertComponentDom(internal, nextSibling, parentDom);
+			insert(internal, parentDom, nextSibling);
 		}
 	}
 

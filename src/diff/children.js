@@ -13,7 +13,7 @@ import {
 import { mount } from './mount';
 import { patch } from './patch';
 import { unmount } from './unmount';
-import { createInternal, getDomSibling } from '../tree';
+import { createInternal, getChildDom, getDomSibling } from '../tree';
 
 /**
  * Scenarios:
@@ -34,9 +34,10 @@ import { createInternal, getDomSibling } from '../tree';
  */
 export function patchChildren(parentInternal, children, parentDom) {
 	/** @type {Internal} */
-	let newTail;
+	let prevInternal;
+	// let newTail;
 	let oldHead = parentInternal._child;
-	let skewedOldHead = oldHead;
+	// let skewedOldHead = oldHead;
 
 	for (let index = 0; index < children.length; index++) {
 		const vnode = children[index];
@@ -62,44 +63,122 @@ export function patchChildren(parentInternal, children, parentDom) {
 		/** @type {Internal?} */
 		let internal;
 
+		/*
 		// seek forward through the unsorted Internals list, starting at the skewed head.
 		// if we reach the end of the list, wrap around until we hit the skewed head again.
 		let match = skewedOldHead;
+		/** @type {Internal?} *\/
+		let prevMatch;
 
-		/** @type {Internal?} */
 		while (match) {
 			const flags = match.flags;
-			const next = match._next;
+			// next Internal (wrapping around to start):
+			let next = match._next || oldHead;
+			if (next === match) next = undefined;
 
 			if ((flags & typeFlag) !== 0 && match.type === type && match.key == key) {
 				internal = match;
 
+				// update ptr from prev item to remove the match, but don't create a circular tail:
+				if (prevMatch) prevMatch._next = match._next;
+				else skewedOldHead = next;
+
 				// if we are at the old head, bump it forward and reset skew:
-				if (match === oldHead) oldHead = skewedOldHead = next;
+				// if (match === oldHead) oldHead = skewedOldHead = next;
+				if (match === oldHead) oldHead = match._next;
 				// otherwise just bump the skewed head:
-				else skewedOldHead = next || oldHead;
+				// else skewedOldHead = next;
 
 				break;
 			}
 
 			// we've visited all candidates, bail out (no match):
 			if (next === skewedOldHead) break;
+
 			// advance forward one or wrap around:
-			match = next || oldHead;
+			prevMatch = match;
+			match = next;
+		}
+		*/
+
+		// seek forward through the Internals list, starting at the head (either first, or first unused).
+		// only match unused items, which are internals where _prev === undefined.
+		// note: _prev=null for the first matched internal, and should be considered "used".
+		let match = oldHead;
+		while (match) {
+			const flags = match.flags;
+			const isUnused = match !== prevInternal && match._prev == null;
+			if (
+				isUnused &&
+				(flags & typeFlag) !== 0 &&
+				match.type === type &&
+				match.key == key
+			) {
+				internal = match;
+				// if the match was the first unused item, bump the start ptr forward:
+				if (match === oldHead) oldHead = oldHead._next;
+				break;
+			}
+			match = match._next;
 		}
 
 		// no match, create a new Internal:
 		if (!internal) {
 			internal = createInternal(normalizedVNode, parentInternal);
+		} else {
+			// patch(internal, vnode, parentDom);
 		}
 
 		// move into place in new list
-		if (newTail) newTail._next = internal;
-		else parentInternal._child = internal;
-		newTail = internal;
+		// if (newTail) newTail._next = internal;
+		// else parentInternal._child = internal;
+		// newTail = internal;
+		internal._prev = prevInternal || parentInternal;
+		prevInternal = internal;
 	}
 
+	// next, we walk backwards over the newly-assigned _prev properties,
+	// visiting each Internal to set its _next ptr and perform insert/mount/update.
+	let internal = prevInternal;
+	/** @type {Internal} */
+	let nextInternal;
+
+	let index = children.length;
+	while (internal) {
+		let next = internal._next;
+
+		// set this internal's next ptr to the previous loop entry
+		internal._next = nextInternal;
+		nextInternal = internal;
+
+		index--;
+
+		if (!next) {
+			mount(internal, parentDom, getDomSibling(internal));
+			insert(internal, parentDom);
+		} else {
+			const vnode = children[index];
+			patch(internal, vnode, parentDom);
+			// If the previous Internal doesn't point back to us, it means we were moved.
+			// if (next._prev !== internal) {
+			if (internal._prev._next !== internal) {
+				// move
+				insert(internal, parentDom, getDomSibling(internal));
+			}
+		}
+
+		// for now, we're only using double-links internally to this function:
+		prevInternal = internal._prev;
+		if (prevInternal === parentInternal) prevInternal = undefined;
+		internal._prev = null;
+		internal = prevInternal;
+	}
+
+	parentInternal._child = internal;
+
+	/*
 	let childInternal = parentInternal._child;
+	let skew = 0;
 	// walk over the now sorted Internal children and insert/mount/update
 	for (let index = 0; index < children.length; index++) {
 		const vnode = children[index];
@@ -107,31 +186,66 @@ export function patchChildren(parentInternal, children, parentDom) {
 		// account for holes by incrementing the index:
 		if (vnode == null || vnode === true || vnode === false) continue;
 
-		let prevIndex = childInternal._index;
+		let prevIndex = childInternal._index + skew;
+
 		childInternal._index = index;
 		if (prevIndex === -1) {
+			console.log('mounting <' + childInternal.type + '> at index ' + index);
 			// insert
 			mount(childInternal, parentDom, getDomSibling(childInternal));
+			// insert(childInternal, getDomSibling(childInternal), parentDom);
+			insert(childInternal, parentDom);
+			skew++;
 		} else {
 			// update (or move+update)
 			patch(childInternal, vnode, parentDom);
+			// if (prevIndex > index) {
+			// 	skew--;
+			// }
+
+			let nextDomSibling;
+			let siblingSkew = skew;
+			let sibling = childInternal._next;
+			let siblingIndex = index;
+			while (sibling) {
+				let prevSiblingIndex = sibling._index + siblingSkew;
+				siblingIndex++;
+				// if this item is in-place:
+				if (prevSiblingIndex === siblingIndex) {
+					nextDomSibling = getChildDom(sibling);
+					break;
+				}
+				sibling = sibling._next;
+			}
+			// while (sibling && (sibling._index + siblingSkew) !== ++siblingIndex) {
+			// 	siblingSkew++;
+			// }
+
+			// if (prevIndex < index) {
 			if (prevIndex !== index) {
-				// move
-				insertComponentDom(
-					childInternal,
-					getDomSibling(childInternal),
-					parentDom
+				skew++;
+				// skew = prevIndex - index;
+				console.log(
+					'<' + childInternal.type + '> index changed from ',
+					prevIndex,
+					'to',
+					index,
+					childInternal.data.textContent
 				);
+				// move
+				insert(childInternal, parentDom, nextDomSibling);
 			}
 		}
 
 		childInternal = childInternal._next;
 	}
+	*/
 
 	// walk over the unused children and unmount:
 	while (oldHead) {
+		const next = oldHead._next;
 		unmount(oldHead, parentInternal, 0);
-		oldHead = oldHead._next;
+		oldHead = next;
 	}
 }
 /*
@@ -348,25 +462,23 @@ function findMatchingIndex(
 
 /**
  * @param {import('../internal').Internal} internal
- * @param {import('../internal').PreactNode} nextSibling
  * @param {import('../internal').PreactNode} parentDom
+ * @param {import('../internal').PreactNode} [nextSibling]
  */
-export function insertComponentDom(internal, nextSibling, parentDom) {
-	if (internal._children == null) {
-		return;
+export function insert(internal, parentDom, nextSibling) {
+	if (nextSibling === undefined) {
+		nextSibling = getDomSibling(internal);
 	}
 
-	for (let i = 0; i < internal._children.length; i++) {
-		let childInternal = internal._children[i];
-		if (childInternal) {
-			childInternal._parent = internal;
-
-			if (childInternal.flags & TYPE_COMPONENT) {
-				insertComponentDom(childInternal, nextSibling, parentDom);
-			} else if (childInternal.data != nextSibling) {
-				parentDom.insertBefore(childInternal.data, nextSibling);
-			}
+	if (internal.flags & TYPE_COMPONENT) {
+		let child = internal._child;
+		while (child) {
+			insert(child, parentDom, nextSibling);
+			child = child._next;
 		}
+	} else if (internal.data != nextSibling) {
+		// @ts-ignore .data is a Node
+		parentDom.insertBefore(internal.data, nextSibling);
 	}
 }
 

@@ -92,7 +92,7 @@ describe('keys', () => {
 		expect(Foo.args[0][0]).to.deep.equal({});
 	});
 
-	it.only('should update in-place keyed DOM nodes', () => {
+	it('should update in-place keyed DOM nodes', () => {
 		render(
 			<ul>
 				<li key="0">a</li>
@@ -189,7 +189,7 @@ describe('keys', () => {
 		);
 	});
 
-	it('should append new keyed elements', () => {
+	it.only('should append new keyed elements', () => {
 		const values = ['a', 'b'];
 
 		render(<List values={values} />, scratch);
@@ -280,9 +280,41 @@ describe('keys', () => {
 		render(<List values={values} />, scratch);
 		expect(scratch.textContent).to.equal('abcd');
 		expect(getLog()).to.deep.equal([
-			'<li>z.remove()',
+			'<li>x.remove()',
 			'<li>y.remove()',
-			'<li>x.remove()'
+			'<li>z.remove()'
+		]);
+	});
+
+	it('should move keyed children to the beginning', () => {
+		const values = ['b', 'c', 'd', 'a'];
+
+		render(<List values={values} />, scratch);
+		expect(scratch.textContent).to.equal('bcda');
+
+		move(values, values.length - 1, 0);
+		clearLog();
+
+		render(<List values={values} />, scratch);
+		expect(scratch.textContent).to.equal('abcd');
+		expect(getLog()).to.deep.equal(['<ol>bcda.insertBefore(<li>a, <li>b)']);
+	});
+
+	it('should move multiple keyed children to the beginning', () => {
+		const values = ['c', 'd', 'e', 'a', 'b'];
+
+		render(<List values={values} />, scratch);
+		expect(scratch.textContent).to.equal('cdeab');
+
+		move(values, values.length - 1, 0);
+		move(values, values.length - 1, 0);
+		clearLog();
+
+		render(<List values={values} />, scratch);
+		expect(scratch.textContent).to.equal('abcde');
+		expect(getLog()).to.deep.equal([
+			'<ol>cdeab.insertBefore(<li>a, <li>c)',
+			'<ol>acdeb.insertBefore(<li>b, <li>c)'
 		]);
 	});
 
