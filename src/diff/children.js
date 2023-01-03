@@ -107,7 +107,7 @@ export function patchChildren(parentInternal, children, parentDom) {
 		let match = oldHead;
 		while (match) {
 			const flags = match.flags;
-			const isUnused = match !== prevInternal && match._prev == null;
+			const isUnused = match._prev == null;
 			if (
 				isUnused &&
 				(flags & typeFlag) !== 0 &&
@@ -125,7 +125,9 @@ export function patchChildren(parentInternal, children, parentDom) {
 		// no match, create a new Internal:
 		if (!internal) {
 			internal = createInternal(normalizedVNode, parentInternal);
+			console.log('creating new', internal.type);
 		} else {
+			console.log('updating', internal.type);
 			// patch(internal, vnode, parentDom);
 		}
 
@@ -137,11 +139,26 @@ export function patchChildren(parentInternal, children, parentDom) {
 		prevInternal = internal;
 	}
 
+	// walk over the unused children and unmount:
+	let lastMatchedInternal;
+	oldHead = parentInternal._child;
+	while (oldHead) {
+		const next = oldHead._next;
+		if (oldHead._prev == null) {
+			if (lastMatchedInternal) lastMatchedInternal._next = next;
+			// else parentInternal._child = next;
+			unmount(oldHead, parentInternal, 0);
+		} else {
+			lastMatchedInternal = oldHead;
+		}
+		oldHead = next;
+	}
+
 	// next, we walk backwards over the newly-assigned _prev properties,
 	// visiting each Internal to set its _next ptr and perform insert/mount/update.
 	let internal = prevInternal;
 	/** @type {Internal} */
-	let nextInternal;
+	let nextInternal = null;
 
 	let index = children.length;
 	while (internal) {
@@ -153,23 +170,51 @@ export function patchChildren(parentInternal, children, parentDom) {
 
 		index--;
 
-		if (!next) {
+		prevInternal = internal._prev;
+		if (prevInternal === parentInternal) prevInternal = undefined;
+
+		// if (next === null) {
+		if (internal.data == null) {
+			console.log('mount', internal.type);
 			mount(internal, parentDom, getDomSibling(internal));
 			insert(internal, parentDom);
+			prevInternal._next = internal;
+			// prevInternal._next = null;
 		} else {
 			const vnode = children[index];
 			patch(internal, vnode, parentDom);
 			// If the previous Internal doesn't point back to us, it means we were moved.
-			// if (next._prev !== internal) {
-			if (internal._prev._next !== internal) {
+			// if (prevInternal._next !== internal) {
+			if (internal._next !== next && internal._next) {
 				// move
+				console.log('move', internal.type, internal.data.textContent);
+				console.log(
+					' > expected _next:',
+					internal._next && internal._next.type,
+					internal._next && internal._next.props
+				);
+				console.log(' > _next:', next && next.type, next && next.props);
 				insert(internal, parentDom, getDomSibling(internal));
+				// we moved this node, so unset its previous sibling's next pointer
+				// note: this is like doing a splice() out of oldChildren
+				internal._prev._next = next; // or set to null?
+				// prevInternal._next = internal;
+				// internal._prev._next = internal;
+			} else {
+				console.log('update', internal.type, internal.data.textContent);
+				console.log(
+					' > expected _next:',
+					internal._next && internal._next.type,
+					internal._next && internal._next.props
+				);
+				console.log(' > _next:', next && next.type, next && next.props);
 			}
 		}
 
+		// if (prevInternal) prevInternal._next = internal;
+		// else parentInternal._child = internal;
+
 		// for now, we're only using double-links internally to this function:
-		prevInternal = internal._prev;
-		if (prevInternal === parentInternal) prevInternal = undefined;
 		internal._prev = null;
 		internal = prevInternal;
 	}
@@ -241,12 +286,12 @@ export function patchChildren(parentInternal, children, parentDom) {
 	}
 	*/
 
-	// walk over the unused children and unmount:
-	while (oldHead) {
-		const next = oldHead._next;
-		unmount(oldHead, parentInternal, 0);
-		oldHead = next;
-	}
+	// // walk over the unused children and unmount:
+	// while (oldHead) {
+	// 	const next = oldHead._next;
+	// 	unmount(oldHead, parentInternal, 0);
+	// 	oldHead = next;
+	// }
 }
 /*
 export function patchChildren(internal, children, parentDom) {

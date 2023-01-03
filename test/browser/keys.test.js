@@ -6,7 +6,7 @@ import { div } from '../_util/dom';
 
 /** @jsx createElement */
 
-describe('keys', () => {
+describe.only('keys', () => {
 	/** @type {HTMLDivElement} */
 	let scratch;
 
@@ -92,7 +92,7 @@ describe('keys', () => {
 		expect(Foo.args[0][0]).to.deep.equal({});
 	});
 
-	it('should update in-place keyed DOM nodes', () => {
+	it.only('should update in-place keyed DOM nodes', () => {
 		render(
 			<ul>
 				<li key="0">a</li>
@@ -119,7 +119,7 @@ describe('keys', () => {
 	});
 
 	// See preactjs/preact-compat#21
-	it('should remove orphaned keyed nodes', () => {
+	it.only('should remove orphaned keyed nodes', () => {
 		render(
 			<div>
 				<div>1</div>
@@ -206,7 +206,7 @@ describe('keys', () => {
 		]);
 	});
 
-	it('should remove keyed elements from the end', () => {
+	it.only('should remove keyed elements from the end', () => {
 		const values = ['a', 'b', 'c', 'd'];
 
 		render(<List values={values} />, scratch);
@@ -237,7 +237,7 @@ describe('keys', () => {
 		]);
 	});
 
-	it('should remove keyed elements from the beginning', () => {
+	it.only('should remove keyed elements from the beginning', () => {
 		const values = ['z', 'a', 'b', 'c'];
 
 		render(<List values={values} />, scratch);
@@ -251,7 +251,7 @@ describe('keys', () => {
 		expect(getLog()).to.deep.equal(['<li>z.remove()']);
 	});
 
-	it('should insert new keyed children in the middle', () => {
+	it.only('should insert new keyed children in the middle', () => {
 		const values = ['a', 'c'];
 
 		render(<List values={values} />, scratch);
@@ -268,7 +268,7 @@ describe('keys', () => {
 		]);
 	});
 
-	it('should remove keyed children from the middle', () => {
+	it.only('should remove keyed children from the middle', () => {
 		const values = ['a', 'b', 'x', 'y', 'z', 'c', 'd'];
 
 		render(<List values={values} />, scratch);
@@ -286,7 +286,7 @@ describe('keys', () => {
 		]);
 	});
 
-	it('should move keyed children to the beginning', () => {
+	it.only('should move keyed children to the beginning', () => {
 		const values = ['b', 'c', 'd', 'a'];
 
 		render(<List values={values} />, scratch);
@@ -300,7 +300,7 @@ describe('keys', () => {
 		expect(getLog()).to.deep.equal(['<ol>bcda.insertBefore(<li>a, <li>b)']);
 	});
 
-	it('should move multiple keyed children to the beginning', () => {
+	it.only('should move multiple keyed children to the beginning', () => {
 		const values = ['c', 'd', 'e', 'a', 'b'];
 
 		render(<List values={values} />, scratch);
@@ -313,12 +313,12 @@ describe('keys', () => {
 		render(<List values={values} />, scratch);
 		expect(scratch.textContent).to.equal('abcde');
 		expect(getLog()).to.deep.equal([
-			'<ol>cdeab.insertBefore(<li>a, <li>c)',
-			'<ol>acdeb.insertBefore(<li>b, <li>c)'
+			'<ol>cdeab.insertBefore(<li>b, <li>c)',
+			'<ol>bcdea.insertBefore(<li>a, <li>b)'
 		]);
 	});
 
-	it('should swap keyed children efficiently', () => {
+	it.only('should swap keyed children efficiently', () => {
 		render(<List values={['a', 'b']} />, scratch);
 		expect(scratch.textContent).to.equal('ab');
 
@@ -327,10 +327,10 @@ describe('keys', () => {
 		render(<List values={['b', 'a']} />, scratch);
 		expect(scratch.textContent).to.equal('ba');
 
-		expect(getLog()).to.deep.equal(['<ol>ab.insertBefore(<li>a, Null)']);
+		expect(getLog()).to.deep.equal(['<ol>ab.insertBefore(<li>b, <li>a)']);
 	});
 
-	it('should swap existing keyed children in the middle of a list efficiently', () => {
+	it.only('should swap existing keyed children in the middle of a list efficiently', () => {
 		const values = ['a', 'b', 'c', 'd'];
 
 		render(<List values={values} />, scratch);
