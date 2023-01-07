@@ -42,7 +42,7 @@ export function createElement(type, props, children) {
 		key,
 		ref,
 		constructor: undefined,
-		_vnodeId: ++vnodeId
+		_vnodeId: (vnodeId = (vnodeId + 1) | 0)
 	};
 
 	if (options.vnode != null) options.vnode(vnode);
