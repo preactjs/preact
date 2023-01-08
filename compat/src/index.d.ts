@@ -135,8 +135,11 @@ declare namespace React {
 	interface MutableRefObject<T> {
 		current: T;
 	}
-	
-	export type ForwardedRef<T> = ((instance: T | null) => void) | MutableRefObject<T | null> | null;
+
+	export type ForwardedRef<T> =
+		| ((instance: T | null) => void)
+		| MutableRefObject<T | null>
+		| null;
 
 	export function unstable_batchedUpdates(
 		callback: (arg?: any) => void,
@@ -144,17 +147,19 @@ declare namespace React {
 	): void;
 
 	export type PropsWithChildren<P = unknown> = P & {
-		children?: preact.ComponentChild | undefined
+		children?: preact.ComponentChild | undefined;
 	};
-	
+
 	export const Children: {
 		map<T extends preact.ComponentChild, R>(
 			children: T | T[],
-			fn: (child: T, i: number) => R
+			fn: (child: T, i: number) => R,
+			context: any
 		): R[];
 		forEach<T extends preact.ComponentChild>(
 			children: T | T[],
-			fn: (child: T, i: number) => void
+			fn: (child: T, i: number) => void,
+			context: any
 		): void;
 		count: (children: preact.ComponentChildren) => number;
 		only: (children: preact.ComponentChildren) => preact.ComponentChild;
