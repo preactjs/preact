@@ -13,7 +13,7 @@ import {
 import { mount } from './mount';
 import { patch } from './patch';
 import { unmount } from './unmount';
-import { createInternal, getDomSibling } from '../tree';
+import { createInternal, getChildDom, getDomSibling } from '../tree';
 
 /**
  * Scenarios:
@@ -34,7 +34,7 @@ import { createInternal, getDomSibling } from '../tree';
  */
 export function patchChildren(parentInternal, children, parentDom) {
 	/** @type {Internal} */
-	let newTail;
+	let prevInternal;
 	let oldHead = parentInternal._child;
 	let skewedOldHead = oldHead;
 
@@ -65,19 +65,28 @@ export function patchChildren(parentInternal, children, parentDom) {
 		// seek forward through the unsorted Internals list, starting at the skewed head.
 		// if we reach the end of the list, wrap around until we hit the skewed head again.
 		let match = skewedOldHead;
+		/** @type {Internal?} */
+		let prevMatch;
 
 		/** @type {Internal?} */
 		while (match) {
 			const flags = match.flags;
-			const next = match._next;
+			// next Internal (wrapping around to start):
+			let next = match._next || oldHead;
+			if (next === match) next = undefined;
 
 			if ((flags & typeFlag) !== 0 && match.type === type && match.key == key) {
 				internal = match;
 
+				// update ptr from prev item to remove the match, but don't create a circular tail:
+				if (prevMatch) prevMatch._next = match._next;
+				else skewedOldHead = next;
+
 				// if we are at the old head, bump it forward and reset skew:
-				if (match === oldHead) oldHead = skewedOldHead = next;
+				// if (match === oldHead) oldHead = skewedOldHead = next;
+				if (match === oldHead) oldHead = match._next;
 				// otherwise just bump the skewed head:
-				else skewedOldHead = next || oldHead;
+				// else skewedOldHead = next || oldHead;
 
 				break;
 			}
@@ -85,7 +94,8 @@ export function patchChildren(parentInternal, children, parentDom) {
 			// we've visited all candidates, bail out (no match):
 			if (next === skewedOldHead) break;
 			// advance forward one or wrap around:
-			match = next || oldHead;
+			prevMatch = match;
+			match = next;
 		}
 
 		// no match, create a new Internal:
@@ -94,12 +104,13 @@ export function patchChildren(parentInternal, children, parentDom) {
 		}
 
 		// move into place in new list
-		if (newTail) newTail._next = internal;
+		if (prevInternal) prevInternal._next = internal;
 		else parentInternal._child = internal;
-		newTail = internal;
+		prevInternal = internal;
 	}
 
 	let childInternal = parentInternal._child;
+	let skew = 0;
 	// walk over the now sorted Internal children and insert/mount/update
 	for (let index = 0; index < children.length; index++) {
 		const vnode = children[index];
@@ -107,17 +118,52 @@ export function patchChildren(parentInternal, children, parentDom) {
 		// account for holes by incrementing the index:
 		if (vnode == null || vnode === true || vnode === false) continue;
 
-		let prevIndex = childInternal._index;
+		let prevIndex = childInternal._index + skew;
+
 		childInternal._index = index;
 		if (prevIndex === -1) {
+			console.log('mounting <' + childInternal.type + '> at index ' + index);
 			// insert
 			mount(childInternal, parentDom, getDomSibling(childInternal));
+			insert(childInternal, parentDom);
+			skew++;
 		} else {
 			// update (or move+update)
 			patch(childInternal, vnode, parentDom);
+			// if (prevIndex > index) {
+			// 	skew--;
+			// }
+			let nextDomSibling;
+			let siblingSkew = skew;
+			let sibling = childInternal._next;
+			let siblingIndex = index;
+			while (sibling) {
+				let prevSiblingIndex = sibling._index + siblingSkew;
+				siblingIndex++;
+				// if this item is in-place:
+				if (prevSiblingIndex === siblingIndex) {
+					nextDomSibling = getChildDom(sibling);
+					break;
+				}
+				sibling = sibling._next;
+			}
+			// while (sibling && (sibling._index + siblingSkew) !== ++siblingIndex) {
+			// 	siblingSkew++;
+			// }
+
+			// if (prevIndex < index) {
 			if (prevIndex !== index) {
+				skew++;
+				// skew = prevIndex - index;
+				console.log(
+					'<' + childInternal.type + '> index changed from ',
+					prevIndex,
+					'to',
+					index,
+					childInternal.data.textContent
+				);
 				// move
-				insert(childInternal, parentDom, getDomSibling(childInternal));
+				insert(childInternal, parentDom, nextDomSibling);
 			}
 		}
 
@@ -126,8 +172,9 @@ export function patchChildren(parentInternal, children, parentDom) {
 
 	// walk over the unused children and unmount:
 	while (oldHead) {
+		const next = oldHead._next;
 		unmount(oldHead, parentInternal, 0);
-		oldHead = oldHead._next;
+		oldHead = next;
 	}
 }
 /*
