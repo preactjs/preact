@@ -24,6 +24,8 @@ export interface ErrorInfo {
 	componentStack?: string;
 }
 
+export type CommitQueue = VNode[];
+
 export interface Options extends preact.Options {
 	/** Attach a hook that is invoked before render, mainly to check the arguments. */
 	_root?(
@@ -33,7 +35,7 @@ export interface Options extends preact.Options {
 	/** Attach a hook that is invoked before a vnode is diffed. */
 	_diff?(vnode: VNode): void;
 	/** Attach a hook that is invoked after a tree was mounted or was updated. */
-	_commit?(vnode: VNode, commitQueue: Component[]): void;
+	_commit?(vnode: VNode, commitQueue: CommitQueue): void;
 	/** Attach a hook that is invoked before a vnode has rendered. */
 	_render?(vnode: VNode): void;
 	/** Attach a hook that is invoked before a hook's state is queried. */
@@ -120,6 +122,7 @@ export interface VNode<P = {}> extends preact.VNode<P> {
 	_nextDom: PreactElement | null;
 	_component: Component | null;
 	_hydrating: boolean | null;
+	_renderCallbacks: Array<() => void>;
 	constructor: undefined;
 	_original: number;
 }
@@ -132,7 +135,6 @@ export interface Component<P = {}, S = {}> extends preact.Component<P, S> {
 
 	_dirty: boolean;
 	_force?: boolean;
-	_renderCallbacks: Array<() => void>; // Only class components
 	_stateCallbacks: Array<() => void>; // Only class components
 	_globalContext?: any;
 	_vnode?: VNode<P> | null;

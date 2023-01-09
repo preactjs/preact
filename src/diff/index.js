@@ -14,7 +14,7 @@ import options from '../options';
  * @param {object} globalContext The current context object. Modified by getChildContext
  * @param {boolean} isSvg Whether or not this element is an SVG node
  * @param {Array<import('../internal').PreactElement>} excessDomChildren
- * @param {Array<import('../internal').Component>} commitQueue List of components
+ * @param {import('../internal').CommitQueue} commitQueue List of components
  * which have callbacks to invoke in commitRoot
  * @param {import('../internal').PreactElement} oldDom The current attached DOM
  * element any new dom elements should be placed around. Likely `null` on first
@@ -53,8 +53,14 @@ export function diff(
 
 	try {
 		outer: if (typeof newType == 'function') {
-			let c, isNew, oldProps, oldState, snapshot, clearProcessingException;
+			/** @type {import('../internal').Component} */
+			let c;
+			let isNew, oldProps, oldState, snapshot, clearProcessingException;
 			let newProps = newVNode.props;
+
+			if (!newVNode._renderCallbacks) {
+				newVNode._renderCallbacks = [];
+			}
 
 			// Necessary for createContext api. Setting this property will pass
 			// the context value as `this.context` just for this component.
@@ -88,7 +94,6 @@ export function diff(
 				c.context = componentContext;
 				c._globalContext = globalContext;
 				isNew = c._dirty = true;
-				c._renderCallbacks = [];
 				c._stateCallbacks = [];
 			}
 
@@ -122,7 +127,7 @@ export function diff(
 				}
 
 				if (c.componentDidMount != null) {
-					c._renderCallbacks.push(c.componentDidMount);
+					newVNode._renderCallbacks.push(c.componentDidMount);
 				}
 			} else {
 				if (
@@ -163,13 +168,9 @@ export function diff(
 					});
 
 					for (let i = 0; i < c._stateCallbacks.length; i++) {
-						c._renderCallbacks.push(c._stateCallbacks[i]);
+						newVNode._renderCallbacks.push(c._stateCallbacks[i]);
 					}
 					c._stateCallbacks = [];
-
-					if (c._renderCallbacks.length) {
-						commitQueue.push(c);
-					}
 
 					break outer;
 				}
@@ -179,7 +180,7 @@ export function diff(
 				}
 
 				if (c.componentDidUpdate != null) {
-					c._renderCallbacks.push(() => {
+					newVNode._renderCallbacks.push(() => {
 						c.componentDidUpdate(oldProps, oldState, snapshot);
 					});
 				}
@@ -200,7 +201,7 @@ export function diff(
 				tmp = c.render(c.props, c.state, c.context);
 
 				for (let i = 0; i < c._stateCallbacks.length; i++) {
-					c._renderCallbacks.push(c._stateCallbacks[i]);
+					newVNode._renderCallbacks.push(c._stateCallbacks[i]);
 				}
 				c._stateCallbacks = [];
 			} else {
@@ -248,10 +249,6 @@ export function diff(
 			// We successfully rendered this VNode, unset any stored hydration/bailout state:
 			newVNode._hydrating = null;
 
-			if (c._renderCallbacks.length) {
-				commitQueue.push(c);
-			}
-
 			if (clearProcessingException) {
 				c._pendingError = c._processingException = null;
 			}
@@ -276,6 +273,24 @@ export function diff(
 			);
 		}
 
+		if ((tmp = newVNode.ref) && oldVNode.ref != tmp) {
+			if (!newVNode._renderCallbacks) newVNode._renderCallbacks = [];
+
+			if (oldVNode.ref) {
+				newVNode._renderCallbacks.push(() => {
+					applyRef(oldVNode.ref, null, newVNode);
+				});
+			}
+
+			newVNode._renderCallbacks.push(() => {
+				applyRef(newVNode.ref, newVNode._component || newVNode._dom, newVNode);
+			});
+		}
+
+		if (newVNode._renderCallbacks && newVNode._renderCallbacks.length) {
+			commitQueue.push(newVNode);
+		}
+
 		if ((tmp = options.diffed)) tmp(newVNode);
 	} catch (e) {
 		newVNode._original = null;
@@ -292,24 +307,25 @@ export function diff(
 }
 
 /**
- * @param {Array<import('../internal').Component>} commitQueue List of components
+ * @param {import('../internal').CommitQueue} commitQueue List of components
  * which have callbacks to invoke in commitRoot
  * @param {import('../internal').VNode} root
  */
 export function commitRoot(commitQueue, root) {
 	if (options._commit) options._commit(root, commitQueue);
 
-	commitQueue.some(c => {
+	commitQueue.some(vnode => {
 		try {
 			// @ts-ignore Reuse the commitQueue variable here so the type changes
-			commitQueue = c._renderCallbacks;
-			c._renderCallbacks = [];
-			commitQueue.some(cb => {
-				// @ts-ignore See above ts-ignore on commitQueue
-				cb.call(c);
-			});
+			if ((commitQueue = vnode._renderCallbacks)) {
+				vnode._renderCallbacks = [];
+				commitQueue.some(cb => {
+					// @ts-ignore See above ts-ignore on commitQueue
+					cb.call(vnode._component);
+				});
+			}
 		} catch (e) {
-			options._catchError(e, c._vnode);
+			options._catchError(e, vnode);
 		}
 	});
 }
@@ -323,7 +339,7 @@ export function commitRoot(commitQueue, root) {
  * @param {object} globalContext The current context object
  * @param {boolean} isSvg Whether or not this DOM node is an SVG node
  * @param {*} excessDomChildren
- * @param {Array<import('../internal').Component>} commitQueue List of components
+ * @param {import('../internal').CommitQueue} commitQueue List of components
  * which have callbacks to invoke in commitRoot
  * @param {boolean} isHydrating Whether or not we are in hydration
  * @returns {import('../internal').PreactElement}
