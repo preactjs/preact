@@ -15,6 +15,9 @@ import { patch } from './patch';
 import { unmount } from './unmount';
 import { createInternal, getChildDom, getDomSibling } from '../tree';
 
+const DEBUG = false;
+const log = (...args) => DEBUG && console.log(...args);
+
 /**
  * Scenarios:
  *
@@ -125,9 +128,9 @@ export function patchChildren(parentInternal, children, parentDom) {
 		// no match, create a new Internal:
 		if (!internal) {
 			internal = createInternal(normalizedVNode, parentInternal);
-			console.log('creating new', internal.type);
+			log('creating new', internal.type);
 		} else {
-			console.log('updating', internal.type);
+			log('updating', internal.type);
 			// patch(internal, vnode, parentDom);
 		}
 
@@ -162,7 +165,7 @@ export function patchChildren(parentInternal, children, parentDom) {
 
 	let index = children.length;
 	while (internal) {
-		let next = internal._next;
+		let oldNext = internal._next;
 
 		// set this internal's next ptr to the previous loop entry
 		internal._next = nextInternal;
@@ -175,39 +178,67 @@ export function patchChildren(parentInternal, children, parentDom) {
 
 		// if (next === null) {
 		if (internal.data == null) {
-			console.log('mount', internal.type);
+			log('mount', internal.type);
 			mount(internal, parentDom, getDomSibling(internal));
 			insert(internal, parentDom);
-			prevInternal._next = internal;
+
+			if (prevInternal) prevInternal._next = internal;
 			// prevInternal._next = null;
 		} else {
 			const vnode = children[index];
 			patch(internal, vnode, parentDom);
 			// If the previous Internal doesn't point back to us, it means we were moved.
 			// if (prevInternal._next !== internal) {
-			if (internal._next !== next && internal._next) {
+			if (internal._next !== oldNext && internal._next) {
 				// move
-				console.log('move', internal.type, internal.data.textContent);
-				console.log(
-					' > expected _next:',
-					internal._next && internal._next.type,
-					internal._next && internal._next.props
-				);
-				console.log(' > _next:', next && next.type, next && next.props);
+				log('move', internal.type, internal.data.textContent);
+				log(' > expected _next:', internal._next?.type, internal._next?.props);
+				log(' > _next:', oldNext?.type, oldNext?.props);
+
+				// This code block finds the internal's old previous sibling. It then
+				// sets its _next pointer to the internal's oldNext. This effectively
+				// removes the internal from the oldChildren "array"
+				let node = parentInternal._child;
+				while (node && node._next !== internal) {
+					node = node._next;
+				}
+				if (node) {
+					console.log(
+						`SPLICE(${internal.data.textContent}): setting ${node.data.textContent}._next to ${oldNext.data.textContent}`
+					);
+					node._next = oldNext;
+				}
+
+				// This code block finds the internal's new next sibling's old previous
+				// sibling (internal._next._oldPrev). It this sets its _next pointer to
+				// the internal. This inserts the internal into the "new children array"
+				node = parentInternal._child;
+				while (node && node._next !== internal._next) {
+					node = node._next;
+				}
+				if (node) {
+					console.log(
+						`INSERT(${internal.data.textContent}): setting ${node.data.textContent}._next to ${internal.data.textContent}`
+					);
+					node._next = internal;
+				}
+
 				insert(internal, parentDom, getDomSibling(internal));
 				// we moved this node, so unset its previous sibling's next pointer
 				// note: this is like doing a splice() out of oldChildren
-				internal._prev._next = next; // or set to null?
-				// prevInternal._next = internal;
-				// internal._prev._next = internal;
+				// internal._prev._next = oldNext; // or set to null?
+				// internal._prev == parentInternal
+				// 	? (internal._prev = undefined)
+				// 	: (internal._prev._next = internal);
+
+				// To mimic insertBefore:
+				// internal -> newNext -> oldPrev.next = internal (insert b into linked list at its new position)
+				//      use newNext -> oldPrev because newNext -> newPrev is internal (lol)
+				// internal oldPrev.next = internal oldNext
 			} else {
-				console.log('update', internal.type, internal.data.textContent);
-				console.log(
-					' > expected _next:',
-					internal._next && internal._next.type,
-					internal._next && internal._next.props
-				);
-				console.log(' > _next:', next && next.type, next && next.props);
+				log('update', internal.type, internal.data.textContent);
+				log(' > expected _next:', internal._next?.type, internal._next?.props);
+				log(' > _next:', oldNext?.type, oldNext?.props);
 			}
 		}
 
@@ -216,10 +247,11 @@ export function patchChildren(parentInternal, children, parentDom) {
 
 		// for now, we're only using double-links internally to this function:
 		internal._prev = null;
+		if (!prevInternal) parentInternal._child = internal;
 		internal = prevInternal;
 	}
 
-	parentInternal._child = internal;
+	// parentInternal._child = internal;
 
 	/*
 	let childInternal = parentInternal._child;

@@ -328,7 +328,8 @@ module.exports = function(config) {
 				'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || ''),
 				ENABLE_PERFORMANCE: performance
 			},
-			plugins: [createEsbuildPlugin()]
+			plugins: [createEsbuildPlugin()],
+			logLevel: 'silent'
 		}
 	});
 };
