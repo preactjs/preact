@@ -286,6 +286,38 @@ describe.only('keys', () => {
 		]);
 	});
 
+	it.only('should move keyed children to the beginning', () => {
+		const values = ['b', 'c', 'd', 'a'];
+
+		render(<List values={values} />, scratch);
+		expect(scratch.textContent).to.equal('bcda');
+
+		move(values, values.length - 1, 0);
+		clearLog();
+
+		render(<List values={values} />, scratch);
+		expect(scratch.textContent).to.equal('abcd');
+		expect(getLog()).to.deep.equal(['<ol>bcda.insertBefore(<li>a, <li>b)']);
+	});
+
+	it.only('should move multiple keyed children to the beginning', () => {
+		const values = ['c', 'd', 'e', 'a', 'b'];
+
+		render(<List values={values} />, scratch);
+		expect(scratch.textContent).to.equal('cdeab');
+
+		move(values, values.length - 1, 0);
+		move(values, values.length - 1, 0);
+		clearLog();
+
+		render(<List values={values} />, scratch);
+		expect(scratch.textContent).to.equal('abcde');
+		expect(getLog()).to.deep.equal([
+			'<ol>cdeab.insertBefore(<li>a, <li>c)',
+			'<ol>acdeb.insertBefore(<li>b, <li>c)'
+		]);
+	});
+
 	it('should swap keyed children efficiently', () => {
 		render(<List values={['a', 'b']} />, scratch);
 		expect(scratch.textContent).to.equal('ab');
