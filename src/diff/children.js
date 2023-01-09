@@ -117,11 +117,7 @@ export function patchChildren(parentInternal, children, parentDom) {
 			patch(childInternal, vnode, parentDom);
 			if (prevIndex !== index) {
 				// move
-				insertComponentDom(
-					childInternal,
-					getDomSibling(childInternal),
-					parentDom
-				);
+				insert(childInternal, parentDom, getDomSibling(childInternal));
 			}
 		}
 
@@ -348,25 +344,23 @@ function findMatchingIndex(
 
 /**
  * @param {import('../internal').Internal} internal
- * @param {import('../internal').PreactNode} nextSibling
  * @param {import('../internal').PreactNode} parentDom
+ * @param {import('../internal').PreactNode | undefined} [nextSibling]
  */
-export function insertComponentDom(internal, nextSibling, parentDom) {
-	if (internal._children == null) {
-		return;
+export function insert(internal, parentDom, nextSibling) {
+	if (nextSibling === undefined) {
+		nextSibling = getDomSibling(internal);
 	}
 
-	for (let i = 0; i < internal._children.length; i++) {
-		let childInternal = internal._children[i];
-		if (childInternal) {
-			childInternal._parent = internal;
-
-			if (childInternal.flags & TYPE_COMPONENT) {
-				insertComponentDom(childInternal, nextSibling, parentDom);
-			} else if (childInternal.data != nextSibling) {
-				parentDom.insertBefore(childInternal.data, nextSibling);
-			}
+	if (internal.flags & TYPE_COMPONENT) {
+		let child = internal._child;
+		while (child) {
+			insert(child, parentDom, nextSibling);
+			child = child._next;
 		}
+	} else if (internal.data != nextSibling) {
+		// @ts-ignore .data is a Node
+		parentDom.insertBefore(internal.data, nextSibling);
 	}
 }
 
