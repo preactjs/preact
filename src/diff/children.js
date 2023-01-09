@@ -109,6 +109,13 @@ export function patchChildren(parentInternal, children, parentDom) {
 		prevInternal = internal;
 	}
 
+	// walk over the unused children and unmount:
+	while (oldHead) {
+		const next = oldHead._next;
+		unmount(oldHead, parentInternal, 0);
+		oldHead = next;
+	}
+
 	let childInternal = parentInternal._child;
 	let skew = 0;
 	// walk over the now sorted Internal children and insert/mount/update
@@ -122,7 +129,7 @@ export function patchChildren(parentInternal, children, parentDom) {
 
 		childInternal._index = index;
 		if (prevIndex === -1) {
-			console.log('mounting <' + childInternal.type + '> at index ' + index);
+			console.log(`mounting <${childInternal.type}> at index ${index}`);
 			// insert
 			mount(childInternal, parentDom, getDomSibling(childInternal));
 			insert(childInternal, parentDom);
@@ -156,11 +163,7 @@ export function patchChildren(parentInternal, children, parentDom) {
 				skew++;
 				// skew = prevIndex - index;
 				console.log(
-					'<' + childInternal.type + '> index changed from ',
-					prevIndex,
-					'to',
-					index,
-					childInternal.data.textContent
+					`<${childInternal.type}> index changed from ${prevIndex} to ${index} ${childInternal.data.textContent}`
 				);
 				// move
 				insert(childInternal, parentDom, nextDomSibling);
@@ -168,13 +171,6 @@ export function patchChildren(parentInternal, children, parentDom) {
 		}
 
 		childInternal = childInternal._next;
-	}
-
-	// walk over the unused children and unmount:
-	while (oldHead) {
-		const next = oldHead._next;
-		unmount(oldHead, parentInternal, 0);
-		oldHead = next;
 	}
 }
 /*
