@@ -58,10 +58,6 @@ export function diff(
 			let isNew, oldProps, oldState, snapshot, clearProcessingException;
 			let newProps = newVNode.props;
 
-			if (!newVNode._renderCallbacks) {
-				newVNode._renderCallbacks = [];
-			}
-
 			// Necessary for createContext api. Setting this property will pass
 			// the context value as `this.context` just for this component.
 			tmp = newType.contextType;
@@ -94,6 +90,7 @@ export function diff(
 				c.context = componentContext;
 				c._globalContext = globalContext;
 				isNew = c._dirty = true;
+				c._renderCallbacks = [];
 				c._stateCallbacks = [];
 			}
 
@@ -127,7 +124,7 @@ export function diff(
 				}
 
 				if (c.componentDidMount != null) {
-					newVNode._renderCallbacks.push(c.componentDidMount);
+					c._renderCallbacks.push(c.componentDidMount);
 				}
 			} else {
 				if (
@@ -167,10 +164,15 @@ export function diff(
 						if (vnode) vnode._parent = newVNode;
 					});
 
-					for (let i = 0; i < c._stateCallbacks.length; i++) {
-						newVNode._renderCallbacks.push(c._stateCallbacks[i]);
+					if (c._stateCallbacks.length) {
+						if (!newVNode._renderCallbacks) newVNode._renderCallbacks = [];
+						for (let i = 0; i < c._stateCallbacks.length; i++) {
+							newVNode._renderCallbacks.push(c._stateCallbacks[i]);
+						}
+						c._stateCallbacks = [];
+
+						commitQueue.push(newVNode);
 					}
-					c._stateCallbacks = [];
 
 					break outer;
 				}
@@ -180,7 +182,7 @@ export function diff(
 				}
 
 				if (c.componentDidUpdate != null) {
-					newVNode._renderCallbacks.push(() => {
+					c._renderCallbacks.push(() => {
 						c.componentDidUpdate(oldProps, oldState, snapshot);
 					});
 				}
@@ -201,7 +203,7 @@ export function diff(
 				tmp = c.render(c.props, c.state, c.context);
 
 				for (let i = 0; i < c._stateCallbacks.length; i++) {
-					newVNode._renderCallbacks.push(c._stateCallbacks[i]);
+					c._renderCallbacks.push(c._stateCallbacks[i]);
 				}
 				c._stateCallbacks = [];
 			} else {
@@ -251,6 +253,14 @@ export function diff(
 
 			if (clearProcessingException) {
 				c._pendingError = c._processingException = null;
+			}
+
+			if (c._renderCallbacks.length) {
+				if (!newVNode._renderCallbacks) newVNode._renderCallbacks = [];
+				newVNode._renderCallbacks = newVNode._renderCallbacks.concat(
+					c._renderCallbacks
+				);
+				c._renderCallbacks = [];
 			}
 
 			c._force = false;

@@ -135,6 +135,7 @@ export interface Component<P = {}, S = {}> extends preact.Component<P, S> {
 
 	_dirty: boolean;
 	_force?: boolean;
+	_renderCallbacks: Array<() => void>; // Only class components
 	_stateCallbacks: Array<() => void>; // Only class components
 	_globalContext?: any;
 	_vnode?: VNode<P> | null;
