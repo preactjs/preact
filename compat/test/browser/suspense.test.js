@@ -1636,27 +1636,25 @@ describe('suspense', () => {
 	});
 
 	it('should call componentWillUnmount on a suspended component', () => {
-		const cWUSpy = sinon.spy();
+		// TODO: Note, React blocks all state changes on subtrees of a suspended Suspense node: https://codesandbox.io/s/suspense-and-refs-zp3sxw?file=/src/index.js
 
+		let suspender = null;
 		// eslint-disable-next-line react/require-render-return
 		class Suspender extends Component {
+			constructor(props) {
+				super(props);
+				suspender = this;
+			}
+			componentWillUnmount() {}
 			render() {
 				throw new Promise(() => {});
 			}
 		}
 
-		Suspender.prototype.componentWillUnmount = cWUSpy;
+		const cWUSpy = sinon.spy(Suspender.prototype, 'componentWillUnmount');
 
+		/** @type {() => void} */
 		let hide;
-
-		let suspender = null;
-		let suspenderRef = s => {
-			// skip null values as we want to keep the ref even after unmount
-			if (s) {
-				suspender = s;
-			}
-		};
-
 		class Conditional extends Component {
 			constructor(props) {
 				super(props);
@@ -1671,7 +1669,7 @@ describe('suspense', () => {
 				return (
 					<div>
 						conditional {show ? 'show' : 'hide'}
-						{show && <Suspender ref={suspenderRef} />}
+						{show && <Suspender />}
 					</div>
 				);
 			}
@@ -1691,8 +1689,7 @@ describe('suspense', () => {
 		rerender();
 
 		expect(cWUSpy).to.have.been.calledOnce;
-		expect(suspender).not.to.be.undefined;
-		expect(suspender).not.to.be.null;
+		expect(suspender).to.be.instanceOf(Suspender);
 		expect(cWUSpy.getCall(0).thisValue).to.eql(suspender);
 		expect(scratch.innerHTML).to.eql(`<div>conditional hide</div>`);
 	});
