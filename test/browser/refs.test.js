@@ -12,6 +12,7 @@ let spy = (name, ...args) => {
 };
 
 describe('refs', () => {
+	/** @type {HTMLElement} */
 	let scratch;
 	let rerender;
 
@@ -542,5 +543,54 @@ describe('refs', () => {
 		render(<App count={2} />, scratch);
 		expect(calls.length).to.equal(1);
 		expect(calls[0]).to.equal(scratch.firstChild.firstChild);
+	});
+
+	it('should bind refs before componentDidMount', () => {
+		/** @type {import('preact').RefObject<HTMLSpanElement>[]} */
+		const refs = [];
+
+		class Parent extends Component {
+			componentDidMount() {
+				// Child refs should be set
+				expect(refs.length).to.equal(2);
+				expect(refs[0].current.tagName).to.equal('SPAN');
+				expect(refs[1].current.tagName).to.equal('SPAN');
+			}
+
+			render(props) {
+				return props.children;
+			}
+		}
+
+		class Child extends Component {
+			constructor(props) {
+				super(props);
+
+				this.ref = createRef();
+			}
+
+			componentDidMount() {
+				// SPAN refs should be set
+				expect(this.ref.current.tagName).to.equal('SPAN');
+				expect(document.body.contains(this.ref.current)).to.equal(true);
+				refs.push(this.ref);
+			}
+
+			render() {
+				return <span ref={this.ref}>Hello</span>;
+			}
+		}
+
+		render(
+			<Parent>
+				<Child />
+				<Child />
+			</Parent>,
+			scratch
+		);
+
+		expect(scratch.innerHTML).to.equal('<span>Hello</span><span>Hello</span>');
+		expect(refs[0].current).to.equalNode(scratch.firstChild);
+		expect(refs[1].current).to.equalNode(scratch.lastChild);
 	});
 });

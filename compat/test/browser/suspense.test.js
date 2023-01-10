@@ -1636,7 +1636,9 @@ describe('suspense', () => {
 	});
 
 	it('should call componentWillUnmount on a suspended component', () => {
-		// TODO: Note, React blocks all state changes on subtrees of a suspended Suspense node: https://codesandbox.io/s/suspense-and-refs-zp3sxw?file=/src/index.js
+		// TODO: Note, React blocks all state changes on subtrees of a suspended
+		// Suspense node which contradicts what this test asserts.
+		// https://codesandbox.io/s/suspense-and-refs-zp3sxw?file=/src/index.js
 
 		let suspender = null;
 		// eslint-disable-next-line react/require-render-return
