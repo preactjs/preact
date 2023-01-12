@@ -1,6 +1,6 @@
-import { render as basicRender } from '../src';
-import { renderToJsxString as render } from '../src/jsx';
-import { createElement, Fragment } from 'preact';
+import basicRender from '../src';
+import { render } from '../src/jsx';
+import { h, Fragment } from 'preact';
 import { expect } from 'chai';
 import { dedent } from './utils';
 import './setup';
@@ -121,35 +121,19 @@ describe('pretty', () => {
 		// prettier-ignore
 		expect(prettyRender(
 			<div>hello{' '} <b /></div>
-		)).to.equal(dedent`
-			<div>
-				hello  
-				<b></b>
-			</div>
-		`);
+		)).to.equal(`<div>\n\thello  \n\t<b></b>\n</div>`);
 
 		// prettier-ignore
 		expect(prettyRender(
 			<div>hello{' '} <b />{'a'}{'b'}</div>
-		)).to.equal(dedent`
-			<div>
-				hello  
-				<b></b>
-				ab
-			</div>
-		`);
+		)).to.equal(`<div>\n\thello  \n\t<b></b>\n\tab\n</div>`);
 	});
 
-	it('should join adjacent text nodeswith Fragments', () => {
+	it('should join adjacent text nodes with Fragments', () => {
 		// prettier-ignore
 		expect(prettyRender(
 			<div><Fragment>foo</Fragment>bar{' '} <b /></div>
-		)).to.equal(dedent`
-			<div>
-				foobar  
-				<b></b>
-			</div>
-		`);
+		)).to.equal(`<div>\n\tfoobar  \n\t<b></b>\n</div>`);
 	});
 
 	it('should collapse whitespace', () => {
@@ -159,12 +143,7 @@ describe('pretty', () => {
 					a<a>b</a>
 				</p>
 			)
-		).to.equal(dedent`
-			<p>
-				a
-				<a>b</a>
-			</p>
-		`);
+		).to.equal(`<p>\n\ta\n\t<a>b</a>\n</p>`);
 
 		expect(
 			prettyRender(
@@ -172,12 +151,7 @@ describe('pretty', () => {
 					a <a>b</a>
 				</p>
 			)
-		).to.equal(dedent`
-			<p>
-				a 
-				<a>b</a>
-			</p>
-		`);
+		).to.equal(`<p>\n\ta \n\t<a>b</a>\n</p>`);
 
 		expect(
 			prettyRender(
@@ -199,12 +173,7 @@ describe('pretty', () => {
 					a <a>b</a>
 				</p>
 			)
-		).to.equal(dedent`
-			<p>
-				a\ 
-				<a>b</a>
-			</p>
-		`);
+		).to.equal(`<p>\n\ta \n\t<a>b</a>\n</p>`);
 
 		expect(prettyRender(<a> b </a>)).to.equal(dedent`
 			<a> b </a>
@@ -216,11 +185,16 @@ describe('pretty', () => {
 					<b /> a{' '}
 				</p>
 			)
-		).to.equal(dedent`
-			<p>
-				<b></b>
-				\ a\ 
-			</p>
-		`);
+		).to.equal(`<p>\n\t<b></b>\n\t a \n</p>`);
+	});
+
+	it('should prevent JSON injection', () => {
+		expect(prettyRender(<div>{{ hello: 'world' }}</div>)).to.equal(
+			'<div></div>'
+		);
+	});
+
+	it('should not render function children', () => {
+		expect(prettyRender(<div>{() => {}}</div>)).to.equal('<div></div>');
 	});
 });

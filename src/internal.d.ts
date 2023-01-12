@@ -50,7 +50,7 @@ export type CommitQueue = Internal[];
 // Redefine ComponentFactory using our new internal FunctionalComponent interface above
 export type ComponentFactory<P> =
 	| preact.ComponentClass<P>
-	| FunctionalComponent<P>;
+	| preact.FunctionalComponent<P>;
 
 export type ComponentChild =
 	| VNode<any>

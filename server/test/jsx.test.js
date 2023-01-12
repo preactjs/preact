@@ -1,5 +1,5 @@
-import { renderToJsxString as render } from '../src/jsx';
-import { createElement } from 'preact';
+import render from '../src/jsx';
+import { h } from 'preact';
 import { expect } from 'chai';
 import { dedent } from './utils';
 import './setup';
