@@ -204,7 +204,7 @@ export function clearOptions() {
 
 /**
  * Teardown test environment and reset preact's internal state
- * @param {HTMLDivElement} scratch
+ * @param {HTMLElement} scratch
  */
 export function teardown(scratch) {
 	if (scratch) {

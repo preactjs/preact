@@ -35,7 +35,7 @@ export function diffProps(dom, newProps, oldProps, isSvg, hydrate) {
 
 function setStyle(style, key, value) {
 	if (key[0] === '-') {
-		style.setProperty(key, value);
+		style.setProperty(key, value == null ? '' : value);
 	} else if (value == null) {
 		style[key] = '';
 	} else if (typeof value != 'number' || IS_NON_DIMENSIONAL.test(key)) {
