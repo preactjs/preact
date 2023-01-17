@@ -275,9 +275,11 @@ export namespace h {
 // Preact render
 // -----------------------------------
 
+type Parent = Omit<Pick<Element | Document | ShadowRoot | DocumentFragment, 'nodeType' | 'parentNode' | 'firstChild' | 'insertBefore' | 'appendChild' | 'removeChild'>, 'childNodes'> & { childNodes: ArrayLike<Node> }
+
 export function render(
 	vnode: ComponentChild,
-	parent: Element | Document | ShadowRoot | DocumentFragment
+	parent: Parent
 ): void;
 /**
  * @deprecated Will be removed in v11.
@@ -286,12 +288,12 @@ export function render(
  */
 export function render(
 	vnode: ComponentChild,
-	parent: Element | Document | ShadowRoot | DocumentFragment,
+	parent: Parent,
 	replaceNode?: Element | Text
 ): void;
 export function hydrate(
 	vnode: ComponentChild,
-	parent: Element | Document | ShadowRoot | DocumentFragment
+	parent: Parent
 ): void;
 export function cloneElement(
 	vnode: VNode<any>,
