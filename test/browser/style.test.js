@@ -223,7 +223,7 @@ describe('style attribute', () => {
 			);
 		});
 
-		it('should clear css properties is passed an empty string, null, and undefined', () => {
+		it('should clear css properties when passed an empty string, null, or undefined', () => {
 			const red = 'rgb(255, 0, 0)';
 			const blue = 'rgb(0, 0, 255)';
 			const green = 'rgb(0, 128, 0)';
@@ -267,7 +267,7 @@ describe('style attribute', () => {
 
 			render(<App color={null} />, scratch);
 			expect(getCSSVariableValue(), 'null').to.equal('');
-			expect(getTextColor(), null).to.equal(red);
+			expect(getTextColor(), 'null').to.equal(red);
 
 			render(<App color="violet" />, scratch);
 			expect(getCSSVariableValue()).to.equal('violet');
