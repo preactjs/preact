@@ -63,44 +63,6 @@ export function patchChildren(parentInternal, children, parentDom) {
 		/** @type {Internal?} */
 		let internal;
 
-		/*
-		// seek forward through the unsorted Internals list, starting at the skewed head.
-		// if we reach the end of the list, wrap around until we hit the skewed head again.
-		let match = skewedOldHead;
-		/** @type {Internal?} *\/
-		let prevMatch;
-
-		while (match) {
-			const flags = match.flags;
-			// next Internal (wrapping around to start):
-			let next = match._next || oldHead;
-			if (next === match) next = undefined;
-
-			if ((flags & typeFlag) !== 0 && match.type === type && match.key == key) {
-				internal = match;
-
-				// update ptr from prev item to remove the match, but don't create a circular tail:
-				if (prevMatch) prevMatch._next = match._next;
-				else skewedOldHead = next;
-
-				// if we are at the old head, bump it forward and reset skew:
-				// if (match === oldHead) oldHead = skewedOldHead = next;
-				if (match === oldHead) oldHead = match._next;
-				// otherwise just bump the skewed head:
-				// else skewedOldHead = next;
-
-				break;
-			}
-
-			// we've visited all candidates, bail out (no match):
-			if (next === skewedOldHead) break;
-
-			// advance forward one or wrap around:
-			prevMatch = match;
-			match = next;
-		}
-		*/
-
 		// seek forward through the Internals list, starting at the head (either first, or first unused).
 		// only match unused items, which are internals where _prev === undefined.
 		// note: _prev=null for the first matched internal, and should be considered "used".
@@ -131,10 +93,6 @@ export function patchChildren(parentInternal, children, parentDom) {
 			// patch(internal, vnode, parentDom);
 		}
 
-		// move into place in new list
-		// if (newTail) newTail._next = internal;
-		// else parentInternal._child = internal;
-		// newTail = internal;
 		internal._prev = prevInternal || parentInternal;
 		prevInternal = internal;
 	}
@@ -220,78 +178,6 @@ export function patchChildren(parentInternal, children, parentDom) {
 		internal._prev = null;
 		internal = prevInternal;
 	}
-
-	/*
-	let childInternal = parentInternal._child;
-	let skew = 0;
-	// walk over the now sorted Internal children and insert/mount/update
-	for (let index = 0; index < children.length; index++) {
-		const vnode = children[index];
-
-		// account for holes by incrementing the index:
-		if (vnode == null || vnode === true || vnode === false) continue;
-
-		let prevIndex = childInternal._index + skew;
-
-		childInternal._index = index;
-		if (prevIndex === -1) {
-			console.log('mounting <' + childInternal.type + '> at index ' + index);
-			// insert
-			mount(childInternal, parentDom, getDomSibling(childInternal));
-			// insert(childInternal, getDomSibling(childInternal), parentDom);
-			insert(childInternal, parentDom);
-			skew++;
-		} else {
-			// update (or move+update)
-			patch(childInternal, vnode, parentDom);
-			// if (prevIndex > index) {
-			// 	skew--;
-			// }
-
-			let nextDomSibling;
-			let siblingSkew = skew;
-			let sibling = childInternal._next;
-			let siblingIndex = index;
-			while (sibling) {
-				let prevSiblingIndex = sibling._index + siblingSkew;
-				siblingIndex++;
-				// if this item is in-place:
-				if (prevSiblingIndex === siblingIndex) {
-					nextDomSibling = getChildDom(sibling);
-					break;
-				}
-				sibling = sibling._next;
-			}
-			// while (sibling && (sibling._index + siblingSkew) !== ++siblingIndex) {
-			// 	siblingSkew++;
-			// }
-
-			// if (prevIndex < index) {
-			if (prevIndex !== index) {
-				skew++;
-				// skew = prevIndex - index;
-				console.log(
-					'<' + childInternal.type + '> index changed from ',
-					prevIndex,
-					'to',
-					index,
-					childInternal.data.textContent
-				);
-				// move
-				insert(childInternal, parentDom, nextDomSibling);
-			}
-		}
-
-		childInternal = childInternal._next;
-	}
-	*/
-
-	// // walk over the unused children and unmount:
-	// while (oldHead) {
-	// 	const next = oldHead._next;
-	// 	unmount(oldHead, parentInternal, 0);
-	// 	oldHead = next;
-	// }
 }
 /*
 export function patchChildren(internal, children, parentDom) {
