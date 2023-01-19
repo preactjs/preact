@@ -178,7 +178,7 @@ export function patchChildren(parentInternal, children, parentDom) {
 			console.log('mount', internal.type);
 			mount(internal, parentDom, getDomSibling(internal));
 			insert(internal, parentDom);
-			prevInternal._next = internal;
+			if (prevInternal) prevInternal._next = internal;
 			// prevInternal._next = null;
 		} else {
 			const vnode = children[index];
