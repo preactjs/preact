@@ -388,6 +388,35 @@ describe.only('keys', () => {
 		);
 	});
 
+	it.only('should move keyed children to the beginning on longer list', () => {
+		// Preact v10 worst case
+		const values = ['a', 'b', 'c', 'd', 'e', 'f'];
+
+		render(<List values={values} />, scratch);
+		expect(scratch.textContent).to.equal('abcdef');
+
+		move(values, 4, 1);
+		clearLog();
+
+		render(<List values={values} />, scratch);
+		expect(scratch.textContent).to.equal('aebcdf');
+		expect(getLog()).to.deep.equal(['<ol>abcdef.insertBefore(<li>e, <li>b)']);
+	});
+
+	it.only('should move keyed children to the end on longer list', () => {
+		const values = ['a', 'b', 'c', 'd', 'e', 'f'];
+
+		render(<List values={values} />, scratch);
+		expect(scratch.textContent).to.equal('abcdef');
+
+		move(values, 1, values.length - 2);
+		clearLog();
+
+		render(<List values={values} />, scratch);
+		expect(scratch.textContent).to.equal('acdebf');
+		expect(getLog()).to.deep.equal(['<ol>abcdef.insertBefore(<li>b, <li>f)']);
+	});
+
 	it('should reverse keyed children effectively', () => {
 		const values = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'];
 
