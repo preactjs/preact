@@ -214,12 +214,12 @@ export function patchChildren(parentInternal, children, parentDom) {
 		// if (prevInternal) prevInternal._next = internal;
 		// else parentInternal._child = internal;
 
+		if (!prevInternal) parentInternal._child = internal;
+
 		// for now, we're only using double-links internally to this function:
 		internal._prev = null;
 		internal = prevInternal;
 	}
-
-	parentInternal._child = internal;
 
 	/*
 	let childInternal = parentInternal._child;
