@@ -4,6 +4,7 @@ import { setupScratch, teardown, sortCss } from '../_util/helpers';
 /** @jsx createElement */
 
 describe('style attribute', () => {
+	/** @type {HTMLElement} */
 	let scratch;
 
 	beforeEach(() => {
@@ -220,6 +221,57 @@ describe('style attribute', () => {
 				'--foo',
 				'10px'
 			);
+		});
+
+		it('should clear css properties when passed an empty string, null, or undefined', () => {
+			const red = 'rgb(255, 0, 0)';
+			const blue = 'rgb(0, 0, 255)';
+			const green = 'rgb(0, 128, 0)';
+			const yellow = 'rgb(255, 255, 0)';
+			const violet = 'rgb(238, 130, 238)';
+
+			function App({ color }) {
+				return (
+					<div style={{ '--color': color }}>
+						<span style={{ color: 'var(--color, red)' }}>Hello World!</span>
+					</div>
+				);
+			}
+
+			const getDiv = () => /** @type {HTMLDivElement} */ (scratch.firstChild);
+			const getSpan = () =>
+				/** @type {HTMLSpanElement} */ (scratch.firstChild.firstChild);
+			const getCSSVariableValue = () =>
+				getDiv().style.getPropertyValue('--color');
+			const getTextColor = () => window.getComputedStyle(getSpan()).color;
+
+			render(<App color="blue" />, scratch);
+			expect(getCSSVariableValue()).to.equal('blue');
+			expect(getTextColor()).to.equal(blue);
+
+			render(<App color="" />, scratch);
+			expect(getCSSVariableValue(), 'empty string').to.equal('');
+			expect(getTextColor(), 'empty string').to.equal(red);
+
+			render(<App color="green" />, scratch);
+			expect(getCSSVariableValue()).to.equal('green');
+			expect(getTextColor()).to.equal(green);
+
+			render(<App color={undefined} />, scratch);
+			expect(getCSSVariableValue(), 'undefined').to.equal('');
+			expect(getTextColor(), 'undefined').to.equal(red);
+
+			render(<App color="yellow" />, scratch);
+			expect(getCSSVariableValue()).to.equal('yellow');
+			expect(getTextColor()).to.equal(yellow);
+
+			render(<App color={null} />, scratch);
+			expect(getCSSVariableValue(), 'null').to.equal('');
+			expect(getTextColor(), 'null').to.equal(red);
+
+			render(<App color="violet" />, scratch);
+			expect(getCSSVariableValue()).to.equal('violet');
+			expect(getTextColor()).to.equal(violet);
 		});
 	}
 });
