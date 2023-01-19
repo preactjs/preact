@@ -327,7 +327,7 @@ describe.only('keys', () => {
 		render(<List values={['b', 'a']} />, scratch);
 		expect(scratch.textContent).to.equal('ba');
 
-		expect(getLog()).to.deep.equal(['<ol>ab.insertBefore(<li>b, <li>a)']);
+		expect(getLog()).to.deep.equal(['<ol>ab.insertBefore(<li>a, Null)']);
 	});
 
 	it('should swap existing keyed children in the middle of a list efficiently', () => {

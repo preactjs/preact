@@ -153,6 +153,8 @@ export interface Internal<P = {}> {
 	_next: Internal | null;
 	/** temporarily holds previous sibling Internal while diffing. Is purposefully cleared after diffing due to how the diffing algorithm works */
 	_prev: Internal | null;
+	_index: number;
+	_prevLDS: Internal | null;
 	/** most recent vnode ID */
 	_vnodeId: number;
 	/**

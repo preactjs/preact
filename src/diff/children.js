@@ -15,6 +15,9 @@ import { patch } from './patch';
 import { unmount } from './unmount';
 import { createInternal, getChildDom, getDomSibling } from '../tree';
 
+// TODO: Use a flag?
+const LDSMarker = -2;
+
 /**
  * Scenarios:
  *
@@ -39,6 +42,7 @@ export function patchChildren(parentInternal, children, parentDom) {
 	let oldHead = parentInternal._child;
 	// let skewedOldHead = oldHead;
 
+	// Step 1. Find matches and set up _prev pointers
 	for (let index = 0; index < children.length; index++) {
 		const vnode = children[index];
 
@@ -97,7 +101,7 @@ export function patchChildren(parentInternal, children, parentDom) {
 		prevInternal = internal;
 	}
 
-	// walk over the unused children and unmount:
+	// Step 2. Walk over the unused children and unmount:
 	let lastMatchedInternal;
 	oldHead = parentInternal._child;
 	while (oldHead) {
@@ -112,9 +116,49 @@ export function patchChildren(parentInternal, children, parentDom) {
 		oldHead = next;
 	}
 
+	// Step 3. Find the longest decreasing subsequence
+	let internal = prevInternal;
+	/** @type {Internal[]} */
+	const wipLDS = [internal];
+
+	while ((internal = internal._prev) !== parentInternal) {
+		// Skip over newly mounted internals. They will be mounted in place.
+		if (internal._index === -1) continue;
+
+		let ldsTail = wipLDS[wipLDS.length - 1];
+		if (ldsTail._index > internal._index) {
+			internal._prevLDS = ldsTail;
+			wipLDS.push(internal);
+		} else {
+			// Search for position in wipLIS where node should go. It should replace
+			// the first node where node > wip[i] (though keep in mind, we are
+			// iterating over the list backwards). Example:
+			// ```
+			// wipLIS = [4,3,1], node = 2.
+			// Node should replace 1: [4,3,2]
+			// ```
+			let i = wipLDS.length;
+			// TODO: Binary search?
+			while (--i >= 0 && wipLDS[i]._index < internal._index) {}
+
+			wipLDS[i + 1] = internal;
+			let prevLDS = i < 0 ? null : wipLDS[i];
+			internal._prevLDS = prevLDS;
+		}
+	}
+
+	// Step 4. Mark internals in longest decreasing subsequence
+	/** @type {Internal | null} */
+	let ldsNode = wipLDS[wipLDS.length - 1];
+	while (ldsNode) {
+		// Mark node as being in the longest increasing subsequence (_index = -2)
+		ldsNode._index = LDSMarker;
+		ldsNode = ldsNode._prevLDS;
+	}
+
 	// next, we walk backwards over the newly-assigned _prev properties,
 	// visiting each Internal to set its _next ptr and perform insert/mount/update.
-	let internal = prevInternal;
+	internal = prevInternal;
 	/** @type {Internal} */
 	let nextInternal = null;
 
@@ -131,19 +175,17 @@ export function patchChildren(parentInternal, children, parentDom) {
 		prevInternal = internal._prev;
 		if (prevInternal === parentInternal) prevInternal = undefined;
 
-		// if (next === null) {
-		if (internal.data == null) {
+		if (internal._index === -1) {
 			console.log('mount', internal.type);
 			mount(internal, parentDom, getDomSibling(internal));
 			insert(internal, parentDom);
-			if (prevInternal) prevInternal._next = internal;
+			// if (prevInternal) prevInternal._next = internal;
 			// prevInternal._next = null;
 		} else {
 			const vnode = children[index];
 			patch(internal, vnode, parentDom);
-			// If the previous Internal doesn't point back to us, it means we were moved.
-			// if (prevInternal._next !== internal) {
-			if (internal._next !== next && internal._next) {
+
+			if (internal._index !== LDSMarker) {
 				// move
 				console.log('move', internal.type, internal.data.textContent);
 				console.log(
@@ -153,11 +195,6 @@ export function patchChildren(parentInternal, children, parentDom) {
 				);
 				console.log(' > _next:', next && next.type, next && next.props);
 				insert(internal, parentDom, getDomSibling(internal));
-				// we moved this node, so unset its previous sibling's next pointer
-				// note: this is like doing a splice() out of oldChildren
-				internal._prev._next = next; // or set to null?
-				// prevInternal._next = internal;
-				// internal._prev._next = internal;
 			} else {
 				console.log('update', internal.type, internal.data.textContent);
 				console.log(
@@ -175,7 +212,8 @@ export function patchChildren(parentInternal, children, parentDom) {
 		if (!prevInternal) parentInternal._child = internal;
 
 		// for now, we're only using double-links internally to this function:
-		internal._prev = null;
+		internal._prev = internal._prevLDS = null;
+		internal._index = index;
 		internal = prevInternal;
 	}
 }

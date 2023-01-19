@@ -97,6 +97,8 @@ export function createInternal(vnode, parentInternal) {
 		_child: null,
 		_next: null,
 		_prev: null,
+		_prevLDS: null,
+		_index: -1,
 		_vnodeId: vnodeId,
 		_component: null,
 		_context: null,
