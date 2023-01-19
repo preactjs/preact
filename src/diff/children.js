@@ -36,6 +36,8 @@ const LDSMarker = -2;
  * @param {import('../internal').PreactElement} parentDom The element into which this subtree is rendered
  */
 export function patchChildren(parentInternal, children, parentDom) {
+	/** @type {Internal | undefined} */
+	let internal;
 	/** @type {Internal} */
 	let prevInternal;
 	// let newTail;
@@ -117,7 +119,9 @@ export function patchChildren(parentInternal, children, parentDom) {
 	}
 
 	// Step 3. Find the longest decreasing subsequence
-	let internal = prevInternal;
+	// TODO: Ideally only run this if something has moved
+	// TODO: Explore trying to do this without an array, maybe next pointers? Or maybe reuse the array
+	internal = prevInternal;
 	/** @type {Internal[]} */
 	const wipLDS = [internal];
 
@@ -156,16 +160,14 @@ export function patchChildren(parentInternal, children, parentDom) {
 		ldsNode = ldsNode._prevLDS;
 	}
 
-	// next, we walk backwards over the newly-assigned _prev properties,
-	// visiting each Internal to set its _next ptr and perform insert/mount/update.
-	internal = prevInternal;
+	// Step 5. Walk backwards over the newly-assigned _prev properties, visiting
+	// each Internal to set its _next ptr and perform insert/mount/update.
 	/** @type {Internal} */
 	let nextInternal = null;
 
 	let index = children.length;
+	internal = prevInternal;
 	while (internal) {
-		let next = internal._next;
-
 		// set this internal's next ptr to the previous loop entry
 		internal._next = nextInternal;
 		nextInternal = internal;
@@ -176,38 +178,15 @@ export function patchChildren(parentInternal, children, parentDom) {
 		if (prevInternal === parentInternal) prevInternal = undefined;
 
 		if (internal._index === -1) {
-			console.log('mount', internal.type);
 			mount(internal, parentDom, getDomSibling(internal));
-			insert(internal, parentDom);
-			// if (prevInternal) prevInternal._next = internal;
-			// prevInternal._next = null;
 		} else {
-			const vnode = children[index];
-			patch(internal, vnode, parentDom);
-
-			if (internal._index !== LDSMarker) {
-				// move
-				console.log('move', internal.type, internal.data.textContent);
-				console.log(
-					' > expected _next:',
-					internal._next && internal._next.type,
-					internal._next && internal._next.props
-				);
-				console.log(' > _next:', next && next.type, next && next.props);
-				insert(internal, parentDom, getDomSibling(internal));
-			} else {
-				console.log('update', internal.type, internal.data.textContent);
-				console.log(
-					' > expected _next:',
-					internal._next && internal._next.type,
-					internal._next && internal._next.props
-				);
-				console.log(' > _next:', next && next.type, next && next.props);
-			}
+			// TODO: Skip over non-renderable vnodes
+			patch(internal, children[index], parentDom);
 		}
 
-		// if (prevInternal) prevInternal._next = internal;
-		// else parentInternal._child = internal;
+		if (internal._index > LDSMarker) {
+			insert(internal, parentDom);
+		}
 
 		if (!prevInternal) parentInternal._child = internal;
 
