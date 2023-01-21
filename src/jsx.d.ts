@@ -418,11 +418,7 @@ export namespace JSXInternal {
 	>;
 
 	export interface EventHandler<E extends TargetedEvent> {
-		/**
-		 * The `this` keyword always points to the DOM element the event handler
-		 * was invoked on. See: https://developer.mozilla.org/en-US/docs/Web/Guide/Events/Event_handlers#Event_handlers_parameters_this_binding_and_the_return_value
-		 */
-		(this: never, event: E): void;
+		(this: void, event: E): void;
 	}
 
 	export type AnimationEventHandler<Target extends EventTarget> = EventHandler<
