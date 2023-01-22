@@ -118,6 +118,7 @@ export function patchChildren(parentInternal, children, parentDom) {
 
 	// Step 3. Find the longest decreasing subsequence
 	// TODO: Ideally only run this if something has moved
+	// TODO: Replace _prevLDS with _next. Doing this will make _next meaningless for a moment
 	// TODO: Explore trying to do this without an array, maybe next pointers? Or maybe reuse the array
 	internal = prevInternal;
 	/** @type {Internal[]} */
@@ -178,6 +179,8 @@ export function patchChildren(parentInternal, children, parentDom) {
 		index--;
 
 		prevInternal = internal._prev;
+		internal._prev = internal._prevLDS = null;
+
 		if (prevInternal === parentInternal) prevInternal = undefined;
 
 		if (internal._index === -1) {
@@ -196,7 +199,6 @@ export function patchChildren(parentInternal, children, parentDom) {
 		internal.flags &= ~INSERT_INTERNAL;
 
 		// for now, we're only using double-links internally to this function:
-		internal._prev = internal._prevLDS = null;
 		internal._index = index;
 		internal = prevInternal;
 	}
