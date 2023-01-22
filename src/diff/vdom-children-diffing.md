@@ -46,17 +46,17 @@ How do we determine the fewest number of movements? Looking at our previous exam
 
 But let's look at another example: `0 1 2 3 4 5` -> `0 3 1 4 2 5`. Here, there are no common substrings! But if you look closely we can morph the old children into the new children in just 2 moves: insert `3` before `1` and insert `4` before `2`. How did we determine that?
 
-While there aren't any common substrings between the children arrays, there are common _subsequences_. A subsequence is set of elements from an array that are in the same order as the original sequence, but aren't necessarily next to each other. So while a _substring_ the items must be next to each other, in a _subsequence_ they do not. For example, `0 3 5`, `0 1 5`, and `2 4` are a subsequences of `0 1 2 3 4 5`. `0 2 1` is not a subsequence of `0 1 2 3 4 5` because the `2` does not occur after `0` and before `1` in the original sequence.
+While there aren't any common substrings between the children arrays, there are common _subsequences_. A subsequence is set of elements from an array that are in the same order as the original sequence, but aren't necessarily next to each other. So while in a _substring_ the items must be next to each other, in a _subsequence_ they do not. For example, `0 3 5`, `0 1 5`, and `2 4` are a subsequences of `0 1 2 3 4 5`. `0 2 1` is not a subsequence of `0 1 2 3 4 5` because the `2` does not occur after `0` and before `1` in the original sequence.
 
 In our example above (`0 1 2 3 4 5` -> `0 3 1 4 2 5`), let's use our understanding of subsequences to examine the differences between the two children arrays. If we remove the two nodes that moved (`3` and `4`) from the arrays, we are left a common subsequence between the two arrays: `0 1 2 5`. This subsequence is actually the _longest common subsequence_ between the two arrays!
 
 If we can identify _longest common subsequence_ between two arrays, we have identified the most nodes that we can hold in place (i.e. **not move**). Every other node has changed positions and can move around these nodes. This approach leads to the minimal number of moves because we have found the most nodes that we don't have to move. Said another way, we have found the longest sequence of _relatively_ in place nodes, i.e. nodes that are in the same order with relationship to other nodes in the array.
 
-The longest common subsequence algorithm is a well-known algorithm in computer science. You can read more about [longest common subsequence on Wikipedia](https://en.wikipedia.org/wiki/Longest_common_subsequence). The best time complexity for determining the longest common subsequence is $O(n^2)$. This time complexity is acceptable, but can we do better for our specific use case of diffing virtual DOM children?
+The longest common subsequence algorithm is a well-known algorithm in computer science. You can read more about [the longest common subsequence algorithm on Wikipedia](https://en.wikipedia.org/wiki/Longest_common_subsequence). The best time complexity for determining the longest common subsequence is $O(n^2)$. This time complexity is acceptable, but can we do better for our specific use case of diffing virtual DOM children?
 
 ## Longest increasing subsequence
 
-Typically, virtual dom keys are strings. A more realistic example might look something like trying to morph `a c b e d f` -> `a b c d e f`. Let's map this to numbers using the indices of each key in the original array. So the original array becomes `0 1 2 3 4 5` (with `{a: 0, c: 1, b: 2, e: 3, d: 4, f: 5}`) and the new array becomes `0 2 1 4 3 5`.
+Typically, virtual dom keys are strings. A more realistic example might look something like trying to morph `a c b e d f` -> `a b c d e f`. Let's map this to numbers using the indices of each key in the original array. Let's assign to each key its index in the original array: `{a: 0, c: 1, b: 2, e: 3, d: 4, f: 5}`. Now, let's replace each key with this number in both arrays. So the original array becomes `0 1 2 3 4 5` and the new array becomes `0 2 1 4 3 5`.
 
 ```text
 Original array
@@ -70,20 +70,29 @@ original index: 0 2 1 4 3 5
 
 Two interesting properties emerge from doing this:
 
-1. The original array will always be an array of numbers from `0` to `array.length`, and so will always be numbers sorted in increasing order.
+1. The original array will always be an array of numbers from `0` to `array.length - 1`, and will always be numbers sorted in increasing order.
 2. The new array is a mapping of an item's new index to it's old index in the original array. Said another way, the item at index `0` in `0 2 1 4 3 5` (`a`) was at index `0` in the original way, the item at index `1` in the new array (`b`) was at index `2` in the original array, and so on.
 
-We can use these properties to simplify the problem we are trying to solve. Remember, we are searching for items that are in the relatively same order between the two arrays (in the same order relative to each other). Since the original array will always be in increasing sorted order, any subsequence of the original array that is also present in the new array will also be in increasing order!
+We can use these properties to simplify the problem we are trying to solve. Remember, we are searching for items that are in the relatively same order between the two arrays (in the same order relative to each other). Since the original array will always be in increasing sorted order, any subsequence of the original array that is present in the new array will also be in increasing order.
 
 This insight is big! We can simplify what we need to search for now. Instead of solving the general _longest common subsequence_ problem, we now only need to look for the longest subsequence of increasing numbers in the new array. Again, any subsequence of the new array that is in increasing order is also a subsequence of the original array which was in increasing sorted order.
 
-TODO: Why longest increasing subsequence (only looking at one array?) and not longest common subsequence (comparing the two arrays)? Numbers that are increasing are in in the correct order (`2 4 5 8`), perhaps? We are looking for the longest subsequence of nodes whose new positions are in the same relative old position ("relative old position" meaning "position relative to other nodes"). The relative old position is marked by the values in the array.
-
-Finding the longest increasing subsequence is an easier algorithm because we are only looking at one array (the new array with the mapped indices) and has a better time complexity: $O(n\log(n))$.
+Finding the longest increasing subsequence is an easier algorithm because we are only looking at one array (the new array with the mapped indices) and has a better time complexity: $O(n\log(n))$. Let's take a look at the algorithm to do this.
 
 ### Algorithm
 
-TODO: Show algorithm
+TODO: Talk about `insertBefore` and how DOM objects such as Document and DocumentFragment only support `insertBefore` and not newer methods such as `after` or `before` since they are only containers. You can't place a node after the document which is the root container. This limitation motivates using `prev` pointers in our algorithm.
+
+For understanding this algorithm, we are going to use a linked list to represent our array of children. Here is the structure of the linked list node we will use:
+
+```ts
+interface Node {
+	originalIndex: number;
+	next: Node | null;
+}
+```
+
+The list we are searching through is the list of
 
 ## Adding new nodes and deletions
 
