@@ -48,6 +48,9 @@ export const DIRTY_BIT = 1 << 14;
 /** Signals the component can skip children due to a non-update */
 export const SKIP_CHILDREN = 1 << 15;
 
+/** Indicates that this node needs to be inserted while patching children */
+export const INSERT_INTERNAL = 1 << 16;
+
 /** Reset all mode flags */
 export const RESET_MODE = ~(
 	MODE_HYDRATE |

@@ -8,15 +8,13 @@ import {
 	EMPTY_ARR,
 	TYPE_DOM,
 	UNDEFINED,
-	TYPE_ELEMENT
+	TYPE_ELEMENT,
+	INSERT_INTERNAL
 } from '../constants';
 import { mount } from './mount';
 import { patch } from './patch';
 import { unmount } from './unmount';
 import { createInternal, getChildDom, getDomSibling } from '../tree';
-
-// TODO: Use a flag?
-const LDSMarker = -2;
 
 /**
  * Scenarios:
@@ -93,9 +91,9 @@ export function patchChildren(parentInternal, children, parentDom) {
 		// no match, create a new Internal:
 		if (!internal) {
 			internal = createInternal(normalizedVNode, parentInternal);
-			console.log('creating new', internal.type);
+			// console.log('creating new', internal.type);
 		} else {
-			console.log('updating', internal.type);
+			// console.log('updating', internal.type);
 			// patch(internal, vnode, parentDom);
 		}
 
@@ -124,8 +122,13 @@ export function patchChildren(parentInternal, children, parentDom) {
 	internal = prevInternal;
 	/** @type {Internal[]} */
 	const wipLDS = [internal];
+	internal.flags |= INSERT_INTERNAL;
 
 	while ((internal = internal._prev) !== parentInternal) {
+		// Mark all internals as requiring insertion. We will clear this flag for
+		// internals on longest decreasing subsequence
+		internal.flags |= INSERT_INTERNAL;
+
 		// Skip over newly mounted internals. They will be mounted in place.
 		if (internal._index === -1) continue;
 
@@ -155,8 +158,8 @@ export function patchChildren(parentInternal, children, parentDom) {
 	/** @type {Internal | null} */
 	let ldsNode = wipLDS[wipLDS.length - 1];
 	while (ldsNode) {
-		// Mark node as being in the longest increasing subsequence (_index = -2)
-		ldsNode._index = LDSMarker;
+		// This node is on the longest decreasing subsequence so clear INSERT_NODE flag
+		ldsNode.flags &= ~INSERT_INTERNAL;
 		ldsNode = ldsNode._prevLDS;
 	}
 
@@ -179,16 +182,18 @@ export function patchChildren(parentInternal, children, parentDom) {
 
 		if (internal._index === -1) {
 			mount(internal, parentDom, getDomSibling(internal));
+			insert(internal, parentDom);
 		} else {
 			// TODO: Skip over non-renderable vnodes
 			patch(internal, children[index], parentDom);
-		}
-
-		if (internal._index > LDSMarker) {
-			insert(internal, parentDom);
+			if (internal.flags & INSERT_INTERNAL) {
+				insert(internal, parentDom);
+			}
 		}
 
 		if (!prevInternal) parentInternal._child = internal;
+
+		internal.flags &= ~INSERT_INTERNAL;
 
 		// for now, we're only using double-links internally to this function:
 		internal._prev = internal._prevLDS = null;
