@@ -117,6 +117,8 @@ export function patchChildren(parentInternal, children, parentDom) {
 	}
 
 	// Step 3. Find the longest decreasing subsequence
+	// TODO: Move this into it's own function
+	// TODO: Check prevInternal exits before running (aka we are unmounting everything);
 	// TODO: Ideally only run this if something has moved
 	// TODO: Replace _prevLDS with _next. Doing this will make _next meaningless for a moment
 	// TODO: Explore trying to do this without an array, maybe next pointers? Or maybe reuse the array

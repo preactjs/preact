@@ -34,15 +34,14 @@ export function unmount(internal, parentInternal, skipRemove) {
 		}
 	}
 
-	if ((r = internal._children)) {
-		for (; i < r.length; i++) {
-			if (r[i]) {
-				unmount(
-					r[i],
-					parentInternal,
-					skipRemove ? ~internal.flags & TYPE_ROOT : internal.flags & TYPE_DOM
-				);
-			}
+	if ((r = internal._child)) {
+		while (r) {
+			unmount(
+				r,
+				parentInternal,
+				skipRemove ? ~internal.flags & TYPE_ROOT : internal.flags & TYPE_DOM
+			);
+			r = r._next;
 		}
 	}
 

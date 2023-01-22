@@ -443,8 +443,6 @@ describe.only('keys', () => {
 		// ]);
 	});
 
-	// eslint-disable-next-line jest/no-commented-out-tests
-	/*
 	it("should not preserve state when a component's keys are different", () => {
 		const Stateful = createStateful('Stateful');
 
@@ -844,5 +842,4 @@ describe.only('keys', () => {
 			done();
 		});
 	});
-	*/
 });
