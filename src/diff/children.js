@@ -181,6 +181,8 @@ export function patchChildren(parentInternal, children, parentDom) {
 		index--;
 
 		prevInternal = internal._prev;
+
+		// for now, we're only using double-links internally to this function:
 		internal._prev = internal._prevLDS = null;
 
 		if (prevInternal === parentInternal) prevInternal = undefined;
@@ -200,7 +202,10 @@ export function patchChildren(parentInternal, children, parentDom) {
 
 		internal.flags &= ~INSERT_INTERNAL;
 
-		// for now, we're only using double-links internally to this function:
+		// TODO: this index should match the index of the matching vnode. So any
+		// skipping over of non-renderables should move this index accordingly.
+		// Doing this should help with null placeholders and enable us to skip the
+		// LIS algorithm for situations like `{condition && <div />}`
 		internal._index = index;
 		internal = prevInternal;
 	}

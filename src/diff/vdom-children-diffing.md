@@ -60,8 +60,8 @@ Typically, virtual dom keys are strings. A more realistic example might look som
 
 ```text
 Original array
-           key: a c b e d f
-original index: 0 1 2 3 4 5
+  key: a c b e d f
+index: 0 1 2 3 4 5
 
 New array
            key: a b c d e f
@@ -79,7 +79,65 @@ This insight is big! We can simplify what we need to search for now. Instead of 
 
 Finding the longest increasing subsequence is an easier algorithm because we are only looking at one array (the new array with the mapped indices) and has a better time complexity: $O(n\log(n))$. Let's take a look at the algorithm to do this.
 
-### Algorithm
+### Basic dynamic programming algorithm
+
+Let's start by writing a simple loop to find and track the first increasing subsequence to get us started:
+
+```js
+/**
+ * Longest increasing subsequence (LIS) algorithm
+ * @param {number[]} nums An array of numbers to find the longest increasing subsequence
+ * @returns {number[]} The items in the longest increasing subsequence of nums
+ */
+function findLIS(nums) {
+	// If there are no items, just return an empty array
+	if (nums.length < 0) {
+		return [];
+	}
+
+	// There is at least one item in the array, so let's get started by adding it to
+	// start our longest increasing subsequence.
+	/** @type {number[]} The indicies of the items in the longest increasing subsequence */
+	const lisIndices = [0];
+
+	for (let i = 1; i < nums.length; i++) {
+		/** The next value from nums to consider */
+		const nextValue = nums[i];
+
+		/** Last index of current longest increasing subsequence */
+		const lastIndex = lisIndices[lisIndices.length - 1];
+		/** Last value in our current longest increasing subsequence */
+		const lastValue = nums[lastIndex];
+
+		if (nums[i] > lastValue) {
+			// The next value in nums is greater than the last value in our current
+			// increasing subsequence. Let's tack this index at the end of the
+			// sequence
+			lisIndices.push(i);
+		} else {
+			// We'll come back to this part
+		}
+	}
+
+	// Now that lisIndices has all the indices of our increasing subsequence,
+	// let's add those items to an array and return the result.
+	const result = [];
+	for (let index of lisIndices) {
+		result.push(nums[index]);
+	}
+
+	return result;
+}
+```
+
+TODO: This code currently only finds
+
+## Algorithm
+
+Design decisions:
+
+1. Use linked list for perf and memory reasons
+2. Iterate backwards cuz `insertBefore` is the API available on `Node` in DOM. We can't use `after` or `before` cuz DocumentFragment and Document don't support it.
 
 TODO: Talk about `insertBefore` and how DOM objects such as Document and DocumentFragment only support `insertBefore` and not newer methods such as `after` or `before` since they are only containers. You can't place a node after the document which is the root container. This limitation motivates using `prev` pointers in our algorithm.
 
@@ -87,16 +145,61 @@ For understanding this algorithm, we are going to use a linked list to represent
 
 ```ts
 interface Node {
-	originalIndex: number;
+	/** The position of this node in the original list of children */
+	index: number;
 	next: Node | null;
 }
 ```
 
-The list we are searching through is the list of
+TODO: finish
 
 ## Adding new nodes and deletions
 
 TODO: fill out
+
+## Summary
+
+Basic algorithm for diffing virtual dom children:
+
+1. Find matches between current and new children
+2. Determine which children should move
+3. Unmount, mount, and move children to match the new order
+
+When determining which children should move, we want to minimize the number of children that move (moving DOM nodes can be expensive). To do this, we need to determine longest subsequence of children that didn't move. One way to do this is to find the longest common subsequence between the current children and next children. However, the longest common subsequence runs in $O(n^2)$ time.
+
+If we map the array of current and next children into new arrays using their indices from the current children array, we can run a more efficient algorithm. For example, given current children of `a c b e d f` and next children of `a b c d e f`, we use the current children array to create a map of item to index in that array: `{a: 0, c: 1, b: 2, e: 3, d: 4, f: 5}`. Now create arrays using this map.
+
+```text
+Current children
+  key: a c b e d f
+index: 0 1 2 3 4 5
+
+New children
+           key: a b c d e f
+original index: 0 2 1 4 3 5
+```
+
+Because the original array will always be sorted in increasing order, any common subsequence between the current and new children will also be increasing. Said another way, any increasing subsequence of the new children array is also a subsequence in the current children. So if we find the longest increasing subsequence in the new children array, we've found the longest common subsequence between the two arrays! Looking for the longest increasing subsequence, we no longer need to compare the two arrays and can instead just look at the new children array.
+
+To find the longest increasing subsequence, we need to keep track of two things as we traverse the array:
+
+1. The node/index that ends the smallest (in value) subsequence of each length
+
+   For example, the subsequence `0 1 2` is smaller than `4 5 6` since the values in the subsequence are smaller
+
+2. The complete subsequence for each length
+
+For #1, let's take a look at two examples, `0 8 3 6` and `4 5 3 2`. Upon traversing over the first two elements (`0 8` in the first example and `4 5` in the second), we add them to our current increasing subsequence since they are all increasing. However, when we get to `3`, we need to decide whether to throw away our existing subsequence to include `3` or not. In first example, we should use `3` because using `3` gives us a longer subsequence `0 3 6`. But in the second example, we should not because `4 5` is the longest increasing subsequence.
+
+This decision is where #1 comes into play. After traversing the first two elements we end up with array `[0, 1]` signaling that the smallest increasing subsequence of length 1 starts at index `0`, the smallest subsequence of length 2 starts at index `2`, and so on. Upon reaching the value `3`, we search through our existing array to see if it can form start a smaller subsequence.
+
+In the first example, `3 < 8` so we replace the `8`'s index (`1`) with `3`'s index: `[0, 2]`. When we get to `6`, the tip of our subsequence is the value at index `2` (`3`). Since `6 > 3`, we add to our subsequence.
+
+In the second example, `3 < 4` so we replace `4`'s index (`0`) with `3`'s index: `[2, 1]`. However, we have now broken our subsequence. `3` doesn't come before `5` in the original array. Doing this is okay though because this array we are using is only keeping track of the index that starts the subsequence at that length.
+
+And this is where #2 comes into play. Since #1 only keeps tracks of the start of an increasing subsequence, we use an additional data structure to keep track of what the actual subsequence that starts at that index is. This data structure can be an array of the index that comes before current index in its increasing subsequence, or if using a linked list, a pointer to the previous node in its increasing subsequence.
+
+In Preact, we use linked lists to traverse the virtual DOM tree for better memory and performance. Also, to support DOM objects such as Document and DocumentFragment, we only use the `insertBefore` method to move DOM nodes around. Because `insertBefore` requires knowing the node that comes after the node to insert, we loop through children backwards, setting up a nodes next sibling before itself.
 
 ## Acknowledgements
 
