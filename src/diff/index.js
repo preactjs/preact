@@ -75,10 +75,10 @@ export function diff(
 			} else {
 				// Instantiate the new component
 				if ('prototype' in newType && newType.prototype.render) {
-					// @ts-ignore The check above verifies that newType is suppose to be constructed
+					// @ts-expect-error The check above verifies that newType is suppose to be constructed
 					newVNode._component = c = new newType(newProps, componentContext); // eslint-disable-line new-cap
 				} else {
-					// @ts-ignore Trust me, Component implements the interface we want
+					// @ts-expect-error Trust me, Component implements the interface we want
 					newVNode._component = c = new Component(newProps, componentContext);
 					c.constructor = newType;
 					c.render = doRender;
@@ -308,11 +308,11 @@ export function commitRoot(commitQueue, root, refQueue) {
 
 	commitQueue.some(c => {
 		try {
-			// @ts-ignore Reuse the commitQueue variable here so the type changes
+			// @ts-expect-error Reuse the commitQueue variable here so the type changes
 			commitQueue = c._renderCallbacks;
 			c._renderCallbacks = [];
 			commitQueue.some(cb => {
-				// @ts-ignore See above ts-ignore on commitQueue
+				// @ts-expect-error See above ts-expect-error on commitQueue
 				cb.call(c);
 			});
 		} catch (e) {
@@ -376,19 +376,19 @@ function diffElementNodes(
 
 	if (dom == null) {
 		if (nodeType === null) {
-			// @ts-ignore createTextNode returns Text, we expect PreactElement
+			// @ts-expect-error createTextNode returns Text, we expect PreactElement
 			return document.createTextNode(newProps);
 		}
 
 		if (isSvg) {
 			dom = document.createElementNS(
 				'http://www.w3.org/2000/svg',
-				// @ts-ignore We know `newVNode.type` is a string
+				// @ts-expect-error We know `newVNode.type` is a string
 				nodeType
 			);
 		} else {
 			dom = document.createElement(
-				// @ts-ignore We know `newVNode.type` is a string
+				// @ts-expect-error We know `newVNode.type` is a string
 				nodeType,
 				newProps.is && newProps
 			);
