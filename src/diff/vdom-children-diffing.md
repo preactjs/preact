@@ -81,7 +81,7 @@ Finding the longest increasing subsequence is an easier algorithm because we are
 
 ### Basic dynamic programming algorithm
 
-Let's start by writing a simple loop to find and track the first increasing subsequence to get us started:
+Let's start by writing a simple loop to find and track the first increasing subsequence to get us started. In this code we'll use the acronym LIS (or `lis`) to represent "longest increasing subsequence".
 
 ```js
 /**
@@ -109,7 +109,7 @@ function findLIS(nums) {
 		/** Last value in our current longest increasing subsequence */
 		const lastValue = nums[lastIndex];
 
-		if (nums[i] > lastValue) {
+		if (lastValue < nextValue) {
 			// The next value in nums is greater than the last value in our current
 			// increasing subsequence. Let's tack this index at the end of the
 			// sequence
@@ -130,7 +130,35 @@ function findLIS(nums) {
 }
 ```
 
-TODO: This code currently only finds
+This code currently only finds the first increasing subsequence starting at the first item. To fix it to find the longest increasing subsequence, let's walk through some examples and talk about what we should change.
+
+#### Example 1: 0 8 3 6
+
+Let's run the array `0 8 3 6` through our algorithm:
+
+1.  `nums.length` is `4` so we continue on
+2.  We initialize `lisIndices` to `[0]` and start our loop at `1`
+3.  Loop iteration `i=1`:  
+    `lisIndices` is currently `[0]`
+    1. We initialize some variables:  
+       `nextValue = 8` (`nums[i]`)  
+       `lastIndex = 0` (`lisIndices[lisIndices.length - 1]`)  
+       `lastValue = 0` (`nums[lasIndex]`)
+    2. `0 < 8 == true` (`lastValue < nextValue`)  
+       The next value in our array is greater than the last value in our current increasing subsequence, so let's add it to the subsequence:
+    3. `lisIndices.push(1)`
+4.  Loop iteration `i=2`  
+    `lisIndices` is currently `[0, 1]`
+
+    1.  Initialize variables  
+        `nextValue = 3` (`nums[i]`)  
+        `lastIndex = 1` (`lisIndices[lisIndices.length - 1]`)  
+        `lastValue = 8` (`nums[lasIndex]`)
+    2.  `8 < 3 == false` (`lastValue < nextValue`)
+
+             		TODO: Here we've reached our first
+
+#### Example 2: 1 4 5 6 2 3
 
 ## Algorithm
 
