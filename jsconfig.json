@@ -10,7 +10,8 @@
       "preact/*": ["./*"]
     },
     "reactNamespace": "createElement",
-    "target": "es5"
+    "target": "es5",
+    "noEmit": true
   },
   "exclude": ["node_modules", "dist", "demo"]
 }
