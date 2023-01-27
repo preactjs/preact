@@ -1,4 +1,4 @@
-const { renderToString } = require('preact/server');
+const { renderToString } = require('preact-render-to-string');
 
 module.exports = {
 	renderToString,
