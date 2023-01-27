@@ -100,6 +100,9 @@ export interface PreactElement extends preact.ContainerNode {
 	// Setting styles
 	readonly style?: CSSStyleDeclaration;
 
+	// nextSibling required for inserting nodes
+	readonly nextSibling: ContainerNode | null;
+
 	// Input handling
 	value?: HTMLInputElement['value'];
 	checked?: HTMLInputElement['checked'];
