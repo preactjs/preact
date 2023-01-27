@@ -54,13 +54,13 @@ describe('components', () => {
 				toggleLocation = () => {
 					const oldLocation = this.state.location;
 					const newLocation = oldLocation === route1 ? route2 : route1;
-					console.log('Toggling  location', oldLocation, '->', newLocation);
+					// console.log('Toggling  location', oldLocation, '->', newLocation);
 					this.setState({ location: newLocation });
 				};
 			}
 
 			render() {
-				console.log('Rendering Router', { location: this.state.location });
+				// console.log('Rendering Router', { location: this.state.location });
 				return (
 					<RouterContext.Provider value={{ location: this.state.location }}>
 						{this.props.children}
@@ -77,9 +77,9 @@ describe('components', () => {
 				return (
 					<RouterContext.Consumer>
 						{contextValue => {
-							console.log('Rendering Route', {
-								location: contextValue.location
-							});
+							// console.log('Rendering Route', {
+							// 	location: contextValue.location
+							// });
 							// Pretend to do something with the context value
 							const newContextValue = { ...contextValue };
 							return (
@@ -98,11 +98,11 @@ describe('components', () => {
 			const { location } = useContext(RouterContext);
 
 			pageRenders.push({ location, localState });
-			console.log('Rendering Page', { location, localState });
+			// console.log('Rendering Page', { location, localState });
 
 			toggleLocalState = () => {
 				let newValue = !localState;
-				console.log('Toggling  localState', localState, '->', newValue);
+				// console.log('Toggling  localState', localState, '->', newValue);
 				setLocalState(newValue);
 			};
 
