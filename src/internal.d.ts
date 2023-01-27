@@ -45,7 +45,7 @@ export interface Options extends preact.Options {
 	_internal?(internal: Internal, vnode: VNode | string): void;
 }
 
-export type CommitQueue = Internal[];
+export type CommitQueue = ComponentInternal[];
 
 // Redefine ComponentFactory using our new internal FunctionalComponent interface above
 export type ComponentFactory<P> =
@@ -130,17 +130,12 @@ export interface VNode<P = {}> extends preact.VNode<P> {
  * An Internal is a persistent backing node within Preact's virtual DOM tree.
  * Think of an Internal like a long-lived VNode with stored data and tree linkages.
  */
-export interface Internal<P = {}> {
-	type: string | ComponentType<P>;
-	/** The props object for Elements/Components, and the string contents for Text */
-	props: (P & { children: ComponentChildren }) | string | number;
+export interface BaseInternal<P = {}> {
 	key: any;
 	ref: Ref<any> | null;
 
 	/** Bitfield containing information about the Internal or its component. */
 	flags: number;
-	/** Polymorphic property to store extensions like hooks on */
-	data: object | PreactNode;
 	/** The function that triggers in-place re-renders for an internal */
 	rerender: (internal: Internal) => void;
 
@@ -158,16 +153,52 @@ export interface Internal<P = {}> {
 	_component: Component | null;
 	/** This Internal's distance from the tree root */
 	_depth: number | null;
-	/** Callbacks to invoke when this internal commits */
-	_commitCallbacks: Array<() => void>;
-	_stateCallbacks: Array<() => void>; // Only class components
 }
+
+export interface ComponentInternal<P = {}> extends BaseInternal<P> {
+	type: ComponentType<P>;
+	props: P & { children: ComponentChildren };
+	/** Polymorphic property to store extensions like hooks on */
+	data: {
+		/** Callbacks to invoke when this internal commits */
+		_commitCallbacks: Array<() => void>;
+		_stateCallbacks: Array<() => void>; // Only class components
+		[key: string]: any;
+	};
+}
+
+export interface RootInternal<P = {}>
+	extends Exclude<ComponentInternal<P>, 'props'> {
+	props: P & { children: ComponentChildren; _parentDom: PreactNode };
+}
+
+export interface DomInternal<P = {}> extends BaseInternal<P> {
+	type: string;
+	/** The props object for Elements/Components, and the string contents for Text */
+	props: (P & { children: ComponentChildren }) | string | number;
+	data: PreactNode;
+}
+
+export type Internal<P = {}> =
+	| ComponentInternal<P>
+	| DomInternal<P>
+	| RootInternal<P>;
+
+export type isDomInternal<P = {}> = (
+	internal: Internal<P>
+) => internal is DomInternal<P>;
+export type isComponentInternal<P = {}> = (
+	internal: Internal<P>
+) => internal is ComponentInternal<P>;
+export type isRootInternal<P = {}> = (
+	internal: Internal<P>
+) => internal is RootInternal<P>;
 
 export interface Component<P = {}, S = {}> extends preact.Component<P, S> {
 	// When component is functional component, this is reset to functional component
 	constructor: ComponentType<P>;
 	state: S; // Override Component["state"] to not be readonly for internal use, specifically Hooks
-	_internal?: Internal<P> | null;
+	_internal?: ComponentInternal<P> | null;
 	_nextState?: S | null; // Only class components
 	/** Only used in the devtools to later dirty check if state has changed */
 	_prevState?: S | null;
