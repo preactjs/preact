@@ -85,12 +85,6 @@
 			"require": "./jsx-runtime/dist/jsxRuntime.js",
 			"umd": "./jsx-runtime/dist/jsxRuntime.umd.js"
 		},
-		"./server": {
-			"module": "./server/dist/server.mjs",
-			"import": "./server/dist/server.mjs",
-			"require": "./server/dist/server.js",
-			"umd": "./server/dist/server.umd.js"
-		},
     "./compat/client": {
 			"import": "./compat/client.mjs",
 			"require": "./compat/client.js"
@@ -127,19 +121,17 @@
 		"build:test-utils": "npm run -s _bundle -- --cwd test-utils",
 		"build:compat": "npm run -s _bundle -- --cwd compat --globals 'preact/hooks=preactHooks'",
 		"build:jsx": "npm run -s _bundle -- --cwd jsx-runtime",
-		"build:server": "npm run -s _bundle -- --cwd server",
 		"postbuild": "node ./config/compat-entries.js",
 		"dev": "microbundle watch --raw --format cjs --no-generateTypes",
 		"dev:hooks": "microbundle watch --raw --format cjs --cwd hooks --no-generateTypes",
 		"dev:compat": "microbundle watch --raw --format cjs --cwd compat --globals 'preact/hooks=preactHooks' --no-generateTypes",
 		"test": "npm-run-all build lint test:unit",
-		"test:unit": "run-p test:mocha test:mocha:server test:karma:minify test:ts",
+		"test:unit": "run-p test:mocha test:karma:minify test:ts",
 		"test:ts": "run-p test:ts:*",
 		"test:ts:core": "tsc -p test/ts/ && mocha --require \"@babel/register\" test/ts/**/*-test.js",
 		"test:ts:compat": "tsc -p compat/test/ts/",
 		"test:mocha": "mocha --recursive --require \"@babel/register\" test/shared test/node",
 		"test:mocha:watch": "npm run test:mocha -- --watch",
-		"test:mocha:server": "SERVER=true BABEL_ENV=test mocha -r @babel/register -r server/test/setup.js server/test/**/*.test.js --watch-ignore='benches/**'",
 		"test:karma": "cross-env COVERAGE=true BABEL_NO_MODULES=true karma start karma.conf.js --single-run",
 		"test:karma:minify": "cross-env COVERAGE=true MINIFY=true BABEL_NO_MODULES=true karma start karma.conf.js --single-run",
 		"test:karma:watch": "cross-env BABEL_NO_MODULES=true karma start karma.conf.js --no-single-run",
@@ -239,9 +231,6 @@
 		"jsx-runtime/dist",
 		"jsx-runtime/src",
 		"jsx-runtime/package.json",
-		"server/src",
-		"server/package.json",
-		"server/dist",
 		"test-utils/src",
 		"test-utils/package.json",
 		"test-utils/dist"
@@ -277,7 +266,6 @@
 		"@types/mocha": "^9.1.0",
 		"@types/node": "^14.14.10",
 		"babel-plugin-istanbul": "^6.0.0",
-		"babel-plugin-module-resolver": "^4.1.0",
 		"babel-plugin-transform-async-to-promises": "^0.8.15",
 		"babel-plugin-transform-rename-properties": "0.1.0",
 		"benchmark": "^2.1.4",
@@ -315,8 +303,5 @@
 		"sinon": "^9.2.3",
 		"sinon-chai": "^3.7.0",
 		"typescript": "3.5.3"
-	},
-	"dependencies": {
-		"pretty-format": "^27.5.1"
 	}
 }
