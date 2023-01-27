@@ -26,10 +26,7 @@ export interface ErrorInfo {
 
 export interface Options extends preact.Options {
 	/** Attach a hook that is invoked before render, mainly to check the arguments. */
-	_root?(
-		vnode: ComponentChild,
-		parent: Element | Document | ShadowRoot | DocumentFragment
-	): void;
+	_root?(vnode: ComponentChild, parent: preact.ContainerNode): void;
 	/** Attach a hook that is invoked before a vnode is diffed. */
 	_diff?(vnode: VNode): void;
 	/** Attach a hook that is invoked after a tree was mounted or was updated. */
@@ -44,8 +41,8 @@ export interface Options extends preact.Options {
 	_catchError(
 		error: any,
 		vnode: VNode,
-		oldVNode: VNode | undefined,
-		errorInfo: ErrorInfo | undefined
+		oldVNode?: VNode | undefined,
+		errorInfo?: ErrorInfo | undefined
 	): void;
 }
 
@@ -83,17 +80,34 @@ export interface ComponentClass<P = {}> extends preact.ComponentClass<P> {
 // Redefine ComponentType using our new internal FunctionComponent interface above
 export type ComponentType<P = {}> = ComponentClass<P> | FunctionComponent<P>;
 
-export interface PreactElement extends HTMLElement {
+export interface PreactElement extends preact.ContainerNode {
+	// SVG detection
+	readonly ownerSVGElement?: SVGSVGElement | null;
+	// Property used to update Text nodes
+	data?: string;
+	// Property to set __dangerouslySetInnerHTML
+	innerHTML?: string;
+
+	// Attribute reading and setting
+	readonly attributes?: Element['attributes'];
+	setAttribute?: Element['setAttribute'];
+	removeAttribute?: Element['removeAttribute'];
+
+	// Event listeners
+	addEventListener?: Element['addEventListener'];
+	removeEventListener?: Element['removeEventListener'];
+
+	// Setting styles
+	readonly style?: CSSStyleDeclaration;
+
+	// Input handling
+	value?: HTMLInputElement['value'];
+	checked?: HTMLInputElement['checked'];
+
+	// Internal properties
 	_children?: VNode<any> | null;
 	/** Event listeners to support event delegation */
 	_listeners?: Record<string, (e: Event) => void>;
-
-	// Preact uses this attribute to detect SVG nodes
-	ownerSVGElement?: SVGElement | null;
-
-	// style: HTMLElement["style"]; // From HTMLElement
-
-	data?: string | number; // From Text node
 }
 
 // We use the `current` property to differentiate between the two kinds of Refs so

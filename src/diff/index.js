@@ -312,7 +312,7 @@ export function commitRoot(commitQueue, root, refQueue) {
 			commitQueue = c._renderCallbacks;
 			c._renderCallbacks = [];
 			commitQueue.some(cb => {
-				// @ts-expect-error See above ts-expect-error on commitQueue
+				// @ts-expect-error See above comment on commitQueue
 				cb.call(c);
 			});
 		} catch (e) {
@@ -349,7 +349,8 @@ function diffElementNodes(
 ) {
 	let oldProps = oldVNode.props;
 	let newProps = newVNode.props;
-	let nodeType = newVNode.type;
+	let nodeType = /** @type {string} */ (newVNode.type);
+	/** @type {any} */
 	let i = 0;
 
 	// Tracks entering and exiting SVG namespace when descending through the tree.
@@ -376,22 +377,13 @@ function diffElementNodes(
 
 	if (dom == null) {
 		if (nodeType === null) {
-			// @ts-expect-error createTextNode returns Text, we expect PreactElement
 			return document.createTextNode(newProps);
 		}
 
 		if (isSvg) {
-			dom = document.createElementNS(
-				'http://www.w3.org/2000/svg',
-				// @ts-expect-error We know `newVNode.type` is a string
-				nodeType
-			);
+			dom = document.createElementNS('http://www.w3.org/2000/svg', nodeType);
 		} else {
-			dom = document.createElement(
-				// @ts-expect-error We know `newVNode.type` is a string
-				nodeType,
-				newProps.is && newProps
-			);
+			dom = document.createElement(nodeType, newProps.is && newProps);
 		}
 
 		// we created a new parent, so none of the previously attached children can be reused:

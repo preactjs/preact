@@ -259,6 +259,12 @@ export function diffChildren(
 	}
 }
 
+/**
+ * @param {import('../internal').VNode} childVNode
+ * @param {import('../internal').PreactElement} oldDom
+ * @param {import('../internal').PreactElement} parentDom
+ * @returns {import('../internal').PreactElement}
+ */
 function reorderChildren(childVNode, oldDom, parentDom) {
 	// Note: VNodes in nested suspended trees may be missing _children.
 	let c = childVNode._children;
@@ -303,6 +309,12 @@ export function toChildArray(children, out) {
 	return out;
 }
 
+/**
+ * @param {import('../internal').PreactElement} parentDom
+ * @param {import('../internal').PreactElement} newDom
+ * @param {import('../internal').PreactElement} oldDom
+ * @returns {import('../internal').PreactElement}
+ */
 function placeChild(parentDom, newDom, oldDom) {
 	if (oldDom == null || oldDom.parentNode !== parentDom) {
 		parentDom.insertBefore(newDom, null);
