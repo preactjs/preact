@@ -277,7 +277,7 @@ export namespace h {
 
 interface ContainerNode {
 	nodeType: Node['nodeType'];
-	parentNode: Node['nodeType'];
+	parentNode: Node['parentNode'];
 	firstChild: Node['firstChild'];
 	insertBefore: Node['insertBefore'];
 	appendChild: Node['appendChild'];
