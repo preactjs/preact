@@ -82,11 +82,11 @@ export type ComponentType<P = {}> = ComponentClass<P> | FunctionComponent<P>;
 
 export interface PreactElement extends preact.ContainerNode {
 	// SVG detection
-	readonly ownerSVGElement?: SVGSVGElement | null;
+	readonly ownerSVGElement?: SVGElement['ownerSVGElement'];
 	// Property used to update Text nodes
-	data?: string;
+	data?: CharacterData['data'];
 	// Property to set __dangerouslySetInnerHTML
-	innerHTML?: string;
+	innerHTML?: Element['innerHTML'];
 
 	// Attribute reading and setting
 	readonly attributes?: Element['attributes'];
