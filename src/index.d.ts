@@ -275,9 +275,19 @@ export namespace h {
 // Preact render
 // -----------------------------------
 
+interface ContainerNode {
+	nodeType: Node['nodeType'];
+	parentNode: Node['parentNode'];
+	firstChild: Node['firstChild'];
+	insertBefore: Node['insertBefore'];
+	appendChild: Node['appendChild'];
+	removeChild: Node['removeChild'];
+	childNodes: ArrayLike<Node>
+}
+
 export function render(
 	vnode: ComponentChild,
-	parent: Element | Document | ShadowRoot | DocumentFragment
+	parent: ContainerNode
 ): void;
 /**
  * @deprecated Will be removed in v11.
@@ -286,12 +296,12 @@ export function render(
  */
 export function render(
 	vnode: ComponentChild,
-	parent: Element | Document | ShadowRoot | DocumentFragment,
+	parent: ContainerNode,
 	replaceNode?: Element | Text
 ): void;
 export function hydrate(
 	vnode: ComponentChild,
-	parent: Element | Document | ShadowRoot | DocumentFragment
+	parent: ContainerNode
 ): void;
 export function cloneElement(
 	vnode: VNode<any>,
