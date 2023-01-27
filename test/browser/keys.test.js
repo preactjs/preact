@@ -286,7 +286,7 @@ describe.only('keys', () => {
 		]);
 	});
 
-	it.only('should move keyed children to the beginning', () => {
+	it('should move keyed children to the beginning', () => {
 		const values = ['b', 'c', 'd', 'a'];
 
 		render(<List values={values} />, scratch);
