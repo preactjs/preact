@@ -4,16 +4,35 @@ import { setupScratch, teardown } from '../_util/helpers';
 
 /** @jsx createElement */
 
+/**
+ * @typedef {import('../../src/internal').Internal} Internal
+ * @typedef {import('../../src/internal').PreactElement} PreactElement
+ */
+
 describe('getParentDom', () => {
-	/** @type {import('../../src/internal').PreactElement} */
+	/** @type {PreactElement} */
 	let scratch;
 
-	const getRoot = dom => dom._children;
+	/** @type {(dom: PreactElement) => Internal} */
+	const getRoot = dom => dom._child;
 
 	const Root = props => props.children;
 	const createPortal = (vnode, parent) => (
 		<Root _parentDom={parent}>{vnode}</Root>
 	);
+
+	/**
+	 * @param {Internal} parent
+	 * @param {(internal: Internal, index: number) => void} cb
+	 */
+	function forEachChild(parent, cb) {
+		let index = 0;
+		let child = parent._child;
+		while (child) {
+			cb(child, index++);
+			child = child._next;
+		}
+	}
 
 	beforeEach(() => {
 		scratch = setupScratch();
@@ -34,11 +53,11 @@ describe('getParentDom', () => {
 			scratch
 		);
 
-		let domInternals = getRoot(scratch)._children[0]._children;
-		for (let internal of domInternals) {
+		let parentInternal = getRoot(scratch)._child;
+		forEachChild(parentInternal, internal => {
 			expect(internal.type).to.equal('div');
 			expect(getParentDom(internal)).to.equalNode(scratch.firstChild);
-		}
+		});
 	});
 
 	it('should find direct parent of text node', () => {
@@ -49,12 +68,12 @@ describe('getParentDom', () => {
 			scratch
 		);
 
-		let domInternals = getRoot(scratch)._children[0]._children;
+		let parent = getRoot(scratch)._child;
 		let expectedTypes = ['div', null, 'div'];
-		for (let i = 0; i < domInternals.length; i++) {
-			expect(domInternals[i].type).to.equal(expectedTypes[i]);
-			expect(getParentDom(domInternals[i])).to.equalNode(scratch.firstChild);
-		}
+		forEachChild(parent, (internal, i) => {
+			expect(internal.type).to.equal(expectedTypes[i]);
+			expect(getParentDom(internal)).to.equalNode(scratch.firstChild);
+		});
 	});
 
 	it('should find parent through Fragments', () => {
@@ -69,8 +88,8 @@ describe('getParentDom', () => {
 		);
 
 		let domInternals = [
-			getRoot(scratch)._children[0]._children[0]._children[0],
-			getRoot(scratch)._children[0]._children[1]._children[0]
+			getRoot(scratch)._child._child._child,
+			getRoot(scratch)._child._child._next._child
 		];
 
 		let expectedTypes = ['div', null];
@@ -97,8 +116,8 @@ describe('getParentDom', () => {
 		);
 
 		let domInternals = [
-			getRoot(scratch)._children[0]._children[0]._children[0]._children[0],
-			getRoot(scratch)._children[0]._children[1]._children[0]._children[0]
+			getRoot(scratch)._child._child._child._child,
+			getRoot(scratch)._child._child._next._child._child
 		];
 
 		let expectedTypes = ['div', null];
@@ -127,8 +146,8 @@ describe('getParentDom', () => {
 		);
 
 		let domInternals = [
-			getRoot(scratch)._children[0]._children[0]._children[0],
-			getRoot(scratch)._children[0]._children[1]._children[0]
+			getRoot(scratch)._child._child._child,
+			getRoot(scratch)._child._child._next._child
 		];
 
 		let expectedTypes = [Foo, Fragment];
@@ -150,8 +169,7 @@ describe('getParentDom', () => {
 			scratch
 		);
 
-		let internal = getRoot(scratch)._children[0]._children[1]._children[0]
-			._children[0];
+		let internal = getRoot(scratch)._child._child._next._child._child;
 		let parentDom = getParentDom(internal);
 
 		expect(internal.type).to.equal('span');
@@ -175,8 +193,7 @@ describe('getParentDom', () => {
 			scratch
 		);
 
-		let internal = getRoot(scratch)._children[0]._children[0]._children[0]
-			._children[0];
+		let internal = getRoot(scratch)._child._child._child._child;
 		let parent = getParentDom(internal);
 
 		expect(internal.type).to.equal('p');
@@ -192,7 +209,7 @@ describe('getParentDom', () => {
 			scratch
 		);
 
-		const internal = getRoot(scratch)._children[0];
+		const internal = getRoot(scratch)._child;
 		expect(internal.type).to.equal(Foo);
 		expect(getParentDom(internal)).to.equal(scratch);
 	});
@@ -215,7 +232,7 @@ describe('getParentDom', () => {
 
 		expect(scratch.innerHTML).to.equal('<div></div>');
 
-		let internal = getRoot(scratch)._children[0]._children[0];
+		let internal = getRoot(scratch)._child._child;
 		expect(internal.type).to.equal(Root);
 		expect(getParentDom(internal)).to.equalNode(portalParent);
 	});
@@ -238,11 +255,11 @@ describe('getParentDom', () => {
 
 		expect(scratch.innerHTML).to.equal('<div></div>');
 
-		let fooInternal = getRoot(scratch)._children[0]._children[0]._children[0];
+		let fooInternal = getRoot(scratch)._child._child._child;
 		expect(fooInternal.type).to.equal(Foo);
 		expect(getParentDom(fooInternal)).to.equalNode(portalParent);
 
-		let divInternal = fooInternal._children[0];
+		let divInternal = fooInternal._child;
 		expect(divInternal.type).to.equal('div');
 		expect(getParentDom(divInternal)).to.equalNode(portalParent);
 	});
@@ -260,8 +277,7 @@ describe('getParentDom', () => {
 
 		expect(scratch.innerHTML).to.equal('<div></div>');
 
-		let internal = getRoot(scratch)._children[0]._children[0]._children[0]
-			._children[0];
+		let internal = getRoot(scratch)._child._child._child._child;
 		expect(internal.type).to.equal('div');
 		expect(getParentDom(internal)).to.equalNode(portalParent);
 	});
