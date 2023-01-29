@@ -207,6 +207,13 @@ export function patchChildren(parentInternal, children, parentDom) {
 
 		internal.flags &= ~INSERT_INTERNAL;
 
+		let oldRef = internal._prevRef;
+		if (internal.ref != oldRef) {
+			if (oldRef) applyRef(oldRef, null, internal);
+			if (internal.ref)
+				applyRef(internal.ref, internal._component || internal.data, internal);
+		}
+
 		// TODO: this index should match the index of the matching vnode. So any
 		// skipping over of non-renderables should move this index accordingly.
 		// Doing this should help with null placeholders and enable us to skip the
