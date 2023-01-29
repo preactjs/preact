@@ -123,47 +123,49 @@ export function patchChildren(parentInternal, children, parentDom) {
 	// TODO: Replace _prevLDS with _next. Doing this will make _next meaningless for a moment
 	// TODO: Explore trying to do this without an array, maybe next pointers? Or maybe reuse the array
 	internal = prevInternal;
-	/** @type {Internal[]} */
-	const wipLDS = [internal];
-	internal.flags |= INSERT_INTERNAL;
-
-	while ((internal = internal._prev) !== parentInternal) {
-		// Mark all internals as requiring insertion. We will clear this flag for
-		// internals on longest decreasing subsequence
+	if (internal) {
+		/** @type {Internal[]} */
+		const wipLDS = [internal];
 		internal.flags |= INSERT_INTERNAL;
 
-		// Skip over newly mounted internals. They will be mounted in place.
-		if (internal._index === -1) continue;
+		while ((internal = internal._prev) !== parentInternal) {
+			// Mark all internals as requiring insertion. We will clear this flag for
+			// internals on longest decreasing subsequence
+			internal.flags |= INSERT_INTERNAL;
 
-		let ldsTail = wipLDS[wipLDS.length - 1];
-		if (ldsTail._index > internal._index) {
-			internal._prevLDS = ldsTail;
-			wipLDS.push(internal);
-		} else {
-			// Search for position in wipLIS where node should go. It should replace
-			// the first node where node > wip[i] (though keep in mind, we are
-			// iterating over the list backwards). Example:
-			// ```
-			// wipLIS = [4,3,1], node = 2.
-			// Node should replace 1: [4,3,2]
-			// ```
-			let i = wipLDS.length;
-			// TODO: Binary search?
-			while (--i >= 0 && wipLDS[i]._index < internal._index) {}
+			// Skip over newly mounted internals. They will be mounted in place.
+			if (internal._index === -1) continue;
 
-			wipLDS[i + 1] = internal;
-			let prevLDS = i < 0 ? null : wipLDS[i];
-			internal._prevLDS = prevLDS;
+			let ldsTail = wipLDS[wipLDS.length - 1];
+			if (ldsTail._index > internal._index) {
+				internal._prevLDS = ldsTail;
+				wipLDS.push(internal);
+			} else {
+				// Search for position in wipLIS where node should go. It should replace
+				// the first node where node > wip[i] (though keep in mind, we are
+				// iterating over the list backwards). Example:
+				// ```
+				// wipLIS = [4,3,1], node = 2.
+				// Node should replace 1: [4,3,2]
+				// ```
+				let i = wipLDS.length;
+				// TODO: Binary search?
+				while (--i >= 0 && wipLDS[i]._index < internal._index) {}
+
+				wipLDS[i + 1] = internal;
+				let prevLDS = i < 0 ? null : wipLDS[i];
+				internal._prevLDS = prevLDS;
+			}
 		}
-	}
 
-	// Step 4. Mark internals in longest decreasing subsequence
-	/** @type {Internal | null} */
-	let ldsNode = wipLDS[wipLDS.length - 1];
-	while (ldsNode) {
-		// This node is on the longest decreasing subsequence so clear INSERT_NODE flag
-		ldsNode.flags &= ~INSERT_INTERNAL;
-		ldsNode = ldsNode._prevLDS;
+		// Step 4. Mark internals in longest decreasing subsequence
+		/** @type {Internal | null} */
+		let ldsNode = wipLDS[wipLDS.length - 1];
+		while (ldsNode) {
+			// This node is on the longest decreasing subsequence so clear INSERT_NODE flag
+			ldsNode.flags &= ~INSERT_INTERNAL;
+			ldsNode = ldsNode._prevLDS;
+		}
 	}
 
 	// Step 5. Walk backwards over the newly-assigned _prev properties, visiting
