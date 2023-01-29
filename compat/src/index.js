@@ -89,9 +89,11 @@ function findDOMNode(component) {
 		return null;
 	} else if (component.nodeType == 1) {
 		return component;
+	} else if (component._internal._child == null) {
+		return null;
 	}
 
-	return getChildDom(component._internal, 0);
+	return getChildDom(component._internal._child, 0);
 }
 
 /**

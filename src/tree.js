@@ -110,10 +110,12 @@ export function createInternal(vnode, parentInternal) {
 	return internal;
 }
 
+/** @type {(internal: import('./internal').Internal) => boolean} */
 const shouldSearchComponent = internal =>
 	internal.flags & TYPE_COMPONENT &&
 	(!(internal.flags & TYPE_ROOT) ||
-		internal.props._parentDom == getParentDom(internal._parent));
+		(internal._parent &&
+			internal.props._parentDom == getParentDom(internal._parent)));
 
 /**
  * Get the next DOM Internal after a given index within a parent Internal.
@@ -123,48 +125,65 @@ const shouldSearchComponent = internal =>
  * @returns {import('./internal').PreactNode}
  */
 export function getDomSibling(internal, childIndex) {
-	// basically looking for the next pointer that can be used to perform an insertBefore:
-	// @TODO inline the null case, since it's only used in patch.
-	if (childIndex == null) {
-		// Use childIndex==null as a signal to resume the search from the vnode's sibling
-		const next = internal._next;
-		return next && (getChildDom(next) || getDomSibling(next));
+	// // basically looking for the next pointer that can be used to perform an insertBefore:
+	// // @TODO inline the null case, since it's only used in patch.
+	// if (childIndex == null) {
+	// 	// Use childIndex==null as a signal to resume the search from the vnode's sibling
+	// 	const next = internal._next;
+	// 	return next && (getChildDom(next) || getDomSibling(next));
 
-		// return next && (getChildDom(next) || getDomSibling(next));
-		// let sibling = internal;
-		// while (sibling = sibling._next) {
-		// 	let domChildInternal = getChildDom(sibling);
-		// 	if (domChildInternal) return domChildInternal;
-		// }
+	// 	// return next && (getChildDom(next) || getDomSibling(next));
+	// 	// let sibling = internal;
+	// 	// while (sibling = sibling._next) {
+	// 	// 	let domChildInternal = getChildDom(sibling);
+	// 	// 	if (domChildInternal) return domChildInternal;
+	// 	// }
 
-		// const parent = internal._parent;
-		// let child = parent._child;
-		// while (child) {
-		// 	if (child === internal) {
-		// 		return getDomSibling(child._next);
-		// 	}
-		// 	child = child._next;
-		// }
+	// 	// const parent = internal._parent;
+	// 	// let child = parent._child;
+	// 	// while (child) {
+	// 	// 	if (child === internal) {
+	// 	// 		return getDomSibling(child._next);
+	// 	// 	}
+	// 	// 	child = child._next;
+	// 	// }
 
-		// return getDomSibling(
-		// 	internal._parent,
-		// 	internal._parent._children.indexOf(internal) + 1
-		// );
+	// 	// return getDomSibling(
+	// 	// 	internal._parent,
+	// 	// 	internal._parent._children.indexOf(internal) + 1
+	// 	// );
+	// }
+
+	// let childDom = getChildDom(internal._child);
+	// if (childDom) {
+	// 	return childDom;
+	// }
+
+	// // If we get here, we have not found a DOM node in this vnode's children. We
+	// // must resume from this vnode's sibling (in it's parent _children array).
+	// // Only climb up and search the parent if we aren't searching through a DOM
+	// // VNode (meaning we reached the DOM parent of the original vnode that began
+	// // the search). Note, the top of the tree has _parent == null so avoiding that
+	// // here.
+	// return internal._parent && shouldSearchComponent(internal)
+	// 	? getDomSibling(internal)
+	// 	: null;
+
+	if (internal._next) {
+		let childDom = getChildDom(internal._next);
+		if (childDom) {
+			return childDom;
+		}
 	}
 
-	let childDom = getChildDom(internal._child);
-	if (childDom) {
-		return childDom;
-	}
-
-	// If we get here, we have not found a DOM node in this vnode's children. We
-	// must resume from this vnode's sibling (in it's parent _children array).
-	// Only climb up and search the parent if we aren't searching through a DOM
-	// VNode (meaning we reached the DOM parent of the original vnode that began
-	// the search). Note, the top of the tree has _parent == null so avoiding that
-	// here.
-	return internal._parent && shouldSearchComponent(internal)
-		? getDomSibling(internal)
+	// If we get here, we have not found a DOM node in this internal's siblings so
+	// we need to search up through the parent's sibling's sub tree for a DOM
+	// Node, assuming the parent's siblings should be searched. If the parent is
+	// DOM node or a root node with a different parentDOM, we shouldn't search
+	// through it since any siblings we'd find wouldn't be siblings of the current
+	// internal's DOM
+	return internal._parent && shouldSearchComponent(internal._parent)
+		? getDomSibling(internal._parent)
 		: null;
 }
 
