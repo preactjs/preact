@@ -170,7 +170,7 @@ export function getDomSibling(internal, childIndex) {
 	// 	: null;
 
 	if (internal._next) {
-		let childDom = getChildDom(internal._next);
+		let childDom = getFirstDom(internal._next);
 		if (childDom) {
 			return childDom;
 		}
@@ -188,13 +188,15 @@ export function getDomSibling(internal, childIndex) {
 }
 
 /**
- * Get the root DOM element for a given subtree.
- * Returns the nearest DOM element within a given Internal's subtree.
- * If the provided Internal _is_ a DOM Internal, its DOM will be returned.
- * @param {import('./internal').Internal} internal The internal to begin the search
+ * Search the given internal and it's siblings for a DOM element. If the
+ * provided Internal _is_ a DOM Internal, its DOM will be returned. If you want
+ * to find the first DOM node of an Internal's subtree, than pass in
+ * `internal._child`
+ * @param {import('./internal').Internal} internal The internal to begin the
+ * search
  * @returns {import('./internal').PreactElement}
  */
-export function getChildDom(internal) {
+export function getFirstDom(internal) {
 	while (internal) {
 		// this is a DOM internal
 		if (internal.flags & TYPE_DOM) {
@@ -209,7 +211,7 @@ export function getChildDom(internal) {
 			!(internal.flags & TYPE_ROOT) ||
 			internal.props._parentDom == getParentDom(internal._parent)
 		) {
-			const childDom = getChildDom(internal._child);
+			const childDom = getFirstDom(internal._child);
 			if (childDom) return childDom;
 		}
 

@@ -14,7 +14,7 @@ import {
 import { mount } from './mount';
 import { patch } from './patch';
 import { unmount } from './unmount';
-import { createInternal, getChildDom, getDomSibling } from '../tree';
+import { createInternal, getDomSibling } from '../tree';
 
 /**
  * Scenarios:

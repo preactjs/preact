@@ -32,7 +32,7 @@ import {
 	REACT_ELEMENT_TYPE,
 	__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED
 } from './render';
-import { getChildDom } from '../../src/tree';
+import { getFirstDom } from '../../src/tree';
 export * from './scheduler';
 
 const version = '17.0.2'; // trick libraries to think we are react
@@ -93,7 +93,7 @@ function findDOMNode(component) {
 		return null;
 	}
 
-	return getChildDom(component._internal._child, 0);
+	return getFirstDom(component._internal._child, 0);
 }
 
 /**
