@@ -191,8 +191,13 @@ export function patchChildren(parentInternal, children, parentDom) {
 			mount(internal, parentDom, getDomSibling(internal));
 			insert(internal, parentDom);
 		} else {
-			// TODO: Skip over non-renderable vnodes
-			patch(internal, children[index], parentDom);
+			let vnode = children[index];
+			while (vnode == null || vnode === true || vnode === false) {
+				index--;
+				vnode = children[index];
+			}
+
+			patch(internal, vnode, parentDom);
 			if (internal.flags & INSERT_INTERNAL) {
 				insert(internal, parentDom);
 			}
