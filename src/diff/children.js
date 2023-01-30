@@ -110,7 +110,7 @@ export function patchChildren(parentInternal, children, parentDom) {
 		if (oldHead._prev == null) {
 			if (lastMatchedInternal) lastMatchedInternal._next = next;
 			// else parentInternal._child = next;
-			unmount(oldHead, parentInternal, 0);
+			unmount(oldHead, oldHead, 0);
 		} else {
 			lastMatchedInternal = oldHead;
 		}
