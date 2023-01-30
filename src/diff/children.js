@@ -172,6 +172,7 @@ export function patchChildren(parentInternal, children, parentDom) {
 	// each Internal to set its _next ptr and perform insert/mount/update.
 	/** @type {Internal} */
 	let nextInternal = null;
+	let firstChild = null;
 
 	let index = children.length;
 	internal = prevInternal;
@@ -205,7 +206,7 @@ export function patchChildren(parentInternal, children, parentDom) {
 			}
 		}
 
-		if (!prevInternal) parentInternal._child = internal;
+		if (!prevInternal) firstChild = internal;
 
 		internal.flags &= ~INSERT_INTERNAL;
 
@@ -223,6 +224,8 @@ export function patchChildren(parentInternal, children, parentDom) {
 		internal._index = index;
 		internal = prevInternal;
 	}
+
+	parentInternal._child = firstChild;
 }
 /*
 export function patchChildren(internal, children, parentDom) {
