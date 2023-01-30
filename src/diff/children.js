@@ -1,5 +1,5 @@
 import { applyRef } from './refs';
-import { normalizeToVNode } from '../create-element';
+import { createElement, Fragment, normalizeToVNode } from '../create-element';
 import {
 	TYPE_COMPONENT,
 	TYPE_TEXT,
@@ -30,7 +30,7 @@ import { createInternal, getDomSibling } from '../tree';
 /**
  * Update an internal with new children.
  * @param {Internal} parentInternal The internal whose children should be patched
- * @param {import('../internal').ComponentChild[]} children The new children, represented as VNodes
+ * @param {import('../internal').ComponentChildren[]} children The new children, represented as VNodes
  * @param {import('../internal').PreactElement} parentDom The element into which this subtree is rendered
  */
 export function patchChildren(parentInternal, children, parentDom) {
@@ -59,9 +59,10 @@ export function patchChildren(parentInternal, children, parentDom) {
 			typeFlag = TYPE_TEXT;
 			normalizedVNode += '';
 		} else {
-			type = vnode.type;
+			const isArray = Array.isArray(vnode);
+			type = isArray ? Fragment : vnode.type;
 			typeFlag = typeof type === 'function' ? TYPE_COMPONENT : TYPE_ELEMENT;
-			key = vnode.key;
+			key = isArray ? null : vnode.key;
 		}
 
 		/** @type {Internal?} */
@@ -200,7 +201,11 @@ export function patchChildren(parentInternal, children, parentDom) {
 				vnode = children[index];
 			}
 
-			patch(internal, vnode, parentDom);
+			patch(
+				internal,
+				Array.isArray(vnode) ? createElement(Fragment, null, vnode) : vnode,
+				parentDom
+			);
 			if (internal.flags & INSERT_INTERNAL) {
 				insert(internal, parentDom);
 			}
