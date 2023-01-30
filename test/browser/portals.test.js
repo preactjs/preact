@@ -22,13 +22,28 @@ describe('Portal', () => {
 	let resetRemoveChild;
 	let resetRemove;
 
+	let containers;
+	/** @type {(type: string) => Element} */
+	function createContainer(type) {
+		const container = document.createElement(type);
+		containers.push(container);
+		return container;
+	}
+
 	beforeEach(() => {
 		scratch = setupScratch();
 		rerender = setupRerender();
+
+		containers = [];
 	});
 
 	afterEach(() => {
 		teardown(scratch);
+
+		for (let container of containers) {
+			container.remove();
+		}
+		containers = null;
 	});
 
 	before(() => {
@@ -46,7 +61,7 @@ describe('Portal', () => {
 	});
 
 	it('should render into a different root node', () => {
-		let root = document.createElement('div');
+		let root = createContainer('div');
 		document.body.appendChild(root);
 
 		function Foo(props) {
@@ -60,10 +75,10 @@ describe('Portal', () => {
 	});
 
 	it('should preserve mount order of non-portal siblings', () => {
-		let portals = document.createElement('portals');
+		let portals = createContainer('portals');
 		scratch.appendChild(portals);
 
-		let main = document.createElement('main');
+		let main = createContainer('main');
 		scratch.appendChild(main);
 
 		function Foo(props) {
@@ -99,10 +114,10 @@ describe('Portal', () => {
 	});
 
 	it('should preserve hydration order of non-portal siblings', () => {
-		let portals = document.createElement('portals');
+		let portals = createContainer('portals');
 		scratch.appendChild(portals);
 
-		let main = document.createElement('main');
+		let main = createContainer('main');
 		scratch.appendChild(main);
 
 		main.innerHTML = '<h1>A</h1><h3>C</h3><h5>E</h5>';
@@ -246,8 +261,8 @@ describe('Portal', () => {
 	});
 
 	it('should not render <undefined> for Portal nodes', () => {
-		let root = document.createElement('div');
-		let dialog = document.createElement('div');
+		let root = createContainer('div');
+		let dialog = createContainer('div');
 		dialog.id = 'container';
 
 		scratch.appendChild(root);
@@ -266,8 +281,8 @@ describe('Portal', () => {
 	});
 
 	it('should unmount Portal', () => {
-		let root = document.createElement('div');
-		let dialog = document.createElement('div');
+		let root = createContainer('div');
+		let dialog = createContainer('div');
 		dialog.id = 'container';
 
 		scratch.appendChild(root);
@@ -612,8 +627,8 @@ describe('Portal', () => {
 	});
 
 	it('should not unmount when parent renders', () => {
-		let root = document.createElement('div');
-		let dialog = document.createElement('div');
+		let root = createContainer('div');
+		let dialog = createContainer('div');
 		dialog.id = 'container';
 
 		scratch.appendChild(root);
@@ -793,6 +808,8 @@ describe('Portal', () => {
 	});
 
 	it('should order complex effects well', () => {
+		const container = createContainer('div');
+
 		const calls = [];
 		const Parent = ({ children, isPortal }) => {
 			useEffect(() => {
@@ -819,7 +836,7 @@ describe('Portal', () => {
 				calls.push('Portal');
 			}, []);
 
-			return createPortal(<Parent isPortal>{content}</Parent>, document.body);
+			return createPortal(<Parent isPortal>{content}</Parent>, container);
 		};
 
 		const App = () => {
@@ -853,7 +870,7 @@ describe('Portal', () => {
 	});
 
 	it('should include containerInfo', () => {
-		let root = document.createElement('div');
+		let root = createContainer('div');
 		document.body.appendChild(root);
 
 		const A = () => <span>A</span>;
