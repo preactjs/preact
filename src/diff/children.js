@@ -9,7 +9,8 @@ import {
 	TYPE_DOM,
 	UNDEFINED,
 	TYPE_ELEMENT,
-	INSERT_INTERNAL
+	INSERT_INTERNAL,
+	TYPE_ROOT
 } from '../constants';
 import { mount } from './mount';
 import { patch } from './patch';
@@ -125,17 +126,45 @@ export function patchChildren(parentInternal, children, parentDom) {
 	// TODO: Explore trying to do this without an array, maybe next pointers? Or maybe reuse the array
 	internal = prevInternal;
 	if (internal) {
+		// TODO: Argh, we need to skip this first internal if it is a TYPE_ROOT node with a different parentDOM :/
 		/** @type {Internal[]} */
 		const wipLDS = [internal];
 		internal.flags |= INSERT_INTERNAL;
 
 		while ((internal = internal._prev) !== parentInternal) {
+			// Skip over Root nodes whose parentDOM is different from the current
+			// parentDOM (aka Portals). Don't mark them for insertion since the
+			// recursive calls to mountChildren/patchChildren will handle
+			// mounting/inserting any DOM nodes under the root node.
+			//
+			// If a root node's parentDOM is the same as the current parentDOM then
+			// treat it as an unkeyed fragment and prepare it for moving or insertion
+			// if necessary.
+			//
+			// TODO: Consider the case where a root node has the same parent, goes
+			// into a different parent, a new node is inserted before the portal, and
+			// then the portal goes back to the original parent. Do we correctly
+			// insert the portal into the right place? Currently yes, because the
+			// beginning of patch calls insert whenever parentDom changes. Could we
+			// move that logic here?
+			//
+			// TODO: We do the props._parentDom !== parentDom in a couple places.
+			// Could we do this check once and cache the result in a flag?
+			if (
+				internal.flags & TYPE_ROOT &&
+				internal.props._parentDom !== parentDom
+			) {
+				continue;
+			}
+
 			// Mark all internals as requiring insertion. We will clear this flag for
 			// internals on longest decreasing subsequence
 			internal.flags |= INSERT_INTERNAL;
 
 			// Skip over newly mounted internals. They will be mounted in place.
-			if (internal._index === -1) continue;
+			if (internal._index === -1) {
+				continue;
+			}
 
 			let ldsTail = wipLDS[wipLDS.length - 1];
 			if (ldsTail._index > internal._index) {

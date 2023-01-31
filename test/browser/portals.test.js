@@ -891,4 +891,77 @@ describe('Portal', () => {
 
 		root.parentNode.removeChild(root);
 	});
+
+	it('should preserve portal behavior when moving nodes around a portal', () => {
+		const portalRoot = createContainer('div');
+		document.body.appendChild(portalRoot);
+
+		render(
+			[
+				<div key="A">A</div>,
+				<div key="B">B</div>,
+				<div key="C">C</div>,
+				<div key="D">D</div>,
+				createPortal(<div>Portal</div>, portalRoot)
+			],
+			scratch
+		);
+
+		expect(scratch.innerHTML).to.equal(
+			'<div>A</div><div>B</div><div>C</div><div>D</div>'
+		);
+		expect(portalRoot.innerHTML).to.equal('<div>Portal</div>');
+
+		render(
+			[
+				<div key="A">A</div>,
+				<div key="B">B</div>,
+				createPortal(<div>Portal</div>, portalRoot),
+				<div key="C">C</div>,
+				<div key="D">D</div>
+			],
+			scratch
+		);
+
+		expect(scratch.innerHTML).to.equal(
+			'<div>A</div><div>B</div><div>C</div><div>D</div>'
+		);
+		expect(portalRoot.innerHTML).to.equal('<div>Portal</div>');
+	});
+
+	it('should insert a portal before new siblings when changing container to match siblings', () => {
+		const portalRoot = createContainer('div');
+		document.body.appendChild(portalRoot);
+
+		render(
+			[
+				<div key="A">A</div>,
+				<div key="B">B</div>,
+				createPortal(<div>Portal</div>, portalRoot),
+				<div key="D">D</div>
+			],
+			scratch
+		);
+
+		expect(scratch.innerHTML).to.equal('<div>A</div><div>B</div><div>D</div>');
+		expect(portalRoot.innerHTML).to.equal('<div>Portal</div>');
+
+		render(
+			[
+				<div key="A">A</div>,
+				<div key="B">B</div>,
+				// Change container to match siblings container
+				createPortal(<div>Portal</div>, scratch),
+				// While adding a new sibling
+				<div key="C">C</div>,
+				<div key="D">D</div>
+			],
+			scratch
+		);
+
+		expect(scratch.innerHTML).to.equal(
+			'<div>A</div><div>B</div><div>Portal</div><div>C</div><div>D</div>'
+		);
+		expect(portalRoot.innerHTML).to.equal('');
+	});
 });
