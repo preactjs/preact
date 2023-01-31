@@ -195,6 +195,7 @@ export namespace JSXInternal {
 		gradientTransform?: string | SignalLike<string>;
 		gradientUnits?: string | SignalLike<string>;
 		hanging?: number | string | SignalLike<number | string>;
+		height?: number | string | SignalLife<number | string>;
 		horizAdvX?: number | string | SignalLike<number | string>;
 		horizOriginX?: number | string | SignalLike<number | string>;
 		ideographic?: number | string | SignalLike<number | string>;
@@ -337,6 +338,7 @@ export namespace JSXInternal {
 		viewTarget?: number | string | SignalLike<number | string>;
 		visibility?: number | string | SignalLike<number | string>;
 		vMathematical?: number | string | SignalLike<number | string>;
+		width?: number | string | SignalLike<number | string>;
 		widths?: number | string | SignalLike<number | string>;
 		wordSpacing?: number | string | SignalLike<number | string>;
 		writingMode?: number | string | SignalLike<number | string>;
