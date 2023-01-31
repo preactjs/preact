@@ -66,17 +66,24 @@ export function patchChildren(parentInternal, children, parentDom) {
 		let type = null;
 		let typeFlag = 0;
 		let key;
-		let normalizedVNode = /** @type {VNode | string} */ (vnode);
+		/** @type {VNode | string} */
+		let normalizedVNode;
 
 		// text VNodes (strings, numbers, bigints, etc):
 		if (typeof vnode !== 'object') {
 			typeFlag = TYPE_TEXT;
-			normalizedVNode += '';
+			normalizedVNode = '' + vnode;
 		} else {
-			const isArray = Array.isArray(vnode);
-			type = isArray ? Fragment : vnode.type;
+			// TODO: Investigate avoiding this VNode allocation (and the one below in
+			// the call to `patch`) by passing through the raw VNode type and handling
+			// nested arrays directly in mount, patch, createInternal, etc.
+			normalizedVNode = Array.isArray(vnode)
+				? createElement(Fragment, null, vnode)
+				: vnode;
+
+			type = normalizedVNode.type;
 			typeFlag = typeof type === 'function' ? TYPE_COMPONENT : TYPE_ELEMENT;
-			key = isArray ? null : vnode.key;
+			key = normalizedVNode.key;
 		}
 
 		/** @type {Internal?} */
