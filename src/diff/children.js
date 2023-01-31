@@ -193,7 +193,13 @@ export function patchChildren(parentInternal, children, parentDom) {
 
 		if (internal._index === -1) {
 			mount(internal, parentDom, getDomSibling(internal));
-			insert(internal, parentDom);
+			if (internal.flags & TYPE_DOM) {
+				// If we are mounting a component, it's DOM children will get inserted
+				// into the DOM in mountChildren. If we are mounting a DOM node, then
+				// it's children will be mounted into itself and we need to insert this
+				// DOM in place.
+				insert(internal, parentDom);
+			}
 		} else {
 			let vnode = children[index];
 			while (vnode == null || vnode === true || vnode === false) {
