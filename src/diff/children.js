@@ -238,7 +238,10 @@ export function patchChildren(parentInternal, children, parentDom) {
 		internal._next = nextInternal;
 		nextInternal = internal;
 
-		index--;
+		let vnode = children[--index];
+		while (vnode == null || vnode === true || vnode === false) {
+			vnode = children[--index];
+		}
 
 		prevInternal = internal._prev;
 
@@ -257,12 +260,6 @@ export function patchChildren(parentInternal, children, parentDom) {
 				insert(internal, parentDom);
 			}
 		} else {
-			let vnode = children[index];
-			while (vnode == null || vnode === true || vnode === false) {
-				index--;
-				vnode = children[index];
-			}
-
 			patch(
 				internal,
 				Array.isArray(vnode) ? createElement(Fragment, null, vnode) : vnode,
