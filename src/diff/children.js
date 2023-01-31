@@ -10,7 +10,8 @@ import {
 	UNDEFINED,
 	TYPE_ELEMENT,
 	INSERT_INTERNAL,
-	TYPE_ROOT
+	TYPE_ROOT,
+	MODE_UNMOUNTING
 } from '../constants';
 import { mount } from './mount';
 import { patch } from './patch';
@@ -35,20 +36,32 @@ import { createInternal, getDomSibling } from '../tree';
  * @param {import('../internal').PreactElement} parentDom The element into which this subtree is rendered
  */
 export function patchChildren(parentInternal, children, parentDom) {
-	/** @type {Internal | undefined} */
-	let internal;
+	/** @type {Internal} */
+	let internal = parentInternal._child;
 	/** @type {Internal} */
 	let prevInternal;
 	// let newTail;
-	let oldHead = parentInternal._child;
+	let oldHead = internal;
 	// let skewedOldHead = oldHead;
 
-	// Step 1. Find matches and set up _prev pointers
+	// Step 1. Find matches and set up _prev pointers. Identity null placeholders
+	// by also walking the old internal children at the same time
 	for (let index = 0; index < children.length; index++) {
 		const vnode = children[index];
 
 		// holes get accounted for in the index property:
-		if (vnode == null || vnode === true || vnode === false) continue;
+		if (vnode == null || vnode === true || vnode === false) {
+			if (internal && index == internal._index && internal.key == null) {
+				// The current internal is unkeyed, has the same index as this VNode
+				// child, and the VNode is now null. So we'll unmount the Internal and
+				// treat this slot in the children array as a null placeholder. We mark
+				// this node as unmounting to prevent it from being used in future
+				// searches for matching internals
+				internal.flags |= MODE_UNMOUNTING;
+				internal = internal._next;
+			}
+			continue;
+		}
 
 		let type = null;
 		let typeFlag = 0;
@@ -67,40 +80,54 @@ export function patchChildren(parentInternal, children, parentDom) {
 		}
 
 		/** @type {Internal?} */
-		let internal;
+		let matchedInternal;
 
-		// seek forward through the Internals list, starting at the head (either first, or first unused).
-		// only match unused items, which are internals where _prev === undefined.
-		// note: _prev=null for the first matched internal, and should be considered "used".
-		let match = oldHead;
-		while (match) {
-			const flags = match.flags;
-			const isUnused = match._prev == null;
-			if (
-				isUnused &&
-				(flags & typeFlag) !== 0 &&
-				match.type === type &&
-				match.key == key
-			) {
-				internal = match;
-				// if the match was the first unused item, bump the start ptr forward:
-				if (match === oldHead) oldHead = oldHead._next;
-				break;
+		// TODO: See if doing a fast path (special if condition) for already in
+		// place matches is faster than while loop
+		if (key == null && internal && index < internal._index) {
+			// If we are doing an unkeyed diff, and the old index of the current
+			// internal is greater than the current VNode index, then this vnode
+			// represents a new element that is mounting into what was previous a null
+			// placeholder slot. We should create a new internal to mount this VNode.
+		} else {
+			// seek forward through the Internals list, starting at the head (either first, or first unused).
+			// only match unused items, which are internals where _prev === undefined.
+			// note: _prev=null for the first matched internal, and should be considered "used".
+			let search = oldHead;
+			while (search) {
+				const flags = search.flags;
+				const isUnused =
+					search._prev == null && ~search.flags & MODE_UNMOUNTING;
+				if (
+					isUnused &&
+					(flags & typeFlag) !== 0 &&
+					search.type === type &&
+					search.key == key
+				) {
+					matchedInternal = search;
+					// if the match was the first unused item, bump the start ptr forward:
+					if (search === oldHead) oldHead = oldHead._next;
+					break;
+				}
+				search = search._next;
 			}
-			match = match._next;
 		}
 
 		// no match, create a new Internal:
-		if (!internal) {
-			internal = createInternal(normalizedVNode, parentInternal);
+		if (!matchedInternal) {
+			matchedInternal = createInternal(normalizedVNode, parentInternal);
 			// console.log('creating new', internal.type);
 		} else {
 			// console.log('updating', internal.type);
 			// patch(internal, vnode, parentDom);
 		}
 
-		internal._prev = prevInternal || parentInternal;
-		prevInternal = internal;
+		matchedInternal._prev = prevInternal || parentInternal;
+		prevInternal = matchedInternal;
+
+		if (internal && internal._index == index) {
+			internal = internal._next;
+		}
 	}
 
 	// Step 2. Walk over the unused children and unmount:
