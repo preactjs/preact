@@ -195,7 +195,7 @@ export namespace JSXInternal {
 		gradientTransform?: string | SignalLike<string>;
 		gradientUnits?: string | SignalLike<string>;
 		hanging?: number | string | SignalLike<number | string>;
-		height?: number | string | SignalLife<number | string>;
+		height?: number | string | SignalLike<number | string>;
 		horizAdvX?: number | string | SignalLike<number | string>;
 		horizOriginX?: number | string | SignalLike<number | string>;
 		ideographic?: number | string | SignalLike<number | string>;
