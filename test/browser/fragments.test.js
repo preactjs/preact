@@ -237,9 +237,7 @@ describe('Fragment', () => {
 		expectDomLogToBe([
 			'<div>.appendChild(#text)',
 			'<div>122.insertBefore(<div>1, <span>1)',
-			'<span>1.remove()',
-			'<div>122.appendChild(<span>2)',
-			'<div>122.appendChild(<span>2)'
+			'<span>1.remove()'
 		]);
 	});
 
@@ -2658,7 +2656,7 @@ describe('Fragment', () => {
 		render(<App condition={false} />, scratch);
 
 		expect(scratch.innerHTML).to.equal(div([div(1), div('A')]));
-		expectDomLogToBe(['<div>2.remove()', '<div>1A.appendChild(<div>A)']);
+		expectDomLogToBe(['<div>2.remove()']);
 	});
 
 	it('should efficiently unmount nested Fragment children', () => {
@@ -2857,13 +2855,12 @@ describe('Fragment', () => {
 			'<div>123AB.insertBefore(<span>1, <div>1)',
 			'<div>2.remove()',
 			'<div>3.remove()',
-			'<div>1.remove()',
-			'<div>1AB.appendChild(<div>A)',
-			'<div>1BA.appendChild(<div>B)'
+			'<div>1.remove()'
 		]);
 	});
 
 	it('should swap nested fragments correctly', () => {
+		/** @type {() => void} */
 		let swap;
 		class App extends Component {
 			constructor(props) {
@@ -2875,11 +2872,9 @@ describe('Fragment', () => {
 				if (this.state.first) {
 					return (
 						<Fragment>
-							{
-								<Fragment>
-									<p>1. Original item first paragraph</p>
-								</Fragment>
-							}
+							<Fragment>
+								<p>1. Original item first paragraph</p>
+							</Fragment>
 							<p>2. Original item second paragraph</p>
 							<button onClick={(swap = () => this.setState({ first: false }))}>
 								Click me
