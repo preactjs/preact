@@ -266,6 +266,11 @@ export function patchChildren(parentInternal, children, parentDom) {
 				// DOM in place.
 				insert(internal, parentDom);
 			}
+		} else if (
+			(internal.flags & (MODE_HYDRATE | MODE_SUSPENDED)) ===
+			(MODE_HYDRATE | MODE_SUSPENDED)
+		) {
+			mount(internal, parentDom, internal.data);
 		} else {
 			patch(
 				internal,
