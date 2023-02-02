@@ -2700,12 +2700,7 @@ describe('Fragment', () => {
 		render(<App condition={false} />, scratch);
 
 		expect(scratch.innerHTML).to.equal(div([div(1), div('A'), div('B')]));
-		expectDomLogToBe([
-			'<div>2.remove()',
-			'<div>3.remove()',
-			'<div>1AB.appendChild(<div>A)',
-			'<div>1BA.appendChild(<div>B)'
-		]);
+		expectDomLogToBe(['<div>2.remove()', '<div>3.remove()']);
 	});
 
 	it('should efficiently place new children and unmount nested Fragment children', () => {
@@ -2754,9 +2749,7 @@ describe('Fragment', () => {
 			'<div>.appendChild(#text)',
 			'<div>123AB.insertBefore(<div>4, <div>2)',
 			'<div>2.remove()',
-			'<div>3.remove()',
-			'<div>14AB.appendChild(<div>A)',
-			'<div>14BA.appendChild(<div>B)'
+			'<div>3.remove()'
 		]);
 	});
 
