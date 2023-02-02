@@ -2914,4 +2914,54 @@ describe('Fragment', () => {
 			'<p>1. Original item first paragraph</p><p>2. Original item second paragraph</p><button>Click me</button>'
 		);
 	});
+
+	it('should efficiently unmount nested Fragment children when rerendering and reordering', () => {
+		/** @type {() => void} */
+		let toggle;
+
+		class App extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { condition: true };
+				toggle = () => this.setState({ condition: !this.state.condition });
+			}
+
+			render() {
+				return this.state.condition ? (
+					<Fragment>
+						<div>1</div>
+						<Fragment>
+							<div>A</div>
+							<div>B</div>
+						</Fragment>
+						<div>2</div>
+					</Fragment>
+				) : (
+					<Fragment>
+						<Fragment>
+							<div>A</div>
+						</Fragment>
+						<div>1</div>
+						<div>2</div>
+					</Fragment>
+				);
+			}
+		}
+
+		clearLog();
+		render(<App />, scratch);
+		expect(scratch.innerHTML).to.equal(
+			[div(1), div('A'), div('B'), div(2)].join('')
+		);
+
+		clearLog();
+		toggle();
+		rerender();
+
+		expect(scratch.innerHTML).to.equal([div('A'), div(1), div(2)].join(''));
+		expectDomLogToBe([
+			'<div>B.remove()',
+			'<div>1A2.insertBefore(<div>1, <div>2)'
+		]);
+	});
 });
