@@ -125,50 +125,6 @@ const shouldSearchComponent = internal =>
  * @returns {import('./internal').PreactNode}
  */
 export function getDomSibling(internal, childIndex) {
-	// // basically looking for the next pointer that can be used to perform an insertBefore:
-	// // @TODO inline the null case, since it's only used in patch.
-	// if (childIndex == null) {
-	// 	// Use childIndex==null as a signal to resume the search from the vnode's sibling
-	// 	const next = internal._next;
-	// 	return next && (getChildDom(next) || getDomSibling(next));
-
-	// 	// return next && (getChildDom(next) || getDomSibling(next));
-	// 	// let sibling = internal;
-	// 	// while (sibling = sibling._next) {
-	// 	// 	let domChildInternal = getChildDom(sibling);
-	// 	// 	if (domChildInternal) return domChildInternal;
-	// 	// }
-
-	// 	// const parent = internal._parent;
-	// 	// let child = parent._child;
-	// 	// while (child) {
-	// 	// 	if (child === internal) {
-	// 	// 		return getDomSibling(child._next);
-	// 	// 	}
-	// 	// 	child = child._next;
-	// 	// }
-
-	// 	// return getDomSibling(
-	// 	// 	internal._parent,
-	// 	// 	internal._parent._children.indexOf(internal) + 1
-	// 	// );
-	// }
-
-	// let childDom = getChildDom(internal._child);
-	// if (childDom) {
-	// 	return childDom;
-	// }
-
-	// // If we get here, we have not found a DOM node in this vnode's children. We
-	// // must resume from this vnode's sibling (in it's parent _children array).
-	// // Only climb up and search the parent if we aren't searching through a DOM
-	// // VNode (meaning we reached the DOM parent of the original vnode that began
-	// // the search). Note, the top of the tree has _parent == null so avoiding that
-	// // here.
-	// return internal._parent && shouldSearchComponent(internal)
-	// 	? getDomSibling(internal)
-	// 	: null;
-
 	if (internal._next) {
 		let childDom = getFirstDom(internal._next);
 		if (childDom) {
