@@ -58,6 +58,11 @@ export function patchChildren(parentInternal, children, parentDom) {
 				// this node as unmounting to prevent it from being used in future
 				// searches for matching internals
 				internal.flags |= MODE_UNMOUNTING;
+
+				// If this internal is the first unmatched internal, then bump our
+				// pointer to the next node so our search will skip over this internal
+				if (oldHead == internal) oldHead = oldHead._next;
+
 				internal = internal._next;
 			}
 			continue;
