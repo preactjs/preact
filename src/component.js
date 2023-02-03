@@ -202,16 +202,23 @@ export function enqueueRender(c) {
 
 /** Flush the render queue by rerendering all queued components */
 function process() {
-	let queue;
-	while ((process._rerenderCount = rerenderQueue.length)) {
-		queue = rerenderQueue.sort((a, b) => a._vnode._depth - b._vnode._depth);
-		rerenderQueue = [];
-		// Don't update `renderCount` yet. Keep its value non-zero to prevent unnecessary
-		// process() calls from getting scheduled while `queue` is still being consumed.
-		queue.some(c => {
-			if (c._dirty) renderComponent(c);
-		});
+	let c;
+	rerenderQueue.sort((a, b) => a._vnode._depth - b._vnode._depth);
+	// Don't update `renderCount` yet. Keep its value non-zero to prevent unnecessary
+	// process() calls from getting scheduled while `queue` is still being consumed.
+	while ((c = rerenderQueue.shift())) {
+		if (c._dirty) {
+			let renderQueueLength = rerenderQueue.length;
+			renderComponent(c);
+			if (rerenderQueue.length > renderQueueLength) {
+				// When i.e. rerendering a provider additional new items can be injected, we want to
+				// keep the order from top to bottom with those new items so we can handle them in a
+				// single pass
+				rerenderQueue.sort((a, b) => a._vnode._depth - b._vnode._depth);
+			}
+		}
 	}
+	process._rerenderCount = 0;
 }
 
 process._rerenderCount = 0;
