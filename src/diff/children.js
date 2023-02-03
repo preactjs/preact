@@ -164,77 +164,80 @@ export function patchChildren(parentInternal, children, parentDom) {
 	// TODO: Replace _prevLDS with _next. Doing this will make _next meaningless for a moment
 	// TODO: Explore trying to do this without an array, maybe next pointers? Or maybe reuse the array
 	internal = prevInternal;
-	if (internal) {
-		// TODO: Argh, we need to skip this first internal if it is a TYPE_ROOT node with a different parentDOM :/
-		/** @type {Internal[]} */
-		const wipLDS = [internal];
+	/** @type {Internal[]} */
+	const wipLDS = [];
+
+	while (internal && internal !== parentInternal) {
+		// Skip over Root nodes whose parentDOM is different from the current
+		// parentDOM (aka Portals). Don't mark them for insertion since the
+		// recursive calls to mountChildren/patchChildren will handle
+		// mounting/inserting any DOM nodes under the root node.
+		//
+		// If a root node's parentDOM is the same as the current parentDOM then
+		// treat it as an unkeyed fragment and prepare it for moving or insertion
+		// if necessary.
+		//
+		// TODO: Consider the case where a root node has the same parent, goes
+		// into a different parent, a new node is inserted before the portal, and
+		// then the portal goes back to the original parent. Do we correctly
+		// insert the portal into the right place? Currently yes, because the
+		// beginning of patch calls insert whenever parentDom changes. Could we
+		// move that logic here?
+		//
+		// TODO: We do the props._parentDom !== parentDom in a couple places.
+		// Could we do this check once and cache the result in a flag?
+		if (internal.flags & TYPE_ROOT && internal.props._parentDom !== parentDom) {
+			internal = internal._prev;
+			continue;
+		}
+
+		// Mark all internals as requiring insertion. We will clear this flag for
+		// internals on longest decreasing subsequence
 		internal.flags |= INSERT_INTERNAL;
 
-		while ((internal = internal._prev) !== parentInternal) {
-			// Skip over Root nodes whose parentDOM is different from the current
-			// parentDOM (aka Portals). Don't mark them for insertion since the
-			// recursive calls to mountChildren/patchChildren will handle
-			// mounting/inserting any DOM nodes under the root node.
-			//
-			// If a root node's parentDOM is the same as the current parentDOM then
-			// treat it as an unkeyed fragment and prepare it for moving or insertion
-			// if necessary.
-			//
-			// TODO: Consider the case where a root node has the same parent, goes
-			// into a different parent, a new node is inserted before the portal, and
-			// then the portal goes back to the original parent. Do we correctly
-			// insert the portal into the right place? Currently yes, because the
-			// beginning of patch calls insert whenever parentDom changes. Could we
-			// move that logic here?
-			//
-			// TODO: We do the props._parentDom !== parentDom in a couple places.
-			// Could we do this check once and cache the result in a flag?
-			if (
-				internal.flags & TYPE_ROOT &&
-				internal.props._parentDom !== parentDom
-			) {
-				continue;
-			}
-
-			// Mark all internals as requiring insertion. We will clear this flag for
-			// internals on longest decreasing subsequence
-			internal.flags |= INSERT_INTERNAL;
-
-			// Skip over newly mounted internals. They will be mounted in place.
-			if (internal._index === -1) {
-				continue;
-			}
-
-			let ldsTail = wipLDS[wipLDS.length - 1];
-			if (ldsTail._index > internal._index) {
-				internal._prevLDS = ldsTail;
-				wipLDS.push(internal);
-			} else {
-				// Search for position in wipLIS where node should go. It should replace
-				// the first node where node > wip[i] (though keep in mind, we are
-				// iterating over the list backwards). Example:
-				// ```
-				// wipLIS = [4,3,1], node = 2.
-				// Node should replace 1: [4,3,2]
-				// ```
-				let i = wipLDS.length;
-				// TODO: Binary search?
-				while (--i >= 0 && wipLDS[i]._index < internal._index) {}
-
-				wipLDS[i + 1] = internal;
-				let prevLDS = i < 0 ? null : wipLDS[i];
-				internal._prevLDS = prevLDS;
-			}
+		// Skip over newly mounted internals. They will be mounted in place.
+		if (internal._index === -1) {
+			internal = internal._prev;
+			continue;
 		}
 
-		// Step 4. Mark internals in longest decreasing subsequence
-		/** @type {Internal | null} */
-		let ldsNode = wipLDS[wipLDS.length - 1];
-		while (ldsNode) {
-			// This node is on the longest decreasing subsequence so clear INSERT_NODE flag
-			ldsNode.flags &= ~INSERT_INTERNAL;
-			ldsNode = ldsNode._prevLDS;
+		if (wipLDS.length == 0) {
+			wipLDS.push(internal);
+			internal = internal._prev;
+			continue;
 		}
+
+		let ldsTail = wipLDS[wipLDS.length - 1];
+		if (ldsTail._index > internal._index) {
+			internal._prevLDS = ldsTail;
+			wipLDS.push(internal);
+		} else {
+			// Search for position in wipLIS where node should go. It should replace
+			// the first node where node > wip[i] (though keep in mind, we are
+			// iterating over the list backwards). Example:
+			// ```
+			// wipLIS = [4,3,1], node = 2.
+			// Node should replace 1: [4,3,2]
+			// ```
+			let i = wipLDS.length;
+			// TODO: Binary search?
+			while (--i >= 0 && wipLDS[i]._index < internal._index) {}
+
+			wipLDS[i + 1] = internal;
+			let prevLDS = i < 0 ? null : wipLDS[i];
+			internal._prevLDS = prevLDS;
+		}
+
+		internal = internal._prev;
+	}
+
+	// Step 4. Mark internals in longest decreasing subsequence
+	/** @type {Internal | null} */
+	let ldsNode = wipLDS.length ? wipLDS[wipLDS.length - 1] : null;
+	while (ldsNode) {
+		// This node is on the longest decreasing subsequence so clear INSERT_NODE flag
+		ldsNode.flags &= ~INSERT_INTERNAL;
+		ldsNode = ldsNode._prevLDS;
 	}
 
 	// Step 5. Walk backwards over the newly-assigned _prev properties, visiting
