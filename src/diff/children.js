@@ -11,7 +11,8 @@ import {
 	TYPE_ELEMENT,
 	INSERT_INTERNAL,
 	TYPE_ROOT,
-	MODE_UNMOUNTING
+	MODE_UNMOUNTING,
+	MATCHED_INTERNAL
 } from '../constants';
 import { mount } from './mount';
 import { patch } from './patch';
@@ -148,16 +149,17 @@ function findMatches(parentInternal, children) {
 			let search = oldHead._next;
 			while (search) {
 				const flags = search.flags;
-				const isUnused =
-					search._prev == null && ~search.flags & MODE_UNMOUNTING;
+				const isUsed =
+					search.flags & MODE_UNMOUNTING || search.flags & MATCHED_INTERNAL;
 				if (
-					isUnused &&
+					!isUsed &&
 					(flags & typeFlag) !== 0 &&
 					search.type === type &&
 					search.key == key
 				) {
 					moved = true;
 					matchedInternal = search;
+					matchedInternal.flags |= MATCHED_INTERNAL;
 					// if the match was the first unused item, bump the start ptr forward:
 					if (search === oldHead) oldHead = oldHead._next;
 					break;
@@ -190,10 +192,11 @@ function unmountUnusedChildren(parentInternal) {
 	let oldHead = parentInternal._child;
 	while (oldHead) {
 		const next = oldHead._next;
-		if (oldHead._prev == null) {
+		if (~oldHead.flags & MATCHED_INTERNAL) {
 			if (lastMatchedInternal) lastMatchedInternal._next = next;
 			unmount(oldHead, oldHead, 0);
 		} else {
+			oldHead.flags &= ~MATCHED_INTERNAL;
 			lastMatchedInternal = oldHead;
 		}
 		oldHead = next;
