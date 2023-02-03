@@ -376,12 +376,15 @@ export namespace JSXInternal {
 		readonly currentTarget: Target;
 	};
 
-	export type TargetedAnimationEvent<Target extends EventTarget> =
-		TargetedEvent<Target, AnimationEvent>;
-	export type TargetedClipboardEvent<Target extends EventTarget> =
-		TargetedEvent<Target, ClipboardEvent>;
-	export type TargetedCompositionEvent<Target extends EventTarget> =
-		TargetedEvent<Target, CompositionEvent>;
+	export type TargetedAnimationEvent<
+		Target extends EventTarget
+	> = TargetedEvent<Target, AnimationEvent>;
+	export type TargetedClipboardEvent<
+		Target extends EventTarget
+	> = TargetedEvent<Target, ClipboardEvent>;
+	export type TargetedCompositionEvent<
+		Target extends EventTarget
+	> = TargetedEvent<Target, CompositionEvent>;
 	export type TargetedDragEvent<Target extends EventTarget> = TargetedEvent<
 		Target,
 		DragEvent
@@ -406,8 +409,9 @@ export namespace JSXInternal {
 		Target,
 		TouchEvent
 	>;
-	export type TargetedTransitionEvent<Target extends EventTarget> =
-		TargetedEvent<Target, TransitionEvent>;
+	export type TargetedTransitionEvent<
+		Target extends EventTarget
+	> = TargetedEvent<Target, TransitionEvent>;
 	export type TargetedUIEvent<Target extends EventTarget> = TargetedEvent<
 		Target,
 		UIEvent
@@ -421,14 +425,22 @@ export namespace JSXInternal {
 		(this: void, event: E): void;
 	}
 
+	export interface EventHandlerOptions {
+		capture?: boolean;
+		once?: boolean;
+		passive?: boolean;
+		signal?: AbortSignal;
+	}
+
 	export type AnimationEventHandler<Target extends EventTarget> = EventHandler<
 		TargetedAnimationEvent<Target>
 	>;
 	export type ClipboardEventHandler<Target extends EventTarget> = EventHandler<
 		TargetedClipboardEvent<Target>
 	>;
-	export type CompositionEventHandler<Target extends EventTarget> =
-		EventHandler<TargetedCompositionEvent<Target>>;
+	export type CompositionEventHandler<
+		Target extends EventTarget
+	> = EventHandler<TargetedCompositionEvent<Target>>;
 	export type DragEventHandler<Target extends EventTarget> = EventHandler<
 		TargetedDragEvent<Target>
 	>;
@@ -463,148 +475,276 @@ export namespace JSXInternal {
 	export interface DOMAttributes<Target extends EventTarget>
 		extends PreactDOMAttributes {
 		// Image Events
-		onLoad?: GenericEventHandler<Target>;
+		onLoad?:
+			| GenericEventHandler<Target>
+			| [GenericEventHandler<Target>, EventHandlerOptions];
 		onLoadCapture?: GenericEventHandler<Target>;
-		onError?: GenericEventHandler<Target>;
+		onError?:
+			| GenericEventHandler<Target>
+			| [GenericEventHandler<Target>, EventHandlerOptions];
 		onErrorCapture?: GenericEventHandler<Target>;
 
 		// Clipboard Events
-		onCopy?: ClipboardEventHandler<Target>;
+		onCopy?:
+			| ClipboardEventHandler<Target>
+			| [ClipboardEventHandler<Target>, EventHandlerOptions];
 		onCopyCapture?: ClipboardEventHandler<Target>;
-		onCut?: ClipboardEventHandler<Target>;
+		onCut?:
+			| ClipboardEventHandler<Target>
+			| [ClipboardEventHandler<Target>, EventHandlerOptions];
 		onCutCapture?: ClipboardEventHandler<Target>;
-		onPaste?: ClipboardEventHandler<Target>;
+		onPaste?:
+			| ClipboardEventHandler<Target>
+			| [ClipboardEventHandler<Target>, EventHandlerOptions];
 		onPasteCapture?: ClipboardEventHandler<Target>;
 
 		// Composition Events
-		onCompositionEnd?: CompositionEventHandler<Target>;
+		onCompositionEnd?:
+			| CompositionEventHandler<Target>
+			| [CompositionEventHandler<Target>, EventHandlerOptions];
 		onCompositionEndCapture?: CompositionEventHandler<Target>;
-		onCompositionStart?: CompositionEventHandler<Target>;
+		onCompositionStart?:
+			| CompositionEventHandler<Target>
+			| [CompositionEventHandler<Target>, EventHandlerOptions];
 		onCompositionStartCapture?: CompositionEventHandler<Target>;
-		onCompositionUpdate?: CompositionEventHandler<Target>;
+		onCompositionUpdate?:
+			| CompositionEventHandler<Target>
+			| [CompositionEventHandler<Target>, EventHandlerOptions];
 		onCompositionUpdateCapture?: CompositionEventHandler<Target>;
 
 		// Details Events
-		onToggle?: GenericEventHandler<Target>;
+		onToggle?:
+			| GenericEventHandler<Target>
+			| [GenericEventHandler<Target>, EventHandlerOptions];
 
 		// Focus Events
-		onFocus?: FocusEventHandler<Target>;
+		onFocus?:
+			| FocusEventHandler<Target>
+			| [FocusEventHandler<Target>, EventHandlerOptions];
 		onFocusCapture?: FocusEventHandler<Target>;
-		onfocusin?: FocusEventHandler<Target>;
+		onfocusin?:
+			| FocusEventHandler<Target>
+			| [FocusEventHandler<Target>, EventHandlerOptions];
 		onfocusinCapture?: FocusEventHandler<Target>;
-		onfocusout?: FocusEventHandler<Target>;
+		onfocusout?:
+			| FocusEventHandler<Target>
+			| [FocusEventHandler<Target>, EventHandlerOptions];
 		onfocusoutCapture?: FocusEventHandler<Target>;
-		onBlur?: FocusEventHandler<Target>;
+		onBlur?:
+			| FocusEventHandler<Target>
+			| [FocusEventHandler<Target>, EventHandlerOptions];
 		onBlurCapture?: FocusEventHandler<Target>;
 
 		// Form Events
-		onChange?: GenericEventHandler<Target>;
+		onChange?:
+			| GenericEventHandler<Target>
+			| [GenericEventHandler<Target>, EventHandlerOptions];
 		onChangeCapture?: GenericEventHandler<Target>;
-		onInput?: GenericEventHandler<Target>;
+		onInput?:
+			| GenericEventHandler<Target>
+			| [GenericEventHandler<Target>, EventHandlerOptions];
 		onInputCapture?: GenericEventHandler<Target>;
-		onBeforeInput?: GenericEventHandler<Target>;
+		onBeforeInput?:
+			| GenericEventHandler<Target>
+			| [GenericEventHandler<Target>, EventHandlerOptions];
 		onBeforeInputCapture?: GenericEventHandler<Target>;
-		onSearch?: GenericEventHandler<Target>;
+		onSearch?:
+			| GenericEventHandler<Target>
+			| [GenericEventHandler<Target>, EventHandlerOptions];
 		onSearchCapture?: GenericEventHandler<Target>;
-		onSubmit?: GenericEventHandler<Target>;
+		onSubmit?:
+			| GenericEventHandler<Target>
+			| [GenericEventHandler<Target>, EventHandlerOptions];
 		onSubmitCapture?: GenericEventHandler<Target>;
-		onInvalid?: GenericEventHandler<Target>;
+		onInvalid?:
+			| GenericEventHandler<Target>
+			| [GenericEventHandler<Target>, EventHandlerOptions];
 		onInvalidCapture?: GenericEventHandler<Target>;
-		onReset?: GenericEventHandler<Target>;
+		onReset?:
+			| GenericEventHandler<Target>
+			| [GenericEventHandler<Target>, EventHandlerOptions];
 		onResetCapture?: GenericEventHandler<Target>;
-		onFormData?: GenericEventHandler<Target>;
+		onFormData?:
+			| GenericEventHandler<Target>
+			| [GenericEventHandler<Target>, EventHandlerOptions];
 		onFormDataCapture?: GenericEventHandler<Target>;
 
 		// Keyboard Events
-		onKeyDown?: KeyboardEventHandler<Target>;
+		onKeyDown?:
+			| KeyboardEventHandler<Target>
+			| [KeyboardEventHandler<Target>, EventHandlerOptions];
 		onKeyDownCapture?: KeyboardEventHandler<Target>;
-		onKeyPress?: KeyboardEventHandler<Target>;
+		onKeyPress?:
+			| KeyboardEventHandler<Target>
+			| [KeyboardEventHandler<Target>, EventHandlerOptions];
 		onKeyPressCapture?: KeyboardEventHandler<Target>;
-		onKeyUp?: KeyboardEventHandler<Target>;
+		onKeyUp?:
+			| KeyboardEventHandler<Target>
+			| [KeyboardEventHandler<Target>, EventHandlerOptions];
 		onKeyUpCapture?: KeyboardEventHandler<Target>;
 
 		// Media Events
-		onAbort?: GenericEventHandler<Target>;
+		onAbort?:
+			| GenericEventHandler<Target>
+			| [GenericEventHandler<Target>, EventHandlerOptions];
 		onAbortCapture?: GenericEventHandler<Target>;
-		onCanPlay?: GenericEventHandler<Target>;
+		onCanPlay?:
+			| GenericEventHandler<Target>
+			| [GenericEventHandler<Target>, EventHandlerOptions];
 		onCanPlayCapture?: GenericEventHandler<Target>;
-		onCanPlayThrough?: GenericEventHandler<Target>;
+		onCanPlayThrough?:
+			| GenericEventHandler<Target>
+			| [GenericEventHandler<Target>, EventHandlerOptions];
 		onCanPlayThroughCapture?: GenericEventHandler<Target>;
-		onDurationChange?: GenericEventHandler<Target>;
+		onDurationChange?:
+			| GenericEventHandler<Target>
+			| [GenericEventHandler<Target>, EventHandlerOptions];
 		onDurationChangeCapture?: GenericEventHandler<Target>;
-		onEmptied?: GenericEventHandler<Target>;
+		onEmptied?:
+			| GenericEventHandler<Target>
+			| [GenericEventHandler<Target>, EventHandlerOptions];
 		onEmptiedCapture?: GenericEventHandler<Target>;
-		onEncrypted?: GenericEventHandler<Target>;
+		onEncrypted?:
+			| GenericEventHandler<Target>
+			| [GenericEventHandler<Target>, EventHandlerOptions];
 		onEncryptedCapture?: GenericEventHandler<Target>;
-		onEnded?: GenericEventHandler<Target>;
+		onEnded?:
+			| GenericEventHandler<Target>
+			| [GenericEventHandler<Target>, EventHandlerOptions];
 		onEndedCapture?: GenericEventHandler<Target>;
-		onLoadedData?: GenericEventHandler<Target>;
+		onLoadedData?:
+			| GenericEventHandler<Target>
+			| [GenericEventHandler<Target>, EventHandlerOptions];
 		onLoadedDataCapture?: GenericEventHandler<Target>;
-		onLoadedMetadata?: GenericEventHandler<Target>;
+		onLoadedMetadata?:
+			| GenericEventHandler<Target>
+			| [GenericEventHandler<Target>, EventHandlerOptions];
 		onLoadedMetadataCapture?: GenericEventHandler<Target>;
-		onLoadStart?: GenericEventHandler<Target>;
+		onLoadStart?:
+			| GenericEventHandler<Target>
+			| [GenericEventHandler<Target>, EventHandlerOptions];
 		onLoadStartCapture?: GenericEventHandler<Target>;
-		onPause?: GenericEventHandler<Target>;
+		onPause?:
+			| GenericEventHandler<Target>
+			| [GenericEventHandler<Target>, EventHandlerOptions];
 		onPauseCapture?: GenericEventHandler<Target>;
-		onPlay?: GenericEventHandler<Target>;
+		onPlay?:
+			| GenericEventHandler<Target>
+			| [GenericEventHandler<Target>, EventHandlerOptions];
 		onPlayCapture?: GenericEventHandler<Target>;
-		onPlaying?: GenericEventHandler<Target>;
+		onPlaying?:
+			| GenericEventHandler<Target>
+			| [GenericEventHandler<Target>, EventHandlerOptions];
 		onPlayingCapture?: GenericEventHandler<Target>;
-		onProgress?: GenericEventHandler<Target>;
+		onProgress?:
+			| GenericEventHandler<Target>
+			| [GenericEventHandler<Target>, EventHandlerOptions];
 		onProgressCapture?: GenericEventHandler<Target>;
-		onRateChange?: GenericEventHandler<Target>;
+		onRateChange?:
+			| GenericEventHandler<Target>
+			| [GenericEventHandler<Target>, EventHandlerOptions];
 		onRateChangeCapture?: GenericEventHandler<Target>;
-		onSeeked?: GenericEventHandler<Target>;
+		onSeeked?:
+			| GenericEventHandler<Target>
+			| [GenericEventHandler<Target>, EventHandlerOptions];
 		onSeekedCapture?: GenericEventHandler<Target>;
-		onSeeking?: GenericEventHandler<Target>;
+		onSeeking?:
+			| GenericEventHandler<Target>
+			| [GenericEventHandler<Target>, EventHandlerOptions];
 		onSeekingCapture?: GenericEventHandler<Target>;
-		onStalled?: GenericEventHandler<Target>;
+		onStalled?:
+			| GenericEventHandler<Target>
+			| [GenericEventHandler<Target>, EventHandlerOptions];
 		onStalledCapture?: GenericEventHandler<Target>;
-		onSuspend?: GenericEventHandler<Target>;
+		onSuspend?:
+			| GenericEventHandler<Target>
+			| [GenericEventHandler<Target>, EventHandlerOptions];
 		onSuspendCapture?: GenericEventHandler<Target>;
-		onTimeUpdate?: GenericEventHandler<Target>;
+		onTimeUpdate?:
+			| GenericEventHandler<Target>
+			| [GenericEventHandler<Target>, EventHandlerOptions];
 		onTimeUpdateCapture?: GenericEventHandler<Target>;
-		onVolumeChange?: GenericEventHandler<Target>;
+		onVolumeChange?:
+			| GenericEventHandler<Target>
+			| [GenericEventHandler<Target>, EventHandlerOptions];
 		onVolumeChangeCapture?: GenericEventHandler<Target>;
-		onWaiting?: GenericEventHandler<Target>;
+		onWaiting?:
+			| GenericEventHandler<Target>
+			| [GenericEventHandler<Target>, EventHandlerOptions];
 		onWaitingCapture?: GenericEventHandler<Target>;
 
 		// MouseEvents
-		onClick?: MouseEventHandler<Target>;
+		onClick?:
+			| MouseEventHandler<Target>
+			| [MouseEventHandler<Target>, EventHandlerOptions];
 		onClickCapture?: MouseEventHandler<Target>;
-		onContextMenu?: MouseEventHandler<Target>;
+		onContextMenu?:
+			| MouseEventHandler<Target>
+			| [MouseEventHandler<Target>, EventHandlerOptions];
 		onContextMenuCapture?: MouseEventHandler<Target>;
-		onDblClick?: MouseEventHandler<Target>;
+		onDblClick?:
+			| MouseEventHandler<Target>
+			| [MouseEventHandler<Target>, EventHandlerOptions];
 		onDblClickCapture?: MouseEventHandler<Target>;
-		onDrag?: DragEventHandler<Target>;
+		onDrag?:
+			| DragEventHandler<Target>
+			| [DragEventHandler<Target>, EventHandlerOptions];
 		onDragCapture?: DragEventHandler<Target>;
-		onDragEnd?: DragEventHandler<Target>;
+		onDragEnd?:
+			| DragEventHandler<Target>
+			| [DragEventHandler<Target>, EventHandlerOptions];
 		onDragEndCapture?: DragEventHandler<Target>;
-		onDragEnter?: DragEventHandler<Target>;
+		onDragEnter?:
+			| DragEventHandler<Target>
+			| [DragEventHandler<Target>, EventHandlerOptions];
 		onDragEnterCapture?: DragEventHandler<Target>;
-		onDragExit?: DragEventHandler<Target>;
+		onDragExit?:
+			| DragEventHandler<Target>
+			| [DragEventHandler<Target>, EventHandlerOptions];
 		onDragExitCapture?: DragEventHandler<Target>;
-		onDragLeave?: DragEventHandler<Target>;
+		onDragLeave?:
+			| DragEventHandler<Target>
+			| [DragEventHandler<Target>, EventHandlerOptions];
 		onDragLeaveCapture?: DragEventHandler<Target>;
-		onDragOver?: DragEventHandler<Target>;
+		onDragOver?:
+			| DragEventHandler<Target>
+			| [DragEventHandler<Target>, EventHandlerOptions];
 		onDragOverCapture?: DragEventHandler<Target>;
-		onDragStart?: DragEventHandler<Target>;
+		onDragStart?:
+			| DragEventHandler<Target>
+			| [DragEventHandler<Target>, EventHandlerOptions];
 		onDragStartCapture?: DragEventHandler<Target>;
-		onDrop?: DragEventHandler<Target>;
+		onDrop?:
+			| DragEventHandler<Target>
+			| [DragEventHandler<Target>, EventHandlerOptions];
 		onDropCapture?: DragEventHandler<Target>;
-		onMouseDown?: MouseEventHandler<Target>;
+		onMouseDown?:
+			| MouseEventHandler<Target>
+			| [MouseEventHandler<Target>, EventHandlerOptions];
 		onMouseDownCapture?: MouseEventHandler<Target>;
-		onMouseEnter?: MouseEventHandler<Target>;
+		onMouseEnter?:
+			| MouseEventHandler<Target>
+			| [MouseEventHandler<Target>, EventHandlerOptions];
 		onMouseEnterCapture?: MouseEventHandler<Target>;
-		onMouseLeave?: MouseEventHandler<Target>;
+		onMouseLeave?:
+			| MouseEventHandler<Target>
+			| [MouseEventHandler<Target>, EventHandlerOptions];
 		onMouseLeaveCapture?: MouseEventHandler<Target>;
-		onMouseMove?: MouseEventHandler<Target>;
+		onMouseMove?:
+			| MouseEventHandler<Target>
+			| [MouseEventHandler<Target>, EventHandlerOptions];
 		onMouseMoveCapture?: MouseEventHandler<Target>;
-		onMouseOut?: MouseEventHandler<Target>;
+		onMouseOut?:
+			| MouseEventHandler<Target>
+			| [MouseEventHandler<Target>, EventHandlerOptions];
 		onMouseOutCapture?: MouseEventHandler<Target>;
-		onMouseOver?: MouseEventHandler<Target>;
+		onMouseOver?:
+			| MouseEventHandler<Target>
+			| [MouseEventHandler<Target>, EventHandlerOptions];
 		onMouseOverCapture?: MouseEventHandler<Target>;
-		onMouseUp?: MouseEventHandler<Target>;
+		onMouseUp?:
+			| MouseEventHandler<Target>
+			| [MouseEventHandler<Target>, EventHandlerOptions];
 		onMouseUpCapture?: MouseEventHandler<Target>;
 
 		// Selection Events
@@ -612,55 +752,95 @@ export namespace JSXInternal {
 		onSelectCapture?: GenericEventHandler<Target>;
 
 		// Touch Events
-		onTouchCancel?: TouchEventHandler<Target>;
+		onTouchCancel?:
+			| TouchEventHandler<Target>
+			| [TouchEventHandler<Target>, EventHandlerOptions];
 		onTouchCancelCapture?: TouchEventHandler<Target>;
-		onTouchEnd?: TouchEventHandler<Target>;
+		onTouchEnd?:
+			| TouchEventHandler<Target>
+			| [TouchEventHandler<Target>, EventHandlerOptions];
 		onTouchEndCapture?: TouchEventHandler<Target>;
-		onTouchMove?: TouchEventHandler<Target>;
+		onTouchMove?:
+			| TouchEventHandler<Target>
+			| [TouchEventHandler<Target>, EventHandlerOptions];
 		onTouchMoveCapture?: TouchEventHandler<Target>;
-		onTouchStart?: TouchEventHandler<Target>;
+		onTouchStart?:
+			| TouchEventHandler<Target>
+			| [TouchEventHandler<Target>, EventHandlerOptions];
 		onTouchStartCapture?: TouchEventHandler<Target>;
 
 		// Pointer Events
-		onPointerOver?: PointerEventHandler<Target>;
+		onPointerOver?:
+			| PointerEventHandler<Target>
+			| [PointerEventHandler<Target>, EventHandlerOptions];
 		onPointerOverCapture?: PointerEventHandler<Target>;
-		onPointerEnter?: PointerEventHandler<Target>;
+		onPointerEnter?:
+			| PointerEventHandler<Target>
+			| [PointerEventHandler<Target>, EventHandlerOptions];
 		onPointerEnterCapture?: PointerEventHandler<Target>;
-		onPointerDown?: PointerEventHandler<Target>;
+		onPointerDown?:
+			| PointerEventHandler<Target>
+			| [PointerEventHandler<Target>, EventHandlerOptions];
 		onPointerDownCapture?: PointerEventHandler<Target>;
-		onPointerMove?: PointerEventHandler<Target>;
+		onPointerMove?:
+			| PointerEventHandler<Target>
+			| [PointerEventHandler<Target>, EventHandlerOptions];
 		onPointerMoveCapture?: PointerEventHandler<Target>;
-		onPointerUp?: PointerEventHandler<Target>;
+		onPointerUp?:
+			| PointerEventHandler<Target>
+			| [PointerEventHandler<Target>, EventHandlerOptions];
 		onPointerUpCapture?: PointerEventHandler<Target>;
-		onPointerCancel?: PointerEventHandler<Target>;
+		onPointerCancel?:
+			| PointerEventHandler<Target>
+			| [PointerEventHandler<Target>, EventHandlerOptions];
 		onPointerCancelCapture?: PointerEventHandler<Target>;
-		onPointerOut?: PointerEventHandler<Target>;
+		onPointerOut?:
+			| PointerEventHandler<Target>
+			| [PointerEventHandler<Target>, EventHandlerOptions];
 		onPointerOutCapture?: PointerEventHandler<Target>;
-		onPointerLeave?: PointerEventHandler<Target>;
+		onPointerLeave?:
+			| PointerEventHandler<Target>
+			| [PointerEventHandler<Target>, EventHandlerOptions];
 		onPointerLeaveCapture?: PointerEventHandler<Target>;
-		onGotPointerCapture?: PointerEventHandler<Target>;
+		onGotPointerCapture?:
+			| PointerEventHandler<Target>
+			| [PointerEventHandler<Target>, EventHandlerOptions];
 		onGotPointerCaptureCapture?: PointerEventHandler<Target>;
-		onLostPointerCapture?: PointerEventHandler<Target>;
+		onLostPointerCapture?:
+			| PointerEventHandler<Target>
+			| [PointerEventHandler<Target>, EventHandlerOptions];
 		onLostPointerCaptureCapture?: PointerEventHandler<Target>;
 
 		// UI Events
-		onScroll?: UIEventHandler<Target>;
+		onScroll?:
+			| UIEventHandler<Target>
+			| [UIEventHandler<Target>, EventHandlerOptions];
 		onScrollCapture?: UIEventHandler<Target>;
 
 		// Wheel Events
-		onWheel?: WheelEventHandler<Target>;
+		onWheel?:
+			| WheelEventHandler<Target>
+			| [WheelEventHandler<Target>, EventHandlerOptions];
 		onWheelCapture?: WheelEventHandler<Target>;
 
 		// Animation Events
-		onAnimationStart?: AnimationEventHandler<Target>;
+		onAnimationStart?:
+			| AnimationEventHandler<Target>
+			| [AnimationEventHandler<Target>, EventHandlerOptions];
 		onAnimationStartCapture?: AnimationEventHandler<Target>;
-		onAnimationEnd?: AnimationEventHandler<Target>;
+		onAnimationEnd?:
+			| AnimationEventHandler<Target>
+			| [AnimationEventHandler<Target>, EventHandlerOptions];
 		onAnimationEndCapture?: AnimationEventHandler<Target>;
-		onAnimationIteration?: AnimationEventHandler<Target>;
+		onAnimationIteration?:
+			| AnimationEventHandler<Target>
+			| [AnimationEventHandler<Target>, EventHandlerOptions];
 		onAnimationIterationCapture?: AnimationEventHandler<Target>;
 
 		// Transition Events
-		onTransitionEnd?: TransitionEventHandler<Target>;
+		onTransitionEnd?:
+			| TransitionEventHandler<Target>
+			| [TransitionEventHandler<Target>, EventHandlerOptions];
 		onTransitionEndCapture?: TransitionEventHandler<Target>;
 	}
 
