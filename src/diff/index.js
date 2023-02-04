@@ -143,10 +143,16 @@ export function diff(
 						) === false) ||
 					newVNode._original === oldVNode._original
 				) {
-					c.props = newProps;
-					c.state = c._nextState;
 					// More info about this here: https://gist.github.com/JoviDeCroock/bec5f2ce93544d2e6070ef8e0036e4e8
-					if (newVNode._original !== oldVNode._original) c._dirty = false;
+					if (newVNode._original !== oldVNode._original) {
+						// When we are dealing with a bail because of sCU we have to update
+						// the props, state and dirty-state.
+						// when we are dealing with strict-equality we don't as the child could still
+						// be dirtied see #3883
+						c.props = newProps;
+						c.state = c._nextState;
+						c._dirty = false;
+					}
 					newVNode._dom = oldVNode._dom;
 					newVNode._children = oldVNode._children;
 					newVNode._children.forEach(vnode => {
