@@ -29,8 +29,11 @@ import { commitQueue } from './commit';
  * @param {import('../internal').Internal} internal The Internal node to patch
  * @param {import('../internal').ComponentChild} vnode The new virtual node
  * @param {import('../internal').PreactElement} parentDom The element into which this subtree is rendered
+ * @param {import('../internal').PreactElement} boundaryNode The DOM element that all children of this internal
+ * should be inserted before, i.e. the DOM boundary or edge of this Internal, a.k.a. the next DOM sibling of
+ * this internal
  */
-export function patch(internal, vnode, parentDom) {
+export function patch(internal, vnode, parentDom, boundaryNode) {
 	let flags = internal.flags;
 
 	if (flags & TYPE_TEXT) {
@@ -100,11 +103,11 @@ export function patch(internal, vnode, parentDom) {
 						? internal.data
 						: internal.flags & MODE_HYDRATE
 						? null
-						: getDomSibling(internal);
+						: boundaryNode;
 
 				mountChildren(internal, renderResult, parentDom, siblingDom);
 			} else {
-				patchChildren(internal, renderResult, parentDom);
+				patchChildren(internal, renderResult, parentDom, boundaryNode);
 			}
 
 			// TODO: for some reason lazy-hydration stops working as .data is assigned a DOM-node
@@ -190,7 +193,8 @@ function patchElement(internal, vnode) {
 		patchChildren(
 			internal,
 			newChildren && Array.isArray(newChildren) ? newChildren : [newChildren],
-			dom
+			dom,
+			null
 		);
 	}
 }

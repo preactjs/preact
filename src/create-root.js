@@ -30,7 +30,8 @@ export function createRoot(parentDom) {
 			/** @type {import('./internal').PreactElement} */ (parentDom.firstChild);
 
 		if (rootInternal) {
-			patch(rootInternal, vnode, parentDom);
+			// TODO: Huh...... Do we have to assume the boundaryNode is null?
+			patch(rootInternal, vnode, parentDom, null);
 		} else {
 			rootInternal = createInternal(vnode);
 

@@ -3,7 +3,7 @@ import options from './options';
 import { createElement, Fragment } from './create-element';
 import { patch } from './diff/patch';
 import { DIRTY_BIT, FORCE_UPDATE, MODE_UNMOUNTING } from './constants';
-import { getParentDom } from './tree';
+import { getDomSibling, getParentDom } from './tree';
 import { inEvent } from './diff/props';
 
 export let ENABLE_CLASSES = false;
@@ -102,7 +102,7 @@ function renderQueuedInternal(internal) {
 	const vnode = createElement(internal.type, internal.props);
 	vnode.props = internal.props;
 
-	patch(internal, vnode, getParentDom(internal));
+	patch(internal, vnode, getParentDom(internal), getDomSibling(internal));
 	commitRoot(internal);
 }
 
