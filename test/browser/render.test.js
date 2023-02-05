@@ -1,5 +1,5 @@
 import { setupRerender } from 'preact/test-utils';
-import { createElement, render, Component, options } from 'preact';
+import { createElement, render, Component, options, Fragment } from 'preact';
 import {
 	setupScratch,
 	teardown,
@@ -1223,5 +1223,33 @@ describe('render()', () => {
 
 		expect(items[0]).to.have.property('parentNode').that.should.exist;
 		expect(items[1]).to.have.property('parentNode').that.should.exist;
+	});
+
+	it('should replace in-place children with different types', () => {
+		const B1 = () => <div>b1</div>;
+		const B2 = () => <div>b2</div>;
+
+		/** @type {(c: React.JSX.Element) => void} */
+		let setChild;
+		function App() {
+			// Mimic some state that may cause a suspend
+			const [child, setChildInternal] = useState(<B1 />);
+			setChild = setChildInternal;
+
+			return (
+				<Fragment>
+					<div>a</div>
+					{child}
+					<div>c</div>
+				</Fragment>
+			);
+		}
+
+		render(<App />, scratch);
+		expect(scratch.innerHTML).to.equal('<div>a</div><div>b1</div><div>c</div>');
+
+		setChild(<B2 />);
+		rerender();
+		expect(scratch.innerHTML).to.equal('<div>a</div><div>b2</div><div>c</div>');
 	});
 });

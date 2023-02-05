@@ -103,6 +103,18 @@ function findMatches(internal, children, parentInternal) {
 	/** @type {Internal} The last matched internal */
 	let prevMatchedInternal;
 
+	/**
+	 * @type {Internal} The previously searched internal, aka the old previous
+	 * Internal of prevMatchedInternal. We store this outside of the loop so we
+	 * can begin our search with prevMatchedInternal._next and have a previous
+	 * Internal to update if prevMatchedInternal._next matches. In other words, it
+	 * allows us to resume our search in the middle of the list of unused
+	 * Internals. We initialize it to oldHead since the first time we enter the
+	 * search loop, we just attempted to match oldHead so oldHead is the previous
+	 * search.
+	 */
+	let prevSearch = oldHead;
+
 	for (let index = 0; index < children.length; index++) {
 		const vnode = children[index];
 
@@ -179,15 +191,23 @@ function findMatches(internal, children, parentInternal) {
 			// find a match, we'll remove it from the list of unmatched Internals and
 			// add to the new list of children internals, whose tail is
 			// prevMatchedInternal
-			/** @type {Internal} */
-			let prevSearch = oldHead;
+			//
+			// TODO: Measure if starting search from prevMatchedInternal._next is worth it.
+			// Let's start our search at the node where our previous match left off.
+			// We do this to optimize for the more common case of holes over keyed
+			// shuffles
+			let searchStart;
+			if (
+				prevMatchedInternal &&
+				prevMatchedInternal._next &&
+				prevMatchedInternal._next !== oldHead
+			) {
+				searchStart = prevMatchedInternal._next;
+			} else {
+				searchStart = oldHead._next;
+				prevSearch = oldHead;
+			}
 
-			// TODO: Try to get this optimization to work
-			// // Let's start our search at the node where our previous match left off.
-			// // We do this cuz it optimizes the more common case of holes over a keyed
-			// // shuffles.
-			// let searchStart = prevMatchedInternal._next;
-			let searchStart = oldHead._next;
 			/** @type {Internal} */
 			let search = searchStart;
 
