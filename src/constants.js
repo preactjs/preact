@@ -51,9 +51,6 @@ export const SKIP_CHILDREN = 1 << 15;
 /** Indicates that this node needs to be inserted while patching children */
 export const INSERT_INTERNAL = 1 << 16;
 
-/** Indicates that this node matched a VNode while diffing and is not going to be unmounted */
-export const MATCHED_INTERNAL = 1 << 17;
-
 /** Reset all mode flags */
 export const RESET_MODE = ~(
 	MODE_HYDRATE |

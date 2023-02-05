@@ -10,9 +10,7 @@ import {
 	UNDEFINED,
 	TYPE_ELEMENT,
 	INSERT_INTERNAL,
-	TYPE_ROOT,
-	MODE_UNMOUNTING,
-	MATCHED_INTERNAL
+	TYPE_ROOT
 } from '../constants';
 import { mount } from './mount';
 import { patch } from './patch';
@@ -109,11 +107,14 @@ function findMatches(internal, children, parentInternal) {
 				// treat this slot in the children array as a null placeholder. We mark
 				// this node as unmounting to prevent it from being used in future
 				// searches for matching internals
-				internal.flags |= MODE_UNMOUNTING;
 				unmount(internal, internal, 0);
 
 				// If this internal is the first unmatched internal, then bump our
-				// pointer to the next node so our search will skip over this internal
+				// pointer to the next node so our search will skip over this internal.
+				//
+				// TODO: What if this node is not the first unmatched Internal (and so
+				// remains in the search array) and shares the type with another
+				// Internal that is it matches? Do we have a test for this?
 				if (oldHead == internal) oldHead = oldHead._next;
 
 				internal = internal._next;
@@ -148,14 +149,13 @@ function findMatches(internal, children, parentInternal) {
 		let matchedInternal;
 
 		if (key == null && internal && index < internal._index) {
-			// TODO: FIX NULL PLACEHOLDERS
 			// If we are doing an unkeyed diff, and the old index of the current
-			// internal is greater than the current VNode index, then this vnode
-			// represents a new element that is mounting into what was previous a null
-			// placeholder slot. We should create a new internal to mount this VNode.
+			// internal in the old list of children is greater than the current VNode
+			// index, then this vnode represents a new element that is mounting into
+			// what was previous a null placeholder slot. We should create a new
+			// internal to mount this VNode.
 		} else if (
 			oldHead &&
-			~oldHead.flags & MODE_UNMOUNTING &&
 			(oldHead.flags & typeFlag) !== 0 &&
 			oldHead.type === type &&
 			oldHead.key == key
@@ -167,9 +167,11 @@ function findMatches(internal, children, parentInternal) {
 			matchedInternal = oldHead;
 			oldHead = oldHead._next;
 		} else if (oldHead) {
-			// seek forward through the Internals list, starting at the head (either first, or first unused).
-			// only match unused items, which are internals where _prev === undefined.
-			// note: _prev=null for the first matched internal, and should be considered "used".
+			// We need to search for a matching internal for this VNode. We'll start
+			// at the first unmatched Internal and search all of its siblings. When we
+			// find a match, we'll remove it from the list of unmatched Internals and
+			// add to the new list of children internals, whose tail is
+			// prevMatchedInternal
 			/** @type {Internal} */
 			let prevSearch = oldHead;
 
@@ -184,21 +186,13 @@ function findMatches(internal, children, parentInternal) {
 
 			while (search) {
 				const flags = search.flags;
-				const isUsed =
-					search.flags & MODE_UNMOUNTING || search.flags & MATCHED_INTERNAL;
 
 				// Match found!
-				if (
-					!isUsed &&
-					(flags & typeFlag) !== 0 &&
-					search.type === type &&
-					search.key == key
-				) {
+				if (flags & typeFlag && search.type === type && search.key == key) {
 					moved = true;
 					matchedInternal = search;
-					matchedInternal.flags |= MATCHED_INTERNAL;
 
-					// Let's update our list of nodes to search to remove the new matchedInternal.
+					// Let's update our list of unmatched nodes to remove the new matchedInternal.
 					// TODO: Better explain this: Temporarily keep the old next pointer
 					// around for tracking null placeholders. Particularly examine the
 					// test "should support moving Fragments between beginning and end"
@@ -224,23 +218,25 @@ function findMatches(internal, children, parentInternal) {
 			}
 		}
 
-		// no match, create a new Internal:
+		// No match, create a new Internal:
 		if (!matchedInternal) {
 			matchedInternal = createInternal(normalizedVNode, parentInternal);
-			matchedInternal.flags |= MATCHED_INTERNAL;
-			// console.log('creating new', internal.type);
 		}
 
-		// move into place in new list
+		// Put matched or new internal into the new list of children
 		if (prevMatchedInternal) prevMatchedInternal._next = matchedInternal;
 		else parentInternal._child = matchedInternal;
 		prevMatchedInternal = matchedInternal;
 
 		if (internal && internal._index == index) {
+			// Move forward our tracker for null placeholders
 			internal = internal._prevLIS || internal._next;
 		}
 	}
 
+	// Ensure the last node of the last matched internal has a null _next pointer.
+	// Its possible that it still points to it's old sibling at this point so
+	// we'll manually clear it here.
 	if (prevMatchedInternal) prevMatchedInternal._next = null;
 
 	// Step 2. Walk over the unused children and unmount:
@@ -287,8 +283,6 @@ function runLIS(internal, parentDom) {
 		// TODO: We do the props._parentDom !== parentDom in a couple places.
 		// Could we do this check once and cache the result in a flag?
 		if (internal.flags & TYPE_ROOT && internal.props._parentDom !== parentDom) {
-			// if (prevMatchedInternal) prevMatchedInternal._next = internal;
-			// prevMatchedInternal = internal;
 			internal = internal._next;
 			continue;
 		}
@@ -299,17 +293,12 @@ function runLIS(internal, parentDom) {
 
 		// Skip over newly mounted internals. They will be mounted in place.
 		if (internal._index === -1) {
-			// if (prevMatchedInternal) prevMatchedInternal._next = internal;
-			// prevMatchedInternal = internal;
 			internal = internal._next;
 			continue;
 		}
 
 		if (wipLIS.length == 0) {
 			wipLIS.push(internal);
-
-			// if (prevMatchedInternal) prevMatchedInternal._next = internal;
-			// prevMatchedInternal = internal;
 			internal = internal._next;
 			continue;
 		}
@@ -335,8 +324,6 @@ function runLIS(internal, parentDom) {
 			internal._prevLIS = prevLIS;
 		}
 
-		// if (prevMatchedInternal) prevMatchedInternal._next = internal;
-		// prevMatchedInternal = internal;
 		internal = internal._next;
 	}
 
@@ -349,10 +336,14 @@ function runLIS(internal, parentDom) {
 	while (lisNode) {
 		// This node is on the longest decreasing subsequence so clear INSERT_NODE flag
 		lisNode.flags &= ~INSERT_INTERNAL;
-		let temp = lisNode._prevLIS;
+
+		// Reverse the _prevLIS linked list
+		internal = lisNode._prevLIS;
 		lisNode._prevLIS = nextLIS;
 		nextLIS = lisNode;
-		lisNode = temp;
+		lisNode = internal;
+
+		// Track the head of the linked list
 		if (lisNode) lisHead = lisNode;
 	}
 
@@ -424,9 +415,6 @@ function insertionLoop(internal, children, parentDom, boundaryNode, lisHead) {
 			}
 		}
 
-		internal.flags &= ~INSERT_INTERNAL;
-		internal.flags &= ~MATCHED_INTERNAL;
-
 		let oldRef = internal._prevRef;
 		if (internal.ref != oldRef) {
 			if (oldRef) applyRef(oldRef, null, internal);
@@ -434,6 +422,7 @@ function insertionLoop(internal, children, parentDom, boundaryNode, lisHead) {
 				applyRef(internal.ref, internal._component || internal.data, internal);
 		}
 
+		internal.flags &= ~INSERT_INTERNAL;
 		internal._prevLIS = null;
 		internal._index = index++;
 		internal = internal._next;
@@ -443,13 +432,9 @@ function insertionLoop(internal, children, parentDom, boundaryNode, lisHead) {
 /**
  * @param {import('../internal').Internal} internal
  * @param {import('../internal').PreactNode} parentDom
- * @param {import('../internal').PreactNode} [nextSibling]
+ * @param {import('../internal').PreactNode} nextSibling
  */
 export function insert(internal, parentDom, nextSibling) {
-	if (nextSibling === undefined) {
-		nextSibling = getDomSibling(internal);
-	}
-
 	if (internal.flags & TYPE_COMPONENT) {
 		let child = internal._child;
 		while (child) {
