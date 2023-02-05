@@ -60,11 +60,7 @@ export function patch(internal, vnode, parentDom, boundaryNode) {
 		parentDom = vnode.props._parentDom;
 
 		if (internal.props._parentDom !== parentDom) {
-			// let nextSibling =
-			// 	parentDom == prevParentDom ? getDomSibling(internal) : null;
-			// insert(internal, nextSibling, parentDom);
-			let nextSibling =
-				parentDom == prevParentDom ? getDomSibling(internal) : null;
+			let nextSibling = parentDom == prevParentDom ? boundaryNode : null;
 			insert(internal, parentDom, nextSibling);
 		}
 	}
