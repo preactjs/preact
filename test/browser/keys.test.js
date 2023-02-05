@@ -143,7 +143,7 @@ describe('keys', () => {
 		);
 	});
 
-	it.skip('should remove keyed nodes (#232)', () => {
+	it('should remove keyed nodes (#232)', () => {
 		class App extends Component {
 			componentDidMount() {
 				setTimeout(() => this.setState({ opened: true, loading: true }), 10);
@@ -313,8 +313,8 @@ describe('keys', () => {
 		render(<List values={values} />, scratch);
 		expect(scratch.textContent).to.equal('abcde');
 		expect(getLog()).to.deep.equal([
-			'<ol>cdeab.insertBefore(<li>b, <li>c)',
-			'<ol>bcdea.insertBefore(<li>a, <li>b)'
+			'<ol>cdeab.insertBefore(<li>a, <li>c)',
+			'<ol>acdeb.insertBefore(<li>b, <li>c)'
 		]);
 	});
 
@@ -327,7 +327,7 @@ describe('keys', () => {
 		render(<List values={['b', 'a']} />, scratch);
 		expect(scratch.textContent).to.equal('ba');
 
-		expect(getLog()).to.deep.equal(['<ol>ab.insertBefore(<li>a, Null)']);
+		expect(getLog()).to.deep.equal(['<ol>ab.insertBefore(<li>b, <li>a)']);
 	});
 
 	it('should swap existing keyed children in the middle of a list efficiently', () => {
@@ -343,7 +343,7 @@ describe('keys', () => {
 		render(<List values={values} />, scratch);
 		expect(scratch.textContent).to.equal('acbd', 'initial swap');
 		expect(getLog()).to.deep.equal(
-			['<ol>abcd.insertBefore(<li>b, <li>d)'],
+			['<ol>abcd.insertBefore(<li>c, <li>b)'],
 			'initial swap'
 		);
 
@@ -354,7 +354,7 @@ describe('keys', () => {
 		render(<List values={values} />, scratch);
 		expect(scratch.textContent).to.equal('abcd', 'swap back');
 		expect(getLog()).to.deep.equal(
-			['<ol>acbd.insertBefore(<li>c, <li>d)'],
+			['<ol>acbd.insertBefore(<li>b, <li>c)'],
 			'swap back'
 		);
 	});
@@ -429,18 +429,18 @@ describe('keys', () => {
 
 		render(<List values={values} />, scratch);
 		expect(scratch.textContent).to.equal(values.join(''));
-		expect(getLog()).to.have.lengthOf(9);
-		// expect(getLog()).to.deep.equal([
-		// 	'<ol>abcdefghij.insertBefore(<li>j, <li>a)',
-		// 	'<ol>jabcdefghi.insertBefore(<li>i, <li>a)',
-		// 	'<ol>jiabcdefgh.insertBefore(<li>h, <li>a)',
-		// 	'<ol>jihabcdefg.insertBefore(<li>g, <li>a)',
-		// 	'<ol>jihgabcdef.insertBefore(<li>f, <li>a)',
-		// 	'<ol>jihgfabcde.insertBefore(<li>e, <li>a)',
-		// 	'<ol>jihgfeabcd.insertBefore(<li>d, <li>a)',
-		// 	'<ol>jihgfedabc.insertBefore(<li>c, <li>a)',
-		// 	'<ol>jihgfedcab.insertBefore(<li>a, Null)'
-		// ]);
+		// expect(getLog()).to.have.lengthOf(9);
+		expect(getLog()).to.deep.equal([
+			'<ol>abcdefghij.insertBefore(<li>j, <li>a)',
+			'<ol>jabcdefghi.insertBefore(<li>i, <li>a)',
+			'<ol>jiabcdefgh.insertBefore(<li>h, <li>a)',
+			'<ol>jihabcdefg.insertBefore(<li>g, <li>a)',
+			'<ol>jihgabcdef.insertBefore(<li>f, <li>a)',
+			'<ol>jihgfabcde.insertBefore(<li>e, <li>a)',
+			'<ol>jihgfeabcd.insertBefore(<li>d, <li>a)',
+			'<ol>jihgfedabc.insertBefore(<li>c, <li>a)',
+			'<ol>jihgfedcab.insertBefore(<li>b, <li>a)'
+		]);
 	});
 
 	it("should not preserve state when a component's keys are different", () => {
@@ -552,8 +552,8 @@ describe('keys', () => {
 
 		expect(scratch.innerHTML).to.equal(expectedHtml);
 		expect(ops).to.deep.equal([
-			'Unmount Stateful2',
 			'Unmount Stateful1',
+			'Unmount Stateful2',
 			'Mount Stateful1',
 			'Mount Stateful2'
 		]);
@@ -565,8 +565,8 @@ describe('keys', () => {
 
 		expect(scratch.innerHTML).to.equal(expectedHtml);
 		expect(ops).to.deep.equal([
-			'Unmount Stateful2',
 			'Unmount Stateful1',
+			'Unmount Stateful2',
 			'Mount Stateful1',
 			'Mount Stateful2'
 		]);
@@ -697,8 +697,8 @@ describe('keys', () => {
 
 		expect(scratch.innerHTML).to.equal(expectedHtml);
 		expect(ops).to.deep.equal([
-			'Unmount Stateful2',
 			'Unmount Stateful1',
+			'Unmount Stateful2',
 			'Mount Stateful1',
 			'Mount Stateful2'
 		]);
@@ -710,8 +710,8 @@ describe('keys', () => {
 
 		expect(scratch.innerHTML).to.equal(expectedHtml);
 		expect(ops).to.deep.equal([
-			'Unmount Stateful2',
 			'Unmount Stateful1',
+			'Unmount Stateful2',
 			'Mount Stateful1',
 			'Mount Stateful2'
 		]);
