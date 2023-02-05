@@ -199,6 +199,10 @@ function findMatches(internal, children, parentInternal) {
 					matchedInternal.flags |= MATCHED_INTERNAL;
 
 					// Let's update our list of nodes to search to remove the new matchedInternal.
+					// TODO: Better explain this: Temporarily keep the old next pointer
+					// around for tracking null placeholders. Particularly examine the
+					// test "should support moving Fragments between beginning and end"
+					prevSearch._prevLIS = prevSearch._next;
 					prevSearch._next = matchedInternal._next;
 
 					break;
@@ -233,7 +237,7 @@ function findMatches(internal, children, parentInternal) {
 		prevMatchedInternal = matchedInternal;
 
 		if (internal && internal._index == index) {
-			internal = internal._next;
+			internal = internal._prevLIS || internal._next;
 		}
 	}
 
