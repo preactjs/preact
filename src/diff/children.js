@@ -15,7 +15,7 @@ import {
 import { mount } from './mount';
 import { patch } from './patch';
 import { unmount } from './unmount';
-import { createInternal, getDomSibling, getFirstDom } from '../tree';
+import { createInternal, getFirstDom } from '../tree';
 
 /**
  * Scenarios:
@@ -51,17 +51,23 @@ export function patchChildren(
 	// Step 1. Find matches and set up _next pointers. All unused internals are at
 	// attached to oldHead.
 	//
-	// TODO: Identity null placeholders by also walking the old internal children
-	// at the same time.
-	//
-	// TODO: Remove usages of MODE_UNMOUNTING and MATCHED_INTERNALS flags since
-	// they are unnecessary now
+	// In this step, _tempNext will hold the old next pointer for an internal.
+	// This algorithm changes `_next` when finding matching internals. This change
+	// breaks our null placeholder detection logic which compares the old internal
+	// at a particular index with the new VNode at that index. By using
+	// `_tempNext` to hold the old next pointers we are able to simultaneously
+	// iterate over the new VNodes, iterate over the old Internal list, and update
+	// _next pointers to the new Internals.
 	moved = true; // TODO: Bring back skipping LIS on no moves. `moved` should start out as `false`
 	findMatches(parentInternal._child, children, parentInternal);
 
 	// Step 3. Find the longest increasing subsequence
-	// TODO: Replace _prevLDS with _next. Doing this will make _next meaningless for a moment
-	// TODO: Explore trying to do this without an array, maybe next pointers? Or maybe reuse the array
+	//
+	// In this step, `_tempNext` will hold the previous Internal in the longest
+	// increasing subsequence containing the current Internal.
+	//
+	// - [ ] TODO: Explore trying to do this without an array, maybe next
+	//   pointers? Or maybe reuse the array
 	let lisHead = null;
 	if (parentInternal._child && moved) {
 		lisHead = runLIS(parentInternal._child, parentDom);
@@ -70,7 +76,8 @@ export function patchChildren(
 
 	// Step 5. Walk forwards over the newly-assigned _next properties, inserting
 	// Internals that require insertion. We track the next dom sibling Internals
-	// should be inserted before by walking over the LIS at the same time
+	// should be inserted before by walking over the LIS (using _tempNext) at the
+	// same time
 	insertionLoop(
 		parentInternal._child,
 		children,
@@ -104,8 +111,8 @@ function findMatches(internal, children, parentInternal) {
 			if (internal && index == internal._index && internal.key == null) {
 				// The current internal is unkeyed, has the same index as this VNode
 				// child, and the VNode is now null. So we'll unmount the Internal and
-				// treat this slot in the children array as a null placeholder. We mark
-				// this node as unmounting to prevent it from being used in future
+				// treat this slot in the children array as a null placeholder. We'll
+				// eagerly unmount this node to prevent it from being used in future
 				// searches for matching internals
 				unmount(internal, internal, 0);
 
@@ -196,7 +203,7 @@ function findMatches(internal, children, parentInternal) {
 					// TODO: Better explain this: Temporarily keep the old next pointer
 					// around for tracking null placeholders. Particularly examine the
 					// test "should support moving Fragments between beginning and end"
-					prevSearch._prevLIS = prevSearch._next;
+					prevSearch._tempNext = prevSearch._next;
 					prevSearch._next = matchedInternal._next;
 
 					break;
@@ -230,13 +237,13 @@ function findMatches(internal, children, parentInternal) {
 
 		if (internal && internal._index == index) {
 			// Move forward our tracker for null placeholders
-			internal = internal._prevLIS || internal._next;
+			internal = internal._tempNext || internal._next;
 		}
 	}
 
 	// Ensure the last node of the last matched internal has a null _next pointer.
-	// Its possible that it still points to it's old sibling at this point so
-	// we'll manually clear it here.
+	// Its possible that it still points to it's old sibling at the end of Step 1,
+	// so we'll manually clear it here.
 	if (prevMatchedInternal) prevMatchedInternal._next = null;
 
 	// Step 2. Walk over the unused children and unmount:
@@ -305,7 +312,7 @@ function runLIS(internal, parentDom) {
 
 		let ldsTail = wipLIS[wipLIS.length - 1];
 		if (ldsTail._index < internal._index) {
-			internal._prevLIS = ldsTail;
+			internal._tempNext = ldsTail;
 			wipLIS.push(internal);
 		} else {
 			// Search for position in wipLIS where node should go. It should replace
@@ -321,14 +328,18 @@ function runLIS(internal, parentDom) {
 
 			wipLIS[i + 1] = internal;
 			let prevLIS = i < 0 ? null : wipLIS[i];
-			internal._prevLIS = prevLIS;
+			internal._tempNext = prevLIS;
 		}
 
 		internal = internal._next;
 	}
 
 	// Step 4. Mark internals in longest increasing subsequence and reverse the
-	// _prevLIS pointers to be _nextLIS pointers for use in the insertion loop
+	// the longest increasing subsequence linked list. Before this step, _tempNext
+	// is actual the **previous** Internal in the longest increasing subsequence.
+	//
+	// After this step, _tempNext becomes the **next** Internal in the longest
+	// increasing subsequence.
 	/** @type {Internal | null} */
 	let lisNode = wipLIS.length ? wipLIS[wipLIS.length - 1] : null;
 	let lisHead = lisNode;
@@ -337,9 +348,9 @@ function runLIS(internal, parentDom) {
 		// This node is on the longest decreasing subsequence so clear INSERT_NODE flag
 		lisNode.flags &= ~INSERT_INTERNAL;
 
-		// Reverse the _prevLIS linked list
-		internal = lisNode._prevLIS;
-		lisNode._prevLIS = nextLIS;
+		// Reverse the _tempNext LIS linked list
+		internal = lisNode._tempNext;
+		lisNode._tempNext = nextLIS;
 		nextLIS = lisNode;
 		lisNode = internal;
 
@@ -380,7 +391,7 @@ function insertionLoop(internal, children, parentDom, boundaryNode, lisHead) {
 		}
 
 		if (internal === lisNode) {
-			lisNode = lisNode._prevLIS;
+			lisNode = lisNode._tempNext;
 			if (lisNode) {
 				nextDomSibling =
 					lisNode.flags & TYPE_DOM ? lisNode.data : getFirstDom(lisNode._child);
@@ -423,7 +434,7 @@ function insertionLoop(internal, children, parentDom, boundaryNode, lisHead) {
 		}
 
 		internal.flags &= ~INSERT_INTERNAL;
-		internal._prevLIS = null;
+		internal._tempNext = null;
 		internal._index = index++;
 		internal = internal._next;
 	}

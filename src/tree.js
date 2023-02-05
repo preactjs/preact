@@ -96,8 +96,7 @@ export function createInternal(vnode, parentInternal) {
 		_parent: parentInternal,
 		_child: null,
 		_next: null,
-		_prev: null,
-		_prevLIS: null,
+		_tempNext: null,
 		_index: -1,
 		_vnodeId: vnodeId,
 		_component: null,
@@ -144,7 +143,7 @@ export function getDomSibling(internal, childIndex) {
 }
 
 /**
- * Search the given internal and it's siblings for a DOM element. If the
+ * Search the given internal and it's next siblings for a DOM element. If the
  * provided Internal _is_ a DOM Internal, its DOM will be returned. If you want
  * to find the first DOM node of an Internal's subtree, than pass in
  * `internal._child`

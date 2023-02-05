@@ -151,10 +151,12 @@ export interface Internal<P = {}> {
 	_child: Internal | null;
 	/** next sibling Internal node */
 	_next: Internal | null;
-	/** temporarily holds previous sibling Internal while diffing. Is purposefully cleared after diffing due to how the diffing algorithm works */
-	_prev: Internal | null;
 	_index: number;
-	_prevLIS: Internal | null;
+	/**
+	 * A temporary pointer to another Internal, used for different purposes in
+	 * the patching children algorithm. See comments there for its different uses
+	 * */
+	_tempNext: Internal | null;
 	/** most recent vnode ID */
 	_vnodeId: number;
 	/**
