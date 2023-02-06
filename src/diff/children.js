@@ -31,6 +31,9 @@ import { createInternal, getDomSibling } from '../tree';
 /** @typedef {import('../internal').PreactElement} PreactElement */
 /** @typedef {import('../internal').ComponentChildren} ComponentChildren */
 
+/** @type {boolean} */
+let moved;
+
 /**
  * Update an internal with new children.
  * @param {Internal} parentInternal The internal whose children should be patched
@@ -40,17 +43,19 @@ import { createInternal, getDomSibling } from '../tree';
 export function patchChildren(parentInternal, children, parentDom) {
 	// Step 1. Find matches and set up _prev pointers. Identity null placeholders
 	// by also walking the old internal children at the same time
+	moved = false;
 	let prevInternal = findMatches(parentInternal, children);
 
 	// Step 2. Walk over the unused children and unmount:
 	unmountUnusedChildren(parentInternal);
 
 	// Step 3. Find the longest decreasing subsequence
-	// TODO: Check prevInternal exits before running (aka we are unmounting everything);
-	// TODO: Ideally only run this if something has moved
 	// TODO: Replace _prevLDS with _next. Doing this will make _next meaningless for a moment
 	// TODO: Explore trying to do this without an array, maybe next pointers? Or maybe reuse the array
-	runLDS(prevInternal, parentInternal, parentDom);
+	if (prevInternal && moved) {
+		runLDS(prevInternal, parentInternal, parentDom);
+	}
+	moved = false;
 
 	// Step 5. Walk backwards over the newly-assigned _prev properties, visiting
 	// each Internal to set its _next ptr and perform insert/mount/update.
@@ -117,18 +122,30 @@ function findMatches(parentInternal, children) {
 		/** @type {Internal?} */
 		let matchedInternal;
 
-		// TODO: See if doing a fast path (special if condition) for already in
-		// place matches is faster than while loop
 		if (key == null && internal && index < internal._index) {
 			// If we are doing an unkeyed diff, and the old index of the current
 			// internal is greater than the current VNode index, then this vnode
 			// represents a new element that is mounting into what was previous a null
 			// placeholder slot. We should create a new internal to mount this VNode.
-		} else {
+		} else if (
+			oldHead &&
+			oldHead._prev == null &&
+			~oldHead.flags & MODE_UNMOUNTING &&
+			(oldHead.flags & typeFlag) !== 0 &&
+			oldHead.type === type &&
+			oldHead.key == key
+		) {
+			// Fast path checking if this current vnode matches the first unused
+			// Internal. By doing this we can avoid the search loop and setting the
+			// move flag, which allows us to skip the LDS algorithm if no Internals
+			// moved
+			matchedInternal = oldHead;
+			oldHead = oldHead._next;
+		} else if (oldHead) {
 			// seek forward through the Internals list, starting at the head (either first, or first unused).
 			// only match unused items, which are internals where _prev === undefined.
 			// note: _prev=null for the first matched internal, and should be considered "used".
-			let search = oldHead;
+			let search = oldHead._next;
 			while (search) {
 				const flags = search.flags;
 				const isUnused =
@@ -139,6 +156,7 @@ function findMatches(parentInternal, children) {
 					search.type === type &&
 					search.key == key
 				) {
+					moved = true;
 					matchedInternal = search;
 					// if the match was the first unused item, bump the start ptr forward:
 					if (search === oldHead) oldHead = oldHead._next;
