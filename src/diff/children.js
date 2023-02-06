@@ -28,22 +28,47 @@ import { createInternal, getDomSibling } from '../tree';
 
 /** @typedef {import('../internal').Internal} Internal */
 /** @typedef {import('../internal').VNode} VNode */
+/** @typedef {import('../internal').PreactElement} PreactElement */
+/** @typedef {import('../internal').ComponentChildren} ComponentChildren */
 
 /**
  * Update an internal with new children.
  * @param {Internal} parentInternal The internal whose children should be patched
- * @param {import('../internal').ComponentChildren[]} children The new children, represented as VNodes
- * @param {import('../internal').PreactElement} parentDom The element into which this subtree is rendered
+ * @param {ComponentChildren[]} children The new children, represented as VNodes
+ * @param {PreactElement} parentDom The element into which this subtree is rendered
  */
 export function patchChildren(parentInternal, children, parentDom) {
+	// Step 1. Find matches and set up _prev pointers. Identity null placeholders
+	// by also walking the old internal children at the same time
+	let prevInternal = findMatches(parentInternal, children);
+
+	// Step 2. Walk over the unused children and unmount:
+	unmountUnusedChildren(parentInternal);
+
+	// Step 3. Find the longest decreasing subsequence
+	// TODO: Check prevInternal exits before running (aka we are unmounting everything);
+	// TODO: Ideally only run this if something has moved
+	// TODO: Replace _prevLDS with _next. Doing this will make _next meaningless for a moment
+	// TODO: Explore trying to do this without an array, maybe next pointers? Or maybe reuse the array
+	runLDS(prevInternal, parentInternal, parentDom);
+
+	// Step 5. Walk backwards over the newly-assigned _prev properties, visiting
+	// each Internal to set its _next ptr and perform insert/mount/update.
+	insertionLoop(prevInternal, children, parentDom, parentInternal);
+}
+
+/**
+ * @param {Internal} parentInternal
+ * @param {ComponentChildren[]} children
+ * @returns {Internal}
+ */
+function findMatches(parentInternal, children) {
 	/** @type {Internal} */
 	let internal = parentInternal._child;
 	/** @type {Internal} */
 	let prevInternal;
 	let oldHead = internal;
 
-	// Step 1. Find matches and set up _prev pointers. Identity null placeholders
-	// by also walking the old internal children at the same time
 	for (let index = 0; index < children.length; index++) {
 		const vnode = children[index];
 
@@ -136,9 +161,15 @@ export function patchChildren(parentInternal, children, parentDom) {
 		}
 	}
 
-	// Step 2. Walk over the unused children and unmount:
+	return prevInternal;
+}
+
+/**
+ * @param {Internal} parentInternal
+ */
+function unmountUnusedChildren(parentInternal) {
 	let lastMatchedInternal;
-	oldHead = parentInternal._child;
+	let oldHead = parentInternal._child;
 	while (oldHead) {
 		const next = oldHead._next;
 		if (oldHead._prev == null) {
@@ -149,14 +180,15 @@ export function patchChildren(parentInternal, children, parentDom) {
 		}
 		oldHead = next;
 	}
+}
 
-	// Step 3. Find the longest decreasing subsequence
-	// TODO: Move this into it's own function
-	// TODO: Check prevInternal exits before running (aka we are unmounting everything);
-	// TODO: Ideally only run this if something has moved
-	// TODO: Replace _prevLDS with _next. Doing this will make _next meaningless for a moment
-	// TODO: Explore trying to do this without an array, maybe next pointers? Or maybe reuse the array
-	internal = prevInternal;
+/**
+ * @param {Internal} internal
+ * @param {Internal} parentInternal
+ * @param {PreactElement} parentDom
+ */
+function runLDS(internal, parentInternal, parentDom) {
+	// let internal = prevInternal;
 	/** @type {Internal[]} */
 	const wipLDS = [];
 
@@ -232,15 +264,22 @@ export function patchChildren(parentInternal, children, parentDom) {
 		ldsNode.flags &= ~INSERT_INTERNAL;
 		ldsNode = ldsNode._prevLDS;
 	}
+}
 
-	// Step 5. Walk backwards over the newly-assigned _prev properties, visiting
-	// each Internal to set its _next ptr and perform insert/mount/update.
+/**
+ * @param {Internal} internal
+ * @param {ComponentChildren[]} children
+ * @param {PreactElement} parentDom
+ * @param {Internal} parentInternal
+ */
+function insertionLoop(internal, children, parentDom, parentInternal) {
 	/** @type {Internal} */
 	let nextInternal = null;
 	let firstChild = null;
 
 	let index = children.length;
-	internal = prevInternal;
+	// internal = prevInternal;
+	let prevInternal = internal;
 	while (internal) {
 		// set this internal's next ptr to the previous loop entry
 		internal._next = nextInternal;
