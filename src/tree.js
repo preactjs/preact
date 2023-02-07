@@ -9,7 +9,8 @@ import {
 	TYPE_COMPONENT,
 	TYPE_DOM,
 	MODE_SVG,
-	UNDEFINED
+	UNDEFINED,
+	INSERT_INTERNAL
 } from './constants';
 import { enqueueRender } from './component';
 
@@ -153,6 +154,11 @@ export function getDomSibling(internal, childIndex) {
  */
 export function getFirstDom(internal) {
 	while (internal) {
+		if (internal.flags & INSERT_INTERNAL) {
+			internal = internal._next;
+			continue;
+		}
+
 		// this is a DOM internal
 		if (internal.flags & TYPE_DOM) {
 			// @ts-ignore this is an Element Internal, .data is a PreactElement.

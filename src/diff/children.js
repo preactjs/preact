@@ -15,7 +15,7 @@ import {
 import { mount } from './mount';
 import { patch } from './patch';
 import { unmount } from './unmount';
-import { createInternal, getFirstDom } from '../tree';
+import { createInternal, getDomSibling, getFirstDom } from '../tree';
 
 /**
  * Scenarios:
@@ -29,9 +29,6 @@ import { createInternal, getFirstDom } from '../tree';
 /** @typedef {import('../internal').VNode} VNode */
 /** @typedef {import('../internal').PreactElement} PreactElement */
 /** @typedef {import('../internal').ComponentChildren} ComponentChildren */
-
-/** @type {boolean} */
-let moved;
 
 /**
  * Update an internal with new children.
@@ -58,8 +55,7 @@ export function patchChildren(
 	// `_tempNext` to hold the old next pointers we are able to simultaneously
 	// iterate over the new VNodes, iterate over the old Internal list, and update
 	// _next pointers to the new Internals.
-	moved = true; // TODO: Bring back skipping LIS on no moves. `moved` should start out as `false`
-	findMatches(parentInternal._child, children, parentInternal);
+	let moved = findMatches(parentInternal._child, children, parentInternal);
 
 	// Step 3. Find the longest increasing subsequence
 	//
@@ -72,27 +68,31 @@ export function patchChildren(
 	if (parentInternal._child && moved) {
 		lisHead = runLIS(parentInternal._child, parentDom);
 	}
-	moved = false;
 
 	// Step 5. Walk forwards over the newly-assigned _next properties, inserting
 	// Internals that require insertion. We track the next dom sibling Internals
 	// should be inserted before by walking over the LIS (using _tempNext) at the
 	// same time
-	insertionLoop(
-		parentInternal._child,
-		children,
-		parentDom,
-		boundaryNode,
-		lisHead
-	);
+	if (parentInternal._child) {
+		insertionLoop(
+			parentInternal._child,
+			children,
+			parentDom,
+			boundaryNode,
+			lisHead
+		);
+	}
 }
 
 /**
  * @param {Internal} internal
  * @param {ComponentChildren[]} children
  * @param {Internal} parentInternal
+ * @returns {boolean}
  */
 function findMatches(internal, children, parentInternal) {
+	let moved = false;
+
 	/** @type {Internal} */
 	// let internal = parentInternal._child;
 	parentInternal._child = null;
@@ -268,6 +268,8 @@ function findMatches(internal, children, parentInternal) {
 
 	// Step 2. Walk over the unused children and unmount:
 	unmountUnusedChildren(oldHead);
+
+	return moved;
 }
 
 /**
@@ -393,14 +395,13 @@ function insertionLoop(internal, children, parentDom, boundaryNode, lisHead) {
 	let lisNode = lisHead;
 	/** @type {PreactElement} The DOM element of the next LIS internal */
 	let nextDomSibling;
-	if (lisNode) {
-		if (lisNode.flags & TYPE_DOM) {
-			nextDomSibling = lisNode.data;
-		} else {
-			nextDomSibling = getFirstDom(lisNode._child);
-		}
+	if (lisHead) {
+		// If lisHead is non-null, then we have a LIS sequence of in-place Internal
+		// we can use to determine our next DOM sibling
+		nextDomSibling =
+			lisNode.flags & TYPE_DOM ? lisNode.data : getFirstDom(lisNode._child);
 	} else {
-		nextDomSibling = boundaryNode;
+		nextDomSibling = getDomSibling(internal) || boundaryNode;
 	}
 
 	let index = 0;
@@ -410,14 +411,28 @@ function insertionLoop(internal, children, parentDom, boundaryNode, lisHead) {
 			vnode = children[++index];
 		}
 
-		if (internal === lisNode) {
-			lisNode = lisNode._tempNext;
-			if (lisNode) {
-				nextDomSibling =
-					lisNode.flags & TYPE_DOM ? lisNode.data : getFirstDom(lisNode._child);
-			} else {
-				nextDomSibling = boundaryNode;
+		if (lisHead) {
+			// If lisHead is non-null, then we have a LIS sequence of in-place
+			// Internal we can use to determine our next DOM sibling. If this internal
+			// is the current internal in our LIS in-place sequence, then let's go to
+			// the next Internal in the sequence and use it's DOM node as our new
+			// nextSibling
+			if (internal === lisNode) {
+				lisNode = lisNode._tempNext;
+				if (lisNode) {
+					nextDomSibling =
+						lisNode.flags & TYPE_DOM
+							? lisNode.data
+							: getFirstDom(lisNode._child);
+				} else {
+					nextDomSibling = boundaryNode;
+				}
 			}
+		} else {
+			// We may not have an LIS sequence if nothing moved. If so, we'll need to
+			// manually compute the next dom sibling in case any children below us do
+			// insertions before it.
+			nextDomSibling = getDomSibling(internal) || boundaryNode;
 		}
 
 		if (internal._index === -1) {
