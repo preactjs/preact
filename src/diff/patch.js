@@ -29,11 +29,8 @@ import { commitQueue } from './commit';
  * @param {import('../internal').Internal} internal The Internal node to patch
  * @param {import('../internal').ComponentChild} vnode The new virtual node
  * @param {import('../internal').PreactElement} parentDom The element into which this subtree is rendered
- * @param {import('../internal').PreactElement} boundaryNode The DOM element that all children of this internal
- * should be inserted before, i.e. the DOM boundary or edge of this Internal, a.k.a. the next DOM sibling of
- * this internal
  */
-export function patch(internal, vnode, parentDom, boundaryNode) {
+export function patch(internal, vnode, parentDom) {
 	let flags = internal.flags;
 
 	if (flags & TYPE_TEXT) {
@@ -60,7 +57,8 @@ export function patch(internal, vnode, parentDom, boundaryNode) {
 		parentDom = vnode.props._parentDom;
 
 		if (internal.props._parentDom !== parentDom) {
-			let nextSibling = parentDom == prevParentDom ? boundaryNode : null;
+			let nextSibling =
+				parentDom == prevParentDom ? getDomSibling(internal) : null;
 			insert(internal, parentDom, nextSibling);
 		}
 	}
@@ -99,11 +97,11 @@ export function patch(internal, vnode, parentDom, boundaryNode) {
 						? internal.data
 						: internal.flags & MODE_HYDRATE
 						? null
-						: boundaryNode;
+						: getDomSibling(internal);
 
 				mountChildren(internal, renderResult, parentDom, siblingDom);
 			} else {
-				patchChildren(internal, renderResult, parentDom, boundaryNode);
+				patchChildren(internal, renderResult, parentDom);
 			}
 
 			// TODO: for some reason lazy-hydration stops working as .data is assigned a DOM-node
@@ -189,8 +187,7 @@ function patchElement(internal, vnode) {
 		patchChildren(
 			internal,
 			newChildren && Array.isArray(newChildren) ? newChildren : [newChildren],
-			dom,
-			null
+			dom
 		);
 	}
 }

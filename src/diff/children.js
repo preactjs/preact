@@ -35,16 +35,8 @@ import { createInternal, getDomSibling, getFirstDom } from '../tree';
  * @param {Internal} parentInternal The internal whose children should be patched
  * @param {ComponentChildren[]} children The new children, represented as VNodes
  * @param {PreactElement} parentDom The element into which this subtree is rendered
- * @param {PreactElement} boundaryNode The DOM element that all children of this internal
- * should be inserted before, i.e. the DOM boundary or edge of this Internal, a.k.a. the next DOM sibling of
- * this internal
  */
-export function patchChildren(
-	parentInternal,
-	children,
-	parentDom,
-	boundaryNode
-) {
+export function patchChildren(parentInternal, children, parentDom) {
 	// Step 1. Find matches and set up _next pointers. All unused internals are at
 	// attached to oldHead.
 	//
@@ -74,13 +66,7 @@ export function patchChildren(
 	// should be inserted before by walking over the LIS (using _tempNext) at the
 	// same time
 	if (parentInternal._child) {
-		insertionLoop(
-			parentInternal._child,
-			children,
-			parentDom,
-			boundaryNode,
-			lisHead
-		);
+		insertionLoop(parentInternal._child, children, parentDom, lisHead);
 	}
 }
 
@@ -255,6 +241,10 @@ function findMatches(internal, children, parentInternal) {
 		else parentInternal._child = matchedInternal;
 		prevMatchedInternal = matchedInternal;
 
+		// TODO: Consider detecting if an internal is of TYPE_ROOT, whether or not
+		// it is a PORTAL, and setting a flag as such to use in getDomSibling and
+		// getFirstDom
+
 		if (internal && internal._index == index) {
 			// Move forward our tracker for null placeholders
 			internal = internal._tempNext || internal._next;
@@ -387,21 +377,19 @@ function runLIS(internal, parentDom) {
  * @param {Internal} internal
  * @param {ComponentChildren[]} children
  * @param {PreactElement} parentDom
- * @param {PreactElement} boundaryNode
  * @param {Internal} lisHead
  */
-function insertionLoop(internal, children, parentDom, boundaryNode, lisHead) {
+function insertionLoop(internal, children, parentDom, lisHead) {
 	/** @type {Internal} The next in-place Internal whose DOM previous Internals should be inserted before */
 	let lisNode = lisHead;
-	/** @type {PreactElement} The DOM element of the next LIS internal */
+	/** @type {PreactElement | null} The DOM element of the next LIS internal */
 	let nextDomSibling;
+
+	// If lisHead is non-null, then we have a LIS sequence of in-place Internal
+	// we can use to determine our next DOM sibling
 	if (lisHead) {
-		// If lisHead is non-null, then we have a LIS sequence of in-place Internal
-		// we can use to determine our next DOM sibling
 		nextDomSibling =
 			lisNode.flags & TYPE_DOM ? lisNode.data : getFirstDom(lisNode._child);
-	} else {
-		nextDomSibling = getDomSibling(internal) || boundaryNode;
 	}
 
 	let index = 0;
@@ -411,38 +399,32 @@ function insertionLoop(internal, children, parentDom, boundaryNode, lisHead) {
 			vnode = children[++index];
 		}
 
-		if (lisHead) {
-			// If lisHead is non-null, then we have a LIS sequence of in-place
-			// Internal we can use to determine our next DOM sibling. If this internal
-			// is the current internal in our LIS in-place sequence, then let's go to
-			// the next Internal in the sequence and use it's DOM node as our new
-			// nextSibling
-			if (internal === lisNode) {
-				lisNode = lisNode._tempNext;
-				if (lisNode) {
-					nextDomSibling =
-						lisNode.flags & TYPE_DOM
-							? lisNode.data
-							: getFirstDom(lisNode._child);
-				} else {
-					nextDomSibling = boundaryNode;
-				}
+		// If lisHead is non-null, then we have a LIS sequence of in-place
+		// Internals we can use to determine our next DOM sibling. If this internal
+		// is the current internal in our LIS in-place sequence, then let's go to
+		// the next Internal in the sequence and use it's DOM node as our new
+		// nextSibling
+		if (lisHead && internal === lisNode) {
+			lisNode = lisNode._tempNext;
+			if (lisNode) {
+				nextDomSibling =
+					lisNode.flags & TYPE_DOM ? lisNode.data : getFirstDom(lisNode._child);
+			} else {
+				nextDomSibling = getDomSibling(internal);
 			}
-		} else {
-			// We may not have an LIS sequence if nothing moved. If so, we'll need to
-			// manually compute the next dom sibling in case any children below us do
-			// insertions before it.
-			nextDomSibling = getDomSibling(internal) || boundaryNode;
 		}
 
 		if (internal._index === -1) {
-			mount(internal, parentDom, nextDomSibling);
+			let mountNextDomSibling = lisHead
+				? nextDomSibling
+				: getDomSibling(internal);
+			mount(internal, parentDom, mountNextDomSibling);
 			if (internal.flags & TYPE_DOM) {
 				// If we are mounting a component, it's DOM children will get inserted
 				// into the DOM in mountChildren. If we are mounting a DOM node, then
 				// it's children will be mounted into itself and we need to insert this
 				// DOM in place.
-				insert(internal, parentDom, nextDomSibling);
+				insert(internal, parentDom, mountNextDomSibling);
 			}
 		} else if (
 			(internal.flags & (MODE_HYDRATE | MODE_SUSPENDED)) ===
@@ -453,11 +435,14 @@ function insertionLoop(internal, children, parentDom, boundaryNode, lisHead) {
 			patch(
 				internal,
 				Array.isArray(vnode) ? createElement(Fragment, null, vnode) : vnode,
-				parentDom,
-				nextDomSibling
+				parentDom
 			);
 			if (internal.flags & INSERT_INTERNAL) {
-				insert(internal, parentDom, nextDomSibling);
+				insert(
+					internal,
+					parentDom,
+					lisHead ? nextDomSibling : getDomSibling(internal)
+				);
 			}
 		}
 
