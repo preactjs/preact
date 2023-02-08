@@ -107,18 +107,7 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
 			// - xlink:href / xlinkHref --> href (xlink:href was removed from SVG and isn't needed)
 			// - className --> class
 			name = name.replace(/xlink(H|:h)/, 'h').replace(/sName$/, 's');
-		} else if (
-			name !== 'width' &&
-			name !== 'height' &&
-			name !== 'href' &&
-			name !== 'list' &&
-			name !== 'form' &&
-			// Default value in browsers is `-1` and an empty string is
-			// cast to `0` instead
-			name !== 'tabIndex' &&
-			name !== 'download' &&
-			name in dom
-		) {
+		} else if (!IS_ATTRIBUTE.test(name) && name in dom) {
 			try {
 				dom[name] = value == null ? '' : value;
 				// labelled break is 1b smaller here than a return statement (sorry)
@@ -142,6 +131,8 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
 		}
 	}
 }
+
+const IS_ATTRIBUTE = /wid|hei|hre|for|lis|tabI|down/;
 
 export let inEvent = false;
 
