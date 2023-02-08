@@ -132,7 +132,7 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
 	}
 }
 
-const IS_ATTRIBUTE = /wid|hei|hre|for|lis|tabI|down/;
+const IS_ATTRIBUTE = /^(wid|hei|hre|for|lis|tabI|dow)/;
 
 export let inEvent = false;
 
