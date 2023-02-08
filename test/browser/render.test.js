@@ -79,6 +79,16 @@ describe('render()', () => {
 		expect(scratch.innerHTML).to.eql(`<div>Good</div>`);
 	});
 
+	it('should render % width and height on img correctly', () => {
+		render(<img width="100%" height="100%" />, scratch);
+		expect(scratch.innerHTML).to.eql(`<img width="100%" height="100%">`);
+	});
+
+	it('should render px width and height on img correctly', () => {
+		render(<img width="100px" height="100px" />, scratch);
+		expect(scratch.innerHTML).to.eql(`<img width="100px" height="100px">`);
+	});
+
 	it('should not render when detecting JSON-injection', () => {
 		const vnode = JSON.parse('{"type":"span","children":"Malicious"}');
 		render(vnode, scratch);
