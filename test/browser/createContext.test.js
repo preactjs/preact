@@ -928,4 +928,48 @@ describe('createContext', () => {
 		rerender();
 		expect(scratch.innerHTML).to.equal('<p>hi</p>');
 	});
+
+	it('should not call sCU on context update', () => {
+		const Ctx = createContext('foo');
+
+		/** @type {(s: string) => void} */
+		let update;
+		class App extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { foo: 'foo' };
+				update = v => this.setState({ foo: v });
+			}
+			render() {
+				return (
+					<Ctx.Provider value={this.state.foo}>
+						<Child />
+					</Ctx.Provider>
+				);
+			}
+		}
+
+		const spy = sinon.spy();
+
+		class Child extends Component {
+			static contextType = Ctx;
+
+			shouldComponentUpdate() {
+				spy();
+				return false;
+			}
+
+			render() {
+				return <p>{this.context}</p>;
+			}
+		}
+
+		render(<App />, scratch);
+		expect(scratch.textContent).to.equal('foo');
+
+		update('bar');
+		rerender();
+		expect(scratch.textContent).to.equal('bar');
+		expect(spy).not.to.be.called;
+	});
 });

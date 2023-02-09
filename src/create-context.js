@@ -18,6 +18,7 @@ export function createContext(defaultValue, contextId) {
 		/** @type {import('./internal').FunctionComponent} */
 		Provider(props) {
 			if (!this.getChildContext) {
+				/** @type {import('./internal').Component[]} */
 				let subs = [];
 				let ctx = {};
 				ctx[contextId] = this;
@@ -40,7 +41,10 @@ export function createContext(defaultValue, contextId) {
 						// 	c.context[contextId] = _props.value;
 						// 	enqueueRender(c);
 						// });
-						subs.some(enqueueRender);
+						subs.some(c => {
+							c._force = true;
+							enqueueRender(c);
+						});
 					}
 				};
 
