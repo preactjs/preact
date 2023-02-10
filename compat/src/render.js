@@ -238,7 +238,7 @@ options.diffed = function(vnode) {
 		'value' in props &&
 		props.value !== dom.value
 	) {
-		dom.value = props.value ?? '';
+		dom.value = props.value == null ? '' : props.value;
 	}
 };
 
