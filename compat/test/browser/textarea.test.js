@@ -1,8 +1,10 @@
-import React, { render, useState } from 'preact/compat';
+import React, { render, hydrate, useState } from 'preact/compat';
+import ReactDOMServer from 'preact/compat/server';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { act } from 'preact/test-utils';
 
 describe('Textarea', () => {
+	/** @type {HTMLElement} */
 	let scratch;
 
 	beforeEach(() => {
@@ -17,6 +19,20 @@ describe('Textarea', () => {
 		render(<textarea value="foo" />, scratch);
 
 		expect(scratch.firstElementChild.value).to.equal('foo');
+	});
+
+	it('should hydrate textarea value', () => {
+		function App() {
+			return <textarea value="foo" />;
+		}
+
+		scratch.innerHTML = ReactDOMServer.renderToString(<App />);
+		expect(scratch.firstElementChild.value).to.equal('foo');
+		expect(scratch.innerHTML).to.be.equal('<textarea>foo</textarea>');
+
+		hydrate(<App />, scratch);
+		expect(scratch.firstElementChild.value).to.equal('foo');
+		expect(scratch.innerHTML).to.be.equal('<textarea></textarea>');
 	});
 
 	it('should alias defaultValue to children', () => {

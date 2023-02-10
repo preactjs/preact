@@ -223,6 +223,25 @@ options._render = function(vnode) {
 	currentComponent = vnode._component;
 };
 
+const oldDiffed = options.diffed;
+/** @type {(vnode: import('./internal').VNode)} */
+options.diffed = function(vnode) {
+	if (oldDiffed) {
+		oldDiffed(vnode);
+	}
+
+	const props = vnode.props;
+	const dom = vnode._dom;
+	if (
+		dom != null &&
+		vnode.type === 'textarea' &&
+		'value' in props &&
+		props.value !== dom.value
+	) {
+		dom.value = props.value ?? '';
+	}
+};
+
 // This is a very very private internal function for React it
 // is used to sort-of do runtime dependency injection. So far
 // only `react-relay` makes use of it. It uses it to read the
