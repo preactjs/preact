@@ -89,6 +89,11 @@ function findMatches(internal, children, parentInternal) {
 	/** @type {Internal} The last matched internal */
 	let prevMatchedInternal;
 
+	/** @type {Record<string | number, Internal>} */
+	let keyMap;
+	/** @type {Map<any, Internal[]>} */
+	let typeMap;
+
 	/**
 	 * @type {Internal} The previously searched internal, aka the old previous
 	 * Internal of prevMatchedInternal. We store this outside of the loop so we
@@ -160,6 +165,7 @@ function findMatches(internal, children, parentInternal) {
 			// what was previous a null placeholder slot. We should create a new
 			// internal to mount this VNode.
 		} else if (
+			!keyMap &&
 			oldHead &&
 			(oldHead.flags & typeFlag) !== 0 &&
 			oldHead.type === type &&
@@ -172,61 +178,96 @@ function findMatches(internal, children, parentInternal) {
 			matchedInternal = oldHead;
 			oldHead = oldHead._next;
 		} else if (oldHead) {
-			// We need to search for a matching internal for this VNode. We'll start
-			// at the first unmatched Internal and search all of its siblings. When we
-			// find a match, we'll remove it from the list of unmatched Internals and
-			// add to the new list of children internals, whose tail is
-			// prevMatchedInternal
-			//
-			// TODO: Measure if starting search from prevMatchedInternal._next is worth it.
-			// Let's start our search at the node where our previous match left off.
-			// We do this to optimize for the more common case of holes over keyed
-			// shuffles
-			let searchStart;
-			if (
-				prevMatchedInternal &&
-				prevMatchedInternal._next &&
-				prevMatchedInternal._next !== oldHead
-			) {
-				searchStart = prevMatchedInternal._next;
-			} else {
-				searchStart = oldHead._next;
-				prevSearch = oldHead;
-			}
+			// // We need to search for a matching internal for this VNode. We'll start
+			// // at the first unmatched Internal and search all of its siblings. When we
+			// // find a match, we'll remove it from the list of unmatched Internals and
+			// // add to the new list of children internals, whose tail is
+			// // prevMatchedInternal
+			// //
+			// // TODO: Measure if starting search from prevMatchedInternal._next is worth it.
+			// // Let's start our search at the node where our previous match left off.
+			// // We do this to optimize for the more common case of holes over keyed
+			// // shuffles
+			// let searchStart;
+			// if (
+			// 	prevMatchedInternal &&
+			// 	prevMatchedInternal._next &&
+			// 	prevMatchedInternal._next !== oldHead
+			// ) {
+			// 	searchStart = prevMatchedInternal._next;
+			// } else {
+			// 	searchStart = oldHead._next;
+			// 	prevSearch = oldHead;
+			// }
 
+			// /** @type {Internal} */
+			// let search = searchStart;
+
+			// while (search) {
+			// 	if (
+			// 		search.flags & typeFlag &&
+			// 		search.type === type &&
+			// 		search.key == key
+			// 	) {
+			// 		// Match found!
+			// 		moved = true;
+			// 		matchedInternal = search;
+
+			// 		// Let's update our list of unmatched nodes to remove the new matchedInternal.
+			// 		// TODO: Better explain this: Temporarily keep the old next pointer
+			// 		// around for tracking null placeholders. Particularly examine the
+			// 		// test "should support moving Fragments between beginning and end"
+			// 		prevSearch._tempNext = prevSearch._next;
+			// 		prevSearch._next = matchedInternal._next;
+
+			// 		break;
+			// 	}
+
+			// 	// No match found. Let's move our pointers to the next node in our
+			// 	// search.
+			// 	prevSearch = search;
+
+			// 	// If our current node we are searching has a _next node, then let's
+			// 	// continue from there. If it doesn't, let's loop back around to the
+			// 	// start of the list of unmatched nodes (i.e. oldHead).
+			// 	search = search._next ? search._next : oldHead._next;
+			// 	if (search === searchStart) {
+			// 		// However, it's possible that oldHead was the start of our search. If
+			// 		// so, we can stop searching. No match was found.
+			// 		break;
+			// 	}
+			// }
+
+			/* Keyed search */
 			/** @type {Internal} */
-			let search = searchStart;
-
-			while (search) {
-				const flags = search.flags;
-
-				// Match found!
-				if (flags & typeFlag && search.type === type && search.key == key) {
-					moved = true;
-					matchedInternal = search;
-
-					// Let's update our list of unmatched nodes to remove the new matchedInternal.
-					// TODO: Better explain this: Temporarily keep the old next pointer
-					// around for tracking null placeholders. Particularly examine the
-					// test "should support moving Fragments between beginning and end"
-					prevSearch._tempNext = prevSearch._next;
-					prevSearch._next = matchedInternal._next;
-
-					break;
+			let search;
+			if (!keyMap) {
+				keyMap = {};
+				typeMap = new Map();
+				search = oldHead;
+				while (search) {
+					if (search.key) {
+						keyMap[search.key] = search;
+					} else if (!typeMap.has(search.type)) {
+						typeMap.set(search.type, [search]);
+					} else {
+						typeMap.get(search.type).push(search);
+					}
+					search = search._next;
 				}
-
-				// No match found. Let's move our pointers to the next node in our
-				// search.
-				prevSearch = search;
-
-				// If our current node we are searching has a _next node, then let's
-				// continue from there. If it doesn't, let's loop back around to the
-				// start of the list of unmatched nodes (i.e. oldHead).
-				search = search._next ? search._next : oldHead._next;
-				if (search === searchStart) {
-					// However, it's possible that oldHead was the start of our search. If
-					// so, we can stop searching. No match was found.
-					break;
+			}
+			if (key == null) {
+				search = typeMap.get(type);
+				if (search && search.length) {
+					moved = true;
+					matchedInternal = search.shift();
+				}
+			} else {
+				search = keyMap[key];
+				if (search && search.type == type) {
+					moved = true;
+					keyMap[search.key] = null;
+					matchedInternal = search;
 				}
 			}
 		}
@@ -257,9 +298,35 @@ function findMatches(internal, children, parentInternal) {
 	if (prevMatchedInternal) prevMatchedInternal._next = null;
 
 	// Step 2. Walk over the unused children and unmount:
-	unmountUnusedChildren(oldHead);
+	// unmountUnusedChildren(oldHead);
+	if (keyMap) {
+		unmountUnusedKeyedChildren(keyMap, typeMap);
+	} else if (oldHead) {
+		unmountUnusedChildren(oldHead);
+	}
 
 	return moved;
+}
+
+/**
+ *
+ * @param {Record<string, Internal>} keyMap
+ * @param {Map<any, Internal[]>} typeMap
+ */
+function unmountUnusedKeyedChildren(keyMap, typeMap) {
+	let key, internal;
+	for (key in keyMap) {
+		internal = keyMap[key];
+		if (internal) {
+			unmount(internal, internal, 0);
+		}
+	}
+
+	for (key of typeMap.values()) {
+		for (internal of key) {
+			unmount(internal, internal, 0);
+		}
+	}
 }
 
 /**
