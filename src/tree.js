@@ -82,32 +82,66 @@ export function createInternal(vnode, parentInternal) {
 	}
 
 	/** @type {import('./internal').Internal} */
-	const internal = {
+	// const internal = {
+	// 	type,
+	// 	props,
+	// 	key,
+	// 	ref,
+	// 	_prevRef: null,
+	// 	data:
+	// 		flags & TYPE_COMPONENT
+	// 			? { _commitCallbacks: [], _stateCallbacks: [] }
+	// 			: null,
+	// 	rerender: enqueueRender,
+	// 	flags,
+	// 	_parent: parentInternal,
+	// 	_child: null,
+	// 	_next: null,
+	// 	_tempNext: null,
+	// 	_index: -1,
+	// 	_vnodeId: vnodeId,
+	// 	_component: null,
+	// 	_context: null,
+	// 	_depth: parentInternal ? parentInternal._depth + 1 : 0
+	// };
+	const internal = new Internal(
 		type,
 		props,
 		key,
 		ref,
-		_prevRef: null,
-		data:
-			flags & TYPE_COMPONENT
-				? { _commitCallbacks: [], _stateCallbacks: [] }
-				: null,
-		rerender: enqueueRender,
 		flags,
-		_parent: parentInternal,
-		_child: null,
-		_next: null,
-		_tempNext: null,
-		_index: -1,
-		_vnodeId: vnodeId,
-		_component: null,
-		_context: null,
-		_depth: parentInternal ? parentInternal._depth + 1 : 0
-	};
+		parentInternal,
+		vnodeId
+	);
 
 	if (options._internal) options._internal(internal, vnode);
 
 	return internal;
+}
+
+class Internal {
+	constructor(type, props, key, ref, flags, parentInternal, vnodeId) {
+		this.type = type;
+		this.props = props;
+		this.key = key;
+		this.ref = ref;
+		this._prevRef = null;
+		this.data =
+			flags & TYPE_COMPONENT
+				? { _commitCallbacks: [], _stateCallbacks: [] }
+				: null;
+		this.rerender = enqueueRender;
+		this.flags = flags;
+		this._parent = parentInternal;
+		this._child = null;
+		this._next = null;
+		this._tempNext = null;
+		this._index = -1;
+		this._vnodeId = vnodeId;
+		this._component = null;
+		this._context = null;
+		this._depth = parentInternal ? parentInternal._depth + 1 : 0;
+	}
 }
 
 /** @type {(internal: import('./internal').Internal) => boolean} */
