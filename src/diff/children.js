@@ -89,7 +89,7 @@ function findMatches(internal, children, parentInternal) {
 	/** @type {Internal} The last matched internal */
 	let prevMatchedInternal;
 
-	/** @type {Record<string | number, Internal>} */
+	/** @type {Map<string | number, Internal>} */
 	let keyMap;
 	/** @type {Map<any, Internal[]>} */
 	let typeMap;
@@ -242,12 +242,12 @@ function findMatches(internal, children, parentInternal) {
 			/** @type {Internal} */
 			let search;
 			if (!keyMap) {
-				keyMap = {};
+				keyMap = new Map();
 				typeMap = new Map();
 				search = oldHead;
 				while (search) {
 					if (search.key) {
-						keyMap[search.key] = search;
+						keyMap.set(search.key, search);
 					} else if (!typeMap.has(search.type)) {
 						typeMap.set(search.type, [search]);
 					} else {
@@ -263,10 +263,10 @@ function findMatches(internal, children, parentInternal) {
 					matchedInternal = search.shift();
 				}
 			} else {
-				search = keyMap[key];
+				search = keyMap.get(key);
 				if (search && search.type == type) {
 					moved = true;
-					keyMap[search.key] = null;
+					keyMap.delete(key);
 					matchedInternal = search;
 				}
 			}
@@ -309,17 +309,13 @@ function findMatches(internal, children, parentInternal) {
 }
 
 /**
- *
- * @param {Record<string, Internal>} keyMap
+ * @param {Map<string | number, Internal>} keyMap
  * @param {Map<any, Internal[]>} typeMap
  */
 function unmountUnusedKeyedChildren(keyMap, typeMap) {
 	let key, internal;
-	for (key in keyMap) {
-		internal = keyMap[key];
-		if (internal) {
-			unmount(internal, internal, 0);
-		}
+	for (internal of keyMap.values()) {
+		unmount(internal, internal, 0);
 	}
 
 	for (key of typeMap.values()) {
