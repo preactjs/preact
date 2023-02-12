@@ -89,10 +89,8 @@ function findMatches(internal, children, parentInternal) {
 	/** @type {Internal} The last matched internal */
 	let prevMatchedInternal;
 
-	/** @type {Map<string | number, Internal>} */
+	/** @type {Map<any, Internal | Internal[]>} */
 	let keyMap;
-	/** @type {Map<any, Internal[]>} */
-	let typeMap;
 
 	/**
 	 * @type {Internal} The previously searched internal, aka the old previous
@@ -243,21 +241,20 @@ function findMatches(internal, children, parentInternal) {
 			let search;
 			if (!keyMap) {
 				keyMap = new Map();
-				typeMap = new Map();
 				search = oldHead;
 				while (search) {
 					if (search.key) {
 						keyMap.set(search.key, search);
-					} else if (!typeMap.has(search.type)) {
-						typeMap.set(search.type, [search]);
+					} else if (!keyMap.has(search.type)) {
+						keyMap.set(search.type, [search]);
 					} else {
-						typeMap.get(search.type).push(search);
+						keyMap.get(search.type).push(search);
 					}
 					search = search._next;
 				}
 			}
 			if (key == null) {
-				search = typeMap.get(type);
+				search = keyMap.get(type);
 				if (search && search.length) {
 					moved = true;
 					matchedInternal = search.shift();
@@ -300,7 +297,7 @@ function findMatches(internal, children, parentInternal) {
 	// Step 2. Walk over the unused children and unmount:
 	// unmountUnusedChildren(oldHead);
 	if (keyMap) {
-		unmountUnusedKeyedChildren(keyMap, typeMap);
+		unmountUnusedKeyedChildren(keyMap);
 	} else if (oldHead) {
 		unmountUnusedChildren(oldHead);
 	}
@@ -309,17 +306,15 @@ function findMatches(internal, children, parentInternal) {
 }
 
 /**
- * @param {Map<string | number, Internal>} keyMap
- * @param {Map<any, Internal[]>} typeMap
+ * @param {Map<any, Internal | Internal[]>} keyMap
  */
-function unmountUnusedKeyedChildren(keyMap, typeMap) {
-	let key, internal;
-	for (internal of keyMap.values()) {
-		unmount(internal, internal, 0);
-	}
-
-	for (key of typeMap.values()) {
-		for (internal of key) {
+function unmountUnusedKeyedChildren(keyMap) {
+	for (let internal of keyMap.values()) {
+		if (Array.isArray(internal)) {
+			for (let i of internal) {
+				unmount(i, i, 0);
+			}
+		} else {
 			unmount(internal, internal, 0);
 		}
 	}
