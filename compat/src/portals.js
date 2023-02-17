@@ -61,12 +61,6 @@ function Portal(props) {
 		createElement(ContextProvider, { context: _this.context }, props._vnode),
 		_this._temp
 	);
-
-	// When we come from a conditional render, on a mounted
-	// portal we should clear the DOM.
-	if (!props._vnode && _this._temp) {
-		_this.componentWillUnmount();
-	}
 }
 
 /**
