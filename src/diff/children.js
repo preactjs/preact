@@ -104,7 +104,7 @@ function findMatches(internal, children, parentInternal) {
 	let lastPlacedIndex = 0;
 
 	for (let index = 0; index < children.length; index++) {
-		const vnode = children[index];
+		let vnode = children[index];
 
 		// holes get accounted for in the index property:
 		if (vnode == null || vnode === true || vnode === false) {
@@ -124,26 +124,24 @@ function findMatches(internal, children, parentInternal) {
 		let type = null;
 		let typeFlag = 0;
 		let key;
-		/** @type {VNode | string} */
-		let normalizedVNode = '';
 		/** @type {Internal | undefined} */
 		let matchedInternal;
 
 		// text VNodes (strings, numbers, bigints, etc):
 		if (typeof vnode !== 'object') {
 			typeFlag = TYPE_TEXT;
-			normalizedVNode += vnode;
+			vnode = '' + vnode;
 		} else {
 			// TODO: Investigate avoiding this VNode allocation (and the one below in
 			// the call to `patch`) by passing through the raw VNode type and handling
 			// nested arrays directly in mount, patch, createInternal, etc.
-			normalizedVNode = Array.isArray(vnode)
+			vnode = Array.isArray(vnode)
 				? createElement(Fragment, null, vnode)
 				: vnode;
 
-			type = normalizedVNode.type;
+			type = vnode.type;
 			typeFlag = typeof type === 'function' ? TYPE_COMPONENT : TYPE_ELEMENT;
-			key = normalizedVNode.key;
+			key = vnode.key;
 		}
 
 		if (key == null && internal && index < internal._index) {
@@ -199,7 +197,7 @@ function findMatches(internal, children, parentInternal) {
 
 		// No match, create a new Internal:
 		if (!matchedInternal) {
-			matchedInternal = createInternal(normalizedVNode, parentInternal);
+			matchedInternal = createInternal(vnode, parentInternal);
 		} else if (matchedInternal._index < lastPlacedIndex) {
 			// If the matched internal has moved such that it is now after the last
 			// internal we determined was "in-place", mark it for insertion to move it
