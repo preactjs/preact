@@ -29,11 +29,11 @@ import { createInternal, getDomSibling } from '../tree';
 
 /**
  * Update an internal with new children.
- * @param {Internal} parentInternal The internal whose children should be patched
+ * @param {Internal} internal The internal whose children should be patched
  * @param {ComponentChildren[]} children The new children, represented as VNodes
  * @param {PreactElement} parentDom The element into which this subtree is rendered
  */
-export function patchChildren(parentInternal, children, parentDom) {
+export function patchChildren(internal, children, parentDom) {
 	// Step 1. Find matches and set up _next pointers. All unused internals are at
 	// attached to oldHead.
 	//
@@ -44,14 +44,57 @@ export function patchChildren(parentInternal, children, parentDom) {
 	// `_tempNext` to hold the old next pointers we are able to simultaneously
 	// iterate over the new VNodes, iterate over the old Internal list, and update
 	// _next pointers to the new Internals.
-	findMatches(parentInternal._child, children, parentInternal);
+	findMatches(internal._child, children, internal);
 
 	// Step 5. Walk forwards over the newly-assigned _next properties, inserting
 	// Internals that require insertion. We track the next dom sibling Internals
 	// should be inserted before by walking over the LIS (using _tempNext) at the
 	// same time
-	if (parentInternal._child) {
-		insertionLoop(parentInternal._child, children, parentDom);
+	let index = 0;
+	internal = internal._child;
+	while (internal) {
+		let vnode = children[index];
+		while (vnode == null || vnode === true || vnode === false) {
+			vnode = children[++index];
+		}
+
+		if (internal._index === -1) {
+			let nextDomSibling = getDomSibling(internal);
+			mount(internal, parentDom, nextDomSibling);
+			if (internal.flags & TYPE_DOM) {
+				// If we are mounting a component, it's DOM children will get inserted
+				// into the DOM in mountChildren. If we are mounting a DOM node, then
+				// it's children will be mounted into itself and we need to insert this
+				// DOM in place.
+				insert(internal, parentDom, nextDomSibling);
+			}
+		} else if (
+			(internal.flags & (MODE_HYDRATE | MODE_SUSPENDED)) ===
+			(MODE_HYDRATE | MODE_SUSPENDED)
+		) {
+			mount(internal, parentDom, internal.data);
+		} else {
+			patch(
+				internal,
+				Array.isArray(vnode) ? createElement(Fragment, null, vnode) : vnode,
+				parentDom
+			);
+			if (internal.flags & INSERT_INTERNAL) {
+				insert(internal, parentDom, getDomSibling(internal));
+			}
+		}
+
+		let oldRef = internal._prevRef;
+		if (internal.ref != oldRef) {
+			if (oldRef) applyRef(oldRef, null, internal);
+			if (internal.ref)
+				applyRef(internal.ref, internal._component || internal.data, internal);
+		}
+
+		internal.flags &= ~INSERT_INTERNAL;
+		internal._tempNext = null;
+		internal._index = index++;
+		internal = internal._next;
 	}
 }
 
@@ -106,12 +149,12 @@ function findMatches(internal, children, parentInternal) {
 		let typeFlag = 0;
 		let key;
 		/** @type {VNode | string} */
-		let normalizedVNode;
+		let normalizedVNode = '';
 
 		// text VNodes (strings, numbers, bigints, etc):
 		if (typeof vnode !== 'object') {
 			typeFlag = TYPE_TEXT;
-			normalizedVNode = '' + vnode;
+			normalizedVNode += vnode;
 		} else {
 			// TODO: Investigate avoiding this VNode allocation (and the one below in
 			// the call to `patch`) by passing through the raw VNode type and handling
@@ -208,7 +251,7 @@ function findMatches(internal, children, parentInternal) {
 
 		if (internal && internal._index == index) {
 			// Move forward our tracker for null placeholders
-			internal = internal._tempNext || internal._next;
+			internal = internal._next;
 		}
 	}
 
@@ -247,59 +290,6 @@ function unmountUnusedKeyedChildren(keyMap) {
 function unmountUnusedChildren(internal) {
 	while (internal) {
 		unmount(internal, internal, 0);
-		internal = internal._next;
-	}
-}
-
-/**
- * @param {Internal | null} internal
- * @param {ComponentChildren[]} children
- * @param {PreactElement} parentDom
- */
-function insertionLoop(internal, children, parentDom) {
-	let index = 0;
-	while (internal) {
-		let vnode = children[index];
-		while (vnode == null || vnode === true || vnode === false) {
-			vnode = children[++index];
-		}
-
-		if (internal._index === -1) {
-			let nextDomSibling = getDomSibling(internal);
-			mount(internal, parentDom, nextDomSibling);
-			if (internal.flags & TYPE_DOM) {
-				// If we are mounting a component, it's DOM children will get inserted
-				// into the DOM in mountChildren. If we are mounting a DOM node, then
-				// it's children will be mounted into itself and we need to insert this
-				// DOM in place.
-				insert(internal, parentDom, nextDomSibling);
-			}
-		} else if (
-			(internal.flags & (MODE_HYDRATE | MODE_SUSPENDED)) ===
-			(MODE_HYDRATE | MODE_SUSPENDED)
-		) {
-			mount(internal, parentDom, internal.data);
-		} else {
-			patch(
-				internal,
-				Array.isArray(vnode) ? createElement(Fragment, null, vnode) : vnode,
-				parentDom
-			);
-			if (internal.flags & INSERT_INTERNAL) {
-				insert(internal, parentDom, getDomSibling(internal));
-			}
-		}
-
-		let oldRef = internal._prevRef;
-		if (internal.ref != oldRef) {
-			if (oldRef) applyRef(oldRef, null, internal);
-			if (internal.ref)
-				applyRef(internal.ref, internal._component || internal.data, internal);
-		}
-
-		internal.flags &= ~INSERT_INTERNAL;
-		internal._tempNext = null;
-		internal._index = index++;
 		internal = internal._next;
 	}
 }
