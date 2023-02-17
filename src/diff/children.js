@@ -34,22 +34,11 @@ import { createInternal, getDomSibling } from '../tree';
  * @param {PreactElement} parentDom The element into which this subtree is rendered
  */
 export function patchChildren(internal, children, parentDom) {
-	// Step 1. Find matches and set up _next pointers. All unused internals are at
-	// attached to oldHead.
-	//
-	// In this step, _tempNext will hold the old next pointer for an internal.
-	// This algorithm changes `_next` when finding matching internals. This change
-	// breaks our null placeholder detection logic which compares the old internal
-	// at a particular index with the new VNode at that index. By using
-	// `_tempNext` to hold the old next pointers we are able to simultaneously
-	// iterate over the new VNodes, iterate over the old Internal list, and update
-	// _next pointers to the new Internals.
+	// Find matches and set up _next pointers. Unmount unused/unclaimed Internal
 	findMatches(internal._child, children, internal);
 
-	// Step 5. Walk forwards over the newly-assigned _next properties, inserting
-	// Internals that require insertion. We track the next dom sibling Internals
-	// should be inserted before by walking over the LIS (using _tempNext) at the
-	// same time
+	// Walk forwards over the newly-assigned _next properties, inserting Internals
+	// that require insertion.
 	let index = 0;
 	internal = internal._child;
 	while (internal) {
@@ -92,7 +81,6 @@ export function patchChildren(internal, children, parentDom) {
 		}
 
 		internal.flags &= ~INSERT_INTERNAL;
-		internal._tempNext = null;
 		internal._index = index++;
 		internal = internal._next;
 	}
@@ -256,12 +244,11 @@ function findMatches(internal, children, parentInternal) {
 	}
 
 	// Ensure the last node of the last matched internal has a null _next pointer.
-	// Its possible that it still points to it's old sibling at the end of Step 1,
+	// Its possible that it still points to it's old sibling at the end of this loop,
 	// so we'll manually clear it here.
 	if (prevMatchedInternal) prevMatchedInternal._next = null;
 
-	// Step 2. Walk over the unused children and unmount:
-	// unmountUnusedChildren(oldHead);
+	// Walk over the unused children and unmount:
 	if (keyMap) {
 		unmountUnusedKeyedChildren(keyMap);
 	} else if (oldHead) {

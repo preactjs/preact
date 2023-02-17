@@ -97,7 +97,6 @@ export function createInternal(vnode, parentInternal) {
 	// 	_parent: parentInternal,
 	// 	_child: null,
 	// 	_next: null,
-	// 	_tempNext: null,
 	// 	_index: -1,
 	// 	_vnodeId: vnodeId,
 	// 	_component: null,
@@ -135,7 +134,6 @@ class Internal {
 		this._parent = parentInternal;
 		this._child = null;
 		this._next = null;
-		this._tempNext = null;
 		this._index = -1;
 		this._vnodeId = vnodeId;
 		this._component = null;

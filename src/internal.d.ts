@@ -152,11 +152,6 @@ export interface Internal<P = {}> {
 	/** next sibling Internal node */
 	_next: Internal | null;
 	_index: number;
-	/**
-	 * A temporary pointer to another Internal, used for different purposes in
-	 * the patching children algorithm. See comments there for its different uses
-	 * */
-	_tempNext: Internal | null;
 	/** most recent vnode ID */
 	_vnodeId: number;
 	/**
