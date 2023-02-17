@@ -1404,6 +1404,7 @@ export namespace JSXInternal {
 					| 'send'
 					| undefined
 			  >;
+		for?: string | undefined | SignalLike<string | undefined>;
 		form?: string | undefined | SignalLike<string | undefined>;
 		formAction?: string | undefined | SignalLike<string | undefined>;
 		formEncType?: string | undefined | SignalLike<string | undefined>;
@@ -1425,11 +1426,11 @@ export namespace JSXInternal {
 		high?: number | undefined | SignalLike<number | undefined>;
 		href?: string | undefined | SignalLike<string | undefined>;
 		hrefLang?: string | undefined | SignalLike<string | undefined>;
-		for?: string | undefined | SignalLike<string | undefined>;
 		htmlFor?: string | undefined | SignalLike<string | undefined>;
 		httpEquiv?: string | undefined | SignalLike<string | undefined>;
 		icon?: string | undefined | SignalLike<string | undefined>;
 		id?: string | undefined | SignalLike<string | undefined>;
+		indeterminate?: boolean | undefined | SignalLike<boolean>;
 		inputMode?: string | undefined | SignalLike<string | undefined>;
 		integrity?: string | undefined | SignalLike<string | undefined>;
 		is?: string | undefined | SignalLike<string | undefined>;
