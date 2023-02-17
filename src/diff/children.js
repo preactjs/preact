@@ -92,11 +92,7 @@ export function patchChildren(internal, children, parentDom) {
  * @param {Internal} parentInternal
  */
 function findMatches(internal, children, parentInternal) {
-	/** @type {Internal} */
 	parentInternal._child = null;
-
-	/** @type {Internal | null} The start of the list of unmatched Internals */
-	let oldHead = internal;
 
 	/** @type {Internal | undefined} The last matched internal */
 	let prevMatchedInternal;
@@ -120,14 +116,6 @@ function findMatches(internal, children, parentInternal) {
 				// searches for matching internals
 				unmount(internal, internal, 0);
 
-				// If this internal is the first unmatched internal, then bump our
-				// pointer to the next node so our search will skip over this internal.
-				//
-				// TODO: What if this node is not the first unmatched Internal (and so
-				// remains in the search array) and shares the type with another
-				// Internal that is it matches? Do we have a test for this?
-				if (oldHead == internal) oldHead = oldHead._next;
-
 				internal = internal._next;
 			}
 			continue;
@@ -138,6 +126,8 @@ function findMatches(internal, children, parentInternal) {
 		let key;
 		/** @type {VNode | string} */
 		let normalizedVNode = '';
+		/** @type {Internal | undefined} */
+		let matchedInternal;
 
 		// text VNodes (strings, numbers, bigints, etc):
 		if (typeof vnode !== 'object') {
@@ -156,9 +146,6 @@ function findMatches(internal, children, parentInternal) {
 			key = normalizedVNode.key;
 		}
 
-		/** @type {Internal | undefined} */
-		let matchedInternal;
-
 		if (key == null && internal && index < internal._index) {
 			// If we are doing an unkeyed diff, and the old index of the current
 			// internal in the old list of children is greater than the current VNode
@@ -167,24 +154,24 @@ function findMatches(internal, children, parentInternal) {
 			// internal to mount this VNode.
 		} else if (
 			!keyMap &&
-			oldHead &&
-			(oldHead.flags & typeFlag) !== 0 &&
-			oldHead.type === type &&
-			oldHead.key == key
+			internal &&
+			internal.flags & typeFlag &&
+			internal.type === type &&
+			internal.key == key
 		) {
 			// Fast path checking if this current vnode matches the first unused
 			// Internal. By doing this we can avoid the search loop and setting the
 			// move flag, which allows us to skip the LDS algorithm if no Internals
 			// moved
-			matchedInternal = oldHead;
-			oldHead = oldHead._next;
-		} else if (oldHead) {
+			matchedInternal = internal;
+			internal = internal._next;
+		} else if (internal) {
 			/* Keyed search */
 			/** @type {Internal} */
 			let search;
 			if (!keyMap) {
 				keyMap = new Map();
-				search = oldHead;
+				search = internal;
 				while (search) {
 					if (search.key) {
 						keyMap.set(search.key, search);
@@ -236,11 +223,6 @@ function findMatches(internal, children, parentInternal) {
 		// TODO: Consider detecting if an internal is of TYPE_ROOT, whether or not
 		// it is a PORTAL, and setting a flag as such to use in getDomSibling and
 		// getFirstDom
-
-		if (internal && internal._index == index) {
-			// Move forward our tracker for null placeholders
-			internal = internal._next;
-		}
 	}
 
 	// Ensure the last node of the last matched internal has a null _next pointer.
@@ -251,8 +233,8 @@ function findMatches(internal, children, parentInternal) {
 	// Walk over the unused children and unmount:
 	if (keyMap) {
 		unmountUnusedKeyedChildren(keyMap);
-	} else if (oldHead) {
-		unmountUnusedChildren(oldHead);
+	} else if (internal) {
+		unmountUnusedChildren(internal);
 	}
 }
 
