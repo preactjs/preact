@@ -120,18 +120,18 @@ options.vnode = vnode => {
 		for (let i in props) {
 			let value = props[i];
 
-			if (IS_DOM && i === 'children' && type === 'noscript') {
+			if (
+				(i === 'value' && 'defaultValue' in props && value == null) ||
 				// Emulate React's behavior of not rendering the contents of noscript tags on the client.
-				continue;
-			} else if (i === 'value' && 'defaultValue' in props && value == null) {
+				(IS_DOM && i === 'children' && type === 'noscript')
+			) {
 				// Skip applying value if it is null/undefined and we already set
 				// a default value
 				continue;
-			} else if (
-				i === 'defaultValue' &&
-				'value' in props &&
-				props.value == null
-			) {
+			}
+
+			let lowerCased = i.toLowerCase();
+			if (i === 'defaultValue' && 'value' in props && props.value == null) {
 				// `defaultValue` is treated as a fallback `value` when a value prop is present but null/undefined.
 				// `defaultValue` for Elements with no value prop is the same as the DOM defaultValue property.
 				i = 'value';
@@ -142,16 +142,16 @@ options.vnode = vnode => {
 				// value will be used as the file name and the file will be called
 				// "true" upon downloading it.
 				value = '';
-			} else if (/ondoubleclick/i.test(i)) {
+			} else if (/ondoubleclick/.test(lowerCased)) {
 				i = 'ondblclick';
 			} else if (
-				/^onchange(textarea|input)/i.test(i + type) &&
+				/^onchange(textarea|input)/.test(lowerCased + type) &&
 				!onChangeInputType(props.type)
 			) {
-				i = 'oninput';
-			} else if (/^onfocus$/i.test(i)) {
+				lowerCased = i = 'oninput';
+			} else if (/^onfocus$/.test(lowerCased)) {
 				i = 'onfocusin';
-			} else if (/^onblur$/i.test(i)) {
+			} else if (/^onblur$/.test(lowerCased)) {
 				i = 'onfocusout';
 			} else if (/^on(Ani|Tra|Tou|BeforeInp|Compo)/.test(i)) {
 				i = i.toLowerCase();
@@ -163,8 +163,8 @@ options.vnode = vnode => {
 
 			// Add support for onInput and onChange, see #3561
 			// if we have an oninput prop already change it to oninputCapture
-			if (/^oninput$/i.test(i)) {
-				i = i.toLowerCase();
+			if (/^oninput$/.test(lowerCased)) {
+				i = lowerCased;
 				if (normalizedProps[i]) {
 					i = 'oninputCapture';
 				}
