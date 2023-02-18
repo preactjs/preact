@@ -186,7 +186,7 @@ export function getDomSibling(internal, childIndex) {
  */
 export function getFirstDom(internal) {
 	while (internal) {
-		if (internal.flags & INSERT_INTERNAL) {
+		if (internal.flags & INSERT_INTERNAL || internal._index == -1) {
 			internal = internal._next;
 			continue;
 		}
