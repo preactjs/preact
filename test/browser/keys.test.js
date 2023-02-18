@@ -297,7 +297,13 @@ describe('keys', () => {
 
 		render(<List values={values} />, scratch);
 		expect(scratch.textContent).to.equal('abcd');
-		expect(getLog()).to.deep.equal(['<ol>bcda.insertBefore(<li>a, <li>b)']);
+		// A perfect algorithm would do this in one move. Our algorithm is a compromise of size vs common case perf
+		// expect(getLog()).to.deep.equal(['<ol>bcda.insertBefore(<li>a, <li>b)']);
+		expect(getLog()).to.deep.equal([
+			'<ol>bcda.insertBefore(<li>b, Null)',
+			'<ol>cdab.insertBefore(<li>c, Null)',
+			'<ol>dabc.insertBefore(<li>d, Null)'
+		]);
 	});
 
 	it('should move multiple keyed children to the beginning', () => {
@@ -312,9 +318,15 @@ describe('keys', () => {
 
 		render(<List values={values} />, scratch);
 		expect(scratch.textContent).to.equal('abcde');
+		// A perfect algorithm would do this in two moves. Our algorithm is a compromise of size vs common case perf
+		// expect(getLog()).to.deep.equal([
+		// 	'<ol>cdeab.insertBefore(<li>a, <li>c)',
+		// 	'<ol>acdeb.insertBefore(<li>b, <li>c)'
+		// ]);
 		expect(getLog()).to.deep.equal([
-			'<ol>cdeab.insertBefore(<li>a, <li>c)',
-			'<ol>acdeb.insertBefore(<li>b, <li>c)'
+			'<ol>cdeab.insertBefore(<li>c, Null)',
+			'<ol>deabc.insertBefore(<li>d, Null)',
+			'<ol>eabcd.insertBefore(<li>e, Null)'
 		]);
 	});
 
@@ -327,7 +339,7 @@ describe('keys', () => {
 		render(<List values={['b', 'a']} />, scratch);
 		expect(scratch.textContent).to.equal('ba');
 
-		expect(getLog()).to.deep.equal(['<ol>ab.insertBefore(<li>b, <li>a)']);
+		expect(getLog()).to.deep.equal(['<ol>ab.insertBefore(<li>a, Null)']);
 	});
 
 	it('should swap existing keyed children in the middle of a list efficiently', () => {
@@ -343,7 +355,7 @@ describe('keys', () => {
 		render(<List values={values} />, scratch);
 		expect(scratch.textContent).to.equal('acbd', 'initial swap');
 		expect(getLog()).to.deep.equal(
-			['<ol>abcd.insertBefore(<li>c, <li>b)'],
+			['<ol>abcd.insertBefore(<li>b, <li>d)'],
 			'initial swap'
 		);
 
@@ -354,7 +366,7 @@ describe('keys', () => {
 		render(<List values={values} />, scratch);
 		expect(scratch.textContent).to.equal('abcd', 'swap back');
 		expect(getLog()).to.deep.equal(
-			['<ol>acbd.insertBefore(<li>b, <li>c)'],
+			['<ol>acbd.insertBefore(<li>c, <li>d)'],
 			'swap back'
 		);
 	});
@@ -383,7 +395,13 @@ describe('keys', () => {
 		render(<List values={values} />, scratch);
 		expect(scratch.textContent).to.equal('abcd', 'move to beginning');
 		expect(getLog()).to.deep.equal(
-			['<ol>bcda.insertBefore(<li>a, <li>b)'],
+			// A perfect algorithm would do this in one move. Our algorithm is a compromise of size vs common case perf
+			// ['<ol>bcda.insertBefore(<li>a, <li>b)'],
+			[
+				'<ol>bcda.insertBefore(<li>b, Null)',
+				'<ol>cdab.insertBefore(<li>c, Null)',
+				'<ol>dabc.insertBefore(<li>d, Null)'
+			],
 			'move to beginning'
 		);
 	});
@@ -400,7 +418,13 @@ describe('keys', () => {
 
 		render(<List values={values} />, scratch);
 		expect(scratch.textContent).to.equal('aebcdf');
-		expect(getLog()).to.deep.equal(['<ol>abcdef.insertBefore(<li>e, <li>b)']);
+		// A perfect algorithm would do this in one move. Our algorithm is a compromise of size vs common case perf
+		// expect(getLog()).to.deep.equal(['<ol>abcdef.insertBefore(<li>e, <li>b)']);
+		expect(getLog()).to.deep.equal([
+			'<ol>abcdef.insertBefore(<li>b, <li>f)',
+			'<ol>acdebf.insertBefore(<li>c, <li>f)',
+			'<ol>adebcf.insertBefore(<li>d, <li>f)'
+		]);
 	});
 
 	it('should move keyed children to the end on longer list', () => {
@@ -431,15 +455,15 @@ describe('keys', () => {
 		expect(scratch.textContent).to.equal(values.join(''));
 		// expect(getLog()).to.have.lengthOf(9);
 		expect(getLog()).to.deep.equal([
-			'<ol>abcdefghij.insertBefore(<li>j, <li>a)',
-			'<ol>jabcdefghi.insertBefore(<li>i, <li>a)',
-			'<ol>jiabcdefgh.insertBefore(<li>h, <li>a)',
-			'<ol>jihabcdefg.insertBefore(<li>g, <li>a)',
-			'<ol>jihgabcdef.insertBefore(<li>f, <li>a)',
-			'<ol>jihgfabcde.insertBefore(<li>e, <li>a)',
-			'<ol>jihgfeabcd.insertBefore(<li>d, <li>a)',
-			'<ol>jihgfedabc.insertBefore(<li>c, <li>a)',
-			'<ol>jihgfedcab.insertBefore(<li>b, <li>a)'
+			'<ol>abcdefghij.insertBefore(<li>i, Null)',
+			'<ol>abcdefghji.insertBefore(<li>h, Null)',
+			'<ol>abcdefgjih.insertBefore(<li>g, Null)',
+			'<ol>abcdefjihg.insertBefore(<li>f, Null)',
+			'<ol>abcdejihgf.insertBefore(<li>e, Null)',
+			'<ol>abcdjihgfe.insertBefore(<li>d, Null)',
+			'<ol>abcjihgfed.insertBefore(<li>c, Null)',
+			'<ol>abjihgfedc.insertBefore(<li>b, Null)',
+			'<ol>ajihgfedcb.insertBefore(<li>a, Null)'
 		]);
 	});
 

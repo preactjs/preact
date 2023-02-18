@@ -318,5 +318,8 @@
 	},
 	"dependencies": {
 		"pretty-format": "^27.5.1"
+	},
+	"volta": {
+		"node": "18.14.0"
 	}
 }

@@ -3,13 +3,13 @@
 		"baseUrl": ".",
 		"checkJs": true,
 		"jsx": "react",
+		"jsxFactory": "createElement",
 		"lib": ["dom", "es5"],
 		"moduleResolution": "node",
 		"paths": {
 			"preact": ["."],
 			"preact/*": ["./*"]
 		},
-		"reactNamespace": "createElement",
 		"target": "es2015"
 	},
 	"exclude": ["node_modules", "dist", "demo"]

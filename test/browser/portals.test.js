@@ -104,12 +104,12 @@ describe('Portal', () => {
 		const log = getLog().filter(t => !/#text/.test(t));
 
 		expect(log).to.deep.equal([
-			'<main>.insertBefore(<h1>A, <replace>)',
+			'<replace>.remove()',
+			'<main>.insertBefore(<h1>A, <after>)',
 			'<portals>.insertBefore(<h2>B, Null)',
-			'<main>A.insertBefore(<h3>C, <replace>)',
+			'<main>A.insertBefore(<h3>C, <after>)',
 			'<portals>B.insertBefore(<h4>D, Null)',
-			'<main>AC.insertBefore(<h5>E, <replace>)',
-			'<replace>.remove()'
+			'<main>AC.insertBefore(<h5>E, <after>)'
 		]);
 	});
 
