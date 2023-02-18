@@ -165,21 +165,10 @@ function findMatches(internal, children, parentInternal) {
 			internal = internal._next;
 		} else if (internal) {
 			/* Keyed search */
-			/** @type {Internal} */
+			/** @type {any} */
 			let search;
 			if (!keyMap) {
-				keyMap = new Map();
-				search = internal;
-				while (search) {
-					if (search.key) {
-						keyMap.set(search.key, search);
-					} else if (!keyMap.has(search.type)) {
-						keyMap.set(search.type, [search]);
-					} else {
-						keyMap.get(search.type).push(search);
-					}
-					search = search._next;
-				}
+				keyMap = buildMap(internal);
 			}
 			if (key == null) {
 				search = keyMap.get(type);
@@ -234,6 +223,26 @@ function findMatches(internal, children, parentInternal) {
 	} else if (internal) {
 		unmountUnusedChildren(internal);
 	}
+}
+
+/**
+ * @param {Internal | null} internal
+ * @returns {Map<any, Internal | Internal[]>}
+ */
+function buildMap(internal) {
+	let keyMap = new Map();
+	while (internal) {
+		if (internal.key) {
+			keyMap.set(internal.key, internal);
+		} else if (!keyMap.has(internal.type)) {
+			keyMap.set(internal.type, [internal]);
+		} else {
+			keyMap.get(internal.type).push(internal);
+		}
+		internal = internal._next;
+	}
+
+	return keyMap;
 }
 
 /**
