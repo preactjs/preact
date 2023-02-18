@@ -11,6 +11,13 @@ export const REACT_ELEMENT_TYPE =
 	0xeac7;
 
 const CAMEL_PROPS = /^(?:accent|alignment|arabic|baseline|cap|clip(?!PathU)|color|dominant|fill|flood|font|glyph(?!R)|horiz|image|letter|lighting|marker(?!H|W|U)|overline|paint|pointer|shape|stop|strikethrough|stroke|text(?!L)|transform|underline|unicode|units|v|vector|vert|word|writing|x(?!C))[A-Z]/;
+const DOUBLE_CLICK = /ondoubleclick/;
+const CHANGE_INPUT = /^onchange(textarea|input)/;
+const ON_ANI = /^on(Ani|Tra|Tou|BeforeInp|Compo)/;
+const ON_BLUR = /^onblur$/;
+const ON_FOCUS = /^onfocus$/;
+const ON_INPUT = /^oninput$/;
+const CAMEL_REPLACE = /[A-Z0-9]/g;
 
 const IS_DOM = typeof document !== 'undefined';
 
@@ -19,8 +26,8 @@ const IS_DOM = typeof document !== 'undefined';
 // (IE11 doesn't support Symbol, which we use here to turn `rad` into `ra` which matches "range")
 const onChangeInputType = type =>
 	(typeof Symbol != 'undefined' && typeof Symbol() == 'symbol'
-		? /fil|che|rad/i
-		: /fil|che|ra/i
+		? /fil|che|rad/
+		: /fil|che|ra/
 	).test(type);
 
 // Some libraries like `react-virtualized` explicitly check for this.
@@ -114,7 +121,6 @@ options.vnode = vnode => {
 
 	// only normalize props on Element nodes
 	if (typeof type === 'string') {
-		const nonCustomElement = type.indexOf('-') === -1;
 		normalizedProps = {};
 
 		for (let i in props) {
@@ -142,28 +148,28 @@ options.vnode = vnode => {
 				// value will be used as the file name and the file will be called
 				// "true" upon downloading it.
 				value = '';
-			} else if (/ondoubleclick/.test(lowerCased)) {
+			} else if (DOUBLE_CLICK.test(lowerCased)) {
 				i = 'ondblclick';
 			} else if (
-				/^onchange(textarea|input)/.test(lowerCased + type) &&
+				CHANGE_INPUT.test(lowerCased + type) &&
 				!onChangeInputType(props.type)
 			) {
 				lowerCased = i = 'oninput';
-			} else if (/^onfocus$/.test(lowerCased)) {
+			} else if (ON_FOCUS.test(lowerCased)) {
 				i = 'onfocusin';
-			} else if (/^onblur$/.test(lowerCased)) {
+			} else if (ON_BLUR.test(lowerCased)) {
 				i = 'onfocusout';
-			} else if (/^on(Ani|Tra|Tou|BeforeInp|Compo)/.test(i)) {
+			} else if (ON_ANI.test(i)) {
 				i = i.toLowerCase();
-			} else if (nonCustomElement && CAMEL_PROPS.test(i)) {
-				i = i.replace(/[A-Z0-9]/g, '-$&').toLowerCase();
+			} else if (type.indexOf('-') === -1 && CAMEL_PROPS.test(i)) {
+				i = i.replace(CAMEL_REPLACE, '-$&').toLowerCase();
 			} else if (value === null) {
 				value = undefined;
 			}
 
 			// Add support for onInput and onChange, see #3561
 			// if we have an oninput prop already change it to oninputCapture
-			if (/^oninput$/.test(lowerCased)) {
+			if (ON_INPUT.test(lowerCased)) {
 				i = lowerCased;
 				if (normalizedProps[i]) {
 					i = 'oninputCapture';
