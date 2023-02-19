@@ -1938,6 +1938,7 @@ export namespace JSXInternal {
 		svg: SVGAttributes<SVGSVGElement>;
 		animate: SVGAttributes<SVGAnimateElement>;
 		circle: SVGAttributes<SVGCircleElement>;
+		animateMotion: SVGAttributes<SVGAnimateMotionElement>;
 		animateTransform: SVGAttributes<SVGAnimateElement>;
 		clipPath: SVGAttributes<SVGClipPathElement>;
 		defs: SVGAttributes<SVGDefsElement>;
@@ -1950,6 +1951,7 @@ export namespace JSXInternal {
 		feConvolveMatrix: SVGAttributes<SVGFEConvolveMatrixElement>;
 		feDiffuseLighting: SVGAttributes<SVGFEDiffuseLightingElement>;
 		feDisplacementMap: SVGAttributes<SVGFEDisplacementMapElement>;
+		feDistantLight: SVGAttributes<SVGFEDistantLightElement>;
 		feDropShadow: SVGAttributes<SVGFEDropShadowElement>;
 		feFlood: SVGAttributes<SVGFEFloodElement>;
 		feFuncA: SVGAttributes<SVGFEFuncAElement>;
@@ -1962,7 +1964,9 @@ export namespace JSXInternal {
 		feMergeNode: SVGAttributes<SVGFEMergeNodeElement>;
 		feMorphology: SVGAttributes<SVGFEMorphologyElement>;
 		feOffset: SVGAttributes<SVGFEOffsetElement>;
+		fePointLight: SVGAttributes<SVGFEPointLightElement>;
 		feSpecularLighting: SVGAttributes<SVGFESpecularLightingElement>;
+		feSpotLight: SVGAttributes<SVGFESpotLightElement>;
 		feTile: SVGAttributes<SVGFETileElement>;
 		feTurbulence: SVGAttributes<SVGFETurbulenceElement>;
 		filter: SVGAttributes<SVGFilterElement>;
@@ -1973,17 +1977,22 @@ export namespace JSXInternal {
 		linearGradient: SVGAttributes<SVGLinearGradientElement>;
 		marker: SVGAttributes<SVGMarkerElement>;
 		mask: SVGAttributes<SVGMaskElement>;
+		metadata: SVGAttributes<SVGMetadataElement>;
+		mpath: SVGAttributes<SVGMPathElement>;
 		path: SVGAttributes<SVGPathElement>;
 		pattern: SVGAttributes<SVGPatternElement>;
 		polygon: SVGAttributes<SVGPolygonElement>;
 		polyline: SVGAttributes<SVGPolylineElement>;
 		radialGradient: SVGAttributes<SVGRadialGradientElement>;
 		rect: SVGAttributes<SVGRectElement>;
+		set: SVGAttributes<SVGSetElement>;
 		stop: SVGAttributes<SVGStopElement>;
+		switch: SVGAttributes<SVGSwitchElement>;
 		symbol: SVGAttributes<SVGSymbolElement>;
 		text: SVGAttributes<SVGTextElement>;
 		textPath: SVGAttributes<SVGTextPathElement>;
 		tspan: SVGAttributes<SVGTSpanElement>;
 		use: SVGAttributes<SVGUseElement>;
+		view: SVGAttributes<SVGViewElement>;
 	}
 }
