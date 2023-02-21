@@ -282,13 +282,10 @@ interface ContainerNode {
 	insertBefore: Node['insertBefore'];
 	appendChild: Node['appendChild'];
 	removeChild: Node['removeChild'];
-	childNodes: ArrayLike<Node>
+	childNodes: ArrayLike<Node>;
 }
 
-export function render(
-	vnode: ComponentChild,
-	parent: ContainerNode
-): void;
+export function render(vnode: ComponentChild, parent: ContainerNode): void;
 /**
  * @deprecated Will be removed in v11.
  *
@@ -299,10 +296,7 @@ export function render(
 	parent: ContainerNode,
 	replaceNode?: Element | Text
 ): void;
-export function hydrate(
-	vnode: ComponentChild,
-	parent: ContainerNode
-): void;
+export function hydrate(vnode: ComponentChild, parent: ContainerNode): void;
 export function cloneElement(
 	vnode: VNode<any>,
 	props?: any,
@@ -337,7 +331,7 @@ export interface Options {
 	diffed?(vnode: VNode): void;
 	event?(e: Event): any;
 	requestAnimationFrame?(callback: () => void): void;
-	debounceRendering?(cb: () => void): void;
+	debounceRendering?(cb: () => void, inEvent: boolean): void;
 	useDebugValue?(value: string | number): void;
 	_addHookName?(name: string | number): void;
 	__suspenseDidResolve?(vnode: VNode, cb: () => void): void;

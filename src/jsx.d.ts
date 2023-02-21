@@ -1499,7 +1499,149 @@ export namespace JSXInternal {
 		rel?: string | undefined | SignalLike<string | undefined>;
 		required?: boolean | undefined | SignalLike<boolean | undefined>;
 		reversed?: boolean | undefined | SignalLike<boolean | undefined>;
-		role?: string | undefined | SignalLike<string | undefined>;
+		role?:
+			| 'alert'
+			| 'alertdialog'
+			| 'application'
+			| 'article'
+			| 'banner'
+			| 'button'
+			| 'cell'
+			| 'checkbox'
+			| 'columnheader'
+			| 'combobox'
+			| 'complementary'
+			| 'contentinfo'
+			| 'definition'
+			| 'dialog'
+			| 'directory'
+			| 'document'
+			| 'feed'
+			| 'figure'
+			| 'form'
+			| 'grid'
+			| 'gridcell'
+			| 'group'
+			| 'heading'
+			| 'img'
+			| 'link'
+			| 'list'
+			| 'listbox'
+			| 'listitem'
+			| 'log'
+			| 'main'
+			| 'marquee'
+			| 'math'
+			| 'menu'
+			| 'menubar'
+			| 'menuitem'
+			| 'menuitemcheckbox'
+			| 'menuitemradio'
+			| 'navigation'
+			| 'none'
+			| 'note'
+			| 'option'
+			| 'presentation'
+			| 'progressbar'
+			| 'radio'
+			| 'radiogroup'
+			| 'region'
+			| 'row'
+			| 'rowgroup'
+			| 'rowheader'
+			| 'scrollbar'
+			| 'search'
+			| 'searchbox'
+			| 'separator'
+			| 'slider'
+			| 'spinbutton'
+			| 'status'
+			| 'switch'
+			| 'tab'
+			| 'table'
+			| 'tablist'
+			| 'tabpanel'
+			| 'term'
+			| 'textbox'
+			| 'timer'
+			| 'toolbar'
+			| 'tooltip'
+			| 'tree'
+			| 'treegrid'
+			| 'treeitem'
+			| undefined
+			| SignalLike<
+				| 'alert'
+				| 'alertdialog'
+				| 'application'
+				| 'article'
+				| 'banner'
+				| 'button'
+				| 'cell'
+				| 'checkbox'
+				| 'columnheader'
+				| 'combobox'
+				| 'complementary'
+				| 'contentinfo'
+				| 'definition'
+				| 'dialog'
+				| 'directory'
+				| 'document'
+				| 'feed'
+				| 'figure'
+				| 'form'
+				| 'grid'
+				| 'gridcell'
+				| 'group'
+				| 'heading'
+				| 'img'
+				| 'link'
+				| 'list'
+				| 'listbox'
+				| 'listitem'
+				| 'log'
+				| 'main'
+				| 'marquee'
+				| 'math'
+				| 'menu'
+				| 'menubar'
+				| 'menuitem'
+				| 'menuitemcheckbox'
+				| 'menuitemradio'
+				| 'navigation'
+				| 'none'
+				| 'note'
+				| 'option'
+				| 'presentation'
+				| 'progressbar'
+				| 'radio'
+				| 'radiogroup'
+				| 'region'
+				| 'row'
+				| 'rowgroup'
+				| 'rowheader'
+				| 'scrollbar'
+				| 'search'
+				| 'searchbox'
+				| 'separator'
+				| 'slider'
+				| 'spinbutton'
+				| 'status'
+				| 'switch'
+				| 'tab'
+				| 'table'
+				| 'tablist'
+				| 'tabpanel'
+				| 'term'
+				| 'textbox'
+				| 'timer'
+				| 'toolbar'
+				| 'tooltip'
+				| 'tree'
+				| 'treegrid'
+				| 'treeitem'
+				| undefined
+			>;
 		rows?: number | undefined | SignalLike<number | undefined>;
 		rowSpan?: number | undefined | SignalLike<number | undefined>;
 		sandbox?: string | undefined | SignalLike<string | undefined>;
@@ -1796,6 +1938,7 @@ export namespace JSXInternal {
 		svg: SVGAttributes<SVGSVGElement>;
 		animate: SVGAttributes<SVGAnimateElement>;
 		circle: SVGAttributes<SVGCircleElement>;
+		animateMotion: SVGAttributes<SVGAnimateMotionElement>;
 		animateTransform: SVGAttributes<SVGAnimateElement>;
 		clipPath: SVGAttributes<SVGClipPathElement>;
 		defs: SVGAttributes<SVGDefsElement>;
@@ -1808,6 +1951,7 @@ export namespace JSXInternal {
 		feConvolveMatrix: SVGAttributes<SVGFEConvolveMatrixElement>;
 		feDiffuseLighting: SVGAttributes<SVGFEDiffuseLightingElement>;
 		feDisplacementMap: SVGAttributes<SVGFEDisplacementMapElement>;
+		feDistantLight: SVGAttributes<SVGFEDistantLightElement>;
 		feDropShadow: SVGAttributes<SVGFEDropShadowElement>;
 		feFlood: SVGAttributes<SVGFEFloodElement>;
 		feFuncA: SVGAttributes<SVGFEFuncAElement>;
@@ -1820,7 +1964,9 @@ export namespace JSXInternal {
 		feMergeNode: SVGAttributes<SVGFEMergeNodeElement>;
 		feMorphology: SVGAttributes<SVGFEMorphologyElement>;
 		feOffset: SVGAttributes<SVGFEOffsetElement>;
+		fePointLight: SVGAttributes<SVGFEPointLightElement>;
 		feSpecularLighting: SVGAttributes<SVGFESpecularLightingElement>;
+		feSpotLight: SVGAttributes<SVGFESpotLightElement>;
 		feTile: SVGAttributes<SVGFETileElement>;
 		feTurbulence: SVGAttributes<SVGFETurbulenceElement>;
 		filter: SVGAttributes<SVGFilterElement>;
@@ -1831,17 +1977,22 @@ export namespace JSXInternal {
 		linearGradient: SVGAttributes<SVGLinearGradientElement>;
 		marker: SVGAttributes<SVGMarkerElement>;
 		mask: SVGAttributes<SVGMaskElement>;
+		metadata: SVGAttributes<SVGMetadataElement>;
+		mpath: SVGAttributes<SVGMPathElement>;
 		path: SVGAttributes<SVGPathElement>;
 		pattern: SVGAttributes<SVGPatternElement>;
 		polygon: SVGAttributes<SVGPolygonElement>;
 		polyline: SVGAttributes<SVGPolylineElement>;
 		radialGradient: SVGAttributes<SVGRadialGradientElement>;
 		rect: SVGAttributes<SVGRectElement>;
+		set: SVGAttributes<SVGSetElement>;
 		stop: SVGAttributes<SVGStopElement>;
+		switch: SVGAttributes<SVGSwitchElement>;
 		symbol: SVGAttributes<SVGSymbolElement>;
 		text: SVGAttributes<SVGTextElement>;
 		textPath: SVGAttributes<SVGTextPathElement>;
 		tspan: SVGAttributes<SVGTSpanElement>;
 		use: SVGAttributes<SVGUseElement>;
+		view: SVGAttributes<SVGViewElement>;
 	}
 }
