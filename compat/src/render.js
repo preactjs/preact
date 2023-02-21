@@ -240,6 +240,8 @@ options.diffed = function(vnode) {
 	) {
 		dom.value = props.value == null ? '' : props.value;
 	}
+
+	currentComponent = null;
 };
 
 // This is a very very private internal function for React it
