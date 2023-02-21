@@ -1,3 +1,4 @@
+import { createContext } from 'preact';
 import React, {
 	createElement,
 	useDeferredValue,
@@ -6,7 +7,9 @@ import React, {
 	useTransition,
 	render,
 	useState,
-	useCallback
+	useCallback,
+	useContext,
+	useEffect
 } from 'preact/compat';
 import { setupRerender, act } from 'preact/test-utils';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
@@ -250,5 +253,79 @@ describe('React-18-hooks', () => {
 
 			expect(scratch.innerHTML).to.equal('<p>nope</p>');
 		});
+	});
+
+	it('should release ._force on context-consumers', () => {
+		let sequence, setSubmitting;
+		const Ctx = createContext({
+			isSubmitting: false,
+			setIsSubmitting: () => {}
+		});
+		const FormWrapper = props => {
+			const [isSubmitting, setIsSubmitting] = useState(false);
+			setSubmitting = setIsSubmitting;
+			return (
+				<Ctx.Provider value={{ isSubmitting, setIsSubmitting }}>
+					{props.children}
+				</Ctx.Provider>
+			);
+		};
+
+		const Form = () => {
+			const { isSubmitting, setIsSubmitting } = useContext(Ctx);
+			const [shouldSubmit, setShouldSubmit] = useState(false);
+
+			sequence = () => {
+				setShouldSubmit(true);
+			};
+
+			const submit = () => {
+				setIsSubmitting(true);
+				setShouldSubmit(false);
+			};
+
+			useEffect(() => {
+				if (shouldSubmit) {
+					submit();
+				}
+			}, [shouldSubmit]);
+
+			return (
+				<p>
+					isSubmitting: {'' + isSubmitting} | shouldSubmit: {'' + shouldSubmit}
+				</p>
+			);
+		};
+
+		const App = () => {
+			return (
+				<FormWrapper>
+					<Form />
+				</FormWrapper>
+			);
+		};
+
+		render(<App />, scratch);
+
+		act(() => {
+			sequence();
+		});
+		expect(scratch.innerHTML).to.equal(
+			'<p>isSubmitting: true | shouldSubmit: false</p>'
+		);
+
+		act(() => {
+			setSubmitting(false);
+		});
+		expect(scratch.innerHTML).to.equal(
+			'<p>isSubmitting: false | shouldSubmit: false</p>'
+		);
+
+		act(() => {
+			sequence();
+		});
+		expect(scratch.innerHTML).to.equal(
+			'<p>isSubmitting: true | shouldSubmit: false</p>'
+		);
 	});
 });
