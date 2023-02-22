@@ -33,9 +33,8 @@ const signalValidAriaValues2 = (
 	/>
 );
 
-// Explicitly allow any string to accommodate new aria roles and match React typings behavior
-const newRole = <div role="new-value" />;
 const validRole = <div role="button" />;
+const fallbackRole = <div role="none presentation" />;
 
 const booleanishTest = (
 	<>

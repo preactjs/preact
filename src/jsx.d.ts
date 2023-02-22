@@ -1616,7 +1616,7 @@ export namespace JSXInternal {
 		| 'tree'
 		| 'treegrid'
 		| 'treeitem'
-		| (string & {}); // This trick allows any string to be valid here but also provides TS auto-complete behavior for the explicitly listed values here
+		| 'none presentation';
 
 	export interface HTMLAttributes<RefType extends EventTarget = EventTarget>
 		extends ClassAttributes<RefType>,
