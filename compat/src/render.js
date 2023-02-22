@@ -160,7 +160,7 @@ options.vnode = vnode => {
 			} else if (ON_BLUR.test(lowerCased)) {
 				i = 'onfocusout';
 			} else if (ON_ANI.test(i)) {
-				i = i.toLowerCase();
+				i = lowerCased;
 			} else if (type.indexOf('-') === -1 && CAMEL_PROPS.test(i)) {
 				i = i.replace(CAMEL_REPLACE, '-$&').toLowerCase();
 			} else if (value === null) {
