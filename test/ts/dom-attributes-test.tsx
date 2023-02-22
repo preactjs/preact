@@ -1,7 +1,15 @@
 import { createElement, JSX } from 'preact';
 
-function createSignal<T>(value: T) {
-	return { value };
+function createSignal<T>(value: T): JSX.SignalLike<T> {
+	return {
+		value,
+		peek() {
+			return value;
+		},
+		subscribe() {
+			return () => {};
+		}
+	};
 }
 
 // @ts-expect-error We should correctly type aria attributes like autocomplete
@@ -10,15 +18,17 @@ const validAriaValues = <div aria-autocomplete="none" />;
 const undefAriaValues = <div aria-autocomplete={undefined} />;
 const noAriaValues = <div />;
 
-// @ts-expect-error We should correctly type aria attributes like autocomplete
 const signalBadAriaValues = (
+	// @ts-expect-error We should correctly type aria attributes like autocomplete
 	<div aria-autocomplete={createSignal('bad-value' as const)} />
 );
 const signalValidAriaValues = (
+	<div aria-autocomplete={createSignal('none' as 'none' | undefined)} />
+);
+const signalValidAriaValues2 = (
 	<div
 		aria-autocomplete={createSignal(
-			'none' as 'none' | undefined
-			// 'none' as JSX.AriaAttributes['aria-autocomplete']
+			'none' as JSX.UnpackSignal<JSX.AriaAttributes['aria-autocomplete']>
 		)}
 	/>
 );
