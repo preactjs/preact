@@ -1346,9 +1346,7 @@ export namespace JSXInternal {
 		 * @see aria-pressed
 		 * @see aria-selected.
 		 */
-		'aria-checked'?: Signalish<
-			boolean | 'false' | 'mixed' | 'true' | undefined
-		>;
+		'aria-checked'?: Signalish<Booleanish | 'mixed' | undefined>;
 		/**
 		 * Defines the total number of columns in a table, grid, or treegrid.
 		 * @see aria-colindex.
@@ -1373,15 +1371,7 @@ export namespace JSXInternal {
 		'aria-controls'?: Signalish<string | undefined>;
 		/** Indicates the element that represents the current item within a container or set of related elements. */
 		'aria-current'?: Signalish<
-			| boolean
-			| 'false'
-			| 'true'
-			| 'page'
-			| 'step'
-			| 'location'
-			| 'date'
-			| 'time'
-			| undefined
+			Booleanish | 'page' | 'step' | 'location' | 'date' | 'time' | undefined
 		>;
 		/**
 		 * Identifies the element (or elements) that describes the object.
@@ -1426,15 +1416,7 @@ export namespace JSXInternal {
 		'aria-grabbed'?: Signalish<Booleanish | undefined>;
 		/** Indicates the availability and type of interactive popup element, such as menu or dialog, that can be triggered by an element. */
 		'aria-haspopup'?: Signalish<
-			| boolean
-			| 'false'
-			| 'true'
-			| 'menu'
-			| 'listbox'
-			| 'tree'
-			| 'grid'
-			| 'dialog'
-			| undefined
+			Booleanish | 'menu' | 'listbox' | 'tree' | 'grid' | 'dialog' | undefined
 		>;
 		/**
 		 * Indicates whether the element is exposed to an accessibility API.
@@ -1445,9 +1427,7 @@ export namespace JSXInternal {
 		 * Indicates the entered value does not conform to the format expected by the application.
 		 * @see aria-errormessage.
 		 */
-		'aria-invalid'?: Signalish<
-			boolean | 'false' | 'true' | 'grammar' | 'spelling' | undefined
-		>;
+		'aria-invalid'?: Signalish<Booleanish | 'grammar' | 'spelling' | undefined>;
 		/** Indicates keyboard shortcuts that an author has implemented to activate or give focus to an element. */
 		'aria-keyshortcuts'?: Signalish<string | undefined>;
 		/**
@@ -1493,9 +1473,7 @@ export namespace JSXInternal {
 		 * @see aria-checked
 		 * @see aria-selected.
 		 */
-		'aria-pressed'?: Signalish<
-			boolean | 'false' | 'mixed' | 'true' | undefined
-		>;
+		'aria-pressed'?: Signalish<Booleanish | 'mixed' | undefined>;
 		/**
 		 * Indicates that the element is not editable, but is otherwise operable.
 		 * @see aria-disabled.

@@ -1,4 +1,4 @@
-import { createElement, JSX } from 'preact';
+import { createElement, Fragment, JSX } from 'preact';
 
 function createSignal<T>(value: T): JSX.SignalLike<T> {
 	return {
@@ -36,3 +36,13 @@ const signalValidAriaValues2 = (
 // Explicitly allow any string to accommodate new aria roles and match React typings behavior
 const newRole = <div role="new-value" />;
 const validRole = <div role="button" />;
+
+const booleanishTest = (
+	<>
+		<div aria-haspopup={true} />
+		<div aria-haspopup={false} />
+		<div aria-haspopup={'true'} />
+		<div aria-haspopup={'false'} />
+		<div aria-haspopup={'dialog'} />
+	</>
+);
