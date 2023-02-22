@@ -1343,7 +1343,8 @@ export namespace JSXInternal {
 		'aria-busy'?: Signalish<Booleanish | undefined>;
 		/**
 		 * Indicates the current "checked" state of checkboxes, radio buttons, and other widgets.
-		 * @see aria-pressed @see aria-selected.
+		 * @see aria-pressed
+		 * @see aria-selected.
 		 */
 		'aria-checked'?: Signalish<
 			boolean | 'false' | 'mixed' | 'true' | undefined
@@ -1355,12 +1356,14 @@ export namespace JSXInternal {
 		'aria-colcount'?: Signalish<number | undefined>;
 		/**
 		 * Defines an element's column index or position with respect to the total number of columns within a table, grid, or treegrid.
-		 * @see aria-colcount @see aria-colspan.
+		 * @see aria-colcount
+		 * @see aria-colspan.
 		 */
 		'aria-colindex'?: Signalish<number | undefined>;
 		/**
 		 * Defines the number of columns spanned by a cell or gridcell within a table, grid, or treegrid.
-		 * @see aria-colindex @see aria-rowspan.
+		 * @see aria-colindex
+		 * @see aria-rowspan.
 		 */
 		'aria-colspan'?: Signalish<number | undefined>;
 		/**
@@ -1392,7 +1395,8 @@ export namespace JSXInternal {
 		'aria-details'?: Signalish<string | undefined>;
 		/**
 		 * Indicates that the element is perceivable but disabled, so it is not editable or otherwise operable.
-		 * @see aria-hidden @see aria-readonly.
+		 * @see aria-hidden
+		 * @see aria-readonly.
 		 */
 		'aria-disabled'?: Signalish<Booleanish | undefined>;
 		/**
@@ -1404,7 +1408,8 @@ export namespace JSXInternal {
 		>;
 		/**
 		 * Identifies the element that provides an error message for the object.
-		 * @see aria-invalid @see aria-describedby.
+		 * @see aria-invalid
+		 * @see aria-describedby.
 		 */
 		'aria-errormessage'?: Signalish<string | undefined>;
 		/** Indicates whether the element, or another grouping element it controls, is currently expanded or collapsed. */
@@ -1485,7 +1490,8 @@ export namespace JSXInternal {
 		'aria-posinset'?: Signalish<number | undefined>;
 		/**
 		 * Indicates the current "pressed" state of toggle buttons.
-		 * @see aria-checked @see aria-selected.
+		 * @see aria-checked
+		 * @see aria-selected.
 		 */
 		'aria-pressed'?: Signalish<
 			boolean | 'false' | 'mixed' | 'true' | undefined
@@ -1523,17 +1529,20 @@ export namespace JSXInternal {
 		'aria-rowcount'?: Signalish<number | undefined>;
 		/**
 		 * Defines an element's row index or position with respect to the total number of rows within a table, grid, or treegrid.
-		 * @see aria-rowcount @see aria-rowspan.
+		 * @see aria-rowcount
+		 * @see aria-rowspan.
 		 */
 		'aria-rowindex'?: Signalish<number | undefined>;
 		/**
 		 * Defines the number of rows spanned by a cell or gridcell within a table, grid, or treegrid.
-		 * @see aria-rowindex @see aria-colspan.
+		 * @see aria-rowindex
+		 * @see aria-colspan.
 		 */
 		'aria-rowspan'?: Signalish<number | undefined>;
 		/**
 		 * Indicates the current "selected" state of various widgets.
-		 * @see aria-checked @see aria-pressed.
+		 * @see aria-checked
+		 * @see aria-pressed.
 		 */
 		'aria-selected'?: Signalish<Booleanish | undefined>;
 		/**
