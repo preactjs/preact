@@ -85,7 +85,7 @@ describe('render()', () => {
 	});
 
 	// IE11 doesn't support these.
-	if (/Trident/.test(window.navigator.userAgent)) {
+	if (!/Trident/.test(window.navigator.userAgent)) {
 		it('should render px width and height on img correctly', () => {
 			render(<img width="100px" height="100px" />, scratch);
 			expect(scratch.innerHTML).to.eql(`<img width="100px" height="100px">`);
