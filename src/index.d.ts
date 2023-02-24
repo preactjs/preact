@@ -331,7 +331,7 @@ export interface Options {
 	diffed?(vnode: VNode): void;
 	event?(e: Event): any;
 	requestAnimationFrame?(callback: () => void): void;
-	debounceRendering?(cb: () => void, inEvent: boolean): void;
+	debounceRendering?(cb: () => void): void;
 	useDebugValue?(value: string | number): void;
 	_addHookName?(name: string | number): void;
 	__suspenseDidResolve?(vnode: VNode, cb: () => void): void;
