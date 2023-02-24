@@ -74,7 +74,10 @@ describe('Textarea', () => {
 		act(() => {
 			set('');
 		});
-		expect(scratch.innerHTML).to.equal('<textarea></textarea>');
+		// Same as earlier: IE11 always displays the value as node.innerHTML
+		if (!/Trident/.test(window.navigator.userAgent)) {
+			expect(scratch.innerHTML).to.equal('<textarea></textarea>');
+		}
 		expect(scratch.firstElementChild.value).to.equal('');
 	});
 });
