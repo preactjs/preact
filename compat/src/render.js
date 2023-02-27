@@ -11,8 +11,6 @@ export const REACT_ELEMENT_TYPE =
 	0xeac7;
 
 const CAMEL_PROPS = /^(?:accent|alignment|arabic|baseline|cap|clip(?!PathU)|color|dominant|fill|flood|font|glyph(?!R)|horiz|image|letter|lighting|marker(?!H|W|U)|overline|paint|pointer|shape|stop|strikethrough|stroke|text(?!L)|transform|underline|unicode|units|v|vector|vert|word|writing|x(?!C))[A-Z]/;
-const DOUBLE_CLICK = /ondoubleclick/;
-const CHANGE_INPUT = /^onchange(textarea|input)/;
 const ON_ANI = /^on(Ani|Tra|Tou|BeforeInp|Compo)/;
 const CAMEL_REPLACE = /[A-Z0-9]/g;
 
@@ -145,10 +143,11 @@ options.vnode = vnode => {
 				// value will be used as the file name and the file will be called
 				// "true" upon downloading it.
 				value = '';
-			} else if (DOUBLE_CLICK.test(lowerCased)) {
+			} else if (lowerCased === 'ondoubleclick') {
 				i = 'ondblclick';
 			} else if (
-				CHANGE_INPUT.test(lowerCased + type) &&
+				lowerCased === 'onchange' &&
+				(type === 'input' || type === 'textarea') &&
 				!onChangeInputType(props.type)
 			) {
 				lowerCased = i = 'oninput';
