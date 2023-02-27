@@ -14,9 +14,6 @@ const CAMEL_PROPS = /^(?:accent|alignment|arabic|baseline|cap|clip(?!PathU)|colo
 const DOUBLE_CLICK = /ondoubleclick/;
 const CHANGE_INPUT = /^onchange(textarea|input)/;
 const ON_ANI = /^on(Ani|Tra|Tou|BeforeInp|Compo)/;
-const ON_BLUR = /^onblur$/;
-const ON_FOCUS = /^onfocus$/;
-const ON_INPUT = /^oninput$/;
 const CAMEL_REPLACE = /[A-Z0-9]/g;
 
 const IS_DOM = typeof document !== 'undefined';
@@ -155,9 +152,9 @@ options.vnode = vnode => {
 				!onChangeInputType(props.type)
 			) {
 				lowerCased = i = 'oninput';
-			} else if (ON_FOCUS.test(lowerCased)) {
+			} else if (lowerCased === 'onfocus') {
 				i = 'onfocusin';
-			} else if (ON_BLUR.test(lowerCased)) {
+			} else if (lowerCased === 'onblur') {
 				i = 'onfocusout';
 			} else if (ON_ANI.test(i)) {
 				i = lowerCased;
@@ -169,7 +166,7 @@ options.vnode = vnode => {
 
 			// Add support for onInput and onChange, see #3561
 			// if we have an oninput prop already change it to oninputCapture
-			if (ON_INPUT.test(lowerCased)) {
+			if (lowerCased === 'oninput') {
 				i = lowerCased;
 				if (normalizedProps[i]) {
 					i = 'oninputCapture';
