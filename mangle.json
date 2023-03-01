@@ -33,6 +33,7 @@
       "$_value": "__",
       "$_pendingValue": "__V",
       "$_nextValue": "__N",
+      "$_hasScuFromHooks": "__S",
       "$_original": "__v",
       "$_args": "__H",
       "$_factory": "__h",

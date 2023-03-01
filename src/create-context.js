@@ -42,7 +42,9 @@ export function createContext(defaultValue, contextId) {
 						// 	enqueueRender(c);
 						// });
 						subs.some(c => {
-							c._force = true;
+							if (!c._hasScuFromHooks) {
+								c._force = true;
+							}
 							enqueueRender(c);
 						});
 					}
