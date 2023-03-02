@@ -254,6 +254,16 @@ describe('render()', () => {
 		expect(scratch.innerHTML).to.equal('<div></div>');
 	});
 
+	it('should not render children when rerendering a function child', () => {
+		const icon = () => {};
+
+		render(<div>{icon}</div>, scratch);
+		expect(scratch.innerHTML).to.equal('<div></div>');
+
+		render(<div>{icon}</div>, scratch);
+		expect(scratch.innerHTML).to.equal('<div></div>');
+	});
+
 	it('should render NaN as text content', () => {
 		render(NaN, scratch);
 		expect(scratch.innerHTML).to.equal('NaN');

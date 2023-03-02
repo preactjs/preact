@@ -47,7 +47,11 @@ export function diffChildren(
 	for (i = 0; i < renderResult.length; i++) {
 		childVNode = renderResult[i];
 
-		if (childVNode == null || typeof childVNode == 'boolean') {
+		if (
+			childVNode == null ||
+			typeof childVNode == 'boolean' ||
+			typeof childVNode == 'function'
+		) {
 			childVNode = newParentVNode._children[i] = null;
 		}
 		// If this newVNode is being reused (e.g. <div>{reuse}{reuse}</div>) in the same diff,
