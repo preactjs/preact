@@ -184,7 +184,23 @@ export function useReducer(reducer, initialState, init) {
 
 		if (!currentComponent._hasScuFromHooks) {
 			currentComponent._hasScuFromHooks = true;
-			const prevScu = currentComponent.shouldComponentUpdate;
+			let prevScu = currentComponent.shouldComponentUpdate;
+			const prevCWU = currentComponent.componentWillUpdate;
+
+			// If we're dealing with a forced update `shouldComponentUpdate` will
+			// not be called. But we use that to update the hook values, so we
+			// need to call it.
+			currentComponent.componentWillUpdate = function(p, s, c) {
+				if (this._force) {
+					let tmp = prevScu;
+					// Clear to avoid other sCU hooks from being called
+					prevScu = undefined;
+					this.shouldComponentUpdate(p, s, c);
+					prevScu = tmp;
+				}
+
+				if (prevCWU) prevCWU.call(this, p, s, c);
+			};
 
 			// This SCU has the purpose of bailing out after repeated updates
 			// to stateful hooks.
