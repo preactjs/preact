@@ -346,7 +346,7 @@ describe('combinations', () => {
 		expect(ops).to.deep.equal(['child effect', 'parent effect']);
 	});
 
-	it('should not block hook updates when context upates are enqueud', () => {
+	it('should not block hook updates when context updates are enqueued', () => {
 		const Ctx = createContext({
 			value: 0,
 			setValue: /** @type {*} */ () => {}
