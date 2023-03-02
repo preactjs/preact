@@ -4,16 +4,62 @@
  * https://github.com/facebook/react/blob/b2ae9ddb3b497d16a7c27c051da1827d08871138/packages/react/src/__tests__/ReactChildren-test.js
  */
 
-describe('ReactChildren', () => {
-	let React;
-	let ReactTestUtils;
+import {
+	setupScratch,
+	teardown,
+	serializeHtml
+} from '../../../test/_util/helpers';
+import { div, span } from '../../../test/_util/dom';
+import React, { createElement, render } from 'preact/compat';
 
-	beforeEach(() => {
-		jest.resetModules();
-		React = require('react');
-		ReactTestUtils = require('react-dom/test-utils');
+/* eslint-disable func-style */
+/* eslint-disable object-shorthand */
+/* eslint-disable no-else-return */
+
+const ReactDOM = React;
+
+function addMethod(name, assert) {
+	/* global chai */
+	chai.use(chai => {
+		chai.Assertion.addMethod(name, function(expected) {
+			assert(this._obj, expected);
+		});
 	});
+}
 
+addMethod('toBe', (actual, expected) => expect(actual).to.equal(expected));
+addMethod('toEqual', (actual, expected) =>
+	expect(actual).to.deep.equal(expected)
+);
+addMethod('toHaveBeenCalledWith', (actual, expected) =>
+	expect(actual).to.have.been.calledWith(expected)
+);
+addMethod('toHaveBeenCalledTimes', (actual, expected) =>
+	expect(actual.callCount ?? -1).to.equal(expected)
+);
+addMethod('toContain', (actual, expected) =>
+	expect(actual).to.contain(expected)
+);
+addMethod('toThrow', (actual, expected) => expect(actual).to.throw(expected));
+addMethod('toThrowError', (actual, expected) =>
+	expect(actual).to.throw(expected)
+);
+
+const jest = {
+	fn() {
+		return {
+			/** @type {(mock: any) => import('sinon').SinonSpy & {mockClear(): void}} */
+			mockImplementation(mock) {
+				/** @type {any} */
+				const spy = sinon.spy(mock);
+				spy.mockClear = () => spy.resetHistory();
+				return spy;
+			}
+		};
+	}
+};
+
+describe('ReactChildren', () => {
 	it('should support identity for simple', () => {
 		const context = {};
 		const callback = jest.fn().mockImplementation(function(kid, index) {
@@ -45,7 +91,6 @@ describe('ReactChildren', () => {
 			expect(this).toBe(context);
 			return kid;
 		});
-		const ReactDOM = require('react-dom');
 		const portalContainer = document.createElement('div');
 
 		const simpleChild = <span key="simple" />;
@@ -870,6 +915,7 @@ describe('ReactChildren', () => {
 				<p />
 			</div>
 		);
+		/** @type {any[]} */
 		const mappedChildren = React.Children.map(
 			instance.props.children,
 			// Try a few things: keyed, unkeyed, hole, and a cloned element.
