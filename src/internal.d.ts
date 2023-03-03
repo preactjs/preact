@@ -47,6 +47,8 @@ export interface Options extends preact.Options {
 		oldVNode: VNode | undefined,
 		errorInfo: ErrorInfo | undefined
 	): void;
+	/** Attach a hook that is invoked after the assigned Preact event handler runs */
+	_evented(event: Event): void;
 }
 
 export type ComponentChild =

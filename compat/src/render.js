@@ -239,14 +239,40 @@ options._render = function (vnode) {
 };
 
 const oldDiffed = options.diffed;
-/** @type {(vnode: import('./internal').VNode)} */
+/** @type {(vnode: import('./internal').VNode) => void} */
 options.diffed = function (vnode) {
 	if (oldDiffed) {
 		oldDiffed(vnode);
 	}
 
+	const type = vnode.type;
 	const props = vnode.props;
 	const dom = vnode._dom;
+	const isControlled = dom && dom._isControlled;
+
+	if (
+		dom != null &&
+		(type === 'input' || type === 'textarea' || type === 'select')
+	) {
+		if (isControlled === false) {
+		} else if (
+			isControlled ||
+			props.oninput ||
+			props.onchange ||
+			props.onChange
+		) {
+			if (props.value != null) {
+				dom._isControlled = true;
+				dom._prevValue = props.value;
+			} else if (props.checked != null) {
+				dom._isControlled = true;
+				dom._prevValue = props.checked;
+			} else {
+				dom._isControlled = false;
+			}
+		}
+	}
+
 	if (
 		dom != null &&
 		vnode.type === 'textarea' &&
@@ -257,6 +283,28 @@ options.diffed = function (vnode) {
 	}
 
 	currentComponent = null;
+};
+
+const oldEvented = options._evented;
+options._evented = function (event) {
+	if (oldEvented) oldEvented(event);
+
+	const target = event.currentTarget;
+	const eventType = event.type;
+	if (
+		(eventType === 'input' || eventType === 'change') &&
+		target._isControlled &&
+		target.value != null
+	) {
+		target.value = target._prevValue;
+	}
+	if (
+		eventType === 'change' &&
+		target._isControlled &&
+		target.checked != null
+	) {
+		target.checked = target._prevValue;
+	}
 };
 
 // This is a very very private internal function for React it
