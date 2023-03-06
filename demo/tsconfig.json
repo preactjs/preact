@@ -9,7 +9,7 @@
 		"moduleResolution": "node",
 		"paths": {
 			"preact/hooks": ["../hooks/src/index.js"],
-			"preact": ["../src/index.js"],
+			"preact": ["../src/index.js"]
 		}
 	}
 }

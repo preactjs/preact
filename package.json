@@ -130,7 +130,7 @@
 		"test:karma:bench": "cross-env PERFORMANCE=true COVERAGE=false BABEL_NO_MODULES=true karma start karma.conf.js --grep=test/benchmarks/**.js --single-run",
 		"benchmark": "npm run test:karma:bench -- no-single-run",
 		"lint": "eslint src test debug compat hooks test-utils",
-		"format": "prettier --write '**/*.{js,jsx,ts,tsx,yml}'"
+		"format": "prettier --write '**/*.{js,jsx,ts,tsx,yml,json}'"
 	},
 	"eslintConfig": {
 		"extends": [
@@ -189,7 +189,7 @@
 		"tabWidth": 2
 	},
 	"lint-staged": {
-		"**/*.{js,jsx,ts,tsx,yml}": [
+		"**/*.{js,jsx,ts,tsx,yml,json}": [
 			"prettier --write"
 		]
 	},

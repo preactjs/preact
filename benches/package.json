@@ -27,7 +27,7 @@
 		"tachometer": "^0.7.0",
 		"v8-deopt-viewer": "^0.2.1"
 	},
-  "volta": {
+	"volta": {
 		"extends": "../package.json"
 	}
 }
