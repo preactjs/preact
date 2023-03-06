@@ -7,7 +7,7 @@ const compat = path.join(__dirname, '..', 'compat', 'src');
 
 /** @type {import('webpack').Configuration} */
 module.exports = {
-	mode: "development",
+	mode: 'development',
 	context: __dirname,
 	entry: './index',
 	output: {
@@ -103,7 +103,7 @@ module.exports = {
 	},
 	devtool: 'inline-source-map',
 	devServer: {
-		allowedHosts: "all",
+		allowedHosts: 'all',
 		historyApiFallback: true
 	},
 	plugins: [new HtmlWebpackPlugin()]

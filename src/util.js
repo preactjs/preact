@@ -1,4 +1,4 @@
-import { EMPTY_ARR } from "./constants";
+import { EMPTY_ARR } from './constants';
 
 /**
  * Assign properties from `props` to `obj`
