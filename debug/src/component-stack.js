@@ -1,4 +1,6 @@
-import { options, Fragment } from 'preact';
+import { options as rawOptions, Fragment } from 'preact';
+
+const options = /** @type {import('../../src/internal').Options} */ (rawOptions);
 
 /**
  * Get human readable name of the component/dom node

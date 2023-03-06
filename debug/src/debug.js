@@ -1,5 +1,5 @@
 import { checkPropTypes } from './check-props';
-import { options, Component } from 'preact';
+import { options as rawOptions, Component } from 'preact';
 import {
 	ELEMENT_NODE,
 	DOCUMENT_NODE,
@@ -13,7 +13,7 @@ import {
 } from './component-stack';
 import { IS_NON_DIMENSIONAL } from '../../compat/src/util';
 
-const isWeakMapSupported = typeof WeakMap == 'function';
+const options = /** @type {import('../../src/internal').Options} */ (rawOptions);
 
 function getClosestDomNodeParent(parent) {
 	if (!parent) return {};
@@ -35,13 +35,11 @@ export function initDebug() {
 	let oldCatchError = options._catchError;
 	let oldRoot = options._root;
 	let oldHook = options._hook;
-	const warnedComponents = !isWeakMapSupported
-		? null
-		: {
-				useEffect: new WeakMap(),
-				useLayoutEffect: new WeakMap(),
-				lazyPropTypes: new WeakMap()
-		  };
+	const warnedComponents = {
+		useEffect: new WeakMap(),
+		useLayoutEffect: new WeakMap(),
+		lazyPropTypes: new WeakMap()
+	};
 	const deprecations = [];
 
 	options._catchError = (error, vnode, oldVNode) => {
@@ -244,7 +242,6 @@ export function initDebug() {
 		if (typeof internal.type == 'function' && internal.type.propTypes) {
 			if (
 				internal.type.displayName === 'Lazy' &&
-				warnedComponents &&
 				!warnedComponents.lazyPropTypes.has(internal.type)
 			) {
 				const m =
