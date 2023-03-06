@@ -1,4 +1,25 @@
-import { toChildArray } from 'preact';
+// import { toChildArray } from 'preact';
+
+/**
+ * Flatten and loop through the children of a virtual node
+ * @param {import('preact').ComponentChildren} children The unflattened
+ * children of a virtual node
+ * @returns {import('./internal').VNode[]}
+ */
+export function toChildArray(children, out) {
+	out = out || [];
+	if (children == null || typeof children == 'boolean') {
+		out.push(null);
+	} else if (typeof children == 'function') {
+	} else if (Array.isArray(children)) {
+		children.some(child => {
+			toChildArray(child, out);
+		});
+	} else {
+		out.push(children);
+	}
+	return out;
+}
 
 const mapFn = (children, fn) => {
 	if (children == null) return null;

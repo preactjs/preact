@@ -2,11 +2,11 @@ import {
 	render as preactRender,
 	hydrate as preactHydrate,
 	options,
-	toChildArray,
 	Component
 } from 'preact';
 import { getParentContext } from '../../src/tree';
 import { IS_NON_DIMENSIONAL } from './util';
+import { toChildArray } from './Children';
 
 export const REACT_ELEMENT_TYPE = Symbol.for('react.element');
 
@@ -128,6 +128,12 @@ options.vnode = vnode => {
 			if (IS_DOM && i === 'children' && type === 'noscript') {
 				// Emulate React's behavior of not rendering the contents of noscript tags on the client.
 				continue;
+			} else if (i == 'children') {
+				if (typeof value === 'function') {
+					value = null;
+				} else if (Array.isArray(value)) {
+					value = toChildArray(value);
+				}
 			} else if (i === 'value' && 'defaultValue' in props && value == null) {
 				// Skip applying value if it is null/undefined and we already set
 				// a default value

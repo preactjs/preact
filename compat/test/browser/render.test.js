@@ -10,7 +10,9 @@ import {
 	setupScratch,
 	teardown,
 	serializeHtml,
-	createEvent
+	createEvent,
+	getMixedArray,
+	mixedArrayHTML
 } from '../../../test/_util/helpers';
 
 describe('compat render', () => {
@@ -133,6 +135,24 @@ describe('compat render', () => {
 			.to.have.property('textContent')
 			.that.is.a('string')
 			.that.equals('dynamic content');
+	});
+
+	it('should not render children when child is a function', () => {
+		/** @type {any} */
+		const icon = () => null;
+
+		render(<div>{icon}</div>, scratch);
+		expect(scratch.innerHTML).to.equal('<div></div>');
+
+		render(<div>{icon}</div>, scratch);
+		expect(scratch.innerHTML).to.equal('<div></div>');
+
+		let children = getMixedArray();
+		children.push(icon, [icon], <span>{icon}</span>);
+		render(<div>{children}</div>, scratch);
+		expect(scratch.innerHTML).to.equal(
+			`<div>${mixedArrayHTML}<span></span></div>`
+		);
 	});
 
 	it('should ignore maxLength / minLength when is null', () => {
