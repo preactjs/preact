@@ -42,15 +42,25 @@ export function initDebug() {
 	};
 	const deprecations = [];
 
-	options._catchError = (error, vnode, oldVNode) => {
-		let component = vnode && vnode._component;
+	options._catchError = catchErrorHook;
+	options._root = rootHook;
+	options._diff = diffHook;
+	options._hook = hookHook;
+	options.vnode = vnodeHook;
+	options.diffed = diffedHook;
+
+	/** @type {typeof options["_catchError"]} */
+	function catchErrorHook(error, internal) {
+		let component = internal && internal._component;
 		if (component && typeof error.then == 'function') {
 			const promise = error;
 			error = new Error(
-				`Missing Suspense. The throwing component was: ${getDisplayName(vnode)}`
+				`Missing Suspense. The throwing component was: ${getDisplayName(
+					internal
+				)}`
 			);
 
-			let parent = vnode;
+			let parent = internal;
 			for (; parent; parent = parent._parent) {
 				if (parent._component && parent._component._childDidSuspend) {
 					error = promise;
@@ -66,7 +76,7 @@ export function initDebug() {
 		}
 
 		try {
-			oldCatchError(error, vnode, oldVNode);
+			oldCatchError(error, internal);
 
 			// when an error was handled by an ErrorBoundary we will nontheless emit an error
 			// event on the window object. This is to make up for react compatibility in dev mode
@@ -79,9 +89,10 @@ export function initDebug() {
 		} catch (e) {
 			throw e;
 		}
-	};
+	}
 
-	options._root = (vnode, parentNode) => {
+	/** @type {typeof options["_root"]} */
+	function rootHook(vnode, parentNode) {
 		if (!parentNode) {
 			throw new Error(
 				'Undefined parent passed to render(), this is the second argument.\n' +
@@ -108,9 +119,10 @@ export function initDebug() {
 		}
 
 		if (oldRoot) oldRoot(vnode, parentNode);
-	};
+	}
 
-	options._diff = (internal, vnode) => {
+	/** @type {typeof options["_diff"]} */
+	function diffHook(internal, vnode) {
 		if (vnode === null || typeof vnode !== 'object') return;
 		// Check if the user passed plain objects as children. Note that we cannot
 		// move this check into `options.vnode` because components can receive
@@ -276,15 +288,16 @@ export function initDebug() {
 		}
 
 		if (oldBeforeDiff) oldBeforeDiff(internal, vnode);
-	};
+	}
 
-	options._hook = (internal, index, type) => {
+	/** @type {typeof options["_hook"]} */
+	function hookHook(internal, index, type) {
 		if (!internal || !hooksAllowed) {
 			throw new Error('Hook can only be invoked from render methods.');
 		}
 
 		if (oldHook) oldHook(internal, index, type);
-	};
+	}
 
 	// Ideally we'd want to print a warning once per component, but we
 	// don't have access to the vnode that triggered it here. As a
@@ -324,7 +337,8 @@ export function initDebug() {
 	// https://esbench.com/bench/6021ebd7d9c27600a7bfdba3
 	const deprecatedProto = Object.create({}, deprecatedAttributes);
 
-	options.vnode = vnode => {
+	/** @type {typeof options["vnode"]} */
+	function vnodeHook(vnode) {
 		const props = vnode.props;
 		if (props != null && ('__source' in props || '__self' in props)) {
 			Object.defineProperties(props, debugProps);
@@ -335,17 +349,18 @@ export function initDebug() {
 		// eslint-disable-next-line
 		vnode.__proto__ = deprecatedProto;
 		if (oldVnode) oldVnode(vnode);
-	};
+	}
 
-	options.diffed = vnode => {
+	/** @type {typeof options["diffed"]} */
+	function diffedHook(internal) {
 		hooksAllowed = false;
 
-		if (oldDiffed) oldDiffed(vnode);
+		if (oldDiffed) oldDiffed(internal);
 
-		if (vnode._children != null) {
+		if (internal._children != null) {
 			const keys = [];
-			for (let i = 0; i < vnode._children.length; i++) {
-				const child = vnode._children[i];
+			for (let i = 0; i < internal._children.length; i++) {
+				const child = internal._children[i];
 				if (!child || child.key == null) continue;
 
 				const key = child.key;
@@ -354,8 +369,8 @@ export function initDebug() {
 						'Following component has two or more children with the ' +
 							`same key attribute: "${key}". This may cause glitches and misbehavior ` +
 							'in rendering process. Component: \n\n' +
-							serializeVNode(vnode) +
-							`\n\n${getOwnerStack(vnode)}`
+							serializeVNode(internal) +
+							`\n\n${getOwnerStack(internal)}`
 					);
 
 					// Break early to not spam the console
@@ -365,7 +380,7 @@ export function initDebug() {
 				keys.push(key);
 			}
 		}
-	};
+	}
 }
 
 const setState = Component.prototype.setState;
