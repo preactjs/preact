@@ -12,16 +12,9 @@ import {
 	getDisplayName
 } from './component-stack';
 import { IS_NON_DIMENSIONAL } from '../../compat/src/util';
+import { validateTableMarkup } from './validateMarkup';
 
 const options = /** @type {import('../../src/internal').Options} */ (rawOptions);
-
-function getClosestDomNodeParent(parent) {
-	if (!parent) return {};
-	if (typeof parent.type == 'function') {
-		return getClosestDomNodeParent(parent._parent);
-	}
-	return parent;
-}
 
 export function initDebug() {
 	setupComponentStack();
@@ -123,7 +116,12 @@ export function initDebug() {
 
 	/** @type {typeof options["_diff"]} */
 	function diffHook(internal, vnode) {
-		if (vnode === null || typeof vnode !== 'object') return;
+		if (vnode === null || typeof vnode !== 'object') {
+			// TODO: This isn't correct. We need these checks to run on mount
+			oldBeforeDiff(internal, vnode);
+			return;
+		}
+
 		// Check if the user passed plain objects as children. Note that we cannot
 		// move this check into `options.vnode` because components can receive
 		// children in any shape they want (e.g.
@@ -163,44 +161,10 @@ export function initDebug() {
 			);
 		}
 
-		let parentVNode = getClosestDomNodeParent(parent);
+		validateTableMarkup(internal);
 
 		hooksAllowed = true;
 
-		if (
-			(type === 'thead' || type === 'tfoot' || type === 'tbody') &&
-			parentVNode.type !== 'table'
-		) {
-			console.error(
-				'Improper nesting of table. Your <thead/tbody/tfoot> should have a <table> parent.' +
-					serializeVNode(internal) +
-					`\n\n${getOwnerStack(internal)}`
-			);
-		} else if (
-			type === 'tr' &&
-			parentVNode.type !== 'thead' &&
-			parentVNode.type !== 'tfoot' &&
-			parentVNode.type !== 'tbody' &&
-			parentVNode.type !== 'table'
-		) {
-			console.error(
-				'Improper nesting of table. Your <tr> should have a <thead/tbody/tfoot/table> parent.' +
-					serializeVNode(internal) +
-					`\n\n${getOwnerStack(internal)}`
-			);
-		} else if (type === 'td' && parentVNode.type !== 'tr') {
-			console.error(
-				'Improper nesting of table. Your <td> should have a <tr> parent.' +
-					serializeVNode(internal) +
-					`\n\n${getOwnerStack(internal)}`
-			);
-		} else if (type === 'th' && parentVNode.type !== 'tr') {
-			console.error(
-				'Improper nesting of table. Your <th> should have a <tr>.' +
-					serializeVNode(internal) +
-					`\n\n${getOwnerStack(internal)}`
-			);
-		}
 		let isCompatNode = '$$typeof' in vnode;
 		if (
 			internal.ref !== undefined &&
