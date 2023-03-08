@@ -2,7 +2,7 @@ import options from '../options';
 
 function setStyle(dom, key, value) {
 	if (key[0] === '-') {
-		dom.style.setProperty(key, value);
+		dom.style.setProperty(key, value == null ? '' : value);
 	} else {
 		dom.style[key] = value == null ? '' : value;
 	}
@@ -67,8 +67,10 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
 			// Normalize incorrect prop usage for SVG:
 			// - xlink:href / xlinkHref --> href (xlink:href was removed from SVG and isn't needed)
 			// - className --> class
-			name = name.replace(/xlink[H:h]/, 'h').replace(/sName$/, 's');
+			name = name.replace(/xlink(H|:h)/, 'h').replace(/sName$/, 's');
 		} else if (
+			name !== 'width' &&
+			name !== 'height' &&
 			name !== 'href' &&
 			name !== 'list' &&
 			name !== 'form' &&

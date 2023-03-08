@@ -53,8 +53,8 @@ export type ComponentChild =
 export type ComponentChildren = ComponentChild[] | ComponentChild;
 
 export interface Attributes {
-	key?: Key;
-	jsx?: boolean;
+	key?: Key | undefined;
+	jsx?: boolean | undefined;
 }
 
 export interface ClassAttributes<T> extends Attributes {
@@ -66,6 +66,10 @@ export interface PreactDOMAttributes {
 	dangerouslySetInnerHTML?: {
 		__html: string;
 	};
+}
+
+export interface ErrorInfo {
+	componentStack?: string;
 }
 
 export type RenderableProps<P, RefType = any> = P &
@@ -130,7 +134,7 @@ export interface Component<P = {}, S = {}> {
 		previousState: Readonly<S>,
 		snapshot: any
 	): void;
-	componentDidCatch?(error: any, errorInfo: any): void;
+	componentDidCatch?(error: any, errorInfo: ErrorInfo): void;
 }
 
 export abstract class Component<P, S> {
@@ -270,14 +274,18 @@ export namespace h {
 // Preact render
 // -----------------------------------
 
-export function render(
-	vnode: ComponentChild,
-	parent: Element | Document | ShadowRoot | DocumentFragment
-): void;
-export function hydrate(
-	vnode: ComponentChild,
-	parent: Element | Document | ShadowRoot | DocumentFragment
-): void;
+interface ContainerNode {
+	nodeType: Node['nodeType'];
+	parentNode: Node['parentNode'];
+	firstChild: Node['firstChild'];
+	insertBefore: Node['insertBefore'];
+	appendChild: Node['appendChild'];
+	removeChild: Node['removeChild'];
+	childNodes: ArrayLike<Node>;
+}
+
+export function render(vnode: ComponentChild, parent: ContainerNode): void;
+export function hydrate(vnode: ComponentChild, parent: ContainerNode): void;
 export function cloneElement(
 	vnode: VNode<any>,
 	props?: any,
@@ -293,6 +301,7 @@ export function cloneElement<P>(
 // Preact Built-in Components
 // -----------------------------------
 
+// TODO: Revisit what the public type of this is...
 export const Fragment: FunctionComponent<{}>;
 
 //
@@ -344,6 +353,9 @@ export interface Provider<T>
 		children: ComponentChildren;
 	}> {}
 export interface PreactProvider<T> extends Provider<T> {}
+export type ContextType<C extends Context<any>> = C extends Context<infer T>
+	? T
+	: never;
 
 export interface Context<T> {
 	Consumer: Consumer<T>;
@@ -351,8 +363,5 @@ export interface Context<T> {
 	displayName?: string;
 }
 export interface PreactContext<T> extends Context<T> {}
-export type ContextType<C extends Context<any>> = C extends Context<infer T>
-	? T
-	: never;
 
 export function createContext<T>(defaultValue: T): Context<T>;

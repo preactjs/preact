@@ -2,7 +2,7 @@ import { fileURLToPath } from 'url';
 import { stat, readFile } from 'fs/promises';
 import * as path from 'path';
 import escalade from 'escalade';
-import globby from 'globby';
+import { globby } from 'globby';
 
 // TODO: Replace with import.meta.resolve when stable
 import { createRequire } from 'module';

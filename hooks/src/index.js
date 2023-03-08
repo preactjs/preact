@@ -111,6 +111,7 @@ options.unmount = internal => {
 				hasErrored = e;
 			}
 		});
+		internal.data.__hooks = undefined;
 		if (hasErrored) options._catchError(hasErrored, internal);
 	}
 };
@@ -364,7 +365,7 @@ options._catchError = function(error, internal) {
 };
 
 /**
- * @param {(error: any) => void} cb
+ * @param {(error: any, errorInfo: import('preact').ErrorInfo) => void} cb
  */
 export function useErrorBoundary(cb) {
 	/** @type {import('./internal').ErrorBoundaryHookState} */
@@ -373,8 +374,8 @@ export function useErrorBoundary(cb) {
 	state._value = cb;
 
 	if (!currentInternal.data._catchError) {
-		currentInternal.data._catchError = err => {
-			if (state._value) state._value(err);
+		currentInternal.data._catchError = (err, errorInfo) => {
+			if (state._value) state._value(err, errorInfo);
 			errState[1](err);
 		};
 	}
@@ -386,6 +387,22 @@ export function useErrorBoundary(cb) {
 	];
 }
 
+export function useId() {
+	const state = getHookState(currentIndex++, 11);
+	if (!state._value) {
+		// Grab either the root node or the nearest async boundary node.
+		/** @type {import('./internal.d').VNode} */
+		let root = currentComponent._vnode;
+		while (root !== null && !root._mask && root._parent !== null) {
+			root = root._parent;
+		}
+
+		let mask = root._mask || (root._mask = [0, 0]);
+		state._value = 'P' + mask[0] + '-' + mask[1]++;
+	}
+
+	return state._value;
+}
 /**
  * After paint effects consumer.
  */

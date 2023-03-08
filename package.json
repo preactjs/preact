@@ -21,79 +21,91 @@
 		"Samsung>=8.2",
 		"not dead"
 	],
-  "sideEffects": [
-    "./compat/**/*",
-    "./debug/**/*",
-    "./devtools/**/*",
-    "./hooks/**/*",
-    "./test-utils/**/*"
-  ],
+	"sideEffects": [
+		"./compat/**/*",
+		"./debug/**/*",
+		"./devtools/**/*",
+		"./hooks/**/*",
+		"./test-utils/**/*"
+	],
 	"exports": {
 		".": {
-      "types": "./src/index.d.ts",
+			"types": "./src/index.d.ts",
 			"module": "./dist/preact.mjs",
 			"import": "./dist/preact.mjs",
 			"require": "./dist/preact.js",
 			"umd": "./dist/preact.umd.js"
 		},
 		"./compat": {
-      "types": "./compat/src/index.d.ts",
+			"types": "./compat/src/index.d.ts",
 			"module": "./compat/dist/compat.mjs",
 			"import": "./compat/dist/compat.mjs",
 			"require": "./compat/dist/compat.js",
 			"umd": "./compat/dist/compat.umd.js"
 		},
 		"./debug": {
-      "types": "./debug/src/index.d.ts",
+			"types": "./debug/src/index.d.ts",
 			"module": "./debug/dist/debug.mjs",
 			"import": "./debug/dist/debug.mjs",
 			"require": "./debug/dist/debug.js",
 			"umd": "./debug/dist/debug.umd.js"
 		},
 		"./devtools": {
-      "types": "./devtools/src/index.d.ts",
+			"types": "./devtools/src/index.d.ts",
 			"module": "./devtools/dist/devtools.mjs",
 			"import": "./devtools/dist/devtools.mjs",
 			"require": "./devtools/dist/devtools.js",
 			"umd": "./devtools/dist/devtools.umd.js"
 		},
 		"./hooks": {
-      "types": "./hooks/src/index.d.ts",
+			"types": "./hooks/src/index.d.ts",
 			"module": "./hooks/dist/hooks.mjs",
 			"import": "./hooks/dist/hooks.mjs",
 			"require": "./hooks/dist/hooks.js",
 			"umd": "./hooks/dist/hooks.umd.js"
 		},
 		"./test-utils": {
-      "types": "./test-utils/src/index.d.ts",
+			"types": "./test-utils/src/index.d.ts",
 			"module": "./test-utils/dist/testUtils.mjs",
 			"import": "./test-utils/dist/testUtils.mjs",
 			"require": "./test-utils/dist/testUtils.js",
 			"umd": "./test-utils/dist/testUtils.umd.js"
 		},
 		"./jsx-runtime": {
-      "types": "./jsx-runtime/src/index.d.ts",
+			"types": "./jsx-runtime/src/index.d.ts",
 			"module": "./jsx-runtime/dist/jsxRuntime.mjs",
 			"import": "./jsx-runtime/dist/jsxRuntime.mjs",
 			"require": "./jsx-runtime/dist/jsxRuntime.js",
 			"umd": "./jsx-runtime/dist/jsxRuntime.umd.js"
 		},
 		"./jsx-dev-runtime": {
-      "types": "./jsx-runtime/src/index.d.ts",
+			"types": "./jsx-runtime/src/index.d.ts",
 			"module": "./jsx-runtime/dist/jsxRuntime.mjs",
 			"import": "./jsx-runtime/dist/jsxRuntime.mjs",
 			"require": "./jsx-runtime/dist/jsxRuntime.js",
 			"umd": "./jsx-runtime/dist/jsxRuntime.umd.js"
 		},
-    "./compat/client": {
+		"./compat/client": {
 			"import": "./compat/client.mjs",
 			"require": "./compat/client.js"
 		},
 		"./compat/server": {
-      "browser": "./compat/server.browser.js",
+			"browser": "./compat/server.browser.js",
 			"module": "./compat/server.mjs",
 			"import": "./compat/server.mjs",
 			"require": "./compat/server.js"
+		},
+		"./compat/jsx-runtime": {
+			"import": "./compat/jsx-runtime.mjs",
+			"require": "./compat/jsx-runtime.js"
+		},
+		"./compat/jsx-dev-runtime": {
+			"import": "./compat/jsx-dev-runtime.mjs",
+			"require": "./compat/jsx-dev-runtime.js"
+		},
+		"./compat/scheduler": {
+			"import": "./compat/scheduler.mjs",
+			"require": "./compat/scheduler.js"
 		},
 		"./package.json": "./package.json",
 		"./compat/package.json": "./compat/package.json",
@@ -178,6 +190,10 @@
 			"react/sort-comp": 0,
 			"jest/valid-expect": 0,
 			"jest/no-disabled-tests": 0,
+			"jest/no-test-callback": 0,
+			"jest/expect-expect": 0,
+			"jest/no-standalone-expect": 0,
+			"jest/no-export": 0,
 			"react/no-find-dom-node": 0
 		}
 	},
@@ -208,10 +224,15 @@
 		"dist",
 		"compat/dist",
 		"compat/src",
+		"compat/client.js",
+		"compat/client.mjs",
+		"compat/server.browser.js",
 		"compat/server.js",
 		"compat/server.browser.js",
 		"compat/server.mjs",
-    "compat/client.js",
+		"compat/scheduler.js",
+		"compat/scheduler.mjs",
+		"compat/client.js",
 		"compat/client.mjs",
 		"compat/test-utils.js",
 		"compat/jsx-runtime.js",
@@ -254,6 +275,8 @@
 	"bugs": "https://github.com/preactjs/preact/issues",
 	"homepage": "https://preactjs.com",
 	"devDependencies": {
+		"@actions/github": "^5.0.0",
+		"@actions/glob": "^0.2.0",
 		"@babel/core": "^7.7.0",
 		"@babel/plugin-proposal-object-rest-spread": "^7.6.2",
 		"@babel/plugin-transform-react-jsx": "^7.7.0",
@@ -273,10 +296,9 @@
 		"check-export-map": "^1.2.0",
 		"coveralls": "^3.1.1",
 		"cross-env": "^7.0.3",
-		"csstype": "^3.0.5",
 		"diff": "^5.0.0",
 		"errorstacks": "^2.4.0",
-		"esbuild": "^0.11.21",
+		"esbuild": "^0.14.50",
 		"eslint": "5.15.1",
 		"eslint-config-developit": "^1.1.1",
 		"eslint-config-prettier": "^6.5.0",
@@ -298,10 +320,16 @@
 		"mocha": "^9.2.2",
 		"npm-merge-driver-install": "^1.1.1",
 		"npm-run-all": "^4.0.0",
+		"preact-render-to-string": "^5.2.5",
 		"prettier": "^1.18.2",
 		"prop-types": "^15.7.2",
+		"sade": "^1.7.4",
 		"sinon": "^9.2.3",
 		"sinon-chai": "^3.7.0",
-		"typescript": "3.5.3"
+		"typescript": "3.5.3",
+		"undici": "^4.12.0"
+	},
+	"volta": {
+		"node": "16.18.0"
 	}
 }

@@ -1,4 +1,5 @@
 import { enqueueRender } from './component';
+import { FORCE_UPDATE } from './constants';
 
 let nextContextId = 0;
 
@@ -31,6 +32,7 @@ export const createContext = (defaultValue, contextId) => {
 		Provider(props, ctx) {
 			// initial setup:
 			if (!this._subs) {
+				/** @type {Set<import('./internal').Internal>} */
 				this._subs = new Set();
 				ctx = {};
 				ctx[contextId] = this;
@@ -39,7 +41,10 @@ export const createContext = (defaultValue, contextId) => {
 			}
 			// re-render subscribers in response to value change
 			else if (props.value !== this._prev) {
-				this._subs.forEach(enqueueRender);
+				this._subs.forEach(internal => {
+					internal.flags |= FORCE_UPDATE;
+					enqueueRender(internal);
+				});
 			}
 			this._prev = props.value;
 

@@ -11,6 +11,7 @@ import {
 } from 'preact';
 import {
 	useState,
+	useId,
 	useReducer,
 	useEffect,
 	useLayoutEffect,
@@ -26,6 +27,7 @@ import { memo } from './memo';
 import { forwardRef } from './forwardRef';
 import { Children } from './Children';
 import { Suspense, lazy } from './suspense';
+import { is } from './util';
 import {
 	hydrate,
 	render,
@@ -33,7 +35,6 @@ import {
 	__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED
 } from './render';
 import { getChildDom } from '../../src/tree';
-export * from './scheduler';
 
 const version = '17.0.2'; // trick libraries to think we are react
 
@@ -105,21 +106,21 @@ function findDOMNode(component) {
 const unstable_batchedUpdates = (callback, arg) => callback(arg);
 
 /**
- * Strict Mode is not implemented in Preact, so we provide a stand-in for it
- * that just renders its children without imposing any restrictions.
- */
-const StrictMode = Fragment;
-
-/**
  * In React, `flushSync` flushes the entire tree and forces a rerender. It's
  * implmented here as a no-op.
  * @template Arg
  * @template Result
  * @param {(arg: Arg) => Result} callback function that runs before the flush
- * @param {Arg} [arg] Optional arugment that can be passed to the callback
+ * @param {Arg} [arg] Optional argument that can be passed to the callback
  * @returns
  */
 const flushSync = (callback, arg) => callback(arg);
+
+/**
+ * Strict Mode is not implemented in Preact, so we provide a stand-in for it
+ * that just renders its children without imposing any restrictions.
+ */
+const StrictMode = Fragment;
 
 export function startTransition(cb) {
 	cb();
@@ -136,16 +137,6 @@ export function useTransition() {
 // TODO: in theory this should be done after a VNode is diffed as we want to insert
 // styles/... before it attaches
 export const useInsertionEffect = useLayoutEffect;
-
-/**
- * Check if two values are the same value
- * @param {*} x
- * @param {*} y
- * @returns {boolean}
- */
-function is(x, y) {
-	return (x === y && (x !== 0 || 1 / x === 1 / y)) || (x !== x && y !== y);
-}
 
 /**
  * This is taken from https://github.com/facebook/react/blob/main/packages/use-sync-external-store/src/useSyncExternalStoreShimClient.js#L84
@@ -187,7 +178,6 @@ export {
 	version,
 	Children,
 	render,
-	flushSync,
 	hydrate,
 	unmountComponentAtNode,
 	createPortal,
@@ -203,6 +193,7 @@ export {
 	PureComponent,
 	memo,
 	forwardRef,
+	flushSync,
 	// eslint-disable-next-line camelcase
 	unstable_batchedUpdates,
 	StrictMode,
@@ -215,10 +206,15 @@ export {
 // React copies the named exports to the default one.
 export default {
 	useState,
+	useId,
 	useReducer,
-	flushSync,
 	useEffect,
 	useLayoutEffect,
+	useInsertionEffect,
+	useTransition,
+	useDeferredValue,
+	useSyncExternalStore,
+	startTransition,
 	useRef,
 	useImperativeHandle,
 	useMemo,
@@ -248,6 +244,7 @@ export default {
 	PureComponent,
 	memo,
 	forwardRef,
+	flushSync,
 	unstable_batchedUpdates,
 	StrictMode,
 	Suspense,

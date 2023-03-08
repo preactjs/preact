@@ -3,23 +3,18 @@ import { readFile, readdir } from 'fs/promises';
 import prompts from 'prompts';
 import { baseTraceLogDir, frameworks } from './config.js';
 
-// @ts-ignore
-import tachometerStats from 'tachometer/lib/stats.js';
-// @ts-ignore
-import tachometerFormat from 'tachometer/lib/format.js';
+import { summaryStats, computeDifferences } from 'tachometer/lib/stats.js';
+import {
+	automaticResultTable,
+	verticalTermResultTable
+} from 'tachometer/lib/format.js';
 
 /**
  * @typedef {import('./tracing').TraceEvent} TraceEvent
  * @typedef {import('tachometer/lib/stats').SummaryStats} SummaryStats
  * @typedef {import('tachometer/lib/stats').ResultStats} ResultStats
  * @typedef {import('tachometer/lib/stats').ResultStatsWithDifferences} ResultStatsWithDifferences
- * @type {import('tachometer/lib/stats')}
  */
-const statsLib = tachometerStats;
-const { summaryStats, computeDifferences } = statsLib;
-/** @type {import('tachometer/lib/format')} */
-const formatLib = tachometerFormat;
-const { automaticResultTable, verticalTermResultTable } = formatLib;
 
 const toTrack = new Set([
 	// 'V8.CompileCode', // Might be tachometer code?? But maybe not?
@@ -47,12 +42,10 @@ function addToGrouping(grouping, results) {
 			} else {
 				grouping.get(group).push(data);
 			}
+		} else if (Array.isArray(data)) {
+			grouping.set(group, data);
 		} else {
-			if (Array.isArray(data)) {
-				grouping.set(group, data);
-			} else {
-				grouping.set(group, [data]);
-			}
+			grouping.set(group, [data]);
 		}
 	}
 }
@@ -226,7 +219,7 @@ async function getStatsFromLogs(version, logPaths, getThreadId, trackEventsIn) {
 		stats.set(key, {
 			result: {
 				name: '02_replace1k',
-				version: version,
+				version,
 				measurement: {
 					name: key,
 					mode: 'expression',

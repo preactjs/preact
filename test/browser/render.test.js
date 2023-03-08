@@ -79,6 +79,19 @@ describe('render()', () => {
 		expect(scratch.innerHTML).to.eql(`<div>Good</div>`);
 	});
 
+	it('should render % width and height on img correctly', () => {
+		render(<img width="100%" height="100%" />, scratch);
+		expect(scratch.innerHTML).to.eql(`<img width="100%" height="100%">`);
+	});
+
+	// IE11 doesn't support these.
+	if (!/Trident/.test(window.navigator.userAgent)) {
+		it('should render px width and height on img correctly', () => {
+			render(<img width="100px" height="100px" />, scratch);
+			expect(scratch.innerHTML).to.eql(`<img width="100px" height="100px">`);
+		});
+	}
+
 	it('should not render when detecting JSON-injection', () => {
 		const vnode = JSON.parse('{"type":"span","children":"Malicious"}');
 		render(vnode, scratch);
@@ -238,6 +251,16 @@ describe('render()', () => {
 
 	it('should not render children when using function children', () => {
 		render(<div>{() => {}}</div>, scratch);
+		expect(scratch.innerHTML).to.equal('<div></div>');
+	});
+
+	it('should not render children when rerendering a function child', () => {
+		const icon = () => {};
+
+		render(<div>{icon}</div>, scratch);
+		expect(scratch.innerHTML).to.equal('<div></div>');
+
+		render(<div>{icon}</div>, scratch);
 		expect(scratch.innerHTML).to.equal('<div></div>');
 	});
 

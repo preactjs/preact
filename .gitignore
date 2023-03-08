@@ -13,7 +13,3 @@ coverage
 package/
 preact-*.tgz
 preact.tgz
-jsx-csstype.d.ts
-.cache
-src/preact-render-to-string-tests.d.ts
-benchmarks/.v8.modern.js
