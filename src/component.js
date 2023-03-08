@@ -67,7 +67,7 @@ Component.prototype.forceUpdate = function(callback) {
 		// shouldComponentUpdate
 		this._force = true;
 		if (callback) this._renderCallbacks.push(callback);
-		enqueueRender(this);
+		renderComponent(this);
 	}
 };
 
