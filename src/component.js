@@ -135,7 +135,7 @@ export function enqueueRender(internal) {
 	if (
 		(!(internal.flags & DIRTY_BIT) &&
 			(internal.flags |= DIRTY_BIT) &&
-			renderQueue.push(internal) &&
+			rerenderQueue.push(internal) &&
 			!processRenderQueue._rerenderCount++) ||
 		prevDebounce !== options.debounceRendering
 	) {
@@ -145,10 +145,11 @@ export function enqueueRender(internal) {
 }
 
 /**
- * @param {import('./internal').Component} a
- * @param {import('./internal').Component} b
+ * @param {import('./internal').Internal} a
+ * @param {import('./internal').Internal} b
+ * @returns {number}
  */
-const depthSort = (a, b) => a._vnode._depth - b._vnode._depth;
+const depthSort = (a, b) => a._depth - b._depth;
 
 /** Flush the render queue by rerendering all queued components */
 function processRenderQueue() {
@@ -166,6 +167,6 @@ function processRenderQueue() {
 			rerenderQueue.sort(depthSort);
 		}
 	}
-	process._rerenderCount = 0;
+	processRenderQueue._rerenderCount = 0;
 }
 let len = (processRenderQueue._rerenderCount = 0);
