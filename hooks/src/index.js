@@ -195,7 +195,7 @@ export function useReducer(reducer, initialState, init) {
 					let tmp = prevScu;
 					// Clear to avoid other sCU hooks from being called
 					prevScu = undefined;
-					this.shouldComponentUpdate(p, s, c);
+					updateHookState(p, s, c);
 					prevScu = tmp;
 				}
 
@@ -208,7 +208,13 @@ export function useReducer(reducer, initialState, init) {
 			// state setters, if we have next states and
 			// all next states within a component end up being equal to their original state
 			// we are safe to bail out for this specific component.
-			currentComponent.shouldComponentUpdate = function(p, s, c) {
+			/**
+			 *
+			 * @type {import('./internal').Component["shouldComponentUpdate"]}
+			 */
+			// @ts-ignore - We don't use TS to downtranspile
+			// eslint-disable-next-line no-inner-declarations
+			function updateHookState(p, s, c) {
 				if (!hookState._component.__hooks) return true;
 
 				const stateHooks = hookState._component.__hooks._list.filter(
@@ -239,7 +245,9 @@ export function useReducer(reducer, initialState, init) {
 						? prevScu.call(this, p, s, c)
 						: true
 					: false;
-			};
+			}
+
+			currentComponent.shouldComponentUpdate = updateHookState;
 		}
 	}
 
