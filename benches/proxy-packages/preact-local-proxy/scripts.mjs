@@ -49,9 +49,11 @@ export async function postinstall(
 	const pkgJsonPath = pkgRoot('package.json');
 	const pkgJson = JSON.parse(await readFile(pkgJsonPath, 'utf-8'));
 
-	const localBuild = "file:../../../";
+	const localBuild = 'file:../../../';
 	if (pkgJson.dependencies.preact !== localBuild) {
-		console.log(`${prefix}Resetting preact dep back to local build (${localBuild}) from "${pkgJson.dependencies.preact}" now that bench install is done.`);
+		console.log(
+			`${prefix}Resetting preact dep back to local build (${localBuild}) from "${pkgJson.dependencies.preact}" now that bench install is done.`
+		);
 		pkgJson.dependencies.preact = localBuild;
 	}
 

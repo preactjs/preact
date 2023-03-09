@@ -47,7 +47,7 @@
 
 				await afterFrameAsync();
 
-				afterFrame(function () {
+				afterFrame(function() {
 					testElementText(elementSelector, WARMUP_COUNT + '001');
 					performance.mark('stop');
 					performance.measure(measureName, 'start', 'stop');
