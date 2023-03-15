@@ -10,6 +10,18 @@ This steps will help you to set up your development environment. That includes a
 2. Go into the cloned folder: `cd preact/`
 3. Install all dependencies: `npm install`
 
+### Online one-click setup
+
+You can use Gitpod (a free online VS Code-like IDE) for contributing, with a single click it will launch a workspace and automatically:
+
+- clone the preact repo.
+- install the dependencies.
+- run `npm run start` and `npm run dev`.
+
+So that you can start straight away.
+
+[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/from-referrer/)
+
 ## The Repo Structure
 
 This repository contains Preact itself, as well as several addons like the debugging package for example. This is reflected in the directory structure of this repository. Each package has a `src/` folder where the source code can be found, a `test` folder for all sorts of tests that check if the code in `src/` is correct, and a `dist/` folder where you can find the bundled artifacts. Note that the `dist/` folder may not be present initially. It will be created as soon as you run any of the build scripts inside `package.json`. More on that later ;)
