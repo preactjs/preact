@@ -282,13 +282,10 @@ interface ContainerNode {
 	insertBefore: Node['insertBefore'];
 	appendChild: Node['appendChild'];
 	removeChild: Node['removeChild'];
-	childNodes: ArrayLike<Node>
+	childNodes: ArrayLike<Node>;
 }
 
-export function render(
-	vnode: ComponentChild,
-	parent: ContainerNode
-): void;
+export function render(vnode: ComponentChild, parent: ContainerNode): void;
 /**
  * @deprecated Will be removed in v11.
  *
@@ -299,10 +296,7 @@ export function render(
 	parent: ContainerNode,
 	replaceNode?: Element | Text
 ): void;
-export function hydrate(
-	vnode: ComponentChild,
-	parent: ContainerNode
-): void;
+export function hydrate(vnode: ComponentChild, parent: ContainerNode): void;
 export function cloneElement(
 	vnode: VNode<any>,
 	props?: any,

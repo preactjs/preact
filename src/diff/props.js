@@ -143,29 +143,15 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
 	}
 }
 
-export let inEvent = false;
-
 /**
  * Proxy an event to hooked event handlers
  * @param {Event} e The event object from the browser
  * @private
  */
 function eventProxy(e) {
-	inEvent = true;
-	try {
-		return this._listeners[e.type + false](
-			options.event ? options.event(e) : e
-		);
-	} finally {
-		inEvent = false;
-	}
+	return this._listeners[e.type + false](options.event ? options.event(e) : e);
 }
 
 function eventProxyCapture(e) {
-	inEvent = true;
-	try {
-		return this._listeners[e.type + true](options.event ? options.event(e) : e);
-	} finally {
-		inEvent = false;
-	}
+	return this._listeners[e.type + true](options.event ? options.event(e) : e);
 }

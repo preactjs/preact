@@ -153,6 +153,9 @@ export function diff(
 						c.state = c._nextState;
 						c._dirty = false;
 					}
+
+					// In cases of bailing due to strict-equality we have to reset force as well
+					c._force = false;
 					newVNode._dom = oldVNode._dom;
 					newVNode._children = oldVNode._children;
 					newVNode._children.forEach(vnode => {

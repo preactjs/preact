@@ -111,6 +111,12 @@ declare namespace React {
 		isPureReactComponent: boolean;
 	}
 
+	export type MemoExoticComponent<
+		C extends preact.FunctionalComponent<any>
+	> = preact.FunctionComponent<ComponentProps<C>> & {
+		readonly type: C;
+	};
+
 	export function memo<P = {}>(
 		component: preact.FunctionalComponent<P>,
 		comparer?: (prev: P, next: P) => boolean
@@ -135,8 +141,11 @@ declare namespace React {
 	interface MutableRefObject<T> {
 		current: T;
 	}
-	
-	export type ForwardedRef<T> = ((instance: T | null) => void) | MutableRefObject<T | null> | null;
+
+	export type ForwardedRef<T> =
+		| ((instance: T | null) => void)
+		| MutableRefObject<T | null>
+		| null;
 
 	export function unstable_batchedUpdates(
 		callback: (arg?: any) => void,
@@ -144,9 +153,9 @@ declare namespace React {
 	): void;
 
 	export type PropsWithChildren<P = unknown> = P & {
-		children?: preact.ComponentChild | undefined
+		children?: preact.ComponentChild | undefined;
 	};
-	
+
 	export const Children: {
 		map<T extends preact.ComponentChild, R>(
 			children: T | T[],

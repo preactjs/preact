@@ -2,7 +2,6 @@ import { assign } from './util';
 import { diff, commitRoot } from './diff/index';
 import options from './options';
 import { Fragment } from './create-element';
-import { inEvent } from './diff/props';
 
 /**
  * Base Component class. Provides `setState()` and `forceUpdate()`, which
@@ -184,17 +183,10 @@ let rerenderQueue = [];
 
 let prevDebounce;
 
-const microTick =
+const defer =
 	typeof Promise == 'function'
 		? Promise.prototype.then.bind(Promise.resolve())
 		: setTimeout;
-function defer(cb) {
-	if (inEvent) {
-		setTimeout(cb);
-	} else {
-		microTick(cb);
-	}
-}
 
 /**
  * Enqueue a rerender of a component
@@ -213,10 +205,16 @@ export function enqueueRender(c) {
 	}
 }
 
+/**
+ * @param {import('./internal').Component} a
+ * @param {import('./internal').Component} b
+ */
+const depthSort = (a, b) => a._vnode._depth - b._vnode._depth;
+
 /** Flush the render queue by rerendering all queued components */
 function process() {
 	let c;
-	rerenderQueue.sort((a, b) => a._vnode._depth - b._vnode._depth);
+	rerenderQueue.sort(depthSort);
 	// Don't update `renderCount` yet. Keep its value non-zero to prevent unnecessary
 	// process() calls from getting scheduled while `queue` is still being consumed.
 	while ((c = rerenderQueue.shift())) {
@@ -227,7 +225,7 @@ function process() {
 				// When i.e. rerendering a provider additional new items can be injected, we want to
 				// keep the order from top to bottom with those new items so we can handle them in a
 				// single pass
-				rerenderQueue.sort((a, b) => a._vnode._depth - b._vnode._depth);
+				rerenderQueue.sort(depthSort);
 			}
 		}
 	}
