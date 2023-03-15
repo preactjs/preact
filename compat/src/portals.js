@@ -31,8 +31,6 @@ function Portal(props) {
 		_this.componentWillUnmount();
 	}
 
-	// When props.vnode is undefined/false/null we are dealing with some kind of
-	// conditional vnode. This should not trigger a render.
 	if (!_this._temp) {
 		_this._container = container;
 
