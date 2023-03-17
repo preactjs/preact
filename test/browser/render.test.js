@@ -1194,4 +1194,37 @@ describe('render()', () => {
 		render(<div tabindex={null} />, scratch);
 		expect(scratch.firstChild.tabIndex).to.equal(defaultValue);
 	});
+
+	it('should correctly transition from multiple children to single text node and back', () => {
+		class Child extends Component {
+			componentDidMount() {}
+			componentWillUnmount() {}
+			render() {
+				return 'Child';
+			}
+		}
+
+		const proto = Child.prototype;
+		sinon.spy(Child.prototype, 'componentDidMount');
+		sinon.spy(Child.prototype, 'componentWillUnmount');
+
+		function App({ condition = false }) {
+			return <div>{condition ? 'Hello' : [<Child />, <span>b</span>]}</div>;
+		}
+
+		render(<App />, scratch);
+		expect(scratch.innerHTML).to.equal('<div>Child<span>b</span></div>');
+		expect(proto.componentDidMount).to.have.been.calledOnce;
+		expect(proto.componentWillUnmount).to.have.not.been.called;
+
+		render(<App condition />, scratch);
+		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
+		expect(proto.componentDidMount).to.have.been.calledOnce;
+		expect(proto.componentWillUnmount).to.have.been.calledOnce;
+
+		render(<App />, scratch);
+		expect(scratch.innerHTML).to.equal('<div>Child<span>b</span></div>');
+		expect(proto.componentDidMount).to.have.been.calledTwice;
+		expect(proto.componentWillUnmount).to.have.been.calledOnce;
+	});
 });

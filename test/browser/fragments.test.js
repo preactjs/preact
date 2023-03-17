@@ -1639,9 +1639,9 @@ describe('Fragment', () => {
 		expect(scratch.innerHTML).to.equal(htmlForFalse);
 		expectDomLogToBe(
 			[
-				'<div>1.insertBefore(<div>3, #text)',
-				'<div>31.insertBefore(<div>4, #text)',
 				'#text.remove()',
+				'<div>.appendChild(<div>3)',
+				'<div>3.appendChild(<div>4)',
 				'<div>2.remove()'
 			],
 			'rendering from true to false'
@@ -1652,12 +1652,7 @@ describe('Fragment', () => {
 
 		expect(scratch.innerHTML).to.equal(htmlForTrue);
 		expectDomLogToBe(
-			[
-				'<div>34.insertBefore(#text, <div>3)',
-				'<div>4.remove()',
-				'<div>3.remove()',
-				'<div>1.appendChild(<div>2)'
-			],
+			['<div>1.appendChild(<div>2)'],
 			'rendering from false to true'
 		);
 	});

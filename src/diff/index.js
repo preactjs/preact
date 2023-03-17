@@ -436,12 +436,25 @@ function diffElementNodes(
 		if (newHtml) {
 			newVNode._children = [];
 		} else if (typeof i === 'string') {
-			// TODO: Do we need to unmount oldChildren?
 			if (i !== oldProps.children) {
-				// TODO: Should we use textContent on mount and firstChild.data on update?
 				dom.textContent = i;
+
+				// Unmount any previous children
+				if (oldVNode._children) {
+					while ((i = oldVNode._children.pop())) {
+						// Setting textContent on the dom element already unmounted all DOM
+						// nodes of the previous children
+						unmount(i, oldVNode, true);
+					}
+				}
 			}
 		} else {
+			// Previous render was a single text child. New children are not so let's
+			// unmount the previous text child
+			if (typeof oldProps.children === 'string') {
+				dom.removeChild(dom.firstChild);
+			}
+
 			diffChildren(
 				dom,
 				Array.isArray(i) ? i : [i],
