@@ -432,10 +432,16 @@ function diffElementNodes(
 		diffProps(dom, newProps, oldProps, isSvg, isHydrating);
 
 		// If the new vnode didn't have dangerouslySetInnerHTML, diff its children
+		i = newProps.children;
 		if (newHtml) {
 			newVNode._children = [];
+		} else if (typeof i === 'string') {
+			// TODO: Do we need to unmount oldChildren?
+			if (i !== oldProps.children) {
+				// TODO: Should we use textContent on mount and firstChild.data on update?
+				dom.textContent = i;
+			}
 		} else {
-			i = newVNode.props.children;
 			diffChildren(
 				dom,
 				Array.isArray(i) ? i : [i],
