@@ -248,9 +248,7 @@ describe('null placeholders', () => {
 			div([div(1), div('Nullable'), div(3), div('Nullable2')])
 		);
 		expect(getLog()).to.deep.equal([
-			'<div>.appendChild(#text)',
 			'<div>13.appendChild(<div>Nullable2)',
-			'<div>.appendChild(#text)',
 			'<div>13Nullable2.insertBefore(<div>Nullable, <div>3)'
 		]);
 	});

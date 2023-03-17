@@ -168,10 +168,7 @@ describe('keys', () => {
 
 		render(<List values={values} />, scratch);
 		expect(scratch.textContent).to.equal('abc');
-		expect(getLog()).to.deep.equal([
-			'<li>.appendChild(#text)',
-			'<ol>ab.appendChild(<li>c)'
-		]);
+		expect(getLog()).to.deep.equal(['<ol>ab.appendChild(<li>c)']);
 	});
 
 	it('should remove keyed elements from the end', () => {
@@ -199,10 +196,7 @@ describe('keys', () => {
 
 		render(<List values={values} />, scratch);
 		expect(scratch.textContent).to.equal('abc');
-		expect(getLog()).to.deep.equal([
-			'<li>.appendChild(#text)',
-			'<ol>bc.insertBefore(<li>a, <li>b)'
-		]);
+		expect(getLog()).to.deep.equal(['<ol>bc.insertBefore(<li>a, <li>b)']);
 	});
 
 	it('should remove keyed elements from the beginning', () => {
@@ -230,10 +224,7 @@ describe('keys', () => {
 
 		render(<List values={values} />, scratch);
 		expect(scratch.textContent).to.equal('abc');
-		expect(getLog()).to.deep.equal([
-			'<li>.appendChild(#text)',
-			'<ol>ac.insertBefore(<li>b, <li>c)'
-		]);
+		expect(getLog()).to.deep.equal(['<ol>ac.insertBefore(<li>b, <li>c)']);
 	});
 
 	it('should remove keyed children from the middle', () => {
