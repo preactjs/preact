@@ -431,14 +431,11 @@ function diffElementNodes(
 
 		diffProps(dom, newProps, oldProps, isSvg, isHydrating);
 
-		// If the new vnode didn't have dangerouslySetInnerHTML, diff its children
-		i = newProps.children;
+		let newChildren = newProps.children;
 		if (newHtml) {
 			newVNode._children = [];
-		} else if (typeof i === 'string') {
-			if (i !== oldProps.children) {
-				dom.textContent = i;
-
+		} else if (typeof newChildren === 'string') {
+			if (newChildren !== oldProps.children) {
 				// Unmount any previous children
 				if (oldVNode._children) {
 					while ((i = oldVNode._children.pop())) {
@@ -447,6 +444,8 @@ function diffElementNodes(
 						unmount(i, oldVNode, true);
 					}
 				}
+
+				dom.textContent = newChildren;
 			}
 		} else {
 			// Previous render was a single text child. New children are not so let's
@@ -455,9 +454,10 @@ function diffElementNodes(
 				dom.removeChild(dom.firstChild);
 			}
 
+			// If the new vnode didn't have dangerouslySetInnerHTML, diff its children
 			diffChildren(
 				dom,
-				Array.isArray(i) ? i : [i],
+				Array.isArray(newChildren) ? newChildren : [newChildren],
 				newVNode,
 				oldVNode,
 				globalContext,

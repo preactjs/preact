@@ -68,5 +68,25 @@ describe('Lifecycle methods', () => {
 			render(<Foo />, scratch);
 			render(null, scratch);
 		});
+
+		it('should only remove dom after componentWillUnmount was called with single text child', () => {
+			class Foo extends Component {
+				componentWillUnmount() {
+					expect(document.getElementById('foo')).to.not.equal(null);
+				}
+
+				render() {
+					return <div id="foo" />;
+				}
+			}
+
+			render(
+				<div>
+					<Foo />
+				</div>,
+				scratch
+			);
+			render(<div>Text</div>, scratch);
+		});
 	});
 });
