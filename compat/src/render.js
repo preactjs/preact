@@ -10,7 +10,97 @@ export const REACT_ELEMENT_TYPE =
 	(typeof Symbol != 'undefined' && Symbol.for && Symbol.for('react.element')) ||
 	0xeac7;
 
-const CAMEL_PROPS = /^(?:accent|alignment|arabic|baseline|cap|clip(?!PathU)|color|dominant|fill|flood|font|glyph(?!R)|horiz|image|letter|lighting|marker(?!H|W|U)|overline|paint|pointer|shape|stop|strikethrough|stroke|text(?!L)|transform|underline|unicode|units|v|vector|vert|word|writing|x(?!C))[A-Z]/;
+// This was inspired by the inferno project https://github.com/infernojs/inferno/blob/master/packages/inferno-compat/src/InfernoCompatPropertyMap.ts
+// there is an addition here for 'transformOrigin'
+const CAMEL_PROPS = [
+	'accentHeight',
+	'alignmentBaseline',
+	'arabicForm',
+	'baselineShift',
+	'capHeight',
+	'clipPath',
+	'clipRule',
+	'colorInterpolation',
+	'colorInterpolationFilters',
+	'colorProfile',
+	'colorRendering',
+	'dominantBaseline',
+	'enableBackground',
+	'fillOpacity',
+	'fillRule',
+	'floodColor',
+	'floodOpacity',
+	'fontFamily',
+	'fontSize',
+	'fontSizeAdjust',
+	'fontStretch',
+	'fontStyle',
+	'fontConstiant',
+	'fontWeight',
+	'glyphName',
+	'glyphOrientationHorizontal',
+	'glyphOrientationVertical',
+	'horizAdvX',
+	'horizOriginX',
+	'imageRendering',
+	'letterSpacing',
+	'lightingColor',
+	'markerEnd',
+	'markerMid',
+	'markerStart',
+	'overlinePosition',
+	'overlineThickness',
+	'paintOrder',
+	// TODO: this is a deprecated attribute
+	'panose1',
+	'pointerEvents',
+	'renderingIntent',
+	'shapeRendering',
+	'stopColor',
+	'stopOpacity',
+	'strikethroughPosition',
+	'strikethroughRhickness',
+	'strokeDasharray',
+	'strokeDashoffset',
+	'strokeLinecap',
+	'strokeLinejoin',
+	'strokeMiterlimit',
+	'strokeOpacity',
+	'strokeWidth',
+	'textAnchor',
+	'textDecoration',
+	'textRendering',
+	'transformOrigin',
+	'underlinePosition',
+	'underlineThickness',
+	'unicodeBidi',
+	'unicodeRange',
+	'unitsPerEm',
+	'vAlphabetic',
+	'vHanging',
+	'vIdeographic',
+	'vMathematical',
+	'vectorEffect',
+	'vertAdvY',
+	'vertOriginX',
+	'vertOriginY',
+	'wordSpacing',
+	'writingMode',
+	// TODO: do we currently tranform these?
+	'xHeight',
+	'xlinkActuate',
+	'xlinkArcrole',
+	'xlinkHref',
+	'xlinkRole',
+	'xlinkShow',
+	'xlinkTitle',
+	'xlinkType',
+	'xmlBase',
+	'xmlnsXlink',
+	'xmlLang',
+	'xmlSpace'
+];
+
 const ON_ANI = /^on(Ani|Tra|Tou|BeforeInp|Compo)/;
 const CAMEL_REPLACE = /[A-Z0-9]/g;
 
@@ -157,7 +247,7 @@ options.vnode = vnode => {
 				i = 'onfocusout';
 			} else if (ON_ANI.test(i)) {
 				i = lowerCased;
-			} else if (type.indexOf('-') === -1 && CAMEL_PROPS.test(i)) {
+			} else if (type.indexOf('-') === -1 && CAMEL_PROPS.indexOf(i) !== -1) {
 				i = i.replace(CAMEL_REPLACE, '-$&').toLowerCase();
 			} else if (value === null) {
 				value = undefined;
