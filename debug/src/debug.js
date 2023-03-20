@@ -12,6 +12,7 @@ import {
 	getDisplayName
 } from './component-stack';
 import { IS_NON_DIMENSIONAL } from '../../compat/src/util';
+import { MODE_UNMOUNTING } from '../../src/constants';
 
 const isWeakMapSupported = typeof WeakMap == 'function';
 
@@ -374,6 +375,7 @@ export function initDebug() {
 }
 
 const setState = Component.prototype.setState;
+const forceUpdate = Component.prototype.forceUpdate;
 
 /** @this {import('../../src/internal').Component} */
 Component.prototype.setState = function(update, callback) {
@@ -394,6 +396,32 @@ Component.prototype.setState = function(update, callback) {
 	}
 
 	return setState.call(this, update, callback);
+};
+
+/** @this {import('../../src/internal').Component} */
+Component.prototype.forceUpdate = function(callback) {
+	if (this._internal == null) {
+		// `this._internal` will be `null` during componentWillMount. But it
+		// is perfectly valid to call `forceUpdate` during cWM. So we
+		// need an additional check to verify that we are dealing with a
+		// call inside constructor.
+		if (this.state == null) {
+			console.warn(
+				`Calling "this.forceUpdate" inside the constructor of a component is a ` +
+					`no-op and might be a bug in your application.` +
+					`\n\n${getOwnerStack(getCurrentInternal())}`
+			);
+		}
+	} else if (this._internal.flags & MODE_UNMOUNTING) {
+		console.warn(
+			`Can't call "this.forceUpdate" on an unmounted component. This is a no-op, ` +
+				`but it indicates a memory leak in your application. To fix, cancel all ` +
+				`subscriptions and asynchronous tasks in the componentWillUnmount method.` +
+				`\n\n${getOwnerStack(this._internal)}`
+		);
+	}
+
+	return forceUpdate.call(this, callback);
 };
 
 /**

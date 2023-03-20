@@ -11,6 +11,11 @@
 - `[MINOR]` Add `createRoot` API
 - `[MAJOR]` Change `options._hook` to get an internal passed in (devtools)
 
+### Internal breaking changes
+
+- `[MAJOR]` New internal tree data structure is used instead of extending VNodes.
+- `[MAJOR]` `Component.prototype.forceUpdate` no longer calls `Component.prototype.setState`
+
 ## To verify
 
 PR's that weren't backported yet, do they work?
