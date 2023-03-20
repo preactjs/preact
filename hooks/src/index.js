@@ -128,6 +128,12 @@ function getHookState(index, type) {
 	}
 	currentHook = 0;
 
+	// TODO: Required for RTS which currently doesn't set the `.data` property.
+	// Should we move this to RTS?
+	if (!currentInternal.data) {
+		currentInternal.data = {};
+	}
+
 	// Largely inspired by:
 	// * https://github.com/michael-klein/funcy.js/blob/f6be73468e6ec46b0ff5aa3cc4c9baf72a29025a/src/hooks/core_hooks.mjs
 	// * https://github.com/michael-klein/funcy.js/blob/650beaa58c43c33a74820a3c98b3c7079cf2e333/src/renderer.mjs
@@ -391,9 +397,9 @@ export function useId() {
 	const state = getHookState(currentIndex++, 11);
 	if (!state._value) {
 		// Grab either the root node or the nearest async boundary node.
-		/** @type {import('./internal.d').VNode} */
-		let root = currentComponent._vnode;
-		while (root !== null && !root._mask && root._parent !== null) {
+		/** @type {import('./internal').Internal} */
+		let root = currentInternal;
+		while (root !== null && !root._mask && root._parent != null) {
 			root = root._parent;
 		}
 
