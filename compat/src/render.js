@@ -155,7 +155,7 @@ function handleDomVNode(vnode) {
 			i = 'onfocusout';
 		} else if (ON_ANI.test(i)) {
 			i = lowerCased;
-		} else if (type.indexOf('-') === -1 && CAMEL_PROPS[i]) {
+		} else if (type.indexOf('-') === -1 && CAMEL_PROPS.test(i)) {
 			i = i.replace(CAMEL_REPLACE, '-$&').toLowerCase();
 		} else if (value === null) {
 			value = undefined;
