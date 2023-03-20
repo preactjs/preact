@@ -320,6 +320,7 @@ describe('compat render', () => {
 		it('should preserve className, add class alias', () => {
 			const { props } = <ul className="from className" />;
 			expect(props).to.have.property('className', 'from className');
+			// TODO: why would we do this, assuming that folks add className themselves
 			expect(props).to.have.property('class', 'from className');
 		});
 
@@ -342,6 +343,7 @@ describe('compat render', () => {
 			const { props } = <ul className="from className" />;
 			const spreaded = (<li a {...props} />).props;
 			expect(spreaded).to.have.property('className', 'from className');
+			// TODO: why would we do this, assuming that folks add className themselves
 			expect(spreaded).to.have.property('class', 'from className');
 			expect(spreaded.propertyIsEnumerable('class')).to.equal(true);
 		});

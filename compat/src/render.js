@@ -200,7 +200,7 @@ function handleDomVNode(vnode) {
 	}
 
 	if (props.class && !props.className) {
-		normalizedProps.class = normalizedProps.className = props.class;
+		normalizedProps.class = props.class;
 		Object.defineProperty(
 			normalizedProps,
 			'className',
