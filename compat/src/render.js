@@ -113,7 +113,6 @@ options.vnode = vnode => {
 
 	// only normalize props on Element nodes
 	if (typeof type == 'string') {
-		const nonCustomElement = type.indexOf('-') === -1;
 		normalizedProps = {};
 
 		let style = props.style;
