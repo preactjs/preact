@@ -439,8 +439,9 @@ function diffElementNodes(
 				// Unmount any previous children
 				if (oldVNode._children) {
 					while ((i = oldVNode._children.pop())) {
-						// Setting textContent on the dom element already unmounted all DOM
-						// nodes of the previous children
+						// Setting textContent on the dom element will unmount all DOM nodes
+						// of the previous children, so we don't need to remove DOM in this
+						// call to unmount
 						unmount(i, oldVNode, true);
 					}
 				}

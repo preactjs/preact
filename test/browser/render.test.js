@@ -1208,8 +1208,8 @@ describe('render()', () => {
 		sinon.spy(Child.prototype, 'componentDidMount');
 		sinon.spy(Child.prototype, 'componentWillUnmount');
 
-		function App({ condition = false }) {
-			return <div>{condition ? 'Hello' : [<Child />, <span>b</span>]}</div>;
+		function App({ textChild = false }) {
+			return <div>{textChild ? 'Hello' : [<Child />, <span>b</span>]}</div>;
 		}
 
 		render(<App />, scratch);
@@ -1217,7 +1217,7 @@ describe('render()', () => {
 		expect(proto.componentDidMount).to.have.been.calledOnce;
 		expect(proto.componentWillUnmount).to.have.not.been.called;
 
-		render(<App condition />, scratch);
+		render(<App textChild />, scratch);
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
 		expect(proto.componentDidMount).to.have.been.calledOnce;
 		expect(proto.componentWillUnmount).to.have.been.calledOnce;
