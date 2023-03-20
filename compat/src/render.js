@@ -101,7 +101,8 @@ function isDefaultPrevented() {
 	return this.defaultPrevented;
 }
 
-let classNameDescriptor = {
+const classNameDescriptorNonEnumberable = {
+	enumerable: false,
 	configurable: true,
 	get() {
 		return this.class;
@@ -111,18 +112,17 @@ let classNameDescriptor = {
 function handleDomVNode(vnode) {
 	let props = vnode.props,
 		type = vnode.type,
-		normalizedProps = {},
-		hasChanged = false;
+		normalizedProps = {};
 
 	for (let i in props) {
-		let original = i,
-			originalValue = props[i],
-			value = props[i];
+		let value = props[i];
 
 		if (
 			(i === 'value' && 'defaultValue' in props && value == null) ||
 			// Emulate React's behavior of not rendering the contents of noscript tags on the client.
-			(IS_DOM && i === 'children' && type === 'noscript')
+			(IS_DOM && i === 'children' && type === 'noscript') ||
+			i === 'class' ||
+			i === 'className'
 		) {
 			// Skip applying value if it is null/undefined and we already set
 			// a default value
@@ -170,8 +170,6 @@ function handleDomVNode(vnode) {
 			}
 		}
 
-		if (i !== original || value !== originalValue) hasChanged = true;
-
 		normalizedProps[i] = value;
 	}
 
@@ -181,7 +179,6 @@ function handleDomVNode(vnode) {
 		normalizedProps.multiple &&
 		Array.isArray(normalizedProps.value)
 	) {
-		hasChanged = true;
 		// forEach() always returns undefined, which we abuse here to unset the value prop.
 		normalizedProps.value = toChildArray(props.children).forEach(child => {
 			child.props.selected =
@@ -191,7 +188,6 @@ function handleDomVNode(vnode) {
 
 	// Adding support for defaultValue in select tag
 	if (type == 'select' && normalizedProps.defaultValue != null) {
-		hasChanged = true;
 		normalizedProps.value = toChildArray(props.children).forEach(child => {
 			if (normalizedProps.multiple) {
 				child.props.selected =
@@ -203,14 +199,20 @@ function handleDomVNode(vnode) {
 		});
 	}
 
-	if (props.class != props.className) {
-		hasChanged = true;
-		classNameDescriptor.enumerable = 'className' in props;
-		if (props.className != null) normalizedProps.class = props.className;
-		Object.defineProperty(normalizedProps, 'className', classNameDescriptor);
+	if (props.class && !props.className) {
+		normalizedProps.class = normalizedProps.className = props.class;
+		Object.defineProperty(
+			normalizedProps,
+			'className',
+			classNameDescriptorNonEnumberable
+		);
+	} else if (props.className && !props.class) {
+		normalizedProps.class = normalizedProps.className = props.className;
+	} else if (props.class && props.className) {
+		normalizedProps.class = normalizedProps.className = props.className;
 	}
 
-	if (hasChanged) vnode.props = normalizedProps;
+	vnode.props = normalizedProps;
 }
 
 let oldVNodeHook = options.vnode;
