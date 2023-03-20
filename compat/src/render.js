@@ -238,17 +238,17 @@ options._render = function(internal) {
 };
 
 const oldDiffed = options.diffed;
-/** @type {(vnode: import('./internal').VNode)} */
-options.diffed = function(vnode) {
+/** @type {(vnode: import('./internal').Internal) => void} */
+options.diffed = function(internal) {
 	if (oldDiffed) {
-		oldDiffed(vnode);
+		oldDiffed(internal);
 	}
 
-	const props = vnode.props;
-	const dom = vnode._dom;
+	const props = internal.props;
+	const dom = internal.data;
 	if (
 		dom != null &&
-		vnode.type === 'textarea' &&
+		internal.type === 'textarea' &&
 		'value' in props &&
 		props.value !== dom.value
 	) {
