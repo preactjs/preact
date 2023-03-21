@@ -19,51 +19,6 @@ export function afterFrameAsync() {
 	return promise;
 }
 
-let count = 0;
-const channel = new MessageChannel();
-const callbacks = new Map();
-channel.port1.onmessage = e => {
-	let id = e.data;
-	let fn = callbacks.get(id);
-	callbacks.delete(id);
-	fn();
-};
-let pm = function(callback) {
-	let id = ++count;
-	callbacks.set(id, callback);
-	this.postMessage(id);
-}.bind(channel.port2);
-
-export function nextTick() {
-	return new Promise(r => pm(r));
-}
-
-export function mutateAndLayoutAsync(mutation, times = 1) {
-	return new Promise(resolve => {
-		requestAnimationFrame(() => {
-			for (let i = 0; i < times; i++) {
-				mutation(i);
-			}
-			pm(resolve);
-		});
-	});
-}
-
-export const raf = () => new Promise(requestAnimationFrame);
-export const forceLayout = () =>
-	(document.body._height = document.body.getBoundingClientRect().height);
-export const tick = () => new Promise(r => Promise.resolve().then(r));
-export const sleep = ms => new Promise(r => setTimeout(r, ms));
-
-export async function mutateAndLayout(mutation, times = 1) {
-	// await afterFrameAsync();
-	for (let i = 0; i < times; i++) {
-		await mutation(i);
-	}
-	await tick();
-	await forceLayout();
-}
-
 export function measureMemory() {
 	if ('gc' in window && 'memory' in performance) {
 		// Report results in MBs
@@ -173,3 +128,17 @@ export function mutateAndLayoutAsync(mutation, times = 1) {
 }
 
 export const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+export const raf = () => new Promise(requestAnimationFrame);
+export const forceLayout = () =>
+	(document.body._height = document.body.getBoundingClientRect().height);
+export const tick = () => new Promise(r => Promise.resolve().then(r));
+
+export async function mutateAndLayout(mutation, times = 1) {
+	// await afterFrameAsync();
+	for (let i = 0; i < times; i++) {
+		await mutation(i);
+	}
+	await tick();
+	await forceLayout();
+}
