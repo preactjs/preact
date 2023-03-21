@@ -106,7 +106,7 @@ channel.port1.onmessage = e => {
 	callbacks.delete(id);
 	fn();
 };
-let pm = function(callback) {
+let pm = function (callback) {
 	let id = ++count;
 	callbacks.set(id, callback);
 	this.postMessage(id);

@@ -19,9 +19,7 @@ describe('createElement(jsx)', () => {
 		expect(r).to.be.an('object');
 		// expect(r).to.be.an.instanceof(VNode);
 		expect(r).to.have.property('type', 'foo');
-		expect(r)
-			.to.have.property('props')
-			.that.eql({});
+		expect(r).to.have.property('props').that.eql({});
 		// expect(r).to.have.deep.property('props.children').that.eql(null);
 	});
 
@@ -81,10 +79,7 @@ describe('createElement(jsx)', () => {
 	it('should preserve raw props', () => {
 		let props = { foo: 'bar', baz: 10, func: () => {} },
 			r = h('foo', props);
-		expect(r)
-			.to.be.an('object')
-			.with.property('props')
-			.that.deep.equals(props);
+		expect(r).to.be.an('object').with.property('props').that.deep.equals(props);
 	});
 
 	it('should support element children', () => {
@@ -164,12 +159,10 @@ describe('createElement(jsx)', () => {
 	it('should override children if null is provided as an argument', () => {
 		let r = h('foo', { foo: 'bar', children: 'baz' }, null);
 
-		expect(r)
-			.to.be.an('object')
-			.to.deep.nested.include({
-				'props.foo': 'bar',
-				'props.children': null
-			});
+		expect(r).to.be.an('object').to.deep.nested.include({
+			'props.foo': 'bar',
+			'props.children': null
+		});
 	});
 
 	it('should NOT set children prop when unspecified', () => {

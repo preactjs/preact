@@ -60,12 +60,12 @@ function benchmark(iter, callback) {
 	next();
 }
 
-describe('performance', function() {
+describe('performance', function () {
 	let scratch;
 
 	this.timeout(10000);
 
-	before(function() {
+	before(function () {
 		if (!ENABLE_PERFORMANCE) this.skip();
 		if (COVERAGE) {
 			console.warn(
@@ -306,7 +306,7 @@ describe('performance', function() {
 
 	it('should mutate styles/properties quickly', done => {
 		let counter = 0;
-		const keyLooper = n => c => (c % n ? `${c}px` : c);
+		const keyLooper = n => c => c % n ? `${c}px` : c;
 		const get = (obj, i) => obj[i % obj.length];
 		const CLASSES = ['foo', 'foo bar', '', 'baz-bat', null];
 		const STYLES = [];
@@ -329,8 +329,9 @@ describe('performance', function() {
 			[
 				'color',
 				c =>
-					`rgba(${c % 255}, ${255 - (c % 255)}, ${50 + (c % 150)}, ${(c % 50) /
-						50})`
+					`rgba(${c % 255}, ${255 - (c % 255)}, ${50 + (c % 150)}, ${
+						(c % 50) / 50
+					})`
 			],
 			[
 				'border',

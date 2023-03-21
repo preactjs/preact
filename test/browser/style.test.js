@@ -80,23 +80,17 @@ describe('style attribute', () => {
 	it('should support opacity 0', () => {
 		render(<div style={{ opacity: 1 }}>Test</div>, scratch);
 		let style = scratch.firstChild.style;
-		expect(style)
-			.to.have.property('opacity')
-			.that.equals('1');
+		expect(style).to.have.property('opacity').that.equals('1');
 
 		render(<div style={{ opacity: 0 }}>Test</div>, scratch);
 		style = scratch.firstChild.style;
-		expect(style)
-			.to.have.property('opacity')
-			.that.equals('0');
+		expect(style).to.have.property('opacity').that.equals('0');
 	});
 
 	it('should support animation-iteration-count as number', () => {
 		render(<div style={{ animationIterationCount: 1 }}>Test</div>, scratch);
 		let style = scratch.firstChild.style;
-		expect(style)
-			.to.have.property('animationIterationCount')
-			.that.equals('1');
+		expect(style).to.have.property('animationIterationCount').that.equals('1');
 
 		render(<div style={{ animationIterationCount: 2.5 }}>Test</div>, scratch);
 		style = scratch.firstChild.style;
@@ -110,12 +104,8 @@ describe('style attribute', () => {
 
 		let style = scratch.firstChild.style;
 		expect(style.cssText).to.equal('display: inline;');
-		expect(style)
-			.to.have.property('display')
-			.that.equals('inline');
-		expect(style)
-			.to.have.property('color')
-			.that.equals('');
+		expect(style).to.have.property('display').that.equals('inline');
+		expect(style).to.have.property('color').that.equals('');
 		expect(style.zIndex.toString()).to.equal('');
 
 		render(
@@ -125,12 +115,8 @@ describe('style attribute', () => {
 
 		style = scratch.firstChild.style;
 		expect(style.cssText).to.equal('color: rgb(0, 255, 255); z-index: 3;');
-		expect(style)
-			.to.have.property('display')
-			.that.equals('');
-		expect(style)
-			.to.have.property('color')
-			.that.equals('rgb(0, 255, 255)');
+		expect(style).to.have.property('display').that.equals('');
+		expect(style).to.have.property('color').that.equals('rgb(0, 255, 255)');
 
 		// IE stores numeric z-index values as a number
 		expect(style.zIndex.toString()).to.equal('3');
@@ -142,12 +128,8 @@ describe('style attribute', () => {
 
 		style = scratch.firstChild.style;
 		expect(style.cssText).to.equal('color: rgb(0, 255, 255); display: inline;');
-		expect(style)
-			.to.have.property('display')
-			.that.equals('inline');
-		expect(style)
-			.to.have.property('color')
-			.that.equals('rgb(0, 255, 255)');
+		expect(style).to.have.property('display').that.equals('inline');
+		expect(style).to.have.property('color').that.equals('rgb(0, 255, 255)');
 		expect(style.zIndex.toString()).to.equal('');
 	});
 

@@ -186,7 +186,8 @@
   ],
   "prettier": {
     "singleQuote": true,
-    "trailingComma": "none"
+    "trailingComma": "none",
+    "arrowParens": "avoid"
   },
   "lint-staged": {
     "**/*.{js,jsx,mjs,cjs,ts,tsx,yml,json,html}": [
@@ -296,7 +297,7 @@
     "npm-merge-driver-install": "^1.1.1",
     "npm-run-all": "^4.0.0",
     "preact-render-to-string": "^5.2.5",
-    "prettier": "^1.18.2",
+    "prettier": "^2.8.6",
     "prop-types": "^15.7.2",
     "sade": "^1.7.4",
     "sinon": "^9.2.3",
