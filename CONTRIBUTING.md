@@ -170,6 +170,8 @@ We closely watch our issues and have a pretty active [Slack workspace](https://c
 This guide is intended for core team members that have the necessary
 rights to publish new releases on npm.
 
+**TODO: Update instructions for v11 to include changesets**
+
 1. Make a PR where **only** the version number is incremented in `package.json` and everywhere else. A simple search and replace works. (note: We follow `SemVer` conventions)
 2. Wait until the PR is approved and merged.
 3. Switch back to the `master` branch and pull the merged PR
