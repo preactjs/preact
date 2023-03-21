@@ -358,12 +358,12 @@ const oldCatchError = options._catchError;
 // however when we split Component up this shouldn't be needed
 // there can be a better solution to this if we just do a single iteration
 // as a combination of suspsense + hooks + component (compat) would be 3 tree-iterations
-options._catchError = function(error, internal) {
+options._catchError = function(error, internal, errorInfo) {
 	/** @type {import('./internal').Component} */
 	let handler = internal;
 	for (; (handler = handler._parent); ) {
 		if (handler.data && handler.data._catchError) {
-			return handler.data._catchError(error, internal);
+			return handler.data._catchError(error, errorInfo || {});
 		}
 	}
 
