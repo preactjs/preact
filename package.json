@@ -131,8 +131,8 @@
     "benchmark": "npm run test:karma:bench -- no-single-run",
     "lint": "run-s eslint format:check",
     "eslint": "eslint src test debug compat hooks test-utils",
-    "format": "prettier --write '**/*.{js,jsx,mjs,cjs,ts,tsx,yml,json,html}'",
-    "format:check": "prettier --check '**/*.{js,jsx,mjs,cjs,ts,tsx,yml,json,html}'"
+    "format": "prettier --write '**/*.{js,jsx,mjs,cjs,ts,tsx,yml,json,html,md,css,scss}'",
+    "format:check": "prettier --check '**/*.{js,jsx,mjs,cjs,ts,tsx,yml,json,html,md,css,scss}'"
   },
   "eslintConfig": {
     "extends": [
@@ -190,7 +190,7 @@
     "arrowParens": "avoid"
   },
   "lint-staged": {
-    "**/*.{js,jsx,mjs,cjs,ts,tsx,yml,json,html}": [
+    "**/*.{js,jsx,mjs,cjs,ts,tsx,yml,json,html,md,css,scss}": [
       "prettier --write"
     ]
   },
