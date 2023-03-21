@@ -45,7 +45,6 @@ export function createElement(type, props, children) {
 		_vnodeId: ++vnodeId
 	};
 
-	// Only invoke the vnode hook if this was *not* a direct copy:
 	if (options.vnode != null) options.vnode(vnode);
 
 	return vnode;

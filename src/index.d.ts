@@ -301,7 +301,6 @@ export function cloneElement<P>(
 // Preact Built-in Components
 // -----------------------------------
 
-// TODO: Revisit what the public type of this is...
 export const Fragment: FunctionComponent<{}>;
 
 //
