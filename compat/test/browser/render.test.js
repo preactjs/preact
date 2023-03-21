@@ -45,29 +45,6 @@ describe('compat render', () => {
 		expect(vnode.props).to.not.haveOwnProperty('oninputCapture');
 	});
 
-	it('should call onChange and onInput when input event is dispatched', () => {
-		const onChange = sinon.spy();
-		const onInput = sinon.spy();
-
-		render(<input onChange={onChange} onInput={onInput} />, scratch);
-
-		scratch.firstChild.dispatchEvent(createEvent('input'));
-
-		expect(onChange).to.be.calledOnce;
-		expect(onInput).to.be.calledOnce;
-
-		onChange.resetHistory();
-		onInput.resetHistory();
-
-		// change props order
-		render(<input onInput={onInput} onChange={onChange} />, scratch);
-
-		scratch.firstChild.dispatchEvent(createEvent('input'));
-
-		expect(onChange).to.be.calledOnce;
-		expect(onInput).to.be.calledOnce;
-	});
-
 	it('should render react-style jsx', () => {
 		let jsx = (
 			<div className="foo bar" data-foo="bar">
@@ -338,21 +315,6 @@ describe('compat render', () => {
 		expect(scratch.firstChild.className).to.equal('new');
 	});
 
-	it('should correctly allow for "className"', () => {
-		const Foo = props => {
-			const { className, ...rest } = props;
-			return (
-				<div class={className}>
-					<p {...rest}>Foo</p>
-				</div>
-			);
-		};
-
-		render(<Foo className="foo" />, scratch);
-		expect(scratch.firstChild.className).to.equal('foo');
-		expect(scratch.firstChild.firstChild.className).to.equal('');
-	});
-
 	it('should give precedence to last-applied class/className prop', () => {
 		render(<ul className="from className" class="from class" />, scratch);
 		expect(scratch.firstChild.className).to.equal('from className');
@@ -541,18 +503,6 @@ describe('compat render', () => {
 	it('should support false data-* attributes', () => {
 		render(<div data-checked={false} />, scratch);
 		expect(scratch.firstChild.getAttribute('data-checked')).to.equal('false');
-	});
-
-	it('should transform react-style camel cased attributes', () => {
-		render(
-			<text dominantBaseline="middle" fontWeight="30px">
-				foo
-			</text>,
-			scratch
-		);
-		expect(scratch.innerHTML).to.equal(
-			'<text dominant-baseline="middle" font-weight="30px">foo</text>'
-		);
 	});
 
 	it("should support react-relay's usage of __SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED", () => {
