@@ -3065,7 +3065,7 @@ describe('Fragment', () => {
 		expect(scratch.innerHTML).to.equal([div('A'), div(1), div(2)].join(''));
 		expectDomLogToBe([
 			'<div>B.remove()',
-			'<div>1A2.insertBefore(<div>1, <div>2)'
+			'<div>2A1.insertBefore(<div>2, Null)'
 		]);
 	});
 });

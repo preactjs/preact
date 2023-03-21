@@ -325,11 +325,7 @@ describe('keys', () => {
 		render(<List values={values} />, scratch);
 		expect(scratch.textContent).to.equal('abcd', 'move to beginning');
 		expect(getLog()).to.deep.equal(
-			[
-				'<ol>bcda.appendChild(<li>b)',
-				'<ol>cdab.appendChild(<li>c)',
-				'<ol>dabc.appendChild(<li>d)'
-			],
+			['<ol>bcda.insertBefore(<li>a, <li>b)'],
 			'move to beginning'
 		);
 	});
