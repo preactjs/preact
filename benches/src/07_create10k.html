@@ -34,6 +34,8 @@
 			import * as framework from 'framework';
 			import { render } from '../src/keyed-children/index.js';
 
+			framework.options.debounceRendering = queueMicrotask;
+
 			const clone = document.getElementById('main').cloneNode(true);
 			const { clear, run, runLots } = render(
 				framework,

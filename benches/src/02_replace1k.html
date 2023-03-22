@@ -34,6 +34,8 @@
 			import * as framework from 'framework';
 			import { render } from '../src/keyed-children/index.js';
 
+			framework.options.debounceRendering = queueMicrotask;
+
 			const { run } = render(framework, document.getElementById('main'));
 
 			async function main() {
@@ -52,11 +54,13 @@
 
 				await afterFrameAsync();
 
-				markRunStart('final');
 				performance.mark('start');
-				await mutateAndLayout(run);
+				await mutateAndLayout(() => {
+					markRunStart('final');
+					run()
+					markRunEnd('final');
+				});
 				performance.mark('stop');
-				await markRunEnd('final');
 				testElementText(elementSelector, WARMUP_COUNT + '001');
 				performance.measure(measureName, 'start', 'stop');
 
