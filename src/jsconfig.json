@@ -1,5 +1,0 @@
-{
-  "extends": "../jsconfig.json",
-  "compilerOptions": {},
-  "exclude": ["node_modules", "dist", "demo"]
-}

@@ -3,15 +3,17 @@
     "baseUrl": ".",
     "checkJs": true,
     "jsx": "react",
+    "jsxFactory": "createElement",
+    "jsxFragmentFactory": "Fragment",
     "lib": ["dom", "es5"],
     "moduleResolution": "node",
+    "resolveJsonModule": true,
     "paths": {
       "preact": ["."],
       "preact/*": ["./*"]
     },
-    "reactNamespace": "createElement",
     "target": "es5",
     "noEmit": true
   },
-  "exclude": ["node_modules", "dist", "demo"]
+  "exclude": ["**/node_modules/**", "**/dist/**", "**/coverage/**", "demo"]
 }
