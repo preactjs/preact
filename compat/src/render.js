@@ -101,113 +101,125 @@ function isDefaultPrevented() {
 	return this.defaultPrevented;
 }
 
-let classNameDescriptor = {
+const classNameDescriptorNonEnumberable = {
+	enumerable: false,
 	configurable: true,
 	get() {
 		return this.class;
 	}
 };
 
-let oldVNodeHook = options.vnode;
-options.vnode = vnode => {
-	let type = vnode.type;
-	let props = vnode.props;
-	let normalizedProps = props;
-
-	// only normalize props on Element nodes
-	if (typeof type === 'string') {
+function handleDomVNode(vnode) {
+	let props = vnode.props,
+		type = vnode.type,
 		normalizedProps = {};
 
-		for (let i in props) {
-			let value = props[i];
+	for (let i in props) {
+		let value = props[i];
 
-			if (
-				(i === 'value' && 'defaultValue' in props && value == null) ||
-				// Emulate React's behavior of not rendering the contents of noscript tags on the client.
-				(IS_DOM && i === 'children' && type === 'noscript')
-			) {
-				// Skip applying value if it is null/undefined and we already set
-				// a default value
-				continue;
-			}
-
-			let lowerCased = i.toLowerCase();
-			if (i === 'defaultValue' && 'value' in props && props.value == null) {
-				// `defaultValue` is treated as a fallback `value` when a value prop is present but null/undefined.
-				// `defaultValue` for Elements with no value prop is the same as the DOM defaultValue property.
-				i = 'value';
-			} else if (i === 'download' && value === true) {
-				// Calling `setAttribute` with a truthy value will lead to it being
-				// passed as a stringified value, e.g. `download="true"`. React
-				// converts it to an empty string instead, otherwise the attribute
-				// value will be used as the file name and the file will be called
-				// "true" upon downloading it.
-				value = '';
-			} else if (lowerCased === 'ondoubleclick') {
-				i = 'ondblclick';
-			} else if (
-				lowerCased === 'onchange' &&
-				(type === 'input' || type === 'textarea') &&
-				!onChangeInputType(props.type)
-			) {
-				lowerCased = i = 'oninput';
-			} else if (lowerCased === 'onfocus') {
-				i = 'onfocusin';
-			} else if (lowerCased === 'onblur') {
-				i = 'onfocusout';
-			} else if (ON_ANI.test(i)) {
-				i = lowerCased;
-			} else if (type.indexOf('-') === -1 && CAMEL_PROPS.test(i)) {
-				i = i.replace(CAMEL_REPLACE, '-$&').toLowerCase();
-			} else if (value === null) {
-				value = undefined;
-			}
-
-			// Add support for onInput and onChange, see #3561
-			// if we have an oninput prop already change it to oninputCapture
-			if (lowerCased === 'oninput') {
-				i = lowerCased;
-				if (normalizedProps[i]) {
-					i = 'oninputCapture';
-				}
-			}
-
-			normalizedProps[i] = value;
-		}
-
-		// Add support for array select values: <select multiple value={[]} />
 		if (
-			type == 'select' &&
-			normalizedProps.multiple &&
-			Array.isArray(normalizedProps.value)
+			(i === 'value' && 'defaultValue' in props && value == null) ||
+			// Emulate React's behavior of not rendering the contents of noscript tags on the client.
+			(IS_DOM && i === 'children' && type === 'noscript') ||
+			i === 'class' ||
+			i === 'className'
 		) {
-			// forEach() always returns undefined, which we abuse here to unset the value prop.
-			normalizedProps.value = toChildArray(props.children).forEach(child => {
+			// Skip applying value if it is null/undefined and we already set
+			// a default value
+			continue;
+		}
+
+		let lowerCased = i.toLowerCase();
+		if (i === 'defaultValue' && 'value' in props && props.value == null) {
+			// `defaultValue` is treated as a fallback `value` when a value prop is present but null/undefined.
+			// `defaultValue` for Elements with no value prop is the same as the DOM defaultValue property.
+			i = 'value';
+		} else if (i === 'download' && value === true) {
+			// Calling `setAttribute` with a truthy value will lead to it being
+			// passed as a stringified value, e.g. `download="true"`. React
+			// converts it to an empty string instead, otherwise the attribute
+			// value will be used as the file name and the file will be called
+			// "true" upon downloading it.
+			value = '';
+		} else if (lowerCased === 'ondoubleclick') {
+			i = 'ondblclick';
+		} else if (
+			lowerCased === 'onchange' &&
+			(type === 'input' || type === 'textarea') &&
+			!onChangeInputType(props.type)
+		) {
+			lowerCased = i = 'oninput';
+		} else if (lowerCased === 'onfocus') {
+			i = 'onfocusin';
+		} else if (lowerCased === 'onblur') {
+			i = 'onfocusout';
+		} else if (ON_ANI.test(i)) {
+			i = lowerCased;
+		} else if (type.indexOf('-') === -1 && CAMEL_PROPS.test(i)) {
+			i = i.replace(CAMEL_REPLACE, '-$&').toLowerCase();
+		} else if (value === null) {
+			value = undefined;
+		}
+
+		// Add support for onInput and onChange, see #3561
+		// if we have an oninput prop already change it to oninputCapture
+		if (lowerCased === 'oninput') {
+			i = lowerCased;
+			if (normalizedProps[i]) {
+				i = 'oninputCapture';
+			}
+		}
+
+		normalizedProps[i] = value;
+	}
+
+	// Add support for array select values: <select multiple value={[]} />
+	if (
+		type == 'select' &&
+		normalizedProps.multiple &&
+		Array.isArray(normalizedProps.value)
+	) {
+		// forEach() always returns undefined, which we abuse here to unset the value prop.
+		normalizedProps.value = toChildArray(props.children).forEach(child => {
+			child.props.selected =
+				normalizedProps.value.indexOf(child.props.value) != -1;
+		});
+	}
+
+	// Adding support for defaultValue in select tag
+	if (type == 'select' && normalizedProps.defaultValue != null) {
+		normalizedProps.value = toChildArray(props.children).forEach(child => {
+			if (normalizedProps.multiple) {
 				child.props.selected =
-					normalizedProps.value.indexOf(child.props.value) != -1;
-			});
-		}
+					normalizedProps.defaultValue.indexOf(child.props.value) != -1;
+			} else {
+				child.props.selected =
+					normalizedProps.defaultValue == child.props.value;
+			}
+		});
+	}
 
-		// Adding support for defaultValue in select tag
-		if (type == 'select' && normalizedProps.defaultValue != null) {
-			normalizedProps.value = toChildArray(props.children).forEach(child => {
-				if (normalizedProps.multiple) {
-					child.props.selected =
-						normalizedProps.defaultValue.indexOf(child.props.value) != -1;
-				} else {
-					child.props.selected =
-						normalizedProps.defaultValue == child.props.value;
-				}
-			});
-		}
+	if (props.class && !props.className) {
+		normalizedProps.class = props.class;
+		Object.defineProperty(
+			normalizedProps,
+			'className',
+			classNameDescriptorNonEnumberable
+		);
+	} else if (props.className && !props.class) {
+		normalizedProps.class = normalizedProps.className = props.className;
+	} else if (props.class && props.className) {
+		normalizedProps.class = normalizedProps.className = props.className;
+	}
 
-		vnode.props = normalizedProps;
+	vnode.props = normalizedProps;
+}
 
-		if (props.class != props.className) {
-			classNameDescriptor.enumerable = 'className' in props;
-			if (props.className != null) normalizedProps.class = props.className;
-			Object.defineProperty(normalizedProps, 'className', classNameDescriptor);
-		}
+let oldVNodeHook = options.vnode;
+options.vnode = vnode => {
+	// only normalize props on Element nodes
+	if (typeof vnode.type === 'string') {
+		handleDomVNode(vnode);
 	}
 
 	vnode.$$typeof = REACT_ELEMENT_TYPE;
