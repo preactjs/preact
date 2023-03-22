@@ -13,7 +13,7 @@
 	"peerDependencies": {
 		"preact": "^10.0.0"
 	},
-  "exports": {
+	"exports": {
 		".": {
 			"types": "./src/index.d.ts",
 			"browser": "./dist/devtools.mjs",

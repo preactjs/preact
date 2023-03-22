@@ -12,8 +12,9 @@ import { ENABLE_CLASSES } from '../component';
  * @param {import('../internal').Internal} internal The Internal node that threw
  * the error that was caught (except for unmounting when this parameter
  * is the highest parent that was being unmounted)
+ * @param {import('../internal').ErrorInfo} [errorInfo]
  */
-export function _catchError(error, internal) {
+export function _catchError(error, internal, errorInfo) {
 	while ((internal = internal._parent)) {
 		if (
 			internal.flags & TYPE_COMPONENT &&
@@ -28,7 +29,7 @@ export function _catchError(error, internal) {
 					}
 
 					if (internal._component.componentDidCatch) {
-						internal._component.componentDidCatch(error);
+						internal._component.componentDidCatch(error, errorInfo || {});
 					}
 				}
 

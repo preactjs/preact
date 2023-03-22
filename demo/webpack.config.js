@@ -5,6 +5,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const preact = path.join(__dirname, '..');
 const compat = path.join(__dirname, '..', 'compat');
 
+/** @type {import('webpack').Configuration} */
 module.exports = {
 	mode: 'development',
 	context: __dirname,
@@ -71,6 +72,7 @@ module.exports = {
 	},
 	// devtool: 'inline-source-map',
 	devServer: {
+		allowedHosts: 'all',
 		historyApiFallback: true
 	},
 	plugins: [

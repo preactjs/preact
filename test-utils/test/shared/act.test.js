@@ -466,15 +466,6 @@ describe('act', () => {
 				expect(scratch.textContent).to.equal('1');
 			});
 
-			it('should not affect effects in future renders', () => {
-				try {
-					renderBrokenEffect();
-				} catch (e) {}
-
-				renderWorking();
-				expect(effectCount).to.equal(1);
-			});
-
 			it('should restore custom `debounceRendering` hook', () => {
 				const prevDebounce = options.debounceRendering;
 				const tempDebounce = () => {};
@@ -489,6 +480,15 @@ describe('act', () => {
 				} finally {
 					options.debounceRendering = prevDebounce;
 				}
+			});
+
+			it('should not affect effects in future renders', () => {
+				try {
+					renderBrokenEffect();
+				} catch (e) {}
+
+				renderWorking();
+				expect(effectCount).to.equal(1);
 			});
 		});
 	});

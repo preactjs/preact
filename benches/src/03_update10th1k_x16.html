@@ -37,6 +37,8 @@
 			import * as framework from 'framework';
 			import { render } from '../src/keyed-children/index.js';
 
+			framework.options.debounceRendering = queueMicrotask;
+
 			const { run: mount, update } = render(
 				framework,
 				document.getElementById('main')

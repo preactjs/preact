@@ -173,7 +173,11 @@ export function getChildDom(internal, offset) {
  */
 export function getParentContext(internal) {
 	// @TODO: compare performance of recursion here (it's 11b smaller, but may be slower for deep trees)
-	return internal.data._context || getParentContext(internal._parent);
+	return (
+		// Only components have _context property
+		(internal.flags & TYPE_COMPONENT && internal.data._context) ||
+		getParentContext(internal._parent)
+	);
 
 	// while ((internal = internal._parent)) {
 	// 	let context = internal._context;

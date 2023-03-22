@@ -171,11 +171,12 @@ export function sortCss(cssText) {
 
 /**
  * Setup the test environment
+ * @param {string} [id]
  * @returns {HTMLDivElement}
  */
-export function setupScratch() {
+export function setupScratch(id) {
 	const scratch = document.createElement('div');
-	scratch.id = 'scratch';
+	scratch.id = id || 'scratch';
 	(document.body || document.documentElement).appendChild(scratch);
 	return scratch;
 }
@@ -191,7 +192,7 @@ export function clearOptions() {
 
 /**
  * Teardown test environment and reset preact's internal state
- * @param {HTMLDivElement} scratch
+ * @param {HTMLElement} scratch
  */
 export function teardown(scratch) {
 	if (scratch) {

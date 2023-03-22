@@ -20,6 +20,10 @@ export interface DevSource {
 	lineNumber: number;
 }
 
+export interface ErrorInfo {
+	componentStack?: string;
+}
+
 export interface Options extends preact.Options {
 	/** Attach a hook that is invoked immediately before a vnode is unmounted. */
 	unmount?(internal: Internal): void;
@@ -41,7 +45,11 @@ export interface Options extends preact.Options {
 	/** Bypass effect execution. Currenty only used in devtools for hooks inspection */
 	_skipEffects?: boolean;
 	/** Attach a hook that is invoked after an error is caught in a component but before calling lifecycle hooks */
-	_catchError?(error: any, internal: Internal): void;
+	_catchError?(
+		error: any,
+		internal: Internal,
+		errorInfo: ErrorInfo | undefined
+	): void;
 	_internal?(internal: Internal, vnode: VNode | string): void;
 }
 

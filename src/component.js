@@ -109,7 +109,7 @@ function renderQueuedInternal(internal) {
  * The render queue
  * @type {Array<import('./internal').Internal>}
  */
-let renderQueue = [];
+let rerenderQueue = [];
 
 /*
  * The value of `Component.debounce` must asynchronously invoke the passed in callback. It is
@@ -122,6 +122,11 @@ let renderQueue = [];
 
 let prevDebounce;
 
+const defer =
+	typeof Promise == 'function'
+		? Promise.prototype.then.bind(Promise.resolve())
+		: setTimeout;
+
 /**
  * Enqueue a rerender of an internal
  * @param {import('./internal').Internal} internal The internal to rerender
@@ -130,22 +135,38 @@ export function enqueueRender(internal) {
 	if (
 		(!(internal.flags & DIRTY_BIT) &&
 			(internal.flags |= DIRTY_BIT) &&
-			renderQueue.push(internal) &&
+			rerenderQueue.push(internal) &&
 			!processRenderQueue._rerenderCount++) ||
 		prevDebounce !== options.debounceRendering
 	) {
 		prevDebounce = options.debounceRendering;
-		(prevDebounce || setTimeout)(processRenderQueue);
+		(prevDebounce || defer)(processRenderQueue);
 	}
 }
 
+/**
+ * @param {import('./internal').Internal} a
+ * @param {import('./internal').Internal} b
+ * @returns {number}
+ */
+const depthSort = (a, b) => a._depth - b._depth;
+
 /** Flush the render queue by rerendering all queued components */
 function processRenderQueue() {
-	while ((len = processRenderQueue._rerenderCount = renderQueue.length)) {
-		renderQueue.sort((a, b) => a._depth - b._depth);
-		while (len--) {
-			renderQueuedInternal(renderQueue.shift());
+	let i;
+	rerenderQueue.sort(depthSort);
+	// Don't update `renderCount` yet. Keep its value non-zero to prevent unnecessary
+	// process() calls from getting scheduled while `queue` is still being consumed.
+	while ((i = rerenderQueue.shift())) {
+		len = rerenderQueue.length;
+		renderQueuedInternal(i);
+		if (rerenderQueue.length > len) {
+			// When i.e. rerendering a provider additional new items can be injected, we want to
+			// keep the order from top to bottom with those new items so we can handle them in a
+			// single pass
+			rerenderQueue.sort(depthSort);
 		}
 	}
+	processRenderQueue._rerenderCount = 0;
 }
 let len = (processRenderQueue._rerenderCount = 0);

@@ -34,13 +34,14 @@ declare namespace React {
 	export import useDebugValue = _hooks.useDebugValue;
 	export import useEffect = _hooks.useEffect;
 	export import useImperativeHandle = _hooks.useImperativeHandle;
+	export import useId = _hooks.useId;
 	export import useLayoutEffect = _hooks.useLayoutEffect;
 	export import useMemo = _hooks.useMemo;
 	export import useReducer = _hooks.useReducer;
 	export import useRef = _hooks.useRef;
 	export import useState = _hooks.useState;
-	export import useInsertionEffect = _hooks.useLayoutEffect;
 	// React 18 hooks
+	export import useInsertionEffect = _hooks.useLayoutEffect;
 	export function useTransition(): [false, typeof startTransition];
 	export function useDeferredValue<T = any>(val: T): T;
 	export function useSyncExternalStore<T>(
@@ -120,6 +121,12 @@ declare namespace React {
 	> {
 		isPureReactComponent: boolean;
 	}
+
+	export type MemoExoticComponent<
+		C extends preact.FunctionalComponent<any>
+	> = preact.FunctionComponent<ComponentProps<C>> & {
+		readonly type: C;
+	};
 
 	export function memo<P = {}>(
 		component: preact.FunctionalComponent<P>,

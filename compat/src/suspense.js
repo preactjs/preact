@@ -9,8 +9,8 @@ import { TYPE_ELEMENT, MODE_HYDRATE } from '../../src/constants';
 import { getParentDom } from '../../src/tree';
 
 const oldCatchError = options._catchError;
-/** @type {(error: any, internal: import('./internal').Internal) => void} */
-options._catchError = function(error, internal) {
+/** @type {(error: any, internal: import('./internal').Internal, errorInfo: any) => void} */
+options._catchError = function(error, internal, errorInfo) {
 	if (error.then) {
 		/** @type {import('./internal').Component} */
 		let component;
@@ -23,7 +23,7 @@ options._catchError = function(error, internal) {
 			}
 		}
 	}
-	oldCatchError(error, internal);
+	oldCatchError(error, internal, errorInfo);
 };
 
 const oldUnmount = options.unmount;

@@ -271,10 +271,6 @@ function patchComponent(internal, newVNode) {
 		if (renderHook) renderHook(internal);
 		if (ENABLE_CLASSES && internal.flags & TYPE_CLASS) {
 			renderResult = c.render(c.props, c.state, c.context);
-			for (let i = 0; i < internal.data._stateCallbacks.length; i++) {
-				internal.data._commitCallbacks.push(internal.data._stateCallbacks[i]);
-			}
-			internal.data._stateCallbacks = [];
 			// note: disable repeat render invocation for class components
 			break;
 		} else {
@@ -302,6 +298,13 @@ function patchComponent(internal, newVNode) {
 			internal.data._commitCallbacks.push(() => {
 				c.componentDidUpdate(oldProps, oldState, snapshot);
 			});
+		}
+
+		if (internal.data._stateCallbacks) {
+			for (let i = 0; i < internal.data._stateCallbacks.length; i++) {
+				internal.data._commitCallbacks.push(internal.data._stateCallbacks[i]);
+			}
+			internal.data._stateCallbacks = [];
 		}
 	}
 

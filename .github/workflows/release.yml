@@ -1,5 +1,9 @@
 name: Version or Publish
 
+###### TODO ######
+## Update to work with release scripts which create a GH release and upload the
+## built npm package as an artifact
+
 on:
   push:
     branches:
