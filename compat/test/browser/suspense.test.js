@@ -1464,7 +1464,7 @@ describe('suspense', () => {
 	});
 
 	it('should allow same component to be suspended multiple times', async () => {
-		const cache = { '1': true };
+		const cache = { 1: true };
 		function Lazy({ value }) {
 			if (!cache[value]) {
 				throw new Promise(resolve => {

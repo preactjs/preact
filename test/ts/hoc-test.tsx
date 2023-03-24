@@ -34,9 +34,8 @@ export function highlighted<T>(
 	};
 }
 
-const HighlightedSimpleComponent = highlighted<SimpleComponentProps>(
-	SimpleComponent
-);
+const HighlightedSimpleComponent =
+	highlighted<SimpleComponentProps>(SimpleComponent);
 
 describe('hoc', () => {
 	it('wraps the given component', () => {

@@ -1033,15 +1033,12 @@ export namespace JSXInternal {
 		readonly currentTarget: Target;
 	};
 
-	export type TargetedAnimationEvent<
-		Target extends EventTarget
-	> = TargetedEvent<Target, AnimationEvent>;
-	export type TargetedClipboardEvent<
-		Target extends EventTarget
-	> = TargetedEvent<Target, ClipboardEvent>;
-	export type TargetedCompositionEvent<
-		Target extends EventTarget
-	> = TargetedEvent<Target, CompositionEvent>;
+	export type TargetedAnimationEvent<Target extends EventTarget> =
+		TargetedEvent<Target, AnimationEvent>;
+	export type TargetedClipboardEvent<Target extends EventTarget> =
+		TargetedEvent<Target, ClipboardEvent>;
+	export type TargetedCompositionEvent<Target extends EventTarget> =
+		TargetedEvent<Target, CompositionEvent>;
 	export type TargetedDragEvent<Target extends EventTarget> = TargetedEvent<
 		Target,
 		DragEvent
@@ -1066,9 +1063,8 @@ export namespace JSXInternal {
 		Target,
 		TouchEvent
 	>;
-	export type TargetedTransitionEvent<
-		Target extends EventTarget
-	> = TargetedEvent<Target, TransitionEvent>;
+	export type TargetedTransitionEvent<Target extends EventTarget> =
+		TargetedEvent<Target, TransitionEvent>;
 	export type TargetedUIEvent<Target extends EventTarget> = TargetedEvent<
 		Target,
 		UIEvent
@@ -1088,9 +1084,8 @@ export namespace JSXInternal {
 	export type ClipboardEventHandler<Target extends EventTarget> = EventHandler<
 		TargetedClipboardEvent<Target>
 	>;
-	export type CompositionEventHandler<
-		Target extends EventTarget
-	> = EventHandler<TargetedCompositionEvent<Target>>;
+	export type CompositionEventHandler<Target extends EventTarget> =
+		EventHandler<TargetedCompositionEvent<Target>>;
 	export type DragEventHandler<Target extends EventTarget> = EventHandler<
 		TargetedDragEvent<Target>
 	>;

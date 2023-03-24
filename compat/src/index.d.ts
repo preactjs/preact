@@ -111,11 +111,10 @@ declare namespace React {
 		isPureReactComponent: boolean;
 	}
 
-	export type MemoExoticComponent<
-		C extends preact.FunctionalComponent<any>
-	> = preact.FunctionComponent<ComponentProps<C>> & {
-		readonly type: C;
-	};
+	export type MemoExoticComponent<C extends preact.FunctionalComponent<any>> =
+		preact.FunctionComponent<ComponentProps<C>> & {
+			readonly type: C;
+		};
 
 	export function memo<P = {}>(
 		component: preact.FunctionalComponent<P>,

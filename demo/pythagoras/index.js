@@ -22,9 +22,7 @@ export default class PythagorasDemo extends Component {
 		this.svgElement = c;
 	};
 
-	scaleFactor = scaleLinear()
-		.domain([this.svg.height, 0])
-		.range([0, 0.8]);
+	scaleFactor = scaleLinear().domain([this.svg.height, 0]).range([0, 0.8]);
 
 	scaleLean = scaleLinear()
 		.domain([0, this.svg.width / 2, this.svg.width])

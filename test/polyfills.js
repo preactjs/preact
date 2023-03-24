@@ -37,7 +37,7 @@ if (!function f() {}.name) {
 chai.use((chai, util) => {
 	const Assertion = chai.Assertion;
 
-	Assertion.addMethod('equalNode', function(expectedNode, message) {
+	Assertion.addMethod('equalNode', function (expectedNode, message) {
 		const obj = this._obj;
 		message = message || 'equalNode';
 

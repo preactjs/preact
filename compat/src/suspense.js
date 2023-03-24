@@ -2,7 +2,7 @@ import { Component, createElement, options, Fragment } from 'preact';
 import { assign } from './util';
 
 const oldCatchError = options._catchError;
-options._catchError = function(error, newVNode, oldVNode, errorInfo) {
+options._catchError = function (error, newVNode, oldVNode, errorInfo) {
 	if (error.then) {
 		/** @type {import('./internal').Component} */
 		let component;
@@ -23,7 +23,7 @@ options._catchError = function(error, newVNode, oldVNode, errorInfo) {
 };
 
 const oldUnmount = options.unmount;
-options.unmount = function(vnode) {
+options.unmount = function (vnode) {
 	/** @type {import('./internal').Component} */
 	const component = vnode._component;
 	if (component && component._onResolve) {
@@ -110,7 +110,7 @@ Suspense.prototype = new Component();
  * @param {Promise} promise The thrown promise
  * @param {import('./internal').VNode<any, any>} suspendingVNode The suspending component
  */
-Suspense.prototype._childDidSuspend = function(promise, suspendingVNode) {
+Suspense.prototype._childDidSuspend = function (promise, suspendingVNode) {
 	const suspendingComponent = suspendingVNode._component;
 
 	/** @type {import('./internal').SuspenseComponent} */
@@ -173,7 +173,7 @@ Suspense.prototype._childDidSuspend = function(promise, suspendingVNode) {
 	promise.then(onResolved, onResolved);
 };
 
-Suspense.prototype.componentWillUnmount = function() {
+Suspense.prototype.componentWillUnmount = function () {
 	this._suspenders = [];
 };
 
@@ -182,7 +182,7 @@ Suspense.prototype.componentWillUnmount = function() {
  * @param {import('./internal').SuspenseComponent["props"]} props
  * @param {import('./internal').SuspenseState} state
  */
-Suspense.prototype.render = function(props, state) {
+Suspense.prototype.render = function (props, state) {
 	if (this._detachOnNextRender) {
 		// When the Suspense's _vnode was created by a call to createVNode
 		// (i.e. due to a setState further up in the tree)

@@ -150,10 +150,8 @@ describe('createContext', () => {
 	});
 
 	it('should preserve provider context between different providers', () => {
-		const {
-			Provider: ThemeProvider,
-			Consumer: ThemeConsumer
-		} = createContext();
+		const { Provider: ThemeProvider, Consumer: ThemeConsumer } =
+			createContext();
 		const { Provider: DataProvider, Consumer: DataConsumer } = createContext();
 		const THEME_CONTEXT = { theme: 'black' };
 		const DATA_CONTEXT = { global: 'a' };
@@ -558,9 +556,9 @@ describe('createContext', () => {
 		});
 
 		// Rendered three times, should call 'Consumer' render two times
-		expect(
-			Inner.prototype.render
-		).to.have.been.calledTwice.and.calledWithMatch({ i: 2 });
+		expect(Inner.prototype.render).to.have.been.calledTwice.and.calledWithMatch(
+			{ i: 2 }
+		);
 		expect(scratch.innerHTML).to.equal('<div>2</div>');
 	});
 

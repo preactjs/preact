@@ -30,7 +30,7 @@ A quick overview of our repository:
   	src/  # Source code of the compat addon
   	test/ # Tests related to the compat addon
   	dist/ # Build artifacts for publishing on npm (may not be present)
-  
+
   # Sub-package, can be imported via `preact/hooks` by users.
   # The hooks API is an effect based API to deal with component lifcycles.
   # It's similar to hooks in React
@@ -38,7 +38,7 @@ A quick overview of our repository:
   	src/  # Source code of the hooks addon
   	test/ # Tests related to the hooks addon
   	dist/ # Build artifacts for publishing on npm (may not be present)
-  
+
   # Sub-package, can be imported via `preact/debug` by users.
   # Includes debugging warnings and error messages for common mistakes found
   # in Preact application. Also hosts the devtools bridge
@@ -46,18 +46,18 @@ A quick overview of our repository:
   	src/  # Source code of the debug addon
   	test/ # Tests related to the debug addon
   	dist/ # Build artifacts for publishing on npm (may not be present)
-  
+
   # Sub-package, can be imported via `preact/test-utils` by users.
   # Provides helpers to make testing Preact applications easier
   test-utils/
   	src/  # Source code of the test-utils addon
   	test/ # Tests related to the test-utils addon
   	dist/ # Build artifacts for publishing on npm (may not be present)
-  
+
   # A demo application that we use to debug tricky errors and play with new
   # features.
   demo/
-  
+
   # Contains build scripts and dependencies for development
   package.json
 ```
@@ -174,13 +174,13 @@ rights to publish new releases on npm.
 2. Wait until the PR is approved and merged.
 3. Switch back to the `master` branch and pull the merged PR
 4. Create and push a tag for the new version you want to publish:
-	1. `git tag 10.0.0`
-	2. `git push --tags`
+   1. `git tag 10.0.0`
+   2. `git push --tags`
 5. Wait for the Release workflow to complete
-	- It'll create a draft release and upload the built npm package as an asset to the release
+   - It'll create a draft release and upload the built npm package as an asset to the release
 6. [Fill in the release notes](#writing-release-notes) in GitHub and publish them
 7. Run the publish script with the tag you created
-	1. `node ./scripts/release/publish.mjs 10.0.0`
+   1. `node ./scripts/release/publish.mjs 10.0.0`
    2. Make sure you have 2FA enabled in npm, otherwise the above command will fail.
    3. If you're doing a pre-release add `--npm-tag next` to the `publish.mjs` command to publish it under a different tag (default is `latest`)
 8. Tweet it out
