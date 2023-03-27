@@ -126,16 +126,16 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
 			} catch (e) {}
 		}
 
-		// ARIA-attributes have a different notion of boolean values.
-		// The value `false` is different from the attribute not
-		// existing on the DOM, so we can't remove it. For non-boolean
-		// ARIA-attributes we could treat false as a removal, but the
-		// amount of exceptions would cost us too many bytes. On top of
-		// that other VDOM frameworks also always stringify `false`.
+		// aria- and data- attributes have no boolean representation.
+		// A `false` value is different from the attribute not being
+		// present, so we can't remove it. For non-boolean aria
+		// attributes we could treat false as a removal, but the
+		// amount of exceptions would cost too many bytes. On top of
+		// that other frameworks generally stringify `false`.
 
 		if (typeof value === 'function') {
 			// never serialize functions as attribute values
-		} else if (value != null && (value !== false || name.indexOf('-') != -1)) {
+		} else if (value != null && (value !== false || name[4] === '-')) {
 			dom.setAttribute(name, value);
 		} else {
 			dom.removeAttribute(name);
