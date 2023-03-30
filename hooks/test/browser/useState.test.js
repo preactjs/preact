@@ -371,4 +371,30 @@ describe('useState', () => {
 		rerender();
 		expect(scratch.innerHTML).to.equal('<p>hello world!!!</p>');
 	});
+
+	it('should limit rerenders when setting state to NaN', () => {
+		const calls = [];
+		const App = ({ i }) => {
+			calls.push('rendering' + i);
+			const [greeting, setGreeting] = useState(0);
+
+			if (i === 2) {
+				setGreeting(NaN);
+			}
+
+			return <p>{greeting}</p>;
+		};
+
+		act(() => {
+			render(<App i={1} />, scratch);
+		});
+		expect(calls.length).to.equal(1);
+		expect(calls).to.deep.equal(['rendering1']);
+
+		act(() => {
+			render(<App i={2} />, scratch);
+		});
+		expect(calls.length).to.equal(26);
+		expect(calls.slice(1).every(c => c === 'rendering2')).to.equal(true);
+	});
 });

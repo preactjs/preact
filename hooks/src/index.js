@@ -236,7 +236,7 @@ export function useReducer(reducer, initialState, init) {
 						const currentValue = hookItem._value[0];
 						hookItem._value = hookItem._nextValue;
 						hookItem._nextValue = undefined;
-						if (currentValue !== hookItem._value[0]) shouldUpdate = true;
+						if (!is(currentValue, hookItem._value[0])) shouldUpdate = true;
 					}
 				});
 
