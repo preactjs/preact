@@ -1,11 +1,9 @@
-import { createElement, Suspense, lazy } from 'react';
+import { Suspense, lazy } from 'react';
 
 import { Router, Route, Switch } from './simple-router';
 
-/** @jsx createElement */
-
-let Hello = lazy(() => import('./hello.js'));
-let Bye = lazy(() => import('./bye.js'));
+let Hello = lazy(() => import('./hello.jsx'));
+let Bye = lazy(() => import('./bye.jsx'));
 
 function Loading() {
 	return <div>Hey! This is a fallback because we're loading things! :D</div>;
