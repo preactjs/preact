@@ -593,4 +593,39 @@ describe('refs', () => {
 		expect(refs[0].current).to.equalNode(scratch.firstChild);
 		expect(refs[1].current).to.equalNode(scratch.lastChild);
 	});
+
+	it('should call refs after element is added to document on initial mount', () => {
+		const verifyRef = name => el =>
+			expect(document.body.contains(el), name).to.equal(true);
+
+		function App() {
+			return (
+				<div ref={verifyRef('div tag')}>
+					<p ref={verifyRef('p tag')}>Hello</p>
+				</div>
+			);
+		}
+
+		render(<App />, scratch);
+	});
+
+	it('should call refs after element is added to document on update', () => {
+		const verifyRef = name => el =>
+			expect(document.body.contains(el), name).to.equal(true);
+
+		function App({ show = false }) {
+			return (
+				<div>
+					{show && (
+						<p ref={verifyRef('p tag')}>
+							<span ref={verifyRef('inner span')}>Hello</span>
+						</p>
+					)}
+				</div>
+			);
+		}
+
+		render(<App />, scratch);
+		render(<App show />, scratch);
+	});
 });
