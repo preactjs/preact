@@ -1,5 +1,6 @@
 import { slice } from './util';
 import options from './options';
+import { COMMENT_TYPE } from './constants';
 
 let vnodeId = 0;
 
@@ -12,6 +13,10 @@ let vnodeId = 0;
  * @returns {import('./internal').VNode}
  */
 export function createElement(type, props, children) {
+	if (type === '!--') {
+		return createVNode(COMMENT_TYPE, children, null, null);
+	}
+
 	let normalizedProps = {},
 		key,
 		ref,

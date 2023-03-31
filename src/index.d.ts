@@ -188,6 +188,11 @@ export abstract class Component<P, S> {
 // -----------------------------------
 
 export function createElement(
+	type: '!--',
+	props: unknown,
+	children: string
+): VNode<any>;
+export function createElement(
 	type: 'input',
 	props:
 		| (JSXInternal.DOMAttributes<HTMLInputElement> &
@@ -229,6 +234,7 @@ export namespace createElement {
 	export import JSX = JSXInternal;
 }
 
+export function h(type: '!--', props: unknown, children: string): VNode<any>;
 export function h(
 	type: 'input',
 	props:
