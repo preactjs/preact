@@ -3,7 +3,7 @@ import { Component, getDomSibling } from '../component';
 import { Fragment } from '../create-element';
 import { diffChildren } from './children';
 import { diffProps, setProperty } from './props';
-import { assign, removeNode, slice } from '../util';
+import { assign, isArray, removeNode, slice } from '../util';
 import options from '../options';
 
 /**
@@ -232,7 +232,7 @@ export function diff(
 
 			diffChildren(
 				parentDom,
-				Array.isArray(renderResult) ? renderResult : [renderResult],
+				isArray(renderResult) ? renderResult : [renderResult],
 				newVNode,
 				oldVNode,
 				globalContext,
@@ -458,7 +458,7 @@ function diffElementNodes(
 			// If the new vnode didn't have dangerouslySetInnerHTML, diff its children
 			diffChildren(
 				dom,
-				Array.isArray(newChildren) ? newChildren : [newChildren],
+				isArray(newChildren) ? newChildren : [newChildren],
 				newVNode,
 				oldVNode,
 				globalContext,

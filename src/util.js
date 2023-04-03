@@ -1,5 +1,7 @@
 import { EMPTY_ARR } from './constants';
 
+export const isArray = Array.isArray;
+
 /**
  * Assign properties from `props` to `obj`
  * @template O, P The obj and props types
