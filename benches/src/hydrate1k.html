@@ -22,7 +22,9 @@
 				measureMemory,
 				testElementText,
 				afterFrame,
-				afterFrameAsync
+				afterFrameAsync,
+				markRunStart,
+				markRunEnd
 			} from './util.js';
 			import * as framework from 'framework';
 			import { getComponents } from '../src/keyed-children/components.js';
@@ -101,9 +103,12 @@
 				testElementText(lastRowSel, '1000');
 				await clickRemove(hydrateRoot, `WARMUP ${i} - prehydrate`, 1000, 1000);
 
+				// Hydrate the root
 				const store = new Store();
 				store.data = baseStore.data.slice();
+				markRunStart(`warmup-${i}`);
 				createRoot(hydrateRoot).hydrate(createElement(Main, { store }));
+				await markRunEnd(`warmup-${i}`);
 
 				// Verify hydrate has correct markup and is properly hydrated
 				testElementText(firstRowSel, '1');
@@ -111,7 +116,7 @@
 				await clickRemove(hydrateRoot, `WARMUP ${i} - posthydrate`, 1000, 999);
 			}
 
-			function timedRun() {
+			async function timedRun() {
 				afterFrame(function () {
 					performance.mark('stop');
 					performance.measure(measureName, 'start', 'stop');
@@ -123,12 +128,13 @@
 				const store = new Store();
 				store.data = baseStore.data.slice();
 
+				markRunStart('final');
 				performance.mark('start');
 				createRoot(hydrateRoot).hydrate(createElement(Main, { store }));
+				await markRunEnd('final');
 			}
 
 			async function main() {
-				// const WARMUP_COUNT = 5;
 				const WARMUP_COUNT = 5;
 				for (let i = 0; i < WARMUP_COUNT; i++) {
 					await warmupRun(i);
@@ -136,7 +142,7 @@
 
 				await afterFrameAsync();
 
-				timedRun();
+				await timedRun();
 			}
 
 			initializeTemplate().then(main);
