@@ -1,6 +1,7 @@
 import * as path from 'path';
 import { deleteAsync } from 'del';
 import { writeFile, stat, mkdir } from 'fs/promises';
+import { traceCategories } from 'tachometer/lib/defaults.js';
 import { repoRoot, benchesRoot, toUrl } from './utils.js';
 import { defaultBenchOptions } from './bench.js';
 import { prepare } from './prepare.js';
@@ -189,6 +190,14 @@ export async function generateConfig(benchPath, options) {
 
 		browser.trace = {
 			logDir: traceLogDir
+			// categories: [
+			// 	...traceCategories,
+			// 	'devtools.timeline',
+			// 	'disabled-by-default-devtools.timeline',
+			// 	'disabled-by-default-devtools.cpu_profiler',
+			// 	'disabled-by-default-cpu_profiler',
+			// 	'disabled-by-default-v8.cpu_profiler'
+			// ]
 		};
 	}
 
