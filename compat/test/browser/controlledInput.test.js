@@ -10,29 +10,36 @@ import React, {
 	Component,
 	useState
 } from 'preact/compat';
-import { setupRerender } from 'preact/test-utils';
 
 describe('preact/compat controlled inputs', () => {
 	/** @type {HTMLDivElement} */
 	let scratch;
-	/** @type {() => void} */
-	let rerender;
 
+	/**
+	 * @param {EventTarget} on
+	 * @param {string} type
+	 * @returns {Promise<void>}
+	 */
 	function fireEvent(on, type) {
 		let e = createEvent(type);
 		on.dispatchEvent(e);
+		// Flush the microtask queue after dispatching an event by returning a
+		// Promise to mimic what the browser would do after invoking event handlers.
+		// Technically, this test does it only after all event handlers have been
+		// invoked, whereas a real event dispatched by a browser would do it after
+		// each event handler.
+		return Promise.resolve();
 	}
 
 	beforeEach(() => {
 		scratch = setupScratch();
-		rerender = setupRerender();
 	});
 
 	afterEach(() => {
 		teardown(scratch);
 	});
 
-	it('should support controlled inputs', () => {
+	it('should support controlled inputs', async () => {
 		const calls = [];
 		class Input extends Component {
 			constructor(props) {
@@ -55,19 +62,17 @@ describe('preact/compat controlled inputs', () => {
 		render(<Input />, scratch);
 
 		scratch.firstChild.value = 'hii';
-		fireEvent(scratch.firstChild, 'input');
-		rerender();
+		await fireEvent(scratch.firstChild, 'input');
 		expect(calls).to.deep.equal(['hii']);
 		expect(scratch.firstChild.value).to.equal('hii');
 
 		scratch.firstChild.value = 'hiii';
-		fireEvent(scratch.firstChild, 'input');
-		rerender();
+		await fireEvent(scratch.firstChild, 'input');
 		expect(calls).to.deep.equal(['hii', 'hiii']);
 		expect(scratch.firstChild.value).to.equal('hii');
 	});
 
-	it('should support controlled inputs with bailed out rerenders', () => {
+	it('should support controlled inputs with bailed out rerenders', async () => {
 		const calls = [];
 		function Input() {
 			const [value, setValue] = useState('');
@@ -85,19 +90,22 @@ describe('preact/compat controlled inputs', () => {
 		render(<Input />, scratch);
 
 		scratch.firstChild.value = 'hii';
-		fireEvent(scratch.firstChild, 'input');
-		rerender();
+		await fireEvent(scratch.firstChild, 'input');
 		expect(calls).to.deep.equal(['hii']);
 		expect(scratch.firstChild.value).to.equal('HII');
 
 		scratch.firstChild.value = 'hiii';
-		fireEvent(scratch.firstChild, 'input');
-		rerender();
+		await fireEvent(scratch.firstChild, 'input');
 		expect(calls).to.deep.equal(['hii', 'hiii']);
 		expect(scratch.firstChild.value).to.equal('HII');
+
+		scratch.firstChild.value = 'ahiii';
+		await fireEvent(scratch.firstChild, 'input');
+		expect(calls).to.deep.equal(['hii', 'hiii', 'ahiii']);
+		expect(scratch.firstChild.value).to.equal('AHI');
 	});
 
-	it('should support controlled textareas', () => {
+	it('should support controlled textareas', async () => {
 		const calls = [];
 		class Input extends Component {
 			constructor(props) {
@@ -120,19 +128,17 @@ describe('preact/compat controlled inputs', () => {
 		render(<Input />, scratch);
 
 		scratch.firstChild.value = 'hii';
-		fireEvent(scratch.firstChild, 'input');
-		rerender();
+		await fireEvent(scratch.firstChild, 'input');
 		expect(calls).to.deep.equal(['hii']);
 		expect(scratch.firstChild.value).to.equal('hii');
 
 		scratch.firstChild.value = 'hiii';
-		fireEvent(scratch.firstChild, 'input');
-		rerender();
+		await fireEvent(scratch.firstChild, 'input');
 		expect(calls).to.deep.equal(['hii', 'hiii']);
 		expect(scratch.firstChild.value).to.equal('hii');
 	});
 
-	it('should support controlled selects', () => {
+	it('should support controlled selects', async () => {
 		const calls = [];
 		class Input extends Component {
 			constructor(props) {
@@ -163,18 +169,16 @@ describe('preact/compat controlled inputs', () => {
 
 		scratch.firstChild.value = 'A';
 		fireEvent(scratch.firstChild, 'change');
-		rerender();
 		expect(calls).to.deep.equal(['A']);
 		expect(scratch.firstChild.value).to.equal('A');
 
 		scratch.firstChild.value = 'C';
-		fireEvent(scratch.firstChild, 'change');
-		rerender();
+		await fireEvent(scratch.firstChild, 'change');
 		expect(calls).to.deep.equal(['A', 'C']);
 		expect(scratch.firstChild.value).to.equal('A');
 	});
 
-	it('should support controlled checkboxes', () => {
+	it('should support controlled checkboxes', async () => {
 		const calls = [];
 		class Input extends Component {
 			constructor(props) {
@@ -203,8 +207,7 @@ describe('preact/compat controlled inputs', () => {
 		render(<Input />, scratch);
 
 		scratch.firstChild.checked = false;
-		fireEvent(scratch.firstChild, 'change');
-		rerender();
+		await fireEvent(scratch.firstChild, 'change');
 		expect(calls).to.deep.equal([false]);
 		expect(scratch.firstChild.checked).to.equal(true);
 	});
