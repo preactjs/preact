@@ -102,7 +102,7 @@ options.event = e => {
 		// afterEvent, if we were to inspect the original Event object, we would see
 		// that the currentTarget is null. So instead we pass the event type and the
 		// target to afterEvent.
-		Promise.resolve([eventType, target]).then(afterEvent);
+		Promise.resolve().then(() => afterEvent(eventType, target));
 	}
 
 	e.persist = empty;
@@ -113,11 +113,10 @@ options.event = e => {
 
 /**
  * @typedef {EventTarget & {value: any; checked: any; _isControlled: boolean; _prevValue: any}} ControlledTarget
- * @param {[string, ControlledTarget]} args
+ * @param {string} eventType
+ * @param {ControlledTarget} target
  */
-function afterEvent(args) {
-	const eventType = args[0];
-	const target = args[1];
+function afterEvent(eventType, target) {
 	if (target.value != null) {
 		target.value = target._prevValue;
 	}
