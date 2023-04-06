@@ -25,6 +25,7 @@ import SuspenseRouterBug from './suspense-router';
 import NestedSuspenseBug from './nested-suspense';
 import Contenteditable from './contenteditable';
 import { MobXDemo } from './mobx';
+import ControlledInputs from './controlled-inputs';
 
 let isBenchmark = /(\/spiral|\/pythagoras|[#&]bench)/g.test(
 	window.location.href
@@ -135,6 +136,9 @@ class App extends Component {
 						<Link href="/contenteditable" activeClassName="active">
 							contenteditable
 						</Link>
+						<Link href="/controlled-inputs" activeClassName="active">
+							Controlled Inputs
+						</Link>
 					</nav>
 				</header>
 				<main>
@@ -165,6 +169,7 @@ class App extends Component {
 						<SuspenseRouterBug path="/suspense-router" />
 						<NestedSuspenseBug path="/nested-suspense" />
 						<Contenteditable path="/contenteditable" />
+						<ControlledInputs path="/controlled-inputs" />
 					</Router>
 				</main>
 			</div>

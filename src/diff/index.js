@@ -3,7 +3,7 @@ import { Component, getDomSibling } from '../component';
 import { Fragment } from '../create-element';
 import { diffChildren } from './children';
 import { diffProps, setProperty } from './props';
-import { assign, removeNode, slice } from '../util';
+import { assign, isArray, removeNode, slice } from '../util';
 import options from '../options';
 
 /**
@@ -232,7 +232,7 @@ export function diff(
 
 			diffChildren(
 				parentDom,
-				Array.isArray(renderResult) ? renderResult : [renderResult],
+				isArray(renderResult) ? renderResult : [renderResult],
 				newVNode,
 				oldVNode,
 				globalContext,
@@ -438,7 +438,7 @@ function diffElementNodes(
 			i = newVNode.props.children;
 			diffChildren(
 				dom,
-				Array.isArray(i) ? i : [i],
+				isArray(i) ? i : [i],
 				newVNode,
 				oldVNode,
 				globalContext,

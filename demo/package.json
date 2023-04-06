@@ -40,5 +40,8 @@
     "react-router-dom": "^5.0.1",
     "redux": "^4.0.1",
     "styled-components": "^4.2.0"
+  },
+  "volta": {
+    "extends": "../package.json"
   }
 }
