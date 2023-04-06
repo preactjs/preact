@@ -2,6 +2,7 @@ import { diff, unmount, applyRef } from './index';
 import { createVNode, Fragment } from '../create-element';
 import { EMPTY_OBJ, EMPTY_ARR } from '../constants';
 import { getDomSibling } from '../component';
+import { isArray } from '../util';
 
 /**
  * Diff the children of a virtual node
@@ -70,7 +71,7 @@ export function diffChildren(
 				null,
 				childVNode
 			);
-		} else if (Array.isArray(childVNode)) {
+		} else if (isArray(childVNode)) {
 			childVNode = newParentVNode._children[i] = createVNode(
 				Fragment,
 				{ children: childVNode },
@@ -265,7 +266,7 @@ function reorderChildren(childVNode, oldDom, parentDom) {
 export function toChildArray(children, out) {
 	out = out || [];
 	if (children == null || typeof children == 'boolean') {
-	} else if (Array.isArray(children)) {
+	} else if (isArray(children)) {
 		children.some(child => {
 			toChildArray(child, out);
 		});

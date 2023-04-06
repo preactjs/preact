@@ -180,7 +180,7 @@ describe('useImperativeHandle', () => {
 		expect(() => render(<Comp />, scratch)).to.not.throw();
 	});
 
-	it('should reset ref to null when the component get unmounted', () => {
+	it('should reset ref object to null when the component get unmounted', () => {
 		let ref,
 			createHandleSpy = sinon.spy(() => ({ test: () => 'test' }));
 
@@ -197,5 +197,26 @@ describe('useImperativeHandle', () => {
 		render(<div />, scratch);
 		expect(createHandleSpy).to.have.been.calledOnce;
 		expect(ref.current).to.equal(null);
+	});
+
+	it('should reset ref callback to null when the component get unmounted', () => {
+		const ref = sinon.spy();
+		const handle = { test: () => 'test' };
+		const createHandleSpy = sinon.spy(() => handle);
+
+		function Comp() {
+			useImperativeHandle(ref, createHandleSpy, [1]);
+			return <p>Test</p>;
+		}
+
+		render(<Comp />, scratch);
+		expect(createHandleSpy).to.have.been.calledOnce;
+		expect(ref).to.have.been.calledWith(handle);
+
+		ref.resetHistory();
+
+		render(<div />, scratch);
+		expect(createHandleSpy).to.have.been.calledOnce;
+		expect(ref).to.have.been.calledWith(null);
 	});
 });
