@@ -328,7 +328,7 @@ export function commitRoot(commitQueue, root) {
 		try {
 			// @ts-ignore Reuse the commitQueue variable here so the type changes
 			if ((commitQueue = vnode._renderCallbacks)) {
-				vnode._renderCallbacks = [];
+				vnode._renderCallbacks = null;
 				commitQueue.some(cb => {
 					// @ts-ignore See above ts-ignore on commitQueue
 					cb.call(vnode._component);
