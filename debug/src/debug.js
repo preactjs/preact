@@ -357,6 +357,27 @@ export function initDebug() {
 				keys.push(key);
 			}
 		}
+
+		if (vnode._component != null && vnode._component.__hooks != null) {
+			// Validate that none of the hooks in this component contain arguments that are NaN.
+			// This is a common mistake that can be hard to debug, so we want to catch it early.
+			const hooks = vnode._component.__hooks._list;
+			if (hooks) {
+				for (let i = 0; i < hooks.length; i += 1) {
+					const hook = hooks[i];
+					if (hook._args) {
+						for (const arg of hook._args) {
+							if (Number.isNaN(arg)) {
+								const componentName = getDisplayName(vnode);
+								throw new Error(
+									`Invalid argument passed to hook. Hooks should not be called with NaN in the dependency array. Hook index ${i} in component ${componentName} was called with NaN.`
+								);
+							}
+						}
+					}
+				}
+			}
+		}
 	};
 }
 
