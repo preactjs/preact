@@ -84,4 +84,10 @@ describe('cloneElement', () => {
 		const clone = cloneElement(div, { key: 'myKey' });
 		expect(clone.props.key).to.equal(undefined);
 	});
+
+	it('should prevent undefined properties from overriding default props', () => {
+		const element = <div style={{ color: 'blue' }}>thing</div>;
+		const clone = cloneElement(element, { color: undefined });
+		expect(clone.props.style.color).to.equal('blue');
+	});
 });
