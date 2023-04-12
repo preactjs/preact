@@ -7,19 +7,7 @@ import {
 	createContext,
 	Fragment
 } from 'preact';
-import {
-	useState,
-	useId,
-	useReducer,
-	useEffect,
-	useLayoutEffect,
-	useRef,
-	useImperativeHandle,
-	useMemo,
-	useCallback,
-	useContext,
-	useDebugValue
-} from 'preact/hooks';
+import * as preactHooks from 'preact/hooks';
 import { PureComponent } from './PureComponent';
 import { memo } from './memo';
 import { forwardRef } from './forwardRef';
@@ -34,6 +22,20 @@ import {
 	REACT_ELEMENT_TYPE,
 	__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED
 } from './render';
+
+const {
+	useState,
+	useId,
+	useReducer,
+	useEffect,
+	useLayoutEffect,
+	useRef,
+	useImperativeHandle,
+	useMemo,
+	useCallback,
+	useContext,
+	useDebugValue
+} = preactHooks;
 
 const version = '17.0.2'; // trick libraries to think we are react
 
@@ -170,7 +172,17 @@ export function useSyncExternalStore(subscribe, getSnapshot) {
 	return value;
 }
 
-export * from 'preact/hooks';
+// We do this so that the exports are configurable: microbundle is not using `loose: true`, or,
+// the constant exports compiler assumption: https://babeljs.io/docs/assumptions#constantreexports
+// this means that we end up with configurable: false for our exports, which makes imports
+// harder to test in unit tests
+Object.keys(preactHooks).forEach(function(t) {
+	if ('default' === t || exports.hasOwnProperty(t)) {
+		return;
+	}
+	exports[t] = preactHooks[t];
+});
+
 export {
 	version,
 	Children,
