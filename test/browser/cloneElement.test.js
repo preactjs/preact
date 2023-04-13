@@ -1,5 +1,4 @@
-import { Component } from 'preact';
-import { createElement, cloneElement, createRef } from 'preact';
+import { createElement, cloneElement, createRef, Component } from 'preact';
 
 /** @jsx createElement */
 
