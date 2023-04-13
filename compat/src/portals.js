@@ -1,4 +1,5 @@
-import { createElement, render } from 'preact';
+import { createElement, options, render } from 'preact';
+import { commitRoot } from 'preact/src/diff';
 
 /**
  * @param {import('../../src/index').RenderableProps<{ context: any }>} props
@@ -57,11 +58,37 @@ function Portal(props) {
 			};
 		}
 
+		// TODO: Return a fake dom node to stich this tree into the parent. Also
+		// handle unmounting of this node.
+
+		// TODO: Explore using a non-dynamic commit hook to do this, perhaps storing
+		// the current portal component as a variable and using that to know whether
+		// or not to capture the commit queue. May need to track a portal stack for
+		// nested portals?
+
+		// Capture the commit queue so we can add it to this component's
+		// renderCallbacks to be invoked with the commit callbacks of the rest of
+		// this VNode tree
+		let commitQueue;
+		let oldCommit = options._commit;
+		options._commit = (root, queue) => {
+			commitQueue = queue.splice(0, queue.length);
+		};
+
 		// Render our wrapping element into temp.
 		render(
 			createElement(ContextProvider, { context: _this.context }, props._vnode),
 			_this._temp
 		);
+
+		options._commit = oldCommit;
+		if (commitQueue) {
+			this._renderCallbacks = [
+				() => {
+					commitRoot(commitQueue, this._vnode);
+				}
+			];
+		}
 	}
 	// When we come from a conditional render, on a mounted
 	// portal we should clear the DOM.
