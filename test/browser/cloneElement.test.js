@@ -1,3 +1,4 @@
+import { Component } from 'preact';
 import { createElement, cloneElement, createRef } from 'preact';
 
 /** @jsx createElement */
@@ -86,8 +87,15 @@ describe('cloneElement', () => {
 	});
 
 	it('should prevent undefined properties from overriding default props', () => {
-		const element = <div style={{ color: 'blue' }}>thing</div>;
+		class Example extends Component {
+			render(props) {
+				return <div style={{ color: props.color }}>thing</div>;
+			}
+		}
+		Example.defaultProps = { color: 'blue' };
+
+		const element = <Example color="red" />;
 		const clone = cloneElement(element, { color: undefined });
-		expect(clone.props.style.color).to.equal('blue');
+		expect(clone.props.color).to.equal('blue');
 	});
 });
