@@ -3,7 +3,9 @@ import React, {
 	render,
 	createPortal,
 	useState,
+	useRef,
 	Component,
+	useLayoutEffect,
 	useEffect
 } from 'preact/compat';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
@@ -748,6 +750,90 @@ describe('Portal', () => {
 			'Portal Child 3',
 			'Portal Parent',
 			'Portal'
+		]);
+	});
+
+	it('parent and child refs should be set before all effects through portals', () => {
+		const anchorId = 'anchor';
+		const tooltipId = 'tooltip-body';
+		const effectLog = [];
+
+		let useWatchedRef = sinon.spy(init => {
+			const realRef = useRef(init);
+			const ref = useRef(init);
+			Object.defineProperty(ref, 'current', {
+				get: () => realRef.current,
+				set: value => {
+					realRef.current = value;
+					effectLog.push('set ref ' + value?.tagName);
+				}
+			});
+			return ref;
+		});
+
+		function TooltipBody({ anchorRef, children }) {
+			// For example, used to manually position the tooltip
+			const tooltipRef = useWatchedRef(null);
+
+			useLayoutEffect(() => {
+				expect(anchorRef.current?.id).to.equal(anchorId);
+				expect(tooltipRef.current?.id).to.equal(tooltipId);
+				effectLog.push('tooltip layout effect');
+			}, [anchorRef, tooltipRef]);
+			useEffect(() => {
+				expect(anchorRef.current?.id).to.equal(anchorId);
+				expect(tooltipRef.current?.id).to.equal(tooltipId);
+				effectLog.push('tooltip effect');
+			}, [anchorRef, tooltipRef]);
+
+			return (
+				<div id={tooltipId} ref={tooltipRef}>
+					{children}
+				</div>
+			);
+		}
+
+		function Tooltip({ anchorRef, children }) {
+			return createPortal(
+				<TooltipBody anchorRef={anchorRef}>{children}</TooltipBody>,
+				scratch2
+			);
+		}
+
+		function App() {
+			// For example, used to define what element to anchor the tooltip to
+			const anchorRef = useWatchedRef(null);
+
+			useLayoutEffect(() => {
+				expect(anchorRef.current?.id).to.equal(anchorId);
+				effectLog.push('anchor layout effect');
+			}, [anchorRef]);
+			useEffect(() => {
+				expect(anchorRef.current?.id).to.equal(anchorId);
+				effectLog.push('anchor effect');
+			}, [anchorRef]);
+
+			return (
+				<div>
+					<p id={anchorId} ref={anchorRef}>
+						More info
+					</p>
+					<Tooltip anchorRef={anchorRef}>a tooltip</Tooltip>
+				</div>
+			);
+		}
+
+		act(() => {
+			render(<App />, scratch);
+		});
+
+		expect(effectLog).to.deep.equal([
+			'set ref P',
+			'set ref DIV',
+			'tooltip layout effect',
+			'anchor layout effect',
+			'tooltip effect',
+			'anchor effect'
 		]);
 	});
 });
