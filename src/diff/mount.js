@@ -237,7 +237,13 @@ export function mountChildren(parentInternal, children, parentDom, startDom) {
 		vnode = children[i];
 
 		// account for holes by incrementing the index:
-		if (vnode == null || vnode === true || vnode === false) continue;
+		if (
+			vnode == null ||
+			vnode === true ||
+			vnode === false ||
+			typeof vnode === 'function'
+		)
+			continue;
 		else if (Array.isArray(vnode)) vnode = createElement(Fragment, null, vnode);
 		else if (typeof vnode !== 'object') vnode = String(vnode);
 
