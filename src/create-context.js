@@ -52,7 +52,10 @@ export function createContext(defaultValue, contextId) {
 					subs.push(c);
 					let old = c.componentWillUnmount;
 					c.componentWillUnmount = () => {
-						subs.splice(subs.indexOf(c), 1);
+						// Patch: this is a hot path, and taking sub out of the array is much
+						// faster this way since it's an unordered list.
+						subs[subs.indexOf(c)] = subs[subs.length - 1];
+						subs.pop();
 						if (old) old.call(c);
 					};
 				};
