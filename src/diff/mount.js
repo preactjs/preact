@@ -22,12 +22,13 @@ import { commitQueue } from './commit';
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
  * @param {import('../internal').Internal} internal The Internal node to mount
+ * @param {import('../internal').VNode | string} vnode The vnode that was used to create the internal
  * @param {import('../internal').PreactElement} parentDom The element into which this subtree is rendered
  * @param {import('../internal').PreactNode} startDom
  * @returns {import('../internal').PreactNode | null} pointer to the next DOM node to be hydrated (or null)
  */
-export function mount(internal, parentDom, startDom) {
-	if (options._diff) options._diff(internal, null);
+export function mount(internal, vnode, parentDom, startDom) {
+	if (options._diff) options._diff(internal, vnode);
 
 	/** @type {import('../internal').PreactNode} */
 	let nextDomSibling, prevStartDom;
@@ -254,7 +255,7 @@ export function mountChildren(parentInternal, children, parentDom, startDom) {
 		else parentInternal._child = internal;
 
 		// Morph the old element into the new one, but don't append it to the dom yet
-		mountedNextChild = mount(internal, parentDom, startDom);
+		mountedNextChild = mount(internal, vnode, parentDom, startDom);
 
 		newDom = internal.data;
 

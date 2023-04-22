@@ -49,7 +49,7 @@ export function patchChildren(internal, children, parentDom) {
 
 		if (internal._index === -1) {
 			let nextDomSibling = getDomSibling(internal);
-			mount(internal, parentDom, nextDomSibling);
+			mount(internal, vnode, parentDom, nextDomSibling);
 			if (internal.flags & TYPE_DOM) {
 				// If we are mounting a component, it's DOM children will get inserted
 				// into the DOM in mountChildren. If we are mounting a DOM node, then
@@ -61,7 +61,7 @@ export function patchChildren(internal, children, parentDom) {
 			(internal.flags & (MODE_HYDRATE | MODE_SUSPENDED)) ===
 			(MODE_HYDRATE | MODE_SUSPENDED)
 		) {
-			mount(internal, parentDom, internal.data);
+			mount(internal, vnode, parentDom, internal.data);
 		} else {
 			patch(
 				internal,
