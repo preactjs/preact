@@ -107,7 +107,12 @@ function findMatches(internal, children, parentInternal) {
 		let vnode = children[index];
 
 		// holes get accounted for in the index property:
-		if (vnode == null || vnode === true || vnode === false) {
+		if (
+			vnode == null ||
+			vnode === true ||
+			vnode === false ||
+			typeof vnode === 'function'
+		) {
 			if (internal && index == internal._index && internal.key == null) {
 				// The current internal is unkeyed, has the same index as this VNode
 				// child, and the VNode is now null. So we'll unmount the Internal and
