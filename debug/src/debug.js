@@ -321,11 +321,14 @@ export function initDebug() {
 
 		if (oldDiffed) oldDiffed(internal);
 
-		if (internal._children != null) {
+		if (internal._child != null) {
+			let child = internal._child;
 			const keys = [];
-			for (let i = 0; i < internal._children.length; i++) {
-				const child = internal._children[i];
-				if (!child || child.key == null) continue;
+			if (child.key != null) {
+				keys.push(child.key);
+			}
+			while ((child = child._next) != null) {
+				if (child.key == null) continue;
 
 				const key = child.key;
 				if (keys.indexOf(key) !== -1) {
