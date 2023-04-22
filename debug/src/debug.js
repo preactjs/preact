@@ -161,8 +161,6 @@ export function initDebug() {
 			);
 		}
 
-		validateTableMarkup(internal);
-
 		hooksAllowed = true;
 
 		let isCompatNode = '$$typeof' in vnode;
@@ -181,6 +179,8 @@ export function initDebug() {
 		}
 
 		if (typeof internal.type == 'string') {
+			validateTableMarkup(internal);
+
 			for (const key in vnode.props) {
 				if (
 					key[0] === 'o' &&
