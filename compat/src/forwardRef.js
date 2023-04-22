@@ -10,10 +10,10 @@ options._diff = (internal, vnode) => {
 		if (vnode) {
 			vnode.props.ref = vnode.ref;
 			vnode.ref = null;
-		} else {
-			internal.props.ref = internal.ref;
-			internal.ref = null;
 		}
+
+		internal.props.ref = internal.ref;
+		internal.ref = null;
 	}
 	if (oldDiffHook) oldDiffHook(internal, vnode);
 };
