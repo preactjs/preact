@@ -1,4 +1,11 @@
-import { createElement, render, createRef, Component, Fragment } from 'preact';
+import {
+	createElement,
+	render,
+	createRef,
+	Component,
+	Fragment,
+	hydrate
+} from 'preact';
 import {
 	setupScratch,
 	teardown,
@@ -48,6 +55,11 @@ describe('debug', () => {
 
 	it('should print an error on rendering on undefined parent', () => {
 		let fn = () => render(<div />, undefined);
+		expect(fn).to.throw(/render/);
+	});
+
+	it('should print an error on hydrating on undefined parent', () => {
+		let fn = () => hydrate(<div />, undefined);
 		expect(fn).to.throw(/render/);
 	});
 
