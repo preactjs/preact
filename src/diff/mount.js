@@ -13,7 +13,7 @@ import {
 	MODE_SVG,
 	DIRTY_BIT
 } from '../constants';
-import { normalizeToVNode, createElement, Fragment } from '../create-element';
+import { createElement, Fragment } from '../create-element';
 import { setProperty } from './props';
 import { createInternal, getParentContext } from '../tree';
 import options from '../options';

@@ -134,7 +134,7 @@ export function initDebug() {
 			);
 		}
 
-		let { type, _parent: parent } = internal;
+		let { type } = internal;
 
 		if (type === undefined) {
 			throw new Error(
