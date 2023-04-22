@@ -11,7 +11,7 @@ import {
 	getCurrentVNode,
 	getDisplayName
 } from './component-stack';
-import { assign } from './util';
+import { assign, isNaN } from './util';
 
 const isWeakMapSupported = typeof WeakMap == 'function';
 
@@ -367,7 +367,7 @@ export function initDebug() {
 					const hook = hooks[i];
 					if (hook._args) {
 						for (const arg of hook._args) {
-							if (Number.isNaN(arg)) {
+							if (isNaN(arg)) {
 								const componentName = getDisplayName(vnode);
 								throw new Error(
 									`Invalid argument passed to hook. Hooks should not be called with NaN in the dependency array. Hook index ${i} in component ${componentName} was called with NaN.`
