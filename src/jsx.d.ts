@@ -1029,8 +1029,8 @@ export namespace JSXInternal {
 	export type TargetedEvent<
 		Target extends EventTarget = EventTarget,
 		TypedEvent extends Event = Event
-	> = Omit<TypedEvent, 'currentTarget'> & {
-		readonly currentTarget: Target;
+	> = Omit<TypedEvent, 'target'> & {
+		readonly target: Target;
 	};
 
 	export type TargetedAnimationEvent<Target extends EventTarget> =
