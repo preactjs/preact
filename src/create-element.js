@@ -1,5 +1,5 @@
 import { UNDEFINED } from './constants';
-import options from './options';
+import { vnodeHook } from './options';
 
 let vnodeId = 0;
 
@@ -45,7 +45,7 @@ export function createElement(type, props, children) {
 		_vnodeId: ++vnodeId
 	};
 
-	if (options.vnode != null) options.vnode(vnode);
+	if (vnodeHook != null) vnodeHook(vnode);
 
 	return vnode;
 }
@@ -84,5 +84,5 @@ export function Fragment(props) {
  * @param {*} vnode
  * @returns {vnode is import('./internal').VNode}
  */
-export const isValidElement = vnode =>
+export const isValidElement = (vnode) =>
 	vnode != null && vnode.constructor === UNDEFINED;

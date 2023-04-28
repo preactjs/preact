@@ -48,7 +48,8 @@ function createVNode(type, props, key, __source, __self) {
 		__self
 	};
 
-	if (options.vnode) options.vnode(vnode);
+	let vnodeHook = options.vnode;
+	if (vnodeHook) vnodeHook(vnode);
 	return vnode;
 }
 

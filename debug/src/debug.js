@@ -31,7 +31,6 @@ export function initDebug() {
 	/* eslint-disable no-console */
 	let oldBeforeDiff = options._diff;
 	let oldDiffed = options.diffed;
-	let oldVnode = options.vnode;
 	let oldCatchError = options._catchError;
 	let oldRoot = options._root;
 	let oldHook = options._hook;
@@ -327,7 +326,7 @@ export function initDebug() {
 	// https://esbench.com/bench/6021ebd7d9c27600a7bfdba3
 	const deprecatedProto = Object.create({}, deprecatedAttributes);
 
-	options.vnode = vnode => {
+	options.vnode = (vnode) => {
 		const props = vnode.props;
 		if (props != null && ('__source' in props || '__self' in props)) {
 			Object.defineProperties(props, debugProps);
@@ -337,10 +336,9 @@ export function initDebug() {
 
 		// eslint-disable-next-line
 		vnode.__proto__ = deprecatedProto;
-		if (oldVnode) oldVnode(vnode);
 	};
 
-	options.diffed = vnode => {
+	options.diffed = (vnode) => {
 		hooksAllowed = false;
 
 		if (oldDiffed) oldDiffed(vnode);
@@ -374,7 +372,7 @@ export function initDebug() {
 const setState = Component.prototype.setState;
 
 /** @this {import('../../src/internal').Component} */
-Component.prototype.setState = function(update, callback) {
+Component.prototype.setState = function (update, callback) {
 	if (this._internal == null) {
 		// `this._internal` will be `null` during componentWillMount. But it
 		// is perfectly valid to call `setState` during cWM. So we

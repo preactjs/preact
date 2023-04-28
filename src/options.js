@@ -1,5 +1,7 @@
 import { _catchError } from './diff/catch-error';
 
+export let vnodeHook;
+
 /**
  * The `option` object can potentially contain callback functions
  * that are called during various stages of our renderer. This is the
@@ -12,5 +14,22 @@ import { _catchError } from './diff/catch-error';
 const options = {
 	_catchError
 };
+
+Object.defineProperty(options, 'vnode', {
+	get() {
+		return vnodeHook;
+	},
+	set(newHook) {
+		if (newHook) {
+			let oldHook = vnodeHook;
+			vnodeHook = (vnode) => {
+				newHook(vnode);
+				if (oldHook) oldHook(vnode);
+			};
+		} else {
+			vnodeHook = undefined;
+		}
+	}
+});
 
 export default options;
