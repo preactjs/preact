@@ -16,7 +16,7 @@ import {
 import { normalizeToVNode, Fragment } from '../create-element';
 import { setProperty } from './props';
 import { createInternal, getParentContext } from '../tree';
-import options from '../options';
+import { diffHook, diffedHook, errorHook, renderHook } from '../options';
 import { ENABLE_CLASSES } from '../component';
 import { commitQueue } from './commit';
 /**
@@ -28,7 +28,7 @@ import { commitQueue } from './commit';
  * @returns {import('../internal').PreactNode | null} pointer to the next DOM node to be hydrated (or null)
  */
 export function mount(internal, newVNode, parentDom, startDom, refs) {
-	if (options._diff) options._diff(internal, newVNode);
+	if (diffHook) diffHook(internal, newVNode);
 
 	/** @type {import('../internal').PreactNode} */
 	let nextDomSibling, prevStartDom;
@@ -76,7 +76,7 @@ export function mount(internal, newVNode, parentDom, startDom, refs) {
 			nextDomSibling = mountElement(internal, hydrateDom, refs);
 		}
 
-		if (options.diffed) options.diffed(internal);
+		if (diffedHook) diffedHook(internal);
 
 		// We successfully rendered this VNode, unset any stored hydration/bailout state:
 		internal.flags &= RESET_MODE;
@@ -89,7 +89,7 @@ export function mount(internal, newVNode, parentDom, startDom, refs) {
 			nextDomSibling = startDom && startDom.nextSibling;
 			internal.data = startDom; // Save our current DOM position to resume later
 		}
-		options._catchError(e, internal);
+		errorHook(e, internal);
 	}
 
 	return prevStartDom || nextDomSibling;
@@ -366,7 +366,6 @@ function mountComponent(internal, startDom) {
 	internal.props = c.props = newProps;
 	c.state = c._nextState;
 
-	let renderHook = options._render;
 	if (renderHook) renderHook(internal);
 
 	let counter = 0,

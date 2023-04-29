@@ -1,4 +1,4 @@
-import options from '../options';
+import { errorHook } from '../options';
 
 /**
  * Invoke or update a ref, depending on whether it is a function or object ref.
@@ -11,6 +11,6 @@ export function applyRef(ref, value, internal) {
 		if (typeof ref == 'function') ref(value);
 		else if (ref) ref.current = value;
 	} catch (e) {
-		options._catchError(e, internal);
+		errorHook(e, internal);
 	}
 }

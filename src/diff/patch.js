@@ -1,6 +1,6 @@
 import { patchChildren, insertComponentDom } from './children';
 import { setProperty } from './props';
-import options from '../options';
+import { diffHook, diffedHook, errorHook, renderHook } from '../options';
 import {
 	RESET_MODE,
 	TYPE_TEXT,
@@ -47,7 +47,7 @@ export function patch(internal, vnode, parentDom) {
 	// constructor as undefined. This to prevent JSON-injection.
 	if (vnode.constructor !== UNDEFINED) return;
 
-	if (options._diff) options._diff(internal, vnode);
+	if (diffHook) diffHook(internal, vnode);
 
 	// Root nodes render their children into a specific parent DOM element.
 	// They can occur anywhere in the tree, can be nested, and currently allow reparenting during patches.
@@ -116,11 +116,11 @@ export function patch(internal, vnode, parentDom) {
 			// @TODO: assign a new VNode ID here? Or NaN?
 			// newVNode._vnodeId = 0;
 			internal.flags |= e.then ? MODE_SUSPENDED : MODE_ERRORED;
-			options._catchError(e, internal);
+			errorHook(e, internal);
 		}
 	}
 
-	if (options.diffed) options.diffed(internal);
+	if (diffedHook) diffedHook(internal);
 
 	// We successfully rendered this VNode, unset any stored hydration/bailout state:
 	internal.flags &= RESET_MODE;
@@ -261,7 +261,6 @@ function patchComponent(internal, newVNode) {
 	internal.props = c.props = newProps;
 	c.state = c._nextState;
 
-	let renderHook = options._render;
 	if (renderHook) renderHook(internal);
 
 	let counter = 0,

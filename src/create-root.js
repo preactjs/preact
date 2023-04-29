@@ -6,7 +6,7 @@ import {
 } from './constants';
 import { commitRoot } from './diff/commit';
 import { createElement, Fragment } from './create-element';
-import options from './options';
+import { rootHook } from './options';
 import { mount } from './diff/mount';
 import { patch } from './diff/patch';
 import { createInternal } from './tree';
@@ -22,7 +22,7 @@ export function createRoot(parentDom) {
 		flags = 0;
 
 	function render(vnode) {
-		if (options._root) options._root(vnode, parentDom);
+		if (rootHook) rootHook(vnode, parentDom);
 
 		vnode = createElement(Fragment, { _parentDom: parentDom }, [vnode]);
 

@@ -10,12 +10,11 @@ import { IS_NON_DIMENSIONAL } from './util';
 
 export const REACT_ELEMENT_TYPE = Symbol.for('react.element');
 
-const CAMEL_PROPS =
-	/^(?:accent|alignment|arabic|baseline|cap|clip(?!PathU)|color|dominant|fill|flood|font|glyph(?!R)|horiz|image|letter|lighting|marker(?!H|W|U)|overline|paint|pointer|shape|stop|strikethrough|stroke|text(?!L)|transform|underline|unicode|units|v|vector|vert|word|writing|x(?!C))[A-Z]/;
+const CAMEL_PROPS = /^(?:accent|alignment|arabic|baseline|cap|clip(?!PathU)|color|dominant|fill|flood|font|glyph(?!R)|horiz|image|letter|lighting|marker(?!H|W|U)|overline|paint|pointer|shape|stop|strikethrough|stroke|text(?!L)|transform|underline|unicode|units|v|vector|vert|word|writing|x(?!C))[A-Z]/;
 const IS_DOM = typeof document !== 'undefined';
 
 // type="file|checkbox|radio".
-const onChangeInputType = (type) => /fil|che|rad/i.test(type);
+const onChangeInputType = type => /fil|che|rad/i.test(type);
 
 // Some libraries like `react-virtualized` explicitly check for this.
 Component.prototype.isReactComponent = {};
@@ -31,7 +30,7 @@ Component.prototype.isReactComponent = {};
 	'componentWillMount',
 	'componentWillReceiveProps',
 	'componentWillUpdate'
-].forEach((key) => {
+].forEach(key => {
 	Object.defineProperty(Component.prototype, key, {
 		configurable: true,
 		get() {
@@ -76,7 +75,7 @@ export function hydrate(vnode, parent, callback) {
 }
 
 let oldEventHook = options.event;
-options.event = (e) => {
+options.event = e => {
 	if (oldEventHook) e = oldEventHook(e);
 	e.persist = empty;
 	e.isPropagationStopped = isPropagationStopped;
@@ -101,7 +100,8 @@ let classNameDescriptor = {
 	}
 };
 
-options.vnode = (vnode) => {
+let oldVNodeHook = options.vnode;
+options.vnode = vnode => {
 	let i;
 	let type = vnode.type;
 	let props = vnode.props;
@@ -185,7 +185,7 @@ options.vnode = (vnode) => {
 			Array.isArray(normalizedProps.value)
 		) {
 			// forEach() always returns undefined, which we abuse here to unset the value prop.
-			normalizedProps.value = toChildArray(props.children).forEach((child) => {
+			normalizedProps.value = toChildArray(props.children).forEach(child => {
 				child.props.selected =
 					normalizedProps.value.indexOf(child.props.value) != -1;
 			});
@@ -193,7 +193,7 @@ options.vnode = (vnode) => {
 
 		// Adding support for defaultValue in select tag
 		if (type == 'select' && normalizedProps.defaultValue != null) {
-			normalizedProps.value = toChildArray(props.children).forEach((child) => {
+			normalizedProps.value = toChildArray(props.children).forEach(child => {
 				if (normalizedProps.multiple) {
 					child.props.selected =
 						normalizedProps.defaultValue.indexOf(child.props.value) != -1;
@@ -220,12 +220,13 @@ options.vnode = (vnode) => {
 	}
 
 	vnode.$$typeof = REACT_ELEMENT_TYPE;
+	if (oldVNodeHook) oldVNodeHook(vnode);
 };
 
 // Only needed for react-relay
 let currentContext;
 const oldBeforeRender = options._render;
-options._render = function (internal) {
+options._render = function(internal) {
 	if (oldBeforeRender) {
 		oldBeforeRender(internal);
 	}

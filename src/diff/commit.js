@@ -1,4 +1,4 @@
-import options from '../options';
+import { commitHook, errorHook } from '../options';
 
 /**
  * A list of components with effects that need to be run at the end of the current render pass.
@@ -13,7 +13,7 @@ export function commitRoot(rootInternal) {
 	let currentQueue = commitQueue;
 	commitQueue = [];
 
-	if (options._commit) options._commit(rootInternal, currentQueue);
+	if (commitHook) commitHook(rootInternal, currentQueue);
 
 	currentQueue.some(internal => {
 		try {
@@ -24,7 +24,7 @@ export function commitRoot(rootInternal) {
 				internal.data._commitCallbacks.shift()();
 			}
 		} catch (e) {
-			options._catchError(e, internal);
+			errorHook(e, internal);
 		}
 	});
 }

@@ -1,8 +1,8 @@
 import { MODE_UNMOUNTING, TYPE_DOM, TYPE_ROOT } from '../constants';
 import { unsubscribeFromContext } from '../create-context';
-import options from '../options';
 import { applyRef } from './refs';
 import { ENABLE_CLASSES } from '../component';
+import { errorHook, unmountHook } from '../options';
 
 /**
  * Unmount a virtual node from the tree and apply DOM changes
@@ -15,7 +15,7 @@ import { ENABLE_CLASSES } from '../component';
 export function unmount(internal, parentInternal, skipRemove) {
 	let r,
 		i = 0;
-	if (options.unmount) options.unmount(internal);
+	if (unmountHook) unmountHook(internal);
 	internal.flags |= MODE_UNMOUNTING;
 
 	if ((r = internal.ref)) {
@@ -29,7 +29,7 @@ export function unmount(internal, parentInternal, skipRemove) {
 			try {
 				r.componentWillUnmount();
 			} catch (e) {
-				options._catchError(e, parentInternal);
+				errorHook(e, parentInternal);
 			}
 		}
 	}

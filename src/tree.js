@@ -1,4 +1,4 @@
-import options from './options';
+import { internalHook } from './options';
 import {
 	TYPE_FUNCTION,
 	TYPE_ELEMENT,
@@ -99,7 +99,7 @@ export function createInternal(vnode, parentInternal) {
 		_depth: parentInternal ? parentInternal._depth + 1 : 0
 	};
 
-	if (options._internal) options._internal(internal, vnode);
+	if (internalHook) internalHook(internal, vnode);
 
 	return internal;
 }

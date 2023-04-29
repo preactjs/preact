@@ -1,4 +1,4 @@
-import options from '../options';
+import { eventHook } from '../options';
 
 function setStyle(dom, key, value) {
 	if (key[0] === '-') {
@@ -108,9 +108,9 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
  * @private
  */
 function eventProxy(e) {
-	return this._listeners[e.type + false](options.event ? options.event(e) : e);
+	return this._listeners[e.type + false](eventHook ? eventHook(e) : e);
 }
 
 function eventProxyCapture(e) {
-	return this._listeners[e.type + true](options.event ? options.event(e) : e);
+	return this._listeners[e.type + true](eventHook ? eventHook(e) : e);
 }

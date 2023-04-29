@@ -107,10 +107,11 @@ export function setupComponentStack() {
 	let oldDiff = options._diff;
 	let oldDiffed = options.diffed;
 	let oldRoot = options._root;
+	let oldVNode = options.vnode;
 	let oldInternal = options._internal;
 	let oldRender = options._render;
 
-	options.diffed = (internal) => {
+	options.diffed = internal => {
 		if (isPossibleOwner(internal)) {
 			ownerStack.pop();
 		}
@@ -130,9 +131,10 @@ export function setupComponentStack() {
 		if (oldRoot) oldRoot(vnode, parent);
 	};
 
-	options.vnode = (vnode) => {
+	options.vnode = vnode => {
 		vnode._owner =
 			ownerStack.length > 0 ? ownerStack[ownerStack.length - 1] : null;
+		if (oldVNode) oldVNode(vnode);
 	};
 
 	options._internal = (internal, vnode) => {
@@ -142,7 +144,7 @@ export function setupComponentStack() {
 		if (oldInternal) oldInternal(internal, vnode);
 	};
 
-	options._render = (vnode) => {
+	options._render = vnode => {
 		if (isPossibleOwner(vnode)) {
 			ownerStack.push(vnode);
 		}

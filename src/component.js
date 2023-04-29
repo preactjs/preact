@@ -1,5 +1,5 @@
 import { commitRoot } from './diff/commit';
-import options from './options';
+import { debounceHook } from './options';
 import { createElement, Fragment } from './create-element';
 import { patch } from './diff/patch';
 import { DIRTY_BIT, FORCE_UPDATE, MODE_UNMOUNTING } from './constants';
@@ -132,9 +132,9 @@ export function enqueueRender(internal) {
 			(internal.flags |= DIRTY_BIT) &&
 			renderQueue.push(internal) &&
 			!processRenderQueue._rerenderCount++) ||
-		prevDebounce !== options.debounceRendering
+		prevDebounce !== debounceHook
 	) {
-		prevDebounce = options.debounceRendering;
+		prevDebounce = debounceHook;
 		(prevDebounce || setTimeout)(processRenderQueue);
 	}
 }
