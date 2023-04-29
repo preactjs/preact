@@ -31,8 +31,7 @@ export function supportsDataList() {
 	);
 }
 
-const VOID_ELEMENTS =
-	/^(area|base|br|col|embed|hr|img|input|link|meta|param|source|track|wbr)$/;
+const VOID_ELEMENTS = /^(area|base|br|col|embed|hr|img|input|link|meta|param|source|track|wbr)$/;
 
 function encodeEntities(str) {
 	return str.replace(/&/g, '&amp;');
@@ -153,7 +152,7 @@ export function sortCss(cssText) {
 		cssText
 			.split(';')
 			.filter(Boolean)
-			.map((s) => s.replace(/^\s+|\s+$/g, '').replace(/(\s*:\s*)/g, ': '))
+			.map(s => s.replace(/^\s+|\s+$/g, '').replace(/(\s*:\s*)/g, ': '))
 			.sort((a, b) => {
 				// CSS Variables are typically positioned at the start
 				if (a[0] === '-') {
@@ -186,9 +185,9 @@ export function clearOptions() {
 	oldOptions = Object.assign({}, options);
 	// delete options.vnode;
 	options.vnode = undefined;
-	delete options.diffed;
-	delete options.unmount;
-	delete options._diff;
+	options.diffed = undefined;
+	options.unmount = undefined;
+	options._diff = undefined;
 }
 
 /**
@@ -225,7 +224,7 @@ export const mixedArrayHTML = '0ab<span>c</span>def1';
  * @param {object} obj
  */
 export function clear(obj) {
-	Object.keys(obj).forEach((key) => delete obj[key]);
+	Object.keys(obj).forEach(key => delete obj[key]);
 }
 
 /**
