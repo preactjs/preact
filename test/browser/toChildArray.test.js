@@ -67,6 +67,9 @@ describe('toChildArray', () => {
 		render(<Foo>{child}</Foo>, scratch);
 		expect(children).to.be.an('array');
 		expect(scratch.innerHTML).to.equal('<div></div>');
+
+		render(<Foo>{child}</Foo>, scratch);
+		expect(scratch.innerHTML).to.equal('<div></div>');
 	});
 
 	it('returns an array containing a VNode with a text child', () => {

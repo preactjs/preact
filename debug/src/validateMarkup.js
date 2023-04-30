@@ -20,6 +20,7 @@ function getClosestDomNodeParent(parent) {
 export function validateTableMarkup(internal) {
 	const { type, _parent: parent } = internal;
 	const parentDomInternal = getClosestDomNodeParent(parent);
+	if (parentDomInternal === null) return;
 
 	if (
 		(type === 'thead' || type === 'tfoot' || type === 'tbody') &&

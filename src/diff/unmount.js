@@ -13,8 +13,7 @@ import { ENABLE_CLASSES } from '../component';
  * current element is already detached from the DOM.
  */
 export function unmount(internal, topUnmountedInternal, skipRemove) {
-	let r,
-		i = 0;
+	let r;
 	if (options.unmount) options.unmount(internal);
 	internal.flags |= MODE_UNMOUNTING;
 

@@ -49,7 +49,7 @@ export function patchChildren(internal, children, parentDom) {
 
 		if (internal._index === -1) {
 			let nextDomSibling = getDomSibling(internal);
-			mount(internal, parentDom, nextDomSibling);
+			mount(internal, vnode, parentDom, nextDomSibling);
 			if (internal.flags & TYPE_DOM) {
 				// If we are mounting a component, it's DOM children will get inserted
 				// into the DOM in mountChildren. If we are mounting a DOM node, then
@@ -61,7 +61,7 @@ export function patchChildren(internal, children, parentDom) {
 			(internal.flags & (MODE_HYDRATE | MODE_SUSPENDED)) ===
 			(MODE_HYDRATE | MODE_SUSPENDED)
 		) {
-			mount(internal, parentDom, internal.data);
+			mount(internal, vnode, parentDom, internal.data);
 		} else {
 			patch(
 				internal,
@@ -107,7 +107,12 @@ function findMatches(internal, children, parentInternal) {
 		let vnode = children[index];
 
 		// holes get accounted for in the index property:
-		if (vnode == null || vnode === true || vnode === false) {
+		if (
+			vnode == null ||
+			vnode === true ||
+			vnode === false ||
+			typeof vnode === 'function'
+		) {
 			if (internal && index == internal._index && internal.key == null) {
 				// The current internal is unkeyed, has the same index as this VNode
 				// child, and the VNode is now null. So we'll unmount the Internal and
