@@ -1043,9 +1043,10 @@ describe('createRoot()', () => {
 			render(<A />);
 			expect(scratch.innerHTML).to.equal('<div>0</div>');
 
-			const sandbox = sinon.createSandbox();
+			const oldDebounceRendering = options.debounceRendering;
 			try {
-				sandbox.spy(options, 'debounceRendering');
+				const newDebounceRendering = sinon.spy(oldDebounceRendering);
+				options.debounceRendering = newDebounceRendering;
 
 				comp.setState({ updates: 1 }, () => {
 					comp.setState({ updates: 2 });
@@ -1053,9 +1054,9 @@ describe('createRoot()', () => {
 				rerender();
 				expect(scratch.innerHTML).to.equal('<div>2</div>');
 
-				expect(options.debounceRendering).to.have.been.calledOnce;
+				expect(newDebounceRendering).to.have.been.calledOnce;
 			} finally {
-				sandbox.restore();
+				options.debounceRendering = oldDebounceRendering;
 			}
 		});
 
@@ -1537,7 +1538,7 @@ describe('createRoot()', () => {
 
 			expect(scratch.innerHTML).to.equal(finalHtml);
 			expect(getLog()).to.deep.equal([
-				"<div>sibling1234.insertBefore(<ul>1234, <div>sibling)"
+				'<div>sibling1234.insertBefore(<ul>1234, <div>sibling)'
 			]);
 		});
 

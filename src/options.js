@@ -10,7 +10,7 @@ export let rootHook;
 export let internalHook;
 export let renderHook;
 export let commitHook;
-export let errorHook;
+export let errorHook = _catchError;
 
 /**
  * The `option` object can potentially contain callback functions
@@ -121,6 +121,5 @@ Object.defineProperty(options, '_catchError', {
 		errorHook = newHook;
 	}
 });
-options._catchError = _catchError;
 
 export default options;
