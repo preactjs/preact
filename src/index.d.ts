@@ -314,6 +314,8 @@ export function cloneElement<P>(
 
 // TODO: Revisit what the public type of this is...
 export const Fragment: FunctionComponent<{}>;
+export const Island: FunctionComponent<{ hydrate?: boolean }>;
+export function createPortal(vnode: VNode, container: Element): VNode<any>;
 
 //
 // Preact options

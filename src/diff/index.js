@@ -5,6 +5,7 @@ import { diffChildren } from './children';
 import { diffProps, setProperty } from './props';
 import { assign, isArray, removeNode, slice } from '../util';
 import options from '../options';
+import { Portal } from '../create-portal';
 
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
@@ -230,6 +231,11 @@ export function diff(
 				tmp != null && tmp.type === Fragment && tmp.key == null;
 			let renderResult = isTopLevelFragment ? tmp.props.children : tmp;
 
+			if (newType === Portal && newProps._parentDom !== parentDom) {
+				console.log('>> portal');
+				parentDom = newProps._parentDom;
+			}
+
 			diffChildren(
 				parentDom,
 				isArray(renderResult) ? renderResult : [renderResult],
@@ -436,6 +442,15 @@ function diffElementNodes(
 			newVNode._children = [];
 		} else {
 			i = newVNode.props.children;
+			// Islands are a a special node that can opt out of hydrating
+			// a subtree to hydrate it at a later time. Like when it is
+			// visible in the viewport for example.
+			if (nodeType === 'preact-island') {
+				if (oldVNode._dom == null && !newProps.hydrate) {
+					return dom;
+				}
+			}
+
 			diffChildren(
 				dom,
 				isArray(i) ? i : [i],
