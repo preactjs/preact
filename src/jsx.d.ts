@@ -2092,6 +2092,9 @@ export namespace JSXInternal {
 		video: HTMLAttributes<HTMLVideoElement>;
 		wbr: HTMLAttributes<HTMLElement>;
 
+		// Preact custom elements
+		'preact-island': HTMLAttributes<HTMLElement> & { hydrate?: boolean };
+
 		//SVG
 		svg: SVGAttributes<SVGSVGElement>;
 		animate: SVGAttributes<SVGAnimateElement>;

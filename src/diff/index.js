@@ -436,6 +436,15 @@ function diffElementNodes(
 			newVNode._children = [];
 		} else {
 			i = newVNode.props.children;
+			// Islands are a a special node that can opt out of hydrating
+			// a subtree to hydrate it at a later time. Like when it is
+			// visible in the viewport for example.
+			if (nodeType === 'preact-island') {
+				if (oldVNode._dom == null && !newProps.hydrate) {
+					return dom;
+				}
+			}
+
 			diffChildren(
 				dom,
 				isArray(i) ? i : [i],
