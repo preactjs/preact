@@ -1,17 +1,5 @@
 import { _catchError } from './diff/catch-error';
 
-export let vnodeHook;
-export let unmountHook;
-export let eventHook;
-export let diffedHook;
-export let diffHook;
-export let debounceHook;
-export let rootHook;
-export let internalHook;
-export let renderHook;
-export let commitHook;
-export let errorHook = _catchError;
-
 /**
  * The `option` object can potentially contain callback functions
  * that are called during various stages of our renderer. This is the
@@ -23,103 +11,34 @@ export let errorHook = _catchError;
  */
 const options = {};
 
-Object.defineProperty(options, 'vnode', {
-	get() {
-		return vnodeHook;
-	},
-	set(newHook) {
-		vnodeHook = newHook;
-	}
-});
+/**
+ * @template {keyof import('./internal').Options} T
+ * @param {T} name
+ * @param {any} [value] - initial value for the hook
+ * @returns {import('./internal').Options[T]}
+ */
+function optionsHook(name, value) {
+	Object.defineProperty(options, name, {
+		get() {
+			return value;
+		},
+		set(newValue) {
+			value = newValue;
+		}
+	});
+	return value;
+}
 
-Object.defineProperty(options, 'unmount', {
-	get() {
-		return unmountHook;
-	},
-	set(newHook) {
-		unmountHook = newHook;
-	}
-});
-
-Object.defineProperty(options, 'diffed', {
-	get() {
-		return diffedHook;
-	},
-	set(newHook) {
-		diffedHook = newHook;
-	}
-});
-
-Object.defineProperty(options, 'event', {
-	get() {
-		return eventHook;
-	},
-	set(newHook) {
-		eventHook = newHook;
-	}
-});
-
-Object.defineProperty(options, 'debounceRendering', {
-	get() {
-		return debounceHook;
-	},
-	set(newHook) {
-		debounceHook = newHook;
-	}
-});
-
-Object.defineProperty(options, '_diff', {
-	get() {
-		return diffHook;
-	},
-	set(newHook) {
-		diffHook = newHook;
-	}
-});
-
-Object.defineProperty(options, '_internal', {
-	get() {
-		return internalHook;
-	},
-	set(newHook) {
-		internalHook = newHook;
-	}
-});
-
-Object.defineProperty(options, '_root', {
-	get() {
-		return rootHook;
-	},
-	set(newHook) {
-		rootHook = newHook;
-	}
-});
-
-Object.defineProperty(options, '_render', {
-	get() {
-		return renderHook;
-	},
-	set(newHook) {
-		renderHook = newHook;
-	}
-});
-
-Object.defineProperty(options, '_commit', {
-	get() {
-		return commitHook;
-	},
-	set(newHook) {
-		commitHook = newHook;
-	}
-});
-
-Object.defineProperty(options, '_catchError', {
-	get() {
-		return errorHook;
-	},
-	set(newHook) {
-		errorHook = newHook;
-	}
-});
+export let vnodeHook = optionsHook('vnode');
+export let unmountHook = optionsHook('unmount');
+export let eventHook = optionsHook('event');
+export let diffedHook = optionsHook('diffed');
+export let debounceHook = optionsHook('debounceRendering');
+export let diffHook = optionsHook('_diff');
+export let rootHook = optionsHook('_root');
+export let internalHook = optionsHook('_internal');
+export let renderHook = optionsHook('_render');
+export let commitHook = optionsHook('_commit');
+export let errorHook = optionsHook('_catchError', _catchError);
 
 export default options;
