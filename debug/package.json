@@ -17,6 +17,7 @@
   },
   "exports": {
     ".": {
+      "types": "./src/index.d.ts",
       "browser": "./dist/debug.module.js",
       "umd": "./dist/debug.umd.js",
       "import": "./dist/debug.mjs",
