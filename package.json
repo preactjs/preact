@@ -60,6 +60,7 @@
       "require": "./jsx-runtime/dist/jsxRuntime.js"
     },
     "./jsx-dev-runtime": {
+      "types": "./jsx-runtime/src/index.d.ts",
       "browser": "./jsx-runtime/dist/jsxRuntime.module.js",
       "umd": "./jsx-runtime/dist/jsxRuntime.umd.js",
       "import": "./jsx-runtime/dist/jsxRuntime.mjs",
@@ -75,10 +76,12 @@
       "require": "./compat/server.js"
     },
     "./compat/jsx-runtime": {
+      "types": "./jsx-runtime/src/index.d.ts",
       "import": "./compat/jsx-runtime.mjs",
       "require": "./compat/jsx-runtime.js"
     },
     "./compat/jsx-dev-runtime": {
+      "types": "./jsx-runtime/src/index.d.ts",
       "import": "./compat/jsx-dev-runtime.mjs",
       "require": "./compat/jsx-dev-runtime.js"
     },
