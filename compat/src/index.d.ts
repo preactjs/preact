@@ -133,6 +133,11 @@ declare namespace React {
 		displayName?: string;
 	}
 
+	export interface ForwardRefExoticComponent<P>
+		extends preact.FunctionComponent<P> {
+		defaultProps?: Partial<P> | undefined;
+	}
+
 	export function forwardRef<R, P = {}>(
 		fn: ForwardFn<P, R>
 	): preact.FunctionalComponent<Omit<P, 'ref'> & { ref?: preact.Ref<R> }>;
