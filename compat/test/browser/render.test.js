@@ -252,6 +252,21 @@ describe('compat render', () => {
 		);
 	});
 
+	it('shouldnot transform imageSrcSet', () => {
+		render(
+			<link
+				rel="preload"
+				as="image"
+				href="preact.jpg"
+				imageSrcSet="preact_400px.jpg 400w"
+			/>,
+			scratch
+		);
+		expect(scratch.innerHTML).to.equal(
+			'<link rel="preload" as="image" href="preact.jpg" imagesrcset="preact_400px.jpg 400w">'
+		);
+	});
+
 	it('should correctly allow for "className"', () => {
 		const Foo = props => {
 			const { className, ...rest } = props;
