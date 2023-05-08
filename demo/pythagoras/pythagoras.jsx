@@ -1,5 +1,4 @@
 import { interpolateViridis } from 'd3-scale';
-import { createElement } from 'preact';
 
 Math.deg = function (radians) {
 	return radians * (180 / Math.PI);

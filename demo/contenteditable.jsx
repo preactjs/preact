@@ -1,4 +1,3 @@
-import { createElement } from 'preact';
 import { useState } from 'preact/hooks';
 
 export default function Contenteditable() {

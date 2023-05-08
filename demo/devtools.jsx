@@ -1,12 +1,4 @@
-// eslint-disable-next-line no-unused-vars
-import {
-	createElement,
-	Component,
-	memo,
-	Fragment,
-	Suspense,
-	lazy
-} from 'react';
+import { Component, memo, Suspense, lazy } from 'react';
 
 function Foo() {
 	return <div>I'm memoed</div>;

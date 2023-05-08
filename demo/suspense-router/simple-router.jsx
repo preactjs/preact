@@ -1,14 +1,10 @@
 import {
-	createElement,
-	cloneElement,
 	createContext,
 	useState,
 	useContext,
 	Children,
 	useLayoutEffect
 } from 'react';
-
-/** @jsx createElement */
 
 const memoryHistory = {
 	/**
