@@ -117,6 +117,8 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
 			// cast to `0` instead
 			name !== 'tabIndex' &&
 			name !== 'download' &&
+			name !== 'rowSpan' &&
+			name !== 'colSpan' &&
 			name in dom
 		) {
 			try {
