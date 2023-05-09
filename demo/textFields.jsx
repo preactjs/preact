@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
 import TextField from '@material-ui/core/TextField';
 
-/** @jsx React.createElement */
-
 const PatchedTextField = props => {
 	const [value, set] = useState(props.value);
 	return (

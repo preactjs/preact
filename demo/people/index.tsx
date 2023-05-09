@@ -1,5 +1,5 @@
 import { observer } from 'mobx-react';
-import { Component, h } from 'preact';
+import { Component } from 'preact';
 import { Profile } from './profile';
 import { Link, Route, Router } from './router';
 import { store } from './store';

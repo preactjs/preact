@@ -1,7 +1,5 @@
 import React, { useState } from 'react';
 
-/** @jsx React.createElement */
-
 const ControlledInputs = () => {
 	const [value, set] = useState('');
 	const onChange = e => {
