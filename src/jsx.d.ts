@@ -2097,7 +2097,7 @@ export namespace JSXInternal {
 		animate: SVGAttributes<SVGAnimateElement>;
 		circle: SVGAttributes<SVGCircleElement>;
 		animateMotion: SVGAttributes<SVGAnimateMotionElement>;
-		animateTransform: SVGAttributes<SVGAnimateElement>;
+		animateTransform: SVGAttributes<SVGAnimateTransformElement>;
 		clipPath: SVGAttributes<SVGClipPathElement>;
 		defs: SVGAttributes<SVGDefsElement>;
 		desc: SVGAttributes<SVGDescElement>;
