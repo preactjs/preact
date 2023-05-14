@@ -74,7 +74,7 @@ declare namespace React {
 
 	export function createPortal(
 		vnode: preact.VNode,
-		container: Element
+		container: Element | DocumentFragment
 	): preact.VNode<any>;
 
 	export function render(
