@@ -36,13 +36,21 @@ export function diffChildren(
 	oldDom,
 	isHydrating
 ) {
-	let i, j, oldVNode, childVNode, newDom, firstChildDom, refs;
+	let i,
+		j,
+		oldVNode,
+		childVNode,
+		newDom,
+		firstChildDom,
+		refs,
+		skew = 0;
 
 	// This is a compression of oldParentVNode!=null && oldParentVNode != EMPTY_OBJ && oldParentVNode._children || EMPTY_ARR
 	// as EMPTY_OBJ._children should be `undefined`.
 	let oldChildren = (oldParentVNode && oldParentVNode._children) || EMPTY_ARR;
 
-	let oldChildrenLength = oldChildren.length;
+	let oldChildrenLength = oldChildren.length,
+		remainingOldChildren = oldChildrenLength;
 
 	newParentVNode._children = [];
 	for (i = 0; i < renderResult.length; i++) {
@@ -104,39 +112,24 @@ export function diffChildren(
 		childVNode._parent = newParentVNode;
 		childVNode._depth = newParentVNode._depth + 1;
 
-		// Check if we find a corresponding element in oldChildren.
-		// If found, delete the array item by setting to `undefined`.
-		// We use `undefined`, as `null` is reserved for empty placeholders
-		// (holes).
-		oldVNode = oldChildren[i];
+		let skewedIndex = i + skew;
+		const matchingIndex = findMatchingIndex(
+			childVNode,
+			oldChildren,
+			skewedIndex,
+			remainingOldChildren
+		);
 
-		if (
-			oldVNode === null ||
-			(oldVNode &&
-				childVNode.key == oldVNode.key &&
-				childVNode.type === oldVNode.type)
-		) {
-			oldChildren[i] = undefined;
+		if (matchingIndex === -1) {
+			oldVNode = EMPTY_OBJ;
 		} else {
-			// Either oldVNode === undefined or oldChildrenLength > 0,
-			// so after this loop oldVNode == null or oldVNode is a valid value.
-			for (j = 0; j < oldChildrenLength; j++) {
-				oldVNode = oldChildren[j];
-				// If childVNode is unkeyed, we only match similarly unkeyed nodes, otherwise we match by key.
-				// We always match by type (in either case).
-				if (
-					oldVNode &&
-					childVNode.key == oldVNode.key &&
-					childVNode.type === oldVNode.type
-				) {
-					oldChildren[j] = undefined;
-					break;
-				}
-				oldVNode = null;
-			}
+			oldVNode = oldChildren[matchingIndex];
+			oldChildren[matchingIndex] = undefined;
+			remainingOldChildren--;
 		}
 
 		oldVNode = oldVNode || EMPTY_OBJ;
+		let isMounting = oldVNode === EMPTY_OBJ;
 
 		// Morph the old element into the new one, but don't append it to the dom yet
 		diff(
@@ -164,6 +157,34 @@ export function diffChildren(
 				firstChildDom = newDom;
 			}
 
+			let hasMatchingIndex = !isMounting && matchingIndex === skewedIndex;
+			if (isMounting) {
+				if (matchingIndex == -1) {
+					skew--;
+				}
+			} else if (!hasMatchingIndex) {
+				if (matchingIndex === skewedIndex + 1) {
+					skew++;
+					hasMatchingIndex = true;
+				} else if (matchingIndex > skewedIndex) {
+					if (remainingOldChildren > renderResult.length - skewedIndex) {
+						skew += matchingIndex - skewedIndex;
+						hasMatchingIndex = true;
+					} else {
+						// ### Change from keyed: I think this was missing from the algo...
+						skew--;
+					}
+				} else if (matchingIndex < skewedIndex) {
+					if (matchingIndex == skewedIndex - 1) {
+						skew = matchingIndex - skewedIndex;
+					} else {
+						skew = 0;
+					}
+				} else {
+					skew = 0;
+				}
+			}
+
 			if (
 				typeof childVNode.type == 'function' &&
 				childVNode._children === oldVNode._children
@@ -173,7 +194,7 @@ export function diffChildren(
 					oldDom,
 					parentDom
 				);
-			} else {
+			} else if (!hasMatchingIndex) {
 				oldDom = placeChild(
 					parentDom,
 					childVNode,
@@ -182,6 +203,8 @@ export function diffChildren(
 					newDom,
 					oldDom
 				);
+			} else {
+				oldDom = newDom.nextSibling;
 			}
 
 			if (typeof newParentVNode.type == 'function') {
@@ -353,4 +376,59 @@ function getLastDom(vnode) {
 	}
 
 	return null;
+}
+
+/**
+ * @param {import('../internal').VNode | string} childVNode
+ * @param {import('../internal').VNode[]} oldChildren
+ * @param {number} skewedIndex
+ * @param {number} remainingOldChildren
+ * @returns {number}
+ */
+function findMatchingIndex(
+	childVNode,
+	oldChildren,
+	skewedIndex,
+	remainingOldChildren
+) {
+	const type = typeof childVNode == 'string' ? null : childVNode.type;
+	const key = type !== null ? childVNode.key : undefined;
+	let match = -1;
+	let x = skewedIndex - 1; // i - 1;
+	let y = skewedIndex + 1; // i + 1;
+	let oldChild = oldChildren[skewedIndex]; // i
+
+	if (
+		// ### Change from keyed: support for matching null placeholders
+		oldChild === null ||
+		(oldChild != null && oldChild.type === type && oldChild.key == key)
+	) {
+		match = skewedIndex; // i
+	}
+	// If there are any unused children left (ignoring an available in-place child which we just checked)
+	else if (remainingOldChildren > (oldChild != null ? 1 : 0)) {
+		// eslint-disable-next-line no-constant-condition
+		while (true) {
+			if (x >= 0) {
+				oldChild = oldChildren[x];
+				if (oldChild != null && oldChild.type === type && oldChild.key == key) {
+					match = x;
+					break;
+				}
+				x--;
+			}
+			if (y < oldChildren.length) {
+				oldChild = oldChildren[y];
+				if (oldChild != null && oldChild.type === type && oldChild.key == key) {
+					match = y;
+					break;
+				}
+				y++;
+			} else if (x < 0) {
+				break;
+			}
+		}
+	}
+
+	return match;
 }
