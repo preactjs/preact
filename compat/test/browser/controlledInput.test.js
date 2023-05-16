@@ -168,7 +168,7 @@ describe('preact/compat controlled inputs', () => {
 		render(<Input />, scratch);
 
 		scratch.firstChild.value = 'A';
-		fireEvent(scratch.firstChild, 'change');
+		await fireEvent(scratch.firstChild, 'change');
 		expect(calls).to.deep.equal(['A']);
 		expect(scratch.firstChild.value).to.equal('A');
 
@@ -208,6 +208,8 @@ describe('preact/compat controlled inputs', () => {
 
 		scratch.firstChild.checked = false;
 		await fireEvent(scratch.firstChild, 'change');
+		// Have to wait for the microtick
+		await new Promise(res => setTimeout(res));
 		expect(calls).to.deep.equal([false]);
 		expect(scratch.firstChild.checked).to.equal(true);
 	});
