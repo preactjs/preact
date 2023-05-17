@@ -128,9 +128,18 @@ declare namespace React {
 		) => boolean
 	): C;
 
+	export interface RefAttributes<R> extends preact.Attributes {
+		ref?: preact.Ref<R> | undefined;
+	}
+
 	export interface ForwardFn<P = {}, T = any> {
 		(props: P, ref: ForwardedRef<T>): preact.ComponentChild;
 		displayName?: string;
+	}
+
+	export interface ForwardRefExoticComponent<P>
+		extends preact.FunctionComponent<P> {
+		defaultProps?: Partial<P> | undefined;
 	}
 
 	export function forwardRef<R, P = {}>(
