@@ -414,6 +414,48 @@ describe('render()', () => {
 		});
 	}
 
+	// Test for #3969
+	it('should clear rowspan and colspan', () => {
+		let update;
+		class App extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { active: true };
+				update = this.setState.bind(this);
+			}
+
+			render() {
+				return (
+					<div>
+						{this.state.active ? (
+							<table>
+								<tr>
+									<td rowSpan={2} colSpan={2}>
+										Foo
+									</td>
+								</tr>
+							</table>
+						) : (
+							<table>
+								<tr>
+									<td>Foo</td>
+								</tr>
+							</table>
+						)}
+					</div>
+				);
+			}
+		}
+
+		render(<App />, scratch);
+
+		update({ active: false });
+		rerender();
+
+		expect(scratch.querySelector('td[rowspan]')).to.equal(null);
+		expect(scratch.querySelector('td[colspan]')).to.equal(null);
+	});
+
 	// Test for preactjs/preact#651
 	it('should set enumerable boolean attribute', () => {
 		render(<input spellcheck={false} />, scratch);
