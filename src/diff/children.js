@@ -192,14 +192,12 @@ export function diffChildren(
 				typeof childVNode.type == 'function' &&
 				childVNode._children === oldVNode._children
 			) {
-				console.log('reordering');
 				childVNode._nextDom = oldDom = reorderChildren(
 					childVNode,
 					oldDom,
 					parentDom
 				);
 			} else if (!hasMatchingIndex) {
-				console.log('placing', newDom, oldDom);
 				oldDom = placeChild(
 					parentDom,
 					childVNode,
@@ -340,22 +338,12 @@ function placeChild(
 		newDom != oldDom ||
 		newDom.parentNode == null
 	) {
-		outer: if (oldDom == null || oldDom.parentNode !== parentDom) {
+		if (oldDom == null || oldDom.parentNode !== parentDom) {
+			// Can actually replace this with insertBefore(x, null)
 			parentDom.appendChild(newDom);
 			nextDom = null;
 		} else {
-			// `j<oldChildrenLength; j+=2` is an alternative to `j++<oldChildrenLength/2`
-			for (
-				let sibDom = oldDom, j = 0;
-				(sibDom = sibDom.nextSibling) && j < oldChildren.length;
-				j += 1
-			) {
-				if (sibDom == newDom) {
-					break outer;
-				}
-			}
 			parentDom.insertBefore(newDom, oldDom);
-			nextDom = oldDom;
 		}
 	}
 

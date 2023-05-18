@@ -2608,8 +2608,10 @@ describe('Fragment', () => {
 		rerender();
 		expect(scratch.innerHTML).to.equal(bottom);
 		expectDomLogToBe([
+			'<div>top panelNavigationContent.insertBefore(<div>Navigation, <div>top panel)',
+			'<div>Navigationtop panelContent.insertBefore(<div>Content, <div>top panel)',
 			'<div>.appendChild(#text)',
-			'<div>top panelNavigationContent.appendChild(<div>bottom panel)',
+			'<div>NavigationContenttop panel.insertBefore(<div>bottom panel, <div>top panel)',
 			'<div>top panel.remove()'
 		]);
 
@@ -2952,9 +2954,6 @@ describe('Fragment', () => {
 		rerender();
 
 		expect(scratch.innerHTML).to.equal([div('A'), div(1), div(2)].join(''));
-		expectDomLogToBe([
-			'<div>B.remove()',
-			'<div>1A2.insertBefore(<div>1, <div>2)'
-		]);
+		expectDomLogToBe(['<div>B.remove()', '<div>2A1.appendChild(<div>2)']);
 	});
 });
