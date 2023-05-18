@@ -129,7 +129,10 @@ export function diffChildren(
 		}
 
 		oldVNode = oldVNode || EMPTY_OBJ;
-		let isMounting = oldVNode === EMPTY_OBJ;
+		let isMounting =
+			isHydrating ||
+			oldVNode === EMPTY_OBJ ||
+			!(oldVNode._dom && oldVNode._dom.isConnected);
 
 		// Morph the old element into the new one, but don't append it to the dom yet
 		diff(
@@ -189,12 +192,14 @@ export function diffChildren(
 				typeof childVNode.type == 'function' &&
 				childVNode._children === oldVNode._children
 			) {
+				console.log('reordering');
 				childVNode._nextDom = oldDom = reorderChildren(
 					childVNode,
 					oldDom,
 					parentDom
 				);
 			} else if (!hasMatchingIndex) {
+				console.log('placing', newDom, oldDom);
 				oldDom = placeChild(
 					parentDom,
 					childVNode,
@@ -203,6 +208,17 @@ export function diffChildren(
 					newDom,
 					oldDom
 				);
+			} else if (childVNode._nextDom !== undefined) {
+				// Only Fragments or components that return Fragment like VNodes will
+				// have a non-undefined _nextDom. Continue the diff from the sibling
+				// of last DOM child of this child VNode
+				oldDom = childVNode._nextDom;
+
+				// Eagerly cleanup _nextDom. We don't need to persist the value because
+				// it is only used by `diffChildren` to determine where to resume the diff after
+				// diffing Components and Fragments. Once we store it the nextDOM local var, we
+				// can clean up the property
+				childVNode._nextDom = undefined;
 			} else {
 				oldDom = newDom.nextSibling;
 			}
