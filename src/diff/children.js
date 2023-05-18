@@ -122,14 +122,10 @@ export function diffChildren(
 		if (matchingIndex === -1) {
 			oldVNode = EMPTY_OBJ;
 		} else {
-			oldVNode = oldChildren[matchingIndex];
+			oldVNode = oldChildren[matchingIndex] || EMPTY_OBJ;
 			oldChildren[matchingIndex] = undefined;
 			remainingOldChildren--;
 		}
-
-		oldVNode = oldVNode || EMPTY_OBJ;
-		let isMounting =
-			isHydrating || oldVNode === EMPTY_OBJ || oldVNode._original === null;
 
 		// Morph the old element into the new one, but don't append it to the dom yet
 		diff(
@@ -157,12 +153,13 @@ export function diffChildren(
 				firstChildDom = newDom;
 			}
 
+			let isMounting = oldVNode === EMPTY_OBJ || oldVNode._original === null;
 			let hasMatchingIndex = !isMounting && matchingIndex === skewedIndex;
 			if (isMounting) {
 				if (matchingIndex == -1) {
 					skew--;
 				}
-			} else if (!hasMatchingIndex) {
+			} else if (matchingIndex !== skewedIndex) {
 				if (matchingIndex === skewedIndex + 1) {
 					skew++;
 					hasMatchingIndex = true;
@@ -186,11 +183,11 @@ export function diffChildren(
 			}
 
 			skewedIndex = i + skew;
-			if (matchingIndex == i && !isMounting) {
-				hasMatchingIndex = true;
-			}
+			hasMatchingIndex =
+				hasMatchingIndex || (matchingIndex == i && !isMounting);
 
 			if (
+				!isHydrating &&
 				!isMounting &&
 				typeof childVNode.type == 'function' &&
 				(matchingIndex !== skewedIndex ||
