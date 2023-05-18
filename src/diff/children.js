@@ -189,6 +189,9 @@ export function diffChildren(
 			}
 
 			skewedIndex = i + skew;
+			if (matchingIndex == i && !isMounting) {
+				hasMatchingIndex = true;
+			}
 
 			if (
 				typeof childVNode.type == 'function' &&
