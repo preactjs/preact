@@ -201,7 +201,7 @@ export function diffChildren(
 					parentDom
 				);
 			} else if (typeof childVNode.type != 'function' && !hasMatchingIndex) {
-				oldDom = placeChild(parentDom, childVNode, oldVNode, newDom, oldDom);
+				oldDom = placeChild(parentDom, newDom, oldDom);
 			} else if (childVNode._nextDom !== undefined) {
 				// Only Fragments or components that return Fragment like VNodes will
 				// have a non-undefined _nextDom. Continue the diff from the sibling
@@ -269,6 +269,8 @@ export function diffChildren(
 function reorderChildren(childVNode, oldDom, parentDom) {
 	// Note: VNodes in nested suspended trees may be missing _children.
 	let c = childVNode._children;
+	if (!c || !c.length) return oldDom;
+
 	let tmp = 0;
 	for (; c && tmp < c.length; tmp++) {
 		let vnode = c[tmp];
@@ -282,7 +284,7 @@ function reorderChildren(childVNode, oldDom, parentDom) {
 			if (typeof vnode.type == 'function') {
 				oldDom = reorderChildren(vnode, oldDom, parentDom);
 			} else {
-				oldDom = placeChild(parentDom, vnode, vnode, vnode._dom, oldDom);
+				oldDom = placeChild(parentDom, vnode._dom, oldDom);
 			}
 		}
 	}
@@ -309,44 +311,17 @@ export function toChildArray(children, out) {
 	return out;
 }
 
-function placeChild(parentDom, childVNode, oldVNode, newDom, oldDom) {
-	let nextDom;
-	if (childVNode._nextDom !== undefined) {
-		// Only Fragments or components that return Fragment like VNodes will
-		// have a non-undefined _nextDom. Continue the diff from the sibling
-		// of last DOM child of this child VNode
-		nextDom = childVNode._nextDom;
-
-		// Eagerly cleanup _nextDom. We don't need to persist the value because
-		// it is only used by `diffChildren` to determine where to resume the diff after
-		// diffing Components and Fragments. Once we store it the nextDOM local var, we
-		// can clean up the property
-		childVNode._nextDom = undefined;
-	} else if (
-		oldVNode == null ||
-		newDom != oldDom ||
-		newDom.parentNode == null
-	) {
+function placeChild(parentDom, newDom, oldDom) {
+	if (newDom != oldDom || newDom.parentNode == null) {
 		if (oldDom == null || oldDom.parentNode !== parentDom) {
 			// Can actually replace this with insertBefore(x, null)
 			parentDom.appendChild(newDom);
-			nextDom = null;
 		} else {
 			parentDom.insertBefore(newDom, oldDom);
-			nextDom = oldDom;
 		}
 	}
 
-	// If we have pre-calculated the nextDOM node, use it. Else calculate it now
-	// Strictly check for `undefined` here cuz `null` is a valid value of `nextDom`.
-	// See more detail in create-element.js:createVNode
-	if (nextDom !== undefined) {
-		oldDom = nextDom;
-	} else {
-		oldDom = newDom.nextSibling;
-	}
-
-	return oldDom;
+	return newDom.nextSibling;
 }
 
 /**
