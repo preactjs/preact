@@ -687,7 +687,8 @@ describe('Fragment', () => {
 		expect(scratch.innerHTML).to.equal(htmlForFalse);
 		expectDomLogToBe(
 			[
-				'<div>fooHellobeep.appendChild(<div>Hello)',
+				'<div>barHellobeep.insertBefore(<div>bar, <div>beep)',
+				'<div>Hellobarbeep.appendChild(<div>Hello)',
 				'<div>barbeepHello.appendChild(<div>bar)'
 			],
 			'rendering true to false'
@@ -1277,9 +1278,7 @@ describe('Fragment', () => {
 		);
 		expectDomLogToBe([
 			'<ol>012345.insertBefore(<li>4, <li>0)',
-			'<ol>401235.insertBefore(<li>5, <li>0)',
-			// TODO: Hmmm why does this extra append happen?
-			'<ol>453012.appendChild(<li>3)'
+			'<ol>401235.insertBefore(<li>5, <li>0)'
 		]);
 
 		clearLog();
@@ -1478,7 +1477,8 @@ describe('Fragment', () => {
 		);
 		expectDomLogToBe(
 			[
-				'<div>fooHellobeepboop.insertBefore(<div>Hello, <div>boop)',
+				'<div>barHellobeepboop.insertBefore(<div>bar, <div>beep)',
+				'<div>Hellobarbeepboop.insertBefore(<div>Hello, <div>boop)',
 				'<div>barbeepHelloboop.insertBefore(<div>bar, <div>boop)',
 				'<div>boop.remove()'
 			],
@@ -1564,7 +1564,8 @@ describe('Fragment', () => {
 		);
 		expectDomLogToBe(
 			[
-				'<div>fooHellobeepbeepbeep.appendChild(<div>Hello)',
+				'<div>barHellobeepbeepbeep.insertBefore(<div>bar, <div>beep)',
+				'<div>Hellobarbeepbeepbeep.appendChild(<div>Hello)',
 				'<div>barbeepbeepbeepHello.appendChild(<div>bar)'
 			],
 			'rendering from true to false'
@@ -1580,9 +1581,9 @@ describe('Fragment', () => {
 		);
 		expectDomLogToBe(
 			[
-				'<div>beepbeepbeepHellofoo.insertBefore(<div>foo, <div>beep)',
-				'<div>foobeepbeepbeepHello.insertBefore(<div>Hello, <div>beep)',
-				'<div>fooHelloboopboopboop.appendChild(<div>boop)'
+				'<div>beepbeepbeepHellofoo.appendChild(<div>Hello)',
+				'<div>beepbeepbeepfooHello.insertBefore(<div>foo, <div>beep)',
+				'<div>foobeepbeepbeepHello.insertBefore(<div>Hello, <div>beep)'
 			],
 			'rendering from false to true'
 		);

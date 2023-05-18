@@ -188,16 +188,18 @@ export function diffChildren(
 				}
 			}
 
+			skewedIndex = i + skew;
+
 			if (
 				typeof childVNode.type == 'function' &&
-				childVNode._children === oldVNode._children
+				matchingIndex !== skewedIndex
 			) {
 				childVNode._nextDom = oldDom = reorderChildren(
 					childVNode,
 					oldDom,
 					parentDom
 				);
-			} else if (!hasMatchingIndex) {
+			} else if (typeof childVNode.type != 'function' && !hasMatchingIndex) {
 				oldDom = placeChild(
 					parentDom,
 					childVNode,
