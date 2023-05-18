@@ -320,44 +320,46 @@ function findMatchingIndex(
 	skewedIndex,
 	remainingOldChildren
 ) {
-	const type = typeof childVNode == 'string' ? null : childVNode.type;
-	const key = type !== null ? childVNode.key : undefined;
-	let match = -1;
-	let x = skewedIndex - 1; // i - 1;
-	let y = skewedIndex + 1; // i + 1;
-	let oldChild = oldChildren[skewedIndex]; // i
+	let x = skewedIndex - 1;
+	let y = skewedIndex + 1;
+	let oldVNode = oldChildren[skewedIndex];
 
 	if (
-		// ### Change from keyed: support for matching null placeholders
-		oldChild === null ||
-		(oldChild != null && oldChild.type === type && oldChild.key == key)
+		oldVNode === null ||
+		(oldVNode &&
+			childVNode.key == oldVNode.key &&
+			childVNode.type === oldVNode.type)
 	) {
-		match = skewedIndex; // i
-	}
-	// If there are any unused children left (ignoring an available in-place child which we just checked)
-	else if (remainingOldChildren > (oldChild != null ? 1 : 0)) {
+		return skewedIndex;
+	} else if (remainingOldChildren > (oldVNode != null ? 1 : 0)) {
 		// eslint-disable-next-line no-constant-condition
 		while (true) {
 			if (x >= 0) {
-				oldChild = oldChildren[x];
-				if (oldChild != null && oldChild.type === type && oldChild.key == key) {
-					match = x;
-					break;
+				oldVNode = oldChildren[x];
+				if (
+					oldVNode &&
+					childVNode.key == oldVNode.key &&
+					childVNode.type === oldVNode.type
+				) {
+					return x;
 				}
 				x--;
 			}
 			if (y < oldChildren.length) {
-				oldChild = oldChildren[y];
-				if (oldChild != null && oldChild.type === type && oldChild.key == key) {
-					match = y;
-					break;
+				oldVNode = oldChildren[y];
+				if (
+					oldVNode &&
+					childVNode.key == oldVNode.key &&
+					childVNode.type === oldVNode.type
+				) {
+					return y;
 				}
 				y++;
 			} else if (x < 0) {
-				break;
+				return -1;
 			}
 		}
 	}
 
-	return match;
+	return -1;
 }
