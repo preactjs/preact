@@ -189,20 +189,13 @@ export function diffChildren(
 			}
 
 			skewedIndex = i + skew;
-			if (matchingIndex == i && !isMounting) {
-				hasMatchingIndex = true;
-			}
 
 			if (
 				typeof childVNode.type == 'function' &&
 				(matchingIndex !== skewedIndex ||
 					oldVNode._children === childVNode._children)
 			) {
-				childVNode._nextDom = oldDom = reorderChildren(
-					childVNode,
-					oldDom,
-					parentDom
-				);
+				oldDom = reorderChildren(childVNode, oldDom, parentDom);
 			} else if (typeof childVNode.type != 'function' && !hasMatchingIndex) {
 				oldDom = placeChild(parentDom, newDom, oldDom);
 			} else if (childVNode._nextDom !== undefined) {
@@ -230,14 +223,6 @@ export function diffChildren(
 				// node's nextSibling.
 				newParentVNode._nextDom = oldDom;
 			}
-		} else if (
-			oldDom &&
-			oldVNode._dom == oldDom &&
-			oldDom.parentNode != parentDom
-		) {
-			// The above condition is to handle null placeholders. See test in placeholder.test.js:
-			// `efficiently replace null placeholders in parent rerenders`
-			oldDom = getDomSibling(oldVNode);
 		}
 	}
 
@@ -272,7 +257,6 @@ export function diffChildren(
 function reorderChildren(childVNode, oldDom, parentDom) {
 	// Note: VNodes in nested suspended trees may be missing _children.
 	let c = childVNode._children;
-	if (!c || !c.length) return oldDom;
 
 	let tmp = 0;
 	for (; c && tmp < c.length; tmp++) {
@@ -317,7 +301,6 @@ export function toChildArray(children, out) {
 function placeChild(parentDom, newDom, oldDom) {
 	if (newDom != oldDom || newDom.parentNode == null) {
 		if (oldDom == null || oldDom.parentNode !== parentDom) {
-			// Can actually replace this with insertBefore(x, null)
 			parentDom.appendChild(newDom);
 		} else {
 			parentDom.insertBefore(newDom, oldDom);
