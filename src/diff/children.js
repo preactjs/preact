@@ -129,9 +129,7 @@ export function diffChildren(
 
 		oldVNode = oldVNode || EMPTY_OBJ;
 		let isMounting =
-			isHydrating ||
-			oldVNode === EMPTY_OBJ ||
-			!(oldVNode._dom && oldVNode._dom.isConnected);
+			isHydrating || oldVNode === EMPTY_OBJ || oldVNode._original === null;
 
 		// Morph the old element into the new one, but don't append it to the dom yet
 		diff(
