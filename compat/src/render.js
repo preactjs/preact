@@ -87,43 +87,11 @@ let oldEventHook = options.event;
 options.event = e => {
 	if (oldEventHook) e = oldEventHook(e);
 
-	/** @type {ControlledTarget} */
-	const target = e.currentTarget;
-	const eventType = e.type;
-	if (
-		(eventType === 'input' || eventType === 'change') &&
-		target._isControlled
-	) {
-		// Note: We can't just send the event to the afterEvent function because
-		// some properties on the event (e.g. currentTarget) will be changed by the
-		// time afterEvent is called. `currentTarget` will be `null` at that point.
-		// The browser reuses event objects for event handlers and just modifies the
-		// relevant properties before invoking the next handler. So whenever we call
-		// afterEvent, if we were to inspect the original Event object, we would see
-		// that the currentTarget is null. So instead we pass the event type and the
-		// target to afterEvent.
-		Promise.resolve().then(() => afterEvent(eventType, target));
-	}
-
 	e.persist = empty;
 	e.isPropagationStopped = isPropagationStopped;
 	e.isDefaultPrevented = isDefaultPrevented;
 	return (e.nativeEvent = e);
 };
-
-/**
- * @typedef {EventTarget & {value: any; checked: any; _isControlled: boolean; _prevValue: any}} ControlledTarget
- * @param {string} eventType
- * @param {ControlledTarget} target
- */
-function afterEvent(eventType, target) {
-	if (target.value != null) {
-		target.value = target._prevValue;
-	}
-	if (eventType === 'change' && target.checked != null) {
-		target.checked = target._prevValue;
-	}
-}
 
 function empty() {}
 
@@ -278,33 +246,8 @@ options.diffed = function (vnode) {
 		oldDiffed(vnode);
 	}
 
-	const type = vnode.type;
 	const props = vnode.props;
 	const dom = vnode._dom;
-	const isControlled = dom && dom._isControlled;
-
-	if (
-		dom != null &&
-		(type === 'input' || type === 'textarea' || type === 'select')
-	) {
-		if (isControlled === false) {
-		} else if (
-			isControlled ||
-			props.oninput ||
-			props.onchange ||
-			props.onChange
-		) {
-			if (props.value != null) {
-				dom._isControlled = true;
-				dom._prevValue = props.value;
-			} else if (props.checked != null) {
-				dom._isControlled = true;
-				dom._prevValue = props.checked;
-			} else {
-				dom._isControlled = false;
-			}
-		}
-	}
 
 	if (
 		dom != null &&
