@@ -192,7 +192,8 @@ export function diffChildren(
 
 			if (
 				typeof childVNode.type == 'function' &&
-				matchingIndex !== skewedIndex
+				(matchingIndex !== skewedIndex ||
+					oldVNode._children === childVNode._children)
 			) {
 				childVNode._nextDom = oldDom = reorderChildren(
 					childVNode,
@@ -200,14 +201,7 @@ export function diffChildren(
 					parentDom
 				);
 			} else if (typeof childVNode.type != 'function' && !hasMatchingIndex) {
-				oldDom = placeChild(
-					parentDom,
-					childVNode,
-					oldVNode,
-					oldChildren,
-					newDom,
-					oldDom
-				);
+				oldDom = placeChild(parentDom, childVNode, oldVNode, newDom, oldDom);
 			} else if (childVNode._nextDom !== undefined) {
 				// Only Fragments or components that return Fragment like VNodes will
 				// have a non-undefined _nextDom. Continue the diff from the sibling
@@ -288,7 +282,7 @@ function reorderChildren(childVNode, oldDom, parentDom) {
 			if (typeof vnode.type == 'function') {
 				oldDom = reorderChildren(vnode, oldDom, parentDom);
 			} else {
-				oldDom = placeChild(parentDom, vnode, vnode, c, vnode._dom, oldDom);
+				oldDom = placeChild(parentDom, vnode, vnode, vnode._dom, oldDom);
 			}
 		}
 	}
@@ -315,14 +309,7 @@ export function toChildArray(children, out) {
 	return out;
 }
 
-function placeChild(
-	parentDom,
-	childVNode,
-	oldVNode,
-	oldChildren,
-	newDom,
-	oldDom
-) {
+function placeChild(parentDom, childVNode, oldVNode, newDom, oldDom) {
 	let nextDom;
 	if (childVNode._nextDom !== undefined) {
 		// Only Fragments or components that return Fragment like VNodes will
@@ -346,6 +333,7 @@ function placeChild(
 			nextDom = null;
 		} else {
 			parentDom.insertBefore(newDom, oldDom);
+			nextDom = oldDom;
 		}
 	}
 
