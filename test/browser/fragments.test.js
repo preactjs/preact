@@ -237,9 +237,7 @@ describe('Fragment', () => {
 		expectDomLogToBe([
 			'<div>.appendChild(#text)',
 			'<div>122.insertBefore(<div>1, <span>1)',
-			'<span>1.remove()',
-			'<div>122.appendChild(<span>2)',
-			'<div>122.appendChild(<span>2)'
+			'<span>1.remove()'
 		]);
 	});
 
@@ -2658,7 +2656,7 @@ describe('Fragment', () => {
 		render(<App condition={false} />, scratch);
 
 		expect(scratch.innerHTML).to.equal(div([div(1), div('A')]));
-		expectDomLogToBe(['<div>2.remove()', '<div>1A.appendChild(<div>A)']);
+		expectDomLogToBe(['<div>2.remove()']);
 	});
 
 	it('should efficiently unmount nested Fragment children', () => {
@@ -2702,12 +2700,7 @@ describe('Fragment', () => {
 		render(<App condition={false} />, scratch);
 
 		expect(scratch.innerHTML).to.equal(div([div(1), div('A'), div('B')]));
-		expectDomLogToBe([
-			'<div>2.remove()',
-			'<div>3.remove()',
-			'<div>1AB.appendChild(<div>A)',
-			'<div>1BA.appendChild(<div>B)'
-		]);
+		expectDomLogToBe(['<div>2.remove()', '<div>3.remove()']);
 	});
 
 	it('should efficiently place new children and unmount nested Fragment children', () => {
@@ -2756,9 +2749,7 @@ describe('Fragment', () => {
 			'<div>.appendChild(#text)',
 			'<div>123AB.insertBefore(<div>4, <div>2)',
 			'<div>2.remove()',
-			'<div>3.remove()',
-			'<div>14AB.appendChild(<div>A)',
-			'<div>14BA.appendChild(<div>B)'
+			'<div>3.remove()'
 		]);
 	});
 
@@ -2857,13 +2848,12 @@ describe('Fragment', () => {
 			'<div>123AB.insertBefore(<span>1, <div>1)',
 			'<div>2.remove()',
 			'<div>3.remove()',
-			'<div>1.remove()',
-			'<div>1AB.appendChild(<div>A)',
-			'<div>1BA.appendChild(<div>B)'
+			'<div>1.remove()'
 		]);
 	});
 
 	it('should swap nested fragments correctly', () => {
+		/** @type {() => void} */
 		let swap;
 		class App extends Component {
 			constructor(props) {
@@ -2875,11 +2865,9 @@ describe('Fragment', () => {
 				if (this.state.first) {
 					return (
 						<Fragment>
-							{
-								<Fragment>
-									<p>1. Original item first paragraph</p>
-								</Fragment>
-							}
+							<Fragment>
+								<p>1. Original item first paragraph</p>
+							</Fragment>
 							<p>2. Original item second paragraph</p>
 							<button onClick={(swap = () => this.setState({ first: false }))}>
 								Click me
@@ -2918,5 +2906,55 @@ describe('Fragment', () => {
 		expect(scratch.innerHTML).to.equal(
 			'<p>1. Original item first paragraph</p><p>2. Original item second paragraph</p><button>Click me</button>'
 		);
+	});
+
+	it('should efficiently unmount nested Fragment children when rerendering and reordering', () => {
+		/** @type {() => void} */
+		let toggle;
+
+		class App extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { condition: true };
+				toggle = () => this.setState({ condition: !this.state.condition });
+			}
+
+			render() {
+				return this.state.condition ? (
+					<Fragment>
+						<div>1</div>
+						<Fragment>
+							<div>A</div>
+							<div>B</div>
+						</Fragment>
+						<div>2</div>
+					</Fragment>
+				) : (
+					<Fragment>
+						<Fragment>
+							<div>A</div>
+						</Fragment>
+						<div>1</div>
+						<div>2</div>
+					</Fragment>
+				);
+			}
+		}
+
+		clearLog();
+		render(<App />, scratch);
+		expect(scratch.innerHTML).to.equal(
+			[div(1), div('A'), div('B'), div(2)].join('')
+		);
+
+		clearLog();
+		toggle();
+		rerender();
+
+		expect(scratch.innerHTML).to.equal([div('A'), div(1), div(2)].join(''));
+		expectDomLogToBe([
+			'<div>B.remove()',
+			'<div>1A2.insertBefore(<div>1, <div>2)'
+		]);
 	});
 });

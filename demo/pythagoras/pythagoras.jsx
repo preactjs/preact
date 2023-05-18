@@ -1,11 +1,10 @@
 import { interpolateViridis } from 'd3-scale';
-import { createElement } from 'preact';
 
-Math.deg = function(radians) {
+Math.deg = function (radians) {
 	return radians * (180 / Math.PI);
 };
 
-const memoizedCalc = (function() {
+const memoizedCalc = (function () {
 	const memo = {};
 
 	const key = ({ w, heightFactor, lean }) => `${w}-${heightFactor}-${lean}`;

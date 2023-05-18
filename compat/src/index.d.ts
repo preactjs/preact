@@ -74,7 +74,7 @@ declare namespace React {
 
 	export function createPortal(
 		vnode: preact.VNode,
-		container: Element
+		container: Element | DocumentFragment
 	): preact.VNode<any>;
 
 	export function render(
@@ -111,6 +111,11 @@ declare namespace React {
 		isPureReactComponent: boolean;
 	}
 
+	export type MemoExoticComponent<C extends preact.FunctionalComponent<any>> =
+		preact.FunctionComponent<ComponentProps<C>> & {
+			readonly type: C;
+		};
+
 	export function memo<P = {}>(
 		component: preact.FunctionalComponent<P>,
 		comparer?: (prev: P, next: P) => boolean
@@ -123,9 +128,18 @@ declare namespace React {
 		) => boolean
 	): C;
 
+	export interface RefAttributes<R> extends preact.Attributes {
+		ref?: preact.Ref<R> | undefined;
+	}
+
 	export interface ForwardFn<P = {}, T = any> {
 		(props: P, ref: ForwardedRef<T>): preact.ComponentChild;
 		displayName?: string;
+	}
+
+	export interface ForwardRefExoticComponent<P>
+		extends preact.FunctionComponent<P> {
+		defaultProps?: Partial<P> | undefined;
 	}
 
 	export function forwardRef<R, P = {}>(
@@ -135,8 +149,11 @@ declare namespace React {
 	interface MutableRefObject<T> {
 		current: T;
 	}
-	
-	export type ForwardedRef<T> = ((instance: T | null) => void) | MutableRefObject<T | null> | null;
+
+	export type ForwardedRef<T> =
+		| ((instance: T | null) => void)
+		| MutableRefObject<T | null>
+		| null;
 
 	export function unstable_batchedUpdates(
 		callback: (arg?: any) => void,
@@ -144,9 +161,9 @@ declare namespace React {
 	): void;
 
 	export type PropsWithChildren<P = unknown> = P & {
-		children?: preact.ComponentChild | undefined
+		children?: preact.ComponentChild | undefined;
 	};
-	
+
 	export const Children: {
 		map<T extends preact.ComponentChild, R>(
 			children: T | T[],

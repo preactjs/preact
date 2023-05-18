@@ -79,6 +79,12 @@ render(
 	document
 );
 
+// Mounting into different types of Nodes
+render(h('div', {}), document.createElement('div'));
+render(h('div', {}), document);
+render(h('div', {}), document.createElement('div').shadowRoot!);
+render(h('div', {}), document.createDocumentFragment());
+
 // Accessing children
 const ComponentWithChildren: FunctionalComponent<DummerComponentProps> = ({
 	input,

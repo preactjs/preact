@@ -1,9 +1,9 @@
 import { createElement, Suspense, lazy, Component } from 'react';
 
-const Loading = function() {
+const Loading = function () {
 	return <div>Loading...</div>;
 };
-const Error = function({ resetState }) {
+const Error = function ({ resetState }) {
 	return (
 		<div>
 			Error!&nbsp;
@@ -18,16 +18,16 @@ const pause = timeout =>
 	new Promise(d => setTimeout(d, timeout), console.log(timeout));
 
 const DropZone = lazy(() =>
-	pause(Math.random() * 1000).then(() => import('./dropzone.js'))
+	pause(Math.random() * 1000).then(() => import('./dropzone.jsx'))
 );
 const Editor = lazy(() =>
-	pause(Math.random() * 1000).then(() => import('./editor.js'))
+	pause(Math.random() * 1000).then(() => import('./editor.jsx'))
 );
 const AddNewComponent = lazy(() =>
-	pause(Math.random() * 1000).then(() => import('./addnewcomponent.js'))
+	pause(Math.random() * 1000).then(() => import('./addnewcomponent.jsx'))
 );
 const GenerateComponents = lazy(() =>
-	pause(Math.random() * 1000).then(() => import('./component-container.js'))
+	pause(Math.random() * 1000).then(() => import('./component-container.jsx'))
 );
 
 export default class App extends Component {

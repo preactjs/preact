@@ -1,0 +1,25 @@
+.DS_Store
+node_modules
+npm-debug.log
+dist
+*/package-lock.json
+yarn.lock
+.vscode
+.idea
+test/ts/**/*.js
+coverage
+*.sw[op]
+*.log
+package/
+preact-*.tgz
+preact.tgz
+
+# Copied from benches/.gitignore so prettier can ignore these paths too
+benches/dist/
+benches/results/
+benches/logs/
+benches/logs-saved/
+benches/node_modules/
+benches/proxy-packages/*/package-lock.json
+
+package-lock.json

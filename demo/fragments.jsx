@@ -1,6 +1,6 @@
-import { createElement, Component, Fragment } from 'preact';
+import { Component } from 'preact';
 
-export default class extends Component {
+export default class FragmentComp extends Component {
 	state = { number: 0 };
 
 	componentDidMount() {

@@ -19,9 +19,7 @@ describe('PureComponent', () => {
 	});
 
 	it('should be a class', () => {
-		expect(React)
-			.to.have.property('PureComponent')
-			.that.is.a('function');
+		expect(React).to.have.property('PureComponent').that.is.a('function');
 	});
 
 	it('should pass props in constructor', () => {

@@ -252,6 +252,21 @@ describe('compat render', () => {
 		);
 	});
 
+	it('shouldnot transform imageSrcSet', () => {
+		render(
+			<link
+				rel="preload"
+				as="image"
+				href="preact.jpg"
+				imageSrcSet="preact_400px.jpg 400w"
+			/>,
+			scratch
+		);
+		expect(scratch.innerHTML).to.equal(
+			'<link rel="preload" as="image" href="preact.jpg" imagesrcset="preact_400px.jpg 400w">'
+		);
+	});
+
 	it('should correctly allow for "className"', () => {
 		const Foo = props => {
 			const { className, ...rest } = props;
@@ -320,6 +335,7 @@ describe('compat render', () => {
 		it('should preserve className, add class alias', () => {
 			const { props } = <ul className="from className" />;
 			expect(props).to.have.property('className', 'from className');
+			// TODO: why would we do this, assuming that folks add className themselves
 			expect(props).to.have.property('class', 'from className');
 		});
 
@@ -342,6 +358,7 @@ describe('compat render', () => {
 			const { props } = <ul className="from className" />;
 			const spreaded = (<li a {...props} />).props;
 			expect(spreaded).to.have.property('className', 'from className');
+			// TODO: why would we do this, assuming that folks add className themselves
 			expect(spreaded).to.have.property('class', 'from className');
 			expect(spreaded.propertyIsEnumerable('class')).to.equal(true);
 		});
@@ -490,9 +507,8 @@ describe('compat render', () => {
 
 		// Simplified version of: https://github.com/facebook/relay/blob/fba79309977bf6b356ee77a5421ca5e6f306223b/packages/react-relay/readContext.js#L17-L28
 		function readContext(Context) {
-			const {
-				ReactCurrentDispatcher
-			} = React.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
+			const { ReactCurrentDispatcher } =
+				React.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
 			const dispatcher = ReactCurrentDispatcher.current;
 			return dispatcher.readContext(Context);
 		}

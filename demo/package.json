@@ -2,28 +2,15 @@
   "name": "demo",
   "main": "index.js",
   "scripts": {
-    "start": "webpack-dev-server"
+    "start": "vite",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
   },
   "devDependencies": {
-    "@babel/core": "^7.0.0-beta.55",
     "@babel/plugin-proposal-class-properties": "^7.0.0-beta.55",
     "@babel/plugin-proposal-decorators": "^7.4.0",
-    "@babel/plugin-syntax-dynamic-import": "^7.2.0",
-    "@babel/plugin-transform-react-constant-elements": "^7.0.0-beta.55",
-    "@babel/plugin-transform-react-jsx": "^7.0.0-beta.55",
-    "@babel/plugin-transform-runtime": "^7.4.0",
-    "@babel/preset-env": "^7.0.0-beta.55",
-    "@babel/preset-react": "^7.0.0-beta.55",
-    "@babel/preset-typescript": "^7.3.3",
-    "babel-loader": "^8.0.0-beta.0",
-    "css-loader": "6.7.1",
-    "html-webpack-plugin": "5.5.0",
-    "sass": "^1.53.0",
-    "sass-loader": "13.0.2",
-    "style-loader": "3.3.1",
-    "webpack": "5.73.0",
-    "webpack-cli": "4.10.0",
-    "webpack-dev-server": "4.9.3"
+    "vite": "^4.2.1"
   },
   "dependencies": {
     "@material-ui/core": "4.9.5",
@@ -40,5 +27,8 @@
     "react-router-dom": "^5.0.1",
     "redux": "^4.0.1",
     "styled-components": "^4.2.0"
+  },
+  "volta": {
+    "extends": "../package.json"
   }
 }

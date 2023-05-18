@@ -8,12 +8,12 @@ import preact8 from '../fixtures/preact';
 import * as preactX from '../../dist/preact.module';
 const MULTIPLIER = ENABLE_PERFORMANCE ? (COVERAGE ? 5 : 1) : 999999;
 
-describe('benchmarks', function() {
+describe('benchmarks', function () {
 	let scratch;
 
 	this.timeout(100000);
 
-	before(function() {
+	before(function () {
 		if (!ENABLE_PERFORMANCE) this.skip();
 		if (COVERAGE) {
 			console.warn(

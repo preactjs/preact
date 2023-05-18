@@ -147,8 +147,9 @@
 				translateY(calc(var(--spinner-size) / 3 * 2 - 1px)) rotate(-180deg);
 		}
 		75% {
-			transform: translateX(0) translateY(calc(var(--spinner-size) / 3 * 2 - 1px))
-				rotate(-270deg) scale(0.5);
+			transform: translateX(0)
+				translateY(calc(var(--spinner-size) / 3 * 2 - 1px)) rotate(-270deg)
+				scale(0.5);
 		}
 		100% {
 			transform: rotate(-360deg);

@@ -2,6 +2,7 @@ import { diff, unmount, applyRef } from './index';
 import { createVNode, Fragment } from '../create-element';
 import { EMPTY_OBJ, EMPTY_ARR } from '../constants';
 import { getDomSibling } from '../component';
+import { isArray } from '../util';
 
 /**
  * Diff the children of a virtual node
@@ -47,7 +48,11 @@ export function diffChildren(
 	for (i = 0; i < renderResult.length; i++) {
 		childVNode = renderResult[i];
 
-		if (childVNode == null || typeof childVNode == 'boolean') {
+		if (
+			childVNode == null ||
+			typeof childVNode == 'boolean' ||
+			typeof childVNode == 'function'
+		) {
 			childVNode = newParentVNode._children[i] = null;
 		}
 		// If this newVNode is being reused (e.g. <div>{reuse}{reuse}</div>) in the same diff,
@@ -66,7 +71,7 @@ export function diffChildren(
 				null,
 				childVNode
 			);
-		} else if (Array.isArray(childVNode)) {
+		} else if (isArray(childVNode)) {
 			childVNode = newParentVNode._children[i] = createVNode(
 				Fragment,
 				{ children: childVNode },
@@ -205,6 +210,17 @@ export function diffChildren(
 	// Remove remaining oldChildren if there are any.
 	for (i = oldChildrenLength; i--; ) {
 		if (oldChildren[i] != null) {
+			if (
+				typeof newParentVNode.type == 'function' &&
+				oldChildren[i]._dom != null &&
+				oldChildren[i]._dom == newParentVNode._nextDom
+			) {
+				// If the newParentVNode.__nextDom points to a dom node that is about to
+				// be unmounted, then get the next sibling of that vnode and set
+				// _nextDom to it
+				newParentVNode._nextDom = getLastDom(oldParentVNode).nextSibling;
+			}
+
 			unmount(oldChildren[i], oldChildren[i]);
 		}
 	}
@@ -250,7 +266,7 @@ function reorderChildren(childVNode, oldDom, parentDom) {
 export function toChildArray(children, out) {
 	out = out || [];
 	if (children == null || typeof children == 'boolean') {
-	} else if (Array.isArray(children)) {
+	} else if (isArray(children)) {
 		children.some(child => {
 			toChildArray(child, out);
 		});
@@ -314,4 +330,27 @@ function placeChild(
 	}
 
 	return oldDom;
+}
+
+/**
+ * @param {import('../internal').VNode} vnode
+ */
+function getLastDom(vnode) {
+	if (vnode.type == null || typeof vnode.type === 'string') {
+		return vnode._dom;
+	}
+
+	if (vnode._children) {
+		for (let i = vnode._children.length - 1; i >= 0; i--) {
+			let child = vnode._children[i];
+			if (child) {
+				let lastDom = getLastDom(child);
+				if (lastDom) {
+					return lastDom;
+				}
+			}
+		}
+	}
+
+	return null;
 }

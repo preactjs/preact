@@ -28,7 +28,7 @@ describe('Lifecycle methods', () => {
 
 		let log;
 		function logger(msg) {
-			return function() {
+			return function () {
 				// return true for shouldComponentUpdate
 				log.push(msg);
 				return true;

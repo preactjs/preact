@@ -3,7 +3,7 @@ import { Component, getDomSibling } from '../component';
 import { Fragment } from '../create-element';
 import { diffChildren } from './children';
 import { diffProps, setProperty } from './props';
-import { assign, removeNode, slice } from '../util';
+import { assign, isArray, removeNode, slice } from '../util';
 import options from '../options';
 
 /**
@@ -110,6 +110,7 @@ export function diff(
 
 			oldProps = c.props;
 			oldState = c.state;
+			c._vnode = newVNode;
 
 			// Invoke pre-render lifecycle methods
 			if (isNew) {
@@ -142,11 +143,19 @@ export function diff(
 						) === false) ||
 					newVNode._original === oldVNode._original
 				) {
-					c.props = newProps;
-					c.state = c._nextState;
 					// More info about this here: https://gist.github.com/JoviDeCroock/bec5f2ce93544d2e6070ef8e0036e4e8
-					if (newVNode._original !== oldVNode._original) c._dirty = false;
-					c._vnode = newVNode;
+					if (newVNode._original !== oldVNode._original) {
+						// When we are dealing with a bail because of sCU we have to update
+						// the props, state and dirty-state.
+						// when we are dealing with strict-equality we don't as the child could still
+						// be dirtied see #3883
+						c.props = newProps;
+						c.state = c._nextState;
+						c._dirty = false;
+					}
+
+					// In cases of bailing due to strict-equality we have to reset force as well
+					c._force = false;
 					newVNode._dom = oldVNode._dom;
 					newVNode._children = oldVNode._children;
 					newVNode._children.forEach(vnode => {
@@ -178,7 +187,6 @@ export function diff(
 
 			c.context = componentContext;
 			c.props = newProps;
-			c._vnode = newVNode;
 			c._parentDom = parentDom;
 
 			let renderHook = options._render,
@@ -224,7 +232,7 @@ export function diff(
 
 			diffChildren(
 				parentDom,
-				Array.isArray(renderResult) ? renderResult : [renderResult],
+				isArray(renderResult) ? renderResult : [renderResult],
 				newVNode,
 				oldVNode,
 				globalContext,
@@ -430,7 +438,7 @@ function diffElementNodes(
 			i = newVNode.props.children;
 			diffChildren(
 				dom,
-				Array.isArray(i) ? i : [i],
+				isArray(i) ? i : [i],
 				newVNode,
 				oldVNode,
 				globalContext,

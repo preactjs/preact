@@ -1,5 +1,5 @@
 // eslint-disable-next-line no-unused-vars
-import { createElement, Component, createContext, Fragment } from 'preact';
+import { Component, createContext } from 'preact';
 const { Provider, Consumer } = createContext();
 
 class ThemeProvider extends Component {
