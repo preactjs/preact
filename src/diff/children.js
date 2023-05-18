@@ -320,43 +320,33 @@ function findMatchingIndex(
 	skewedIndex,
 	remainingOldChildren
 ) {
+	const key = childVNode.key;
+	const type = childVNode.type;
 	let x = skewedIndex - 1;
 	let y = skewedIndex + 1;
 	let oldVNode = oldChildren[skewedIndex];
 
 	if (
 		oldVNode === null ||
-		(oldVNode &&
-			childVNode.key == oldVNode.key &&
-			childVNode.type === oldVNode.type)
+		(oldVNode && key == oldVNode.key && type === oldVNode.type)
 	) {
 		return skewedIndex;
 	} else if (remainingOldChildren > (oldVNode != null ? 1 : 0)) {
-		// eslint-disable-next-line no-constant-condition
-		while (true) {
+		while (x >= 0 || y < oldChildren.length) {
 			if (x >= 0) {
 				oldVNode = oldChildren[x];
-				if (
-					oldVNode &&
-					childVNode.key == oldVNode.key &&
-					childVNode.type === oldVNode.type
-				) {
+				if (oldVNode && key == oldVNode.key && type === oldVNode.type) {
 					return x;
 				}
 				x--;
 			}
+
 			if (y < oldChildren.length) {
 				oldVNode = oldChildren[y];
-				if (
-					oldVNode &&
-					childVNode.key == oldVNode.key &&
-					childVNode.type === oldVNode.type
-				) {
+				if (oldVNode && key == oldVNode.key && type === oldVNode.type) {
 					return y;
 				}
 				y++;
-			} else if (x < 0) {
-				return -1;
 			}
 		}
 	}
