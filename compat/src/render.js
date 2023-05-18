@@ -118,10 +118,10 @@ options.event = e => {
  */
 function afterEvent(eventType, target) {
 	if (target.value != null) {
-		Promise.resolve().then(() => (target.value = target._prevValue));
+		target.value = target._prevValue;
 	}
 	if (eventType === 'change' && target.checked != null) {
-		Promise.resolve().then(() => (target.checked = target._prevValue));
+		target.checked = target._prevValue;
 	}
 }
 
