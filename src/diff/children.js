@@ -299,7 +299,7 @@ export function toChildArray(children, out) {
 
 function placeChild(parentDom, newDom, oldDom) {
 	if (oldDom == null || oldDom.parentNode !== parentDom) {
-		parentDom.appendChild(newDom);
+		parentDom.insertBefore(newDom, null);
 	} else if (newDom != oldDom || newDom.parentNode == null) {
 		parentDom.insertBefore(newDom, oldDom);
 	}
