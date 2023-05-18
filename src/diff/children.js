@@ -300,12 +300,10 @@ export function toChildArray(children, out) {
 }
 
 function placeChild(parentDom, newDom, oldDom) {
-	if (newDom != oldDom || newDom.parentNode == null) {
-		if (oldDom == null || oldDom.parentNode !== parentDom) {
-			parentDom.appendChild(newDom);
-		} else {
-			parentDom.insertBefore(newDom, oldDom);
-		}
+	if (oldDom == null || oldDom.parentNode !== parentDom) {
+		parentDom.appendChild(newDom);
+	} else if (newDom != oldDom || newDom.parentNode == null) {
+		parentDom.insertBefore(newDom, oldDom);
 	}
 
 	return newDom.nextSibling;
