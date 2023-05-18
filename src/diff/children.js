@@ -1,7 +1,6 @@
 import { diff, unmount, applyRef } from './index';
 import { createVNode, Fragment } from '../create-element';
 import { EMPTY_OBJ, EMPTY_ARR } from '../constants';
-import { getDomSibling } from '../component';
 import { isArray } from '../util';
 
 /**
