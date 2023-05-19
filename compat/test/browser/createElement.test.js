@@ -24,20 +24,16 @@ describe('compat createElement()', () => {
 		const $$typeof = getSymbol('react.element', 0xeac7);
 		expect(vnode).to.have.property('$$typeof', $$typeof);
 		expect(vnode).to.have.property('type', 'div');
-		expect(vnode)
-			.to.have.property('props')
-			.that.is.an('object');
+		expect(vnode).to.have.property('props').that.is.an('object');
 		expect(vnode.props).to.have.property('children');
 		expect(vnode.props.children).to.have.property('$$typeof', $$typeof);
 		expect(vnode.props.children).to.have.property('type', 'a');
-		expect(vnode.props.children)
-			.to.have.property('props')
-			.that.is.an('object');
+		expect(vnode.props.children).to.have.property('props').that.is.an('object');
 		expect(vnode.props.children.props).to.eql({ children: 't' });
 	});
 
 	it('should not normalize text nodes', () => {
-		String.prototype.capFLetter = function() {
+		String.prototype.capFLetter = function () {
 			return this.charAt(0).toUpperCase() + this.slice(1);
 		};
 		let vnode = <div>hi buddy</div>;

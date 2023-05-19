@@ -13,10 +13,21 @@ export function cloneElement(vnode, props, children) {
 		key,
 		ref,
 		i;
+
+	let defaultProps;
+
+	if (vnode.type && vnode.type.defaultProps) {
+		defaultProps = vnode.type.defaultProps;
+	}
+
 	for (i in props) {
 		if (i == 'key') key = props[i];
 		else if (i == 'ref') ref = props[i];
-		else normalizedProps[i] = props[i];
+		else if (props[i] === undefined && defaultProps !== undefined) {
+			normalizedProps[i] = defaultProps[i];
+		} else {
+			normalizedProps[i] = props[i];
+		}
 	}
 
 	if (arguments.length > 2) {

@@ -1,4 +1,4 @@
-import { createElement, render, Component, Fragment } from 'preact';
+import { render, Component, Fragment } from 'preact';
 // import renderToString from 'preact-render-to-string';
 import './style.scss';
 import { Router, Link } from 'preact-router';

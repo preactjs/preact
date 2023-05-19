@@ -11,7 +11,7 @@ import {
 	getCurrentVNode,
 	getDisplayName
 } from './component-stack';
-import { assign } from './util';
+import { assign, isNaN } from './util';
 
 const isWeakMapSupported = typeof WeakMap == 'function';
 
@@ -357,11 +357,32 @@ export function initDebug() {
 				keys.push(key);
 			}
 		}
+
+		if (vnode._component != null && vnode._component.__hooks != null) {
+			// Validate that none of the hooks in this component contain arguments that are NaN.
+			// This is a common mistake that can be hard to debug, so we want to catch it early.
+			const hooks = vnode._component.__hooks._list;
+			if (hooks) {
+				for (let i = 0; i < hooks.length; i += 1) {
+					const hook = hooks[i];
+					if (hook._args) {
+						for (const arg of hook._args) {
+							if (isNaN(arg)) {
+								const componentName = getDisplayName(vnode);
+								throw new Error(
+									`Invalid argument passed to hook. Hooks should not be called with NaN in the dependency array. Hook index ${i} in component ${componentName} was called with NaN.`
+								);
+							}
+						}
+					}
+				}
+			}
+		}
 	};
 }
 
 const setState = Component.prototype.setState;
-Component.prototype.setState = function(update, callback) {
+Component.prototype.setState = function (update, callback) {
 	if (this._vnode == null) {
 		// `this._vnode` will be `null` during componentWillMount. But it
 		// is perfectly valid to call `setState` during cWM. So we
@@ -380,7 +401,7 @@ Component.prototype.setState = function(update, callback) {
 };
 
 const forceUpdate = Component.prototype.forceUpdate;
-Component.prototype.forceUpdate = function(callback) {
+Component.prototype.forceUpdate = function (callback) {
 	if (this._vnode == null) {
 		console.warn(
 			`Calling "this.forceUpdate" inside the constructor of a component is a ` +

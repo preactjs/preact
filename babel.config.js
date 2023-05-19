@@ -1,4 +1,4 @@
-module.exports = function(api) {
+module.exports = function (api) {
 	api.cache(true);
 
 	const noModules = String(process.env.BABEL_NO_MODULES) === 'true';

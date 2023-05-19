@@ -19,7 +19,7 @@ function Portal(props) {
 	const _this = this;
 	let container = props._container;
 
-	_this.componentWillUnmount = function() {
+	_this.componentWillUnmount = function () {
 		render(null, _this._temp);
 		_this._temp = null;
 		_this._container = null;

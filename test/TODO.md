@@ -1,10 +1,10 @@
 # Tests skipped to get CI to pass
 
 - Fragment
-	- ✖ should not preserve state between array nested in fragment and double nested array
-	- ✖ should preserve state between double nested fragment and double nested array
+  - ✖ should not preserve state between array nested in fragment and double nested array
+  - ✖ should preserve state between double nested fragment and double nested array
 - hydrate
-	- ✖ should override incorrect pre-existing DOM with VNodes passed into render
+  - ✖ should override incorrect pre-existing DOM with VNodes passed into render
 
 Also:
 

@@ -258,9 +258,7 @@ describe('useEffect', () => {
 			render(<App />, scratch);
 		});
 		expect(spy).to.be.calledOnce;
-		expect(errored)
-			.to.be.an('Error')
-			.with.property('message', 'hi');
+		expect(errored).to.be.an('Error').with.property('message', 'hi');
 		expect(scratch.innerHTML).to.equal('<p>Error</p>');
 	});
 

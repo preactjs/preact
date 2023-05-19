@@ -10,7 +10,8 @@ export const REACT_ELEMENT_TYPE =
 	(typeof Symbol != 'undefined' && Symbol.for && Symbol.for('react.element')) ||
 	0xeac7;
 
-const CAMEL_PROPS = /^(?:accent|alignment|arabic|baseline|cap|clip(?!PathU)|color|dominant|fill|flood|font|glyph(?!R)|horiz|image|letter|lighting|marker(?!H|W|U)|overline|paint|pointer|shape|stop|strikethrough|stroke|text(?!L)|transform|underline|unicode|units|v|vector|vert|word|writing|x(?!C))[A-Z]/;
+const CAMEL_PROPS =
+	/^(?:accent|alignment|arabic|baseline|cap|clip(?!PathU)|color|dominant|fill|flood|font|glyph(?!R)|horiz|image(!S)|letter|lighting|marker(?!H|W|U)|overline|paint|pointer|shape|stop|strikethrough|stroke|text(?!L)|transform|underline|unicode|units|v|vector|vert|word|writing|x(?!C))[A-Z]/;
 const ON_ANI = /^on(Ani|Tra|Tou|BeforeInp|Compo)/;
 const CAMEL_REPLACE = /[A-Z0-9]/g;
 
@@ -85,6 +86,7 @@ export function hydrate(vnode, parent, callback) {
 let oldEventHook = options.event;
 options.event = e => {
 	if (oldEventHook) e = oldEventHook(e);
+
 	e.persist = empty;
 	e.isPropagationStopped = isPropagationStopped;
 	e.isDefaultPrevented = isDefaultPrevented;
@@ -230,7 +232,7 @@ options.vnode = vnode => {
 // Only needed for react-relay
 let currentComponent;
 const oldBeforeRender = options._render;
-options._render = function(vnode) {
+options._render = function (vnode) {
 	if (oldBeforeRender) {
 		oldBeforeRender(vnode);
 	}
@@ -238,14 +240,15 @@ options._render = function(vnode) {
 };
 
 const oldDiffed = options.diffed;
-/** @type {(vnode: import('./internal').VNode)} */
-options.diffed = function(vnode) {
+/** @type {(vnode: import('./internal').VNode) => void} */
+options.diffed = function (vnode) {
 	if (oldDiffed) {
 		oldDiffed(vnode);
 	}
 
 	const props = vnode.props;
 	const dom = vnode._dom;
+
 	if (
 		dom != null &&
 		vnode.type === 'textarea' &&

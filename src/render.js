@@ -29,10 +29,8 @@ export function render(vnode, parentDom, replaceNode) {
 		? null
 		: (replaceNode && replaceNode._children) || parentDom._children;
 
-	vnode = (
-		(!isHydrating && replaceNode) ||
-		parentDom
-	)._children = createElement(Fragment, null, [vnode]);
+	vnode = ((!isHydrating && replaceNode) || parentDom)._children =
+		createElement(Fragment, null, [vnode]);
 
 	// List of effects that need to be called after diffing.
 	let commitQueue = [];

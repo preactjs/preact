@@ -10,6 +10,6 @@ export function PureComponent(p) {
 PureComponent.prototype = new Component();
 // Some third-party libraries check if this property is present
 PureComponent.prototype.isPureReactComponent = true;
-PureComponent.prototype.shouldComponentUpdate = function(props, state) {
+PureComponent.prototype.shouldComponentUpdate = function (props, state) {
 	return shallowDiffers(this.props, props) || shallowDiffers(this.state, state);
 };

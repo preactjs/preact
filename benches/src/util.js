@@ -5,6 +5,12 @@ export { afterFrame };
 
 export const measureName = 'duration';
 
+const majorTask = () =>
+	new Promise(resolve => {
+		window.addEventListener('message', resolve, { once: true });
+		window.postMessage('major task delay', '*');
+	});
+
 let promise = null;
 export function afterFrameAsync() {
 	if (promise === null) {
@@ -19,10 +25,20 @@ export function afterFrameAsync() {
 	return promise;
 }
 
-export function measureMemory() {
+export async function measureMemory() {
 	if ('gc' in window && 'memory' in performance) {
 		// Report results in MBs
+		performance.mark('gc-start');
 		window.gc();
+		performance.measure('gc', 'gc-start');
+
+		// window.gc synchronously triggers one Major GC. However that MajorGC
+		// asynchronously triggers additional MajorGCs until the
+		// usedJSHeapSizeBefore and usedJSHeapSizeAfter are the same. Here, we'll
+		// wait a moment for some (hopefully all) additional GCs to finish before
+		// measuring the memory.
+		await majorTask();
+		performance.mark('measure-memory');
 		window.usedJSHeapSize = performance.memory.usedJSHeapSize / 1e6;
 	} else {
 		window.usedJSHeapSize = 0;
@@ -106,7 +122,7 @@ channel.port1.onmessage = e => {
 	callbacks.delete(id);
 	fn();
 };
-let pm = function(callback) {
+let pm = function (callback) {
 	let id = ++count;
 	callbacks.set(id, callback);
 	this.postMessage(id);

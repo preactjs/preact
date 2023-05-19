@@ -22,11 +22,7 @@ const Config = () => html`
 const Child = ({ items, setItems }) => {
 	let [pendingId, setPendingId] = useState(null);
 	if (!pendingId) {
-		setPendingId(
-			(pendingId = Math.random()
-				.toFixed(20)
-				.slice(2))
-		);
+		setPendingId((pendingId = Math.random().toFixed(20).slice(2)));
 	}
 
 	const onInput = useCallback(

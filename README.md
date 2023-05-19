@@ -1,7 +1,7 @@
 <p align="center">
 <a href="https://preactjs.com" target="_blank">
 
-![Preact](https://raw.githubusercontent.com/preactjs/preact/8b0bcc927995c188eca83cba30fbc83491cc0b2f/logo.svg?sanitize=true "Preact")
+![Preact](https://raw.githubusercontent.com/preactjs/preact/8b0bcc927995c188eca83cba30fbc83491cc0b2f/logo.svg?sanitize=true 'Preact')
 
 </a>
 </p>
@@ -18,7 +18,6 @@
 
 ### 💁 More information at the [Preact Website ➞](https://preactjs.com)
 
-
 <table border="0">
 <tbody>
 <tr>
@@ -32,6 +31,7 @@
 [![coveralls](https://img.shields.io/coveralls/preactjs/preact/master.svg)](https://coveralls.io/github/preactjs/preact)
 [![gzip size](http://img.badgesize.io/https://unpkg.com/preact/dist/preact.min.js?compression=gzip&label=gzip)](https://unpkg.com/preact/dist/preact.min.js)
 [![brotli size](http://img.badgesize.io/https://unpkg.com/preact/dist/preact.min.js?compression=brotli&label=brotli)](https://unpkg.com/preact/dist/preact.min.js)
+
 </td>
 <td>
 
@@ -41,7 +41,6 @@
 </tr>
 </tbody>
 </table>
-
 
 You can find some awesome libraries in the [awesome-preact list](https://github.com/preactjs/awesome-preact) :sunglasses:
 
@@ -65,10 +64,20 @@ import { h, render } from 'preact';
 /** @jsx h */
 
 // create our tree and append it to document.body:
-render(<main><h1>Hello</h1></main>, document.body);
+render(
+	<main>
+		<h1>Hello</h1>
+	</main>,
+	document.body
+);
 
 // update the tree in-place:
-render(<main><h1>Hello World!</h1></main>, document.body);
+render(
+	<main>
+		<h1>Hello World!</h1>
+	</main>,
+	document.body
+);
 // ^ this second invocation of render(...) will use a single DOM call to update the text of the <h1>
 ```
 
@@ -88,8 +97,8 @@ const App = () => {
 			<p>Do you agree to the statement: "Preact is awesome"?</p>
 			<input value={input} onInput={e => setInput(e.target.value)} />
 		</div>
-	)
-}
+	);
+};
 
 render(<App />, document.body);
 ```
@@ -97,6 +106,7 @@ render(<App />, document.body);
 ---
 
 ## Sponsors
+
 Become a sponsor and get your logo on our README on GitHub with a link to your site. [[Become a sponsor](https://opencollective.com/preact#sponsor)]
 
 <a href="https://opencollective.com/preact/sponsor/0/website" target="_blank"><img src="https://opencollective.com/preact/sponsor/0/avatar.svg"></a>
@@ -131,8 +141,6 @@ Become a sponsor and get your logo on our README on GitHub with a link to your s
 <a href="https://opencollective.com/preact/sponsor/27/website" target="_blank"><img src="https://opencollective.com/preact/sponsor/27/avatar.svg"></a>
 <a href="https://opencollective.com/preact/sponsor/28/website" target="_blank"><img src="https://opencollective.com/preact/sponsor/28/avatar.svg"></a>
 <a href="https://opencollective.com/preact/sponsor/29/website" target="_blank"><img src="https://opencollective.com/preact/sponsor/29/avatar.svg"></a>
-
-
 
 ## Backers
 
@@ -175,10 +183,7 @@ Support us with a monthly donation and help us continue our activities. [[Become
 
 MIT
 
-
-
 [![Preact](https://i.imgur.com/YqCHvEW.gif)](https://preactjs.com)
-
 
 [preact/compat]: https://github.com/preactjs/preact/tree/master/compat
 [hyperscript]: https://github.com/dominictarr/hyperscript

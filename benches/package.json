@@ -1,33 +1,33 @@
 {
-	"name": "preact-benchmarks",
-	"private": true,
-	"version": "1.0.0",
-	"type": "module",
-	"description": "Benchmarks for Preact",
-	"scripts": {
-		"start": "node ./scripts config many_updates.html && tach --force-clean-npm-install --config dist/many_updates.config.json --manual",
-		"analyze": "node ./scripts analyze",
-		"bench": "node ./scripts bench",
-		"deopts": "node ./scripts deopts",
-		"help": "node ./scripts --help"
-	},
-	"license": "MIT",
-	"dependencies": {
-		"afterframe": "^1.0.1"
-	},
-	"devDependencies": {
-		"@kristoferbaxter/async": "^1.0.0",
-		"del": "^7.0.0",
-		"escalade": "^3.1.1",
-		"escape-string-regexp": "^5.0.0",
-		"globby": "^13.1.2",
-		"prompts": "^2.4.2",
-		"sade": "^1.8.1",
-		"strip-ansi": "^7.0.1",
-		"tachometer": "^0.7.0",
-		"v8-deopt-viewer": "^0.2.1"
-	},
+  "name": "preact-benchmarks",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Benchmarks for Preact",
+  "scripts": {
+    "start": "node ./scripts config many_updates.html && tach --force-clean-npm-install --config dist/many_updates.config.json --manual",
+    "analyze": "node ./scripts analyze",
+    "bench": "node ./scripts bench",
+    "deopts": "node ./scripts deopts",
+    "help": "node ./scripts --help"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "afterframe": "^1.0.1"
+  },
+  "devDependencies": {
+    "@kristoferbaxter/async": "^1.0.0",
+    "del": "^7.0.0",
+    "escalade": "^3.1.1",
+    "escape-string-regexp": "^5.0.0",
+    "globby": "^13.1.2",
+    "prompts": "^2.4.2",
+    "sade": "^1.8.1",
+    "strip-ansi": "^7.0.1",
+    "tachometer": "^0.7.0",
+    "v8-deopt-viewer": "^0.2.1"
+  },
   "volta": {
-		"extends": "../package.json"
-	}
+    "extends": "../package.json"
+  }
 }

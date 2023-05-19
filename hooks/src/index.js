@@ -190,7 +190,7 @@ export function useReducer(reducer, initialState, init) {
 			// If we're dealing with a forced update `shouldComponentUpdate` will
 			// not be called. But we use that to update the hook values, so we
 			// need to call it.
-			currentComponent.componentWillUpdate = function(p, s, c) {
+			currentComponent.componentWillUpdate = function (p, s, c) {
 				if (this._force) {
 					let tmp = prevScu;
 					// Clear to avoid other sCU hooks from being called

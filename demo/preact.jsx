@@ -29,7 +29,7 @@ function normalize(obj) {
 export function Component(props, context) {
 	CevicheComponent.call(this, props, context);
 	const render = this.render;
-	this.render = function(props, state, context) {
+	this.render = function (props, state, context) {
 		if (props.children) props.children = asArray(normalize(props.children));
 		return render.call(this, props, state, context);
 	};

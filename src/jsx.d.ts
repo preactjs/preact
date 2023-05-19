@@ -1033,15 +1033,12 @@ export namespace JSXInternal {
 		readonly currentTarget: Target;
 	};
 
-	export type TargetedAnimationEvent<
-		Target extends EventTarget
-	> = TargetedEvent<Target, AnimationEvent>;
-	export type TargetedClipboardEvent<
-		Target extends EventTarget
-	> = TargetedEvent<Target, ClipboardEvent>;
-	export type TargetedCompositionEvent<
-		Target extends EventTarget
-	> = TargetedEvent<Target, CompositionEvent>;
+	export type TargetedAnimationEvent<Target extends EventTarget> =
+		TargetedEvent<Target, AnimationEvent>;
+	export type TargetedClipboardEvent<Target extends EventTarget> =
+		TargetedEvent<Target, ClipboardEvent>;
+	export type TargetedCompositionEvent<Target extends EventTarget> =
+		TargetedEvent<Target, CompositionEvent>;
 	export type TargetedDragEvent<Target extends EventTarget> = TargetedEvent<
 		Target,
 		DragEvent
@@ -1066,9 +1063,8 @@ export namespace JSXInternal {
 		Target,
 		TouchEvent
 	>;
-	export type TargetedTransitionEvent<
-		Target extends EventTarget
-	> = TargetedEvent<Target, TransitionEvent>;
+	export type TargetedTransitionEvent<Target extends EventTarget> =
+		TargetedEvent<Target, TransitionEvent>;
 	export type TargetedUIEvent<Target extends EventTarget> = TargetedEvent<
 		Target,
 		UIEvent
@@ -1088,9 +1084,8 @@ export namespace JSXInternal {
 	export type ClipboardEventHandler<Target extends EventTarget> = EventHandler<
 		TargetedClipboardEvent<Target>
 	>;
-	export type CompositionEventHandler<
-		Target extends EventTarget
-	> = EventHandler<TargetedCompositionEvent<Target>>;
+	export type CompositionEventHandler<Target extends EventTarget> =
+		EventHandler<TargetedCompositionEvent<Target>>;
 	export type DragEventHandler<Target extends EventTarget> = EventHandler<
 		TargetedDragEvent<Target>
 	>;
@@ -1721,7 +1716,12 @@ export namespace JSXInternal {
 			| string
 			| undefined
 			| SignalLike<number | string | undefined>;
-		hidden?: boolean | undefined | SignalLike<boolean | undefined>;
+		hidden?:
+			| boolean
+			| 'hidden'
+			| 'until-found'
+			| undefined
+			| SignalLike<boolean | 'hidden' | 'until-found' | undefined>;
 		high?: number | undefined | SignalLike<number | undefined>;
 		href?: string | undefined | SignalLike<string | undefined>;
 		hrefLang?: string | undefined | SignalLike<string | undefined>;
@@ -1729,7 +1729,8 @@ export namespace JSXInternal {
 		httpEquiv?: string | undefined | SignalLike<string | undefined>;
 		icon?: string | undefined | SignalLike<string | undefined>;
 		id?: string | undefined | SignalLike<string | undefined>;
-		indeterminate?: boolean | undefined | SignalLike<boolean>;
+		indeterminate?: boolean | undefined | SignalLike<boolean | undefined>;
+		inert?: boolean | undefined | SignalLike<boolean | undefined>;
 		inputMode?: string | undefined | SignalLike<string | undefined>;
 		integrity?: string | undefined | SignalLike<string | undefined>;
 		is?: string | undefined | SignalLike<string | undefined>;
@@ -2096,7 +2097,7 @@ export namespace JSXInternal {
 		animate: SVGAttributes<SVGAnimateElement>;
 		circle: SVGAttributes<SVGCircleElement>;
 		animateMotion: SVGAttributes<SVGAnimateMotionElement>;
-		animateTransform: SVGAttributes<SVGAnimateElement>;
+		animateTransform: SVGAttributes<SVGAnimateTransformElement>;
 		clipPath: SVGAttributes<SVGClipPathElement>;
 		defs: SVGAttributes<SVGDefsElement>;
 		desc: SVGAttributes<SVGDescElement>;
