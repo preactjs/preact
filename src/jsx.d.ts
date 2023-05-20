@@ -1144,6 +1144,10 @@ export namespace JSXInternal {
 		// Details Events
 		onToggle?: GenericEventHandler<Target> | undefined;
 
+		// Dialog Events
+		onClose?: GenericEventHandler<Target> | undefined;
+		onCancel?: GenericEventHandler<Target> | undefined;
+
 		// Focus Events
 		onFocus?: FocusEventHandler<Target> | undefined;
 		onFocusCapture?: FocusEventHandler<Target> | undefined;
