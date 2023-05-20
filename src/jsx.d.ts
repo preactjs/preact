@@ -1337,7 +1337,7 @@ export namespace JSXInternal {
 		onTransitionStart?: TransitionEventHandler<Target>;
 		onTransitionStartCapture?: TransitionEventHandler<Target>;
 
-    // PictureInPicture Events
+		// PictureInPicture Events
 		onEnterPictureInPicture?: PictureInPictureEventHandler<Target>;
 		onEnterPictureInPictureCapture?: PictureInPictureEventHandler<Target>;
 		onLeavePictureInPicture?: PictureInPictureEventHandler<Target>;
