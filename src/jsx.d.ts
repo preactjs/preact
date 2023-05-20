@@ -1328,10 +1328,16 @@ export namespace JSXInternal {
 		onAnimationIterationCapture?: AnimationEventHandler<Target> | undefined;
 
 		// Transition Events
+		onTransitionCancel?: TransitionEventHandler<Target>;
+		onTransitionCancelCapture?: TransitionEventHandler<Target>;
 		onTransitionEnd?: TransitionEventHandler<Target>;
 		onTransitionEndCapture?: TransitionEventHandler<Target>;
+		onTransitionRun?: TransitionEventHandler<Target>;
+		onTransitionRunCapture?: TransitionEventHandler<Target>;
+		onTransitionStart?: TransitionEventHandler<Target>;
+		onTransitionStartCapture?: TransitionEventHandler<Target>;
 
-		// PictureInPicture Events
+    // PictureInPicture Events
 		onEnterPictureInPicture?: PictureInPictureEventHandler<Target>;
 		onEnterPictureInPictureCapture?: PictureInPictureEventHandler<Target>;
 		onLeavePictureInPicture?: PictureInPictureEventHandler<Target>;
