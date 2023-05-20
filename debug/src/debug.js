@@ -32,6 +32,7 @@ export function initDebug() {
 	let oldBeforeDiff = options._diff;
 	let oldDiffed = options.diffed;
 	let oldVnode = options.vnode;
+	let oldRender = options._render;
 	let oldCatchError = options._catchError;
 	let oldRoot = options._root;
 	let oldHook = options._hook;
@@ -250,6 +251,13 @@ export function initDebug() {
 		}
 
 		if (oldBeforeDiff) oldBeforeDiff(vnode);
+	};
+
+	options._render = vnode => {
+		if (oldRender) {
+			oldRender(vnode);
+		}
+		hooksAllowed = true;
 	};
 
 	options._hook = (comp, index, type) => {
