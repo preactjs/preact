@@ -1336,6 +1336,8 @@ export namespace JSXInternal {
 		onEnterPictureInPictureCapture?: PictureInPictureEventHandler<Target>;
 		onLeavePictureInPicture?: PictureInPictureEventHandler<Target>;
 		onLeavePictureInPictureCapture?: PictureInPictureEventHandler<Target>;
+		onResize?: PictureInPictureEventHandler<Target>;
+		onResizeCapture?: PictureInPictureEventHandler<Target>;
 	}
 
 	// All the WAI-ARIA 1.1 attributes from https://www.w3.org/TR/wai-aria-1.1/
