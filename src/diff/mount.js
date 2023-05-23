@@ -129,8 +129,8 @@ function mountElement(internal, dom, refs) {
 
 	if (flags & TYPE_TEXT) {
 		if (isNew) {
-			// @ts-ignore createTextNode returns Text, we expect PreactElement
-			dom = document.createTextNode(newProps);
+			// @ts-ignore returns Text, we expect PreactElement
+			dom = new Text(newProps);
 		} else if (dom.data !== newProps) {
 			dom.data = newProps;
 		}
