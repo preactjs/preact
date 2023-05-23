@@ -22,6 +22,7 @@ export interface Component<P = {}, S = {}> extends PreactComponent<P, S> {
 	// Portal internal properties
 	_temp: any;
 	_container: PreactElement;
+	_containerVNode: VNode;
 }
 
 export interface FunctionComponent<P = {}> extends PreactFunctionComponent<P> {

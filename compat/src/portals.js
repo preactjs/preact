@@ -1,5 +1,4 @@
-import { createElement, options, render } from 'preact';
-import { commitRoot } from 'preact/src/diff';
+import { createElement, options, render, Fragment } from 'preact';
 
 /**
  * @param {import('../../src/index').RenderableProps<{ context: any }>} props
@@ -9,10 +8,15 @@ function ContextProvider(props) {
 	return props.children;
 }
 
+// TODO: Consider using a options._diffed hook to move the children of the
+// containerVNode somewhere else after they are diffed to prevent the algorithm
+// from trying to insert them. Restore them in an options._diff hook.
+
 /**
  * Portal component
+ * @typedef {import('./internal').VNode<any>} VNode
  * @this {import('./internal').Component}
- * @param {object | null | undefined} props
+ * @param {{ _vnode: VNode; _container: import('./internal').PreactElement; }} props
  *
  * TODO: use createRoot() instead of fake root
  */
@@ -36,6 +40,24 @@ function Portal(props) {
 	// conditional vnode. This should not trigger a render.
 	if (props._vnode) {
 		if (!_this._temp) {
+			// Initialize the component
+
+			// To the tree above the Portal, this component doesn't render any DOM
+			// nodes (it appears like a Fragment with no DOM children). Doing this
+			// causes diffChildren to correctly move children around this Portal and
+			// not mess with any of the real DOM this portal is managing.
+			//
+			// TODO: How can I use mangle config for defining this property?
+			Object.defineProperty(_this, '__e', {
+				get() {
+					return null;
+				},
+				set() {
+					// Should never be set?
+					throw new Error('unexpected 🫨');
+				}
+			});
+
 			_this._container = container;
 
 			// Create a fake DOM parent node that manages a subset of `container`'s children:
@@ -56,45 +78,44 @@ function Portal(props) {
 					_this._container.removeChild(child);
 				}
 			};
-		}
 
-		// TODO: Return a fake dom node to stich this tree into the parent. Also
-		// handle unmounting of this node.
-
-		// TODO: Explore using a non-dynamic commit hook to do this, perhaps storing
-		// the current portal component as a variable and using that to know whether
-		// or not to capture the commit queue. May need to track a portal stack for
-		// nested portals?
-
-		// Capture the commit queue so we can add it to this component's
-		// renderCallbacks to be invoked with the commit callbacks of the rest of
-		// this VNode tree
-		let commitQueue;
-		let oldCommit = options._commit;
-		options._commit = (root, queue) => {
-			commitQueue = queue.splice(0, queue.length);
-		};
-
-		// Render our wrapping element into temp.
-		render(
-			createElement(ContextProvider, { context: _this.context }, props._vnode),
-			_this._temp
-		);
-
-		options._commit = oldCommit;
-		if (commitQueue) {
-			this._renderCallbacks = [
-				() => {
-					commitRoot(commitQueue, this._vnode);
+			// Create a "fake" VNode to represent the container of the Portal's
+			// children. It's a "fake" VNode because we make the VNode's _dom property
+			// always return our fake DOM parent. This behavior is necessary to ignore
+			// the DOM node that Preact will create for this VNode on mount and
+			// enables us to use the standard diffing algorithm to manage the children
+			// of the Portal.
+			_this._containerVNode = /** @type {VNode} */ (
+				createElement(container.tagName, null)
+			);
+			Object.defineProperty(_this._containerVNode, '__e', {
+				get() {
+					return _this._temp;
+				},
+				set() {
+					// Explicitly ignore the dom element the Preact render creates since
+					// we are using a fake one to represent the portal.
 				}
-			];
+			});
 		}
+
+		// // Render our wrapping element into temp.
+		// render(
+		// 	createElement(ContextProvider, { context: _this.context }, props._vnode),
+		// 	_this._temp
+		// );
 	}
 	// When we come from a conditional render, on a mounted
 	// portal we should clear the DOM.
 	else if (_this._temp) {
 		_this.componentWillUnmount();
 	}
+
+	let tempNode = createElement(Fragment, null);
+	_this._containerVNode._original = tempNode._original;
+	_this._containerVNode._children = props._vnode;
+
+	return _this._containerVNode;
 }
 
 /**
