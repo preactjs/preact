@@ -1359,6 +1359,16 @@ export namespace JSXInternal {
 		'aria-autocomplete'?: Signalish<
 			'none' | 'inline' | 'list' | 'both' | undefined
 		>;
+		/**
+		 * Defines a string value that labels the current element, which is intended to be converted into Braille.
+		 * @see aria-label.
+		 */
+		'aria-braillelabel'?: Signalish<string | undefined>;
+		/**
+		 * Defines a human-readable, author-localized abbreviated description for the role of an element, which is intended to be converted into Braille.
+		 * @see aria-roledescription.
+		 */
+		'aria-brailleroledescription'?: Signalish<string | undefined>;
 		/** Indicates an element is being modified and that assistive technologies MAY want to wait until the modifications are complete before exposing them to the user. */
 		'aria-busy'?: Signalish<Booleanish | undefined>;
 		/**
