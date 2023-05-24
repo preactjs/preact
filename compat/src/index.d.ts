@@ -30,6 +30,7 @@ declare namespace React {
 	export import useReducer = _hooks.useReducer;
 	export import useRef = _hooks.useRef;
 	export import useState = _hooks.useState;
+	export type Dispatch<A> = (value: A) => void;
 	// React 18 hooks
 	export import useInsertionEffect = _hooks.useLayoutEffect;
 	export function useTransition(): [false, typeof startTransition];
@@ -40,6 +41,7 @@ declare namespace React {
 	): T;
 
 	// Preact Defaults
+	export import Context = preact.Context;
 	export import ContextType = preact.ContextType;
 	export import RefObject = preact.RefObject;
 	export import Component = preact.Component;
