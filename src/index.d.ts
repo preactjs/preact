@@ -89,7 +89,7 @@ export type ComponentProps<
 export interface FunctionComponent<P = {}> {
 	(props: RenderableProps<P>, context?: any): VNode<any> | null;
 	displayName?: string;
-	defaultProps?: Partial<P>;
+	defaultProps?: Partial<P> | undefined;
 }
 export interface FunctionalComponent<P = {}> extends FunctionComponent<P> {}
 
