@@ -17,6 +17,7 @@ declare namespace React {
 	export import Inputs = _hooks.Inputs;
 	export import PropRef = _hooks.PropRef;
 	export import Reducer = _hooks.Reducer;
+	export import Dispatch = _hooks.Dispatch;
 	export import Ref = _hooks.Ref;
 	export import StateUpdater = _hooks.StateUpdater;
 	export import useCallback = _hooks.useCallback;
@@ -30,7 +31,6 @@ declare namespace React {
 	export import useReducer = _hooks.useReducer;
 	export import useRef = _hooks.useRef;
 	export import useState = _hooks.useState;
-	export type Dispatch<A> = (action: A) => void;
 	// React 18 hooks
 	export import useInsertionEffect = _hooks.useLayoutEffect;
 	export function useTransition(): [false, typeof startTransition];
