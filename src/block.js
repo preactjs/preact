@@ -10,6 +10,10 @@ export class Block extends Component {
 		//
 	}
 
+	componentDidMount() {
+		console.log('MOUNTED', this._vnode._dom);
+	}
+
 	createHTML() {
 		const str = this.props.template;
 		const dom = createDomFromString(str);

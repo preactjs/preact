@@ -161,11 +161,25 @@ export function diffChildren(
 		}
 
 		if (newDom != null) {
+			console.log('hey', newDom, childVNode);
 			if (firstChildDom == null) {
 				firstChildDom = newDom;
 			}
 
-			if (
+			if (childVNode.type === Block) {
+				console.log('yeah block', parentDom);
+				const first = newDom.firstChild;
+				parentDom.append(newDom);
+				console.log(
+					'appended',
+					newDom.firstChild,
+					first,
+					parentDom,
+					parentDom.lastChild
+				);
+				childVNode._dom = parentDom.lastChild;
+				firstChildDom = childVNode._dom;
+			} else if (
 				typeof childVNode.type == 'function' &&
 				childVNode._children === oldVNode._children
 			) {
@@ -288,6 +302,8 @@ function placeChild(
 	oldDom
 ) {
 	let nextDom;
+	console.log({ oldDom, newDom });
+
 	if (childVNode._nextDom !== undefined) {
 		// Only Fragments or components that return Fragment like VNodes will
 		// have a non-undefined _nextDom. Continue the diff from the sibling
@@ -306,10 +322,19 @@ function placeChild(
 	) {
 		console.log('ADD', oldDom, oldDom?.parentNode, parentDom);
 		if (oldDom instanceof DocumentFragment) {
+			console.log('OLD DD', oldDom.firstChild);
+			childVNode._dom = oldDom.firstChild;
+			childVNode._nextDom = oldDom.lastChild;
 			parentDom.append(oldDom);
+			console.log('af', childVNode._dom);
 			oldDom = null;
-			parentDom = parentDom.querySelector('slot');
-			console.log(childVNode._parent);
+			const slot = parentDom.querySelector('[slot-name="default"]');
+			while (slot.firstChild) {
+				slot.firstChild.remove();
+			}
+			console.log('foo', childVNode, oldVNode, nextDom);
+			parentDom = slot;
+			// return null;
 		}
 		outer: if (oldDom == null || oldDom.parentNode !== parentDom) {
 			parentDom.appendChild(newDom);

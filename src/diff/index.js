@@ -120,12 +120,7 @@ export function diff(
 					newType.getDerivedStateFromProps == null &&
 					c.componentWillMount != null
 				) {
-					if (newType === Block) {
-						console.log('block before mount', parentDom, oldDom);
-						c.componentWillMount();
-					} else {
-						c.componentWillMount();
-					}
+					c.componentWillMount();
 				}
 
 				if (c.componentDidMount != null) {
