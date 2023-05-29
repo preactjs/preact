@@ -9,5 +9,6 @@ export {
 export { Component } from './component';
 export { cloneElement } from './clone-element';
 export { createContext } from './create-context';
+export { Block } from './block';
 export { toChildArray } from './diff/children';
 export { default as options } from './options';

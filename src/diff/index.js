@@ -5,6 +5,7 @@ import { diffChildren } from './children';
 import { diffProps, setProperty } from './props';
 import { assign, isArray, removeNode, slice } from '../util';
 import options from '../options';
+import { Block } from '../block';
 
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
@@ -43,6 +44,7 @@ export function diff(
 	// If the previous diff bailed out, resume creating/hydrating.
 	if (oldVNode._hydrating != null) {
 		isHydrating = oldVNode._hydrating;
+		console.log('set3');
 		oldDom = newVNode._dom = oldVNode._dom;
 		// if we resume, we want the tree to be "unlocked"
 		newVNode._hydrating = null;
@@ -118,7 +120,12 @@ export function diff(
 					newType.getDerivedStateFromProps == null &&
 					c.componentWillMount != null
 				) {
-					c.componentWillMount();
+					if (newType === Block) {
+						console.log('block before mount', parentDom, oldDom);
+						c.componentWillMount();
+					} else {
+						c.componentWillMount();
+					}
 				}
 
 				if (c.componentDidMount != null) {
@@ -156,6 +163,7 @@ export function diff(
 
 					// In cases of bailing due to strict-equality we have to reset force as well
 					c._force = false;
+					console.log('set4');
 					newVNode._dom = oldVNode._dom;
 					newVNode._children = oldVNode._children;
 					newVNode._children.forEach(vnode => {
@@ -230,6 +238,12 @@ export function diff(
 				tmp != null && tmp.type === Fragment && tmp.key == null;
 			let renderResult = isTopLevelFragment ? tmp.props.children : tmp;
 
+			// console.log('d', newType, newVNode._dom);
+			if (newType === Block) {
+				newVNode._dom = c.createHTML();
+				oldDom = newVNode._dom;
+			}
+
 			diffChildren(
 				parentDom,
 				isArray(renderResult) ? renderResult : [renderResult],
@@ -242,6 +256,11 @@ export function diff(
 				oldDom,
 				isHydrating
 			);
+
+			if (newType === Block) {
+				// console.log('af diff', newVNode._dom);
+				oldDom = newVNode._dom;
+			}
 
 			c.base = newVNode._dom;
 
@@ -262,8 +281,10 @@ export function diff(
 			newVNode._original === oldVNode._original
 		) {
 			newVNode._children = oldVNode._children;
+			console.log('set1');
 			newVNode._dom = oldVNode._dom;
 		} else {
+			console.log('set5', newVNode.type, newVNode.props);
 			newVNode._dom = diffElementNodes(
 				oldVNode._dom,
 				newVNode,
@@ -281,6 +302,7 @@ export function diff(
 		newVNode._original = null;
 		// if hydrating or creating initial tree, bailout preserves DOM:
 		if (isHydrating || excessDomChildren != null) {
+			console.log('set2');
 			newVNode._dom = oldDom;
 			newVNode._hydrating = !!isHydrating;
 			excessDomChildren[excessDomChildren.indexOf(oldDom)] = null;

@@ -3,6 +3,7 @@ import { createVNode, Fragment } from '../create-element';
 import { EMPTY_OBJ, EMPTY_ARR } from '../constants';
 import { getDomSibling } from '../component';
 import { isArray } from '../util';
+import { Block } from '../block';
 
 /**
  * Diff the children of a virtual node
@@ -205,7 +206,9 @@ export function diffChildren(
 		}
 	}
 
-	newParentVNode._dom = firstChildDom;
+	if (newParentVNode.type !== Block) {
+		newParentVNode._dom = firstChildDom;
+	}
 
 	// Remove remaining oldChildren if there are any.
 	for (i = oldChildrenLength; i--; ) {

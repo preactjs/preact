@@ -314,6 +314,7 @@ export function cloneElement<P>(
 
 // TODO: Revisit what the public type of this is...
 export const Fragment: FunctionComponent<{}>;
+export const Block: FunctionComponent<{ template: string }>;
 
 //
 // Preact options
