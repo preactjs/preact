@@ -1,4 +1,9 @@
 import { Component } from './component';
+import { createElement } from './create-element';
+
+/**
+ * @typedef {{parentDom: HTMLElement, before: Comment | null }} SlotInfo
+ */
 
 export class Block extends Component {
 	componentWillMount() {
@@ -13,8 +18,12 @@ export class Block extends Component {
 	}
 
 	render() {
-		return this.props.children;
+		return createElement(Slot, null, this.props.children);
 	}
+}
+
+function Slot(props) {
+	return props.children;
 }
 
 /** @typedef {{i:number, input: string}} Lexer */
@@ -23,6 +32,7 @@ const CHAR_EL_OPEN = 60; // <
 const CHAR_EL_CLOSE = 62; // >
 const CHAR_SLASH = 47; // /
 const CHAR_EQUAL = 61; // =
+const CHAR_DOUBLE_QUOTE = 34; // "
 
 /**
  * @param {string} str
@@ -54,8 +64,8 @@ function createDomFromString(str) {
 			let name = parseTagName(lexer);
 			// Optional whitespace
 			char = consumeWhiteSpace(lexer);
-			console.log(name);
 
+			// TODO: Ignore <script>-tags
 			const el = document.createElement(name);
 			elementStack[elementStack.length - 1].appendChild(el);
 			elementStack.push(el);
@@ -71,9 +81,24 @@ function createDomFromString(str) {
 				continue;
 			} else {
 				// TODO: Attributes
-				let char = lexer.input.charCodeAt(lexer.i);
-				while (lexer.i < lexer.input.length && !isWhitespace(char)) {
+				let start = lexer.i - 1;
+				while (
+					lexer.i < lexer.input.length &&
+					!isWhitespace(char) &&
+					char !== CHAR_EQUAL
+				) {
 					char = step(lexer);
+				}
+
+				const attrName = lexer.input.slice(start, lexer.i - 1);
+				if (char === CHAR_EQUAL) {
+					expectChar(lexer, CHAR_DOUBLE_QUOTE);
+					const start = lexer.i;
+
+					consumeUntil(lexer, CHAR_DOUBLE_QUOTE);
+
+					const attrValue = lexer.input.slice(start, lexer.i - 1);
+					el.setAttribute(attrName, attrValue);
 				}
 			}
 
@@ -192,11 +217,4 @@ function consumeWhiteSpace(lexer) {
 		char = step(lexer);
 	}
 	return char;
-}
-
-/**
- * @param {string} str
- */
-function parseAttrName(str) {
-	//
 }

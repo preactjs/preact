@@ -43,7 +43,9 @@ describe.only('Block', () => {
 		render(
 			<div>
 				<p>foo</p>
-				<Block template="<div><p>bar</p><h2><slot /></h2></div>">
+				<Block
+					template={`<div><p>bar</p><h2><slot /><slot name="foo" /></h2></div>`}
+				>
 					<span>block children</span>
 				</Block>
 			</div>,

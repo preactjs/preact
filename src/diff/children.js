@@ -304,6 +304,13 @@ function placeChild(
 		newDom != oldDom ||
 		newDom.parentNode == null
 	) {
+		console.log('ADD', oldDom, oldDom?.parentNode, parentDom);
+		if (oldDom instanceof DocumentFragment) {
+			parentDom.append(oldDom);
+			oldDom = null;
+			parentDom = parentDom.querySelector('slot');
+			console.log(childVNode._parent);
+		}
 		outer: if (oldDom == null || oldDom.parentNode !== parentDom) {
 			parentDom.appendChild(newDom);
 			nextDom = null;
