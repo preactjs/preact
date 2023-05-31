@@ -1073,10 +1073,8 @@ export namespace JSXInternal {
 		Target,
 		WheelEvent
 	>;
-	export type TargetedPictureInPictureEvent<Target extends EventTarget> = TargetedEvent<
-		Target,
-		PictureInPictureEvent
-	>;
+	export type TargetedPictureInPictureEvent<Target extends EventTarget> =
+		TargetedEvent<Target, PictureInPictureEvent>;
 
 	export interface EventHandler<E extends TargetedEvent> {
 		(this: void, event: E): void;
@@ -1120,9 +1118,8 @@ export namespace JSXInternal {
 	export type WheelEventHandler<Target extends EventTarget> = EventHandler<
 		TargetedWheelEvent<Target>
 	>;
-	export type PictureInPictureEventHandler<Target extends EventTarget> = EventHandler<
-		TargetedPictureInPictureEvent<Target>
-	>;
+	export type PictureInPictureEventHandler<Target extends EventTarget> =
+		EventHandler<TargetedPictureInPictureEvent<Target>>;
 
 	export interface DOMAttributes<Target extends EventTarget>
 		extends PreactDOMAttributes {
@@ -1389,6 +1386,11 @@ export namespace JSXInternal {
 		 */
 		'aria-colindex'?: Signalish<number | undefined>;
 		/**
+		 * Defines a human readable text alternative of aria-colindex.
+		 * @see aria-rowindextext.
+		 */
+		'aria-colindextext'?: Signalish<string | undefined>;
+		/**
 		 * Defines the number of columns spanned by a cell or gridcell within a table, grid, or treegrid.
 		 * @see aria-colindex
 		 * @see aria-rowspan.
@@ -1408,6 +1410,11 @@ export namespace JSXInternal {
 		 * @see aria-labelledby
 		 */
 		'aria-describedby'?: Signalish<string | undefined>;
+		/**
+		 * Defines a string value that describes or annotates the current element.
+		 * @see related aria-describedby.
+		 */
+		'aria-description'?: Signalish<string | undefined>;
 		/**
 		 * Identifies the element that provides a detailed, extended description for the object.
 		 * @see aria-describedby.
@@ -1541,6 +1548,11 @@ export namespace JSXInternal {
 		 * @see aria-rowspan.
 		 */
 		'aria-rowindex'?: Signalish<number | undefined>;
+		/**
+		 * Defines a human readable text alternative of aria-rowindex.
+		 * @see aria-colindextext.
+		 */
+		'aria-rowindextext'?: Signalish<string | undefined>;
 		/**
 		 * Defines the number of rows spanned by a cell or gridcell within a table, grid, or treegrid.
 		 * @see aria-rowindex
