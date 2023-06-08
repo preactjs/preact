@@ -44,7 +44,11 @@ describe.only('Block', () => {
 			<div>
 				<p>foo</p>
 				<Block
-					template={`<div><p>bar</p><h2 slot-name="default">fallback</h2></div>`}
+					template={`<div><p>bar</p>
+					<a href="#foo" data-preact="active-link">foo link</a>
+					<a href="#bar" data-preact="active-link">bar link</a>
+					<a href="#baz" data-preact="active-link"><span>baz link</span></a>
+					<h2 slot-name="default">fallback</h2></div>`}
 				>
 					<span>block children</span>
 				</Block>

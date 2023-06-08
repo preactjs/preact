@@ -11,13 +11,26 @@ export class Block extends Component {
 	}
 
 	componentDidMount() {
-		console.log('MOUNTED', this._vnode._dom);
+		document.querySelector('#scratch').addEventListener('click', e => {
+			e.preventDefault();
+			/** @type {HTMLElement} */
+			let target = e.target;
+			target = target.closest(`[data-preact="active-link"]`);
+
+			// Remove old activation state
+			document.querySelectorAll(`a[data-preact="active-link"]`).forEach(el => {
+				el.removeAttribute('style');
+			});
+
+			if (target.dataset.preact === 'active-link') {
+				target.style.cssText = 'background: red';
+			}
+		});
 	}
 
 	createHTML() {
 		const str = this.props.template;
 		const dom = createDomFromString(str);
-		console.log(dom);
 		return dom;
 	}
 
@@ -84,25 +97,33 @@ function createDomFromString(str) {
 				expectChar(lexer, CHAR_EL_CLOSE);
 				continue;
 			} else {
-				// TODO: Attributes
-				let start = lexer.i - 1;
 				while (
 					lexer.i < lexer.input.length &&
-					!isWhitespace(char) &&
-					char !== CHAR_EQUAL
+					char !== CHAR_EL_CLOSE &&
+					char !== CHAR_SLASH
 				) {
-					char = step(lexer);
-				}
+					// TODO: Attributes
+					let start = lexer.i - 1;
+					while (
+						lexer.i < lexer.input.length &&
+						!isWhitespace(char) &&
+						char !== CHAR_EQUAL
+					) {
+						char = step(lexer);
+					}
 
-				const attrName = lexer.input.slice(start, lexer.i - 1);
-				if (char === CHAR_EQUAL) {
-					expectChar(lexer, CHAR_DOUBLE_QUOTE);
-					const start = lexer.i;
+					const attrName = lexer.input.slice(start, lexer.i - 1);
+					if (char === CHAR_EQUAL) {
+						expectChar(lexer, CHAR_DOUBLE_QUOTE);
+						const start = lexer.i;
 
-					consumeUntil(lexer, CHAR_DOUBLE_QUOTE);
+						consumeUntil(lexer, CHAR_DOUBLE_QUOTE);
 
-					const attrValue = lexer.input.slice(start, lexer.i - 1);
-					el.setAttribute(attrName, attrValue);
+						const attrValue = lexer.input.slice(start, lexer.i - 1);
+						el.setAttribute(attrName, attrValue);
+					}
+					consumeWhiteSpace(lexer);
+					char = peek(lexer);
 				}
 			}
 

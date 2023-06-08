@@ -178,6 +178,7 @@ export function diffChildren(
 					parentDom.lastChild
 				);
 				childVNode._dom = parentDom.lastChild;
+				childVNode._component.base = childVNode._dom;
 				firstChildDom = childVNode._dom;
 			} else if (
 				typeof childVNode.type == 'function' &&
