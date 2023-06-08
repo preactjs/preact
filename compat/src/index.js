@@ -244,6 +244,7 @@ export default {
 	createRef,
 	Fragment,
 	isValidElement,
+	isFragment,
 	findDOMNode,
 	Component,
 	PureComponent,
