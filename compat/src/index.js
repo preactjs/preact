@@ -55,6 +55,18 @@ function isValidElement(element) {
 }
 
 /**
+ * Check if the passed element is a Fragment node.
+ * @param {*} element The element to check
+ * @returns {boolean}
+ */
+function isFragment(element) {
+	if (isValidElement(element)) {
+		return element.type === Fragment;
+	}
+	return false;
+}
+
+/**
  * Wrap `cloneElement` to abort if the passed element is not a valid element and apply
  * all vnode normalizations.
  * @param {import('./internal').VNode} element The vnode to clone
@@ -185,6 +197,7 @@ export {
 	createRef,
 	Fragment,
 	isValidElement,
+	isFragment,
 	findDOMNode,
 	Component,
 	PureComponent,
