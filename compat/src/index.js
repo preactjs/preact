@@ -60,10 +60,7 @@ function isValidElement(element) {
  * @returns {boolean}
  */
 function isFragment(element) {
-	if (isValidElement(element)) {
-		return element.type === Fragment;
-	}
-	return false;
+	return isValidElement(element) && element.type === Fragment;
 }
 
 /**
