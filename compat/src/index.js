@@ -185,6 +185,7 @@ export {
 	createRef,
 	Fragment,
 	isValidElement,
+	isValidElement as isElement,
 	findDOMNode,
 	Component,
 	PureComponent,
