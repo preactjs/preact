@@ -15,6 +15,7 @@ const h = createElement;
 /** @jsx createElement */
 
 describe('debug', () => {
+	/** @type {HTMLDivElement} */
 	let scratch;
 	let errors = [];
 	let warnings = [];
@@ -511,6 +512,19 @@ describe('debug', () => {
 				</table>
 			);
 			render(<Table />, scratch);
+			expect(console.error).to.not.be.called;
+		});
+
+		it('should include DOM parents outside of root node', () => {
+			const Table = () => (
+				<tr>
+					<td>Head</td>
+				</tr>
+			);
+
+			const table = document.createElement('table');
+			scratch.appendChild(table);
+			render(<Table />, table);
 			expect(console.error).to.not.be.called;
 		});
 	});
