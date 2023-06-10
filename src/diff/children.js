@@ -180,7 +180,8 @@ export function diffChildren(
 					oldVNode,
 					oldChildren,
 					newDom,
-					oldDom
+					oldDom,
+					!isHydrating && i === renderResult.length - 1
 				);
 			}
 
@@ -282,7 +283,8 @@ function placeChild(
 	oldVNode,
 	oldChildren,
 	newDom,
-	oldDom
+	oldDom,
+	replace
 ) {
 	let nextDom;
 	if (childVNode._nextDom !== undefined) {
@@ -303,6 +305,9 @@ function placeChild(
 	) {
 		outer: if (oldDom == null || oldDom.parentNode !== parentDom) {
 			parentDom.appendChild(newDom);
+			nextDom = null;
+		} else if (replace) {
+			parentDom.replaceChild(newDom, oldDom);
 			nextDom = null;
 		} else {
 			// `j<oldChildrenLength; j+=2` is an alternative to `j++<oldChildrenLength/2`
