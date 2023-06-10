@@ -326,7 +326,12 @@ function placeChild(
 	if (nextDom !== undefined) {
 		oldDom = nextDom;
 	} else {
-		oldDom = newDom.nextSibling;
+		oldDom = newDom;
+		// Skip over comment nodes. Will be removed right after calling diffChildren
+		// in diff so that the vnode tree matches the DOM tree again.
+		do {
+			oldDom = oldDom.nextSibling;
+		} while (oldDom !== null && oldDom.nodeType === 8);
 	}
 
 	return oldDom;
