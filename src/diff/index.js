@@ -431,14 +431,34 @@ function diffElementNodes(
 
 		diffProps(dom, newProps, oldProps, isSvg, isHydrating);
 
-		// If the new vnode didn't have dangerouslySetInnerHTML, diff its children
+		let newChildren = newProps.children;
 		if (newHtml) {
 			newVNode._children = [];
+		} else if (typeof newChildren === 'string') {
+			if (newChildren !== oldProps.children) {
+				// Unmount any previous children
+				if (oldVNode._children) {
+					while ((i = oldVNode._children.pop())) {
+						// Setting textContent on the dom element will unmount all DOM nodes
+						// of the previous children, so we don't need to remove DOM in this
+						// call to unmount
+						unmount(i, oldVNode, true);
+					}
+				}
+
+				dom.textContent = newChildren;
+			}
 		} else {
-			i = newVNode.props.children;
+			// Previous render was a single text child. New children are not so let's
+			// unmount the previous text child
+			if (typeof oldProps.children === 'string') {
+				dom.removeChild(dom.firstChild);
+			}
+
+			// If the new vnode didn't have dangerouslySetInnerHTML, diff its children
 			diffChildren(
 				dom,
-				isArray(i) ? i : [i],
+				isArray(newChildren) ? newChildren : [newChildren],
 				newVNode,
 				oldVNode,
 				globalContext,
