@@ -1,13 +1,16 @@
-import { createElement, Component, render } from 'preact';
+import { createElement, Component, render, createRef } from 'preact';
 import { setupScratch, teardown } from '../_util/helpers';
 import { logCall, clearLog, getLog } from '../_util/logCall';
 import { div } from '../_util/dom';
+import { setupRerender } from 'preact/test-utils';
 
 /** @jsx createElement */
 
 describe('keys', () => {
 	/** @type {HTMLDivElement} */
 	let scratch;
+
+	let rerender;
 
 	/** @type {string[]} */
 	let ops;
@@ -70,6 +73,7 @@ describe('keys', () => {
 	});
 
 	beforeEach(() => {
+		rerender = setupRerender();
 		scratch = setupScratch();
 		ops = [];
 	});
@@ -319,11 +323,7 @@ describe('keys', () => {
 		render(<List values={values} />, scratch);
 		expect(scratch.textContent).to.equal('abcd', 'move to beginning');
 		expect(getLog()).to.deep.equal(
-			[
-				'<ol>bcda.appendChild(<li>b)',
-				'<ol>cdab.appendChild(<li>c)',
-				'<ol>dabc.appendChild(<li>d)'
-			],
+			['<ol>bcda.insertBefore(<li>a, <li>b)'],
 			'move to beginning'
 		);
 	});
@@ -341,15 +341,15 @@ describe('keys', () => {
 		render(<List values={values} />, scratch);
 		expect(scratch.textContent).to.equal(values.join(''));
 		expect(getLog()).to.deep.equal([
-			'<ol>abcdefghij.appendChild(<li>i)',
-			'<ol>abcdefghji.appendChild(<li>h)',
-			'<ol>abcdefgjih.appendChild(<li>g)',
-			'<ol>abcdefjihg.appendChild(<li>f)',
-			'<ol>abcdejihgf.appendChild(<li>e)',
-			'<ol>abcdjihgfe.appendChild(<li>d)',
-			'<ol>abcjihgfed.appendChild(<li>c)',
-			'<ol>abjihgfedc.appendChild(<li>b)',
-			'<ol>ajihgfedcb.appendChild(<li>a)'
+			'<ol>abcdefghij.insertBefore(<li>j, <li>a)',
+			'<ol>jabcdefghi.insertBefore(<li>i, <li>a)',
+			'<ol>jiabcdefgh.insertBefore(<li>h, <li>a)',
+			'<ol>jihabcdefg.insertBefore(<li>g, <li>a)',
+			'<ol>jihgabcdef.insertBefore(<li>f, <li>a)',
+			'<ol>jihgfabcde.insertBefore(<li>e, <li>a)',
+			'<ol>jihgfeabcd.insertBefore(<li>d, <li>a)',
+			'<ol>jihgfedabc.insertBefore(<li>c, <li>a)',
+			'<ol>jihgfedcab.appendChild(<li>a)'
 		]);
 	});
 
@@ -556,6 +556,130 @@ describe('keys', () => {
 		expect(ops).to.deep.equal(['Update Stateful1', 'Update Stateful2']);
 		expect(Stateful1Ref).to.equal(Stateful1MovedRef);
 		expect(Stateful2Ref).to.equal(Stateful2MovedRef);
+	});
+
+	it('should effectively iterate on large lists', done => {
+		const newItems = () =>
+			Array(100)
+				.fill(0)
+				.map((item, i) => i);
+
+		let set,
+			mutatedNodes = [];
+
+		class App extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { items: newItems() };
+				set = this.set = this.set.bind(this);
+				this.ref = createRef();
+			}
+
+			componentDidMount() {
+				const observer = new MutationObserver(listener);
+				observer.observe(this.ref.current, { childList: true });
+
+				function listener(mutations) {
+					for (const { addedNodes } of mutations) {
+						for (const node of addedNodes) {
+							mutatedNodes.push(node);
+						}
+					}
+				}
+			}
+
+			set() {
+				const currentItems = this.state.items;
+				const items = newItems().filter(id => {
+					const isVisible = currentItems.includes(id);
+					return id >= 20 && id <= 80 ? !isVisible : isVisible;
+				});
+				this.setState({ items });
+			}
+
+			render() {
+				return (
+					<div ref={this.ref}>
+						{this.state.items.map(i => (
+							<div key={i}>{i}</div>
+						))}
+					</div>
+				);
+			}
+		}
+
+		render(<App />, scratch);
+
+		set();
+		rerender();
+
+		setTimeout(() => {
+			expect(mutatedNodes.length).to.equal(0);
+			done();
+		});
+	});
+
+	it('should effectively iterate on large component lists', done => {
+		const newItems = () =>
+			Array(100)
+				.fill(0)
+				.map((item, i) => i);
+
+		let set,
+			mutatedNodes = [];
+
+		const Row = ({ i }) => <p>{i}</p>;
+
+		class App extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { items: newItems() };
+				set = this.set = this.set.bind(this);
+				this.ref = createRef();
+			}
+
+			componentDidMount() {
+				const observer = new MutationObserver(listener);
+				observer.observe(this.ref.current, { childList: true });
+
+				function listener(mutations) {
+					for (const { addedNodes } of mutations) {
+						for (const node of addedNodes) {
+							mutatedNodes.push(node);
+						}
+					}
+				}
+			}
+
+			set() {
+				const currentItems = this.state.items;
+				const items = newItems().filter(id => {
+					const isVisible = currentItems.includes(id);
+					return id >= 20 && id <= 80 ? !isVisible : isVisible;
+				});
+				this.setState({ items });
+			}
+
+			render() {
+				return (
+					<div ref={this.ref}>
+						{this.state.items.map(i => (
+							<Row key={i} i={i} />
+						))}
+					</div>
+				);
+			}
+		}
+
+		render(<App />, scratch);
+
+		set();
+		rerender();
+
+		setTimeout(() => {
+			expect(mutatedNodes.length).to.equal(0);
+			done();
+		});
 	});
 
 	it('should not preserve state when switching between keyed and unkeyed components as children', () => {
