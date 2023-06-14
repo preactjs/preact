@@ -49,10 +49,11 @@ export function diffChildren(
 	let oldChildren = (oldParentVNode && oldParentVNode._children) || EMPTY_ARR;
 
 	let oldChildrenLength = oldChildren.length,
-		remainingOldChildren = oldChildrenLength;
+		remainingOldChildren = oldChildrenLength,
+		newChildrenLength = renderResult.length;
 
 	newParentVNode._children = [];
-	for (i = 0; i < renderResult.length; i++) {
+	for (i = 0; i < newChildrenLength; i++) {
 		childVNode = renderResult[i];
 
 		if (
@@ -165,7 +166,7 @@ export function diffChildren(
 					skew++;
 					hasMatchingIndex = true;
 				} else if (matchingIndex > skewedIndex) {
-					if (remainingOldChildren > renderResult.length - skewedIndex) {
+					if (remainingOldChildren > newChildrenLength - skewedIndex) {
 						skew += matchingIndex - skewedIndex;
 						hasMatchingIndex = true;
 					} else {
@@ -188,7 +189,6 @@ export function diffChildren(
 				hasMatchingIndex || (matchingIndex == i && !isMounting);
 
 			if (
-				!isMounting &&
 				typeof childVNode.type == 'function' &&
 				(matchingIndex !== skewedIndex ||
 					oldVNode._children === childVNode._children)
