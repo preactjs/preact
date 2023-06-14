@@ -153,8 +153,7 @@ export function diffChildren(
 				firstChildDom = newDom;
 			}
 
-			let isMounting =
-				isHydrating || oldVNode === EMPTY_OBJ || oldVNode._original === null;
+			let isMounting = oldVNode === EMPTY_OBJ || oldVNode._original === null;
 			let hasMatchingIndex = !isMounting && matchingIndex === skewedIndex;
 			if (isMounting) {
 				if (matchingIndex == -1) {
@@ -188,7 +187,6 @@ export function diffChildren(
 				hasMatchingIndex || (matchingIndex == i && !isMounting);
 
 			if (
-				!isMounting &&
 				typeof childVNode.type == 'function' &&
 				(matchingIndex !== skewedIndex ||
 					oldVNode._children === childVNode._children)
