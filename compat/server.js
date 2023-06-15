@@ -9,7 +9,5 @@ try {
 	);
 }
 
-module.exports = {
-	renderToString: renderToString,
-	renderToStaticMarkup: renderToString
-};
+exports.renderToString = renderToString;
+exports.renderToStaticMarkup = renderToString;
