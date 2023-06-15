@@ -1,4 +1,9 @@
+import { renderToString as preactRenderToString } from 'preact-render-to-string';
+
+export const renderToString = preactRenderToString;
+export const renderToStaticMarkup = preactRenderToString;
+
 export default {
 	renderToString,
-	renderToString as renderToStaticMarkup
-} from 'preact-render-to-string';
+	renderToStaticMarkup
+};
