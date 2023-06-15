@@ -1061,6 +1061,51 @@ describe('render()', () => {
 		expect(scratch.textContent).to.equal('01');
 	});
 
+	it('should not remove iframe', () => {
+		let setState;
+		const Iframe = () => {
+			return <iframe src="https://codesandbox.io/s/runtime-silence-no4zx" />;
+		};
+
+		const Test2 = () => <div>Test2</div>;
+		const Test3 = () => <div>Test3</div>;
+
+		class App extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { value: true };
+				setState = this.setState.bind(this);
+			}
+
+			render(props, state) {
+				return (
+					<div>
+						{state.value ? <Test3 /> : null}
+						{state.value ? <Test2 /> : null}
+						<Iframe key="iframe" />
+					</div>
+				);
+			}
+		}
+
+		render(<App />, scratch);
+
+		expect(scratch.innerHTML).to.equal(
+			'<div><div>Test3</div><div>Test2</div><iframe src="https://codesandbox.io/s/runtime-silence-no4zx"></iframe></div>'
+		);
+		clearLog();
+		setState({ value: false });
+		rerender();
+
+		expect(scratch.innerHTML).to.equal(
+			'<div><iframe src="https://codesandbox.io/s/runtime-silence-no4zx"></iframe></div>'
+		);
+		expect(getLog()).to.deep.equal([
+			'<div>Test2.remove()',
+			'<div>Test3.remove()'
+		]);
+	});
+
 	it('should not cause infinite loop with referentially equal props', () => {
 		let i = 0;
 		let prevDiff = options._diff;
