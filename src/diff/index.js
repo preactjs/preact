@@ -134,14 +134,14 @@ export function diff(
 				}
 
 				if (
-					(!c._force &&
-						c.shouldComponentUpdate != null &&
+					!c._force &&
+					((c.shouldComponentUpdate != null &&
 						c.shouldComponentUpdate(
 							newProps,
 							c._nextState,
 							componentContext
 						) === false) ||
-					newVNode._original === oldVNode._original
+						newVNode._original === oldVNode._original)
 				) {
 					// More info about this here: https://gist.github.com/JoviDeCroock/bec5f2ce93544d2e6070ef8e0036e4e8
 					if (newVNode._original !== oldVNode._original) {
@@ -154,8 +154,6 @@ export function diff(
 						c._dirty = false;
 					}
 
-					// In cases of bailing due to strict-equality we have to reset force as well
-					c._force = false;
 					newVNode._dom = oldVNode._dom;
 					newVNode._children = oldVNode._children;
 					newVNode._children.forEach(vnode => {
@@ -188,6 +186,7 @@ export function diff(
 			c.context = componentContext;
 			c.props = newProps;
 			c._parentDom = parentDom;
+			c._force = false;
 
 			let renderHook = options._render,
 				count = 0;
@@ -255,8 +254,6 @@ export function diff(
 			if (clearProcessingException) {
 				c._pendingError = c._processingException = null;
 			}
-
-			c._force = false;
 		} else if (
 			excessDomChildren == null &&
 			newVNode._original === oldVNode._original

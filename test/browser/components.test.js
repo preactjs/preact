@@ -2660,5 +2660,58 @@ describe('Components', () => {
 
 			expect(scratch.innerHTML).to.equal('<div>bar</div>');
 		});
+
+		it('should skip shouldComponentUpdate when called during render', () => {
+			let isSCUCalled = false;
+			class App extends Component {
+				shouldComponentUpdate() {
+					isSCUCalled = true;
+					return false;
+				}
+				render() {
+					const isUpdated = this.isUpdated;
+					if (!isUpdated) {
+						this.isUpdated = true;
+						this.forceUpdate();
+					}
+					return <div>Updated: {isUpdated ? 'yes' : 'no'}</div>;
+				}
+			}
+			render(<App />, scratch);
+			rerender();
+			expect(isSCUCalled).to.be.false;
+			expect(scratch.innerHTML).to.equal('<div>Updated: yes</div>');
+		});
+
+		it('should break through strict equality optimization', () => {
+			let isSCUCalled = false;
+
+			class Child extends Component {
+				componentDidMount() {
+					this.props.parent.forceUpdate();
+					this.forceUpdate();
+					this.isUpdated = true;
+				}
+				shouldComponentUpdate() {
+					isSCUCalled = true;
+					return false;
+				}
+				render() {
+					return <div>Updated: {this.isUpdated ? 'yes' : 'no'}</div>;
+				}
+			}
+
+			class App extends Component {
+				children = (<Child parent={this} />);
+				render() {
+					return this.children;
+				}
+			}
+
+			render(<App />, scratch);
+			rerender();
+			expect(isSCUCalled).to.be.false;
+			expect(scratch.innerHTML).to.equal('<div>Updated: yes</div>');
+		});
 	});
 });
