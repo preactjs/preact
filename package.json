@@ -1,9 +1,9 @@
 {
-	"name": "preact",
-	"amdName": "preact",
-	"version": "10.6.4",
+	"name": "preact-async",
+	"amdName": "preactasync",
+	"version": "10.6.8",
 	"private": false,
-	"description": "Fast 3kb React-compatible Virtual DOM library.",
+	"description": "Fast 3kb React-compatible Virtual DOM library. (Async Rendering Fork)",
 	"main": "dist/preact.js",
 	"module": "dist/preact.module.js",
 	"umd:main": "dist/preact.umd.js",
@@ -13,32 +13,27 @@
 		".": {
 			"browser": "./dist/preact.module.js",
 			"umd": "./dist/preact.umd.js",
-			"import": "./dist/preact.mjs",
 			"require": "./dist/preact.js"
 		},
 		"./compat": {
 			"browser": "./compat/dist/compat.module.js",
 			"umd": "./compat/dist/compat.umd.js",
-			"require": "./compat/dist/compat.js",
-			"import": "./compat/dist/compat.mjs"
+			"require": "./compat/dist/compat.js"
 		},
 		"./debug": {
 			"browser": "./debug/dist/debug.module.js",
 			"umd": "./debug/dist/debug.umd.js",
-			"require": "./debug/dist/debug.js",
-			"import": "./debug/dist/debug.mjs"
+			"require": "./debug/dist/debug.js"
 		},
 		"./devtools": {
 			"browser": "./devtools/dist/devtools.module.js",
 			"umd": "./devtools/dist/devtools.umd.js",
-			"require": "./devtools/dist/devtools.js",
-			"import": "./devtools/dist/devtools.mjs"
+			"require": "./devtools/dist/devtools.js"
 		},
 		"./hooks": {
 			"browser": "./hooks/dist/hooks.module.js",
 			"umd": "./hooks/dist/hooks.umd.js",
-			"require": "./hooks/dist/hooks.js",
-			"import": "./hooks/dist/hooks.mjs"
+			"require": "./hooks/dist/hooks.js"
 		},
     "./async": {
       "browser": "./async/dist/async.module.js",
@@ -49,36 +44,29 @@
 		"./test-utils": {
 			"browser": "./test-utils/dist/testUtils.module.js",
 			"umd": "./test-utils/dist/testUtils.umd.js",
-			"require": "./test-utils/dist/testUtils.js",
-			"import": "./test-utils/dist/testUtils.mjs"
+			"require": "./test-utils/dist/testUtils.js"
 		},
 		"./jsx-runtime": {
 			"browser": "./jsx-runtime/dist/jsxRuntime.module.js",
 			"umd": "./jsx-runtime/dist/jsxRuntime.umd.js",
-			"require": "./jsx-runtime/dist/jsxRuntime.js",
-			"import": "./jsx-runtime/dist/jsxRuntime.mjs"
+			"require": "./jsx-runtime/dist/jsxRuntime.js"
 		},
 		"./jsx-dev-runtime": {
 			"browser": "./jsx-runtime/dist/jsxRuntime.module.js",
 			"umd": "./jsx-runtime/dist/jsxRuntime.umd.js",
-			"require": "./jsx-runtime/dist/jsxRuntime.js",
-			"import": "./jsx-runtime/dist/jsxRuntime.mjs"
+			"require": "./jsx-runtime/dist/jsxRuntime.js"
 		},
 		"./compat/server": {
-			"require": "./compat/server.js",
-			"import": "./compat/server.mjs"
+			"require": "./compat/server.js"
 		},
 		"./compat/jsx-runtime": {
-			"require": "./compat/jsx-runtime.js",
-			"import": "./compat/jsx-runtime.mjs"
+			"require": "./compat/jsx-runtime.js"
 		},
 		"./compat/jsx-dev-runtime": {
-			"require": "./compat/jsx-dev-runtime.js",
-			"import": "./compat/jsx-dev-runtime.mjs"
+			"require": "./compat/jsx-dev-runtime.js"
 		},
 		"./compat/scheduler": {
-			"require": "./compat/scheduler.js",
-			"import": "./compat/scheduler.mjs"
+			"require": "./compat/scheduler.js"
 		},
 		"./package.json": "./package.json",
 		"./compat/package.json": "./compat/package.json",
