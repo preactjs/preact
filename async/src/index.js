@@ -341,6 +341,11 @@ const initializeAsyncRendering = () => {
 		['diff']
 	);
 
+	/*************************************************************************************************************************************
+	 * below is async implementation of processing render queue. disabled for now, limiting async rendering to initial render only.
+	 * we have seen some bugs in cases of frequent re-rendering, specifically in comparison control, when we update state quickly based on mouse events.
+	 * we may want to re-visit this later to fix it properly.
+
 	// async implementation of adding component to render queue
 	options.addRenderQueue = c => {
 		// initialize render queue variables in global space
@@ -371,12 +376,9 @@ const initializeAsyncRendering = () => {
 		['diff']
 	);
 
-	/*************************************************************************************************************************************
-	 * below is async implementation of processing render queue. disabled for now, limiting async rendering to initial render only.
-	 * we have seen some bugs in cases of frequent re-rendering, specifically in comparison control, when we update state quickly based on mouse events.
-	 * we may want to re-visit this later to fix it properly. note that we are waiting for each component render here. otherwise it would be
-	 * "concurrent rendering" but that does not work at all - double rendering issues - not a good idea.
-	 * __v is mangled property of _vnode, __b => _depth, __d => _dirty
+	// note that we are waiting for each component render here. otherwise it would be
+	// "concurrent rendering" but that does not work at all - double rendering issues - not a good idea.
+	// __v is mangled property of _vnode, __b => _depth, __d => _dirty
 	window._preactAsync.processRenderQueue = new AsyncFunction(`
 		let queue;
 		while ((window._preactAsync.queueCount = window._preactAsync.queue.length)) {
