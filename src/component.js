@@ -143,10 +143,7 @@ function renderComponent(component) {
 			refQueue
 		);
 
-		for (let i = 0; i < refQueue.length; i++) {
-			applyRef(refQueue[i], refQueue[++i], refQueue[++i]);
-		}
-		commitRoot(commitQueue, vnode);
+		commitRoot(commitQueue, vnode, refQueue);
 
 		if (vnode._dom != oldDom) {
 			updateParentDomPointers(vnode);
