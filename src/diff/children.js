@@ -33,7 +33,8 @@ export function diffChildren(
 	excessDomChildren,
 	commitQueue,
 	oldDom,
-	isHydrating
+	isHydrating,
+	refQueue
 ) {
 	let i,
 		j,
@@ -138,7 +139,8 @@ export function diffChildren(
 			excessDomChildren,
 			commitQueue,
 			oldDom,
-			isHydrating
+			isHydrating,
+			refQueue
 		);
 
 		newDom = childVNode._dom;
@@ -246,9 +248,7 @@ export function diffChildren(
 
 	// Set refs only after unmount
 	if (refs) {
-		for (i = 0; i < refs.length; i++) {
-			applyRef(refs[i], refs[++i], refs[++i]);
-		}
+		refQueue.push(refs);
 	}
 }
 

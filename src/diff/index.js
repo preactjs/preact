@@ -31,7 +31,8 @@ export function diff(
 	excessDomChildren,
 	commitQueue,
 	oldDom,
-	isHydrating
+	isHydrating,
+	refQueue
 ) {
 	let tmp,
 		newType = newVNode.type;
@@ -239,7 +240,8 @@ export function diff(
 				excessDomChildren,
 				commitQueue,
 				oldDom,
-				isHydrating
+				isHydrating,
+				refQueue
 			);
 
 			c.base = newVNode._dom;
@@ -269,7 +271,8 @@ export function diff(
 				isSvg,
 				excessDomChildren,
 				commitQueue,
-				isHydrating
+				isHydrating,
+				refQueue
 			);
 		}
 
@@ -333,7 +336,8 @@ function diffElementNodes(
 	isSvg,
 	excessDomChildren,
 	commitQueue,
-	isHydrating
+	isHydrating,
+	refQueue
 ) {
 	let oldProps = oldVNode.props;
 	let newProps = newVNode.props;
@@ -445,7 +449,8 @@ function diffElementNodes(
 				excessDomChildren
 					? excessDomChildren[0]
 					: oldVNode._children && getDomSibling(oldVNode, 0),
-				isHydrating
+				isHydrating,
+				refQueue
 			);
 
 			// Remove children that are not part of any vnode.

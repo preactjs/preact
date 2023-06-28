@@ -1,5 +1,5 @@
 import { assign } from './util';
-import { diff, commitRoot } from './diff/index';
+import { diff, commitRoot, applyRef } from './diff/index';
 import options from './options';
 import { Fragment } from './create-element';
 
@@ -126,6 +126,7 @@ function renderComponent(component) {
 
 	if (parentDom) {
 		let commitQueue = [];
+		let refQueue = [];
 		const oldVNode = assign({}, vnode);
 		oldVNode._original = vnode._original + 1;
 
@@ -138,8 +139,15 @@ function renderComponent(component) {
 			vnode._hydrating != null ? [oldDom] : null,
 			commitQueue,
 			oldDom == null ? getDomSibling(vnode) : oldDom,
-			vnode._hydrating
+			vnode._hydrating,
+			refQueue
 		);
+
+		refQueue.some(refs => {
+			for (let i = 0; i < refs.length; i++) {
+				applyRef(refs[i], refs[++i], refs[++i]);
+			}
+		});
 		commitRoot(commitQueue, vnode);
 
 		if (vnode._dom != oldDom) {

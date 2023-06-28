@@ -1,5 +1,5 @@
 import { EMPTY_OBJ } from './constants';
-import { commitRoot, diff } from './diff/index';
+import { applyRef, commitRoot, diff } from './diff/index';
 import { createElement, Fragment } from './create-element';
 import options from './options';
 import { slice } from './util';
@@ -34,6 +34,7 @@ export function render(vnode, parentDom, replaceNode) {
 
 	// List of effects that need to be called after diffing.
 	let commitQueue = [];
+	let refQueue = [];
 	diff(
 		parentDom,
 		// Determine the new vnode tree and store it on the DOM element on
@@ -55,9 +56,15 @@ export function render(vnode, parentDom, replaceNode) {
 			: oldVNode
 			? oldVNode._dom
 			: parentDom.firstChild,
-		isHydrating
+		isHydrating,
+		refQueue
 	);
 
+	refQueue.some(refs => {
+		for (let i = 0; i < refs.length; i++) {
+			applyRef(refs[i], refs[++i], refs[++i]);
+		}
+	});
 	// Flush all queued effects
 	commitRoot(commitQueue, vnode);
 }
