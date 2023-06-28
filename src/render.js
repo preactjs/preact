@@ -33,8 +33,8 @@ export function render(vnode, parentDom, replaceNode) {
 		createElement(Fragment, null, [vnode]);
 
 	// List of effects that need to be called after diffing.
-	let commitQueue = [];
-	let refQueue = [];
+	let commitQueue = [],
+		refQueue = [];
 	diff(
 		parentDom,
 		// Determine the new vnode tree and store it on the DOM element on

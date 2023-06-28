@@ -628,9 +628,9 @@ describe('refs', () => {
 		rerender();
 		expect(calls).to.deep.equal([
 			'removing ref from two',
+			'adding ref to one',
 			'adding ref to two',
-			'adding ref to three',
-			'adding ref to one'
+			'adding ref to three'
 		]);
 	});
 });

@@ -125,8 +125,8 @@ function renderComponent(component) {
 		parentDom = component._parentDom;
 
 	if (parentDom) {
-		let commitQueue = [];
-		let refQueue = [];
+		let commitQueue = [],
+			refQueue = [];
 		const oldVNode = assign({}, vnode);
 		oldVNode._original = vnode._original + 1;
 

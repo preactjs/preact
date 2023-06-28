@@ -146,9 +146,11 @@ export function diffChildren(
 		newDom = childVNode._dom;
 
 		if ((j = childVNode.ref) && oldVNode.ref != j) {
-			if (!refs) refs = [];
-			if (oldVNode.ref) refs.push(oldVNode.ref, null, childVNode);
-			refs.push(j, childVNode._component || newDom, childVNode);
+			if (oldVNode.ref) {
+				if (!refs) refs = [];
+				refs.push(oldVNode.ref, null, childVNode);
+			}
+			refQueue.push(j, childVNode._component || newDom, childVNode);
 		}
 
 		if (newDom != null) {
@@ -248,12 +250,8 @@ export function diffChildren(
 
 	// Set refs only after unmount
 	if (refs) {
-		for (let i = 0; i < refs.length; i++) {
-			if (refs[i + 1]) {
-				refQueue.push(refs[i], refs[++i], refs[++i]);
-			} else {
-				applyRef(refs[i], refs[++i], refs[++i]);
-			}
+		for (i = 0; i < refs.length; i++) {
+			applyRef(refs[i], refs[++i], refs[++i]);
 		}
 	}
 }
