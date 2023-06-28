@@ -22,6 +22,7 @@ import { isArray } from '../util';
  * render (except when hydrating). Can be a sibling DOM element when diffing
  * Fragments that have siblings. In most cases, it starts out as `oldChildren[0]._dom`.
  * @param {boolean} isHydrating Whether or not we are in hydration
+ * @param {Array<any>} refQueue an array of elements needed to invoke refs
  */
 export function diffChildren(
 	parentDom,

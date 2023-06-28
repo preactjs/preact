@@ -20,7 +20,8 @@ import options from '../options';
  * element any new dom elements should be placed around. Likely `null` on first
  * render (except when hydrating). Can be a sibling DOM element when diffing
  * Fragments that have siblings. In most cases, it starts out as `oldChildren[0]._dom`.
- * @param {boolean} [isHydrating] Whether or not we are in hydration
+ * @param {boolean} isHydrating Whether or not we are in hydration
+ * @param {Array<any>} refQueue an array of elements needed to invoke refs
  */
 export function diff(
 	parentDom,
@@ -330,6 +331,7 @@ export function commitRoot(commitQueue, root, refQueue) {
  * @param {Array<import('../internal').Component>} commitQueue List of components
  * which have callbacks to invoke in commitRoot
  * @param {boolean} isHydrating Whether or not we are in hydration
+ * @param {Array<any>} refQueue an array of elements needed to invoke refs
  * @returns {import('../internal').PreactElement}
  */
 function diffElementNodes(
