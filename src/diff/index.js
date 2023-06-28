@@ -521,6 +521,7 @@ export function unmount(vnode, parentVNode, skipRemove) {
 
 	if ((r = vnode.ref)) {
 		if (!r.current || r.current === vnode._dom) {
+			console.log('applying', r, 'null');
 			applyRef(r, null, parentVNode);
 		}
 	}

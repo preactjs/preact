@@ -60,11 +60,9 @@ export function render(vnode, parentDom, replaceNode) {
 		refQueue
 	);
 
-	refQueue.some(refs => {
-		for (let i = 0; i < refs.length; i++) {
-			applyRef(refs[i], refs[++i], refs[++i]);
-		}
-	});
+	for (let i = 0; i < refQueue.length; i++) {
+		applyRef(refQueue[i], refQueue[++i], refQueue[++i]);
+	}
 	// Flush all queued effects
 	commitRoot(commitQueue, vnode);
 }

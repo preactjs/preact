@@ -1,5 +1,5 @@
 import { setupRerender } from 'preact/test-utils';
-import { createElement, render, Component, createRef } from 'preact';
+import { createElement, render, Component, createRef, Fragment } from 'preact';
 import { setupScratch, teardown } from '../_util/helpers';
 
 /** @jsx createElement */
@@ -103,8 +103,8 @@ describe('refs', () => {
 			'called with H1',
 			'called with DIV',
 			'called with null',
-			'called with H1',
 			'called with null',
+			'called with H1',
 			'called with DIV'
 		]);
 	});
@@ -542,5 +542,95 @@ describe('refs', () => {
 		render(<App count={2} />, scratch);
 		expect(calls.length).to.equal(1);
 		expect(calls[0]).to.equal(scratch.firstChild.firstChild);
+	});
+
+	// Test for #4049
+	it('should first clean-up refs and after apply them', () => {
+		let calls = [];
+		let set;
+		class App extends Component {
+			constructor(props) {
+				super(props);
+				this.state = {
+					phase: 1
+				};
+				set = () => this.setState({ phase: 2 });
+			}
+
+			render(props, { phase }) {
+				return (
+					<Fragment>
+						{phase === 1 ? (
+							<div>
+								<div
+									ref={r =>
+										r
+											? calls.push('adding ref to two')
+											: calls.push('removing ref from two')
+									}
+								>
+									Element two
+								</div>
+								<div
+									ref={r =>
+										r
+											? calls.push('adding ref to three')
+											: calls.push('removing ref from three')
+									}
+								>
+									Element three
+								</div>
+							</div>
+						) : phase === 2 ? (
+							<div class="outer">
+								<div
+									ref={r =>
+										r
+											? calls.push('adding ref to one')
+											: calls.push('removing ref from one')
+									}
+								>
+									Element one
+								</div>
+								<div class="wrapper">
+									<div
+										ref={r =>
+											r
+												? calls.push('adding ref to two')
+												: calls.push('removing ref from two')
+										}
+									>
+										Element two
+									</div>
+									<div
+										ref={r =>
+											r
+												? calls.push('adding ref to three')
+												: calls.push('removing ref from three')
+										}
+									>
+										Element three
+									</div>
+								</div>
+							</div>
+						) : null}
+					</Fragment>
+				);
+			}
+		}
+
+		render(<App />, scratch);
+
+		expect(calls).to.deep.equal(['adding ref to two', 'adding ref to three']);
+		calls = [];
+
+		set();
+		rerender();
+		expect(calls).to.deep.equal([
+			'removing ref from two',
+			'adding ref to two',
+			'adding ref to three',
+			'adding ref to one'
+		]);
 	});
 });

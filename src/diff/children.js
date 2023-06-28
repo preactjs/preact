@@ -248,7 +248,13 @@ export function diffChildren(
 
 	// Set refs only after unmount
 	if (refs) {
-		refQueue.push(refs);
+		for (let i = 0; i < refs.length; i++) {
+			if (refs[i + 1]) {
+				refQueue.push(refs[i], refs[++i], refs[++i]);
+			} else {
+				applyRef(refs[i], refs[++i], refs[++i]);
+			}
+		}
 	}
 }
 
