@@ -42,7 +42,6 @@ export function diffChildren(
 		childVNode,
 		newDom,
 		firstChildDom,
-		refs,
 		skew = 0;
 
 	// This is a compression of oldParentVNode!=null && oldParentVNode != EMPTY_OBJ && oldParentVNode._children || EMPTY_ARR
@@ -147,8 +146,7 @@ export function diffChildren(
 
 		if ((j = childVNode.ref) && oldVNode.ref != j) {
 			if (oldVNode.ref) {
-				if (!refs) refs = [];
-				refs.push(oldVNode.ref, null, childVNode);
+				applyRef(oldVNode.ref, null, childVNode);
 			}
 			refQueue.push(j, childVNode._component || newDom, childVNode);
 		}
@@ -245,13 +243,6 @@ export function diffChildren(
 			}
 
 			unmount(oldChildren[i], oldChildren[i]);
-		}
-	}
-
-	// Set refs only after unmount
-	if (refs) {
-		for (i = 0; i < refs.length; i++) {
-			applyRef(refs[i], refs[++i], refs[++i]);
 		}
 	}
 }
