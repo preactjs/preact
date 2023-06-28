@@ -22,6 +22,7 @@ import { isArray } from '../util';
  * render (except when hydrating). Can be a sibling DOM element when diffing
  * Fragments that have siblings. In most cases, it starts out as `oldChildren[0]._dom`.
  * @param {boolean} isHydrating Whether or not we are in hydration
+ * @param {Document} doc The owner document of the parentNode
  */
 export function diffChildren(
 	parentDom,
@@ -33,7 +34,8 @@ export function diffChildren(
 	excessDomChildren,
 	commitQueue,
 	oldDom,
-	isHydrating
+	isHydrating,
+	doc
 ) {
 	let i,
 		j,
@@ -138,7 +140,8 @@ export function diffChildren(
 			excessDomChildren,
 			commitQueue,
 			oldDom,
-			isHydrating
+			isHydrating,
+			doc
 		);
 
 		newDom = childVNode._dom;

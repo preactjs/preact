@@ -20,7 +20,8 @@ import options from '../options';
  * element any new dom elements should be placed around. Likely `null` on first
  * render (except when hydrating). Can be a sibling DOM element when diffing
  * Fragments that have siblings. In most cases, it starts out as `oldChildren[0]._dom`.
- * @param {boolean} [isHydrating] Whether or not we are in hydration
+ * @param {boolean} isHydrating Whether or not we are in hydration
+ * @param {Document} doc The owner document of the parentNode
  */
 export function diff(
 	parentDom,
@@ -31,7 +32,8 @@ export function diff(
 	excessDomChildren,
 	commitQueue,
 	oldDom,
-	isHydrating
+	isHydrating,
+	doc
 ) {
 	let tmp,
 		newType = newVNode.type;
@@ -239,7 +241,8 @@ export function diff(
 				excessDomChildren,
 				commitQueue,
 				oldDom,
-				isHydrating
+				isHydrating,
+				doc
 			);
 
 			c.base = newVNode._dom;
@@ -269,7 +272,8 @@ export function diff(
 				isSvg,
 				excessDomChildren,
 				commitQueue,
-				isHydrating
+				isHydrating,
+				doc
 			);
 		}
 
@@ -323,6 +327,7 @@ export function commitRoot(commitQueue, root) {
  * @param {Array<import('../internal').Component>} commitQueue List of components
  * which have callbacks to invoke in commitRoot
  * @param {boolean} isHydrating Whether or not we are in hydration
+ * @param {Document} doc The owner document of the parentNode #2545
  * @returns {import('../internal').PreactElement}
  */
 function diffElementNodes(
@@ -333,7 +338,8 @@ function diffElementNodes(
 	isSvg,
 	excessDomChildren,
 	commitQueue,
-	isHydrating
+	isHydrating,
+	doc
 ) {
 	let oldProps = oldVNode.props;
 	let newProps = newVNode.props;
@@ -365,17 +371,17 @@ function diffElementNodes(
 	if (dom == null) {
 		if (nodeType === null) {
 			// @ts-ignore createTextNode returns Text, we expect PreactElement
-			return document.createTextNode(newProps);
+			return doc.createTextNode(newProps);
 		}
 
 		if (isSvg) {
-			dom = document.createElementNS(
+			dom = doc.createElementNS(
 				'http://www.w3.org/2000/svg',
 				// @ts-ignore We know `newVNode.type` is a string
 				nodeType
 			);
 		} else {
-			dom = document.createElement(
+			dom = doc.createElement(
 				// @ts-ignore We know `newVNode.type` is a string
 				nodeType,
 				newProps.is && newProps
@@ -445,7 +451,8 @@ function diffElementNodes(
 				excessDomChildren
 					? excessDomChildren[0]
 					: oldVNode._children && getDomSibling(oldVNode, 0),
-				isHydrating
+				isHydrating,
+				doc
 			);
 
 			// Remove children that are not part of any vnode.
