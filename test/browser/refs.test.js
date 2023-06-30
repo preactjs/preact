@@ -633,4 +633,88 @@ describe('refs', () => {
 			'adding ref to three'
 		]);
 	});
+
+	it('should bind refs before componentDidMount', () => {
+		/** @type {import('preact').RefObject<HTMLSpanElement>[]} */
+		const refs = [];
+
+		class Parent extends Component {
+			componentDidMount() {
+				// Child refs should be set
+				expect(refs.length).to.equal(2);
+				expect(refs[0].current.tagName).to.equal('SPAN');
+				expect(refs[1].current.tagName).to.equal('SPAN');
+			}
+
+			render(props) {
+				return props.children;
+			}
+		}
+
+		class Child extends Component {
+			constructor(props) {
+				super(props);
+
+				this.ref = createRef();
+			}
+
+			componentDidMount() {
+				// SPAN refs should be set
+				expect(this.ref.current.tagName).to.equal('SPAN');
+				expect(document.body.contains(this.ref.current)).to.equal(true);
+				refs.push(this.ref);
+			}
+
+			render() {
+				return <span ref={this.ref}>Hello</span>;
+			}
+		}
+
+		render(
+			<Parent>
+				<Child />
+				<Child />
+			</Parent>,
+			scratch
+		);
+
+		expect(scratch.innerHTML).to.equal('<span>Hello</span><span>Hello</span>');
+		expect(refs[0].current).to.equalNode(scratch.firstChild);
+		expect(refs[1].current).to.equalNode(scratch.lastChild);
+	});
+
+	it('should call refs after element is added to document on initial mount', () => {
+		const verifyRef = name => el =>
+			expect(document.body.contains(el), name).to.equal(true);
+
+		function App() {
+			return (
+				<div ref={verifyRef('div tag')}>
+					<p ref={verifyRef('p tag')}>Hello</p>
+				</div>
+			);
+		}
+
+		render(<App />, scratch);
+	});
+
+	it('should call refs after element is added to document on update', () => {
+		const verifyRef = name => el =>
+			expect(document.body.contains(el), name).to.equal(true);
+
+		function App({ show = false }) {
+			return (
+				<div>
+					{show && (
+						<p ref={verifyRef('p tag')}>
+							<span ref={verifyRef('inner span')}>Hello</span>
+						</p>
+					)}
+				</div>
+			);
+		}
+
+		render(<App />, scratch);
+		render(<App show />, scratch);
+	});
 });
