@@ -125,7 +125,8 @@ function renderComponent(component) {
 		parentDom = component._parentDom;
 
 	if (parentDom) {
-		let commitQueue = [];
+		let commitQueue = [],
+			refQueue = [];
 		const oldVNode = assign({}, vnode);
 		oldVNode._original = vnode._original + 1;
 
@@ -138,9 +139,11 @@ function renderComponent(component) {
 			vnode._hydrating != null ? [oldDom] : null,
 			commitQueue,
 			oldDom == null ? getDomSibling(vnode) : oldDom,
-			vnode._hydrating
+			vnode._hydrating,
+			refQueue
 		);
-		commitRoot(commitQueue, vnode);
+
+		commitRoot(commitQueue, vnode, refQueue);
 
 		if (vnode._dom != oldDom) {
 			updateParentDomPointers(vnode);

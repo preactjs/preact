@@ -33,7 +33,8 @@ export function render(vnode, parentDom, replaceNode) {
 		createElement(Fragment, null, [vnode]);
 
 	// List of effects that need to be called after diffing.
-	let commitQueue = [];
+	let commitQueue = [],
+		refQueue = [];
 	diff(
 		parentDom,
 		// Determine the new vnode tree and store it on the DOM element on
@@ -55,11 +56,12 @@ export function render(vnode, parentDom, replaceNode) {
 			: oldVNode
 			? oldVNode._dom
 			: parentDom.firstChild,
-		isHydrating
+		isHydrating,
+		refQueue
 	);
 
 	// Flush all queued effects
-	commitRoot(commitQueue, vnode);
+	commitRoot(commitQueue, vnode, refQueue);
 }
 
 /**
