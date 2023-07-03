@@ -509,25 +509,23 @@ describe('refs', () => {
 		expect(ref.current).to.equal(scratch.firstChild.firstChild);
 	});
 
-	// TODO
-	it.skip('should properly call null for memoized components keyed', () => {
-		const calls = [];
+	it('should properly call null for memoized components keyed', () => {
+		let calls = [];
 		const element = <div ref={x => calls.push(x)}>hey</div>;
 		function App(props) {
 			return <div key={props.count}>{element}</div>;
 		}
 
 		render(<App count={0} />, scratch);
+		expect(calls).to.deep.equal([scratch.firstChild.firstChild]);
+		calls = [];
+
 		render(<App count={1} />, scratch);
+		expect(calls).to.deep.equal([null, scratch.firstChild.firstChild]);
+		calls = [];
+
 		render(<App count={2} />, scratch);
-		expect(calls.length).to.equal(5);
-		expect(calls).to.deep.equal([
-			scratch.firstChild.firstChild,
-			null,
-			scratch.firstChild.firstChild,
-			null,
-			scratch.firstChild.firstChild
-		]);
+		expect(calls).to.deep.equal([null, scratch.firstChild.firstChild]);
 	});
 
 	it('should properly call null for memoized components unkeyed', () => {
