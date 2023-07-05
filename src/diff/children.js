@@ -22,6 +22,7 @@ import { isArray } from '../util';
  * render (except when hydrating). Can be a sibling DOM element when diffing
  * Fragments that have siblings. In most cases, it starts out as `oldChildren[0]._dom`.
  * @param {boolean} isHydrating Whether or not we are in hydration
+ * @param {Array<any>} refQueue an array of elements needed to invoke refs
  */
 export function diffChildren(
 	parentDom,
@@ -33,7 +34,8 @@ export function diffChildren(
 	excessDomChildren,
 	commitQueue,
 	oldDom,
-	isHydrating
+	isHydrating,
+	refQueue
 ) {
 	let i,
 		j,
@@ -41,7 +43,6 @@ export function diffChildren(
 		childVNode,
 		newDom,
 		firstChildDom,
-		refs,
 		skew = 0;
 
 	// This is a compression of oldParentVNode!=null && oldParentVNode != EMPTY_OBJ && oldParentVNode._children || EMPTY_ARR
@@ -138,15 +139,17 @@ export function diffChildren(
 			excessDomChildren,
 			commitQueue,
 			oldDom,
-			isHydrating
+			isHydrating,
+			refQueue
 		);
 
 		newDom = childVNode._dom;
 
 		if ((j = childVNode.ref) && oldVNode.ref != j) {
-			if (!refs) refs = [];
-			if (oldVNode.ref) refs.push(oldVNode.ref, null, childVNode);
-			refs.push(j, childVNode._component || newDom, childVNode);
+			if (oldVNode.ref) {
+				applyRef(oldVNode.ref, null, childVNode);
+			}
+			refQueue.push(j, childVNode._component || newDom, childVNode);
 		}
 
 		if (newDom != null) {
@@ -241,13 +244,6 @@ export function diffChildren(
 			}
 
 			unmount(oldChildren[i], oldChildren[i]);
-		}
-	}
-
-	// Set refs only after unmount
-	if (refs) {
-		for (i = 0; i < refs.length; i++) {
-			applyRef(refs[i], refs[++i], refs[++i]);
 		}
 	}
 }

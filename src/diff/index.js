@@ -20,7 +20,8 @@ import options from '../options';
  * element any new dom elements should be placed around. Likely `null` on first
  * render (except when hydrating). Can be a sibling DOM element when diffing
  * Fragments that have siblings. In most cases, it starts out as `oldChildren[0]._dom`.
- * @param {boolean} [isHydrating] Whether or not we are in hydration
+ * @param {boolean} isHydrating Whether or not we are in hydration
+ * @param {Array<any>} refQueue an array of elements needed to invoke refs
  */
 export function diff(
 	parentDom,
@@ -31,7 +32,8 @@ export function diff(
 	excessDomChildren,
 	commitQueue,
 	oldDom,
-	isHydrating
+	isHydrating,
+	refQueue
 ) {
 	let tmp,
 		newType = newVNode.type;
@@ -134,14 +136,14 @@ export function diff(
 				}
 
 				if (
-					(!c._force &&
-						c.shouldComponentUpdate != null &&
+					!c._force &&
+					((c.shouldComponentUpdate != null &&
 						c.shouldComponentUpdate(
 							newProps,
 							c._nextState,
 							componentContext
 						) === false) ||
-					newVNode._original === oldVNode._original
+						newVNode._original === oldVNode._original)
 				) {
 					// More info about this here: https://gist.github.com/JoviDeCroock/bec5f2ce93544d2e6070ef8e0036e4e8
 					if (newVNode._original !== oldVNode._original) {
@@ -154,8 +156,6 @@ export function diff(
 						c._dirty = false;
 					}
 
-					// In cases of bailing due to strict-equality we have to reset force as well
-					c._force = false;
 					newVNode._dom = oldVNode._dom;
 					newVNode._children = oldVNode._children;
 					newVNode._children.forEach(vnode => {
@@ -188,6 +188,7 @@ export function diff(
 			c.context = componentContext;
 			c.props = newProps;
 			c._parentDom = parentDom;
+			c._force = false;
 
 			let renderHook = options._render,
 				count = 0;
@@ -240,7 +241,8 @@ export function diff(
 				excessDomChildren,
 				commitQueue,
 				oldDom,
-				isHydrating
+				isHydrating,
+				refQueue
 			);
 
 			c.base = newVNode._dom;
@@ -255,8 +257,6 @@ export function diff(
 			if (clearProcessingException) {
 				c._pendingError = c._processingException = null;
 			}
-
-			c._force = false;
 		} else if (
 			excessDomChildren == null &&
 			newVNode._original === oldVNode._original
@@ -272,7 +272,8 @@ export function diff(
 				isSvg,
 				excessDomChildren,
 				commitQueue,
-				isHydrating
+				isHydrating,
+				refQueue
 			);
 		}
 
@@ -296,7 +297,11 @@ export function diff(
  * which have callbacks to invoke in commitRoot
  * @param {import('../internal').VNode} root
  */
-export function commitRoot(commitQueue, root) {
+export function commitRoot(commitQueue, root, refQueue) {
+	for (let i = 0; i < refQueue.length; i++) {
+		applyRef(refQueue[i], refQueue[++i], refQueue[++i]);
+	}
+
 	if (options._commit) options._commit(root, commitQueue);
 
 	commitQueue.some(c => {
@@ -326,6 +331,7 @@ export function commitRoot(commitQueue, root) {
  * @param {Array<import('../internal').Component>} commitQueue List of components
  * which have callbacks to invoke in commitRoot
  * @param {boolean} isHydrating Whether or not we are in hydration
+ * @param {Array<any>} refQueue an array of elements needed to invoke refs
  * @returns {import('../internal').PreactElement}
  */
 function diffElementNodes(
@@ -336,7 +342,8 @@ function diffElementNodes(
 	isSvg,
 	excessDomChildren,
 	commitQueue,
-	isHydrating
+	isHydrating,
+	refQueue
 ) {
 	let oldProps = oldVNode.props;
 	let newProps = newVNode.props;
@@ -448,7 +455,8 @@ function diffElementNodes(
 				excessDomChildren
 					? excessDomChildren[0]
 					: oldVNode._children && getDomSibling(oldVNode, 0),
-				isHydrating
+				isHydrating,
+				refQueue
 			);
 
 			// Remove children that are not part of any vnode.

@@ -476,4 +476,41 @@ describe('useLayoutEffect', () => {
 		expect(calls.length).to.equal(1);
 		expect(calls).to.deep.equal(['doing effecthi']);
 	});
+
+	it('should run layout affects after all refs are invoked', () => {
+		const calls = [];
+		const verifyRef = name => el => {
+			calls.push(name);
+			expect(document.body.contains(el), name).to.equal(true);
+		};
+
+		const App = () => {
+			const ref = useRef();
+			useLayoutEffect(() => {
+				expect(ref.current).to.equalNode(scratch.querySelector('p'));
+
+				calls.push('doing effect');
+				return () => {
+					calls.push('cleaning up');
+				};
+			});
+
+			return (
+				<div ref={verifyRef('callback ref outer')}>
+					<p ref={ref}>
+						<span ref={verifyRef('callback ref inner')}>Hi</span>
+					</p>
+				</div>
+			);
+		};
+
+		act(() => {
+			render(<App />, scratch);
+		});
+		expect(calls).to.deep.equal([
+			'callback ref inner',
+			'callback ref outer',
+			'doing effect'
+		]);
+	});
 });
