@@ -15,12 +15,22 @@ import { assign, isNaN } from './util';
 
 const isWeakMapSupported = typeof WeakMap == 'function';
 
-function getClosestDomNodeParent(parent) {
-	if (!parent) return {};
+/**
+ * @param {import('./internal').VNode} parent
+ * @returns {string}
+ */
+function getClosestDomNodeParentName(parent) {
+	if (!parent) return '';
 	if (typeof parent.type == 'function') {
-		return getClosestDomNodeParent(parent._parent);
+		if (parent._parent === null) {
+			if (parent._dom !== null && parent._dom.parentNode !== null) {
+				return parent._dom.parentNode.localName;
+			}
+			return '';
+		}
+		return getClosestDomNodeParentName(parent._parent);
 	}
-	return parent;
+	return /** @type {string} */ (parent.type);
 }
 
 export function initDebug() {
@@ -36,6 +46,7 @@ export function initDebug() {
 	let oldCatchError = options._catchError;
 	let oldRoot = options._root;
 	let oldHook = options._hook;
+	let oldCommit = options._commit;
 	const warnedComponents = !isWeakMapSupported
 		? null
 		: {
@@ -44,6 +55,8 @@ export function initDebug() {
 				lazyPropTypes: new WeakMap()
 		  };
 	const deprecations = [];
+	/** @type {import("./internal.d.ts").VNode[]} */
+	let checkVNodeDom = [];
 
 	options._catchError = (error, vnode, oldVNode, errorInfo) => {
 		let component = vnode && vnode._component;
@@ -116,8 +129,18 @@ export function initDebug() {
 	};
 
 	options._diff = vnode => {
-		let { type, _parent: parent } = vnode;
-		let parentVNode = getClosestDomNodeParent(parent);
+		let { type } = vnode;
+		if (
+			typeof type === 'string' &&
+			(type === 'thead' ||
+				type === 'tfoot' ||
+				type === 'tbody' ||
+				type === 'tr' ||
+				type === 'td' ||
+				type === 'th')
+		) {
+			checkVNodeDom.push(vnode);
+		}
 
 		hooksAllowed = true;
 
@@ -143,41 +166,6 @@ export function initDebug() {
 			throw new Error(
 				'Invalid type passed to createElement(): ' +
 					(Array.isArray(type) ? 'array' : type)
-			);
-		}
-
-		if (
-			(type === 'thead' || type === 'tfoot' || type === 'tbody') &&
-			parentVNode.type !== 'table'
-		) {
-			console.error(
-				'Improper nesting of table. Your <thead/tbody/tfoot> should have a <table> parent.' +
-					serializeVNode(vnode) +
-					`\n\n${getOwnerStack(vnode)}`
-			);
-		} else if (
-			type === 'tr' &&
-			parentVNode.type !== 'thead' &&
-			parentVNode.type !== 'tfoot' &&
-			parentVNode.type !== 'tbody' &&
-			parentVNode.type !== 'table'
-		) {
-			console.error(
-				'Improper nesting of table. Your <tr> should have a <thead/tbody/tfoot/table> parent.' +
-					serializeVNode(vnode) +
-					`\n\n${getOwnerStack(vnode)}`
-			);
-		} else if (type === 'td' && parentVNode.type !== 'tr') {
-			console.error(
-				'Improper nesting of table. Your <td> should have a <tr> parent.' +
-					serializeVNode(vnode) +
-					`\n\n${getOwnerStack(vnode)}`
-			);
-		} else if (type === 'th' && parentVNode.type !== 'tr') {
-			console.error(
-				'Improper nesting of table. Your <th> should have a <tr>.' +
-					serializeVNode(vnode) +
-					`\n\n${getOwnerStack(vnode)}`
 			);
 		}
 
@@ -386,6 +374,57 @@ export function initDebug() {
 				}
 			}
 		}
+	};
+
+	options._commit = (root, queue) => {
+		for (let i = 0; i < checkVNodeDom.length; i++) {
+			const vnode = checkVNodeDom[i];
+
+			// Check if HTML nesting is valid. We need to do it in `options.diffed`
+			// so that we can optionally traverse outside the vdom root in case
+			// it's an island embedded in an existing (and valid) HTML tree.
+			const { type, _parent: parent } = vnode;
+
+			let domParentName = getClosestDomNodeParentName(parent);
+
+			if (
+				(type === 'thead' || type === 'tfoot' || type === 'tbody') &&
+				domParentName !== 'table'
+			) {
+				console.error(
+					'Improper nesting of table. Your <thead/tbody/tfoot> should have a <table> parent.' +
+						serializeVNode(vnode) +
+						`\n\n${getOwnerStack(vnode)}`
+				);
+			} else if (
+				type === 'tr' &&
+				domParentName !== 'thead' &&
+				domParentName !== 'tfoot' &&
+				domParentName !== 'tbody' &&
+				domParentName !== 'table'
+			) {
+				console.error(
+					'Improper nesting of table. Your <tr> should have a <thead/tbody/tfoot/table> parent.' +
+						serializeVNode(vnode) +
+						`\n\n${getOwnerStack(vnode)}`
+				);
+			} else if (type === 'td' && domParentName !== 'tr') {
+				console.error(
+					'Improper nesting of table. Your <td> should have a <tr> parent.' +
+						serializeVNode(vnode) +
+						`\n\n${getOwnerStack(vnode)}`
+				);
+			} else if (type === 'th' && domParentName !== 'tr') {
+				console.error(
+					'Improper nesting of table. Your <th> should have a <tr>.' +
+						serializeVNode(vnode) +
+						`\n\n${getOwnerStack(vnode)}`
+				);
+			}
+		}
+		checkVNodeDom = [];
+
+		if (oldCommit) oldCommit(root, queue);
 	};
 }
 
