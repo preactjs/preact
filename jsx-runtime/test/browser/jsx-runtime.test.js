@@ -14,10 +14,10 @@ describe('Babel jsx/jsxDEV', () => {
 	});
 
 	it('should have needed exports', () => {
-		expect(typeof jsx).to.equal('function');
-		expect(typeof jsxs).to.equal('function');
-		expect(typeof jsxDEV).to.equal('function');
-		expect(typeof Fragment).to.equal('function');
+		expect(jsx).to.be.a('function');
+		expect(jsxs).to.be.a('function');
+		expect(jsxDEV).to.be.a('function');
+		expect(Fragment).to.be.a('function');
 	});
 
 	it('should keep ref in props', () => {
