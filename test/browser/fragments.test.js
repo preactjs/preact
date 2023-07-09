@@ -687,7 +687,8 @@ describe('Fragment', () => {
 		expect(scratch.innerHTML).to.equal(htmlForFalse);
 		expectDomLogToBe(
 			[
-				'<div>fooHellobeep.appendChild(<div>Hello)',
+				'<div>barHellobeep.insertBefore(<div>bar, <div>beep)',
+				'<div>Hellobarbeep.appendChild(<div>Hello)',
 				'<div>barbeepHello.appendChild(<div>bar)'
 			],
 			'rendering true to false'
@@ -1277,9 +1278,7 @@ describe('Fragment', () => {
 		);
 		expectDomLogToBe([
 			'<ol>012345.insertBefore(<li>4, <li>0)',
-			'<ol>401235.insertBefore(<li>5, <li>0)',
-			// TODO: Hmmm why does this extra append happen?
-			'<ol>453012.appendChild(<li>3)'
+			'<ol>401235.insertBefore(<li>5, <li>0)'
 		]);
 
 		clearLog();
@@ -1478,7 +1477,8 @@ describe('Fragment', () => {
 		);
 		expectDomLogToBe(
 			[
-				'<div>fooHellobeepboop.insertBefore(<div>Hello, <div>boop)',
+				'<div>barHellobeepboop.insertBefore(<div>bar, <div>beep)',
+				'<div>Hellobarbeepboop.insertBefore(<div>Hello, <div>boop)',
 				'<div>barbeepHelloboop.insertBefore(<div>bar, <div>boop)',
 				'<div>boop.remove()'
 			],
@@ -1564,7 +1564,8 @@ describe('Fragment', () => {
 		);
 		expectDomLogToBe(
 			[
-				'<div>fooHellobeepbeepbeep.appendChild(<div>Hello)',
+				'<div>barHellobeepbeepbeep.insertBefore(<div>bar, <div>beep)',
+				'<div>Hellobarbeepbeepbeep.appendChild(<div>Hello)',
 				'<div>barbeepbeepbeepHello.appendChild(<div>bar)'
 			],
 			'rendering from true to false'
@@ -1580,9 +1581,9 @@ describe('Fragment', () => {
 		);
 		expectDomLogToBe(
 			[
-				'<div>beepbeepbeepHellofoo.insertBefore(<div>foo, <div>beep)',
-				'<div>foobeepbeepbeepHello.insertBefore(<div>Hello, <div>beep)',
-				'<div>fooHelloboopboopboop.appendChild(<div>boop)'
+				'<div>beepbeepbeepHellofoo.appendChild(<div>Hello)',
+				'<div>beepbeepbeepfooHello.insertBefore(<div>foo, <div>beep)',
+				'<div>foobeepbeepbeepHello.insertBefore(<div>Hello, <div>beep)'
 			],
 			'rendering from false to true'
 		);
@@ -2608,8 +2609,10 @@ describe('Fragment', () => {
 		rerender();
 		expect(scratch.innerHTML).to.equal(bottom);
 		expectDomLogToBe([
+			'<div>top panelNavigationContent.insertBefore(<div>Navigation, <div>top panel)',
+			'<div>Navigationtop panelContent.insertBefore(<div>Content, <div>top panel)',
 			'<div>.appendChild(#text)',
-			'<div>top panelNavigationContent.appendChild(<div>bottom panel)',
+			'<div>NavigationContenttop panel.insertBefore(<div>bottom panel, <div>top panel)',
 			'<div>top panel.remove()'
 		]);
 
@@ -2701,6 +2704,96 @@ describe('Fragment', () => {
 
 		expect(scratch.innerHTML).to.equal(div([div(1), div('A'), div('B')]));
 		expectDomLogToBe(['<div>2.remove()', '<div>3.remove()']);
+	});
+
+	it('should properly unmount Fragment children around an unmounting null placeholder #2987', () => {
+		const arrayOf = (n, fill = 0) => new Array(n).fill(fill);
+
+		class App extends Component {
+			constructor(props) {
+				super(props);
+
+				this.state = {
+					renderFirstElement: true,
+					renderLastElement: true,
+					childrenProps: [
+						{
+							arrayData: arrayOf(10).map((_, index) => ({
+								key: index + 5,
+								text: index + 5
+							}))
+						},
+						{
+							arrayData: arrayOf(10).map((_, index) => ({
+								key: index + 15,
+								text: index + 15
+							}))
+						}
+					]
+				};
+			}
+
+			componentDidMount() {
+				// eslint-disable-next-line react/no-did-mount-set-state
+				this.setState({
+					renderFirstElement: false,
+					renderLastElement: true,
+					childrenProps: [
+						{
+							arrayData: arrayOf(15).map((_, index) => ({
+								key: index,
+								text: index
+							}))
+						},
+						{
+							arrayData: arrayOf(5).map((_, index) => ({
+								key: index + 15,
+								text: index + 15
+							}))
+						}
+					]
+				});
+			}
+
+			render() {
+				const { renderFirstElement, renderLastElement, childrenProps } =
+					this.state;
+				return (
+					<div>
+						{renderFirstElement && <div>This is the first div</div>}
+						{childrenProps.map(({ arrayData }) => {
+							return arrayData.map(({ key, text }) => (
+								<div key={key}>{text}</div>
+							));
+						})}
+						{renderLastElement && <div>This is the last div</div>}
+					</div>
+				);
+			}
+		}
+
+		render(<App />, scratch);
+		expect(scratch.innerHTML).to.equal(
+			div([
+				div('This is the first div'),
+				arrayOf(20)
+					.map((_, i) => div(i + 5)) // 5 - 24
+					.join(''),
+				div('This is the last div')
+			])
+		);
+
+		// Flush CDM setState call
+		rerender();
+		expect(scratch.innerHTML).to.equal(
+			div([
+				// "This is the first div" is unmounted using a null placeholder pattern
+				arrayOf(20)
+					.map((_, i) => div(i)) // 0 - 19 (0 - 4 are inserted, 20 - 24 are unmounted)
+					.join(''),
+				div('This is the last div')
+			])
+		);
 	});
 
 	it('should efficiently place new children and unmount nested Fragment children', () => {
@@ -2952,9 +3045,6 @@ describe('Fragment', () => {
 		rerender();
 
 		expect(scratch.innerHTML).to.equal([div('A'), div(1), div(2)].join(''));
-		expectDomLogToBe([
-			'<div>B.remove()',
-			'<div>1A2.insertBefore(<div>1, <div>2)'
-		]);
+		expectDomLogToBe(['<div>B.remove()', '<div>2A1.appendChild(<div>2)']);
 	});
 });

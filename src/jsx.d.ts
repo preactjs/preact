@@ -1073,6 +1073,8 @@ export namespace JSXInternal {
 		Target,
 		WheelEvent
 	>;
+	export type TargetedPictureInPictureEvent<Target extends EventTarget> =
+		TargetedEvent<Target, PictureInPictureEvent>;
 
 	export interface EventHandler<E extends TargetedEvent> {
 		(this: void, event: E): void;
@@ -1116,6 +1118,8 @@ export namespace JSXInternal {
 	export type WheelEventHandler<Target extends EventTarget> = EventHandler<
 		TargetedWheelEvent<Target>
 	>;
+	export type PictureInPictureEventHandler<Target extends EventTarget> =
+		EventHandler<TargetedPictureInPictureEvent<Target>>;
 
 	export interface DOMAttributes<Target extends EventTarget>
 		extends PreactDOMAttributes {
@@ -1143,6 +1147,10 @@ export namespace JSXInternal {
 
 		// Details Events
 		onToggle?: GenericEventHandler<Target> | undefined;
+
+		// Dialog Events
+		onClose?: GenericEventHandler<Target> | undefined;
+		onCancel?: GenericEventHandler<Target> | undefined;
 
 		// Focus Events
 		onFocus?: FocusEventHandler<Target> | undefined;
@@ -1317,8 +1325,22 @@ export namespace JSXInternal {
 		onAnimationIterationCapture?: AnimationEventHandler<Target> | undefined;
 
 		// Transition Events
+		onTransitionCancel?: TransitionEventHandler<Target>;
+		onTransitionCancelCapture?: TransitionEventHandler<Target>;
 		onTransitionEnd?: TransitionEventHandler<Target>;
 		onTransitionEndCapture?: TransitionEventHandler<Target>;
+		onTransitionRun?: TransitionEventHandler<Target>;
+		onTransitionRunCapture?: TransitionEventHandler<Target>;
+		onTransitionStart?: TransitionEventHandler<Target>;
+		onTransitionStartCapture?: TransitionEventHandler<Target>;
+
+		// PictureInPicture Events
+		onEnterPictureInPicture?: PictureInPictureEventHandler<Target>;
+		onEnterPictureInPictureCapture?: PictureInPictureEventHandler<Target>;
+		onLeavePictureInPicture?: PictureInPictureEventHandler<Target>;
+		onLeavePictureInPictureCapture?: PictureInPictureEventHandler<Target>;
+		onResize?: PictureInPictureEventHandler<Target>;
+		onResizeCapture?: PictureInPictureEventHandler<Target>;
 	}
 
 	// All the WAI-ARIA 1.1 attributes from https://www.w3.org/TR/wai-aria-1.1/
@@ -1334,6 +1356,16 @@ export namespace JSXInternal {
 		'aria-autocomplete'?: Signalish<
 			'none' | 'inline' | 'list' | 'both' | undefined
 		>;
+		/**
+		 * Defines a string value that labels the current element, which is intended to be converted into Braille.
+		 * @see aria-label.
+		 */
+		'aria-braillelabel'?: Signalish<string | undefined>;
+		/**
+		 * Defines a human-readable, author-localized abbreviated description for the role of an element, which is intended to be converted into Braille.
+		 * @see aria-roledescription.
+		 */
+		'aria-brailleroledescription'?: Signalish<string | undefined>;
 		/** Indicates an element is being modified and that assistive technologies MAY want to wait until the modifications are complete before exposing them to the user. */
 		'aria-busy'?: Signalish<Booleanish | undefined>;
 		/**
@@ -1354,6 +1386,11 @@ export namespace JSXInternal {
 		 */
 		'aria-colindex'?: Signalish<number | undefined>;
 		/**
+		 * Defines a human readable text alternative of aria-colindex.
+		 * @see aria-rowindextext.
+		 */
+		'aria-colindextext'?: Signalish<string | undefined>;
+		/**
 		 * Defines the number of columns spanned by a cell or gridcell within a table, grid, or treegrid.
 		 * @see aria-colindex
 		 * @see aria-rowspan.
@@ -1373,6 +1410,11 @@ export namespace JSXInternal {
 		 * @see aria-labelledby
 		 */
 		'aria-describedby'?: Signalish<string | undefined>;
+		/**
+		 * Defines a string value that describes or annotates the current element.
+		 * @see related aria-describedby.
+		 */
+		'aria-description'?: Signalish<string | undefined>;
 		/**
 		 * Identifies the element that provides a detailed, extended description for the object.
 		 * @see aria-describedby.
@@ -1506,6 +1548,11 @@ export namespace JSXInternal {
 		 * @see aria-rowspan.
 		 */
 		'aria-rowindex'?: Signalish<number | undefined>;
+		/**
+		 * Defines a human readable text alternative of aria-rowindex.
+		 * @see aria-colindextext.
+		 */
+		'aria-rowindextext'?: Signalish<string | undefined>;
 		/**
 		 * Defines the number of rows spanned by a cell or gridcell within a table, grid, or treegrid.
 		 * @see aria-rowindex
