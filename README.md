@@ -28,7 +28,7 @@
 [![OpenCollective Backers](https://opencollective.com/preact/backers/badge.svg)](#backers)
 [![OpenCollective Sponsors](https://opencollective.com/preact/sponsors/badge.svg)](#sponsors)
 
-[![coveralls](https://img.shields.io/coveralls/preactjs/preact/master.svg)](https://coveralls.io/github/preactjs/preact)
+[![coveralls](https://img.shields.io/coveralls/preactjs/preact/main.svg)](https://coveralls.io/github/preactjs/preact)
 [![gzip size](http://img.badgesize.io/https://unpkg.com/preact/dist/preact.min.js?compression=gzip&label=gzip)](https://unpkg.com/preact/dist/preact.min.js)
 [![brotli size](http://img.badgesize.io/https://unpkg.com/preact/dist/preact.min.js?compression=brotli&label=brotli)](https://unpkg.com/preact/dist/preact.min.js)
 
@@ -185,6 +185,6 @@ MIT
 
 [![Preact](https://i.imgur.com/YqCHvEW.gif)](https://preactjs.com)
 
-[preact/compat]: https://github.com/preactjs/preact/tree/master/compat
+[preact/compat]: https://github.com/preactjs/preact/tree/main/compat
 [hyperscript]: https://github.com/dominictarr/hyperscript
 [DevTools]: https://github.com/preactjs/preact-devtools

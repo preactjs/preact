@@ -30,7 +30,7 @@ prog
 	.example('bench text*')
 	.example('bench *.html')
 	.example('bench all')
-	.example('bench many* -f preact-local -f preact-master')
+	.example('bench many* -f preact-local -f preact-main')
 	.option(
 		'--browser, -b',
 		'Which browsers to launch in automatic mode, comma-delimited (chrome, chrome-headless, firefox, firefox-headless, safari, edge, ie)',
@@ -72,7 +72,7 @@ prog
 // Tests:
 // - (no args)
 // - many*
-// - many* -f preact-local -f preact-master
+// - many* -f preact-local -f preact-main
 prog
 	.command('deopts [benchmark]')
 	.describe(
@@ -81,7 +81,7 @@ prog
 	.example('deopts many_updates.html')
 	.example('deopts many*')
 	.example('deopts many* -f preact-local')
-	.example('deopts many* -f preact-local -f preact-master')
+	.example('deopts many* -f preact-local -f preact-main')
 	.option(
 		'--framework, -f',
 		'The framework to run the benchmark with.',
