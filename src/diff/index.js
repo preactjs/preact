@@ -54,8 +54,8 @@ export function diff(
 	if ((tmp = options._diff)) tmp(newVNode);
 
 	outer: if (typeof newType == 'function') {
+		let c, isNew, oldProps, oldState, snapshot, clearProcessingException;
 		try {
-			let c, isNew, oldProps, oldState, snapshot, clearProcessingException;
 			let newProps = newVNode.props;
 
 			// Necessary for createContext api. Setting this property will pass
@@ -226,37 +226,6 @@ export function diff(
 			if (!isNew && c.getSnapshotBeforeUpdate != null) {
 				snapshot = c.getSnapshotBeforeUpdate(oldProps, oldState);
 			}
-
-			let isTopLevelFragment =
-				tmp != null && tmp.type === Fragment && tmp.key == null;
-			let renderResult = isTopLevelFragment ? tmp.props.children : tmp;
-
-			diffChildren(
-				parentDom,
-				isArray(renderResult) ? renderResult : [renderResult],
-				newVNode,
-				oldVNode,
-				globalContext,
-				isSvg,
-				excessDomChildren,
-				commitQueue,
-				oldDom,
-				isHydrating,
-				refQueue
-			);
-
-			c.base = newVNode._dom;
-
-			// We successfully rendered this VNode, unset any stored hydration/bailout state:
-			newVNode._hydrating = null;
-
-			if (c._renderCallbacks.length) {
-				commitQueue.push(c);
-			}
-
-			if (clearProcessingException) {
-				c._pendingError = c._processingException = null;
-			}
 		} catch (e) {
 			newVNode._original = null;
 			// if hydrating or creating initial tree, bailout preserves DOM:
@@ -268,6 +237,38 @@ export function diff(
 				// excessDomChildren.length = 0;
 			}
 			options._catchError(e, newVNode, oldVNode);
+			return;
+		}
+
+		let isTopLevelFragment =
+			tmp != null && tmp.type === Fragment && tmp.key == null;
+		let renderResult = isTopLevelFragment ? tmp.props.children : tmp;
+
+		diffChildren(
+			parentDom,
+			isArray(renderResult) ? renderResult : [renderResult],
+			newVNode,
+			oldVNode,
+			globalContext,
+			isSvg,
+			excessDomChildren,
+			commitQueue,
+			oldDom,
+			isHydrating,
+			refQueue
+		);
+
+		c.base = newVNode._dom;
+
+		// We successfully rendered this VNode, unset any stored hydration/bailout state:
+		newVNode._hydrating = null;
+
+		if (c._renderCallbacks.length) {
+			commitQueue.push(c);
+		}
+
+		if (clearProcessingException) {
+			c._pendingError = c._processingException = null;
 		}
 	} else if (
 		excessDomChildren == null &&
