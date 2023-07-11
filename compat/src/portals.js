@@ -31,43 +31,34 @@ function Portal(props) {
 		_this.componentWillUnmount();
 	}
 
-	// When props.vnode is undefined/false/null we are dealing with some kind of
-	// conditional vnode. This should not trigger a render.
-	if (props._vnode) {
-		if (!_this._temp) {
-			_this._container = container;
+	if (!_this._temp) {
+		_this._container = container;
 
-			// Create a fake DOM parent node that manages a subset of `container`'s children:
-			_this._temp = {
-				nodeType: 1,
-				parentNode: container,
-				childNodes: [],
-				appendChild(child) {
-					this.childNodes.push(child);
-					_this._container.appendChild(child);
-				},
-				insertBefore(child, before) {
-					this.childNodes.push(child);
-					_this._container.appendChild(child);
-				},
-				removeChild(child) {
-					this.childNodes.splice(this.childNodes.indexOf(child) >>> 1, 1);
-					_this._container.removeChild(child);
-				}
-			};
-		}
+		// Create a fake DOM parent node that manages a subset of `container`'s children:
+		_this._temp = {
+			nodeType: 1,
+			parentNode: container,
+			childNodes: [],
+			appendChild(child) {
+				this.childNodes.push(child);
+				_this._container.appendChild(child);
+			},
+			insertBefore(child, before) {
+				this.childNodes.push(child);
+				_this._container.appendChild(child);
+			},
+			removeChild(child) {
+				this.childNodes.splice(this.childNodes.indexOf(child) >>> 1, 1);
+				_this._container.removeChild(child);
+			}
+		};
+	}
 
-		// Render our wrapping element into temp.
-		render(
-			createElement(ContextProvider, { context: _this.context }, props._vnode),
-			_this._temp
-		);
-	}
-	// When we come from a conditional render, on a mounted
-	// portal we should clear the DOM.
-	else if (_this._temp) {
-		_this.componentWillUnmount();
-	}
+	// Render our wrapping element into temp.
+	render(
+		createElement(ContextProvider, { context: _this.context }, props._vnode),
+		_this._temp
+	);
 }
 
 /**
