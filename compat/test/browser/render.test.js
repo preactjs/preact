@@ -10,7 +10,8 @@ import {
 	setupScratch,
 	teardown,
 	serializeHtml,
-	createEvent
+	createEvent,
+	sortAttributes
 } from '../../../test/_util/helpers';
 
 describe('compat render', () => {
@@ -252,7 +253,7 @@ describe('compat render', () => {
 		);
 	});
 
-	it('shouldnot transform imageSrcSet', () => {
+	it('should not transform imageSrcSet', () => {
 		render(
 			<link
 				rel="preload"
@@ -262,8 +263,8 @@ describe('compat render', () => {
 			/>,
 			scratch
 		);
-		expect(scratch.innerHTML).to.equal(
-			'<link rel="preload" as="image" href="preact.jpg" imagesrcset="preact_400px.jpg 400w">'
+		expect(sortAttributes(scratch.innerHTML)).to.equal(
+			'<link as="image" href="preact.jpg" imagesrcset="preact_400px.jpg 400w" rel="preload">'
 		);
 	});
 
