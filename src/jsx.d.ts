@@ -1076,9 +1076,9 @@ export namespace JSXInternal {
 	export type TargetedPictureInPictureEvent<Target extends EventTarget> =
 		TargetedEvent<Target, PictureInPictureEvent>;
 
-	export interface EventHandler<E extends TargetedEvent> {
-		(this: void, event: E): void;
-	}
+	export type EventHandler<E extends TargetedEvent> = {
+		bivarianceHack(event: E): void;
+	}['bivarianceHack'];
 
 	export type AnimationEventHandler<Target extends EventTarget> = EventHandler<
 		TargetedAnimationEvent<Target>
