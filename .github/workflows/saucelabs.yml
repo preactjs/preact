@@ -3,7 +3,7 @@ name: Saucelabs
 on:
   push:
     branches:
-      - master
+      - main
       - restructure
 
 jobs:
