@@ -65,9 +65,13 @@ declare namespace React {
 	export function startTransition(cb: () => void): void;
 
 	// HTML
-	export import HTMLAttributes = JSXInternal.HTMLAttributes;
+	export interface HTMLAttributes<T extends EventTarget>
+		extends JSXInternal.HTMLAttributes<T> {}
 	export import DetailedHTMLProps = JSXInternal.DetailedHTMLProps;
 	export import CSSProperties = JSXInternal.CSSProperties;
+	export interface SVGProps<T extends EventTarget>
+		extends JSXInternal.SVGAttributes<T>,
+			preact.ClassAttributes<T> {}
 
 	// Events
 	export import TargetedEvent = JSXInternal.TargetedEvent;
