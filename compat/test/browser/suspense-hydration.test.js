@@ -121,6 +121,37 @@ describe('suspense hydration', () => {
 		});
 	});
 
+	it('should correct processed empty result of lazy component', () => {
+		scratch.innerHTML = '<main><p>i am not from lazy</p></main>';
+		clearLog();
+
+		const [Lazy, resolve] = createLazy();
+		hydrate(
+			<main>
+				<Suspense fallback={<p>will be never showed while hydration</p>}>
+					<Lazy />
+				</Suspense>
+				<p>i am not from lazy</p>
+			</main>,
+			scratch
+		);
+		rerender(); // Flush rerender queue to mimic what preact will really do
+		expect(scratch.innerHTML).to.equal(
+			'<main><p>i am not from lazy</p></main>'
+		);
+		expect(getLog()).to.deep.equal([]);
+		clearLog();
+
+		return resolve(() => null).then(() => {
+			rerender();
+			expect(scratch.innerHTML).to.equal(
+				'<main><p>i am not from lazy</p></main>'
+			);
+			expect(getLog()).to.deep.equal([]);
+			clearLog();
+		});
+	});
+
 	it('should properly attach event listeners when suspending while hydrating', () => {
 		scratch.innerHTML = '<div>Hello</div><div>World</div>';
 		clearLog();
