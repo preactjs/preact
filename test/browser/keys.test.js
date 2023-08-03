@@ -752,4 +752,65 @@ describe('keys', () => {
 		expect(Stateful1Ref).to.not.equal(Stateful1MovedRef);
 		expect(Stateful2Ref).to.not.equal(Stateful2MovedRef);
 	});
+
+	it.only('should handle full reorders', () => {
+		const keys = {
+			Apple: `Apple_1`,
+			Orange: `Orange_1`,
+			Banana: `Banana_1`,
+			Grape: `Grape_1`,
+			Kiwi: `Kiwi_1`,
+			Cherry: `Cherry_1`
+		};
+
+		let sort;
+
+		class App extends Component {
+			order;
+
+			state = { items: ['Apple', 'Grape', 'Cherry', 'Orange', 'Banana'] };
+
+			sort() {
+				this.order = this.order === 'ASC' ? 'DESC' : 'ASC';
+				const items = [...this.state.items].sort((a, b) =>
+					this.order === 'ASC' ? a.localeCompare(b) : b.localeCompare(a)
+				);
+				this.setState({ items });
+			}
+
+			render(_, { items }) {
+				sort = this.sort.bind(this);
+				return (
+					<div>
+						{items.map(item => (
+							<div key={keys[item]}>{item}</div>
+						))}
+					</div>
+				);
+			}
+		}
+
+		const expected = values => {
+			return values.map(key => `<div>${key}</div>`).join('');
+		};
+
+		render(<App />, scratch);
+		expect(scratch.innerHTML).to.eq(
+			`<div>${expected(['Apple', 'Grape', 'Cherry', 'Orange', 'Banana'])}</div>`
+		);
+
+		sort();
+		rerender();
+		let sorted = ['Apple', 'Grape', 'Cherry', 'Orange', 'Banana'].sort((a, b) =>
+			a.localeCompare(b)
+		);
+		expect(scratch.innerHTML).to.eq(`<div>${expected(sorted)}</div>`);
+
+		sort();
+		rerender();
+		sorted = ['Apple', 'Grape', 'Cherry', 'Orange', 'Banana'].sort((a, b) =>
+			b.localeCompare(a)
+		);
+		expect(scratch.innerHTML).to.eq(`<div>${expected(sorted)}</div>`);
+	});
 });
