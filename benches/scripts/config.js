@@ -49,13 +49,14 @@ export const frameworks = [
 		}
 	},
 	{
-		label: 'preact-main',
+		label: 'preact-master',
 		dependencies: {
-			framework: 'file:' + repoRoot('benches/proxy-packages/preact-main-proxy')
+			framework:
+				'file:' + repoRoot('benches/proxy-packages/preact-master-proxy')
 		},
 		async isValid() {
 			try {
-				await stat(repoRoot('preact-main.tgz'));
+				await stat(repoRoot('preact-master.tgz'));
 				return validateFileDep(this.dependencies.framework);
 			} catch (e) {
 				return false;
