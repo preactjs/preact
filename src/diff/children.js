@@ -2,6 +2,7 @@ import { diff, unmount, applyRef } from './index';
 import { createVNode, Fragment } from '../create-element';
 import { EMPTY_OBJ, EMPTY_ARR } from '../constants';
 import { isArray } from '../util';
+import { getDomSibling } from '../component';
 
 /**
  * Diff the children of a virtual node
@@ -110,7 +111,7 @@ export function diffChildren(
 			oldVNode = oldChildren[i];
 			if (oldVNode && oldVNode.key == null && oldVNode._dom) {
 				if (oldVNode._dom == oldDom) {
-					oldDom = oldDom.nextSibling;
+					oldDom = getDomSibling(oldVNode);
 				}
 
 				unmount(oldVNode, oldVNode, false);
