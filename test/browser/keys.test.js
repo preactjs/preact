@@ -753,7 +753,7 @@ describe('keys', () => {
 		expect(Stateful2Ref).to.not.equal(Stateful2MovedRef);
 	});
 
-	it.only('should handle full reorders', () => {
+	it('should handle full reorders', () => {
 		const keys = {
 			Apple: `Apple_1`,
 			Orange: `Orange_1`,
@@ -799,18 +799,20 @@ describe('keys', () => {
 			`<div>${expected(['Apple', 'Grape', 'Cherry', 'Orange', 'Banana'])}</div>`
 		);
 
-		sort();
-		rerender();
 		let sorted = ['Apple', 'Grape', 'Cherry', 'Orange', 'Banana'].sort((a, b) =>
 			a.localeCompare(b)
 		);
-		expect(scratch.innerHTML).to.eq(`<div>${expected(sorted)}</div>`);
-
 		sort();
 		rerender();
+
+		expect(scratch.innerHTML).to.eq(`<div>${expected(sorted)}</div>`);
+
 		sorted = ['Apple', 'Grape', 'Cherry', 'Orange', 'Banana'].sort((a, b) =>
 			b.localeCompare(a)
 		);
+		sort();
+		rerender();
+
 		expect(scratch.innerHTML).to.eq(`<div>${expected(sorted)}</div>`);
 	});
 });

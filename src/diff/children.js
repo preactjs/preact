@@ -2,6 +2,7 @@ import { diff, unmount, applyRef } from './index';
 import { createVNode, Fragment } from '../create-element';
 import { EMPTY_OBJ, EMPTY_ARR } from '../constants';
 import { isArray } from '../util';
+import { getDomSibling } from '../component';
 
 /**
  * Diff the children of a virtual node
@@ -144,7 +145,6 @@ export function diffChildren(
 		);
 
 		newDom = childVNode._dom;
-
 		if ((j = childVNode.ref) && oldVNode.ref != j) {
 			if (oldVNode.ref) {
 				applyRef(oldVNode.ref, null, childVNode);
@@ -158,7 +158,6 @@ export function diffChildren(
 			}
 
 			let isMounting = oldVNode === EMPTY_OBJ || oldVNode._original === null;
-			let hasMatchingIndex = !isMounting && matchingIndex === skewedIndex;
 			if (isMounting) {
 				if (matchingIndex == -1) {
 					skew--;
@@ -166,11 +165,9 @@ export function diffChildren(
 			} else if (matchingIndex !== skewedIndex) {
 				if (matchingIndex === skewedIndex + 1) {
 					skew++;
-					hasMatchingIndex = true;
 				} else if (matchingIndex > skewedIndex) {
 					if (remainingOldChildren > newChildrenLength - skewedIndex) {
 						skew += matchingIndex - skewedIndex;
-						hasMatchingIndex = true;
 					} else {
 						// ### Change from keyed: I think this was missing from the algo...
 						skew--;
@@ -187,8 +184,6 @@ export function diffChildren(
 			}
 
 			skewedIndex = i + skew;
-			hasMatchingIndex =
-				hasMatchingIndex || (matchingIndex == i && !isMounting);
 
 			if (
 				typeof childVNode.type == 'function' &&
@@ -196,7 +191,10 @@ export function diffChildren(
 					oldVNode._children === childVNode._children)
 			) {
 				oldDom = reorderChildren(childVNode, oldDom, parentDom);
-			} else if (typeof childVNode.type != 'function' && !hasMatchingIndex) {
+			} else if (
+				typeof childVNode.type != 'function' &&
+				(matchingIndex !== skewedIndex || isMounting)
+			) {
 				oldDom = placeChild(parentDom, newDom, oldDom);
 			} else if (childVNode._nextDom !== undefined) {
 				// Only Fragments or components that return Fragment like VNodes will
