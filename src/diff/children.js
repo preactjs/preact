@@ -107,6 +107,15 @@ export function diffChildren(
 		// Terser removes the `continue` here and wraps the loop body
 		// in a `if (childVNode) { ... } condition
 		if (childVNode == null) {
+			oldVNode = oldChildren[i];
+			if (oldVNode && oldVNode.key == null && oldVNode._dom) {
+				if (oldVNode._dom == oldDom) {
+					oldDom = oldDom.nextSibling;
+				}
+
+				unmount(oldVNode, oldVNode, false);
+			}
+
 			continue;
 		}
 

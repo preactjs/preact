@@ -1328,14 +1328,14 @@ describe('Fragment', () => {
 			'rendering from true to false'
 		);
 		expectDomLogToBe([
-			// Mount 3 & 4
-			'<li>.appendChild(#text)',
-			'<ol>0122.appendChild(<li>3)',
-			'<li>.appendChild(#text)',
-			'<ol>01223.appendChild(<li>4)',
 			// Remove 1 & 2 (replaced with null)
 			'<li>0.remove()',
-			'<li>1.remove()'
+			'<li>1.remove()',
+			// Mount 3 & 4
+			'<li>.appendChild(#text)',
+			'<ol>22.appendChild(<li>3)',
+			'<li>.appendChild(#text)',
+			'<ol>223.appendChild(<li>4)'
 		]);
 
 		clearLog();
@@ -1399,14 +1399,14 @@ describe('Fragment', () => {
 			'rendering from true to false'
 		);
 		expectDomLogToBe([
-			// Mount 4 & 5
-			'<li>.appendChild(#text)',
-			'<ol>0123.appendChild(<li>4)',
-			'<li>.appendChild(#text)',
-			'<ol>01234.appendChild(<li>5)',
 			// Remove 1 & 2 (replaced with null)
 			'<li>0.remove()',
-			'<li>1.remove()'
+			'<li>1.remove()',
+			// Mount 4 & 5
+			'<li>.appendChild(#text)',
+			'<ol>23.appendChild(<li>4)',
+			'<li>.appendChild(#text)',
+			'<ol>234.appendChild(<li>5)'
 		]);
 
 		clearLog();
@@ -2609,11 +2609,9 @@ describe('Fragment', () => {
 		rerender();
 		expect(scratch.innerHTML).to.equal(bottom);
 		expectDomLogToBe([
-			'<div>top panelNavigationContent.insertBefore(<div>Navigation, <div>top panel)',
-			'<div>Navigationtop panelContent.insertBefore(<div>Content, <div>top panel)',
+			'<div>top panel.remove()',
 			'<div>.appendChild(#text)',
-			'<div>NavigationContenttop panel.insertBefore(<div>bottom panel, <div>top panel)',
-			'<div>top panel.remove()'
+			'<div>NavigationContent.appendChild(<div>bottom panel)'
 		]);
 
 		clearLog();

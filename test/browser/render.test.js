@@ -1101,8 +1101,8 @@ describe('render()', () => {
 			'<div><iframe src="https://codesandbox.io/s/runtime-silence-no4zx"></iframe></div>'
 		);
 		expect(getLog()).to.deep.equal([
-			'<div>Test2.remove()',
-			'<div>Test3.remove()'
+			'<div>Test3.remove()',
+			'<div>Test2.remove()'
 		]);
 	});
 

@@ -305,4 +305,56 @@ describe('null placeholders', () => {
 			'#text.remove()'
 		]);
 	});
+
+	it('when set through the children prop', () => {
+		/** @type {(state: { value: boolean }) => void} */
+		let setState;
+		const Iframe = () => {
+			// Using a div here to make debugging tests in devtools a little less
+			// noisy. The dom ops still assert that the iframe isn't moved.
+			//
+			// return <iframe src="https://codesandbox.io/s/runtime-silence-no4zx" />;
+			return <div>Iframe</div>;
+		};
+
+		const Test2 = () => <div>Test2</div>;
+		const Test3 = () => <div>Test3</div>;
+
+		class App extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { value: true };
+				setState = this.setState.bind(this);
+			}
+
+			render(props, state) {
+				return (
+					<div>
+						<Test2 />
+						{state.value && <Test3 />}
+						{props.children}
+					</div>
+				);
+			}
+		}
+
+		render(
+			<App>
+				<Iframe />
+			</App>,
+			scratch
+		);
+
+		expect(scratch.innerHTML).to.equal(
+			'<div><div>Test2</div><div>Test3</div><div>Iframe</div></div>'
+		);
+		clearLog();
+		setState({ value: false });
+		rerender();
+
+		expect(scratch.innerHTML).to.equal(
+			'<div><div>Test2</div><div>Iframe</div></div>'
+		);
+		expect(getLog()).to.deep.equal(['<div>Test3.remove()']);
+	});
 });
