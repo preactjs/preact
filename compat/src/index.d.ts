@@ -53,6 +53,7 @@ declare namespace React {
 	export import createElement = preact.createElement;
 	export import cloneElement = preact.cloneElement;
 	export import ComponentProps = preact.ComponentProps;
+	export import ReactNode = preact.ComponentChild;
 
 	// Suspense
 	export import Suspense = _Suspense.Suspense;
@@ -65,9 +66,13 @@ declare namespace React {
 	export function startTransition(cb: () => void): void;
 
 	// HTML
-	export import HTMLAttributes = JSXInternal.HTMLAttributes;
+	export interface HTMLAttributes<T extends EventTarget>
+		extends JSXInternal.HTMLAttributes<T> {}
 	export import DetailedHTMLProps = JSXInternal.DetailedHTMLProps;
 	export import CSSProperties = JSXInternal.CSSProperties;
+	export interface SVGProps<T extends EventTarget>
+		extends JSXInternal.SVGAttributes<T>,
+			preact.ClassAttributes<T> {}
 
 	// Events
 	export import TargetedEvent = JSXInternal.TargetedEvent;
@@ -102,6 +107,7 @@ declare namespace React {
 		...children: preact.ComponentChildren[]
 	) => preact.VNode<any>;
 	export function isValidElement(element: any): boolean;
+	export function isFragment(element: any): boolean;
 	export function findDOMNode(
 		component: preact.Component | Element
 	): Element | null;

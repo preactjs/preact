@@ -53,8 +53,8 @@ export function diff(
 
 	if ((tmp = options._diff)) tmp(newVNode);
 
-	try {
-		outer: if (typeof newType == 'function') {
+	outer: if (typeof newType == 'function') {
+		try {
 			let c, isNew, oldProps, oldState, snapshot, clearProcessingException;
 			let newProps = newVNode.props;
 
@@ -257,39 +257,39 @@ export function diff(
 			if (clearProcessingException) {
 				c._pendingError = c._processingException = null;
 			}
-		} else if (
-			excessDomChildren == null &&
-			newVNode._original === oldVNode._original
-		) {
-			newVNode._children = oldVNode._children;
-			newVNode._dom = oldVNode._dom;
-		} else {
-			newVNode._dom = diffElementNodes(
-				oldVNode._dom,
-				newVNode,
-				oldVNode,
-				globalContext,
-				isSvg,
-				excessDomChildren,
-				commitQueue,
-				isHydrating,
-				refQueue
-			);
+		} catch (e) {
+			newVNode._original = null;
+			// if hydrating or creating initial tree, bailout preserves DOM:
+			if (isHydrating || excessDomChildren != null) {
+				newVNode._dom = oldDom;
+				newVNode._hydrating = !!isHydrating;
+				excessDomChildren[excessDomChildren.indexOf(oldDom)] = null;
+				// ^ could possibly be simplified to:
+				// excessDomChildren.length = 0;
+			}
+			options._catchError(e, newVNode, oldVNode);
 		}
-
-		if ((tmp = options.diffed)) tmp(newVNode);
-	} catch (e) {
-		newVNode._original = null;
-		// if hydrating or creating initial tree, bailout preserves DOM:
-		if (isHydrating || excessDomChildren != null) {
-			newVNode._dom = oldDom;
-			newVNode._hydrating = !!isHydrating;
-			excessDomChildren[excessDomChildren.indexOf(oldDom)] = null;
-			// ^ could possibly be simplified to:
-			// excessDomChildren.length = 0;
-		}
-		options._catchError(e, newVNode, oldVNode);
+	} else if (
+		excessDomChildren == null &&
+		newVNode._original === oldVNode._original
+	) {
+		newVNode._children = oldVNode._children;
+		newVNode._dom = oldVNode._dom;
+	} else {
+		newVNode._dom = diffElementNodes(
+			oldVNode._dom,
+			newVNode,
+			oldVNode,
+			globalContext,
+			isSvg,
+			excessDomChildren,
+			commitQueue,
+			isHydrating,
+			refQueue
+		);
 	}
+
+	if ((tmp = options.diffed)) tmp(newVNode);
 }
 
 /**

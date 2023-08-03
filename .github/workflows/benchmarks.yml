@@ -9,7 +9,7 @@ on:
       - 'src/**.js'
   push:
     branches:
-      - master
+      - main
       - restructure
     paths:
       - 'src/**.js'
@@ -41,12 +41,12 @@ jobs:
           artifact: npm-package
           workflow: ci.yml
           required: false
-      - run: mv preact.tgz preact-master.tgz
+      - run: mv preact.tgz preact-main.tgz
       - name: Upload base preact package
         uses: actions/upload-artifact@v3
         with:
           name: bench-environment
-          path: preact-master.tgz
+          path: preact-main.tgz
 
   bench_todo:
     name: Bench todo
