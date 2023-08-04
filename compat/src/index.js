@@ -144,6 +144,9 @@ export function useTransition() {
 // styles/... before it attaches
 export const useInsertionEffect = useLayoutEffect;
 
+// compat to react-is
+export const isElement = isValidElement;
+
 /**
  * This is taken from https://github.com/facebook/react/blob/main/packages/use-sync-external-store/src/useSyncExternalStoreShimClient.js#L84
  * on a high level this cuts out the warnings, ... and attempts a smaller implementation
@@ -241,6 +244,7 @@ export default {
 	createRef,
 	Fragment,
 	isValidElement,
+	isElement,
 	isFragment,
 	findDOMNode,
 	Component,
