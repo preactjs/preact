@@ -197,7 +197,6 @@ export {
 	createRef,
 	Fragment,
 	isValidElement,
-  isElement,
 	isFragment,
 	findDOMNode,
 	Component,
