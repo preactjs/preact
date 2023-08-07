@@ -2111,6 +2111,7 @@ export namespace JSXInternal {
 		s: HTMLAttributes<HTMLElement>;
 		samp: HTMLAttributes<HTMLElement>;
 		script: HTMLAttributes<HTMLScriptElement>;
+		search: HTMLAttributes<HTMLElement>;
 		section: HTMLAttributes<HTMLElement>;
 		select: HTMLAttributes<HTMLSelectElement>;
 		slot: HTMLAttributes<HTMLSlotElement>;
