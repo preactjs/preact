@@ -95,6 +95,32 @@ describe('event handling', () => {
 		expect(click).to.have.been.calledOnce.and.calledWith(1);
 	});
 
+	// Uniquely named in that the base event names end with 'Capture'
+	it('should support got/lost pointer capture', () => {
+		let ongotpointercapture = sinon.spy(),
+			onlostpointercapture = sinon.spy();
+
+		render(
+			<div
+				onPointerDown={e => e.target.setPointerCapture(e.pointerId)}
+				onGotPointerCapture={ongotpointercapture}
+				onLostPointerCapture={onlostpointercapture}
+			/>,
+			scratch
+		);
+
+		fireEvent(scratch.childNodes[0], 'pointerdown');
+		expect(ongotpointercapture).to.have.been.calledOnce;
+		expect(onlostpointercapture).to.not.have.been.called;
+
+		ongotpointercapture.resetHistory();
+		onlostpointercapture.resetHistory();
+
+		fireEvent(scratch.childNodes[0], 'pointerup');
+		expect(ongotpointercapture).to.not.have.been.called;
+		expect(onlostpointercapture).to.have.been.calledOnce;
+	});
+
 	it('should update event handlers', () => {
 		let click1 = sinon.spy();
 		let click2 = sinon.spy();
