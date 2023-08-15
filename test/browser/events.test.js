@@ -100,6 +100,9 @@ describe('event handling', () => {
 		let ongotpointercapture = sinon.spy(),
 			onlostpointercapture = sinon.spy();
 
+		let firePointerEvent = (on, type) =>
+			on.dispatchEvent(new PointerEvent(type, { pointerId: 1 }));
+
 		render(
 			<div
 				onPointerDown={e => e.target.setPointerCapture(e.pointerId)}
@@ -109,14 +112,14 @@ describe('event handling', () => {
 			scratch
 		);
 
-		fireEvent(scratch.childNodes[0], 'pointerdown');
+		firePointerEvent(scratch.childNodes[0], 'pointerdown');
 		expect(ongotpointercapture).to.have.been.calledOnce;
 		expect(onlostpointercapture).to.not.have.been.called;
 
 		ongotpointercapture.resetHistory();
 		onlostpointercapture.resetHistory();
 
-		fireEvent(scratch.childNodes[0], 'pointerup');
+		firePointerEvent(scratch.childNodes[0], 'pointerup');
 		expect(ongotpointercapture).to.not.have.been.called;
 		expect(onlostpointercapture).to.have.been.calledOnce;
 	});
