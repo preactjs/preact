@@ -1669,7 +1669,8 @@ export namespace JSXInternal {
 		| 'treegrid'
 		| 'treeitem'
 		| 'widget'
-		| 'window';
+		| 'window'
+		| 'none presentation';
 
 	export interface HTMLAttributes<RefType extends EventTarget = EventTarget>
 		extends ClassAttributes<RefType>,
