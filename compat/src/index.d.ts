@@ -78,7 +78,7 @@ declare namespace React {
 
 	interface SVGAttributes extends JSXInternal.SVGAttributes {}
 
-	interface ReactSVG extends JSXInternal.SVGElements {}
+	interface ReactSVG extends JSXInternal.IntrinsicSVGElements {}
 
 	type HTMLAttributeReferrerPolicy =
 		| ''

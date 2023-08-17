@@ -2021,7 +2021,7 @@ export namespace JSXInternal {
 			| SignalLike<number | string | undefined>;
 	}
 
-	export interface SVGElements {
+	export interface IntrinsicSVGElements {
 		svg: SVGAttributes<SVGSVGElement>;
 		animate: SVGAttributes<SVGAnimateElement>;
 		circle: SVGAttributes<SVGCircleElement>;
@@ -2083,7 +2083,7 @@ export namespace JSXInternal {
 		view: SVGAttributes<SVGViewElement>;
 	}
 
-	export interface IntrinsicElements extends SVGElements {
+	export interface IntrinsicElements extends IntrinsicSVGElements {
 		// HTML
 		a: HTMLAttributes<HTMLAnchorElement>;
 		abbr: HTMLAttributes<HTMLElement>;
