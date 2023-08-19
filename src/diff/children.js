@@ -115,6 +115,7 @@ export function diffChildren(
 				}
 
 				unmount(oldVNode, oldVNode, false);
+				oldChildren[i] = null;
 			}
 
 			continue;
