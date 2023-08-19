@@ -533,7 +533,7 @@ describe('debug', () => {
 				<table>
 					<tbody>
 						<tr>
-							<table></table>
+							<table />
 						</tr>
 					</tbody>
 				</table>
