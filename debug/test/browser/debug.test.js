@@ -552,6 +552,13 @@ describe('debug', () => {
 			expect(console.error).to.not.be.called;
 		});
 
+		it('should not crash for an empty pragraph', () => {
+			const Paragraph = () => <p />;
+
+			render(<Paragraph />, scratch);
+			expect(console.error).to.not.be.called;
+		});
+
 		it('should warn for nesting illegal dom-nodes under a paragraph', () => {
 			const Paragraph = () => (
 				<p>

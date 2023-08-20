@@ -21,13 +21,15 @@ const isWeakMapSupported = typeof WeakMap == 'function';
  */
 function getDomChildren(vnode) {
 	let domChildren = [];
+
 	vnode._children.forEach(child => {
-		if (typeof child.type === 'function') {
+		if (child && typeof child.type === 'function') {
 			domChildren.push.apply(domChildren, getDomChildren(child));
-		} else if (typeof child.type === 'string') {
+		} else if (child && typeof child.type === 'string') {
 			domChildren.push(child.type);
 		}
 	});
+
 	return domChildren;
 }
 
@@ -435,7 +437,7 @@ export function initDebug() {
 				);
 			} else if (type === 'p') {
 				let illegalDomChildrenTypes = getDomChildren(vnode).filter(childType =>
-					illegalParagraphChildElements.includes(childType)
+					ILLEGAL_PARAGRAPH_CHILD_ELEMENTS.test(childType)
 				);
 				if (illegalDomChildrenTypes.length) {
 					console.error(
@@ -485,39 +487,8 @@ function isTableElement(type) {
 	);
 }
 
-const illegalParagraphChildElements = [
-	'address',
-	'article',
-	'aside',
-	'blockquote',
-	'details',
-	'div',
-	'dl',
-	'fieldset',
-	'figcaption',
-	'figure',
-	'footer',
-	'form',
-	'h1',
-	'h2',
-	'h3',
-	'h4',
-	'h5',
-	'h6',
-	'header',
-	'hgroup',
-	'hr',
-	'main',
-	'menu',
-	'nav',
-	'ol',
-	'p',
-	'pre',
-	'search',
-	'section',
-	'table',
-	'ul'
-];
+const ILLEGAL_PARAGRAPH_CHILD_ELEMENTS =
+	/address|article|aside|blockquote|details|div|dl|fieldset|figcaption|figure|footer|form|h1|h2|h3|h4|h5|h6|header|hgroup|hr|main|menu|nav|ol|p|pre|search|section|table|ul/;
 
 const forceUpdate = Component.prototype.forceUpdate;
 Component.prototype.forceUpdate = function (callback) {
