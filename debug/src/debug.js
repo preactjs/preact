@@ -23,8 +23,8 @@ function getDomChildren(vnode) {
 	let domChildren = [];
 	vnode._children.forEach(child => {
 		if (typeof child.type === 'function') {
-			domChildren = [...domChildren, ...getDomChildren(child)];
-		} else if (typeof child.type !== 'function' && child.type) {
+			domChildren.push.apply(domChildren, getDomChildren(child));
+		} else if (typeof child.type === 'string') {
 			domChildren.push(child.type);
 		}
 	});
