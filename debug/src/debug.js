@@ -362,7 +362,8 @@ export function initDebug() {
 				for (let i = 0; i < hooks.length; i += 1) {
 					const hook = hooks[i];
 					if (hook._args) {
-						for (const arg of hook._args) {
+						for (let j = 0; j < hook._args.length; j++) {
+							const arg = hook._args[j];
 							if (isNaN(arg)) {
 								const componentName = getDisplayName(vnode);
 								throw new Error(
