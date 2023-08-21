@@ -527,6 +527,60 @@ describe('debug', () => {
 			render(<Table />, table);
 			expect(console.error).to.not.be.called;
 		});
+
+		it('should warn for improper nested table', () => {
+			const Table = () => (
+				<table>
+					<tbody>
+						<tr>
+							<table />
+						</tr>
+					</tbody>
+				</table>
+			);
+
+			render(<Table />, scratch);
+			expect(console.error).to.be.calledOnce;
+		});
+	});
+
+	describe('paragraph nesting', () => {
+		it('should not warn a regular text paragraph', () => {
+			const Paragraph = () => <p>Hello world</p>;
+
+			render(<Paragraph />, scratch);
+			expect(console.error).to.not.be.called;
+		});
+
+		it('should not crash for an empty pragraph', () => {
+			const Paragraph = () => <p />;
+
+			render(<Paragraph />, scratch);
+			expect(console.error).to.not.be.called;
+		});
+
+		it('should warn for nesting illegal dom-nodes under a paragraph', () => {
+			const Paragraph = () => (
+				<p>
+					<h1>Hello world</h1>
+				</p>
+			);
+
+			render(<Paragraph />, scratch);
+			expect(console.error).to.be.calledOnce;
+		});
+
+		it('should warn for nesting illegal dom-nodes under a paragraph as func', () => {
+			const Title = ({ children }) => <h1>{children}</h1>;
+			const Paragraph = () => (
+				<p>
+					<Title>Hello world</Title>
+				</p>
+			);
+
+			render(<Paragraph />, scratch);
+			expect(console.error).to.be.calledOnce;
+		});
 	});
 
 	describe('PropTypes', () => {

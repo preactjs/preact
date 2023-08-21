@@ -16,6 +16,24 @@ import { assign, isNaN } from './util';
 const isWeakMapSupported = typeof WeakMap == 'function';
 
 /**
+ * @param {import('./internal').VNode} vnode
+ * @returns {Array<string>}
+ */
+function getDomChildren(vnode) {
+	let domChildren = [];
+
+	vnode._children.forEach(child => {
+		if (child && typeof child.type === 'function') {
+			domChildren.push.apply(domChildren, getDomChildren(child));
+		} else if (child && typeof child.type === 'string') {
+			domChildren.push(child.type);
+		}
+	});
+
+	return domChildren;
+}
+
+/**
  * @param {import('./internal').VNode} parent
  * @returns {string}
  */
@@ -130,15 +148,7 @@ export function initDebug() {
 
 	options._diff = vnode => {
 		let { type } = vnode;
-		if (
-			typeof type === 'string' &&
-			(type === 'thead' ||
-				type === 'tfoot' ||
-				type === 'tbody' ||
-				type === 'tr' ||
-				type === 'td' ||
-				type === 'th')
-		) {
+		if ((typeof type === 'string' && isTableElement(type)) || type === 'p') {
 			checkVNodeDom.push(vnode);
 		}
 
@@ -387,8 +397,13 @@ export function initDebug() {
 			const { type, _parent: parent } = vnode;
 
 			let domParentName = getClosestDomNodeParentName(parent);
-
-			if (
+			if (type === 'table' && isTableElement(domParentName)) {
+				console.error(
+					'Improper nesting of table. Your <table> should not have a table-node parent.' +
+						serializeVNode(vnode) +
+						`\n\n${getOwnerStack(vnode)}`
+				);
+			} else if (
 				(type === 'thead' || type === 'tfoot' || type === 'tbody') &&
 				domParentName !== 'table'
 			) {
@@ -421,6 +436,19 @@ export function initDebug() {
 						serializeVNode(vnode) +
 						`\n\n${getOwnerStack(vnode)}`
 				);
+			} else if (type === 'p') {
+				let illegalDomChildrenTypes = getDomChildren(vnode).filter(childType =>
+					ILLEGAL_PARAGRAPH_CHILD_ELEMENTS.test(childType)
+				);
+				if (illegalDomChildrenTypes.length) {
+					console.error(
+						'Improper nesting of paragraph. Your <p> should not have ' +
+							illegalDomChildrenTypes.join(', ') +
+							'as child-elements.' +
+							serializeVNode(vnode) +
+							`\n\n${getOwnerStack(vnode)}`
+					);
+				}
 			}
 		}
 		checkVNodeDom = [];
@@ -447,6 +475,21 @@ Component.prototype.setState = function (update, callback) {
 
 	return setState.call(this, update, callback);
 };
+
+function isTableElement(type) {
+	return (
+		type === 'table' ||
+		type === 'tfoot' ||
+		type === 'tbody' ||
+		type === 'thead' ||
+		type === 'td' ||
+		type === 'tr' ||
+		type === 'th'
+	);
+}
+
+const ILLEGAL_PARAGRAPH_CHILD_ELEMENTS =
+	/address|article|aside|blockquote|details|div|dl|fieldset|figcaption|figure|footer|form|h1|h2|h3|h4|h5|h6|header|hgroup|hr|main|menu|nav|ol|p|pre|search|section|table|ul/;
 
 const forceUpdate = Component.prototype.forceUpdate;
 Component.prototype.forceUpdate = function (callback) {
