@@ -8,6 +8,7 @@ import {
 	ComponentConstructor,
 	ComponentFactory,
 	VNode,
+	ComponentChild,
 	ComponentChildren,
 	cloneElement
 } from '../../';
@@ -195,3 +196,11 @@ class ComponentWithNumberChildren extends Component<{ children: number[] }> {
 	{1}
 	{2}
 </ComponentWithNumberChildren>;
+
+const ComponentReturningComponentChildren = ({
+	children
+}: {
+	children: ComponentChild;
+}) => children;
+
+<ComponentReturningComponentChildren>123</ComponentReturningComponentChildren>;
