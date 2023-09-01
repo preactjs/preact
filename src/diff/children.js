@@ -111,6 +111,7 @@ export function diffChildren(
 			oldVNode = oldChildren[i];
 			if (oldVNode && oldVNode.key == null && oldVNode._dom) {
 				if (oldVNode._dom == oldDom) {
+					oldVNode._parent = oldParentVNode;
 					oldDom = getDomSibling(oldVNode);
 				}
 
@@ -200,6 +201,7 @@ export function diffChildren(
 				(matchingIndex !== skewedIndex ||
 					oldVNode._children === childVNode._children)
 			) {
+				console.log('reorder');
 				oldDom = reorderChildren(childVNode, oldDom, parentDom);
 			} else if (
 				typeof childVNode.type != 'function' &&
