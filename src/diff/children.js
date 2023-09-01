@@ -201,7 +201,6 @@ export function diffChildren(
 				(matchingIndex !== skewedIndex ||
 					oldVNode._children === childVNode._children)
 			) {
-				console.log('reorder');
 				oldDom = reorderChildren(childVNode, oldDom, parentDom);
 			} else if (
 				typeof childVNode.type != 'function' &&

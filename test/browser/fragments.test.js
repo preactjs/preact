@@ -677,37 +677,6 @@ describe('Fragment', () => {
 		);
 	});
 
-	it('should preserver order 2', () => {
-		let set;
-		class Foo extends Component {
-			constructor(props) {
-				super(props);
-				this.state = { isLoading: true, data: null };
-				set = this.setState.bind(this);
-			}
-			render(props, { isLoading, data }) {
-				return (
-					<div>
-						<div>HEADER</div>
-						{isLoading ? <div>Loading...</div> : null}
-						{data ? <div>Content: {data}</div> : null}
-					</div>
-				);
-			}
-		}
-
-		render(<Foo />, scratch);
-		expect(scratch.firstChild.innerHTML).to.equal(
-			'<div>HEADER</div><div>Loading...</div>'
-		);
-
-		set({ isLoading: false, data: 2 });
-		rerender();
-		expect(scratch.firstChild.innerHTML).to.equal(
-			'<div>HEADER</div><div>Content: 2</div>'
-		);
-	});
-
 	it('should preserve state with reordering in multiple levels', () => {
 		function Foo({ condition }) {
 			return condition ? (

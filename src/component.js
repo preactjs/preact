@@ -103,9 +103,7 @@ export function getDomSibling(vnode, childIndex) {
 			// Since updateParentDomPointers keeps _dom pointer correct,
 			// we can rely on _dom to tell us if this subtree contains a
 			// rendered DOM node, and what the first rendered DOM node is
-			return typeof sibling.type == 'function'
-				? sibling._nextDom || sibling._dom
-				: sibling._dom;
+			return sibling._nextDom || sibling._dom;
 		}
 	}
 
