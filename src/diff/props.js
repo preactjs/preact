@@ -161,9 +161,13 @@ function eventProxy(e) {
 	 * when the dom performs an event it leaves micro-ticks in between bubbling up which means that an event can trigger on a newly
 	 * created DOM-node while the event bubbles up, this can cause quirky behavior as seen in https://github.com/preactjs/preact/issues/3927
 	 */
-	if (!e._dispatched && e.bubbles) {
+	if (!e._dispatched) {
+		// When an event has no _dispatched we know this is the first event-target in the chain
+		// so we set the initial dispatched time.
 		e._dispatched = Date.now();
-	} else if (e._dispatched && e._dispatched <= eventHandler._attached) {
+		// When the _dispatched is smaller than the time when the targetted event handler was attached
+		// we know we have bubbled up to an element that was added during patching the dom.
+	} else if (e._dispatched <= eventHandler._attached) {
 		return;
 	}
 	return eventHandler(options.event ? options.event(e) : e);
