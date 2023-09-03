@@ -111,6 +111,7 @@ export function diffChildren(
 			oldVNode = oldChildren[i];
 			if (oldVNode && oldVNode.key == null && oldVNode._dom) {
 				if (oldVNode._dom == oldDom) {
+					oldVNode._parent = oldParentVNode;
 					oldDom = getDomSibling(oldVNode);
 				}
 

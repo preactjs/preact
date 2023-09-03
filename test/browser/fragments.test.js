@@ -646,6 +646,110 @@ describe('Fragment', () => {
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
 	});
 
+	it('should preserve order for fragment switching', () => {
+		let set;
+		class Foo extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { isLoading: true, data: null };
+				set = this.setState.bind(this);
+			}
+			render(props, { isLoading, data }) {
+				return (
+					<Fragment>
+						<div>HEADER</div>
+						{isLoading ? <div>Loading...</div> : null}
+						{data ? <div>Content: {data}</div> : null}
+					</Fragment>
+				);
+			}
+		}
+
+		render(<Foo />, scratch);
+		expect(scratch.innerHTML).to.equal(
+			'<div>HEADER</div><div>Loading...</div>'
+		);
+
+		set({ isLoading: false, data: 2 });
+		rerender();
+		expect(scratch.innerHTML).to.equal(
+			'<div>HEADER</div><div>Content: 2</div>'
+		);
+	});
+
+	it('should preserve order for nested fragment switching w/ child return', () => {
+		let set;
+		const Wrapper = ({ children }) => <Fragment>{children}</Fragment>;
+		class Foo extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { isLoading: true, data: null };
+				set = this.setState.bind(this);
+			}
+			render(props, { isLoading, data }) {
+				return (
+					<Fragment>
+						<div>HEADER</div>
+						{isLoading ? <div>Loading...</div> : null}
+						{data ? <div>Content: {data}</div> : null}
+					</Fragment>
+				);
+			}
+		}
+
+		render(
+			<Wrapper>
+				<Foo />
+			</Wrapper>,
+			scratch
+		);
+		expect(scratch.innerHTML).to.equal(
+			'<div>HEADER</div><div>Loading...</div>'
+		);
+
+		set({ isLoading: false, data: 2 });
+		rerender();
+		expect(scratch.innerHTML).to.equal(
+			'<div>HEADER</div><div>Content: 2</div>'
+		);
+	});
+
+	it('should preserve order for nested fragment switching', () => {
+		let set;
+		const Wrapper = () => (
+			<Fragment>
+				<Foo />
+			</Fragment>
+		);
+		class Foo extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { isLoading: true, data: null };
+				set = this.setState.bind(this);
+			}
+			render(props, { isLoading, data }) {
+				return (
+					<Fragment>
+						<div>HEADER</div>
+						{isLoading ? <div>Loading...</div> : null}
+						{data ? <div>Content: {data}</div> : null}
+					</Fragment>
+				);
+			}
+		}
+
+		render(<Wrapper />, scratch);
+		expect(scratch.innerHTML).to.equal(
+			'<div>HEADER</div><div>Loading...</div>'
+		);
+
+		set({ isLoading: false, data: 2 });
+		rerender();
+		expect(scratch.innerHTML).to.equal(
+			'<div>HEADER</div><div>Content: 2</div>'
+		);
+	});
+
 	it('should preserve state with reordering in multiple levels', () => {
 		function Foo({ condition }) {
 			return condition ? (
