@@ -6,7 +6,7 @@ import { slice } from './util';
 
 /**
  * Render a Preact virtual node into a DOM element
- * @param {import('./internal').ComponentChild} vnode The virtual node to render
+ * @param {import('./internal').VNode} vnode The virtual node to render
  * @param {import('./internal').PreactElement} parentDom The DOM element to
  * render into
  * @param {import('./internal').PreactElement | object} [replaceNode] Optional: Attempt to re-use an
@@ -66,7 +66,7 @@ export function render(vnode, parentDom, replaceNode) {
 
 /**
  * Update an existing DOM element with data from a Preact virtual node
- * @param {import('./internal').ComponentChild} vnode The virtual node to render
+ * @param {import('./internal').VNode} vnode The virtual node to render
  * @param {import('./internal').PreactElement} parentDom The DOM element to
  * update
  */
