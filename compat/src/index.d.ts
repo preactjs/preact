@@ -19,7 +19,7 @@ declare namespace React {
 	export import Reducer = _hooks.Reducer;
 	export import Dispatch = _hooks.Dispatch;
 	export import Ref = _hooks.Ref;
-	export import StateUpdater = _hooks.StateUpdater;
+	export import SetStateAction = _hooks.StateUpdater;
 	export import useCallback = _hooks.useCallback;
 	export import useContext = _hooks.useContext;
 	export import useDebugValue = _hooks.useDebugValue;
@@ -155,7 +155,9 @@ declare namespace React {
 
 	export function forwardRef<R, P = {}>(
 		fn: ForwardFn<P, R>
-	): preact.FunctionalComponent<Omit<P, 'ref'> & { ref?: preact.Ref<R> }>;
+	): preact.FunctionalComponent<PropsWithoutRef<P> & { ref?: preact.Ref<R> }>;
+
+	export type PropsWithoutRef<P> = Omit<P, 'ref'>;
 
 	interface MutableRefObject<T> {
 		current: T;
