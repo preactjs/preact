@@ -1,6 +1,7 @@
 import { diff, unmount, applyRef } from './index';
 import { createVNode, Fragment } from '../create-element';
 import { EMPTY_OBJ, EMPTY_ARR } from '../constants';
+import { isArray } from '../util';
 import { getDomSibling } from '../component';
 
 /**
@@ -22,6 +23,7 @@ import { getDomSibling } from '../component';
  * render (except when hydrating). Can be a sibling DOM element when diffing
  * Fragments that have siblings. In most cases, it starts out as `oldChildren[0]._dom`.
  * @param {boolean} isHydrating Whether or not we are in hydration
+ * @param {Array<any>} refQueue an array of elements needed to invoke refs
  */
 export function diffChildren(
 	parentDom,
@@ -33,21 +35,34 @@ export function diffChildren(
 	excessDomChildren,
 	commitQueue,
 	oldDom,
-	isHydrating
+	isHydrating,
+	refQueue
 ) {
-	let i, j, oldVNode, childVNode, newDom, firstChildDom, refs;
+	let i,
+		j,
+		oldVNode,
+		childVNode,
+		newDom,
+		firstChildDom,
+		skew = 0;
 
 	// This is a compression of oldParentVNode!=null && oldParentVNode != EMPTY_OBJ && oldParentVNode._children || EMPTY_ARR
 	// as EMPTY_OBJ._children should be `undefined`.
 	let oldChildren = (oldParentVNode && oldParentVNode._children) || EMPTY_ARR;
 
-	let oldChildrenLength = oldChildren.length;
+	let oldChildrenLength = oldChildren.length,
+		remainingOldChildren = oldChildrenLength,
+		newChildrenLength = renderResult.length;
 
 	newParentVNode._children = [];
-	for (i = 0; i < renderResult.length; i++) {
+	for (i = 0; i < newChildrenLength; i++) {
 		childVNode = renderResult[i];
 
-		if (childVNode == null || typeof childVNode == 'boolean') {
+		if (
+			childVNode == null ||
+			typeof childVNode == 'boolean' ||
+			typeof childVNode == 'function'
+		) {
 			childVNode = newParentVNode._children[i] = null;
 		}
 		// If this newVNode is being reused (e.g. <div>{reuse}{reuse}</div>) in the same diff,
@@ -66,7 +81,7 @@ export function diffChildren(
 				null,
 				childVNode
 			);
-		} else if (Array.isArray(childVNode)) {
+		} else if (isArray(childVNode)) {
 			childVNode = newParentVNode._children[i] = createVNode(
 				Fragment,
 				{ children: childVNode },
@@ -93,45 +108,38 @@ export function diffChildren(
 		// Terser removes the `continue` here and wraps the loop body
 		// in a `if (childVNode) { ... } condition
 		if (childVNode == null) {
+			oldVNode = oldChildren[i];
+			if (oldVNode && oldVNode.key == null && oldVNode._dom) {
+				if (oldVNode._dom == oldDom) {
+					oldVNode._parent = oldParentVNode;
+					oldDom = getDomSibling(oldVNode);
+				}
+
+				unmount(oldVNode, oldVNode, false);
+				oldChildren[i] = null;
+			}
+
 			continue;
 		}
 
 		childVNode._parent = newParentVNode;
 		childVNode._depth = newParentVNode._depth + 1;
 
-		// Check if we find a corresponding element in oldChildren.
-		// If found, delete the array item by setting to `undefined`.
-		// We use `undefined`, as `null` is reserved for empty placeholders
-		// (holes).
-		oldVNode = oldChildren[i];
+		let skewedIndex = i + skew;
+		const matchingIndex = findMatchingIndex(
+			childVNode,
+			oldChildren,
+			skewedIndex,
+			remainingOldChildren
+		);
 
-		if (
-			oldVNode === null ||
-			(oldVNode &&
-				childVNode.key == oldVNode.key &&
-				childVNode.type === oldVNode.type)
-		) {
-			oldChildren[i] = undefined;
+		if (matchingIndex === -1) {
+			oldVNode = EMPTY_OBJ;
 		} else {
-			// Either oldVNode === undefined or oldChildrenLength > 0,
-			// so after this loop oldVNode == null or oldVNode is a valid value.
-			for (j = 0; j < oldChildrenLength; j++) {
-				oldVNode = oldChildren[j];
-				// If childVNode is unkeyed, we only match similarly unkeyed nodes, otherwise we match by key.
-				// We always match by type (in either case).
-				if (
-					oldVNode &&
-					childVNode.key == oldVNode.key &&
-					childVNode.type === oldVNode.type
-				) {
-					oldChildren[j] = undefined;
-					break;
-				}
-				oldVNode = null;
-			}
+			oldVNode = oldChildren[matchingIndex] || EMPTY_OBJ;
+			oldChildren[matchingIndex] = undefined;
+			remainingOldChildren--;
 		}
-
-		oldVNode = oldVNode || EMPTY_OBJ;
 
 		// Morph the old element into the new one, but don't append it to the dom yet
 		diff(
@@ -143,15 +151,16 @@ export function diffChildren(
 			excessDomChildren,
 			commitQueue,
 			oldDom,
-			isHydrating
+			isHydrating,
+			refQueue
 		);
 
 		newDom = childVNode._dom;
-
 		if ((j = childVNode.ref) && oldVNode.ref != j) {
-			if (!refs) refs = [];
-			if (oldVNode.ref) refs.push(oldVNode.ref, null, childVNode);
-			refs.push(j, childVNode._component || newDom, childVNode);
+			if (oldVNode.ref) {
+				applyRef(oldVNode.ref, null, childVNode);
+			}
+			refQueue.push(j, childVNode._component || newDom, childVNode);
 		}
 
 		if (newDom != null) {
@@ -159,24 +168,58 @@ export function diffChildren(
 				firstChildDom = newDom;
 			}
 
+			let isMounting = oldVNode === EMPTY_OBJ || oldVNode._original === null;
+			if (isMounting) {
+				if (matchingIndex == -1) {
+					skew--;
+				}
+			} else if (matchingIndex !== skewedIndex) {
+				if (matchingIndex === skewedIndex + 1) {
+					skew++;
+				} else if (matchingIndex > skewedIndex) {
+					if (remainingOldChildren > newChildrenLength - skewedIndex) {
+						skew += matchingIndex - skewedIndex;
+					} else {
+						// ### Change from keyed: I think this was missing from the algo...
+						skew--;
+					}
+				} else if (matchingIndex < skewedIndex) {
+					if (matchingIndex == skewedIndex - 1) {
+						skew = matchingIndex - skewedIndex;
+					} else {
+						skew = 0;
+					}
+				} else {
+					skew = 0;
+				}
+			}
+
+			skewedIndex = i + skew;
+
 			if (
 				typeof childVNode.type == 'function' &&
-				childVNode._children === oldVNode._children
+				(matchingIndex !== skewedIndex ||
+					oldVNode._children === childVNode._children)
 			) {
-				childVNode._nextDom = oldDom = reorderChildren(
-					childVNode,
-					oldDom,
-					parentDom
-				);
+				oldDom = reorderChildren(childVNode, oldDom, parentDom);
+			} else if (
+				typeof childVNode.type != 'function' &&
+				(matchingIndex !== skewedIndex || isMounting)
+			) {
+				oldDom = placeChild(parentDom, newDom, oldDom);
+			} else if (childVNode._nextDom !== undefined) {
+				// Only Fragments or components that return Fragment like VNodes will
+				// have a non-undefined _nextDom. Continue the diff from the sibling
+				// of last DOM child of this child VNode
+				oldDom = childVNode._nextDom;
+
+				// Eagerly cleanup _nextDom. We don't need to persist the value because
+				// it is only used by `diffChildren` to determine where to resume the diff after
+				// diffing Components and Fragments. Once we store it the nextDOM local var, we
+				// can clean up the property
+				childVNode._nextDom = undefined;
 			} else {
-				oldDom = placeChild(
-					parentDom,
-					childVNode,
-					oldVNode,
-					oldChildren,
-					newDom,
-					oldDom
-				);
+				oldDom = newDom.nextSibling;
 			}
 
 			if (typeof newParentVNode.type == 'function') {
@@ -189,14 +232,6 @@ export function diffChildren(
 				// node's nextSibling.
 				newParentVNode._nextDom = oldDom;
 			}
-		} else if (
-			oldDom &&
-			oldVNode._dom == oldDom &&
-			oldDom.parentNode != parentDom
-		) {
-			// The above condition is to handle null placeholders. See test in placeholder.test.js:
-			// `efficiently replace null placeholders in parent rerenders`
-			oldDom = getDomSibling(oldVNode);
 		}
 	}
 
@@ -205,14 +240,19 @@ export function diffChildren(
 	// Remove remaining oldChildren if there are any.
 	for (i = oldChildrenLength; i--; ) {
 		if (oldChildren[i] != null) {
-			unmount(oldChildren[i], oldChildren[i]);
-		}
-	}
+			if (
+				typeof newParentVNode.type == 'function' &&
+				oldChildren[i]._dom != null &&
+				oldChildren[i]._dom == newParentVNode._nextDom
+			) {
+				// If the newParentVNode.__nextDom points to a dom node that is about to
+				// be unmounted, then get the next sibling of that vnode and set
+				// _nextDom to it
 
-	// Set refs only after unmount
-	if (refs) {
-		for (i = 0; i < refs.length; i++) {
-			applyRef(refs[i], refs[++i], refs[++i]);
+				newParentVNode._nextDom = oldChildren[i]._dom.nextSibling;
+			}
+
+			unmount(oldChildren[i], oldChildren[i]);
 		}
 	}
 }
@@ -220,6 +260,7 @@ export function diffChildren(
 function reorderChildren(childVNode, oldDom, parentDom) {
 	// Note: VNodes in nested suspended trees may be missing _children.
 	let c = childVNode._children;
+
 	let tmp = 0;
 	for (; c && tmp < c.length; tmp++) {
 		let vnode = c[tmp];
@@ -233,7 +274,7 @@ function reorderChildren(childVNode, oldDom, parentDom) {
 			if (typeof vnode.type == 'function') {
 				oldDom = reorderChildren(vnode, oldDom, parentDom);
 			} else {
-				oldDom = placeChild(parentDom, vnode, vnode, c, vnode._dom, oldDom);
+				oldDom = placeChild(parentDom, vnode._dom, oldDom);
 			}
 		}
 	}
@@ -250,7 +291,7 @@ function reorderChildren(childVNode, oldDom, parentDom) {
 export function toChildArray(children, out) {
 	out = out || [];
 	if (children == null || typeof children == 'boolean') {
-	} else if (Array.isArray(children)) {
+	} else if (isArray(children)) {
 		children.some(child => {
 			toChildArray(child, out);
 		});
@@ -260,58 +301,59 @@ export function toChildArray(children, out) {
 	return out;
 }
 
-function placeChild(
-	parentDom,
-	childVNode,
-	oldVNode,
-	oldChildren,
-	newDom,
-	oldDom
-) {
-	let nextDom;
-	if (childVNode._nextDom !== undefined) {
-		// Only Fragments or components that return Fragment like VNodes will
-		// have a non-undefined _nextDom. Continue the diff from the sibling
-		// of last DOM child of this child VNode
-		nextDom = childVNode._nextDom;
+function placeChild(parentDom, newDom, oldDom) {
+	if (oldDom == null || oldDom.parentNode !== parentDom) {
+		parentDom.insertBefore(newDom, null);
+	} else if (newDom != oldDom || newDom.parentNode == null) {
+		parentDom.insertBefore(newDom, oldDom);
+	}
 
-		// Eagerly cleanup _nextDom. We don't need to persist the value because
-		// it is only used by `diffChildren` to determine where to resume the diff after
-		// diffing Components and Fragments. Once we store it the nextDOM local var, we
-		// can clean up the property
-		childVNode._nextDom = undefined;
-	} else if (
-		oldVNode == null ||
-		newDom != oldDom ||
-		newDom.parentNode == null
+	return newDom.nextSibling;
+}
+
+/**
+ * @param {import('../internal').VNode | string} childVNode
+ * @param {import('../internal').VNode[]} oldChildren
+ * @param {number} skewedIndex
+ * @param {number} remainingOldChildren
+ * @returns {number}
+ */
+function findMatchingIndex(
+	childVNode,
+	oldChildren,
+	skewedIndex,
+	remainingOldChildren
+) {
+	const key = childVNode.key;
+	const type = childVNode.type;
+	let x = skewedIndex - 1;
+	let y = skewedIndex + 1;
+	let oldVNode = oldChildren[skewedIndex];
+
+	if (
+		oldVNode === null ||
+		(oldVNode && key == oldVNode.key && type === oldVNode.type)
 	) {
-		outer: if (oldDom == null || oldDom.parentNode !== parentDom) {
-			parentDom.appendChild(newDom);
-			nextDom = null;
-		} else {
-			// `j<oldChildrenLength; j+=2` is an alternative to `j++<oldChildrenLength/2`
-			for (
-				let sibDom = oldDom, j = 0;
-				(sibDom = sibDom.nextSibling) && j < oldChildren.length;
-				j += 1
-			) {
-				if (sibDom == newDom) {
-					break outer;
+		return skewedIndex;
+	} else if (remainingOldChildren > (oldVNode != null ? 1 : 0)) {
+		while (x >= 0 || y < oldChildren.length) {
+			if (x >= 0) {
+				oldVNode = oldChildren[x];
+				if (oldVNode && key == oldVNode.key && type === oldVNode.type) {
+					return x;
 				}
+				x--;
 			}
-			parentDom.insertBefore(newDom, oldDom);
-			nextDom = oldDom;
+
+			if (y < oldChildren.length) {
+				oldVNode = oldChildren[y];
+				if (oldVNode && key == oldVNode.key && type === oldVNode.type) {
+					return y;
+				}
+				y++;
+			}
 		}
 	}
 
-	// If we have pre-calculated the nextDOM node, use it. Else calculate it now
-	// Strictly check for `undefined` here cuz `null` is a valid value of `nextDom`.
-	// See more detail in create-element.js:createVNode
-	if (nextDom !== undefined) {
-		oldDom = nextDom;
-	} else {
-		oldDom = newDom.nextSibling;
-	}
-
-	return oldDom;
+	return -1;
 }

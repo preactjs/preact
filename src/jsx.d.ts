@@ -18,6 +18,8 @@ type Defaultize<Props, Defaults> =
 				Pick<Props, Exclude<keyof Props, keyof Defaults>>
 		: never;
 
+type Booleanish = boolean | 'true' | 'false';
+
 export namespace JSXInternal {
 	export type LibraryManagedAttributes<Component, Props> = Component extends {
 		defaultProps: infer Defaults;
@@ -70,11 +72,27 @@ export namespace JSXInternal {
 		subscribe(fn: (value: T) => void): () => void;
 	}
 
+	export type Signalish<T> = T | SignalLike<T>;
+
+	export type UnpackSignal<T> = T extends SignalLike<infer V> ? V : T;
+
 	export interface SVGAttributes<Target extends EventTarget = SVGElement>
 		extends HTMLAttributes<Target> {
-		accentHeight?: number | string | SignalLike<number | string>;
-		accumulate?: 'none' | 'sum' | SignalLike<'none' | 'sum'>;
-		additive?: 'replace' | 'sum' | SignalLike<'replace' | 'sum'>;
+		accentHeight?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		accumulate?:
+			| 'none'
+			| 'sum'
+			| undefined
+			| SignalLike<'none' | 'sum' | undefined>;
+		additive?:
+			| 'replace'
+			| 'sum'
+			| undefined
+			| SignalLike<'replace' | 'sum' | undefined>;
 		alignmentBaseline?:
 			| 'auto'
 			| 'baseline'
@@ -89,6 +107,7 @@ export namespace JSXInternal {
 			| 'hanging'
 			| 'mathematical'
 			| 'inherit'
+			| undefined
 			| SignalLike<
 					| 'auto'
 					| 'baseline'
@@ -103,266 +122,904 @@ export namespace JSXInternal {
 					| 'hanging'
 					| 'mathematical'
 					| 'inherit'
+					| undefined
 			  >;
-		allowReorder?: 'no' | 'yes' | SignalLike<'no' | 'yes'>;
-		alphabetic?: number | string | SignalLike<number | string>;
-		amplitude?: number | string | SignalLike<number | string>;
+		allowReorder?:
+			| 'no'
+			| 'yes'
+			| undefined
+			| SignalLike<'no' | 'yes' | undefined>;
+		alphabetic?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		amplitude?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
 		arabicForm?:
 			| 'initial'
 			| 'medial'
 			| 'terminal'
 			| 'isolated'
-			| SignalLike<'initial' | 'medial' | 'terminal' | 'isolated'>;
-		ascent?: number | string | SignalLike<number | string>;
-		attributeName?: string | SignalLike<string>;
-		attributeType?: string | SignalLike<string>;
-		autoReverse?: number | string | SignalLike<number | string>;
-		azimuth?: number | string | SignalLike<number | string>;
-		baseFrequency?: number | string | SignalLike<number | string>;
-		baselineShift?: number | string | SignalLike<number | string>;
-		baseProfile?: number | string | SignalLike<number | string>;
-		bbox?: number | string | SignalLike<number | string>;
-		begin?: number | string | SignalLike<number | string>;
-		bias?: number | string | SignalLike<number | string>;
-		by?: number | string | SignalLike<number | string>;
-		calcMode?: number | string | SignalLike<number | string>;
-		capHeight?: number | string | SignalLike<number | string>;
-		clip?: number | string | SignalLike<number | string>;
-		clipPath?: string | SignalLike<string>;
-		clipPathUnits?: number | string | SignalLike<number | string>;
-		clipRule?: number | string | SignalLike<number | string>;
-		colorInterpolation?: number | string | SignalLike<number | string>;
+			| undefined
+			| SignalLike<'initial' | 'medial' | 'terminal' | 'isolated' | undefined>;
+		ascent?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		attributeName?: string | undefined | SignalLike<string | undefined>;
+		attributeType?: string | undefined | SignalLike<string | undefined>;
+		autoReverse?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		azimuth?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		baseFrequency?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		baselineShift?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		baseProfile?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		bbox?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		begin?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		bias?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		by?: number | string | undefined | SignalLike<number | string | undefined>;
+		calcMode?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		capHeight?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		clip?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		clipPath?: string | undefined | SignalLike<string | undefined>;
+		clipPathUnits?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		clipRule?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		colorInterpolation?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
 		colorInterpolationFilters?:
 			| 'auto'
 			| 'sRGB'
 			| 'linearRGB'
 			| 'inherit'
-			| SignalLike<'auto' | 'sRGB' | 'linearRGB' | 'inherit'>;
-		colorProfile?: number | string | SignalLike<number | string>;
-		colorRendering?: number | string | SignalLike<number | string>;
-		contentScriptType?: number | string | SignalLike<number | string>;
-		contentStyleType?: number | string | SignalLike<number | string>;
-		cursor?: number | string | SignalLike<number | string>;
-		cx?: number | string | SignalLike<number | string>;
-		cy?: number | string | SignalLike<number | string>;
-		d?: string | SignalLike<string>;
-		decelerate?: number | string | SignalLike<number | string>;
-		descent?: number | string | SignalLike<number | string>;
-		diffuseConstant?: number | string | SignalLike<number | string>;
-		direction?: number | string | SignalLike<number | string>;
-		display?: number | string | SignalLike<number | string>;
-		divisor?: number | string | SignalLike<number | string>;
-		dominantBaseline?: number | string | SignalLike<number | string>;
-		dur?: number | string | SignalLike<number | string>;
-		dx?: number | string | SignalLike<number | string>;
-		dy?: number | string | SignalLike<number | string>;
-		edgeMode?: number | string | SignalLike<number | string>;
-		elevation?: number | string | SignalLike<number | string>;
-		enableBackground?: number | string | SignalLike<number | string>;
-		end?: number | string | SignalLike<number | string>;
-		exponent?: number | string | SignalLike<number | string>;
-		externalResourcesRequired?: number | string | SignalLike<number | string>;
-		fill?: string | SignalLike<string>;
-		fillOpacity?: number | string | SignalLike<number | string>;
+			| undefined
+			| SignalLike<'auto' | 'sRGB' | 'linearRGB' | 'inherit' | undefined>;
+		colorProfile?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		colorRendering?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		contentScriptType?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		contentStyleType?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		cursor?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		cx?: number | string | undefined | SignalLike<number | string | undefined>;
+		cy?: number | string | undefined | SignalLike<number | string | undefined>;
+		d?: string | undefined | SignalLike<string | undefined>;
+		decelerate?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		descent?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		diffuseConstant?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		direction?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		display?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		divisor?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		dominantBaseline?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		dur?: number | string | undefined | SignalLike<number | string | undefined>;
+		dx?: number | string | undefined | SignalLike<number | string | undefined>;
+		dy?: number | string | undefined | SignalLike<number | string | undefined>;
+		edgeMode?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		elevation?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		enableBackground?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		end?: number | string | undefined | SignalLike<number | string | undefined>;
+		exponent?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		externalResourcesRequired?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		fill?: string | undefined | SignalLike<string | undefined>;
+		fillOpacity?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
 		fillRule?:
 			| 'nonzero'
 			| 'evenodd'
 			| 'inherit'
-			| SignalLike<'nonzero' | 'evenodd' | 'inherit'>;
-		filter?: string | SignalLike<string>;
-		filterRes?: number | string | SignalLike<number | string>;
-		filterUnits?: number | string | SignalLike<number | string>;
-		floodColor?: number | string | SignalLike<number | string>;
-		floodOpacity?: number | string | SignalLike<number | string>;
-		focusable?: number | string | SignalLike<number | string>;
-		fontFamily?: string | SignalLike<string>;
-		fontSize?: number | string | SignalLike<number | string>;
-		fontSizeAdjust?: number | string | SignalLike<number | string>;
-		fontStretch?: number | string | SignalLike<number | string>;
-		fontStyle?: number | string | SignalLike<number | string>;
-		fontVariant?: number | string | SignalLike<number | string>;
-		fontWeight?: number | string | SignalLike<number | string>;
-		format?: number | string | SignalLike<number | string>;
-		from?: number | string | SignalLike<number | string>;
-		fx?: number | string | SignalLike<number | string>;
-		fy?: number | string | SignalLike<number | string>;
-		g1?: number | string | SignalLike<number | string>;
-		g2?: number | string | SignalLike<number | string>;
-		glyphName?: number | string | SignalLike<number | string>;
-		glyphOrientationHorizontal?: number | string | SignalLike<number | string>;
-		glyphOrientationVertical?: number | string | SignalLike<number | string>;
-		glyphRef?: number | string | SignalLike<number | string>;
-		gradientTransform?: string | SignalLike<string>;
-		gradientUnits?: string | SignalLike<string>;
-		hanging?: number | string | SignalLike<number | string>;
-		horizAdvX?: number | string | SignalLike<number | string>;
-		horizOriginX?: number | string | SignalLike<number | string>;
-		ideographic?: number | string | SignalLike<number | string>;
-		imageRendering?: number | string | SignalLike<number | string>;
-		in2?: number | string | SignalLike<number | string>;
-		in?: string | SignalLike<string>;
-		intercept?: number | string | SignalLike<number | string>;
-		k1?: number | string | SignalLike<number | string>;
-		k2?: number | string | SignalLike<number | string>;
-		k3?: number | string | SignalLike<number | string>;
-		k4?: number | string | SignalLike<number | string>;
-		k?: number | string | SignalLike<number | string>;
-		kernelMatrix?: number | string | SignalLike<number | string>;
-		kernelUnitLength?: number | string | SignalLike<number | string>;
-		kerning?: number | string | SignalLike<number | string>;
-		keyPoints?: number | string | SignalLike<number | string>;
-		keySplines?: number | string | SignalLike<number | string>;
-		keyTimes?: number | string | SignalLike<number | string>;
-		lengthAdjust?: number | string | SignalLike<number | string>;
-		letterSpacing?: number | string | SignalLike<number | string>;
-		lightingColor?: number | string | SignalLike<number | string>;
-		limitingConeAngle?: number | string | SignalLike<number | string>;
-		local?: number | string | SignalLike<number | string>;
-		markerEnd?: string | SignalLike<string>;
-		markerHeight?: number | string | SignalLike<number | string>;
-		markerMid?: string | SignalLike<string>;
-		markerStart?: string | SignalLike<string>;
-		markerUnits?: number | string | SignalLike<number | string>;
-		markerWidth?: number | string | SignalLike<number | string>;
-		mask?: string | SignalLike<string>;
-		maskContentUnits?: number | string | SignalLike<number | string>;
-		maskUnits?: number | string | SignalLike<number | string>;
-		mathematical?: number | string | SignalLike<number | string>;
-		mode?: number | string | SignalLike<number | string>;
-		numOctaves?: number | string | SignalLike<number | string>;
-		offset?: number | string | SignalLike<number | string>;
-		opacity?: number | string | SignalLike<number | string>;
-		operator?: number | string | SignalLike<number | string>;
-		order?: number | string | SignalLike<number | string>;
-		orient?: number | string | SignalLike<number | string>;
-		orientation?: number | string | SignalLike<number | string>;
-		origin?: number | string | SignalLike<number | string>;
-		overflow?: number | string | SignalLike<number | string>;
-		overlinePosition?: number | string | SignalLike<number | string>;
-		overlineThickness?: number | string | SignalLike<number | string>;
-		paintOrder?: number | string | SignalLike<number | string>;
-		panose1?: number | string | SignalLike<number | string>;
-		pathLength?: number | string | SignalLike<number | string>;
-		patternContentUnits?: string | SignalLike<string>;
-		patternTransform?: number | string | SignalLike<number | string>;
-		patternUnits?: string | SignalLike<string>;
-		pointerEvents?: number | string | SignalLike<number | string>;
-		points?: string | SignalLike<string>;
-		pointsAtX?: number | string | SignalLike<number | string>;
-		pointsAtY?: number | string | SignalLike<number | string>;
-		pointsAtZ?: number | string | SignalLike<number | string>;
-		preserveAlpha?: number | string | SignalLike<number | string>;
-		preserveAspectRatio?: string | SignalLike<string>;
-		primitiveUnits?: number | string | SignalLike<number | string>;
-		r?: number | string | SignalLike<number | string>;
-		radius?: number | string | SignalLike<number | string>;
-		refX?: number | string | SignalLike<number | string>;
-		refY?: number | string | SignalLike<number | string>;
-		renderingIntent?: number | string | SignalLike<number | string>;
-		repeatCount?: number | string | SignalLike<number | string>;
-		repeatDur?: number | string | SignalLike<number | string>;
-		requiredExtensions?: number | string | SignalLike<number | string>;
-		requiredFeatures?: number | string | SignalLike<number | string>;
-		restart?: number | string | SignalLike<number | string>;
-		result?: string | SignalLike<string>;
-		rotate?: number | string | SignalLike<number | string>;
-		rx?: number | string | SignalLike<number | string>;
-		ry?: number | string | SignalLike<number | string>;
-		scale?: number | string | SignalLike<number | string>;
-		seed?: number | string | SignalLike<number | string>;
-		shapeRendering?: number | string | SignalLike<number | string>;
-		slope?: number | string | SignalLike<number | string>;
-		spacing?: number | string | SignalLike<number | string>;
-		specularConstant?: number | string | SignalLike<number | string>;
-		specularExponent?: number | string | SignalLike<number | string>;
-		speed?: number | string | SignalLike<number | string>;
-		spreadMethod?: string | SignalLike<string>;
-		startOffset?: number | string | SignalLike<number | string>;
-		stdDeviation?: number | string | SignalLike<number | string>;
-		stemh?: number | string | SignalLike<number | string>;
-		stemv?: number | string | SignalLike<number | string>;
-		stitchTiles?: number | string | SignalLike<number | string>;
-		stopColor?: string | SignalLike<string>;
-		stopOpacity?: number | string | SignalLike<number | string>;
-		strikethroughPosition?: number | string | SignalLike<number | string>;
-		strikethroughThickness?: number | string | SignalLike<number | string>;
-		string?: number | string | SignalLike<number | string>;
-		stroke?: string | SignalLike<string>;
-		strokeDasharray?: string | number | SignalLike<number | string>;
-		strokeDashoffset?: string | number | SignalLike<number | string>;
+			| undefined
+			| SignalLike<'nonzero' | 'evenodd' | 'inherit' | undefined>;
+		filter?: string | undefined | SignalLike<string | undefined>;
+		filterRes?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		filterUnits?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		floodColor?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		floodOpacity?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		focusable?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		fontFamily?: string | undefined | SignalLike<string | undefined>;
+		fontSize?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		fontSizeAdjust?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		fontStretch?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		fontStyle?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		fontVariant?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		fontWeight?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		format?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		from?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		fx?: number | string | undefined | SignalLike<number | string | undefined>;
+		fy?: number | string | undefined | SignalLike<number | string | undefined>;
+		g1?: number | string | undefined | SignalLike<number | string | undefined>;
+		g2?: number | string | undefined | SignalLike<number | string | undefined>;
+		glyphName?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		glyphOrientationHorizontal?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		glyphOrientationVertical?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		glyphRef?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		gradientTransform?: string | undefined | SignalLike<string | undefined>;
+		gradientUnits?: string | undefined | SignalLike<string | undefined>;
+		hanging?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		horizAdvX?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		horizOriginX?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		ideographic?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		imageRendering?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		in2?: number | string | undefined | SignalLike<number | string | undefined>;
+		in?: string | undefined | SignalLike<string | undefined>;
+		intercept?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		k1?: number | string | undefined | SignalLike<number | string | undefined>;
+		k2?: number | string | undefined | SignalLike<number | string | undefined>;
+		k3?: number | string | undefined | SignalLike<number | string | undefined>;
+		k4?: number | string | undefined | SignalLike<number | string | undefined>;
+		k?: number | string | undefined | SignalLike<number | string | undefined>;
+		kernelMatrix?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		kernelUnitLength?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		kerning?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		keyPoints?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		keySplines?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		keyTimes?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		lengthAdjust?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		letterSpacing?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		lightingColor?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		limitingConeAngle?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		local?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		markerEnd?: string | undefined | SignalLike<string | undefined>;
+		markerHeight?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		markerMid?: string | undefined | SignalLike<string | undefined>;
+		markerStart?: string | undefined | SignalLike<string | undefined>;
+		markerUnits?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		markerWidth?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		mask?: string | undefined | SignalLike<string | undefined>;
+		maskContentUnits?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		maskUnits?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		mathematical?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		mode?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		numOctaves?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		offset?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		opacity?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		operator?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		order?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		orient?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		orientation?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		origin?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		overflow?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		overlinePosition?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		overlineThickness?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		paintOrder?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		panose1?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		pathLength?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		patternContentUnits?: string | undefined | SignalLike<string | undefined>;
+		patternTransform?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		patternUnits?: string | undefined | SignalLike<string | undefined>;
+		pointerEvents?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		points?: string | undefined | SignalLike<string | undefined>;
+		pointsAtX?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		pointsAtY?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		pointsAtZ?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		preserveAlpha?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		preserveAspectRatio?: string | undefined | SignalLike<string | undefined>;
+		primitiveUnits?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		r?: number | string | undefined | SignalLike<number | string | undefined>;
+		radius?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		refX?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		refY?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		renderingIntent?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		repeatCount?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		repeatDur?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		requiredExtensions?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		requiredFeatures?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		restart?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		result?: string | undefined | SignalLike<string | undefined>;
+		rotate?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		rx?: number | string | undefined | SignalLike<number | string | undefined>;
+		ry?: number | string | undefined | SignalLike<number | string | undefined>;
+		scale?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		seed?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		shapeRendering?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		slope?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		spacing?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		specularConstant?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		specularExponent?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		speed?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		spreadMethod?: string | undefined | SignalLike<string | undefined>;
+		startOffset?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		stdDeviation?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		stemh?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		stemv?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		stitchTiles?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		stopColor?: string | undefined | SignalLike<string | undefined>;
+		stopOpacity?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		strikethroughPosition?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		strikethroughThickness?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		string?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		stroke?: string | undefined | SignalLike<string | undefined>;
+		strokeDasharray?:
+			| string
+			| number
+			| undefined
+			| SignalLike<number | string | undefined>;
+		strokeDashoffset?:
+			| string
+			| number
+			| undefined
+			| SignalLike<number | string | undefined>;
 		strokeLinecap?:
 			| 'butt'
 			| 'round'
 			| 'square'
 			| 'inherit'
-			| SignalLike<'butt' | 'round' | 'square' | 'inherit'>;
+			| undefined
+			| SignalLike<'butt' | 'round' | 'square' | 'inherit' | undefined>;
 		strokeLinejoin?:
 			| 'miter'
 			| 'round'
 			| 'bevel'
 			| 'inherit'
-			| SignalLike<'miter' | 'round' | 'bevel' | 'inherit'>;
-		strokeMiterlimit?: string | number | SignalLike<number | string>;
-		strokeOpacity?: number | string | SignalLike<number | string>;
-		strokeWidth?: number | string | SignalLike<number | string>;
-		surfaceScale?: number | string | SignalLike<number | string>;
-		systemLanguage?: number | string | SignalLike<number | string>;
-		tableValues?: number | string | SignalLike<number | string>;
-		targetX?: number | string | SignalLike<number | string>;
-		targetY?: number | string | SignalLike<number | string>;
-		textAnchor?: string | SignalLike<string>;
-		textDecoration?: number | string | SignalLike<number | string>;
-		textLength?: number | string | SignalLike<number | string>;
-		textRendering?: number | string | SignalLike<number | string>;
-		to?: number | string | SignalLike<number | string>;
-		transform?: string | SignalLike<string>;
-		u1?: number | string | SignalLike<number | string>;
-		u2?: number | string | SignalLike<number | string>;
-		underlinePosition?: number | string | SignalLike<number | string>;
-		underlineThickness?: number | string | SignalLike<number | string>;
-		unicode?: number | string | SignalLike<number | string>;
-		unicodeBidi?: number | string | SignalLike<number | string>;
-		unicodeRange?: number | string | SignalLike<number | string>;
-		unitsPerEm?: number | string | SignalLike<number | string>;
-		vAlphabetic?: number | string | SignalLike<number | string>;
-		values?: string | SignalLike<string>;
-		vectorEffect?: number | string | SignalLike<number | string>;
-		version?: string | SignalLike<string>;
-		vertAdvY?: number | string | SignalLike<number | string>;
-		vertOriginX?: number | string | SignalLike<number | string>;
-		vertOriginY?: number | string | SignalLike<number | string>;
-		vHanging?: number | string | SignalLike<number | string>;
-		vIdeographic?: number | string | SignalLike<number | string>;
-		viewBox?: string | SignalLike<string>;
-		viewTarget?: number | string | SignalLike<number | string>;
-		visibility?: number | string | SignalLike<number | string>;
-		vMathematical?: number | string | SignalLike<number | string>;
-		widths?: number | string | SignalLike<number | string>;
-		wordSpacing?: number | string | SignalLike<number | string>;
-		writingMode?: number | string | SignalLike<number | string>;
-		x1?: number | string | SignalLike<number | string>;
-		x2?: number | string | SignalLike<number | string>;
-		x?: number | string | SignalLike<number | string>;
-		xChannelSelector?: string | SignalLike<string>;
-		xHeight?: number | string | SignalLike<number | string>;
-		xlinkActuate?: string | SignalLike<string>;
-		xlinkArcrole?: string | SignalLike<string>;
-		xlinkHref?: string | SignalLike<string>;
-		xlinkRole?: string | SignalLike<string>;
-		xlinkShow?: string | SignalLike<string>;
-		xlinkTitle?: string | SignalLike<string>;
-		xlinkType?: string | SignalLike<string>;
-		xmlBase?: string | SignalLike<string>;
-		xmlLang?: string | SignalLike<string>;
-		xmlns?: string | SignalLike<string>;
-		xmlnsXlink?: string | SignalLike<string>;
-		xmlSpace?: string | SignalLike<string>;
-		y1?: number | string | SignalLike<number | string>;
-		y2?: number | string | SignalLike<number | string>;
-		y?: number | string | SignalLike<number | string>;
-		yChannelSelector?: string | SignalLike<string>;
-		z?: number | string | SignalLike<number | string>;
-		zoomAndPan?: string | SignalLike<string>;
+			| undefined
+			| SignalLike<'miter' | 'round' | 'bevel' | 'inherit' | undefined>;
+		strokeMiterlimit?:
+			| string
+			| number
+			| undefined
+			| SignalLike<number | string | undefined>;
+		strokeOpacity?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		strokeWidth?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		surfaceScale?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		systemLanguage?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		tableValues?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		targetX?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		targetY?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		textAnchor?: string | undefined | SignalLike<string | undefined>;
+		textDecoration?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		textLength?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		textRendering?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		to?: number | string | undefined | SignalLike<number | string | undefined>;
+		transform?: string | undefined | SignalLike<string | undefined>;
+		u1?: number | string | undefined | SignalLike<number | string | undefined>;
+		u2?: number | string | undefined | SignalLike<number | string | undefined>;
+		underlinePosition?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		underlineThickness?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		unicode?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		unicodeBidi?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		unicodeRange?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		unitsPerEm?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		vAlphabetic?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		values?: string | undefined | SignalLike<string | undefined>;
+		vectorEffect?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		version?: string | undefined | SignalLike<string | undefined>;
+		vertAdvY?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		vertOriginX?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		vertOriginY?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		vHanging?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		vIdeographic?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		viewBox?: string | undefined | SignalLike<string | undefined>;
+		viewTarget?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		visibility?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		vMathematical?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		widths?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		wordSpacing?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		writingMode?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		x1?: number | string | undefined | SignalLike<number | string | undefined>;
+		x2?: number | string | undefined | SignalLike<number | string | undefined>;
+		x?: number | string | undefined | SignalLike<number | string | undefined>;
+		xChannelSelector?: string | undefined | SignalLike<string | undefined>;
+		xHeight?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		xlinkActuate?: string | undefined | SignalLike<string | undefined>;
+		xlinkArcrole?: string | undefined | SignalLike<string | undefined>;
+		xlinkHref?: string | undefined | SignalLike<string | undefined>;
+		xlinkRole?: string | undefined | SignalLike<string | undefined>;
+		xlinkShow?: string | undefined | SignalLike<string | undefined>;
+		xlinkTitle?: string | undefined | SignalLike<string | undefined>;
+		xlinkType?: string | undefined | SignalLike<string | undefined>;
+		xmlBase?: string | undefined | SignalLike<string | undefined>;
+		xmlLang?: string | undefined | SignalLike<string | undefined>;
+		xmlns?: string | undefined | SignalLike<string | undefined>;
+		xmlnsXlink?: string | undefined | SignalLike<string | undefined>;
+		xmlSpace?: string | undefined | SignalLike<string | undefined>;
+		y1?: number | string | undefined | SignalLike<number | string | undefined>;
+		y2?: number | string | undefined | SignalLike<number | string | undefined>;
+		y?: number | string | undefined | SignalLike<number | string | undefined>;
+		yChannelSelector?: string | undefined | SignalLike<string | undefined>;
+		z?: number | string | undefined | SignalLike<number | string | undefined>;
+		zoomAndPan?: string | undefined | SignalLike<string | undefined>;
 	}
 
 	export interface PathAttributes {
@@ -416,14 +1073,12 @@ export namespace JSXInternal {
 		Target,
 		WheelEvent
 	>;
+	export type TargetedPictureInPictureEvent<Target extends EventTarget> =
+		TargetedEvent<Target, PictureInPictureEvent>;
 
-	export interface EventHandler<E extends TargetedEvent> {
-		/**
-		 * The `this` keyword always points to the DOM element the event handler
-		 * was invoked on. See: https://developer.mozilla.org/en-US/docs/Web/Guide/Events/Event_handlers#Event_handlers_parameters_this_binding_and_the_return_value
-		 */
-		(this: never, event: E): void;
-	}
+	export type EventHandler<E extends TargetedEvent> = {
+		bivarianceHack(event: E): void;
+	}['bivarianceHack'];
 
 	export type AnimationEventHandler<Target extends EventTarget> = EventHandler<
 		TargetedAnimationEvent<Target>
@@ -463,267 +1118,639 @@ export namespace JSXInternal {
 	export type WheelEventHandler<Target extends EventTarget> = EventHandler<
 		TargetedWheelEvent<Target>
 	>;
+	export type PictureInPictureEventHandler<Target extends EventTarget> =
+		EventHandler<TargetedPictureInPictureEvent<Target>>;
 
 	export interface DOMAttributes<Target extends EventTarget>
 		extends PreactDOMAttributes {
 		// Image Events
-		onLoad?: GenericEventHandler<Target>;
-		onLoadCapture?: GenericEventHandler<Target>;
-		onError?: GenericEventHandler<Target>;
-		onErrorCapture?: GenericEventHandler<Target>;
+		onLoad?: GenericEventHandler<Target> | undefined;
+		onLoadCapture?: GenericEventHandler<Target> | undefined;
+		onError?: GenericEventHandler<Target> | undefined;
+		onErrorCapture?: GenericEventHandler<Target> | undefined;
 
 		// Clipboard Events
-		onCopy?: ClipboardEventHandler<Target>;
-		onCopyCapture?: ClipboardEventHandler<Target>;
-		onCut?: ClipboardEventHandler<Target>;
-		onCutCapture?: ClipboardEventHandler<Target>;
-		onPaste?: ClipboardEventHandler<Target>;
-		onPasteCapture?: ClipboardEventHandler<Target>;
+		onCopy?: ClipboardEventHandler<Target> | undefined;
+		onCopyCapture?: ClipboardEventHandler<Target> | undefined;
+		onCut?: ClipboardEventHandler<Target> | undefined;
+		onCutCapture?: ClipboardEventHandler<Target> | undefined;
+		onPaste?: ClipboardEventHandler<Target> | undefined;
+		onPasteCapture?: ClipboardEventHandler<Target> | undefined;
 
 		// Composition Events
-		onCompositionEnd?: CompositionEventHandler<Target>;
-		onCompositionEndCapture?: CompositionEventHandler<Target>;
-		onCompositionStart?: CompositionEventHandler<Target>;
-		onCompositionStartCapture?: CompositionEventHandler<Target>;
-		onCompositionUpdate?: CompositionEventHandler<Target>;
-		onCompositionUpdateCapture?: CompositionEventHandler<Target>;
+		onCompositionEnd?: CompositionEventHandler<Target> | undefined;
+		onCompositionEndCapture?: CompositionEventHandler<Target> | undefined;
+		onCompositionStart?: CompositionEventHandler<Target> | undefined;
+		onCompositionStartCapture?: CompositionEventHandler<Target> | undefined;
+		onCompositionUpdate?: CompositionEventHandler<Target> | undefined;
+		onCompositionUpdateCapture?: CompositionEventHandler<Target> | undefined;
 
 		// Details Events
-		onToggle?: GenericEventHandler<Target>;
+		onToggle?: GenericEventHandler<Target> | undefined;
+
+		// Dialog Events
+		onClose?: GenericEventHandler<Target> | undefined;
+		onCancel?: GenericEventHandler<Target> | undefined;
 
 		// Focus Events
-		onFocus?: FocusEventHandler<Target>;
-		onFocusCapture?: FocusEventHandler<Target>;
-		onfocusin?: FocusEventHandler<Target>;
-		onfocusinCapture?: FocusEventHandler<Target>;
-		onfocusout?: FocusEventHandler<Target>;
-		onfocusoutCapture?: FocusEventHandler<Target>;
-		onBlur?: FocusEventHandler<Target>;
-		onBlurCapture?: FocusEventHandler<Target>;
+		onFocus?: FocusEventHandler<Target> | undefined;
+		onFocusCapture?: FocusEventHandler<Target> | undefined;
+		onfocusin?: FocusEventHandler<Target> | undefined;
+		onfocusinCapture?: FocusEventHandler<Target> | undefined;
+		onfocusout?: FocusEventHandler<Target> | undefined;
+		onfocusoutCapture?: FocusEventHandler<Target> | undefined;
+		onBlur?: FocusEventHandler<Target> | undefined;
+		onBlurCapture?: FocusEventHandler<Target> | undefined;
 
 		// Form Events
-		onChange?: GenericEventHandler<Target>;
-		onChangeCapture?: GenericEventHandler<Target>;
-		onInput?: GenericEventHandler<Target>;
-		onInputCapture?: GenericEventHandler<Target>;
-		onBeforeInput?: GenericEventHandler<Target>;
-		onBeforeInputCapture?: GenericEventHandler<Target>;
-		onSearch?: GenericEventHandler<Target>;
-		onSearchCapture?: GenericEventHandler<Target>;
-		onSubmit?: GenericEventHandler<Target>;
-		onSubmitCapture?: GenericEventHandler<Target>;
-		onInvalid?: GenericEventHandler<Target>;
-		onInvalidCapture?: GenericEventHandler<Target>;
-		onReset?: GenericEventHandler<Target>;
-		onResetCapture?: GenericEventHandler<Target>;
-		onFormData?: GenericEventHandler<Target>;
-		onFormDataCapture?: GenericEventHandler<Target>;
+		onChange?: GenericEventHandler<Target> | undefined;
+		onChangeCapture?: GenericEventHandler<Target> | undefined;
+		onInput?: GenericEventHandler<Target> | undefined;
+		onInputCapture?: GenericEventHandler<Target> | undefined;
+		onBeforeInput?: GenericEventHandler<Target> | undefined;
+		onBeforeInputCapture?: GenericEventHandler<Target> | undefined;
+		onSearch?: GenericEventHandler<Target> | undefined;
+		onSearchCapture?: GenericEventHandler<Target> | undefined;
+		onSubmit?: GenericEventHandler<Target> | undefined;
+		onSubmitCapture?: GenericEventHandler<Target> | undefined;
+		onInvalid?: GenericEventHandler<Target> | undefined;
+		onInvalidCapture?: GenericEventHandler<Target> | undefined;
+		onReset?: GenericEventHandler<Target> | undefined;
+		onResetCapture?: GenericEventHandler<Target> | undefined;
+		onFormData?: GenericEventHandler<Target> | undefined;
+		onFormDataCapture?: GenericEventHandler<Target> | undefined;
 
 		// Keyboard Events
-		onKeyDown?: KeyboardEventHandler<Target>;
-		onKeyDownCapture?: KeyboardEventHandler<Target>;
-		onKeyPress?: KeyboardEventHandler<Target>;
-		onKeyPressCapture?: KeyboardEventHandler<Target>;
-		onKeyUp?: KeyboardEventHandler<Target>;
-		onKeyUpCapture?: KeyboardEventHandler<Target>;
+		onKeyDown?: KeyboardEventHandler<Target> | undefined;
+		onKeyDownCapture?: KeyboardEventHandler<Target> | undefined;
+		onKeyPress?: KeyboardEventHandler<Target> | undefined;
+		onKeyPressCapture?: KeyboardEventHandler<Target> | undefined;
+		onKeyUp?: KeyboardEventHandler<Target> | undefined;
+		onKeyUpCapture?: KeyboardEventHandler<Target> | undefined;
 
 		// Media Events
-		onAbort?: GenericEventHandler<Target>;
-		onAbortCapture?: GenericEventHandler<Target>;
-		onCanPlay?: GenericEventHandler<Target>;
-		onCanPlayCapture?: GenericEventHandler<Target>;
-		onCanPlayThrough?: GenericEventHandler<Target>;
-		onCanPlayThroughCapture?: GenericEventHandler<Target>;
-		onDurationChange?: GenericEventHandler<Target>;
-		onDurationChangeCapture?: GenericEventHandler<Target>;
-		onEmptied?: GenericEventHandler<Target>;
-		onEmptiedCapture?: GenericEventHandler<Target>;
-		onEncrypted?: GenericEventHandler<Target>;
-		onEncryptedCapture?: GenericEventHandler<Target>;
-		onEnded?: GenericEventHandler<Target>;
-		onEndedCapture?: GenericEventHandler<Target>;
-		onLoadedData?: GenericEventHandler<Target>;
-		onLoadedDataCapture?: GenericEventHandler<Target>;
-		onLoadedMetadata?: GenericEventHandler<Target>;
-		onLoadedMetadataCapture?: GenericEventHandler<Target>;
-		onLoadStart?: GenericEventHandler<Target>;
-		onLoadStartCapture?: GenericEventHandler<Target>;
-		onPause?: GenericEventHandler<Target>;
-		onPauseCapture?: GenericEventHandler<Target>;
-		onPlay?: GenericEventHandler<Target>;
-		onPlayCapture?: GenericEventHandler<Target>;
-		onPlaying?: GenericEventHandler<Target>;
-		onPlayingCapture?: GenericEventHandler<Target>;
-		onProgress?: GenericEventHandler<Target>;
-		onProgressCapture?: GenericEventHandler<Target>;
-		onRateChange?: GenericEventHandler<Target>;
-		onRateChangeCapture?: GenericEventHandler<Target>;
-		onSeeked?: GenericEventHandler<Target>;
-		onSeekedCapture?: GenericEventHandler<Target>;
-		onSeeking?: GenericEventHandler<Target>;
-		onSeekingCapture?: GenericEventHandler<Target>;
-		onStalled?: GenericEventHandler<Target>;
-		onStalledCapture?: GenericEventHandler<Target>;
-		onSuspend?: GenericEventHandler<Target>;
-		onSuspendCapture?: GenericEventHandler<Target>;
-		onTimeUpdate?: GenericEventHandler<Target>;
-		onTimeUpdateCapture?: GenericEventHandler<Target>;
-		onVolumeChange?: GenericEventHandler<Target>;
-		onVolumeChangeCapture?: GenericEventHandler<Target>;
-		onWaiting?: GenericEventHandler<Target>;
-		onWaitingCapture?: GenericEventHandler<Target>;
+		onAbort?: GenericEventHandler<Target> | undefined;
+		onAbortCapture?: GenericEventHandler<Target> | undefined;
+		onCanPlay?: GenericEventHandler<Target> | undefined;
+		onCanPlayCapture?: GenericEventHandler<Target> | undefined;
+		onCanPlayThrough?: GenericEventHandler<Target> | undefined;
+		onCanPlayThroughCapture?: GenericEventHandler<Target> | undefined;
+		onDurationChange?: GenericEventHandler<Target> | undefined;
+		onDurationChangeCapture?: GenericEventHandler<Target> | undefined;
+		onEmptied?: GenericEventHandler<Target> | undefined;
+		onEmptiedCapture?: GenericEventHandler<Target> | undefined;
+		onEncrypted?: GenericEventHandler<Target> | undefined;
+		onEncryptedCapture?: GenericEventHandler<Target> | undefined;
+		onEnded?: GenericEventHandler<Target> | undefined;
+		onEndedCapture?: GenericEventHandler<Target> | undefined;
+		onLoadedData?: GenericEventHandler<Target> | undefined;
+		onLoadedDataCapture?: GenericEventHandler<Target> | undefined;
+		onLoadedMetadata?: GenericEventHandler<Target> | undefined;
+		onLoadedMetadataCapture?: GenericEventHandler<Target> | undefined;
+		onLoadStart?: GenericEventHandler<Target> | undefined;
+		onLoadStartCapture?: GenericEventHandler<Target> | undefined;
+		onPause?: GenericEventHandler<Target> | undefined;
+		onPauseCapture?: GenericEventHandler<Target> | undefined;
+		onPlay?: GenericEventHandler<Target> | undefined;
+		onPlayCapture?: GenericEventHandler<Target> | undefined;
+		onPlaying?: GenericEventHandler<Target> | undefined;
+		onPlayingCapture?: GenericEventHandler<Target> | undefined;
+		onProgress?: GenericEventHandler<Target> | undefined;
+		onProgressCapture?: GenericEventHandler<Target> | undefined;
+		onRateChange?: GenericEventHandler<Target> | undefined;
+		onRateChangeCapture?: GenericEventHandler<Target> | undefined;
+		onSeeked?: GenericEventHandler<Target> | undefined;
+		onSeekedCapture?: GenericEventHandler<Target> | undefined;
+		onSeeking?: GenericEventHandler<Target> | undefined;
+		onSeekingCapture?: GenericEventHandler<Target> | undefined;
+		onStalled?: GenericEventHandler<Target> | undefined;
+		onStalledCapture?: GenericEventHandler<Target> | undefined;
+		onSuspend?: GenericEventHandler<Target> | undefined;
+		onSuspendCapture?: GenericEventHandler<Target> | undefined;
+		onTimeUpdate?: GenericEventHandler<Target> | undefined;
+		onTimeUpdateCapture?: GenericEventHandler<Target> | undefined;
+		onVolumeChange?: GenericEventHandler<Target> | undefined;
+		onVolumeChangeCapture?: GenericEventHandler<Target> | undefined;
+		onWaiting?: GenericEventHandler<Target> | undefined;
+		onWaitingCapture?: GenericEventHandler<Target> | undefined;
 
 		// MouseEvents
-		onClick?: MouseEventHandler<Target>;
-		onClickCapture?: MouseEventHandler<Target>;
-		onContextMenu?: MouseEventHandler<Target>;
-		onContextMenuCapture?: MouseEventHandler<Target>;
-		onDblClick?: MouseEventHandler<Target>;
-		onDblClickCapture?: MouseEventHandler<Target>;
-		onDrag?: DragEventHandler<Target>;
-		onDragCapture?: DragEventHandler<Target>;
-		onDragEnd?: DragEventHandler<Target>;
-		onDragEndCapture?: DragEventHandler<Target>;
-		onDragEnter?: DragEventHandler<Target>;
-		onDragEnterCapture?: DragEventHandler<Target>;
-		onDragExit?: DragEventHandler<Target>;
-		onDragExitCapture?: DragEventHandler<Target>;
-		onDragLeave?: DragEventHandler<Target>;
-		onDragLeaveCapture?: DragEventHandler<Target>;
-		onDragOver?: DragEventHandler<Target>;
-		onDragOverCapture?: DragEventHandler<Target>;
-		onDragStart?: DragEventHandler<Target>;
-		onDragStartCapture?: DragEventHandler<Target>;
-		onDrop?: DragEventHandler<Target>;
-		onDropCapture?: DragEventHandler<Target>;
-		onMouseDown?: MouseEventHandler<Target>;
-		onMouseDownCapture?: MouseEventHandler<Target>;
-		onMouseEnter?: MouseEventHandler<Target>;
-		onMouseEnterCapture?: MouseEventHandler<Target>;
-		onMouseLeave?: MouseEventHandler<Target>;
-		onMouseLeaveCapture?: MouseEventHandler<Target>;
-		onMouseMove?: MouseEventHandler<Target>;
-		onMouseMoveCapture?: MouseEventHandler<Target>;
-		onMouseOut?: MouseEventHandler<Target>;
-		onMouseOutCapture?: MouseEventHandler<Target>;
-		onMouseOver?: MouseEventHandler<Target>;
-		onMouseOverCapture?: MouseEventHandler<Target>;
-		onMouseUp?: MouseEventHandler<Target>;
-		onMouseUpCapture?: MouseEventHandler<Target>;
+		onClick?: MouseEventHandler<Target> | undefined;
+		onClickCapture?: MouseEventHandler<Target> | undefined;
+		onContextMenu?: MouseEventHandler<Target> | undefined;
+		onContextMenuCapture?: MouseEventHandler<Target> | undefined;
+		onDblClick?: MouseEventHandler<Target> | undefined;
+		onDblClickCapture?: MouseEventHandler<Target> | undefined;
+		onDrag?: DragEventHandler<Target> | undefined;
+		onDragCapture?: DragEventHandler<Target> | undefined;
+		onDragEnd?: DragEventHandler<Target> | undefined;
+		onDragEndCapture?: DragEventHandler<Target> | undefined;
+		onDragEnter?: DragEventHandler<Target> | undefined;
+		onDragEnterCapture?: DragEventHandler<Target> | undefined;
+		onDragExit?: DragEventHandler<Target> | undefined;
+		onDragExitCapture?: DragEventHandler<Target> | undefined;
+		onDragLeave?: DragEventHandler<Target> | undefined;
+		onDragLeaveCapture?: DragEventHandler<Target> | undefined;
+		onDragOver?: DragEventHandler<Target> | undefined;
+		onDragOverCapture?: DragEventHandler<Target> | undefined;
+		onDragStart?: DragEventHandler<Target> | undefined;
+		onDragStartCapture?: DragEventHandler<Target> | undefined;
+		onDrop?: DragEventHandler<Target> | undefined;
+		onDropCapture?: DragEventHandler<Target> | undefined;
+		onMouseDown?: MouseEventHandler<Target> | undefined;
+		onMouseDownCapture?: MouseEventHandler<Target> | undefined;
+		onMouseEnter?: MouseEventHandler<Target> | undefined;
+		onMouseEnterCapture?: MouseEventHandler<Target> | undefined;
+		onMouseLeave?: MouseEventHandler<Target> | undefined;
+		onMouseLeaveCapture?: MouseEventHandler<Target> | undefined;
+		onMouseMove?: MouseEventHandler<Target> | undefined;
+		onMouseMoveCapture?: MouseEventHandler<Target> | undefined;
+		onMouseOut?: MouseEventHandler<Target> | undefined;
+		onMouseOutCapture?: MouseEventHandler<Target> | undefined;
+		onMouseOver?: MouseEventHandler<Target> | undefined;
+		onMouseOverCapture?: MouseEventHandler<Target> | undefined;
+		onMouseUp?: MouseEventHandler<Target> | undefined;
+		onMouseUpCapture?: MouseEventHandler<Target> | undefined;
 
 		// Selection Events
-		onSelect?: GenericEventHandler<Target>;
-		onSelectCapture?: GenericEventHandler<Target>;
+		onSelect?: GenericEventHandler<Target> | undefined;
+		onSelectCapture?: GenericEventHandler<Target> | undefined;
 
 		// Touch Events
-		onTouchCancel?: TouchEventHandler<Target>;
-		onTouchCancelCapture?: TouchEventHandler<Target>;
-		onTouchEnd?: TouchEventHandler<Target>;
-		onTouchEndCapture?: TouchEventHandler<Target>;
-		onTouchMove?: TouchEventHandler<Target>;
-		onTouchMoveCapture?: TouchEventHandler<Target>;
-		onTouchStart?: TouchEventHandler<Target>;
-		onTouchStartCapture?: TouchEventHandler<Target>;
+		onTouchCancel?: TouchEventHandler<Target> | undefined;
+		onTouchCancelCapture?: TouchEventHandler<Target> | undefined;
+		onTouchEnd?: TouchEventHandler<Target> | undefined;
+		onTouchEndCapture?: TouchEventHandler<Target> | undefined;
+		onTouchMove?: TouchEventHandler<Target> | undefined;
+		onTouchMoveCapture?: TouchEventHandler<Target> | undefined;
+		onTouchStart?: TouchEventHandler<Target> | undefined;
+		onTouchStartCapture?: TouchEventHandler<Target> | undefined;
 
 		// Pointer Events
-		onPointerOver?: PointerEventHandler<Target>;
-		onPointerOverCapture?: PointerEventHandler<Target>;
-		onPointerEnter?: PointerEventHandler<Target>;
-		onPointerEnterCapture?: PointerEventHandler<Target>;
-		onPointerDown?: PointerEventHandler<Target>;
-		onPointerDownCapture?: PointerEventHandler<Target>;
-		onPointerMove?: PointerEventHandler<Target>;
-		onPointerMoveCapture?: PointerEventHandler<Target>;
-		onPointerUp?: PointerEventHandler<Target>;
-		onPointerUpCapture?: PointerEventHandler<Target>;
-		onPointerCancel?: PointerEventHandler<Target>;
-		onPointerCancelCapture?: PointerEventHandler<Target>;
-		onPointerOut?: PointerEventHandler<Target>;
-		onPointerOutCapture?: PointerEventHandler<Target>;
-		onPointerLeave?: PointerEventHandler<Target>;
-		onPointerLeaveCapture?: PointerEventHandler<Target>;
-		onGotPointerCapture?: PointerEventHandler<Target>;
-		onGotPointerCaptureCapture?: PointerEventHandler<Target>;
-		onLostPointerCapture?: PointerEventHandler<Target>;
-		onLostPointerCaptureCapture?: PointerEventHandler<Target>;
+		onPointerOver?: PointerEventHandler<Target> | undefined;
+		onPointerOverCapture?: PointerEventHandler<Target> | undefined;
+		onPointerEnter?: PointerEventHandler<Target> | undefined;
+		onPointerEnterCapture?: PointerEventHandler<Target> | undefined;
+		onPointerDown?: PointerEventHandler<Target> | undefined;
+		onPointerDownCapture?: PointerEventHandler<Target> | undefined;
+		onPointerMove?: PointerEventHandler<Target> | undefined;
+		onPointerMoveCapture?: PointerEventHandler<Target> | undefined;
+		onPointerUp?: PointerEventHandler<Target> | undefined;
+		onPointerUpCapture?: PointerEventHandler<Target> | undefined;
+		onPointerCancel?: PointerEventHandler<Target> | undefined;
+		onPointerCancelCapture?: PointerEventHandler<Target> | undefined;
+		onPointerOut?: PointerEventHandler<Target> | undefined;
+		onPointerOutCapture?: PointerEventHandler<Target> | undefined;
+		onPointerLeave?: PointerEventHandler<Target> | undefined;
+		onPointerLeaveCapture?: PointerEventHandler<Target> | undefined;
+		onGotPointerCapture?: PointerEventHandler<Target> | undefined;
+		onGotPointerCaptureCapture?: PointerEventHandler<Target> | undefined;
+		onLostPointerCapture?: PointerEventHandler<Target> | undefined;
+		onLostPointerCaptureCapture?: PointerEventHandler<Target> | undefined;
 
 		// UI Events
-		onScroll?: UIEventHandler<Target>;
-		onScrollCapture?: UIEventHandler<Target>;
+		onScroll?: UIEventHandler<Target> | undefined;
+		onScrollCapture?: UIEventHandler<Target> | undefined;
 
 		// Wheel Events
-		onWheel?: WheelEventHandler<Target>;
-		onWheelCapture?: WheelEventHandler<Target>;
+		onWheel?: WheelEventHandler<Target> | undefined;
+		onWheelCapture?: WheelEventHandler<Target> | undefined;
 
 		// Animation Events
-		onAnimationStart?: AnimationEventHandler<Target>;
-		onAnimationStartCapture?: AnimationEventHandler<Target>;
-		onAnimationEnd?: AnimationEventHandler<Target>;
-		onAnimationEndCapture?: AnimationEventHandler<Target>;
-		onAnimationIteration?: AnimationEventHandler<Target>;
-		onAnimationIterationCapture?: AnimationEventHandler<Target>;
+		onAnimationStart?: AnimationEventHandler<Target> | undefined;
+		onAnimationStartCapture?: AnimationEventHandler<Target> | undefined;
+		onAnimationEnd?: AnimationEventHandler<Target> | undefined;
+		onAnimationEndCapture?: AnimationEventHandler<Target> | undefined;
+		onAnimationIteration?: AnimationEventHandler<Target> | undefined;
+		onAnimationIterationCapture?: AnimationEventHandler<Target> | undefined;
 
 		// Transition Events
+		onTransitionCancel?: TransitionEventHandler<Target>;
+		onTransitionCancelCapture?: TransitionEventHandler<Target>;
 		onTransitionEnd?: TransitionEventHandler<Target>;
 		onTransitionEndCapture?: TransitionEventHandler<Target>;
+		onTransitionRun?: TransitionEventHandler<Target>;
+		onTransitionRunCapture?: TransitionEventHandler<Target>;
+		onTransitionStart?: TransitionEventHandler<Target>;
+		onTransitionStartCapture?: TransitionEventHandler<Target>;
+
+		// PictureInPicture Events
+		onEnterPictureInPicture?: PictureInPictureEventHandler<Target>;
+		onEnterPictureInPictureCapture?: PictureInPictureEventHandler<Target>;
+		onLeavePictureInPicture?: PictureInPictureEventHandler<Target>;
+		onLeavePictureInPictureCapture?: PictureInPictureEventHandler<Target>;
+		onResize?: PictureInPictureEventHandler<Target>;
+		onResizeCapture?: PictureInPictureEventHandler<Target>;
 	}
+
+	// All the WAI-ARIA 1.1 attributes from https://www.w3.org/TR/wai-aria-1.1/
+	export interface AriaAttributes {
+		/** Identifies the currently active element when DOM focus is on a composite widget, textbox, group, or application. */
+		'aria-activedescendant'?: Signalish<string | undefined>;
+		/** Indicates whether assistive technologies will present all, or only parts of, the changed region based on the change notifications defined by the aria-relevant attribute. */
+		'aria-atomic'?: Signalish<Booleanish | undefined>;
+		/**
+		 * Indicates whether inputting text could trigger display of one or more predictions of the user's intended value for an input and specifies how predictions would be
+		 * presented if they are made.
+		 */
+		'aria-autocomplete'?: Signalish<
+			'none' | 'inline' | 'list' | 'both' | undefined
+		>;
+		/**
+		 * Defines a string value that labels the current element, which is intended to be converted into Braille.
+		 * @see aria-label.
+		 */
+		'aria-braillelabel'?: Signalish<string | undefined>;
+		/**
+		 * Defines a human-readable, author-localized abbreviated description for the role of an element, which is intended to be converted into Braille.
+		 * @see aria-roledescription.
+		 */
+		'aria-brailleroledescription'?: Signalish<string | undefined>;
+		/** Indicates an element is being modified and that assistive technologies MAY want to wait until the modifications are complete before exposing them to the user. */
+		'aria-busy'?: Signalish<Booleanish | undefined>;
+		/**
+		 * Indicates the current "checked" state of checkboxes, radio buttons, and other widgets.
+		 * @see aria-pressed
+		 * @see aria-selected.
+		 */
+		'aria-checked'?: Signalish<Booleanish | 'mixed' | undefined>;
+		/**
+		 * Defines the total number of columns in a table, grid, or treegrid.
+		 * @see aria-colindex.
+		 */
+		'aria-colcount'?: Signalish<number | undefined>;
+		/**
+		 * Defines an element's column index or position with respect to the total number of columns within a table, grid, or treegrid.
+		 * @see aria-colcount
+		 * @see aria-colspan.
+		 */
+		'aria-colindex'?: Signalish<number | undefined>;
+		/**
+		 * Defines a human readable text alternative of aria-colindex.
+		 * @see aria-rowindextext.
+		 */
+		'aria-colindextext'?: Signalish<string | undefined>;
+		/**
+		 * Defines the number of columns spanned by a cell or gridcell within a table, grid, or treegrid.
+		 * @see aria-colindex
+		 * @see aria-rowspan.
+		 */
+		'aria-colspan'?: Signalish<number | undefined>;
+		/**
+		 * Identifies the element (or elements) whose contents or presence are controlled by the current element.
+		 * @see aria-owns.
+		 */
+		'aria-controls'?: Signalish<string | undefined>;
+		/** Indicates the element that represents the current item within a container or set of related elements. */
+		'aria-current'?: Signalish<
+			Booleanish | 'page' | 'step' | 'location' | 'date' | 'time' | undefined
+		>;
+		/**
+		 * Identifies the element (or elements) that describes the object.
+		 * @see aria-labelledby
+		 */
+		'aria-describedby'?: Signalish<string | undefined>;
+		/**
+		 * Defines a string value that describes or annotates the current element.
+		 * @see related aria-describedby.
+		 */
+		'aria-description'?: Signalish<string | undefined>;
+		/**
+		 * Identifies the element that provides a detailed, extended description for the object.
+		 * @see aria-describedby.
+		 */
+		'aria-details'?: Signalish<string | undefined>;
+		/**
+		 * Indicates that the element is perceivable but disabled, so it is not editable or otherwise operable.
+		 * @see aria-hidden
+		 * @see aria-readonly.
+		 */
+		'aria-disabled'?: Signalish<Booleanish | undefined>;
+		/**
+		 * Indicates what functions can be performed when a dragged object is released on the drop target.
+		 * @deprecated in ARIA 1.1
+		 */
+		'aria-dropeffect'?: Signalish<
+			'none' | 'copy' | 'execute' | 'link' | 'move' | 'popup' | undefined
+		>;
+		/**
+		 * Identifies the element that provides an error message for the object.
+		 * @see aria-invalid
+		 * @see aria-describedby.
+		 */
+		'aria-errormessage'?: Signalish<string | undefined>;
+		/** Indicates whether the element, or another grouping element it controls, is currently expanded or collapsed. */
+		'aria-expanded'?: Signalish<Booleanish | undefined>;
+		/**
+		 * Identifies the next element (or elements) in an alternate reading order of content which, at the user's discretion,
+		 * allows assistive technology to override the general default of reading in document source order.
+		 */
+		'aria-flowto'?: Signalish<string | undefined>;
+		/**
+		 * Indicates an element's "grabbed" state in a drag-and-drop operation.
+		 * @deprecated in ARIA 1.1
+		 */
+		'aria-grabbed'?: Signalish<Booleanish | undefined>;
+		/** Indicates the availability and type of interactive popup element, such as menu or dialog, that can be triggered by an element. */
+		'aria-haspopup'?: Signalish<
+			Booleanish | 'menu' | 'listbox' | 'tree' | 'grid' | 'dialog' | undefined
+		>;
+		/**
+		 * Indicates whether the element is exposed to an accessibility API.
+		 * @see aria-disabled.
+		 */
+		'aria-hidden'?: Signalish<Booleanish | undefined>;
+		/**
+		 * Indicates the entered value does not conform to the format expected by the application.
+		 * @see aria-errormessage.
+		 */
+		'aria-invalid'?: Signalish<Booleanish | 'grammar' | 'spelling' | undefined>;
+		/** Indicates keyboard shortcuts that an author has implemented to activate or give focus to an element. */
+		'aria-keyshortcuts'?: Signalish<string | undefined>;
+		/**
+		 * Defines a string value that labels the current element.
+		 * @see aria-labelledby.
+		 */
+		'aria-label'?: Signalish<string | undefined>;
+		/**
+		 * Identifies the element (or elements) that labels the current element.
+		 * @see aria-describedby.
+		 */
+		'aria-labelledby'?: Signalish<string | undefined>;
+		/** Defines the hierarchical level of an element within a structure. */
+		'aria-level'?: Signalish<number | undefined>;
+		/** Indicates that an element will be updated, and describes the types of updates the user agents, assistive technologies, and user can expect from the live region. */
+		'aria-live'?: Signalish<'off' | 'assertive' | 'polite' | undefined>;
+		/** Indicates whether an element is modal when displayed. */
+		'aria-modal'?: Signalish<Booleanish | undefined>;
+		/** Indicates whether a text box accepts multiple lines of input or only a single line. */
+		'aria-multiline'?: Signalish<Booleanish | undefined>;
+		/** Indicates that the user may select more than one item from the current selectable descendants. */
+		'aria-multiselectable'?: Signalish<Booleanish | undefined>;
+		/** Indicates whether the element's orientation is horizontal, vertical, or unknown/ambiguous. */
+		'aria-orientation'?: Signalish<'horizontal' | 'vertical' | undefined>;
+		/**
+		 * Identifies an element (or elements) in order to define a visual, functional, or contextual parent/child relationship
+		 * between DOM elements where the DOM hierarchy cannot be used to represent the relationship.
+		 * @see aria-controls.
+		 */
+		'aria-owns'?: Signalish<string | undefined>;
+		/**
+		 * Defines a short hint (a word or short phrase) intended to aid the user with data entry when the control has no value.
+		 * A hint could be a sample value or a brief description of the expected format.
+		 */
+		'aria-placeholder'?: Signalish<string | undefined>;
+		/**
+		 * Defines an element's number or position in the current set of listitems or treeitems. Not required if all elements in the set are present in the DOM.
+		 * @see aria-setsize.
+		 */
+		'aria-posinset'?: Signalish<number | undefined>;
+		/**
+		 * Indicates the current "pressed" state of toggle buttons.
+		 * @see aria-checked
+		 * @see aria-selected.
+		 */
+		'aria-pressed'?: Signalish<Booleanish | 'mixed' | undefined>;
+		/**
+		 * Indicates that the element is not editable, but is otherwise operable.
+		 * @see aria-disabled.
+		 */
+		'aria-readonly'?: Signalish<Booleanish | undefined>;
+		/**
+		 * Indicates what notifications the user agent will trigger when the accessibility tree within a live region is modified.
+		 * @see aria-atomic.
+		 */
+		'aria-relevant'?: Signalish<
+			| 'additions'
+			| 'additions removals'
+			| 'additions text'
+			| 'all'
+			| 'removals'
+			| 'removals additions'
+			| 'removals text'
+			| 'text'
+			| 'text additions'
+			| 'text removals'
+			| undefined
+		>;
+		/** Indicates that user input is required on the element before a form may be submitted. */
+		'aria-required'?: Signalish<Booleanish | undefined>;
+		/** Defines a human-readable, author-localized description for the role of an element. */
+		'aria-roledescription'?: Signalish<string | undefined>;
+		/**
+		 * Defines the total number of rows in a table, grid, or treegrid.
+		 * @see aria-rowindex.
+		 */
+		'aria-rowcount'?: Signalish<number | undefined>;
+		/**
+		 * Defines an element's row index or position with respect to the total number of rows within a table, grid, or treegrid.
+		 * @see aria-rowcount
+		 * @see aria-rowspan.
+		 */
+		'aria-rowindex'?: Signalish<number | undefined>;
+		/**
+		 * Defines a human readable text alternative of aria-rowindex.
+		 * @see aria-colindextext.
+		 */
+		'aria-rowindextext'?: Signalish<string | undefined>;
+		/**
+		 * Defines the number of rows spanned by a cell or gridcell within a table, grid, or treegrid.
+		 * @see aria-rowindex
+		 * @see aria-colspan.
+		 */
+		'aria-rowspan'?: Signalish<number | undefined>;
+		/**
+		 * Indicates the current "selected" state of various widgets.
+		 * @see aria-checked
+		 * @see aria-pressed.
+		 */
+		'aria-selected'?: Signalish<Booleanish | undefined>;
+		/**
+		 * Defines the number of items in the current set of listitems or treeitems. Not required if all elements in the set are present in the DOM.
+		 * @see aria-posinset.
+		 */
+		'aria-setsize'?: Signalish<number | undefined>;
+		/** Indicates if items in a table or grid are sorted in ascending or descending order. */
+		'aria-sort'?: Signalish<
+			'none' | 'ascending' | 'descending' | 'other' | undefined
+		>;
+		/** Defines the maximum allowed value for a range widget. */
+		'aria-valuemax'?: Signalish<number | undefined>;
+		/** Defines the minimum allowed value for a range widget. */
+		'aria-valuemin'?: Signalish<number | undefined>;
+		/**
+		 * Defines the current value for a range widget.
+		 * @see aria-valuetext.
+		 */
+		'aria-valuenow'?: Signalish<number | undefined>;
+		/** Defines the human readable text alternative of aria-valuenow for a range widget. */
+		'aria-valuetext'?: Signalish<string | undefined>;
+	}
+
+	// All the WAI-ARIA 1.2 role attribute values from https://www.w3.org/TR/wai-aria-1.2/#role_definitions
+	type AriaRole =
+		| 'alert'
+		| 'alertdialog'
+		| 'application'
+		| 'article'
+		| 'banner'
+		| 'blockquote'
+		| 'button'
+		| 'caption'
+		| 'cell'
+		| 'checkbox'
+		| 'code'
+		| 'columnheader'
+		| 'combobox'
+		| 'command'
+		| 'complementary'
+		| 'composite'
+		| 'contentinfo'
+		| 'definition'
+		| 'deletion'
+		| 'dialog'
+		| 'directory'
+		| 'document'
+		| 'emphasis'
+		| 'feed'
+		| 'figure'
+		| 'form'
+		| 'generic'
+		| 'grid'
+		| 'gridcell'
+		| 'group'
+		| 'heading'
+		| 'img'
+		| 'input'
+		| 'insertion'
+		| 'landmark'
+		| 'link'
+		| 'list'
+		| 'listbox'
+		| 'listitem'
+		| 'log'
+		| 'main'
+		| 'marquee'
+		| 'math'
+		| 'meter'
+		| 'menu'
+		| 'menubar'
+		| 'menuitem'
+		| 'menuitemcheckbox'
+		| 'menuitemradio'
+		| 'navigation'
+		| 'none'
+		| 'note'
+		| 'option'
+		| 'paragraph'
+		| 'presentation'
+		| 'progressbar'
+		| 'radio'
+		| 'radiogroup'
+		| 'range'
+		| 'region'
+		| 'roletype'
+		| 'row'
+		| 'rowgroup'
+		| 'rowheader'
+		| 'scrollbar'
+		| 'search'
+		| 'searchbox'
+		| 'section'
+		| 'sectionhead'
+		| 'select'
+		| 'separator'
+		| 'slider'
+		| 'spinbutton'
+		| 'status'
+		| 'strong'
+		| 'structure'
+		| 'subscript'
+		| 'superscript'
+		| 'switch'
+		| 'tab'
+		| 'table'
+		| 'tablist'
+		| 'tabpanel'
+		| 'term'
+		| 'textbox'
+		| 'time'
+		| 'timer'
+		| 'toolbar'
+		| 'tooltip'
+		| 'tree'
+		| 'treegrid'
+		| 'treeitem'
+		| 'widget'
+		| 'window'
+		| 'none presentation';
 
 	export interface HTMLAttributes<RefType extends EventTarget = EventTarget>
 		extends ClassAttributes<RefType>,
-			DOMAttributes<RefType> {
+			DOMAttributes<RefType>,
+			AriaAttributes {
 		// Standard HTML Attributes
-		accept?: string | SignalLike<string>;
-		acceptCharset?: string | SignalLike<string>;
-		accessKey?: string | SignalLike<string>;
-		action?: string | SignalLike<string>;
-		allow?: string | SignalLike<string>;
-		allowFullScreen?: boolean | SignalLike<boolean>;
-		allowTransparency?: boolean | SignalLike<boolean>;
-		alt?: string | SignalLike<string>;
-		as?: string | SignalLike<string>;
-		async?: boolean | SignalLike<boolean>;
-		autocomplete?: string | SignalLike<string>;
-		autoComplete?: string | SignalLike<string>;
-		autocorrect?: string | SignalLike<string>;
-		autoCorrect?: string | SignalLike<string>;
-		autofocus?: boolean | SignalLike<boolean>;
-		autoFocus?: boolean | SignalLike<boolean>;
-		autoPlay?: boolean | SignalLike<boolean>;
-		capture?: boolean | string | SignalLike<string>;
-		cellPadding?: number | string | SignalLike<string>;
-		cellSpacing?: number | string | SignalLike<string>;
-		charSet?: string | SignalLike<string>;
-		challenge?: string | SignalLike<string>;
-		checked?: boolean | SignalLike<boolean>;
-		cite?: string | SignalLike<string>;
+		accept?: string | undefined | SignalLike<string | undefined>;
+		acceptCharset?: string | undefined | SignalLike<string | undefined>;
+		accessKey?: string | undefined | SignalLike<string | undefined>;
+		action?: string | undefined | SignalLike<string | undefined>;
+		allow?: string | undefined | SignalLike<string | undefined>;
+		allowFullScreen?: boolean | undefined | SignalLike<boolean | undefined>;
+		allowTransparency?: boolean | undefined | SignalLike<boolean | undefined>;
+		alt?: string | undefined | SignalLike<string | undefined>;
+		as?: string | undefined | SignalLike<string | undefined>;
+		async?: boolean | undefined | SignalLike<boolean | undefined>;
+		autocomplete?: string | undefined | SignalLike<string | undefined>;
+		autoComplete?: string | undefined | SignalLike<string | undefined>;
+		autocorrect?: string | undefined | SignalLike<string | undefined>;
+		autoCorrect?: string | undefined | SignalLike<string | undefined>;
+		autofocus?: boolean | undefined | SignalLike<boolean | undefined>;
+		autoFocus?: boolean | undefined | SignalLike<boolean | undefined>;
+		autoPlay?: boolean | undefined | SignalLike<boolean | undefined>;
+		capture?: boolean | string | undefined | SignalLike<string | undefined>;
+		cellPadding?: number | string | undefined | SignalLike<string | undefined>;
+		cellSpacing?: number | string | undefined | SignalLike<string | undefined>;
+		charSet?: string | undefined | SignalLike<string | undefined>;
+		challenge?: string | undefined | SignalLike<string | undefined>;
+		checked?: boolean | undefined | SignalLike<boolean | undefined>;
+		cite?: string | undefined | SignalLike<string | undefined>;
 		class?: string | undefined | SignalLike<string | undefined>;
 		className?: string | undefined | SignalLike<string | undefined>;
-		cols?: number | SignalLike<number>;
-		colSpan?: number | SignalLike<number>;
-		content?: string | SignalLike<string>;
-		contentEditable?: boolean | SignalLike<boolean>;
-		contextMenu?: string | SignalLike<string>;
-		controls?: boolean | SignalLike<boolean>;
-		controlsList?: string | SignalLike<string>;
-		coords?: string | SignalLike<string>;
-		crossOrigin?: string | SignalLike<string>;
-		data?: string | SignalLike<string>;
-		dateTime?: string | SignalLike<string>;
-		default?: boolean | SignalLike<boolean>;
-		defaultChecked?: boolean | SignalLike<boolean>;
-		defaultValue?: string | SignalLike<string>;
-		defer?: boolean | SignalLike<boolean>;
-		dir?: 'auto' | 'rtl' | 'ltr' | SignalLike<'auto' | 'rtl' | 'ltr'>;
-		disabled?: boolean | SignalLike<boolean>;
-		disableRemotePlayback?: boolean | SignalLike<boolean>;
-		download?: any;
+		cols?: number | undefined | SignalLike<number | undefined>;
+		colSpan?: number | undefined | SignalLike<number | undefined>;
+		content?: string | undefined | SignalLike<string | undefined>;
+		contentEditable?: boolean | undefined | SignalLike<boolean | undefined>;
+		contextMenu?: string | undefined | SignalLike<string | undefined>;
+		controls?: boolean | undefined | SignalLike<boolean | undefined>;
+		controlsList?: string | undefined | SignalLike<string | undefined>;
+		coords?: string | undefined | SignalLike<string | undefined>;
+		crossOrigin?: string | undefined | SignalLike<string | undefined>;
+		data?: string | undefined | SignalLike<string | undefined>;
+		dateTime?: string | undefined | SignalLike<string | undefined>;
+		default?: boolean | undefined | SignalLike<boolean | undefined>;
+		defaultChecked?: boolean | undefined | SignalLike<boolean | undefined>;
+		defaultValue?: string | undefined | SignalLike<string | undefined>;
+		defer?: boolean | undefined | SignalLike<boolean | undefined>;
+		dir?:
+			| 'auto'
+			| 'rtl'
+			| 'ltr'
+			| undefined
+			| SignalLike<'auto' | 'rtl' | 'ltr' | undefined>;
+		disabled?: boolean | undefined | SignalLike<boolean | undefined>;
+		disableRemotePlayback?:
+			| boolean
+			| undefined
+			| SignalLike<boolean | undefined>;
+		download?: any | undefined;
 		decoding?:
 			| 'sync'
 			| 'async'
 			| 'auto'
-			| SignalLike<'sync' | 'async' | 'auto'>;
-		draggable?: boolean | SignalLike<boolean>;
-		encType?: string | SignalLike<string>;
+			| undefined
+			| SignalLike<'sync' | 'async' | 'auto' | undefined>;
+		draggable?: boolean | undefined | SignalLike<boolean | undefined>;
+		encType?: string | undefined | SignalLike<string | undefined>;
 		enterkeyhint?:
 			| 'enter'
 			| 'done'
@@ -732,67 +1759,94 @@ export namespace JSXInternal {
 			| 'previous'
 			| 'search'
 			| 'send'
+			| undefined
 			| SignalLike<
-					'enter' | 'done' | 'go' | 'next' | 'previous' | 'search' | 'send'
+					| 'enter'
+					| 'done'
+					| 'go'
+					| 'next'
+					| 'previous'
+					| 'search'
+					| 'send'
+					| undefined
 			  >;
-		form?: string | SignalLike<string>;
-		formAction?: string | SignalLike<string>;
-		formEncType?: string | SignalLike<string>;
-		formMethod?: string | SignalLike<string>;
-		formNoValidate?: boolean | SignalLike<boolean>;
-		formTarget?: string | SignalLike<string>;
-		frameBorder?: number | string | SignalLike<number | string>;
-		headers?: string | SignalLike<string>;
-		height?: number | string | SignalLike<number | string>;
-		hidden?: boolean | SignalLike<boolean>;
-		high?: number | SignalLike<number>;
-		href?: string | SignalLike<string>;
-		hrefLang?: string | SignalLike<string>;
-		for?: string | SignalLike<string>;
-		htmlFor?: string | SignalLike<string>;
-		httpEquiv?: string | SignalLike<string>;
-		icon?: string | SignalLike<string>;
-		id?: string | SignalLike<string>;
-		inputMode?: string | SignalLike<string>;
-		integrity?: string | SignalLike<string>;
-		is?: string | SignalLike<string>;
-		keyParams?: string | SignalLike<string>;
-		keyType?: string | SignalLike<string>;
-		kind?: string | SignalLike<string>;
-		label?: string | SignalLike<string>;
-		lang?: string | SignalLike<string>;
-		list?: string | SignalLike<string>;
-		loading?: 'eager' | 'lazy' | SignalLike<'eager' | 'lazy'>;
-		loop?: boolean | SignalLike<boolean>;
-		low?: number | SignalLike<number>;
-		manifest?: string | SignalLike<string>;
-		marginHeight?: number | SignalLike<number>;
-		marginWidth?: number | SignalLike<number>;
-		max?: number | string | SignalLike<string>;
-		maxLength?: number | SignalLike<number>;
-		media?: string | SignalLike<string>;
-		mediaGroup?: string | SignalLike<string>;
-		method?: string | SignalLike<string>;
-		min?: number | string | SignalLike<string>;
-		minLength?: number | SignalLike<number>;
-		multiple?: boolean | SignalLike<boolean>;
-		muted?: boolean | SignalLike<boolean>;
-		name?: string | SignalLike<string>;
-		nomodule?: boolean | SignalLike<boolean>;
-		nonce?: string | SignalLike<string>;
-		noValidate?: boolean | SignalLike<boolean>;
-		open?: boolean | SignalLike<boolean>;
-		optimum?: number | SignalLike<number>;
-		part?: string | SignalLike<string>;
-		pattern?: string | SignalLike<string>;
-		ping?: string | SignalLike<string>;
-		placeholder?: string | SignalLike<string>;
-		playsInline?: boolean | SignalLike<boolean>;
-		poster?: string | SignalLike<string>;
-		preload?: string | SignalLike<string>;
-		radioGroup?: string | SignalLike<string>;
-		readonly?: boolean | SignalLike<boolean>;
-		readOnly?: boolean | SignalLike<boolean>;
+		for?: string | undefined | SignalLike<string | undefined>;
+		form?: string | undefined | SignalLike<string | undefined>;
+		formAction?: string | undefined | SignalLike<string | undefined>;
+		formEncType?: string | undefined | SignalLike<string | undefined>;
+		formMethod?: string | undefined | SignalLike<string | undefined>;
+		formNoValidate?: boolean | undefined | SignalLike<boolean | undefined>;
+		formTarget?: string | undefined | SignalLike<string | undefined>;
+		frameBorder?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		headers?: string | undefined | SignalLike<string | undefined>;
+		height?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		hidden?:
+			| boolean
+			| 'hidden'
+			| 'until-found'
+			| undefined
+			| SignalLike<boolean | 'hidden' | 'until-found' | undefined>;
+		high?: number | undefined | SignalLike<number | undefined>;
+		href?: string | undefined | SignalLike<string | undefined>;
+		hrefLang?: string | undefined | SignalLike<string | undefined>;
+		htmlFor?: string | undefined | SignalLike<string | undefined>;
+		httpEquiv?: string | undefined | SignalLike<string | undefined>;
+		icon?: string | undefined | SignalLike<string | undefined>;
+		id?: string | undefined | SignalLike<string | undefined>;
+		indeterminate?: boolean | undefined | SignalLike<boolean | undefined>;
+		inert?: boolean | undefined | SignalLike<boolean | undefined>;
+		inputMode?: string | undefined | SignalLike<string | undefined>;
+		integrity?: string | undefined | SignalLike<string | undefined>;
+		is?: string | undefined | SignalLike<string | undefined>;
+		keyParams?: string | undefined | SignalLike<string | undefined>;
+		keyType?: string | undefined | SignalLike<string | undefined>;
+		kind?: string | undefined | SignalLike<string | undefined>;
+		label?: string | undefined | SignalLike<string | undefined>;
+		lang?: string | undefined | SignalLike<string | undefined>;
+		list?: string | undefined | SignalLike<string | undefined>;
+		loading?:
+			| 'eager'
+			| 'lazy'
+			| undefined
+			| SignalLike<'eager' | 'lazy' | undefined>;
+		loop?: boolean | undefined | SignalLike<boolean | undefined>;
+		low?: number | undefined | SignalLike<number | undefined>;
+		manifest?: string | undefined | SignalLike<string | undefined>;
+		marginHeight?: number | undefined | SignalLike<number | undefined>;
+		marginWidth?: number | undefined | SignalLike<number | undefined>;
+		max?: number | string | undefined | SignalLike<string | undefined>;
+		maxLength?: number | undefined | SignalLike<number | undefined>;
+		media?: string | undefined | SignalLike<string | undefined>;
+		mediaGroup?: string | undefined | SignalLike<string | undefined>;
+		method?: string | undefined | SignalLike<string | undefined>;
+		min?: number | string | undefined | SignalLike<string | undefined>;
+		minLength?: number | undefined | SignalLike<number | undefined>;
+		multiple?: boolean | undefined | SignalLike<boolean | undefined>;
+		muted?: boolean | undefined | SignalLike<boolean | undefined>;
+		name?: string | undefined | SignalLike<string | undefined>;
+		nomodule?: boolean | undefined | SignalLike<boolean | undefined>;
+		nonce?: string | undefined | SignalLike<string | undefined>;
+		noValidate?: boolean | undefined | SignalLike<boolean | undefined>;
+		open?: boolean | undefined | SignalLike<boolean | undefined>;
+		optimum?: number | undefined | SignalLike<number | undefined>;
+		part?: string | undefined | SignalLike<string | undefined>;
+		pattern?: string | undefined | SignalLike<string | undefined>;
+		ping?: string | undefined | SignalLike<string | undefined>;
+		placeholder?: string | undefined | SignalLike<string | undefined>;
+		playsInline?: boolean | undefined | SignalLike<boolean | undefined>;
+		poster?: string | undefined | SignalLike<string | undefined>;
+		preload?: string | undefined | SignalLike<string | undefined>;
+		radioGroup?: string | undefined | SignalLike<string | undefined>;
+		readonly?: boolean | undefined | SignalLike<boolean | undefined>;
+		readOnly?: boolean | undefined | SignalLike<boolean | undefined>;
 		referrerpolicy?:
 			| 'no-referrer'
 			| 'no-referrer-when-downgrade'
@@ -802,6 +1856,7 @@ export namespace JSXInternal {
 			| 'strict-origin'
 			| 'strict-origin-when-cross-origin'
 			| 'unsafe-url'
+			| undefined
 			| SignalLike<
 					| 'no-referrer'
 					| 'no-referrer-when-downgrade'
@@ -811,45 +1866,67 @@ export namespace JSXInternal {
 					| 'strict-origin'
 					| 'strict-origin-when-cross-origin'
 					| 'unsafe-url'
+					| undefined
 			  >;
-		rel?: string | SignalLike<string>;
-		required?: boolean | SignalLike<boolean>;
-		reversed?: boolean | SignalLike<boolean>;
-		role?: string | SignalLike<string>;
-		rows?: number | SignalLike<number>;
-		rowSpan?: number | SignalLike<number>;
-		sandbox?: string | SignalLike<string>;
-		scope?: string | SignalLike<string>;
-		scoped?: boolean | SignalLike<boolean>;
-		scrolling?: string | SignalLike<string>;
-		seamless?: boolean | SignalLike<boolean>;
-		selected?: boolean | SignalLike<boolean>;
-		shape?: string | SignalLike<string>;
-		size?: number | SignalLike<number>;
-		sizes?: string | SignalLike<string>;
-		slot?: string | SignalLike<string>;
-		span?: number | SignalLike<number>;
-		spellcheck?: boolean | SignalLike<boolean>;
-		spellCheck?: boolean | SignalLike<boolean>;
-		src?: string | SignalLike<string>;
-		srcset?: string | SignalLike<string>;
-		srcDoc?: string | SignalLike<string>;
-		srcLang?: string | SignalLike<string>;
-		srcSet?: string | SignalLike<string>;
-		start?: number | SignalLike<number>;
-		step?: number | string | SignalLike<number | string>;
-		style?: string | CSSProperties | SignalLike<string | CSSProperties>;
-		summary?: string | SignalLike<string>;
-		tabIndex?: number | SignalLike<number>;
-		target?: string | SignalLike<string>;
-		title?: string | SignalLike<string>;
-		type?: string | SignalLike<string>;
-		useMap?: string | SignalLike<string>;
-		value?: string | string[] | number | SignalLike<string | string[] | number>;
-		volume?: string | number | SignalLike<string | number>;
-		width?: number | string | SignalLike<number | string>;
-		wmode?: string | SignalLike<string>;
-		wrap?: string | SignalLike<string>;
+		rel?: string | undefined | SignalLike<string | undefined>;
+		required?: boolean | undefined | SignalLike<boolean | undefined>;
+		reversed?: boolean | undefined | SignalLike<boolean | undefined>;
+		role?: AriaRole | undefined | SignalLike<AriaRole | undefined>;
+		rows?: number | undefined | SignalLike<number | undefined>;
+		rowSpan?: number | undefined | SignalLike<number | undefined>;
+		sandbox?: string | undefined | SignalLike<string | undefined>;
+		scope?: string | undefined | SignalLike<string | undefined>;
+		scoped?: boolean | undefined | SignalLike<boolean | undefined>;
+		scrolling?: string | undefined | SignalLike<string | undefined>;
+		seamless?: boolean | undefined | SignalLike<boolean | undefined>;
+		selected?: boolean | undefined | SignalLike<boolean | undefined>;
+		shape?: string | undefined | SignalLike<string | undefined>;
+		size?: number | undefined | SignalLike<number | undefined>;
+		sizes?: string | undefined | SignalLike<string | undefined>;
+		slot?: string | undefined | SignalLike<string | undefined>;
+		span?: number | undefined | SignalLike<number | undefined>;
+		spellcheck?: boolean | undefined | SignalLike<boolean | undefined>;
+		spellCheck?: boolean | undefined | SignalLike<boolean | undefined>;
+		src?: string | undefined | SignalLike<string | undefined>;
+		srcset?: string | undefined | SignalLike<string | undefined>;
+		srcDoc?: string | undefined | SignalLike<string | undefined>;
+		srcLang?: string | undefined | SignalLike<string | undefined>;
+		srcSet?: string | undefined | SignalLike<string | undefined>;
+		start?: number | undefined | SignalLike<number | undefined>;
+		step?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		style?:
+			| string
+			| CSSProperties
+			| undefined
+			| SignalLike<string | CSSProperties | undefined>;
+		summary?: string | undefined | SignalLike<string | undefined>;
+		tabIndex?: number | undefined | SignalLike<number | undefined>;
+		target?: string | undefined | SignalLike<string | undefined>;
+		title?: string | undefined | SignalLike<string | undefined>;
+		type?: string | undefined | SignalLike<string | undefined>;
+		useMap?: string | undefined | SignalLike<string | undefined>;
+		value?:
+			| string
+			| string[]
+			| number
+			| undefined
+			| SignalLike<string | string[] | number | undefined>;
+		volume?:
+			| string
+			| number
+			| undefined
+			| SignalLike<string | number | undefined>;
+		width?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		wmode?: string | undefined | SignalLike<string | undefined>;
+		wrap?: string | undefined | SignalLike<string | undefined>;
 
 		// Non-standard Attributes
 		autocapitalize?:
@@ -859,8 +1936,15 @@ export namespace JSXInternal {
 			| 'sentences'
 			| 'words'
 			| 'characters'
+			| undefined
 			| SignalLike<
-					'off' | 'none' | 'on' | 'sentences' | 'words' | 'characters'
+					| 'off'
+					| 'none'
+					| 'on'
+					| 'sentences'
+					| 'words'
+					| 'characters'
+					| undefined
 			  >;
 		autoCapitalize?:
 			| 'off'
@@ -869,29 +1953,39 @@ export namespace JSXInternal {
 			| 'sentences'
 			| 'words'
 			| 'characters'
+			| undefined
 			| SignalLike<
-					'off' | 'none' | 'on' | 'sentences' | 'words' | 'characters'
+					| 'off'
+					| 'none'
+					| 'on'
+					| 'sentences'
+					| 'words'
+					| 'characters'
+					| undefined
 			  >;
-		disablePictureInPicture?: boolean | SignalLike<boolean>;
-		results?: number | SignalLike<number>;
-		translate?: 'yes' | 'no' | SignalLike<'yes' | 'no'>;
+		disablePictureInPicture?:
+			| boolean
+			| undefined
+			| SignalLike<boolean | undefined>;
+		results?: number | undefined | SignalLike<number | undefined>;
+		translate?: 'yes' | 'no' | undefined | SignalLike<'yes' | 'no' | undefined>;
 
 		// RDFa Attributes
-		about?: string | SignalLike<string>;
-		datatype?: string | SignalLike<string>;
+		about?: string | undefined | SignalLike<string | undefined>;
+		datatype?: string | undefined | SignalLike<string | undefined>;
 		inlist?: any;
-		prefix?: string | SignalLike<string>;
-		property?: string | SignalLike<string>;
-		resource?: string | SignalLike<string>;
-		typeof?: string | SignalLike<string>;
-		vocab?: string | SignalLike<string>;
+		prefix?: string | undefined | SignalLike<string | undefined>;
+		property?: string | undefined | SignalLike<string | undefined>;
+		resource?: string | undefined | SignalLike<string | undefined>;
+		typeof?: string | undefined | SignalLike<string | undefined>;
+		vocab?: string | undefined | SignalLike<string | undefined>;
 
 		// Microdata Attributes
-		itemProp?: string | SignalLike<string>;
-		itemScope?: boolean | SignalLike<boolean>;
-		itemType?: string | SignalLike<string>;
-		itemID?: string | SignalLike<string>;
-		itemRef?: string | SignalLike<string>;
+		itemProp?: string | undefined | SignalLike<string | undefined>;
+		itemScope?: boolean | undefined | SignalLike<boolean | undefined>;
+		itemType?: string | undefined | SignalLike<string | undefined>;
+		itemID?: string | undefined | SignalLike<string | undefined>;
+		itemRef?: string | undefined | SignalLike<string | undefined>;
 	}
 
 	export type DetailedHTMLProps<
@@ -904,22 +1998,52 @@ export namespace JSXInternal {
 			| 'scroll'
 			| 'slide'
 			| 'alternate'
-			| SignalLike<'scroll' | 'slide' | 'alternate'>;
-		bgColor?: string | SignalLike<string>;
+			| undefined
+			| SignalLike<'scroll' | 'slide' | 'alternate' | undefined>;
+		bgColor?: string | undefined | SignalLike<string | undefined>;
 		direction?:
 			| 'left'
 			| 'right'
 			| 'up'
 			| 'down'
-			| SignalLike<'left' | 'right' | 'up' | 'down'>;
-		height?: number | string | SignalLike<number | string>;
-		hspace?: number | string | SignalLike<number | string>;
-		loop?: number | string | SignalLike<number | string>;
-		scrollAmount?: number | string | SignalLike<number | string>;
-		scrollDelay?: number | string | SignalLike<number | string>;
-		trueSpeed?: boolean | SignalLike<boolean>;
-		vspace?: number | string | SignalLike<number | string>;
-		width?: number | string | SignalLike<number | string>;
+			| undefined
+			| SignalLike<'left' | 'right' | 'up' | 'down' | undefined>;
+		height?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		hspace?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		loop?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		scrollAmount?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		scrollDelay?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		trueSpeed?: boolean | undefined | SignalLike<boolean | undefined>;
+		vspace?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		width?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
 	}
 
 	export interface IntrinsicElements {
@@ -1012,6 +2136,7 @@ export namespace JSXInternal {
 		s: HTMLAttributes<HTMLElement>;
 		samp: HTMLAttributes<HTMLElement>;
 		script: HTMLAttributes<HTMLScriptElement>;
+		search: HTMLAttributes<HTMLElement>;
 		section: HTMLAttributes<HTMLElement>;
 		select: HTMLAttributes<HTMLSelectElement>;
 		slot: HTMLAttributes<HTMLSlotElement>;
@@ -1044,7 +2169,8 @@ export namespace JSXInternal {
 		svg: SVGAttributes<SVGSVGElement>;
 		animate: SVGAttributes<SVGAnimateElement>;
 		circle: SVGAttributes<SVGCircleElement>;
-		animateTransform: SVGAttributes<SVGAnimateElement>;
+		animateMotion: SVGAttributes<SVGAnimateMotionElement>;
+		animateTransform: SVGAttributes<SVGAnimateTransformElement>;
 		clipPath: SVGAttributes<SVGClipPathElement>;
 		defs: SVGAttributes<SVGDefsElement>;
 		desc: SVGAttributes<SVGDescElement>;
@@ -1056,6 +2182,7 @@ export namespace JSXInternal {
 		feConvolveMatrix: SVGAttributes<SVGFEConvolveMatrixElement>;
 		feDiffuseLighting: SVGAttributes<SVGFEDiffuseLightingElement>;
 		feDisplacementMap: SVGAttributes<SVGFEDisplacementMapElement>;
+		feDistantLight: SVGAttributes<SVGFEDistantLightElement>;
 		feDropShadow: SVGAttributes<SVGFEDropShadowElement>;
 		feFlood: SVGAttributes<SVGFEFloodElement>;
 		feFuncA: SVGAttributes<SVGFEFuncAElement>;
@@ -1068,7 +2195,9 @@ export namespace JSXInternal {
 		feMergeNode: SVGAttributes<SVGFEMergeNodeElement>;
 		feMorphology: SVGAttributes<SVGFEMorphologyElement>;
 		feOffset: SVGAttributes<SVGFEOffsetElement>;
+		fePointLight: SVGAttributes<SVGFEPointLightElement>;
 		feSpecularLighting: SVGAttributes<SVGFESpecularLightingElement>;
+		feSpotLight: SVGAttributes<SVGFESpotLightElement>;
 		feTile: SVGAttributes<SVGFETileElement>;
 		feTurbulence: SVGAttributes<SVGFETurbulenceElement>;
 		filter: SVGAttributes<SVGFilterElement>;
@@ -1079,17 +2208,22 @@ export namespace JSXInternal {
 		linearGradient: SVGAttributes<SVGLinearGradientElement>;
 		marker: SVGAttributes<SVGMarkerElement>;
 		mask: SVGAttributes<SVGMaskElement>;
+		metadata: SVGAttributes<SVGMetadataElement>;
+		mpath: SVGAttributes<SVGMPathElement>;
 		path: SVGAttributes<SVGPathElement>;
 		pattern: SVGAttributes<SVGPatternElement>;
 		polygon: SVGAttributes<SVGPolygonElement>;
 		polyline: SVGAttributes<SVGPolylineElement>;
 		radialGradient: SVGAttributes<SVGRadialGradientElement>;
 		rect: SVGAttributes<SVGRectElement>;
+		set: SVGAttributes<SVGSetElement>;
 		stop: SVGAttributes<SVGStopElement>;
+		switch: SVGAttributes<SVGSwitchElement>;
 		symbol: SVGAttributes<SVGSymbolElement>;
 		text: SVGAttributes<SVGTextElement>;
 		textPath: SVGAttributes<SVGTextPathElement>;
 		tspan: SVGAttributes<SVGTSpanElement>;
 		use: SVGAttributes<SVGUseElement>;
+		view: SVGAttributes<SVGViewElement>;
 	}
 }

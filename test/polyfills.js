@@ -37,7 +37,7 @@ if (!function f() {}.name) {
 chai.use((chai, util) => {
 	const Assertion = chai.Assertion;
 
-	Assertion.addMethod('equalNode', function(expectedNode, message) {
+	Assertion.addMethod('equalNode', function (expectedNode, message) {
 		const obj = this._obj;
 		message = message || 'equalNode';
 
@@ -71,7 +71,7 @@ chai.use((chai, util) => {
 
 //
 // The following code overwrites karma's internal logging feature to
-// support a much prettier and humand readable represantation of
+// support a much prettier and humand readable representation of
 // console logs in our terminal. This includes indentation, coloring
 // and support for Map and Set objects.
 //

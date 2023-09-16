@@ -20,10 +20,11 @@ let vnodeId = 0;
  * @param {VNode['type']} type
  * @param {VNode['props']} props
  * @param {VNode['key']} [key]
- * @param {string} [__self]
- * @param {string} [__source]
+ * @param {unknown} [isStaticChildren]
+ * @param {unknown} [__source]
+ * @param {unknown} [__self]
  */
-function createVNode(type, props, key, __self, __source) {
+function createVNode(type, props, key, isStaticChildren, __source, __self) {
 	// We'll want to preserve `ref` in props to get rid of the need for
 	// forwardRef components in the future, but that should happen via
 	// a separate PR.

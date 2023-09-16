@@ -1,4 +1,4 @@
-import { createElement, Component } from 'preact';
+import { Component } from 'preact';
 import { select as d3select, mouse as d3mouse } from 'd3-selection';
 import { scaleLinear } from 'd3-scale';
 import Pythagoras from './pythagoras';
@@ -22,9 +22,7 @@ export default class PythagorasDemo extends Component {
 		this.svgElement = c;
 	};
 
-	scaleFactor = scaleLinear()
-		.domain([this.svg.height, 0])
-		.range([0, 0.8]);
+	scaleFactor = scaleLinear().domain([this.svg.height, 0]).range([0, 0.8]);
 
 	scaleLean = scaleLinear()
 		.domain([0, this.svg.width / 2, this.svg.width])

@@ -43,7 +43,8 @@ export function supportsDataList() {
 	);
 }
 
-const VOID_ELEMENTS = /^(area|base|br|col|embed|hr|img|input|link|meta|param|source|track|wbr)$/;
+const VOID_ELEMENTS =
+	/^(area|base|br|col|embed|hr|img|input|link|meta|param|source|track|wbr)$/;
 
 function encodeEntities(str) {
 	return str.replace(/&/g, '&amp;');
@@ -204,7 +205,7 @@ export function clearOptions() {
 
 /**
  * Teardown test environment and reset preact's internal state
- * @param {HTMLDivElement} scratch
+ * @param {HTMLElement} scratch
  */
 export function teardown(scratch) {
 	if (scratch) {

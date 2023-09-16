@@ -53,8 +53,8 @@ export type ComponentChild =
 export type ComponentChildren = ComponentChild[] | ComponentChild;
 
 export interface Attributes {
-	key?: Key;
-	jsx?: boolean;
+	key?: Key | undefined;
+	jsx?: boolean | undefined;
 }
 
 export interface ClassAttributes<T> extends Attributes {
@@ -89,7 +89,7 @@ export type ComponentProps<
 export interface FunctionComponent<P = {}> {
 	(props: RenderableProps<P>, context?: any): VNode<any> | null;
 	displayName?: string;
-	defaultProps?: Partial<P>;
+	defaultProps?: Partial<P> | undefined;
 }
 export interface FunctionalComponent<P = {}> extends FunctionComponent<P> {}
 
@@ -194,7 +194,11 @@ export function createElement(
 				ClassAttributes<HTMLInputElement>)
 		| null,
 	...children: ComponentChildren[]
-): VNode<any>;
+): VNode<
+	| (JSXInternal.DOMAttributes<HTMLInputElement> &
+			ClassAttributes<HTMLInputElement>)
+	| null
+>;
 export function createElement<
 	P extends JSXInternal.HTMLAttributes<T>,
 	T extends HTMLElement
@@ -202,7 +206,7 @@ export function createElement<
 	type: keyof JSXInternal.IntrinsicElements,
 	props: (ClassAttributes<T> & P) | null,
 	...children: ComponentChildren[]
-): VNode<any>;
+): VNode<(ClassAttributes<T> & P) | null>;
 export function createElement<
 	P extends JSXInternal.SVGAttributes<T>,
 	T extends HTMLElement
@@ -210,7 +214,7 @@ export function createElement<
 	type: keyof JSXInternal.IntrinsicElements,
 	props: (ClassAttributes<T> & P) | null,
 	...children: ComponentChildren[]
-): VNode<any>;
+): VNode<(ClassAttributes<T> & P) | null>;
 export function createElement<T extends HTMLElement>(
 	type: string,
 	props:
@@ -219,12 +223,14 @@ export function createElement<T extends HTMLElement>(
 				JSXInternal.SVGAttributes)
 		| null,
 	...children: ComponentChildren[]
-): VNode<any>;
+): VNode<
+	ClassAttributes<T> & JSXInternal.HTMLAttributes & JSXInternal.SVGAttributes
+>;
 export function createElement<P>(
 	type: ComponentType<P>,
 	props: (Attributes & P) | null,
 	...children: ComponentChildren[]
-): VNode<any>;
+): VNode<P>;
 export namespace createElement {
 	export import JSX = JSXInternal;
 }
@@ -236,7 +242,11 @@ export function h(
 				ClassAttributes<HTMLInputElement>)
 		| null,
 	...children: ComponentChildren[]
-): VNode<any>;
+): VNode<
+	| (JSXInternal.DOMAttributes<HTMLInputElement> &
+			ClassAttributes<HTMLInputElement>)
+	| null
+>;
 export function h<
 	P extends JSXInternal.HTMLAttributes<T>,
 	T extends HTMLElement
@@ -244,7 +254,7 @@ export function h<
 	type: keyof JSXInternal.IntrinsicElements,
 	props: (ClassAttributes<T> & P) | null,
 	...children: ComponentChildren[]
-): VNode<any>;
+): VNode<(ClassAttributes<T> & P) | null>;
 export function h<
 	P extends JSXInternal.SVGAttributes<T>,
 	T extends HTMLElement
@@ -252,7 +262,7 @@ export function h<
 	type: keyof JSXInternal.IntrinsicElements,
 	props: (ClassAttributes<T> & P) | null,
 	...children: ComponentChildren[]
-): VNode<any>;
+): VNode<(ClassAttributes<T> & P) | null>;
 export function h<T extends HTMLElement>(
 	type: string,
 	props:
@@ -261,12 +271,17 @@ export function h<T extends HTMLElement>(
 				JSXInternal.SVGAttributes)
 		| null,
 	...children: ComponentChildren[]
-): VNode<any>;
+): VNode<
+	| (ClassAttributes<T> &
+			JSXInternal.HTMLAttributes &
+			JSXInternal.SVGAttributes)
+	| null
+>;
 export function h<P>(
 	type: ComponentType<P>,
 	props: (Attributes & P) | null,
 	...children: ComponentChildren[]
-): VNode<any>;
+): VNode<(Attributes & P) | null>;
 export namespace h {
 	export import JSX = JSXInternal;
 }
@@ -275,10 +290,17 @@ export namespace h {
 // Preact render
 // -----------------------------------
 
-export function render(
-	vnode: ComponentChild,
-	parent: Element | Document | ShadowRoot | DocumentFragment
-): void;
+interface ContainerNode {
+	nodeType: Node['nodeType'];
+	parentNode: Node['parentNode'];
+	firstChild: Node['firstChild'];
+	insertBefore: Node['insertBefore'];
+	appendChild: Node['appendChild'];
+	removeChild: Node['removeChild'];
+	childNodes: ArrayLike<Node>;
+}
+
+export function render(vnode: ComponentChild, parent: ContainerNode): void;
 /**
  * @deprecated Will be removed in v11.
  *
@@ -286,13 +308,10 @@ export function render(
  */
 export function render(
 	vnode: ComponentChild,
-	parent: Element | Document | ShadowRoot | DocumentFragment,
+	parent: ContainerNode,
 	replaceNode?: Element | Text
 ): void;
-export function hydrate(
-	vnode: ComponentChild,
-	parent: Element | Document | ShadowRoot | DocumentFragment
-): void;
+export function hydrate(vnode: ComponentChild, parent: ContainerNode): void;
 export function cloneElement(
 	vnode: VNode<any>,
 	props?: any,

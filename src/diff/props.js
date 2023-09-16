@@ -35,7 +35,7 @@ export function diffProps(dom, newProps, oldProps, isSvg, hydrate) {
 
 function setStyle(style, key, value) {
 	if (key[0] === '-') {
-		style.setProperty(key, value);
+		style.setProperty(key, value == null ? '' : value);
 	} else if (value == null) {
 		style[key] = '';
 	} else if (typeof value != 'number' || IS_NON_DIMENSIONAL.test(key)) {
@@ -83,7 +83,8 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
 	}
 	// Benchmark for comparison: https://esbench.com/bench/574c954bdb965b9a00965ac6
 	else if (name[0] === 'o' && name[1] === 'n') {
-		useCapture = name !== (name = name.replace(/Capture$/, ''));
+		useCapture =
+			name !== (name = name.replace(/(PointerCapture)$|Capture$/, '$1'));
 
 		// Infer correct casing for DOM built-in events:
 		if (name.toLowerCase() in dom) name = name.toLowerCase().slice(2);
@@ -94,8 +95,11 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
 
 		if (value) {
 			if (!oldValue) {
+				value._attached = Date.now();
 				const handler = useCapture ? eventProxyCapture : eventProxy;
 				dom.addEventListener(name, handler, useCapture);
+			} else {
+				value._attached = oldValue._attached;
 			}
 		} else {
 			const handler = useCapture ? eventProxyCapture : eventProxy;
@@ -108,6 +112,8 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
 			// - className --> class
 			name = name.replace(/xlink(H|:h)/, 'h').replace(/sName$/, 's');
 		} else if (
+			name !== 'width' &&
+			name !== 'height' &&
 			name !== 'href' &&
 			name !== 'list' &&
 			name !== 'form' &&
@@ -115,6 +121,8 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
 			// cast to `0` instead
 			name !== 'tabIndex' &&
 			name !== 'download' &&
+			name !== 'rowSpan' &&
+			name !== 'colSpan' &&
 			name in dom
 		) {
 			try {
@@ -124,16 +132,16 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
 			} catch (e) {}
 		}
 
-		// ARIA-attributes have a different notion of boolean values.
-		// The value `false` is different from the attribute not
-		// existing on the DOM, so we can't remove it. For non-boolean
-		// ARIA-attributes we could treat false as a removal, but the
-		// amount of exceptions would cost us too many bytes. On top of
-		// that other VDOM frameworks also always stringify `false`.
+		// aria- and data- attributes have no boolean representation.
+		// A `false` value is different from the attribute not being
+		// present, so we can't remove it. For non-boolean aria
+		// attributes we could treat false as a removal, but the
+		// amount of exceptions would cost too many bytes. On top of
+		// that other frameworks generally stringify `false`.
 
 		if (typeof value === 'function') {
 			// never serialize functions as attribute values
-		} else if (value != null && (value !== false || name.indexOf('-') != -1)) {
+		} else if (value != null && (value !== false || name[4] === '-')) {
 			dom.setAttribute(name, value);
 		} else {
 			dom.removeAttribute(name);
@@ -147,9 +155,24 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
  * @private
  */
 function eventProxy(e) {
-	this._listeners[e.type + false](options.event ? options.event(e) : e);
+	const eventHandler = this._listeners[e.type + false];
+	/**
+	 * This trick is inspired by Vue https://github.com/vuejs/core/blob/main/packages/runtime-dom/src/modules/events.ts#L90-L101
+	 * when the dom performs an event it leaves micro-ticks in between bubbling up which means that an event can trigger on a newly
+	 * created DOM-node while the event bubbles up, this can cause quirky behavior as seen in https://github.com/preactjs/preact/issues/3927
+	 */
+	if (!e._dispatched) {
+		// When an event has no _dispatched we know this is the first event-target in the chain
+		// so we set the initial dispatched time.
+		e._dispatched = Date.now();
+		// When the _dispatched is smaller than the time when the targetted event handler was attached
+		// we know we have bubbled up to an element that was added during patching the dom.
+	} else if (e._dispatched <= eventHandler._attached) {
+		return;
+	}
+	return eventHandler(options.event ? options.event(e) : e);
 }
 
 function eventProxyCapture(e) {
-	this._listeners[e.type + true](options.event ? options.event(e) : e);
+	return this._listeners[e.type + true](options.event ? options.event(e) : e);
 }

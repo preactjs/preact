@@ -4,7 +4,7 @@ on: create
 jobs:
   build:
     if: github.ref_type == 'tag'
-    uses: preactjs/preact/.github/workflows/ci.yml@master
+    uses: preactjs/preact/.github/workflows/ci.yml@main
 
   release:
     runs-on: ubuntu-latest

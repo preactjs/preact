@@ -17,8 +17,9 @@ declare namespace React {
 	export import Inputs = _hooks.Inputs;
 	export import PropRef = _hooks.PropRef;
 	export import Reducer = _hooks.Reducer;
+	export import Dispatch = _hooks.Dispatch;
 	export import Ref = _hooks.Ref;
-	export import StateUpdater = _hooks.StateUpdater;
+	export import SetStateAction = _hooks.StateUpdater;
 	export import useCallback = _hooks.useCallback;
 	export import useContext = _hooks.useContext;
 	export import useDebugValue = _hooks.useDebugValue;
@@ -40,6 +41,7 @@ declare namespace React {
 	): T;
 
 	// Preact Defaults
+	export import Context = preact.Context;
 	export import ContextType = preact.ContextType;
 	export import RefObject = preact.RefObject;
 	export import Component = preact.Component;
@@ -51,6 +53,7 @@ declare namespace React {
 	export import createElement = preact.createElement;
 	export import cloneElement = preact.cloneElement;
 	export import ComponentProps = preact.ComponentProps;
+	export import ReactNode = preact.ComponentChild;
 
 	// Suspense
 	export import Suspense = _Suspense.Suspense;
@@ -63,9 +66,16 @@ declare namespace React {
 	export function startTransition(cb: () => void): void;
 
 	// HTML
-	export import HTMLAttributes = JSXInternal.HTMLAttributes;
+	export interface HTMLAttributes<T extends EventTarget>
+		extends JSXInternal.HTMLAttributes<T> {}
+	export interface HTMLProps<T extends EventTarget>
+		extends JSXInternal.HTMLAttributes<T>,
+			preact.ClassAttributes<T> {}
 	export import DetailedHTMLProps = JSXInternal.DetailedHTMLProps;
 	export import CSSProperties = JSXInternal.CSSProperties;
+	export interface SVGProps<T extends EventTarget>
+		extends JSXInternal.SVGAttributes<T>,
+			preact.ClassAttributes<T> {}
 
 	// Events
 	export import TargetedEvent = JSXInternal.TargetedEvent;
@@ -74,7 +84,7 @@ declare namespace React {
 
 	export function createPortal(
 		vnode: preact.VNode,
-		container: Element
+		container: Element | DocumentFragment
 	): preact.VNode<any>;
 
 	export function render(
@@ -100,6 +110,7 @@ declare namespace React {
 		...children: preact.ComponentChildren[]
 	) => preact.VNode<any>;
 	export function isValidElement(element: any): boolean;
+	export function isFragment(element: any): boolean;
 	export function findDOMNode(
 		component: preact.Component | Element
 	): Element | null;
@@ -110,6 +121,11 @@ declare namespace React {
 	> {
 		isPureReactComponent: boolean;
 	}
+
+	export type MemoExoticComponent<C extends preact.FunctionalComponent<any>> =
+		preact.FunctionComponent<ComponentProps<C>> & {
+			readonly type: C;
+		};
 
 	export function memo<P = {}>(
 		component: preact.FunctionalComponent<P>,
@@ -123,20 +139,34 @@ declare namespace React {
 		) => boolean
 	): C;
 
+	export interface RefAttributes<R> extends preact.Attributes {
+		ref?: preact.Ref<R> | undefined;
+	}
+
 	export interface ForwardFn<P = {}, T = any> {
 		(props: P, ref: ForwardedRef<T>): preact.ComponentChild;
 		displayName?: string;
 	}
 
+	export interface ForwardRefExoticComponent<P>
+		extends preact.FunctionComponent<P> {
+		defaultProps?: Partial<P> | undefined;
+	}
+
 	export function forwardRef<R, P = {}>(
 		fn: ForwardFn<P, R>
-	): preact.FunctionalComponent<Omit<P, 'ref'> & { ref?: preact.Ref<R> }>;
+	): preact.FunctionalComponent<PropsWithoutRef<P> & { ref?: preact.Ref<R> }>;
+
+	export type PropsWithoutRef<P> = Omit<P, 'ref'>;
 
 	interface MutableRefObject<T> {
 		current: T;
 	}
-	
-	export type ForwardedRef<T> = ((instance: T | null) => void) | MutableRefObject<T | null> | null;
+
+	export type ForwardedRef<T> =
+		| ((instance: T | null) => void)
+		| MutableRefObject<T | null>
+		| null;
 
 	export function unstable_batchedUpdates(
 		callback: (arg?: any) => void,
@@ -144,9 +174,9 @@ declare namespace React {
 	): void;
 
 	export type PropsWithChildren<P = unknown> = P & {
-		children?: preact.ComponentChild | undefined
+		children?: preact.ComponentChild | undefined;
 	};
-	
+
 	export const Children: {
 		map<T extends preact.ComponentChild, R>(
 			children: T | T[],

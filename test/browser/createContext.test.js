@@ -150,10 +150,8 @@ describe('createContext', () => {
 	});
 
 	it('should preserve provider context between different providers', () => {
-		const {
-			Provider: ThemeProvider,
-			Consumer: ThemeConsumer
-		} = createContext();
+		const { Provider: ThemeProvider, Consumer: ThemeConsumer } =
+			createContext();
 		const { Provider: DataProvider, Consumer: DataConsumer } = createContext();
 		const THEME_CONTEXT = { theme: 'black' };
 		const DATA_CONTEXT = { global: 'a' };
@@ -558,9 +556,9 @@ describe('createContext', () => {
 		});
 
 		// Rendered three times, should call 'Consumer' render two times
-		expect(
-			Inner.prototype.render
-		).to.have.been.calledTwice.and.calledWithMatch({ i: 2 });
+		expect(Inner.prototype.render).to.have.been.calledTwice.and.calledWithMatch(
+			{ i: 2 }
+		);
 		expect(scratch.innerHTML).to.equal('<div>2</div>');
 	});
 
@@ -927,5 +925,49 @@ describe('createContext', () => {
 		set(defaultValue);
 		rerender();
 		expect(scratch.innerHTML).to.equal('<p>hi</p>');
+	});
+
+	it('should not call sCU on context update', () => {
+		const Ctx = createContext('foo');
+
+		/** @type {(s: string) => void} */
+		let update;
+		class App extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { foo: 'foo' };
+				update = v => this.setState({ foo: v });
+			}
+			render() {
+				return (
+					<Ctx.Provider value={this.state.foo}>
+						<Child />
+					</Ctx.Provider>
+				);
+			}
+		}
+
+		const spy = sinon.spy();
+
+		class Child extends Component {
+			static contextType = Ctx;
+
+			shouldComponentUpdate() {
+				spy();
+				return false;
+			}
+
+			render() {
+				return <p>{this.context}</p>;
+			}
+		}
+
+		render(<App />, scratch);
+		expect(scratch.textContent).to.equal('foo');
+
+		update('bar');
+		rerender();
+		expect(scratch.textContent).to.equal('bar');
+		expect(spy).not.to.be.called;
 	});
 });

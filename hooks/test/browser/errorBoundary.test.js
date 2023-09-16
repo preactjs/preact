@@ -1,6 +1,6 @@
 import { createElement, render } from 'preact';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
-import { useErrorBoundary } from 'preact/hooks';
+import { useErrorBoundary, useLayoutEffect } from 'preact/hooks';
 import { setupRerender } from 'preact/test-utils';
 
 /** @jsx createElement */
@@ -106,5 +106,50 @@ describe('errorBoundary', () => {
 		expect(spy2).to.be.calledOnce;
 		expect(spy2).to.be.calledWith(error);
 		expect(scratch.innerHTML).to.equal('<p>Error</p>');
+	});
+
+	it('does not invoke old effects when a cleanup callback throws an error and is handled', () => {
+		let throwErr = false;
+		let thrower = sinon.spy(() => {
+			if (throwErr) {
+				throw new Error('test');
+			}
+		});
+		let badEffect = sinon.spy(() => thrower);
+		let goodEffect = sinon.spy();
+
+		function EffectThrowsError() {
+			useLayoutEffect(badEffect);
+			return <span>Test</span>;
+		}
+
+		function Child({ children }) {
+			useLayoutEffect(goodEffect);
+			return children;
+		}
+
+		function App() {
+			const [err] = useErrorBoundary();
+			return err ? (
+				<p>Error</p>
+			) : (
+				<Child>
+					<EffectThrowsError />
+				</Child>
+			);
+		}
+
+		render(<App />, scratch);
+		expect(scratch.innerHTML).to.equal('<span>Test</span>');
+		expect(badEffect).to.be.calledOnce;
+		expect(goodEffect).to.be.calledOnce;
+
+		throwErr = true;
+		render(<App />, scratch);
+		rerender();
+		expect(scratch.innerHTML).to.equal('<p>Error</p>');
+		expect(thrower).to.be.calledOnce;
+		expect(badEffect).to.be.calledOnce;
+		expect(goodEffect).to.be.calledOnce;
 	});
 });

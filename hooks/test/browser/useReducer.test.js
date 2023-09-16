@@ -152,7 +152,7 @@ describe('useReducer', () => {
 		const initState = { count: 0 };
 
 		function Comp({ increment }) {
-			const [state, dispatch] = useReducer(function(state, action) {
+			const [state, dispatch] = useReducer(function (state, action) {
 				switch (action.type) {
 					case 'increment':
 						return { count: state.count + increment };

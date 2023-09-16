@@ -1,4 +1,4 @@
-import { act } from 'preact/test-utils';
+import { act, teardown as teardownAct } from 'preact/test-utils';
 import { createElement, render, Fragment, Component } from 'preact';
 import { useEffect, useState, useRef } from 'preact/hooks';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
@@ -258,9 +258,7 @@ describe('useEffect', () => {
 			render(<App />, scratch);
 		});
 		expect(spy).to.be.calledOnce;
-		expect(errored)
-			.to.be.an('Error')
-			.with.property('message', 'hi');
+		expect(errored).to.be.an('Error').with.property('message', 'hi');
 		expect(scratch.innerHTML).to.equal('<p>Error</p>');
 	});
 
@@ -366,6 +364,51 @@ describe('useEffect', () => {
 		});
 		await promise;
 		act(() => {});
+		expect(scratch.innerHTML).to.equal(
+			'<div><div>Count: 2</div><div><div>dummy</div></div></div>'
+		);
+	});
+
+	it('hooks should be called in right order', async () => {
+		teardownAct();
+
+		let increment;
+
+		const Counter = () => {
+			const [count, setCount] = useState(0);
+			useState('binggo!!');
+			const renderRoot = useRef();
+			useEffect(() => {
+				const div = renderRoot.current;
+				render(<Dummy />, div);
+			}, [count]);
+
+			increment = () => {
+				setCount(x => x + 1);
+				return Promise.resolve().then(() => setCount(x => x + 1));
+			};
+
+			return (
+				<div>
+					<div>Count: {count}</div>
+					<div ref={renderRoot} />
+				</div>
+			);
+		};
+
+		const Dummy = () => {
+			useState();
+			return <div>dummy</div>;
+		};
+
+		render(<Counter />, scratch);
+
+		expect(scratch.innerHTML).to.equal(
+			'<div><div>Count: 0</div><div></div></div>'
+		);
+		/** Using the act function will affect the timing of the useEffect */
+		await increment();
+
 		expect(scratch.innerHTML).to.equal(
 			'<div><div>Count: 2</div><div><div>dummy</div></div></div>'
 		);

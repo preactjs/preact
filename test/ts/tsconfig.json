@@ -1,15 +1,20 @@
 {
-	"compilerOptions": {
-		"target": "es6",
-		"module": "es6",
-		"moduleResolution": "node",
-		"lib": ["es6", "dom"],
-		"strict": true,
-		"typeRoots": ["../../"],
-		"types": [],
-		"forceConsistentCasingInFileNames": true,
-		"jsx": "react",
-		"jsxFactory": "createElement"
-	},
-	"include": ["./**/*.ts", "./**/*.tsx"]
+  "compilerOptions": {
+    "target": "es6",
+    "module": "es6",
+    "moduleResolution": "node",
+    "lib": ["es6", "dom"],
+    "strict": true,
+    "typeRoots": ["../../"],
+    "types": [],
+    "forceConsistentCasingInFileNames": true,
+    "jsx": "react",
+    "jsxFactory": "createElement",
+    "jsxFragmentFactory": "Fragment",
+    "paths": {
+      "preact": ["../../"],
+      "preact/*": ["../../*"]
+    }
+  },
+  "include": ["./**/*.ts", "./**/*.tsx"]
 }

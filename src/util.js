@@ -1,4 +1,6 @@
-import { EMPTY_ARR } from "./constants";
+import { EMPTY_ARR } from './constants';
+
+export const isArray = Array.isArray;
 
 /**
  * Assign properties from `props` to `obj`

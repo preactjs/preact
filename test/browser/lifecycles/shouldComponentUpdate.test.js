@@ -858,6 +858,53 @@ describe('Lifecycle methods', () => {
 		// ]);
 	});
 
+	it('should correctly handle double state updates', () => {
+		let updateParent, updateChild;
+		class Parent extends Component {
+			state = { text: 'parent-old' };
+
+			componentDidMount() {
+				updateParent = () => this.setState({ text: 'Parent-NEW' });
+			}
+
+			render() {
+				return (
+					<Fragment>
+						{this.props.children} and {this.state.text}
+					</Fragment>
+				);
+			}
+		}
+
+		class Child extends Component {
+			state = { text: 'child-old' };
+
+			shouldComponentUpdate(nextProps, nextState) {
+				return this.state.text !== nextState.text;
+			}
+
+			componentDidMount() {
+				updateChild = () => this.setState({ text: 'Child-NEW' });
+			}
+
+			render() {
+				return <h1>{this.state.text}</h1>;
+			}
+		}
+
+		render(
+			<Parent>
+				<Child />
+			</Parent>,
+			scratch
+		);
+
+		updateParent();
+		updateChild();
+		rerender();
+		expect(scratch.innerHTML).to.equal('<h1>Child-NEW</h1> and Parent-NEW');
+	});
+
 	it('should maintain the order if memoised component initially rendered empty content', () => {
 		let showText, updateParent;
 		class Child extends Component {
