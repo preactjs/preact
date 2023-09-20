@@ -1282,6 +1282,7 @@ describe('render()', () => {
 		expect(scratch.firstChild.tabIndex).to.equal(defaultValue);
 	});
 
+	// #4137
 	it('should unset role if null || undefined', () => {
 		render(
 			<section>
