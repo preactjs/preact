@@ -123,6 +123,7 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
 			name !== 'download' &&
 			name !== 'rowSpan' &&
 			name !== 'colSpan' &&
+			name !== 'role' &&
 			name in dom
 		) {
 			try {
