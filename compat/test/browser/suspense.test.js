@@ -2101,7 +2101,7 @@ describe('suspense', () => {
 		});
 	});
 
-	it('originalParent undefined should not crash', () => {
+	it('should not crash if fallback has same DOM as suspended nodes', () => {
 		const [Lazy, resolveLazy] = createLazy();
 
 		const App = () => {
