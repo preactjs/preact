@@ -2100,4 +2100,29 @@ describe('suspense', () => {
 			expect(scratch.innerHTML).to.eql(`<p>hello new world</p>`);
 		});
 	});
+
+	it('originalParent undefined should not crash', () => {
+		const C = lazy(async () => {
+			await new Promise(r => setTimeout(r, 1000));
+			const Comp = () => <p>hello world</p>;
+			return {
+				default: Comp
+			};
+		});
+
+		const App = () => {
+			const [, setTest] = useState(false);
+			useLayoutEffect(() => setTest(true), []);
+
+			return (
+				<Suspense fallback={<div />}>
+					<div>
+						<C />
+					</div>
+				</Suspense>
+			);
+		};
+
+		render(<App />, scratch);
+	});
 });
