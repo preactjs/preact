@@ -70,7 +70,7 @@ function detachedClone(vnode, detachedParent, parentDom) {
 }
 
 function removeOriginal(vnode, detachedParent, originalParent) {
-	if (vnode) {
+	if (vnode && originalParent) {
 		vnode._original = null;
 		vnode._children =
 			vnode._children &&

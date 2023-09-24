@@ -2100,4 +2100,30 @@ describe('suspense', () => {
 			expect(scratch.innerHTML).to.eql(`<p>hello new world</p>`);
 		});
 	});
+
+	it('should not crash if fallback has same DOM as suspended nodes', () => {
+		const [Lazy, resolveLazy] = createLazy();
+
+		const App = () => {
+			const [, setTest] = useState(false);
+			useLayoutEffect(() => setTest(true), []);
+
+			return (
+				<Suspense fallback={<div />}>
+					<div>
+						<Lazy />
+					</div>
+				</Suspense>
+			);
+		};
+
+		render(<App />, scratch);
+		expect(scratch.innerHTML).to.equal('<div></div>');
+		rerender();
+
+		return resolveLazy(() => <p>hello world</p>).then(() => {
+			rerender();
+			expect(scratch.innerHTML).to.equal('<div><p>hello world</p></div>');
+		});
+	});
 });
