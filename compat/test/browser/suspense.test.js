@@ -2102,13 +2102,7 @@ describe('suspense', () => {
 	});
 
 	it('originalParent undefined should not crash', () => {
-		const C = lazy(async () => {
-			await new Promise(r => setTimeout(r, 1000));
-			const Comp = () => <p>hello world</p>;
-			return {
-				default: Comp
-			};
-		});
+		const [Lazy, resolveLazy] = createLazy();
 
 		const App = () => {
 			const [, setTest] = useState(false);
@@ -2117,12 +2111,19 @@ describe('suspense', () => {
 			return (
 				<Suspense fallback={<div />}>
 					<div>
-						<C />
+						<Lazy />
 					</div>
 				</Suspense>
 			);
 		};
 
 		render(<App />, scratch);
+		expect(scratch.innerHTML).to.equal('<div></div>');
+		rerender();
+
+		return resolveLazy(() => <p>hello world</p>).then(() => {
+			rerender();
+			expect(scratch.innerHTML).to.equal('<div><p>hello world</p></div>');
+		});
 	});
 });
