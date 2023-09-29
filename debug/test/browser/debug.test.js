@@ -581,6 +581,17 @@ describe('debug', () => {
 			render(<Paragraph />, scratch);
 			expect(console.error).to.be.calledOnce;
 		});
+
+		it('should not warn for nesting span under a paragraph', () => {
+			const Paragraph = () => (
+				<p>
+					<span>Hello world</span>
+				</p>
+			);
+
+			render(<Paragraph />, scratch);
+			expect(console.error).to.not.be.called;
+		});
 	});
 
 	describe('PropTypes', () => {
