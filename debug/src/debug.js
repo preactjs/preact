@@ -22,6 +22,8 @@ const isWeakMapSupported = typeof WeakMap == 'function';
 function getDomChildren(vnode) {
 	let domChildren = [];
 
+	if (!vnode._children) return domChildren;
+
 	vnode._children.forEach(child => {
 		if (child && typeof child.type === 'function') {
 			domChildren.push.apply(domChildren, getDomChildren(child));
