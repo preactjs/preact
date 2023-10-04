@@ -69,7 +69,7 @@ export function diffChildren(
 		// or we are rendering a component (e.g. setState) copy the oldVNodes so it can have
 		// it's own DOM & etc. pointers
 		else if (
-			typeof childVNode == 'string' ||
+			childVNode.constructor === String ||
 			typeof childVNode == 'number' ||
 			// eslint-disable-next-line valid-typeof
 			typeof childVNode == 'bigint'
