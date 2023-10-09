@@ -95,4 +95,4 @@ export function Fragment(props) {
  * @returns {vnode is import('./internal').VNode}
  */
 export const isValidElement = vnode =>
-	vnode != null && vnode.constructor === undefined;
+	vnode != null && vnode.constructor == undefined;
