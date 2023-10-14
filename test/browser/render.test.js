@@ -1,5 +1,5 @@
 import { setupRerender } from 'preact/test-utils';
-import { createElement, render, Component, options } from 'preact';
+import { createElement, render, Component, options, Fragment } from 'preact';
 import {
 	setupScratch,
 	teardown,
@@ -1104,6 +1104,92 @@ describe('render()', () => {
 			'<div>Test3.remove()',
 			'<div>Test2.remove()'
 		]);
+	});
+
+	it.only('should not remove iframe with memoized components', () => {
+		function renderLeaf(props) {
+			if (props.text === '') {
+				return null;
+			}
+
+			return <span>{props.text}</span>;
+		}
+
+		const value = [
+			{
+				id: 2,
+				type: 'paragraph',
+				children: [{ text: 'hello world.' }]
+			},
+			{
+				id: 1,
+				type: 'iframe',
+				url: 'https://codesandbox.io/embed/sweet-haze-6izou?fontsize=14&hidenavigation=1&theme=dark',
+				children: [{ text: '' }]
+			}
+		];
+
+		function renderElement(props) {
+			if (props.element.type === 'iframe') {
+				return <div id="iframe">{props.children}</div>;
+			}
+
+			return <p {...props.attributes}>{props.children}</p>;
+		}
+
+		class MemoizedComponent extends Component {
+			shouldComponentUpdate(prevProps) {
+				return prevProps.element.id !== this.props.element.id;
+			}
+
+			render() {
+				return renderElement({
+					element: this.props.element,
+					children: this.props.element.children.map(leaf => renderLeaf(leaf))
+				});
+			}
+		}
+
+		function Editor({ value }) {
+			return (
+				<Fragment>
+					{value.map(element => (
+						<MemoizedComponent
+							key={element.id}
+							element={element}
+							renderElement={renderElement}
+						/>
+					))}
+				</Fragment>
+			);
+		}
+
+		let set;
+		class Wrapper extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { value };
+				set = this.setState.bind(this);
+			}
+
+			render() {
+				return <Editor value={this.state.value} />;
+			}
+		}
+
+		render(<Wrapper />, scratch);
+
+		expect(scratch.innerHTML).to.equal(
+			'<p><span>hello world.</span></p><div id="iframe"></div>'
+		);
+
+		clearLog();
+		console.log('--- YEET ---');
+		set({ value: value.filter((_, index) => index !== 0) });
+		rerender();
+
+		expect(scratch.innerHTML).to.equal('<div id="iframe"></div>');
+		expect(getLog()).to.deep.equal(['<p>hello world..remove()']);
 	});
 
 	it('should not cause infinite loop with referentially equal props', () => {
