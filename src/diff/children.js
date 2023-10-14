@@ -115,7 +115,6 @@ export function diffChildren(
 					oldDom = getDomSibling(oldVNode);
 				}
 
-				console.log('unmounting', i);
 				unmount(oldVNode, oldVNode, false);
 				oldChildren[i] = null;
 			}
@@ -200,14 +199,9 @@ export function diffChildren(
 			if (
 				typeof childVNode.type == 'function' &&
 				(matchingIndex !== skewedIndex ||
-					oldVNode._children === childVNode._children)
+					(oldVNode._children === childVNode._children &&
+						oldChildrenLength <= newChildrenLength))
 			) {
-				console.log(
-					'reordering',
-					matchingIndex !== skewedIndex,
-					oldVNode._children === childVNode._children
-				);
-				console.log(childVNode._dom, oldDom, parentDom);
 				oldDom = reorderChildren(childVNode, oldDom, parentDom);
 			} else if (
 				typeof childVNode.type != 'function' &&
@@ -259,7 +253,6 @@ export function diffChildren(
 				newParentVNode._nextDom = oldChildren[i]._dom.nextSibling;
 			}
 
-			console.log('unmounting', i);
 			unmount(oldChildren[i], oldChildren[i]);
 		}
 	}
@@ -282,7 +275,6 @@ function reorderChildren(childVNode, oldDom, parentDom) {
 			if (typeof vnode.type == 'function') {
 				oldDom = reorderChildren(vnode, oldDom, parentDom);
 			} else {
-				console.log('placing child', parentDom, vnode._dom, oldDom);
 				oldDom = placeChild(parentDom, vnode._dom, oldDom);
 			}
 		}

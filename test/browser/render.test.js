@@ -1106,7 +1106,7 @@ describe('render()', () => {
 		]);
 	});
 
-	it.only('should not remove iframe with memoized components', () => {
+	it('should not remove iframe with memoized components', () => {
 		function renderLeaf(props) {
 			if (props.text === '') {
 				return null;
