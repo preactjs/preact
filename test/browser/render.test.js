@@ -26,7 +26,7 @@ function getAttributes(node) {
 
 const isIE11 = /Trident\//.test(navigator.userAgent);
 
-describe('render()', () => {
+describe.only('render()', () => {
 	let scratch, rerender;
 
 	let resetAppendChild;
@@ -1064,7 +1064,7 @@ describe('render()', () => {
 	it('should not remove iframe', () => {
 		let setState;
 		const Iframe = () => {
-			return <iframe src="https://codesandbox.io/s/runtime-silence-no4zx" />;
+			return <iframe src="about:blank" />;
 		};
 
 		const Test2 = () => <div>Test2</div>;
@@ -1091,14 +1091,14 @@ describe('render()', () => {
 		render(<App />, scratch);
 
 		expect(scratch.innerHTML).to.equal(
-			'<div><div>Test3</div><div>Test2</div><iframe src="https://codesandbox.io/s/runtime-silence-no4zx"></iframe></div>'
+			'<div><div>Test3</div><div>Test2</div><iframe src="about:blank"></iframe></div>'
 		);
 		clearLog();
 		setState({ value: false });
 		rerender();
 
 		expect(scratch.innerHTML).to.equal(
-			'<div><iframe src="https://codesandbox.io/s/runtime-silence-no4zx"></iframe></div>'
+			'<div><iframe src="about:blank"></iframe></div>'
 		);
 		expect(getLog()).to.deep.equal([
 			'<div>Test3.remove()',

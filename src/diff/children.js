@@ -1,8 +1,10 @@
 import { diff, unmount, applyRef } from './index';
 import { createVNode, Fragment } from '../create-element';
-import { EMPTY_OBJ, EMPTY_ARR } from '../constants';
+import { EMPTY_OBJ, EMPTY_ARR, EMPTY_VNODE } from '../constants';
 import { isArray } from '../util';
 import { getDomSibling } from '../component';
+
+export const diffChildren = diffChildren2;
 
 /**
  * Diff the children of a virtual node
@@ -25,7 +27,7 @@ import { getDomSibling } from '../component';
  * @param {boolean} isHydrating Whether or not we are in hydration
  * @param {Array<any>} refQueue an array of elements needed to invoke refs
  */
-export function diffChildren(
+function diffChildren1(
 	parentDom,
 	renderResult,
 	newParentVNode,
@@ -69,6 +71,8 @@ export function diffChildren(
 		// or we are rendering a component (e.g. setState) copy the oldVNodes so it can have
 		// it's own DOM & etc. pointers
 		else if (
+			// TODO: To make TS happy, I've added this check, but it's not necessary. Remove
+			typeof childVNode == 'string' ||
 			childVNode.constructor == String ||
 			typeof childVNode == 'number' ||
 			// eslint-disable-next-line valid-typeof
@@ -255,6 +259,286 @@ export function diffChildren(
 			unmount(oldChildren[i], oldChildren[i]);
 		}
 	}
+}
+
+/**
+ * Diff the children of a virtual node
+ * @param {import('../internal').PreactElement} parentDom The DOM element whose
+ * children are being diffed
+ * @param {import('../internal').ComponentChildren[]} renderResult
+ * @param {import('../internal').VNode} newParentVNode The new virtual
+ * node whose children should be diff'ed against oldParentVNode
+ * @param {import('../internal').VNode} oldParentVNode The old virtual
+ * node whose children should be diff'ed against newParentVNode
+ * @param {object} globalContext The current context object - modified by getChildContext
+ * @param {boolean} isSvg Whether or not this DOM node is an SVG node
+ * @param {Array<import('../internal').PreactElement>} excessDomChildren
+ * @param {Array<import('../internal').Component>} commitQueue List of components
+ * which have callbacks to invoke in commitRoot
+ * @param {import('../internal').PreactElement} oldDom The current attached DOM
+ * element any new dom elements should be placed around. Likely `null` on first
+ * render (except when hydrating). Can be a sibling DOM element when diffing
+ * Fragments that have siblings. In most cases, it starts out as `oldChildren[0]._dom`.
+ * @param {boolean} isHydrating Whether or not we are in hydration
+ * @param {Array<any>} refQueue an array of elements needed to invoke refs
+ */
+function diffChildren2(
+	parentDom,
+	renderResult,
+	newParentVNode,
+	oldParentVNode,
+	globalContext,
+	isSvg,
+	excessDomChildren,
+	commitQueue,
+	oldDom,
+	isHydrating,
+	refQueue
+) {
+	let i, j, childVNode, newDom, firstChildDom;
+
+	// This is a compression of oldParentVNode!=null && oldParentVNode != EMPTY_VNODE && oldParentVNode._children || EMPTY_ARR
+	// as EMPTY_VNODE._children should be `undefined`.
+	let oldChildren = (oldParentVNode && oldParentVNode._children) || EMPTY_ARR;
+
+	let oldChildrenLength = oldChildren.length,
+		newChildrenLength = renderResult.length;
+
+	const newChildren = (newParentVNode._children = constructNewChildrenArray(
+		newParentVNode,
+		renderResult,
+		oldChildren
+	));
+
+	// Remove remaining oldChildren if there are any.
+	for (i = oldChildrenLength; i--; ) {
+		if (oldChildren[i] != null) {
+			/*
+			if (
+				typeof newParentVNode.type == 'function' &&
+				oldChildren[i]._dom != null &&
+				oldChildren[i]._dom == newParentVNode._nextDom
+			) {
+				// If the newParentVNode.__nextDom points to a dom node that is about to
+				// be unmounted, then get the next sibling of that vnode and set
+				// _nextDom to it
+
+				newParentVNode._nextDom = oldChildren[i]._dom.nextSibling;
+			}
+			*/
+
+			unmount(oldChildren[i], oldChildren[i]);
+		}
+	}
+
+	for (let i = 0; i < newChildrenLength; i++) {
+		childVNode = newChildren[i];
+
+		if (
+			childVNode == null ||
+			typeof childVNode == 'boolean' ||
+			typeof childVNode == 'function'
+		) {
+			continue;
+		}
+
+		diff(
+			parentDom,
+			childVNode,
+			childVNode._prevVNode,
+			globalContext,
+			isSvg,
+			excessDomChildren,
+			commitQueue,
+			oldDom,
+			isHydrating,
+			refQueue
+		);
+
+		// Adjust DOM nodes
+		newDom = childVNode._dom;
+		if ((j = childVNode.ref) && childVNode._prevVNode.ref != j) {
+			if (childVNode._prevVNode.ref) {
+				applyRef(childVNode._prevVNode.ref, null, childVNode);
+			}
+			refQueue.push(j, childVNode._component || newDom, childVNode);
+		}
+
+		if (newDom != null) {
+			if (firstChildDom == null) {
+				firstChildDom = newDom;
+			}
+
+			if (childVNode._insert || childVNode._prevVNode === EMPTY_VNODE) {
+				if (typeof childVNode.type == 'function') {
+					oldDom = reorderChildren(childVNode, oldDom, parentDom);
+				} else {
+					oldDom = placeChild(parentDom, newDom, oldDom);
+				}
+			}
+
+			oldDom = newDom.nextSibling;
+		}
+
+		// Unset diffing properties
+		childVNode._prevVNode = null;
+		childVNode._insert = false;
+		childVNode._matched = false;
+	}
+
+	newParentVNode._dom = firstChildDom;
+}
+
+/**
+ * @param {import('../internal').VNode} newParentVNode
+ * @param {import('../internal').ComponentChildren[]} renderResult
+ * @param {import('../internal').VNode[]} oldChildren
+ * @returns {import('../internal').VNode[]}
+ */
+function constructNewChildrenArray(newParentVNode, renderResult, oldChildren) {
+	/** @type {number} */
+	let i;
+	/** @type {import('../internal').VNode} */
+	let childVNode;
+	/** @type {import('../internal').VNode} */
+	let oldVNode;
+	let remainingOldChildren = oldChildren.length;
+	let lastPlacedIndex = 0;
+	// TODO: Bring back skewed diff?
+	// let skew = 0;
+
+	const newChildren = [];
+	for (i = 0; i < renderResult.length; i++) {
+		childVNode = renderResult[i];
+
+		// Convert render results to VNodes (e.g. strings => VNodes, etc.)
+		if (
+			childVNode == null ||
+			typeof childVNode == 'boolean' ||
+			typeof childVNode == 'function'
+		) {
+			childVNode = newChildren[i] = null;
+		}
+		// If this newVNode is being reused (e.g. <div>{reuse}{reuse}</div>) in the same diff,
+		// or we are rendering a component (e.g. setState) copy the oldVNodes so it can have
+		// it's own DOM & etc. pointers
+		else if (
+			// TODO: To make TS happy, I've added this check, but it's not necessary. Remove
+			typeof childVNode == 'string' ||
+			childVNode.constructor == String ||
+			typeof childVNode == 'number' ||
+			// eslint-disable-next-line valid-typeof
+			typeof childVNode == 'bigint'
+		) {
+			childVNode = newChildren[i] = createVNode(
+				null,
+				childVNode,
+				null,
+				null,
+				childVNode
+			);
+		} else if (isArray(childVNode)) {
+			childVNode = newChildren[i] = createVNode(
+				Fragment,
+				{ children: childVNode },
+				null,
+				null,
+				null
+			);
+		} else if (childVNode._depth > 0) {
+			// VNode is already in use, clone it. This can happen in the following
+			// scenario:
+			//   const reuse = <div />
+			//   <div>{reuse}<span />{reuse}</div>
+			childVNode = newChildren[i] = createVNode(
+				childVNode.type,
+				childVNode.props,
+				childVNode.key,
+				childVNode.ref ? childVNode.ref : null,
+				childVNode._original
+			);
+		} else {
+			childVNode = newChildren[i] = childVNode;
+		}
+
+		// Handle unmounting null placeholders, i.e. VNode => null in unkeyed children
+		if (childVNode == null) {
+			oldVNode = oldChildren[i];
+			if (oldVNode && oldVNode.key == null && oldVNode._dom) {
+				/*
+				// TODO: Bring this back?
+				if (oldVNode._dom == oldDom) {
+					oldVNode._parent = oldParentVNode;
+					oldDom = getDomSibling(oldVNode);
+				}
+				*/
+
+				unmount(oldVNode, oldVNode, false);
+				oldChildren[i] = null;
+			}
+
+			continue;
+		}
+
+		childVNode._parent = newParentVNode;
+		childVNode._depth = newParentVNode._depth + 1;
+		childVNode._index = i;
+
+		// let skewedIndex = i + skew;
+		const matchingIndex = findMatchingIndex(
+			childVNode,
+			oldChildren,
+			i, // skewedIndex,
+			remainingOldChildren
+		);
+
+		childVNode._prevVNode = oldVNode =
+			oldChildren[matchingIndex] || EMPTY_VNODE;
+		if (matchingIndex === -1) {
+			childVNode._matched = false;
+			childVNode._insert = true;
+		} else {
+			childVNode._matched = true;
+			if (oldVNode._index < lastPlacedIndex) {
+				childVNode._insert = true;
+			} else {
+				lastPlacedIndex = oldVNode._index;
+			}
+
+			oldChildren[matchingIndex] = undefined;
+			remainingOldChildren--;
+		}
+
+		/*
+		let isMounting = oldVNode === EMPTY_VNODE || oldVNode._original === null;
+		if (isMounting) {
+			if (matchingIndex == -1) {
+				skew--;
+			}
+		} else if (matchingIndex !== skewedIndex) {
+			if (matchingIndex === skewedIndex + 1) {
+				skew++;
+			} else if (matchingIndex > skewedIndex) {
+				if (remainingOldChildren > newChildrenLength - skewedIndex) {
+					skew += matchingIndex - skewedIndex;
+				} else {
+					// ### Change from keyed: I think this was missing from the algo...
+					skew--;
+				}
+			} else if (matchingIndex < skewedIndex) {
+				if (matchingIndex == skewedIndex - 1) {
+					skew = matchingIndex - skewedIndex;
+				} else {
+					skew = 0;
+				}
+			} else {
+				skew = 0;
+			}
+		}
+		*/
+	}
+
+	return newChildren;
 }
 
 function reorderChildren(childVNode, oldDom, parentDom) {
