@@ -375,9 +375,23 @@ function diffChildren2(
 				} else {
 					oldDom = placeChild(parentDom, newDom, oldDom);
 				}
+			} else {
+				oldDom = newDom.nextSibling;
 			}
 
-			oldDom = newDom.nextSibling;
+			// TODO: Do we still need this?
+			/*
+			if (typeof newParentVNode.type == 'function') {
+				// Because the newParentVNode is Fragment-like, we need to set it's
+				// _nextDom property to the nextSibling of its last child DOM node.
+				//
+				// `oldDom` contains the correct value here because if the last child
+				// is a Fragment-like, then oldDom has already been set to that child's _nextDom.
+				// If the last child is a DOM VNode, then oldDom will be set to that DOM
+				// node's nextSibling.
+				newParentVNode._nextDom = oldDom;
+			}
+			*/
 		}
 
 		// Unset diffing properties
@@ -409,7 +423,7 @@ function constructNewChildrenArray(newParentVNode, renderResult, oldChildren) {
 
 	const newChildren = [];
 	for (i = 0; i < renderResult.length; i++) {
-		childVNode = renderResult[i];
+		childVNode = /** @type {import('../internal').VNode} */ (renderResult[i]);
 
 		// Convert render results to VNodes (e.g. strings => VNodes, etc.)
 		if (
@@ -494,23 +508,17 @@ function constructNewChildrenArray(newParentVNode, renderResult, oldChildren) {
 
 		childVNode._prevVNode = oldVNode =
 			oldChildren[matchingIndex] || EMPTY_VNODE;
-		if (matchingIndex === -1) {
+
+		let isMounting = oldVNode === EMPTY_VNODE || oldVNode._original === null;
+		if (isMounting) {
 			childVNode._matched = false;
-			childVNode._insert = true;
 		} else {
 			childVNode._matched = true;
-			if (oldVNode._index < lastPlacedIndex) {
-				childVNode._insert = true;
-			} else {
-				lastPlacedIndex = oldVNode._index;
-			}
-
 			oldChildren[matchingIndex] = undefined;
 			remainingOldChildren--;
 		}
 
 		/*
-		let isMounting = oldVNode === EMPTY_VNODE || oldVNode._original === null;
 		if (isMounting) {
 			if (matchingIndex == -1) {
 				skew--;
@@ -536,6 +544,14 @@ function constructNewChildrenArray(newParentVNode, renderResult, oldChildren) {
 			}
 		}
 		*/
+
+		if (isMounting) {
+			childVNode._insert = true;
+		} else if (oldVNode._index < lastPlacedIndex) {
+			childVNode._insert = true;
+		} else {
+			lastPlacedIndex = oldVNode._index;
+		}
 	}
 
 	return newChildren;
