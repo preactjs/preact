@@ -355,9 +355,11 @@ describe('debug', () => {
 	describe('table markup', () => {
 		it('missing <tbody>/<thead>/<tfoot>/<table>', () => {
 			const Table = () => (
-				<tr>
-					<td>hi</td>
-				</tr>
+				<div>
+					<tr>
+						<td>hi</td>
+					</tr>
+				</div>
 			);
 			render(<Table />, scratch);
 			expect(console.error).to.be.calledOnce;
@@ -365,11 +367,13 @@ describe('debug', () => {
 
 		it('missing <table> with <thead>', () => {
 			const Table = () => (
-				<thead>
-					<tr>
-						<td>hi</td>
-					</tr>
-				</thead>
+				<div>
+					<thead>
+						<tr>
+							<td>hi</td>
+						</tr>
+					</thead>
+				</div>
 			);
 			render(<Table />, scratch);
 			expect(console.error).to.be.calledOnce;
@@ -377,11 +381,13 @@ describe('debug', () => {
 
 		it('missing <table> with <tbody>', () => {
 			const Table = () => (
-				<tbody>
-					<tr>
-						<td>hi</td>
-					</tr>
-				</tbody>
+				<div>
+					<tbody>
+						<tr>
+							<td>hi</td>
+						</tr>
+					</tbody>
+				</div>
 			);
 			render(<Table />, scratch);
 			expect(console.error).to.be.calledOnce;
@@ -389,11 +395,13 @@ describe('debug', () => {
 
 		it('missing <table> with <tfoot>', () => {
 			const Table = () => (
-				<tfoot>
-					<tr>
-						<td>hi</td>
-					</tr>
-				</tfoot>
+				<div>
+					<tfoot>
+						<tr>
+							<td>hi</td>
+						</tr>
+					</tfoot>
+				</div>
 			);
 			render(<Table />, scratch);
 			expect(console.error).to.be.calledOnce;
