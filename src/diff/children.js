@@ -27,6 +27,7 @@ export const diffChildren = diffChildren2;
  * @param {boolean} isHydrating Whether or not we are in hydration
  * @param {Array<any>} refQueue an array of elements needed to invoke refs
  */
+// eslint-disable-next-line no-unused-vars
 function diffChildren1(
 	parentDom,
 	renderResult,
@@ -282,6 +283,7 @@ function diffChildren1(
  * @param {boolean} isHydrating Whether or not we are in hydration
  * @param {Array<any>} refQueue an array of elements needed to invoke refs
  */
+// eslint-disable-next-line no-unused-vars
 function diffChildren2(
 	parentDom,
 	renderResult,
