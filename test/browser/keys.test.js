@@ -6,7 +6,7 @@ import { setupRerender } from 'preact/test-utils';
 
 /** @jsx createElement */
 
-describe.only('keys', () => {
+describe('keys', () => {
 	/** @type {HTMLDivElement} */
 	let scratch;
 

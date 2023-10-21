@@ -73,6 +73,8 @@ export function createVNode(type, props, key, ref, original) {
 		_hydrating: null,
 		constructor: undefined,
 		_original: original == null ? ++vnodeId : original,
+		// TODO: Consolidate new VNode fields and add mangle.json entries for new
+		// ones that stay
 		_prevVNode: undefined,
 		_insert: false,
 		_matched: false,

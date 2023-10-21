@@ -7,7 +7,7 @@ import { logCall, clearLog, getLog } from '../_util/logCall';
 /** @jsx createElement */
 /* eslint-disable react/jsx-boolean-value */
 
-describe.only('Fragment', () => {
+describe('Fragment', () => {
 	/** @type {HTMLDivElement} */
 	let scratch;
 
