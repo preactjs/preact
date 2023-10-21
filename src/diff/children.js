@@ -304,28 +304,28 @@ function diffChildren2(
 	let oldChildrenLength = oldChildren.length,
 		newChildrenLength = renderResult.length;
 
+	// TODO: Is there a better way to track oldDom then a ref? Since
+	// constructNewChildrenArray can unmount DOM nodes while looping (to handle
+	// null placeholders, i.e. VNode => null in unkeyed children), we need to adjust
+	// oldDom in that method.
+	const oldDomRef = { current: oldDom };
 	const newChildren = (newParentVNode._children = constructNewChildrenArray(
 		newParentVNode,
 		renderResult,
-		oldChildren
+		oldChildren,
+		oldDomRef
 	));
 
-	// Remove remaining oldChildren if there are any.
-	for (i = oldChildrenLength; i--; ) {
-		if (oldChildren[i] != null) {
-			/*
-			if (
-				typeof newParentVNode.type == 'function' &&
-				oldChildren[i]._dom != null &&
-				oldChildren[i]._dom == newParentVNode._nextDom
-			) {
-				// If the newParentVNode.__nextDom points to a dom node that is about to
-				// be unmounted, then get the next sibling of that vnode and set
-				// _nextDom to it
+	oldDom = oldDomRef.current;
 
-				newParentVNode._nextDom = oldChildren[i]._dom.nextSibling;
+	// Remove remaining oldChildren if there are any. Loop forwards so that as we
+	// unmount DOM from the beginning of the oldChildren, we can adjust oldDom to
+	// point to the next child.
+	for (i = 0; i < oldChildrenLength; i++) {
+		if (oldChildren[i] != null && !oldChildren[i]._matched) {
+			if (oldDom == oldChildren[i]._dom) {
+				oldDom = getDomSibling(oldChildren[i]);
 			}
-			*/
 
 			unmount(oldChildren[i], oldChildren[i]);
 		}
@@ -407,9 +407,15 @@ function diffChildren2(
  * @param {import('../internal').VNode} newParentVNode
  * @param {import('../internal').ComponentChildren[]} renderResult
  * @param {import('../internal').VNode[]} oldChildren
+ * @param {{ current: import('../internal').PreactElement }} oldDomRef
  * @returns {import('../internal').VNode[]}
  */
-function constructNewChildrenArray(newParentVNode, renderResult, oldChildren) {
+function constructNewChildrenArray(
+	newParentVNode,
+	renderResult,
+	oldChildren,
+	oldDomRef
+) {
 	/** @type {number} */
 	let i;
 	/** @type {import('../internal').VNode} */
@@ -479,13 +485,10 @@ function constructNewChildrenArray(newParentVNode, renderResult, oldChildren) {
 		if (childVNode == null) {
 			oldVNode = oldChildren[i];
 			if (oldVNode && oldVNode.key == null && oldVNode._dom) {
-				/*
-				// TODO: Bring this back?
-				if (oldVNode._dom == oldDom) {
-					oldVNode._parent = oldParentVNode;
-					oldDom = getDomSibling(oldVNode);
+				if (oldVNode._dom == oldDomRef.current) {
+					// oldVNode._parent = oldParentVNode;
+					oldDomRef.current = getDomSibling(oldVNode);
 				}
-				*/
 
 				unmount(oldVNode, oldVNode, false);
 				oldChildren[i] = null;

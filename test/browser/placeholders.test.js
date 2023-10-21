@@ -6,7 +6,7 @@ import { div } from '../_util/dom';
 
 /** @jsx createElement */
 
-describe('null placeholders', () => {
+describe.only('null placeholders', () => {
 	/** @type {HTMLDivElement} */
 	let scratch;
 
