@@ -53,7 +53,7 @@ function createVNode(type, props, key, isStaticChildren, __source, __self) {
 		_hydrating: null,
 		constructor: undefined,
 		_original: --vnodeId,
-		_prevVNode: undefined,
+		_prevVNode: null,
 		_insert: false,
 		_matched: false,
 		_index: -1,
