@@ -369,18 +369,34 @@ function diffChildren2(
 				firstChildDom = newDom;
 			}
 
-			if (childVNode._insert || childVNode._prevVNode === EMPTY_VNODE) {
+			// TODO: Golf this `if` block
+			if (
+				childVNode._insert ||
+				(typeof childVNode.type == 'function' &&
+					childVNode._children == childVNode._prevVNode._children)
+			) {
 				if (typeof childVNode.type == 'function') {
 					oldDom = reorderChildren(childVNode, oldDom, parentDom);
 				} else {
 					oldDom = placeChild(parentDom, newDom, oldDom);
 				}
+			} else if (childVNode._nextDom !== undefined) {
+				// Only Fragments or components that return Fragment like VNodes will
+				// have a non-undefined _nextDom. Continue the diff from the sibling
+				// of last DOM child of this child VNode
+				oldDom = childVNode._nextDom;
+
+				// Eagerly cleanup _nextDom. We don't need to persist the value because
+				// it is only used by `diffChildren` to determine where to resume the diff after
+				// diffing Components and Fragments. Once we store it the nextDOM local var, we
+				// can clean up the property
+				childVNode._nextDom = undefined;
 			} else {
 				oldDom = newDom.nextSibling;
 			}
 
-			// TODO: Do we still need this?
-			/*
+			// TODO: With new child diffing algo, consider alt ways to diff Fragments.
+			// Such as dropping oldDom and moving fragments in place
 			if (typeof newParentVNode.type == 'function') {
 				// Because the newParentVNode is Fragment-like, we need to set it's
 				// _nextDom property to the nextSibling of its last child DOM node.
@@ -391,7 +407,6 @@ function diffChildren2(
 				// node's nextSibling.
 				newParentVNode._nextDom = oldDom;
 			}
-			*/
 		}
 
 		// Unset diffing properties
@@ -555,18 +570,9 @@ function constructNewChildrenArray(
 		}
 
 		skewedIndex = i + skew;
-		if (
-			typeof childVNode.type == 'function' &&
-			(matchingIndex !== skewedIndex ||
-				oldVNode._children === childVNode._children)
-		) {
-			childVNode._insert = true;
-		} else if (
-			typeof childVNode.type != 'function' &&
-			(matchingIndex !== skewedIndex || isMounting)
-		) {
-			childVNode._insert = true;
-		}
+		childVNode._insert =
+			matchingIndex !== skewedIndex ||
+			(typeof childVNode.type != 'function' && isMounting);
 	}
 
 	return newChildren;
