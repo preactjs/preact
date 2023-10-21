@@ -422,10 +422,9 @@ function constructNewChildrenArray(
 	let childVNode;
 	/** @type {import('../internal').VNode} */
 	let oldVNode;
+	let newChildrenLength = renderResult.length;
 	let remainingOldChildren = oldChildren.length;
-	let lastPlacedIndex = 0;
-	// TODO: Bring back skewed diff?
-	// let skew = 0;
+	let skew = 0;
 
 	const newChildren = [];
 	for (i = 0; i < renderResult.length; i++) {
@@ -491,7 +490,18 @@ function constructNewChildrenArray(
 				}
 
 				unmount(oldVNode, oldVNode, false);
+
+				// Explicitly nullify this position in oldChildren instead of just
+				// setting `_match=true` to prevent other routines (e.g.
+				// `findMatchingIndex` or `getDomSibling`) from thinking VNodes or DOM
+				// nodes in this position are still available to be used in diffing when
+				// they have actually already been unmounted. For example, by only
+				// setting `_match=true` here, the unmounting loop later would attempt
+				// to unmount this VNode again seeing `_match==true`.  Further,
+				// getDomSibling doesn't know about _match and so would incorrectly
+				// assume DOM nodes in this subtree are mounted and usable.
 				oldChildren[i] = null;
+				remainingOldChildren--;
 			}
 
 			continue;
@@ -501,11 +511,11 @@ function constructNewChildrenArray(
 		childVNode._depth = newParentVNode._depth + 1;
 		childVNode._index = i;
 
-		// let skewedIndex = i + skew;
+		let skewedIndex = i + skew;
 		const matchingIndex = findMatchingIndex(
 			childVNode,
 			oldChildren,
-			i, // skewedIndex,
+			skewedIndex,
 			remainingOldChildren
 		);
 
@@ -513,15 +523,12 @@ function constructNewChildrenArray(
 			oldChildren[matchingIndex] || EMPTY_VNODE;
 
 		let isMounting = oldVNode === EMPTY_VNODE || oldVNode._original === null;
-		if (isMounting) {
-			childVNode._matched = false;
-		} else {
-			childVNode._matched = true;
-			oldChildren[matchingIndex] = undefined;
+		if (!isMounting) {
+			// Mark oldVNode as matched so it isn't unmounted
+			oldVNode._matched = true;
 			remainingOldChildren--;
 		}
 
-		/*
 		if (isMounting) {
 			if (matchingIndex == -1) {
 				skew--;
@@ -546,14 +553,19 @@ function constructNewChildrenArray(
 				skew = 0;
 			}
 		}
-		*/
 
-		if (isMounting) {
+		skewedIndex = i + skew;
+		if (
+			typeof childVNode.type == 'function' &&
+			(matchingIndex !== skewedIndex ||
+				oldVNode._children === childVNode._children)
+		) {
 			childVNode._insert = true;
-		} else if (oldVNode._index < lastPlacedIndex) {
+		} else if (
+			typeof childVNode.type != 'function' &&
+			(matchingIndex !== skewedIndex || isMounting)
+		) {
 			childVNode._insert = true;
-		} else {
-			lastPlacedIndex = oldVNode._index;
 		}
 	}
 
@@ -632,17 +644,32 @@ function findMatchingIndex(
 	let x = skewedIndex - 1;
 	let y = skewedIndex + 1;
 	let oldVNode = oldChildren[skewedIndex];
+	// We only need to perform a search if there are more children
+	// (remainingOldChildren) to search. However, if the oldVNode we just looked
+	// at skewedIndex was not already used in this diff, then there must be at
+	// least 1 other (so greater than 1) remainingOldChildren to attempt to match
+	// against. So the following condition checks that ensuring
+	// remainingOldChildren > 1 if the oldVNode is not already used/matched. Else
+	// if the oldVNode was null or matched, then there could needs to be at least
+	// 1 (aka `remainingOldChildren > 0`) children to find and compare against.
+	let shouldSearch =
+		remainingOldChildren > (oldVNode != null && !oldVNode._matched ? 1 : 0);
 
 	if (
 		oldVNode === null ||
 		(oldVNode && key == oldVNode.key && type === oldVNode.type)
 	) {
 		return skewedIndex;
-	} else if (remainingOldChildren > (oldVNode != null ? 1 : 0)) {
+	} else if (shouldSearch) {
 		while (x >= 0 || y < oldChildren.length) {
 			if (x >= 0) {
 				oldVNode = oldChildren[x];
-				if (oldVNode && key == oldVNode.key && type === oldVNode.type) {
+				if (
+					oldVNode &&
+					!oldVNode._matched &&
+					key == oldVNode.key &&
+					type === oldVNode.type
+				) {
 					return x;
 				}
 				x--;
@@ -650,7 +677,12 @@ function findMatchingIndex(
 
 			if (y < oldChildren.length) {
 				oldVNode = oldChildren[y];
-				if (oldVNode && key == oldVNode.key && type === oldVNode.type) {
+				if (
+					oldVNode &&
+					!oldVNode._matched &&
+					key == oldVNode.key &&
+					type === oldVNode.type
+				) {
 					return y;
 				}
 				y++;

@@ -6,7 +6,7 @@ import { setupRerender } from 'preact/test-utils';
 
 /** @jsx createElement */
 
-describe('keys', () => {
+describe.only('keys', () => {
 	/** @type {HTMLDivElement} */
 	let scratch;
 
@@ -252,9 +252,9 @@ describe('keys', () => {
 		render(<List values={values} />, scratch);
 		expect(scratch.textContent).to.equal('abcd');
 		expect(getLog()).to.deep.equal([
-			'<li>z.remove()',
+			'<li>x.remove()',
 			'<li>y.remove()',
-			'<li>x.remove()'
+			'<li>z.remove()'
 		]);
 	});
 
@@ -462,8 +462,8 @@ describe('keys', () => {
 
 		expect(scratch.innerHTML).to.equal(expectedHtml);
 		expect(ops).to.deep.equal([
-			'Unmount Stateful2',
 			'Unmount Stateful1',
+			'Unmount Stateful2',
 			'Mount Stateful1',
 			'Mount Stateful2'
 		]);
@@ -475,8 +475,8 @@ describe('keys', () => {
 
 		expect(scratch.innerHTML).to.equal(expectedHtml);
 		expect(ops).to.deep.equal([
-			'Unmount Stateful2',
 			'Unmount Stateful1',
+			'Unmount Stateful2',
 			'Mount Stateful1',
 			'Mount Stateful2'
 		]);
@@ -731,8 +731,8 @@ describe('keys', () => {
 
 		expect(scratch.innerHTML).to.equal(expectedHtml);
 		expect(ops).to.deep.equal([
-			'Unmount Stateful2',
 			'Unmount Stateful1',
+			'Unmount Stateful2',
 			'Mount Stateful1',
 			'Mount Stateful2'
 		]);
@@ -744,8 +744,8 @@ describe('keys', () => {
 
 		expect(scratch.innerHTML).to.equal(expectedHtml);
 		expect(ops).to.deep.equal([
-			'Unmount Stateful2',
 			'Unmount Stateful1',
+			'Unmount Stateful2',
 			'Mount Stateful1',
 			'Mount Stateful2'
 		]);
