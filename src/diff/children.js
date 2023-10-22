@@ -375,7 +375,7 @@ function diffChildren2(
 			if (
 				childVNode._insert ||
 				(typeof childVNode.type == 'function' &&
-					childVNode._children == childVNode._prevVNode._children)
+					childVNode._children === childVNode._prevVNode._children)
 			) {
 				if (typeof childVNode.type == 'function') {
 					oldDom = reorderChildren(childVNode, oldDom, parentDom);
