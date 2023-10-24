@@ -81,7 +81,7 @@ function removeOriginal(vnode, detachedParent, originalParent) {
 		if (vnode._component) {
 			if (vnode._component._parentDom === detachedParent) {
 				if (vnode._dom) {
-					originalParent.insertBefore(vnode._dom, vnode._nextDom);
+					originalParent.appendChild(vnode._dom);
 				}
 				vnode._component._force = true;
 				vnode._component._parentDom = originalParent;
