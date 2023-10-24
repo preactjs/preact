@@ -143,7 +143,6 @@ function renderComponent(component) {
 			refQueue
 		);
 
-		vnode._nextDom = undefined;
 		commitRoot(commitQueue, vnode, refQueue);
 
 		if (vnode._dom != oldDom) {
