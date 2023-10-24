@@ -2176,6 +2176,8 @@ export namespace JSXInternal {
 					| 'send'
 					| undefined
 			  >;
+		elementTiming?: string | undefined | SignalLike<string | undefined>;
+		elementtiming?: HTMLAttributes['elementTiming'];
 		for?: string | undefined | SignalLike<string | undefined>;
 		form?: string | undefined | SignalLike<string | undefined>;
 		formAction?: string | undefined | SignalLike<string | undefined>;
