@@ -2181,6 +2181,7 @@ export namespace JSXInternal {
 					| 'send'
 					| undefined
 			  >;
+		exportparts?: string | undefined | SignalLike<string | undefined>;
 		for?: string | undefined | SignalLike<string | undefined>;
 		form?: string | undefined | SignalLike<string | undefined>;
 		formAction?: string | undefined | SignalLike<string | undefined>;
