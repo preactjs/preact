@@ -196,28 +196,28 @@ export function diffChildren(
 
 			skewedIndex = i + skew;
 
-			if (
-				typeof childVNode.type == 'function' &&
-				(matchingIndex !== skewedIndex ||
-					oldVNode._children === childVNode._children)
-			) {
-				oldDom = reorderChildren(childVNode, oldDom, parentDom);
-			} else if (
-				typeof childVNode.type != 'function' &&
-				(matchingIndex !== skewedIndex || isMounting)
-			) {
-				oldDom = placeChild(parentDom, newDom, oldDom);
-			} else if (childVNode._nextDom !== undefined) {
-				// Only Fragments or components that return Fragment like VNodes will
-				// have a non-undefined _nextDom. Continue the diff from the sibling
-				// of last DOM child of this child VNode
-				oldDom = childVNode._nextDom;
+			if (typeof childVNode.type == 'function') {
+				if (
+					matchingIndex !== skewedIndex ||
+					oldVNode._children === childVNode._children
+				) {
+					oldDom = reorderChildren(childVNode, oldDom, parentDom);
+				} else if (childVNode._nextDom !== undefined) {
+					// Only Fragments or components that return Fragment like VNodes will
+					// have a non-undefined _nextDom. Continue the diff from the sibling
+					// of last DOM child of this child VNode
+					oldDom = childVNode._nextDom;
+				} else {
+					oldDom = newDom.nextSibling;
+				}
 
 				// Eagerly cleanup _nextDom. We don't need to persist the value because
 				// it is only used by `diffChildren` to determine where to resume the diff after
 				// diffing Components and Fragments. Once we store it the nextDOM local var, we
 				// can clean up the property
 				childVNode._nextDom = undefined;
+			} else if (matchingIndex !== skewedIndex || isMounting) {
+				oldDom = placeChild(parentDom, newDom, oldDom);
 			} else {
 				oldDom = newDom.nextSibling;
 			}

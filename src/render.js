@@ -60,6 +60,8 @@ export function render(vnode, parentDom, replaceNode) {
 		refQueue
 	);
 
+	vnode._nextDom = undefined;
+
 	// Flush all queued effects
 	commitRoot(commitQueue, vnode, refQueue);
 }
