@@ -392,6 +392,7 @@ function diffChildren2(
 				// it is only used by `diffChildren` to determine where to resume the diff after
 				// diffing Components and Fragments. Once we store it the nextDOM local var, we
 				// can clean up the property
+				// TODO: Should we always set this to undefined to ensure it is cleaned up?
 				childVNode._nextDom = undefined;
 			} else {
 				oldDom = newDom.nextSibling;
