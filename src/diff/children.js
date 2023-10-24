@@ -40,7 +40,9 @@ export function diffChildren(
 ) {
 	let i,
 		j,
+		/** @type {import('../internal').VNode} */
 		oldVNode,
+		/** @type {import('../internal').VNode} */
 		childVNode,
 		newDom,
 		firstChildDom,
@@ -111,7 +113,6 @@ export function diffChildren(
 			oldVNode = oldChildren[i];
 			if (oldVNode && oldVNode.key == null && oldVNode._dom) {
 				if (oldVNode._dom == oldDom) {
-					oldVNode._parent = oldParentVNode;
 					oldDom = getDomSibling(oldVNode);
 				}
 
@@ -124,6 +125,7 @@ export function diffChildren(
 
 		childVNode._parent = newParentVNode;
 		childVNode._depth = newParentVNode._depth + 1;
+		childVNode._index = i;
 
 		let skewedIndex = i + skew;
 		const matchingIndex = findMatchingIndex(

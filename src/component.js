@@ -91,7 +91,7 @@ export function getDomSibling(vnode, childIndex) {
 	if (childIndex == null) {
 		// Use childIndex==null as a signal to resume the search from the vnode's sibling
 		return vnode._parent
-			? getDomSibling(vnode._parent, vnode._parent._children.indexOf(vnode) + 1)
+			? getDomSibling(vnode._parent, vnode._index + 1)
 			: null;
 	}
 
@@ -103,7 +103,7 @@ export function getDomSibling(vnode, childIndex) {
 			// Since updateParentDomPointers keeps _dom pointer correct,
 			// we can rely on _dom to tell us if this subtree contains a
 			// rendered DOM node, and what the first rendered DOM node is
-			return sibling._nextDom || sibling._dom;
+			return sibling._dom;
 		}
 	}
 
