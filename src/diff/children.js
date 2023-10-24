@@ -38,12 +38,10 @@ export function diffChildren(
 	isHydrating,
 	refQueue
 ) {
-	/** @type {import('../internal').VNode} */
-	let childVNode;
-	/** @type {import('../internal').VNode} */
-	let oldVNode;
 	let i,
 		j,
+		oldVNode,
+		childVNode,
 		newDom,
 		firstChildDom,
 		skew = 0;
