@@ -677,6 +677,84 @@ describe('Fragment', () => {
 		);
 	});
 
+	it('should preserve order for fragment switching with sibling DOM', () => {
+		/** @type {() => void} */
+		let set;
+		class Foo extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { isLoading: true, data: null };
+				set = this.setState.bind(this);
+			}
+			render(props, { isLoading, data }) {
+				return (
+					<Fragment>
+						<div>HEADER</div>
+						{isLoading ? <div>Loading...</div> : null}
+						{data ? <div>Content: {data}</div> : null}
+						<div>FOOTER</div>
+					</Fragment>
+				);
+			}
+		}
+
+		render(<Foo />, scratch);
+		expect(scratch.innerHTML).to.equal(
+			'<div>HEADER</div><div>Loading...</div><div>FOOTER</div>'
+		);
+
+		set({ isLoading: false, data: 2 });
+		rerender();
+		expect(scratch.innerHTML).to.equal(
+			'<div>HEADER</div><div>Content: 2</div><div>FOOTER</div>'
+		);
+	});
+
+	it('should preserve order for fragment switching with sibling Components', () => {
+		/** @type {() => void} */
+		let set;
+		class Foo extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { isLoading: true, data: null };
+				set = this.setState.bind(this);
+			}
+			render(props, { isLoading, data }) {
+				return (
+					<Fragment>
+						<div>HEADER</div>
+						{isLoading ? <div>Loading...</div> : null}
+						{data ? <div>Content: {data}</div> : null}
+					</Fragment>
+				);
+			}
+		}
+
+		function Footer() {
+			return <div>FOOTER</div>;
+		}
+
+		function App() {
+			return (
+				<Fragment>
+					<Foo />
+					<Footer />
+				</Fragment>
+			);
+		}
+
+		render(<App />, scratch);
+		expect(scratch.innerHTML).to.equal(
+			'<div>HEADER</div><div>Loading...</div><div>FOOTER</div>'
+		);
+
+		set({ isLoading: false, data: 2 });
+		rerender();
+		expect(scratch.innerHTML).to.equal(
+			'<div>HEADER</div><div>Content: 2</div><div>FOOTER</div>'
+		);
+	});
+
 	it('should preserve order for nested fragment switching w/ child return', () => {
 		let set;
 		const Wrapper = ({ children }) => <Fragment>{children}</Fragment>;
