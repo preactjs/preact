@@ -5,6 +5,7 @@ import {
 } from '../../../test/_util/helpers';
 import { div, span } from '../../../test/_util/dom';
 import React, { createElement, Children, render } from 'preact/compat';
+import sinon from 'sinon';
 
 describe('Children', () => {
 	/** @type {HTMLDivElement} */
@@ -104,6 +105,17 @@ describe('Children', () => {
 
 			render(<Foo>{testNumber}</Foo>, scratch);
 			expect(serializeHtml(scratch)).to.equal('<div><span>0</span></div>');
+		});
+
+		it('should propagate "this" context', () => {
+			const context = {};
+			const spy = sinon.spy(child => child); // noop
+			const Foo = ({ children }) => {
+				return React.Children.map(children, spy, context);
+			};
+			render(<Foo>foo</Foo>, scratch);
+
+			expect(spy.thisValues[0]).to.equal(context);
 		});
 
 		it('should flatten result', () => {
