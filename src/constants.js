@@ -1,3 +1,4 @@
+export const COMMENT_TYPE = 8;
 export const EMPTY_OBJ = {};
 export const EMPTY_ARR = [];
 export const IS_NON_DIMENSIONAL =

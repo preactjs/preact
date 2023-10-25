@@ -102,9 +102,11 @@ type RefObject<T> = { current: T | null };
 type RefCallback<T> = { (instance: T | null): void; current: undefined };
 type Ref<T> = RefObject<T> | RefCallback<T>;
 
+type COMMENT_TYPE = 8;
+
 export interface VNode<P = {}> extends preact.VNode<P> {
 	// Redefine type here using our internal ComponentType type
-	type: string | ComponentType<P>;
+	type: string | ComponentType<P> | COMMENT_TYPE;
 	props: P & { children: ComponentChildren };
 	ref?: Ref<any> | null;
 	_children: Array<VNode<any>> | null;

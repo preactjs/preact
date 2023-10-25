@@ -1,4 +1,4 @@
-import { EMPTY_OBJ } from '../constants';
+import { COMMENT_TYPE, EMPTY_OBJ } from '../constants';
 import { Component, getDomSibling } from '../component';
 import { Fragment } from '../create-element';
 import { diffChildren } from './children';
@@ -364,8 +364,11 @@ function diffElementNodes(
 			// excessDomChildren so it isn't later removed in diffChildren
 			if (
 				child &&
-				'setAttribute' in child === !!nodeType &&
-				(nodeType ? child.localName === nodeType : child.nodeType === 3)
+				(nodeType === COMMENT_TYPE
+					? child.nodeType === COMMENT_TYPE
+					: nodeType
+					? child.localName === nodeType
+					: child.nodeType === 3)
 			) {
 				dom = child;
 				excessDomChildren[i] = null;
@@ -378,6 +381,9 @@ function diffElementNodes(
 		if (nodeType === null) {
 			// @ts-ignore createTextNode returns Text, we expect PreactElement
 			return document.createTextNode(newProps);
+		} else if (nodeType === COMMENT_TYPE) {
+			// @ts-ignore createComment returns Comment, we expect PreactElement
+			return document.createComment(newProps);
 		}
 
 		if (isSvg) {
@@ -400,7 +406,7 @@ function diffElementNodes(
 		isHydrating = false;
 	}
 
-	if (nodeType === null) {
+	if (nodeType === null || nodeType === COMMENT_TYPE) {
 		// During hydration, we still have to split merged text from SSR'd HTML.
 		if (oldProps !== newProps && (!isHydrating || dom.data !== newProps)) {
 			dom.data = newProps;
