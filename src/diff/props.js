@@ -173,6 +173,11 @@ function eventProxy(e) {
 	return eventHandler(options.event ? options.event(e) : e);
 }
 
+/**
+ * Proxy an event to hooked event handlers
+ * @param {PreactEvent} e The event object from the browser
+ * @private
+ */
 function eventProxyCapture(e) {
 	return this._listeners[e.type + true](options.event ? options.event(e) : e);
 }

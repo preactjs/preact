@@ -22,7 +22,7 @@ import options from '../options';
  * hydrating). Can be a sibling DOM element when diffing Fragments that have
  * siblings. In most cases, it starts out as `oldChildren[0]._dom`.
  * @param {boolean} isHydrating Whether or not we are in hydration
- * @param {Array<any>} refQueue an array of elements needed to invoke refs
+ * @param {any[]} refQueue an array of elements needed to invoke refs
  */
 export function diff(
 	parentDom,
@@ -36,6 +36,7 @@ export function diff(
 	isHydrating,
 	refQueue
 ) {
+	/** @type {any} */
 	let tmp,
 		newType = newVNode.type;
 
@@ -333,11 +334,11 @@ export function commitRoot(commitQueue, root, refQueue) {
  * @param {VNode} oldVNode The old virtual node
  * @param {object} globalContext The current context object
  * @param {boolean} isSvg Whether or not this DOM node is an SVG node
- * @param {*} excessDomChildren
+ * @param {Array<PreactElement>} excessDomChildren
  * @param {Array<Component>} commitQueue List of components which have callbacks
  * to invoke in commitRoot
  * @param {boolean} isHydrating Whether or not we are in hydration
- * @param {Array<any>} refQueue an array of elements needed to invoke refs
+ * @param {any[]} refQueue an array of elements needed to invoke refs
  * @returns {PreactElement}
  */
 function diffElementNodes(
@@ -498,7 +499,7 @@ function diffElementNodes(
 
 /**
  * Invoke or update a ref, depending on whether it is a function or object ref.
- * @param {object|function} ref
+ * @param {Ref<any>} ref
  * @param {any} value
  * @param {VNode} vnode
  */

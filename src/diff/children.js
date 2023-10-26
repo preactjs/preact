@@ -24,7 +24,7 @@ import { getDomSibling } from '../component';
  * hydrating). Can be a sibling DOM element when diffing Fragments that have
  * siblings. In most cases, it starts out as `oldChildren[0]._dom`.
  * @param {boolean} isHydrating Whether or not we are in hydration
- * @param {Array<any>} refQueue an array of elements needed to invoke refs
+ * @param {any[]} refQueue an array of elements needed to invoke refs
  */
 export function diffChildren(
 	parentDom,
@@ -45,12 +45,15 @@ export function diffChildren(
 		oldVNode,
 		/** @type {VNode} */
 		childVNode,
+		/** @type {PreactElement} */
 		newDom,
+		/** @type {PreactElement} */
 		firstChildDom,
 		skew = 0;
 
 	// This is a compression of oldParentVNode!=null && oldParentVNode != EMPTY_OBJ && oldParentVNode._children || EMPTY_ARR
 	// as EMPTY_OBJ._children should be `undefined`.
+	/** @type {VNode[]} */
 	let oldChildren = (oldParentVNode && oldParentVNode._children) || EMPTY_ARR;
 
 	let oldChildrenLength = oldChildren.length,

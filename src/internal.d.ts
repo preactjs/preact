@@ -105,6 +105,10 @@ declare global {
 		// nextSibling required for inserting nodes
 		readonly nextSibling: ContainerNode | null;
 
+		// Used to match DOM nodes to VNodes during hydration. Note: doesn't exist
+		// on Text nodes
+		readonly localName?: string;
+
 		// Input handling
 		value?: HTMLInputElement['value'];
 		checked?: HTMLInputElement['checked'];

@@ -9,7 +9,11 @@
  */
 export function _catchError(error, vnode, oldVNode, errorInfo) {
 	/** @type {Component} */
-	let component, ctor, handled;
+	let component,
+		/** @type {ComponentType} */
+		ctor,
+		/** @type {boolean} */
+		handled;
 
 	for (; (vnode = vnode._parent); ) {
 		if ((component = vnode._component) && !component._processingException) {
