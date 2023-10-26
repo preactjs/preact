@@ -120,6 +120,13 @@ export function diffChildren(
 			if (oldVNode && oldVNode.key == null && oldVNode._dom) {
 				if (oldVNode._dom == oldDom) {
 					oldDom = getDomSibling(oldVNode);
+
+					if (typeof newParentVNode.type == 'function') {
+						// If the parent VNode is a component/fragment, make sure its diff
+						// continues with a DOM node that is still mounted in case this loop
+						// exits here because the rest of the new children are `null`.
+						newParentVNode._nextDom = oldDom;
+					}
 				}
 
 				unmount(oldVNode, oldVNode, false);
@@ -171,75 +178,75 @@ export function diffChildren(
 			refQueue.push(j, childVNode._component || newDom, childVNode);
 		}
 
-		if (newDom != null) {
-			if (firstChildDom == null) {
-				firstChildDom = newDom;
-			}
+		if (firstChildDom == null && newDom != null) {
+			firstChildDom = newDom;
+		}
 
-			let isMounting = oldVNode === EMPTY_OBJ || oldVNode._original === null;
-			if (isMounting) {
-				if (matchingIndex == -1) {
+		let isMounting = oldVNode === EMPTY_OBJ || oldVNode._original === null;
+		if (isMounting) {
+			if (matchingIndex == -1) {
+				skew--;
+			}
+		} else if (matchingIndex !== skewedIndex) {
+			if (matchingIndex === skewedIndex + 1) {
+				skew++;
+			} else if (matchingIndex > skewedIndex) {
+				if (remainingOldChildren > newChildrenLength - skewedIndex) {
+					skew += matchingIndex - skewedIndex;
+				} else {
+					// ### Change from keyed: I think this was missing from the algo...
 					skew--;
 				}
-			} else if (matchingIndex !== skewedIndex) {
-				if (matchingIndex === skewedIndex + 1) {
-					skew++;
-				} else if (matchingIndex > skewedIndex) {
-					if (remainingOldChildren > newChildrenLength - skewedIndex) {
-						skew += matchingIndex - skewedIndex;
-					} else {
-						// ### Change from keyed: I think this was missing from the algo...
-						skew--;
-					}
-				} else if (matchingIndex < skewedIndex) {
-					if (matchingIndex == skewedIndex - 1) {
-						skew = matchingIndex - skewedIndex;
-					} else {
-						skew = 0;
-					}
+			} else if (matchingIndex < skewedIndex) {
+				if (matchingIndex == skewedIndex - 1) {
+					skew = matchingIndex - skewedIndex;
 				} else {
 					skew = 0;
 				}
+			} else {
+				skew = 0;
+			}
+		}
+
+		skewedIndex = i + skew;
+
+		if (typeof childVNode.type == 'function') {
+			if (
+				matchingIndex !== skewedIndex ||
+				oldVNode._children === childVNode._children
+			) {
+				oldDom = reorderChildren(childVNode, oldDom, parentDom);
+			} else if (childVNode._nextDom !== undefined) {
+				// Only Fragments or components that return Fragment like VNodes will
+				// have a non-undefined _nextDom. Continue the diff from the sibling
+				// of last DOM child of this child VNode
+				oldDom = childVNode._nextDom;
+			} else if (newDom) {
+				oldDom = newDom.nextSibling;
 			}
 
-			skewedIndex = i + skew;
-
-			if (typeof childVNode.type == 'function') {
-				if (
-					matchingIndex !== skewedIndex ||
-					oldVNode._children === childVNode._children
-				) {
-					oldDom = reorderChildren(childVNode, oldDom, parentDom);
-				} else if (childVNode._nextDom !== undefined) {
-					// Only Fragments or components that return Fragment like VNodes will
-					// have a non-undefined _nextDom. Continue the diff from the sibling
-					// of last DOM child of this child VNode
-					oldDom = childVNode._nextDom;
-				} else {
-					oldDom = newDom.nextSibling;
-				}
-
-				// Eagerly cleanup _nextDom. We don't need to persist the value because
-				// it is only used by `diffChildren` to determine where to resume the diff after
-				// diffing Components and Fragments. Once we store it the nextDOM local var, we
-				// can clean up the property
-				childVNode._nextDom = undefined;
-			} else if (matchingIndex !== skewedIndex || isMounting) {
+			// Eagerly cleanup _nextDom. We don't need to persist the value because
+			// it is only used by `diffChildren` to determine where to resume the diff after
+			// diffing Components and Fragments. Once we store it the nextDOM local var, we
+			// can clean up the property
+			childVNode._nextDom = undefined;
+		} else if (newDom) {
+			if (matchingIndex !== skewedIndex || isMounting) {
 				oldDom = placeChild(parentDom, newDom, oldDom);
 			} else {
 				oldDom = newDom.nextSibling;
 			}
+		}
 
-			if (typeof newParentVNode.type == 'function') {
-				// Because the newParentVNode is Fragment-like, we need to set it's
-				// _nextDom property to the nextSibling of its last child DOM node.
-				//
-				// `oldDom` contains the correct value here because if the last child
-				// is a Fragment-like, then oldDom has already been set to that child's _nextDom.
-				// If the last child is a DOM VNode, then oldDom will be set to that DOM
-				// node's nextSibling.
-				newParentVNode._nextDom = oldDom;
-			}
+		if (typeof newParentVNode.type == 'function') {
+			// Because the newParentVNode is Fragment-like, we need to set it's
+			// _nextDom property to the nextSibling of its last child DOM node.
+			//
+			// `oldDom` contains the correct value here because if the last child
+			// is a Fragment-like, then oldDom has already been set to that child's _nextDom.
+			// If the last child is a DOM VNode, then oldDom will be set to that DOM
+			// node's nextSibling.
+			newParentVNode._nextDom = oldDom;
 		}
 	}
 
@@ -251,12 +258,11 @@ export function diffChildren(
 			if (
 				typeof newParentVNode.type == 'function' &&
 				oldChildren[i]._dom != null &&
-				oldChildren[i]._dom == newParentVNode._nextDom
+				oldChildren[i]._dom == oldDom
 			) {
-				// If the newParentVNode.__nextDom points to a dom node that is about to
-				// be unmounted, then get the next sibling of that vnode and set
-				// _nextDom to it
-
+				// If oldDom points to a dom node that is about to be unmounted, then
+				// get the next sibling of that vnode and set _nextDom to it, so the
+				// parent's diff continues diffing an existing DOM node
 				newParentVNode._nextDom = oldChildren[i]._dom.nextSibling;
 			}
 

@@ -1,7 +1,7 @@
 import { setupRerender } from 'preact/test-utils';
 import { createElement, render, Component, Fragment } from 'preact';
 import { setupScratch, teardown } from '../_util/helpers';
-import { span, div, ul, ol, li, section } from '../_util/dom';
+import { span, div, ul, ol, li, section, p } from '../_util/dom';
 import { logCall, clearLog, getLog } from '../_util/logCall';
 
 /** @jsx createElement */
@@ -647,6 +647,7 @@ describe('Fragment', () => {
 	});
 
 	it('should preserve order for fragment switching', () => {
+		/** @type {(newState: { isLoading: boolean; data: number | null }) => void} */
 		let set;
 		class Foo extends Component {
 			constructor(props) {
@@ -678,7 +679,7 @@ describe('Fragment', () => {
 	});
 
 	it('should preserve order for fragment switching with sibling DOM', () => {
-		/** @type {() => void} */
+		/** @type {(newState: { isLoading: boolean; data: number | null }) => void} */
 		let set;
 		class Foo extends Component {
 			constructor(props) {
@@ -711,7 +712,7 @@ describe('Fragment', () => {
 	});
 
 	it('should preserve order for fragment switching with sibling Components', () => {
-		/** @type {() => void} */
+		/** @type {(newState: { isLoading: boolean; data: number | null }) => void} */
 		let set;
 		class Foo extends Component {
 			constructor(props) {
@@ -3226,5 +3227,102 @@ describe('Fragment', () => {
 
 		expect(scratch.innerHTML).to.equal([div('A'), div(1), div(2)].join(''));
 		expectDomLogToBe(['<div>B.remove()', '<div>2A1.appendChild(<div>2)']);
+	});
+
+	it('should efficiently unmount & mount components that conditionally return null', () => {
+		function Conditional({ condition }) {
+			return condition ? (
+				<Fragment>
+					<p>2</p>
+					<p>3</p>
+				</Fragment>
+			) : null;
+		}
+
+		/** @type {() => void} */
+		let toggle;
+		class App extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { condition: true };
+				toggle = () =>
+					this.setState(prevState => ({ condition: !prevState.condition }));
+			}
+
+			render() {
+				const { condition } = this.state;
+				return (
+					<Fragment>
+						<p>1</p>
+						<Conditional condition={condition} />
+						{condition ? null : <p>A</p>}
+						<p>4</p>
+					</Fragment>
+				);
+			}
+		}
+
+		render(<App />, scratch);
+		expect(scratch.innerHTML).to.equal([1, 2, 3, 4].map(p).join(''));
+
+		clearLog();
+		toggle();
+		rerender();
+
+		expect(scratch.innerHTML).to.equal([1, 'A', 4].map(p).join(''));
+		expectDomLogToBe([
+			'<p>2.remove()',
+			'<p>3.remove()',
+			'<p>.appendChild(#text)',
+			'<div>14.insertBefore(<p>A, <p>4)'
+		]);
+	});
+
+	it('should efficiently unmount & mount components that conditionally return null with null first child', () => {
+		function Conditional({ condition }) {
+			return condition ? (
+				<Fragment>
+					{null}
+					<p>3</p>
+				</Fragment>
+			) : null;
+		}
+
+		/** @type {() => void} */
+		let toggle;
+		class App extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { condition: true };
+				toggle = () =>
+					this.setState(prevState => ({ condition: !prevState.condition }));
+			}
+
+			render() {
+				const { condition } = this.state;
+				return (
+					<Fragment>
+						<p>1</p>
+						<Conditional condition={condition} />
+						{condition ? null : <p>A</p>}
+						<p>4</p>
+					</Fragment>
+				);
+			}
+		}
+
+		render(<App />, scratch);
+		expect(scratch.innerHTML).to.equal([1, 3, 4].map(p).join(''));
+
+		clearLog();
+		toggle();
+		rerender();
+
+		expect(scratch.innerHTML).to.equal([1, 'A', 4].map(p).join(''));
+		expectDomLogToBe([
+			'<p>3.remove()',
+			'<p>.appendChild(#text)',
+			'<div>14.insertBefore(<p>A, <p>4)'
+		]);
 	});
 });
