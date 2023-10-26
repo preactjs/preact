@@ -8,17 +8,17 @@ export function createContext(defaultValue, contextId) {
 	const context = {
 		_id: contextId,
 		_defaultValue: defaultValue,
-		/** @type {import('./internal').FunctionComponent} */
+		/** @type {FunctionComponent} */
 		Consumer(props, contextValue) {
 			// return props.children(
 			// 	context[contextId] ? context[contextId].props.value : defaultValue
 			// );
 			return props.children(contextValue);
 		},
-		/** @type {import('./internal').FunctionComponent} */
+		/** @type {FunctionComponent} */
 		Provider(props) {
 			if (!this.getChildContext) {
-				/** @type {import('./internal').Component[]} */
+				/** @type {Component[]} */
 				let subs = [];
 				let ctx = {};
 				ctx[contextId] = this;
