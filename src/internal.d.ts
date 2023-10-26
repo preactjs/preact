@@ -123,7 +123,6 @@ export interface VNode<P = {}> extends preact.VNode<P> {
 	constructor: undefined;
 	_original: number;
 	// New properties
-	_prevVNode: VNode;
 	_insert: boolean;
 	_matched: boolean;
 	_index: number;

@@ -297,7 +297,14 @@ function diffChildren2(
 	isHydrating,
 	refQueue
 ) {
-	let i, j, childVNode, newDom, firstChildDom;
+	let i,
+		j,
+		/** @type {import('../internal').VNode} */
+		oldVNode,
+		/** @type {import('../internal').VNode} */
+		childVNode,
+		newDom,
+		firstChildDom;
 
 	// This is a compression of oldParentVNode!=null && oldParentVNode != EMPTY_VNODE && oldParentVNode._children || EMPTY_ARR
 	// as EMPTY_VNODE._children should be `undefined`.
@@ -322,14 +329,16 @@ function diffChildren2(
 
 	// Remove remaining oldChildren if there are any. Loop forwards so that as we
 	// unmount DOM from the beginning of the oldChildren, we can adjust oldDom to
-	// point to the next child.
+	// point to the next child, which needs to be the first DOM node that won't be
+	// unmounted.
 	for (i = 0; i < oldChildrenLength; i++) {
-		if (oldChildren[i] != null && !oldChildren[i]._matched) {
-			if (oldDom == oldChildren[i]._dom) {
-				oldDom = getDomSibling(oldChildren[i]);
+		oldVNode = oldChildren[i];
+		if (oldVNode != null && !oldVNode._matched) {
+			if (oldDom == oldVNode._dom) {
+				oldDom = getDomSibling(oldVNode);
 			}
 
-			unmount(oldChildren[i], oldChildren[i]);
+			unmount(oldVNode, oldVNode);
 		}
 	}
 
@@ -344,10 +353,21 @@ function diffChildren2(
 			continue;
 		}
 
+		// At this point, constructNewChildrenArray has assigned _index to be the
+		// matchingIndex for this VNode's oldVNode (or -1 if there is no oldVNode).
+		if (childVNode._index === -1) {
+			oldVNode = EMPTY_VNODE;
+		} else {
+			oldVNode = oldChildren[childVNode._index] || EMPTY_VNODE;
+		}
+
+		// Update childVNode._index to its final index
+		childVNode._index = i;
+
 		diff(
 			parentDom,
 			childVNode,
-			childVNode._prevVNode,
+			oldVNode,
 			globalContext,
 			isSvg,
 			excessDomChildren,
@@ -359,9 +379,9 @@ function diffChildren2(
 
 		// Adjust DOM nodes
 		newDom = childVNode._dom;
-		if ((j = childVNode.ref) && childVNode._prevVNode.ref != j) {
-			if (childVNode._prevVNode.ref) {
-				applyRef(childVNode._prevVNode.ref, null, childVNode);
+		if ((j = childVNode.ref) && oldVNode.ref != j) {
+			if (oldVNode.ref) {
+				applyRef(oldVNode.ref, null, childVNode);
 			}
 			refQueue.push(j, childVNode._component || newDom, childVNode);
 		}
@@ -375,7 +395,7 @@ function diffChildren2(
 			if (
 				childVNode._insert ||
 				(typeof childVNode.type == 'function' &&
-					childVNode._children === childVNode._prevVNode._children)
+					childVNode._children === oldVNode._children)
 			) {
 				if (typeof childVNode.type == 'function') {
 					oldDom = reorderChildren(childVNode, oldDom, parentDom);
@@ -413,7 +433,6 @@ function diffChildren2(
 		}
 
 		// Unset diffing properties
-		childVNode._prevVNode = null;
 		childVNode._insert = false;
 		childVNode._matched = false;
 	}
@@ -438,8 +457,6 @@ function constructNewChildrenArray(
 	let i;
 	/** @type {import('../internal').VNode} */
 	let childVNode;
-	/** @type {import('../internal').VNode} */
-	let oldVNode;
 	let newChildrenLength = renderResult.length;
 	let remainingOldChildren = oldChildren.length;
 	let skew = 0;
@@ -500,7 +517,8 @@ function constructNewChildrenArray(
 
 		// Handle unmounting null placeholders, i.e. VNode => null in unkeyed children
 		if (childVNode == null) {
-			oldVNode = oldChildren[i];
+			/** @type {import('../internal').VNode} */
+			let oldVNode = oldChildren[i];
 			if (oldVNode && oldVNode.key == null && oldVNode._dom) {
 				if (oldVNode._dom == oldDomRef.current) {
 					// oldVNode._parent = oldParentVNode;
@@ -527,7 +545,6 @@ function constructNewChildrenArray(
 
 		childVNode._parent = newParentVNode;
 		childVNode._depth = newParentVNode._depth + 1;
-		childVNode._index = i;
 
 		let skewedIndex = i + skew;
 		const matchingIndex = findMatchingIndex(
@@ -537,23 +554,30 @@ function constructNewChildrenArray(
 			remainingOldChildren
 		);
 
-		if (matchingIndex === -1) {
-			oldVNode = EMPTY_VNODE;
-		} else if (matchingIndex !== -1) {
-			// Mark oldVNode as matched so it isn't unmounted
-			oldVNode = oldChildren[matchingIndex] || EMPTY_VNODE;
-			if (oldVNode !== EMPTY_VNODE) {
-				oldVNode._matched = true;
-			}
+		// Temporarily store the matchingIndex on the _index property so we can pull
+		// out the oldVNode in diffChildren. We'll override this to the VNode's
+		// final index after using this property to get the oldVNode
+		childVNode._index = matchingIndex;
+
+		if (matchingIndex !== -1) {
 			remainingOldChildren--;
+			if (oldChildren[matchingIndex]) {
+				// TODO: Can we somehow not use this property? or override another
+				// property? We need it now so we can pull off the matchingIndex in
+				// diffChildren and when unmounting we can get the next DOM element by
+				// calling getDomSibling, which needs a complete oldTree
+				oldChildren[matchingIndex]._matched = true;
+			}
 		}
 
-		childVNode._prevVNode = oldVNode;
+		// // Here, we define isMounting for the purposes of the skew diffing
+		// // algorithm. Nodes that are unsuspending are considered mounting and we detect
+		// // this by checking if oldVNode._original === null
+		let isMounting =
+			matchingIndex === -1 ||
+			oldChildren[matchingIndex] == null ||
+			oldChildren[matchingIndex]._original === null;
 
-		// Here, we define isMounting for the purposes of the skew diffing
-		// algorithm. Nodes that are unsuspending are considered mounting and we detect
-		// this by checking if oldVNode._original == null
-		let isMounting = oldVNode === EMPTY_VNODE || oldVNode._original === null;
 		if (isMounting) {
 			if (matchingIndex == -1) {
 				skew--;
@@ -579,9 +603,10 @@ function constructNewChildrenArray(
 			}
 		}
 
-		skewedIndex = i + skew;
+		// Move this VNode's DOM if the original index (matchingIndex) doesn't match
+		// the new skew index (i + skew) or it's a mounting component VNode
 		childVNode._insert =
-			matchingIndex !== skewedIndex ||
+			matchingIndex !== i + skew ||
 			(typeof childVNode.type != 'function' && isMounting);
 	}
 
