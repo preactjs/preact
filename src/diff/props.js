@@ -152,7 +152,7 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
 
 /**
  * Proxy an event to hooked event handlers
- * @param {Event} e The event object from the browser
+ * @param {import('../internal').PreactEvent} e The event object from the browser
  * @private
  */
 function eventProxy(e) {

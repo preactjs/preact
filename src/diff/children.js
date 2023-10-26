@@ -58,6 +58,8 @@ export function diffChildren(
 
 	newParentVNode._children = [];
 	for (i = 0; i < newChildrenLength; i++) {
+		// @ts-expect-error We are reusing the childVNode variable to hold both the
+		// pre and post normalized childVNode
 		childVNode = renderResult[i];
 
 		if (
@@ -326,7 +328,7 @@ function placeChild(parentDom, newDom, oldDom) {
 }
 
 /**
- * @param {import('../internal').VNode | string} childVNode
+ * @param {import('../internal').VNode} childVNode
  * @param {import('../internal').VNode[]} oldChildren
  * @param {number} skewedIndex
  * @param {number} remainingOldChildren

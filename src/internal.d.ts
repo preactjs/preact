@@ -113,6 +113,10 @@ export interface PreactElement extends preact.ContainerNode {
 	_listeners?: Record<string, (e: Event) => void>;
 }
 
+export interface PreactEvent extends Event {
+	_dispatched?: number;
+}
+
 // We use the `current` property to differentiate between the two kinds of Refs so
 // internally we'll define `current` on both to make TypeScript happy
 type RefObject<T> = { current: T | null };
@@ -120,8 +124,9 @@ type RefCallback<T> = { (instance: T | null): void; current: undefined };
 type Ref<T> = RefObject<T> | RefCallback<T>;
 
 export interface VNode<P = {}> extends preact.VNode<P> {
-	// Redefine type here using our internal ComponentType type
-	type: string | ComponentType<P>;
+	// Redefine type here using our internal ComponentType type, and specify
+	// string has an undefined `defaultProps` property to make TS happy
+	type: (string & { defaultProps: undefined }) | ComponentType<P>;
 	props: P & { children: ComponentChildren };
 	ref?: Ref<any> | null;
 	_children: Array<VNode<any>> | null;
@@ -134,7 +139,7 @@ export interface VNode<P = {}> extends preact.VNode<P> {
 	/**
 	 * The last dom child of a Fragment, or components that return a Fragment
 	 */
-	_nextDom: PreactElement | null;
+	_nextDom: PreactElement | null | undefined;
 	_component: Component | null;
 	_hydrating: boolean | null;
 	constructor: undefined;
