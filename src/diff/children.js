@@ -328,13 +328,8 @@ export function toChildArray(children, out) {
  * @returns {PreactElement}
  */
 function placeChild(parentDom, newDom, oldDom) {
-	// TODO: How do we enter here when oldDom isn't in parentDom? We should fix
-	// that such that it never happens. Changing `oldDom.parentNode !== parentDom`
-	// to `!oldDom.isConnected` also passes our test suite.
-	if (oldDom == null || oldDom.parentNode !== parentDom) {
-		parentDom.insertBefore(newDom, null);
-	} else if (newDom != oldDom) {
-		parentDom.insertBefore(newDom, oldDom);
+	if (newDom != oldDom) {
+		parentDom.insertBefore(newDom, oldDom || null);
 	}
 
 	return newDom.nextSibling;
