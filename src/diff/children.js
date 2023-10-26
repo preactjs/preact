@@ -298,7 +298,6 @@ function diffChildren2(
 	refQueue
 ) {
 	let i,
-		j,
 		/** @type {import('../internal').VNode} */
 		oldVNode,
 		/** @type {import('../internal').VNode} */
@@ -317,7 +316,7 @@ function diffChildren2(
 	// constructNewChildrenArray can unmount DOM nodes while looping (to handle
 	// null placeholders, i.e. VNode => null in unkeyed children), we need to adjust
 	// oldDom in that method.
-	const oldDomRef = { current: oldDom };
+	const oldDomRef = { _current: oldDom };
 	const newChildren = (newParentVNode._children = constructNewChildrenArray(
 		newParentVNode,
 		renderResult,
@@ -325,7 +324,7 @@ function diffChildren2(
 		oldDomRef
 	));
 
-	oldDom = oldDomRef.current;
+	oldDom = oldDomRef._current;
 
 	// Remove remaining oldChildren if there are any. Loop forwards so that as we
 	// unmount DOM from the beginning of the oldChildren, we can adjust oldDom to
@@ -379,11 +378,15 @@ function diffChildren2(
 
 		// Adjust DOM nodes
 		newDom = childVNode._dom;
-		if ((j = childVNode.ref) && oldVNode.ref != j) {
+		if (childVNode.ref && oldVNode.ref != childVNode.ref) {
 			if (oldVNode.ref) {
 				applyRef(oldVNode.ref, null, childVNode);
 			}
-			refQueue.push(j, childVNode._component || newDom, childVNode);
+			refQueue.push(
+				childVNode.ref,
+				childVNode._component || newDom,
+				childVNode
+			);
 		}
 
 		if (newDom != null) {
@@ -444,7 +447,7 @@ function diffChildren2(
  * @param {import('../internal').VNode} newParentVNode
  * @param {import('../internal').ComponentChildren[]} renderResult
  * @param {import('../internal').VNode[]} oldChildren
- * @param {{ current: import('../internal').PreactElement }} oldDomRef
+ * @param {{ _current: import('../internal').PreactElement }} oldDomRef
  * @returns {import('../internal').VNode[]}
  */
 function constructNewChildrenArray(
@@ -520,9 +523,8 @@ function constructNewChildrenArray(
 			/** @type {import('../internal').VNode} */
 			let oldVNode = oldChildren[i];
 			if (oldVNode && oldVNode.key == null && oldVNode._dom) {
-				if (oldVNode._dom == oldDomRef.current) {
-					// oldVNode._parent = oldParentVNode;
-					oldDomRef.current = getDomSibling(oldVNode);
+				if (oldVNode._dom == oldDomRef._current) {
+					oldDomRef._current = getDomSibling(oldVNode);
 				}
 
 				unmount(oldVNode, oldVNode, false);
