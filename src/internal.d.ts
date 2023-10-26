@@ -122,6 +122,7 @@ export interface VNode<P = {}> extends preact.VNode<P> {
 	_hydrating: boolean | null;
 	constructor: undefined;
 	_original: number;
+	_index: number;
 }
 
 export interface Component<P = {}, S = {}> extends preact.Component<P, S> {
