@@ -308,7 +308,9 @@ describe('suspense', () => {
 
 		const FuncWrapper = props => <div id="func-wrapper">{props.children}</div>;
 
-		const [Suspender, suspend] = createSuspender(() => <div>Hello</div>);
+		const [Suspender, suspend] = createSuspender(() => (
+			<div id="initial-contents">Hello</div>
+		));
 
 		render(
 			<Suspense fallback={<div>Suspended...</div>}>
@@ -322,7 +324,7 @@ describe('suspense', () => {
 		);
 
 		expect(scratch.innerHTML).to.eql(
-			`<div id="class-wrapper"><div id="func-wrapper"><div>Hello</div></div></div>`
+			`<div id="class-wrapper"><div id="func-wrapper"><div id="initial-contents">Hello</div></div></div>`
 		);
 
 		const [resolve] = suspend();
@@ -330,10 +332,10 @@ describe('suspense', () => {
 
 		expect(scratch.innerHTML).to.eql(`<div>Suspended...</div>`);
 
-		return resolve(() => <div>Hello2</div>).then(() => {
+		return resolve(() => <div id="resolved-contents">Hello2</div>).then(() => {
 			rerender();
 			expect(scratch.innerHTML).to.eql(
-				`<div id="class-wrapper"><div id="func-wrapper"><div>Hello2</div></div></div>`
+				`<div id="class-wrapper"><div id="func-wrapper"><div id="resolved-contents">Hello2</div></div></div>`
 			);
 		});
 	});
