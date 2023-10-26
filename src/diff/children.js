@@ -333,7 +333,7 @@ function diffChildren2(
 		}
 	}
 
-	for (let i = 0; i < newChildrenLength; i++) {
+	for (i = 0; i < newChildrenLength; i++) {
 		childVNode = newChildren[i];
 
 		if (
