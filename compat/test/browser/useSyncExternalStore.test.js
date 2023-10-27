@@ -38,6 +38,10 @@ describe('useSyncExternalStore', () => {
 		Scheduler.logs = [];
 	});
 
+	function defer(cb) {
+		return Promise.resolve().then(cb);
+	}
+
 	function assertLog(expected) {
 		expect(Scheduler.logs).to.deep.equal(expected);
 		Scheduler.logs = [];
@@ -61,6 +65,7 @@ describe('useSyncExternalStore', () => {
 		const listeners = new Set();
 		let currentState = initialState;
 		return {
+			listeners,
 			set(text) {
 				currentState = text;
 				listeners.forEach(listener => listener());
@@ -253,6 +258,49 @@ describe('useSyncExternalStore', () => {
 		rerender();
 
 		expect(scratch.innerHTML).to.equal('<p>nope</p>');
+	});
+
+	it('handles store updates before subscribing', async () => {
+		// This test is testing scheduling mechanics, so teardown the manual
+		// rerender test setup to rely on Preact's built-in scheduling and verify
+		// this behavior works. We still need a DOM container to render into so set
+		// that back up.
+		teardown(scratch);
+		scratch = setupScratch();
+
+		const store = createExternalStore(0);
+
+		function App() {
+			const value = useSyncExternalStore(store.subscribe, store.getState);
+			useEffect(() => {
+				Scheduler.log('Passive effect: ' + value);
+			}, [value]);
+			return <Text text={value} />;
+		}
+
+		const container = document.createElement('div');
+		const root = createRoot(container);
+
+		// Schedule a mutation in the next microtask after the initial render but
+		// before subscribing to the store
+		const mutation = defer(() => {
+			// Assert we are running this mutation before subscribing to the store
+			expect(store.listeners.size).to.equal(0);
+			store.set(1);
+		});
+
+		root.render(<App />);
+		expect(container.textContent).to.equal('0');
+		assertLog([0]);
+
+		// Wait for the mutation to occur. Then wait for the passive effects that
+		// subscribe to the store and log the new value.
+		await mutation;
+		await new Promise(r => setTimeout(r, 32));
+
+		expect(container.textContent).to.equal('1');
+		expect(store.listeners.size).to.equal(1);
+		assertLog(['Passive effect: 0', 1, 'Passive effect: 1']);
 	});
 
 	// The following tests are taken from the React test suite:

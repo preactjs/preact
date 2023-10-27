@@ -151,12 +151,14 @@ export const isElement = isValidElement;
  * This is taken from https://github.com/facebook/react/blob/main/packages/use-sync-external-store/src/useSyncExternalStoreShimClient.js#L84
  * on a high level this cuts out the warnings, ... and attempts a smaller implementation
  * @typedef {{ _value: any; _getSnapshot: () => any }} Store
- * @typedef {{ _instance: Store }} StoreInstance
  */
 export function useSyncExternalStore(subscribe, getSnapshot) {
 	const value = getSnapshot();
 
-	/** @type {[StoreInstance, (store: StoreInstance) => void]} */
+	/**
+	 * @typedef {{ _instance: Store }} StoreRef
+	 * @type {[StoreRef, (store: StoreRef) => void]}
+	 */
 	const [{ _instance }, forceUpdate] = useState({
 		_instance: { _value: value, _getSnapshot: getSnapshot }
 	});
