@@ -1,15 +1,18 @@
-import { Component, createElement, createRef } from 'preact';
+import { Component, createElement, createRef, options } from 'preact';
 import { jsx, jsxs, jsxDEV, Fragment } from 'preact/jsx-runtime';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 
 describe('Babel jsx/jsxDEV', () => {
 	let scratch;
+	let prevVNodeOption;
 
 	beforeEach(() => {
 		scratch = setupScratch();
+		prevVNodeOption = options.vnode;
 	});
 
 	afterEach(() => {
+		options.vnode = prevVNodeOption;
 		teardown(scratch);
 	});
 
@@ -90,5 +93,11 @@ describe('Babel jsx/jsxDEV', () => {
 		const vnode = jsx('div', { ref }, null);
 		expect(vnode.props).to.deep.equal({});
 		expect(vnode.ref).to.equal(ref);
+	});
+
+	it('should call options.vnode with the vnode', () => {
+		options.vnode = sinon.spy();
+		const vnode = jsx('div', { class: 'foo' }, 'key');
+		expect(options.vnode).to.have.been.calledWith(vnode);
 	});
 });

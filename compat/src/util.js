@@ -22,11 +22,6 @@ export function shallowDiffers(a, b) {
 	return false;
 }
 
-export function removeNode(node) {
-	let parentNode = node.parentNode;
-	if (parentNode) parentNode.removeChild(node);
-}
-
 /**
  * Check if two values are the same value
  * @param {*} x
