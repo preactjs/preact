@@ -6,24 +6,25 @@ import { getDomSibling } from '../component';
 
 /**
  * Diff the children of a virtual node
- * @param {import('../internal').PreactElement} parentDom The DOM element whose
- * children are being diffed
- * @param {import('../internal').ComponentChildren[]} renderResult
- * @param {import('../internal').VNode} newParentVNode The new virtual
- * node whose children should be diff'ed against oldParentVNode
- * @param {import('../internal').VNode} oldParentVNode The old virtual
- * node whose children should be diff'ed against newParentVNode
- * @param {object} globalContext The current context object - modified by getChildContext
+ * @param {PreactElement} parentDom The DOM element whose children are being
+ * diffed
+ * @param {ComponentChildren[]} renderResult
+ * @param {VNode} newParentVNode The new virtual node whose children should be
+ * diff'ed against oldParentVNode
+ * @param {VNode} oldParentVNode The old virtual node whose children should be
+ * diff'ed against newParentVNode
+ * @param {object} globalContext The current context object - modified by
+ * getChildContext
  * @param {boolean} isSvg Whether or not this DOM node is an SVG node
- * @param {Array<import('../internal').PreactElement>} excessDomChildren
- * @param {Array<import('../internal').Component>} commitQueue List of components
- * which have callbacks to invoke in commitRoot
- * @param {import('../internal').PreactElement} oldDom The current attached DOM
- * element any new dom elements should be placed around. Likely `null` on first
- * render (except when hydrating). Can be a sibling DOM element when diffing
- * Fragments that have siblings. In most cases, it starts out as `oldChildren[0]._dom`.
+ * @param {Array<PreactElement>} excessDomChildren
+ * @param {Array<Component>} commitQueue List of components which have callbacks
+ * to invoke in commitRoot
+ * @param {PreactElement} oldDom The current attached DOM element any new dom
+ * elements should be placed around. Likely `null` on first render (except when
+ * hydrating). Can be a sibling DOM element when diffing Fragments that have
+ * siblings. In most cases, it starts out as `oldChildren[0]._dom`.
  * @param {boolean} isHydrating Whether or not we are in hydration
- * @param {Array<any>} refQueue an array of elements needed to invoke refs
+ * @param {any[]} refQueue an array of elements needed to invoke refs
  */
 export function diffChildren(
 	parentDom,
@@ -40,16 +41,19 @@ export function diffChildren(
 ) {
 	let i,
 		j,
-		/** @type {import('../internal').VNode} */
+		/** @type {VNode} */
 		oldVNode,
-		/** @type {import('../internal').VNode} */
+		/** @type {VNode} */
 		childVNode,
+		/** @type {PreactElement} */
 		newDom,
+		/** @type {PreactElement} */
 		firstChildDom,
 		skew = 0;
 
 	// This is a compression of oldParentVNode!=null && oldParentVNode != EMPTY_OBJ && oldParentVNode._children || EMPTY_ARR
 	// as EMPTY_OBJ._children should be `undefined`.
+	/** @type {VNode[]} */
 	let oldChildren = (oldParentVNode && oldParentVNode._children) || EMPTY_ARR;
 
 	let oldChildrenLength = oldChildren.length,
@@ -58,6 +62,8 @@ export function diffChildren(
 
 	newParentVNode._children = [];
 	for (i = 0; i < newChildrenLength; i++) {
+		// @ts-expect-error We are reusing the childVNode variable to hold both the
+		// pre and post normalized childVNode
 		childVNode = renderResult[i];
 
 		if (
@@ -259,6 +265,12 @@ export function diffChildren(
 	}
 }
 
+/**
+ * @param {VNode} childVNode
+ * @param {PreactElement} oldDom
+ * @param {PreactElement} parentDom
+ * @returns {PreactElement}
+ */
 function reorderChildren(childVNode, oldDom, parentDom) {
 	// Note: VNodes in nested suspended trees may be missing _children.
 	let c = childVNode._children;
@@ -286,9 +298,9 @@ function reorderChildren(childVNode, oldDom, parentDom) {
 
 /**
  * Flatten and loop through the children of a virtual node
- * @param {import('../index').ComponentChildren} children The unflattened
- * children of a virtual node
- * @returns {import('../internal').VNode[]}
+ * @param {ComponentChildren} children The unflattened children of a virtual
+ * node
+ * @returns {VNode[]}
  */
 export function toChildArray(children, out) {
 	out = out || [];
@@ -303,6 +315,12 @@ export function toChildArray(children, out) {
 	return out;
 }
 
+/**
+ * @param {PreactElement} parentDom
+ * @param {PreactElement} newDom
+ * @param {PreactElement} oldDom
+ * @returns {PreactElement}
+ */
 function placeChild(parentDom, newDom, oldDom) {
 	if (oldDom == null || oldDom.parentNode !== parentDom) {
 		parentDom.insertBefore(newDom, null);
@@ -314,8 +332,8 @@ function placeChild(parentDom, newDom, oldDom) {
 }
 
 /**
- * @param {import('../internal').VNode | string} childVNode
- * @param {import('../internal').VNode[]} oldChildren
+ * @param {VNode} childVNode
+ * @param {VNode[]} oldChildren
  * @param {number} skewedIndex
  * @param {number} remainingOldChildren
  * @returns {number}

@@ -10,21 +10,21 @@ import { Fragment } from './create-element';
  * @param {object} context The initial context from parent components'
  * getChildContext
  */
-export function Component(props, context) {
+export function BaseComponent(props, context) {
 	this.props = props;
 	this.context = context;
 }
 
 /**
  * Update component state and schedule a re-render.
- * @this {import('./internal').Component}
+ * @this {Component}
  * @param {object | ((s: object, p: object) => object)} update A hash of state
  * properties to update with new values or a function that given the current
  * state and props returns a new partial state
  * @param {() => void} [callback] A function to be called once component state is
  * updated
  */
-Component.prototype.setState = function (update, callback) {
+BaseComponent.prototype.setState = function (update, callback) {
 	// only clone state when copying to nextState the first time.
 	let s;
 	if (this._nextState != null && this._nextState !== this.state) {
@@ -56,11 +56,11 @@ Component.prototype.setState = function (update, callback) {
 
 /**
  * Immediately perform a synchronous re-render of the component
- * @this {import('./internal').Component}
+ * @this {Component}
  * @param {() => void} [callback] A function to be called after component is
  * re-rendered
  */
-Component.prototype.forceUpdate = function (callback) {
+BaseComponent.prototype.forceUpdate = function (callback) {
 	if (this._vnode) {
 		// Set render mode so that we can differentiate where the render request
 		// is coming from. We need this because forceUpdate should never call
@@ -79,12 +79,12 @@ Component.prototype.forceUpdate = function (callback) {
  * @param {object} state The component's current state
  * @param {object} context Context object, as returned by the nearest
  * ancestor's `getChildContext()`
- * @returns {import('./index').ComponentChildren | void}
+ * @returns {ComponentChildren | void}
  */
-Component.prototype.render = Fragment;
+BaseComponent.prototype.render = Fragment;
 
 /**
- * @param {import('./internal').VNode} vnode
+ * @param {VNode} vnode
  * @param {number | null} [childIndex]
  */
 export function getDomSibling(vnode, childIndex) {
@@ -117,7 +117,7 @@ export function getDomSibling(vnode, childIndex) {
 
 /**
  * Trigger in-place re-rendering of a component.
- * @param {import('./internal').Component} component The component to rerender
+ * @param {Component} component The component to rerender
  */
 function renderComponent(component) {
 	let vnode = component._vnode,
@@ -158,7 +158,7 @@ function renderComponent(component) {
 }
 
 /**
- * @param {import('./internal').VNode} vnode
+ * @param {VNode} vnode
  */
 function updateParentDomPointers(vnode) {
 	if ((vnode = vnode._parent) != null && vnode._component != null) {
@@ -177,7 +177,7 @@ function updateParentDomPointers(vnode) {
 
 /**
  * The render queue
- * @type {Array<import('./internal').Component>}
+ * @type {Array<Component>}
  */
 let rerenderQueue = [];
 
@@ -199,7 +199,7 @@ const defer =
 
 /**
  * Enqueue a rerender of a component
- * @param {import('./internal').Component} c The component to rerender
+ * @param {Component} c The component to rerender
  */
 export function enqueueRender(c) {
 	if (
@@ -215,8 +215,8 @@ export function enqueueRender(c) {
 }
 
 /**
- * @param {import('./internal').Component} a
- * @param {import('./internal').Component} b
+ * @param {Component} a
+ * @param {Component} b
  */
 const depthSort = (a, b) => a._vnode._depth - b._vnode._depth;
 
