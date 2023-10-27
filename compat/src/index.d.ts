@@ -168,6 +168,9 @@ declare namespace React {
 		| MutableRefObject<T | null>
 		| null;
 
+	export function flushSync<R>(fn: () => R): R;
+	export function flushSync<A, R>(fn: (a: A) => R, a: A): R;
+
 	export function unstable_batchedUpdates(
 		callback: (arg?: any) => void,
 		arg?: any
