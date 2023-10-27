@@ -15,5 +15,5 @@
     "target": "es5",
     "noEmit": true
   },
-  "exclude": ["node_modules", "dist", "coverage", "demo"]
+  "exclude": ["**/node_modules/**", "**/dist/**", "coverage", "demo"]
 }
