@@ -1,8 +1,8 @@
 import { createElement, Component, render, createRef } from 'preact';
+import { setupRerender } from 'preact/test-utils';
 import { setupScratch, teardown } from '../_util/helpers';
 import { logCall, clearLog, getLog } from '../_util/logCall';
 import { div } from '../_util/dom';
-import { setupRerender } from 'preact/test-utils';
 
 /** @jsx createElement */
 
@@ -73,8 +73,8 @@ describe('keys', () => {
 	});
 
 	beforeEach(() => {
-		rerender = setupRerender();
 		scratch = setupScratch();
+		rerender = setupRerender();
 		ops = [];
 	});
 
@@ -85,9 +85,37 @@ describe('keys', () => {
 
 	// https://fb.me/react-special-props
 	it('should not pass key in props', () => {
-		const Foo = sinon.spy(() => null);
+		const Foo = sinon.spy(function Foo() {
+			return null;
+		});
 		render(<Foo key="foo" />, scratch);
 		expect(Foo.args[0][0]).to.deep.equal({});
+	});
+
+	it('should update in-place keyed DOM nodes', () => {
+		render(
+			<ul>
+				<li key="0">a</li>
+				<li key="1">b</li>
+				<li key="2">c</li>
+			</ul>,
+			scratch
+		);
+		expect(scratch.innerHTML).to.equal(
+			'<ul><li>a</li><li>b</li><li>c</li></ul>'
+		);
+
+		render(
+			<ul>
+				<li key="0">x</li>
+				<li key="1">y</li>
+				<li key="2">z</li>
+			</ul>,
+			scratch
+		);
+		expect(scratch.innerHTML).to.equal(
+			'<ul><li>x</li><li>y</li><li>z</li></ul>'
+		);
 	});
 
 	// See preactjs/preact-compat#21
@@ -258,6 +286,56 @@ describe('keys', () => {
 		]);
 	});
 
+	it('should move keyed children to the beginning', () => {
+		const values = ['b', 'c', 'd', 'a'];
+
+		render(<List values={values} />, scratch);
+		expect(scratch.textContent).to.equal('bcda');
+
+		move(values, values.length - 1, 0);
+		clearLog();
+
+		render(<List values={values} />, scratch);
+		expect(scratch.textContent).to.equal('abcd');
+		// A perfect algorithm would do this in one move. Our algorithm is a
+		// compromise of size vs common case perf
+		//
+		// expect(getLog()).to.deep.equal(['<ol>bcda.insertBefore(<li>a, <li>b)']);
+		expect(getLog()).to.deep.equal([
+			'<ol>bcda.insertBefore(<li>b, Null)',
+			'<ol>cdab.insertBefore(<li>c, Null)',
+			'<ol>dabc.insertBefore(<li>d, Null)'
+		]);
+	});
+
+	it('should move multiple keyed children to the beginning', () => {
+		const values = ['c', 'd', 'e', 'a', 'b'];
+
+		render(<List values={values} />, scratch);
+		expect(scratch.textContent).to.equal('cdeab');
+
+		move(values, values.length - 1, 0);
+		move(values, values.length - 1, 0);
+		clearLog();
+
+		render(<List values={values} />, scratch);
+		expect(scratch.textContent).to.equal('abcde');
+		// A perfect algorithm would do this in two moves. Our algorithm is a
+		// compromise of size vs common case perf
+		//
+		//```
+		// expect(getLog()).to.deep.equal([
+		//  '<ol>cdeab.insertBefore(<li>a, <li>c)',
+		//  '<ol>acdeb.insertBefore(<li>b, <li>c)'
+		// ]);
+		// ```
+		expect(getLog()).to.deep.equal([
+			'<ol>cdeab.insertBefore(<li>c, Null)',
+			'<ol>deabc.insertBefore(<li>d, Null)',
+			'<ol>eabcd.insertBefore(<li>e, Null)'
+		]);
+	});
+
 	it('should swap keyed children efficiently', () => {
 		render(<List values={['a', 'b']} />, scratch);
 		expect(scratch.textContent).to.equal('ab');
@@ -322,10 +400,55 @@ describe('keys', () => {
 
 		render(<List values={values} />, scratch);
 		expect(scratch.textContent).to.equal('abcd', 'move to beginning');
+		// A perfect algorithm would do this in one move. Our algorithm is a
+		// compromise of size vs common case perf.
+		//
+		// expect(getLog()).to.deep.equal(['<ol>bcda.insertBefore(<li>a, <li>b)']);
 		expect(getLog()).to.deep.equal(
-			['<ol>bcda.insertBefore(<li>a, <li>b)'],
+			[
+				'<ol>bcda.insertBefore(<li>b, Null)',
+				'<ol>cdab.insertBefore(<li>c, Null)',
+				'<ol>dabc.insertBefore(<li>d, Null)'
+			],
 			'move to beginning'
 		);
+	});
+
+	it('should move keyed children to the beginning on longer list', () => {
+		// Preact v10 worst case
+		const values = ['a', 'b', 'c', 'd', 'e', 'f'];
+
+		render(<List values={values} />, scratch);
+		expect(scratch.textContent).to.equal('abcdef');
+
+		move(values, 4, 1);
+		clearLog();
+
+		render(<List values={values} />, scratch);
+		expect(scratch.textContent).to.equal('aebcdf');
+		// A perfect algorithm would do this in one move. Our algorithm is a
+		// compromise of size vs common case perf.
+		//
+		// expect(getLog()).to.deep.equal(['<ol>abcdef.insertBefore(<li>e, <li>b)']);
+		expect(getLog()).to.deep.equal([
+			'<ol>abcdef.insertBefore(<li>b, <li>f)',
+			'<ol>acdebf.insertBefore(<li>c, <li>f)',
+			'<ol>adebcf.insertBefore(<li>d, <li>f)'
+		]);
+	});
+
+	it('should move keyed children to the end on longer list', () => {
+		const values = ['a', 'b', 'c', 'd', 'e', 'f'];
+
+		render(<List values={values} />, scratch);
+		expect(scratch.textContent).to.equal('abcdef');
+
+		move(values, 1, values.length - 2);
+		clearLog();
+
+		render(<List values={values} />, scratch);
+		expect(scratch.textContent).to.equal('acdebf');
+		expect(getLog()).to.deep.equal(['<ol>abcdef.insertBefore(<li>b, <li>f)']);
 	});
 
 	it('should reverse keyed children effectively', () => {
@@ -340,6 +463,7 @@ describe('keys', () => {
 
 		render(<List values={values} />, scratch);
 		expect(scratch.textContent).to.equal(values.join(''));
+		// expect(getLog()).to.have.lengthOf(9);
 		expect(getLog()).to.deep.equal([
 			'<ol>abcdefghij.insertBefore(<li>j, <li>a)',
 			'<ol>jabcdefghi.insertBefore(<li>i, <li>a)',
