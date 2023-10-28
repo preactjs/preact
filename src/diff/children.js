@@ -131,9 +131,9 @@ export function diffChildren(
 			) {
 				oldDom = reorderChildren(childVNode, oldDom, parentDom);
 			} else if (childVNode._nextDom !== undefined) {
-				// Only Fragments or components that return Fragment like VNodes will
-				// have a non-undefined _nextDom. Continue the diff from the sibling
-				// of last DOM child of this child VNode
+				// Since Fragments or components that return Fragment like VNodes can
+				// contain multiple DOM nodes as the same level, continue the diff from
+				// the sibling of last DOM child of this child VNode
 				oldDom = childVNode._nextDom;
 			} else if (newDom) {
 				oldDom = newDom.nextSibling;
@@ -144,19 +144,6 @@ export function diffChildren(
 			} else {
 				oldDom = newDom.nextSibling;
 			}
-		}
-
-		// TODO: With new child diffing algo, consider alt ways to diff Fragments.
-		// Such as dropping oldDom and moving fragments in place
-		if (typeof newParentVNode.type == 'function') {
-			// Because the newParentVNode is Fragment-like, we need to set it's
-			// _nextDom property to the nextSibling of its last child DOM node.
-			//
-			// `oldDom` contains the correct value here because if the last child
-			// is a Fragment-like, then oldDom has already been set to that child's _nextDom.
-			// If the last child is a DOM VNode, then oldDom will be set to that DOM
-			// node's nextSibling.
-			newParentVNode._nextDom = oldDom;
 		}
 
 		// Eagerly cleanup _nextDom. We don't need to persist the value because it
@@ -170,6 +157,17 @@ export function diffChildren(
 		childVNode._flags &= RESET_MODE;
 	}
 
+	// TODO: With new child diffing algo, consider alt ways to diff Fragments.
+	// Such as dropping oldDom and moving fragments in place
+	//
+	// Because the newParentVNode is Fragment-like, we need to set it's
+	// _nextDom property to the nextSibling of its last child DOM node.
+	//
+	// `oldDom` contains the correct value here because if the last child
+	// is a Fragment-like, then oldDom has already been set to that child's _nextDom.
+	// If the last child is a DOM VNode, then oldDom will be set to that DOM
+	// node's nextSibling.
+	newParentVNode._nextDom = oldDom;
 	newParentVNode._dom = firstChildDom;
 }
 
