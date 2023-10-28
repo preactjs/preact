@@ -55,6 +55,7 @@
       "$_hydrating": "__h",
       "$_component": "__c",
       "$_index": "__i",
+      "$_flags": "__u",
       "$__html": "__html",
       "$_parent": "__",
       "$_pendingError": "__E",
