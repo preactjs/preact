@@ -297,15 +297,7 @@ describe('keys', () => {
 
 		render(<List values={values} />, scratch);
 		expect(scratch.textContent).to.equal('abcd');
-		// A perfect algorithm would do this in one move. Our algorithm is a
-		// compromise of size vs common case perf
-		//
-		// expect(getLog()).to.deep.equal(['<ol>bcda.insertBefore(<li>a, <li>b)']);
-		expect(getLog()).to.deep.equal([
-			'<ol>bcda.insertBefore(<li>b, Null)',
-			'<ol>cdab.insertBefore(<li>c, Null)',
-			'<ol>dabc.insertBefore(<li>d, Null)'
-		]);
+		expect(getLog()).to.deep.equal(['<ol>bcda.insertBefore(<li>a, <li>b)']);
 	});
 
 	it('should move multiple keyed children to the beginning', () => {
@@ -320,19 +312,9 @@ describe('keys', () => {
 
 		render(<List values={values} />, scratch);
 		expect(scratch.textContent).to.equal('abcde');
-		// A perfect algorithm would do this in two moves. Our algorithm is a
-		// compromise of size vs common case perf
-		//
-		//```
-		// expect(getLog()).to.deep.equal([
-		//  '<ol>cdeab.insertBefore(<li>a, <li>c)',
-		//  '<ol>acdeb.insertBefore(<li>b, <li>c)'
-		// ]);
-		// ```
 		expect(getLog()).to.deep.equal([
-			'<ol>cdeab.insertBefore(<li>c, Null)',
-			'<ol>deabc.insertBefore(<li>d, Null)',
-			'<ol>eabcd.insertBefore(<li>e, Null)'
+			'<ol>cdeab.insertBefore(<li>a, <li>c)',
+			'<ol>acdeb.insertBefore(<li>b, <li>c)'
 		]);
 	});
 
@@ -400,16 +382,8 @@ describe('keys', () => {
 
 		render(<List values={values} />, scratch);
 		expect(scratch.textContent).to.equal('abcd', 'move to beginning');
-		// A perfect algorithm would do this in one move. Our algorithm is a
-		// compromise of size vs common case perf.
-		//
-		// expect(getLog()).to.deep.equal(['<ol>bcda.insertBefore(<li>a, <li>b)']);
 		expect(getLog()).to.deep.equal(
-			[
-				'<ol>bcda.insertBefore(<li>b, Null)',
-				'<ol>cdab.insertBefore(<li>c, Null)',
-				'<ol>dabc.insertBefore(<li>d, Null)'
-			],
+			['<ol>bcda.insertBefore(<li>a, <li>b)'],
 			'move to beginning'
 		);
 	});
@@ -426,15 +400,7 @@ describe('keys', () => {
 
 		render(<List values={values} />, scratch);
 		expect(scratch.textContent).to.equal('aebcdf');
-		// A perfect algorithm would do this in one move. Our algorithm is a
-		// compromise of size vs common case perf.
-		//
-		// expect(getLog()).to.deep.equal(['<ol>abcdef.insertBefore(<li>e, <li>b)']);
-		expect(getLog()).to.deep.equal([
-			'<ol>abcdef.insertBefore(<li>b, <li>f)',
-			'<ol>acdebf.insertBefore(<li>c, <li>f)',
-			'<ol>adebcf.insertBefore(<li>d, <li>f)'
-		]);
+		expect(getLog()).to.deep.equal(['<ol>abcdef.insertBefore(<li>e, <li>b)']);
 	});
 
 	it('should move keyed children to the end on longer list', () => {
