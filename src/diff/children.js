@@ -1,6 +1,13 @@
 import { diff, unmount, applyRef } from './index';
 import { createVNode, Fragment } from '../create-element';
-import { EMPTY_OBJ, EMPTY_ARR, EMPTY_VNODE } from '../constants';
+import {
+	EMPTY_OBJ,
+	EMPTY_ARR,
+	EMPTY_VNODE,
+	MATCHED,
+	INSERT_VNODE,
+	RESET_MODE
+} from '../constants';
 import { isArray } from '../util';
 import { getDomSibling } from '../component';
 
@@ -332,7 +339,7 @@ function diffChildren2(
 	// unmounted.
 	for (i = 0; i < oldChildrenLength; i++) {
 		oldVNode = oldChildren[i];
-		if (oldVNode != null && !oldVNode._matched) {
+		if (oldVNode != null && (oldVNode._flags & MATCHED) === 0) {
 			if (oldDom == oldVNode._dom) {
 				oldDom = getDomSibling(oldVNode);
 			}
@@ -396,7 +403,7 @@ function diffChildren2(
 
 			// TODO: Golf this `if` block
 			if (
-				childVNode._insert ||
+				childVNode._flags & INSERT_VNODE ||
 				(typeof childVNode.type == 'function' &&
 					childVNode._children === oldVNode._children)
 			) {
@@ -436,8 +443,7 @@ function diffChildren2(
 		}
 
 		// Unset diffing properties
-		childVNode._insert = false;
-		childVNode._matched = false;
+		childVNode._flags &= RESET_MODE;
 	}
 
 	newParentVNode._dom = firstChildDom;
@@ -568,7 +574,7 @@ function constructNewChildrenArray(
 				// property? We need it now so we can pull off the matchingIndex in
 				// diffChildren and when unmounting we can get the next DOM element by
 				// calling getDomSibling, which needs a complete oldTree
-				oldChildren[matchingIndex]._matched = true;
+				oldChildren[matchingIndex]._flags |= MATCHED;
 			}
 		}
 
@@ -607,9 +613,12 @@ function constructNewChildrenArray(
 
 		// Move this VNode's DOM if the original index (matchingIndex) doesn't match
 		// the new skew index (i + skew) or it's a mounting component VNode
-		childVNode._insert =
+		if (
 			matchingIndex !== i + skew ||
-			(typeof childVNode.type != 'function' && isMounting);
+			(typeof childVNode.type != 'function' && isMounting)
+		) {
+			childVNode._flags |= INSERT_VNODE;
+		}
 	}
 
 	return newChildren;
@@ -696,7 +705,8 @@ function findMatchingIndex(
 	// if the oldVNode was null or matched, then there could needs to be at least
 	// 1 (aka `remainingOldChildren > 0`) children to find and compare against.
 	let shouldSearch =
-		remainingOldChildren > (oldVNode != null && !oldVNode._matched ? 1 : 0);
+		remainingOldChildren >
+		(oldVNode != null && (oldVNode._flags & MATCHED) === 0 ? 1 : 0);
 
 	if (
 		oldVNode === null ||
@@ -709,7 +719,7 @@ function findMatchingIndex(
 				oldVNode = oldChildren[x];
 				if (
 					oldVNode &&
-					!oldVNode._matched &&
+					(oldVNode._flags & MATCHED) === 0 &&
 					key == oldVNode.key &&
 					type === oldVNode.type
 				) {
@@ -722,7 +732,7 @@ function findMatchingIndex(
 				oldVNode = oldChildren[y];
 				if (
 					oldVNode &&
-					!oldVNode._matched &&
+					(oldVNode._flags & MATCHED) === 0 &&
 					key == oldVNode.key &&
 					type === oldVNode.type
 				) {

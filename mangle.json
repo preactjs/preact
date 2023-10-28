@@ -54,7 +54,7 @@
       "$_dom": "__e",
       "$_hydrating": "__h",
       "$_component": "__c",
-      "$_prevVNode": "__u",
+      "$_flags": "__u",
       "$_insert": "__r",
       "$_matched": "__s",
       "$_index": "__i",
