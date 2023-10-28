@@ -60,44 +60,16 @@ export function diffChildren(
 	/** @type {VNode[]} */
 	let oldChildren = (oldParentVNode && oldParentVNode._children) || EMPTY_ARR;
 
-	let oldChildrenLength = oldChildren.length,
-		newChildrenLength = renderResult.length;
+	let newChildrenLength = renderResult.length;
 
-	// TODO: Consider replacing with newParentVNode._nextDom;
-	// TODO: Is there a better way to track oldDom then a ref? Since
-	// constructNewChildrenArray can unmount DOM nodes while looping (to handle
-	// null placeholders, i.e. VNode => null in unkeyed children), we need to adjust
-	// oldDom in that method.
-	const oldDomRef = { _current: oldDom };
+	// TODO: Could we drop oldDom all together and just use _nextDom?
+	newParentVNode._nextDom = oldDom;
 	const newChildren = (newParentVNode._children = constructNewChildrenArray(
 		newParentVNode,
 		renderResult,
-		oldChildren,
-		oldDomRef
+		oldChildren
 	));
-	oldDom = oldDomRef._current;
-
-	// Remove remaining oldChildren if there are any. Loop forwards so that as we
-	// unmount DOM from the beginning of the oldChildren, we can adjust oldDom to
-	// point to the next child, which needs to be the first DOM node that won't be
-	// unmounted.
-	for (i = 0; i < oldChildrenLength; i++) {
-		oldVNode = oldChildren[i];
-		if (oldVNode != null && (oldVNode._flags & MATCHED) === 0) {
-			if (oldDom == oldVNode._dom) {
-				oldDom = getDomSibling(oldVNode);
-
-				if (typeof newParentVNode.type == 'function') {
-					// If the parent VNode is a component/fragment, make sure its diff
-					// continues with a DOM node that is still mounted in case this loop
-					// exits here because the rest of the new children are `null`.
-					newParentVNode._nextDom = oldDom;
-				}
-			}
-
-			unmount(oldVNode, oldVNode);
-		}
-	}
+	oldDom = newParentVNode._nextDom;
 
 	for (i = 0; i < newChildrenLength; i++) {
 		childVNode = newChildren[i];
@@ -166,12 +138,6 @@ export function diffChildren(
 			} else if (newDom) {
 				oldDom = newDom.nextSibling;
 			}
-
-			// Eagerly cleanup _nextDom. We don't need to persist the value because
-			// it is only used by `diffChildren` to determine where to resume the diff after
-			// diffing Components and Fragments. Once we store it the nextDOM local var, we
-			// can clean up the property
-			childVNode._nextDom = undefined;
 		} else if (newDom) {
 			if (childVNode._flags & INSERT_VNODE) {
 				oldDom = placeChild(parentDom, newDom, oldDom);
@@ -193,6 +159,13 @@ export function diffChildren(
 			newParentVNode._nextDom = oldDom;
 		}
 
+		// Eagerly cleanup _nextDom. We don't need to persist the value because it
+		// is only used by `diffChildren` to determine where to resume the diff
+		// after diffing Components and Fragments. Once we store it the nextDOM
+		// local var, we can clean up the property. Also prevents us hanging on to
+		// DOM nodes that may have been unmounted.
+		childVNode._nextDom = undefined;
+
 		// Unset diffing flags
 		childVNode._flags &= RESET_MODE;
 	}
@@ -204,21 +177,20 @@ export function diffChildren(
  * @param {VNode} newParentVNode
  * @param {ComponentChildren[]} renderResult
  * @param {VNode[]} oldChildren
- * @param {{ _current: PreactElement }} oldDomRef
  * @returns {VNode[]}
  */
-function constructNewChildrenArray(
-	newParentVNode,
-	renderResult,
-	oldChildren,
-	oldDomRef
-) {
+function constructNewChildrenArray(newParentVNode, renderResult, oldChildren) {
 	/** @type {number} */
 	let i;
 	/** @type {VNode} */
 	let childVNode;
-	let newChildrenLength = renderResult.length;
+	/** @type {VNode} */
+	let oldVNode;
+
+	const newChildrenLength = renderResult.length;
+	const oldChildrenLength = oldChildren.length;
 	let remainingOldChildren = oldChildren.length;
+
 	let skew = 0;
 
 	/** @type {VNode[]} */
@@ -277,17 +249,10 @@ function constructNewChildrenArray(
 
 		// Handle unmounting null placeholders, i.e. VNode => null in unkeyed children
 		if (childVNode == null) {
-			const oldVNode = oldChildren[i];
+			oldVNode = oldChildren[i];
 			if (oldVNode && oldVNode.key == null && oldVNode._dom) {
-				if (oldVNode._dom == oldDomRef._current) {
-					oldDomRef._current = getDomSibling(oldVNode);
-
-					if (typeof newParentVNode.type == 'function') {
-						// If the parent VNode is a component/fragment, make sure its diff
-						// continues with a DOM node that is still mounted in case this loop
-						// exits here because the rest of the new children are `null`.
-						newParentVNode._nextDom = oldDomRef._current;
-					}
+				if (oldVNode._dom == newParentVNode._nextDom) {
+					newParentVNode._nextDom = getDomSibling(oldVNode);
 				}
 
 				unmount(oldVNode, oldVNode, false);
@@ -375,6 +340,21 @@ function constructNewChildrenArray(
 			(typeof childVNode.type != 'function' && isMounting)
 		) {
 			childVNode._flags |= INSERT_VNODE;
+		}
+	}
+
+	// Remove remaining oldChildren if there are any. Loop forwards so that as we
+	// unmount DOM from the beginning of the oldChildren, we can adjust oldDom to
+	// point to the next child, which needs to be the first DOM node that won't be
+	// unmounted.
+	for (i = 0; i < oldChildrenLength; i++) {
+		oldVNode = oldChildren[i];
+		if (oldVNode != null && (oldVNode._flags & MATCHED) === 0) {
+			if (oldVNode._dom == newParentVNode._nextDom) {
+				newParentVNode._nextDom = getDomSibling(oldVNode);
+			}
+
+			unmount(oldVNode, oldVNode);
 		}
 	}
 
