@@ -1,4 +1,5 @@
 import { options, Fragment } from 'preact';
+import { encodeEntities } from './encode';
 
 /** @typedef {import('preact').VNode} VNode */
 
@@ -71,9 +72,45 @@ function createVNode(type, props, key, isStaticChildren, __source, __self) {
 	return vnode;
 }
 
+/**
+ * @param {string[]} templates
+ * @param  {Array<string | null | VNode>} exprs
+ * @returns {VNode}
+ */
+function jsxssr(templates, ...exprs) {
+	const vnode = createVNode(Fragment, { tpl: templates, exprs });
+	// Bypass render to string top level Fragment optimization
+	vnode.key = vnode._vnode;
+	return vnode;
+}
+
+/**
+ * Serialize an attribute to HTML
+ * @param {string} name Attribute name
+ * @param {*} value
+ * @returns {string}
+ */
+function jsxattr(name, value) {
+	if (name === 'ref' || name === 'key') return '';
+
+	if (
+		value == null ||
+		value === false ||
+		typeof value === 'function' ||
+		typeof value === 'object'
+	) {
+		return '';
+	} else if (value === true) return name;
+
+	return name + '="' + encodeEntities(value) + '"';
+}
+
 export {
 	createVNode as jsx,
 	createVNode as jsxs,
 	createVNode as jsxDEV,
-	Fragment
+	Fragment,
+	// precompiled JSX transform
+	jsxattr,
+	jsxssr
 };

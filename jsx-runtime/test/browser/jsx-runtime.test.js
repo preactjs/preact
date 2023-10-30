@@ -1,6 +1,9 @@
 import { Component, createElement, createRef, options } from 'preact';
 import { jsx, jsxs, jsxDEV, Fragment } from 'preact/jsx-runtime';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
+import { jsxattr } from 'preact/jsx-runtime/src';
+import { jsxssr } from 'preact/jsx-runtime/src';
+import { encodeEntities } from 'preact/jsx-runtime/src/encode';
 
 describe('Babel jsx/jsxDEV', () => {
 	let scratch;
@@ -99,5 +102,38 @@ describe('Babel jsx/jsxDEV', () => {
 		options.vnode = sinon.spy();
 		const vnode = jsx('div', { class: 'foo' }, 'key');
 		expect(options.vnode).to.have.been.calledWith(vnode);
+	});
+});
+
+describe('encodeEntities', () => {
+	it('should encode', () => {
+		expect(encodeEntities("&<'")).to.equal("&amp;&lt;'");
+	});
+});
+
+describe('precompiled JSX', () => {
+	it('jsxattr', () => {
+		expect(jsxattr('foo', 'bar')).to.equal('foo="bar"');
+		expect(jsxattr('foo', "&<'")).to.equal('foo="&amp;&lt;\'"');
+
+		// Boolean attributes
+		expect(jsxattr('foo', true)).to.equal('foo');
+
+		// Invalid values
+		expect(jsxattr('foo', false)).to.equal('');
+		expect(jsxattr('foo', null)).to.equal('');
+		expect(jsxattr('foo', undefined)).to.equal('');
+		expect(jsxattr('foo', () => null)).to.equal('');
+		expect(jsxattr('foo', [])).to.equal('');
+		expect(jsxattr('key', 'foo')).to.equal('');
+		expect(jsxattr('ref', 'foo')).to.equal('');
+	});
+
+	it('jsxssr', () => {
+		const tpl = [`<div>foo</div>`];
+		const vnode = jsxssr(tpl);
+		expect(vnode.props.tpl).to.equal(tpl);
+		expect(vnode.type).to.equal(Fragment);
+		expect(vnode.key).not.to.equal(null);
 	});
 });
