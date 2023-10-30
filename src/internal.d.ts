@@ -151,8 +151,7 @@ declare global {
 		constructor: undefined;
 		_original: number;
 		_index: number;
-		_insert: boolean;
-		_matched: boolean;
+		_flags: number;
 	}
 
 	export interface Component<P = {}, S = {}> extends preact.Component<P, S> {
