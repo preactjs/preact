@@ -1,6 +1,12 @@
 import { diff, unmount, applyRef } from './index';
 import { createVNode, Fragment } from '../create-element';
-import { EMPTY_OBJ, EMPTY_ARR } from '../constants';
+import {
+	EMPTY_OBJ,
+	EMPTY_ARR,
+	INSERT_VNODE,
+	MATCHED,
+	RESET_MODE
+} from '../constants';
 import { isArray } from '../util';
 import { getDomSibling } from '../component';
 
@@ -77,7 +83,7 @@ export function diffChildren(
 	// unmounted.
 	for (i = 0; i < oldChildrenLength; i++) {
 		oldVNode = oldChildren[i];
-		if (oldVNode != null && !oldVNode._matched) {
+		if (oldVNode != null && (oldVNode._flags & MATCHED) === 0) {
 			if (oldDom == oldVNode._dom) {
 				oldDom = getDomSibling(oldVNode);
 
@@ -147,7 +153,10 @@ export function diffChildren(
 		}
 
 		if (typeof childVNode.type == 'function') {
-			if (childVNode._insert || oldVNode._children === childVNode._children) {
+			if (
+				childVNode._flags & INSERT_VNODE ||
+				oldVNode._children === childVNode._children
+			) {
 				oldDom = reorderChildren(childVNode, oldDom, parentDom);
 			} else if (childVNode._nextDom !== undefined) {
 				// Only Fragments or components that return Fragment like VNodes will
@@ -164,7 +173,7 @@ export function diffChildren(
 			// can clean up the property
 			childVNode._nextDom = undefined;
 		} else if (newDom) {
-			if (childVNode._insert) {
+			if (childVNode._flags & INSERT_VNODE) {
 				oldDom = placeChild(parentDom, newDom, oldDom);
 			} else {
 				oldDom = newDom.nextSibling;
@@ -185,7 +194,7 @@ export function diffChildren(
 		}
 
 		// Unset diffing flags
-		childVNode._insert = false;
+		childVNode._flags &= RESET_MODE;
 	}
 
 	newParentVNode._dom = firstChildDom;
@@ -322,7 +331,7 @@ function constructNewChildrenArray(
 				// property? We need it now so we can pull off the matchingIndex in
 				// diffChildren and when unmounting we can get the next DOM element by
 				// calling getDomSibling, which needs a complete oldTree
-				oldChildren[matchingIndex]._matched = true;
+				oldChildren[matchingIndex]._flags |= MATCHED;
 			}
 		}
 
@@ -365,7 +374,7 @@ function constructNewChildrenArray(
 			matchingIndex !== i + skew ||
 			(typeof childVNode.type != 'function' && isMounting)
 		) {
-			childVNode._insert = true;
+			childVNode._flags |= INSERT_VNODE;
 		}
 	}
 
@@ -464,7 +473,8 @@ function findMatchingIndex(
 	// if the oldVNode was null or matched, then there could needs to be at least
 	// 1 (aka `remainingOldChildren > 0`) children to find and compare against.
 	let shouldSearch =
-		remainingOldChildren > (oldVNode != null && !oldVNode._matched ? 1 : 0);
+		remainingOldChildren >
+		(oldVNode != null && (oldVNode._flags & MATCHED) === 0 ? 1 : 0);
 
 	if (
 		oldVNode === null ||
@@ -477,7 +487,7 @@ function findMatchingIndex(
 				oldVNode = oldChildren[x];
 				if (
 					oldVNode &&
-					!oldVNode._matched &&
+					(oldVNode._flags & MATCHED) === 0 &&
 					key == oldVNode.key &&
 					type === oldVNode.type
 				) {
@@ -490,7 +500,7 @@ function findMatchingIndex(
 				oldVNode = oldChildren[y];
 				if (
 					oldVNode &&
-					!oldVNode._matched &&
+					(oldVNode._flags & MATCHED) === 0 &&
 					key == oldVNode.key &&
 					type === oldVNode.type
 				) {
