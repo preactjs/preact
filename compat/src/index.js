@@ -150,10 +150,15 @@ export const isElement = isValidElement;
 /**
  * This is taken from https://github.com/facebook/react/blob/main/packages/use-sync-external-store/src/useSyncExternalStoreShimClient.js#L84
  * on a high level this cuts out the warnings, ... and attempts a smaller implementation
+ * @typedef {{ _value: any; _getSnapshot: () => any }} Store
  */
 export function useSyncExternalStore(subscribe, getSnapshot) {
 	const value = getSnapshot();
 
+	/**
+	 * @typedef {{ _instance: Store }} StoreRef
+	 * @type {[StoreRef, (store: StoreRef) => void]}
+	 */
 	const [{ _instance }, forceUpdate] = useState({
 		_instance: { _value: value, _getSnapshot: getSnapshot }
 	});
@@ -162,24 +167,36 @@ export function useSyncExternalStore(subscribe, getSnapshot) {
 		_instance._value = value;
 		_instance._getSnapshot = getSnapshot;
 
-		if (!is(_instance._value, getSnapshot())) {
+		if (didSnapshotChange(_instance)) {
 			forceUpdate({ _instance });
 		}
 	}, [subscribe, value, getSnapshot]);
 
 	useEffect(() => {
-		if (!is(_instance._value, _instance._getSnapshot())) {
+		if (didSnapshotChange(_instance)) {
 			forceUpdate({ _instance });
 		}
 
 		return subscribe(() => {
-			if (!is(_instance._value, _instance._getSnapshot())) {
+			if (didSnapshotChange(_instance)) {
 				forceUpdate({ _instance });
 			}
 		});
 	}, [subscribe]);
 
 	return value;
+}
+
+/** @type {(inst: Store) => boolean} */
+function didSnapshotChange(inst) {
+	const latestGetSnapshot = inst._getSnapshot;
+	const prevValue = inst._value;
+	try {
+		const nextValue = latestGetSnapshot();
+		return !is(prevValue, nextValue);
+	} catch (error) {
+		return true;
+	}
 }
 
 export * from 'preact/hooks';
