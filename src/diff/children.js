@@ -124,26 +124,21 @@ export function diffChildren(
 			firstChildDom = newDom;
 		}
 
-		if (typeof childVNode.type == 'function') {
-			if (
-				childVNode._flags & INSERT_VNODE ||
-				oldVNode._children === childVNode._children
-			) {
-				oldDom = reorderChildren(childVNode, oldDom, parentDom);
-			} else if (childVNode._nextDom !== undefined) {
-				// Since Fragments or components that return Fragment like VNodes can
-				// contain multiple DOM nodes as the same level, continue the diff from
-				// the sibling of last DOM child of this child VNode
-				oldDom = childVNode._nextDom;
-			} else if (newDom) {
-				oldDom = newDom.nextSibling;
-			}
+		if (
+			childVNode._flags & INSERT_VNODE ||
+			oldVNode._children === childVNode._children
+		) {
+			oldDom = insert(childVNode, oldDom, parentDom);
+		} else if (
+			typeof childVNode.type == 'function' &&
+			childVNode._nextDom !== undefined
+		) {
+			// Since Fragments or components that return Fragment like VNodes can
+			// contain multiple DOM nodes as the same level, continue the diff from
+			// the sibling of last DOM child of this child VNode
+			oldDom = childVNode._nextDom;
 		} else if (newDom) {
-			if (childVNode._flags & INSERT_VNODE) {
-				oldDom = placeChild(parentDom, newDom, oldDom);
-			} else {
-				oldDom = newDom.nextSibling;
-			}
+			oldDom = newDom.nextSibling;
 		}
 
 		// Eagerly cleanup _nextDom. We don't need to persist the value because it
@@ -290,10 +285,6 @@ function constructNewChildrenArray(newParentVNode, renderResult, oldChildren) {
 		if (matchingIndex !== -1) {
 			remainingOldChildren--;
 			if (oldChildren[matchingIndex]) {
-				// TODO: Can we somehow not use this property? or override another
-				// property? We need it now so we can pull off the matchingIndex in
-				// diffChildren and when unmounting we can get the next DOM element by
-				// calling getDomSibling, which needs a complete oldTree
 				oldChildren[matchingIndex]._flags |= MATCHED;
 			}
 		}
@@ -360,34 +351,34 @@ function constructNewChildrenArray(newParentVNode, renderResult, oldChildren) {
 }
 
 /**
- * @param {VNode} childVNode
+ * @param {VNode} parentVNode
  * @param {PreactElement} oldDom
  * @param {PreactElement} parentDom
  * @returns {PreactElement}
  */
-function reorderChildren(childVNode, oldDom, parentDom) {
+function insert(parentVNode, oldDom, parentDom) {
 	// Note: VNodes in nested suspended trees may be missing _children.
-	let c = childVNode._children;
 
-	let tmp = 0;
-	for (; c && tmp < c.length; tmp++) {
-		let vnode = c[tmp];
-		if (vnode) {
-			// We typically enter this code path on sCU bailout, where we copy
-			// oldVNode._children to newVNode._children. If that is the case, we need
-			// to update the old children's _parent pointer to point to the newVNode
-			// (childVNode here).
-			vnode._parent = childVNode;
-
-			if (typeof vnode.type == 'function') {
-				oldDom = reorderChildren(vnode, oldDom, parentDom);
-			} else {
-				oldDom = placeChild(parentDom, vnode._dom, oldDom);
+	if (typeof parentVNode.type == 'function') {
+		let children = parentVNode._children;
+		for (let i = 0; children && i < children.length; i++) {
+			if (children[i]) {
+				// If we enter this code path on sCU bailout, where we copy
+				// oldVNode._children to newVNode._children, we need to update the old
+				// children's _parent pointer to point to the newVNode (parentVNode
+				// here).
+				children[i]._parent = parentVNode;
+				oldDom = insert(children[i], oldDom, parentDom);
 			}
 		}
+
+		return oldDom;
+	} else if (parentVNode._dom != oldDom) {
+		parentDom.insertBefore(parentVNode._dom, oldDom || null);
+		oldDom = parentVNode._dom;
 	}
 
-	return oldDom;
+	return oldDom && oldDom.nextSibling;
 }
 
 /**
@@ -407,20 +398,6 @@ export function toChildArray(children, out) {
 		out.push(children);
 	}
 	return out;
-}
-
-/**
- * @param {PreactElement} parentDom
- * @param {PreactElement} newDom
- * @param {PreactElement} oldDom
- * @returns {PreactElement}
- */
-function placeChild(parentDom, newDom, oldDom) {
-	if (newDom != oldDom) {
-		parentDom.insertBefore(newDom, oldDom || null);
-	}
-
-	return newDom.nextSibling;
 }
 
 /**
