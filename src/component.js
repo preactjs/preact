@@ -122,12 +122,11 @@ export function getDomSibling(vnode, childIndex) {
 function renderComponent(component) {
 	let oldVNode = component._vnode,
 		oldDom = oldVNode._dom,
-		parentDom = component._parentDom;
+		parentDom = component._parentDom,
+		commitQueue = [],
+		refQueue = [];
 
 	if (parentDom) {
-		let commitQueue = [],
-			refQueue = [];
-
 		const newVNode = assign({}, oldVNode);
 		newVNode._original = oldVNode._original + 1;
 
