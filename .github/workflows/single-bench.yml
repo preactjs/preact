@@ -26,11 +26,15 @@ on:
         type: boolean
         default: true
         required: false
-      timeout:
-        description: 'How many minutes to give the benchmark to run before timing out and failing'
-        type: number
-        default: 20
-        required: false
+      # A bug in GitHub actions prevents us from passing numbers (as either
+      # number or string type) to called workflows. So disabling this for now.
+      # See: https://github.com/orgs/community/discussions/67182
+      #
+      # timeout:
+      #   description: 'How many minutes to give the benchmark to run before timing out and failing'
+      #   type: number
+      #   default: 20
+      #   required: false
 
 jobs:
   build_local:
@@ -57,17 +61,17 @@ jobs:
         with:
           name: npm-package
       - run: mv preact.tgz preact-local.tgz
+      - name: Upload locally built preact package
+        uses: actions/upload-artifact@v3
+        with:
+          name: bench-environment
+          path: preact-local.tgz
       - name: Clear working directory
         run: |
           ls -al
           rm -rf *
           echo "===================="
           ls -al
-      - name: Upload locally built preact package
-        uses: actions/upload-artifact@v3
-        with:
-          name: bench-environment
-          path: preact-local.tgz
       - name: Download base package
         uses: actions/download-artifact@v3
         with:
@@ -80,10 +84,10 @@ jobs:
           path: preact-main.tgz
 
   benchmark:
-    name: Bench ${{ inputs.benchmark}}
+    name: Bench ${{ inputs.benchmark }}
     uses: ./.github/workflows/run-bench.yml
     needs: prepare
     with:
-      benchmark: ${{ inputs.benchmark}}
-      timeout: ${{ inputs.timeout }}
+      benchmark: ${{ inputs.benchmark }}
       trace: ${{ inputs.trace }}
+      # timeout: ${{ inputs.timeout }}
