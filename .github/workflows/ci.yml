@@ -3,6 +3,17 @@ name: CI
 on:
   workflow_dispatch:
   workflow_call:
+    inputs:
+      ref:
+        description: 'Branch or tag ref to check out'
+        type: string
+        required: false
+        default: 'main'
+      artifact_name:
+        description: 'Name of the artifact to upload'
+        type: string
+        required: false
+        default: 'npm-package'
   pull_request:
     branches:
       - '**'
@@ -17,6 +28,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref || '' }}
       - uses: actions/setup-node@v4
         with:
           node-version-file: 'package.json'
@@ -44,5 +57,5 @@ jobs:
       - name: Upload npm package
         uses: actions/upload-artifact@v3
         with:
-          name: npm-package
+          name: ${{ inputs.artifact_name || 'npm-package' }}
           path: preact.tgz
