@@ -87,7 +87,7 @@ function setInMapArray(map, key, index, value) {
 function logDifferences(key, results) {
 	let withDifferences = computeDifferences(results);
 	console.log();
-	let { fixed, unfixed } = automaticResultTable(withDifferences);
+	let { unfixed } = automaticResultTable(withDifferences);
 	// console.log(horizontalTermResultTable(fixed));
 	console.log(key);
 	console.log(verticalTermResultTable(unfixed));
@@ -273,7 +273,8 @@ function isDurationLog(log) {
 	);
 }
 
-export async function analyze() {
+/** @param {string} requestedBench */
+export async function analyze(requestedBench) {
 	// const frameworkNames = await readdir(p('logs'));
 	const frameworkNames = frameworks.map(f => f.label);
 	const listAtEnd = [
@@ -296,6 +297,16 @@ export async function analyze() {
 	if (benchmarkNames.length == 0) {
 		console.log(`No benchmarks or results found in "${baseTraceLogDir()}".`);
 		return;
+	} else if (requestedBench) {
+		if (benchmarkNames.includes(requestedBench)) {
+			selectedBench = requestedBench;
+		} else {
+			console.log(
+				`Could not find benchmark "${requestedBench}". Available benchmarks:`
+			);
+			console.log(benchmarkNames);
+			return;
+		}
 	} else if (benchmarkNames.length == 1) {
 		selectedBench = benchmarkNames[0];
 	} else {
