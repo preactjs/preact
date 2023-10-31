@@ -1,8 +1,14 @@
 import { Component, createElement, createRef, options } from 'preact';
-import { jsx, jsxs, jsxDEV, Fragment } from 'preact/jsx-runtime';
+import {
+	jsx,
+	jsxs,
+	jsxDEV,
+	Fragment,
+	jsxAttr,
+	jsxTemplate,
+	jsxEscape
+} from 'preact/jsx-runtime';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
-import { jsxattr } from 'preact/jsx-runtime/src';
-import { jsxssr } from 'preact/jsx-runtime/src';
 import { encodeEntities } from 'preact/jsx-runtime/src/encode';
 
 describe('Babel jsx/jsxDEV', () => {
@@ -112,28 +118,74 @@ describe('encodeEntities', () => {
 });
 
 describe('precompiled JSX', () => {
-	it('jsxattr', () => {
-		expect(jsxattr('foo', 'bar')).to.equal('foo="bar"');
-		expect(jsxattr('foo', "&<'")).to.equal('foo="&amp;&lt;\'"');
+	describe('jsxAttr', () => {
+		it('should render simple values', () => {
+			expect(jsxAttr('foo', 'bar')).to.equal('foo="bar"');
+			expect(jsxAttr('foo', "&<'")).to.equal('foo="&amp;&lt;\'"');
 
-		// Boolean attributes
-		expect(jsxattr('foo', true)).to.equal('foo');
+			// Boolean attributes
+			expect(jsxAttr('foo', true)).to.equal('foo');
 
-		// Invalid values
-		expect(jsxattr('foo', false)).to.equal('');
-		expect(jsxattr('foo', null)).to.equal('');
-		expect(jsxattr('foo', undefined)).to.equal('');
-		expect(jsxattr('foo', () => null)).to.equal('');
-		expect(jsxattr('foo', [])).to.equal('');
-		expect(jsxattr('key', 'foo')).to.equal('');
-		expect(jsxattr('ref', 'foo')).to.equal('');
+			// Invalid values
+			expect(jsxAttr('foo', false)).to.equal('');
+			expect(jsxAttr('foo', null)).to.equal('');
+			expect(jsxAttr('foo', undefined)).to.equal('');
+			expect(jsxAttr('foo', () => null)).to.equal('');
+			expect(jsxAttr('foo', [])).to.equal('');
+			expect(jsxAttr('key', 'foo')).to.equal('');
+			expect(jsxAttr('ref', 'foo')).to.equal('');
+		});
 	});
 
-	it('jsxssr', () => {
-		const tpl = [`<div>foo</div>`];
-		const vnode = jsxssr(tpl);
-		expect(vnode.props.tpl).to.equal(tpl);
-		expect(vnode.type).to.equal(Fragment);
-		expect(vnode.key).not.to.equal(null);
+	describe('jsxTemplate', () => {
+		it('should construct basic template vnode', () => {
+			const tpl = [`<div>foo</div>`];
+			const vnode = jsxTemplate(tpl);
+			expect(vnode.props.tpl).to.equal(tpl);
+			expect(vnode.type).to.equal(Fragment);
+			expect(vnode.key).not.to.equal(null);
+		});
+
+		it('should constructe template vnode with expressions', () => {
+			const tpl = [`<div>foo`, '</div>'];
+			const vnode = jsxTemplate(tpl, 'bar');
+			expect(vnode.props.tpl).to.equal(tpl);
+			expect(vnode.props.exprs).to.deep.equal(['bar']);
+			expect(vnode.type).to.equal(Fragment);
+			expect(vnode.key).not.to.equal(null);
+		});
+	});
+
+	describe('jsxEscape', () => {
+		it('should escape string children', () => {
+			expect(jsxEscape('foo')).to.equal('foo');
+			expect(jsxEscape(2)).to.equal('2');
+			expect(jsxEscape('&"<')).to.equal('&amp;&quot;&lt;');
+			expect(jsxEscape(null)).to.equal(null);
+			expect(jsxEscape(undefined)).to.equal(null);
+			expect(jsxEscape(true)).to.equal(null);
+			expect(jsxEscape(false)).to.equal(null);
+		});
+
+		it("should leave VNode's as is", () => {
+			const vnode = jsx('div', null);
+			expect(jsxEscape(vnode)).to.equal(vnode);
+		});
+
+		it('should escape arrays', () => {
+			const vnode = jsx('div', null);
+			expect(
+				jsxEscape([vnode, 'foo&"<', null, undefined, true, false, 2, 'foo'])
+			).to.deep.equal([
+				vnode,
+				'foo&amp;&quot;&lt;',
+				null,
+				null,
+				null,
+				null,
+				'2',
+				'foo'
+			]);
+		});
 	});
 });

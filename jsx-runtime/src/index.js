@@ -5,6 +5,8 @@ import { encodeEntities } from './encode';
 
 let vnodeId = 0;
 
+const isArray = Array.isArray;
+
 /**
  * @fileoverview
  * This file exports various methods that implement Babel's "automatic" JSX runtime API:
@@ -73,11 +75,13 @@ function createVNode(type, props, key, isStaticChildren, __source, __self) {
 }
 
 /**
+ * Create a template vnode. This function is not expected to be
+ * used directly, but rather through a precompile JSX transform
  * @param {string[]} templates
  * @param  {Array<string | null | VNode>} exprs
  * @returns {VNode}
  */
-function jsxssr(templates, ...exprs) {
+function jsxTemplate(templates, ...exprs) {
 	const vnode = createVNode(Fragment, { tpl: templates, exprs });
 	// Bypass render to string top level Fragment optimization
 	vnode.key = vnode._vnode;
@@ -85,12 +89,14 @@ function jsxssr(templates, ...exprs) {
 }
 
 /**
- * Serialize an attribute to HTML
- * @param {string} name Attribute name
- * @param {*} value
- * @returns {string}
+ * Serialize an HTML attribute to a string. This function is not
+ * expected to be used directly, but rather through a precompile
+ * JSX transform
+ * @param {string} name The attribute name
+ * @param {*} value The attribute value
+ * @returns {string | null}
  */
-function jsxattr(name, value) {
+function jsxAttr(name, value) {
 	if (name === 'ref' || name === 'key') return '';
 
 	if (
@@ -105,12 +111,44 @@ function jsxattr(name, value) {
 	return name + '="' + encodeEntities(value) + '"';
 }
 
+/**
+ * Escape a dynamic child passed to `jsxTemplate`. This function
+ * is not expected to be used directly, but rather through a
+ * precompile JSX transform
+ * @param {*} value
+ * @returns {string | null | VNode | Array<string | null | VNode>}
+ */
+function jsxEscape(value) {
+	if (
+		value == null ||
+		typeof value === 'boolean' ||
+		typeof value === 'function'
+	) {
+		return null;
+	}
+
+	if (typeof value === 'object') {
+		// Check for VNode
+		if (value.constructor === undefined) return value;
+
+		if (isArray(value)) {
+			for (let i = 0; i < value.length; i++) {
+				value[i] = jsxEscape(value[i]);
+			}
+			return value;
+		}
+	}
+
+	return encodeEntities('' + value);
+}
+
 export {
 	createVNode as jsx,
 	createVNode as jsxs,
 	createVNode as jsxDEV,
 	Fragment,
 	// precompiled JSX transform
-	jsxattr,
-	jsxssr
+	jsxTemplate,
+	jsxAttr,
+	jsxEscape
 };
