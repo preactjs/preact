@@ -119,14 +119,24 @@ describe('encodeEntities', () => {
 
 describe('precompiled JSX', () => {
 	describe('jsxAttr', () => {
+		beforeEach(() => {
+			options.attr = undefined;
+		});
+
+		afterEach(() => {
+			options.attr = undefined;
+		});
+
 		it('should render simple values', () => {
 			expect(jsxAttr('foo', 'bar')).to.equal('foo="bar"');
-			expect(jsxAttr('foo', "&<'")).to.equal('foo="&amp;&lt;\'"');
+		});
 
-			// Boolean attributes
+		it('should render boolean values', () => {
 			expect(jsxAttr('foo', true)).to.equal('foo');
+			expect(jsxAttr('foo', false)).to.equal('');
+		});
 
-			// Invalid values
+		it('should ignore invalid values', () => {
 			expect(jsxAttr('foo', false)).to.equal('');
 			expect(jsxAttr('foo', null)).to.equal('');
 			expect(jsxAttr('foo', undefined)).to.equal('');
@@ -134,6 +144,18 @@ describe('precompiled JSX', () => {
 			expect(jsxAttr('foo', [])).to.equal('');
 			expect(jsxAttr('key', 'foo')).to.equal('');
 			expect(jsxAttr('ref', 'foo')).to.equal('');
+		});
+
+		it('should escape values', () => {
+			expect(jsxAttr('foo', "&<'")).to.equal('foo="&amp;&lt;\'"');
+		});
+
+		it('should call options.attr()', () => {
+			options.attr = (name, value) => {
+				return `data-${name}="foo${value}"`;
+			};
+
+			expect(jsxAttr('foo', 'bar')).to.equal('data-foo="foobar"');
 		});
 	});
 

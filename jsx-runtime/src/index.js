@@ -94,9 +94,14 @@ function jsxTemplate(templates, ...exprs) {
  * JSX transform
  * @param {string} name The attribute name
  * @param {*} value The attribute value
- * @returns {string | null}
+ * @returns {string}
  */
 function jsxAttr(name, value) {
+	if (options.attr) {
+		const result = options.attr(name, value);
+		if (typeof result === 'string') return result;
+	}
+
 	if (name === 'ref' || name === 'key') return '';
 
 	if (

@@ -349,6 +349,12 @@ export interface Options {
 	_addHookName?(name: string | number): void;
 	__suspenseDidResolve?(vnode: VNode, cb: () => void): void;
 	// __canSuspenseResolve?(vnode: VNode, cb: () => void): void;
+
+	/**
+	 * Customize attribute serialization when a precompiled JSX transform
+	 * is used.
+	 */
+	attr?(name: string, value: any): string | void;
 }
 
 export const options: Options;
