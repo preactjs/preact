@@ -1,4 +1,4 @@
-name: Run Benchmark
+name: Benchmark Worker
 
 # Expectations:
 #
@@ -31,8 +31,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: ${{ inputs.timeout }}
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version-file: 'package.json'
           cache: 'npm'
