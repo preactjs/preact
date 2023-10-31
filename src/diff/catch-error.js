@@ -1,3 +1,5 @@
+import { unmount } from '.';
+
 /**
  * Find the closest error boundary to a thrown error and call it
  * @param {object} error The thrown value
