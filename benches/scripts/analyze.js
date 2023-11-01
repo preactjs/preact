@@ -96,7 +96,7 @@ function logDifferences(key, results) {
 /**
  * @param {string} version
  * @param {string[]} logPaths
- * @param {(logs: TraceEvent[], logFilePath: string) => number} [getThreadId]
+ * @param {(logs: TraceEvent[], logFilePath: string) => number | null} [getThreadId]
  * @param {(log: TraceEvent) => boolean} [trackEventsIn]
  * @returns {Promise<Map<string, ResultStats>>}
  */
@@ -108,6 +108,10 @@ async function getStatsFromLogs(version, logPaths, getThreadId, trackEventsIn) {
 		const logs = JSON.parse(await readFile(logPath, 'utf8'));
 
 		let tid = getThreadId ? getThreadId(logs, logPath) : null;
+		if (tid == null) {
+			console.warn(`Could not find threadId for ${logPath}. Skipping...`);
+			continue;
+		}
 
 		/** @type {Array<{ id: string; start: number; end: number; }>} Determine what durations to track events under */
 		const parentLogs = [];
@@ -245,18 +249,10 @@ async function getStatsFromLogs(version, logPaths, getThreadId, trackEventsIn) {
 /**
  * @param {import('./tracing').TraceEvent[]} logs
  * @param {string} logFilePath
- * @returns {number}
+ * @returns {number | null}
  */
 function getDurationThread(logs, logFilePath) {
-	let log = logs.find(isDurationLog);
-
-	if (log == null) {
-		throw new Error(
-			`Could not find blink.user_timing log for "run-final" or "duration" in ${logFilePath}.`
-		);
-	} else {
-		return log.tid;
-	}
+	return logs.find(isDurationLog)?.tid ?? null;
 }
 
 /**
