@@ -8,7 +8,7 @@ on:
         description: 'Branch or tag ref to check out'
         type: string
         required: false
-        default: 'main'
+        default: ''
       artifact_name:
         description: 'Name of the artifact to upload'
         type: string

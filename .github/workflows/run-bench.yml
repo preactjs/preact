@@ -53,6 +53,9 @@ jobs:
         with:
           name: results
           path: benches/results/${{ inputs.benchmark }}.json
+      - name: Anaylze logs if present
+        working-directory: benches
+        run: '[ -d logs ] && npm run analyze ${{ inputs.benchmark }} || echo "No logs to analyze"'
       - name: Tar logs if present
         working-directory: benches
         run: '[ -d logs ] && tar -zcvf ${{ inputs.benchmark}}_logs.tgz logs || echo "No logs found"'

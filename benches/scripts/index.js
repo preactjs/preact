@@ -99,12 +99,17 @@ prog
 	)
 	.action(runDeopts);
 
+// Test
+// - (no args)
+// - 02_replace1k
 prog
-	.command('analyze')
+	.command('analyze [benchmark]')
 	.describe(
 		'Analyze the trace logs created by running benchmarks with the --trace flag'
 	)
 	.example('analyze')
+	.example('analyze 02_replace1k')
+	.example('analyze many_updates')
 	.action(analyze);
 
 prog.parse(process.argv);
