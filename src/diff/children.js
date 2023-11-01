@@ -62,17 +62,12 @@ export function diffChildren(
 
 	let newChildrenLength = renderResult.length;
 
-	// TODO: Could we drop oldDom all together and just use _nextDom?
 	newParentVNode._nextDom = oldDom;
-	const newChildren = (newParentVNode._children = constructNewChildrenArray(
-		newParentVNode,
-		renderResult,
-		oldChildren
-	));
+	constructNewChildrenArray(newParentVNode, renderResult, oldChildren);
 	oldDom = newParentVNode._nextDom;
 
 	for (i = 0; i < newChildrenLength; i++) {
-		childVNode = newChildren[i];
+		childVNode = newParentVNode._children[i];
 
 		if (
 			childVNode == null ||
@@ -170,7 +165,6 @@ export function diffChildren(
  * @param {VNode} newParentVNode
  * @param {ComponentChildren[]} renderResult
  * @param {VNode[]} oldChildren
- * @returns {VNode[]}
  */
 function constructNewChildrenArray(newParentVNode, renderResult, oldChildren) {
 	/** @type {number} */
@@ -186,8 +180,7 @@ function constructNewChildrenArray(newParentVNode, renderResult, oldChildren) {
 
 	let skew = 0;
 
-	/** @type {VNode[]} */
-	const newChildren = [];
+	newParentVNode._children = [];
 	for (i = 0; i < newChildrenLength; i++) {
 		// @ts-expect-error We are reusing the childVNode variable to hold both the
 		// pre and post normalized childVNode
@@ -198,7 +191,7 @@ function constructNewChildrenArray(newParentVNode, renderResult, oldChildren) {
 			typeof childVNode == 'boolean' ||
 			typeof childVNode == 'function'
 		) {
-			childVNode = newChildren[i] = null;
+			childVNode = newParentVNode._children[i] = null;
 		}
 		// If this newVNode is being reused (e.g. <div>{reuse}{reuse}</div>) in the same diff,
 		// or we are rendering a component (e.g. setState) copy the oldVNodes so it can have
@@ -209,7 +202,7 @@ function constructNewChildrenArray(newParentVNode, renderResult, oldChildren) {
 			// eslint-disable-next-line valid-typeof
 			typeof childVNode == 'bigint'
 		) {
-			childVNode = newChildren[i] = createVNode(
+			childVNode = newParentVNode._children[i] = createVNode(
 				null,
 				childVNode,
 				null,
@@ -217,7 +210,7 @@ function constructNewChildrenArray(newParentVNode, renderResult, oldChildren) {
 				childVNode
 			);
 		} else if (isArray(childVNode)) {
-			childVNode = newChildren[i] = createVNode(
+			childVNode = newParentVNode._children[i] = createVNode(
 				Fragment,
 				{ children: childVNode },
 				null,
@@ -229,7 +222,7 @@ function constructNewChildrenArray(newParentVNode, renderResult, oldChildren) {
 			// scenario:
 			//   const reuse = <div />
 			//   <div>{reuse}<span />{reuse}</div>
-			childVNode = newChildren[i] = createVNode(
+			childVNode = newParentVNode._children[i] = createVNode(
 				childVNode.type,
 				childVNode.props,
 				childVNode.key,
@@ -237,7 +230,7 @@ function constructNewChildrenArray(newParentVNode, renderResult, oldChildren) {
 				childVNode._original
 			);
 		} else {
-			childVNode = newChildren[i] = childVNode;
+			childVNode = newParentVNode._children[i] = childVNode;
 		}
 
 		// Handle unmounting null placeholders, i.e. VNode => null in unkeyed children
@@ -346,8 +339,6 @@ function constructNewChildrenArray(newParentVNode, renderResult, oldChildren) {
 			unmount(oldVNode, oldVNode);
 		}
 	}
-
-	return newChildren;
 }
 
 /**
