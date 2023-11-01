@@ -58,12 +58,18 @@ export function diffChildren(
 	// This is a compression of oldParentVNode!=null && oldParentVNode != EMPTY_OBJ && oldParentVNode._children || EMPTY_ARR
 	// as EMPTY_OBJ._children should be `undefined`.
 	/** @type {VNode[]} */
-	let oldChildren = (oldParentVNode && oldParentVNode._children) || EMPTY_ARR;
-
-	let newChildrenLength = renderResult.length;
+	const oldChildren = (oldParentVNode && oldParentVNode._children) || EMPTY_ARR;
+	const oldChildrenLength = oldChildren.length;
+	const newChildrenLength = renderResult.length;
 
 	newParentVNode._nextDom = oldDom;
-	constructNewChildrenArray(newParentVNode, renderResult, oldChildren);
+	constructNewChildrenArray(
+		newParentVNode,
+		renderResult,
+		newChildrenLength,
+		oldChildren,
+		oldChildrenLength
+	);
 	oldDom = newParentVNode._nextDom;
 
 	for (i = 0; i < newChildrenLength; i++) {
@@ -164,9 +170,17 @@ export function diffChildren(
 /**
  * @param {VNode} newParentVNode
  * @param {ComponentChildren[]} renderResult
+ * @param {number} newChildrenLength
  * @param {VNode[]} oldChildren
+ * @param {number} oldChildrenLength
  */
-function constructNewChildrenArray(newParentVNode, renderResult, oldChildren) {
+function constructNewChildrenArray(
+	newParentVNode,
+	renderResult,
+	newChildrenLength,
+	oldChildren,
+	oldChildrenLength
+) {
 	/** @type {number} */
 	let i;
 	/** @type {VNode} */
@@ -174,9 +188,7 @@ function constructNewChildrenArray(newParentVNode, renderResult, oldChildren) {
 	/** @type {VNode} */
 	let oldVNode;
 
-	const newChildrenLength = renderResult.length;
-	const oldChildrenLength = oldChildren.length;
-	let remainingOldChildren = oldChildren.length;
+	let remainingOldChildren = oldChildrenLength;
 
 	let skew = 0;
 
@@ -268,6 +280,7 @@ function constructNewChildrenArray(newParentVNode, renderResult, oldChildren) {
 			childVNode,
 			oldChildren,
 			skewedIndex,
+			oldChildrenLength,
 			remainingOldChildren
 		);
 
@@ -396,19 +409,22 @@ export function toChildArray(children, out) {
  * @param {VNode[]} oldChildren
  * @param {number} skewedIndex
  * @param {number} remainingOldChildren
+ * @param {number} remainingOldChildren
  * @returns {number}
  */
 function findMatchingIndex(
 	childVNode,
 	oldChildren,
 	skewedIndex,
+	oldChildrenLength,
 	remainingOldChildren
 ) {
 	const key = childVNode.key;
 	const type = childVNode.type;
 	let x = skewedIndex - 1;
 	let y = skewedIndex + 1;
-	let oldVNode = oldChildren[skewedIndex];
+	let oldVNode =
+		skewedIndex < oldChildrenLength ? oldChildren[skewedIndex] : undefined;
 
 	// We only need to perform a search if there are more children
 	// (remainingOldChildren) to search. However, if the oldVNode we just looked
@@ -428,7 +444,7 @@ function findMatchingIndex(
 	) {
 		return skewedIndex;
 	} else if (shouldSearch) {
-		while (x >= 0 || y < oldChildren.length) {
+		while (x >= 0 || y < oldChildrenLength) {
 			if (x >= 0) {
 				oldVNode = oldChildren[x];
 				if (
@@ -442,7 +458,7 @@ function findMatchingIndex(
 				x--;
 			}
 
-			if (y < oldChildren.length) {
+			if (y < oldChildrenLength) {
 				oldVNode = oldChildren[y];
 				if (
 					oldVNode &&
