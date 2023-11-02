@@ -153,26 +153,40 @@ export function diffChildren(
 		childVNode._depth = newParentVNode._depth + 1;
 
 		const skewedIndex = i + skew;
-		const matchingIndex = findMatchingIndex(
-			childVNode,
-			oldChildren,
-			skewedIndex,
-			oldChildrenLength,
-			remainingOldChildren
-		);
+		let matchingIndex = skewedIndex;
+		oldVNode =
+			matchingIndex < oldChildrenLength
+				? oldChildren[matchingIndex]
+				: undefined;
+
+		if (oldVNode === null) {
+			// Mounting into a null placeholder
+		} else if (
+			oldVNode &&
+			childVNode.key == oldVNode.key &&
+			childVNode.type === oldVNode.type
+		) {
+			// Found matching oldVNode!
+		} else if (remainingOldChildren) {
+			// Need to search remaining children for a matching VNode.
+			matchingIndex = findMatchingIndex(
+				childVNode,
+				oldChildren,
+				skewedIndex,
+				oldChildrenLength
+			);
+			oldVNode = null;
+		}
 
 		// Temporarily store the matchingIndex on the _index property so we can pull
 		// out the oldVNode in diffChildren. We'll override this to the VNode's
 		// final index after using this property to get the oldVNode
 		childVNode._index = matchingIndex;
 
-		oldVNode = null;
 		if (matchingIndex !== -1) {
-			oldVNode = oldChildren[matchingIndex];
 			remainingOldChildren--;
-			if (oldVNode) {
-				oldVNode._flags |= MATCHED;
-			}
+			oldVNode = oldChildren[matchingIndex];
+			if (oldVNode) oldVNode._flags |= MATCHED;
 		}
 
 		// Here, we define isMounting for the purposes of the skew diffing
@@ -385,23 +399,20 @@ export function toChildArray(children, out) {
  * @param {VNode} childVNode
  * @param {VNode[]} oldChildren
  * @param {number} skewedIndex
- * @param {number} remainingOldChildren
- * @param {number} remainingOldChildren
+ * @param {number} oldChildrenLength
  * @returns {number}
  */
 function findMatchingIndex(
 	childVNode,
 	oldChildren,
 	skewedIndex,
-	oldChildrenLength,
-	remainingOldChildren
+	oldChildrenLength
 ) {
 	const key = childVNode.key;
 	const type = childVNode.type;
 	let x = skewedIndex - 1;
 	let y = skewedIndex + 1;
-	let oldVNode =
-		skewedIndex < oldChildrenLength ? oldChildren[skewedIndex] : undefined;
+	let oldVNode;
 
 	// We only need to perform a search if there are more children
 	// (remainingOldChildren) to search. However, if the oldVNode we just looked
@@ -411,42 +422,31 @@ function findMatchingIndex(
 	// remainingOldChildren > 1 if the oldVNode is not already used/matched. Else
 	// if the oldVNode was null or matched, then there could needs to be at least
 	// 1 (aka `remainingOldChildren > 0`) children to find and compare against.
-	let shouldSearch =
-		remainingOldChildren >
-		(oldVNode != null && (oldVNode._flags & MATCHED) === 0 ? 1 : 0);
-
-	if (
-		oldVNode === null ||
-		(oldVNode && key == oldVNode.key && type === oldVNode.type)
-	) {
-		return skewedIndex;
-	} else if (shouldSearch) {
-		while (x >= 0 || y < oldChildrenLength) {
-			if (x >= 0) {
-				oldVNode = oldChildren[x];
-				if (
-					oldVNode &&
-					(oldVNode._flags & MATCHED) === 0 &&
-					key == oldVNode.key &&
-					type === oldVNode.type
-				) {
-					return x;
-				}
-				x--;
+	while (x >= 0 || y < oldChildrenLength) {
+		if (x >= 0) {
+			oldVNode = oldChildren[x];
+			if (
+				oldVNode &&
+				(oldVNode._flags & MATCHED) === 0 &&
+				key == oldVNode.key &&
+				type === oldVNode.type
+			) {
+				return x;
 			}
+			x--;
+		}
 
-			if (y < oldChildrenLength) {
-				oldVNode = oldChildren[y];
-				if (
-					oldVNode &&
-					(oldVNode._flags & MATCHED) === 0 &&
-					key == oldVNode.key &&
-					type === oldVNode.type
-				) {
-					return y;
-				}
-				y++;
+		if (y < oldChildrenLength) {
+			oldVNode = oldChildren[y];
+			if (
+				oldVNode &&
+				(oldVNode._flags & MATCHED) === 0 &&
+				key == oldVNode.key &&
+				type === oldVNode.type
+			) {
+				return y;
 			}
+			y++;
 		}
 	}
 
