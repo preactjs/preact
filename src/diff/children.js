@@ -63,131 +63,8 @@ export function diffChildren(
 	const newChildrenLength = renderResult.length;
 
 	newParentVNode._nextDom = oldDom;
-	constructNewChildrenArray(
-		newParentVNode,
-		renderResult,
-		newChildrenLength,
-		oldChildren,
-		oldChildrenLength
-	);
-	oldDom = newParentVNode._nextDom;
 
-	for (i = 0; i < newChildrenLength; i++) {
-		childVNode = newParentVNode._children[i];
-
-		if (
-			childVNode == null ||
-			typeof childVNode == 'boolean' ||
-			typeof childVNode == 'function'
-		) {
-			continue;
-		}
-
-		// At this point, constructNewChildrenArray has assigned _index to be the
-		// matchingIndex for this VNode's oldVNode (or -1 if there is no oldVNode).
-		if (childVNode._index === -1) {
-			oldVNode = EMPTY_OBJ;
-		} else {
-			oldVNode = oldChildren[childVNode._index] || EMPTY_OBJ;
-		}
-
-		// Update childVNode._index to its final index
-		childVNode._index = i;
-
-		// Morph the old element into the new one, but don't append it to the dom yet
-		diff(
-			parentDom,
-			childVNode,
-			oldVNode,
-			globalContext,
-			isSvg,
-			excessDomChildren,
-			commitQueue,
-			oldDom,
-			isHydrating,
-			refQueue
-		);
-
-		// Adjust DOM nodes
-		newDom = childVNode._dom;
-		if (childVNode.ref && oldVNode.ref != childVNode.ref) {
-			if (oldVNode.ref) {
-				applyRef(oldVNode.ref, null, childVNode);
-			}
-			refQueue.push(
-				childVNode.ref,
-				childVNode._component || newDom,
-				childVNode
-			);
-		}
-
-		if (firstChildDom == null && newDom != null) {
-			firstChildDom = newDom;
-		}
-
-		if (
-			childVNode._flags & INSERT_VNODE ||
-			oldVNode._children === childVNode._children
-		) {
-			oldDom = insert(childVNode, oldDom, parentDom);
-		} else if (
-			typeof childVNode.type == 'function' &&
-			childVNode._nextDom !== undefined
-		) {
-			// Since Fragments or components that return Fragment like VNodes can
-			// contain multiple DOM nodes as the same level, continue the diff from
-			// the sibling of last DOM child of this child VNode
-			oldDom = childVNode._nextDom;
-		} else if (newDom) {
-			oldDom = newDom.nextSibling;
-		}
-
-		// Eagerly cleanup _nextDom. We don't need to persist the value because it
-		// is only used by `diffChildren` to determine where to resume the diff
-		// after diffing Components and Fragments. Once we store it the nextDOM
-		// local var, we can clean up the property. Also prevents us hanging on to
-		// DOM nodes that may have been unmounted.
-		childVNode._nextDom = undefined;
-
-		// Unset diffing flags
-		childVNode._flags &= RESET_MODE;
-	}
-
-	// TODO: With new child diffing algo, consider alt ways to diff Fragments.
-	// Such as dropping oldDom and moving fragments in place
-	//
-	// Because the newParentVNode is Fragment-like, we need to set it's
-	// _nextDom property to the nextSibling of its last child DOM node.
-	//
-	// `oldDom` contains the correct value here because if the last child
-	// is a Fragment-like, then oldDom has already been set to that child's _nextDom.
-	// If the last child is a DOM VNode, then oldDom will be set to that DOM
-	// node's nextSibling.
-	newParentVNode._nextDom = oldDom;
-	newParentVNode._dom = firstChildDom;
-}
-
-/**
- * @param {VNode} newParentVNode
- * @param {ComponentChildren[]} renderResult
- * @param {number} newChildrenLength
- * @param {VNode[]} oldChildren
- * @param {number} oldChildrenLength
- */
-function constructNewChildrenArray(
-	newParentVNode,
-	renderResult,
-	newChildrenLength,
-	oldChildren,
-	oldChildrenLength
-) {
-	/** @type {number} */
-	let i;
-	/** @type {VNode} */
-	let childVNode;
-	/** @type {VNode} */
-	let oldVNode;
-
+	// ============ START constructNewChildrenArray ============
 	let remainingOldChildren = oldChildrenLength;
 
 	let skew = 0;
@@ -352,6 +229,103 @@ function constructNewChildrenArray(
 			unmount(oldVNode, oldVNode);
 		}
 	}
+	// ============ END constructNewChildrenArray ============
+
+	oldDom = newParentVNode._nextDom;
+
+	for (i = 0; i < newChildrenLength; i++) {
+		childVNode = newParentVNode._children[i];
+
+		if (
+			childVNode == null ||
+			typeof childVNode == 'boolean' ||
+			typeof childVNode == 'function'
+		) {
+			continue;
+		}
+
+		// At this point, constructNewChildrenArray has assigned _index to be the
+		// matchingIndex for this VNode's oldVNode (or -1 if there is no oldVNode).
+		if (childVNode._index === -1) {
+			oldVNode = EMPTY_OBJ;
+		} else {
+			oldVNode = oldChildren[childVNode._index] || EMPTY_OBJ;
+		}
+
+		// Update childVNode._index to its final index
+		childVNode._index = i;
+
+		// Morph the old element into the new one, but don't append it to the dom yet
+		diff(
+			parentDom,
+			childVNode,
+			oldVNode,
+			globalContext,
+			isSvg,
+			excessDomChildren,
+			commitQueue,
+			oldDom,
+			isHydrating,
+			refQueue
+		);
+
+		// Adjust DOM nodes
+		newDom = childVNode._dom;
+		if (childVNode.ref && oldVNode.ref != childVNode.ref) {
+			if (oldVNode.ref) {
+				applyRef(oldVNode.ref, null, childVNode);
+			}
+			refQueue.push(
+				childVNode.ref,
+				childVNode._component || newDom,
+				childVNode
+			);
+		}
+
+		if (firstChildDom == null && newDom != null) {
+			firstChildDom = newDom;
+		}
+
+		if (
+			childVNode._flags & INSERT_VNODE ||
+			oldVNode._children === childVNode._children
+		) {
+			oldDom = insert(childVNode, oldDom, parentDom);
+		} else if (
+			typeof childVNode.type == 'function' &&
+			childVNode._nextDom !== undefined
+		) {
+			// Since Fragments or components that return Fragment like VNodes can
+			// contain multiple DOM nodes as the same level, continue the diff from
+			// the sibling of last DOM child of this child VNode
+			oldDom = childVNode._nextDom;
+		} else if (newDom) {
+			oldDom = newDom.nextSibling;
+		}
+
+		// Eagerly cleanup _nextDom. We don't need to persist the value because it
+		// is only used by `diffChildren` to determine where to resume the diff
+		// after diffing Components and Fragments. Once we store it the nextDOM
+		// local var, we can clean up the property. Also prevents us hanging on to
+		// DOM nodes that may have been unmounted.
+		childVNode._nextDom = undefined;
+
+		// Unset diffing flags
+		childVNode._flags &= RESET_MODE;
+	}
+
+	// TODO: With new child diffing algo, consider alt ways to diff Fragments.
+	// Such as dropping oldDom and moving fragments in place
+	//
+	// Because the newParentVNode is Fragment-like, we need to set it's
+	// _nextDom property to the nextSibling of its last child DOM node.
+	//
+	// `oldDom` contains the correct value here because if the last child
+	// is a Fragment-like, then oldDom has already been set to that child's _nextDom.
+	// If the last child is a DOM VNode, then oldDom will be set to that DOM
+	// node's nextSibling.
+	newParentVNode._nextDom = oldDom;
+	newParentVNode._dom = firstChildDom;
 }
 
 /**
