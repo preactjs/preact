@@ -219,14 +219,16 @@ export function diffChildren(
 	// unmount DOM from the beginning of the oldChildren, we can adjust oldDom to
 	// point to the next child, which needs to be the first DOM node that won't be
 	// unmounted.
-	for (i = 0; i < oldChildrenLength; i++) {
-		oldVNode = oldChildren[i];
-		if (oldVNode != null && (oldVNode._flags & MATCHED) === 0) {
-			if (oldVNode._dom == newParentVNode._nextDom) {
-				newParentVNode._nextDom = getDomSibling(oldVNode);
-			}
+	if (remainingOldChildren) {
+		for (i = 0; i < oldChildrenLength; i++) {
+			oldVNode = oldChildren[i];
+			if (oldVNode != null && (oldVNode._flags & MATCHED) === 0) {
+				if (oldVNode._dom == newParentVNode._nextDom) {
+					newParentVNode._nextDom = getDomSibling(oldVNode);
+				}
 
-			unmount(oldVNode, oldVNode);
+				unmount(oldVNode, oldVNode);
+			}
 		}
 	}
 	// ============ END constructNewChildrenArray ============
