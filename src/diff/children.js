@@ -179,10 +179,14 @@ export function diffChildren(
 		// algorithm. Nodes that are unsuspending are considered mounting and we detect
 		// this by checking if oldVNode._original === null
 		const isMounting = oldVNode == null || oldVNode._original === null;
-
 		if (isMounting) {
 			if (matchingIndex == -1) {
 				skew--;
+			}
+
+			// If we are mounting a DOM node, mark it for insertion
+			if (typeof childVNode.type != 'function') {
+				childVNode._flags |= INSERT_VNODE;
 			}
 		} else if (matchingIndex !== skewedIndex) {
 			if (matchingIndex === skewedIndex + 1) {
@@ -203,15 +207,12 @@ export function diffChildren(
 			} else {
 				skew = 0;
 			}
-		}
 
-		// Move this VNode's DOM if the original index (matchingIndex) doesn't match
-		// the new skew index (i + new skew) or it's a mounting DOM VNode
-		if (
-			matchingIndex !== i + skew ||
-			(typeof childVNode.type != 'function' && isMounting)
-		) {
-			childVNode._flags |= INSERT_VNODE;
+			// Move this VNode's DOM if the original index (matchingIndex) doesn't match
+			// the new skew index (i + skew)
+			if (matchingIndex !== i + skew) {
+				childVNode._flags |= INSERT_VNODE;
+			}
 		}
 	}
 
