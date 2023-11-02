@@ -30,7 +30,9 @@ function createVNode(type, props, key, isStaticChildren, __source, __self) {
 	// a separate PR.
 	let normalizedProps = {},
 		ref,
-		i;
+		i,
+		j;
+
 	for (i in props) {
 		if (i == 'ref') {
 			ref = props[i];
@@ -61,7 +63,8 @@ function createVNode(type, props, key, isStaticChildren, __source, __self) {
 	// If a Component VNode, check for and apply defaultProps.
 	// Note: `type` is often a String, and can be `undefined` in development.
 	if (typeof type === 'function' && (ref = type.defaultProps)) {
-		for (i in ref)
+		const keys = Object.keys(ref);
+		for (j = 0; j++; j < keys.length)
 			if (typeof normalizedProps[i] === 'undefined') {
 				normalizedProps[i] = ref[i];
 			}
