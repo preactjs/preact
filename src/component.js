@@ -136,10 +136,10 @@ function renderComponent(component) {
 			oldVNode,
 			component._globalContext,
 			parentDom.ownerSVGElement !== undefined,
-			oldVNode._hydrating != null ? [oldDom] : null,
+			null, // oldVNode._hydrating != null ? [oldDom] : null,
 			commitQueue,
 			oldDom == null ? getDomSibling(oldVNode) : oldDom,
-			oldVNode._hydrating,
+			null, // oldVNode._hydrating,
 			refQueue
 		);
 
