@@ -9,7 +9,7 @@ import {
 	jsxEscape
 } from 'preact/jsx-runtime';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
-import { encodeEntities } from 'preact/jsx-runtime/src/encode';
+import { encodeEntities } from 'preact/jsx-runtime/src/utils';
 
 describe('Babel jsx/jsxDEV', () => {
 	let scratch;
@@ -156,6 +156,10 @@ describe('precompiled JSX', () => {
 			};
 
 			expect(jsxAttr('foo', 'bar')).to.equal('data-foo="foobar"');
+		});
+
+		it('should serialize style object', () => {
+			expect(jsxAttr('style', { padding: 3 })).to.equal('style="padding:3px;"');
 		});
 	});
 

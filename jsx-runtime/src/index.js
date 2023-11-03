@@ -1,5 +1,5 @@
 import { options, Fragment } from 'preact';
-import { encodeEntities } from './encode';
+import { encodeEntities, styleObjToCss } from './utils';
 
 /** @typedef {import('preact').VNode} VNode */
 
@@ -103,6 +103,9 @@ function jsxAttr(name, value) {
 	}
 
 	if (name === 'ref' || name === 'key') return '';
+	if (name === 'style' && typeof value === 'object') {
+		return name + '="' + styleObjToCss(value) + '"';
+	}
 
 	if (
 		value == null ||
