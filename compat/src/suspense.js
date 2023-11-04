@@ -1,6 +1,6 @@
 import { Component, createElement, options, Fragment } from 'preact';
 import { assign } from './util';
-import { MODE_HYDRATE } from 'preact/src/constants';
+import { MODE_HYDRATE } from '../../src/constants';
 
 const oldCatchError = options._catchError;
 options._catchError = function (error, newVNode, oldVNode, errorInfo) {
@@ -35,7 +35,7 @@ options.unmount = function (vnode) {
 	// most likely it is because the component is suspended
 	// we set the vnode.type as `null` so that it is not a typeof function
 	// so the unmount will remove the vnode._dom
-	if (component && (vnode._flags & MODE_HYDRATE) === MODE_HYDRATE) {
+	if (component && vnode._flags & MODE_HYDRATE) {
 		vnode.type = null;
 	}
 
@@ -167,8 +167,10 @@ Suspense.prototype._childDidSuspend = function (promise, suspendingVNode) {
 	 * to remain on screen and hydrate it when the suspense actually gets resolved.
 	 * While in non-hydration cases the usual fallback -> component flow would occour.
 	 */
-	const wasHydrating = (suspendingVNode._flags & MODE_HYDRATE) === MODE_HYDRATE;
-	if (!c._pendingSuspensionCount++ && !wasHydrating) {
+	if (
+		!c._pendingSuspensionCount++ &&
+		!(suspendingVNode._flags & MODE_HYDRATE)
+	) {
 		c.setState({ _suspended: (c._detachOnNextRender = c._vnode._children[0]) });
 	}
 	promise.then(onResolved, onResolved);

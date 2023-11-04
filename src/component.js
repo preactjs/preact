@@ -131,17 +131,16 @@ function renderComponent(component) {
 		const newVNode = assign({}, oldVNode);
 		newVNode._original = oldVNode._original + 1;
 
-		let isHydrating = (oldVNode._flags & MODE_HYDRATE) == MODE_HYDRATE;
 		diff(
 			parentDom,
 			newVNode,
 			oldVNode,
 			component._globalContext,
 			parentDom.ownerSVGElement !== undefined,
-			isHydrating ? [oldDom] : null,
+			oldVNode._flags & MODE_HYDRATE ? [oldDom] : null,
 			commitQueue,
 			oldDom == null ? getDomSibling(oldVNode) : oldDom,
-			isHydrating,
+			!!(oldVNode._flags & MODE_HYDRATE),
 			refQueue
 		);
 

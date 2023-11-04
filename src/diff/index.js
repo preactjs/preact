@@ -252,9 +252,6 @@ export function diff(
 
 			c.base = newVNode._dom;
 
-			// We successfully rendered this VNode, unset any stored hydration/bailout state:
-			newVNode._flags &= ~MODE_HYDRATE;
-
 			if (c._renderCallbacks.length) {
 				commitQueue.push(c);
 			}
