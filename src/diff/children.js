@@ -1,12 +1,6 @@
 import { diff, unmount, applyRef } from './index';
 import { createVNode, Fragment } from '../create-element';
-import {
-	EMPTY_OBJ,
-	EMPTY_ARR,
-	INSERT_VNODE,
-	MATCHED,
-	RESET_MODE
-} from '../constants';
+import { EMPTY_OBJ, EMPTY_ARR, INSERT_VNODE, MATCHED } from '../constants';
 import { isArray } from '../util';
 import { getDomSibling } from '../component';
 
@@ -144,7 +138,7 @@ export function diffChildren(
 		childVNode._nextDom = undefined;
 
 		// Unset diffing flags
-		childVNode._flags &= RESET_MODE;
+		childVNode._flags &= ~(INSERT_VNODE | MATCHED);
 	}
 
 	// TODO: With new child diffing algo, consider alt ways to diff Fragments.

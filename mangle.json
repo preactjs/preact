@@ -52,7 +52,6 @@
       "$_onResolve": "__R",
       "$_suspended": "__a",
       "$_dom": "__e",
-      "$_hydrating": "__h",
       "$_component": "__c",
       "$_index": "__i",
       "$_flags": "__u",

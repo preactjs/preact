@@ -147,7 +147,6 @@ declare global {
 		 */
 		_nextDom: PreactElement | null | undefined;
 		_component: Component | null;
-		_hydrating: boolean | null;
 		constructor: undefined;
 		_original: number;
 		_index: number;
