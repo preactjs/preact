@@ -1,4 +1,4 @@
-import { EMPTY_OBJ } from '../constants';
+import { EMPTY_OBJ, MODE_HYDRATE } from '../constants';
 import { BaseComponent, getDomSibling } from '../component';
 import { Fragment } from '../create-element';
 import { diffChildren } from './children';
@@ -45,11 +45,11 @@ export function diff(
 	if (newVNode.constructor !== undefined) return null;
 
 	// If the previous diff bailed out, resume creating/hydrating.
-	if (oldVNode._hydrating != null) {
-		isHydrating = oldVNode._hydrating;
+	if (oldVNode._flags & MODE_HYDRATE) {
+		isHydrating = true;
 		oldDom = newVNode._dom = oldVNode._dom;
 		// if we resume, we want the tree to be "unlocked"
-		newVNode._hydrating = null;
+		newVNode._flags &= ~MODE_HYDRATE;
 		excessDomChildren = [oldDom];
 	}
 
@@ -253,7 +253,7 @@ export function diff(
 			c.base = newVNode._dom;
 
 			// We successfully rendered this VNode, unset any stored hydration/bailout state:
-			newVNode._hydrating = null;
+			newVNode._flags &= ~MODE_HYDRATE;
 
 			if (c._renderCallbacks.length) {
 				commitQueue.push(c);
@@ -267,7 +267,9 @@ export function diff(
 			// if hydrating or creating initial tree, bailout preserves DOM:
 			if (isHydrating || excessDomChildren != null) {
 				newVNode._dom = oldDom;
-				newVNode._hydrating = !!isHydrating;
+				if (isHydrating) {
+					newVNode._flags |= MODE_HYDRATE;
+				}
 				excessDomChildren[excessDomChildren.indexOf(oldDom)] = null;
 				// ^ could possibly be simplified to:
 				// excessDomChildren.length = 0;

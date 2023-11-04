@@ -1,3 +1,5 @@
+/** Normal hydration that attaches to a DOM tree but does not diff it. */
+export const MODE_HYDRATE = 1 << 5;
 /** Indicates that this node needs to be inserted while patching children */
 export const INSERT_VNODE = 1 << 16;
 /** Indicates a VNode has been matched with another VNode in the diff */
