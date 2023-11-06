@@ -115,7 +115,7 @@ declare namespace React {
 		component: preact.Component | Element
 	): Element | null;
 
-	export abstract class PureComponent<P = {}, S = {}> extends preact.Component<
+	export abstract class PureComponent<P = {}, S = {}, SS = any> extends preact.Component<
 		P,
 		S
 	> {
