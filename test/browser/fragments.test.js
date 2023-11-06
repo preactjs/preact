@@ -1,7 +1,7 @@
 import { setupRerender } from 'preact/test-utils';
 import { createElement, render, Component, Fragment } from 'preact';
 import { setupScratch, teardown } from '../_util/helpers';
-import { span, div, ul, ol, li, section } from '../_util/dom';
+import { span, div, ul, ol, li, section, p } from '../_util/dom';
 import { logCall, clearLog, getLog } from '../_util/logCall';
 
 /** @jsx createElement */
@@ -644,6 +644,189 @@ describe('Fragment', () => {
 
 		expect(ops).to.deep.equal([]);
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
+	});
+
+	it('should preserve order for fragment switching', () => {
+		/** @type {(newState: { isLoading: boolean; data: number | null }) => void} */
+		let set;
+		class Foo extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { isLoading: true, data: null };
+				set = this.setState.bind(this);
+			}
+			render(props, { isLoading, data }) {
+				return (
+					<Fragment>
+						<div>HEADER</div>
+						{isLoading ? <div>Loading...</div> : null}
+						{data ? <div>Content: {data}</div> : null}
+					</Fragment>
+				);
+			}
+		}
+
+		render(<Foo />, scratch);
+		expect(scratch.innerHTML).to.equal(
+			'<div>HEADER</div><div>Loading...</div>'
+		);
+
+		set({ isLoading: false, data: 2 });
+		rerender();
+		expect(scratch.innerHTML).to.equal(
+			'<div>HEADER</div><div>Content: 2</div>'
+		);
+	});
+
+	it('should preserve order for fragment switching with sibling DOM', () => {
+		/** @type {(newState: { isLoading: boolean; data: number | null }) => void} */
+		let set;
+		class Foo extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { isLoading: true, data: null };
+				set = this.setState.bind(this);
+			}
+			render(props, { isLoading, data }) {
+				return (
+					<Fragment>
+						<div>HEADER</div>
+						{isLoading ? <div>Loading...</div> : null}
+						{data ? <div>Content: {data}</div> : null}
+						<div>FOOTER</div>
+					</Fragment>
+				);
+			}
+		}
+
+		render(<Foo />, scratch);
+		expect(scratch.innerHTML).to.equal(
+			'<div>HEADER</div><div>Loading...</div><div>FOOTER</div>'
+		);
+
+		set({ isLoading: false, data: 2 });
+		rerender();
+		expect(scratch.innerHTML).to.equal(
+			'<div>HEADER</div><div>Content: 2</div><div>FOOTER</div>'
+		);
+	});
+
+	it('should preserve order for fragment switching with sibling Components', () => {
+		/** @type {(newState: { isLoading: boolean; data: number | null }) => void} */
+		let set;
+		class Foo extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { isLoading: true, data: null };
+				set = this.setState.bind(this);
+			}
+			render(props, { isLoading, data }) {
+				return (
+					<Fragment>
+						<div>HEADER</div>
+						{isLoading ? <div>Loading...</div> : null}
+						{data ? <div>Content: {data}</div> : null}
+					</Fragment>
+				);
+			}
+		}
+
+		function Footer() {
+			return <div>FOOTER</div>;
+		}
+
+		function App() {
+			return (
+				<Fragment>
+					<Foo />
+					<Footer />
+				</Fragment>
+			);
+		}
+
+		render(<App />, scratch);
+		expect(scratch.innerHTML).to.equal(
+			'<div>HEADER</div><div>Loading...</div><div>FOOTER</div>'
+		);
+
+		set({ isLoading: false, data: 2 });
+		rerender();
+		expect(scratch.innerHTML).to.equal(
+			'<div>HEADER</div><div>Content: 2</div><div>FOOTER</div>'
+		);
+	});
+
+	it('should preserve order for nested fragment switching w/ child return', () => {
+		let set;
+		const Wrapper = ({ children }) => <Fragment>{children}</Fragment>;
+		class Foo extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { isLoading: true, data: null };
+				set = this.setState.bind(this);
+			}
+			render(props, { isLoading, data }) {
+				return (
+					<Fragment>
+						<div>HEADER</div>
+						{isLoading ? <div>Loading...</div> : null}
+						{data ? <div>Content: {data}</div> : null}
+					</Fragment>
+				);
+			}
+		}
+
+		render(
+			<Wrapper>
+				<Foo />
+			</Wrapper>,
+			scratch
+		);
+		expect(scratch.innerHTML).to.equal(
+			'<div>HEADER</div><div>Loading...</div>'
+		);
+
+		set({ isLoading: false, data: 2 });
+		rerender();
+		expect(scratch.innerHTML).to.equal(
+			'<div>HEADER</div><div>Content: 2</div>'
+		);
+	});
+
+	it('should preserve order for nested fragment switching', () => {
+		let set;
+		const Wrapper = () => (
+			<Fragment>
+				<Foo />
+			</Fragment>
+		);
+		class Foo extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { isLoading: true, data: null };
+				set = this.setState.bind(this);
+			}
+			render(props, { isLoading, data }) {
+				return (
+					<Fragment>
+						<div>HEADER</div>
+						{isLoading ? <div>Loading...</div> : null}
+						{data ? <div>Content: {data}</div> : null}
+					</Fragment>
+				);
+			}
+		}
+
+		render(<Wrapper />, scratch);
+		expect(scratch.innerHTML).to.equal(
+			'<div>HEADER</div><div>Loading...</div>'
+		);
+
+		set({ isLoading: false, data: 2 });
+		rerender();
+		expect(scratch.innerHTML).to.equal(
+			'<div>HEADER</div><div>Content: 2</div>'
+		);
 	});
 
 	it('should preserve state with reordering in multiple levels', () => {
@@ -1328,14 +1511,14 @@ describe('Fragment', () => {
 			'rendering from true to false'
 		);
 		expectDomLogToBe([
-			// Mount 3 & 4
-			'<li>.appendChild(#text)',
-			'<ol>0122.appendChild(<li>3)',
-			'<li>.appendChild(#text)',
-			'<ol>01223.appendChild(<li>4)',
 			// Remove 1 & 2 (replaced with null)
 			'<li>0.remove()',
-			'<li>1.remove()'
+			'<li>1.remove()',
+			// Mount 3 & 4
+			'<li>.appendChild(#text)',
+			'<ol>22.appendChild(<li>3)',
+			'<li>.appendChild(#text)',
+			'<ol>223.appendChild(<li>4)'
 		]);
 
 		clearLog();
@@ -1399,14 +1582,14 @@ describe('Fragment', () => {
 			'rendering from true to false'
 		);
 		expectDomLogToBe([
-			// Mount 4 & 5
-			'<li>.appendChild(#text)',
-			'<ol>0123.appendChild(<li>4)',
-			'<li>.appendChild(#text)',
-			'<ol>01234.appendChild(<li>5)',
 			// Remove 1 & 2 (replaced with null)
 			'<li>0.remove()',
-			'<li>1.remove()'
+			'<li>1.remove()',
+			// Mount 4 & 5
+			'<li>.appendChild(#text)',
+			'<ol>23.appendChild(<li>4)',
+			'<li>.appendChild(#text)',
+			'<ol>234.appendChild(<li>5)'
 		]);
 
 		clearLog();
@@ -2609,11 +2792,9 @@ describe('Fragment', () => {
 		rerender();
 		expect(scratch.innerHTML).to.equal(bottom);
 		expectDomLogToBe([
-			'<div>top panelNavigationContent.insertBefore(<div>Navigation, <div>top panel)',
-			'<div>Navigationtop panelContent.insertBefore(<div>Content, <div>top panel)',
+			'<div>top panel.remove()',
 			'<div>.appendChild(#text)',
-			'<div>NavigationContenttop panel.insertBefore(<div>bottom panel, <div>top panel)',
-			'<div>top panel.remove()'
+			'<div>NavigationContent.appendChild(<div>bottom panel)'
 		]);
 
 		clearLog();
@@ -3046,5 +3227,102 @@ describe('Fragment', () => {
 
 		expect(scratch.innerHTML).to.equal([div('A'), div(1), div(2)].join(''));
 		expectDomLogToBe(['<div>B.remove()', '<div>2A1.appendChild(<div>2)']);
+	});
+
+	it('should efficiently unmount & mount components that conditionally return null', () => {
+		function Conditional({ condition }) {
+			return condition ? (
+				<Fragment>
+					<p>2</p>
+					<p>3</p>
+				</Fragment>
+			) : null;
+		}
+
+		/** @type {() => void} */
+		let toggle;
+		class App extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { condition: true };
+				toggle = () =>
+					this.setState(prevState => ({ condition: !prevState.condition }));
+			}
+
+			render() {
+				const { condition } = this.state;
+				return (
+					<Fragment>
+						<p>1</p>
+						<Conditional condition={condition} />
+						{condition ? null : <p>A</p>}
+						<p>4</p>
+					</Fragment>
+				);
+			}
+		}
+
+		render(<App />, scratch);
+		expect(scratch.innerHTML).to.equal([1, 2, 3, 4].map(p).join(''));
+
+		clearLog();
+		toggle();
+		rerender();
+
+		expect(scratch.innerHTML).to.equal([1, 'A', 4].map(p).join(''));
+		expectDomLogToBe([
+			'<p>2.remove()',
+			'<p>3.remove()',
+			'<p>.appendChild(#text)',
+			'<div>14.insertBefore(<p>A, <p>4)'
+		]);
+	});
+
+	it('should efficiently unmount & mount components that conditionally return null with null first child', () => {
+		function Conditional({ condition }) {
+			return condition ? (
+				<Fragment>
+					{null}
+					<p>3</p>
+				</Fragment>
+			) : null;
+		}
+
+		/** @type {() => void} */
+		let toggle;
+		class App extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { condition: true };
+				toggle = () =>
+					this.setState(prevState => ({ condition: !prevState.condition }));
+			}
+
+			render() {
+				const { condition } = this.state;
+				return (
+					<Fragment>
+						<p>1</p>
+						<Conditional condition={condition} />
+						{condition ? null : <p>A</p>}
+						<p>4</p>
+					</Fragment>
+				);
+			}
+		}
+
+		render(<App />, scratch);
+		expect(scratch.innerHTML).to.equal([1, 3, 4].map(p).join(''));
+
+		clearLog();
+		toggle();
+		rerender();
+
+		expect(scratch.innerHTML).to.equal([1, 'A', 4].map(p).join(''));
+		expectDomLogToBe([
+			'<p>3.remove()',
+			'<p>.appendChild(#text)',
+			'<div>14.insertBefore(<p>A, <p>4)'
+		]);
 	});
 });

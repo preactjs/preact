@@ -19,7 +19,7 @@ declare namespace React {
 	export import Reducer = _hooks.Reducer;
 	export import Dispatch = _hooks.Dispatch;
 	export import Ref = _hooks.Ref;
-	export import StateUpdater = _hooks.StateUpdater;
+	export import SetStateAction = _hooks.StateUpdater;
 	export import useCallback = _hooks.useCallback;
 	export import useContext = _hooks.useContext;
 	export import useDebugValue = _hooks.useDebugValue;
@@ -53,6 +53,7 @@ declare namespace React {
 	export import createElement = preact.createElement;
 	export import cloneElement = preact.cloneElement;
 	export import ComponentProps = preact.ComponentProps;
+	export import ReactNode = preact.ComponentChild;
 
 	// Suspense
 	export import Suspense = _Suspense.Suspense;
@@ -65,9 +66,16 @@ declare namespace React {
 	export function startTransition(cb: () => void): void;
 
 	// HTML
-	export import HTMLAttributes = JSXInternal.HTMLAttributes;
+	export interface HTMLAttributes<T extends EventTarget>
+		extends JSXInternal.HTMLAttributes<T> {}
+	export interface HTMLProps<T extends EventTarget>
+		extends JSXInternal.HTMLAttributes<T>,
+			preact.ClassAttributes<T> {}
 	export import DetailedHTMLProps = JSXInternal.DetailedHTMLProps;
 	export import CSSProperties = JSXInternal.CSSProperties;
+	export interface SVGProps<T extends EventTarget>
+		extends JSXInternal.SVGAttributes<T>,
+			preact.ClassAttributes<T> {}
 
 	// Events
 	export import TargetedEvent = JSXInternal.TargetedEvent;
@@ -76,23 +84,23 @@ declare namespace React {
 
 	export function createPortal(
 		vnode: preact.VNode,
-		container: Element | DocumentFragment
+		container: preact.ContainerNode
 	): preact.VNode<any>;
 
 	export function render(
 		vnode: preact.VNode<any>,
-		parent: Element,
+		parent: preact.ContainerNode,
 		callback?: () => void
 	): Component | null;
 
 	export function hydrate(
 		vnode: preact.VNode<any>,
-		parent: Element,
+		parent: preact.ContainerNode,
 		callback?: () => void
 	): Component | null;
 
 	export function unmountComponentAtNode(
-		container: Element | Document | ShadowRoot | DocumentFragment
+		container: preact.ContainerNode
 	): boolean;
 
 	export function createFactory(
@@ -102,6 +110,7 @@ declare namespace React {
 		...children: preact.ComponentChildren[]
 	) => preact.VNode<any>;
 	export function isValidElement(element: any): boolean;
+	export function isFragment(element: any): boolean;
 	export function findDOMNode(
 		component: preact.Component | Element
 	): Element | null;
@@ -146,7 +155,9 @@ declare namespace React {
 
 	export function forwardRef<R, P = {}>(
 		fn: ForwardFn<P, R>
-	): preact.FunctionalComponent<Omit<P, 'ref'> & { ref?: preact.Ref<R> }>;
+	): preact.FunctionalComponent<PropsWithoutRef<P> & { ref?: preact.Ref<R> }>;
+
+	export type PropsWithoutRef<P> = Omit<P, 'ref'>;
 
 	interface MutableRefObject<T> {
 		current: T;
@@ -156,6 +167,9 @@ declare namespace React {
 		| ((instance: T | null) => void)
 		| MutableRefObject<T | null>
 		| null;
+
+	export function flushSync<R>(fn: () => R): R;
+	export function flushSync<A, R>(fn: (a: A) => R, a: A): R;
 
 	export function unstable_batchedUpdates(
 		callback: (arg?: any) => void,

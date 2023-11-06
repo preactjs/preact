@@ -4,13 +4,13 @@ on: create
 jobs:
   build:
     if: github.ref_type == 'tag'
-    uses: preactjs/preact/.github/workflows/ci.yml@master
+    uses: preactjs/preact/.github/workflows/ci.yml@main
 
   release:
     runs-on: ubuntu-latest
     needs: build
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions/download-artifact@v3
         with:
           name: npm-package

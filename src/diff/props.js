@@ -3,8 +3,7 @@ import options from '../options';
 
 /**
  * Diff the old and new properties of a VNode and apply changes to the DOM node
- * @param {import('../internal').PreactElement} dom The DOM node to apply
- * changes to
+ * @param {PreactElement} dom The DOM node to apply changes to
  * @param {object} newProps The new props
  * @param {object} oldProps The old props
  * @param {boolean} isSvg Whether or not this node is an SVG node
@@ -47,7 +46,7 @@ function setStyle(style, key, value) {
 
 /**
  * Set a property value on a DOM node
- * @param {import('../internal').PreactElement} dom The DOM node to modify
+ * @param {PreactElement} dom The DOM node to modify
  * @param {string} name The name of the property to set
  * @param {*} value The value to set the property to
  * @param {*} oldValue The old value the property had
@@ -83,7 +82,8 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
 	}
 	// Benchmark for comparison: https://esbench.com/bench/574c954bdb965b9a00965ac6
 	else if (name[0] === 'o' && name[1] === 'n') {
-		useCapture = name !== (name = name.replace(/Capture$/, ''));
+		useCapture =
+			name !== (name = name.replace(/(PointerCapture)$|Capture$/, '$1'));
 
 		// Infer correct casing for DOM built-in events:
 		if (name.toLowerCase() in dom) name = name.toLowerCase().slice(2);
@@ -94,8 +94,11 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
 
 		if (value) {
 			if (!oldValue) {
+				value._attached = Date.now();
 				const handler = useCapture ? eventProxyCapture : eventProxy;
 				dom.addEventListener(name, handler, useCapture);
+			} else {
+				value._attached = oldValue._attached;
 			}
 		} else {
 			const handler = useCapture ? eventProxyCapture : eventProxy;
@@ -119,6 +122,7 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
 			name !== 'download' &&
 			name !== 'rowSpan' &&
 			name !== 'colSpan' &&
+			name !== 'role' &&
 			name in dom
 		) {
 			try {
@@ -135,7 +139,7 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
 		// amount of exceptions would cost too many bytes. On top of
 		// that other frameworks generally stringify `false`.
 
-		if (typeof value === 'function') {
+		if (typeof value == 'function') {
 			// never serialize functions as attribute values
 		} else if (value != null && (value !== false || name[4] === '-')) {
 			dom.setAttribute(name, value);
@@ -147,13 +151,33 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
 
 /**
  * Proxy an event to hooked event handlers
- * @param {Event} e The event object from the browser
+ * @param {PreactEvent} e The event object from the browser
  * @private
  */
 function eventProxy(e) {
-	return this._listeners[e.type + false](options.event ? options.event(e) : e);
+	const eventHandler = this._listeners[e.type + false];
+	/**
+	 * This trick is inspired by Vue https://github.com/vuejs/core/blob/main/packages/runtime-dom/src/modules/events.ts#L90-L101
+	 * when the dom performs an event it leaves micro-ticks in between bubbling up which means that an event can trigger on a newly
+	 * created DOM-node while the event bubbles up, this can cause quirky behavior as seen in https://github.com/preactjs/preact/issues/3927
+	 */
+	if (!e._dispatched) {
+		// When an event has no _dispatched we know this is the first event-target in the chain
+		// so we set the initial dispatched time.
+		e._dispatched = Date.now();
+		// When the _dispatched is smaller than the time when the targetted event handler was attached
+		// we know we have bubbled up to an element that was added during patching the dom.
+	} else if (e._dispatched <= eventHandler._attached) {
+		return;
+	}
+	return eventHandler(options.event ? options.event(e) : e);
 }
 
+/**
+ * Proxy an event to hooked event handlers
+ * @param {PreactEvent} e The event object from the browser
+ * @private
+ */
 function eventProxyCapture(e) {
 	return this._listeners[e.type + true](options.event ? options.event(e) : e);
 }

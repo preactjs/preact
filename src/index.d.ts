@@ -195,9 +195,8 @@ export function createElement(
 		| null,
 	...children: ComponentChildren[]
 ): VNode<
-	| (JSXInternal.DOMAttributes<HTMLInputElement> &
-			ClassAttributes<HTMLInputElement>)
-	| null
+	| JSXInternal.DOMAttributes<HTMLInputElement> &
+			ClassAttributes<HTMLInputElement>
 >;
 export function createElement<
 	P extends JSXInternal.HTMLAttributes<T>,
@@ -206,7 +205,7 @@ export function createElement<
 	type: keyof JSXInternal.IntrinsicElements,
 	props: (ClassAttributes<T> & P) | null,
 	...children: ComponentChildren[]
-): VNode<(ClassAttributes<T> & P) | null>;
+): VNode<ClassAttributes<T> & P>;
 export function createElement<
 	P extends JSXInternal.SVGAttributes<T>,
 	T extends HTMLElement
@@ -214,7 +213,7 @@ export function createElement<
 	type: keyof JSXInternal.IntrinsicElements,
 	props: (ClassAttributes<T> & P) | null,
 	...children: ComponentChildren[]
-): VNode<(ClassAttributes<T> & P) | null>;
+): VNode<ClassAttributes<T> & P>;
 export function createElement<T extends HTMLElement>(
 	type: string,
 	props:
@@ -243,9 +242,8 @@ export function h(
 		| null,
 	...children: ComponentChildren[]
 ): VNode<
-	| (JSXInternal.DOMAttributes<HTMLInputElement> &
-			ClassAttributes<HTMLInputElement>)
-	| null
+	| JSXInternal.DOMAttributes<HTMLInputElement> &
+			ClassAttributes<HTMLInputElement>
 >;
 export function h<
 	P extends JSXInternal.HTMLAttributes<T>,
@@ -254,7 +252,7 @@ export function h<
 	type: keyof JSXInternal.IntrinsicElements,
 	props: (ClassAttributes<T> & P) | null,
 	...children: ComponentChildren[]
-): VNode<(ClassAttributes<T> & P) | null>;
+): VNode<ClassAttributes<T> & P>;
 export function h<
 	P extends JSXInternal.SVGAttributes<T>,
 	T extends HTMLElement
@@ -262,7 +260,7 @@ export function h<
 	type: keyof JSXInternal.IntrinsicElements,
 	props: (ClassAttributes<T> & P) | null,
 	...children: ComponentChildren[]
-): VNode<(ClassAttributes<T> & P) | null>;
+): VNode<ClassAttributes<T> & P>;
 export function h<T extends HTMLElement>(
 	type: string,
 	props:
@@ -281,7 +279,7 @@ export function h<P>(
 	type: ComponentType<P>,
 	props: (Attributes & P) | null,
 	...children: ComponentChildren[]
-): VNode<(Attributes & P) | null>;
+): VNode<Attributes & P>;
 export namespace h {
 	export import JSX = JSXInternal;
 }
@@ -289,15 +287,15 @@ export namespace h {
 //
 // Preact render
 // -----------------------------------
-
 interface ContainerNode {
-	nodeType: Node['nodeType'];
-	parentNode: Node['parentNode'];
-	firstChild: Node['firstChild'];
-	insertBefore: Node['insertBefore'];
-	appendChild: Node['appendChild'];
-	removeChild: Node['removeChild'];
-	childNodes: ArrayLike<Node>;
+	readonly nodeType: number;
+	readonly parentNode: ContainerNode | null;
+	readonly firstChild: ContainerNode | null;
+	readonly childNodes: ArrayLike<ContainerNode>;
+
+	insertBefore(node: ContainerNode, child: ContainerNode | null): ContainerNode;
+	appendChild(node: ContainerNode): ContainerNode;
+	removeChild(child: ContainerNode): ContainerNode;
 }
 
 export function render(vnode: ComponentChild, parent: ContainerNode): void;

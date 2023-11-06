@@ -55,6 +55,15 @@ function isValidElement(element) {
 }
 
 /**
+ * Check if the passed element is a Fragment node.
+ * @param {*} element The element to check
+ * @returns {boolean}
+ */
+function isFragment(element) {
+	return isValidElement(element) && element.type === Fragment;
+}
+
+/**
  * Wrap `cloneElement` to abort if the passed element is not a valid element and apply
  * all vnode normalizations.
  * @param {import('./internal').VNode} element The vnode to clone
@@ -135,13 +144,21 @@ export function useTransition() {
 // styles/... before it attaches
 export const useInsertionEffect = useLayoutEffect;
 
+// compat to react-is
+export const isElement = isValidElement;
+
 /**
  * This is taken from https://github.com/facebook/react/blob/main/packages/use-sync-external-store/src/useSyncExternalStoreShimClient.js#L84
  * on a high level this cuts out the warnings, ... and attempts a smaller implementation
+ * @typedef {{ _value: any; _getSnapshot: () => any }} Store
  */
 export function useSyncExternalStore(subscribe, getSnapshot) {
 	const value = getSnapshot();
 
+	/**
+	 * @typedef {{ _instance: Store }} StoreRef
+	 * @type {[StoreRef, (store: StoreRef) => void]}
+	 */
 	const [{ _instance }, forceUpdate] = useState({
 		_instance: { _value: value, _getSnapshot: getSnapshot }
 	});
@@ -150,24 +167,36 @@ export function useSyncExternalStore(subscribe, getSnapshot) {
 		_instance._value = value;
 		_instance._getSnapshot = getSnapshot;
 
-		if (!is(_instance._value, getSnapshot())) {
+		if (didSnapshotChange(_instance)) {
 			forceUpdate({ _instance });
 		}
 	}, [subscribe, value, getSnapshot]);
 
 	useEffect(() => {
-		if (!is(_instance._value, _instance._getSnapshot())) {
+		if (didSnapshotChange(_instance)) {
 			forceUpdate({ _instance });
 		}
 
 		return subscribe(() => {
-			if (!is(_instance._value, _instance._getSnapshot())) {
+			if (didSnapshotChange(_instance)) {
 				forceUpdate({ _instance });
 			}
 		});
 	}, [subscribe]);
 
 	return value;
+}
+
+/** @type {(inst: Store) => boolean} */
+function didSnapshotChange(inst) {
+	const latestGetSnapshot = inst._getSnapshot;
+	const prevValue = inst._value;
+	try {
+		const nextValue = latestGetSnapshot();
+		return !is(prevValue, nextValue);
+	} catch (error) {
+		return true;
+	}
 }
 
 export * from 'preact/hooks';
@@ -185,6 +214,7 @@ export {
 	createRef,
 	Fragment,
 	isValidElement,
+	isFragment,
 	findDOMNode,
 	Component,
 	PureComponent,
@@ -231,6 +261,8 @@ export default {
 	createRef,
 	Fragment,
 	isValidElement,
+	isElement,
+	isFragment,
 	findDOMNode,
 	Component,
 	PureComponent,

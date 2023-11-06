@@ -295,4 +295,18 @@ describe('preact/compat events', () => {
 		scratch.firstChild.dispatchEvent(createEvent('compositionstart'));
 		expect(spy).to.be.calledOnce;
 	});
+
+	it('should normalize onFocus to onfocusin', () => {
+		let spy = sinon.spy();
+		render(<input onFocus={spy} />, scratch);
+		scratch.firstChild.dispatchEvent(createEvent('focusin'));
+		expect(spy).to.be.calledOnce;
+	});
+
+	it('should normalize onBlur to onfocusout', () => {
+		let spy = sinon.spy();
+		render(<input onBlur={spy} />, scratch);
+		scratch.firstChild.dispatchEvent(createEvent('focusout'));
+		expect(spy).to.be.calledOnce;
+	});
 });

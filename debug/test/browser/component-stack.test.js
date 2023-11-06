@@ -79,7 +79,7 @@ describe('component stack', () => {
 		render(<Bar />, scratch);
 
 		let lines = getStack(errors).split('\n');
-		expect(lines[0].indexOf('td') > -1).to.equal(true);
+		expect(lines[0].indexOf('tr') > -1).to.equal(true);
 		expect(lines[1].indexOf('Thrower') > -1).to.equal(true);
 		expect(lines[2].indexOf('Bar') > -1).to.equal(true);
 	});

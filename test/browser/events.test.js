@@ -199,4 +199,38 @@ describe('event handling', () => {
 			expect(click, 'click').to.have.been.calledOnce;
 		});
 	}
+
+	// Uniquely named in that the base event names end with 'Capture'
+	it('should support (got|lost)PointerCapture events', () => {
+		let gotPointerCapture = sinon.spy(),
+			gotPointerCaptureCapture = sinon.spy(),
+			lostPointerCapture = sinon.spy(),
+			lostPointerCaptureCapture = sinon.spy();
+
+		render(
+			<div
+				onGotPointerCapture={gotPointerCapture}
+				onLostPointerCapture={lostPointerCapture}
+			/>,
+			scratch
+		);
+
+		expect(proto.addEventListener)
+			.to.have.been.calledTwice.and.to.have.been.calledWith('gotpointercapture')
+			.and.calledWith('lostpointercapture');
+
+		proto.addEventListener.resetHistory();
+
+		render(
+			<div
+				onGotPointerCaptureCapture={gotPointerCaptureCapture}
+				onLostPointerCaptureCapture={lostPointerCaptureCapture}
+			/>,
+			scratch
+		);
+
+		expect(proto.addEventListener)
+			.to.have.been.calledTwice.and.to.have.been.calledWith('gotpointercapture')
+			.and.calledWith('lostpointercapture');
+	});
 });

@@ -39,9 +39,15 @@ describe('VNode TS types', () => {
 		expect(actual).to.include.all.keys('type', 'props', 'key');
 	});
 
-	it('has a nodeName of string when html element', () => {
-		const div = <div>Hi!</div>;
-		expect(div.type).to.equal('div');
+	it('is returned by h', () => {
+		const actual = <div className="wow" />;
+		expect(actual).to.include.all.keys('type', 'props', 'key');
+	});
+
+	it('createElement conforms to the VNode type', () => {
+		const arr: VNode[] = [];
+		arr.push(createElement('div', null));
+		expect(true).to.be.true;
 	});
 
 	it('has a nodeName equal to the construction function when SFC', () => {

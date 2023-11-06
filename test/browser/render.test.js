@@ -1101,8 +1101,8 @@ describe('render()', () => {
 			'<div><iframe src="https://codesandbox.io/s/runtime-silence-no4zx"></iframe></div>'
 		);
 		expect(getLog()).to.deep.equal([
-			'<div>Test2.remove()',
-			'<div>Test3.remove()'
+			'<div>Test3.remove()',
+			'<div>Test2.remove()'
 		]);
 	});
 
@@ -1280,5 +1280,22 @@ describe('render()', () => {
 		expect(scratch.firstChild.tabIndex).to.equal(defaultValue);
 		render(<div tabindex={null} />, scratch);
 		expect(scratch.firstChild.tabIndex).to.equal(defaultValue);
+	});
+
+	// #4137
+	it('should unset role if null || undefined', () => {
+		render(
+			<section>
+				<div role="status">role="status"</div>
+				<div role={undefined}>role="undefined"</div>
+				<div role={null}>role="null"</div>
+			</section>,
+			scratch
+		);
+
+		const divs = scratch.querySelectorAll('div');
+		expect(divs[0].hasAttribute('role')).to.equal(true);
+		expect(divs[1].hasAttribute('role')).to.equal(false);
+		expect(divs[2].hasAttribute('role')).to.equal(false);
 	});
 });
