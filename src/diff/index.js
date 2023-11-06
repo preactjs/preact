@@ -51,7 +51,7 @@ export function diff(
 
 	// If the previous diff bailed out, resume creating/hydrating.
 	if (oldVNode._flags & MODE_SUSPENDED) {
-		isHydrating = (oldVNode._flags & MODE_HYDRATE) === MODE_HYDRATE;
+		isHydrating = !!(oldVNode._flags & MODE_HYDRATE);
 		oldDom = newVNode._dom = oldVNode._dom;
 		// if we resume, we want the tree to be "unlocked"
 		// newVNode._hydrating = null;
