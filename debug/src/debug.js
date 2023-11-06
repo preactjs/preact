@@ -341,7 +341,14 @@ export function initDebug() {
 			// with false positives, which we'd like to avoid.
 			let domParentName = getClosestDomNodeParentName(parent);
 			if (domParentName !== '') {
-				if (type === 'table' && isTableElement(domParentName)) {
+				if (
+					type === 'table' &&
+					// Tables can be nested inside each other if it's inside a cell.
+					// See https://developer.mozilla.org/en-US/docs/Learn/HTML/Tables/Advanced#nesting_tables
+					domParentName !== 'td' &&
+					isTableElement(domParentName)
+				) {
+					console.log(domParentName, parent._dom);
 					console.error(
 						'Improper nesting of table. Your <table> should not have a table-node parent.' +
 							serializeVNode(vnode) +

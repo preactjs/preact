@@ -550,6 +550,33 @@ describe('debug', () => {
 			render(<Table />, scratch);
 			expect(console.error).to.be.calledOnce;
 		});
+
+		it('accepts valid nested tables', () => {
+			const Table = () => (
+				<table>
+					<tr>
+						<th>foo</th>
+					</tr>
+					<tr>
+						<td id="nested">
+							<table>
+								<tr>
+									<td>cell1</td>
+									<td>cell2</td>
+									<td>cell3</td>
+								</tr>
+							</table>
+						</td>
+					</tr>
+					<tr>
+						<td>bar</td>
+					</tr>
+				</table>
+			);
+
+			render(<Table />, scratch);
+			expect(console.error).to.not.be.called;
+		});
 	});
 
 	describe('paragraph nesting', () => {
