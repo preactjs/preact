@@ -170,7 +170,7 @@ function constructNewChildrenArray(newParentVNode, renderResult, oldChildren) {
 
 	const newChildrenLength = renderResult.length;
 	let oldChildrenLength = oldChildren.length,
-		remainingOldChildren = oldChildrenLength
+		remainingOldChildren = oldChildrenLength;
 
 	let skew = 0;
 

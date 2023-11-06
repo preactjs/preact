@@ -53,8 +53,6 @@ export function diff(
 	if (oldVNode._flags & MODE_SUSPENDED) {
 		isHydrating = !!(oldVNode._flags & MODE_HYDRATE);
 		oldDom = newVNode._dom = oldVNode._dom;
-		// if we resume, we want the tree to be "unlocked"
-		// newVNode._hydrating = null;
 		excessDomChildren = [oldDom];
 	}
 
