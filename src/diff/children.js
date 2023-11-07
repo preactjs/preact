@@ -191,10 +191,11 @@ function constructNewChildrenArray(newParentVNode, renderResult, oldChildren) {
 		// or we are rendering a component (e.g. setState) copy the oldVNodes so it can have
 		// it's own DOM & etc. pointers
 		else if (
-			childVNode.constructor == String ||
+			typeof childVNode == 'string' ||
 			typeof childVNode == 'number' ||
 			// eslint-disable-next-line valid-typeof
-			typeof childVNode == 'bigint'
+			typeof childVNode == 'bigint' ||
+			childVNode.constructor == String
 		) {
 			childVNode = newParentVNode._children[i] = createVNode(
 				null,
