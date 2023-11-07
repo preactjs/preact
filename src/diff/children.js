@@ -288,6 +288,11 @@ function constructNewChildrenArray(newParentVNode, renderResult, oldChildren) {
 			if (matchingIndex == -1) {
 				skew--;
 			}
+
+			// If we are mounting a DOM VNode, mark it for insertion
+			if (typeof childVNode.type != 'function') {
+				childVNode._flags |= INSERT_VNODE;
+			}
 		} else if (matchingIndex !== skewedIndex) {
 			if (matchingIndex === skewedIndex + 1) {
 				skew++;
@@ -307,15 +312,12 @@ function constructNewChildrenArray(newParentVNode, renderResult, oldChildren) {
 			} else {
 				skew = 0;
 			}
-		}
 
-		// Move this VNode's DOM if the original index (matchingIndex) doesn't match
-		// the new skew index (i + new skew) or it's a mounting DOM VNode
-		if (
-			matchingIndex !== i + skew ||
-			(typeof childVNode.type != 'function' && isMounting)
-		) {
-			childVNode._flags |= INSERT_VNODE;
+			// Move this VNode's DOM if the original index (matchingIndex) doesn't
+			// match the new skew index (i + new skew)
+			if (matchingIndex !== i + skew) {
+				childVNode._flags |= INSERT_VNODE;
+			}
 		}
 	}
 
