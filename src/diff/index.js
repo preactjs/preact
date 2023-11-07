@@ -271,7 +271,7 @@ export function diff(
 				excessDomChildren[excessDomChildren.indexOf(oldDom)] = null;
 				// ^ could possibly be simplified to:
 				// excessDomChildren.length = 0;
-			} else {
+			} else if (!newVNode._children) {
 				newVNode._dom = oldVNode._dom;
 				newVNode._children = oldVNode._children;
 			}
