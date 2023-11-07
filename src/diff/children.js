@@ -270,20 +270,19 @@ function constructNewChildrenArray(newParentVNode, renderResult, oldChildren) {
 		// final index after using this property to get the oldVNode
 		childVNode._index = matchingIndex;
 
+		oldVNode = null;
 		if (matchingIndex !== -1) {
+			oldVNode = oldChildren[matchingIndex];
 			remainingOldChildren--;
-			if (oldChildren[matchingIndex]) {
-				oldChildren[matchingIndex]._flags |= MATCHED;
+			if (oldVNode) {
+				oldVNode._flags |= MATCHED;
 			}
 		}
 
 		// Here, we define isMounting for the purposes of the skew diffing
 		// algorithm. Nodes that are unsuspending are considered mounting and we detect
 		// this by checking if oldVNode._original === null
-		const isMounting =
-			matchingIndex === -1 ||
-			oldChildren[matchingIndex] == null ||
-			oldChildren[matchingIndex]._original === null;
+		const isMounting = oldVNode == null || oldVNode._original === null;
 
 		if (isMounting) {
 			if (matchingIndex == -1) {
