@@ -1,5 +1,6 @@
 import { options, Fragment } from 'preact';
-import { encodeEntities, styleObjToCss } from './utils';
+import { encodeEntities } from './utils';
+import { IS_NON_DIMENSIONAL } from '../../src/constants';
 
 /** @typedef {import('preact').VNode} VNode */
 
@@ -88,6 +89,9 @@ function jsxTemplate(templates, ...exprs) {
 	return vnode;
 }
 
+const JS_TO_CSS = {};
+const CSS_REGEX = /[A-Z]/g;
+
 /**
  * Serialize an HTML attribute to a string. This function is not
  * expected to be used directly, but rather through a precompile
@@ -104,7 +108,29 @@ function jsxAttr(name, value) {
 
 	if (name === 'ref' || name === 'key') return '';
 	if (name === 'style' && typeof value === 'object') {
-		return name + '="' + styleObjToCss(value) + '"';
+		let str = '';
+		for (let prop in value) {
+			let val = value[prop];
+			if (val != null && val !== '') {
+				const name =
+					prop[0] == '-'
+						? prop
+						: JS_TO_CSS[prop] ||
+						  (JS_TO_CSS[prop] = prop.replace(CSS_REGEX, '-$&').toLowerCase());
+
+				let suffix = ';';
+				if (
+					typeof val === 'number' &&
+					// Exclude custom-attributes
+					!name.startsWith('--') &&
+					!IS_NON_DIMENSIONAL.test(name)
+				) {
+					suffix = 'px;';
+				}
+				str = str + name + ':' + val + suffix;
+			}
+		}
+		return name + '="' + str + '"';
 	}
 
 	if (
