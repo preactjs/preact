@@ -2,6 +2,7 @@ import { assign } from './util';
 import { diff, commitRoot } from './diff/index';
 import options from './options';
 import { Fragment } from './create-element';
+import { MODE_HYDRATE } from './constants';
 
 /**
  * Base Component class. Provides `setState()` and `forceUpdate()`, which
@@ -122,12 +123,11 @@ export function getDomSibling(vnode, childIndex) {
 function renderComponent(component) {
 	let oldVNode = component._vnode,
 		oldDom = oldVNode._dom,
-		parentDom = component._parentDom;
+		parentDom = component._parentDom,
+		commitQueue = [],
+		refQueue = [];
 
 	if (parentDom) {
-		let commitQueue = [],
-			refQueue = [];
-
 		const newVNode = assign({}, oldVNode);
 		newVNode._original = oldVNode._original + 1;
 
@@ -137,10 +137,10 @@ function renderComponent(component) {
 			oldVNode,
 			component._globalContext,
 			parentDom.ownerSVGElement !== undefined,
-			oldVNode._hydrating != null ? [oldDom] : null,
+			oldVNode._flags & MODE_HYDRATE ? [oldDom] : null,
 			commitQueue,
 			oldDom == null ? getDomSibling(oldVNode) : oldDom,
-			oldVNode._hydrating,
+			!!(oldVNode._flags & MODE_HYDRATE),
 			refQueue
 		);
 

@@ -17,10 +17,10 @@ describe('compat hydrate', () => {
 		const input = document.createElement('input');
 		scratch.appendChild(input);
 		input.focus();
-		expect(document.activeElement).to.equal(input);
+		expect(document.activeElement).to.equalNode(input);
 
 		hydrate(<input />, scratch);
-		expect(document.activeElement).to.equal(input);
+		expect(document.activeElement).to.equalNode(input);
 	});
 
 	it('should call the callback', () => {

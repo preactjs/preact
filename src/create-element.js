@@ -72,10 +72,10 @@ export function createVNode(type, props, key, ref, original) {
 		// a _nextDom that has been set to `null`
 		_nextDom: undefined,
 		_component: null,
-		_hydrating: null,
 		constructor: undefined,
 		_original: original == null ? ++vnodeId : original,
-		_index: -1
+		_index: -1,
+		_flags: 0
 	};
 
 	// Only invoke the vnode hook if this was *not* a direct copy:

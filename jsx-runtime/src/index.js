@@ -2,8 +2,6 @@ import { options, Fragment } from 'preact';
 import { encodeEntities } from './utils';
 import { IS_NON_DIMENSIONAL } from '../../src/constants';
 
-/** @typedef {import('preact').VNode} VNode */
-
 let vnodeId = 0;
 
 const isArray = Array.isArray;
@@ -43,6 +41,7 @@ function createVNode(type, props, key, isStaticChildren, __source, __self) {
 		}
 	}
 
+	/** @type {VNode & { __source: any; __self: any }} */
 	const vnode = {
 		type,
 		props: normalizedProps,
@@ -54,10 +53,10 @@ function createVNode(type, props, key, isStaticChildren, __source, __self) {
 		_dom: null,
 		_nextDom: undefined,
 		_component: null,
-		_hydrating: null,
 		constructor: undefined,
 		_original: --vnodeId,
 		_index: -1,
+		_flags: 0,
 		__source,
 		__self
 	};
