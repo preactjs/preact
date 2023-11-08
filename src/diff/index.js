@@ -364,7 +364,7 @@ function diffElementNodes(
 	let newProps = newVNode.props;
 	let nodeType = /** @type {string} */ (newVNode.type);
 	/** @type {any} */
-	let i = 0;
+	let i;
 	/** @type {{ __html?: string }} */
 	let newHtml;
 	/** @type {{ __html?: string }} */
@@ -379,18 +379,18 @@ function diffElementNodes(
 	if (nodeType === 'svg') isSvg = true;
 
 	if (excessDomChildren != null) {
-		for (; i < excessDomChildren.length; i++) {
-			const child = excessDomChildren[i];
+		for (i = 0; i < excessDomChildren.length; i++) {
+			value = excessDomChildren[i];
 
 			// if newVNode matches an element in excessDomChildren or the `dom`
 			// argument matches an element in excessDomChildren, remove it from
 			// excessDomChildren so it isn't later removed in diffChildren
 			if (
-				child &&
-				'setAttribute' in child === !!nodeType &&
-				(nodeType ? child.localName === nodeType : child.nodeType === 3)
+				value &&
+				'setAttribute' in value === !!nodeType &&
+				(nodeType ? value.localName === nodeType : value.nodeType === 3)
 			) {
-				dom = child;
+				dom = value;
 				excessDomChildren[i] = null;
 				break;
 			}
@@ -410,7 +410,8 @@ function diffElementNodes(
 
 		// we created a new parent, so none of the previously attached children can be reused:
 		excessDomChildren = null;
-		// we are creating a new node, so we can assume this is a new subtree (in case we are hydrating), this deopts the hydrate
+		// we are creating a new node, so we can assume this is a new subtree (in
+		// case we are hydrating), this deopts the hydrate
 		isHydrating = false;
 	}
 
@@ -431,7 +432,8 @@ function diffElementNodes(
 		if (!isHydrating && excessDomChildren != null) {
 			oldProps = {};
 			for (i = 0; i < dom.attributes.length; i++) {
-				oldProps[dom.attributes[i].name] = dom.attributes[i].value;
+				value = dom.attributes[i];
+				oldProps[value.name] = value.value;
 			}
 		}
 
