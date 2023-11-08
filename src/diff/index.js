@@ -454,21 +454,22 @@ function diffElementNodes(
 			}
 		}
 
-		if ((!isHydrating && newHtml) || oldHtml) {
-			// Avoid re-applying the same '__html' if it did not changed between re-render
-			if (
-				!newHtml ||
-				((!oldHtml || newHtml.__html != oldHtml.__html) &&
-					newHtml.__html !== dom.innerHTML)
-			) {
-				dom.innerHTML = (newHtml && newHtml.__html) || '';
-			}
-		}
-
 		// If the new vnode didn't have dangerouslySetInnerHTML, diff its children
 		if (newHtml) {
+			// Avoid re-applying the same '__html' if it did not changed between re-render
+			if (
+				!isHydrating &&
+				(!oldHtml ||
+					(newHtml.__html !== oldHtml.__html &&
+						newHtml.__html !== dom.innerHTML))
+			) {
+				dom.innerHTML = newHtml.__html;
+			}
+
 			newVNode._children = [];
 		} else {
+			if (oldHtml) dom.innerHTML = '';
+
 			i = newVNode.props.children;
 			diffChildren(
 				dom,
