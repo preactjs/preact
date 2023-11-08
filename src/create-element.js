@@ -84,6 +84,18 @@ export function createVNode(type, props, key, ref, original) {
 	return vnode;
 }
 
+// main: 4445 B
+// 4450 B (without _children=[])
+// export const EMPTY_VNODE = {};
+// 4460 B
+export const EMPTY_VNODE = createVNode(null, null, null, null, {});
+// 4460 B
+// export const EMPTY_VNODE = createElement(null, null);
+// EMPTY_VNODE._original = null;
+
+// Required until issue with suspended hydration is fixed
+EMPTY_VNODE._children = []; // TODO: Can we avoid this somehow?
+
 export function createRef() {
 	return { current: null };
 }

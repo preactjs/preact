@@ -1,6 +1,6 @@
 import { diff, unmount, applyRef } from './index';
-import { createVNode, Fragment } from '../create-element';
-import { EMPTY_OBJ, EMPTY_ARR, INSERT_VNODE, MATCHED } from '../constants';
+import { createVNode, EMPTY_VNODE, Fragment } from '../create-element';
+import { EMPTY_ARR, INSERT_VNODE, MATCHED } from '../constants';
 import { isArray } from '../util';
 import { getDomSibling } from '../component';
 
@@ -49,8 +49,6 @@ export function diffChildren(
 		/** @type {PreactElement} */
 		firstChildDom;
 
-	// This is a compression of oldParentVNode!=null && oldParentVNode != EMPTY_OBJ && oldParentVNode._children || EMPTY_ARR
-	// as EMPTY_OBJ._children should be `undefined`.
 	/** @type {VNode[]} */
 	let oldChildren = (oldParentVNode && oldParentVNode._children) || EMPTY_ARR;
 
@@ -74,9 +72,9 @@ export function diffChildren(
 		// At this point, constructNewChildrenArray has assigned _index to be the
 		// matchingIndex for this VNode's oldVNode (or -1 if there is no oldVNode).
 		if (childVNode._index === -1) {
-			oldVNode = EMPTY_OBJ;
+			oldVNode = EMPTY_VNODE;
 		} else {
-			oldVNode = oldChildren[childVNode._index] || EMPTY_OBJ;
+			oldVNode = oldChildren[childVNode._index] || EMPTY_VNODE;
 		}
 
 		// Update childVNode._index to its final index

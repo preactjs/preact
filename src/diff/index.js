@@ -1,9 +1,4 @@
-import {
-	EMPTY_OBJ,
-	MODE_HYDRATE,
-	MODE_SUSPENDED,
-	RESET_MODE
-} from '../constants';
+import { MODE_HYDRATE, MODE_SUSPENDED, RESET_MODE } from '../constants';
 import { BaseComponent, getDomSibling } from '../component';
 import { Fragment } from '../create-element';
 import { diffChildren } from './children';
@@ -424,7 +419,7 @@ function diffElementNodes(
 		// If excessDomChildren was not null, repopulate it with the current element's children:
 		excessDomChildren = excessDomChildren && slice.call(dom.childNodes);
 
-		oldProps = oldVNode.props || EMPTY_OBJ;
+		oldProps = oldVNode.props || {};
 
 		// If we are in a situation where we are not hydrating but are using
 		// existing DOM (e.g. replaceNode) we should read the existing DOM
