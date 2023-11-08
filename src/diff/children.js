@@ -191,10 +191,11 @@ function constructNewChildrenArray(newParentVNode, renderResult, oldChildren) {
 		// or we are rendering a component (e.g. setState) copy the oldVNodes so it can have
 		// it's own DOM & etc. pointers
 		else if (
-			childVNode.constructor == String ||
+			typeof childVNode == 'string' ||
 			typeof childVNode == 'number' ||
 			// eslint-disable-next-line valid-typeof
-			typeof childVNode == 'bigint'
+			typeof childVNode == 'bigint' ||
+			childVNode.constructor == String
 		) {
 			childVNode = newParentVNode._children[i] = createVNode(
 				null,
@@ -269,24 +270,28 @@ function constructNewChildrenArray(newParentVNode, renderResult, oldChildren) {
 		// final index after using this property to get the oldVNode
 		childVNode._index = matchingIndex;
 
+		oldVNode = null;
 		if (matchingIndex !== -1) {
+			oldVNode = oldChildren[matchingIndex];
 			remainingOldChildren--;
-			if (oldChildren[matchingIndex]) {
-				oldChildren[matchingIndex]._flags |= MATCHED;
+			if (oldVNode) {
+				oldVNode._flags |= MATCHED;
 			}
 		}
 
 		// Here, we define isMounting for the purposes of the skew diffing
 		// algorithm. Nodes that are unsuspending are considered mounting and we detect
 		// this by checking if oldVNode._original === null
-		const isMounting =
-			matchingIndex === -1 ||
-			oldChildren[matchingIndex] == null ||
-			oldChildren[matchingIndex]._original === null;
+		const isMounting = oldVNode == null || oldVNode._original === null;
 
 		if (isMounting) {
 			if (matchingIndex == -1) {
 				skew--;
+			}
+
+			// If we are mounting a DOM VNode, mark it for insertion
+			if (typeof childVNode.type != 'function') {
+				childVNode._flags |= INSERT_VNODE;
 			}
 		} else if (matchingIndex !== skewedIndex) {
 			if (matchingIndex === skewedIndex + 1) {
@@ -307,15 +312,12 @@ function constructNewChildrenArray(newParentVNode, renderResult, oldChildren) {
 			} else {
 				skew = 0;
 			}
-		}
 
-		// Move this VNode's DOM if the original index (matchingIndex) doesn't match
-		// the new skew index (i + new skew) or it's a mounting DOM VNode
-		if (
-			matchingIndex !== i + skew ||
-			(typeof childVNode.type != 'function' && isMounting)
-		) {
-			childVNode._flags |= INSERT_VNODE;
+			// Move this VNode's DOM if the original index (matchingIndex) doesn't
+			// match the new skew index (i + new skew)
+			if (matchingIndex !== i + skew) {
+				childVNode._flags |= INSERT_VNODE;
+			}
 		}
 	}
 
