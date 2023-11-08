@@ -423,16 +423,13 @@ function diffElementNodes(
 
 		oldProps = oldVNode.props || EMPTY_OBJ;
 
-		// During hydration, props are not diffed at all (including dangerouslySetInnerHTML)
-		// @TODO we should warn in debug mode when props don't match here.
-		if (!isHydrating) {
-			// But, if we are in a situation where we are using existing DOM (e.g. replaceNode)
-			// we should read the existing DOM attributes to diff them
-			if (excessDomChildren != null) {
-				oldProps = {};
-				for (i = 0; i < dom.attributes.length; i++) {
-					oldProps[dom.attributes[i].name] = dom.attributes[i].value;
-				}
+		// If we are in a situation where we are not hydrating but are using
+		// existing DOM (e.g. replaceNode) we should read the existing DOM
+		// attributes to diff them
+		if (!isHydrating && excessDomChildren != null) {
+			oldProps = {};
+			for (i = 0; i < dom.attributes.length; i++) {
+				oldProps[dom.attributes[i].name] = dom.attributes[i].value;
 			}
 		}
 
@@ -446,6 +443,8 @@ function diffElementNodes(
 			}
 		}
 
+		// During hydration, props are not diffed at all (including dangerouslySetInnerHTML)
+		// @TODO we should warn in debug mode when props don't match here.
 		for (i in newProps) {
 			value = newProps[i];
 			if (i == 'children') {
