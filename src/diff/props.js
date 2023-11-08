@@ -1,37 +1,6 @@
 import { IS_NON_DIMENSIONAL } from '../constants';
 import options from '../options';
 
-/**
- * Diff the old and new properties of a VNode and apply changes to the DOM node
- * @param {PreactElement} dom The DOM node to apply changes to
- * @param {object} newProps The new props
- * @param {object} oldProps The old props
- * @param {boolean} isSvg Whether or not this node is an SVG node
- * @param {boolean} hydrate Whether or not we are in hydration mode
- */
-export function diffProps(dom, newProps, oldProps, isSvg, hydrate) {
-	let i;
-
-	for (i in oldProps) {
-		if (i !== 'children' && i !== 'key' && !(i in newProps)) {
-			setProperty(dom, i, null, oldProps[i], isSvg);
-		}
-	}
-
-	for (i in newProps) {
-		if (
-			(!hydrate || typeof newProps[i] == 'function') &&
-			i !== 'children' &&
-			i !== 'key' &&
-			i !== 'value' &&
-			i !== 'checked' &&
-			oldProps[i] !== newProps[i]
-		) {
-			setProperty(dom, i, newProps[i], oldProps[i], isSvg);
-		}
-	}
-}
-
 function setStyle(style, key, value) {
 	if (key[0] === '-') {
 		style.setProperty(key, value == null ? '' : value);
@@ -104,7 +73,7 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
 			const handler = useCapture ? eventProxyCapture : eventProxy;
 			dom.removeEventListener(name, handler, useCapture);
 		}
-	} else if (name !== 'dangerouslySetInnerHTML') {
+	} else {
 		if (isSvg) {
 			// Normalize incorrect prop usage for SVG:
 			// - xlink:href / xlinkHref --> href (xlink:href was removed from SVG and isn't needed)

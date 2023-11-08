@@ -7,7 +7,7 @@ import {
 import { BaseComponent, getDomSibling } from '../component';
 import { Fragment } from '../create-element';
 import { diffChildren } from './children';
-import { diffProps, setProperty } from './props';
+import { setProperty } from './props';
 import { assign, isArray, removeNode, slice } from '../util';
 import options from '../options';
 
@@ -364,24 +364,33 @@ function diffElementNodes(
 	let newProps = newVNode.props;
 	let nodeType = /** @type {string} */ (newVNode.type);
 	/** @type {any} */
-	let i = 0;
+	let i;
+	/** @type {{ __html?: string }} */
+	let newHtml;
+	/** @type {{ __html?: string }} */
+	let oldHtml;
+	/** @type {ComponentChildren} */
+	let newChildren;
+	let value;
+	let inputValue;
+	let checked;
 
 	// Tracks entering and exiting SVG namespace when descending through the tree.
 	if (nodeType === 'svg') isSvg = true;
 
 	if (excessDomChildren != null) {
-		for (; i < excessDomChildren.length; i++) {
-			const child = excessDomChildren[i];
+		for (i = 0; i < excessDomChildren.length; i++) {
+			value = excessDomChildren[i];
 
 			// if newVNode matches an element in excessDomChildren or the `dom`
 			// argument matches an element in excessDomChildren, remove it from
 			// excessDomChildren so it isn't later removed in diffChildren
 			if (
-				child &&
-				'setAttribute' in child === !!nodeType &&
-				(nodeType ? child.localName === nodeType : child.nodeType === 3)
+				value &&
+				'setAttribute' in value === !!nodeType &&
+				(nodeType ? value.localName === nodeType : value.nodeType === 3)
 			) {
-				dom = child;
+				dom = value;
 				excessDomChildren[i] = null;
 				break;
 			}
@@ -401,7 +410,8 @@ function diffElementNodes(
 
 		// we created a new parent, so none of the previously attached children can be reused:
 		excessDomChildren = null;
-		// we are creating a new node, so we can assume this is a new subtree (in case we are hydrating), this deopts the hydrate
+		// we are creating a new node, so we can assume this is a new subtree (in
+		// case we are hydrating), this deopts the hydrate
 		isHydrating = false;
 	}
 
@@ -416,43 +426,67 @@ function diffElementNodes(
 
 		oldProps = oldVNode.props || EMPTY_OBJ;
 
-		let oldHtml = oldProps.dangerouslySetInnerHTML;
-		let newHtml = newProps.dangerouslySetInnerHTML;
-
-		// During hydration, props are not diffed at all (including dangerouslySetInnerHTML)
-		// @TODO we should warn in debug mode when props don't match here.
-		if (!isHydrating) {
-			// But, if we are in a situation where we are using existing DOM (e.g. replaceNode)
-			// we should read the existing DOM attributes to diff them
-			if (excessDomChildren != null) {
-				oldProps = {};
-				for (i = 0; i < dom.attributes.length; i++) {
-					oldProps[dom.attributes[i].name] = dom.attributes[i].value;
-				}
-			}
-
-			if (newHtml || oldHtml) {
-				// Avoid re-applying the same '__html' if it did not changed between re-render
-				if (
-					!newHtml ||
-					((!oldHtml || newHtml.__html != oldHtml.__html) &&
-						newHtml.__html !== dom.innerHTML)
-				) {
-					dom.innerHTML = (newHtml && newHtml.__html) || '';
-				}
+		// If we are in a situation where we are not hydrating but are using
+		// existing DOM (e.g. replaceNode) we should read the existing DOM
+		// attributes to diff them
+		if (!isHydrating && excessDomChildren != null) {
+			oldProps = {};
+			for (i = 0; i < dom.attributes.length; i++) {
+				value = dom.attributes[i];
+				oldProps[value.name] = value.value;
 			}
 		}
 
-		diffProps(dom, newProps, oldProps, isSvg, isHydrating);
+		for (i in oldProps) {
+			value = oldProps[i];
+			if (i == 'children') {
+			} else if (i == 'dangerouslySetInnerHTML') {
+				oldHtml = value;
+			} else if (i !== 'key' && !(i in newProps)) {
+				setProperty(dom, i, null, value, isSvg);
+			}
+		}
+
+		// During hydration, props are not diffed at all (including dangerouslySetInnerHTML)
+		// @TODO we should warn in debug mode when props don't match here.
+		for (i in newProps) {
+			value = newProps[i];
+			if (i == 'children') {
+				newChildren = value;
+			} else if (i == 'dangerouslySetInnerHTML') {
+				newHtml = value;
+			} else if (i == 'value') {
+				inputValue = value;
+			} else if (i == 'checked') {
+				checked = value;
+			} else if (
+				i !== 'key' &&
+				(!isHydrating || typeof value == 'function') &&
+				oldProps[i] !== value
+			) {
+				setProperty(dom, i, value, oldProps[i], isSvg);
+			}
+		}
 
 		// If the new vnode didn't have dangerouslySetInnerHTML, diff its children
 		if (newHtml) {
+			// Avoid re-applying the same '__html' if it did not changed between re-render
+			if (
+				!isHydrating &&
+				(!oldHtml ||
+					(newHtml.__html !== oldHtml.__html &&
+						newHtml.__html !== dom.innerHTML))
+			) {
+				dom.innerHTML = newHtml.__html;
+			}
+
 			newVNode._children = [];
 		} else {
-			i = newVNode.props.children;
+			if (oldHtml) dom.innerHTML = '';
+
 			diffChildren(
 				dom,
-				isArray(i) ? i : [i],
+				isArray(newChildren) ? newChildren : [newChildren],
 				newVNode,
 				oldVNode,
 				globalContext,
@@ -474,30 +508,28 @@ function diffElementNodes(
 			}
 		}
 
-		// (as above, don't diff props during hydration)
+		// As above, don't diff props during hydration
 		if (!isHydrating) {
+			i = 'value';
 			if (
-				'value' in newProps &&
-				(i = newProps.value) !== undefined &&
+				inputValue !== undefined &&
 				// #2756 For the <progress>-element the initial value is 0,
 				// despite the attribute not being present. When the attribute
 				// is missing the progress bar is treated as indeterminate.
 				// To fix that we'll always update it when it is 0 for progress elements
-				(i !== dom.value ||
-					(nodeType === 'progress' && !i) ||
+				(inputValue !== dom[i] ||
+					(nodeType === 'progress' && !inputValue) ||
 					// This is only for IE 11 to fix <select> value not being updated.
 					// To avoid a stale select value we need to set the option.value
 					// again, which triggers IE11 to re-evaluate the select value
-					(nodeType === 'option' && i !== oldProps.value))
+					(nodeType === 'option' && inputValue !== oldProps[i]))
 			) {
-				setProperty(dom, 'value', i, oldProps.value, false);
+				setProperty(dom, i, inputValue, oldProps[i], false);
 			}
-			if (
-				'checked' in newProps &&
-				(i = newProps.checked) !== undefined &&
-				i !== dom.checked
-			) {
-				setProperty(dom, 'checked', i, oldProps.checked, false);
+
+			i = 'checked';
+			if (checked !== undefined && checked !== dom[i]) {
+				setProperty(dom, i, checked, oldProps[i], false);
 			}
 		}
 	}
