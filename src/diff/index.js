@@ -7,7 +7,7 @@ import {
 import { BaseComponent, getDomSibling } from '../component';
 import { Fragment } from '../create-element';
 import { diffChildren } from './children';
-import { diffProps, setProperty } from './props';
+import { setProperty } from './props';
 import { assign, isArray, removeNode, slice } from '../util';
 import options from '../options';
 
@@ -443,7 +443,24 @@ function diffElementNodes(
 			}
 		}
 
-		diffProps(dom, newProps, oldProps, isSvg, isHydrating);
+		for (i in oldProps) {
+			if (i !== 'children' && i !== 'key' && !(i in newProps)) {
+				setProperty(dom, i, null, oldProps[i], isSvg);
+			}
+		}
+
+		for (i in newProps) {
+			if (
+				(!isHydrating || typeof newProps[i] == 'function') &&
+				i !== 'children' &&
+				i !== 'key' &&
+				i !== 'value' &&
+				i !== 'checked' &&
+				oldProps[i] !== newProps[i]
+			) {
+				setProperty(dom, i, newProps[i], oldProps[i], isSvg);
+			}
+		}
 
 		// If the new vnode didn't have dangerouslySetInnerHTML, diff its children
 		if (newHtml) {
