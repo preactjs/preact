@@ -429,25 +429,27 @@ function diffElementNodes(
 			}
 		}
 
-		let oldHtml, newHtml;
+		let oldHtml, newHtml, newChildren;
 
 		for (i in oldProps) {
-			if (i == 'dangerouslySetInnerHTML') {
+			if (i == 'children') {
+			} else if (i == 'dangerouslySetInnerHTML') {
 				oldHtml = oldProps[i];
-			} else if (i !== 'children' && i !== 'key' && !(i in newProps)) {
+			} else if (i !== 'key' && !(i in newProps)) {
 				setProperty(dom, i, null, oldProps[i], isSvg);
 			}
 		}
 
 		for (i in newProps) {
-			if (i == 'dangerouslySetInnerHTML') {
+			if (i == 'children') {
+				newChildren = newProps[i];
+			} else if (i == 'dangerouslySetInnerHTML') {
 				newHtml = newProps[i];
 			} else if (
-				(!isHydrating || typeof newProps[i] == 'function') &&
-				i !== 'children' &&
 				i !== 'key' &&
 				i !== 'value' &&
 				i !== 'checked' &&
+				(!isHydrating || typeof newProps[i] == 'function') &&
 				oldProps[i] !== newProps[i]
 			) {
 				setProperty(dom, i, newProps[i], oldProps[i], isSvg);
@@ -470,10 +472,9 @@ function diffElementNodes(
 		} else {
 			if (oldHtml) dom.innerHTML = '';
 
-			i = newVNode.props.children;
 			diffChildren(
 				dom,
-				isArray(i) ? i : [i],
+				isArray(newChildren) ? newChildren : [newChildren],
 				newVNode,
 				oldVNode,
 				globalContext,
