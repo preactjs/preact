@@ -73,7 +73,7 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
 			const handler = useCapture ? eventProxyCapture : eventProxy;
 			dom.removeEventListener(name, handler, useCapture);
 		}
-	} else if (name !== 'dangerouslySetInnerHTML') {
+	} else {
 		if (isSvg) {
 			// Normalize incorrect prop usage for SVG:
 			// - xlink:href / xlinkHref --> href (xlink:href was removed from SVG and isn't needed)

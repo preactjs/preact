@@ -416,9 +416,6 @@ function diffElementNodes(
 
 		oldProps = oldVNode.props || EMPTY_OBJ;
 
-		let oldHtml = oldProps.dangerouslySetInnerHTML;
-		let newHtml = newProps.dangerouslySetInnerHTML;
-
 		// During hydration, props are not diffed at all (including dangerouslySetInnerHTML)
 		// @TODO we should warn in debug mode when props don't match here.
 		if (!isHydrating) {
@@ -430,27 +427,22 @@ function diffElementNodes(
 					oldProps[dom.attributes[i].name] = dom.attributes[i].value;
 				}
 			}
-
-			if (newHtml || oldHtml) {
-				// Avoid re-applying the same '__html' if it did not changed between re-render
-				if (
-					!newHtml ||
-					((!oldHtml || newHtml.__html != oldHtml.__html) &&
-						newHtml.__html !== dom.innerHTML)
-				) {
-					dom.innerHTML = (newHtml && newHtml.__html) || '';
-				}
-			}
 		}
 
+		let oldHtml, newHtml;
+
 		for (i in oldProps) {
-			if (i !== 'children' && i !== 'key' && !(i in newProps)) {
+			if (i == 'dangerouslySetInnerHTML') {
+				oldHtml = oldProps[i];
+			} else if (i !== 'children' && i !== 'key' && !(i in newProps)) {
 				setProperty(dom, i, null, oldProps[i], isSvg);
 			}
 		}
 
 		for (i in newProps) {
-			if (
+			if (i == 'dangerouslySetInnerHTML') {
+				newHtml = newProps[i];
+			} else if (
 				(!isHydrating || typeof newProps[i] == 'function') &&
 				i !== 'children' &&
 				i !== 'key' &&
@@ -459,6 +451,17 @@ function diffElementNodes(
 				oldProps[i] !== newProps[i]
 			) {
 				setProperty(dom, i, newProps[i], oldProps[i], isSvg);
+			}
+		}
+
+		if ((!isHydrating && newHtml) || oldHtml) {
+			// Avoid re-applying the same '__html' if it did not changed between re-render
+			if (
+				!newHtml ||
+				((!oldHtml || newHtml.__html != oldHtml.__html) &&
+					newHtml.__html !== dom.innerHTML)
+			) {
+				dom.innerHTML = (newHtml && newHtml.__html) || '';
 			}
 		}
 
