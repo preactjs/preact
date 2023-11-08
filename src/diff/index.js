@@ -365,8 +365,11 @@ function diffElementNodes(
 	let nodeType = /** @type {string} */ (newVNode.type);
 	/** @type {any} */
 	let i = 0;
+	/** @type {{ __html?: string }} */
 	let newHtml;
+	/** @type {{ __html?: string }} */
 	let oldHtml;
+	/** @type {ComponentChildren} */
 	let newChildren;
 	let value;
 
