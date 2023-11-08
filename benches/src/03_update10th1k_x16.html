@@ -27,7 +27,9 @@
 				afterFrameAsync,
 				getRowLinkSel,
 				testElement,
-				testElementTextContains
+				testElementTextContains,
+				markRunStart,
+				markRunEnd
 			} from './util.js';
 			import * as framework from 'framework';
 			import { render } from '../src/keyed-children/index.js';
@@ -53,7 +55,9 @@
 				testElement(getRowLinkSel(1000));
 
 				for (let i = 0; i < 3; i++) {
+					markRunStart(`warmup-${i}`);
 					update();
+					await markRunEnd(`warmup-${i}`);
 
 					await afterFrameAsync();
 					testElementTextContains(getRowLinkSel(991), repeat(' !!!', i + 1));
@@ -61,9 +65,11 @@
 			}
 
 			async function run() {
+				markRunStart('final');
 				performance.mark('start');
 				update();
 
+				await markRunEnd('final');
 				await afterFrameAsync();
 				testElementTextContains(getRowLinkSel(991), repeat(' !!!', 3 + 1));
 				performance.mark('stop');
