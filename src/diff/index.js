@@ -365,6 +365,10 @@ function diffElementNodes(
 	let nodeType = /** @type {string} */ (newVNode.type);
 	/** @type {any} */
 	let i = 0;
+	let newHtml;
+	let oldHtml;
+	let newChildren;
+	let value;
 
 	// Tracks entering and exiting SVG namespace when descending through the tree.
 	if (nodeType === 'svg') isSvg = true;
@@ -429,30 +433,30 @@ function diffElementNodes(
 			}
 		}
 
-		let oldHtml, newHtml, newChildren;
-
 		for (i in oldProps) {
+			value = oldProps[i];
 			if (i == 'children') {
 			} else if (i == 'dangerouslySetInnerHTML') {
-				oldHtml = oldProps[i];
+				oldHtml = value;
 			} else if (i !== 'key' && !(i in newProps)) {
-				setProperty(dom, i, null, oldProps[i], isSvg);
+				setProperty(dom, i, null, value, isSvg);
 			}
 		}
 
 		for (i in newProps) {
+			value = newProps[i];
 			if (i == 'children') {
-				newChildren = newProps[i];
+				newChildren = value;
 			} else if (i == 'dangerouslySetInnerHTML') {
-				newHtml = newProps[i];
+				newHtml = value;
 			} else if (
 				i !== 'key' &&
 				i !== 'value' &&
 				i !== 'checked' &&
-				(!isHydrating || typeof newProps[i] == 'function') &&
-				oldProps[i] !== newProps[i]
+				(!isHydrating || typeof value == 'function') &&
+				oldProps[i] !== value
 			) {
-				setProperty(dom, i, newProps[i], oldProps[i], isSvg);
+				setProperty(dom, i, value, oldProps[i], isSvg);
 			}
 		}
 
@@ -500,26 +504,26 @@ function diffElementNodes(
 		if (!isHydrating) {
 			if (
 				'value' in newProps &&
-				(i = newProps.value) !== undefined &&
+				(value = newProps.value) !== undefined &&
 				// #2756 For the <progress>-element the initial value is 0,
 				// despite the attribute not being present. When the attribute
 				// is missing the progress bar is treated as indeterminate.
 				// To fix that we'll always update it when it is 0 for progress elements
-				(i !== dom.value ||
-					(nodeType === 'progress' && !i) ||
+				(value !== dom.value ||
+					(nodeType === 'progress' && !value) ||
 					// This is only for IE 11 to fix <select> value not being updated.
 					// To avoid a stale select value we need to set the option.value
 					// again, which triggers IE11 to re-evaluate the select value
-					(nodeType === 'option' && i !== oldProps.value))
+					(nodeType === 'option' && value !== oldProps.value))
 			) {
-				setProperty(dom, 'value', i, oldProps.value, false);
+				setProperty(dom, 'value', value, oldProps.value, false);
 			}
 			if (
 				'checked' in newProps &&
-				(i = newProps.checked) !== undefined &&
-				i !== dom.checked
+				(value = newProps.checked) !== undefined &&
+				value !== dom.checked
 			) {
-				setProperty(dom, 'checked', i, oldProps.checked, false);
+				setProperty(dom, 'checked', value, oldProps.checked, false);
 			}
 		}
 	}
