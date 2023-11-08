@@ -502,28 +502,29 @@ function diffElementNodes(
 
 		// (as above, don't diff props during hydration)
 		if (!isHydrating) {
-			if (
-				'value' in newProps &&
-				(value = newProps.value) !== undefined &&
-				// #2756 For the <progress>-element the initial value is 0,
-				// despite the attribute not being present. When the attribute
-				// is missing the progress bar is treated as indeterminate.
-				// To fix that we'll always update it when it is 0 for progress elements
-				(value !== dom.value ||
-					(nodeType === 'progress' && !value) ||
-					// This is only for IE 11 to fix <select> value not being updated.
-					// To avoid a stale select value we need to set the option.value
-					// again, which triggers IE11 to re-evaluate the select value
-					(nodeType === 'option' && value !== oldProps.value))
-			) {
-				setProperty(dom, 'value', value, oldProps.value, false);
-			}
-			if (
-				'checked' in newProps &&
-				(value = newProps.checked) !== undefined &&
-				value !== dom.checked
-			) {
-				setProperty(dom, 'checked', value, oldProps.checked, false);
+			for (i in newProps) {
+				if (
+					i === 'value' &&
+					(value = newProps[i]) !== undefined &&
+					// #2756 For the <progress>-element the initial value is 0,
+					// despite the attribute not being present. When the attribute
+					// is missing the progress bar is treated as indeterminate.
+					// To fix that we'll always update it when it is 0 for progress elements
+					(value !== dom[i] ||
+						(nodeType === 'progress' && !value) ||
+						// This is only for IE 11 to fix <select> value not being updated.
+						// To avoid a stale select value we need to set the option.value
+						// again, which triggers IE11 to re-evaluate the select value
+						(nodeType === 'option' && value !== oldProps[i]))
+				) {
+					setProperty(dom, i, value, oldProps[i], false);
+				} else if (
+					i === 'checked' &&
+					(value = newProps[i]) !== undefined &&
+					value !== dom[i]
+				) {
+					setProperty(dom, i, value, oldProps[i], false);
+				}
 			}
 		}
 	}
