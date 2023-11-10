@@ -367,12 +367,11 @@ function insert(parentVNode, oldDom, parentDom) {
 		oldDom = parentVNode._dom;
 	}
 
-	let nextDom = oldDom;
 	do {
-		nextDom = nextDom && nextDom.nextSibling;
-	} while (nextDom != null && nextDom.nodeType === 8);
+		oldDom = oldDom && oldDom.nextSibling;
+	} while (oldDom != null && oldDom.nodeType === 8);
 
-	return nextDom
+	return oldDom;
 }
 
 /**
