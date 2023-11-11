@@ -1,5 +1,5 @@
 import { Component, createElement, options, Fragment } from 'preact';
-import { MODE_HYDRATE } from 'preact/src/constants';
+import { MODE_HYDRATE } from '../../src/constants';
 import { assign } from './util';
 
 const oldCatchError = options._catchError;
@@ -167,7 +167,10 @@ Suspense.prototype._childDidSuspend = function (promise, suspendingVNode) {
 	 * to remain on screen and hydrate it when the suspense actually gets resolved.
 	 * While in non-hydration cases the usual fallback -> component flow would occour.
 	 */
-	if (!c._pendingSuspensionCount++ && !(suspendingVNode._flags & MODE_HYDRATE)) {
+	if (
+		!c._pendingSuspensionCount++ &&
+		!(suspendingVNode._flags & MODE_HYDRATE)
+	) {
 		c.setState({ _suspended: (c._detachOnNextRender = c._vnode._children[0]) });
 	}
 	promise.then(onResolved, onResolved);
