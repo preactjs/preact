@@ -263,7 +263,13 @@ describe('compat render', () => {
 			/>,
 			scratch
 		);
-		expect(sortAttributes(scratch.innerHTML)).to.equal(
+
+		let html = sortAttributes(scratch.innerHTML);
+		if (/Trident/.test(navigator.userAgent)) {
+			html = html.toLowerCase();
+		}
+
+		expect(html).to.equal(
 			'<link as="image" href="preact.jpg" imagesrcset="preact_400px.jpg 400w" rel="preload">'
 		);
 	});
