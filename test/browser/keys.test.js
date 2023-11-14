@@ -671,7 +671,7 @@ describe('keys', () => {
 
 				function listener(mutations) {
 					for (const { addedNodes } of mutations) {
-						for (const node of addedNodes) {
+						for (const node of Array.from(addedNodes)) {
 							mutatedNodes.push(node);
 						}
 					}
@@ -734,7 +734,7 @@ describe('keys', () => {
 
 				function listener(mutations) {
 					for (const { addedNodes } of mutations) {
-						for (const node of addedNodes) {
+						for (const node of Array.from(addedNodes)) {
 							mutatedNodes.push(node);
 						}
 					}
