@@ -443,6 +443,44 @@ describe('keys', () => {
 		]);
 	});
 
+	it('should properly remove children of memoed components', () => {
+		const values = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+
+		class Item extends Component {
+			shouldComponentUpdate(props) {
+				return props.value !== this.props.value;
+			}
+
+			render() {
+				return <li>{this.props.value}</li>;
+			}
+		}
+
+		function App({ values }) {
+			return (
+				<ul>
+					{values.map(value => (
+						<Item key={value} value={value} />
+					))}
+				</ul>
+			);
+		}
+
+		render(<App values={values} />, scratch);
+		expect(scratch.textContent).to.equal(values.join(''));
+
+		clearLog();
+		values.splice(3, 3);
+
+		render(<App values={values} />, scratch);
+		expect(scratch.textContent).to.equal(values.join(''));
+		expect(getLog()).to.deep.equal([
+			'<li>4.remove()',
+			'<li>5.remove()',
+			'<li>6.remove()'
+		]);
+	});
+
 	it("should not preserve state when a component's keys are different", () => {
 		const Stateful = createStateful('Stateful');
 
