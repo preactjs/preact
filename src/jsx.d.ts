@@ -2501,6 +2501,22 @@ export namespace JSXInternal {
 			| SignalLike<number | string | undefined>;
 	}
 
+	export interface MathMLAttributes<Target extends EventTarget = MathMLElement>
+		extends HTMLAttributes<Target> {
+		dir?: 'ltr' | 'rtl' | undefined | SignalLike<'ltr' | 'rtl' | undefined>;
+		displaystyle?: boolean | undefined | SignalLike<boolean | undefined>;
+		/** @deprecated This feature is non-standard. See https://developer.mozilla.org/en-US/docs/Web/MathML/Global_attributes/href  */
+		href?: string | undefined | SignalLike<string | undefined>;
+		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Global_attributes/mathbackground */
+		mathbackground?: string | undefined | SignalLike<string | undefined>;
+		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Global_attributes/mathcolor */
+		mathcolor?: string | undefined | SignalLike<string | undefined>;
+		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Global_attributes/mathsize */
+		mathsize?: string | undefined | SignalLike<string | undefined>;
+		nonce?: string | undefined | SignalLike<string | undefined>;
+		scriptlevel?: string | undefined | SignalLike<string | undefined>;
+	}
+
 	export interface IntrinsicElements {
 		// HTML
 		a: HTMLAttributes<HTMLAnchorElement>;
