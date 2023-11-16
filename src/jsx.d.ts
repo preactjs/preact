@@ -2625,6 +2625,8 @@ export namespace JSXInternal {
 		superscriptshift?: string | undefined | SignalLike<string | undefined>;
 	}
 
+	export interface HTMLMNElement extends MathMLElement {}
+
 	export interface IntrinsicElements {
 		// HTML
 		a: HTMLAttributes<HTMLAnchorElement>;
@@ -2817,5 +2819,6 @@ export namespace JSXInternal {
 		mfrac: MathMLAttributes<HTMLMFracElement>;
 		mi: MathMLAttributes<HTMLMiElement>;
 		mmultiscripts: MathMLAttributes<HTMLMmultiScriptsElement>;
+		mn: MathMLAttributes<HTMLMNElement>;
 	}
 }
