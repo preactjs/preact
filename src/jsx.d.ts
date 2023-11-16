@@ -2772,6 +2772,29 @@ export namespace JSXInternal {
 		width?: string | undefined | SignalLike<string | undefined>;
 	}
 
+	export interface HTMLMTdElement extends MathMLElement {
+		columnspan?: number | undefined | SignalLike<number | undefined>;
+		rowspan?: number | undefined | SignalLike<number | undefined>;
+		/** Non-standard attribute See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mtd#columnalign */
+		columnalign?:
+			| 'center'
+			| 'left'
+			| 'right'
+			| undefined
+			| SignalLike<'center' | 'left' | 'right' | undefined>;
+		/** Non-standard attribute See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mtd#rowalign */
+		rowalign?:
+			| 'axis'
+			| 'baseline'
+			| 'bottom'
+			| 'center'
+			| 'top'
+			| undefined
+			| SignalLike<
+					'axis' | 'baseline' | 'bottom' | 'center' | 'top' | undefined
+			  >;
+	}
+
 	export interface IntrinsicElements {
 		// HTML
 		a: HTMLAttributes<HTMLAnchorElement>;
@@ -2980,5 +3003,6 @@ export namespace JSXInternal {
 		msubsup: MathMLAttributes<HTMLMSubsupElement>;
 		msup: MathMLAttributes<HTMLMSupElement>;
 		mtable: MathMLAttributes<HTMLMTableElement>;
+		mtd: MathMLAttributes<HTMLMTdElement>;
 	}
 }
