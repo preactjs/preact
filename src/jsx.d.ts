@@ -2618,6 +2618,13 @@ export namespace JSXInternal {
 			  >;
 	}
 
+	export interface HTMLMmultiScriptsElement extends MathMLElement {
+		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mmultiscripts#subscriptshift */
+		subscriptshift?: string | undefined | SignalLike<string | undefined>;
+		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mmultiscripts#superscriptshift */
+		superscriptshift?: string | undefined | SignalLike<string | undefined>;
+	}
+
 	export interface IntrinsicElements {
 		// HTML
 		a: HTMLAttributes<HTMLAnchorElement>;
@@ -2809,5 +2816,6 @@ export namespace JSXInternal {
 		merror: MathMLAttributes<HTMLMErrorElement>;
 		mfrac: MathMLAttributes<HTMLMFracElement>;
 		mi: MathMLAttributes<HTMLMiElement>;
+		mmultiscripts: MathMLAttributes<HTMLMmultiScriptsElement>;
 	}
 }
