@@ -2662,6 +2662,13 @@ export namespace JSXInternal {
 
 	export interface HTMLMRowElement extends MathMLElement {}
 
+	export interface HTMLMSElement extends MathMLElement {
+		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/ms#browser_compatibility */
+		lquote?: string | undefined | SignalLike<string | undefined>;
+		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/ms#browser_compatibility */
+		rquote?: string | undefined | SignalLike<string | undefined>;
+	}
+
 	export interface IntrinsicElements {
 		// HTML
 		a: HTMLAttributes<HTMLAnchorElement>;
@@ -2862,5 +2869,6 @@ export namespace JSXInternal {
 		mprescripts: MathMLAttributes<HTMLMPrescriptsElement>;
 		mroot: MathMLAttributes<HTMLMRootElement>;
 		mrow: MathMLAttributes<HTMLMRowElement>;
+		ms: MathMLAttributes<HTMLMSElement>;
 	}
 }
