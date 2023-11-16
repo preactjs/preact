@@ -2572,6 +2572,52 @@ export namespace JSXInternal {
 			| SignalLike<'center' | 'left' | 'right' | undefined>;
 	}
 
+	export interface HTMLMiElement extends MathMLElement {
+		/** The only value allowed in the current specification is normal (case insensitive)
+		 * See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mi#mathvariant */
+		mathvariant?:
+			| 'normal'
+			| 'bold'
+			| 'italic'
+			| 'bold-italic'
+			| 'double-struck'
+			| 'bold-fraktur'
+			| 'script'
+			| 'bold-script'
+			| 'fraktur'
+			| 'sans-serif'
+			| 'bold-sans-serif'
+			| 'sans-serif-italic'
+			| 'sans-serif-bold-italic'
+			| 'monospace'
+			| 'initial'
+			| 'tailed'
+			| 'looped'
+			| 'stretched'
+			| undefined
+			| SignalLike<
+					| 'normal'
+					| 'bold'
+					| 'italic'
+					| 'bold-italic'
+					| 'double-struck'
+					| 'bold-fraktur'
+					| 'script'
+					| 'bold-script'
+					| 'fraktur'
+					| 'sans-serif'
+					| 'bold-sans-serif'
+					| 'sans-serif-italic'
+					| 'sans-serif-bold-italic'
+					| 'monospace'
+					| 'initial'
+					| 'tailed'
+					| 'looped'
+					| 'stretched'
+					| undefined
+			  >;
+	}
+
 	export interface IntrinsicElements {
 		// HTML
 		a: HTMLAttributes<HTMLAnchorElement>;
@@ -2762,5 +2808,6 @@ export namespace JSXInternal {
 		menclose: MathMLAttributes<HTMLMEncloseElement>;
 		merror: MathMLAttributes<HTMLMErrorElement>;
 		mfrac: MathMLAttributes<HTMLMFracElement>;
+		mi: MathMLAttributes<HTMLMiElement>;
 	}
 }
