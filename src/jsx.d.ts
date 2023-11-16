@@ -2677,6 +2677,23 @@ export namespace JSXInternal {
 
 	export interface HTMLMSqrtElement extends MathMLElement {}
 
+	export interface HTMLMStyleElement extends MathMLElement {
+		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mstyle#background */
+		background?: string | undefined | SignalLike<string | undefined>;
+		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mstyle#color */
+		color?: string | undefined | SignalLike<string | undefined>;
+		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mstyle#fontsize */
+		fontsize?: string | undefined | SignalLike<string | undefined>;
+		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mstyle#fontstyle */
+		fontstyle?: string | undefined | SignalLike<string | undefined>;
+		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mstyle#fontweight */
+		fontweight?: string | undefined | SignalLike<string | undefined>;
+		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mstyle#scriptminsize */
+		scriptminsize?: string | undefined | SignalLike<string | undefined>;
+		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mstyle#scriptsizemultiplier */
+		scriptsizemultiplier?: string | undefined | SignalLike<string | undefined>;
+	}
+
 	export interface IntrinsicElements {
 		// HTML
 		a: HTMLAttributes<HTMLAnchorElement>;
@@ -2880,5 +2897,6 @@ export namespace JSXInternal {
 		ms: MathMLAttributes<HTMLMSElement>;
 		mspace: MathMLAttributes<HTMLMSpaceElement>;
 		msqrt: MathMLAttributes<HTMLMSqrtElement>;
+		mstyle: MathMLAttributes<HTMLMStyleElement>;
 	}
 }
