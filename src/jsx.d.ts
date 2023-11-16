@@ -2656,6 +2656,8 @@ export namespace JSXInternal {
 
 	export interface HTMLMPhantomElement extends MathMLElement {}
 
+	export interface HTMLMPrescriptsElement extends MathMLElement {}
+
 	export interface IntrinsicElements {
 		// HTML
 		a: HTMLAttributes<HTMLAnchorElement>;
@@ -2853,5 +2855,6 @@ export namespace JSXInternal {
 		mover: MathMLAttributes<HTMLMOverElement>;
 		mpadded: MathMLAttributes<HTMLMPaddedElement>;
 		mphantom: MathMLAttributes<HTMLMPhantomElement>;
+		mprescripts: MathMLAttributes<HTMLMPrescriptsElement>;
 	}
 }
