@@ -2529,6 +2529,17 @@ export namespace JSXInternal {
 		src?: string | undefined | SignalLike<string | undefined>;
 	}
 
+	export interface HTMLMActionElement extends MathMLElement {
+		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/maction#actiontype */
+		actiontype?:
+			| 'statusline'
+			| 'toggle'
+			| undefined
+			| SignalLike<'statusline' | 'toggle' | undefined>;
+		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/maction#selection */
+		selection?: string | undefined | SignalLike<string | undefined>;
+	}
+
 	export interface IntrinsicElements {
 		// HTML
 		a: HTMLAttributes<HTMLAnchorElement>;
@@ -2712,5 +2723,7 @@ export namespace JSXInternal {
 		// MathML See https://developer.mozilla.org/en-US/docs/Web/MathML
 		'annotation-xml': MathMLAttributes<HTMLAnnotationXmlElement>;
 		annotation: MathMLAttributes<HTMLAnnotationElement>;
+		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/maction */
+		maction: MathMLAttributes<HTMLMActionElement>;
 	}
 }
