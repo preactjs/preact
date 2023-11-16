@@ -2699,6 +2699,13 @@ export namespace JSXInternal {
 		subscriptshift?: string | undefined | SignalLike<string | undefined>;
 	}
 
+	export interface HTMLMSubsupElement extends MathMLElement {
+		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/msubsup#subscriptshift */
+		subscriptshift?: string | undefined | SignalLike<string | undefined>;
+		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/msubsup#superscriptshift */
+		superscriptshift?: string | undefined | SignalLike<string | undefined>;
+	}
+
 	export interface IntrinsicElements {
 		// HTML
 		a: HTMLAttributes<HTMLAnchorElement>;
@@ -2904,5 +2911,6 @@ export namespace JSXInternal {
 		msqrt: MathMLAttributes<HTMLMSqrtElement>;
 		mstyle: MathMLAttributes<HTMLMStyleElement>;
 		msub: MathMLAttributes<HTMLMSubElement>;
+		msubsup: MathMLAttributes<HTMLMSubsupElement>;
 	}
 }
