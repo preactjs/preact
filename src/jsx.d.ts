@@ -2540,6 +2540,14 @@ export namespace JSXInternal {
 		selection?: string | undefined | SignalLike<string | undefined>;
 	}
 
+	export interface HTMLMathElement extends MathMLElement {
+		display?:
+			| 'block'
+			| 'inline'
+			| undefined
+			| SignalLike<'block' | 'inline' | undefined>;
+	}
+
 	export interface IntrinsicElements {
 		// HTML
 		a: HTMLAttributes<HTMLAnchorElement>;
@@ -2725,5 +2733,6 @@ export namespace JSXInternal {
 		annotation: MathMLAttributes<HTMLAnnotationElement>;
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/maction */
 		maction: MathMLAttributes<HTMLMActionElement>;
+		math: MathMLAttributes<HTMLMathElement>;
 	}
 }
