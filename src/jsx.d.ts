@@ -2818,6 +2818,10 @@ export namespace JSXInternal {
 			  >;
 	}
 
+	export interface HTMLMUnderElement extends MathMLElement {
+		accentunder?: boolean | undefined | SignalLike<boolean | undefined>;
+	}
+
 	export interface IntrinsicElements {
 		// HTML
 		a: HTMLAttributes<HTMLAnchorElement>;
@@ -3029,5 +3033,6 @@ export namespace JSXInternal {
 		mtd: MathMLAttributes<HTMLMTdElement>;
 		mtext: MathMLAttributes<HTMLMTextElement>;
 		mtr: MathMLAttributes<HTMLMTrElement>;
+		munder: MathMLAttributes<HTMLMUnderElement>;
 	}
 }
