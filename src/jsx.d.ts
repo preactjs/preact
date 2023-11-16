@@ -2554,6 +2554,24 @@ export namespace JSXInternal {
 
 	export interface HTMLMErrorElement extends MathMLElement {}
 
+	export interface HTMLMFracElement extends MathMLElement {
+		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mfrac#denomalign */
+		denomalign?:
+			| 'center'
+			| 'left'
+			| 'right'
+			| undefined
+			| SignalLike<'center' | 'left' | 'right' | undefined>;
+		linethickness?: string | undefined | SignalLike<string | undefined>;
+		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mfrac#numalign */
+		numalign?:
+			| 'center'
+			| 'left'
+			| 'right'
+			| undefined
+			| SignalLike<'center' | 'left' | 'right' | undefined>;
+	}
+
 	export interface IntrinsicElements {
 		// HTML
 		a: HTMLAttributes<HTMLAnchorElement>;
@@ -2743,5 +2761,6 @@ export namespace JSXInternal {
 		/** This feature is non-standard. See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/menclose  */
 		menclose: MathMLAttributes<HTMLMEncloseElement>;
 		merror: MathMLAttributes<HTMLMErrorElement>;
+		mfrac: MathMLAttributes<HTMLMFracElement>;
 	}
 }
