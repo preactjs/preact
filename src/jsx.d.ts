@@ -2654,6 +2654,8 @@ export namespace JSXInternal {
 		width?: string | undefined | SignalLike<string | undefined>;
 	}
 
+	export interface HTMLMPhantomElement extends MathMLElement {}
+
 	export interface IntrinsicElements {
 		// HTML
 		a: HTMLAttributes<HTMLAnchorElement>;
@@ -2850,5 +2852,6 @@ export namespace JSXInternal {
 		mo: MathMLAttributes<HTMLMOElement>;
 		mover: MathMLAttributes<HTMLMOverElement>;
 		mpadded: MathMLAttributes<HTMLMPaddedElement>;
+		mphantom: MathMLAttributes<HTMLMPhantomElement>;
 	}
 }
