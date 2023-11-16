@@ -2627,6 +2627,21 @@ export namespace JSXInternal {
 
 	export interface HTMLMNElement extends MathMLElement {}
 
+	export interface HTMLMOElement extends MathMLElement {
+		/** Non-standard attribute See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mo#accent */
+		accent?: boolean | undefined | SignalLike<boolean | undefined>;
+		fence?: boolean | undefined | SignalLike<boolean | undefined>;
+		largeop?: boolean | undefined | SignalLike<boolean | undefined>;
+		lspace?: string | undefined | SignalLike<string | undefined>;
+		maxsize?: string | undefined | SignalLike<string | undefined>;
+		minsize?: string | undefined | SignalLike<string | undefined>;
+		movablelimits?: boolean | undefined | SignalLike<boolean | undefined>;
+		rspace?: string | undefined | SignalLike<string | undefined>;
+		separator?: boolean | undefined | SignalLike<boolean | undefined>;
+		stretchy?: boolean | undefined | SignalLike<boolean | undefined>;
+		symmetric?: boolean | undefined | SignalLike<boolean | undefined>;
+	}
+
 	export interface IntrinsicElements {
 		// HTML
 		a: HTMLAttributes<HTMLAnchorElement>;
@@ -2820,5 +2835,6 @@ export namespace JSXInternal {
 		mi: MathMLAttributes<HTMLMiElement>;
 		mmultiscripts: MathMLAttributes<HTMLMmultiScriptsElement>;
 		mn: MathMLAttributes<HTMLMNElement>;
+		mo: MathMLAttributes<HTMLMOElement>;
 	}
 }
