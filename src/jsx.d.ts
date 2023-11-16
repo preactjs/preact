@@ -2711,6 +2711,67 @@ export namespace JSXInternal {
 		superscriptshift?: string | undefined | SignalLike<string | undefined>;
 	}
 
+	export interface HTMLMTableElement extends MathMLElement {
+		/** Non-standard attribute See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mtable#align */
+		align?:
+			| 'axis'
+			| 'baseline'
+			| 'bottom'
+			| 'center'
+			| 'top'
+			| undefined
+			| SignalLike<
+					'axis' | 'baseline' | 'bottom' | 'center' | 'top' | undefined
+			  >;
+		/** Non-standard attribute See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mtable#columnalign */
+		columnalign?:
+			| 'center'
+			| 'left'
+			| 'right'
+			| undefined
+			| SignalLike<'center' | 'left' | 'right' | undefined>;
+		/** Non-standard attribute See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mtable#columnlines */
+		columnlines?:
+			| 'dashed'
+			| 'none'
+			| 'solid'
+			| undefined
+			| SignalLike<'dashed' | 'none' | 'solid' | undefined>;
+		/** Non-standard attribute See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mtable#columnspacing */
+		columnspacing?: string | undefined | SignalLike<string | undefined>;
+		/** Non-standard attribute See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mtable#frame */
+		frame?:
+			| 'dashed'
+			| 'none'
+			| 'solid'
+			| undefined
+			| SignalLike<'dashed' | 'none' | 'solid' | undefined>;
+		/** Non-standard attribute See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mtable#framespacing */
+		framespacing?: string | undefined | SignalLike<string | undefined>;
+		/** Non-standard attribute See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mtable#rowalign */
+		rowalign?:
+			| 'axis'
+			| 'baseline'
+			| 'bottom'
+			| 'center'
+			| 'top'
+			| undefined
+			| SignalLike<
+					'axis' | 'baseline' | 'bottom' | 'center' | 'top' | undefined
+			  >;
+		/** Non-standard attribute See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mtable#rowlines */
+		rowlines?:
+			| 'dashed'
+			| 'none'
+			| 'solid'
+			| undefined
+			| SignalLike<'dashed' | 'none' | 'solid' | undefined>;
+		/** Non-standard attribute See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mtable#rowspacing */
+		rowspacing?: string | undefined | SignalLike<string | undefined>;
+		/** Non-standard attribute See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mtable#width */
+		width?: string | undefined | SignalLike<string | undefined>;
+	}
+
 	export interface IntrinsicElements {
 		// HTML
 		a: HTMLAttributes<HTMLAnchorElement>;
@@ -2918,5 +2979,6 @@ export namespace JSXInternal {
 		msub: MathMLAttributes<HTMLMSubElement>;
 		msubsup: MathMLAttributes<HTMLMSubsupElement>;
 		msup: MathMLAttributes<HTMLMSupElement>;
+		mtable: MathMLAttributes<HTMLMTableElement>;
 	}
 }
