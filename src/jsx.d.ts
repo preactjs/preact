@@ -2552,6 +2552,8 @@ export namespace JSXInternal {
 		notation?: string | undefined | SignalLike<string | undefined>;
 	}
 
+	export interface HTMLMErrorElement extends MathMLElement {}
+
 	export interface IntrinsicElements {
 		// HTML
 		a: HTMLAttributes<HTMLAnchorElement>;
@@ -2740,5 +2742,6 @@ export namespace JSXInternal {
 		math: MathMLAttributes<HTMLMathElement>;
 		/** This feature is non-standard. See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/menclose  */
 		menclose: MathMLAttributes<HTMLMEncloseElement>;
+		merror: MathMLAttributes<HTMLMErrorElement>;
 	}
 }
