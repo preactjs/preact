@@ -2523,6 +2523,12 @@ export namespace JSXInternal {
 		src?: string | undefined | SignalLike<string | undefined>;
 	}
 
+	export interface HTMLAnnotationXmlElement extends MathMLElement {
+		encoding?: string | undefined | SignalLike<string | undefined>;
+		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/semantics#src */
+		src?: string | undefined | SignalLike<string | undefined>;
+	}
+
 	export interface IntrinsicElements {
 		// HTML
 		a: HTMLAttributes<HTMLAnchorElement>;
@@ -2704,6 +2710,7 @@ export namespace JSXInternal {
 		view: SVGAttributes<SVGViewElement>;
 
 		// MathML See https://developer.mozilla.org/en-US/docs/Web/MathML
+		'annotation-xml': MathMLAttributes<HTMLAnnotationXmlElement>;
 		annotation: MathMLAttributes<HTMLAnnotationElement>;
 	}
 }
