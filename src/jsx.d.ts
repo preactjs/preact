@@ -2694,6 +2694,11 @@ export namespace JSXInternal {
 		scriptsizemultiplier?: string | undefined | SignalLike<string | undefined>;
 	}
 
+	export interface HTMLMSubElement extends MathMLElement {
+		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/msub#subscriptshift */
+		subscriptshift?: string | undefined | SignalLike<string | undefined>;
+	}
+
 	export interface IntrinsicElements {
 		// HTML
 		a: HTMLAttributes<HTMLAnchorElement>;
@@ -2898,5 +2903,6 @@ export namespace JSXInternal {
 		mspace: MathMLAttributes<HTMLMSpaceElement>;
 		msqrt: MathMLAttributes<HTMLMSqrtElement>;
 		mstyle: MathMLAttributes<HTMLMStyleElement>;
+		msub: MathMLAttributes<HTMLMSubElement>;
 	}
 }
