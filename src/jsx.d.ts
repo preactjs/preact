@@ -2642,6 +2642,10 @@ export namespace JSXInternal {
 		symmetric?: boolean | undefined | SignalLike<boolean | undefined>;
 	}
 
+	export interface HTMLMOverElement extends MathMLElement {
+		accent?: boolean | undefined | SignalLike<boolean | undefined>;
+	}
+
 	export interface IntrinsicElements {
 		// HTML
 		a: HTMLAttributes<HTMLAnchorElement>;
@@ -2836,5 +2840,6 @@ export namespace JSXInternal {
 		mmultiscripts: MathMLAttributes<HTMLMmultiScriptsElement>;
 		mn: MathMLAttributes<HTMLMNElement>;
 		mo: MathMLAttributes<HTMLMOElement>;
+		mover: MathMLAttributes<HTMLMOverElement>;
 	}
 }
