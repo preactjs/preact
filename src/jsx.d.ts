@@ -2795,6 +2795,8 @@ export namespace JSXInternal {
 			  >;
 	}
 
+	export interface HTMLMTextElement extends MathMLElement {}
+
 	export interface IntrinsicElements {
 		// HTML
 		a: HTMLAttributes<HTMLAnchorElement>;
@@ -3004,5 +3006,6 @@ export namespace JSXInternal {
 		msup: MathMLAttributes<HTMLMSupElement>;
 		mtable: MathMLAttributes<HTMLMTableElement>;
 		mtd: MathMLAttributes<HTMLMTdElement>;
+		mtext: MathMLAttributes<HTMLMTextElement>;
 	}
 }
