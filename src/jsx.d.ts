@@ -2675,6 +2675,8 @@ export namespace JSXInternal {
 		width?: string | undefined | SignalLike<string | undefined>;
 	}
 
+	export interface HTMLMSqrtElement extends MathMLElement {}
+
 	export interface IntrinsicElements {
 		// HTML
 		a: HTMLAttributes<HTMLAnchorElement>;
@@ -2877,5 +2879,6 @@ export namespace JSXInternal {
 		mrow: MathMLAttributes<HTMLMRowElement>;
 		ms: MathMLAttributes<HTMLMSElement>;
 		mspace: MathMLAttributes<HTMLMSpaceElement>;
+		msqrt: MathMLAttributes<HTMLMSqrtElement>;
 	}
 }
