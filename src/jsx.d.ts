@@ -2797,6 +2797,27 @@ export namespace JSXInternal {
 
 	export interface HTMLMTextElement extends MathMLElement {}
 
+	export interface HTMLMTrElement extends MathMLElement {
+		/** Non-standard attribute See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mtr#columnalign */
+		columnalign?:
+			| 'center'
+			| 'left'
+			| 'right'
+			| undefined
+			| SignalLike<'center' | 'left' | 'right' | undefined>;
+		/** Non-standard attribute See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mtr#rowalign */
+		rowalign?:
+			| 'axis'
+			| 'baseline'
+			| 'bottom'
+			| 'center'
+			| 'top'
+			| undefined
+			| SignalLike<
+					'axis' | 'baseline' | 'bottom' | 'center' | 'top' | undefined
+			  >;
+	}
+
 	export interface IntrinsicElements {
 		// HTML
 		a: HTMLAttributes<HTMLAnchorElement>;
@@ -3007,5 +3028,6 @@ export namespace JSXInternal {
 		mtable: MathMLAttributes<HTMLMTableElement>;
 		mtd: MathMLAttributes<HTMLMTdElement>;
 		mtext: MathMLAttributes<HTMLMTextElement>;
+		mtr: MathMLAttributes<HTMLMTrElement>;
 	}
 }
