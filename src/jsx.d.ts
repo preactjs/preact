@@ -2669,6 +2669,12 @@ export namespace JSXInternal {
 		rquote?: string | undefined | SignalLike<string | undefined>;
 	}
 
+	export interface HTMLMSpaceElement extends MathMLElement {
+		depth?: string | undefined | SignalLike<string | undefined>;
+		height?: string | undefined | SignalLike<string | undefined>;
+		width?: string | undefined | SignalLike<string | undefined>;
+	}
+
 	export interface IntrinsicElements {
 		// HTML
 		a: HTMLAttributes<HTMLAnchorElement>;
@@ -2870,5 +2876,6 @@ export namespace JSXInternal {
 		mroot: MathMLAttributes<HTMLMRootElement>;
 		mrow: MathMLAttributes<HTMLMRowElement>;
 		ms: MathMLAttributes<HTMLMSElement>;
+		mspace: MathMLAttributes<HTMLMSpaceElement>;
 	}
 }
