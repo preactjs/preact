@@ -405,7 +405,10 @@ function diffElementNodes(
 		if (isSvg) {
 			dom = document.createElementNS('http://www.w3.org/2000/svg', nodeType);
 		} else {
-			dom = document.createElement(nodeType, newProps.is && newProps);
+			dom = document.createElement(
+				nodeType,
+				newProps && newProps.is && newProps
+			);
 		}
 
 		// we created a new parent, so none of the previously attached children can be reused:
