@@ -212,7 +212,7 @@ function constructNewChildrenArray(newParentVNode, renderResult, oldChildren) {
 				null,
 				null
 			);
-		} else if (childVNode._depth > 0) {
+		} else if (childVNode.constructor === undefined && childVNode._depth > 0) {
 			// VNode is already in use, clone it. This can happen in the following
 			// scenario:
 			//   const reuse = <div />
