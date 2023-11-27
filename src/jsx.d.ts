@@ -1453,6 +1453,10 @@ export namespace JSXInternal {
 		Target,
 		PointerEvent
 	>;
+	export type TargetedSubmitEvent<Target extends EventTarget> = TargetedEvent<
+		Target,
+		SubmitEvent
+	>;
 	export type TargetedTouchEvent<Target extends EventTarget> = TargetedEvent<
 		Target,
 		TouchEvent
@@ -1565,8 +1569,8 @@ export namespace JSXInternal {
 		onBeforeInputCapture?: GenericEventHandler<Target> | undefined;
 		onSearch?: GenericEventHandler<Target> | undefined;
 		onSearchCapture?: GenericEventHandler<Target> | undefined;
-		onSubmit?: GenericEventHandler<Target> | undefined;
-		onSubmitCapture?: GenericEventHandler<Target> | undefined;
+		onSubmit?: TargetedSubmitEvent<Target> | undefined;
+		onSubmitCapture?: TargetedSubmitEvent<Target> | undefined;
 		onInvalid?: GenericEventHandler<Target> | undefined;
 		onInvalidCapture?: GenericEventHandler<Target> | undefined;
 		onReset?: GenericEventHandler<Target> | undefined;
