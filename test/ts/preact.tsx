@@ -368,7 +368,12 @@ const onInput = (e: h.JSX.TargetedInputEvent<HTMLInputElement>) => {};
 createElement('input', { onInput: onInput });
 h('input', { onInput: onInput });
 
-// Should accept onSubmit
+// Should accept onBeforeInput
+const onBeforeInput = (e: h.JSX.TargetedInputEvent<HTMLInputElement>) => {};
+<input onBeforeInput={e => e.currentTarget.value} />;
+createElement('input', { onBeforeInput: onBeforeInput });
+h('input', { onBeforeInput: onBeforeInput });
+
 const onSubmit = (e: h.JSX.TargetedSubmitEvent<HTMLFormElement>) => {};
 <form onSubmit={e => e.currentTarget.elements} />;
 createElement('form', { onSubmit: onSubmit });

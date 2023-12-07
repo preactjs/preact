@@ -1575,8 +1575,8 @@ export namespace JSXInternal {
 		onChangeCapture?: GenericEventHandler<Target> | undefined;
 		onInput?: InputEventHandler<Target> | undefined;
 		onInputCapture?: InputEventHandler<Target> | undefined;
-		onBeforeInput?: GenericEventHandler<Target> | undefined;
-		onBeforeInputCapture?: GenericEventHandler<Target> | undefined;
+		onBeforeInput?: InputEventHandler<Target> | undefined;
+		onBeforeInputCapture?: InputEventHandler<Target> | undefined;
 		onSearch?: GenericEventHandler<Target> | undefined;
 		onSearchCapture?: GenericEventHandler<Target> | undefined;
 		onSubmit?: SubmitEventHandler<Target> | undefined;
