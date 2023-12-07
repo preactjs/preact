@@ -1441,6 +1441,10 @@ export namespace JSXInternal {
 		Target,
 		FocusEvent
 	>;
+	export type TargetedInputEvent<Target extends EventTarget> = TargetedEvent<
+		Target,
+		InputEvent
+	>;
 	export type TargetedKeyboardEvent<Target extends EventTarget> = TargetedEvent<
 		Target,
 		KeyboardEvent
@@ -1495,6 +1499,9 @@ export namespace JSXInternal {
 	export type GenericEventHandler<Target extends EventTarget> = EventHandler<
 		TargetedEvent<Target>
 	>;
+	export type InputEventHandler<Target extends EventTarget> = EventHandler<
+		TargetedInputEvent<Target>
+	>;
 	export type KeyboardEventHandler<Target extends EventTarget> = EventHandler<
 		TargetedKeyboardEvent<Target>
 	>;
@@ -1503,6 +1510,9 @@ export namespace JSXInternal {
 	>;
 	export type PointerEventHandler<Target extends EventTarget> = EventHandler<
 		TargetedPointerEvent<Target>
+	>;
+	export type SubmitEventHandler<Target extends EventTarget> = EventHandler<
+		TargetedSubmitEvent<Target>
 	>;
 	export type TouchEventHandler<Target extends EventTarget> = EventHandler<
 		TargetedTouchEvent<Target>
@@ -1563,14 +1573,14 @@ export namespace JSXInternal {
 		// Form Events
 		onChange?: GenericEventHandler<Target> | undefined;
 		onChangeCapture?: GenericEventHandler<Target> | undefined;
-		onInput?: GenericEventHandler<Target> | undefined;
-		onInputCapture?: GenericEventHandler<Target> | undefined;
+		onInput?: InputEventHandler<Target> | undefined;
+		onInputCapture?: InputEventHandler<Target> | undefined;
 		onBeforeInput?: GenericEventHandler<Target> | undefined;
 		onBeforeInputCapture?: GenericEventHandler<Target> | undefined;
 		onSearch?: GenericEventHandler<Target> | undefined;
 		onSearchCapture?: GenericEventHandler<Target> | undefined;
-		onSubmit?: TargetedSubmitEvent<Target> | undefined;
-		onSubmitCapture?: TargetedSubmitEvent<Target> | undefined;
+		onSubmit?: SubmitEventHandler<Target> | undefined;
+		onSubmitCapture?: SubmitEventHandler<Target> | undefined;
 		onInvalid?: GenericEventHandler<Target> | undefined;
 		onInvalidCapture?: GenericEventHandler<Target> | undefined;
 		onReset?: GenericEventHandler<Target> | undefined;

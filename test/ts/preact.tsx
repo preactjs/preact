@@ -362,7 +362,14 @@ createElement(RefComponentTest, { ref: functionRef }, 'hi');
 h(RefComponentTest, { ref: functionRef }, 'hi');
 
 // Should accept onInput
-const onInput = (e: h.JSX.TargetedEvent<HTMLInputElement>) => {};
+const onInput = (e: h.JSX.TargetedInputEvent<HTMLInputElement>) => {};
 <input onInput={onInput} />;
+<input onInput={e => e.currentTarget.value} />;
 createElement('input', { onInput: onInput });
 h('input', { onInput: onInput });
+
+// Should accept onSubmit
+const onSubmit = (e: h.JSX.TargetedSubmitEvent<HTMLFormElement>) => {};
+<form onSubmit={e => e.currentTarget.elements} />;
+createElement('form', { onSubmit: onSubmit });
+h('form', { onSubmit: onSubmit });
