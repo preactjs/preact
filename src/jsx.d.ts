@@ -2554,6 +2554,12 @@ export namespace JSXInternal {
 
 	export interface HTMLMErrorElement extends MathMLElement {}
 
+	export interface HTMLMFencedElement extends MathMLElement {
+		close?: string | undefined | SignalLike<string | undefined>;
+		open?: string | undefined | SignalLike<string | undefined>;
+		separators?: string | undefined | SignalLike<string | undefined>;
+	}
+
 	export interface HTMLMFracElement extends MathMLElement {
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mfrac#denomalign */
 		denomalign?:
@@ -3018,6 +3024,8 @@ export namespace JSXInternal {
 		/** This feature is non-standard. See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/menclose  */
 		menclose: MathMLAttributes<HTMLMEncloseElement>;
 		merror: MathMLAttributes<HTMLMErrorElement>;
+		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mfenced */
+		mfenced: HTMLAttributes<HTMLMFencedElement>;
 		mfrac: MathMLAttributes<HTMLMFracElement>;
 		mi: MathMLAttributes<HTMLMiElement>;
 		mmultiscripts: MathMLAttributes<HTMLMmultiScriptsElement>;
