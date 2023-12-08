@@ -152,4 +152,80 @@ describe('React-18-hooks', () => {
 			'<p>isSubmitting: true | shouldSubmit: false</p>'
 		);
 	});
+
+	it('should invoke useEffect cleanup in commit phase after rendering', async () => {
+		/** @type {string[]} */
+		let logs = [];
+
+		class ClassChild extends React.Component {
+			// componentWillUnmount() {
+			// 	logs.push(`ClassChild ${this.props.id} cleanup`);
+			// }
+
+			render() {
+				logs.push(`ClassChild ${this.props.id} render`);
+				return <div>ClassChild {this.props.id}</div>;
+			}
+		}
+
+		function Child({ id }) {
+			logs.push(`Child ${id} render`);
+
+			useEffect(() => {
+				logs.push(`Child ${id} effect`);
+				return () => {
+					logs.push(`Child ${id} cleanup`);
+				};
+			});
+
+			return <div>Child {id}</div>;
+		}
+
+		/** @type {(props: { children?: any }) => any} */
+		function App({ children }) {
+			logs.push('App render');
+			return children;
+		}
+
+		render(
+			<App>
+				<Child key="1" id="1" />
+				<ClassChild key="2" id="2" />
+			</App>,
+			scratch
+		);
+		await new Promise(r => setTimeout(r, 20));
+
+		expect(scratch.innerHTML).to.equal(
+			'<div>Child 1</div><div>ClassChild 2</div>'
+		);
+		expect(logs).to.deep.equal([
+			'App render',
+			'Child 1 render',
+			'ClassChild 2 render',
+			'Child 1 effect'
+		]);
+
+		logs = [];
+		render(
+			<App>
+				<Child key="3" id="3" />
+				<ClassChild key="4" id="4" />
+			</App>,
+			scratch
+		);
+		await new Promise(r => setTimeout(r, 20));
+
+		expect(scratch.innerHTML).to.equal(
+			'<div>Child 3</div><div>ClassChild 4</div>'
+		);
+		expect(logs).to.deep.equal([
+			'App render',
+			'Child 3 render',
+			'ClassChild 4 render',
+			'Child 1 cleanup',
+			// 'ClassChild 2 cleanup',
+			'Child 3 effect'
+		]);
+	});
 });

@@ -15,6 +15,9 @@ let currentHook = 0;
 /** @type {Array<import('./internal').Component>} */
 let afterPaintEffects = [];
 
+/** @type {Array<import('./internal').Component>} */
+let unmountCleanups = [];
+
 let EMPTY = [];
 
 // Cast to use internal Options type
@@ -88,6 +91,24 @@ options.diffed = vnode => {
 // TODO: Improve typing of commitQueue parameter
 /** @type {(vnode: import('./internal').VNode, commitQueue: any) => void} */
 options._commit = (vnode, commitQueue) => {
+	const toInvoke = unmountCleanups;
+	unmountCleanups = [];
+
+	toInvoke.some(c => {
+		if (c && c.__hooks) {
+			let hasErrored;
+			c.__hooks._list.forEach(s => {
+				try {
+					invokeCleanup(s);
+				} catch (e) {
+					hasErrored = e;
+				}
+			});
+			c.__hooks = undefined;
+			if (hasErrored) options._catchError(hasErrored, c._vnode);
+		}
+	});
+
 	commitQueue.some(component => {
 		try {
 			component._renderCallbacks.forEach(invokeCleanup);
@@ -112,16 +133,7 @@ options.unmount = vnode => {
 
 	const c = vnode._component;
 	if (c && c.__hooks) {
-		let hasErrored;
-		c.__hooks._list.forEach(s => {
-			try {
-				invokeCleanup(s);
-			} catch (e) {
-				hasErrored = e;
-			}
-		});
-		c.__hooks = undefined;
-		if (hasErrored) options._catchError(hasErrored, c._vnode);
+		unmountCleanups.push(c);
 	}
 };
 
