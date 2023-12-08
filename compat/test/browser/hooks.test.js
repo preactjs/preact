@@ -214,6 +214,8 @@ describe('React-18-hooks', () => {
 			</App>,
 			scratch
 		);
+
+		// Switch to `scheduleEffectAssertion`
 		await new Promise(r => setTimeout(r, 20));
 
 		expect(scratch.innerHTML).to.equal(

@@ -15,9 +15,6 @@ let currentHook = 0;
 /** @type {Array<import('./internal').Component>} */
 let afterPaintEffects = [];
 
-/** @type {Array<import('./internal').Component>} */
-let unmountCleanups = [];
-
 let EMPTY = [];
 
 // Cast to use internal Options type
@@ -91,24 +88,6 @@ options.diffed = vnode => {
 // TODO: Improve typing of commitQueue parameter
 /** @type {(vnode: import('./internal').VNode, commitQueue: any) => void} */
 options._commit = (vnode, commitQueue) => {
-	const toInvoke = unmountCleanups;
-	unmountCleanups = [];
-
-	toInvoke.some(c => {
-		if (c && c.__hooks) {
-			let hasErrored;
-			c.__hooks._list.forEach(s => {
-				try {
-					invokeCleanup(s);
-				} catch (e) {
-					hasErrored = e;
-				}
-			});
-			c.__hooks = undefined;
-			if (hasErrored) options._catchError(hasErrored, c._vnode);
-		}
-	});
-
 	commitQueue.some(component => {
 		try {
 			component._renderCallbacks.forEach(invokeCleanup);
@@ -131,9 +110,22 @@ options._commit = (vnode, commitQueue) => {
 options.unmount = vnode => {
 	if (oldBeforeUnmount) oldBeforeUnmount(vnode);
 
+	/** @type {import('./internal').Component} */
 	const c = vnode._component;
 	if (c && c.__hooks) {
-		unmountCleanups.push(c);
+		c.__hooks._list.forEach(hookItem => {
+			if (hookItem._type === 3) {
+				c.__hooks._pendingEffects.push(hookItem);
+			} else if (hookItem._type === 4) {
+				// TODO: Golf this
+				try {
+					invokeCleanup(hookItem);
+				} catch (e) {
+					options._catchError(e, c._vnode);
+				}
+			}
+		});
+		afterPaint(afterPaintEffects.push(c));
 	}
 };
 
@@ -162,7 +154,7 @@ function getHookState(index, type) {
 		});
 
 	if (index >= hooks._list.length) {
-		hooks._list.push({ _pendingValue: EMPTY });
+		hooks._list.push({ _type: type, _pendingValue: EMPTY });
 	}
 
 	return hooks._list[index];
@@ -449,16 +441,17 @@ export function useId() {
 	return state._value;
 }
 
-/**
- * After paint effects consumer.
- */
+/** After paint effects consumer */
 function flushAfterPaintEffects() {
 	let component;
 	while ((component = afterPaintEffects.shift())) {
-		if (!component._parentDom || !component.__hooks) continue;
+		if (!component.__hooks) continue;
 		try {
 			component.__hooks._pendingEffects.forEach(invokeCleanup);
-			component.__hooks._pendingEffects.forEach(invokeEffect);
+			if (component._parentDom) {
+				// Only invoke effect if component is still mounted
+				component.__hooks._pendingEffects.forEach(invokeEffect);
+			}
 			component.__hooks._pendingEffects = [];
 		} catch (e) {
 			component.__hooks._pendingEffects = [];

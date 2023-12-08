@@ -122,7 +122,10 @@ export function useEffectAssertions(useEffect, scheduleEffectAssert) {
 		return scheduleEffectAssert(() => {
 			render(null, scratch);
 			rerender();
-			expect(cleanupFunction).to.be.calledOnce;
+
+			return scheduleEffectAssert(() => {
+				expect(cleanupFunction).to.be.calledOnce;
+			});
 		});
 	});
 

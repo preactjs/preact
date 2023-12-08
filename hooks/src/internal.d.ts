@@ -45,6 +45,7 @@ export type HookState =
 	| IdHookState;
 
 interface BaseHookState {
+	_type: number;
 	_value?: unknown;
 	_nextValue?: undefined;
 	_pendingValue?: undefined;
@@ -58,6 +59,7 @@ export type Effect = () => void | Cleanup;
 export type Cleanup = () => void;
 
 export interface EffectHookState extends BaseHookState {
+	_type: 3 | 4;
 	_value?: Effect;
 	_args?: unknown[];
 	_pendingArgs?: unknown[];
@@ -65,6 +67,7 @@ export interface EffectHookState extends BaseHookState {
 }
 
 export interface MemoHookState<T = unknown> extends BaseHookState {
+	_type: 7;
 	_value?: T;
 	_pendingValue?: T;
 	_args?: unknown[];
@@ -74,6 +77,7 @@ export interface MemoHookState<T = unknown> extends BaseHookState {
 
 export interface ReducerHookState<S = unknown, A = unknown>
 	extends BaseHookState {
+	_type: 2;
 	_nextValue?: [S, StateUpdater<S>];
 	_value?: [S, StateUpdater<S>];
 	_component?: Component;
@@ -81,15 +85,18 @@ export interface ReducerHookState<S = unknown, A = unknown>
 }
 
 export interface ContextHookState extends BaseHookState {
+	_type: 9;
 	/** Whether this hooks as subscribed to updates yet */
 	_value?: boolean;
 	_context?: PreactContext;
 }
 
 export interface ErrorBoundaryHookState extends BaseHookState {
+	_type: 10;
 	_value?: (error: unknown, errorInfo: ErrorInfo) => void;
 }
 
 export interface IdHookState extends BaseHookState {
+	_type: 11;
 	_value?: string;
 }
