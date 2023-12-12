@@ -1,4 +1,4 @@
-import { options } from 'preact';
+import { options as _options } from 'preact';
 
 /** @type {number} */
 let currentIndex;
@@ -16,6 +16,9 @@ let currentHook = 0;
 let afterPaintEffects = [];
 
 let EMPTY = [];
+
+// Cast to use internal Options type
+const options = /** @type {Options} */ (_options);
 
 let oldBeforeDiff = options._diff;
 let oldBeforeRender = options._render;
@@ -124,7 +127,11 @@ options.unmount = vnode => {
  */
 function getHookState(index, type) {
 	if (options._hook) {
-		options._hook(currentComponent, index, currentHook || type);
+		options._hook(
+			/** @type {any} */ (currentComponent),
+			index,
+			currentHook || type
+		);
 	}
 	currentHook = 0;
 
@@ -143,6 +150,7 @@ function getHookState(index, type) {
 	if (index >= hooks._list.length) {
 		hooks._list.push({ _pendingValue: EMPTY });
 	}
+
 	return hooks._list[index];
 }
 
@@ -218,9 +226,12 @@ export function useReducer(reducer, initialState, init) {
 			function updateHookState(p, s, c) {
 				if (!hookState._component.__hooks) return true;
 
-				const stateHooks = hookState._component.__hooks._list.filter(
-					x => x._component
-				);
+				/**
+				 * @type {(x: import('./internal').HookState) => x is import('./internal').ReducerHookState} */
+				const isStateHook = x => !!x._component;
+				const stateHooks =
+					hookState._component.__hooks._list.filter(isStateHook);
+
 				const allHooksEmpty = stateHooks.every(x => !x._nextValue);
 				// When we have no updated hooks in the component we invoke the previous SCU or
 				// traverse the VDOM tree further.
@@ -366,7 +377,9 @@ export function useContext(context) {
  */
 export function useDebugValue(value, formatter) {
 	if (options.useDebugValue) {
-		options.useDebugValue(formatter ? formatter(value) : value);
+		options.useDebugValue(
+			formatter ? formatter(value) : /** @type {any}*/ (value)
+		);
 	}
 }
 
@@ -393,6 +406,7 @@ export function useErrorBoundary(cb) {
 }
 
 export function useId() {
+	/** @type {import('./internal').IdHookState} */
 	const state = getHookState(currentIndex++, 11);
 	if (!state._value) {
 		// Grab either the root node or the nearest async boundary node.
@@ -408,6 +422,7 @@ export function useId() {
 
 	return state._value;
 }
+
 /**
  * After paint effects consumer.
  */

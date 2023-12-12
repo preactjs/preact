@@ -1,9 +1,3 @@
-import {
-	Component as PreactComponent,
-	PreactContext,
-	ErrorInfo,
-	VNode as PreactVNode
-} from '../../src/internal';
 import { Reducer } from '.';
 
 export { PreactContext };
@@ -34,11 +28,14 @@ export interface ComponentHooks {
 	_pendingEffects: EffectHookState[];
 }
 
-export interface Component extends PreactComponent<any, any> {
+export interface Component extends globalThis.Component<any, any> {
 	__hooks?: ComponentHooks;
+	// Extend to include HookStates
+	_renderCallbacks?: Array<HookState | (() => void)>;
+	_hasScuFromHooks?: boolean;
 }
 
-export interface VNode extends PreactVNode {
+export interface VNode extends globalThis.VNode {
 	_mask?: [number, number];
 }
 
@@ -47,19 +44,28 @@ export type HookState =
 	| MemoHookState
 	| ReducerHookState
 	| ContextHookState
-	| ErrorBoundaryHookState;
+	| ErrorBoundaryHookState
+	| IdHookState;
+
+interface BaseHookState {
+	_value?: unknown;
+	_component?: undefined;
+	_nextValue?: undefined;
+	_pendingValue?: undefined;
+	_pendingArgs?: undefined;
+}
 
 export type Effect = () => void | Cleanup;
 export type Cleanup = () => void;
 
-export interface EffectHookState {
+export interface EffectHookState extends BaseHookState {
 	_value?: Effect;
 	_args?: any[];
 	_pendingArgs?: any[];
 	_cleanup?: Cleanup | void;
 }
 
-export interface MemoHookState {
+export interface MemoHookState extends BaseHookState {
 	_value?: any;
 	_pendingValue?: any;
 	_args?: any[];
@@ -67,19 +73,23 @@ export interface MemoHookState {
 	_factory?: () => any;
 }
 
-export interface ReducerHookState {
+export interface ReducerHookState extends BaseHookState {
 	_nextValue?: any;
 	_value?: any;
 	_component?: Component;
 	_reducer?: Reducer<any, any>;
 }
 
-export interface ContextHookState {
+export interface ContextHookState extends BaseHookState {
 	/** Whether this hooks as subscribed to updates yet */
 	_value?: boolean;
 	_context?: PreactContext;
 }
 
-export interface ErrorBoundaryHookState {
+export interface ErrorBoundaryHookState extends BaseHookState {
 	_value?: (error: any, errorInfo: ErrorInfo) => void;
+}
+
+export interface IdHookState extends BaseHookState {
+	_value?: string;
 }
