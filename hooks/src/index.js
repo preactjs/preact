@@ -237,7 +237,7 @@ export function useReducer(reducer, initialState, init) {
 						const currentValue = hookItem._value[0];
 						hookItem._value = hookItem._nextValue;
 						hookItem._nextValue = undefined;
-						if (currentValue !== hookItem._value[0]) shouldUpdate = true;
+						if (!is(currentValue, hookItem._value[0])) shouldUpdate = true;
 					}
 				});
 
@@ -495,6 +495,16 @@ function invokeEffect(hook) {
 }
 
 /**
+ * Check if two values are the same value
+ * @param {*} x
+ * @param {*} y
+ * @returns {boolean}
+ */
+function is(x, y) {
+	return (x === y && (x !== 0 || 1 / x === 1 / y)) || (x !== x && y !== y);
+}
+
+/**
  * @param {any[]} oldArgs
  * @param {any[]} newArgs
  */
@@ -502,7 +512,7 @@ function argsChanged(oldArgs, newArgs) {
 	return (
 		!oldArgs ||
 		oldArgs.length !== newArgs.length ||
-		newArgs.some((arg, index) => arg !== oldArgs[index])
+		newArgs.some((arg, index) => !is(arg, oldArgs[index]))
 	);
 }
 
