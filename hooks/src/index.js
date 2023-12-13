@@ -85,7 +85,8 @@ options.diffed = vnode => {
 	previousComponent = currentComponent = null;
 };
 
-/** @type {(vnode: import('./internal').VNode) => void} */
+// TODO: Improve typing of commitQueue parameter
+/** @type {(vnode: import('./internal').VNode, commitQueue: any) => void} */
 options._commit = (vnode, commitQueue) => {
 	commitQueue.some(component => {
 		try {
@@ -158,6 +159,7 @@ function getHookState(index, type) {
 /**
  * @template {unknown} S
  * @param {import('./index').StateUpdater<S>} [initialState]
+ * @returns {[S, (state: S) => void]}
  */
 export function useState(initialState) {
 	currentHook = 1;
@@ -230,8 +232,7 @@ export function useReducer(reducer, initialState, init) {
 			function updateHookState(p, s, c) {
 				if (!hookState._component.__hooks) return true;
 
-				/**
-				 * @type {(x: import('./internal').HookState) => x is import('./internal').ReducerHookState} */
+				/** @type {(x: import('./internal').HookState) => x is import('./internal').ReducerHookState} */
 				const isStateHook = x => !!x._component;
 				const stateHooks =
 					hookState._component.__hooks._list.filter(isStateHook);
@@ -273,6 +274,7 @@ export function useReducer(reducer, initialState, init) {
 /**
  * @param {import('./internal').Effect} callback
  * @param {unknown[]} args
+ * @returns {void}
  */
 export function useEffect(callback, args) {
 	/** @type {import('./internal').EffectHookState} */
@@ -288,6 +290,7 @@ export function useEffect(callback, args) {
 /**
  * @param {import('./internal').Effect} callback
  * @param {unknown[]} args
+ * @returns {void}
  */
 export function useLayoutEffect(callback, args) {
 	/** @type {import('./internal').EffectHookState} */
@@ -310,6 +313,7 @@ export function useRef(initialValue) {
  * @param {object} ref
  * @param {() => object} createHandle
  * @param {unknown[]} args
+ * @returns {void}
  */
 export function useImperativeHandle(ref, createHandle, args) {
 	currentHook = 6;
@@ -328,11 +332,13 @@ export function useImperativeHandle(ref, createHandle, args) {
 }
 
 /**
- * @param {() => unknown} factory
+ * @template {unknown} T
+ * @param {() => T} factory
  * @param {unknown[]} args
+ * @returns {T}
  */
 export function useMemo(factory, args) {
-	/** @type {import('./internal').MemoHookState} */
+	/** @type {import('./internal').MemoHookState<T>} */
 	const state = getHookState(currentIndex++, 7);
 	if (argsChanged(state._args, args)) {
 		state._pendingValue = factory();
@@ -347,6 +353,7 @@ export function useMemo(factory, args) {
 /**
  * @param {() => void} callback
  * @param {unknown[]} args
+ * @returns {() => void}
  */
 export function useCallback(callback, args) {
 	currentHook = 8;
@@ -390,6 +397,7 @@ export function useDebugValue(value, formatter) {
 
 /**
  * @param {(error: unknown, errorInfo: import('preact').ErrorInfo) => void} cb
+ * @returns {[unknown, () => void]}
  */
 export function useErrorBoundary(cb) {
 	/** @type {import('./internal').ErrorBoundaryHookState} */
@@ -479,6 +487,7 @@ function afterNextFrame(callback) {
 /**
  * Schedule afterPaintEffects flush after the browser paints
  * @param {number} newQueueLength
+ * @returns {void}
  */
 function afterPaint(newQueueLength) {
 	if (newQueueLength === 1 || prevRaf !== options.requestAnimationFrame) {
@@ -489,6 +498,7 @@ function afterPaint(newQueueLength) {
 
 /**
  * @param {import('./internal').HookState} hook
+ * @returns {void}
  */
 function invokeCleanup(hook) {
 	// A hook cleanup can introduce a call to render which creates a new root, this will call options.vnode
@@ -506,6 +516,7 @@ function invokeCleanup(hook) {
 /**
  * Invoke a Hook's effect
  * @param {import('./internal').EffectHookState} hook
+ * @returns {void}
  */
 function invokeEffect(hook) {
 	// A hook call can introduce a call to render which creates a new root, this will call options.vnode
@@ -518,6 +529,7 @@ function invokeEffect(hook) {
 /**
  * @param {unknown[]} oldArgs
  * @param {unknown[]} newArgs
+ * @returns {boolean}
  */
 function argsChanged(oldArgs, newArgs) {
 	return (

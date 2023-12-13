@@ -64,12 +64,12 @@ export interface EffectHookState extends BaseHookState {
 	_cleanup?: Cleanup | void;
 }
 
-export interface MemoHookState extends BaseHookState {
-	_value?: unknown;
-	_pendingValue?: unknown;
+export interface MemoHookState<T = unknown> extends BaseHookState {
+	_value?: T;
+	_pendingValue?: T;
 	_args?: unknown[];
 	_pendingArgs?: unknown[];
-	_factory?: () => unknown;
+	_factory?: () => T;
 }
 
 export interface ReducerHookState<S = unknown, A = unknown>
