@@ -18,7 +18,7 @@ let afterPaintEffects = [];
 let EMPTY = [];
 
 // Cast to use internal Options type
-const options = /** @type {Options} */ (_options);
+const options = /** @type {import('./internal').Options} */ (_options);
 
 let oldBeforeDiff = options._diff;
 let oldBeforeRender = options._render;
@@ -29,11 +29,13 @@ let oldBeforeUnmount = options.unmount;
 const RAF_TIMEOUT = 100;
 let prevRaf;
 
+/** @type {(vnode: import('./internal').VNode) => void} */
 options._diff = vnode => {
 	currentComponent = null;
 	if (oldBeforeDiff) oldBeforeDiff(vnode);
 };
 
+/** @type {(vnode: import('./internal').VNode) => void} */
 options._render = vnode => {
 	if (oldBeforeRender) oldBeforeRender(vnode);
 
@@ -62,6 +64,7 @@ options._render = vnode => {
 	previousComponent = currentComponent;
 };
 
+/** @type {(vnode: import('./internal').VNode) => void} */
 options.diffed = vnode => {
 	if (oldAfterDiff) oldAfterDiff(vnode);
 
@@ -82,6 +85,7 @@ options.diffed = vnode => {
 	previousComponent = currentComponent = null;
 };
 
+/** @type {(vnode: import('./internal').VNode) => void} */
 options._commit = (vnode, commitQueue) => {
 	commitQueue.some(component => {
 		try {
@@ -101,6 +105,7 @@ options._commit = (vnode, commitQueue) => {
 	if (oldCommit) oldCommit(vnode, commitQueue);
 };
 
+/** @type {(vnode: import('./internal').VNode) => void} */
 options.unmount = vnode => {
 	if (oldBeforeUnmount) oldBeforeUnmount(vnode);
 
@@ -127,11 +132,7 @@ options.unmount = vnode => {
  */
 function getHookState(index, type) {
 	if (options._hook) {
-		options._hook(
-			/** @type {any} */ (currentComponent),
-			index,
-			currentHook || type
-		);
+		options._hook(currentComponent, index, currentHook || type);
 	}
 	currentHook = 0;
 
@@ -155,7 +156,8 @@ function getHookState(index, type) {
 }
 
 /**
- * @param {import('./index').StateUpdater<any>} [initialState]
+ * @template {unknown} S
+ * @param {import('./index').StateUpdater<S>} [initialState]
  */
 export function useState(initialState) {
 	currentHook = 1;
@@ -163,10 +165,12 @@ export function useState(initialState) {
 }
 
 /**
- * @param {import('./index').Reducer<any, any>} reducer
- * @param {import('./index').StateUpdater<any>} initialState
+ * @template {unknown} S
+ * @template {unknown} A
+ * @param {import('./index').Reducer<S, A>} reducer
+ * @param {import('./index').StateUpdater<S>} initialState
  * @param {(initialState: any) => void} [init]
- * @returns {[ any, (state: any) => void ]}
+ * @returns {[ S, (state: S) => void ]}
  */
 export function useReducer(reducer, initialState, init) {
 	/** @type {import('./internal').ReducerHookState} */
@@ -268,7 +272,7 @@ export function useReducer(reducer, initialState, init) {
 
 /**
  * @param {import('./internal').Effect} callback
- * @param {any[]} args
+ * @param {unknown[]} args
  */
 export function useEffect(callback, args) {
 	/** @type {import('./internal').EffectHookState} */
@@ -283,7 +287,7 @@ export function useEffect(callback, args) {
 
 /**
  * @param {import('./internal').Effect} callback
- * @param {any[]} args
+ * @param {unknown[]} args
  */
 export function useLayoutEffect(callback, args) {
 	/** @type {import('./internal').EffectHookState} */
@@ -296,6 +300,7 @@ export function useLayoutEffect(callback, args) {
 	}
 }
 
+/** @type {(initialValue: unknown) => unknown} */
 export function useRef(initialValue) {
 	currentHook = 5;
 	return useMemo(() => ({ current: initialValue }), []);
@@ -304,7 +309,7 @@ export function useRef(initialValue) {
 /**
  * @param {object} ref
  * @param {() => object} createHandle
- * @param {any[]} args
+ * @param {unknown[]} args
  */
 export function useImperativeHandle(ref, createHandle, args) {
 	currentHook = 6;
@@ -323,8 +328,8 @@ export function useImperativeHandle(ref, createHandle, args) {
 }
 
 /**
- * @param {() => any} factory
- * @param {any[]} args
+ * @param {() => unknown} factory
+ * @param {unknown[]} args
  */
 export function useMemo(factory, args) {
 	/** @type {import('./internal').MemoHookState} */
@@ -341,7 +346,7 @@ export function useMemo(factory, args) {
 
 /**
  * @param {() => void} callback
- * @param {any[]} args
+ * @param {unknown[]} args
  */
 export function useCallback(callback, args) {
 	currentHook = 8;
@@ -384,7 +389,7 @@ export function useDebugValue(value, formatter) {
 }
 
 /**
- * @param {(error: any, errorInfo: import('preact').ErrorInfo) => void} cb
+ * @param {(error: unknown, errorInfo: import('preact').ErrorInfo) => void} cb
  */
 export function useErrorBoundary(cb) {
 	/** @type {import('./internal').ErrorBoundaryHookState} */
@@ -405,6 +410,7 @@ export function useErrorBoundary(cb) {
 	];
 }
 
+/** @type {() => string} */
 export function useId() {
 	/** @type {import('./internal').IdHookState} */
 	const state = getHookState(currentIndex++, 11);
@@ -482,7 +488,7 @@ function afterPaint(newQueueLength) {
 }
 
 /**
- * @param {import('./internal').EffectHookState} hook
+ * @param {import('./internal').HookState} hook
  */
 function invokeCleanup(hook) {
 	// A hook cleanup can introduce a call to render which creates a new root, this will call options.vnode
@@ -510,8 +516,8 @@ function invokeEffect(hook) {
 }
 
 /**
- * @param {any[]} oldArgs
- * @param {any[]} newArgs
+ * @param {unknown[]} oldArgs
+ * @param {unknown[]} newArgs
  */
 function argsChanged(oldArgs, newArgs) {
 	return (
@@ -521,6 +527,12 @@ function argsChanged(oldArgs, newArgs) {
 	);
 }
 
+/**
+ * @template Arg
+ * @param {Arg} arg
+ * @param {(arg: Arg) => any} f
+ * @returns {any}
+ */
 function invokeOrReturn(arg, f) {
 	return typeof f == 'function' ? f(arg) : f;
 }
