@@ -57,7 +57,7 @@ With Preact, you create user interfaces by assembling trees of components and el
 To get started using Preact, first look at the render() function. This function accepts a tree description and creates the structure described. Next, it appends this structure to a parent DOM element provided as the second argument. Future calls to render() will reuse the existing tree and update it in-place in the DOM. Internally, render() will calculate the difference from previous outputted structures in an attempt to perform as few DOM operations as possible.
 
 ```js
-import { h, render } from 'preact';
+import { h, render } from "preact";
 // Tells babel to use h for JSX. It's better to configure this globally.
 // See https://babeljs.io/docs/en/babel-plugin-transform-react-jsx#usage
 // In tsconfig you can specify this with the jsxFactory
@@ -65,18 +65,18 @@ import { h, render } from 'preact';
 
 // create our tree and append it to document.body:
 render(
-	<main>
-		<h1>Hello</h1>
-	</main>,
-	document.body
+  <main>
+    <h1>Hello</h1>
+  </main>,
+  document.body,
 );
 
 // update the tree in-place:
 render(
-	<main>
-		<h1>Hello World!</h1>
-	</main>,
-	document.body
+  <main>
+    <h1>Hello World!</h1>
+  </main>,
+  document.body,
 );
 // ^ this second invocation of render(...) will use a single DOM call to update the text of the <h1>
 ```
@@ -84,20 +84,20 @@ render(
 Hooray! render() has taken our structure and output a User Interface! This approach demonstrates a simple case, but would be difficult to use as an application grows in complexity. Each change would be forced to calculate the difference between the current and updated structure for the entire application. Components can help here – by dividing the User Interface into nested Components each can calculate their difference from their mounted point. Here's an example:
 
 ```js
-import { render, h } from 'preact';
-import { useState } from 'preact/hooks';
+import { render, h } from "preact";
+import { useState } from "preact/hooks";
 
 /** @jsx h */
 
 const App = () => {
-	const [input, setInput] = useState('');
+  const [input, setInput] = useState("");
 
-	return (
-		<div>
-			<p>Do you agree to the statement: "Preact is awesome"?</p>
-			<input value={input} onInput={e => setInput(e.target.value)} />
-		</div>
-	);
+  return (
+    <div>
+      <p>Do you agree to the statement: "Preact is awesome"?</p>
+      <input value={input} onInput={(e) => setInput(e.target.value)} />
+    </div>
+  );
 };
 
 render(<App />, document.body);
