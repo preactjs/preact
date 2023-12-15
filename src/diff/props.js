@@ -13,6 +13,11 @@ function setStyle(style, key, value) {
 	}
 }
 
+let globalCounter = Number.MIN_SAFE_INTEGER;
+const getCounter = increment => {
+	return increment ? ++globalCounter : globalCounter;
+};
+
 /**
  * Set a property value on a DOM node
  * @param {PreactElement} dom The DOM node to modify
@@ -63,7 +68,7 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
 
 		if (value) {
 			if (!oldValue) {
-				value._attached = Date.now();
+				value._attached = getCounter();
 				const handler = useCapture ? eventProxyCapture : eventProxy;
 				dom.addEventListener(name, handler, useCapture);
 			} else {
@@ -134,7 +139,7 @@ function eventProxy(e) {
 		if (!e._dispatched) {
 			// When an event has no _dispatched we know this is the first event-target in the chain
 			// so we set the initial dispatched time.
-			e._dispatched = Date.now();
+			e._dispatched = getCounter(true);
 			// When the _dispatched is smaller than the time when the targetted event handler was attached
 			// we know we have bubbled up to an element that was added during patching the dom.
 		} else if (e._dispatched <= eventHandler._attached) {
