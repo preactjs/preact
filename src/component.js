@@ -233,7 +233,10 @@ function process() {
 		if (c._dirty) {
 			let renderQueueLength = rerenderQueue.length;
 			root = renderComponent(c, commitQueue, refQueue) || root;
-			if (rerenderQueue.length > renderQueueLength) {
+			// If this WAS the last component in the queue, run commit callbacks *before* we exit the tight loop.
+			// This is required in order for `componentDidMount(){this.setState()}` to be batched into one flush.
+			// Otherwise, also run commit callbacks if the render queue was mutated.
+			if (renderQueueLength === 0 || rerenderQueue.length > renderQueueLength) {
 				commitRoot(commitQueue, root, refQueue);
 				commitQueue.length = 0;
 				refQueue.length = 0;
@@ -247,7 +250,7 @@ function process() {
 			}
 		}
 	}
-	commitRoot(commitQueue, root, refQueue);
+	if (root) commitRoot(commitQueue, root, refQueue);
 	// if (root) commitRoot(commitQueue, root, refQueue);
 	process._rerenderCount = 0;
 }
