@@ -2136,8 +2136,9 @@ export namespace JSXInternal {
 			| Booleanish
 			| ''
 			| 'plaintext-only'
+			| 'inherit'
 			| undefined
-			| SignalLike<Booleanish | '' | 'plaintext-only' | undefined>;
+			| SignalLike<Booleanish | '' | 'inherit' | 'plaintext-only' | undefined>;
 		contenteditable?: HTMLAttributes['contentEditable'];
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/contextmenu */
 		contextMenu?: string | undefined | SignalLike<string | undefined>;
