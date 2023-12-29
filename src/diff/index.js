@@ -310,7 +310,7 @@ export function diff(
  * which have callbacks to invoke in commitRoot
  * @param {VNode} root
  */
-export function commitRoot(commitQueue, root, refQueue) {
+export function commitRoot(commitQueue, root, refQueue, focussedElement) {
 	root._nextDom = undefined;
 
 	for (let i = 0; i < refQueue.length; i++) {
@@ -332,6 +332,13 @@ export function commitRoot(commitQueue, root, refQueue) {
 			options._catchError(e, c._vnode);
 		}
 	});
+
+	if (
+		focussedElement !== document.activeElement &&
+		focussedElement.isConnected
+	) {
+		focussedElement.focus();
+	}
 }
 
 /**

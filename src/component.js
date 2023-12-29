@@ -132,6 +132,7 @@ function renderComponent(component) {
 		newVNode._original = oldVNode._original + 1;
 		if (options.vnode) options.vnode(newVNode);
 
+		let focus = document.activeElement;
 		diff(
 			parentDom,
 			newVNode,
@@ -146,7 +147,7 @@ function renderComponent(component) {
 		);
 
 		newVNode._parent._children[newVNode._index] = newVNode;
-		commitRoot(commitQueue, newVNode, refQueue);
+		commitRoot(commitQueue, newVNode, refQueue, focus);
 
 		if (newVNode._dom != oldDom) {
 			updateParentDomPointers(newVNode);
