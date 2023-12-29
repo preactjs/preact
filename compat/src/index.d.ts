@@ -46,6 +46,7 @@ declare namespace React {
 	export import RefObject = preact.RefObject;
 	export import Component = preact.Component;
 	export import FunctionComponent = preact.FunctionComponent;
+	export import ComponentType = preact.ComponentType;
 	export import FC = preact.FunctionComponent;
 	export import createContext = preact.createContext;
 	export import createRef = preact.createRef;

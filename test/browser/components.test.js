@@ -1897,6 +1897,28 @@ describe('Components', () => {
 		expect(unmounted).to.equal(',0,1,2,3');
 	});
 
+	it('should ignore invalid vnodes in children array', () => {
+		/** @type { (() => void)} */
+		let update;
+
+		const obj = { a: 10, b: 'hello' };
+		class App extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { i: 0 };
+				update = () => this.setState({ i: this.state.i + 1 });
+			}
+
+			render() {
+				return <p>{obj}</p>;
+			}
+		}
+
+		render(<App />, scratch);
+		update();
+		expect(() => rerender()).not.to.throw();
+	});
+
 	describe('c.base', () => {
 		/* eslint-disable lines-around-comment */
 		/** @type {import('../../src').Component} */

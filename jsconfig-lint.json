@@ -1,4 +1,4 @@
 {
   "extends": "./jsconfig.json",
-  "include": ["src/**/*"]
+  "include": ["src/**/*", "hooks/src/**/*"]
 }

@@ -380,7 +380,7 @@ export interface PreactConsumer<T> extends Consumer<T> {}
 export interface Provider<T>
 	extends FunctionComponent<{
 		value: T;
-		children: ComponentChildren;
+		children?: ComponentChildren;
 	}> {}
 export interface PreactProvider<T> extends Provider<T> {}
 export type ContextType<C extends Context<any>> = C extends Context<infer T>
