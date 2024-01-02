@@ -236,8 +236,7 @@ function process() {
 			// Otherwise, also run commit callbacks if the render queue was mutated.
 			if (renderQueueLength === 0 || rerenderQueue.length > renderQueueLength) {
 				commitRoot(commitQueue, root, refQueue);
-				commitQueue.length = 0;
-				refQueue.length = 0;
+				refQueue.length = commitQueue.length = 0;
 				root = undefined;
 				// When i.e. rerendering a provider additional new items can be injected, we want to
 				// keep the order from top to bottom with those new items so we can handle them in a
