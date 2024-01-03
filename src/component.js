@@ -248,7 +248,6 @@ function process() {
 		}
 	}
 	if (root) commitRoot(commitQueue, root, refQueue);
-	// if (root) commitRoot(commitQueue, root, refQueue);
 	process._rerenderCount = 0;
 }
 

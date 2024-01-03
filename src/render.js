@@ -59,9 +59,6 @@ export function render(vnode, parentDom, replaceNode) {
 		refQueue
 	);
 
-	// Flush all queued effects
-	// vnode._nextDom = undefined;
-	// if (options._commit) options._commit(vnode, EMPTY_ARR);
 	vnode._nextDom = undefined;
 	commitRoot(commitQueue, vnode, refQueue);
 }

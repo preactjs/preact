@@ -658,10 +658,6 @@ describe('useSyncExternalStore', () => {
 			await act(() => {
 				store.set(1);
 			});
-			// // Preact logs differ from React here cuz of how we do rerendering. We
-			// // rerender subtrees and then commit effects so Child2 never sees the
-			// // update to 1 cuz Child1 rerenders and runs its layout effects first.
-			// assertLog([1, /*1,*/ 'Reset back to 0', 0, 0]);
 			assertLog([1, 1, 'Reset back to 0', 0, 0]);
 			expect(container.textContent).to.equal('00');
 		});
