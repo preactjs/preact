@@ -2,7 +2,7 @@ import { assign } from './util';
 import { diff, commitRoot } from './diff/index';
 import options from './options';
 import { Fragment } from './create-element';
-import { MODE_HYDRATE } from './constants';
+import { EMPTY_ARR, MODE_HYDRATE } from './constants';
 
 /**
  * Base Component class. Provides `setState()` and `forceUpdate()`, which
@@ -120,12 +120,10 @@ export function getDomSibling(vnode, childIndex) {
  * Trigger in-place re-rendering of a component.
  * @param {Component} component The component to rerender
  */
-function renderComponent(component) {
+function renderComponent(component, commitQueue, refQueue) {
 	let oldVNode = component._vnode,
 		oldDom = oldVNode._dom,
-		parentDom = component._parentDom,
-		commitQueue = [],
-		refQueue = [];
+		parentDom = component._parentDom;
 
 	if (parentDom) {
 		const newVNode = assign({}, oldVNode);
@@ -146,11 +144,14 @@ function renderComponent(component) {
 		);
 
 		newVNode._parent._children[newVNode._index] = newVNode;
-		commitRoot(commitQueue, newVNode, refQueue);
+
+		newVNode._nextDom = undefined;
 
 		if (newVNode._dom != oldDom) {
 			updateParentDomPointers(newVNode);
 		}
+
+		return newVNode;
 	}
 }
 
@@ -220,21 +221,33 @@ const depthSort = (a, b) => a._vnode._depth - b._vnode._depth;
 /** Flush the render queue by rerendering all queued components */
 function process() {
 	let c;
+	let commitQueue = [];
+	let refQueue = [];
+	let root;
 	rerenderQueue.sort(depthSort);
 	// Don't update `renderCount` yet. Keep its value non-zero to prevent unnecessary
 	// process() calls from getting scheduled while `queue` is still being consumed.
 	while ((c = rerenderQueue.shift())) {
 		if (c._dirty) {
 			let renderQueueLength = rerenderQueue.length;
-			renderComponent(c);
-			if (rerenderQueue.length > renderQueueLength) {
+			root = renderComponent(c, commitQueue, refQueue) || root;
+			// If this WAS the last component in the queue, run commit callbacks *before* we exit the tight loop.
+			// This is required in order for `componentDidMount(){this.setState()}` to be batched into one flush.
+			// Otherwise, also run commit callbacks if the render queue was mutated.
+			if (renderQueueLength === 0 || rerenderQueue.length > renderQueueLength) {
+				commitRoot(commitQueue, root, refQueue);
+				refQueue.length = commitQueue.length = 0;
+				root = undefined;
 				// When i.e. rerendering a provider additional new items can be injected, we want to
 				// keep the order from top to bottom with those new items so we can handle them in a
 				// single pass
 				rerenderQueue.sort(depthSort);
+			} else if (root) {
+				if (options._commit) options._commit(root, EMPTY_ARR);
 			}
 		}
 	}
+	if (root) commitRoot(commitQueue, root, refQueue);
 	process._rerenderCount = 0;
 }
 

@@ -311,8 +311,6 @@ export function diff(
  * @param {VNode} root
  */
 export function commitRoot(commitQueue, root, refQueue) {
-	root._nextDom = undefined;
-
 	for (let i = 0; i < refQueue.length; i++) {
 		applyRef(refQueue[i], refQueue[++i], refQueue[++i]);
 	}
