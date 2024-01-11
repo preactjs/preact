@@ -124,22 +124,24 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
  * @private
  */
 function eventProxy(e) {
-	const eventHandler = this._listeners[e.type + false];
-	/**
-	 * This trick is inspired by Vue https://github.com/vuejs/core/blob/main/packages/runtime-dom/src/modules/events.ts#L90-L101
-	 * when the dom performs an event it leaves micro-ticks in between bubbling up which means that an event can trigger on a newly
-	 * created DOM-node while the event bubbles up, this can cause quirky behavior as seen in https://github.com/preactjs/preact/issues/3927
-	 */
-	if (!e._dispatched) {
-		// When an event has no _dispatched we know this is the first event-target in the chain
-		// so we set the initial dispatched time.
-		e._dispatched = Date.now();
-		// When the _dispatched is smaller than the time when the targetted event handler was attached
-		// we know we have bubbled up to an element that was added during patching the dom.
-	} else if (e._dispatched <= eventHandler._attached) {
-		return;
+	if (this._listeners) {
+		const eventHandler = this._listeners[e.type + false];
+		/**
+		 * This trick is inspired by Vue https://github.com/vuejs/core/blob/main/packages/runtime-dom/src/modules/events.ts#L90-L101
+		 * when the dom performs an event it leaves micro-ticks in between bubbling up which means that an event can trigger on a newly
+		 * created DOM-node while the event bubbles up, this can cause quirky behavior as seen in https://github.com/preactjs/preact/issues/3927
+		 */
+		if (!e._dispatched) {
+			// When an event has no _dispatched we know this is the first event-target in the chain
+			// so we set the initial dispatched time.
+			e._dispatched = Date.now();
+			// When the _dispatched is smaller than the time when the targetted event handler was attached
+			// we know we have bubbled up to an element that was added during patching the dom.
+		} else if (e._dispatched <= eventHandler._attached) {
+			return;
+		}
+		return eventHandler(options.event ? options.event(e) : e);
 	}
-	return eventHandler(options.event ? options.event(e) : e);
 }
 
 /**
@@ -148,5 +150,7 @@ function eventProxy(e) {
  * @private
  */
 function eventProxyCapture(e) {
-	return this._listeners[e.type + true](options.event ? options.event(e) : e);
+	if (this._listeners) {
+		return this._listeners[e.type + true](options.event ? options.event(e) : e);
+	}
 }
