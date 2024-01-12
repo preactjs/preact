@@ -41,7 +41,7 @@ describe('createContext', () => {
 			<Provider value={CONTEXT}>
 				<div>
 					<Consumer>
-						{data => {
+						{(data) => {
 							receivedContext = data;
 							return <Inner {...data} />;
 						}}
@@ -94,7 +94,7 @@ describe('createContext', () => {
 		expect(renders).to.equal(1);
 	});
 
-	it('should preserve provider context through nesting providers', done => {
+	it('should preserve provider context through nesting providers', (done) => {
 		const { Provider, Consumer } = createContext();
 		const CONTEXT = { a: 'a' };
 		const CHILD_CONTEXT = { b: 'b' };
@@ -116,12 +116,12 @@ describe('createContext', () => {
 		render(
 			<Provider value={CONTEXT}>
 				<Consumer>
-					{data => {
+					{(data) => {
 						parentContext = data;
 						return (
 							<Provider value={CHILD_CONTEXT}>
 								<Consumer>
-									{childData => {
+									{(childData) => {
 										childContext = childData;
 										return <Inner {...data} {...childData} />;
 									}}
@@ -150,10 +150,8 @@ describe('createContext', () => {
 	});
 
 	it('should preserve provider context between different providers', () => {
-		const {
-			Provider: ThemeProvider,
-			Consumer: ThemeConsumer
-		} = createContext();
+		const { Provider: ThemeProvider, Consumer: ThemeConsumer } =
+			createContext();
 		const { Provider: DataProvider, Consumer: DataConsumer } = createContext();
 		const THEME_CONTEXT = { theme: 'black' };
 		const DATA_CONTEXT = { global: 'a' };
@@ -177,11 +175,11 @@ describe('createContext', () => {
 			<ThemeProvider value={THEME_CONTEXT.theme}>
 				<DataProvider value={DATA_CONTEXT}>
 					<ThemeConsumer>
-						{theme => {
+						{(theme) => {
 							receivedTheme = theme;
 							return (
 								<DataConsumer>
-									{data => {
+									{(data) => {
 										receivedData = data;
 										return <Inner theme={theme} {...data} />;
 									}}
@@ -222,11 +220,11 @@ describe('createContext', () => {
 		render(
 			<Provider value={CONTEXT}>
 				<Consumer>
-					{data => {
+					{(data) => {
 						receivedData = data;
 						return (
 							<Consumer>
-								{childData => {
+								{(childData) => {
 									receivedChildData = childData;
 									return <Inner {...data} {...childData} />;
 								}}
@@ -271,7 +269,7 @@ describe('createContext', () => {
 			<div>
 				<Provider value={CONTEXT}>
 					<NoUpdate>
-						<Consumer>{data => <Inner {...data} />}</Consumer>
+						<Consumer>{(data) => <Inner {...data} />}</Consumer>
 					</NoUpdate>
 				</Provider>
 			</div>,
@@ -284,7 +282,7 @@ describe('createContext', () => {
 			<div>
 				<Provider value={CONTEXT}>
 					<NoUpdate>
-						<Consumer>{data => <Inner {...data} />}</Consumer>
+						<Consumer>{(data) => <Inner {...data} />}</Consumer>
 					</NoUpdate>
 				</Provider>
 			</div>,
@@ -333,7 +331,7 @@ describe('createContext', () => {
 				return (
 					<div>
 						<Consumer>
-							{data => {
+							{(data) => {
 								receivedContext = data;
 								return <Consumed {...data} />;
 							}}
@@ -360,7 +358,7 @@ describe('createContext', () => {
 		);
 	});
 
-	it('should propagates through shouldComponentUpdate false', done => {
+	it('should propagates through shouldComponentUpdate false', (done) => {
 		const { Provider, Consumer } = createContext();
 		const CONTEXT = { a: 'a' };
 		const UPDATED_CONTEXT = { a: 'b' };
@@ -401,7 +399,7 @@ describe('createContext', () => {
 			render() {
 				return (
 					<div>
-						<Consumer>{data => <Consumed {...data} />}</Consumer>
+						<Consumer>{(data) => <Consumed {...data} />}</Consumer>
 					</div>
 				);
 			}
@@ -473,14 +471,14 @@ describe('createContext', () => {
 			<Provider value={CONTEXT}>
 				<Provider value={NESTED_CONTEXT}>
 					<Consumer>
-						{data => {
+						{(data) => {
 							receivedNestedData = data;
 							return <Nested {...data} />;
 						}}
 					</Consumer>
 				</Provider>
 				<Consumer>
-					{data => {
+					{(data) => {
 						receivedData = data;
 						return <Inner {...data} />;
 					}}
@@ -525,7 +523,7 @@ describe('createContext', () => {
 		render(
 			<Provider value={CONTEXT}>
 				<NoUpdate>
-					<Consumer>{data => <Inner {...data} />}</Consumer>
+					<Consumer>{(data) => <Inner {...data} />}</Consumer>
 				</NoUpdate>
 			</Provider>,
 			scratch
@@ -534,7 +532,7 @@ describe('createContext', () => {
 		render(
 			<Provider value={CONTEXT}>
 				<NoUpdate>
-					<Consumer>{data => <Inner {...data} />}</Consumer>
+					<Consumer>{(data) => <Inner {...data} />}</Consumer>
 				</NoUpdate>
 			</Provider>,
 			scratch
@@ -550,7 +548,7 @@ describe('createContext', () => {
 			render(
 				<Provider value={{ i: 2 }}>
 					<NoUpdate>
-						<Consumer>{data => <Inner {...data} />}</Consumer>
+						<Consumer>{(data) => <Inner {...data} />}</Consumer>
 					</NoUpdate>
 				</Provider>,
 				scratch
@@ -558,9 +556,9 @@ describe('createContext', () => {
 		});
 
 		// Rendered three times, should call 'Consumer' render two times
-		expect(
-			Inner.prototype.render
-		).to.have.been.calledTwice.and.calledWithMatch({ i: 2 });
+		expect(Inner.prototype.render).to.have.been.calledTwice.and.calledWithMatch(
+			{ i: 2 }
+		);
 		expect(scratch.innerHTML).to.equal('<div>2</div>');
 	});
 
@@ -625,7 +623,7 @@ describe('createContext', () => {
 		act(() => {
 			render(
 				<Provider value={CONTEXT}>
-					<Consumer>{data => <Inner {...data} />}</Consumer>
+					<Consumer>{(data) => <Inner {...data} />}</Consumer>
 				</Provider>,
 				scratch
 			);
@@ -633,7 +631,7 @@ describe('createContext', () => {
 			// Not calling re-render since it's gonna get called with the same Consumer function
 			render(
 				<Provider value={CONTEXT}>
-					<Consumer>{data => <Inner {...data} />}</Consumer>
+					<Consumer>{(data) => <Inner {...data} />}</Consumer>
 				</Provider>,
 				scratch
 			);
@@ -658,7 +656,7 @@ describe('createContext', () => {
 				super();
 
 				this.state = { value: 0, show: true };
-				changeValue = value => this.setState({ value });
+				changeValue = (value) => this.setState({ value });
 				toggleConsumer = () => this.setState(({ show }) => ({ show: !show }));
 			}
 			render(props, state) {
@@ -666,7 +664,7 @@ describe('createContext', () => {
 					<Provider value={state.value}>
 						<div>
 							{state.show ? (
-								<Consumer>{data => <Inner value={data} />}</Consumer>
+								<Consumer>{(data) => <Inner value={data} />}</Consumer>
 							) : null}
 						</div>
 					</Provider>
@@ -828,7 +826,7 @@ describe('createContext', () => {
 				}
 
 				updateStore() {
-					this.setState(state => ({ id: state.id + 1 }));
+					this.setState((state) => ({ id: state.id + 1 }));
 				}
 
 				render() {
@@ -846,12 +844,12 @@ describe('createContext', () => {
 				}
 
 				render() {
-					return <Store.Consumer>{id => <Parent key={id} />}</Store.Consumer>;
+					return <Store.Consumer>{(id) => <Parent key={id} />}</Store.Consumer>;
 				}
 			}
 
 			function Parent(props) {
-				return <Store.Consumer>{id => <Child id={id} />}</Store.Consumer>;
+				return <Store.Consumer>{(id) => <Child id={id} />}</Store.Consumer>;
 			}
 
 			class Child extends Component {
@@ -899,7 +897,7 @@ describe('createContext', () => {
 			}
 
 			render() {
-				return <context.Consumer>{v => <p>{v.state}</p>}</context.Consumer>;
+				return <context.Consumer>{(v) => <p>{v.state}</p>}</context.Consumer>;
 			}
 		}
 
@@ -929,5 +927,49 @@ describe('createContext', () => {
 		set(defaultValue);
 		rerender();
 		expect(scratch.innerHTML).to.equal('<p>hi</p>');
+	});
+
+	it('should not call sCU on context update', () => {
+		const Ctx = createContext('foo');
+
+		/** @type {(s: string) => void} */
+		let update;
+		class App extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { foo: 'foo' };
+				update = (v) => this.setState({ foo: v });
+			}
+			render() {
+				return (
+					<Ctx.Provider value={this.state.foo}>
+						<Child />
+					</Ctx.Provider>
+				);
+			}
+		}
+
+		const spy = sinon.spy();
+
+		class Child extends Component {
+			static contextType = Ctx;
+
+			shouldComponentUpdate() {
+				spy();
+				return false;
+			}
+
+			render() {
+				return <p>{this.context}</p>;
+			}
+		}
+
+		render(<App />, scratch);
+		expect(scratch.textContent).to.equal('foo');
+
+		update('bar');
+		rerender();
+		expect(scratch.textContent).to.equal('bar');
+		expect(spy).not.to.be.called;
 	});
 });
