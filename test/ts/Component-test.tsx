@@ -2,12 +2,6 @@ import 'mocha';
 import { expect } from 'chai';
 import { createElement, Component, RenderableProps, Fragment } from '../../';
 
-// Test `this` binding on event handlers
-function onHandler(this: HTMLInputElement, event: any) {
-	return this.value;
-}
-const foo = <input onChange={onHandler} />;
-
 export class ContextComponent extends Component<{ foo: string }> {
 	getChildContext() {
 		return { something: 2 };
@@ -125,7 +119,7 @@ function MapperItem(props: { foo: number }) {
 }
 
 function Mapper() {
-	return [1, 2, 3].map(x => <MapperItem foo={x} key={x} />);
+	return [1, 2, 3].map((x) => <MapperItem foo={x} key={x} />);
 }
 
 describe('Component', () => {
