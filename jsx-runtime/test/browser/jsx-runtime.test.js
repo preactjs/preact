@@ -1,4 +1,4 @@
-import { Component, createElement, createRef } from 'preact';
+import { createElement, createRef } from 'preact';
 import { jsx, jsxs, jsxDEV, Fragment } from 'preact/jsx-runtime';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 
@@ -32,7 +32,7 @@ describe('Babel jsx/jsxDEV', () => {
 	});
 
 	it('should set __source and __self', () => {
-		const vnode = jsx('div', { class: 'foo' }, 'key', 'source', 'self');
+		const vnode = jsx('div', { class: 'foo' }, 'key', false, 'source', 'self');
 		expect(vnode.__source).to.equal('source');
 		expect(vnode.__self).to.equal('self');
 	});
