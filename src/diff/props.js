@@ -2,7 +2,7 @@ import options from '../options';
 
 function setStyle(dom, key, value) {
 	if (key[0] === '-') {
-		dom.style.setProperty(key, value);
+		dom.style.setProperty(key, value == null ? '' : value);
 	} else {
 		dom.style[key] = value == null ? '' : value;
 	}
