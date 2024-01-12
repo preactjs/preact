@@ -270,14 +270,18 @@ export namespace h {
 // Preact render
 // -----------------------------------
 
-export function render(
-	vnode: ComponentChild,
-	parent: Element | Document | ShadowRoot | DocumentFragment
-): void;
-export function hydrate(
-	vnode: ComponentChild,
-	parent: Element | Document | ShadowRoot | DocumentFragment
-): void;
+interface ContainerNode {
+	nodeType: Node['nodeType'];
+	parentNode: Node['parentNode'];
+	firstChild: Node['firstChild'];
+	insertBefore: Node['insertBefore'];
+	appendChild: Node['appendChild'];
+	removeChild: Node['removeChild'];
+	childNodes: ArrayLike<Node>;
+}
+
+export function render(vnode: ComponentChild, parent: ContainerNode): void;
+export function hydrate(vnode: ComponentChild, parent: ContainerNode): void;
 export function cloneElement(
 	vnode: VNode<any>,
 	props?: any,
