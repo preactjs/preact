@@ -49,7 +49,7 @@ describe('Lifecycle methods', () => {
 			constructor() {
 				super();
 				this.state = { show: true };
-				setState = s => this.setState(s);
+				setState = (s) => this.setState(s);
 			}
 			render(props, { show }) {
 				return show ? <div /> : null;
@@ -106,7 +106,7 @@ describe('Lifecycle methods', () => {
 					<table>
 						{rows
 							.sort((a, b) => (a[sortBy] > b[sortBy] ? -1 : 1))
-							.map(row => (
+							.map((row) => (
 								<Row id={row.id} key={row.id} />
 							))}
 					</table>
@@ -612,7 +612,7 @@ describe('Lifecycle methods', () => {
 				constructor(props) {
 					super(props);
 					this.state = { hideMe: false };
-					hideThree = () => this.setState(s => ({ hideMe: !s.hideMe }));
+					hideThree = () => this.setState((s) => ({ hideMe: !s.hideMe }));
 				}
 
 				shouldComponentUpdate(nextProps, nextState) {
@@ -629,7 +629,7 @@ describe('Lifecycle methods', () => {
 					super(props);
 					this.state = { counter: 1 };
 					incrementThree = () =>
-						this.setState(s => ({ counter: s.counter + 1 }));
+						this.setState((s) => ({ counter: s.counter + 1 }));
 				}
 
 				render(p, { counter }) {
@@ -822,7 +822,7 @@ describe('Lifecycle methods', () => {
 				<table>
 					{rows
 						.sort((a, b) => (a[sortBy] > b[sortBy] ? -1 : 1))
-						.map(row => (
+						.map((row) => (
 							<Row key={row.id} id={row.id} a={row.a} b={row.b} />
 						))}
 				</table>
@@ -912,5 +912,52 @@ describe('Lifecycle methods', () => {
 		expect(scratch.innerHTML).to.equal(
 			`<div>Before</div><div>Component</div><div>After</div>`
 		);
+	});
+
+	it('should correctly handle double state updates', () => {
+		let updateParent, updateChild;
+		class Parent extends Component {
+			state = { text: 'parent-old' };
+
+			componentDidMount() {
+				updateParent = () => this.setState({ text: 'Parent-NEW' });
+			}
+
+			render() {
+				return (
+					<Fragment>
+						{this.props.children} and {this.state.text}
+					</Fragment>
+				);
+			}
+		}
+
+		class Child extends Component {
+			state = { text: 'child-old' };
+
+			shouldComponentUpdate(nextProps, nextState) {
+				return this.state.text !== nextState.text;
+			}
+
+			componentDidMount() {
+				updateChild = () => this.setState({ text: 'Child-NEW' });
+			}
+
+			render() {
+				return <h1>{this.state.text}</h1>;
+			}
+		}
+
+		render(
+			<Parent>
+				<Child />
+			</Parent>,
+			scratch
+		);
+
+		updateParent();
+		updateChild();
+		rerender();
+		expect(scratch.innerHTML).to.equal('<h1>Child-NEW</h1> and Parent-NEW');
 	});
 });
