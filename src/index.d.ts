@@ -53,8 +53,8 @@ export type ComponentChild =
 export type ComponentChildren = ComponentChild[] | ComponentChild;
 
 export interface Attributes {
-	key?: Key;
-	jsx?: boolean;
+	key?: Key | undefined;
+	jsx?: boolean | undefined;
 }
 
 export interface ClassAttributes<T> extends Attributes {
