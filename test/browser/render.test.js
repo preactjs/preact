@@ -73,6 +73,16 @@ describe('render()', () => {
 		expect(c[0].nodeName).to.equal('#text');
 	});
 
+	it('should render % width and height on img correctly', () => {
+		render(<img width="100%" height="100%" />, scratch);
+		expect(scratch.innerHTML).to.eql(`<img width="100%" height="100%">`);
+	});
+
+	it('should render px width and height on img correctly', () => {
+		render(<img width="100px" height="100px" />, scratch);
+		expect(scratch.innerHTML).to.eql(`<img width="100px" height="100px">`);
+	});
+
 	it('should allow node type change with content', () => {
 		render(<span>Bad</span>, scratch);
 		render(<div>Good</div>, scratch);
@@ -636,9 +646,9 @@ describe('render()', () => {
 	});
 
 	it('should reconcile mutated checked property', () => {
-		let check = p => render(<input type="checkbox" checked={p} />, scratch),
+		let check = (p) => render(<input type="checkbox" checked={p} />, scratch),
 			value = () => scratch.lastChild.checked,
-			setValue = p => (scratch.lastChild.checked = p);
+			setValue = (p) => (scratch.lastChild.checked = p);
 		check(true);
 		expect(value()).to.equal(true);
 		check(false);
@@ -744,7 +754,7 @@ describe('render()', () => {
 				const { todos, text } = this.state;
 				return (
 					<div onKeyDown={this.addTodo}>
-						{todos.map(todo => [
+						{todos.map((todo) => [
 							<span>{todo.text}</span>,
 							<span>
 								{' '}
@@ -752,7 +762,11 @@ describe('render()', () => {
 							</span>,
 							<br />
 						])}
-						<input value={text} onInput={this.setText} ref={i => (input = i)} />
+						<input
+							value={text}
+							onInput={this.setText}
+							ref={(i) => (input = i)}
+						/>
 					</div>
 				);
 			}
@@ -819,8 +833,8 @@ describe('render()', () => {
 
 				return (
 					<div>
-						<input value={'Hello'} ref={el => (text = el)} />
-						<input type="checkbox" checked ref={el => (checkbox = el)} />
+						<input value={'Hello'} ref={(el) => (text = el)} />
+						<input type="checkbox" checked ref={(el) => (checkbox = el)} />
 					</div>
 				);
 			}
@@ -852,7 +866,7 @@ describe('render()', () => {
 				<div
 					contentEditable
 					dangerouslySetInnerHTML={{ __html: value }}
-					onInput={e => setValue(e.currentTarget.innerHTML)}
+					onInput={(e) => setValue(e.currentTarget.innerHTML)}
 				/>
 			);
 		}
@@ -965,7 +979,7 @@ describe('render()', () => {
 			}
 
 			update() {
-				this.setState(prev => ({ i: prev.i + 1 }));
+				this.setState((prev) => ({ i: prev.i + 1 }));
 			}
 
 			componentWillUnmount() {
@@ -983,14 +997,14 @@ describe('render()', () => {
 			constructor() {
 				super();
 				this.state = { i: 0 };
-				updateApp = () => this.setState(prev => ({ i: prev.i ^ 1 }));
+				updateApp = () => this.setState((prev) => ({ i: prev.i ^ 1 }));
 			}
 
 			render() {
 				return (
 					<div>
 						{this.state.i === 0 && <X />}
-						<X ref={node => (ref = node)} />
+						<X ref={(node) => (ref = node)} />
 					</div>
 				);
 			}
@@ -1088,7 +1102,7 @@ describe('render()', () => {
 	});
 
 	it('should remove class attributes', () => {
-		const App = props => (
+		const App = (props) => (
 			<div className={props.class}>
 				<span>Bye</span>
 			</div>
@@ -1202,8 +1216,8 @@ describe('render()', () => {
 	});
 
 	it('should only remove the highest parent when unmounting a tree with components', () => {
-		const List = props => props.children;
-		const Item = props => <li>{props.children}</li>;
+		const List = (props) => props.children;
+		const Item = (props) => <li>{props.children}</li>;
 		render(
 			<ul>
 				<List>

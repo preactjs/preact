@@ -69,6 +69,8 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
 			// - className --> class
 			name = name.replace(/xlink[H:h]/, 'h').replace(/sName$/, 's');
 		} else if (
+			name !== 'width' &&
+			name !== 'height' &&
 			name !== 'href' &&
 			name !== 'list' &&
 			name !== 'form' &&
