@@ -116,7 +116,7 @@ const StrictMode = Fragment;
  * @template Arg
  * @template Result
  * @param {(arg: Arg) => Result} callback function that runs before the flush
- * @param {Arg} [arg] Optional arugment that can be passed to the callback
+ * @param {Arg} [arg] Optional argument that can be passed to the callback
  * @returns
  */
 const flushSync = (callback, arg) => callback(arg);

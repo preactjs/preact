@@ -29,7 +29,7 @@ export function Component(props, context) {
  * @param {() => void} [callback] A function to be called once component state is
  * updated
  */
-Component.prototype.setState = function(update, callback) {
+Component.prototype.setState = function (update, callback) {
 	// only clone state when copying to nextState the first time.
 	let s;
 	if (this._nextState != null && this._nextState !== this.state) {
@@ -64,7 +64,7 @@ Component.prototype.setState = function(update, callback) {
  * @param {() => void} [callback] A function to be called after component is
  * re-rendered
  */
-Component.prototype.forceUpdate = function(callback) {
+Component.prototype.forceUpdate = function (callback) {
 	const internal = this._internal;
 	if (internal) {
 		// Set render mode so that we can differentiate where the render request
@@ -141,11 +141,22 @@ export function enqueueRender(internal) {
 
 /** Flush the render queue by rerendering all queued components */
 function processRenderQueue() {
-	while ((len = processRenderQueue._rerenderCount = renderQueue.length)) {
-		renderQueue.sort((a, b) => a._depth - b._depth);
-		while (len--) {
-			renderQueuedInternal(renderQueue.shift());
+	let c;
+	renderQueue.sort((a, b) => a._depth - b._depth);
+	// Don't update `renderCount` yet. Keep its value non-zero to prevent unnecessary
+	// process() calls from getting scheduled while `queue` is still being consumed.
+	while ((c = renderQueue.shift())) {
+		if (c.flags & DIRTY_BIT) {
+			let renderQueueLength = renderQueue.length;
+			renderQueuedInternal(c);
+			if (renderQueue.length > renderQueueLength) {
+				// When i.e. rerendering a provider additional new items can be injected, we want to
+				// keep the order from top to bottom with those new items so we can handle them in a
+				// single pass
+				renderQueue.sort((a, b) => a._depth - b._depth);
+			}
 		}
 	}
+	processRenderQueue._rerenderCount = 0;
 }
-let len = (processRenderQueue._rerenderCount = 0);
+processRenderQueue._rerenderCount = 0;

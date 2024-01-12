@@ -103,6 +103,12 @@ const UseOfComponentWithChildren = () => {
 	);
 };
 
+// Mounting into different types of Nodes
+render(h('div', {}), document.createElement('div'));
+render(h('div', {}), document);
+render(h('div', {}), document.createElement('div').shadowRoot!);
+render(h('div', {}), document.createDocumentFragment());
+
 // using ref and or jsx
 class ComponentUsingRef extends Component<any, any> {
 	private array: string[];
@@ -117,7 +123,7 @@ class ComponentUsingRef extends Component<any, any> {
 		this.refs = [];
 		return (
 			<div jsx>
-				{this.array.map(el => (
+				{this.array.map((el) => (
 					<span ref={this.setRef}>{el}</span>
 				))}
 

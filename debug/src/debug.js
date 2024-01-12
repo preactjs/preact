@@ -70,7 +70,7 @@ export function initDebug() {
 		try {
 			oldCatchError(error, vnode, oldVNode);
 
-			// when an error was handled by an ErrorBoundary we will nontheless emit an error
+			// when an error was handled by an ErrorBoundary we will nonetheless emit an error
 			// event on the window object. This is to make up for react compatibility in dev mode
 			// and thus make the Next.js dev overlay work.
 			if (typeof error.then != 'function') {
@@ -120,6 +120,7 @@ export function initDebug() {
 		// `<MyJSONFormatter>{{ foo: 123, bar: "abc" }}</MyJSONFormatter>`).
 		if (vnode.constructor !== undefined) {
 			const keys = Object.keys(vnode).join(',');
+			// TODO: https://github.com/preactjs/preact/pull/3801
 			throw new Error(
 				`Objects are not valid as a child. Encountered an object with the keys {${keys}}.` +
 					`\n\n${getOwnerStack(internal)}`
@@ -327,7 +328,7 @@ export function initDebug() {
 	// https://esbench.com/bench/6021ebd7d9c27600a7bfdba3
 	const deprecatedProto = Object.create({}, deprecatedAttributes);
 
-	options.vnode = vnode => {
+	options.vnode = (vnode) => {
 		const props = vnode.props;
 		if (props != null && ('__source' in props || '__self' in props)) {
 			Object.defineProperties(props, debugProps);
@@ -340,7 +341,7 @@ export function initDebug() {
 		if (oldVnode) oldVnode(vnode);
 	};
 
-	options.diffed = vnode => {
+	options.diffed = (vnode) => {
 		hooksAllowed = false;
 
 		if (oldDiffed) oldDiffed(vnode);
@@ -374,7 +375,7 @@ export function initDebug() {
 const setState = Component.prototype.setState;
 
 /** @this {import('../../src/internal').Component} */
-Component.prototype.setState = function(update, callback) {
+Component.prototype.setState = function (update, callback) {
 	if (this._internal == null) {
 		// `this._internal` will be `null` during componentWillMount. But it
 		// is perfectly valid to call `setState` during cWM. So we
