@@ -122,6 +122,8 @@ let renderQueue = [];
 
 let prevDebounce;
 
+const defer = Promise.prototype.then.bind(Promise.resolve());
+
 /**
  * Enqueue a rerender of an internal
  * @param {import('./internal').Internal} internal The internal to rerender
@@ -135,7 +137,7 @@ export function enqueueRender(internal) {
 		prevDebounce !== options.debounceRendering
 	) {
 		prevDebounce = options.debounceRendering;
-		(prevDebounce || setTimeout)(processRenderQueue);
+		(prevDebounce || defer)(processRenderQueue);
 	}
 }
 
