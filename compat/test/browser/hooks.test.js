@@ -6,7 +6,10 @@ import React, {
 	useTransition,
 	render,
 	useState,
-	useCallback
+	useCallback,
+	createContext,
+	useContext,
+	useEffect
 } from 'preact/compat';
 import { setupRerender, act } from 'preact/test-utils';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
@@ -29,7 +32,7 @@ describe('React-18-hooks', () => {
 
 	describe('useDeferredValue', () => {
 		it('returns the value', () => {
-			const App = props => {
+			const App = (props) => {
 				const val = useDeferredValue(props.text);
 				return <p>{val}</p>;
 			};
@@ -98,7 +101,7 @@ describe('React-18-hooks', () => {
 
 		it('subscribes and rerenders when called', () => {
 			let flush;
-			const subscribe = sinon.spy(cb => {
+			const subscribe = sinon.spy((cb) => {
 				flush = cb;
 				return () => {};
 			});
@@ -132,7 +135,7 @@ describe('React-18-hooks', () => {
 
 		it('getSnapshot can return NaN without causing infinite loop', () => {
 			let flush;
-			const subscribe = sinon.spy(cb => {
+			const subscribe = sinon.spy((cb) => {
 				flush = cb;
 				return () => {};
 			});
@@ -166,7 +169,7 @@ describe('React-18-hooks', () => {
 
 		it('should not call function values on subscription', () => {
 			let flush;
-			const subscribe = sinon.spy(cb => {
+			const subscribe = sinon.spy((cb) => {
 				flush = cb;
 				return () => {};
 			});
@@ -198,7 +201,7 @@ describe('React-18-hooks', () => {
 
 		it('should work with changing getSnapshot', () => {
 			let flush;
-			const subscribe = sinon.spy(cb => {
+			const subscribe = sinon.spy((cb) => {
 				flush = cb;
 				return () => {};
 			});
@@ -250,5 +253,79 @@ describe('React-18-hooks', () => {
 
 			expect(scratch.innerHTML).to.equal('<p>nope</p>');
 		});
+	});
+
+	it('should release ._force on context-consumers', () => {
+		let sequence, setSubmitting;
+		const Ctx = createContext({
+			isSubmitting: false,
+			setIsSubmitting: () => {}
+		});
+		const FormWrapper = (props) => {
+			const [isSubmitting, setIsSubmitting] = useState(false);
+			setSubmitting = setIsSubmitting;
+			return (
+				<Ctx.Provider value={{ isSubmitting, setIsSubmitting }}>
+					{props.children}
+				</Ctx.Provider>
+			);
+		};
+
+		const Form = () => {
+			const { isSubmitting, setIsSubmitting } = useContext(Ctx);
+			const [shouldSubmit, setShouldSubmit] = useState(false);
+
+			sequence = () => {
+				setShouldSubmit(true);
+			};
+
+			const submit = () => {
+				setIsSubmitting(true);
+				setShouldSubmit(false);
+			};
+
+			useEffect(() => {
+				if (shouldSubmit) {
+					submit();
+				}
+			}, [shouldSubmit]);
+
+			return (
+				<p>
+					isSubmitting: {'' + isSubmitting} | shouldSubmit: {'' + shouldSubmit}
+				</p>
+			);
+		};
+
+		const App = () => {
+			return (
+				<FormWrapper>
+					<Form />
+				</FormWrapper>
+			);
+		};
+
+		render(<App />, scratch);
+
+		act(() => {
+			sequence();
+		});
+		expect(scratch.innerHTML).to.equal(
+			'<p>isSubmitting: true | shouldSubmit: false</p>'
+		);
+
+		act(() => {
+			setSubmitting(false);
+		});
+		expect(scratch.innerHTML).to.equal(
+			'<p>isSubmitting: false | shouldSubmit: false</p>'
+		);
+
+		act(() => {
+			sequence();
+		});
+		expect(scratch.innerHTML).to.equal(
+			'<p>isSubmitting: true | shouldSubmit: false</p>'
+		);
 	});
 });
