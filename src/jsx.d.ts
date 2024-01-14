@@ -1425,6 +1425,7 @@ export namespace JSXInternal {
 		httpEquiv?: string | undefined | SignalLike<string | undefined>;
 		icon?: string | undefined | SignalLike<string | undefined>;
 		id?: string | undefined | SignalLike<string | undefined>;
+		indeterminate?: boolean | undefined | SignalLike<boolean>;
 		inputMode?: string | undefined | SignalLike<string | undefined>;
 		integrity?: string | undefined | SignalLike<string | undefined>;
 		is?: string | undefined | SignalLike<string | undefined>;
