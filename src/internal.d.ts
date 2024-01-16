@@ -31,14 +31,14 @@ export interface Options extends preact.Options {
 		parent: Element | Document | ShadowRoot | DocumentFragment
 	): void;
 	/** Attach a hook that is invoked before a vnode is diffed. */
-	_diff?(internal: Internal, vnode?: VNode | string): void;
+	_diff?(internal: Internal, vnode: VNode | string | null): void;
 	/** Attach a hook that is invoked after a tree was mounted or was updated. */
 	_commit?(internal: Internal, commitQueue: CommitQueue): void;
 	/** Attach a hook that is invoked before a vnode has rendered. */
 	_render?(internal: Internal): void;
 	/** Attach a hook that is invoked before a hook's state is queried. */
 	_hook?(component: Component, index: number, type: HookType): void;
-	/** Bypass effect execution. Currenty only used in devtools for hooks inspection */
+	/** Bypass effect execution. Currently only used in devtools for hooks inspection */
 	_skipEffects?: boolean;
 	/** Attach a hook that is invoked after an error is caught in a component but before calling lifecycle hooks */
 	_catchError?(error: any, internal: Internal): void;
@@ -93,7 +93,7 @@ export type Root = {
 };
 
 export interface PreactElement extends HTMLElement {
-	_children?: Internal<any> | null;
+	_child?: Internal<any> | null;
 	_root?: Root | null;
 	/** Event listeners to support event delegation */
 	_listeners?: Record<string, (e: Event) => void>;
@@ -145,10 +145,13 @@ export interface Internal<P = {}> {
 	/** The function that triggers in-place re-renders for an internal */
 	rerender: (internal: Internal) => void;
 
-	/** children Internal nodes */
-	_children: Internal[];
-	/** next sibling Internal node */
+	/** parent Internal node */
 	_parent: Internal;
+	/** first child Internal node */
+	_child: Internal | null;
+	/** next sibling Internal node */
+	_next: Internal | null;
+	_index: number;
 	/** most recent vnode ID */
 	_vnodeId: number;
 	/**

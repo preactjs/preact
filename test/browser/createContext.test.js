@@ -881,8 +881,8 @@ describe('createContext', () => {
 			expect(events).to.deep.equal([
 				'render 0',
 				'mount 0',
-				'render 1',
 				'unmount 0',
+				'render 1',
 				'mount 1'
 			]);
 		});

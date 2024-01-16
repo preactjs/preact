@@ -1,12 +1,13 @@
 import { applyRef } from './refs';
-import { normalizeToVNode } from '../create-element';
+import { createElement, Fragment } from '../create-element';
 import {
 	TYPE_COMPONENT,
+	TYPE_TEXT,
 	MODE_HYDRATE,
 	MODE_SUSPENDED,
-	EMPTY_ARR,
 	TYPE_DOM,
-	UNDEFINED
+	TYPE_ELEMENT,
+	INSERT_INTERNAL
 } from '../constants';
 import { mount } from './mount';
 import { patch } from './patch';
@@ -14,239 +15,276 @@ import { unmount } from './unmount';
 import { createInternal, getDomSibling } from '../tree';
 
 /**
+ * Scenarios:
+ *
+ * 1. Unchanged:  no ordering changes, walk new+old children and update Internals in-place
+ * 2. All removed:  walk old child Internals and unmount
+ * 3. All added:  walk over new child vnodes and create Internals, assign `.next`, mount
+ */
+
+/** @typedef {import('../internal').Internal} Internal */
+/** @typedef {import('../internal').VNode} VNode */
+/** @typedef {import('../internal').PreactElement} PreactElement */
+/** @typedef {import('../internal').ComponentChildren} ComponentChildren */
+
+/**
  * Update an internal with new children.
- * @param {import('../internal').Internal} internal The internal whose children should be patched
- * @param {import('../internal').ComponentChild[]} children The new children, represented as VNodes
- * @param {import('../internal').PreactElement} parentDom The element into which this subtree is rendered
+ * @param {Internal} internal The internal whose children should be patched
+ * @param {ComponentChildren[]} children The new children, represented as VNodes
+ * @param {PreactElement} parentDom The element into which this subtree is rendered
  */
 export function patchChildren(internal, children, parentDom) {
-	let oldChildren =
-		(internal._children && internal._children.slice()) || EMPTY_ARR;
+	// Find matches and set up _next pointers. Unmount unused/unclaimed Internal
+	findMatches(internal._child, children, internal);
 
-	let oldChildrenLength = oldChildren.length;
-	let remainingOldChildren = oldChildrenLength;
+	// Walk forwards over the newly-assigned _next properties, inserting Internals
+	// that require insertion.
+	let index = 0;
+	internal = internal._child;
+	while (internal) {
+		let vnode = children[index];
+		while (vnode == null || vnode === true || vnode === false) {
+			vnode = children[++index];
+		}
 
-	let skew = 0;
-	let i;
+		if (internal._index === -1) {
+			let nextDomSibling = getDomSibling(internal);
+			mount(internal, parentDom, nextDomSibling);
+			if (internal.flags & TYPE_DOM) {
+				// If we are mounting a component, it's DOM children will get inserted
+				// into the DOM in mountChildren. If we are mounting a DOM node, then
+				// it's children will be mounted into itself and we need to insert this
+				// DOM in place.
+				insert(internal, parentDom, nextDomSibling);
+			}
+		} else if (
+			(internal.flags & (MODE_HYDRATE | MODE_SUSPENDED)) ===
+			(MODE_HYDRATE | MODE_SUSPENDED)
+		) {
+			mount(internal, parentDom, internal.data);
+		} else {
+			patch(
+				internal,
+				Array.isArray(vnode) ? createElement(Fragment, null, vnode) : vnode,
+				parentDom
+			);
+			if (internal.flags & INSERT_INTERNAL) {
+				insert(internal, parentDom, getDomSibling(internal));
+			}
+		}
 
-	/** @type {import('../internal').Internal} */
-	let childInternal;
+		let oldRef = internal._prevRef;
+		if (internal.ref != oldRef) {
+			if (oldRef) applyRef(oldRef, null, internal);
+			if (internal.ref)
+				applyRef(internal.ref, internal._component || internal.data, internal);
+		}
 
-	/** @type {import('../internal').ComponentChild} */
-	let childVNode;
+		internal.flags &= ~INSERT_INTERNAL;
+		internal._index = index++;
+		internal = internal._next;
+	}
+}
 
-	/** @type {import('../internal').Internal[]} */
-	const newChildren = [];
+/**
+ * @param {Internal | null} internal
+ * @param {ComponentChildren[]} children
+ * @param {Internal} parentInternal
+ */
+function findMatches(internal, children, parentInternal) {
+	parentInternal._child = null;
 
-	for (i = 0; i < children.length; i++) {
-		childVNode = normalizeToVNode(children[i]);
+	/** @type {Internal | undefined} The last matched internal */
+	let prevMatchedInternal;
 
-		// Terser removes the `continue` here and wraps the loop body
-		// in a `if (childVNode) { ... } condition
-		if (childVNode == null) {
-			newChildren[i] = null;
+	/** @type {Map<any, Internal | Internal[]> | undefined} */
+	let keyMap;
+
+	/** @type {number} Tracks the index of the last Internal we decided was "in-place" and did not need insertion */
+	let lastPlacedIndex = 0;
+
+	for (let index = 0; index < children.length; index++) {
+		let vnode = children[index];
+
+		// holes get accounted for in the index property:
+		if (vnode == null || vnode === true || vnode === false) {
+			if (internal && index == internal._index && internal.key == null) {
+				// The current internal is unkeyed, has the same index as this VNode
+				// child, and the VNode is now null. So we'll unmount the Internal and
+				// treat this slot in the children array as a null placeholder. We'll
+				// eagerly unmount this node to prevent it from being used in future
+				// searches for matching internals
+				unmount(internal, internal, 0);
+
+				internal = internal._next;
+			}
 			continue;
 		}
 
-		let skewedIndex = i + skew;
+		let type = null;
+		let typeFlag = 0;
+		let key;
+		/** @type {Internal | undefined} */
+		let matchedInternal;
 
-		/// TODO: Reconsider if we should bring back the "not moving text nodes" logic?
-		let matchingIndex = findMatchingIndex(
-			childVNode,
-			oldChildren,
-			skewedIndex,
-			remainingOldChildren
-		);
-
-		if (matchingIndex === -1) {
-			childInternal = UNDEFINED;
+		// text VNodes (strings, numbers, bigints, etc):
+		if (typeof vnode !== 'object') {
+			typeFlag = TYPE_TEXT;
+			vnode = '' + vnode;
 		} else {
-			childInternal = oldChildren[matchingIndex];
-			oldChildren[matchingIndex] = UNDEFINED;
-			remainingOldChildren--;
+			// TODO: Investigate avoiding this VNode allocation (and the one below in
+			// the call to `patch`) by passing through the raw VNode type and handling
+			// nested arrays directly in mount, patch, createInternal, etc.
+			vnode = Array.isArray(vnode)
+				? createElement(Fragment, null, vnode)
+				: vnode;
+
+			type = vnode.type;
+			typeFlag = typeof type === 'function' ? TYPE_COMPONENT : TYPE_ELEMENT;
+			key = vnode.key;
 		}
 
-		let mountingChild = childInternal == null;
-
-		if (mountingChild) {
-			childInternal = createInternal(childVNode, internal);
-
-			// We are mounting a new VNode
-			mount(
-				childInternal,
-				childVNode,
-				parentDom,
-				getDomSibling(internal, skewedIndex)
-			);
-		}
-		// If this node suspended during hydration, and no other flags are set:
-		// @TODO: might be better to explicitly check for MODE_ERRORED here.
-		else if (
-			(childInternal.flags & (MODE_HYDRATE | MODE_SUSPENDED)) ===
-			(MODE_HYDRATE | MODE_SUSPENDED)
+		if (key == null && internal && index < internal._index) {
+			// If we are doing an unkeyed diff, and the old index of the current
+			// internal in the old list of children is greater than the current VNode
+			// index, then this vnode represents a new element that is mounting into
+			// what was previous a null placeholder slot. We should create a new
+			// internal to mount this VNode.
+		} else if (
+			!keyMap &&
+			internal &&
+			internal.flags & typeFlag &&
+			internal.type === type &&
+			internal.key == key
 		) {
-			// We are resuming the hydration of a VNode
-			mount(childInternal, childVNode, parentDom, childInternal.data);
+			// Fast path checking if this current vnode matches the first unused
+			// Internal. By doing this we can avoid the search loop and setting the
+			// move flag, which allows us to skip the LDS algorithm if no Internals
+			// moved
+			matchedInternal = internal;
+			internal = internal._next;
+		} else if (internal) {
+			/* Keyed search */
+			/** @type {any} */
+			let search;
+			if (!keyMap) {
+				keyMap = buildMap(internal);
+			}
+			if (key == null) {
+				search = keyMap.get(type);
+				if (search && search.length) {
+					matchedInternal = search.shift();
+				}
+			} else {
+				search = keyMap.get(key);
+				if (search && search.type == type) {
+					keyMap.delete(key);
+					matchedInternal = search;
+				}
+			}
+		}
+
+		// No match, create a new Internal:
+		if (!matchedInternal) {
+			matchedInternal = createInternal(vnode, parentInternal);
+		} else if (matchedInternal._index < lastPlacedIndex) {
+			// If the matched internal has moved such that it is now after the last
+			// internal we determined was "in-place", mark it for insertion to move it
+			// into the correct place
+			matchedInternal.flags |= INSERT_INTERNAL;
 		} else {
-			// Morph the old element into the new one, but don't append it to the dom yet
-			patch(childInternal, childVNode, parentDom);
+			// If the matched internal's oldIndex is greater the index of the last
+			// internal we determined was "in-place", make this internal the new
+			// "in-place" internal. Doing this (only moving the index forward when
+			// matching internals old index is grater) better accommodates more
+			// scenarios such as unmounting Internals at the beginning and middle of
+			// lists
+			lastPlacedIndex = matchedInternal._index;
 		}
 
-		go: if (mountingChild) {
-			if (matchingIndex == -1) {
-				skew--;
-			}
+		// Put matched or new internal into the new list of children
+		if (prevMatchedInternal) prevMatchedInternal._next = matchedInternal;
+		else parentInternal._child = matchedInternal;
+		prevMatchedInternal = matchedInternal;
 
-			// Perform insert of new dom
-			if (childInternal.flags & TYPE_DOM) {
-				parentDom.insertBefore(
-					childInternal.data,
-					getDomSibling(internal, skewedIndex)
-				);
-			}
-		} else if (matchingIndex !== skewedIndex) {
-			// Move this DOM into its correct place
-			if (matchingIndex === skewedIndex + 1) {
-				skew++;
-				break go;
-			} else if (matchingIndex > skewedIndex) {
-				if (remainingOldChildren > children.length - skewedIndex) {
-					skew += matchingIndex - skewedIndex;
-					break go;
-				} else {
-					// ### Change from keyed: I think this was missing from the algo...
-					skew--;
-				}
-			} else if (matchingIndex < skewedIndex) {
-				if (matchingIndex == skewedIndex - 1) {
-					skew = matchingIndex - skewedIndex;
-				} else {
-					skew = 0;
-				}
-			} else {
-				skew = 0;
-			}
-
-			skewedIndex = i + skew;
-
-			if (matchingIndex == i) break go;
-
-			let nextSibling = getDomSibling(internal, skewedIndex + 1);
-			if (childInternal.flags & TYPE_DOM) {
-				parentDom.insertBefore(childInternal.data, nextSibling);
-			} else {
-				insertComponentDom(childInternal, nextSibling, parentDom);
-			}
-		}
-
-		newChildren[i] = childInternal;
+		// TODO: Consider detecting if an internal is of TYPE_ROOT, whether or not
+		// it is a PORTAL, and setting a flag as such to use in getDomSibling and
+		// getFirstDom
 	}
 
-	internal._children = newChildren;
+	// Ensure the last node of the last matched internal has a null _next pointer.
+	// Its possible that it still points to it's old sibling at the end of this loop,
+	// so we'll manually clear it here.
+	if (prevMatchedInternal) prevMatchedInternal._next = null;
 
-	// Remove remaining oldChildren if there are any.
-	if (remainingOldChildren > 0) {
-		for (i = oldChildrenLength; i--; ) {
-			if (oldChildren[i] != null) {
-				unmount(oldChildren[i], oldChildren[i]);
-			}
+	// Walk over the unused children and unmount:
+	if (keyMap) {
+		unmountUnusedKeyedChildren(keyMap);
+	} else if (internal) {
+		unmountUnusedChildren(internal);
+	}
+}
+
+/**
+ * @param {Internal | null} internal
+ * @returns {Map<any, Internal | Internal[]>}
+ */
+function buildMap(internal) {
+	let keyMap = new Map();
+	while (internal) {
+		if (internal.key) {
+			keyMap.set(internal.key, internal);
+		} else if (!keyMap.has(internal.type)) {
+			keyMap.set(internal.type, [internal]);
+		} else {
+			keyMap.get(internal.type).push(internal);
 		}
+		internal = internal._next;
 	}
 
-	// Set refs only after unmount
-	for (i = 0; i < newChildren.length; i++) {
-		childInternal = newChildren[i];
-		if (childInternal) {
-			let oldRef = childInternal._prevRef;
-			if (childInternal.ref != oldRef) {
-				if (oldRef) applyRef(oldRef, null, childInternal);
-				if (childInternal.ref)
-					applyRef(
-						childInternal.ref,
-						childInternal._component || childInternal.data,
-						childInternal
-					);
+	return keyMap;
+}
+
+/**
+ * @param {Map<any, Internal | Internal[]>} keyMap
+ */
+function unmountUnusedKeyedChildren(keyMap) {
+	for (let internal of keyMap.values()) {
+		if (Array.isArray(internal)) {
+			for (let i of internal) {
+				unmount(i, i, 0);
 			}
+		} else {
+			unmount(internal, internal, 0);
 		}
 	}
 }
 
 /**
- * @param {import('../internal').VNode | string} childVNode
- * @param {import('../internal').Internal[]} oldChildren
- * @param {number} skewedIndex
- * @param {number} remainingOldChildren
- * @returns {number}
+ * @param {Internal | null} internal
  */
-function findMatchingIndex(
-	childVNode,
-	oldChildren,
-	skewedIndex,
-	remainingOldChildren
-) {
-	const type = typeof childVNode == 'string' ? null : childVNode.type;
-	const key = type !== null ? childVNode.key : UNDEFINED;
-	let match = -1;
-	let x = skewedIndex - 1; // i - 1;
-	let y = skewedIndex + 1; // i + 1;
-	let oldChild = oldChildren[skewedIndex]; // i
-
-	if (
-		// ### Change from keyed: support for matching null placeholders
-		oldChild === null ||
-		(oldChild != null && oldChild.type === type && oldChild.key == key)
-	) {
-		match = skewedIndex; // i
+function unmountUnusedChildren(internal) {
+	while (internal) {
+		unmount(internal, internal, 0);
+		internal = internal._next;
 	}
-	// If there are any unused children left (ignoring an available in-place child which we just checked)
-	else if (remainingOldChildren > (oldChild != null ? 1 : 0)) {
-		// eslint-disable-next-line no-constant-condition
-		while (true) {
-			if (x >= 0) {
-				oldChild = oldChildren[x];
-				if (oldChild != null && oldChild.type === type && oldChild.key == key) {
-					match = x;
-					break;
-				}
-				x--;
-			}
-			if (y < oldChildren.length) {
-				oldChild = oldChildren[y];
-				if (oldChild != null && oldChild.type === type && oldChild.key == key) {
-					match = y;
-					break;
-				}
-				y++;
-			} else if (x < 0) {
-				break;
-			}
-		}
-	}
-
-	return match;
 }
 
 /**
  * @param {import('../internal').Internal} internal
- * @param {import('../internal').PreactNode} nextSibling
  * @param {import('../internal').PreactNode} parentDom
+ * @param {import('../internal').PreactNode} nextSibling
  */
-export function insertComponentDom(internal, nextSibling, parentDom) {
-	if (internal._children == null) {
-		return;
-	}
-
-	for (let i = 0; i < internal._children.length; i++) {
-		let childInternal = internal._children[i];
-		if (childInternal) {
-			childInternal._parent = internal;
-
-			if (childInternal.flags & TYPE_COMPONENT) {
-				insertComponentDom(childInternal, nextSibling, parentDom);
-			} else if (childInternal.data != nextSibling) {
-				parentDom.insertBefore(childInternal.data, nextSibling);
-			}
+export function insert(internal, parentDom, nextSibling) {
+	if (internal.flags & TYPE_COMPONENT) {
+		let child = internal._child;
+		while (child) {
+			insert(child, parentDom, nextSibling);
+			child = child._next;
 		}
+	} else if (internal.data != nextSibling) {
+		// @ts-ignore .data is a Node
+		parentDom.insertBefore(internal.data, nextSibling);
 	}
 }
 

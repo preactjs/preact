@@ -9,7 +9,8 @@ import {
 	TYPE_COMPONENT,
 	TYPE_DOM,
 	MODE_SVG,
-	UNDEFINED
+	UNDEFINED,
+	INSERT_INTERNAL
 } from './constants';
 import { enqueueRender } from './component';
 
@@ -81,90 +82,133 @@ export function createInternal(vnode, parentInternal) {
 	}
 
 	/** @type {import('./internal').Internal} */
-	const internal = {
+	// const internal = {
+	// 	type,
+	// 	props,
+	// 	key,
+	// 	ref,
+	// 	_prevRef: null,
+	// 	data:
+	// 		flags & TYPE_COMPONENT
+	// 			? { _commitCallbacks: [], _stateCallbacks: [] }
+	// 			: null,
+	// 	rerender: enqueueRender,
+	// 	flags,
+	// 	_parent: parentInternal,
+	// 	_child: null,
+	// 	_next: null,
+	// 	_index: -1,
+	// 	_vnodeId: vnodeId,
+	// 	_component: null,
+	// 	_context: null,
+	// 	_depth: parentInternal ? parentInternal._depth + 1 : 0
+	// };
+	const internal = new Internal(
 		type,
 		props,
 		key,
 		ref,
-		_prevRef: null,
-		data:
-			flags & TYPE_COMPONENT
-				? { _commitCallbacks: [], _stateCallbacks: [] }
-				: null,
-		rerender: enqueueRender,
 		flags,
-		_children: null,
-		_parent: parentInternal,
-		_vnodeId: vnodeId,
-		_component: null,
-		_context: null,
-		_depth: parentInternal ? parentInternal._depth + 1 : 0
-	};
+		parentInternal,
+		vnodeId
+	);
 
 	if (options._internal) options._internal(internal, vnode);
 
 	return internal;
 }
 
+class Internal {
+	constructor(type, props, key, ref, flags, parentInternal, vnodeId) {
+		this.type = type;
+		this.props = props;
+		this.key = key;
+		this.ref = ref;
+		this._prevRef = null;
+		this.data =
+			flags & TYPE_COMPONENT
+				? { _commitCallbacks: [], _stateCallbacks: [] }
+				: null;
+		this.rerender = enqueueRender;
+		this.flags = flags;
+		this._parent = parentInternal;
+		this._child = null;
+		this._next = null;
+		this._index = -1;
+		this._vnodeId = vnodeId;
+		this._component = null;
+		this._context = null;
+		this._depth = parentInternal ? parentInternal._depth + 1 : 0;
+	}
+}
+
+/** @type {(internal: import('./internal').Internal) => boolean} */
 const shouldSearchComponent = internal =>
 	internal.flags & TYPE_COMPONENT &&
 	(!(internal.flags & TYPE_ROOT) ||
-		internal.props._parentDom == getParentDom(internal._parent));
+		(internal._parent &&
+			internal.props._parentDom == getParentDom(internal._parent)));
 
 /**
+ * Get the next DOM Internal after a given index within a parent Internal.
+ * If `childIndex` is `null`, finds the next DOM Internal sibling of the given Internal.
  * @param {import('./internal').Internal} internal
- * @param {number | null} [childIndex]
+ * @param {never} [childIndex] todo - replace parent+index with child internal reference
  * @returns {import('./internal').PreactNode}
  */
 export function getDomSibling(internal, childIndex) {
-	if (childIndex == null) {
-		// Use childIndex==null as a signal to resume the search from the vnode's sibling
-		return getDomSibling(
-			internal._parent,
-			internal._parent._children.indexOf(internal) + 1
-		);
+	if (internal._next) {
+		let childDom = getFirstDom(internal._next);
+		if (childDom) {
+			return childDom;
+		}
 	}
 
-	let childDom = getChildDom(internal, childIndex);
-	if (childDom) {
-		return childDom;
-	}
-
-	// If we get here, we have not found a DOM node in this vnode's children. We
-	// must resume from this vnode's sibling (in it's parent _children array).
-	// Only climb up and search the parent if we aren't searching through a DOM
-	// VNode (meaning we reached the DOM parent of the original vnode that began
-	// the search). Note, the top of the tree has _parent == null so avoiding that
-	// here.
-	return internal._parent && shouldSearchComponent(internal)
-		? getDomSibling(internal)
+	// If we get here, we have not found a DOM node in this internal's siblings so
+	// we need to search up through the parent's sibling's sub tree for a DOM
+	// Node, assuming the parent's siblings should be searched. If the parent is
+	// DOM node or a root node with a different parentDOM, we shouldn't search
+	// through it since any siblings we'd find wouldn't be siblings of the current
+	// internal's DOM
+	return internal._parent && shouldSearchComponent(internal._parent)
+		? getDomSibling(internal._parent)
 		: null;
 }
 
 /**
- * @param {import('./internal').Internal} internal
- * @param {number} offset
+ * Search the given internal and it's next siblings for a DOM element. If the
+ * provided Internal _is_ a DOM Internal, its DOM will be returned. If you want
+ * to find the first DOM node of an Internal's subtree, than pass in
+ * `internal._child`
+ * @param {import('./internal').Internal} internal The internal to begin the
+ * search
  * @returns {import('./internal').PreactElement}
  */
-export function getChildDom(internal, offset) {
-	if (internal._children == null) {
-		return null;
-	}
-
-	for (; offset < internal._children.length; offset++) {
-		let child = internal._children[offset];
-		if (child != null) {
-			if (child.flags & TYPE_DOM) {
-				return child.data;
-			}
-
-			if (shouldSearchComponent(child)) {
-				let childDom = getChildDom(child, 0);
-				if (childDom) {
-					return childDom;
-				}
-			}
+export function getFirstDom(internal) {
+	while (internal) {
+		if (internal.flags & INSERT_INTERNAL || internal._index == -1) {
+			internal = internal._next;
+			continue;
 		}
+
+		// this is a DOM internal
+		if (internal.flags & TYPE_DOM) {
+			// @ts-ignore this is an Element Internal, .data is a PreactElement.
+			return internal.data;
+		}
+
+		// This is a Component internal (but might be a root/portal).
+		// Find its first DOM child, unless it's a portal:
+		// @todo - this is an inlined version of shouldSearchComponent without the type=component guard.
+		if (
+			!(internal.flags & TYPE_ROOT) ||
+			internal.props._parentDom == getParentDom(internal._parent)
+		) {
+			const childDom = getFirstDom(internal._child);
+			if (childDom) return childDom;
+		}
+
+		internal = internal._next;
 	}
 
 	return null;
@@ -184,23 +228,23 @@ export function getParentContext(internal) {
 }
 
 /**
+ * Get the parent DOM for an Internal. If the Internal is a Root, returns its DOM root.
  * @param {import('./internal').Internal} internal
  * @returns {import('./internal').PreactElement}
  */
 export function getParentDom(internal) {
-	let parent = internal;
-
 	// if this is a Root internal, return its parent DOM:
-	if (parent.flags & TYPE_ROOT) {
-		return parent.props._parentDom;
+	if (internal.flags & TYPE_ROOT) {
+		return internal.props._parentDom;
 	}
 
 	// walk up the tree to find the nearest DOM or Root Internal:
-	while ((parent = parent._parent)) {
-		if (parent.flags & TYPE_ROOT) {
-			return parent.props._parentDom;
-		} else if (parent.flags & TYPE_ELEMENT) {
-			return parent.data;
+	while ((internal = internal._parent)) {
+		if (internal.flags & TYPE_ELEMENT) {
+			return internal.data;
+		}
+		if (internal.flags & TYPE_ROOT) {
+			return internal.props._parentDom;
 		}
 	}
 }

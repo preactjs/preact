@@ -2,10 +2,18 @@ import { options } from 'preact';
 
 let oldDiffHook = options._diff;
 options._diff = (internal, vnode) => {
-	if (internal.type && internal.type._forwarded && vnode.ref) {
-		vnode.props.ref = vnode.ref;
-		vnode.ref = null;
-		internal.ref = null;
+	if (
+		internal.type &&
+		internal.type._forwarded &&
+		(internal.ref || (vnode && vnode.ref))
+	) {
+		if (vnode) {
+			vnode.props.ref = vnode.ref;
+			vnode.ref = null;
+		} else {
+			internal.props.ref = internal.ref;
+			internal.ref = null;
+		}
 	}
 	if (oldDiffHook) oldDiffHook(internal, vnode);
 };

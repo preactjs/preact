@@ -1,18 +1,21 @@
-import { options, Fragment } from 'preact';
+import { options as rawOptions, Fragment } from 'preact';
+
+const options = /** @type {import('../../src/internal').Options} */ (rawOptions);
 
 /**
  * Get human readable name of the component/dom node
- * @param {import('./internal').VNode} vnode
- * @param {import('./internal').VNode} vnode
+ * @param {import('../../src/internal').ComponentChild} vnode
  * @returns {string}
  */
 export function getDisplayName(vnode) {
-	if (vnode.type === Fragment) {
-		return 'Fragment';
-	} else if (typeof vnode.type == 'function') {
-		return vnode.type.displayName || vnode.type.name;
-	} else if (typeof vnode.type == 'string') {
-		return vnode.type;
+	if (vnode != null && typeof vnode === 'object') {
+		if (vnode.type === Fragment) {
+			return 'Fragment';
+		} else if (typeof vnode.type == 'function') {
+			return vnode.type.displayName || vnode.type.name;
+		} else if (typeof vnode.type == 'string') {
+			return vnode.type;
+		}
 	}
 
 	return '#text';

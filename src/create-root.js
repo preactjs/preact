@@ -35,7 +35,7 @@ export function createRoot(parentDom) {
 			rootInternal = createInternal(vnode);
 
 			// Store the VDOM tree root on the DOM element in a (minified) property:
-			parentDom._children = rootInternal;
+			parentDom._child = rootInternal;
 
 			// Calling createRoot().render() on an Element with existing children triggers mutative hydrate mode:
 			if (firstChild) {
@@ -49,7 +49,7 @@ export function createRoot(parentDom) {
 
 			rootInternal._context = {};
 
-			mount(rootInternal, vnode, parentDom, firstChild);
+			mount(rootInternal, parentDom, firstChild);
 		}
 
 		// Flush all queued effects

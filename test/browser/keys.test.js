@@ -92,6 +92,32 @@ describe('keys', () => {
 		expect(Foo.args[0][0]).to.deep.equal({});
 	});
 
+	it('should update in-place keyed DOM nodes', () => {
+		render(
+			<ul>
+				<li key="0">a</li>
+				<li key="1">b</li>
+				<li key="2">c</li>
+			</ul>,
+			scratch
+		);
+		expect(scratch.innerHTML).to.equal(
+			'<ul><li>a</li><li>b</li><li>c</li></ul>'
+		);
+
+		render(
+			<ul>
+				<li key="0">x</li>
+				<li key="1">y</li>
+				<li key="2">z</li>
+			</ul>,
+			scratch
+		);
+		expect(scratch.innerHTML).to.equal(
+			'<ul><li>x</li><li>y</li><li>z</li></ul>'
+		);
+	});
+
 	// See preactjs/preact-compat#21
 	it('should remove orphaned keyed nodes', () => {
 		render(
@@ -254,9 +280,53 @@ describe('keys', () => {
 		render(<List values={values} />, scratch);
 		expect(scratch.textContent).to.equal('abcd');
 		expect(getLog()).to.deep.equal([
-			'<li>z.remove()',
+			'<li>x.remove()',
 			'<li>y.remove()',
-			'<li>x.remove()'
+			'<li>z.remove()'
+		]);
+	});
+
+	it('should move keyed children to the beginning', () => {
+		const values = ['b', 'c', 'd', 'a'];
+
+		render(<List values={values} />, scratch);
+		expect(scratch.textContent).to.equal('bcda');
+
+		move(values, values.length - 1, 0);
+		clearLog();
+
+		render(<List values={values} />, scratch);
+		expect(scratch.textContent).to.equal('abcd');
+		// A perfect algorithm would do this in one move. Our algorithm is a compromise of size vs common case perf
+		// expect(getLog()).to.deep.equal(['<ol>bcda.insertBefore(<li>a, <li>b)']);
+		expect(getLog()).to.deep.equal([
+			'<ol>bcda.insertBefore(<li>b, Null)',
+			'<ol>cdab.insertBefore(<li>c, Null)',
+			'<ol>dabc.insertBefore(<li>d, Null)'
+		]);
+	});
+
+	it('should move multiple keyed children to the beginning', () => {
+		const values = ['c', 'd', 'e', 'a', 'b'];
+
+		render(<List values={values} />, scratch);
+		expect(scratch.textContent).to.equal('cdeab');
+
+		move(values, values.length - 1, 0);
+		move(values, values.length - 1, 0);
+		clearLog();
+
+		render(<List values={values} />, scratch);
+		expect(scratch.textContent).to.equal('abcde');
+		// A perfect algorithm would do this in two moves. Our algorithm is a compromise of size vs common case perf
+		// expect(getLog()).to.deep.equal([
+		// 	'<ol>cdeab.insertBefore(<li>a, <li>c)',
+		// 	'<ol>acdeb.insertBefore(<li>b, <li>c)'
+		// ]);
+		expect(getLog()).to.deep.equal([
+			'<ol>cdeab.insertBefore(<li>c, Null)',
+			'<ol>deabc.insertBefore(<li>d, Null)',
+			'<ol>eabcd.insertBefore(<li>e, Null)'
 		]);
 	});
 
@@ -325,9 +395,50 @@ describe('keys', () => {
 		render(<List values={values} />, scratch);
 		expect(scratch.textContent).to.equal('abcd', 'move to beginning');
 		expect(getLog()).to.deep.equal(
-			['<ol>bcda.insertBefore(<li>a, <li>b)'],
+			// A perfect algorithm would do this in one move. Our algorithm is a compromise of size vs common case perf
+			// ['<ol>bcda.insertBefore(<li>a, <li>b)'],
+			[
+				'<ol>bcda.insertBefore(<li>b, Null)',
+				'<ol>cdab.insertBefore(<li>c, Null)',
+				'<ol>dabc.insertBefore(<li>d, Null)'
+			],
 			'move to beginning'
 		);
+	});
+
+	it('should move keyed children to the beginning on longer list', () => {
+		// Preact v10 worst case
+		const values = ['a', 'b', 'c', 'd', 'e', 'f'];
+
+		render(<List values={values} />, scratch);
+		expect(scratch.textContent).to.equal('abcdef');
+
+		move(values, 4, 1);
+		clearLog();
+
+		render(<List values={values} />, scratch);
+		expect(scratch.textContent).to.equal('aebcdf');
+		// A perfect algorithm would do this in one move. Our algorithm is a compromise of size vs common case perf
+		// expect(getLog()).to.deep.equal(['<ol>abcdef.insertBefore(<li>e, <li>b)']);
+		expect(getLog()).to.deep.equal([
+			'<ol>abcdef.insertBefore(<li>b, <li>f)',
+			'<ol>acdebf.insertBefore(<li>c, <li>f)',
+			'<ol>adebcf.insertBefore(<li>d, <li>f)'
+		]);
+	});
+
+	it('should move keyed children to the end on longer list', () => {
+		const values = ['a', 'b', 'c', 'd', 'e', 'f'];
+
+		render(<List values={values} />, scratch);
+		expect(scratch.textContent).to.equal('abcdef');
+
+		move(values, 1, values.length - 2);
+		clearLog();
+
+		render(<List values={values} />, scratch);
+		expect(scratch.textContent).to.equal('acdebf');
+		expect(getLog()).to.deep.equal(['<ol>abcdef.insertBefore(<li>b, <li>f)']);
 	});
 
 	it('should reverse keyed children effectively', () => {
@@ -342,16 +453,17 @@ describe('keys', () => {
 
 		render(<List values={values} />, scratch);
 		expect(scratch.textContent).to.equal(values.join(''));
+		// expect(getLog()).to.have.lengthOf(9);
 		expect(getLog()).to.deep.equal([
-			'<ol>abcdefghij.insertBefore(<li>j, <li>a)',
-			'<ol>jabcdefghi.insertBefore(<li>i, <li>a)',
-			'<ol>jiabcdefgh.insertBefore(<li>h, <li>a)',
-			'<ol>jihabcdefg.insertBefore(<li>g, <li>a)',
-			'<ol>jihgabcdef.insertBefore(<li>f, <li>a)',
-			'<ol>jihgfabcde.insertBefore(<li>e, <li>a)',
-			'<ol>jihgfeabcd.insertBefore(<li>d, <li>a)',
-			'<ol>jihgfedabc.insertBefore(<li>c, <li>a)',
-			'<ol>jihgfedcab.insertBefore(<li>a, Null)'
+			'<ol>abcdefghij.insertBefore(<li>i, Null)',
+			'<ol>abcdefghji.insertBefore(<li>h, Null)',
+			'<ol>abcdefgjih.insertBefore(<li>g, Null)',
+			'<ol>abcdefjihg.insertBefore(<li>f, Null)',
+			'<ol>abcdejihgf.insertBefore(<li>e, Null)',
+			'<ol>abcdjihgfe.insertBefore(<li>d, Null)',
+			'<ol>abcjihgfed.insertBefore(<li>c, Null)',
+			'<ol>abjihgfedc.insertBefore(<li>b, Null)',
+			'<ol>ajihgfedcb.insertBefore(<li>a, Null)'
 		]);
 	});
 
@@ -464,8 +576,8 @@ describe('keys', () => {
 
 		expect(scratch.innerHTML).to.equal(expectedHtml);
 		expect(ops).to.deep.equal([
-			'Unmount Stateful2',
 			'Unmount Stateful1',
+			'Unmount Stateful2',
 			'Mount Stateful1',
 			'Mount Stateful2'
 		]);
@@ -477,8 +589,8 @@ describe('keys', () => {
 
 		expect(scratch.innerHTML).to.equal(expectedHtml);
 		expect(ops).to.deep.equal([
-			'Unmount Stateful2',
 			'Unmount Stateful1',
+			'Unmount Stateful2',
 			'Mount Stateful1',
 			'Mount Stateful2'
 		]);
@@ -609,8 +721,8 @@ describe('keys', () => {
 
 		expect(scratch.innerHTML).to.equal(expectedHtml);
 		expect(ops).to.deep.equal([
-			'Unmount Stateful2',
 			'Unmount Stateful1',
+			'Unmount Stateful2',
 			'Mount Stateful1',
 			'Mount Stateful2'
 		]);
@@ -622,8 +734,8 @@ describe('keys', () => {
 
 		expect(scratch.innerHTML).to.equal(expectedHtml);
 		expect(ops).to.deep.equal([
-			'Unmount Stateful2',
 			'Unmount Stateful1',
+			'Unmount Stateful2',
 			'Mount Stateful1',
 			'Mount Stateful2'
 		]);

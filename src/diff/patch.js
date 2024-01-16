@@ -1,4 +1,4 @@
-import { patchChildren, insertComponentDom } from './children';
+import { patchChildren, insert } from './children';
 import { setProperty } from './props';
 import options from '../options';
 import {
@@ -27,7 +27,7 @@ import { commitQueue } from './commit';
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
  * @param {import('../internal').Internal} internal The Internal node to patch
- * @param {import('../internal').VNode | string} vnode The new virtual node
+ * @param {import('../internal').ComponentChild} vnode The new virtual node
  * @param {import('../internal').PreactElement} parentDom The element into which this subtree is rendered
  */
 export function patch(internal, vnode, parentDom) {
@@ -56,10 +56,10 @@ export function patch(internal, vnode, parentDom) {
 	if (flags & TYPE_ROOT) {
 		parentDom = vnode.props._parentDom;
 
-		if (internal.props._parentDom !== vnode.props._parentDom) {
+		if (internal.props._parentDom !== parentDom) {
 			let nextSibling =
 				parentDom == prevParentDom ? getDomSibling(internal) : null;
-			insertComponentDom(internal, nextSibling, parentDom);
+			insert(internal, parentDom, nextSibling);
 		}
 	}
 
@@ -90,7 +90,7 @@ export function patch(internal, vnode, parentDom) {
 				if (vnode._vnodeId !== internal._vnodeId) {
 					internal.flags &= ~DIRTY_BIT;
 				}
-			} else if (internal._children == null) {
+			} else if (internal._child == null) {
 				let siblingDom =
 					(internal.flags & (MODE_HYDRATE | MODE_SUSPENDED)) ===
 					(MODE_HYDRATE | MODE_SUSPENDED)
@@ -180,7 +180,8 @@ function patchElement(internal, vnode) {
 		if (!oldHtml || (value !== oldHtml.__html && value !== dom.innerHTML)) {
 			dom.innerHTML = value;
 		}
-		internal._children = null;
+		// @TODO - unmount??
+		internal._child = null;
 	} else {
 		if (oldHtml) dom.innerHTML = '';
 		patchChildren(

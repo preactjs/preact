@@ -4,6 +4,7 @@ import { createElement, Fragment } from './create-element';
 import { patch } from './diff/patch';
 import { DIRTY_BIT, FORCE_UPDATE, MODE_UNMOUNTING } from './constants';
 import { getParentDom } from './tree';
+import { inEvent } from './diff/props';
 
 export let ENABLE_CLASSES = false;
 
@@ -122,6 +123,19 @@ let renderQueue = [];
 
 let prevDebounce;
 
+const microTick =
+	typeof Promise == 'function'
+		? Promise.prototype.then.bind(Promise.resolve())
+		: setTimeout;
+
+function defer(cb) {
+	if (inEvent) {
+		setTimeout(cb);
+	} else {
+		microTick(cb);
+	}
+}
+
 /**
  * Enqueue a rerender of an internal
  * @param {import('./internal').Internal} internal The internal to rerender
@@ -135,7 +149,7 @@ export function enqueueRender(internal) {
 		prevDebounce !== options.debounceRendering
 	) {
 		prevDebounce = options.debounceRendering;
-		(prevDebounce || queueMicrotask)(processRenderQueue);
+		(prevDebounce || defer)(processRenderQueue);
 	}
 }
 

@@ -13,7 +13,7 @@ import {
 	MODE_SVG,
 	DIRTY_BIT
 } from '../constants';
-import { normalizeToVNode, Fragment } from '../create-element';
+import { normalizeToVNode, createElement, Fragment } from '../create-element';
 import { setProperty } from './props';
 import { createInternal, getParentContext } from '../tree';
 import options from '../options';
@@ -22,13 +22,12 @@ import { commitQueue } from './commit';
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
  * @param {import('../internal').Internal} internal The Internal node to mount
- * @param {import('../internal').VNode | string} newVNode The new virtual node
  * @param {import('../internal').PreactElement} parentDom The element into which this subtree is rendered
  * @param {import('../internal').PreactNode} startDom
  * @returns {import('../internal').PreactNode | null} pointer to the next DOM node to be hydrated (or null)
  */
-export function mount(internal, newVNode, parentDom, startDom) {
-	if (options._diff) options._diff(internal, newVNode);
+export function mount(internal, parentDom, startDom) {
+	if (options._diff) options._diff(internal, null);
 
 	/** @type {import('../internal').PreactNode} */
 	let nextDomSibling, prevStartDom;
@@ -40,15 +39,16 @@ export function mount(internal, newVNode, parentDom, startDom) {
 			// top.
 			if (
 				internal.flags & TYPE_ROOT &&
-				newVNode.props._parentDom !== parentDom
+				internal.props._parentDom !== parentDom
 			) {
-				parentDom = newVNode.props._parentDom;
+				parentDom = internal.props._parentDom;
 				prevStartDom = startDom;
 				startDom = null;
 			}
 
 			const renderResult = mountComponent(internal, startDom);
-			if (renderResult === startDom) {
+			// if (renderResult === startDom) {
+			if (renderResult === null) {
 				nextDomSibling = startDom;
 			} else {
 				nextDomSibling = mountChildren(
@@ -218,38 +218,41 @@ function mountElement(internal, dom) {
 
 /**
  * Mount all children of an Internal
- * @param {import('../internal').Internal} internal The parent Internal of the given children
+ * @param {import('../internal').Internal} parentInternal The parent Internal of the given children
  * @param {import('../internal').ComponentChild[]} children
  * @param {import('../internal').PreactElement} parentDom The element into which this subtree is rendered
  * @param {import('../internal').PreactNode} startDom
  */
-export function mountChildren(internal, children, parentDom, startDom) {
-	let internalChildren = (internal._children = []),
-		i,
-		childVNode,
-		childInternal,
+export function mountChildren(parentInternal, children, parentDom, startDom) {
+	let i,
+		/** @type {import('../internal').Internal} */
+		prevInternal,
+		/** @type {import('../internal').Internal} */
+		internal,
+		vnode,
 		newDom,
 		mountedNextChild;
 
 	for (i = 0; i < children.length; i++) {
-		childVNode = normalizeToVNode(children[i]);
+		vnode = children[i];
 
-		// Terser removes the `continue` here and wraps the loop body
-		// in a `if (childVNode) { ... } condition
-		if (childVNode == null) {
-			internalChildren[i] = null;
-			continue;
-		}
+		// account for holes by incrementing the index:
+		if (vnode == null || vnode === true || vnode === false) continue;
+		else if (Array.isArray(vnode)) vnode = createElement(Fragment, null, vnode);
+		else if (typeof vnode !== 'object') vnode = String(vnode);
 
-		childInternal = createInternal(childVNode, internal);
-		internalChildren[i] = childInternal;
+		internal = createInternal(vnode, parentInternal);
+		internal._index = i;
+
+		if (prevInternal) prevInternal._next = internal;
+		else parentInternal._child = internal;
 
 		// Morph the old element into the new one, but don't append it to the dom yet
-		mountedNextChild = mount(childInternal, childVNode, parentDom, startDom);
+		mountedNextChild = mount(internal, parentDom, startDom);
 
-		newDom = childInternal.data;
+		newDom = internal.data;
 
-		if (childInternal.flags & TYPE_COMPONENT || newDom == startDom) {
+		if (internal.flags & TYPE_COMPONENT || newDom == startDom) {
 			// If the child is a Fragment-like or if it is DOM VNode and its _dom
 			// property matches the dom we are diffing (i.e. startDom), just
 			// continue with the mountedNextChild
@@ -261,19 +264,17 @@ export function mountChildren(internal, children, parentDom, startDom) {
 			parentDom.insertBefore(newDom, startDom);
 		}
 
-		if (childInternal.ref) {
-			applyRef(
-				childInternal.ref,
-				childInternal._component || newDom,
-				childInternal
-			);
+		if (internal.ref) {
+			applyRef(internal.ref, internal._component || newDom, internal);
 		}
+
+		prevInternal = internal;
 	}
 
 	// Remove children that are not part of any vnode.
 	if (
-		internal.flags & (MODE_HYDRATE | MODE_MUTATIVE_HYDRATE) &&
-		internal.flags & TYPE_ELEMENT
+		parentInternal.flags & (MODE_HYDRATE | MODE_MUTATIVE_HYDRATE) &&
+		parentInternal.flags & TYPE_ELEMENT
 	) {
 		// TODO: Would it be simpler to just clear the pre-existing DOM in top-level
 		// render if render is called with no oldVNode & existing children & no
@@ -292,7 +293,7 @@ export function mountChildren(internal, children, parentDom, startDom) {
 /**
  * @param {import('../internal').Internal} internal The component's backing Internal node
  * @param {import('../internal').PreactNode} startDom the preceding node
- * @returns {import('../internal').PreactNode} the component's children
+ * @returns {import('../internal').ComponentChild[]} the component's children
  */
 function mountComponent(internal, startDom) {
 	/** @type {import('../internal').Component} */
@@ -393,7 +394,8 @@ function mountComponent(internal, startDom) {
 	}
 
 	if (renderResult == null) {
-		return startDom;
+		// return startDom;
+		return null;
 	}
 
 	if (typeof renderResult == 'object') {

@@ -7,19 +7,19 @@ import { ENABLE_CLASSES } from '../component';
 /**
  * Unmount a virtual node from the tree and apply DOM changes
  * @param {import('../internal').Internal} internal The virtual node to unmount
- * @param {import('../internal').Internal} parentInternal The parent of the VNode that
- * initiated the unmount
+ * @param {import('../internal').Internal} topUnmountedInternal The top of the
+ * subtree that is being unmounted
  * @param {number} [skipRemove] Flag that indicates that a parent node of the
  * current element is already detached from the DOM.
  */
-export function unmount(internal, parentInternal, skipRemove) {
+export function unmount(internal, topUnmountedInternal, skipRemove) {
 	let r,
 		i = 0;
 	if (options.unmount) options.unmount(internal);
 	internal.flags |= MODE_UNMOUNTING;
 
 	if ((r = internal.ref)) {
-		applyRef(r, null, parentInternal);
+		applyRef(r, null, topUnmountedInternal);
 	}
 
 	if ((r = internal._component)) {
@@ -29,20 +29,19 @@ export function unmount(internal, parentInternal, skipRemove) {
 			try {
 				r.componentWillUnmount();
 			} catch (e) {
-				options._catchError(e, parentInternal);
+				options._catchError(e, topUnmountedInternal);
 			}
 		}
 	}
 
-	if ((r = internal._children)) {
-		for (; i < r.length; i++) {
-			if (r[i]) {
-				unmount(
-					r[i],
-					parentInternal,
-					skipRemove ? ~internal.flags & TYPE_ROOT : internal.flags & TYPE_DOM
-				);
-			}
+	if ((r = internal._child)) {
+		while (r) {
+			unmount(
+				r,
+				topUnmountedInternal,
+				skipRemove ? ~internal.flags & TYPE_ROOT : internal.flags & TYPE_DOM
+			);
+			r = r._next;
 		}
 	}
 

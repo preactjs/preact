@@ -11,8 +11,8 @@ export function render(vnode, parentDom) {
 	if (!root) {
 		root = createRoot(parentDom);
 	}
-	root.render(vnode);
 	parentDom._root = root;
+	root.render(vnode);
 }
 
 /**
@@ -26,6 +26,6 @@ export function hydrate(vnode, parentDom) {
 	if (!root) {
 		root = createRoot(parentDom);
 	}
-	root.hydrate(vnode);
 	parentDom._root = root;
+	root.hydrate(vnode);
 }

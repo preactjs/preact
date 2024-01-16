@@ -1,5 +1,5 @@
 import { checkPropTypes } from './check-props';
-import { options, Component } from 'preact';
+import { options as rawOptions, Component } from 'preact';
 import {
 	ELEMENT_NODE,
 	DOCUMENT_NODE,
@@ -12,16 +12,9 @@ import {
 	getDisplayName
 } from './component-stack';
 import { IS_NON_DIMENSIONAL } from '../../compat/src/util';
+import { validateTableMarkup } from './validateMarkup';
 
-const isWeakMapSupported = typeof WeakMap == 'function';
-
-function getClosestDomNodeParent(parent) {
-	if (!parent) return {};
-	if (typeof parent.type == 'function') {
-		return getClosestDomNodeParent(parent._parent);
-	}
-	return parent;
-}
+const options = /** @type {import('../../src/internal').Options} */ (rawOptions);
 
 export function initDebug() {
 	setupComponentStack();
@@ -35,24 +28,32 @@ export function initDebug() {
 	let oldCatchError = options._catchError;
 	let oldRoot = options._root;
 	let oldHook = options._hook;
-	const warnedComponents = !isWeakMapSupported
-		? null
-		: {
-				useEffect: new WeakMap(),
-				useLayoutEffect: new WeakMap(),
-				lazyPropTypes: new WeakMap()
-		  };
+	const warnedComponents = {
+		useEffect: new WeakMap(),
+		useLayoutEffect: new WeakMap(),
+		lazyPropTypes: new WeakMap()
+	};
 	const deprecations = [];
 
-	options._catchError = (error, vnode, oldVNode) => {
-		let component = vnode && vnode._component;
+	options._catchError = catchErrorHook;
+	options._root = rootHook;
+	options._diff = diffHook;
+	options._hook = hookHook;
+	options.vnode = vnodeHook;
+	options.diffed = diffedHook;
+
+	/** @type {typeof options["_catchError"]} */
+	function catchErrorHook(error, internal) {
+		let component = internal && internal._component;
 		if (component && typeof error.then == 'function') {
 			const promise = error;
 			error = new Error(
-				`Missing Suspense. The throwing component was: ${getDisplayName(vnode)}`
+				`Missing Suspense. The throwing component was: ${getDisplayName(
+					internal
+				)}`
 			);
 
-			let parent = vnode;
+			let parent = internal;
 			for (; parent; parent = parent._parent) {
 				if (parent._component && parent._component._childDidSuspend) {
 					error = promise;
@@ -68,7 +69,7 @@ export function initDebug() {
 		}
 
 		try {
-			oldCatchError(error, vnode, oldVNode);
+			oldCatchError(error, internal);
 
 			// when an error was handled by an ErrorBoundary we will nontheless emit an error
 			// event on the window object. This is to make up for react compatibility in dev mode
@@ -81,9 +82,10 @@ export function initDebug() {
 		} catch (e) {
 			throw e;
 		}
-	};
+	}
 
-	options._root = (vnode, parentNode) => {
+	/** @type {typeof options["_root"]} */
+	function rootHook(vnode, parentNode) {
 		if (!parentNode) {
 			throw new Error(
 				'Undefined parent passed to render(), this is the second argument.\n' +
@@ -110,10 +112,16 @@ export function initDebug() {
 		}
 
 		if (oldRoot) oldRoot(vnode, parentNode);
-	};
+	}
 
-	options._diff = (internal, vnode) => {
-		if (vnode === null || typeof vnode !== 'object') return;
+	/** @type {typeof options["_diff"]} */
+	function diffHook(internal, vnode) {
+		if (vnode === null || typeof vnode !== 'object') {
+			// TODO: This isn't correct. We need these checks to run on mount
+			oldBeforeDiff(internal, vnode);
+			return;
+		}
+
 		// Check if the user passed plain objects as children. Note that we cannot
 		// move this check into `options.vnode` because components can receive
 		// children in any shape they want (e.g.
@@ -153,44 +161,10 @@ export function initDebug() {
 			);
 		}
 
-		let parentVNode = getClosestDomNodeParent(parent);
+		validateTableMarkup(internal);
 
 		hooksAllowed = true;
 
-		if (
-			(type === 'thead' || type === 'tfoot' || type === 'tbody') &&
-			parentVNode.type !== 'table'
-		) {
-			console.error(
-				'Improper nesting of table. Your <thead/tbody/tfoot> should have a <table> parent.' +
-					serializeVNode(internal) +
-					`\n\n${getOwnerStack(internal)}`
-			);
-		} else if (
-			type === 'tr' &&
-			parentVNode.type !== 'thead' &&
-			parentVNode.type !== 'tfoot' &&
-			parentVNode.type !== 'tbody' &&
-			parentVNode.type !== 'table'
-		) {
-			console.error(
-				'Improper nesting of table. Your <tr> should have a <thead/tbody/tfoot/table> parent.' +
-					serializeVNode(internal) +
-					`\n\n${getOwnerStack(internal)}`
-			);
-		} else if (type === 'td' && parentVNode.type !== 'tr') {
-			console.error(
-				'Improper nesting of table. Your <td> should have a <tr> parent.' +
-					serializeVNode(internal) +
-					`\n\n${getOwnerStack(internal)}`
-			);
-		} else if (type === 'th' && parentVNode.type !== 'tr') {
-			console.error(
-				'Improper nesting of table. Your <th> should have a <tr>.' +
-					serializeVNode(internal) +
-					`\n\n${getOwnerStack(internal)}`
-			);
-		}
 		let isCompatNode = '$$typeof' in vnode;
 		if (
 			internal.ref !== undefined &&
@@ -244,7 +218,6 @@ export function initDebug() {
 		if (typeof internal.type == 'function' && internal.type.propTypes) {
 			if (
 				internal.type.displayName === 'Lazy' &&
-				warnedComponents &&
 				!warnedComponents.lazyPropTypes.has(internal.type)
 			) {
 				const m =
@@ -279,15 +252,16 @@ export function initDebug() {
 		}
 
 		if (oldBeforeDiff) oldBeforeDiff(internal, vnode);
-	};
+	}
 
-	options._hook = (internal, index, type) => {
+	/** @type {typeof options["_hook"]} */
+	function hookHook(internal, index, type) {
 		if (!internal || !hooksAllowed) {
 			throw new Error('Hook can only be invoked from render methods.');
 		}
 
 		if (oldHook) oldHook(internal, index, type);
-	};
+	}
 
 	// Ideally we'd want to print a warning once per component, but we
 	// don't have access to the vnode that triggered it here. As a
@@ -327,7 +301,8 @@ export function initDebug() {
 	// https://esbench.com/bench/6021ebd7d9c27600a7bfdba3
 	const deprecatedProto = Object.create({}, deprecatedAttributes);
 
-	options.vnode = vnode => {
+	/** @type {typeof options["vnode"]} */
+	function vnodeHook(vnode) {
 		const props = vnode.props;
 		if (props != null && ('__source' in props || '__self' in props)) {
 			Object.defineProperties(props, debugProps);
@@ -338,17 +313,18 @@ export function initDebug() {
 		// eslint-disable-next-line
 		vnode.__proto__ = deprecatedProto;
 		if (oldVnode) oldVnode(vnode);
-	};
+	}
 
-	options.diffed = vnode => {
+	/** @type {typeof options["diffed"]} */
+	function diffedHook(internal) {
 		hooksAllowed = false;
 
-		if (oldDiffed) oldDiffed(vnode);
+		if (oldDiffed) oldDiffed(internal);
 
-		if (vnode._children != null) {
+		if (internal._children != null) {
 			const keys = [];
-			for (let i = 0; i < vnode._children.length; i++) {
-				const child = vnode._children[i];
+			for (let i = 0; i < internal._children.length; i++) {
+				const child = internal._children[i];
 				if (!child || child.key == null) continue;
 
 				const key = child.key;
@@ -357,8 +333,8 @@ export function initDebug() {
 						'Following component has two or more children with the ' +
 							`same key attribute: "${key}". This may cause glitches and misbehavior ` +
 							'in rendering process. Component: \n\n' +
-							serializeVNode(vnode) +
-							`\n\n${getOwnerStack(vnode)}`
+							serializeVNode(internal) +
+							`\n\n${getOwnerStack(internal)}`
 					);
 
 					// Break early to not spam the console
@@ -368,7 +344,7 @@ export function initDebug() {
 				keys.push(key);
 			}
 		}
-	};
+	}
 }
 
 const setState = Component.prototype.setState;

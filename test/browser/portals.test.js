@@ -22,13 +22,28 @@ describe('Portal', () => {
 	let resetRemoveChild;
 	let resetRemove;
 
+	let containers;
+	/** @type {(type: string) => Element} */
+	function createContainer(type) {
+		const container = document.createElement(type);
+		containers.push(container);
+		return container;
+	}
+
 	beforeEach(() => {
 		scratch = setupScratch();
 		rerender = setupRerender();
+
+		containers = [];
 	});
 
 	afterEach(() => {
 		teardown(scratch);
+
+		for (let container of containers) {
+			container.remove();
+		}
+		containers = null;
 	});
 
 	before(() => {
@@ -46,7 +61,7 @@ describe('Portal', () => {
 	});
 
 	it('should render into a different root node', () => {
-		let root = document.createElement('div');
+		let root = createContainer('div');
 		document.body.appendChild(root);
 
 		function Foo(props) {
@@ -60,10 +75,10 @@ describe('Portal', () => {
 	});
 
 	it('should preserve mount order of non-portal siblings', () => {
-		let portals = document.createElement('portals');
+		let portals = createContainer('portals');
 		scratch.appendChild(portals);
 
-		let main = document.createElement('main');
+		let main = createContainer('main');
 		scratch.appendChild(main);
 
 		function Foo(props) {
@@ -89,20 +104,20 @@ describe('Portal', () => {
 		const log = getLog().filter(t => !/#text/.test(t));
 
 		expect(log).to.deep.equal([
-			'<main>.insertBefore(<h1>A, <replace>)',
+			'<replace>.remove()',
+			'<main>.insertBefore(<h1>A, <after>)',
 			'<portals>.insertBefore(<h2>B, Null)',
-			'<main>A.insertBefore(<h3>C, <replace>)',
+			'<main>A.insertBefore(<h3>C, <after>)',
 			'<portals>B.insertBefore(<h4>D, Null)',
-			'<main>AC.insertBefore(<h5>E, <replace>)',
-			'<replace>.remove()'
+			'<main>AC.insertBefore(<h5>E, <after>)'
 		]);
 	});
 
 	it('should preserve hydration order of non-portal siblings', () => {
-		let portals = document.createElement('portals');
+		let portals = createContainer('portals');
 		scratch.appendChild(portals);
 
-		let main = document.createElement('main');
+		let main = createContainer('main');
 		scratch.appendChild(main);
 
 		main.innerHTML = '<h1>A</h1><h3>C</h3><h5>E</h5>';
@@ -246,8 +261,8 @@ describe('Portal', () => {
 	});
 
 	it('should not render <undefined> for Portal nodes', () => {
-		let root = document.createElement('div');
-		let dialog = document.createElement('div');
+		let root = createContainer('div');
+		let dialog = createContainer('div');
 		dialog.id = 'container';
 
 		scratch.appendChild(root);
@@ -266,8 +281,8 @@ describe('Portal', () => {
 	});
 
 	it('should unmount Portal', () => {
-		let root = document.createElement('div');
-		let dialog = document.createElement('div');
+		let root = createContainer('div');
+		let dialog = createContainer('div');
 		dialog.id = 'container';
 
 		scratch.appendChild(root);
@@ -612,8 +627,8 @@ describe('Portal', () => {
 	});
 
 	it('should not unmount when parent renders', () => {
-		let root = document.createElement('div');
-		let dialog = document.createElement('div');
+		let root = createContainer('div');
+		let dialog = createContainer('div');
 		dialog.id = 'container';
 
 		scratch.appendChild(root);
@@ -793,6 +808,8 @@ describe('Portal', () => {
 	});
 
 	it('should order complex effects well', () => {
+		const container = createContainer('div');
+
 		const calls = [];
 		const Parent = ({ children, isPortal }) => {
 			useEffect(() => {
@@ -819,7 +836,7 @@ describe('Portal', () => {
 				calls.push('Portal');
 			}, []);
 
-			return createPortal(<Parent isPortal>{content}</Parent>, document.body);
+			return createPortal(<Parent isPortal>{content}</Parent>, container);
 		};
 
 		const App = () => {
@@ -853,7 +870,7 @@ describe('Portal', () => {
 	});
 
 	it('should include containerInfo', () => {
-		let root = document.createElement('div');
+		let root = createContainer('div');
 		document.body.appendChild(root);
 
 		const A = () => <span>A</span>;
@@ -873,5 +890,78 @@ describe('Portal', () => {
 		expect(portal.containerInfo).to.equal(root);
 
 		root.parentNode.removeChild(root);
+	});
+
+	it('should preserve portal behavior when moving nodes around a portal', () => {
+		const portalRoot = createContainer('div');
+		document.body.appendChild(portalRoot);
+
+		render(
+			[
+				<div key="A">A</div>,
+				<div key="B">B</div>,
+				<div key="C">C</div>,
+				<div key="D">D</div>,
+				createPortal(<div>Portal</div>, portalRoot)
+			],
+			scratch
+		);
+
+		expect(scratch.innerHTML).to.equal(
+			'<div>A</div><div>B</div><div>C</div><div>D</div>'
+		);
+		expect(portalRoot.innerHTML).to.equal('<div>Portal</div>');
+
+		render(
+			[
+				<div key="A">A</div>,
+				<div key="B">B</div>,
+				createPortal(<div>Portal</div>, portalRoot),
+				<div key="C">C</div>,
+				<div key="D">D</div>
+			],
+			scratch
+		);
+
+		expect(scratch.innerHTML).to.equal(
+			'<div>A</div><div>B</div><div>C</div><div>D</div>'
+		);
+		expect(portalRoot.innerHTML).to.equal('<div>Portal</div>');
+	});
+
+	it('should insert a portal before new siblings when changing container to match siblings', () => {
+		const portalRoot = createContainer('div');
+		document.body.appendChild(portalRoot);
+
+		render(
+			[
+				<div key="A">A</div>,
+				<div key="B">B</div>,
+				createPortal(<div>Portal</div>, portalRoot),
+				<div key="D">D</div>
+			],
+			scratch
+		);
+
+		expect(scratch.innerHTML).to.equal('<div>A</div><div>B</div><div>D</div>');
+		expect(portalRoot.innerHTML).to.equal('<div>Portal</div>');
+
+		render(
+			[
+				<div key="A">A</div>,
+				<div key="B">B</div>,
+				// Change container to match siblings container
+				createPortal(<div>Portal</div>, scratch),
+				// While adding a new sibling
+				<div key="C">C</div>,
+				<div key="D">D</div>
+			],
+			scratch
+		);
+
+		expect(scratch.innerHTML).to.equal(
+			'<div>A</div><div>B</div><div>Portal</div><div>C</div><div>D</div>'
+		);
+		expect(portalRoot.innerHTML).to.equal('');
 	});
 });

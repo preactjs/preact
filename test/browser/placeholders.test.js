@@ -304,4 +304,72 @@ describe('null placeholders', () => {
 		expect(scratch.innerHTML).to.equal(div([div('false'), div('the middle')]));
 		expect(getLog()).to.deep.equal(['#text.remove()', '#text.remove()']);
 	});
+
+	it('should properly mount & unmount null placeholders from the start', () => {
+		/** @type {(props: { show: [boolean, boolean, boolean] }) => any} */
+		function App({ show }) {
+			return (
+				<ol>
+					{show[0] && <li class="first">first</li>}
+					{show[1] && <li class="middle">middle</li>}
+					{show[2] && <li class="last">last</li>}
+				</ol>
+			);
+		}
+
+		render(<App show={[false, false, true]} />, scratch);
+		expect(scratch.innerHTML).to.equal('<ol><li class="last">last</li></ol>');
+
+		render(<App show={[false, true, true]} />, scratch);
+		expect(scratch.innerHTML).to.equal(
+			'<ol><li class="middle">middle</li><li class="last">last</li></ol>'
+		);
+
+		render(<App show={[true, true, true]} />, scratch);
+		expect(scratch.innerHTML).to.equal(
+			'<ol><li class="first">first</li><li class="middle">middle</li><li class="last">last</li></ol>'
+		);
+
+		render(<App show={[false, true, true]} />, scratch);
+		expect(scratch.innerHTML).to.equal(
+			'<ol><li class="middle">middle</li><li class="last">last</li></ol>'
+		);
+
+		render(<App show={[false, false, true]} />, scratch);
+		expect(scratch.innerHTML).to.equal('<ol><li class="last">last</li></ol>');
+	});
+
+	it('should properly mount && unmount null placeholders from the back', () => {
+		/** @type {(props: { show: [boolean, boolean, boolean] }) => any} */
+		function App({ show }) {
+			return (
+				<ol>
+					{show[0] && <li class="first">first</li>}
+					{show[1] && <li class="middle">middle</li>}
+					{show[2] && <li class="last">last</li>}
+				</ol>
+			);
+		}
+
+		render(<App show={[true, false, false]} />, scratch);
+		expect(scratch.innerHTML).to.equal('<ol><li class="first">first</li></ol>');
+
+		render(<App show={[true, true, false]} />, scratch);
+		expect(scratch.innerHTML).to.equal(
+			'<ol><li class="first">first</li><li class="middle">middle</li></ol>'
+		);
+
+		render(<App show={[true, true, true]} />, scratch);
+		expect(scratch.innerHTML).to.equal(
+			'<ol><li class="first">first</li><li class="middle">middle</li><li class="last">last</li></ol>'
+		);
+
+		render(<App show={[true, true, false]} />, scratch);
+		expect(scratch.innerHTML).to.equal(
+			'<ol><li class="first">first</li><li class="middle">middle</li></ol>'
+		);
+
+		render(<App show={[true, false, false]} />, scratch);
+		expect(scratch.innerHTML).to.equal('<ol><li class="first">first</li></ol>');
+	});
 });
