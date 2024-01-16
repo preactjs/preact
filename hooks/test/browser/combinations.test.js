@@ -1,5 +1,5 @@
 import { setupRerender, act } from 'preact/test-utils';
-import { createElement, render, Component } from 'preact';
+import { createElement, render, Component, createContext } from 'preact';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import {
 	useState,
@@ -11,7 +11,6 @@ import {
 	useContext
 } from 'preact/hooks';
 import { scheduleEffectAssert } from '../_util/useEffectUtil';
-import { createContext } from 'preact';
 
 /** @jsx createElement */
 

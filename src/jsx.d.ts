@@ -17,7 +17,7 @@ type Defaultize<Props, Defaults> =
 		? Partial<Pick<Props, Extract<keyof Props, keyof Defaults>>> & // Include the remaining properties from Props
 				Pick<Props, Exclude<keyof Props, keyof Defaults>>
 		: never;
-
+type Booleanish = boolean | 'true' | 'false';
 export namespace JSXInternal {
 	export type LibraryManagedAttributes<Component, Props> = Component extends {
 		defaultProps: infer Defaults;

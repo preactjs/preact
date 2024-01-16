@@ -303,6 +303,6 @@
     "prop-types": "^15.7.2",
     "sinon": "^9.2.3",
     "sinon-chai": "^3.7.0",
-    "typescript": "3.5.3"
+    "typescript": "5.3.3"
   }
 }
