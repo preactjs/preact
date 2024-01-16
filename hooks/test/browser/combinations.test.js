@@ -7,9 +7,11 @@ import {
 	useEffect,
 	useLayoutEffect,
 	useRef,
-	useMemo
+	useMemo,
+	useContext
 } from 'preact/hooks';
 import { scheduleEffectAssert } from '../_util/useEffectUtil';
+import { createContext } from 'preact';
 
 /** @jsx createElement */
 
@@ -343,5 +345,58 @@ describe('combinations', () => {
 		act(() => rerender());
 
 		expect(ops).to.deep.equal(['child effect', 'parent effect']);
+	});
+
+	it('should not block hook updates when context updates are enqueued', () => {
+		const Ctx = createContext({
+			value: 0,
+			setValue: /** @type {*} */ () => {}
+		});
+
+		let triggerSubmit = () => {};
+		function Child() {
+			const ctx = useContext(Ctx);
+			const [shouldSubmit, setShouldSubmit] = useState(false);
+			triggerSubmit = () => setShouldSubmit(true);
+
+			useEffect(() => {
+				if (shouldSubmit) {
+					// Update parent state and child state at the same time
+					ctx.setValue(v => v + 1);
+					setShouldSubmit(false);
+				}
+			}, [shouldSubmit]);
+
+			return <p>{ctx.value}</p>;
+		}
+
+		function App() {
+			const [value, setValue] = useState(0);
+			const ctx = useMemo(() => {
+				return { value, setValue };
+			}, [value]);
+			return (
+				<Ctx.Provider value={ctx}>
+					<Child />
+				</Ctx.Provider>
+			);
+		}
+
+		act(() => {
+			render(<App />, scratch);
+		});
+
+		expect(scratch.textContent).to.equal('0');
+
+		act(() => {
+			triggerSubmit();
+		});
+		expect(scratch.textContent).to.equal('1');
+
+		// This is where the update wasn't applied
+		act(() => {
+			triggerSubmit();
+		});
+		expect(scratch.textContent).to.equal('2');
 	});
 });
