@@ -17,7 +17,7 @@ const ON_ANI = /^on(Ani|Tra|Tou|BeforeInp|Compo)/;
 const CAMEL_REPLACE = /[A-Z0-9]/g;
 
 // type="file|checkbox|radio".
-const onChangeInputType = type => /fil|che|rad/i.test(type);
+const onChangeInputType = type => /fil|che|rad/.test(type);
 
 // Some libraries like `react-virtualized` explicitly check for this.
 Component.prototype.isReactComponent = {};
@@ -125,19 +125,18 @@ const handleDomVNode = vnode => {
 
 	for (i in props) {
 		let value = props[i];
-		let lowerCased = i.toLowerCase();
-		if (IS_DOM && i === 'children' && type === 'noscript') {
+		if (
+			(i === 'value' && 'defaultValue' in props && value == null) ||
+			(IS_DOM && i === 'children' && type === 'noscript')
+		) {
 			// Emulate React's behavior of not rendering the contents of noscript tags on the client.
-			continue;
-		} else if (i === 'value' && 'defaultValue' in props && value == null) {
 			// Skip applying value if it is null/undefined and we already set
 			// a default value
 			continue;
-		} else if (
-			i === 'defaultValue' &&
-			'value' in props &&
-			props.value == null
-		) {
+		}
+
+		let lowerCased = i.toLowerCase();
+		if (i === 'defaultValue' && 'value' in props && props.value == null) {
 			// `defaultValue` is treated as a fallback `value` when a value prop is present but null/undefined.
 			// `defaultValue` for Elements with no value prop is the same as the DOM defaultValue property.
 			i = 'value';
