@@ -135,7 +135,7 @@ export function enqueueRender(internal) {
 		prevDebounce !== options.debounceRendering
 	) {
 		prevDebounce = options.debounceRendering;
-		(prevDebounce || setTimeout)(processRenderQueue);
+		(prevDebounce || queueMicrotask)(processRenderQueue);
 	}
 }
 
