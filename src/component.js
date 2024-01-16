@@ -141,10 +141,16 @@ export function enqueueRender(internal) {
 	}
 }
 
+/**
+ * @param {import('./internal').Internal} a
+ * @param {import('./internal').Internal} b
+ */
+const depthSort = (a, b) => a._depth - b._depth;
+
 /** Flush the render queue by rerendering all queued components */
 function processRenderQueue() {
 	let c;
-	renderQueue.sort((a, b) => a._depth - b._depth);
+	renderQueue.sort(depthSort);
 	// Don't update `renderCount` yet. Keep its value non-zero to prevent unnecessary
 	// process() calls from getting scheduled while `queue` is still being consumed.
 	while ((c = renderQueue.shift())) {
@@ -155,7 +161,7 @@ function processRenderQueue() {
 				// When i.e. rerendering a provider additional new items can be injected, we want to
 				// keep the order from top to bottom with those new items so we can handle them in a
 				// single pass
-				renderQueue.sort((a, b) => a._depth - b._depth);
+				renderQueue.sort(depthSort);
 			}
 		}
 	}
