@@ -1537,7 +1537,7 @@ describe('createRoot()', () => {
 
 			expect(scratch.innerHTML).to.equal(finalHtml);
 			expect(getLog()).to.deep.equal([
-				"<div>sibling1234.insertBefore(<ul>1234, <div>sibling)"
+				'<div>sibling1234.insertBefore(<ul>1234, <div>sibling)'
 			]);
 		});
 

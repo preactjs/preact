@@ -37,7 +37,7 @@ describe('focus', () => {
 					before: [newValue, ...before]
 				});
 			};
-			setState = (newState) => this.setState(newState);
+			setState = newState => this.setState(newState);
 			append = () => {
 				const after = this.state.after;
 				const lastValue = after[after.length - 1];
@@ -73,13 +73,13 @@ describe('focus', () => {
 			const ListComponent = props.as || ListItem;
 			return (
 				<div>
-					{state.before.map((value) => (
+					{state.before.map(value => (
 						<ListComponent key={props.unkeyed ? undefined : value}>
 							{value}
 						</ListComponent>
 					))}
 					<InputWithId id="0" />
-					{state.after.map((value) => (
+					{state.after.map(value => (
 						<ListComponent key={props.unkeyed ? undefined : value}>
 							{value}
 						</ListComponent>
@@ -139,9 +139,9 @@ describe('focus', () => {
 	 */
 	function getListHtml(before, after) {
 		return div([
-			...before.map((i) => span(i)),
+			...before.map(i => span(i)),
 			inputStr(),
-			...after.map((i) => span(i))
+			...after.map(i => span(i))
 		]);
 	}
 
@@ -439,7 +439,7 @@ describe('focus', () => {
 			constructor() {
 				super();
 				this.state = { active: false };
-				updateState = () => this.setState((prev) => ({ active: !prev.active }));
+				updateState = () => this.setState(prev => ({ active: !prev.active }));
 			}
 
 			render() {
@@ -453,7 +453,7 @@ describe('focus', () => {
 									Hello World
 									<h2>yo</h2>
 								</Fragment>
-								<input type="text" ref={(i) => (input = i)} />
+								<input type="text" ref={i => (input = i)} />
 							</Fragment>
 						) : (
 							<Fragment>
@@ -462,7 +462,7 @@ describe('focus', () => {
 									<h2>yo</h2>
 								</Fragment>
 								foobar
-								<input type="text" ref={(i) => (input = i)} />
+								<input type="text" ref={i => (input = i)} />
 							</Fragment>
 						)}
 					</div>
@@ -495,7 +495,7 @@ describe('focus', () => {
 			constructor() {
 				super();
 				this.state = { active: false };
-				updateState = () => this.setState((prev) => ({ active: !prev.active }));
+				updateState = () => this.setState(prev => ({ active: !prev.active }));
 			}
 
 			render() {
@@ -509,7 +509,7 @@ describe('focus', () => {
 									Hello World
 									<h2>yo</h2>
 								</Fragment>
-								<input type="text" ref={(i) => (input = i)} value="foobar" />
+								<input type="text" ref={i => (input = i)} value="foobar" />
 							</Fragment>
 						) : (
 							<Fragment>
@@ -518,7 +518,7 @@ describe('focus', () => {
 									<h2>yo</h2>
 								</Fragment>
 								foobar
-								<input type="text" ref={(i) => (input = i)} value="foobar" />
+								<input type="text" ref={i => (input = i)} value="foobar" />
 							</Fragment>
 						)}
 					</div>

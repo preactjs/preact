@@ -26,8 +26,9 @@ export function createRoot(parentDom) {
 
 		vnode = createElement(Fragment, { _parentDom: parentDom }, [vnode]);
 
-		firstChild =
-			/** @type {import('./internal').PreactElement} */ (parentDom.firstChild);
+		firstChild = /** @type {import('./internal').PreactElement} */ (
+			parentDom.firstChild
+		);
 
 		if (rootInternal) {
 			patch(rootInternal, vnode, parentDom);

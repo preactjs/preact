@@ -1,4 +1,4 @@
-!(function() {
+!(function () {
 	'use strict';
 	function h(nodeName, attributes) {
 		var lastSimple,
@@ -579,7 +579,7 @@
 	function createRef() {
 		return {};
 	}
-	var VNode = function() {};
+	var VNode = function () {};
 	var options = {};
 	var stack = [];
 	var EMPTY_CHILDREN = [];
@@ -587,7 +587,8 @@
 		'function' == typeof Promise
 			? Promise.resolve().then.bind(Promise.resolve())
 			: setTimeout;
-	var IS_NON_DIMENSIONAL = /acit|ex(?:s|g|n|p|$)|rph|ows|mnc|ntw|ine[ch]|zoo|^ord/i;
+	var IS_NON_DIMENSIONAL =
+		/acit|ex(?:s|g|n|p|$)|rph|ows|mnc|ntw|ine[ch]|zoo|^ord/i;
 	var items = [];
 	var mounts = [];
 	var diffLevel = 0;
@@ -595,7 +596,7 @@
 	var hydrating = !1;
 	var recyclerComponents = [];
 	extend(Component.prototype, {
-		setState: function(state, callback) {
+		setState: function (state, callback) {
 			if (!this.__s) this.__s = this.state;
 			this.state = extend(
 				extend({}, this.state),
@@ -604,11 +605,11 @@
 			if (callback) this.__h.push(callback);
 			enqueueRender(this);
 		},
-		forceUpdate: function(callback) {
+		forceUpdate: function (callback) {
 			if (callback) this.__h.push(callback);
 			renderComponent(this, 2);
 		},
-		render: function() {}
+		render: function () {}
 	});
 	var preact = {
 		h: h,

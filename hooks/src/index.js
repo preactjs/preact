@@ -190,7 +190,7 @@ export function useReducer(reducer, initialState, init) {
 			// state setters, if we have next states and
 			// all next states within a component end up being equal to their original state
 			// we are safe to bail out for this specific component.
-			currentInternal._component.shouldComponentUpdate = function(p, s, c) {
+			currentInternal._component.shouldComponentUpdate = function (p, s, c) {
 				if (!hookState._internal.data.__hooks) return true;
 
 				const stateHooks = hookState._internal.data.__hooks._list.filter(
@@ -351,7 +351,7 @@ const oldCatchError = options._catchError;
 // however when we split Component up this shouldn't be needed
 // there can be a better solution to this if we just do a single iteration
 // as a combination of suspsense + hooks + component (compat) would be 3 tree-iterations
-options._catchError = function(error, internal) {
+options._catchError = function (error, internal) {
 	/** @type {import('./internal').Component} */
 	let handler = internal;
 	for (; (handler = handler._parent); ) {

@@ -41,7 +41,7 @@ export function initDebug() {
 				useEffect: new WeakMap(),
 				useLayoutEffect: new WeakMap(),
 				lazyPropTypes: new WeakMap()
-		  };
+			};
 	const deprecations = [];
 
 	options._catchError = (error, vnode, oldVNode) => {
@@ -328,7 +328,7 @@ export function initDebug() {
 	// https://esbench.com/bench/6021ebd7d9c27600a7bfdba3
 	const deprecatedProto = Object.create({}, deprecatedAttributes);
 
-	options.vnode = (vnode) => {
+	options.vnode = vnode => {
 		const props = vnode.props;
 		if (props != null && ('__source' in props || '__self' in props)) {
 			Object.defineProperties(props, debugProps);
@@ -341,7 +341,7 @@ export function initDebug() {
 		if (oldVnode) oldVnode(vnode);
 	};
 
-	options.diffed = (vnode) => {
+	options.diffed = vnode => {
 		hooksAllowed = false;
 
 		if (oldDiffed) oldDiffed(vnode);

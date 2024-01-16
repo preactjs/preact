@@ -1,25 +1,25 @@
 {
-	"name": "preact-devtools",
-	"amdName": "preactDevtools",
-	"version": "1.0.0",
-	"private": true,
-	"description": "Preact bridge for Preact devtools",
-	"module": "dist/devtools.mjs",
-	"main": "dist/devtools.js",
-	"umd:main": "dist/devtools.umd.js",
-	"source": "src/index.js",
-	"license": "MIT",
-	"types": "src/index.d.ts",
-	"peerDependencies": {
-		"preact": "^10.0.0"
-	},
+  "name": "preact-devtools",
+  "amdName": "preactDevtools",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Preact bridge for Preact devtools",
+  "module": "dist/devtools.mjs",
+  "main": "dist/devtools.js",
+  "umd:main": "dist/devtools.umd.js",
+  "source": "src/index.js",
+  "license": "MIT",
+  "types": "src/index.d.ts",
+  "peerDependencies": {
+    "preact": "^10.0.0"
+  },
   "exports": {
-		".": {
-			"types": "./src/index.d.ts",
-			"browser": "./dist/devtools.mjs",
-			"umd": "./dist/devtools.umd.js",
-			"import": "./dist/devtools.mjs",
-			"require": "./dist/devtools.js"
-		}
-	}
+    ".": {
+      "types": "./src/index.d.ts",
+      "browser": "./dist/devtools.mjs",
+      "umd": "./dist/devtools.umd.js",
+      "import": "./dist/devtools.mjs",
+      "require": "./dist/devtools.js"
+    }
+  }
 }

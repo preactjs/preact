@@ -2,4 +2,4 @@
 'preact': minor
 ---
 
-Move `createPortal` to the core package 
+Move `createPortal` to the core package

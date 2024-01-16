@@ -1,7 +1,9 @@
 import { flow, Instance, types } from 'mobx-state-tree';
 
-const cmp = <T, U>(fn: (x: T) => U) => (a: T, b: T): number =>
-	fn(a) > fn(b) ? 1 : -1;
+const cmp =
+	<T, U>(fn: (x: T) => U) =>
+	(a: T, b: T): number =>
+		fn(a) > fn(b) ? 1 : -1;
 
 const User = types.model({
 	email: types.string,
@@ -31,7 +33,7 @@ const Store = types
 		}
 	}))
 	.actions(self => ({
-		addUser: flow<unknown, []>(function*() {
+		addUser: flow<unknown, []>(function* () {
 			const data = yield fetch('https://randomuser.me/api?results=1')
 				.then(res => res.json())
 				.then(data =>
@@ -42,7 +44,7 @@ const Store = types
 				);
 			self.users.push(...data);
 		}),
-		loadUsers: flow<unknown, []>(function*() {
+		loadUsers: flow<unknown, []>(function* () {
 			const data = yield fetch(
 				`https://randomuser.me/api?seed=${12321}&results=12`
 			)

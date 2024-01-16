@@ -123,7 +123,7 @@ class ComponentUsingRef extends Component<any, any> {
 		this.refs = [];
 		return (
 			<div jsx>
-				{this.array.map((el) => (
+				{this.array.map(el => (
 					<span ref={this.setRef}>{el}</span>
 				))}
 

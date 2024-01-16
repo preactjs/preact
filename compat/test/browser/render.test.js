@@ -500,9 +500,8 @@ describe('compat render', () => {
 
 		// Simplified version of: https://github.com/facebook/relay/blob/fba79309977bf6b356ee77a5421ca5e6f306223b/packages/react-relay/readContext.js#L17-L28
 		function readContext(Context) {
-			const {
-				ReactCurrentDispatcher
-			} = React.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
+			const { ReactCurrentDispatcher } =
+				React.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
 			const dispatcher = ReactCurrentDispatcher.current;
 			return dispatcher.readContext(Context);
 		}

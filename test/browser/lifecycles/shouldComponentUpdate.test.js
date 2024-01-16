@@ -49,7 +49,7 @@ describe('Lifecycle methods', () => {
 			constructor() {
 				super();
 				this.state = { show: true };
-				setState = (s) => this.setState(s);
+				setState = s => this.setState(s);
 			}
 			render(props, { show }) {
 				return show ? <div /> : null;
@@ -106,7 +106,7 @@ describe('Lifecycle methods', () => {
 					<table>
 						{rows
 							.sort((a, b) => (a[sortBy] > b[sortBy] ? -1 : 1))
-							.map((row) => (
+							.map(row => (
 								<Row id={row.id} key={row.id} />
 							))}
 					</table>
@@ -612,7 +612,7 @@ describe('Lifecycle methods', () => {
 				constructor(props) {
 					super(props);
 					this.state = { hideMe: false };
-					hideThree = () => this.setState((s) => ({ hideMe: !s.hideMe }));
+					hideThree = () => this.setState(s => ({ hideMe: !s.hideMe }));
 				}
 
 				shouldComponentUpdate(nextProps, nextState) {
@@ -629,7 +629,7 @@ describe('Lifecycle methods', () => {
 					super(props);
 					this.state = { counter: 1 };
 					incrementThree = () =>
-						this.setState((s) => ({ counter: s.counter + 1 }));
+						this.setState(s => ({ counter: s.counter + 1 }));
 				}
 
 				render(p, { counter }) {
@@ -822,7 +822,7 @@ describe('Lifecycle methods', () => {
 				<table>
 					{rows
 						.sort((a, b) => (a[sortBy] > b[sortBy] ? -1 : 1))
-						.map((row) => (
+						.map(row => (
 							<Row key={row.id} id={row.id} a={row.a} b={row.b} />
 						))}
 				</table>

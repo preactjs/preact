@@ -6,11 +6,11 @@ let nextContextId = 0;
 const providers = new Set();
 
 /** @param {import('./internal').Internal} internal */
-export const unsubscribeFromContext = (internal) => {
+export const unsubscribeFromContext = internal => {
 	// if this was a context provider, delete() returns true and we exit:
 	if (providers.delete(internal)) return;
 	// ... otherwise, unsubscribe from any contexts:
-	providers.forEach((p) => {
+	providers.forEach(p => {
 		p._component._subs.delete(internal);
 	});
 };
@@ -40,7 +40,7 @@ export const createContext = (defaultValue, contextId) => {
 			}
 			// re-render subscribers in response to value change
 			else if (props.value !== this._prev) {
-				this._subs.forEach((internal) => {
+				this._subs.forEach(internal => {
 					internal.flags |= FORCE_UPDATE;
 					enqueueRender(internal);
 				});

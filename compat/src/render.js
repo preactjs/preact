@@ -17,7 +17,7 @@ const ON_ANI = /^on(Ani|Tra|Tou|BeforeInp|Compo)/;
 const CAMEL_REPLACE = /[A-Z0-9]/g;
 
 // type="file|checkbox|radio".
-const onChangeInputType = (type) => /fil|che|rad/i.test(type);
+const onChangeInputType = type => /fil|che|rad/i.test(type);
 
 // Some libraries like `react-virtualized` explicitly check for this.
 Component.prototype.isReactComponent = {};
@@ -33,7 +33,7 @@ Component.prototype.isReactComponent = {};
 	'componentWillMount',
 	'componentWillReceiveProps',
 	'componentWillUpdate'
-].forEach((key) => {
+].forEach(key => {
 	Object.defineProperty(Component.prototype, key, {
 		configurable: true,
 		get() {
@@ -78,7 +78,7 @@ export function hydrate(vnode, parent, callback) {
 }
 
 let oldEventHook = options.event;
-options.event = (e) => {
+options.event = e => {
 	if (oldEventHook) e = oldEventHook(e);
 	e.persist = empty;
 	e.isPropagationStopped = isPropagationStopped;
@@ -104,7 +104,7 @@ const classNameDescriptorNonEnumberable = {
 	}
 };
 
-const handleDomVNode = (vnode) => {
+const handleDomVNode = vnode => {
 	let i;
 	let type = vnode.type;
 	let props = vnode.props;
@@ -187,7 +187,7 @@ const handleDomVNode = (vnode) => {
 		Array.isArray(normalizedProps.value)
 	) {
 		// forEach() always returns undefined, which we abuse here to unset the value prop.
-		normalizedProps.value = toChildArray(props.children).forEach((child) => {
+		normalizedProps.value = toChildArray(props.children).forEach(child => {
 			child.props.selected =
 				normalizedProps.value.indexOf(child.props.value) != -1;
 		});
@@ -195,7 +195,7 @@ const handleDomVNode = (vnode) => {
 
 	// Adding support for defaultValue in select tag
 	if (type == 'select' && normalizedProps.defaultValue != null) {
-		normalizedProps.value = toChildArray(props.children).forEach((child) => {
+		normalizedProps.value = toChildArray(props.children).forEach(child => {
 			if (normalizedProps.multiple) {
 				child.props.selected =
 					normalizedProps.defaultValue.indexOf(child.props.value) != -1;
@@ -223,7 +223,7 @@ const handleDomVNode = (vnode) => {
 };
 
 let oldVNodeHook = options.vnode;
-options.vnode = (vnode) => {
+options.vnode = vnode => {
 	let i;
 	let type = vnode.type;
 	/** @type {any} */

@@ -232,7 +232,7 @@ function createEsbuildPlugin() {
 	};
 }
 
-module.exports = function(config) {
+module.exports = function (config) {
 	config.set({
 		browsers: sauceLabs
 			? Object.keys(sauceLabsLaunchers)

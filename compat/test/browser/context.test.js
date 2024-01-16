@@ -76,7 +76,7 @@ describe('components', () => {
 			render() {
 				return (
 					<RouterContext.Consumer>
-						{(contextValue) => {
+						{contextValue => {
 							// console.log('Rendering Route', {
 							// 	location: contextValue.location
 							// });

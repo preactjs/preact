@@ -26,7 +26,7 @@ export default function logger(logStats, logConsole) {
 
 	function logCall(obj, method, name) {
 		let old = obj[method];
-		obj[method] = function() {
+		obj[method] = function () {
 			let c = '';
 			for (let i = 0; i < arguments.length; i++) {
 				if (c) c += ', ';

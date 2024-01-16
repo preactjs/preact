@@ -96,8 +96,8 @@ export function patch(internal, vnode, parentDom) {
 					(MODE_HYDRATE | MODE_SUSPENDED)
 						? internal.data
 						: internal.flags & MODE_HYDRATE
-						? null
-						: getDomSibling(internal);
+							? null
+							: getDomSibling(internal);
 
 				mountChildren(internal, renderResult, parentDom, siblingDom);
 			} else {

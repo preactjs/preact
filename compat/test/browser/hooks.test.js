@@ -32,7 +32,7 @@ describe('React-18-hooks', () => {
 
 	describe('useDeferredValue', () => {
 		it('returns the value', () => {
-			const App = (props) => {
+			const App = props => {
 				const val = useDeferredValue(props.text);
 				return <p>{val}</p>;
 			};
@@ -101,7 +101,7 @@ describe('React-18-hooks', () => {
 
 		it('subscribes and rerenders when called', () => {
 			let flush;
-			const subscribe = sinon.spy((cb) => {
+			const subscribe = sinon.spy(cb => {
 				flush = cb;
 				return () => {};
 			});
@@ -135,7 +135,7 @@ describe('React-18-hooks', () => {
 
 		it('getSnapshot can return NaN without causing infinite loop', () => {
 			let flush;
-			const subscribe = sinon.spy((cb) => {
+			const subscribe = sinon.spy(cb => {
 				flush = cb;
 				return () => {};
 			});
@@ -169,7 +169,7 @@ describe('React-18-hooks', () => {
 
 		it('should not call function values on subscription', () => {
 			let flush;
-			const subscribe = sinon.spy((cb) => {
+			const subscribe = sinon.spy(cb => {
 				flush = cb;
 				return () => {};
 			});
@@ -201,7 +201,7 @@ describe('React-18-hooks', () => {
 
 		it('should work with changing getSnapshot', () => {
 			let flush;
-			const subscribe = sinon.spy((cb) => {
+			const subscribe = sinon.spy(cb => {
 				flush = cb;
 				return () => {};
 			});
@@ -261,7 +261,7 @@ describe('React-18-hooks', () => {
 			isSubmitting: false,
 			setIsSubmitting: () => {}
 		});
-		const FormWrapper = (props) => {
+		const FormWrapper = props => {
 			const [isSubmitting, setIsSubmitting] = useState(false);
 			setSubmitting = setIsSubmitting;
 			return (

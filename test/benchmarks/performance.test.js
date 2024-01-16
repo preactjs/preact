@@ -60,12 +60,12 @@ function benchmark(iter, callback) {
 	next();
 }
 
-describe('performance', function() {
+describe('performance', function () {
 	let scratch;
 
 	this.timeout(10000);
 
-	before(function() {
+	before(function () {
 		if (!ENABLE_PERFORMANCE) this.skip();
 		if (COVERAGE) {
 			console.warn(
@@ -329,8 +329,9 @@ describe('performance', function() {
 			[
 				'color',
 				c =>
-					`rgba(${c % 255}, ${255 - (c % 255)}, ${50 + (c % 150)}, ${(c % 50) /
-						50})`
+					`rgba(${c % 255}, ${255 - (c % 255)}, ${50 + (c % 150)}, ${
+						(c % 50) / 50
+					})`
 			],
 			[
 				'border',
