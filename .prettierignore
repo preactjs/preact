@@ -23,3 +23,4 @@ benches/node_modules/
 benches/proxy-packages/*/package-lock.json
 
 package-lock.json
+mangle.json
