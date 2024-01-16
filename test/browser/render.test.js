@@ -1177,6 +1177,16 @@ describe('render()', () => {
 		expect(scratch.querySelector('p').contentEditable).to.equal('false');
 	});
 
+	it('should not render children when rerendering a function child', () => {
+		const icon = () => {};
+
+		render(<div>{icon}</div>, scratch);
+		expect(scratch.innerHTML).to.equal('<div></div>');
+
+		render(<div>{icon}</div>, scratch);
+		expect(scratch.innerHTML).to.equal('<div></div>');
+	});
+
 	// #3060
 	it('should reset tabindex on undefined/null', () => {
 		const defaultValue = isIE11 ? 0 : -1;
