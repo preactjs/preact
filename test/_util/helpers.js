@@ -153,7 +153,7 @@ export function sortCss(cssText) {
 		cssText
 			.split(';')
 			.filter(Boolean)
-			.map((s) => s.replace(/^\s+|\s+$/g, '').replace(/(\s*:\s*)/g, ': '))
+			.map(s => s.replace(/^\s+|\s+$/g, '').replace(/(\s*:\s*)/g, ': '))
 			.sort((a, b) => {
 				// CSS Variables are typically positioned at the start
 				if (a[0] === '-') {
@@ -224,7 +224,7 @@ export const mixedArrayHTML = '0ab<span>c</span>def1';
  * @param {object} obj
  */
 export function clear(obj) {
-	Object.keys(obj).forEach((key) => delete obj[key]);
+	Object.keys(obj).forEach(key => delete obj[key]);
 }
 
 /**

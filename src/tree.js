@@ -65,8 +65,8 @@ export function createInternal(vnode, parentInternal) {
 				? type.prototype && type.prototype.render
 					? TYPE_CLASS
 					: props._parentDom
-					? TYPE_ROOT
-					: TYPE_FUNCTION
+						? TYPE_ROOT
+						: TYPE_FUNCTION
 				: TYPE_ELEMENT;
 
 		if (flags & TYPE_ELEMENT && type === 'svg') {

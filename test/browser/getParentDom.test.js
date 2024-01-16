@@ -150,8 +150,8 @@ describe('getParentDom', () => {
 			scratch
 		);
 
-		let internal = getRoot(scratch)._children[0]._children[1]._children[0]
-			._children[0];
+		let internal =
+			getRoot(scratch)._children[0]._children[1]._children[0]._children[0];
 		let parentDom = getParentDom(internal);
 
 		expect(internal.type).to.equal('span');
@@ -175,8 +175,8 @@ describe('getParentDom', () => {
 			scratch
 		);
 
-		let internal = getRoot(scratch)._children[0]._children[0]._children[0]
-			._children[0];
+		let internal =
+			getRoot(scratch)._children[0]._children[0]._children[0]._children[0];
 		let parent = getParentDom(internal);
 
 		expect(internal.type).to.equal('p');
@@ -260,8 +260,8 @@ describe('getParentDom', () => {
 
 		expect(scratch.innerHTML).to.equal('<div></div>');
 
-		let internal = getRoot(scratch)._children[0]._children[0]._children[0]
-			._children[0];
+		let internal =
+			getRoot(scratch)._children[0]._children[0]._children[0]._children[0];
 		expect(internal.type).to.equal('div');
 		expect(getParentDom(internal)).to.equalNode(portalParent);
 	});

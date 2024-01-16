@@ -76,11 +76,12 @@ export type ComponentFactory<P = {}> = ComponentType<P>;
 
 export type ComponentProps<
 	C extends ComponentType<any> | keyof JSXInternal.IntrinsicElements
-> = C extends ComponentType<infer P>
-	? P
-	: C extends keyof JSXInternal.IntrinsicElements
-	? JSXInternal.IntrinsicElements[C]
-	: never;
+> =
+	C extends ComponentType<infer P>
+		? P
+		: C extends keyof JSXInternal.IntrinsicElements
+			? JSXInternal.IntrinsicElements[C]
+			: never;
 
 export interface FunctionComponent<P = {}> {
 	(props: RenderableProps<P>, context?: any): VNode<any> | null;
@@ -355,8 +356,7 @@ export interface Context<T> {
 	displayName?: string;
 }
 export interface PreactContext<T> extends Context<T> {}
-export type ContextType<C extends Context<any>> = C extends Context<infer T>
-	? T
-	: never;
+export type ContextType<C extends Context<any>> =
+	C extends Context<infer T> ? T : never;
 
 export function createContext<T>(defaultValue: T): Context<T>;

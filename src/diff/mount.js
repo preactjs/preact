@@ -322,6 +322,7 @@ function mountComponent(internal, startDom) {
 
 	if (internal.flags & TYPE_CLASS) {
 		// @ts-ignore `type` is a class component constructor
+		// eslint-disable-next-line
 		c = new type(newProps, componentContext);
 	} else {
 		c = {

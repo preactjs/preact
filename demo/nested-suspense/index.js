@@ -1,9 +1,9 @@
 import { createElement, Suspense, lazy, Component } from 'react';
 
-const Loading = function() {
+const Loading = function () {
 	return <div>Loading...</div>;
 };
-const Error = function({ resetState }) {
+const Error = function ({ resetState }) {
 	return (
 		<div>
 			Error!&nbsp;

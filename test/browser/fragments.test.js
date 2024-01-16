@@ -106,11 +106,11 @@ describe('Fragment', () => {
 			render(_props, state) {
 				deleteItem = () => {
 					this.setState({
-						items: this.state.items.filter((i) => i !== this.state.items[2])
+						items: this.state.items.filter(i => i !== this.state.items[2])
 					});
 				};
 
-				return state.items.map((item) => (
+				return state.items.map(item => (
 					<Element item={item} deleteItem={deleteItem} key={item} />
 				));
 			}
@@ -818,13 +818,13 @@ describe('Fragment', () => {
 						<Fragment>
 							<Stateful />
 						</Fragment>
-				  ]
+					]
 				: [
 						<span />,
 						<Fragment>
 							<Stateful />
 						</Fragment>
-				  ];
+					];
 		}
 
 		render(<Foo condition={true} />, scratch);
@@ -944,7 +944,7 @@ describe('Fragment', () => {
 			}
 		}
 
-		const html = (contents) => span('0') + contents + span('1');
+		const html = contents => span('0') + contents + span('1');
 
 		render(<Comp />, scratch);
 		expect(scratch.innerHTML).to.equal(html('foo'));
@@ -976,7 +976,7 @@ describe('Fragment', () => {
 			render() {
 				return (
 					<Fragment>
-						{this.state.values.map((value) => (
+						{this.state.values.map(value => (
 							<div>{value}</div>
 						))}
 					</Fragment>
@@ -1002,7 +1002,7 @@ describe('Fragment', () => {
 		const Group = ({ title, values }) => (
 			<Fragment>
 				<li>{title}</li>
-				{values.map((value) => (
+				{values.map(value => (
 					<li>{value}</li>
 				))}
 			</Fragment>
@@ -1038,7 +1038,7 @@ describe('Fragment', () => {
 			constructor() {
 				super();
 				this.state = { active: false };
-				updateState = () => this.setState((prev) => ({ active: !prev.active }));
+				updateState = () => this.setState(prev => ({ active: !prev.active }));
 			}
 
 			render() {
@@ -1125,7 +1125,7 @@ describe('Fragment', () => {
 			return props.children(context.text);
 		}
 
-		const Say = (props) => <div>{props.text}</div>;
+		const Say = props => <div>{props.text}</div>;
 
 		const Speak = () => (
 			<Fragment>
@@ -1133,7 +1133,7 @@ describe('Fragment', () => {
 				<BobRossProvider>
 					<span>a span</span>
 					<BobRossConsumer>
-						{(text) => [<Say text={text} />, <Say text={text} />]}
+						{text => [<Say text={text} />, <Say text={text} />]}
 					</BobRossConsumer>
 					<span>another span</span>
 				</BobRossProvider>
@@ -1282,7 +1282,7 @@ describe('Fragment', () => {
 								<li>4</li>
 								<li>5</li>
 							</Fragment>
-					  ]
+						]
 					: [
 							<Fragment>
 								<li>4</li>
@@ -1292,7 +1292,7 @@ describe('Fragment', () => {
 							<li>1</li>,
 							<li>2</li>,
 							<li>3</li>
-					  ]}
+						]}
 			</ol>
 		);
 
@@ -1701,7 +1701,7 @@ describe('Fragment', () => {
 			<ol>
 				<li>a</li>
 				<Fragment>
-					{values.map((value) => (
+					{values.map(value => (
 						<li>{value}</li>
 					))}
 				</Fragment>
@@ -1709,8 +1709,8 @@ describe('Fragment', () => {
 			</ol>
 		);
 
-		const getHtml = (values) =>
-			ol([li('a'), ...values.map((value) => li(value)), li('b')]);
+		const getHtml = values =>
+			ol([li('a'), ...values.map(value => li(value)), li('b')]);
 
 		let values = [0, 1, 2];
 		clearLog();
@@ -1931,7 +1931,7 @@ describe('Fragment', () => {
 		class App extends Component {
 			constructor() {
 				super();
-				setState = (update) => this.setState(update);
+				setState = update => this.setState(update);
 
 				this.state = { error: false };
 			}
@@ -1993,7 +1993,7 @@ describe('Fragment', () => {
 					<div>
 						{this.state.items && (
 							<Fragment>
-								{this.state.items.map((v) => (
+								{this.state.items.map(v => (
 									<div>{v}</div>
 								))}
 								<Noop />
@@ -2375,7 +2375,7 @@ describe('Fragment', () => {
 			constructor(props) {
 				super(props);
 				this.state = { active: true };
-				updateA = () => this.setState((prev) => ({ active: !prev.active }));
+				updateA = () => this.setState(prev => ({ active: !prev.active }));
 			}
 
 			render() {
@@ -2436,7 +2436,7 @@ describe('Fragment', () => {
 			constructor(props) {
 				super(props);
 				this.state = { active: true };
-				updateA = () => this.setState((prev) => ({ active: !prev.active }));
+				updateA = () => this.setState(prev => ({ active: !prev.active }));
 			}
 
 			render() {
@@ -2507,7 +2507,7 @@ describe('Fragment', () => {
 			constructor(props) {
 				super(props);
 				this.state = { active: true };
-				updateA = () => this.setState((prev) => ({ active: !prev.active }));
+				updateA = () => this.setState(prev => ({ active: !prev.active }));
 			}
 
 			render() {
@@ -2521,7 +2521,7 @@ describe('Fragment', () => {
 			constructor(props) {
 				super(props);
 				this.state = { active: false };
-				updateB = () => this.setState((prev) => ({ active: !prev.active }));
+				updateB = () => this.setState(prev => ({ active: !prev.active }));
 			}
 			render() {
 				return this.state.active ? <div>B</div> : null;
@@ -2585,7 +2585,7 @@ describe('Fragment', () => {
 			constructor(props) {
 				super(props);
 				this.state = { active: true };
-				updateA = () => this.setState((prev) => ({ active: !prev.active }));
+				updateA = () => this.setState(prev => ({ active: !prev.active }));
 			}
 
 			render() {
@@ -2601,7 +2601,7 @@ describe('Fragment', () => {
 			constructor(props) {
 				super(props);
 				this.state = { active: false };
-				updateB = () => this.setState((prev) => ({ active: !prev.active }));
+				updateB = () => this.setState(prev => ({ active: !prev.active }));
 			}
 			render() {
 				return (

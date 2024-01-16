@@ -166,7 +166,7 @@ describe('memo()', () => {
 		const App = memo(memo(Foo));
 
 		// eslint-disable-next-line prefer-arrow-callback
-		expect(function() {
+		expect(function () {
 			render(<App />, scratch);
 		}).to.not.throw();
 	});

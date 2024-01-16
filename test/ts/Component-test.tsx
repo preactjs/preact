@@ -119,7 +119,7 @@ function MapperItem(props: { foo: number }) {
 }
 
 function Mapper() {
-	return [1, 2, 3].map((x) => <MapperItem foo={x} key={x} />);
+	return [1, 2, 3].map(x => <MapperItem foo={x} key={x} />);
 }
 
 describe('Component', () => {

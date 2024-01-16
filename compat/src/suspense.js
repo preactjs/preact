@@ -10,7 +10,7 @@ import { getParentDom } from '../../src/tree';
 
 const oldCatchError = options._catchError;
 /** @type {(error: any, internal: import('./internal').Internal) => void} */
-options._catchError = function(error, internal) {
+options._catchError = function (error, internal) {
 	if (error.then) {
 		/** @type {import('./internal').Component} */
 		let component;
@@ -28,7 +28,7 @@ options._catchError = function(error, internal) {
 
 const oldUnmount = options.unmount;
 /** @type {(internal: import('./internal').Internal) => void} */
-options.unmount = function(internal) {
+options.unmount = function (internal) {
 	/** @type {import('./internal').Component} */
 	const component = internal._component;
 	if (component && component._onResolve) {
@@ -69,7 +69,7 @@ Suspense.prototype = new Component();
  * @param {Promise} promise The thrown promise
  * @param {import('./internal').Internal} suspendingInternal The suspending component
  */
-Suspense.prototype._childDidSuspend = function(promise, suspendingInternal) {
+Suspense.prototype._childDidSuspend = function (promise, suspendingInternal) {
 	const suspendingComponent = suspendingInternal._component;
 	if (suspendingComponent._onResolve != null) {
 		// This component has already been handled by a Suspense component. Do
@@ -125,7 +125,7 @@ Suspense.prototype._childDidSuspend = function(promise, suspendingInternal) {
 	promise.then(onResolved, onResolved);
 };
 
-Suspense.prototype.componentWillUnmount = function() {
+Suspense.prototype.componentWillUnmount = function () {
 	this._suspenders = [];
 	this._parentDom = null;
 };
@@ -135,7 +135,7 @@ Suspense.prototype.componentWillUnmount = function() {
  * @param {import('./internal').SuspenseComponent["props"]} props
  * @param {import('./internal').SuspenseState} state
  */
-Suspense.prototype.render = function(props, state) {
+Suspense.prototype.render = function (props, state) {
 	if (this._parentDom == null) {
 		this._parentDom = getParentDom(this._internal);
 	}

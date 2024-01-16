@@ -234,8 +234,8 @@ async function getStatsFromLogs(version, logPaths, getThreadId, trackEventsIn) {
 					unit: key.startsWith('Count')
 						? ''
 						: key.includes('usedHeapSize')
-						? 'MB'
-						: null
+							? 'MB'
+							: null
 				},
 				browser: {
 					name: 'chrome'

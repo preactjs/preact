@@ -76,7 +76,7 @@ patchConsole('info');
  * @returns {[string]}
  */
 function serializeConsoleArgs(args) {
-	const flat = args.map((arg) => serialize(arg, 'flat', 0, new Set()));
+	const flat = args.map(arg => serialize(arg, 'flat', 0, new Set()));
 	// We don't have access to the users terminal width, so we'll try to
 	// format everything into one line if possible and assume a terminal
 	// width of 80 chars
@@ -84,7 +84,7 @@ function serializeConsoleArgs(args) {
 		return [flat.join(', ')];
 	}
 
-	const serialized = args.map((arg) => serialize(arg, 'default', 0, new Set()));
+	const serialized = args.map(arg => serialize(arg, 'default', 0, new Set()));
 	return ['\n' + serialized.join(',\n') + '\n'];
 }
 
@@ -113,17 +113,17 @@ function serialize(value, mode, indent, seen) {
 		return kl.bold('null');
 	} else if (Array.isArray(value)) {
 		seen.add(value);
-		const values = value.map((v) => serialize(v, mode, indent + 1, seen));
+		const values = value.map(v => serialize(v, mode, indent + 1, seen));
 		if (mode === 'flat') {
 			return `[ ${values.join(', ')} ]`;
 		}
 
 		const space = applyIndent(indent);
-		const pretty = values.map((v) => applyIndent(indent + 1) + v).join(',\n');
+		const pretty = values.map(v => applyIndent(indent + 1) + v).join(',\n');
 		return `[\n${pretty}\n${space}]`;
 	} else if (value instanceof Set) {
 		const values = [];
-		value.forEach((v) => {
+		value.forEach(v => {
 			values.push(serialize(v, mode, indent, seen));
 		});
 
@@ -131,7 +131,7 @@ function serialize(value, mode, indent, seen) {
 			return `Set(${value.size}) { ${values.join(', ')} }`;
 		}
 
-		const pretty = values.map((v) => applyIndent(indent + 1) + v).join(',\n');
+		const pretty = values.map(v => applyIndent(indent + 1) + v).join(',\n');
 		return `Set(${value.size}) {\n${pretty}\n${applyIndent(indent)}}`;
 	} else if (value instanceof Map) {
 		const values = [];
@@ -143,12 +143,12 @@ function serialize(value, mode, indent, seen) {
 		});
 
 		if (mode === 'flat') {
-			const pretty = values.map((v) => `${v[0]} => ${v[1]}`).join(', ');
+			const pretty = values.map(v => `${v[0]} => ${v[1]}`).join(', ');
 			return `Map(${value.size}) { ${pretty} }`;
 		}
 
 		const pretty = values
-			.map((v) => {
+			.map(v => {
 				return applyIndent(indent + 1) + `${v[0]} => ${v[1]}`;
 			})
 			.join(', ');
@@ -184,7 +184,7 @@ function serialize(value, mode, indent, seen) {
 
 	seen.add(value);
 
-	const props = Object.keys(value).map((key) => {
+	const props = Object.keys(value).map(key => {
 		const v = serialize(value[key], mode, indent + 1, seen);
 		return `${key}: ${v}`;
 	});
@@ -196,7 +196,7 @@ function serialize(value, mode, indent, seen) {
 		return `{ ${pretty} }`;
 	}
 
-	const pretty = props.map((p) => applyIndent(indent + 1) + p).join(',\n');
+	const pretty = props.map(p => applyIndent(indent + 1) + p).join(',\n');
 	return `{\n${pretty}\n${applyIndent(indent)}}`;
 }
 

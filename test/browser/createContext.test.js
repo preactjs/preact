@@ -41,7 +41,7 @@ describe('createContext', () => {
 			<Provider value={CONTEXT}>
 				<div>
 					<Consumer>
-						{(data) => {
+						{data => {
 							receivedContext = data;
 							return <Inner {...data} />;
 						}}
@@ -94,7 +94,7 @@ describe('createContext', () => {
 		expect(renders).to.equal(1);
 	});
 
-	it('should preserve provider context through nesting providers', (done) => {
+	it('should preserve provider context through nesting providers', done => {
 		const { Provider, Consumer } = createContext();
 		const CONTEXT = { a: 'a' };
 		const CHILD_CONTEXT = { b: 'b' };
@@ -116,12 +116,12 @@ describe('createContext', () => {
 		render(
 			<Provider value={CONTEXT}>
 				<Consumer>
-					{(data) => {
+					{data => {
 						parentContext = data;
 						return (
 							<Provider value={CHILD_CONTEXT}>
 								<Consumer>
-									{(childData) => {
+									{childData => {
 										childContext = childData;
 										return <Inner {...data} {...childData} />;
 									}}
@@ -175,11 +175,11 @@ describe('createContext', () => {
 			<ThemeProvider value={THEME_CONTEXT.theme}>
 				<DataProvider value={DATA_CONTEXT}>
 					<ThemeConsumer>
-						{(theme) => {
+						{theme => {
 							receivedTheme = theme;
 							return (
 								<DataConsumer>
-									{(data) => {
+									{data => {
 										receivedData = data;
 										return <Inner theme={theme} {...data} />;
 									}}
@@ -220,11 +220,11 @@ describe('createContext', () => {
 		render(
 			<Provider value={CONTEXT}>
 				<Consumer>
-					{(data) => {
+					{data => {
 						receivedData = data;
 						return (
 							<Consumer>
-								{(childData) => {
+								{childData => {
 									receivedChildData = childData;
 									return <Inner {...data} {...childData} />;
 								}}
@@ -269,7 +269,7 @@ describe('createContext', () => {
 			<div>
 				<Provider value={CONTEXT}>
 					<NoUpdate>
-						<Consumer>{(data) => <Inner {...data} />}</Consumer>
+						<Consumer>{data => <Inner {...data} />}</Consumer>
 					</NoUpdate>
 				</Provider>
 			</div>,
@@ -282,7 +282,7 @@ describe('createContext', () => {
 			<div>
 				<Provider value={CONTEXT}>
 					<NoUpdate>
-						<Consumer>{(data) => <Inner {...data} />}</Consumer>
+						<Consumer>{data => <Inner {...data} />}</Consumer>
 					</NoUpdate>
 				</Provider>
 			</div>,
@@ -331,7 +331,7 @@ describe('createContext', () => {
 				return (
 					<div>
 						<Consumer>
-							{(data) => {
+							{data => {
 								receivedContext = data;
 								return <Consumed {...data} />;
 							}}
@@ -358,7 +358,7 @@ describe('createContext', () => {
 		);
 	});
 
-	it('should propagates through shouldComponentUpdate false', (done) => {
+	it('should propagates through shouldComponentUpdate false', done => {
 		const { Provider, Consumer } = createContext();
 		const CONTEXT = { a: 'a' };
 		const UPDATED_CONTEXT = { a: 'b' };
@@ -399,7 +399,7 @@ describe('createContext', () => {
 			render() {
 				return (
 					<div>
-						<Consumer>{(data) => <Consumed {...data} />}</Consumer>
+						<Consumer>{data => <Consumed {...data} />}</Consumer>
 					</div>
 				);
 			}
@@ -471,14 +471,14 @@ describe('createContext', () => {
 			<Provider value={CONTEXT}>
 				<Provider value={NESTED_CONTEXT}>
 					<Consumer>
-						{(data) => {
+						{data => {
 							receivedNestedData = data;
 							return <Nested {...data} />;
 						}}
 					</Consumer>
 				</Provider>
 				<Consumer>
-					{(data) => {
+					{data => {
 						receivedData = data;
 						return <Inner {...data} />;
 					}}
@@ -523,7 +523,7 @@ describe('createContext', () => {
 		render(
 			<Provider value={CONTEXT}>
 				<NoUpdate>
-					<Consumer>{(data) => <Inner {...data} />}</Consumer>
+					<Consumer>{data => <Inner {...data} />}</Consumer>
 				</NoUpdate>
 			</Provider>,
 			scratch
@@ -532,7 +532,7 @@ describe('createContext', () => {
 		render(
 			<Provider value={CONTEXT}>
 				<NoUpdate>
-					<Consumer>{(data) => <Inner {...data} />}</Consumer>
+					<Consumer>{data => <Inner {...data} />}</Consumer>
 				</NoUpdate>
 			</Provider>,
 			scratch
@@ -548,7 +548,7 @@ describe('createContext', () => {
 			render(
 				<Provider value={{ i: 2 }}>
 					<NoUpdate>
-						<Consumer>{(data) => <Inner {...data} />}</Consumer>
+						<Consumer>{data => <Inner {...data} />}</Consumer>
 					</NoUpdate>
 				</Provider>,
 				scratch
@@ -623,7 +623,7 @@ describe('createContext', () => {
 		act(() => {
 			render(
 				<Provider value={CONTEXT}>
-					<Consumer>{(data) => <Inner {...data} />}</Consumer>
+					<Consumer>{data => <Inner {...data} />}</Consumer>
 				</Provider>,
 				scratch
 			);
@@ -631,7 +631,7 @@ describe('createContext', () => {
 			// Not calling re-render since it's gonna get called with the same Consumer function
 			render(
 				<Provider value={CONTEXT}>
-					<Consumer>{(data) => <Inner {...data} />}</Consumer>
+					<Consumer>{data => <Inner {...data} />}</Consumer>
 				</Provider>,
 				scratch
 			);
@@ -656,7 +656,7 @@ describe('createContext', () => {
 				super();
 
 				this.state = { value: 0, show: true };
-				changeValue = (value) => this.setState({ value });
+				changeValue = value => this.setState({ value });
 				toggleConsumer = () => this.setState(({ show }) => ({ show: !show }));
 			}
 			render(props, state) {
@@ -664,7 +664,7 @@ describe('createContext', () => {
 					<Provider value={state.value}>
 						<div>
 							{state.show ? (
-								<Consumer>{(data) => <Inner value={data} />}</Consumer>
+								<Consumer>{data => <Inner value={data} />}</Consumer>
 							) : null}
 						</div>
 					</Provider>
@@ -826,7 +826,7 @@ describe('createContext', () => {
 				}
 
 				updateStore() {
-					this.setState((state) => ({ id: state.id + 1 }));
+					this.setState(state => ({ id: state.id + 1 }));
 				}
 
 				render() {
@@ -844,12 +844,12 @@ describe('createContext', () => {
 				}
 
 				render() {
-					return <Store.Consumer>{(id) => <Parent key={id} />}</Store.Consumer>;
+					return <Store.Consumer>{id => <Parent key={id} />}</Store.Consumer>;
 				}
 			}
 
 			function Parent(props) {
-				return <Store.Consumer>{(id) => <Child id={id} />}</Store.Consumer>;
+				return <Store.Consumer>{id => <Child id={id} />}</Store.Consumer>;
 			}
 
 			class Child extends Component {
@@ -897,7 +897,7 @@ describe('createContext', () => {
 			}
 
 			render() {
-				return <context.Consumer>{(v) => <p>{v.state}</p>}</context.Consumer>;
+				return <context.Consumer>{v => <p>{v.state}</p>}</context.Consumer>;
 			}
 		}
 
@@ -938,7 +938,7 @@ describe('createContext', () => {
 			constructor(props) {
 				super(props);
 				this.state = { foo: 'foo' };
-				update = (v) => this.setState({ foo: v });
+				update = v => this.setState({ foo: v });
 			}
 			render() {
 				return (

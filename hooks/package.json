@@ -24,12 +24,12 @@
     "regex": "^_"
   },
   "exports": {
-		".": {
-			"types": "./src/index.d.ts",
-			"browser": "./dist/hooks.mjs",
-			"umd": "./dist/hooks.umd.js",
-			"import": "./dist/hooks.mjs",
-			"require": "./dist/hooks.js"
-		}
-	}
+    ".": {
+      "types": "./src/index.d.ts",
+      "browser": "./dist/hooks.mjs",
+      "umd": "./dist/hooks.umd.js",
+      "import": "./dist/hooks.mjs",
+      "require": "./dist/hooks.js"
+    }
+  }
 }

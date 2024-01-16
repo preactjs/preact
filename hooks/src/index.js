@@ -182,7 +182,23 @@ export function useReducer(reducer, initialState, init) {
 		hookState._internal = currentInternal;
 		if (!currentInternal.data._hasScuFromHooks) {
 			currentInternal.data._hasScuFromHooks = true;
-			const prevScu = currentInternal._component.shouldComponentUpdate;
+			let prevScu = currentInternal._component.shouldComponentUpdate;
+			const prevCWU = currentInternal._component.componentWillUpdate;
+
+			// If we're dealing with a forced update `shouldComponentUpdate` will
+			// not be called. But we use that to update the hook values, so we
+			// need to call it.
+			currentInternal._component.componentWillUpdate = function (p, s, c) {
+				if (this._force) {
+					let tmp = prevScu;
+					// Clear to avoid other sCU hooks from being called
+					prevScu = undefined;
+					updateHookState(p, s, c);
+					prevScu = tmp;
+				}
+
+				if (prevCWU) prevCWU.call(this, p, s, c);
+			};
 
 			// This SCU has the purpose of bailing out after repeated updates
 			// to stateful hooks.
@@ -190,7 +206,13 @@ export function useReducer(reducer, initialState, init) {
 			// state setters, if we have next states and
 			// all next states within a component end up being equal to their original state
 			// we are safe to bail out for this specific component.
-			currentInternal._component.shouldComponentUpdate = function(p, s, c) {
+			/**
+			 *
+			 * @type {import('./internal').Component["shouldComponentUpdate"]}
+			 */
+			// @ts-ignore - We don't use TS to downtranspile
+			// eslint-disable-next-line no-inner-declarations
+			function updateHookState(p, s, c) {
 				if (!hookState._internal.data.__hooks) return true;
 
 				const stateHooks = hookState._internal.data.__hooks._list.filter(
@@ -221,7 +243,9 @@ export function useReducer(reducer, initialState, init) {
 						? prevScu.call(this, p, s, c)
 						: true
 					: false;
-			};
+			}
+
+			currentInternal._component.shouldComponentUpdate = updateHookState;
 		}
 	}
 
@@ -351,7 +375,7 @@ const oldCatchError = options._catchError;
 // however when we split Component up this shouldn't be needed
 // there can be a better solution to this if we just do a single iteration
 // as a combination of suspsense + hooks + component (compat) would be 3 tree-iterations
-options._catchError = function(error, internal) {
+options._catchError = function (error, internal) {
 	/** @type {import('./internal').Component} */
 	let handler = internal;
 	for (; (handler = handler._parent); ) {

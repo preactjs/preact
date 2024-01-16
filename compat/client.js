@@ -13,7 +13,7 @@ function createRoot(container) {
 
 exports.createRoot = createRoot;
 
-exports.hydrateRoot = function(container, children) {
+exports.hydrateRoot = function (container, children) {
 	hydrate(children, container);
 	return createRoot(container);
 };

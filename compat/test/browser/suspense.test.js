@@ -193,9 +193,7 @@ describe('suspense', () => {
 			}
 		}
 
-		const FuncWrapper = (props) => (
-			<div id="func-wrapper">{props.children}</div>
-		);
+		const FuncWrapper = props => <div id="func-wrapper">{props.children}</div>;
 
 		const [Suspender, suspend] = createSuspender(() => <div>Hello</div>);
 
@@ -231,7 +229,7 @@ describe('suspense', () => {
 		/** @type {() => Promise<void>} */
 		let resolve;
 		let resolved = false;
-		const promise = new Promise((_resolve) => {
+		const promise = new Promise(_resolve => {
 			resolve = () => {
 				resolved = true;
 				_resolve();
@@ -299,7 +297,7 @@ describe('suspense', () => {
 		/** @type {() => Promise<void>} */
 		let resolve;
 		let resolved = false;
-		const promise = new Promise((_resolve) => {
+		const promise = new Promise(_resolve => {
 			resolve = () => {
 				resolved = true;
 				_resolve();
@@ -1293,7 +1291,7 @@ describe('suspense', () => {
 		/** @type {() => Promise<void>} */
 		let resolve;
 		let resolved = false;
-		const promise = new Promise((_resolve) => {
+		const promise = new Promise(_resolve => {
 			resolve = () => {
 				resolved = true;
 				_resolve();
@@ -1301,7 +1299,7 @@ describe('suspense', () => {
 			};
 		});
 
-		const Child = (props) => {
+		const Child = props => {
 			if (!resolved) {
 				throw promise;
 			}
@@ -1451,7 +1449,7 @@ describe('suspense', () => {
 		const cache = { 1: true };
 		function Lazy({ value }) {
 			if (!cache[value]) {
-				throw new Promise((resolve) => {
+				throw new Promise(resolve => {
 					cache[value] = resolve;
 				});
 			}
@@ -1471,7 +1469,7 @@ describe('suspense', () => {
 				hide = () => {
 					this.setState({ show: false });
 				};
-				setValue = (value) => {
+				setValue = value => {
 					this.setState({ value });
 				};
 			}
@@ -1635,7 +1633,7 @@ describe('suspense', () => {
 		let increment;
 		function Updater() {
 			const [i, setState] = useState(0);
-			increment = () => setState((i) => i + 1);
+			increment = () => setState(i => i + 1);
 			return (
 				<div>
 					i: {i}
@@ -1691,7 +1689,7 @@ describe('suspense', () => {
 		let hide;
 
 		let suspender = null;
-		let suspenderRef = (s) => {
+		let suspenderRef = s => {
 			// skip null values as we want to keep the ref even after unmount
 			if (s) {
 				suspender = s;
@@ -1861,7 +1859,7 @@ describe('suspense', () => {
 					return this.state.content;
 				}
 			}
-			return [(content) => suspender.unsuspend(content), Suspender];
+			return [content => suspender.unsuspend(content), Suspender];
 		}
 
 		const [unsuspender1, Suspender1] = createSuspender();
@@ -2133,7 +2131,7 @@ describe('suspense', () => {
 		const suspense = (
 			<Suspense fallback={<div>Suspended...</div>}>
 				<ctx.Provider value="123">
-					<ctx.Consumer>{(value) => <Lazy value={value} />}</ctx.Consumer>
+					<ctx.Consumer>{value => <Lazy value={value} />}</ctx.Consumer>
 				</ctx.Provider>
 			</Suspense>
 		);
@@ -2142,7 +2140,7 @@ describe('suspense', () => {
 		rerender();
 		expect(scratch.innerHTML).to.equal(`<div>Suspended...</div>`);
 
-		return resolve((props) => <div>{props.value}</div>).then(() => {
+		return resolve(props => <div>{props.value}</div>).then(() => {
 			rerender();
 			expect(scratch.innerHTML).to.eql(`<div>123</div>`);
 		});
@@ -2157,7 +2155,7 @@ describe('suspense', () => {
 		const suspense = (
 			<Suspense fallback={<div>Suspended...</div>}>
 				<ctx.Provider value="123">
-					<ctx.Consumer>{(value) => <Suspender value={value} />}</ctx.Consumer>
+					<ctx.Consumer>{value => <Suspender value={value} />}</ctx.Consumer>
 				</ctx.Provider>
 			</Suspense>
 		);
@@ -2169,7 +2167,7 @@ describe('suspense', () => {
 		rerender();
 		expect(scratch.innerHTML).to.equal(`<div>Suspended...</div>`);
 
-		return resolve((props) => <div>{props.value}</div>).then(() => {
+		return resolve(props => <div>{props.value}</div>).then(() => {
 			rerender();
 			expect(scratch.innerHTML).to.eql(`<div>123</div>`);
 		});

@@ -151,8 +151,9 @@ describe('getDomSibling', () => {
 			scratch
 		);
 
-		let divAInternal = getRoot(scratch)._children[0]._children[0]._children[0]
-			._children[0]._children[0];
+		let divAInternal =
+			getRoot(scratch)._children[0]._children[0]._children[0]._children[0]
+				._children[0];
 		expect(divAInternal.type).to.equal('div');
 		expect(getDomSibling(divAInternal)).to.equalNode(
 			scratch.firstChild.childNodes[1]
@@ -178,8 +179,8 @@ describe('getDomSibling', () => {
 			scratch
 		);
 
-		let fragment = getRoot(scratch)._children[0]._children[0]._children[0]
-			._children[0];
+		let fragment =
+			getRoot(scratch)._children[0]._children[0]._children[0]._children[0];
 		expect(fragment.type).to.equal(Fragment);
 		expect(getDomSibling(fragment)).to.equalNode(
 			scratch.firstChild.childNodes[1]
@@ -206,8 +207,8 @@ describe('getDomSibling', () => {
 			scratch
 		);
 
-		let foo = getRoot(scratch)._children[0]._children[0]._children[0]
-			._children[0];
+		let foo =
+			getRoot(scratch)._children[0]._children[0]._children[0]._children[0];
 		expect(foo.type).to.equal(Foo);
 		expect(getDomSibling(foo)).to.equalNode(scratch.firstChild.childNodes[1]);
 	});
@@ -306,8 +307,8 @@ describe('getDomSibling', () => {
 			scratch
 		);
 
-		const divCInternal = getRoot(scratch)._children[0]._children[2]
-			._children[0];
+		const divCInternal =
+			getRoot(scratch)._children[0]._children[2]._children[0];
 		expect(getDomSibling(divCInternal)).to.equal(null);
 	});
 
@@ -328,8 +329,9 @@ describe('getDomSibling', () => {
 			scratch
 		);
 
-		let divAInternal = getRoot(scratch)._children[0]._children[0]._children[0]
-			._children[0]._children[0];
+		let divAInternal =
+			getRoot(scratch)._children[0]._children[0]._children[0]._children[0]
+				._children[0];
 		expect(getDomSibling(divAInternal)).to.equal(null);
 	});
 
@@ -357,8 +359,9 @@ describe('getDomSibling', () => {
 			scratch
 		);
 
-		let divAInternal = getRoot(scratch)._children[0]._children[0]._children[0]
-			._children[0]._children[0];
+		let divAInternal =
+			getRoot(scratch)._children[0]._children[0]._children[0]._children[0]
+				._children[0];
 		expect(getDomSibling(divAInternal)).to.equal(null);
 	});
 

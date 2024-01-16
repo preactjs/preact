@@ -56,7 +56,11 @@ export function createElement(type, props, children) {
  */
 export function normalizeToVNode(childVNode) {
 	let type = typeof childVNode;
-	if (childVNode == null || type == 'boolean') {
+	if (
+		childVNode == null ||
+		type == 'boolean' ||
+		typeof childVNode == 'function'
+	) {
 		return null;
 	}
 

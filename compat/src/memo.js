@@ -14,11 +14,11 @@ export function memo(c, comparer) {
 	Memoed.prototype = new Component();
 	Memoed.displayName = 'Memo(' + (c.displayName || c.name) + ')';
 	// eslint-disable-next-line
-	Memoed.prototype.render = function(props) {
+	Memoed.prototype.render = function (props) {
 		return createElement(c, props);
 	};
 
-	Memoed.prototype.shouldComponentUpdate = function(nextProps) {
+	Memoed.prototype.shouldComponentUpdate = function (nextProps) {
 		let ref = this.props.ref;
 		let updateRef = ref == nextProps.ref;
 		if (!updateRef && ref) {

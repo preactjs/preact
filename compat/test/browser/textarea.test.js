@@ -1,4 +1,5 @@
-import React, { render, useState } from 'preact/compat';
+import React, { render, hydrate, useState } from 'preact/compat';
+import ReactDOMServer from 'preact/compat/server';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { act } from 'preact/test-utils';
 
@@ -60,5 +61,21 @@ describe('Textarea', () => {
 		});
 		expect(scratch.innerHTML).to.equal('<textarea></textarea>');
 		expect(scratch.firstElementChild.value).to.equal('');
+	});
+
+	// TODO: can't backport https://github.com/preactjs/preact/pull/3891 this yet until we have a new RTS that is
+	// compatible with internals
+	it.skip('should hydrate textarea value', () => {
+		function App() {
+			return <textarea value="foo" />;
+		}
+
+		scratch.innerHTML = ReactDOMServer.renderToString(<App />);
+		expect(scratch.firstElementChild.value).to.equal('foo');
+		expect(scratch.innerHTML).to.be.equal('<textarea>foo</textarea>');
+
+		hydrate(<App />, scratch);
+		expect(scratch.firstElementChild.value).to.equal('foo');
+		expect(scratch.innerHTML).to.be.equal('<textarea></textarea>');
 	});
 });

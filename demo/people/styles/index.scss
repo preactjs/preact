@@ -109,7 +109,9 @@
 		height: var(--spinner-size);
 		animation: zoom 250ms 500ms forwards ease-out;
 		opacity: 0;
-		transition: opacity 200ms, transform 200ms ease-in;
+		transition:
+			opacity 200ms,
+			transform 200ms ease-in;
 	}
 
 	.spinner.exit {
@@ -147,8 +149,9 @@
 				translateY(calc(var(--spinner-size) / 3 * 2 - 1px)) rotate(-180deg);
 		}
 		75% {
-			transform: translateX(0) translateY(calc(var(--spinner-size) / 3 * 2 - 1px))
-				rotate(-270deg) scale(0.5);
+			transform: translateX(0)
+				translateY(calc(var(--spinner-size) / 3 * 2 - 1px)) rotate(-270deg)
+				scale(0.5);
 		}
 		100% {
 			transform: rotate(-360deg);
