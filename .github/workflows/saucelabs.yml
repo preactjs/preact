@@ -20,6 +20,7 @@ jobs:
           cache-dependency-path: '**/package-lock.json'
       - run: npm ci
       - name: test
+        timeout-minutes: 20
         env:
           CI: true
           COVERAGE: true

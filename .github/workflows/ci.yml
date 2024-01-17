@@ -47,6 +47,7 @@ jobs:
           npm run test:unit
       - name: Coveralls GitHub Action
         uses: coverallsapp/github-action@v2.1.2
+        timeout-minutes: 2
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Package
