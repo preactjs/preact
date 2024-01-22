@@ -1713,7 +1713,12 @@ export namespace JSXInternal {
 			| string
 			| undefined
 			| SignalLike<number | string | undefined>;
-		hidden?: boolean | undefined | SignalLike<boolean | undefined>;
+		hidden?:
+			| boolean
+			| 'hidden'
+			| 'until-found'
+			| undefined
+			| SignalLike<boolean | undefined>;
 		high?: number | undefined | SignalLike<number | undefined>;
 		href?: string | undefined | SignalLike<string | undefined>;
 		hrefLang?: string | undefined | SignalLike<string | undefined>;
@@ -1723,6 +1728,7 @@ export namespace JSXInternal {
 		icon?: string | undefined | SignalLike<string | undefined>;
 		id?: string | undefined | SignalLike<string | undefined>;
 		indeterminate?: boolean | undefined | SignalLike<boolean>;
+		inert?: boolean | undefined | SignalLike<boolean | undefined>;
 		inputMode?: string | undefined | SignalLike<string | undefined>;
 		integrity?: string | undefined | SignalLike<string | undefined>;
 		is?: string | undefined | SignalLike<string | undefined>;
