@@ -3,7 +3,22 @@ export as namespace preact;
 import { JSXInternal } from './jsx';
 
 export import JSX = JSXInternal;
-import { Internal } from './internal';
+
+// Public interface of the internal backing-node
+interface Internal<P = {}> {
+	type: string | ComponentType<P>;
+	/** The props object for Elements/Components, and the string contents for Text */
+	props: (P & { children: ComponentChildren }) | string | number;
+	key: any;
+	ref: Ref<any> | null;
+
+	/** Bitfield containing information about the Internal or its component. */
+	flags: number;
+	/** Polymorphic property to store extensions like hooks on */
+	data: object | Element | Text;
+	/** The function that triggers in-place re-renders for an internal */
+	rerender: (internal: Internal) => void;
+}
 
 //
 // Preact Virtual DOM
@@ -77,11 +92,12 @@ export type ComponentFactory<P = {}> = ComponentType<P>;
 
 export type ComponentProps<
 	C extends ComponentType<any> | keyof JSXInternal.IntrinsicElements
-> = C extends ComponentType<infer P>
-	? P
-	: C extends keyof JSXInternal.IntrinsicElements
-	? JSXInternal.IntrinsicElements[C]
-	: never;
+> =
+	C extends ComponentType<infer P>
+		? P
+		: C extends keyof JSXInternal.IntrinsicElements
+			? JSXInternal.IntrinsicElements[C]
+			: never;
 
 export interface FunctionComponent<P = {}> {
 	(props: RenderableProps<P>, context?: any): VNode<any> | null;
@@ -356,8 +372,7 @@ export interface Context<T> {
 	displayName?: string;
 }
 export interface PreactContext<T> extends Context<T> {}
-export type ContextType<C extends Context<any>> = C extends Context<infer T>
-	? T
-	: never;
+export type ContextType<C extends Context<any>> =
+	C extends Context<infer T> ? T : never;
 
 export function createContext<T>(defaultValue: T): Context<T>;
