@@ -3,6 +3,7 @@ export as namespace preact;
 import { JSXInternal } from './jsx';
 
 export import JSX = JSXInternal;
+import { Internal } from './internal';
 
 //
 // Preact Virtual DOM
@@ -76,12 +77,11 @@ export type ComponentFactory<P = {}> = ComponentType<P>;
 
 export type ComponentProps<
 	C extends ComponentType<any> | keyof JSXInternal.IntrinsicElements
-> =
-	C extends ComponentType<infer P>
-		? P
-		: C extends keyof JSXInternal.IntrinsicElements
-			? JSXInternal.IntrinsicElements[C]
-			: never;
+> = C extends ComponentType<infer P>
+	? P
+	: C extends keyof JSXInternal.IntrinsicElements
+	? JSXInternal.IntrinsicElements[C]
+	: never;
 
 export interface FunctionComponent<P = {}> {
 	(props: RenderableProps<P>, context?: any): VNode<any> | null;
@@ -311,9 +311,9 @@ export interface Options {
 	/** Attach a hook that is invoked whenever a VNode is created. */
 	vnode?(vnode: VNode): void;
 	/** Attach a hook that is invoked immediately before a vnode is unmounted. */
-	unmount?(vnode: VNode): void;
+	unmount?(vnode: Internal): void;
 	/** Attach a hook that is invoked after a vnode has rendered. */
-	diffed?(vnode: VNode): void;
+	diffed?(vnode: Internal): void;
 	event?(e: Event): any;
 	requestAnimationFrame?(callback: () => void): void;
 	debounceRendering?(cb: () => void): void;
@@ -356,7 +356,8 @@ export interface Context<T> {
 	displayName?: string;
 }
 export interface PreactContext<T> extends Context<T> {}
-export type ContextType<C extends Context<any>> =
-	C extends Context<infer T> ? T : never;
+export type ContextType<C extends Context<any>> = C extends Context<infer T>
+	? T
+	: never;
 
 export function createContext<T>(defaultValue: T): Context<T>;
