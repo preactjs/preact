@@ -28,9 +28,6 @@
     "./hooks/**/*",
     "./test-utils/**/*"
   ],
-  "overrides": {
-    "webdriverio": "7.30.2"
-  },
   "exports": {
     ".": {
       "types": "./src/index.d.ts",
