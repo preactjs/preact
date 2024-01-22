@@ -1,5 +1,10 @@
 import { createElement as preactH } from 'preact';
-import React, { createElement, render, cloneElement } from 'preact/compat';
+import React, {
+	createElement,
+	render,
+	cloneElement,
+	Component
+} from 'preact/compat';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 
 describe('compat cloneElement', () => {
@@ -92,5 +97,18 @@ describe('compat cloneElement', () => {
 		let clone = cloneElement(preactH(Foo), { value: 'foo' });
 		render(clone, scratch);
 		expect(scratch.textContent).to.equal('foo');
+	});
+
+	it('should prevent undefined properties from overriding default props', () => {
+		class Example extends Component {
+			render(props) {
+				return <div style={{ color: props.color }}>thing</div>;
+			}
+		}
+		Example.defaultProps = { color: 'blue' };
+
+		const element = <Example color="red" />;
+		const clone = cloneElement(element, { color: undefined });
+		expect(clone.props.color).to.equal('blue');
 	});
 });
