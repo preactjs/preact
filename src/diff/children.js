@@ -12,6 +12,7 @@ import { mount } from './mount';
 import { patch } from './patch';
 import { unmount } from './unmount';
 import { createInternal, getDomSibling } from '../tree';
+import { isArray } from '../util';
 
 /**
  * Update an internal with new children.
@@ -274,7 +275,7 @@ export function insertComponentDom(internal, nextSibling, parentDom) {
 export function toChildArray(children, out) {
 	out = out || [];
 	if (children == null || typeof children == 'boolean') {
-	} else if (Array.isArray(children)) {
+	} else if (isArray(children)) {
 		for (children of children) {
 			toChildArray(children, out);
 		}
