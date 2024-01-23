@@ -1,5 +1,6 @@
 import { UNDEFINED } from './constants';
 import options from './options';
+import { isArray } from './util';
 
 let vnodeId = 0;
 
@@ -65,7 +66,7 @@ export function normalizeToVNode(childVNode) {
 	}
 
 	if (type == 'object' || type == 'function') {
-		if (Array.isArray(childVNode)) {
+		if (isArray(childVNode)) {
 			return createElement(Fragment, null, childVNode);
 		}
 

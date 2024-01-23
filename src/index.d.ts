@@ -4,6 +4,22 @@ import { JSXInternal } from './jsx';
 
 export import JSX = JSXInternal;
 
+// Public interface of the internal backing-node
+interface Internal<P = {}> {
+	type: string | ComponentType<P>;
+	/** The props object for Elements/Components, and the string contents for Text */
+	props: (P & { children: ComponentChildren }) | string | number;
+	key: any;
+	ref: Ref<any> | null;
+
+	/** Bitfield containing information about the Internal or its component. */
+	flags: number;
+	/** Polymorphic property to store extensions like hooks on */
+	data: object | Element | Text;
+	/** The function that triggers in-place re-renders for an internal */
+	rerender: (internal: Internal) => void;
+}
+
 //
 // Preact Virtual DOM
 // -----------------------------------
@@ -311,9 +327,9 @@ export interface Options {
 	/** Attach a hook that is invoked whenever a VNode is created. */
 	vnode?(vnode: VNode): void;
 	/** Attach a hook that is invoked immediately before a vnode is unmounted. */
-	unmount?(vnode: VNode): void;
+	unmount?(vnode: Internal): void;
 	/** Attach a hook that is invoked after a vnode has rendered. */
-	diffed?(vnode: VNode): void;
+	diffed?(vnode: Internal): void;
 	event?(e: Event): any;
 	requestAnimationFrame?(callback: () => void): void;
 	debounceRendering?(cb: () => void): void;

@@ -11,7 +11,7 @@ import { IS_NON_DIMENSIONAL } from './util';
 export const REACT_ELEMENT_TYPE = Symbol.for('react.element');
 
 const CAMEL_PROPS =
-	/^(?:accent|alignment|arabic|baseline|cap|clip(?!PathU)|color|dominant|fill|flood|font|glyph(?!R)|horiz|image|letter|lighting|marker(?!H|W|U)|overline|paint|pointer|shape|stop|strikethrough|stroke|text(?!L)|transform|underline|unicode|units|v|vector|vert|word|writing|x(?!C))[A-Z]/;
+	/^(?:accent|alignment|arabic|baseline|cap|clip(?!PathU)|color|dominant|fill|flood|font|glyph(?!R)|horiz|image(!S)|letter|lighting|marker(?!H|W|U)|overline|paint|pointer|shape|stop|strikethrough|stroke|text(?!L)|transform|underline|unicode|units|v|vector|vert|word|writing|x(?!C))[A-Z]/;
 const IS_DOM = typeof document !== 'undefined';
 const ON_ANI = /^on(Ani|Tra|Tou|BeforeInp|Compo)/;
 const CAMEL_REPLACE = /[A-Z0-9]/g;

@@ -495,6 +495,21 @@ describe('compat render', () => {
 		);
 	});
 
+	it('shouldnot transform imageSrcSet', () => {
+		render(
+			<link
+				rel="preload"
+				as="image"
+				href="preact.jpg"
+				imageSrcSet="preact_400px.jpg 400w"
+			/>,
+			scratch
+		);
+		expect(scratch.innerHTML).to.equal(
+			'<link rel="preload" as="image" href="preact.jpg" imagesrcset="preact_400px.jpg 400w">'
+		);
+	});
+
 	it("should support react-relay's usage of __SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED", () => {
 		const Ctx = createContext('foo');
 

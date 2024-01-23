@@ -19,6 +19,7 @@ import { createInternal, getParentContext } from '../tree';
 import options from '../options';
 import { ENABLE_CLASSES } from '../component';
 import { commitQueue } from './commit';
+import { isArray } from '../util';
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
  * @param {import('../internal').Internal} internal The Internal node to mount
@@ -201,7 +202,7 @@ function mountElement(internal, dom, refs) {
 		} else if (newChildren != null) {
 			mountChildren(
 				internal,
-				Array.isArray(newChildren) ? newChildren : [newChildren],
+				isArray(newChildren) ? newChildren : [newChildren],
 				dom,
 				isNew ? null : dom.firstChild,
 				refs
@@ -409,7 +410,7 @@ function mountComponent(internal, startDom) {
 		if (renderResult.type === Fragment && renderResult.key == null) {
 			renderResult = renderResult.props.children;
 		}
-		if (!Array.isArray(renderResult)) {
+		if (!isArray(renderResult)) {
 			renderResult = [renderResult];
 		}
 	} else {

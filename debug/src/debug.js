@@ -41,7 +41,7 @@ export function initDebug() {
 				useEffect: new WeakMap(),
 				useLayoutEffect: new WeakMap(),
 				lazyPropTypes: new WeakMap()
-			};
+		  };
 	const deprecations = [];
 
 	options._catchError = (error, vnode, oldVNode) => {
@@ -341,15 +341,15 @@ export function initDebug() {
 		if (oldVnode) oldVnode(vnode);
 	};
 
-	options.diffed = vnode => {
+	options.diffed = internal => {
 		hooksAllowed = false;
 
-		if (oldDiffed) oldDiffed(vnode);
+		if (oldDiffed) oldDiffed(internal);
 
-		if (vnode._children != null) {
+		if (internal._children != null) {
 			const keys = [];
-			for (let i = 0; i < vnode._children.length; i++) {
-				const child = vnode._children[i];
+			for (let i = 0; i < internal._children.length; i++) {
+				const child = internal._children[i];
 				if (!child || child.key == null) continue;
 
 				const key = child.key;
@@ -358,8 +358,8 @@ export function initDebug() {
 						'Following component has two or more children with the ' +
 							`same key attribute: "${key}". This may cause glitches and misbehavior ` +
 							'in rendering process. Component: \n\n' +
-							serializeVNode(vnode) +
-							`\n\n${getOwnerStack(vnode)}`
+							serializeVNode(internal) +
+							`\n\n${getOwnerStack(internal)}`
 					);
 
 					// Break early to not spam the console
@@ -367,6 +367,27 @@ export function initDebug() {
 				}
 
 				keys.push(key);
+			}
+		}
+
+		if (internal.data && internal.data.__hooks != null) {
+			// Validate that none of the hooks in this component contain arguments that are NaN.
+			// This is a common mistake that can be hard to debug, so we want to catch it early.
+			const hooks = internal.data.__hooks._list;
+			if (hooks) {
+				for (let i = 0; i < hooks.length; i += 1) {
+					const hook = hooks[i];
+					if (hook._args) {
+						for (const arg of hook._args) {
+							if (Number.isNaN(arg)) {
+								const componentName = getDisplayName(internal);
+								throw new Error(
+									`Invalid argument passed to hook. Hooks should not be called with NaN in the dependency array. Hook index ${i} in component ${componentName} was called with NaN.`
+								);
+							}
+						}
+					}
+				}
 			}
 		}
 	};

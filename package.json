@@ -95,6 +95,16 @@
       "import": "./compat/server.mjs",
       "require": "./compat/server.js"
     },
+    "./compat/jsx-runtime": {
+      "types": "./jsx-runtime/src/index.d.ts",
+      "import": "./compat/jsx-runtime.mjs",
+      "require": "./compat/jsx-runtime.js"
+    },
+    "./compat/jsx-dev-runtime": {
+      "types": "./jsx-runtime/src/index.d.ts",
+      "import": "./compat/jsx-dev-runtime.mjs",
+      "require": "./compat/jsx-dev-runtime.js"
+    },
     "./package.json": "./package.json",
     "./compat/package.json": "./compat/package.json",
     "./debug/package.json": "./debug/package.json",

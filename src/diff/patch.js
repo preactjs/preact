@@ -23,6 +23,7 @@ import { mountChildren } from './mount';
 import { Fragment } from '../create-element';
 import { ENABLE_CLASSES } from '../component';
 import { commitQueue } from './commit';
+import { isArray } from '../util';
 
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
@@ -182,7 +183,7 @@ function patchElement(internal, vnode) {
 		if (oldHtml) dom.innerHTML = '';
 		patchChildren(
 			internal,
-			newChildren && Array.isArray(newChildren) ? newChildren : [newChildren],
+			newChildren && isArray(newChildren) ? newChildren : [newChildren],
 			dom
 		);
 	}
@@ -311,7 +312,7 @@ function patchComponent(internal, newVNode) {
 		if (renderResult.type === Fragment && renderResult.key == null) {
 			renderResult = renderResult.props.children;
 		}
-		if (!Array.isArray(renderResult)) {
+		if (!isArray(renderResult)) {
 			renderResult = [renderResult];
 		}
 	} else {
