@@ -34,14 +34,16 @@ export function initDebug() {
 	let oldVnode = options.vnode;
 	let oldCatchError = options._catchError;
 	let oldRoot = options._root;
+	let oldRender = options._render;
 	let oldHook = options._hook;
+
 	const warnedComponents = !isWeakMapSupported
 		? null
 		: {
 				useEffect: new WeakMap(),
 				useLayoutEffect: new WeakMap(),
 				lazyPropTypes: new WeakMap()
-		  };
+			};
 	const deprecations = [];
 
 	options._catchError = (error, vnode, oldVNode) => {
@@ -280,6 +282,13 @@ export function initDebug() {
 		}
 
 		if (oldBeforeDiff) oldBeforeDiff(internal, vnode);
+	};
+
+	options._render = vnode => {
+		if (oldRender) {
+			oldRender(vnode);
+		}
+		hooksAllowed = true;
 	};
 
 	options._hook = (internal, index, type) => {
