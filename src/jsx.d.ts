@@ -1072,6 +1072,9 @@ export namespace JSXInternal {
 		WheelEvent
 	>;
 
+	export type TargetedPictureInPictureEvent<Target extends EventTarget> =
+		TargetedEvent<Target, PictureInPictureEvent>;
+
 	export interface EventHandler<E extends TargetedEvent> {
 		(this: void, event: E): void;
 	}
@@ -1114,6 +1117,8 @@ export namespace JSXInternal {
 	export type WheelEventHandler<Target extends EventTarget> = EventHandler<
 		TargetedWheelEvent<Target>
 	>;
+	export type PictureInPictureEventHandler<Target extends EventTarget> =
+		EventHandler<TargetedPictureInPictureEvent<Target>>;
 
 	export interface DOMAttributes<Target extends EventTarget>
 		extends PreactDOMAttributes {
@@ -1327,6 +1332,14 @@ export namespace JSXInternal {
 		onTransitionRunCapture?: TransitionEventHandler<Target>;
 		onTransitionStart?: TransitionEventHandler<Target>;
 		onTransitionStartCapture?: TransitionEventHandler<Target>;
+
+		// PictureInPicture Events
+		onEnterPictureInPicture?: PictureInPictureEventHandler<Target>;
+		onEnterPictureInPictureCapture?: PictureInPictureEventHandler<Target>;
+		onLeavePictureInPicture?: PictureInPictureEventHandler<Target>;
+		onLeavePictureInPictureCapture?: PictureInPictureEventHandler<Target>;
+		onResize?: PictureInPictureEventHandler<Target>;
+		onResizeCapture?: PictureInPictureEventHandler<Target>;
 	}
 
 	// All the WAI-ARIA 1.1 attributes from https://www.w3.org/TR/wai-aria-1.1/
