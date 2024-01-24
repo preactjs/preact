@@ -27,6 +27,7 @@ declare namespace React {
 	export import Inputs = _hooks.Inputs;
 	export import PropRef = _hooks.PropRef;
 	export import Reducer = _hooks.Reducer;
+	export import Dispatch = _hooks.Dispatch;
 	export import Ref = _hooks.Ref;
 	export import StateUpdater = _hooks.StateUpdater;
 	export import useCallback = _hooks.useCallback;
@@ -49,6 +50,7 @@ declare namespace React {
 	): T;
 
 	// Preact Defaults
+	export import Context = preact.Context;
 	export import ContextType = preact.ContextType;
 	export import RefObject = preact.RefObject;
 	export import Component = preact.Component;
@@ -138,6 +140,10 @@ declare namespace React {
 		) => boolean
 	): C;
 
+	export interface RefAttributes<R> extends preact.Attributes {
+		ref?: preact.Ref<R> | undefined;
+	}
+
 	export interface ForwardFn<P = {}, T = any> {
 		(props: P, ref: ForwardedRef<T>): preact.ComponentChild;
 		displayName?: string;
@@ -145,6 +151,11 @@ declare namespace React {
 
 	interface MutableRefObject<T> {
 		current: T;
+	}
+
+	export interface ForwardRefExoticComponent<P>
+		extends preact.FunctionComponent<P> {
+		defaultProps?: Partial<P> | undefined;
 	}
 
 	export type ForwardedRef<T> =

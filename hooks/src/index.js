@@ -54,6 +54,7 @@ options._render = internal => {
 			currentInternal.data.__hooks._pendingEffects.forEach(invokeCleanup);
 			currentInternal.data.__hooks._pendingEffects.forEach(invokeEffect);
 			currentInternal.data.__hooks._pendingEffects = [];
+			currentIndex = 0;
 		}
 	}
 	previousInternal = internal;
