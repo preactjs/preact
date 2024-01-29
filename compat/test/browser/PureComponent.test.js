@@ -37,6 +37,38 @@ describe('PureComponent', () => {
 		expect(spy).to.be.calledWithMatch(expected, expected);
 	});
 
+	it('should pass context in constructor', () => {
+		let instance;
+		// Not initializing state matches React behavior: https://codesandbox.io/s/rml19v8o2q
+		class Foo extends React.PureComponent {
+			constructor(props, context) {
+				super(props, context);
+				expect(this.props).to.equal(props);
+				expect(this.state).to.deep.equal(undefined);
+				expect(this.context).to.equal(context);
+
+				instance = this;
+			}
+			render(props) {
+				return <div {...props}>Hello</div>;
+			}
+		}
+
+		sinon.spy(Foo.prototype, 'render');
+
+		const PROPS = { foo: 'bar' };
+		React.render(<Foo {...PROPS} />, scratch);
+
+		expect(Foo.prototype.render)
+			.to.have.been.calledOnce.and.to.have.been.calledWithMatch(PROPS, {}, {})
+			.and.to.have.returned(sinon.match({ type: 'div', props: PROPS }));
+		expect(instance.props).to.deep.equal(PROPS);
+		expect(instance.state).to.deep.equal({});
+		expect(instance.context).to.deep.equal({});
+
+		expect(scratch.innerHTML).to.equal('<div foo="bar">Hello</div>');
+	});
+
 	it('should ignore the __source variable', () => {
 		const pureSpy = sinon.spy();
 		const appSpy = sinon.spy();
