@@ -47,6 +47,7 @@ declare namespace React {
 	export import Component = preact.Component;
 	export import FunctionComponent = preact.FunctionComponent;
 	export import ComponentType = preact.ComponentType;
+	export import ComponentClass = preact.ComponentClass;
 	export import FC = preact.FunctionComponent;
 	export import createContext = preact.createContext;
 	export import createRef = preact.createRef;
@@ -55,6 +56,8 @@ declare namespace React {
 	export import cloneElement = preact.cloneElement;
 	export import ComponentProps = preact.ComponentProps;
 	export import ReactNode = preact.ComponentChild;
+	export import ReactElement = preact.VNode;
+	export import Consumer = preact.Consumer;
 
 	// Suspense
 	export import Suspense = _Suspense.Suspense;
@@ -168,6 +171,12 @@ declare namespace React {
 		| ((instance: T | null) => void)
 		| MutableRefObject<T | null>
 		| null;
+
+	export type ComponentPropsWithRef<
+		C extends ComponentType<any> | keyof JSXInternal.IntrinsicElements
+	> = C extends (new(props: infer P) => Component<any, any>)
+	? PropsWithoutRef<P> & RefAttributes<InstanceType<C>>
+	: ComponentProps<C>;
 
 	export function flushSync<R>(fn: () => R): R;
 	export function flushSync<A, R>(fn: (a: A) => R, a: A): R;
