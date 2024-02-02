@@ -130,6 +130,24 @@ describe('render()', () => {
 		expect(scratch.firstChild).to.have.property('nodeName', 'X-BAR');
 	});
 
+	it('should not register non-function event handlers', () => {
+		const proto = Element.prototype;
+		proto.addEventListener.resetHistory();
+		render(
+			<x-bar
+				only-overflow={true}
+				onChange={() => {
+					console.log('Change');
+				}}
+			/>,
+			scratch
+		);
+
+		expect(proto.addEventListener).to.have.been.calledOnce;
+		expect(scratch.childNodes).to.have.length(1);
+		expect(scratch.firstChild).to.have.property('nodeName', 'X-BAR');
+	});
+
 	it('should support the form attribute', () => {
 		render(
 			<div>
