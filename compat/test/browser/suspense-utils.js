@@ -114,3 +114,46 @@ export function createSuspender(DefaultComponent) {
 
 	return [Suspender, suspend];
 }
+
+/**
+ * @returns {[() => any, (data: any) => Promise<any>, (error: Error) => Promise<any>]}
+ */
+export function createSuspenseLoader() {
+	/** @type {(data: any) => Promise<any>} */
+	let resolver;
+	/** @type {(error: Error) => Promise<any>} */
+	let rejecter;
+	/** @type {any} */
+	let data = null;
+	/** @type {Error} */
+	let error = null;
+
+	/** @type {Promise<any>} */
+	let promise = new Promise((resolve, reject) => {
+		resolver = result => {
+			data = result;
+			resolve(result);
+			return promise;
+		};
+
+		rejecter = e => {
+			error = e;
+			reject(e);
+			return promise;
+		};
+	});
+
+	function useSuspenseLoader() {
+		if (error) {
+			throw error;
+		}
+
+		if (!data) {
+			throw promise;
+		}
+
+		return data;
+	}
+
+	return [useSuspenseLoader, resolver, rejecter];
+}

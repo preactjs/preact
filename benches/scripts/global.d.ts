@@ -10,6 +10,4 @@ interface TachometerOptions {
 
 interface DeoptOptions {
 	framework: string;
-	timeout: number;
-	open: boolean;
 }

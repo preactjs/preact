@@ -2,7 +2,8 @@ import { render } from 'preact';
 import {
 	setupScratch,
 	teardown,
-	createEvent
+	createEvent,
+	supportsPassiveEvents
 } from '../../../test/_util/helpers';
 
 import React, { createElement } from 'preact/compat';
@@ -295,4 +296,38 @@ describe('preact/compat events', () => {
 		scratch.firstChild.dispatchEvent(createEvent('compositionstart'));
 		expect(spy).to.be.calledOnce;
 	});
+
+	it('should normalize onFocus to onfocusin', () => {
+		let spy = sinon.spy();
+		render(<input onFocus={spy} />, scratch);
+		scratch.firstChild.dispatchEvent(createEvent('focusin'));
+		expect(spy).to.be.calledOnce;
+	});
+
+	it('should normalize onBlur to onfocusout', () => {
+		let spy = sinon.spy();
+		render(<input onBlur={spy} />, scratch);
+		scratch.firstChild.dispatchEvent(createEvent('focusout'));
+		expect(spy).to.be.calledOnce;
+	});
+
+	if (supportsPassiveEvents()) {
+		it('should use capturing for event props ending with *Capture', () => {
+			let click = sinon.spy();
+
+			render(
+				<div onTouchMoveCapture={click}>
+					<button type="button">Click me</button>
+				</div>,
+				scratch
+			);
+
+			expect(proto.addEventListener).to.have.been.calledOnce;
+			expect(proto.addEventListener).to.have.been.calledWithExactly(
+				'touchmove',
+				sinon.match.func,
+				true
+			);
+		});
+	}
 });

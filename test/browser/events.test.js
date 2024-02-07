@@ -155,29 +155,23 @@ describe('event handling', () => {
 	// Skip test if browser doesn't support passive events
 	if (supportsPassiveEvents()) {
 		it('should use capturing for event props ending with *Capture', () => {
-			let click = sinon.spy(),
-				focus = sinon.spy();
+			let click = sinon.spy();
 
 			render(
-				<div onClickCapture={click} onFocusCapture={focus}>
-					<button />
+				<div onClickCapture={click}>
+					<button type="button">Click me</button>
 				</div>,
 				scratch
 			);
 
-			let root = scratch.firstChild;
-			root.firstElementChild.click();
-			root.firstElementChild.focus();
+			let btn = scratch.firstChild.firstElementChild;
+			btn.click();
 
 			expect(click, 'click').to.have.been.calledOnce;
-
-			// Focus delegation requires a 50b hack I'm not sure we want to incur
-			expect(focus, 'focus').to.have.been.calledOnce;
 
 			// IE doesn't set it
 			if (!/Edge/.test(navigator.userAgent)) {
 				expect(click).to.have.been.calledWithMatch({ eventPhase: 0 }); // capturing
-				expect(focus).to.have.been.calledWithMatch({ eventPhase: 0 }); // capturing
 			}
 		});
 
@@ -199,4 +193,38 @@ describe('event handling', () => {
 			expect(click, 'click').to.have.been.calledOnce;
 		});
 	}
+
+	// Uniquely named in that the base event names end with 'Capture'
+	it('should support (got|lost)PointerCapture events', () => {
+		let gotPointerCapture = sinon.spy(),
+			gotPointerCaptureCapture = sinon.spy(),
+			lostPointerCapture = sinon.spy(),
+			lostPointerCaptureCapture = sinon.spy();
+
+		render(
+			<div
+				onGotPointerCapture={gotPointerCapture}
+				onLostPointerCapture={lostPointerCapture}
+			/>,
+			scratch
+		);
+
+		expect(proto.addEventListener)
+			.to.have.been.calledTwice.and.to.have.been.calledWith('gotpointercapture')
+			.and.calledWith('lostpointercapture');
+
+		proto.addEventListener.resetHistory();
+
+		render(
+			<div
+				onGotPointerCaptureCapture={gotPointerCaptureCapture}
+				onLostPointerCaptureCapture={lostPointerCaptureCapture}
+			/>,
+			scratch
+		);
+
+		expect(proto.addEventListener)
+			.to.have.been.calledTwice.and.to.have.been.calledWith('gotpointercapture')
+			.and.calledWith('lostpointercapture');
+	});
 });

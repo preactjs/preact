@@ -1,9 +1,10 @@
 name: Saucelabs
 
 on:
+  workflow_dispatch:
   push:
     branches:
-      - master
+      - main
       - restructure
 
 jobs:
@@ -11,14 +12,15 @@ jobs:
     name: Build & Test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version-file: 'package.json'
           cache: 'npm'
           cache-dependency-path: '**/package-lock.json'
       - run: npm ci
       - name: test
+        timeout-minutes: 20
         env:
           CI: true
           COVERAGE: true

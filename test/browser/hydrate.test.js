@@ -50,11 +50,11 @@ describe('hydrate()', () => {
 	beforeEach(() => {
 		scratch = setupScratch();
 		attributesSpy = spyOnElementAttributes();
+		clearLog();
 	});
 
 	afterEach(() => {
 		teardown(scratch);
-		clearLog();
 	});
 
 	it('should reuse existing DOM', () => {
@@ -92,6 +92,7 @@ describe('hydrate()', () => {
 			scratch
 		);
 		expect(scratch.innerHTML).to.equal('<p><i>0</i><b>1</b></p>');
+		expect(getLog()).to.deep.equal(['Comment.remove()']);
 	});
 
 	it('should reuse existing DOM when given components', () => {
@@ -304,12 +305,7 @@ describe('hydrate()', () => {
 		expect(clickHandlers[4]).to.have.been.calledOnce;
 	});
 
-	// Failing because the following condition in diffElementNodes doesn't evaluate to true
-	// when hydrating a dom node which is not correct
-	//		dom===d && newVNode.text!==oldVNode.text
-	// We don't set `d` when hydrating. If we did, then newVNode.text would never equal
-	// oldVNode.text since oldVNode is always EMPTY_OBJ when hydrating
-	it.skip('should override incorrect pre-existing DOM with VNodes passed into render', () => {
+	it('should override incorrect pre-existing DOM with VNodes passed into render', () => {
 		const initialHtml = [
 			div('sibling'),
 			ul([li('1'), li('4'), li('3'), li('2')])
@@ -339,8 +335,9 @@ describe('hydrate()', () => {
 		].join('');
 
 		expect(scratch.innerHTML).to.equal(finalHtml);
-		// TODO: Fill in with proper log once this test is passing
-		expect(getLog()).to.deep.equal([]);
+		expect(getLog()).to.deep.equal([
+			'<div>sibling1234.insertBefore(<ul>1234, <div>sibling)'
+		]);
 	});
 
 	it('should not merge attributes with node created by the DOM', () => {
@@ -462,5 +459,13 @@ describe('hydrate()', () => {
 		scratch.innerHTML = '<p>hello <!-- c -->foo</p>';
 		hydrate(<p>hello {'foo'}</p>, scratch);
 		expect(scratch.innerHTML).to.equal('<p>hello foo</p>');
+		expect(getLog()).to.deep.equal(['Comment.remove()']);
+	});
+
+	it('should skip over multiple comment nodes', () => {
+		scratch.innerHTML = '<p>hello <!-- a --><!-- b -->foo</p>';
+		hydrate(<p>hello {'foo'}</p>, scratch);
+		expect(scratch.innerHTML).to.equal('<p>hello foo</p>');
+		expect(getLog()).to.deep.equal(['Comment.remove()', 'Comment.remove()']);
 	});
 });

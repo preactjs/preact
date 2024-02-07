@@ -15,12 +15,42 @@ import { assign, isNaN } from './util';
 
 const isWeakMapSupported = typeof WeakMap == 'function';
 
-function getClosestDomNodeParent(parent) {
-	if (!parent) return {};
+/**
+ * @param {import('./internal').VNode} vnode
+ * @returns {Array<string>}
+ */
+function getDomChildren(vnode) {
+	let domChildren = [];
+
+	if (!vnode._children) return domChildren;
+
+	vnode._children.forEach(child => {
+		if (child && typeof child.type === 'function') {
+			domChildren.push.apply(domChildren, getDomChildren(child));
+		} else if (child && typeof child.type === 'string') {
+			domChildren.push(child.type);
+		}
+	});
+
+	return domChildren;
+}
+
+/**
+ * @param {import('./internal').VNode} parent
+ * @returns {string}
+ */
+function getClosestDomNodeParentName(parent) {
+	if (!parent) return '';
 	if (typeof parent.type == 'function') {
-		return getClosestDomNodeParent(parent._parent);
+		if (parent._parent === null) {
+			if (parent._dom !== null && parent._dom.parentNode !== null) {
+				return parent._dom.parentNode.localName;
+			}
+			return '';
+		}
+		return getClosestDomNodeParentName(parent._parent);
 	}
-	return parent;
+	return /** @type {string} */ (parent.type);
 }
 
 export function initDebug() {
@@ -32,6 +62,7 @@ export function initDebug() {
 	let oldBeforeDiff = options._diff;
 	let oldDiffed = options.diffed;
 	let oldVnode = options.vnode;
+	let oldRender = options._render;
 	let oldCatchError = options._catchError;
 	let oldRoot = options._root;
 	let oldHook = options._hook;
@@ -115,8 +146,7 @@ export function initDebug() {
 	};
 
 	options._diff = vnode => {
-		let { type, _parent: parent } = vnode;
-		let parentVNode = getClosestDomNodeParent(parent);
+		let { type } = vnode;
 
 		hooksAllowed = true;
 
@@ -142,41 +172,6 @@ export function initDebug() {
 			throw new Error(
 				'Invalid type passed to createElement(): ' +
 					(Array.isArray(type) ? 'array' : type)
-			);
-		}
-
-		if (
-			(type === 'thead' || type === 'tfoot' || type === 'tbody') &&
-			parentVNode.type !== 'table'
-		) {
-			console.error(
-				'Improper nesting of table. Your <thead/tbody/tfoot> should have a <table> parent.' +
-					serializeVNode(vnode) +
-					`\n\n${getOwnerStack(vnode)}`
-			);
-		} else if (
-			type === 'tr' &&
-			parentVNode.type !== 'thead' &&
-			parentVNode.type !== 'tfoot' &&
-			parentVNode.type !== 'tbody' &&
-			parentVNode.type !== 'table'
-		) {
-			console.error(
-				'Improper nesting of table. Your <tr> should have a <thead/tbody/tfoot/table> parent.' +
-					serializeVNode(vnode) +
-					`\n\n${getOwnerStack(vnode)}`
-			);
-		} else if (type === 'td' && parentVNode.type !== 'tr') {
-			console.error(
-				'Improper nesting of table. Your <td> should have a <tr> parent.' +
-					serializeVNode(vnode) +
-					`\n\n${getOwnerStack(vnode)}`
-			);
-		} else if (type === 'th' && parentVNode.type !== 'tr') {
-			console.error(
-				'Improper nesting of table. Your <th> should have a <tr>.' +
-					serializeVNode(vnode) +
-					`\n\n${getOwnerStack(vnode)}`
 			);
 		}
 
@@ -252,6 +247,13 @@ export function initDebug() {
 		if (oldBeforeDiff) oldBeforeDiff(vnode);
 	};
 
+	options._render = vnode => {
+		if (oldRender) {
+			oldRender(vnode);
+		}
+		hooksAllowed = true;
+	};
+
 	options._hook = (comp, index, type) => {
 		if (!comp || !hooksAllowed) {
 			throw new Error('Hook can only be invoked from render methods.');
@@ -311,6 +313,7 @@ export function initDebug() {
 	};
 
 	options.diffed = vnode => {
+		const { type, _parent: parent } = vnode;
 		// Check if the user passed plain objects as children. Note that we cannot
 		// move this check into `options.vnode` because components can receive
 		// children in any shape they want (e.g.
@@ -328,6 +331,77 @@ export function initDebug() {
 					);
 				}
 			});
+		}
+
+		if (typeof type === 'string' && (isTableElement(type) || type === 'p')) {
+			// Avoid false positives when Preact only partially rendered the
+			// HTML tree. Whilst we attempt to include the outer DOM in our
+			// validation, this wouldn't work on the server for
+			// `preact-render-to-string`. There we'd otherwise flood the terminal
+			// with false positives, which we'd like to avoid.
+			let domParentName = getClosestDomNodeParentName(parent);
+			if (domParentName !== '') {
+				if (
+					type === 'table' &&
+					// Tables can be nested inside each other if it's inside a cell.
+					// See https://developer.mozilla.org/en-US/docs/Learn/HTML/Tables/Advanced#nesting_tables
+					domParentName !== 'td' &&
+					isTableElement(domParentName)
+				) {
+					console.log(domParentName, parent._dom);
+					console.error(
+						'Improper nesting of table. Your <table> should not have a table-node parent.' +
+							serializeVNode(vnode) +
+							`\n\n${getOwnerStack(vnode)}`
+					);
+				} else if (
+					(type === 'thead' || type === 'tfoot' || type === 'tbody') &&
+					domParentName !== 'table'
+				) {
+					console.error(
+						'Improper nesting of table. Your <thead/tbody/tfoot> should have a <table> parent.' +
+							serializeVNode(vnode) +
+							`\n\n${getOwnerStack(vnode)}`
+					);
+				} else if (
+					type === 'tr' &&
+					domParentName !== 'thead' &&
+					domParentName !== 'tfoot' &&
+					domParentName !== 'tbody' &&
+					domParentName !== 'table'
+				) {
+					console.error(
+						'Improper nesting of table. Your <tr> should have a <thead/tbody/tfoot/table> parent.' +
+							serializeVNode(vnode) +
+							`\n\n${getOwnerStack(vnode)}`
+					);
+				} else if (type === 'td' && domParentName !== 'tr') {
+					console.error(
+						'Improper nesting of table. Your <td> should have a <tr> parent.' +
+							serializeVNode(vnode) +
+							`\n\n${getOwnerStack(vnode)}`
+					);
+				} else if (type === 'th' && domParentName !== 'tr') {
+					console.error(
+						'Improper nesting of table. Your <th> should have a <tr>.' +
+							serializeVNode(vnode) +
+							`\n\n${getOwnerStack(vnode)}`
+					);
+				}
+			} else if (type === 'p') {
+				let illegalDomChildrenTypes = getDomChildren(vnode).filter(childType =>
+					ILLEGAL_PARAGRAPH_CHILD_ELEMENTS.test(childType)
+				);
+				if (illegalDomChildrenTypes.length) {
+					console.error(
+						'Improper nesting of paragraph. Your <p> should not have ' +
+							illegalDomChildrenTypes.join(', ') +
+							'as child-elements.' +
+							serializeVNode(vnode) +
+							`\n\n${getOwnerStack(vnode)}`
+					);
+				}
+			}
 		}
 
 		hooksAllowed = false;
@@ -366,7 +440,8 @@ export function initDebug() {
 				for (let i = 0; i < hooks.length; i += 1) {
 					const hook = hooks[i];
 					if (hook._args) {
-						for (const arg of hook._args) {
+						for (let j = 0; j < hook._args.length; j++) {
+							const arg = hook._args[j];
 							if (isNaN(arg)) {
 								const componentName = getDisplayName(vnode);
 								throw new Error(
@@ -399,6 +474,21 @@ Component.prototype.setState = function (update, callback) {
 
 	return setState.call(this, update, callback);
 };
+
+function isTableElement(type) {
+	return (
+		type === 'table' ||
+		type === 'tfoot' ||
+		type === 'tbody' ||
+		type === 'thead' ||
+		type === 'td' ||
+		type === 'tr' ||
+		type === 'th'
+	);
+}
+
+const ILLEGAL_PARAGRAPH_CHILD_ELEMENTS =
+	/^(address|article|aside|blockquote|details|div|dl|fieldset|figcaption|figure|footer|form|h1|h2|h3|h4|h5|h6|header|hgroup|hr|main|menu|nav|ol|p|pre|search|section|table|ul)$/;
 
 const forceUpdate = Component.prototype.forceUpdate;
 Component.prototype.forceUpdate = function (callback) {

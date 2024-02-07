@@ -15,6 +15,7 @@ const h = createElement;
 /** @jsx createElement */
 
 describe('debug', () => {
+	/** @type {HTMLDivElement} */
 	let scratch;
 	let errors = [];
 	let warnings = [];
@@ -354,9 +355,11 @@ describe('debug', () => {
 	describe('table markup', () => {
 		it('missing <tbody>/<thead>/<tfoot>/<table>', () => {
 			const Table = () => (
-				<tr>
-					<td>hi</td>
-				</tr>
+				<div>
+					<tr>
+						<td>hi</td>
+					</tr>
+				</div>
 			);
 			render(<Table />, scratch);
 			expect(console.error).to.be.calledOnce;
@@ -364,11 +367,13 @@ describe('debug', () => {
 
 		it('missing <table> with <thead>', () => {
 			const Table = () => (
-				<thead>
-					<tr>
-						<td>hi</td>
-					</tr>
-				</thead>
+				<div>
+					<thead>
+						<tr>
+							<td>hi</td>
+						</tr>
+					</thead>
+				</div>
 			);
 			render(<Table />, scratch);
 			expect(console.error).to.be.calledOnce;
@@ -376,11 +381,13 @@ describe('debug', () => {
 
 		it('missing <table> with <tbody>', () => {
 			const Table = () => (
-				<tbody>
-					<tr>
-						<td>hi</td>
-					</tr>
-				</tbody>
+				<div>
+					<tbody>
+						<tr>
+							<td>hi</td>
+						</tr>
+					</tbody>
+				</div>
 			);
 			render(<Table />, scratch);
 			expect(console.error).to.be.calledOnce;
@@ -388,11 +395,13 @@ describe('debug', () => {
 
 		it('missing <table> with <tfoot>', () => {
 			const Table = () => (
-				<tfoot>
-					<tr>
-						<td>hi</td>
-					</tr>
-				</tfoot>
+				<div>
+					<tfoot>
+						<tr>
+							<td>hi</td>
+						</tr>
+					</tfoot>
+				</div>
 			);
 			render(<Table />, scratch);
 			expect(console.error).to.be.calledOnce;
@@ -511,6 +520,111 @@ describe('debug', () => {
 				</table>
 			);
 			render(<Table />, scratch);
+			expect(console.error).to.not.be.called;
+		});
+
+		it('should include DOM parents outside of root node', () => {
+			const Table = () => (
+				<tr>
+					<td>Head</td>
+				</tr>
+			);
+
+			const table = document.createElement('table');
+			scratch.appendChild(table);
+			render(<Table />, table);
+			expect(console.error).to.not.be.called;
+		});
+
+		it('should warn for improper nested table', () => {
+			const Table = () => (
+				<table>
+					<tbody>
+						<tr>
+							<table />
+						</tr>
+					</tbody>
+				</table>
+			);
+
+			render(<Table />, scratch);
+			expect(console.error).to.be.calledOnce;
+		});
+
+		it('accepts valid nested tables', () => {
+			const Table = () => (
+				<table>
+					<tr>
+						<th>foo</th>
+					</tr>
+					<tr>
+						<td id="nested">
+							<table>
+								<tr>
+									<td>cell1</td>
+									<td>cell2</td>
+									<td>cell3</td>
+								</tr>
+							</table>
+						</td>
+					</tr>
+					<tr>
+						<td>bar</td>
+					</tr>
+				</table>
+			);
+
+			render(<Table />, scratch);
+			expect(console.error).to.not.be.called;
+		});
+	});
+
+	describe('paragraph nesting', () => {
+		it('should not warn a regular text paragraph', () => {
+			const Paragraph = () => <p>Hello world</p>;
+
+			render(<Paragraph />, scratch);
+			expect(console.error).to.not.be.called;
+		});
+
+		it('should not crash for an empty pragraph', () => {
+			const Paragraph = () => <p />;
+
+			render(<Paragraph />, scratch);
+			expect(console.error).to.not.be.called;
+		});
+
+		it('should warn for nesting illegal dom-nodes under a paragraph', () => {
+			const Paragraph = () => (
+				<p>
+					<h1>Hello world</h1>
+				</p>
+			);
+
+			render(<Paragraph />, scratch);
+			expect(console.error).to.be.calledOnce;
+		});
+
+		it('should warn for nesting illegal dom-nodes under a paragraph as func', () => {
+			const Title = ({ children }) => <h1>{children}</h1>;
+			const Paragraph = () => (
+				<p>
+					<Title>Hello world</Title>
+				</p>
+			);
+
+			render(<Paragraph />, scratch);
+			expect(console.error).to.be.calledOnce;
+		});
+
+		it('should not warn for nesting span under a paragraph', () => {
+			const Paragraph = () => (
+				<p>
+					<span>Hello world</span>
+				</p>
+			);
+
+			render(<Paragraph />, scratch);
 			expect(console.error).to.not.be.called;
 		});
 	});

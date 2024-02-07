@@ -533,6 +533,18 @@ describe('Components', () => {
 		expect(scratch.innerHTML).to.equal('42');
 	});
 
+	it('should render a new String()', () => {
+		class ConstructedStringComponent extends Component {
+			render() {
+				/* eslint-disable no-new-wrappers */
+				return new String('Hi from a constructed string!');
+			}
+		}
+
+		render(<ConstructedStringComponent />, scratch);
+		expect(scratch.innerHTML).to.equal('Hi from a constructed string!');
+	});
+
 	it('should render null as empty string', () => {
 		class NullComponent extends Component {
 			render() {
@@ -1885,6 +1897,28 @@ describe('Components', () => {
 		expect(unmounted).to.equal(',0,1,2,3');
 	});
 
+	it('should ignore invalid vnodes in children array', () => {
+		/** @type { (() => void)} */
+		let update;
+
+		const obj = { a: 10, b: 'hello' };
+		class App extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { i: 0 };
+				update = () => this.setState({ i: this.state.i + 1 });
+			}
+
+			render() {
+				return <p>{obj}</p>;
+			}
+		}
+
+		render(<App />, scratch);
+		update();
+		expect(() => rerender()).not.to.throw();
+	});
+
 	describe('c.base', () => {
 		/* eslint-disable lines-around-comment */
 		/** @type {import('../../src').Component} */
@@ -2659,6 +2693,59 @@ describe('Components', () => {
 			render(<App />, scratch);
 
 			expect(scratch.innerHTML).to.equal('<div>bar</div>');
+		});
+
+		it('should skip shouldComponentUpdate when called during render', () => {
+			let isSCUCalled = false;
+			class App extends Component {
+				shouldComponentUpdate() {
+					isSCUCalled = true;
+					return false;
+				}
+				render() {
+					const isUpdated = this.isUpdated;
+					if (!isUpdated) {
+						this.isUpdated = true;
+						this.forceUpdate();
+					}
+					return <div>Updated: {isUpdated ? 'yes' : 'no'}</div>;
+				}
+			}
+			render(<App />, scratch);
+			rerender();
+			expect(isSCUCalled).to.be.false;
+			expect(scratch.innerHTML).to.equal('<div>Updated: yes</div>');
+		});
+
+		it('should break through strict equality optimization', () => {
+			let isSCUCalled = false;
+
+			class Child extends Component {
+				componentDidMount() {
+					this.props.parent.forceUpdate();
+					this.forceUpdate();
+					this.isUpdated = true;
+				}
+				shouldComponentUpdate() {
+					isSCUCalled = true;
+					return false;
+				}
+				render() {
+					return <div>Updated: {this.isUpdated ? 'yes' : 'no'}</div>;
+				}
+			}
+
+			class App extends Component {
+				children = (<Child parent={this} />);
+				render() {
+					return this.children;
+				}
+			}
+
+			render(<App />, scratch);
+			rerender();
+			expect(isSCUCalled).to.be.false;
+			expect(scratch.innerHTML).to.equal('<div>Updated: yes</div>');
 		});
 	});
 });

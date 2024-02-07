@@ -1,29 +1,19 @@
-import {
-	Component as PreactComponent,
-	PreactContext,
-	ErrorInfo,
-	VNode as PreactVNode
-} from '../../src/internal';
-import { Reducer } from '.';
+import { Reducer, StateUpdater } from '.';
 
 export { PreactContext };
 
-/**
- * The type of arguments passed to a Hook function. While this type is not
- * strictly necessary, they are given a type name to make it easier to read
- * the following types and trace the flow of data.
- */
-export type HookArgs = any;
-
-/**
- * The return type of a Hook function. While this type is not
- * strictly necessary, they are given a type name to make it easier to read
- * the following types and trace the flow of data.
- */
-export type HookReturnValue = any;
-
-/** The public function a user invokes to use a Hook */
-export type Hook = (...args: HookArgs[]) => HookReturnValue;
+export interface Options extends globalThis.Options {
+	/** Attach a hook that is invoked before a vnode is diffed. */
+	_diff?(vnode: VNode): void;
+	diffed?(vnode: VNode): void;
+	/** Attach a hook that is invoked before a vnode has rendered. */
+	_render?(vnode: VNode): void;
+	/** Attach a hook that is invoked after a tree was mounted or was updated. */
+	_commit?(vnode: VNode, commitQueue: Component[]): void;
+	_unmount?(vnode: VNode): void;
+	/** Attach a hook that is invoked before a hook's state is queried. */
+	_hook?(component: Component, index: number, type: HookType): void;
+}
 
 // Hook tracking
 
@@ -34,12 +24,16 @@ export interface ComponentHooks {
 	_pendingEffects: EffectHookState[];
 }
 
-export interface Component extends PreactComponent<any, any> {
+export interface Component extends globalThis.Component<any, any> {
 	__hooks?: ComponentHooks;
+	// Extend to include HookStates
+	_renderCallbacks?: Array<HookState | (() => void)>;
+	_hasScuFromHooks?: boolean;
 }
 
-export interface VNode extends PreactVNode {
+export interface VNode extends globalThis.VNode {
 	_mask?: [number, number];
+	_component?: Component; // Override with our specific Component type
 }
 
 export type HookState =
@@ -47,39 +41,55 @@ export type HookState =
 	| MemoHookState
 	| ReducerHookState
 	| ContextHookState
-	| ErrorBoundaryHookState;
+	| ErrorBoundaryHookState
+	| IdHookState;
+
+interface BaseHookState {
+	_value?: unknown;
+	_nextValue?: undefined;
+	_pendingValue?: undefined;
+	_args?: undefined;
+	_pendingArgs?: undefined;
+	_component?: undefined;
+	_cleanup?: undefined;
+}
 
 export type Effect = () => void | Cleanup;
 export type Cleanup = () => void;
 
-export interface EffectHookState {
+export interface EffectHookState extends BaseHookState {
 	_value?: Effect;
-	_args?: any[];
-	_pendingArgs?: any[];
+	_args?: unknown[];
+	_pendingArgs?: unknown[];
 	_cleanup?: Cleanup | void;
 }
 
-export interface MemoHookState {
-	_value?: any;
-	_pendingValue?: any;
-	_args?: any[];
-	_pendingArgs?: any[];
-	_factory?: () => any;
+export interface MemoHookState<T = unknown> extends BaseHookState {
+	_value?: T;
+	_pendingValue?: T;
+	_args?: unknown[];
+	_pendingArgs?: unknown[];
+	_factory?: () => T;
 }
 
-export interface ReducerHookState {
-	_nextValue?: any;
-	_value?: any;
+export interface ReducerHookState<S = unknown, A = unknown>
+	extends BaseHookState {
+	_nextValue?: [S, StateUpdater<S>];
+	_value?: [S, StateUpdater<S>];
 	_component?: Component;
-	_reducer?: Reducer<any, any>;
+	_reducer?: Reducer<S, A>;
 }
 
-export interface ContextHookState {
+export interface ContextHookState extends BaseHookState {
 	/** Whether this hooks as subscribed to updates yet */
 	_value?: boolean;
 	_context?: PreactContext;
 }
 
-export interface ErrorBoundaryHookState {
-	_value?: (error: any, errorInfo: ErrorInfo) => void;
+export interface ErrorBoundaryHookState extends BaseHookState {
+	_value?: (error: unknown, errorInfo: ErrorInfo) => void;
+}
+
+export interface IdHookState extends BaseHookState {
+	_value?: string;
 }

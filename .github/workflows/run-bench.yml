@@ -1,4 +1,4 @@
-name: Run Benchmark
+name: Benchmark Worker
 
 # Expectations:
 #
@@ -31,8 +31,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: ${{ inputs.timeout }}
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version-file: 'package.json'
           cache: 'npm'
@@ -53,6 +53,9 @@ jobs:
         with:
           name: results
           path: benches/results/${{ inputs.benchmark }}.json
+      - name: Anaylze logs if present
+        working-directory: benches
+        run: '[ -d logs ] && npm run analyze ${{ inputs.benchmark }} || echo "No logs to analyze"'
       - name: Tar logs if present
         working-directory: benches
         run: '[ -d logs ] && tar -zcvf ${{ inputs.benchmark}}_logs.tgz logs || echo "No logs found"'

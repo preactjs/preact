@@ -74,7 +74,7 @@ Unique to Preact we do support several ways to hook into our renderer. All our a
 
 ## Important Branches
 
-We merge every PR into the `master` branch which is the one that we'll use to publish code to npm. For the previous Preact release line we have a branch called `8` which is in maintenance mode. As a new contributor you won't have to deal with that ;)
+We merge every PR into the `main` branch which is the one that we'll use to publish code to npm. For the previous Preact release line we have a branch called `8` which is in maintenance mode. As a new contributor you won't have to deal with that ;)
 
 ## Creating your first Pull-Request
 
@@ -82,7 +82,7 @@ We try to make it as easy as possible to contribute to Preact and make heavy use
 
 Once a PR or a Draft PR has been created our community typically joins the discussion about the proposed change. Sometimes that includes ideas for test cases or even different ways to go about implementing a feature. Often this also includes ideas on how to make the code smaller. We usually refer to the latter as "code-golfing" or just "golfing".
 
-When everything is good to go someone will approve the PR and the changes will be merged into the `master` branch and we usually cut a release a few days/ a week later.
+When everything is good to go someone will approve the PR and the changes will be merged into the `main` branch and we usually cut a release a few days/ a week later.
 
 _The big takeaway for you here is, that we will guide you along the way. We're here to help to make a PR ready for approval!_
 
@@ -90,7 +90,7 @@ The short summary is:
 
 1. Make changes and submit a PR
 2. Modify change according to feedback (if there is any)
-3. PR will be merged into `master`
+3. PR will be merged into `main`
 4. A new release will be cut (every 2-3 weeks).
 
 ## Commonly used scripts for contributions
@@ -172,7 +172,7 @@ rights to publish new releases on npm.
 
 1. Make a PR where **only** the version number is incremented in `package.json` and everywhere else. A simple search and replace works. (note: We follow `SemVer` conventions)
 2. Wait until the PR is approved and merged.
-3. Switch back to the `master` branch and pull the merged PR
+3. Switch back to the `main` branch and pull the merged PR
 4. Create and push a tag for the new version you want to publish:
    1. `git tag 10.0.0`
    2. `git push --tags`
@@ -195,7 +195,7 @@ rights to publish new releases on npm.
    1. I'd recommend writing them in an offline editor because each edit to a draft will change the URL in GitHub.
 2. Make a PR where **only** the version number is incremented in `package.json` (note: We follow `SemVer` conventions)
 3. Wait until the PR is approved and merged.
-4. Switch back to the `master` branch and pull the merged PR
+4. Switch back to the `main` branch and pull the merged PR
 5. Run `npm run build && npm publish`
    1. Make sure you have 2FA enabled in npm, otherwise the above command will fail.
    2. If you're doing a pre-release add `--tag next` to the `npm publish` command to publish it under a different tag (default is `latest`)
