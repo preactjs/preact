@@ -477,4 +477,44 @@ describe('combinations', () => {
 			'anchor effect'
 		]);
 	});
+
+	it.only('should not crash', () => {
+		const B = () => <div>B</div>;
+
+		let update;
+		const Test = () => {
+			const [state, setState] = useState(true);
+			update = () => setState(s => !s);
+
+			if (state) {
+				return (
+					<div>
+						<B />
+						<div />
+					</div>
+				);
+			}
+			return (
+				<div>
+					<div />
+					{null}
+					<B />
+				</div>
+			);
+		};
+		render(<Test />, scratch);
+		expect(scratch.innerHTML).to.equal('<div><div>B</div><div></div></div>');
+
+		update();
+		rerender();
+		expect(scratch.innerHTML).to.equal('<div><div></div><div>B</div></div>');
+
+		update();
+		rerender();
+		expect(scratch.innerHTML).to.equal('<div><div></div><div>B</div></div>');
+
+		update();
+		rerender();
+		expect(scratch.innerHTML).to.equal('<div><div></div><div>B</div></div>');
+	});
 });
