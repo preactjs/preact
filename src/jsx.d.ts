@@ -2419,7 +2419,7 @@ export namespace JSXInternal {
 			| undefined
 			| SignalLike<boolean | undefined>;
 		results?: number | undefined | SignalLike<number | undefined>;
-		translate?: 'yes' | 'no' | undefined | SignalLike<'yes' | 'no' | undefined>;
+		translate?: boolean | undefined | SignalLike<boolean | undefined>;
 
 		// RDFa Attributes
 		about?: string | undefined | SignalLike<string | undefined>;

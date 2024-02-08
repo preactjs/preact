@@ -130,9 +130,14 @@ describe('render()', () => {
 		expect(scratch.firstChild).to.have.property('nodeName', 'X-BAR');
 	});
 
-	it('should support the translate attribute', () => {
-		render(<b translate="no">Bold</b>, scratch);
+	it('should support the translate attribute w/ false as a boolean', () => {
+		render(<b translate={false}>Bold</b>, scratch);
 		expect(scratch.innerHTML).to.equal('<b translate="no">Bold</b>');
+	});
+
+	it('should support the translate attribute w/ true as a boolean', () => {
+		render(<b translate>Bold</b>, scratch);
+		expect(scratch.innerHTML).to.equal('<b translate="yes">Bold</b>');
 	});
 
 	it('should support the form attribute', () => {

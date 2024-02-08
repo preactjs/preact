@@ -83,7 +83,6 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
 			name !== 'width' &&
 			name !== 'height' &&
 			name !== 'href' &&
-			name !== 'translate' &&
 			name !== 'list' &&
 			name !== 'form' &&
 			// Default value in browsers is `-1` and an empty string is
