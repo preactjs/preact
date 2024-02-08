@@ -499,6 +499,16 @@ describe('compat render', () => {
 		expect(updateSpy).to.not.be.calledOnce;
 	});
 
+	it('should support the translate attribute w/ yes as a string', () => {
+		render(<b translate="yes">Bold</b>, scratch);
+		expect(scratch.innerHTML).to.equal('<b translate="yes">Bold</b>');
+	});
+
+	it('should support the translate attribute w/ no as a string', () => {
+		render(<b translate="no">Bold</b>, scratch);
+		expect(scratch.innerHTML).to.equal('<b translate="no">Bold</b>');
+	});
+
 	it('should support false aria-* attributes', () => {
 		render(<div aria-checked={false} />, scratch);
 		expect(scratch.firstChild.getAttribute('aria-checked')).to.equal('false');

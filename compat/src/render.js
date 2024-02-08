@@ -143,6 +143,8 @@ function handleDomVNode(vnode) {
 			// value will be used as the file name and the file will be called
 			// "true" upon downloading it.
 			value = '';
+		} else if (lowerCased === 'translate' && value === 'no') {
+			value = false;
 		} else if (lowerCased === 'ondoubleclick') {
 			i = 'ondblclick';
 		} else if (
