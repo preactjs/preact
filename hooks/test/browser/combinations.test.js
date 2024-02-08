@@ -502,18 +502,22 @@ describe('combinations', () => {
 				</div>
 			);
 		};
+
 		render(<Test />, scratch);
 		expect(scratch.innerHTML).to.equal('<div><div>B</div><div></div></div>');
 
 		update();
+		console.log('--- RENDER');
 		rerender();
 		expect(scratch.innerHTML).to.equal('<div><div></div><div>B</div></div>');
 
 		update();
+		console.log('--- RENDER');
 		rerender();
 		expect(scratch.innerHTML).to.equal('<div><div></div><div>B</div></div>');
 
 		update();
+		console.log('--- RENDER');
 		rerender();
 		expect(scratch.innerHTML).to.equal('<div><div></div><div>B</div></div>');
 	});
