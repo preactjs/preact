@@ -1996,7 +1996,7 @@ export namespace JSXInternal {
 	}
 
 	// All the WAI-ARIA 1.2 role attribute values from https://www.w3.org/TR/wai-aria-1.2/#role_definitions
-	type AriaRole =
+	type WAIAriaRole =
 		| 'alert'
 		| 'alertdialog'
 		| 'application'
@@ -2092,6 +2092,50 @@ export namespace JSXInternal {
 		| 'widget'
 		| 'window'
 		| 'none presentation';
+
+	// All the Digital Publishing WAI-ARIA 1.0 role attribute values from https://www.w3.org/TR/dpub-aria-1.0/#role_definitions
+	type DPubAriaRole =
+		| 'doc-abstract'
+		| 'doc-acknowledgments'
+		| 'doc-afterword'
+		| 'doc-appendix'
+		| 'doc-backlink'
+		| 'doc-biblioentry'
+		| 'doc-bibliography'
+		| 'doc-biblioref'
+		| 'doc-chapter'
+		| 'doc-colophon'
+		| 'doc-conclusion'
+		| 'doc-cover'
+		| 'doc-credit'
+		| 'doc-credits'
+		| 'doc-dedication'
+		| 'doc-endnote'
+		| 'doc-endnotes'
+		| 'doc-epigraph'
+		| 'doc-epilogue'
+		| 'doc-errata'
+		| 'doc-example'
+		| 'doc-footnote'
+		| 'doc-foreword'
+		| 'doc-glossary'
+		| 'doc-glossref'
+		| 'doc-index'
+		| 'doc-introduction'
+		| 'doc-noteref'
+		| 'doc-notice'
+		| 'doc-pagebreak'
+		| 'doc-pagelist'
+		| 'doc-part'
+		| 'doc-preface'
+		| 'doc-prologue'
+		| 'doc-pullquote'
+		| 'doc-qna'
+		| 'doc-subtitle'
+		| 'doc-tip'
+		| 'doc-toc';
+
+	type AriaRole = WAIAriaRole | DPubAriaRole;
 
 	export interface HTMLAttributes<RefType extends EventTarget = EventTarget>
 		extends ClassAttributes<RefType>,
