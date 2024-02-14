@@ -37,7 +37,7 @@ options._diff = vnode => {
 };
 
 options._root = (vnode, parentDom) => {
-	if (parentDom._children && parentDom._children._mask) {
+	if (vnode && parentDom._children && parentDom._children._mask) {
 		vnode._mask = parentDom._children._mask;
 	}
 
