@@ -456,4 +456,25 @@ describe('useId', () => {
 			'<div><div>My id is P0-0</div><div>My id is P0-1</div></div>'
 		);
 	});
+
+	it('should not crash for rendering null after a non-null render', () => {
+		const Id = () => {
+			const id = useId();
+			return <div>My id is {id}</div>;
+		};
+
+		const App = props => {
+			return (
+				<div>
+					<Id />
+					{props.secondId ? <Id /> : null}
+				</div>
+			);
+		};
+
+		render(createElement(App, { secondId: false }), scratch);
+		expect(scratch.innerHTML).to.equal('<div><div>My id is P0-0</div></div>');
+		render(null, scratch);
+		expect(scratch.innerHTML).to.equal('');
+	});
 });
