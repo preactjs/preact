@@ -340,7 +340,7 @@ describe('Components', () => {
 			expect(scratch.innerHTML).to.equal('<p>B</p>');
 		});
 
-		it('should update children props correct', () => {
+		it('should update children props correctly in subsequent renders', () => {
 			let update, update2;
 			class Counter extends Component {
 				constructor(props) {
