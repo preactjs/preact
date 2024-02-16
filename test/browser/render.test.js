@@ -1308,4 +1308,52 @@ describe('render()', () => {
 		expect(divs[1].hasAttribute('role')).to.equal(false);
 		expect(divs[2].hasAttribute('role')).to.equal(false);
 	});
+
+	it('should not crash or repeatedly add the same child when replacing a matched vnode with null', () => {
+		const B = () => <div>B</div>;
+
+		let update;
+		class App extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { show: true };
+				update = () => {
+					this.setState(state => ({ show: !state.show }));
+				};
+			}
+
+			render() {
+				if (this.state.show) {
+					return (
+						<div>
+							<B />
+							<div />
+						</div>
+					);
+				}
+				return (
+					<div>
+						<div />
+						{null}
+						<B />
+					</div>
+				);
+			}
+		}
+
+		render(<App />, scratch);
+		expect(scratch.innerHTML).to.equal('<div><div>B</div><div></div></div>');
+
+		update();
+		rerender();
+		expect(scratch.innerHTML).to.equal('<div><div></div><div>B</div></div>');
+
+		update();
+		rerender();
+		expect(scratch.innerHTML).to.equal('<div><div>B</div><div></div></div>');
+
+		update();
+		rerender();
+		expect(scratch.innerHTML).to.equal('<div><div></div><div>B</div></div>');
+	});
 });

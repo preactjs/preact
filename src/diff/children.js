@@ -62,7 +62,6 @@ export function diffChildren(
 
 	for (i = 0; i < newChildrenLength; i++) {
 		childVNode = newParentVNode._children[i];
-
 		if (
 			childVNode == null ||
 			typeof childVNode == 'boolean' ||
@@ -231,11 +230,15 @@ function constructNewChildrenArray(newParentVNode, renderResult, oldChildren) {
 		// Handle unmounting null placeholders, i.e. VNode => null in unkeyed children
 		if (childVNode == null) {
 			oldVNode = oldChildren[i];
-			if (oldVNode && oldVNode.key == null && oldVNode._dom) {
+			if (
+				oldVNode &&
+				oldVNode.key == null &&
+				oldVNode._dom &&
+				(oldVNode._flags & MATCHED) === 0
+			) {
 				if (oldVNode._dom == newParentVNode._nextDom) {
 					newParentVNode._nextDom = getDomSibling(oldVNode);
 				}
-
 				unmount(oldVNode, oldVNode, false);
 
 				// Explicitly nullify this position in oldChildren instead of just
@@ -250,7 +253,6 @@ function constructNewChildrenArray(newParentVNode, renderResult, oldChildren) {
 				oldChildren[i] = null;
 				remainingOldChildren--;
 			}
-
 			continue;
 		}
 
