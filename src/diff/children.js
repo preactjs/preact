@@ -97,13 +97,6 @@ export function diffChildren(
 
 		// Adjust DOM nodes
 		newDom = childVNode._dom;
-		console.log(
-			'compared',
-			newDom,
-			childVNode._index,
-			childVNode && childVNode.type,
-			oldVNode && oldVNode.type
-		);
 		if (childVNode.ref && oldVNode.ref != childVNode.ref) {
 			if (oldVNode.ref) {
 				applyRef(oldVNode.ref, null, childVNode);
@@ -119,7 +112,6 @@ export function diffChildren(
 			firstChildDom = newDom;
 		}
 
-		console.log(newDom, childVNode._flags & INSERT_VNODE);
 		if (
 			childVNode._flags & INSERT_VNODE ||
 			oldVNode._children === childVNode._children
@@ -238,11 +230,15 @@ function constructNewChildrenArray(newParentVNode, renderResult, oldChildren) {
 		// Handle unmounting null placeholders, i.e. VNode => null in unkeyed children
 		if (childVNode == null) {
 			oldVNode = oldChildren[i];
-			if (oldVNode && oldVNode.key == null && oldVNode._dom) {
+			if (
+				oldVNode &&
+				oldVNode.key == null &&
+				oldVNode._dom &&
+				!oldVNode._flags & MATCHED
+			) {
 				if (oldVNode._dom == newParentVNode._nextDom) {
 					newParentVNode._nextDom = getDomSibling(oldVNode);
 				}
-				console.log('unmounting', oldVNode.type);
 				unmount(oldVNode, oldVNode, false);
 
 				// Explicitly nullify this position in oldChildren instead of just
