@@ -234,7 +234,7 @@ function constructNewChildrenArray(newParentVNode, renderResult, oldChildren) {
 				oldVNode &&
 				oldVNode.key == null &&
 				oldVNode._dom &&
-				!oldVNode._flags & MATCHED
+				(oldVNode._flags & MATCHED) === 0
 			) {
 				if (oldVNode._dom == newParentVNode._nextDom) {
 					newParentVNode._nextDom = getDomSibling(oldVNode);
