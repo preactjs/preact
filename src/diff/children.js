@@ -252,6 +252,7 @@ function constructNewChildrenArray(newParentVNode, renderResult, oldChildren) {
 				// assume DOM nodes in this subtree are mounted and usable.
 				oldChildren[i] = null;
 				remainingOldChildren--;
+				skew++;
 			}
 			continue;
 		}

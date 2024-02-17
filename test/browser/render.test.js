@@ -1356,4 +1356,57 @@ describe('render()', () => {
 		rerender();
 		expect(scratch.innerHTML).to.equal('<div><div></div><div>B</div></div>');
 	});
+
+	it('should not crash or repeatedly add the same child when replacing a matched vnode with null (mixed dom-types)', () => {
+		const B = () => <div>B</div>;
+
+		let update;
+		class App extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { show: true };
+				update = () => {
+					this.setState(state => ({ show: !state.show }));
+				};
+			}
+
+			render() {
+				if (this.state.show) {
+					return (
+						<div>
+							<B />
+							<div />
+						</div>
+					);
+				}
+				return (
+					<div>
+						<span />
+						{null}
+						<B />
+						<div />
+					</div>
+				);
+			}
+		}
+
+		render(<App />, scratch);
+		expect(scratch.innerHTML).to.equal('<div><div>B</div><div></div></div>');
+
+		update();
+		rerender();
+		expect(scratch.innerHTML).to.equal(
+			'<div><span></span><div>B</div><div></div></div>'
+		);
+
+		update();
+		rerender();
+		expect(scratch.innerHTML).to.equal('<div><div>B</div><div></div></div>');
+
+		update();
+		rerender();
+		expect(scratch.innerHTML).to.equal(
+			'<div><span></span><div>B</div><div></div></div>'
+		);
+	});
 });
