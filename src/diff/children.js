@@ -238,6 +238,8 @@ function constructNewChildrenArray(newParentVNode, renderResult, oldChildren) {
 			) {
 				if (oldVNode._dom == newParentVNode._nextDom) {
 					newParentVNode._nextDom = getDomSibling(oldVNode);
+				} else {
+					skew++;
 				}
 				unmount(oldVNode, oldVNode, false);
 
@@ -252,7 +254,6 @@ function constructNewChildrenArray(newParentVNode, renderResult, oldChildren) {
 				// assume DOM nodes in this subtree are mounted and usable.
 				oldChildren[i] = null;
 				remainingOldChildren--;
-				skew++;
 			}
 			continue;
 		}
