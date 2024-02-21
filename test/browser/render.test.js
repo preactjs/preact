@@ -1406,4 +1406,36 @@ describe('render()', () => {
 		);
 		expect(scratch.textContent).to.equal('BEDC');
 	});
+
+	it('should reconcile children in right order #3', () => {
+		render(
+			<div>
+				<p>_A1</p>
+				<p>_A2</p>
+				<h2>_A3</h2>
+				<p>_A4</p>
+				<h2>_A5</h2>
+				<p>_A6</p>
+				<h2>_A7</h2>
+				<p>_A8</p>
+			</div>,
+			scratch
+		);
+
+		render(
+			<div>
+				<p>_B1</p>
+				<p>_B2</p>
+				<p>_B3</p>
+				<h2>_B4</h2>
+				<p>_B5</p>
+				<p>_B6</p>
+				<h2>_B7</h2>
+				<p>_B8</p>
+			</div>,
+			scratch
+		);
+
+		expect(scratch.textContent).to.equal('_B1_B2_B3_B4_B5_B6_B7_B8');
+	});
 });
