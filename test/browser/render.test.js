@@ -1440,4 +1440,47 @@ describe('render()', () => {
 			'<div><p>_B1</p><p>_B2</p><p>_B3</p><h2>_B4</h2><p>_B5</p><p>_B6</p><h2>_B7</h2><p>_B8</p></div>'
 		);
 	});
+
+	it('should reconcile children in right order #4', () => {
+		render(
+			<div>
+				<p>_A1</p>
+				<p>_A2</p>
+				<div>_A3</div>
+				<h2>_A4</h2>
+				<p>_A5</p>
+				<div>_A6</div>
+				<h2>_A7</h2>
+				<p>_A8</p>
+				<div>_A9</div>
+				<h2>_A10</h2>
+				<p>_A11</p>
+				<div>_A12</div>
+			</div>,
+			scratch
+		);
+
+		render(
+			<div>
+				<p>_B1</p>
+				<p>_B2</p>
+				<p>_B3</p>
+				<h2>_B4</h2>
+				<p>_B5</p>
+				<p>_B6</p>
+				<p>_B7</p>
+				<h2>_B8</h2>
+				<p>_B9</p>
+				<p>_B10</p>
+				<p>_B11</p>
+				<p>_B12</p>
+				<h2>_B13</h2>
+			</div>,
+			scratch
+		);
+
+		expect(serializeHtml(scratch)).to.equal(
+			'<div><p>_B1</p><p>_B2</p><p>_B3</p><h2>_B4</h2><p>_B5</p><p>_B6</p><p>_B7</p><h2>_B8</h2><p>_B9</p><p>_B10</p><p>_B11</p><p>_B12</p><h2>_B13</h2></div>'
+		);
+	});
 });
