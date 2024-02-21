@@ -1357,7 +1357,7 @@ describe('render()', () => {
 		expect(scratch.innerHTML).to.equal('<div><div></div><div>B</div></div>');
 	});
 
-	it.only('should reconcile chidlren in right order', () => {
+	it('should reconcile chidlren in right order', () => {
 		let data = ['A', 'B', 'C', 'D', 'E'];
 		render(
 			<ul>
