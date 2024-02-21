@@ -305,8 +305,6 @@ function constructNewChildrenArray(newParentVNode, renderResult, oldChildren) {
 			} else if (matchingIndex < skewedIndex) {
 				if (matchingIndex == skewedIndex - 1) {
 					skew = matchingIndex - skewedIndex;
-				} else {
-					skew = 0;
 				}
 			} else {
 				skew = 0;
