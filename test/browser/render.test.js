@@ -1436,6 +1436,8 @@ describe('render()', () => {
 			scratch
 		);
 
-		expect(scratch.textContent).to.equal('_B1_B2_B3_B4_B5_B6_B7_B8');
+		expect(serializeHtml(scratch)).to.equal(
+			'<div><p>_B1</p><p>_B2</p><p>_B3</p><h2>_B4</h2><p>_B5</p><p>_B6</p><h2>_B7</h2><p>_B8</p></div>'
+		);
 	});
 });
