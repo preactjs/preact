@@ -1356,4 +1356,29 @@ describe('render()', () => {
 		rerender();
 		expect(scratch.innerHTML).to.equal('<div><div></div><div>B</div></div>');
 	});
+
+	it.only('should reconcile chidlren in right order', () => {
+		let data = ['A', 'B', 'C', 'D', 'E'];
+		render(
+			<ul>
+				{data.map(d => (
+					<li key={d}>{d}</li>
+				))}
+			</ul>,
+			scratch
+		);
+
+		expect(scratch.textContent).to.equal('ABCDE');
+
+		data = ['B', 'E', 'C', 'D'];
+		render(
+			<ul>
+				{data.map(d => (
+					<li key={d}>{d}</li>
+				))}
+			</ul>,
+			scratch
+		);
+		expect(scratch.textContent).to.equal('BECD');
+	});
 });
