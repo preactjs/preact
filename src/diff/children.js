@@ -201,7 +201,7 @@ function constructNewChildrenArray(newParentVNode, renderResult, oldChildren) {
 				childVNode,
 				null,
 				null,
-				childVNode
+				null
 			);
 		} else if (isArray(childVNode)) {
 			childVNode = newParentVNode._children[i] = createVNode(
