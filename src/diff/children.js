@@ -299,10 +299,7 @@ function constructNewChildrenArray(newParentVNode, renderResult, oldChildren) {
 			if (matchingIndex === skewedIndex + 1) {
 				skew++;
 			} else if (matchingIndex > skewedIndex) {
-				if (remainingOldChildren > newChildrenLength - skewedIndex) {
-					skew += matchingIndex - skewedIndex;
-				} else {
-					// ### Change from keyed: I think this was missing from the algo...
+				if (remainingOldChildren <= newChildrenLength - skewedIndex) {
 					skew--;
 				}
 			} else if (matchingIndex < skewedIndex) {
