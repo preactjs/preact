@@ -303,14 +303,11 @@ function constructNewChildrenArray(newParentVNode, renderResult, oldChildren) {
 				if (remainingOldChildren > newChildrenLength - skewedIndex) {
 					skew += matchingIndex - skewedIndex;
 				} else {
-					// ### Change from keyed: I think this was missing from the algo...
 					skew--;
 				}
 			} else if (matchingIndex < skewedIndex) {
 				if (matchingIndex == skewedIndex - 1) {
 					skew = matchingIndex - skewedIndex;
-				} else {
-					skew = 0;
 				}
 			} else {
 				skew = 0;
@@ -429,7 +426,10 @@ function findMatchingIndex(
 
 	if (
 		oldVNode === null ||
-		(oldVNode && key == oldVNode.key && type === oldVNode.type)
+		(oldVNode &&
+			key == oldVNode.key &&
+			type === oldVNode.type &&
+			(oldVNode._flags & MATCHED) === 0)
 	) {
 		return skewedIndex;
 	} else if (shouldSearch) {
