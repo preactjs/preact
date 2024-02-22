@@ -1304,7 +1304,7 @@ describe('Fragment', () => {
 			'rendering from true to false'
 		);
 		expectDomLogToBe(
-			['<li>1.remove()', '<li>2.remove()', '<ol>043.appendChild(<li>4)'],
+			['<li>1.remove()', '<li>2.remove()'],
 			'rendering from true to false'
 		);
 

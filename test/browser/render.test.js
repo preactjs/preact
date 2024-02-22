@@ -1360,6 +1360,7 @@ describe('render()', () => {
 	it('should not crash or repeatedly add the same child when replacing a matched vnode with null (mixed dom-types)', () => {
 		const B = () => <div>B</div>;
 
+		/** @type {() => void} */
 		let update;
 		class App extends Component {
 			constructor(props) {
@@ -1375,38 +1376,38 @@ describe('render()', () => {
 					return (
 						<div>
 							<B />
-							<div />
+							<div>C</div>
 						</div>
 					);
 				}
 				return (
 					<div>
-						<span />
+						<span>A</span>
 						{null}
 						<B />
-						<div />
+						<div>C</div>
 					</div>
 				);
 			}
 		}
 
 		render(<App />, scratch);
-		expect(scratch.innerHTML).to.equal('<div><div>B</div><div></div></div>');
+		expect(scratch.innerHTML).to.equal('<div><div>B</div><div>C</div></div>');
 
 		update();
 		rerender();
 		expect(scratch.innerHTML).to.equal(
-			'<div><span></span><div>B</div><div></div></div>'
+			'<div><span>A</span><div>B</div><div>C</div></div>'
 		);
 
 		update();
 		rerender();
-		expect(scratch.innerHTML).to.equal('<div><div>B</div><div></div></div>');
+		expect(scratch.innerHTML).to.equal('<div><div>B</div><div>C</div></div>');
 
 		update();
 		rerender();
 		expect(scratch.innerHTML).to.equal(
-			'<div><span></span><div>B</div><div></div></div>'
+			'<div><span>A</span><div>B</div><div>C</div></div>'
 		);
 	});
 });
