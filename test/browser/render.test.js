@@ -1481,6 +1481,60 @@ describe('render()', () => {
 
 		expect(serializeHtml(scratch)).to.equal(
 			'<div><p>_B1</p><p>_B2</p><p>_B3</p><h2>_B4</h2><p>_B5</p><p>_B6</p><p>_B7</p><h2>_B8</h2><p>_B9</p><p>_B10</p><p>_B11</p><p>_B12</p><h2>_B13</h2></div>'
+    );
+  });
+
+	it('should not crash or repeatedly add the same child when replacing a matched vnode with null (mixed dom-types)', () => {
+		const B = () => <div>B</div>;
+
+		/** @type {() => void} */
+		let update;
+		class App extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { show: true };
+				update = () => {
+					this.setState(state => ({ show: !state.show }));
+				};
+			}
+
+			render() {
+				if (this.state.show) {
+					return (
+						<div>
+							<B />
+							<div>C</div>
+						</div>
+					);
+				}
+				return (
+					<div>
+						<span>A</span>
+						{null}
+						<B />
+						<div>C</div>
+					</div>
+				);
+			}
+		}
+
+		render(<App />, scratch);
+		expect(scratch.innerHTML).to.equal('<div><div>B</div><div>C</div></div>');
+
+		update();
+		rerender();
+		expect(scratch.innerHTML).to.equal(
+			'<div><span>A</span><div>B</div><div>C</div></div>'
+		);
+
+		update();
+		rerender();
+		expect(scratch.innerHTML).to.equal('<div><div>B</div><div>C</div></div>');
+
+		update();
+		rerender();
+		expect(scratch.innerHTML).to.equal(
+			'<div><span>A</span><div>B</div><div>C</div></div>'
 		);
 	});
 });
