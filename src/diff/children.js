@@ -424,7 +424,10 @@ function findMatchingIndex(
 
 	if (
 		oldVNode === null ||
-		(oldVNode && key == oldVNode.key && type === oldVNode.type)
+		(oldVNode &&
+			key == oldVNode.key &&
+			type === oldVNode.type &&
+			(oldVNode._flags & MATCHED) === 0)
 	) {
 		return skewedIndex;
 	} else if (shouldSearch) {
