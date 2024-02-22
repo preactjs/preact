@@ -172,6 +172,7 @@ function constructNewChildrenArray(newParentVNode, renderResult, oldChildren) {
 		remainingOldChildren = oldChildrenLength;
 
 	let skew = 0;
+	let moved = false;
 
 	newParentVNode._children = [];
 	for (i = 0; i < newChildrenLength; i++) {
@@ -297,6 +298,7 @@ function constructNewChildrenArray(newParentVNode, renderResult, oldChildren) {
 				childVNode._flags |= INSERT_VNODE;
 			}
 		} else if (matchingIndex !== skewedIndex) {
+			moved = true;
 			if (matchingIndex === skewedIndex + 1) {
 				skew++;
 			} else if (matchingIndex > skewedIndex) {
@@ -313,12 +315,16 @@ function constructNewChildrenArray(newParentVNode, renderResult, oldChildren) {
 				skew = 0;
 			}
 
-			// Move this VNode's DOM if the original index (matchingIndex) doesn't
-			// match the new skew index (i + new skew)
-			if (matchingIndex !== i + skew) {
-				childVNode._flags |= INSERT_VNODE;
-			}
+			// // Move this VNode's DOM if the original index (matchingIndex) doesn't
+			// // match the new skew index (i + new skew)
+			// if (matchingIndex !== i + skew) {
+			// 	childVNode._flags |= INSERT_VNODE;
+			// }
 		}
+	}
+
+	if (moved) {
+		runLIS(newParentVNode);
 	}
 
 	// Remove remaining oldChildren if there are any. Loop forwards so that as we
@@ -336,6 +342,67 @@ function constructNewChildrenArray(newParentVNode, renderResult, oldChildren) {
 				unmount(oldVNode, oldVNode);
 			}
 		}
+	}
+}
+
+/** @type {(newParentVNode: VNode) => void} */
+function runLIS(newParentVNode) {
+	const newChildren = newParentVNode._children;
+	const wipLIS = [];
+	for (let i = 0; i < newChildren.length; i++) {
+		let newVNode = newChildren[i];
+		if (newVNode == null) {
+			continue;
+		}
+
+		newVNode._parent = null;
+		newVNode._flags |= INSERT_VNODE;
+
+		if (newVNode._index === -1) {
+			if (typeof newVNode.type == 'function') {
+				// A newly mounted component will have it's children mounted when they are diffed.
+				//
+				// TODO: Is this only necessary/duplicative of the INSERT_NODE in constructNewChildArray?
+				newVNode._flags &= ~INSERT_VNODE;
+			}
+			continue;
+		}
+
+		if (wipLIS.length === 0) {
+			wipLIS.push(newVNode);
+			continue;
+		}
+
+		let tail = wipLIS[wipLIS.length - 1];
+		if (newVNode._index > tail._index) {
+			newVNode._parent = tail;
+			wipLIS.push(newVNode);
+			continue;
+		}
+
+		let j = wipLIS.length;
+		while (--j >= 0 && wipLIS[j]._index > newVNode._index) {}
+
+		wipLIS[j + 1] = newVNode;
+		let prevLIS = j < 0 ? null : wipLIS[j];
+		newVNode._parent = prevLIS;
+	}
+
+	let lisNode = wipLIS.length ? wipLIS[wipLIS.length - 1] : null;
+	while (lisNode) {
+		lisNode._flags &= ~INSERT_VNODE;
+		let prevLIS = lisNode._parent;
+		lisNode._parent = newParentVNode;
+		lisNode = prevLIS;
+	}
+
+	for (let i = 0; i < newChildren.length; i++) {
+		let newVNode = newChildren[i];
+		if (newVNode == null) {
+			continue;
+		}
+
+		newVNode._parent = newParentVNode;
 	}
 }
 
