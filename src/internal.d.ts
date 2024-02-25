@@ -120,7 +120,7 @@ declare global {
 	}
 
 	export interface PreactEvent extends Event {
-		_dispatched?: number;
+		_dispatched?: number | bigint;
 	}
 
 	// We use the `current` property to differentiate between the two kinds of Refs so

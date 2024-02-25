@@ -13,14 +13,17 @@ function setStyle(style, key, value) {
 	}
 }
 
-// Force counters to 32-bit unsigned integer
-let globalCounter = 0 >>> 0;
-let cachedCounter = 0 >>> 0;
+// BigInt is used for the counter to avoid overflow.
+// It is supported by all major browsers except IE and Opera mini
+// where the plain number is used as fallback.
+// eslint-disable-next-line no-undef
+const zero = typeof window != 'undefined' && window.BigInt ? BigInt(0) : 0;
+let globalCounter = zero;
+let cachedCounter = zero;
 const p = Promise.resolve();
 const getCounter = () =>
 	cachedCounter ||
-	(p.then(() => (cachedCounter = 0 >>> 0)),
-	(cachedCounter = ++globalCounter >>> 0));
+	(p.then(() => (cachedCounter = zero)), (cachedCounter = ++globalCounter));
 
 /**
  * Set a property value on a DOM node
@@ -72,6 +75,14 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
 
 		if (value) {
 			if (!oldValue) {
+				// Note that the counter is incremented when an event listener is newly attached
+				// for the first time during a render cycle. All event listeners that are newly
+				// attached during that render cycle will share the same counter value.
+				// The value will be compared to the _dispatched added to the event itself
+				// and the event will propagate when _attached is less or equal to _dispatched.
+				// Potentially the event handler might be shared between multiple nodes, but
+				// as long as the order of _attached and _dispatched values is correct
+				// the event bubbling will work.
 				value._attached = getCounter();
 				const handler = useCapture ? eventProxyCapture : eventProxy;
 				dom.addEventListener(name, handler, useCapture);
