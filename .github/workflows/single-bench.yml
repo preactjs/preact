@@ -7,14 +7,14 @@ on:
         description: 'Which benchmark to run'
         type: choice
         options:
-          - 02_replace1k
-          - 03_update10th1k_x16
-          - 07_create10k
-          - filter_list
-          - hydrate1k
-          - many_updates
-          - text_update
-          - todo
+          - table-app/replace1k
+          - table-app/update10th1k
+          - table-app/create10k
+          - table-app/hydrate1k
+          - filter_list/filter-list
+          - many-updates/many-updates
+          - text-update/text-update
+          - todo/todo
         required: true
       base:
         description: 'The branch name, tag, or commit sha of the version of preact to benchmark against.'
