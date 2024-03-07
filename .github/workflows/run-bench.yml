@@ -63,15 +63,25 @@ jobs:
         with:
           name: bench-environment
       - name: Move tarballs from env to correct location
+        working-directory: benchmarks
         run: |
           ls -al
-          mv preact-local.tgz benchmarks/dependencies/preact/local-pinned/preact-local-pinned.tgz
-          ls -al benchmarks/dependencies/preact/local-pinned
-          mv preact-main.tgz benchmarks/dependencies/preact/main/preact-main.tgz
-          ls -al benchmarks/dependencies/preact/main
+          mv preact-local.tgz dependencies/preact/local-pinned/preact-local-pinned.tgz
+          ls -al dependencies/preact/local-pinned
+          mv preact-main.tgz dependencies/preact/main/preact-main.tgz
+          ls -al dependencies/preact/main
       - name: Install deps
         working-directory: benchmarks
         run: pnpm install
+      - name: List dependency directories
+        working-directory: benchmarks
+        run: |
+          echo "$ ls -al dependencies/preact/local-pinned"
+          ls -al dependencies/preact/local-pinned
+          echo "$ ls -al dependencies/preact/local-pinned/node_modules"
+          ls -al dependencies/preact/local-pinned/node_modules
+          echo "$ ls -al node_modules/.pnpm/tachometer@*/node_modules/tachometer/node_modules"
+          ls -al node_modules/.pnpm/tachometer@*/node_modules/tachometer/node_modules
 
       # Run benchmark
       - name: Run benchmark
