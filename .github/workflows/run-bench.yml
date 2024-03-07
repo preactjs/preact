@@ -78,7 +78,7 @@ jobs:
         working-directory: benchmarks
         run: |
           export CHROMEDRIVER_FILEPATH=$(which chromedriver)
-          pnpm run bench ${{ inputs.benchmark }}.html -d preact@local-pinned -d preact@main --trace=${{ inputs.trace }}
+          pnpm run bench apps/${{ inputs.benchmark }}.html -d preact@local-pinned -d preact@main --trace=${{ inputs.trace }}
 
       # Prepare output
       - name: Anaylze logs if present
