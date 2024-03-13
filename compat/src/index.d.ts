@@ -115,14 +115,16 @@ declare namespace React {
 	) => preact.VNode<any>;
 	export function isValidElement(element: any): boolean;
 	export function isFragment(element: any): boolean;
+	export function isMemo(element: any): boolean;
 	export function findDOMNode(
 		component: preact.Component | Element
 	): Element | null;
 
-	export abstract class PureComponent<P = {}, S = {}, SS = any> extends preact.Component<
-		P,
-		S
-	> {
+	export abstract class PureComponent<
+		P = {},
+		S = {},
+		SS = any
+	> extends preact.Component<P, S> {
 		isPureReactComponent: boolean;
 	}
 
@@ -174,9 +176,9 @@ declare namespace React {
 
 	export type ComponentPropsWithRef<
 		C extends ComponentType<any> | keyof JSXInternal.IntrinsicElements
-	> = C extends (new(props: infer P) => Component<any, any>)
-	? PropsWithoutRef<P> & RefAttributes<InstanceType<C>>
-	: ComponentProps<C>;
+	> = C extends new (props: infer P) => Component<any, any>
+		? PropsWithoutRef<P> & RefAttributes<InstanceType<C>>
+		: ComponentProps<C>;
 
 	export function flushSync<R>(fn: () => R): R;
 	export function flushSync<A, R>(fn: (a: A) => R, a: A): R;
