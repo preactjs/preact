@@ -135,10 +135,15 @@ jobs:
         with:
           name: results
           path: benchmarks/out/results/${{ inputs.benchmark }}.json
+      - name: Calculate log artifact name
+        id: log-artifact-name
+        run: |
+          NAME=$(echo "${{ inputs.benchmark }}" | sed -r 's/[\/]+/_/g')
+          echo "artifact_name=logs_$NAME" >> $GITHUB_OUTPUT
       - name: Upload logs
         uses: actions/upload-artifact@v3
         with:
-          name: ${{ inputs.benchmark}}_logs
+          name: ${{ steps.log-artifact-name.outputs.artifact_name }}
           path: benchmarks/out/${{ inputs.benchmark }}_logs.tgz
           if-no-files-found: ignore
 
