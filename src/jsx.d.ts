@@ -1718,6 +1718,7 @@ export namespace JSXInternal {
 
 		// UI Events
 		onScroll?: UIEventHandler<Target> | undefined;
+		onScrollEnd?: UIEventHandler<Target> | undefined;
 		onScrollCapture?: UIEventHandler<Target> | undefined;
 
 		// Wheel Events
