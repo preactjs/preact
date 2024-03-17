@@ -56,7 +56,7 @@ jobs:
           npm pack --ignore-scripts
           mv preact-*.tgz preact.tgz
       - name: Upload npm package
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v3
         with:
           name: ${{ inputs.artifact_name || 'npm-package' }}
           path: preact.tgz
