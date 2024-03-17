@@ -1563,10 +1563,10 @@ export namespace JSXInternal {
 		// Focus Events
 		onFocus?: FocusEventHandler<Target> | undefined;
 		onFocusCapture?: FocusEventHandler<Target> | undefined;
-		onfocusin?: FocusEventHandler<Target> | undefined;
-		onfocusinCapture?: FocusEventHandler<Target> | undefined;
-		onfocusout?: FocusEventHandler<Target> | undefined;
-		onfocusoutCapture?: FocusEventHandler<Target> | undefined;
+		onFocusIn?: FocusEventHandler<Target> | undefined;
+		onFocusInCapture?: FocusEventHandler<Target> | undefined;
+		onFocusOut?: FocusEventHandler<Target> | undefined;
+		onFocusOutCapture?: FocusEventHandler<Target> | undefined;
 		onBlur?: FocusEventHandler<Target> | undefined;
 		onBlurCapture?: FocusEventHandler<Target> | undefined;
 
