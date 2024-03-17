@@ -2,20 +2,24 @@ import { ErrorInfo, PreactContext, Ref as PreactRef } from '../..';
 
 type Inputs = ReadonlyArray<unknown>;
 
-export type StateUpdater<S> = (value: S | ((prevState: S) => S)) => void;
+export type Dispatch<A> = (value: A) => void;
+export type StateUpdater<S> = S | ((prevState: S) => S);
+
 /**
  * Returns a stateful value, and a function to update it.
  * @param initialState The initial value (or a function that returns the initial value)
  */
-export function useState<S>(initialState: S | (() => S)): [S, StateUpdater<S>];
+export function useState<S>(
+	initialState: S | (() => S)
+): [S, Dispatch<StateUpdater<S>>];
 
 export function useState<S = undefined>(): [
 	S | undefined,
-	StateUpdater<S | undefined>
+	Dispatch<StateUpdater<S | undefined>>
 ];
 
 export type Reducer<S, A> = (prevState: S, action: A) => S;
-export type Dispatch<A> = (action: A) => void;
+
 /**
  * An alternative to `useState`.
  *
