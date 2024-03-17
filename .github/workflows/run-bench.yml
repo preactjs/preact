@@ -53,6 +53,7 @@ jobs:
         with:
           name: results
           path: benches/results/${{ inputs.benchmark }}.json
+          overwrite: true
       - name: Anaylze logs if present
         working-directory: benches
         run: '[ -d logs ] && npm run analyze ${{ inputs.benchmark }} || echo "No logs to analyze"'
@@ -65,3 +66,4 @@ jobs:
           name: ${{ inputs.benchmark}}_logs
           path: benches/${{ inputs.benchmark}}_logs.tgz
           if-no-files-found: ignore
+          overwrite: true

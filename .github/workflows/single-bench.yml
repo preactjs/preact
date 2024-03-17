@@ -66,6 +66,7 @@ jobs:
         with:
           name: bench-environment
           path: preact-local.tgz
+          overwrite: true
       - name: Clear working directory
         run: |
           ls -al
@@ -82,6 +83,7 @@ jobs:
         with:
           name: bench-environment
           path: preact-main.tgz
+          overwrite: true
 
   benchmark:
     name: Bench ${{ inputs.benchmark }}
