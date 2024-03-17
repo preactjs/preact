@@ -58,7 +58,7 @@ export function render(vnode, parentDom, replaceNode) {
 		isHydrating,
 		refQueue
 	);
-
+	// test
 	// Flush all queued effects
 	commitRoot(commitQueue, vnode, refQueue);
 }
