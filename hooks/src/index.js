@@ -167,7 +167,7 @@ function getHookState(index, type) {
 
 /**
  * @template {unknown} S
- * @param {import('./index').StateUpdater<S>} [initialState]
+ * @param {import('./index').Dispatch<import('./index').StateUpdater<S>>} [initialState]
  * @returns {[S, (state: S) => void]}
  */
 export function useState(initialState) {
@@ -179,7 +179,7 @@ export function useState(initialState) {
  * @template {unknown} S
  * @template {unknown} A
  * @param {import('./index').Reducer<S, A>} reducer
- * @param {import('./index').StateUpdater<S>} initialState
+ * @param {import('./index').Dispatch<import('./index').StateUpdater<S>>} initialState
  * @param {(initialState: any) => void} [init]
  * @returns {[ S, (state: S) => void ]}
  */
