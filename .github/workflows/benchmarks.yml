@@ -43,7 +43,7 @@ jobs:
           required: false
       - run: mv preact.tgz preact-main.tgz
       - name: Upload base preact package
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v3
         with:
           name: bench-environment
           path: preact-main.tgz

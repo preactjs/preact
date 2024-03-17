@@ -37,7 +37,7 @@ jobs:
           node-version-file: 'package.json'
           cache: 'npm'
           cache-dependency-path: '**/package-lock.json'
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v3
         with:
           name: bench-environment
       - name: Install deps
@@ -49,7 +49,7 @@ jobs:
           export CHROMEDRIVER_FILEPATH=$(which chromedriver)
           npm run bench ${{ inputs.benchmark }}.html -- --trace=${{ inputs.trace }}
       - name: Upload results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v3
         with:
           name: results
           path: benches/results/${{ inputs.benchmark }}.json
@@ -60,7 +60,7 @@ jobs:
         working-directory: benches
         run: '[ -d logs ] && tar -zcvf ${{ inputs.benchmark}}_logs.tgz logs || echo "No logs found"'
       - name: Upload logs
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v3
         with:
           name: ${{ inputs.benchmark}}_logs
           path: benches/${{ inputs.benchmark}}_logs.tgz
