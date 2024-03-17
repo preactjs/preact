@@ -60,4 +60,3 @@ jobs:
         with:
           name: ${{ inputs.artifact_name || 'npm-package' }}
           path: preact.tgz
-          overwrite: true

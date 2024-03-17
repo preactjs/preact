@@ -35,7 +35,6 @@ jobs:
         with:
           name: bench-environment
           path: preact-local.tgz
-          overwrite: true
       - name: Download base package
         uses: andrewiggins/download-base-artifact@v3
         with:
@@ -48,7 +47,6 @@ jobs:
         with:
           name: bench-environment
           path: preact-main.tgz
-          overwrite: true
 
   bench_todo:
     name: Bench todo
