@@ -75,44 +75,17 @@ jobs:
         # correct binary when its installed
         run: |
           export CHROMEDRIVER_FILEPATH=$(which chromedriver)
-          pnpm install --reporter ndjson > pnpm-log-0.json
+          pnpm install
           # Install local dependencies with --no-frozen-lockfile to ensure local tarballs
           # are installed regardless of if they match the integrity hash stored in the lockfile
-          pnpm install --no-frozen-lockfile --filter ./dependencies --reporter ndjson > pnpm-log-1.json
-      - name: List dependency directories
-        working-directory: benchmarks
-        run: |
-          echo
-          echo "$ ls -al dependencies/preact/local-pinned"
-          ls -al dependencies/preact/local-pinned
-          echo
-          echo "$ ls -al dependencies/preact/local-pinned/node_modules"
-          ls -al dependencies/preact/local-pinned/node_modules
-          echo
-          echo "$ ls -a dependencies/preact/local-pinned/node_modules/preact"
-          ls -a dependencies/preact/local-pinned/node_modules/preact
-
-      # DEBUGGING
-      # - name: Tar working dir
-      #   run: |
-      #     tar -z -c -f benchmarks.tgz --exclude .git benchmarks
-      # - name: Upload working dir
-      #   uses: actions/upload-artifact@v3
-      #   with:
-      #     name: benchmarks
-      #     path: benchmarks.tgz
-      - name: DEBUG require preact
-        working-directory: benchmarks
-        run: |
-          cd dependencies/preact/local-pinned
-          node -e "console.log(require.resolve('preact'))"
+          pnpm install --no-frozen-lockfile --filter ./dependencies
 
       # Run benchmark
       - name: Run benchmark
         working-directory: benchmarks
         run: |
           export CHROMEDRIVER_FILEPATH=$(which chromedriver)
-          pnpm run bench apps/${{ inputs.benchmark }}.html -d preact@local-pinned -d preact@main --trace=${{ inputs.trace }} -t 0
+          pnpm run bench apps/${{ inputs.benchmark }}.html -d preact@local-pinned -d preact@main --trace=${{ inputs.trace }}
 
       # Prepare output
       - name: Anaylze logs if present
@@ -130,29 +103,19 @@ jobs:
           fi
 
       # Upload results and logs
-      - name: Upload results
-        uses: actions/upload-artifact@v3
-        with:
-          name: results
-          path: benchmarks/out/results/${{ inputs.benchmark }}.json
       - name: Calculate log artifact name
         id: log-artifact-name
         run: |
           NAME=$(echo "${{ inputs.benchmark }}" | sed -r 's/[\/]+/_/g')
           echo "artifact_name=logs_$NAME" >> $GITHUB_OUTPUT
+      - name: Upload results
+        uses: actions/upload-artifact@v3
+        with:
+          name: results
+          path: benchmarks/out/results/${{ inputs.benchmark }}.json
       - name: Upload logs
         uses: actions/upload-artifact@v3
         with:
           name: ${{ steps.log-artifact-name.outputs.artifact_name }}
           path: benchmarks/out/${{ inputs.benchmark }}_logs.tgz
           if-no-files-found: ignore
-
-      # DEBUGGING
-      - name: Tar working dir
-        run: |
-          tar -z -c -f benchmarks.tgz --exclude .git benchmarks
-      - name: Upload working dir
-        uses: actions/upload-artifact@v3
-        with:
-          name: benchmarks
-          path: benchmarks.tgz
