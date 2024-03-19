@@ -6,13 +6,13 @@ on:
     branches:
       - '**'
     paths:
-      - 'src/**.js'
+      - '**/src/**.js'
   push:
     branches:
       - main
-      - restructure
+      - v11
     paths:
-      - 'src/**.js'
+      - '**/src/**.js'
 
 jobs:
   build_test:
