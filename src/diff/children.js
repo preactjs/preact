@@ -116,6 +116,9 @@ export function diffChildren(
 			childVNode._flags & INSERT_VNODE ||
 			oldVNode._children === childVNode._children
 		) {
+			if (!newDom && oldVNode._dom == oldDom) {
+				oldDom = getDomSibling(oldVNode);
+			}
 			oldDom = insert(childVNode, oldDom, parentDom);
 		} else if (
 			typeof childVNode.type == 'function' &&
@@ -229,11 +232,6 @@ function constructNewChildrenArray(newParentVNode, renderResult, oldChildren) {
 
 		const skewedIndex = i + skew;
 
-		console.log(
-			'hi',
-			childVNode && childVNode.type,
-			childVNode && childVNode.key
-		);
 		// Handle unmounting null placeholders, i.e. VNode => null in unkeyed children
 		if (childVNode == null) {
 			oldVNode = oldChildren[skewedIndex];
@@ -244,17 +242,8 @@ function constructNewChildrenArray(newParentVNode, renderResult, oldChildren) {
 				(oldVNode._flags & MATCHED) === 0
 			) {
 				if (oldVNode._dom == newParentVNode._nextDom) {
-					console.log(newParentVNode._parent._nextDom);
-					if (newParentVNode._parent._nextDom === oldVNode._dom) {
-						newParentVNode._parent._nextDom = getDomSibling(oldVNode);
-					}
 					newParentVNode._nextDom = getDomSibling(oldVNode);
 				}
-				console.log(
-					'setting early unmount',
-					newParentVNode.type,
-					newParentVNode._nextDom
-				);
 
 				unmount(oldVNode, oldVNode, false);
 
@@ -386,7 +375,6 @@ function insert(parentVNode, oldDom, parentDom) {
 		oldDom = oldDom && oldDom.nextSibling;
 	} while (oldDom != null && oldDom.nodeType === 8);
 
-	console.log('returning from insert', oldDom);
 	return oldDom;
 }
 

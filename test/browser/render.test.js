@@ -1538,7 +1538,7 @@ describe('render()', () => {
 		);
 	});
 
-	it.only('should shrink lists', () => {
+	it('should shrink lists', () => {
 		function RenderedItem({ item }) {
 			if (item.renderAsNullInComponent) {
 				return null;
@@ -1576,7 +1576,6 @@ describe('render()', () => {
 			'<div><div>One</div><div>Two</div><div>Three</div><div>Four</div></div>'
 		);
 
-		console.log('---');
 		render(<App list={secondList} />, scratch);
 		expect(scratch.innerHTML).to.equal(
 			'<div><div>One</div><div>Six</div><div>Seven</div></div>'
