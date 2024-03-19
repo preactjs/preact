@@ -1481,8 +1481,8 @@ describe('render()', () => {
 
 		expect(serializeHtml(scratch)).to.equal(
 			'<div><p>_B1</p><p>_B2</p><p>_B3</p><h2>_B4</h2><p>_B5</p><p>_B6</p><p>_B7</p><h2>_B8</h2><p>_B9</p><p>_B10</p><p>_B11</p><p>_B12</p><h2>_B13</h2></div>'
-    );
-  });
+		);
+	});
 
 	it('should not crash or repeatedly add the same child when replacing a matched vnode with null (mixed dom-types)', () => {
 		const B = () => <div>B</div>;
@@ -1535,6 +1535,51 @@ describe('render()', () => {
 		rerender();
 		expect(scratch.innerHTML).to.equal(
 			'<div><span>A</span><div>B</div><div>C</div></div>'
+		);
+	});
+
+	it.only('should shrink lists', () => {
+		function RenderedItem({ item }) {
+			if (item.renderAsNullInComponent) {
+				return null;
+			}
+
+			return <div>{item.id}</div>;
+		}
+
+		function App({ list }) {
+			return (
+				<div>
+					{list.map(item => (
+						<RenderedItem key={item.id} item={item} />
+					))}
+				</div>
+			);
+		}
+
+		const firstList = [
+			{ id: 'One' },
+			{ id: 'Two' },
+			{ id: 'Three' },
+			{ id: 'Four' }
+		];
+
+		const secondList = [
+			{ id: 'One' },
+			{ id: 'Four', renderAsNullInComponent: true },
+			{ id: 'Six' },
+			{ id: 'Seven' }
+		];
+
+		render(<App list={firstList} />, scratch);
+		expect(scratch.innerHTML).to.equal(
+			'<div><div>One</div><div>Two</div><div>Three</div><div>Four</div></div>'
+		);
+
+		console.log('---');
+		render(<App list={secondList} />, scratch);
+		expect(scratch.innerHTML).to.equal(
+			'<div><div>One</div><div>Six</div><div>Seven</div></div>'
 		);
 	});
 });
