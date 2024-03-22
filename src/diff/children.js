@@ -116,6 +116,7 @@ export function diffChildren(
 			childVNode._flags & INSERT_VNODE ||
 			oldVNode._children === childVNode._children
 		) {
+			// @ts-expect-error olDom should be present on a DOM node
 			if (oldDom && !oldDom.isConnected) {
 				oldDom = getDomSibling(oldVNode);
 			}
