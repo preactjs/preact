@@ -123,21 +123,20 @@ export function getDomSibling(vnode, childIndex) {
 function renderComponent(component) {
 	let oldVNode = component._vnode,
 		oldDom = oldVNode._dom,
-		parentDom = component._parentDom,
 		commitQueue = [],
 		refQueue = [];
 
-	if (parentDom) {
+	if (component._parentDom) {
 		const newVNode = assign({}, oldVNode);
 		newVNode._original = oldVNode._original + 1;
 		if (options.vnode) options.vnode(newVNode);
 
 		diff(
-			parentDom,
+			component._parentDom,
 			newVNode,
 			oldVNode,
 			component._globalContext,
-			parentDom.ownerSVGElement !== undefined,
+			component._parentDom.ownerSVGElement !== undefined,
 			oldVNode._flags & MODE_HYDRATE ? [oldDom] : null,
 			commitQueue,
 			oldDom == null ? getDomSibling(oldVNode) : oldDom,
