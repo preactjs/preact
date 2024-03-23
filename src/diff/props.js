@@ -69,14 +69,20 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
 		if (value) {
 			if (!oldValue) {
 				value._attached = Date.now();
-				const handler = useCapture ? eventProxyCapture : eventProxy;
-				dom.addEventListener(name, handler, useCapture);
+				dom.addEventListener(
+					name,
+					useCapture ? eventProxyCapture : eventProxy,
+					useCapture
+				);
 			} else {
 				value._attached = oldValue._attached;
 			}
 		} else {
-			const handler = useCapture ? eventProxyCapture : eventProxy;
-			dom.removeEventListener(name, handler, useCapture);
+			dom.removeEventListener(
+				name,
+				useCapture ? eventProxyCapture : eventProxy,
+				useCapture
+			);
 		}
 	} else {
 		if (isSvg) {
