@@ -21,14 +21,10 @@ function setStyle(style, key, value) {
 // but modified to use a virtual clock instead of Date.now() in case event handlers get attached and
 // events get dispatched during the same millisecond.
 //
-// Odd values are reserved for event dispatch times, and even values are reserved for new
-// event handler attachment times.
-//
-// The clock is incremented before a new event is dispatched if the value is even
-// (i.e a new event handler was attached after the previous new event).
-// The clock is also incremented when a new event handler gets attached if the value is odd
-// (i.e. a new event was dispatched after the previous new event dispatch).
+// `eventClock` is incremented whenever the first new event handler gets attached after
+// events have been dispatched. `nextEventClockIncrement` keeps track of this increment.
 let eventClock = 0;
+let nextEventClockIncrement = 0;
 
 /**
  * Set a property value on a DOM node
@@ -85,16 +81,9 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
 
 		if (value) {
 			if (!oldValue) {
-				// If any new events were dispatched between this moment and the last time
-				// an event handler was attached (i.e. `eventClock` is an odd number),
-				// then increment `eventClock` first.
-				//
-				// The following line is a compacted version of:
-				//   if (eventClock % 2 === 1) {
-				// 	   eventClock += 1;
-				//   }
-				//   value._attached = eventClock;
-				value._attached = eventClock += eventClock % 2;
+				value._attached = eventClock += nextEventClockIncrement;
+				nextEventClockIncrement = 0;
+
 				const handler = useCapture ? eventProxyCapture : eventProxy;
 				dom.addEventListener(name, handler, useCapture);
 			} else {
@@ -157,19 +146,13 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
 function eventProxy(e) {
 	if (this._listeners) {
 		const eventHandler = this._listeners[e.type + false];
-		// If e._dispatched is set, it has to be an odd number, so !e._dispatched must be true if set.
-		if (!e._dispatched) {
-			// If any new event handlers were attached after the previous new event dispatch
-			// (i.e. `eventClock` is an even number), then increment `eventClock` first.
-			//
-			// The following line is a compacted version of:
-			//   if (eventClock % 2 === 0) {
-			// 	   eventClock += 1;
-			//   }
-			//   e._dispatched = eventClock;
-			e._dispatched = eventClock += (eventClock + 1) % 2;
-			// When the _dispatched is smaller than the time when the targetted event handler was attached
-			// we know we have bubbled up to an element that was added during patching the dom.
+		if (e._dispatched == null) {
+			e._dispatched = eventClock;
+			nextEventClockIncrement = 1;
+
+			// When `e._dispatched` is smaller than the time when the targeted event
+			// handler was attached we know we have bubbled up to an element that was added
+			// during patching the DOM.
 		} else if (e._dispatched < eventHandler._attached) {
 			return;
 		}
