@@ -594,8 +594,9 @@ export function unmount(vnode, parentVNode, skipRemove) {
 		}
 	}
 
-	if (!skipRemove && vnode._dom != null) {
-		removeNode(vnode._dom);
+	if (vnode._dom != null) {
+		vnode._dom._listeners = undefined;
+		if (!skipRemove) removeNode(vnode._dom);
 	}
 
 	// Must be set to `undefined` to properly clean up `_nextDom`
