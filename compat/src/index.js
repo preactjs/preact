@@ -64,6 +64,21 @@ function isFragment(element) {
 }
 
 /**
+ * Check if the passed element is a Memo node.
+ * @param {*} element The element to check
+ * @returns {boolean}
+ */
+function isMemo(element) {
+	return (
+		!!element &&
+		!!element.displayName &&
+		(typeof element.displayName === 'string' ||
+			element.displayName instanceof String) &&
+		element.displayName.startsWith('Memo(')
+	);
+}
+
+/**
  * Wrap `cloneElement` to abort if the passed element is not a valid element and apply
  * all vnode normalizations.
  * @param {import('./internal').VNode} element The vnode to clone
@@ -215,6 +230,7 @@ export {
 	Fragment,
 	isValidElement,
 	isFragment,
+	isMemo,
 	findDOMNode,
 	Component,
 	PureComponent,
@@ -263,6 +279,7 @@ export default {
 	isValidElement,
 	isElement,
 	isFragment,
+	isMemo,
 	findDOMNode,
 	Component,
 	PureComponent,
