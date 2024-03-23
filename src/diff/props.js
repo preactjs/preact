@@ -77,6 +77,7 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
 		} else {
 			const handler = useCapture ? eventProxyCapture : eventProxy;
 			dom.removeEventListener(name, handler, useCapture);
+			dom._listeners[name + useCapture] = undefined;
 		}
 	} else {
 		if (isSvg) {
