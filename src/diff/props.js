@@ -13,6 +13,21 @@ function setStyle(style, key, value) {
 	}
 }
 
+const reserved = [
+	'width',
+	'height',
+	'href',
+	'list',
+	'form',
+	// Default value in browsers is `-1` and an empty string is
+	// cast to `0` instead
+	'tabIndex',
+	'download',
+	'rowSpan',
+	'colSpan',
+	'role'
+];
+
 /**
  * Set a property value on a DOM node
  * @param {PreactElement} dom The DOM node to modify
@@ -90,21 +105,7 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
 			// - xlink:href / xlinkHref --> href (xlink:href was removed from SVG and isn't needed)
 			// - className --> class
 			name = name.replace(/xlink(H|:h)/, 'h').replace(/sName$/, 's');
-		} else if (
-			name !== 'width' &&
-			name !== 'height' &&
-			name !== 'href' &&
-			name !== 'list' &&
-			name !== 'form' &&
-			// Default value in browsers is `-1` and an empty string is
-			// cast to `0` instead
-			name !== 'tabIndex' &&
-			name !== 'download' &&
-			name !== 'rowSpan' &&
-			name !== 'colSpan' &&
-			name !== 'role' &&
-			name in dom
-		) {
+		} else if (!reserved.includes(name) && name in dom) {
 			try {
 				dom[name] = value == null ? '' : value;
 				// labelled break is 1b smaller here than a return statement (sorry)
