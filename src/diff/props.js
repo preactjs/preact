@@ -13,6 +13,23 @@ function setStyle(style, key, value) {
 	}
 }
 
+// A "virtual clock" to solve issues like https://github.com/preactjs/preact/issues/3927.
+// When the DOM performs an event it leaves micro-ticks in between bubbling up which means that
+// an event can trigger on a newly reated DOM-node while the event bubbles up.
+//
+// Originally inspired by Vue https://github.com/vuejs/core/blob/main/packages/runtime-dom/src/modules/events.ts#L90-L101,
+// but modified to use a virtual clock instead of Date.now() in case event handlers get attached and
+// events get dispatched during the same millisecond.
+//
+// Odd values are reserved for event dispatch times, and even values are reserved for new
+// event handler attachment times.
+//
+// The clock is incremented before a new event is dispatched if the value is even
+// (i.e a new event handler was attached after the previous new event).
+// The clock is also incremented when a new event handler gets attached if the value is odd
+// (i.e. a new event was dispatched after the previous new event dispatch).
+let eventClock = 0;
+
 /**
  * Set a property value on a DOM node
  * @param {PreactElement} dom The DOM node to modify
@@ -68,7 +85,16 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
 
 		if (value) {
 			if (!oldValue) {
-				value._attached = Date.now();
+				// If any new events were dispatched between this moment and the last time
+				// an event handler was attached (i.e. `eventClock` is an odd number),
+				// then increment `eventClock` first.
+				//
+				// The following line is a compacted version of:
+				//   if (eventClock % 2 === 1) {
+				// 	   eventClock += 1;
+				//   }
+				//   value._attached = eventClock;
+				value._attached = eventClock += eventClock % 2;
 				dom.addEventListener(
 					name,
 					useCapture ? eventProxyCapture : eventProxy,
@@ -137,18 +163,20 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
 function eventProxy(e) {
 	if (this._listeners) {
 		const eventHandler = this._listeners[e.type + false];
-		/**
-		 * This trick is inspired by Vue https://github.com/vuejs/core/blob/main/packages/runtime-dom/src/modules/events.ts#L90-L101
-		 * when the dom performs an event it leaves micro-ticks in between bubbling up which means that an event can trigger on a newly
-		 * created DOM-node while the event bubbles up, this can cause quirky behavior as seen in https://github.com/preactjs/preact/issues/3927
-		 */
+		// If e._dispatched is set, it has to be an odd number, so !e._dispatched must be true if set.
 		if (!e._dispatched) {
-			// When an event has no _dispatched we know this is the first event-target in the chain
-			// so we set the initial dispatched time.
-			e._dispatched = Date.now();
+			// If any new event handlers were attached after the previous new event dispatch
+			// (i.e. `eventClock` is an even number), then increment `eventClock` first.
+			//
+			// The following line is a compacted version of:
+			//   if (eventClock % 2 === 0) {
+			// 	   eventClock += 1;
+			//   }
+			//   e._dispatched = eventClock;
+			e._dispatched = eventClock += (eventClock + 1) % 2;
 			// When the _dispatched is smaller than the time when the targetted event handler was attached
 			// we know we have bubbled up to an element that was added during patching the dom.
-		} else if (e._dispatched <= eventHandler._attached) {
+		} else if (e._dispatched < eventHandler._attached) {
 			return;
 		}
 		return eventHandler(options.event ? options.event(e) : e);
