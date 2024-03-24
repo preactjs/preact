@@ -13,21 +13,17 @@ function setStyle(style, key, value) {
 	}
 }
 
-// A "virtual clock" to solve issues like https://github.com/preactjs/preact/issues/3927.
+// A logical clock to solve issues like https://github.com/preactjs/preact/issues/3927.
 // When the DOM performs an event it leaves micro-ticks in between bubbling up which means that
 // an event can trigger on a newly reated DOM-node while the event bubbles up.
 //
-// Originally inspired by Vue https://github.com/vuejs/core/blob/main/packages/runtime-dom/src/modules/events.ts#L90-L101,
-// but modified to use a virtual clock instead of Date.now() in case event handlers get attached and
-// events get dispatched during the same millisecond.
+// Originally inspired by Vue
+// (https://github.com/vuejs/core/blob/caeb8a68811a1b0f79/packages/runtime-dom/src/modules/events.ts#L90-L101),
+// but modified to use a logical clock instead of Date.now() in case event handlers get attached
+// and events get dispatched during the same millisecond.
 //
-// Odd values are reserved for event dispatch times, and even values are reserved for new
-// event handler attachment times.
-//
-// The clock is incremented before a new event is dispatched if the value is even
-// (i.e a new event handler was attached after the previous new event).
-// The clock is also incremented when a new event handler gets attached if the value is odd
-// (i.e. a new event was dispatched after the previous new event dispatch).
+// The clock is incremented after each new event dispatch. This allows 1 000 000 new events
+// per second for over 280 years before the value reaches Number.MAX_SAFE_INTEGER (2**53 - 1).
 let eventClock = 0;
 
 /**
@@ -85,21 +81,12 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
 
 		if (value) {
 			if (!oldValue) {
-				// If any new events were dispatched between this moment and the last time
-				// an event handler was attached (i.e. `eventClock` is an odd number),
-				// then increment `eventClock` first.
-				//
-				// The following line is a compacted version of:
-				//   if (eventClock % 2 === 1) {
-				// 	   eventClock += 1;
-				//   }
-				//   value._attached = eventClock;
-				value._attached = eventClock += eventClock % 2;
+				value._attached = eventClock;
 				dom.addEventListener(
-					name,
-					useCapture ? eventProxyCapture : eventProxy,
-					useCapture
-				);
+          name,
+          useCapture ? eventProxyCapture : eventProxy,
+          useCapture
+        );
 			} else {
 				value._attached = oldValue._attached;
 			}
@@ -156,40 +143,32 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
 }
 
 /**
- * Proxy an event to hooked event handlers
- * @param {PreactEvent} e The event object from the browser
+ * Create an event proxy function.
+ * @param {boolean} useCapture Is the event handler for the capture phase.
  * @private
  */
-function eventProxy(e) {
-	if (this._listeners) {
-		const eventHandler = this._listeners[e.type + false];
-		// If e._dispatched is set, it has to be an odd number, so !e._dispatched must be true if set.
-		if (!e._dispatched) {
-			// If any new event handlers were attached after the previous new event dispatch
-			// (i.e. `eventClock` is an even number), then increment `eventClock` first.
-			//
-			// The following line is a compacted version of:
-			//   if (eventClock % 2 === 0) {
-			// 	   eventClock += 1;
-			//   }
-			//   e._dispatched = eventClock;
-			e._dispatched = eventClock += (eventClock + 1) % 2;
-			// When the _dispatched is smaller than the time when the targetted event handler was attached
-			// we know we have bubbled up to an element that was added during patching the dom.
-		} else if (e._dispatched < eventHandler._attached) {
-			return;
+function createEventProxy(useCapture) {
+	/**
+	 * Proxy an event to hooked event handlers
+	 * @param {PreactEvent} e The event object from the browser
+	 * @private
+	 */
+	return function (e) {
+		if (this._listeners) {
+			const eventHandler = this._listeners[e.type + useCapture];
+			if (e._dispatched == null) {
+				e._dispatched = eventClock++;
+
+				// When `e._dispatched` is smaller than the time when the targeted event
+				// handler was attached we know we have bubbled up to an element that was added
+				// during patching the DOM.
+			} else if (e._dispatched < eventHandler._attached) {
+				return;
+			}
+			return eventHandler(options.event ? options.event(e) : e);
 		}
-		return eventHandler(options.event ? options.event(e) : e);
-	}
+	};
 }
 
-/**
- * Proxy an event to hooked event handlers
- * @param {PreactEvent} e The event object from the browser
- * @private
- */
-function eventProxyCapture(e) {
-	if (this._listeners) {
-		return this._listeners[e.type + true](options.event ? options.event(e) : e);
-	}
-}
+const eventProxy = createEventProxy(false);
+const eventProxyCapture = createEventProxy(true);
