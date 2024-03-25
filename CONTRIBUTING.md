@@ -131,6 +131,30 @@ it.only('should test something', () => {
 - Check the JSDoc block right above the function definition to understand what it does. It contains a short description of each function argument and what it does.
 - Check the callsites of a function to understand how it's used. Modern editors/IDEs allow you to quickly find those, or use the plain old search feature instead.
 
+## Benchmarks
+
+We have a benchmark suite that we use to measure the performance of Preact. Our benchmark suite lives in our [preactjs/benchmarks repository](https://github.com/preactjs/benchmarks), but is included here as Git submodule. To run the benchmarks, first ensure [PNPM](https://pnpm.io/installation) is installed on your system and initialize and setup the submodule (it uses `pnpm` as a package manager):
+
+```bash
+pnpm -v # Make sure pnpm is installed
+git submodule update --init --recursive
+cd benchmarks
+pnpm i
+```
+
+Then you can run the benchmarks:
+
+```bash
+# In the benchmarks folder
+pnpm run bench
+```
+
+Checkout the README in the benchmarks folder for more information on running benchmarks.
+
+> **Note:** When switching branches, git submodules are not automatically updated to the commit of the new branch - it stays at the commit of the previous branch. This can be a feature! It allows you to work in different branches with the latest versions of the benchmarks - especially if you have made changes to the benchmarks.
+>
+> However if you want to switch branches and also update the benchmarks to the latest commit of the new branch, you can run `git submodule update --recursive` after switching branches, or run `git checkout --recurse-submodules` when checking out a new branch.
+
 ## FAQ
 
 ### Why does the JSDoc use TypeScript syntax to specify types?

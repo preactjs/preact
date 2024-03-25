@@ -186,7 +186,8 @@
     "test/fixtures",
     "test/ts/",
     "*.ts",
-    "dist"
+    "dist",
+    "benchmarks"
   ],
   "prettier": {
     "singleQuote": true,
