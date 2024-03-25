@@ -82,15 +82,20 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
 		if (value) {
 			if (!oldValue) {
 				value._attached = eventClock;
-
-				const handler = useCapture ? eventProxyCapture : eventProxy;
-				dom.addEventListener(name, handler, useCapture);
+				dom.addEventListener(
+          name,
+          useCapture ? eventProxyCapture : eventProxy,
+          useCapture
+        );
 			} else {
 				value._attached = oldValue._attached;
 			}
 		} else {
-			const handler = useCapture ? eventProxyCapture : eventProxy;
-			dom.removeEventListener(name, handler, useCapture);
+			dom.removeEventListener(
+				name,
+				useCapture ? eventProxyCapture : eventProxy,
+				useCapture
+			);
 		}
 	} else {
 		if (isSvg) {
@@ -99,18 +104,18 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
 			// - className --> class
 			name = name.replace(/xlink(H|:h)/, 'h').replace(/sName$/, 's');
 		} else if (
-			name !== 'width' &&
-			name !== 'height' &&
-			name !== 'href' &&
-			name !== 'list' &&
-			name !== 'form' &&
+			name != 'width' &&
+			name != 'height' &&
+			name != 'href' &&
+			name != 'list' &&
+			name != 'form' &&
 			// Default value in browsers is `-1` and an empty string is
 			// cast to `0` instead
-			name !== 'tabIndex' &&
-			name !== 'download' &&
-			name !== 'rowSpan' &&
-			name !== 'colSpan' &&
-			name !== 'role' &&
+			name != 'tabIndex' &&
+			name != 'download' &&
+			name != 'rowSpan' &&
+			name != 'colSpan' &&
+			name != 'role' &&
 			name in dom
 		) {
 			try {
