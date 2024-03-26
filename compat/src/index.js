@@ -35,6 +35,31 @@ import {
 	__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED
 } from './render';
 
+
+const requestIdleCallbackPreact =
+	(typeof self !== 'undefined' &&
+		self.requestIdleCallback &&
+		self.requestIdleCallback.bind(window)) ||
+	function (cb) {
+		let start = Date.now()
+		return setTimeout(function () {
+			cb({
+				didTimeout: false,
+				timeRemaining: function () {
+					return Math.max(0, 50 - (Date.now() - start))
+				},
+			})
+		}, 3)
+	}
+
+const cancelIdleCallbackPreact =
+	(typeof self !== 'undefined' &&
+		self.cancelIdleCallback &&
+		self.cancelIdleCallback.bind(window)) ||
+	function (id) {
+		return clearTimeout(id)
+	}
+
 const version = '17.0.2'; // trick libraries to think we are react
 
 /**
@@ -144,7 +169,16 @@ const flushSync = (callback, arg) => callback(arg);
 const StrictMode = Fragment;
 
 export function startTransition(cb) {
-	cb();
+
+	const preactIdleTask = requestIdleCallbackPreact(() => {
+		cb();
+	});
+
+	useEffect(() => {
+		return () => {
+			cancelIdleCallbackPreact(preactIdleTask);
+		}
+	}, [preactIdleTask]);
 }
 
 export function useDeferredValue(val) {
@@ -152,7 +186,17 @@ export function useDeferredValue(val) {
 }
 
 export function useTransition() {
-	return [false, startTransition];
+	const [isTransitionPending, setIsTransitionPending] = useState(false);
+
+	const startTransitionFunction = (cb) => {
+		setIsTransitionPending(true);
+		requestIdleCallbackPreact(() => {
+			cb();
+			setIsTransitionPending(false);
+		});
+	};
+
+	return [isTransitionPending, startTransitionFunction];
 }
 
 // TODO: in theory this should be done after a VNode is diffed as we want to insert
