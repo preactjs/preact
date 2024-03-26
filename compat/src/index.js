@@ -157,7 +157,14 @@ export function useTransition() {
 
 // TODO: in theory this should be done after a VNode is diffed as we want to insert
 // styles/... before it attaches
-export const useInsertionEffect = useLayoutEffect;
+export const useInsertionEffect = (callback, args) => {
+	useLayoutEffect(() => {
+		const preactAnimationID = requestAnimationFrame(callback);
+		() => {
+			cancelAnimationFrame(preactAnimationID);
+		};
+	}, args);
+};
 
 // compat to react-is
 export const isElement = isValidElement;
