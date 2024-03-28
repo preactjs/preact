@@ -46,6 +46,6 @@ jobs:
         uses: andrewiggins/tachometer-reporter-action@v2
         with:
           path: results/*.json
-          base-bench-name: preact-main
-          pr-bench-name: preact-local
+          base-bench-name: preact@main
+          pr-bench-name: preact@local-pinned
           summarize: 'duration, usedJSHeapSize'
