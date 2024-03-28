@@ -1,4 +1,3 @@
-// Test 1
 export { render, hydrate } from './render';
 export {
 	createElement,
