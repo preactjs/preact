@@ -116,6 +116,9 @@ export function diffChildren(
 			childVNode._flags & INSERT_VNODE ||
 			oldVNode._children === childVNode._children
 		) {
+			if (!newDom && oldVNode._dom == oldDom) {
+				oldDom = getDomSibling(oldVNode);
+			}
 			oldDom = insert(childVNode, oldDom, parentDom);
 		} else if (
 			typeof childVNode.type == 'function' &&
@@ -241,6 +244,7 @@ function constructNewChildrenArray(newParentVNode, renderResult, oldChildren) {
 				if (oldVNode._dom == newParentVNode._nextDom) {
 					newParentVNode._nextDom = getDomSibling(oldVNode);
 				}
+
 				unmount(oldVNode, oldVNode, false);
 
 				// Explicitly nullify this position in oldChildren instead of just

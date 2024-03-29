@@ -311,6 +311,8 @@ export function diff(
  * @param {VNode} root
  */
 export function commitRoot(commitQueue, root, refQueue) {
+	root._nextDom = undefined;
+
 	for (let i = 0; i < refQueue.length; i++) {
 		applyRef(refQueue[i], refQueue[++i], refQueue[++i]);
 	}
@@ -577,7 +579,6 @@ export function unmount(vnode, parentVNode, skipRemove) {
 		}
 
 		r.base = r._parentDom = null;
-		vnode._component = undefined;
 	}
 
 	if ((r = vnode._children)) {
@@ -586,7 +587,7 @@ export function unmount(vnode, parentVNode, skipRemove) {
 				unmount(
 					r[i],
 					parentVNode,
-					skipRemove || typeof vnode.type !== 'function'
+					skipRemove || typeof vnode.type != 'function'
 				);
 			}
 		}
@@ -598,7 +599,7 @@ export function unmount(vnode, parentVNode, skipRemove) {
 
 	// Must be set to `undefined` to properly clean up `_nextDom`
 	// for which `null` is a valid value. See comment in `create-element.js`
-	vnode._parent = vnode._dom = vnode._nextDom = undefined;
+	vnode._component = vnode._parent = vnode._dom = vnode._nextDom = undefined;
 }
 
 /** The `.render()` method for a PFC backing instance. */
