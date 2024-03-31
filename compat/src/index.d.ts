@@ -178,7 +178,7 @@ declare namespace React {
 		C extends ComponentType<any> | keyof JSXInternal.IntrinsicElements
 	> = C extends new (props: infer P) => Component<any, any>
 		? PropsWithoutRef<P> & RefAttributes<InstanceType<C>>
-		: ComponentProps<C>;
+		: PropsWithRef<ComponentProps<C>>;
 
 	export function flushSync<R>(fn: () => R): R;
 	export function flushSync<A, R>(fn: (a: A) => R, a: A): R;
