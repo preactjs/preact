@@ -2986,6 +2986,7 @@ export namespace JSXInternal {
 		table: HTMLAttributes<HTMLTableElement>;
 		tbody: HTMLAttributes<HTMLTableSectionElement>;
 		td: HTMLAttributes<HTMLTableCellElement>;
+		template: HTMLAttributes<HTMLTemplateElement>;
 		textarea: HTMLAttributes<HTMLTextAreaElement>;
 		tfoot: HTMLAttributes<HTMLTableSectionElement>;
 		th: HTMLAttributes<HTMLTableCellElement>;
