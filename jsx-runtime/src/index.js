@@ -27,13 +27,14 @@ const isArray = Array.isArray;
  * @param {unknown} [__self]
  */
 function createVNode(type, props, key, isStaticChildren, __source, __self) {
+	if (!props) props = {};
 	// We'll want to preserve `ref` in props to get rid of the need for
 	// forwardRef components in the future, but that should happen via
 	// a separate PR.
-	let normalizedProps = props || {},
+	let normalizedProps = props,
 		ref,
 		i;
-	if (normalizedProps && (ref = normalizedProps.ref)) {
+	if ((ref = normalizedProps.ref)) {
 		normalizedProps = {};
 		for (i in props) {
 			if (i != 'ref') {
