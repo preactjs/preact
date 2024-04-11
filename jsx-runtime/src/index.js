@@ -30,14 +30,15 @@ function createVNode(type, props, key, isStaticChildren, __source, __self) {
 	// We'll want to preserve `ref` in props to get rid of the need for
 	// forwardRef components in the future, but that should happen via
 	// a separate PR.
-	let normalizedProps = {},
+	let normalizedProps = props || {},
 		ref,
 		i;
-	for (i in props) {
-		if (i == 'ref') {
-			ref = props[i];
-		} else {
-			normalizedProps[i] = props[i];
+	if (normalizedProps && (ref = normalizedProps.ref)) {
+		normalizedProps = {};
+		for (i in props) {
+			if (i != 'ref') {
+				normalizedProps[i] = props[i];
+			}
 		}
 	}
 
