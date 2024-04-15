@@ -1,4 +1,4 @@
-import { createElement, Fragment, JSX } from 'preact';
+import { ChangeEventHandler, createElement, Fragment, JSX } from 'preact';
 
 function createSignal<T>(value: T): JSX.SignalLike<T> {
 	return {
@@ -45,3 +45,20 @@ const booleanishTest = (
 		<div aria-haspopup={'dialog'} />
 	</>
 );
+
+const onChange: ChangeEventHandler<HTMLInputElement> = e => {
+	return e.currentTarget.value;
+};
+
+const Test = () => {
+	return (
+		<div>
+			<input onInput={onChange} />
+			<input
+				onInput={e => {
+					return e.currentTarget.value;
+				}}
+			/>
+		</div>
+	);
+};

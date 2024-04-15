@@ -395,3 +395,28 @@ export interface Context<T> {
 export interface PreactContext<T> extends Context<T> {}
 
 export function createContext<T>(defaultValue: T): Context<T>;
+
+type EventHandler<E extends Event<any>> = (event: E) => void;
+export type ClipboardEventHandler<T = Element> = EventHandler<
+	ClipboardEvent<T>
+>;
+export type CompositionEventHandler<T = Element> = EventHandler<
+	CompositionEvent<T>
+>;
+export type DragEventHandler<T = Element> = EventHandler<DragEvent<T>>;
+export type FocusEventHandler<T = Element> = EventHandler<FocusEvent<T>>;
+export type FormEventHandler<T = Element> = EventHandler<FormEvent<T>>;
+export type ChangeEventHandler<T = Element> = EventHandler<ChangeEvent<T>>;
+export type InputEventHandler<T = Element> = EventHandler<InputEvent<T>>;
+export type KeyboardEventHandler<T = Element> = EventHandler<KeyboardEvent<T>>;
+export type MouseEventHandler<T = Element> = EventHandler<MouseEvent<T>>;
+export type TouchEventHandler<T = Element> = EventHandler<TouchEvent<T>>;
+export type PointerEventHandler<T = Element> = EventHandler<PointerEvent<T>>;
+export type UIEventHandler<T = Element> = EventHandler<UIEvent<T>>;
+export type WheelEventHandler<T = Element> = EventHandler<WheelEvent<T>>;
+export type AnimationEventHandler<T = Element> = EventHandler<
+	AnimationEvent<T>
+>;
+export type TransitionEventHandler<T = Element> = EventHandler<
+	TransitionEvent<T>
+>;
