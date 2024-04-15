@@ -58,6 +58,21 @@ declare namespace React {
 	export import ReactNode = preact.ComponentChild;
 	export import ReactElement = preact.VNode;
 	export import Consumer = preact.Consumer;
+	export import ClipboardEventHandler = preact.ClipboardEventHandler;
+	export import CompositionEventHandler = preact.CompositionEventHandler;
+	export import DragEventHandler = preact.DragEventHandler;
+	export import FocusEventHandler = preact.FocusEventHandler;
+	export import FormEventHandler = preact.FormEventHandler;
+	export import ChangeEventHandler = preact.ChangeEventHandler;
+	export import InputEventHandler = preact.InputEventHandler;
+	export import KeyboardEventHandler = preact.KeyboardEventHandler;
+	export import MouseEventHandler = preact.MouseEventHandler;
+	export import TouchEventHandler = preact.TouchEventHandler;
+	export import PointerEventHandler = preact.PointerEventHandler;
+	export import UIEventHandler = preact.UIEventHandler;
+	export import WheelEventHandler = preact.WheelEventHandler;
+	export import AnimationEventHandler = preact.AnimationEventHandler;
+	export import TransitionEventHandler = preact.TransitionEventHandler;
 
 	// Suspense
 	export import Suspense = _Suspense.Suspense;
