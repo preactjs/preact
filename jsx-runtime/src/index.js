@@ -34,10 +34,12 @@ function createVNode(type, props, key, isStaticChildren, __source, __self) {
 	let normalizedProps = props,
 		ref,
 		i;
-	if ((ref = normalizedProps.ref)) {
+	if ('ref' in normalizedProps) {
 		normalizedProps = {};
 		for (i in props) {
 			if (i != 'ref') {
+				ref = props[i];
+			} else {
 				normalizedProps[i] = props[i];
 			}
 		}
