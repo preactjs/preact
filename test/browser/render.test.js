@@ -472,7 +472,7 @@ describe('render()', () => {
 		expect(scratch.firstChild.spellcheck).to.equal(false);
 	});
 
-	// Test for preactjs/preact#651
+	// Test for preactjs/preact#4340
 	it('should respect defaultValue in render', () => {
 		scratch.innerHTML = '<input value="foo">';
 		render(<input defaultValue="foo" />, scratch);

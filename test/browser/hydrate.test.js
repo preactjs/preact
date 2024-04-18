@@ -57,6 +57,7 @@ describe('hydrate()', () => {
 		teardown(scratch);
 	});
 
+	// Test for preactjs/preact#4340
 	it('should respect defaultValue in hydrate', () => {
 		scratch.innerHTML = '<input value="foo">';
 		hydrate(<input defaultValue="foo" />, scratch);
