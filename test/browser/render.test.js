@@ -472,6 +472,35 @@ describe('render()', () => {
 		expect(scratch.firstChild.spellcheck).to.equal(false);
 	});
 
+	// Test for preactjs/preact#4340
+	it('should respect defaultValue in render', () => {
+		scratch.innerHTML = '<input value="foo">';
+		render(<input defaultValue="foo" />, scratch);
+		expect(scratch.firstChild.value).to.equal('foo');
+	});
+
+	it('should support subsequent renders w/ defaultValue', () => {
+		scratch.innerHTML = '<input value="foo">';
+		render(<input defaultValue="foo" value="bar" />, scratch);
+		expect(scratch.firstChild.value).to.equal('bar');
+		render(<input defaultValue="foo" value="baz" />, scratch);
+		expect(scratch.firstChild.value).to.equal('baz');
+	});
+
+	it('should respect defaultChecked in render', () => {
+		scratch.innerHTML = '<input checked="true">';
+		render(<input defaultChecked />, scratch);
+		expect(scratch.firstChild.checked).to.equal(true);
+	});
+
+	it('should support subsequent renders w/ defaultChecked', () => {
+		scratch.innerHTML = '<input checked="true">';
+		render(<input defaultChecked checked />, scratch);
+		expect(scratch.firstChild.checked).to.equal(true);
+		render(<input defaultChecked checked={false} />, scratch);
+		expect(scratch.firstChild.checked).to.equal(false);
+	});
+
 	it('should render download attribute', () => {
 		render(<a download="" />, scratch);
 		expect(scratch.firstChild.getAttribute('download')).to.equal('');

@@ -443,6 +443,12 @@ function diffElementNodes(
 			} else if (i == 'dangerouslySetInnerHTML') {
 				oldHtml = value;
 			} else if (i !== 'key' && !(i in newProps)) {
+				if (
+					(i == 'value' && 'defaultValue' in newProps) ||
+					(i == 'checked' && 'defaultChecked' in newProps)
+				) {
+					continue;
+				}
 				setProperty(dom, i, null, value, isSvg);
 			}
 		}

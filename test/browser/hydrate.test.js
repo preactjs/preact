@@ -57,6 +57,19 @@ describe('hydrate()', () => {
 		teardown(scratch);
 	});
 
+	// Test for preactjs/preact#4340
+	it('should respect defaultValue in hydrate', () => {
+		scratch.innerHTML = '<input value="foo">';
+		hydrate(<input defaultValue="foo" />, scratch);
+		expect(scratch.firstChild.value).to.equal('foo');
+	});
+
+	it('should respect defaultChecked in hydrate', () => {
+		scratch.innerHTML = '<input checked="true">';
+		hydrate(<input defaultChecked />, scratch);
+		expect(scratch.firstChild.checked).to.equal(true);
+	});
+
 	it('should reuse existing DOM', () => {
 		const onClickSpy = sinon.spy();
 		const html = ul([li('1'), li('2'), li('3')]);
