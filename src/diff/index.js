@@ -446,8 +446,9 @@ function diffElementNodes(
 				if (
 					(i == 'value' && 'defaultValue' in newProps) ||
 					(i == 'checked' && 'defaultChecked' in newProps)
-				)
+				) {
 					continue;
+				}
 				setProperty(dom, i, null, value, isSvg);
 			}
 		}
