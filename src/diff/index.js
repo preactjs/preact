@@ -443,6 +443,7 @@ function diffElementNodes(
 			} else if (i == 'dangerouslySetInnerHTML') {
 				oldHtml = value;
 			} else if (i !== 'key' && !(i in newProps)) {
+				if (i == 'value' && 'defaultValue' in newProps) continue;
 				setProperty(dom, i, null, value, isSvg);
 			}
 		}
@@ -524,6 +525,7 @@ function diffElementNodes(
 					// again, which triggers IE11 to re-evaluate the select value
 					(nodeType === 'option' && inputValue !== oldProps[i]))
 			) {
+				console.log('setting', i);
 				setProperty(dom, i, inputValue, oldProps[i], false);
 			}
 

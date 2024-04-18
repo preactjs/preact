@@ -57,6 +57,12 @@ describe('hydrate()', () => {
 		teardown(scratch);
 	});
 
+	it('should respect defaultValue in hydrate', () => {
+		scratch.innerHTML = '<input value="foo">';
+		hydrate(<input defaultValue="foo" />, scratch);
+		expect(scratch.firstChild.value).to.equal('foo');
+	});
+
 	it('should reuse existing DOM', () => {
 		const onClickSpy = sinon.spy();
 		const html = ul([li('1'), li('2'), li('3')]);

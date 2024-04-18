@@ -1,5 +1,5 @@
 import { setupRerender } from 'preact/test-utils';
-import { createElement, render, Component, options } from 'preact';
+import { createElement, render, Component, options, hydrate } from 'preact';
 import {
 	setupScratch,
 	teardown,
@@ -470,6 +470,13 @@ describe('render()', () => {
 	it('should set enumerable boolean attribute', () => {
 		render(<input spellcheck={false} />, scratch);
 		expect(scratch.firstChild.spellcheck).to.equal(false);
+	});
+
+	// Test for preactjs/preact#651
+	it('should respect defaultValue in render', () => {
+		scratch.innerHTML = '<input value="foo">';
+		render(<input defaultValue="foo" />, scratch);
+		expect(scratch.firstChild.value).to.equal('foo');
 	});
 
 	it('should render download attribute', () => {
