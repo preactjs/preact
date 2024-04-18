@@ -525,7 +525,6 @@ function diffElementNodes(
 					// again, which triggers IE11 to re-evaluate the select value
 					(nodeType === 'option' && inputValue !== oldProps[i]))
 			) {
-				console.log('setting', i);
 				setProperty(dom, i, inputValue, oldProps[i], false);
 			}
 
