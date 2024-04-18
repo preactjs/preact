@@ -479,6 +479,15 @@ describe('render()', () => {
 		expect(scratch.firstChild.value).to.equal('foo');
 	});
 
+	// Test for preactjs/preact#4340
+	it('should support subsequent renders', () => {
+		scratch.innerHTML = '<input value="foo">';
+		render(<input defaultValue="foo" value="bar" />, scratch);
+		expect(scratch.firstChild.value).to.equal('bar');
+		render(<input defaultValue="foo" value="baz" />, scratch);
+		expect(scratch.firstChild.value).to.equal('baz');
+	});
+
 	it('should render download attribute', () => {
 		render(<a download="" />, scratch);
 		expect(scratch.firstChild.getAttribute('download')).to.equal('');
