@@ -544,4 +544,23 @@ describe('compat render', () => {
 
 		expect(scratch.textContent).to.equal('foo');
 	});
+
+	it("should support recoils's usage of __SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED", () => {
+		// Simplified version of: https://github.com/facebookexperimental/Recoil/blob/c1b97f3a0117cad76cbc6ab3cb06d89a9ce717af/packages/recoil/core/Recoil_ReactMode.js#L36-L44
+		function useStateWrapper(init) {
+			const { ReactCurrentDispatcher } =
+				React.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
+			const dispatcher = ReactCurrentDispatcher.current;
+			return dispatcher.useState(init);
+		}
+
+		function Foo() {
+			const [value] = useStateWrapper('foo');
+			return <div>{value}</div>;
+		}
+
+		React.render(<Foo />, scratch);
+
+		expect(scratch.textContent).to.equal('foo');
+	});
 });
