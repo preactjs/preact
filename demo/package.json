@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "@material-ui/core": "4.9.5",
+    "@reduxjs/toolkit": "^2.2.3",
     "d3-scale": "^1.0.7",
     "d3-selection": "^1.2.0",
     "htm": "2.1.1",
@@ -26,7 +27,8 @@
     "react-router": "^5.0.1",
     "react-router-dom": "^5.0.1",
     "redux": "^4.0.1",
-    "styled-components": "^4.2.0"
+    "styled-components": "^4.2.0",
+    "zustand": "^4.5.2"
   },
   "volta": {
     "extends": "../package.json"
