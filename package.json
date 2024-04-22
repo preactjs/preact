@@ -67,6 +67,7 @@
       "require": "./jsx-runtime/dist/jsxRuntime.js"
     },
     "./compat/client": {
+      "types": "./compat/client.d.ts",
       "import": "./compat/client.mjs",
       "require": "./compat/client.js"
     },
@@ -209,6 +210,7 @@
     "dist",
     "compat/dist",
     "compat/src",
+    "compat/client.d.ts",
     "compat/client.js",
     "compat/client.mjs",
     "compat/server.browser.js",
