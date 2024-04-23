@@ -1,13 +1,14 @@
 import {
 	Component as PreactComponent,
 	VNode as PreactVNode,
-	FunctionComponent as PreactFunctionComponent
+	FunctionComponent as PreactFunctionComponent,
+	PreactElement
 } from '../../src/internal';
 import { SuspenseProps } from './suspense';
 
 export { ComponentChildren } from '../..';
 
-export { PreactElement } from '../../src/internal';
+export { PreactElement };
 
 export interface Component<P = {}, S = {}> extends PreactComponent<P, S> {
 	isReactComponent?: object;
