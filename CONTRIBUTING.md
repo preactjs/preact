@@ -30,7 +30,7 @@ A quick overview of our repository:
   	src/  # Source code of the compat addon
   	test/ # Tests related to the compat addon
   	dist/ # Build artifacts for publishing on npm (may not be present)
-  
+
   # Sub-package, can be imported via `preact/hooks` by users.
   # The hooks API is an effect based API to deal with component lifcycles.
   # It's similar to hooks in React
@@ -38,7 +38,7 @@ A quick overview of our repository:
   	src/  # Source code of the hooks addon
   	test/ # Tests related to the hooks addon
   	dist/ # Build artifacts for publishing on npm (may not be present)
-  
+
   # Sub-package, can be imported via `preact/debug` by users.
   # Includes debugging warnings and error messages for common mistakes found
   # in Preact application. Also hosts the devtools bridge
@@ -46,18 +46,18 @@ A quick overview of our repository:
   	src/  # Source code of the debug addon
   	test/ # Tests related to the debug addon
   	dist/ # Build artifacts for publishing on npm (may not be present)
-  
+
   # Sub-package, can be imported via `preact/test-utils` by users.
   # Provides helpers to make testing Preact applications easier
   test-utils/
   	src/  # Source code of the test-utils addon
   	test/ # Tests related to the test-utils addon
   	dist/ # Build artifacts for publishing on npm (may not be present)
-  
+
   # A demo application that we use to debug tricky errors and play with new
   # features.
   demo/
-  
+
   # Contains build scripts and dependencies for development
   package.json
 ```
@@ -74,7 +74,7 @@ Unique to Preact we do support several ways to hook into our renderer. All our a
 
 ## Important Branches
 
-We merge every PR into the `master` branch which is the one that we'll use to publish code to npm. For the previous Preact release line we have a branch called `8` which is in maintenance mode. As a new contributor you won't have to deal with that ;)
+We merge every PR into the `main` branch which is the one that we'll use to publish code to npm. For the previous Preact release line we have a branch called `8` which is in maintenance mode. As a new contributor you won't have to deal with that ;)
 
 ## Creating your first Pull-Request
 
@@ -82,7 +82,7 @@ We try to make it as easy as possible to contribute to Preact and make heavy use
 
 Once a PR or a Draft PR has been created our community typically joins the discussion about the proposed change. Sometimes that includes ideas for test cases or even different ways to go about implementing a feature. Often this also includes ideas on how to make the code smaller. We usually refer to the latter as "code-golfing" or just "golfing".
 
-When everything is good to go someone will approve the PR and the changes will be merged into the `master` branch and we usually cut a release a few days/ a week later.
+When everything is good to go someone will approve the PR and the changes will be merged into the `main` branch and we usually cut a release a few days/ a week later.
 
 _The big takeaway for you here is, that we will guide you along the way. We're here to help to make a PR ready for approval!_
 
@@ -90,7 +90,7 @@ The short summary is:
 
 1. Make changes and submit a PR
 2. Modify change according to feedback (if there is any)
-3. PR will be merged into `master`
+3. PR will be merged into `main`
 4. A new release will be cut (every 2-3 weeks).
 
 ## Commonly used scripts for contributions
@@ -131,6 +131,30 @@ it.only('should test something', () => {
 - Check the JSDoc block right above the function definition to understand what it does. It contains a short description of each function argument and what it does.
 - Check the callsites of a function to understand how it's used. Modern editors/IDEs allow you to quickly find those, or use the plain old search feature instead.
 
+## Benchmarks
+
+We have a benchmark suite that we use to measure the performance of Preact. Our benchmark suite lives in our [preactjs/benchmarks repository](https://github.com/preactjs/benchmarks), but is included here as Git submodule. To run the benchmarks, first ensure [PNPM](https://pnpm.io/installation) is installed on your system and initialize and setup the submodule (it uses `pnpm` as a package manager):
+
+```bash
+pnpm -v # Make sure pnpm is installed
+git submodule update --init --recursive
+cd benchmarks
+pnpm i
+```
+
+Then you can run the benchmarks:
+
+```bash
+# In the benchmarks folder
+pnpm run bench
+```
+
+Checkout the README in the benchmarks folder for more information on running benchmarks.
+
+> **Note:** When switching branches, git submodules are not automatically updated to the commit of the new branch - it stays at the commit of the previous branch. This can be a feature! It allows you to work in different branches with the latest versions of the benchmarks - especially if you have made changes to the benchmarks.
+>
+> However if you want to switch branches and also update the benchmarks to the latest commit of the new branch, you can run `git submodule update --recursive` after switching branches, or run `git checkout --recurse-submodules` when checking out a new branch.
+
 ## FAQ
 
 ### Why does the JSDoc use TypeScript syntax to specify types?
@@ -170,16 +194,20 @@ We closely watch our issues and have a pretty active [Slack workspace](https://c
 This guide is intended for core team members that have the necessary
 rights to publish new releases on npm.
 
-1. [Write the release notes](#writing-release-notes) and keep them as a draft in GitHub
-   1. I'd recommend writing them in an offline editor because each edit to a draft will change the URL in GitHub.
-2. Make a PR where **only** the version number is incremented in `package.json` (note: We follow `SemVer` conventions)
-3. Wait until the PR is approved and merged.
-4. Switch back to the `master` branch and pull the merged PR
-5. Run `npm run build && npm publish`
-   1. Make sure you have 2FA enabled in npm, otherwise the above command will fail.
-   2. If you're doing a pre-release add `--tag next` to the `npm publish` command to publish it under a different tag (default is `latest`)
-6. Publish the release notes and create the correct git tag.
-7. Tweet it out
+1. Make a PR where **only** the version number is incremented in `package.json` and everywhere else. A simple search and replace works. (note: We follow `SemVer` conventions)
+2. Wait until the PR is approved and merged.
+3. Switch back to the `main` branch and pull the merged PR
+4. Create and push a tag for the new version you want to publish:
+   1. `git tag 10.0.0`
+   2. `git push --tags`
+5. Wait for the Release workflow to complete
+   - It'll create a draft release and upload the built npm package as an asset to the release
+6. [Fill in the release notes](#writing-release-notes) in GitHub and publish them
+7. Run the publish script with the tag you created
+   1. `node ./scripts/release/publish.mjs 10.0.0`
+   2. Make sure you have 2FA enabled in npm, otherwise the above command will fail.
+   3. If you're doing a pre-release add `--npm-tag next` to the `publish.mjs` command to publish it under a different tag (default is `latest`)
+8. Tweet it out
 
 ## Legacy Releases (8.x)
 
@@ -187,8 +215,16 @@ rights to publish new releases on npm.
 > when switching from a 10.x branch.
 
 0. Run `rm -rf dist node_modules && npm i` to make sure to have the correct dependencies.
-
-Apart from that it's the same as above.
+1. [Write the release notes](#writing-release-notes) and keep them as a draft in GitHub
+   1. I'd recommend writing them in an offline editor because each edit to a draft will change the URL in GitHub.
+2. Make a PR where **only** the version number is incremented in `package.json` (note: We follow `SemVer` conventions)
+3. Wait until the PR is approved and merged.
+4. Switch back to the `main` branch and pull the merged PR
+5. Run `npm run build && npm publish`
+   1. Make sure you have 2FA enabled in npm, otherwise the above command will fail.
+   2. If you're doing a pre-release add `--tag next` to the `npm publish` command to publish it under a different tag (default is `latest`)
+6. Publish the release notes and create the correct git tag.
+7. Tweet it out
 
 ## Writing release notes
 

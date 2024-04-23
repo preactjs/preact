@@ -1,5 +1,5 @@
 import { setupRerender } from 'preact/test-utils';
-import { createElement, render, Component, createRef } from 'preact';
+import { createElement, render, Component, createRef, Fragment } from 'preact';
 import { setupScratch, teardown } from '../_util/helpers';
 
 /** @jsx createElement */
@@ -103,8 +103,8 @@ describe('refs', () => {
 			'called with H1',
 			'called with DIV',
 			'called with null',
-			'called with H1',
 			'called with null',
+			'called with H1',
 			'called with DIV'
 		]);
 	});
@@ -477,5 +477,242 @@ describe('refs', () => {
 
 		render(<App />, scratch);
 		expect(el).to.not.be.equal(null);
+	});
+
+	it('should not remove refs for memoized components keyed', () => {
+		const ref = createRef();
+		const element = <div ref={ref}>hey</div>;
+		function App(props) {
+			return <div key={props.count}>{element}</div>;
+		}
+
+		render(<App count={0} />, scratch);
+		expect(ref.current).to.equal(scratch.firstChild.firstChild);
+		render(<App count={1} />, scratch);
+		expect(ref.current).to.equal(scratch.firstChild.firstChild);
+		render(<App count={2} />, scratch);
+		expect(ref.current).to.equal(scratch.firstChild.firstChild);
+	});
+
+	it('should not remove refs for memoized components unkeyed', () => {
+		const ref = createRef();
+		const element = <div ref={ref}>hey</div>;
+		function App(props) {
+			return <div>{element}</div>;
+		}
+
+		render(<App count={0} />, scratch);
+		expect(ref.current).to.equal(scratch.firstChild.firstChild);
+		render(<App count={1} />, scratch);
+		expect(ref.current).to.equal(scratch.firstChild.firstChild);
+		render(<App count={2} />, scratch);
+		expect(ref.current).to.equal(scratch.firstChild.firstChild);
+	});
+
+	it('should properly call null for memoized components keyed', () => {
+		let calls = [];
+		const element = <div ref={x => calls.push(x)}>hey</div>;
+		function App(props) {
+			return <div key={props.count}>{element}</div>;
+		}
+
+		render(<App count={0} />, scratch);
+		expect(calls).to.deep.equal([scratch.firstChild.firstChild]);
+		calls = [];
+
+		render(<App count={1} />, scratch);
+		expect(calls).to.deep.equal([null, scratch.firstChild.firstChild]);
+		calls = [];
+
+		render(<App count={2} />, scratch);
+		expect(calls).to.deep.equal([null, scratch.firstChild.firstChild]);
+	});
+
+	it('should properly call null for memoized components unkeyed', () => {
+		const calls = [];
+		const element = <div ref={x => calls.push(x)}>hey</div>;
+		function App(props) {
+			return <div>{element}</div>;
+		}
+
+		render(<App count={0} />, scratch);
+		render(<App count={1} />, scratch);
+		render(<App count={2} />, scratch);
+		expect(calls.length).to.equal(1);
+		expect(calls[0]).to.equal(scratch.firstChild.firstChild);
+	});
+
+	// Test for #4049
+	it('should first clean-up refs and after apply them', () => {
+		let calls = [];
+		let set;
+		class App extends Component {
+			constructor(props) {
+				super(props);
+				this.state = {
+					phase: 1
+				};
+				set = () => this.setState({ phase: 2 });
+			}
+
+			render(props, { phase }) {
+				return (
+					<Fragment>
+						{phase === 1 ? (
+							<div>
+								<div
+									ref={r =>
+										r
+											? calls.push('adding ref to two')
+											: calls.push('removing ref from two')
+									}
+								>
+									Element two
+								</div>
+								<div
+									ref={r =>
+										r
+											? calls.push('adding ref to three')
+											: calls.push('removing ref from three')
+									}
+								>
+									Element three
+								</div>
+							</div>
+						) : phase === 2 ? (
+							<div class="outer">
+								<div
+									ref={r =>
+										r
+											? calls.push('adding ref to one')
+											: calls.push('removing ref from one')
+									}
+								>
+									Element one
+								</div>
+								<div class="wrapper">
+									<div
+										ref={r =>
+											r
+												? calls.push('adding ref to two')
+												: calls.push('removing ref from two')
+										}
+									>
+										Element two
+									</div>
+									<div
+										ref={r =>
+											r
+												? calls.push('adding ref to three')
+												: calls.push('removing ref from three')
+										}
+									>
+										Element three
+									</div>
+								</div>
+							</div>
+						) : null}
+					</Fragment>
+				);
+			}
+		}
+
+		render(<App />, scratch);
+
+		expect(calls).to.deep.equal(['adding ref to two', 'adding ref to three']);
+		calls = [];
+
+		set();
+		rerender();
+		expect(calls).to.deep.equal([
+			'removing ref from two',
+			'adding ref to one',
+			'adding ref to two',
+			'adding ref to three'
+		]);
+	});
+
+	it('should bind refs before componentDidMount', () => {
+		/** @type {import('preact').RefObject<HTMLSpanElement>[]} */
+		const refs = [];
+
+		class Parent extends Component {
+			componentDidMount() {
+				// Child refs should be set
+				expect(refs.length).to.equal(2);
+				expect(refs[0].current.tagName).to.equal('SPAN');
+				expect(refs[1].current.tagName).to.equal('SPAN');
+			}
+
+			render(props) {
+				return props.children;
+			}
+		}
+
+		class Child extends Component {
+			constructor(props) {
+				super(props);
+
+				this.ref = createRef();
+			}
+
+			componentDidMount() {
+				// SPAN refs should be set
+				expect(this.ref.current.tagName).to.equal('SPAN');
+				expect(document.body.contains(this.ref.current)).to.equal(true);
+				refs.push(this.ref);
+			}
+
+			render() {
+				return <span ref={this.ref}>Hello</span>;
+			}
+		}
+
+		render(
+			<Parent>
+				<Child />
+				<Child />
+			</Parent>,
+			scratch
+		);
+
+		expect(scratch.innerHTML).to.equal('<span>Hello</span><span>Hello</span>');
+		expect(refs[0].current).to.equalNode(scratch.firstChild);
+		expect(refs[1].current).to.equalNode(scratch.lastChild);
+	});
+
+	it('should call refs after element is added to document on initial mount', () => {
+		const verifyRef = name => el =>
+			expect(document.body.contains(el), name).to.equal(true);
+
+		function App() {
+			return (
+				<div ref={verifyRef('div tag')}>
+					<p ref={verifyRef('p tag')}>Hello</p>
+				</div>
+			);
+		}
+
+		render(<App />, scratch);
+	});
+
+	it('should call refs after element is added to document on update', () => {
+		const verifyRef = name => el =>
+			expect(document.body.contains(el), name).to.equal(true);
+
+		function App({ show = false }) {
+			return (
+				<div>
+					{show && (
+						<p ref={verifyRef('p tag')}>
+							<span ref={verifyRef('inner span')}>Hello</span>
+						</p>
+					)}
+				</div>
+			);
+		}
+
+		render(<App />, scratch);
+		render(<App show />, scratch);
 	});
 });

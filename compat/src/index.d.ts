@@ -17,28 +17,47 @@ declare namespace React {
 	export import Inputs = _hooks.Inputs;
 	export import PropRef = _hooks.PropRef;
 	export import Reducer = _hooks.Reducer;
+	export import Dispatch = _hooks.Dispatch;
 	export import Ref = _hooks.Ref;
-	export import StateUpdater = _hooks.StateUpdater;
+	export import SetStateAction = _hooks.StateUpdater;
 	export import useCallback = _hooks.useCallback;
 	export import useContext = _hooks.useContext;
 	export import useDebugValue = _hooks.useDebugValue;
 	export import useEffect = _hooks.useEffect;
 	export import useImperativeHandle = _hooks.useImperativeHandle;
+	export import useId = _hooks.useId;
 	export import useLayoutEffect = _hooks.useLayoutEffect;
 	export import useMemo = _hooks.useMemo;
 	export import useReducer = _hooks.useReducer;
 	export import useRef = _hooks.useRef;
 	export import useState = _hooks.useState;
+	// React 18 hooks
+	export import useInsertionEffect = _hooks.useLayoutEffect;
+	export function useTransition(): [false, typeof startTransition];
+	export function useDeferredValue<T = any>(val: T): T;
+	export function useSyncExternalStore<T>(
+		subscribe: (flush: () => void) => () => void,
+		getSnapshot: () => T
+	): T;
 
 	// Preact Defaults
+	export import Context = preact.Context;
+	export import ContextType = preact.ContextType;
+	export import RefObject = preact.RefObject;
 	export import Component = preact.Component;
 	export import FunctionComponent = preact.FunctionComponent;
+	export import ComponentType = preact.ComponentType;
+	export import ComponentClass = preact.ComponentClass;
 	export import FC = preact.FunctionComponent;
 	export import createContext = preact.createContext;
 	export import createRef = preact.createRef;
 	export import Fragment = preact.Fragment;
 	export import createElement = preact.createElement;
 	export import cloneElement = preact.cloneElement;
+	export import ComponentProps = preact.ComponentProps;
+	export import ReactNode = preact.ComponentChild;
+	export import ReactElement = preact.VNode;
+	export import Consumer = preact.Consumer;
 
 	// Suspense
 	export import Suspense = _Suspense.Suspense;
@@ -48,26 +67,44 @@ declare namespace React {
 	// Compat
 	export import StrictMode = preact.Fragment;
 	export const version: string;
+	export function startTransition(cb: () => void): void;
+
+	// HTML
+	export interface HTMLAttributes<T extends EventTarget>
+		extends JSXInternal.HTMLAttributes<T> {}
+	export interface HTMLProps<T extends EventTarget>
+		extends JSXInternal.HTMLAttributes<T>,
+			preact.ClassAttributes<T> {}
+	export import DetailedHTMLProps = JSXInternal.DetailedHTMLProps;
+	export import CSSProperties = JSXInternal.CSSProperties;
+	export interface SVGProps<T extends EventTarget>
+		extends JSXInternal.SVGAttributes<T>,
+			preact.ClassAttributes<T> {}
+
+	// Events
+	export import TargetedEvent = JSXInternal.TargetedEvent;
+	export import ChangeEvent = JSXInternal.TargetedEvent;
+	export import ChangeEventHandler = JSXInternal.GenericEventHandler;
 
 	export function createPortal(
 		vnode: preact.VNode,
-		container: Element
+		container: preact.ContainerNode
 	): preact.VNode<any>;
 
 	export function render(
 		vnode: preact.VNode<any>,
-		parent: Element,
+		parent: preact.ContainerNode,
 		callback?: () => void
 	): Component | null;
 
 	export function hydrate(
 		vnode: preact.VNode<any>,
-		parent: Element,
+		parent: preact.ContainerNode,
 		callback?: () => void
 	): Component | null;
 
 	export function unmountComponentAtNode(
-		container: Element | Document | ShadowRoot | DocumentFragment
+		container: preact.ContainerNode
 	): boolean;
 
 	export function createFactory(
@@ -77,14 +114,24 @@ declare namespace React {
 		...children: preact.ComponentChildren[]
 	) => preact.VNode<any>;
 	export function isValidElement(element: any): boolean;
-	export function findDOMNode(component: preact.Component): Element | null;
+	export function isFragment(element: any): boolean;
+	export function isMemo(element: any): boolean;
+	export function findDOMNode(
+		component: preact.Component | Element
+	): Element | null;
 
-	export abstract class PureComponent<P = {}, S = {}> extends preact.Component<
-		P,
-		S
-	> {
+	export abstract class PureComponent<
+		P = {},
+		S = {},
+		SS = any
+	> extends preact.Component<P, S> {
 		isPureReactComponent: boolean;
 	}
+
+	export type MemoExoticComponent<C extends preact.FunctionalComponent<any>> =
+		preact.FunctionComponent<ComponentProps<C>> & {
+			readonly type: C;
+		};
 
 	export function memo<P = {}>(
 		component: preact.FunctionalComponent<P>,
@@ -98,19 +145,52 @@ declare namespace React {
 		) => boolean
 	): C;
 
+	export interface RefAttributes<R> extends preact.Attributes {
+		ref?: preact.Ref<R> | undefined;
+	}
+
 	export interface ForwardFn<P = {}, T = any> {
-		(props: P, ref: Ref<T>): preact.ComponentChild;
+		(props: P, ref: ForwardedRef<T>): preact.ComponentChild;
 		displayName?: string;
+	}
+
+	export interface ForwardRefExoticComponent<P>
+		extends preact.FunctionComponent<P> {
+		defaultProps?: Partial<P> | undefined;
 	}
 
 	export function forwardRef<R, P = {}>(
 		fn: ForwardFn<P, R>
-	): preact.FunctionalComponent<Omit<P, 'ref'> & { ref?: preact.RefObject<R> }>;
+	): preact.FunctionalComponent<PropsWithoutRef<P> & { ref?: preact.Ref<R> }>;
+
+	export type PropsWithoutRef<P> = Omit<P, 'ref'>;
+
+	interface MutableRefObject<T> {
+		current: T;
+	}
+
+	export type ForwardedRef<T> =
+		| ((instance: T | null) => void)
+		| MutableRefObject<T | null>
+		| null;
+
+	export type ComponentPropsWithRef<
+		C extends ComponentType<any> | keyof JSXInternal.IntrinsicElements
+	> = C extends new (props: infer P) => Component<any, any>
+		? PropsWithoutRef<P> & RefAttributes<InstanceType<C>>
+		: ComponentProps<C>;
+
+	export function flushSync<R>(fn: () => R): R;
+	export function flushSync<A, R>(fn: (a: A) => R, a: A): R;
 
 	export function unstable_batchedUpdates(
 		callback: (arg?: any) => void,
 		arg?: any
 	): void;
+
+	export type PropsWithChildren<P = unknown> = P & {
+		children?: preact.ComponentChild | undefined;
+	};
 
 	export const Children: {
 		map<T extends preact.ComponentChild, R>(

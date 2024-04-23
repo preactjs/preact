@@ -1,10 +1,11 @@
-import * as path from 'path';
+/* eslint-disable no-console */
+
 import { mkdir } from 'fs/promises';
+import path from 'path';
 import { spawn } from 'child_process';
-import { Transform } from 'stream';
 import escapeRe from 'escape-string-regexp';
+import puppeteer from 'puppeteer';
 import stripAnsi from 'strip-ansi';
-import { pool } from '@kristoferbaxter/async';
 import {
 	globSrc,
 	benchesRoot,
@@ -18,11 +19,11 @@ import { defaultBenchOptions } from './bench.js';
 export const defaultDeoptsOptions = {
 	framework: 'preact-local',
 	timeout: 5,
-	open: IS_CI ? false : true
+	open: !IS_CI
 };
 
-const getResultDir = (benchmark, framework) =>
-	resultsPath('v8-deopt-viewer', benchmark, framework);
+const getLogFilePath = (benchmark, framework) =>
+	resultsPath('deopts', `${benchmark}-${framework}-v8.log`);
 
 /**
  * @param {string} pkgName
@@ -64,7 +65,7 @@ async function onExit(childProcess) {
  * @returns {Promise<TachURL[]>}
  */
 async function getTachometerURLs(tachProcess, tachConfig, timeoutMs = 60e3) {
-	return new Promise(async (resolve, reject) => {
+	return new Promise((resolve, reject) => {
 		let timeout;
 		if (timeoutMs > 0) {
 			timeout = setTimeout(() => {
@@ -119,58 +120,49 @@ async function getTachometerURLs(tachProcess, tachConfig, timeoutMs = 60e3) {
 	});
 }
 
-function createPrefixTransform(prefix) {
-	return new Transform({
-		transform(chunk, encoding, callback) {
-			try {
-				// @ts-ignore
-				chunk = encoding == 'buffer' ? chunk.toString() : chunk;
-				const lines = chunk.split('\n');
-
-				for (let line of lines) {
-					if (line) {
-						line = `[${prefix}] ${line}`;
-						this.push(line + '\n');
-					}
-				}
-
-				callback();
-			} catch (error) {
-				return callback(error);
-			}
-		}
-	});
-}
+/** @type {(ms: number) => Promise<void>} */
+const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
 
 /**
  * @param {TachURL} tachURL
  * @param {DeoptOptions} options
  */
-async function runV8DeoptViewer(tachURL, options) {
-	const deoptOutputDir = getResultDir(tachURL.benchName, tachURL.framework);
-	await mkdir(deoptOutputDir, { recursive: true });
+async function runPuppeteer(tachURL, options) {
+	const logFilePath = getLogFilePath(tachURL.benchName, tachURL.framework);
+	await mkdir(path.dirname(logFilePath), { recursive: true });
 
-	const deoptArgs = [
-		tachURL.url,
-		'-o',
-		deoptOutputDir,
-		'-t',
-		(options.timeout * 1000).toString()
-	];
+	const browser = await puppeteer.launch({
+		headless: false,
+		ignoreDefaultArgs: ['about:blank'],
+		args: [
+			'--disable-extensions',
+			'--no-sandbox',
+			'--js-flags=' +
+				[
+					'--prof',
+					'--log-deopt',
+					'--log-ic',
+					'--log-maps',
+					'--log-map-details',
+					'--log-internal-timer-events',
+					'--log-code',
+					'--log-source-code',
+					'--detailed-line-info',
+					'--no-logfile-per-isolate',
+					`--logfile=${logFilePath}`
+				].join(','),
+			tachURL.url
+		]
+	});
 
-	if (options.open) {
-		deoptArgs.push('--open');
-	}
+	await browser.pages();
 
-	const deoptProcess = await runPackage('v8-deopt-viewer', deoptArgs);
-	deoptProcess.stdout
-		.pipe(createPrefixTransform(tachURL.framework))
-		.pipe(process.stdout);
-	deoptProcess.stderr
-		.pipe(createPrefixTransform(tachURL.framework))
-		.pipe(process.stderr);
+	console.log(`Loading ${tachURL.url} in puppeteer...`);
+	await delay(1000);
+	await browser.close();
 
-	await onExit(deoptProcess);
+	console.log('Waiting for browser to exit...');
+	await delay(1000);
 }
 
 /**
@@ -216,23 +208,20 @@ export async function runDeopts(benchGlob, options) {
 		// Parse URL from tachometer stdout
 		const tachURLs = await getTachometerURLs(tachProcess, tachConfig);
 
-		// Run v8-deopt-viewer against tachometer URL
+		// Run puppeteer for each tachometer URL
 		console.log();
-		await pool(tachURLs, tachURL =>
-			runV8DeoptViewer(tachURL, {
-				...options,
-				open: options.open && tachURLs.length == 1
-			})
-		);
-
-		if (tachURLs.length > 1) {
-			const rootResultDir = getResultDir('', '');
-			console.log(`\nOpen your browser to ${rootResultDir} to view results.`);
-
-			if (options.open) {
-				// TODO: Figure out how to open a directory in the user's default browser
-			}
+		for (let tachURL of tachURLs) {
+			await runPuppeteer(tachURL, options);
 		}
+
+		console.log(
+			`\nOpen the following files in VSCode's DeoptExplorer extension to view results:`
+		);
+		console.log(
+			tachURLs
+				.map(tachURL => getLogFilePath(tachURL.benchName, tachURL.framework))
+				.map(logFilePath => path.relative(benchesRoot(), logFilePath))
+		);
 	} finally {
 		if (tachProcess) {
 			tachProcess.kill('SIGINT');

@@ -13,4 +13,3 @@ coverage
 package/
 preact-*.tgz
 preact.tgz
-jsx-csstype.d.ts

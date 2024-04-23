@@ -57,7 +57,7 @@ const resolve = (list, child, node) => {
 // - do not set `Suspense.prototype.constructor` to `Suspense`
 SuspenseList.prototype = new Component();
 
-SuspenseList.prototype._suspended = function(child) {
+SuspenseList.prototype._suspended = function (child) {
 	const list = this;
 	const delegated = suspended(list._vnode);
 
@@ -83,7 +83,7 @@ SuspenseList.prototype._suspended = function(child) {
 	};
 };
 
-SuspenseList.prototype.render = function(props) {
+SuspenseList.prototype.render = function (props) {
 	this._next = null;
 	this._map = new Map();
 
@@ -113,14 +113,15 @@ SuspenseList.prototype.render = function(props) {
 	return props.children;
 };
 
-SuspenseList.prototype.componentDidUpdate = SuspenseList.prototype.componentDidMount = function() {
-	// Iterate through all children after mounting for two reasons:
-	// 1. As each node[SUSPENDED_COUNT] starts from 1, this iteration increases
-	//    each node[RELEASED_COUNT] by 1, therefore balancing the counters.
-	//    The nodes can now be completely consumed from the linked list.
-	// 2. Handle nodes that might have gotten resolved between render and
-	//    componentDidMount.
-	this._map.forEach((node, child) => {
-		resolve(this, child, node);
-	});
-};
+SuspenseList.prototype.componentDidUpdate =
+	SuspenseList.prototype.componentDidMount = function () {
+		// Iterate through all children after mounting for two reasons:
+		// 1. As each node[SUSPENDED_COUNT] starts from 1, this iteration increases
+		//    each node[RELEASED_COUNT] by 1, therefore balancing the counters.
+		//    The nodes can now be completely consumed from the linked list.
+		// 2. Handle nodes that might have gotten resolved between render and
+		//    componentDidMount.
+		this._map.forEach((node, child) => {
+			resolve(this, child, node);
+		});
+	};

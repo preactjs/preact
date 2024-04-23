@@ -79,6 +79,19 @@ describe('render()', () => {
 		expect(scratch.innerHTML).to.eql(`<div>Good</div>`);
 	});
 
+	it('should render % width and height on img correctly', () => {
+		render(<img width="100%" height="100%" />, scratch);
+		expect(scratch.innerHTML).to.eql(`<img width="100%" height="100%">`);
+	});
+
+	// IE11 doesn't support these.
+	if (!/Trident/.test(window.navigator.userAgent)) {
+		it('should render px width and height on img correctly', () => {
+			render(<img width="100px" height="100px" />, scratch);
+			expect(scratch.innerHTML).to.eql(`<img width="100px" height="100px">`);
+		});
+	}
+
 	it('should not render when detecting JSON-injection', () => {
 		const vnode = JSON.parse('{"type":"span","children":"Malicious"}');
 		render(vnode, scratch);
@@ -115,6 +128,16 @@ describe('render()', () => {
 		render(<x-bar />, scratch);
 		expect(scratch.childNodes).to.have.length(1);
 		expect(scratch.firstChild).to.have.property('nodeName', 'X-BAR');
+	});
+
+	it('should support the translate attribute w/ false as a boolean', () => {
+		render(<b translate={false}>Bold</b>, scratch);
+		expect(scratch.innerHTML).to.equal('<b translate="no">Bold</b>');
+	});
+
+	it('should support the translate attribute w/ true as a boolean', () => {
+		render(<b translate>Bold</b>, scratch);
+		expect(scratch.innerHTML).to.equal('<b translate="yes">Bold</b>');
 	});
 
 	it('should support the form attribute', () => {
@@ -238,6 +261,16 @@ describe('render()', () => {
 
 	it('should not render children when using function children', () => {
 		render(<div>{() => {}}</div>, scratch);
+		expect(scratch.innerHTML).to.equal('<div></div>');
+	});
+
+	it('should not render children when rerendering a function child', () => {
+		const icon = () => {};
+
+		render(<div>{icon}</div>, scratch);
+		expect(scratch.innerHTML).to.equal('<div></div>');
+
+		render(<div>{icon}</div>, scratch);
 		expect(scratch.innerHTML).to.equal('<div></div>');
 	});
 
@@ -391,10 +424,81 @@ describe('render()', () => {
 		});
 	}
 
+	// Test for #3969
+	it('should clear rowspan and colspan', () => {
+		let update;
+		class App extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { active: true };
+				update = this.setState.bind(this);
+			}
+
+			render() {
+				return (
+					<div>
+						{this.state.active ? (
+							<table>
+								<tr>
+									<td rowSpan={2} colSpan={2}>
+										Foo
+									</td>
+								</tr>
+							</table>
+						) : (
+							<table>
+								<tr>
+									<td>Foo</td>
+								</tr>
+							</table>
+						)}
+					</div>
+				);
+			}
+		}
+
+		render(<App />, scratch);
+
+		update({ active: false });
+		rerender();
+
+		expect(scratch.querySelector('td[rowspan]')).to.equal(null);
+		expect(scratch.querySelector('td[colspan]')).to.equal(null);
+	});
+
 	// Test for preactjs/preact#651
 	it('should set enumerable boolean attribute', () => {
 		render(<input spellcheck={false} />, scratch);
 		expect(scratch.firstChild.spellcheck).to.equal(false);
+	});
+
+	// Test for preactjs/preact#4340
+	it('should respect defaultValue in render', () => {
+		scratch.innerHTML = '<input value="foo">';
+		render(<input defaultValue="foo" />, scratch);
+		expect(scratch.firstChild.value).to.equal('foo');
+	});
+
+	it('should support subsequent renders w/ defaultValue', () => {
+		scratch.innerHTML = '<input value="foo">';
+		render(<input defaultValue="foo" value="bar" />, scratch);
+		expect(scratch.firstChild.value).to.equal('bar');
+		render(<input defaultValue="foo" value="baz" />, scratch);
+		expect(scratch.firstChild.value).to.equal('baz');
+	});
+
+	it('should respect defaultChecked in render', () => {
+		scratch.innerHTML = '<input checked="true">';
+		render(<input defaultChecked />, scratch);
+		expect(scratch.firstChild.checked).to.equal(true);
+	});
+
+	it('should support subsequent renders w/ defaultChecked', () => {
+		scratch.innerHTML = '<input checked="true">';
+		render(<input defaultChecked checked />, scratch);
+		expect(scratch.firstChild.checked).to.equal(true);
+		render(<input defaultChecked checked={false} />, scratch);
+		expect(scratch.firstChild.checked).to.equal(false);
 	});
 
 	it('should render download attribute', () => {
@@ -462,9 +566,19 @@ describe('render()', () => {
 		expect(scratch.childNodes[0]).to.have.property('className', 'bar');
 	});
 
-	it('should support false aria-* attributes', () => {
+	it('should support false string aria-* attributes', () => {
 		render(<div aria-checked="false" />, scratch);
 		expect(scratch.firstChild.getAttribute('aria-checked')).to.equal('false');
+	});
+
+	it('should support false aria-* attributes', () => {
+		render(<div aria-checked={false} />, scratch);
+		expect(scratch.firstChild.getAttribute('aria-checked')).to.equal('false');
+	});
+
+	it('should support false data-* attributes', () => {
+		render(<div data-checked={false} />, scratch);
+		expect(scratch.firstChild.getAttribute('data-checked')).to.equal('false');
 	});
 
 	it('should set checked attribute on custom elements without checked property', () => {
@@ -986,6 +1100,51 @@ describe('render()', () => {
 		expect(scratch.textContent).to.equal('01');
 	});
 
+	it('should not remove iframe', () => {
+		let setState;
+		const Iframe = () => {
+			return <iframe src="https://codesandbox.io/s/runtime-silence-no4zx" />;
+		};
+
+		const Test2 = () => <div>Test2</div>;
+		const Test3 = () => <div>Test3</div>;
+
+		class App extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { value: true };
+				setState = this.setState.bind(this);
+			}
+
+			render(props, state) {
+				return (
+					<div>
+						{state.value ? <Test3 /> : null}
+						{state.value ? <Test2 /> : null}
+						<Iframe key="iframe" />
+					</div>
+				);
+			}
+		}
+
+		render(<App />, scratch);
+
+		expect(scratch.innerHTML).to.equal(
+			'<div><div>Test3</div><div>Test2</div><iframe src="https://codesandbox.io/s/runtime-silence-no4zx"></iframe></div>'
+		);
+		clearLog();
+		setState({ value: false });
+		rerender();
+
+		expect(scratch.innerHTML).to.equal(
+			'<div><iframe src="https://codesandbox.io/s/runtime-silence-no4zx"></iframe></div>'
+		);
+		expect(getLog()).to.deep.equal([
+			'<div>Test3.remove()',
+			'<div>Test2.remove()'
+		]);
+	});
+
 	it('should not cause infinite loop with referentially equal props', () => {
 		let i = 0;
 		let prevDiff = options._diff;
@@ -1160,5 +1319,295 @@ describe('render()', () => {
 		expect(scratch.firstChild.tabIndex).to.equal(defaultValue);
 		render(<div tabindex={null} />, scratch);
 		expect(scratch.firstChild.tabIndex).to.equal(defaultValue);
+	});
+
+	// #4137
+	it('should unset role if null || undefined', () => {
+		render(
+			<section>
+				<div role="status">role="status"</div>
+				<div role={undefined}>role="undefined"</div>
+				<div role={null}>role="null"</div>
+			</section>,
+			scratch
+		);
+
+		const divs = scratch.querySelectorAll('div');
+		expect(divs[0].hasAttribute('role')).to.equal(true);
+		expect(divs[1].hasAttribute('role')).to.equal(false);
+		expect(divs[2].hasAttribute('role')).to.equal(false);
+	});
+
+	it('should not crash or repeatedly add the same child when replacing a matched vnode with null', () => {
+		const B = () => <div>B</div>;
+
+		let update;
+		class App extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { show: true };
+				update = () => {
+					this.setState(state => ({ show: !state.show }));
+				};
+			}
+
+			render() {
+				if (this.state.show) {
+					return (
+						<div>
+							<B />
+							<div />
+						</div>
+					);
+				}
+				return (
+					<div>
+						<div />
+						{null}
+						<B />
+					</div>
+				);
+			}
+		}
+
+		render(<App />, scratch);
+		expect(scratch.innerHTML).to.equal('<div><div>B</div><div></div></div>');
+
+		update();
+		rerender();
+		expect(scratch.innerHTML).to.equal('<div><div></div><div>B</div></div>');
+
+		update();
+		rerender();
+		expect(scratch.innerHTML).to.equal('<div><div>B</div><div></div></div>');
+
+		update();
+		rerender();
+		expect(scratch.innerHTML).to.equal('<div><div></div><div>B</div></div>');
+	});
+
+	it('should reconcile children in right order', () => {
+		let data = ['A', 'B', 'C', 'D', 'E'];
+		render(
+			<ul>
+				{data.map(d => (
+					<li key={d}>{d}</li>
+				))}
+			</ul>,
+			scratch
+		);
+
+		expect(scratch.textContent).to.equal('ABCDE');
+
+		data = ['B', 'E', 'C', 'D'];
+		render(
+			<ul>
+				{data.map(d => (
+					<li key={d}>{d}</li>
+				))}
+			</ul>,
+			scratch
+		);
+		expect(scratch.textContent).to.equal('BECD');
+	});
+
+	it('should reconcile children in right order #2', () => {
+		let data = ['A', 'B', 'C', 'D', 'E'];
+		render(
+			<ul>
+				{data.map(d => (
+					<li key={d}>{d}</li>
+				))}
+			</ul>,
+			scratch
+		);
+
+		expect(scratch.textContent).to.equal('ABCDE');
+
+		data = ['B', 'E', 'D', 'C'];
+		render(
+			<ul>
+				{data.map(d => (
+					<li key={d}>{d}</li>
+				))}
+			</ul>,
+			scratch
+		);
+		expect(scratch.textContent).to.equal('BEDC');
+	});
+
+	it('should reconcile children in right order #3', () => {
+		render(
+			<div>
+				<p>_A1</p>
+				<p>_A2</p>
+				<h2>_A3</h2>
+				<p>_A4</p>
+				<h2>_A5</h2>
+				<p>_A6</p>
+				<h2>_A7</h2>
+				<p>_A8</p>
+			</div>,
+			scratch
+		);
+
+		render(
+			<div>
+				<p>_B1</p>
+				<p>_B2</p>
+				<p>_B3</p>
+				<h2>_B4</h2>
+				<p>_B5</p>
+				<p>_B6</p>
+				<h2>_B7</h2>
+				<p>_B8</p>
+			</div>,
+			scratch
+		);
+
+		expect(serializeHtml(scratch)).to.equal(
+			'<div><p>_B1</p><p>_B2</p><p>_B3</p><h2>_B4</h2><p>_B5</p><p>_B6</p><h2>_B7</h2><p>_B8</p></div>'
+		);
+	});
+
+	it('should reconcile children in right order #4', () => {
+		render(
+			<div>
+				<p>_A1</p>
+				<p>_A2</p>
+				<div>_A3</div>
+				<h2>_A4</h2>
+				<p>_A5</p>
+				<div>_A6</div>
+				<h2>_A7</h2>
+				<p>_A8</p>
+				<div>_A9</div>
+				<h2>_A10</h2>
+				<p>_A11</p>
+				<div>_A12</div>
+			</div>,
+			scratch
+		);
+
+		render(
+			<div>
+				<p>_B1</p>
+				<p>_B2</p>
+				<p>_B3</p>
+				<h2>_B4</h2>
+				<p>_B5</p>
+				<p>_B6</p>
+				<p>_B7</p>
+				<h2>_B8</h2>
+				<p>_B9</p>
+				<p>_B10</p>
+				<p>_B11</p>
+				<p>_B12</p>
+				<h2>_B13</h2>
+			</div>,
+			scratch
+		);
+
+		expect(serializeHtml(scratch)).to.equal(
+			'<div><p>_B1</p><p>_B2</p><p>_B3</p><h2>_B4</h2><p>_B5</p><p>_B6</p><p>_B7</p><h2>_B8</h2><p>_B9</p><p>_B10</p><p>_B11</p><p>_B12</p><h2>_B13</h2></div>'
+		);
+	});
+
+	it('should not crash or repeatedly add the same child when replacing a matched vnode with null (mixed dom-types)', () => {
+		const B = () => <div>B</div>;
+
+		/** @type {() => void} */
+		let update;
+		class App extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { show: true };
+				update = () => {
+					this.setState(state => ({ show: !state.show }));
+				};
+			}
+
+			render() {
+				if (this.state.show) {
+					return (
+						<div>
+							<B />
+							<div>C</div>
+						</div>
+					);
+				}
+				return (
+					<div>
+						<span>A</span>
+						{null}
+						<B />
+						<div>C</div>
+					</div>
+				);
+			}
+		}
+
+		render(<App />, scratch);
+		expect(scratch.innerHTML).to.equal('<div><div>B</div><div>C</div></div>');
+
+		update();
+		rerender();
+		expect(scratch.innerHTML).to.equal(
+			'<div><span>A</span><div>B</div><div>C</div></div>'
+		);
+
+		update();
+		rerender();
+		expect(scratch.innerHTML).to.equal('<div><div>B</div><div>C</div></div>');
+
+		update();
+		rerender();
+		expect(scratch.innerHTML).to.equal(
+			'<div><span>A</span><div>B</div><div>C</div></div>'
+		);
+	});
+
+	it('should shrink lists', () => {
+		function RenderedItem({ item }) {
+			if (item.renderAsNullInComponent) {
+				return null;
+			}
+
+			return <div>{item.id}</div>;
+		}
+
+		function App({ list }) {
+			return (
+				<div>
+					{list.map(item => (
+						<RenderedItem key={item.id} item={item} />
+					))}
+				</div>
+			);
+		}
+
+		const firstList = [
+			{ id: 'One' },
+			{ id: 'Two' },
+			{ id: 'Three' },
+			{ id: 'Four' }
+		];
+
+		const secondList = [
+			{ id: 'One' },
+			{ id: 'Four', renderAsNullInComponent: true },
+			{ id: 'Six' },
+			{ id: 'Seven' }
+		];
+
+		render(<App list={firstList} />, scratch);
+		expect(scratch.innerHTML).to.equal(
+			'<div><div>One</div><div>Two</div><div>Three</div><div>Four</div></div>'
+		);
+
+		render(<App list={secondList} />, scratch);
+		expect(scratch.innerHTML).to.equal(
+			'<div><div>One</div><div>Six</div><div>Seven</div></div>'
+		);
 	});
 });

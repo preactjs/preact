@@ -5,7 +5,8 @@ import {
 	ComponentProps,
 	FunctionalComponent,
 	AnyComponent,
-	h
+	h,
+	createRef
 } from '../../';
 
 interface DummyProps {
@@ -78,6 +79,40 @@ render(
 	document
 );
 
+// Mounting into different types of Nodes
+render(h('div', {}), document.createElement('div'));
+render(h('div', {}), document);
+render(h('div', {}), document.createElement('div').shadowRoot!);
+render(h('div', {}), document.createDocumentFragment());
+
+// From https://gist.github.com/developit/f4c67a2ede71dc2fab7f357f39cff28c, modified to be TypeScript compliant
+function createRootFragment(parent: Element, replaceNode: Element | Element[]) {
+	const replaceNodes: Element[] = ([] as Element[]).concat(replaceNode);
+	const s = replaceNodes[replaceNodes.length - 1].nextSibling;
+	function insert(c: Node, r: Node | null) {
+		return parent.insertBefore(c, r || s);
+	}
+	return ((parent as any).__k = {
+		nodeType: 1,
+		parentNode: parent,
+		firstChild: replaceNodes[0],
+		childNodes: replaceNodes,
+		insertBefore: insert,
+		appendChild: (c: Node) => insert(c, null),
+		removeChild: function (c: Node) {
+			return parent.removeChild(c);
+		}
+	});
+}
+
+render(
+	h('div', {}),
+	createRootFragment(
+		document.createElement('div'),
+		document.createElement('div')
+	)
+);
+
 // Accessing children
 const ComponentWithChildren: FunctionalComponent<DummerComponentProps> = ({
 	input,
@@ -101,6 +136,23 @@ const UseOfComponentWithChildren = () => {
 		</ComponentWithChildren>
 	);
 };
+
+// TODO: make this work
+// const DummyChildren: FunctionalComponent = ({ children }) => {
+// 	return children;
+// };
+
+// function ReturnChildren(props: { children: preact.ComponentChildren }) {
+// 	return props.children;
+// }
+
+// function TestUndefinedChildren() {
+// 	return (
+// 		<ReturnChildren>
+// 			<ReturnChildren>Hello</ReturnChildren>
+// 		</ReturnChildren>
+// 	);
+// }
 
 // using ref and or jsx
 class ComponentUsingRef extends Component<any, any> {
@@ -295,3 +347,34 @@ let elementProps: ComponentProps<'button'> = {
 // Typing of style property
 const acceptsNumberAsLength = <div style={{ marginTop: 20 }} />;
 const acceptsStringAsLength = <div style={{ marginTop: '20px' }} />;
+
+const ReturnNull: FunctionalComponent = () => null;
+
+// Refs should work on elements
+const ref = createRef<HTMLDivElement>();
+createElement('div', { ref: ref }, 'hi');
+h('div', { ref: ref }, 'hi');
+
+// Refs should work on functions
+const functionRef = createRef();
+const RefComponentTest = () => <p>hi</p>;
+createElement(RefComponentTest, { ref: functionRef }, 'hi');
+h(RefComponentTest, { ref: functionRef }, 'hi');
+
+// Should accept onInput
+const onInput = (e: h.JSX.TargetedInputEvent<HTMLInputElement>) => {};
+<input onInput={onInput} />;
+<input onInput={e => e.currentTarget.value} />;
+createElement('input', { onInput: onInput });
+h('input', { onInput: onInput });
+
+// Should accept onBeforeInput
+const onBeforeInput = (e: h.JSX.TargetedInputEvent<HTMLInputElement>) => {};
+<input onBeforeInput={e => e.currentTarget.value} />;
+createElement('input', { onBeforeInput: onBeforeInput });
+h('input', { onBeforeInput: onBeforeInput });
+
+const onSubmit = (e: h.JSX.TargetedSubmitEvent<HTMLFormElement>) => {};
+<form onSubmit={e => e.currentTarget.elements} />;
+createElement('form', { onSubmit: onSubmit });
+h('form', { onSubmit: onSubmit });

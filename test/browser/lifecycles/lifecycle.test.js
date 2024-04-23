@@ -28,7 +28,7 @@ describe('Lifecycle methods', () => {
 
 		let log;
 		function logger(msg) {
-			return function() {
+			return function () {
 				// return true for shouldComponentUpdate
 				log.push(msg);
 				return true;
@@ -155,8 +155,8 @@ describe('Lifecycle methods', () => {
 			'inner render',
 			'inner getSnapshotBeforeUpdate',
 			'inner componentDidUpdate',
-			'outer setState callback',
-			'outer componentDidUpdate'
+			'outer componentDidUpdate',
+			'outer setState callback'
 		]);
 
 		// Inner state update
@@ -168,8 +168,8 @@ describe('Lifecycle methods', () => {
 			'inner shouldComponentUpdate',
 			'inner render',
 			'inner getSnapshotBeforeUpdate',
-			'inner setState callback',
-			'inner componentDidUpdate'
+			'inner componentDidUpdate',
+			'inner setState callback'
 		]);
 
 		// Force update Outer

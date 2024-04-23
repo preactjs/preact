@@ -22,18 +22,33 @@ let log = [];
  */
 export function logCall(obj, method) {
 	let old = obj[method];
-	obj[method] = function(...args) {
+	obj[method] = function (...args) {
 		let c = '';
 		for (let i = 0; i < args.length; i++) {
 			if (c) c += ', ';
 			c += serialize(args[i]);
 		}
 
-		// Normalize removeChild -> remove to keep output clean and readable
-		const operation =
-			method != 'removeChild'
-				? `${serialize(this)}.${method}(${c})`
-				: `${serialize(c)}.remove()`;
+		let operation;
+		switch (method) {
+			case 'removeChild': {
+				operation = `${serialize(c)}.remove()`;
+				break;
+			}
+			case 'insertBefore': {
+				if (args[1] === null && args.length === 2) {
+					operation = `${serialize(this)}.appendChild(${serialize(args[0])})`;
+				} else {
+					operation = `${serialize(this)}.${method}(${c})`;
+				}
+				break;
+			}
+			default: {
+				operation = `${serialize(this)}.${method}(${c})`;
+				break;
+			}
+		}
+
 		log.push(operation);
 		return old.apply(this, args);
 	};

@@ -66,7 +66,7 @@ class SimpleComponent extends Component {
 					<custom-whatever
 						dir="auto" // Inherited prop from HTMLAttributes
 						someattribute="string"
-						onsomeevent={function(e) {
+						onsomeevent={function (e) {
 							// Validate `this` and `e` are the right type
 							console.log('clicked', this.instanceProp, e.eventProp);
 						}}

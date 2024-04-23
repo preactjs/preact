@@ -13,6 +13,9 @@ describe('focus', () => {
 	/** @type {() => void} */
 	let rerender;
 
+	/** @type {(newState: Partial<{ before: number[]; after: number[] }>) => void} */
+	let setState;
+
 	/** @type {() => void} */
 	let prepend, append, shift, pop;
 
@@ -26,6 +29,8 @@ describe('focus', () => {
 				before: props.initialBefore || [],
 				after: props.initialAfter || []
 			};
+
+			setState = newState => this.setState(newState);
 
 			prepend = () => {
 				const before = this.state.before;
@@ -56,13 +61,14 @@ describe('focus', () => {
 				});
 			};
 
-			const liHtml = this.props.as == Input ? inputStr : span;
-			getDynamicListHtml = () =>
-				div([
+			getDynamicListHtml = () => {
+				const liHtml = this.props.as == Input ? inputStr : span;
+				return div([
 					...this.state.before.map(liHtml),
 					'<input id="input-0" type="text">',
 					...this.state.after.map(liHtml)
 				]);
+			};
 		}
 
 		render(props, state) {
@@ -375,6 +381,22 @@ describe('focus', () => {
 
 		expect(scratch.innerHTML).to.equal(getDynamicListHtml());
 		validateFocus(input, 'remove sibling before 2');
+	});
+
+	it('should  maintain focus when removing element directly before input', () => {
+		render(
+			<DynamicList initialBefore={[0, 1]} initialAfter={[2, 3]} />,
+			scratch
+		);
+
+		let input = focusInput();
+		expect(scratch.innerHTML).to.equal(getDynamicListHtml());
+
+		setState({ before: [0] });
+		rerender();
+
+		expect(scratch.innerHTML).to.equal(getDynamicListHtml());
+		validateFocus(input, 'remove sibling directly before input');
 	});
 
 	it('should maintain focus when adding input next to the current input', () => {

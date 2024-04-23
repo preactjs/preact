@@ -1,8 +1,9 @@
-html, body {
+html,
+body {
 	height: 100%;
 	margin: 0;
 	background: #eee;
-	font: 400 16px/1.3 'Helvetica Neue',helvetica,sans-serif;
+	font: 400 16px/1.3 'Helvetica Neue', helvetica, sans-serif;
 	text-rendering: optimizeSpeed;
 	color: #444;
 }
@@ -15,7 +16,8 @@ html, body {
 	> header {
 		flex: 0;
 		background: #f9f9f9;
-		box-shadow: inset 0 -.5px 0 0 rgba(0,0,0,0.2), 0 .5px 0 0 rgba(255,255,255,0.6);
+		box-shadow: inset 0 -0.5px 0 0 rgba(0, 0, 0, 0.2),
+			0 0.5px 0 0 rgba(255, 255, 255, 0.6);
 
 		nav {
 			display: inline-block;
@@ -25,14 +27,14 @@ html, body {
 				display: inline-block;
 				margin: 2px;
 				padding: 4px 10px;
-				background-color: rgba(255,255,255,0);
+				background-color: rgba(255, 255, 255, 0);
 				border-radius: 1em;
 				color: #6b1d8f;
 				text-decoration: none;
 				// transition: all 250ms ease;
-				transition: all 250ms cubic-bezier(.2,0,.4,2);
+				transition: all 250ms cubic-bezier(0.2, 0, 0.4, 2);
 				&:hover {
-					background-color: rgba(255,255,255,1);
+					background-color: rgba(255, 255, 255, 1);
 					box-shadow: 0 0 0 2px #6b1d8f;
 				}
 				&.active {
@@ -49,7 +51,6 @@ html, body {
 	}
 }
 
-
 h1 {
 	margin: 0;
 	color: #6b1d8f;
@@ -57,11 +58,11 @@ h1 {
 	font-size: 250%;
 }
 
-
-input, textarea {
+input,
+textarea {
 	box-sizing: border-box;
 	margin: 1px;
-	padding: .25em .5em;
+	padding: 0.25em 0.5em;
 	background: #fff;
 	border: 1px solid #999;
 	border-radius: 3px;
@@ -74,11 +75,13 @@ input, textarea {
 	}
 }
 
-
-button, input[type="submit"], input[type="reset"], input[type="button"] {
+button,
+input[type='submit'],
+input[type='reset'],
+input[type='button'] {
 	box-sizing: border-box;
 	margin: 1px;
-	padding: .25em .8em;
+	padding: 0.25em 0.8em;
 	background: #6b1d8f;
 	border: 1px solid #6b1d8f;
 	// border: none;
@@ -89,7 +92,6 @@ button, input[type="submit"], input[type="reset"], input[type="button"] {
 	cursor: pointer;
 }
 
-
 .cursor {
 	position: absolute;
 	left: 0;
@@ -97,7 +99,7 @@ button, input[type="submit"], input[type="reset"], input[type="button"] {
 	width: 8px;
 	height: 8px;
 	margin: -5px 0 0 -5px;
-	border: 2px solid #F00;
+	border: 2px solid #f00;
 	border-radius: 50%;
 	transform-origin: 50% 50%;
 	pointer-events: none;
@@ -131,7 +133,6 @@ button, input[type="submit"], input[type="reset"], input[type="button"] {
 	}
 }
 
-
 .animation-picker {
 	position: fixed;
 	display: inline-block;
@@ -139,7 +140,7 @@ button, input[type="submit"], input[type="reset"], input[type="button"] {
 	top: 0;
 	padding: 10px;
 	background: #000;
-	color: #BBB;
+	color: #bbb;
 	z-index: 1000;
 
 	select {

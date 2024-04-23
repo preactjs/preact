@@ -3,23 +3,18 @@ import { readFile, readdir } from 'fs/promises';
 import prompts from 'prompts';
 import { baseTraceLogDir, frameworks } from './config.js';
 
-// @ts-ignore
-import tachometerStats from 'tachometer/lib/stats.js';
-// @ts-ignore
-import tachometerFormat from 'tachometer/lib/format.js';
+import { summaryStats, computeDifferences } from 'tachometer/lib/stats.js';
+import {
+	automaticResultTable,
+	verticalTermResultTable
+} from 'tachometer/lib/format.js';
 
 /**
  * @typedef {import('./tracing').TraceEvent} TraceEvent
  * @typedef {import('tachometer/lib/stats').SummaryStats} SummaryStats
  * @typedef {import('tachometer/lib/stats').ResultStats} ResultStats
  * @typedef {import('tachometer/lib/stats').ResultStatsWithDifferences} ResultStatsWithDifferences
- * @type {import('tachometer/lib/stats')}
  */
-const statsLib = tachometerStats;
-const { summaryStats, computeDifferences } = statsLib;
-/** @type {import('tachometer/lib/format')} */
-const formatLib = tachometerFormat;
-const { automaticResultTable, verticalTermResultTable } = formatLib;
 
 const toTrack = new Set([
 	// 'V8.CompileCode', // Might be tachometer code?? But maybe not?
@@ -47,12 +42,10 @@ function addToGrouping(grouping, results) {
 			} else {
 				grouping.get(group).push(data);
 			}
+		} else if (Array.isArray(data)) {
+			grouping.set(group, data);
 		} else {
-			if (Array.isArray(data)) {
-				grouping.set(group, data);
-			} else {
-				grouping.set(group, [data]);
-			}
+			grouping.set(group, [data]);
 		}
 	}
 }
@@ -94,7 +87,7 @@ function setInMapArray(map, key, index, value) {
 function logDifferences(key, results) {
 	let withDifferences = computeDifferences(results);
 	console.log();
-	let { fixed, unfixed } = automaticResultTable(withDifferences);
+	let { unfixed } = automaticResultTable(withDifferences);
 	// console.log(horizontalTermResultTable(fixed));
 	console.log(key);
 	console.log(verticalTermResultTable(unfixed));
@@ -103,7 +96,7 @@ function logDifferences(key, results) {
 /**
  * @param {string} version
  * @param {string[]} logPaths
- * @param {(logs: TraceEvent[], logFilePath: string) => number} [getThreadId]
+ * @param {(logs: TraceEvent[], logFilePath: string) => number | null} [getThreadId]
  * @param {(log: TraceEvent) => boolean} [trackEventsIn]
  * @returns {Promise<Map<string, ResultStats>>}
  */
@@ -115,6 +108,10 @@ async function getStatsFromLogs(version, logPaths, getThreadId, trackEventsIn) {
 		const logs = JSON.parse(await readFile(logPath, 'utf8'));
 
 		let tid = getThreadId ? getThreadId(logs, logPath) : null;
+		if (tid == null) {
+			console.warn(`Could not find threadId for ${logPath}. Skipping...`);
+			continue;
+		}
 
 		/** @type {Array<{ id: string; start: number; end: number; }>} Determine what durations to track events under */
 		const parentLogs = [];
@@ -226,7 +223,7 @@ async function getStatsFromLogs(version, logPaths, getThreadId, trackEventsIn) {
 		stats.set(key, {
 			result: {
 				name: '02_replace1k',
-				version: version,
+				version,
 				measurement: {
 					name: key,
 					mode: 'expression',
@@ -252,18 +249,10 @@ async function getStatsFromLogs(version, logPaths, getThreadId, trackEventsIn) {
 /**
  * @param {import('./tracing').TraceEvent[]} logs
  * @param {string} logFilePath
- * @returns {number}
+ * @returns {number | null}
  */
 function getDurationThread(logs, logFilePath) {
-	let log = logs.find(isDurationLog);
-
-	if (log == null) {
-		throw new Error(
-			`Could not find blink.user_timing log for "run-final" or "duration" in ${logFilePath}.`
-		);
-	} else {
-		return log.tid;
-	}
+	return logs.find(isDurationLog)?.tid ?? null;
 }
 
 /**
@@ -280,7 +269,8 @@ function isDurationLog(log) {
 	);
 }
 
-export async function analyze() {
+/** @param {string} requestedBench */
+export async function analyze(requestedBench) {
 	// const frameworkNames = await readdir(p('logs'));
 	const frameworkNames = frameworks.map(f => f.label);
 	const listAtEnd = [
@@ -303,6 +293,16 @@ export async function analyze() {
 	if (benchmarkNames.length == 0) {
 		console.log(`No benchmarks or results found in "${baseTraceLogDir()}".`);
 		return;
+	} else if (requestedBench) {
+		if (benchmarkNames.includes(requestedBench)) {
+			selectedBench = requestedBench;
+		} else {
+			console.log(
+				`Could not find benchmark "${requestedBench}". Available benchmarks:`
+			);
+			console.log(benchmarkNames);
+			return;
+		}
 	} else if (benchmarkNames.length == 1) {
 		selectedBench = benchmarkNames[0];
 	} else {

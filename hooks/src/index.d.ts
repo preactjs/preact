@@ -1,20 +1,25 @@
-import { PreactContext, Ref as PreactRef, RefObject } from '../..';
+import { ErrorInfo, PreactContext, Ref as PreactRef } from '../..';
 
 type Inputs = ReadonlyArray<unknown>;
 
-export type StateUpdater<S> = (value: S | ((prevState: S) => S)) => void;
+export type Dispatch<A> = (value: A) => void;
+export type StateUpdater<S> = S | ((prevState: S) => S);
+
 /**
  * Returns a stateful value, and a function to update it.
  * @param initialState The initial value (or a function that returns the initial value)
  */
-export function useState<S>(initialState: S | (() => S)): [S, StateUpdater<S>];
+export function useState<S>(
+	initialState: S | (() => S)
+): [S, Dispatch<StateUpdater<S>>];
 
 export function useState<S = undefined>(): [
 	S | undefined,
-	StateUpdater<S | undefined>
+	Dispatch<StateUpdater<S | undefined>>
 ];
 
 export type Reducer<S, A> = (prevState: S, action: A) => S;
+
 /**
  * An alternative to `useState`.
  *
@@ -27,7 +32,7 @@ export type Reducer<S, A> = (prevState: S, action: A) => S;
 export function useReducer<S, A>(
 	reducer: Reducer<S, A>,
 	initialState: S
-): [S, (action: A) => void];
+): [S, Dispatch<A>];
 
 /**
  * An alternative to `useState`.
@@ -43,11 +48,17 @@ export function useReducer<S, A, I>(
 	reducer: Reducer<S, A>,
 	initialArg: I,
 	init: (arg: I) => S
-): [S, (action: A) => void];
+): [S, Dispatch<A>];
 
 /** @deprecated Use the `Ref` type instead. */
-type PropRef<T> = { current: T };
-type Ref<T> = { current: T };
+type PropRef<T> = MutableRef<T>;
+interface Ref<T> {
+	readonly current: T | null;
+}
+
+interface MutableRef<T> {
+	current: T;
+}
 
 /**
  * `useRef` returns a mutable ref object whose `.current` property is initialized to the passed argument
@@ -58,9 +69,9 @@ type Ref<T> = { current: T };
  *
  * @param initialValue the initial value to store in the ref object
  */
-export function useRef<T>(initialValue: null): RefObject<T>;
-export function useRef<T>(initialValue: T): Ref<T>;
-export function useRef<T>(): Ref<T | undefined>;
+export function useRef<T>(initialValue: T): MutableRef<T>;
+export function useRef<T>(initialValue: T | null): Ref<T>;
+export function useRef<T = undefined>(): MutableRef<T | undefined>;
 
 type EffectCallback = () => void | (() => void);
 /**
@@ -129,5 +140,7 @@ export function useContext<T>(context: PreactContext<T>): T;
 export function useDebugValue<T>(value: T, formatter?: (value: T) => any): void;
 
 export function useErrorBoundary(
-	callback?: (error: any) => Promise<void> | void
+	callback?: (error: any, errorInfo: ErrorInfo) => Promise<void> | void
 ): [any, () => void];
+
+export function useId(): string;

@@ -15,5 +15,14 @@
   },
   "mangle": {
     "regex": "^_"
+  },
+  "exports": {
+    ".": {
+      "types": "./src/index.d.ts",
+      "browser": "./dist/testUtils.module.js",
+      "umd": "./dist/testUtils.umd.js",
+      "import": "./dist/testUtils.mjs",
+      "require": "./dist/testUtils.js"
+    }
   }
 }

@@ -1,8 +1,9 @@
 {
-	"compilerOptions": {
-		"target": "es2020",
-		"checkJs": true,
-		"moduleResolution": "node"
-	},
-	"exclude": ["node_modules", "dist"]
+  "compilerOptions": {
+    "target": "es2022",
+    "module": "es2022",
+    "checkJs": true,
+    "moduleResolution": "node"
+  },
+  "exclude": ["node_modules", "dist"]
 }

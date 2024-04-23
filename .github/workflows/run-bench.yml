@@ -1,0 +1,121 @@
+name: Benchmark Worker
+
+# Expectations:
+#
+# This workflow expects calling workflows to have uploaded an artifact named
+# "bench-environment" that contains any built artifacts required to run the
+# benchmark. This typically is the dist/ folder that running `npm run build`
+# produces and/or a tarball of a previous build to bench the local build against
+
+on:
+  workflow_call:
+    inputs:
+      benchmark:
+        description: 'The name of the benchmark to run. Should be name of an HTML file without the .html extension'
+        type: string
+        required: true
+      trace:
+        description: 'Whether to capture browser traces for this benchmark run'
+        type: boolean
+        required: false
+        default: false
+      timeout:
+        description: 'How many minutes to give the benchmark to run before timing out and failing'
+        type: number
+        required: false
+        default: 20
+
+jobs:
+  run_bench:
+    name: Bench ${{ inputs.benchmark }}
+    runs-on: ubuntu-latest
+    timeout-minutes: ${{ inputs.timeout }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: 'recursive'
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: 'package.json'
+          cache: 'npm'
+          cache-dependency-path: '**/package-lock.json'
+
+      # Setup pnpm
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 8
+          run_install: false
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        run: |
+          echo "pnpm_cache_dir=$(pnpm store path)" >> $GITHUB_OUTPUT
+      - uses: actions/cache@v4
+        name: Setup pnpm cache
+        with:
+          path: ${{ steps.pnpm-cache.outputs.pnpm_cache_dir }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      # Install benchmark dependencies
+      - uses: actions/download-artifact@v3
+        with:
+          name: bench-environment
+      - name: Move tarballs from env to correct location
+        run: |
+          ls -al
+          mv preact-local.tgz benchmarks/dependencies/preact/local-pinned/preact-local-pinned.tgz
+          ls -al benchmarks/dependencies/preact/local-pinned
+          mv preact-main.tgz benchmarks/dependencies/preact/main/preact-main.tgz
+          ls -al benchmarks/dependencies/preact/main
+      - name: Install deps
+        working-directory: benchmarks
+        # Set the CHROMEDRIVER_FILEPATH so the chromedriver npm package uses the
+        # correct binary when its installed
+        run: |
+          export CHROMEDRIVER_FILEPATH=$(which chromedriver)
+          pnpm install
+          # Install local dependencies with --no-frozen-lockfile to ensure local tarballs
+          # are installed regardless of if they match the integrity hash stored in the lockfile
+          pnpm install --no-frozen-lockfile --filter ./dependencies
+
+      # Run benchmark
+      - name: Run benchmark
+        working-directory: benchmarks
+        run: |
+          export CHROMEDRIVER_FILEPATH=$(which chromedriver)
+          pnpm run bench apps/${{ inputs.benchmark }}.html -d preact@local-pinned -d preact@main --trace=${{ inputs.trace }}
+
+      # Prepare output
+      - name: Anaylze logs if present
+        working-directory: benchmarks
+        run: '[ -d out/logs ] && pnpm run analyze ${{ inputs.benchmark }} || echo "No logs to analyze"'
+      - name: Tar logs if present
+        working-directory: benchmarks
+        run: |
+          if [ -d out/logs ]; then
+            LOGS_FILE=out/${{ inputs.benchmark }}_logs.tgz
+            mkdir -p $(dirname $LOGS_FILE)
+            tar -zcvf $LOGS_FILE out/logs
+          else
+            echo "No logs found"
+          fi
+
+      # Upload results and logs
+      - name: Calculate log artifact name
+        id: log-artifact-name
+        run: |
+          NAME=$(echo "${{ inputs.benchmark }}" | sed -r 's/[\/]+/_/g')
+          echo "artifact_name=logs_$NAME" >> $GITHUB_OUTPUT
+      - name: Upload results
+        uses: actions/upload-artifact@v3
+        with:
+          name: results
+          path: benchmarks/out/results/${{ inputs.benchmark }}.json
+      - name: Upload logs
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ steps.log-artifact-name.outputs.artifact_name }}
+          path: benchmarks/out/${{ inputs.benchmark }}_logs.tgz
+          if-no-files-found: ignore

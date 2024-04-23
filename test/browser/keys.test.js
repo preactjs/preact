@@ -1,4 +1,5 @@
-import { createElement, Component, render } from 'preact';
+import { createElement, Component, render, createRef } from 'preact';
+import { setupRerender } from 'preact/test-utils';
 import { setupScratch, teardown } from '../_util/helpers';
 import { logCall, clearLog, getLog } from '../_util/logCall';
 import { div } from '../_util/dom';
@@ -8,6 +9,8 @@ import { div } from '../_util/dom';
 describe('keys', () => {
 	/** @type {HTMLDivElement} */
 	let scratch;
+
+	let rerender;
 
 	/** @type {string[]} */
 	let ops;
@@ -71,6 +74,7 @@ describe('keys', () => {
 
 	beforeEach(() => {
 		scratch = setupScratch();
+		rerender = setupRerender();
 		ops = [];
 	});
 
@@ -81,9 +85,37 @@ describe('keys', () => {
 
 	// https://fb.me/react-special-props
 	it('should not pass key in props', () => {
-		const Foo = sinon.spy(() => null);
+		const Foo = sinon.spy(function Foo() {
+			return null;
+		});
 		render(<Foo key="foo" />, scratch);
 		expect(Foo.args[0][0]).to.deep.equal({});
+	});
+
+	it('should update in-place keyed DOM nodes', () => {
+		render(
+			<ul>
+				<li key="0">a</li>
+				<li key="1">b</li>
+				<li key="2">c</li>
+			</ul>,
+			scratch
+		);
+		expect(scratch.innerHTML).to.equal(
+			'<ul><li>a</li><li>b</li><li>c</li></ul>'
+		);
+
+		render(
+			<ul>
+				<li key="0">x</li>
+				<li key="1">y</li>
+				<li key="2">z</li>
+			</ul>,
+			scratch
+		);
+		expect(scratch.innerHTML).to.equal(
+			'<ul><li>x</li><li>y</li><li>z</li></ul>'
+		);
 	});
 
 	// See preactjs/preact-compat#21
@@ -248,9 +280,41 @@ describe('keys', () => {
 		render(<List values={values} />, scratch);
 		expect(scratch.textContent).to.equal('abcd');
 		expect(getLog()).to.deep.equal([
-			'<li>z.remove()',
+			'<li>x.remove()',
 			'<li>y.remove()',
-			'<li>x.remove()'
+			'<li>z.remove()'
+		]);
+	});
+
+	it('should move keyed children to the beginning', () => {
+		const values = ['b', 'c', 'd', 'a'];
+
+		render(<List values={values} />, scratch);
+		expect(scratch.textContent).to.equal('bcda');
+
+		move(values, values.length - 1, 0);
+		clearLog();
+
+		render(<List values={values} />, scratch);
+		expect(scratch.textContent).to.equal('abcd');
+		expect(getLog()).to.deep.equal(['<ol>bcda.insertBefore(<li>a, <li>b)']);
+	});
+
+	it('should move multiple keyed children to the beginning', () => {
+		const values = ['c', 'd', 'e', 'a', 'b'];
+
+		render(<List values={values} />, scratch);
+		expect(scratch.textContent).to.equal('cdeab');
+
+		move(values, values.length - 1, 0);
+		move(values, values.length - 1, 0);
+		clearLog();
+
+		render(<List values={values} />, scratch);
+		expect(scratch.textContent).to.equal('abcde');
+		expect(getLog()).to.deep.equal([
+			'<ol>cdeab.insertBefore(<li>a, <li>c)',
+			'<ol>acdeb.insertBefore(<li>b, <li>c)'
 		]);
 	});
 
@@ -324,6 +388,35 @@ describe('keys', () => {
 		);
 	});
 
+	it('should move keyed children to the beginning on longer list', () => {
+		// Preact v10 worst case
+		const values = ['a', 'b', 'c', 'd', 'e', 'f'];
+
+		render(<List values={values} />, scratch);
+		expect(scratch.textContent).to.equal('abcdef');
+
+		move(values, 4, 1);
+		clearLog();
+
+		render(<List values={values} />, scratch);
+		expect(scratch.textContent).to.equal('aebcdf');
+		expect(getLog()).to.deep.equal(['<ol>abcdef.insertBefore(<li>e, <li>b)']);
+	});
+
+	it('should move keyed children to the end on longer list', () => {
+		const values = ['a', 'b', 'c', 'd', 'e', 'f'];
+
+		render(<List values={values} />, scratch);
+		expect(scratch.textContent).to.equal('abcdef');
+
+		move(values, 1, values.length - 2);
+		clearLog();
+
+		render(<List values={values} />, scratch);
+		expect(scratch.textContent).to.equal('acdebf');
+		expect(getLog()).to.deep.equal(['<ol>abcdef.insertBefore(<li>b, <li>f)']);
+	});
+
 	it('should reverse keyed children effectively', () => {
 		const values = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'];
 
@@ -336,16 +429,55 @@ describe('keys', () => {
 
 		render(<List values={values} />, scratch);
 		expect(scratch.textContent).to.equal(values.join(''));
+		// expect(getLog()).to.have.lengthOf(9);
 		expect(getLog()).to.deep.equal([
 			'<ol>abcdefghij.insertBefore(<li>j, <li>a)',
 			'<ol>jabcdefghi.insertBefore(<li>i, <li>a)',
 			'<ol>jiabcdefgh.insertBefore(<li>h, <li>a)',
 			'<ol>jihabcdefg.insertBefore(<li>g, <li>a)',
-			'<ol>jihgabcdef.appendChild(<li>e)',
-			'<ol>jihgabcdfe.appendChild(<li>d)',
-			'<ol>jihgabcfed.appendChild(<li>c)',
-			'<ol>jihgabfedc.appendChild(<li>b)',
-			'<ol>jihgafedcb.appendChild(<li>a)'
+			'<ol>jihgabcdef.insertBefore(<li>f, <li>a)',
+			'<ol>jihgfabcde.insertBefore(<li>e, <li>a)',
+			'<ol>jihgfeabcd.insertBefore(<li>d, <li>a)',
+			'<ol>jihgfedabc.insertBefore(<li>c, <li>a)',
+			'<ol>jihgfedcab.appendChild(<li>a)'
+		]);
+	});
+
+	it('should properly remove children of memoed components', () => {
+		const values = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+
+		class Item extends Component {
+			shouldComponentUpdate(props) {
+				return props.value !== this.props.value;
+			}
+
+			render() {
+				return <li>{this.props.value}</li>;
+			}
+		}
+
+		function App({ values }) {
+			return (
+				<ul>
+					{values.map(value => (
+						<Item key={value} value={value} />
+					))}
+				</ul>
+			);
+		}
+
+		render(<App values={values} />, scratch);
+		expect(scratch.textContent).to.equal(values.join(''));
+
+		clearLog();
+		values.splice(3, 3);
+
+		render(<App values={values} />, scratch);
+		expect(scratch.textContent).to.equal(values.join(''));
+		expect(getLog()).to.deep.equal([
+			'<li>4.remove()',
+			'<li>5.remove()',
+			'<li>6.remove()'
 		]);
 	});
 
@@ -458,8 +590,8 @@ describe('keys', () => {
 
 		expect(scratch.innerHTML).to.equal(expectedHtml);
 		expect(ops).to.deep.equal([
-			'Unmount Stateful2',
 			'Unmount Stateful1',
+			'Unmount Stateful2',
 			'Mount Stateful1',
 			'Mount Stateful2'
 		]);
@@ -471,8 +603,8 @@ describe('keys', () => {
 
 		expect(scratch.innerHTML).to.equal(expectedHtml);
 		expect(ops).to.deep.equal([
-			'Unmount Stateful2',
 			'Unmount Stateful1',
+			'Unmount Stateful2',
 			'Mount Stateful1',
 			'Mount Stateful2'
 		]);
@@ -554,6 +686,130 @@ describe('keys', () => {
 		expect(Stateful2Ref).to.equal(Stateful2MovedRef);
 	});
 
+	it('should effectively iterate on large lists', done => {
+		const newItems = () =>
+			Array(100)
+				.fill(0)
+				.map((item, i) => i);
+
+		let set,
+			mutatedNodes = [];
+
+		class App extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { items: newItems() };
+				set = this.set = this.set.bind(this);
+				this.ref = createRef();
+			}
+
+			componentDidMount() {
+				const observer = new MutationObserver(listener);
+				observer.observe(this.ref.current, { childList: true });
+
+				function listener(mutations) {
+					for (const { addedNodes } of mutations) {
+						for (const node of Array.from(addedNodes)) {
+							mutatedNodes.push(node);
+						}
+					}
+				}
+			}
+
+			set() {
+				const currentItems = this.state.items;
+				const items = newItems().filter(id => {
+					const isVisible = currentItems.includes(id);
+					return id >= 20 && id <= 80 ? !isVisible : isVisible;
+				});
+				this.setState({ items });
+			}
+
+			render() {
+				return (
+					<div ref={this.ref}>
+						{this.state.items.map(i => (
+							<div key={i}>{i}</div>
+						))}
+					</div>
+				);
+			}
+		}
+
+		render(<App />, scratch);
+
+		set();
+		rerender();
+
+		setTimeout(() => {
+			expect(mutatedNodes.length).to.equal(0);
+			done();
+		});
+	});
+
+	it('should effectively iterate on large component lists', done => {
+		const newItems = () =>
+			Array(100)
+				.fill(0)
+				.map((item, i) => i);
+
+		let set,
+			mutatedNodes = [];
+
+		const Row = ({ i }) => <p>{i}</p>;
+
+		class App extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { items: newItems() };
+				set = this.set = this.set.bind(this);
+				this.ref = createRef();
+			}
+
+			componentDidMount() {
+				const observer = new MutationObserver(listener);
+				observer.observe(this.ref.current, { childList: true });
+
+				function listener(mutations) {
+					for (const { addedNodes } of mutations) {
+						for (const node of Array.from(addedNodes)) {
+							mutatedNodes.push(node);
+						}
+					}
+				}
+			}
+
+			set() {
+				const currentItems = this.state.items;
+				const items = newItems().filter(id => {
+					const isVisible = currentItems.includes(id);
+					return id >= 20 && id <= 80 ? !isVisible : isVisible;
+				});
+				this.setState({ items });
+			}
+
+			render() {
+				return (
+					<div ref={this.ref}>
+						{this.state.items.map(i => (
+							<Row key={i} i={i} />
+						))}
+					</div>
+				);
+			}
+		}
+
+		render(<App />, scratch);
+
+		set();
+		rerender();
+
+		setTimeout(() => {
+			expect(mutatedNodes.length).to.equal(0);
+			done();
+		});
+	});
+
 	it('should not preserve state when switching between keyed and unkeyed components as children', () => {
 		// React & Preact v8 behavior: https://codesandbox.io/s/8l3p6lz9kj
 
@@ -603,8 +859,8 @@ describe('keys', () => {
 
 		expect(scratch.innerHTML).to.equal(expectedHtml);
 		expect(ops).to.deep.equal([
-			'Unmount Stateful2',
 			'Unmount Stateful1',
+			'Unmount Stateful2',
 			'Mount Stateful1',
 			'Mount Stateful2'
 		]);
@@ -616,12 +872,75 @@ describe('keys', () => {
 
 		expect(scratch.innerHTML).to.equal(expectedHtml);
 		expect(ops).to.deep.equal([
-			'Unmount Stateful2',
 			'Unmount Stateful1',
+			'Unmount Stateful2',
 			'Mount Stateful1',
 			'Mount Stateful2'
 		]);
 		expect(Stateful1Ref).to.not.equal(Stateful1MovedRef);
 		expect(Stateful2Ref).to.not.equal(Stateful2MovedRef);
+	});
+
+	it('should handle full reorders', () => {
+		const keys = {
+			Apple: `Apple_1`,
+			Orange: `Orange_1`,
+			Banana: `Banana_1`,
+			Grape: `Grape_1`,
+			Kiwi: `Kiwi_1`,
+			Cherry: `Cherry_1`
+		};
+
+		let sort;
+
+		class App extends Component {
+			order;
+
+			state = { items: ['Apple', 'Grape', 'Cherry', 'Orange', 'Banana'] };
+
+			sort() {
+				this.order = this.order === 'ASC' ? 'DESC' : 'ASC';
+				const items = [...this.state.items].sort((a, b) =>
+					this.order === 'ASC' ? a.localeCompare(b) : b.localeCompare(a)
+				);
+				this.setState({ items });
+			}
+
+			render(_, { items }) {
+				sort = this.sort.bind(this);
+				return (
+					<div>
+						{items.map(item => (
+							<div key={keys[item]}>{item}</div>
+						))}
+					</div>
+				);
+			}
+		}
+
+		const expected = values => {
+			return values.map(key => `<div>${key}</div>`).join('');
+		};
+
+		render(<App />, scratch);
+		expect(scratch.innerHTML).to.eq(
+			`<div>${expected(['Apple', 'Grape', 'Cherry', 'Orange', 'Banana'])}</div>`
+		);
+
+		let sorted = ['Apple', 'Grape', 'Cherry', 'Orange', 'Banana'].sort((a, b) =>
+			a.localeCompare(b)
+		);
+		sort();
+		rerender();
+
+		expect(scratch.innerHTML).to.eq(`<div>${expected(sorted)}</div>`);
+
+		sorted = ['Apple', 'Grape', 'Cherry', 'Orange', 'Banana'].sort((a, b) =>
+			b.localeCompare(a)
+		);
+		sort();
+		rerender();
+
+		expect(scratch.innerHTML).to.eq(`<div>${expected(sorted)}</div>`);
 	});
 });

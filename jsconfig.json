@@ -1,16 +1,19 @@
 {
-	"compilerOptions": {
-		"baseUrl": ".",
-		"checkJs": true,
-		"jsx": "react",
-		"lib": ["dom", "es5"],
-		"moduleResolution": "node",
-		"paths": {
-			"preact": ["."],
-			"preact/*": ["./*"]
-		},
-		"reactNamespace": "createElement",
-		"target": "es5"
-	},
-	"exclude": ["node_modules", "dist", "demo"]
+  "compilerOptions": {
+    "baseUrl": ".",
+    "checkJs": true,
+    "jsx": "react",
+    "jsxFactory": "createElement",
+    "jsxFragmentFactory": "Fragment",
+    "lib": ["dom", "es5"],
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "paths": {
+      "preact": ["."],
+      "preact/*": ["./*"]
+    },
+    "target": "es5",
+    "noEmit": true
+  },
+  "exclude": ["**/node_modules/**", "**/dist/**", "coverage", "demo"]
 }

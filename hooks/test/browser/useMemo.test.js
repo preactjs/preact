@@ -1,6 +1,7 @@
 import { createElement, render } from 'preact';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
-import { useMemo } from 'preact/hooks';
+import { useMemo, useState } from 'preact/hooks';
+import { act } from 'preact/test-utils';
 
 /** @jsx createElement */
 
@@ -121,5 +122,83 @@ describe('useMemo', () => {
 		render(<App x={2} />, scratch);
 		expect(spy2).to.be.calledThrice;
 		expect(scratch.innerHTML).to.equal('<div><span>2</span><p>2</p></div>');
+	});
+
+	it('should not commit memoization from a skipped render', () => {
+		const calls = [];
+		let set;
+		const App = () => {
+			const [greeting, setGreeting] = useState('hi');
+			set = setGreeting;
+
+			const value = useMemo(() => {
+				calls.push('doing memo');
+				return greeting;
+			}, [greeting]);
+			calls.push(`render ${value}`);
+
+			if (greeting === 'bye') {
+				setGreeting('hi');
+			}
+
+			return <p>{value}</p>;
+		};
+
+		render(<App />, scratch);
+		expect(calls.length).to.equal(2);
+		expect(calls).to.deep.equal(['doing memo', 'render hi']);
+
+		act(() => {
+			set('bye');
+		});
+		expect(calls.length).to.equal(5);
+		expect(calls).to.deep.equal([
+			'doing memo',
+			'render hi',
+			'doing memo',
+			'render bye', // We expect a missing "doing memo"  here because we return to the previous args value
+			'render hi'
+		]);
+	});
+
+	it('should promote falsy value after a skipped render', () => {
+		let update;
+
+		function App() {
+			const [v, set] = useState(0);
+			update = set;
+			const res = useMemo(() => 0, [v > 1]);
+
+			if (v === 0) {
+				set(v + 1);
+			}
+			return <p>{res}</p>;
+		}
+
+		render(<App />, scratch);
+		expect(scratch.textContent).to.equal('0');
+
+		act(() => {
+			update(v => v + 1);
+		});
+		act(() => {
+			update(v => v + 1);
+		});
+
+		expect(scratch.textContent).to.equal('0');
+	});
+
+	it('should promote undefined value after a skipped render', () => {
+		let value;
+		function Comp({ all }) {
+			const result = (value = useMemo(() => (all ? 5 : undefined), [all]));
+			return result;
+		}
+		render(<Comp all />, scratch);
+		expect(value).to.equal(5);
+		render(<Comp all={false} />, scratch);
+		expect(value).to.equal(undefined);
+		render(<Comp all={false} />, scratch);
+		expect(value).to.equal(undefined);
 	});
 });

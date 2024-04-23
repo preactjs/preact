@@ -385,6 +385,12 @@ describe('act', () => {
 			} catch (e) {}
 		};
 
+		const tryNestedRenderBroken = () => {
+			act(() => {
+				tryRenderBroken();
+			});
+		};
+
 		describe('synchronously', () => {
 			it('should rethrow the exception', () => {
 				expect(renderBroken).to.throw('BrokenWidget is broken');
@@ -392,6 +398,12 @@ describe('act', () => {
 
 			it('should not affect state updates in future renders', () => {
 				tryRenderBroken();
+				renderWorking();
+				expect(scratch.textContent).to.equal('1');
+			});
+
+			it('should not affect state updates in future renders when nested `act` throws an exception', () => {
+				tryNestedRenderBroken();
 				renderWorking();
 				expect(scratch.textContent).to.equal('1');
 			});
@@ -414,6 +426,18 @@ describe('act', () => {
 				let err;
 				try {
 					await renderBrokenAsync();
+				} catch (e) {
+					err = e;
+				}
+				expect(err.message).to.equal('BrokenWidget is broken');
+			});
+
+			it('should rethrow the exception in nested act calls', async () => {
+				let err;
+				try {
+					await act(async () => {
+						await renderBrokenAsync();
+					});
 				} catch (e) {
 					err = e;
 				}
@@ -464,6 +488,22 @@ describe('act', () => {
 
 				renderWorking();
 				expect(scratch.textContent).to.equal('1');
+			});
+
+			it('should restore custom `debounceRendering` hook', () => {
+				const prevDebounce = options.debounceRendering;
+				const tempDebounce = () => {};
+				options.debounceRendering = tempDebounce;
+
+				try {
+					renderBrokenEffect();
+				} catch (e) {}
+
+				try {
+					expect(options.debounceRendering).to.equal(tempDebounce);
+				} finally {
+					options.debounceRendering = prevDebounce;
+				}
 			});
 
 			it('should not affect effects in future renders', () => {

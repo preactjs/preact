@@ -2,12 +2,7 @@ import { fileURLToPath } from 'url';
 import { stat, readFile } from 'fs/promises';
 import * as path from 'path';
 import escalade from 'escalade';
-import globby from 'globby';
-
-// TODO: Replace with import.meta.resolve when stable
-import { createRequire } from 'module';
-// @ts-ignore
-const require = createRequire(import.meta.url);
+import { globby } from 'globby';
 
 export const IS_CI = process.env.CI === 'true';
 
@@ -28,8 +23,7 @@ export async function getPkgBinPath(pkgName) {
 	/** @type {string | void} */
 	let packageJsonPath;
 	try {
-		// TODO: Replace with import.meta.resolve when stable
-		const pkgMainPath = require.resolve(pkgName);
+		const pkgMainPath = await import.meta.resolve(pkgName);
 		packageJsonPath = await escalade(pkgMainPath, (dir, names) => {
 			if (names.includes('package.json')) {
 				return 'package.json';

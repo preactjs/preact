@@ -32,11 +32,19 @@ export function act(cb) {
 		// been set up.
 		//
 		// If an exception occurs, the outermost `act` will handle cleanup.
-		const result = cb();
-		if (isThenable(result)) {
-			return result.then(() => {
-				--actDepth;
-			});
+		try {
+			const result = cb();
+			if (isThenable(result)) {
+				return result.then(() => {
+					--actDepth;
+				}, (e) => {
+					--actDepth;
+					throw e;
+				})
+			}
+		} catch(e) {
+			--actDepth;
+			throw e;
 		}
 		--actDepth;
 		return Promise.resolve();
@@ -61,11 +69,12 @@ export function act(cb) {
 				toFlush();
 				rerender();
 			}
-			teardown();
 		} catch (e) {
 			if (!err) {
 				err = e;
 			}
+		} finally {
+			teardown();
 		}
 
 		options.requestAnimationFrame = previousRequestAnimationFrame;

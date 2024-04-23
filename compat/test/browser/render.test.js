@@ -10,7 +10,8 @@ import {
 	setupScratch,
 	teardown,
 	serializeHtml,
-	createEvent
+	createEvent,
+	sortAttributes
 } from '../../../test/_util/helpers';
 
 describe('compat render', () => {
@@ -158,6 +159,29 @@ describe('compat render', () => {
 		expect(scratch.firstElementChild.value).to.equal('0');
 	});
 
+	it('should call onChange and onInput when input event is dispatched', () => {
+		const onChange = sinon.spy();
+		const onInput = sinon.spy();
+
+		render(<input onChange={onChange} onInput={onInput} />, scratch);
+
+		scratch.firstChild.dispatchEvent(createEvent('input'));
+
+		expect(onChange).to.be.calledOnce;
+		expect(onInput).to.be.calledOnce;
+
+		onChange.resetHistory();
+		onInput.resetHistory();
+
+		// change props order
+		render(<input onInput={onInput} onChange={onChange} />, scratch);
+
+		scratch.firstChild.dispatchEvent(createEvent('input'));
+
+		expect(onChange).to.be.calledOnce;
+		expect(onInput).to.be.calledOnce;
+	});
+
 	it('should keep value of uncontrolled inputs using defaultValue', () => {
 		// See https://github.com/preactjs/preact/issues/2391
 
@@ -217,6 +241,54 @@ describe('compat render', () => {
 		expect(document.activeElement.nodeName).to.equal('INPUT');
 	});
 
+	it('should transform react-style camel cased attributes', () => {
+		render(
+			<text dominantBaseline="middle" fontWeight="30px">
+				foo
+			</text>,
+			scratch
+		);
+		expect(scratch.innerHTML).to.equal(
+			'<text dominant-baseline="middle" font-weight="30px">foo</text>'
+		);
+	});
+
+	it('should not transform imageSrcSet', () => {
+		render(
+			<link
+				rel="preload"
+				as="image"
+				href="preact.jpg"
+				imageSrcSet="preact_400px.jpg 400w"
+			/>,
+			scratch
+		);
+
+		let html = sortAttributes(scratch.innerHTML);
+		if (/Trident/.test(navigator.userAgent)) {
+			html = html.toLowerCase();
+		}
+
+		expect(html).to.equal(
+			'<link as="image" href="preact.jpg" imagesrcset="preact_400px.jpg 400w" rel="preload">'
+		);
+	});
+
+	it('should correctly allow for "className"', () => {
+		const Foo = props => {
+			const { className, ...rest } = props;
+			return (
+				<div class={className}>
+					<p {...rest}>Foo</p>
+				</div>
+			);
+		};
+
+		render(<Foo className="foo" />, scratch);
+		expect(scratch.firstChild.className).to.equal('foo');
+		expect(scratch.firstChild.firstChild.className).to.equal('');
+	});
+
 	it('should normalize class+className even on components', () => {
 		function Foo(props) {
 			return (
@@ -270,6 +342,7 @@ describe('compat render', () => {
 		it('should preserve className, add class alias', () => {
 			const { props } = <ul className="from className" />;
 			expect(props).to.have.property('className', 'from className');
+			// TODO: why would we do this, assuming that folks add className themselves
 			expect(props).to.have.property('class', 'from className');
 		});
 
@@ -292,6 +365,7 @@ describe('compat render', () => {
 			const { props } = <ul className="from className" />;
 			const spreaded = (<li a {...props} />).props;
 			expect(spreaded).to.have.property('className', 'from className');
+			// TODO: why would we do this, assuming that folks add className themselves
 			expect(spreaded).to.have.property('class', 'from className');
 			expect(spreaded.propertyIsEnumerable('class')).to.equal(true);
 		});
@@ -425,14 +499,33 @@ describe('compat render', () => {
 		expect(updateSpy).to.not.be.calledOnce;
 	});
 
+	it('should support the translate attribute w/ yes as a string', () => {
+		render(<b translate="yes">Bold</b>, scratch);
+		expect(scratch.innerHTML).to.equal('<b translate="yes">Bold</b>');
+	});
+
+	it('should support the translate attribute w/ no as a string', () => {
+		render(<b translate="no">Bold</b>, scratch);
+		expect(scratch.innerHTML).to.equal('<b translate="no">Bold</b>');
+	});
+
+	it('should support false aria-* attributes', () => {
+		render(<div aria-checked={false} />, scratch);
+		expect(scratch.firstChild.getAttribute('aria-checked')).to.equal('false');
+	});
+
+	it('should support false data-* attributes', () => {
+		render(<div data-checked={false} />, scratch);
+		expect(scratch.firstChild.getAttribute('data-checked')).to.equal('false');
+	});
+
 	it("should support react-relay's usage of __SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED", () => {
 		const Ctx = createContext('foo');
 
 		// Simplified version of: https://github.com/facebook/relay/blob/fba79309977bf6b356ee77a5421ca5e6f306223b/packages/react-relay/readContext.js#L17-L28
 		function readContext(Context) {
-			const {
-				ReactCurrentDispatcher
-			} = React.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
+			const { ReactCurrentDispatcher } =
+				React.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
 			const dispatcher = ReactCurrentDispatcher.current;
 			return dispatcher.readContext(Context);
 		}
@@ -448,6 +541,25 @@ describe('compat render', () => {
 			</Ctx.Provider>,
 			scratch
 		);
+
+		expect(scratch.textContent).to.equal('foo');
+	});
+
+	it("should support recoils's usage of __SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED", () => {
+		// Simplified version of: https://github.com/facebookexperimental/Recoil/blob/c1b97f3a0117cad76cbc6ab3cb06d89a9ce717af/packages/recoil/core/Recoil_ReactMode.js#L36-L44
+		function useStateWrapper(init) {
+			const { ReactCurrentDispatcher } =
+				React.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
+			const dispatcher = ReactCurrentDispatcher.current;
+			return dispatcher.useState(init);
+		}
+
+		function Foo() {
+			const [value] = useStateWrapper('foo');
+			return <div>{value}</div>;
+		}
+
+		React.render(<Foo />, scratch);
 
 		expect(scratch.textContent).to.equal('foo');
 	});

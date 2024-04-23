@@ -4,6 +4,8 @@ var coverage = String(process.env.COVERAGE) === 'true',
 	minify = String(process.env.MINIFY) === 'true',
 	ci = String(process.env.CI).match(/^(1|true)$/gi),
 	sauceLabs = ci && String(process.env.RUN_SAUCE_LABS) === 'true',
+	// always downlevel to ES5 for saucelabs:
+	downlevel = sauceLabs || String(process.env.DOWNLEVEL) === 'true',
 	performance = !coverage && String(process.env.PERFORMANCE) !== 'false',
 	path = require('path'),
 	errorstacks = require('errorstacks'),
@@ -137,16 +139,14 @@ function createEsbuildPlugin() {
 			build.onResolve({ filter: /^preact.*/ }, args => {
 				const pkg = alias[args.path];
 				return {
-					path: pkg,
-					namespace: 'preact'
+					path: pkg
 				};
 			});
 
 			build.onResolve({ filter: /^(react|react-dom)$/ }, args => {
 				const pkg = alias['preact/compat'];
 				return {
-					path: pkg,
-					namespace: 'preact'
+					path: pkg
 				};
 			});
 
@@ -163,7 +163,7 @@ function createEsbuildPlugin() {
 								loose: true,
 								modules: false,
 								targets: {
-									browsers: ['last 2 versions', 'IE >= 9']
+									browsers: ['last 2 versions', 'IE >= 11']
 								}
 							}
 						]
@@ -178,7 +178,7 @@ function createEsbuildPlugin() {
 			});
 
 			// Apply babel pass whenever we load a .js file
-			build.onLoad({ filter: /\.js$/ }, async args => {
+			build.onLoad({ filter: /\.[mc]?js$/ }, async args => {
 				const contents = await fs.readFile(args.path, 'utf-8');
 
 				// Using a cache is crucial as babel is 30x slower than esbuild
@@ -202,6 +202,20 @@ function createEsbuildPlugin() {
 					const tmp = await babel.transformAsync(result, {
 						filename: args.path,
 						sourceMaps: 'inline',
+						presets: downlevel
+							? [
+									[
+										'@babel/preset-env',
+										{
+											loose: true,
+											modules: false,
+											targets: {
+												browsers: ['last 2 versions', 'IE >= 11']
+											}
+										}
+									]
+							  ]
+							: [],
 						plugins: [
 							coverage && [
 								'istanbul',
@@ -237,7 +251,7 @@ function createEsbuildPlugin() {
 	};
 }
 
-module.exports = function(config) {
+module.exports = function (config) {
 	config.set({
 		browsers: sauceLabs
 			? Object.keys(sauceLabsLaunchers)
@@ -326,7 +340,7 @@ module.exports = function(config) {
 			singleBundle: false,
 
 			// esbuild options
-			target: 'es5',
+			target: downlevel ? 'es5' : 'es2015',
 			define: {
 				COVERAGE: coverage,
 				'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || ''),

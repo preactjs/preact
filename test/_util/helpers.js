@@ -43,7 +43,8 @@ export function supportsDataList() {
 	);
 }
 
-const VOID_ELEMENTS = /^(area|base|br|col|embed|hr|img|input|link|meta|param|source|track|wbr)$/;
+const VOID_ELEMENTS =
+	/^(area|base|br|col|embed|hr|img|input|link|meta|param|source|track|wbr)$/;
 
 function encodeEntities(str) {
 	return str.replace(/&/g, '&amp;');
@@ -183,11 +184,12 @@ export function sortCss(cssText) {
 
 /**
  * Setup the test environment
+ * @param {string} [id]
  * @returns {HTMLDivElement}
  */
-export function setupScratch() {
+export function setupScratch(id) {
 	const scratch = document.createElement('div');
-	scratch.id = 'scratch';
+	scratch.id = id || 'scratch';
 	(document.body || document.documentElement).appendChild(scratch);
 	return scratch;
 }
@@ -203,9 +205,17 @@ export function clearOptions() {
 
 /**
  * Teardown test environment and reset preact's internal state
- * @param {HTMLDivElement} scratch
+ * @param {HTMLElement} scratch
  */
 export function teardown(scratch) {
+	if (
+		scratch &&
+		('__k' in scratch || '_children' in scratch) &&
+		scratch._children
+	) {
+		verifyVNodeTree(scratch._children);
+	}
+
 	if (scratch) {
 		scratch.parentNode.removeChild(scratch);
 	}
@@ -222,6 +232,21 @@ export function teardown(scratch) {
 	}
 
 	restoreElementAttributes();
+}
+
+/** @type {(vnode: import('../../src/internal').VNode) => void} */
+function verifyVNodeTree(vnode) {
+	if (vnode._nextDom) {
+		expect.fail('vnode should not have _nextDom:' + vnode._nextDom);
+	}
+
+	if (vnode._children) {
+		for (let child of vnode._children) {
+			if (child) {
+				verifyVNodeTree(child);
+			}
+		}
+	}
 }
 
 const Foo = () => 'd';

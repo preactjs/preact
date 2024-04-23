@@ -1,12 +1,14 @@
 import { setupRerender, act } from 'preact/test-utils';
-import { createElement, render, Component } from 'preact';
+import { createElement, render, Component, createContext } from 'preact';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import {
 	useState,
 	useReducer,
 	useEffect,
 	useLayoutEffect,
-	useRef
+	useRef,
+	useMemo,
+	useContext
 } from 'preact/hooks';
 import { scheduleEffectAssert } from '../_util/useEffectUtil';
 
@@ -296,6 +298,183 @@ describe('combinations', () => {
 			'effect inner call <span>hello 2</span>',
 			'effect outer dispose <span>hello 2</span>',
 			'effect outer call <span>hello 2</span>'
+		]);
+	});
+
+	// TODO: I actually think this is an acceptable failure, because we update child first and then parent
+	// the effects are out of order
+	it.skip('should run effects child-first even for children separated by memoization', () => {
+		let ops = [];
+
+		/** @type {() => void} */
+		let updateChild;
+		/** @type {() => void} */
+		let updateParent;
+
+		function Child() {
+			const [, setCount] = useState(0);
+			updateChild = () => setCount(c => c + 1);
+			useEffect(() => {
+				ops.push('child effect');
+			});
+			return <div>Child</div>;
+		}
+
+		function Parent() {
+			const [, setCount] = useState(0);
+			updateParent = () => setCount(c => c + 1);
+			const memoedChild = useMemo(() => <Child />, []);
+			useEffect(() => {
+				ops.push('parent effect');
+			});
+			return (
+				<div>
+					<div>Parent</div>
+					{memoedChild}
+				</div>
+			);
+		}
+
+		act(() => render(<Parent />, scratch));
+		expect(ops).to.deep.equal(['child effect', 'parent effect']);
+
+		ops = [];
+		updateChild();
+		updateParent();
+		act(() => rerender());
+
+		expect(ops).to.deep.equal(['child effect', 'parent effect']);
+	});
+
+	it('should not block hook updates when context updates are enqueued', () => {
+		const Ctx = createContext({
+			value: 0,
+			setValue: /** @type {*} */ () => {}
+		});
+
+		let triggerSubmit = () => {};
+		function Child() {
+			const ctx = useContext(Ctx);
+			const [shouldSubmit, setShouldSubmit] = useState(false);
+			triggerSubmit = () => setShouldSubmit(true);
+
+			useEffect(() => {
+				if (shouldSubmit) {
+					// Update parent state and child state at the same time
+					ctx.setValue(v => v + 1);
+					setShouldSubmit(false);
+				}
+			}, [shouldSubmit]);
+
+			return <p>{ctx.value}</p>;
+		}
+
+		function App() {
+			const [value, setValue] = useState(0);
+			const ctx = useMemo(() => {
+				return { value, setValue };
+			}, [value]);
+			return (
+				<Ctx.Provider value={ctx}>
+					<Child />
+				</Ctx.Provider>
+			);
+		}
+
+		act(() => {
+			render(<App />, scratch);
+		});
+
+		expect(scratch.textContent).to.equal('0');
+
+		act(() => {
+			triggerSubmit();
+		});
+		expect(scratch.textContent).to.equal('1');
+
+		// This is where the update wasn't applied
+		act(() => {
+			triggerSubmit();
+		});
+		expect(scratch.textContent).to.equal('2');
+	});
+
+	it('parent and child refs should be set before all effects', () => {
+		const anchorId = 'anchor';
+		const tooltipId = 'tooltip';
+		const effectLog = [];
+
+		let useRef2 = sinon.spy(init => {
+			const realRef = useRef(init);
+			const ref = useRef(init);
+			Object.defineProperty(ref, 'current', {
+				get: () => realRef.current,
+				set: value => {
+					realRef.current = value;
+					effectLog.push('set ref ' + value?.tagName);
+				}
+			});
+			return ref;
+		});
+
+		function Tooltip({ anchorRef, children }) {
+			// For example, used to manually position the tooltip
+			const tooltipRef = useRef2(null);
+
+			useLayoutEffect(() => {
+				expect(anchorRef.current?.id).to.equal(anchorId);
+				expect(tooltipRef.current?.id).to.equal(tooltipId);
+				effectLog.push('tooltip layout effect');
+			}, [anchorRef, tooltipRef]);
+			useEffect(() => {
+				expect(anchorRef.current?.id).to.equal(anchorId);
+				expect(tooltipRef.current?.id).to.equal(tooltipId);
+				effectLog.push('tooltip effect');
+			}, [anchorRef, tooltipRef]);
+
+			return (
+				<div class="tooltip-wrapper">
+					<div id={tooltipId} ref={tooltipRef}>
+						{children}
+					</div>
+				</div>
+			);
+		}
+
+		function App() {
+			// For example, used to define what element to anchor the tooltip to
+			const anchorRef = useRef2(null);
+
+			useLayoutEffect(() => {
+				expect(anchorRef.current?.id).to.equal(anchorId);
+				effectLog.push('anchor layout effect');
+			}, [anchorRef]);
+			useEffect(() => {
+				expect(anchorRef.current?.id).to.equal(anchorId);
+				effectLog.push('anchor effect');
+			}, [anchorRef]);
+
+			return (
+				<div>
+					<p id={anchorId} ref={anchorRef}>
+						More info
+					</p>
+					<Tooltip anchorRef={anchorRef}>a tooltip</Tooltip>
+				</div>
+			);
+		}
+
+		act(() => {
+			render(<App />, scratch);
+		});
+
+		expect(effectLog).to.deep.equal([
+			'set ref P',
+			'set ref DIV',
+			'tooltip layout effect',
+			'anchor layout effect',
+			'tooltip effect',
+			'anchor effect'
 		]);
 	});
 });

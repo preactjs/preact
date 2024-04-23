@@ -1,0 +1,29 @@
+name: Release
+on: create
+
+jobs:
+  build:
+    if: github.ref_type == 'tag'
+    uses: preactjs/preact/.github/workflows/ci.yml@main
+
+  release:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v3
+        with:
+          name: npm-package
+      - name: Create draft release
+        id: create-release
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const script = require('./scripts/release/create-gh-release.js')
+            return script({ github, context })
+      - name: Upload release artifact
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const script = require('./scripts/release/upload-gh-asset.js')
+            return script({ require, github, context, glob, release: ${{ steps.create-release.outputs.result }} })

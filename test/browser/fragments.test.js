@@ -235,9 +235,9 @@ describe('Fragment', () => {
 
 		expect(scratch.innerHTML).to.equal(div([div(1), span(2), span(2)]));
 		expectDomLogToBe([
+			'<span>1.remove()',
 			'<div>.appendChild(#text)',
-			'<div>122.insertBefore(<div>1, <span>1)',
-			'<span>1.remove()'
+			'<div>22.insertBefore(<div>1, <span>2)'
 		]);
 	});
 
@@ -357,9 +357,9 @@ describe('Fragment', () => {
 		expect(ops).to.deep.equal([]);
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
 		expectDomLogToBe([
+			'<div>Hello.remove()',
 			'<div>.appendChild(#text)',
-			'<div>Hello.insertBefore(<div>Hello, <div>Hello)',
-			'<div>Hello.remove()'
+			'<div>.appendChild(<div>Hello)'
 		]);
 
 		clearLog();
@@ -368,10 +368,10 @@ describe('Fragment', () => {
 		expect(ops).to.deep.equal([]);
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
 		expectDomLogToBe([
+			'<div>Hello.remove()',
 			'<div>.appendChild(#text)',
 			// Re-append the Stateful DOM since it has been re-parented
-			'<div>Hello.insertBefore(<div>Hello, <div>Hello)',
-			'<div>Hello.remove()'
+			'<div>.appendChild(<div>Hello)'
 		]);
 	});
 
@@ -396,9 +396,9 @@ describe('Fragment', () => {
 		expect(ops).to.deep.equal([]);
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
 		expectDomLogToBe([
+			'<div>Hello.remove()',
 			'<div>.appendChild(#text)',
-			'<div>Hello.insertBefore(<div>Hello, <div>Hello)',
-			'<div>Hello.remove()'
+			'<div>.appendChild(<div>Hello)'
 		]);
 
 		clearLog();
@@ -407,9 +407,9 @@ describe('Fragment', () => {
 		expect(ops).to.deep.equal([]);
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
 		expectDomLogToBe([
+			'<div>Hello.remove()',
 			'<div>.appendChild(#text)',
-			'<div>Hello.insertBefore(<div>Hello, <div>Hello)',
-			'<div>Hello.remove()'
+			'<div>.appendChild(<div>Hello)'
 		]);
 	});
 
@@ -646,6 +646,110 @@ describe('Fragment', () => {
 		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
 	});
 
+	it('should preserve order for fragment switching', () => {
+		let set;
+		class Foo extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { isLoading: true, data: null };
+				set = this.setState.bind(this);
+			}
+			render(props, { isLoading, data }) {
+				return (
+					<Fragment>
+						<div>HEADER</div>
+						{isLoading ? <div>Loading...</div> : null}
+						{data ? <div>Content: {data}</div> : null}
+					</Fragment>
+				);
+			}
+		}
+
+		render(<Foo />, scratch);
+		expect(scratch.innerHTML).to.equal(
+			'<div>HEADER</div><div>Loading...</div>'
+		);
+
+		set({ isLoading: false, data: 2 });
+		rerender();
+		expect(scratch.innerHTML).to.equal(
+			'<div>HEADER</div><div>Content: 2</div>'
+		);
+	});
+
+	it('should preserve order for nested fragment switching w/ child return', () => {
+		let set;
+		const Wrapper = ({ children }) => <Fragment>{children}</Fragment>;
+		class Foo extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { isLoading: true, data: null };
+				set = this.setState.bind(this);
+			}
+			render(props, { isLoading, data }) {
+				return (
+					<Fragment>
+						<div>HEADER</div>
+						{isLoading ? <div>Loading...</div> : null}
+						{data ? <div>Content: {data}</div> : null}
+					</Fragment>
+				);
+			}
+		}
+
+		render(
+			<Wrapper>
+				<Foo />
+			</Wrapper>,
+			scratch
+		);
+		expect(scratch.innerHTML).to.equal(
+			'<div>HEADER</div><div>Loading...</div>'
+		);
+
+		set({ isLoading: false, data: 2 });
+		rerender();
+		expect(scratch.innerHTML).to.equal(
+			'<div>HEADER</div><div>Content: 2</div>'
+		);
+	});
+
+	it('should preserve order for nested fragment switching', () => {
+		let set;
+		const Wrapper = () => (
+			<Fragment>
+				<Foo />
+			</Fragment>
+		);
+		class Foo extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { isLoading: true, data: null };
+				set = this.setState.bind(this);
+			}
+			render(props, { isLoading, data }) {
+				return (
+					<Fragment>
+						<div>HEADER</div>
+						{isLoading ? <div>Loading...</div> : null}
+						{data ? <div>Content: {data}</div> : null}
+					</Fragment>
+				);
+			}
+		}
+
+		render(<Wrapper />, scratch);
+		expect(scratch.innerHTML).to.equal(
+			'<div>HEADER</div><div>Loading...</div>'
+		);
+
+		set({ isLoading: false, data: 2 });
+		rerender();
+		expect(scratch.innerHTML).to.equal(
+			'<div>HEADER</div><div>Content: 2</div>'
+		);
+	});
+
 	it('should preserve state with reordering in multiple levels', () => {
 		function Foo({ condition }) {
 			return condition ? (
@@ -687,8 +791,9 @@ describe('Fragment', () => {
 		expect(scratch.innerHTML).to.equal(htmlForFalse);
 		expectDomLogToBe(
 			[
-				'<div>fooHellobeep.insertBefore(<div>beep, <div>foo)',
-				'<div>beepbarHello.appendChild(<div>bar)'
+				'<div>barHellobeep.insertBefore(<div>bar, <div>beep)',
+				'<div>Hellobarbeep.appendChild(<div>Hello)',
+				'<div>barbeepHello.appendChild(<div>bar)'
 			],
 			'rendering true to false'
 		);
@@ -700,8 +805,8 @@ describe('Fragment', () => {
 		expect(scratch.innerHTML).to.equal(htmlForTrue);
 		expectDomLogToBe(
 			[
-				'<div>beepHellofoo.insertBefore(<div>foo, <div>beep)',
-				'<div>fooboopHello.appendChild(<div>boop)'
+				'<div>beepHellofoo.appendChild(<div>Hello)',
+				'<div>boopfooHello.appendChild(<div>boop)'
 			],
 			'rendering false to true'
 		);
@@ -738,13 +843,12 @@ describe('Fragment', () => {
 		expect(ops).to.deep.equal([]); // Component should not have updated (empty op log)
 		expect(scratch.innerHTML).to.equal(html);
 		expectDomLogToBe([
-			'<span>.appendChild(#text)',
-			'<div>1Hello2.insertBefore(<span>1, <span>1)',
-			'<div>.appendChild(#text)',
-			'<div>11Hello2.insertBefore(<div>Hello, <span>1)',
-			'<div>1Hello1Hello2.insertBefore(<span>2, <span>1)',
 			'<span>1.remove()',
-			'<div>Hello.remove()'
+			'<div>Hello.remove()',
+			'<span>.appendChild(#text)',
+			'<div>2.insertBefore(<span>1, <span>2)',
+			'<div>.appendChild(#text)',
+			'<div>12.insertBefore(<div>Hello, <span>2)'
 		]);
 
 		clearLog();
@@ -753,13 +857,12 @@ describe('Fragment', () => {
 		expect(ops).to.deep.equal([]); // Component should not have updated (empty op log)
 		expect(scratch.innerHTML).to.equal(html);
 		expectDomLogToBe([
-			'<span>.appendChild(#text)',
-			'<div>1Hello2.insertBefore(<span>1, <span>1)',
-			'<div>.appendChild(#text)',
-			'<div>11Hello2.insertBefore(<div>Hello, <span>1)',
-			'<div>1Hello1Hello2.insertBefore(<span>2, <span>1)',
 			'<span>1.remove()',
-			'<div>Hello.remove()'
+			'<div>Hello.remove()',
+			'<span>.appendChild(#text)',
+			'<div>2.insertBefore(<span>1, <span>2)',
+			'<div>.appendChild(#text)',
+			'<div>12.insertBefore(<div>Hello, <span>2)'
 		]);
 	});
 
@@ -822,9 +925,9 @@ describe('Fragment', () => {
 
 		expect(scratch.innerHTML).to.equal('foobar');
 		expectDomLogToBe([
-			'<div>spamfoobar.insertBefore(#text, #text)',
 			'#text.remove()',
-			'#text.remove()'
+			'#text.remove()',
+			'<div>foo.appendChild(#text)'
 		]);
 	});
 
@@ -1279,9 +1382,7 @@ describe('Fragment', () => {
 		);
 		expectDomLogToBe([
 			'<ol>012345.insertBefore(<li>4, <li>0)',
-			'<ol>401235.insertBefore(<li>5, <li>0)',
-			// TODO: Hmmm why does this extra append happen?
-			'<ol>453012.appendChild(<li>3)'
+			'<ol>401235.insertBefore(<li>5, <li>0)'
 		]);
 
 		clearLog();
@@ -1331,14 +1432,14 @@ describe('Fragment', () => {
 			'rendering from true to false'
 		);
 		expectDomLogToBe([
-			// Mount 3 & 4
-			'<li>.appendChild(#text)',
-			'<ol>0122.appendChild(<li>3)',
-			'<li>.appendChild(#text)',
-			'<ol>01223.appendChild(<li>4)',
 			// Remove 1 & 2 (replaced with null)
 			'<li>0.remove()',
-			'<li>1.remove()'
+			'<li>1.remove()',
+			// Mount 3 & 4
+			'<li>.appendChild(#text)',
+			'<ol>22.appendChild(<li>3)',
+			'<li>.appendChild(#text)',
+			'<ol>223.appendChild(<li>4)'
 		]);
 
 		clearLog();
@@ -1348,14 +1449,14 @@ describe('Fragment', () => {
 			'rendering from false to true'
 		);
 		expectDomLogToBe([
-			// Insert 0 and 1
-			'<li>.appendChild(#text)',
-			'<ol>2234.insertBefore(<li>0, <li>2)',
-			'<li>.appendChild(#text)',
-			'<ol>02234.insertBefore(<li>1, <li>2)',
 			// Remove 3 & 4 (replaced by null)
 			'<li>3.remove()',
-			'<li>4.remove()'
+			'<li>4.remove()',
+			// Insert 0 and 1
+			'<li>.appendChild(#text)',
+			'<ol>22.insertBefore(<li>0, <li>2)',
+			'<li>.appendChild(#text)',
+			'<ol>022.insertBefore(<li>1, <li>2)'
 		]);
 	});
 
@@ -1402,14 +1503,14 @@ describe('Fragment', () => {
 			'rendering from true to false'
 		);
 		expectDomLogToBe([
-			// Mount 4 & 5
-			'<li>.appendChild(#text)',
-			'<ol>0123.appendChild(<li>4)',
-			'<li>.appendChild(#text)',
-			'<ol>01234.appendChild(<li>5)',
 			// Remove 1 & 2 (replaced with null)
 			'<li>0.remove()',
-			'<li>1.remove()'
+			'<li>1.remove()',
+			// Mount 4 & 5
+			'<li>.appendChild(#text)',
+			'<ol>23.appendChild(<li>4)',
+			'<li>.appendChild(#text)',
+			'<ol>234.appendChild(<li>5)'
 		]);
 
 		clearLog();
@@ -1419,14 +1520,14 @@ describe('Fragment', () => {
 			'rendering from false to true'
 		);
 		expectDomLogToBe([
-			// Insert 0 and 1 back into the DOM
-			'<li>.appendChild(#text)',
-			'<ol>2345.insertBefore(<li>0, <li>2)',
-			'<li>.appendChild(#text)',
-			'<ol>02345.insertBefore(<li>1, <li>2)',
 			// Remove 4 & 5 (replaced by null)
 			'<li>4.remove()',
-			'<li>5.remove()'
+			'<li>5.remove()',
+			// Insert 0 and 1 back into the DOM
+			'<li>.appendChild(#text)',
+			'<ol>23.insertBefore(<li>0, <li>2)',
+			'<li>.appendChild(#text)',
+			'<ol>023.insertBefore(<li>1, <li>2)'
 		]);
 	});
 
@@ -1480,9 +1581,10 @@ describe('Fragment', () => {
 		);
 		expectDomLogToBe(
 			[
-				'<div>fooHellobeepboop.insertBefore(<div>Hello, <div>boop)',
-				'<div>barbeepHelloboop.insertBefore(<div>bar, <div>boop)',
-				'<div>boop.remove()'
+				'<div>boop.remove()',
+				'<div>barHellobeep.insertBefore(<div>bar, <div>beep)',
+				'<div>Hellobarbeep.appendChild(<div>Hello)',
+				'<div>barbeepHello.appendChild(<div>bar)'
 			],
 			'rendering from true to false'
 		);
@@ -1497,8 +1599,8 @@ describe('Fragment', () => {
 		);
 		expectDomLogToBe(
 			[
-				'<div>beepHellofoo.insertBefore(<div>foo, <div>beep)',
-				'<div>fooboopHello.appendChild(<div>boop)',
+				'<div>beepHellofoo.appendChild(<div>Hello)',
+				'<div>boopfooHello.appendChild(<div>boop)',
 				'<div>.appendChild(#text)',
 				'<div>fooHelloboop.appendChild(<div>boop)'
 			],
@@ -1566,7 +1668,8 @@ describe('Fragment', () => {
 		);
 		expectDomLogToBe(
 			[
-				'<div>fooHellobeepbeepbeep.appendChild(<div>Hello)',
+				'<div>barHellobeepbeepbeep.insertBefore(<div>bar, <div>beep)',
+				'<div>Hellobarbeepbeepbeep.appendChild(<div>Hello)',
 				'<div>barbeepbeepbeepHello.appendChild(<div>bar)'
 			],
 			'rendering from true to false'
@@ -1582,9 +1685,9 @@ describe('Fragment', () => {
 		);
 		expectDomLogToBe(
 			[
-				'<div>beepbeepbeepHellofoo.insertBefore(<div>foo, <div>beep)',
-				'<div>foobeepbeepbeepHello.insertBefore(<div>Hello, <div>beep)',
-				'<div>fooHelloboopboopboop.appendChild(<div>boop)'
+				'<div>beepbeepbeepHellofoo.appendChild(<div>Hello)',
+				'<div>beepbeepbeepfooHello.insertBefore(<div>foo, <div>beep)',
+				'<div>foobeepbeepbeepHello.insertBefore(<div>Hello, <div>beep)'
 			],
 			'rendering from false to true'
 		);
@@ -1673,12 +1776,12 @@ describe('Fragment', () => {
 		expect(scratch.innerHTML).to.equal(htmlForFalse);
 		expectDomLogToBe(
 			[
-				'<div>.appendChild(#text)',
-				'<div>1.insertBefore(<div>3, #text)',
-				'<div>.appendChild(#text)',
-				'<div>31.insertBefore(<div>4, #text)',
+				'<div>2.remove()',
 				'#text.remove()',
-				'<div>2.remove()'
+				'<div>.appendChild(#text)',
+				'<div>.appendChild(<div>3)',
+				'<div>.appendChild(#text)',
+				'<div>3.appendChild(<div>4)'
 			],
 			'rendering from true to false'
 		);
@@ -1689,9 +1792,9 @@ describe('Fragment', () => {
 		expect(scratch.innerHTML).to.equal(htmlForTrue);
 		expectDomLogToBe(
 			[
-				'<div>34.insertBefore(#text, <div>3)',
-				'<div>4.remove()',
 				'<div>3.remove()',
+				'<div>4.remove()',
+				'<div>.appendChild(#text)',
 				'<div>.appendChild(#text)',
 				'<div>1.appendChild(<div>2)'
 			],
@@ -1953,9 +2056,9 @@ describe('Fragment', () => {
 			`<div><div>A</div><section>B2</section><div>C</div></div>`
 		);
 		expectDomLogToBe([
+			'<div>B1.remove()',
 			'<section>.appendChild(#text)',
-			'<div>AB1C.insertBefore(<section>B2, <div>B1)',
-			'<div>B1.remove()'
+			'<div>AC.insertBefore(<section>B2, <div>C)'
 		]);
 	});
 
@@ -2003,12 +2106,12 @@ describe('Fragment', () => {
 			div([div('A'), section('B3'), section('B4'), div('C')])
 		);
 		expectDomLogToBe([
-			'<section>.appendChild(#text)',
-			'<div>AB1B2C.insertBefore(<section>B3, <div>B1)',
-			'<section>.appendChild(#text)',
-			'<div>AB3B1B2C.insertBefore(<section>B4, <div>B1)',
+			'<div>B1.remove()',
 			'<div>B2.remove()',
-			'<div>B1.remove()'
+			'<section>.appendChild(#text)',
+			'<div>AC.insertBefore(<section>B3, <div>C)',
+			'<section>.appendChild(#text)',
+			'<div>AB3C.insertBefore(<section>B4, <div>C)'
 		]);
 	});
 
@@ -2321,9 +2424,9 @@ describe('Fragment', () => {
 
 		expect(scratch.innerHTML).to.eql(`<div><span>A2</span><div>C</div></div>`);
 		expectDomLogToBe([
+			'<div>A.remove()',
 			'<span>.appendChild(#text)',
-			'<div>AC.insertBefore(<span>A2, <div>A)',
-			'<div>A.remove()'
+			'<div>C.insertBefore(<span>A2, <div>C)'
 		]);
 	});
 
@@ -2388,12 +2491,12 @@ describe('Fragment', () => {
 			`<div><span>A3</span><span>A4</span><div>C</div></div>`
 		);
 		expectDomLogToBe([
-			'<span>.appendChild(#text)',
-			'<div>A1A2C.insertBefore(<span>A3, <div>A1)',
-			'<span>.appendChild(#text)',
-			'<div>A3A1A2C.insertBefore(<span>A4, <div>A1)',
+			'<div>A1.remove()',
 			'<div>A2.remove()',
-			'<div>A1.remove()'
+			'<span>.appendChild(#text)',
+			'<div>C.insertBefore(<span>A3, <div>C)',
+			'<span>.appendChild(#text)',
+			'<div>A3C.insertBefore(<span>A4, <div>C)'
 		]);
 	});
 
@@ -2469,9 +2572,9 @@ describe('Fragment', () => {
 			'updateA'
 		);
 		expectDomLogToBe([
+			'<div>A.remove()',
 			'<span>.appendChild(#text)',
-			'<div>ABC.insertBefore(<span>A2, <div>A)',
-			'<div>A.remove()'
+			'<div>BC.insertBefore(<span>A2, <div>B)'
 		]);
 	});
 
@@ -2526,12 +2629,12 @@ describe('Fragment', () => {
 			'updateA'
 		);
 		expectDomLogToBe([
-			'<span>.appendChild(#text)',
-			'<div>A1A2.insertBefore(<span>A3, <div>A1)',
-			'<span>.appendChild(#text)',
-			'<div>A3A1A2.insertBefore(<span>A4, <div>A1)',
+			'<div>A1.remove()',
 			'<div>A2.remove()',
-			'<div>A1.remove()'
+			'<span>.appendChild(#text)',
+			'<div>.appendChild(<span>A3)',
+			'<span>.appendChild(#text)',
+			'<div>A3.appendChild(<span>A4)'
 		]);
 
 		clearLog();
@@ -2549,7 +2652,8 @@ describe('Fragment', () => {
 	});
 
 	it('should properly place conditional elements around strictly equal vnodes', () => {
-		let set;
+		/** @type {() => void} */
+		let toggle;
 
 		const Children = () => (
 			<Fragment>
@@ -2562,7 +2666,7 @@ describe('Fragment', () => {
 			constructor(props) {
 				super(props);
 				this.state = { panelPosition: 'bottom' };
-				set = this.tooglePanelPosition = this.tooglePanelPosition.bind(this);
+				toggle = this.tooglePanelPosition = this.tooglePanelPosition.bind(this);
 			}
 
 			tooglePanelPosition() {
@@ -2596,33 +2700,33 @@ describe('Fragment', () => {
 		expect(scratch.innerHTML).to.equal(bottom);
 
 		clearLog();
-		set();
+		toggle();
 		rerender();
 		expect(scratch.innerHTML).to.equal(top);
 		expectDomLogToBe([
+			'<div>bottom panel.remove()',
 			'<div>.appendChild(#text)',
-			'<div>NavigationContentbottom panel.insertBefore(<div>top panel, <div>Navigation)',
-			'<div>bottom panel.remove()'
+			'<div>NavigationContent.insertBefore(<div>top panel, <div>Navigation)'
 		]);
 
 		clearLog();
-		set();
+		toggle();
 		rerender();
 		expect(scratch.innerHTML).to.equal(bottom);
 		expectDomLogToBe([
+			'<div>top panel.remove()',
 			'<div>.appendChild(#text)',
-			'<div>top panelNavigationContent.appendChild(<div>bottom panel)',
-			'<div>top panel.remove()'
+			'<div>NavigationContent.appendChild(<div>bottom panel)'
 		]);
 
 		clearLog();
-		set();
+		toggle();
 		rerender();
 		expect(scratch.innerHTML).to.equal(top);
 		expectDomLogToBe([
+			'<div>bottom panel.remove()',
 			'<div>.appendChild(#text)',
-			'<div>NavigationContentbottom panel.insertBefore(<div>top panel, <div>Navigation)',
-			'<div>bottom panel.remove()'
+			'<div>NavigationContent.insertBefore(<div>top panel, <div>Navigation)'
 		]);
 	});
 
@@ -2705,6 +2809,96 @@ describe('Fragment', () => {
 		expectDomLogToBe(['<div>2.remove()', '<div>3.remove()']);
 	});
 
+	it('should properly unmount Fragment children around an unmounting null placeholder #2987', () => {
+		const arrayOf = (n, fill = 0) => new Array(n).fill(fill);
+
+		class App extends Component {
+			constructor(props) {
+				super(props);
+
+				this.state = {
+					renderFirstElement: true,
+					renderLastElement: true,
+					childrenProps: [
+						{
+							arrayData: arrayOf(10).map((_, index) => ({
+								key: index + 5,
+								text: index + 5
+							}))
+						},
+						{
+							arrayData: arrayOf(10).map((_, index) => ({
+								key: index + 15,
+								text: index + 15
+							}))
+						}
+					]
+				};
+			}
+
+			componentDidMount() {
+				// eslint-disable-next-line react/no-did-mount-set-state
+				this.setState({
+					renderFirstElement: false,
+					renderLastElement: true,
+					childrenProps: [
+						{
+							arrayData: arrayOf(15).map((_, index) => ({
+								key: index,
+								text: index
+							}))
+						},
+						{
+							arrayData: arrayOf(5).map((_, index) => ({
+								key: index + 15,
+								text: index + 15
+							}))
+						}
+					]
+				});
+			}
+
+			render() {
+				const { renderFirstElement, renderLastElement, childrenProps } =
+					this.state;
+				return (
+					<div>
+						{renderFirstElement && <div>This is the first div</div>}
+						{childrenProps.map(({ arrayData }) => {
+							return arrayData.map(({ key, text }) => (
+								<div key={key}>{text}</div>
+							));
+						})}
+						{renderLastElement && <div>This is the last div</div>}
+					</div>
+				);
+			}
+		}
+
+		render(<App />, scratch);
+		expect(scratch.innerHTML).to.equal(
+			div([
+				div('This is the first div'),
+				arrayOf(20)
+					.map((_, i) => div(i + 5)) // 5 - 24
+					.join(''),
+				div('This is the last div')
+			])
+		);
+
+		// Flush CDM setState call
+		rerender();
+		expect(scratch.innerHTML).to.equal(
+			div([
+				// "This is the first div" is unmounted using a null placeholder pattern
+				arrayOf(20)
+					.map((_, i) => div(i)) // 0 - 19 (0 - 4 are inserted, 20 - 24 are unmounted)
+					.join(''),
+				div('This is the last div')
+			])
+		);
+	});
+
 	it('should efficiently place new children and unmount nested Fragment children', () => {
 		// <div>4 is added and Fragment sibling unmounts. Does <div>4 get correct _nextDom pointer?
 		function App({ condition }) {
@@ -2748,10 +2942,61 @@ describe('Fragment', () => {
 			div([div(1), div(4), div('A'), div('B')])
 		);
 		expectDomLogToBe([
-			'<div>.appendChild(#text)',
-			'<div>123AB.insertBefore(<div>4, <div>2)',
 			'<div>2.remove()',
-			'<div>3.remove()'
+			'<div>3.remove()',
+			'<div>.appendChild(#text)',
+			'<div>1AB.insertBefore(<div>4, <div>A)'
+		]);
+	});
+
+	it('should not remove keyed elements', () => {
+		let deleteItem = () => {};
+		const Element = ({ item, deleteItem }) => (
+			<Fragment>
+				<div>Item: {item}</div>
+				{''} {/* If you delete this, it works fine. */}
+			</Fragment>
+		);
+
+		class App extends Component {
+			constructor(props) {
+				super(props);
+				this.state = {
+					items: Array(10)
+						.fill()
+						.map((_, i) => i)
+				};
+			}
+
+			render(_props, state) {
+				deleteItem = () => {
+					this.setState({
+						items: this.state.items.filter(i => i !== this.state.items[2])
+					});
+				};
+
+				return state.items.map(item => (
+					<Element item={item} deleteItem={deleteItem} key={item} />
+				));
+			}
+		}
+
+		render(<App />, scratch);
+		expect(scratch.innerHTML).to.equal(
+			'<div>Item: 0</div> <div>Item: 1</div> <div>Item: 2</div> <div>Item: 3</div> <div>Item: 4</div> <div>Item: 5</div> <div>Item: 6</div> <div>Item: 7</div> <div>Item: 8</div> <div>Item: 9</div> '
+		);
+
+		clearLog();
+		deleteItem();
+		rerender();
+
+		expect(scratch.innerHTML).to.equal(
+			'<div>Item: 0</div> <div>Item: 1</div> <div>Item: 3</div> <div>Item: 4</div> <div>Item: 5</div> <div>Item: 6</div> <div>Item: 7</div> <div>Item: 8</div> <div>Item: 9</div> '
+		);
+		expectDomLogToBe([
+			'<div>Item: 2.remove()',
+			'#text.remove()',
+			'#text.remove()'
 		]);
 	});
 
@@ -2795,11 +3040,114 @@ describe('Fragment', () => {
 
 		expect(scratch.innerHTML).to.equal(div([span(1), div('A'), div('B')]));
 		expectDomLogToBe([
-			'<span>.appendChild(#text)',
-			'<div>123AB.insertBefore(<span>1, <div>1)',
+			'<div>1.remove()',
 			'<div>2.remove()',
 			'<div>3.remove()',
-			'<div>1.remove()'
+			'<span>.appendChild(#text)',
+			'<div>AB.insertBefore(<span>1, <div>A)'
 		]);
+	});
+
+	it('should swap nested fragments correctly', () => {
+		/** @type {() => void} */
+		let swap;
+		class App extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { first: true };
+			}
+
+			render() {
+				if (this.state.first) {
+					return (
+						<Fragment>
+							<Fragment>
+								<p>1. Original item first paragraph</p>
+							</Fragment>
+							<p>2. Original item second paragraph</p>
+							<button onClick={(swap = () => this.setState({ first: false }))}>
+								Click me
+							</button>
+						</Fragment>
+					);
+				}
+				return (
+					<Fragment>
+						<p>1. Second item first paragraph</p>
+						<Fragment>
+							<p>2. Second item second paragraph</p>
+							<div />
+						</Fragment>
+						<button onClick={(swap = () => this.setState({ first: true }))}>
+							Click me
+						</button>
+					</Fragment>
+				);
+			}
+		}
+
+		render(<App />, scratch);
+		expect(scratch.innerHTML).to.equal(
+			'<p>1. Original item first paragraph</p><p>2. Original item second paragraph</p><button>Click me</button>'
+		);
+
+		swap();
+		rerender();
+		expect(scratch.innerHTML).to.equal(
+			'<p>1. Second item first paragraph</p><p>2. Second item second paragraph</p><div></div><button>Click me</button>'
+		);
+
+		swap();
+		rerender();
+		expect(scratch.innerHTML).to.equal(
+			'<p>1. Original item first paragraph</p><p>2. Original item second paragraph</p><button>Click me</button>'
+		);
+	});
+
+	it('should efficiently unmount nested Fragment children when rerendering and reordering', () => {
+		/** @type {() => void} */
+		let toggle;
+
+		class App extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { condition: true };
+				toggle = () => this.setState({ condition: !this.state.condition });
+			}
+
+			render() {
+				return this.state.condition ? (
+					<Fragment>
+						<div>1</div>
+						<Fragment>
+							<div>A</div>
+							<div>B</div>
+						</Fragment>
+						<div>2</div>
+					</Fragment>
+				) : (
+					<Fragment>
+						<Fragment>
+							<div>A</div>
+						</Fragment>
+						<div>1</div>
+						<div>2</div>
+					</Fragment>
+				);
+			}
+		}
+
+		clearLog();
+		render(<App />, scratch);
+		expect(scratch.innerHTML).to.equal(
+			[div(1), div('A'), div('B'), div(2)].join('')
+		);
+
+		clearLog();
+		toggle();
+		rerender();
+
+		expect(scratch.innerHTML).to.equal([div('A'), div(1), div(2)].join(''));
+		expectDomLogToBe(['<div>B.remove()', '<div>2A1.appendChild(<div>2)']);
 	});
 });

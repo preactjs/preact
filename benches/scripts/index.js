@@ -30,7 +30,7 @@ prog
 	.example('bench text*')
 	.example('bench *.html')
 	.example('bench all')
-	.example('bench many* -f preact-local -f preact-master')
+	.example('bench many* -f preact-local -f preact-main')
 	.option(
 		'--browser, -b',
 		'Which browsers to launch in automatic mode, comma-delimited (chrome, chrome-headless, firefox, firefox-headless, safari, edge, ie)',
@@ -72,7 +72,7 @@ prog
 // Tests:
 // - (no args)
 // - many*
-// - many* -f preact-local -f preact-master
+// - many* -f preact-local -f preact-main
 prog
 	.command('deopts [benchmark]')
 	.describe(
@@ -81,30 +81,25 @@ prog
 	.example('deopts many_updates.html')
 	.example('deopts many*')
 	.example('deopts many* -f preact-local')
-	.example('deopts many* -f preact-local -f preact-master')
+	.example('deopts many* -f preact-local -f preact-main')
 	.option(
 		'--framework, -f',
 		'The framework to run the benchmark with.',
 		defaultDeoptsOptions.framework
 	)
-	.option(
-		'--timeout, -t',
-		'How long in seconds to keep the browser open while the benchmark runs. Passed to v8-deopt-viewer.',
-		defaultDeoptsOptions.timeout
-	)
-	.option(
-		'--open',
-		'Open the resulting v8-deopt-viewer result in the browser upon completion',
-		defaultDeoptsOptions.open
-	)
 	.action(runDeopts);
 
+// Test
+// - (no args)
+// - 02_replace1k
 prog
-	.command('analyze')
+	.command('analyze [benchmark]')
 	.describe(
 		'Analyze the trace logs created by running benchmarks with the --trace flag'
 	)
 	.example('analyze')
+	.example('analyze 02_replace1k')
+	.example('analyze many_updates')
 	.action(analyze);
 
 prog.parse(process.argv);
