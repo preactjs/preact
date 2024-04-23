@@ -87,18 +87,18 @@ declare namespace React {
 	export import ChangeEventHandler = JSXInternal.GenericEventHandler;
 
 	export function createPortal(
-		vnode: preact.VNode,
+		vnode: preact.ComponentChildren,
 		container: preact.ContainerNode
 	): preact.VNode<any>;
 
 	export function render(
-		vnode: preact.VNode<any>,
+		vnode: preact.ComponentChild,
 		parent: preact.ContainerNode,
 		callback?: () => void
 	): Component | null;
 
 	export function hydrate(
-		vnode: preact.VNode<any>,
+		vnode: preact.ComponentChild,
 		parent: preact.ContainerNode,
 		callback?: () => void
 	): Component | null;
