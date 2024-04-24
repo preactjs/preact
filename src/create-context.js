@@ -18,7 +18,7 @@ export function createContext(defaultValue, contextId) {
 		/** @type {FunctionComponent} */
 		Provider(props) {
 			if (!this.getChildContext) {
-				/** @type {Component[]} */
+				/** @type {Component[] | null} */
 				let subs = [];
 				let ctx = {};
 				ctx[contextId] = this;
@@ -48,11 +48,15 @@ export function createContext(defaultValue, contextId) {
 					}
 				};
 
+				this.componentWillUnmount = () => {
+					subs = null;
+				};
+
 				this.sub = c => {
 					subs.push(c);
 					let old = c.componentWillUnmount;
 					c.componentWillUnmount = () => {
-						subs.splice(subs.indexOf(c), 1);
+						if (subs) subs.splice(subs.indexOf(c), 1);
 						if (old) old.call(c);
 					};
 				};
