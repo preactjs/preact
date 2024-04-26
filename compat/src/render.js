@@ -250,7 +250,6 @@ options.vnode = vnode => {
 	if (oldVNodeHook) oldVNodeHook(vnode);
 };
 
-let renderCount = 0;
 let currentComponent;
 const oldBeforeRender = options._render;
 options._render = function (vnode) {
@@ -258,20 +257,7 @@ options._render = function (vnode) {
 		oldBeforeRender(vnode);
 	}
 
-	const nextComponent = vnode._component;
-	if (nextComponent === currentComponent) {
-		renderCount++;
-	} else {
-		renderCount = 1;
-	}
-
-	if (renderCount >= 25) {
-		throw new Error(
-			`Too many re-renders. Preact/compat limits the number of renders to prevent an infinite loop.`
-		);
-	}
-
-	currentComponent = nextComponent;
+	currentComponent = vnode._component;
 };
 
 const oldDiffed = options.diffed;
