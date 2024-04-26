@@ -1,4 +1,3 @@
-import { applyRef } from './refs';
 import {
 	TYPE_COMPONENT,
 	TYPE_ELEMENT,
@@ -19,7 +18,7 @@ import { setProperty } from './props';
 import { createInternal, getParentContext } from '../tree';
 import options from '../options';
 import { ENABLE_CLASSES } from '../component';
-import { commitQueue } from './commit';
+import { commitQueue, refQueue } from './commit';
 import { isArray } from '../util';
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
@@ -29,7 +28,7 @@ import { isArray } from '../util';
  * @param {import('../internal').PreactNode} startDom
  * @returns {import('../internal').PreactNode | null} pointer to the next DOM node to be hydrated (or null)
  */
-export function mount(internal, newVNode, parentDom, startDom, refs) {
+export function mount(internal, newVNode, parentDom, startDom) {
 	if (options._diff) options._diff(internal, newVNode);
 
 	/** @type {import('../internal').PreactNode} */
@@ -57,8 +56,7 @@ export function mount(internal, newVNode, parentDom, startDom, refs) {
 					internal,
 					renderResult,
 					parentDom,
-					startDom,
-					refs
+					startDom
 				);
 			}
 
@@ -75,7 +73,7 @@ export function mount(internal, newVNode, parentDom, startDom, refs) {
 					? startDom
 					: null;
 
-			nextDomSibling = mountElement(internal, hydrateDom, refs);
+			nextDomSibling = mountElement(internal, hydrateDom);
 		}
 
 		if (options.diffed) options.diffed(internal);
@@ -108,7 +106,7 @@ export function mount(internal, newVNode, parentDom, startDom, refs) {
  * @param {import('../internal').PreactNode} dom A DOM node to attempt to re-use during hydration
  * @returns {import('../internal').PreactNode}
  */
-function mountElement(internal, dom, refs) {
+function mountElement(internal, dom) {
 	let newProps = internal.props;
 	let nodeType = internal.type;
 	let flags = internal.flags;
@@ -210,8 +208,7 @@ function mountElement(internal, dom, refs) {
 				internal,
 				isArray(newChildren) ? newChildren : [newChildren],
 				dom,
-				isNew ? null : dom.firstChild,
-				refs
+				isNew ? null : dom.firstChild
 			);
 		}
 
@@ -232,7 +229,7 @@ function mountElement(internal, dom, refs) {
  * @param {import('../internal').PreactElement} parentDom The element into which this subtree is rendered
  * @param {import('../internal').PreactNode} startDom
  */
-export function mountChildren(internal, children, parentDom, startDom, refs) {
+export function mountChildren(internal, children, parentDom, startDom) {
 	let internalChildren = (internal._children = []),
 		i,
 		childVNode,
@@ -271,16 +268,8 @@ export function mountChildren(internal, children, parentDom, startDom, refs) {
 		}
 
 		if (childInternal.ref) {
-			if (refs) {
-				refs.push(childInternal, undefined);
-				childInternal.ref = childVNode.ref;
-			} else {
-				applyRef(
-					childInternal.ref,
-					childInternal._component || newDom,
-					childInternal
-				);
-			}
+			refQueue.push(childInternal);
+			childInternal.ref = childVNode.ref;
 		}
 	}
 

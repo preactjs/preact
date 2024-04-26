@@ -14,6 +14,7 @@ import { patch } from './patch';
 import { unmount } from './unmount';
 import { createInternal, getDomSibling } from '../tree';
 import { isArray } from '../util';
+import { refQueue } from './commit';
 
 /**
  * Update an internal with new children.
@@ -31,7 +32,6 @@ export function patchChildren(internal, children, parentDom) {
 	let skew = 0;
 	let i;
 
-	let refs;
 	/** @type {import('../internal').Internal} */
 	let childInternal;
 
@@ -74,10 +74,8 @@ export function patchChildren(internal, children, parentDom) {
 		if (mountingChild) {
 			childInternal = createInternal(childVNode, internal);
 
-			if (!refs) refs = [];
-
 			if (childVNode.ref) {
-				refs.push(childInternal, undefined);
+				refQueue.push(childInternal);
 				childInternal.ref = childVNode.ref;
 			}
 
@@ -86,8 +84,7 @@ export function patchChildren(internal, children, parentDom) {
 				childInternal,
 				childVNode,
 				parentDom,
-				getDomSibling(internal, skewedIndex),
-				refs
+				getDomSibling(internal, skewedIndex)
 			);
 		}
 		// If this node suspended during hydration, and no other flags are set:
@@ -96,10 +93,8 @@ export function patchChildren(internal, children, parentDom) {
 			(childInternal.flags & (MODE_HYDRATE | MODE_SUSPENDED)) ===
 			(MODE_HYDRATE | MODE_SUSPENDED)
 		) {
-			if (!refs) refs = [];
-
 			if (childVNode.ref) {
-				refs.push(childInternal, undefined);
+				refQueue.push(childInternal);
 				childInternal.ref = childVNode.ref;
 			}
 
@@ -107,8 +102,8 @@ export function patchChildren(internal, children, parentDom) {
 			mount(childInternal, childVNode, parentDom, childInternal.data);
 		} else {
 			if (childInternal.ref != childVNode.ref) {
-				if (!refs) refs = [];
-				refs.push(childInternal, childInternal.ref);
+				applyRef(childInternal.ref, null, internal);
+				refQueue.push(childInternal);
 				childInternal.ref = childVNode.ref;
 			}
 
@@ -174,16 +169,6 @@ export function patchChildren(internal, children, parentDom) {
 			if (oldChildren[i] != null) {
 				unmount(oldChildren[i], oldChildren[i]);
 			}
-		}
-	}
-
-	// Set refs only after unmount
-	if (refs) {
-		for (i = 0; i < refs.length; i += 2) {
-			const internal = refs[i];
-			if (refs[i + 1]) applyRef(refs[i + 1], null, internal);
-			if (internal && internal.ref)
-				applyRef(internal.ref, internal._component || internal.data, internal);
 		}
 	}
 }
