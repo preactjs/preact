@@ -247,11 +247,31 @@ export function initDebug() {
 		if (oldBeforeDiff) oldBeforeDiff(vnode);
 	};
 
+	let renderCount = 0;
+	let currentComponent;
 	options._render = vnode => {
 		if (oldRender) {
 			oldRender(vnode);
 		}
 		hooksAllowed = true;
+
+		const nextComponent = vnode._component;
+		if (nextComponent === currentComponent) {
+			renderCount++;
+		} else {
+			renderCount = 1;
+		}
+
+		if (renderCount >= 25) {
+			throw new Error(
+				`Too many re-renders. This is limited to prevent an infinite loop ` +
+					`which may lock up your browser. The component causing this is: ${getDisplayName(
+						vnode
+					)}`
+			);
+		}
+
+		currentComponent = nextComponent;
 	};
 
 	options._hook = (comp, index, type) => {
