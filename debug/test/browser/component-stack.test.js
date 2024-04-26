@@ -86,8 +86,7 @@ describe('component stack', () => {
 
 	it('should not print a warning when "@babel/plugin-transform-react-jsx-source" is installed', () => {
 		function Thrower() {
-			throw 'foo';
-			return <div>foo</div>;
+			throw new Error('foo');
 		}
 
 		try {
