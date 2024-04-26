@@ -250,13 +250,13 @@ options.vnode = vnode => {
 	if (oldVNodeHook) oldVNodeHook(vnode);
 };
 
+// Only needed for react-relay
 let currentComponent;
 const oldBeforeRender = options._render;
 options._render = function (vnode) {
 	if (oldBeforeRender) {
 		oldBeforeRender(vnode);
 	}
-
 	currentComponent = vnode._component;
 };
 
