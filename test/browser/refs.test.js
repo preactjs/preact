@@ -603,7 +603,6 @@ describe('refs', () => {
 	});
 
 	// Test for #4049
-	// TODO: verify this test change
 	it('should first clean-up refs and after apply them', () => {
 		let calls = [];
 		let set;
@@ -687,6 +686,7 @@ describe('refs', () => {
 		rerender();
 		expect(calls).to.deep.equal([
 			'removing ref from two',
+			'removing ref from three',
 			'adding ref to one',
 			'adding ref to two',
 			'adding ref to three'
