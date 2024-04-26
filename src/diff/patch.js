@@ -80,7 +80,10 @@ export function patch(internal, vnode, parentDom) {
 
 		try {
 			let renderResult;
-			if (internal._vnodeId === vnode._vnodeId) {
+			if (
+				!(internal.flags & FORCE_UPDATE) &&
+				internal._vnodeId === vnode._vnodeId
+			) {
 				internal.flags |= SKIP_CHILDREN;
 			} else {
 				renderResult = patchComponent(internal, vnode);
@@ -97,8 +100,8 @@ export function patch(internal, vnode, parentDom) {
 					(MODE_HYDRATE | MODE_SUSPENDED)
 						? internal.data
 						: internal.flags & MODE_HYDRATE
-							? null
-							: getDomSibling(internal);
+						? null
+						: getDomSibling(internal);
 
 				mountChildren(internal, renderResult, parentDom, siblingDom);
 			} else {
@@ -261,6 +264,7 @@ function patchComponent(internal, newVNode) {
 	c.context = componentContext;
 	internal.props = c.props = newProps;
 	c.state = c._nextState;
+	internal.flags |= FORCE_UPDATE;
 
 	let renderHook = options._render;
 	if (renderHook) renderHook(internal);

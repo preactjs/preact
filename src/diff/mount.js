@@ -11,7 +11,8 @@ import {
 	MODE_ERRORED,
 	TYPE_ROOT,
 	MODE_SVG,
-	DIRTY_BIT
+	DIRTY_BIT,
+	FORCE_UPDATE
 } from '../constants';
 import { normalizeToVNode, Fragment } from '../create-element';
 import { setProperty } from './props';
@@ -80,7 +81,12 @@ export function mount(internal, newVNode, parentDom, startDom, refs) {
 		if (options.diffed) options.diffed(internal);
 
 		// We successfully rendered this VNode, unset any stored hydration/bailout state:
-		internal.flags &= RESET_MODE;
+		if (internal.flags & FORCE_UPDATE) {
+			internal.flags &= RESET_MODE;
+			internal.flags |= FORCE_UPDATE;
+		} else {
+			internal.flags &= RESET_MODE;
+		}
 	} catch (e) {
 		internal._vnodeId = 0;
 		internal.flags |= e.then ? MODE_SUSPENDED : MODE_ERRORED;
