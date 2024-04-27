@@ -1,4 +1,5 @@
 import { createElement, render, createRef, Component, Fragment } from 'preact';
+import { useState } from 'preact/hooks';
 import {
 	setupScratch,
 	teardown,
@@ -269,6 +270,37 @@ describe('debug', () => {
 		let ref = createRef();
 		render(<div ref={ref} />, scratch);
 		expect(console.error).to.not.be.called;
+	});
+
+	it('throws an error if a component rerenders too many times', () => {
+		let rerenderCount = 0;
+		function TestComponent({ loop = false }) {
+			const [count, setCount] = useState(0);
+			if (loop) {
+				setCount(count + 1);
+			}
+
+			if (count > 30) {
+				expect.fail(
+					'Repeated rerenders did not cause the expected error. This test is failing.'
+				);
+			}
+
+			rerenderCount += 1;
+			return <div />;
+		}
+
+		expect(() => {
+			render(
+				<Fragment>
+					<TestComponent />
+					<TestComponent loop />
+				</Fragment>,
+				scratch
+			);
+		}).to.throw(/Too many re-renders/);
+		// 1 for first TestComponent + 24 for second TestComponent
+		expect(rerenderCount).to.equal(25);
 	});
 
 	describe('duplicate keys', () => {
