@@ -373,6 +373,12 @@ describe('act', () => {
 			});
 		};
 
+		const tryNestedRenderBroken = () => {
+			act(() => {
+				tryRenderBroken();
+			});
+		};
+
 		const renderWorking = () => {
 			act(() => {
 				render(<WorkingWidget />, scratch);
@@ -392,6 +398,12 @@ describe('act', () => {
 
 			it('should not affect state updates in future renders', () => {
 				tryRenderBroken();
+				renderWorking();
+				expect(scratch.textContent).to.equal('1');
+			});
+
+			it('should not affect state updates in future renders when nested `act` throws an exception', () => {
+				tryNestedRenderBroken();
 				renderWorking();
 				expect(scratch.textContent).to.equal('1');
 			});
