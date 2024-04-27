@@ -46,10 +46,9 @@ export const frameworks = [
 		}
 	},
 	{
-		label: 'preact-master',
+		label: 'preact-main',
 		dependencies: {
-			framework:
-				'file:' + repoRoot('benches/proxy-packages/preact-master-proxy')
+			framework: 'file:' + repoRoot('benches/proxy-packages/preact-main-proxy')
 		},
 		async isValid() {
 			try {
