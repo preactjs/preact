@@ -171,3 +171,16 @@ describe('Component', () => {
 		});
 	});
 });
+
+class Button extends Component {
+	handleClick(this: HTMLButtonElement, event: MouseEvent) {
+		event.preventDefault();
+		if (event.target instanceof HTMLElement) {
+			console.log(event.target.localName);
+		}
+	}
+
+	render() {
+		return <button onClick={this.handleClick}>{this.props.children}</button>;
+	}
+}
