@@ -6,8 +6,7 @@ import {
 	MODE_SUSPENDED,
 	EMPTY_ARR,
 	TYPE_DOM,
-	UNDEFINED,
-	FORCE_UPDATE
+	UNDEFINED
 } from '../constants';
 import { mount } from './mount';
 import { patch } from './patch';
