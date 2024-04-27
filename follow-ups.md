@@ -23,6 +23,15 @@ PR's that weren't backported yet, do they work?
 - Make this work https://github.com/preactjs/preact/pull/3306
 - https://github.com/preactjs/preact/pull/3696
 
+## To backport
+
+- https://github.com/preactjs/preact/pull/4043
+
+## To consider
+
+- Ref cleanup functions
+- eliminate `forwardRef` completely
+
 ## Root node follow ups
 
 - Investigate if the return value of `createRoot()` can be re-used as a root Node...
@@ -42,7 +51,6 @@ PR's that weren't backported yet, do they work?
 ## Backing Node follow ups
 
 - Address many TODOs
-- Move refs to internal renderCallbacks
 - Consider converting Fragment (and other special nodes, e.g. root, Portal,
   context?) to be numbers instead of functions with special diff handling
 
