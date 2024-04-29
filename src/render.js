@@ -45,6 +45,8 @@ export function render(vnode, parentDom, replaceNode) {
 			? slice.call(parentDom.childNodes)
 			: null,
 		commitQueue,
+		// @ts-expect-error parentDom.firstChild is a PreactElement but
+		// TS thinks it's a ContainerNode
 		oldVNode ? oldVNode._dom : parentDom.firstChild,
 		isHydrating,
 		refQueue
