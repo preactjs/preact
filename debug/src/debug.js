@@ -229,13 +229,20 @@ export function initDebug() {
 				}
 			}
 
-			checkPropTypes(
-				vnode.type.propTypes,
-				vnode.props,
-				'prop',
-				getDisplayName(vnode),
-				() => getOwnerStack(vnode)
-			);
+			if (
+				!vnode.type.displayName ||
+				(!vnode.type.displayName.startsWith('ForwardRef(') &&
+					!vnode.type.displayName.startsWith('Memo(') &&
+					vnode.type.displayName !== 'Lazy')
+			) {
+				checkPropTypes(
+					vnode.type.propTypes,
+					vnode.props,
+					'prop',
+					getDisplayName(vnode),
+					() => getOwnerStack(vnode)
+				);
+			}
 		}
 
 		if (oldBeforeDiff) oldBeforeDiff(vnode);
