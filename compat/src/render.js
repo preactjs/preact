@@ -24,6 +24,7 @@ import {
 	useSyncExternalStore,
 	useTransition
 } from './index';
+import { IS_NON_DIMENSIONAL } from './util';
 
 export const REACT_ELEMENT_TYPE =
 	(typeof Symbol != 'undefined' && Symbol.for && Symbol.for('react.element')) ||
@@ -131,11 +132,21 @@ const classNameDescriptorNonEnumberable = {
 };
 
 function handleDomVNode(vnode) {
-	let props = vnode.props,
+	let i,
+		props = vnode.props,
 		type = vnode.type,
 		normalizedProps = {};
 
-	for (let i in props) {
+	let style = props.style;
+	if (typeof style === 'object') {
+		for (i in style) {
+			if (typeof style[i] === 'number' && !IS_NON_DIMENSIONAL.test(i)) {
+				style[i] += 'px';
+			}
+		}
+	}
+
+	for (i in props) {
 		let value = props[i];
 
 		if (
