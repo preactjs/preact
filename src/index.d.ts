@@ -304,11 +304,7 @@ export function render(vnode: ComponentChild, parent: ContainerNode): void;
  *
  * Replacement Preact 10+ implementation can be found here: https://gist.github.com/developit/f4c67a2ede71dc2fab7f357f39cff28c
  */
-export function render(
-	vnode: ComponentChild,
-	parent: ContainerNode,
-	replaceNode?: Element | Text
-): void;
+export function render(vnode: ComponentChild, parent: ContainerNode): void;
 export function hydrate(vnode: ComponentChild, parent: ContainerNode): void;
 export function cloneElement(
 	vnode: VNode<any>,
