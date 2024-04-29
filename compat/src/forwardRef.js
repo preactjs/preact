@@ -1,4 +1,3 @@
-import { options } from 'preact';
 import { assign } from './util';
 
 export const REACT_FORWARD_SYMBOL =

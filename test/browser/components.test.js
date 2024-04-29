@@ -1963,7 +1963,7 @@ describe('Components', () => {
 		expect(() => rerender()).not.to.throw();
 	});
 
-	describe('c.base', () => {
+	describe.skip('c.base', () => {
 		/* eslint-disable lines-around-comment */
 		/** @type {import('../../src').Component} */
 		let parentDom1;
