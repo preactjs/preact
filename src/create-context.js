@@ -18,8 +18,8 @@ export function createContext(defaultValue, contextId) {
 		/** @type {FunctionComponent} */
 		Provider(props) {
 			if (!this.getChildContext) {
-				/** @type {Component[]} */
-				let subs = [];
+				/** @type {Set<Component>} */
+				let subs = new Set();
 				let ctx = {};
 				ctx[contextId] = this;
 
@@ -27,21 +27,7 @@ export function createContext(defaultValue, contextId) {
 
 				this.shouldComponentUpdate = function (_props) {
 					if (this.props.value !== _props.value) {
-						// I think the forced value propagation here was only needed when `options.debounceRendering` was being bypassed:
-						// https://github.com/preactjs/preact/commit/4d339fb803bea09e9f198abf38ca1bf8ea4b7771#diff-54682ce380935a717e41b8bfc54737f6R358
-						// In those cases though, even with the value corrected, we're double-rendering all nodes.
-						// It might be better to just tell folks not to use force-sync mode.
-						// Currently, using `useContext()` in a class component will overwrite its `this.context` value.
-						// subs.some(c => {
-						// 	c.context = _props.value;
-						// 	enqueueRender(c);
-						// });
-
-						// subs.some(c => {
-						// 	c.context[contextId] = _props.value;
-						// 	enqueueRender(c);
-						// });
-						subs.some(c => {
+						subs.forEach(c => {
 							c._force = true;
 							enqueueRender(c);
 						});
@@ -49,10 +35,10 @@ export function createContext(defaultValue, contextId) {
 				};
 
 				this.sub = c => {
-					subs.push(c);
+					subs.add(c);
 					let old = c.componentWillUnmount;
 					c.componentWillUnmount = () => {
-						subs.splice(subs.indexOf(c), 1);
+						subs.delete(c);
 						if (old) old.call(c);
 					};
 				};
