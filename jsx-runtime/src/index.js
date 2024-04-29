@@ -1,6 +1,5 @@
 import { options, Fragment } from 'preact';
 import { encodeEntities } from './utils';
-import { IS_NON_DIMENSIONAL } from '../../src/constants';
 
 let vnodeId = 0;
 
@@ -122,16 +121,7 @@ function jsxAttr(name, value) {
 						: JS_TO_CSS[prop] ||
 						  (JS_TO_CSS[prop] = prop.replace(CSS_REGEX, '-$&').toLowerCase());
 
-				let suffix = ';';
-				if (
-					typeof val === 'number' &&
-					// Exclude custom-attributes
-					!name.startsWith('--') &&
-					!IS_NON_DIMENSIONAL.test(name)
-				) {
-					suffix = 'px;';
-				}
-				str = str + name + ':' + val + suffix;
+				str = str + name + ':' + val + ';';
 			}
 		}
 		return name + '="' + str + '"';
