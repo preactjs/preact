@@ -520,7 +520,9 @@ function diffElementNodes(
 			// Remove children that are not part of any vnode.
 			if (excessDomChildren != null) {
 				for (i = excessDomChildren.length; i--; ) {
-					if (excessDomChildren[i] != null) excessDomChildren[i].remove();
+					if (excessDomChildren[i] != null) {
+						excessDomChildren[i].remove();
+					}
 				}
 			}
 		}
@@ -622,7 +624,7 @@ export function unmount(vnode, parentVNode, skipRemove) {
 		}
 	}
 
-	if (!skipRemove && vnode._dom != null) {
+	if (!skipRemove && vnode._dom != null && typeof vnode.type != 'function') {
 		vnode._dom.remove();
 	}
 
