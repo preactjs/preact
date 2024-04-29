@@ -28,7 +28,7 @@ export function forwardRef(fn) {
 	// mobx-react throws.
 	Forwarded.render = Forwarded;
 
-	Forwarded.prototype.isReactComponent = Forwarded._forwarded = true;
+	Forwarded.prototype.isReactComponent = true;
 	Forwarded.displayName = 'ForwardRef(' + (fn.displayName || fn.name) + ')';
 	return Forwarded;
 }
