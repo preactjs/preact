@@ -130,9 +130,7 @@ declare global {
 	type Ref<T> = RefObject<T> | RefCallback<T>;
 
 	export interface VNode<P = {}> extends preact.VNode<P> {
-		// Redefine type here using our internal ComponentType type, and specify
-		// string has an undefined `defaultProps` property to make TS happy
-		type: (string & { defaultProps: undefined }) | ComponentType<P>;
+		type: string | ComponentType<P>;
 		props: P & { children: ComponentChildren };
 		ref?: Ref<any> | null;
 		_children: Array<VNode<any>> | null;
