@@ -67,10 +67,10 @@ describe('cloneElement', () => {
 		const instance = <Foo ref={a}>hello</Foo>;
 
 		let clone = cloneElement(instance);
-		expect(clone.ref).to.equal(a);
+		expect(clone.props.ref).to.equal(a);
 
 		clone = cloneElement(instance, { ref: b });
-		expect(clone.ref).to.equal(b);
+		expect(clone.props.ref).to.equal(b);
 	});
 
 	it('should normalize props (ref)', () => {
