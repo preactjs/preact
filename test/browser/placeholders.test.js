@@ -56,21 +56,21 @@ describe('null placeholders', () => {
 
 	let resetAppendChild;
 	let resetInsertBefore;
-	let resetRemoveChild;
 	let resetRemove;
+	//let resetRemoveText;
 
 	before(() => {
 		resetAppendChild = logCall(Element.prototype, 'appendChild');
 		resetInsertBefore = logCall(Element.prototype, 'insertBefore');
-		resetRemoveChild = logCall(Element.prototype, 'removeChild');
 		resetRemove = logCall(Element.prototype, 'remove');
+		//resetRemoveText = logCall(Text.prototype, 'remove');
 	});
 
 	after(() => {
 		resetAppendChild();
 		resetInsertBefore();
-		resetRemoveChild();
 		resetRemove();
+		//resetRemoveText();
 	});
 
 	beforeEach(() => {
