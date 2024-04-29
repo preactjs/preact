@@ -1,4 +1,3 @@
-import { IS_NON_DIMENSIONAL } from '../constants';
 import options from '../options';
 
 function setStyle(style, key, value) {
@@ -6,10 +5,8 @@ function setStyle(style, key, value) {
 		style.setProperty(key, value == null ? '' : value);
 	} else if (value == null) {
 		style[key] = '';
-	} else if (typeof value != 'number' || IS_NON_DIMENSIONAL.test(key)) {
-		style[key] = value;
 	} else {
-		style[key] = value + 'px';
+		style[key] = value;
 	}
 }
 
@@ -39,10 +36,10 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
 
 	o: if (name === 'style') {
 		if (typeof value == 'string') {
-			dom.style.cssText = value;
+			setStyle(dom.style, 'cssText', value);
 		} else {
 			if (typeof oldValue == 'string') {
-				dom.style.cssText = oldValue = '';
+				setStyle(dom.style, 'cssText', (oldValue = ''));
 			}
 
 			if (oldValue) {
@@ -83,10 +80,10 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
 			if (!oldValue) {
 				value._attached = eventClock;
 				dom.addEventListener(
-          name,
-          useCapture ? eventProxyCapture : eventProxy,
-          useCapture
-        );
+					name,
+					useCapture ? eventProxyCapture : eventProxy,
+					useCapture
+				);
 			} else {
 				value._attached = oldValue._attached;
 			}
