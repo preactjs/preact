@@ -41,11 +41,11 @@ export function render(vnode, parentDom, replaceNode) {
 		vnode,
 		oldVNode || EMPTY_OBJ,
 		EMPTY_OBJ,
-		parentDom.namespaceURI == 'http://www.w3.org/1999/xhtml'
-			? 1
-			: parentDom.namespaceURI == 'http://www.w3.org/2000/svg'
+		parentDom.namespaceURI == 'http://www.w3.org/2000/svg'
 			? 2
-			: 3,
+			: parentDom.namespaceURI == 'http://www.w3.org/1998/Math/MathML'
+			? 3
+			: 1,
 		!isHydrating && replaceNode
 			? [replaceNode]
 			: oldVNode
