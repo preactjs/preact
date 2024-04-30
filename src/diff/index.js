@@ -239,9 +239,11 @@ export function diff(
 				tmp != null && tmp.type === Fragment && tmp.key == null;
 			let renderResult = isTopLevelFragment ? tmp.props.children : tmp;
 
+			newVNode._children = isArray(renderResult)
+				? renderResult
+				: [renderResult];
 			diffChildren(
 				parentDom,
-				isArray(renderResult) ? renderResult : [renderResult],
 				newVNode,
 				oldVNode,
 				globalContext,
@@ -490,9 +492,10 @@ function diffElementNodes(
 		} else {
 			if (oldHtml) dom.innerHTML = '';
 
+			// @ts-expect-error
+			newVNode._children = isArray(newChildren) ? newChildren : [newChildren];
 			diffChildren(
 				dom,
-				isArray(newChildren) ? newChildren : [newChildren],
 				newVNode,
 				oldVNode,
 				globalContext,
