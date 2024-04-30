@@ -136,10 +136,21 @@ describe('svg', () => {
 	it('should render children with the correct namespace URI', () => {
 		render(
 			<svg>
-				<text>Foo</text>
+				<text />
 			</svg>,
 			scratch
 		);
+
+		let namespace = scratch.querySelector('text').namespaceURI;
+
+		expect(namespace).to.equal('http://www.w3.org/2000/svg');
+	});
+
+	it('should inherit correct namespace URI from parent', () => {
+		const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+		scratch.appendChild(svg);
+
+		render(<text />, scratch.firstChild);
 
 		let namespace = scratch.querySelector('text').namespaceURI;
 

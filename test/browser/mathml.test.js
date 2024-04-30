@@ -35,6 +35,20 @@ describe('mathml', () => {
 		expect(namespace).to.equal('http://www.w3.org/1998/Math/MathML');
 	});
 
+	it('should inherit correct namespace URI from parent', () => {
+		const math = document.createElementNS(
+			'http://www.w3.org/1998/Math/MathML',
+			'math'
+		);
+		scratch.appendChild(math);
+
+		render(<mrow />, scratch.firstChild);
+
+		let namespace = scratch.querySelector('mrow').namespaceURI;
+
+		expect(namespace).to.equal('http://www.w3.org/1998/Math/MathML');
+	});
+
 	it('should use attributes for className', () => {
 		const Demo = ({ c }) => (
 			<math {...(c ? { class: 'foo_' + c } : {})}>
