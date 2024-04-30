@@ -426,9 +426,9 @@ function diffElementNodes(
 
 		oldProps = oldVNode.props || EMPTY_OBJ;
 
+		// TODO: do we want to keep this in v11?
 		// If we are in a situation where we are not hydrating but are using
-		// existing DOM (e.g. replaceNode) we should read the existing DOM
-		// attributes to diff them
+		// existing DOM we should read the existing DOM attributes to diff them
 		if (!isHydrating && excessDomChildren != null) {
 			oldProps = {};
 			for (i = 0; i < dom.attributes.length; i++) {
