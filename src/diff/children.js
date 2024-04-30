@@ -1,6 +1,12 @@
 import { diff, unmount, applyRef } from './index';
 import { createVNode, Fragment } from '../create-element';
-import { EMPTY_OBJ, EMPTY_ARR, INSERT_VNODE, MATCHED } from '../constants';
+import {
+	EMPTY_OBJ,
+	EMPTY_ARR,
+	INSERT_VNODE,
+	MATCHED,
+	FUNCTION
+} from '../constants';
 import { isArray } from '../util';
 import { getDomSibling } from '../component';
 
@@ -65,7 +71,7 @@ export function diffChildren(
 		if (
 			childVNode == null ||
 			typeof childVNode == 'boolean' ||
-			typeof childVNode == 'function'
+			typeof childVNode == FUNCTION
 		) {
 			continue;
 		}
@@ -122,7 +128,7 @@ export function diffChildren(
 			}
 			oldDom = insert(childVNode, oldDom, parentDom);
 		} else if (
-			typeof childVNode.type == 'function' &&
+			typeof childVNode.type == FUNCTION &&
 			childVNode._nextDom !== undefined
 		) {
 			// Since Fragments or components that return Fragment like VNodes can
@@ -186,7 +192,7 @@ function constructNewChildrenArray(newParentVNode, renderResult, oldChildren) {
 		if (
 			childVNode == null ||
 			typeof childVNode == 'boolean' ||
-			typeof childVNode == 'function'
+			typeof childVNode == FUNCTION
 		) {
 			childVNode = newParentVNode._children[i] = null;
 		}
@@ -298,7 +304,7 @@ function constructNewChildrenArray(newParentVNode, renderResult, oldChildren) {
 			}
 
 			// If we are mounting a DOM VNode, mark it for insertion
-			if (typeof childVNode.type != 'function') {
+			if (typeof childVNode.type != FUNCTION) {
 				childVNode._flags |= INSERT_VNODE;
 			}
 		} else if (matchingIndex !== skewedIndex) {
@@ -353,7 +359,7 @@ function constructNewChildrenArray(newParentVNode, renderResult, oldChildren) {
 function insert(parentVNode, oldDom, parentDom) {
 	// Note: VNodes in nested suspended trees may be missing _children.
 
-	if (typeof parentVNode.type == 'function') {
+	if (typeof parentVNode.type == FUNCTION) {
 		let children = parentVNode._children;
 		for (let i = 0; children && i < children.length; i++) {
 			if (children[i]) {
