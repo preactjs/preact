@@ -136,7 +136,11 @@ function renderComponent(component) {
 			newVNode,
 			oldVNode,
 			component._globalContext,
-			component._parentDom.ownerSVGElement !== undefined ? 2 : 1,
+			component._parentDom.namespaceURI == 'http://www.w3.org/1999/xhtml'
+				? 1
+				: component._parentDom.namespaceURI == 'http://www.w3.org/2000/svg'
+				? 2
+				: 3,
 			oldVNode._flags & MODE_HYDRATE ? [oldDom] : null,
 			commitQueue,
 			oldDom == null ? getDomSibling(oldVNode) : oldDom,

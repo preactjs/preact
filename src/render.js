@@ -41,7 +41,11 @@ export function render(vnode, parentDom, replaceNode) {
 		vnode,
 		oldVNode || EMPTY_OBJ,
 		EMPTY_OBJ,
-		parentDom.ownerSVGElement !== undefined ? 2 : 1,
+		parentDom.namespaceURI == 'http://www.w3.org/1999/xhtml'
+			? 1
+			: parentDom.namespaceURI == 'http://www.w3.org/2000/svg'
+			? 2
+			: 3,
 		!isHydrating && replaceNode
 			? [replaceNode]
 			: oldVNode
