@@ -2,7 +2,7 @@ import { assign } from './util';
 import { diff, commitRoot } from './diff/index';
 import options from './options';
 import { Fragment } from './create-element';
-import { FUNCTION, MODE_HYDRATE } from './constants';
+import { MODE_HYDRATE } from './constants';
 
 /**
  * Base Component class. Provides `setState()` and `forceUpdate()`, which
@@ -34,7 +34,7 @@ BaseComponent.prototype.setState = function (update, callback) {
 		s = this._nextState = assign({}, this.state);
 	}
 
-	if (typeof update == FUNCTION) {
+	if (typeof update == 'function') {
 		// Some libraries like `immer` mark the current state as readonly,
 		// preventing us from mutating it, so we need to clone it. See #2716
 		update = update(assign({}, s), this.props);
@@ -113,7 +113,7 @@ export function getDomSibling(vnode, childIndex) {
 	// Only climb up and search the parent if we aren't searching through a DOM
 	// VNode (meaning we reached the DOM parent of the original vnode that began
 	// the search)
-	return typeof vnode.type == FUNCTION ? getDomSibling(vnode) : null;
+	return typeof vnode.type == 'function' ? getDomSibling(vnode) : null;
 }
 
 /**
@@ -190,7 +190,7 @@ let rerenderQueue = [];
 let prevDebounce;
 
 const defer =
-	typeof Promise == FUNCTION
+	typeof Promise == 'function'
 		? Promise.prototype.then.bind(Promise.resolve())
 		: setTimeout;
 

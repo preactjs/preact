@@ -1,4 +1,4 @@
-import { FUNCTION, IS_NON_DIMENSIONAL } from '../constants';
+import { IS_NON_DIMENSIONAL } from '../constants';
 import options from '../options';
 
 function setStyle(style, key, value) {
@@ -83,10 +83,10 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
 			if (!oldValue) {
 				value._attached = eventClock;
 				dom.addEventListener(
-					name,
-					useCapture ? eventProxyCapture : eventProxy,
-					useCapture
-				);
+          name,
+          useCapture ? eventProxyCapture : eventProxy,
+          useCapture
+        );
 			} else {
 				value._attached = oldValue._attached;
 			}
@@ -132,7 +132,7 @@ export function setProperty(dom, name, value, oldValue, isSvg) {
 		// amount of exceptions would cost too many bytes. On top of
 		// that other frameworks generally stringify `false`.
 
-		if (typeof value == FUNCTION) {
+		if (typeof value == 'function') {
 			// never serialize functions as attribute values
 		} else if (value != null && (value !== false || name[4] === '-')) {
 			dom.setAttribute(name, value);

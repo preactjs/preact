@@ -1,6 +1,5 @@
 import { assign, slice } from './util';
 import { createVNode } from './create-element';
-import { FUNCTION } from './constants';
 
 /**
  * Clones the given VNode, optionally adding attributes/props and replacing its
@@ -23,7 +22,7 @@ export function cloneElement(vnode, props, children) {
 		defaultProps = vnode.type.defaultProps;
 	}
 
-	const isComponent = typeof vnode.type == FUNCTION;
+	const isComponent = typeof vnode.type == 'function';
 	for (i in props) {
 		if (i == 'key') key = props[i];
 		else if (!isComponent && i == 'ref') ref = props[i];

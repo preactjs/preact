@@ -1,6 +1,5 @@
 import { slice } from './util';
 import options from './options';
-import { FUNCTION } from './constants';
 
 let vnodeId = 0;
 
@@ -19,7 +18,7 @@ export function createElement(type, props, children) {
 		ref,
 		i;
 
-	const isComponent = typeof type == FUNCTION;
+	const isComponent = typeof type == 'function';
 	for (i in props) {
 		if (i == 'key') key = props[i];
 		else if (!isComponent && i == 'ref') ref = props[i];
@@ -33,7 +32,7 @@ export function createElement(type, props, children) {
 
 	// If a Component VNode, check for and apply defaultProps
 	// Note: type may be undefined in development, must never error here.
-	if (isComponent && type.defaultProps != null) {
+	if (typeof type == 'function' && type.defaultProps != null) {
 		for (i in type.defaultProps) {
 			if (normalizedProps[i] === undefined) {
 				normalizedProps[i] = type.defaultProps[i];
