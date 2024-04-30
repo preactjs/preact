@@ -133,6 +133,19 @@ describe('svg', () => {
 		expect(namespace).to.equal('http://www.w3.org/2000/svg');
 	});
 
+	it('should render children with the correct namespace URI', () => {
+		render(
+			<svg>
+				<text>Foo</text>
+			</svg>,
+			scratch
+		);
+
+		let namespace = scratch.querySelector('text').namespaceURI;
+
+		expect(namespace).to.equal('http://www.w3.org/2000/svg');
+	});
+
 	it('should use attributes for className', () => {
 		const Demo = ({ c }) => (
 			<svg viewBox="0 0 360 360" {...(c ? { class: 'foo_' + c } : {})}>

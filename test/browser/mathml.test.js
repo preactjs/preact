@@ -21,4 +21,17 @@ describe('mathml', () => {
 
 		expect(namespace).to.equal('http://www.w3.org/1998/Math/MathML');
 	});
+
+	it('should render children with the correct namespace URI', () => {
+		render(
+			<math>
+				<mrow />
+			</math>,
+			scratch
+		);
+
+		let namespace = scratch.querySelector('mrow').namespaceURI;
+
+		expect(namespace).to.equal('http://www.w3.org/1998/Math/MathML');
+	});
 });
