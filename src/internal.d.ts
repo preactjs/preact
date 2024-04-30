@@ -16,6 +16,12 @@ declare global {
 		useDebugvalue = 11
 	}
 
+	export enum ElementNamespace {
+		html = 1,
+		svg = 2,
+		mathml = 3
+	}
+
 	export interface DevSource {
 		fileName: string;
 		lineNumber: number;
