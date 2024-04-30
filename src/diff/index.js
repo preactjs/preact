@@ -375,7 +375,7 @@ function diffElementNodes(
 	let inputValue;
 	let checked;
 
-	// Tracks entering and exiting SVG namespace when descending through the tree.
+	// Tracks entering and exiting namespaces when descending through the tree.
 	if (nodeType === 'svg') namespace = 2;
 	else if (nodeType === 'math') namespace = 3;
 
@@ -403,15 +403,15 @@ function diffElementNodes(
 			return document.createTextNode(newProps);
 		}
 
-		if (namespace == 2) {
-			dom = document.createElementNS('http://www.w3.org/2000/svg', nodeType);
-		} else if (namespace == 3) {
+		if (namespace == 1) {
+			dom = document.createElement(nodeType, newProps.is && newProps);
+		} else {
 			dom = document.createElementNS(
-				'http://www.w3.org/1998/Math/MathML',
+				namespace == 2
+					? 'http://www.w3.org/2000/svg'
+					: 'http://www.w3.org/1998/Math/MathML',
 				nodeType
 			);
-		} else {
-			dom = document.createElement(nodeType, newProps.is && newProps);
 		}
 
 		// we created a new parent, so none of the previously attached children can be reused:
@@ -502,7 +502,7 @@ function diffElementNodes(
 				newVNode,
 				oldVNode,
 				globalContext,
-				nodeType == 'foreignObject' ? 1 : namespace,
+				nodeType === 'foreignObject' ? 1 : namespace,
 				excessDomChildren,
 				commitQueue,
 				excessDomChildren
