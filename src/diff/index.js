@@ -404,6 +404,11 @@ function diffElementNodes(
 
 		if (isSvg) {
 			dom = document.createElementNS('http://www.w3.org/2000/svg', nodeType);
+		} else if (nodeType === 'math') {
+			dom = document.createElementNS(
+				'http://www.w3.org/1998/Math/MathML',
+				nodeType
+			);
 		} else {
 			dom = document.createElement(nodeType, newProps.is && newProps);
 		}
