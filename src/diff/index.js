@@ -292,7 +292,6 @@ export function diff(
 		newVNode._dom = oldVNode._dom;
 	} else {
 		newVNode._dom = diffElementNodes(
-			oldVNode._dom,
 			newVNode,
 			oldVNode,
 			globalContext,
@@ -338,8 +337,6 @@ export function commitRoot(commitQueue, root, refQueue) {
 
 /**
  * Diff two virtual nodes representing DOM element
- * @param {PreactElement} dom The DOM element representing the virtual nodes
- * being diffed
  * @param {VNode} newVNode The new virtual node
  * @param {VNode} oldVNode The old virtual node
  * @param {object} globalContext The current context object
@@ -352,7 +349,6 @@ export function commitRoot(commitQueue, root, refQueue) {
  * @returns {PreactElement}
  */
 function diffElementNodes(
-	dom,
 	newVNode,
 	oldVNode,
 	globalContext,
@@ -362,6 +358,7 @@ function diffElementNodes(
 	isHydrating,
 	refQueue
 ) {
+	let dom = oldVNode._dom;
 	let oldProps = oldVNode.props;
 	let newProps = newVNode.props;
 	let nodeType = /** @type {string} */ (newVNode.type);
