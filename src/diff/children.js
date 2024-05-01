@@ -15,7 +15,7 @@ import { getDomSibling } from '../component';
  * diff'ed against newParentVNode
  * @param {object} globalContext The current context object - modified by
  * getChildContext
- * @param {ElementNamespace} namespace Current namespace of the DOM node (HTML, SVG, or MathML)
+ * @param {string} namespace Current namespace of the DOM node (HTML, SVG, or MathML)
  * @param {Array<PreactElement>} excessDomChildren
  * @param {Array<Component>} commitQueue List of components which have callbacks
  * to invoke in commitRoot

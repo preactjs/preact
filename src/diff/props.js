@@ -32,7 +32,7 @@ let eventClock = 0;
  * @param {string} name The name of the property to set
  * @param {*} value The value to set the property to
  * @param {*} oldValue The old value the property had
- * @param {ElementNamespace} namespace Whether or not this DOM node is an SVG node or not
+ * @param {string} namespace Whether or not this DOM node is an SVG node or not
  */
 export function setProperty(dom, name, value, oldValue, namespace) {
 	let useCapture;
@@ -98,7 +98,7 @@ export function setProperty(dom, name, value, oldValue, namespace) {
 			);
 		}
 	} else {
-		if (namespace == 2) {
+		if (namespace == 'http://www.w3.org/2000/svg') {
 			// Normalize incorrect prop usage for SVG:
 			// - xlink:href / xlinkHref --> href (xlink:href was removed from SVG and isn't needed)
 			// - className --> class
