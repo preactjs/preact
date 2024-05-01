@@ -1,4 +1,5 @@
-import { createElement, render } from 'preact';
+import { createElement, Component, render } from 'preact';
+import { setupRerender } from 'preact/test-utils';
 import { setupScratch, teardown, sortAttributes } from '../_util/helpers';
 
 /** @jsx createElement */
@@ -155,6 +156,30 @@ describe('svg', () => {
 		let namespace = scratch.querySelector('text').namespaceURI;
 
 		expect(namespace).to.equal('http://www.w3.org/2000/svg');
+	});
+
+	it('should inherit correct namespace URI from parent upon updating', () => {
+		setupRerender();
+
+		const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+		scratch.appendChild(svg);
+
+		class App extends Component {
+			state = { show: true };
+			componentDidMount() {
+				// eslint-disable-next-line
+				this.setState({ show: false }, () => {
+					expect(scratch.querySelector('circle').namespaceURI).to.equal(
+						'http://www.w3.org/2000/svg'
+					);
+				});
+			}
+			render() {
+				return this.state.show ? <text /> : <circle />;
+			}
+		}
+
+		render(<App />, scratch.firstChild);
 	});
 
 	it('should use attributes for className', () => {
