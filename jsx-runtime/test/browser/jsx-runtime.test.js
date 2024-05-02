@@ -167,7 +167,7 @@ describe('precompiled JSX', () => {
 		});
 
 		it('should serialize style object', () => {
-			expect(jsxAttr('style', { padding: 3 })).to.equal('style="padding:3px;"');
+			expect(jsxAttr('style', { padding: '3px' })).to.equal('style="padding:3px;"');
 		});
 	});
 

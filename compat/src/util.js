@@ -31,3 +31,6 @@ export function shallowDiffers(a, b) {
 export function is(x, y) {
 	return (x === y && (x !== 0 || 1 / x === 1 / y)) || (x !== x && y !== y);
 }
+
+export const IS_NON_DIMENSIONAL =
+	/acit|ex(?:s|g|n|p|$)|rph|grid|ows|mnc|ntw|ine[ch]|zoo|^ord|itera/i;
