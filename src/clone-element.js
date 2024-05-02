@@ -22,9 +22,10 @@ export function cloneElement(vnode, props, children) {
 		defaultProps = vnode.type.defaultProps;
 	}
 
+	const isComponent = typeof vnode.type == 'function';
 	for (i in props) {
 		if (i == 'key') key = props[i];
-		else if (i == 'ref') ref = props[i];
+		else if (!isComponent && i == 'ref') ref = props[i];
 		else if (props[i] === undefined && defaultProps !== undefined) {
 			normalizedProps[i] = defaultProps[i];
 		} else {

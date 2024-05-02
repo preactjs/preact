@@ -118,6 +118,9 @@ describe('null placeholders', () => {
 			constructor(props) {
 				super(props);
 				this.state = { count: 0 };
+				if (props.ref) {
+					props.ref.current = this;
+				}
 			}
 			increment() {
 				this.setState({ count: this.state.count + 1 });

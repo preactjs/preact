@@ -11,7 +11,7 @@ import {
 	getCurrentVNode,
 	getDisplayName
 } from './component-stack';
-import { assign, isNaN } from './util';
+import { isNaN } from './util';
 
 const isWeakMapSupported = typeof WeakMap == 'function';
 
@@ -229,19 +229,20 @@ export function initDebug() {
 				}
 			}
 
-			let values = vnode.props;
-			if (vnode.type._forwarded) {
-				values = assign({}, values);
-				delete values.ref;
+			if (
+				!vnode.type.displayName ||
+				(!vnode.type.displayName.startsWith('ForwardRef(') &&
+					!vnode.type.displayName.startsWith('Memo(') &&
+					vnode.type.displayName !== 'Lazy')
+			) {
+				checkPropTypes(
+					vnode.type.propTypes,
+					vnode.props,
+					'prop',
+					getDisplayName(vnode),
+					() => getOwnerStack(vnode)
+				);
 			}
-
-			checkPropTypes(
-				vnode.type.propTypes,
-				values,
-				'prop',
-				getDisplayName(vnode),
-				() => getOwnerStack(vnode)
-			);
 		}
 
 		if (oldBeforeDiff) oldBeforeDiff(vnode);

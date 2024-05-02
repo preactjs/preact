@@ -17,9 +17,11 @@ export function createElement(type, props, children) {
 		key,
 		ref,
 		i;
+
+	const isComponent = typeof type == 'function';
 	for (i in props) {
 		if (i == 'key') key = props[i];
-		else if (i == 'ref') ref = props[i];
+		else if (!isComponent && i == 'ref') ref = props[i];
 		else normalizedProps[i] = props[i];
 	}
 

@@ -27,7 +27,6 @@ export interface Component<P = {}, S = {}> extends PreactComponent<P, S> {
 
 export interface FunctionComponent<P = {}> extends PreactFunctionComponent<P> {
 	shouldComponentUpdate?(nextProps: Readonly<P>): boolean;
-	_forwarded?: boolean;
 	_patchedLifecycles?: true;
 }
 
