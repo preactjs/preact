@@ -41,7 +41,7 @@ export function render(vnode, parentDom, replaceNode) {
 		vnode,
 		oldVNode || EMPTY_OBJ,
 		EMPTY_OBJ,
-		parentDom.ownerSVGElement !== undefined,
+		parentDom.namespaceURI,
 		!isHydrating && replaceNode
 			? [replaceNode]
 			: oldVNode

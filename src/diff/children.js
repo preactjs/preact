@@ -14,7 +14,7 @@ import { getDomSibling } from '../component';
  * diff'ed against newParentVNode
  * @param {object} globalContext The current context object - modified by
  * getChildContext
- * @param {boolean} isSvg Whether or not this DOM node is an SVG node
+ * @param {string} namespace Current namespace of the DOM node (HTML, SVG, or MathML)
  * @param {Array<PreactElement>} excessDomChildren
  * @param {Array<Component>} commitQueue List of components which have callbacks
  * to invoke in commitRoot
@@ -30,7 +30,7 @@ export function diffChildren(
 	newParentVNode,
 	oldParentVNode,
 	globalContext,
-	isSvg,
+	namespace,
 	excessDomChildren,
 	commitQueue,
 	oldDom,
@@ -89,7 +89,7 @@ export function diffChildren(
 			childVNode,
 			oldVNode,
 			globalContext,
-			isSvg,
+			namespace,
 			excessDomChildren,
 			commitQueue,
 			oldDom,
