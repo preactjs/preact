@@ -24,6 +24,7 @@ import {
 	useSyncExternalStore,
 	useTransition
 } from './index';
+import { assign } from './util';
 
 export const REACT_ELEMENT_TYPE =
 	(typeof Symbol != 'undefined' && Symbol.for && Symbol.for('react.element')) ||
@@ -243,6 +244,14 @@ options.vnode = vnode => {
 	// only normalize props on Element nodes
 	if (typeof vnode.type === 'string') {
 		handleDomVNode(vnode);
+	} else if (typeof vnode.type === 'function' && vnode.type.defaultProps) {
+		let normalizedProps = assign({}, vnode.props);
+		for (let i in vnode.type.defaultProps) {
+			if (normalizedProps[i] === undefined) {
+				normalizedProps[i] = vnode.type.defaultProps[i];
+			}
+		}
+		vnode.props = normalizedProps;
 	}
 
 	vnode.$$typeof = REACT_ELEMENT_TYPE;
