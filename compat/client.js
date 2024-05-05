@@ -2,10 +2,10 @@ const { render, hydrate, unmountComponentAtNode } = require('preact/compat');
 
 function createRoot(container) {
 	return {
-		render(children) {
+		render: function (children) {
 			render(children, container);
 		},
-		unmount() {
+		unmount: function () {
 			unmountComponentAtNode(container);
 		}
 	};
