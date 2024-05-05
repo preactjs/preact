@@ -2,10 +2,10 @@ import { render, hydrate, unmountComponentAtNode } from 'preact/compat';
 
 export function createRoot(container) {
 	return {
-		render(children) {
+		render: function (children) {
 			render(children, container);
 		},
-		unmount() {
+		unmount: function () {
 			unmountComponentAtNode(container);
 		}
 	};
