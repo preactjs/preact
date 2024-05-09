@@ -428,7 +428,7 @@ export function initDebug() {
 					);
 				}
 			} else if (type === 'a' || type === 'button') {
-				if (getDomChildren(vnode).find(childType => childType === type)) {
+				if (getDomChildren(vnode).indexOf(type) !== -1) {
 					console.error(
 						`Improper nesting of interactive content. Your <${type}>` +
 							` should not have other ${type === 'a' ? 'anchor' : 'button'}` +
