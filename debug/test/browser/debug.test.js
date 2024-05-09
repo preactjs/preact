@@ -543,12 +543,14 @@ describe('debug', () => {
 		it('Accepts minimal well formed table', () => {
 			const Table = () => (
 				<table>
-					<tr>
-						<th>Head</th>
-					</tr>
-					<tr>
-						<td>Body</td>
-					</tr>
+					<tbody>
+						<tr>
+							<th>Head</th>
+						</tr>
+						<tr>
+							<td>Body</td>
+						</tr>
+					</tbody>
 				</table>
 			);
 			render(<Table />, scratch);
@@ -586,23 +588,27 @@ describe('debug', () => {
 		it('accepts valid nested tables', () => {
 			const Table = () => (
 				<table>
-					<tr>
-						<th>foo</th>
-					</tr>
-					<tr>
-						<td id="nested">
-							<table>
-								<tr>
-									<td>cell1</td>
-									<td>cell2</td>
-									<td>cell3</td>
-								</tr>
-							</table>
-						</td>
-					</tr>
-					<tr>
-						<td>bar</td>
-					</tr>
+					<tbody>
+						<tr>
+							<th>foo</th>
+						</tr>
+						<tr>
+							<td id="nested">
+								<table>
+									<tbody>
+										<tr>
+											<td>cell1</td>
+											<td>cell2</td>
+											<td>cell3</td>
+										</tr>
+									</tbody>
+								</table>
+							</td>
+						</tr>
+						<tr>
+							<td>bar</td>
+						</tr>
+					</tbody>
 				</table>
 			);
 
@@ -657,6 +663,94 @@ describe('debug', () => {
 			);
 
 			render(<Paragraph />, scratch);
+			expect(console.error).to.not.be.called;
+		});
+	});
+
+	describe('button nesting', () => {
+		it('should not warn on a regular button', () => {
+			const Button = () => <button>Hello world</button>;
+
+			render(<Button />, scratch);
+			expect(console.error).to.not.be.called;
+		});
+
+		it('should warn for nesting illegal dom-nodes under a button', () => {
+			const Button = () => (
+				<button>
+					<button>Hello world</button>
+				</button>
+			);
+
+			render(<Button />, scratch);
+			expect(console.error).to.be.calledOnce;
+		});
+
+		it('should warn for nesting illegal dom-nodes under a button as func', () => {
+			const ButtonChild = ({ children }) => <button>{children}</button>;
+			const Button = () => (
+				<button>
+					<ButtonChild>Hello world</ButtonChild>
+				</button>
+			);
+
+			render(<Button />, scratch);
+			expect(console.error).to.be.calledOnce;
+		});
+
+		it('should not warn for nesting non-interactive content under a button', () => {
+			const Button = () => (
+				<button>
+					<span>Hello </span>
+					<a>World</a>
+				</button>
+			);
+
+			render(<Button />, scratch);
+			expect(console.error).to.not.be.called;
+		});
+	});
+
+	describe('anchor nesting', () => {
+		it('should not warn a regular anchor', () => {
+			const Anchor = () => <a>Hello world</a>;
+
+			render(<Anchor />, scratch);
+			expect(console.error).to.not.be.called;
+		});
+
+		it('should warn for nesting illegal dom-nodes under an anchor', () => {
+			const Anchor = () => (
+				<a>
+					<a>Hello world</a>
+				</a>
+			);
+
+			render(<Anchor />, scratch);
+			expect(console.error).to.be.calledOnce;
+		});
+
+		it('should warn for nesting illegal dom-nodes under an anchor as func', () => {
+			const AnchorChild = ({ children }) => <a>{children}</a>;
+			const Anchor = () => (
+				<a>
+					<AnchorChild>Hello world</AnchorChild>
+				</a>
+			);
+
+			render(<Anchor />, scratch);
+			expect(console.error).to.be.calledOnce;
+		});
+
+		it('should not warn for nesting non-interactive content under an anchor', () => {
+			const Anchor = () => (
+				<a>
+					<span>Hello </span>
+					<button>World</button>
+				</a>
+			);
+
+			render(<Anchor />, scratch);
 			expect(console.error).to.not.be.called;
 		});
 	});
