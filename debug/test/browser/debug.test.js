@@ -661,6 +661,94 @@ describe('debug', () => {
 		});
 	});
 
+	describe('button nesting', () => {
+		it('should not warn on a regular button', () => {
+			const Button = () => <button>Hello world</button>;
+
+			render(<Button />, scratch);
+			expect(console.error).to.not.be.called;
+		});
+
+		it('should warn for nesting illegal dom-nodes under a button', () => {
+			const Button = () => (
+				<button>
+					<button>Hello world</button>
+				</button>
+			);
+
+			render(<Button />, scratch);
+			expect(console.error).to.be.calledOnce;
+		});
+
+		it('should warn for nesting illegal dom-nodes under a button as func', () => {
+			const ButtonChild = ({ children }) => <button>{children}</button>;
+			const Button = () => (
+				<button>
+					<ButtonChild>Hello world</ButtonChild>
+				</button>
+			);
+
+			render(<Button />, scratch);
+			expect(console.error).to.be.calledOnce;
+		});
+
+		it('should not warn for nesting non-interactive content under a button', () => {
+			const Button = () => (
+				<button>
+					<span>Hello </span>
+					<a>World</a>
+				</button>
+			);
+
+			render(<Button />, scratch);
+			expect(console.error).to.not.be.called;
+		});
+	});
+
+	describe('anchor nesting', () => {
+		it('should not warn a regular anchor', () => {
+			const Anchor = () => <a>Hello world</a>;
+
+			render(<Anchor />, scratch);
+			expect(console.error).to.not.be.called;
+		});
+
+		it('should warn for nesting illegal dom-nodes under an anchor', () => {
+			const Anchor = () => (
+				<a>
+					<a>Hello world</a>
+				</a>
+			);
+
+			render(<Anchor />, scratch);
+			expect(console.error).to.be.calledOnce;
+		});
+
+		it('should warn for nesting illegal dom-nodes under an anchor as func', () => {
+			const AnchorChild = ({ children }) => <a>{children}</a>;
+			const Anchor = () => (
+				<a>
+					<AnchorChild>Hello world</AnchorChild>
+				</a>
+			);
+
+			render(<Anchor />, scratch);
+			expect(console.error).to.be.calledOnce;
+		});
+
+		it('should not warn for nesting non-interactive content under an anchor', () => {
+			const Anchor = () => (
+				<a>
+					<span>Hello </span>
+					<button>World</button>
+				</a>
+			);
+
+			render(<Anchor />, scratch);
+			expect(console.error).to.not.be.called;
+		});
+	});
+
 	describe('PropTypes', () => {
 		beforeEach(() => {
 			resetPropWarnings();
