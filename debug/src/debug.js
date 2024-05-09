@@ -393,11 +393,10 @@ export function initDebug() {
 					type === 'tr' &&
 					domParentName !== 'thead' &&
 					domParentName !== 'tfoot' &&
-					domParentName !== 'tbody' &&
-					domParentName !== 'table'
+					domParentName !== 'tbody'
 				) {
 					console.error(
-						'Improper nesting of table. Your <tr> should have a <thead/tbody/tfoot/table> parent.' +
+						'Improper nesting of table. Your <tr> should have a <thead/tbody/tfoot> parent.' +
 							serializeVNode(vnode) +
 							`\n\n${getOwnerStack(vnode)}`
 					);

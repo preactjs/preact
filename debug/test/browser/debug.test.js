@@ -543,12 +543,14 @@ describe('debug', () => {
 		it('Accepts minimal well formed table', () => {
 			const Table = () => (
 				<table>
-					<tr>
-						<th>Head</th>
-					</tr>
-					<tr>
-						<td>Body</td>
-					</tr>
+					<tbody>
+						<tr>
+							<th>Head</th>
+						</tr>
+						<tr>
+							<td>Body</td>
+						</tr>
+					</tbody>
 				</table>
 			);
 			render(<Table />, scratch);
@@ -586,23 +588,27 @@ describe('debug', () => {
 		it('accepts valid nested tables', () => {
 			const Table = () => (
 				<table>
-					<tr>
-						<th>foo</th>
-					</tr>
-					<tr>
-						<td id="nested">
-							<table>
-								<tr>
-									<td>cell1</td>
-									<td>cell2</td>
-									<td>cell3</td>
-								</tr>
-							</table>
-						</td>
-					</tr>
-					<tr>
-						<td>bar</td>
-					</tr>
+					<tbody>
+						<tr>
+							<th>foo</th>
+						</tr>
+						<tr>
+							<td id="nested">
+								<table>
+									<tbody>
+										<tr>
+											<td>cell1</td>
+											<td>cell2</td>
+											<td>cell3</td>
+										</tr>
+									</tbody>
+								</table>
+							</td>
+						</tr>
+						<tr>
+							<td>bar</td>
+						</tr>
+					</tbody>
 				</table>
 			);
 
