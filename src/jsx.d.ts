@@ -2333,6 +2333,27 @@ export namespace JSXInternal {
 		placeholder?: string | undefined | SignalLike<string | undefined>;
 		playsInline?: boolean | undefined | SignalLike<boolean | undefined>;
 		playsinline?: boolean | undefined | SignalLike<boolean | undefined>;
+		popover?:
+			| 'auto'
+			| 'hint'
+			| 'manual'
+			| boolean
+			| undefined
+			| SignalLike<'auto' | 'hint' | 'manual' | boolean | undefined>;
+		popovertarget?: string | undefined | SignalLike<string | undefined>;
+		popoverTarget?: string | undefined | SignalLike<string | undefined>;
+		popovertargetaction?:
+			| 'hide'
+			| 'show'
+			| 'toggle'
+			| undefined
+			| SignalLike<'hide' | 'show' | 'toggle' | undefined>;
+		popoverTargetAction?:
+			| 'hide'
+			| 'show'
+			| 'toggle'
+			| undefined
+			| SignalLike<'hide' | 'show' | 'toggle' | undefined>;
 		poster?: string | undefined | SignalLike<string | undefined>;
 		preload?: string | undefined | SignalLike<string | undefined>;
 		radioGroup?: string | undefined | SignalLike<string | undefined>;
