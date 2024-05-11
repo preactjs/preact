@@ -353,6 +353,10 @@ export function initDebug() {
 			});
 		}
 
+		if (vnode._component === currentComponent) {
+			renderCount = 0;
+		}
+
 		if (
 			typeof type === 'string' &&
 			(isTableElement(type) ||

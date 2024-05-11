@@ -7,6 +7,7 @@ import {
 } from '../../../test/_util/helpers';
 import './fakeDevTools';
 import 'preact/debug';
+import { setupRerender } from 'preact/test-utils';
 import * as PropTypes from 'prop-types';
 
 // eslint-disable-next-line no-duplicate-imports
@@ -20,11 +21,13 @@ describe('debug', () => {
 	let scratch;
 	let errors = [];
 	let warnings = [];
+	let rerender;
 
 	beforeEach(() => {
 		errors = [];
 		warnings = [];
 		scratch = setupScratch();
+		rerender = setupRerender();
 		sinon.stub(console, 'error').callsFake(e => errors.push(e));
 		sinon.stub(console, 'warn').callsFake(w => warnings.push(w));
 	});
@@ -301,6 +304,22 @@ describe('debug', () => {
 		}).to.throw(/Too many re-renders/);
 		// 1 for first TestComponent + 24 for second TestComponent
 		expect(rerenderCount).to.equal(25);
+	});
+
+	it('does not throw an error if a component renders many times in different cycles', () => {
+		let set;
+		function TestComponent() {
+			const [count, setCount] = useState(0);
+			set = () => setCount(count + 1);
+			return <div>{count}</div>;
+		}
+
+		render(<TestComponent />, scratch);
+		for (let i = 0; i < 30; i++) {
+			set();
+			rerender();
+		}
+		expect(scratch.innerHTML).to.equal('<div>30</div>');
 	});
 
 	describe('duplicate keys', () => {
