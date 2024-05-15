@@ -120,7 +120,7 @@ function jsxAttr(name, value) {
 					prop[0] == '-'
 						? prop
 						: JS_TO_CSS[prop] ||
-						  (JS_TO_CSS[prop] = prop.replace(CSS_REGEX, '-$&').toLowerCase());
+							(JS_TO_CSS[prop] = prop.replace(CSS_REGEX, '-$&').toLowerCase());
 
 				let suffix = ';';
 				if (

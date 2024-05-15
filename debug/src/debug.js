@@ -72,7 +72,7 @@ export function initDebug() {
 				useEffect: new WeakMap(),
 				useLayoutEffect: new WeakMap(),
 				lazyPropTypes: new WeakMap()
-		  };
+			};
 	const deprecations = [];
 
 	options._catchError = (error, vnode, oldVNode, errorInfo) => {

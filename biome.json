@@ -1,0 +1,56 @@
+{
+  "formatter": {
+    "enabled": true,
+    "formatWithErrors": false,
+    "indentStyle": "tab",
+    "indentWidth": 2,
+    "lineEnding": "lf",
+    "lineWidth": 80,
+    "attributePosition": "auto",
+    "ignore": [
+      "**/.DS_Store",
+      "**/node_modules",
+      "**/npm-debug.log",
+      "**/dist",
+      "*/package-lock.json",
+      "**/yarn.lock",
+      "**/.vscode",
+      "**/.idea",
+      "test/ts/**/*.js",
+      "**/coverage",
+      "**/*.sw[op]",
+      "**/*.log",
+      "**/package/",
+      "**/preact-*.tgz",
+      "**/preact.tgz",
+      "benches/dist/",
+      "benches/results/",
+      "benches/logs/",
+      "benches/logs-saved/",
+      "benches/node_modules/",
+      "benches/proxy-packages/*/package-lock.json",
+      "**/package-lock.json"
+    ]
+  },
+  "organizeImports": { "enabled": true },
+  "linter": { "enabled": true, "rules": { "recommended": true } },
+  "javascript": {
+    "formatter": {
+      "jsxQuoteStyle": "double",
+      "quoteProperties": "asNeeded",
+      "trailingComma": "none",
+      "semicolons": "always",
+      "arrowParentheses": "asNeeded",
+      "bracketSpacing": true,
+      "bracketSameLine": false,
+      "quoteStyle": "single",
+      "attributePosition": "auto"
+    }
+  },
+  "overrides": [
+    {
+      "include": ["*.json", ".*rc", "*.yml"],
+      "formatter": { "indentWidth": 2, "indentStyle": "space" }
+    }
+  ]
+}

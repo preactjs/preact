@@ -34,7 +34,7 @@ describe('debug', () => {
 
 	afterEach(() => {
 		/** @type {*} */
-		(console.error).restore();
+		console.error.restore();
 		console.warn.restore();
 		teardown(scratch);
 	});

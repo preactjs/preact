@@ -214,7 +214,7 @@ function createEsbuildPlugin() {
 											}
 										}
 									]
-							  ]
+								]
 							: [],
 						plugins: [
 							coverage && [
