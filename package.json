@@ -140,7 +140,7 @@
     "format:check": "biome format ."
   },
   "eslintConfig": {
-    "extends": ["developit"],
+    "extends": ["developit", "prettier"],
     "settings": {
       "react": {
         "pragma": "createElement"
@@ -179,7 +179,7 @@
   "eslintIgnore": ["test/fixtures", "test/ts/", "*.ts", "dist", "benchmarks"],
   "lint-staged": {
     "**/*.{js,jsx,mjs,cjs,ts,tsx,yml,json,html,md,css,scss}": [
-      "biome --write"
+      "biome format --write --no-errors-on-unmatched"
     ]
   },
   "husky": {
@@ -267,6 +267,7 @@
     "esbuild": "^0.14.50",
     "eslint": "5.15.1",
     "eslint-config-developit": "^1.1.1",
+    "eslint-config-prettier": "^6.5.0",
     "eslint-plugin-react": "7.12.4",
     "husky": "^4.3.0",
     "karma": "^6.3.16",
