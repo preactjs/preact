@@ -1,45 +1,45 @@
-import { render, Component, Fragment } from 'preact';
+import { render, Component, Fragment } from 'preact'
 // import renderToString from 'preact-render-to-string';
-import './style.scss';
-import { Router, Link } from 'preact-router';
-import Pythagoras from './pythagoras';
-import Spiral from './spiral';
-import Reorder from './reorder';
-import Todo from './todo';
-import Fragments from './fragments';
-import Context from './context';
-import installLogger from './logger';
-import ProfilerDemo from './profiler';
-import KeyBug from './key_bug';
-import StateOrderBug from './stateOrderBug';
-import PeopleBrowser from './people';
-import StyledComp from './styled-components';
-import { initDevTools } from 'preact/devtools/src/devtools';
-import { initDebug } from 'preact/debug/src/debug';
-import DevtoolsDemo from './devtools';
-import SuspenseDemo from './suspense';
-import Redux from './redux';
-import TextFields from './textFields';
-import ReduxBug from './reduxUpdate';
-import SuspenseRouterBug from './suspense-router';
-import NestedSuspenseBug from './nested-suspense';
-import Contenteditable from './contenteditable';
-import { MobXDemo } from './mobx';
-import Zustand from './zustand';
-import ReduxToolkit from './redux_toolkit';
+import './style.scss'
+import { Router, Link } from 'preact-router'
+import Pythagoras from './pythagoras'
+import Spiral from './spiral'
+import Reorder from './reorder'
+import Todo from './todo'
+import Fragments from './fragments'
+import Context from './context'
+import installLogger from './logger'
+import ProfilerDemo from './profiler'
+import KeyBug from './key_bug'
+import StateOrderBug from './stateOrderBug'
+import PeopleBrowser from './people'
+import StyledComp from './styled-components'
+import { initDevTools } from 'preact/devtools/src/devtools'
+import { initDebug } from 'preact/debug/src/debug'
+import DevtoolsDemo from './devtools'
+import SuspenseDemo from './suspense'
+import Redux from './redux'
+import TextFields from './textFields'
+import ReduxBug from './reduxUpdate'
+import SuspenseRouterBug from './suspense-router'
+import NestedSuspenseBug from './nested-suspense'
+import Contenteditable from './contenteditable'
+import { MobXDemo } from './mobx'
+import Zustand from './zustand'
+import ReduxToolkit from './redux_toolkit'
 
 let isBenchmark = /(\/spiral|\/pythagoras|[#&]bench)/g.test(
 	window.location.href
-);
+)
 if (!isBenchmark) {
 	// eslint-disable-next-line no-console
-	console.log('Enabling devtools and debug');
-	initDevTools();
-	initDebug();
+	console.log('Enabling devtools and debug')
+	initDevTools()
+	initDebug()
 }
 
 // mobx-state-tree fix
-window.setImmediate = setTimeout;
+window.setImmediate = setTimeout
 
 class Home extends Component {
 	render() {
@@ -47,21 +47,21 @@ class Home extends Component {
 			<div>
 				<h1>Hello</h1>
 			</div>
-		);
+		)
 	}
 }
 
 class DevtoolsWarning extends Component {
 	onClick = () => {
-		window.location.reload();
-	};
+		window.location.reload()
+	}
 
 	render() {
 		return (
 			<button onClick={this.onClick}>
 				Start Benchmark (disables devtools)
 			</button>
-		);
+		)
 	}
 }
 
@@ -178,12 +178,12 @@ class App extends Component {
 					</Router>
 				</main>
 			</div>
-		);
+		)
 	}
 }
 
 function EmptyFragment() {
-	return <Fragment />;
+	return <Fragment />
 }
 
 // document.body.innerHTML = renderToString(<App url={location.href.match(/[#&]ssr/) ? undefined : '/'} />);
@@ -192,6 +192,6 @@ function EmptyFragment() {
 installLogger(
 	String(localStorage.LOG) === 'true' || location.href.match(/logger/),
 	String(localStorage.CONSOLE) === 'true' || location.href.match(/console/)
-);
+)
 
-render(<App />, document.body);
+render(<App />, document.body)

@@ -1,6 +1,6 @@
-import React, { Component, lazy } from 'preact/compat';
+import React, { Component, lazy } from 'preact/compat'
 
-const h = React.createElement;
+const h = React.createElement
 
 /**
  * Create a Lazy component whose promise is controlled by by the test. This
@@ -32,24 +32,24 @@ const h = React.createElement;
  */
 export function createLazy() {
 	/** @type {(c: ComponentType) => Promise<void>} */
-	let resolver, rejecter;
+	let resolver, rejecter
 	const Lazy = lazy(() => {
 		let promise = new Promise((resolve, reject) => {
 			resolver = c => {
-				resolve({ default: c });
-				return promise;
-			};
+				resolve({ default: c })
+				return promise
+			}
 
 			rejecter = e => {
-				reject(e);
-				return promise;
-			};
-		});
+				reject(e)
+				return promise
+			}
+		})
 
-		return promise;
-	});
+		return promise
+	})
 
-	return [Lazy, c => resolver(c), e => rejecter(e)];
+	return [Lazy, c => resolver(c), e => rejecter(e)]
 }
 
 /**
@@ -87,32 +87,32 @@ export function createLazy() {
  */
 export function createSuspender(DefaultComponent) {
 	/** @type {(lazy: typeof Component) => void} */
-	let renderLazy;
+	let renderLazy
 	class Suspender extends Component {
 		constructor(props, context) {
-			super(props, context);
-			this.state = { Lazy: null };
+			super(props, context)
+			this.state = { Lazy: null }
 
-			renderLazy = Lazy => this.setState({ Lazy });
+			renderLazy = Lazy => this.setState({ Lazy })
 		}
 
 		render(props, state) {
-			return state.Lazy ? h(state.Lazy, props) : h(DefaultComponent, props);
+			return state.Lazy ? h(state.Lazy, props) : h(DefaultComponent, props)
 		}
 	}
 
-	sinon.spy(Suspender.prototype, 'render');
+	sinon.spy(Suspender.prototype, 'render')
 
 	/**
 	 * @returns {Resolvers}
 	 */
 	function suspend() {
-		const [Lazy, resolve, reject] = createLazy();
-		renderLazy(Lazy);
-		return [resolve, reject];
+		const [Lazy, resolve, reject] = createLazy()
+		renderLazy(Lazy)
+		return [resolve, reject]
 	}
 
-	return [Suspender, suspend];
+	return [Suspender, suspend]
 }
 
 /**
@@ -120,40 +120,40 @@ export function createSuspender(DefaultComponent) {
  */
 export function createSuspenseLoader() {
 	/** @type {(data: any) => Promise<any>} */
-	let resolver;
+	let resolver
 	/** @type {(error: Error) => Promise<any>} */
-	let rejecter;
+	let rejecter
 	/** @type {any} */
-	let data = null;
+	let data = null
 	/** @type {Error} */
-	let error = null;
+	let error = null
 
 	/** @type {Promise<any>} */
 	let promise = new Promise((resolve, reject) => {
 		resolver = result => {
-			data = result;
-			resolve(result);
-			return promise;
-		};
+			data = result
+			resolve(result)
+			return promise
+		}
 
 		rejecter = e => {
-			error = e;
-			reject(e);
-			return promise;
-		};
-	});
+			error = e
+			reject(e)
+			return promise
+		}
+	})
 
 	function useSuspenseLoader() {
 		if (error) {
-			throw error;
+			throw error
 		}
 
 		if (!data) {
-			throw promise;
+			throw promise
 		}
 
-		return data;
+		return data
 	}
 
-	return [useSuspenseLoader, resolver, rejecter];
+	return [useSuspenseLoader, resolver, rejecter]
 }

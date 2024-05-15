@@ -1,7 +1,7 @@
-import { useState } from 'preact/hooks';
+import { useState } from 'preact/hooks'
 
 export default function Contenteditable() {
-	const [value, setValue] = useState("Hey there<br />I'm editable!");
+	const [value, setValue] = useState("Hey there<br />I'm editable!")
 
 	return (
 		<div>
@@ -20,5 +20,5 @@ export default function Contenteditable() {
 				dangerouslySetInnerHTML={{ __html: value }}
 			/>
 		</div>
-	);
+	)
 }

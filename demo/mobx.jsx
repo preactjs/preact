@@ -1,19 +1,19 @@
-import React, { forwardRef, useRef, useState } from 'react';
-import { decorate, observable } from 'mobx';
-import { observer, useObserver } from 'mobx-react';
-import 'mobx-react-lite/batchingForReactDom';
+import React, { forwardRef, useRef, useState } from 'react'
+import { decorate, observable } from 'mobx'
+import { observer, useObserver } from 'mobx-react'
+import 'mobx-react-lite/batchingForReactDom'
 
 class Todo {
 	constructor() {
-		this.id = Math.random();
-		this.title = 'initial';
-		this.finished = false;
+		this.id = Math.random()
+		this.title = 'initial'
+		this.finished = false
 	}
 }
 decorate(Todo, {
 	title: observable,
 	finished: observable
-});
+})
 
 const Forward = observer(
 	// eslint-disable-next-line react/display-name
@@ -22,19 +22,19 @@ const Forward = observer(
 			<p ref={ref}>
 				Forward: "{todo.title}" {'' + todo.finished}
 			</p>
-		);
+		)
 	})
-);
+)
 
-const todo = new Todo();
+const todo = new Todo()
 
 const TodoView = observer(({ todo }) => {
 	return (
 		<p>
 			Todo View: "{todo.title}" {'' + todo.finished}
 		</p>
-	);
-});
+	)
+})
 
 const HookView = ({ todo }) => {
 	return useObserver(() => {
@@ -42,15 +42,15 @@ const HookView = ({ todo }) => {
 			<p>
 				Todo View: "{todo.title}" {'' + todo.finished}
 			</p>
-		);
-	});
-};
+		)
+	})
+}
 
 export function MobXDemo() {
-	const ref = useRef(null);
-	let [v, set] = useState(0);
+	const ref = useRef(null)
+	let [v, set] = useState(0)
 
-	const success = ref.current && ref.current.nodeName === 'P';
+	const success = ref.current && ref.current.nodeName === 'P'
 
 	return (
 		<div>
@@ -58,8 +58,8 @@ export function MobXDemo() {
 				type="text"
 				placeholder="type here..."
 				onInput={e => {
-					todo.title = e.target.value;
-					set(v + 1);
+					todo.title = e.target.value
+					set(v + 1)
 				}}
 			/>
 			<p>
@@ -71,5 +71,5 @@ export function MobXDemo() {
 			<Forward todo={todo} ref={ref} />
 			<HookView todo={todo} />
 		</div>
-	);
+	)
 }

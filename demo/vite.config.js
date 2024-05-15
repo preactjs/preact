@@ -1,8 +1,8 @@
-import { defineConfig } from 'vite';
-import path from 'path';
+import { defineConfig } from 'vite'
+import path from 'path'
 
-const root = path.join(__dirname, '..');
-const resolvePkg = (...parts) => path.join(root, ...parts, 'src', 'index.js');
+const root = path.join(__dirname, '..')
+const resolvePkg = (...parts) => path.join(root, ...parts, 'src', 'index.js')
 
 // https://vitejs.dev/config/
 /** @type {import('vite').UserConfig} */
@@ -44,4 +44,4 @@ export default defineConfig({
 		jsx: 'automatic',
 		jsxImportSource: 'preact'
 	}
-});
+})

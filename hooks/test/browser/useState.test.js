@@ -1,335 +1,335 @@
-import { setupRerender, act } from 'preact/test-utils';
-import { createElement, render, createContext } from 'preact';
-import { useState, useContext, useEffect } from 'preact/hooks';
-import { setupScratch, teardown } from '../../../test/_util/helpers';
+import { setupRerender, act } from 'preact/test-utils'
+import { createElement, render, createContext } from 'preact'
+import { useState, useContext, useEffect } from 'preact/hooks'
+import { setupScratch, teardown } from '../../../test/_util/helpers'
 
 /** @jsx createElement */
 
 describe('useState', () => {
 	/** @type {HTMLDivElement} */
-	let scratch;
+	let scratch
 
 	/** @type {() => void} */
-	let rerender;
+	let rerender
 
 	beforeEach(() => {
-		scratch = setupScratch();
-		rerender = setupRerender();
-	});
+		scratch = setupScratch()
+		rerender = setupRerender()
+	})
 
 	afterEach(() => {
-		teardown(scratch);
-	});
+		teardown(scratch)
+	})
 
 	it('serves the same state across render calls', () => {
-		const stateHistory = [];
+		const stateHistory = []
 
 		function Comp() {
-			const [state] = useState({ a: 1 });
-			stateHistory.push(state);
-			return null;
+			const [state] = useState({ a: 1 })
+			stateHistory.push(state)
+			return null
 		}
 
-		render(<Comp />, scratch);
-		render(<Comp />, scratch);
+		render(<Comp />, scratch)
+		render(<Comp />, scratch)
 
-		expect(stateHistory).to.deep.equal([{ a: 1 }, { a: 1 }]);
-		expect(stateHistory[0]).to.equal(stateHistory[1]);
-	});
+		expect(stateHistory).to.deep.equal([{ a: 1 }, { a: 1 }])
+		expect(stateHistory[0]).to.equal(stateHistory[1])
+	})
 
 	it('can initialize the state via a function', () => {
-		const initState = sinon.spy(() => 1);
+		const initState = sinon.spy(() => 1)
 
 		function Comp() {
-			useState(initState);
-			return null;
+			useState(initState)
+			return null
 		}
 
-		render(<Comp />, scratch);
-		render(<Comp />, scratch);
+		render(<Comp />, scratch)
+		render(<Comp />, scratch)
 
-		expect(initState).to.be.calledOnce;
-	});
+		expect(initState).to.be.calledOnce
+	})
 
 	it('does not rerender on equal state', () => {
-		let lastState;
-		let doSetState;
+		let lastState
+		let doSetState
 
 		const Comp = sinon.spy(() => {
-			const [state, setState] = useState(0);
-			lastState = state;
-			doSetState = setState;
-			return null;
-		});
+			const [state, setState] = useState(0)
+			lastState = state
+			doSetState = setState
+			return null
+		})
 
-		render(<Comp />, scratch);
-		expect(lastState).to.equal(0);
-		expect(Comp).to.be.calledOnce;
+		render(<Comp />, scratch)
+		expect(lastState).to.equal(0)
+		expect(Comp).to.be.calledOnce
 
-		doSetState(0);
-		rerender();
-		expect(lastState).to.equal(0);
-		expect(Comp).to.be.calledOnce;
+		doSetState(0)
+		rerender()
+		expect(lastState).to.equal(0)
+		expect(Comp).to.be.calledOnce
 
-		doSetState(() => 0);
-		rerender();
-		expect(lastState).to.equal(0);
-		expect(Comp).to.be.calledOnce;
-	});
+		doSetState(() => 0)
+		rerender()
+		expect(lastState).to.equal(0)
+		expect(Comp).to.be.calledOnce
+	})
 
 	it('rerenders when setting the state', () => {
-		let lastState;
-		let doSetState;
+		let lastState
+		let doSetState
 
 		const Comp = sinon.spy(() => {
-			const [state, setState] = useState(0);
-			lastState = state;
-			doSetState = setState;
-			return null;
-		});
+			const [state, setState] = useState(0)
+			lastState = state
+			doSetState = setState
+			return null
+		})
 
-		render(<Comp />, scratch);
-		expect(lastState).to.equal(0);
-		expect(Comp).to.be.calledOnce;
+		render(<Comp />, scratch)
+		expect(lastState).to.equal(0)
+		expect(Comp).to.be.calledOnce
 
-		doSetState(1);
-		rerender();
-		expect(lastState).to.equal(1);
-		expect(Comp).to.be.calledTwice;
+		doSetState(1)
+		rerender()
+		expect(lastState).to.equal(1)
+		expect(Comp).to.be.calledTwice
 
 		// Updater function style
-		doSetState(current => current * 10);
-		rerender();
-		expect(lastState).to.equal(10);
-		expect(Comp).to.be.calledThrice;
-	});
+		doSetState(current => current * 10)
+		rerender()
+		expect(lastState).to.equal(10)
+		expect(Comp).to.be.calledThrice
+	})
 
 	it('can be set by another component', () => {
 		function StateContainer() {
-			const [count, setCount] = useState(0);
+			const [count, setCount] = useState(0)
 			return (
 				<div>
 					<p>Count: {count}</p>
 					<Increment increment={() => setCount(c => c + 10)} />
 				</div>
-			);
+			)
 		}
 
 		function Increment(props) {
-			return <button onClick={props.increment}>Increment</button>;
+			return <button onClick={props.increment}>Increment</button>
 		}
 
-		render(<StateContainer />, scratch);
-		expect(scratch.textContent).to.include('Count: 0');
+		render(<StateContainer />, scratch)
+		expect(scratch.textContent).to.include('Count: 0')
 
-		const button = scratch.querySelector('button');
-		button.click();
+		const button = scratch.querySelector('button')
+		button.click()
 
-		rerender();
-		expect(scratch.textContent).to.include('Count: 10');
-	});
+		rerender()
+		expect(scratch.textContent).to.include('Count: 10')
+	})
 
 	it('should correctly initialize', () => {
-		let scopedThing = 'hi';
-		let arg;
+		let scopedThing = 'hi'
+		let arg
 
 		function useSomething() {
-			const args = useState(setup);
+			const args = useState(setup)
 			function setup(thing = scopedThing) {
-				arg = thing;
-				return thing;
+				arg = thing
+				return thing
 			}
-			return args;
+			return args
 		}
 
 		const App = () => {
-			const [state] = useSomething();
-			return <p>{state}</p>;
-		};
+			const [state] = useSomething()
+			return <p>{state}</p>
+		}
 
-		render(<App />, scratch);
+		render(<App />, scratch)
 
-		expect(arg).to.equal('hi');
-		expect(scratch.innerHTML).to.equal('<p>hi</p>');
-	});
+		expect(arg).to.equal('hi')
+		expect(scratch.innerHTML).to.equal('<p>hi</p>')
+	})
 
 	it('should correctly re-initialize when first run threw an error', () => {
-		let hasThrown = false;
+		let hasThrown = false
 		let setup = sinon.spy(() => {
 			if (!hasThrown) {
-				hasThrown = true;
-				throw new Error('test');
+				hasThrown = true
+				throw new Error('test')
 			} else {
-				return 'hi';
+				return 'hi'
 			}
-		});
+		})
 
 		const App = () => {
-			const state = useState(setup)[0];
-			return <p>{state}</p>;
-		};
+			const state = useState(setup)[0]
+			return <p>{state}</p>
+		}
 
-		expect(() => render(<App />, scratch)).to.throw('test');
-		expect(setup).to.have.been.calledOnce;
-		expect(() => render(<App />, scratch)).not.to.throw();
-		expect(setup).to.have.been.calledTwice;
-		expect(scratch.innerHTML).to.equal('<p>hi</p>');
-	});
+		expect(() => render(<App />, scratch)).to.throw('test')
+		expect(setup).to.have.been.calledOnce
+		expect(() => render(<App />, scratch)).not.to.throw()
+		expect(setup).to.have.been.calledTwice
+		expect(scratch.innerHTML).to.equal('<p>hi</p>')
+	})
 
 	it('should handle queued useState', () => {
 		function Message({ message, onClose }) {
-			const [isVisible, setVisible] = useState(Boolean(message));
-			const [prevMessage, setPrevMessage] = useState(message);
+			const [isVisible, setVisible] = useState(Boolean(message))
+			const [prevMessage, setPrevMessage] = useState(message)
 
 			if (message !== prevMessage) {
-				setPrevMessage(message);
-				setVisible(Boolean(message));
+				setPrevMessage(message)
+				setVisible(Boolean(message))
 			}
 
 			if (!isVisible) {
-				return null;
+				return null
 			}
-			return <p onClick={onClose}>{message}</p>;
+			return <p onClick={onClose}>{message}</p>
 		}
 
 		function App() {
-			const [message, setMessage] = useState('Click Here!!');
+			const [message, setMessage] = useState('Click Here!!')
 			return (
 				<Message
 					onClose={() => {
-						setMessage('');
+						setMessage('')
 					}}
 					message={message}
 				/>
-			);
+			)
 		}
 
-		render(<App />, scratch);
-		expect(scratch.textContent).to.equal('Click Here!!');
-		const text = scratch.querySelector('p');
-		text.click();
-		rerender();
-		expect(scratch.innerHTML).to.equal('');
-	});
+		render(<App />, scratch)
+		expect(scratch.textContent).to.equal('Click Here!!')
+		const text = scratch.querySelector('p')
+		text.click()
+		rerender()
+		expect(scratch.innerHTML).to.equal('')
+	})
 
 	it('should render a second time when the render function updates state', () => {
-		const calls = [];
+		const calls = []
 		const App = () => {
-			const [greeting, setGreeting] = useState('bye');
+			const [greeting, setGreeting] = useState('bye')
 
 			if (greeting === 'bye') {
-				setGreeting('hi');
+				setGreeting('hi')
 			}
 
-			calls.push(greeting);
+			calls.push(greeting)
 
-			return <p>{greeting}</p>;
-		};
+			return <p>{greeting}</p>
+		}
 
 		act(() => {
-			render(<App />, scratch);
-		});
-		expect(calls.length).to.equal(2);
-		expect(calls).to.deep.equal(['bye', 'hi']);
-		expect(scratch.textContent).to.equal('hi');
-	});
+			render(<App />, scratch)
+		})
+		expect(calls.length).to.equal(2)
+		expect(calls).to.deep.equal(['bye', 'hi'])
+		expect(scratch.textContent).to.equal('hi')
+	})
 
 	// https://github.com/preactjs/preact/issues/3669
 	it('correctly updates with multiple state updates', () => {
-		let simulateClick;
+		let simulateClick
 		function TestWidget() {
-			const [saved, setSaved] = useState(false);
-			const [, setSaving] = useState(false);
+			const [saved, setSaved] = useState(false)
+			const [, setSaving] = useState(false)
 
 			simulateClick = () => {
-				setSaving(true);
-				setSaved(true);
-				setSaving(false);
-			};
+				setSaving(true)
+				setSaved(true)
+				setSaving(false)
+			}
 
-			return <div>{saved ? 'Saved!' : 'Unsaved!'}</div>;
+			return <div>{saved ? 'Saved!' : 'Unsaved!'}</div>
 		}
 
-		render(<TestWidget />, scratch);
-		expect(scratch.innerHTML).to.equal('<div>Unsaved!</div>');
+		render(<TestWidget />, scratch)
+		expect(scratch.innerHTML).to.equal('<div>Unsaved!</div>')
 
 		act(() => {
-			simulateClick();
-		});
+			simulateClick()
+		})
 
-		expect(scratch.innerHTML).to.equal('<div>Saved!</div>');
-	});
+		expect(scratch.innerHTML).to.equal('<div>Saved!</div>')
+	})
 
 	// https://github.com/preactjs/preact/issues/3674
 	it('ensure we iterate over all hooks', () => {
-		let open, close;
+		let open, close
 
 		function TestWidget() {
-			const [, setCounter] = useState(0);
-			const [isOpen, setOpen] = useState(false);
+			const [, setCounter] = useState(0)
+			const [isOpen, setOpen] = useState(false)
 
 			open = () => {
-				setCounter(42);
-				setOpen(true);
-			};
+				setCounter(42)
+				setOpen(true)
+			}
 
 			close = () => {
-				setOpen(false);
-			};
+				setOpen(false)
+			}
 
-			return <div>{isOpen ? 'open' : 'closed'}</div>;
+			return <div>{isOpen ? 'open' : 'closed'}</div>
 		}
 
-		render(<TestWidget />, scratch);
-		expect(scratch.innerHTML).to.equal('<div>closed</div>');
+		render(<TestWidget />, scratch)
+		expect(scratch.innerHTML).to.equal('<div>closed</div>')
 
 		act(() => {
-			open();
-		});
+			open()
+		})
 
-		expect(scratch.innerHTML).to.equal('<div>open</div>');
+		expect(scratch.innerHTML).to.equal('<div>open</div>')
 
 		act(() => {
-			close();
-		});
-		expect(scratch.innerHTML).to.equal('<div>closed</div>');
-	});
+			close()
+		})
+		expect(scratch.innerHTML).to.equal('<div>closed</div>')
+	})
 
 	it('does not loop when states are equal after batches', () => {
-		const renderSpy = sinon.spy();
-		const Context = createContext(null);
+		const renderSpy = sinon.spy()
+		const Context = createContext(null)
 
 		function ModalProvider(props) {
-			let [modalCount, setModalCount] = useState(0);
-			renderSpy(modalCount);
+			let [modalCount, setModalCount] = useState(0)
+			renderSpy(modalCount)
 			let context = {
 				modalCount,
 				addModal() {
-					setModalCount(count => count + 1);
+					setModalCount(count => count + 1)
 				},
 				removeModal() {
-					setModalCount(count => count - 1);
+					setModalCount(count => count - 1)
 				}
-			};
+			}
 
 			return (
 				<Context.Provider value={context}>{props.children}</Context.Provider>
-			);
+			)
 		}
 
 		function useModal() {
-			let context = useContext(Context);
+			let context = useContext(Context)
 			useEffect(() => {
-				context.addModal();
+				context.addModal()
 				return () => {
-					context.removeModal();
-				};
-			}, [context]);
+					context.removeModal()
+				}
+			}, [context])
 		}
 
 		function Popover() {
-			useModal();
-			return <div>Popover</div>;
+			useModal()
+			return <div>Popover</div>
 		}
 
 		function App() {
@@ -337,38 +337,38 @@ describe('useState', () => {
 				<ModalProvider>
 					<Popover />
 				</ModalProvider>
-			);
+			)
 		}
 
 		act(() => {
-			render(<App />, scratch);
-		});
+			render(<App />, scratch)
+		})
 
-		expect(renderSpy).to.be.calledTwice;
-	});
+		expect(renderSpy).to.be.calledTwice
+	})
 
 	// see preactjs/preact#3731
 	it('respects updates initiated from the parent', () => {
-		let setChild, setParent;
+		let setChild, setParent
 		const Child = props => {
-			const [, setState] = useState(false);
-			setChild = setState;
-			return <p>{props.text}</p>;
-		};
+			const [, setState] = useState(false)
+			setChild = setState
+			return <p>{props.text}</p>
+		}
 
 		const Parent = () => {
-			const [state, setState] = useState('hello world');
-			setParent = setState;
-			return <Child text={state} />;
-		};
+			const [state, setState] = useState('hello world')
+			setParent = setState
+			return <Child text={state} />
+		}
 
-		render(<Parent />, scratch);
-		expect(scratch.innerHTML).to.equal('<p>hello world</p>');
+		render(<Parent />, scratch)
+		expect(scratch.innerHTML).to.equal('<p>hello world</p>')
 
-		setParent('hello world!!!');
-		setChild(true);
-		setChild(false);
-		rerender();
-		expect(scratch.innerHTML).to.equal('<p>hello world!!!</p>');
-	});
-});
+		setParent('hello world!!!')
+		setChild(true)
+		setChild(false)
+		rerender()
+		expect(scratch.innerHTML).to.equal('<p>hello world!!!</p>')
+	})
+})

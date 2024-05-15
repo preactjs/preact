@@ -1,59 +1,59 @@
-import { options, createElement, render, Component } from 'preact';
-import { teardown, setupRerender } from 'preact/test-utils';
+import { options, createElement, render, Component } from 'preact'
+import { teardown, setupRerender } from 'preact/test-utils'
 
 /** @jsx createElement */
 
 describe('setupRerender & teardown', () => {
 	/** @type {HTMLDivElement} */
-	let scratch;
+	let scratch
 
 	beforeEach(() => {
-		scratch = document.createElement('div');
-	});
+		scratch = document.createElement('div')
+	})
 
 	it('should restore previous debounce', () => {
-		let spy = (options.debounceRendering = sinon.spy());
+		let spy = (options.debounceRendering = sinon.spy())
 
-		setupRerender();
-		teardown();
+		setupRerender()
+		teardown()
 
-		expect(options.debounceRendering).to.equal(spy);
-	});
+		expect(options.debounceRendering).to.equal(spy)
+	})
 
 	it('teardown should flush the queue', () => {
 		/** @type {() => void} */
-		let increment;
+		let increment
 		class Counter extends Component {
 			constructor(props) {
-				super(props);
+				super(props)
 
-				this.state = { count: 0 };
-				increment = () => this.setState({ count: this.state.count + 1 });
+				this.state = { count: 0 }
+				increment = () => this.setState({ count: this.state.count + 1 })
 			}
 
 			render() {
-				return <div>{this.state.count}</div>;
+				return <div>{this.state.count}</div>
 			}
 		}
 
-		sinon.spy(Counter.prototype, 'render');
+		sinon.spy(Counter.prototype, 'render')
 
 		// Setup rerender
-		setupRerender();
+		setupRerender()
 
 		// Initial render
-		render(<Counter />, scratch);
-		expect(Counter.prototype.render).to.have.been.calledOnce;
-		expect(scratch.innerHTML).to.equal('<div>0</div>');
+		render(<Counter />, scratch)
+		expect(Counter.prototype.render).to.have.been.calledOnce
+		expect(scratch.innerHTML).to.equal('<div>0</div>')
 
 		// queue rerender
-		increment();
-		expect(Counter.prototype.render).to.have.been.calledOnce;
-		expect(scratch.innerHTML).to.equal('<div>0</div>');
+		increment()
+		expect(Counter.prototype.render).to.have.been.calledOnce
+		expect(scratch.innerHTML).to.equal('<div>0</div>')
 
 		// Pretend test forgot to call rerender. Teardown should do that
-		teardown();
-		expect(Counter.prototype.render).to.have.been.calledTwice;
-		expect(scratch.innerHTML).to.equal('<div>1</div>');
-	});
-});
+		teardown()
+		expect(Counter.prototype.render).to.have.been.calledTwice
+		expect(scratch.innerHTML).to.equal('<div>1</div>')
+	})
+})

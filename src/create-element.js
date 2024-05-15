@@ -1,7 +1,7 @@
-import { slice } from './util';
-import options from './options';
+import { slice } from './util'
+import options from './options'
 
-let vnodeId = 0;
+let vnodeId = 0
 
 /**
  * Create an virtual node (used for JSX)
@@ -16,16 +16,16 @@ export function createElement(type, props, children) {
 	let normalizedProps = {},
 		key,
 		ref,
-		i;
+		i
 	for (i in props) {
-		if (i == 'key') key = props[i];
-		else if (i == 'ref') ref = props[i];
-		else normalizedProps[i] = props[i];
+		if (i == 'key') key = props[i]
+		else if (i == 'ref') ref = props[i]
+		else normalizedProps[i] = props[i]
 	}
 
 	if (arguments.length > 2) {
 		normalizedProps.children =
-			arguments.length > 3 ? slice.call(arguments, 2) : children;
+			arguments.length > 3 ? slice.call(arguments, 2) : children
 	}
 
 	// If a Component VNode, check for and apply defaultProps
@@ -33,12 +33,12 @@ export function createElement(type, props, children) {
 	if (typeof type == 'function' && type.defaultProps != null) {
 		for (i in type.defaultProps) {
 			if (normalizedProps[i] === undefined) {
-				normalizedProps[i] = type.defaultProps[i];
+				normalizedProps[i] = type.defaultProps[i]
 			}
 		}
 	}
 
-	return createVNode(type, normalizedProps, key, ref, null);
+	return createVNode(type, normalizedProps, key, ref, null)
 }
 
 /**
@@ -76,20 +76,20 @@ export function createVNode(type, props, key, ref, original) {
 		_original: original == null ? ++vnodeId : original,
 		_index: -1,
 		_flags: 0
-	};
+	}
 
 	// Only invoke the vnode hook if this was *not* a direct copy:
-	if (original == null && options.vnode != null) options.vnode(vnode);
+	if (original == null && options.vnode != null) options.vnode(vnode)
 
-	return vnode;
+	return vnode
 }
 
 export function createRef() {
-	return { current: null };
+	return { current: null }
 }
 
 export function Fragment(props) {
-	return props.children;
+	return props.children
 }
 
 /**
@@ -98,4 +98,4 @@ export function Fragment(props) {
  * @returns {vnode is VNode}
  */
 export const isValidElement = vnode =>
-	vnode != null && vnode.constructor == undefined;
+	vnode != null && vnode.constructor == undefined

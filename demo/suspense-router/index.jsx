@@ -1,12 +1,12 @@
-import { Suspense, lazy } from 'react';
+import { Suspense, lazy } from 'react'
 
-import { Router, Route, Switch } from './simple-router';
+import { Router, Route, Switch } from './simple-router'
 
-let Hello = lazy(() => import('./hello.jsx'));
-let Bye = lazy(() => import('./bye.jsx'));
+let Hello = lazy(() => import('./hello.jsx'))
+let Bye = lazy(() => import('./bye.jsx'))
 
 function Loading() {
-	return <div>Hey! This is a fallback because we're loading things! :D</div>;
+	return <div>Hey! This is a fallback because we're loading things! :D</div>
 }
 
 export default function SuspenseRouterBug() {
@@ -24,5 +24,5 @@ export default function SuspenseRouterBug() {
 				</Switch>
 			</Suspense>
 		</Router>
-	);
+	)
 }

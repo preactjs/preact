@@ -4,7 +4,7 @@
  * @param {number} fallback Fallback value if Symbols are not supported
  */
 export function getSymbol(name, fallback) {
-	let out = fallback;
+	let out = fallback
 
 	try {
 		// eslint-disable-next-line
@@ -16,9 +16,9 @@ export function getSymbol(name, fallback) {
 			// Concatenate these string literals to prevent the test
 			// harness and/or Babel from modifying the symbol value.
 			// eslint-disable-next-line
-			out = (0, eval)('Sym' + 'bol.for("' + name + '")');
+			out = (0, eval)('Sym' + 'bol.for("' + name + '")')
 		}
 	} catch (e) {}
 
-	return out;
+	return out
 }

@@ -1,13 +1,13 @@
-import { existsSync } from 'fs';
-import { readFile, readdir } from 'fs/promises';
-import prompts from 'prompts';
-import { baseTraceLogDir, frameworks } from './config.js';
+import { existsSync } from 'fs'
+import { readFile, readdir } from 'fs/promises'
+import prompts from 'prompts'
+import { baseTraceLogDir, frameworks } from './config.js'
 
-import { summaryStats, computeDifferences } from 'tachometer/lib/stats.js';
+import { summaryStats, computeDifferences } from 'tachometer/lib/stats.js'
 import {
 	automaticResultTable,
 	verticalTermResultTable
-} from 'tachometer/lib/format.js';
+} from 'tachometer/lib/format.js'
 
 /**
  * @typedef {import('./tracing').TraceEvent} TraceEvent
@@ -27,7 +27,7 @@ const toTrack = new Set([
 	'V8.DeoptimizeCode',
 	'MinorGC',
 	'V8.GCDeoptMarkedAllocationSites'
-]);
+])
 
 /**
  * @template T
@@ -38,14 +38,14 @@ function addToGrouping(grouping, results) {
 	for (let [group, data] of results.entries()) {
 		if (grouping.has(group)) {
 			if (Array.isArray(data)) {
-				grouping.get(group).push(...data);
+				grouping.get(group).push(...data)
 			} else {
-				grouping.get(group).push(data);
+				grouping.get(group).push(data)
 			}
 		} else if (Array.isArray(data)) {
-			grouping.set(group, data);
+			grouping.set(group, data)
 		} else {
-			grouping.set(group, [data]);
+			grouping.set(group, [data])
 		}
 	}
 }
@@ -59,9 +59,9 @@ function addToGrouping(grouping, results) {
  */
 function addToMapArray(map, key, ...values) {
 	if (map.has(key)) {
-		map.get(key).push(...values);
+		map.get(key).push(...values)
 	} else {
-		map.set(key, values);
+		map.set(key, values)
 	}
 }
 
@@ -75,9 +75,9 @@ function addToMapArray(map, key, ...values) {
  */
 function setInMapArray(map, key, index, value) {
 	if (map.has(key)) {
-		map.get(key)[index] = value;
+		map.get(key)[index] = value
 	} else {
-		map.set(key, [value]);
+		map.set(key, [value])
 	}
 }
 
@@ -85,12 +85,12 @@ function setInMapArray(map, key, index, value) {
  * @param {ResultStats[]} results
  */
 function logDifferences(key, results) {
-	let withDifferences = computeDifferences(results);
-	console.log();
-	let { unfixed } = automaticResultTable(withDifferences);
+	let withDifferences = computeDifferences(results)
+	console.log()
+	let { unfixed } = automaticResultTable(withDifferences)
 	// console.log(horizontalTermResultTable(fixed));
-	console.log(key);
-	console.log(verticalTermResultTable(unfixed));
+	console.log(key)
+	console.log(verticalTermResultTable(unfixed))
 }
 
 /**
@@ -102,19 +102,19 @@ function logDifferences(key, results) {
  */
 async function getStatsFromLogs(version, logPaths, getThreadId, trackEventsIn) {
 	/** @type {Map<string, number[]>} Sums for each function for each file */
-	const data = new Map();
+	const data = new Map()
 	for (let logPath of logPaths) {
 		/** @type {TraceEvent[]} */
-		const logs = JSON.parse(await readFile(logPath, 'utf8'));
+		const logs = JSON.parse(await readFile(logPath, 'utf8'))
 
-		let tid = getThreadId ? getThreadId(logs, logPath) : null;
+		let tid = getThreadId ? getThreadId(logs, logPath) : null
 		if (tid == null) {
-			console.warn(`Could not find threadId for ${logPath}. Skipping...`);
-			continue;
+			console.warn(`Could not find threadId for ${logPath}. Skipping...`)
+			continue
 		}
 
 		/** @type {Array<{ id: string; start: number; end: number; }>} Determine what durations to track events under */
-		const parentLogs = [];
+		const parentLogs = []
 		for (let log of logs) {
 			if (trackEventsIn && trackEventsIn(log)) {
 				if (log.ph == 'X') {
@@ -122,26 +122,26 @@ async function getStatsFromLogs(version, logPaths, getThreadId, trackEventsIn) {
 						id: log.name,
 						start: log.ts,
 						end: log.ts + log.dur
-					});
+					})
 				} else if (log.ph == 'b') {
 					parentLogs.push({
 						id: log.name,
 						start: log.ts,
 						end: log.ts
-					});
+					})
 				} else if (log.ph == 'e') {
-					parentLogs.find(l => l.id == log.name).end = log.ts;
+					parentLogs.find(l => l.id == log.name).end = log.ts
 				} else {
-					throw new Error(`Unsupported parent log type: ${log.ph}`);
+					throw new Error(`Unsupported parent log type: ${log.ph}`)
 				}
 			}
 		}
 
 		/** @type {Map<string, import('./tracing').AsyncEvent>} */
-		const durationBeginEvents = new Map();
+		const durationBeginEvents = new Map()
 
 		/** @type {Map<string, number[]>} Sum of time spent in each function for this log file */
-		const sumsForFile = new Map();
+		const sumsForFile = new Map()
 		for (let log of logs) {
 			if (tid != null && log.tid !== tid) {
 				// if (toTrack.has(log.name)) {
@@ -150,45 +150,45 @@ async function getStatsFromLogs(version, logPaths, getThreadId, trackEventsIn) {
 				// 	);
 				// }
 
-				continue;
+				continue
 			}
 
 			if (log.ph == 'X') {
 				// Track duration event
 				if (toTrack.has(log.name)) {
-					let key = `Sum of ${log.name} time`;
-					let sum = sumsForFile.get(key)?.[0] ?? 0;
+					let key = `Sum of ${log.name} time`
+					let sum = sumsForFile.get(key)?.[0] ?? 0
 					// sumsForFile.set(log.name, sum + log.dur / 1000);
-					setInMapArray(sumsForFile, key, 0, sum + log.dur / 1000);
+					setInMapArray(sumsForFile, key, 0, sum + log.dur / 1000)
 
-					key = `Count of ${log.name}`;
-					sum = sumsForFile.get(key)?.[0] ?? 0;
+					key = `Count of ${log.name}`
+					sum = sumsForFile.get(key)?.[0] ?? 0
 					// sumsForFile.set(key, sum + 1);
-					setInMapArray(sumsForFile, key, 0, sum + 1);
+					setInMapArray(sumsForFile, key, 0, sum + 1)
 
-					key = `Sum of V8 runtime`;
-					sum = sumsForFile.get(key)?.[0] ?? 0;
+					key = `Sum of V8 runtime`
+					sum = sumsForFile.get(key)?.[0] ?? 0
 					// sumsForFile.set(key, sum + log.dur / 1000);
-					setInMapArray(sumsForFile, key, 0, sum + log.dur / 1000);
+					setInMapArray(sumsForFile, key, 0, sum + log.dur / 1000)
 
 					for (let parentLog of parentLogs) {
 						if (
 							parentLog.start <= log.ts &&
 							log.ts + log.dur <= parentLog.end
 						) {
-							key = `In ${parentLog.id}, Sum of V8 runtime`;
-							sum = sumsForFile.get(key)?.[0] ?? 0;
-							setInMapArray(sumsForFile, key, 0, sum + log.dur / 1000);
+							key = `In ${parentLog.id}, Sum of V8 runtime`
+							sum = sumsForFile.get(key)?.[0] ?? 0
+							setInMapArray(sumsForFile, key, 0, sum + log.dur / 1000)
 						}
 					}
 				}
 
 				if (log.name == 'MinorGC' || log.name == 'MajorGC') {
-					let key = `${log.name} usedHeapSizeBefore`;
-					addToMapArray(sumsForFile, key, log.args.usedHeapSizeBefore / 1e6);
+					let key = `${log.name} usedHeapSizeBefore`
+					addToMapArray(sumsForFile, key, log.args.usedHeapSizeBefore / 1e6)
 
-					key = `${log.name} usedHeapSizeAfter`;
-					addToMapArray(sumsForFile, key, log.args.usedHeapSizeAfter / 1e6);
+					key = `${log.name} usedHeapSizeAfter`
+					addToMapArray(sumsForFile, key, log.args.usedHeapSizeAfter / 1e6)
 				}
 			} else if (
 				(log.ph == 'b' || log.ph == 'e') &&
@@ -197,28 +197,28 @@ async function getStatsFromLogs(version, logPaths, getThreadId, trackEventsIn) {
 			) {
 				// TODO: Doesn't handle nested events of same name. Oh well.
 				if (log.ph == 'b') {
-					durationBeginEvents.set(log.name, log);
+					durationBeginEvents.set(log.name, log)
 				} else {
-					const beginEvent = durationBeginEvents.get(log.name);
-					const endEvent = log;
-					durationBeginEvents.delete(log.name);
+					const beginEvent = durationBeginEvents.get(log.name)
+					const endEvent = log
+					durationBeginEvents.delete(log.name)
 
-					let key = beginEvent.name;
-					let duration = (endEvent.ts - beginEvent.ts) / 1000;
-					addToMapArray(sumsForFile, key, duration);
+					let key = beginEvent.name
+					let duration = (endEvent.ts - beginEvent.ts) / 1000
+					addToMapArray(sumsForFile, key, duration)
 
 					if (key.startsWith('run-') && key !== 'run-warmup-0') {
 						// Skip run-warmup-0 since it doesn't do unmounting
-						addToMapArray(sumsForFile, 'average run duration', duration);
+						addToMapArray(sumsForFile, 'average run duration', duration)
 					}
 				}
 			}
 		}
 
-		addToGrouping(data, sumsForFile);
+		addToGrouping(data, sumsForFile)
 	}
 
-	const stats = new Map();
+	const stats = new Map()
 	for (let [key, sums] of data) {
 		stats.set(key, {
 			result: {
@@ -231,8 +231,8 @@ async function getStatsFromLogs(version, logPaths, getThreadId, trackEventsIn) {
 					unit: key.startsWith('Count')
 						? ''
 						: key.includes('usedHeapSize')
-						? 'MB'
-						: null
+							? 'MB'
+							: null
 				},
 				browser: {
 					name: 'chrome'
@@ -240,10 +240,10 @@ async function getStatsFromLogs(version, logPaths, getThreadId, trackEventsIn) {
 				millis: sums
 			},
 			stats: summaryStats(sums)
-		});
+		})
 	}
 
-	return stats;
+	return stats
 }
 
 /**
@@ -252,7 +252,7 @@ async function getStatsFromLogs(version, logPaths, getThreadId, trackEventsIn) {
  * @returns {number | null}
  */
 function getDurationThread(logs, logFilePath) {
-	return logs.find(isDurationLog)?.tid ?? null;
+	return logs.find(isDurationLog)?.tid ?? null
 }
 
 /**
@@ -266,45 +266,45 @@ function isDurationLog(log) {
 		// Tachometer may kill the tab after seeing the duration measure before
 		// the tab can log it to the trace file
 		(log.name == 'run-final' || log.name == 'duration')
-	);
+	)
 }
 
 /** @param {string} requestedBench */
 export async function analyze(requestedBench) {
 	// const frameworkNames = await readdir(p('logs'));
-	const frameworkNames = frameworks.map(f => f.label);
+	const frameworkNames = frameworks.map(f => f.label)
 	const listAtEnd = [
 		'average run duration',
 		'Sum of V8 runtime',
 		'In run-final, Sum of V8 runtime',
 		'In duration, Sum of V8 runtime',
 		'duration'
-	];
+	]
 
 	if (!existsSync(baseTraceLogDir())) {
 		console.log(
 			`Could not find log directory: "${baseTraceLogDir()}". Did you run the benchmarks?`
-		);
-		return;
+		)
+		return
 	}
 
-	const benchmarkNames = await readdir(baseTraceLogDir());
-	let selectedBench;
+	const benchmarkNames = await readdir(baseTraceLogDir())
+	let selectedBench
 	if (benchmarkNames.length == 0) {
-		console.log(`No benchmarks or results found in "${baseTraceLogDir()}".`);
-		return;
+		console.log(`No benchmarks or results found in "${baseTraceLogDir()}".`)
+		return
 	} else if (requestedBench) {
 		if (benchmarkNames.includes(requestedBench)) {
-			selectedBench = requestedBench;
+			selectedBench = requestedBench
 		} else {
 			console.log(
 				`Could not find benchmark "${requestedBench}". Available benchmarks:`
-			);
-			console.log(benchmarkNames);
-			return;
+			)
+			console.log(benchmarkNames)
+			return
 		}
 	} else if (benchmarkNames.length == 1) {
-		selectedBench = benchmarkNames[0];
+		selectedBench = benchmarkNames[0]
 	} else {
 		selectedBench = (
 			await prompts({
@@ -316,22 +316,22 @@ export async function analyze(requestedBench) {
 					value: name
 				}))
 			})
-		).value;
+		).value
 	}
 
 	/** @type {Map<string, ResultStats[]>} */
-	const resultStatsMap = new Map();
+	const resultStatsMap = new Map()
 	for (let framework of frameworkNames) {
-		const logDir = baseTraceLogDir(selectedBench, framework);
+		const logDir = baseTraceLogDir(selectedBench, framework)
 
-		let logFilePaths;
+		let logFilePaths
 		try {
 			logFilePaths = (await readdir(logDir)).map(fn =>
 				baseTraceLogDir(selectedBench, framework, fn)
-			);
+			)
 		} catch (e) {
 			// If directory doesn't exist or we fail to read it, just skip
-			continue;
+			continue
 		}
 
 		const resultStats = await getStatsFromLogs(
@@ -339,8 +339,8 @@ export async function analyze(requestedBench) {
 			logFilePaths,
 			getDurationThread,
 			isDurationLog
-		);
-		addToGrouping(resultStatsMap, resultStats);
+		)
+		addToGrouping(resultStatsMap, resultStats)
 
 		// console.log(`${framework}:`);
 		// console.log(resultStats);
@@ -349,15 +349,15 @@ export async function analyze(requestedBench) {
 	// Compute differences and print table
 	for (let [key, results] of resultStatsMap.entries()) {
 		if (listAtEnd.includes(key)) {
-			continue;
+			continue
 		}
 
-		logDifferences(key, results);
+		logDifferences(key, results)
 	}
 
 	for (let key of listAtEnd) {
 		if (resultStatsMap.has(key)) {
-			logDifferences(key, resultStatsMap.get(key));
+			logDifferences(key, resultStatsMap.get(key))
 		}
 	}
 }

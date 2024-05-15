@@ -1,14 +1,14 @@
-import { Component } from 'preact';
+import { Component } from 'preact'
 
 export default class FragmentComp extends Component {
-	state = { number: 0 };
+	state = { number: 0 }
 
 	componentDidMount() {
-		setInterval(_ => this.updateChildren(), 1000);
+		setInterval(_ => this.updateChildren(), 1000)
 	}
 
 	updateChildren() {
-		this.setState(state => ({ number: state.number + 1 }));
+		this.setState(state => ({ number: state.number + 1 }))
 	}
 
 	render(props, state) {
@@ -21,6 +21,6 @@ export default class FragmentComp extends Component {
 					<div>three</div>
 				</>
 			</div>
-		);
+		)
 	}
 }

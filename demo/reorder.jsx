@@ -1,18 +1,18 @@
-import { createElement, Component } from 'preact';
+import { createElement, Component } from 'preact'
 
 function createItems(count = 10) {
-	let items = [];
+	let items = []
 	for (let i = 0; i < count; i++) {
 		items.push({
 			label: `Item #${i + 1}`,
 			key: i + 1
-		});
+		})
 	}
-	return items;
+	return items
 }
 
 function random() {
-	return Math.random() < 0.5 ? 1 : -1;
+	return Math.random() < 0.5 ? 1 : -1
 }
 
 export default class Reorder extends Component {
@@ -20,53 +20,53 @@ export default class Reorder extends Component {
 		items: createItems(),
 		count: 1,
 		useKeys: false
-	};
+	}
 
 	shuffle = () => {
-		this.setState({ items: this.state.items.slice().sort(random) });
-	};
+		this.setState({ items: this.state.items.slice().sort(random) })
+	}
 
 	swapTwo = () => {
 		let items = this.state.items.slice(),
 			first = Math.floor(Math.random() * items.length),
-			second;
+			second
 		do {
-			second = Math.floor(Math.random() * items.length);
-		} while (second === first);
-		let other = items[first];
-		items[first] = items[second];
-		items[second] = other;
-		this.setState({ items });
-	};
+			second = Math.floor(Math.random() * items.length)
+		} while (second === first)
+		let other = items[first]
+		items[first] = items[second]
+		items[second] = other
+		this.setState({ items })
+	}
 
 	reverse = () => {
-		this.setState({ items: this.state.items.slice().reverse() });
-	};
+		this.setState({ items: this.state.items.slice().reverse() })
+	}
 
 	setCount = e => {
-		this.setState({ count: Math.round(e.target.value) });
-	};
+		this.setState({ count: Math.round(e.target.value) })
+	}
 
 	rotate = () => {
-		let { items, count } = this.state;
-		items = items.slice(count).concat(items.slice(0, count));
-		this.setState({ items });
-	};
+		let { items, count } = this.state
+		items = items.slice(count).concat(items.slice(0, count))
+		this.setState({ items })
+	}
 
 	rotateBackward = () => {
 		let { items, count } = this.state,
-			len = items.length;
-		items = items.slice(len - count, len).concat(items.slice(0, len - count));
-		this.setState({ items });
-	};
+			len = items.length
+		items = items.slice(len - count, len).concat(items.slice(0, len - count))
+		this.setState({ items })
+	}
 
 	toggleKeys = () => {
-		this.setState({ useKeys: !this.state.useKeys });
-	};
+		this.setState({ useKeys: !this.state.useKeys })
+	}
 
 	renderItem = item => (
 		<li key={this.state.useKeys ? item.key : null}>{item.label}</li>
-	);
+	)
 
 	render({}, { items, count, useKeys }) {
 		return (
@@ -99,6 +99,6 @@ export default class Reorder extends Component {
 				</header>
 				<ul>{items.map(this.renderItem)}</ul>
 			</div>
-		);
+		)
 	}
 }

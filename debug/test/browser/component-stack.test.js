@@ -1,59 +1,59 @@
-import { createElement, render, Component } from 'preact';
-import 'preact/debug';
-import { setupScratch, teardown } from '../../../test/_util/helpers';
+import { createElement, render, Component } from 'preact'
+import 'preact/debug'
+import { setupScratch, teardown } from '../../../test/_util/helpers'
 
 /** @jsx createElement */
 
 describe('component stack', () => {
 	/** @type {HTMLDivElement} */
-	let scratch;
+	let scratch
 
-	let errors = [];
-	let warnings = [];
+	let errors = []
+	let warnings = []
 
-	const getStack = arr => arr[0].split('\n\n')[1];
+	const getStack = arr => arr[0].split('\n\n')[1]
 
 	beforeEach(() => {
-		scratch = setupScratch();
+		scratch = setupScratch()
 
-		errors = [];
-		warnings = [];
-		sinon.stub(console, 'error').callsFake(e => errors.push(e));
-		sinon.stub(console, 'warn').callsFake(w => warnings.push(w));
-	});
+		errors = []
+		warnings = []
+		sinon.stub(console, 'error').callsFake(e => errors.push(e))
+		sinon.stub(console, 'warn').callsFake(w => warnings.push(w))
+	})
 
 	afterEach(() => {
-		console.error.restore();
-		console.warn.restore();
-		teardown(scratch);
-	});
+		console.error.restore()
+		console.warn.restore()
+		teardown(scratch)
+	})
 
 	it('should print component stack', () => {
 		function Foo() {
-			return <Thrower />;
+			return <Thrower />
 		}
 
 		class Thrower extends Component {
 			constructor(props) {
-				super(props);
-				this.setState({ foo: 1 });
+				super(props)
+				this.setState({ foo: 1 })
 			}
 
 			render() {
-				return <div>foo</div>;
+				return <div>foo</div>
 			}
 		}
 
-		render(<Foo />, scratch);
+		render(<Foo />, scratch)
 
-		let lines = getStack(warnings).split('\n');
-		expect(lines[0].indexOf('Thrower') > -1).to.equal(true);
-		expect(lines[1].indexOf('Foo') > -1).to.equal(true);
-	});
+		let lines = getStack(warnings).split('\n')
+		expect(lines[0].indexOf('Thrower') > -1).to.equal(true)
+		expect(lines[1].indexOf('Foo') > -1).to.equal(true)
+	})
 
 	it('should only print owners', () => {
 		function Foo(props) {
-			return <div>{props.children}</div>;
+			return <div>{props.children}</div>
 		}
 
 		function Bar() {
@@ -61,7 +61,7 @@ describe('component stack', () => {
 				<Foo>
 					<Thrower />
 				</Foo>
-			);
+			)
 		}
 
 		class Thrower extends Component {
@@ -72,29 +72,29 @@ describe('component stack', () => {
 							<tr>foo</tr>
 						</td>
 					</table>
-				);
+				)
 			}
 		}
 
-		render(<Bar />, scratch);
+		render(<Bar />, scratch)
 
-		let lines = getStack(errors).split('\n');
-		expect(lines[0].indexOf('tr') > -1).to.equal(true);
-		expect(lines[1].indexOf('Thrower') > -1).to.equal(true);
-		expect(lines[2].indexOf('Bar') > -1).to.equal(true);
-	});
+		let lines = getStack(errors).split('\n')
+		expect(lines[0].indexOf('tr') > -1).to.equal(true)
+		expect(lines[1].indexOf('Thrower') > -1).to.equal(true)
+		expect(lines[2].indexOf('Bar') > -1).to.equal(true)
+	})
 
 	it('should not print a warning when "@babel/plugin-transform-react-jsx-source" is installed', () => {
 		function Thrower() {
-			throw new Error('foo');
+			throw new Error('foo')
 		}
 
 		try {
-			render(<Thrower />, scratch);
+			render(<Thrower />, scratch)
 		} catch {}
 
 		expect(warnings.join(' ')).to.not.include(
 			'@babel/plugin-transform-react-jsx-source'
-		);
-	});
-});
+		)
+	})
+})

@@ -1,34 +1,34 @@
-import { readdir } from 'fs/promises';
-import path from 'path';
-import { execFileSync } from 'child_process';
-import { deleteAsync } from 'del';
-import { repoRoot } from './utils.js';
-import { existsSync } from 'fs';
+import { readdir } from 'fs/promises'
+import path from 'path'
+import { execFileSync } from 'child_process'
+import { deleteAsync } from 'del'
+import { repoRoot } from './utils.js'
+import { existsSync } from 'fs'
 
-const npmCmd = process.platform == 'win32' ? 'npm.cmd' : 'npm';
+const npmCmd = process.platform == 'win32' ? 'npm.cmd' : 'npm'
 
 /**
  * @param {string[]} frameworks
  */
 export async function prepare(frameworks) {
-	const proxyRoot = repoRoot('benches/proxy-packages');
+	const proxyRoot = repoRoot('benches/proxy-packages')
 	const proxyDirs = (await readdir(proxyRoot)).map(dirname =>
 		dirname.replace(/-proxy$/, '')
-	);
+	)
 
 	for (let framework of frameworks) {
-		const dirname = proxyDirs.find(dir => dir == framework);
+		const dirname = proxyDirs.find(dir => dir == framework)
 		if (dirname == null) {
-			continue;
+			continue
 		}
 
 		const proxyDir = (...args) =>
-			path.join(proxyRoot, dirname + '-proxy', ...args);
+			path.join(proxyRoot, dirname + '-proxy', ...args)
 
-		const packageScripts = proxyDir('scripts.mjs');
-		const hasScripts = existsSync(packageScripts);
+		const packageScripts = proxyDir('scripts.mjs')
+		const hasScripts = existsSync(packageScripts)
 		if (hasScripts) {
-			await import(packageScripts).then(m => m.preinstall?.());
+			await import(packageScripts).then(m => m.preinstall?.())
 		}
 
 		// It appears from ad-hoc testing (npm v6.14.9 on Windows), npm will cache
@@ -42,16 +42,16 @@ export async function prepare(frameworks) {
 		// Because of the above behavior, we'll always delete the package-lock file
 		// and node_modules folder and use `npm i` to ensure we always get the
 		// latest packages
-		console.log(`Preparing ${dirname}: Cleaning ${proxyDir()}...`);
+		console.log(`Preparing ${dirname}: Cleaning ${proxyDir()}...`)
 		await deleteAsync(['package-lock.json', 'node_modules'], {
 			cwd: proxyDir()
-		});
+		})
 
-		console.log(`Preparing ${dirname}: Running "npm i" in ${proxyDir()}...`);
-		execFileSync(npmCmd, ['i'], { cwd: proxyDir(), stdio: 'inherit' });
+		console.log(`Preparing ${dirname}: Running "npm i" in ${proxyDir()}...`)
+		execFileSync(npmCmd, ['i'], { cwd: proxyDir(), stdio: 'inherit' })
 
 		if (hasScripts) {
-			await import(packageScripts).then(m => m.postinstall?.());
+			await import(packageScripts).then(m => m.postinstall?.())
 		}
 	}
 }

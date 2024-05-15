@@ -1,42 +1,42 @@
-import { setupRerender } from 'preact/test-utils';
-import { createElement, render, Component, Fragment } from 'preact';
-import { setupScratch, teardown } from '../_util/helpers';
-import { span, div, ul, ol, li, section } from '../_util/dom';
-import { logCall, clearLog, getLog } from '../_util/logCall';
+import { setupRerender } from 'preact/test-utils'
+import { createElement, render, Component, Fragment } from 'preact'
+import { setupScratch, teardown } from '../_util/helpers'
+import { span, div, ul, ol, li, section } from '../_util/dom'
+import { logCall, clearLog, getLog } from '../_util/logCall'
 
 /** @jsx createElement */
 /* eslint-disable react/jsx-boolean-value */
 
 describe('Fragment', () => {
 	/** @type {HTMLDivElement} */
-	let scratch;
+	let scratch
 
 	/** @type {() => void} */
-	let rerender;
+	let rerender
 
-	let ops = [];
+	let ops = []
 
 	function expectDomLogToBe(expectedOperations, message) {
-		expect(getLog()).to.deep.equal(expectedOperations, message);
+		expect(getLog()).to.deep.equal(expectedOperations, message)
 	}
 
 	class Stateful extends Component {
 		componentDidUpdate() {
-			ops.push('Update Stateful');
+			ops.push('Update Stateful')
 		}
 		render() {
-			return <div>Hello</div>;
+			return <div>Hello</div>
 		}
 	}
 
-	let resetInsertBefore;
-	let resetAppendChild;
-	let resetRemoveChild;
+	let resetInsertBefore
+	let resetAppendChild
+	let resetRemoveChild
 
 	before(() => {
-		resetInsertBefore = logCall(Element.prototype, 'insertBefore');
-		resetAppendChild = logCall(Element.prototype, 'appendChild');
-		resetRemoveChild = logCall(Element.prototype, 'removeChild');
+		resetInsertBefore = logCall(Element.prototype, 'insertBefore')
+		resetAppendChild = logCall(Element.prototype, 'appendChild')
+		resetRemoveChild = logCall(Element.prototype, 'removeChild')
 		// logCall(CharacterData.prototype, 'remove');
 		// TODO: Consider logging setting set data
 		// ```
@@ -47,46 +47,46 @@ describe('Fragment', () => {
 		// 	set(value) { console.log('setData', value); orgData.set.call(this, value); }
 		// });
 		// ```
-	});
+	})
 
 	after(() => {
-		resetInsertBefore();
-		resetAppendChild();
-		resetRemoveChild();
-	});
+		resetInsertBefore()
+		resetAppendChild()
+		resetRemoveChild()
+	})
 
 	beforeEach(() => {
-		scratch = setupScratch();
-		rerender = setupRerender();
-		ops = [];
+		scratch = setupScratch()
+		rerender = setupRerender()
+		ops = []
 
-		clearLog();
-	});
+		clearLog()
+	})
 
 	afterEach(() => {
-		teardown(scratch);
-	});
+		teardown(scratch)
+	})
 
 	it('should not render empty Fragment', () => {
-		render(<Fragment />, scratch);
-		expect(scratch.innerHTML).to.equal('');
-	});
+		render(<Fragment />, scratch)
+		expect(scratch.innerHTML).to.equal('')
+	})
 
 	it('should render a single child', () => {
-		clearLog();
+		clearLog()
 		render(
 			<Fragment>
 				<span>foo</span>
 			</Fragment>,
 			scratch
-		);
+		)
 
-		expect(scratch.innerHTML).to.equal('<span>foo</span>');
+		expect(scratch.innerHTML).to.equal('<span>foo</span>')
 		expectDomLogToBe([
 			'<span>.appendChild(#text)',
 			'<div>.appendChild(<span>foo)'
-		]);
-	});
+		])
+	})
 
 	it('should render multiple children via noop renderer', () => {
 		render(
@@ -94,10 +94,10 @@ describe('Fragment', () => {
 				hello <span>world</span>
 			</Fragment>,
 			scratch
-		);
+		)
 
-		expect(scratch.innerHTML).to.equal('hello <span>world</span>');
-	});
+		expect(scratch.innerHTML).to.equal('hello <span>world</span>')
+	})
 
 	it('should not crash with null as last child', () => {
 		let fn = () => {
@@ -107,10 +107,10 @@ describe('Fragment', () => {
 					{null}
 				</Fragment>,
 				scratch
-			);
-		};
-		expect(fn).not.to.throw();
-		expect(scratch.innerHTML).to.equal('<span>world</span>');
+			)
+		}
+		expect(fn).not.to.throw()
+		expect(scratch.innerHTML).to.equal('<span>world</span>')
 
 		render(
 			<Fragment>
@@ -118,11 +118,11 @@ describe('Fragment', () => {
 				<p>Hello</p>
 			</Fragment>,
 			scratch
-		);
-		expect(scratch.innerHTML).to.equal('<span>world</span><p>Hello</p>');
+		)
+		expect(scratch.innerHTML).to.equal('<span>world</span><p>Hello</p>')
 
-		expect(fn).not.to.throw();
-		expect(scratch.innerHTML).to.equal('<span>world</span>');
+		expect(fn).not.to.throw()
+		expect(scratch.innerHTML).to.equal('<span>world</span>')
 
 		render(
 			<Fragment>
@@ -131,8 +131,8 @@ describe('Fragment', () => {
 				<span>world</span>
 			</Fragment>,
 			scratch
-		);
-		expect(scratch.innerHTML).to.equal('<span>world</span><span>world</span>');
+		)
+		expect(scratch.innerHTML).to.equal('<span>world</span><span>world</span>')
 
 		render(
 			<Fragment>
@@ -141,16 +141,16 @@ describe('Fragment', () => {
 				<span>world</span>
 			</Fragment>,
 			scratch
-		);
+		)
 		expect(scratch.innerHTML).to.equal(
 			'<span>world</span>Hello<span>world</span>'
-		);
-	});
+		)
+	})
 
 	it('should handle reordering components that return Fragments #1325', () => {
 		class X extends Component {
 			render() {
-				return <Fragment>{this.props.children}</Fragment>;
+				return <Fragment>{this.props.children}</Fragment>
 			}
 		}
 
@@ -162,38 +162,38 @@ describe('Fragment', () => {
 							<X key={1}>1</X>
 							<X key={2}>2</X>
 						</div>
-					);
+					)
 				}
 				return (
 					<div>
 						<X key={2}>2</X>
 						<X key={1}>1</X>
 					</div>
-				);
+				)
 			}
 		}
 
-		render(<App i={0} />, scratch);
-		expect(scratch.textContent).to.equal('12');
-		render(<App i={1} />, scratch);
-		expect(scratch.textContent).to.equal('21');
-	});
+		render(<App i={0} />, scratch)
+		expect(scratch.textContent).to.equal('12')
+		render(<App i={1} />, scratch)
+		expect(scratch.textContent).to.equal('21')
+	})
 
 	it('should handle changing node type within a Component that returns a Fragment #1326', () => {
 		class X extends Component {
 			render() {
-				return this.props.children;
+				return this.props.children
 			}
 		}
 
 		/** @type {(newState: any) => void} */
-		let setState;
+		let setState
 		class App extends Component {
 			constructor(props, context) {
-				super(props, context);
+				super(props, context)
 
-				this.state = { i: 0 };
-				setState = this.setState.bind(this);
+				this.state = { i: 0 }
+				setState = this.setState.bind(this)
 			}
 
 			render() {
@@ -208,7 +208,7 @@ describe('Fragment', () => {
 								<span>2</span>
 							</X>
 						</div>
-					);
+					)
 				}
 
 				return (
@@ -221,25 +221,25 @@ describe('Fragment', () => {
 							<span>2</span>
 						</X>
 					</div>
-				);
+				)
 			}
 		}
 
-		render(<App />, scratch);
-		expect(scratch.innerHTML).to.equal(div([span(1), span(2), span(2)]));
+		render(<App />, scratch)
+		expect(scratch.innerHTML).to.equal(div([span(1), span(2), span(2)]))
 
-		setState({ i: 1 });
+		setState({ i: 1 })
 
-		clearLog();
-		rerender();
+		clearLog()
+		rerender()
 
-		expect(scratch.innerHTML).to.equal(div([div(1), span(2), span(2)]));
+		expect(scratch.innerHTML).to.equal(div([div(1), span(2), span(2)]))
 		expectDomLogToBe([
 			'<span>1.remove()',
 			'<div>.appendChild(#text)',
 			'<div>22.insertBefore(<div>1, <span>2)'
-		]);
-	});
+		])
+	})
 
 	it('should preserve state of children with 1 level nesting', () => {
 		function Foo({ condition }) {
@@ -250,20 +250,20 @@ describe('Fragment', () => {
 					<Stateful key="a" />
 					<div key="b">World</div>
 				</Fragment>
-			);
+			)
 		}
 
-		render(<Foo condition={true} />, scratch);
-		render(<Foo condition={false} />, scratch);
+		render(<Foo condition={true} />, scratch)
+		render(<Foo condition={false} />, scratch)
 
-		expect(ops).to.deep.equal(['Update Stateful']);
-		expect(scratch.innerHTML).to.deep.equal('<div>Hello</div><div>World</div>');
+		expect(ops).to.deep.equal(['Update Stateful'])
+		expect(scratch.innerHTML).to.deep.equal('<div>Hello</div><div>World</div>')
 
-		render(<Foo condition={true} />, scratch);
+		render(<Foo condition={true} />, scratch)
 
-		expect(ops).to.deep.equal(['Update Stateful', 'Update Stateful']);
-		expect(scratch.innerHTML).to.deep.equal('<div>Hello</div>');
-	});
+		expect(ops).to.deep.equal(['Update Stateful', 'Update Stateful'])
+		expect(scratch.innerHTML).to.deep.equal('<div>Hello</div>')
+	})
 
 	it('should preserve state between top-level fragments', () => {
 		function Foo({ condition }) {
@@ -275,25 +275,25 @@ describe('Fragment', () => {
 				<Fragment>
 					<Stateful />
 				</Fragment>
-			);
+			)
 		}
 
-		render(<Foo condition={true} />, scratch);
+		render(<Foo condition={true} />, scratch)
 
-		clearLog();
-		render(<Foo condition={false} />, scratch);
+		clearLog()
+		render(<Foo condition={false} />, scratch)
 
-		expect(ops).to.deep.equal(['Update Stateful']);
-		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
-		expectDomLogToBe([]);
+		expect(ops).to.deep.equal(['Update Stateful'])
+		expect(scratch.innerHTML).to.equal('<div>Hello</div>')
+		expectDomLogToBe([])
 
-		clearLog();
-		render(<Foo condition={true} />, scratch);
+		clearLog()
+		render(<Foo condition={true} />, scratch)
 
-		expect(ops).to.deep.equal(['Update Stateful', 'Update Stateful']);
-		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
-		expectDomLogToBe([]);
-	});
+		expect(ops).to.deep.equal(['Update Stateful', 'Update Stateful'])
+		expect(scratch.innerHTML).to.equal('<div>Hello</div>')
+		expectDomLogToBe([])
+	})
 
 	it('should preserve state of children nested at same level', () => {
 		function Foo({ condition }) {
@@ -314,25 +314,25 @@ describe('Fragment', () => {
 						</Fragment>
 					</Fragment>
 				</Fragment>
-			);
+			)
 		}
 
-		render(<Foo condition={true} />, scratch);
+		render(<Foo condition={true} />, scratch)
 
-		clearLog();
-		render(<Foo condition={false} />, scratch);
+		clearLog()
+		render(<Foo condition={false} />, scratch)
 
-		expect(ops).to.deep.equal(['Update Stateful']);
-		expect(scratch.innerHTML).to.equal('<div></div><div>Hello</div>');
-		expectDomLogToBe(['<div>Hello.insertBefore(<div>, <div>Hello)']);
+		expect(ops).to.deep.equal(['Update Stateful'])
+		expect(scratch.innerHTML).to.equal('<div></div><div>Hello</div>')
+		expectDomLogToBe(['<div>Hello.insertBefore(<div>, <div>Hello)'])
 
-		clearLog();
-		render(<Foo condition={true} />, scratch);
+		clearLog()
+		render(<Foo condition={true} />, scratch)
 
-		expect(ops).to.deep.equal(['Update Stateful', 'Update Stateful']);
-		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
-		expectDomLogToBe(['<div>.remove()']);
-	});
+		expect(ops).to.deep.equal(['Update Stateful', 'Update Stateful'])
+		expect(scratch.innerHTML).to.equal('<div>Hello</div>')
+		expectDomLogToBe(['<div>.remove()'])
+	})
 
 	it('should not preserve state in non-top-level fragment nesting', () => {
 		function Foo({ condition }) {
@@ -346,34 +346,34 @@ describe('Fragment', () => {
 				<Fragment>
 					<Stateful key="a" />
 				</Fragment>
-			);
+			)
 		}
 
-		render(<Foo condition={true} />, scratch);
+		render(<Foo condition={true} />, scratch)
 
-		clearLog();
-		render(<Foo condition={false} />, scratch);
+		clearLog()
+		render(<Foo condition={false} />, scratch)
 
-		expect(ops).to.deep.equal([]);
-		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
+		expect(ops).to.deep.equal([])
+		expect(scratch.innerHTML).to.equal('<div>Hello</div>')
 		expectDomLogToBe([
 			'<div>Hello.remove()',
 			'<div>.appendChild(#text)',
 			'<div>.appendChild(<div>Hello)'
-		]);
+		])
 
-		clearLog();
-		render(<Foo condition={true} />, scratch);
+		clearLog()
+		render(<Foo condition={true} />, scratch)
 
-		expect(ops).to.deep.equal([]);
-		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
+		expect(ops).to.deep.equal([])
+		expect(scratch.innerHTML).to.equal('<div>Hello</div>')
 		expectDomLogToBe([
 			'<div>Hello.remove()',
 			'<div>.appendChild(#text)',
 			// Re-append the Stateful DOM since it has been re-parented
 			'<div>.appendChild(<div>Hello)'
-		]);
-	});
+		])
+	})
 
 	it('should not preserve state of children if nested 2 levels without siblings', () => {
 		function Foo({ condition }) {
@@ -385,33 +385,33 @@ describe('Fragment', () => {
 						<Stateful key="a" />
 					</Fragment>
 				</Fragment>
-			);
+			)
 		}
 
-		render(<Foo condition={true} />, scratch);
+		render(<Foo condition={true} />, scratch)
 
-		clearLog();
-		render(<Foo condition={false} />, scratch);
+		clearLog()
+		render(<Foo condition={false} />, scratch)
 
-		expect(ops).to.deep.equal([]);
-		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
+		expect(ops).to.deep.equal([])
+		expect(scratch.innerHTML).to.equal('<div>Hello</div>')
 		expectDomLogToBe([
 			'<div>Hello.remove()',
 			'<div>.appendChild(#text)',
 			'<div>.appendChild(<div>Hello)'
-		]);
+		])
 
-		clearLog();
-		render(<Foo condition={true} />, scratch);
+		clearLog()
+		render(<Foo condition={true} />, scratch)
 
-		expect(ops).to.deep.equal([]);
-		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
+		expect(ops).to.deep.equal([])
+		expect(scratch.innerHTML).to.equal('<div>Hello</div>')
 		expectDomLogToBe([
 			'<div>Hello.remove()',
 			'<div>.appendChild(#text)',
 			'<div>.appendChild(<div>Hello)'
-		]);
-	});
+		])
+	})
 
 	it('should just render children for fragments', () => {
 		class Comp extends Component {
@@ -421,13 +421,13 @@ describe('Fragment', () => {
 						<div>Child1</div>
 						<div>Child2</div>
 					</Fragment>
-				);
+				)
 			}
 		}
 
-		render(<Comp />, scratch);
-		expect(scratch.innerHTML).to.equal('<div>Child1</div><div>Child2</div>');
-	});
+		render(<Comp />, scratch)
+		expect(scratch.innerHTML).to.equal('<div>Child1</div><div>Child2</div>')
+	})
 
 	it('should not preserve state of children if nested 2 levels with siblings', () => {
 		function Foo({ condition }) {
@@ -440,20 +440,20 @@ describe('Fragment', () => {
 					</Fragment>
 					<div />
 				</Fragment>
-			);
+			)
 		}
 
-		render(<Foo condition={true} />, scratch);
-		render(<Foo condition={false} />, scratch);
+		render(<Foo condition={true} />, scratch)
+		render(<Foo condition={false} />, scratch)
 
-		expect(ops).to.deep.equal([]);
-		expect(scratch.innerHTML).to.equal('<div>Hello</div><div></div>');
+		expect(ops).to.deep.equal([])
+		expect(scratch.innerHTML).to.equal('<div>Hello</div><div></div>')
 
-		render(<Foo condition={true} />, scratch);
+		render(<Foo condition={true} />, scratch)
 
-		expect(ops).to.deep.equal([]);
-		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
-	});
+		expect(ops).to.deep.equal([])
+		expect(scratch.innerHTML).to.equal('<div>Hello</div>')
+	})
 
 	it('should preserve state between array nested in fragment and fragment', () => {
 		// In this test case, the children of the Fragment in Foo end up being the same when flattened.
@@ -473,20 +473,20 @@ describe('Fragment', () => {
 				</Fragment>
 			) : (
 				<Fragment>{[<Stateful key="a" />]}</Fragment>
-			);
+			)
 		}
 
-		render(<Foo condition={true} />, scratch);
-		render(<Foo condition={false} />, scratch);
+		render(<Foo condition={true} />, scratch)
+		render(<Foo condition={false} />, scratch)
 
-		expect(ops).to.deep.equal(['Update Stateful']);
-		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
+		expect(ops).to.deep.equal(['Update Stateful'])
+		expect(scratch.innerHTML).to.equal('<div>Hello</div>')
 
-		render(<Foo condition={true} />, scratch);
+		render(<Foo condition={true} />, scratch)
 
-		expect(ops).to.deep.equal(['Update Stateful', 'Update Stateful']);
-		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
-	});
+		expect(ops).to.deep.equal(['Update Stateful', 'Update Stateful'])
+		expect(scratch.innerHTML).to.equal('<div>Hello</div>')
+	})
 
 	it('should preserve state between top level fragment and array', () => {
 		function Foo({ condition }) {
@@ -496,20 +496,20 @@ describe('Fragment', () => {
 				<Fragment>
 					<Stateful key="a" />
 				</Fragment>
-			);
+			)
 		}
 
-		render(<Foo condition={true} />, scratch);
-		render(<Foo condition={false} />, scratch);
+		render(<Foo condition={true} />, scratch)
+		render(<Foo condition={false} />, scratch)
 
-		expect(ops).to.deep.equal(['Update Stateful']);
-		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
+		expect(ops).to.deep.equal(['Update Stateful'])
+		expect(scratch.innerHTML).to.equal('<div>Hello</div>')
 
-		render(<Foo condition={true} />, scratch);
+		render(<Foo condition={true} />, scratch)
 
-		expect(ops).to.deep.equal(['Update Stateful', 'Update Stateful']);
-		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
-	});
+		expect(ops).to.deep.equal(['Update Stateful', 'Update Stateful'])
+		expect(scratch.innerHTML).to.equal('<div>Hello</div>')
+	})
 
 	it('should not preserve state between array nested in fragment and double nested fragment', () => {
 		// In this test case, the children of the Fragment in Foo end up being the different when flattened.
@@ -532,20 +532,20 @@ describe('Fragment', () => {
 						<Stateful key="a" />
 					</Fragment>
 				</Fragment>
-			);
+			)
 		}
 
-		render(<Foo condition={true} />, scratch);
-		render(<Foo condition={false} />, scratch);
+		render(<Foo condition={true} />, scratch)
+		render(<Foo condition={false} />, scratch)
 
-		expect(ops).to.deep.equal([]);
-		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
+		expect(ops).to.deep.equal([])
+		expect(scratch.innerHTML).to.equal('<div>Hello</div>')
 
-		render(<Foo condition={true} />, scratch);
+		render(<Foo condition={true} />, scratch)
 
-		expect(ops).to.deep.equal([]);
-		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
-	});
+		expect(ops).to.deep.equal([])
+		expect(scratch.innerHTML).to.equal('<div>Hello</div>')
+	})
 
 	it('should not preserve state between array nested in fragment and double nested array', () => {
 		function Foo({ condition }) {
@@ -553,20 +553,20 @@ describe('Fragment', () => {
 				<Fragment>{[<Stateful key="a" />]}</Fragment>
 			) : (
 				[[<Stateful key="a" />]]
-			);
+			)
 		}
 
-		render(<Foo condition={true} />, scratch);
-		render(<Foo condition={false} />, scratch);
+		render(<Foo condition={true} />, scratch)
+		render(<Foo condition={false} />, scratch)
 
-		expect(ops).to.deep.equal([]);
-		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
+		expect(ops).to.deep.equal([])
+		expect(scratch.innerHTML).to.equal('<div>Hello</div>')
 
-		render(<Foo condition={true} />, scratch);
+		render(<Foo condition={true} />, scratch)
 
-		expect(ops).to.deep.equal([]);
-		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
-	});
+		expect(ops).to.deep.equal([])
+		expect(scratch.innerHTML).to.equal('<div>Hello</div>')
+	})
 
 	it('should preserve state between double nested fragment and double nested array', () => {
 		function Foo({ condition }) {
@@ -578,20 +578,20 @@ describe('Fragment', () => {
 				</Fragment>
 			) : (
 				[[<Stateful key="a" />]]
-			);
+			)
 		}
 
-		render(<Foo condition={true} />, scratch);
-		render(<Foo condition={false} />, scratch);
+		render(<Foo condition={true} />, scratch)
+		render(<Foo condition={false} />, scratch)
 
-		expect(ops).to.deep.equal(['Update Stateful']);
-		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
+		expect(ops).to.deep.equal(['Update Stateful'])
+		expect(scratch.innerHTML).to.equal('<div>Hello</div>')
 
-		render(<Foo condition={true} />, scratch);
+		render(<Foo condition={true} />, scratch)
 
-		expect(ops).to.deep.equal(['Update Stateful', 'Update Stateful']);
-		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
-	});
+		expect(ops).to.deep.equal(['Update Stateful', 'Update Stateful'])
+		expect(scratch.innerHTML).to.equal('<div>Hello</div>')
+	})
 
 	it('should not preserve state of children when the keys are different', () => {
 		function Foo({ condition }) {
@@ -604,20 +604,20 @@ describe('Fragment', () => {
 					<Stateful />
 					<span>World</span>
 				</Fragment>
-			);
+			)
 		}
 
-		render(<Foo condition={true} />, scratch);
-		render(<Foo condition={false} />, scratch);
+		render(<Foo condition={true} />, scratch)
+		render(<Foo condition={false} />, scratch)
 
-		expect(ops).to.deep.equal([]);
-		expect(scratch.innerHTML).to.equal('<div>Hello</div><span>World</span>');
+		expect(ops).to.deep.equal([])
+		expect(scratch.innerHTML).to.equal('<div>Hello</div><span>World</span>')
 
-		render(<Foo condition={true} />, scratch);
+		render(<Foo condition={true} />, scratch)
 
-		expect(ops).to.deep.equal([]);
-		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
-	});
+		expect(ops).to.deep.equal([])
+		expect(scratch.innerHTML).to.equal('<div>Hello</div>')
+	})
 
 	it('should not preserve state between unkeyed and keyed fragment', () => {
 		function Foo({ condition }) {
@@ -629,30 +629,30 @@ describe('Fragment', () => {
 				<Fragment>
 					<Stateful />
 				</Fragment>
-			);
+			)
 		}
 
 		// React & Preact: has the same behavior for components
 		// https://codesandbox.io/s/57prmy5mx
-		render(<Foo condition={true} />, scratch);
-		render(<Foo condition={false} />, scratch);
+		render(<Foo condition={true} />, scratch)
+		render(<Foo condition={false} />, scratch)
 
-		expect(ops).to.deep.equal([]);
-		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
+		expect(ops).to.deep.equal([])
+		expect(scratch.innerHTML).to.equal('<div>Hello</div>')
 
-		render(<Foo condition={true} />, scratch);
+		render(<Foo condition={true} />, scratch)
 
-		expect(ops).to.deep.equal([]);
-		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
-	});
+		expect(ops).to.deep.equal([])
+		expect(scratch.innerHTML).to.equal('<div>Hello</div>')
+	})
 
 	it('should preserve order for fragment switching', () => {
-		let set;
+		let set
 		class Foo extends Component {
 			constructor(props) {
-				super(props);
-				this.state = { isLoading: true, data: null };
-				set = this.setState.bind(this);
+				super(props)
+				this.state = { isLoading: true, data: null }
+				set = this.setState.bind(this)
 			}
 			render(props, { isLoading, data }) {
 				return (
@@ -661,30 +661,26 @@ describe('Fragment', () => {
 						{isLoading ? <div>Loading...</div> : null}
 						{data ? <div>Content: {data}</div> : null}
 					</Fragment>
-				);
+				)
 			}
 		}
 
-		render(<Foo />, scratch);
-		expect(scratch.innerHTML).to.equal(
-			'<div>HEADER</div><div>Loading...</div>'
-		);
+		render(<Foo />, scratch)
+		expect(scratch.innerHTML).to.equal('<div>HEADER</div><div>Loading...</div>')
 
-		set({ isLoading: false, data: 2 });
-		rerender();
-		expect(scratch.innerHTML).to.equal(
-			'<div>HEADER</div><div>Content: 2</div>'
-		);
-	});
+		set({ isLoading: false, data: 2 })
+		rerender()
+		expect(scratch.innerHTML).to.equal('<div>HEADER</div><div>Content: 2</div>')
+	})
 
 	it('should preserve order for nested fragment switching w/ child return', () => {
-		let set;
-		const Wrapper = ({ children }) => <Fragment>{children}</Fragment>;
+		let set
+		const Wrapper = ({ children }) => <Fragment>{children}</Fragment>
 		class Foo extends Component {
 			constructor(props) {
-				super(props);
-				this.state = { isLoading: true, data: null };
-				set = this.setState.bind(this);
+				super(props)
+				this.state = { isLoading: true, data: null }
+				set = this.setState.bind(this)
 			}
 			render(props, { isLoading, data }) {
 				return (
@@ -693,7 +689,7 @@ describe('Fragment', () => {
 						{isLoading ? <div>Loading...</div> : null}
 						{data ? <div>Content: {data}</div> : null}
 					</Fragment>
-				);
+				)
 			}
 		}
 
@@ -702,30 +698,26 @@ describe('Fragment', () => {
 				<Foo />
 			</Wrapper>,
 			scratch
-		);
-		expect(scratch.innerHTML).to.equal(
-			'<div>HEADER</div><div>Loading...</div>'
-		);
+		)
+		expect(scratch.innerHTML).to.equal('<div>HEADER</div><div>Loading...</div>')
 
-		set({ isLoading: false, data: 2 });
-		rerender();
-		expect(scratch.innerHTML).to.equal(
-			'<div>HEADER</div><div>Content: 2</div>'
-		);
-	});
+		set({ isLoading: false, data: 2 })
+		rerender()
+		expect(scratch.innerHTML).to.equal('<div>HEADER</div><div>Content: 2</div>')
+	})
 
 	it('should preserve order for nested fragment switching', () => {
-		let set;
+		let set
 		const Wrapper = () => (
 			<Fragment>
 				<Foo />
 			</Fragment>
-		);
+		)
 		class Foo extends Component {
 			constructor(props) {
-				super(props);
-				this.state = { isLoading: true, data: null };
-				set = this.setState.bind(this);
+				super(props)
+				this.state = { isLoading: true, data: null }
+				set = this.setState.bind(this)
 			}
 			render(props, { isLoading, data }) {
 				return (
@@ -734,21 +726,17 @@ describe('Fragment', () => {
 						{isLoading ? <div>Loading...</div> : null}
 						{data ? <div>Content: {data}</div> : null}
 					</Fragment>
-				);
+				)
 			}
 		}
 
-		render(<Wrapper />, scratch);
-		expect(scratch.innerHTML).to.equal(
-			'<div>HEADER</div><div>Loading...</div>'
-		);
+		render(<Wrapper />, scratch)
+		expect(scratch.innerHTML).to.equal('<div>HEADER</div><div>Loading...</div>')
 
-		set({ isLoading: false, data: 2 });
-		rerender();
-		expect(scratch.innerHTML).to.equal(
-			'<div>HEADER</div><div>Content: 2</div>'
-		);
-	});
+		set({ isLoading: false, data: 2 })
+		rerender()
+		expect(scratch.innerHTML).to.equal('<div>HEADER</div><div>Content: 2</div>')
+	})
 
 	it('should preserve state with reordering in multiple levels', () => {
 		function Foo({ condition }) {
@@ -772,23 +760,23 @@ describe('Fragment', () => {
 						<div>bar</div>
 					</Fragment>
 				</div>
-			);
+			)
 		}
 
-		const htmlForTrue = div([div('foo'), div(div('Hello')), div('boop')]);
+		const htmlForTrue = div([div('foo'), div(div('Hello')), div('boop')])
 
-		const htmlForFalse = div([div('beep'), div(div('Hello')), div('bar')]);
+		const htmlForFalse = div([div('beep'), div(div('Hello')), div('bar')])
 
-		clearLog();
-		render(<Foo condition={true} />, scratch);
+		clearLog()
+		render(<Foo condition={true} />, scratch)
 
-		expect(scratch.innerHTML).to.equal(htmlForTrue);
+		expect(scratch.innerHTML).to.equal(htmlForTrue)
 
-		clearLog();
-		render(<Foo condition={false} />, scratch);
+		clearLog()
+		render(<Foo condition={false} />, scratch)
 
-		expect(ops).to.deep.equal(['Update Stateful']);
-		expect(scratch.innerHTML).to.equal(htmlForFalse);
+		expect(ops).to.deep.equal(['Update Stateful'])
+		expect(scratch.innerHTML).to.equal(htmlForFalse)
 		expectDomLogToBe(
 			[
 				'<div>barHellobeep.insertBefore(<div>bar, <div>beep)',
@@ -796,21 +784,21 @@ describe('Fragment', () => {
 				'<div>barbeepHello.appendChild(<div>bar)'
 			],
 			'rendering true to false'
-		);
+		)
 
-		clearLog();
-		render(<Foo condition={true} />, scratch);
+		clearLog()
+		render(<Foo condition={true} />, scratch)
 
-		expect(ops).to.deep.equal(['Update Stateful', 'Update Stateful']);
-		expect(scratch.innerHTML).to.equal(htmlForTrue);
+		expect(ops).to.deep.equal(['Update Stateful', 'Update Stateful'])
+		expect(scratch.innerHTML).to.equal(htmlForTrue)
 		expectDomLogToBe(
 			[
 				'<div>beepHellofoo.appendChild(<div>Hello)',
 				'<div>boopfooHello.appendChild(<div>boop)'
 			],
 			'rendering false to true'
-		);
-	});
+		)
+	})
 
 	it('should not preserve state when switching between a keyed fragment and an array', () => {
 		function Foo({ condition }) {
@@ -829,19 +817,19 @@ describe('Fragment', () => {
 					{[<span>1</span>, <Stateful />]}
 					<span>2</span>
 				</div>
-			);
+			)
 		}
 
-		const html = div([span('1'), div('Hello'), span('2')]);
+		const html = div([span('1'), div('Hello'), span('2')])
 
-		clearLog();
-		render(<Foo condition={true} />, scratch);
+		clearLog()
+		render(<Foo condition={true} />, scratch)
 
-		clearLog();
-		render(<Foo condition={false} />, scratch);
+		clearLog()
+		render(<Foo condition={false} />, scratch)
 
-		expect(ops).to.deep.equal([]); // Component should not have updated (empty op log)
-		expect(scratch.innerHTML).to.equal(html);
+		expect(ops).to.deep.equal([]) // Component should not have updated (empty op log)
+		expect(scratch.innerHTML).to.equal(html)
 		expectDomLogToBe([
 			'<span>1.remove()',
 			'<div>Hello.remove()',
@@ -849,13 +837,13 @@ describe('Fragment', () => {
 			'<div>2.insertBefore(<span>1, <span>2)',
 			'<div>.appendChild(#text)',
 			'<div>12.insertBefore(<div>Hello, <span>2)'
-		]);
+		])
 
-		clearLog();
-		render(<Foo condition={true} />, scratch);
+		clearLog()
+		render(<Foo condition={true} />, scratch)
 
-		expect(ops).to.deep.equal([]); // Component should not have updated (empty op log)
-		expect(scratch.innerHTML).to.equal(html);
+		expect(ops).to.deep.equal([]) // Component should not have updated (empty op log)
+		expect(scratch.innerHTML).to.equal(html)
 		expectDomLogToBe([
 			'<span>1.remove()',
 			'<div>Hello.remove()',
@@ -863,8 +851,8 @@ describe('Fragment', () => {
 			'<div>2.insertBefore(<span>1, <span>2)',
 			'<div>.appendChild(#text)',
 			'<div>12.insertBefore(<div>Hello, <span>2)'
-		]);
-	});
+		])
+	})
 
 	it('should preserve state when it does not change positions', () => {
 		function Foo({ condition }) {
@@ -874,29 +862,29 @@ describe('Fragment', () => {
 						<Fragment>
 							<Stateful />
 						</Fragment>
-				  ]
+					]
 				: [
 						<span />,
 						<Fragment>
 							<Stateful />
 						</Fragment>
-				  ];
+					]
 		}
 
-		render(<Foo condition={true} />, scratch);
-		render(<Foo condition={false} />, scratch);
+		render(<Foo condition={true} />, scratch)
+		render(<Foo condition={false} />, scratch)
 
-		expect(ops).to.deep.equal(['Update Stateful']);
-		expect(scratch.innerHTML).to.equal('<span></span><div>Hello</div>');
+		expect(ops).to.deep.equal(['Update Stateful'])
+		expect(scratch.innerHTML).to.equal('<span></span><div>Hello</div>')
 
-		render(<Foo condition={true} />, scratch);
+		render(<Foo condition={true} />, scratch)
 
-		expect(ops).to.deep.equal(['Update Stateful', 'Update Stateful']);
-		expect(scratch.innerHTML).to.equal('<span></span><div>Hello</div>');
-	});
+		expect(ops).to.deep.equal(['Update Stateful', 'Update Stateful'])
+		expect(scratch.innerHTML).to.equal('<span></span><div>Hello</div>')
+	})
 
 	it('should render nested Fragments', () => {
-		clearLog();
+		clearLog()
 		render(
 			<Fragment>
 				spam
@@ -905,34 +893,34 @@ describe('Fragment', () => {
 				bar
 			</Fragment>,
 			scratch
-		);
+		)
 
-		expect(scratch.innerHTML).to.equal('spamfoobar');
+		expect(scratch.innerHTML).to.equal('spamfoobar')
 		expectDomLogToBe([
 			'<div>.appendChild(#text)',
 			'<div>spam.appendChild(#text)',
 			'<div>spamfoo.appendChild(#text)'
-		]);
+		])
 
-		clearLog();
+		clearLog()
 		render(
 			<Fragment>
 				<Fragment>foo</Fragment>
 				<Fragment>bar</Fragment>
 			</Fragment>,
 			scratch
-		);
+		)
 
-		expect(scratch.innerHTML).to.equal('foobar');
+		expect(scratch.innerHTML).to.equal('foobar')
 		expectDomLogToBe([
 			'#text.remove()',
 			'#text.remove()',
 			'<div>foo.appendChild(#text)'
-		]);
-	});
+		])
+	})
 
 	it('should render nested Fragments with siblings', () => {
-		clearLog();
+		clearLog()
 		render(
 			<div>
 				<div>0</div>
@@ -947,46 +935,46 @@ describe('Fragment', () => {
 				<div>5</div>
 			</div>,
 			scratch
-		);
+		)
 
 		expect(scratch.innerHTML).to.equal(
 			div([div(0), div(1), div(2), div(3), div(4), div(5)])
-		);
-	});
+		)
+	})
 
 	it('should respect keyed Fragments', () => {
 		/** @type {() => void} */
-		let update;
+		let update
 
 		class Comp extends Component {
 			constructor() {
-				super();
-				this.state = { key: 'foo' };
-				update = () => this.setState({ key: 'bar' });
+				super()
+				this.state = { key: 'foo' }
+				update = () => this.setState({ key: 'bar' })
 			}
 
 			render() {
-				return <Fragment key={this.state.key}>foo</Fragment>;
+				return <Fragment key={this.state.key}>foo</Fragment>
 			}
 		}
-		render(<Comp />, scratch);
-		expect(scratch.innerHTML).to.equal('foo');
+		render(<Comp />, scratch)
+		expect(scratch.innerHTML).to.equal('foo')
 
-		update();
-		rerender();
+		update()
+		rerender()
 
-		expect(scratch.innerHTML).to.equal('foo');
-	});
+		expect(scratch.innerHTML).to.equal('foo')
+	})
 
 	it('should support conditionally rendered children', () => {
 		/** @type {() => void} */
-		let update;
+		let update
 
 		class Comp extends Component {
 			constructor() {
-				super();
-				this.state = { value: true };
-				update = () => this.setState({ value: !this.state.value });
+				super()
+				this.state = { value: true }
+				update = () => this.setState({ value: !this.state.value })
 			}
 
 			render() {
@@ -996,37 +984,37 @@ describe('Fragment', () => {
 						{this.state.value && 'foo'}
 						<span>1</span>
 					</Fragment>
-				);
+				)
 			}
 		}
 
-		const html = contents => span('0') + contents + span('1');
+		const html = contents => span('0') + contents + span('1')
 
-		render(<Comp />, scratch);
-		expect(scratch.innerHTML).to.equal(html('foo'));
+		render(<Comp />, scratch)
+		expect(scratch.innerHTML).to.equal(html('foo'))
 
-		update();
-		rerender();
+		update()
+		rerender()
 
-		expect(scratch.innerHTML).to.equal(html(''));
+		expect(scratch.innerHTML).to.equal(html(''))
 
-		update();
-		rerender();
-		expect(scratch.innerHTML).to.equal(html('foo'));
-	});
+		update()
+		rerender()
+		expect(scratch.innerHTML).to.equal(html('foo'))
+	})
 
 	it('can modify the children of a Fragment', () => {
 		/** @type {() => void} */
-		let push;
+		let push
 
 		class List extends Component {
 			constructor() {
-				super();
-				this.state = { values: [0, 1, 2] };
+				super()
+				this.state = { values: [0, 1, 2] }
 				push = () =>
 					this.setState({
 						values: [...this.state.values, this.state.values.length]
-					});
+					})
 			}
 
 			render() {
@@ -1036,23 +1024,23 @@ describe('Fragment', () => {
 							<div>{value}</div>
 						))}
 					</Fragment>
-				);
+				)
 			}
 		}
 
-		render(<List />, scratch);
-		expect(scratch.textContent).to.equal('012');
+		render(<List />, scratch)
+		expect(scratch.textContent).to.equal('012')
 
-		push();
-		rerender();
+		push()
+		rerender()
 
-		expect(scratch.textContent).to.equal('0123');
+		expect(scratch.textContent).to.equal('0123')
 
-		push();
-		rerender();
+		push()
+		rerender()
 
-		expect(scratch.textContent).to.equal('01234');
-	});
+		expect(scratch.textContent).to.equal('01234')
+	})
 
 	it('should render sibling array children', () => {
 		const Group = ({ title, values }) => (
@@ -1062,7 +1050,7 @@ describe('Fragment', () => {
 					<li>{value}</li>
 				))}
 			</Fragment>
-		);
+		)
 
 		const Todo = () => (
 			<ul>
@@ -1070,9 +1058,9 @@ describe('Fragment', () => {
 				<Group title={'A divider'} values={['c', 'd']} />
 				<li>A footer</li>
 			</ul>
-		);
+		)
 
-		render(<Todo />, scratch);
+		render(<Todo />, scratch)
 
 		expect(scratch.innerHTML).to.equal(
 			ul([
@@ -1084,17 +1072,17 @@ describe('Fragment', () => {
 				li('d'),
 				li('A footer')
 			])
-		);
-	});
+		)
+	})
 
 	it('should reorder Fragment children', () => {
-		let updateState;
+		let updateState
 
 		class App extends Component {
 			constructor() {
-				super();
-				this.state = { active: false };
-				updateState = () => this.setState(prev => ({ active: !prev.active }));
+				super()
+				this.state = { active: false }
+				updateState = () => this.setState(prev => ({ active: !prev.active }))
 			}
 
 			render() {
@@ -1121,25 +1109,25 @@ describe('Fragment', () => {
 							</Fragment>
 						)}
 					</div>
-				);
+				)
 			}
 		}
 
-		render(<App />, scratch);
+		render(<App />, scratch)
 
 		expect(scratch.innerHTML).to.equal(
 			'<div><h1>Heading</h1>foobarHello World<h2>yo</h2><input type="text"></div>'
-		);
+		)
 
-		updateState();
+		updateState()
 
 		// See "should preserve state between top level fragment and array"
 		// Perhaps rename test to "should reorder **keyed** Fragment children"
-		rerender();
+		rerender()
 		expect(scratch.innerHTML).to.equal(
 			'<div><h1>Heading</h1>Hello World<h2>yo</h2>foobar<input type="text"></div>'
-		);
-	});
+		)
+	})
 
 	it('should render sibling fragments with multiple children in the correct order', () => {
 		render(
@@ -1158,30 +1146,30 @@ describe('Fragment', () => {
 				<li>7</li>
 			</ol>,
 			scratch
-		);
+		)
 
-		expect(scratch.textContent).to.equal('01234567');
-	});
+		expect(scratch.textContent).to.equal('01234567')
+	})
 
 	it('should support HOCs that return children', () => {
 		const text =
-			"Don't forget to tell these special people in your life just how special they are to you.";
+			"Don't forget to tell these special people in your life just how special they are to you."
 
 		class BobRossProvider extends Component {
 			getChildContext() {
-				return { text };
+				return { text }
 			}
 
 			render(props) {
-				return props.children;
+				return props.children
 			}
 		}
 
 		function BobRossConsumer(props, context) {
-			return props.children(context.text);
+			return props.children(context.text)
 		}
 
-		const Say = props => <div>{props.text}</div>;
+		const Say = props => <div>{props.text}</div>
 
 		const Speak = () => (
 			<Fragment>
@@ -1195,9 +1183,9 @@ describe('Fragment', () => {
 				</BobRossProvider>
 				<span>a final span</span>
 			</Fragment>
-		);
+		)
 
-		render(<Speak />, scratch);
+		render(<Speak />, scratch)
 
 		expect(scratch.innerHTML).to.equal(
 			[
@@ -1208,8 +1196,8 @@ describe('Fragment', () => {
 				span('another span'),
 				span('a final span')
 			].join('')
-		);
-	});
+		)
+	})
 
 	it('should support conditionally rendered Fragment', () => {
 		const Foo = ({ condition }) => (
@@ -1225,13 +1213,13 @@ describe('Fragment', () => {
 				)}
 				<li>3</li>
 			</ol>
-		);
+		)
 
-		const html = ol([li('0'), li('1'), li('2'), li('3')]);
+		const html = ol([li('0'), li('1'), li('2'), li('3')])
 
-		clearLog();
-		render(<Foo condition={true} />, scratch);
-		expect(scratch.innerHTML).to.equal(html, 'initial render of true');
+		clearLog()
+		render(<Foo condition={true} />, scratch)
+		expect(scratch.innerHTML).to.equal(html, 'initial render of true')
 		expectDomLogToBe(
 			[
 				'<li>.appendChild(#text)',
@@ -1245,18 +1233,18 @@ describe('Fragment', () => {
 				'<div>.appendChild(<ol>0123)'
 			],
 			'initial render of true'
-		);
+		)
 
-		clearLog();
-		render(<Foo condition={false} />, scratch);
-		expect(scratch.innerHTML).to.equal(html, 'rendering from true to false');
-		expectDomLogToBe([], 'rendering from true to false');
+		clearLog()
+		render(<Foo condition={false} />, scratch)
+		expect(scratch.innerHTML).to.equal(html, 'rendering from true to false')
+		expectDomLogToBe([], 'rendering from true to false')
 
-		clearLog();
-		render(<Foo condition={true} />, scratch);
-		expect(scratch.innerHTML).to.equal(html, 'rendering from false to true');
-		expectDomLogToBe([], 'rendering from false to true');
-	});
+		clearLog()
+		render(<Foo condition={true} />, scratch)
+		expect(scratch.innerHTML).to.equal(html, 'rendering from false to true')
+		expectDomLogToBe([], 'rendering from false to true')
+	})
 
 	it('should support conditionally rendered Fragment or null', () => {
 		const Foo = ({ condition }) => (
@@ -1271,15 +1259,15 @@ describe('Fragment', () => {
 				<li>3</li>
 				<li>4</li>
 			</ol>
-		);
+		)
 
-		const htmlForTrue = ol([li('0'), li('1'), li('2'), li('3'), li('4')]);
+		const htmlForTrue = ol([li('0'), li('1'), li('2'), li('3'), li('4')])
 
-		const htmlForFalse = ol([li('0'), li('3'), li('4')]);
+		const htmlForFalse = ol([li('0'), li('3'), li('4')])
 
-		clearLog();
-		render(<Foo condition={true} />, scratch);
-		expect(scratch.innerHTML).to.equal(htmlForTrue, 'initial render of true');
+		clearLog()
+		render(<Foo condition={true} />, scratch)
+		expect(scratch.innerHTML).to.equal(htmlForTrue, 'initial render of true')
 		expectDomLogToBe(
 			[
 				'<li>.appendChild(#text)',
@@ -1295,25 +1283,25 @@ describe('Fragment', () => {
 				'<div>.appendChild(<ol>01234)'
 			],
 			'initial render of true'
-		);
+		)
 
-		clearLog();
-		render(<Foo condition={false} />, scratch);
+		clearLog()
+		render(<Foo condition={false} />, scratch)
 		expect(scratch.innerHTML).to.equal(
 			htmlForFalse,
 			'rendering from true to false'
-		);
+		)
 		expectDomLogToBe(
 			['<li>1.remove()', '<li>2.remove()'],
 			'rendering from true to false'
-		);
+		)
 
-		clearLog();
-		render(<Foo condition={true} />, scratch);
+		clearLog()
+		render(<Foo condition={true} />, scratch)
 		expect(scratch.innerHTML).to.equal(
 			htmlForTrue,
 			'rendering from false to true'
-		);
+		)
 		expectDomLogToBe(
 			[
 				'<li>.appendChild(#text)',
@@ -1322,8 +1310,8 @@ describe('Fragment', () => {
 				'<ol>0134.insertBefore(<li>2, <li>3)'
 			],
 			'rendering from false to true'
-		);
-	});
+		)
+	})
 
 	it('should support moving Fragments between beginning and end', () => {
 		const Foo = ({ condition }) => (
@@ -1338,7 +1326,7 @@ describe('Fragment', () => {
 								<li>4</li>
 								<li>5</li>
 							</Fragment>
-					  ]
+						]
 					: [
 							<Fragment>
 								<li>4</li>
@@ -1348,9 +1336,9 @@ describe('Fragment', () => {
 							<li>1</li>,
 							<li>2</li>,
 							<li>3</li>
-					  ]}
+						]}
 			</ol>
-		);
+		)
 
 		const htmlForTrue = ol([
 			li('0'),
@@ -1359,7 +1347,7 @@ describe('Fragment', () => {
 			li('3'),
 			li('4'),
 			li('5')
-		]);
+		])
 
 		const htmlForFalse = ol([
 			li('4'),
@@ -1368,34 +1356,34 @@ describe('Fragment', () => {
 			li('1'),
 			li('2'),
 			li('3')
-		]);
+		])
 
-		clearLog();
-		render(<Foo condition={true} />, scratch);
-		expect(scratch.innerHTML).to.equal(htmlForTrue, 'initial render of true');
+		clearLog()
+		render(<Foo condition={true} />, scratch)
+		expect(scratch.innerHTML).to.equal(htmlForTrue, 'initial render of true')
 
-		clearLog();
-		render(<Foo condition={false} />, scratch);
+		clearLog()
+		render(<Foo condition={false} />, scratch)
 		expect(scratch.innerHTML).to.equal(
 			htmlForFalse,
 			'rendering from true to false'
-		);
+		)
 		expectDomLogToBe([
 			'<ol>012345.insertBefore(<li>4, <li>0)',
 			'<ol>401235.insertBefore(<li>5, <li>0)'
-		]);
+		])
 
-		clearLog();
-		render(<Foo condition={true} />, scratch);
+		clearLog()
+		render(<Foo condition={true} />, scratch)
 		expect(scratch.innerHTML).to.equal(
 			htmlForTrue,
 			'rendering from false to true'
-		);
+		)
 		expectDomLogToBe([
 			'<ol>450123.appendChild(<li>4)',
 			'<ol>501234.appendChild(<li>5)'
-		]);
-	});
+		])
+	})
 
 	it('should support conditional beginning and end Fragments', () => {
 		const Foo = ({ condition }) => (
@@ -1415,22 +1403,22 @@ describe('Fragment', () => {
 					</Fragment>
 				)}
 			</ol>
-		);
+		)
 
-		const htmlForTrue = ol([li(0), li(1), li(2), li(2)]);
+		const htmlForTrue = ol([li(0), li(1), li(2), li(2)])
 
-		const htmlForFalse = ol([li(2), li(2), li(3), li(4)]);
+		const htmlForFalse = ol([li(2), li(2), li(3), li(4)])
 
-		clearLog();
-		render(<Foo condition={true} />, scratch);
-		expect(scratch.innerHTML).to.equal(htmlForTrue, 'initial render of true');
+		clearLog()
+		render(<Foo condition={true} />, scratch)
+		expect(scratch.innerHTML).to.equal(htmlForTrue, 'initial render of true')
 
-		clearLog();
-		render(<Foo condition={false} />, scratch);
+		clearLog()
+		render(<Foo condition={false} />, scratch)
 		expect(scratch.innerHTML).to.equal(
 			htmlForFalse,
 			'rendering from true to false'
-		);
+		)
 		expectDomLogToBe([
 			// Remove 1 & 2 (replaced with null)
 			'<li>0.remove()',
@@ -1440,14 +1428,14 @@ describe('Fragment', () => {
 			'<ol>22.appendChild(<li>3)',
 			'<li>.appendChild(#text)',
 			'<ol>223.appendChild(<li>4)'
-		]);
+		])
 
-		clearLog();
-		render(<Foo condition={true} />, scratch);
+		clearLog()
+		render(<Foo condition={true} />, scratch)
 		expect(scratch.innerHTML).to.equal(
 			htmlForTrue,
 			'rendering from false to true'
-		);
+		)
 		expectDomLogToBe([
 			// Remove 3 & 4 (replaced by null)
 			'<li>3.remove()',
@@ -1457,8 +1445,8 @@ describe('Fragment', () => {
 			'<ol>22.insertBefore(<li>0, <li>2)',
 			'<li>.appendChild(#text)',
 			'<ol>022.insertBefore(<li>1, <li>2)'
-		]);
-	});
+		])
+	})
 
 	it('should support nested conditional beginning and end Fragments', () => {
 		const Foo = ({ condition }) => (
@@ -1486,22 +1474,22 @@ describe('Fragment', () => {
 					</Fragment>
 				)}
 			</ol>
-		);
+		)
 
-		const htmlForTrue = ol([li(0), li(1), li(2), li(3)]);
+		const htmlForTrue = ol([li(0), li(1), li(2), li(3)])
 
-		const htmlForFalse = ol([li(2), li(3), li(4), li(5)]);
+		const htmlForFalse = ol([li(2), li(3), li(4), li(5)])
 
-		clearLog();
-		render(<Foo condition={true} />, scratch);
-		expect(scratch.innerHTML).to.equal(htmlForTrue, 'initial render of true');
+		clearLog()
+		render(<Foo condition={true} />, scratch)
+		expect(scratch.innerHTML).to.equal(htmlForTrue, 'initial render of true')
 
-		clearLog();
-		render(<Foo condition={false} />, scratch);
+		clearLog()
+		render(<Foo condition={false} />, scratch)
 		expect(scratch.innerHTML).to.equal(
 			htmlForFalse,
 			'rendering from true to false'
-		);
+		)
 		expectDomLogToBe([
 			// Remove 1 & 2 (replaced with null)
 			'<li>0.remove()',
@@ -1511,14 +1499,14 @@ describe('Fragment', () => {
 			'<ol>23.appendChild(<li>4)',
 			'<li>.appendChild(#text)',
 			'<ol>234.appendChild(<li>5)'
-		]);
+		])
 
-		clearLog();
-		render(<Foo condition={true} />, scratch);
+		clearLog()
+		render(<Foo condition={true} />, scratch)
 		expect(scratch.innerHTML).to.equal(
 			htmlForTrue,
 			'rendering from false to true'
-		);
+		)
 		expectDomLogToBe([
 			// Remove 4 & 5 (replaced by null)
 			'<li>4.remove()',
@@ -1528,8 +1516,8 @@ describe('Fragment', () => {
 			'<ol>23.insertBefore(<li>0, <li>2)',
 			'<li>.appendChild(#text)',
 			'<ol>023.insertBefore(<li>1, <li>2)'
-		]);
-	});
+		])
+	})
 
 	it('should preserve state with reordering in multiple levels with mixed # of Fragment siblings', () => {
 		// Also fails if the # of divs outside the Fragment equals or exceeds
@@ -1556,7 +1544,7 @@ describe('Fragment', () => {
 						<div>bar</div>
 					</Fragment>
 				</div>
-			);
+			)
 		}
 
 		const htmlForTrue = div([
@@ -1564,21 +1552,21 @@ describe('Fragment', () => {
 			div(div('Hello')),
 			div('boop'),
 			div('boop')
-		]);
+		])
 
-		const htmlForFalse = div([div('beep'), div(div('Hello')), div('bar')]);
+		const htmlForFalse = div([div('beep'), div(div('Hello')), div('bar')])
 
-		clearLog();
-		render(<Foo condition={true} />, scratch);
+		clearLog()
+		render(<Foo condition={true} />, scratch)
 
-		clearLog();
-		render(<Foo condition={false} />, scratch);
+		clearLog()
+		render(<Foo condition={false} />, scratch)
 
-		expect(ops).to.deep.equal(['Update Stateful']);
+		expect(ops).to.deep.equal(['Update Stateful'])
 		expect(scratch.innerHTML).to.equal(
 			htmlForFalse,
 			'rendering from true to false'
-		);
+		)
 		expectDomLogToBe(
 			[
 				'<div>boop.remove()',
@@ -1587,16 +1575,16 @@ describe('Fragment', () => {
 				'<div>barbeepHello.appendChild(<div>bar)'
 			],
 			'rendering from true to false'
-		);
+		)
 
-		clearLog();
-		render(<Foo condition={true} />, scratch);
+		clearLog()
+		render(<Foo condition={true} />, scratch)
 
-		expect(ops).to.deep.equal(['Update Stateful', 'Update Stateful']);
+		expect(ops).to.deep.equal(['Update Stateful', 'Update Stateful'])
 		expect(scratch.innerHTML).to.equal(
 			htmlForTrue,
 			'rendering from false to true'
-		);
+		)
 		expectDomLogToBe(
 			[
 				'<div>beepHellofoo.appendChild(<div>Hello)',
@@ -1605,8 +1593,8 @@ describe('Fragment', () => {
 				'<div>fooHelloboop.appendChild(<div>boop)'
 			],
 			'rendering from false to true'
-		);
-	});
+		)
+	})
 
 	it('should preserve state with reordering in multiple levels with lots of Fragment siblings', () => {
 		// Also fails if the # of divs outside the Fragment equals or exceeds
@@ -1636,7 +1624,7 @@ describe('Fragment', () => {
 						<div>bar</div>
 					</Fragment>
 				</div>
-			);
+			)
 		}
 
 		const htmlForTrue = div([
@@ -1645,7 +1633,7 @@ describe('Fragment', () => {
 			div('boop'),
 			div('boop'),
 			div('boop')
-		]);
+		])
 
 		const htmlForFalse = div([
 			div('beep'),
@@ -1653,19 +1641,19 @@ describe('Fragment', () => {
 			div('beep'),
 			div(div('Hello')),
 			div('bar')
-		]);
+		])
 
-		clearLog();
-		render(<Foo condition={true} />, scratch);
+		clearLog()
+		render(<Foo condition={true} />, scratch)
 
-		clearLog();
-		render(<Foo condition={false} />, scratch);
+		clearLog()
+		render(<Foo condition={false} />, scratch)
 
-		expect(ops).to.deep.equal(['Update Stateful']);
+		expect(ops).to.deep.equal(['Update Stateful'])
 		expect(scratch.innerHTML).to.equal(
 			htmlForFalse,
 			'rendering from true to false'
-		);
+		)
 		expectDomLogToBe(
 			[
 				'<div>barHellobeepbeepbeep.insertBefore(<div>bar, <div>beep)',
@@ -1673,16 +1661,16 @@ describe('Fragment', () => {
 				'<div>barbeepbeepbeepHello.appendChild(<div>bar)'
 			],
 			'rendering from true to false'
-		);
+		)
 
-		clearLog();
-		render(<Foo condition={true} />, scratch);
+		clearLog()
+		render(<Foo condition={true} />, scratch)
 
-		expect(ops).to.deep.equal(['Update Stateful', 'Update Stateful']);
+		expect(ops).to.deep.equal(['Update Stateful', 'Update Stateful'])
 		expect(scratch.innerHTML).to.equal(
 			htmlForTrue,
 			'rendering from false to true'
-		);
+		)
 		expectDomLogToBe(
 			[
 				'<div>beepbeepbeepHellofoo.appendChild(<div>Hello)',
@@ -1690,8 +1678,8 @@ describe('Fragment', () => {
 				'<div>foobeepbeepbeepHello.insertBefore(<div>Hello, <div>beep)'
 			],
 			'rendering from false to true'
-		);
-	});
+		)
+	})
 
 	it('should correctly append children with siblings', () => {
 		/**
@@ -1707,45 +1695,45 @@ describe('Fragment', () => {
 				</Fragment>
 				<li>b</li>
 			</ol>
-		);
+		)
 
 		const getHtml = values =>
-			ol([li('a'), ...values.map(value => li(value)), li('b')]);
+			ol([li('a'), ...values.map(value => li(value)), li('b')])
 
-		let values = [0, 1, 2];
-		clearLog();
-		render(<Foo values={values} />, scratch);
+		let values = [0, 1, 2]
+		clearLog()
+		render(<Foo values={values} />, scratch)
 		expect(scratch.innerHTML).to.equal(
 			getHtml(values),
 			`original list: [${values.join(',')}]`
-		);
+		)
 
-		values.push(3);
+		values.push(3)
 
-		clearLog();
-		render(<Foo values={values} />, scratch);
+		clearLog()
+		render(<Foo values={values} />, scratch)
 		expect(scratch.innerHTML).to.equal(
 			getHtml(values),
 			`push 3: [${values.join(',')}]`
-		);
+		)
 		expectDomLogToBe([
 			'<li>.appendChild(#text)',
 			'<ol>a012b.insertBefore(<li>3, <li>b)'
-		]);
+		])
 
-		values.push(4);
+		values.push(4)
 
-		clearLog();
-		render(<Foo values={values} />, scratch);
+		clearLog()
+		render(<Foo values={values} />, scratch)
 		expect(scratch.innerHTML).to.equal(
 			getHtml(values),
 			`push 4: [${values.join(',')}]`
-		);
+		)
 		expectDomLogToBe([
 			'<li>.appendChild(#text)',
 			'<ol>a0123b.insertBefore(<li>4, <li>b)'
-		]);
-	});
+		])
+	})
 
 	it('should render components that conditionally return Fragments', () => {
 		const Foo = ({ condition }) =>
@@ -1759,21 +1747,21 @@ describe('Fragment', () => {
 					<div>3</div>
 					<div>4</div>
 				</div>
-			);
+			)
 
-		const htmlForTrue = [div(1), div(2)].join('');
+		const htmlForTrue = [div(1), div(2)].join('')
 
-		const htmlForFalse = div([div(3), div(4)]);
+		const htmlForFalse = div([div(3), div(4)])
 
-		clearLog();
-		render(<Foo condition={true} />, scratch);
+		clearLog()
+		render(<Foo condition={true} />, scratch)
 
-		expect(scratch.innerHTML).to.equal(htmlForTrue);
+		expect(scratch.innerHTML).to.equal(htmlForTrue)
 
-		clearLog();
-		render(<Foo condition={false} />, scratch);
+		clearLog()
+		render(<Foo condition={false} />, scratch)
 
-		expect(scratch.innerHTML).to.equal(htmlForFalse);
+		expect(scratch.innerHTML).to.equal(htmlForFalse)
 		expectDomLogToBe(
 			[
 				'<div>2.remove()',
@@ -1784,12 +1772,12 @@ describe('Fragment', () => {
 				'<div>3.appendChild(<div>4)'
 			],
 			'rendering from true to false'
-		);
+		)
 
-		clearLog();
-		render(<Foo condition={true} />, scratch);
+		clearLog()
+		render(<Foo condition={true} />, scratch)
 
-		expect(scratch.innerHTML).to.equal(htmlForTrue);
+		expect(scratch.innerHTML).to.equal(htmlForTrue)
 		expectDomLogToBe(
 			[
 				'<div>3.remove()',
@@ -1799,23 +1787,23 @@ describe('Fragment', () => {
 				'<div>1.appendChild(<div>2)'
 			],
 			'rendering from false to true'
-		);
-	});
+		)
+	})
 
 	it('should clear empty Fragments', () => {
 		function Foo(props) {
 			if (props.condition) {
-				return <Fragment>foo</Fragment>;
+				return <Fragment>foo</Fragment>
 			}
-			return <Fragment />;
+			return <Fragment />
 		}
 
-		render(<Foo condition={true} />, scratch);
-		expect(scratch.textContent).to.equal('foo');
+		render(<Foo condition={true} />, scratch)
+		expect(scratch.textContent).to.equal('foo')
 
-		render(<Foo condition={false} />, scratch);
-		expect(scratch.textContent).to.equal('');
-	});
+		render(<Foo condition={false} />, scratch)
+		expect(scratch.textContent).to.equal('')
+	})
 
 	it('should support conditionally rendered nested Fragments or null with siblings', () => {
 		const Foo = ({ condition }) => (
@@ -1833,7 +1821,7 @@ describe('Fragment', () => {
 				</Fragment>
 				<li>5</li>
 			</ol>
-		);
+		)
 
 		const htmlForTrue = ol([
 			li('0'),
@@ -1842,13 +1830,13 @@ describe('Fragment', () => {
 			li('3'),
 			li('4'),
 			li('5')
-		]);
+		])
 
-		const htmlForFalse = ol([li('0'), li('1'), li('4'), li('5')]);
+		const htmlForFalse = ol([li('0'), li('1'), li('4'), li('5')])
 
-		clearLog();
-		render(<Foo condition={true} />, scratch);
-		expect(scratch.innerHTML).to.equal(htmlForTrue, 'initial render of true');
+		clearLog()
+		render(<Foo condition={true} />, scratch)
+		expect(scratch.innerHTML).to.equal(htmlForTrue, 'initial render of true')
 		expectDomLogToBe(
 			[
 				'<li>.appendChild(#text)',
@@ -1866,25 +1854,25 @@ describe('Fragment', () => {
 				'<div>.appendChild(<ol>012345)'
 			],
 			'initial render of true'
-		);
+		)
 
-		clearLog();
-		render(<Foo condition={false} />, scratch);
+		clearLog()
+		render(<Foo condition={false} />, scratch)
 		expect(scratch.innerHTML).to.equal(
 			htmlForFalse,
 			'rendering from true to false'
-		);
+		)
 		expectDomLogToBe(
 			['<li>2.remove()', '<li>3.remove()'],
 			'rendering from true to false'
-		);
+		)
 
-		clearLog();
-		render(<Foo condition={true} />, scratch);
+		clearLog()
+		render(<Foo condition={true} />, scratch)
 		expect(scratch.innerHTML).to.equal(
 			htmlForTrue,
 			'rendering from false to true'
-		);
+		)
 		expectDomLogToBe(
 			[
 				'<li>.appendChild(#text)',
@@ -1893,11 +1881,11 @@ describe('Fragment', () => {
 				'<ol>01245.insertBefore(<li>3, <li>4)'
 			],
 			'rendering from false to true'
-		);
-	});
+		)
+	})
 
 	it('should render first child Fragment that wrap null components', () => {
-		const Empty = () => null;
+		const Empty = () => null
 		const Foo = () => (
 			<ol>
 				<Fragment>
@@ -1905,16 +1893,16 @@ describe('Fragment', () => {
 				</Fragment>
 				<li>1</li>
 			</ol>
-		);
+		)
 
-		render(<Foo />, scratch);
-		expect(scratch.innerHTML).to.equal(ol(li(1)));
-	});
+		render(<Foo />, scratch)
+		expect(scratch.innerHTML).to.equal(ol(li(1)))
+	})
 
 	it('should properly render Components that return Fragments and use shouldComponentUpdate #1415', () => {
 		class SubList extends Component {
 			shouldComponentUpdate(nextProps) {
-				return nextProps.prop1 !== this.props.prop1;
+				return nextProps.prop1 !== this.props.prop1
 			}
 			render() {
 				return (
@@ -1922,18 +1910,18 @@ describe('Fragment', () => {
 						<div>2</div>
 						<div>3</div>
 					</Fragment>
-				);
+				)
 			}
 		}
 
 		/** @type {(update: any) => void} */
-		let setState;
+		let setState
 		class App extends Component {
 			constructor() {
-				super();
-				setState = update => this.setState(update);
+				super()
+				setState = update => this.setState(update)
 
-				this.state = { error: false };
+				this.state = { error: false }
 			}
 
 			render() {
@@ -1948,44 +1936,44 @@ describe('Fragment', () => {
 							</div>
 						)}
 					</div>
-				);
+				)
 			}
 		}
 
-		const successHtml = div(div([div(1), div(2), div(3)]));
+		const successHtml = div(div([div(1), div(2), div(3)]))
 
-		const errorHtml = div(div('Error!'));
+		const errorHtml = div(div('Error!'))
 
-		render(<App />, scratch);
-		expect(scratch.innerHTML).to.equal(successHtml);
+		render(<App />, scratch)
+		expect(scratch.innerHTML).to.equal(successHtml)
 
-		setState({}); // Trigger sCU
-		rerender();
-		expect(scratch.innerHTML).to.equal(successHtml);
+		setState({}) // Trigger sCU
+		rerender()
+		expect(scratch.innerHTML).to.equal(successHtml)
 
-		setState({ error: true });
-		rerender();
-		expect(scratch.innerHTML).to.equal(errorHtml);
+		setState({ error: true })
+		rerender()
+		expect(scratch.innerHTML).to.equal(errorHtml)
 
-		setState({ error: false });
-		rerender();
-		expect(scratch.innerHTML).to.equal(successHtml);
+		setState({ error: false })
+		rerender()
+		expect(scratch.innerHTML).to.equal(successHtml)
 
-		setState({}); // Trigger sCU again
-		rerender();
-		expect(scratch.innerHTML).to.equal(successHtml);
-	});
+		setState({}) // Trigger sCU again
+		rerender()
+		expect(scratch.innerHTML).to.equal(successHtml)
+	})
 
 	it('should properly render Fragments whose last child is a component returning null', () => {
-		let Noop = () => null;
-		let update;
+		let Noop = () => null
+		let update
 		class App extends Component {
 			constructor(props) {
-				super(props);
-				update = () => this.setState({ items: ['A', 'B', 'C'] });
+				super(props)
+				update = () => this.setState({ items: ['A', 'B', 'C'] })
 				this.state = {
 					items: null
-				};
+				}
 			}
 
 			render() {
@@ -2000,18 +1988,18 @@ describe('Fragment', () => {
 							</Fragment>
 						)}
 					</div>
-				);
+				)
 			}
 		}
 
-		render(<App />, scratch);
-		expect(scratch.textContent).to.equal('');
+		render(<App />, scratch)
+		expect(scratch.textContent).to.equal('')
 
-		clearLog();
-		update();
-		rerender();
+		clearLog()
+		update()
+		rerender()
 
-		expect(scratch.textContent).to.equal('ABC');
+		expect(scratch.textContent).to.equal('ABC')
 		expectDomLogToBe([
 			'<div>.appendChild(#text)',
 			'<div>.appendChild(<div>A)',
@@ -2019,19 +2007,19 @@ describe('Fragment', () => {
 			'<div>A.appendChild(<div>B)',
 			'<div>.appendChild(#text)',
 			'<div>AB.appendChild(<div>C)'
-		]);
-	});
+		])
+	})
 
 	it('should replace node in-between children', () => {
-		let update;
+		let update
 		class SetState extends Component {
 			constructor(props) {
-				super(props);
-				update = () => this.setState({ active: true });
+				super(props)
+				update = () => this.setState({ active: true })
 			}
 
 			render() {
-				return this.state.active ? <section>B2</section> : <div>B1</div>;
+				return this.state.active ? <section>B2</section> : <div>B1</div>
 			}
 		}
 
@@ -2042,32 +2030,32 @@ describe('Fragment', () => {
 				<div>C</div>
 			</div>,
 			scratch
-		);
+		)
 
 		expect(scratch.innerHTML).to.eql(
 			`<div><div>A</div><div>B1</div><div>C</div></div>`
-		);
+		)
 
-		clearLog();
-		update();
-		rerender();
+		clearLog()
+		update()
+		rerender()
 
 		expect(scratch.innerHTML).to.eql(
 			`<div><div>A</div><section>B2</section><div>C</div></div>`
-		);
+		)
 		expectDomLogToBe([
 			'<div>B1.remove()',
 			'<section>.appendChild(#text)',
 			'<div>AC.insertBefore(<section>B2, <div>C)'
-		]);
-	});
+		])
+	})
 
 	it('should replace Fragment in-between children', () => {
-		let update;
+		let update
 		class SetState extends Component {
 			constructor(props) {
-				super(props);
-				update = () => this.setState({ active: true });
+				super(props)
+				update = () => this.setState({ active: true })
 			}
 
 			render() {
@@ -2081,7 +2069,7 @@ describe('Fragment', () => {
 						<div>B1</div>
 						<div>B2</div>
 					</Fragment>
-				);
+				)
 			}
 		}
 
@@ -2092,19 +2080,19 @@ describe('Fragment', () => {
 				<div>C</div>
 			</div>,
 			scratch
-		);
+		)
 
 		expect(scratch.innerHTML).to.eql(
 			div([div('A'), div('B1'), div('B2'), div('C')])
-		);
+		)
 
-		clearLog();
-		update();
-		rerender();
+		clearLog()
+		update()
+		rerender()
 
 		expect(scratch.innerHTML).to.eql(
 			div([div('A'), section('B3'), section('B4'), div('C')])
-		);
+		)
 		expectDomLogToBe([
 			'<div>B1.remove()',
 			'<div>B2.remove()',
@@ -2112,19 +2100,19 @@ describe('Fragment', () => {
 			'<div>AC.insertBefore(<section>B3, <div>C)',
 			'<section>.appendChild(#text)',
 			'<div>AB3C.insertBefore(<section>B4, <div>C)'
-		]);
-	});
+		])
+	})
 
 	it('should insert in-between children', () => {
-		let update;
+		let update
 		class SetState extends Component {
 			constructor(props) {
-				super(props);
-				update = () => this.setState({ active: true });
+				super(props)
+				update = () => this.setState({ active: true })
 			}
 
 			render() {
-				return this.state.active ? <div>B</div> : null;
+				return this.state.active ? <div>B</div> : null
 			}
 		}
 
@@ -2135,33 +2123,33 @@ describe('Fragment', () => {
 				<div>C</div>
 			</div>,
 			scratch
-		);
+		)
 
-		expect(scratch.innerHTML).to.eql(`<div><div>A</div><div>C</div></div>`);
+		expect(scratch.innerHTML).to.eql(`<div><div>A</div><div>C</div></div>`)
 
-		clearLog();
-		update();
-		rerender();
+		clearLog()
+		update()
+		rerender()
 
 		expect(scratch.innerHTML).to.eql(
 			`<div><div>A</div><div>B</div><div>C</div></div>`
-		);
+		)
 		expectDomLogToBe([
 			'<div>.appendChild(#text)',
 			'<div>AC.insertBefore(<div>B, <div>C)'
-		]);
-	});
+		])
+	})
 
 	it('should insert in-between Fragments', () => {
-		let update;
+		let update
 		class SetState extends Component {
 			constructor(props) {
-				super(props);
-				update = () => this.setState({ active: true });
+				super(props)
+				update = () => this.setState({ active: true })
 			}
 
 			render() {
-				return this.state.active ? [<div>B1</div>, <div>B2</div>] : null;
+				return this.state.active ? [<div>B1</div>, <div>B2</div>] : null
 			}
 		}
 
@@ -2172,35 +2160,35 @@ describe('Fragment', () => {
 				<div>C</div>
 			</div>,
 			scratch
-		);
+		)
 
-		expect(scratch.innerHTML).to.eql(`<div><div>A</div><div>C</div></div>`);
+		expect(scratch.innerHTML).to.eql(`<div><div>A</div><div>C</div></div>`)
 
-		clearLog();
-		update();
-		rerender();
+		clearLog()
+		update()
+		rerender()
 
 		expect(scratch.innerHTML).to.eql(
 			`<div><div>A</div><div>B1</div><div>B2</div><div>C</div></div>`
-		);
+		)
 		expectDomLogToBe([
 			'<div>.appendChild(#text)',
 			'<div>AC.insertBefore(<div>B1, <div>C)',
 			'<div>.appendChild(#text)',
 			'<div>AB1C.insertBefore(<div>B2, <div>C)'
-		]);
-	});
+		])
+	})
 
 	it('should insert in-between null children', () => {
-		let update;
+		let update
 		class SetState extends Component {
 			constructor(props) {
-				super(props);
-				update = () => this.setState({ active: true });
+				super(props)
+				update = () => this.setState({ active: true })
 			}
 
 			render() {
-				return this.state.active ? <div>B</div> : null;
+				return this.state.active ? <div>B</div> : null
 			}
 		}
 
@@ -2213,29 +2201,29 @@ describe('Fragment', () => {
 				<div>C</div>
 			</div>,
 			scratch
-		);
+		)
 
-		expect(scratch.innerHTML).to.eql(`<div><div>A</div><div>C</div></div>`);
+		expect(scratch.innerHTML).to.eql(`<div><div>A</div><div>C</div></div>`)
 
-		clearLog();
-		update();
-		rerender();
+		clearLog()
+		update()
+		rerender()
 
 		expect(scratch.innerHTML).to.eql(
 			`<div><div>A</div><div>B</div><div>C</div></div>`
-		);
+		)
 		expectDomLogToBe([
 			'<div>.appendChild(#text)',
 			'<div>AC.insertBefore(<div>B, <div>C)'
-		]);
-	});
+		])
+	})
 
 	it('should insert Fragment in-between null children', () => {
-		let update;
+		let update
 		class SetState extends Component {
 			constructor(props) {
-				super(props);
-				update = () => this.setState({ active: true });
+				super(props)
+				update = () => this.setState({ active: true })
 			}
 
 			render() {
@@ -2244,7 +2232,7 @@ describe('Fragment', () => {
 						<div>B1</div>
 						<div>B2</div>
 					</Fragment>
-				) : null;
+				) : null
 			}
 		}
 
@@ -2257,40 +2245,40 @@ describe('Fragment', () => {
 				<div>C</div>
 			</div>,
 			scratch
-		);
+		)
 
-		expect(scratch.innerHTML).to.eql(`<div><div>A</div><div>C</div></div>`);
+		expect(scratch.innerHTML).to.eql(`<div><div>A</div><div>C</div></div>`)
 
-		clearLog();
-		update();
-		rerender();
+		clearLog()
+		update()
+		rerender()
 
 		expect(scratch.innerHTML).to.eql(
 			`<div><div>A</div><div>B1</div><div>B2</div><div>C</div></div>`
-		);
+		)
 		expectDomLogToBe([
 			'<div>.appendChild(#text)',
 			'<div>AC.insertBefore(<div>B1, <div>C)',
 			'<div>.appendChild(#text)',
 			'<div>AB1C.insertBefore(<div>B2, <div>C)'
-		]);
-	});
+		])
+	})
 
 	it('should insert in-between nested null children', () => {
-		let update;
+		let update
 		class SetState extends Component {
 			constructor(props) {
-				super(props);
-				update = () => this.setState({ active: true });
+				super(props)
+				update = () => this.setState({ active: true })
 			}
 
 			render() {
-				return this.state.active ? <div>B</div> : null;
+				return this.state.active ? <div>B</div> : null
 			}
 		}
 
 		function Outer() {
-			return <SetState />;
+			return <SetState />
 		}
 
 		render(
@@ -2302,29 +2290,29 @@ describe('Fragment', () => {
 				<div>C</div>
 			</div>,
 			scratch
-		);
+		)
 
-		expect(scratch.innerHTML).to.eql(`<div><div>A</div><div>C</div></div>`);
+		expect(scratch.innerHTML).to.eql(`<div><div>A</div><div>C</div></div>`)
 
-		clearLog();
-		update();
-		rerender();
+		clearLog()
+		update()
+		rerender()
 
 		expect(scratch.innerHTML).to.eql(
 			`<div><div>A</div><div>B</div><div>C</div></div>`
-		);
+		)
 		expectDomLogToBe([
 			'<div>.appendChild(#text)',
 			'<div>AC.insertBefore(<div>B, <div>C)'
-		]);
-	});
+		])
+	})
 
 	it('should insert Fragment in-between nested null children', () => {
-		let update;
+		let update
 		class SetState extends Component {
 			constructor(props) {
-				super(props);
-				update = () => this.setState({ active: true });
+				super(props)
+				update = () => this.setState({ active: true })
 			}
 
 			render() {
@@ -2333,12 +2321,12 @@ describe('Fragment', () => {
 						<div>B1</div>
 						<div>B2</div>
 					</Fragment>
-				) : null;
+				) : null
 			}
 		}
 
 		function Outer() {
-			return <SetState />;
+			return <SetState />
 		}
 
 		render(
@@ -2350,49 +2338,49 @@ describe('Fragment', () => {
 				<div>C</div>
 			</div>,
 			scratch
-		);
+		)
 
-		expect(scratch.innerHTML).to.eql(`<div><div>A</div><div>C</div></div>`);
+		expect(scratch.innerHTML).to.eql(`<div><div>A</div><div>C</div></div>`)
 
-		clearLog();
-		update();
-		rerender();
+		clearLog()
+		update()
+		rerender()
 
 		expect(scratch.innerHTML).to.eql(
 			`<div><div>A</div><div>B1</div><div>B2</div><div>C</div></div>`
-		);
+		)
 		expectDomLogToBe([
 			'<div>.appendChild(#text)',
 			'<div>AC.insertBefore(<div>B1, <div>C)',
 			'<div>.appendChild(#text)',
 			'<div>AB1C.insertBefore(<div>B2, <div>C)'
-		]);
-	});
+		])
+	})
 
 	it('should update at correct place', () => {
-		let updateA;
+		let updateA
 		class A extends Component {
 			constructor(props) {
-				super(props);
-				this.state = { active: true };
-				updateA = () => this.setState(prev => ({ active: !prev.active }));
+				super(props)
+				this.state = { active: true }
+				updateA = () => this.setState(prev => ({ active: !prev.active }))
 			}
 
 			render() {
-				return this.state.active ? <div>A</div> : <span>A2</span>;
+				return this.state.active ? <div>A</div> : <span>A2</span>
 			}
 		}
 
 		function B() {
-			return <div>B</div>;
+			return <div>B</div>
 		}
 
 		function X(props) {
-			return props.children;
+			return props.children
 		}
 
 		function App(props) {
-			let b = props.condition ? <B /> : null;
+			let b = props.condition ? <B /> : null
 			return (
 				<div>
 					<X>
@@ -2403,59 +2391,59 @@ describe('Fragment', () => {
 						<div>C</div>
 					</X>
 				</div>
-			);
+			)
 		}
 
-		render(<App condition={true} />, scratch);
+		render(<App condition={true} />, scratch)
 
 		expect(scratch.innerHTML).to.eql(
 			`<div><div>A</div><div>B</div><div>C</div></div>`
-		);
+		)
 
-		clearLog();
-		render(<App condition={false} />, scratch);
+		clearLog()
+		render(<App condition={false} />, scratch)
 
-		expect(scratch.innerHTML).to.eql(`<div><div>A</div><div>C</div></div>`);
-		expectDomLogToBe(['<div>B.remove()']);
+		expect(scratch.innerHTML).to.eql(`<div><div>A</div><div>C</div></div>`)
+		expectDomLogToBe(['<div>B.remove()'])
 
-		clearLog();
-		updateA();
-		rerender();
+		clearLog()
+		updateA()
+		rerender()
 
-		expect(scratch.innerHTML).to.eql(`<div><span>A2</span><div>C</div></div>`);
+		expect(scratch.innerHTML).to.eql(`<div><span>A2</span><div>C</div></div>`)
 		expectDomLogToBe([
 			'<div>A.remove()',
 			'<span>.appendChild(#text)',
 			'<div>C.insertBefore(<span>A2, <div>C)'
-		]);
-	});
+		])
+	})
 
 	it('should update Fragment at correct place', () => {
-		let updateA;
+		let updateA
 		class A extends Component {
 			constructor(props) {
-				super(props);
-				this.state = { active: true };
-				updateA = () => this.setState(prev => ({ active: !prev.active }));
+				super(props)
+				this.state = { active: true }
+				updateA = () => this.setState(prev => ({ active: !prev.active }))
 			}
 
 			render() {
 				return this.state.active
 					? [<div>A1</div>, <div>A2</div>]
-					: [<span>A3</span>, <span>A4</span>];
+					: [<span>A3</span>, <span>A4</span>]
 			}
 		}
 
 		function B() {
-			return <div>B</div>;
+			return <div>B</div>
 		}
 
 		function X(props) {
-			return props.children;
+			return props.children
 		}
 
 		function App(props) {
-			let b = props.condition ? <B /> : null;
+			let b = props.condition ? <B /> : null
 			return (
 				<div>
 					<X>
@@ -2466,30 +2454,30 @@ describe('Fragment', () => {
 						<div>C</div>
 					</X>
 				</div>
-			);
+			)
 		}
 
-		render(<App condition={true} />, scratch);
+		render(<App condition={true} />, scratch)
 
 		expect(scratch.innerHTML).to.eql(
 			`<div><div>A1</div><div>A2</div><div>B</div><div>C</div></div>`
-		);
+		)
 
-		clearLog();
-		render(<App condition={false} />, scratch);
+		clearLog()
+		render(<App condition={false} />, scratch)
 
 		expect(scratch.innerHTML).to.eql(
 			`<div><div>A1</div><div>A2</div><div>C</div></div>`
-		);
-		expectDomLogToBe(['<div>B.remove()']);
+		)
+		expectDomLogToBe(['<div>B.remove()'])
 
-		clearLog();
-		updateA();
-		rerender();
+		clearLog()
+		updateA()
+		rerender()
 
 		expect(scratch.innerHTML).to.eql(
 			`<div><span>A3</span><span>A4</span><div>C</div></div>`
-		);
+		)
 		expectDomLogToBe([
 			'<div>A1.remove()',
 			'<div>A2.remove()',
@@ -2497,39 +2485,39 @@ describe('Fragment', () => {
 			'<div>C.insertBefore(<span>A3, <div>C)',
 			'<span>.appendChild(#text)',
 			'<div>A3C.insertBefore(<span>A4, <div>C)'
-		]);
-	});
+		])
+	})
 
 	it('should insert children correctly if sibling component DOM changes', () => {
 		/** @type {() => void} */
-		let updateA;
+		let updateA
 		class A extends Component {
 			constructor(props) {
-				super(props);
-				this.state = { active: true };
-				updateA = () => this.setState(prev => ({ active: !prev.active }));
+				super(props)
+				this.state = { active: true }
+				updateA = () => this.setState(prev => ({ active: !prev.active }))
 			}
 
 			render() {
-				return this.state.active ? <div>A</div> : <span>A2</span>;
+				return this.state.active ? <div>A</div> : <span>A2</span>
 			}
 		}
 
 		/** @type {() => void} */
-		let updateB;
+		let updateB
 		class B extends Component {
 			constructor(props) {
-				super(props);
-				this.state = { active: false };
-				updateB = () => this.setState(prev => ({ active: !prev.active }));
+				super(props)
+				this.state = { active: false }
+				updateB = () => this.setState(prev => ({ active: !prev.active }))
 			}
 			render() {
-				return this.state.active ? <div>B</div> : null;
+				return this.state.active ? <div>B</div> : null
 			}
 		}
 
 		function X(props) {
-			return props.children;
+			return props.children
 		}
 
 		function App() {
@@ -2543,65 +2531,65 @@ describe('Fragment', () => {
 						<div>C</div>
 					</X>
 				</div>
-			);
+			)
 		}
 
-		render(<App />, scratch);
+		render(<App />, scratch)
 
-		expect(scratch.innerHTML).to.eql(div([div('A'), div('C')]), 'initial');
+		expect(scratch.innerHTML).to.eql(div([div('A'), div('C')]), 'initial')
 
-		clearLog();
-		updateB();
-		rerender();
+		clearLog()
+		updateB()
+		rerender()
 
 		expect(scratch.innerHTML).to.eql(
 			div([div('A'), div('B'), div('C')]),
 			'updateB'
-		);
+		)
 		expectDomLogToBe([
 			'<div>.appendChild(#text)',
 			'<div>AC.insertBefore(<div>B, <div>C)'
-		]);
+		])
 
-		clearLog();
-		updateA();
-		rerender();
+		clearLog()
+		updateA()
+		rerender()
 
 		expect(scratch.innerHTML).to.eql(
 			div([span('A2'), div('B'), div('C')]),
 			'updateA'
-		);
+		)
 		expectDomLogToBe([
 			'<div>A.remove()',
 			'<span>.appendChild(#text)',
 			'<div>BC.insertBefore(<span>A2, <div>B)'
-		]);
-	});
+		])
+	})
 
 	it('should correctly append children if last child changes DOM', () => {
 		/** @type {() => void} */
-		let updateA;
+		let updateA
 		class A extends Component {
 			constructor(props) {
-				super(props);
-				this.state = { active: true };
-				updateA = () => this.setState(prev => ({ active: !prev.active }));
+				super(props)
+				this.state = { active: true }
+				updateA = () => this.setState(prev => ({ active: !prev.active }))
 			}
 
 			render() {
 				return this.state.active
 					? [<div>A1</div>, <div>A2</div>]
-					: [<span>A3</span>, <span>A4</span>];
+					: [<span>A3</span>, <span>A4</span>]
 			}
 		}
 
 		/** @type {() => void} */
-		let updateB;
+		let updateB
 		class B extends Component {
 			constructor(props) {
-				super(props);
-				this.state = { active: false };
-				updateB = () => this.setState(prev => ({ active: !prev.active }));
+				super(props)
+				this.state = { active: false }
+				updateB = () => this.setState(prev => ({ active: !prev.active }))
 			}
 			render() {
 				return (
@@ -2609,25 +2597,22 @@ describe('Fragment', () => {
 						<A />
 						{this.state.active ? <div>B</div> : null}
 					</Fragment>
-				);
+				)
 			}
 		}
 
-		render(<B />, scratch);
+		render(<B />, scratch)
 
-		expect(scratch.innerHTML).to.eql(
-			[div('A1'), div('A2')].join(''),
-			'initial'
-		);
+		expect(scratch.innerHTML).to.eql([div('A1'), div('A2')].join(''), 'initial')
 
-		clearLog();
-		updateA();
-		rerender();
+		clearLog()
+		updateA()
+		rerender()
 
 		expect(scratch.innerHTML).to.eql(
 			[span('A3'), span('A4')].join(''),
 			'updateA'
-		);
+		)
 		expectDomLogToBe([
 			'<div>A1.remove()',
 			'<div>A2.remove()',
@@ -2635,44 +2620,44 @@ describe('Fragment', () => {
 			'<div>.appendChild(<span>A3)',
 			'<span>.appendChild(#text)',
 			'<div>A3.appendChild(<span>A4)'
-		]);
+		])
 
-		clearLog();
-		updateB();
-		rerender();
+		clearLog()
+		updateB()
+		rerender()
 
 		expect(scratch.innerHTML).to.eql(
 			[span('A3'), span('A4'), div('B')].join(''),
 			'updateB'
-		);
+		)
 		expectDomLogToBe([
 			'<div>.appendChild(#text)',
 			'<div>A3A4.appendChild(<div>B)'
-		]);
-	});
+		])
+	})
 
 	it('should properly place conditional elements around strictly equal vnodes', () => {
 		/** @type {() => void} */
-		let toggle;
+		let toggle
 
 		const Children = () => (
 			<Fragment>
 				<div>Navigation</div>
 				<div>Content</div>
 			</Fragment>
-		);
+		)
 
 		class Parent extends Component {
 			constructor(props) {
-				super(props);
-				this.state = { panelPosition: 'bottom' };
-				toggle = this.tooglePanelPosition = this.tooglePanelPosition.bind(this);
+				super(props)
+				this.state = { panelPosition: 'bottom' }
+				toggle = this.tooglePanelPosition = this.tooglePanelPosition.bind(this)
 			}
 
 			tooglePanelPosition() {
 				this.setState({
 					panelPosition: this.state.panelPosition === 'top' ? 'bottom' : 'top'
-				});
+				})
 			}
 
 			render() {
@@ -2682,7 +2667,7 @@ describe('Fragment', () => {
 						{this.props.children}
 						{this.state.panelPosition === 'bottom' && <div>bottom panel</div>}
 					</div>
-				);
+				)
 			}
 		}
 
@@ -2690,45 +2675,45 @@ describe('Fragment', () => {
 			<Parent>
 				<Children />
 			</Parent>
-		);
+		)
 
-		const content = `<div>Navigation</div><div>Content</div>`;
-		const top = `<div><div>top panel</div>${content}</div>`;
-		const bottom = `<div>${content}<div>bottom panel</div></div>`;
+		const content = `<div>Navigation</div><div>Content</div>`
+		const top = `<div><div>top panel</div>${content}</div>`
+		const bottom = `<div>${content}<div>bottom panel</div></div>`
 
-		render(<App />, scratch);
-		expect(scratch.innerHTML).to.equal(bottom);
+		render(<App />, scratch)
+		expect(scratch.innerHTML).to.equal(bottom)
 
-		clearLog();
-		toggle();
-		rerender();
-		expect(scratch.innerHTML).to.equal(top);
+		clearLog()
+		toggle()
+		rerender()
+		expect(scratch.innerHTML).to.equal(top)
 		expectDomLogToBe([
 			'<div>bottom panel.remove()',
 			'<div>.appendChild(#text)',
 			'<div>NavigationContent.insertBefore(<div>top panel, <div>Navigation)'
-		]);
+		])
 
-		clearLog();
-		toggle();
-		rerender();
-		expect(scratch.innerHTML).to.equal(bottom);
+		clearLog()
+		toggle()
+		rerender()
+		expect(scratch.innerHTML).to.equal(bottom)
 		expectDomLogToBe([
 			'<div>top panel.remove()',
 			'<div>.appendChild(#text)',
 			'<div>NavigationContent.appendChild(<div>bottom panel)'
-		]);
+		])
 
-		clearLog();
-		toggle();
-		rerender();
-		expect(scratch.innerHTML).to.equal(top);
+		clearLog()
+		toggle()
+		rerender()
+		expect(scratch.innerHTML).to.equal(top)
 		expectDomLogToBe([
 			'<div>bottom panel.remove()',
 			'<div>.appendChild(#text)',
 			'<div>NavigationContent.insertBefore(<div>top panel, <div>Navigation)'
-		]);
-	});
+		])
+	})
 
 	it('should efficiently unmount Fragment children', () => {
 		// <div>1 => <span>1 and Fragment sibling unmounts. Does <span>1 get correct _nextDom pointer?
@@ -2752,18 +2737,18 @@ describe('Fragment', () => {
 						<div>A</div>
 					</Fragment>
 				</div>
-			);
+			)
 		}
 
-		render(<App condition={true} />, scratch);
-		expect(scratch.innerHTML).to.equal(div([div(1), div(2), div('A')]));
+		render(<App condition={true} />, scratch)
+		expect(scratch.innerHTML).to.equal(div([div(1), div(2), div('A')]))
 
-		clearLog();
-		render(<App condition={false} />, scratch);
+		clearLog()
+		render(<App condition={false} />, scratch)
 
-		expect(scratch.innerHTML).to.equal(div([div(1), div('A')]));
-		expectDomLogToBe(['<div>2.remove()']);
-	});
+		expect(scratch.innerHTML).to.equal(div([div(1), div('A')]))
+		expectDomLogToBe(['<div>2.remove()'])
+	})
 
 	it('should efficiently unmount nested Fragment children', () => {
 		// Fragment wrapping <div>2 and <div>3 unmounts. Does <div>1 get correct
@@ -2793,28 +2778,28 @@ describe('Fragment', () => {
 						<div>B</div>
 					</Fragment>
 				</div>
-			);
+			)
 		}
 
-		clearLog();
-		render(<App condition={true} />, scratch);
+		clearLog()
+		render(<App condition={true} />, scratch)
 		expect(scratch.innerHTML).to.equal(
 			div([div(1), div(2), div(3), div('A'), div('B')])
-		);
+		)
 
-		clearLog();
-		render(<App condition={false} />, scratch);
+		clearLog()
+		render(<App condition={false} />, scratch)
 
-		expect(scratch.innerHTML).to.equal(div([div(1), div('A'), div('B')]));
-		expectDomLogToBe(['<div>2.remove()', '<div>3.remove()']);
-	});
+		expect(scratch.innerHTML).to.equal(div([div(1), div('A'), div('B')]))
+		expectDomLogToBe(['<div>2.remove()', '<div>3.remove()'])
+	})
 
 	it('should properly unmount Fragment children around an unmounting null placeholder #2987', () => {
-		const arrayOf = (n, fill = 0) => new Array(n).fill(fill);
+		const arrayOf = (n, fill = 0) => new Array(n).fill(fill)
 
 		class App extends Component {
 			constructor(props) {
-				super(props);
+				super(props)
 
 				this.state = {
 					renderFirstElement: true,
@@ -2833,7 +2818,7 @@ describe('Fragment', () => {
 							}))
 						}
 					]
-				};
+				}
 			}
 
 			componentDidMount() {
@@ -2855,27 +2840,27 @@ describe('Fragment', () => {
 							}))
 						}
 					]
-				});
+				})
 			}
 
 			render() {
 				const { renderFirstElement, renderLastElement, childrenProps } =
-					this.state;
+					this.state
 				return (
 					<div>
 						{renderFirstElement && <div>This is the first div</div>}
 						{childrenProps.map(({ arrayData }) => {
 							return arrayData.map(({ key, text }) => (
 								<div key={key}>{text}</div>
-							));
+							))
 						})}
 						{renderLastElement && <div>This is the last div</div>}
 					</div>
-				);
+				)
 			}
 		}
 
-		render(<App />, scratch);
+		render(<App />, scratch)
 		expect(scratch.innerHTML).to.equal(
 			div([
 				div('This is the first div'),
@@ -2884,10 +2869,10 @@ describe('Fragment', () => {
 					.join(''),
 				div('This is the last div')
 			])
-		);
+		)
 
 		// Flush CDM setState call
-		rerender();
+		rerender()
 		expect(scratch.innerHTML).to.equal(
 			div([
 				// "This is the first div" is unmounted using a null placeholder pattern
@@ -2896,8 +2881,8 @@ describe('Fragment', () => {
 					.join(''),
 				div('This is the last div')
 			])
-		);
-	});
+		)
+	})
 
 	it('should efficiently place new children and unmount nested Fragment children', () => {
 		// <div>4 is added and Fragment sibling unmounts. Does <div>4 get correct _nextDom pointer?
@@ -2927,78 +2912,78 @@ describe('Fragment', () => {
 						<div>B</div>
 					</Fragment>
 				</div>
-			);
+			)
 		}
 
-		render(<App condition={true} />, scratch);
+		render(<App condition={true} />, scratch)
 		expect(scratch.innerHTML).to.equal(
 			div([div(1), div(2), div(3), div('A'), div('B')])
-		);
+		)
 
-		clearLog();
-		render(<App condition={false} />, scratch);
+		clearLog()
+		render(<App condition={false} />, scratch)
 
 		expect(scratch.innerHTML).to.equal(
 			div([div(1), div(4), div('A'), div('B')])
-		);
+		)
 		expectDomLogToBe([
 			'<div>2.remove()',
 			'<div>3.remove()',
 			'<div>.appendChild(#text)',
 			'<div>1AB.insertBefore(<div>4, <div>A)'
-		]);
-	});
+		])
+	})
 
 	it('should not remove keyed elements', () => {
-		let deleteItem = () => {};
+		let deleteItem = () => {}
 		const Element = ({ item, deleteItem }) => (
 			<Fragment>
 				<div>Item: {item}</div>
 				{''} {/* If you delete this, it works fine. */}
 			</Fragment>
-		);
+		)
 
 		class App extends Component {
 			constructor(props) {
-				super(props);
+				super(props)
 				this.state = {
 					items: Array(10)
 						.fill()
 						.map((_, i) => i)
-				};
+				}
 			}
 
 			render(_props, state) {
 				deleteItem = () => {
 					this.setState({
 						items: this.state.items.filter(i => i !== this.state.items[2])
-					});
-				};
+					})
+				}
 
 				return state.items.map(item => (
 					<Element item={item} deleteItem={deleteItem} key={item} />
-				));
+				))
 			}
 		}
 
-		render(<App />, scratch);
+		render(<App />, scratch)
 		expect(scratch.innerHTML).to.equal(
 			'<div>Item: 0</div> <div>Item: 1</div> <div>Item: 2</div> <div>Item: 3</div> <div>Item: 4</div> <div>Item: 5</div> <div>Item: 6</div> <div>Item: 7</div> <div>Item: 8</div> <div>Item: 9</div> '
-		);
+		)
 
-		clearLog();
-		deleteItem();
-		rerender();
+		clearLog()
+		deleteItem()
+		rerender()
 
 		expect(scratch.innerHTML).to.equal(
 			'<div>Item: 0</div> <div>Item: 1</div> <div>Item: 3</div> <div>Item: 4</div> <div>Item: 5</div> <div>Item: 6</div> <div>Item: 7</div> <div>Item: 8</div> <div>Item: 9</div> '
-		);
+		)
 		expectDomLogToBe([
 			'<div>Item: 2.remove()',
 			'#text.remove()',
 			'#text.remove()'
-		]);
-	});
+		])
+	})
 
 	it('should efficiently unmount nested Fragment children when changing node type', () => {
 		// <div>1 => <span>1 and Fragment sibling unmounts. Does <span>1 get correct _nextDom pointer?
@@ -3027,34 +3012,34 @@ describe('Fragment', () => {
 						<div>B</div>
 					</Fragment>
 				</div>
-			);
+			)
 		}
 
-		render(<App condition={true} />, scratch);
+		render(<App condition={true} />, scratch)
 		expect(scratch.innerHTML).to.equal(
 			div([div(1), div(2), div(3), div('A'), div('B')])
-		);
+		)
 
-		clearLog();
-		render(<App condition={false} />, scratch);
+		clearLog()
+		render(<App condition={false} />, scratch)
 
-		expect(scratch.innerHTML).to.equal(div([span(1), div('A'), div('B')]));
+		expect(scratch.innerHTML).to.equal(div([span(1), div('A'), div('B')]))
 		expectDomLogToBe([
 			'<div>1.remove()',
 			'<div>2.remove()',
 			'<div>3.remove()',
 			'<span>.appendChild(#text)',
 			'<div>AB.insertBefore(<span>1, <div>A)'
-		]);
-	});
+		])
+	})
 
 	it('should swap nested fragments correctly', () => {
 		/** @type {() => void} */
-		let swap;
+		let swap
 		class App extends Component {
 			constructor(props) {
-				super(props);
-				this.state = { first: true };
+				super(props)
+				this.state = { first: true }
 			}
 
 			render() {
@@ -3069,7 +3054,7 @@ describe('Fragment', () => {
 								Click me
 							</button>
 						</Fragment>
-					);
+					)
 				}
 				return (
 					<Fragment>
@@ -3082,37 +3067,37 @@ describe('Fragment', () => {
 							Click me
 						</button>
 					</Fragment>
-				);
+				)
 			}
 		}
 
-		render(<App />, scratch);
+		render(<App />, scratch)
 		expect(scratch.innerHTML).to.equal(
 			'<p>1. Original item first paragraph</p><p>2. Original item second paragraph</p><button>Click me</button>'
-		);
+		)
 
-		swap();
-		rerender();
+		swap()
+		rerender()
 		expect(scratch.innerHTML).to.equal(
 			'<p>1. Second item first paragraph</p><p>2. Second item second paragraph</p><div></div><button>Click me</button>'
-		);
+		)
 
-		swap();
-		rerender();
+		swap()
+		rerender()
 		expect(scratch.innerHTML).to.equal(
 			'<p>1. Original item first paragraph</p><p>2. Original item second paragraph</p><button>Click me</button>'
-		);
-	});
+		)
+	})
 
 	it('should efficiently unmount nested Fragment children when rerendering and reordering', () => {
 		/** @type {() => void} */
-		let toggle;
+		let toggle
 
 		class App extends Component {
 			constructor(props) {
-				super(props);
-				this.state = { condition: true };
-				toggle = () => this.setState({ condition: !this.state.condition });
+				super(props)
+				this.state = { condition: true }
+				toggle = () => this.setState({ condition: !this.state.condition })
 			}
 
 			render() {
@@ -3133,21 +3118,21 @@ describe('Fragment', () => {
 						<div>1</div>
 						<div>2</div>
 					</Fragment>
-				);
+				)
 			}
 		}
 
-		clearLog();
-		render(<App />, scratch);
+		clearLog()
+		render(<App />, scratch)
 		expect(scratch.innerHTML).to.equal(
 			[div(1), div('A'), div('B'), div(2)].join('')
-		);
+		)
 
-		clearLog();
-		toggle();
-		rerender();
+		clearLog()
+		toggle()
+		rerender()
 
-		expect(scratch.innerHTML).to.equal([div('A'), div(1), div(2)].join(''));
-		expectDomLogToBe(['<div>B.remove()', '<div>2A1.appendChild(<div>2)']);
-	});
-});
+		expect(scratch.innerHTML).to.equal([div('A'), div(1), div(2)].join(''))
+		expectDomLogToBe(['<div>B.remove()', '<div>2A1.appendChild(<div>2)'])
+	})
+})

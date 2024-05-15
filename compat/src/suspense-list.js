@@ -1,15 +1,15 @@
-import { Component, toChildArray } from 'preact';
-import { suspended } from './suspense.js';
+import { Component, toChildArray } from 'preact'
+import { suspended } from './suspense.js'
 
 // Indexes to linked list nodes (nodes are stored as arrays to save bytes).
-const SUSPENDED_COUNT = 0;
-const RESOLVED_COUNT = 1;
-const NEXT_NODE = 2;
+const SUSPENDED_COUNT = 0
+const RESOLVED_COUNT = 1
+const NEXT_NODE = 2
 
 // Having custom inheritance instead of a class here saves a lot of bytes.
 export function SuspenseList() {
-	this._next = null;
-	this._map = null;
+	this._next = null
+	this._map = null
 }
 
 // Mark one of child's earlier suspensions as resolved.
@@ -23,7 +23,7 @@ const resolve = (list, child, node) => {
 		// mark the child as completely resolved by deleting it from ._map.
 		// This is used to figure out when *all* children have been completely
 		// resolved when revealOrder is 'together'.
-		list._map.delete(child);
+		list._map.delete(child)
 	}
 
 	// If revealOrder is falsy then we can do an early exit, as the
@@ -34,65 +34,65 @@ const resolve = (list, child, node) => {
 		!list.props.revealOrder ||
 		(list.props.revealOrder[0] === 't' && list._map.size)
 	) {
-		return;
+		return
 	}
 
 	// Walk the currently suspended children in order, calling their
 	// stored callbacks on the way. Stop if we encounter a child that
 	// has not been completely resolved yet.
-	node = list._next;
+	node = list._next
 	while (node) {
 		while (node.length > 3) {
-			node.pop()();
+			node.pop()()
 		}
 		if (node[RESOLVED_COUNT] < node[SUSPENDED_COUNT]) {
-			break;
+			break
 		}
-		list._next = node = node[NEXT_NODE];
+		list._next = node = node[NEXT_NODE]
 	}
-};
+}
 
 // Things we do here to save some bytes but are not proper JS inheritance:
 // - call `new Component()` as the prototype
 // - do not set `Suspense.prototype.constructor` to `Suspense`
-SuspenseList.prototype = new Component();
+SuspenseList.prototype = new Component()
 
 SuspenseList.prototype._suspended = function (child) {
-	const list = this;
-	const delegated = suspended(list._vnode);
+	const list = this
+	const delegated = suspended(list._vnode)
 
-	let node = list._map.get(child);
-	node[SUSPENDED_COUNT]++;
+	let node = list._map.get(child)
+	node[SUSPENDED_COUNT]++
 
 	return unsuspend => {
 		const wrappedUnsuspend = () => {
 			if (!list.props.revealOrder) {
 				// Special case the undefined (falsy) revealOrder, as there
 				// is no need to coordinate a specific order or unsuspends.
-				unsuspend();
+				unsuspend()
 			} else {
-				node.push(unsuspend);
-				resolve(list, child, node);
+				node.push(unsuspend)
+				resolve(list, child, node)
 			}
-		};
-		if (delegated) {
-			delegated(wrappedUnsuspend);
-		} else {
-			wrappedUnsuspend();
 		}
-	};
-};
+		if (delegated) {
+			delegated(wrappedUnsuspend)
+		} else {
+			wrappedUnsuspend()
+		}
+	}
+}
 
 SuspenseList.prototype.render = function (props) {
-	this._next = null;
-	this._map = new Map();
+	this._next = null
+	this._map = new Map()
 
-	const children = toChildArray(props.children);
+	const children = toChildArray(props.children)
 	if (props.revealOrder && props.revealOrder[0] === 'b') {
 		// If order === 'backwards' (or, well, anything starting with a 'b')
 		// then flip the child list around so that the last child will be
 		// the first in the linked list.
-		children.reverse();
+		children.reverse()
 	}
 	// Build the linked list. Iterate through the children in reverse order
 	// so that `_next` points to the first linked list node to be resolved.
@@ -108,10 +108,10 @@ SuspenseList.prototype.render = function (props) {
 		//
 		// Pending callbacks are added to the end of the node:
 		// 	[suspended_count, resolved_count, next_node, callback_0, callback_1, ...]
-		this._map.set(children[i], (this._next = [1, 0, this._next]));
+		this._map.set(children[i], (this._next = [1, 0, this._next]))
 	}
-	return props.children;
-};
+	return props.children
+}
 
 SuspenseList.prototype.componentDidUpdate =
 	SuspenseList.prototype.componentDidMount = function () {
@@ -122,6 +122,6 @@ SuspenseList.prototype.componentDidUpdate =
 		// 2. Handle nodes that might have gotten resolved between render and
 		//    componentDidMount.
 		this._map.forEach((node, child) => {
-			resolve(this, child, node);
-		});
-	};
+			resolve(this, child, node)
+		})
+	}

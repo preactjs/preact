@@ -1,5 +1,5 @@
-import { setupRerender } from 'preact/test-utils';
-import { setupScratch, teardown } from '../../../test/_util/helpers';
+import { setupRerender } from 'preact/test-utils'
+import { setupScratch, teardown } from '../../../test/_util/helpers'
 import React, {
 	render,
 	createElement,
@@ -7,41 +7,41 @@ import React, {
 	Component,
 	useState,
 	useContext
-} from 'preact/compat';
+} from 'preact/compat'
 
 describe('components', () => {
 	/** @type {HTMLDivElement} */
-	let scratch;
+	let scratch
 
 	/** @type {() => void} */
-	let rerender;
+	let rerender
 
 	beforeEach(() => {
-		scratch = setupScratch();
-		rerender = setupRerender();
-	});
+		scratch = setupScratch()
+		rerender = setupRerender()
+	})
 
 	afterEach(() => {
-		teardown(scratch);
-	});
+		teardown(scratch)
+	})
 
 	it('nested context updates propagate throughout the tree synchronously', () => {
-		const RouterContext = createContext({ location: '__default_value__' });
+		const RouterContext = createContext({ location: '__default_value__' })
 
-		const route1 = '/page/1';
-		const route2 = '/page/2';
+		const route1 = '/page/1'
+		const route2 = '/page/2'
 
 		/** @type {() => void} */
-		let toggleLocalState;
+		let toggleLocalState
 		/** @type {() => void} */
-		let toggleLocation;
+		let toggleLocation
 
 		/** @type {Array<{location: string, localState: boolean}>} */
-		let pageRenders = [];
+		let pageRenders = []
 
 		function runUpdate() {
-			toggleLocalState();
-			toggleLocation();
+			toggleLocalState()
+			toggleLocation()
 		}
 
 		/**
@@ -49,14 +49,14 @@ describe('components', () => {
 		 */
 		class Router extends Component {
 			constructor(props) {
-				super(props);
-				this.state = { location: route1 };
+				super(props)
+				this.state = { location: route1 }
 				toggleLocation = () => {
-					const oldLocation = this.state.location;
-					const newLocation = oldLocation === route1 ? route2 : route1;
+					const oldLocation = this.state.location
+					const newLocation = oldLocation === route1 ? route2 : route1
 					// console.log('Toggling  location', oldLocation, '->', newLocation);
-					this.setState({ location: newLocation });
-				};
+					this.setState({ location: newLocation })
+				}
 			}
 
 			render() {
@@ -65,7 +65,7 @@ describe('components', () => {
 					<RouterContext.Provider value={{ location: this.state.location }}>
 						{this.props.children}
 					</RouterContext.Provider>
-				);
+				)
 			}
 		}
 
@@ -81,30 +81,30 @@ describe('components', () => {
 							// 	location: contextValue.location
 							// });
 							// Pretend to do something with the context value
-							const newContextValue = { ...contextValue };
+							const newContextValue = { ...contextValue }
 							return (
 								<RouterContext.Provider value={newContextValue}>
 									{this.props.children}
 								</RouterContext.Provider>
-							);
+							)
 						}}
 					</RouterContext.Consumer>
-				);
+				)
 			}
 		}
 
 		function Page() {
-			const [localState, setLocalState] = useState(true);
-			const { location } = useContext(RouterContext);
+			const [localState, setLocalState] = useState(true)
+			const { location } = useContext(RouterContext)
 
-			pageRenders.push({ location, localState });
+			pageRenders.push({ location, localState })
 			// console.log('Rendering Page', { location, localState });
 
 			toggleLocalState = () => {
-				let newValue = !localState;
+				let newValue = !localState
 				// console.log('Toggling  localState', localState, '->', newValue);
-				setLocalState(newValue);
-			};
+				setLocalState(newValue)
+			}
 
 			return (
 				<>
@@ -116,7 +116,7 @@ describe('components', () => {
 						</button>
 					</div>
 				</>
-			);
+			)
 		}
 
 		function App() {
@@ -126,19 +126,17 @@ describe('components', () => {
 						<Page />
 					</Route>
 				</Router>
-			);
+			)
 		}
 
-		render(<App />, scratch);
-		expect(pageRenders).to.deep.equal([{ location: route1, localState: true }]);
+		render(<App />, scratch)
+		expect(pageRenders).to.deep.equal([{ location: route1, localState: true }])
 
-		pageRenders = [];
-		runUpdate(); // Simulate button click
-		rerender();
+		pageRenders = []
+		runUpdate() // Simulate button click
+		rerender()
 
 		// Page should rerender once with both propagated context and local state updates
-		expect(pageRenders).to.deep.equal([
-			{ location: route2, localState: false }
-		]);
-	});
-});
+		expect(pageRenders).to.deep.equal([{ location: route2, localState: false }])
+	})
+})

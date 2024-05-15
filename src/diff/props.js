@@ -1,15 +1,15 @@
-import { IS_NON_DIMENSIONAL } from '../constants';
-import options from '../options';
+import { IS_NON_DIMENSIONAL } from '../constants'
+import options from '../options'
 
 function setStyle(style, key, value) {
 	if (key[0] === '-') {
-		style.setProperty(key, value == null ? '' : value);
+		style.setProperty(key, value == null ? '' : value)
 	} else if (value == null) {
-		style[key] = '';
+		style[key] = ''
 	} else if (typeof value != 'number' || IS_NON_DIMENSIONAL.test(key)) {
-		style[key] = value;
+		style[key] = value
 	} else {
-		style[key] = value + 'px';
+		style[key] = value + 'px'
 	}
 }
 
@@ -24,7 +24,7 @@ function setStyle(style, key, value) {
 //
 // The clock is incremented after each new event dispatch. This allows 1 000 000 new events
 // per second for over 280 years before the value reaches Number.MAX_SAFE_INTEGER (2**53 - 1).
-let eventClock = 0;
+let eventClock = 0
 
 /**
  * Set a property value on a DOM node
@@ -35,20 +35,20 @@ let eventClock = 0;
  * @param {string} namespace Whether or not this DOM node is an SVG node or not
  */
 export function setProperty(dom, name, value, oldValue, namespace) {
-	let useCapture;
+	let useCapture
 
 	o: if (name === 'style') {
 		if (typeof value == 'string') {
-			dom.style.cssText = value;
+			dom.style.cssText = value
 		} else {
 			if (typeof oldValue == 'string') {
-				dom.style.cssText = oldValue = '';
+				dom.style.cssText = oldValue = ''
 			}
 
 			if (oldValue) {
 				for (name in oldValue) {
 					if (!(value && name in value)) {
-						setStyle(dom.style, name, '');
+						setStyle(dom.style, name, '')
 					}
 				}
 			}
@@ -56,7 +56,7 @@ export function setProperty(dom, name, value, oldValue, namespace) {
 			if (value) {
 				for (name in value) {
 					if (!oldValue || value[name] !== oldValue[name]) {
-						setStyle(dom.style, name, value[name]);
+						setStyle(dom.style, name, value[name])
 					}
 				}
 			}
@@ -65,7 +65,7 @@ export function setProperty(dom, name, value, oldValue, namespace) {
 	// Benchmark for comparison: https://esbench.com/bench/574c954bdb965b9a00965ac6
 	else if (name[0] === 'o' && name[1] === 'n') {
 		useCapture =
-			name !== (name = name.replace(/(PointerCapture)$|Capture$/i, '$1'));
+			name !== (name = name.replace(/(PointerCapture)$|Capture$/i, '$1'))
 
 		// Infer correct casing for DOM built-in events:
 		if (
@@ -73,36 +73,36 @@ export function setProperty(dom, name, value, oldValue, namespace) {
 			name === 'onFocusOut' ||
 			name === 'onFocusIn'
 		)
-			name = name.toLowerCase().slice(2);
-		else name = name.slice(2);
+			name = name.toLowerCase().slice(2)
+		else name = name.slice(2)
 
-		if (!dom._listeners) dom._listeners = {};
-		dom._listeners[name + useCapture] = value;
+		if (!dom._listeners) dom._listeners = {}
+		dom._listeners[name + useCapture] = value
 
 		if (value) {
 			if (!oldValue) {
-				value._attached = eventClock;
+				value._attached = eventClock
 				dom.addEventListener(
 					name,
 					useCapture ? eventProxyCapture : eventProxy,
 					useCapture
-				);
+				)
 			} else {
-				value._attached = oldValue._attached;
+				value._attached = oldValue._attached
 			}
 		} else {
 			dom.removeEventListener(
 				name,
 				useCapture ? eventProxyCapture : eventProxy,
 				useCapture
-			);
+			)
 		}
 	} else {
 		if (namespace == 'http://www.w3.org/2000/svg') {
 			// Normalize incorrect prop usage for SVG:
 			// - xlink:href / xlinkHref --> href (xlink:href was removed from SVG and isn't needed)
 			// - className --> class
-			name = name.replace(/xlink(H|:h)/, 'h').replace(/sName$/, 's');
+			name = name.replace(/xlink(H|:h)/, 'h').replace(/sName$/, 's')
 		} else if (
 			name != 'width' &&
 			name != 'height' &&
@@ -119,9 +119,9 @@ export function setProperty(dom, name, value, oldValue, namespace) {
 			name in dom
 		) {
 			try {
-				dom[name] = value == null ? '' : value;
+				dom[name] = value == null ? '' : value
 				// labelled break is 1b smaller here than a return statement (sorry)
-				break o;
+				break o
 			} catch (e) {}
 		}
 
@@ -135,9 +135,9 @@ export function setProperty(dom, name, value, oldValue, namespace) {
 		if (typeof value == 'function') {
 			// never serialize functions as attribute values
 		} else if (value != null && (value !== false || name[4] === '-')) {
-			dom.setAttribute(name, value);
+			dom.setAttribute(name, value)
 		} else {
-			dom.removeAttribute(name);
+			dom.removeAttribute(name)
 		}
 	}
 }
@@ -155,20 +155,20 @@ function createEventProxy(useCapture) {
 	 */
 	return function (e) {
 		if (this._listeners) {
-			const eventHandler = this._listeners[e.type + useCapture];
+			const eventHandler = this._listeners[e.type + useCapture]
 			if (e._dispatched == null) {
-				e._dispatched = eventClock++;
+				e._dispatched = eventClock++
 
 				// When `e._dispatched` is smaller than the time when the targeted event
 				// handler was attached we know we have bubbled up to an element that was added
 				// during patching the DOM.
 			} else if (e._dispatched < eventHandler._attached) {
-				return;
+				return
 			}
-			return eventHandler(options.event ? options.event(e) : e);
+			return eventHandler(options.event ? options.event(e) : e)
 		}
-	};
+	}
 }
 
-const eventProxy = createEventProxy(false);
-const eventProxyCapture = createEventProxy(true);
+const eventProxy = createEventProxy(false)
+const eventProxyCapture = createEventProxy(true)

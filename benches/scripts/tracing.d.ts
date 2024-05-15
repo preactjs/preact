@@ -16,28 +16,28 @@ export type TraceEvent =
 	| ContextEvent
 	| ObjectCreatedEvent
 	| ObjectSnapshotEvent
-	| ObjectDestroyedEvent;
+	| ObjectDestroyedEvent
 
 interface BaseEvent {
 	/** The name of the event */
-	name: string;
+	name: string
 	/**
 	 * The event categories. This is a comma separated list of categories for the
 	 * event.
 	 */
-	cat: string;
+	cat: string
 	/** The event type (phase?) */
-	ph: string;
+	ph: string
 	/** The tracing clock timestamp (microseconds) */
-	ts: number;
+	ts: number
 	/** The thread clock timestamp of the event (microseconds) */
-	tts?: number;
+	tts?: number
 	/** Process ID */
-	pid: number;
+	pid: number
 	/** Thread ID */
-	tid: number;
+	tid: number
 	/** Any args provided for the event */
-	args: Record<string, any>;
+	args: Record<string, any>
 }
 
 interface StackData {
@@ -45,30 +45,30 @@ interface StackData {
 	 * Stack frame at the start of the event. ID pointing the corresponding stack
 	 * in the stackFrames map
 	 */
-	sf?: number;
+	sf?: number
 	/**
 	 * Stack at the start of the event. Usually contains program counter addresses
 	 * as hex strings
 	 */
-	stack?: string[];
+	stack?: string[]
 }
 
 /** Mark the beginning or end of a duration of work on a given thread */
 interface DurationEvent extends BaseEvent, StackData {
-	ph: 'B' | 'E';
+	ph: 'B' | 'E'
 }
 
 /** Represents a duration of work on a given thread */
 interface CompleteEvent extends BaseEvent, StackData {
-	ph: 'X';
+	ph: 'X'
 	/** Tracing clock duration (microseconds) */
-	dur: number;
+	dur: number
 	/** Thread clock duration? (microseconds) */
-	tdur?: number;
+	tdur?: number
 	/** Stack frame at the end of this event */
-	esf?: number;
+	esf?: number
 	/** Stack at the end of this event */
-	estack?: string[];
+	estack?: string[]
 }
 
 /**
@@ -76,9 +76,9 @@ interface CompleteEvent extends BaseEvent, StackData {
  * scoped events can have stack data associated with them.
  */
 interface InstantEvent extends BaseEvent, StackData {
-	ph: 'i' | 'I';
+	ph: 'i' | 'I'
 	/** Scope of the event. g = global, p = process, t = thread (default) */
-	s?: 'g' | 'p' | 't';
+	s?: 'g' | 'p' | 't'
 }
 
 /**
@@ -88,9 +88,9 @@ interface InstantEvent extends BaseEvent, StackData {
  * have the same category and id as its parent (but perhaps a different name).
  */
 interface AsyncEvent extends BaseEvent {
-	ph: 'b' | 'n' | 'e';
-	id: string;
-	scope?: string;
+	ph: 'b' | 'n' | 'e'
+	id: string
+	scope?: string
 }
 
 /**
@@ -103,67 +103,67 @@ interface AsyncEvent extends BaseEvent {
  * TODO: Finish filling out
  */
 interface FlowEvent extends BaseEvent {
-	ph: 's' | 't' | 'f';
+	ph: 's' | 't' | 'f'
 }
 
 interface SampleEvent extends BaseEvent, StackData {
-	ph: 'P';
+	ph: 'P'
 }
 
 interface ProcessNameEvent extends BaseEvent {
-	ph: 'M';
-	name: 'process_name';
+	ph: 'M'
+	name: 'process_name'
 	args: {
-		name: string;
-	};
+		name: string
+	}
 }
 
 interface ProcessLabelsEvent extends BaseEvent {
-	ph: 'M';
-	name: 'process_labels';
+	ph: 'M'
+	name: 'process_labels'
 	args: {
-		labels: string;
-	};
+		labels: string
+	}
 }
 
 interface ProcessSortIndexEvent extends BaseEvent {
-	ph: 'M';
-	name: 'process_sort_index';
+	ph: 'M'
+	name: 'process_sort_index'
 	args: {
-		sort_index: number;
-	};
+		sort_index: number
+	}
 }
 
 interface ProcessUptimeEvent extends BaseEvent {
-	ph: 'M';
-	name: 'process_uptime_seconds';
+	ph: 'M'
+	name: 'process_uptime_seconds'
 	args: {
-		uptime: number;
-	};
+		uptime: number
+	}
 }
 
 interface ThreadNameEvent extends BaseEvent {
-	ph: 'M';
-	name: 'thread_name';
+	ph: 'M'
+	name: 'thread_name'
 	args: {
-		name: string;
-	};
+		name: string
+	}
 }
 
 interface ThreadSortIndexEvent extends BaseEvent {
-	ph: 'M';
-	name: 'thread_sort_index';
+	ph: 'M'
+	name: 'thread_sort_index'
 	args: {
-		sort_index: number;
-	};
+		sort_index: number
+	}
 }
 
 interface NumCPUsEvent extends BaseEvent {
-	ph: 'M';
-	name: 'num_cpus';
+	ph: 'M'
+	name: 'num_cpus'
 	args: {
-		number: number;
-	};
+		number: number
+	}
 }
 
 /**
@@ -171,7 +171,7 @@ interface NumCPUsEvent extends BaseEvent {
  * is created
  */
 interface MarkEvent extends BaseEvent {
-	ph: 'R';
+	ph: 'R'
 }
 
 /**
@@ -182,22 +182,22 @@ interface MarkEvent extends BaseEvent {
  * refer to context object snapshots.
  */
 interface ContextEvent extends BaseEvent {
-	ph: '(' | ')';
-	id?: string;
+	ph: '(' | ')'
+	id?: string
 }
 
 /** Object was created. Time is inclusive */
 interface ObjectCreatedEvent extends BaseEvent {
-	ph: 'N';
-	id: string;
-	scope?: string;
-	args: undefined;
+	ph: 'N'
+	id: string
+	scope?: string
+	args: undefined
 }
 
 interface ObjectSnapshotEvent extends BaseEvent {
-	ph: 'O';
-	id: string;
-	scope?: string;
+	ph: 'O'
+	id: string
+	scope?: string
 	args: {
 		/**
 		 * By default, an object snapshot inherits the category of its containing
@@ -208,17 +208,17 @@ interface ObjectSnapshotEvent extends BaseEvent {
 		 * commands must match the snapshot commands. Thus, the category of any
 		 * object snapshot may be provided with the snapshot itself
 		 */
-		cat?: string;
+		cat?: string
 		/** Name of base type object */
-		base_type?: string;
-		snapshot: any;
-	};
+		base_type?: string
+		snapshot: any
+	}
 }
 
 /** Object was destroyed. Time is exclusive */
 interface ObjectDestroyedEvent extends BaseEvent {
-	ph: 'D';
-	id: string;
-	scope?: string;
-	args: undefined;
+	ph: 'D'
+	id: string
+	scope?: string
+	args: undefined
 }

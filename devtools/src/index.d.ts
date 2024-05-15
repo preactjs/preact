@@ -5,4 +5,4 @@
  * @param value Wrapped native hook.
  * @param name Custom name
  */
-export function addHookName<T>(value: T, name: string): T;
+export function addHookName<T>(value: T, name: string): T

@@ -1,8 +1,8 @@
-import { createElement, Suspense, lazy, Component } from 'react';
+import { createElement, Suspense, lazy, Component } from 'react'
 
 const Loading = function () {
-	return <div>Loading...</div>;
-};
+	return <div>Loading...</div>
+}
 const Error = function ({ resetState }) {
 	return (
 		<div>
@@ -11,32 +11,32 @@ const Error = function ({ resetState }) {
 				Reset app
 			</a>
 		</div>
-	);
-};
+	)
+}
 
 const pause = timeout =>
-	new Promise(d => setTimeout(d, timeout), console.log(timeout));
+	new Promise(d => setTimeout(d, timeout), console.log(timeout))
 
 const DropZone = lazy(() =>
 	pause(Math.random() * 1000).then(() => import('./dropzone.jsx'))
-);
+)
 const Editor = lazy(() =>
 	pause(Math.random() * 1000).then(() => import('./editor.jsx'))
-);
+)
 const AddNewComponent = lazy(() =>
 	pause(Math.random() * 1000).then(() => import('./addnewcomponent.jsx'))
-);
+)
 const GenerateComponents = lazy(() =>
 	pause(Math.random() * 1000).then(() => import('./component-container.jsx'))
-);
+)
 
 export default class App extends Component {
-	state = { hasError: false };
+	state = { hasError: false }
 
 	static getDerivedStateFromError(error) {
 		// Update state so the next render will show the fallback UI.
-		console.warn(error);
-		return { hasError: true };
+		console.warn(error)
+		return { hasError: true }
 	}
 
 	render() {
@@ -64,6 +64,6 @@ export default class App extends Component {
 
 				<footer>Footer here</footer>
 			</Suspense>
-		);
+		)
 	}
 }

@@ -1,34 +1,34 @@
-import React, { hydrate } from 'preact/compat';
-import { setupScratch, teardown } from '../../../test/_util/helpers';
+import React, { hydrate } from 'preact/compat'
+import { setupScratch, teardown } from '../../../test/_util/helpers'
 
 describe('compat hydrate', () => {
 	/** @type {HTMLDivElement} */
-	let scratch;
+	let scratch
 
 	beforeEach(() => {
-		scratch = setupScratch();
-	});
+		scratch = setupScratch()
+	})
 
 	afterEach(() => {
-		teardown(scratch);
-	});
+		teardown(scratch)
+	})
 
 	it('should render react-style jsx', () => {
-		const input = document.createElement('input');
-		scratch.appendChild(input);
-		input.focus();
-		expect(document.activeElement).to.equalNode(input);
+		const input = document.createElement('input')
+		scratch.appendChild(input)
+		input.focus()
+		expect(document.activeElement).to.equalNode(input)
 
-		hydrate(<input />, scratch);
-		expect(document.activeElement).to.equalNode(input);
-	});
+		hydrate(<input />, scratch)
+		expect(document.activeElement).to.equalNode(input)
+	})
 
 	it('should call the callback', () => {
-		scratch.innerHTML = '<div></div>';
+		scratch.innerHTML = '<div></div>'
 
-		let spy = sinon.spy();
-		hydrate(<div />, scratch, spy);
-		expect(spy).to.be.calledOnce;
-		expect(spy).to.be.calledWithExactly();
-	});
-});
+		let spy = sinon.spy()
+		hydrate(<div />, scratch, spy)
+		expect(spy).to.be.calledOnce
+		expect(spy).to.be.calledWithExactly()
+	})
+})

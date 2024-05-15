@@ -1,15 +1,15 @@
-import { observer } from 'mobx-react';
-import { Component } from 'preact';
-import { Profile } from './profile';
-import { Link, Route, Router } from './router';
-import { store } from './store';
+import { observer } from 'mobx-react'
+import { Component } from 'preact'
+import { Profile } from './profile'
+import { Link, Route, Router } from './router'
+import { store } from './store'
 
-import './styles/index.scss';
+import './styles/index.scss'
 
 @observer
 export default class App extends Component {
 	componentDidMount() {
-		store.loadUsers().catch(console.error);
+		store.loadUsers().catch(console.error)
 	}
 
 	render() {
@@ -22,7 +22,7 @@ export default class App extends Component {
 							<select
 								value={store.usersOrder}
 								onChange={(ev: any) => {
-									store.setUsersOrder(ev.target.value);
+									store.setUsersOrder(ev.target.value)
 								}}
 							>
 								<option value="name">Name</option>
@@ -54,6 +54,6 @@ export default class App extends Component {
 					</section>
 				</div>
 			</Router>
-		);
+		)
 	}
 }

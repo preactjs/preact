@@ -1,10 +1,10 @@
-import sade from 'sade';
-import { generateSingleConfig } from './config.js';
-import { defaultDeoptsOptions, runDeopts } from './deopts.js';
-import { defaultBenchOptions, runBenches } from './bench.js';
-import { analyze } from './analyze.js';
+import sade from 'sade'
+import { generateSingleConfig } from './config.js'
+import { defaultDeoptsOptions, runDeopts } from './deopts.js'
+import { defaultBenchOptions, runBenches } from './bench.js'
+import { analyze } from './analyze.js'
 
-const prog = sade('./scripts');
+const prog = sade('./scripts')
 
 // Tests:
 // - npm start
@@ -16,7 +16,7 @@ prog
 		'Enable perf tracing for browsers that support it',
 		defaultBenchOptions.trace
 	)
-	.action(generateSingleConfig);
+	.action(generateSingleConfig)
 
 // Tests:
 // - many* -n 2 -t 0
@@ -67,7 +67,7 @@ prog
 		'Enable perf tracing for browsers that support it',
 		defaultBenchOptions.trace
 	)
-	.action(runBenches);
+	.action(runBenches)
 
 // Tests:
 // - (no args)
@@ -87,7 +87,7 @@ prog
 		'The framework to run the benchmark with.',
 		defaultDeoptsOptions.framework
 	)
-	.action(runDeopts);
+	.action(runDeopts)
 
 // Test
 // - (no args)
@@ -100,6 +100,6 @@ prog
 	.example('analyze')
 	.example('analyze 02_replace1k')
 	.example('analyze many_updates')
-	.action(analyze);
+	.action(analyze)
 
-prog.parse(process.argv);
+prog.parse(process.argv)

@@ -1,16 +1,16 @@
-import { Component, memo, Suspense, lazy } from 'react';
+import { Component, memo, Suspense, lazy } from 'react'
 
 function Foo() {
-	return <div>I'm memoed</div>;
+	return <div>I'm memoed</div>
 }
 
 function LazyComp() {
-	return <div>I'm (fake) lazy loaded</div>;
+	return <div>I'm (fake) lazy loaded</div>
 }
 
-const Lazy = lazy(() => Promise.resolve({ default: LazyComp }));
+const Lazy = lazy(() => Promise.resolve({ default: LazyComp }))
 
-const Memoed = memo(Foo);
+const Memoed = memo(Foo)
 
 export default class DevtoolsDemo extends Component {
 	render() {
@@ -29,6 +29,6 @@ export default class DevtoolsDemo extends Component {
 					<Lazy />
 				</Suspense>
 			</div>
-		);
+		)
 	}
 }

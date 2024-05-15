@@ -1,26 +1,26 @@
-import { computed, observable } from 'mobx';
-import { observer } from 'mobx-react';
-import { Component } from 'preact';
-import { RouteChildProps } from './router';
-import { store } from './store';
+import { computed, observable } from 'mobx'
+import { observer } from 'mobx-react'
+import { Component } from 'preact'
+import { RouteChildProps } from './router'
+import { store } from './store'
 
-export type ProfileProps = RouteChildProps;
+export type ProfileProps = RouteChildProps
 @observer
 export class Profile extends Component<ProfileProps> {
-	@observable id = '';
-	@observable busy = false;
+	@observable id = ''
+	@observable busy = false
 
 	componentDidMount() {
-		this.id = this.props.route;
+		this.id = this.props.route
 	}
 
 	componentWillReceiveProps(props: ProfileProps) {
-		this.id = props.route;
+		this.id = props.route
 	}
 
 	render() {
-		const user = this.user;
-		if (user == null) return null;
+		const user = this.user
+		if (user == null) return null
 		return (
 			<div class="profile">
 				<img class="avatar" src={user.picture.large} />
@@ -43,17 +43,17 @@ export class Profile extends Component<ProfileProps> {
 					</button>
 				</p>
 			</div>
-		);
+		)
 	}
 
 	@computed get user() {
-		return store.users.find(u => u.id === this.id);
+		return store.users.find(u => u.id === this.id)
 	}
 
 	remove = async () => {
-		this.busy = true;
-		await new Promise<void>(cb => setTimeout(cb, 1500));
-		store.deleteUser(this.id);
-		this.busy = false;
-	};
+		this.busy = true
+		await new Promise<void>(cb => setTimeout(cb, 1500))
+		store.deleteUser(this.id)
+		this.busy = false
+	}
 }

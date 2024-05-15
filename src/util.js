@@ -1,6 +1,6 @@
-import { EMPTY_ARR } from './constants';
+import { EMPTY_ARR } from './constants'
 
-export const isArray = Array.isArray;
+export const isArray = Array.isArray
 
 /**
  * Assign properties from `props` to `obj`
@@ -11,8 +11,8 @@ export const isArray = Array.isArray;
  */
 export function assign(obj, props) {
 	// @ts-expect-error We change the type of `obj` to be `O & P`
-	for (let i in props) obj[i] = props[i];
-	return /** @type {O & P} */ (obj);
+	for (let i in props) obj[i] = props[i]
+	return /** @type {O & P} */ (obj)
 }
 
 /**
@@ -22,8 +22,8 @@ export function assign(obj, props) {
  * @param {preact.ContainerNode} node The node to remove
  */
 export function removeNode(node) {
-	let parentNode = node.parentNode;
-	if (parentNode) parentNode.removeChild(node);
+	let parentNode = node.parentNode
+	if (parentNode) parentNode.removeChild(node)
 }
 
-export const slice = EMPTY_ARR.slice;
+export const slice = EMPTY_ARR.slice

@@ -1,13 +1,13 @@
-import { spawnSync } from 'child_process';
-import { mkdir } from 'fs/promises';
+import { spawnSync } from 'child_process'
+import { mkdir } from 'fs/promises'
 import {
 	globSrc,
 	benchesRoot,
 	allBenches,
 	resultsPath,
 	IS_CI
-} from './utils.js';
-import { generateConfig } from './config.js';
+} from './utils.js'
+import { generateConfig } from './config.js'
 
 export const defaultBenchOptions = {
 	browser: 'chrome-headless',
@@ -23,33 +23,33 @@ export const defaultBenchOptions = {
 	'window-size': '1024,768',
 	framework: IS_CI ? ['preact-main', 'preact-local', 'preact-hooks'] : null,
 	trace: false
-};
+}
 
 /**
  * @param {string} bench1
  * @param {{ _: string[]; } & TachometerOptions} opts
  */
 export async function runBenches(bench1 = 'all', opts) {
-	const globs = bench1 === 'all' ? allBenches : [bench1].concat(opts._);
-	const benchesToRun = await globSrc(globs);
+	const globs = bench1 === 'all' ? allBenches : [bench1].concat(opts._)
+	const benchesToRun = await globSrc(globs)
 
 	if (benchesToRun.length == 0) {
-		console.log('No benchmarks found matching patterns:', globs);
+		console.log('No benchmarks found matching patterns:', globs)
 	} else {
-		console.log('Running benchmarks:', benchesToRun.join(', '));
-		console.log();
+		console.log('Running benchmarks:', benchesToRun.join(', '))
+		console.log()
 	}
 
 	const configFileTasks = benchesToRun.map(async (benchPath, i) => {
 		return generateConfig(benchesRoot('src', benchPath), {
 			...opts,
 			prepare: i === 0 // Only run prepare script for first config
-		});
-	});
+		})
+	})
 
-	await mkdir(resultsPath(), { recursive: true });
+	await mkdir(resultsPath(), { recursive: true })
 
-	const configFiles = await Promise.all(configFileTasks);
+	const configFiles = await Promise.all(configFileTasks)
 	for (const { name, configPath } of configFiles) {
 		const args = [
 			benchesRoot('node_modules/tachometer/bin/tach.js'),
@@ -58,13 +58,13 @@ export async function runBenches(bench1 = 'all', opts) {
 			configPath,
 			'--json-file',
 			benchesRoot('results', name + '.json')
-		];
+		]
 
-		console.log('\n$', process.execPath, ...args);
+		console.log('\n$', process.execPath, ...args)
 
 		spawnSync(process.execPath, args, {
 			cwd: benchesRoot(),
 			stdio: 'inherit'
-		});
+		})
 	}
 }

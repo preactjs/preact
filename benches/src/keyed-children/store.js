@@ -1,12 +1,12 @@
 function _random(max) {
-	return Math.round(Math.random() * 1000) % max;
+	return Math.round(Math.random() * 1000) % max
 }
 
 export class Store {
 	constructor() {
-		this.data = [];
-		this.selected = undefined;
-		this.id = 1;
+		this.data = []
+		this.selected = undefined
+		this.id = 1
 	}
 	buildData(count = 1000) {
 		var adjectives = [
@@ -35,7 +35,7 @@ export class Store {
 			'cheap',
 			'expensive',
 			'fancy'
-		];
+		]
 		var colours = [
 			'red',
 			'yellow',
@@ -48,7 +48,7 @@ export class Store {
 			'white',
 			'black',
 			'orange'
-		];
+		]
 		var nouns = [
 			'table',
 			'chair',
@@ -63,8 +63,8 @@ export class Store {
 			'pizza',
 			'mouse',
 			'keyboard'
-		];
-		var data = [];
+		]
+		var data = []
 		for (var i = 0; i < count; i++)
 			data.push({
 				id: this.id++,
@@ -74,46 +74,46 @@ export class Store {
 					colours[_random(colours.length)] +
 					' ' +
 					nouns[_random(nouns.length)]
-			});
-		return data;
+			})
+		return data
 	}
 	updateData(mod = 10) {
 		for (let i = 0; i < this.data.length; i += 10) {
 			this.data[i] = Object.assign({}, this.data[i], {
 				label: this.data[i].label + ' !!!'
-			});
+			})
 		}
 	}
 	delete(id) {
-		var idx = this.data.findIndex(d => d.id === id);
-		this.data.splice(idx, 1);
+		var idx = this.data.findIndex(d => d.id === id)
+		this.data.splice(idx, 1)
 	}
 	run() {
-		this.data = this.buildData();
-		this.selected = undefined;
+		this.data = this.buildData()
+		this.selected = undefined
 	}
 	add() {
-		this.data = this.data.concat(this.buildData(1000));
+		this.data = this.data.concat(this.buildData(1000))
 	}
 	update() {
-		this.updateData();
+		this.updateData()
 	}
 	select(id) {
-		this.selected = id;
+		this.selected = id
 	}
 	runLots() {
-		this.data = this.buildData(10000);
-		this.selected = undefined;
+		this.data = this.buildData(10000)
+		this.selected = undefined
 	}
 	clear() {
-		this.data = [];
-		this.selected = undefined;
+		this.data = []
+		this.selected = undefined
 	}
 	swapRows() {
 		if (this.data.length > 998) {
-			var a = this.data[1];
-			this.data[1] = this.data[998];
-			this.data[998] = a;
+			var a = this.data[1]
+			this.data[1] = this.data[998]
+			this.data[998] = a
 		}
 	}
 }

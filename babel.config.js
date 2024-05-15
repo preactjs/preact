@@ -1,17 +1,17 @@
 module.exports = function (api) {
-	api.cache(true);
+	api.cache(true)
 
-	const noModules = String(process.env.BABEL_NO_MODULES) === 'true';
+	const noModules = String(process.env.BABEL_NO_MODULES) === 'true'
 
-	const rename = {};
-	const mangle = require('./mangle.json');
+	const rename = {}
+	const mangle = require('./mangle.json')
 	for (let prop in mangle.props.props) {
-		let name = prop;
+		let name = prop
 		if (name[0] === '$') {
-			name = name.slice(1);
+			name = name.slice(1)
 		}
 
-		rename[name] = mangle.props.props[prop];
+		rename[name] = mangle.props.props[prop]
 	}
 
 	return {
@@ -42,5 +42,5 @@ module.exports = function (api) {
 				plugins: ['@babel/plugin-transform-react-jsx-source']
 			}
 		]
-	};
-};
+	}
+}

@@ -1,12 +1,12 @@
-import React, { useState } from 'react';
-import TextField from '@material-ui/core/TextField';
+import React, { useState } from 'react'
+import TextField from '@material-ui/core/TextField'
 
 const PatchedTextField = props => {
-	const [value, set] = useState(props.value);
+	const [value, set] = useState(props.value)
 	return (
 		<TextField {...props} value={value} onChange={e => set(e.target.value)} />
-	);
-};
+	)
+}
 
 const TextFields = () => (
 	<div>
@@ -30,6 +30,6 @@ const TextFields = () => (
 			label="default value"
 		/>
 	</div>
-);
+)
 
-export default TextFields;
+export default TextFields
