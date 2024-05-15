@@ -7,27 +7,27 @@ import {
 	AnyComponent,
 	h,
 	createRef
-} from '../../'
+} from '../../';
 
 interface DummyProps {
-	initialInput: string
+	initialInput: string;
 }
 
 interface DummyState {
-	input: string
+	input: string;
 }
 
 class DummyComponent extends Component<DummyProps, DummyState> {
 	constructor(props: DummyProps) {
-		super(props)
+		super(props);
 		this.state = {
 			input: `x${this.props}x`
-		}
+		};
 	}
 
 	private setRef = (el: AnyComponent<any>) => {
-		console.log(el)
-	}
+		console.log(el);
+	};
 
 	render({ initialInput }: DummyProps, { input }: DummyState) {
 		return (
@@ -41,7 +41,7 @@ class DummyComponent extends Component<DummyProps, DummyState> {
 					ref={this.setRef}
 				/>
 			</div>
-		)
+		);
 	}
 }
 
@@ -52,14 +52,14 @@ function DummerComponent({ input, initialInput }: DummerComponentProps) {
 		<div>
 			Input: {input}, initial: {initialInput}
 		</div>
-	)
+	);
 }
 
-render(createElement('div', { title: 'test', key: '1' }), document)
+render(createElement('div', { title: 'test', key: '1' }), document);
 render(
 	createElement(DummyComponent, { initialInput: 'The input', key: '1' }),
 	document
-)
+);
 render(
 	createElement(DummerComponent, {
 		initialInput: 'The input',
@@ -67,9 +67,9 @@ render(
 		key: '1'
 	}),
 	document
-)
-render(h('div', { title: 'test', key: '1' }), document)
-render(h(DummyComponent, { initialInput: 'The input', key: '1' }), document)
+);
+render(h('div', { title: 'test', key: '1' }), document);
+render(h(DummyComponent, { initialInput: 'The input', key: '1' }), document);
 render(
 	h(DummerComponent, {
 		initialInput: 'The input',
@@ -77,20 +77,20 @@ render(
 		key: '1'
 	}),
 	document
-)
+);
 
 // Mounting into different types of Nodes
-render(h('div', {}), document.createElement('div'))
-render(h('div', {}), document)
-render(h('div', {}), document.createElement('div').shadowRoot!)
-render(h('div', {}), document.createDocumentFragment())
+render(h('div', {}), document.createElement('div'));
+render(h('div', {}), document);
+render(h('div', {}), document.createElement('div').shadowRoot!);
+render(h('div', {}), document.createDocumentFragment());
 
 // From https://gist.github.com/developit/f4c67a2ede71dc2fab7f357f39cff28c, modified to be TypeScript compliant
 function createRootFragment(parent: Element, replaceNode: Element | Element[]) {
-	const replaceNodes: Element[] = ([] as Element[]).concat(replaceNode)
-	const s = replaceNodes[replaceNodes.length - 1].nextSibling
+	const replaceNodes: Element[] = ([] as Element[]).concat(replaceNode);
+	const s = replaceNodes[replaceNodes.length - 1].nextSibling;
 	function insert(c: Node, r: Node | null) {
-		return parent.insertBefore(c, r || s)
+		return parent.insertBefore(c, r || s);
 	}
 	return ((parent as any).__k = {
 		nodeType: 1,
@@ -100,9 +100,9 @@ function createRootFragment(parent: Element, replaceNode: Element | Element[]) {
 		insertBefore: insert,
 		appendChild: (c: Node) => insert(c, null),
 		removeChild: function (c: Node) {
-			return parent.removeChild(c)
+			return parent.removeChild(c);
 		}
-	})
+	});
 }
 
 render(
@@ -111,7 +111,7 @@ render(
 		document.createElement('div'),
 		document.createElement('div')
 	)
-)
+);
 
 // Accessing children
 const ComponentWithChildren: FunctionalComponent<DummerComponentProps> = ({
@@ -125,8 +125,8 @@ const ComponentWithChildren: FunctionalComponent<DummerComponentProps> = ({
 			<span>{input}</span>
 			<span>{children}</span>
 		</div>
-	)
-}
+	);
+};
 
 const UseOfComponentWithChildren = () => {
 	return (
@@ -134,8 +134,8 @@ const UseOfComponentWithChildren = () => {
 			<span>child 1</span>
 			<span>child 2</span>
 		</ComponentWithChildren>
-	)
-}
+	);
+};
 
 // TODO: make this work
 // const DummyChildren: FunctionalComponent = ({ children }) => {
@@ -156,16 +156,16 @@ const UseOfComponentWithChildren = () => {
 
 // using ref and or jsx
 class ComponentUsingRef extends Component<any, any> {
-	private array: string[]
-	private refs: (Element | null)[] = []
+	private array: string[];
+	private refs: (Element | null)[] = [];
 
 	constructor() {
-		super()
-		this.array = ['1', '2']
+		super();
+		this.array = ['1', '2'];
 	}
 
 	render() {
-		this.refs = []
+		this.refs = [];
 		return (
 			<div jsx>
 				{this.array.map(el => (
@@ -175,35 +175,35 @@ class ComponentUsingRef extends Component<any, any> {
 				{/* Can specify Preact attributes on a component */}
 				<DummyComponent initialInput="1" key="1" ref={this.setRef} />
 			</div>
-		)
+		);
 	}
 
 	private setRef = (el: Element | null) => {
-		this.refs.push(el)
-	}
+		this.refs.push(el);
+	};
 }
 
 // using lifecycles
 class ComponentWithLifecycle extends Component<DummyProps, DummyState> {
 	render() {
-		return <div>Hi</div>
+		return <div>Hi</div>;
 	}
 
 	componentWillMount() {
-		console.log('componentWillMount')
+		console.log('componentWillMount');
 	}
 
 	componentDidMount() {
-		console.log('componentDidMount')
+		console.log('componentDidMount');
 	}
 
 	componentWillUnmount() {
-		console.log('componentWillUnmount')
+		console.log('componentWillUnmount');
 	}
 
 	componentWillReceiveProps(nextProps: DummyProps, nextCtx: any) {
-		const { initialInput } = nextProps
-		console.log('componentWillReceiveProps', initialInput, nextCtx)
+		const { initialInput } = nextProps;
+		console.log('componentWillReceiveProps', initialInput, nextCtx);
 	}
 
 	shouldComponentUpdate(
@@ -211,7 +211,7 @@ class ComponentWithLifecycle extends Component<DummyProps, DummyState> {
 		nextState: DummyState,
 		nextContext: any
 	) {
-		return false
+		return false;
 	}
 
 	componentWillUpdate(
@@ -219,7 +219,7 @@ class ComponentWithLifecycle extends Component<DummyProps, DummyState> {
 		nextState: DummyState,
 		nextContext: any
 	) {
-		console.log('componentWillUpdate', nextProps, nextState, nextContext)
+		console.log('componentWillUpdate', nextProps, nextState, nextContext);
 	}
 
 	componentDidUpdate(
@@ -232,7 +232,7 @@ class ComponentWithLifecycle extends Component<DummyProps, DummyState> {
 			previousProps,
 			previousState,
 			previousContext
-		)
+		);
 	}
 }
 
@@ -241,79 +241,79 @@ class ComponentWithLifecycle extends Component<DummyProps, DummyState> {
 class DefaultProps extends Component<{ text: string; bool: boolean }> {
 	static defaultProps = {
 		text: 'hello'
-	}
+	};
 
 	render() {
-		return <div>{this.props.text}</div>
+		return <div>{this.props.text}</div>;
 	}
 }
 
-const d1 = <DefaultProps bool={false} text="foo" />
-const d2 = <DefaultProps bool={false} />
+const d1 = <DefaultProps bool={false} text="foo" />;
+const d2 = <DefaultProps bool={false} />;
 
 class DefaultPropsWithUnion extends Component<
 	{ default: boolean } & (
 		| {
-				type: 'string'
-				str: string
+				type: 'string';
+				str: string;
 		  }
 		| {
-				type: 'number'
-				num: number
+				type: 'number';
+				num: number;
 		  }
 	)
 > {
 	static defaultProps = {
 		default: true
-	}
+	};
 
 	render() {
-		return <div />
+		return <div />;
 	}
 }
 
-const d3 = <DefaultPropsWithUnion type="string" str={'foo'} />
-const d4 = <DefaultPropsWithUnion type="number" num={0xf00} />
-const d5 = <DefaultPropsWithUnion type="string" str={'foo'} default={false} />
-const d6 = <DefaultPropsWithUnion type="number" num={0xf00} default={false} />
+const d3 = <DefaultPropsWithUnion type="string" str={'foo'} />;
+const d4 = <DefaultPropsWithUnion type="number" num={0xf00} />;
+const d5 = <DefaultPropsWithUnion type="string" str={'foo'} default={false} />;
+const d6 = <DefaultPropsWithUnion type="number" num={0xf00} default={false} />;
 
 class DefaultUnion extends Component<
 	| {
-			type: 'number'
-			num: number
+			type: 'number';
+			num: number;
 	  }
 	| {
-			type: 'string'
-			str: string
+			type: 'string';
+			str: string;
 	  }
 > {
 	static defaultProps = {
 		type: 'number',
 		num: 1
-	}
+	};
 
 	render() {
-		return <div />
+		return <div />;
 	}
 }
 
-const d7 = <DefaultUnion />
-const d8 = <DefaultUnion num={1} />
-const d9 = <DefaultUnion type="number" />
-const d10 = <DefaultUnion type="string" str="foo" />
+const d7 = <DefaultUnion />;
+const d8 = <DefaultUnion num={1} />;
+const d9 = <DefaultUnion type="number" />;
+const d10 = <DefaultUnion type="string" str="foo" />;
 
 class ComponentWithDefaultProps extends Component<{ value: string }> {
-	static defaultProps = { value: '' }
+	static defaultProps = { value: '' };
 	render() {
-		return <div>{this.props.value}</div>
+		return <div>{this.props.value}</div>;
 	}
 }
 
-const withDefaultProps = <ComponentWithDefaultProps />
+const withDefaultProps = <ComponentWithDefaultProps />;
 
 interface PartialState {
-	foo: string
-	bar: number
+	foo: string;
+	bar: number;
 }
 
 class ComponentWithPartialSetState extends Component<{}, PartialState> {
@@ -322,59 +322,59 @@ class ComponentWithPartialSetState extends Component<{}, PartialState> {
 			<button onClick={() => this.handleClick('foo')}>
 				{foo}-{bar}
 			</button>
-		)
+		);
 	}
 	handleClick = (value: keyof PartialState) => {
-		this.setState({ [value]: 'updated' })
-	}
+		this.setState({ [value]: 'updated' });
+	};
 }
 
-const withPartialSetState = <ComponentWithPartialSetState />
+const withPartialSetState = <ComponentWithPartialSetState />;
 
 let functionalProps: ComponentProps<typeof DummerComponent> = {
 	initialInput: '',
 	input: ''
-}
+};
 
 let classProps: ComponentProps<typeof DummyComponent> = {
 	initialInput: ''
-}
+};
 
 let elementProps: ComponentProps<'button'> = {
 	type: 'button'
-}
+};
 
 // Typing of style property
-const acceptsNumberAsLength = <div style={{ marginTop: 20 }} />
-const acceptsStringAsLength = <div style={{ marginTop: '20px' }} />
+const acceptsNumberAsLength = <div style={{ marginTop: 20 }} />;
+const acceptsStringAsLength = <div style={{ marginTop: '20px' }} />;
 
-const ReturnNull: FunctionalComponent = () => null
+const ReturnNull: FunctionalComponent = () => null;
 
 // Refs should work on elements
-const ref = createRef<HTMLDivElement>()
-createElement('div', { ref: ref }, 'hi')
-h('div', { ref: ref }, 'hi')
+const ref = createRef<HTMLDivElement>();
+createElement('div', { ref: ref }, 'hi');
+h('div', { ref: ref }, 'hi');
 
 // Refs should work on functions
-const functionRef = createRef()
-const RefComponentTest = () => <p>hi</p>
-createElement(RefComponentTest, { ref: functionRef }, 'hi')
-h(RefComponentTest, { ref: functionRef }, 'hi')
+const functionRef = createRef();
+const RefComponentTest = () => <p>hi</p>;
+createElement(RefComponentTest, { ref: functionRef }, 'hi');
+h(RefComponentTest, { ref: functionRef }, 'hi');
 
 // Should accept onInput
-const onInput = (e: h.JSX.TargetedInputEvent<HTMLInputElement>) => {}
-;<input onInput={onInput} />
-;<input onInput={e => e.currentTarget.value} />
-createElement('input', { onInput: onInput })
-h('input', { onInput: onInput })
+const onInput = (e: h.JSX.TargetedInputEvent<HTMLInputElement>) => {};
+<input onInput={onInput} />;
+<input onInput={e => e.currentTarget.value} />;
+createElement('input', { onInput: onInput });
+h('input', { onInput: onInput });
 
 // Should accept onBeforeInput
-const onBeforeInput = (e: h.JSX.TargetedInputEvent<HTMLInputElement>) => {}
-;<input onBeforeInput={e => e.currentTarget.value} />
-createElement('input', { onBeforeInput: onBeforeInput })
-h('input', { onBeforeInput: onBeforeInput })
+const onBeforeInput = (e: h.JSX.TargetedInputEvent<HTMLInputElement>) => {};
+<input onBeforeInput={e => e.currentTarget.value} />;
+createElement('input', { onBeforeInput: onBeforeInput });
+h('input', { onBeforeInput: onBeforeInput });
 
-const onSubmit = (e: h.JSX.TargetedSubmitEvent<HTMLFormElement>) => {}
-;<form onSubmit={e => e.currentTarget.elements} />
-createElement('form', { onSubmit: onSubmit })
-h('form', { onSubmit: onSubmit })
+const onSubmit = (e: h.JSX.TargetedSubmitEvent<HTMLFormElement>) => {};
+<form onSubmit={e => e.currentTarget.elements} />;
+createElement('form', { onSubmit: onSubmit });
+h('form', { onSubmit: onSubmit });

@@ -2,9 +2,9 @@ export function scheduleEffectAssert(assertFn) {
 	return new Promise(resolve => {
 		requestAnimationFrame(() =>
 			setTimeout(() => {
-				assertFn()
-				resolve()
+				assertFn();
+				resolve();
 			}, 0)
-		)
-	})
+		);
+	});
 }

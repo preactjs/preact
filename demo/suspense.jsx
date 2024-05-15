@@ -1,15 +1,22 @@
 // eslint-disable-next-line no-unused-vars
-import { createElement, Component, memo, Fragment, Suspense, lazy } from 'react'
+import {
+	createElement,
+	Component,
+	memo,
+	Fragment,
+	Suspense,
+	lazy
+} from 'react';
 
 function LazyComp() {
-	return <div>I'm (fake) lazy loaded</div>
+	return <div>I'm (fake) lazy loaded</div>;
 }
 
-const Lazy = lazy(() => Promise.resolve({ default: LazyComp }))
+const Lazy = lazy(() => Promise.resolve({ default: LazyComp }));
 
 function createSuspension(name, timeout, error) {
-	let done = false
-	let prom
+	let done = false;
+	let prom;
 
 	return {
 		name,
@@ -18,33 +25,33 @@ function createSuspension(name, timeout, error) {
 			if (!prom) {
 				prom = new Promise((res, rej) => {
 					setTimeout(() => {
-						done = true
+						done = true;
 						if (error) {
-							rej(error)
+							rej(error);
 						} else {
-							res()
+							res();
 						}
-					}, timeout)
-				})
+					}, timeout);
+				});
 			}
 
-			return prom
+			return prom;
 		},
 		getPromise: () => prom,
 		isDone: () => done
-	}
+	};
 }
 
 function CustomSuspense({ isDone, start, timeout, name }) {
 	if (!isDone()) {
-		throw start()
+		throw start();
 	}
 
 	return (
 		<div>
 			Hello from CustomSuspense {name}, loaded after {timeout / 1000}s
 		</div>
-	)
+	);
 }
 
 function init() {
@@ -52,18 +59,18 @@ function init() {
 		s1: createSuspension('1', 1000, null),
 		s2: createSuspension('2', 2000, null),
 		s3: createSuspension('3', 3000, null)
-	}
+	};
 }
 
 export default class DevtoolsDemo extends Component {
 	constructor(props) {
-		super(props)
-		this.state = init()
-		this.onRerun = this.onRerun.bind(this)
+		super(props);
+		this.state = init();
+		this.onRerun = this.onRerun.bind(this);
 	}
 
 	onRerun() {
-		this.setState(init())
+		this.setState(init());
 	}
 
 	render(props, state) {
@@ -85,6 +92,6 @@ export default class DevtoolsDemo extends Component {
 					</Suspense>
 				</Suspense>
 			</div>
-		)
+		);
 	}
 }

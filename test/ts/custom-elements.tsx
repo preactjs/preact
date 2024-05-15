@@ -1,24 +1,24 @@
-import { createElement, Component, createContext } from '../../'
+import { createElement, Component, createContext } from '../../';
 
 declare module '../../' {
 	namespace createElement.JSX {
 		interface IntrinsicElements {
 			// Custom element can use JSX EventHandler definitions
 			'clickable-ce': {
-				optionalAttr?: string
-				onClick?: MouseEventHandler<HTMLElement>
-			}
+				optionalAttr?: string;
+				onClick?: MouseEventHandler<HTMLElement>;
+			};
 
 			// Custom Element that extends HTML attributes
 			'color-picker': HTMLAttributes & {
 				// Required attribute
-				space: 'rgb' | 'hsl' | 'hsv'
+				space: 'rgb' | 'hsl' | 'hsv';
 				// Optional attribute
-				alpha?: boolean
-			}
+				alpha?: boolean;
+			};
 
 			// Custom Element with custom interface definition
-			'custom-whatever': WhateveElAttributes
+			'custom-whatever': WhateveElAttributes;
 		}
 	}
 }
@@ -26,27 +26,27 @@ declare module '../../' {
 // Whatever Element definition
 
 interface WhateverElement {
-	instanceProp: string
+	instanceProp: string;
 }
 
 interface WhateverElementEvent {
-	eventProp: number
+	eventProp: number;
 }
 
 // preact.JSX.HTMLAttributes also appears to work here but for consistency,
 // let's use createElement.JSX
 interface WhateveElAttributes extends createElement.JSX.HTMLAttributes {
-	someattribute?: string
-	onsomeevent?: (this: WhateverElement, ev: WhateverElementEvent) => void
+	someattribute?: string;
+	onsomeevent?: (this: WhateverElement, ev: WhateverElementEvent) => void;
 }
 
 // Ensure context still works
-const { Provider, Consumer } = createContext({ contextValue: '' })
+const { Provider, Consumer } = createContext({ contextValue: '' });
 
 // Sample component that uses custom elements
 
 class SimpleComponent extends Component {
-	componentProp = 'componentProp'
+	componentProp = 'componentProp';
 	render() {
 		// Render inside div to ensure standard JSX elements still work
 		return (
@@ -56,10 +56,10 @@ class SimpleComponent extends Component {
 						onClick={e => {
 							// `this` should be instance of SimpleComponent since this is an
 							// arrow function
-							console.log(this.componentProp)
+							console.log(this.componentProp);
 
 							// Validate `currentTarget` is HTMLElement
-							console.log('clicked ', e.currentTarget.style.display)
+							console.log('clicked ', e.currentTarget.style.display);
 						}}
 					></clickable-ce>
 					<color-picker space="rgb" dir="rtl"></color-picker>
@@ -68,7 +68,7 @@ class SimpleComponent extends Component {
 						someattribute="string"
 						onsomeevent={function (e) {
 							// Validate `this` and `e` are the right type
-							console.log('clicked', this.instanceProp, e.eventProp)
+							console.log('clicked', this.instanceProp, e.eventProp);
 						}}
 					></custom-whatever>
 
@@ -78,8 +78,8 @@ class SimpleComponent extends Component {
 					</Consumer>
 				</div>
 			</Provider>
-		)
+		);
 	}
 }
 
-const component = <SimpleComponent />
+const component = <SimpleComponent />;

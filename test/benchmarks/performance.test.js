@@ -1,86 +1,86 @@
 /*global COVERAGE, ENABLE_PERFORMANCE*/
 /*eslint no-console:0*/
 /** @jsx createElement */
-import { setupScratch, teardown } from '../_util/helpers'
+import { setupScratch, teardown } from '../_util/helpers';
 import {
 	createElement,
 	Component,
 	render,
 	hydrate
-} from 'preact/dist/preact.module'
+} from 'preact/dist/preact.module';
 
-const MULTIPLIER = ENABLE_PERFORMANCE ? (COVERAGE ? 5 : 1) : 999999
+const MULTIPLIER = ENABLE_PERFORMANCE ? (COVERAGE ? 5 : 1) : 999999;
 
 // let now = typeof performance!=='undefined' && performance.now ? () => performance.now() : () => +new Date();
 if (typeof performance == 'undefined') {
-	window.performance = { now: () => +new Date() }
+	window.performance = { now: () => +new Date() };
 }
 
 function loop(iter, time) {
 	let start = performance.now(),
-		count = 0
+		count = 0;
 	while (performance.now() - start < time) {
-		count++
-		iter()
+		count++;
+		iter();
 	}
-	return count
+	return count;
 }
 
 function benchmark(iter, callback) {
-	let a = 0 // eslint-disable-line no-unused-vars
+	let a = 0; // eslint-disable-line no-unused-vars
 	function noop() {
 		try {
-			a++
+			a++;
 		} finally {
-			a += Math.random()
+			a += Math.random();
 		}
 	}
 
 	// warm
-	for (let i = 100; i--; ) noop(), iter()
+	for (let i = 100; i--; ) noop(), iter();
 
 	let count = 4,
 		time = 500,
 		passes = 0,
 		noops = loop(noop, time),
-		iterations = 0
+		iterations = 0;
 
 	function next() {
-		iterations += loop(iter, time)
-		setTimeout(++passes === count ? done : next, 10)
+		iterations += loop(iter, time);
+		setTimeout(++passes === count ? done : next, 10);
 	}
 
 	function done() {
 		let ticks = Math.round((noops / iterations) * count),
 			hz = (iterations / count / time) * 1000,
-			message = `${hz | 0}/s (${ticks} ticks)`
-		callback({ iterations, noops, count, time, ticks, hz, message })
+			message = `${hz | 0}/s (${ticks} ticks)`;
+		callback({ iterations, noops, count, time, ticks, hz, message });
 	}
 
-	next()
+	next();
 }
 
 describe('performance', function () {
-	let scratch
+	let scratch;
 
-	this.timeout(10000)
+	this.timeout(10000);
 
 	before(function () {
-		if (!ENABLE_PERFORMANCE) this.skip()
+		if (!ENABLE_PERFORMANCE) this.skip();
 		if (COVERAGE) {
 			console.warn(
 				'WARNING: Code coverage is enabled, which dramatically reduces performance. Do not pay attention to these numbers.'
-			)
+			);
 		}
-	})
+	});
 
 	beforeEach(() => {
-		scratch = setupScratch()
-	})
+		scratch = setupScratch();
+	});
 
 	afterEach(() => {
-		teardown(scratch)
-	})
+		teardown(scratch);
+	});
 
 	it('should rerender without changes fast', done => {
 		let jsx = (
@@ -126,19 +126,19 @@ describe('performance', function () {
 					</form>
 				</main>
 			</div>
-		)
+		);
 
 		benchmark(
 			() => {
-				render(jsx, scratch)
+				render(jsx, scratch);
 			},
 			({ ticks, message }) => {
-				console.log(`PERF: empty diff: ${message}`)
-				expect(ticks).to.be.below(150 * MULTIPLIER)
-				done()
+				console.log(`PERF: empty diff: ${message}`);
+				expect(ticks).to.be.below(150 * MULTIPLIER);
+				done();
 			}
-		)
-	})
+		);
+	});
 
 	it('should rerender repeated trees fast', done => {
 		class Header extends Component {
@@ -153,7 +153,7 @@ describe('performance', function () {
 							<a href="/bar">Bar</a>
 						</nav>
 					</header>
-				)
+				);
 			}
 		}
 		class Form extends Component {
@@ -172,7 +172,7 @@ describe('performance', function () {
 						</fieldset>
 						<ButtonBar />
 					</form>
-				)
+				);
 			}
 		}
 		class ButtonBar extends Component {
@@ -193,17 +193,17 @@ describe('performance', function () {
 							Object CSS
 						</Button>
 					</button-bar>
-				)
+				);
 			}
 		}
 		class Button extends Component {
 			render(props) {
-				return <button {...props} />
+				return <button {...props} />;
 			}
 		}
 		class Main extends Component {
 			render() {
-				return <Form />
+				return <Form />;
 			}
 		}
 		class Root extends Component {
@@ -213,41 +213,41 @@ describe('performance', function () {
 						<Header />
 						<Main />
 					</div>
-				)
+				);
 			}
 		}
 		class Empty extends Component {
 			render() {
-				return <div />
+				return <div />;
 			}
 		}
 		class Parent extends Component {
 			render({ child: C }) {
-				return <C />
+				return <C />;
 			}
 		}
 
 		benchmark(
 			() => {
-				render(<Parent child={Root} />, scratch)
-				render(<Parent child={Empty} />, scratch)
+				render(<Parent child={Root} />, scratch);
+				render(<Parent child={Empty} />, scratch);
 			},
 			({ ticks, message }) => {
-				console.log(`PERF: repeat diff: ${message}`)
-				expect(ticks).to.be.below(3000 * MULTIPLIER)
-				done()
+				console.log(`PERF: repeat diff: ${message}`);
+				expect(ticks).to.be.below(3000 * MULTIPLIER);
+				done();
 			}
-		)
-	})
+		);
+	});
 
 	it('should construct large VDOM trees fast', done => {
-		const FIELDS = []
-		for (let i = 100; i--; ) FIELDS.push((i * 999).toString(36))
+		const FIELDS = [];
+		for (let i = 100; i--; ) FIELDS.push((i * 999).toString(36));
 
-		let out = []
+		let out = [];
 		function digest(vnode) {
-			out.push(vnode)
-			out.length = 0
+			out.push(vnode);
+			out.length = 0;
 		}
 		benchmark(
 			() => {
@@ -294,22 +294,22 @@ describe('performance', function () {
 							</form>
 						</main>
 					</div>
-				)
+				);
 			},
 			({ ticks, message }) => {
-				console.log(`PERF: large VTree: ${message}`)
-				expect(ticks).to.be.below(200 * MULTIPLIER)
-				done()
+				console.log(`PERF: large VTree: ${message}`);
+				expect(ticks).to.be.below(200 * MULTIPLIER);
+				done();
 			}
-		)
-	})
+		);
+	});
 
 	it('should mutate styles/properties quickly', done => {
-		let counter = 0
-		const keyLooper = n => c => (c % n ? `${c}px` : c)
-		const get = (obj, i) => obj[i % obj.length]
-		const CLASSES = ['foo', 'foo bar', '', 'baz-bat', null]
-		const STYLES = []
+		let counter = 0;
+		const keyLooper = n => c => (c % n ? `${c}px` : c);
+		const get = (obj, i) => obj[i % obj.length];
+		const CLASSES = ['foo', 'foo bar', '', 'baz-bat', null];
+		const STYLES = [];
 		const MULTIVALUE = [
 			'0 1px',
 			'0 0 1px 0',
@@ -318,7 +318,7 @@ describe('performance', function () {
 			'20px 10px',
 			'7em 5px',
 			'1px 0 5em 2px'
-		]
+		];
 		const STYLEKEYS = [
 			['left', keyLooper(3)],
 			['top', keyLooper(2)],
@@ -340,14 +340,14 @@ describe('performance', function () {
 						? `${c % 10}px ${c % 2 ? 'solid' : 'dotted'} ${STYLEKEYS[6][1](c)}`
 						: ''
 			]
-		]
+		];
 		for (let i = 0; i < 1000; i++) {
-			let style = {}
+			let style = {};
 			for (let j = 0; j < i % 10; j++) {
-				let conf = get(STYLEKEYS, ++counter)
-				style[conf[0]] = conf[1](counter)
+				let conf = get(STYLEKEYS, ++counter);
+				style[conf[0]] = conf[1](counter);
 			}
-			STYLES[i] = style
+			STYLES[i] = style;
 		}
 
 		const app = index => (
@@ -368,20 +368,20 @@ describe('performance', function () {
 					<p style={get(STYLES, index * 3 + 1)}>p4</p>
 				</div>
 			</div>
-		)
+		);
 
-		let count = 0
+		let count = 0;
 		benchmark(
 			() => {
-				render(app(++count), scratch)
+				render(app(++count), scratch);
 			},
 			({ ticks, message }) => {
-				console.log(`PERF: style/prop mutation: ${message}`)
-				expect(ticks).to.be.below(350 * MULTIPLIER)
-				done()
+				console.log(`PERF: style/prop mutation: ${message}`);
+				expect(ticks).to.be.below(350 * MULTIPLIER);
+				done();
 			}
-		)
-	})
+		);
+	});
 
 	it('should hydrate from SSR quickly', done => {
 		class Header extends Component {
@@ -396,7 +396,7 @@ describe('performance', function () {
 							<a href="/bar">Bar</a>
 						</nav>
 					</header>
-				)
+				);
 			}
 		}
 		class Form extends Component {
@@ -415,7 +415,7 @@ describe('performance', function () {
 						</fieldset>
 						<ButtonBar />
 					</form>
-				)
+				);
 			}
 		}
 		const ButtonBar = () => (
@@ -434,14 +434,14 @@ describe('performance', function () {
 					Object CSS
 				</Button>
 			</button-bar>
-		)
+		);
 		class Button extends Component {
 			handleClick() {}
 			render(props) {
-				return <button onClick={this.handleClick} {...props} />
+				return <button onClick={this.handleClick} {...props} />;
 			}
 		}
-		const Main = () => <Form />
+		const Main = () => <Form />;
 		class App extends Component {
 			render() {
 				return (
@@ -449,23 +449,23 @@ describe('performance', function () {
 						<Header />
 						<Main />
 					</div>
-				)
+				);
 			}
 		}
 
-		render(<App />, scratch)
-		let html = scratch.innerHTML
+		render(<App />, scratch);
+		let html = scratch.innerHTML;
 
 		benchmark(
 			() => {
-				scratch.innerHTML = html
-				hydrate(<App />, scratch)
+				scratch.innerHTML = html;
+				hydrate(<App />, scratch);
 			},
 			({ ticks, message }) => {
-				console.log(`PERF: SSR Hydrate: ${message}`)
-				expect(ticks).to.be.below(3000 * MULTIPLIER)
-				done()
+				console.log(`PERF: SSR Hydrate: ${message}`);
+				expect(ticks).to.be.below(3000 * MULTIPLIER);
+				done();
 			}
-		)
-	})
-})
+		);
+	});
+});

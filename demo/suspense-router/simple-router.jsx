@@ -4,7 +4,7 @@ import {
 	useContext,
 	Children,
 	useLayoutEffect
-} from 'react'
+} from 'react';
 
 const memoryHistory = {
 	/**
@@ -18,66 +18,66 @@ const memoryHistory = {
 	 * @param {HistoryListener} listener
 	 */
 	listen(listener) {
-		const newLength = this.listeners.push(listener)
-		return () => this.listeners.splice(newLength - 1, 1)
+		const newLength = this.listeners.push(listener);
+		return () => this.listeners.splice(newLength - 1, 1);
 	},
 
 	/**
 	 * @param {Location} to
 	 */
 	navigate(to) {
-		this.listeners.forEach(listener => listener(to))
+		this.listeners.forEach(listener => listener(to));
 	}
-}
+};
 
 /** @type {import('react').Context<{ history: typeof memoryHistory; location: Location }>} */
-const RouterContext = createContext(null)
+const RouterContext = createContext(null);
 
 export function Router({ history = memoryHistory, children }) {
-	const [location, setLocation] = useState({ pathname: '/' })
+	const [location, setLocation] = useState({ pathname: '/' });
 
 	useLayoutEffect(() => {
-		return history.listen(newLocation => setLocation(newLocation))
-	}, [])
+		return history.listen(newLocation => setLocation(newLocation));
+	}, []);
 
 	return (
 		<RouterContext.Provider value={{ history, location }}>
 			{children}
 		</RouterContext.Provider>
-	)
+	);
 }
 
 export function Switch(props) {
-	const { location } = useContext(RouterContext)
+	const { location } = useContext(RouterContext);
 
-	let element = null
+	let element = null;
 	Children.forEach(props.children, child => {
 		if (element == null && child.props.path == location.pathname) {
-			element = child
+			element = child;
 		}
-	})
+	});
 
-	return element
+	return element;
 }
 
 /**
  * @param {{ children: any; path: string; exact?: boolean; }} props
  */
 export function Route({ children, path, exact }) {
-	return children
+	return children;
 }
 
 export function Link({ to, children }) {
-	const { history } = useContext(RouterContext)
+	const { history } = useContext(RouterContext);
 	const onClick = event => {
-		event.preventDefault()
-		event.stopPropagation()
-		history.navigate({ pathname: to })
-	}
+		event.preventDefault();
+		event.stopPropagation();
+		history.navigate({ pathname: to });
+	};
 
 	return (
 		<a href={to} onClick={onClick}>
 			{children}
 		</a>
-	)
+	);
 }

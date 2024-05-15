@@ -1,19 +1,19 @@
-import { createElement, render, Component } from 'preact'
-import { setupScratch, teardown } from '../../_util/helpers'
+import { createElement, render, Component } from 'preact';
+import { setupScratch, teardown } from '../../_util/helpers';
 
 /** @jsx createElement */
 
 describe('Lifecycle methods', () => {
 	/** @type {HTMLDivElement} */
-	let scratch
+	let scratch;
 
 	beforeEach(() => {
-		scratch = setupScratch()
-	})
+		scratch = setupScratch();
+	});
 
 	afterEach(() => {
-		teardown(scratch)
-	})
+		teardown(scratch);
+	});
 
 	describe('top-level componentWillUnmount', () => {
 		it('should invoke componentWillUnmount for top-level components', () => {
@@ -21,52 +21,52 @@ describe('Lifecycle methods', () => {
 				componentDidMount() {}
 				componentWillUnmount() {}
 				render() {
-					return 'foo'
+					return 'foo';
 				}
 			}
 			class Bar extends Component {
 				componentDidMount() {}
 				componentWillUnmount() {}
 				render() {
-					return 'bar'
+					return 'bar';
 				}
 			}
-			sinon.spy(Foo.prototype, 'componentDidMount')
-			sinon.spy(Foo.prototype, 'componentWillUnmount')
-			sinon.spy(Foo.prototype, 'render')
+			sinon.spy(Foo.prototype, 'componentDidMount');
+			sinon.spy(Foo.prototype, 'componentWillUnmount');
+			sinon.spy(Foo.prototype, 'render');
 
-			sinon.spy(Bar.prototype, 'componentDidMount')
-			sinon.spy(Bar.prototype, 'componentWillUnmount')
-			sinon.spy(Bar.prototype, 'render')
+			sinon.spy(Bar.prototype, 'componentDidMount');
+			sinon.spy(Bar.prototype, 'componentWillUnmount');
+			sinon.spy(Bar.prototype, 'render');
 
-			render(<Foo />, scratch)
+			render(<Foo />, scratch);
 			expect(Foo.prototype.componentDidMount, 'initial render').to.have.been
-				.calledOnce
+				.calledOnce;
 
-			render(<Bar />, scratch)
+			render(<Bar />, scratch);
 			expect(Foo.prototype.componentWillUnmount, 'when replaced').to.have.been
-				.calledOnce
+				.calledOnce;
 			expect(Bar.prototype.componentDidMount, 'when replaced').to.have.been
-				.calledOnce
+				.calledOnce;
 
-			render(<div />, scratch)
+			render(<div />, scratch);
 			expect(Bar.prototype.componentWillUnmount, 'when removed').to.have.been
-				.calledOnce
-		})
+				.calledOnce;
+		});
 
 		it('should only remove dom after componentWillUnmount was called', () => {
 			class Foo extends Component {
 				componentWillUnmount() {
-					expect(document.getElementById('foo')).to.not.equal(null)
+					expect(document.getElementById('foo')).to.not.equal(null);
 				}
 
 				render() {
-					return <div id="foo" />
+					return <div id="foo" />;
 				}
 			}
 
-			render(<Foo />, scratch)
-			render(null, scratch)
-		})
-	})
-})
+			render(<Foo />, scratch);
+			render(null, scratch);
+		});
+	});
+});

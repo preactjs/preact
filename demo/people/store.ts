@@ -1,9 +1,9 @@
-import { flow, Instance, types } from 'mobx-state-tree'
+import { flow, Instance, types } from 'mobx-state-tree';
 
 const cmp =
 	<T, U>(fn: (x: T) => U) =>
 	(a: T, b: T): number =>
-		fn(a) > fn(b) ? 1 : -1
+		fn(a) > fn(b) ? 1 : -1;
 
 const User = types.model({
 	email: types.string,
@@ -16,7 +16,7 @@ const User = types.model({
 	picture: types.model({
 		large: types.string
 	})
-})
+});
 
 const Store = types
 	.model({
@@ -26,10 +26,10 @@ const Store = types
 	.views(self => ({
 		getSortedUsers() {
 			if (self.usersOrder === 'name')
-				return self.users.slice().sort(cmp(x => x.name.first))
+				return self.users.slice().sort(cmp(x => x.name.first));
 			if (self.usersOrder === 'id')
-				return self.users.slice().sort(cmp(x => x.id))
-			throw Error(`Unknown ordering ${self.usersOrder}`)
+				return self.users.slice().sort(cmp(x => x.id));
+			throw Error(`Unknown ordering ${self.usersOrder}`);
 		}
 	}))
 	.actions(self => ({
@@ -41,8 +41,8 @@ const Store = types
 						...user,
 						id: user.login.username
 					}))
-				)
-			self.users.push(...data)
+				);
+			self.users.push(...data);
 		}),
 		loadUsers: flow<unknown, []>(function* () {
 			const data = yield fetch(
@@ -54,23 +54,23 @@ const Store = types
 						...user,
 						id: user.login.username
 					}))
-				)
-			self.users.replace(data)
+				);
+			self.users.replace(data);
 		}),
 		deleteUser(id: string) {
-			const user = self.users.find(u => u.id === id)
-			if (user != null) self.users.remove(user)
+			const user = self.users.find(u => u.id === id);
+			if (user != null) self.users.remove(user);
 		},
 		setUsersOrder(order: 'name' | 'id') {
-			self.usersOrder = order
+			self.usersOrder = order;
 		}
-	}))
+	}));
 
-export type StoreType = Instance<typeof Store>
+export type StoreType = Instance<typeof Store>;
 export const store = Store.create({
 	usersOrder: 'name',
 	users: []
-})
+});
 
 // const { Provider, Consumer } = createContext<StoreType>(undefined as any)
 

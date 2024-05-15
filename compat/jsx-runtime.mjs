@@ -1,3 +1,3 @@
-import 'preact/compat'
+import 'preact/compat';
 
-export * from 'preact/jsx-runtime'
+export * from 'preact/jsx-runtime';

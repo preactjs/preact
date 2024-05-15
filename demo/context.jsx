@@ -1,18 +1,18 @@
 // eslint-disable-next-line no-unused-vars
-import { Component, createContext } from 'preact'
-const { Provider, Consumer } = createContext()
+import { Component, createContext } from 'preact';
+const { Provider, Consumer } = createContext();
 
 class ThemeProvider extends Component {
 	state = {
 		value: this.props.value
-	}
+	};
 
 	onClick = () => {
 		this.setState(prev => ({
 			value:
 				prev.value === this.props.value ? this.props.next : this.props.value
-		}))
-	}
+		}));
+	};
 
 	render() {
 		return (
@@ -20,13 +20,13 @@ class ThemeProvider extends Component {
 				<button onClick={this.onClick}>Toggle</button>
 				<Provider value={this.state.value}>{this.props.children}</Provider>
 			</div>
-		)
+		);
 	}
 }
 
 class Child extends Component {
 	shouldComponentUpdate() {
-		return false
+		return false;
 	}
 
 	render() {
@@ -35,7 +35,7 @@ class Child extends Component {
 				<p>(blocked update)</p>
 				{this.props.children}
 			</>
-		)
+		);
 	}
 }
 
@@ -64,6 +64,6 @@ export default class ContextDemo extends Component {
 					</Consumer>
 				</Child>
 			</ThemeProvider>
-		)
+		);
 	}
 }

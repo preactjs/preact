@@ -1,18 +1,18 @@
-import { createElement, render } from 'preact'
-import { setupScratch, teardown } from '../_util/helpers'
+import { createElement, render } from 'preact';
+import { setupScratch, teardown } from '../_util/helpers';
 
 /** @jsx createElement */
 
 describe('Select', () => {
-	let scratch
+	let scratch;
 
 	beforeEach(() => {
-		scratch = setupScratch()
-	})
+		scratch = setupScratch();
+	});
 
 	afterEach(() => {
-		teardown(scratch)
-	})
+		teardown(scratch);
+	});
 
 	it('should set <select> value', () => {
 		function App() {
@@ -22,12 +22,12 @@ describe('Select', () => {
 					<option value="B">B</option>
 					<option value="C">C</option>
 				</select>
-			)
+			);
 		}
 
-		render(<App />, scratch)
-		expect(scratch.firstChild.value).to.equal('B')
-	})
+		render(<App />, scratch);
+		expect(scratch.firstChild.value).to.equal('B');
+	});
 
 	it('should set value with selected', () => {
 		function App() {
@@ -39,12 +39,12 @@ describe('Select', () => {
 					</option>
 					<option value="C">C</option>
 				</select>
-			)
+			);
 		}
 
-		render(<App />, scratch)
-		expect(scratch.firstChild.value).to.equal('B')
-	})
+		render(<App />, scratch);
+		expect(scratch.firstChild.value).to.equal('B');
+	});
 
 	it('should work with multiple selected', () => {
 		function App() {
@@ -58,15 +58,15 @@ describe('Select', () => {
 						C
 					</option>
 				</select>
-			)
+			);
 		}
 
-		render(<App />, scratch)
+		render(<App />, scratch);
 		Array.prototype.slice.call(scratch.firstChild.childNodes).forEach(node => {
 			if (node.value === 'B' || node.value === 'C') {
-				expect(node.selected).to.equal(true)
+				expect(node.selected).to.equal(true);
 			}
-		})
-		expect(scratch.firstChild.value).to.equal('B')
-	})
-})
+		});
+		expect(scratch.firstChild.value).to.equal('B');
+	});
+});

@@ -1,9 +1,9 @@
-import { enqueueRender } from './component'
+import { enqueueRender } from './component';
 
-export let i = 0
+export let i = 0;
 
 export function createContext(defaultValue, contextId) {
-	contextId = '__cC' + i++
+	contextId = '__cC' + i++;
 
 	const context = {
 		_id: contextId,
@@ -13,17 +13,17 @@ export function createContext(defaultValue, contextId) {
 			// return props.children(
 			// 	context[contextId] ? context[contextId].props.value : defaultValue
 			// );
-			return props.children(contextValue)
+			return props.children(contextValue);
 		},
 		/** @type {FunctionComponent} */
 		Provider(props) {
 			if (!this.getChildContext) {
 				/** @type {Component[]} */
-				let subs = []
-				let ctx = {}
-				ctx[contextId] = this
+				let subs = [];
+				let ctx = {};
+				ctx[contextId] = this;
 
-				this.getChildContext = () => ctx
+				this.getChildContext = () => ctx;
 
 				this.shouldComponentUpdate = function (_props) {
 					if (this.props.value !== _props.value) {
@@ -42,25 +42,25 @@ export function createContext(defaultValue, contextId) {
 						// 	enqueueRender(c);
 						// });
 						subs.some(c => {
-							c._force = true
-							enqueueRender(c)
-						})
+							c._force = true;
+							enqueueRender(c);
+						});
 					}
-				}
+				};
 
 				this.sub = c => {
-					subs.push(c)
-					let old = c.componentWillUnmount
+					subs.push(c);
+					let old = c.componentWillUnmount;
 					c.componentWillUnmount = () => {
-						subs.splice(subs.indexOf(c), 1)
-						if (old) old.call(c)
-					}
-				}
+						subs.splice(subs.indexOf(c), 1);
+						if (old) old.call(c);
+					};
+				};
 			}
 
-			return props.children
+			return props.children;
 		}
-	}
+	};
 
 	// Devtools needs access to the context object when it
 	// encounters a Provider. This is necessary to support
@@ -68,5 +68,6 @@ export function createContext(defaultValue, contextId) {
 	// of on the component itself. See:
 	// https://reactjs.org/docs/context.html#contextdisplayname
 
-	return (context.Provider._contextRef = context.Consumer.contextType = context)
+	return (context.Provider._contextRef = context.Consumer.contextType =
+		context);
 }

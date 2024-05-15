@@ -1,6 +1,6 @@
-import { createElement, options } from 'preact'
-import { clearLog, getLog } from './logCall'
-import { teardown as testUtilTeardown } from 'preact/test-utils'
+import { createElement, options } from 'preact';
+import { clearLog, getLog } from './logCall';
+import { teardown as testUtilTeardown } from 'preact/test-utils';
 
 /** @jsx createElement */
 
@@ -12,26 +12,26 @@ import { teardown as testUtilTeardown } from 'preact/test-utils'
  * @returns {O & P}
  */
 function assign(obj, props) {
-	for (let i in props) obj[i] = props[i]
-	return /** @type {O & P} */ (obj)
+	for (let i in props) obj[i] = props[i];
+	return /** @type {O & P} */ (obj);
 }
 
 export function supportsPassiveEvents() {
-	let supported = false
+	let supported = false;
 	try {
 		let options = {
 			get passive() {
-				supported = true
-				return undefined
+				supported = true;
+				return undefined;
 			}
-		}
+		};
 
-		window.addEventListener('test', options, options)
-		window.removeEventListener('test', options, options)
+		window.addEventListener('test', options, options);
+		window.removeEventListener('test', options, options);
 	} catch (err) {
-		supported = false
+		supported = false;
 	}
-	return supported
+	return supported;
 }
 
 export function supportsDataList() {
@@ -40,14 +40,14 @@ export function supportsDataList() {
 		Boolean(
 			document.createElement('datalist') && 'HTMLDataListElement' in window
 		)
-	)
+	);
 }
 
 const VOID_ELEMENTS =
-	/^(area|base|br|col|embed|hr|img|input|link|meta|param|source|track|wbr)$/
+	/^(area|base|br|col|embed|hr|img|input|link|meta|param|source|track|wbr)$/;
 
 function encodeEntities(str) {
-	return str.replace(/&/g, '&amp;')
+	return str.replace(/&/g, '&amp;');
 }
 
 /**
@@ -57,29 +57,29 @@ function encodeEntities(str) {
  * @returns {string}
  */
 function normalizePath(str) {
-	let len = str.length
-	let out = ''
+	let len = str.length;
+	let out = '';
 	for (let i = 0; i < len; i++) {
-		const char = str[i]
+		const char = str[i];
 		if (/[A-Za-z]/.test(char)) {
-			if (i == 0) out += char + ' '
+			if (i == 0) out += char + ' ';
 			else
-				out += (str[i - 1] == ' ' ? '' : ' ') + char + (i < len - 1 ? ' ' : '')
-		} else if (char == '-' && str[i - 1] !== ' ') out += ' ' + char
-		else out += char
+				out += (str[i - 1] == ' ' ? '' : ' ') + char + (i < len - 1 ? ' ' : '');
+		} else if (char == '-' && str[i - 1] !== ' ') out += ' ' + char;
+		else out += char;
 	}
 
-	return out.replace(/\s\s+/g, ' ').replace(/z/g, 'Z')
+	return out.replace(/\s\s+/g, ' ').replace(/z/g, 'Z');
 }
 
 export function serializeHtml(node) {
-	let str = ''
-	let child = node.firstChild
+	let str = '';
+	let child = node.firstChild;
 	while (child) {
-		str += serializeDomTree(child)
-		child = child.nextSibling
+		str += serializeDomTree(child);
+		child = child.nextSibling;
 	}
-	return str
+	return str;
 }
 
 /**
@@ -90,52 +90,52 @@ export function serializeHtml(node) {
  */
 function serializeDomTree(node) {
 	if (node.nodeType === 3) {
-		return encodeEntities(node.data)
+		return encodeEntities(node.data);
 	} else if (node.nodeType === 8) {
-		return '<!--' + encodeEntities(node.data) + '-->'
+		return '<!--' + encodeEntities(node.data) + '-->';
 	} else if (node.nodeType === 1 || node.nodeType === 9) {
-		let str = '<' + node.localName
-		const attrs = []
+		let str = '<' + node.localName;
+		const attrs = [];
 		for (let i = 0; i < node.attributes.length; i++) {
-			attrs.push(node.attributes[i].name)
+			attrs.push(node.attributes[i].name);
 		}
-		attrs.sort()
+		attrs.sort();
 		for (let i = 0; i < attrs.length; i++) {
-			const name = attrs[i]
-			let value = node.getAttribute(name)
+			const name = attrs[i];
+			let value = node.getAttribute(name);
 
 			// don't render attributes with null or undefined values
-			if (value == null) continue
+			if (value == null) continue;
 
 			// normalize empty class attribute
-			if (!value && name === 'class') continue
+			if (!value && name === 'class') continue;
 
-			str += ' ' + name
-			value = encodeEntities(value)
+			str += ' ' + name;
+			value = encodeEntities(value);
 
 			// normalize svg <path d="value">
 			if (node.localName === 'path' && name === 'd') {
-				value = normalizePath(value)
+				value = normalizePath(value);
 			}
-			str += '="' + value + '"'
+			str += '="' + value + '"';
 		}
-		str += '>'
+		str += '>';
 
 		// For elements that don't have children (e.g. <wbr />) don't descend.
 		if (!VOID_ELEMENTS.test(node.localName)) {
 			// IE puts the value of a textarea as its children while other browsers don't.
 			// Normalize those differences by forcing textarea to not have children.
 			if (node.localName != 'textarea') {
-				let child = node.firstChild
+				let child = node.firstChild;
 				while (child) {
-					str += serializeDomTree(child)
-					child = child.nextSibling
+					str += serializeDomTree(child);
+					child = child.nextSibling;
 				}
 			}
 
-			str += '</' + node.localName + '>'
+			str += '</' + node.localName + '>';
 		}
-		return str
+		return str;
 	}
 }
 
@@ -147,13 +147,13 @@ function serializeDomTree(node) {
 export function createEvent(name) {
 	// Modern browsers
 	if (typeof Event == 'function') {
-		return new Event(name)
+		return new Event(name);
 	}
 
 	// IE 11...
-	let event = document.createEvent('Event')
-	event.initEvent(name, true, true)
-	return event
+	let event = document.createEvent('Event');
+	event.initEvent(name, true, true);
+	return event;
 }
 
 /**
@@ -170,16 +170,16 @@ export function sortCss(cssText) {
 				// CSS Variables are typically positioned at the start
 				if (a[0] === '-') {
 					// If both are a variable we just compare them
-					if (b[0] === '-') return a.localeCompare(b)
-					return -1
+					if (b[0] === '-') return a.localeCompare(b);
+					return -1;
 				}
 				// b is a css var
-				if (b[0] === '-') return 1
+				if (b[0] === '-') return 1;
 
-				return a.localeCompare(b)
+				return a.localeCompare(b);
 			})
 			.join('; ') + ';'
-	)
+	);
 }
 
 /**
@@ -188,19 +188,19 @@ export function sortCss(cssText) {
  * @returns {HTMLDivElement}
  */
 export function setupScratch(id) {
-	const scratch = document.createElement('div')
-	scratch.id = id || 'scratch'
-	;(document.body || document.documentElement).appendChild(scratch)
-	return scratch
+	const scratch = document.createElement('div');
+	scratch.id = id || 'scratch';
+	(document.body || document.documentElement).appendChild(scratch);
+	return scratch;
 }
 
-let oldOptions = null
+let oldOptions = null;
 export function clearOptions() {
-	oldOptions = assign({}, options)
-	delete options.vnode
-	delete options.diffed
-	delete options.unmount
-	delete options._diff
+	oldOptions = assign({}, options);
+	delete options.vnode;
+	delete options.diffed;
+	delete options.unmount;
+	delete options._diff;
 }
 
 /**
@@ -213,54 +213,54 @@ export function teardown(scratch) {
 		('__k' in scratch || '_children' in scratch) &&
 		scratch._children
 	) {
-		verifyVNodeTree(scratch._children)
+		verifyVNodeTree(scratch._children);
 	}
 
 	if (scratch) {
-		scratch.parentNode.removeChild(scratch)
+		scratch.parentNode.removeChild(scratch);
 	}
 
 	if (oldOptions != null) {
-		assign(options, oldOptions)
-		oldOptions = null
+		assign(options, oldOptions);
+		oldOptions = null;
 	}
 
-	testUtilTeardown()
+	testUtilTeardown();
 
 	if (getLog().length > 0) {
-		clearLog()
+		clearLog();
 	}
 
-	restoreElementAttributes()
+	restoreElementAttributes();
 }
 
 /** @type {(vnode: import('../../src/internal').VNode) => void} */
 function verifyVNodeTree(vnode) {
 	if (vnode._nextDom) {
-		expect.fail('vnode should not have _nextDom:' + vnode._nextDom)
+		expect.fail('vnode should not have _nextDom:' + vnode._nextDom);
 	}
 
 	if (vnode._children) {
 		for (let child of vnode._children) {
 			if (child) {
-				verifyVNodeTree(child)
+				verifyVNodeTree(child);
 			}
 		}
 	}
 }
 
-const Foo = () => 'd'
+const Foo = () => 'd';
 export const getMixedArray = () =>
 	// Make it a function so each test gets a new copy of the array
-	[0, 'a', 'b', <span>c</span>, <Foo />, null, undefined, false, ['e', 'f'], 1]
-export const mixedArrayHTML = '0ab<span>c</span>def1'
+	[0, 'a', 'b', <span>c</span>, <Foo />, null, undefined, false, ['e', 'f'], 1];
+export const mixedArrayHTML = '0ab<span>c</span>def1';
 
 /**
  * Reset obj to empty to keep reference
  * @param {object} obj
  */
 export function clear(obj) {
-	Object.keys(obj).forEach(key => delete obj[key])
+	Object.keys(obj).forEach(key => delete obj[key]);
 }
 
 /**
@@ -273,17 +273,17 @@ export function sortAttributes(html) {
 		(s, pre, attrs, after) => {
 			let list = attrs
 				.match(/\s[a-z0-9:_.-]+=".*?"/gi)
-				.sort((a, b) => (a > b ? 1 : -1))
-			if (~after.indexOf('/')) after = '></' + pre + '>'
-			return '<' + pre + list.join('') + after
+				.sort((a, b) => (a > b ? 1 : -1));
+			if (~after.indexOf('/')) after = '></' + pre + '>';
+			return '<' + pre + list.join('') + after;
 		}
-	)
+	);
 }
 
-let attributesSpy, originalAttributesPropDescriptor
+let attributesSpy, originalAttributesPropDescriptor;
 
 export function spyOnElementAttributes() {
-	const test = Object.getOwnPropertyDescriptor(Element.prototype, 'attributes')
+	const test = Object.getOwnPropertyDescriptor(Element.prototype, 'attributes');
 
 	// IE11 doesn't correctly restore the prototype methods so we have to check
 	// whether this prototype method is already a sinon spy.
@@ -292,16 +292,16 @@ export function spyOnElementAttributes() {
 			originalAttributesPropDescriptor = Object.getOwnPropertyDescriptor(
 				Element.prototype,
 				'attributes'
-			)
+			);
 		}
 
-		attributesSpy = sinon.spy(Element.prototype, 'attributes', ['get'])
+		attributesSpy = sinon.spy(Element.prototype, 'attributes', ['get']);
 	} else if (test && test.get && test.get.isSinonProxy) {
 		// Due to IE11 not resetting we will do this manually when it is a proxy.
-		test.get.resetHistory()
+		test.get.resetHistory();
 	}
 
-	return attributesSpy || test
+	return attributesSpy || test;
 }
 
 function restoreElementAttributes() {
@@ -311,7 +311,7 @@ function restoreElementAttributes() {
 			Element.prototype,
 			'attributes',
 			originalAttributesPropDescriptor
-		)
-		attributesSpy = null
+		);
+		attributesSpy = null;
 	}
 }

@@ -1,6 +1,6 @@
-import { initDebug } from './debug'
-import 'preact/devtools'
+import { initDebug } from './debug';
+import 'preact/devtools';
 
-initDebug()
+initDebug();
 
-export { resetPropWarnings } from './check-props'
+export { resetPropWarnings } from './check-props';

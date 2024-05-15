@@ -1,7 +1,7 @@
-import { render, hydrate } from 'preact'
+import { render, hydrate } from 'preact';
 
-export * from 'preact/hooks'
-export * from 'preact'
+export * from 'preact/hooks';
+export * from 'preact';
 
 /**
  * @param {HTMLElement} rootDom
@@ -10,10 +10,10 @@ export * from 'preact'
 export function createRoot(rootDom) {
 	return {
 		render(vnode) {
-			render(vnode, rootDom)
+			render(vnode, rootDom);
 		},
 		hydrate(vnode) {
-			hydrate(vnode, rootDom)
+			hydrate(vnode, rootDom);
 		}
-	}
+	};
 }

@@ -1,4 +1,4 @@
-import { Store } from './store.js'
+import { Store } from './store.js';
 
 /**
  * @param {import('./index').Framework} framework
@@ -6,28 +6,28 @@ import { Store } from './store.js'
 export function getComponents({ createElement, Component }) {
 	class Row extends Component {
 		constructor(props) {
-			super(props)
-			this.onDelete = this.onDelete.bind(this)
-			this.onClick = this.onClick.bind(this)
+			super(props);
+			this.onDelete = this.onDelete.bind(this);
+			this.onClick = this.onClick.bind(this);
 		}
 
 		shouldComponentUpdate(nextProps, nextState) {
 			return (
 				nextProps.data !== this.props.data ||
 				nextProps.styleClass !== this.props.styleClass
-			)
+			);
 		}
 
 		onDelete() {
-			this.props.onDelete(this.props.data.id)
+			this.props.onDelete(this.props.data.id);
 		}
 
 		onClick() {
-			this.props.onClick(this.props.data.id)
+			this.props.onClick(this.props.data.id);
 		}
 
 		render() {
-			let { styleClass, onClick, onDelete, data } = this.props
+			let { styleClass, onClick, onDelete, data } = this.props;
 			return createElement(
 				'tr',
 				{
@@ -72,51 +72,51 @@ export function getComponents({ createElement, Component }) {
 				createElement('td', {
 					className: 'col-md-6'
 				})
-			)
+			);
 		}
 	}
 
 	class Main extends Component {
 		constructor(props) {
-			super(props)
-			this.state = { store: props.store ?? new Store() }
-			this.select = this.select.bind(this)
-			this.delete = this.delete.bind(this)
+			super(props);
+			this.state = { store: props.store ?? new Store() };
+			this.select = this.select.bind(this);
+			this.delete = this.delete.bind(this);
 
 			// @ts-ignore
-			window.app = this
+			window.app = this;
 		}
 		run() {
-			this.state.store.run()
-			this.setState({ store: this.state.store })
+			this.state.store.run();
+			this.setState({ store: this.state.store });
 		}
 		add() {
-			this.state.store.add()
-			this.setState({ store: this.state.store })
+			this.state.store.add();
+			this.setState({ store: this.state.store });
 		}
 		update() {
-			this.state.store.update()
-			this.setState({ store: this.state.store })
+			this.state.store.update();
+			this.setState({ store: this.state.store });
 		}
 		select(id) {
-			this.state.store.select(id)
-			this.setState({ store: this.state.store })
+			this.state.store.select(id);
+			this.setState({ store: this.state.store });
 		}
 		delete(id) {
-			this.state.store.delete(id)
-			this.setState({ store: this.state.store })
+			this.state.store.delete(id);
+			this.setState({ store: this.state.store });
 		}
 		runLots() {
-			this.state.store.runLots()
-			this.setState({ store: this.state.store })
+			this.state.store.runLots();
+			this.setState({ store: this.state.store });
 		}
 		clear() {
-			this.state.store.clear()
-			this.setState({ store: this.state.store })
+			this.state.store.clear();
+			this.setState({ store: this.state.store });
 		}
 		swapRows() {
-			this.state.store.swapRows()
-			this.setState({ store: this.state.store })
+			this.state.store.swapRows();
+			this.setState({ store: this.state.store });
 		}
 		render() {
 			let rows = this.state.store.data.map((d, i) => {
@@ -126,8 +126,8 @@ export function getComponents({ createElement, Component }) {
 					onClick: this.select,
 					onDelete: this.delete,
 					styleClass: d.id === this.state.store.selected ? 'danger' : ''
-				})
-			})
+				});
+			});
 			return createElement(
 				'div',
 				{
@@ -144,9 +144,9 @@ export function getComponents({ createElement, Component }) {
 					className: 'preloadicon glyphicon glyphicon-remove',
 					'aria-hidden': 'true'
 				})
-			)
+			);
 		}
 	}
 
-	return { Main, Row }
+	return { Main, Row };
 }

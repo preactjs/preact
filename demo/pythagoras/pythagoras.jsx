@@ -1,35 +1,35 @@
-import { interpolateViridis } from 'd3-scale'
+import { interpolateViridis } from 'd3-scale';
 
 Math.deg = function (radians) {
-	return radians * (180 / Math.PI)
-}
+	return radians * (180 / Math.PI);
+};
 
 const memoizedCalc = (function () {
-	const memo = {}
+	const memo = {};
 
-	const key = ({ w, heightFactor, lean }) => `${w}-${heightFactor}-${lean}`
+	const key = ({ w, heightFactor, lean }) => `${w}-${heightFactor}-${lean}`;
 
 	return args => {
-		let memoKey = key(args)
+		let memoKey = key(args);
 
 		if (memo[memoKey]) {
-			return memo[memoKey]
+			return memo[memoKey];
 		}
 
-		let { w, heightFactor, lean } = args
-		let trigH = heightFactor * w
+		let { w, heightFactor, lean } = args;
+		let trigH = heightFactor * w;
 
 		let result = {
 			nextRight: Math.sqrt(trigH ** 2 + (w * (0.5 + lean)) ** 2),
 			nextLeft: Math.sqrt(trigH ** 2 + (w * (0.5 - lean)) ** 2),
 			A: Math.deg(Math.atan(trigH / ((0.5 - lean) * w))),
 			B: Math.deg(Math.atan(trigH / ((0.5 + lean) * w)))
-		}
+		};
 
-		memo[memoKey] = result
-		return result
-	}
-})()
+		memo[memoKey] = result;
+		return result;
+	};
+})();
 
 export default function Pythagoras({
 	w,
@@ -43,21 +43,21 @@ export default function Pythagoras({
 	maxlvl
 }) {
 	if (lvl >= maxlvl || w < 1) {
-		return null
+		return null;
 	}
 
 	const { nextRight, nextLeft, A, B } = memoizedCalc({
 		w,
 		heightFactor,
 		lean
-	})
+	});
 
-	let rotate = ''
+	let rotate = '';
 
 	if (left) {
-		rotate = `rotate(${-A} 0 ${w})`
+		rotate = `rotate(${-A} 0 ${w})`;
 	} else if (right) {
-		rotate = `rotate(${B} ${w} ${w})`
+		rotate = `rotate(${B} ${w} ${w})`;
 	}
 
 	return (
@@ -92,5 +92,5 @@ export default function Pythagoras({
 				right
 			/>
 		</g>
-	)
+	);
 }

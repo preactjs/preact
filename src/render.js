@@ -1,8 +1,8 @@
-import { EMPTY_OBJ } from './constants'
-import { commitRoot, diff } from './diff/index'
-import { createElement, Fragment } from './create-element'
-import options from './options'
-import { slice } from './util'
+import { EMPTY_OBJ } from './constants';
+import { commitRoot, diff } from './diff/index';
+import { createElement, Fragment } from './create-element';
+import options from './options';
+import { slice } from './util';
 
 /**
  * Render a Preact virtual node into a DOM element
@@ -12,12 +12,12 @@ import { slice } from './util'
  * existing DOM tree rooted at `replaceNode`
  */
 export function render(vnode, parentDom, replaceNode) {
-	if (options._root) options._root(vnode, parentDom)
+	if (options._root) options._root(vnode, parentDom);
 
 	// We abuse the `replaceNode` parameter in `hydrate()` to signal if we are in
 	// hydration mode or not by passing the `hydrate` function instead of a DOM
 	// element..
-	let isHydrating = typeof replaceNode == 'function'
+	let isHydrating = typeof replaceNode == 'function';
 
 	// To be able to support calling `render()` multiple times on the same
 	// DOM node, we need to obtain a reference to the previous tree. We do
@@ -26,14 +26,14 @@ export function render(vnode, parentDom, replaceNode) {
 	// means that we are mounting a new tree for the first time.
 	let oldVNode = isHydrating
 		? null
-		: (replaceNode && replaceNode._children) || parentDom._children
+		: (replaceNode && replaceNode._children) || parentDom._children;
 
 	vnode = ((!isHydrating && replaceNode) || parentDom)._children =
-		createElement(Fragment, null, [vnode])
+		createElement(Fragment, null, [vnode]);
 
 	// List of effects that need to be called after diffing.
 	let commitQueue = [],
-		refQueue = []
+		refQueue = [];
 	diff(
 		parentDom,
 		// Determine the new vnode tree and store it on the DOM element on
@@ -57,10 +57,10 @@ export function render(vnode, parentDom, replaceNode) {
 				: parentDom.firstChild,
 		isHydrating,
 		refQueue
-	)
+	);
 
 	// Flush all queued effects
-	commitRoot(commitQueue, vnode, refQueue)
+	commitRoot(commitQueue, vnode, refQueue);
 }
 
 /**
@@ -69,5 +69,5 @@ export function render(vnode, parentDom, replaceNode) {
  * @param {PreactElement} parentDom The DOM element to update
  */
 export function hydrate(vnode, parentDom) {
-	render(vnode, parentDom, hydrate)
+	render(vnode, parentDom, hydrate);
 }

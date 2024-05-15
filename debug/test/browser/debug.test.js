@@ -1,104 +1,104 @@
-import { createElement, render, createRef, Component, Fragment } from 'preact'
-import { useState } from 'preact/hooks'
+import { createElement, render, createRef, Component, Fragment } from 'preact';
+import { useState } from 'preact/hooks';
 import {
 	setupScratch,
 	teardown,
 	serializeHtml
-} from '../../../test/_util/helpers'
-import './fakeDevTools'
-import 'preact/debug'
-import { setupRerender } from 'preact/test-utils'
-import * as PropTypes from 'prop-types'
+} from '../../../test/_util/helpers';
+import './fakeDevTools';
+import 'preact/debug';
+import { setupRerender } from 'preact/test-utils';
+import * as PropTypes from 'prop-types';
 
 // eslint-disable-next-line no-duplicate-imports
-import { resetPropWarnings } from 'preact/debug'
+import { resetPropWarnings } from 'preact/debug';
 
-const h = createElement
+const h = createElement;
 /** @jsx createElement */
 
 describe('debug', () => {
 	/** @type {HTMLDivElement} */
-	let scratch
-	let errors = []
-	let warnings = []
-	let rerender
+	let scratch;
+	let errors = [];
+	let warnings = [];
+	let rerender;
 
 	beforeEach(() => {
-		errors = []
-		warnings = []
-		scratch = setupScratch()
-		rerender = setupRerender()
-		sinon.stub(console, 'error').callsFake(e => errors.push(e))
-		sinon.stub(console, 'warn').callsFake(w => warnings.push(w))
-	})
+		errors = [];
+		warnings = [];
+		scratch = setupScratch();
+		rerender = setupRerender();
+		sinon.stub(console, 'error').callsFake(e => errors.push(e));
+		sinon.stub(console, 'warn').callsFake(w => warnings.push(w));
+	});
 
 	afterEach(() => {
 		/** @type {*} */
-		console.error.restore()
-		console.warn.restore()
-		teardown(scratch)
-	})
+		console.error.restore();
+		console.warn.restore();
+		teardown(scratch);
+	});
 
 	it('should initialize devtools', () => {
-		expect(window.__PREACT_DEVTOOLS__.attachPreact).to.have.been.called
-	})
+		expect(window.__PREACT_DEVTOOLS__.attachPreact).to.have.been.called;
+	});
 
 	it('should print an error on rendering on undefined parent', () => {
-		let fn = () => render(<div />, undefined)
-		expect(fn).to.throw(/render/)
-	})
+		let fn = () => render(<div />, undefined);
+		expect(fn).to.throw(/render/);
+	});
 
 	it('should print an error on rendering on invalid parent', () => {
-		let fn = () => render(<div />, 6)
-		expect(fn).to.throw(/valid HTML node/)
-		expect(fn).to.throw(/<div/)
-	})
+		let fn = () => render(<div />, 6);
+		expect(fn).to.throw(/valid HTML node/);
+		expect(fn).to.throw(/<div/);
+	});
 
 	it('should print an error with (function) component name when available', () => {
-		const App = () => <div />
-		let fn = () => render(<App />, 6)
-		expect(fn).to.throw(/<App/)
-		expect(fn).to.throw(/6/)
+		const App = () => <div />;
+		let fn = () => render(<App />, 6);
+		expect(fn).to.throw(/<App/);
+		expect(fn).to.throw(/6/);
 
-		fn = () => render(<App />, {})
-		expect(fn).to.throw(/<App/)
-		expect(fn).to.throw(/[object Object]/)
+		fn = () => render(<App />, {});
+		expect(fn).to.throw(/<App/);
+		expect(fn).to.throw(/[object Object]/);
 
-		fn = () => render(<Fragment />, 'badroot')
-		expect(fn).to.throw(/<Fragment/)
-		expect(fn).to.throw(/badroot/)
-	})
+		fn = () => render(<Fragment />, 'badroot');
+		expect(fn).to.throw(/<Fragment/);
+		expect(fn).to.throw(/badroot/);
+	});
 
 	it('should print an error with (class) component name when available', () => {
 		class App extends Component {
 			render() {
-				return <div />
+				return <div />;
 			}
 		}
-		let fn = () => render(<App />, 6)
-		expect(fn).to.throw(/<App/)
-	})
+		let fn = () => render(<App />, 6);
+		expect(fn).to.throw(/<App/);
+	});
 
 	it('should print an error on undefined component', () => {
-		let fn = () => render(h(undefined), scratch)
-		expect(fn).to.throw(/createElement/)
-	})
+		let fn = () => render(h(undefined), scratch);
+		expect(fn).to.throw(/createElement/);
+	});
 
 	it('should print an error on invalid object component', () => {
-		let fn = () => render(h({}), scratch)
-		expect(fn).to.throw(/createElement/)
-	})
+		let fn = () => render(h({}), scratch);
+		expect(fn).to.throw(/createElement/);
+	});
 
 	it('should print an error when component is an array', () => {
-		let fn = () => render(h([<div />]), scratch)
-		expect(fn).to.throw(/createElement/)
-	})
+		let fn = () => render(h([<div />]), scratch);
+		expect(fn).to.throw(/createElement/);
+	});
 
 	it('should print an error on double jsx conversion', () => {
-		let Foo = <div />
-		let fn = () => render(h(<Foo />), scratch)
-		expect(fn).to.throw(/JSX twice/)
-	})
+		let Foo = <div />;
+		let fn = () => render(h(<Foo />), scratch);
+		expect(fn).to.throw(/JSX twice/);
+	});
 
 	it('should add __source to the vnode in debug mode.', () => {
 		const vnode = h('div', {
@@ -106,191 +106,191 @@ describe('debug', () => {
 				fileName: 'div.jsx',
 				lineNumber: 3
 			}
-		})
+		});
 		expect(vnode.__source).to.deep.equal({
 			fileName: 'div.jsx',
 			lineNumber: 3
-		})
-		expect(vnode.props.__source).to.be.undefined
-	})
+		});
+		expect(vnode.props.__source).to.be.undefined;
+	});
 
 	it('should add __self to the vnode in debug mode.', () => {
 		const vnode = h('div', {
 			__self: {}
-		})
-		expect(vnode.__self).to.deep.equal({})
-		expect(vnode.props.__self).to.be.undefined
-	})
+		});
+		expect(vnode.__self).to.deep.equal({});
+		expect(vnode.props.__self).to.be.undefined;
+	});
 
 	it('should warn when accessing certain attributes', () => {
-		const vnode = h('div', null)
+		const vnode = h('div', null);
 
 		// Push into an array to avoid empty statements being dead code eliminated
-		const res = []
-		res.push(vnode)
-		res.push(vnode.attributes)
-		expect(console.warn).to.be.calledOnce
-		expect(console.warn.args[0]).to.match(/use vnode.props/)
-		res.push(vnode.nodeName)
-		expect(console.warn).to.be.calledTwice
-		expect(console.warn.args[1]).to.match(/use vnode.type/)
-		res.push(vnode.children)
-		expect(console.warn).to.be.calledThrice
-		expect(console.warn.args[2]).to.match(/use vnode.props.children/)
+		const res = [];
+		res.push(vnode);
+		res.push(vnode.attributes);
+		expect(console.warn).to.be.calledOnce;
+		expect(console.warn.args[0]).to.match(/use vnode.props/);
+		res.push(vnode.nodeName);
+		expect(console.warn).to.be.calledTwice;
+		expect(console.warn.args[1]).to.match(/use vnode.type/);
+		res.push(vnode.children);
+		expect(console.warn).to.be.calledThrice;
+		expect(console.warn.args[2]).to.match(/use vnode.props.children/);
 
 		// Should only warn once
-		res.push(vnode.attributes)
-		expect(console.warn).to.be.calledThrice
-		res.push(vnode.nodeName)
-		expect(console.warn).to.be.calledThrice
-		res.push(vnode.children)
-		expect(console.warn).to.be.calledThrice
+		res.push(vnode.attributes);
+		expect(console.warn).to.be.calledThrice;
+		res.push(vnode.nodeName);
+		expect(console.warn).to.be.calledThrice;
+		res.push(vnode.children);
+		expect(console.warn).to.be.calledThrice;
 
-		vnode.attributes = {}
-		expect(console.warn.args[3]).to.match(/use vnode.props/)
-		vnode.nodeName = ''
-		expect(console.warn.args[4]).to.match(/use vnode.type/)
-		vnode.children = []
-		expect(console.warn.args[5]).to.match(/use vnode.props.children/)
+		vnode.attributes = {};
+		expect(console.warn.args[3]).to.match(/use vnode.props/);
+		vnode.nodeName = '';
+		expect(console.warn.args[4]).to.match(/use vnode.type/);
+		vnode.children = [];
+		expect(console.warn.args[5]).to.match(/use vnode.props.children/);
 
 		// Should only warn once
-		vnode.attributes = {}
-		expect(console.warn.args.length).to.equal(6)
-		vnode.nodeName = ''
-		expect(console.warn.args.length).to.equal(6)
-		vnode.children = []
-		expect(console.warn.args.length).to.equal(6)
+		vnode.attributes = {};
+		expect(console.warn.args.length).to.equal(6);
+		vnode.nodeName = '';
+		expect(console.warn.args.length).to.equal(6);
+		vnode.children = [];
+		expect(console.warn.args.length).to.equal(6);
 
 		// Mark res as used, otherwise it will be dead code eliminated
-		expect(res.length).to.equal(7)
-	})
+		expect(res.length).to.equal(7);
+	});
 
 	it('should warn when calling setState inside the constructor', () => {
 		class Foo extends Component {
 			constructor(props) {
-				super(props)
-				this.setState({ foo: true })
+				super(props);
+				this.setState({ foo: true });
 			}
 			render() {
-				return <div>foo</div>
+				return <div>foo</div>;
 			}
 		}
 
-		render(<Foo />, scratch)
-		expect(console.warn).to.be.calledOnce
-		expect(console.warn.args[0]).to.match(/no-op/)
-	})
+		render(<Foo />, scratch);
+		expect(console.warn).to.be.calledOnce;
+		expect(console.warn.args[0]).to.match(/no-op/);
+	});
 
 	it('should NOT warn when calling setState inside the cWM', () => {
 		class Foo extends Component {
 			componentWillMount() {
-				this.setState({ foo: true })
+				this.setState({ foo: true });
 			}
 			render() {
-				return <div>foo</div>
+				return <div>foo</div>;
 			}
 		}
 
-		render(<Foo />, scratch)
-		expect(console.warn).to.not.be.called
-	})
+		render(<Foo />, scratch);
+		expect(console.warn).to.not.be.called;
+	});
 
 	it('should warn when calling forceUpdate inside the constructor', () => {
 		class Foo extends Component {
 			constructor(props) {
-				super(props)
-				this.forceUpdate()
+				super(props);
+				this.forceUpdate();
 			}
 			render() {
-				return <div>foo</div>
+				return <div>foo</div>;
 			}
 		}
 
-		render(<Foo />, scratch)
-		expect(console.warn).to.be.calledOnce
-		expect(console.warn.args[0]).to.match(/no-op/)
-	})
+		render(<Foo />, scratch);
+		expect(console.warn).to.be.calledOnce;
+		expect(console.warn.args[0]).to.match(/no-op/);
+	});
 
 	it('should warn when calling forceUpdate on an unmounted Component', () => {
-		let forceUpdate
+		let forceUpdate;
 
 		class Foo extends Component {
 			constructor(props) {
-				super(props)
-				forceUpdate = () => this.forceUpdate()
+				super(props);
+				forceUpdate = () => this.forceUpdate();
 			}
 			render() {
-				return <div>foo</div>
+				return <div>foo</div>;
 			}
 		}
 
-		render(<Foo />, scratch)
-		forceUpdate()
-		expect(console.warn).to.not.be.called
+		render(<Foo />, scratch);
+		forceUpdate();
+		expect(console.warn).to.not.be.called;
 
-		render(null, scratch)
+		render(null, scratch);
 
-		forceUpdate()
-		expect(console.warn).to.be.calledOnce
-		expect(console.warn.args[0]).to.match(/no-op/)
-	})
+		forceUpdate();
+		expect(console.warn).to.be.calledOnce;
+		expect(console.warn.args[0]).to.match(/no-op/);
+	});
 
 	it('should print an error when child is a plain object', () => {
-		let fn = () => render(<div>{{}}</div>, scratch)
-		expect(fn).to.throw(/not valid/)
-	})
+		let fn = () => render(<div>{{}}</div>, scratch);
+		expect(fn).to.throw(/not valid/);
+	});
 
 	it('should print an error on invalid refs', () => {
-		let fn = () => render(<div ref="a" />, scratch)
-		expect(fn).to.throw(/createRef/)
-	})
+		let fn = () => render(<div ref="a" />, scratch);
+		expect(fn).to.throw(/createRef/);
+	});
 
 	it('should not print for null as a handler', () => {
-		let fn = () => render(<div onclick={null} />, scratch)
-		expect(fn).not.to.throw()
-	})
+		let fn = () => render(<div onclick={null} />, scratch);
+		expect(fn).not.to.throw();
+	});
 
 	it('should not print for undefined as a handler', () => {
-		let fn = () => render(<div onclick={undefined} />, scratch)
-		expect(fn).not.to.throw()
-	})
+		let fn = () => render(<div onclick={undefined} />, scratch);
+		expect(fn).not.to.throw();
+	});
 
 	it('should not print for attributes starting with on for Components', () => {
-		const Comp = () => <p>online</p>
-		let fn = () => render(<Comp online={false} />, scratch)
-		expect(fn).not.to.throw()
-	})
+		const Comp = () => <p>online</p>;
+		let fn = () => render(<Comp online={false} />, scratch);
+		expect(fn).not.to.throw();
+	});
 
 	it('should print an error on invalid handler', () => {
-		let fn = () => render(<div onclick="a" />, scratch)
-		expect(fn).to.throw(/"onclick" property should be a function/)
-	})
+		let fn = () => render(<div onclick="a" />, scratch);
+		expect(fn).to.throw(/"onclick" property should be a function/);
+	});
 
 	it('should NOT print an error on valid refs', () => {
-		let noop = () => {}
-		render(<div ref={noop} />, scratch)
+		let noop = () => {};
+		render(<div ref={noop} />, scratch);
 
-		let ref = createRef()
-		render(<div ref={ref} />, scratch)
-		expect(console.error).to.not.be.called
-	})
+		let ref = createRef();
+		render(<div ref={ref} />, scratch);
+		expect(console.error).to.not.be.called;
+	});
 
 	it('throws an error if a component rerenders too many times', () => {
-		let rerenderCount = 0
+		let rerenderCount = 0;
 		function TestComponent({ loop = false }) {
-			const [count, setCount] = useState(0)
+			const [count, setCount] = useState(0);
 			if (loop) {
-				setCount(count + 1)
+				setCount(count + 1);
 			}
 
 			if (count > 30) {
 				expect.fail(
 					'Repeated rerenders did not cause the expected error. This test is failing.'
-				)
+				);
 			}
 
-			rerenderCount += 1
-			return <div />
+			rerenderCount += 1;
+			return <div />;
 		}
 
 		expect(() => {
@@ -300,31 +300,31 @@ describe('debug', () => {
 					<TestComponent loop />
 				</Fragment>,
 				scratch
-			)
-		}).to.throw(/Too many re-renders/)
+			);
+		}).to.throw(/Too many re-renders/);
 		// 1 for first TestComponent + 24 for second TestComponent
-		expect(rerenderCount).to.equal(25)
-	})
+		expect(rerenderCount).to.equal(25);
+	});
 
 	it('does not throw an error if a component renders many times in different cycles', () => {
-		let set
+		let set;
 		function TestComponent() {
-			const [count, setCount] = useState(0)
-			set = () => setCount(count + 1)
-			return <div>{count}</div>
+			const [count, setCount] = useState(0);
+			set = () => setCount(count + 1);
+			return <div>{count}</div>;
 		}
 
-		render(<TestComponent />, scratch)
+		render(<TestComponent />, scratch);
 		for (let i = 0; i < 30; i++) {
-			set()
-			rerender()
+			set();
+			rerender();
 		}
-		expect(scratch.innerHTML).to.equal('<div>30</div>')
-	})
+		expect(scratch.innerHTML).to.equal('<div>30</div>');
+	});
 
 	describe('duplicate keys', () => {
-		const List = props => <ul>{props.children}</ul>
-		const ListItem = props => <li>{props.children}</li>
+		const List = props => <ul>{props.children}</ul>;
+		const ListItem = props => <li>{props.children}</li>;
 
 		it('should print an error on duplicate keys with DOM nodes', () => {
 			render(
@@ -333,34 +333,34 @@ describe('debug', () => {
 					<span key="a" />
 				</div>,
 				scratch
-			)
-			expect(console.error).to.be.calledOnce
-		})
+			);
+			expect(console.error).to.be.calledOnce;
+		});
 
 		it('should allow distinct object keys', () => {
-			const A = { is: 'A' }
-			const B = { is: 'B' }
+			const A = { is: 'A' };
+			const B = { is: 'B' };
 			render(
 				<div>
 					<span key={A} />
 					<span key={B} />
 				</div>,
 				scratch
-			)
-			expect(console.error).not.to.be.called
-		})
+			);
+			expect(console.error).not.to.be.called;
+		});
 
 		it('should print an error for duplicate object keys', () => {
-			const A = { is: 'A' }
+			const A = { is: 'A' };
 			render(
 				<div>
 					<span key={A} />
 					<span key={A} />
 				</div>,
 				scratch
-			)
-			expect(console.error).to.be.calledOnce
-		})
+			);
+			expect(console.error).to.be.calledOnce;
+		});
 
 		it('should print an error on duplicate keys with Components', () => {
 			function App() {
@@ -371,12 +371,12 @@ describe('debug', () => {
 						<ListItem key="b">d</ListItem>
 						<ListItem key="d">d</ListItem>
 					</List>
-				)
+				);
 			}
 
-			render(<App />, scratch)
-			expect(console.error).to.be.calledOnce
-		})
+			render(<App />, scratch);
+			expect(console.error).to.be.calledOnce;
+		});
 
 		it('should print an error on duplicate keys with Fragments', () => {
 			function App() {
@@ -395,13 +395,13 @@ describe('debug', () => {
 						</List>
 						<div key="list">sibling</div>
 					</Fragment>
-				)
+				);
 			}
 
-			render(<App />, scratch)
-			expect(console.error).to.be.calledTwice
-		})
-	})
+			render(<App />, scratch);
+			expect(console.error).to.be.calledTwice;
+		});
+	});
 
 	describe('table markup', () => {
 		it('missing <tbody>/<thead>/<tfoot>/<table>', () => {
@@ -411,10 +411,10 @@ describe('debug', () => {
 						<td>hi</td>
 					</tr>
 				</div>
-			)
-			render(<Table />, scratch)
-			expect(console.error).to.be.calledOnce
-		})
+			);
+			render(<Table />, scratch);
+			expect(console.error).to.be.calledOnce;
+		});
 
 		it('missing <table> with <thead>', () => {
 			const Table = () => (
@@ -425,10 +425,10 @@ describe('debug', () => {
 						</tr>
 					</thead>
 				</div>
-			)
-			render(<Table />, scratch)
-			expect(console.error).to.be.calledOnce
-		})
+			);
+			render(<Table />, scratch);
+			expect(console.error).to.be.calledOnce;
+		});
 
 		it('missing <table> with <tbody>', () => {
 			const Table = () => (
@@ -439,10 +439,10 @@ describe('debug', () => {
 						</tr>
 					</tbody>
 				</div>
-			)
-			render(<Table />, scratch)
-			expect(console.error).to.be.calledOnce
-		})
+			);
+			render(<Table />, scratch);
+			expect(console.error).to.be.calledOnce;
+		});
 
 		it('missing <table> with <tfoot>', () => {
 			const Table = () => (
@@ -453,10 +453,10 @@ describe('debug', () => {
 						</tr>
 					</tfoot>
 				</div>
-			)
-			render(<Table />, scratch)
-			expect(console.error).to.be.calledOnce
-		})
+			);
+			render(<Table />, scratch);
+			expect(console.error).to.be.calledOnce;
+		});
 
 		it('missing <tr>', () => {
 			const Table = () => (
@@ -465,36 +465,36 @@ describe('debug', () => {
 						<td>Hi</td>
 					</tbody>
 				</table>
-			)
-			render(<Table />, scratch)
-			expect(console.error).to.be.calledOnce
-		})
+			);
+			render(<Table />, scratch);
+			expect(console.error).to.be.calledOnce;
+		});
 
 		it('missing <tr> with td component', () => {
-			const Cell = ({ children }) => <td>{children}</td>
+			const Cell = ({ children }) => <td>{children}</td>;
 			const Table = () => (
 				<table>
 					<tbody>
 						<Cell>Hi</Cell>
 					</tbody>
 				</table>
-			)
-			render(<Table />, scratch)
-			expect(console.error).to.be.calledOnce
-		})
+			);
+			render(<Table />, scratch);
+			expect(console.error).to.be.calledOnce;
+		});
 
 		it('missing <tr> with th component', () => {
-			const Cell = ({ children }) => <th>{children}</th>
+			const Cell = ({ children }) => <th>{children}</th>;
 			const Table = () => (
 				<table>
 					<tbody>
 						<Cell>Hi</Cell>
 					</tbody>
 				</table>
-			)
-			render(<Table />, scratch)
-			expect(console.error).to.be.calledOnce
-		})
+			);
+			render(<Table />, scratch);
+			expect(console.error).to.be.calledOnce;
+		});
 
 		it('Should accept <td> instead of <th> in <thead>', () => {
 			const Table = () => (
@@ -505,13 +505,13 @@ describe('debug', () => {
 						</tr>
 					</thead>
 				</table>
-			)
-			render(<Table />, scratch)
-			expect(console.error).to.not.be.called
-		})
+			);
+			render(<Table />, scratch);
+			expect(console.error).to.not.be.called;
+		});
 
 		it('Accepts well formed table with TD components', () => {
-			const Cell = ({ children }) => <td>{children}</td>
+			const Cell = ({ children }) => <td>{children}</td>;
 			const Table = () => (
 				<table>
 					<thead>
@@ -530,10 +530,10 @@ describe('debug', () => {
 						</tr>
 					</tfoot>
 				</table>
-			)
-			render(<Table />, scratch)
-			expect(console.error).to.not.be.called
-		})
+			);
+			render(<Table />, scratch);
+			expect(console.error).to.not.be.called;
+		});
 
 		it('Accepts well formed table', () => {
 			const Table = () => (
@@ -554,10 +554,10 @@ describe('debug', () => {
 						</tr>
 					</tfoot>
 				</table>
-			)
-			render(<Table />, scratch)
-			expect(console.error).to.not.be.called
-		})
+			);
+			render(<Table />, scratch);
+			expect(console.error).to.not.be.called;
+		});
 
 		it('Accepts minimal well formed table', () => {
 			const Table = () => (
@@ -571,23 +571,23 @@ describe('debug', () => {
 						</tr>
 					</tbody>
 				</table>
-			)
-			render(<Table />, scratch)
-			expect(console.error).to.not.be.called
-		})
+			);
+			render(<Table />, scratch);
+			expect(console.error).to.not.be.called;
+		});
 
 		it('should include DOM parents outside of root node', () => {
 			const Table = () => (
 				<tr>
 					<td>Head</td>
 				</tr>
-			)
+			);
 
-			const table = document.createElement('table')
-			scratch.appendChild(table)
-			render(<Table />, table)
-			expect(console.error).to.not.be.called
-		})
+			const table = document.createElement('table');
+			scratch.appendChild(table);
+			render(<Table />, table);
+			expect(console.error).to.not.be.called;
+		});
 
 		it('should warn for improper nested table', () => {
 			const Table = () => (
@@ -598,11 +598,11 @@ describe('debug', () => {
 						</tr>
 					</tbody>
 				</table>
-			)
+			);
 
-			render(<Table />, scratch)
-			expect(console.error).to.be.calledOnce
-		})
+			render(<Table />, scratch);
+			expect(console.error).to.be.calledOnce;
+		});
 
 		it('accepts valid nested tables', () => {
 			const Table = () => (
@@ -629,93 +629,93 @@ describe('debug', () => {
 						</tr>
 					</tbody>
 				</table>
-			)
+			);
 
-			render(<Table />, scratch)
-			expect(console.error).to.not.be.called
-		})
-	})
+			render(<Table />, scratch);
+			expect(console.error).to.not.be.called;
+		});
+	});
 
 	describe('paragraph nesting', () => {
 		it('should not warn a regular text paragraph', () => {
-			const Paragraph = () => <p>Hello world</p>
+			const Paragraph = () => <p>Hello world</p>;
 
-			render(<Paragraph />, scratch)
-			expect(console.error).to.not.be.called
-		})
+			render(<Paragraph />, scratch);
+			expect(console.error).to.not.be.called;
+		});
 
 		it('should not crash for an empty pragraph', () => {
-			const Paragraph = () => <p />
+			const Paragraph = () => <p />;
 
-			render(<Paragraph />, scratch)
-			expect(console.error).to.not.be.called
-		})
+			render(<Paragraph />, scratch);
+			expect(console.error).to.not.be.called;
+		});
 
 		it('should warn for nesting illegal dom-nodes under a paragraph', () => {
 			const Paragraph = () => (
 				<p>
 					<h1>Hello world</h1>
 				</p>
-			)
+			);
 
-			render(<Paragraph />, scratch)
-			expect(console.error).to.be.calledOnce
-		})
+			render(<Paragraph />, scratch);
+			expect(console.error).to.be.calledOnce;
+		});
 
 		it('should warn for nesting illegal dom-nodes under a paragraph as func', () => {
-			const Title = ({ children }) => <h1>{children}</h1>
+			const Title = ({ children }) => <h1>{children}</h1>;
 			const Paragraph = () => (
 				<p>
 					<Title>Hello world</Title>
 				</p>
-			)
+			);
 
-			render(<Paragraph />, scratch)
-			expect(console.error).to.be.calledOnce
-		})
+			render(<Paragraph />, scratch);
+			expect(console.error).to.be.calledOnce;
+		});
 
 		it('should not warn for nesting span under a paragraph', () => {
 			const Paragraph = () => (
 				<p>
 					<span>Hello world</span>
 				</p>
-			)
+			);
 
-			render(<Paragraph />, scratch)
-			expect(console.error).to.not.be.called
-		})
-	})
+			render(<Paragraph />, scratch);
+			expect(console.error).to.not.be.called;
+		});
+	});
 
 	describe('button nesting', () => {
 		it('should not warn on a regular button', () => {
-			const Button = () => <button>Hello world</button>
+			const Button = () => <button>Hello world</button>;
 
-			render(<Button />, scratch)
-			expect(console.error).to.not.be.called
-		})
+			render(<Button />, scratch);
+			expect(console.error).to.not.be.called;
+		});
 
 		it('should warn for nesting illegal dom-nodes under a button', () => {
 			const Button = () => (
 				<button>
 					<button>Hello world</button>
 				</button>
-			)
+			);
 
-			render(<Button />, scratch)
-			expect(console.error).to.be.calledOnce
-		})
+			render(<Button />, scratch);
+			expect(console.error).to.be.calledOnce;
+		});
 
 		it('should warn for nesting illegal dom-nodes under a button as func', () => {
-			const ButtonChild = ({ children }) => <button>{children}</button>
+			const ButtonChild = ({ children }) => <button>{children}</button>;
 			const Button = () => (
 				<button>
 					<ButtonChild>Hello world</ButtonChild>
 				</button>
-			)
+			);
 
-			render(<Button />, scratch)
-			expect(console.error).to.be.calledOnce
-		})
+			render(<Button />, scratch);
+			expect(console.error).to.be.calledOnce;
+		});
 
 		it('should not warn for nesting non-interactive content under a button', () => {
 			const Button = () => (
@@ -723,43 +723,43 @@ describe('debug', () => {
 					<span>Hello </span>
 					<a>World</a>
 				</button>
-			)
+			);
 
-			render(<Button />, scratch)
-			expect(console.error).to.not.be.called
-		})
-	})
+			render(<Button />, scratch);
+			expect(console.error).to.not.be.called;
+		});
+	});
 
 	describe('anchor nesting', () => {
 		it('should not warn a regular anchor', () => {
-			const Anchor = () => <a>Hello world</a>
+			const Anchor = () => <a>Hello world</a>;
 
-			render(<Anchor />, scratch)
-			expect(console.error).to.not.be.called
-		})
+			render(<Anchor />, scratch);
+			expect(console.error).to.not.be.called;
+		});
 
 		it('should warn for nesting illegal dom-nodes under an anchor', () => {
 			const Anchor = () => (
 				<a>
 					<a>Hello world</a>
 				</a>
-			)
+			);
 
-			render(<Anchor />, scratch)
-			expect(console.error).to.be.calledOnce
-		})
+			render(<Anchor />, scratch);
+			expect(console.error).to.be.calledOnce;
+		});
 
 		it('should warn for nesting illegal dom-nodes under an anchor as func', () => {
-			const AnchorChild = ({ children }) => <a>{children}</a>
+			const AnchorChild = ({ children }) => <a>{children}</a>;
 			const Anchor = () => (
 				<a>
 					<AnchorChild>Hello world</AnchorChild>
 				</a>
-			)
+			);
 
-			render(<Anchor />, scratch)
-			expect(console.error).to.be.calledOnce
-		})
+			render(<Anchor />, scratch);
+			expect(console.error).to.be.calledOnce;
+		});
 
 		it('should not warn for nesting non-interactive content under an anchor', () => {
 			const Anchor = () => (
@@ -767,30 +767,30 @@ describe('debug', () => {
 					<span>Hello </span>
 					<button>World</button>
 				</a>
-			)
+			);
 
-			render(<Anchor />, scratch)
-			expect(console.error).to.not.be.called
-		})
-	})
+			render(<Anchor />, scratch);
+			expect(console.error).to.not.be.called;
+		});
+	});
 
 	describe('PropTypes', () => {
 		beforeEach(() => {
-			resetPropWarnings()
-		})
+			resetPropWarnings();
+		});
 
 		it("should fail if props don't match prop-types", () => {
 			function Foo(props) {
-				return <h1>{props.text}</h1>
+				return <h1>{props.text}</h1>;
 			}
 
 			Foo.propTypes = {
 				text: PropTypes.string.isRequired
-			}
+			};
 
-			render(<Foo text={123} />, scratch)
+			render(<Foo text={123} />, scratch);
 
-			expect(console.error).to.be.calledOnce
+			expect(console.error).to.be.calledOnce;
 
 			// The message here may change when the "prop-types" library is updated,
 			// but we check it exactly to make sure all parameters were supplied
@@ -799,62 +799,62 @@ describe('debug', () => {
 				sinon.match(
 					/^Failed prop type: Invalid prop `text` of type `number` supplied to `Foo`, expected `string`\.\n {2}in Foo \(at (.*)[/\\]debug[/\\]test[/\\]browser[/\\]debug\.test\.js:[0-9]+\)$/m
 				)
-			)
-		})
+			);
+		});
 
 		it('should only log a given prop type error once', () => {
 			function Foo(props) {
-				return <h1>{props.text}</h1>
+				return <h1>{props.text}</h1>;
 			}
 
 			Foo.propTypes = {
 				text: PropTypes.string.isRequired,
 				count: PropTypes.number
-			}
+			};
 
 			// Trigger the same error twice. The error should only be logged
 			// once.
-			render(<Foo text={123} />, scratch)
-			render(<Foo text={123} />, scratch)
+			render(<Foo text={123} />, scratch);
+			render(<Foo text={123} />, scratch);
 
-			expect(console.error).to.be.calledOnce
+			expect(console.error).to.be.calledOnce;
 
 			// Trigger a different error. This should result in a new log
 			// message.
-			console.error.resetHistory()
-			render(<Foo text="ok" count="123" />, scratch)
-			expect(console.error).to.be.calledOnce
-		})
+			console.error.resetHistory();
+			render(<Foo text="ok" count="123" />, scratch);
+			expect(console.error).to.be.calledOnce;
+		});
 
 		it('should render with error logged when validator gets signal and throws exception', () => {
 			function Baz(props) {
-				return <h1>{props.unhappy}</h1>
+				return <h1>{props.unhappy}</h1>;
 			}
 
 			Baz.propTypes = {
 				unhappy: function alwaysThrows(obj, key) {
-					if (obj[key] === 'signal') throw Error('got prop')
+					if (obj[key] === 'signal') throw Error('got prop');
 				}
-			}
+			};
 
-			render(<Baz unhappy={'signal'} />, scratch)
+			render(<Baz unhappy={'signal'} />, scratch);
 
-			expect(console.error).to.be.calledOnce
-			expect(errors[0].includes('got prop')).to.equal(true)
-			expect(serializeHtml(scratch)).to.equal('<h1>signal</h1>')
-		})
+			expect(console.error).to.be.calledOnce;
+			expect(errors[0].includes('got prop')).to.equal(true);
+			expect(serializeHtml(scratch)).to.equal('<h1>signal</h1>');
+		});
 
 		it('should not print to console when types are correct', () => {
 			function Bar(props) {
-				return <h1>{props.text}</h1>
+				return <h1>{props.text}</h1>;
 			}
 
 			Bar.propTypes = {
 				text: PropTypes.string.isRequired
-			}
+			};
 
-			render(<Bar text="foo" />, scratch)
-			expect(console.error).to.not.be.called
-		})
-	})
-})
+			render(<Bar text="foo" />, scratch);
+			expect(console.error).to.not.be.called;
+		});
+	});
+});

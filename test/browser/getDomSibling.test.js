@@ -1,22 +1,22 @@
-import { createElement, render, Fragment } from '../../src/'
-import { getDomSibling } from '../../src/component'
-import { setupScratch, teardown } from '../_util/helpers'
+import { createElement, render, Fragment } from '../../src/';
+import { getDomSibling } from '../../src/component';
+import { setupScratch, teardown } from '../_util/helpers';
 
 /** @jsx createElement */
 
 describe('getDomSibling', () => {
 	/** @type {HTMLDivElement} */
-	let scratch
+	let scratch;
 
-	const getRoot = dom => dom._children
+	const getRoot = dom => dom._children;
 
 	beforeEach(() => {
-		scratch = setupScratch()
-	})
+		scratch = setupScratch();
+	});
 
 	afterEach(() => {
-		teardown(scratch)
-	})
+		teardown(scratch);
+	});
 
 	it('should find direct sibling', () => {
 		render(
@@ -25,10 +25,10 @@ describe('getDomSibling', () => {
 				<div>B</div>
 			</div>,
 			scratch
-		)
-		let vnode = getRoot(scratch)._children[0]._children[0]
-		expect(getDomSibling(vnode)).to.equalNode(scratch.firstChild.childNodes[1])
-	})
+		);
+		let vnode = getRoot(scratch)._children[0]._children[0];
+		expect(getDomSibling(vnode)).to.equalNode(scratch.firstChild.childNodes[1]);
+	});
 
 	it('should find direct text node sibling', () => {
 		render(
@@ -36,10 +36,10 @@ describe('getDomSibling', () => {
 				<div>A</div>B
 			</div>,
 			scratch
-		)
-		let vnode = getRoot(scratch)._children[0]._children[0]
-		expect(getDomSibling(vnode)).to.equalNode(scratch.firstChild.childNodes[1])
-	})
+		);
+		let vnode = getRoot(scratch)._children[0]._children[0];
+		expect(getDomSibling(vnode)).to.equalNode(scratch.firstChild.childNodes[1]);
+	});
 
 	it('should find nested text node sibling', () => {
 		render(
@@ -50,16 +50,16 @@ describe('getDomSibling', () => {
 				<Fragment>B</Fragment>
 			</div>,
 			scratch
-		)
-		let vnode = getRoot(scratch)._children[0]._children[0]
-		expect(getDomSibling(vnode)).to.equalNode(scratch.firstChild.childNodes[1])
-	})
+		);
+		let vnode = getRoot(scratch)._children[0]._children[0];
+		expect(getDomSibling(vnode)).to.equalNode(scratch.firstChild.childNodes[1]);
+	});
 
 	it('should find text node sibling with placeholder', () => {
-		render(<div>A{null}B</div>, scratch)
-		let vnode = getRoot(scratch)._children[0]._children[0]
-		expect(getDomSibling(vnode)).to.equalNode(scratch.firstChild.childNodes[1])
-	})
+		render(<div>A{null}B</div>, scratch);
+		let vnode = getRoot(scratch)._children[0]._children[0];
+		expect(getDomSibling(vnode)).to.equalNode(scratch.firstChild.childNodes[1]);
+	});
 
 	it('should find sibling with placeholder', () => {
 		render(
@@ -69,10 +69,10 @@ describe('getDomSibling', () => {
 				<div key="B">B</div>
 			</div>,
 			scratch
-		)
-		let vnode = getRoot(scratch)._children[0]._children[0]
-		expect(getDomSibling(vnode)).to.equalNode(scratch.firstChild.childNodes[1])
-	})
+		);
+		let vnode = getRoot(scratch)._children[0]._children[0];
+		expect(getDomSibling(vnode)).to.equalNode(scratch.firstChild.childNodes[1]);
+	});
 
 	it('should find sibling with nested placeholder', () => {
 		render(
@@ -86,10 +86,10 @@ describe('getDomSibling', () => {
 				</Fragment>
 			</div>,
 			scratch
-		)
-		let vnode = getRoot(scratch)._children[0]._children[0]._children[0]
-		expect(getDomSibling(vnode)).to.equalNode(scratch.firstChild.childNodes[1])
-	})
+		);
+		let vnode = getRoot(scratch)._children[0]._children[0]._children[0];
+		expect(getDomSibling(vnode)).to.equalNode(scratch.firstChild.childNodes[1]);
+	});
 
 	it('should find sibling in parent', () => {
 		render(
@@ -100,10 +100,10 @@ describe('getDomSibling', () => {
 				<div>B</div>
 			</div>,
 			scratch
-		)
-		let vnode = getRoot(scratch)._children[0]._children[0]._children[0]
-		expect(getDomSibling(vnode)).to.equalNode(scratch.firstChild.childNodes[1])
-	})
+		);
+		let vnode = getRoot(scratch)._children[0]._children[0]._children[0];
+		expect(getDomSibling(vnode)).to.equalNode(scratch.firstChild.childNodes[1]);
+	});
 
 	it('should find unrelated sibling from a DOM VNode', () => {
 		render(
@@ -129,16 +129,16 @@ describe('getDomSibling', () => {
 				</Fragment>
 			</div>,
 			scratch
-		)
+		);
 
 		let divAVNode =
 			getRoot(scratch)._children[0]._children[0]._children[0]._children[0]
-				._children[0]
-		expect(divAVNode.type).to.equal('div')
+				._children[0];
+		expect(divAVNode.type).to.equal('div');
 		expect(getDomSibling(divAVNode)).to.equalNode(
 			scratch.firstChild.childNodes[1]
-		)
-	})
+		);
+	});
 
 	it('should find unrelated sibling from a Fragment VNode', () => {
 		render(
@@ -157,18 +157,18 @@ describe('getDomSibling', () => {
 				</Fragment>
 			</div>,
 			scratch
-		)
+		);
 
 		let fragment =
-			getRoot(scratch)._children[0]._children[0]._children[0]._children[0]
-		expect(fragment.type).to.equal(Fragment)
+			getRoot(scratch)._children[0]._children[0]._children[0]._children[0];
+		expect(fragment.type).to.equal(Fragment);
 		expect(getDomSibling(fragment)).to.equalNode(
 			scratch.firstChild.childNodes[1]
-		)
-	})
+		);
+	});
 
 	it('should find unrelated sibling from a Component VNode', () => {
-		const Foo = props => props.children
+		const Foo = props => props.children;
 		render(
 			<div key="0">
 				<Fragment key="0.0">
@@ -185,16 +185,16 @@ describe('getDomSibling', () => {
 				</Fragment>
 			</div>,
 			scratch
-		)
+		);
 
 		let foo =
-			getRoot(scratch)._children[0]._children[0]._children[0]._children[0]
-		expect(foo.type).to.equal(Foo)
-		expect(getDomSibling(foo)).to.equalNode(scratch.firstChild.childNodes[1])
-	})
+			getRoot(scratch)._children[0]._children[0]._children[0]._children[0];
+		expect(foo.type).to.equal(Foo);
+		expect(getDomSibling(foo)).to.equalNode(scratch.firstChild.childNodes[1]);
+	});
 
 	it('should find sibling through components', () => {
-		const Foo = props => props.children
+		const Foo = props => props.children;
 		render(
 			<div key="0">
 				<Foo key="0.0">
@@ -208,17 +208,17 @@ describe('getDomSibling', () => {
 				</Foo>
 			</div>,
 			scratch
-		)
+		);
 
-		let divAVNode = getRoot(scratch)._children[0]._children[0]._children[0]
-		expect(divAVNode.type).to.equal('div')
+		let divAVNode = getRoot(scratch)._children[0]._children[0]._children[0];
+		expect(divAVNode.type).to.equal('div');
 		expect(getDomSibling(divAVNode)).to.equalNode(
 			scratch.firstChild.childNodes[1]
-		)
-	})
+		);
+	});
 
 	it('should find sibling rendered in Components that wrap JSX children', () => {
-		const Foo = props => <p key="p">{props.children}</p>
+		const Foo = props => <p key="p">{props.children}</p>;
 		render(
 			<div key="0">
 				<div key="A">A</div>
@@ -227,35 +227,35 @@ describe('getDomSibling', () => {
 				</Foo>
 			</div>,
 			scratch
-		)
+		);
 
-		let divAVNode = getRoot(scratch)._children[0]._children[0]
-		expect(divAVNode.type).to.equal('div')
+		let divAVNode = getRoot(scratch)._children[0]._children[0];
+		expect(divAVNode.type).to.equal('div');
 
-		let sibling = getDomSibling(divAVNode)
-		expect(sibling).to.equalNode(scratch.firstChild.childNodes[1])
-	})
+		let sibling = getDomSibling(divAVNode);
+		expect(sibling).to.equalNode(scratch.firstChild.childNodes[1]);
+	});
 
 	it('should find sibling rendered in Components without JSX children', () => {
-		const Foo = props => <p key="p">A paragraph</p>
+		const Foo = props => <p key="p">A paragraph</p>;
 		render(
 			<div key="0">
 				<div key="A">A</div>
 				<Foo key="Foo" />
 			</div>,
 			scratch
-		)
+		);
 
-		let divAVNode = getRoot(scratch)._children[0]._children[0]
-		expect(divAVNode.type).to.equal('div')
+		let divAVNode = getRoot(scratch)._children[0]._children[0];
+		expect(divAVNode.type).to.equal('div');
 
-		let sibling = getDomSibling(divAVNode)
-		expect(sibling).to.equalNode(scratch.firstChild.childNodes[1])
-	})
+		let sibling = getDomSibling(divAVNode);
+		expect(sibling).to.equalNode(scratch.firstChild.childNodes[1]);
+	});
 
 	it('should climb through Components without JSX children', () => {
-		const divAVNode = <div key="A">A</div>
-		const Foo = () => divAVNode
+		const divAVNode = <div key="A">A</div>;
+		const Foo = () => divAVNode;
 
 		render(
 			<div key="0">
@@ -263,11 +263,11 @@ describe('getDomSibling', () => {
 				<div key="B">B</div>
 			</div>,
 			scratch
-		)
+		);
 
-		let sibling = getDomSibling(divAVNode)
-		expect(sibling).to.equalNode(scratch.firstChild.childNodes[1])
-	})
+		let sibling = getDomSibling(divAVNode);
+		expect(sibling).to.equalNode(scratch.firstChild.childNodes[1]);
+	});
 
 	it('should return null if last sibling', () => {
 		render(
@@ -283,11 +283,11 @@ describe('getDomSibling', () => {
 				</Fragment>
 			</div>,
 			scratch
-		)
+		);
 
-		const divCVNode = getRoot(scratch)._children[0]._children[2]._children[0]
-		expect(getDomSibling(divCVNode)).to.equal(null)
-	})
+		const divCVNode = getRoot(scratch)._children[0]._children[2]._children[0];
+		expect(getDomSibling(divCVNode)).to.equal(null);
+	});
 
 	it('should return null if no sibling', () => {
 		render(
@@ -304,13 +304,13 @@ describe('getDomSibling', () => {
 				</Fragment>
 			</div>,
 			scratch
-		)
+		);
 
 		let divAVNode =
 			getRoot(scratch)._children[0]._children[0]._children[0]._children[0]
-				._children[0]
-		expect(getDomSibling(divAVNode)).to.equal(null)
-	})
+				._children[0];
+		expect(getDomSibling(divAVNode)).to.equal(null);
+	});
 
 	it('should return null if no sibling with lots of empty trees', () => {
 		render(
@@ -334,16 +334,16 @@ describe('getDomSibling', () => {
 				</Fragment>
 			</div>,
 			scratch
-		)
+		);
 
 		let divAVNode =
 			getRoot(scratch)._children[0]._children[0]._children[0]._children[0]
-				._children[0]
-		expect(getDomSibling(divAVNode)).to.equal(null)
-	})
+				._children[0];
+		expect(getDomSibling(divAVNode)).to.equal(null);
+	});
 
 	it('should return null if current parent has no siblings (even if parent has siblings at same level)', () => {
-		let divAVNode = <div key="A">A</div>
+		let divAVNode = <div key="A">A</div>;
 
 		render(
 			<div key="0">
@@ -358,8 +358,8 @@ describe('getDomSibling', () => {
 				</div>
 			</div>,
 			scratch
-		)
+		);
 
-		expect(getDomSibling(divAVNode)).to.equal(null)
-	})
-})
+		expect(getDomSibling(divAVNode)).to.equal(null);
+	});
+});

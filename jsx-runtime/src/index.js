@@ -1,10 +1,10 @@
-import { options, Fragment } from 'preact'
-import { encodeEntities } from './utils'
-import { IS_NON_DIMENSIONAL } from '../../src/constants'
+import { options, Fragment } from 'preact';
+import { encodeEntities } from './utils';
+import { IS_NON_DIMENSIONAL } from '../../src/constants';
 
-let vnodeId = 0
+let vnodeId = 0;
 
-const isArray = Array.isArray
+const isArray = Array.isArray;
 
 /**
  * @fileoverview
@@ -27,21 +27,21 @@ const isArray = Array.isArray
  * @param {unknown} [__self]
  */
 function createVNode(type, props, key, isStaticChildren, __source, __self) {
-	if (!props) props = {}
+	if (!props) props = {};
 	// We'll want to preserve `ref` in props to get rid of the need for
 	// forwardRef components in the future, but that should happen via
 	// a separate PR.
 	let normalizedProps = props,
 		ref,
-		i
+		i;
 
 	if ('ref' in normalizedProps) {
-		normalizedProps = {}
+		normalizedProps = {};
 		for (i in props) {
 			if (i == 'ref') {
-				ref = props[i]
+				ref = props[i];
 			} else {
-				normalizedProps[i] = props[i]
+				normalizedProps[i] = props[i];
 			}
 		}
 	}
@@ -64,19 +64,19 @@ function createVNode(type, props, key, isStaticChildren, __source, __self) {
 		_flags: 0,
 		__source,
 		__self
-	}
+	};
 
 	// If a Component VNode, check for and apply defaultProps.
 	// Note: `type` is often a String, and can be `undefined` in development.
 	if (typeof type === 'function' && (ref = type.defaultProps)) {
 		for (i in ref)
 			if (typeof normalizedProps[i] === 'undefined') {
-				normalizedProps[i] = ref[i]
+				normalizedProps[i] = ref[i];
 			}
 	}
 
-	if (options.vnode) options.vnode(vnode)
-	return vnode
+	if (options.vnode) options.vnode(vnode);
+	return vnode;
 }
 
 /**
@@ -87,14 +87,14 @@ function createVNode(type, props, key, isStaticChildren, __source, __self) {
  * @returns {VNode}
  */
 function jsxTemplate(templates, ...exprs) {
-	const vnode = createVNode(Fragment, { tpl: templates, exprs })
+	const vnode = createVNode(Fragment, { tpl: templates, exprs });
 	// Bypass render to string top level Fragment optimization
-	vnode.key = vnode._vnode
-	return vnode
+	vnode.key = vnode._vnode;
+	return vnode;
 }
 
-const JS_TO_CSS = {}
-const CSS_REGEX = /[A-Z]/g
+const JS_TO_CSS = {};
+const CSS_REGEX = /[A-Z]/g;
 
 /**
  * Serialize an HTML attribute to a string. This function is not
@@ -106,35 +106,35 @@ const CSS_REGEX = /[A-Z]/g
  */
 function jsxAttr(name, value) {
 	if (options.attr) {
-		const result = options.attr(name, value)
-		if (typeof result === 'string') return result
+		const result = options.attr(name, value);
+		if (typeof result === 'string') return result;
 	}
 
-	if (name === 'ref' || name === 'key') return ''
+	if (name === 'ref' || name === 'key') return '';
 	if (name === 'style' && typeof value === 'object') {
-		let str = ''
+		let str = '';
 		for (let prop in value) {
-			let val = value[prop]
+			let val = value[prop];
 			if (val != null && val !== '') {
 				const name =
 					prop[0] == '-'
 						? prop
 						: JS_TO_CSS[prop] ||
-							(JS_TO_CSS[prop] = prop.replace(CSS_REGEX, '-$&').toLowerCase())
+							(JS_TO_CSS[prop] = prop.replace(CSS_REGEX, '-$&').toLowerCase());
 
-				let suffix = ';'
+				let suffix = ';';
 				if (
 					typeof val === 'number' &&
 					// Exclude custom-attributes
 					!name.startsWith('--') &&
 					!IS_NON_DIMENSIONAL.test(name)
 				) {
-					suffix = 'px;'
+					suffix = 'px;';
 				}
-				str = str + name + ':' + val + suffix
+				str = str + name + ':' + val + suffix;
 			}
 		}
-		return name + '="' + str + '"'
+		return name + '="' + str + '"';
 	}
 
 	if (
@@ -143,10 +143,10 @@ function jsxAttr(name, value) {
 		typeof value === 'function' ||
 		typeof value === 'object'
 	) {
-		return ''
-	} else if (value === true) return name
+		return '';
+	} else if (value === true) return name;
 
-	return name + '="' + encodeEntities(value) + '"'
+	return name + '="' + encodeEntities(value) + '"';
 }
 
 /**
@@ -162,22 +162,22 @@ function jsxEscape(value) {
 		typeof value === 'boolean' ||
 		typeof value === 'function'
 	) {
-		return null
+		return null;
 	}
 
 	if (typeof value === 'object') {
 		// Check for VNode
-		if (value.constructor === undefined) return value
+		if (value.constructor === undefined) return value;
 
 		if (isArray(value)) {
 			for (let i = 0; i < value.length; i++) {
-				value[i] = jsxEscape(value[i])
+				value[i] = jsxEscape(value[i]);
 			}
-			return value
+			return value;
 		}
 	}
 
-	return encodeEntities('' + value)
+	return encodeEntities('' + value);
 }
 
 export {
@@ -189,4 +189,4 @@ export {
 	jsxTemplate,
 	jsxAttr,
 	jsxEscape
-}
+};

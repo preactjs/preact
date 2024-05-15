@@ -1,7 +1,7 @@
-import { options } from 'preact'
-import { initDevTools } from './devtools'
+import { options } from 'preact';
+import { initDevTools } from './devtools';
 
-initDevTools()
+initDevTools();
 
 /**
  * Display a custom label for a custom hook for the devtools panel
@@ -9,7 +9,7 @@ initDevTools()
  */
 export function addHookName(value, name) {
 	if (options._addHookName) {
-		options._addHookName(name)
+		options._addHookName(name);
 	}
-	return value
+	return value;
 }

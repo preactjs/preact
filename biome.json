@@ -39,7 +39,7 @@
       "jsxQuoteStyle": "double",
       "quoteProperties": "asNeeded",
       "trailingComma": "none",
-      "semicolons": "asNeeded",
+      "semicolons": "always",
       "arrowParentheses": "asNeeded",
       "bracketSpacing": true,
       "bracketSameLine": false,

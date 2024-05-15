@@ -1,58 +1,58 @@
-import { createElement, Component } from 'preact'
+import { createElement, Component } from 'preact';
 
-const COUNT = 500
-const LOOPS = 6
+const COUNT = 500;
+const LOOPS = 6;
 
 // Component.debounce = requestAnimationFrame;
 
 export default class Spiral extends Component {
-	state = { x: 0, y: 0, big: false, counter: 0 }
+	state = { x: 0, y: 0, big: false, counter: 0 };
 
 	handleClick = e => {
-		console.log('click')
-	}
+		console.log('click');
+	};
 
 	increment = () => {
-		if (this.stop) return
+		if (this.stop) return;
 		// this.setState({ counter: this.state.counter + 1 }, this.increment);
-		this.setState({ counter: this.state.counter + 1 })
+		this.setState({ counter: this.state.counter + 1 });
 		// this.forceUpdate();
-		requestAnimationFrame(this.increment)
-	}
+		requestAnimationFrame(this.increment);
+	};
 
 	setMouse({ pageX: x, pageY: y }) {
-		this.setState({ x, y })
-		return false
+		this.setState({ x, y });
+		return false;
 	}
 
 	setBig(big) {
-		this.setState({ big })
+		this.setState({ big });
 	}
 
 	componentDidMount() {
-		console.log('mount')
+		console.log('mount');
 
 		// let touch = navigator.maxTouchPoints > 1;
-		let touch = false
+		let touch = false;
 
 		// set mouse position state on move:
 		addEventListener(touch ? 'touchmove' : 'mousemove', e => {
-			this.setMouse(e.touches ? e.touches[0] : e)
-		})
+			this.setMouse(e.touches ? e.touches[0] : e);
+		});
 
 		// holding the mouse down enables big mode:
 		addEventListener(touch ? 'touchstart' : 'mousedown', e => {
-			this.setBig(true)
-			e.preventDefault()
-		})
-		addEventListener(touch ? 'touchend' : 'mouseup', e => this.setBig(false))
+			this.setBig(true);
+			e.preventDefault();
+		});
+		addEventListener(touch ? 'touchend' : 'mouseup', e => this.setBig(false));
 
-		requestAnimationFrame(this.increment)
+		requestAnimationFrame(this.increment);
 	}
 
 	componentWillUnmount() {
-		console.log('unmount')
-		this.stop = true
+		console.log('unmount');
+		this.stop = true;
 	}
 
 	// componentDidUpdate() {
@@ -65,14 +65,14 @@ export default class Spiral extends Component {
 		let max =
 				COUNT +
 				Math.round(Math.sin((counter / 90) * 2 * Math.PI) * COUNT * 0.5),
-			cursors = []
+			cursors = [];
 
 		// the advantage of JSX is that you can use the entirety of JS to "template":
 		for (let i = max; i--; ) {
 			let f = (i / max) * LOOPS,
 				θ = f * 2 * Math.PI,
 				m = 20 + i * 2,
-				hue = (f * 255 + counter * 10) % 255
+				hue = (f * 255 + counter * 10) % 255;
 			cursors[i] = (
 				<Cursor
 					big={big}
@@ -80,7 +80,7 @@ export default class Spiral extends Component {
 					x={(x + Math.sin(θ) * m) | 0}
 					y={(y + Math.cos(θ) * m) | 0}
 				/>
-			)
+			);
 		}
 
 		return (
@@ -88,7 +88,7 @@ export default class Spiral extends Component {
 				<Cursor label x={x} y={y} big={big} />
 				{cursors}
 			</div>
-		)
+		);
 	}
 }
 
@@ -96,28 +96,28 @@ export default class Spiral extends Component {
 class Cursor extends Component {
 	// get shared/pooled class object
 	getClass(big, label) {
-		let cl = 'cursor'
-		if (big) cl += ' big'
-		if (label) cl += ' label'
-		return cl
+		let cl = 'cursor';
+		if (big) cl += ' big';
+		if (label) cl += ' label';
+		return cl;
 	}
 
 	// skip any pointless re-renders
 	shouldComponentUpdate(props) {
 		for (let i in props)
-			if (i !== 'children' && props[i] !== this.props[i]) return true
-		return false
+			if (i !== 'children' && props[i] !== this.props[i]) return true;
+		return false;
 	}
 
 	// first argument is "props", the attributes passed to <Cursor ...>
 	render({ x, y, label, color, big }) {
-		let inner = null
+		let inner = null;
 		if (label)
 			inner = (
 				<span class="label">
 					{x},{y}
 				</span>
-			)
+			);
 		return (
 			<div
 				class={this.getClass(big, label)}
@@ -132,9 +132,9 @@ class Cursor extends Component {
 			>
 				{inner}
 			</div>
-		)
+		);
 	}
 }
 
 // Addendum: disable dragging on mobile
-addEventListener('touchstart', e => (e.preventDefault(), false))
+addEventListener('touchstart', e => (e.preventDefault(), false));

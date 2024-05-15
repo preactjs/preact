@@ -6,13 +6,13 @@ import {
 	Fragment,
 	RefObject,
 	RefCallback
-} from '../../'
+} from '../../';
 
 // Test Fixtures
-const Foo: FunctionalComponent = () => <span>Foo</span>
+const Foo: FunctionalComponent = () => <span>Foo</span>;
 class Bar extends Component {
 	render() {
-		return <span>Bar</span>
+		return <span>Bar</span>;
 	}
 }
 
@@ -20,19 +20,19 @@ class Bar extends Component {
 class CallbackRef extends Component {
 	divRef: RefCallback<HTMLDivElement> = div => {
 		if (div !== null) {
-			console.log(div.tagName)
+			console.log(div.tagName);
 		}
-	}
+	};
 	fooRef: RefCallback<Component> = foo => {
 		if (foo !== null) {
-			console.log(foo.base)
+			console.log(foo.base);
 		}
-	}
+	};
 	barRef: RefCallback<Bar> = bar => {
 		if (bar !== null) {
-			console.log(bar.base)
+			console.log(bar.base);
 		}
-	}
+	};
 
 	render() {
 		return (
@@ -41,26 +41,26 @@ class CallbackRef extends Component {
 				<Foo ref={this.fooRef} />
 				<Bar ref={this.barRef} />
 			</Fragment>
-		)
+		);
 	}
 }
 
 class CreateRefComponent extends Component {
-	private divRef: RefObject<HTMLDivElement> = createRef()
-	private fooRef: RefObject<Component> = createRef()
-	private barRef: RefObject<Bar> = createRef()
+	private divRef: RefObject<HTMLDivElement> = createRef();
+	private fooRef: RefObject<Component> = createRef();
+	private barRef: RefObject<Bar> = createRef();
 
 	componentDidMount() {
 		if (this.divRef.current != null) {
-			console.log(this.divRef.current.tagName)
+			console.log(this.divRef.current.tagName);
 		}
 
 		if (this.fooRef.current != null) {
-			console.log(this.fooRef.current.base)
+			console.log(this.fooRef.current.base);
 		}
 
 		if (this.barRef.current != null) {
-			console.log(this.barRef.current.base)
+			console.log(this.barRef.current.base);
 		}
 	}
 
@@ -71,6 +71,6 @@ class CreateRefComponent extends Component {
 				<Foo ref={this.fooRef} />
 				<Bar ref={this.barRef} />
 			</Fragment>
-		)
+		);
 	}
 }

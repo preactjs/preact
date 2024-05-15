@@ -1,7 +1,7 @@
 // see scheduler.mjs
 
 function unstable_runWithPriority(priority, callback) {
-	return callback()
+	return callback();
 }
 
 module.exports = {
@@ -12,4 +12,4 @@ module.exports = {
 	unstable_IdlePriority: 5,
 	unstable_runWithPriority,
 	unstable_now: performance.now.bind(performance)
-}
+};
