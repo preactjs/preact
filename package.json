@@ -105,7 +105,7 @@
   },
   "types": "src/index.d.ts",
   "scripts": {
-    "prepare": "run-s build && check-export-map",
+    "prepare": "husky && run-s build && check-export-map",
     "build": "npm-run-all --parallel build:*",
     "build:core": "microbundle build --raw --no-generateTypes -f cjs,esm,umd",
     "build:core-min": "microbundle build --raw --no-generateTypes -f cjs,esm,umd,iife src/cjs.js -o dist/preact.min.js",
@@ -143,11 +143,6 @@
     "**/*.{js,jsx,mjs,cjs,ts,tsx,yml,json,html,md,css,scss}": [
       "biome format --write --no-errors-on-unmatched"
     ]
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged"
-    }
   },
   "files": [
     "src",
@@ -227,7 +222,7 @@
     "diff": "^5.0.0",
     "errorstacks": "^2.4.0",
     "esbuild": "^0.14.50",
-    "husky": "^4.3.0",
+    "husky": "^9.0.11",
     "karma": "^6.3.16",
     "karma-chai-sinon": "^0.1.5",
     "karma-chrome-launcher": "^3.1.0",
