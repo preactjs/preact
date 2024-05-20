@@ -105,7 +105,7 @@
   },
   "types": "src/index.d.ts",
   "scripts": {
-    "prepare": "run-s build && check-export-map",
+    "prepare": "husky && run-s build && check-export-map",
     "build": "npm-run-all --parallel build:*",
     "build:core": "microbundle build --raw --no-generateTypes -f cjs,esm,umd",
     "build:core-min": "microbundle build --raw --no-generateTypes -f cjs,esm,umd,iife src/cjs.js -o dist/preact.min.js",
