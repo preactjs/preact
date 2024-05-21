@@ -154,7 +154,6 @@ class ComponentWithFunctionChild extends Component<{
 		return null;
 	}
 }
-
 <ComponentWithFunctionChild>
 	{num => num.toFixed(2)}
 </ComponentWithFunctionChild>;
@@ -164,7 +163,6 @@ class ComponentWithStringChild extends Component<{ children: string }> {
 		return null;
 	}
 }
-
 <ComponentWithStringChild>child</ComponentWithStringChild>;
 
 class ComponentWithNumberChild extends Component<{ children: number }> {
@@ -172,7 +170,6 @@ class ComponentWithNumberChild extends Component<{ children: number }> {
 		return null;
 	}
 }
-
 <ComponentWithNumberChild>{1}</ComponentWithNumberChild>;
 
 class ComponentWithBooleanChild extends Component<{ children: boolean }> {
@@ -180,7 +177,6 @@ class ComponentWithBooleanChild extends Component<{ children: boolean }> {
 		return null;
 	}
 }
-
 <ComponentWithBooleanChild>{false}</ComponentWithBooleanChild>;
 
 class ComponentWithNullChild extends Component<{ children: null }> {
@@ -188,7 +184,6 @@ class ComponentWithNullChild extends Component<{ children: null }> {
 		return null;
 	}
 }
-
 <ComponentWithNullChild>{null}</ComponentWithNullChild>;
 
 class ComponentWithNumberChildren extends Component<{ children: number[] }> {
@@ -196,7 +191,6 @@ class ComponentWithNumberChildren extends Component<{ children: number[] }> {
 		return null;
 	}
 }
-
 <ComponentWithNumberChildren>
 	{1}
 	{2}

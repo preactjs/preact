@@ -176,7 +176,9 @@ declare namespace React {
 
 	export type ComponentPropsWithRef<
 		C extends ComponentType<any> | keyof JSXInternal.IntrinsicElements
-	> = C extends new (props: infer P) => Component<any, any>
+	> = C extends new (
+		props: infer P
+	) => Component<any, any>
 		? PropsWithoutRef<P> & RefAttributes<InstanceType<C>>
 		: ComponentProps<C>;
 

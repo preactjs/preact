@@ -2780,7 +2780,7 @@ describe('Components', () => {
 			}
 
 			class App extends Component {
-				children = (<Child parent={this} />);
+				children = <Child parent={this} />;
 				render() {
 					return this.children;
 				}

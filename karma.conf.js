@@ -1,5 +1,3 @@
-/*eslint no-var:0, object-shorthand:0 */
-
 var coverage = String(process.env.COVERAGE) === 'true',
 	minify = String(process.env.MINIFY) === 'true',
 	ci = String(process.env.CI).match(/^(1|true)$/gi),
@@ -214,7 +212,7 @@ function createEsbuildPlugin() {
 											}
 										}
 									]
-							  ]
+								]
 							: [],
 						plugins: [
 							coverage && [
