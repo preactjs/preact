@@ -136,7 +136,7 @@ function renderComponent(component) {
 			newVNode,
 			oldVNode,
 			component._globalContext,
-			component._parentDom.ownerSVGElement !== undefined,
+			component._parentDom.namespaceURI,
 			oldVNode._flags & MODE_HYDRATE ? [oldDom] : null,
 			commitQueue,
 			oldDom == null ? getDomSibling(oldVNode) : oldDom,

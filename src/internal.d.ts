@@ -83,8 +83,8 @@ declare global {
 	export type ComponentType<P = {}> = ComponentClass<P> | FunctionComponent<P>;
 
 	export interface PreactElement extends preact.ContainerNode {
-		// SVG detection
-		readonly ownerSVGElement?: SVGElement['ownerSVGElement'];
+		// Namespace detection
+		readonly namespaceURI?: string;
 		// Property used to update Text nodes
 		data?: CharacterData['data'];
 		// Property to set __dangerouslySetInnerHTML

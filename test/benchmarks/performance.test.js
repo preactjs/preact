@@ -306,7 +306,7 @@ describe('performance', function () {
 
 	it('should mutate styles/properties quickly', done => {
 		let counter = 0;
-		const keyLooper = n => c => c % n ? `${c}px` : c;
+		const keyLooper = n => c => (c % n ? `${c}px` : c);
 		const get = (obj, i) => obj[i % obj.length];
 		const CLASSES = ['foo', 'foo bar', '', 'baz-bat', null];
 		const STYLES = [];
