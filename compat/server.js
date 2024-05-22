@@ -15,7 +15,7 @@ try {
 	renderToPipeableStream = mod.default || mod.renderToPipeableStream || mod;
 } catch (e) {
 	throw Error(
-		'renderToPipeableStream() error: using outdated version of "preact-render-to-string" dependency.'
+		'renderToPipeableStream() error: update "preact-render-to-string" dependency to at least 6.5.0.'
 	);
 }
 
