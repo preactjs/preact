@@ -45,16 +45,16 @@ export function render(vnode, parentDom, replaceNode) {
 		!isHydrating && replaceNode
 			? [replaceNode]
 			: oldVNode
-			? null
-			: parentDom.firstChild
-			? slice.call(parentDom.childNodes)
-			: null,
+				? null
+				: parentDom.firstChild
+					? slice.call(parentDom.childNodes)
+					: null,
 		commitQueue,
 		!isHydrating && replaceNode
 			? replaceNode
 			: oldVNode
-			? oldVNode._dom
-			: parentDom.firstChild,
+				? oldVNode._dom
+				: parentDom.firstChild,
 		isHydrating,
 		refQueue
 	);

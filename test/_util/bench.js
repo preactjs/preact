@@ -27,7 +27,7 @@ export default function bench(benches, callback) {
 						bench.name === result.fastest.name
 							? 0
 							: (((result.fastest.hz - bench.hz) / result.fastest.hz) * 100) |
-							  0,
+								0,
 					hz: bench.hz.toFixed(bench.hz < 100 ? 2 : 0),
 					rme: bench.stats.rme.toFixed(2),
 					size: bench.stats.sample.length,

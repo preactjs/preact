@@ -30,7 +30,7 @@ describe('debug compat', () => {
 
 	afterEach(() => {
 		/** @type {*} */
-		(console.error).restore();
+		console.error.restore();
 		console.warn.restore();
 		teardown(scratch);
 

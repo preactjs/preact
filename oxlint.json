@@ -1,0 +1,42 @@
+{
+  "rules": {
+    "camelcase": [
+      1,
+      {
+        "allow": ["__test__*", "unstable_*", "UNSAFE_*"]
+      }
+    ],
+    "no-unused-vars": [
+      2,
+      {
+        "args": "none",
+        "varsIgnorePattern": "^h|React$"
+      }
+    ],
+    "typescript/no-namespace": 0,
+    "no-constant-binary-expression": 0,
+    "no-useless-catch": 0,
+    "no-empty-pattern": 0,
+    "prefer-rest-params": 0,
+    "prefer-spread": 0,
+    "no-cond-assign": 0,
+    "react/jsx-no-bind": 0,
+    "react/no-danger": "off",
+    "react/prefer-stateless-function": 0,
+    "react/sort-comp": 0,
+    "jest/valid-expect": 0,
+    "jest/no-disabled-tests": 0,
+    "jest/no-test-callback": 0,
+    "jest/expect-expect": 0,
+    "jest/no-standalone-expect": 0,
+    "jest/no-export": 0,
+    "react/no-find-dom-node": 0,
+    "react/no-direct-mutation-state": 0,
+    "react/no-children-prop": 0,
+    "react/jsx-key": 0,
+    "react/no-string-refs": 0,
+    "react/require-render-return": 0,
+    "unicorn/no-new-array": 0,
+    "unicorn/prefer-string-starts-ends-with": 0
+  }
+}

@@ -35,14 +35,17 @@ export function act(cb) {
 		try {
 			const result = cb();
 			if (isThenable(result)) {
-				return result.then(() => {
-					--actDepth;
-				}, (e) => {
-					--actDepth;
-					throw e;
-				})
+				return result.then(
+					() => {
+						--actDepth;
+					},
+					e => {
+						--actDepth;
+						throw e;
+					}
+				);
 			}
-		} catch(e) {
+		} catch (e) {
 			--actDepth;
 			throw e;
 		}

@@ -83,8 +83,8 @@ export type ComponentProps<
 > = C extends ComponentType<infer P>
 	? P
 	: C extends keyof JSXInternal.IntrinsicElements
-	? JSXInternal.IntrinsicElements[C]
-	: never;
+		? JSXInternal.IntrinsicElements[C]
+		: never;
 
 export interface FunctionComponent<P = {}> {
 	(props: RenderableProps<P>, context?: any): VNode<any> | null;
@@ -195,8 +195,8 @@ export function createElement(
 		| null,
 	...children: ComponentChildren[]
 ): VNode<
-	| JSXInternal.DOMAttributes<HTMLInputElement> &
-			ClassAttributes<HTMLInputElement>
+	JSXInternal.DOMAttributes<HTMLInputElement> &
+		ClassAttributes<HTMLInputElement>
 >;
 export function createElement<
 	P extends JSXInternal.HTMLAttributes<T>,
@@ -242,8 +242,8 @@ export function h(
 		| null,
 	...children: ComponentChildren[]
 ): VNode<
-	| JSXInternal.DOMAttributes<HTMLInputElement> &
-			ClassAttributes<HTMLInputElement>
+	JSXInternal.DOMAttributes<HTMLInputElement> &
+		ClassAttributes<HTMLInputElement>
 >;
 export function h<
 	P extends JSXInternal.HTMLAttributes<T>,
