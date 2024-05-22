@@ -13,6 +13,22 @@ function setStyle(style, key, value) {
 	}
 }
 
+const ATTRIBUTE_PROPS = new Set([
+	'width',
+	'height',
+	'href',
+	'list',
+	'form',
+	// Default value in browsers is `-1` and an empty string is
+	// cast to `0` instead
+	'tabIndex',
+	'download',
+	'rowSpan',
+	'colSpan',
+	'role',
+	'popover',
+])
+
 // A logical clock to solve issues like https://github.com/preactjs/preact/issues/3927.
 // When the DOM performs an event it leaves micro-ticks in between bubbling up which means that
 // an event can trigger on a newly reated DOM-node while the event bubbles up.
@@ -104,19 +120,7 @@ export function setProperty(dom, name, value, oldValue, namespace) {
 			// - className --> class
 			name = name.replace(/xlink(H|:h)/, 'h').replace(/sName$/, 's');
 		} else if (
-			name != 'width' &&
-			name != 'height' &&
-			name != 'href' &&
-			name != 'list' &&
-			name != 'form' &&
-			// Default value in browsers is `-1` and an empty string is
-			// cast to `0` instead
-			name != 'tabIndex' &&
-			name != 'download' &&
-			name != 'rowSpan' &&
-			name != 'colSpan' &&
-			name != 'role' &&
-			name != 'popover' &&
+			!ATTRIBUTE_PROPS.has(name) &&
 			name in dom
 		) {
 			try {
