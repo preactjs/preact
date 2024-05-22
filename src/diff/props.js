@@ -136,7 +136,7 @@ export function setProperty(dom, name, value, oldValue, namespace) {
 		if (typeof value == 'function') {
 			// never serialize functions as attribute values
 		} else if (value != null && (value !== false || name[4] === '-')) {
-			dom.setAttribute(name, name === 'popover' && value === true ? '' : value);
+			dom.setAttribute(name, name == 'popover' && value == true ? '' : value);
 		} else {
 			dom.removeAttribute(name);
 		}
