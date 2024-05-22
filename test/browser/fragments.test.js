@@ -874,13 +874,13 @@ describe('Fragment', () => {
 						<Fragment>
 							<Stateful />
 						</Fragment>
-				  ]
+					]
 				: [
 						<span />,
 						<Fragment>
 							<Stateful />
 						</Fragment>
-				  ];
+					];
 		}
 
 		render(<Foo condition={true} />, scratch);
@@ -1338,7 +1338,7 @@ describe('Fragment', () => {
 								<li>4</li>
 								<li>5</li>
 							</Fragment>
-					  ]
+						]
 					: [
 							<Fragment>
 								<li>4</li>
@@ -1348,7 +1348,7 @@ describe('Fragment', () => {
 							<li>1</li>,
 							<li>2</li>,
 							<li>3</li>
-					  ]}
+						]}
 			</ol>
 		);
 

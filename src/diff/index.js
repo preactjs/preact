@@ -18,7 +18,7 @@ import options from '../options';
  * @param {VNode} oldVNode The old virtual node
  * @param {object} globalContext The current context object. Modified by
  * getChildContext
- * @param {boolean} isSvg Whether or not this element is an SVG node
+ * @param {string} namespace Current namespace of the DOM node (HTML, SVG, or MathML)
  * @param {Array<PreactElement>} excessDomChildren
  * @param {Array<Component>} commitQueue List of components which have callbacks
  * to invoke in commitRoot
@@ -34,7 +34,7 @@ export function diff(
 	newVNode,
 	oldVNode,
 	globalContext,
-	isSvg,
+	namespace,
 	excessDomChildren,
 	commitQueue,
 	oldDom,
@@ -245,7 +245,7 @@ export function diff(
 				newVNode,
 				oldVNode,
 				globalContext,
-				isSvg,
+				namespace,
 				excessDomChildren,
 				commitQueue,
 				oldDom,
@@ -294,7 +294,7 @@ export function diff(
 			newVNode,
 			oldVNode,
 			globalContext,
-			isSvg,
+			namespace,
 			excessDomChildren,
 			commitQueue,
 			isHydrating,
@@ -341,7 +341,7 @@ export function commitRoot(commitQueue, root, refQueue) {
  * @param {VNode} newVNode The new virtual node
  * @param {VNode} oldVNode The old virtual node
  * @param {object} globalContext The current context object
- * @param {boolean} isSvg Whether or not this DOM node is an SVG node
+ * @param {string} namespace Current namespace of the DOM node (HTML, SVG, or MathML)
  * @param {Array<PreactElement>} excessDomChildren
  * @param {Array<Component>} commitQueue List of components which have callbacks
  * to invoke in commitRoot
@@ -354,7 +354,7 @@ function diffElementNodes(
 	newVNode,
 	oldVNode,
 	globalContext,
-	isSvg,
+	namespace,
 	excessDomChildren,
 	commitQueue,
 	isHydrating,
@@ -375,8 +375,11 @@ function diffElementNodes(
 	let inputValue;
 	let checked;
 
-	// Tracks entering and exiting SVG namespace when descending through the tree.
-	if (nodeType === 'svg') isSvg = true;
+	// Tracks entering and exiting namespaces when descending through the tree.
+	if (nodeType === 'svg') namespace = 'http://www.w3.org/2000/svg';
+	else if (nodeType === 'math')
+		namespace = 'http://www.w3.org/1998/Math/MathML';
+	else if (!namespace) namespace = 'http://www.w3.org/1999/xhtml';
 
 	if (excessDomChildren != null) {
 		for (i = 0; i < excessDomChildren.length; i++) {
@@ -402,11 +405,11 @@ function diffElementNodes(
 			return document.createTextNode(newProps);
 		}
 
-		if (isSvg) {
-			dom = document.createElementNS('http://www.w3.org/2000/svg', nodeType);
-		} else {
-			dom = document.createElement(nodeType, newProps.is && newProps);
-		}
+		dom = document.createElementNS(
+			namespace,
+			nodeType,
+			newProps.is && newProps
+		);
 
 		// we created a new parent, so none of the previously attached children can be reused:
 		excessDomChildren = null;
@@ -449,7 +452,7 @@ function diffElementNodes(
 				) {
 					continue;
 				}
-				setProperty(dom, i, null, value, isSvg);
+				setProperty(dom, i, null, value, namespace);
 			}
 		}
 
@@ -470,7 +473,7 @@ function diffElementNodes(
 				(!isHydrating || typeof value == 'function') &&
 				oldProps[i] !== value
 			) {
-				setProperty(dom, i, value, oldProps[i], isSvg);
+				setProperty(dom, i, value, oldProps[i], namespace);
 			}
 		}
 
@@ -496,7 +499,9 @@ function diffElementNodes(
 				newVNode,
 				oldVNode,
 				globalContext,
-				isSvg && nodeType !== 'foreignObject',
+				nodeType === 'foreignObject'
+					? 'http://www.w3.org/1999/xhtml'
+					: namespace,
 				excessDomChildren,
 				commitQueue,
 				excessDomChildren
@@ -530,12 +535,12 @@ function diffElementNodes(
 					// again, which triggers IE11 to re-evaluate the select value
 					(nodeType === 'option' && inputValue !== oldProps[i]))
 			) {
-				setProperty(dom, i, inputValue, oldProps[i], false);
+				setProperty(dom, i, inputValue, oldProps[i], namespace);
 			}
 
 			i = 'checked';
 			if (checked !== undefined && checked !== dom[i]) {
-				setProperty(dom, i, checked, oldProps[i], false);
+				setProperty(dom, i, checked, oldProps[i], namespace);
 			}
 		}
 	}
