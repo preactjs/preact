@@ -482,7 +482,7 @@ describe('render()', () => {
 		expect(scratch.innerHTML).to.equal("<div popover=\"\"></div>");
 	});
 
-	it('should support popover true boolean', () => {
+	it('should support popover false boolean', () => {
 		render(<div popover={false} />, scratch);
 		expect(scratch.innerHTML).to.equal("<div></div>");
 	});
