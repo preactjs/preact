@@ -472,6 +472,21 @@ describe('render()', () => {
 		expect(scratch.firstChild.spellcheck).to.equal(false);
 	});
 
+	it('should support popover auto', () => {
+		render(<div popover="auto" />, scratch);
+		expect(scratch.innerHTML).to.equal("<div popover=\"auto\"></div>");
+	});
+
+	it('should support popover true boolean', () => {
+		render(<div popover />, scratch);
+		expect(scratch.innerHTML).to.equal("<div popover=\"\"></div>");
+	});
+
+	it('should support popover false boolean', () => {
+		render(<div popover={false} />, scratch);
+		expect(scratch.innerHTML).to.equal("<div></div>");
+	});
+
 	// Test for preactjs/preact#4340
 	it('should respect defaultValue in render', () => {
 		scratch.innerHTML = '<input value="foo">';
