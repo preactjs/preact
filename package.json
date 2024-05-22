@@ -241,7 +241,7 @@
     "npm-merge-driver-install": "^1.1.1",
     "npm-run-all": "^4.0.0",
     "oxlint": "^0.3.4",
-    "preact-render-to-string": "^5.2.5",
+    "preact-render-to-string": "^6.5.0",
     "prop-types": "^15.7.2",
     "sade": "^1.7.4",
     "sinon": "^9.2.3",
