@@ -62,6 +62,8 @@ export function diff(
 		try {
 			let c, isNew, oldProps, oldState, snapshot, clearProcessingException;
 			let newProps = newVNode.props;
+			const isClassComponent =
+				'prototype' in newType && newType.prototype.render;
 
 			// Necessary for createContext api. Setting this property will pass
 			// the context value as `this.context` just for this component.
@@ -79,7 +81,7 @@ export function diff(
 				clearProcessingException = c._processingException = c._pendingError;
 			} else {
 				// Instantiate the new component
-				if ('prototype' in newType && newType.prototype.render) {
+				if (isClassComponent) {
 					// @ts-expect-error The check above verifies that newType is suppose to be constructed
 					newVNode._component = c = new newType(newProps, componentContext); // eslint-disable-line new-cap
 				} else {
@@ -103,11 +105,11 @@ export function diff(
 			}
 
 			// Invoke getDerivedStateFromProps
-			if (c._nextState == null) {
+			if (isClassComponent && c._nextState == null) {
 				c._nextState = c.state;
 			}
 
-			if (newType.getDerivedStateFromProps != null) {
+			if (isClassComponent && newType.getDerivedStateFromProps != null) {
 				if (c._nextState == c.state) {
 					c._nextState = assign({}, c._nextState);
 				}
@@ -125,17 +127,19 @@ export function diff(
 			// Invoke pre-render lifecycle methods
 			if (isNew) {
 				if (
+					isClassComponent &&
 					newType.getDerivedStateFromProps == null &&
 					c.componentWillMount != null
 				) {
 					c.componentWillMount();
 				}
 
-				if (c.componentDidMount != null) {
+				if (isClassComponent && c.componentDidMount != null) {
 					c._renderCallbacks.push(c.componentDidMount);
 				}
 			} else {
 				if (
+					isClassComponent &&
 					newType.getDerivedStateFromProps == null &&
 					newProps !== oldProps &&
 					c.componentWillReceiveProps != null
@@ -186,7 +190,7 @@ export function diff(
 					c.componentWillUpdate(newProps, c._nextState, componentContext);
 				}
 
-				if (c.componentDidUpdate != null) {
+				if (isClassComponent && c.componentDidUpdate != null) {
 					c._renderCallbacks.push(() => {
 						c.componentDidUpdate(oldProps, oldState, snapshot);
 					});
@@ -200,7 +204,7 @@ export function diff(
 
 			let renderHook = options._render,
 				count = 0;
-			if ('prototype' in newType && newType.prototype.render) {
+			if (isClassComponent) {
 				c.state = c._nextState;
 				c._dirty = false;
 
@@ -231,7 +235,7 @@ export function diff(
 				globalContext = assign(assign({}, globalContext), c.getChildContext());
 			}
 
-			if (!isNew && c.getSnapshotBeforeUpdate != null) {
+			if (isClassComponent && !isNew && c.getSnapshotBeforeUpdate != null) {
 				snapshot = c.getSnapshotBeforeUpdate(oldProps, oldState);
 			}
 
