@@ -1,4 +1,4 @@
-import { IS_NON_DIMENSIONAL } from '../constants';
+import { IS_NON_DIMENSIONAL, ATTRIBUTE_PROPS } from '../constants';
 import options from '../options';
 
 function setStyle(style, key, value) {
@@ -103,22 +103,7 @@ export function setProperty(dom, name, value, oldValue, namespace) {
 			// - xlink:href / xlinkHref --> href (xlink:href was removed from SVG and isn't needed)
 			// - className --> class
 			name = name.replace(/xlink(H|:h)/, 'h').replace(/sName$/, 's');
-		} else if (
-			name != 'width' &&
-			name != 'height' &&
-			name != 'href' &&
-			name != 'list' &&
-			name != 'form' &&
-			// Default value in browsers is `-1` and an empty string is
-			// cast to `0` instead
-			name != 'tabIndex' &&
-			name != 'download' &&
-			name != 'rowSpan' &&
-			name != 'colSpan' &&
-			name != 'role' &&
-			name != 'popover' &&
-			name in dom
-		) {
+		} else if (!ATTRIBUTE_PROPS.test(name) && name in dom) {
 			try {
 				dom[name] = value == null ? '' : value;
 				// labelled break is 1b smaller here than a return statement (sorry)
