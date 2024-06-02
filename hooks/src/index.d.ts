@@ -1,4 +1,4 @@
-import { ErrorInfo, PreactContext, Ref as PreactRef } from '../..';
+import { ErrorInfo, PreactContext, Ref, RefObject } from '../..';
 
 type Inputs = ReadonlyArray<unknown>;
 
@@ -52,9 +52,6 @@ export function useReducer<S, A, I>(
 
 /** @deprecated Use the `Ref` type instead. */
 type PropRef<T> = MutableRef<T>;
-interface Ref<T> {
-	readonly current: T | null;
-}
 
 interface MutableRef<T> {
 	current: T;
@@ -70,7 +67,7 @@ interface MutableRef<T> {
  * @param initialValue the initial value to store in the ref object
  */
 export function useRef<T>(initialValue: T): MutableRef<T>;
-export function useRef<T>(initialValue: T | null): Ref<T>;
+export function useRef<T>(initialValue: T | null): RefObject<T>;
 export function useRef<T = undefined>(): MutableRef<T | undefined>;
 
 type EffectCallback = () => void | (() => void);
@@ -92,7 +89,7 @@ type CreateHandle = () => object;
  * @param inputs If present, effect will only activate if the values in the list change (using ===).
  */
 export function useImperativeHandle<T, R extends T>(
-	ref: PreactRef<T>,
+	ref: Ref<T>,
 	create: () => R,
 	inputs?: Inputs
 ): void;

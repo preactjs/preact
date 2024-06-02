@@ -18,7 +18,6 @@ declare namespace React {
 	export import PropRef = _hooks.PropRef;
 	export import Reducer = _hooks.Reducer;
 	export import Dispatch = _hooks.Dispatch;
-	export import Ref = _hooks.Ref;
 	export import SetStateAction = _hooks.StateUpdater;
 	export import useCallback = _hooks.useCallback;
 	export import useContext = _hooks.useContext;
@@ -50,6 +49,7 @@ declare namespace React {
 	export import ComponentClass = preact.ComponentClass;
 	export import FC = preact.FunctionComponent;
 	export import createContext = preact.createContext;
+	export import Ref = preact.Ref;
 	export import createRef = preact.createRef;
 	export import Fragment = preact.Fragment;
 	export import createElement = preact.createElement;
