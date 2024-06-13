@@ -22,6 +22,7 @@ export function assign(obj, props) {
  * @param {preact.ContainerNode} node The node to remove
  */
 export function removeNode(node) {
+	if (node.nodeType === 8) return;
 	let parentNode = node.parentNode;
 	if (parentNode) parentNode.removeChild(node);
 }

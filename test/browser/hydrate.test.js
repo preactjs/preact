@@ -104,8 +104,8 @@ describe('hydrate()', () => {
 			</p>,
 			scratch
 		);
-		expect(scratch.innerHTML).to.equal('<p><i>0</i><b>1</b></p>');
-		expect(getLog()).to.deep.equal(['Comment.remove()']);
+		expect(scratch.innerHTML).to.equal('<p><i>0</i><!-- c --><b>1</b></p>');
+		expect(getLog()).to.deep.equal([]);
 	});
 
 	it('should reuse existing DOM when given components', () => {
@@ -471,14 +471,14 @@ describe('hydrate()', () => {
 	it('should skip comment nodes', () => {
 		scratch.innerHTML = '<p>hello <!-- c -->foo</p>';
 		hydrate(<p>hello {'foo'}</p>, scratch);
-		expect(scratch.innerHTML).to.equal('<p>hello foo</p>');
-		expect(getLog()).to.deep.equal(['Comment.remove()']);
+		expect(scratch.innerHTML).to.equal('<p>hello <!-- c -->foo</p>');
+		expect(getLog()).to.deep.equal([]);
 	});
 
 	it('should skip over multiple comment nodes', () => {
 		scratch.innerHTML = '<p>hello <!-- a --><!-- b -->foo</p>';
 		hydrate(<p>hello {'foo'}</p>, scratch);
-		expect(scratch.innerHTML).to.equal('<p>hello foo</p>');
-		expect(getLog()).to.deep.equal(['Comment.remove()', 'Comment.remove()']);
+		expect(scratch.innerHTML).to.equal('<p>hello <!-- a --><!-- b -->foo</p>');
+		expect(getLog()).to.deep.equal([]);
 	});
 });
