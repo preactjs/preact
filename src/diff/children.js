@@ -117,7 +117,7 @@ export function diffChildren(
 			oldVNode._children === childVNode._children
 		) {
 			// @ts-expect-error olDom should be present on a DOM node
-			if (oldDom && !parentDom.contains(oldDom)) {
+			if (oldDom && oldDom.nodeType === 1 && !parentDom.contains(oldDom)) {
 				oldDom = getDomSibling(oldVNode);
 			}
 			oldDom = insert(childVNode, oldDom, parentDom);
