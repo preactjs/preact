@@ -474,17 +474,17 @@ describe('render()', () => {
 
 	it('should support popover auto', () => {
 		render(<div popover="auto" />, scratch);
-		expect(scratch.innerHTML).to.equal("<div popover=\"auto\"></div>");
+		expect(scratch.innerHTML).to.equal('<div popover="auto"></div>');
 	});
 
 	it('should support popover true boolean', () => {
 		render(<div popover />, scratch);
-		expect(scratch.innerHTML).to.equal("<div popover=\"\"></div>");
+		expect(scratch.innerHTML).to.equal('<div popover=""></div>');
 	});
 
 	it('should support popover false boolean', () => {
 		render(<div popover={false} />, scratch);
-		expect(scratch.innerHTML).to.equal("<div></div>");
+		expect(scratch.innerHTML).to.equal('<div></div>');
 	});
 
 	// Test for preactjs/preact#4340
@@ -1623,6 +1623,33 @@ describe('render()', () => {
 		render(<App list={secondList} />, scratch);
 		expect(scratch.innerHTML).to.equal(
 			'<div><div>One</div><div>Six</div><div>Seven</div></div>'
+		);
+	});
+
+	it('shuffle', function () {
+		const App = ({ items }) => (
+			<div>
+				{items.map(key => (
+					<div key={key}>{key}</div>
+				))}
+			</div>
+		);
+		const a = ['0', '1', '2', '3', '4', '5', '6'];
+		const b = ['1', '3', '5', '2', '6', '4', '0'];
+		render(<App items={a} />, scratch);
+		expect(scratch.innerHTML).to.equal(
+			`<div>${a.map(n => `<div>${n}</div>`).join('')}</div>`
+		);
+
+		render(<App items={b} />, scratch);
+
+		expect(scratch.innerHTML).to.equal(
+			`<div>${b.map(n => `<div>${n}</div>`).join('')}</div>`
+		);
+
+		render(<App items={a} />, scratch);
+		expect(scratch.innerHTML).to.equal(
+			`<div>${a.map(n => `<div>${n}</div>`).join('')}</div>`
 		);
 	});
 });
