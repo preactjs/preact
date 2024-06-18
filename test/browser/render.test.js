@@ -1626,7 +1626,7 @@ describe('render()', () => {
 		);
 	});
 
-	it('shuffle', function () {
+	it('handles shuffled child-ordering', function () {
 		const App = ({ items }) => (
 			<div>
 				{items.map(key => (
