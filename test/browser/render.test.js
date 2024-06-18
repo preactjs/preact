@@ -1642,7 +1642,6 @@ describe('render()', () => {
 		);
 
 		render(<App items={b} />, scratch);
-
 		expect(scratch.innerHTML).to.equal(
 			`<div>${b.map(n => `<div>${n}</div>`).join('')}</div>`
 		);
