@@ -2,7 +2,7 @@ import { EMPTY_OBJ } from './constants';
 import { commitRoot, diff } from './diff/index';
 import { createElement, Fragment } from './create-element';
 import options from './options';
-import { slice } from './util';
+import { slice, setup } from './util';
 
 /**
  * Render a Preact virtual node into a DOM element
@@ -12,6 +12,7 @@ import { slice } from './util';
  * existing DOM tree rooted at `replaceNode`
  */
 export function render(vnode, parentDom, replaceNode) {
+	setup();
 	if (options._root) options._root(vnode, parentDom);
 
 	// We abuse the `replaceNode` parameter in `hydrate()` to signal if we are in

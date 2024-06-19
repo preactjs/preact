@@ -1,5 +1,6 @@
 import { IS_NON_DIMENSIONAL } from '../constants';
 import options from '../options';
+import { removeAttribute, setAttribute } from '../util';
 
 function setStyle(style, key, value) {
 	if (key[0] === '-') {
@@ -82,7 +83,8 @@ export function setProperty(dom, name, value, oldValue, namespace) {
 		if (value) {
 			if (!oldValue) {
 				value._attached = eventClock;
-				dom.addEventListener(
+				addEventListener.call(
+					dom,
 					name,
 					useCapture ? eventProxyCapture : eventProxy,
 					useCapture
@@ -91,7 +93,8 @@ export function setProperty(dom, name, value, oldValue, namespace) {
 				value._attached = oldValue._attached;
 			}
 		} else {
-			dom.removeEventListener(
+			removeEventListener.call(
+				dom,
 				name,
 				useCapture ? eventProxyCapture : eventProxy,
 				useCapture
@@ -136,9 +139,13 @@ export function setProperty(dom, name, value, oldValue, namespace) {
 		if (typeof value == 'function') {
 			// never serialize functions as attribute values
 		} else if (value != null && (value !== false || name[4] === '-')) {
-			dom.setAttribute(name, name == 'popover' && value == true ? '' : value);
+			setAttribute.call(
+				dom,
+				name,
+				name == 'popover' && value == true ? '' : value
+			);
 		} else {
-			dom.removeAttribute(name);
+			removeAttribute.call(dom, name);
 		}
 	}
 }

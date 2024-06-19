@@ -1,7 +1,7 @@
 import { diff, unmount, applyRef } from './index';
 import { createVNode, Fragment } from '../create-element';
 import { EMPTY_OBJ, EMPTY_ARR, INSERT_VNODE, MATCHED } from '../constants';
-import { isArray } from '../util';
+import { insertBefore, isArray } from '../util';
 import { getDomSibling } from '../component';
 
 /**
@@ -368,7 +368,7 @@ function insert(parentVNode, oldDom, parentDom) {
 
 		return oldDom;
 	} else if (parentVNode._dom != oldDom) {
-		parentDom.insertBefore(parentVNode._dom, oldDom || null);
+		insertBefore.call(parentDom, parentVNode._dom, oldDom || null);
 		oldDom = parentVNode._dom;
 	}
 
