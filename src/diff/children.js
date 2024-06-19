@@ -320,16 +320,8 @@ function constructNewChildrenArray(newParentVNode, renderResult, oldChildren) {
 					skew--;
 				}
 			} else if (matchingIndex < skewedIndex) {
-				// Our matched DOM-node is further in the negative way in the list of children
-				// than where it's at now.
-
-				// When the remaining old chiildren is less than the new children
-				// plus our skewed index we know we are dealing with a growing list
-				if (remainingOldChildren < newChildrenLength + skewedIndex) {
-					skew += matchingIndex + skewedIndex;
-				} else {
-					skew = 0;
-				}
+				// When our new position is in front of our old position than we increase the skew
+				skew++;
 			}
 
 			// Move this VNode's DOM if the original index (matchingIndex) doesn't
