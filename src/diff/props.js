@@ -37,7 +37,7 @@ let eventClock = 0;
 export function setProperty(dom, name, value, oldValue, namespace) {
 	let useCapture,
 		split = name.split(':');
-	name = name.replace(/(.+):/, '');
+	if (split.length > 1) name = split[1];
 
 	o: if (name === 'style') {
 		if (typeof value == 'string') {
@@ -107,21 +107,21 @@ export function setProperty(dom, name, value, oldValue, namespace) {
 			name = name.replace(/xlink(H|:h)/, 'h').replace(/sName$/, 's');
 		} else if (
 			split[0] == 'prop' ||
-			split[0] != 'attr' &&
-			name != 'width' &&
-			name != 'height' &&
-			name != 'href' &&
-			name != 'list' &&
-			name != 'form' &&
-			// Default value in browsers is `-1` and an empty string is
-			// cast to `0` instead
-			name != 'tabIndex' &&
-			name != 'download' &&
-			name != 'rowSpan' &&
-			name != 'colSpan' &&
-			name != 'role' &&
-			name != 'popover' &&
-			name in dom
+			(split[0] != 'attr' &&
+				name != 'width' &&
+				name != 'height' &&
+				name != 'href' &&
+				name != 'list' &&
+				name != 'form' &&
+				// Default value in browsers is `-1` and an empty string is
+				// cast to `0` instead
+				name != 'tabIndex' &&
+				name != 'download' &&
+				name != 'rowSpan' &&
+				name != 'colSpan' &&
+				name != 'role' &&
+				name != 'popover' &&
+				name in dom)
 		) {
 			try {
 				dom[name] = value == null ? '' : value;
