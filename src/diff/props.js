@@ -35,7 +35,9 @@ let eventClock = 0;
  * @param {string} namespace Whether or not this DOM node is an SVG node or not
  */
 export function setProperty(dom, name, value, oldValue, namespace) {
-	let useCapture;
+	let useCapture,
+		split = name.split(':');
+	name = name.replace(/(.+):/, '');
 
 	o: if (name === 'style') {
 		if (typeof value == 'string') {
@@ -104,6 +106,8 @@ export function setProperty(dom, name, value, oldValue, namespace) {
 			// - className --> class
 			name = name.replace(/xlink(H|:h)/, 'h').replace(/sName$/, 's');
 		} else if (
+			split[0] == 'prop' ||
+			split[0] != 'attr' &&
 			name != 'width' &&
 			name != 'height' &&
 			name != 'href' &&
