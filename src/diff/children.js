@@ -302,20 +302,26 @@ function constructNewChildrenArray(newParentVNode, renderResult, oldChildren) {
 				childVNode._flags |= INSERT_VNODE;
 			}
 		} else if (matchingIndex !== skewedIndex) {
-			if (matchingIndex === skewedIndex + 1) {
+			if (matchingIndex == skewedIndex - 1) {
+				skew = matchingIndex - skewedIndex;
+			} else if (matchingIndex == skewedIndex + 1) {
 				skew++;
 			} else if (matchingIndex > skewedIndex) {
+				// Our matched DOM-node is further in the list of children than
+				// where it's at now.
+
+				// When the remaining old children is bigger than the new-children
+				// minus our skewed index we know we are dealing with a shrinking list
+				// we have to increase our skew with the matchedIndex - the skewed index
 				if (remainingOldChildren > newChildrenLength - skewedIndex) {
 					skew += matchingIndex - skewedIndex;
 				} else {
+					// If we have matched all the children just decrease the skew
 					skew--;
 				}
 			} else if (matchingIndex < skewedIndex) {
-				if (matchingIndex == skewedIndex - 1) {
-					skew = matchingIndex - skewedIndex;
-				}
-			} else {
-				skew = 0;
+				// When our new position is in front of our old position than we increase the skew
+				skew++;
 			}
 
 			// Move this VNode's DOM if the original index (matchingIndex) doesn't
