@@ -61,7 +61,7 @@ options._render = vnode => {
 					hookItem._value = hookItem._nextValue;
 				}
 				hookItem._pendingValue = EMPTY;
-				hookItem._nextValue = hookItem._pendingArgs = undefined;
+				hookItem._pendingArgs = hookItem._nextValue = undefined;
 			});
 		} else {
 			hooks._pendingEffects.forEach(invokeCleanup);
@@ -350,10 +350,9 @@ export function useMemo(factory, args) {
 	/** @type {import('./internal').MemoHookState<T>} */
 	const state = getHookState(currentIndex++, 7);
 	if (argsChanged(state._args, args)) {
-		state._pendingValue = factory();
-		state._pendingArgs = args;
+		state._value = factory();
+		state._args = args;
 		state._factory = factory;
-		return state._pendingValue;
 	}
 
 	return state._value;
