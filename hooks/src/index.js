@@ -15,8 +15,6 @@ let currentHook = 0;
 /** @type {Array<import('./internal').Component>} */
 let afterPaintEffects = [];
 
-let EMPTY = [];
-
 // Cast to use internal Options type
 const options = /** @type {import('./internal').Options} */ (_options);
 
@@ -60,8 +58,7 @@ options._render = vnode => {
 				if (hookItem._nextValue) {
 					hookItem._value = hookItem._nextValue;
 				}
-				hookItem._pendingValue = EMPTY;
-				hookItem._nextValue = hookItem._pendingArgs = undefined;
+				hookItem._pendingArgs = hookItem._nextValue = undefined;
 			});
 		} else {
 			hooks._pendingEffects.forEach(invokeCleanup);
@@ -84,11 +81,7 @@ options.diffed = vnode => {
 			if (hookItem._pendingArgs) {
 				hookItem._args = hookItem._pendingArgs;
 			}
-			if (hookItem._pendingValue !== EMPTY) {
-				hookItem._value = hookItem._pendingValue;
-			}
 			hookItem._pendingArgs = undefined;
-			hookItem._pendingValue = EMPTY;
 		});
 	}
 	previousComponent = currentComponent = null;
@@ -159,7 +152,7 @@ function getHookState(index, type) {
 		});
 
 	if (index >= hooks._list.length) {
-		hooks._list.push({ _pendingValue: EMPTY });
+		hooks._list.push({});
 	}
 
 	return hooks._list[index];
@@ -350,10 +343,9 @@ export function useMemo(factory, args) {
 	/** @type {import('./internal').MemoHookState<T>} */
 	const state = getHookState(currentIndex++, 7);
 	if (argsChanged(state._args, args)) {
-		state._pendingValue = factory();
-		state._pendingArgs = args;
+		state._value = factory();
+		state._args = args;
 		state._factory = factory;
-		return state._pendingValue;
 	}
 
 	return state._value;
