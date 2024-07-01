@@ -31,7 +31,7 @@ module.exports = function (api) {
 		],
 		plugins: [
 			'@babel/plugin-proposal-object-rest-spread',
-			'@babel/plugin-transform-react-jsx',
+			['@babel/plugin-transform-react-jsx', { throwIfNamespace: false }],
 			'babel-plugin-transform-async-to-promises',
 			['babel-plugin-transform-rename-properties', { rename }]
 		],

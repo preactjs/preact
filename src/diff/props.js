@@ -35,7 +35,15 @@ let eventClock = 0;
  * @param {string} namespace Whether or not this DOM node is an SVG node or not
  */
 export function setProperty(dom, name, value, oldValue, namespace) {
-	let useCapture;
+	let useCapture, prefix;
+	if (name[0] == 'a' || name[0] == 'p') {
+		let idx = name.indexOf(':');
+		if (idx > -1) {
+			// Only slices here, should be faster than array allocation
+			prefix = name.slice(0, idx);
+			name = name.slice(idx + 1);
+		}
+	}
 
 	o: if (name === 'style') {
 		if (typeof value == 'string') {
@@ -104,20 +112,22 @@ export function setProperty(dom, name, value, oldValue, namespace) {
 			// - className --> class
 			name = name.replace(/xlink(H|:h)/, 'h').replace(/sName$/, 's');
 		} else if (
-			name != 'width' &&
-			name != 'height' &&
-			name != 'href' &&
-			name != 'list' &&
-			name != 'form' &&
-			// Default value in browsers is `-1` and an empty string is
-			// cast to `0` instead
-			name != 'tabIndex' &&
-			name != 'download' &&
-			name != 'rowSpan' &&
-			name != 'colSpan' &&
-			name != 'role' &&
-			name != 'popover' &&
-			name in dom
+			(prefix != 'attr' &&
+				name != 'width' &&
+				name != 'height' &&
+				name != 'href' &&
+				name != 'list' &&
+				name != 'form' &&
+				// Default value in browsers is `-1` and an empty string is
+				// cast to `0` instead
+				name != 'tabIndex' &&
+				name != 'download' &&
+				name != 'rowSpan' &&
+				name != 'colSpan' &&
+				name != 'role' &&
+				name != 'popover' &&
+				name in dom) ||
+			prefix == 'prop'
 		) {
 			try {
 				dom[name] = value == null ? '' : value;
