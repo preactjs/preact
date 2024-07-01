@@ -26,6 +26,8 @@ function setStyle(style, key, value) {
 // per second for over 280 years before the value reaches Number.MAX_SAFE_INTEGER (2**53 - 1).
 let eventClock = 0;
 
+const cache = [];
+
 /**
  * Set a property value on a DOM node
  * @param {PreactElement} dom The DOM node to modify
@@ -37,7 +39,9 @@ let eventClock = 0;
 export function setProperty(dom, name, value, oldValue, namespace) {
 	let useCapture;
 
-	o: if (name === 'style') {
+	o: if (cache.includes(name)) {
+		dom[name] = value == null ? '' : value;
+	} else if (name === 'style') {
 		if (typeof value == 'string') {
 			dom.style.cssText = value;
 		} else {
@@ -121,6 +125,7 @@ export function setProperty(dom, name, value, oldValue, namespace) {
 		) {
 			try {
 				dom[name] = value == null ? '' : value;
+				cache.push(name);
 				// labelled break is 1b smaller here than a return statement (sorry)
 				break o;
 			} catch (e) {}
