@@ -26,7 +26,8 @@ function setStyle(style, key, value) {
 // per second for over 280 years before the value reaches Number.MAX_SAFE_INTEGER (2**53 - 1).
 let eventClock = 0;
 
-const cache = [];
+const propsCache = [];
+const attrsCache = [];
 
 /**
  * Set a property value on a DOM node
@@ -39,8 +40,14 @@ const cache = [];
 export function setProperty(dom, name, value, oldValue, namespace) {
 	let useCapture;
 
-	o: if (cache.includes(name)) {
+	o: if (propsCache.includes(name + dom.nodeName)) {
 		dom[name] = value == null ? '' : value;
+	} else if (attrsCache.includes(name + dom.nodeName)) {
+		if (value != null && (value !== false || name[4] === '-')) {
+			dom.setAttribute(name, name == 'popover' && value == true ? '' : value);
+		} else {
+			dom.removeAttribute(name);
+		}
 	} else if (name === 'style') {
 		if (typeof value == 'string') {
 			dom.style.cssText = value;
@@ -125,7 +132,7 @@ export function setProperty(dom, name, value, oldValue, namespace) {
 		) {
 			try {
 				dom[name] = value == null ? '' : value;
-				cache.push(name);
+				propsCache.push(name + dom.nodeName);
 				// labelled break is 1b smaller here than a return statement (sorry)
 				break o;
 			} catch (e) {}
@@ -141,8 +148,10 @@ export function setProperty(dom, name, value, oldValue, namespace) {
 		if (typeof value == 'function') {
 			// never serialize functions as attribute values
 		} else if (value != null && (value !== false || name[4] === '-')) {
+			attrsCache.push(name + dom.nodeName);
 			dom.setAttribute(name, name == 'popover' && value == true ? '' : value);
 		} else {
+			attrsCache.push(name + dom.nodeName);
 			dom.removeAttribute(name);
 		}
 	}
