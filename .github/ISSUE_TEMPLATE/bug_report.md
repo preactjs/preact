@@ -13,7 +13,7 @@ A clear and concise description of what the bug is.
 
 **To Reproduce**
 
-If possible, please provide a CodeSandbox/Codepen that demonstrates the issue. You can use the following template: https://codesandbox.io/s/preact-x-preact-cli-3-starter-vj285y2rn3
+If possible, please provide a link to a StackBlitz/CodeSandbox/Codepen project or a GitHub repository that demonstrates the issue. You can use the following template on StackBlitz to get started: https://stackblitz.com/edit/create-preact-starter
 
 Steps to reproduce the behavior:
 

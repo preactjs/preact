@@ -18,8 +18,7 @@ declare namespace React {
 	export import PropRef = _hooks.PropRef;
 	export import Reducer = _hooks.Reducer;
 	export import Dispatch = _hooks.Dispatch;
-	export import Ref = _hooks.Ref;
-	export import StateUpdater = _hooks.StateUpdater;
+	export import SetStateAction = _hooks.StateUpdater;
 	export import useCallback = _hooks.useCallback;
 	export import useContext = _hooks.useContext;
 	export import useDebugValue = _hooks.useDebugValue;
@@ -46,14 +45,19 @@ declare namespace React {
 	export import RefObject = preact.RefObject;
 	export import Component = preact.Component;
 	export import FunctionComponent = preact.FunctionComponent;
+	export import ComponentType = preact.ComponentType;
+	export import ComponentClass = preact.ComponentClass;
 	export import FC = preact.FunctionComponent;
 	export import createContext = preact.createContext;
+	export import Ref = preact.Ref;
 	export import createRef = preact.createRef;
 	export import Fragment = preact.Fragment;
 	export import createElement = preact.createElement;
 	export import cloneElement = preact.cloneElement;
 	export import ComponentProps = preact.ComponentProps;
 	export import ReactNode = preact.ComponentChild;
+	export import ReactElement = preact.VNode;
+	export import Consumer = preact.Consumer;
 
 	// Suspense
 	export import Suspense = _Suspense.Suspense;
@@ -68,7 +72,9 @@ declare namespace React {
 	// HTML
 	export interface HTMLAttributes<T extends EventTarget>
 		extends JSXInternal.HTMLAttributes<T> {}
-
+	export interface HTMLProps<T extends EventTarget>
+		extends JSXInternal.HTMLAttributes<T>,
+			preact.ClassAttributes<T> {}
 	export import DetailedHTMLProps = JSXInternal.DetailedHTMLProps;
 	export import CSSProperties = JSXInternal.CSSProperties;
 
@@ -577,24 +583,24 @@ declare namespace React {
 	export import ChangeEventHandler = JSXInternal.GenericEventHandler;
 
 	export function createPortal(
-		vnode: preact.VNode,
-		container: Element | DocumentFragment
+		vnode: preact.ComponentChildren,
+		container: preact.ContainerNode
 	): preact.VNode<any>;
 
 	export function render(
-		vnode: preact.VNode<any>,
-		parent: Element,
+		vnode: preact.ComponentChild,
+		parent: preact.ContainerNode,
 		callback?: () => void
 	): Component | null;
 
 	export function hydrate(
-		vnode: preact.VNode<any>,
-		parent: Element,
+		vnode: preact.ComponentChild,
+		parent: preact.ContainerNode,
 		callback?: () => void
 	): Component | null;
 
 	export function unmountComponentAtNode(
-		container: Element | Document | ShadowRoot | DocumentFragment
+		container: preact.ContainerNode
 	): boolean;
 
 	export function createFactory(
@@ -605,14 +611,16 @@ declare namespace React {
 	) => preact.VNode<any>;
 	export function isValidElement(element: any): boolean;
 	export function isFragment(element: any): boolean;
+	export function isMemo(element: any): boolean;
 	export function findDOMNode(
 		component: preact.Component | Element
 	): Element | null;
 
-	export abstract class PureComponent<P = {}, S = {}> extends preact.Component<
-		P,
-		S
-	> {
+	export abstract class PureComponent<
+		P = {},
+		S = {},
+		SS = any
+	> extends preact.Component<P, S> {
 		isPureReactComponent: boolean;
 	}
 
@@ -649,7 +657,9 @@ declare namespace React {
 
 	export function forwardRef<R, P = {}>(
 		fn: ForwardFn<P, R>
-	): preact.FunctionalComponent<Omit<P, 'ref'> & { ref?: preact.Ref<R> }>;
+	): preact.FunctionalComponent<PropsWithoutRef<P> & { ref?: preact.Ref<R> }>;
+
+	export type PropsWithoutRef<P> = Omit<P, 'ref'>;
 
 	interface MutableRefObject<T> {
 		current: T;
@@ -659,6 +669,17 @@ declare namespace React {
 		| ((instance: T | null) => void)
 		| MutableRefObject<T | null>
 		| null;
+
+	export type ComponentPropsWithRef<
+		C extends ComponentType<any> | keyof JSXInternal.IntrinsicElements
+	> = C extends new (
+		props: infer P
+	) => Component<any, any>
+		? PropsWithoutRef<P> & RefAttributes<InstanceType<C>>
+		: ComponentProps<C>;
+
+	export function flushSync<R>(fn: () => R): R;
+	export function flushSync<A, R>(fn: (a: A) => R, a: A): R;
 
 	export function unstable_batchedUpdates(
 		callback: (arg?: any) => void,

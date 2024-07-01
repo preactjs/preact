@@ -5,7 +5,7 @@ import { setupScratch, teardown } from '../_util/helpers';
 /** @jsx createElement */
 
 describe('getDomSibling', () => {
-	/** @type {import('../../src/internal').PreactElement} */
+	/** @type {HTMLDivElement} */
 	let scratch;
 
 	const getRoot = dom => dom._children;

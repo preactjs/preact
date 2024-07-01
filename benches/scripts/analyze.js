@@ -87,7 +87,7 @@ function setInMapArray(map, key, index, value) {
 function logDifferences(key, results) {
 	let withDifferences = computeDifferences(results);
 	console.log();
-	let { fixed, unfixed } = automaticResultTable(withDifferences);
+	let { unfixed } = automaticResultTable(withDifferences);
 	// console.log(horizontalTermResultTable(fixed));
 	console.log(key);
 	console.log(verticalTermResultTable(unfixed));
@@ -96,7 +96,7 @@ function logDifferences(key, results) {
 /**
  * @param {string} version
  * @param {string[]} logPaths
- * @param {(logs: TraceEvent[], logFilePath: string) => number} [getThreadId]
+ * @param {(logs: TraceEvent[], logFilePath: string) => number | null} [getThreadId]
  * @param {(log: TraceEvent) => boolean} [trackEventsIn]
  * @returns {Promise<Map<string, ResultStats>>}
  */
@@ -108,6 +108,10 @@ async function getStatsFromLogs(version, logPaths, getThreadId, trackEventsIn) {
 		const logs = JSON.parse(await readFile(logPath, 'utf8'));
 
 		let tid = getThreadId ? getThreadId(logs, logPath) : null;
+		if (tid == null) {
+			console.warn(`Could not find threadId for ${logPath}. Skipping...`);
+			continue;
+		}
 
 		/** @type {Array<{ id: string; start: number; end: number; }>} Determine what durations to track events under */
 		const parentLogs = [];
@@ -227,8 +231,8 @@ async function getStatsFromLogs(version, logPaths, getThreadId, trackEventsIn) {
 					unit: key.startsWith('Count')
 						? ''
 						: key.includes('usedHeapSize')
-						? 'MB'
-						: null
+							? 'MB'
+							: null
 				},
 				browser: {
 					name: 'chrome'
@@ -245,18 +249,10 @@ async function getStatsFromLogs(version, logPaths, getThreadId, trackEventsIn) {
 /**
  * @param {import('./tracing').TraceEvent[]} logs
  * @param {string} logFilePath
- * @returns {number}
+ * @returns {number | null}
  */
 function getDurationThread(logs, logFilePath) {
-	let log = logs.find(isDurationLog);
-
-	if (log == null) {
-		throw new Error(
-			`Could not find blink.user_timing log for "run-final" or "duration" in ${logFilePath}.`
-		);
-	} else {
-		return log.tid;
-	}
+	return logs.find(isDurationLog)?.tid ?? null;
 }
 
 /**
@@ -273,7 +269,8 @@ function isDurationLog(log) {
 	);
 }
 
-export async function analyze() {
+/** @param {string} requestedBench */
+export async function analyze(requestedBench) {
 	// const frameworkNames = await readdir(p('logs'));
 	const frameworkNames = frameworks.map(f => f.label);
 	const listAtEnd = [
@@ -296,6 +293,16 @@ export async function analyze() {
 	if (benchmarkNames.length == 0) {
 		console.log(`No benchmarks or results found in "${baseTraceLogDir()}".`);
 		return;
+	} else if (requestedBench) {
+		if (benchmarkNames.includes(requestedBench)) {
+			selectedBench = requestedBench;
+		} else {
+			console.log(
+				`Could not find benchmark "${requestedBench}". Available benchmarks:`
+			);
+			console.log(benchmarkNames);
+			return;
+		}
 	} else if (benchmarkNames.length == 1) {
 		selectedBench = benchmarkNames[0];
 	} else {

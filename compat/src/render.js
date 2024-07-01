@@ -5,6 +5,25 @@ import {
 	toChildArray,
 	Component
 } from 'preact';
+import {
+	useCallback,
+	useContext,
+	useDebugValue,
+	useEffect,
+	useId,
+	useImperativeHandle,
+	useLayoutEffect,
+	useMemo,
+	useReducer,
+	useRef,
+	useState
+} from 'preact/hooks';
+import {
+	useDeferredValue,
+	useInsertionEffect,
+	useSyncExternalStore,
+	useTransition
+} from './index';
 
 export const REACT_ELEMENT_TYPE =
 	(typeof Symbol != 'undefined' && Symbol.for && Symbol.for('react.element')) ||
@@ -143,6 +162,8 @@ function handleDomVNode(vnode) {
 			// value will be used as the file name and the file will be called
 			// "true" upon downloading it.
 			value = '';
+		} else if (lowerCased === 'translate' && value === 'no') {
+			value = false;
 		} else if (lowerCased === 'ondoubleclick') {
 			i = 'ondblclick';
 		} else if (
@@ -262,15 +283,29 @@ options.diffed = function (vnode) {
 };
 
 // This is a very very private internal function for React it
-// is used to sort-of do runtime dependency injection. So far
-// only `react-relay` makes use of it. It uses it to read the
-// context value.
+// is used to sort-of do runtime dependency injection.
 export const __SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED = {
 	ReactCurrentDispatcher: {
 		current: {
 			readContext(context) {
 				return currentComponent._globalContext[context._id].props.value;
-			}
+			},
+			useCallback,
+			useContext,
+			useDebugValue,
+			useDeferredValue,
+			useEffect,
+			useId,
+			useImperativeHandle,
+			useInsertionEffect,
+			useLayoutEffect,
+			useMemo,
+			// useMutableSource, // experimental-only and replaced by uSES, likely not worth supporting
+			useReducer,
+			useRef,
+			useState,
+			useSyncExternalStore,
+			useTransition
 		}
 	}
 };

@@ -389,7 +389,7 @@ describe('act', () => {
 			act(() => {
 				tryRenderBroken();
 			});
-		}
+		};
 
 		describe('synchronously', () => {
 			it('should rethrow the exception', () => {
@@ -407,7 +407,7 @@ describe('act', () => {
 				renderWorking();
 				expect(scratch.textContent).to.equal('1');
 			});
-			
+
 			it('should not affect effects in future renders', () => {
 				tryRenderBroken();
 				renderWorking();
@@ -426,6 +426,18 @@ describe('act', () => {
 				let err;
 				try {
 					await renderBrokenAsync();
+				} catch (e) {
+					err = e;
+				}
+				expect(err.message).to.equal('BrokenWidget is broken');
+			});
+
+			it('should rethrow the exception in nested act calls', async () => {
+				let err;
+				try {
+					await act(async () => {
+						await renderBrokenAsync();
+					});
 				} catch (e) {
 					err = e;
 				}

@@ -79,8 +79,22 @@ describe('component stack', () => {
 		render(<Bar />, scratch);
 
 		let lines = getStack(errors).split('\n');
-		expect(lines[0].indexOf('td') > -1).to.equal(true);
+		expect(lines[0].indexOf('tr') > -1).to.equal(true);
 		expect(lines[1].indexOf('Thrower') > -1).to.equal(true);
 		expect(lines[2].indexOf('Bar') > -1).to.equal(true);
+	});
+
+	it('should not print a warning when "@babel/plugin-transform-react-jsx-source" is installed', () => {
+		function Thrower() {
+			throw new Error('foo');
+		}
+
+		try {
+			render(<Thrower />, scratch);
+		} catch {}
+
+		expect(warnings.join(' ')).to.not.include(
+			'@babel/plugin-transform-react-jsx-source'
+		);
 	});
 });

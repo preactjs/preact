@@ -417,4 +417,61 @@ describe('null placeholders', () => {
 			'<div>Test4.remove()'
 		]);
 	});
+
+	it('should only call unmount once when removing placeholders (#4104)', () => {
+		/** @type {(state: { value: boolean }) => void} */
+		let setState;
+		const Iframe = () => {
+			// Using a div here to make debugging tests in devtools a little less
+			// noisy. The dom ops still assert that the iframe isn't moved.
+			//
+			// return <iframe src="https://codesandbox.io/s/runtime-silence-no4zx" />;
+			return <div>Iframe</div>;
+		};
+
+		const Test2 = () => <div>Test2</div>;
+
+		const ref = sinon.spy();
+
+		class App extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { value: true };
+				setState = this.setState.bind(this);
+			}
+
+			render(props, state) {
+				return (
+					<div>
+						<Test2 />
+						{state.value && <div ref={ref}>Test3</div>}
+						{props.children}
+					</div>
+				);
+			}
+		}
+
+		render(
+			<App>
+				<Iframe />
+			</App>,
+			scratch
+		);
+
+		expect(scratch.innerHTML).to.equal(
+			'<div><div>Test2</div><div>Test3</div><div>Iframe</div></div>'
+		);
+		expect(ref).to.have.been.calledOnce;
+
+		ref.resetHistory();
+		clearLog();
+		setState({ value: false });
+		rerender();
+
+		expect(scratch.innerHTML).to.equal(
+			'<div><div>Test2</div><div>Iframe</div></div>'
+		);
+		expect(getLog()).to.deep.equal(['<div>Test3.remove()']);
+		expect(ref).to.have.been.calledOnce;
+	});
 });

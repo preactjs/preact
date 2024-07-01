@@ -3,6 +3,17 @@ name: CI
 on:
   workflow_dispatch:
   workflow_call:
+    inputs:
+      ref:
+        description: 'Branch or tag ref to check out'
+        type: string
+        required: false
+        default: ''
+      artifact_name:
+        description: 'Name of the artifact to upload'
+        type: string
+        required: false
+        default: 'npm-package'
   pull_request:
     branches:
       - '**'
@@ -16,8 +27,10 @@ jobs:
     name: Build & Test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref || '' }}
+      - uses: actions/setup-node@v4
         with:
           node-version-file: 'package.json'
           cache: 'npm'
@@ -34,6 +47,7 @@ jobs:
           npm run test:unit
       - name: Coveralls GitHub Action
         uses: coverallsapp/github-action@v2.1.2
+        timeout-minutes: 2
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Package
@@ -44,5 +58,5 @@ jobs:
       - name: Upload npm package
         uses: actions/upload-artifact@v3
         with:
-          name: npm-package
+          name: ${{ inputs.artifact_name || 'npm-package' }}
           path: preact.tgz

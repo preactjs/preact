@@ -39,9 +39,15 @@ describe('VNode TS types', () => {
 		expect(actual).to.include.all.keys('type', 'props', 'key');
 	});
 
-	it('has a nodeName of string when html element', () => {
-		const div = <div>Hi!</div>;
-		expect(div.type).to.equal('div');
+	it('is returned by h', () => {
+		const actual = <div className="wow" />;
+		expect(actual).to.include.all.keys('type', 'props', 'key');
+	});
+
+	it('createElement conforms to the VNode type', () => {
+		const arr: VNode[] = [];
+		arr.push(createElement('div', null));
+		expect(true).to.be.true;
 	});
 
 	it('has a nodeName equal to the construction function when SFC', () => {
@@ -148,7 +154,6 @@ class ComponentWithFunctionChild extends Component<{
 		return null;
 	}
 }
-
 <ComponentWithFunctionChild>
 	{num => num.toFixed(2)}
 </ComponentWithFunctionChild>;
@@ -158,7 +163,6 @@ class ComponentWithStringChild extends Component<{ children: string }> {
 		return null;
 	}
 }
-
 <ComponentWithStringChild>child</ComponentWithStringChild>;
 
 class ComponentWithNumberChild extends Component<{ children: number }> {
@@ -166,7 +170,6 @@ class ComponentWithNumberChild extends Component<{ children: number }> {
 		return null;
 	}
 }
-
 <ComponentWithNumberChild>{1}</ComponentWithNumberChild>;
 
 class ComponentWithBooleanChild extends Component<{ children: boolean }> {
@@ -174,7 +177,6 @@ class ComponentWithBooleanChild extends Component<{ children: boolean }> {
 		return null;
 	}
 }
-
 <ComponentWithBooleanChild>{false}</ComponentWithBooleanChild>;
 
 class ComponentWithNullChild extends Component<{ children: null }> {
@@ -182,7 +184,6 @@ class ComponentWithNullChild extends Component<{ children: null }> {
 		return null;
 	}
 }
-
 <ComponentWithNullChild>{null}</ComponentWithNullChild>;
 
 class ComponentWithNumberChildren extends Component<{ children: number[] }> {
@@ -190,7 +191,6 @@ class ComponentWithNumberChildren extends Component<{ children: number[] }> {
 		return null;
 	}
 }
-
 <ComponentWithNumberChildren>
 	{1}
 	{2}

@@ -399,7 +399,7 @@ describe('combinations', () => {
 		expect(scratch.textContent).to.equal('2');
 	});
 
-	it.skip('parent and child refs should be set before all effects', () => {
+	it('parent and child refs should be set before all effects', () => {
 		const anchorId = 'anchor';
 		const tooltipId = 'tooltip';
 		const effectLog = [];
@@ -476,5 +476,45 @@ describe('combinations', () => {
 			'tooltip effect',
 			'anchor effect'
 		]);
+	});
+
+	it('should not loop infinitely', () => {
+		const actions = [];
+		let toggle;
+		function App() {
+			const [value, setValue] = useState(false);
+
+			const data = useMemo(() => {
+				actions.push('memo');
+				return {};
+			}, [value]);
+
+			const [prevData, setPreviousData] = useState(data);
+			if (prevData !== data) {
+				setPreviousData(data);
+			}
+
+			actions.push('render');
+			toggle = () => setValue(!value);
+			return <div>Value: {JSON.stringify(value)}</div>;
+		}
+
+		act(() => {
+			render(<App />, scratch);
+		});
+		expect(actions).to.deep.equal(['memo', 'render']);
+		expect(scratch.innerHTML).to.deep.equal('<div>Value: false</div>');
+
+		act(() => {
+			toggle();
+		});
+		expect(actions).to.deep.equal([
+			'memo',
+			'render',
+			'memo',
+			'render',
+			'render'
+		]);
+		expect(scratch.innerHTML).to.deep.equal('<div>Value: true</div>');
 	});
 });

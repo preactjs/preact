@@ -85,6 +85,34 @@ render(h('div', {}), document);
 render(h('div', {}), document.createElement('div').shadowRoot!);
 render(h('div', {}), document.createDocumentFragment());
 
+// From https://gist.github.com/developit/f4c67a2ede71dc2fab7f357f39cff28c, modified to be TypeScript compliant
+function createRootFragment(parent: Element, replaceNode: Element | Element[]) {
+	const replaceNodes: Element[] = ([] as Element[]).concat(replaceNode);
+	const s = replaceNodes[replaceNodes.length - 1].nextSibling;
+	function insert(c: Node, r: Node | null) {
+		return parent.insertBefore(c, r || s);
+	}
+	return ((parent as any).__k = {
+		nodeType: 1,
+		parentNode: parent,
+		firstChild: replaceNodes[0],
+		childNodes: replaceNodes,
+		insertBefore: insert,
+		appendChild: (c: Node) => insert(c, null),
+		removeChild: function (c: Node) {
+			return parent.removeChild(c);
+		}
+	});
+}
+
+render(
+	h('div', {}),
+	createRootFragment(
+		document.createElement('div'),
+		document.createElement('div')
+	)
+);
+
 // Accessing children
 const ComponentWithChildren: FunctionalComponent<DummerComponentProps> = ({
 	input,
@@ -334,7 +362,19 @@ createElement(RefComponentTest, { ref: functionRef }, 'hi');
 h(RefComponentTest, { ref: functionRef }, 'hi');
 
 // Should accept onInput
-const onInput = (e: h.JSX.TargetedEvent<HTMLInputElement>) => {};
+const onInput = (e: h.JSX.TargetedInputEvent<HTMLInputElement>) => {};
 <input onInput={onInput} />;
+<input onInput={e => e.currentTarget.value} />;
 createElement('input', { onInput: onInput });
 h('input', { onInput: onInput });
+
+// Should accept onBeforeInput
+const onBeforeInput = (e: h.JSX.TargetedInputEvent<HTMLInputElement>) => {};
+<input onBeforeInput={e => e.currentTarget.value} />;
+createElement('input', { onBeforeInput: onBeforeInput });
+h('input', { onBeforeInput: onBeforeInput });
+
+const onSubmit = (e: h.JSX.TargetedSubmitEvent<HTMLFormElement>) => {};
+<form onSubmit={e => e.currentTarget.elements} />;
+createElement('form', { onSubmit: onSubmit });
+h('form', { onSubmit: onSubmit });

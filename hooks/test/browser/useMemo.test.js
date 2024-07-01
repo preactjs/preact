@@ -151,12 +151,13 @@ describe('useMemo', () => {
 		act(() => {
 			set('bye');
 		});
-		expect(calls.length).to.equal(5);
+		expect(calls.length).to.equal(6);
 		expect(calls).to.deep.equal([
 			'doing memo',
 			'render hi',
 			'doing memo',
-			'render bye', // We expect a missing "doing memo"  here because we return to the previous args value
+			'render bye',
+			'doing memo',
 			'render hi'
 		]);
 	});

@@ -4,6 +4,7 @@ import React, {
 	hydrate,
 	Fragment,
 	Suspense,
+	memo,
 	useState
 } from 'preact/compat';
 import { logCall, getLog, clearLog } from '../../../test/_util/logCall';
@@ -13,7 +14,7 @@ import {
 	teardown
 } from '../../../test/_util/helpers';
 import { ul, li, div } from '../../../test/_util/dom';
-import { createLazy } from './suspense-utils';
+import { createLazy, createSuspenseLoader } from './suspense-utils';
 
 /* eslint-env browser, mocha */
 describe('suspense hydration', () => {
@@ -657,6 +658,45 @@ describe('suspense hydration', () => {
 				scratch.firstChild.nextSibling.dispatchEvent(createEvent('click'));
 				expect(bOnClickSpy).to.have.been.calledTwice;
 			});
+	});
+
+	it('should correctly hydrate and rerender a memoized lazy data loader', () => {
+		const originalHtml = '<p>Count: 5</p>';
+		scratch.innerHTML = originalHtml;
+
+		const [useSuspenseLoader, resolve] = createSuspenseLoader();
+
+		/** @type {() => void} */
+		let increment;
+		const DataLoader = memo(function DataLoader() {
+			const initialCount = useSuspenseLoader();
+			const [count, setCount] = useState(initialCount);
+			increment = () => setCount(c => c + 1);
+
+			return <p>Count: {count}</p>;
+		});
+
+		function App() {
+			return (
+				<Suspense>
+					<DataLoader />
+				</Suspense>
+			);
+		}
+
+		hydrate(<App />, scratch);
+		rerender();
+		expect(scratch.innerHTML).to.equal(originalHtml);
+
+		return resolve(5).then(() => {
+			rerender();
+			expect(scratch.innerHTML).to.equal('<p>Count: 5</p>');
+
+			increment();
+			rerender();
+
+			expect(scratch.innerHTML).to.equal('<p>Count: 6</p>');
+		});
 	});
 
 	// Currently not supported. Hydration doesn't set attributes... but should it

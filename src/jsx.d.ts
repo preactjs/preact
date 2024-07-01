@@ -124,7 +124,43 @@ export namespace JSXInternal {
 					| 'inherit'
 					| undefined
 			  >;
+		'alignment-baseline'?:
+			| 'auto'
+			| 'baseline'
+			| 'before-edge'
+			| 'text-before-edge'
+			| 'middle'
+			| 'central'
+			| 'after-edge'
+			| 'text-after-edge'
+			| 'ideographic'
+			| 'alphabetic'
+			| 'hanging'
+			| 'mathematical'
+			| 'inherit'
+			| undefined
+			| SignalLike<
+					| 'auto'
+					| 'baseline'
+					| 'before-edge'
+					| 'text-before-edge'
+					| 'middle'
+					| 'central'
+					| 'after-edge'
+					| 'text-after-edge'
+					| 'ideographic'
+					| 'alphabetic'
+					| 'hanging'
+					| 'mathematical'
+					| 'inherit'
+					| undefined
+			  >;
 		allowReorder?:
+			| 'no'
+			| 'yes'
+			| undefined
+			| SignalLike<'no' | 'yes' | undefined>;
+		'allow-reorder'?:
 			| 'no'
 			| 'yes'
 			| undefined
@@ -139,7 +175,16 @@ export namespace JSXInternal {
 			| string
 			| undefined
 			| SignalLike<number | string | undefined>;
+		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/arabic-form */
 		arabicForm?:
+			| 'initial'
+			| 'medial'
+			| 'terminal'
+			| 'isolated'
+			| undefined
+			| SignalLike<'initial' | 'medial' | 'terminal' | 'isolated' | undefined>;
+		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/arabic-form */
+		'arabic-form'?:
 			| 'initial'
 			| 'medial'
 			| 'terminal'
@@ -169,6 +214,11 @@ export namespace JSXInternal {
 			| undefined
 			| SignalLike<number | string | undefined>;
 		baselineShift?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		'baseline-shift'?:
 			| number
 			| string
 			| undefined
@@ -204,12 +254,18 @@ export namespace JSXInternal {
 			| string
 			| undefined
 			| SignalLike<number | string | undefined>;
+		'cap-height'?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
 		clip?:
 			| number
 			| string
 			| undefined
 			| SignalLike<number | string | undefined>;
 		clipPath?: string | undefined | SignalLike<string | undefined>;
+		'clip-path'?: string | undefined | SignalLike<string | undefined>;
 		clipPathUnits?:
 			| number
 			| string
@@ -220,7 +276,17 @@ export namespace JSXInternal {
 			| string
 			| undefined
 			| SignalLike<number | string | undefined>;
+		'clip-rule'?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
 		colorInterpolation?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		'color-interpolation'?:
 			| number
 			| string
 			| undefined
@@ -232,7 +298,19 @@ export namespace JSXInternal {
 			| 'inherit'
 			| undefined
 			| SignalLike<'auto' | 'sRGB' | 'linearRGB' | 'inherit' | undefined>;
+		'color-interpolation-filters'?:
+			| 'auto'
+			| 'sRGB'
+			| 'linearRGB'
+			| 'inherit'
+			| undefined
+			| SignalLike<'auto' | 'sRGB' | 'linearRGB' | 'inherit' | undefined>;
 		colorProfile?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		'color-profile'?:
 			| number
 			| string
 			| undefined
@@ -242,12 +320,27 @@ export namespace JSXInternal {
 			| string
 			| undefined
 			| SignalLike<number | string | undefined>;
+		'color-rendering'?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
 		contentScriptType?:
 			| number
 			| string
 			| undefined
 			| SignalLike<number | string | undefined>;
+		'content-script-type'?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
 		contentStyleType?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		'content-style-type'?:
 			| number
 			| string
 			| undefined
@@ -295,6 +388,11 @@ export namespace JSXInternal {
 			| string
 			| undefined
 			| SignalLike<number | string | undefined>;
+		'dominant-baseline'?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
 		dur?: number | string | undefined | SignalLike<number | string | undefined>;
 		dx?: number | string | undefined | SignalLike<number | string | undefined>;
 		dy?: number | string | undefined | SignalLike<number | string | undefined>;
@@ -309,6 +407,11 @@ export namespace JSXInternal {
 			| undefined
 			| SignalLike<number | string | undefined>;
 		enableBackground?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		'enable-background'?:
 			| number
 			| string
 			| undefined
@@ -330,7 +433,18 @@ export namespace JSXInternal {
 			| string
 			| undefined
 			| SignalLike<number | string | undefined>;
+		'fill-opacity'?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
 		fillRule?:
+			| 'nonzero'
+			| 'evenodd'
+			| 'inherit'
+			| undefined
+			| SignalLike<'nonzero' | 'evenodd' | 'inherit' | undefined>;
+		'fill-rule'?:
 			| 'nonzero'
 			| 'evenodd'
 			| 'inherit'
@@ -352,7 +466,17 @@ export namespace JSXInternal {
 			| string
 			| undefined
 			| SignalLike<number | string | undefined>;
+		'flood-color'?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
 		floodOpacity?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		'flood-opacity'?:
 			| number
 			| string
 			| undefined
@@ -363,7 +487,13 @@ export namespace JSXInternal {
 			| undefined
 			| SignalLike<number | string | undefined>;
 		fontFamily?: string | undefined | SignalLike<string | undefined>;
+		'font-family'?: string | undefined | SignalLike<string | undefined>;
 		fontSize?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		'font-size'?:
 			| number
 			| string
 			| undefined
@@ -373,7 +503,17 @@ export namespace JSXInternal {
 			| string
 			| undefined
 			| SignalLike<number | string | undefined>;
+		'font-size-adjust'?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
 		fontStretch?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		'font-stretch'?:
 			| number
 			| string
 			| undefined
@@ -383,12 +523,27 @@ export namespace JSXInternal {
 			| string
 			| undefined
 			| SignalLike<number | string | undefined>;
+		'font-style'?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
 		fontVariant?:
 			| number
 			| string
 			| undefined
 			| SignalLike<number | string | undefined>;
+		'font-variant'?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
 		fontWeight?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		'font-weight'?:
 			| number
 			| string
 			| undefined
@@ -412,12 +567,27 @@ export namespace JSXInternal {
 			| string
 			| undefined
 			| SignalLike<number | string | undefined>;
+		'glyph-name'?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
 		glyphOrientationHorizontal?:
 			| number
 			| string
 			| undefined
 			| SignalLike<number | string | undefined>;
+		'glyph-orientation-horizontal'?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
 		glyphOrientationVertical?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		'glyph-orientation-vertical'?:
 			| number
 			| string
 			| undefined
@@ -439,7 +609,17 @@ export namespace JSXInternal {
 			| string
 			| undefined
 			| SignalLike<number | string | undefined>;
+		'horiz-adv-x'?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
 		horizOriginX?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		'horiz-origin-x'?:
 			| number
 			| string
 			| undefined
@@ -450,6 +630,11 @@ export namespace JSXInternal {
 			| undefined
 			| SignalLike<number | string | undefined>;
 		imageRendering?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		'image-rendering'?:
 			| number
 			| string
 			| undefined
@@ -506,7 +691,17 @@ export namespace JSXInternal {
 			| string
 			| undefined
 			| SignalLike<number | string | undefined>;
+		'letter-spacing'?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
 		lightingColor?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		'lighting-color'?:
 			| number
 			| string
 			| undefined
@@ -522,13 +717,16 @@ export namespace JSXInternal {
 			| undefined
 			| SignalLike<number | string | undefined>;
 		markerEnd?: string | undefined | SignalLike<string | undefined>;
+		'marker-end'?: string | undefined | SignalLike<string | undefined>;
 		markerHeight?:
 			| number
 			| string
 			| undefined
 			| SignalLike<number | string | undefined>;
 		markerMid?: string | undefined | SignalLike<string | undefined>;
+		'marker-mid'?: string | undefined | SignalLike<string | undefined>;
 		markerStart?: string | undefined | SignalLike<string | undefined>;
+		'marker-start'?: string | undefined | SignalLike<string | undefined>;
 		markerUnits?:
 			| number
 			| string
@@ -610,7 +808,17 @@ export namespace JSXInternal {
 			| string
 			| undefined
 			| SignalLike<number | string | undefined>;
+		'overline-position'?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
 		overlineThickness?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		'overline-thickness'?:
 			| number
 			| string
 			| undefined
@@ -620,7 +828,17 @@ export namespace JSXInternal {
 			| string
 			| undefined
 			| SignalLike<number | string | undefined>;
+		'paint-order'?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
 		panose1?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		'panose-1'?:
 			| number
 			| string
 			| undefined
@@ -638,6 +856,11 @@ export namespace JSXInternal {
 			| SignalLike<number | string | undefined>;
 		patternUnits?: string | undefined | SignalLike<string | undefined>;
 		pointerEvents?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		'pointer-events'?:
 			| number
 			| string
 			| undefined
@@ -690,12 +913,27 @@ export namespace JSXInternal {
 			| string
 			| undefined
 			| SignalLike<number | string | undefined>;
+		'rendering-intent'?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
 		repeatCount?:
 			| number
 			| string
 			| undefined
 			| SignalLike<number | string | undefined>;
+		'repeat-count'?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
 		repeatDur?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		'repeat-dur'?:
 			| number
 			| string
 			| undefined
@@ -734,6 +972,11 @@ export namespace JSXInternal {
 			| undefined
 			| SignalLike<number | string | undefined>;
 		shapeRendering?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		'shape-rendering'?:
 			| number
 			| string
 			| undefined
@@ -790,7 +1033,13 @@ export namespace JSXInternal {
 			| undefined
 			| SignalLike<number | string | undefined>;
 		stopColor?: string | undefined | SignalLike<string | undefined>;
+		'stop-color'?: string | undefined | SignalLike<string | undefined>;
 		stopOpacity?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		'stop-opacity'?:
 			| number
 			| string
 			| undefined
@@ -800,7 +1049,17 @@ export namespace JSXInternal {
 			| string
 			| undefined
 			| SignalLike<number | string | undefined>;
+		'strikethrough-position'?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
 		strikethroughThickness?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		'strikethrough-thickness'?:
 			| number
 			| string
 			| undefined
@@ -816,12 +1075,29 @@ export namespace JSXInternal {
 			| number
 			| undefined
 			| SignalLike<number | string | undefined>;
+		'stroke-dasharray'?:
+			| string
+			| number
+			| undefined
+			| SignalLike<number | string | undefined>;
 		strokeDashoffset?:
 			| string
 			| number
 			| undefined
 			| SignalLike<number | string | undefined>;
+		'stroke-dashoffset'?:
+			| string
+			| number
+			| undefined
+			| SignalLike<number | string | undefined>;
 		strokeLinecap?:
+			| 'butt'
+			| 'round'
+			| 'square'
+			| 'inherit'
+			| undefined
+			| SignalLike<'butt' | 'round' | 'square' | 'inherit' | undefined>;
+		'stroke-linecap'?:
 			| 'butt'
 			| 'round'
 			| 'square'
@@ -835,7 +1111,19 @@ export namespace JSXInternal {
 			| 'inherit'
 			| undefined
 			| SignalLike<'miter' | 'round' | 'bevel' | 'inherit' | undefined>;
+		'stroke-linejoin'?:
+			| 'miter'
+			| 'round'
+			| 'bevel'
+			| 'inherit'
+			| undefined
+			| SignalLike<'miter' | 'round' | 'bevel' | 'inherit' | undefined>;
 		strokeMiterlimit?:
+			| string
+			| number
+			| undefined
+			| SignalLike<number | string | undefined>;
+		'stroke-miterlimit'?:
 			| string
 			| number
 			| undefined
@@ -845,7 +1133,17 @@ export namespace JSXInternal {
 			| string
 			| undefined
 			| SignalLike<number | string | undefined>;
+		'stroke-opacity'?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
 		strokeWidth?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		'stroke-width'?:
 			| number
 			| string
 			| undefined
@@ -876,7 +1174,13 @@ export namespace JSXInternal {
 			| undefined
 			| SignalLike<number | string | undefined>;
 		textAnchor?: string | undefined | SignalLike<string | undefined>;
+		'text-anchor'?: string | undefined | SignalLike<string | undefined>;
 		textDecoration?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		'text-decoration'?:
 			| number
 			| string
 			| undefined
@@ -900,7 +1204,17 @@ export namespace JSXInternal {
 			| string
 			| undefined
 			| SignalLike<number | string | undefined>;
+		'underline-position'?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
 		underlineThickness?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		'underline-thickness'?:
 			| number
 			| string
 			| undefined
@@ -915,7 +1229,17 @@ export namespace JSXInternal {
 			| string
 			| undefined
 			| SignalLike<number | string | undefined>;
+		'unicode-bidi'?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
 		unicodeRange?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		'unicode-range'?:
 			| number
 			| string
 			| undefined
@@ -925,7 +1249,17 @@ export namespace JSXInternal {
 			| string
 			| undefined
 			| SignalLike<number | string | undefined>;
+		'units-per-em'?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
 		vAlphabetic?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		'v-alphabetic'?:
 			| number
 			| string
 			| undefined
@@ -936,8 +1270,18 @@ export namespace JSXInternal {
 			| string
 			| undefined
 			| SignalLike<number | string | undefined>;
+		'vector-effect'?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
 		version?: string | undefined | SignalLike<string | undefined>;
 		vertAdvY?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		'vert-adv-y'?:
 			| number
 			| string
 			| undefined
@@ -947,7 +1291,17 @@ export namespace JSXInternal {
 			| string
 			| undefined
 			| SignalLike<number | string | undefined>;
+		'vert-origin-x'?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
 		vertOriginY?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		'vert-origin-y'?:
 			| number
 			| string
 			| undefined
@@ -957,7 +1311,17 @@ export namespace JSXInternal {
 			| string
 			| undefined
 			| SignalLike<number | string | undefined>;
+		'v-hanging'?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
 		vIdeographic?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		'v-ideographic'?:
 			| number
 			| string
 			| undefined
@@ -978,6 +1342,11 @@ export namespace JSXInternal {
 			| string
 			| undefined
 			| SignalLike<number | string | undefined>;
+		'v-mathematical'?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
 		widths?:
 			| number
 			| string
@@ -988,7 +1357,17 @@ export namespace JSXInternal {
 			| string
 			| undefined
 			| SignalLike<number | string | undefined>;
+		'word-spacing'?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
 		writingMode?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		'writing-mode'?:
 			| number
 			| string
 			| undefined
@@ -1002,18 +1381,33 @@ export namespace JSXInternal {
 			| string
 			| undefined
 			| SignalLike<number | string | undefined>;
+		'x-height'?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
 		xlinkActuate?: string | undefined | SignalLike<string | undefined>;
+		'xlink:actuate'?: SVGAttributes['xlinkActuate'];
 		xlinkArcrole?: string | undefined | SignalLike<string | undefined>;
+		'xlink:arcrole'?: string | undefined | SignalLike<string | undefined>;
 		xlinkHref?: string | undefined | SignalLike<string | undefined>;
+		'xlink:href'?: string | undefined | SignalLike<string | undefined>;
 		xlinkRole?: string | undefined | SignalLike<string | undefined>;
+		'xlink:role'?: string | undefined | SignalLike<string | undefined>;
 		xlinkShow?: string | undefined | SignalLike<string | undefined>;
+		'xlink:show'?: string | undefined | SignalLike<string | undefined>;
 		xlinkTitle?: string | undefined | SignalLike<string | undefined>;
+		'xlink:title'?: string | undefined | SignalLike<string | undefined>;
 		xlinkType?: string | undefined | SignalLike<string | undefined>;
+		'xlink:type'?: string | undefined | SignalLike<string | undefined>;
 		xmlBase?: string | undefined | SignalLike<string | undefined>;
+		'xml:base'?: string | undefined | SignalLike<string | undefined>;
 		xmlLang?: string | undefined | SignalLike<string | undefined>;
+		'xml:lang'?: string | undefined | SignalLike<string | undefined>;
 		xmlns?: string | undefined | SignalLike<string | undefined>;
 		xmlnsXlink?: string | undefined | SignalLike<string | undefined>;
 		xmlSpace?: string | undefined | SignalLike<string | undefined>;
+		'xml:space'?: string | undefined | SignalLike<string | undefined>;
 		y1?: number | string | undefined | SignalLike<number | string | undefined>;
 		y2?: number | string | undefined | SignalLike<number | string | undefined>;
 		y?: number | string | undefined | SignalLike<number | string | undefined>;
@@ -1047,6 +1441,10 @@ export namespace JSXInternal {
 		Target,
 		FocusEvent
 	>;
+	export type TargetedInputEvent<Target extends EventTarget> = TargetedEvent<
+		Target,
+		InputEvent
+	>;
 	export type TargetedKeyboardEvent<Target extends EventTarget> = TargetedEvent<
 		Target,
 		KeyboardEvent
@@ -1058,6 +1456,10 @@ export namespace JSXInternal {
 	export type TargetedPointerEvent<Target extends EventTarget> = TargetedEvent<
 		Target,
 		PointerEvent
+	>;
+	export type TargetedSubmitEvent<Target extends EventTarget> = TargetedEvent<
+		Target,
+		SubmitEvent
 	>;
 	export type TargetedTouchEvent<Target extends EventTarget> = TargetedEvent<
 		Target,
@@ -1097,6 +1499,9 @@ export namespace JSXInternal {
 	export type GenericEventHandler<Target extends EventTarget> = EventHandler<
 		TargetedEvent<Target>
 	>;
+	export type InputEventHandler<Target extends EventTarget> = EventHandler<
+		TargetedInputEvent<Target>
+	>;
 	export type KeyboardEventHandler<Target extends EventTarget> = EventHandler<
 		TargetedKeyboardEvent<Target>
 	>;
@@ -1105,6 +1510,9 @@ export namespace JSXInternal {
 	>;
 	export type PointerEventHandler<Target extends EventTarget> = EventHandler<
 		TargetedPointerEvent<Target>
+	>;
+	export type SubmitEventHandler<Target extends EventTarget> = EventHandler<
+		TargetedSubmitEvent<Target>
 	>;
 	export type TouchEventHandler<Target extends EventTarget> = EventHandler<
 		TargetedTouchEvent<Target>
@@ -1155,24 +1563,24 @@ export namespace JSXInternal {
 		// Focus Events
 		onFocus?: FocusEventHandler<Target> | undefined;
 		onFocusCapture?: FocusEventHandler<Target> | undefined;
-		onfocusin?: FocusEventHandler<Target> | undefined;
-		onfocusinCapture?: FocusEventHandler<Target> | undefined;
-		onfocusout?: FocusEventHandler<Target> | undefined;
-		onfocusoutCapture?: FocusEventHandler<Target> | undefined;
+		onFocusIn?: FocusEventHandler<Target> | undefined;
+		onFocusInCapture?: FocusEventHandler<Target> | undefined;
+		onFocusOut?: FocusEventHandler<Target> | undefined;
+		onFocusOutCapture?: FocusEventHandler<Target> | undefined;
 		onBlur?: FocusEventHandler<Target> | undefined;
 		onBlurCapture?: FocusEventHandler<Target> | undefined;
 
 		// Form Events
 		onChange?: GenericEventHandler<Target> | undefined;
 		onChangeCapture?: GenericEventHandler<Target> | undefined;
-		onInput?: GenericEventHandler<Target> | undefined;
-		onInputCapture?: GenericEventHandler<Target> | undefined;
-		onBeforeInput?: GenericEventHandler<Target> | undefined;
-		onBeforeInputCapture?: GenericEventHandler<Target> | undefined;
+		onInput?: InputEventHandler<Target> | undefined;
+		onInputCapture?: InputEventHandler<Target> | undefined;
+		onBeforeInput?: InputEventHandler<Target> | undefined;
+		onBeforeInputCapture?: InputEventHandler<Target> | undefined;
 		onSearch?: GenericEventHandler<Target> | undefined;
 		onSearchCapture?: GenericEventHandler<Target> | undefined;
-		onSubmit?: GenericEventHandler<Target> | undefined;
-		onSubmitCapture?: GenericEventHandler<Target> | undefined;
+		onSubmit?: SubmitEventHandler<Target> | undefined;
+		onSubmitCapture?: SubmitEventHandler<Target> | undefined;
 		onInvalid?: GenericEventHandler<Target> | undefined;
 		onInvalidCapture?: GenericEventHandler<Target> | undefined;
 		onReset?: GenericEventHandler<Target> | undefined;
@@ -1310,6 +1718,7 @@ export namespace JSXInternal {
 
 		// UI Events
 		onScroll?: UIEventHandler<Target> | undefined;
+		onScrollEnd?: UIEventHandler<Target> | undefined;
 		onScrollCapture?: UIEventHandler<Target> | undefined;
 
 		// Wheel Events
@@ -1588,7 +1997,7 @@ export namespace JSXInternal {
 	}
 
 	// All the WAI-ARIA 1.2 role attribute values from https://www.w3.org/TR/wai-aria-1.2/#role_definitions
-	type AriaRole =
+	type WAIAriaRole =
 		| 'alert'
 		| 'alertdialog'
 		| 'application'
@@ -1685,6 +2094,50 @@ export namespace JSXInternal {
 		| 'window'
 		| 'none presentation';
 
+	// All the Digital Publishing WAI-ARIA 1.0 role attribute values from https://www.w3.org/TR/dpub-aria-1.0/#role_definitions
+	type DPubAriaRole =
+		| 'doc-abstract'
+		| 'doc-acknowledgments'
+		| 'doc-afterword'
+		| 'doc-appendix'
+		| 'doc-backlink'
+		| 'doc-biblioentry'
+		| 'doc-bibliography'
+		| 'doc-biblioref'
+		| 'doc-chapter'
+		| 'doc-colophon'
+		| 'doc-conclusion'
+		| 'doc-cover'
+		| 'doc-credit'
+		| 'doc-credits'
+		| 'doc-dedication'
+		| 'doc-endnote'
+		| 'doc-endnotes'
+		| 'doc-epigraph'
+		| 'doc-epilogue'
+		| 'doc-errata'
+		| 'doc-example'
+		| 'doc-footnote'
+		| 'doc-foreword'
+		| 'doc-glossary'
+		| 'doc-glossref'
+		| 'doc-index'
+		| 'doc-introduction'
+		| 'doc-noteref'
+		| 'doc-notice'
+		| 'doc-pagebreak'
+		| 'doc-pagelist'
+		| 'doc-part'
+		| 'doc-preface'
+		| 'doc-prologue'
+		| 'doc-pullquote'
+		| 'doc-qna'
+		| 'doc-subtitle'
+		| 'doc-tip'
+		| 'doc-toc';
+
+	type AriaRole = WAIAriaRole | DPubAriaRole;
+
 	export interface HTMLAttributes<RefType extends EventTarget = EventTarget>
 		extends ClassAttributes<RefType>,
 			DOMAttributes<RefType>,
@@ -1692,7 +2145,9 @@ export namespace JSXInternal {
 		// Standard HTML Attributes
 		accept?: string | undefined | SignalLike<string | undefined>;
 		acceptCharset?: string | undefined | SignalLike<string | undefined>;
+		'accept-charset'?: HTMLAttributes['acceptCharset'];
 		accessKey?: string | undefined | SignalLike<string | undefined>;
+		accesskey?: HTMLAttributes['accessKey'];
 		action?: string | undefined | SignalLike<string | undefined>;
 		allow?: string | undefined | SignalLike<string | undefined>;
 		allowFullScreen?: boolean | undefined | SignalLike<boolean | undefined>;
@@ -1707,10 +2162,12 @@ export namespace JSXInternal {
 		autofocus?: boolean | undefined | SignalLike<boolean | undefined>;
 		autoFocus?: boolean | undefined | SignalLike<boolean | undefined>;
 		autoPlay?: boolean | undefined | SignalLike<boolean | undefined>;
+		autoplay?: boolean | undefined | SignalLike<boolean | undefined>;
 		capture?: boolean | string | undefined | SignalLike<string | undefined>;
 		cellPadding?: number | string | undefined | SignalLike<string | undefined>;
 		cellSpacing?: number | string | undefined | SignalLike<string | undefined>;
 		charSet?: string | undefined | SignalLike<string | undefined>;
+		charset?: string | undefined | SignalLike<string | undefined>;
 		challenge?: string | undefined | SignalLike<string | undefined>;
 		checked?: boolean | undefined | SignalLike<boolean | undefined>;
 		cite?: string | undefined | SignalLike<string | undefined>;
@@ -1718,15 +2175,28 @@ export namespace JSXInternal {
 		className?: string | undefined | SignalLike<string | undefined>;
 		cols?: number | undefined | SignalLike<number | undefined>;
 		colSpan?: number | undefined | SignalLike<number | undefined>;
+		colspan?: number | undefined | SignalLike<number | undefined>;
 		content?: string | undefined | SignalLike<string | undefined>;
-		contentEditable?: boolean | undefined | SignalLike<boolean | undefined>;
+		contentEditable?:
+			| Booleanish
+			| ''
+			| 'plaintext-only'
+			| 'inherit'
+			| undefined
+			| SignalLike<Booleanish | '' | 'inherit' | 'plaintext-only' | undefined>;
+		contenteditable?: HTMLAttributes['contentEditable'];
+		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/contextmenu */
 		contextMenu?: string | undefined | SignalLike<string | undefined>;
+		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/contextmenu */
+		contextmenu?: string | undefined | SignalLike<string | undefined>;
 		controls?: boolean | undefined | SignalLike<boolean | undefined>;
 		controlsList?: string | undefined | SignalLike<string | undefined>;
 		coords?: string | undefined | SignalLike<string | undefined>;
 		crossOrigin?: string | undefined | SignalLike<string | undefined>;
+		crossorigin?: string | undefined | SignalLike<string | undefined>;
 		data?: string | undefined | SignalLike<string | undefined>;
 		dateTime?: string | undefined | SignalLike<string | undefined>;
+		datetime?: string | undefined | SignalLike<string | undefined>;
 		default?: boolean | undefined | SignalLike<boolean | undefined>;
 		defaultChecked?: boolean | undefined | SignalLike<boolean | undefined>;
 		defaultValue?: string | undefined | SignalLike<string | undefined>;
@@ -1751,6 +2221,7 @@ export namespace JSXInternal {
 			| SignalLike<'sync' | 'async' | 'auto' | undefined>;
 		draggable?: boolean | undefined | SignalLike<boolean | undefined>;
 		encType?: string | undefined | SignalLike<string | undefined>;
+		enctype?: string | undefined | SignalLike<string | undefined>;
 		enterkeyhint?:
 			| 'enter'
 			| 'done'
@@ -1770,14 +2241,27 @@ export namespace JSXInternal {
 					| 'send'
 					| undefined
 			  >;
+		elementTiming?: string | undefined | SignalLike<string | undefined>;
+		elementtiming?: HTMLAttributes['elementTiming'];
+		exportparts?: string | undefined | SignalLike<string | undefined>;
 		for?: string | undefined | SignalLike<string | undefined>;
 		form?: string | undefined | SignalLike<string | undefined>;
 		formAction?: string | undefined | SignalLike<string | undefined>;
+		formaction?: string | undefined | SignalLike<string | undefined>;
 		formEncType?: string | undefined | SignalLike<string | undefined>;
+		formenctype?: string | undefined | SignalLike<string | undefined>;
 		formMethod?: string | undefined | SignalLike<string | undefined>;
+		formmethod?: string | undefined | SignalLike<string | undefined>;
 		formNoValidate?: boolean | undefined | SignalLike<boolean | undefined>;
+		formnovalidate?: boolean | undefined | SignalLike<boolean | undefined>;
 		formTarget?: string | undefined | SignalLike<string | undefined>;
+		formtarget?: string | undefined | SignalLike<string | undefined>;
 		frameBorder?:
+			| number
+			| string
+			| undefined
+			| SignalLike<number | string | undefined>;
+		frameborder?:
 			| number
 			| string
 			| undefined
@@ -1797,13 +2281,16 @@ export namespace JSXInternal {
 		high?: number | undefined | SignalLike<number | undefined>;
 		href?: string | undefined | SignalLike<string | undefined>;
 		hrefLang?: string | undefined | SignalLike<string | undefined>;
+		hreflang?: string | undefined | SignalLike<string | undefined>;
 		htmlFor?: string | undefined | SignalLike<string | undefined>;
 		httpEquiv?: string | undefined | SignalLike<string | undefined>;
+		'http-equiv'?: string | undefined | SignalLike<string | undefined>;
 		icon?: string | undefined | SignalLike<string | undefined>;
 		id?: string | undefined | SignalLike<string | undefined>;
 		indeterminate?: boolean | undefined | SignalLike<boolean | undefined>;
 		inert?: boolean | undefined | SignalLike<boolean | undefined>;
 		inputMode?: string | undefined | SignalLike<string | undefined>;
+		inputmode?: string | undefined | SignalLike<string | undefined>;
 		integrity?: string | undefined | SignalLike<string | undefined>;
 		is?: string | undefined | SignalLike<string | undefined>;
 		keyParams?: string | undefined | SignalLike<string | undefined>;
@@ -1824,17 +2311,20 @@ export namespace JSXInternal {
 		marginWidth?: number | undefined | SignalLike<number | undefined>;
 		max?: number | string | undefined | SignalLike<string | undefined>;
 		maxLength?: number | undefined | SignalLike<number | undefined>;
+		maxlength?: number | undefined | SignalLike<number | undefined>;
 		media?: string | undefined | SignalLike<string | undefined>;
 		mediaGroup?: string | undefined | SignalLike<string | undefined>;
 		method?: string | undefined | SignalLike<string | undefined>;
 		min?: number | string | undefined | SignalLike<string | undefined>;
 		minLength?: number | undefined | SignalLike<number | undefined>;
+		minlength?: number | undefined | SignalLike<number | undefined>;
 		multiple?: boolean | undefined | SignalLike<boolean | undefined>;
 		muted?: boolean | undefined | SignalLike<boolean | undefined>;
 		name?: string | undefined | SignalLike<string | undefined>;
 		nomodule?: boolean | undefined | SignalLike<boolean | undefined>;
 		nonce?: string | undefined | SignalLike<string | undefined>;
 		noValidate?: boolean | undefined | SignalLike<boolean | undefined>;
+		novalidate?: boolean | undefined | SignalLike<boolean | undefined>;
 		open?: boolean | undefined | SignalLike<boolean | undefined>;
 		optimum?: number | undefined | SignalLike<number | undefined>;
 		part?: string | undefined | SignalLike<string | undefined>;
@@ -1842,6 +2332,28 @@ export namespace JSXInternal {
 		ping?: string | undefined | SignalLike<string | undefined>;
 		placeholder?: string | undefined | SignalLike<string | undefined>;
 		playsInline?: boolean | undefined | SignalLike<boolean | undefined>;
+		playsinline?: boolean | undefined | SignalLike<boolean | undefined>;
+		popover?:
+			| 'auto'
+			| 'hint'
+			| 'manual'
+			| boolean
+			| undefined
+			| SignalLike<'auto' | 'hint' | 'manual' | boolean | undefined>;
+		popovertarget?: string | undefined | SignalLike<string | undefined>;
+		popoverTarget?: string | undefined | SignalLike<string | undefined>;
+		popovertargetaction?:
+			| 'hide'
+			| 'show'
+			| 'toggle'
+			| undefined
+			| SignalLike<'hide' | 'show' | 'toggle' | undefined>;
+		popoverTargetAction?:
+			| 'hide'
+			| 'show'
+			| 'toggle'
+			| undefined
+			| SignalLike<'hide' | 'show' | 'toggle' | undefined>;
 		poster?: string | undefined | SignalLike<string | undefined>;
 		preload?: string | undefined | SignalLike<string | undefined>;
 		radioGroup?: string | undefined | SignalLike<string | undefined>;
@@ -1874,6 +2386,7 @@ export namespace JSXInternal {
 		role?: AriaRole | undefined | SignalLike<AriaRole | undefined>;
 		rows?: number | undefined | SignalLike<number | undefined>;
 		rowSpan?: number | undefined | SignalLike<number | undefined>;
+		rowspan?: number | undefined | SignalLike<number | undefined>;
 		sandbox?: string | undefined | SignalLike<string | undefined>;
 		scope?: string | undefined | SignalLike<string | undefined>;
 		scoped?: boolean | undefined | SignalLike<boolean | undefined>;
@@ -1888,10 +2401,12 @@ export namespace JSXInternal {
 		spellcheck?: boolean | undefined | SignalLike<boolean | undefined>;
 		spellCheck?: boolean | undefined | SignalLike<boolean | undefined>;
 		src?: string | undefined | SignalLike<string | undefined>;
+		srcSet?: string | undefined | SignalLike<string | undefined>;
 		srcset?: string | undefined | SignalLike<string | undefined>;
 		srcDoc?: string | undefined | SignalLike<string | undefined>;
+		srcdoc?: string | undefined | SignalLike<string | undefined>;
 		srcLang?: string | undefined | SignalLike<string | undefined>;
-		srcSet?: string | undefined | SignalLike<string | undefined>;
+		srclang?: string | undefined | SignalLike<string | undefined>;
 		start?: number | undefined | SignalLike<number | undefined>;
 		step?:
 			| number
@@ -1905,10 +2420,12 @@ export namespace JSXInternal {
 			| SignalLike<string | CSSProperties | undefined>;
 		summary?: string | undefined | SignalLike<string | undefined>;
 		tabIndex?: number | undefined | SignalLike<number | undefined>;
+		tabindex?: number | undefined | SignalLike<number | undefined>;
 		target?: string | undefined | SignalLike<string | undefined>;
 		title?: string | undefined | SignalLike<string | undefined>;
 		type?: string | undefined | SignalLike<string | undefined>;
 		useMap?: string | undefined | SignalLike<string | undefined>;
+		usemap?: string | undefined | SignalLike<string | undefined>;
 		value?:
 			| string
 			| string[]
@@ -1968,7 +2485,7 @@ export namespace JSXInternal {
 			| undefined
 			| SignalLike<boolean | undefined>;
 		results?: number | undefined | SignalLike<number | undefined>;
-		translate?: 'yes' | 'no' | undefined | SignalLike<'yes' | 'no' | undefined>;
+		translate?: boolean | undefined | SignalLike<boolean | undefined>;
 
 		// RDFa Attributes
 		about?: string | undefined | SignalLike<string | undefined>;
@@ -1982,10 +2499,15 @@ export namespace JSXInternal {
 
 		// Microdata Attributes
 		itemProp?: string | undefined | SignalLike<string | undefined>;
+		itemprop?: string | undefined | SignalLike<string | undefined>;
 		itemScope?: boolean | undefined | SignalLike<boolean | undefined>;
+		itemscope?: boolean | undefined | SignalLike<boolean | undefined>;
 		itemType?: string | undefined | SignalLike<string | undefined>;
+		itemtype?: string | undefined | SignalLike<string | undefined>;
 		itemID?: string | undefined | SignalLike<string | undefined>;
+		itemid?: string | undefined | SignalLike<string | undefined>;
 		itemRef?: string | undefined | SignalLike<string | undefined>;
+		itemref?: string | undefined | SignalLike<string | undefined>;
 	}
 
 	export type DetailedHTMLProps<
@@ -2046,6 +2568,340 @@ export namespace JSXInternal {
 			| SignalLike<number | string | undefined>;
 	}
 
+	export interface MathMLAttributes<Target extends EventTarget = MathMLElement>
+		extends HTMLAttributes<Target> {
+		dir?: 'ltr' | 'rtl' | undefined | SignalLike<'ltr' | 'rtl' | undefined>;
+		displaystyle?: boolean | undefined | SignalLike<boolean | undefined>;
+		/** @deprecated This feature is non-standard. See https://developer.mozilla.org/en-US/docs/Web/MathML/Global_attributes/href  */
+		href?: string | undefined | SignalLike<string | undefined>;
+		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Global_attributes/mathbackground */
+		mathbackground?: string | undefined | SignalLike<string | undefined>;
+		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Global_attributes/mathcolor */
+		mathcolor?: string | undefined | SignalLike<string | undefined>;
+		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Global_attributes/mathsize */
+		mathsize?: string | undefined | SignalLike<string | undefined>;
+		nonce?: string | undefined | SignalLike<string | undefined>;
+		scriptlevel?: string | undefined | SignalLike<string | undefined>;
+	}
+
+	export interface HTMLAnnotationElement extends MathMLElement {
+		encoding?: string | undefined | SignalLike<string | undefined>;
+		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/semantics#src */
+		src?: string | undefined | SignalLike<string | undefined>;
+	}
+
+	export interface HTMLAnnotationXmlElement extends MathMLElement {
+		encoding?: string | undefined | SignalLike<string | undefined>;
+		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/semantics#src */
+		src?: string | undefined | SignalLike<string | undefined>;
+	}
+
+	export interface HTMLMActionElement extends MathMLElement {
+		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/maction#actiontype */
+		actiontype?:
+			| 'statusline'
+			| 'toggle'
+			| undefined
+			| SignalLike<'statusline' | 'toggle' | undefined>;
+		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/maction#selection */
+		selection?: string | undefined | SignalLike<string | undefined>;
+	}
+
+	export interface HTMLMathElement extends MathMLElement {
+		display?:
+			| 'block'
+			| 'inline'
+			| undefined
+			| SignalLike<'block' | 'inline' | undefined>;
+	}
+
+	export interface HTMLMEncloseElement extends MathMLElement {
+		notation?: string | undefined | SignalLike<string | undefined>;
+	}
+
+	export interface HTMLMErrorElement extends MathMLElement {}
+
+	export interface HTMLMFencedElement extends MathMLElement {
+		close?: string | undefined | SignalLike<string | undefined>;
+		open?: string | undefined | SignalLike<string | undefined>;
+		separators?: string | undefined | SignalLike<string | undefined>;
+	}
+
+	export interface HTMLMFracElement extends MathMLElement {
+		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mfrac#denomalign */
+		denomalign?:
+			| 'center'
+			| 'left'
+			| 'right'
+			| undefined
+			| SignalLike<'center' | 'left' | 'right' | undefined>;
+		linethickness?: string | undefined | SignalLike<string | undefined>;
+		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mfrac#numalign */
+		numalign?:
+			| 'center'
+			| 'left'
+			| 'right'
+			| undefined
+			| SignalLike<'center' | 'left' | 'right' | undefined>;
+	}
+
+	export interface HTMLMiElement extends MathMLElement {
+		/** The only value allowed in the current specification is normal (case insensitive)
+		 * See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mi#mathvariant */
+		mathvariant?:
+			| 'normal'
+			| 'bold'
+			| 'italic'
+			| 'bold-italic'
+			| 'double-struck'
+			| 'bold-fraktur'
+			| 'script'
+			| 'bold-script'
+			| 'fraktur'
+			| 'sans-serif'
+			| 'bold-sans-serif'
+			| 'sans-serif-italic'
+			| 'sans-serif-bold-italic'
+			| 'monospace'
+			| 'initial'
+			| 'tailed'
+			| 'looped'
+			| 'stretched'
+			| undefined
+			| SignalLike<
+					| 'normal'
+					| 'bold'
+					| 'italic'
+					| 'bold-italic'
+					| 'double-struck'
+					| 'bold-fraktur'
+					| 'script'
+					| 'bold-script'
+					| 'fraktur'
+					| 'sans-serif'
+					| 'bold-sans-serif'
+					| 'sans-serif-italic'
+					| 'sans-serif-bold-italic'
+					| 'monospace'
+					| 'initial'
+					| 'tailed'
+					| 'looped'
+					| 'stretched'
+					| undefined
+			  >;
+	}
+
+	export interface HTMLMmultiScriptsElement extends MathMLElement {
+		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mmultiscripts#subscriptshift */
+		subscriptshift?: string | undefined | SignalLike<string | undefined>;
+		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mmultiscripts#superscriptshift */
+		superscriptshift?: string | undefined | SignalLike<string | undefined>;
+	}
+
+	export interface HTMLMNElement extends MathMLElement {}
+
+	export interface HTMLMOElement extends MathMLElement {
+		/** Non-standard attribute See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mo#accent */
+		accent?: boolean | undefined | SignalLike<boolean | undefined>;
+		fence?: boolean | undefined | SignalLike<boolean | undefined>;
+		largeop?: boolean | undefined | SignalLike<boolean | undefined>;
+		lspace?: string | undefined | SignalLike<string | undefined>;
+		maxsize?: string | undefined | SignalLike<string | undefined>;
+		minsize?: string | undefined | SignalLike<string | undefined>;
+		movablelimits?: boolean | undefined | SignalLike<boolean | undefined>;
+		rspace?: string | undefined | SignalLike<string | undefined>;
+		separator?: boolean | undefined | SignalLike<boolean | undefined>;
+		stretchy?: boolean | undefined | SignalLike<boolean | undefined>;
+		symmetric?: boolean | undefined | SignalLike<boolean | undefined>;
+	}
+
+	export interface HTMLMOverElement extends MathMLElement {
+		accent?: boolean | undefined | SignalLike<boolean | undefined>;
+	}
+
+	export interface HTMLMPaddedElement extends MathMLElement {
+		depth?: string | undefined | SignalLike<string | undefined>;
+		height?: string | undefined | SignalLike<string | undefined>;
+		lspace?: string | undefined | SignalLike<string | undefined>;
+		voffset?: string | undefined | SignalLike<string | undefined>;
+		width?: string | undefined | SignalLike<string | undefined>;
+	}
+
+	export interface HTMLMPhantomElement extends MathMLElement {}
+
+	export interface HTMLMPrescriptsElement extends MathMLElement {}
+
+	export interface HTMLMRootElement extends MathMLElement {}
+
+	export interface HTMLMRowElement extends MathMLElement {}
+
+	export interface HTMLMSElement extends MathMLElement {
+		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/ms#browser_compatibility */
+		lquote?: string | undefined | SignalLike<string | undefined>;
+		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/ms#browser_compatibility */
+		rquote?: string | undefined | SignalLike<string | undefined>;
+	}
+
+	export interface HTMLMSpaceElement extends MathMLElement {
+		depth?: string | undefined | SignalLike<string | undefined>;
+		height?: string | undefined | SignalLike<string | undefined>;
+		width?: string | undefined | SignalLike<string | undefined>;
+	}
+
+	export interface HTMLMSqrtElement extends MathMLElement {}
+
+	export interface HTMLMStyleElement extends MathMLElement {
+		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mstyle#background */
+		background?: string | undefined | SignalLike<string | undefined>;
+		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mstyle#color */
+		color?: string | undefined | SignalLike<string | undefined>;
+		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mstyle#fontsize */
+		fontsize?: string | undefined | SignalLike<string | undefined>;
+		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mstyle#fontstyle */
+		fontstyle?: string | undefined | SignalLike<string | undefined>;
+		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mstyle#fontweight */
+		fontweight?: string | undefined | SignalLike<string | undefined>;
+		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mstyle#scriptminsize */
+		scriptminsize?: string | undefined | SignalLike<string | undefined>;
+		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mstyle#scriptsizemultiplier */
+		scriptsizemultiplier?: string | undefined | SignalLike<string | undefined>;
+	}
+
+	export interface HTMLMSubElement extends MathMLElement {
+		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/msub#subscriptshift */
+		subscriptshift?: string | undefined | SignalLike<string | undefined>;
+	}
+
+	export interface HTMLMSubsupElement extends MathMLElement {
+		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/msubsup#subscriptshift */
+		subscriptshift?: string | undefined | SignalLike<string | undefined>;
+		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/msubsup#superscriptshift */
+		superscriptshift?: string | undefined | SignalLike<string | undefined>;
+	}
+
+	export interface HTMLMSupElement extends MathMLElement {
+		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/msup#superscriptshift */
+		superscriptshift?: string | undefined | SignalLike<string | undefined>;
+	}
+
+	export interface HTMLMTableElement extends MathMLElement {
+		/** Non-standard attribute See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mtable#align */
+		align?:
+			| 'axis'
+			| 'baseline'
+			| 'bottom'
+			| 'center'
+			| 'top'
+			| undefined
+			| SignalLike<
+					'axis' | 'baseline' | 'bottom' | 'center' | 'top' | undefined
+			  >;
+		/** Non-standard attribute See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mtable#columnalign */
+		columnalign?:
+			| 'center'
+			| 'left'
+			| 'right'
+			| undefined
+			| SignalLike<'center' | 'left' | 'right' | undefined>;
+		/** Non-standard attribute See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mtable#columnlines */
+		columnlines?:
+			| 'dashed'
+			| 'none'
+			| 'solid'
+			| undefined
+			| SignalLike<'dashed' | 'none' | 'solid' | undefined>;
+		/** Non-standard attribute See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mtable#columnspacing */
+		columnspacing?: string | undefined | SignalLike<string | undefined>;
+		/** Non-standard attribute See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mtable#frame */
+		frame?:
+			| 'dashed'
+			| 'none'
+			| 'solid'
+			| undefined
+			| SignalLike<'dashed' | 'none' | 'solid' | undefined>;
+		/** Non-standard attribute See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mtable#framespacing */
+		framespacing?: string | undefined | SignalLike<string | undefined>;
+		/** Non-standard attribute See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mtable#rowalign */
+		rowalign?:
+			| 'axis'
+			| 'baseline'
+			| 'bottom'
+			| 'center'
+			| 'top'
+			| undefined
+			| SignalLike<
+					'axis' | 'baseline' | 'bottom' | 'center' | 'top' | undefined
+			  >;
+		/** Non-standard attribute See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mtable#rowlines */
+		rowlines?:
+			| 'dashed'
+			| 'none'
+			| 'solid'
+			| undefined
+			| SignalLike<'dashed' | 'none' | 'solid' | undefined>;
+		/** Non-standard attribute See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mtable#rowspacing */
+		rowspacing?: string | undefined | SignalLike<string | undefined>;
+		/** Non-standard attribute See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mtable#width */
+		width?: string | undefined | SignalLike<string | undefined>;
+	}
+
+	export interface HTMLMTdElement extends MathMLElement {
+		columnspan?: number | undefined | SignalLike<number | undefined>;
+		rowspan?: number | undefined | SignalLike<number | undefined>;
+		/** Non-standard attribute See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mtd#columnalign */
+		columnalign?:
+			| 'center'
+			| 'left'
+			| 'right'
+			| undefined
+			| SignalLike<'center' | 'left' | 'right' | undefined>;
+		/** Non-standard attribute See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mtd#rowalign */
+		rowalign?:
+			| 'axis'
+			| 'baseline'
+			| 'bottom'
+			| 'center'
+			| 'top'
+			| undefined
+			| SignalLike<
+					'axis' | 'baseline' | 'bottom' | 'center' | 'top' | undefined
+			  >;
+	}
+
+	export interface HTMLMTextElement extends MathMLElement {}
+
+	export interface HTMLMTrElement extends MathMLElement {
+		/** Non-standard attribute See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mtr#columnalign */
+		columnalign?:
+			| 'center'
+			| 'left'
+			| 'right'
+			| undefined
+			| SignalLike<'center' | 'left' | 'right' | undefined>;
+		/** Non-standard attribute See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mtr#rowalign */
+		rowalign?:
+			| 'axis'
+			| 'baseline'
+			| 'bottom'
+			| 'center'
+			| 'top'
+			| undefined
+			| SignalLike<
+					'axis' | 'baseline' | 'bottom' | 'center' | 'top' | undefined
+			  >;
+	}
+
+	export interface HTMLMUnderElement extends MathMLElement {
+		accentunder?: boolean | undefined | SignalLike<boolean | undefined>;
+	}
+
+	export interface HTMLMUnderoverElement extends MathMLElement {
+		accent?: boolean | undefined | SignalLike<boolean | undefined>;
+		accentunder?: boolean | undefined | SignalLike<boolean | undefined>;
+	}
+
+	export interface HTMLSemanticsElement extends MathMLElement {}
+  
 	export interface IntrinsicSVGElements {
 		svg: SVGAttributes<SVGSVGElement>;
 		animate: SVGAttributes<SVGAnimateElement>;
@@ -2213,6 +3069,7 @@ export namespace JSXInternal {
 		table: HTMLAttributes<HTMLTableElement>;
 		tbody: HTMLAttributes<HTMLTableSectionElement>;
 		td: HTMLAttributes<HTMLTableCellElement>;
+		template: HTMLAttributes<HTMLTemplateElement>;
 		textarea: HTMLAttributes<HTMLTextAreaElement>;
 		tfoot: HTMLAttributes<HTMLTableSectionElement>;
 		th: HTMLAttributes<HTMLTableCellElement>;
@@ -2226,5 +3083,42 @@ export namespace JSXInternal {
 		var: HTMLAttributes<HTMLElement>;
 		video: HTMLAttributes<HTMLVideoElement>;
 		wbr: HTMLAttributes<HTMLElement>;
+
+		// MathML See https://developer.mozilla.org/en-US/docs/Web/MathML
+		'annotation-xml': MathMLAttributes<HTMLAnnotationXmlElement>;
+		annotation: MathMLAttributes<HTMLAnnotationElement>;
+		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/maction */
+		maction: MathMLAttributes<HTMLMActionElement>;
+		math: MathMLAttributes<HTMLMathElement>;
+		/** This feature is non-standard. See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/menclose  */
+		menclose: MathMLAttributes<HTMLMEncloseElement>;
+		merror: MathMLAttributes<HTMLMErrorElement>;
+		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mfenced */
+		mfenced: HTMLAttributes<HTMLMFencedElement>;
+		mfrac: MathMLAttributes<HTMLMFracElement>;
+		mi: MathMLAttributes<HTMLMiElement>;
+		mmultiscripts: MathMLAttributes<HTMLMmultiScriptsElement>;
+		mn: MathMLAttributes<HTMLMNElement>;
+		mo: MathMLAttributes<HTMLMOElement>;
+		mover: MathMLAttributes<HTMLMOverElement>;
+		mpadded: MathMLAttributes<HTMLMPaddedElement>;
+		mphantom: MathMLAttributes<HTMLMPhantomElement>;
+		mprescripts: MathMLAttributes<HTMLMPrescriptsElement>;
+		mroot: MathMLAttributes<HTMLMRootElement>;
+		mrow: MathMLAttributes<HTMLMRowElement>;
+		ms: MathMLAttributes<HTMLMSElement>;
+		mspace: MathMLAttributes<HTMLMSpaceElement>;
+		msqrt: MathMLAttributes<HTMLMSqrtElement>;
+		mstyle: MathMLAttributes<HTMLMStyleElement>;
+		msub: MathMLAttributes<HTMLMSubElement>;
+		msubsup: MathMLAttributes<HTMLMSubsupElement>;
+		msup: MathMLAttributes<HTMLMSupElement>;
+		mtable: MathMLAttributes<HTMLMTableElement>;
+		mtd: MathMLAttributes<HTMLMTdElement>;
+		mtext: MathMLAttributes<HTMLMTextElement>;
+		mtr: MathMLAttributes<HTMLMTrElement>;
+		munder: MathMLAttributes<HTMLMUnderElement>;
+		munderover: MathMLAttributes<HTMLMUnderoverElement>;
+		semantics: MathMLAttributes<HTMLSemanticsElement>;
 	}
 }

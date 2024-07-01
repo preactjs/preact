@@ -1,0 +1,93 @@
+name: Benchmark Debug
+
+on:
+  workflow_dispatch:
+    inputs:
+      benchmark:
+        description: 'Which benchmark to run'
+        type: choice
+        options:
+          - table-app/replace1k
+          - table-app/update10th1k
+          - table-app/create10k
+          - table-app/hydrate1k
+          - filter_list/filter-list
+          - many-updates/many-updates
+          - text-update/text-update
+          - todo/todo
+        required: true
+      base:
+        description: 'The branch name, tag, or commit sha of the version of preact to benchmark against.'
+        type: string
+        default: main
+        required: false
+      trace:
+        description: 'Whether to capture browser traces for this benchmark run'
+        type: boolean
+        default: true
+        required: false
+      # A bug in GitHub actions prevents us from passing numbers (as either
+      # number or string type) to called workflows. So disabling this for now.
+      # See: https://github.com/orgs/community/discussions/67182
+      #
+      # timeout:
+      #   description: 'How many minutes to give the benchmark to run before timing out and failing'
+      #   type: number
+      #   default: 20
+      #   required: false
+
+jobs:
+  build_local:
+    name: Build local package
+    uses: ./.github/workflows/ci.yml
+
+  build_base:
+    name: Build base package
+    uses: ./.github/workflows/ci.yml
+    with:
+      ref: ${{ inputs.base }}
+      artifact_name: base-npm-package
+
+  prepare:
+    name: Prepare environment
+    runs-on: ubuntu-latest
+    needs:
+      - build_local
+      - build_base
+    timeout-minutes: 5
+    steps:
+      - name: Download locally built preact package
+        uses: actions/download-artifact@v3
+        with:
+          name: npm-package
+      - run: mv preact.tgz preact-local.tgz
+      - name: Upload locally built preact package
+        uses: actions/upload-artifact@v3
+        with:
+          name: bench-environment
+          path: preact-local.tgz
+      - name: Clear working directory
+        run: |
+          ls -al
+          rm -rf *
+          echo "===================="
+          ls -al
+      - name: Download base package
+        uses: actions/download-artifact@v3
+        with:
+          name: base-npm-package
+      - run: mv preact.tgz preact-main.tgz
+      - name: Upload base preact package
+        uses: actions/upload-artifact@v3
+        with:
+          name: bench-environment
+          path: preact-main.tgz
+
+  benchmark:
+    name: Bench ${{ inputs.benchmark }}
+    uses: ./.github/workflows/run-bench.yml
+    needs: prepare
+    with:
+      benchmark: ${{ inputs.benchmark }}
+      trace: ${{ inputs.trace }}
+      # timeout: ${{ inputs.timeout }}

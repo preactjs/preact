@@ -10,13 +10,13 @@ export function getSymbol(name, fallback) {
 		// eslint-disable-next-line
 		if (
 			Function.prototype.toString
-				.call(eval('Symbol.for'))
+				.call((0, eval)('Symbol.for'))
 				.match(/\[native code\]/)
 		) {
 			// Concatenate these string literals to prevent the test
 			// harness and/or Babel from modifying the symbol value.
 			// eslint-disable-next-line
-			out = eval('Sym' + 'bol.for("' + name + '")');
+			out = (0, eval)('Sym' + 'bol.for("' + name + '")');
 		}
 	} catch (e) {}
 

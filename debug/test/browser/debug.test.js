@@ -1,4 +1,5 @@
 import { createElement, render, createRef, Component, Fragment } from 'preact';
+import { useState } from 'preact/hooks';
 import {
 	setupScratch,
 	teardown,
@@ -6,6 +7,7 @@ import {
 } from '../../../test/_util/helpers';
 import './fakeDevTools';
 import 'preact/debug';
+import { setupRerender } from 'preact/test-utils';
 import * as PropTypes from 'prop-types';
 
 // eslint-disable-next-line no-duplicate-imports
@@ -19,18 +21,20 @@ describe('debug', () => {
 	let scratch;
 	let errors = [];
 	let warnings = [];
+	let rerender;
 
 	beforeEach(() => {
 		errors = [];
 		warnings = [];
 		scratch = setupScratch();
+		rerender = setupRerender();
 		sinon.stub(console, 'error').callsFake(e => errors.push(e));
 		sinon.stub(console, 'warn').callsFake(w => warnings.push(w));
 	});
 
 	afterEach(() => {
 		/** @type {*} */
-		(console.error).restore();
+		console.error.restore();
 		console.warn.restore();
 		teardown(scratch);
 	});
@@ -271,6 +275,53 @@ describe('debug', () => {
 		expect(console.error).to.not.be.called;
 	});
 
+	it('throws an error if a component rerenders too many times', () => {
+		let rerenderCount = 0;
+		function TestComponent({ loop = false }) {
+			const [count, setCount] = useState(0);
+			if (loop) {
+				setCount(count + 1);
+			}
+
+			if (count > 30) {
+				expect.fail(
+					'Repeated rerenders did not cause the expected error. This test is failing.'
+				);
+			}
+
+			rerenderCount += 1;
+			return <div />;
+		}
+
+		expect(() => {
+			render(
+				<Fragment>
+					<TestComponent />
+					<TestComponent loop />
+				</Fragment>,
+				scratch
+			);
+		}).to.throw(/Too many re-renders/);
+		// 1 for first TestComponent + 24 for second TestComponent
+		expect(rerenderCount).to.equal(25);
+	});
+
+	it('does not throw an error if a component renders many times in different cycles', () => {
+		let set;
+		function TestComponent() {
+			const [count, setCount] = useState(0);
+			set = () => setCount(count + 1);
+			return <div>{count}</div>;
+		}
+
+		render(<TestComponent />, scratch);
+		for (let i = 0; i < 30; i++) {
+			set();
+			rerender();
+		}
+		expect(scratch.innerHTML).to.equal('<div>30</div>');
+	});
+
 	describe('duplicate keys', () => {
 		const List = props => <ul>{props.children}</ul>;
 		const ListItem = props => <li>{props.children}</li>;
@@ -355,9 +406,11 @@ describe('debug', () => {
 	describe('table markup', () => {
 		it('missing <tbody>/<thead>/<tfoot>/<table>', () => {
 			const Table = () => (
-				<tr>
-					<td>hi</td>
-				</tr>
+				<div>
+					<tr>
+						<td>hi</td>
+					</tr>
+				</div>
 			);
 			render(<Table />, scratch);
 			expect(console.error).to.be.calledOnce;
@@ -365,11 +418,13 @@ describe('debug', () => {
 
 		it('missing <table> with <thead>', () => {
 			const Table = () => (
-				<thead>
-					<tr>
-						<td>hi</td>
-					</tr>
-				</thead>
+				<div>
+					<thead>
+						<tr>
+							<td>hi</td>
+						</tr>
+					</thead>
+				</div>
 			);
 			render(<Table />, scratch);
 			expect(console.error).to.be.calledOnce;
@@ -377,11 +432,13 @@ describe('debug', () => {
 
 		it('missing <table> with <tbody>', () => {
 			const Table = () => (
-				<tbody>
-					<tr>
-						<td>hi</td>
-					</tr>
-				</tbody>
+				<div>
+					<tbody>
+						<tr>
+							<td>hi</td>
+						</tr>
+					</tbody>
+				</div>
 			);
 			render(<Table />, scratch);
 			expect(console.error).to.be.calledOnce;
@@ -389,11 +446,13 @@ describe('debug', () => {
 
 		it('missing <table> with <tfoot>', () => {
 			const Table = () => (
-				<tfoot>
-					<tr>
-						<td>hi</td>
-					</tr>
-				</tfoot>
+				<div>
+					<tfoot>
+						<tr>
+							<td>hi</td>
+						</tr>
+					</tfoot>
+				</div>
 			);
 			render(<Table />, scratch);
 			expect(console.error).to.be.calledOnce;
@@ -503,12 +562,14 @@ describe('debug', () => {
 		it('Accepts minimal well formed table', () => {
 			const Table = () => (
 				<table>
-					<tr>
-						<th>Head</th>
-					</tr>
-					<tr>
-						<td>Body</td>
-					</tr>
+					<tbody>
+						<tr>
+							<th>Head</th>
+						</tr>
+						<tr>
+							<td>Body</td>
+						</tr>
+					</tbody>
 				</table>
 			);
 			render(<Table />, scratch);
@@ -525,6 +586,190 @@ describe('debug', () => {
 			const table = document.createElement('table');
 			scratch.appendChild(table);
 			render(<Table />, table);
+			expect(console.error).to.not.be.called;
+		});
+
+		it('should warn for improper nested table', () => {
+			const Table = () => (
+				<table>
+					<tbody>
+						<tr>
+							<table />
+						</tr>
+					</tbody>
+				</table>
+			);
+
+			render(<Table />, scratch);
+			expect(console.error).to.be.calledOnce;
+		});
+
+		it('accepts valid nested tables', () => {
+			const Table = () => (
+				<table>
+					<tbody>
+						<tr>
+							<th>foo</th>
+						</tr>
+						<tr>
+							<td id="nested">
+								<table>
+									<tbody>
+										<tr>
+											<td>cell1</td>
+											<td>cell2</td>
+											<td>cell3</td>
+										</tr>
+									</tbody>
+								</table>
+							</td>
+						</tr>
+						<tr>
+							<td>bar</td>
+						</tr>
+					</tbody>
+				</table>
+			);
+
+			render(<Table />, scratch);
+			expect(console.error).to.not.be.called;
+		});
+	});
+
+	describe('paragraph nesting', () => {
+		it('should not warn a regular text paragraph', () => {
+			const Paragraph = () => <p>Hello world</p>;
+
+			render(<Paragraph />, scratch);
+			expect(console.error).to.not.be.called;
+		});
+
+		it('should not crash for an empty pragraph', () => {
+			const Paragraph = () => <p />;
+
+			render(<Paragraph />, scratch);
+			expect(console.error).to.not.be.called;
+		});
+
+		it('should warn for nesting illegal dom-nodes under a paragraph', () => {
+			const Paragraph = () => (
+				<p>
+					<h1>Hello world</h1>
+				</p>
+			);
+
+			render(<Paragraph />, scratch);
+			expect(console.error).to.be.calledOnce;
+		});
+
+		it('should warn for nesting illegal dom-nodes under a paragraph as func', () => {
+			const Title = ({ children }) => <h1>{children}</h1>;
+			const Paragraph = () => (
+				<p>
+					<Title>Hello world</Title>
+				</p>
+			);
+
+			render(<Paragraph />, scratch);
+			expect(console.error).to.be.calledOnce;
+		});
+
+		it('should not warn for nesting span under a paragraph', () => {
+			const Paragraph = () => (
+				<p>
+					<span>Hello world</span>
+				</p>
+			);
+
+			render(<Paragraph />, scratch);
+			expect(console.error).to.not.be.called;
+		});
+	});
+
+	describe('button nesting', () => {
+		it('should not warn on a regular button', () => {
+			const Button = () => <button>Hello world</button>;
+
+			render(<Button />, scratch);
+			expect(console.error).to.not.be.called;
+		});
+
+		it('should warn for nesting illegal dom-nodes under a button', () => {
+			const Button = () => (
+				<button>
+					<button>Hello world</button>
+				</button>
+			);
+
+			render(<Button />, scratch);
+			expect(console.error).to.be.calledOnce;
+		});
+
+		it('should warn for nesting illegal dom-nodes under a button as func', () => {
+			const ButtonChild = ({ children }) => <button>{children}</button>;
+			const Button = () => (
+				<button>
+					<ButtonChild>Hello world</ButtonChild>
+				</button>
+			);
+
+			render(<Button />, scratch);
+			expect(console.error).to.be.calledOnce;
+		});
+
+		it('should not warn for nesting non-interactive content under a button', () => {
+			const Button = () => (
+				<button>
+					<span>Hello </span>
+					<a>World</a>
+				</button>
+			);
+
+			render(<Button />, scratch);
+			expect(console.error).to.not.be.called;
+		});
+	});
+
+	describe('anchor nesting', () => {
+		it('should not warn a regular anchor', () => {
+			const Anchor = () => <a>Hello world</a>;
+
+			render(<Anchor />, scratch);
+			expect(console.error).to.not.be.called;
+		});
+
+		it('should warn for nesting illegal dom-nodes under an anchor', () => {
+			const Anchor = () => (
+				<a>
+					<a>Hello world</a>
+				</a>
+			);
+
+			render(<Anchor />, scratch);
+			expect(console.error).to.be.calledOnce;
+		});
+
+		it('should warn for nesting illegal dom-nodes under an anchor as func', () => {
+			const AnchorChild = ({ children }) => <a>{children}</a>;
+			const Anchor = () => (
+				<a>
+					<AnchorChild>Hello world</AnchorChild>
+				</a>
+			);
+
+			render(<Anchor />, scratch);
+			expect(console.error).to.be.calledOnce;
+		});
+
+		it('should not warn for nesting non-interactive content under an anchor', () => {
+			const Anchor = () => (
+				<a>
+					<span>Hello </span>
+					<button>World</button>
+				</a>
+			);
+
+			render(<Anchor />, scratch);
 			expect(console.error).to.not.be.called;
 		});
 	});

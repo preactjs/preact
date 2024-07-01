@@ -5,11 +5,12 @@ let vnodeId = 0;
 
 /**
  * Create an virtual node (used for JSX)
- * @param {import('./internal').VNode["type"]} type The node name or Component
- * constructor for this virtual node
+ * @param {VNode["type"]} type The node name or Component constructor for this
+ * virtual node
  * @param {object | null | undefined} [props] The properties of the virtual node
- * @param {Array<import('.').ComponentChildren>} [children] The children of the virtual node
- * @returns {import('./internal').VNode}
+ * @param {Array<import('.').ComponentChildren>} [children] The children of the
+ * virtual node
+ * @returns {VNode}
  */
 export function createElement(type, props, children) {
 	let normalizedProps = {},
@@ -42,19 +43,20 @@ export function createElement(type, props, children) {
 
 /**
  * Create a VNode (used internally by Preact)
- * @param {import('./internal').VNode["type"]} type The node name or Component
+ * @param {VNode["type"]} type The node name or Component
  * Constructor for this virtual node
  * @param {object | string | number | null} props The properties of this virtual node.
  * If this virtual node represents a text node, this is the text of the node (string or number).
  * @param {string | number | null} key The key for this virtual node, used when
  * diffing it against its children
- * @param {import('./internal').VNode["ref"]} ref The ref property that will
+ * @param {VNode["ref"]} ref The ref property that will
  * receive a reference to its created child
- * @returns {import('./internal').VNode}
+ * @returns {VNode}
  */
 export function createVNode(type, props, key, ref, original) {
 	// V8 seems to be better at detecting type shapes if the object is allocated from the same call site
 	// Do not inline into createElement and coerceToVNode!
+	/** @type {VNode} */
 	const vnode = {
 		type,
 		props,
@@ -70,9 +72,10 @@ export function createVNode(type, props, key, ref, original) {
 		// a _nextDom that has been set to `null`
 		_nextDom: undefined,
 		_component: null,
-		_hydrating: null,
 		constructor: undefined,
-		_original: original == null ? ++vnodeId : original
+		_original: original == null ? ++vnodeId : original,
+		_index: -1,
+		_flags: 0
 	};
 
 	// Only invoke the vnode hook if this was *not* a direct copy:
@@ -92,7 +95,7 @@ export function Fragment(props) {
 /**
  * Check if a the argument is a valid Preact VNode.
  * @param {*} vnode
- * @returns {vnode is import('./internal').VNode}
+ * @returns {vnode is VNode}
  */
 export const isValidElement = vnode =>
-	vnode != null && vnode.constructor === undefined;
+	vnode != null && vnode.constructor == undefined;

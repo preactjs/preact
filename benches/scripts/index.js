@@ -87,24 +87,19 @@ prog
 		'The framework to run the benchmark with.',
 		defaultDeoptsOptions.framework
 	)
-	.option(
-		'--timeout, -t',
-		'How long in seconds to keep the browser open while the benchmark runs. Passed to v8-deopt-viewer.',
-		defaultDeoptsOptions.timeout
-	)
-	.option(
-		'--open',
-		'Open the resulting v8-deopt-viewer result in the browser upon completion',
-		defaultDeoptsOptions.open
-	)
 	.action(runDeopts);
 
+// Test
+// - (no args)
+// - 02_replace1k
 prog
-	.command('analyze')
+	.command('analyze [benchmark]')
 	.describe(
 		'Analyze the trace logs created by running benchmarks with the --trace flag'
 	)
 	.example('analyze')
+	.example('analyze 02_replace1k')
+	.example('analyze many_updates')
 	.action(analyze);
 
 prog.parse(process.argv);

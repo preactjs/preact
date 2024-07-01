@@ -1,8 +1,19 @@
-import { options, Fragment, Component } from 'preact';
+import { Component, Fragment, options } from 'preact';
 
 export function initDevTools() {
-	if (typeof window != 'undefined' && window.__PREACT_DEVTOOLS__) {
-		window.__PREACT_DEVTOOLS__.attachPreact('10.17.0', options, {
+	const globalVar =
+		typeof globalThis !== 'undefined'
+			? globalThis
+			: typeof window !== 'undefined'
+				? window
+				: undefined;
+
+	if (
+		globalVar !== null &&
+		globalVar !== undefined &&
+		globalVar.__PREACT_DEVTOOLS__
+	) {
+		globalVar.__PREACT_DEVTOOLS__.attachPreact('10.22.1', options, {
 			Fragment,
 			Component
 		});

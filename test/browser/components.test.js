@@ -340,6 +340,50 @@ describe('Components', () => {
 			expect(scratch.innerHTML).to.equal('<p>B</p>');
 		});
 
+		it('should update children props correctly in subsequent renders', () => {
+			let update, update2;
+			class Counter extends Component {
+				constructor(props) {
+					super(props);
+					this.state = { counter: 0 };
+					update2 = () => {
+						this.setState({ counter: this.state.counter + 1 });
+					};
+				}
+
+				render({ counter }) {
+					if (!counter) return null;
+					return (
+						<p>
+							{counter}-{this.state.counter}
+						</p>
+					);
+				}
+			}
+			class App extends Component {
+				constructor(props) {
+					super(props);
+					this.state = { counter: 0 };
+					update = () => {
+						this.setState({ counter: this.state.counter + 1 });
+					};
+				}
+
+				render() {
+					return <Counter counter={this.state.counter} />;
+				}
+			}
+
+			render(<App />, scratch);
+			expect(scratch.innerHTML).to.equal('');
+
+			update2();
+			rerender();
+			update();
+			rerender();
+			expect(scratch.innerHTML).to.equal('<p>1-1</p>');
+		});
+
 		it("should render components that don't pass args into the Component constructor (unistore pattern)", () => {
 			// Pattern unistore uses for connect: https://github.com/developit/unistore/blob/1df7cf60ac6fa1a70859d745fbaea7ea3f1b8d30/src/integrations/preact.js#L23
 			function Wrapper() {
@@ -531,6 +575,18 @@ describe('Components', () => {
 
 		render(<NumberComponent />, scratch);
 		expect(scratch.innerHTML).to.equal('42');
+	});
+
+	it('should render a new String()', () => {
+		class ConstructedStringComponent extends Component {
+			render() {
+				/* eslint-disable no-new-wrappers */
+				return new String('Hi from a constructed string!');
+			}
+		}
+
+		render(<ConstructedStringComponent />, scratch);
+		expect(scratch.innerHTML).to.equal('Hi from a constructed string!');
 	});
 
 	it('should render null as empty string', () => {
@@ -1885,6 +1941,28 @@ describe('Components', () => {
 		expect(unmounted).to.equal(',0,1,2,3');
 	});
 
+	it('should ignore invalid vnodes in children array', () => {
+		/** @type { (() => void)} */
+		let update;
+
+		const obj = { a: 10, b: 'hello' };
+		class App extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { i: 0 };
+				update = () => this.setState({ i: this.state.i + 1 });
+			}
+
+			render() {
+				return <p>{obj}</p>;
+			}
+		}
+
+		render(<App />, scratch);
+		update();
+		expect(() => rerender()).not.to.throw();
+	});
+
 	describe('c.base', () => {
 		/* eslint-disable lines-around-comment */
 		/** @type {import('../../src').Component} */
@@ -2702,7 +2780,7 @@ describe('Components', () => {
 			}
 
 			class App extends Component {
-				children = (<Child parent={this} />);
+				children = <Child parent={this} />;
 				render() {
 					return this.children;
 				}
