@@ -2901,7 +2901,7 @@ export namespace JSXInternal {
 	}
 
 	export interface HTMLSemanticsElement extends MathMLElement {}
-  
+
 	export interface IntrinsicSVGElements {
 		svg: SVGAttributes<SVGSVGElement>;
 		animate: SVGAttributes<SVGAnimateElement>;
