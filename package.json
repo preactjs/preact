@@ -198,8 +198,8 @@
   "bugs": "https://github.com/preactjs/preact/issues",
   "homepage": "https://preactjs.com",
   "devDependencies": {
-    "@actions/github": "^5.0.0",
-    "@actions/glob": "^0.2.0",
+    "@actions/github": "^6.0.0",
+    "@actions/glob": "^0.4.0",
     "@babel/core": "^7.7.0",
     "@babel/plugin-proposal-object-rest-spread": "^7.6.2",
     "@babel/plugin-transform-react-jsx": "^7.7.0",
