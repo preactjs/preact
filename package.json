@@ -105,7 +105,7 @@
   },
   "types": "src/index.d.ts",
   "scripts": {
-    "prepare": "husky && run-s build && check-export-map",
+    "prepare": "husky && run-s build && check-export-map && npm-merge-driver-install",
     "build": "npm-run-all --parallel build:*",
     "build:core": "microbundle build --raw --no-generateTypes -f cjs,esm,umd",
     "build:core-min": "microbundle build --raw --no-generateTypes -f cjs,esm,umd,iife src/cjs.js -o dist/preact.min.js",
@@ -238,7 +238,7 @@
     "lodash": "^4.17.21",
     "microbundle": "^0.15.1",
     "mocha": "^8.2.1",
-    "npm-merge-driver-install": "^1.1.1",
+    "npm-merge-driver-install": "^3.0.0",
     "npm-run-all": "^4.1.5",
     "oxlint": "^0.5.2",
     "preact-render-to-string": "^6.5.0",
