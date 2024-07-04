@@ -340,9 +340,9 @@ module.exports = function (config) {
 			// esbuild options
 			target: downlevel ? 'es5' : 'es2015',
 			define: {
-				COVERAGE: coverage,
+				COVERAGE: JSON.stringify(coverage),
 				'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || ''),
-				ENABLE_PERFORMANCE: performance
+				ENABLE_PERFORMANCE: JSON.stringify(performance)
 			},
 			plugins: [createEsbuildPlugin()]
 		}
