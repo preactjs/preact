@@ -49,7 +49,8 @@ export type ComponentChild =
 	| bigint
 	| boolean
 	| null
-	| undefined;
+	| undefined
+	| Function;
 export type ComponentChildren = ComponentChild[] | ComponentChild;
 
 export interface Attributes {
