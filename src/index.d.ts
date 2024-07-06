@@ -43,9 +43,9 @@ export type Ref<T> = RefObject<T> | RefCallback<T> | null;
 
 export type ComponentChild =
 	| VNode<any>
-	| object
 	| string
 	| number
+	| Iterable<ComponentChild>
 	| bigint
 	| boolean
 	| null
