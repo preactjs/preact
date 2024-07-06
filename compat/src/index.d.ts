@@ -726,11 +726,10 @@ declare namespace React {
 		| null;
 
 	export type ElementType<P = any, Tag extends keyof JSX.IntrinsicElements = keyof JSX.IntrinsicElements> =
-                | { [K in Tag]: P extends JSX.IntrinsicElements[K] ? K : never }[Tag]
-                | ComponentType<P>;
+		| { [K in Tag]: P extends JSX.IntrinsicElements[K] ? K : never }[Tag]
+		| ComponentType<P>;
 
-        export type ComponentPropsWithoutRef<T extends ElementType> = PropsWithoutRef<ComponentProps<T>>;
-
+	export type ComponentPropsWithoutRef<T extends ElementType> = PropsWithoutRef<ComponentProps<T>>;
 
 	export type ComponentPropsWithRef<
 		C extends ComponentType<any> | keyof JSXInternal.IntrinsicElements
