@@ -563,6 +563,7 @@ export function applyRef(ref, value, vnode) {
 		if (typeof ref == 'function') {
 			let hasRefUnmount = typeof ref._unmount == 'function';
 			if (hasRefUnmount) {
+				// @ts-ignore TS doesn't like moving narrowing checks into variables
 				ref._unmount();
 			}
 
