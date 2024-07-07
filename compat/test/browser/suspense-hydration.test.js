@@ -97,6 +97,30 @@ describe('suspense hydration', () => {
 		});
 	});
 
+	it.only('should leave DOM untouched when suspending while hydrating', () => {
+		scratch.innerHTML = '<p>loading...</p>';
+		clearLog();
+
+		const [Lazy, resolve] = createLazy();
+		hydrate(
+			<Suspense fallback={<p>loading...</p>}>
+				<Lazy />
+			</Suspense>,
+			scratch
+		);
+		rerender(); // Flush rerender queue to mimic what preact will really do
+		expect(scratch.innerHTML).to.equal('<p>loading...</p>');
+		expect(getLog()).to.deep.equal([]);
+		clearLog();
+
+		return resolve(() => <div>Hello</div>).then(() => {
+			rerender();
+			expect(scratch.innerHTML).to.equal('<div>Hello</div>');
+			expect(getLog()).to.deep.equal([]);
+			clearLog();
+		});
+	});
+
 	it('should properly attach event listeners when suspending while hydrating', () => {
 		scratch.innerHTML = '<div>Hello</div><div>World</div>';
 		clearLog();

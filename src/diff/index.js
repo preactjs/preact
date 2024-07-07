@@ -416,7 +416,11 @@ function diffElementNodes(
 		);
 
 		// we created a new parent, so none of the previously attached children can be reused:
+		// TODO: this here is problematic because we could be missmatching a fragment with a node
+		// this happens a lot in Suspense with a fallback where after hydration completes we are hydrating
+		// the content and not the fallback.
 		excessDomChildren = null;
+
 		// we are creating a new node, so we can assume this is a new subtree (in
 		// case we are hydrating), this deopts the hydrate
 		isHydrating = false;
