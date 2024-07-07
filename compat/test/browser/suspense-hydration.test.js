@@ -97,7 +97,7 @@ describe('suspense hydration', () => {
 		});
 	});
 
-	it.only('should leave DOM untouched when suspending while hydrating', () => {
+	it('should replace a missmatched element during hydration', () => {
 		scratch.innerHTML = '<p>loading...</p>';
 		clearLog();
 
@@ -116,7 +116,6 @@ describe('suspense hydration', () => {
 		return resolve(() => <div>Hello</div>).then(() => {
 			rerender();
 			expect(scratch.innerHTML).to.equal('<div>Hello</div>');
-			expect(getLog()).to.deep.equal([]);
 			clearLog();
 		});
 	});
