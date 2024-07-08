@@ -56,7 +56,8 @@ export function render(vnode, parentDom, replaceNode) {
 				? oldVNode._dom
 				: parentDom.firstChild,
 		isHydrating,
-		refQueue
+		refQueue,
+		false
 	);
 
 	// Flush all queued effects

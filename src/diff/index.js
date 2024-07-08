@@ -28,6 +28,8 @@ import options from '../options';
  * siblings. In most cases, it starts out as `oldChildren[0]._dom`.
  * @param {boolean} isHydrating Whether or not we are in hydration
  * @param {any[]} refQueue an array of elements needed to invoke refs
+ * @param {boolean} isResumedHydration Whether we are resuming hydration after
+ * a suspenseful resolve.
  */
 export function diff(
 	parentDom,
@@ -39,7 +41,8 @@ export function diff(
 	commitQueue,
 	oldDom,
 	isHydrating,
-	refQueue
+	refQueue,
+	isResumedHydration
 ) {
 	/** @type {any} */
 	let tmp,
@@ -51,7 +54,7 @@ export function diff(
 
 	// If the previous diff bailed out, resume creating/hydrating.
 	if (oldVNode._flags & MODE_SUSPENDED) {
-		isHydrating = !!(oldVNode._flags & MODE_HYDRATE);
+		isResumedHydration = isHydrating = !!(oldVNode._flags & MODE_HYDRATE);
 		oldDom = newVNode._dom = oldVNode._dom;
 		excessDomChildren = [oldDom];
 	}
@@ -254,7 +257,8 @@ export function diff(
 				commitQueue,
 				oldDom,
 				isHydrating,
-				refQueue
+				refQueue,
+				isResumedHydration
 			);
 
 			c.base = newVNode._dom;
@@ -302,7 +306,8 @@ export function diff(
 			excessDomChildren,
 			commitQueue,
 			isHydrating,
-			refQueue
+			refQueue,
+			isResumedHydration
 		);
 	}
 
@@ -351,6 +356,8 @@ export function commitRoot(commitQueue, root, refQueue) {
  * to invoke in commitRoot
  * @param {boolean} isHydrating Whether or not we are in hydration
  * @param {any[]} refQueue an array of elements needed to invoke refs
+ * @param {boolean} isResumedHydration Whether we are resuming hydration after
+ * a suspenseful resolve.
  * @returns {PreactElement}
  */
 function diffElementNodes(
@@ -362,7 +369,8 @@ function diffElementNodes(
 	excessDomChildren,
 	commitQueue,
 	isHydrating,
-	refQueue
+	refQueue,
+	isResumedHydration
 ) {
 	let oldProps = oldVNode.props;
 	let newProps = newVNode.props;
@@ -403,7 +411,7 @@ function diffElementNodes(
 			}
 		}
 
-		if (dom == null && nodeType !== null) {
+		if (isResumedHydration && dom == null && nodeType !== null) {
 			for (i = 0; i < excessDomChildren.length; i++) {
 				value = excessDomChildren[i];
 				if (value) {
@@ -523,7 +531,8 @@ function diffElementNodes(
 					? excessDomChildren[0]
 					: oldVNode._children && getDomSibling(oldVNode, 0),
 				isHydrating,
-				refQueue
+				refQueue,
+				isResumedHydration
 			);
 
 			// Remove children that are not part of any vnode.
