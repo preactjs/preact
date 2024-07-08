@@ -27,6 +27,7 @@
     "props": {
       "$_listeners": "l",
       "$_cleanup": "__c",
+      "$_excess": "__x",
       "$__hooks": "__H",
       "$_list": "__",
       "$_pendingEffects": "__h",

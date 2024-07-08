@@ -141,6 +141,7 @@ declare global {
 		_children: Array<VNode<any>> | null;
 		_parent: VNode | null;
 		_depth: number | null;
+		_excess: Array<any> | null;
 		/**
 		 * The [first (for Fragments)] DOM child of a VNode
 		 */
