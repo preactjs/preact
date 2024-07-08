@@ -169,6 +169,43 @@ describe('suspense hydration', () => {
 		});
 	});
 
+	it('Should hydrate a fragment with multiple children and an adjacent node correctly', () => {
+		scratch.innerHTML = '<div>Hello</div><div>World!</div><div>Baz</div>';
+		clearLog();
+
+		const [Lazy, resolve] = createLazy();
+		hydrate(
+			<>
+				<Suspense>
+					<Lazy />
+				</Suspense>
+				<div>Baz</div>
+			</>,
+			scratch
+		);
+		rerender(); // Flush rerender queue to mimic what preact will really do
+		expect(scratch.innerHTML).to.equal(
+			'<div>Hello</div><div>World!</div><div>Baz</div>'
+		);
+		expect(getLog()).to.deep.equal([]);
+		clearLog();
+
+		return resolve(() => (
+			<>
+				<div>Hello</div>
+				<div>World!</div>
+			</>
+		)).then(() => {
+			rerender();
+			expect(scratch.innerHTML).to.equal(
+				'<div>Hello</div><div>World!</div><div>Baz</div>'
+			);
+			expect(getLog()).to.deep.equal([]);
+
+			clearLog();
+		});
+	});
+
 	it('should allow siblings to update around suspense boundary', () => {
 		scratch.innerHTML = '<div>Count: 0</div><div>Hello</div>';
 		clearLog();
