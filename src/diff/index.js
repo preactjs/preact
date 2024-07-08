@@ -403,12 +403,14 @@ function diffElementNodes(
 			}
 		}
 
-		if (
-			dom == null &&
-			excessDomChildren.length == 1 &&
-			excessDomChildren[0] != null
-		) {
-			removeNode(excessDomChildren[0]);
+		if (dom == null && nodeType !== null) {
+			for (i = 0; i < excessDomChildren.length; i++) {
+				value = excessDomChildren[i];
+				if (value) {
+					removeNode(value);
+					excessDomChildren[i] = null;
+				}
+			}
 		}
 	}
 
