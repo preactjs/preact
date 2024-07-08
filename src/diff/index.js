@@ -53,7 +53,7 @@ export function diff(
 	if (oldVNode._flags & MODE_SUSPENDED) {
 		isHydrating = !!(oldVNode._flags & MODE_HYDRATE);
 		oldDom = newVNode._dom = oldVNode._dom;
-		excessDomChildren = [oldDom];
+		excessDomChildren = oldVNode._excess;
 	}
 
 	if ((tmp = options._diff)) tmp(newVNode);
@@ -277,6 +277,7 @@ export function diff(
 				newVNode._flags |= isHydrating
 					? MODE_HYDRATE | MODE_SUSPENDED
 					: MODE_HYDRATE;
+				newVNode._excess = [...excessDomChildren];
 				excessDomChildren[excessDomChildren.indexOf(oldDom)] = null;
 				// ^ could possibly be simplified to:
 				// excessDomChildren.length = 0;
