@@ -120,6 +120,29 @@ describe('suspense hydration', () => {
 		});
 	});
 
+	it('should replace a missmatched text-node', () => {
+		scratch.innerHTML = 'loading...';
+		clearLog();
+
+		const [Lazy, resolve] = createLazy();
+		hydrate(
+			<Suspense fallback="loading...">
+				<Lazy />
+			</Suspense>,
+			scratch
+		);
+		rerender(); // Flush rerender queue to mimic what preact will really do
+		expect(scratch.innerHTML).to.equal('loading...');
+		expect(getLog()).to.deep.equal([]);
+		clearLog();
+
+		return resolve(() => <div>Hello</div>).then(() => {
+			rerender();
+			expect(scratch.innerHTML).to.equal('<div>Hello</div>');
+			clearLog();
+		});
+	});
+
 	it('should properly attach event listeners when suspending while hydrating', () => {
 		scratch.innerHTML = '<div>Hello</div><div>World</div>';
 		clearLog();
