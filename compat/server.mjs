@@ -1,4 +1,5 @@
 import { renderToString } from 'preact-render-to-string';
+import { renderToPipeableStream } from 'preact-render-to-string/stream-node';
 
 export {
 	renderToString,
