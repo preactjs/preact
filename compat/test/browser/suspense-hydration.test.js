@@ -132,7 +132,7 @@ describe('suspense hydration', () => {
 	});
 
 	it('Should hydrate a fragment with no children correctly', () => {
-		scratch.innerHTML = '<!--$s--><div>Hello</div><div>World!</div><!--/$s-->';
+		scratch.innerHTML = '<!--$s--><!--/$s-->';
 		clearLog();
 
 		const [Lazy, resolve] = createLazy();
@@ -143,22 +143,13 @@ describe('suspense hydration', () => {
 			scratch
 		);
 		rerender(); // Flush rerender queue to mimic what preact will really do
-		expect(scratch.innerHTML).to.equal(
-			'<!--$s--><div>Hello</div><div>World!</div><!--/$s-->'
-		);
+		expect(scratch.innerHTML).to.equal('<!--$s--><!--/$s-->');
 		expect(getLog()).to.deep.equal([]);
 		clearLog();
 
-		return resolve(() => (
-			<>
-				<div>Hello</div>
-				<div>World!</div>
-			</>
-		)).then(() => {
+		return resolve(() => null).then(() => {
 			rerender();
-			expect(scratch.innerHTML).to.equal(
-				'<!--$s--><div>Hello</div><div>World!</div><!--/$s-->'
-			);
+			expect(scratch.innerHTML).to.equal('<!--$s--><!--/$s-->');
 			expect(getLog()).to.deep.equal([]);
 
 			clearLog();
@@ -167,7 +158,7 @@ describe('suspense hydration', () => {
 
 	// This is in theory correct but still it shows that our oldDom becomes stale very quickly
 	// and moves DOM into weird places
-	it.skip('Should hydrate a fragment with no children and an adjacent node correctly', () => {
+	it('Should hydrate a fragment with no children and an adjacent node correctly', () => {
 		scratch.innerHTML = '<!--$s--><!--/$s--><div>Baz</div>';
 		clearLog();
 

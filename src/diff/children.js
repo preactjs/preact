@@ -135,6 +135,9 @@ export function diffChildren(
 			oldDom = childVNode._nextDom;
 		} else if (newDom) {
 			oldDom = newDom.nextSibling;
+			while (oldDom && oldDom.nodeType == 8 && oldDom.nextSibling) {
+				oldDom = oldDom.nextSibling;
+			}
 		}
 
 		// Eagerly cleanup _nextDom. We don't need to persist the value because it

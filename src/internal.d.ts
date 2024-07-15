@@ -145,7 +145,6 @@ declare global {
 		 * The [first (for Fragments)] DOM child of a VNode
 		 */
 		_dom: PreactElement | null;
-		_excess: PreactElement[] | null;
 		/**
 		 * The last dom child of a Fragment, or components that return a Fragment
 		 */
@@ -163,6 +162,7 @@ declare global {
 		state: S; // Override Component["state"] to not be readonly for internal use, specifically Hooks
 		base?: PreactElement;
 
+		_excess: PreactElement[] | null;
 		_dirty: boolean;
 		_force?: boolean;
 		_renderCallbacks: Array<() => void>; // Only class components
