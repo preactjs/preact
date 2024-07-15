@@ -145,6 +145,7 @@ declare global {
 		 * The [first (for Fragments)] DOM child of a VNode
 		 */
 		_dom: PreactElement | null;
+		_excess: PreactElement[] | null;
 		/**
 		 * The last dom child of a Fragment, or components that return a Fragment
 		 */

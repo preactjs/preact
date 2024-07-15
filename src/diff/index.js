@@ -52,8 +52,13 @@ export function diff(
 	// If the previous diff bailed out, resume creating/hydrating.
 	if (oldVNode._flags & MODE_SUSPENDED) {
 		isHydrating = !!(oldVNode._flags & MODE_HYDRATE);
-		oldDom = newVNode._dom = oldVNode._dom;
-		excessDomChildren = [oldDom];
+		if (oldVNode._excess) {
+			excessDomChildren = oldVNode._excess;
+			oldDom = newVNode._dom = oldVNode._dom = excessDomChildren[1];
+		} else {
+			oldDom = newVNode._dom = oldVNode._dom;
+			excessDomChildren = [oldDom];
+		}
 	}
 
 	if ((tmp = options._diff)) tmp(newVNode);
@@ -273,13 +278,36 @@ export function diff(
 			newVNode._original = null;
 			// if hydrating or creating initial tree, bailout preserves DOM:
 			if (isHydrating || excessDomChildren != null) {
-				newVNode._dom = oldDom;
 				newVNode._flags |= isHydrating
 					? MODE_HYDRATE | MODE_SUSPENDED
 					: MODE_HYDRATE;
-				excessDomChildren[excessDomChildren.indexOf(oldDom)] = null;
-				// ^ could possibly be simplified to:
-				// excessDomChildren.length = 0;
+
+				let found = excessDomChildren.find(
+						child => child && child.nodeType == 8 && child.data == '$s'
+					),
+					index = excessDomChildren.indexOf(found) + 1;
+
+				newVNode._dom = oldDom;
+				if (found) {
+					let commentMarkersToFind = 1;
+					newVNode._excess = [found];
+					excessDomChildren[index - 1] = null;
+					while (commentMarkersToFind && index <= excessDomChildren.length) {
+						const node = excessDomChildren[index];
+						excessDomChildren[index] = null;
+						index++;
+						newVNode._excess.push(node);
+						if (node.nodeType == 8) {
+							if (node.data == '$s') {
+								commentMarkersToFind++;
+							} else if (node.data == '/$s') {
+								commentMarkersToFind--;
+							}
+						}
+					}
+				} else {
+					excessDomChildren[excessDomChildren.indexOf(oldDom)] = null;
+				}
 			} else {
 				newVNode._dom = oldVNode._dom;
 				newVNode._children = oldVNode._children;
