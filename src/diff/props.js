@@ -36,7 +36,7 @@ let eventClock = 0;
  */
 export function setProperty(dom, name, value, oldValue, namespace) {
 	let useCapture, prefix;
-	if (name[0] == 'a' || (name[0] == 'p' && name[5] == ':')) {
+	if ((name[0] == 'a' || name[0] == 'p') && name[5] == ':') {
 		prefix = name.slice(0, 4);
 		name = name.slice(5);
 	}
