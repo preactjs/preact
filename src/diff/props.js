@@ -36,13 +36,9 @@ let eventClock = 0;
  */
 export function setProperty(dom, name, value, oldValue, namespace) {
 	let useCapture, prefix;
-	if (name[0] == 'a' || name[0] == 'p') {
-		let idx = name.indexOf(':');
-		if (idx > -1) {
-			// Only slices here, should be faster than array allocation
-			prefix = name.slice(0, idx);
-			name = name.slice(idx + 1);
-		}
+	if (name[0] == 'a' || (name[0] == 'p' && name[5] == ':')) {
+		prefix = name.slice(0, 4);
+		name = name.slice(5);
 	}
 
 	o: if (name === 'style') {
