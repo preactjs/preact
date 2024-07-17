@@ -52,16 +52,11 @@ export function diff(
 	// If the previous diff bailed out, resume creating/hydrating.
 	if (oldVNode._flags & MODE_SUSPENDED) {
 		isHydrating = !!(oldVNode._flags & MODE_HYDRATE);
-		if (oldVNode._component._excess) {
-			excessDomChildren = oldVNode._component._excess;
-			// TODO: it's entirely possible for nested Suspense scenario's that we
-			// take another comment-node here as oldDom which isn't ideal however
-			// let's try it out for now.
-			oldDom = newVNode._dom = oldVNode._dom = excessDomChildren[0];
-		} else {
-			oldDom = newVNode._dom = oldVNode._dom;
-			excessDomChildren = [oldDom];
-		}
+		excessDomChildren = oldVNode._component._excess;
+		// TODO: it's entirely possible for nested Suspense scenario's that we
+		// take another comment-node here as oldDom which isn't ideal however
+		// let's try it out for now.
+		oldDom = newVNode._dom = oldVNode._dom = excessDomChildren[0];
 	}
 
 	if ((tmp = options._diff)) tmp(newVNode);
@@ -285,38 +280,35 @@ export function diff(
 					? MODE_HYDRATE | MODE_SUSPENDED
 					: MODE_HYDRATE;
 
-				let found = excessDomChildren.find(
-					child => child && child.nodeType == 8 && child.data == '$s'
-				);
+				let shouldFallback = true,
+					commentMarkersToFind = 0,
+					done = false;
+				newVNode._component._excess = [];
+				for (let i = 0; i < excessDomChildren.length; i++) {
+					let child = excessDomChildren[i];
+					if (child == null || done) continue;
+
+					if (commentMarkersToFind > 0) {
+						excessDomChildren[i] = null;
+					}
+
+					if (child.nodeType == 8 && child.data == '$s') {
+						commentMarkersToFind++;
+						shouldFallback = false;
+					} else if (child.nodeType == 8 && child.data == '/$s') {
+						commentMarkersToFind--;
+						done = commentMarkersToFind === 0;
+					} else if (commentMarkersToFind > 0) {
+						newVNode._component._excess.push(child);
+					}
+				}
+
+				if (shouldFallback) {
+					excessDomChildren[excessDomChildren.indexOf(oldDom)] = null;
+					newVNode._component._excess.push(oldDom);
+				}
 
 				newVNode._dom = oldDom;
-				if (found) {
-					let commentMarkersToFind = 1,
-						index = excessDomChildren.indexOf(found) + 1;
-					newVNode._component._excess = [];
-					// Clear the comment marker so we don't reuse them for sibling
-					// Suspenders.
-					excessDomChildren[index - 1] = null;
-
-					while (commentMarkersToFind && index <= excessDomChildren.length) {
-						const node = excessDomChildren[index];
-						excessDomChildren[index] = null;
-						index++;
-						// node being undefined here would be a problem as it would
-						// imply that we have a mismatch.
-						if (node.nodeType == 8) {
-							if (node.data == '$s') {
-								commentMarkersToFind++;
-							} else if (node.data == '/$s') {
-								commentMarkersToFind--;
-							}
-						} else {
-							newVNode._component._excess.push(node);
-						}
-					}
-				} else {
-					excessDomChildren[excessDomChildren.indexOf(oldDom)] = null;
-				}
 			} else {
 				newVNode._dom = oldVNode._dom;
 				newVNode._children = oldVNode._children;
