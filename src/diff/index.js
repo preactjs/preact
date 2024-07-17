@@ -283,20 +283,36 @@ export function diff(
 				let shouldFallback = true,
 					commentMarkersToFind = 0,
 					done = false;
+
 				newVNode._component._excess = [];
 				for (let i = 0; i < excessDomChildren.length; i++) {
 					let child = excessDomChildren[i];
 					if (child == null || done) continue;
 
+					// When we are inside of the boundaries we set
+					// the excess child to null.
 					if (commentMarkersToFind > 0) {
 						excessDomChildren[i] = null;
 					}
 
+					// When we encounter a boundary with $s we are opening
+					// a boundary, this implies that we need to bump
+					// the amount of markers we need to find before closing
+					// the outer boundary.
+					// We exclude the open and closing marker from
+					// the future excessDomChildren but any nested one
+					// needs to be included for future suspensions.
 					if (child.nodeType == 8 && child.data == '$s') {
+						if (commentMarkersToFind > 0) {
+							newVNode._component._excess.push(child);
+						}
 						commentMarkersToFind++;
 						shouldFallback = false;
 					} else if (child.nodeType == 8 && child.data == '/$s') {
 						commentMarkersToFind--;
+						if (commentMarkersToFind > 0) {
+							newVNode._component._excess.push(child);
+						}
 						done = commentMarkersToFind === 0;
 					} else if (commentMarkersToFind > 0) {
 						newVNode._component._excess.push(child);
