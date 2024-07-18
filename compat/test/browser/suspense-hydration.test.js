@@ -131,6 +131,38 @@ describe('suspense hydration', () => {
 		});
 	});
 
+	it('Should hydrate a fragment with no children correctly', () => {
+		scratch.innerHTML = '<!--$s--><!--/$s--><div>Hello world</div>';
+		clearLog();
+
+		const [Lazy, resolve] = createLazy();
+		hydrate(
+			<>
+				<Suspense>
+					<Lazy />
+				</Suspense>
+				<div>Hello world</div>
+			</>,
+			scratch
+		);
+		rerender(); // Flush rerender queue to mimic what preact will really do
+		expect(scratch.innerHTML).to.equal(
+			'<!--$s--><!--/$s--><div>Hello world</div>'
+		);
+		expect(getLog()).to.deep.equal([]);
+		clearLog();
+
+		return resolve(() => null).then(() => {
+			rerender();
+			expect(scratch.innerHTML).to.equal(
+				'<!--$s--><!--/$s--><div>Hello world</div>'
+			);
+			expect(getLog()).to.deep.equal([]);
+
+			clearLog();
+		});
+	});
+
 	it('should leave DOM untouched when suspending while hydrating', () => {
 		scratch.innerHTML = '<!-- test --><div>Hello</div>';
 		clearLog();
