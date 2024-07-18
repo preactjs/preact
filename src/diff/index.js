@@ -320,6 +320,9 @@ export function diff(
 				}
 
 				if (shouldFallback) {
+					while (oldDom && oldDom.nodeType === 8 && oldDom.nextSibling) {
+						oldDom = oldDom.nextSibling;
+					}
 					excessDomChildren[excessDomChildren.indexOf(oldDom)] = null;
 					newVNode._component._excess.push(oldDom);
 				}
