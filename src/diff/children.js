@@ -378,6 +378,13 @@ function insert(parentVNode, oldDom, parentDom) {
 
 		return oldDom;
 	} else if (parentVNode._dom != oldDom) {
+		if (
+			oldDom &&
+			// @ts-expect-error olDom should be present on a DOM node
+			!parentDom.contains(oldDom)
+		) {
+			oldDom = getDomSibling(parentVNode);
+		}
 		parentDom.insertBefore(parentVNode._dom, oldDom || null);
 		oldDom = parentVNode._dom;
 	}
