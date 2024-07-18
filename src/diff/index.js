@@ -273,13 +273,15 @@ export function diff(
 			newVNode._original = null;
 			// if hydrating or creating initial tree, bailout preserves DOM:
 			if (isHydrating || excessDomChildren != null) {
-				newVNode._dom = oldDom;
 				newVNode._flags |= isHydrating
 					? MODE_HYDRATE | MODE_SUSPENDED
 					: MODE_HYDRATE;
+
+				while (oldDom && oldDom.nodeType === 8 && oldDom.nextSibling) {
+					oldDom = oldDom.nextSibling;
+				}
 				excessDomChildren[excessDomChildren.indexOf(oldDom)] = null;
-				// ^ could possibly be simplified to:
-				// excessDomChildren.length = 0;
+				newVNode._dom = oldDom;
 			} else {
 				newVNode._dom = oldVNode._dom;
 				newVNode._children = oldVNode._children;
