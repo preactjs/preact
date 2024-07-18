@@ -45,7 +45,7 @@ export type ComponentChild =
 	| VNode<any>
 	| string
 	| number
-	| Iterable<ComponentChild>
+	| Array<ComponentChild>
 	| bigint
 	| boolean
 	| null
