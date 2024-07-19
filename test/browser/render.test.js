@@ -1689,4 +1689,58 @@ describe('render()', () => {
 		]);
 		clearLog();
 	});
+
+	it('should shift keyed lists with wrapping fragment-like children', () => {
+		const ItemA = ({ text }) => <div>A: {text}</div>;
+		const ItemB = ({ text }) => <div>B: {text}</div>;
+
+		const Item = ({ text, type }) => {
+			return type === 'B' ? <ItemB text={text} /> : <ItemA text={text} />;
+		};
+
+		let set;
+		class App extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { items: a, mapping: mappingA };
+				set = (items, mapping) => {
+					this.setState({ items, mapping });
+				};
+			}
+
+			render() {
+				return (
+					<ul>
+						{this.state.items.map((key, i) => (
+							<Item key={key} type={this.state.mapping[i]} text={key} />
+						))}
+					</ul>
+				);
+			}
+		}
+
+		const a = ['4', '1', '2', '3'];
+		const mappingA = ['A', 'A', 'B', 'B'];
+		const b = ['1', '2', '4', '3'];
+		const mappingB = ['B', 'A', 'A', 'A'];
+		const c = ['4', '2', '1', '3'];
+		const mappingC = ['A', 'B', 'B', 'A'];
+
+		render(<App items={a} mapping={mappingA} />, scratch);
+		expect(scratch.innerHTML).to.equal(
+			'<ul><div>A: 4</div><div>A: 1</div><div>B: 2</div><div>B: 3</div></ul>'
+		);
+
+		set(b, mappingB);
+		rerender();
+		expect(scratch.innerHTML).to.equal(
+			'<ul><div>B: 1</div><div>A: 2</div><div>A: 4</div><div>A: 3</div></ul>'
+		);
+
+		set(c, mappingC);
+		rerender();
+		expect(scratch.innerHTML).to.equal(
+			'<ul><div>A: 4</div><div>B: 2</div><div>B: 1</div><div>A: 3</div></ul>'
+		);
+	});
 });

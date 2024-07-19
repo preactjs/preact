@@ -116,14 +116,6 @@ export function diffChildren(
 			childVNode._flags & INSERT_VNODE ||
 			oldVNode._children === childVNode._children
 		) {
-			if (
-				oldDom &&
-				typeof childVNode.type == 'string' &&
-				// @ts-expect-error olDom should be present on a DOM node
-				!parentDom.contains(oldDom)
-			) {
-				oldDom = getDomSibling(oldVNode);
-			}
 			oldDom = insert(childVNode, oldDom, parentDom);
 		} else if (
 			typeof childVNode.type == 'function' &&
@@ -378,6 +370,14 @@ function insert(parentVNode, oldDom, parentDom) {
 
 		return oldDom;
 	} else if (parentVNode._dom != oldDom) {
+		if (
+			oldDom &&
+			parentVNode.type &&
+			// @ts-expect-error olDom should be present on a DOM node
+			!parentDom.contains(oldDom)
+		) {
+			oldDom = getDomSibling(parentVNode);
+		}
 		parentDom.insertBefore(parentVNode._dom, oldDom || null);
 		oldDom = parentVNode._dom;
 	}
