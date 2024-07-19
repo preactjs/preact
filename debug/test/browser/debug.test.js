@@ -662,6 +662,19 @@ describe('debug', () => {
 			expect(console.error).to.be.calledOnce;
 		});
 
+		it('should warn for nesting illegal dom-nodes under a paragraph with a parent', () => {
+			const Paragraph = () => (
+				<div>
+					<p>
+						<div>Hello world</div>
+					</p>
+				</div>
+			);
+
+			render(<Paragraph />, scratch);
+			expect(console.error).to.be.calledOnce;
+		});
+
 		it('should warn for nesting illegal dom-nodes under a paragraph as func', () => {
 			const Title = ({ children }) => <h1>{children}</h1>;
 			const Paragraph = () => (
