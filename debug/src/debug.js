@@ -370,7 +370,7 @@ export function initDebug() {
 			// `preact-render-to-string`. There we'd otherwise flood the terminal
 			// with false positives, which we'd like to avoid.
 			let domParentName = getClosestDomNodeParentName(parent);
-			if (domParentName !== '') {
+			if (domParentName !== '' && isTableElement(type)) {
 				if (
 					type === 'table' &&
 					// Tables can be nested inside each other if it's inside a cell.
