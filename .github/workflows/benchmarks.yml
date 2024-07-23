@@ -10,6 +10,7 @@ on:
   push:
     branches:
       - main
+      - breaking-changes
       - v11
     paths:
       - '**/src/**.js'
