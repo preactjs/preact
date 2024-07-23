@@ -1217,6 +1217,7 @@ describe('render()', () => {
 		}
 	});
 
+	// Would break if we remove the mutative render props removal
 	it('should remove attributes on pre-existing DOM', () => {
 		const div = document.createElement('div');
 		div.setAttribute('class', 'red');

@@ -435,7 +435,7 @@ function diffElementNodes(
 
 		oldProps = oldVNode.props || EMPTY_OBJ;
 
-		// TODO: do we want to keep this in v11?
+		// TODO: do we want to keep this in v11? Bigger question right now
 		// If we are in a situation where we are not hydrating but are using
 		// existing DOM we should read the existing DOM attributes to diff them
 		if (!isHydrating && excessDomChildren != null) {
