@@ -31,7 +31,6 @@ describe('render()', () => {
 
 	let resetAppendChild;
 	let resetInsertBefore;
-	let resetRemoveChild;
 	let resetRemove;
 
 	beforeEach(() => {
@@ -46,14 +45,12 @@ describe('render()', () => {
 	before(() => {
 		resetAppendChild = logCall(Element.prototype, 'appendChild');
 		resetInsertBefore = logCall(Element.prototype, 'insertBefore');
-		resetRemoveChild = logCall(Element.prototype, 'removeChild');
 		resetRemove = logCall(Element.prototype, 'remove');
 	});
 
 	after(() => {
 		resetAppendChild();
 		resetInsertBefore();
-		resetRemoveChild();
 		resetRemove();
 	});
 
