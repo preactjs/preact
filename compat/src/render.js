@@ -39,41 +39,10 @@ const IS_DOM = typeof document !== 'undefined';
 // Input types for which onchange should not be converted to oninput.
 // type="file|checkbox|radio", plus "range" in IE11.
 // (IE11 doesn't support Symbol, which we use here to turn `rad` into `ra` which matches "range")
-const onChangeInputType = type =>
-	(typeof Symbol != 'undefined' && typeof Symbol() == 'symbol'
-		? /fil|che|rad/
-		: /fil|che|ra/
-	).test(type);
+const onChangeInputType = type => /fil|che|ra/.test(type);
 
 // Some libraries like `react-virtualized` explicitly check for this.
 Component.prototype.isReactComponent = {};
-
-// `UNSAFE_*` lifecycle hooks
-// Preact only ever invokes the unprefixed methods.
-// Here we provide a base "fallback" implementation that calls any defined UNSAFE_ prefixed method.
-// - If a component defines its own `componentDidMount()` (including via defineProperty), use that.
-// - If a component defines `UNSAFE_componentDidMount()`, `componentDidMount` is the alias getter/setter.
-// - If anything assigns to an `UNSAFE_*` property, the assignment is forwarded to the unprefixed property.
-// See https://github.com/preactjs/preact/issues/1941
-[
-	'componentWillMount',
-	'componentWillReceiveProps',
-	'componentWillUpdate'
-].forEach(key => {
-	Object.defineProperty(Component.prototype, key, {
-		configurable: true,
-		get() {
-			return this['UNSAFE_' + key];
-		},
-		set(v) {
-			Object.defineProperty(this, key, {
-				configurable: true,
-				writable: true,
-				value: v
-			});
-		}
-	});
-});
 
 /**
  * Proxy render() since React returns a Component reference.
@@ -250,16 +219,6 @@ options.vnode = vnode => {
 	if (oldVNodeHook) oldVNodeHook(vnode);
 };
 
-// Only needed for react-relay
-let currentComponent;
-const oldBeforeRender = options._render;
-options._render = function (vnode) {
-	if (oldBeforeRender) {
-		oldBeforeRender(vnode);
-	}
-	currentComponent = vnode._component;
-};
-
 const oldDiffed = options.diffed;
 /** @type {(vnode: import('./internal').VNode) => void} */
 options.diffed = function (vnode) {
@@ -277,35 +236,5 @@ options.diffed = function (vnode) {
 		props.value !== dom.value
 	) {
 		dom.value = props.value == null ? '' : props.value;
-	}
-
-	currentComponent = null;
-};
-
-// This is a very very private internal function for React it
-// is used to sort-of do runtime dependency injection.
-export const __SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED = {
-	ReactCurrentDispatcher: {
-		current: {
-			readContext(context) {
-				return currentComponent._globalContext[context._id].props.value;
-			},
-			useCallback,
-			useContext,
-			useDebugValue,
-			useDeferredValue,
-			useEffect,
-			useId,
-			useImperativeHandle,
-			useInsertionEffect,
-			useLayoutEffect,
-			useMemo,
-			// useMutableSource, // experimental-only and replaced by uSES, likely not worth supporting
-			useReducer,
-			useRef,
-			useState,
-			useSyncExternalStore,
-			useTransition
-		}
 	}
 };
