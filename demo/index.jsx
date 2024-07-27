@@ -140,7 +140,7 @@ class App extends Component {
 						<Link href="/zustand" activeClassName="active">
 							zustand
 						</Link>
-						<Link href="/demo/redux-toolkit" activeClassName="active">
+						<Link href="/redux-toolkit" activeClassName="active">
 							redux-toolkit
 						</Link>
 					</nav>
