@@ -28,12 +28,7 @@ import { Suspense, lazy } from './suspense';
 import { SuspenseList } from './suspense-list';
 import { createPortal } from './portals';
 import { is } from './util';
-import {
-	hydrate,
-	render,
-	REACT_ELEMENT_TYPE,
-	__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED
-} from './render';
+import { hydrate, render, REACT_ELEMENT_TYPE } from './render';
 
 const version = '17.0.2'; // trick libraries to think we are react
 
@@ -95,6 +90,7 @@ function cloneElement(element) {
  * @param {import('./internal').PreactElement} container
  * @returns {boolean}
  */
+// TODO: replaced with root.unmount()
 function unmountComponentAtNode(container) {
 	if (container._children) {
 		preactRender(null, container);
@@ -242,8 +238,7 @@ export {
 	StrictMode,
 	Suspense,
 	SuspenseList,
-	lazy,
-	__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED
+	lazy
 };
 
 // React copies the named exports to the default one.
@@ -290,6 +285,5 @@ export default {
 	StrictMode,
 	Suspense,
 	SuspenseList,
-	lazy,
-	__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED
+	lazy
 };

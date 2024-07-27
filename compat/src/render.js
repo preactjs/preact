@@ -219,16 +219,6 @@ options.vnode = vnode => {
 	if (oldVNodeHook) oldVNodeHook(vnode);
 };
 
-// Only needed for react-relay
-let currentComponent;
-const oldBeforeRender = options._render;
-options._render = function (vnode) {
-	if (oldBeforeRender) {
-		oldBeforeRender(vnode);
-	}
-	currentComponent = vnode._component;
-};
-
 const oldDiffed = options.diffed;
 /** @type {(vnode: import('./internal').VNode) => void} */
 options.diffed = function (vnode) {
@@ -246,35 +236,5 @@ options.diffed = function (vnode) {
 		props.value !== dom.value
 	) {
 		dom.value = props.value == null ? '' : props.value;
-	}
-
-	currentComponent = null;
-};
-
-// This is a very very private internal function for React it
-// is used to sort-of do runtime dependency injection.
-export const __SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED = {
-	ReactCurrentDispatcher: {
-		current: {
-			readContext(context) {
-				return currentComponent._globalContext[context._id].props.value;
-			},
-			useCallback,
-			useContext,
-			useDebugValue,
-			useDeferredValue,
-			useEffect,
-			useId,
-			useImperativeHandle,
-			useInsertionEffect,
-			useLayoutEffect,
-			useMemo,
-			// useMutableSource, // experimental-only and replaced by uSES, likely not worth supporting
-			useReducer,
-			useRef,
-			useState,
-			useSyncExternalStore,
-			useTransition
-		}
 	}
 };
