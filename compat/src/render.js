@@ -20,7 +20,6 @@ import {
 } from 'preact/hooks';
 import {
 	useDeferredValue,
-	useInsertionEffect,
 	useSyncExternalStore,
 	useTransition
 } from './index';
@@ -297,7 +296,7 @@ export const __SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED = {
 			useEffect,
 			useId,
 			useImperativeHandle,
-			useInsertionEffect,
+			useInsertionEffect: useLayoutEffect,
 			useLayoutEffect,
 			useMemo,
 			// useMutableSource, // experimental-only and replaced by uSES, likely not worth supporting

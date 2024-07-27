@@ -26,7 +26,7 @@ import NestedSuspenseBug from './nested-suspense';
 import Contenteditable from './contenteditable';
 import { MobXDemo } from './mobx';
 import Zustand from './zustand';
-import ReduxToolkit from './redux_toolkit';
+import ReduxToolkit from './redux-toolkit';
 
 let isBenchmark = /(\/spiral|\/pythagoras|[#&]bench)/g.test(
 	window.location.href
@@ -140,7 +140,7 @@ class App extends Component {
 						<Link href="/zustand" activeClassName="active">
 							zustand
 						</Link>
-						<Link href="/redux-toolkit" activeClassName="active">
+						<Link href="/demo/redux-toolkit" activeClassName="active">
 							redux-toolkit
 						</Link>
 					</nav>
