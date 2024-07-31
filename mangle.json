@@ -35,6 +35,7 @@
     "cname": 6,
     "props": {
       "$_vnodeId": "__v",
+      "$_listeners": "__l",
       "$_cleanup": "__c",
       "$_afterPaintQueued": "__a",
       "$__hooks": "__H",
