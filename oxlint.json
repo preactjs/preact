@@ -10,7 +10,8 @@
       2,
       {
         "args": "none",
-        "varsIgnorePattern": "^h|React$"
+        "caughtErrors": "none",
+        "varsIgnorePattern": "^h|React|createElement|Fragment$"
       }
     ],
     "typescript/no-namespace": 0,
