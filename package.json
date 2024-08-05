@@ -135,7 +135,7 @@
     "benchmark": "npm run test:karma:bench -- no-single-run",
     "lint": "run-s oxlint tsc",
     "tsc": "tsc -p jsconfig-lint.json",
-    "oxlint": "oxlint src test debug compat hooks test-utils -c oxlint.json",
+    "oxlint": "oxlint -c oxlint.json src test/browser test/node test/shared debug compat hooks test-utils",
     "format": "biome format --write .",
     "format:check": "biome format ."
   },
@@ -240,7 +240,7 @@
     "mocha": "^9.0.0",
     "npm-merge-driver-install": "^3.0.0",
     "npm-run-all": "^4.1.5",
-    "oxlint": "^0.5.2",
+    "oxlint": "^0.7.0",
     "preact-render-to-string": "^6.5.0",
     "prop-types": "^15.8.1",
     "sade": "^1.8.1",

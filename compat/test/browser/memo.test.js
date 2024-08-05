@@ -11,7 +11,6 @@ import React, {
 	memo,
 	useState
 } from 'preact/compat';
-import { li, ol } from '../../../test/_util/dom';
 
 const h = React.createElement;
 
