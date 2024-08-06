@@ -20,6 +20,7 @@ on:
   push:
     branches:
       - main
+      - breaking-changes
       - restructure
 
 jobs:
