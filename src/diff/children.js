@@ -373,7 +373,6 @@ function insert(parentVNode, oldDom, parentDom) {
 		if (
 			oldDom &&
 			parentVNode.type &&
-			// @ts-expect-error olDom should be present on a DOM node
 			!parentDom.contains(oldDom)
 		) {
 			oldDom = getDomSibling(parentVNode);
