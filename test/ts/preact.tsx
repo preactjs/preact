@@ -97,6 +97,7 @@ function createRootFragment(parent: Element, replaceNode: Element | Element[]) {
 		parentNode: parent,
 		firstChild: replaceNodes[0],
 		childNodes: replaceNodes,
+		contains: (c: Node) => parent.contains(c),
 		insertBefore: insert,
 		appendChild: (c: Node) => insert(c, null),
 		removeChild: function (c: Node) {
