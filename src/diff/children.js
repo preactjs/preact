@@ -299,7 +299,7 @@ function constructNewChildrenArray(newParentVNode, renderResult, oldChildren) {
 			}
 		} else if (matchingIndex !== skewedIndex) {
 			if (matchingIndex == skewedIndex - 1) {
-				skew = matchingIndex - skewedIndex;
+				skew--;
 			} else if (matchingIndex == skewedIndex + 1) {
 				skew++;
 			} else if (matchingIndex > skewedIndex) {
@@ -316,8 +316,12 @@ function constructNewChildrenArray(newParentVNode, renderResult, oldChildren) {
 					skew--;
 				}
 			} else if (matchingIndex < skewedIndex) {
-				// When our new position is in front of our old position than we increase the skew
-				skew++;
+				if (matchingIndex == skewedIndex - skew) {
+					skew -= matchingIndex - skewedIndex;
+				} else {
+					// When our new position is in front of our old position than we increase the skew
+					skew++;
+				}
 			}
 
 			// Move this VNode's DOM if the original index (matchingIndex) doesn't
@@ -370,11 +374,7 @@ function insert(parentVNode, oldDom, parentDom) {
 
 		return oldDom;
 	} else if (parentVNode._dom != oldDom) {
-		if (
-			oldDom &&
-			parentVNode.type &&
-			!parentDom.contains(oldDom)
-		) {
+		if (oldDom && parentVNode.type && !parentDom.contains(oldDom)) {
 			oldDom = getDomSibling(parentVNode);
 		}
 		parentDom.insertBefore(parentVNode._dom, oldDom || null);
