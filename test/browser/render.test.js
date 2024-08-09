@@ -631,6 +631,17 @@ describe('render()', () => {
 		expect(links[3].hasAttribute('href')).to.equal(true);
 	});
 
+	it('should support using `prop:` directive to set properties', () => {
+		render(<input prop:foo="bar" />, scratch);
+		expect(scratch.firstChild.foo).to.equal('bar');
+		expect(scratch.firstChild.getAttribute('foo')).to.equal(null);
+	});
+
+	it('should support using `attr:` directive to set attributes', () => {
+		render(<input attr:value="foo" />, scratch);
+		expect(scratch.firstChild.getAttribute('value')).to.equal('foo');
+	});
+
 	describe('dangerouslySetInnerHTML', () => {
 		it('should support dangerouslySetInnerHTML', () => {
 			let html = '<b>foo &amp; bar</b>';
