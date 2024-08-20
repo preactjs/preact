@@ -117,6 +117,7 @@ export function setProperty(dom, name, value, oldValue, namespace) {
 			name != 'colSpan' &&
 			name != 'role' &&
 			name != 'popover' &&
+			!dom.constructor.observedAttributes?.includes(name) &&
 			name in dom
 		) {
 			try {
