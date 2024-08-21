@@ -117,6 +117,10 @@ export function setProperty(dom, name, value, oldValue, namespace) {
 			name != 'colSpan' &&
 			name != 'role' &&
 			name != 'popover' &&
+			// observedAttributes can exist as a static property on custom elements
+			// a runtime check here has no tangible benefit apart from satisfying typescript
+			// which runs later in the toolchain
+			// @ts-ignore
 			!dom.constructor.observedAttributes?.includes(name) &&
 			name in dom
 		) {
