@@ -110,7 +110,7 @@ export interface ComponentConstructor<P = {}, S = {}>
 // Type alias for a component instance considered generally, whether stateless or stateful.
 export type AnyComponent<P = {}, S = {}> =
 	| FunctionComponent<P>
-	| Component<P, S>;
+	| ComponentConstructor<P, S>;
 
 export interface Component<P = {}, S = {}> {
 	componentWillMount?(): void;
