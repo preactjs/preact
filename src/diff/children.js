@@ -298,30 +298,30 @@ function constructNewChildrenArray(newParentVNode, renderResult, oldChildren) {
 				childVNode._flags |= INSERT_VNODE;
 			}
 		} else if (matchingIndex !== skewedIndex) {
+			// When we move elements around i.e. [0, 1, 2] --> [1, 0, 2]
+			// --> we diff 1, we find it at position 1 while our skewed index is 0 and our skew is 0
+			//     we set the skew to 1 as we found an offset.
+			// --> we diff 0, we find it at position 0 while our skewed index is at 2 and our skew is 1
+			//     this makes us increase the skew again.
+			// --> we diff 2, we find it at position 2 while our skewed index is at 4 and our skew is 2
+			//
+			// this becomes an optimization question where currently we see a 1 element offset as an insertion
+			// or deletion i.e. we optimize for [0, 1, 2] --> [9, 0, 1, 2]
+			// while a more than 1 offset we see as a swap.
+			// We could probably build heuristics for having an optimized course of action here as well, but
+			// might go at the cost of some bytes.
+			//
+			// If we wanted to optimize for i.e. only swaps we'd just do the last two code-branches and have
+			// only the first item be a re-scouting and all the others fall in their skewed counter-part.
+			// We could also further optimize for swaps
 			if (matchingIndex == skewedIndex - 1) {
 				skew--;
 			} else if (matchingIndex == skewedIndex + 1) {
 				skew++;
 			} else if (matchingIndex > skewedIndex) {
-				// Our matched DOM-node is further in the list of children than
-				// where it's at now.
-
-				// When the remaining old children is bigger than the new-children
-				// minus our skewed index we know we are dealing with a shrinking list
-				// we have to increase our skew with the matchedIndex - the skewed index
-				if (remainingOldChildren > newChildrenLength - skewedIndex) {
-					skew += matchingIndex - skewedIndex;
-				} else {
-					// If we have matched all the children just decrease the skew
-					skew--;
-				}
-			} else if (matchingIndex < skewedIndex) {
-				if (matchingIndex == skewedIndex - skew) {
-					skew -= matchingIndex - skewedIndex;
-				} else {
-					// When our new position is in front of our old position than we increase the skew
-					skew++;
-				}
+				skew--;
+			} else {
+				skew++;
 			}
 
 			// Move this VNode's DOM if the original index (matchingIndex) doesn't

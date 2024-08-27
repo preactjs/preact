@@ -1680,12 +1680,10 @@ describe('render()', () => {
 			'<div>11.remove()',
 			'<div>9.remove()',
 			'<div>10.remove()',
-			'<div>3146250.appendChild(<div>1)',
-			'<div>3462501.appendChild(<div>2)',
-			'<div>3465012.appendChild(<div>3)',
-			'<div>4650123.appendChild(<div>4)',
-			'<div>6501234.appendChild(<div>5)',
-			'<div>6012345.appendChild(<div>6)'
+			'<div>3146250.insertBefore(<div>0, <div>3)',
+			'<div>0314625.insertBefore(<div>1, <div>3)',
+			'<div>0134625.insertBefore(<div>2, <div>3)',
+			'<div>0123465.insertBefore(<div>5, <div>6)'
 		]);
 		clearLog();
 	});
