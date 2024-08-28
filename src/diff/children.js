@@ -227,52 +227,24 @@ function constructNewChildrenArray(newParentVNode, renderResult, oldChildren) {
 			childVNode = newParentVNode._children[i] = childVNode;
 		}
 
-		const skewedIndex = i + skew;
-
 		// Handle unmounting null placeholders, i.e. VNode => null in unkeyed children
 		if (childVNode == null) {
-			oldVNode = oldChildren[skewedIndex];
-			if (
-				oldVNode &&
-				oldVNode.key == null &&
-				oldVNode._dom &&
-				(oldVNode._flags & MATCHED) === 0
-			) {
-				if (oldVNode._dom == newParentVNode._nextDom) {
-					newParentVNode._nextDom = getDomSibling(oldVNode);
-				}
-
-				unmount(oldVNode, oldVNode, false);
-
-				// Explicitly nullify this position in oldChildren instead of just
-				// setting `_match=true` to prevent other routines (e.g.
-				// `findMatchingIndex` or `getDomSibling`) from thinking VNodes or DOM
-				// nodes in this position are still available to be used in diffing when
-				// they have actually already been unmounted. For example, by only
-				// setting `_match=true` here, the unmounting loop later would attempt
-				// to unmount this VNode again seeing `_match==true`.  Further,
-				// getDomSibling doesn't know about _match and so would incorrectly
-				// assume DOM nodes in this subtree are mounted and usable.
-				oldChildren[skewedIndex] = null;
-				remainingOldChildren--;
-			}
 			continue;
 		}
 
+		const skewedIndex = i + skew;
 		childVNode._parent = newParentVNode;
 		childVNode._depth = newParentVNode._depth + 1;
-
-		const matchingIndex = findMatchingIndex(
-			childVNode,
-			oldChildren,
-			skewedIndex,
-			remainingOldChildren
-		);
 
 		// Temporarily store the matchingIndex on the _index property so we can pull
 		// out the oldVNode in diffChildren. We'll override this to the VNode's
 		// final index after using this property to get the oldVNode
-		childVNode._index = matchingIndex;
+		const matchingIndex = (childVNode._index = findMatchingIndex(
+			childVNode,
+			oldChildren,
+			skewedIndex,
+			remainingOldChildren
+		));
 
 		oldVNode = null;
 		if (matchingIndex !== -1) {
@@ -318,16 +290,18 @@ function constructNewChildrenArray(newParentVNode, renderResult, oldChildren) {
 				skew--;
 			} else if (matchingIndex == skewedIndex + 1) {
 				skew++;
-			} else if (matchingIndex > skewedIndex) {
-				skew--;
 			} else {
-				skew++;
-			}
+				if (matchingIndex > skewedIndex) {
+					skew--;
+				} else {
+					skew++;
+				}
 
-			// Move this VNode's DOM if the original index (matchingIndex) doesn't
-			// match the new skew index (i + new skew)
-			if (matchingIndex !== i + skew) {
-				childVNode._flags |= INSERT_VNODE;
+				// Move this VNode's DOM if the original index (matchingIndex) doesn't
+				// match the new skew index (i + new skew)
+				if (matchingIndex !== i + skew) {
+					childVNode._flags |= INSERT_VNODE;
+				}
 			}
 		}
 	}
