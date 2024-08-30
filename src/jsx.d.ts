@@ -1997,7 +1997,7 @@ export namespace JSXInternal {
 	}
 
 	// All the WAI-ARIA 1.2 role attribute values from https://www.w3.org/TR/wai-aria-1.2/#role_definitions
-	type WAIAriaRole =
+	export type WAIAriaRole =
 		| 'alert'
 		| 'alertdialog'
 		| 'application'
@@ -2095,7 +2095,7 @@ export namespace JSXInternal {
 		| 'none presentation';
 
 	// All the Digital Publishing WAI-ARIA 1.0 role attribute values from https://www.w3.org/TR/dpub-aria-1.0/#role_definitions
-	type DPubAriaRole =
+	export type DPubAriaRole =
 		| 'doc-abstract'
 		| 'doc-acknowledgments'
 		| 'doc-afterword'
@@ -2136,7 +2136,7 @@ export namespace JSXInternal {
 		| 'doc-tip'
 		| 'doc-toc';
 
-	type AriaRole = WAIAriaRole | DPubAriaRole;
+	export type AriaRole = WAIAriaRole | DPubAriaRole;
 
 	export interface HTMLAttributes<RefType extends EventTarget = EventTarget>
 		extends ClassAttributes<RefType>,

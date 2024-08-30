@@ -42,8 +42,8 @@ function getDomChildren(vnode) {
 function getClosestDomNodeParentName(parent) {
 	if (!parent) return '';
 	if (typeof parent.type == 'function') {
-		if (parent._parent === null) {
-			if (parent._dom !== null && parent._dom.parentNode !== null) {
+		if (parent._parent == null) {
+			if (parent._dom != null && parent._dom.parentNode != null) {
 				return parent._dom.parentNode.localName;
 			}
 			return '';

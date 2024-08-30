@@ -1231,7 +1231,7 @@ describe('Components', () => {
 
 			let j = 0;
 			class Inner extends Component {
-				constructor(...args) {
+				constructor() {
 					super();
 				}
 				componentWillMount() {}

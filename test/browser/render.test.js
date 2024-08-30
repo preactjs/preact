@@ -1680,12 +1680,10 @@ describe('render()', () => {
 			'<div>11.remove()',
 			'<div>9.remove()',
 			'<div>10.remove()',
-			'<div>3146250.appendChild(<div>1)',
-			'<div>3462501.appendChild(<div>2)',
-			'<div>3465012.appendChild(<div>3)',
-			'<div>4650123.appendChild(<div>4)',
-			'<div>6501234.appendChild(<div>5)',
-			'<div>6012345.appendChild(<div>6)'
+			'<div>3146250.insertBefore(<div>0, <div>3)',
+			'<div>0314625.insertBefore(<div>1, <div>3)',
+			'<div>0134625.insertBefore(<div>2, <div>3)',
+			'<div>0123465.insertBefore(<div>5, <div>6)'
 		]);
 		clearLog();
 	});
@@ -1742,5 +1740,62 @@ describe('render()', () => {
 		expect(scratch.innerHTML).to.equal(
 			'<ul><div>A: 4</div><div>B: 2</div><div>B: 1</div><div>A: 3</div></ul>'
 		);
+	});
+
+	it('handle shuffled array children (moving to the front)', () => {
+		const App = ({ items }) => (
+			<div>
+				{items.map(key => (
+					<div key={key}>{key}</div>
+				))}
+			</div>
+		);
+
+		const a = ['0', '2', '7', '6', '1', '3', '5', '4'];
+		const b = ['1', '0', '6', '7', '5', '2', '4', '3'];
+		const c = ['0', '7', '2', '1', '3', '5', '6', '4'];
+
+		render(<App items={a} />, scratch);
+		expect(scratch.innerHTML).to.equal(
+			`<div>${a.map(n => `<div>${n}</div>`).join('')}</div>`
+		);
+
+		render(<App items={b} />, scratch);
+		expect(scratch.innerHTML).to.equal(
+			`<div>${b.map(n => `<div>${n}</div>`).join('')}</div>`
+		);
+
+		render(<App items={c} />, scratch);
+		expect(scratch.innerHTML).to.equal(
+			`<div>${c.map(n => `<div>${n}</div>`).join('')}</div>`
+		);
+	});
+
+	it('handle shuffled (stress test)', () => {
+		function randomize(arr) {
+			for (let i = arr.length - 1; i > 0; i--) {
+				let j = Math.floor(Math.random() * (i + 1));
+				[arr[i], arr[j]] = [arr[j], arr[i]];
+			}
+			return arr;
+		}
+
+		const App = ({ items }) => (
+			<div>
+				{items.map(key => (
+					<div key={key}>{key}</div>
+				))}
+			</div>
+		);
+
+		const a = Array.from({ length: 8 }).map((_, i) => `${i}`);
+
+		for (let i = 0; i < 10000; i++) {
+			const aa = randomize(a);
+			render(<App items={aa} />, scratch);
+			expect(scratch.innerHTML).to.equal(
+				`<div>${aa.map(n => `<div>${n}</div>`).join('')}</div>`
+			);
+		}
 	});
 });
