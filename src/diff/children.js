@@ -62,13 +62,7 @@ export function diffChildren(
 
 	for (i = 0; i < newChildrenLength; i++) {
 		childVNode = newParentVNode._children[i];
-		if (
-			childVNode == null ||
-			typeof childVNode == 'boolean' ||
-			typeof childVNode == 'function'
-		) {
-			continue;
-		}
+		if (childVNode == null) continue;
 
 		// At this point, constructNewChildrenArray has assigned _index to be the
 		// matchingIndex for this VNode's oldVNode (or -1 if there is no oldVNode).
@@ -185,6 +179,7 @@ function constructNewChildrenArray(newParentVNode, renderResult, oldChildren) {
 			typeof childVNode == 'function'
 		) {
 			childVNode = newParentVNode._children[i] = null;
+			continue;
 		}
 		// If this newVNode is being reused (e.g. <div>{reuse}{reuse}</div>) in the same diff,
 		// or we are rendering a component (e.g. setState) copy the oldVNodes so it can have
@@ -225,11 +220,6 @@ function constructNewChildrenArray(newParentVNode, renderResult, oldChildren) {
 			);
 		} else {
 			childVNode = newParentVNode._children[i] = childVNode;
-		}
-
-		// Handle unmounting null placeholders, i.e. VNode => null in unkeyed children
-		if (childVNode == null) {
-			continue;
 		}
 
 		const skewedIndex = i + skew;
@@ -299,9 +289,8 @@ function constructNewChildrenArray(newParentVNode, renderResult, oldChildren) {
 
 				// Move this VNode's DOM if the original index (matchingIndex) doesn't
 				// match the new skew index (i + new skew)
-				if (matchingIndex !== i + skew) {
-					childVNode._flags |= INSERT_VNODE;
-				}
+				// In the former two branches we know that it matches after skewing
+				childVNode._flags |= INSERT_VNODE;
 			}
 		}
 	}
