@@ -582,3 +582,11 @@ export function serializeVNode(vnode) {
 		children && children.length ? '>..</' + name + '>' : ' />'
 	}`;
 }
+
+options._hydrationMismatch = (newVNode, excessDomChildren) => {
+	const { type } = newVNode;
+	const availableTypes = excessDomChildren.map(child => child.localName);
+	console.error(
+		`Expected a DOM node of type ${type} but found ${availableTypes.join(', ')}as available DOM-node(s), this is caused by the SSR'd HTML containing different DOM-nodes compared to the hydrated one.\n\n${getOwnerStack(newVNode)}`
+	);
+};
