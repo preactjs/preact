@@ -1,4 +1,11 @@
-import { createElement, render, createRef, Component, Fragment } from 'preact';
+import {
+	createElement,
+	render,
+	createRef,
+	Component,
+	Fragment,
+	hydrate
+} from 'preact';
 import { useState } from 'preact/hooks';
 import {
 	setupScratch,
@@ -867,6 +874,45 @@ describe('debug', () => {
 			};
 
 			render(<Bar text="foo" />, scratch);
+			expect(console.error).to.not.be.called;
+		});
+	});
+
+	describe('Hydration mismatches', () => {
+		it('Should warn us for a node mismatch', () => {
+			scratch.innerHTML = '<div><span>foo</span>/div>';
+			const App = () => (
+				<div>
+					<p>foo</p>
+				</div>
+			);
+			hydrate(<App />, scratch);
+			expect(console.error).to.be.calledOnce;
+			expect(console.error).to.be.calledOnceWith(
+				sinon.match(/Expected a DOM node of type p but found span/)
+			);
+		});
+
+		it('Should not warn for a text-node mismatch', () => {
+			scratch.innerHTML = '<div>foo bar baz/div>';
+			const App = () => (
+				<div>
+					foo {'bar'} {'baz'}
+				</div>
+			);
+			hydrate(<App />, scratch);
+			expect(console.error).to.not.be.called;
+		});
+
+		it('Should not warn for a well-formed tree', () => {
+			scratch.innerHTML = '<div><span>foo</span><span>bar</span></div>';
+			const App = () => (
+				<div>
+					<span>foo</span>
+					<span>bar</span>
+				</div>
+			);
+			hydrate(<App />, scratch);
 			expect(console.error).to.not.be.called;
 		});
 	});

@@ -28,6 +28,7 @@
       "$_listeners": "l",
       "$_cleanup": "__c",
       "$__hooks": "__H",
+      "$_hydrationMismatch": "__m",
       "$_list": "__",
       "$_pendingEffects": "__h",
       "$_value": "__",
