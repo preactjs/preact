@@ -919,6 +919,20 @@ describe('render()', () => {
 		expect(scratch.firstChild.getAttribute('value')).to.equal('0');
 	});
 
+	// #4487
+	it('should not set value for undefined/null on a progress element', () => {
+		render(<progress value={undefined} />, scratch);
+		expect(scratch.firstChild.getAttribute('value')).to.equal(null);
+		render(<progress value={null} />, scratch);
+		expect(scratch.firstChild.getAttribute('value')).to.equal(null);
+		render(<progress value={0} />, scratch);
+		expect(scratch.firstChild.getAttribute('value')).to.equal('0');
+		render(<progress value={50} />, scratch);
+		expect(scratch.firstChild.getAttribute('value')).to.equal('50');
+		render(<progress value={null} />, scratch);
+		expect(scratch.firstChild.getAttribute('value')).to.equal(null);
+	});
+
 	it('should always diff `checked` and `value` properties against the DOM', () => {
 		// See https://github.com/preactjs/preact/issues/1324
 
