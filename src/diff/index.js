@@ -455,7 +455,7 @@ function diffElementNodes(
 			if (i == 'children') {
 			} else if (i == 'dangerouslySetInnerHTML') {
 				oldHtml = value;
-			} else if (i !== 'key' && !(i in newProps)) {
+			} else if (!(i in newProps)) {
 				if (
 					(i == 'value' && 'defaultValue' in newProps) ||
 					(i == 'checked' && 'defaultChecked' in newProps)
@@ -479,7 +479,6 @@ function diffElementNodes(
 			} else if (i == 'checked') {
 				checked = value;
 			} else if (
-				i !== 'key' &&
 				(!isHydrating || typeof value == 'function') &&
 				oldProps[i] !== value
 			) {
