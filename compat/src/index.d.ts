@@ -748,7 +748,7 @@ declare namespace React {
 	): void;
 
 	export type PropsWithChildren<P = unknown> = P & {
-		children?: preact.ComponentChild | undefined;
+		children?: preact.ComponentChildren | undefined;
 	};
 
 	export const Children: {
