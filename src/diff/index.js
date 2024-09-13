@@ -531,7 +531,9 @@ function diffElementNodes(
 		// As above, don't diff props during hydration
 		if (!isHydrating) {
 			i = 'value';
-			if (
+			if (nodeType === 'progress' && inputValue == null) {
+				dom.removeAttribute('value');
+			} else if (
 				inputValue !== undefined &&
 				// #2756 For the <progress>-element the initial value is 0,
 				// despite the attribute not being present. When the attribute
