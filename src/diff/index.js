@@ -170,7 +170,7 @@ export function diff(
 
 					newVNode._dom = oldVNode._dom;
 					newVNode._children = oldVNode._children;
-					newVNode._children.forEach(vnode => {
+					newVNode._children.some(vnode => {
 						if (vnode) vnode._parent = newVNode;
 					});
 
@@ -455,7 +455,7 @@ function diffElementNodes(
 			if (i == 'children') {
 			} else if (i == 'dangerouslySetInnerHTML') {
 				oldHtml = value;
-			} else if (i !== 'key' && !(i in newProps)) {
+			} else if (!(i in newProps)) {
 				if (
 					(i == 'value' && 'defaultValue' in newProps) ||
 					(i == 'checked' && 'defaultChecked' in newProps)
@@ -479,7 +479,6 @@ function diffElementNodes(
 			} else if (i == 'checked') {
 				checked = value;
 			} else if (
-				i !== 'key' &&
 				(!isHydrating || typeof value == 'function') &&
 				oldProps[i] !== value
 			) {
@@ -524,7 +523,7 @@ function diffElementNodes(
 			// Remove children that are not part of any vnode.
 			if (excessDomChildren != null) {
 				for (i = excessDomChildren.length; i--; ) {
-					if (excessDomChildren[i] != null) removeNode(excessDomChildren[i]);
+					removeNode(excessDomChildren[i]);
 				}
 			}
 		}
@@ -626,7 +625,7 @@ export function unmount(vnode, parentVNode, skipRemove) {
 		}
 	}
 
-	if (!skipRemove && vnode._dom != null) {
+	if (!skipRemove) {
 		removeNode(vnode._dom);
 	}
 
