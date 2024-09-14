@@ -2399,7 +2399,6 @@ export namespace JSXInternal {
 		slot?: string | undefined | SignalLike<string | undefined>;
 		span?: number | undefined | SignalLike<number | undefined>;
 		spellcheck?: boolean | undefined | SignalLike<boolean | undefined>;
-		spellCheck?: boolean | undefined | SignalLike<boolean | undefined>;
 		src?: string | undefined | SignalLike<string | undefined>;
 		srcSet?: string | undefined | SignalLike<string | undefined>;
 		srcset?: string | undefined | SignalLike<string | undefined>;
