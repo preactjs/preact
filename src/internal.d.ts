@@ -45,7 +45,7 @@ declare global {
 			oldVNode?: VNode | undefined,
 			errorInfo?: ErrorInfo | undefined
 		): void;
-		/** Attach a hook that firs when hydration can't find a proper DOM-node to match with */
+		/** Attach a hook that fires when hydration can't find a proper DOM-node to match with */
 		_hydrationMismatch?(vnode: VNode, excessDomChildren: PreactElement[]): void;
 	}
 
