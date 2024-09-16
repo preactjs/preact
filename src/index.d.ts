@@ -292,7 +292,7 @@ interface ContainerNode {
 	readonly parentNode: ContainerNode | null;
 	readonly firstChild: ContainerNode | null;
 	readonly childNodes: ArrayLike<ContainerNode>;
-	readonly ownerDocument: Document;
+	readonly ownerDocument: Document | null;
 
 	contains(other: ContainerNode | null): boolean;
 	insertBefore(node: ContainerNode, child: ContainerNode | null): ContainerNode;

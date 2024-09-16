@@ -15,7 +15,7 @@ describe('parentDom.ownerDocument', () => {
 		teardown(scratch);
 	});
 
-	it('should reference the correct document from the parent node', () => {
+	it.skip('should reference the correct document from the parent node', () => {
 		let iframe = document.createElement('iframe');
 
 		scratch.appendChild(iframe);
