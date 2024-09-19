@@ -240,7 +240,7 @@
     "mocha": "^9.0.0",
     "npm-merge-driver-install": "^3.0.0",
     "npm-run-all": "^4.1.5",
-    "oxlint": "^0.7.0",
+    "oxlint": "^0.9.6",
     "preact-render-to-string": "^6.5.0",
     "prop-types": "^15.8.1",
     "sade": "^1.8.1",
