@@ -46,7 +46,10 @@ declare global {
 			errorInfo?: ErrorInfo | undefined
 		): void;
 		/** Attach a hook that fires when hydration can't find a proper DOM-node to match with */
-		_hydrationMismatch?(vnode: VNode, excessDomChildren: PreactElement[]): void;
+		_hydrationMismatch?(
+			vnode: VNode,
+			excessDomChildren: Array<PreactElement | null>
+		): void;
 	}
 
 	export type ComponentChild =
