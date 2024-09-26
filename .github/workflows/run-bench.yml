@@ -59,7 +59,7 @@ jobs:
             ${{ runner.os }}-pnpm-store-
 
       # Install benchmark dependencies
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: bench-environment
       - name: Move tarballs from env to correct location
@@ -109,12 +109,12 @@ jobs:
           NAME=$(echo "${{ inputs.benchmark }}" | sed -r 's/[\/]+/_/g')
           echo "artifact_name=logs_$NAME" >> $GITHUB_OUTPUT
       - name: Upload results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: results
           path: benchmarks/out/results/${{ inputs.benchmark }}.json
       - name: Upload logs
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ steps.log-artifact-name.outputs.artifact_name }}
           path: benchmarks/out/${{ inputs.benchmark }}_logs.tgz
