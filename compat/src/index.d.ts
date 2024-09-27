@@ -635,7 +635,35 @@ declare namespace React {
 	// Events
 	export import TargetedEvent = JSXInternal.TargetedEvent;
 	export import ChangeEvent = JSXInternal.TargetedEvent;
+	export import ClipboardEvent = JSXInternal.TargetedClipboardEvent;
+	export import CompositionEvent = JSXInternal.TargetedCompositionEvent;
+	export import DragEvent = JSXInternal.TargetedDragEvent;
+	export import PointerEvent = JSXInternal.TargetedPointerEvent;
+	export import FocusEvent = JSXInternal.TargetedFocusEvent;
+	export import FormEvent = JSXInternal.TargetedEvent;
+	export import InvalidEvent = JSXInternal.TargetedEvent;
+	export import KeyboardEvent = JSXInternal.TargetedKeyboardEvent;
+	export import MouseEvent = JSXInternal.TargetedMouseEvent;
+	export import TouchEvent = JSXInternal.TargetedTouchEvent;
+	export import UIEvent = JSXInternal.TargetedUIEvent;
+	export import AnimationEvent = JSXInternal.TargetedAnimationEvent;
+	export import TransitionEvent = JSXInternal.TargetedTransitionEvent;
+
+	// Event Handler Types
 	export import ChangeEventHandler = JSXInternal.GenericEventHandler;
+	export import ClipboardEventHandler = JSXInternal.ClipboardEventHandler;
+	export import CompositionEventHandler = JSXInternal.CompositionEventHandler;
+	export import DragEventHandler = JSXInternal.DragEventHandler;
+	export import PointerEventHandler = JSXInternal.PointerEventHandler;
+	export import FocusEventHandler = JSXInternal.FocusEventHandler;
+	export import FormEventHandler = JSXInternal.GenericEventHandler;
+	export import InvalidEventHandler = JSXInternal.GenericEventHandler;
+	export import KeyboardEventHandler = JSXInternal.KeyboardEventHandler;
+	export import MouseEventHandler = JSXInternal.MouseEventHandler;
+	export import TouchEventHandler = JSXInternal.TouchEventHandler;
+	export import UIEventHandler = JSXInternal.UIEventHandler;
+	export import AnimationEventHandler = JSXInternal.AnimationEventHandler;
+	export import TransitionEventHandler = JSXInternal.TransitionEventHandler;
 
 	export function createPortal(
 		vnode: preact.ComponentChildren,
