@@ -23,7 +23,7 @@ import { getDomSibling } from '../component';
  * elements should be placed around. Likely `null` on first render (except when
  * hydrating). Can be a sibling DOM element when diffing Fragments that have
  * siblings. In most cases, it starts out as `oldChildren[0]._dom`.
- * @param {boolean} isHydrating Whether or not we are in hydration
+ * @param {{_: boolean}} isHydratingRef Whether or not we are in hydration
  * @param {any[]} refQueue an array of elements needed to invoke refs
  */
 export function diffChildren(
@@ -36,7 +36,7 @@ export function diffChildren(
 	excessDomChildren,
 	commitQueue,
 	oldDom,
-	isHydrating,
+	isHydratingRef,
 	refQueue
 ) {
 	let i,
@@ -85,7 +85,7 @@ export function diffChildren(
 			excessDomChildren,
 			commitQueue,
 			oldDom,
-			isHydrating,
+			isHydratingRef,
 			refQueue
 		);
 

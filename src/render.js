@@ -55,7 +55,7 @@ export function render(vnode, parentDom, replaceNode) {
 			: oldVNode
 				? oldVNode._dom
 				: parentDom.firstChild,
-		isHydrating,
+		{ _: isHydrating },
 		refQueue
 	);
 
