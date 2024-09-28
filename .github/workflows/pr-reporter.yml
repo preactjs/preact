@@ -38,7 +38,8 @@ jobs:
         with:
           workflow: ${{ github.event.workflow.id }}
           run_id: ${{ github.event.workflow_run.id }}
-          name: results
+          name_is_regexp: true
+          name: /results/
           path: results
 
       # Create/update the comment with the latest results
