@@ -107,11 +107,12 @@ jobs:
         id: log-artifact-name
         run: |
           NAME=$(echo "${{ inputs.benchmark }}" | sed -r 's/[\/]+/_/g')
+          echo "clean_name=$NAME" >> $GITHUB_OUTPUT
           echo "artifact_name=logs_$NAME" >> $GITHUB_OUTPUT
       - name: Upload results
         uses: actions/upload-artifact@v4
         with:
-          name: results-${{ env.NAME }}
+          name: results-${{ steps.log-artifact-name.outputs.clean_name }}
           path: benchmarks/out/results/${{ inputs.benchmark }}.json
       - name: Upload logs
         uses: actions/upload-artifact@v4
