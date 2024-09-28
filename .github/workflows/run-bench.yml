@@ -111,7 +111,7 @@ jobs:
       - name: Upload results
         uses: actions/upload-artifact@v4
         with:
-          name: results${{ inputs.benchmark }}
+          name: results-${{ env.NAME }}
           path: benchmarks/out/results/${{ inputs.benchmark }}.json
       - name: Upload logs
         uses: actions/upload-artifact@v4
