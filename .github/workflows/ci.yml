@@ -24,6 +24,7 @@ jobs:
               - '**/src/**.js'
 
   build_test:
+    needs: filter_jobs
     name: Build & Test
     uses: ./.github/workflows/build-test.yml
 
