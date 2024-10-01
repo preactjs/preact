@@ -4,7 +4,7 @@ on:
   # The pull_request event can't write comments for PRs from forks so using this
   # workflow_run workflow as a workaround
   workflow_run:
-    workflows: ['Benchmarks']
+    workflows: ['CI']
     branches: ['**']
     types:
       - completed

@@ -2,18 +2,6 @@ name: CI
 
 on:
   workflow_dispatch:
-  workflow_call:
-    inputs:
-      ref:
-        description: 'Branch or tag ref to check out'
-        type: string
-        required: false
-        default: ''
-      artifact_name:
-        description: 'Name of the artifact to upload'
-        type: string
-        required: false
-        default: 'npm-package'
   pull_request:
     branches:
       - '**'
@@ -21,42 +9,107 @@ on:
     branches:
       - main
       - restructure
+      - v11
 
 jobs:
+  filter_jobs:
+    outputs:
+      benchmarks: ${{ steps.filter.outputs.benchmarks }}
+    steps:
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            benchmarks:
+              - '**/src/**.js'
+
   build_test:
     name: Build & Test
+    uses: ./.github/workflows/build-test.yml
+
+  prepare:
+    name: Prepare environment
     runs-on: ubuntu-latest
+    needs: build_test
+    if: ${{ needs.changes.outputs.benchmarks == 'true' }}
+    timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v4
+      - name: Download locally built preact package
+        uses: actions/download-artifact@v4
         with:
-          ref: ${{ inputs.ref || '' }}
-      - uses: actions/setup-node@v4
+          name: npm-package
+      - run: mv preact.tgz preact-local.tgz
+      - name: Download base package
+        uses: andrewiggins/download-base-artifact@v3
         with:
-          node-version-file: 'package.json'
-          cache: 'npm'
-          cache-dependency-path: '**/package-lock.json'
-      - run: npm ci
-      - name: test
-        env:
-          CI: true
-          COVERAGE: true
-          FLAKEY: false
-        # Not using `npm test` since it rebuilds source which npm ci has already done
-        run: |
-          npm run lint
-          npm run test:unit
-      - name: Coveralls GitHub Action
-        uses: coverallsapp/github-action@v2.3.0
-        timeout-minutes: 2
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Package
-        # Use --ignore-scripts here to avoid re-building again before pack
-        run: |
-          npm pack --ignore-scripts
-          mv preact-*.tgz preact.tgz
-      - name: Upload npm package
+          artifact: npm-package
+          workflow: build-test.yml
+          required: false
+      - run: mv preact.tgz preact-main.tgz
+      - name: Upload locally build & base preact package
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ inputs.artifact_name || 'npm-package' }}
-          path: preact.tgz
+          name: bench-environment
+          path: |
+            preact-local.tgz
+            preact-main.tgz
+
+  bench_todo:
+    name: Bench todo
+    uses: ./.github/workflows/run-bench.yml
+    needs: prepare
+    with:
+      benchmark: todo/todo
+      timeout: 10
+
+  bench_text_update:
+    name: Bench text-update
+    uses: ./.github/workflows/run-bench.yml
+    needs: prepare
+    with:
+      benchmark: text-update/text-update
+      timeout: 10
+
+  bench_many_updates:
+    name: Bench many-updates
+    uses: ./.github/workflows/run-bench.yml
+    needs: prepare
+    with:
+      benchmark: many-updates/many-updates
+      timeout: 10
+
+  bench_replace1k:
+    name: Bench replace1k
+    uses: ./.github/workflows/run-bench.yml
+    needs: prepare
+    with:
+      benchmark: table-app/replace1k
+
+  bench_update10th1k:
+    name: Bench 03_update10th1k_x16
+    uses: ./.github/workflows/run-bench.yml
+    needs: prepare
+    with:
+      benchmark: table-app/update10th1k
+
+  bench_create10k:
+    name: Bench create10k
+    uses: ./.github/workflows/run-bench.yml
+    needs: prepare
+    with:
+      benchmark: table-app/create10k
+
+  bench_hydrate1k:
+    name: Bench hydrate1k
+    uses: ./.github/workflows/run-bench.yml
+    needs: prepare
+    with:
+      benchmark: table-app/hydrate1k
+
+  bench_filter_list:
+    name: Bench filter-list
+    uses: ./.github/workflows/run-bench.yml
+    needs: prepare
+    with:
+      benchmark: filter-list/filter-list
+      timeout: 10
