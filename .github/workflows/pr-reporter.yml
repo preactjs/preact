@@ -46,7 +46,7 @@ jobs:
       - name: Report Tachometer Results
         uses: andrewiggins/tachometer-reporter-action@v2
         with:
-          path: results/*.json
+          path: results/**/*.json
           base-bench-name: preact-main
           pr-bench-name: preact-local
           summarize: 'duration, usedJSHeapSize'
