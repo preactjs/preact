@@ -33,7 +33,7 @@ jobs:
     name: Prepare environment
     runs-on: ubuntu-latest
     needs: build_test
-    if: ${{ needs.changes.outputs.benchmarks == 'true' }}
+    if: ${{ needs.filter_jobs.outputs.benchmarks == 'true' }}
     timeout-minutes: 5
     steps:
       - name: Download locally built preact package
