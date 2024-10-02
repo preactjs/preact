@@ -1,11 +1,7 @@
 name: Compressed Size
 
 on:
-  pull_request:
-    branches:
-      - '**'
-    paths:
-      - '**/src/**.js'
+  workflow_call:
 
 jobs:
   build:

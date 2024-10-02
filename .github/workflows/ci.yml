@@ -24,95 +24,19 @@ jobs:
           filters: |
             benchmarks: '**/src/**.js'
 
+  compressed_size:
+    name: Compressed Size
+    needs: filter_jobs
+    if: ${{ needs.filter_jobs.outputs.benchmarks == 'true' }}
+    uses: ./.github/workflows/compressed-size.yml
+
   build_test:
     name: Build & Test
     needs: filter_jobs
     uses: ./.github/workflows/build-test.yml
 
-  prepare:
-    name: Prepare environment
-    runs-on: ubuntu-latest
+  benchmarks:
+    name: Benchmarks
     needs: build_test
     if: ${{ needs.filter_jobs.outputs.benchmarks == 'true' }}
-    timeout-minutes: 5
-    steps:
-      - name: Download locally built preact package
-        uses: actions/download-artifact@v4
-        with:
-          name: npm-package
-      - run: mv preact.tgz preact-local.tgz
-      - name: Download base package
-        uses: andrewiggins/download-base-artifact@v3
-        with:
-          artifact: npm-package
-          # REVERT ME: This uses the action as it is on `main`
-          workflow: ci.yml
-          required: false
-      - run: mv preact.tgz preact-main.tgz
-      - name: Upload locally build & base preact package
-        uses: actions/upload-artifact@v4
-        with:
-          name: bench-environment
-          path: |
-            preact-local.tgz
-            preact-main.tgz
-
-  bench_todo:
-    name: Bench todo
-    uses: ./.github/workflows/run-bench.yml
-    needs: prepare
-    with:
-      benchmark: todo/todo
-      timeout: 10
-
-  bench_text_update:
-    name: Bench text-update
-    uses: ./.github/workflows/run-bench.yml
-    needs: prepare
-    with:
-      benchmark: text-update/text-update
-      timeout: 10
-
-  bench_many_updates:
-    name: Bench many-updates
-    uses: ./.github/workflows/run-bench.yml
-    needs: prepare
-    with:
-      benchmark: many-updates/many-updates
-      timeout: 10
-
-  bench_replace1k:
-    name: Bench replace1k
-    uses: ./.github/workflows/run-bench.yml
-    needs: prepare
-    with:
-      benchmark: table-app/replace1k
-
-  bench_update10th1k:
-    name: Bench 03_update10th1k_x16
-    uses: ./.github/workflows/run-bench.yml
-    needs: prepare
-    with:
-      benchmark: table-app/update10th1k
-
-  bench_create10k:
-    name: Bench create10k
-    uses: ./.github/workflows/run-bench.yml
-    needs: prepare
-    with:
-      benchmark: table-app/create10k
-
-  bench_hydrate1k:
-    name: Bench hydrate1k
-    uses: ./.github/workflows/run-bench.yml
-    needs: prepare
-    with:
-      benchmark: table-app/hydrate1k
-
-  bench_filter_list:
-    name: Bench filter-list
-    uses: ./.github/workflows/run-bench.yml
-    needs: prepare
-    with:
-      benchmark: filter-list/filter-list
-      timeout: 10
+    uses: ./.github/workflows/benchmarks.yml
