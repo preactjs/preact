@@ -16,18 +16,18 @@ jobs:
     name: Filter jobs
     runs-on: ubuntu-latest
     outputs:
-      benchmarks: ${{ steps.filter.outputs.benchmarks }}
+      jsChanged: ${{ steps.filter.outputs.jsChanged }}
     steps:
       - uses: dorny/paths-filter@v3
         id: filter
         with:
           filters: |
-            benchmarks: '**/src/**.js'
+            jsChanged: '**/src/**.js'
 
   compressed_size:
     name: Compressed Size
     needs: filter_jobs
-    if: ${{ needs.filter_jobs.outputs.benchmarks == 'true' }}
+    if: ${{ needs.filter_jobs.outputs.jsChanged == 'true' }}
     uses: ./.github/workflows/compressed-size.yml
 
   build_test:
@@ -38,5 +38,5 @@ jobs:
   benchmarks:
     name: Benchmarks
     needs: build_test
-    if: ${{ needs.filter_jobs.outputs.benchmarks == 'true' }}
+    if: ${{ needs.filter_jobs.outputs.jsChanged == 'true' }}
     uses: ./.github/workflows/benchmarks.yml
