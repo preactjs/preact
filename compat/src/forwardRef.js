@@ -1,5 +1,4 @@
 import { options } from 'preact';
-import { assign } from './util';
 
 let oldDiffHook = options._diff;
 options._diff = vnode => {
@@ -25,9 +24,13 @@ export const REACT_FORWARD_SYMBOL =
  */
 export function forwardRef(fn) {
 	function Forwarded(props) {
-		let clone = assign({}, props);
-		delete clone.ref;
-		return fn(clone, props.ref || null);
+		if (!('ref' in props)) return fn(props, null);
+
+		let ref = props.ref;
+		delete props.ref;
+		const result = fn(props, ref);
+		props.ref = ref;
+		return result;
 	}
 
 	// mobx-react checks for this being present
