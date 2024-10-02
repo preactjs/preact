@@ -1,4 +1,5 @@
 import {
+	EMPTY_ARR,
 	EMPTY_OBJ,
 	MODE_HYDRATE,
 	MODE_SUSPENDED,
@@ -498,7 +499,7 @@ function diffElementNodes(
 				dom.innerHTML = newHtml.__html;
 			}
 
-			newVNode._children = [];
+			newVNode._children = EMPTY_ARR;
 		} else {
 			if (oldHtml) dom.innerHTML = '';
 
