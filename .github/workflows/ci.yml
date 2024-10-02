@@ -28,7 +28,7 @@ jobs:
     name: Compressed Size
     needs: filter_jobs
     if: ${{ needs.filter_jobs.outputs.jsChanged == 'true' }}
-    uses: ./.github/workflows/compressed-size.yml
+    uses: ./.github/workflows/size.yml
 
   build_test:
     name: Build & Test
