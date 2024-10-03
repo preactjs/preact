@@ -1,7 +1,13 @@
 import { render, hydrate } from 'preact';
+import { jsx } from 'preact/jsx-runtime';
 
-export * from 'preact/hooks';
 export * from 'preact';
+export * from 'preact/hooks';
+
+export const createElement = (type, props, children) => {
+	props.children = children;
+	return jsx(type, props, props.key);
+};
 
 /**
  * @param {HTMLElement} rootDom
