@@ -200,10 +200,7 @@ describe('keys', () => {
 
 		render(<List values={values} />, scratch);
 		expect(scratch.textContent).to.equal('abc');
-		expect(getLog()).to.deep.equal([
-			'<li>.appendChild(#text)',
-			'<ol>ab.appendChild(<li>c)'
-		]);
+		expect(getLog()).to.deep.equal(['<ol>ab.appendChild(<li>c)']);
 	});
 
 	it('should remove keyed elements from the end', () => {
@@ -231,10 +228,7 @@ describe('keys', () => {
 
 		render(<List values={values} />, scratch);
 		expect(scratch.textContent).to.equal('abc');
-		expect(getLog()).to.deep.equal([
-			'<li>.appendChild(#text)',
-			'<ol>bc.insertBefore(<li>a, <li>b)'
-		]);
+		expect(getLog()).to.deep.equal(['<ol>bc.insertBefore(<li>a, <li>b)']);
 	});
 
 	it('should remove keyed elements from the beginning', () => {
@@ -262,10 +256,7 @@ describe('keys', () => {
 
 		render(<List values={values} />, scratch);
 		expect(scratch.textContent).to.equal('abc');
-		expect(getLog()).to.deep.equal([
-			'<li>.appendChild(#text)',
-			'<ol>ac.insertBefore(<li>b, <li>c)'
-		]);
+		expect(getLog()).to.deep.equal(['<ol>ac.insertBefore(<li>b, <li>c)']);
 	});
 
 	it('should remove keyed children from the middle', () => {
@@ -327,7 +318,7 @@ describe('keys', () => {
 		render(<List values={['b', 'a']} />, scratch);
 		expect(scratch.textContent).to.equal('ba');
 
-		expect(getLog()).to.deep.equal(['<ol>ab.appendChild(<li>a)']);
+		expect(getLog()).to.deep.equal(['<ol>ab.insertBefore(<li>b, <li>a)']);
 	});
 
 	it('should swap existing keyed children in the middle of a list efficiently', () => {
@@ -343,7 +334,7 @@ describe('keys', () => {
 		render(<List values={values} />, scratch);
 		expect(scratch.textContent).to.equal('acbd', 'initial swap');
 		expect(getLog()).to.deep.equal(
-			['<ol>abcd.insertBefore(<li>b, <li>d)'],
+			['<ol>abcd.insertBefore(<li>c, <li>b)'],
 			'initial swap'
 		);
 
@@ -354,7 +345,7 @@ describe('keys', () => {
 		render(<List values={values} />, scratch);
 		expect(scratch.textContent).to.equal('abcd', 'swap back');
 		expect(getLog()).to.deep.equal(
-			['<ol>acbd.insertBefore(<li>c, <li>d)'],
+			['<ol>acbd.insertBefore(<li>b, <li>c)'],
 			'swap back'
 		);
 	});
@@ -372,7 +363,11 @@ describe('keys', () => {
 		render(<List values={values} />, scratch);
 		expect(scratch.textContent).to.equal('bcda', 'move to end');
 		expect(getLog()).to.deep.equal(
-			['<ol>abcd.appendChild(<li>a)'],
+			[
+				'<ol>abcd.insertBefore(<li>b, <li>a)',
+				'<ol>bacd.insertBefore(<li>c, <li>a)',
+				'<ol>bcad.insertBefore(<li>d, <li>a)'
+			],
 			'move to end'
 		);
 
@@ -414,7 +409,11 @@ describe('keys', () => {
 
 		render(<List values={values} />, scratch);
 		expect(scratch.textContent).to.equal('acdebf');
-		expect(getLog()).to.deep.equal(['<ol>abcdef.insertBefore(<li>b, <li>f)']);
+		expect(getLog()).to.deep.equal([
+			'<ol>abcdef.insertBefore(<li>c, <li>b)',
+			'<ol>acbdef.insertBefore(<li>d, <li>b)',
+			'<ol>acdbef.insertBefore(<li>e, <li>b)'
+		]);
 	});
 
 	it('should reverse keyed children effectively', () => {
@@ -439,7 +438,7 @@ describe('keys', () => {
 			'<ol>jihgfabcde.insertBefore(<li>e, <li>a)',
 			'<ol>jihgfeabcd.insertBefore(<li>d, <li>a)',
 			'<ol>jihgfedabc.insertBefore(<li>c, <li>a)',
-			'<ol>jihgfedcab.appendChild(<li>a)'
+			'<ol>jihgfedcab.insertBefore(<li>b, <li>a)'
 		]);
 	});
 

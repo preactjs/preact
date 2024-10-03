@@ -486,7 +486,6 @@ function diffElementNodes(
 			}
 		}
 
-		// If the new vnode didn't have dangerouslySetInnerHTML, diff its children
 		if (newHtml) {
 			// Avoid re-applying the same '__html' if it did not changed between re-render
 			if (
@@ -499,8 +498,28 @@ function diffElementNodes(
 			}
 
 			newVNode._children = [];
+		} else if (typeof newChildren === 'string') {
+			if (newChildren !== oldProps.children) {
+				// Unmount any previous children
+				if (oldVNode._children) {
+					while ((i = oldVNode._children.pop())) {
+						// Setting textContent on the dom element will unmount all DOM nodes
+						// of the previous children, so we don't need to remove DOM in this
+						// call to unmount
+						unmount(i, oldVNode, true);
+					}
+				}
+
+				// @ts-expect-error
+				dom.textContent = newChildren;
+			}
 		} else {
 			if (oldHtml) dom.innerHTML = '';
+			// Previous render was a single text child. New children are not so let's
+			// unmount the previous text child
+			if (typeof oldProps.children === 'string') {
+				dom.removeChild(dom.firstChild);
+			}
 
 			diffChildren(
 				dom,

@@ -1662,9 +1662,12 @@ describe('render()', () => {
 			`<div>${b.map(n => `<div>${n}</div>`).join('')}</div>`
 		);
 		expect(getLog()).to.deep.equal([
-			'<div>0123456.insertBefore(<div>2, <div>6)',
-			'<div>0134526.appendChild(<div>4)',
-			'<div>0135264.appendChild(<div>0)'
+			'<div>0123456.insertBefore(<div>1, <div>0)',
+			'<div>1023456.insertBefore(<div>3, <div>0)',
+			'<div>1302456.insertBefore(<div>5, <div>0)',
+			'<div>1350246.insertBefore(<div>2, <div>0)',
+			'<div>1352046.insertBefore(<div>6, <div>0)',
+			'<div>1352604.insertBefore(<div>4, <div>0)'
 		]);
 		clearLog();
 
@@ -1673,15 +1676,12 @@ describe('render()', () => {
 			`<div>${c.map(n => `<div>${n}</div>`).join('')}</div>`
 		);
 		expect(getLog()).to.deep.equal([
-			'<div>.appendChild(#text)',
 			'<div>1352640.insertBefore(<div>11, <div>1)',
-			'<div>111352640.insertBefore(<div>1, <div>5)',
-			'<div>113152640.insertBefore(<div>6, <div>0)',
-			'<div>113152460.insertBefore(<div>2, <div>0)',
-			'<div>113154620.insertBefore(<div>5, <div>0)',
-			'<div>.appendChild(#text)',
+			'<div>111352640.insertBefore(<div>3, <div>1)',
+			'<div>113152640.insertBefore(<div>4, <div>5)',
+			'<div>113145260.insertBefore(<div>6, <div>5)',
+			'<div>113146520.insertBefore(<div>2, <div>5)',
 			'<div>113146250.appendChild(<div>9)',
-			'<div>.appendChild(#text)',
 			'<div>1131462509.appendChild(<div>10)'
 		]);
 		clearLog();
@@ -1811,5 +1811,38 @@ describe('render()', () => {
 				`<div>${aa.map(n => `<div>${n}</div>`).join('')}</div>`
 			);
 		}
+	});
+
+	it('should correctly transition from multiple children to single text node and back', () => {
+		class Child extends Component {
+			componentDidMount() {}
+			componentWillUnmount() {}
+			render() {
+				return 'Child';
+			}
+		}
+
+		const proto = Child.prototype;
+		sinon.spy(Child.prototype, 'componentDidMount');
+		sinon.spy(Child.prototype, 'componentWillUnmount');
+
+		function App({ textChild = false }) {
+			return <div>{textChild ? 'Hello' : [<Child />, <span>b</span>]}</div>;
+		}
+
+		render(<App />, scratch);
+		expect(scratch.innerHTML).to.equal('<div>Child<span>b</span></div>');
+		expect(proto.componentDidMount).to.have.been.calledOnce;
+		expect(proto.componentWillUnmount).to.have.not.been.called;
+
+		render(<App textChild />, scratch);
+		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
+		expect(proto.componentDidMount).to.have.been.calledOnce;
+		expect(proto.componentWillUnmount).to.have.been.calledOnce;
+
+		render(<App />, scratch);
+		expect(scratch.innerHTML).to.equal('<div>Child<span>b</span></div>');
+		expect(proto.componentDidMount).to.have.been.calledTwice;
+		expect(proto.componentWillUnmount).to.have.been.calledOnce;
 	});
 });
