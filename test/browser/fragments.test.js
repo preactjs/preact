@@ -1325,6 +1325,7 @@ describe('Fragment', () => {
 		);
 	});
 
+	// TODO
 	it('should support moving Fragments between beginning and end', () => {
 		const Foo = ({ condition }) => (
 			<ol>
@@ -1392,8 +1393,10 @@ describe('Fragment', () => {
 			'rendering from false to true'
 		);
 		expectDomLogToBe([
-			'<ol>450123.appendChild(<li>4)',
-			'<ol>501234.appendChild(<li>5)'
+			'<ol>450123.insertBefore(<li>0, <li>4)',
+			'<ol>045123.insertBefore(<li>1, <li>4)',
+			'<ol>014523.insertBefore(<li>2, <li>4)',
+			'<ol>012453.insertBefore(<li>3, <li>4)'
 		]);
 	});
 

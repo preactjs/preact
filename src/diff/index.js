@@ -486,7 +486,6 @@ function diffElementNodes(
 			}
 		}
 
-		// If the new vnode didn't have dangerouslySetInnerHTML, diff its children
 		if (newHtml) {
 			// Avoid re-applying the same '__html' if it did not changed between re-render
 			if (
@@ -499,6 +498,15 @@ function diffElementNodes(
 			}
 
 			newVNode._children = [];
+		} else if (
+			typeof newChildren === 'string' &&
+			typeof oldProps.children === 'string'
+		) {
+			if (newChildren !== oldProps.children) {
+				oldVNode._children[0]._dom.data = newChildren;
+				newVNode._children = oldVNode._children;
+				oldVNode._children = null;
+			}
 		} else {
 			if (oldHtml) dom.innerHTML = '';
 

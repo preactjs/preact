@@ -474,4 +474,16 @@ describe('null placeholders', () => {
 		expect(getLog()).to.deep.equal(['<div>Test3.remove()']);
 		expect(ref).to.have.been.calledOnce;
 	});
+
+	it('should properly mount and unmount text nodes with placeholders', () => {
+		function App({ show = false }) {
+			return <div>{show && 'Hello'}</div>;
+		}
+
+		render(<App show />, scratch);
+		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
+
+		render(<App />, scratch);
+		expect(scratch.innerHTML).to.equal('<div></div>');
+	});
 });

@@ -354,7 +354,7 @@ describe('keys', () => {
 		render(<List values={values} />, scratch);
 		expect(scratch.textContent).to.equal('abcd', 'swap back');
 		expect(getLog()).to.deep.equal(
-			['<ol>acbd.insertBefore(<li>c, <li>d)'],
+			['<ol>acbd.insertBefore(<li>b, <li>c)'],
 			'swap back'
 		);
 	});
