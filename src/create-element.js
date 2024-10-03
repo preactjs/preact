@@ -84,6 +84,10 @@ export function createVNode(type, props, key, ref, original) {
 	return vnode;
 }
 
+// @ts-ignore
+export const EMPTY_VNODE = createVNode(null, {});
+EMPTY_VNODE._children = [];
+
 export function createRef() {
 	return { current: null };
 }
