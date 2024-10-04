@@ -1,5 +1,6 @@
 import { slice } from './util';
 import options from './options';
+import { assign } from './util';
 
 let vnodeId = 0;
 
@@ -39,6 +40,28 @@ export function createElement(type, props, children) {
 	}
 
 	return createVNode(type, normalizedProps, key, ref, null);
+}
+
+/**
+ * Experimental support for JSX2
+ * https://github.com/reactjs/rfcs/blob/createlement-rfc/text/0000-create-element-changes.md
+ */
+export function jsx(type, props, key) {
+	if (typeof type === 'function' && type.defaultProps != null) {
+		props = props ? assign({}, props) : {};
+		for (i in type.defaultProps) {
+			if (props[i] === undefined) {
+				props[i] = type.defaultProps[i];
+			}
+		}
+	}
+
+	return createVNode(
+		type,
+		props,
+		key,
+		props && props.ref
+	);
 }
 
 /**
