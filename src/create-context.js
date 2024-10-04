@@ -43,7 +43,11 @@ export function createContext(defaultValue, contextId) {
 					let old = c.componentWillUnmount;
 					c.componentWillUnmount = () => {
 						if (subs) {
-							subs.splice(subs.indexOf(c), 1);
+							if (subs.length === 1) {
+								subs = [];
+							} else {
+								subs[subs.indexOf(c)] = subs.pop();
+							}
 						}
 						if (old) old.call(c);
 					};
