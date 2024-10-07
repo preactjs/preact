@@ -238,6 +238,22 @@ describe('hydrate()', () => {
 		expect(scratch.innerHTML).to.equal('<div class="foo">bar</div>');
 	});
 
+	it('should bail for adjacent trees', () => {
+		scratch.innerHTML = '<main><div>Hello world</div></main>';
+		hydrate(
+			<main>
+				<Fragment>
+					<span>Foo</span>
+				</Fragment>
+				<div test-id="x">Hello world</div>
+			</main>,
+			scratch
+		);
+		expect(scratch.innerHTML).to.equal(
+			'<main><span>Foo</span><div test-id="x">Hello world</div></main>'
+		);
+	});
+
 	it('should correctly hydrate with Fragments', () => {
 		const html = ul([li('1'), li('2'), li('3'), li('4')]);
 

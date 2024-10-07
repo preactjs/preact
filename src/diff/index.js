@@ -26,7 +26,7 @@ import options from '../options';
  * elements should be placed around. Likely `null` on first render (except when
  * hydrating). Can be a sibling DOM element when diffing Fragments that have
  * siblings. In most cases, it starts out as `oldChildren[0]._dom`.
- * @param {boolean} isHydrating Whether or not we are in hydration
+ * @param {{_:boolean}} isHydratingRef Whether or not we are in hydration
  * @param {any[]} refQueue an array of elements needed to invoke refs
  */
 export function diff(
@@ -38,9 +38,10 @@ export function diff(
 	excessDomChildren,
 	commitQueue,
 	oldDom,
-	isHydrating,
+	isHydratingRef,
 	refQueue
 ) {
+	let isHydrating = isHydratingRef._;
 	/** @type {any} */
 	let tmp,
 		newType = newVNode.type;
@@ -253,7 +254,7 @@ export function diff(
 				excessDomChildren,
 				commitQueue,
 				oldDom,
-				isHydrating,
+				isHydratingRef,
 				refQueue
 			);
 
@@ -303,7 +304,7 @@ export function diff(
 			namespace,
 			excessDomChildren,
 			commitQueue,
-			isHydrating,
+			isHydratingRef,
 			refQueue
 		);
 	}
@@ -351,7 +352,7 @@ export function commitRoot(commitQueue, root, refQueue) {
  * @param {Array<PreactElement>} excessDomChildren
  * @param {Array<Component>} commitQueue List of components which have callbacks
  * to invoke in commitRoot
- * @param {boolean} isHydrating Whether or not we are in hydration
+ * @param {{_: boolean}} isHydratingRef Whether or not we are in hydration
  * @param {any[]} refQueue an array of elements needed to invoke refs
  * @returns {PreactElement}
  */
@@ -363,9 +364,11 @@ function diffElementNodes(
 	namespace,
 	excessDomChildren,
 	commitQueue,
-	isHydrating,
+	isHydratingRef,
 	refQueue
 ) {
+	let isHydrating = isHydratingRef._;
+
 	let oldProps = oldVNode.props;
 	let newProps = newVNode.props;
 	let nodeType = /** @type {string} */ (newVNode.type);
@@ -422,7 +425,7 @@ function diffElementNodes(
 		if (isHydrating) {
 			if (options._hydrationMismatch)
 				options._hydrationMismatch(newVNode, excessDomChildren);
-			isHydrating = false;
+			isHydratingRef._ = isHydrating = false;
 		}
 		// we created a new parent, so none of the previously attached children can be reused:
 		excessDomChildren = null;
@@ -516,7 +519,7 @@ function diffElementNodes(
 				excessDomChildren
 					? excessDomChildren[0]
 					: oldVNode._children && getDomSibling(oldVNode, 0),
-				isHydrating,
+				isHydratingRef,
 				refQueue
 			);
 
