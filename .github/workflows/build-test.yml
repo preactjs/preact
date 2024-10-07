@@ -1,0 +1,55 @@
+name: Build & Test
+
+on:
+  workflow_dispatch:
+  workflow_call:
+    inputs:
+      ref:
+        description: 'Branch or tag ref to check out'
+        type: string
+        required: false
+        default: ''
+      artifact_name:
+        description: 'Name of the artifact to upload'
+        type: string
+        required: false
+        default: 'npm-package'
+
+jobs:
+  build_test:
+    name: Build & Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref || '' }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: 'package.json'
+          cache: 'npm'
+          cache-dependency-path: '**/package-lock.json'
+      - run: npm ci
+      - name: test
+        env:
+          CI: true
+          COVERAGE: true
+          FLAKEY: false
+        # Not using `npm test` since it rebuilds source which npm ci has already done
+        run: |
+          npm run lint
+          npm run test:unit
+      - name: Coveralls GitHub Action
+        uses: coverallsapp/github-action@v2.3.0
+        timeout-minutes: 2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Package
+        # Use --ignore-scripts here to avoid re-building again before pack
+        run: |
+          npm pack --ignore-scripts
+          mv preact-*.tgz preact.tgz
+      - name: Upload npm package
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.artifact_name || 'npm-package' }}
+          path: preact.tgz
