@@ -43,13 +43,14 @@ export type Ref<T> = RefObject<T> | RefCallback<T> | null;
 
 export type ComponentChild =
 	| VNode<any>
-	| object
 	| string
 	| number
+	| Array<ComponentChild>
 	| bigint
 	| boolean
 	| null
-	| undefined;
+	| undefined
+	| Function;
 export type ComponentChildren = ComponentChild[] | ComponentChild;
 
 export interface Attributes {
