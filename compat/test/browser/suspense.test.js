@@ -299,6 +299,25 @@ describe('suspense', () => {
 		});
 	});
 
+	it('should not duplicate DOM when suspending while rendering', () => {
+		scratch.innerHTML = '<div>Hello</div>';
+
+		const [Lazy, resolve] = createLazy();
+		render(
+			<Suspense>
+				<Lazy />
+			</Suspense>,
+			scratch
+		);
+		rerender(); // Flush rerender queue to mimic what preact will really do
+		expect(scratch.innerHTML).to.equal('');
+
+		return resolve(() => <div>Hello</div>).then(() => {
+			rerender();
+			expect(scratch.innerHTML).to.equal('<div>Hello</div>');
+		});
+	});
+
 	it('should suspend when a promise is thrown', () => {
 		class ClassWrapper extends Component {
 			render(props) {

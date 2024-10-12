@@ -275,7 +275,7 @@ export function diff(
 			if (isHydrating || excessDomChildren != null) {
 				newVNode._flags |= isHydrating
 					? MODE_HYDRATE | MODE_SUSPENDED
-					: MODE_HYDRATE;
+					: MODE_SUSPENDED;
 
 				while (oldDom && oldDom.nodeType === 8 && oldDom.nextSibling) {
 					oldDom = oldDom.nextSibling;
