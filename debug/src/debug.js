@@ -483,7 +483,7 @@ export function initDebug() {
 							const arg = hook._args[j];
 							if (isNaN(arg)) {
 								const componentName = getDisplayName(vnode);
-								throw new Error(
+								console.warn(
 									`Invalid argument passed to hook. Hooks should not be called with NaN in the dependency array. Hook index ${i} in component ${componentName} was called with NaN.`
 								);
 							}

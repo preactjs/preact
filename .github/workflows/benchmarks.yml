@@ -19,7 +19,7 @@ jobs:
         uses: andrewiggins/download-base-artifact@v3
         with:
           artifact: npm-package
-          workflow: build-test.yml
+          workflow: ci.yml
           required: true
       - run: mv preact.tgz preact-main.tgz
       - name: Upload locally build & base preact package
