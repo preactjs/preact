@@ -18,6 +18,7 @@ jobs:
     outputs:
       jsChanged: ${{ steps.filter.outputs.jsChanged }}
     steps:
+      - uses: actions/checkout@v4
       - uses: dorny/paths-filter@v3
         id: filter
         with:
