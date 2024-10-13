@@ -22,8 +22,9 @@ jobs:
       - uses: dorny/paths-filter@v3
         id: filter
         with:
+          # Should be kept in sync with the filter in the PR Reporter workflow
           filters: |
-            jsChanged: '**/src/**.js'
+            jsChanged: '**/src/**/*.js'
 
   compressed_size:
     name: Compressed Size
