@@ -1132,6 +1132,7 @@ describe('render()', () => {
 	it('should not remove iframe', () => {
 		let setState;
 		const Iframe = () => {
+			// oxlint-disable-next-line iframe-missing-sandbox
 			return <iframe src="https://codesandbox.io/s/runtime-silence-no4zx" />;
 		};
 
