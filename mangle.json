@@ -32,6 +32,7 @@
       "$_list": "__",
       "$_pendingEffects": "__h",
       "$_value": "__",
+      "$_excess": "__x",
       "$_nextValue": "__N",
       "$_original": "__v",
       "$_args": "__H",
