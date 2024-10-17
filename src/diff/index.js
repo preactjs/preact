@@ -5,7 +5,7 @@ import {
 	RESET_MODE
 } from '../constants';
 import { BaseComponent, getDomSibling } from '../component';
-import { Fragment } from '../create-element';
+import { Fragment, createVNode } from '../create-element';
 import { diffChildren } from './children';
 import { setProperty } from './props';
 import { assign, isArray, removeNode, slice } from '../util';
@@ -486,7 +486,6 @@ function diffElementNodes(
 			}
 		}
 
-		// If the new vnode didn't have dangerouslySetInnerHTML, diff its children
 		if (newHtml) {
 			// Avoid re-applying the same '__html' if it did not changed between re-render
 			if (
@@ -499,6 +498,22 @@ function diffElementNodes(
 			}
 
 			newVNode._children = [];
+		} else if (typeof newChildren === 'string') {
+			if (newChildren !== oldProps.children) {
+				while (oldVNode._children && (i = oldVNode._children.pop())) {
+					// Setting textContent on the dom element will unmount all DOM nodes
+					// of the previous children, so we don't need to remove DOM in this
+					// call to unmount
+					unmount(i, oldVNode, true);
+				}
+
+				newVNode._children = [
+					// @ts-expect-error
+					createVNode(null, (dom.textContent = newChildren), null, null)
+				];
+				// @ts-expect-error
+				newVNode._children[0]._dom = dom.firstChild;
+			}
 		} else {
 			if (oldHtml) dom.innerHTML = '';
 

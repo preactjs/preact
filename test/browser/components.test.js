@@ -1,4 +1,4 @@
-import { createElement, render, Component, Fragment } from 'preact';
+import { createElement, render, Component, Fragment, createRef } from 'preact';
 import { setupRerender } from 'preact/test-utils';
 import {
 	setupScratch,
@@ -2076,6 +2076,17 @@ describe('Components', () => {
 			expect(parent2.base).to.equalNode(child.base);
 			expect(parent1.base).to.equalNode(child.base);
 			expect(parentDom1.base).to.equalNode(scratch.firstChild);
+		});
+
+		it('should set c.base for a single text-node child', () => {
+			let ref = createRef();
+			const SignalValue = props => {
+				return props.text;
+			};
+			render(<SignalValue ref={ref} text="hello world" />, scratch);
+			console.log(ref.current);
+			expect(ref.current.base.nodeType).to.equal(3);
+			expect(ref.current.base.data).to.equal('hello world');
 		});
 
 		it('should not update sibling c.base if child component changes DOM nodes', () => {
