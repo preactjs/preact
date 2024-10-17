@@ -140,7 +140,7 @@ function renderComponent(component) {
 			oldVNode._flags & MODE_HYDRATE ? [oldDom] : null,
 			commitQueue,
 			oldDom == null ? getDomSibling(oldVNode) : oldDom,
-			!!(oldVNode._flags & MODE_HYDRATE),
+			{ _: !!(oldVNode._flags & MODE_HYDRATE) },
 			refQueue
 		);
 
