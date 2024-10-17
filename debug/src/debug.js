@@ -425,7 +425,7 @@ export function initDebug() {
 					console.error(
 						'Improper nesting of paragraph. Your <p> should not have ' +
 							illegalDomChildrenTypes.join(', ') +
-							'as child-elements.' +
+							' as child-elements.' +
 							serializeVNode(vnode) +
 							`\n\n${getOwnerStack(vnode)}`
 					);
