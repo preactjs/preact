@@ -248,9 +248,7 @@ describe('null placeholders', () => {
 			div([div(1), div('Nullable'), div(3), div('Nullable2')])
 		);
 		expect(getLog()).to.deep.equal([
-			'<div>.appendChild(#text)',
 			'<div>13.appendChild(<div>Nullable2)',
-			'<div>.appendChild(#text)',
 			'<div>13Nullable2.insertBefore(<div>Nullable, <div>3)'
 		]);
 	});
@@ -473,5 +471,17 @@ describe('null placeholders', () => {
 		);
 		expect(getLog()).to.deep.equal(['<div>Test3.remove()']);
 		expect(ref).to.have.been.calledOnce;
+	});
+
+	it('should properly mount and unmount text nodes with placeholders', () => {
+		function App({ show = false }) {
+			return <div>{show && 'Hello'}</div>;
+		}
+
+		render(<App show />, scratch);
+		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
+
+		render(<App />, scratch);
+		expect(scratch.innerHTML).to.equal('<div></div>');
 	});
 });
