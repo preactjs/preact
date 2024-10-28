@@ -166,7 +166,7 @@ function createEventProxy(useCapture) {
 			} else if (e._dispatched < eventHandler._attached) {
 				return;
 			}
-			return eventHandler(options.event ? options.event(e) : e);
+			return ("handleEvent" in eventHandler ? eventHandler.handleEvent : eventHandler)(options.event ? options.event(e) : e);
 		}
 	};
 }
