@@ -66,7 +66,8 @@ declare namespace React {
 	export import ReactNode = preact.ComponentChild;
 	export import ReactElement = preact.VNode;
 	export import Consumer = preact.Consumer;
-
+	export import ErrorInfo = preact.ErrorInfo;
+	
 	// Suspense
 	export import Suspense = _Suspense.Suspense;
 	export import lazy = _Suspense.lazy;
