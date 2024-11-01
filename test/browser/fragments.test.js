@@ -1325,7 +1325,6 @@ describe('Fragment', () => {
 		);
 	});
 
-	// TODO
 	it('should support moving Fragments between beginning and end', () => {
 		const Foo = ({ condition }) => (
 			<ol>
