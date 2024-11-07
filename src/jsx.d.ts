@@ -78,22 +78,19 @@ export namespace JSXInternal {
 
 	export interface SVGAttributes<Target extends EventTarget = SVGElement>
 		extends HTMLAttributes<Target> {
-		accentHeight?:
+		accentHeight?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		accumulate?:
+			| undefined>;
+		accumulate?: Signalish<
 			| 'none'
 			| 'sum'
-			| undefined
-			| SignalLike<'none' | 'sum' | undefined>;
-		additive?:
+			| undefined>;
+		additive?: Signalish<
 			| 'replace'
 			| 'sum'
-			| undefined
-			| SignalLike<'replace' | 'sum' | undefined>;
-		alignmentBaseline?:
+			| undefined>;
+		alignmentBaseline?: Signalish<
 			| 'auto'
 			| 'baseline'
 			| 'before-edge'
@@ -107,24 +104,8 @@ export namespace JSXInternal {
 			| 'hanging'
 			| 'mathematical'
 			| 'inherit'
-			| undefined
-			| SignalLike<
-					| 'auto'
-					| 'baseline'
-					| 'before-edge'
-					| 'text-before-edge'
-					| 'middle'
-					| 'central'
-					| 'after-edge'
-					| 'text-after-edge'
-					| 'ideographic'
-					| 'alphabetic'
-					| 'hanging'
-					| 'mathematical'
-					| 'inherit'
-					| undefined
-			  >;
-		'alignment-baseline'?:
+			| undefined>;
+		'alignment-baseline'?: Signalish<
 			| 'auto'
 			| 'baseline'
 			| 'before-edge'
@@ -138,1284 +119,1040 @@ export namespace JSXInternal {
 			| 'hanging'
 			| 'mathematical'
 			| 'inherit'
-			| undefined
-			| SignalLike<
-					| 'auto'
-					| 'baseline'
-					| 'before-edge'
-					| 'text-before-edge'
-					| 'middle'
-					| 'central'
-					| 'after-edge'
-					| 'text-after-edge'
-					| 'ideographic'
-					| 'alphabetic'
-					| 'hanging'
-					| 'mathematical'
-					| 'inherit'
-					| undefined
-			  >;
-		allowReorder?:
+			| undefined>;
+		allowReorder?: Signalish<
 			| 'no'
 			| 'yes'
-			| undefined
-			| SignalLike<'no' | 'yes' | undefined>;
-		'allow-reorder'?:
+			| undefined>;
+		'allow-reorder'?: Signalish<
 			| 'no'
 			| 'yes'
-			| undefined
-			| SignalLike<'no' | 'yes' | undefined>;
-		alphabetic?:
+			| undefined>;
+		alphabetic?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		amplitude?:
+			| undefined>;
+		amplitude?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
+			| undefined>;
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/arabic-form */
-		arabicForm?:
+		arabicForm?: Signalish<
 			| 'initial'
 			| 'medial'
 			| 'terminal'
 			| 'isolated'
-			| undefined
-			| SignalLike<'initial' | 'medial' | 'terminal' | 'isolated' | undefined>;
+			| undefined>;
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/arabic-form */
-		'arabic-form'?:
+		'arabic-form'?: Signalish<
 			| 'initial'
 			| 'medial'
 			| 'terminal'
 			| 'isolated'
-			| undefined
-			| SignalLike<'initial' | 'medial' | 'terminal' | 'isolated' | undefined>;
-		ascent?:
+			| undefined>;
+		ascent?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		attributeName?: string | undefined | SignalLike<string | undefined>;
-		attributeType?: string | undefined | SignalLike<string | undefined>;
-		azimuth?:
+			| undefined>;
+		attributeName?: Signalish<string | undefined>;
+		attributeType?: Signalish<string | undefined>;
+		azimuth?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		baseFrequency?:
+			| undefined>;
+		baseFrequency?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		baselineShift?:
+			| undefined>;
+		baselineShift?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		'baseline-shift'?:
+			| undefined>;
+		'baseline-shift'?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		baseProfile?:
+			| undefined>;
+		baseProfile?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		bbox?:
+			| undefined>;
+		bbox?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		begin?:
+			| undefined>;
+		begin?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		bias?:
+			| undefined>;
+		bias?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		by?: number | string | undefined | SignalLike<number | string | undefined>;
-		calcMode?:
+			| undefined>;
+		by?: Signalish<number | string | undefined>;
+		calcMode?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		capHeight?:
+			| undefined>;
+		capHeight?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		'cap-height'?:
+			| undefined>;
+		'cap-height'?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		clip?:
+			| undefined>;
+		clip?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		clipPath?: string | undefined | SignalLike<string | undefined>;
-		'clip-path'?: string | undefined | SignalLike<string | undefined>;
-		clipPathUnits?:
+			| undefined>;
+		clipPath?: Signalish<string | undefined>;
+		'clip-path'?: Signalish<string | undefined>;
+		clipPathUnits?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		clipRule?:
+			| undefined>;
+		clipRule?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		'clip-rule'?:
+			| undefined>;
+		'clip-rule'?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		colorInterpolation?:
+			| undefined>;
+		colorInterpolation?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		'color-interpolation'?:
+			| undefined>;
+		'color-interpolation'?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		colorInterpolationFilters?:
+			| undefined>;
+		colorInterpolationFilters?: Signalish<
 			| 'auto'
 			| 'sRGB'
 			| 'linearRGB'
 			| 'inherit'
-			| undefined
-			| SignalLike<'auto' | 'sRGB' | 'linearRGB' | 'inherit' | undefined>;
-		'color-interpolation-filters'?:
+			| undefined>;
+		'color-interpolation-filters'?: Signalish<
 			| 'auto'
 			| 'sRGB'
 			| 'linearRGB'
 			| 'inherit'
-			| undefined
-			| SignalLike<'auto' | 'sRGB' | 'linearRGB' | 'inherit' | undefined>;
-		colorProfile?:
+			| undefined>;
+		colorProfile?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		'color-profile'?:
+			| undefined>;
+		'color-profile'?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		colorRendering?:
+			| undefined>;
+		colorRendering?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		'color-rendering'?:
+			| undefined>;
+		'color-rendering'?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		contentScriptType?:
+			| undefined>;
+		contentScriptType?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		'content-script-type'?:
+			| undefined>;
+		'content-script-type'?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		contentStyleType?:
+			| undefined>;
+		contentStyleType?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		'content-style-type'?:
+			| undefined>;
+		'content-style-type'?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		cursor?:
+			| undefined>;
+		cursor?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		cx?: number | string | undefined | SignalLike<number | string | undefined>;
-		cy?: number | string | undefined | SignalLike<number | string | undefined>;
-		d?: string | undefined | SignalLike<string | undefined>;
-		decelerate?:
+			| undefined>;
+		cx?: Signalish<number | string | undefined>;
+		cy?: Signalish<number | string | undefined>;
+		d?: Signalish<string | undefined>;
+		decelerate?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		descent?:
+			| undefined>;
+		descent?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		diffuseConstant?:
+			| undefined>;
+		diffuseConstant?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		direction?:
+			| undefined>;
+		direction?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		display?:
+			| undefined>;
+		display?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		divisor?:
+			| undefined>;
+		divisor?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		dominantBaseline?:
+			| undefined>;
+		dominantBaseline?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		'dominant-baseline'?:
+			| undefined>;
+		'dominant-baseline'?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		dur?: number | string | undefined | SignalLike<number | string | undefined>;
-		dx?: number | string | undefined | SignalLike<number | string | undefined>;
-		dy?: number | string | undefined | SignalLike<number | string | undefined>;
-		edgeMode?:
+			| undefined>;
+		dur?: Signalish<number | string | undefined>;
+		dx?: Signalish<number | string | undefined>;
+		dy?: Signalish<number | string | undefined>;
+		edgeMode?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		elevation?:
+			| undefined>;
+		elevation?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		enableBackground?:
+			| undefined>;
+		enableBackground?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		'enable-background'?:
+			| undefined>;
+		'enable-background'?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		end?: number | string | undefined | SignalLike<number | string | undefined>;
-		exponent?:
+			| undefined>;
+		end?: Signalish<number | string | undefined>;
+		exponent?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		externalResourcesRequired?:
+			| undefined>;
+		externalResourcesRequired?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		fill?: string | undefined | SignalLike<string | undefined>;
-		fillOpacity?:
+			| undefined>;
+		fill?: Signalish<string | undefined>;
+		fillOpacity?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		'fill-opacity'?:
+			| undefined>;
+		'fill-opacity'?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		fillRule?:
+			| undefined>;
+		fillRule?: Signalish<
 			| 'nonzero'
 			| 'evenodd'
 			| 'inherit'
-			| undefined
-			| SignalLike<'nonzero' | 'evenodd' | 'inherit' | undefined>;
-		'fill-rule'?:
+			| undefined>;
+		'fill-rule'?: Signalish<
 			| 'nonzero'
 			| 'evenodd'
 			| 'inherit'
-			| undefined
-			| SignalLike<'nonzero' | 'evenodd' | 'inherit' | undefined>;
-		filter?: string | undefined | SignalLike<string | undefined>;
-		filterRes?:
+			| undefined>;
+		filter?: Signalish<string | undefined>;
+		filterRes?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		filterUnits?:
+			| undefined>;
+		filterUnits?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		floodColor?:
+			| undefined>;
+		floodColor?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		'flood-color'?:
+			| undefined>;
+		'flood-color'?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		floodOpacity?:
+			| undefined>;
+		floodOpacity?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		'flood-opacity'?:
+			| undefined>;
+		'flood-opacity'?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		focusable?:
+			| undefined>;
+		focusable?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		fontFamily?: string | undefined | SignalLike<string | undefined>;
-		'font-family'?: string | undefined | SignalLike<string | undefined>;
-		fontSize?:
+			| undefined>;
+		fontFamily?: Signalish<string | undefined>;
+		'font-family'?: Signalish<string | undefined>;
+		fontSize?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		'font-size'?:
+			| undefined>;
+		'font-size'?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		fontSizeAdjust?:
+			| undefined>;
+		fontSizeAdjust?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		'font-size-adjust'?:
+			| undefined>;
+		'font-size-adjust'?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		fontStretch?:
+			| undefined>;
+		fontStretch?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		'font-stretch'?:
+			| undefined>;
+		'font-stretch'?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		fontStyle?:
+			| undefined>;
+		fontStyle?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		'font-style'?:
+			| undefined>;
+		'font-style'?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		fontVariant?:
+			| undefined>;
+		fontVariant?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		'font-variant'?:
+			| undefined>;
+		'font-variant'?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		fontWeight?:
+			| undefined>;
+		fontWeight?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		'font-weight'?:
+			| undefined>;
+		'font-weight'?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		format?:
+			| undefined>;
+		format?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		from?:
+			| undefined>;
+		from?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		fx?: number | string | undefined | SignalLike<number | string | undefined>;
-		fy?: number | string | undefined | SignalLike<number | string | undefined>;
-		g1?: number | string | undefined | SignalLike<number | string | undefined>;
-		g2?: number | string | undefined | SignalLike<number | string | undefined>;
-		glyphName?:
+			| undefined>;
+		fx?: Signalish<number | string | undefined>;
+		fy?: Signalish<number | string | undefined>;
+		g1?: Signalish<number | string | undefined>;
+		g2?: Signalish<number | string | undefined>;
+		glyphName?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		'glyph-name'?:
+			| undefined>;
+		'glyph-name'?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		glyphOrientationHorizontal?:
+			| undefined>;
+		glyphOrientationHorizontal?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		'glyph-orientation-horizontal'?:
+			| undefined>;
+		'glyph-orientation-horizontal'?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		glyphOrientationVertical?:
+			| undefined>;
+		glyphOrientationVertical?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		'glyph-orientation-vertical'?:
+			| undefined>;
+		'glyph-orientation-vertical'?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		glyphRef?:
+			| undefined>;
+		glyphRef?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		gradientTransform?: string | undefined | SignalLike<string | undefined>;
-		gradientUnits?: string | undefined | SignalLike<string | undefined>;
-		hanging?:
+			| undefined>;
+		gradientTransform?: Signalish<string | undefined>;
+		gradientUnits?: Signalish<string | undefined>;
+		hanging?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		horizAdvX?:
+			| undefined>;
+		horizAdvX?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		'horiz-adv-x'?:
+			| undefined>;
+		'horiz-adv-x'?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		horizOriginX?:
+			| undefined>;
+		horizOriginX?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		'horiz-origin-x'?:
+			| undefined>;
+		'horiz-origin-x'?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		ideographic?:
+			| undefined>;
+		ideographic?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		imageRendering?:
+			| undefined>;
+		imageRendering?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		'image-rendering'?:
+			| undefined>;
+		'image-rendering'?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		in2?: number | string | undefined | SignalLike<number | string | undefined>;
-		in?: string | undefined | SignalLike<string | undefined>;
-		intercept?:
+			| undefined>;
+		in2?: Signalish<number | string | undefined>;
+		in?: Signalish<string | undefined>;
+		intercept?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		k1?: number | string | undefined | SignalLike<number | string | undefined>;
-		k2?: number | string | undefined | SignalLike<number | string | undefined>;
-		k3?: number | string | undefined | SignalLike<number | string | undefined>;
-		k4?: number | string | undefined | SignalLike<number | string | undefined>;
-		k?: number | string | undefined | SignalLike<number | string | undefined>;
-		kernelMatrix?:
+			| undefined>;
+		k1?: Signalish<number | string | undefined>;
+		k2?: Signalish<number | string | undefined>;
+		k3?: Signalish<number | string | undefined>;
+		k4?: Signalish<number | string | undefined>;
+		k?: Signalish<number | string | undefined>;
+		kernelMatrix?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		kernelUnitLength?:
+			| undefined>;
+		kernelUnitLength?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		kerning?:
+			| undefined>;
+		kerning?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		keyPoints?:
+			| undefined>;
+		keyPoints?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		keySplines?:
+			| undefined>;
+		keySplines?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		keyTimes?:
+			| undefined>;
+		keyTimes?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		lengthAdjust?:
+			| undefined>;
+		lengthAdjust?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		letterSpacing?:
+			| undefined>;
+		letterSpacing?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		'letter-spacing'?:
+			| undefined>;
+		'letter-spacing'?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		lightingColor?:
+			| undefined>;
+		lightingColor?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		'lighting-color'?:
+			| undefined>;
+		'lighting-color'?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		limitingConeAngle?:
+			| undefined>;
+		limitingConeAngle?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		local?:
+			| undefined>;
+		local?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		markerEnd?: string | undefined | SignalLike<string | undefined>;
-		'marker-end'?: string | undefined | SignalLike<string | undefined>;
-		markerHeight?:
+			| undefined>;
+		markerEnd?: Signalish<string | undefined>;
+		'marker-end'?: Signalish<string | undefined>;
+		markerHeight?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		markerMid?: string | undefined | SignalLike<string | undefined>;
-		'marker-mid'?: string | undefined | SignalLike<string | undefined>;
-		markerStart?: string | undefined | SignalLike<string | undefined>;
-		'marker-start'?: string | undefined | SignalLike<string | undefined>;
-		markerUnits?:
+			| undefined>;
+		markerMid?: Signalish<string | undefined>;
+		'marker-mid'?: Signalish<string | undefined>;
+		markerStart?: Signalish<string | undefined>;
+		'marker-start'?: Signalish<string | undefined>;
+		markerUnits?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		markerWidth?:
+			| undefined>;
+		markerWidth?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		mask?: string | undefined | SignalLike<string | undefined>;
-		maskContentUnits?:
+			| undefined>;
+		mask?: Signalish<string | undefined>;
+		maskContentUnits?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		maskUnits?:
+			| undefined>;
+		maskUnits?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		mathematical?:
+			| undefined>;
+		mathematical?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		mode?:
+			| undefined>;
+		mode?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		numOctaves?:
+			| undefined>;
+		numOctaves?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		offset?:
+			| undefined>;
+		offset?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		opacity?:
+			| undefined>;
+		opacity?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		operator?:
+			| undefined>;
+		operator?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		order?:
+			| undefined>;
+		order?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		orient?:
+			| undefined>;
+		orient?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		orientation?:
+			| undefined>;
+		orientation?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		origin?:
+			| undefined>;
+		origin?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		overflow?:
+			| undefined>;
+		overflow?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		overlinePosition?:
+			| undefined>;
+		overlinePosition?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		'overline-position'?:
+			| undefined>;
+		'overline-position'?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		overlineThickness?:
+			| undefined>;
+		overlineThickness?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		'overline-thickness'?:
+			| undefined>;
+		'overline-thickness'?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		paintOrder?:
+			| undefined>;
+		paintOrder?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		'paint-order'?:
+			| undefined>;
+		'paint-order'?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		panose1?:
+			| undefined>;
+		panose1?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		'panose-1'?:
+			| undefined>;
+		'panose-1'?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		pathLength?:
+			| undefined>;
+		pathLength?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		patternContentUnits?: string | undefined | SignalLike<string | undefined>;
-		patternTransform?:
+			| undefined>;
+		patternContentUnits?: Signalish<string | undefined>;
+		patternTransform?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		patternUnits?: string | undefined | SignalLike<string | undefined>;
-		pointerEvents?:
+			| undefined>;
+		patternUnits?: Signalish<string | undefined>;
+		pointerEvents?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		'pointer-events'?:
+			| undefined>;
+		'pointer-events'?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		points?: string | undefined | SignalLike<string | undefined>;
-		pointsAtX?:
+			| undefined>;
+		points?: Signalish<string | undefined>;
+		pointsAtX?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		pointsAtY?:
+			| undefined>;
+		pointsAtY?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		pointsAtZ?:
+			| undefined>;
+		pointsAtZ?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		preserveAlpha?:
+			| undefined>;
+		preserveAlpha?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		preserveAspectRatio?: string | undefined | SignalLike<string | undefined>;
-		primitiveUnits?:
+			| undefined>;
+		preserveAspectRatio?: Signalish<string | undefined>;
+		primitiveUnits?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		r?: number | string | undefined | SignalLike<number | string | undefined>;
-		radius?:
+			| undefined>;
+		r?: Signalish<number | string | undefined>;
+		radius?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		refX?:
+			| undefined>;
+		refX?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		refY?:
+			| undefined>;
+		refY?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		renderingIntent?:
+			| undefined>;
+		renderingIntent?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		'rendering-intent'?:
+			| undefined>;
+		'rendering-intent'?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		repeatCount?:
+			| undefined>;
+		repeatCount?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		'repeat-count'?:
+			| undefined>;
+		'repeat-count'?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		repeatDur?:
+			| undefined>;
+		repeatDur?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		'repeat-dur'?:
+			| undefined>;
+		'repeat-dur'?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		requiredExtensions?:
+			| undefined>;
+		requiredExtensions?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		requiredFeatures?:
+			| undefined>;
+		requiredFeatures?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		restart?:
+			| undefined>;
+		restart?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		result?: string | undefined | SignalLike<string | undefined>;
-		rotate?:
+			| undefined>;
+		result?: Signalish<string | undefined>;
+		rotate?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		rx?: number | string | undefined | SignalLike<number | string | undefined>;
-		ry?: number | string | undefined | SignalLike<number | string | undefined>;
-		scale?:
+			| undefined>;
+		rx?: Signalish<number | string | undefined>;
+		ry?: Signalish<number | string | undefined>;
+		scale?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		seed?:
+			| undefined>;
+		seed?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		shapeRendering?:
+			| undefined>;
+		shapeRendering?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		'shape-rendering'?:
+			| undefined>;
+		'shape-rendering'?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		slope?:
+			| undefined>;
+		slope?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		spacing?:
+			| undefined>;
+		spacing?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		specularConstant?:
+			| undefined>;
+		specularConstant?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		specularExponent?:
+			| undefined>;
+		specularExponent?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		speed?:
+			| undefined>;
+		speed?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		spreadMethod?: string | undefined | SignalLike<string | undefined>;
-		startOffset?:
+			| undefined>;
+		spreadMethod?: Signalish<string | undefined>;
+		startOffset?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		stdDeviation?:
+			| undefined>;
+		stdDeviation?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		stemh?:
+			| undefined>;
+		stemh?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		stemv?:
+			| undefined>;
+		stemv?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		stitchTiles?:
+			| undefined>;
+		stitchTiles?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		stopColor?: string | undefined | SignalLike<string | undefined>;
-		'stop-color'?: string | undefined | SignalLike<string | undefined>;
-		stopOpacity?:
+			| undefined>;
+		stopColor?: Signalish<string | undefined>;
+		'stop-color'?: Signalish<string | undefined>;
+		stopOpacity?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		'stop-opacity'?:
+			| undefined>;
+		'stop-opacity'?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		strikethroughPosition?:
+			| undefined>;
+		strikethroughPosition?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		'strikethrough-position'?:
+			| undefined>;
+		'strikethrough-position'?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		strikethroughThickness?:
+			| undefined>;
+		strikethroughThickness?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		'strikethrough-thickness'?:
+			| undefined>;
+		'strikethrough-thickness'?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		string?:
+			| undefined>;
+		string?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		stroke?: string | undefined | SignalLike<string | undefined>;
-		strokeDasharray?:
+			| undefined>;
+		stroke?: Signalish<string | undefined>;
+		strokeDasharray?: Signalish<
 			| string
 			| number
-			| undefined
-			| SignalLike<number | string | undefined>;
-		'stroke-dasharray'?:
+			| undefined>;
+		'stroke-dasharray'?: Signalish<
 			| string
 			| number
-			| undefined
-			| SignalLike<number | string | undefined>;
-		strokeDashoffset?:
+			| undefined>;
+		strokeDashoffset?: Signalish<
 			| string
 			| number
-			| undefined
-			| SignalLike<number | string | undefined>;
-		'stroke-dashoffset'?:
+			| undefined>;
+		'stroke-dashoffset'?: Signalish<
 			| string
 			| number
-			| undefined
-			| SignalLike<number | string | undefined>;
-		strokeLinecap?:
+			| undefined>;
+		strokeLinecap?: Signalish<
 			| 'butt'
 			| 'round'
 			| 'square'
 			| 'inherit'
-			| undefined
-			| SignalLike<'butt' | 'round' | 'square' | 'inherit' | undefined>;
-		'stroke-linecap'?:
+			| undefined>;
+		'stroke-linecap'?: Signalish<
 			| 'butt'
 			| 'round'
 			| 'square'
 			| 'inherit'
-			| undefined
-			| SignalLike<'butt' | 'round' | 'square' | 'inherit' | undefined>;
-		strokeLinejoin?:
+			| undefined>;
+		strokeLinejoin?: Signalish<
 			| 'miter'
 			| 'round'
 			| 'bevel'
 			| 'inherit'
-			| undefined
-			| SignalLike<'miter' | 'round' | 'bevel' | 'inherit' | undefined>;
-		'stroke-linejoin'?:
+			| undefined>;
+		'stroke-linejoin'?: Signalish<
 			| 'miter'
 			| 'round'
 			| 'bevel'
 			| 'inherit'
-			| undefined
-			| SignalLike<'miter' | 'round' | 'bevel' | 'inherit' | undefined>;
-		strokeMiterlimit?:
+			| undefined>;
+		strokeMiterlimit?: Signalish<
 			| string
 			| number
-			| undefined
-			| SignalLike<number | string | undefined>;
-		'stroke-miterlimit'?:
+			| undefined>;
+		'stroke-miterlimit'?: Signalish<
 			| string
 			| number
-			| undefined
-			| SignalLike<number | string | undefined>;
-		strokeOpacity?:
+			| undefined>;
+		strokeOpacity?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		'stroke-opacity'?:
+			| undefined>;
+		'stroke-opacity'?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		strokeWidth?:
+			| undefined>;
+		strokeWidth?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		'stroke-width'?:
+			| undefined>;
+		'stroke-width'?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		surfaceScale?:
+			| undefined>;
+		surfaceScale?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		systemLanguage?:
+			| undefined>;
+		systemLanguage?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		tableValues?:
+			| undefined>;
+		tableValues?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		targetX?:
+			| undefined>;
+		targetX?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		targetY?:
+			| undefined>;
+		targetY?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		textAnchor?: string | undefined | SignalLike<string | undefined>;
-		'text-anchor'?: string | undefined | SignalLike<string | undefined>;
-		textDecoration?:
+			| undefined>;
+		textAnchor?: Signalish<string | undefined>;
+		'text-anchor'?: Signalish<string | undefined>;
+		textDecoration?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		'text-decoration'?:
+			| undefined>;
+		'text-decoration'?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		textLength?:
+			| undefined>;
+		textLength?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		textRendering?:
+			| undefined>;
+		textRendering?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		'text-rendering'?:
+			| undefined>;
+		'text-rendering'?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		to?: number | string | undefined | SignalLike<number | string | undefined>;
-		transform?: string | undefined | SignalLike<string | undefined>;
-		transformOrigin?: string | undefined | SignalLike<string | undefined>;
-		'transform-origin'?: string | undefined | SignalLike<string | undefined>;
-		u1?: number | string | undefined | SignalLike<number | string | undefined>;
-		u2?: number | string | undefined | SignalLike<number | string | undefined>;
-		underlinePosition?:
+			| undefined>;
+		to?: Signalish<number | string | undefined>;
+		transform?: Signalish<string | undefined>;
+		transformOrigin?: Signalish<string | undefined>;
+		'transform-origin'?: Signalish<string | undefined>;
+		u1?: Signalish<number | string | undefined>;
+		u2?: Signalish<number | string | undefined>;
+		underlinePosition?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		'underline-position'?:
+			| undefined>;
+		'underline-position'?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		underlineThickness?:
+			| undefined>;
+		underlineThickness?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		'underline-thickness'?:
+			| undefined>;
+		'underline-thickness'?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		unicode?:
+			| undefined>;
+		unicode?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		unicodeBidi?:
+			| undefined>;
+		unicodeBidi?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		'unicode-bidi'?:
+			| undefined>;
+		'unicode-bidi'?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		unicodeRange?:
+			| undefined>;
+		unicodeRange?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		'unicode-range'?:
+			| undefined>;
+		'unicode-range'?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		unitsPerEm?:
+			| undefined>;
+		unitsPerEm?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		'units-per-em'?:
+			| undefined>;
+		'units-per-em'?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		vAlphabetic?:
+			| undefined>;
+		vAlphabetic?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		'v-alphabetic'?:
+			| undefined>;
+		'v-alphabetic'?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		values?: string | undefined | SignalLike<string | undefined>;
-		vectorEffect?:
+			| undefined>;
+		values?: Signalish<string | undefined>;
+		vectorEffect?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		'vector-effect'?:
+			| undefined>;
+		'vector-effect'?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		version?: string | undefined | SignalLike<string | undefined>;
-		vertAdvY?:
+			| undefined>;
+		version?: Signalish<string | undefined>;
+		vertAdvY?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		'vert-adv-y'?:
+			| undefined>;
+		'vert-adv-y'?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		vertOriginX?:
+			| undefined>;
+		vertOriginX?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		'vert-origin-x'?:
+			| undefined>;
+		'vert-origin-x'?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		vertOriginY?:
+			| undefined>;
+		vertOriginY?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		'vert-origin-y'?:
+			| undefined>;
+		'vert-origin-y'?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		vHanging?:
+			| undefined>;
+		vHanging?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		'v-hanging'?:
+			| undefined>;
+		'v-hanging'?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		vIdeographic?:
+			| undefined>;
+		vIdeographic?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		'v-ideographic'?:
+			| undefined>;
+		'v-ideographic'?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		viewBox?: string | undefined | SignalLike<string | undefined>;
-		viewTarget?:
+			| undefined>;
+		viewBox?: Signalish<string | undefined>;
+		viewTarget?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		visibility?:
+			| undefined>;
+		visibility?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		vMathematical?:
+			| undefined>;
+		vMathematical?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		'v-mathematical'?:
+			| undefined>;
+		'v-mathematical'?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		widths?:
+			| undefined>;
+		widths?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		wordSpacing?:
+			| undefined>;
+		wordSpacing?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		'word-spacing'?:
+			| undefined>;
+		'word-spacing'?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		writingMode?:
+			| undefined>;
+		writingMode?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		'writing-mode'?:
+			| undefined>;
+		'writing-mode'?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		x1?: number | string | undefined | SignalLike<number | string | undefined>;
-		x2?: number | string | undefined | SignalLike<number | string | undefined>;
-		x?: number | string | undefined | SignalLike<number | string | undefined>;
-		xChannelSelector?: string | undefined | SignalLike<string | undefined>;
-		xHeight?:
+			| undefined>;
+		x1?: Signalish<number | string | undefined>;
+		x2?: Signalish<number | string | undefined>;
+		x?: Signalish<number | string | undefined>;
+		xChannelSelector?: Signalish<string | undefined>;
+		xHeight?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		'x-height'?:
+			| undefined>;
+		'x-height'?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		xlinkActuate?: string | undefined | SignalLike<string | undefined>;
-		'xlink:actuate'?: SVGAttributes['xlinkActuate'];
-		xlinkArcrole?: string | undefined | SignalLike<string | undefined>;
-		'xlink:arcrole'?: string | undefined | SignalLike<string | undefined>;
-		xlinkHref?: string | undefined | SignalLike<string | undefined>;
-		'xlink:href'?: string | undefined | SignalLike<string | undefined>;
-		xlinkRole?: string | undefined | SignalLike<string | undefined>;
-		'xlink:role'?: string | undefined | SignalLike<string | undefined>;
-		xlinkShow?: string | undefined | SignalLike<string | undefined>;
-		'xlink:show'?: string | undefined | SignalLike<string | undefined>;
-		xlinkTitle?: string | undefined | SignalLike<string | undefined>;
-		'xlink:title'?: string | undefined | SignalLike<string | undefined>;
-		xlinkType?: string | undefined | SignalLike<string | undefined>;
-		'xlink:type'?: string | undefined | SignalLike<string | undefined>;
-		xmlBase?: string | undefined | SignalLike<string | undefined>;
-		'xml:base'?: string | undefined | SignalLike<string | undefined>;
-		xmlLang?: string | undefined | SignalLike<string | undefined>;
-		'xml:lang'?: string | undefined | SignalLike<string | undefined>;
-		xmlns?: string | undefined | SignalLike<string | undefined>;
-		xmlnsXlink?: string | undefined | SignalLike<string | undefined>;
-		xmlSpace?: string | undefined | SignalLike<string | undefined>;
-		'xml:space'?: string | undefined | SignalLike<string | undefined>;
-		y1?: number | string | undefined | SignalLike<number | string | undefined>;
-		y2?: number | string | undefined | SignalLike<number | string | undefined>;
-		y?: number | string | undefined | SignalLike<number | string | undefined>;
-		yChannelSelector?: string | undefined | SignalLike<string | undefined>;
-		z?: number | string | undefined | SignalLike<number | string | undefined>;
-		zoomAndPan?: string | undefined | SignalLike<string | undefined>;
+			| undefined>;
+		xlinkActuate?: Signalish<string | undefined>;
+		'xlink:actuate'?: Signalish<SVGAttributes['xlinkActuate']>;
+		xlinkArcrole?: Signalish<string | undefined>;
+		'xlink:arcrole'?: Signalish<string | undefined>;
+		xlinkHref?: Signalish<string | undefined>;
+		'xlink:href'?: Signalish<string | undefined>;
+		xlinkRole?: Signalish<string | undefined>;
+		'xlink:role'?: Signalish<string | undefined>;
+		xlinkShow?: Signalish<string | undefined>;
+		'xlink:show'?: Signalish<string | undefined>;
+		xlinkTitle?: Signalish<string | undefined>;
+		'xlink:title'?: Signalish<string | undefined>;
+		xlinkType?: Signalish<string | undefined>;
+		'xlink:type'?: Signalish<string | undefined>;
+		xmlBase?: Signalish<string | undefined>;
+		'xml:base'?: Signalish<string | undefined>;
+		xmlLang?: Signalish<string | undefined>;
+		'xml:lang'?: Signalish<string | undefined>;
+		xmlns?: Signalish<string | undefined>;
+		xmlnsXlink?: Signalish<string | undefined>;
+		xmlSpace?: Signalish<string | undefined>;
+		'xml:space'?: Signalish<string | undefined>;
+		y1?: Signalish<number | string | undefined>;
+		y2?: Signalish<number | string | undefined>;
+		y?: Signalish<number | string | undefined>;
+		yChannelSelector?: Signalish<string | undefined>;
+		z?: Signalish<number | string | undefined>;
+		zoomAndPan?: Signalish<string | undefined>;
+		z?: Signalish<number | string | undefined>;
+		zoomAndPan?: Signalish<string | undefined>;
 	}
 
 	export interface PathAttributes {
