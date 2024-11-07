@@ -2589,8 +2589,45 @@ export namespace JSXInternal {
 		view: SVGAttributes<SVGViewElement>;
 	}
 
-	export interface IntrinsicElements extends IntrinsicSVGElements {
-		// HTML
+	export interface IntrinsicMathMLElements {
+		'annotation-xml': MathMLAttributes<HTMLAnnotationXmlElement>;
+		annotation: MathMLAttributes<HTMLAnnotationElement>;
+		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/maction */
+		maction: MathMLAttributes<HTMLMActionElement>;
+		math: MathMLAttributes<HTMLMathElement>;
+		/** This feature is non-standard. See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/menclose  */
+		menclose: MathMLAttributes<HTMLMEncloseElement>;
+		merror: MathMLAttributes<HTMLMErrorElement>;
+		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mfenced */
+		mfenced: HTMLAttributes<HTMLMFencedElement>;
+		mfrac: MathMLAttributes<HTMLMFracElement>;
+		mi: MathMLAttributes<HTMLMiElement>;
+		mmultiscripts: MathMLAttributes<HTMLMmultiScriptsElement>;
+		mn: MathMLAttributes<HTMLMNElement>;
+		mo: MathMLAttributes<HTMLMOElement>;
+		mover: MathMLAttributes<HTMLMOverElement>;
+		mpadded: MathMLAttributes<HTMLMPaddedElement>;
+		mphantom: MathMLAttributes<HTMLMPhantomElement>;
+		mprescripts: MathMLAttributes<HTMLMPrescriptsElement>;
+		mroot: MathMLAttributes<HTMLMRootElement>;
+		mrow: MathMLAttributes<HTMLMRowElement>;
+		ms: MathMLAttributes<HTMLMSElement>;
+		mspace: MathMLAttributes<HTMLMSpaceElement>;
+		msqrt: MathMLAttributes<HTMLMSqrtElement>;
+		mstyle: MathMLAttributes<HTMLMStyleElement>;
+		msub: MathMLAttributes<HTMLMSubElement>;
+		msubsup: MathMLAttributes<HTMLMSubsupElement>;
+		msup: MathMLAttributes<HTMLMSupElement>;
+		mtable: MathMLAttributes<HTMLMTableElement>;
+		mtd: MathMLAttributes<HTMLMTdElement>;
+		mtext: MathMLAttributes<HTMLMTextElement>;
+		mtr: MathMLAttributes<HTMLMTrElement>;
+		munder: MathMLAttributes<HTMLMUnderElement>;
+		munderover: MathMLAttributes<HTMLMUnderoverElement>;
+		semantics: MathMLAttributes<HTMLSemanticsElement>;
+	}
+
+	export interface IntrinsicElements extends IntrinsicSVGElements, IntrinsicMathMLElements {
 		a: HTMLAttributes<HTMLAnchorElement>;
 		abbr: HTMLAttributes<HTMLElement>;
 		address: HTMLAttributes<HTMLElement>;
@@ -2708,42 +2745,5 @@ export namespace JSXInternal {
 		var: HTMLAttributes<HTMLElement>;
 		video: HTMLAttributes<HTMLVideoElement>;
 		wbr: HTMLAttributes<HTMLElement>;
-
-		// MathML See https://developer.mozilla.org/en-US/docs/Web/MathML
-		'annotation-xml': MathMLAttributes<HTMLAnnotationXmlElement>;
-		annotation: MathMLAttributes<HTMLAnnotationElement>;
-		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/maction */
-		maction: MathMLAttributes<HTMLMActionElement>;
-		math: MathMLAttributes<HTMLMathElement>;
-		/** This feature is non-standard. See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/menclose  */
-		menclose: MathMLAttributes<HTMLMEncloseElement>;
-		merror: MathMLAttributes<HTMLMErrorElement>;
-		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mfenced */
-		mfenced: HTMLAttributes<HTMLMFencedElement>;
-		mfrac: MathMLAttributes<HTMLMFracElement>;
-		mi: MathMLAttributes<HTMLMiElement>;
-		mmultiscripts: MathMLAttributes<HTMLMmultiScriptsElement>;
-		mn: MathMLAttributes<HTMLMNElement>;
-		mo: MathMLAttributes<HTMLMOElement>;
-		mover: MathMLAttributes<HTMLMOverElement>;
-		mpadded: MathMLAttributes<HTMLMPaddedElement>;
-		mphantom: MathMLAttributes<HTMLMPhantomElement>;
-		mprescripts: MathMLAttributes<HTMLMPrescriptsElement>;
-		mroot: MathMLAttributes<HTMLMRootElement>;
-		mrow: MathMLAttributes<HTMLMRowElement>;
-		ms: MathMLAttributes<HTMLMSElement>;
-		mspace: MathMLAttributes<HTMLMSpaceElement>;
-		msqrt: MathMLAttributes<HTMLMSqrtElement>;
-		mstyle: MathMLAttributes<HTMLMStyleElement>;
-		msub: MathMLAttributes<HTMLMSubElement>;
-		msubsup: MathMLAttributes<HTMLMSubsupElement>;
-		msup: MathMLAttributes<HTMLMSupElement>;
-		mtable: MathMLAttributes<HTMLMTableElement>;
-		mtd: MathMLAttributes<HTMLMTdElement>;
-		mtext: MathMLAttributes<HTMLMTextElement>;
-		mtr: MathMLAttributes<HTMLMTrElement>;
-		munder: MathMLAttributes<HTMLMUnderElement>;
-		munderover: MathMLAttributes<HTMLMUnderoverElement>;
-		semantics: MathMLAttributes<HTMLSemanticsElement>;
 	}
 }
