@@ -1886,86 +1886,82 @@ export namespace JSXInternal {
 			DOMAttributes<RefType>,
 			AriaAttributes {
 		// Standard HTML Attributes
-		accept?: string | undefined | SignalLike<string | undefined>;
-		acceptCharset?: string | undefined | SignalLike<string | undefined>;
-		'accept-charset'?: HTMLAttributes['acceptCharset'];
-		accessKey?: string | undefined | SignalLike<string | undefined>;
-		accesskey?: HTMLAttributes['accessKey'];
-		action?: string | undefined | SignalLike<string | undefined>;
-		allow?: string | undefined | SignalLike<string | undefined>;
-		allowFullScreen?: boolean | undefined | SignalLike<boolean | undefined>;
-		allowTransparency?: boolean | undefined | SignalLike<boolean | undefined>;
-		alt?: string | undefined | SignalLike<string | undefined>;
-		as?: string | undefined | SignalLike<string | undefined>;
-		async?: boolean | undefined | SignalLike<boolean | undefined>;
-		autocomplete?: string | undefined | SignalLike<string | undefined>;
-		autoComplete?: string | undefined | SignalLike<string | undefined>;
-		autocorrect?: string | undefined | SignalLike<string | undefined>;
-		autoCorrect?: string | undefined | SignalLike<string | undefined>;
-		autofocus?: boolean | undefined | SignalLike<boolean | undefined>;
-		autoFocus?: boolean | undefined | SignalLike<boolean | undefined>;
-		autoPlay?: boolean | undefined | SignalLike<boolean | undefined>;
-		autoplay?: boolean | undefined | SignalLike<boolean | undefined>;
-		capture?: boolean | string | undefined | SignalLike<string | undefined>;
-		cellPadding?: number | string | undefined | SignalLike<string | undefined>;
-		cellSpacing?: number | string | undefined | SignalLike<string | undefined>;
-		charSet?: string | undefined | SignalLike<string | undefined>;
-		charset?: string | undefined | SignalLike<string | undefined>;
-		challenge?: string | undefined | SignalLike<string | undefined>;
-		checked?: boolean | undefined | SignalLike<boolean | undefined>;
-		cite?: string | undefined | SignalLike<string | undefined>;
-		class?: string | undefined | SignalLike<string | undefined>;
-		className?: string | undefined | SignalLike<string | undefined>;
-		cols?: number | undefined | SignalLike<number | undefined>;
-		colSpan?: number | undefined | SignalLike<number | undefined>;
-		colspan?: number | undefined | SignalLike<number | undefined>;
-		content?: string | undefined | SignalLike<string | undefined>;
-		contentEditable?:
+		accept?: Signalish<string | undefined>;
+		acceptCharset?: Signalish<string | undefined>;
+		'accept-charset'?: Signalish<HTMLAttributes['acceptCharset']>;
+		accessKey?: Signalish<string | undefined>;
+		accesskey?: Signalish<HTMLAttributes['accessKey']>;
+		action?: Signalish<string | undefined>;
+		allow?: Signalish<string | undefined>;
+		allowFullScreen?: Signalish<boolean | undefined>;
+		allowTransparency?: Signalish<boolean | undefined>;
+		alt?: Signalish<string | undefined>;
+		as?: Signalish<string | undefined>;
+		async?: Signalish<boolean | undefined>;
+		autocomplete?: Signalish<string | undefined>;
+		autoComplete?: Signalish<string | undefined>;
+		autocorrect?: Signalish<string | undefined>;
+		autoCorrect?: Signalish<string | undefined>;
+		autofocus?: Signalish<boolean | undefined>;
+		autoFocus?: Signalish<boolean | undefined>;
+		autoPlay?: Signalish<boolean | undefined>;
+		autoplay?: Signalish<boolean | undefined>;
+		capture?: Signalish<boolean | string | undefined>;
+		cellPadding?: Signalish<number | string | undefined>;
+		cellSpacing?: Signalish<number | string | undefined>;
+		charSet?: Signalish<string | undefined>;
+		charset?: Signalish<string | undefined>;
+		challenge?: Signalish<string | undefined>;
+		checked?: Signalish<boolean | undefined>;
+		cite?: Signalish<string | undefined>;
+		class?: Signalish<string | undefined>;
+		className?: Signalish<string | undefined>;
+		cols?: Signalish<number | undefined>;
+		colSpan?: Signalish<number | undefined>;
+		colspan?: Signalish<number | undefined>;
+		content?: Signalish<string | undefined>;
+		contentEditable?: Signalish<
 			| Booleanish
 			| ''
 			| 'plaintext-only'
 			| 'inherit'
-			| undefined
-			| SignalLike<Booleanish | '' | 'inherit' | 'plaintext-only' | undefined>;
-		contenteditable?: HTMLAttributes['contentEditable'];
+			| undefined>;
+		contenteditable?: Signalish<HTMLAttributes['contentEditable']>;
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/contextmenu */
-		contextMenu?: string | undefined | SignalLike<string | undefined>;
+		contextMenu?: Signalish<string | undefined>;
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/contextmenu */
-		contextmenu?: string | undefined | SignalLike<string | undefined>;
-		controls?: boolean | undefined | SignalLike<boolean | undefined>;
-		controlsList?: string | undefined | SignalLike<string | undefined>;
-		coords?: string | undefined | SignalLike<string | undefined>;
-		crossOrigin?: string | undefined | SignalLike<string | undefined>;
-		crossorigin?: string | undefined | SignalLike<string | undefined>;
-		data?: string | undefined | SignalLike<string | undefined>;
-		dateTime?: string | undefined | SignalLike<string | undefined>;
-		datetime?: string | undefined | SignalLike<string | undefined>;
-		default?: boolean | undefined | SignalLike<boolean | undefined>;
-		defaultChecked?: boolean | undefined | SignalLike<boolean | undefined>;
-		defaultValue?: string | undefined | SignalLike<string | undefined>;
-		defer?: boolean | undefined | SignalLike<boolean | undefined>;
-		dir?:
+		contextmenu?: Signalish<string | undefined>;
+		controls?: Signalish<boolean | undefined>;
+		controlsList?: Signalish<string | undefined>;
+		coords?: Signalish<string | undefined>;
+		crossOrigin?: Signalish<string | undefined>;
+		crossorigin?: Signalish<string | undefined>;
+		data?: Signalish<string | undefined>;
+		dateTime?: Signalish<string | undefined>;
+		datetime?: Signalish<string | undefined>;
+		default?: Signalish<boolean | undefined>;
+		defaultChecked?: Signalish<boolean | undefined>;
+		defaultValue?: Signalish<string | undefined>;
+		defer?: Signalish<boolean | undefined>;
+		dir?: Signalish<
 			| 'auto'
 			| 'rtl'
 			| 'ltr'
-			| undefined
-			| SignalLike<'auto' | 'rtl' | 'ltr' | undefined>;
-		disabled?: boolean | undefined | SignalLike<boolean | undefined>;
-		disableRemotePlayback?:
+			| undefined>;
+		disabled?: Signalish<boolean | undefined>;
+		disableRemotePlayback?: Signalish<
 			| boolean
-			| undefined
-			| SignalLike<boolean | undefined>;
-		download?: any | undefined;
-		decoding?:
+			| undefined>;
+		download?: Signalish<any | undefined>;
+		decoding?: Signalish<
 			| 'sync'
 			| 'async'
 			| 'auto'
-			| undefined
-			| SignalLike<'sync' | 'async' | 'auto' | undefined>;
-		draggable?: boolean | undefined | SignalLike<boolean | undefined>;
-		encType?: string | undefined | SignalLike<string | undefined>;
-		enctype?: string | undefined | SignalLike<string | undefined>;
-		enterkeyhint?:
+			| undefined>;
+		draggable?: Signalish<boolean | undefined>;
+		encType?: Signalish<string | undefined>;
+		enctype?: Signalish<string | undefined>;
+		enterkeyhint?: Signalish<
 			| 'enter'
 			| 'done'
 			| 'go'
@@ -1973,136 +1969,118 @@ export namespace JSXInternal {
 			| 'previous'
 			| 'search'
 			| 'send'
-			| undefined
-			| SignalLike<
-					| 'enter'
-					| 'done'
-					| 'go'
-					| 'next'
-					| 'previous'
-					| 'search'
-					| 'send'
-					| undefined
-			  >;
-		elementTiming?: string | undefined | SignalLike<string | undefined>;
-		elementtiming?: HTMLAttributes['elementTiming'];
-		exportparts?: string | undefined | SignalLike<string | undefined>;
-		for?: string | undefined | SignalLike<string | undefined>;
-		form?: string | undefined | SignalLike<string | undefined>;
-		formAction?: string | undefined | SignalLike<string | undefined>;
-		formaction?: string | undefined | SignalLike<string | undefined>;
-		formEncType?: string | undefined | SignalLike<string | undefined>;
-		formenctype?: string | undefined | SignalLike<string | undefined>;
-		formMethod?: string | undefined | SignalLike<string | undefined>;
-		formmethod?: string | undefined | SignalLike<string | undefined>;
-		formNoValidate?: boolean | undefined | SignalLike<boolean | undefined>;
-		formnovalidate?: boolean | undefined | SignalLike<boolean | undefined>;
-		formTarget?: string | undefined | SignalLike<string | undefined>;
-		formtarget?: string | undefined | SignalLike<string | undefined>;
-		frameBorder?:
+			| undefined>;
+		elementTiming?: Signalish<string | undefined>;
+		elementtiming?: Signalish<HTMLAttributes['elementTiming']>;
+		exportparts?: Signalish<string | undefined>;
+		for?: Signalish<string | undefined>;
+		form?: Signalish<string | undefined>;
+		formAction?: Signalish<string | undefined>;
+		formaction?: Signalish<string | undefined>;
+		formEncType?: Signalish<string | undefined>;
+		formenctype?: Signalish<string | undefined>;
+		formMethod?: Signalish<string | undefined>;
+		formmethod?: Signalish<string | undefined>;
+		formNoValidate?: Signalish<boolean | undefined>;
+		formnovalidate?: Signalish<boolean | undefined>;
+		formTarget?: Signalish<string | undefined>;
+		formtarget?: Signalish<string | undefined>;
+		frameBorder?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		frameborder?:
+			| undefined>;
+		frameborder?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		headers?: string | undefined | SignalLike<string | undefined>;
-		height?:
+			| undefined>;
+		headers?: Signalish<string | undefined>;
+		height?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		hidden?:
+			| undefined>;
+		hidden?: Signalish<
 			| boolean
 			| 'hidden'
 			| 'until-found'
-			| undefined
-			| SignalLike<boolean | 'hidden' | 'until-found' | undefined>;
-		high?: number | undefined | SignalLike<number | undefined>;
-		href?: string | undefined | SignalLike<string | undefined>;
-		hrefLang?: string | undefined | SignalLike<string | undefined>;
-		hreflang?: string | undefined | SignalLike<string | undefined>;
-		htmlFor?: string | undefined | SignalLike<string | undefined>;
-		httpEquiv?: string | undefined | SignalLike<string | undefined>;
-		'http-equiv'?: string | undefined | SignalLike<string | undefined>;
-		icon?: string | undefined | SignalLike<string | undefined>;
-		id?: string | undefined | SignalLike<string | undefined>;
-		indeterminate?: boolean | undefined | SignalLike<boolean | undefined>;
-		inert?: boolean | undefined | SignalLike<boolean | undefined>;
-		inputMode?: string | undefined | SignalLike<string | undefined>;
-		inputmode?: string | undefined | SignalLike<string | undefined>;
-		integrity?: string | undefined | SignalLike<string | undefined>;
-		is?: string | undefined | SignalLike<string | undefined>;
-		keyParams?: string | undefined | SignalLike<string | undefined>;
-		keyType?: string | undefined | SignalLike<string | undefined>;
-		kind?: string | undefined | SignalLike<string | undefined>;
-		label?: string | undefined | SignalLike<string | undefined>;
-		lang?: string | undefined | SignalLike<string | undefined>;
-		list?: string | undefined | SignalLike<string | undefined>;
-		loading?:
+			| undefined>;
+		high?: Signalish<number | undefined>;
+		href?: Signalish<string | undefined>;
+		hrefLang?: Signalish<string | undefined>;
+		hreflang?: Signalish<string | undefined>;
+		htmlFor?: Signalish<string | undefined>;
+		httpEquiv?: Signalish<string | undefined>;
+		'http-equiv'?: Signalish<string | undefined>;
+		icon?: Signalish<string | undefined>;
+		id?: Signalish<string | undefined>;
+		indeterminate?: Signalish<boolean | undefined>;
+		inert?: Signalish<boolean | undefined>;
+		inputMode?: Signalish<string | undefined>;
+		inputmode?: Signalish<string | undefined>;
+		integrity?: Signalish<string | undefined>;
+		is?: Signalish<string | undefined>;
+		keyParams?: Signalish<string | undefined>;
+		keyType?: Signalish<string | undefined>;
+		kind?: Signalish<string | undefined>;
+		label?: Signalish<string | undefined>;
+		lang?: Signalish<string | undefined>;
+		list?: Signalish<string | undefined>;
+		loading?: Signalish<
 			| 'eager'
 			| 'lazy'
-			| undefined
-			| SignalLike<'eager' | 'lazy' | undefined>;
-		loop?: boolean | undefined | SignalLike<boolean | undefined>;
-		low?: number | undefined | SignalLike<number | undefined>;
-		manifest?: string | undefined | SignalLike<string | undefined>;
-		marginHeight?: number | undefined | SignalLike<number | undefined>;
-		marginWidth?: number | undefined | SignalLike<number | undefined>;
-		max?: number | string | undefined | SignalLike<string | undefined>;
-		maxLength?: number | undefined | SignalLike<number | undefined>;
-		maxlength?: number | undefined | SignalLike<number | undefined>;
-		media?: string | undefined | SignalLike<string | undefined>;
-		mediaGroup?: string | undefined | SignalLike<string | undefined>;
-		method?: string | undefined | SignalLike<string | undefined>;
-		min?: number | string | undefined | SignalLike<string | undefined>;
-		minLength?: number | undefined | SignalLike<number | undefined>;
-		minlength?: number | undefined | SignalLike<number | undefined>;
-		multiple?: boolean | undefined | SignalLike<boolean | undefined>;
-		muted?: boolean | undefined | SignalLike<boolean | undefined>;
-		name?: string | undefined | SignalLike<string | undefined>;
-		nomodule?: boolean | undefined | SignalLike<boolean | undefined>;
-		nonce?: string | undefined | SignalLike<string | undefined>;
-		noValidate?: boolean | undefined | SignalLike<boolean | undefined>;
-		novalidate?: boolean | undefined | SignalLike<boolean | undefined>;
-		open?: boolean | undefined | SignalLike<boolean | undefined>;
-		optimum?: number | undefined | SignalLike<number | undefined>;
-		part?: string | undefined | SignalLike<string | undefined>;
-		pattern?: string | undefined | SignalLike<string | undefined>;
-		ping?: string | undefined | SignalLike<string | undefined>;
-		placeholder?: string | undefined | SignalLike<string | undefined>;
-		playsInline?: boolean | undefined | SignalLike<boolean | undefined>;
-		playsinline?: boolean | undefined | SignalLike<boolean | undefined>;
-		popover?:
+			| undefined>;
+		loop?: Signalish<boolean | undefined>;
+		low?: Signalish<number | undefined>;
+		manifest?: Signalish<string | undefined>;
+		marginHeight?: Signalish<number | undefined>;
+		marginWidth?: Signalish<number | undefined>;
+		max?: Signalish<number | string | undefined>;
+		maxLength?: Signalish<number | undefined>;
+		maxlength?: Signalish<number | undefined>;
+		media?: Signalish<string | undefined>;
+		mediaGroup?: Signalish<string | undefined>;
+		method?: Signalish<string | undefined>;
+		min?: Signalish<number | string | undefined>;
+		minLength?: Signalish<number | undefined>;
+		minlength?: Signalish<number | undefined>;
+		multiple?: Signalish<boolean | undefined>;
+		muted?: Signalish<boolean | undefined>;
+		name?: Signalish<string | undefined>;
+		nomodule?: Signalish<boolean | undefined>;
+		nonce?: Signalish<string | undefined>;
+		noValidate?: Signalish<boolean | undefined>;
+		novalidate?: Signalish<boolean | undefined>;
+		open?: Signalish<boolean | undefined>;
+		optimum?: Signalish<number | undefined>;
+		part?: Signalish<string | undefined>;
+		pattern?: Signalish<string | undefined>;
+		ping?: Signalish<string | undefined>;
+		placeholder?: Signalish<string | undefined>;
+		playsInline?: Signalish<boolean | undefined>;
+		playsinline?: Signalish<boolean | undefined>;
+		popover?: Signalish<
 			| 'auto'
 			| 'hint'
 			| 'manual'
 			| boolean
-			| undefined
-			| SignalLike<'auto' | 'hint' | 'manual' | boolean | undefined>;
-		popovertarget?: string | undefined | SignalLike<string | undefined>;
-		popoverTarget?: string | undefined | SignalLike<string | undefined>;
-		popovertargetaction?:
+			| undefined>;
+		popovertarget?: Signalish<string | undefined>;
+		popoverTarget?: Signalish<string | undefined>;
+		popovertargetaction?: Signalish<
 			| 'hide'
 			| 'show'
 			| 'toggle'
-			| undefined
-			| SignalLike<'hide' | 'show' | 'toggle' | undefined>;
-		popoverTargetAction?:
+			| undefined>;
+		popoverTargetAction?: Signalish<
 			| 'hide'
 			| 'show'
 			| 'toggle'
-			| undefined
-			| SignalLike<'hide' | 'show' | 'toggle' | undefined>;
-		poster?: string | undefined | SignalLike<string | undefined>;
-		preload?: string | undefined | SignalLike<string | undefined>;
-		radioGroup?: string | undefined | SignalLike<string | undefined>;
-		readonly?: boolean | undefined | SignalLike<boolean | undefined>;
-		readOnly?: boolean | undefined | SignalLike<boolean | undefined>;
-		referrerpolicy?:
+			| undefined>;
+		poster?: Signalish<string | undefined>;
+		preload?: Signalish<string | undefined>;
+		radioGroup?: Signalish<string | undefined>;
+		readonly?: Signalish<boolean | undefined>;
+		readOnly?: Signalish<boolean | undefined>;
+		referrerpolicy?: Signalish<
 			| 'no-referrer'
 			| 'no-referrer-when-downgrade'
 			| 'origin'
@@ -2111,145 +2089,110 @@ export namespace JSXInternal {
 			| 'strict-origin'
 			| 'strict-origin-when-cross-origin'
 			| 'unsafe-url'
-			| undefined
-			| SignalLike<
-					| 'no-referrer'
-					| 'no-referrer-when-downgrade'
-					| 'origin'
-					| 'origin-when-cross-origin'
-					| 'same-origin'
-					| 'strict-origin'
-					| 'strict-origin-when-cross-origin'
-					| 'unsafe-url'
-					| undefined
-			  >;
-		rel?: string | undefined | SignalLike<string | undefined>;
-		required?: boolean | undefined | SignalLike<boolean | undefined>;
-		reversed?: boolean | undefined | SignalLike<boolean | undefined>;
-		role?: AriaRole | undefined | SignalLike<AriaRole | undefined>;
-		rows?: number | undefined | SignalLike<number | undefined>;
-		rowSpan?: number | undefined | SignalLike<number | undefined>;
-		rowspan?: number | undefined | SignalLike<number | undefined>;
-		sandbox?: string | undefined | SignalLike<string | undefined>;
-		scope?: string | undefined | SignalLike<string | undefined>;
-		scoped?: boolean | undefined | SignalLike<boolean | undefined>;
-		scrolling?: string | undefined | SignalLike<string | undefined>;
-		seamless?: boolean | undefined | SignalLike<boolean | undefined>;
-		selected?: boolean | undefined | SignalLike<boolean | undefined>;
-		shape?: string | undefined | SignalLike<string | undefined>;
-		size?: number | undefined | SignalLike<number | undefined>;
-		sizes?: string | undefined | SignalLike<string | undefined>;
-		slot?: string | undefined | SignalLike<string | undefined>;
-		span?: number | undefined | SignalLike<number | undefined>;
-		spellcheck?: boolean | undefined | SignalLike<boolean | undefined>;
-		src?: string | undefined | SignalLike<string | undefined>;
-		srcSet?: string | undefined | SignalLike<string | undefined>;
-		srcset?: string | undefined | SignalLike<string | undefined>;
-		srcDoc?: string | undefined | SignalLike<string | undefined>;
-		srcdoc?: string | undefined | SignalLike<string | undefined>;
-		srcLang?: string | undefined | SignalLike<string | undefined>;
-		srclang?: string | undefined | SignalLike<string | undefined>;
-		start?: number | undefined | SignalLike<number | undefined>;
-		step?:
+			| undefined>;
+		rel?: Signalish<string | undefined>;
+		required?: Signalish<boolean | undefined>;
+		reversed?: Signalish<boolean | undefined>;
+		role?: Signalish<AriaRole | undefined>;
+		rows?: Signalish<number | undefined>;
+		rowSpan?: Signalish<number | undefined>;
+		rowspan?: Signalish<number | undefined>;
+		sandbox?: Signalish<string | undefined>;
+		scope?: Signalish<string | undefined>;
+		scoped?: Signalish<boolean | undefined>;
+		scrolling?: Signalish<string | undefined>;
+		seamless?: Signalish<boolean | undefined>;
+		selected?: Signalish<boolean | undefined>;
+		shape?: Signalish<string | undefined>;
+		size?: Signalish<number | undefined>;
+		sizes?: Signalish<string | undefined>;
+		slot?: Signalish<string | undefined>;
+		span?: Signalish<number | undefined>;
+		spellcheck?: Signalish<boolean | undefined>;
+		src?: Signalish<string | undefined>;
+		srcSet?: Signalish<string | undefined>;
+		srcset?: Signalish<string | undefined>;
+		srcDoc?: Signalish<string | undefined>;
+		srcdoc?: Signalish<string | undefined>;
+		srcLang?: Signalish<string | undefined>;
+		srclang?: Signalish<string | undefined>;
+		start?: Signalish<number | undefined>;
+		step?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		style?:
+			| undefined>;
+		style?: Signalish<
 			| string
 			| CSSProperties
-			| undefined
-			| SignalLike<string | CSSProperties | undefined>;
-		summary?: string | undefined | SignalLike<string | undefined>;
-		tabIndex?: number | undefined | SignalLike<number | undefined>;
-		tabindex?: number | undefined | SignalLike<number | undefined>;
-		target?: string | undefined | SignalLike<string | undefined>;
-		title?: string | undefined | SignalLike<string | undefined>;
-		type?: string | undefined | SignalLike<string | undefined>;
-		useMap?: string | undefined | SignalLike<string | undefined>;
-		usemap?: string | undefined | SignalLike<string | undefined>;
-		value?:
+			| undefined>;
+		summary?: Signalish<string | undefined>;
+		tabIndex?: Signalish<number | undefined>;
+		tabindex?: Signalish<number | undefined>;
+		target?: Signalish<string | undefined>;
+		title?: Signalish<string | undefined>;
+		type?: Signalish<string | undefined>;
+		useMap?: Signalish<string | undefined>;
+		usemap?: Signalish<string | undefined>;
+		value?: Signalish<
 			| string
 			| string[]
 			| number
-			| undefined
-			| SignalLike<string | string[] | number | undefined>;
-		volume?:
+			| undefined>;
+		volume?: Signalish<
 			| string
 			| number
-			| undefined
-			| SignalLike<string | number | undefined>;
-		width?:
+			| undefined>;
+		width?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		wmode?: string | undefined | SignalLike<string | undefined>;
-		wrap?: string | undefined | SignalLike<string | undefined>;
+			| undefined>;
+		wmode?: Signalish<string | undefined>;
+		wrap?: Signalish<string | undefined>;
 
 		// Non-standard Attributes
-		autocapitalize?:
+		autocapitalize?: Signalish<
 			| 'off'
 			| 'none'
 			| 'on'
 			| 'sentences'
 			| 'words'
 			| 'characters'
-			| undefined
-			| SignalLike<
-					| 'off'
-					| 'none'
-					| 'on'
-					| 'sentences'
-					| 'words'
-					| 'characters'
-					| undefined
-			  >;
-		autoCapitalize?:
+			| undefined>;
+		autoCapitalize?: Signalish<
 			| 'off'
 			| 'none'
 			| 'on'
 			| 'sentences'
 			| 'words'
 			| 'characters'
-			| undefined
-			| SignalLike<
-					| 'off'
-					| 'none'
-					| 'on'
-					| 'sentences'
-					| 'words'
-					| 'characters'
-					| undefined
-			  >;
-		disablePictureInPicture?:
+			| undefined>;
+		disablePictureInPicture?: Signalish<
 			| boolean
-			| undefined
-			| SignalLike<boolean | undefined>;
-		results?: number | undefined | SignalLike<number | undefined>;
-		translate?: boolean | undefined | SignalLike<boolean | undefined>;
+			| undefined>;
+		results?: Signalish<number | undefined>;
+		translate?: Signalish<boolean | undefined>;
 
 		// RDFa Attributes
-		about?: string | undefined | SignalLike<string | undefined>;
-		datatype?: string | undefined | SignalLike<string | undefined>;
-		inlist?: any;
-		prefix?: string | undefined | SignalLike<string | undefined>;
-		property?: string | undefined | SignalLike<string | undefined>;
-		resource?: string | undefined | SignalLike<string | undefined>;
-		typeof?: string | undefined | SignalLike<string | undefined>;
-		vocab?: string | undefined | SignalLike<string | undefined>;
+		about?: Signalish<string | undefined>;
+		datatype?: Signalish<string | undefined>;
+		inlist?: Signalish<any>;
+		prefix?: Signalish<string | undefined>;
+		property?: Signalish<string | undefined>;
+		resource?: Signalish<string | undefined>;
+		typeof?: Signalish<string | undefined>;
+		vocab?: Signalish<string | undefined>;
 
 		// Microdata Attributes
-		itemProp?: string | undefined | SignalLike<string | undefined>;
-		itemprop?: string | undefined | SignalLike<string | undefined>;
-		itemScope?: boolean | undefined | SignalLike<boolean | undefined>;
-		itemscope?: boolean | undefined | SignalLike<boolean | undefined>;
-		itemType?: string | undefined | SignalLike<string | undefined>;
-		itemtype?: string | undefined | SignalLike<string | undefined>;
-		itemID?: string | undefined | SignalLike<string | undefined>;
-		itemid?: string | undefined | SignalLike<string | undefined>;
-		itemRef?: string | undefined | SignalLike<string | undefined>;
-		itemref?: string | undefined | SignalLike<string | undefined>;
+		itemProp?: Signalish<string | undefined>;
+		itemprop?: Signalish<string | undefined>;
+		itemScope?: Signalish<boolean | undefined>;
+		itemscope?: Signalish<boolean | undefined>;
+		itemType?: Signalish<string | undefined>;
+		itemtype?: Signalish<string | undefined>;
+		itemID?: Signalish<string | undefined>;
+		itemid?: Signalish<string | undefined>;
+		itemRef?: Signalish<string | undefined>;
+		itemref?: Signalish<string | undefined>;
 	}
 
 	export type DetailedHTMLProps<
