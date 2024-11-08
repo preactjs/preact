@@ -2201,139 +2201,120 @@ export namespace JSXInternal {
 	> = HA;
 
 	export interface HTMLMarqueeElement extends HTMLElement {
-		behavior?:
+		behavior?: Signalish<
 			| 'scroll'
 			| 'slide'
 			| 'alternate'
-			| undefined
-			| SignalLike<'scroll' | 'slide' | 'alternate' | undefined>;
-		bgColor?: string | undefined | SignalLike<string | undefined>;
-		direction?:
+			| undefined>;
+		bgColor?: Signalish< string | undefined>;
+		direction?: Signalish<
 			| 'left'
 			| 'right'
 			| 'up'
 			| 'down'
-			| undefined
-			| SignalLike<'left' | 'right' | 'up' | 'down' | undefined>;
-		height?:
+			| undefined>;
+		height?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		hspace?:
+			| undefined>;
+		hspace?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		loop?:
+			| undefined>;
+		loop?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		scrollAmount?:
+			| undefined>;
+		scrollAmount?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		scrollDelay?:
+			| undefined>;
+		scrollDelay?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		trueSpeed?: boolean | undefined | SignalLike<boolean | undefined>;
-		vspace?:
+			| undefined>;
+		trueSpeed?: Signalish< boolean | undefined>;
+		vspace?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
-		width?:
+			| undefined>;
+		width?: Signalish<
 			| number
 			| string
-			| undefined
-			| SignalLike<number | string | undefined>;
+			| undefined>;
 	}
 
 	export interface MathMLAttributes<Target extends EventTarget = MathMLElement>
 		extends HTMLAttributes<Target> {
-		dir?: 'ltr' | 'rtl' | undefined | SignalLike<'ltr' | 'rtl' | undefined>;
-		displaystyle?: boolean | undefined | SignalLike<boolean | undefined>;
+		dir?: Signalish< 'ltr' | 'rtl' | undefined>;
+		displaystyle?: Signalish< boolean | undefined>;
 		/** @deprecated This feature is non-standard. See https://developer.mozilla.org/en-US/docs/Web/MathML/Global_attributes/href  */
-		href?: string | undefined | SignalLike<string | undefined>;
+		href?: Signalish< string | undefined>;
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Global_attributes/mathbackground */
-		mathbackground?: string | undefined | SignalLike<string | undefined>;
+		mathbackground?: Signalish< string | undefined>;
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Global_attributes/mathcolor */
-		mathcolor?: string | undefined | SignalLike<string | undefined>;
+		mathcolor?: Signalish< string | undefined>;
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Global_attributes/mathsize */
-		mathsize?: string | undefined | SignalLike<string | undefined>;
-		nonce?: string | undefined | SignalLike<string | undefined>;
-		scriptlevel?: string | undefined | SignalLike<string | undefined>;
+		mathsize?: Signalish< string | undefined>;
+		nonce?: Signalish< string | undefined>;
+		scriptlevel?: Signalish< string | undefined>;
 	}
 
 	export interface HTMLAnnotationElement extends MathMLElement {
-		encoding?: string | undefined | SignalLike<string | undefined>;
+		encoding?: Signalish< string | undefined>;
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/semantics#src */
-		src?: string | undefined | SignalLike<string | undefined>;
+		src?: Signalish< string | undefined>;
 	}
 
 	export interface HTMLAnnotationXmlElement extends MathMLElement {
-		encoding?: string | undefined | SignalLike<string | undefined>;
+		encoding?: Signalish< string | undefined>;
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/semantics#src */
-		src?: string | undefined | SignalLike<string | undefined>;
+		src?: Signalish< string | undefined>;
 	}
 
 	export interface HTMLMActionElement extends MathMLElement {
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/maction#actiontype */
-		actiontype?:
-			| 'statusline'
-			| 'toggle'
-			| undefined
-			| SignalLike<'statusline' | 'toggle' | undefined>;
+		actiontype?: Signalish<'statusline' | 'toggle' | undefined>
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/maction#selection */
-		selection?: string | undefined | SignalLike<string | undefined>;
+		selection?: Signalish<string | undefined>;
 	}
 
 	export interface HTMLMathElement extends MathMLElement {
-		display?:
-			| 'block'
-			| 'inline'
-			| undefined
-			| SignalLike<'block' | 'inline' | undefined>;
+		display?: Signalish<'block' | 'inline' | undefined>;
 	}
 
 	export interface HTMLMEncloseElement extends MathMLElement {
-		notation?: string | undefined | SignalLike<string | undefined>;
+		notation?: Signalish<string | undefined>;
 	}
 
 	export interface HTMLMErrorElement extends MathMLElement {}
 
 	export interface HTMLMFencedElement extends MathMLElement {
-		close?: string | undefined | SignalLike<string | undefined>;
-		open?: string | undefined | SignalLike<string | undefined>;
-		separators?: string | undefined | SignalLike<string | undefined>;
+		close?: Signalish<string | undefined>;
+		open?: Signalish<string | undefined>;
+		separators?: Signalish<string | undefined>;
 	}
 
 	export interface HTMLMFracElement extends MathMLElement {
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mfrac#denomalign */
-		denomalign?:
+		denomalign?: Signalish<
 			| 'center'
 			| 'left'
 			| 'right'
-			| undefined
-			| SignalLike<'center' | 'left' | 'right' | undefined>;
-		linethickness?: string | undefined | SignalLike<string | undefined>;
+			| undefined>;
+		linethickness?: Signalish<string | undefined>;
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mfrac#numalign */
-		numalign?:
+		numalign?: Signalish<
 			| 'center'
 			| 'left'
 			| 'right'
-			| undefined
-			| SignalLike<'center' | 'left' | 'right' | undefined>;
+			| undefined>;
 	}
 
 	export interface HTMLMiElement extends MathMLElement {
 		/** The only value allowed in the current specification is normal (case insensitive)
 		 * See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mi#mathvariant */
-		mathvariant?:
+		mathvariant?: Signalish<
 			| 'normal'
 			| 'bold'
 			| 'italic'
@@ -2352,64 +2333,43 @@ export namespace JSXInternal {
 			| 'tailed'
 			| 'looped'
 			| 'stretched'
-			| undefined
-			| SignalLike<
-					| 'normal'
-					| 'bold'
-					| 'italic'
-					| 'bold-italic'
-					| 'double-struck'
-					| 'bold-fraktur'
-					| 'script'
-					| 'bold-script'
-					| 'fraktur'
-					| 'sans-serif'
-					| 'bold-sans-serif'
-					| 'sans-serif-italic'
-					| 'sans-serif-bold-italic'
-					| 'monospace'
-					| 'initial'
-					| 'tailed'
-					| 'looped'
-					| 'stretched'
-					| undefined
-			  >;
+			| undefined>;
 	}
 
 	export interface HTMLMmultiScriptsElement extends MathMLElement {
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mmultiscripts#subscriptshift */
-		subscriptshift?: string | undefined | SignalLike<string | undefined>;
+		subscriptshift?: Signalish<string | undefined>;
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mmultiscripts#superscriptshift */
-		superscriptshift?: string | undefined | SignalLike<string | undefined>;
+		superscriptshift?: Signalish<string | undefined>;
 	}
 
 	export interface HTMLMNElement extends MathMLElement {}
 
 	export interface HTMLMOElement extends MathMLElement {
 		/** Non-standard attribute See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mo#accent */
-		accent?: boolean | undefined | SignalLike<boolean | undefined>;
-		fence?: boolean | undefined | SignalLike<boolean | undefined>;
-		largeop?: boolean | undefined | SignalLike<boolean | undefined>;
-		lspace?: string | undefined | SignalLike<string | undefined>;
-		maxsize?: string | undefined | SignalLike<string | undefined>;
-		minsize?: string | undefined | SignalLike<string | undefined>;
-		movablelimits?: boolean | undefined | SignalLike<boolean | undefined>;
-		rspace?: string | undefined | SignalLike<string | undefined>;
-		separator?: boolean | undefined | SignalLike<boolean | undefined>;
-		stretchy?: boolean | undefined | SignalLike<boolean | undefined>;
-		symmetric?: boolean | undefined | SignalLike<boolean | undefined>;
+		accent?: Signalish< boolean | undefined>;
+		fence?: Signalish< boolean | undefined>;
+		largeop?: Signalish< boolean | undefined>;
+		lspace?: Signalish< string | undefined>;
+		maxsize?: Signalish< string | undefined>;
+		minsize?: Signalish< string | undefined>;
+		movablelimits?: Signalish< boolean | undefined>;
+		rspace?: Signalish< string | undefined>;
+		separator?: Signalish< boolean | undefined>;
+		stretchy?: Signalish< boolean | undefined>;
+		symmetric?: Signalish< boolean | undefined>;
 	}
 
 	export interface HTMLMOverElement extends MathMLElement {
-		accent?: boolean | undefined | SignalLike<boolean | undefined>;
+		accent?: Signalish< boolean | undefined>;
 	}
 
 	export interface HTMLMPaddedElement extends MathMLElement {
-		depth?: string | undefined | SignalLike<string | undefined>;
-		height?: string | undefined | SignalLike<string | undefined>;
-		lspace?: string | undefined | SignalLike<string | undefined>;
-		voffset?: string | undefined | SignalLike<string | undefined>;
-		width?: string | undefined | SignalLike<string | undefined>;
+		depth?: Signalish< string | undefined>;
+		height?: Signalish< string | undefined>;
+		lspace?: Signalish< string | undefined>;
+		voffset?: Signalish< string | undefined>;
+		width?: Signalish< string | undefined>;
 	}
 
 	export interface HTMLMPhantomElement extends MathMLElement {}
@@ -2422,167 +2382,149 @@ export namespace JSXInternal {
 
 	export interface HTMLMSElement extends MathMLElement {
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/ms#browser_compatibility */
-		lquote?: string | undefined | SignalLike<string | undefined>;
+		lquote?: Signalish< string | undefined>;
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/ms#browser_compatibility */
-		rquote?: string | undefined | SignalLike<string | undefined>;
+		rquote?: Signalish< string | undefined>;
 	}
 
 	export interface HTMLMSpaceElement extends MathMLElement {
-		depth?: string | undefined | SignalLike<string | undefined>;
-		height?: string | undefined | SignalLike<string | undefined>;
-		width?: string | undefined | SignalLike<string | undefined>;
+		depth?: Signalish< string | undefined>;
+		height?: Signalish< string | undefined>;
+		width?: Signalish< string | undefined>;
 	}
 
 	export interface HTMLMSqrtElement extends MathMLElement {}
 
 	export interface HTMLMStyleElement extends MathMLElement {
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mstyle#background */
-		background?: string | undefined | SignalLike<string | undefined>;
+		background?: Signalish< string | undefined>;
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mstyle#color */
-		color?: string | undefined | SignalLike<string | undefined>;
+		color?: Signalish< string | undefined>;
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mstyle#fontsize */
-		fontsize?: string | undefined | SignalLike<string | undefined>;
+		fontsize?: Signalish< string | undefined>;
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mstyle#fontstyle */
-		fontstyle?: string | undefined | SignalLike<string | undefined>;
+		fontstyle?: Signalish< string | undefined>;
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mstyle#fontweight */
-		fontweight?: string | undefined | SignalLike<string | undefined>;
+		fontweight?: Signalish< string | undefined>;
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mstyle#scriptminsize */
-		scriptminsize?: string | undefined | SignalLike<string | undefined>;
+		scriptminsize?: Signalish< string | undefined>;
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mstyle#scriptsizemultiplier */
-		scriptsizemultiplier?: string | undefined | SignalLike<string | undefined>;
+		scriptsizemultiplier?: Signalish< string | undefined>;
 	}
 
 	export interface HTMLMSubElement extends MathMLElement {
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/msub#subscriptshift */
-		subscriptshift?: string | undefined | SignalLike<string | undefined>;
+		subscriptshift?: Signalish< string | undefined>;
 	}
 
 	export interface HTMLMSubsupElement extends MathMLElement {
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/msubsup#subscriptshift */
-		subscriptshift?: string | undefined | SignalLike<string | undefined>;
+		subscriptshift?: Signalish< string | undefined>;
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/msubsup#superscriptshift */
-		superscriptshift?: string | undefined | SignalLike<string | undefined>;
+		superscriptshift?: Signalish< string | undefined>;
 	}
 
 	export interface HTMLMSupElement extends MathMLElement {
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/msup#superscriptshift */
-		superscriptshift?: string | undefined | SignalLike<string | undefined>;
+		superscriptshift?: Signalish< string | undefined>;
 	}
 
 	export interface HTMLMTableElement extends MathMLElement {
 		/** Non-standard attribute See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mtable#align */
-		align?:
+		align?: Signalish<
 			| 'axis'
 			| 'baseline'
 			| 'bottom'
 			| 'center'
 			| 'top'
-			| undefined
-			| SignalLike<
-					'axis' | 'baseline' | 'bottom' | 'center' | 'top' | undefined
-			  >;
+			| undefined>;
 		/** Non-standard attribute See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mtable#columnalign */
-		columnalign?:
+		columnalign?: Signalish<
 			| 'center'
 			| 'left'
 			| 'right'
-			| undefined
-			| SignalLike<'center' | 'left' | 'right' | undefined>;
+			| undefined>;
 		/** Non-standard attribute See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mtable#columnlines */
-		columnlines?:
+		columnlines?: Signalish<
 			| 'dashed'
 			| 'none'
 			| 'solid'
-			| undefined
-			| SignalLike<'dashed' | 'none' | 'solid' | undefined>;
+			| undefined>;
 		/** Non-standard attribute See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mtable#columnspacing */
-		columnspacing?: string | undefined | SignalLike<string | undefined>;
+		columnspacing?: Signalish< string | undefined>;
 		/** Non-standard attribute See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mtable#frame */
-		frame?:
+		frame?: Signalish<
 			| 'dashed'
 			| 'none'
 			| 'solid'
-			| undefined
-			| SignalLike<'dashed' | 'none' | 'solid' | undefined>;
+			| undefined>;
 		/** Non-standard attribute See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mtable#framespacing */
-		framespacing?: string | undefined | SignalLike<string | undefined>;
+		framespacing?: Signalish< string | undefined>;
 		/** Non-standard attribute See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mtable#rowalign */
-		rowalign?:
+		rowalign?: Signalish<
 			| 'axis'
 			| 'baseline'
 			| 'bottom'
 			| 'center'
 			| 'top'
-			| undefined
-			| SignalLike<
-					'axis' | 'baseline' | 'bottom' | 'center' | 'top' | undefined
-			  >;
+			| undefined>;
 		/** Non-standard attribute See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mtable#rowlines */
-		rowlines?:
+		rowlines?: Signalish<
 			| 'dashed'
 			| 'none'
 			| 'solid'
-			| undefined
-			| SignalLike<'dashed' | 'none' | 'solid' | undefined>;
+			| undefined>;
 		/** Non-standard attribute See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mtable#rowspacing */
-		rowspacing?: string | undefined | SignalLike<string | undefined>;
+		rowspacing?: Signalish< string | undefined>;
 		/** Non-standard attribute See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mtable#width */
-		width?: string | undefined | SignalLike<string | undefined>;
+		width?: Signalish< string | undefined>;
 	}
 
 	export interface HTMLMTdElement extends MathMLElement {
-		columnspan?: number | undefined | SignalLike<number | undefined>;
-		rowspan?: number | undefined | SignalLike<number | undefined>;
+		columnspan?: Signalish< number | undefined>;
+		rowspan?: Signalish< number | undefined>;
 		/** Non-standard attribute See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mtd#columnalign */
-		columnalign?:
+		columnalign?: Signalish<
 			| 'center'
 			| 'left'
 			| 'right'
-			| undefined
-			| SignalLike<'center' | 'left' | 'right' | undefined>;
+			| undefined>;
 		/** Non-standard attribute See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mtd#rowalign */
-		rowalign?:
+		rowalign?: Signalish<
 			| 'axis'
 			| 'baseline'
 			| 'bottom'
 			| 'center'
 			| 'top'
-			| undefined
-			| SignalLike<
-					'axis' | 'baseline' | 'bottom' | 'center' | 'top' | undefined
-			  >;
+			| undefined>;
 	}
 
 	export interface HTMLMTextElement extends MathMLElement {}
 
 	export interface HTMLMTrElement extends MathMLElement {
 		/** Non-standard attribute See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mtr#columnalign */
-		columnalign?:
+		columnalign?: Signalish<
 			| 'center'
 			| 'left'
 			| 'right'
-			| undefined
-			| SignalLike<'center' | 'left' | 'right' | undefined>;
+			| undefined>;
 		/** Non-standard attribute See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mtr#rowalign */
-		rowalign?:
+		rowalign?: Signalish<
 			| 'axis'
 			| 'baseline'
 			| 'bottom'
 			| 'center'
 			| 'top'
-			| undefined
-			| SignalLike<
-					'axis' | 'baseline' | 'bottom' | 'center' | 'top' | undefined
-			  >;
+			| undefined>;
 	}
 
 	export interface HTMLMUnderElement extends MathMLElement {
-		accentunder?: boolean | undefined | SignalLike<boolean | undefined>;
+		accentunder?: Signalish<boolean | undefined>;
 	}
 
 	export interface HTMLMUnderoverElement extends MathMLElement {
-		accent?: boolean | undefined | SignalLike<boolean | undefined>;
-		accentunder?: boolean | undefined | SignalLike<boolean | undefined>;
+		accent?: Signalish<boolean | undefined>;
+		accentunder?: Signalish<boolean | undefined>;
 	}
 
 	export interface HTMLSemanticsElement extends MathMLElement {}
