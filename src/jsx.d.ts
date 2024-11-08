@@ -1151,8 +1151,6 @@ export namespace JSXInternal {
 		yChannelSelector?: Signalish<string | undefined>;
 		z?: Signalish<number | string | undefined>;
 		zoomAndPan?: Signalish<string | undefined>;
-		z?: Signalish<number | string | undefined>;
-		zoomAndPan?: Signalish<string | undefined>;
 	}
 
 	export interface PathAttributes {
