@@ -1879,7 +1879,7 @@ export namespace JSXInternal {
 
 	export type AriaRole = WAIAriaRole | DPubAriaRole;
 
-	export interface HTMLAttributes<RefType extends EventTarget = EventTarget>
+	export interface HTMLAttributesFull<RefType extends EventTarget = EventTarget>
 		extends ClassAttributes<RefType>,
 			DOMAttributes<RefType>,
 			AriaAttributes {
@@ -2194,6 +2194,107 @@ export namespace JSXInternal {
 	}
 
 
+	export interface HTMLAttributes<RefType extends EventTarget = EventTarget>
+		extends ClassAttributes<RefType>,
+			DOMAttributes<RefType>,
+			AriaAttributes {
+		// Standard HTML Attributes
+		accesskey?: Signalish<string | undefined>;
+		accessKey?: Signalish<string | undefined>;
+		autocapitalize?: Signalish<
+			| 'off'
+			| 'none'
+			| 'on'
+			| 'sentences'
+			| 'words'
+			| 'characters'
+			| undefined>;
+		autoCapitalize?: Signalish<
+			| 'off'
+			| 'none'
+			| 'on'
+			| 'sentences'
+			| 'words'
+			| 'characters'
+			| undefined>;
+		autocorrect?: Signalish<string | undefined>;
+		autoCorrect?: Signalish<string | undefined>;
+		autofocus?: Signalish<boolean | undefined>;
+		autoFocus?: Signalish<boolean | undefined>;
+		class?: Signalish<string | undefined>;
+		className?: Signalish<string | undefined>;
+		contenteditable?: Signalish<Booleanish | '' | 'plaintext-only' | 'inherit' | undefined>;
+		contentEditable?: Signalish<Booleanish | '' | 'plaintext-only' | 'inherit' | undefined>;
+		dir?: Signalish<'auto' | 'rtl' | 'ltr' | undefined>;
+		draggable?: Signalish<boolean | undefined>;
+		enterkeyhint?: Signalish<
+			| 'enter'
+			| 'done'
+			| 'go'
+			| 'next'
+			| 'previous'
+			| 'search'
+			| 'send'
+			| undefined>;
+		exportparts?: Signalish<string | undefined>;
+		hidden?: Signalish<
+			| boolean
+			| 'hidden'
+			| 'until-found'
+			| undefined>;
+		id?: Signalish<string | undefined>;
+		inert?: Signalish<boolean | undefined>;
+		inputmode?: Signalish<string | undefined>;
+		inputMode?: Signalish<string | undefined>;
+		is?: Signalish<string | undefined>;
+		lang?: Signalish<string | undefined>;
+		nonce?: Signalish<string | undefined>;
+		part?: Signalish<string | undefined>;
+		popover?: Signalish<
+			| 'auto'
+			| 'hint'
+			| 'manual'
+			| boolean
+			| undefined>;
+		slot?: Signalish<string | undefined>;
+		spellcheck?: Signalish<boolean | undefined>;
+		style?: Signalish<
+			| string
+			| CSSProperties
+			| undefined>;
+		tabindex?: Signalish<number | undefined>;
+		tabIndex?: Signalish<number | undefined>;
+		title?: Signalish<string | undefined>;
+		translate?: Signalish<boolean | undefined>;
+
+		// Non-standard Attributes
+		disablePictureInPicture?: Signalish<
+			| boolean
+			| undefined>;
+		results?: Signalish<number | undefined>;
+
+		// RDFa Attributes
+		about?: Signalish<string | undefined>;
+		datatype?: Signalish<string | undefined>;
+		inlist?: Signalish<any>;
+		prefix?: Signalish<string | undefined>;
+		property?: Signalish<string | undefined>;
+		resource?: Signalish<string | undefined>;
+		typeof?: Signalish<string | undefined>;
+		vocab?: Signalish<string | undefined>;
+
+		// Microdata Attributes
+		itemid?: Signalish<string | undefined>;
+		itemID?: Signalish<string | undefined>;
+		itemprop?: Signalish<string | undefined>;
+		itemProp?: Signalish<string | undefined>;
+		itemref?: Signalish<string | undefined>;
+		itemRef?: Signalish<string | undefined>;
+		itemscope?: Signalish<boolean | undefined>;
+		itemScope?: Signalish<boolean | undefined>;
+		itemtype?: Signalish<string | undefined>;
+		itemType?: Signalish<string | undefined>;
+	}
 
 	type HTMLAttributeReferrerPolicy =
 		| ''
