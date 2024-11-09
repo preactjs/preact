@@ -1886,9 +1886,9 @@ export namespace JSXInternal {
 		// Standard HTML Attributes
 		accept?: Signalish<string | undefined>;
 		acceptCharset?: Signalish<string | undefined>;
-		'accept-charset'?: Signalish<HTMLAttributes['acceptCharset']>;
+		'accept-charset'?: Signalish<HTMLAttributesFull['acceptCharset']>;
 		accessKey?: Signalish<string | undefined>;
-		accesskey?: Signalish<HTMLAttributes['accessKey']>;
+		accesskey?: Signalish<HTMLAttributesFull['accessKey']>;
 		action?: Signalish<string | undefined>;
 		allow?: Signalish<string | undefined>;
 		allowFullScreen?: Signalish<boolean | undefined>;
@@ -1924,7 +1924,7 @@ export namespace JSXInternal {
 			| 'plaintext-only'
 			| 'inherit'
 			| undefined>;
-		contenteditable?: Signalish<HTMLAttributes['contentEditable']>;
+		contenteditable?: Signalish<HTMLAttributesFull['contentEditable']>;
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/contextmenu */
 		contextMenu?: Signalish<string | undefined>;
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/contextmenu */
@@ -1969,7 +1969,7 @@ export namespace JSXInternal {
 			| 'send'
 			| undefined>;
 		elementTiming?: Signalish<string | undefined>;
-		elementtiming?: Signalish<HTMLAttributes['elementTiming']>;
+		elementtiming?: Signalish<HTMLAttributesFull['elementTiming']>;
 		exportparts?: Signalish<string | undefined>;
 		for?: Signalish<string | undefined>;
 		form?: Signalish<string | undefined>;
@@ -2267,6 +2267,9 @@ export namespace JSXInternal {
 		title?: Signalish<string | undefined>;
 		translate?: Signalish<boolean | undefined>;
 
+		// WAI-ARIA Attributes
+		role?: Signalish<AriaRole | undefined>;
+
 		// Non-standard Attributes
 		disablePictureInPicture?: Signalish<
 			| boolean
@@ -2326,9 +2329,6 @@ export namespace JSXInternal {
 		referrerPolicy?: Signalish<HTMLAttributeReferrerPolicy | undefined>;
 	}
 
-	interface AudioHTMLAttributes<T extends EventTarget>
-		extends MediaHTMLAttributes<T> {}
-
 	interface AreaHTMLAttributes<T extends EventTarget>
 		extends HTMLAttributes<T> {
 		alt?: Signalish<string | undefined>;
@@ -2341,6 +2341,10 @@ export namespace JSXInternal {
 		shape?: Signalish<string | undefined>;
 		target?: Signalish<string | undefined>;
 	}
+
+	interface AudioHTMLAttributes<T extends EventTarget>
+		extends MediaHTMLAttributes<T> {}
+
 
 	interface BaseHTMLAttributes<T extends EventTarget>
 		extends HTMLAttributes<T> {
@@ -2388,15 +2392,15 @@ export namespace JSXInternal {
 		value?: Signalish<string | number | undefined>;
 	}
 
+	interface DelHTMLAttributes<T extends EventTarget> extends HTMLAttributes<T> {
+		cite?: Signalish<string | undefined>;
+		dateTime?: Signalish<string | undefined>;
+	}
+
 	interface DetailsHTMLAttributes<T extends EventTarget>
 		extends HTMLAttributes<T> {
 		open?: Signalish<boolean | undefined>;
 		onToggle?: GenericEventHandler<T> | undefined;
-	}
-
-	interface DelHTMLAttributes<T extends EventTarget> extends HTMLAttributes<T> {
-		cite?: Signalish<string | undefined>;
-		dateTime?: Signalish<string | undefined>;
 	}
 
 	interface DialogHTMLAttributes<T extends EventTarget>
@@ -2473,11 +2477,6 @@ export namespace JSXInternal {
 		width?: Signalish<number | string | undefined>;
 	}
 
-	interface InsHTMLAttributes<T extends EventTarget> extends HTMLAttributes<T> {
-		cite?: Signalish<string | undefined>;
-		dateTime?: Signalish<string | undefined>;
-	}
-
 	type HTMLInputTypeAttribute =
 		| 'button'
 		| 'checkbox'
@@ -2548,6 +2547,11 @@ export namespace JSXInternal {
 		onChange?: GenericEventHandler<T> | undefined;
 	}
 
+	interface InsHTMLAttributes<T extends EventTarget> extends HTMLAttributes<T> {
+		cite?: Signalish<string | undefined>;
+		dateTime?: Signalish<string | undefined>;
+	}
+
 	interface KeygenHTMLAttributes<T extends EventTarget>
 		extends HTMLAttributes<T> {
 		challenge?: Signalish<string | undefined>;
@@ -2603,11 +2607,6 @@ export namespace JSXInternal {
 		width?: Signalish<number | string | undefined>;
 	}
 
-	interface MenuHTMLAttributes<T extends EventTarget>
-		extends HTMLAttributes<T> {
-		type?: Signalish<string | undefined>;
-	}
-
 	interface MediaHTMLAttributes<T extends EventTarget>
 		extends HTMLAttributes<T> {
 		autoPlay?: Signalish<boolean | undefined>;
@@ -2620,6 +2619,11 @@ export namespace JSXInternal {
 		playsInline?: Signalish<boolean | undefined>;
 		preload?: Signalish<string | undefined>;
 		src?: Signalish<string | undefined>;
+	}
+
+	interface MenuHTMLAttributes<T extends EventTarget>
+		extends HTMLAttributes<T> {
+		type?: Signalish<string | undefined>;
 	}
 
 	interface MetaHTMLAttributes<T extends EventTarget>
@@ -2639,11 +2643,6 @@ export namespace JSXInternal {
 		min?: Signalish<string | undefined>;
 		optimum?: Signalish<number | undefined>;
 		value?: Signalish<string | number | undefined>;
-	}
-
-	interface QuoteHTMLAttributes<T extends EventTarget>
-		extends HTMLAttributes<T> {
-		cite?: Signalish<string | undefined>;
 	}
 
 	interface ObjectHTMLAttributes<T extends EventTarget>
@@ -2698,9 +2697,9 @@ export namespace JSXInternal {
 		value?: Signalish<string | number | undefined>;
 	}
 
-	interface SlotHTMLAttributes<T extends EventTarget>
+	interface QuoteHTMLAttributes<T extends EventTarget>
 		extends HTMLAttributes<T> {
-		name?: Signalish<string | undefined>;
+		cite?: Signalish<string | undefined>;
 	}
 
 	interface ScriptHTMLAttributes<T extends EventTarget>
@@ -2730,6 +2729,11 @@ export namespace JSXInternal {
 		onChange?: GenericEventHandler<T> | undefined;
 	}
 
+	interface SlotHTMLAttributes<T extends EventTarget>
+		extends HTMLAttributes<T> {
+		name?: Signalish<string | undefined>;
+	}
+
 	interface SourceHTMLAttributes<T extends EventTarget>
 		extends HTMLAttributes<T> {
 		height?: Signalish<number | string | undefined>;
@@ -2756,6 +2760,20 @@ export namespace JSXInternal {
 		width?: Signalish<number | string | undefined>;
 	}
 
+	interface TdHTMLAttributes<T extends EventTarget> extends HTMLAttributes<T> {
+		align?: Signalish<
+			'left' | 'center' | 'right' | 'justify' | 'char' | undefined
+		>;
+		colSpan?: Signalish<number | undefined>;
+		headers?: Signalish<string | undefined>;
+		rowSpan?: Signalish<number | undefined>;
+		scope?: Signalish<string | undefined>;
+		abbr?: Signalish<string | undefined>;
+		height?: Signalish<number | string | undefined>;
+		width?: Signalish<number | string | undefined>;
+		valign?: Signalish<'top' | 'middle' | 'bottom' | 'baseline' | undefined>;
+	}
+
 	interface TextareaHTMLAttributes<T extends EventTarget>
 		extends HTMLAttributes<T> {
 		autoComplete?: Signalish<string | undefined>;
@@ -2773,20 +2791,6 @@ export namespace JSXInternal {
 		value?: Signalish<string | number | undefined>;
 		wrap?: Signalish<string | undefined>;
 		onChange?: GenericEventHandler<T> | undefined;
-	}
-
-	interface TdHTMLAttributes<T extends EventTarget> extends HTMLAttributes<T> {
-		align?: Signalish<
-			'left' | 'center' | 'right' | 'justify' | 'char' | undefined
-		>;
-		colSpan?: Signalish<number | undefined>;
-		headers?: Signalish<string | undefined>;
-		rowSpan?: Signalish<number | undefined>;
-		scope?: Signalish<string | undefined>;
-		abbr?: Signalish<string | undefined>;
-		height?: Signalish<number | string | undefined>;
-		width?: Signalish<number | string | undefined>;
-		valign?: Signalish<'top' | 'middle' | 'bottom' | 'baseline' | undefined>;
 	}
 
 	interface ThHTMLAttributes<T extends EventTarget> extends HTMLAttributes<T> {
@@ -3215,45 +3219,45 @@ export namespace JSXInternal {
 	}
 
 	export interface IntrinsicElements extends IntrinsicSVGElements, IntrinsicMathMLElements {
-		a: HTMLAttributes<HTMLAnchorElement>;
+		a: AnchorHTMLAttributes<HTMLAnchorElement>;
 		abbr: HTMLAttributes<HTMLElement>;
 		address: HTMLAttributes<HTMLElement>;
-		area: HTMLAttributes<HTMLAreaElement>;
+		area: AreaHTMLAttributes<HTMLAreaElement>;
 		article: HTMLAttributes<HTMLElement>;
 		aside: HTMLAttributes<HTMLElement>;
-		audio: HTMLAttributes<HTMLAudioElement>;
+		audio: AudioHTMLAttributes<HTMLAudioElement>;
 		b: HTMLAttributes<HTMLElement>;
-		base: HTMLAttributes<HTMLBaseElement>;
+		base: BaseHTMLAttributes<HTMLBaseElement>;
 		bdi: HTMLAttributes<HTMLElement>;
 		bdo: HTMLAttributes<HTMLElement>;
 		big: HTMLAttributes<HTMLElement>;
-		blockquote: HTMLAttributes<HTMLQuoteElement>;
+		blockquote: BlockquoteHTMLAttributes<HTMLQuoteElement>;
 		body: HTMLAttributes<HTMLBodyElement>;
 		br: HTMLAttributes<HTMLBRElement>;
-		button: HTMLAttributes<HTMLButtonElement>;
-		canvas: HTMLAttributes<HTMLCanvasElement>;
+		button: ButtonHTMLAttributes<HTMLButtonElement>;
+		canvas: CanvasHTMLAttributes<HTMLCanvasElement>;
 		caption: HTMLAttributes<HTMLTableCaptionElement>;
 		cite: HTMLAttributes<HTMLElement>;
 		code: HTMLAttributes<HTMLElement>;
-		col: HTMLAttributes<HTMLTableColElement>;
-		colgroup: HTMLAttributes<HTMLTableColElement>;
-		data: HTMLAttributes<HTMLDataElement>;
+		col: ColHTMLAttributes<HTMLTableColElement>;
+		colgroup: ColgroupHTMLAttributes<HTMLTableColElement>;
+		data: DataHTMLAttributes<HTMLDataElement>;
 		datalist: HTMLAttributes<HTMLDataListElement>;
 		dd: HTMLAttributes<HTMLElement>;
-		del: HTMLAttributes<HTMLModElement>;
-		details: HTMLAttributes<HTMLDetailsElement>;
+		del: DelHTMLAttributes<HTMLModElement>;
+		details: DetailsHTMLAttributes<HTMLDetailsElement>;
 		dfn: HTMLAttributes<HTMLElement>;
-		dialog: HTMLAttributes<HTMLDialogElement>;
+		dialog: DialogHTMLAttributes<HTMLDialogElement>;
 		div: HTMLAttributes<HTMLDivElement>;
 		dl: HTMLAttributes<HTMLDListElement>;
 		dt: HTMLAttributes<HTMLElement>;
 		em: HTMLAttributes<HTMLElement>;
-		embed: HTMLAttributes<HTMLEmbedElement>;
-		fieldset: HTMLAttributes<HTMLFieldSetElement>;
+		embed: EmbedHTMLAttributes<HTMLEmbedElement>;
+		fieldset: FieldsetHTMLAttributes<HTMLFieldSetElement>;
 		figcaption: HTMLAttributes<HTMLElement>;
 		figure: HTMLAttributes<HTMLElement>;
 		footer: HTMLAttributes<HTMLElement>;
-		form: HTMLAttributes<HTMLFormElement>;
+		form: FormHTMLAttributes<HTMLFormElement>;
 		h1: HTMLAttributes<HTMLHeadingElement>;
 		h2: HTMLAttributes<HTMLHeadingElement>;
 		h3: HTMLAttributes<HTMLHeadingElement>;
@@ -3266,71 +3270,71 @@ export namespace JSXInternal {
 		hr: HTMLAttributes<HTMLHRElement>;
 		html: HTMLAttributes<HTMLHtmlElement>;
 		i: HTMLAttributes<HTMLElement>;
-		iframe: HTMLAttributes<HTMLIFrameElement>;
-		img: HTMLAttributes<HTMLImageElement>;
-		input: HTMLAttributes<HTMLInputElement>;
-		ins: HTMLAttributes<HTMLModElement>;
+		iframe: IframeHTMLAttributes<HTMLIFrameElement>;
+		img: ImgHTMLAttributes<HTMLImageElement>;
+		input: InputHTMLAttributes<HTMLInputElement>;
+		ins: InsHTMLAttributes<HTMLModElement>;
 		kbd: HTMLAttributes<HTMLElement>;
-		keygen: HTMLAttributes<HTMLUnknownElement>;
-		label: HTMLAttributes<HTMLLabelElement>;
+		keygen: KeygenHTMLAttributes<HTMLUnknownElement>;
+		label: LabelHTMLAttributes<HTMLLabelElement>;
 		legend: HTMLAttributes<HTMLLegendElement>;
-		li: HTMLAttributes<HTMLLIElement>;
-		link: HTMLAttributes<HTMLLinkElement>;
+		li: LiHTMLAttributes<HTMLLIElement>;
+		link: LinkHTMLAttributes<HTMLLinkElement>;
 		main: HTMLAttributes<HTMLElement>;
-		map: HTMLAttributes<HTMLMapElement>;
+		map: MapHTMLAttributes<HTMLMapElement>;
 		mark: HTMLAttributes<HTMLElement>;
-		marquee: HTMLAttributes<HTMLMarqueeElement>;
-		menu: HTMLAttributes<HTMLMenuElement>;
+		marquee: MarqueeHTMLAttributes<HTMLMarqueeElement>;
+		menu: MenuHTMLAttributes<HTMLMenuElement>;
 		menuitem: HTMLAttributes<HTMLUnknownElement>;
-		meta: HTMLAttributes<HTMLMetaElement>;
-		meter: HTMLAttributes<HTMLMeterElement>;
+		meta: MetaHTMLAttributes<HTMLMetaElement>;
+		meter: MeterHTMLAttributes<HTMLMeterElement>;
 		nav: HTMLAttributes<HTMLElement>;
 		noscript: HTMLAttributes<HTMLElement>;
-		object: HTMLAttributes<HTMLObjectElement>;
-		ol: HTMLAttributes<HTMLOListElement>;
-		optgroup: HTMLAttributes<HTMLOptGroupElement>;
-		option: HTMLAttributes<HTMLOptionElement>;
-		output: HTMLAttributes<HTMLOutputElement>;
+		object: ObjectHTMLAttributes<HTMLObjectElement>;
+		ol: OlHTMLAttributes<HTMLOListElement>;
+		optgroup: OptgroupHTMLAttributes<HTMLOptGroupElement>;
+		option: OptionHTMLAttributes<HTMLOptionElement>;
+		output: OutputHTMLAttributes<HTMLOutputElement>;
 		p: HTMLAttributes<HTMLParagraphElement>;
-		param: HTMLAttributes<HTMLParamElement>;
+		param: ParamHTMLAttributes<HTMLParamElement>;
 		picture: HTMLAttributes<HTMLPictureElement>;
 		pre: HTMLAttributes<HTMLPreElement>;
-		progress: HTMLAttributes<HTMLProgressElement>;
-		q: HTMLAttributes<HTMLQuoteElement>;
+		progress: ProgressHTMLAttributes<HTMLProgressElement>;
+		q: QuoteHTMLAttributes<HTMLQuoteElement>;
 		rp: HTMLAttributes<HTMLElement>;
 		rt: HTMLAttributes<HTMLElement>;
 		ruby: HTMLAttributes<HTMLElement>;
 		s: HTMLAttributes<HTMLElement>;
 		samp: HTMLAttributes<HTMLElement>;
-		script: HTMLAttributes<HTMLScriptElement>;
+		script: ScriptHTMLAttributes<HTMLScriptElement>;
 		search: HTMLAttributes<HTMLElement>;
 		section: HTMLAttributes<HTMLElement>;
-		select: HTMLAttributes<HTMLSelectElement>;
-		slot: HTMLAttributes<HTMLSlotElement>;
+		select: SelectHTMLAttributes<HTMLSelectElement>;
+		slot: SlotHTMLAttributes<HTMLSlotElement>;
 		small: HTMLAttributes<HTMLElement>;
-		source: HTMLAttributes<HTMLSourceElement>;
+		source: SourceHTMLAttributes<HTMLSourceElement>;
 		span: HTMLAttributes<HTMLSpanElement>;
 		strong: HTMLAttributes<HTMLElement>;
-		style: HTMLAttributes<HTMLStyleElement>;
+		style: StyleHTMLAttributes<HTMLStyleElement>;
 		sub: HTMLAttributes<HTMLElement>;
 		summary: HTMLAttributes<HTMLElement>;
 		sup: HTMLAttributes<HTMLElement>;
-		table: HTMLAttributes<HTMLTableElement>;
+		table: TableHTMLAttributes<HTMLTableElement>;
 		tbody: HTMLAttributes<HTMLTableSectionElement>;
-		td: HTMLAttributes<HTMLTableCellElement>;
+		td: TdHTMLAttributes<HTMLTableCellElement>;
 		template: HTMLAttributes<HTMLTemplateElement>;
-		textarea: HTMLAttributes<HTMLTextAreaElement>;
+		textarea: TextareaHTMLAttributes<HTMLTextAreaElement>;
 		tfoot: HTMLAttributes<HTMLTableSectionElement>;
-		th: HTMLAttributes<HTMLTableCellElement>;
+		th: ThHTMLAttributes<HTMLTableCellElement>;
 		thead: HTMLAttributes<HTMLTableSectionElement>;
-		time: HTMLAttributes<HTMLTimeElement>;
+		time: TimeHTMLAttributes<HTMLTimeElement>;
 		title: HTMLAttributes<HTMLTitleElement>;
 		tr: HTMLAttributes<HTMLTableRowElement>;
-		track: HTMLAttributes<HTMLTrackElement>;
+		track: TrackHTMLAttributes<HTMLTrackElement>;
 		u: HTMLAttributes<HTMLElement>;
 		ul: HTMLAttributes<HTMLUListElement>;
 		var: HTMLAttributes<HTMLElement>;
-		video: HTMLAttributes<HTMLVideoElement>;
+		video: VideoHTMLAttributes<HTMLVideoElement>;
 		wbr: HTMLAttributes<HTMLElement>;
 	}
 }
