@@ -2824,28 +2824,6 @@ export namespace JSXInternal {
 		disableRemotePlayback?: Signalish<boolean | undefined>;
 	}
 
-	interface WebViewHTMLAttributes<T extends EventTarget>
-		extends HTMLAttributes<T> {
-		allowFullScreen?: Signalish<boolean | undefined>;
-		allowpopups?: Signalish<boolean | undefined>;
-		autosize?: Signalish<boolean | undefined>;
-		blinkfeatures?: Signalish<string | undefined>;
-		disableblinkfeatures?: Signalish<string | undefined>;
-		disableguestresize?: Signalish<boolean | undefined>;
-		disablewebsecurity?: Signalish<boolean | undefined>;
-		guestinstance?: Signalish<string | undefined>;
-		httpreferrer?: Signalish<string | undefined>;
-		nodeintegration?: Signalish<boolean | undefined>;
-		partition?: Signalish<string | undefined>;
-		plugins?: Signalish<boolean | undefined>;
-		preload?: Signalish<string | undefined>;
-		src?: Signalish<string | undefined>;
-		useragent?: Signalish<string | undefined>;
-		webpreferences?: Signalish<string | undefined>;
-	}
-
-
-
 	export type DetailedHTMLProps<
 		HA extends HTMLAttributes<RefType>,
 		RefType extends EventTarget = EventTarget

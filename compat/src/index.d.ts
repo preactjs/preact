@@ -149,7 +149,6 @@ declare namespace React {
 	export import TimeHTMLAttributes = JSXInternal.TimeHTMLAttributes;
 	export import TrackHTMLAttributes = JSXInternal.TrackHTMLAttributes;
 	export import VideoHTMLAttributes = JSXInternal.VideoHTMLAttributes;
-	export import WebViewHTMLAttributes = JSXInternal.WebViewHTMLAttributes;
 
 	// Events
 	export import TargetedEvent = JSXInternal.TargetedEvent;
