@@ -1182,16 +1182,16 @@ export namespace JSXInternal {
 
 	export type AriaRole = WAIAriaRole | DPubAriaRole;
 
-	export interface HTMLAttributesFull<RefType extends EventTarget = EventTarget>
+	export interface AllHTMLAttributes<RefType extends EventTarget = EventTarget>
 		extends ClassAttributes<RefType>,
 			DOMAttributes<RefType>,
 			AriaAttributes {
 		// Standard HTML Attributes
 		accept?: Signalish<string | undefined>;
 		acceptCharset?: Signalish<string | undefined>;
-		'accept-charset'?: Signalish<HTMLAttributesFull['acceptCharset']>;
+		'accept-charset'?: Signalish<AllHTMLAttributes['acceptCharset']>;
 		accessKey?: Signalish<string | undefined>;
-		accesskey?: Signalish<HTMLAttributesFull['accessKey']>;
+		accesskey?: Signalish<AllHTMLAttributes['accessKey']>;
 		action?: Signalish<string | undefined>;
 		allow?: Signalish<string | undefined>;
 		allowFullScreen?: Signalish<boolean | undefined>;
@@ -1224,7 +1224,7 @@ export namespace JSXInternal {
 		contentEditable?: Signalish<
 			Booleanish | '' | 'plaintext-only' | 'inherit' | undefined
 		>;
-		contenteditable?: Signalish<HTMLAttributesFull['contentEditable']>;
+		contenteditable?: Signalish<AllHTMLAttributes['contentEditable']>;
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/contextmenu */
 		contextMenu?: Signalish<string | undefined>;
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/contextmenu */
@@ -1260,7 +1260,7 @@ export namespace JSXInternal {
 			| undefined
 		>;
 		elementTiming?: Signalish<string | undefined>;
-		elementtiming?: Signalish<HTMLAttributesFull['elementTiming']>;
+		elementtiming?: Signalish<AllHTMLAttributes['elementTiming']>;
 		exportparts?: Signalish<string | undefined>;
 		for?: Signalish<string | undefined>;
 		form?: Signalish<string | undefined>;
