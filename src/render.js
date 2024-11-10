@@ -22,19 +22,16 @@ export function render(vnode, parentDom, replaceNode) {
 	// We abuse the `replaceNode` parameter in `hydrate()` to signal if we are in
 	// hydration mode or not by passing the `hydrate` function instead of a DOM
 	// element..
-	let isHydrating = typeof replaceNode == 'function';
+	let isHydrating = replaceNode === hydrate;
 
 	// To be able to support calling `render()` multiple times on the same
 	// DOM node, we need to obtain a reference to the previous tree. We do
 	// this by assigning a new `_children` property to DOM nodes which points
 	// to the last rendered tree. By default this property is not present, which
 	// means that we are mounting a new tree for the first time.
-	let oldVNode = isHydrating
-		? NULL
-		: (replaceNode && replaceNode._children) || parentDom._children;
+	let oldVNode = isHydrating ? NULL : parentDom._children;
 
-	vnode = ((!isHydrating && replaceNode) || parentDom)._children =
-		createElement(Fragment, NULL, [vnode]);
+	vnode = parentDom._children = createElement(Fragment, NULL, [vnode]);
 
 	// List of effects that need to be called after diffing.
 	let commitQueue = [],
@@ -47,19 +44,13 @@ export function render(vnode, parentDom, replaceNode) {
 		oldVNode || EMPTY_OBJ,
 		EMPTY_OBJ,
 		parentDom.namespaceURI,
-		!isHydrating && replaceNode
-			? [replaceNode]
-			: oldVNode
-				? NULL
-				: parentDom.firstChild
-					? slice.call(parentDom.childNodes)
-					: NULL,
+		oldVNode
+			? NULL
+			: parentDom.firstChild
+				? slice.call(parentDom.childNodes)
+				: NULL,
 		commitQueue,
-		!isHydrating && replaceNode
-			? replaceNode
-			: oldVNode
-				? oldVNode._dom
-				: parentDom.firstChild,
+		oldVNode ? oldVNode._dom : parentDom.firstChild,
 		isHydrating,
 		refQueue
 	);
