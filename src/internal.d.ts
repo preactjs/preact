@@ -167,7 +167,6 @@ declare global {
 		// When component is functional component, this is reset to functional component
 		constructor: ComponentType<P>;
 		state: S; // Override Component["state"] to not be readonly for internal use, specifically Hooks
-		base?: PreactElement;
 
 		_dirty: boolean;
 		_force?: boolean;
