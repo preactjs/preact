@@ -99,6 +99,7 @@ declare global {
 		readonly attributes?: Element['attributes'];
 		setAttribute?: Element['setAttribute'];
 		removeAttribute?: Element['removeAttribute'];
+		remove?: Element['remove'];
 
 		// Event listeners
 		addEventListener?: Element['addEventListener'];
