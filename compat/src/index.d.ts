@@ -4,7 +4,6 @@ import * as _hooks from '../../hooks';
 import * as preact from 'preact';
 import { JSXInternal } from '../../src/jsx';
 import * as _Suspense from './suspense';
-import * as _SuspenseList from './suspense-list';
 
 interface SignalLike<T> {
 	value: T;
@@ -73,7 +72,6 @@ declare namespace React {
 	// Suspense
 	export import Suspense = _Suspense.Suspense;
 	export import lazy = _Suspense.lazy;
-	export import SuspenseList = _SuspenseList.SuspenseList;
 
 	// Compat
 	export import StrictMode = preact.Fragment;
