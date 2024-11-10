@@ -50,3 +50,18 @@ function ReactSuspenseListTester(_props: any) {
 		</React.SuspenseList>
 	);
 }
+
+const Comp = () => <p>Hello world</p>;
+
+const importComponent = async () => {
+	return { MyComponent: Comp };
+};
+
+const Lazy = React.lazy(() =>
+	importComponent().then(mod => ({ default: mod.MyComponent }))
+);
+
+// eslint-disable-next-line
+function App() {
+	return <Lazy />;
+}
