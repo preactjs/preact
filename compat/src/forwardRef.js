@@ -10,11 +10,7 @@ options._diff = vnode => {
 	if (oldDiffHook) oldDiffHook(vnode);
 };
 
-export const REACT_FORWARD_SYMBOL =
-	(typeof Symbol != 'undefined' &&
-		Symbol.for &&
-		Symbol.for('react.forward_ref')) ||
-	0xf47;
+export const REACT_FORWARD_SYMBOL = Symbol.for('react.forward_ref');
 
 /**
  * Pass ref down to a child. This is mainly used in libraries with HOCs that
