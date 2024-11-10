@@ -217,7 +217,7 @@ Suspense.prototype.render = function (props, state) {
 
 /**
  * Checks and calls the parent component's _suspended method, passing in the
- * suspended vnode. This is a way for a parent (e.g. SuspenseList) to get notified
+ * suspended vnode. This is a way for a parent to get notified
  * that one of its children/descendants suspended.
  *
  * The parent MAY return a callback. The callback will get called when the
@@ -232,7 +232,7 @@ Suspense.prototype.render = function (props, state) {
  * @param {import('./internal').VNode} vnode
  * @returns {((unsuspend: () => void) => void)?}
  */
-export function suspended(vnode) {
+function suspended(vnode) {
 	/** @type {import('./internal').Component} */
 	let component = vnode._parent._component;
 	return component && component._suspended && component._suspended(vnode);
