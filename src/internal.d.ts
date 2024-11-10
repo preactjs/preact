@@ -84,6 +84,52 @@ declare global {
 		contextType?: PreactContext;
 	}
 
+	export interface VNode<P = {}> extends preact.VNode<P> {
+		// Redefine type here using our internal ComponentType type
+		type: string | ComponentType<P>;
+		props: P & { children: ComponentChildren };
+		/**
+		 * Internal GUID for this VNode, used for fast equality checks.
+		 * Note: h() allocates monotonic positive integer IDs, jsx() allocates negative.
+		 * @private
+		 */
+		_original: number;
+	}
+
+	/**
+	 * An Internal is a persistent backing node within Preact's virtual DOM tree.
+	 * Think of an Internal like a long-lived VNode with stored data and tree linkages.
+	 */
+	export interface Internal<P = {}> {
+		type: string | ComponentType<P>;
+		/** The props object for Elements/Components, and the string contents for Text */
+		props: (P & { children: ComponentChildren }) | string | number;
+		key: any;
+		ref: Ref<any> | null;
+
+		/** Bitfield containing information about the Internal or its component. */
+		flags: number;
+		/** Polymorphic property to store extensions like hooks on */
+		data: object | PreactNode;
+		/** The function that triggers in-place re-renders for an internal */
+		rerender: (internal: Internal) => void;
+
+		/** children Internal nodes */
+		_children: Internal[];
+		/** next sibling Internal node */
+		_parent: Internal;
+		/** most recent vnode ID */
+		_vnodeId: number;
+		/**
+		 * Associated DOM element for the Internal, or its nearest realized descendant.
+		 * For Fragments, this is the first DOM child.
+		 */
+		/** The component instance for which this is a backing Internal node */
+		_component: Component | null;
+		/** This Internal's distance from the tree root */
+		_depth: number | null;
+	}
+
 	// Redefine ComponentType using our new internal FunctionComponent interface above
 	export type ComponentType<P = {}> = ComponentClass<P> | FunctionComponent<P>;
 
@@ -121,7 +167,7 @@ declare global {
 		checked?: HTMLInputElement['checked'];
 
 		// Internal properties
-		_children?: VNode<any> | null;
+		_children?: Internal<any> | null;
 		/** Event listeners to support event delegation */
 		_listeners?: Record<string, (e: Event) => void>;
 	}
@@ -145,22 +191,8 @@ declare global {
 		type: (string & { defaultProps: undefined }) | ComponentType<P>;
 		props: P & { children: ComponentChildren };
 		ref?: Ref<any> | null;
-		_children: Array<VNode<any>> | null;
-		_parent: VNode | null;
-		_depth: number | null;
-		/**
-		 * The [first (for Fragments)] DOM child of a VNode
-		 */
-		_dom: PreactElement | null;
-		/**
-		 * The last dom child of a Fragment, or components that return a Fragment
-		 */
-		_nextDom: PreactElement | null | undefined;
-		_component: Component | null;
 		constructor: undefined;
 		_original: number;
-		_index: number;
-		_flags: number;
 	}
 
 	export interface Component<P = {}, S = {}> extends preact.Component<P, S> {

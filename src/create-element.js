@@ -62,20 +62,8 @@ export function createVNode(type, props, key, ref, original) {
 		props,
 		key,
 		ref,
-		_children: null,
-		_parent: null,
-		_depth: 0,
-		_dom: null,
-		// _nextDom must be initialized to undefined b/c it will eventually
-		// be set to dom.nextSibling which can return `null` and it is important
-		// to be able to distinguish between an uninitialized _nextDom and
-		// a _nextDom that has been set to `null`
-		_nextDom: undefined,
-		_component: null,
 		constructor: undefined,
-		_original: original == null ? ++vnodeId : original,
-		_index: -1,
-		_flags: 0
+		_original: original == null ? ++vnodeId : original
 	};
 
 	// Only invoke the vnode hook if this was *not* a direct copy:

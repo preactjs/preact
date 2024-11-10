@@ -2,7 +2,7 @@ import { assign } from './util';
 import { diff, commitRoot } from './diff/index';
 import options from './options';
 import { Fragment } from './create-element';
-import { MODE_HYDRATE } from './constants';
+import { DIRTY_BIT, MODE_HYDRATE } from './constants';
 
 /**
  * Base Component class. Provides `setState()` and `forceUpdate()`, which
@@ -198,6 +198,23 @@ export function enqueueRender(c) {
 		(!c._dirty &&
 			(c._dirty = true) &&
 			rerenderQueue.push(c) &&
+			!process._rerenderCount++) ||
+		prevDebounce !== options.debounceRendering
+	) {
+		prevDebounce = options.debounceRendering;
+		(prevDebounce || queueMicrotask)(process);
+	}
+}
+
+/**
+ * Enqueue a rerender of a component
+ * @param {Internal} internal The component to rerender
+ */
+export function enqueueRenderInternal(internal) {
+	if (
+		(!(internal.flags & DIRTY_BIT) &&
+			(internal.flags |= DIRTY_BIT) &&
+			rerenderQueue.push(internal) &&
 			!process._rerenderCount++) ||
 		prevDebounce !== options.debounceRendering
 	) {

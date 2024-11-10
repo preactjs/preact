@@ -3,6 +3,7 @@ import { commitRoot, diff } from './diff/index';
 import { createElement, Fragment } from './create-element';
 import options from './options';
 import { slice } from './util';
+import { createInternal } from './backing-node';
 
 /**
  * Render a Preact virtual node into a DOM element
@@ -26,7 +27,8 @@ export function render(vnode, parentDom, replaceNode) {
 	// means that we are mounting a new tree for the first time.
 	let oldVNode = isHydrating ? null : parentDom._children;
 
-	vnode = parentDom._children = createElement(Fragment, null, [vnode]);
+	vnode = createElement(Fragment, null, [vnode]);
+	const rootInternal = (parentDom._children = createInternal(vnode));
 
 	// List of effects that need to be called after diffing.
 	let commitQueue = [],
