@@ -2063,42 +2063,50 @@ export namespace JSXInternal {
 		scriptlevel?: Signalish<string | undefined>;
 	}
 
-	export interface AnnotationMathMLAttributes extends MathMLElement {
+	export interface AnnotationMathMLAttributes<T extends EventTarget>
+		extends MathMLAttributes<T> {
 		encoding?: Signalish<string | undefined>;
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/semantics#src */
 		src?: Signalish<string | undefined>;
 	}
 
-	export interface AnnotationXmlMathMLAttributes extends MathMLElement {
+	export interface AnnotationXmlMathMLAttributes<T extends EventTarget>
+		extends MathMLAttributes<T> {
 		encoding?: Signalish<string | undefined>;
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/semantics#src */
 		src?: Signalish<string | undefined>;
 	}
 
-	export interface MActionMathMLAttributes extends MathMLElement {
+	export interface MActionMathMLAttributes<T extends EventTarget>
+		extends MathMLAttributes<T> {
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/maction#actiontype */
 		actiontype?: Signalish<'statusline' | 'toggle' | undefined>;
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/maction#selection */
 		selection?: Signalish<string | undefined>;
 	}
 
-	export interface MathMathMLAttributes extends MathMLElement {
+	export interface MathMathMLAttributes<T extends EventTarget>
+		extends MathMLAttributes<T> {
 		display?: Signalish<'block' | 'inline' | undefined>;
 	}
 
-	export interface MEncloseMathMLAttributes extends MathMLElement {
+	export interface MEncloseMathMLAttributes<T extends EventTarget>
+		extends MathMLAttributes<T> {
 		notation?: Signalish<string | undefined>;
 	}
 
-	export interface MErrorMathMLAttributes extends MathMLElement {}
+	export interface MErrorMathMLAttributes<T extends EventTarget>
+		extends MathMLAttributes<T> {}
 
-	export interface MFencedMathMLAttributes extends MathMLElement {
+	export interface MFencedMathMLAttributes<T extends EventTarget>
+		extends MathMLAttributes<T> {
 		close?: Signalish<string | undefined>;
 		open?: Signalish<string | undefined>;
 		separators?: Signalish<string | undefined>;
 	}
 
-	export interface MFracMathMLAttributes extends MathMLElement {
+	export interface MFracMathMLAttributes<T extends EventTarget>
+		extends MathMLAttributes<T> {
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mfrac#denomalign */
 		denomalign?: Signalish<'center' | 'left' | 'right' | undefined>;
 		linethickness?: Signalish<string | undefined>;
@@ -2106,7 +2114,8 @@ export namespace JSXInternal {
 		numalign?: Signalish<'center' | 'left' | 'right' | undefined>;
 	}
 
-	export interface MiMathMLAttributes extends MathMLElement {
+	export interface MiMathMLAttributes<T extends EventTarget>
+		extends MathMLAttributes<T> {
 		/** The only value allowed in the current specification is normal (case insensitive)
 		 * See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mi#mathvariant */
 		mathvariant?: Signalish<
@@ -2132,16 +2141,19 @@ export namespace JSXInternal {
 		>;
 	}
 
-	export interface MmultiScriptsMathMLAttributes extends MathMLElement {
+	export interface MmultiScriptsMathMLAttributes<T extends EventTarget>
+		extends MathMLAttributes<T> {
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mmultiscripts#subscriptshift */
 		subscriptshift?: Signalish<string | undefined>;
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mmultiscripts#superscriptshift */
 		superscriptshift?: Signalish<string | undefined>;
 	}
 
-	export interface MNMathMLAttributes extends MathMLElement {}
+	export interface MNMathMLAttributes<T extends EventTarget>
+		extends MathMLAttributes<T> {}
 
-	export interface MOMathMLAttributes extends MathMLElement {
+	export interface MOMathMLAttributes<T extends EventTarget>
+		extends MathMLAttributes<T> {
 		/** Non-standard attribute See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mo#accent */
 		accent?: Signalish<boolean | undefined>;
 		fence?: Signalish<boolean | undefined>;
@@ -2156,11 +2168,13 @@ export namespace JSXInternal {
 		symmetric?: Signalish<boolean | undefined>;
 	}
 
-	export interface MOverMathMLAttributes extends MathMLElement {
+	export interface MOverMathMLAttributes<T extends EventTarget>
+		extends MathMLAttributes<T> {
 		accent?: Signalish<boolean | undefined>;
 	}
 
-	export interface MPaddedMathMLAttributes extends MathMLElement {
+	export interface MPaddedMathMLAttributes<T extends EventTarget>
+		extends MathMLAttributes<T> {
 		depth?: Signalish<string | undefined>;
 		height?: Signalish<string | undefined>;
 		lspace?: Signalish<string | undefined>;
@@ -2168,30 +2182,38 @@ export namespace JSXInternal {
 		width?: Signalish<string | undefined>;
 	}
 
-	export interface MPhantomMathMLAttributes extends MathMLElement {}
+	export interface MPhantomMathMLAttributes<T extends EventTarget>
+		extends MathMLAttributes<T> {}
 
-	export interface MPrescriptsMathMLAttributes extends MathMLElement {}
+	export interface MPrescriptsMathMLAttributes<T extends EventTarget>
+		extends MathMLAttributes<T> {}
 
-	export interface MRootMathMLAttributes extends MathMLElement {}
+	export interface MRootMathMLAttributes<T extends EventTarget>
+		extends MathMLAttributes<T> {}
 
-	export interface MRowMathMLAttributes extends MathMLElement {}
+	export interface MRowMathMLAttributes<T extends EventTarget>
+		extends MathMLAttributes<T> {}
 
-	export interface MSMathMLAttributes extends MathMLElement {
+	export interface MSMathMLAttributes<T extends EventTarget>
+		extends MathMLAttributes<T> {
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/ms#browser_compatibility */
 		lquote?: Signalish<string | undefined>;
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/ms#browser_compatibility */
 		rquote?: Signalish<string | undefined>;
 	}
 
-	export interface MSpaceMathMLAttributes extends MathMLElement {
+	export interface MSpaceMathMLAttributes<T extends EventTarget>
+		extends MathMLAttributes<T> {
 		depth?: Signalish<string | undefined>;
 		height?: Signalish<string | undefined>;
 		width?: Signalish<string | undefined>;
 	}
 
-	export interface MSqrtMathMLAttributes extends MathMLElement {}
+	export interface MSqrtMathMLAttributes<T extends EventTarget>
+		extends MathMLAttributes<T> {}
 
-	export interface MStyleMathMLAttributes extends MathMLElement {
+	export interface MStyleMathMLAttributes<T extends EventTarget>
+		extends MathMLAttributes<T> {
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mstyle#background */
 		background?: Signalish<string | undefined>;
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mstyle#color */
@@ -2208,24 +2230,28 @@ export namespace JSXInternal {
 		scriptsizemultiplier?: Signalish<string | undefined>;
 	}
 
-	export interface MSubMathMLAttributes extends MathMLElement {
+	export interface MSubMathMLAttributes<T extends EventTarget>
+		extends MathMLAttributes<T> {
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/msub#subscriptshift */
 		subscriptshift?: Signalish<string | undefined>;
 	}
 
-	export interface MSubsupMathMLAttributes extends MathMLElement {
+	export interface MSubsupMathMLAttributes<T extends EventTarget>
+		extends MathMLAttributes<T> {
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/msubsup#subscriptshift */
 		subscriptshift?: Signalish<string | undefined>;
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/msubsup#superscriptshift */
 		superscriptshift?: Signalish<string | undefined>;
 	}
 
-	export interface MSupMathMLAttributes extends MathMLElement {
+	export interface MSupMathMLAttributes<T extends EventTarget>
+		extends MathMLAttributes<T> {
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/msup#superscriptshift */
 		superscriptshift?: Signalish<string | undefined>;
 	}
 
-	export interface MTableMathMLAttributes extends MathMLElement {
+	export interface MTableMathMLAttributes<T extends EventTarget>
+		extends MathMLAttributes<T> {
 		/** Non-standard attribute See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mtable#align */
 		align?: Signalish<
 			'axis' | 'baseline' | 'bottom' | 'center' | 'top' | undefined
@@ -2252,7 +2278,8 @@ export namespace JSXInternal {
 		width?: Signalish<string | undefined>;
 	}
 
-	export interface MTdMathMLAttributes extends MathMLElement {
+	export interface MTdMathMLAttributes<T extends EventTarget>
+		extends MathMLAttributes<T> {
 		columnspan?: Signalish<number | undefined>;
 		rowspan?: Signalish<number | undefined>;
 		/** Non-standard attribute See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mtd#columnalign */
@@ -2263,9 +2290,11 @@ export namespace JSXInternal {
 		>;
 	}
 
-	export interface MTextMathMLAttributes extends MathMLElement {}
+	export interface MTextMathMLAttributes<T extends EventTarget>
+		extends MathMLAttributes<T> {}
 
-	export interface MTrMathMLAttributes extends MathMLElement {
+	export interface MTrMathMLAttributes<T extends EventTarget>
+		extends MathMLAttributes<T> {
 		/** Non-standard attribute See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mtr#columnalign */
 		columnalign?: Signalish<'center' | 'left' | 'right' | undefined>;
 		/** Non-standard attribute See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mtr#rowalign */
@@ -2274,16 +2303,19 @@ export namespace JSXInternal {
 		>;
 	}
 
-	export interface MUnderMathMLAttributes extends MathMLElement {
+	export interface MUnderMathMLAttributes<T extends EventTarget>
+		extends MathMLAttributes<T> {
 		accentunder?: Signalish<boolean | undefined>;
 	}
 
-	export interface MUnderoverMathMLAttributes extends MathMLElement {
+	export interface MUnderoverMathMLAttributes<T extends EventTarget>
+		extends MathMLAttributes<T> {
 		accent?: Signalish<boolean | undefined>;
 		accentunder?: Signalish<boolean | undefined>;
 	}
 
-	export interface SemanticsMathMLAttributes extends MathMLElement {}
+	export interface SemanticsMathMLAttributes<T extends EventTarget>
+		extends MathMLAttributes<T> {}
 
 	export interface IntrinsicSVGElements {
 		svg: SVGAttributes<SVGSVGElement>;
@@ -2348,41 +2380,41 @@ export namespace JSXInternal {
 	}
 
 	export interface IntrinsicMathMLElements {
-		'annotation-xml': MathMLAttributes<HTMLAnnotationXmlElement>;
-		annotation: MathMLAttributes<HTMLAnnotationElement>;
+		annotation: AnnotationMathMLAttributes<MathMLElement>;
+		'annotation-xml': AnnotationXmlMathMLAttributes<MathMLElement>;
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/maction */
-		maction: MathMLAttributes<HTMLMActionElement>;
-		math: MathMLAttributes<HTMLMathElement>;
+		maction: MActionMathMLAttributes<MathMLElement>;
+		math: MathMathMLAttributes<MathMLElement>;
 		/** This feature is non-standard. See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/menclose  */
-		menclose: MathMLAttributes<HTMLMEncloseElement>;
-		merror: MathMLAttributes<HTMLMErrorElement>;
+		menclose: MEncloseMathMLAttributes<MathMLElement>;
+		merror: MErrorMathMLAttributes<MathMLElement>;
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mfenced */
-		mfenced: HTMLAttributes<HTMLMFencedElement>;
-		mfrac: MathMLAttributes<HTMLMFracElement>;
-		mi: MathMLAttributes<HTMLMiElement>;
-		mmultiscripts: MathMLAttributes<HTMLMmultiScriptsElement>;
-		mn: MathMLAttributes<HTMLMNElement>;
-		mo: MathMLAttributes<HTMLMOElement>;
-		mover: MathMLAttributes<HTMLMOverElement>;
-		mpadded: MathMLAttributes<HTMLMPaddedElement>;
-		mphantom: MathMLAttributes<HTMLMPhantomElement>;
-		mprescripts: MathMLAttributes<HTMLMPrescriptsElement>;
-		mroot: MathMLAttributes<HTMLMRootElement>;
-		mrow: MathMLAttributes<HTMLMRowElement>;
-		ms: MathMLAttributes<HTMLMSElement>;
-		mspace: MathMLAttributes<HTMLMSpaceElement>;
-		msqrt: MathMLAttributes<HTMLMSqrtElement>;
-		mstyle: MathMLAttributes<HTMLMStyleElement>;
-		msub: MathMLAttributes<HTMLMSubElement>;
-		msubsup: MathMLAttributes<HTMLMSubsupElement>;
-		msup: MathMLAttributes<HTMLMSupElement>;
-		mtable: MathMLAttributes<HTMLMTableElement>;
-		mtd: MathMLAttributes<HTMLMTdElement>;
-		mtext: MathMLAttributes<HTMLMTextElement>;
-		mtr: MathMLAttributes<HTMLMTrElement>;
-		munder: MathMLAttributes<HTMLMUnderElement>;
-		munderover: MathMLAttributes<HTMLMUnderoverElement>;
-		semantics: MathMLAttributes<HTMLSemanticsElement>;
+		mfenced: MFencedMathMLAttributes<MathMLElement>;
+		mfrac: MFracMathMLAttributes<MathMLElement>;
+		mi: MiMathMLAttributes<MathMLElement>;
+		mmultiscripts: MmultiScriptsMathMLAttributes<MathMLElement>;
+		mn: MNMathMLAttributes<MathMLElement>;
+		mo: MOMathMLAttributes<MathMLElement>;
+		mover: MOverMathMLAttributes<MathMLElement>;
+		mpadded: MPaddedMathMLAttributes<MathMLElement>;
+		mphantom: MPhantomMathMLAttributes<MathMLElement>;
+		mprescripts: MPrescriptsMathMLAttributes<MathMLElement>;
+		mroot: MRootMathMLAttributes<MathMLElement>;
+		mrow: MRowMathMLAttributes<MathMLElement>;
+		ms: MSMathMLAttributes<MathMLElement>;
+		mspace: MSpaceMathMLAttributes<MathMLElement>;
+		msqrt: MSqrtMathMLAttributes<MathMLElement>;
+		mstyle: MStyleMathMLAttributes<MathMLElement>;
+		msub: MSubMathMLAttributes<MathMLElement>;
+		msubsup: MSubsupMathMLAttributes<MathMLElement>;
+		msup: MSupMathMLAttributes<MathMLElement>;
+		mtable: MTableMathMLAttributes<MathMLElement>;
+		mtd: MTdMathMLAttributes<MathMLElement>;
+		mtext: MTextMathMLAttributes<MathMLElement>;
+		mtr: MTrMathMLAttributes<MathMLElement>;
+		munder: MUnderMathMLAttributes<MathMLElement>;
+		munderover: MUnderMathMLAttributes<MathMLElement>;
+		semantics: SemanticsMathMLAttributes<MathMLElement>;
 	}
 
 	export interface IntrinsicElements
