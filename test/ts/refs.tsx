@@ -25,12 +25,12 @@ class CallbackRef extends Component {
 	};
 	fooRef: RefCallback<Component> = foo => {
 		if (foo !== null) {
-			console.log(foo.base);
+			console.log(foo);
 		}
 	};
 	barRef: RefCallback<Bar> = bar => {
 		if (bar !== null) {
-			console.log(bar.base);
+			console.log(bar);
 		}
 	};
 
@@ -56,11 +56,11 @@ class CreateRefComponent extends Component {
 		}
 
 		if (this.fooRef.current != null) {
-			console.log(this.fooRef.current.base);
+			console.log(this.fooRef.current);
 		}
 
 		if (this.barRef.current != null) {
-			console.log(this.barRef.current.base);
+			console.log(this.barRef.current);
 		}
 	}
 
