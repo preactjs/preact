@@ -1,9 +1,8 @@
 - https://github.com/preactjs/preact/pull/4362
 - https://github.com/preactjs/preact/pull/4358
 - https://github.com/preactjs/preact/pull/4361
-- https://github.com/preactjs/preact/pull/4460
-- https://github.com/preactjs/preact/pull/4453
 - Backing VNodes
+- Enable removing classes from the bundle
 - Remove deprecated lifecycle methods
 - Try to get rid of DOM pointers
 - Separate mount/update paths
