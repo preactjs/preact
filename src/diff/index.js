@@ -278,8 +278,6 @@ export function diff(
 				refQueue
 			);
 
-			c.base = newVNode._dom;
-
 			// We successfully rendered this VNode, unset any stored hydration/bailout state:
 			newVNode._flags &= RESET_MODE;
 
@@ -645,7 +643,7 @@ export function unmount(vnode, parentVNode, skipRemove) {
 			}
 		}
 
-		r.base = r._parentDom = NULL;
+		r._parentDom = NULL;
 	}
 
 	if ((r = vnode._children)) {
