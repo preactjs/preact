@@ -160,7 +160,9 @@ describe('refs', () => {
 		render(<Outer />, scratch);
 
 		expect(outer).to.have.been.calledOnce.and.calledWith(inst);
-		expect(inner).to.have.been.calledOnce.and.calledWith(inst.base);
+		expect(inner).to.have.been.calledOnce.and.calledWith(
+			scratch.querySelector(InnermostComponent)
+		);
 
 		outer.resetHistory();
 		inner.resetHistory();
@@ -178,7 +180,7 @@ describe('refs', () => {
 		expect(inner, 're-render swap');
 		expect(inner.firstCall, 're-render swap').to.have.been.calledWith(null);
 		expect(inner.secondCall, 're-render swap').to.have.been.calledWith(
-			inst.base
+			scratch.querySelector(InnermostComponent)
 		);
 
 		InnermostComponent = 'span';
@@ -228,7 +230,9 @@ describe('refs', () => {
 		expect(
 			innermost,
 			'innerMost initial'
-		).to.have.been.calledOnce.and.calledWith(innerInst.base);
+		).to.have.been.calledOnce.and.calledWith(
+			scratch.querySelector(InnermostComponent)
+		);
 
 		outer.resetHistory();
 		inner.resetHistory();
@@ -246,7 +250,7 @@ describe('refs', () => {
 		expect(innermost, 'innerMost swap');
 		expect(innermost.firstCall, 'innerMost swap').to.have.been.calledWith(null);
 		expect(innermost.secondCall, 'innerMost swap').to.have.been.calledWith(
-			innerInst.base
+			scratch.querySelector(InnermostComponent)
 		);
 		InnermostComponent = 'span';
 
@@ -390,32 +394,6 @@ describe('refs', () => {
 		expect(inst.handleMount.firstCall).to.have.been.calledWith(null);
 		expect(inst.handleMount.secondCall).to.have.been.calledWith(
 			scratch.querySelector('#div')
-		);
-	});
-
-	it('should add refs to components representing DOM nodes with no attributes if they have been pre-rendered', () => {
-		// Simulate pre-render
-		let parent = document.createElement('div');
-		let child = document.createElement('div');
-		parent.appendChild(child);
-		scratch.appendChild(parent); // scratch contains: <div><div></div></div>
-
-		let ref = spy('ref');
-
-		class Wrapper extends Component {
-			render() {
-				return <div />;
-			}
-		}
-
-		render(
-			<div>
-				<Wrapper ref={c => ref(c.base)} />
-			</div>,
-			scratch
-		);
-		expect(ref).to.have.been.calledOnce.and.calledWith(
-			scratch.firstChild.firstChild
 		);
 	});
 

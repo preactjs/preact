@@ -4,6 +4,7 @@
 - https://github.com/preactjs/preact/pull/4460
 - https://github.com/preactjs/preact/pull/4453
 - Backing VNodes
+- Remove deprecated lifecycle methods
 - Try to get rid of DOM pointers
 - Separate mount/update paths
 - Rethink TypeScript types
