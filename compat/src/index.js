@@ -116,7 +116,8 @@ function unmountComponentAtNode(container) {
 function findDOMNode(component) {
 	return (
 		(component &&
-			(component.base || (component.nodeType === 1 && component))) ||
+			((component._vnode && component._vnode._dom) ||
+				(component.nodeType === 1 && component))) ||
 		null
 	);
 }
