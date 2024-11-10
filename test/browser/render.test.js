@@ -1817,6 +1817,46 @@ describe('render()', () => {
 		expect(scratch.textContent).to.equal('A');
 	});
 
+	it('should retain state for inserted children', () => {
+		class X extends Component {
+			constructor(props) {
+				super(props);
+				this.name = props.name;
+			}
+			render() {
+				return <p>{this.name}</p>;
+			}
+		}
+
+		function Foo({ condition }) {
+			// We swap the prop from A to B but we don't expect this to
+			// reflect in text-content as we are testing whether the
+			// state is retained for a skew that matches the original children.
+			//
+			// We insert <span /> which should amount to a skew of -1 which should
+			// make us correctly match the X component.
+			return condition ? (
+				<div>
+					<span />
+					<X name="B" />
+				</div>
+			) : (
+				<div>
+					<X name="A" />
+				</div>
+			);
+		}
+
+		render(<Foo />, scratch);
+		expect(scratch.textContent).to.equal('A');
+
+		render(<Foo condition />, scratch);
+		expect(scratch.textContent).to.equal('A');
+
+		render(<Foo />, scratch);
+		expect(scratch.textContent).to.equal('A');
+	});
+
 	it('handle shuffled (stress test)', () => {
 		function randomize(arr) {
 			for (let i = arr.length - 1; i > 0; i--) {
