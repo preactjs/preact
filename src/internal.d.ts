@@ -95,6 +95,7 @@ export interface PreactElement extends preact.ContainerNode {
 	data?: CharacterData['data'];
 	// Property to set __dangerouslySetInnerHTML
 	innerHTML?: Element['innerHTML'];
+	remove?: Element['remove'];
 
 	// Attribute reading and setting
 	readonly attributes?: Element['attributes'];
@@ -162,7 +163,6 @@ export interface Component<P = {}, S = {}> extends Omit<preact.Component<P, S>, 
 	// When component is functional component, this is reset to functional component
 	constructor: ComponentType<P>;
 	state: S; // Override Component["state"] to not be readonly for internal use, specifically Hooks
-	base?: PreactElement;
 
 	_dirty: boolean;
 	_force?: boolean;
