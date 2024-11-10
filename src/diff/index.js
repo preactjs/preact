@@ -305,7 +305,9 @@ export function diff(
 					newVNode._dom = oldDom;
 				} else {
 					for (let i = excessDomChildren.length; i--; ) {
-						removeNode(excessDomChildren[i]);
+						if (excessDomChildren[i]) {
+							excessDomChildren[i].remove();
+						}
 					}
 				}
 			} else {
