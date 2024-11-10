@@ -2063,42 +2063,42 @@ export namespace JSXInternal {
 		scriptlevel?: Signalish<string | undefined>;
 	}
 
-	export interface HTMLAnnotationElement extends MathMLElement {
+	export interface AnnotationMathMLAttributes extends MathMLElement {
 		encoding?: Signalish<string | undefined>;
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/semantics#src */
 		src?: Signalish<string | undefined>;
 	}
 
-	export interface HTMLAnnotationXmlElement extends MathMLElement {
+	export interface AnnotationXmlMathMLAttributes extends MathMLElement {
 		encoding?: Signalish<string | undefined>;
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/semantics#src */
 		src?: Signalish<string | undefined>;
 	}
 
-	export interface HTMLMActionElement extends MathMLElement {
+	export interface MActionMathMLAttributes extends MathMLElement {
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/maction#actiontype */
 		actiontype?: Signalish<'statusline' | 'toggle' | undefined>;
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/maction#selection */
 		selection?: Signalish<string | undefined>;
 	}
 
-	export interface HTMLMathElement extends MathMLElement {
+	export interface MathMathMLAttributes extends MathMLElement {
 		display?: Signalish<'block' | 'inline' | undefined>;
 	}
 
-	export interface HTMLMEncloseElement extends MathMLElement {
+	export interface MEncloseMathMLAttributes extends MathMLElement {
 		notation?: Signalish<string | undefined>;
 	}
 
-	export interface HTMLMErrorElement extends MathMLElement {}
+	export interface MErrorMathMLAttributes extends MathMLElement {}
 
-	export interface HTMLMFencedElement extends MathMLElement {
+	export interface MFencedMathMLAttributes extends MathMLElement {
 		close?: Signalish<string | undefined>;
 		open?: Signalish<string | undefined>;
 		separators?: Signalish<string | undefined>;
 	}
 
-	export interface HTMLMFracElement extends MathMLElement {
+	export interface MFracMathMLAttributes extends MathMLElement {
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mfrac#denomalign */
 		denomalign?: Signalish<'center' | 'left' | 'right' | undefined>;
 		linethickness?: Signalish<string | undefined>;
@@ -2106,7 +2106,7 @@ export namespace JSXInternal {
 		numalign?: Signalish<'center' | 'left' | 'right' | undefined>;
 	}
 
-	export interface HTMLMiElement extends MathMLElement {
+	export interface MiMathMLAttributes extends MathMLElement {
 		/** The only value allowed in the current specification is normal (case insensitive)
 		 * See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mi#mathvariant */
 		mathvariant?: Signalish<
@@ -2132,16 +2132,16 @@ export namespace JSXInternal {
 		>;
 	}
 
-	export interface HTMLMmultiScriptsElement extends MathMLElement {
+	export interface MmultiScriptsMathMLAttributes extends MathMLElement {
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mmultiscripts#subscriptshift */
 		subscriptshift?: Signalish<string | undefined>;
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mmultiscripts#superscriptshift */
 		superscriptshift?: Signalish<string | undefined>;
 	}
 
-	export interface HTMLMNElement extends MathMLElement {}
+	export interface MNMathMLAttributes extends MathMLElement {}
 
-	export interface HTMLMOElement extends MathMLElement {
+	export interface MOMathMLAttributes extends MathMLElement {
 		/** Non-standard attribute See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mo#accent */
 		accent?: Signalish<boolean | undefined>;
 		fence?: Signalish<boolean | undefined>;
@@ -2156,11 +2156,11 @@ export namespace JSXInternal {
 		symmetric?: Signalish<boolean | undefined>;
 	}
 
-	export interface HTMLMOverElement extends MathMLElement {
+	export interface MOverMathMLAttributes extends MathMLElement {
 		accent?: Signalish<boolean | undefined>;
 	}
 
-	export interface HTMLMPaddedElement extends MathMLElement {
+	export interface MPaddedMathMLAttributes extends MathMLElement {
 		depth?: Signalish<string | undefined>;
 		height?: Signalish<string | undefined>;
 		lspace?: Signalish<string | undefined>;
@@ -2168,30 +2168,30 @@ export namespace JSXInternal {
 		width?: Signalish<string | undefined>;
 	}
 
-	export interface HTMLMPhantomElement extends MathMLElement {}
+	export interface MPhantomMathMLAttributes extends MathMLElement {}
 
-	export interface HTMLMPrescriptsElement extends MathMLElement {}
+	export interface MPrescriptsMathMLAttributes extends MathMLElement {}
 
-	export interface HTMLMRootElement extends MathMLElement {}
+	export interface MRootMathMLAttributes extends MathMLElement {}
 
-	export interface HTMLMRowElement extends MathMLElement {}
+	export interface MRowMathMLAttributes extends MathMLElement {}
 
-	export interface HTMLMSElement extends MathMLElement {
+	export interface MSMathMLAttributes extends MathMLElement {
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/ms#browser_compatibility */
 		lquote?: Signalish<string | undefined>;
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/ms#browser_compatibility */
 		rquote?: Signalish<string | undefined>;
 	}
 
-	export interface HTMLMSpaceElement extends MathMLElement {
+	export interface MSpaceMathMLAttributes extends MathMLElement {
 		depth?: Signalish<string | undefined>;
 		height?: Signalish<string | undefined>;
 		width?: Signalish<string | undefined>;
 	}
 
-	export interface HTMLMSqrtElement extends MathMLElement {}
+	export interface MSqrtMathMLAttributes extends MathMLElement {}
 
-	export interface HTMLMStyleElement extends MathMLElement {
+	export interface MStyleMathMLAttributes extends MathMLElement {
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mstyle#background */
 		background?: Signalish<string | undefined>;
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mstyle#color */
@@ -2208,24 +2208,24 @@ export namespace JSXInternal {
 		scriptsizemultiplier?: Signalish<string | undefined>;
 	}
 
-	export interface HTMLMSubElement extends MathMLElement {
+	export interface MSubMathMLAttributes extends MathMLElement {
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/msub#subscriptshift */
 		subscriptshift?: Signalish<string | undefined>;
 	}
 
-	export interface HTMLMSubsupElement extends MathMLElement {
+	export interface MSubsupMathMLAttributes extends MathMLElement {
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/msubsup#subscriptshift */
 		subscriptshift?: Signalish<string | undefined>;
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/msubsup#superscriptshift */
 		superscriptshift?: Signalish<string | undefined>;
 	}
 
-	export interface HTMLMSupElement extends MathMLElement {
+	export interface MSupMathMLAttributes extends MathMLElement {
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/msup#superscriptshift */
 		superscriptshift?: Signalish<string | undefined>;
 	}
 
-	export interface HTMLMTableElement extends MathMLElement {
+	export interface MTableMathMLAttributes extends MathMLElement {
 		/** Non-standard attribute See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mtable#align */
 		align?: Signalish<
 			'axis' | 'baseline' | 'bottom' | 'center' | 'top' | undefined
@@ -2252,7 +2252,7 @@ export namespace JSXInternal {
 		width?: Signalish<string | undefined>;
 	}
 
-	export interface HTMLMTdElement extends MathMLElement {
+	export interface MTdMathMLAttributes extends MathMLElement {
 		columnspan?: Signalish<number | undefined>;
 		rowspan?: Signalish<number | undefined>;
 		/** Non-standard attribute See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mtd#columnalign */
@@ -2263,9 +2263,9 @@ export namespace JSXInternal {
 		>;
 	}
 
-	export interface HTMLMTextElement extends MathMLElement {}
+	export interface MTextMathMLAttributes extends MathMLElement {}
 
-	export interface HTMLMTrElement extends MathMLElement {
+	export interface MTrMathMLAttributes extends MathMLElement {
 		/** Non-standard attribute See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mtr#columnalign */
 		columnalign?: Signalish<'center' | 'left' | 'right' | undefined>;
 		/** Non-standard attribute See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mtr#rowalign */
@@ -2274,16 +2274,16 @@ export namespace JSXInternal {
 		>;
 	}
 
-	export interface HTMLMUnderElement extends MathMLElement {
+	export interface MUnderMathMLAttributes extends MathMLElement {
 		accentunder?: Signalish<boolean | undefined>;
 	}
 
-	export interface HTMLMUnderoverElement extends MathMLElement {
+	export interface MUnderoverMathMLAttributes extends MathMLElement {
 		accent?: Signalish<boolean | undefined>;
 		accentunder?: Signalish<boolean | undefined>;
 	}
 
-	export interface HTMLSemanticsElement extends MathMLElement {}
+	export interface SemanticsMathMLAttributes extends MathMLElement {}
 
 	export interface IntrinsicSVGElements {
 		svg: SVGAttributes<SVGSVGElement>;
