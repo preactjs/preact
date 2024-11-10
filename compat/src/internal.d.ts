@@ -32,7 +32,7 @@ export interface FunctionComponent<P = {}> extends PreactFunctionComponent<P> {
 }
 
 export interface VNode<T = any> extends PreactVNode<T> {
-	$$typeof?: symbol | string;
+	$$typeof?: symbol;
 	preactCompatNormalized?: boolean;
 }
 
