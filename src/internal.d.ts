@@ -45,6 +45,11 @@ declare global {
 			oldVNode?: VNode | undefined,
 			errorInfo?: ErrorInfo | undefined
 		): void;
+		/** Attach a hook that fires when hydration can't find a proper DOM-node to match with */
+		_hydrationMismatch?(
+			vnode: VNode,
+			excessDomChildren: Array<PreactElement | null>
+		): void;
 	}
 
 	export type ComponentChild =
@@ -83,8 +88,8 @@ declare global {
 	export type ComponentType<P = {}> = ComponentClass<P> | FunctionComponent<P>;
 
 	export interface PreactElement extends preact.ContainerNode {
-		// SVG detection
-		readonly ownerSVGElement?: SVGElement['ownerSVGElement'];
+		// Namespace detection
+		readonly namespaceURI?: string;
 		// Property used to update Text nodes
 		data?: CharacterData['data'];
 		// Property to set __dangerouslySetInnerHTML
@@ -126,7 +131,10 @@ declare global {
 	// We use the `current` property to differentiate between the two kinds of Refs so
 	// internally we'll define `current` on both to make TypeScript happy
 	type RefObject<T> = { current: T | null };
-	type RefCallback<T> = { (instance: T | null): void; current: undefined };
+	type RefCallback<T> = {
+		(instance: T | null): void | (() => void);
+		current: undefined;
+	};
 	type Ref<T> = RefObject<T> | RefCallback<T>;
 
 	export interface VNode<P = {}> extends preact.VNode<P> {

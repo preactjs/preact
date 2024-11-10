@@ -58,7 +58,7 @@ export function getCurrentVNode() {
  * location of a component. In that case we just omit that, but we'll
  * print a helpful message to the console, notifying the user of it.
  */
-let hasBabelPlugin = false;
+let showJsxSourcePluginWarning = true;
 
 /**
  * Check if a `vnode` is a possible owner.
@@ -87,12 +87,12 @@ export function getOwnerStack(vnode) {
 		const source = owner.__source;
 		if (source) {
 			acc += ` (at ${source.fileName}:${source.lineNumber})`;
-		} else if (!hasBabelPlugin) {
-			hasBabelPlugin = true;
+		} else if (showJsxSourcePluginWarning) {
 			console.warn(
 				'Add @babel/plugin-transform-react-jsx-source to get a more detailed component stack. Note that you should not add it to production builds of your App for bundle size reasons.'
 			);
 		}
+		showJsxSourcePluginWarning = false;
 
 		return (acc += '\n');
 	}, '');

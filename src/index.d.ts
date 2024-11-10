@@ -83,8 +83,8 @@ export type ComponentProps<
 > = C extends ComponentType<infer P>
 	? P
 	: C extends keyof JSXInternal.IntrinsicElements
-	? JSXInternal.IntrinsicElements[C]
-	: never;
+		? JSXInternal.IntrinsicElements[C]
+		: never;
 
 export interface FunctionComponent<P = {}> {
 	(props: RenderableProps<P>, context?: any): VNode<any> | null;
@@ -110,7 +110,7 @@ export interface ComponentConstructor<P = {}, S = {}>
 // Type alias for a component instance considered generally, whether stateless or stateful.
 export type AnyComponent<P = {}, S = {}> =
 	| FunctionComponent<P>
-	| Component<P, S>;
+	| ComponentConstructor<P, S>;
 
 export interface Component<P = {}, S = {}> {
 	componentWillMount?(): void;
@@ -195,8 +195,8 @@ export function createElement(
 		| null,
 	...children: ComponentChildren[]
 ): VNode<
-	| JSXInternal.DOMAttributes<HTMLInputElement> &
-			ClassAttributes<HTMLInputElement>
+	JSXInternal.DOMAttributes<HTMLInputElement> &
+		ClassAttributes<HTMLInputElement>
 >;
 export function createElement<
 	P extends JSXInternal.HTMLAttributes<T>,
@@ -242,8 +242,8 @@ export function h(
 		| null,
 	...children: ComponentChildren[]
 ): VNode<
-	| JSXInternal.DOMAttributes<HTMLInputElement> &
-			ClassAttributes<HTMLInputElement>
+	JSXInternal.DOMAttributes<HTMLInputElement> &
+		ClassAttributes<HTMLInputElement>
 >;
 export function h<
 	P extends JSXInternal.HTMLAttributes<T>,
@@ -293,6 +293,7 @@ interface ContainerNode {
 	readonly firstChild: ContainerNode | null;
 	readonly childNodes: ArrayLike<ContainerNode>;
 
+	contains(other: ContainerNode | null): boolean;
 	insertBefore(node: ContainerNode, child: ContainerNode | null): ContainerNode;
 	appendChild(node: ContainerNode): ContainerNode;
 	removeChild(child: ContainerNode): ContainerNode;

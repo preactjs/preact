@@ -35,7 +35,7 @@ import {
 	__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED
 } from './render';
 
-const version = '17.0.2'; // trick libraries to think we are react
+const version = '18.3.1'; // trick libraries to think we are react
 
 /**
  * Legacy version of createElement.
@@ -61,6 +61,21 @@ function isValidElement(element) {
  */
 function isFragment(element) {
 	return isValidElement(element) && element.type === Fragment;
+}
+
+/**
+ * Check if the passed element is a Memo node.
+ * @param {*} element The element to check
+ * @returns {boolean}
+ */
+function isMemo(element) {
+	return (
+		!!element &&
+		!!element.displayName &&
+		(typeof element.displayName === 'string' ||
+			element.displayName instanceof String) &&
+		element.displayName.startsWith('Memo(')
+	);
 }
 
 /**
@@ -215,6 +230,7 @@ export {
 	Fragment,
 	isValidElement,
 	isFragment,
+	isMemo,
 	findDOMNode,
 	Component,
 	PureComponent,
@@ -263,6 +279,7 @@ export default {
 	isValidElement,
 	isElement,
 	isFragment,
+	isMemo,
 	findDOMNode,
 	Component,
 	PureComponent,

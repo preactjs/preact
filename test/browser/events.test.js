@@ -227,4 +227,60 @@ describe('event handling', () => {
 			.to.have.been.calledTwice.and.to.have.been.calledWith('gotpointercapture')
 			.and.calledWith('lostpointercapture');
 	});
+
+	it('should support camel-case focus event names', () => {
+		render(<div onFocusIn={() => {}} onFocusOut={() => {}} />, scratch);
+
+		expect(proto.addEventListener)
+			.to.have.been.calledTwice.and.to.have.been.calledWith('focusin')
+			.and.calledWith('focusout');
+	});
+
+	it('should register EventListenerObject as handler', () => {
+		let handler = { handleEvent() {} }
+
+		render(<div onClick={handler} />, scratch);
+
+		expect(scratch.childNodes[0].attributes.length).to.equal(0);
+
+		expect(proto.addEventListener).to.have.been.calledOnce;
+	});
+
+	it('should call registered EventListenerObject through the .handleEvent() method', () => {
+		let onclick = sinon.spy();
+
+		let handler = {
+			onclick,
+			handleEvent() {
+				this.onclick()
+			}
+		}
+
+		render(<div onClick={handler} />, scratch);
+
+		fireEvent(scratch.childNodes[0], 'click');
+
+		expect(onclick).to.have.been.calledOnce;
+	});
+
+	it('should keep the registered EventListenerObject referentially identical when calling', () => {
+		let onclick = sinon.spy();
+
+		// if the handler object was destructured or otherwise copied, this will fail
+		let handler = new class {
+			onclick = onclick
+			#onClick() {
+				this.onclick()
+			}
+			handleEvent() {
+				this.#onClick()
+			}
+		}
+
+		render(<div onClick={handler} />, scratch);
+
+		fireEvent(scratch.childNodes[0], 'click');
+
+		expect(onclick).to.have.been.calledOnce;
+	});
 });

@@ -15,7 +15,7 @@ import { getDomSibling } from '../component';
  * diff'ed against newParentVNode
  * @param {object} globalContext The current context object - modified by
  * getChildContext
- * @param {boolean} isSvg Whether or not this DOM node is an SVG node
+ * @param {string} namespace Current namespace of the DOM node (HTML, SVG, or MathML)
  * @param {Array<PreactElement>} excessDomChildren
  * @param {Array<Component>} commitQueue List of components which have callbacks
  * to invoke in commitRoot
@@ -32,7 +32,7 @@ export function diffChildren(
 	newParentVNode,
 	oldParentVNode,
 	globalContext,
-	isSvg,
+	namespace,
 	excessDomChildren,
 	commitQueue,
 	oldDom,
@@ -62,14 +62,7 @@ export function diffChildren(
 
 	for (i = 0; i < newChildrenLength; i++) {
 		childVNode = newParentVNode._children[i];
-
-		if (
-			childVNode == null ||
-			typeof childVNode == 'boolean' ||
-			typeof childVNode == 'function'
-		) {
-			continue;
-		}
+		if (childVNode == null) continue;
 
 		// At this point, constructNewChildrenArray has assigned _index to be the
 		// matchingIndex for this VNode's oldVNode (or -1 if there is no oldVNode).
@@ -88,7 +81,7 @@ export function diffChildren(
 			childVNode,
 			oldVNode,
 			globalContext,
-			isSvg,
+			namespace,
 			excessDomChildren,
 			commitQueue,
 			oldDom,
@@ -186,6 +179,7 @@ function constructNewChildrenArray(newParentVNode, renderResult, oldChildren) {
 			typeof childVNode == 'function'
 		) {
 			childVNode = newParentVNode._children[i] = null;
+			continue;
 		}
 		// If this newVNode is being reused (e.g. <div>{reuse}{reuse}</div>) in the same diff,
 		// or we are rendering a component (e.g. setState) copy the oldVNodes so it can have
@@ -202,7 +196,7 @@ function constructNewChildrenArray(newParentVNode, renderResult, oldChildren) {
 				childVNode,
 				null,
 				null,
-				childVNode
+				null
 			);
 		} else if (isArray(childVNode)) {
 			childVNode = newParentVNode._children[i] = createVNode(
@@ -228,47 +222,19 @@ function constructNewChildrenArray(newParentVNode, renderResult, oldChildren) {
 			childVNode = newParentVNode._children[i] = childVNode;
 		}
 
-		// Handle unmounting null placeholders, i.e. VNode => null in unkeyed children
-		if (childVNode == null) {
-			oldVNode = oldChildren[i];
-			if (oldVNode && oldVNode.key == null && oldVNode._dom) {
-				if (oldVNode._dom == newParentVNode._nextDom) {
-					newParentVNode._nextDom = getDomSibling(oldVNode);
-				}
-
-				unmount(oldVNode, oldVNode, false);
-
-				// Explicitly nullify this position in oldChildren instead of just
-				// setting `_match=true` to prevent other routines (e.g.
-				// `findMatchingIndex` or `getDomSibling`) from thinking VNodes or DOM
-				// nodes in this position are still available to be used in diffing when
-				// they have actually already been unmounted. For example, by only
-				// setting `_match=true` here, the unmounting loop later would attempt
-				// to unmount this VNode again seeing `_match==true`.  Further,
-				// getDomSibling doesn't know about _match and so would incorrectly
-				// assume DOM nodes in this subtree are mounted and usable.
-				oldChildren[i] = null;
-				remainingOldChildren--;
-			}
-
-			continue;
-		}
-
+		const skewedIndex = i + skew;
 		childVNode._parent = newParentVNode;
 		childVNode._depth = newParentVNode._depth + 1;
-
-		const skewedIndex = i + skew;
-		const matchingIndex = findMatchingIndex(
-			childVNode,
-			oldChildren,
-			skewedIndex,
-			remainingOldChildren
-		);
 
 		// Temporarily store the matchingIndex on the _index property so we can pull
 		// out the oldVNode in diffChildren. We'll override this to the VNode's
 		// final index after using this property to get the oldVNode
-		childVNode._index = matchingIndex;
+		const matchingIndex = (childVNode._index = findMatchingIndex(
+			childVNode,
+			oldChildren,
+			skewedIndex,
+			remainingOldChildren
+		));
 
 		oldVNode = null;
 		if (matchingIndex !== -1) {
@@ -294,28 +260,36 @@ function constructNewChildrenArray(newParentVNode, renderResult, oldChildren) {
 				childVNode._flags |= INSERT_VNODE;
 			}
 		} else if (matchingIndex !== skewedIndex) {
-			if (matchingIndex === skewedIndex + 1) {
+			// When we move elements around i.e. [0, 1, 2] --> [1, 0, 2]
+			// --> we diff 1, we find it at position 1 while our skewed index is 0 and our skew is 0
+			//     we set the skew to 1 as we found an offset.
+			// --> we diff 0, we find it at position 0 while our skewed index is at 2 and our skew is 1
+			//     this makes us increase the skew again.
+			// --> we diff 2, we find it at position 2 while our skewed index is at 4 and our skew is 2
+			//
+			// this becomes an optimization question where currently we see a 1 element offset as an insertion
+			// or deletion i.e. we optimize for [0, 1, 2] --> [9, 0, 1, 2]
+			// while a more than 1 offset we see as a swap.
+			// We could probably build heuristics for having an optimized course of action here as well, but
+			// might go at the cost of some bytes.
+			//
+			// If we wanted to optimize for i.e. only swaps we'd just do the last two code-branches and have
+			// only the first item be a re-scouting and all the others fall in their skewed counter-part.
+			// We could also further optimize for swaps
+			if (matchingIndex == skewedIndex - 1) {
+				skew--;
+			} else if (matchingIndex == skewedIndex + 1) {
 				skew++;
-			} else if (matchingIndex > skewedIndex) {
-				if (remainingOldChildren > newChildrenLength - skewedIndex) {
-					skew += matchingIndex - skewedIndex;
-				} else {
-					// ### Change from keyed: I think this was missing from the algo...
-					skew--;
-				}
-			} else if (matchingIndex < skewedIndex) {
-				if (matchingIndex == skewedIndex - 1) {
-					skew = matchingIndex - skewedIndex;
-				} else {
-					skew = 0;
-				}
 			} else {
-				skew = 0;
-			}
+				if (matchingIndex > skewedIndex) {
+					skew--;
+				} else {
+					skew++;
+				}
 
-			// Move this VNode's DOM if the original index (matchingIndex) doesn't
-			// match the new skew index (i + new skew)
-			if (matchingIndex !== i + skew) {
+				// Move this VNode's DOM if the original index (matchingIndex) doesn't
+				// match the new skew index (i + new skew)
+				// In the former two branches we know that it matches after skewing
 				childVNode._flags |= INSERT_VNODE;
 			}
 		}
@@ -363,6 +337,9 @@ function insert(parentVNode, oldDom, parentDom) {
 
 		return oldDom;
 	} else if (parentVNode._dom != oldDom) {
+		if (oldDom && parentVNode.type && !parentDom.contains(oldDom)) {
+			oldDom = getDomSibling(parentVNode);
+		}
 		parentDom.insertBefore(parentVNode._dom, oldDom || null);
 		oldDom = parentVNode._dom;
 	}
@@ -426,7 +403,10 @@ function findMatchingIndex(
 
 	if (
 		oldVNode === null ||
-		(oldVNode && key == oldVNode.key && type === oldVNode.type)
+		(oldVNode &&
+			key == oldVNode.key &&
+			type === oldVNode.type &&
+			(oldVNode._flags & MATCHED) === 0)
 	) {
 		return skewedIndex;
 	} else if (shouldSearch) {

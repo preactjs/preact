@@ -4,19 +4,39 @@ on:
   # The pull_request event can't write comments for PRs from forks so using this
   # workflow_run workflow as a workaround
   workflow_run:
-    workflows: ['Benchmarks']
+    workflows: ['CI']
     branches: ['**']
     types:
       - completed
       - requested
 
 jobs:
+  filter_jobs:
+    name: Filter jobs
+    runs-on: ubuntu-latest
+    if: |
+      github.event.workflow_run.event == 'pull_request'
+    outputs:
+      jsChanged: ${{ steps.filter.outputs.jsChanged }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          ref: ${{ github.event.workflow_run.head_branch }}
+          # Should be kept in sync with the filter in the CI workflow
+          filters: |
+            jsChanged: '**/src/**/*.js'
+
   report_running:
     name: Report benchmarks are in-progress
+    needs: filter_jobs
     runs-on: ubuntu-latest
     # Only add the "benchmarks are running" text when a workflow_run is
     # requested (a.k.a starting)
-    if: ${{ github.event.action == 'requested' }}
+    if: |
+      needs.filter_jobs.outputs.jsChanged == 'true' &&
+      github.event.action == 'requested'
     steps:
       - name: Report Tachometer Running
         uses: andrewiggins/tachometer-reporter-action@v2
@@ -27,10 +47,14 @@ jobs:
 
   report_results:
     name: Report benchmark results
+    needs: filter_jobs
     runs-on: ubuntu-latest
     # Only run this job if the event action was "completed" and the triggering
     # workflow_run was successful
-    if: ${{ github.event.action == 'completed' && github.event.workflow_run.conclusion == 'success' }}
+    if: |
+      needs.filter_jobs.outputs.jsChanged == 'true' &&
+      github.event.action == 'completed' &&
+      github.event.workflow_run.conclusion == 'success'
     steps:
       # Download the artifact from the triggering workflow that contains the
       # Tachometer results to report
@@ -38,14 +62,15 @@ jobs:
         with:
           workflow: ${{ github.event.workflow.id }}
           run_id: ${{ github.event.workflow_run.id }}
-          name: results
+          name_is_regexp: true
+          name: results-*
           path: results
 
       # Create/update the comment with the latest results
       - name: Report Tachometer Results
         uses: andrewiggins/tachometer-reporter-action@v2
         with:
-          path: results/*.json
+          path: results/**/*.json
           base-bench-name: preact-main
           pr-bench-name: preact-local
           summarize: 'duration, usedJSHeapSize'

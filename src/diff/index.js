@@ -18,7 +18,7 @@ import options from '../options';
  * @param {VNode} oldVNode The old virtual node
  * @param {object} globalContext The current context object. Modified by
  * getChildContext
- * @param {boolean} isSvg Whether or not this element is an SVG node
+ * @param {string} namespace Current namespace of the DOM node (HTML, SVG, or MathML)
  * @param {Array<PreactElement>} excessDomChildren
  * @param {Array<Component>} commitQueue List of components which have callbacks
  * to invoke in commitRoot
@@ -34,7 +34,7 @@ export function diff(
 	newVNode,
 	oldVNode,
 	globalContext,
-	isSvg,
+	namespace,
 	excessDomChildren,
 	commitQueue,
 	oldDom,
@@ -62,6 +62,8 @@ export function diff(
 		try {
 			let c, isNew, oldProps, oldState, snapshot, clearProcessingException;
 			let newProps = newVNode.props;
+			const isClassComponent =
+				'prototype' in newType && newType.prototype.render;
 
 			// Necessary for createContext api. Setting this property will pass
 			// the context value as `this.context` just for this component.
@@ -79,7 +81,7 @@ export function diff(
 				clearProcessingException = c._processingException = c._pendingError;
 			} else {
 				// Instantiate the new component
-				if ('prototype' in newType && newType.prototype.render) {
+				if (isClassComponent) {
 					// @ts-expect-error The check above verifies that newType is suppose to be constructed
 					newVNode._component = c = new newType(newProps, componentContext); // eslint-disable-line new-cap
 				} else {
@@ -103,11 +105,11 @@ export function diff(
 			}
 
 			// Invoke getDerivedStateFromProps
-			if (c._nextState == null) {
+			if (isClassComponent && c._nextState == null) {
 				c._nextState = c.state;
 			}
 
-			if (newType.getDerivedStateFromProps != null) {
+			if (isClassComponent && newType.getDerivedStateFromProps != null) {
 				if (c._nextState == c.state) {
 					c._nextState = assign({}, c._nextState);
 				}
@@ -125,17 +127,19 @@ export function diff(
 			// Invoke pre-render lifecycle methods
 			if (isNew) {
 				if (
+					isClassComponent &&
 					newType.getDerivedStateFromProps == null &&
 					c.componentWillMount != null
 				) {
 					c.componentWillMount();
 				}
 
-				if (c.componentDidMount != null) {
+				if (isClassComponent && c.componentDidMount != null) {
 					c._renderCallbacks.push(c.componentDidMount);
 				}
 			} else {
 				if (
+					isClassComponent &&
 					newType.getDerivedStateFromProps == null &&
 					newProps !== oldProps &&
 					c.componentWillReceiveProps != null
@@ -166,7 +170,7 @@ export function diff(
 
 					newVNode._dom = oldVNode._dom;
 					newVNode._children = oldVNode._children;
-					newVNode._children.forEach(vnode => {
+					newVNode._children.some(vnode => {
 						if (vnode) vnode._parent = newVNode;
 					});
 
@@ -186,7 +190,7 @@ export function diff(
 					c.componentWillUpdate(newProps, c._nextState, componentContext);
 				}
 
-				if (c.componentDidUpdate != null) {
+				if (isClassComponent && c.componentDidUpdate != null) {
 					c._renderCallbacks.push(() => {
 						c.componentDidUpdate(oldProps, oldState, snapshot);
 					});
@@ -200,7 +204,7 @@ export function diff(
 
 			let renderHook = options._render,
 				count = 0;
-			if ('prototype' in newType && newType.prototype.render) {
+			if (isClassComponent) {
 				c.state = c._nextState;
 				c._dirty = false;
 
@@ -231,7 +235,7 @@ export function diff(
 				globalContext = assign(assign({}, globalContext), c.getChildContext());
 			}
 
-			if (!isNew && c.getSnapshotBeforeUpdate != null) {
+			if (isClassComponent && !isNew && c.getSnapshotBeforeUpdate != null) {
 				snapshot = c.getSnapshotBeforeUpdate(oldProps, oldState);
 			}
 
@@ -245,7 +249,7 @@ export function diff(
 				newVNode,
 				oldVNode,
 				globalContext,
-				isSvg,
+				namespace,
 				excessDomChildren,
 				commitQueue,
 				oldDom,
@@ -269,13 +273,15 @@ export function diff(
 			newVNode._original = null;
 			// if hydrating or creating initial tree, bailout preserves DOM:
 			if (isHydrating || excessDomChildren != null) {
-				newVNode._dom = oldDom;
 				newVNode._flags |= isHydrating
 					? MODE_HYDRATE | MODE_SUSPENDED
-					: MODE_HYDRATE;
+					: MODE_SUSPENDED;
+
+				while (oldDom && oldDom.nodeType === 8 && oldDom.nextSibling) {
+					oldDom = oldDom.nextSibling;
+				}
 				excessDomChildren[excessDomChildren.indexOf(oldDom)] = null;
-				// ^ could possibly be simplified to:
-				// excessDomChildren.length = 0;
+				newVNode._dom = oldDom;
 			} else {
 				newVNode._dom = oldVNode._dom;
 				newVNode._children = oldVNode._children;
@@ -294,7 +300,7 @@ export function diff(
 			newVNode,
 			oldVNode,
 			globalContext,
-			isSvg,
+			namespace,
 			excessDomChildren,
 			commitQueue,
 			isHydrating,
@@ -348,7 +354,7 @@ export function commitRoot(commitQueue, root, refQueue, focussedElement) {
  * @param {VNode} newVNode The new virtual node
  * @param {VNode} oldVNode The old virtual node
  * @param {object} globalContext The current context object
- * @param {boolean} isSvg Whether or not this DOM node is an SVG node
+ * @param {string} namespace Current namespace of the DOM node (HTML, SVG, or MathML)
  * @param {Array<PreactElement>} excessDomChildren
  * @param {Array<Component>} commitQueue List of components which have callbacks
  * to invoke in commitRoot
@@ -361,7 +367,7 @@ function diffElementNodes(
 	newVNode,
 	oldVNode,
 	globalContext,
-	isSvg,
+	namespace,
 	excessDomChildren,
 	commitQueue,
 	isHydrating,
@@ -382,8 +388,11 @@ function diffElementNodes(
 	let inputValue;
 	let checked;
 
-	// Tracks entering and exiting SVG namespace when descending through the tree.
-	if (nodeType === 'svg') isSvg = true;
+	// Tracks entering and exiting namespaces when descending through the tree.
+	if (nodeType === 'svg') namespace = 'http://www.w3.org/2000/svg';
+	else if (nodeType === 'math')
+		namespace = 'http://www.w3.org/1998/Math/MathML';
+	else if (!namespace) namespace = 'http://www.w3.org/1999/xhtml';
 
 	if (excessDomChildren != null) {
 		for (i = 0; i < excessDomChildren.length; i++) {
@@ -409,17 +418,21 @@ function diffElementNodes(
 			return document.createTextNode(newProps);
 		}
 
-		if (isSvg) {
-			dom = document.createElementNS('http://www.w3.org/2000/svg', nodeType);
-		} else {
-			dom = document.createElement(nodeType, newProps.is && newProps);
-		}
+		dom = document.createElementNS(
+			namespace,
+			nodeType,
+			newProps.is && newProps
+		);
 
-		// we created a new parent, so none of the previously attached children can be reused:
-		excessDomChildren = null;
 		// we are creating a new node, so we can assume this is a new subtree (in
 		// case we are hydrating), this deopts the hydrate
-		isHydrating = false;
+		if (isHydrating) {
+			if (options._hydrationMismatch)
+				options._hydrationMismatch(newVNode, excessDomChildren);
+			isHydrating = false;
+		}
+		// we created a new parent, so none of the previously attached children can be reused:
+		excessDomChildren = null;
 	}
 
 	if (nodeType === null) {
@@ -449,8 +462,14 @@ function diffElementNodes(
 			if (i == 'children') {
 			} else if (i == 'dangerouslySetInnerHTML') {
 				oldHtml = value;
-			} else if (i !== 'key' && !(i in newProps)) {
-				setProperty(dom, i, null, value, isSvg);
+			} else if (!(i in newProps)) {
+				if (
+					(i == 'value' && 'defaultValue' in newProps) ||
+					(i == 'checked' && 'defaultChecked' in newProps)
+				) {
+					continue;
+				}
+				setProperty(dom, i, null, value, namespace);
 			}
 		}
 
@@ -467,11 +486,10 @@ function diffElementNodes(
 			} else if (i == 'checked') {
 				checked = value;
 			} else if (
-				i !== 'key' &&
 				(!isHydrating || typeof value == 'function') &&
 				oldProps[i] !== value
 			) {
-				setProperty(dom, i, value, oldProps[i], isSvg);
+				setProperty(dom, i, value, oldProps[i], namespace);
 			}
 		}
 
@@ -497,7 +515,9 @@ function diffElementNodes(
 				newVNode,
 				oldVNode,
 				globalContext,
-				isSvg && nodeType !== 'foreignObject',
+				nodeType === 'foreignObject'
+					? 'http://www.w3.org/1999/xhtml'
+					: namespace,
 				excessDomChildren,
 				commitQueue,
 				excessDomChildren
@@ -510,7 +530,7 @@ function diffElementNodes(
 			// Remove children that are not part of any vnode.
 			if (excessDomChildren != null) {
 				for (i = excessDomChildren.length; i--; ) {
-					if (excessDomChildren[i] != null) removeNode(excessDomChildren[i]);
+					removeNode(excessDomChildren[i]);
 				}
 			}
 		}
@@ -518,7 +538,9 @@ function diffElementNodes(
 		// As above, don't diff props during hydration
 		if (!isHydrating) {
 			i = 'value';
-			if (
+			if (nodeType === 'progress' && inputValue == null) {
+				dom.removeAttribute('value');
+			} else if (
 				inputValue !== undefined &&
 				// #2756 For the <progress>-element the initial value is 0,
 				// despite the attribute not being present. When the attribute
@@ -531,12 +553,12 @@ function diffElementNodes(
 					// again, which triggers IE11 to re-evaluate the select value
 					(nodeType === 'option' && inputValue !== oldProps[i]))
 			) {
-				setProperty(dom, i, inputValue, oldProps[i], false);
+				setProperty(dom, i, inputValue, oldProps[i], namespace);
 			}
 
 			i = 'checked';
 			if (checked !== undefined && checked !== dom[i]) {
-				setProperty(dom, i, checked, oldProps[i], false);
+				setProperty(dom, i, checked, oldProps[i], namespace);
 			}
 		}
 	}
@@ -546,14 +568,26 @@ function diffElementNodes(
 
 /**
  * Invoke or update a ref, depending on whether it is a function or object ref.
- * @param {Ref<any>} ref
+ * @param {Ref<any> & { _unmount?: unknown }} ref
  * @param {any} value
  * @param {VNode} vnode
  */
 export function applyRef(ref, value, vnode) {
 	try {
-		if (typeof ref == 'function') ref(value);
-		else ref.current = value;
+		if (typeof ref == 'function') {
+			let hasRefUnmount = typeof ref._unmount == 'function';
+			if (hasRefUnmount) {
+				// @ts-ignore TS doesn't like moving narrowing checks into variables
+				ref._unmount();
+			}
+
+			if (!hasRefUnmount || value != null) {
+				// Store the cleanup function on the function
+				// instance object itself to avoid shape
+				// transitioning vnode
+				ref._unmount = ref(value);
+			}
+		} else ref.current = value;
 	} catch (e) {
 		options._catchError(e, vnode);
 	}
@@ -586,7 +620,6 @@ export function unmount(vnode, parentVNode, skipRemove) {
 		}
 
 		r.base = r._parentDom = null;
-		vnode._component = undefined;
 	}
 
 	if ((r = vnode._children)) {
@@ -595,19 +628,19 @@ export function unmount(vnode, parentVNode, skipRemove) {
 				unmount(
 					r[i],
 					parentVNode,
-					skipRemove || typeof vnode.type !== 'function'
+					skipRemove || typeof vnode.type != 'function'
 				);
 			}
 		}
 	}
 
-	if (!skipRemove && vnode._dom != null) {
+	if (!skipRemove) {
 		removeNode(vnode._dom);
 	}
 
 	// Must be set to `undefined` to properly clean up `_nextDom`
 	// for which `null` is a valid value. See comment in `create-element.js`
-	vnode._parent = vnode._dom = vnode._nextDom = undefined;
+	vnode._component = vnode._parent = vnode._dom = vnode._nextDom = undefined;
 }
 
 /** The `.render()` method for a PFC backing instance. */

@@ -5,6 +5,25 @@ import {
 	toChildArray,
 	Component
 } from 'preact';
+import {
+	useCallback,
+	useContext,
+	useDebugValue,
+	useEffect,
+	useId,
+	useImperativeHandle,
+	useLayoutEffect,
+	useMemo,
+	useReducer,
+	useRef,
+	useState
+} from 'preact/hooks';
+import {
+	useDeferredValue,
+	useInsertionEffect,
+	useSyncExternalStore,
+	useTransition
+} from './index';
 
 export const REACT_ELEMENT_TYPE =
 	(typeof Symbol != 'undefined' && Symbol.for && Symbol.for('react.element')) ||
@@ -14,7 +33,6 @@ const CAMEL_PROPS =
 	/^(?:accent|alignment|arabic|baseline|cap|clip(?!PathU)|color|dominant|fill|flood|font|glyph(?!R)|horiz|image(!S)|letter|lighting|marker(?!H|W|U)|overline|paint|pointer|shape|stop|strikethrough|stroke|text(?!L)|transform|underline|unicode|units|v|vector|vert|word|writing|x(?!C))[A-Z]/;
 const ON_ANI = /^on(Ani|Tra|Tou|BeforeInp|Compo)/;
 const CAMEL_REPLACE = /[A-Z0-9]/g;
-
 const IS_DOM = typeof document !== 'undefined';
 
 // Input types for which onchange should not be converted to oninput.
@@ -116,6 +134,7 @@ function handleDomVNode(vnode) {
 		type = vnode.type,
 		normalizedProps = {};
 
+	let isNonDashedType = type.indexOf('-') === -1;
 	for (let i in props) {
 		let value = props[i];
 
@@ -143,21 +162,25 @@ function handleDomVNode(vnode) {
 			// value will be used as the file name and the file will be called
 			// "true" upon downloading it.
 			value = '';
-		} else if (lowerCased === 'ondoubleclick') {
-			i = 'ondblclick';
-		} else if (
-			lowerCased === 'onchange' &&
-			(type === 'input' || type === 'textarea') &&
-			!onChangeInputType(props.type)
-		) {
-			lowerCased = i = 'oninput';
-		} else if (lowerCased === 'onfocus') {
-			i = 'onfocusin';
-		} else if (lowerCased === 'onblur') {
-			i = 'onfocusout';
-		} else if (ON_ANI.test(i)) {
-			i = lowerCased;
-		} else if (type.indexOf('-') === -1 && CAMEL_PROPS.test(i)) {
+		} else if (lowerCased === 'translate' && value === 'no') {
+			value = false;
+		} else if (lowerCased[0] === 'o' && lowerCased[1] === 'n') {
+			if (lowerCased === 'ondoubleclick') {
+				i = 'ondblclick';
+			} else if (
+				lowerCased === 'onchange' &&
+				(type === 'input' || type === 'textarea') &&
+				!onChangeInputType(props.type)
+			) {
+				lowerCased = i = 'oninput';
+			} else if (lowerCased === 'onfocus') {
+				i = 'onfocusin';
+			} else if (lowerCased === 'onblur') {
+				i = 'onfocusout';
+			} else if (ON_ANI.test(i)) {
+				i = lowerCased;
+			}
+		} else if (isNonDashedType && CAMEL_PROPS.test(i)) {
 			i = i.replace(CAMEL_REPLACE, '-$&').toLowerCase();
 		} else if (value === null) {
 			value = undefined;
@@ -262,15 +285,29 @@ options.diffed = function (vnode) {
 };
 
 // This is a very very private internal function for React it
-// is used to sort-of do runtime dependency injection. So far
-// only `react-relay` makes use of it. It uses it to read the
-// context value.
+// is used to sort-of do runtime dependency injection.
 export const __SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED = {
 	ReactCurrentDispatcher: {
 		current: {
 			readContext(context) {
 				return currentComponent._globalContext[context._id].props.value;
-			}
+			},
+			useCallback,
+			useContext,
+			useDebugValue,
+			useDeferredValue,
+			useEffect,
+			useId,
+			useImperativeHandle,
+			useInsertionEffect,
+			useLayoutEffect,
+			useMemo,
+			// useMutableSource, // experimental-only and replaced by uSES, likely not worth supporting
+			useReducer,
+			useRef,
+			useState,
+			useSyncExternalStore,
+			useTransition
 		}
 	}
 };

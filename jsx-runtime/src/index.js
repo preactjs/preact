@@ -27,18 +27,17 @@ const isArray = Array.isArray;
  * @param {unknown} [__self]
  */
 function createVNode(type, props, key, isStaticChildren, __source, __self) {
+	if (!props) props = {};
 	// We'll want to preserve `ref` in props to get rid of the need for
 	// forwardRef components in the future, but that should happen via
 	// a separate PR.
-	let normalizedProps = {},
+	let normalizedProps = props,
 		ref,
 		i;
-	for (i in props) {
-		if (i == 'ref') {
-			ref = props[i];
-		} else {
-			normalizedProps[i] = props[i];
-		}
+
+	if ('ref' in props) {
+		ref = props.ref;
+		delete props.ref;
 	}
 
 	/** @type {VNode & { __source: any; __self: any }} */
@@ -115,7 +114,7 @@ function jsxAttr(name, value) {
 					prop[0] == '-'
 						? prop
 						: JS_TO_CSS[prop] ||
-						  (JS_TO_CSS[prop] = prop.replace(CSS_REGEX, '-$&').toLowerCase());
+							(JS_TO_CSS[prop] = prop.replace(CSS_REGEX, '-$&').toLowerCase());
 
 				let suffix = ';';
 				if (

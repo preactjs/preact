@@ -33,11 +33,6 @@
 [![brotli size](http://img.badgesize.io/https://unpkg.com/preact/dist/preact.min.js?compression=brotli&label=brotli)](https://unpkg.com/preact/dist/preact.min.js)
 
 </td>
-<td>
-
-<img src="https://saucelabs.com/browser-matrix/preact.svg" title="Browser support matrix">
-
-</td>
 </tr>
 </tbody>
 </table>

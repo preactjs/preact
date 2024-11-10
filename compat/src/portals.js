@@ -39,6 +39,7 @@ function Portal(props) {
 			nodeType: 1,
 			parentNode: container,
 			childNodes: [],
+			contains: () => true,
 			appendChild(child) {
 				this.childNodes.push(child);
 				_this._container.appendChild(child);

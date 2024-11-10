@@ -25,6 +25,7 @@
       "require": "./dist/compat.js"
     },
     "./client": {
+      "types": "./client.d.ts",
       "import": "./client.mjs",
       "require": "./client.js"
     },

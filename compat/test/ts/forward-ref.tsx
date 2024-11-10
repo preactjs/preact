@@ -24,3 +24,7 @@ export const Bar = React.forwardRef<HTMLDivElement, { children: any }>(
 		return <div ref={ref}>{props.children}</div>;
 	}
 );
+
+export const baz = (
+	ref: React.ForwardedRef<HTMLElement>
+): React.Ref<HTMLElement> => ref;

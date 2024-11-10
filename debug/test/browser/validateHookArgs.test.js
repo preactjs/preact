@@ -31,18 +31,21 @@ describe('Hook argument validation', () => {
 		};
 
 		it(`should error if ${name} is mounted with NaN as an argument`, async () => {
-			expect(() =>
-				render(<TestComponent initialValue={NaN} />, scratch)
-			).to.throw(/Hooks should not be called with NaN in the dependency array/);
+			render(<TestComponent initialValue={NaN} />, scratch);
+			expect(console.warn).to.be.calledOnce;
+			expect(console.warn.args[0]).to.match(
+				/Hooks should not be called with NaN in the dependency array/
+			);
 		});
 
 		it(`should error if ${name} is updated with NaN as an argument`, async () => {
 			render(<TestComponent initialValue={0} />, scratch);
 
-			expect(() => {
-				scratch.querySelector('button').click();
-				rerender();
-			}).to.throw(
+			scratch.querySelector('button').click();
+			rerender();
+
+			expect(console.warn).to.be.calledOnce;
+			expect(console.warn.args[0]).to.match(
 				/Hooks should not be called with NaN in the dependency array/
 			);
 		});
@@ -52,14 +55,18 @@ describe('Hook argument validation', () => {
 	let scratch;
 	/** @type {() => void} */
 	let rerender;
+	let warnings = [];
 
 	beforeEach(() => {
 		scratch = setupScratch();
 		rerender = setupRerender();
+		warnings = [];
+		sinon.stub(console, 'warn').callsFake(w => warnings.push(w));
 	});
 
 	afterEach(() => {
 		teardown(scratch);
+		console.warn.restore();
 	});
 
 	validateHook('useEffect', arg => useEffect(() => {}, [arg]));

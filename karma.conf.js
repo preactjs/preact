@@ -1,11 +1,6 @@
-/*eslint no-var:0, object-shorthand:0 */
-
 var coverage = String(process.env.COVERAGE) === 'true',
 	minify = String(process.env.MINIFY) === 'true',
-	ci = String(process.env.CI).match(/^(1|true)$/gi),
-	sauceLabs = ci && String(process.env.RUN_SAUCE_LABS) === 'true',
-	// always downlevel to ES5 for saucelabs:
-	downlevel = sauceLabs || String(process.env.DOWNLEVEL) === 'true',
+	downlevel = String(process.env.DOWNLEVEL) === 'true',
 	performance = !coverage && String(process.env.PERFORMANCE) !== 'false',
 	path = require('path'),
 	errorstacks = require('errorstacks'),
@@ -40,40 +35,6 @@ process.stdout.write = msg => {
 	}
 
 	return orgStdoutWrite.call(process.stdout, out);
-};
-
-var sauceLabsLaunchers = {
-	sl_chrome: {
-		base: 'SauceLabs',
-		browserName: 'chrome',
-		platform: 'Windows 10'
-	},
-	sl_firefox: {
-		base: 'SauceLabs',
-		browserName: 'firefox',
-		platform: 'Windows 10'
-	},
-	// TODO: Safari always fails and disconnects before any tests are executed.
-	// This seems to be an issue with Saucelabs and they're actively investigating
-	// that (see: https://mobile.twitter.com/bromann/status/1136323458328084482).
-	// We'll disable Safari for now until that's resolved.
-	// sl_safari: {
-	// 	base: 'SauceLabs',
-	// 	browserName: 'Safari',
-	// 	version: '11',
-	// 	platform: 'OS X 10.13'
-	// },
-	sl_edge: {
-		base: 'SauceLabs',
-		browserName: 'MicrosoftEdge',
-		platform: 'Windows 10'
-	},
-	sl_ie_11: {
-		base: 'SauceLabs',
-		browserName: 'internet explorer',
-		version: '11.0',
-		platform: 'Windows 7'
-	}
 };
 
 var localLaunchers = {
@@ -214,7 +175,7 @@ function createEsbuildPlugin() {
 											}
 										}
 									]
-							  ]
+								]
 							: [],
 						plugins: [
 							coverage && [
@@ -253,16 +214,11 @@ function createEsbuildPlugin() {
 
 module.exports = function (config) {
 	config.set({
-		browsers: sauceLabs
-			? Object.keys(sauceLabsLaunchers)
-			: Object.keys(localLaunchers),
+		browsers: Object.keys(localLaunchers),
 
 		frameworks: ['mocha', 'chai-sinon'],
 
-		reporters: ['mocha'].concat(
-			coverage ? 'coverage' : [],
-			sauceLabs ? 'saucelabs' : []
-		),
+		reporters: ['mocha'].concat(coverage ? 'coverage' : []),
 
 		formatError(msg) {
 			const frames = errorstacks.parseStackTrace(msg);
@@ -297,22 +253,9 @@ module.exports = function (config) {
 
 		browserNoActivityTimeout: 5 * 60 * 1000,
 
-		// Use only two browsers concurrently, works better with open source Sauce Labs remote testing
-		concurrency: 2,
-
 		captureTimeout: 0,
 
-		sauceLabs: {
-			build: `CI #${process.env.GITHUB_RUN_NUMBER} (${process.env.GITHUB_RUN_ID})`,
-			tunnelIdentifier:
-				process.env.GITHUB_RUN_NUMBER ||
-				`local${require('./package.json').version}`,
-			connectLocationForSERelay: 'localhost',
-			connectPortForSERelay: 4445,
-			startConnect: !!sauceLabs
-		},
-
-		customLaunchers: sauceLabs ? sauceLabsLaunchers : localLaunchers,
+		customLaunchers: localLaunchers,
 
 		files: [
 			{ pattern: 'test/polyfills.js', watched: false },
@@ -342,9 +285,9 @@ module.exports = function (config) {
 			// esbuild options
 			target: downlevel ? 'es5' : 'es2015',
 			define: {
-				COVERAGE: coverage,
+				COVERAGE: JSON.stringify(coverage),
 				'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || ''),
-				ENABLE_PERFORMANCE: performance
+				ENABLE_PERFORMANCE: JSON.stringify(performance)
 			},
 			plugins: [createEsbuildPlugin()]
 		}
