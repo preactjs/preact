@@ -57,12 +57,14 @@ describe('keys', () => {
 	let resetInsertBefore;
 	let resetRemoveChild;
 	let resetRemove;
+	let resetRemoveText;
 
 	beforeAll(() => {
 		resetAppendChild = logCall(Element.prototype, 'appendChild');
 		resetInsertBefore = logCall(Element.prototype, 'insertBefore');
 		resetRemoveChild = logCall(Element.prototype, 'removeChild');
 		resetRemove = logCall(Element.prototype, 'remove');
+		resetRemoveText = logCall(Text.prototype, 'remove');
 	});
 
 	afterAll(() => {
@@ -70,6 +72,7 @@ describe('keys', () => {
 		resetInsertBefore();
 		resetRemoveChild();
 		resetRemove();
+		resetRemoveText();
 	});
 
 	beforeEach(() => {
