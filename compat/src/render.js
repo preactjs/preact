@@ -25,9 +25,7 @@ import {
 	useTransition
 } from './index';
 
-export const REACT_ELEMENT_TYPE =
-	(typeof Symbol != 'undefined' && Symbol.for && Symbol.for('react.element')) ||
-	0xeac7;
+export const REACT_ELEMENT_TYPE = Symbol.for('react.element');
 
 const CAMEL_PROPS =
 	/^(?:accent|alignment|arabic|baseline|cap|clip(?!PathU)|color|dominant|fill|flood|font|glyph(?!R)|horiz|image(!S)|letter|lighting|marker(?!H|W|U)|overline|paint|pointer|shape|stop|strikethrough|stroke|text(?!L)|transform|underline|unicode|units|v|vector|vert|word|writing|x(?!C))[A-Z]/;
@@ -36,13 +34,7 @@ const CAMEL_REPLACE = /[A-Z0-9]/g;
 const IS_DOM = typeof document !== 'undefined';
 
 // Input types for which onchange should not be converted to oninput.
-// type="file|checkbox|radio", plus "range" in IE11.
-// (IE11 doesn't support Symbol, which we use here to turn `rad` into `ra` which matches "range")
-const onChangeInputType = type =>
-	(typeof Symbol != 'undefined' && typeof Symbol() == 'symbol'
-		? /fil|che|rad/
-		: /fil|che|ra/
-	).test(type);
+const onChangeInputType = type => /fil|che|rad/.test(type);
 
 // Some libraries like `react-virtualized` explicitly check for this.
 Component.prototype.isReactComponent = {};
