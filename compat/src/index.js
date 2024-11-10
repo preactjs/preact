@@ -117,16 +117,6 @@ function findDOMNode(component) {
 }
 
 /**
- * Deprecated way to control batched rendering inside the reconciler, but we
- * already schedule in batches inside our rendering code
- * @template Arg
- * @param {(arg: Arg) => void} callback function that triggers the updated
- * @param {Arg} [arg] Optional argument that can be passed to the callback
- */
-// eslint-disable-next-line camelcase
-const unstable_batchedUpdates = (callback, arg) => callback(arg);
-
-/**
  * In React, `flushSync` flushes the entire tree and forces a rerender. It's
  * implmented here as a no-op.
  * @template Arg
@@ -237,8 +227,6 @@ export {
 	memo,
 	forwardRef,
 	flushSync,
-	// eslint-disable-next-line camelcase
-	unstable_batchedUpdates,
 	StrictMode,
 	Suspense,
 	lazy,
@@ -285,7 +273,6 @@ export default {
 	memo,
 	forwardRef,
 	flushSync,
-	unstable_batchedUpdates,
 	StrictMode,
 	Suspense,
 	lazy,
