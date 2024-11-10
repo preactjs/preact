@@ -1786,6 +1786,37 @@ describe('render()', () => {
 		);
 	});
 
+	// #2949
+	it('should not swap unkeyed chlildren', () => {
+		class X extends Component {
+			constructor(props) {
+				super(props);
+				this.name = props.name;
+			}
+			render() {
+				return <p>{this.name}</p>;
+			}
+		}
+
+		function Foo({ condition }) {
+			return (
+				<div>
+					{condition ? '' : <X name="A" />}
+					{condition ? <X name="B" /> : ''}
+				</div>
+			);
+		}
+
+		render(<Foo />, scratch);
+		expect(scratch.textContent).to.equal('A');
+
+		render(<Foo condition />, scratch);
+		expect(scratch.textContent).to.equal('B');
+
+		render(<Foo />, scratch);
+		expect(scratch.textContent).to.equal('A');
+	});
+
 	it('handle shuffled (stress test)', () => {
 		function randomize(arr) {
 			for (let i = arr.length - 1; i > 0; i--) {
