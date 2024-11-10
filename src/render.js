@@ -62,7 +62,7 @@ export function render(vnode, parentDom, replaceNode) {
 	);
 
 	// Flush all queued effects
-	commitRoot(commitQueue, vnode, refQueue, focus);
+	commitRoot(commitQueue, vnode, refQueue, parentDom.contains(focus) && focus);
 }
 
 /**

@@ -339,10 +339,7 @@ export function commitRoot(commitQueue, root, refQueue, focussedElement) {
 		}
 	});
 
-	if (
-		focussedElement !== document.activeElement &&
-		focussedElement.isConnected
-	) {
+	if (focussedElement && focussedElement !== document.activeElement) {
 		focussedElement.focus();
 	}
 }
