@@ -1581,6 +1581,10 @@ export namespace JSXInternal {
 		formNoValidate?: Signalish<boolean | undefined>;
 		formTarget?: Signalish<string | undefined>;
 		name?: Signalish<string | undefined>;
+		popovertarget?: Signalish<string | undefined>;
+		popoverTarget?: Signalish<string | undefined>;
+		popovertargetaction?: Signalish<'hide' | 'show' | 'toggle' | undefined>;
+		popoverTargetAction?: Signalish<'hide' | 'show' | 'toggle' | undefined>;
 		type?: Signalish<'submit' | 'reset' | 'button' | undefined>;
 		value?: Signalish<string | number | undefined>;
 	}
