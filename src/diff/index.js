@@ -12,7 +12,7 @@ import { BaseComponent, getDomSibling } from '../component';
 import { Fragment } from '../create-element';
 import { diffChildren } from './children';
 import { setProperty } from './props';
-import { assign, isArray, removeNode, slice } from '../util';
+import { assign, isArray, slice } from '../util';
 import options from '../options';
 
 /**
@@ -543,7 +543,7 @@ function diffElementNodes(
 			// Remove children that are not part of any vnode.
 			if (excessDomChildren != null) {
 				for (i = excessDomChildren.length; i--; ) {
-					removeNode(excessDomChildren[i]);
+					if (excessDomChildren[i]) excessDomChildren[i].remove();
 				}
 			}
 		}
@@ -647,8 +647,8 @@ export function unmount(vnode, parentVNode, skipRemove) {
 		}
 	}
 
-	if (!skipRemove) {
-		removeNode(vnode._dom);
+	if (!skipRemove && vnode._dom != null && typeof vnode.type != 'function') {
+		vnode._dom.remove();
 	}
 
 	vnode._component = vnode._parent = vnode._dom = UNDEFINED;
