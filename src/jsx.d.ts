@@ -1575,10 +1575,15 @@ export namespace JSXInternal {
 		extends HTMLAttributes<T> {
 		disabled?: Signalish<boolean | undefined>;
 		form?: Signalish<string | undefined>;
+		formaction?: Signalish<string | undefined>;
 		formAction?: Signalish<string | undefined>;
+		formenctype?: Signalish<string | undefined>;
 		formEncType?: Signalish<string | undefined>;
+		formmethod?: Signalish<string | undefined>;
 		formMethod?: Signalish<string | undefined>;
+		formnovalidate?: Signalish<boolean | undefined>;
 		formNoValidate?: Signalish<boolean | undefined>;
+		formtarget?: Signalish<string | undefined>;
 		formTarget?: Signalish<string | undefined>;
 		name?: Signalish<string | undefined>;
 		popovertarget?: Signalish<string | undefined>;
@@ -1612,6 +1617,7 @@ export namespace JSXInternal {
 
 	interface DelHTMLAttributes<T extends EventTarget> extends HTMLAttributes<T> {
 		cite?: Signalish<string | undefined>;
+		datetime: Signalish<string | undefined>;
 		dateTime?: Signalish<string | undefined>;
 	}
 
@@ -1645,12 +1651,16 @@ export namespace JSXInternal {
 
 	interface FormHTMLAttributes<T extends EventTarget>
 		extends HTMLAttributes<T> {
+		'accept-charset'?: Signalish<string | undefined>;
 		acceptCharset?: Signalish<string | undefined>;
 		action?: Signalish<string | undefined>;
+		autocomplete?: Signalish<string | undefined>;
 		autoComplete?: Signalish<string | undefined>;
+		enctype?: Signalish<string | undefined>;
 		encType?: Signalish<string | undefined>;
 		method?: Signalish<string | undefined>;
 		name?: Signalish<string | undefined>;
+		novalidate?: Signalish<boolean | undefined>;
 		noValidate?: Signalish<boolean | undefined>;
 		target?: Signalish<string | undefined>;
 	}
@@ -1660,6 +1670,8 @@ export namespace JSXInternal {
 		allow?: Signalish<string | undefined>;
 		allowFullScreen?: Signalish<boolean | undefined>;
 		allowTransparency?: Signalish<boolean | undefined>;
+		/** @deprecated */
+		frameborder?: Signalish<number | string | undefined>;
 		/** @deprecated */
 		frameBorder?: Signalish<number | string | undefined>;
 		height?: Signalish<number | string | undefined>;
@@ -1675,6 +1687,7 @@ export namespace JSXInternal {
 		scrolling?: Signalish<string | undefined>;
 		seamless?: Signalish<boolean | undefined>;
 		src?: Signalish<string | undefined>;
+		srcdoc?: Signalish<string | undefined>;
 		srcDoc?: Signalish<string | undefined>;
 		width?: Signalish<number | string | undefined>;
 	}
@@ -1683,6 +1696,7 @@ export namespace JSXInternal {
 
 	interface ImgHTMLAttributes<T extends EventTarget> extends HTMLAttributes<T> {
 		alt?: Signalish<string | undefined>;
+		crossorigin?: Signalish<HTMLAttributeCrossOrigin>;
 		crossOrigin?: Signalish<HTMLAttributeCrossOrigin>;
 		decoding?: Signalish<'async' | 'auto' | 'sync' | undefined>;
 		height?: Signalish<number | string | undefined>;
@@ -1690,7 +1704,9 @@ export namespace JSXInternal {
 		referrerPolicy?: Signalish<HTMLAttributeReferrerPolicy | undefined>;
 		sizes?: Signalish<string | undefined>;
 		src?: Signalish<string | undefined>;
+		srcset?: Signalish<string | undefined>;
 		srcSet?: Signalish<string | undefined>;
+		usemap?: Signalish<string | undefined>;
 		useMap?: Signalish<string | undefined>;
 		width?: Signalish<number | string | undefined>;
 	}
@@ -1724,6 +1740,7 @@ export namespace JSXInternal {
 		extends HTMLAttributes<T> {
 		accept?: Signalish<string | undefined>;
 		alt?: Signalish<string | undefined>;
+		autocomplete?: Signalish<string | undefined>;
 		autoComplete?: Signalish<string | undefined>;
 		capture?: Signalish<'user' | 'environment' | undefined>; // https://www.w3.org/TR/html-media-capture/#the-capture-attribute
 		checked?: Signalish<boolean | undefined>;
@@ -1739,21 +1756,29 @@ export namespace JSXInternal {
 			| undefined
 		>;
 		form?: Signalish<string | undefined>;
+		formaction?: Signalish<string | undefined>;
 		formAction?: Signalish<string | undefined>;
+		formenctype?: Signalish<string | undefined>;
 		formEncType?: Signalish<string | undefined>;
+		formmethod?: Signalish<string | undefined>;
 		formMethod?: Signalish<string | undefined>;
+		formnovalidate?: Signalish<boolean | undefined>;
 		formNoValidate?: Signalish<boolean | undefined>;
+		formtarget?: Signalish<string | undefined>;
 		formTarget?: Signalish<string | undefined>;
 		height?: Signalish<number | string | undefined>;
 		list?: Signalish<string | undefined>;
 		max?: Signalish<string | undefined>;
+		maxlength?: Signalish<number | undefined>;
 		maxLength?: Signalish<number | undefined>;
 		min?: Signalish<string | undefined>;
+		minength?: Signalish<number | undefined>;
 		minLength?: Signalish<number | undefined>;
 		multiple?: Signalish<boolean | undefined>;
 		name?: Signalish<string | undefined>;
 		pattern?: Signalish<string | undefined>;
 		placeholder?: Signalish<string | undefined>;
+		readonly?: Signalish<boolean | undefined>;
 		readOnly?: Signalish<boolean | undefined>;
 		required?: Signalish<boolean | undefined>;
 		size?: Signalish<number | undefined>;
@@ -1767,6 +1792,7 @@ export namespace JSXInternal {
 
 	interface InsHTMLAttributes<T extends EventTarget> extends HTMLAttributes<T> {
 		cite?: Signalish<string | undefined>;
+		datetime?: Signalish<string | undefined>;
 		dateTime?: Signalish<string | undefined>;
 	}
 
@@ -1793,9 +1819,11 @@ export namespace JSXInternal {
 	interface LinkHTMLAttributes<T extends EventTarget>
 		extends HTMLAttributes<T> {
 		as?: Signalish<string | undefined>;
+		crossorigin?: Signalish<HTMLAttributeCrossOrigin>;
 		crossOrigin?: Signalish<HTMLAttributeCrossOrigin>;
 		fetchPriority?: Signalish<'high' | 'low' | 'auto'>;
 		href?: Signalish<string | undefined>;
+		hreflang?: Signalish<string | undefined>;
 		hrefLang?: Signalish<string | undefined>;
 		integrity?: Signalish<string | undefined>;
 		media?: Signalish<string | undefined>;
@@ -1803,6 +1831,7 @@ export namespace JSXInternal {
 		referrerPolicy?: HTMLAttributeReferrerPolicy | undefined;
 		sizes?: Signalish<string | undefined>;
 		type?: Signalish<string | undefined>;
+		charset?: Signalish<string | undefined>;
 		charSet?: Signalish<string | undefined>;
 	}
 
@@ -1827,13 +1856,16 @@ export namespace JSXInternal {
 
 	interface MediaHTMLAttributes<T extends EventTarget>
 		extends HTMLAttributes<T> {
+		autoplay?: Signalish<boolean | undefined>;
 		autoPlay?: Signalish<boolean | undefined>;
 		controls?: Signalish<boolean | undefined>;
 		controlsList?: Signalish<string | undefined>;
+		crossorigin?: Signalish<HTMLAttributeCrossOrigin>;
 		crossOrigin?: Signalish<HTMLAttributeCrossOrigin>;
 		loop?: Signalish<boolean | undefined>;
 		mediaGroup?: Signalish<string | undefined>;
 		muted?: Signalish<boolean | undefined>;
+		playsinline?: Signalish<boolean | undefined>;
 		playsInline?: Signalish<boolean | undefined>;
 		preload?: Signalish<string | undefined>;
 		src?: Signalish<string | undefined>;
@@ -1846,7 +1878,9 @@ export namespace JSXInternal {
 
 	interface MetaHTMLAttributes<T extends EventTarget>
 		extends HTMLAttributes<T> {
+		charset?: Signalish<string | undefined>;
 		charSet?: Signalish<string | undefined>;
+		'http-equiv'?: Signalish<string | undefined>;
 		httpEquiv?: Signalish<string | undefined>;
 		name?: Signalish<string | undefined>;
 		media?: Signalish<string | undefined>;
@@ -1871,6 +1905,7 @@ export namespace JSXInternal {
 		height?: Signalish<number | string | undefined>;
 		name?: Signalish<string | undefined>;
 		type?: Signalish<string | undefined>;
+		usemap?: Signalish<string | undefined>;
 		useMap?: Signalish<string | undefined>;
 		width?: Signalish<number | string | undefined>;
 		wmode?: Signalish<string | undefined>;
@@ -1924,7 +1959,10 @@ export namespace JSXInternal {
 		extends HTMLAttributes<T> {
 		async?: Signalish<boolean | undefined>;
 		/** @deprecated */
+		charset?: Signalish<string | undefined>;
+		/** @deprecated */
 		charSet?: Signalish<string | undefined>;
+		crossorigin?: Signalish<HTMLAttributeCrossOrigin>;
 		crossOrigin?: Signalish<HTMLAttributeCrossOrigin>;
 		defer?: Signalish<boolean | undefined>;
 		integrity?: Signalish<string | undefined>;
@@ -1936,6 +1974,7 @@ export namespace JSXInternal {
 
 	interface SelectHTMLAttributes<T extends EventTarget>
 		extends HTMLAttributes<T> {
+		autocomplete?: Signalish<string | undefined>;
 		autoComplete?: Signalish<string | undefined>;
 		disabled?: Signalish<boolean | undefined>;
 		form?: Signalish<string | undefined>;
@@ -1958,6 +1997,7 @@ export namespace JSXInternal {
 		media?: Signalish<string | undefined>;
 		sizes?: Signalish<string | undefined>;
 		src?: Signalish<string | undefined>;
+		srcset?: Signalish<string | undefined>;
 		srcSet?: Signalish<string | undefined>;
 		type?: Signalish<string | undefined>;
 		width?: Signalish<number | string | undefined>;
@@ -1982,8 +2022,10 @@ export namespace JSXInternal {
 		align?: Signalish<
 			'left' | 'center' | 'right' | 'justify' | 'char' | undefined
 		>;
+		colspan?: Signalish<number | undefined>;
 		colSpan?: Signalish<number | undefined>;
 		headers?: Signalish<string | undefined>;
+		rowspan?: Signalish<number | undefined>;
 		rowSpan?: Signalish<number | undefined>;
 		scope?: Signalish<string | undefined>;
 		abbr?: Signalish<string | undefined>;
@@ -1994,6 +2036,7 @@ export namespace JSXInternal {
 
 	interface TextareaHTMLAttributes<T extends EventTarget>
 		extends HTMLAttributes<T> {
+		autocomplete?: Signalish<string | undefined>;
 		autoComplete?: Signalish<string | undefined>;
 		cols?: Signalish<number | undefined>;
 		dirName?: Signalish<string | undefined>;
@@ -2015,8 +2058,10 @@ export namespace JSXInternal {
 		align?: Signalish<
 			'left' | 'center' | 'right' | 'justify' | 'char' | undefined
 		>;
+		colspan?: Signalish<number | undefined>;
 		colSpan?: Signalish<number | undefined>;
 		headers?: Signalish<string | undefined>;
+		rowspan?: Signalish<number | undefined>;
 		rowSpan?: Signalish<number | undefined>;
 		scope?: Signalish<string | undefined>;
 		abbr?: Signalish<string | undefined>;
@@ -2024,6 +2069,7 @@ export namespace JSXInternal {
 
 	interface TimeHTMLAttributes<T extends EventTarget>
 		extends HTMLAttributes<T> {
+		datetime?: Signalish<string | undefined>;
 		dateTime?: Signalish<string | undefined>;
 	}
 
@@ -2033,6 +2079,7 @@ export namespace JSXInternal {
 		kind?: Signalish<string | undefined>;
 		label?: Signalish<string | undefined>;
 		src?: Signalish<string | undefined>;
+		srclang?: Signalish<string | undefined>;
 		srcLang?: Signalish<string | undefined>;
 	}
 
