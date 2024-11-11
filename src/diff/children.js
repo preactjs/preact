@@ -397,9 +397,13 @@ function findMatchingIndex(
 	// remainingOldChildren > 1 if the oldVNode is not already used/matched. Else
 	// if the oldVNode was null or matched, then there could needs to be at least
 	// 1 (aka `remainingOldChildren > 0`) children to find and compare against.
+	//
+	// If there is an unkeyed functional VNode, that isn't a built-in like our Fragment,
+	// we should not search as we risk re-using state of an unrelated VNode.
 	let shouldSearch =
+		(typeof type !== 'function' || type === Fragment || key) &&
 		remainingOldChildren >
-		(oldVNode != null && (oldVNode._flags & MATCHED) === 0 ? 1 : 0);
+			(oldVNode != null && (oldVNode._flags & MATCHED) === 0 ? 1 : 0);
 
 	if (
 		oldVNode === null ||
