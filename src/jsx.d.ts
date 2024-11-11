@@ -78,18 +78,9 @@ export namespace JSXInternal {
 
 	export interface SVGAttributes<Target extends EventTarget = SVGElement>
 		extends HTMLAttributes<Target> {
-		accentHeight?: Signalish<
-			| number
-			| string
-			| undefined>;
-		accumulate?: Signalish<
-			| 'none'
-			| 'sum'
-			| undefined>;
-		additive?: Signalish<
-			| 'replace'
-			| 'sum'
-			| undefined>;
+		accentHeight?: Signalish<number | string | undefined>;
+		accumulate?: Signalish<'none' | 'sum' | undefined>;
+		additive?: Signalish<'replace' | 'sum' | undefined>;
 		alignmentBaseline?: Signalish<
 			| 'auto'
 			| 'baseline'
@@ -104,7 +95,8 @@ export namespace JSXInternal {
 			| 'hanging'
 			| 'mathematical'
 			| 'inherit'
-			| undefined>;
+			| undefined
+		>;
 		'alignment-baseline'?: Signalish<
 			| 'auto'
 			| 'baseline'
@@ -119,1010 +111,319 @@ export namespace JSXInternal {
 			| 'hanging'
 			| 'mathematical'
 			| 'inherit'
-			| undefined>;
-		allowReorder?: Signalish<
-			| 'no'
-			| 'yes'
-			| undefined>;
-		'allow-reorder'?: Signalish<
-			| 'no'
-			| 'yes'
-			| undefined>;
-		alphabetic?: Signalish<
-			| number
-			| string
-			| undefined>;
-		amplitude?: Signalish<
-			| number
-			| string
-			| undefined>;
+			| undefined
+		>;
+		allowReorder?: Signalish<'no' | 'yes' | undefined>;
+		'allow-reorder'?: Signalish<'no' | 'yes' | undefined>;
+		alphabetic?: Signalish<number | string | undefined>;
+		amplitude?: Signalish<number | string | undefined>;
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/arabic-form */
 		arabicForm?: Signalish<
-			| 'initial'
-			| 'medial'
-			| 'terminal'
-			| 'isolated'
-			| undefined>;
+			'initial' | 'medial' | 'terminal' | 'isolated' | undefined
+		>;
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/arabic-form */
 		'arabic-form'?: Signalish<
-			| 'initial'
-			| 'medial'
-			| 'terminal'
-			| 'isolated'
-			| undefined>;
-		ascent?: Signalish<
-			| number
-			| string
-			| undefined>;
+			'initial' | 'medial' | 'terminal' | 'isolated' | undefined
+		>;
+		ascent?: Signalish<number | string | undefined>;
 		attributeName?: Signalish<string | undefined>;
 		attributeType?: Signalish<string | undefined>;
-		azimuth?: Signalish<
-			| number
-			| string
-			| undefined>;
-		baseFrequency?: Signalish<
-			| number
-			| string
-			| undefined>;
-		baselineShift?: Signalish<
-			| number
-			| string
-			| undefined>;
-		'baseline-shift'?: Signalish<
-			| number
-			| string
-			| undefined>;
-		baseProfile?: Signalish<
-			| number
-			| string
-			| undefined>;
-		bbox?: Signalish<
-			| number
-			| string
-			| undefined>;
-		begin?: Signalish<
-			| number
-			| string
-			| undefined>;
-		bias?: Signalish<
-			| number
-			| string
-			| undefined>;
+		azimuth?: Signalish<number | string | undefined>;
+		baseFrequency?: Signalish<number | string | undefined>;
+		baselineShift?: Signalish<number | string | undefined>;
+		'baseline-shift'?: Signalish<number | string | undefined>;
+		baseProfile?: Signalish<number | string | undefined>;
+		bbox?: Signalish<number | string | undefined>;
+		begin?: Signalish<number | string | undefined>;
+		bias?: Signalish<number | string | undefined>;
 		by?: Signalish<number | string | undefined>;
-		calcMode?: Signalish<
-			| number
-			| string
-			| undefined>;
-		capHeight?: Signalish<
-			| number
-			| string
-			| undefined>;
-		'cap-height'?: Signalish<
-			| number
-			| string
-			| undefined>;
-		clip?: Signalish<
-			| number
-			| string
-			| undefined>;
+		calcMode?: Signalish<number | string | undefined>;
+		capHeight?: Signalish<number | string | undefined>;
+		'cap-height'?: Signalish<number | string | undefined>;
+		clip?: Signalish<number | string | undefined>;
 		clipPath?: Signalish<string | undefined>;
 		'clip-path'?: Signalish<string | undefined>;
-		clipPathUnits?: Signalish<
-			| number
-			| string
-			| undefined>;
-		clipRule?: Signalish<
-			| number
-			| string
-			| undefined>;
-		'clip-rule'?: Signalish<
-			| number
-			| string
-			| undefined>;
-		colorInterpolation?: Signalish<
-			| number
-			| string
-			| undefined>;
-		'color-interpolation'?: Signalish<
-			| number
-			| string
-			| undefined>;
+		clipPathUnits?: Signalish<number | string | undefined>;
+		clipRule?: Signalish<number | string | undefined>;
+		'clip-rule'?: Signalish<number | string | undefined>;
+		colorInterpolation?: Signalish<number | string | undefined>;
+		'color-interpolation'?: Signalish<number | string | undefined>;
 		colorInterpolationFilters?: Signalish<
-			| 'auto'
-			| 'sRGB'
-			| 'linearRGB'
-			| 'inherit'
-			| undefined>;
+			'auto' | 'sRGB' | 'linearRGB' | 'inherit' | undefined
+		>;
 		'color-interpolation-filters'?: Signalish<
-			| 'auto'
-			| 'sRGB'
-			| 'linearRGB'
-			| 'inherit'
-			| undefined>;
-		colorProfile?: Signalish<
-			| number
-			| string
-			| undefined>;
-		'color-profile'?: Signalish<
-			| number
-			| string
-			| undefined>;
-		colorRendering?: Signalish<
-			| number
-			| string
-			| undefined>;
-		'color-rendering'?: Signalish<
-			| number
-			| string
-			| undefined>;
-		contentScriptType?: Signalish<
-			| number
-			| string
-			| undefined>;
-		'content-script-type'?: Signalish<
-			| number
-			| string
-			| undefined>;
-		contentStyleType?: Signalish<
-			| number
-			| string
-			| undefined>;
-		'content-style-type'?: Signalish<
-			| number
-			| string
-			| undefined>;
-		cursor?: Signalish<
-			| number
-			| string
-			| undefined>;
+			'auto' | 'sRGB' | 'linearRGB' | 'inherit' | undefined
+		>;
+		colorProfile?: Signalish<number | string | undefined>;
+		'color-profile'?: Signalish<number | string | undefined>;
+		colorRendering?: Signalish<number | string | undefined>;
+		'color-rendering'?: Signalish<number | string | undefined>;
+		contentScriptType?: Signalish<number | string | undefined>;
+		'content-script-type'?: Signalish<number | string | undefined>;
+		contentStyleType?: Signalish<number | string | undefined>;
+		'content-style-type'?: Signalish<number | string | undefined>;
+		cursor?: Signalish<number | string | undefined>;
 		cx?: Signalish<number | string | undefined>;
 		cy?: Signalish<number | string | undefined>;
 		d?: Signalish<string | undefined>;
-		decelerate?: Signalish<
-			| number
-			| string
-			| undefined>;
-		descent?: Signalish<
-			| number
-			| string
-			| undefined>;
-		diffuseConstant?: Signalish<
-			| number
-			| string
-			| undefined>;
-		direction?: Signalish<
-			| number
-			| string
-			| undefined>;
-		display?: Signalish<
-			| number
-			| string
-			| undefined>;
-		divisor?: Signalish<
-			| number
-			| string
-			| undefined>;
-		dominantBaseline?: Signalish<
-			| number
-			| string
-			| undefined>;
-		'dominant-baseline'?: Signalish<
-			| number
-			| string
-			| undefined>;
+		decelerate?: Signalish<number | string | undefined>;
+		descent?: Signalish<number | string | undefined>;
+		diffuseConstant?: Signalish<number | string | undefined>;
+		direction?: Signalish<number | string | undefined>;
+		display?: Signalish<number | string | undefined>;
+		divisor?: Signalish<number | string | undefined>;
+		dominantBaseline?: Signalish<number | string | undefined>;
+		'dominant-baseline'?: Signalish<number | string | undefined>;
 		dur?: Signalish<number | string | undefined>;
 		dx?: Signalish<number | string | undefined>;
 		dy?: Signalish<number | string | undefined>;
-		edgeMode?: Signalish<
-			| number
-			| string
-			| undefined>;
-		elevation?: Signalish<
-			| number
-			| string
-			| undefined>;
-		enableBackground?: Signalish<
-			| number
-			| string
-			| undefined>;
-		'enable-background'?: Signalish<
-			| number
-			| string
-			| undefined>;
+		edgeMode?: Signalish<number | string | undefined>;
+		elevation?: Signalish<number | string | undefined>;
+		enableBackground?: Signalish<number | string | undefined>;
+		'enable-background'?: Signalish<number | string | undefined>;
 		end?: Signalish<number | string | undefined>;
-		exponent?: Signalish<
-			| number
-			| string
-			| undefined>;
-		externalResourcesRequired?: Signalish<
-			| number
-			| string
-			| undefined>;
+		exponent?: Signalish<number | string | undefined>;
+		externalResourcesRequired?: Signalish<number | string | undefined>;
 		fill?: Signalish<string | undefined>;
-		fillOpacity?: Signalish<
-			| number
-			| string
-			| undefined>;
-		'fill-opacity'?: Signalish<
-			| number
-			| string
-			| undefined>;
-		fillRule?: Signalish<
-			| 'nonzero'
-			| 'evenodd'
-			| 'inherit'
-			| undefined>;
-		'fill-rule'?: Signalish<
-			| 'nonzero'
-			| 'evenodd'
-			| 'inherit'
-			| undefined>;
+		fillOpacity?: Signalish<number | string | undefined>;
+		'fill-opacity'?: Signalish<number | string | undefined>;
+		fillRule?: Signalish<'nonzero' | 'evenodd' | 'inherit' | undefined>;
+		'fill-rule'?: Signalish<'nonzero' | 'evenodd' | 'inherit' | undefined>;
 		filter?: Signalish<string | undefined>;
-		filterRes?: Signalish<
-			| number
-			| string
-			| undefined>;
-		filterUnits?: Signalish<
-			| number
-			| string
-			| undefined>;
-		floodColor?: Signalish<
-			| number
-			| string
-			| undefined>;
-		'flood-color'?: Signalish<
-			| number
-			| string
-			| undefined>;
-		floodOpacity?: Signalish<
-			| number
-			| string
-			| undefined>;
-		'flood-opacity'?: Signalish<
-			| number
-			| string
-			| undefined>;
-		focusable?: Signalish<
-			| number
-			| string
-			| undefined>;
+		filterRes?: Signalish<number | string | undefined>;
+		filterUnits?: Signalish<number | string | undefined>;
+		floodColor?: Signalish<number | string | undefined>;
+		'flood-color'?: Signalish<number | string | undefined>;
+		floodOpacity?: Signalish<number | string | undefined>;
+		'flood-opacity'?: Signalish<number | string | undefined>;
+		focusable?: Signalish<number | string | undefined>;
 		fontFamily?: Signalish<string | undefined>;
 		'font-family'?: Signalish<string | undefined>;
-		fontSize?: Signalish<
-			| number
-			| string
-			| undefined>;
-		'font-size'?: Signalish<
-			| number
-			| string
-			| undefined>;
-		fontSizeAdjust?: Signalish<
-			| number
-			| string
-			| undefined>;
-		'font-size-adjust'?: Signalish<
-			| number
-			| string
-			| undefined>;
-		fontStretch?: Signalish<
-			| number
-			| string
-			| undefined>;
-		'font-stretch'?: Signalish<
-			| number
-			| string
-			| undefined>;
-		fontStyle?: Signalish<
-			| number
-			| string
-			| undefined>;
-		'font-style'?: Signalish<
-			| number
-			| string
-			| undefined>;
-		fontVariant?: Signalish<
-			| number
-			| string
-			| undefined>;
-		'font-variant'?: Signalish<
-			| number
-			| string
-			| undefined>;
-		fontWeight?: Signalish<
-			| number
-			| string
-			| undefined>;
-		'font-weight'?: Signalish<
-			| number
-			| string
-			| undefined>;
-		format?: Signalish<
-			| number
-			| string
-			| undefined>;
-		from?: Signalish<
-			| number
-			| string
-			| undefined>;
+		fontSize?: Signalish<number | string | undefined>;
+		'font-size'?: Signalish<number | string | undefined>;
+		fontSizeAdjust?: Signalish<number | string | undefined>;
+		'font-size-adjust'?: Signalish<number | string | undefined>;
+		fontStretch?: Signalish<number | string | undefined>;
+		'font-stretch'?: Signalish<number | string | undefined>;
+		fontStyle?: Signalish<number | string | undefined>;
+		'font-style'?: Signalish<number | string | undefined>;
+		fontVariant?: Signalish<number | string | undefined>;
+		'font-variant'?: Signalish<number | string | undefined>;
+		fontWeight?: Signalish<number | string | undefined>;
+		'font-weight'?: Signalish<number | string | undefined>;
+		format?: Signalish<number | string | undefined>;
+		from?: Signalish<number | string | undefined>;
 		fx?: Signalish<number | string | undefined>;
 		fy?: Signalish<number | string | undefined>;
 		g1?: Signalish<number | string | undefined>;
 		g2?: Signalish<number | string | undefined>;
-		glyphName?: Signalish<
-			| number
-			| string
-			| undefined>;
-		'glyph-name'?: Signalish<
-			| number
-			| string
-			| undefined>;
-		glyphOrientationHorizontal?: Signalish<
-			| number
-			| string
-			| undefined>;
-		'glyph-orientation-horizontal'?: Signalish<
-			| number
-			| string
-			| undefined>;
-		glyphOrientationVertical?: Signalish<
-			| number
-			| string
-			| undefined>;
-		'glyph-orientation-vertical'?: Signalish<
-			| number
-			| string
-			| undefined>;
-		glyphRef?: Signalish<
-			| number
-			| string
-			| undefined>;
+		glyphName?: Signalish<number | string | undefined>;
+		'glyph-name'?: Signalish<number | string | undefined>;
+		glyphOrientationHorizontal?: Signalish<number | string | undefined>;
+		'glyph-orientation-horizontal'?: Signalish<number | string | undefined>;
+		glyphOrientationVertical?: Signalish<number | string | undefined>;
+		'glyph-orientation-vertical'?: Signalish<number | string | undefined>;
+		glyphRef?: Signalish<number | string | undefined>;
 		gradientTransform?: Signalish<string | undefined>;
 		gradientUnits?: Signalish<string | undefined>;
-		hanging?: Signalish<
-			| number
-			| string
-			| undefined>;
-		horizAdvX?: Signalish<
-			| number
-			| string
-			| undefined>;
-		'horiz-adv-x'?: Signalish<
-			| number
-			| string
-			| undefined>;
-		horizOriginX?: Signalish<
-			| number
-			| string
-			| undefined>;
-		'horiz-origin-x'?: Signalish<
-			| number
-			| string
-			| undefined>;
-		ideographic?: Signalish<
-			| number
-			| string
-			| undefined>;
-		imageRendering?: Signalish<
-			| number
-			| string
-			| undefined>;
-		'image-rendering'?: Signalish<
-			| number
-			| string
-			| undefined>;
+		hanging?: Signalish<number | string | undefined>;
+		horizAdvX?: Signalish<number | string | undefined>;
+		'horiz-adv-x'?: Signalish<number | string | undefined>;
+		horizOriginX?: Signalish<number | string | undefined>;
+		'horiz-origin-x'?: Signalish<number | string | undefined>;
+		ideographic?: Signalish<number | string | undefined>;
+		imageRendering?: Signalish<number | string | undefined>;
+		'image-rendering'?: Signalish<number | string | undefined>;
 		in2?: Signalish<number | string | undefined>;
 		in?: Signalish<string | undefined>;
-		intercept?: Signalish<
-			| number
-			| string
-			| undefined>;
+		intercept?: Signalish<number | string | undefined>;
 		k1?: Signalish<number | string | undefined>;
 		k2?: Signalish<number | string | undefined>;
 		k3?: Signalish<number | string | undefined>;
 		k4?: Signalish<number | string | undefined>;
 		k?: Signalish<number | string | undefined>;
-		kernelMatrix?: Signalish<
-			| number
-			| string
-			| undefined>;
-		kernelUnitLength?: Signalish<
-			| number
-			| string
-			| undefined>;
-		kerning?: Signalish<
-			| number
-			| string
-			| undefined>;
-		keyPoints?: Signalish<
-			| number
-			| string
-			| undefined>;
-		keySplines?: Signalish<
-			| number
-			| string
-			| undefined>;
-		keyTimes?: Signalish<
-			| number
-			| string
-			| undefined>;
-		lengthAdjust?: Signalish<
-			| number
-			| string
-			| undefined>;
-		letterSpacing?: Signalish<
-			| number
-			| string
-			| undefined>;
-		'letter-spacing'?: Signalish<
-			| number
-			| string
-			| undefined>;
-		lightingColor?: Signalish<
-			| number
-			| string
-			| undefined>;
-		'lighting-color'?: Signalish<
-			| number
-			| string
-			| undefined>;
-		limitingConeAngle?: Signalish<
-			| number
-			| string
-			| undefined>;
-		local?: Signalish<
-			| number
-			| string
-			| undefined>;
+		kernelMatrix?: Signalish<number | string | undefined>;
+		kernelUnitLength?: Signalish<number | string | undefined>;
+		kerning?: Signalish<number | string | undefined>;
+		keyPoints?: Signalish<number | string | undefined>;
+		keySplines?: Signalish<number | string | undefined>;
+		keyTimes?: Signalish<number | string | undefined>;
+		lengthAdjust?: Signalish<number | string | undefined>;
+		letterSpacing?: Signalish<number | string | undefined>;
+		'letter-spacing'?: Signalish<number | string | undefined>;
+		lightingColor?: Signalish<number | string | undefined>;
+		'lighting-color'?: Signalish<number | string | undefined>;
+		limitingConeAngle?: Signalish<number | string | undefined>;
+		local?: Signalish<number | string | undefined>;
 		markerEnd?: Signalish<string | undefined>;
 		'marker-end'?: Signalish<string | undefined>;
-		markerHeight?: Signalish<
-			| number
-			| string
-			| undefined>;
+		markerHeight?: Signalish<number | string | undefined>;
 		markerMid?: Signalish<string | undefined>;
 		'marker-mid'?: Signalish<string | undefined>;
 		markerStart?: Signalish<string | undefined>;
 		'marker-start'?: Signalish<string | undefined>;
-		markerUnits?: Signalish<
-			| number
-			| string
-			| undefined>;
-		markerWidth?: Signalish<
-			| number
-			| string
-			| undefined>;
+		markerUnits?: Signalish<number | string | undefined>;
+		markerWidth?: Signalish<number | string | undefined>;
 		mask?: Signalish<string | undefined>;
-		maskContentUnits?: Signalish<
-			| number
-			| string
-			| undefined>;
-		maskUnits?: Signalish<
-			| number
-			| string
-			| undefined>;
-		mathematical?: Signalish<
-			| number
-			| string
-			| undefined>;
-		mode?: Signalish<
-			| number
-			| string
-			| undefined>;
-		numOctaves?: Signalish<
-			| number
-			| string
-			| undefined>;
-		offset?: Signalish<
-			| number
-			| string
-			| undefined>;
-		opacity?: Signalish<
-			| number
-			| string
-			| undefined>;
-		operator?: Signalish<
-			| number
-			| string
-			| undefined>;
-		order?: Signalish<
-			| number
-			| string
-			| undefined>;
-		orient?: Signalish<
-			| number
-			| string
-			| undefined>;
-		orientation?: Signalish<
-			| number
-			| string
-			| undefined>;
-		origin?: Signalish<
-			| number
-			| string
-			| undefined>;
-		overflow?: Signalish<
-			| number
-			| string
-			| undefined>;
-		overlinePosition?: Signalish<
-			| number
-			| string
-			| undefined>;
-		'overline-position'?: Signalish<
-			| number
-			| string
-			| undefined>;
-		overlineThickness?: Signalish<
-			| number
-			| string
-			| undefined>;
-		'overline-thickness'?: Signalish<
-			| number
-			| string
-			| undefined>;
-		paintOrder?: Signalish<
-			| number
-			| string
-			| undefined>;
-		'paint-order'?: Signalish<
-			| number
-			| string
-			| undefined>;
-		panose1?: Signalish<
-			| number
-			| string
-			| undefined>;
-		'panose-1'?: Signalish<
-			| number
-			| string
-			| undefined>;
-		pathLength?: Signalish<
-			| number
-			| string
-			| undefined>;
+		maskContentUnits?: Signalish<number | string | undefined>;
+		maskUnits?: Signalish<number | string | undefined>;
+		mathematical?: Signalish<number | string | undefined>;
+		mode?: Signalish<number | string | undefined>;
+		numOctaves?: Signalish<number | string | undefined>;
+		offset?: Signalish<number | string | undefined>;
+		opacity?: Signalish<number | string | undefined>;
+		operator?: Signalish<number | string | undefined>;
+		order?: Signalish<number | string | undefined>;
+		orient?: Signalish<number | string | undefined>;
+		orientation?: Signalish<number | string | undefined>;
+		origin?: Signalish<number | string | undefined>;
+		overflow?: Signalish<number | string | undefined>;
+		overlinePosition?: Signalish<number | string | undefined>;
+		'overline-position'?: Signalish<number | string | undefined>;
+		overlineThickness?: Signalish<number | string | undefined>;
+		'overline-thickness'?: Signalish<number | string | undefined>;
+		paintOrder?: Signalish<number | string | undefined>;
+		'paint-order'?: Signalish<number | string | undefined>;
+		panose1?: Signalish<number | string | undefined>;
+		'panose-1'?: Signalish<number | string | undefined>;
+		pathLength?: Signalish<number | string | undefined>;
 		patternContentUnits?: Signalish<string | undefined>;
-		patternTransform?: Signalish<
-			| number
-			| string
-			| undefined>;
+		patternTransform?: Signalish<number | string | undefined>;
 		patternUnits?: Signalish<string | undefined>;
-		pointerEvents?: Signalish<
-			| number
-			| string
-			| undefined>;
-		'pointer-events'?: Signalish<
-			| number
-			| string
-			| undefined>;
+		pointerEvents?: Signalish<number | string | undefined>;
+		'pointer-events'?: Signalish<number | string | undefined>;
 		points?: Signalish<string | undefined>;
-		pointsAtX?: Signalish<
-			| number
-			| string
-			| undefined>;
-		pointsAtY?: Signalish<
-			| number
-			| string
-			| undefined>;
-		pointsAtZ?: Signalish<
-			| number
-			| string
-			| undefined>;
-		preserveAlpha?: Signalish<
-			| number
-			| string
-			| undefined>;
+		pointsAtX?: Signalish<number | string | undefined>;
+		pointsAtY?: Signalish<number | string | undefined>;
+		pointsAtZ?: Signalish<number | string | undefined>;
+		preserveAlpha?: Signalish<number | string | undefined>;
 		preserveAspectRatio?: Signalish<string | undefined>;
-		primitiveUnits?: Signalish<
-			| number
-			| string
-			| undefined>;
+		primitiveUnits?: Signalish<number | string | undefined>;
 		r?: Signalish<number | string | undefined>;
-		radius?: Signalish<
-			| number
-			| string
-			| undefined>;
-		refX?: Signalish<
-			| number
-			| string
-			| undefined>;
-		refY?: Signalish<
-			| number
-			| string
-			| undefined>;
-		renderingIntent?: Signalish<
-			| number
-			| string
-			| undefined>;
-		'rendering-intent'?: Signalish<
-			| number
-			| string
-			| undefined>;
-		repeatCount?: Signalish<
-			| number
-			| string
-			| undefined>;
-		'repeat-count'?: Signalish<
-			| number
-			| string
-			| undefined>;
-		repeatDur?: Signalish<
-			| number
-			| string
-			| undefined>;
-		'repeat-dur'?: Signalish<
-			| number
-			| string
-			| undefined>;
-		requiredExtensions?: Signalish<
-			| number
-			| string
-			| undefined>;
-		requiredFeatures?: Signalish<
-			| number
-			| string
-			| undefined>;
-		restart?: Signalish<
-			| number
-			| string
-			| undefined>;
+		radius?: Signalish<number | string | undefined>;
+		refX?: Signalish<number | string | undefined>;
+		refY?: Signalish<number | string | undefined>;
+		renderingIntent?: Signalish<number | string | undefined>;
+		'rendering-intent'?: Signalish<number | string | undefined>;
+		repeatCount?: Signalish<number | string | undefined>;
+		'repeat-count'?: Signalish<number | string | undefined>;
+		repeatDur?: Signalish<number | string | undefined>;
+		'repeat-dur'?: Signalish<number | string | undefined>;
+		requiredExtensions?: Signalish<number | string | undefined>;
+		requiredFeatures?: Signalish<number | string | undefined>;
+		restart?: Signalish<number | string | undefined>;
 		result?: Signalish<string | undefined>;
-		rotate?: Signalish<
-			| number
-			| string
-			| undefined>;
+		rotate?: Signalish<number | string | undefined>;
 		rx?: Signalish<number | string | undefined>;
 		ry?: Signalish<number | string | undefined>;
-		scale?: Signalish<
-			| number
-			| string
-			| undefined>;
-		seed?: Signalish<
-			| number
-			| string
-			| undefined>;
-		shapeRendering?: Signalish<
-			| number
-			| string
-			| undefined>;
-		'shape-rendering'?: Signalish<
-			| number
-			| string
-			| undefined>;
-		slope?: Signalish<
-			| number
-			| string
-			| undefined>;
-		spacing?: Signalish<
-			| number
-			| string
-			| undefined>;
-		specularConstant?: Signalish<
-			| number
-			| string
-			| undefined>;
-		specularExponent?: Signalish<
-			| number
-			| string
-			| undefined>;
-		speed?: Signalish<
-			| number
-			| string
-			| undefined>;
+		scale?: Signalish<number | string | undefined>;
+		seed?: Signalish<number | string | undefined>;
+		shapeRendering?: Signalish<number | string | undefined>;
+		'shape-rendering'?: Signalish<number | string | undefined>;
+		slope?: Signalish<number | string | undefined>;
+		spacing?: Signalish<number | string | undefined>;
+		specularConstant?: Signalish<number | string | undefined>;
+		specularExponent?: Signalish<number | string | undefined>;
+		speed?: Signalish<number | string | undefined>;
 		spreadMethod?: Signalish<string | undefined>;
-		startOffset?: Signalish<
-			| number
-			| string
-			| undefined>;
-		stdDeviation?: Signalish<
-			| number
-			| string
-			| undefined>;
-		stemh?: Signalish<
-			| number
-			| string
-			| undefined>;
-		stemv?: Signalish<
-			| number
-			| string
-			| undefined>;
-		stitchTiles?: Signalish<
-			| number
-			| string
-			| undefined>;
+		startOffset?: Signalish<number | string | undefined>;
+		stdDeviation?: Signalish<number | string | undefined>;
+		stemh?: Signalish<number | string | undefined>;
+		stemv?: Signalish<number | string | undefined>;
+		stitchTiles?: Signalish<number | string | undefined>;
 		stopColor?: Signalish<string | undefined>;
 		'stop-color'?: Signalish<string | undefined>;
-		stopOpacity?: Signalish<
-			| number
-			| string
-			| undefined>;
-		'stop-opacity'?: Signalish<
-			| number
-			| string
-			| undefined>;
-		strikethroughPosition?: Signalish<
-			| number
-			| string
-			| undefined>;
-		'strikethrough-position'?: Signalish<
-			| number
-			| string
-			| undefined>;
-		strikethroughThickness?: Signalish<
-			| number
-			| string
-			| undefined>;
-		'strikethrough-thickness'?: Signalish<
-			| number
-			| string
-			| undefined>;
-		string?: Signalish<
-			| number
-			| string
-			| undefined>;
+		stopOpacity?: Signalish<number | string | undefined>;
+		'stop-opacity'?: Signalish<number | string | undefined>;
+		strikethroughPosition?: Signalish<number | string | undefined>;
+		'strikethrough-position'?: Signalish<number | string | undefined>;
+		strikethroughThickness?: Signalish<number | string | undefined>;
+		'strikethrough-thickness'?: Signalish<number | string | undefined>;
+		string?: Signalish<number | string | undefined>;
 		stroke?: Signalish<string | undefined>;
-		strokeDasharray?: Signalish<
-			| string
-			| number
-			| undefined>;
-		'stroke-dasharray'?: Signalish<
-			| string
-			| number
-			| undefined>;
-		strokeDashoffset?: Signalish<
-			| string
-			| number
-			| undefined>;
-		'stroke-dashoffset'?: Signalish<
-			| string
-			| number
-			| undefined>;
+		strokeDasharray?: Signalish<string | number | undefined>;
+		'stroke-dasharray'?: Signalish<string | number | undefined>;
+		strokeDashoffset?: Signalish<string | number | undefined>;
+		'stroke-dashoffset'?: Signalish<string | number | undefined>;
 		strokeLinecap?: Signalish<
-			| 'butt'
-			| 'round'
-			| 'square'
-			| 'inherit'
-			| undefined>;
+			'butt' | 'round' | 'square' | 'inherit' | undefined
+		>;
 		'stroke-linecap'?: Signalish<
-			| 'butt'
-			| 'round'
-			| 'square'
-			| 'inherit'
-			| undefined>;
+			'butt' | 'round' | 'square' | 'inherit' | undefined
+		>;
 		strokeLinejoin?: Signalish<
-			| 'miter'
-			| 'round'
-			| 'bevel'
-			| 'inherit'
-			| undefined>;
+			'miter' | 'round' | 'bevel' | 'inherit' | undefined
+		>;
 		'stroke-linejoin'?: Signalish<
-			| 'miter'
-			| 'round'
-			| 'bevel'
-			| 'inherit'
-			| undefined>;
-		strokeMiterlimit?: Signalish<
-			| string
-			| number
-			| undefined>;
-		'stroke-miterlimit'?: Signalish<
-			| string
-			| number
-			| undefined>;
-		strokeOpacity?: Signalish<
-			| number
-			| string
-			| undefined>;
-		'stroke-opacity'?: Signalish<
-			| number
-			| string
-			| undefined>;
-		strokeWidth?: Signalish<
-			| number
-			| string
-			| undefined>;
-		'stroke-width'?: Signalish<
-			| number
-			| string
-			| undefined>;
-		surfaceScale?: Signalish<
-			| number
-			| string
-			| undefined>;
-		systemLanguage?: Signalish<
-			| number
-			| string
-			| undefined>;
-		tableValues?: Signalish<
-			| number
-			| string
-			| undefined>;
-		targetX?: Signalish<
-			| number
-			| string
-			| undefined>;
-		targetY?: Signalish<
-			| number
-			| string
-			| undefined>;
+			'miter' | 'round' | 'bevel' | 'inherit' | undefined
+		>;
+		strokeMiterlimit?: Signalish<string | number | undefined>;
+		'stroke-miterlimit'?: Signalish<string | number | undefined>;
+		strokeOpacity?: Signalish<number | string | undefined>;
+		'stroke-opacity'?: Signalish<number | string | undefined>;
+		strokeWidth?: Signalish<number | string | undefined>;
+		'stroke-width'?: Signalish<number | string | undefined>;
+		surfaceScale?: Signalish<number | string | undefined>;
+		systemLanguage?: Signalish<number | string | undefined>;
+		tableValues?: Signalish<number | string | undefined>;
+		targetX?: Signalish<number | string | undefined>;
+		targetY?: Signalish<number | string | undefined>;
 		textAnchor?: Signalish<string | undefined>;
 		'text-anchor'?: Signalish<string | undefined>;
-		textDecoration?: Signalish<
-			| number
-			| string
-			| undefined>;
-		'text-decoration'?: Signalish<
-			| number
-			| string
-			| undefined>;
-		textLength?: Signalish<
-			| number
-			| string
-			| undefined>;
-		textRendering?: Signalish<
-			| number
-			| string
-			| undefined>;
-		'text-rendering'?: Signalish<
-			| number
-			| string
-			| undefined>;
+		textDecoration?: Signalish<number | string | undefined>;
+		'text-decoration'?: Signalish<number | string | undefined>;
+		textLength?: Signalish<number | string | undefined>;
+		textRendering?: Signalish<number | string | undefined>;
+		'text-rendering'?: Signalish<number | string | undefined>;
 		to?: Signalish<number | string | undefined>;
 		transform?: Signalish<string | undefined>;
 		transformOrigin?: Signalish<string | undefined>;
 		'transform-origin'?: Signalish<string | undefined>;
 		u1?: Signalish<number | string | undefined>;
 		u2?: Signalish<number | string | undefined>;
-		underlinePosition?: Signalish<
-			| number
-			| string
-			| undefined>;
-		'underline-position'?: Signalish<
-			| number
-			| string
-			| undefined>;
-		underlineThickness?: Signalish<
-			| number
-			| string
-			| undefined>;
-		'underline-thickness'?: Signalish<
-			| number
-			| string
-			| undefined>;
-		unicode?: Signalish<
-			| number
-			| string
-			| undefined>;
-		unicodeBidi?: Signalish<
-			| number
-			| string
-			| undefined>;
-		'unicode-bidi'?: Signalish<
-			| number
-			| string
-			| undefined>;
-		unicodeRange?: Signalish<
-			| number
-			| string
-			| undefined>;
-		'unicode-range'?: Signalish<
-			| number
-			| string
-			| undefined>;
-		unitsPerEm?: Signalish<
-			| number
-			| string
-			| undefined>;
-		'units-per-em'?: Signalish<
-			| number
-			| string
-			| undefined>;
-		vAlphabetic?: Signalish<
-			| number
-			| string
-			| undefined>;
-		'v-alphabetic'?: Signalish<
-			| number
-			| string
-			| undefined>;
+		underlinePosition?: Signalish<number | string | undefined>;
+		'underline-position'?: Signalish<number | string | undefined>;
+		underlineThickness?: Signalish<number | string | undefined>;
+		'underline-thickness'?: Signalish<number | string | undefined>;
+		unicode?: Signalish<number | string | undefined>;
+		unicodeBidi?: Signalish<number | string | undefined>;
+		'unicode-bidi'?: Signalish<number | string | undefined>;
+		unicodeRange?: Signalish<number | string | undefined>;
+		'unicode-range'?: Signalish<number | string | undefined>;
+		unitsPerEm?: Signalish<number | string | undefined>;
+		'units-per-em'?: Signalish<number | string | undefined>;
+		vAlphabetic?: Signalish<number | string | undefined>;
+		'v-alphabetic'?: Signalish<number | string | undefined>;
 		values?: Signalish<string | undefined>;
-		vectorEffect?: Signalish<
-			| number
-			| string
-			| undefined>;
-		'vector-effect'?: Signalish<
-			| number
-			| string
-			| undefined>;
+		vectorEffect?: Signalish<number | string | undefined>;
+		'vector-effect'?: Signalish<number | string | undefined>;
 		version?: Signalish<string | undefined>;
-		vertAdvY?: Signalish<
-			| number
-			| string
-			| undefined>;
-		'vert-adv-y'?: Signalish<
-			| number
-			| string
-			| undefined>;
-		vertOriginX?: Signalish<
-			| number
-			| string
-			| undefined>;
-		'vert-origin-x'?: Signalish<
-			| number
-			| string
-			| undefined>;
-		vertOriginY?: Signalish<
-			| number
-			| string
-			| undefined>;
-		'vert-origin-y'?: Signalish<
-			| number
-			| string
-			| undefined>;
-		vHanging?: Signalish<
-			| number
-			| string
-			| undefined>;
-		'v-hanging'?: Signalish<
-			| number
-			| string
-			| undefined>;
-		vIdeographic?: Signalish<
-			| number
-			| string
-			| undefined>;
-		'v-ideographic'?: Signalish<
-			| number
-			| string
-			| undefined>;
+		vertAdvY?: Signalish<number | string | undefined>;
+		'vert-adv-y'?: Signalish<number | string | undefined>;
+		vertOriginX?: Signalish<number | string | undefined>;
+		'vert-origin-x'?: Signalish<number | string | undefined>;
+		vertOriginY?: Signalish<number | string | undefined>;
+		'vert-origin-y'?: Signalish<number | string | undefined>;
+		vHanging?: Signalish<number | string | undefined>;
+		'v-hanging'?: Signalish<number | string | undefined>;
+		vIdeographic?: Signalish<number | string | undefined>;
+		'v-ideographic'?: Signalish<number | string | undefined>;
 		viewBox?: Signalish<string | undefined>;
-		viewTarget?: Signalish<
-			| number
-			| string
-			| undefined>;
-		visibility?: Signalish<
-			| number
-			| string
-			| undefined>;
-		vMathematical?: Signalish<
-			| number
-			| string
-			| undefined>;
-		'v-mathematical'?: Signalish<
-			| number
-			| string
-			| undefined>;
-		widths?: Signalish<
-			| number
-			| string
-			| undefined>;
-		wordSpacing?: Signalish<
-			| number
-			| string
-			| undefined>;
-		'word-spacing'?: Signalish<
-			| number
-			| string
-			| undefined>;
-		writingMode?: Signalish<
-			| number
-			| string
-			| undefined>;
-		'writing-mode'?: Signalish<
-			| number
-			| string
-			| undefined>;
+		viewTarget?: Signalish<number | string | undefined>;
+		visibility?: Signalish<number | string | undefined>;
+		vMathematical?: Signalish<number | string | undefined>;
+		'v-mathematical'?: Signalish<number | string | undefined>;
+		widths?: Signalish<number | string | undefined>;
+		wordSpacing?: Signalish<number | string | undefined>;
+		'word-spacing'?: Signalish<number | string | undefined>;
+		writingMode?: Signalish<number | string | undefined>;
+		'writing-mode'?: Signalish<number | string | undefined>;
 		x1?: Signalish<number | string | undefined>;
 		x2?: Signalish<number | string | undefined>;
 		x?: Signalish<number | string | undefined>;
 		xChannelSelector?: Signalish<string | undefined>;
-		xHeight?: Signalish<
-			| number
-			| string
-			| undefined>;
-		'x-height'?: Signalish<
-			| number
-			| string
-			| undefined>;
+		xHeight?: Signalish<number | string | undefined>;
+		'x-height'?: Signalish<number | string | undefined>;
 		xlinkActuate?: Signalish<string | undefined>;
 		'xlink:actuate'?: Signalish<SVGAttributes['xlinkActuate']>;
 		xlinkArcrole?: Signalish<string | undefined>;
@@ -1216,12 +517,14 @@ export namespace JSXInternal {
 		TargetedEvent<Target, PictureInPictureEvent>;
 
 	export type EventHandlerObject<E extends TargetedEvent> = {
-		handleEvent(e: E): unknown
-	}
+		handleEvent(e: E): unknown;
+	};
 
-	export type EventHandler<E extends TargetedEvent> = {
-		bivarianceHack(event: E): void;
-	}['bivarianceHack']  | EventHandlerObject<E>;
+	export type EventHandler<E extends TargetedEvent> =
+		| {
+				bivarianceHack(event: E): void;
+		  }['bivarianceHack']
+		| EventHandlerObject<E>;
 
 	export type AnimationEventHandler<Target extends EventTarget> = EventHandler<
 		TargetedAnimationEvent<Target>
@@ -1879,16 +1182,16 @@ export namespace JSXInternal {
 
 	export type AriaRole = WAIAriaRole | DPubAriaRole;
 
-	export interface HTMLAttributes<RefType extends EventTarget = EventTarget>
+	export interface AllHTMLAttributes<RefType extends EventTarget = EventTarget>
 		extends ClassAttributes<RefType>,
 			DOMAttributes<RefType>,
 			AriaAttributes {
 		// Standard HTML Attributes
 		accept?: Signalish<string | undefined>;
 		acceptCharset?: Signalish<string | undefined>;
-		'accept-charset'?: Signalish<HTMLAttributes['acceptCharset']>;
+		'accept-charset'?: Signalish<AllHTMLAttributes['acceptCharset']>;
 		accessKey?: Signalish<string | undefined>;
-		accesskey?: Signalish<HTMLAttributes['accessKey']>;
+		accesskey?: Signalish<AllHTMLAttributes['accessKey']>;
 		action?: Signalish<string | undefined>;
 		allow?: Signalish<string | undefined>;
 		allowFullScreen?: Signalish<boolean | undefined>;
@@ -1919,12 +1222,9 @@ export namespace JSXInternal {
 		colspan?: Signalish<number | undefined>;
 		content?: Signalish<string | undefined>;
 		contentEditable?: Signalish<
-			| Booleanish
-			| ''
-			| 'plaintext-only'
-			| 'inherit'
-			| undefined>;
-		contenteditable?: Signalish<HTMLAttributes['contentEditable']>;
+			Booleanish | '' | 'plaintext-only' | 'inherit' | undefined
+		>;
+		contenteditable?: Signalish<AllHTMLAttributes['contentEditable']>;
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/contextmenu */
 		contextMenu?: Signalish<string | undefined>;
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/contextmenu */
@@ -1941,21 +1241,11 @@ export namespace JSXInternal {
 		defaultChecked?: Signalish<boolean | undefined>;
 		defaultValue?: Signalish<string | undefined>;
 		defer?: Signalish<boolean | undefined>;
-		dir?: Signalish<
-			| 'auto'
-			| 'rtl'
-			| 'ltr'
-			| undefined>;
+		dir?: Signalish<'auto' | 'rtl' | 'ltr' | undefined>;
 		disabled?: Signalish<boolean | undefined>;
-		disableRemotePlayback?: Signalish<
-			| boolean
-			| undefined>;
+		disableRemotePlayback?: Signalish<boolean | undefined>;
 		download?: Signalish<any | undefined>;
-		decoding?: Signalish<
-			| 'sync'
-			| 'async'
-			| 'auto'
-			| undefined>;
+		decoding?: Signalish<'sync' | 'async' | 'auto' | undefined>;
 		draggable?: Signalish<boolean | undefined>;
 		encType?: Signalish<string | undefined>;
 		enctype?: Signalish<string | undefined>;
@@ -1967,9 +1257,10 @@ export namespace JSXInternal {
 			| 'previous'
 			| 'search'
 			| 'send'
-			| undefined>;
+			| undefined
+		>;
 		elementTiming?: Signalish<string | undefined>;
-		elementtiming?: Signalish<HTMLAttributes['elementTiming']>;
+		elementtiming?: Signalish<AllHTMLAttributes['elementTiming']>;
 		exportparts?: Signalish<string | undefined>;
 		for?: Signalish<string | undefined>;
 		form?: Signalish<string | undefined>;
@@ -1983,24 +1274,11 @@ export namespace JSXInternal {
 		formnovalidate?: Signalish<boolean | undefined>;
 		formTarget?: Signalish<string | undefined>;
 		formtarget?: Signalish<string | undefined>;
-		frameBorder?: Signalish<
-			| number
-			| string
-			| undefined>;
-		frameborder?: Signalish<
-			| number
-			| string
-			| undefined>;
+		frameBorder?: Signalish<number | string | undefined>;
+		frameborder?: Signalish<number | string | undefined>;
 		headers?: Signalish<string | undefined>;
-		height?: Signalish<
-			| number
-			| string
-			| undefined>;
-		hidden?: Signalish<
-			| boolean
-			| 'hidden'
-			| 'until-found'
-			| undefined>;
+		height?: Signalish<number | string | undefined>;
+		hidden?: Signalish<boolean | 'hidden' | 'until-found' | undefined>;
 		high?: Signalish<number | undefined>;
 		href?: Signalish<string | undefined>;
 		hrefLang?: Signalish<string | undefined>;
@@ -2022,10 +1300,7 @@ export namespace JSXInternal {
 		label?: Signalish<string | undefined>;
 		lang?: Signalish<string | undefined>;
 		list?: Signalish<string | undefined>;
-		loading?: Signalish<
-			| 'eager'
-			| 'lazy'
-			| undefined>;
+		loading?: Signalish<'eager' | 'lazy' | undefined>;
 		loop?: Signalish<boolean | undefined>;
 		low?: Signalish<number | undefined>;
 		manifest?: Signalish<string | undefined>;
@@ -2055,24 +1330,11 @@ export namespace JSXInternal {
 		placeholder?: Signalish<string | undefined>;
 		playsInline?: Signalish<boolean | undefined>;
 		playsinline?: Signalish<boolean | undefined>;
-		popover?: Signalish<
-			| 'auto'
-			| 'hint'
-			| 'manual'
-			| boolean
-			| undefined>;
+		popover?: Signalish<'auto' | 'hint' | 'manual' | boolean | undefined>;
 		popovertarget?: Signalish<string | undefined>;
 		popoverTarget?: Signalish<string | undefined>;
-		popovertargetaction?: Signalish<
-			| 'hide'
-			| 'show'
-			| 'toggle'
-			| undefined>;
-		popoverTargetAction?: Signalish<
-			| 'hide'
-			| 'show'
-			| 'toggle'
-			| undefined>;
+		popovertargetaction?: Signalish<'hide' | 'show' | 'toggle' | undefined>;
+		popoverTargetAction?: Signalish<'hide' | 'show' | 'toggle' | undefined>;
 		poster?: Signalish<string | undefined>;
 		preload?: Signalish<string | undefined>;
 		radioGroup?: Signalish<string | undefined>;
@@ -2087,7 +1349,8 @@ export namespace JSXInternal {
 			| 'strict-origin'
 			| 'strict-origin-when-cross-origin'
 			| 'unsafe-url'
-			| undefined>;
+			| undefined
+		>;
 		rel?: Signalish<string | undefined>;
 		required?: Signalish<boolean | undefined>;
 		reversed?: Signalish<boolean | undefined>;
@@ -2115,14 +1378,8 @@ export namespace JSXInternal {
 		srcLang?: Signalish<string | undefined>;
 		srclang?: Signalish<string | undefined>;
 		start?: Signalish<number | undefined>;
-		step?: Signalish<
-			| number
-			| string
-			| undefined>;
-		style?: Signalish<
-			| string
-			| CSSProperties
-			| undefined>;
+		step?: Signalish<number | string | undefined>;
+		style?: Signalish<string | CSSProperties | undefined>;
 		summary?: Signalish<string | undefined>;
 		tabIndex?: Signalish<number | undefined>;
 		tabindex?: Signalish<number | undefined>;
@@ -2131,42 +1388,20 @@ export namespace JSXInternal {
 		type?: Signalish<string | undefined>;
 		useMap?: Signalish<string | undefined>;
 		usemap?: Signalish<string | undefined>;
-		value?: Signalish<
-			| string
-			| string[]
-			| number
-			| undefined>;
-		volume?: Signalish<
-			| string
-			| number
-			| undefined>;
-		width?: Signalish<
-			| number
-			| string
-			| undefined>;
+		value?: Signalish<string | string[] | number | undefined>;
+		volume?: Signalish<string | number | undefined>;
+		width?: Signalish<number | string | undefined>;
 		wmode?: Signalish<string | undefined>;
 		wrap?: Signalish<string | undefined>;
 
 		// Non-standard Attributes
 		autocapitalize?: Signalish<
-			| 'off'
-			| 'none'
-			| 'on'
-			| 'sentences'
-			| 'words'
-			| 'characters'
-			| undefined>;
+			'off' | 'none' | 'on' | 'sentences' | 'words' | 'characters' | undefined
+		>;
 		autoCapitalize?: Signalish<
-			| 'off'
-			| 'none'
-			| 'on'
-			| 'sentences'
-			| 'words'
-			| 'characters'
-			| undefined>;
-		disablePictureInPicture?: Signalish<
-			| boolean
-			| undefined>;
+			'off' | 'none' | 'on' | 'sentences' | 'words' | 'characters' | undefined
+		>;
+		disablePictureInPicture?: Signalish<boolean | undefined>;
 		results?: Signalish<number | undefined>;
 		translate?: Signalish<boolean | undefined>;
 
@@ -2193,123 +1428,698 @@ export namespace JSXInternal {
 		itemref?: Signalish<string | undefined>;
 	}
 
+	export interface HTMLAttributes<RefType extends EventTarget = EventTarget>
+		extends ClassAttributes<RefType>,
+			DOMAttributes<RefType>,
+			AriaAttributes {
+		// Standard HTML Attributes
+		accesskey?: Signalish<string | undefined>;
+		accessKey?: Signalish<string | undefined>;
+		autocapitalize?: Signalish<
+			'off' | 'none' | 'on' | 'sentences' | 'words' | 'characters' | undefined
+		>;
+		autoCapitalize?: Signalish<
+			'off' | 'none' | 'on' | 'sentences' | 'words' | 'characters' | undefined
+		>;
+		autocorrect?: Signalish<string | undefined>;
+		autoCorrect?: Signalish<string | undefined>;
+		autofocus?: Signalish<boolean | undefined>;
+		autoFocus?: Signalish<boolean | undefined>;
+		class?: Signalish<string | undefined>;
+		className?: Signalish<string | undefined>;
+		contenteditable?: Signalish<
+			Booleanish | '' | 'plaintext-only' | 'inherit' | undefined
+		>;
+		contentEditable?: Signalish<
+			Booleanish | '' | 'plaintext-only' | 'inherit' | undefined
+		>;
+		dir?: Signalish<'auto' | 'rtl' | 'ltr' | undefined>;
+		draggable?: Signalish<boolean | undefined>;
+		enterkeyhint?: Signalish<
+			| 'enter'
+			| 'done'
+			| 'go'
+			| 'next'
+			| 'previous'
+			| 'search'
+			| 'send'
+			| undefined
+		>;
+		exportparts?: Signalish<string | undefined>;
+		hidden?: Signalish<boolean | 'hidden' | 'until-found' | undefined>;
+		id?: Signalish<string | undefined>;
+		inert?: Signalish<boolean | undefined>;
+		inputmode?: Signalish<string | undefined>;
+		inputMode?: Signalish<string | undefined>;
+		is?: Signalish<string | undefined>;
+		lang?: Signalish<string | undefined>;
+		nonce?: Signalish<string | undefined>;
+		part?: Signalish<string | undefined>;
+		popover?: Signalish<'auto' | 'hint' | 'manual' | boolean | undefined>;
+		slot?: Signalish<string | undefined>;
+		spellcheck?: Signalish<boolean | undefined>;
+		style?: Signalish<string | CSSProperties | undefined>;
+		tabindex?: Signalish<number | undefined>;
+		tabIndex?: Signalish<number | undefined>;
+		title?: Signalish<string | undefined>;
+		translate?: Signalish<boolean | undefined>;
+
+		// WAI-ARIA Attributes
+		role?: Signalish<AriaRole | undefined>;
+
+		// Non-standard Attributes
+		disablePictureInPicture?: Signalish<boolean | undefined>;
+		results?: Signalish<number | undefined>;
+
+		// RDFa Attributes
+		about?: Signalish<string | undefined>;
+		datatype?: Signalish<string | undefined>;
+		inlist?: Signalish<any>;
+		prefix?: Signalish<string | undefined>;
+		property?: Signalish<string | undefined>;
+		resource?: Signalish<string | undefined>;
+		typeof?: Signalish<string | undefined>;
+		vocab?: Signalish<string | undefined>;
+
+		// Microdata Attributes
+		itemid?: Signalish<string | undefined>;
+		itemID?: Signalish<string | undefined>;
+		itemprop?: Signalish<string | undefined>;
+		itemProp?: Signalish<string | undefined>;
+		itemref?: Signalish<string | undefined>;
+		itemRef?: Signalish<string | undefined>;
+		itemscope?: Signalish<boolean | undefined>;
+		itemScope?: Signalish<boolean | undefined>;
+		itemtype?: Signalish<string | undefined>;
+		itemType?: Signalish<string | undefined>;
+	}
+
+	type HTMLAttributeReferrerPolicy =
+		| ''
+		| 'no-referrer'
+		| 'no-referrer-when-downgrade'
+		| 'origin'
+		| 'origin-when-cross-origin'
+		| 'same-origin'
+		| 'strict-origin'
+		| 'strict-origin-when-cross-origin'
+		| 'unsafe-url';
+
+	type HTMLAttributeAnchorTarget =
+		| '_self'
+		| '_blank'
+		| '_parent'
+		| '_top'
+		| (string & {});
+
+	interface AnchorHTMLAttributes<T extends EventTarget>
+		extends HTMLAttributes<T> {
+		download?: Signalish<any>;
+		href?: Signalish<string | undefined>;
+		hrefLang?: Signalish<string | undefined>;
+		media?: Signalish<string | undefined>;
+		ping?: Signalish<string | undefined>;
+		target?: Signalish<HTMLAttributeAnchorTarget | undefined>;
+		type?: Signalish<string | undefined>;
+		referrerPolicy?: Signalish<HTMLAttributeReferrerPolicy | undefined>;
+	}
+
+	interface AreaHTMLAttributes<T extends EventTarget>
+		extends HTMLAttributes<T> {
+		alt?: Signalish<string | undefined>;
+		coords?: Signalish<string | undefined>;
+		download?: Signalish<any>;
+		href?: Signalish<string | undefined>;
+		hrefLang?: Signalish<string | undefined>;
+		media?: Signalish<string | undefined>;
+		referrerPolicy?: Signalish<HTMLAttributeReferrerPolicy | undefined>;
+		shape?: Signalish<string | undefined>;
+		target?: Signalish<string | undefined>;
+	}
+
+	interface AudioHTMLAttributes<T extends EventTarget>
+		extends MediaHTMLAttributes<T> {}
+
+	interface BaseHTMLAttributes<T extends EventTarget>
+		extends HTMLAttributes<T> {
+		href?: Signalish<string | undefined>;
+		target?: Signalish<string | undefined>;
+	}
+
+	interface BlockquoteHTMLAttributes<T extends EventTarget>
+		extends HTMLAttributes<T> {
+		cite?: Signalish<string | undefined>;
+	}
+
+	interface ButtonHTMLAttributes<T extends EventTarget>
+		extends HTMLAttributes<T> {
+		disabled?: Signalish<boolean | undefined>;
+		form?: Signalish<string | undefined>;
+		formAction?: Signalish<string | undefined>;
+		formEncType?: Signalish<string | undefined>;
+		formMethod?: Signalish<string | undefined>;
+		formNoValidate?: Signalish<boolean | undefined>;
+		formTarget?: Signalish<string | undefined>;
+		name?: Signalish<string | undefined>;
+		popovertarget?: Signalish<string | undefined>;
+		popoverTarget?: Signalish<string | undefined>;
+		popovertargetaction?: Signalish<'hide' | 'show' | 'toggle' | undefined>;
+		popoverTargetAction?: Signalish<'hide' | 'show' | 'toggle' | undefined>;
+		type?: Signalish<'submit' | 'reset' | 'button' | undefined>;
+		value?: Signalish<string | number | undefined>;
+	}
+
+	interface CanvasHTMLAttributes<T extends EventTarget>
+		extends HTMLAttributes<T> {
+		height?: Signalish<number | string | undefined>;
+		width?: Signalish<number | string | undefined>;
+	}
+
+	interface ColHTMLAttributes<T extends EventTarget> extends HTMLAttributes<T> {
+		span?: Signalish<number | undefined>;
+		width?: Signalish<number | string | undefined>;
+	}
+
+	interface ColgroupHTMLAttributes<T extends EventTarget>
+		extends HTMLAttributes<T> {
+		span?: Signalish<number | undefined>;
+	}
+
+	interface DataHTMLAttributes<T extends EventTarget>
+		extends HTMLAttributes<T> {
+		value?: Signalish<string | number | undefined>;
+	}
+
+	interface DelHTMLAttributes<T extends EventTarget> extends HTMLAttributes<T> {
+		cite?: Signalish<string | undefined>;
+		dateTime?: Signalish<string | undefined>;
+	}
+
+	interface DetailsHTMLAttributes<T extends EventTarget>
+		extends HTMLAttributes<T> {
+		open?: Signalish<boolean | undefined>;
+		onToggle?: GenericEventHandler<T> | undefined;
+	}
+
+	interface DialogHTMLAttributes<T extends EventTarget>
+		extends HTMLAttributes<T> {
+		onCancel?: GenericEventHandler<T> | undefined;
+		onClose?: GenericEventHandler<T> | undefined;
+		open?: Signalish<boolean | undefined>;
+	}
+
+	interface EmbedHTMLAttributes<T extends EventTarget>
+		extends HTMLAttributes<T> {
+		height?: Signalish<number | string | undefined>;
+		src?: Signalish<string | undefined>;
+		type?: Signalish<string | undefined>;
+		width?: Signalish<number | string | undefined>;
+	}
+
+	interface FieldsetHTMLAttributes<T extends EventTarget>
+		extends HTMLAttributes<T> {
+		disabled?: Signalish<boolean | undefined>;
+		form?: Signalish<string | undefined>;
+		name?: Signalish<string | undefined>;
+	}
+
+	interface FormHTMLAttributes<T extends EventTarget>
+		extends HTMLAttributes<T> {
+		acceptCharset?: Signalish<string | undefined>;
+		action?: Signalish<string | undefined>;
+		autoComplete?: Signalish<string | undefined>;
+		encType?: Signalish<string | undefined>;
+		method?: Signalish<string | undefined>;
+		name?: Signalish<string | undefined>;
+		noValidate?: Signalish<boolean | undefined>;
+		target?: Signalish<string | undefined>;
+	}
+
+	interface IframeHTMLAttributes<T extends EventTarget>
+		extends HTMLAttributes<T> {
+		allow?: Signalish<string | undefined>;
+		allowFullScreen?: Signalish<boolean | undefined>;
+		allowTransparency?: Signalish<boolean | undefined>;
+		/** @deprecated */
+		frameBorder?: Signalish<number | string | undefined>;
+		height?: Signalish<number | string | undefined>;
+		loading?: 'eager' | 'lazy' | undefined;
+		/** @deprecated */
+		marginHeight?: Signalish<number | undefined>;
+		/** @deprecated */
+		marginWidth?: Signalish<number | undefined>;
+		name?: Signalish<string | undefined>;
+		referrerPolicy?: Signalish<HTMLAttributeReferrerPolicy | undefined>;
+		sandbox?: Signalish<string | undefined>;
+		/** @deprecated */
+		scrolling?: Signalish<string | undefined>;
+		seamless?: Signalish<boolean | undefined>;
+		src?: Signalish<string | undefined>;
+		srcDoc?: Signalish<string | undefined>;
+		width?: Signalish<number | string | undefined>;
+	}
+
+	type HTMLAttributeCrossOrigin = 'anonymous' | 'use-credentials';
+
+	interface ImgHTMLAttributes<T extends EventTarget> extends HTMLAttributes<T> {
+		alt?: Signalish<string | undefined>;
+		crossOrigin?: Signalish<HTMLAttributeCrossOrigin>;
+		decoding?: Signalish<'async' | 'auto' | 'sync' | undefined>;
+		height?: Signalish<number | string | undefined>;
+		loading?: Signalish<'eager' | 'lazy' | undefined>;
+		referrerPolicy?: Signalish<HTMLAttributeReferrerPolicy | undefined>;
+		sizes?: Signalish<string | undefined>;
+		src?: Signalish<string | undefined>;
+		srcSet?: Signalish<string | undefined>;
+		useMap?: Signalish<string | undefined>;
+		width?: Signalish<number | string | undefined>;
+	}
+
+	type HTMLInputTypeAttribute =
+		| 'button'
+		| 'checkbox'
+		| 'color'
+		| 'date'
+		| 'datetime-local'
+		| 'email'
+		| 'file'
+		| 'hidden'
+		| 'image'
+		| 'month'
+		| 'number'
+		| 'password'
+		| 'radio'
+		| 'range'
+		| 'reset'
+		| 'search'
+		| 'submit'
+		| 'tel'
+		| 'text'
+		| 'time'
+		| 'url'
+		| 'week'
+		| (string & {});
+
+	interface InputHTMLAttributes<T extends EventTarget>
+		extends HTMLAttributes<T> {
+		accept?: Signalish<string | undefined>;
+		alt?: Signalish<string | undefined>;
+		autoComplete?: Signalish<string | undefined>;
+		capture?: Signalish<'user' | 'environment' | undefined>; // https://www.w3.org/TR/html-media-capture/#the-capture-attribute
+		checked?: Signalish<boolean | undefined>;
+		disabled?: Signalish<boolean | undefined>;
+		enterKeyHint?: Signalish<
+			| 'enter'
+			| 'done'
+			| 'go'
+			| 'next'
+			| 'previous'
+			| 'search'
+			| 'send'
+			| undefined
+		>;
+		form?: Signalish<string | undefined>;
+		formAction?: Signalish<string | undefined>;
+		formEncType?: Signalish<string | undefined>;
+		formMethod?: Signalish<string | undefined>;
+		formNoValidate?: Signalish<boolean | undefined>;
+		formTarget?: Signalish<string | undefined>;
+		height?: Signalish<number | string | undefined>;
+		list?: Signalish<string | undefined>;
+		max?: Signalish<string | undefined>;
+		maxLength?: Signalish<number | undefined>;
+		min?: Signalish<string | undefined>;
+		minLength?: Signalish<number | undefined>;
+		multiple?: Signalish<boolean | undefined>;
+		name?: Signalish<string | undefined>;
+		pattern?: Signalish<string | undefined>;
+		placeholder?: Signalish<string | undefined>;
+		readOnly?: Signalish<boolean | undefined>;
+		required?: Signalish<boolean | undefined>;
+		size?: Signalish<number | undefined>;
+		src?: Signalish<string | undefined>;
+		step?: Signalish<number | string | undefined>;
+		type?: HTMLInputTypeAttribute | undefined;
+		value?: Signalish<string | number | undefined>;
+		width?: Signalish<number | string | undefined>;
+		onChange?: GenericEventHandler<T> | undefined;
+	}
+
+	interface InsHTMLAttributes<T extends EventTarget> extends HTMLAttributes<T> {
+		cite?: Signalish<string | undefined>;
+		dateTime?: Signalish<string | undefined>;
+	}
+
+	interface KeygenHTMLAttributes<T extends EventTarget>
+		extends HTMLAttributes<T> {
+		challenge?: Signalish<string | undefined>;
+		disabled?: Signalish<boolean | undefined>;
+		form?: Signalish<string | undefined>;
+		keyType?: Signalish<string | undefined>;
+		keyParams?: Signalish<string | undefined>;
+		name?: Signalish<string | undefined>;
+	}
+
+	interface LabelHTMLAttributes<T extends EventTarget>
+		extends HTMLAttributes<T> {
+		form?: Signalish<string | undefined>;
+		htmlFor?: Signalish<string | undefined>;
+	}
+
+	interface LiHTMLAttributes<T extends EventTarget> extends HTMLAttributes<T> {
+		value?: Signalish<string | number | undefined>;
+	}
+
+	interface LinkHTMLAttributes<T extends EventTarget>
+		extends HTMLAttributes<T> {
+		as?: Signalish<string | undefined>;
+		crossOrigin?: Signalish<HTMLAttributeCrossOrigin>;
+		fetchPriority?: Signalish<'high' | 'low' | 'auto'>;
+		href?: Signalish<string | undefined>;
+		hrefLang?: Signalish<string | undefined>;
+		integrity?: Signalish<string | undefined>;
+		media?: Signalish<string | undefined>;
+		imageSrcSet?: Signalish<string | undefined>;
+		referrerPolicy?: HTMLAttributeReferrerPolicy | undefined;
+		sizes?: Signalish<string | undefined>;
+		type?: Signalish<string | undefined>;
+		charSet?: Signalish<string | undefined>;
+	}
+
+	interface MapHTMLAttributes<T extends EventTarget> extends HTMLAttributes<T> {
+		name?: Signalish<string | undefined>;
+	}
+
+	interface MarqueeHTMLAttributes<T extends EventTarget>
+		extends HTMLAttributes<T> {
+		behavior?: Signalish<'scroll' | 'slide' | 'alternate' | undefined>;
+		bgColor?: Signalish<string | undefined>;
+		direction?: Signalish<'left' | 'right' | 'up' | 'down' | undefined>;
+		height?: Signalish<number | string | undefined>;
+		hspace?: Signalish<number | string | undefined>;
+		loop?: Signalish<number | string | undefined>;
+		scrollAmount?: Signalish<number | string | undefined>;
+		scrollDelay?: Signalish<number | string | undefined>;
+		trueSpeed?: Signalish<boolean | undefined>;
+		vspace?: Signalish<number | string | undefined>;
+		width?: Signalish<number | string | undefined>;
+	}
+
+	interface MediaHTMLAttributes<T extends EventTarget>
+		extends HTMLAttributes<T> {
+		autoPlay?: Signalish<boolean | undefined>;
+		controls?: Signalish<boolean | undefined>;
+		controlsList?: Signalish<string | undefined>;
+		crossOrigin?: Signalish<HTMLAttributeCrossOrigin>;
+		loop?: Signalish<boolean | undefined>;
+		mediaGroup?: Signalish<string | undefined>;
+		muted?: Signalish<boolean | undefined>;
+		playsInline?: Signalish<boolean | undefined>;
+		preload?: Signalish<string | undefined>;
+		src?: Signalish<string | undefined>;
+	}
+
+	interface MenuHTMLAttributes<T extends EventTarget>
+		extends HTMLAttributes<T> {
+		type?: Signalish<string | undefined>;
+	}
+
+	interface MetaHTMLAttributes<T extends EventTarget>
+		extends HTMLAttributes<T> {
+		charSet?: Signalish<string | undefined>;
+		httpEquiv?: Signalish<string | undefined>;
+		name?: Signalish<string | undefined>;
+		media?: Signalish<string | undefined>;
+	}
+
+	interface MeterHTMLAttributes<T extends EventTarget>
+		extends HTMLAttributes<T> {
+		form?: Signalish<string | undefined>;
+		high?: Signalish<number | undefined>;
+		low?: Signalish<number | undefined>;
+		max?: Signalish<string | undefined>;
+		min?: Signalish<string | undefined>;
+		optimum?: Signalish<number | undefined>;
+		value?: Signalish<string | number | undefined>;
+	}
+
+	interface ObjectHTMLAttributes<T extends EventTarget>
+		extends HTMLAttributes<T> {
+		classID?: Signalish<string | undefined>;
+		data?: Signalish<string | undefined>;
+		form?: Signalish<string | undefined>;
+		height?: Signalish<number | string | undefined>;
+		name?: Signalish<string | undefined>;
+		type?: Signalish<string | undefined>;
+		useMap?: Signalish<string | undefined>;
+		width?: Signalish<number | string | undefined>;
+		wmode?: Signalish<string | undefined>;
+	}
+
+	interface OlHTMLAttributes<T extends EventTarget> extends HTMLAttributes<T> {
+		reversed?: Signalish<boolean | undefined>;
+		start?: Signalish<number | undefined>;
+		type?: Signalish<'1' | 'a' | 'A' | 'i' | 'I' | undefined>;
+	}
+
+	interface OptgroupHTMLAttributes<T extends EventTarget>
+		extends HTMLAttributes<T> {
+		disabled?: Signalish<boolean | undefined>;
+		label?: Signalish<string | undefined>;
+	}
+
+	interface OptionHTMLAttributes<T extends EventTarget>
+		extends HTMLAttributes<T> {
+		disabled?: Signalish<boolean | undefined>;
+		label?: Signalish<string | undefined>;
+		selected?: Signalish<boolean | undefined>;
+		value?: Signalish<string | number | undefined>;
+	}
+
+	interface OutputHTMLAttributes<T extends EventTarget>
+		extends HTMLAttributes<T> {
+		form?: Signalish<string | undefined>;
+		htmlFor?: Signalish<string | undefined>;
+		name?: Signalish<string | undefined>;
+	}
+
+	interface ParamHTMLAttributes<T extends EventTarget>
+		extends HTMLAttributes<T> {
+		name?: Signalish<string | undefined>;
+		value?: Signalish<string | number | undefined>;
+	}
+
+	interface ProgressHTMLAttributes<T extends EventTarget>
+		extends HTMLAttributes<T> {
+		max?: Signalish<string | undefined>;
+		value?: Signalish<string | number | undefined>;
+	}
+
+	interface QuoteHTMLAttributes<T extends EventTarget>
+		extends HTMLAttributes<T> {
+		cite?: Signalish<string | undefined>;
+	}
+
+	interface ScriptHTMLAttributes<T extends EventTarget>
+		extends HTMLAttributes<T> {
+		async?: Signalish<boolean | undefined>;
+		/** @deprecated */
+		charSet?: Signalish<string | undefined>;
+		crossOrigin?: Signalish<HTMLAttributeCrossOrigin>;
+		defer?: Signalish<boolean | undefined>;
+		integrity?: Signalish<string | undefined>;
+		noModule?: Signalish<boolean | undefined>;
+		referrerPolicy?: HTMLAttributeReferrerPolicy | undefined;
+		src?: Signalish<string | undefined>;
+		type?: Signalish<string | undefined>;
+	}
+
+	interface SelectHTMLAttributes<T extends EventTarget>
+		extends HTMLAttributes<T> {
+		autoComplete?: Signalish<string | undefined>;
+		disabled?: Signalish<boolean | undefined>;
+		form?: Signalish<string | undefined>;
+		multiple?: Signalish<boolean | undefined>;
+		name?: Signalish<string | undefined>;
+		required?: Signalish<boolean | undefined>;
+		size?: Signalish<number | undefined>;
+		value?: Signalish<string | number | undefined>;
+		onChange?: GenericEventHandler<T> | undefined;
+	}
+
+	interface SlotHTMLAttributes<T extends EventTarget>
+		extends HTMLAttributes<T> {
+		name?: Signalish<string | undefined>;
+	}
+
+	interface SourceHTMLAttributes<T extends EventTarget>
+		extends HTMLAttributes<T> {
+		height?: Signalish<number | string | undefined>;
+		media?: Signalish<string | undefined>;
+		sizes?: Signalish<string | undefined>;
+		src?: Signalish<string | undefined>;
+		srcSet?: Signalish<string | undefined>;
+		type?: Signalish<string | undefined>;
+		width?: Signalish<number | string | undefined>;
+	}
+
+	interface StyleHTMLAttributes<T extends EventTarget>
+		extends HTMLAttributes<T> {
+		media?: Signalish<string | undefined>;
+		scoped?: Signalish<boolean | undefined>;
+		type?: Signalish<string | undefined>;
+	}
+
+	interface TableHTMLAttributes<T extends EventTarget>
+		extends HTMLAttributes<T> {
+		cellPadding?: Signalish<string | undefined>;
+		cellSpacing?: Signalish<string | undefined>;
+		summary?: Signalish<string | undefined>;
+		width?: Signalish<number | string | undefined>;
+	}
+
+	interface TdHTMLAttributes<T extends EventTarget> extends HTMLAttributes<T> {
+		align?: Signalish<
+			'left' | 'center' | 'right' | 'justify' | 'char' | undefined
+		>;
+		colSpan?: Signalish<number | undefined>;
+		headers?: Signalish<string | undefined>;
+		rowSpan?: Signalish<number | undefined>;
+		scope?: Signalish<string | undefined>;
+		abbr?: Signalish<string | undefined>;
+		height?: Signalish<number | string | undefined>;
+		width?: Signalish<number | string | undefined>;
+		valign?: Signalish<'top' | 'middle' | 'bottom' | 'baseline' | undefined>;
+	}
+
+	interface TextareaHTMLAttributes<T extends EventTarget>
+		extends HTMLAttributes<T> {
+		autoComplete?: Signalish<string | undefined>;
+		cols?: Signalish<number | undefined>;
+		dirName?: Signalish<string | undefined>;
+		disabled?: Signalish<boolean | undefined>;
+		form?: Signalish<string | undefined>;
+		maxLength?: Signalish<number | undefined>;
+		minLength?: Signalish<number | undefined>;
+		name?: Signalish<string | undefined>;
+		placeholder?: Signalish<string | undefined>;
+		readOnly?: Signalish<boolean | undefined>;
+		required?: Signalish<boolean | undefined>;
+		rows?: Signalish<number | undefined>;
+		value?: Signalish<string | number | undefined>;
+		wrap?: Signalish<string | undefined>;
+		onChange?: GenericEventHandler<T> | undefined;
+	}
+
+	interface ThHTMLAttributes<T extends EventTarget> extends HTMLAttributes<T> {
+		align?: Signalish<
+			'left' | 'center' | 'right' | 'justify' | 'char' | undefined
+		>;
+		colSpan?: Signalish<number | undefined>;
+		headers?: Signalish<string | undefined>;
+		rowSpan?: Signalish<number | undefined>;
+		scope?: Signalish<string | undefined>;
+		abbr?: Signalish<string | undefined>;
+	}
+
+	interface TimeHTMLAttributes<T extends EventTarget>
+		extends HTMLAttributes<T> {
+		dateTime?: Signalish<string | undefined>;
+	}
+
+	interface TrackHTMLAttributes<T extends EventTarget>
+		extends HTMLAttributes<T> {
+		default?: Signalish<boolean | undefined>;
+		kind?: Signalish<string | undefined>;
+		label?: Signalish<string | undefined>;
+		src?: Signalish<string | undefined>;
+		srcLang?: Signalish<string | undefined>;
+	}
+
+	interface VideoHTMLAttributes<T extends EventTarget>
+		extends MediaHTMLAttributes<T> {
+		height?: Signalish<number | string | undefined>;
+		playsInline?: Signalish<boolean | undefined>;
+		poster?: Signalish<string | undefined>;
+		width?: Signalish<number | string | undefined>;
+		disablePictureInPicture?: Signalish<boolean | undefined>;
+		disableRemotePlayback?: Signalish<boolean | undefined>;
+	}
+
 	export type DetailedHTMLProps<
 		HA extends HTMLAttributes<RefType>,
 		RefType extends EventTarget = EventTarget
 	> = HA;
 
-	export interface HTMLMarqueeElement extends HTMLElement {
-		behavior?: Signalish<
-			| 'scroll'
-			| 'slide'
-			| 'alternate'
-			| undefined>;
-		bgColor?: Signalish< string | undefined>;
-		direction?: Signalish<
-			| 'left'
-			| 'right'
-			| 'up'
-			| 'down'
-			| undefined>;
-		height?: Signalish<
-			| number
-			| string
-			| undefined>;
-		hspace?: Signalish<
-			| number
-			| string
-			| undefined>;
-		loop?: Signalish<
-			| number
-			| string
-			| undefined>;
-		scrollAmount?: Signalish<
-			| number
-			| string
-			| undefined>;
-		scrollDelay?: Signalish<
-			| number
-			| string
-			| undefined>;
-		trueSpeed?: Signalish< boolean | undefined>;
-		vspace?: Signalish<
-			| number
-			| string
-			| undefined>;
-		width?: Signalish<
-			| number
-			| string
-			| undefined>;
-	}
-
 	export interface MathMLAttributes<Target extends EventTarget = MathMLElement>
 		extends HTMLAttributes<Target> {
-		dir?: Signalish< 'ltr' | 'rtl' | undefined>;
-		displaystyle?: Signalish< boolean | undefined>;
+		dir?: Signalish<'ltr' | 'rtl' | undefined>;
+		displaystyle?: Signalish<boolean | undefined>;
 		/** @deprecated This feature is non-standard. See https://developer.mozilla.org/en-US/docs/Web/MathML/Global_attributes/href  */
-		href?: Signalish< string | undefined>;
+		href?: Signalish<string | undefined>;
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Global_attributes/mathbackground */
-		mathbackground?: Signalish< string | undefined>;
+		mathbackground?: Signalish<string | undefined>;
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Global_attributes/mathcolor */
-		mathcolor?: Signalish< string | undefined>;
+		mathcolor?: Signalish<string | undefined>;
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Global_attributes/mathsize */
-		mathsize?: Signalish< string | undefined>;
-		nonce?: Signalish< string | undefined>;
-		scriptlevel?: Signalish< string | undefined>;
+		mathsize?: Signalish<string | undefined>;
+		nonce?: Signalish<string | undefined>;
+		scriptlevel?: Signalish<string | undefined>;
 	}
 
-	export interface HTMLAnnotationElement extends MathMLElement {
-		encoding?: Signalish< string | undefined>;
+	export interface AnnotationMathMLAttributes<T extends EventTarget>
+		extends MathMLAttributes<T> {
+		encoding?: Signalish<string | undefined>;
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/semantics#src */
-		src?: Signalish< string | undefined>;
+		src?: Signalish<string | undefined>;
 	}
 
-	export interface HTMLAnnotationXmlElement extends MathMLElement {
-		encoding?: Signalish< string | undefined>;
+	export interface AnnotationXmlMathMLAttributes<T extends EventTarget>
+		extends MathMLAttributes<T> {
+		encoding?: Signalish<string | undefined>;
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/semantics#src */
-		src?: Signalish< string | undefined>;
+		src?: Signalish<string | undefined>;
 	}
 
-	export interface HTMLMActionElement extends MathMLElement {
+	export interface MActionMathMLAttributes<T extends EventTarget>
+		extends MathMLAttributes<T> {
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/maction#actiontype */
-		actiontype?: Signalish<'statusline' | 'toggle' | undefined>
+		actiontype?: Signalish<'statusline' | 'toggle' | undefined>;
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/maction#selection */
 		selection?: Signalish<string | undefined>;
 	}
 
-	export interface HTMLMathElement extends MathMLElement {
+	export interface MathMathMLAttributes<T extends EventTarget>
+		extends MathMLAttributes<T> {
 		display?: Signalish<'block' | 'inline' | undefined>;
 	}
 
-	export interface HTMLMEncloseElement extends MathMLElement {
+	export interface MEncloseMathMLAttributes<T extends EventTarget>
+		extends MathMLAttributes<T> {
 		notation?: Signalish<string | undefined>;
 	}
 
-	export interface HTMLMErrorElement extends MathMLElement {}
+	export interface MErrorMathMLAttributes<T extends EventTarget>
+		extends MathMLAttributes<T> {}
 
-	export interface HTMLMFencedElement extends MathMLElement {
+	export interface MFencedMathMLAttributes<T extends EventTarget>
+		extends MathMLAttributes<T> {
 		close?: Signalish<string | undefined>;
 		open?: Signalish<string | undefined>;
 		separators?: Signalish<string | undefined>;
 	}
 
-	export interface HTMLMFracElement extends MathMLElement {
+	export interface MFracMathMLAttributes<T extends EventTarget>
+		extends MathMLAttributes<T> {
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mfrac#denomalign */
-		denomalign?: Signalish<
-			| 'center'
-			| 'left'
-			| 'right'
-			| undefined>;
+		denomalign?: Signalish<'center' | 'left' | 'right' | undefined>;
 		linethickness?: Signalish<string | undefined>;
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mfrac#numalign */
-		numalign?: Signalish<
-			| 'center'
-			| 'left'
-			| 'right'
-			| undefined>;
+		numalign?: Signalish<'center' | 'left' | 'right' | undefined>;
 	}
 
-	export interface HTMLMiElement extends MathMLElement {
+	export interface MiMathMLAttributes<T extends EventTarget>
+		extends MathMLAttributes<T> {
 		/** The only value allowed in the current specification is normal (case insensitive)
 		 * See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mi#mathvariant */
 		mathvariant?: Signalish<
@@ -2331,201 +2141,185 @@ export namespace JSXInternal {
 			| 'tailed'
 			| 'looped'
 			| 'stretched'
-			| undefined>;
+			| undefined
+		>;
 	}
 
-	export interface HTMLMmultiScriptsElement extends MathMLElement {
+	export interface MmultiScriptsMathMLAttributes<T extends EventTarget>
+		extends MathMLAttributes<T> {
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mmultiscripts#subscriptshift */
 		subscriptshift?: Signalish<string | undefined>;
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mmultiscripts#superscriptshift */
 		superscriptshift?: Signalish<string | undefined>;
 	}
 
-	export interface HTMLMNElement extends MathMLElement {}
+	export interface MNMathMLAttributes<T extends EventTarget>
+		extends MathMLAttributes<T> {}
 
-	export interface HTMLMOElement extends MathMLElement {
+	export interface MOMathMLAttributes<T extends EventTarget>
+		extends MathMLAttributes<T> {
 		/** Non-standard attribute See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mo#accent */
-		accent?: Signalish< boolean | undefined>;
-		fence?: Signalish< boolean | undefined>;
-		largeop?: Signalish< boolean | undefined>;
-		lspace?: Signalish< string | undefined>;
-		maxsize?: Signalish< string | undefined>;
-		minsize?: Signalish< string | undefined>;
-		movablelimits?: Signalish< boolean | undefined>;
-		rspace?: Signalish< string | undefined>;
-		separator?: Signalish< boolean | undefined>;
-		stretchy?: Signalish< boolean | undefined>;
-		symmetric?: Signalish< boolean | undefined>;
+		accent?: Signalish<boolean | undefined>;
+		fence?: Signalish<boolean | undefined>;
+		largeop?: Signalish<boolean | undefined>;
+		lspace?: Signalish<string | undefined>;
+		maxsize?: Signalish<string | undefined>;
+		minsize?: Signalish<string | undefined>;
+		movablelimits?: Signalish<boolean | undefined>;
+		rspace?: Signalish<string | undefined>;
+		separator?: Signalish<boolean | undefined>;
+		stretchy?: Signalish<boolean | undefined>;
+		symmetric?: Signalish<boolean | undefined>;
 	}
 
-	export interface HTMLMOverElement extends MathMLElement {
-		accent?: Signalish< boolean | undefined>;
+	export interface MOverMathMLAttributes<T extends EventTarget>
+		extends MathMLAttributes<T> {
+		accent?: Signalish<boolean | undefined>;
 	}
 
-	export interface HTMLMPaddedElement extends MathMLElement {
-		depth?: Signalish< string | undefined>;
-		height?: Signalish< string | undefined>;
-		lspace?: Signalish< string | undefined>;
-		voffset?: Signalish< string | undefined>;
-		width?: Signalish< string | undefined>;
+	export interface MPaddedMathMLAttributes<T extends EventTarget>
+		extends MathMLAttributes<T> {
+		depth?: Signalish<string | undefined>;
+		height?: Signalish<string | undefined>;
+		lspace?: Signalish<string | undefined>;
+		voffset?: Signalish<string | undefined>;
+		width?: Signalish<string | undefined>;
 	}
 
-	export interface HTMLMPhantomElement extends MathMLElement {}
+	export interface MPhantomMathMLAttributes<T extends EventTarget>
+		extends MathMLAttributes<T> {}
 
-	export interface HTMLMPrescriptsElement extends MathMLElement {}
+	export interface MPrescriptsMathMLAttributes<T extends EventTarget>
+		extends MathMLAttributes<T> {}
 
-	export interface HTMLMRootElement extends MathMLElement {}
+	export interface MRootMathMLAttributes<T extends EventTarget>
+		extends MathMLAttributes<T> {}
 
-	export interface HTMLMRowElement extends MathMLElement {}
+	export interface MRowMathMLAttributes<T extends EventTarget>
+		extends MathMLAttributes<T> {}
 
-	export interface HTMLMSElement extends MathMLElement {
+	export interface MSMathMLAttributes<T extends EventTarget>
+		extends MathMLAttributes<T> {
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/ms#browser_compatibility */
-		lquote?: Signalish< string | undefined>;
+		lquote?: Signalish<string | undefined>;
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/ms#browser_compatibility */
-		rquote?: Signalish< string | undefined>;
+		rquote?: Signalish<string | undefined>;
 	}
 
-	export interface HTMLMSpaceElement extends MathMLElement {
-		depth?: Signalish< string | undefined>;
-		height?: Signalish< string | undefined>;
-		width?: Signalish< string | undefined>;
+	export interface MSpaceMathMLAttributes<T extends EventTarget>
+		extends MathMLAttributes<T> {
+		depth?: Signalish<string | undefined>;
+		height?: Signalish<string | undefined>;
+		width?: Signalish<string | undefined>;
 	}
 
-	export interface HTMLMSqrtElement extends MathMLElement {}
+	export interface MSqrtMathMLAttributes<T extends EventTarget>
+		extends MathMLAttributes<T> {}
 
-	export interface HTMLMStyleElement extends MathMLElement {
+	export interface MStyleMathMLAttributes<T extends EventTarget>
+		extends MathMLAttributes<T> {
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mstyle#background */
-		background?: Signalish< string | undefined>;
+		background?: Signalish<string | undefined>;
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mstyle#color */
-		color?: Signalish< string | undefined>;
+		color?: Signalish<string | undefined>;
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mstyle#fontsize */
-		fontsize?: Signalish< string | undefined>;
+		fontsize?: Signalish<string | undefined>;
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mstyle#fontstyle */
-		fontstyle?: Signalish< string | undefined>;
+		fontstyle?: Signalish<string | undefined>;
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mstyle#fontweight */
-		fontweight?: Signalish< string | undefined>;
+		fontweight?: Signalish<string | undefined>;
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mstyle#scriptminsize */
-		scriptminsize?: Signalish< string | undefined>;
+		scriptminsize?: Signalish<string | undefined>;
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mstyle#scriptsizemultiplier */
-		scriptsizemultiplier?: Signalish< string | undefined>;
+		scriptsizemultiplier?: Signalish<string | undefined>;
 	}
 
-	export interface HTMLMSubElement extends MathMLElement {
+	export interface MSubMathMLAttributes<T extends EventTarget>
+		extends MathMLAttributes<T> {
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/msub#subscriptshift */
-		subscriptshift?: Signalish< string | undefined>;
+		subscriptshift?: Signalish<string | undefined>;
 	}
 
-	export interface HTMLMSubsupElement extends MathMLElement {
+	export interface MSubsupMathMLAttributes<T extends EventTarget>
+		extends MathMLAttributes<T> {
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/msubsup#subscriptshift */
-		subscriptshift?: Signalish< string | undefined>;
+		subscriptshift?: Signalish<string | undefined>;
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/msubsup#superscriptshift */
-		superscriptshift?: Signalish< string | undefined>;
+		superscriptshift?: Signalish<string | undefined>;
 	}
 
-	export interface HTMLMSupElement extends MathMLElement {
+	export interface MSupMathMLAttributes<T extends EventTarget>
+		extends MathMLAttributes<T> {
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/msup#superscriptshift */
-		superscriptshift?: Signalish< string | undefined>;
+		superscriptshift?: Signalish<string | undefined>;
 	}
 
-	export interface HTMLMTableElement extends MathMLElement {
+	export interface MTableMathMLAttributes<T extends EventTarget>
+		extends MathMLAttributes<T> {
 		/** Non-standard attribute See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mtable#align */
 		align?: Signalish<
-			| 'axis'
-			| 'baseline'
-			| 'bottom'
-			| 'center'
-			| 'top'
-			| undefined>;
+			'axis' | 'baseline' | 'bottom' | 'center' | 'top' | undefined
+		>;
 		/** Non-standard attribute See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mtable#columnalign */
-		columnalign?: Signalish<
-			| 'center'
-			| 'left'
-			| 'right'
-			| undefined>;
+		columnalign?: Signalish<'center' | 'left' | 'right' | undefined>;
 		/** Non-standard attribute See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mtable#columnlines */
-		columnlines?: Signalish<
-			| 'dashed'
-			| 'none'
-			| 'solid'
-			| undefined>;
+		columnlines?: Signalish<'dashed' | 'none' | 'solid' | undefined>;
 		/** Non-standard attribute See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mtable#columnspacing */
-		columnspacing?: Signalish< string | undefined>;
+		columnspacing?: Signalish<string | undefined>;
 		/** Non-standard attribute See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mtable#frame */
-		frame?: Signalish<
-			| 'dashed'
-			| 'none'
-			| 'solid'
-			| undefined>;
+		frame?: Signalish<'dashed' | 'none' | 'solid' | undefined>;
 		/** Non-standard attribute See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mtable#framespacing */
-		framespacing?: Signalish< string | undefined>;
+		framespacing?: Signalish<string | undefined>;
 		/** Non-standard attribute See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mtable#rowalign */
 		rowalign?: Signalish<
-			| 'axis'
-			| 'baseline'
-			| 'bottom'
-			| 'center'
-			| 'top'
-			| undefined>;
+			'axis' | 'baseline' | 'bottom' | 'center' | 'top' | undefined
+		>;
 		/** Non-standard attribute See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mtable#rowlines */
-		rowlines?: Signalish<
-			| 'dashed'
-			| 'none'
-			| 'solid'
-			| undefined>;
+		rowlines?: Signalish<'dashed' | 'none' | 'solid' | undefined>;
 		/** Non-standard attribute See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mtable#rowspacing */
-		rowspacing?: Signalish< string | undefined>;
+		rowspacing?: Signalish<string | undefined>;
 		/** Non-standard attribute See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mtable#width */
-		width?: Signalish< string | undefined>;
+		width?: Signalish<string | undefined>;
 	}
 
-	export interface HTMLMTdElement extends MathMLElement {
-		columnspan?: Signalish< number | undefined>;
-		rowspan?: Signalish< number | undefined>;
+	export interface MTdMathMLAttributes<T extends EventTarget>
+		extends MathMLAttributes<T> {
+		columnspan?: Signalish<number | undefined>;
+		rowspan?: Signalish<number | undefined>;
 		/** Non-standard attribute See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mtd#columnalign */
-		columnalign?: Signalish<
-			| 'center'
-			| 'left'
-			| 'right'
-			| undefined>;
+		columnalign?: Signalish<'center' | 'left' | 'right' | undefined>;
 		/** Non-standard attribute See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mtd#rowalign */
 		rowalign?: Signalish<
-			| 'axis'
-			| 'baseline'
-			| 'bottom'
-			| 'center'
-			| 'top'
-			| undefined>;
+			'axis' | 'baseline' | 'bottom' | 'center' | 'top' | undefined
+		>;
 	}
 
-	export interface HTMLMTextElement extends MathMLElement {}
+	export interface MTextMathMLAttributes<T extends EventTarget>
+		extends MathMLAttributes<T> {}
 
-	export interface HTMLMTrElement extends MathMLElement {
+	export interface MTrMathMLAttributes<T extends EventTarget>
+		extends MathMLAttributes<T> {
 		/** Non-standard attribute See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mtr#columnalign */
-		columnalign?: Signalish<
-			| 'center'
-			| 'left'
-			| 'right'
-			| undefined>;
+		columnalign?: Signalish<'center' | 'left' | 'right' | undefined>;
 		/** Non-standard attribute See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mtr#rowalign */
 		rowalign?: Signalish<
-			| 'axis'
-			| 'baseline'
-			| 'bottom'
-			| 'center'
-			| 'top'
-			| undefined>;
+			'axis' | 'baseline' | 'bottom' | 'center' | 'top' | undefined
+		>;
 	}
 
-	export interface HTMLMUnderElement extends MathMLElement {
+	export interface MUnderMathMLAttributes<T extends EventTarget>
+		extends MathMLAttributes<T> {
 		accentunder?: Signalish<boolean | undefined>;
 	}
 
-	export interface HTMLMUnderoverElement extends MathMLElement {
+	export interface MUnderoverMathMLAttributes<T extends EventTarget>
+		extends MathMLAttributes<T> {
 		accent?: Signalish<boolean | undefined>;
 		accentunder?: Signalish<boolean | undefined>;
 	}
 
-	export interface HTMLSemanticsElement extends MathMLElement {}
+	export interface SemanticsMathMLAttributes<T extends EventTarget>
+		extends MathMLAttributes<T> {}
 
 	export interface IntrinsicSVGElements {
 		svg: SVGAttributes<SVGSVGElement>;
@@ -2589,47 +2383,86 @@ export namespace JSXInternal {
 		view: SVGAttributes<SVGViewElement>;
 	}
 
-	export interface IntrinsicElements extends IntrinsicSVGElements {
-		// HTML
-		a: HTMLAttributes<HTMLAnchorElement>;
+	export interface IntrinsicMathMLElements {
+		annotation: AnnotationMathMLAttributes<MathMLElement>;
+		'annotation-xml': AnnotationXmlMathMLAttributes<MathMLElement>;
+		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/maction */
+		maction: MActionMathMLAttributes<MathMLElement>;
+		math: MathMathMLAttributes<MathMLElement>;
+		/** This feature is non-standard. See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/menclose  */
+		menclose: MEncloseMathMLAttributes<MathMLElement>;
+		merror: MErrorMathMLAttributes<MathMLElement>;
+		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mfenced */
+		mfenced: MFencedMathMLAttributes<MathMLElement>;
+		mfrac: MFracMathMLAttributes<MathMLElement>;
+		mi: MiMathMLAttributes<MathMLElement>;
+		mmultiscripts: MmultiScriptsMathMLAttributes<MathMLElement>;
+		mn: MNMathMLAttributes<MathMLElement>;
+		mo: MOMathMLAttributes<MathMLElement>;
+		mover: MOverMathMLAttributes<MathMLElement>;
+		mpadded: MPaddedMathMLAttributes<MathMLElement>;
+		mphantom: MPhantomMathMLAttributes<MathMLElement>;
+		mprescripts: MPrescriptsMathMLAttributes<MathMLElement>;
+		mroot: MRootMathMLAttributes<MathMLElement>;
+		mrow: MRowMathMLAttributes<MathMLElement>;
+		ms: MSMathMLAttributes<MathMLElement>;
+		mspace: MSpaceMathMLAttributes<MathMLElement>;
+		msqrt: MSqrtMathMLAttributes<MathMLElement>;
+		mstyle: MStyleMathMLAttributes<MathMLElement>;
+		msub: MSubMathMLAttributes<MathMLElement>;
+		msubsup: MSubsupMathMLAttributes<MathMLElement>;
+		msup: MSupMathMLAttributes<MathMLElement>;
+		mtable: MTableMathMLAttributes<MathMLElement>;
+		mtd: MTdMathMLAttributes<MathMLElement>;
+		mtext: MTextMathMLAttributes<MathMLElement>;
+		mtr: MTrMathMLAttributes<MathMLElement>;
+		munder: MUnderMathMLAttributes<MathMLElement>;
+		munderover: MUnderMathMLAttributes<MathMLElement>;
+		semantics: SemanticsMathMLAttributes<MathMLElement>;
+	}
+
+	export interface IntrinsicElements
+		extends IntrinsicSVGElements,
+			IntrinsicMathMLElements {
+		a: AnchorHTMLAttributes<HTMLAnchorElement>;
 		abbr: HTMLAttributes<HTMLElement>;
 		address: HTMLAttributes<HTMLElement>;
-		area: HTMLAttributes<HTMLAreaElement>;
+		area: AreaHTMLAttributes<HTMLAreaElement>;
 		article: HTMLAttributes<HTMLElement>;
 		aside: HTMLAttributes<HTMLElement>;
-		audio: HTMLAttributes<HTMLAudioElement>;
+		audio: AudioHTMLAttributes<HTMLAudioElement>;
 		b: HTMLAttributes<HTMLElement>;
-		base: HTMLAttributes<HTMLBaseElement>;
+		base: BaseHTMLAttributes<HTMLBaseElement>;
 		bdi: HTMLAttributes<HTMLElement>;
 		bdo: HTMLAttributes<HTMLElement>;
 		big: HTMLAttributes<HTMLElement>;
-		blockquote: HTMLAttributes<HTMLQuoteElement>;
+		blockquote: BlockquoteHTMLAttributes<HTMLQuoteElement>;
 		body: HTMLAttributes<HTMLBodyElement>;
 		br: HTMLAttributes<HTMLBRElement>;
-		button: HTMLAttributes<HTMLButtonElement>;
-		canvas: HTMLAttributes<HTMLCanvasElement>;
+		button: ButtonHTMLAttributes<HTMLButtonElement>;
+		canvas: CanvasHTMLAttributes<HTMLCanvasElement>;
 		caption: HTMLAttributes<HTMLTableCaptionElement>;
 		cite: HTMLAttributes<HTMLElement>;
 		code: HTMLAttributes<HTMLElement>;
-		col: HTMLAttributes<HTMLTableColElement>;
-		colgroup: HTMLAttributes<HTMLTableColElement>;
-		data: HTMLAttributes<HTMLDataElement>;
+		col: ColHTMLAttributes<HTMLTableColElement>;
+		colgroup: ColgroupHTMLAttributes<HTMLTableColElement>;
+		data: DataHTMLAttributes<HTMLDataElement>;
 		datalist: HTMLAttributes<HTMLDataListElement>;
 		dd: HTMLAttributes<HTMLElement>;
-		del: HTMLAttributes<HTMLModElement>;
-		details: HTMLAttributes<HTMLDetailsElement>;
+		del: DelHTMLAttributes<HTMLModElement>;
+		details: DetailsHTMLAttributes<HTMLDetailsElement>;
 		dfn: HTMLAttributes<HTMLElement>;
-		dialog: HTMLAttributes<HTMLDialogElement>;
+		dialog: DialogHTMLAttributes<HTMLDialogElement>;
 		div: HTMLAttributes<HTMLDivElement>;
 		dl: HTMLAttributes<HTMLDListElement>;
 		dt: HTMLAttributes<HTMLElement>;
 		em: HTMLAttributes<HTMLElement>;
-		embed: HTMLAttributes<HTMLEmbedElement>;
-		fieldset: HTMLAttributes<HTMLFieldSetElement>;
+		embed: EmbedHTMLAttributes<HTMLEmbedElement>;
+		fieldset: FieldsetHTMLAttributes<HTMLFieldSetElement>;
 		figcaption: HTMLAttributes<HTMLElement>;
 		figure: HTMLAttributes<HTMLElement>;
 		footer: HTMLAttributes<HTMLElement>;
-		form: HTMLAttributes<HTMLFormElement>;
+		form: FormHTMLAttributes<HTMLFormElement>;
 		h1: HTMLAttributes<HTMLHeadingElement>;
 		h2: HTMLAttributes<HTMLHeadingElement>;
 		h3: HTMLAttributes<HTMLHeadingElement>;
@@ -2642,108 +2475,71 @@ export namespace JSXInternal {
 		hr: HTMLAttributes<HTMLHRElement>;
 		html: HTMLAttributes<HTMLHtmlElement>;
 		i: HTMLAttributes<HTMLElement>;
-		iframe: HTMLAttributes<HTMLIFrameElement>;
-		img: HTMLAttributes<HTMLImageElement>;
-		input: HTMLAttributes<HTMLInputElement>;
-		ins: HTMLAttributes<HTMLModElement>;
+		iframe: IframeHTMLAttributes<HTMLIFrameElement>;
+		img: ImgHTMLAttributes<HTMLImageElement>;
+		input: InputHTMLAttributes<HTMLInputElement>;
+		ins: InsHTMLAttributes<HTMLModElement>;
 		kbd: HTMLAttributes<HTMLElement>;
-		keygen: HTMLAttributes<HTMLUnknownElement>;
-		label: HTMLAttributes<HTMLLabelElement>;
+		keygen: KeygenHTMLAttributes<HTMLUnknownElement>;
+		label: LabelHTMLAttributes<HTMLLabelElement>;
 		legend: HTMLAttributes<HTMLLegendElement>;
-		li: HTMLAttributes<HTMLLIElement>;
-		link: HTMLAttributes<HTMLLinkElement>;
+		li: LiHTMLAttributes<HTMLLIElement>;
+		link: LinkHTMLAttributes<HTMLLinkElement>;
 		main: HTMLAttributes<HTMLElement>;
-		map: HTMLAttributes<HTMLMapElement>;
+		map: MapHTMLAttributes<HTMLMapElement>;
 		mark: HTMLAttributes<HTMLElement>;
-		marquee: HTMLAttributes<HTMLMarqueeElement>;
-		menu: HTMLAttributes<HTMLMenuElement>;
+		marquee: MarqueeHTMLAttributes<HTMLMarqueeElement>;
+		menu: MenuHTMLAttributes<HTMLMenuElement>;
 		menuitem: HTMLAttributes<HTMLUnknownElement>;
-		meta: HTMLAttributes<HTMLMetaElement>;
-		meter: HTMLAttributes<HTMLMeterElement>;
+		meta: MetaHTMLAttributes<HTMLMetaElement>;
+		meter: MeterHTMLAttributes<HTMLMeterElement>;
 		nav: HTMLAttributes<HTMLElement>;
 		noscript: HTMLAttributes<HTMLElement>;
-		object: HTMLAttributes<HTMLObjectElement>;
-		ol: HTMLAttributes<HTMLOListElement>;
-		optgroup: HTMLAttributes<HTMLOptGroupElement>;
-		option: HTMLAttributes<HTMLOptionElement>;
-		output: HTMLAttributes<HTMLOutputElement>;
+		object: ObjectHTMLAttributes<HTMLObjectElement>;
+		ol: OlHTMLAttributes<HTMLOListElement>;
+		optgroup: OptgroupHTMLAttributes<HTMLOptGroupElement>;
+		option: OptionHTMLAttributes<HTMLOptionElement>;
+		output: OutputHTMLAttributes<HTMLOutputElement>;
 		p: HTMLAttributes<HTMLParagraphElement>;
-		param: HTMLAttributes<HTMLParamElement>;
+		param: ParamHTMLAttributes<HTMLParamElement>;
 		picture: HTMLAttributes<HTMLPictureElement>;
 		pre: HTMLAttributes<HTMLPreElement>;
-		progress: HTMLAttributes<HTMLProgressElement>;
-		q: HTMLAttributes<HTMLQuoteElement>;
+		progress: ProgressHTMLAttributes<HTMLProgressElement>;
+		q: QuoteHTMLAttributes<HTMLQuoteElement>;
 		rp: HTMLAttributes<HTMLElement>;
 		rt: HTMLAttributes<HTMLElement>;
 		ruby: HTMLAttributes<HTMLElement>;
 		s: HTMLAttributes<HTMLElement>;
 		samp: HTMLAttributes<HTMLElement>;
-		script: HTMLAttributes<HTMLScriptElement>;
+		script: ScriptHTMLAttributes<HTMLScriptElement>;
 		search: HTMLAttributes<HTMLElement>;
 		section: HTMLAttributes<HTMLElement>;
-		select: HTMLAttributes<HTMLSelectElement>;
-		slot: HTMLAttributes<HTMLSlotElement>;
+		select: SelectHTMLAttributes<HTMLSelectElement>;
+		slot: SlotHTMLAttributes<HTMLSlotElement>;
 		small: HTMLAttributes<HTMLElement>;
-		source: HTMLAttributes<HTMLSourceElement>;
+		source: SourceHTMLAttributes<HTMLSourceElement>;
 		span: HTMLAttributes<HTMLSpanElement>;
 		strong: HTMLAttributes<HTMLElement>;
-		style: HTMLAttributes<HTMLStyleElement>;
+		style: StyleHTMLAttributes<HTMLStyleElement>;
 		sub: HTMLAttributes<HTMLElement>;
 		summary: HTMLAttributes<HTMLElement>;
 		sup: HTMLAttributes<HTMLElement>;
-		table: HTMLAttributes<HTMLTableElement>;
+		table: TableHTMLAttributes<HTMLTableElement>;
 		tbody: HTMLAttributes<HTMLTableSectionElement>;
-		td: HTMLAttributes<HTMLTableCellElement>;
+		td: TdHTMLAttributes<HTMLTableCellElement>;
 		template: HTMLAttributes<HTMLTemplateElement>;
-		textarea: HTMLAttributes<HTMLTextAreaElement>;
+		textarea: TextareaHTMLAttributes<HTMLTextAreaElement>;
 		tfoot: HTMLAttributes<HTMLTableSectionElement>;
-		th: HTMLAttributes<HTMLTableCellElement>;
+		th: ThHTMLAttributes<HTMLTableCellElement>;
 		thead: HTMLAttributes<HTMLTableSectionElement>;
-		time: HTMLAttributes<HTMLTimeElement>;
+		time: TimeHTMLAttributes<HTMLTimeElement>;
 		title: HTMLAttributes<HTMLTitleElement>;
 		tr: HTMLAttributes<HTMLTableRowElement>;
-		track: HTMLAttributes<HTMLTrackElement>;
+		track: TrackHTMLAttributes<HTMLTrackElement>;
 		u: HTMLAttributes<HTMLElement>;
 		ul: HTMLAttributes<HTMLUListElement>;
 		var: HTMLAttributes<HTMLElement>;
-		video: HTMLAttributes<HTMLVideoElement>;
+		video: VideoHTMLAttributes<HTMLVideoElement>;
 		wbr: HTMLAttributes<HTMLElement>;
-
-		// MathML See https://developer.mozilla.org/en-US/docs/Web/MathML
-		'annotation-xml': MathMLAttributes<HTMLAnnotationXmlElement>;
-		annotation: MathMLAttributes<HTMLAnnotationElement>;
-		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/maction */
-		maction: MathMLAttributes<HTMLMActionElement>;
-		math: MathMLAttributes<HTMLMathElement>;
-		/** This feature is non-standard. See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/menclose  */
-		menclose: MathMLAttributes<HTMLMEncloseElement>;
-		merror: MathMLAttributes<HTMLMErrorElement>;
-		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mfenced */
-		mfenced: HTMLAttributes<HTMLMFencedElement>;
-		mfrac: MathMLAttributes<HTMLMFracElement>;
-		mi: MathMLAttributes<HTMLMiElement>;
-		mmultiscripts: MathMLAttributes<HTMLMmultiScriptsElement>;
-		mn: MathMLAttributes<HTMLMNElement>;
-		mo: MathMLAttributes<HTMLMOElement>;
-		mover: MathMLAttributes<HTMLMOverElement>;
-		mpadded: MathMLAttributes<HTMLMPaddedElement>;
-		mphantom: MathMLAttributes<HTMLMPhantomElement>;
-		mprescripts: MathMLAttributes<HTMLMPrescriptsElement>;
-		mroot: MathMLAttributes<HTMLMRootElement>;
-		mrow: MathMLAttributes<HTMLMRowElement>;
-		ms: MathMLAttributes<HTMLMSElement>;
-		mspace: MathMLAttributes<HTMLMSpaceElement>;
-		msqrt: MathMLAttributes<HTMLMSqrtElement>;
-		mstyle: MathMLAttributes<HTMLMStyleElement>;
-		msub: MathMLAttributes<HTMLMSubElement>;
-		msubsup: MathMLAttributes<HTMLMSubsupElement>;
-		msup: MathMLAttributes<HTMLMSupElement>;
-		mtable: MathMLAttributes<HTMLMTableElement>;
-		mtd: MathMLAttributes<HTMLMTdElement>;
-		mtext: MathMLAttributes<HTMLMTextElement>;
-		mtr: MathMLAttributes<HTMLMTrElement>;
-		munder: MathMLAttributes<HTMLMUnderElement>;
-		munderover: MathMLAttributes<HTMLMUnderoverElement>;
-		semantics: MathMLAttributes<HTMLSemanticsElement>;
 	}
 }
