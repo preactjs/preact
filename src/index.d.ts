@@ -87,7 +87,7 @@ export type ComponentProps<
 		: never;
 
 export interface FunctionComponent<P = {}> {
-	(props: RenderableProps<P>, context?: any): ComponentChild;
+	(props: RenderableProps<P>, context?: any): ComponentChildren;
 	displayName?: string;
 	defaultProps?: Partial<P> | undefined;
 }
@@ -180,7 +180,7 @@ export abstract class Component<P, S> {
 		props?: RenderableProps<P>,
 		state?: Readonly<S>,
 		context?: any
-	): ComponentChild;
+	): ComponentChildren;
 }
 
 //
