@@ -254,7 +254,7 @@
     "sade": "^1.8.1",
     "sinon": "^9.2.3",
     "sinon-chai": "^3.7.0",
-    "typescript": "^4.9.5",
+    "typescript": "^5.6.3",
     "undici": "^4.12.0"
   },
   "volta": {
