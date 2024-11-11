@@ -10,6 +10,7 @@ export const MATCHED = 1 << 17;
 /** Reset all mode flags */
 export const RESET_MODE = ~(MODE_HYDRATE | MODE_SUSPENDED);
 
+export const UNDEFINED = undefined;
 export const EMPTY_OBJ = /** @type {any} */ ({});
 export const EMPTY_ARR = [];
 export const IS_NON_DIMENSIONAL =
