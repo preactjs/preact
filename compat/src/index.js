@@ -20,6 +20,13 @@ import {
 	useContext,
 	useDebugValue
 } from 'preact/hooks';
+import {
+	useInsertionEffect,
+	startTransition,
+	useDeferredValue,
+	useSyncExternalStore,
+	useTransition
+} from './hooks';
 import { PureComponent } from './PureComponent';
 import { memo } from './memo';
 import { forwardRef } from './forwardRef';
@@ -27,7 +34,6 @@ import { Children } from './Children';
 import { Suspense, lazy } from './suspense';
 import { SuspenseList } from './suspense-list';
 import { createPortal } from './portals';
-import { is } from './util';
 import {
 	hydrate,
 	render,
@@ -143,76 +149,8 @@ const flushSync = (callback, arg) => callback(arg);
  */
 const StrictMode = Fragment;
 
-export function startTransition(cb) {
-	cb();
-}
-
-export function useDeferredValue(val) {
-	return val;
-}
-
-export function useTransition() {
-	return [false, startTransition];
-}
-
-// TODO: in theory this should be done after a VNode is diffed as we want to insert
-// styles/... before it attaches
-export const useInsertionEffect = useLayoutEffect;
-
 // compat to react-is
 export const isElement = isValidElement;
-
-/**
- * This is taken from https://github.com/facebook/react/blob/main/packages/use-sync-external-store/src/useSyncExternalStoreShimClient.js#L84
- * on a high level this cuts out the warnings, ... and attempts a smaller implementation
- * @typedef {{ _value: any; _getSnapshot: () => any }} Store
- */
-export function useSyncExternalStore(subscribe, getSnapshot) {
-	const value = getSnapshot();
-
-	/**
-	 * @typedef {{ _instance: Store }} StoreRef
-	 * @type {[StoreRef, (store: StoreRef) => void]}
-	 */
-	const [{ _instance }, forceUpdate] = useState({
-		_instance: { _value: value, _getSnapshot: getSnapshot }
-	});
-
-	useLayoutEffect(() => {
-		_instance._value = value;
-		_instance._getSnapshot = getSnapshot;
-
-		if (didSnapshotChange(_instance)) {
-			forceUpdate({ _instance });
-		}
-	}, [subscribe, value, getSnapshot]);
-
-	useEffect(() => {
-		if (didSnapshotChange(_instance)) {
-			forceUpdate({ _instance });
-		}
-
-		return subscribe(() => {
-			if (didSnapshotChange(_instance)) {
-				forceUpdate({ _instance });
-			}
-		});
-	}, [subscribe]);
-
-	return value;
-}
-
-/** @type {(inst: Store) => boolean} */
-function didSnapshotChange(inst) {
-	const latestGetSnapshot = inst._getSnapshot;
-	const prevValue = inst._value;
-	try {
-		const nextValue = latestGetSnapshot();
-		return !is(prevValue, nextValue);
-	} catch (error) {
-		return true;
-	}
-}
 
 export * from 'preact/hooks';
 export {
@@ -237,6 +175,11 @@ export {
 	memo,
 	forwardRef,
 	flushSync,
+	useInsertionEffect,
+	startTransition,
+	useDeferredValue,
+	useSyncExternalStore,
+	useTransition,
 	// eslint-disable-next-line camelcase
 	unstable_batchedUpdates,
 	StrictMode,
