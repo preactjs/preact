@@ -2,7 +2,8 @@ import {
 	EMPTY_OBJ,
 	MODE_HYDRATE,
 	MODE_SUSPENDED,
-	RESET_MODE
+	RESET_MODE,
+	UNDEFINED
 } from '../constants';
 import { BaseComponent, getDomSibling } from '../component';
 import { Fragment } from '../create-element';
@@ -47,7 +48,7 @@ export function diff(
 
 	// When passing through createElement it assigns the object
 	// constructor as undefined. This to prevent JSON-injection.
-	if (newVNode.constructor !== undefined) return null;
+	if (newVNode.constructor !== UNDEFINED) return null;
 
 	// If the previous diff bailed out, resume creating/hydrating.
 	if (oldVNode._flags & MODE_SUSPENDED) {
@@ -317,7 +318,7 @@ export function diff(
  * @param {VNode} root
  */
 export function commitRoot(commitQueue, root, refQueue) {
-	root._nextDom = undefined;
+	root._nextDom = UNDEFINED;
 
 	for (let i = 0; i < refQueue.length; i++) {
 		applyRef(refQueue[i], refQueue[++i], refQueue[++i]);
@@ -534,7 +535,7 @@ function diffElementNodes(
 			if (nodeType === 'progress' && inputValue == null) {
 				dom.removeAttribute('value');
 			} else if (
-				inputValue !== undefined &&
+				inputValue !== UNDEFINED &&
 				// #2756 For the <progress>-element the initial value is 0,
 				// despite the attribute not being present. When the attribute
 				// is missing the progress bar is treated as indeterminate.
@@ -550,7 +551,7 @@ function diffElementNodes(
 			}
 
 			i = 'checked';
-			if (checked !== undefined && checked !== dom[i]) {
+			if (checked !== UNDEFINED && checked !== dom[i]) {
 				setProperty(dom, i, checked, oldProps[i], namespace);
 			}
 		}
@@ -633,7 +634,7 @@ export function unmount(vnode, parentVNode, skipRemove) {
 
 	// Must be set to `undefined` to properly clean up `_nextDom`
 	// for which `null` is a valid value. See comment in `create-element.js`
-	vnode._component = vnode._parent = vnode._dom = vnode._nextDom = undefined;
+	vnode._component = vnode._parent = vnode._dom = vnode._nextDom = UNDEFINED;
 }
 
 /** The `.render()` method for a PFC backing instance. */

@@ -1,6 +1,12 @@
 import { diff, unmount, applyRef } from './index';
 import { createVNode, Fragment } from '../create-element';
-import { EMPTY_OBJ, EMPTY_ARR, INSERT_VNODE, MATCHED } from '../constants';
+import {
+	EMPTY_OBJ,
+	EMPTY_ARR,
+	INSERT_VNODE,
+	MATCHED,
+	UNDEFINED
+} from '../constants';
 import { isArray } from '../util';
 import { getDomSibling } from '../component';
 
@@ -113,7 +119,7 @@ export function diffChildren(
 			oldDom = insert(childVNode, oldDom, parentDom);
 		} else if (
 			typeof childVNode.type == 'function' &&
-			childVNode._nextDom !== undefined
+			childVNode._nextDom !== UNDEFINED
 		) {
 			// Since Fragments or components that return Fragment like VNodes can
 			// contain multiple DOM nodes as the same level, continue the diff from
@@ -128,7 +134,7 @@ export function diffChildren(
 		// after diffing Components and Fragments. Once we store it the nextDOM
 		// local var, we can clean up the property. Also prevents us hanging on to
 		// DOM nodes that may have been unmounted.
-		childVNode._nextDom = undefined;
+		childVNode._nextDom = UNDEFINED;
 
 		// Unset diffing flags
 		childVNode._flags &= ~(INSERT_VNODE | MATCHED);
@@ -206,7 +212,7 @@ function constructNewChildrenArray(newParentVNode, renderResult, oldChildren) {
 				null,
 				null
 			);
-		} else if (childVNode.constructor === undefined && childVNode._depth > 0) {
+		} else if (childVNode.constructor === UNDEFINED && childVNode._depth > 0) {
 			// VNode is already in use, clone it. This can happen in the following
 			// scenario:
 			//   const reuse = <div />

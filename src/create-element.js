@@ -1,5 +1,6 @@
 import { slice } from './util';
 import options from './options';
+import { UNDEFINED } from './constants';
 
 let vnodeId = 0;
 
@@ -32,7 +33,7 @@ export function createElement(type, props, children) {
 	// Note: type may be undefined in development, must never error here.
 	if (typeof type == 'function' && type.defaultProps != null) {
 		for (i in type.defaultProps) {
-			if (normalizedProps[i] === undefined) {
+			if (normalizedProps[i] === UNDEFINED) {
 				normalizedProps[i] = type.defaultProps[i];
 			}
 		}
@@ -70,9 +71,9 @@ export function createVNode(type, props, key, ref, original) {
 		// be set to dom.nextSibling which can return `null` and it is important
 		// to be able to distinguish between an uninitialized _nextDom and
 		// a _nextDom that has been set to `null`
-		_nextDom: undefined,
+		_nextDom: UNDEFINED,
 		_component: null,
-		constructor: undefined,
+		constructor: UNDEFINED,
 		_original: original == null ? ++vnodeId : original,
 		_index: -1,
 		_flags: 0
@@ -98,4 +99,4 @@ export function Fragment(props) {
  * @returns {vnode is VNode}
  */
 export const isValidElement = vnode =>
-	vnode != null && vnode.constructor == undefined;
+	vnode != null && vnode.constructor == UNDEFINED;
