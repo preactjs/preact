@@ -9,8 +9,16 @@
   "umd:main": "dist/preact.umd.js",
   "unpkg": "dist/preact.min.js",
   "source": "src/index.js",
+  "typesVersions": {
+    "<=5.0": {
+      ".": ["./src/index-5.d.ts"]
+    }
+  },
   "exports": {
     ".": {
+      "types@<=5.0": {
+        "types": "./src/index-5.d.ts"
+      },
       "types": "./src/index.d.ts",
       "browser": "./dist/preact.module.js",
       "umd": "./dist/preact.umd.js",
@@ -105,7 +113,7 @@
   },
   "types": "src/index.d.ts",
   "scripts": {
-    "prepare": "husky && run-s build && check-export-map && npm-merge-driver-install",
+    "prepare": "husky && run-s build && npm-merge-driver-install",
     "build": "npm-run-all --parallel build:*",
     "build:core": "microbundle build --raw --no-generateTypes -f cjs,esm,umd",
     "build:core-min": "microbundle build --raw --no-generateTypes -f cjs,esm,umd,iife src/cjs.js -o dist/preact.min.js",
@@ -246,7 +254,7 @@
     "sade": "^1.8.1",
     "sinon": "^9.2.3",
     "sinon-chai": "^3.7.0",
-    "typescript": "^4.9.5",
+    "typescript": "5.1.6",
     "undici": "^4.12.0"
   },
   "volta": {

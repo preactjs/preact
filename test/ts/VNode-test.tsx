@@ -9,7 +9,8 @@ import {
 	ComponentFactory,
 	VNode,
 	ComponentChildren,
-	cloneElement
+	cloneElement,
+	ComponentChild
 } from '../../';
 
 function getDisplayType(vnode: VNode | string | number) {
@@ -195,3 +196,11 @@ class ComponentWithNumberChildren extends Component<{ children: number[] }> {
 	{1}
 	{2}
 </ComponentWithNumberChildren>;
+
+const ComponentReturningComponentChildren = ({
+	children
+}: {
+	children: ComponentChild;
+}) => children;
+
+<ComponentReturningComponentChildren>123</ComponentReturningComponentChildren>;

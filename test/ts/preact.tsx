@@ -138,22 +138,21 @@ const UseOfComponentWithChildren = () => {
 	);
 };
 
-// TODO: make this work
-// const DummyChildren: FunctionalComponent = ({ children }) => {
-// 	return children;
-// };
+const DummyChildren: FunctionalComponent = ({ children }) => {
+	return children;
+};
 
-// function ReturnChildren(props: { children: preact.ComponentChildren }) {
-// 	return props.children;
-// }
+function ReturnChildren(props: { children: preact.ComponentChildren }) {
+	return props.children;
+}
 
-// function TestUndefinedChildren() {
-// 	return (
-// 		<ReturnChildren>
-// 			<ReturnChildren>Hello</ReturnChildren>
-// 		</ReturnChildren>
-// 	);
-// }
+function TestUndefinedChildren() {
+	return (
+		<ReturnChildren>
+			<ReturnChildren>Hello</ReturnChildren>
+		</ReturnChildren>
+	);
+}
 
 // using ref and or jsx
 class ComponentUsingRef extends Component<any, any> {
