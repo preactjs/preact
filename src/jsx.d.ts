@@ -227,6 +227,7 @@ export namespace JSXInternal {
 		gradientTransform?: Signalish<string | undefined>;
 		gradientUnits?: Signalish<string | undefined>;
 		hanging?: Signalish<number | string | undefined>;
+		height?: Signalish<number | string | undefined>;
 		horizAdvX?: Signalish<number | string | undefined>;
 		'horiz-adv-x'?: Signalish<number | string | undefined>;
 		horizOriginX?: Signalish<number | string | undefined>;
@@ -413,7 +414,7 @@ export namespace JSXInternal {
 		visibility?: Signalish<number | string | undefined>;
 		vMathematical?: Signalish<number | string | undefined>;
 		'v-mathematical'?: Signalish<number | string | undefined>;
-		widths?: Signalish<number | string | undefined>;
+		width?: Signalish<number | string | undefined>;
 		wordSpacing?: Signalish<number | string | undefined>;
 		'word-spacing'?: Signalish<number | string | undefined>;
 		writingMode?: Signalish<number | string | undefined>;
