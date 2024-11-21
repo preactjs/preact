@@ -1,5 +1,5 @@
 import { setupRerender, act } from 'preact/test-utils';
-import { createElement, render, createContext } from 'preact';
+import { createElement, render, createContext, Component } from 'preact';
 import { useState, useContext, useEffect } from 'preact/hooks';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 
@@ -370,5 +370,47 @@ describe('useState', () => {
 		setChild(false);
 		rerender();
 		expect(scratch.innerHTML).to.equal('<p>hello world!!!</p>');
+	});
+
+	describe('Global sCU', () => {
+		let prevScu;
+		before(() => {
+			prevScu = Component.prototype.shouldComponentUpdate;
+			Component.prototype.shouldComponentUpdate = () => {
+				return true;
+			};
+		});
+
+		after(() => {
+			Component.prototype.shouldComponentUpdate = prevScu;
+		});
+
+		it('correctly updates with multiple state updates', () => {
+			let simulateClick;
+
+			let renders = 0;
+			function TestWidget() {
+				renders++;
+				const [saved, setSaved] = useState(false);
+
+				simulateClick = () => {
+					setSaved(true);
+					setSaved(false);
+				};
+
+				return <div>{saved ? 'Saved!' : 'Unsaved!'}</div>;
+			}
+
+			render(<TestWidget />, scratch);
+			expect(scratch.innerHTML).to.equal('<div>Unsaved!</div>');
+			expect(renders).to.equal(1);
+
+			act(() => {
+				simulateClick();
+			});
+
+			expect(scratch.innerHTML).to.equal('<div>Unsaved!</div>');
+			expect(renders).to.equal(2);
+		});
 	});
 });

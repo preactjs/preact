@@ -249,7 +249,7 @@ export function useReducer(reducer, initialState, init) {
 				// We check whether we have components with a nextValue set that
 				// have values that aren't equal to one another this pushes
 				// us to update further down the tree
-				let shouldUpdate = false;
+				let shouldUpdate = hookState._component.props !== p;
 				stateHooks.forEach(hookItem => {
 					if (hookItem._nextValue) {
 						const currentValue = hookItem._value[0];
@@ -259,11 +259,9 @@ export function useReducer(reducer, initialState, init) {
 					}
 				});
 
-				return shouldUpdate || hookState._component.props !== p
-					? prevScu
-						? prevScu.call(this, p, s, c)
-						: true
-					: false;
+				return prevScu
+					? prevScu.call(this, p, s, c) || shouldUpdate
+					: shouldUpdate;
 			}
 
 			currentComponent.shouldComponentUpdate = updateHookState;
