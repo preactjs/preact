@@ -208,6 +208,8 @@ export function clearOptions() {
  * @param {HTMLElement} scratch
  */
 export function teardown(scratch) {
+	if (!document.contains(scratch)) return;
+
 	if (
 		scratch &&
 		('__k' in scratch || '_children' in scratch) &&
