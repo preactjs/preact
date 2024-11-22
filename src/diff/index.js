@@ -244,7 +244,7 @@ export function diff(
 				tmp != null && tmp.type === Fragment && tmp.key == null;
 			let renderResult = isTopLevelFragment ? tmp.props.children : tmp;
 
-			diffChildren(
+			oldDom = diffChildren(
 				parentDom,
 				isArray(renderResult) ? renderResult : [renderResult],
 				newVNode,
@@ -281,6 +281,7 @@ export function diff(
 				while (oldDom && oldDom.nodeType === 8 && oldDom.nextSibling) {
 					oldDom = oldDom.nextSibling;
 				}
+
 				excessDomChildren[excessDomChildren.indexOf(oldDom)] = null;
 				newVNode._dom = oldDom;
 			} else {
@@ -296,7 +297,7 @@ export function diff(
 		newVNode._children = oldVNode._children;
 		newVNode._dom = oldVNode._dom;
 	} else {
-		newVNode._dom = diffElementNodes(
+		oldDom = newVNode._dom = diffElementNodes(
 			oldVNode._dom,
 			newVNode,
 			oldVNode,
@@ -310,6 +311,8 @@ export function diff(
 	}
 
 	if ((tmp = options.diffed)) tmp(newVNode);
+
+	return newVNode._flags & MODE_SUSPENDED ? undefined : oldDom;
 }
 
 /**
@@ -318,8 +321,6 @@ export function diff(
  * @param {VNode} root
  */
 export function commitRoot(commitQueue, root, refQueue) {
-	root._nextDom = UNDEFINED;
-
 	for (let i = 0; i < refQueue.length; i++) {
 		applyRef(refQueue[i], refQueue[++i], refQueue[++i]);
 	}
@@ -632,9 +633,7 @@ export function unmount(vnode, parentVNode, skipRemove) {
 		removeNode(vnode._dom);
 	}
 
-	// Must be set to `undefined` to properly clean up `_nextDom`
-	// for which `null` is a valid value. See comment in `create-element.js`
-	vnode._component = vnode._parent = vnode._dom = vnode._nextDom = UNDEFINED;
+	vnode._component = vnode._parent = vnode._dom = UNDEFINED;
 }
 
 /** The `.render()` method for a PFC backing instance. */

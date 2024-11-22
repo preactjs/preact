@@ -50,7 +50,6 @@ function createVNode(type, props, key, isStaticChildren, __source, __self) {
 		_parent: null,
 		_depth: 0,
 		_dom: null,
-		_nextDom: undefined,
 		_component: null,
 		constructor: undefined,
 		_original: --vnodeId,
