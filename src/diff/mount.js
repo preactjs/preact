@@ -196,7 +196,8 @@ export function mount(
 					}
 				}
 			}
-			options._catchError(e, newVNode, EMPTY_OBJ);
+
+			options._catchError(e, newVNode, newVNode);
 		}
 	} else {
 		oldDom = newVNode._dom = mountElementNode(
@@ -300,14 +301,10 @@ function mountElementNode(
 
 	if (nodeType === null) {
 		// During hydration, we still have to split merged text from SSR'd HTML.
-		if (!isHydrating || dom.data !== newProps) {
-			dom.data = newProps;
-		}
+		dom.data = newProps;
 	} else {
 		// If excessDomChildren was not null, repopulate it with the current element's children:
 		excessDomChildren = excessDomChildren && slice.call(dom.childNodes);
-
-		oldProps = EMPTY_OBJ;
 
 		// If we are in a situation where we are not hydrating but are using
 		// existing DOM (e.g. replaceNode) we should read the existing DOM

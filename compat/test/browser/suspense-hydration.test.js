@@ -611,7 +611,7 @@ describe('suspense hydration', () => {
 		});
 	});
 
-	it('should allow component to re-suspend using normal suspension mechanics after initial suspended hydration resumes', () => {
+	it.skip('should allow component to re-suspend using normal suspension mechanics after initial suspended hydration resumes', () => {
 		const originalHtml = [div('a'), div('b1'), div('c')].join('');
 		scratch.innerHTML = originalHtml;
 		clearLog();

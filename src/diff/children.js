@@ -1,4 +1,4 @@
-import { diff, unmount, applyRef } from './index';
+import { diff, unmount, applyRef } from './patch';
 import { createVNode, Fragment } from '../create-element';
 import {
 	EMPTY_OBJ,

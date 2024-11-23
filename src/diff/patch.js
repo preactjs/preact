@@ -76,8 +76,12 @@ export function diff(
 
 	outer: if (typeof newType == 'function') {
 		try {
-			let c, isNew, oldProps, oldState, snapshot, clearProcessingException;
-			let newProps = newVNode.props;
+			let c,
+				oldProps,
+				oldState,
+				snapshot,
+				clearProcessingException,
+				newProps = newVNode.props;
 			const isClassComponent =
 				'prototype' in newType && newType.prototype.render;
 
@@ -95,29 +99,6 @@ export function diff(
 			if (oldVNode._component) {
 				c = newVNode._component = oldVNode._component;
 				clearProcessingException = c._processingException = c._pendingError;
-			} else {
-				// Instantiate the new component
-				if (isClassComponent) {
-					// @ts-expect-error The check above verifies that newType is suppose to be constructed
-					newVNode._component = c = new newType(newProps, componentContext); // eslint-disable-line new-cap
-				} else {
-					// @ts-expect-error Trust me, Component implements the interface we want
-					newVNode._component = c = new BaseComponent(
-						newProps,
-						componentContext
-					);
-					c.constructor = newType;
-					c.render = doRender;
-				}
-				if (provider) provider.sub(c);
-
-				c.props = newProps;
-				if (!c.state) c.state = {};
-				c.context = componentContext;
-				c._globalContext = globalContext;
-				isNew = c._dirty = true;
-				c._renderCallbacks = [];
-				c._stateCallbacks = [];
 			}
 
 			// Invoke getDerivedStateFromProps
@@ -139,78 +120,59 @@ export function diff(
 			oldProps = c.props;
 			oldState = c.state;
 			c._vnode = newVNode;
+			if (
+				isClassComponent &&
+				newType.getDerivedStateFromProps == null &&
+				newProps !== oldProps &&
+				c.componentWillReceiveProps != null
+			) {
+				c.componentWillReceiveProps(newProps, componentContext);
+			}
 
-			// Invoke pre-render lifecycle methods
-			if (isNew) {
-				if (
-					isClassComponent &&
-					newType.getDerivedStateFromProps == null &&
-					c.componentWillMount != null
-				) {
-					c.componentWillMount();
+			if (
+				!c._force &&
+				((c.shouldComponentUpdate != null &&
+					c.shouldComponentUpdate(newProps, c._nextState, componentContext) ===
+						false) ||
+					newVNode._original === oldVNode._original)
+			) {
+				// More info about this here: https://gist.github.com/JoviDeCroock/bec5f2ce93544d2e6070ef8e0036e4e8
+				if (newVNode._original !== oldVNode._original) {
+					// When we are dealing with a bail because of sCU we have to update
+					// the props, state and dirty-state.
+					// when we are dealing with strict-equality we don't as the child could still
+					// be dirtied see #3883
+					c.props = newProps;
+					c.state = c._nextState;
+					c._dirty = false;
 				}
 
-				if (isClassComponent && c.componentDidMount != null) {
-					c._renderCallbacks.push(c.componentDidMount);
+				newVNode._dom = oldVNode._dom;
+				newVNode._children = oldVNode._children;
+				newVNode._children.some(vnode => {
+					if (vnode) vnode._parent = newVNode;
+				});
+
+				for (let i = 0; i < c._stateCallbacks.length; i++) {
+					c._renderCallbacks.push(c._stateCallbacks[i]);
 				}
-			} else {
-				if (
-					isClassComponent &&
-					newType.getDerivedStateFromProps == null &&
-					newProps !== oldProps &&
-					c.componentWillReceiveProps != null
-				) {
-					c.componentWillReceiveProps(newProps, componentContext);
-				}
+				c._stateCallbacks = [];
 
-				if (
-					!c._force &&
-					((c.shouldComponentUpdate != null &&
-						c.shouldComponentUpdate(
-							newProps,
-							c._nextState,
-							componentContext
-						) === false) ||
-						newVNode._original == oldVNode._original)
-				) {
-					// More info about this here: https://gist.github.com/JoviDeCroock/bec5f2ce93544d2e6070ef8e0036e4e8
-					if (newVNode._original != oldVNode._original) {
-						// When we are dealing with a bail because of sCU we have to update
-						// the props, state and dirty-state.
-						// when we are dealing with strict-equality we don't as the child could still
-						// be dirtied see #3883
-						c.props = newProps;
-						c.state = c._nextState;
-						c._dirty = false;
-					}
-
-					newVNode._dom = oldVNode._dom;
-					newVNode._children = oldVNode._children;
-					newVNode._children.some(vnode => {
-						if (vnode) vnode._parent = newVNode;
-					});
-
-					for (let i = 0; i < c._stateCallbacks.length; i++) {
-						c._renderCallbacks.push(c._stateCallbacks[i]);
-					}
-					c._stateCallbacks = [];
-
-					if (c._renderCallbacks.length) {
-						commitQueue.push(c);
-					}
-
-					break outer;
+				if (c._renderCallbacks.length) {
+					commitQueue.push(c);
 				}
 
-				if (c.componentWillUpdate != null) {
-					c.componentWillUpdate(newProps, c._nextState, componentContext);
-				}
+				break outer;
+			}
 
-				if (isClassComponent && c.componentDidUpdate != null) {
-					c._renderCallbacks.push(() => {
-						c.componentDidUpdate(oldProps, oldState, snapshot);
-					});
-				}
+			if (c.componentWillUpdate != null) {
+				c.componentWillUpdate(newProps, c._nextState, componentContext);
+			}
+
+			if (isClassComponent && c.componentDidUpdate != null) {
+				c._renderCallbacks.push(() => {
+					c.componentDidUpdate(oldProps, oldState, snapshot);
+				});
 			}
 
 			c.context = componentContext;
@@ -251,7 +213,7 @@ export function diff(
 				globalContext = assign({}, globalContext, c.getChildContext());
 			}
 
-			if (isClassComponent && !isNew && c.getSnapshotBeforeUpdate != null) {
+			if (isClassComponent && c.getSnapshotBeforeUpdate != null) {
 				snapshot = c.getSnapshotBeforeUpdate(oldProps, oldState);
 			}
 
@@ -324,9 +286,7 @@ export function diff(
 			oldVNode,
 			globalContext,
 			namespace,
-			excessDomChildren,
 			commitQueue,
-			isHydrating,
 			refQueue
 		);
 	}
@@ -371,10 +331,8 @@ export function commitRoot(commitQueue, root, refQueue) {
  * @param {VNode} oldVNode The old virtual node
  * @param {object} globalContext The current context object
  * @param {string} namespace Current namespace of the DOM node (HTML, SVG, or MathML)
- * @param {Array<PreactElement>} excessDomChildren
  * @param {Array<Component>} commitQueue List of components which have callbacks
  * to invoke in commitRoot
- * @param {boolean} isHydrating Whether or not we are in hydration
  * @param {any[]} refQueue an array of elements needed to invoke refs
  * @returns {PreactElement}
  */
@@ -384,9 +342,7 @@ function diffElementNodes(
 	oldVNode,
 	globalContext,
 	namespace,
-	excessDomChildren,
 	commitQueue,
-	isHydrating,
 	refQueue
 ) {
 	let oldProps = oldVNode.props;
@@ -409,25 +365,6 @@ function diffElementNodes(
 	else if (nodeType == 'math') namespace = MATH_NAMESPACE;
 	else if (!namespace) namespace = XHTML_NAMESPACE;
 
-	if (excessDomChildren != null) {
-		for (i = 0; i < excessDomChildren.length; i++) {
-			value = excessDomChildren[i];
-
-			// if newVNode matches an element in excessDomChildren or the `dom`
-			// argument matches an element in excessDomChildren, remove it from
-			// excessDomChildren so it isn't later removed in diffChildren
-			if (
-				value &&
-				'setAttribute' in value == !!nodeType &&
-				(nodeType ? value.localName == nodeType : value.nodeType == 3)
-			) {
-				dom = value;
-				excessDomChildren[i] = null;
-				break;
-			}
-		}
-	}
-
 	if (dom == null) {
 		if (nodeType == null) {
 			return document.createTextNode(newProps);
@@ -438,57 +375,34 @@ function diffElementNodes(
 			nodeType,
 			newProps.is && newProps
 		);
-
-		// we are creating a new node, so we can assume this is a new subtree (in
-		// case we are hydrating), this deopts the hydrate
-		if (isHydrating) {
-			if (options._hydrationMismatch)
-				options._hydrationMismatch(newVNode, excessDomChildren);
-			isHydrating = false;
-		}
-		// we created a new parent, so none of the previously attached children can be reused:
-		excessDomChildren = null;
 	}
 
 	if (nodeType === null) {
 		// During hydration, we still have to split merged text from SSR'd HTML.
-		if (oldProps !== newProps && (!isHydrating || dom.data !== newProps)) {
+		if (oldProps !== newProps && dom.data !== newProps) {
 			dom.data = newProps;
 		}
 	} else {
-		// If excessDomChildren was not null, repopulate it with the current element's children:
-		excessDomChildren = excessDomChildren && slice.call(dom.childNodes);
-
 		oldProps = oldVNode.props || EMPTY_OBJ;
 
-		// If we are in a situation where we are not hydrating but are using
-		// existing DOM (e.g. replaceNode) we should read the existing DOM
-		// attributes to diff them
-		if (!isHydrating && excessDomChildren != null) {
-			oldProps = {};
-			for (i = 0; i < dom.attributes.length; i++) {
-				value = dom.attributes[i];
-				oldProps[value.name] = value.value;
-			}
-		}
-
-		for (i in oldProps) {
-			value = oldProps[i];
-			if (i == 'children') {
-			} else if (i == 'dangerouslySetInnerHTML') {
-				oldHtml = value;
-			} else if (!(i in newProps)) {
-				if (
-					(i == 'value' && 'defaultValue' in newProps) ||
-					(i == 'checked' && 'defaultChecked' in newProps)
-				) {
-					continue;
+		if (oldProps !== EMPTY_OBJ) {
+			for (i in oldProps) {
+				value = oldProps[i];
+				if (i == 'children') {
+				} else if (i == 'dangerouslySetInnerHTML') {
+					oldHtml = value;
+				} else if (!(i in newProps)) {
+					if (
+						(i == 'value' && 'defaultValue' in newProps) ||
+						(i == 'checked' && 'defaultChecked' in newProps)
+					) {
+						continue;
+					}
+					setProperty(dom, i, null, value, namespace);
 				}
-				setProperty(dom, i, null, value, namespace);
 			}
 		}
 
-		// During hydration, props are not diffed at all (including dangerouslySetInnerHTML)
 		// @TODO we should warn in debug mode when props don't match here.
 		for (i in newProps) {
 			value = newProps[i];
@@ -500,10 +414,7 @@ function diffElementNodes(
 				inputValue = value;
 			} else if (i == 'checked') {
 				checked = value;
-			} else if (
-				(!isHydrating || typeof value == 'function') &&
-				oldProps[i] !== value
-			) {
+			} else if (oldProps[i] !== value) {
 				setProperty(dom, i, value, oldProps[i], namespace);
 			}
 		}
@@ -512,10 +423,8 @@ function diffElementNodes(
 		if (newHtml) {
 			// Avoid re-applying the same '__html' if it did not changed between re-render
 			if (
-				!isHydrating &&
-				(!oldHtml ||
-					(newHtml.__html !== oldHtml.__html &&
-						newHtml.__html !== dom.innerHTML))
+				!oldHtml ||
+				(newHtml.__html !== oldHtml.__html && newHtml.__html !== dom.innerHTML)
 			) {
 				dom.innerHTML = newHtml.__html;
 			}
@@ -531,43 +440,12 @@ function diffElementNodes(
 				oldVNode,
 				globalContext,
 				nodeType == 'foreignObject' ? XHTML_NAMESPACE : namespace,
-				excessDomChildren,
+				null,
 				commitQueue,
-				excessDomChildren
-					? excessDomChildren[0]
-					: oldVNode._children && getDomSibling(oldVNode, 0),
-				isHydrating,
+				oldVNode._children && getDomSibling(oldVNode, 0),
+				false,
 				refQueue
 			);
-
-			// Remove children that are not part of any vnode.
-			if (excessDomChildren != null) {
-				for (i = excessDomChildren.length; i--; ) {
-					if (excessDomChildren[i]) excessDomChildren[i].remove();
-				}
-			}
-		}
-
-		// As above, don't diff props during hydration
-		if (!isHydrating) {
-			i = 'value';
-			if (nodeType == 'progress' && inputValue == null) {
-				dom.removeAttribute('value');
-			} else if (
-				inputValue !== UNDEFINED &&
-				// #2756 For the <progress>-element the initial value is 0,
-				// despite the attribute not being present. When the attribute
-				// is missing the progress bar is treated as indeterminate.
-				// To fix that we'll always update it when it is 0 for progress elements
-				(inputValue !== dom[i] || (nodeType === 'progress' && !inputValue))
-			) {
-				setProperty(dom, i, inputValue, oldProps[i], namespace);
-			}
-
-			i = 'checked';
-			if (checked !== UNDEFINED && checked !== dom[i]) {
-				setProperty(dom, i, checked, oldProps[i], namespace);
-			}
 		}
 	}
 
