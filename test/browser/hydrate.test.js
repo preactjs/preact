@@ -1,4 +1,5 @@
-import { createElement, hydrate, Fragment } from 'preact';
+import { createElement, hydrate, Fragment, Component } from 'preact';
+import { setupRerender } from 'preact/test-utils';
 import {
 	setupScratch,
 	teardown,
@@ -28,6 +29,7 @@ describe('hydrate()', () => {
 	let resetRemove;
 	let resetSetAttribute;
 	let resetRemoveAttribute;
+	let rerender;
 
 	before(() => {
 		resetAppendChild = logCall(Element.prototype, 'appendChild');
@@ -48,6 +50,7 @@ describe('hydrate()', () => {
 	});
 
 	beforeEach(() => {
+		rerender = setupRerender();
 		scratch = setupScratch();
 		attributesSpy = spyOnElementAttributes();
 		clearLog();
@@ -480,5 +483,36 @@ describe('hydrate()', () => {
 		hydrate(<p>hello {'foo'}</p>, scratch);
 		expect(scratch.innerHTML).to.equal('<p>hello foo</p>');
 		expect(getLog()).to.deep.equal(['Comment.remove()', 'Comment.remove()']);
+	});
+
+	it('should work with error boundaries', () => {
+		scratch.innerHTML = '<div>Hello, World!</div>';
+		class Root extends Component {
+			constructor() {
+				super();
+				this.state = {};
+			}
+
+			componentDidCatch(error) {
+				this.setState({ error });
+			}
+
+			render() {
+				if (!this.state.error) {
+					return <App />;
+				} else {
+					return <div>Error!</div>;
+				}
+			}
+		}
+
+		function App() {
+			throw Error();
+			return createElement('div', {}, 'Hello, World!');
+		}
+
+		hydrate(<Root />, scratch);
+		rerender();
+		expect(scratch.innerHTML).to.equal('<div>Error!</div>');
 	});
 });
