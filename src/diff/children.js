@@ -9,6 +9,7 @@ import {
 } from '../constants';
 import { isArray } from '../util';
 import { getDomSibling } from '../component';
+import { mount } from './mount';
 
 /**
  * @typedef {import('../internal').ComponentChildren} ComponentChildren
@@ -93,18 +94,34 @@ export function diffChildren(
 		childVNode._index = i;
 
 		// Morph the old element into the new one, but don't append it to the dom yet
-		let result = diff(
-			parentDom,
-			childVNode,
-			oldVNode,
-			globalContext,
-			namespace,
-			excessDomChildren,
-			commitQueue,
-			oldDom,
-			isHydrating,
-			refQueue
-		);
+		let result;
+
+		if (oldVNode !== EMPTY_OBJ) {
+			result = diff(
+				parentDom,
+				childVNode,
+				oldVNode,
+				globalContext,
+				namespace,
+				excessDomChildren,
+				commitQueue,
+				oldDom,
+				isHydrating,
+				refQueue
+			);
+		} else {
+			result = mount(
+				parentDom,
+				childVNode,
+				globalContext,
+				namespace,
+				excessDomChildren,
+				commitQueue,
+				oldDom,
+				isHydrating,
+				refQueue
+			);
+		}
 
 		// Adjust DOM nodes
 		newDom = childVNode._dom;

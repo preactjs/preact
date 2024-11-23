@@ -3,6 +3,7 @@ import { commitRoot, diff } from './diff/index';
 import { createElement, Fragment } from './create-element';
 import options from './options';
 import { slice } from './util';
+import { mount } from './diff/mount';
 
 /**
  * Render a Preact virtual node into a DOM element
@@ -36,24 +37,37 @@ export function render(vnode, parentDom, replaceNode) {
 	// List of effects that need to be called after diffing.
 	let commitQueue = [],
 		refQueue = [];
-	diff(
-		parentDom,
-		// Determine the new vnode tree and store it on the DOM element on
-		// our custom `_children` property.
-		vnode,
-		oldVNode || EMPTY_OBJ,
-		EMPTY_OBJ,
-		parentDom.namespaceURI,
-		oldVNode
-			? null
-			: parentDom.firstChild
-				? slice.call(parentDom.childNodes)
-				: null,
-		commitQueue,
-		oldVNode ? oldVNode._dom : parentDom.firstChild,
-		isHydrating,
-		refQueue
-	);
+
+	if (oldVNode) {
+		diff(
+			parentDom,
+			// Determine the new vnode tree and store it on the DOM element on
+			// our custom `_children` property.
+			vnode,
+			oldVNode,
+			EMPTY_OBJ,
+			parentDom.namespaceURI,
+			null,
+			commitQueue,
+			oldVNode._dom,
+			isHydrating,
+			refQueue
+		);
+	} else {
+		mount(
+			parentDom,
+			// Determine the new vnode tree and store it on the DOM element on
+			// our custom `_children` property.
+			vnode,
+			EMPTY_OBJ,
+			parentDom.namespaceURI,
+			parentDom.firstChild ? slice.call(parentDom.childNodes) : null,
+			commitQueue,
+			parentDom.firstChild,
+			isHydrating,
+			refQueue
+		);
+	}
 
 	// Flush all queued effects
 	commitRoot(commitQueue, vnode, refQueue);
