@@ -6,8 +6,8 @@ import {
 	UNDEFINED
 } from '../constants';
 import { BaseComponent } from '../component';
-import { Fragment } from '../create-element';
-import { diffChildren } from './children';
+import { createVNode, Fragment } from '../create-element';
+import { insert } from './operations';
 import { setProperty } from './props';
 import { assign, isArray, slice } from '../util';
 import options from '../options';
@@ -155,11 +155,10 @@ export function mount(
 				tmp != null && tmp.type === Fragment && tmp.key == null;
 			let renderResult = isTopLevelFragment ? tmp.props.children : tmp;
 
-			oldDom = diffChildren(
+			oldDom = mountChildren(
 				parentDom,
 				isArray(renderResult) ? renderResult : [renderResult],
 				newVNode,
-				EMPTY_OBJ,
 				globalContext,
 				namespace,
 				excessDomChildren,
@@ -361,11 +360,10 @@ function mountElementNode(
 
 			newVNode._children = [];
 		} else {
-			diffChildren(
+			mountChildren(
 				dom,
 				isArray(newChildren) ? newChildren : [newChildren],
 				newVNode,
-				EMPTY_OBJ,
 				globalContext,
 				nodeType === 'foreignObject'
 					? 'http://www.w3.org/1999/xhtml'
@@ -414,4 +412,148 @@ function mountElementNode(
 /** The `.render()` method for a PFC backing instance. */
 function doRender(props, _state, context) {
 	return this.constructor(props, context);
+}
+
+/**
+ * Diff the children of a virtual node
+ * @param {PreactElement} parentDom The DOM element whose children are being
+ * diffed
+ * @param {ComponentChildren[]} renderResult
+ * @param {VNode} newParentVNode The new virtual node whose children should be
+ * diff'ed against oldParentVNode
+ * @param {object} globalContext The current context object - modified by
+ * getChildContext
+ * @param {string} namespace Current namespace of the DOM node (HTML, SVG, or MathML)
+ * @param {Array<PreactElement>} excessDomChildren
+ * @param {Array<Component>} commitQueue List of components which have callbacks
+ * to invoke in commitRoot
+ * @param {PreactElement} oldDom The current attached DOM element any new dom
+ * elements should be placed around. Likely `null` on first render (except when
+ * hydrating). Can be a sibling DOM element when diffing Fragments that have
+ * siblings. In most cases, it starts out as `oldChildren[0]._dom`.
+ * @param {boolean} isHydrating Whether or not we are in hydration
+ * @param {any[]} refQueue an array of elements needed to invoke refs
+ */
+function mountChildren(
+	parentDom,
+	renderResult,
+	newParentVNode,
+	globalContext,
+	namespace,
+	excessDomChildren,
+	commitQueue,
+	oldDom,
+	isHydrating,
+	refQueue
+) {
+	let i,
+		/** @type {VNode} */
+		childVNode,
+		/** @type {PreactElement} */
+		newDom,
+		/** @type {PreactElement} */
+		firstChildDom;
+
+	let newChildrenLength = renderResult.length;
+	newParentVNode._children = [];
+
+	for (i = 0; i < newChildrenLength; i++) {
+		// @ts-expect-error We are reusing the childVNode variable to hold both the
+		// pre and post normalized childVNode
+		childVNode = renderResult[i];
+
+		if (
+			childVNode == null ||
+			typeof childVNode == 'boolean' ||
+			typeof childVNode == 'function'
+		) {
+			childVNode = newParentVNode._children[i] = null;
+			continue;
+		}
+		// If this newVNode is being reused (e.g. <div>{reuse}{reuse}</div>) in the same diff,
+		// or we are rendering a component (e.g. setState) copy the oldVNodes so it can have
+		// it's own DOM & etc. pointers
+		else if (
+			typeof childVNode == 'string' ||
+			typeof childVNode == 'number' ||
+			// eslint-disable-next-line valid-typeof
+			typeof childVNode == 'bigint' ||
+			childVNode.constructor == String
+		) {
+			childVNode = newParentVNode._children[i] = createVNode(
+				null,
+				childVNode,
+				null,
+				null,
+				null
+			);
+		} else if (isArray(childVNode)) {
+			childVNode = newParentVNode._children[i] = createVNode(
+				Fragment,
+				{ children: childVNode },
+				null,
+				null,
+				null
+			);
+		} else if (childVNode.constructor === UNDEFINED && childVNode._depth > 0) {
+			// VNode is already in use, clone it. This can happen in the following
+			// scenario:
+			//   const reuse = <div />
+			//   <div>{reuse}<span />{reuse}</div>
+			childVNode = newParentVNode._children[i] = createVNode(
+				childVNode.type,
+				childVNode.props,
+				childVNode.key,
+				childVNode.ref ? childVNode.ref : null,
+				childVNode._original
+			);
+		} else {
+			childVNode = newParentVNode._children[i] = childVNode;
+		}
+
+		if (childVNode == null) continue;
+
+		childVNode._index = i;
+		childVNode._parent = newParentVNode;
+		childVNode._depth = newParentVNode._depth + 1;
+
+		// Morph the old element into the new one, but don't append it to the dom yet
+		const result = mount(
+			parentDom,
+			childVNode,
+			globalContext,
+			namespace,
+			excessDomChildren,
+			commitQueue,
+			oldDom,
+			isHydrating,
+			refQueue
+		);
+
+		// Adjust DOM nodes
+		newDom = childVNode._dom;
+		if (childVNode.ref) {
+			refQueue.push(
+				childVNode.ref,
+				childVNode._component || newDom,
+				childVNode
+			);
+		}
+
+		if (firstChildDom == null && newDom != null) {
+			firstChildDom = newDom;
+		}
+
+		if (typeof childVNode.type != 'function') {
+			oldDom = insert(childVNode, oldDom, parentDom);
+		} else if (typeof childVNode.type == 'function' && result !== UNDEFINED) {
+			oldDom = result;
+		} else if (newDom) {
+			oldDom = newDom.nextSibling;
+		}
+	}
+
+	newParentVNode._dom = firstChildDom;
+
+	return oldDom;
 }

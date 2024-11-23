@@ -8,11 +8,11 @@ import {
 	UNDEFINED,
 	XHTML_NAMESPACE
 } from '../constants';
-import { BaseComponent, getDomSibling } from '../component';
+import { getDomSibling } from '../component';
 import { Fragment } from '../create-element';
 import { diffChildren } from './children';
 import { setProperty } from './props';
-import { assign, isArray, slice } from '../util';
+import { assign, isArray } from '../util';
 import options from '../options';
 
 /**
@@ -248,7 +248,7 @@ export function diff(
 		} catch (e) {
 			newVNode._original = null;
 			// if hydrating or creating initial tree, bailout preserves DOM:
-			if (isHydrating || excessDomChildren != null) {
+			if (isHydrating) {
 				if (e.then) {
 					newVNode._flags |= isHydrating
 						? MODE_HYDRATE | MODE_SUSPENDED
@@ -273,10 +273,7 @@ export function diff(
 			}
 			options._catchError(e, newVNode, oldVNode);
 		}
-	} else if (
-		excessDomChildren == null &&
-		newVNode._original == oldVNode._original
-	) {
+	} else if (newVNode._original === oldVNode._original) {
 		newVNode._children = oldVNode._children;
 		newVNode._dom = oldVNode._dom;
 	} else {
@@ -525,9 +522,4 @@ export function unmount(vnode, parentVNode, skipRemove) {
 	}
 
 	vnode._component = vnode._parent = vnode._dom = UNDEFINED;
-}
-
-/** The `.render()` method for a PFC backing instance. */
-function doRender(props, state, context) {
-	return this.constructor(props, context);
 }

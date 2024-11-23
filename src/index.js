@@ -9,5 +9,5 @@ export {
 export { BaseComponent as Component } from './component';
 export { cloneElement } from './clone-element';
 export { createContext } from './create-context';
-export { toChildArray } from './diff/children';
+export { toChildArray } from './diff/operations';
 export { default as options } from './options';
