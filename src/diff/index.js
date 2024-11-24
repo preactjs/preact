@@ -11,12 +11,13 @@ import { diffChildren } from './children';
 import { setProperty } from './props';
 import { assign, isArray, slice } from '../util';
 import options from '../options';
+import { TYPE_CLASS, TYPE_FUNCTION } from '../tree';
 
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
  * @param {PreactElement} parentDom The parent of the DOM element
+ * @param {Internal} internal The backing node.
  * @param {VNode} newVNode The new virtual node
- * @param {VNode} oldVNode The old virtual node
  * @param {object} globalContext The current context object. Modified by
  * getChildContext
  * @param {string} namespace Current namespace of the DOM node (HTML, SVG, or MathML)
@@ -32,8 +33,8 @@ import options from '../options';
  */
 export function diff(
 	parentDom,
+	internal,
 	newVNode,
-	oldVNode,
 	globalContext,
 	namespace,
 	excessDomChildren,
@@ -44,7 +45,8 @@ export function diff(
 ) {
 	/** @type {any} */
 	let tmp,
-		newType = newVNode.type;
+		newType = newVNode.type,
+		oldVNode = internal.vnode;
 
 	// When passing through createElement it assigns the object
 	// constructor as undefined. This to prevent JSON-injection.
@@ -59,13 +61,11 @@ export function diff(
 
 	if ((tmp = options._diff)) tmp(newVNode);
 
-	outer: if (typeof newType == 'function') {
+	outer: if (internal.flags & TYPE_FUNCTION || internal.flags & TYPE_CLASS) {
 		try {
 			let c, isNew, oldProps, oldState, snapshot, clearProcessingException;
 			let newProps = newVNode.props;
-			const isClassComponent =
-				'prototype' in newType && newType.prototype.render;
-
+			const isClassComponent = !!(internal.flags & TYPE_CLASS);
 			// Necessary for createContext api. Setting this property will pass
 			// the context value as `this.context` just for this component.
 			tmp = newType.contextType;
@@ -202,6 +202,7 @@ export function diff(
 			c.props = newProps;
 			c._parentDom = parentDom;
 			c._force = false;
+			c._internal = internal;
 
 			let renderHook = options._render,
 				count = 0;
@@ -285,7 +286,7 @@ export function diff(
 					newVNode._dom = oldDom;
 				} else {
 					for (let i = excessDomChildren.length; i--; ) {
-						removeNode(excessDomChildren[i]);
+						if (excessDomChildren[i]) excessDomChildren[i].remove();
 					}
 				}
 			} else {
@@ -296,15 +297,17 @@ export function diff(
 		}
 	} else if (
 		excessDomChildren == null &&
+		newVNode._dom &&
 		newVNode._original === oldVNode._original
 	) {
 		newVNode._children = oldVNode._children;
 		newVNode._dom = oldVNode._dom;
 	} else {
+		console.log('diffElementNodes');
 		oldDom = newVNode._dom = diffElementNodes(
 			oldVNode._dom,
+			internal,
 			newVNode,
-			oldVNode,
 			globalContext,
 			namespace,
 			excessDomChildren,
@@ -316,6 +319,8 @@ export function diff(
 
 	if ((tmp = options.diffed)) tmp(newVNode);
 
+	internal.vnode = newVNode;
+	newVNode._internal = internal;
 	return newVNode._flags & MODE_SUSPENDED ? undefined : oldDom;
 }
 
@@ -350,8 +355,8 @@ export function commitRoot(commitQueue, root, refQueue) {
  * Diff two virtual nodes representing DOM element
  * @param {PreactElement} dom The DOM element representing the virtual nodes
  * being diffed
+ * @param {Internal} internal The backing internal node.
  * @param {VNode} newVNode The new virtual node
- * @param {VNode} oldVNode The old virtual node
  * @param {object} globalContext The current context object
  * @param {string} namespace Current namespace of the DOM node (HTML, SVG, or MathML)
  * @param {Array<PreactElement>} excessDomChildren
@@ -363,8 +368,8 @@ export function commitRoot(commitQueue, root, refQueue) {
  */
 function diffElementNodes(
 	dom,
+	internal,
 	newVNode,
-	oldVNode,
 	globalContext,
 	namespace,
 	excessDomChildren,
@@ -372,7 +377,8 @@ function diffElementNodes(
 	isHydrating,
 	refQueue
 ) {
-	let oldProps = oldVNode.props;
+	let oldVNode = internal.vnode;
+	let oldProps = oldVNode.props || EMPTY_OBJ;
 	let newProps = newVNode.props;
 	let nodeType = /** @type {string} */ (newVNode.type);
 	/** @type {any} */

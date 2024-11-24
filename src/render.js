@@ -3,6 +3,7 @@ import { commitRoot, diff } from './diff/index';
 import { createElement, Fragment } from './create-element';
 import options from './options';
 import { slice } from './util';
+import { createInternal } from './tree';
 
 /**
  * Render a Preact virtual node into a DOM element
@@ -27,16 +28,17 @@ export function render(vnode, parentDom, replaceNode) {
 	let oldVNode = isHydrating ? null : parentDom._children;
 
 	vnode = parentDom._children = createElement(Fragment, null, [vnode]);
+	const internal = createInternal(oldVNode || vnode);
 
 	// List of effects that need to be called after diffing.
 	let commitQueue = [],
 		refQueue = [];
 	diff(
 		parentDom,
+		internal,
 		// Determine the new vnode tree and store it on the DOM element on
 		// our custom `_children` property.
 		vnode,
-		oldVNode || EMPTY_OBJ,
 		EMPTY_OBJ,
 		parentDom.namespaceURI,
 		oldVNode

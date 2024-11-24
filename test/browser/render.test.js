@@ -26,7 +26,7 @@ function getAttributes(node) {
 
 const isIE11 = /Trident\//.test(navigator.userAgent);
 
-describe('render()', () => {
+describe.only('render()', () => {
 	let scratch, rerender;
 
 	let resetAppendChild;
@@ -79,7 +79,7 @@ describe('render()', () => {
 		expect(scratch.innerHTML).to.eql(`<div>Good</div>`);
 	});
 
-	it('should render % width and height on img correctly', () => {
+	it.only('should render % width and height on img correctly', () => {
 		render(<img width="100%" height="100%" />, scratch);
 		expect(scratch.innerHTML).to.eql(`<img width="100%" height="100%">`);
 	});

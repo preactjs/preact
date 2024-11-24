@@ -133,8 +133,8 @@ function renderComponent(component) {
 
 		diff(
 			component._parentDom,
+			component._internal,
 			newVNode,
-			oldVNode,
 			component._globalContext,
 			component._parentDom.namespaceURI,
 			oldVNode._flags & MODE_HYDRATE ? [oldDom] : null,

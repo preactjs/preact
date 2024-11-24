@@ -139,6 +139,15 @@ declare global {
 	};
 	type Ref<T> = RefObject<T> | RefCallback<T>;
 
+	/**
+	 * An Internal is a persistent backing node within Preact's virtual DOM tree.
+	 * Think of an Internal like a long-lived VNode with stored data and tree linkages.
+	 */
+	export interface Internal<P = {}> {
+		vnode: VNode;
+		flags: number;
+	}
+
 	export interface VNode<P = {}> extends preact.VNode<P> {
 		// Redefine type here using our internal ComponentType type, and specify
 		// string has an undefined `defaultProps` property to make TS happy
@@ -157,6 +166,7 @@ declare global {
 		_original: number;
 		_index: number;
 		_flags: number;
+		_internal: Internal;
 	}
 
 	export interface Component<P = {}, S = {}> extends preact.Component<P, S> {
@@ -164,6 +174,7 @@ declare global {
 		constructor: ComponentType<P>;
 		state: S; // Override Component["state"] to not be readonly for internal use, specifically Hooks
 
+		_internal: Internal;
 		_dirty: boolean;
 		_force?: boolean;
 		_renderCallbacks: Array<() => void>; // Only class components

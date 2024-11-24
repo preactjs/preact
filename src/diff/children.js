@@ -9,6 +9,7 @@ import {
 } from '../constants';
 import { isArray } from '../util';
 import { getDomSibling } from '../component';
+import { createInternal } from '../tree';
 
 /**
  * Diff the children of a virtual node
@@ -46,8 +47,8 @@ export function diffChildren(
 	refQueue
 ) {
 	let i,
-		/** @type {VNode} */
-		oldVNode,
+		/** @type {Internal} */
+		internal,
 		/** @type {VNode} */
 		childVNode,
 		/** @type {PreactElement} */
@@ -76,19 +77,23 @@ export function diffChildren(
 		// At this point, constructNewChildrenArray has assigned _index to be the
 		// matchingIndex for this VNode's oldVNode (or -1 if there is no oldVNode).
 		if (childVNode._index === -1) {
-			oldVNode = EMPTY_OBJ;
+			internal = createInternal(childVNode);
 		} else {
-			oldVNode = oldChildren[childVNode._index] || EMPTY_OBJ;
+			internal =
+				oldChildren[childVNode._index] &&
+				oldChildren[childVNode._index]._internal;
+			if (!internal) internal = createInternal(childVNode);
 		}
 
 		// Update childVNode._index to its final index
 		childVNode._index = i;
+		const oldVNode = internal.vnode;
 
 		// Morph the old element into the new one, but don't append it to the dom yet
 		let result = diff(
 			parentDom,
+			internal,
 			childVNode,
-			oldVNode,
 			globalContext,
 			namespace,
 			excessDomChildren,

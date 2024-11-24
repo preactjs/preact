@@ -57,6 +57,7 @@
       "$_flags": "__u",
       "$__html": "__html",
       "$_parent": "__",
+      "$_internal": "___i",
       "$_pendingError": "__E",
       "$_processingException": "__",
       "$_globalContext": "__n",
