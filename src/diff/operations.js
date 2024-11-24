@@ -2,10 +2,10 @@ import { getDomSibling } from '../component';
 import { isArray } from '../util';
 
 /**
- * @param {VNode} parentVNode
- * @param {PreactElement} oldDom
- * @param {PreactElement} parentDom
- * @returns {PreactElement}
+ * @param {import('../internal').VNode} parentVNode
+ * @param {import('../internal').PreactElement} oldDom
+ * @param {import('../internal').PreactElement} parentDom
+ * @returns {import('../internal').PreactElement}
  */
 export function insert(parentVNode, oldDom, parentDom) {
 	// Note: VNodes in nested suspended trees may be missing _children.
@@ -41,9 +41,9 @@ export function insert(parentVNode, oldDom, parentDom) {
 
 /**
  * Flatten and loop through the children of a virtual node
- * @param {ComponentChildren} children The unflattened children of a virtual
+ * @param {import('../internal').ComponentChildren} children The unflattened children of a virtual
  * node
- * @returns {VNode[]}
+ * @returns {import('../internal').VNode[]}
  */
 export function toChildArray(children, out) {
 	out = out || [];

@@ -16,6 +16,42 @@ export enum HookType {
 	// Not a real hook, but the devtools treat is as such
 	useDebugvalue = 11
 }
+/**
+ * An Internal is a persistent backing node within Preact's virtual DOM tree.
+ * Think of an Internal like a long-lived VNode with stored data and tree linkages.
+ */
+export interface Internal<P = {}> {
+	type: string | ComponentType<P>;
+	/** The props object for Elements/Components, and the string contents for Text */
+	props: (P & { children: ComponentChildren }) | string | number;
+	key: any;
+	ref: Ref<any> | null;
+
+	/** Bitfield containing information about the Internal or its component. */
+	flags: number;
+	/** Polymorphic property to store extensions like hooks on */
+	data: object | PreactNode;
+	/** The function that triggers in-place re-renders for an internal */
+	// rerender: (internal: Internal) => void;
+
+	/** children Internal nodes */
+	_children: Internal[];
+	/** next sibling Internal node */
+	_parent: Internal;
+	/** most recent vnode ID */
+	_vnodeId: number;
+	/**
+	 * Associated DOM element for the Internal, or its nearest realized descendant.
+	 * For Fragments, this is the first DOM child.
+	 */
+	/** The component instance for which this is a backing Internal node */
+	_component: Component | null;
+	/** This Internal's distance from the tree root */
+	_depth: number | null;
+	/** Callbacks to invoke when this internal commits */
+	_commitCallbacks: Array<() => void>;
+	_stateCallbacks: Array<() => void>; // Only class components
+}
 
 export interface DevSource {
 	fileName: string;
@@ -62,8 +98,7 @@ export type ComponentChild =
 	| undefined;
 export type ComponentChildren = ComponentChild[] | ComponentChild;
 
-export interface FunctionComponent<P = {}>
-	extends preact.FunctionComponent<P> {
+export interface FunctionComponent<P = {}> extends preact.FunctionComponent<P> {
 	// Internally, createContext uses `contextType` on a Function component to
 	// implement the Consumer component
 	contextType?: PreactContext;
@@ -112,7 +147,6 @@ export interface PreactElement extends preact.ContainerNode {
 	// nextSibling required for inserting nodes
 	readonly nextSibling: ContainerNode | null;
 	readonly firstChild: ContainerNode | null;
-
 
 	// Used to match DOM nodes to VNodes during hydration. Note: doesn't exist
 	// on Text nodes

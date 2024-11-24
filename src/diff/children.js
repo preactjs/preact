@@ -11,6 +11,7 @@ import { isArray } from '../util';
 import { getDomSibling } from '../component';
 import { mount } from './mount';
 import { insert } from './operations';
+import { createInternal } from '../tree';
 
 /**
  * @typedef {import('../internal').ComponentChildren} ComponentChildren
@@ -110,9 +111,11 @@ export function diffChildren(
 				refQueue
 			);
 		} else {
+			// TODO: temp
+			const internal = createInternal(childVNode, null);
 			result = mount(
 				parentDom,
-				childVNode,
+				internal,
 				globalContext,
 				namespace,
 				excessDomChildren,
