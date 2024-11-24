@@ -1781,10 +1781,10 @@ export namespace JSXInternal {
 		height?: Signalish<number | string | undefined>;
 		indeterminate?: Signalish<boolean | undefined>;
 		list?: Signalish<string | undefined>;
-		max?: Signalish<string | undefined>;
+		max?: Signalish<number | string | undefined>;
 		maxlength?: Signalish<number | undefined>;
 		maxLength?: Signalish<number | undefined>;
-		min?: Signalish<string | undefined>;
+		min?: Signalish<number | string | undefined>;
 		minlength?: Signalish<number | undefined>;
 		minLength?: Signalish<number | undefined>;
 		multiple?: Signalish<boolean | undefined>;
