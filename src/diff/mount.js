@@ -11,18 +11,29 @@ import { insert } from './operations';
 import { setProperty } from './props';
 import { assign, isArray, slice } from '../util';
 import options from '../options';
+import {
+	createInternal,
+	MODE_MATH,
+	MODE_SVG,
+	TYPE_CLASS,
+	TYPE_COMPONENT,
+	TYPE_ELEMENT,
+	TYPE_FUNCTION,
+	TYPE_INVALID,
+	TYPE_TEXT
+} from '../tree';
 
 /**
  * Diff two virtual nodes and apply proper changes to the DOM
- * @param {PreactElement} parentDom The parent of the DOM element
- * @param {VNode} newVNode The new virtual node
+ * @param {import('../internal').PreactElement} parentDom The parent of the DOM element
+ * @param {import('../internal').Internal} internal The backing node.
  * @param {object} globalContext The current context object. Modified by
  * getChildContext
  * @param {string} namespace Current namespace of the DOM node (HTML, SVG, or MathML)
- * @param {Array<PreactElement>} excessDomChildren
- * @param {Array<Component>} commitQueue List of components which have callbacks
+ * @param {Array<import('../internal').PreactElement>} excessDomChildren
+ * @param {Array<import('../internal').Component>} commitQueue List of components which have callbacks
  * to invoke in commitRoot
- * @param {PreactElement} oldDom The current attached DOM element any new dom
+ * @param {import('../internal').PreactElement} oldDom The current attached DOM element any new dom
  * elements should be placed around. Likely `null` on first render (except when
  * hydrating). Can be a sibling DOM element when diffing Fragments that have
  * siblings. In most cases, it starts out as `oldChildren[0]._dom`.
@@ -31,7 +42,7 @@ import options from '../options';
  */
 export function mount(
 	parentDom,
-	newVNode,
+	internal,
 	globalContext,
 	namespace,
 	excessDomChildren,
@@ -40,22 +51,26 @@ export function mount(
 	isHydrating,
 	refQueue
 ) {
+	// @ts-expect-error
+	const newVNode = internal.vnode;
+
 	// When passing through createElement it assigns the object
 	// constructor as undefined. This to prevent JSON-injection.
-	if (newVNode.constructor !== UNDEFINED) return null;
+	if (internal.flags & TYPE_INVALID) return null;
 
 	/** @type {any} */
-	let tmp,
-		newType = newVNode.type;
+	let tmp;
 
 	if ((tmp = options._diff)) tmp(newVNode);
 
-	if (typeof newType == 'function') {
+	if (internal.flags & TYPE_COMPONENT) {
 		try {
 			let c,
-				newProps = newVNode.props;
-			const isClassComponent =
-				'prototype' in newType && newType.prototype.render;
+				newProps = internal.props,
+				newType = /** @type {import('../internal').ComponentType} */ (
+					internal.type
+				);
+			const isClassComponent = !!(internal.flags & TYPE_CLASS);
 
 			// Necessary for createContext api. Setting this property will pass
 			// the context value as `this.context` just for this component.
@@ -69,11 +84,17 @@ export function mount(
 
 			// Instantiate the new component
 			if (isClassComponent) {
-				// @ts-expect-error The check above verifies that newType is suppose to be constructed
-				newVNode._component = c = new newType(newProps, componentContext); // eslint-disable-line new-cap
+				internal._component =
+					newVNode._component =
+					c =
+						// @ts-expect-error The check above verifies that newType is suppose to be constructed
+						new newType(newProps, componentContext); // eslint-disable-line new-cap
 			} else {
-				// @ts-expect-error Trust me, Component implements the interface we want
-				newVNode._component = c = new BaseComponent(newProps, componentContext);
+				// @ts-expect-error The check above verifies that newType is suppose to be constructed
+				internal._component =
+					newVNode._component =
+					c =
+						new BaseComponent(newProps, componentContext);
 				c.constructor = newType;
 				c.render = doRender;
 			}
@@ -156,6 +177,7 @@ export function mount(
 			let renderResult = isTopLevelFragment ? tmp.props.children : tmp;
 
 			oldDom = mountChildren(
+				internal,
 				parentDom,
 				isArray(renderResult) ? renderResult : [renderResult],
 				newVNode,
@@ -200,7 +222,7 @@ export function mount(
 		}
 	} else {
 		oldDom = newVNode._dom = mountElementNode(
-			newVNode,
+			internal,
 			globalContext,
 			namespace,
 			excessDomChildren,
@@ -217,18 +239,18 @@ export function mount(
 
 /**
  * Diff two virtual nodes representing DOM element
- * @param {VNode} newVNode The new virtual node
+ * @param {import('../internal').Internal} internal The new virtual node
  * @param {object} globalContext The current context object
  * @param {string} namespace Current namespace of the DOM node (HTML, SVG, or MathML)
- * @param {Array<PreactElement>} excessDomChildren
- * @param {Array<Component>} commitQueue List of components which have callbacks
+ * @param {Array<import('../internal').PreactElement>} excessDomChildren
+ * @param {Array<import('../internal').Component>} commitQueue List of components which have callbacks
  * to invoke in commitRoot
  * @param {boolean} isHydrating Whether or not we are in hydration
  * @param {any[]} refQueue an array of elements needed to invoke refs
- * @returns {PreactElement}
+ * @returns {import('../internal').PreactElement}
  */
 function mountElementNode(
-	newVNode,
+	internal,
 	globalContext,
 	namespace,
 	excessDomChildren,
@@ -236,24 +258,26 @@ function mountElementNode(
 	isHydrating,
 	refQueue
 ) {
-	/** @type {PreactElement} */
+	// @ts-expect-error
+	const newVNode = internal.vnode;
+	/** @type {import('../internal').PreactElement} */
 	let dom;
 	let oldProps = EMPTY_OBJ;
-	let newProps = newVNode.props;
-	let nodeType = /** @type {string} */ (newVNode.type);
+	let newProps = internal.props;
+	let nodeType = /** @type {string} */ (internal.type);
 	/** @type {any} */
 	let i;
 	/** @type {{ __html?: string }} */
 	let newHtml;
-	/** @type {ComponentChildren} */
+	/** @type {import('../internal').ComponentChildren} */
 	let newChildren;
 	let value;
 	let inputValue;
 	let checked;
 
 	// Tracks entering and exiting namespaces when descending through the tree.
-	if (nodeType === 'svg') namespace = 'http://www.w3.org/2000/svg';
-	else if (nodeType === 'math')
+	if (internal.flags & MODE_SVG) namespace = 'http://www.w3.org/2000/svg';
+	else if (internal.flags & MODE_MATH)
 		namespace = 'http://www.w3.org/1998/Math/MathML';
 	else if (!namespace) namespace = 'http://www.w3.org/1999/xhtml';
 
@@ -277,7 +301,7 @@ function mountElementNode(
 	}
 
 	if (dom == null) {
-		if (nodeType === null) {
+		if (internal.flags & TYPE_TEXT) {
 			return document.createTextNode(newProps);
 		}
 
@@ -298,7 +322,7 @@ function mountElementNode(
 		excessDomChildren = null;
 	}
 
-	if (nodeType === null) {
+	if (internal.flags & TYPE_TEXT) {
 		// During hydration, we still have to split merged text from SSR'd HTML.
 		dom.data = newProps;
 	} else {
@@ -361,6 +385,7 @@ function mountElementNode(
 			newVNode._children = [];
 		} else {
 			mountChildren(
+				internal,
 				dom,
 				isArray(newChildren) ? newChildren : [newChildren],
 				newVNode,
@@ -416,18 +441,19 @@ function doRender(props, _state, context) {
 
 /**
  * Diff the children of a virtual node
- * @param {PreactElement} parentDom The DOM element whose children are being
+ * @param {import('../internal').Internal} internal The DOM element whose children are being
+ * @param {import('../internal').PreactElement} parentDom The DOM element whose children are being
  * diffed
- * @param {ComponentChildren[]} renderResult
- * @param {VNode} newParentVNode The new virtual node whose children should be
+ * @param {import('../internal').ComponentChildren[]} renderResult
+ * @param {import('../internal').VNode} newParentVNode The new virtual node whose children should be
  * diff'ed against oldParentVNode
  * @param {object} globalContext The current context object - modified by
  * getChildContext
  * @param {string} namespace Current namespace of the DOM node (HTML, SVG, or MathML)
- * @param {Array<PreactElement>} excessDomChildren
- * @param {Array<Component>} commitQueue List of components which have callbacks
+ * @param {Array<import('../internal').PreactElement>} excessDomChildren
+ * @param {Array<import('../internal').Component>} commitQueue List of components which have callbacks
  * to invoke in commitRoot
- * @param {PreactElement} oldDom The current attached DOM element any new dom
+ * @param {import('../internal').PreactElement} oldDom The current attached DOM element any new dom
  * elements should be placed around. Likely `null` on first render (except when
  * hydrating). Can be a sibling DOM element when diffing Fragments that have
  * siblings. In most cases, it starts out as `oldChildren[0]._dom`.
@@ -435,6 +461,7 @@ function doRender(props, _state, context) {
  * @param {any[]} refQueue an array of elements needed to invoke refs
  */
 function mountChildren(
+	internal,
 	parentDom,
 	renderResult,
 	newParentVNode,
@@ -447,11 +474,11 @@ function mountChildren(
 	refQueue
 ) {
 	let i,
-		/** @type {VNode} */
+		/** @type {import('../internal').VNode} */
 		childVNode,
-		/** @type {PreactElement} */
+		/** @type {import('../internal').PreactElement} */
 		newDom,
-		/** @type {PreactElement} */
+		/** @type {import('../internal').PreactElement} */
 		firstChildDom;
 
 	let newChildrenLength = renderResult.length;
@@ -517,10 +544,11 @@ function mountChildren(
 		childVNode._parent = newParentVNode;
 		childVNode._depth = newParentVNode._depth + 1;
 
+		const childInternal = createInternal(childVNode, internal);
 		// Morph the old element into the new one, but don't append it to the dom yet
 		const result = mount(
 			parentDom,
-			childVNode,
+			childInternal,
 			globalContext,
 			namespace,
 			excessDomChildren,
@@ -544,9 +572,13 @@ function mountChildren(
 			firstChildDom = newDom;
 		}
 
-		if (typeof childVNode.type != 'function') {
+		if (childInternal.flags & TYPE_ELEMENT || childInternal.flags & TYPE_TEXT) {
 			oldDom = insert(childVNode, oldDom, parentDom);
-		} else if (typeof childVNode.type == 'function' && result !== UNDEFINED) {
+		} else if (
+			(childInternal.flags & TYPE_FUNCTION ||
+				childInternal.flags & TYPE_CLASS) &&
+			result !== UNDEFINED
+		) {
 			oldDom = result;
 		} else if (newDom) {
 			oldDom = newDom.nextSibling;
