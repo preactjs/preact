@@ -1,5 +1,5 @@
 import { setupRerender } from 'preact/test-utils';
-import { createElement, render, Component, options } from 'preact';
+import { createElement, render, Component, options, Fragment } from 'preact';
 import {
 	setupScratch,
 	teardown,
@@ -1883,5 +1883,23 @@ describe('render()', () => {
 				`<div>${aa.map(n => `<div>${n}</div>`).join('')}</div>`
 			);
 		}
+	});
+
+	it('should work with document', () => {
+		document.textContent = '';
+		const App = () => (
+			<Fragment>
+				<head>
+					<title>Test</title>
+				</head>
+				<body>
+					<p>Test</p>
+				</body>
+			</Fragment>
+		);
+		render(<App />, document);
+		expect(document.documentElement.innerHTML).to.equal(
+			'<head><title>Test</title></head><body><p>Test</p></body>\n'
+		);
 	});
 });
