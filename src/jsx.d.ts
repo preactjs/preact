@@ -1624,7 +1624,7 @@ export namespace JSXInternal {
 
 	interface DelHTMLAttributes<T extends EventTarget> extends HTMLAttributes<T> {
 		cite?: Signalish<string | undefined>;
-		datetime: Signalish<string | undefined>;
+		datetime?: Signalish<string | undefined>;
 		dateTime?: Signalish<string | undefined>;
 	}
 
