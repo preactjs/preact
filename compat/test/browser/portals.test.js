@@ -4,7 +4,8 @@ import React, {
 	createPortal,
 	useState,
 	Component,
-	useEffect
+	useEffect,
+	Fragment
 } from 'preact/compat';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { setupRerender, act } from 'preact/test-utils';
@@ -62,6 +63,35 @@ describe('Portal', () => {
 		setFalse();
 		rerender();
 		expect(scratch.innerHTML).to.equal('<div><p>Hello</p></div>');
+	});
+
+	it('should order portal children well', () => {
+		let bump;
+
+		function Modal() {
+			const [state, setState] = useState(0);
+			bump = () => setState(() => 1);
+
+			return (
+				<Fragment>
+					{state === 1 && <div>top</div>}
+					<div>middle</div>
+					<div>bottom</div>
+				</Fragment>
+			);
+		}
+
+		function Foo(props) {
+			return createPortal(<Modal />, scratch);
+		}
+		render(<Foo />, scratch);
+		expect(scratch.innerHTML).to.equal('<div>middle</div><div>bottom</div>');
+
+		bump();
+		rerender();
+		expect(scratch.innerHTML).to.equal(
+			'<div>top</div><div>middle</div><div>bottom</div>'
+		);
 	});
 
 	it('should toggle the portal', () => {

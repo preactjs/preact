@@ -40,13 +40,14 @@ function Portal(props) {
 			parentNode: container,
 			childNodes: [],
 			contains: () => true,
+			// Technically this isn't needed
 			appendChild(child) {
 				this.childNodes.push(child);
 				_this._container.appendChild(child);
 			},
 			insertBefore(child, before) {
 				this.childNodes.push(child);
-				_this._container.appendChild(child);
+				_this._container.insertBefore(child, before);
 			},
 			removeChild(child) {
 				this.childNodes.splice(this.childNodes.indexOf(child) >>> 1, 1);
