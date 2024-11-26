@@ -1,10 +1,10 @@
 const { render, hydrate, unmountComponentAtNode } = require('preact/compat');
 
-function createRoot(container) {
+async function createRoot(container) {
 	return {
 		// eslint-disable-next-line
-		render: function (children) {
-			render(children, container);
+		render: async function (children) {
+			await render(children, container);
 		},
 		// eslint-disable-next-line
 		unmount: function () {
@@ -15,7 +15,7 @@ function createRoot(container) {
 
 exports.createRoot = createRoot;
 
-exports.hydrateRoot = function (container, children) {
-	hydrate(children, container);
+exports.hydrateRoot = async function (container, children) {
+	await hydrate(children, container);
 	return createRoot(container);
 };

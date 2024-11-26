@@ -120,7 +120,7 @@ export function getDomSibling(vnode, childIndex) {
  * Trigger in-place re-rendering of a component.
  * @param {Component} component The component to rerender
  */
-function renderComponent(component) {
+async function renderComponent(component) {
 	let oldVNode = component._vnode,
 		oldDom = oldVNode._dom,
 		commitQueue = [],
@@ -131,7 +131,7 @@ function renderComponent(component) {
 		newVNode._original = oldVNode._original + 1;
 		if (options.vnode) options.vnode(newVNode);
 
-		diff(
+		await diff(
 			component._parentDom,
 			newVNode,
 			oldVNode,
@@ -146,7 +146,7 @@ function renderComponent(component) {
 
 		newVNode._original = oldVNode._original;
 		newVNode._parent._children[newVNode._index] = newVNode;
-		commitRoot(commitQueue, newVNode, refQueue);
+		await commitRoot(commitQueue, newVNode, refQueue);
 
 		if (newVNode._dom != oldDom) {
 			updateParentDomPointers(newVNode);
@@ -218,7 +218,7 @@ export function enqueueRender(c) {
 const depthSort = (a, b) => a._vnode._depth - b._vnode._depth;
 
 /** Flush the render queue by rerendering all queued components */
-function process() {
+async function process() {
 	let c;
 	rerenderQueue.sort(depthSort);
 	// Don't update `renderCount` yet. Keep its value non-zero to prevent unnecessary
@@ -226,7 +226,7 @@ function process() {
 	while ((c = rerenderQueue.shift())) {
 		if (c._dirty) {
 			let renderQueueLength = rerenderQueue.length;
-			renderComponent(c);
+			await renderComponent(c);
 			if (rerenderQueue.length > renderQueueLength) {
 				// When i.e. rerendering a provider additional new items can be injected, we want to
 				// keep the order from top to bottom with those new items so we can handle them in a

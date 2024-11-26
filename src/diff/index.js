@@ -30,7 +30,7 @@ import options from '../options';
  * @param {boolean} isHydrating Whether or not we are in hydration
  * @param {any[]} refQueue an array of elements needed to invoke refs
  */
-export function diff(
+export async function diff(
 	parentDom,
 	newVNode,
 	oldVNode,
@@ -244,7 +244,11 @@ export function diff(
 				tmp != null && tmp.type === Fragment && tmp.key == null;
 			let renderResult = isTopLevelFragment ? tmp.props.children : tmp;
 
-			oldDom = diffChildren(
+			if (renderResult && renderResult.then) {
+				renderResult = await renderResult;
+			}
+
+			oldDom = await diffChildren(
 				parentDom,
 				isArray(renderResult) ? renderResult : [renderResult],
 				newVNode,
@@ -303,7 +307,7 @@ export function diff(
 		newVNode._children = oldVNode._children;
 		newVNode._dom = oldVNode._dom;
 	} else {
-		oldDom = newVNode._dom = diffElementNodes(
+		oldDom = newVNode._dom = await diffElementNodes(
 			oldVNode._dom,
 			newVNode,
 			oldVNode,
@@ -326,26 +330,26 @@ export function diff(
  * which have callbacks to invoke in commitRoot
  * @param {VNode} root
  */
-export function commitRoot(commitQueue, root, refQueue) {
+export async function commitRoot(commitQueue, root, refQueue) {
 	for (let i = 0; i < refQueue.length; i++) {
 		applyRef(refQueue[i], refQueue[++i], refQueue[++i]);
 	}
 
 	if (options._commit) options._commit(root, commitQueue);
 
-	commitQueue.some(c => {
+	for (const c of commitQueue) {
 		try {
 			// @ts-expect-error Reuse the commitQueue variable here so the type changes
 			commitQueue = c._renderCallbacks;
 			c._renderCallbacks = [];
-			commitQueue.some(cb => {
+			for (const cb of commitQueue) {
 				// @ts-expect-error See above comment on commitQueue
-				cb.call(c);
-			});
+				await cb.call(c);
+			}
 		} catch (e) {
 			options._catchError(e, c._vnode);
 		}
-	});
+	}
 }
 
 /**
@@ -363,7 +367,7 @@ export function commitRoot(commitQueue, root, refQueue) {
  * @param {any[]} refQueue an array of elements needed to invoke refs
  * @returns {PreactElement}
  */
-function diffElementNodes(
+async function diffElementNodes(
 	dom,
 	newVNode,
 	oldVNode,
@@ -510,7 +514,7 @@ function diffElementNodes(
 		} else {
 			if (oldHtml) dom.innerHTML = '';
 
-			diffChildren(
+			await diffChildren(
 				dom,
 				isArray(newChildren) ? newChildren : [newChildren],
 				newVNode,

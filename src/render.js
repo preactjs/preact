@@ -11,7 +11,7 @@ import { slice } from './util';
  * @param {PreactElement | object} [replaceNode] Optional: Attempt to re-use an
  * existing DOM tree rooted at `replaceNode`
  */
-export function render(vnode, parentDom, replaceNode) {
+export async function render(vnode, parentDom, replaceNode) {
 	// https://github.com/preactjs/preact/issues/3794
 	if (parentDom === document) {
 		parentDom = document.documentElement;
@@ -39,7 +39,7 @@ export function render(vnode, parentDom, replaceNode) {
 	// List of effects that need to be called after diffing.
 	let commitQueue = [],
 		refQueue = [];
-	diff(
+	await diff(
 		parentDom,
 		// Determine the new vnode tree and store it on the DOM element on
 		// our custom `_children` property.
@@ -65,7 +65,7 @@ export function render(vnode, parentDom, replaceNode) {
 	);
 
 	// Flush all queued effects
-	commitRoot(commitQueue, vnode, refQueue);
+	await commitRoot(commitQueue, vnode, refQueue);
 }
 
 /**
@@ -73,6 +73,6 @@ export function render(vnode, parentDom, replaceNode) {
  * @param {ComponentChild} vnode The virtual node to render
  * @param {PreactElement} parentDom The DOM element to update
  */
-export function hydrate(vnode, parentDom) {
-	render(vnode, parentDom, hydrate);
+export async function hydrate(vnode, parentDom) {
+	await render(vnode, parentDom, hydrate);
 }
