@@ -1,4 +1,6 @@
-import { ErrorInfo, PreactContext, Ref, RefObject } from '../..';
+// Intentionally not using a relative path to take advantage of
+// the TS version resolution mechanism
+import { ErrorInfo, PreactContext, Ref, RefObject } from 'preact';
 
 type Inputs = ReadonlyArray<unknown>;
 
