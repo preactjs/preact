@@ -9,7 +9,7 @@ import {
 	FunctionComponent,
 	PreactDOMAttributes,
 	VNode
-} from './index';
+} from 'preact';
 
 type Defaultize<Props, Defaults> =
 	// Distribute over unions
