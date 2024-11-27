@@ -232,6 +232,9 @@ export namespace JSXInternal {
 		'horiz-adv-x'?: Signalish<number | string | undefined>;
 		horizOriginX?: Signalish<number | string | undefined>;
 		'horiz-origin-x'?: Signalish<number | string | undefined>;
+		href?: Signalish<string | undefined>;
+		hreflang?: Signalish<string | undefined>;
+		hrefLang?: Signalish<string | undefined>;
 		ideographic?: Signalish<number | string | undefined>;
 		imageRendering?: Signalish<number | string | undefined>;
 		'image-rendering'?: Signalish<number | string | undefined>;
@@ -1539,6 +1542,7 @@ export namespace JSXInternal {
 		extends HTMLAttributes<T> {
 		download?: Signalish<any>;
 		href?: Signalish<string | undefined>;
+		hreflang?: Signalish<string | undefined>;
 		hrefLang?: Signalish<string | undefined>;
 		media?: Signalish<string | undefined>;
 		ping?: Signalish<string | undefined>;
@@ -1555,6 +1559,7 @@ export namespace JSXInternal {
 		coords?: Signalish<string | undefined>;
 		download?: Signalish<any>;
 		href?: Signalish<string | undefined>;
+		hreflang?: Signalish<string | undefined>;
 		hrefLang?: Signalish<string | undefined>;
 		media?: Signalish<string | undefined>;
 		referrerpolicy?: Signalish<HTMLAttributeReferrerPolicy | undefined>;
