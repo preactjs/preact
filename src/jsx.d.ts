@@ -383,6 +383,7 @@ export namespace JSXInternal {
 		transform?: Signalish<string | undefined>;
 		transformOrigin?: Signalish<string | undefined>;
 		'transform-origin'?: Signalish<string | undefined>;
+		type?: Signalish<string | undefined>;
 		u1?: Signalish<number | string | undefined>;
 		u2?: Signalish<number | string | undefined>;
 		underlinePosition?: Signalish<number | string | undefined>;

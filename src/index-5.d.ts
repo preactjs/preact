@@ -226,7 +226,7 @@ export function createElement<T extends HTMLElement>(
 	ClassAttributes<T> & JSXInternal.HTMLAttributes & JSXInternal.SVGAttributes
 >;
 export function createElement<P>(
-	type: ComponentType<P>,
+	type: ComponentType<P> | string,
 	props: (Attributes & P) | null,
 	...children: ComponentChildren[]
 ): VNode<P>;
@@ -276,7 +276,7 @@ export function h<T extends HTMLElement>(
 	| null
 >;
 export function h<P>(
-	type: ComponentType<P>,
+	type: ComponentType<P> | string,
 	props: (Attributes & P) | null,
 	...children: ComponentChildren[]
 ): VNode<Attributes & P>;
