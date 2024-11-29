@@ -378,3 +378,6 @@ const onSubmit = (e: h.JSX.TargetedSubmitEvent<HTMLFormElement>) => {};
 <form onSubmit={e => e.currentTarget.elements} />;
 createElement('form', { onSubmit: onSubmit });
 h('form', { onSubmit: onSubmit });
+
+h('option', { value: 'foo' });
+createElement('option', { value: 'foo' });

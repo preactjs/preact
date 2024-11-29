@@ -210,7 +210,7 @@ export function createElement<
 	P extends JSXInternal.SVGAttributes<T>,
 	T extends HTMLElement
 >(
-	type: keyof JSXInternal.IntrinsicElements,
+	type: keyof JSXInternal.IntrinsicSVGElements,
 	props: (ClassAttributes<T> & P) | null,
 	...children: ComponentChildren[]
 ): VNode<ClassAttributes<T> & P>;
@@ -226,7 +226,7 @@ export function createElement<T extends HTMLElement>(
 	ClassAttributes<T> & JSXInternal.HTMLAttributes & JSXInternal.SVGAttributes
 >;
 export function createElement<P>(
-	type: ComponentType<P>,
+	type: ComponentType<P> | string,
 	props: (Attributes & P) | null,
 	...children: ComponentChildren[]
 ): VNode<P>;
@@ -257,7 +257,7 @@ export function h<
 	P extends JSXInternal.SVGAttributes<T>,
 	T extends HTMLElement
 >(
-	type: keyof JSXInternal.IntrinsicElements,
+	type: keyof JSXInternal.IntrinsicSVGElements,
 	props: (ClassAttributes<T> & P) | null,
 	...children: ComponentChildren[]
 ): VNode<ClassAttributes<T> & P>;
@@ -276,7 +276,7 @@ export function h<T extends HTMLElement>(
 	| null
 >;
 export function h<P>(
-	type: ComponentType<P>,
+	type: ComponentType<P> | string,
 	props: (Attributes & P) | null,
 	...children: ComponentChildren[]
 ): VNode<Attributes & P>;
