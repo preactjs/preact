@@ -389,7 +389,6 @@ function Checkbox({ onChange }: JSX.HTMLAttributes<HTMLInputElement>) {
 		event: JSX.TargetedEvent<HTMLInputElement>
 	) {
 		onChange?.call(this, event);
-		// ^ Error here
 	}
 
 	return <input onChange={handleChange} />;
