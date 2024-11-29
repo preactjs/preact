@@ -1,4 +1,4 @@
-import { IS_NON_DIMENSIONAL } from '../constants';
+import { IS_NON_DIMENSIONAL, SVG_NAMESPACE } from '../constants';
 import options from '../options';
 
 function setStyle(style, key, value) {
@@ -12,6 +12,8 @@ function setStyle(style, key, value) {
 		style[key] = value + 'px';
 	}
 }
+
+const CAPTURE_REGEX = /(PointerCapture)$|Capture$/i;
 
 // A logical clock to solve issues like https://github.com/preactjs/preact/issues/3927.
 // When the DOM performs an event it leaves micro-ticks in between bubbling up which means that
@@ -64,8 +66,7 @@ export function setProperty(dom, name, value, oldValue, namespace) {
 	}
 	// Benchmark for comparison: https://esbench.com/bench/574c954bdb965b9a00965ac6
 	else if (name[0] === 'o' && name[1] === 'n') {
-		useCapture =
-			name !== (name = name.replace(/(PointerCapture)$|Capture$/i, '$1'));
+		useCapture = name !== (name = name.replace(CAPTURE_REGEX, '$1'));
 
 		// Infer correct casing for DOM built-in events:
 		if (
@@ -98,7 +99,7 @@ export function setProperty(dom, name, value, oldValue, namespace) {
 			);
 		}
 	} else {
-		if (namespace == 'http://www.w3.org/2000/svg') {
+		if (namespace == SVG_NAMESPACE) {
 			// Normalize incorrect prop usage for SVG:
 			// - xlink:href / xlinkHref --> href (xlink:href was removed from SVG and isn't needed)
 			// - className --> class
@@ -167,7 +168,9 @@ function createEventProxy(useCapture) {
 				return;
 			}
 			if (options.event) e = options.event(e);
-			return "handleEvent" in eventHandler ? eventHandler.handleEvent(e) : eventHandler(e);
+			return 'handleEvent' in eventHandler
+				? eventHandler.handleEvent(e)
+				: eventHandler(e);
 		}
 	};
 }
