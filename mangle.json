@@ -71,6 +71,7 @@
       "$_diff": "__b",
       "$_commit": "__c",
       "$_addHookName": "__a",
+      "$_afterRender": "__d",
       "$_render": "__r",
       "$_hook": "__h",
       "$_catchError": "__e",

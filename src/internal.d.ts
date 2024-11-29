@@ -35,6 +35,8 @@ export interface Options extends preact.Options {
 	_commit?(vnode: VNode, commitQueue: Component[]): void;
 	/** Attach a hook that is invoked before a vnode has rendered. */
 	_render?(vnode: VNode): void;
+	/** Attach a hook that is invoked after a vnode has rendered. */
+	_afterRender?(vnode: VNode, oldVNode: VNode): void;
 	/** Attach a hook that is invoked before a hook's state is queried. */
 	_hook?(component: Component, index: number, type: HookType): void;
 	/** Bypass effect execution. Currenty only used in devtools for hooks inspection */

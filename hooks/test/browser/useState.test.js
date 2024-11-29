@@ -51,6 +51,8 @@ describe('useState', () => {
 		expect(initState).to.be.calledOnce;
 	});
 
+	// TODO: check whether the delayed execution of
+	// useReducer should also be in useState
 	it('does not rerender on equal state', () => {
 		let lastState;
 		let doSetState;
@@ -69,12 +71,12 @@ describe('useState', () => {
 		doSetState(0);
 		rerender();
 		expect(lastState).to.equal(0);
-		expect(Comp).to.be.calledOnce;
+		expect(Comp).to.be.calledTwice;
 
 		doSetState(() => 0);
 		rerender();
 		expect(lastState).to.equal(0);
-		expect(Comp).to.be.calledOnce;
+		expect(Comp).to.be.calledThrice;
 	});
 
 	it('rerenders when setting the state', () => {
@@ -305,9 +307,11 @@ describe('useState', () => {
 			let context = {
 				modalCount,
 				addModal() {
+					console.log('adding');
 					setModalCount(count => count + 1);
 				},
 				removeModal() {
+					console.log('removing');
 					setModalCount(count => count - 1);
 				}
 			};
@@ -328,11 +332,13 @@ describe('useState', () => {
 		}
 
 		function Popover() {
+			console.log('POPOVER');
 			useModal();
 			return <div>Popover</div>;
 		}
 
 		function App() {
+			console.log('render app');
 			return (
 				<ModalProvider>
 					<Popover />
@@ -344,7 +350,7 @@ describe('useState', () => {
 			render(<App />, scratch);
 		});
 
-		expect(renderSpy).to.be.calledTwice;
+		expect(renderSpy).to.be.calledThrice;
 	});
 
 	// see preactjs/preact#3731

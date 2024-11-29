@@ -194,11 +194,14 @@ describe('useReducer', () => {
 		const badContextDefault = {};
 		const BadContext = createContext({});
 
-		const Abstraction = ({ reducer, defaultState, children }) => (
-			<BadContext.Provider value={useReducer(reducer, defaultState)}>
-				<Wrapper>{children}</Wrapper>
-			</BadContext.Provider>
-		);
+		const Abstraction = ({ reducer, defaultState, children }) => {
+			const state = useReducer(reducer, defaultState);
+			return (
+				<BadContext.Provider value={state}>
+					<Wrapper>{children}</Wrapper>
+				</BadContext.Provider>
+			);
+		};
 
 		const App = () => (
 			<Abstraction reducer={reducer} defaultState={badContextDefault}>

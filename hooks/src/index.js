@@ -1,4 +1,5 @@
 import { options as _options } from 'preact';
+import { SKIP_CHILDREN } from 'preact/src/constants';
 
 /** @type {number} */
 let currentIndex;
@@ -55,10 +56,7 @@ options._render = vnode => {
 			hooks._pendingEffects = [];
 			currentComponent._renderCallbacks = [];
 			hooks._list.forEach(hookItem => {
-				if (hookItem._nextValue) {
-					hookItem._value = hookItem._nextValue;
-				}
-				hookItem._pendingArgs = hookItem._nextValue = undefined;
+				hookItem._pendingArgs = undefined;
 			});
 		} else {
 			hooks._pendingEffects.forEach(invokeCleanup);
@@ -181,95 +179,66 @@ export function useReducer(reducer, initialState, init) {
 	const hookState = getHookState(currentIndex++, 2);
 	hookState._reducer = reducer;
 	if (!hookState._component) {
+		hookState._actions = [];
 		hookState._value = [
 			!init ? invokeOrReturn(undefined, initialState) : init(initialState),
 
 			action => {
-				const currentValue = hookState._nextValue
-					? hookState._nextValue[0]
-					: hookState._value[0];
-				const nextValue = hookState._reducer(currentValue, action);
-
-				if (currentValue !== nextValue) {
-					hookState._nextValue = [nextValue, hookState._value[1]];
-					hookState._component.setState({});
-				}
+				hookState._actions.push(action);
+				hookState._component.setState({});
 			}
 		];
 
 		hookState._component = currentComponent;
-
-		if (!currentComponent._hasScuFromHooks) {
-			currentComponent._hasScuFromHooks = true;
-			let prevScu = currentComponent.shouldComponentUpdate;
-			const prevCWU = currentComponent.componentWillUpdate;
-
-			// If we're dealing with a forced update `shouldComponentUpdate` will
-			// not be called. But we use that to update the hook values, so we
-			// need to call it.
-			currentComponent.componentWillUpdate = function (p, s, c) {
-				if (this._force) {
-					let tmp = prevScu;
-					// Clear to avoid other sCU hooks from being called
-					prevScu = undefined;
-					updateHookState(p, s, c);
-					prevScu = tmp;
-				}
-
-				if (prevCWU) prevCWU.call(this, p, s, c);
-			};
-
-			// This SCU has the purpose of bailing out after repeated updates
-			// to stateful hooks.
-			// we store the next value in _nextValue[0] and keep doing that for all
-			// state setters, if we have next states and
-			// all next states within a component end up being equal to their original state
-			// we are safe to bail out for this specific component.
-			/**
-			 *
-			 * @type {import('./internal').Component["shouldComponentUpdate"]}
-			 */
-			// @ts-ignore - We don't use TS to downtranspile
-			// eslint-disable-next-line no-inner-declarations
-			function updateHookState(p, s, c) {
-				if (!hookState._component.__hooks) return true;
-
-				/** @type {(x: import('./internal').HookState) => x is import('./internal').ReducerHookState} */
-				const isStateHook = x => !!x._component;
-				const stateHooks =
-					hookState._component.__hooks._list.filter(isStateHook);
-
-				const allHooksEmpty = stateHooks.every(x => !x._nextValue);
-				// When we have no updated hooks in the component we invoke the previous SCU or
-				// traverse the VDOM tree further.
-				if (allHooksEmpty) {
-					return prevScu ? prevScu.call(this, p, s, c) : true;
-				}
-
-				// We check whether we have components with a nextValue set that
-				// have values that aren't equal to one another this pushes
-				// us to update further down the tree
-				let shouldUpdate = hookState._component.props !== p;
-				stateHooks.forEach(hookItem => {
-					if (hookItem._nextValue) {
-						const currentValue = hookItem._value[0];
-						hookItem._value = hookItem._nextValue;
-						hookItem._nextValue = undefined;
-						if (currentValue !== hookItem._value[0]) shouldUpdate = true;
-					}
-				});
-
-				return prevScu
-					? prevScu.call(this, p, s, c) || shouldUpdate
-					: shouldUpdate;
-			}
-
-			currentComponent.shouldComponentUpdate = updateHookState;
-		}
 	}
 
-	return hookState._nextValue || hookState._value;
+	if (hookState._actions.length) {
+		const initialValue = hookState._value[0];
+		hookState._actions.forEach(action => {
+			const value = hookState._value[0];
+			hookState._value[0] = hookState._reducer(value, action);
+		});
+
+		hookState._actions = [];
+		// This is incorrect, we set this shallowly based on the last state
+		// which means that if 2 useReducer calls have actions and the last one
+		// settles to an equal state we bail the previous one as well. This should
+		// be tackled all together in a post-render type of hook, that hook should
+		// also give us the ability to set SKIP_CHILDREN
+		hookState._updated = initialValue !== hookState._value[0];
+		hookState._value = [hookState._value[0], hookState._value[1]];
+		hookState._didExecute = true;
+	}
+
+	return hookState._value;
 }
+
+const oldAfterRender = options._afterRender;
+options._afterRender = (newVNode, oldVNode) => {
+	if (newVNode._component && newVNode._component.__hooks) {
+		const hooks = newVNode._component.__hooks._list;
+		const stateHooksThatExecuted = hooks.filter(
+			/** @type {(x: import('./internal').HookState) => x is import('./internal').ReducerHookState} */
+			x => !!x._component && x._didExecute
+		);
+
+		if (
+			stateHooksThatExecuted.length &&
+			!stateHooksThatExecuted.some(x => x._updated) &&
+			oldVNode.props === newVNode.props
+		) {
+			newVNode._component.__hooks._pendingEffects = [];
+			newVNode._flags |= SKIP_CHILDREN;
+		}
+
+		stateHooksThatExecuted.forEach(hook => {
+			hook._updated = undefined;
+			hook._didExecute = false;
+		});
+	}
+
+	if (oldAfterRender) oldAfterRender(newVNode);
+};
 
 /**
  * @param {import('./internal').Effect} callback

@@ -80,7 +80,7 @@ export interface MemoHookState<T = unknown> extends BaseHookState {
 
 export interface ReducerHookState<S = unknown, A = unknown>
 	extends BaseHookState {
-	_nextValue?: [S, StateUpdater<S>];
+	_actions: Array<any>;
 	_value?: [S, StateUpdater<S>];
 	_component?: Component;
 	_reducer?: Reducer<S, A>;
