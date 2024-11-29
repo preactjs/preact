@@ -28,7 +28,7 @@ let eventClock = 0;
 
 /**
  * Set a property value on a DOM node
- * @param {PreactElement} dom The DOM node to modify
+ * @param {import('../internal').PreactElement} dom The DOM node to modify
  * @param {string} name The name of the property to set
  * @param {*} value The value to set the property to
  * @param {*} oldValue The old value the property had
@@ -151,7 +151,7 @@ export function setProperty(dom, name, value, oldValue, namespace) {
 function createEventProxy(useCapture) {
 	/**
 	 * Proxy an event to hooked event handlers
-	 * @param {PreactEvent} e The event object from the browser
+	 * @param {import('../internal').PreactEvent} e The event object from the browser
 	 * @private
 	 */
 	return function (e) {

@@ -5,11 +5,11 @@ import { UNDEFINED } from './constants';
 /**
  * Clones the given VNode, optionally adding attributes/props and replacing its
  * children.
- * @param {VNode} vnode The virtual DOM element to clone
+ * @param {import('./internal').VNode} vnode The virtual DOM element to clone
  * @param {object} props Attributes/props to add when cloning
- * @param {Array<ComponentChildren>} rest Any additional arguments will be used
+ * @param {Array<import('./internal').ComponentChildren>} rest Any additional arguments will be used
  * as replacement children.
- * @returns {VNode}
+ * @returns {import('./internal').VNode}
  */
 export function cloneElement(vnode, props, children) {
 	let normalizedProps = assign({}, vnode.props),

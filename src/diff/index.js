@@ -13,6 +13,18 @@ import { assign, isArray, removeNode, slice } from '../util';
 import options from '../options';
 
 /**
+ * @typedef {import('../internal').ComponentChildren} ComponentChildren
+ * @typedef {import('../internal').Component} Component
+ * @typedef {import('../internal').PreactElement} PreactElement
+ * @typedef {import('../internal').VNode} VNode
+ */
+
+/**
+ * @template {any} T
+ * @typedef {import('../internal').Ref<T>} Ref<T>
+ */
+
+/**
  * Diff two virtual nodes and apply proper changes to the DOM
  * @param {PreactElement} parentDom The parent of the DOM element
  * @param {VNode} newVNode The new virtual node

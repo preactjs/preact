@@ -11,6 +11,13 @@ import { isArray } from '../util';
 import { getDomSibling } from '../component';
 
 /**
+ * @typedef {import('../internal').ComponentChildren} ComponentChildren
+ * @typedef {import('../internal').Component} Component
+ * @typedef {import('../internal').PreactElement} PreactElement
+ * @typedef {import('../internal').VNode} VNode
+ */
+
+/**
  * Diff the children of a virtual node
  * @param {PreactElement} parentDom The DOM element whose children are being
  * diffed
