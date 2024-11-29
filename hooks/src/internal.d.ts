@@ -1,8 +1,14 @@
+import {
+	Options as PreactOptions,
+	Component as PreactComponent,
+	VNode as PreactVNode,
+	Context as PreactContext,
+} from '../../src/internal';
 import { Reducer, StateUpdater } from '.';
 
 export { PreactContext };
 
-export interface Options extends globalThis.Options {
+export interface Options extends PreactOptions {
 	/** Attach a hook that is invoked before a vnode is diffed. */
 	_diff?(vnode: VNode): void;
 	diffed?(vnode: VNode): void;
@@ -24,14 +30,14 @@ export interface ComponentHooks {
 	_pendingEffects: EffectHookState[];
 }
 
-export interface Component extends globalThis.Component<any, any> {
+export interface Component extends PreactComponent<any, any> {
 	__hooks?: ComponentHooks;
 	// Extend to include HookStates
 	_renderCallbacks?: Array<HookState | (() => void)>;
 	_hasScuFromHooks?: boolean;
 }
 
-export interface VNode extends globalThis.VNode {
+export interface VNode extends PreactVNode {
 	_mask?: [number, number];
 	_component?: Component; // Override with our specific Component type
 }
