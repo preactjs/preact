@@ -1,5 +1,6 @@
 import {
 	EMPTY_OBJ,
+	MATH_NAMESPACE,
 	MODE_HYDRATE,
 	MODE_SUSPENDED,
 	RESET_MODE,
@@ -393,8 +394,7 @@ function diffElementNodes(
 
 	// Tracks entering and exiting namespaces when descending through the tree.
 	if (nodeType === 'svg') namespace = SVG_NAMESPACE;
-	else if (nodeType === 'math')
-		namespace = 'http://www.w3.org/1998/Math/MathML';
+	else if (nodeType === 'math') namespace = MATH_NAMESPACE;
 	else if (!namespace) namespace = XHTML_NAMESPACE;
 
 	if (excessDomChildren != null) {
