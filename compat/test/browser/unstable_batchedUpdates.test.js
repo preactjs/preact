@@ -9,6 +9,7 @@ describe('unstable_batchedUpdates', () => {
 
 	it('should call callback with only one arg', () => {
 		const spy = sinon.spy();
+		// @ts-expect-error
 		unstable_batchedUpdates(spy, 'foo', 'bar');
 		expect(spy).to.be.calledWithExactly('foo');
 	});
