@@ -2060,6 +2060,7 @@ export namespace JSXInternal {
 		autocomplete?: Signalish<string | undefined>;
 		autoComplete?: Signalish<string | undefined>;
 		cols?: Signalish<number | undefined>;
+		defaultValue?: Signalish<string | undefined>;
 		dirName?: Signalish<string | undefined>;
 		disabled?: Signalish<boolean | undefined>;
 		form?: Signalish<string | undefined>;
