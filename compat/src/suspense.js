@@ -79,6 +79,10 @@ function removeOriginal(vnode, detachedParent, originalParent) {
 				removeOriginal(child, detachedParent, originalParent)
 			);
 
+		if (vnode._dom && vnode._dom._unmounted) {
+			vnode._dom._unmounted = false;
+		}
+
 		if (vnode._component) {
 			if (vnode._component._parentDom === detachedParent) {
 				if (vnode._dom) {

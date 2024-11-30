@@ -647,6 +647,7 @@ export function unmount(vnode, parentVNode, skipRemove) {
 		}
 	}
 
+	if (vnode._dom) vnode._dom._unmounted = true;
 	if (!skipRemove) {
 		removeNode(vnode._dom);
 	}

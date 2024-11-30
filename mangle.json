@@ -40,6 +40,7 @@
       "$_nextDom": "__d",
       "$_dirty": "__d",
       "$_mask": "__m",
+      "$_unmounted": "__u",
       "$_detachOnNextRender": "__b",
       "$_force": "__e",
       "$_nextState": "__s",
