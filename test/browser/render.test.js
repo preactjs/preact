@@ -426,6 +426,7 @@ describe('render()', () => {
 
 	// Test for #3969
 	it('should clear rowspan and colspan', () => {
+		/** @type {(v) => void} */
 		let update;
 		class App extends Component {
 			constructor(props) {
@@ -658,6 +659,7 @@ describe('render()', () => {
 		});
 
 		it('should apply proper mutation for VNodes with dangerouslySetInnerHTML attr', () => {
+			/** @type {Component} */
 			let thing;
 			class Thing extends Component {
 				constructor(props, context) {
@@ -709,6 +711,7 @@ describe('render()', () => {
 				}
 			}
 
+			/** @type {Component} */
 			let thing;
 			render(<Thing ref={r => (thing = r)} />, scratch);
 
@@ -721,6 +724,7 @@ describe('render()', () => {
 		});
 
 		it('should unmount dangerouslySetInnerHTML', () => {
+			/** @type {(v) => void} */
 			let set;
 
 			const TextDiv = () => (
@@ -831,7 +835,9 @@ describe('render()', () => {
 
 		let todoText = 'new todo that I should complete';
 		let input;
+		/** @type {(v) => void} */
 		let setText;
+		/** @type {(v) => void} */
 		let addTodo;
 
 		const ENTER = 13;
@@ -1013,6 +1019,7 @@ describe('render()', () => {
 
 	it('should not re-render when a component returns undefined', () => {
 		let Dialog = () => undefined;
+		/** @type {() => void} */
 		let updateState;
 		class App extends Component {
 			constructor(props) {
@@ -1043,6 +1050,7 @@ describe('render()', () => {
 
 	it('should not lead to stale DOM nodes', () => {
 		let i = 0;
+		/** @type {() => void} */
 		let updateApp;
 		class App extends Component {
 			render() {
@@ -1051,6 +1059,7 @@ describe('render()', () => {
 			}
 		}
 
+		/** @type {() => void} */
 		let updateParent;
 		function Parent() {
 			updateParent = () => this.forceUpdate();
@@ -1097,6 +1106,7 @@ describe('render()', () => {
 		}
 
 		let ref;
+		/** @type {() => void} */
 		let updateApp;
 		class App extends Component {
 			constructor() {
@@ -1130,6 +1140,7 @@ describe('render()', () => {
 	});
 
 	it('should not remove iframe', () => {
+		/** @type {(v) => void} */
 		let setState;
 		const Iframe = () => {
 			// oxlint-disable-next-line iframe-missing-sandbox
@@ -1199,6 +1210,7 @@ describe('render()', () => {
 	});
 
 	it('should not call options.debounceRendering unnecessarily', () => {
+		/** @type {A} */
 		let comp;
 
 		class A extends Component {
@@ -1371,6 +1383,7 @@ describe('render()', () => {
 	it('should not crash or repeatedly add the same child when replacing a matched vnode with null', () => {
 		const B = () => <div>B</div>;
 
+		/** @type {() => void} */
 		let update;
 		class App extends Component {
 			constructor(props) {
