@@ -1755,7 +1755,7 @@ export namespace JSXInternal {
 		capture?: Signalish<'user' | 'environment' | undefined>; // https://www.w3.org/TR/html-media-capture/#the-capture-attribute
 		checked?: Signalish<boolean | undefined>;
 		defaultChecked?: Signalish<boolean | undefined>;
-		defaultValue?: Signalish<string | undefined>;
+		defaultValue?: Signalish<string | number | undefined>;
 		disabled?: Signalish<boolean | undefined>;
 		enterKeyHint?: Signalish<
 			| 'enter'
