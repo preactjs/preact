@@ -37,6 +37,7 @@ describe('Component spec', () => {
 		});
 
 		it('should apply default props on rerender', () => {
+			/** @type {() => void} */
 			let doRender;
 			class Outer extends Component {
 				constructor() {
@@ -100,6 +101,7 @@ describe('Component spec', () => {
 
 	describe('forceUpdate', () => {
 		it('should force a rerender', () => {
+			/** @type {() => void} */
 			let forceUpdate;
 			class ForceUpdateComponent extends Component {
 				componentWillUpdate() {}
@@ -125,6 +127,7 @@ describe('Component spec', () => {
 		});
 
 		it('should add callback to renderCallbacks', () => {
+			/** @type {() => void} */
 			let forceUpdate;
 			let callback = sinon.spy();
 			class ForceUpdateComponent extends Component {

@@ -24,7 +24,7 @@ describe('createContext', () => {
 	});
 
 	it('should pass context to a consumer', () => {
-		const { Provider, Consumer } = createContext();
+		const { Provider, Consumer } = createContext(null);
 		const CONTEXT = { a: 'a' };
 
 		let receivedContext;
@@ -62,7 +62,7 @@ describe('createContext', () => {
 	// we only propagate to children.
 	// Strict equal vnode optimization
 	it('skips referentially equal children to Provider', () => {
-		const { Provider, Consumer } = createContext();
+		const { Provider, Consumer } = createContext(null);
 		let set,
 			renders = 0;
 		const Layout = ({ children }) => {
@@ -95,7 +95,7 @@ describe('createContext', () => {
 	});
 
 	it('should preserve provider context through nesting providers', done => {
-		const { Provider, Consumer } = createContext();
+		const { Provider, Consumer } = createContext(null);
 		const CONTEXT = { a: 'a' };
 		const CHILD_CONTEXT = { b: 'b' };
 
@@ -151,8 +151,8 @@ describe('createContext', () => {
 
 	it('should preserve provider context between different providers', () => {
 		const { Provider: ThemeProvider, Consumer: ThemeConsumer } =
-			createContext();
-		const { Provider: DataProvider, Consumer: DataConsumer } = createContext();
+			createContext(null);
+		const { Provider: DataProvider, Consumer: DataConsumer } = createContext(null);
 		const THEME_CONTEXT = { theme: 'black' };
 		const DATA_CONTEXT = { global: 'a' };
 
@@ -203,7 +203,7 @@ describe('createContext', () => {
 	});
 
 	it('should preserve provider context through nesting consumers', () => {
-		const { Provider, Consumer } = createContext();
+		const { Provider, Consumer } = createContext(null);
 		const CONTEXT = { a: 'a' };
 
 		let receivedData;
@@ -244,7 +244,7 @@ describe('createContext', () => {
 	});
 
 	it('should not emit when value does not update', () => {
-		const { Provider, Consumer } = createContext();
+		const { Provider, Consumer } = createContext(null);
 		const CONTEXT = { a: 'a' };
 
 		class NoUpdate extends Component {
@@ -293,7 +293,7 @@ describe('createContext', () => {
 	});
 
 	it('should preserve provider context through nested components', () => {
-		const { Provider, Consumer } = createContext();
+		const { Provider, Consumer } = createContext(null);
 		const CONTEXT = { a: 'a' };
 
 		let receivedContext;
@@ -359,7 +359,7 @@ describe('createContext', () => {
 	});
 
 	it('should propagates through shouldComponentUpdate false', done => {
-		const { Provider, Consumer } = createContext();
+		const { Provider, Consumer } = createContext(null);
 		const CONTEXT = { a: 'a' };
 		const UPDATED_CONTEXT = { a: 'b' };
 
@@ -438,7 +438,7 @@ describe('createContext', () => {
 	});
 
 	it('should keep the right context at the right "depth"', () => {
-		const { Provider, Consumer } = createContext();
+		const { Provider, Consumer } = createContext(null);
 		const CONTEXT = { theme: 'a', global: 1 };
 		const NESTED_CONTEXT = { theme: 'b', global: 1 };
 
@@ -499,7 +499,7 @@ describe('createContext', () => {
 	});
 
 	it("should not re-render the consumer if the context doesn't change", () => {
-		const { Provider, Consumer } = createContext();
+		const { Provider, Consumer } = createContext(null);
 		const CONTEXT = { i: 1 };
 
 		class NoUpdate extends Component {
@@ -564,7 +564,7 @@ describe('createContext', () => {
 
 	it('should allow for updates of props', () => {
 		let app;
-		const { Provider, Consumer } = createContext();
+		const { Provider, Consumer } = createContext(null);
 		class App extends Component {
 			constructor(props) {
 				super(props);
@@ -609,7 +609,7 @@ describe('createContext', () => {
 	});
 
 	it('should re-render the consumer if the children change', () => {
-		const { Provider, Consumer } = createContext();
+		const { Provider, Consumer } = createContext(null);
 		const CONTEXT = { i: 1 };
 
 		class Inner extends Component {
@@ -814,7 +814,7 @@ describe('createContext', () => {
 		it('should order updates correctly', () => {
 			const events = [];
 			let update;
-			const Store = createContext();
+			const Store = createContext(null);
 
 			class Root extends Component {
 				constructor(props) {

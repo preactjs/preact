@@ -178,6 +178,7 @@ describe('forwardRef', () => {
 	});
 
 	it('should support useImperativeHandle', () => {
+		/** @type {(v) => void} */
 		let setValue;
 		const Foo = forwardRef((props, ref) => {
 			const result = useState('');

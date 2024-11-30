@@ -28,6 +28,7 @@ describe('componentDidCatch', () => {
 			}
 			render() {
 				if (this.state.error) return <div />;
+				// @ts-expect-error
 				if (this.state.i === 0) return <ThrowErr />;
 				return null;
 			}

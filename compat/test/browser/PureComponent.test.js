@@ -72,6 +72,7 @@ describe('PureComponent', () => {
 	it('should ignore the __source variable', () => {
 		const pureSpy = sinon.spy();
 		const appSpy = sinon.spy();
+		/** @type {(v) => void} */
 		let set;
 		class Pure extends React.PureComponent {
 			render() {
