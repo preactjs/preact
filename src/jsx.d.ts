@@ -1755,7 +1755,7 @@ export namespace JSXInternal {
 		capture?: Signalish<'user' | 'environment' | undefined>; // https://www.w3.org/TR/html-media-capture/#the-capture-attribute
 		checked?: Signalish<boolean | undefined>;
 		defaultChecked?: Signalish<boolean | undefined>;
-		defaultValue?: Signalish<string | undefined>;
+		defaultValue?: Signalish<string | number | undefined>;
 		disabled?: Signalish<boolean | undefined>;
 		enterKeyHint?: Signalish<
 			| 'enter'
@@ -1997,6 +1997,7 @@ export namespace JSXInternal {
 		extends HTMLAttributes<T> {
 		autocomplete?: Signalish<string | undefined>;
 		autoComplete?: Signalish<string | undefined>;
+		defaultValue?: Signalish<string | number | undefined>;
 		disabled?: Signalish<boolean | undefined>;
 		form?: Signalish<string | undefined>;
 		multiple?: Signalish<boolean | undefined>;
@@ -2060,6 +2061,7 @@ export namespace JSXInternal {
 		autocomplete?: Signalish<string | undefined>;
 		autoComplete?: Signalish<string | undefined>;
 		cols?: Signalish<number | undefined>;
+		defaultValue?: Signalish<string | undefined>;
 		dirName?: Signalish<string | undefined>;
 		disabled?: Signalish<boolean | undefined>;
 		form?: Signalish<string | undefined>;
