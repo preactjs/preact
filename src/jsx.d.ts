@@ -1997,6 +1997,7 @@ export namespace JSXInternal {
 		extends HTMLAttributes<T> {
 		autocomplete?: Signalish<string | undefined>;
 		autoComplete?: Signalish<string | undefined>;
+		defaultValue?: Signalish<string | number | undefined>;
 		disabled?: Signalish<boolean | undefined>;
 		form?: Signalish<string | undefined>;
 		multiple?: Signalish<boolean | undefined>;
