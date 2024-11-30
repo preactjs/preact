@@ -3,9 +3,9 @@ export const MODE_HYDRATE = 1 << 5;
 /** Signifies this VNode suspended on the previous render */
 export const MODE_SUSPENDED = 1 << 7;
 /** Indicates that this node needs to be inserted while patching children */
-export const INSERT_VNODE = 1 << 16;
+export const INSERT_VNODE = 1 << 2;
 /** Indicates a VNode has been matched with another VNode in the diff */
-export const MATCHED = 1 << 17;
+export const MATCHED = 1 << 1;
 
 /** Reset all mode flags */
 export const RESET_MODE = ~(MODE_HYDRATE | MODE_SUSPENDED);
