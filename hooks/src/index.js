@@ -205,7 +205,7 @@ export function useReducer(reducer, initialState, init) {
 		// settles to an equal state we bail the previous one as well. This should
 		// be tackled all together in a post-render type of hook, that hook should
 		// also give us the ability to set SKIP_CHILDREN
-		hookState._updated = initialValue !== hookState._value[0];
+		hookState._didUpdate = initialValue !== hookState._value[0];
 		hookState._value = [hookState._value[0], hookState._value[1]];
 		hookState._didExecute = true;
 	}
@@ -219,12 +219,13 @@ options._afterRender = (newVNode, oldVNode) => {
 		const hooks = newVNode._component.__hooks._list;
 		const stateHooksThatExecuted = hooks.filter(
 			/** @type {(x: import('./internal').HookState) => x is import('./internal').ReducerHookState} */
+			// @ts-expect-error
 			x => !!x._component && x._didExecute
 		);
 
 		if (
 			stateHooksThatExecuted.length &&
-			!stateHooksThatExecuted.some(x => x._updated) &&
+			!stateHooksThatExecuted.some(x => x._didUpdate) &&
 			oldVNode.props === newVNode.props
 		) {
 			newVNode._component.__hooks._pendingEffects = [];
@@ -232,12 +233,12 @@ options._afterRender = (newVNode, oldVNode) => {
 		}
 
 		stateHooksThatExecuted.forEach(hook => {
-			hook._updated = undefined;
+			hook._didUpdate = undefined;
 			hook._didExecute = false;
 		});
 	}
 
-	if (oldAfterRender) oldAfterRender(newVNode);
+	if (oldAfterRender) oldAfterRender(newVNode, oldVNode);
 };
 
 /**

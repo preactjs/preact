@@ -2,7 +2,7 @@ import {
 	Options as PreactOptions,
 	Component as PreactComponent,
 	VNode as PreactVNode,
-	Context as PreactContext,
+	Context as PreactContext
 } from '../../src/internal';
 import { Reducer, StateUpdater } from '.';
 
@@ -52,8 +52,6 @@ export type HookState =
 
 interface BaseHookState {
 	_value?: unknown;
-	_nextValue?: undefined;
-	_pendingValue?: undefined;
 	_args?: undefined;
 	_pendingArgs?: undefined;
 	_component?: undefined;
@@ -72,7 +70,6 @@ export interface EffectHookState extends BaseHookState {
 
 export interface MemoHookState<T = unknown> extends BaseHookState {
 	_value?: T;
-	_pendingValue?: T;
 	_args?: unknown[];
 	_pendingArgs?: unknown[];
 	_factory?: () => T;
@@ -84,6 +81,8 @@ export interface ReducerHookState<S = unknown, A = unknown>
 	_value?: [S, StateUpdater<S>];
 	_component?: Component;
 	_reducer?: Reducer<S, A>;
+	_didExecute?: boolean;
+	_didUpdate?: boolean;
 }
 
 export interface ContextHookState extends BaseHookState {
