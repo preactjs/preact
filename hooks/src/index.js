@@ -423,7 +423,7 @@ export function useId() {
 	const state = getHookState(currentIndex++, 11);
 	if (!state._value) {
 		// Grab either the root node or the nearest async boundary node.
-		/** @type {import('./internal.d').VNode} */
+		/** @type {import('./internal').VNode} */
 		let root = currentComponent._vnode;
 		while (root !== null && !root._mask && root._parent !== null) {
 			root = root._parent;
