@@ -39,12 +39,12 @@ export function logCall(obj, method) {
 				if (args[1] === null && args.length === 2) {
 					operation = `${serialize(this)}.appendChild(${serialize(args[0])})`;
 				} else {
-					operation = `${serialize(this)}.${method}(${c})`;
+					operation = `${serialize(this)}.${String(method)}(${c})`;
 				}
 				break;
 			}
 			default: {
-				operation = `${serialize(this)}.${method}(${c})`;
+				operation = `${serialize(this)}.${String(method)}(${c})`;
 				break;
 			}
 		}

@@ -80,6 +80,7 @@ describe('compat cloneElement', () => {
 
 	it('should skip cloning on invalid element', () => {
 		let element = { foo: 42 };
+		// @ts-expect-error
 		let clone = cloneElement(element);
 		expect(clone).to.eql(element);
 	});
@@ -89,7 +90,7 @@ describe('compat cloneElement', () => {
 			return <div>{props.value}</div>;
 		}
 
-		let clone = cloneElement(preactH(Foo), { value: 'foo' });
+		let clone = cloneElement(preactH(Foo, {}), { value: 'foo' });
 		render(clone, scratch);
 		expect(scratch.textContent).to.equal('foo');
 	});

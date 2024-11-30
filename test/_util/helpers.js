@@ -210,14 +210,6 @@ export function clearOptions() {
 export function teardown(scratch) {
 	if (!document.contains(scratch)) return;
 
-	if (
-		scratch &&
-		('__k' in scratch || '_children' in scratch) &&
-		scratch._children
-	) {
-		verifyVNodeTree(scratch._children);
-	}
-
 	if (scratch) {
 		scratch.parentNode.removeChild(scratch);
 	}
@@ -234,21 +226,6 @@ export function teardown(scratch) {
 	}
 
 	restoreElementAttributes();
-}
-
-/** @type {(vnode: import('../../src/internal').VNode) => void} */
-function verifyVNodeTree(vnode) {
-	if (vnode._nextDom) {
-		expect.fail('vnode should not have _nextDom:' + vnode._nextDom);
-	}
-
-	if (vnode._children) {
-		for (let child of vnode._children) {
-			if (child) {
-				verifyVNodeTree(child);
-			}
-		}
-	}
 }
 
 const Foo = () => 'd';

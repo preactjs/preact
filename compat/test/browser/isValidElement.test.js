@@ -13,10 +13,10 @@ describe('isValidElement', () => {
 	});
 
 	it('should detect a preact vnode', () => {
-		expect(isValidElement(preactCreateElement('div'))).to.equal(true);
+		expect(isValidElement(preactCreateElement('div', {}))).to.equal(true);
 	});
 
 	it('should detect a compat vnode', () => {
-		expect(isValidElement(React.createElement('div'))).to.equal(true);
+		expect(isValidElement(React.createElement('div', {}))).to.equal(true);
 	});
 });
