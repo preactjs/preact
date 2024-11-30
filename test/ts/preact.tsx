@@ -6,7 +6,8 @@ import {
 	FunctionalComponent,
 	AnyComponent,
 	h,
-	createRef
+	createRef,
+	JSX
 } from '../../';
 
 interface DummyProps {
@@ -381,3 +382,14 @@ h('form', { onSubmit: onSubmit });
 
 h('option', { value: 'foo' });
 createElement('option', { value: 'foo' });
+
+function Checkbox({ onChange }: JSX.HTMLAttributes<HTMLInputElement>) {
+	function handleChange(
+		this: void,
+		event: JSX.TargetedEvent<HTMLInputElement>
+	) {
+		onChange?.call(this, event);
+	}
+
+	return <input onChange={handleChange} />;
+}
