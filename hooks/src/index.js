@@ -1,5 +1,5 @@
 import { options as _options } from 'preact';
-import { SKIP_CHILDREN } from 'preact/src/constants';
+import { SKIP_CHILDREN } from '../../src/constants';
 
 /** @type {number} */
 let currentIndex;
@@ -25,6 +25,7 @@ let oldAfterDiff = options.diffed;
 let oldCommit = options._commit;
 let oldBeforeUnmount = options.unmount;
 let oldRoot = options._root;
+let oldAfterRender = options._afterRender;
 
 const RAF_TIMEOUT = 100;
 let prevRaf;
@@ -194,12 +195,10 @@ export function useReducer(reducer, initialState, init) {
 
 	if (hookState._actions.length) {
 		const initialValue = hookState._value[0];
-		hookState._actions.forEach(action => {
-			const value = hookState._value[0];
-			hookState._value[0] = hookState._reducer(value, action);
+		hookState._actions.some(action => {
+			hookState._value[0] = hookState._reducer(hookState._value[0], action);
 		});
 
-		hookState._actions = [];
 		// This is incorrect, we set this shallowly based on the last state
 		// which means that if 2 useReducer calls have actions and the last one
 		// settles to an equal state we bail the previous one as well. This should
@@ -208,19 +207,19 @@ export function useReducer(reducer, initialState, init) {
 		hookState._didUpdate = initialValue !== hookState._value[0];
 		hookState._value = [hookState._value[0], hookState._value[1]];
 		hookState._didExecute = true;
+		hookState._actions = [];
 	}
 
 	return hookState._value;
 }
 
-const oldAfterRender = options._afterRender;
 options._afterRender = (newVNode, oldVNode) => {
 	if (newVNode._component && newVNode._component.__hooks) {
 		const hooks = newVNode._component.__hooks._list;
 		const stateHooksThatExecuted = hooks.filter(
 			/** @type {(x: import('./internal').HookState) => x is import('./internal').ReducerHookState} */
 			// @ts-expect-error
-			x => !!x._component && x._didExecute
+			x => x._component && x._didExecute
 		);
 
 		if (
@@ -232,9 +231,8 @@ options._afterRender = (newVNode, oldVNode) => {
 			newVNode._flags |= SKIP_CHILDREN;
 		}
 
-		stateHooksThatExecuted.forEach(hook => {
-			hook._didUpdate = undefined;
-			hook._didExecute = false;
+		stateHooksThatExecuted.some(hook => {
+			hook._didExecute = hook._didUpdate = false;
 		});
 	}
 

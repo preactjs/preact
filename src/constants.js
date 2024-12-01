@@ -7,7 +7,7 @@ export const INSERT_VNODE = 1 << 2;
 /** Indicates a VNode has been matched with another VNode in the diff */
 export const MATCHED = 1 << 1;
 
-export const SKIP_CHILDREN = 1 << 18;
+export const SKIP_CHILDREN = 1 << 3;
 
 /** Reset all mode flags */
 export const RESET_MODE = ~(MODE_HYDRATE | MODE_SUSPENDED);
