@@ -33,6 +33,7 @@ describe('compat createElement()', () => {
 	});
 
 	it('should not normalize text nodes', () => {
+		// @ts-expect-error
 		String.prototype.capFLetter = function () {
 			return this.charAt(0).toUpperCase() + this.slice(1);
 		};

@@ -62,6 +62,7 @@ describe('React-18-hooks', () => {
 		it('runs transitions', () => {
 			const spy = sinon.spy();
 
+			/** @type {(v) => void} */
 			let go;
 			const App = () => {
 				const [isPending, start] = useTransition();

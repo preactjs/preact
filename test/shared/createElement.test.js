@@ -15,7 +15,7 @@ const h = createElement;
 describe('createElement(jsx)', () => {
 	it('should return a VNode', () => {
 		let r;
-		expect(() => (r = h('foo'))).not.to.throw();
+		expect(() => (r = h('foo', null))).not.to.throw();
 		expect(r).to.be.an('object');
 		// expect(r).to.be.an.instanceof(VNode);
 		expect(r).to.have.property('type', 'foo');
@@ -83,8 +83,8 @@ describe('createElement(jsx)', () => {
 	});
 
 	it('should support element children', () => {
-		let kid1 = h('bar');
-		let kid2 = h('baz');
+		let kid1 = h('bar', null);
+		let kid2 = h('baz', null);
 		let r = h('foo', null, kid1, kid2);
 
 		expect(r)
@@ -93,8 +93,8 @@ describe('createElement(jsx)', () => {
 	});
 
 	it('should support multiple element children, given as arg list', () => {
-		let kid1 = h('bar');
-		let kid3 = h('test');
+		let kid1 = h('bar', null);
+		let kid3 = h('test', null);
 		let kid2 = h('baz', null, kid3);
 
 		let r = h('foo', null, kid1, kid2);
@@ -105,8 +105,8 @@ describe('createElement(jsx)', () => {
 	});
 
 	it('should handle multiple element children, given as an array', () => {
-		let kid1 = h('bar');
-		let kid3 = h('test');
+		let kid1 = h('bar', null);
+		let kid3 = h('test', null);
 		let kid2 = h('baz', null, kid3);
 
 		let r = h('foo', null, [kid1, kid2]);
@@ -118,7 +118,7 @@ describe('createElement(jsx)', () => {
 
 	it('should support nested children', () => {
 		const m = x => {
-			const result = h(x);
+			const result = h(x, null);
 			delete result._original;
 			return result;
 		};
@@ -175,12 +175,12 @@ describe('createElement(jsx)', () => {
 	});
 
 	it('should NOT merge adjacent text children', () => {
-		const bar = h('bar');
-		const barClone = h('bar');
-		const baz = h('baz');
-		const bazClone = h('baz');
-		const baz2 = h('baz');
-		const baz2Clone = h('baz');
+		const bar = h('bar', null);
+		const barClone = h('bar', null);
+		const baz = h('baz', null);
+		const bazClone = h('baz', null);
+		const baz2 = h('baz', null);
+		const baz2Clone = h('baz', null);
 
 		delete bar._original;
 		delete barClone._original;
@@ -268,7 +268,7 @@ describe('createElement(jsx)', () => {
 	it('should respect defaultProps', () => {
 		const Component = ({ children }) => children;
 		Component.defaultProps = { foo: 'bar' };
-		expect(h(Component).props).to.deep.equal({ foo: 'bar' });
+		expect(h(Component, null).props).to.deep.equal({ foo: 'bar' });
 	});
 
 	it('should override defaultProps', () => {

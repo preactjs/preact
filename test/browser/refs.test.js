@@ -130,7 +130,9 @@ describe('refs', () => {
 		let outer = spy('outer'),
 			inner = spy('inner'),
 			InnermostComponent = 'span',
+			/** @type {() => void} */
 			update,
+			/** @type {Inner} */
 			inst;
 		class Outer extends Component {
 			constructor() {
@@ -194,6 +196,7 @@ describe('refs', () => {
 			innermost = spy('innermost'),
 			InnermostComponent = 'span',
 			outerInst,
+			/** @type {Inner} */
 			innerInst;
 		class Outer extends Component {
 			constructor() {
@@ -335,6 +338,7 @@ describe('refs', () => {
 	});
 
 	it('should null and re-invoke refs when swapping component root element type', () => {
+		/** @type {Child} */
 		let inst;
 
 		class App extends Component {
@@ -417,6 +421,7 @@ describe('refs', () => {
 
 	// Test for #1177
 	it('should call ref after children are rendered', done => {
+		/** @type {HTMLInputElement} */
 		let input;
 		function autoFocus(el) {
 			if (el) {
@@ -545,6 +550,7 @@ describe('refs', () => {
 	// Test for #4049
 	it('should first clean-up refs and after apply them', () => {
 		let calls = [];
+		/** @type {() => void} */
 		let set;
 		class App extends Component {
 			constructor(props) {

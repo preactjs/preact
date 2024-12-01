@@ -546,6 +546,7 @@ describe('suspense-list', () => {
 		const ComponentA = getSuspendableComponent('A');
 		const ComponentB = getSuspendableComponent('B');
 
+		/** @type {(v) => void} */
 		let showB;
 		function Container() {
 			const [showHidden, setShowHidden] = useState(false);

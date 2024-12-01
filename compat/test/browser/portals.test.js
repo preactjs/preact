@@ -46,6 +46,7 @@ describe('Portal', () => {
 	});
 
 	it('should insert the portal', () => {
+		/** @type {() => void} */
 		let setFalse;
 		function Foo(props) {
 			const [mounted, setMounted] = useState(true);
@@ -66,6 +67,7 @@ describe('Portal', () => {
 	});
 
 	it('should order portal children well', () => {
+		/** @type {() => void} */
 		let bump;
 
 		function Modal() {
@@ -95,6 +97,7 @@ describe('Portal', () => {
 	});
 
 	it('should toggle the portal', () => {
+		/** @type {() => void} */
 		let toggle;
 
 		function Foo(props) {
@@ -130,6 +133,7 @@ describe('Portal', () => {
 	});
 
 	it('should notice prop changes on the portal', () => {
+		/** @type {(c) => void} */
 		let set;
 
 		function Foo(props) {
@@ -155,6 +159,7 @@ describe('Portal', () => {
 
 	it('should not unmount the portal component', () => {
 		let spy = sinon.spy();
+		/** @type {(c) => void} */
 		let set;
 		class Child extends Component {
 			componentWillUnmount() {
@@ -230,7 +235,10 @@ describe('Portal', () => {
 	});
 
 	it('should leave a working root after the portal', () => {
-		let toggle, toggle2;
+		/** @type {() => void} */
+		let toggle,
+		/** @type {() => void} */
+		toggle2;
 
 		function Foo(props) {
 			const [mounted, setMounted] = useState(false);
@@ -279,7 +287,10 @@ describe('Portal', () => {
 	});
 
 	it('should work with stacking portals', () => {
-		let toggle, toggle2;
+		/** @type {() => void} */
+		let toggle,
+		/** @type {() => void} */
+		toggle2;
 
 		function Foo(props) {
 			const [mounted, setMounted] = useState(false);
@@ -327,6 +338,7 @@ describe('Portal', () => {
 	});
 
 	it('should work with changing the container', () => {
+		/** @type {(c) => void} */
 		let set, ref;
 
 		function Foo(props) {
@@ -363,7 +375,10 @@ describe('Portal', () => {
 	});
 
 	it('should work with replacing placeholder portals', () => {
-		let toggle, toggle2;
+		/** @type {() => void} */
+		let toggle,
+		/** @type {() => void} */
+		toggle2;
 
 		function Foo(props) {
 			const [mounted, setMounted] = useState(false);
@@ -409,6 +424,7 @@ describe('Portal', () => {
 	});
 
 	it('should work with removing an element from stacked container to new one', () => {
+		/** @type {() => void} */
 		let toggle, root2;
 
 		function Foo(props) {
@@ -445,7 +461,10 @@ describe('Portal', () => {
 	});
 
 	it('should support nested portals', () => {
-		let toggle, toggle2, inner;
+		/** @type {() => void} */
+		let toggle,
+		/** @type {() => void} */
+		toggle2, inner;
 
 		function Bar() {
 			const [mounted, setMounted] = useState(false);
@@ -598,6 +617,7 @@ describe('Portal', () => {
 	});
 
 	it('should switch between non portal and portal node (Modal as lastChild)', () => {
+		/** @type {() => void} */
 		let toggle;
 		const Modal = ({ children, open }) =>
 			open ? createPortal(<div>{children}</div>, scratch) : <div>Closed</div>;
@@ -627,6 +647,7 @@ describe('Portal', () => {
 	});
 
 	it('should switch between non portal and portal node (Modal as firstChild)', () => {
+		/** @type {() => void} */
 		let toggle;
 		const Modal = ({ children, open }) =>
 			open ? createPortal(<div>{children}</div>, scratch) : <div>Closed</div>;
