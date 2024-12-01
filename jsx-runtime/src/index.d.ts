@@ -1,11 +1,13 @@
-export { Fragment } from '../../';
+// Intentionally not using a relative path to take advantage of
+// the TS version resolution mechanism
+export { Fragment } from 'preact';
 import {
 	ComponentType,
 	ComponentChild,
 	ComponentChildren,
 	VNode,
 	Attributes
-} from '../../';
+} from 'preact';
 import { JSXInternal } from '../../src/jsx';
 
 export function jsx(

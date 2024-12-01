@@ -1,5 +1,7 @@
 import * as _hooks from '../../hooks';
-import * as preact from '../../src';
+// Intentionally not using a relative path to take advantage of
+// the TS version resolution mechanism
+import * as preact from 'preact';
 import { JSXInternal } from '../../src/jsx';
 import * as _Suspense from './suspense';
 import * as _SuspenseList from './suspense-list';
