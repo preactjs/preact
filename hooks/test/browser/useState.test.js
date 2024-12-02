@@ -58,8 +58,6 @@ describe('useState', () => {
 		expect(initState).to.be.calledOnce;
 	});
 
-	// TODO: check whether the delayed execution of
-	// useReducer should also be in useState
 	it('does not rerender on equal state', () => {
 		let lastState;
 		let doSetState;
@@ -314,11 +312,9 @@ describe('useState', () => {
 			let context = {
 				modalCount,
 				addModal() {
-					console.log('adding');
 					setModalCount(count => count + 1);
 				},
 				removeModal() {
-					console.log('removing');
 					setModalCount(count => count - 1);
 				}
 			};
@@ -339,13 +335,11 @@ describe('useState', () => {
 		}
 
 		function Popover() {
-			console.log('POPOVER');
 			useModal();
 			return <div>Popover</div>;
 		}
 
 		function App() {
-			console.log('render app');
 			return (
 				<ModalProvider>
 					<Popover />
