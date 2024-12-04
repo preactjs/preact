@@ -127,54 +127,19 @@ options.unmount = vnode => {
 	}
 };
 
-function getInitialHookState(type) {
-	switch (type) {
-		case 1:
-		case 2: {
-			return {
-				_nextValue: undefined,
-				_value: null,
-				_component: null,
-				_reducer: null
-			};
-		}
-		case 3:
-		case 4: {
-			return {
-				_args: null,
-				_value: null,
-				_pendingArgs: undefined,
-				_cleanup: undefined
-			};
-		}
-		case 3:
-		case 4: {
-			return {
-				_args: null,
-				_value: null,
-				_pendingArgs: undefined,
-				_cleanup: undefined
-			};
-		}
-		case 7:
-		case 8: {
-			return {
-				_value: null,
-				_pendingValue: undefined,
-				_args: null,
-				_pendingArgs: undefined,
-				_factory: null
-			};
-		}
-		case 11:
-		case 10:
-		case 9: {
-			return {
-				_value: null,
-				_context: null
-			};
-		}
-	}
+function getInitialHookState() {
+	return {
+		_nextValue: undefined,
+		_value: null,
+		_component: null,
+		_reducer: null,
+		_args: null,
+		_factory: null,
+		_context: null,
+		_pendingArgs: undefined,
+		_cleanup: undefined,
+		_pendingValue: undefined
+	};
 }
 
 /**
@@ -202,7 +167,7 @@ function getHookState(index, type) {
 		});
 
 	if (index >= hooks._list.length) {
-		hooks._list.push(getInitialHookState(type));
+		hooks._list.push(getInitialHookState());
 	}
 
 	return hooks._list[index];
