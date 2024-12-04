@@ -127,6 +127,56 @@ options.unmount = vnode => {
 	}
 };
 
+function getInitialHookState(type) {
+	switch (type) {
+		case 1:
+		case 2: {
+			return {
+				_nextValue: undefined,
+				_value: null,
+				_component: null,
+				_reducer: null
+			};
+		}
+		case 3:
+		case 4: {
+			return {
+				_args: null,
+				_value: null,
+				_pendingArgs: undefined,
+				_cleanup: undefined
+			};
+		}
+		case 3:
+		case 4: {
+			return {
+				_args: null,
+				_value: null,
+				_pendingArgs: undefined,
+				_cleanup: undefined
+			};
+		}
+		case 7:
+		case 8: {
+			return {
+				_value: null,
+				_pendingValue: undefined,
+				_args: null,
+				_pendingArgs: undefined,
+				_factory: null
+			};
+		}
+		case 11:
+		case 10:
+		case 9: {
+			return {
+				_value: null,
+				_context: null
+			};
+		}
+	}
+}
+
 /**
  * Get a hook's state from the currentComponent
  * @param {number} index The index of the hook to get
@@ -152,7 +202,7 @@ function getHookState(index, type) {
 		});
 
 	if (index >= hooks._list.length) {
-		hooks._list.push({});
+		hooks._list.push(getInitialHookState(type));
 	}
 
 	return hooks._list[index];
