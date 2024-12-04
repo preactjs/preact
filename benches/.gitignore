@@ -1,6 +1,0 @@
-dist/
-results/
-logs/
-logs-saved/
-node_modules/
-proxy-packages/*/package-lock.json
