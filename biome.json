@@ -23,12 +23,6 @@
       "**/package/",
       "**/preact-*.tgz",
       "**/preact.tgz",
-      "benches/dist/",
-      "benches/results/",
-      "benches/logs/",
-      "benches/logs-saved/",
-      "benches/node_modules/",
-      "benches/proxy-packages/*/package-lock.json",
       "**/package-lock.json"
     ]
   },
