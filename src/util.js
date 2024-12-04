@@ -26,4 +26,3 @@ export function removeNode(node) {
 }
 
 export const slice = EMPTY_ARR.slice;
-// test
