@@ -166,7 +166,7 @@ function constructNewChildrenArray(
 
 	let skew = 0;
 
-	newParentVNode._children = [];
+	newParentVNode._children = new Array(newChildrenLength);
 	for (i = 0; i < newChildrenLength; i++) {
 		// @ts-expect-error We are reusing the childVNode variable to hold both the
 		// pre and post normalized childVNode
