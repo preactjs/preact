@@ -166,7 +166,9 @@ function constructNewChildrenArray(
 
 	let skew = 0;
 
-	newParentVNode._children = new Array(newChildrenLength);
+	const newChildren = oldChildren.slice();
+	newChildren.length = newChildrenLength;
+	newParentVNode._children = newChildren;
 	for (i = 0; i < newChildrenLength; i++) {
 		// @ts-expect-error We are reusing the childVNode variable to hold both the
 		// pre and post normalized childVNode
@@ -177,7 +179,7 @@ function constructNewChildrenArray(
 			typeof childVNode == 'boolean' ||
 			typeof childVNode == 'function'
 		) {
-			childVNode = newParentVNode._children[i] = null;
+			newChildren[i] = null;
 			continue;
 		}
 		// If this newVNode is being reused (e.g. <div>{reuse}{reuse}</div>) in the same diff,
@@ -190,7 +192,7 @@ function constructNewChildrenArray(
 			typeof childVNode == 'bigint' ||
 			childVNode.constructor == String
 		) {
-			childVNode = newParentVNode._children[i] = createVNode(
+			childVNode = newChildren[i] = createVNode(
 				null,
 				childVNode,
 				null,
@@ -198,7 +200,7 @@ function constructNewChildrenArray(
 				null
 			);
 		} else if (isArray(childVNode)) {
-			childVNode = newParentVNode._children[i] = createVNode(
+			childVNode = newChildren[i] = createVNode(
 				Fragment,
 				{ children: childVNode },
 				null,
@@ -210,7 +212,7 @@ function constructNewChildrenArray(
 			// scenario:
 			//   const reuse = <div />
 			//   <div>{reuse}<span />{reuse}</div>
-			childVNode = newParentVNode._children[i] = createVNode(
+			childVNode = newChildren[i] = createVNode(
 				childVNode.type,
 				childVNode.props,
 				childVNode.key,
@@ -218,7 +220,7 @@ function constructNewChildrenArray(
 				childVNode._original
 			);
 		} else {
-			childVNode = newParentVNode._children[i] = childVNode;
+			childVNode = newChildren[i] = childVNode;
 		}
 
 		const skewedIndex = i + skew;
