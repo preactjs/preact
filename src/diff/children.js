@@ -69,15 +69,19 @@ export function diffChildren(
 
 	let newChildrenLength = renderResult.length;
 
+	let newChildren = new Array(newChildrenLength);
+	newParentVNode._children = newChildren;
+
 	oldDom = constructNewChildrenArray(
 		newParentVNode,
+		newChildren,
 		renderResult,
 		oldChildren,
 		oldDom
 	);
 
 	for (i = 0; i < newChildrenLength; i++) {
-		childVNode = newParentVNode._children[i];
+		childVNode = newChildren[i];
 		if (childVNode == null) continue;
 
 		// At this point, constructNewChildrenArray has assigned _index to be the
@@ -144,11 +148,13 @@ export function diffChildren(
 
 /**
  * @param {VNode} newParentVNode
+ * @param {VNode[]} newChildren
  * @param {ComponentChildren[]} renderResult
  * @param {VNode[]} oldChildren
  */
 function constructNewChildrenArray(
 	newParentVNode,
+	newChildren,
 	renderResult,
 	oldChildren,
 	oldDom
@@ -166,9 +172,6 @@ function constructNewChildrenArray(
 
 	let skew = 0;
 
-	const newChildren = oldChildren.slice();
-	newChildren.length = newChildrenLength;
-	newParentVNode._children = newChildren;
 	for (i = 0; i < newChildrenLength; i++) {
 		// @ts-expect-error We are reusing the childVNode variable to hold both the
 		// pre and post normalized childVNode
