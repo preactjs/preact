@@ -124,7 +124,8 @@ function renderComponent(component) {
 	let oldVNode = component._vnode,
 		oldDom = oldVNode._dom,
 		commitQueue = [],
-		refQueue = [];
+		refQueue = [],
+		parentDom = component._parentDom;
 
 	if (component._parentDom) {
 		const newVNode = assign({}, oldVNode);
@@ -141,7 +142,8 @@ function renderComponent(component) {
 			commitQueue,
 			oldDom == null ? getDomSibling(oldVNode) : oldDom,
 			!!(oldVNode._flags & MODE_HYDRATE),
-			refQueue
+			refQueue,
+			parentDom.ownerDocument
 		);
 
 		newVNode._original = oldVNode._original;

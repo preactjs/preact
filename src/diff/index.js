@@ -44,6 +44,7 @@ import options from '../options';
  * siblings. In most cases, it starts out as `oldChildren[0]._dom`.
  * @param {boolean} isHydrating Whether or not we are in hydration
  * @param {any[]} refQueue an array of elements needed to invoke refs
+ * @param {Document} doc The owner document of the parentNode
  */
 export function diff(
 	parentDom,
@@ -55,7 +56,8 @@ export function diff(
 	commitQueue,
 	oldDom,
 	isHydrating,
-	refQueue
+	refQueue,
+	doc
 ) {
 	/** @type {any} */
 	let tmp,
@@ -270,7 +272,8 @@ export function diff(
 				commitQueue,
 				oldDom,
 				isHydrating,
-				refQueue
+				refQueue,
+				doc
 			);
 
 			c.base = newVNode._dom;
@@ -327,7 +330,8 @@ export function diff(
 			excessDomChildren,
 			commitQueue,
 			isHydrating,
-			refQueue
+			refQueue,
+			doc,
 		);
 	}
 
@@ -376,6 +380,7 @@ export function commitRoot(commitQueue, root, refQueue) {
  * to invoke in commitRoot
  * @param {boolean} isHydrating Whether or not we are in hydration
  * @param {any[]} refQueue an array of elements needed to invoke refs
+ * @param {Document} doc The owner document of the parentNode
  * @returns {PreactElement}
  */
 function diffElementNodes(
@@ -387,7 +392,8 @@ function diffElementNodes(
 	excessDomChildren,
 	commitQueue,
 	isHydrating,
-	refQueue
+	refQueue,
+	doc
 ) {
 	let oldProps = oldVNode.props;
 	let newProps = newVNode.props;
@@ -430,10 +436,10 @@ function diffElementNodes(
 
 	if (dom == null) {
 		if (nodeType === null) {
-			return document.createTextNode(newProps);
+			return doc.createTextNode(newProps);
 		}
 
-		dom = document.createElementNS(
+		dom = doc.createElementNS(
 			namespace,
 			nodeType,
 			newProps.is && newProps
@@ -446,6 +452,7 @@ function diffElementNodes(
 				options._hydrationMismatch(newVNode, excessDomChildren);
 			isHydrating = false;
 		}
+
 		// we created a new parent, so none of the previously attached children can be reused:
 		excessDomChildren = null;
 	}
@@ -537,7 +544,8 @@ function diffElementNodes(
 					? excessDomChildren[0]
 					: oldVNode._children && getDomSibling(oldVNode, 0),
 				isHydrating,
-				refQueue
+				refQueue,
+				doc
 			);
 
 			// Remove children that are not part of any vnode.
