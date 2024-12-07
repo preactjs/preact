@@ -12,7 +12,7 @@ import { BaseComponent, getDomSibling } from '../component';
 import { Fragment } from '../create-element';
 import { diffChildren } from './children';
 import { setProperty } from './props';
-import { assign, isArray, removeNode, slice } from '../util';
+import { assign, isArray, slice } from '../util';
 import options from '../options';
 
 /**
@@ -248,7 +248,7 @@ export function diff(
 			c.state = c._nextState;
 
 			if (c.getChildContext != null) {
-				globalContext = assign(assign({}, globalContext), c.getChildContext());
+				globalContext = assign({}, globalContext, c.getChildContext());
 			}
 
 			if (isClassComponent && !isNew && c.getSnapshotBeforeUpdate != null) {
@@ -272,8 +272,6 @@ export function diff(
 				isHydrating,
 				refQueue
 			);
-
-			c.base = newVNode._dom;
 
 			// We successfully rendered this VNode, unset any stored hydration/bailout state:
 			newVNode._flags &= RESET_MODE;
@@ -543,7 +541,7 @@ function diffElementNodes(
 			// Remove children that are not part of any vnode.
 			if (excessDomChildren != null) {
 				for (i = excessDomChildren.length; i--; ) {
-					removeNode(excessDomChildren[i]);
+					if (excessDomChildren[i]) excessDomChildren[i].remove();
 				}
 			}
 		}
@@ -559,12 +557,7 @@ function diffElementNodes(
 				// despite the attribute not being present. When the attribute
 				// is missing the progress bar is treated as indeterminate.
 				// To fix that we'll always update it when it is 0 for progress elements
-				(inputValue !== dom[i] ||
-					(nodeType === 'progress' && !inputValue) ||
-					// This is only for IE 11 to fix <select> value not being updated.
-					// To avoid a stale select value we need to set the option.value
-					// again, which triggers IE11 to re-evaluate the select value
-					(nodeType === 'option' && inputValue !== oldProps[i]))
+				(inputValue !== dom[i] || (nodeType === 'progress' && !inputValue))
 			) {
 				setProperty(dom, i, inputValue, oldProps[i], namespace);
 			}
@@ -632,7 +625,7 @@ export function unmount(vnode, parentVNode, skipRemove) {
 			}
 		}
 
-		r.base = r._parentDom = null;
+		r._parentDom = null;
 	}
 
 	if ((r = vnode._children)) {
@@ -647,8 +640,8 @@ export function unmount(vnode, parentVNode, skipRemove) {
 		}
 	}
 
-	if (!skipRemove) {
-		removeNode(vnode._dom);
+	if (!skipRemove && vnode._dom != null && typeof vnode.type != 'function') {
+		vnode._dom.remove();
 	}
 
 	vnode._component = vnode._parent = vnode._dom = UNDEFINED;
