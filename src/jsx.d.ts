@@ -1909,8 +1909,8 @@ export namespace JSXInternal {
 		form?: Signalish<string | undefined>;
 		high?: Signalish<number | undefined>;
 		low?: Signalish<number | undefined>;
-		max?: Signalish<string | undefined>;
-		min?: Signalish<string | undefined>;
+		max?: Signalish<number | string | undefined>;
+		min?: Signalish<number | string | undefined>;
 		optimum?: Signalish<number | undefined>;
 		value?: Signalish<string | number | undefined>;
 	}
@@ -1965,7 +1965,7 @@ export namespace JSXInternal {
 
 	interface ProgressHTMLAttributes<T extends EventTarget>
 		extends HTMLAttributes<T> {
-		max?: Signalish<string | undefined>;
+		max?: Signalish<number | string | undefined>;
 		value?: Signalish<string | number | undefined>;
 	}
 
