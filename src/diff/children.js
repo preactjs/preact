@@ -73,7 +73,8 @@ export function diffChildren(
 		newParentVNode,
 		renderResult,
 		oldChildren,
-		oldDom
+		oldDom,
+		newChildrenLength
 	);
 
 	for (i = 0; i < newChildrenLength; i++) {
@@ -151,7 +152,8 @@ function constructNewChildrenArray(
 	newParentVNode,
 	renderResult,
 	oldChildren,
-	oldDom
+	oldDom,
+	newChildrenLength
 ) {
 	/** @type {number} */
 	let i;
@@ -160,7 +162,6 @@ function constructNewChildrenArray(
 	/** @type {VNode} */
 	let oldVNode;
 
-	const newChildrenLength = renderResult.length;
 	let oldChildrenLength = oldChildren.length,
 		remainingOldChildren = oldChildrenLength;
 
@@ -177,7 +178,7 @@ function constructNewChildrenArray(
 			typeof childVNode == 'boolean' ||
 			typeof childVNode == 'function'
 		) {
-			childVNode = newParentVNode._children[i] = null;
+			newParentVNode._children[i] = null;
 			continue;
 		}
 		// If this newVNode is being reused (e.g. <div>{reuse}{reuse}</div>) in the same diff,
@@ -258,7 +259,7 @@ function constructNewChildrenArray(
 			if (typeof childVNode.type != 'function') {
 				childVNode._flags |= INSERT_VNODE;
 			}
-		} else if (matchingIndex !== skewedIndex) {
+		} else if (matchingIndex != skewedIndex) {
 			// When we move elements around i.e. [0, 1, 2] --> [1, 0, 2]
 			// --> we diff 1, we find it at position 1 while our skewed index is 0 and our skew is 0
 			//     we set the skew to 1 as we found an offset.
@@ -301,7 +302,7 @@ function constructNewChildrenArray(
 	if (remainingOldChildren) {
 		for (i = 0; i < oldChildrenLength; i++) {
 			oldVNode = oldChildren[i];
-			if (oldVNode != null && (oldVNode._flags & MATCHED) === 0) {
+			if (oldVNode != null && (oldVNode._flags & MATCHED) == 0) {
 				if (oldVNode._dom == oldDom) {
 					oldDom = getDomSibling(oldVNode);
 				}
@@ -347,7 +348,7 @@ function insert(parentVNode, oldDom, parentDom) {
 
 	do {
 		oldDom = oldDom && oldDom.nextSibling;
-	} while (oldDom != null && oldDom.nodeType === 8);
+	} while (oldDom != null && oldDom.nodeType == 8);
 
 	return oldDom;
 }
@@ -402,16 +403,16 @@ function findMatchingIndex(
 	// If there is an unkeyed functional VNode, that isn't a built-in like our Fragment,
 	// we should not search as we risk re-using state of an unrelated VNode.
 	let shouldSearch =
-		(typeof type !== 'function' || type === Fragment || key) &&
+		(typeof type != 'function' || type === Fragment || key) &&
 		remainingOldChildren >
-			(oldVNode != null && (oldVNode._flags & MATCHED) === 0 ? 1 : 0);
+			(oldVNode != null && (oldVNode._flags & MATCHED) == 0 ? 1 : 0);
 
 	if (
 		oldVNode === null ||
 		(oldVNode &&
 			key == oldVNode.key &&
 			type === oldVNode.type &&
-			(oldVNode._flags & MATCHED) === 0)
+			(oldVNode._flags & MATCHED) == 0)
 	) {
 		return skewedIndex;
 	} else if (shouldSearch) {
@@ -420,7 +421,7 @@ function findMatchingIndex(
 				oldVNode = oldChildren[x];
 				if (
 					oldVNode &&
-					(oldVNode._flags & MATCHED) === 0 &&
+					(oldVNode._flags & MATCHED) == 0 &&
 					key == oldVNode.key &&
 					type === oldVNode.type
 				) {
@@ -433,7 +434,7 @@ function findMatchingIndex(
 				oldVNode = oldChildren[y];
 				if (
 					oldVNode &&
-					(oldVNode._flags & MATCHED) === 0 &&
+					(oldVNode._flags & MATCHED) == 0 &&
 					key == oldVNode.key &&
 					type === oldVNode.type
 				) {

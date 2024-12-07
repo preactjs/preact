@@ -171,10 +171,10 @@ export function diff(
 							c._nextState,
 							componentContext
 						) === false) ||
-						newVNode._original === oldVNode._original)
+						newVNode._original == oldVNode._original)
 				) {
 					// More info about this here: https://gist.github.com/JoviDeCroock/bec5f2ce93544d2e6070ef8e0036e4e8
-					if (newVNode._original !== oldVNode._original) {
+					if (newVNode._original != oldVNode._original) {
 						// When we are dealing with a bail because of sCU we have to update
 						// the props, state and dirty-state.
 						// when we are dealing with strict-equality we don't as the child could still
@@ -294,7 +294,7 @@ export function diff(
 						? MODE_HYDRATE | MODE_SUSPENDED
 						: MODE_SUSPENDED;
 
-					while (oldDom && oldDom.nodeType === 8 && oldDom.nextSibling) {
+					while (oldDom && oldDom.nodeType == 8 && oldDom.nextSibling) {
 						oldDom = oldDom.nextSibling;
 					}
 
@@ -313,7 +313,7 @@ export function diff(
 		}
 	} else if (
 		excessDomChildren == null &&
-		newVNode._original === oldVNode._original
+		newVNode._original == oldVNode._original
 	) {
 		newVNode._children = oldVNode._children;
 		newVNode._dom = oldVNode._dom;
@@ -405,8 +405,8 @@ function diffElementNodes(
 	let checked;
 
 	// Tracks entering and exiting namespaces when descending through the tree.
-	if (nodeType === 'svg') namespace = SVG_NAMESPACE;
-	else if (nodeType === 'math') namespace = MATH_NAMESPACE;
+	if (nodeType == 'svg') namespace = SVG_NAMESPACE;
+	else if (nodeType == 'math') namespace = MATH_NAMESPACE;
 	else if (!namespace) namespace = XHTML_NAMESPACE;
 
 	if (excessDomChildren != null) {
@@ -418,8 +418,8 @@ function diffElementNodes(
 			// excessDomChildren so it isn't later removed in diffChildren
 			if (
 				value &&
-				'setAttribute' in value === !!nodeType &&
-				(nodeType ? value.localName === nodeType : value.nodeType === 3)
+				'setAttribute' in value == !!nodeType &&
+				(nodeType ? value.localName == nodeType : value.nodeType == 3)
 			) {
 				dom = value;
 				excessDomChildren[i] = null;
@@ -429,7 +429,7 @@ function diffElementNodes(
 	}
 
 	if (dom == null) {
-		if (nodeType === null) {
+		if (nodeType == null) {
 			return document.createTextNode(newProps);
 		}
 
@@ -530,7 +530,7 @@ function diffElementNodes(
 				newVNode,
 				oldVNode,
 				globalContext,
-				nodeType === 'foreignObject' ? XHTML_NAMESPACE : namespace,
+				nodeType == 'foreignObject' ? XHTML_NAMESPACE : namespace,
 				excessDomChildren,
 				commitQueue,
 				excessDomChildren
@@ -551,7 +551,7 @@ function diffElementNodes(
 		// As above, don't diff props during hydration
 		if (!isHydrating) {
 			i = 'value';
-			if (nodeType === 'progress' && inputValue == null) {
+			if (nodeType == 'progress' && inputValue == null) {
 				dom.removeAttribute('value');
 			} else if (
 				inputValue !== UNDEFINED &&
@@ -560,11 +560,11 @@ function diffElementNodes(
 				// is missing the progress bar is treated as indeterminate.
 				// To fix that we'll always update it when it is 0 for progress elements
 				(inputValue !== dom[i] ||
-					(nodeType === 'progress' && !inputValue) ||
+					(nodeType == 'progress' && !inputValue) ||
 					// This is only for IE 11 to fix <select> value not being updated.
 					// To avoid a stale select value we need to set the option.value
 					// again, which triggers IE11 to re-evaluate the select value
-					(nodeType === 'option' && inputValue !== oldProps[i]))
+					(nodeType == 'option' && inputValue !== oldProps[i]))
 			) {
 				setProperty(dom, i, inputValue, oldProps[i], namespace);
 			}
