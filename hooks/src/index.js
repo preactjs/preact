@@ -127,6 +127,21 @@ options.unmount = vnode => {
 	}
 };
 
+function getInitialHookState() {
+	return {
+		_nextValue: undefined,
+		_value: null,
+		_component: null,
+		_reducer: null,
+		_args: null,
+		_factory: null,
+		_context: null,
+		_pendingArgs: undefined,
+		_cleanup: undefined,
+		_pendingValue: undefined
+	};
+}
+
 /**
  * Get a hook's state from the currentComponent
  * @param {number} index The index of the hook to get
@@ -152,7 +167,7 @@ function getHookState(index, type) {
 		});
 
 	if (index >= hooks._list.length) {
-		hooks._list.push({});
+		hooks._list.push(getInitialHookState());
 	}
 
 	return hooks._list[index];
