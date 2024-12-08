@@ -13,7 +13,7 @@ import { slice } from './util';
  */
 export function render(vnode, parentDom, replaceNode) {
 	// https://github.com/preactjs/preact/issues/3794
-	if (parentDom === document) {
+	if (parentDom == document) {
 		parentDom = document.documentElement;
 	}
 
