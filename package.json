@@ -145,7 +145,7 @@
     "format": "biome format --write .",
     "format:check": "biome format ."
   },
-  "lint-staged": {
+  "nano-staged": {
     "**/*.{js,jsx,mjs,cjs,ts,tsx,yml,json,html,md,css,scss}": [
       "biome format --write --no-errors-on-unmatched"
     ]
@@ -238,11 +238,10 @@
     "karma-sinon": "^1.0.5",
     "karma-sourcemap-loader": "^0.4.0",
     "kolorist": "^1.8.0",
-    "lint-staged": "^15.2.10",
     "microbundle": "^0.15.1",
     "mocha": "^11.0.0",
     "npm-merge-driver-install": "^3.0.0",
-    "npm-run-all": "^4.1.5",
+    "npm-run-all2": "^7.0.0",
     "oxlint": "^0.14.0",
     "preact-render-to-string": "^6.5.0",
     "prop-types": "^15.8.1",
