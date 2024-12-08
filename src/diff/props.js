@@ -2,7 +2,7 @@ import { IS_NON_DIMENSIONAL, SVG_NAMESPACE } from '../constants';
 import options from '../options';
 
 function setStyle(style, key, value) {
-	if (key[0] === '-') {
+	if (key[0] == '-') {
 		style.setProperty(key, value == null ? '' : value);
 	} else if (value == null) {
 		style[key] = '';
@@ -39,7 +39,7 @@ let eventClock = 0;
 export function setProperty(dom, name, value, oldValue, namespace) {
 	let useCapture;
 
-	o: if (name === 'style') {
+	o: if (name == 'style') {
 		if (typeof value == 'string') {
 			dom.style.cssText = value;
 		} else {
@@ -65,14 +65,14 @@ export function setProperty(dom, name, value, oldValue, namespace) {
 		}
 	}
 	// Benchmark for comparison: https://esbench.com/bench/574c954bdb965b9a00965ac6
-	else if (name[0] === 'o' && name[1] === 'n') {
-		useCapture = name !== (name = name.replace(CAPTURE_REGEX, '$1'));
+	else if (name[0] == 'o' && name[1] == 'n') {
+		useCapture = name != (name = name.replace(CAPTURE_REGEX, '$1'));
 
 		// Infer correct casing for DOM built-in events:
 		if (
 			name.toLowerCase() in dom ||
-			name === 'onFocusOut' ||
-			name === 'onFocusIn'
+			name == 'onFocusOut' ||
+			name == 'onFocusIn'
 		)
 			name = name.toLowerCase().slice(2);
 		else name = name.slice(2);
@@ -136,7 +136,7 @@ export function setProperty(dom, name, value, oldValue, namespace) {
 
 		if (typeof value == 'function') {
 			// never serialize functions as attribute values
-		} else if (value != null && (value !== false || name[4] === '-')) {
+		} else if (value != null && (value !== false || name[4] == '-')) {
 			dom.setAttribute(name, name == 'popover' && value == true ? '' : value);
 		} else {
 			dom.removeAttribute(name);
