@@ -1,5 +1,5 @@
 import { assign } from './util';
-import { diff, commitRoot } from './diff/index';
+import { diff, commitRoot } from './diff/patch';
 import options from './options';
 import { Fragment } from './create-element';
 import { MODE_HYDRATE } from './constants';

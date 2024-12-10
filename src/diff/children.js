@@ -1,4 +1,4 @@
-import { diff, unmount, applyRef } from './index';
+import { diff, unmount, applyRef } from './patch';
 import { createVNode, Fragment } from '../create-element';
 import {
 	EMPTY_OBJ,
@@ -9,6 +9,9 @@ import {
 } from '../constants';
 import { isArray } from '../util';
 import { getDomSibling } from '../component';
+import { mount } from './mount';
+import { insert } from './operations';
+import { createInternal } from '../tree';
 
 /**
  * @typedef {import('../internal').ComponentChildren} ComponentChildren
@@ -92,18 +95,36 @@ export function diffChildren(
 		childVNode._index = i;
 
 		// Morph the old element into the new one, but don't append it to the dom yet
-		let result = diff(
-			parentDom,
-			childVNode,
-			oldVNode,
-			globalContext,
-			namespace,
-			excessDomChildren,
-			commitQueue,
-			oldDom,
-			isHydrating,
-			refQueue
-		);
+		let result;
+
+		if (oldVNode !== EMPTY_OBJ) {
+			result = diff(
+				parentDom,
+				childVNode,
+				oldVNode,
+				globalContext,
+				namespace,
+				excessDomChildren,
+				commitQueue,
+				oldDom,
+				isHydrating,
+				refQueue
+			);
+		} else {
+			// TODO: temp
+			const internal = createInternal(childVNode, null);
+			result = mount(
+				parentDom,
+				internal,
+				globalContext,
+				namespace,
+				excessDomChildren,
+				commitQueue,
+				oldDom,
+				isHydrating,
+				refQueue
+			);
+		}
 
 		// Adjust DOM nodes
 		newDom = childVNode._dom;
@@ -312,63 +333,6 @@ function constructNewChildrenArray(
 	}
 
 	return oldDom;
-}
-
-/**
- * @param {VNode} parentVNode
- * @param {PreactElement} oldDom
- * @param {PreactElement} parentDom
- * @returns {PreactElement}
- */
-function insert(parentVNode, oldDom, parentDom) {
-	// Note: VNodes in nested suspended trees may be missing _children.
-
-	if (typeof parentVNode.type == 'function') {
-		let children = parentVNode._children;
-		for (let i = 0; children && i < children.length; i++) {
-			if (children[i]) {
-				// If we enter this code path on sCU bailout, where we copy
-				// oldVNode._children to newVNode._children, we need to update the old
-				// children's _parent pointer to point to the newVNode (parentVNode
-				// here).
-				children[i]._parent = parentVNode;
-				oldDom = insert(children[i], oldDom, parentDom);
-			}
-		}
-
-		return oldDom;
-	} else if (parentVNode._dom != oldDom) {
-		if (oldDom && parentVNode.type && !parentDom.contains(oldDom)) {
-			oldDom = getDomSibling(parentVNode);
-		}
-		parentDom.insertBefore(parentVNode._dom, oldDom || null);
-		oldDom = parentVNode._dom;
-	}
-
-	do {
-		oldDom = oldDom && oldDom.nextSibling;
-	} while (oldDom != null && oldDom.nodeType === 8);
-
-	return oldDom;
-}
-
-/**
- * Flatten and loop through the children of a virtual node
- * @param {ComponentChildren} children The unflattened children of a virtual
- * node
- * @returns {VNode[]}
- */
-export function toChildArray(children, out) {
-	out = out || [];
-	if (children == null || typeof children == 'boolean') {
-	} else if (isArray(children)) {
-		children.some(child => {
-			toChildArray(child, out);
-		});
-	} else {
-		out.push(children);
-	}
-	return out;
 }
 
 /**
