@@ -347,6 +347,7 @@ export interface Options {
 	requestAnimationFrame?(callback: () => void): void;
 	debounceRendering?(cb: () => void): void;
 	useDebugValue?(value: string | number): void;
+	_afterRender?(newVNode: VNode, oldVNode: VNode): void;
 	_addHookName?(name: string | number): void;
 	__suspenseDidResolve?(vnode: VNode, cb: () => void): void;
 	// __canSuspenseResolve?(vnode: VNode, cb: () => void): void;

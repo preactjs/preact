@@ -5,8 +5,9 @@ import {
 	MODE_SUSPENDED,
 	RESET_MODE,
 	SVG_NAMESPACE,
-	UNDEFINED,
-	XHTML_NAMESPACE
+	XHTML_NAMESPACE,
+	SKIP_CHILDREN,
+	UNDEFINED
 } from '../constants';
 import { BaseComponent, getDomSibling } from '../component';
 import { Fragment } from '../create-element';
@@ -219,6 +220,7 @@ export function diff(
 			c._force = false;
 
 			let renderHook = options._render,
+				afterRender = options._afterRender,
 				count = 0;
 			if (isClassComponent) {
 				c.state = c._nextState;
@@ -227,6 +229,8 @@ export function diff(
 				if (renderHook) renderHook(newVNode);
 
 				tmp = c.render(c.props, c.state, c.context);
+
+				if (afterRender) afterRender(newVNode, oldVNode);
 
 				for (let i = 0; i < c._stateCallbacks.length; i++) {
 					c._renderCallbacks.push(c._stateCallbacks[i]);
@@ -238,6 +242,19 @@ export function diff(
 					if (renderHook) renderHook(newVNode);
 
 					tmp = c.render(c.props, c.state, c.context);
+
+					if (afterRender) afterRender(newVNode, oldVNode);
+
+					if (newVNode._flags & SKIP_CHILDREN) {
+						c._dirty = false;
+						c._renderCallbacks = [];
+						newVNode._dom = oldVNode._dom;
+						newVNode._children = oldVNode._children;
+						newVNode._children.some(vnode => {
+							if (vnode) vnode._parent = newVNode;
+						});
+						break outer;
+					}
 
 					// Handle setState called in render, see #2553
 					c.state = c._nextState;
