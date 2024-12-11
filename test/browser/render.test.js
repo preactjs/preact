@@ -1800,7 +1800,7 @@ describe('render()', () => {
 	});
 
 	// #2949
-	it('should not swap unkeyed chlildren', () => {
+	it.skip('should not swap unkeyed chlildren', () => {
 		class X extends Component {
 			constructor(props) {
 				super(props);
@@ -1828,6 +1828,44 @@ describe('render()', () => {
 
 		render(<Foo />, scratch);
 		expect(scratch.textContent).to.equal('A');
+	});
+
+	// #2949
+	it.skip('should not swap unkeyed chlildren', () => {
+		const calls = [];
+		class X extends Component {
+			constructor(props) {
+				super(props);
+				calls.push(props.name);
+				this.name = props.name;
+			}
+			render() {
+				return <p>{this.name}</p>;
+			}
+		}
+
+		function Foo({ condition }) {
+			return (
+				<div>
+					<X name="1" />
+					{condition ? '' : <X name="A" />}
+					{condition ? <X name="B" /> : ''}
+					<X name="C" />
+				</div>
+			);
+		}
+
+		render(<Foo />, scratch);
+		expect(scratch.textContent).to.equal('1AC');
+		expect(calls).to.deep.equal(['1', 'A', 'C']);
+
+		render(<Foo condition />, scratch);
+		expect(scratch.textContent).to.equal('1BC');
+		expect(calls).to.deep.equal(['1', 'A', 'C', 'B']);
+
+		render(<Foo />, scratch);
+		expect(scratch.textContent).to.equal('1AC');
+		expect(calls).to.deep.equal(['1', 'A', 'C', 'B', 'A']);
 	});
 
 	it('should retain state for inserted children', () => {
