@@ -1607,7 +1607,8 @@ export namespace JSXInternal {
 		width?: Signalish<number | string | undefined>;
 	}
 
-	interface ColHTMLAttributes<T extends EventTarget = HTMLTableColElement> extends HTMLAttributes<T> {
+	interface ColHTMLAttributes<T extends EventTarget = HTMLTableColElement>
+		extends HTMLAttributes<T> {
 		span?: Signalish<number | undefined>;
 		width?: Signalish<number | string | undefined>;
 	}
@@ -1622,7 +1623,8 @@ export namespace JSXInternal {
 		value?: Signalish<string | number | undefined>;
 	}
 
-	interface DelHTMLAttributes<T extends EventTarget = HTMLModElement> extends HTMLAttributes<T> {
+	interface DelHTMLAttributes<T extends EventTarget = HTMLModElement>
+		extends HTMLAttributes<T> {
 		cite?: Signalish<string | undefined>;
 		datetime?: Signalish<string | undefined>;
 		dateTime?: Signalish<string | undefined>;
@@ -1703,7 +1705,8 @@ export namespace JSXInternal {
 
 	type HTMLAttributeCrossOrigin = 'anonymous' | 'use-credentials';
 
-	interface ImgHTMLAttributes<T extends EventTarget = HTMLImageElement> extends HTMLAttributes<T> {
+	interface ImgHTMLAttributes<T extends EventTarget = HTMLImageElement>
+		extends HTMLAttributes<T> {
 		alt?: Signalish<string | undefined>;
 		crossorigin?: Signalish<HTMLAttributeCrossOrigin>;
 		crossOrigin?: Signalish<HTMLAttributeCrossOrigin>;
@@ -1803,7 +1806,8 @@ export namespace JSXInternal {
 		onChange?: GenericEventHandler<T> | undefined;
 	}
 
-	interface InsHTMLAttributes<T extends EventTarget = HTMLModElement> extends HTMLAttributes<T> {
+	interface InsHTMLAttributes<T extends EventTarget = HTMLModElement>
+		extends HTMLAttributes<T> {
 		cite?: Signalish<string | undefined>;
 		datetime?: Signalish<string | undefined>;
 		dateTime?: Signalish<string | undefined>;
@@ -1826,7 +1830,8 @@ export namespace JSXInternal {
 		htmlFor?: Signalish<string | undefined>;
 	}
 
-	interface LiHTMLAttributes<T extends EventTarget = HTMLLIElement> extends HTMLAttributes<T> {
+	interface LiHTMLAttributes<T extends EventTarget = HTMLLIElement>
+		extends HTMLAttributes<T> {
 		value?: Signalish<string | number | undefined>;
 	}
 
@@ -1851,7 +1856,8 @@ export namespace JSXInternal {
 		charSet?: Signalish<string | undefined>;
 	}
 
-	interface MapHTMLAttributes<T extends EventTarget = HTMLMapElement> extends HTMLAttributes<T> {
+	interface MapHTMLAttributes<T extends EventTarget = HTMLMapElement>
+		extends HTMLAttributes<T> {
 		name?: Signalish<string | undefined>;
 	}
 
@@ -1929,7 +1935,8 @@ export namespace JSXInternal {
 		wmode?: Signalish<string | undefined>;
 	}
 
-	interface OlHTMLAttributes<T extends EventTarget = HTMLOListElement> extends HTMLAttributes<T> {
+	interface OlHTMLAttributes<T extends EventTarget = HTMLOListElement>
+		extends HTMLAttributes<T> {
 		reversed?: Signalish<boolean | undefined>;
 		start?: Signalish<number | undefined>;
 		type?: Signalish<'1' | 'a' | 'A' | 'i' | 'I' | undefined>;
@@ -2040,7 +2047,8 @@ export namespace JSXInternal {
 		width?: Signalish<number | string | undefined>;
 	}
 
-	interface TdHTMLAttributes<T extends EventTarget = HTMLTableCellElement> extends HTMLAttributes<T> {
+	interface TdHTMLAttributes<T extends EventTarget = HTMLTableCellElement>
+		extends HTMLAttributes<T> {
 		align?: Signalish<
 			'left' | 'center' | 'right' | 'justify' | 'char' | undefined
 		>;
@@ -2079,7 +2087,8 @@ export namespace JSXInternal {
 		onChange?: GenericEventHandler<T> | undefined;
 	}
 
-	interface ThHTMLAttributes<T extends EventTarget = HTMLTableCellElement> extends HTMLAttributes<T> {
+	interface ThHTMLAttributes<T extends EventTarget = HTMLTableCellElement>
+		extends HTMLAttributes<T> {
 		align?: Signalish<
 			'left' | 'center' | 'right' | 'justify' | 'char' | undefined
 		>;
