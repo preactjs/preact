@@ -387,8 +387,6 @@ function findMatchingIndex(
 ) {
 	const key = childVNode.key;
 	const type = childVNode.type;
-	let x = skewedIndex - 1;
-	let y = skewedIndex + 1;
 	let oldVNode = oldChildren[skewedIndex];
 
 	// We only need to perform a search if there are more children
@@ -401,11 +399,11 @@ function findMatchingIndex(
 	// 1 (aka `remainingOldChildren > 0`) children to find and compare against.
 	//
 	// If there is an unkeyed functional VNode, that isn't a built-in like our Fragment,
-	// we should not search as we risk re-using state of an unrelated VNode.
+	// we should not search as we risk re-using state of an unrelated VNode. (reverted for now)
 	let shouldSearch =
-		(typeof type != 'function' || type === Fragment || key) &&
+		// (typeof type != 'function' || type === Fragment || key) &&
 		remainingOldChildren >
-			(oldVNode != null && (oldVNode._flags & MATCHED) == 0 ? 1 : 0);
+		(oldVNode != null && (oldVNode._flags & MATCHED) == 0 ? 1 : 0);
 
 	if (
 		oldVNode === null ||
@@ -416,6 +414,8 @@ function findMatchingIndex(
 	) {
 		return skewedIndex;
 	} else if (shouldSearch) {
+		let x = skewedIndex - 1;
+		let y = skewedIndex + 1;
 		while (x >= 0 || y < oldChildren.length) {
 			if (x >= 0) {
 				oldVNode = oldChildren[x];
