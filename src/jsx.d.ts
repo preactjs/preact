@@ -1352,6 +1352,8 @@ export namespace JSXInternal {
 		translate?: Signalish<boolean | undefined>;
 
 		// WAI-ARIA Attributes
+		// Most elements only allow a subset of roles and so this
+		// is overwritten in many of the per-element interfaces below
 		role?: Signalish<AriaRole | undefined>;
 
 		// Non-standard Attributes
@@ -1432,18 +1434,62 @@ export namespace JSXInternal {
 		target?: Signalish<HTMLAttributeAnchorTarget | undefined>;
 	}
 
+	interface ArticleHTMLAttributes<T extends EventTarget = HTMLElement>
+		extends HTMLAttributes<T> {
+		role?:
+			| 'article'
+			| 'application'
+			| 'document'
+			| 'feed'
+			| 'main'
+			| 'none'
+			| 'presentation'
+			| 'region';
+	}
+
+	interface AsideHTMLAttributes<T extends EventTarget = HTMLElement>
+		extends HTMLAttributes<T> {
+		role?:
+			| 'complementary'
+			| 'feed'
+			| 'none'
+			| 'note'
+			| 'presentation'
+			| 'region'
+			| 'search'
+			| 'doc-dedication'
+			| 'doc-example'
+			| 'doc-footnote'
+			| 'doc-glossary'
+			| 'doc-pullquote'
+			| 'doc-tip';
+	}
+
 	interface AudioHTMLAttributes<T extends EventTarget = HTMLAudioElement>
-		extends MediaHTMLAttributes<T> {}
+		extends MediaHTMLAttributes<T> {
+		role?: 'application';
+	}
 
 	interface BaseHTMLAttributes<T extends EventTarget = HTMLBaseElement>
 		extends HTMLAttributes<T> {
 		href?: Signalish<string | undefined>;
+		role: never;
 		target?: Signalish<HTMLAttributeAnchorTarget | undefined>;
 	}
 
 	interface BlockquoteHTMLAttributes<T extends EventTarget = HTMLQuoteElement>
 		extends HTMLAttributes<T> {
 		cite?: Signalish<string | undefined>;
+	}
+
+	interface BodyHTMLAttributes<T extends EventTarget = HTMLBodyElement>
+		extends HTMLAttributes<T> {
+		role?: 'generic';
+	}
+
+	interface BrHTMLAttributes<T extends EventTarget = HTMLBRElement>
+		extends HTMLAttributes<T> {
+		role?: 'none' | 'presentation';
 	}
 
 	interface ButtonHTMLAttributes<T extends EventTarget = HTMLButtonElement>
@@ -1468,6 +1514,22 @@ export namespace JSXInternal {
 		popoverTarget?: Signalish<string | undefined>;
 		popovertargetaction?: Signalish<'hide' | 'show' | 'toggle' | undefined>;
 		popoverTargetAction?: Signalish<'hide' | 'show' | 'toggle' | undefined>;
+		role?:
+			| 'button'
+			| 'checkbox'
+			| 'combobox'
+			| 'gridcell'
+			| 'link'
+			| 'menuitem'
+			| 'menuitemcheckbox'
+			| 'menuitemradio'
+			| 'option'
+			| 'radio'
+			| 'separator'
+			| 'slider'
+			| 'switch'
+			| 'tab'
+			| 'treeitem';
 		type?: Signalish<'submit' | 'reset' | 'button' | undefined>;
 		value?: Signalish<string | number | undefined>;
 	}
@@ -1478,20 +1540,37 @@ export namespace JSXInternal {
 		width?: Signalish<number | string | undefined>;
 	}
 
+	interface CaptionHTMLAttributes<T extends EventTarget = HTMLElement>
+		extends HTMLAttributes<T> {
+		role?: 'caption';
+	}
+
 	interface ColHTMLAttributes<T extends EventTarget = HTMLTableColElement>
 		extends HTMLAttributes<T> {
+		role: never;
 		span?: Signalish<number | undefined>;
 		width?: Signalish<number | string | undefined>;
 	}
 
 	interface ColgroupHTMLAttributes<T extends EventTarget = HTMLTableColElement>
 		extends HTMLAttributes<T> {
+		role: never;
 		span?: Signalish<number | undefined>;
 	}
 
 	interface DataHTMLAttributes<T extends EventTarget = HTMLDataElement>
 		extends HTMLAttributes<T> {
 		value?: Signalish<string | number | undefined>;
+	}
+
+	interface DataListHTMLAttributes<T extends EventTarget = HTMLDataListElement>
+		extends HTMLAttributes<T> {
+		role?: 'listbox';
+	}
+
+	interface DdHTMLAttributes<T extends EventTarget = HTMLElement>
+		extends HTMLAttributes<T> {
+		role: never;
 	}
 
 	interface DelHTMLAttributes<T extends EventTarget = HTMLModElement>
@@ -1504,6 +1583,7 @@ export namespace JSXInternal {
 	interface DetailsHTMLAttributes<T extends EventTarget = HTMLDetailsElement>
 		extends HTMLAttributes<T> {
 		open?: Signalish<boolean | undefined>;
+		role?: 'group';
 	}
 
 	interface DialogHTMLAttributes<T extends EventTarget = HTMLDialogElement>
@@ -1513,11 +1593,23 @@ export namespace JSXInternal {
 		open?: Signalish<boolean | undefined>;
 		closedby?: Signalish<'none' | 'closerequest' | 'any' | undefined>;
 		closedBy?: Signalish<'none' | 'closerequest' | 'any' | undefined>;
+		role?: 'dialog' | 'alertdialog';
+	}
+
+	interface DlHTMLAttributes<T extends EventTarget = HTMLDListElement>
+		extends HTMLAttributes<T> {
+		role?: 'group' | 'list' | 'none' | 'presentation';
+	}
+
+	interface DtHTMLAttributes<T extends EventTarget = HTMLElement>
+		extends HTMLAttributes<T> {
+		role?: 'listitem';
 	}
 
 	interface EmbedHTMLAttributes<T extends EventTarget = HTMLEmbedElement>
 		extends HTMLAttributes<T> {
 		height?: Signalish<number | string | undefined>;
+		role?: 'application' | 'document' | 'img' | 'none' | 'presentation';
 		src?: Signalish<string | undefined>;
 		type?: Signalish<string | undefined>;
 		width?: Signalish<number | string | undefined>;
@@ -1528,6 +1620,23 @@ export namespace JSXInternal {
 		disabled?: Signalish<boolean | undefined>;
 		form?: Signalish<string | undefined>;
 		name?: Signalish<string | undefined>;
+		role?: 'group' | 'none' | 'presentation' | 'radiogroup';
+	}
+
+	interface FigcaptionHTMLAttributes<T extends EventTarget = HTMLElement>
+		extends HTMLAttributes<T> {
+		role?: 'group' | 'none' | 'presentation';
+	}
+
+	interface FooterHTMLAttributes<T extends EventTarget = HTMLElement>
+		extends HTMLAttributes<T> {
+		role?:
+			| 'contentinfo'
+			| 'generic'
+			| 'group'
+			| 'none'
+			| 'presentation'
+			| 'doc-footnote';
 	}
 
 	interface FormHTMLAttributes<T extends EventTarget = HTMLFormElement>
@@ -1544,7 +1653,33 @@ export namespace JSXInternal {
 		novalidate?: Signalish<boolean | undefined>;
 		noValidate?: Signalish<boolean | undefined>;
 		rel?: Signalish<string | undefined>;
+		role?: 'form' | 'none' | 'presentation' | 'search';
 		target?: Signalish<string | undefined>;
+	}
+
+	interface HeadingHTMLAttributes<T extends EventTarget = HTMLHeadingElement>
+		extends HTMLAttributes<T> {
+		role?: 'heading' | 'none' | 'presentation' | 'tab' | 'doc-subtitle';
+	}
+
+	interface HeadHTMLAttributes<T extends EventTarget = HTMLHeadElement>
+		extends HTMLAttributes<T> {
+		role: never;
+	}
+
+	interface HeaderHTMLAttributes<T extends EventTarget = HTMLElement>
+		extends HTMLAttributes<T> {
+		role?: 'banner' | 'generic' | 'group' | 'none' | 'presentation';
+	}
+
+	interface HrHTMLAttributes<T extends EventTarget = HTMLHRElement>
+		extends HTMLAttributes<T> {
+		role?: 'separator' | 'none' | 'presentation' | 'doc-pagebreak';
+	}
+
+	interface HtmlHTMLAttributes<T extends EventTarget = HTMLHtmlElement>
+		extends HTMLAttributes<T> {
+		role?: 'document';
 	}
 
 	interface IframeHTMLAttributes<T extends EventTarget = HTMLIFrameElement>
@@ -1565,6 +1700,7 @@ export namespace JSXInternal {
 		name?: Signalish<string | undefined>;
 		referrerpolicy?: Signalish<HTMLAttributeReferrerPolicy | undefined>;
 		referrerPolicy?: Signalish<HTMLAttributeReferrerPolicy | undefined>;
+		role?: 'application' | 'document' | 'img' | 'none' | 'presentation';
 		sandbox?: Signalish<string | undefined>;
 		/** @deprecated */
 		scrolling?: Signalish<string | undefined>;
@@ -1702,6 +1838,12 @@ export namespace JSXInternal {
 		for?: Signalish<string | undefined>;
 		form?: Signalish<string | undefined>;
 		htmlFor?: Signalish<string | undefined>;
+		role: never;
+	}
+
+	interface LegendHTMLAttributes<T extends EventTarget = HTMLLegendElement>
+		extends HTMLAttributes<T> {
+		role: never;
 	}
 
 	interface LiHTMLAttributes<T extends EventTarget = HTMLLIElement>
@@ -1725,15 +1867,22 @@ export namespace JSXInternal {
 		referrerpolicy?: Signalish<HTMLAttributeReferrerPolicy | undefined>;
 		referrerPolicy?: Signalish<HTMLAttributeReferrerPolicy | undefined>;
 		rel?: Signalish<string | undefined>;
+		role: never;
 		sizes?: Signalish<string | undefined>;
 		type?: Signalish<string | undefined>;
 		charset?: Signalish<string | undefined>;
 		charSet?: Signalish<string | undefined>;
 	}
 
+	interface MainHTMLAttributes<T extends EventTarget = HTMLElement>
+		extends HTMLAttributes<T> {
+		role?: 'main';
+	}
+
 	interface MapHTMLAttributes<T extends EventTarget = HTMLMapElement>
 		extends HTMLAttributes<T> {
 		name?: Signalish<string | undefined>;
+		role: never;
 	}
 
 	interface MarqueeHTMLAttributes<T extends EventTarget = HTMLMarqueeElement>
@@ -1782,6 +1931,18 @@ export namespace JSXInternal {
 
 	interface MenuHTMLAttributes<T extends EventTarget = HTMLMenuElement>
 		extends HTMLAttributes<T> {
+		role:
+			| 'list'
+			| 'group'
+			| 'listbox'
+			| 'menu'
+			| 'menubar'
+			| 'none'
+			| 'presentation'
+			| 'radiogroup'
+			| 'tablist'
+			| 'toolbar'
+			| 'tree';
 		type?: Signalish<string | undefined>;
 	}
 
@@ -1794,6 +1955,7 @@ export namespace JSXInternal {
 		httpEquiv?: Signalish<string | undefined>;
 		name?: Signalish<string | undefined>;
 		media?: Signalish<string | undefined>;
+		role: never;
 	}
 
 	interface MeterHTMLAttributes<T extends EventTarget = HTMLMeterElement>
@@ -1804,7 +1966,24 @@ export namespace JSXInternal {
 		max?: Signalish<number | string | undefined>;
 		min?: Signalish<number | string | undefined>;
 		optimum?: Signalish<number | undefined>;
+		role?: 'meter';
 		value?: Signalish<string | number | undefined>;
+	}
+
+	interface NavHTMLAttributes<T extends EventTarget = HTMLElement>
+		extends HTMLAttributes<T> {
+		role?:
+			| 'navigation'
+			| 'menu'
+			| 'menubar'
+			| 'none'
+			| 'presentation'
+			| 'tablist';
+	}
+
+	interface NoScriptHTMLAttributes<T extends EventTarget = HTMLElement>
+		extends HTMLAttributes<T> {
+		role: never;
 	}
 
 	interface ObjectHTMLAttributes<T extends EventTarget = HTMLObjectElement>
@@ -1814,6 +1993,7 @@ export namespace JSXInternal {
 		form?: Signalish<string | undefined>;
 		height?: Signalish<number | string | undefined>;
 		name?: Signalish<string | undefined>;
+		role?: 'application' | 'document' | 'img';
 		type?: Signalish<string | undefined>;
 		usemap?: Signalish<string | undefined>;
 		useMap?: Signalish<string | undefined>;
@@ -1824,6 +2004,18 @@ export namespace JSXInternal {
 	interface OlHTMLAttributes<T extends EventTarget = HTMLOListElement>
 		extends HTMLAttributes<T> {
 		reversed?: Signalish<boolean | undefined>;
+		role?:
+			| 'list'
+			| 'group'
+			| 'listbox'
+			| 'menu'
+			| 'menubar'
+			| 'none'
+			| 'presentation'
+			| 'radiogroup'
+			| 'tablist'
+			| 'toolbar'
+			| 'tree';
 		start?: Signalish<number | undefined>;
 		type?: Signalish<'1' | 'a' | 'A' | 'i' | 'I' | undefined>;
 	}
@@ -1832,12 +2024,14 @@ export namespace JSXInternal {
 		extends HTMLAttributes<T> {
 		disabled?: Signalish<boolean | undefined>;
 		label?: Signalish<string | undefined>;
+		role?: 'group';
 	}
 
 	interface OptionHTMLAttributes<T extends EventTarget = HTMLOptionElement>
 		extends HTMLAttributes<T> {
 		disabled?: Signalish<boolean | undefined>;
 		label?: Signalish<string | undefined>;
+		role?: 'option';
 		selected?: Signalish<boolean | undefined>;
 		value?: Signalish<string | number | undefined>;
 	}
@@ -1853,12 +2047,19 @@ export namespace JSXInternal {
 	interface ParamHTMLAttributes<T extends EventTarget = HTMLParamElement>
 		extends HTMLAttributes<T> {
 		name?: Signalish<string | undefined>;
+		role: never;
 		value?: Signalish<string | number | undefined>;
+	}
+
+	interface PictureHTMLAttributes<T extends EventTarget = HTMLPictureElement>
+		extends HTMLAttributes<T> {
+		role: never;
 	}
 
 	interface ProgressHTMLAttributes<T extends EventTarget = HTMLProgressElement>
 		extends HTMLAttributes<T> {
 		max?: Signalish<number | string | undefined>;
+		role?: 'progressbar';
 		value?: Signalish<string | number | undefined>;
 	}
 
@@ -1882,8 +2083,14 @@ export namespace JSXInternal {
 		noModule?: Signalish<boolean | undefined>;
 		referrerpolicy?: Signalish<HTMLAttributeReferrerPolicy | undefined>;
 		referrerPolicy?: Signalish<HTMLAttributeReferrerPolicy | undefined>;
+		role: never;
 		src?: Signalish<string | undefined>;
 		type?: Signalish<string | undefined>;
+	}
+
+	interface SearchHTMLAttributes<T extends EventTarget = HTMLElement>
+		extends HTMLAttributes<T> {
+		role?: 'search' | 'form' | 'group' | 'none' | 'presentation' | 'region';
 	}
 
 	interface SelectHTMLAttributes<T extends EventTarget = HTMLSelectElement>
@@ -1896,6 +2103,58 @@ export namespace JSXInternal {
 		multiple?: Signalish<boolean | undefined>;
 		name?: Signalish<string | undefined>;
 		required?: Signalish<boolean | undefined>;
+		// TODO: Select w/ multiple
+		role?:
+			| 'region'
+			| 'generic'
+			| 'alert'
+			| 'alertdialog'
+			| 'application'
+			| 'banner'
+			| 'complementary'
+			| 'contentinfo'
+			| 'dialog'
+			| 'document'
+			| 'feed'
+			| 'group'
+			| 'log'
+			| 'main'
+			| 'marquee'
+			| 'navigation'
+			| 'none'
+			| 'note'
+			| 'presentation'
+			| 'search'
+			| 'status'
+			| 'tabpanel'
+			| 'doc-abstract'
+			| 'doc-acknowledgments'
+			| 'doc-afterword'
+			| 'doc-appendix'
+			| 'doc-bibliography'
+			| 'doc-chapter'
+			| 'doc-colophon'
+			| 'doc-conclusion'
+			| 'doc-credit'
+			| 'doc-credits'
+			| 'doc-dedication'
+			| 'doc-endnotes'
+			| 'doc-epigraph'
+			| 'doc-epilogue'
+			| 'doc-errata'
+			| 'doc-example'
+			| 'doc-foreword'
+			| 'doc-glossary'
+			| 'doc-index'
+			| 'doc-introduction'
+			| 'doc-notice'
+			| 'doc-pagelist'
+			| 'doc-part'
+			| 'doc-preface'
+			| 'doc-prologue'
+			| 'doc-pullquote'
+			| 'doc-qna'
+			| 'doc-toc';
 		size?: Signalish<number | undefined>;
 		value?: Signalish<string | number | undefined>;
 		onChange?: GenericEventHandler<T> | undefined;
@@ -1904,12 +2163,14 @@ export namespace JSXInternal {
 	interface SlotHTMLAttributes<T extends EventTarget = HTMLSlotElement>
 		extends HTMLAttributes<T> {
 		name?: Signalish<string | undefined>;
+		role: never;
 	}
 
 	interface SourceHTMLAttributes<T extends EventTarget = HTMLSourceElement>
 		extends HTMLAttributes<T> {
 		height?: Signalish<number | string | undefined>;
 		media?: Signalish<string | undefined>;
+		role: never;
 		sizes?: Signalish<string | undefined>;
 		src?: Signalish<string | undefined>;
 		srcset?: Signalish<string | undefined>;
@@ -1921,6 +2182,7 @@ export namespace JSXInternal {
 	interface StyleHTMLAttributes<T extends EventTarget = HTMLStyleElement>
 		extends HTMLAttributes<T> {
 		media?: Signalish<string | undefined>;
+		role: never;
 		scoped?: Signalish<boolean | undefined>;
 		type?: Signalish<string | undefined>;
 	}
@@ -1950,6 +2212,11 @@ export namespace JSXInternal {
 		valign?: Signalish<'top' | 'middle' | 'bottom' | 'baseline' | undefined>;
 	}
 
+	interface TemplateHTMLAttributes<T extends EventTarget = HTMLTemplateElement>
+		extends HTMLAttributes<T> {
+		role: never;
+	}
+
 	interface TextareaHTMLAttributes<T extends EventTarget = HTMLTextAreaElement>
 		extends HTMLAttributes<T> {
 		autocomplete?: Signalish<string | undefined>;
@@ -1967,6 +2234,7 @@ export namespace JSXInternal {
 		placeholder?: Signalish<string | undefined>;
 		readOnly?: Signalish<boolean | undefined>;
 		required?: Signalish<boolean | undefined>;
+		role?: 'textbox';
 		rows?: Signalish<number | undefined>;
 		value?: Signalish<string | number | undefined>;
 		wrap?: Signalish<string | undefined>;
@@ -1993,13 +2261,35 @@ export namespace JSXInternal {
 		dateTime?: Signalish<string | undefined>;
 	}
 
+	interface TitleHTMLAttributes<T extends EventTarget = HTMLTitleElement>
+		extends HTMLAttributes<T> {
+		role: never;
+	}
+
 	interface TrackHTMLAttributes<T extends EventTarget = HTMLTrackElement>
 		extends MediaHTMLAttributes<T> {
 		default?: Signalish<boolean | undefined>;
 		kind?: Signalish<string | undefined>;
 		label?: Signalish<string | undefined>;
+		role: never;
 		srclang?: Signalish<string | undefined>;
 		srcLang?: Signalish<string | undefined>;
+	}
+
+	interface UlHTMLAttributes<T extends EventTarget = HTMLUListElement>
+		extends HTMLAttributes<T> {
+		role?:
+			| 'list'
+			| 'group'
+			| 'listbox'
+			| 'menu'
+			| 'menubar'
+			| 'none'
+			| 'presentation'
+			| 'radiogroup'
+			| 'tablist'
+			| 'toolbar'
+			| 'tree';
 	}
 
 	interface VideoHTMLAttributes<T extends EventTarget = HTMLVideoElement>
@@ -2010,6 +2300,12 @@ export namespace JSXInternal {
 		playsInline?: Signalish<boolean | undefined>;
 		poster?: Signalish<string | undefined>;
 		width?: Signalish<number | string | undefined>;
+		role?: 'application';
+	}
+
+	interface WbrHTMLAttributes<T extends EventTarget = HTMLElement>
+		extends HTMLAttributes<T> {
+		role?: 'none' | 'presentation';
 	}
 
 	export type DetailedHTMLProps<
@@ -2394,8 +2690,8 @@ export namespace JSXInternal {
 		abbr: HTMLAttributes<HTMLElement>;
 		address: HTMLAttributes<HTMLElement>;
 		area: AreaHTMLAttributes<HTMLAreaElement>;
-		article: HTMLAttributes<HTMLElement>;
-		aside: HTMLAttributes<HTMLElement>;
+		article: ArticleHTMLAttributes<HTMLElement>;
+		aside: AsideHTMLAttributes<HTMLElement>;
 		audio: AudioHTMLAttributes<HTMLAudioElement>;
 		b: HTMLAttributes<HTMLElement>;
 		base: BaseHTMLAttributes<HTMLBaseElement>;
@@ -2403,43 +2699,43 @@ export namespace JSXInternal {
 		bdo: HTMLAttributes<HTMLElement>;
 		big: HTMLAttributes<HTMLElement>;
 		blockquote: BlockquoteHTMLAttributes<HTMLQuoteElement>;
-		body: HTMLAttributes<HTMLBodyElement>;
-		br: HTMLAttributes<HTMLBRElement>;
+		body: BodyHTMLAttributes<HTMLBodyElement>;
+		br: BrHTMLAttributes<HTMLBRElement>;
 		button: ButtonHTMLAttributes<HTMLButtonElement>;
 		canvas: CanvasHTMLAttributes<HTMLCanvasElement>;
-		caption: HTMLAttributes<HTMLTableCaptionElement>;
+		caption: CaptionHTMLAttributes<HTMLTableCaptionElement>;
 		cite: HTMLAttributes<HTMLElement>;
 		code: HTMLAttributes<HTMLElement>;
 		col: ColHTMLAttributes<HTMLTableColElement>;
 		colgroup: ColgroupHTMLAttributes<HTMLTableColElement>;
 		data: DataHTMLAttributes<HTMLDataElement>;
-		datalist: HTMLAttributes<HTMLDataListElement>;
-		dd: HTMLAttributes<HTMLElement>;
+		datalist: DataListHTMLAttributes<HTMLDataListElement>;
+		dd: DdHTMLAttributes<HTMLElement>;
 		del: DelHTMLAttributes<HTMLModElement>;
 		details: DetailsHTMLAttributes<HTMLDetailsElement>;
 		dfn: HTMLAttributes<HTMLElement>;
 		dialog: DialogHTMLAttributes<HTMLDialogElement>;
 		div: HTMLAttributes<HTMLDivElement>;
-		dl: HTMLAttributes<HTMLDListElement>;
-		dt: HTMLAttributes<HTMLElement>;
+		dl: DlHTMLAttributes<HTMLDListElement>;
+		dt: DtHTMLAttributes<HTMLElement>;
 		em: HTMLAttributes<HTMLElement>;
 		embed: EmbedHTMLAttributes<HTMLEmbedElement>;
 		fieldset: FieldsetHTMLAttributes<HTMLFieldSetElement>;
-		figcaption: HTMLAttributes<HTMLElement>;
+		figcaption: FigcaptionHTMLAttributes<HTMLElement>;
 		figure: HTMLAttributes<HTMLElement>;
-		footer: HTMLAttributes<HTMLElement>;
+		footer: FooterHTMLAttributes<HTMLElement>;
 		form: FormHTMLAttributes<HTMLFormElement>;
-		h1: HTMLAttributes<HTMLHeadingElement>;
-		h2: HTMLAttributes<HTMLHeadingElement>;
-		h3: HTMLAttributes<HTMLHeadingElement>;
-		h4: HTMLAttributes<HTMLHeadingElement>;
-		h5: HTMLAttributes<HTMLHeadingElement>;
-		h6: HTMLAttributes<HTMLHeadingElement>;
-		head: HTMLAttributes<HTMLHeadElement>;
-		header: HTMLAttributes<HTMLElement>;
+		h1: HeadingHTMLAttributes<HTMLHeadingElement>;
+		h2: HeadingHTMLAttributes<HTMLHeadingElement>;
+		h3: HeadingHTMLAttributes<HTMLHeadingElement>;
+		h4: HeadingHTMLAttributes<HTMLHeadingElement>;
+		h5: HeadingHTMLAttributes<HTMLHeadingElement>;
+		h6: HeadingHTMLAttributes<HTMLHeadingElement>;
+		head: HeadHTMLAttributes<HTMLHeadElement>;
+		header: HeaderHTMLAttributes<HTMLElement>;
 		hgroup: HTMLAttributes<HTMLElement>;
-		hr: HTMLAttributes<HTMLHRElement>;
-		html: HTMLAttributes<HTMLHtmlElement>;
+		hr: HrHTMLAttributes<HTMLHRElement>;
+		html: HtmlHTMLAttributes<HTMLHtmlElement>;
 		i: HTMLAttributes<HTMLElement>;
 		iframe: IframeHTMLAttributes<HTMLIFrameElement>;
 		img: ImgHTMLAttributes<HTMLImageElement>;
@@ -2448,10 +2744,10 @@ export namespace JSXInternal {
 		kbd: HTMLAttributes<HTMLElement>;
 		keygen: KeygenHTMLAttributes<HTMLUnknownElement>;
 		label: LabelHTMLAttributes<HTMLLabelElement>;
-		legend: HTMLAttributes<HTMLLegendElement>;
+		legend: LegendHTMLAttributes<HTMLLegendElement>;
 		li: LiHTMLAttributes<HTMLLIElement>;
 		link: LinkHTMLAttributes<HTMLLinkElement>;
-		main: HTMLAttributes<HTMLElement>;
+		main: MainHTMLAttributes<HTMLElement>;
 		map: MapHTMLAttributes<HTMLMapElement>;
 		mark: HTMLAttributes<HTMLElement>;
 		marquee: MarqueeHTMLAttributes<HTMLMarqueeElement>;
@@ -2459,8 +2755,8 @@ export namespace JSXInternal {
 		menuitem: HTMLAttributes<HTMLUnknownElement>;
 		meta: MetaHTMLAttributes<HTMLMetaElement>;
 		meter: MeterHTMLAttributes<HTMLMeterElement>;
-		nav: HTMLAttributes<HTMLElement>;
-		noscript: HTMLAttributes<HTMLElement>;
+		nav: NavHTMLAttributes<HTMLElement>;
+		noscript: NoScriptHTMLAttributes<HTMLElement>;
 		object: ObjectHTMLAttributes<HTMLObjectElement>;
 		ol: OlHTMLAttributes<HTMLOListElement>;
 		optgroup: OptgroupHTMLAttributes<HTMLOptGroupElement>;
@@ -2468,7 +2764,7 @@ export namespace JSXInternal {
 		output: OutputHTMLAttributes<HTMLOutputElement>;
 		p: HTMLAttributes<HTMLParagraphElement>;
 		param: ParamHTMLAttributes<HTMLParamElement>;
-		picture: HTMLAttributes<HTMLPictureElement>;
+		picture: PictureHTMLAttributes<HTMLPictureElement>;
 		pre: HTMLAttributes<HTMLPreElement>;
 		progress: ProgressHTMLAttributes<HTMLProgressElement>;
 		q: QuoteHTMLAttributes<HTMLQuoteElement>;
@@ -2478,7 +2774,7 @@ export namespace JSXInternal {
 		s: HTMLAttributes<HTMLElement>;
 		samp: HTMLAttributes<HTMLElement>;
 		script: ScriptHTMLAttributes<HTMLScriptElement>;
-		search: HTMLAttributes<HTMLElement>;
+		search: SearchHTMLAttributes<HTMLElement>;
 		section: HTMLAttributes<HTMLElement>;
 		select: SelectHTMLAttributes<HTMLSelectElement>;
 		slot: SlotHTMLAttributes<HTMLSlotElement>;
@@ -2493,19 +2789,19 @@ export namespace JSXInternal {
 		table: TableHTMLAttributes<HTMLTableElement>;
 		tbody: HTMLAttributes<HTMLTableSectionElement>;
 		td: TdHTMLAttributes<HTMLTableCellElement>;
-		template: HTMLAttributes<HTMLTemplateElement>;
+		template: TemplateHTMLAttributes<HTMLTemplateElement>;
 		textarea: TextareaHTMLAttributes<HTMLTextAreaElement>;
 		tfoot: HTMLAttributes<HTMLTableSectionElement>;
 		th: ThHTMLAttributes<HTMLTableCellElement>;
 		thead: HTMLAttributes<HTMLTableSectionElement>;
 		time: TimeHTMLAttributes<HTMLTimeElement>;
-		title: HTMLAttributes<HTMLTitleElement>;
+		title: TitleHTMLAttributes<HTMLTitleElement>;
 		tr: HTMLAttributes<HTMLTableRowElement>;
 		track: TrackHTMLAttributes<HTMLTrackElement>;
-		u: HTMLAttributes<HTMLElement>;
+		u: UlHTMLAttributes<HTMLElement>;
 		ul: HTMLAttributes<HTMLUListElement>;
 		var: HTMLAttributes<HTMLElement>;
 		video: VideoHTMLAttributes<HTMLVideoElement>;
-		wbr: HTMLAttributes<HTMLElement>;
+		wbr: WbrHTMLAttributes<HTMLElement>;
 	}
 }
