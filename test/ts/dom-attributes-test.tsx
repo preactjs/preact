@@ -15,6 +15,13 @@ function createSignal<T>(value: T): JSX.SignalLike<T> {
 // @ts-expect-error A button should not have a role of presentation
 const badAriaRole = <button role="presentation" />;
 const validAriaRole = <button role="slider" />;
+const signalBadAriaRole = (
+	// @ts-expect-error A button should not have a role of presentation
+	<button role={createSignal('presentation' as const)} />
+)
+const signalValidAriaRole = (
+	<button role={createSignal('slider' as const)} />
+)
 
 // @ts-expect-error We should correctly type aria attributes like autocomplete
 const badAriaValues = <div aria-autocomplete="bad-value" />;

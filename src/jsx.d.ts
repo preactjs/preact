@@ -1633,7 +1633,7 @@ export namespace JSXInternal {
 
 	interface ArticleHTMLAttributes<T extends EventTarget = HTMLElement>
 		extends HTMLAttributes<T> {
-		role?:
+		role?: Signalish<
 			| 'article'
 			| 'application'
 			| 'document'
@@ -1641,12 +1641,14 @@ export namespace JSXInternal {
 			| 'main'
 			| 'none'
 			| 'presentation'
-			| 'region';
+			| 'region'
+			| undefined
+		>;
 	}
 
 	interface AsideHTMLAttributes<T extends EventTarget = HTMLElement>
 		extends HTMLAttributes<T> {
-		role?:
+		role?: Signalish<
 			| 'complementary'
 			| 'feed'
 			| 'none'
@@ -1659,12 +1661,14 @@ export namespace JSXInternal {
 			| 'doc-footnote'
 			| 'doc-glossary'
 			| 'doc-pullquote'
-			| 'doc-tip';
+			| 'doc-tip'
+			| undefined
+		>;
 	}
 
 	interface AudioHTMLAttributes<T extends EventTarget = HTMLAudioElement>
 		extends MediaHTMLAttributes<T> {
-		role?: 'application';
+		role?: Signalish<'application' | undefined>;
 	}
 
 	interface BaseHTMLAttributes<T extends EventTarget = HTMLBaseElement>
@@ -1686,7 +1690,7 @@ export namespace JSXInternal {
 
 	interface BrHTMLAttributes<T extends EventTarget = HTMLBRElement>
 		extends HTMLAttributes<T> {
-		role?: 'none' | 'presentation';
+		role?: Signalish<'none' | 'presentation' | undefined>;
 	}
 
 	interface ButtonHTMLAttributes<T extends EventTarget = HTMLButtonElement>
@@ -1711,7 +1715,7 @@ export namespace JSXInternal {
 		popoverTarget?: Signalish<string | undefined>;
 		popovertargetaction?: Signalish<'hide' | 'show' | 'toggle' | undefined>;
 		popoverTargetAction?: Signalish<'hide' | 'show' | 'toggle' | undefined>;
-		role?:
+		role?: Signalish<
 			| 'button'
 			| 'checkbox'
 			| 'combobox'
@@ -1726,7 +1730,9 @@ export namespace JSXInternal {
 			| 'slider'
 			| 'switch'
 			| 'tab'
-			| 'treeitem';
+			| 'treeitem'
+			| undefined
+		>;
 		type?: Signalish<'submit' | 'reset' | 'button' | undefined>;
 		value?: Signalish<string | number | undefined>;
 	}
@@ -1762,7 +1768,7 @@ export namespace JSXInternal {
 
 	interface DataListHTMLAttributes<T extends EventTarget = HTMLDataListElement>
 		extends HTMLAttributes<T> {
-		role?: 'listbox';
+		role?: Signalish<'listbox' | undefined>;
 	}
 
 	interface DdHTMLAttributes<T extends EventTarget = HTMLElement>
@@ -1780,7 +1786,7 @@ export namespace JSXInternal {
 	interface DetailsHTMLAttributes<T extends EventTarget = HTMLDetailsElement>
 		extends HTMLAttributes<T> {
 		open?: Signalish<boolean | undefined>;
-		role?: 'group';
+		role?: Signalish<'group' | undefined>;
 	}
 
 	interface DialogHTMLAttributes<T extends EventTarget = HTMLDialogElement>
@@ -1790,23 +1796,25 @@ export namespace JSXInternal {
 		open?: Signalish<boolean | undefined>;
 		closedby?: Signalish<'none' | 'closerequest' | 'any' | undefined>;
 		closedBy?: Signalish<'none' | 'closerequest' | 'any' | undefined>;
-		role?: 'dialog' | 'alertdialog';
+		role?: Signalish<'dialog' | 'alertdialog' | undefined>;
 	}
 
 	interface DlHTMLAttributes<T extends EventTarget = HTMLDListElement>
 		extends HTMLAttributes<T> {
-		role?: 'group' | 'list' | 'none' | 'presentation';
+		role?: Signalish<'group' | 'list' | 'none' | 'presentation' | undefined>;
 	}
 
 	interface DtHTMLAttributes<T extends EventTarget = HTMLElement>
 		extends HTMLAttributes<T> {
-		role?: 'listitem';
+		role?: Signalish<'listitem' | undefined>;
 	}
 
 	interface EmbedHTMLAttributes<T extends EventTarget = HTMLEmbedElement>
 		extends HTMLAttributes<T> {
 		height?: Signalish<number | string | undefined>;
-		role?: 'application' | 'document' | 'img' | 'none' | 'presentation';
+		role?: Signalish<
+			'application' | 'document' | 'img' | 'none' | 'presentation' | undefined
+		>;
 		src?: Signalish<string | undefined>;
 		type?: Signalish<string | undefined>;
 		width?: Signalish<number | string | undefined>;
@@ -1817,23 +1825,27 @@ export namespace JSXInternal {
 		disabled?: Signalish<boolean | undefined>;
 		form?: Signalish<string | undefined>;
 		name?: Signalish<string | undefined>;
-		role?: 'group' | 'none' | 'presentation' | 'radiogroup';
+		role?: Signalish<
+			'group' | 'none' | 'presentation' | 'radiogroup' | undefined
+		>;
 	}
 
 	interface FigcaptionHTMLAttributes<T extends EventTarget = HTMLElement>
 		extends HTMLAttributes<T> {
-		role?: 'group' | 'none' | 'presentation';
+		role?: Signalish<'group' | 'none' | 'presentation' | undefined>;
 	}
 
 	interface FooterHTMLAttributes<T extends EventTarget = HTMLElement>
 		extends HTMLAttributes<T> {
-		role?:
+		role?: Signalish<
 			| 'contentinfo'
 			| 'generic'
 			| 'group'
 			| 'none'
 			| 'presentation'
-			| 'doc-footnote';
+			| 'doc-footnote'
+			| undefined
+		>;
 	}
 
 	interface FormHTMLAttributes<T extends EventTarget = HTMLFormElement>
@@ -1850,13 +1862,15 @@ export namespace JSXInternal {
 		novalidate?: Signalish<boolean | undefined>;
 		noValidate?: Signalish<boolean | undefined>;
 		rel?: Signalish<string | undefined>;
-		role?: 'form' | 'none' | 'presentation' | 'search';
+		role?: Signalish<'form' | 'none' | 'presentation' | 'search' | undefined>;
 		target?: Signalish<string | undefined>;
 	}
 
 	interface HeadingHTMLAttributes<T extends EventTarget = HTMLHeadingElement>
 		extends HTMLAttributes<T> {
-		role?: 'heading' | 'none' | 'presentation' | 'tab' | 'doc-subtitle';
+		role?: Signalish<
+			'heading' | 'none' | 'presentation' | 'tab' | 'doc-subtitle' | undefined
+		>;
 	}
 
 	interface HeadHTMLAttributes<T extends EventTarget = HTMLHeadElement>
@@ -1866,17 +1880,21 @@ export namespace JSXInternal {
 
 	interface HeaderHTMLAttributes<T extends EventTarget = HTMLElement>
 		extends HTMLAttributes<T> {
-		role?: 'banner' | 'generic' | 'group' | 'none' | 'presentation';
+		role?: Signalish<
+			'banner' | 'generic' | 'group' | 'none' | 'presentation' | undefined
+		>;
 	}
 
 	interface HrHTMLAttributes<T extends EventTarget = HTMLHRElement>
 		extends HTMLAttributes<T> {
-		role?: 'separator' | 'none' | 'presentation' | 'doc-pagebreak';
+		role?: Signalish<
+			'separator' | 'none' | 'presentation' | 'doc-pagebreak' | undefined
+		>;
 	}
 
 	interface HtmlHTMLAttributes<T extends EventTarget = HTMLHtmlElement>
 		extends HTMLAttributes<T> {
-		role?: 'document';
+		role?: Signalish<'document' | undefined>;
 	}
 
 	interface IframeHTMLAttributes<T extends EventTarget = HTMLIFrameElement>
@@ -1897,7 +1915,9 @@ export namespace JSXInternal {
 		name?: Signalish<string | undefined>;
 		referrerpolicy?: Signalish<HTMLAttributeReferrerPolicy | undefined>;
 		referrerPolicy?: Signalish<HTMLAttributeReferrerPolicy | undefined>;
-		role?: 'application' | 'document' | 'img' | 'none' | 'presentation';
+		role?: Signalish<
+			'application' | 'document' | 'img' | 'none' | 'presentation' | undefined
+		>;
 		sandbox?: Signalish<string | undefined>;
 		/** @deprecated */
 		scrolling?: Signalish<string | undefined>;
@@ -2073,7 +2093,7 @@ export namespace JSXInternal {
 
 	interface MainHTMLAttributes<T extends EventTarget = HTMLElement>
 		extends HTMLAttributes<T> {
-		role?: 'main';
+		role?: Signalish<'main' | undefined>;
 	}
 
 	interface MapHTMLAttributes<T extends EventTarget = HTMLMapElement>
@@ -2163,19 +2183,21 @@ export namespace JSXInternal {
 		max?: Signalish<number | string | undefined>;
 		min?: Signalish<number | string | undefined>;
 		optimum?: Signalish<number | undefined>;
-		role?: 'meter';
+		role?: Signalish<'meter' | undefined>;
 		value?: Signalish<string | number | undefined>;
 	}
 
 	interface NavHTMLAttributes<T extends EventTarget = HTMLElement>
 		extends HTMLAttributes<T> {
-		role?:
+		role?: Signalish<
 			| 'navigation'
 			| 'menu'
 			| 'menubar'
 			| 'none'
 			| 'presentation'
-			| 'tablist';
+			| 'tablist'
+			| undefined
+		>;
 	}
 
 	interface NoScriptHTMLAttributes<T extends EventTarget = HTMLElement>
@@ -2190,7 +2212,7 @@ export namespace JSXInternal {
 		form?: Signalish<string | undefined>;
 		height?: Signalish<number | string | undefined>;
 		name?: Signalish<string | undefined>;
-		role?: 'application' | 'document' | 'img';
+		role?: Signalish<'application' | 'document' | 'img' | undefined>;
 		type?: Signalish<string | undefined>;
 		usemap?: Signalish<string | undefined>;
 		useMap?: Signalish<string | undefined>;
@@ -2201,7 +2223,7 @@ export namespace JSXInternal {
 	interface OlHTMLAttributes<T extends EventTarget = HTMLOListElement>
 		extends HTMLAttributes<T> {
 		reversed?: Signalish<boolean | undefined>;
-		role?:
+		role?: Signalish<
 			| 'list'
 			| 'group'
 			| 'listbox'
@@ -2212,7 +2234,9 @@ export namespace JSXInternal {
 			| 'radiogroup'
 			| 'tablist'
 			| 'toolbar'
-			| 'tree';
+			| 'tree'
+			| undefined
+		>;
 		start?: Signalish<number | undefined>;
 		type?: Signalish<'1' | 'a' | 'A' | 'i' | 'I' | undefined>;
 	}
@@ -2221,14 +2245,14 @@ export namespace JSXInternal {
 		extends HTMLAttributes<T> {
 		disabled?: Signalish<boolean | undefined>;
 		label?: Signalish<string | undefined>;
-		role?: 'group';
+		role?: Signalish<'group' | undefined>;
 	}
 
 	interface OptionHTMLAttributes<T extends EventTarget = HTMLOptionElement>
 		extends HTMLAttributes<T> {
 		disabled?: Signalish<boolean | undefined>;
 		label?: Signalish<string | undefined>;
-		role?: 'option';
+		role?: Signalish<'option' | undefined>;
 		selected?: Signalish<boolean | undefined>;
 		value?: Signalish<string | number | undefined>;
 	}
@@ -2256,7 +2280,7 @@ export namespace JSXInternal {
 	interface ProgressHTMLAttributes<T extends EventTarget = HTMLProgressElement>
 		extends HTMLAttributes<T> {
 		max?: Signalish<number | string | undefined>;
-		role?: 'progressbar';
+		role?: Signalish<'progressbar' | undefined>;
 		value?: Signalish<string | number | undefined>;
 	}
 
@@ -2287,7 +2311,15 @@ export namespace JSXInternal {
 
 	interface SearchHTMLAttributes<T extends EventTarget = HTMLElement>
 		extends HTMLAttributes<T> {
-		role?: 'search' | 'form' | 'group' | 'none' | 'presentation' | 'region';
+		role?: Signalish<
+			| 'search'
+			| 'form'
+			| 'group'
+			| 'none'
+			| 'presentation'
+			| 'region'
+			| undefined
+		>;
 	}
 
 	interface SelectHTMLAttributes<T extends EventTarget = HTMLSelectElement>
@@ -2301,7 +2333,7 @@ export namespace JSXInternal {
 		name?: Signalish<string | undefined>;
 		required?: Signalish<boolean | undefined>;
 		// TODO: Select w/ multiple
-		role?:
+		role?: Signalish<
 			| 'region'
 			| 'generic'
 			| 'alert'
@@ -2351,7 +2383,9 @@ export namespace JSXInternal {
 			| 'doc-prologue'
 			| 'doc-pullquote'
 			| 'doc-qna'
-			| 'doc-toc';
+			| 'doc-toc'
+			| undefined
+		>;
 		size?: Signalish<number | undefined>;
 		value?: Signalish<string | number | undefined>;
 		onChange?: GenericEventHandler<T> | undefined;
@@ -2431,7 +2465,7 @@ export namespace JSXInternal {
 		placeholder?: Signalish<string | undefined>;
 		readOnly?: Signalish<boolean | undefined>;
 		required?: Signalish<boolean | undefined>;
-		role?: 'textbox';
+		role?: Signalish<'textbox' | undefined>;
 		rows?: Signalish<number | undefined>;
 		value?: Signalish<string | number | undefined>;
 		wrap?: Signalish<string | undefined>;
@@ -2475,7 +2509,7 @@ export namespace JSXInternal {
 
 	interface UlHTMLAttributes<T extends EventTarget = HTMLUListElement>
 		extends HTMLAttributes<T> {
-		role?:
+		role?: Signalish<
 			| 'list'
 			| 'group'
 			| 'listbox'
@@ -2486,7 +2520,9 @@ export namespace JSXInternal {
 			| 'radiogroup'
 			| 'tablist'
 			| 'toolbar'
-			| 'tree';
+			| 'tree'
+			| undefined
+		>;
 	}
 
 	interface VideoHTMLAttributes<T extends EventTarget = HTMLVideoElement>
@@ -2497,12 +2533,12 @@ export namespace JSXInternal {
 		playsInline?: Signalish<boolean | undefined>;
 		poster?: Signalish<string | undefined>;
 		width?: Signalish<number | string | undefined>;
-		role?: 'application';
+		role?: Signalish<'application' | undefined>;
 	}
 
 	interface WbrHTMLAttributes<T extends EventTarget = HTMLElement>
 		extends HTMLAttributes<T> {
-		role?: 'none' | 'presentation';
+		role?: Signalish<'none' | 'presentation' | undefined>;
 	}
 
 	export type DetailedHTMLProps<
