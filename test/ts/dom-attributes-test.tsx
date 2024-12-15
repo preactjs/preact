@@ -23,6 +23,13 @@ const signalValidAriaRole = (
 	<button role={createSignal('slider' as const)} />
 )
 
+// @ts-expect-error A map should never have any role set
+const invalidAriaRole = <map role="presentation" />;
+const signalInvalidAriaRole = (
+	// @ts-expect-error A map should never have any role set
+	<button role={createSignal('presentation' as const)} />
+)
+
 // @ts-expect-error We should correctly type aria attributes like autocomplete
 const badAriaValues = <div aria-autocomplete="bad-value" />;
 const validAriaValues = <div aria-autocomplete="none" />;
