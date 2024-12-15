@@ -1533,7 +1533,7 @@ export namespace JSXInternal {
 		| '_top'
 		| (string & {});
 
-	interface AnchorHTMLAttributes<T extends EventTarget>
+	interface AnchorHTMLAttributes<T extends EventTarget = HTMLAnchorElement>
 		extends HTMLAttributes<T> {
 		download?: Signalish<any>;
 		href?: Signalish<string | undefined>;
@@ -1548,7 +1548,7 @@ export namespace JSXInternal {
 		referrerPolicy?: Signalish<HTMLAttributeReferrerPolicy | undefined>;
 	}
 
-	interface AreaHTMLAttributes<T extends EventTarget>
+	interface AreaHTMLAttributes<T extends EventTarget = HTMLAreaElement>
 		extends HTMLAttributes<T> {
 		alt?: Signalish<string | undefined>;
 		coords?: Signalish<string | undefined>;
@@ -1564,21 +1564,21 @@ export namespace JSXInternal {
 		target?: Signalish<string | undefined>;
 	}
 
-	interface AudioHTMLAttributes<T extends EventTarget>
+	interface AudioHTMLAttributes<T extends EventTarget = HTMLAudioElement>
 		extends MediaHTMLAttributes<T> {}
 
-	interface BaseHTMLAttributes<T extends EventTarget>
+	interface BaseHTMLAttributes<T extends EventTarget = HTMLBaseElement>
 		extends HTMLAttributes<T> {
 		href?: Signalish<string | undefined>;
 		target?: Signalish<string | undefined>;
 	}
 
-	interface BlockquoteHTMLAttributes<T extends EventTarget>
+	interface BlockquoteHTMLAttributes<T extends EventTarget = HTMLQuoteElement>
 		extends HTMLAttributes<T> {
 		cite?: Signalish<string | undefined>;
 	}
 
-	interface ButtonHTMLAttributes<T extends EventTarget>
+	interface ButtonHTMLAttributes<T extends EventTarget = HTMLButtonElement>
 		extends HTMLAttributes<T> {
 		disabled?: Signalish<boolean | undefined>;
 		form?: Signalish<string | undefined>;
@@ -1601,47 +1601,49 @@ export namespace JSXInternal {
 		value?: Signalish<string | number | undefined>;
 	}
 
-	interface CanvasHTMLAttributes<T extends EventTarget>
+	interface CanvasHTMLAttributes<T extends EventTarget = HTMLCanvasElement>
 		extends HTMLAttributes<T> {
 		height?: Signalish<number | string | undefined>;
 		width?: Signalish<number | string | undefined>;
 	}
 
-	interface ColHTMLAttributes<T extends EventTarget> extends HTMLAttributes<T> {
+	interface ColHTMLAttributes<T extends EventTarget = HTMLTableColElement>
+		extends HTMLAttributes<T> {
 		span?: Signalish<number | undefined>;
 		width?: Signalish<number | string | undefined>;
 	}
 
-	interface ColgroupHTMLAttributes<T extends EventTarget>
+	interface ColgroupHTMLAttributes<T extends EventTarget = HTMLTableColElement>
 		extends HTMLAttributes<T> {
 		span?: Signalish<number | undefined>;
 	}
 
-	interface DataHTMLAttributes<T extends EventTarget>
+	interface DataHTMLAttributes<T extends EventTarget = HTMLDataElement>
 		extends HTMLAttributes<T> {
 		value?: Signalish<string | number | undefined>;
 	}
 
-	interface DelHTMLAttributes<T extends EventTarget> extends HTMLAttributes<T> {
+	interface DelHTMLAttributes<T extends EventTarget = HTMLModElement>
+		extends HTMLAttributes<T> {
 		cite?: Signalish<string | undefined>;
 		datetime?: Signalish<string | undefined>;
 		dateTime?: Signalish<string | undefined>;
 	}
 
-	interface DetailsHTMLAttributes<T extends EventTarget>
+	interface DetailsHTMLAttributes<T extends EventTarget = HTMLDetailsElement>
 		extends HTMLAttributes<T> {
 		open?: Signalish<boolean | undefined>;
 		onToggle?: GenericEventHandler<T> | undefined;
 	}
 
-	interface DialogHTMLAttributes<T extends EventTarget>
+	interface DialogHTMLAttributes<T extends EventTarget = HTMLDialogElement>
 		extends HTMLAttributes<T> {
 		onCancel?: GenericEventHandler<T> | undefined;
 		onClose?: GenericEventHandler<T> | undefined;
 		open?: Signalish<boolean | undefined>;
 	}
 
-	interface EmbedHTMLAttributes<T extends EventTarget>
+	interface EmbedHTMLAttributes<T extends EventTarget = HTMLEmbedElement>
 		extends HTMLAttributes<T> {
 		height?: Signalish<number | string | undefined>;
 		src?: Signalish<string | undefined>;
@@ -1649,14 +1651,14 @@ export namespace JSXInternal {
 		width?: Signalish<number | string | undefined>;
 	}
 
-	interface FieldsetHTMLAttributes<T extends EventTarget>
+	interface FieldsetHTMLAttributes<T extends EventTarget = HTMLFieldSetElement>
 		extends HTMLAttributes<T> {
 		disabled?: Signalish<boolean | undefined>;
 		form?: Signalish<string | undefined>;
 		name?: Signalish<string | undefined>;
 	}
 
-	interface FormHTMLAttributes<T extends EventTarget>
+	interface FormHTMLAttributes<T extends EventTarget = HTMLFormElement>
 		extends HTMLAttributes<T> {
 		'accept-charset'?: Signalish<string | undefined>;
 		acceptCharset?: Signalish<string | undefined>;
@@ -1673,7 +1675,7 @@ export namespace JSXInternal {
 		target?: Signalish<string | undefined>;
 	}
 
-	interface IframeHTMLAttributes<T extends EventTarget>
+	interface IframeHTMLAttributes<T extends EventTarget = HTMLIFrameElement>
 		extends HTMLAttributes<T> {
 		allow?: Signalish<string | undefined>;
 		allowFullScreen?: Signalish<boolean | undefined>;
@@ -1703,7 +1705,8 @@ export namespace JSXInternal {
 
 	type HTMLAttributeCrossOrigin = 'anonymous' | 'use-credentials';
 
-	interface ImgHTMLAttributes<T extends EventTarget> extends HTMLAttributes<T> {
+	interface ImgHTMLAttributes<T extends EventTarget = HTMLImageElement>
+		extends HTMLAttributes<T> {
 		alt?: Signalish<string | undefined>;
 		crossorigin?: Signalish<HTMLAttributeCrossOrigin>;
 		crossOrigin?: Signalish<HTMLAttributeCrossOrigin>;
@@ -1746,7 +1749,7 @@ export namespace JSXInternal {
 		| 'week'
 		| (string & {});
 
-	interface InputHTMLAttributes<T extends EventTarget>
+	interface InputHTMLAttributes<T extends EventTarget = HTMLInputElement>
 		extends HTMLAttributes<T> {
 		accept?: Signalish<string | undefined>;
 		alt?: Signalish<string | undefined>;
@@ -1803,13 +1806,14 @@ export namespace JSXInternal {
 		onChange?: GenericEventHandler<T> | undefined;
 	}
 
-	interface InsHTMLAttributes<T extends EventTarget> extends HTMLAttributes<T> {
+	interface InsHTMLAttributes<T extends EventTarget = HTMLModElement>
+		extends HTMLAttributes<T> {
 		cite?: Signalish<string | undefined>;
 		datetime?: Signalish<string | undefined>;
 		dateTime?: Signalish<string | undefined>;
 	}
 
-	interface KeygenHTMLAttributes<T extends EventTarget>
+	interface KeygenHTMLAttributes<T extends EventTarget = HTMLUnknownElement>
 		extends HTMLAttributes<T> {
 		challenge?: Signalish<string | undefined>;
 		disabled?: Signalish<boolean | undefined>;
@@ -1819,18 +1823,19 @@ export namespace JSXInternal {
 		name?: Signalish<string | undefined>;
 	}
 
-	interface LabelHTMLAttributes<T extends EventTarget>
+	interface LabelHTMLAttributes<T extends EventTarget = HTMLLabelElement>
 		extends HTMLAttributes<T> {
 		for?: Signalish<string | undefined>;
 		form?: Signalish<string | undefined>;
 		htmlFor?: Signalish<string | undefined>;
 	}
 
-	interface LiHTMLAttributes<T extends EventTarget> extends HTMLAttributes<T> {
+	interface LiHTMLAttributes<T extends EventTarget = HTMLLIElement>
+		extends HTMLAttributes<T> {
 		value?: Signalish<string | number | undefined>;
 	}
 
-	interface LinkHTMLAttributes<T extends EventTarget>
+	interface LinkHTMLAttributes<T extends EventTarget = HTMLLinkElement>
 		extends HTMLAttributes<T> {
 		as?: Signalish<string | undefined>;
 		crossorigin?: Signalish<HTMLAttributeCrossOrigin>;
@@ -1851,11 +1856,12 @@ export namespace JSXInternal {
 		charSet?: Signalish<string | undefined>;
 	}
 
-	interface MapHTMLAttributes<T extends EventTarget> extends HTMLAttributes<T> {
+	interface MapHTMLAttributes<T extends EventTarget = HTMLMapElement>
+		extends HTMLAttributes<T> {
 		name?: Signalish<string | undefined>;
 	}
 
-	interface MarqueeHTMLAttributes<T extends EventTarget>
+	interface MarqueeHTMLAttributes<T extends EventTarget = HTMLMarqueeElement>
 		extends HTMLAttributes<T> {
 		behavior?: Signalish<'scroll' | 'slide' | 'alternate' | undefined>;
 		bgColor?: Signalish<string | undefined>;
@@ -1870,7 +1876,7 @@ export namespace JSXInternal {
 		width?: Signalish<number | string | undefined>;
 	}
 
-	interface MediaHTMLAttributes<T extends EventTarget>
+	interface MediaHTMLAttributes<T extends EventTarget = HTMLMediaElement>
 		extends HTMLAttributes<T> {
 		autoplay?: Signalish<boolean | undefined>;
 		autoPlay?: Signalish<boolean | undefined>;
@@ -1888,12 +1894,12 @@ export namespace JSXInternal {
 		volume?: Signalish<string | number | undefined>;
 	}
 
-	interface MenuHTMLAttributes<T extends EventTarget>
+	interface MenuHTMLAttributes<T extends EventTarget = HTMLMenuElement>
 		extends HTMLAttributes<T> {
 		type?: Signalish<string | undefined>;
 	}
 
-	interface MetaHTMLAttributes<T extends EventTarget>
+	interface MetaHTMLAttributes<T extends EventTarget = HTMLMetaElement>
 		extends HTMLAttributes<T> {
 		charset?: Signalish<string | undefined>;
 		charSet?: Signalish<string | undefined>;
@@ -1904,7 +1910,7 @@ export namespace JSXInternal {
 		media?: Signalish<string | undefined>;
 	}
 
-	interface MeterHTMLAttributes<T extends EventTarget>
+	interface MeterHTMLAttributes<T extends EventTarget = HTMLMeterElement>
 		extends HTMLAttributes<T> {
 		form?: Signalish<string | undefined>;
 		high?: Signalish<number | undefined>;
@@ -1915,7 +1921,7 @@ export namespace JSXInternal {
 		value?: Signalish<string | number | undefined>;
 	}
 
-	interface ObjectHTMLAttributes<T extends EventTarget>
+	interface ObjectHTMLAttributes<T extends EventTarget = HTMLObjectElement>
 		extends HTMLAttributes<T> {
 		classID?: Signalish<string | undefined>;
 		data?: Signalish<string | undefined>;
@@ -1929,19 +1935,20 @@ export namespace JSXInternal {
 		wmode?: Signalish<string | undefined>;
 	}
 
-	interface OlHTMLAttributes<T extends EventTarget> extends HTMLAttributes<T> {
+	interface OlHTMLAttributes<T extends EventTarget = HTMLOListElement>
+		extends HTMLAttributes<T> {
 		reversed?: Signalish<boolean | undefined>;
 		start?: Signalish<number | undefined>;
 		type?: Signalish<'1' | 'a' | 'A' | 'i' | 'I' | undefined>;
 	}
 
-	interface OptgroupHTMLAttributes<T extends EventTarget>
+	interface OptgroupHTMLAttributes<T extends EventTarget = HTMLOptGroupElement>
 		extends HTMLAttributes<T> {
 		disabled?: Signalish<boolean | undefined>;
 		label?: Signalish<string | undefined>;
 	}
 
-	interface OptionHTMLAttributes<T extends EventTarget>
+	interface OptionHTMLAttributes<T extends EventTarget = HTMLOptionElement>
 		extends HTMLAttributes<T> {
 		disabled?: Signalish<boolean | undefined>;
 		label?: Signalish<string | undefined>;
@@ -1949,7 +1956,7 @@ export namespace JSXInternal {
 		value?: Signalish<string | number | undefined>;
 	}
 
-	interface OutputHTMLAttributes<T extends EventTarget>
+	interface OutputHTMLAttributes<T extends EventTarget = HTMLOutputElement>
 		extends HTMLAttributes<T> {
 		for?: Signalish<string | undefined>;
 		form?: Signalish<string | undefined>;
@@ -1957,24 +1964,24 @@ export namespace JSXInternal {
 		name?: Signalish<string | undefined>;
 	}
 
-	interface ParamHTMLAttributes<T extends EventTarget>
+	interface ParamHTMLAttributes<T extends EventTarget = HTMLParamElement>
 		extends HTMLAttributes<T> {
 		name?: Signalish<string | undefined>;
 		value?: Signalish<string | number | undefined>;
 	}
 
-	interface ProgressHTMLAttributes<T extends EventTarget>
+	interface ProgressHTMLAttributes<T extends EventTarget = HTMLProgressElement>
 		extends HTMLAttributes<T> {
 		max?: Signalish<number | string | undefined>;
 		value?: Signalish<string | number | undefined>;
 	}
 
-	interface QuoteHTMLAttributes<T extends EventTarget>
+	interface QuoteHTMLAttributes<T extends EventTarget = HTMLQuoteElement>
 		extends HTMLAttributes<T> {
 		cite?: Signalish<string | undefined>;
 	}
 
-	interface ScriptHTMLAttributes<T extends EventTarget>
+	interface ScriptHTMLAttributes<T extends EventTarget = HTMLScriptElement>
 		extends HTMLAttributes<T> {
 		async?: Signalish<boolean | undefined>;
 		/** @deprecated */
@@ -1993,7 +2000,7 @@ export namespace JSXInternal {
 		type?: Signalish<string | undefined>;
 	}
 
-	interface SelectHTMLAttributes<T extends EventTarget>
+	interface SelectHTMLAttributes<T extends EventTarget = HTMLSelectElement>
 		extends HTMLAttributes<T> {
 		autocomplete?: Signalish<string | undefined>;
 		autoComplete?: Signalish<string | undefined>;
@@ -2008,12 +2015,12 @@ export namespace JSXInternal {
 		onChange?: GenericEventHandler<T> | undefined;
 	}
 
-	interface SlotHTMLAttributes<T extends EventTarget>
+	interface SlotHTMLAttributes<T extends EventTarget = HTMLSlotElement>
 		extends HTMLAttributes<T> {
 		name?: Signalish<string | undefined>;
 	}
 
-	interface SourceHTMLAttributes<T extends EventTarget>
+	interface SourceHTMLAttributes<T extends EventTarget = HTMLSourceElement>
 		extends HTMLAttributes<T> {
 		height?: Signalish<number | string | undefined>;
 		media?: Signalish<string | undefined>;
@@ -2025,14 +2032,14 @@ export namespace JSXInternal {
 		width?: Signalish<number | string | undefined>;
 	}
 
-	interface StyleHTMLAttributes<T extends EventTarget>
+	interface StyleHTMLAttributes<T extends EventTarget = HTMLStyleElement>
 		extends HTMLAttributes<T> {
 		media?: Signalish<string | undefined>;
 		scoped?: Signalish<boolean | undefined>;
 		type?: Signalish<string | undefined>;
 	}
 
-	interface TableHTMLAttributes<T extends EventTarget>
+	interface TableHTMLAttributes<T extends EventTarget = HTMLTableElement>
 		extends HTMLAttributes<T> {
 		cellPadding?: Signalish<string | undefined>;
 		cellSpacing?: Signalish<string | undefined>;
@@ -2040,7 +2047,8 @@ export namespace JSXInternal {
 		width?: Signalish<number | string | undefined>;
 	}
 
-	interface TdHTMLAttributes<T extends EventTarget> extends HTMLAttributes<T> {
+	interface TdHTMLAttributes<T extends EventTarget = HTMLTableCellElement>
+		extends HTMLAttributes<T> {
 		align?: Signalish<
 			'left' | 'center' | 'right' | 'justify' | 'char' | undefined
 		>;
@@ -2056,7 +2064,7 @@ export namespace JSXInternal {
 		valign?: Signalish<'top' | 'middle' | 'bottom' | 'baseline' | undefined>;
 	}
 
-	interface TextareaHTMLAttributes<T extends EventTarget>
+	interface TextareaHTMLAttributes<T extends EventTarget = HTMLTextAreaElement>
 		extends HTMLAttributes<T> {
 		autocomplete?: Signalish<string | undefined>;
 		autoComplete?: Signalish<string | undefined>;
@@ -2079,7 +2087,8 @@ export namespace JSXInternal {
 		onChange?: GenericEventHandler<T> | undefined;
 	}
 
-	interface ThHTMLAttributes<T extends EventTarget> extends HTMLAttributes<T> {
+	interface ThHTMLAttributes<T extends EventTarget = HTMLTableCellElement>
+		extends HTMLAttributes<T> {
 		align?: Signalish<
 			'left' | 'center' | 'right' | 'justify' | 'char' | undefined
 		>;
@@ -2092,13 +2101,13 @@ export namespace JSXInternal {
 		abbr?: Signalish<string | undefined>;
 	}
 
-	interface TimeHTMLAttributes<T extends EventTarget>
+	interface TimeHTMLAttributes<T extends EventTarget = HTMLTimeElement>
 		extends HTMLAttributes<T> {
 		datetime?: Signalish<string | undefined>;
 		dateTime?: Signalish<string | undefined>;
 	}
 
-	interface TrackHTMLAttributes<T extends EventTarget>
+	interface TrackHTMLAttributes<T extends EventTarget = HTMLTrackElement>
 		extends MediaHTMLAttributes<T> {
 		default?: Signalish<boolean | undefined>;
 		kind?: Signalish<string | undefined>;
@@ -2107,7 +2116,7 @@ export namespace JSXInternal {
 		srcLang?: Signalish<string | undefined>;
 	}
 
-	interface VideoHTMLAttributes<T extends EventTarget>
+	interface VideoHTMLAttributes<T extends EventTarget = HTMLVideoElement>
 		extends MediaHTMLAttributes<T> {
 		height?: Signalish<number | string | undefined>;
 		poster?: Signalish<string | undefined>;
