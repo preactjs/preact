@@ -889,7 +889,7 @@ describe('debug', () => {
 			hydrate(<App />, scratch);
 			expect(console.error).to.be.calledOnce;
 			expect(console.error).to.be.calledOnceWith(
-				sinon.match(/Expected a DOM node of type p but found span/)
+				sinon.match(/Expected a DOM node of type "p" but found "span"/)
 			);
 		});
 
