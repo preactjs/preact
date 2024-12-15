@@ -386,6 +386,7 @@ createElement('option', { value: 'foo' });
 // Should default to correct event target element for the attribute interface
 h<JSX.InputHTMLAttributes>('input', { onClick: e => e.currentTarget.capture });
 createElement<JSX.InputHTMLAttributes>('input', { onClick: e => e.currentTarget.capture });
+<input onClick={e => e.currentTarget.capture} />;
 
 function Checkbox({ onChange }: JSX.HTMLAttributes<HTMLInputElement>) {
 	function handleChange(
