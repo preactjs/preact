@@ -1674,7 +1674,7 @@ export namespace JSXInternal {
 	interface BaseHTMLAttributes<T extends EventTarget = HTMLBaseElement>
 		extends HTMLAttributes<T> {
 		href?: Signalish<string | undefined>;
-		role: never;
+		role?: never;
 		target?: Signalish<HTMLAttributeAnchorTarget | undefined>;
 	}
 
@@ -1750,14 +1750,14 @@ export namespace JSXInternal {
 
 	interface ColHTMLAttributes<T extends EventTarget = HTMLTableColElement>
 		extends HTMLAttributes<T> {
-		role: never;
+		role?: never;
 		span?: Signalish<number | undefined>;
 		width?: Signalish<number | string | undefined>;
 	}
 
 	interface ColgroupHTMLAttributes<T extends EventTarget = HTMLTableColElement>
 		extends HTMLAttributes<T> {
-		role: never;
+		role?: never;
 		span?: Signalish<number | undefined>;
 	}
 
@@ -1773,7 +1773,7 @@ export namespace JSXInternal {
 
 	interface DdHTMLAttributes<T extends EventTarget = HTMLElement>
 		extends HTMLAttributes<T> {
-		role: never;
+		role?: never;
 	}
 
 	interface DelHTMLAttributes<T extends EventTarget = HTMLModElement>
@@ -1875,7 +1875,7 @@ export namespace JSXInternal {
 
 	interface HeadHTMLAttributes<T extends EventTarget = HTMLHeadElement>
 		extends HTMLAttributes<T> {
-		role: never;
+		role?: never;
 	}
 
 	interface HeaderHTMLAttributes<T extends EventTarget = HTMLElement>
@@ -2055,12 +2055,12 @@ export namespace JSXInternal {
 		for?: Signalish<string | undefined>;
 		form?: Signalish<string | undefined>;
 		htmlFor?: Signalish<string | undefined>;
-		role: never;
+		role?: never;
 	}
 
 	interface LegendHTMLAttributes<T extends EventTarget = HTMLLegendElement>
 		extends HTMLAttributes<T> {
-		role: never;
+		role?: never;
 	}
 
 	interface LiHTMLAttributes<T extends EventTarget = HTMLLIElement>
@@ -2084,7 +2084,7 @@ export namespace JSXInternal {
 		referrerpolicy?: Signalish<HTMLAttributeReferrerPolicy | undefined>;
 		referrerPolicy?: Signalish<HTMLAttributeReferrerPolicy | undefined>;
 		rel?: Signalish<string | undefined>;
-		role: never;
+		role?: never;
 		sizes?: Signalish<string | undefined>;
 		type?: Signalish<string | undefined>;
 		charset?: Signalish<string | undefined>;
@@ -2099,7 +2099,7 @@ export namespace JSXInternal {
 	interface MapHTMLAttributes<T extends EventTarget = HTMLMapElement>
 		extends HTMLAttributes<T> {
 		name?: Signalish<string | undefined>;
-		role: never;
+		role?: never;
 	}
 
 	interface MarqueeHTMLAttributes<T extends EventTarget = HTMLMarqueeElement>
@@ -2172,7 +2172,7 @@ export namespace JSXInternal {
 		httpEquiv?: Signalish<string | undefined>;
 		name?: Signalish<string | undefined>;
 		media?: Signalish<string | undefined>;
-		role: never;
+		role?: never;
 	}
 
 	interface MeterHTMLAttributes<T extends EventTarget = HTMLMeterElement>
@@ -2202,7 +2202,7 @@ export namespace JSXInternal {
 
 	interface NoScriptHTMLAttributes<T extends EventTarget = HTMLElement>
 		extends HTMLAttributes<T> {
-		role: never;
+		role?: never;
 	}
 
 	interface ObjectHTMLAttributes<T extends EventTarget = HTMLObjectElement>
@@ -2268,13 +2268,13 @@ export namespace JSXInternal {
 	interface ParamHTMLAttributes<T extends EventTarget = HTMLParamElement>
 		extends HTMLAttributes<T> {
 		name?: Signalish<string | undefined>;
-		role: never;
+		role?: never;
 		value?: Signalish<string | number | undefined>;
 	}
 
 	interface PictureHTMLAttributes<T extends EventTarget = HTMLPictureElement>
 		extends HTMLAttributes<T> {
-		role: never;
+		role?: never;
 	}
 
 	interface ProgressHTMLAttributes<T extends EventTarget = HTMLProgressElement>
@@ -2304,7 +2304,7 @@ export namespace JSXInternal {
 		noModule?: Signalish<boolean | undefined>;
 		referrerpolicy?: Signalish<HTMLAttributeReferrerPolicy | undefined>;
 		referrerPolicy?: Signalish<HTMLAttributeReferrerPolicy | undefined>;
-		role: never;
+		role?: never;
 		src?: Signalish<string | undefined>;
 		type?: Signalish<string | undefined>;
 	}
@@ -2340,14 +2340,14 @@ export namespace JSXInternal {
 	interface SlotHTMLAttributes<T extends EventTarget = HTMLSlotElement>
 		extends HTMLAttributes<T> {
 		name?: Signalish<string | undefined>;
-		role: never;
+		role?: never;
 	}
 
 	interface SourceHTMLAttributes<T extends EventTarget = HTMLSourceElement>
 		extends HTMLAttributes<T> {
 		height?: Signalish<number | string | undefined>;
 		media?: Signalish<string | undefined>;
-		role: never;
+		role?: never;
 		sizes?: Signalish<string | undefined>;
 		src?: Signalish<string | undefined>;
 		srcset?: Signalish<string | undefined>;
@@ -2359,7 +2359,7 @@ export namespace JSXInternal {
 	interface StyleHTMLAttributes<T extends EventTarget = HTMLStyleElement>
 		extends HTMLAttributes<T> {
 		media?: Signalish<string | undefined>;
-		role: never;
+		role?: never;
 		scoped?: Signalish<boolean | undefined>;
 		type?: Signalish<string | undefined>;
 	}
@@ -2391,7 +2391,7 @@ export namespace JSXInternal {
 
 	interface TemplateHTMLAttributes<T extends EventTarget = HTMLTemplateElement>
 		extends HTMLAttributes<T> {
-		role: never;
+		role?: never;
 	}
 
 	interface TextareaHTMLAttributes<T extends EventTarget = HTMLTextAreaElement>
@@ -2440,7 +2440,7 @@ export namespace JSXInternal {
 
 	interface TitleHTMLAttributes<T extends EventTarget = HTMLTitleElement>
 		extends HTMLAttributes<T> {
-		role: never;
+		role?: never;
 	}
 
 	interface TrackHTMLAttributes<T extends EventTarget = HTMLTrackElement>
@@ -2448,7 +2448,7 @@ export namespace JSXInternal {
 		default?: Signalish<boolean | undefined>;
 		kind?: Signalish<string | undefined>;
 		label?: Signalish<string | undefined>;
-		role: never;
+		role?: never;
 		srclang?: Signalish<string | undefined>;
 		srcLang?: Signalish<string | undefined>;
 	}
