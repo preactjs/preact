@@ -193,7 +193,7 @@ const selectInvalid = <select role="button" />;
 
 const selectMultipleValid = <select multiple={true} role="listbox" />;
 // @ts-expect-error A select multiple should not have a role of button
-const selectMultipleInvalid = <select multiple={button} role="button" />;
+const selectMultipleInvalid = <select multiple={true} role="button" />;
 
 
 
