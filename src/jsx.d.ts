@@ -1600,10 +1600,8 @@ export namespace JSXInternal {
 		| '_top'
 		| (string & {});
 
-	interface AnchorHTMLAttributes<T extends EventTarget = HTMLAnchorElement>
-		extends HTMLAttributes<T> {
+	interface PartialAnchorHTMLAttributes<T> extends HTMLAttributes<T> {
 		download?: Signalish<any>;
-		href?: Signalish<string | undefined>;
 		hreflang?: Signalish<string | undefined>;
 		hrefLang?: Signalish<string | undefined>;
 		media?: Signalish<string | undefined>;
@@ -1615,12 +1613,43 @@ export namespace JSXInternal {
 		referrerPolicy?: Signalish<HTMLAttributeReferrerPolicy | undefined>;
 	}
 
-	interface AreaHTMLAttributes<T extends EventTarget = HTMLAreaElement>
-		extends HTMLAttributes<T> {
+	type AnchorAriaRoles =
+		| {
+				href: Signalish<string>;
+				role?: Signalish<
+					| 'link'
+					| 'button'
+					| 'checkbox'
+					| 'menuitem'
+					| 'menuitemcheckbox'
+					| 'menuitemradio'
+					| 'option'
+					| 'radio'
+					| 'switch'
+					| 'tab'
+					| 'treeitem'
+					| 'doc-backlink'
+					| 'doc-biblioref'
+					| 'doc-glossref'
+					| 'doc-noteref'
+					| undefined
+				>;
+		  }
+		| {
+				href?: never;
+				role?: Signalish<AriaRole | undefined>;
+		  };
+
+	type AnchorHTMLAttributes<T extends EventTarget = HTMLAnchorElement> = Omit<
+		PartialAnchorHTMLAttributes<T>,
+		'role'
+	> &
+		AnchorAriaRoles;
+
+	interface PartialAreaHTMLAttributes<T> extends HTMLAttributes<T> {
 		alt?: Signalish<string | undefined>;
 		coords?: Signalish<string | undefined>;
 		download?: Signalish<any>;
-		href?: Signalish<string | undefined>;
 		hreflang?: Signalish<string | undefined>;
 		hrefLang?: Signalish<string | undefined>;
 		media?: Signalish<string | undefined>;
@@ -1630,6 +1659,22 @@ export namespace JSXInternal {
 		shape?: Signalish<string | undefined>;
 		target?: Signalish<HTMLAttributeAnchorTarget | undefined>;
 	}
+
+	type AreaAriaRoles =
+		| {
+				href: Signalish<string>;
+				role?: Signalish<'link' | undefined>;
+		  }
+		| {
+				href?: never;
+				role?: Signalish<'button' | 'link' | undefined>;
+		  };
+
+	type AreaHTMLAttributes<T extends EventTarget = HTMLAreaElement> = Omit<
+		PartialAreaHTMLAttributes<T>,
+		'role'
+	> &
+		AreaAriaRoles;
 
 	interface ArticleHTMLAttributes<T extends EventTarget = HTMLElement>
 		extends HTMLAttributes<T> {
@@ -1930,9 +1975,7 @@ export namespace JSXInternal {
 
 	type HTMLAttributeCrossOrigin = 'anonymous' | 'use-credentials';
 
-	interface ImgHTMLAttributes<T extends EventTarget = HTMLImageElement>
-		extends HTMLAttributes<T> {
-		alt?: Signalish<string | undefined>;
+	interface PartialImgHTMLAttributes<T> extends HTMLAttributes<T> {
 		crossorigin?: Signalish<HTMLAttributeCrossOrigin>;
 		crossOrigin?: Signalish<HTMLAttributeCrossOrigin>;
 		decoding?: Signalish<'async' | 'auto' | 'sync' | undefined>;
@@ -1950,6 +1993,59 @@ export namespace JSXInternal {
 		useMap?: Signalish<string | undefined>;
 		width?: Signalish<number | string | undefined>;
 	}
+
+	type ImgAriaRolesAccessibleName = Signalish<
+		| 'img'
+		| 'button'
+		| 'checkbox'
+		| 'link'
+		| 'menuitem'
+		| 'menuitemcheckbox'
+		| 'menuitemradio'
+		| 'meter'
+		| 'option'
+		| 'progressbar'
+		| 'radio'
+		| 'scrollbar'
+		| 'separator'
+		| 'slider'
+		| 'switch'
+		| 'tab'
+		| 'treeitem'
+		| 'doc-cover'
+		| undefined
+	>;
+
+	type ImgAriaRoles =
+		| {
+				'aria-label': Signalish<string>;
+				role?: ImgAriaRolesAccessibleName;
+		  }
+		| {
+				'aria-labelledby': Signalish<string>;
+				role?: ImgAriaRolesAccessibleName;
+		  }
+		| {
+				alt: Signalish<string>;
+				role?: ImgAriaRolesAccessibleName;
+		  }
+		| {
+				title: Signalish<string>;
+				role?: ImgAriaRolesAccessibleName;
+		  }
+		| {
+				'aria-label'?: never;
+				'aria-labelledby'?: never;
+				alt?: never;
+				title?: never;
+				role?: Signalish<'img' | 'none' | 'presentation' | undefined>;
+		  };
+
+	type ImgHTMLAttributes<T extends EventTarget = HTMLImageElement> = Omit<
+		PartialImgHTMLAttributes<T>,
+		'role' | 'aria-label' | 'aria-labelledby' | 'title'
+	> &
+		ImgAriaRoles;
 
 	type HTMLInputTypeAttribute =
 		| 'button'
@@ -1973,11 +2069,9 @@ export namespace JSXInternal {
 		| 'text'
 		| 'time'
 		| 'url'
-		| 'week'
-		| (string & {});
+		| 'week';
 
-	interface InputHTMLAttributes<T extends EventTarget = HTMLInputElement>
-		extends HTMLAttributes<T> {
+	interface PartialInputHTMLAttributes<T> extends HTMLAttributes<T> {
 		accept?: Signalish<string | undefined>;
 		alt?: Signalish<string | undefined>;
 		autocomplete?: Signalish<string | undefined>;
@@ -2010,7 +2104,6 @@ export namespace JSXInternal {
 		formTarget?: Signalish<string | undefined>;
 		height?: Signalish<number | string | undefined>;
 		indeterminate?: Signalish<boolean | undefined>;
-		list?: Signalish<string | undefined>;
 		max?: Signalish<number | string | undefined>;
 		maxlength?: Signalish<number | undefined>;
 		maxLength?: Signalish<number | undefined>;
@@ -2027,11 +2120,169 @@ export namespace JSXInternal {
 		size?: Signalish<number | undefined>;
 		src?: Signalish<string | undefined>;
 		step?: Signalish<number | string | undefined>;
-		type?: HTMLInputTypeAttribute | undefined;
 		value?: Signalish<string | number | undefined>;
 		width?: Signalish<number | string | undefined>;
 		onChange?: GenericEventHandler<T> | undefined;
 	}
+
+	type InputAriaRoles =
+		| {
+				type: Signalish<'button'>;
+				role?: Signalish<
+					| 'button'
+					| 'checkbox'
+					| 'combobox'
+					| 'gridcell'
+					| 'link'
+					| 'menuitem'
+					| 'menuitemcheckbox'
+					| 'menuitemradio'
+					| 'option'
+					| 'radio'
+					| 'separator'
+					| 'slider'
+					| 'switch'
+					| 'tab'
+					| 'treeitem'
+					| undefined
+				>;
+		  }
+		| {
+				type: Signalish<'checkbox'>;
+				role?: Signalish<
+					| 'checkbox'
+					| 'button'
+					| 'menuitemcheckbox'
+					| 'option'
+					| 'switch'
+					| undefined
+				>;
+		  }
+		| {
+				type: Signalish<'email'>;
+				list?: never;
+				role?: Signalish<'textbox' | undefined>;
+		  }
+		| {
+				type: Signalish<'image'>;
+				role?: Signalish<
+					| 'button'
+					| 'checkbox'
+					| 'gridcell'
+					| 'link'
+					| 'menuitem'
+					| 'menuitemcheckbox'
+					| 'menuitemradio'
+					| 'option'
+					| 'separator'
+					| 'slider'
+					| 'switch'
+					| 'tab'
+					| 'treeitem'
+					| undefined
+				>;
+		  }
+		| {
+				type: Signalish<'number'>;
+				role?: Signalish<'spinbutton' | undefined>;
+		  }
+		| {
+				type: Signalish<'radio'>;
+				role?: Signalish<'radio' | 'menuitemradio' | undefined>;
+		  }
+		| {
+				type: Signalish<'range'>;
+				role?: Signalish<'slider' | undefined>;
+		  }
+		| {
+				type: Signalish<'reset'>;
+				role?: Signalish<
+					| 'button'
+					| 'checkbox'
+					| 'combobox'
+					| 'gridcell'
+					| 'link'
+					| 'menuitem'
+					| 'menuitemcheckbox'
+					| 'menuitemradio'
+					| 'option'
+					| 'radio'
+					| 'separator'
+					| 'slider'
+					| 'switch'
+					| 'tab'
+					| 'treeitem'
+					| undefined
+				>;
+		  }
+		| {
+				type: Signalish<'search'>;
+				list?: never;
+				role?: Signalish<'searchbox' | undefined>;
+		  }
+		| {
+				type: Signalish<'submit'>;
+				role?: Signalish<
+					| 'button'
+					| 'checkbox'
+					| 'combobox'
+					| 'gridcell'
+					| 'link'
+					| 'menuitem'
+					| 'menuitemcheckbox'
+					| 'menuitemradio'
+					| 'option'
+					| 'radio'
+					| 'separator'
+					| 'slider'
+					| 'switch'
+					| 'tab'
+					| 'treeitem'
+					| undefined
+				>;
+		  }
+		| {
+				type: Signalish<'tel'>;
+				list?: never;
+				role?: Signalish<'textbox' | undefined>;
+		  }
+		| {
+				type?: Signalish<'text'>;
+				list?: never;
+				role?: Signalish<
+					'textbox' | 'combobox' | 'searchbox' | 'spinbutton' | undefined
+				>;
+		  }
+		| {
+				type?: Signalish<'text' | 'search' | 'tel' | 'url' | 'email'>;
+				list: Signalish<string | undefined>;
+				role?: Signalish<'combobox' | undefined>;
+		  }
+		| {
+				type: Signalish<'url'>;
+				list?: never;
+				role?: Signalish<'textbox' | undefined>;
+		  }
+		| {
+				type: Signalish<
+					| 'color'
+					| 'date'
+					| 'datetime-local'
+					| 'file'
+					| 'hidden'
+					| 'month'
+					| 'password'
+					| 'time'
+					| 'week'
+				>;
+				role?: never;
+		  };
+
+	type InputHTMLAttributes<T extends EventTarget = HTMLInputElement> = Omit<
+		PartialInputHTMLAttributes<T>,
+		'role'
+	> &
+		InputAriaRoles;
 
 	interface InsHTMLAttributes<T extends EventTarget = HTMLModElement>
 		extends HTMLAttributes<T> {
@@ -2322,20 +2573,38 @@ export namespace JSXInternal {
 		>;
 	}
 
-	interface SelectHTMLAttributes<T extends EventTarget = HTMLSelectElement>
-		extends HTMLAttributes<T> {
+	interface PartialSelectHTMLAttributes<T> extends HTMLAttributes<T> {
 		autocomplete?: Signalish<string | undefined>;
 		autoComplete?: Signalish<string | undefined>;
 		defaultValue?: Signalish<string | number | undefined>;
 		disabled?: Signalish<boolean | undefined>;
 		form?: Signalish<string | undefined>;
-		multiple?: Signalish<boolean | undefined>;
 		name?: Signalish<string | undefined>;
 		required?: Signalish<boolean | undefined>;
 		size?: Signalish<number | undefined>;
 		value?: Signalish<string | number | undefined>;
 		onChange?: GenericEventHandler<T> | undefined;
 	}
+
+	type SelectAriaRoles =
+		| {
+				multiple?: never;
+				// Spec states this branch is limited to "no `multiple` attribute AND no `size` attribute greater than 1".
+				// We can't really express that in TS though so we'll just ignore `size` for now.
+				//size?: never;
+				role?: Signalish<'combobox' | 'menu' | undefined>;
+		  }
+		| {
+				multiple?: Signalish<boolean | undefined>;
+				//size?: Signalish<number | undefined>;
+				role?: Signalish<'listbox' | undefined>;
+		  };
+
+	type SelectHTMLAttributes<T extends EventTarget = HTMLSelectElement> = Omit<
+		PartialSelectHTMLAttributes<T>,
+		'role'
+	> &
+		SelectAriaRoles;
 
 	interface SlotHTMLAttributes<T extends EventTarget = HTMLSlotElement>
 		extends HTMLAttributes<T> {
