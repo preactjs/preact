@@ -1850,30 +1850,6 @@ export namespace JSXInternal {
 	> &
 		ImgAriaRoles;
 
-	type HTMLInputTypeAttribute =
-		| 'button'
-		| 'checkbox'
-		| 'color'
-		| 'date'
-		| 'datetime-local'
-		| 'email'
-		| 'file'
-		| 'hidden'
-		| 'image'
-		| 'month'
-		| 'number'
-		| 'password'
-		| 'radio'
-		| 'range'
-		| 'reset'
-		| 'search'
-		| 'submit'
-		| 'tel'
-		| 'text'
-		| 'time'
-		| 'url'
-		| 'week';
-
 	interface PartialInputHTMLAttributes<T> extends HTMLAttributes<T> {
 		accept?: Signalish<string | undefined>;
 		alt?: Signalish<string | undefined>;
@@ -2398,7 +2374,7 @@ export namespace JSXInternal {
 				role?: Signalish<'combobox' | 'menu' | undefined>;
 		  }
 		| {
-				multiple?: Signalish<boolean | undefined>;
+				multiple: Signalish<boolean | undefined>;
 				//size?: Signalish<number | undefined>;
 				role?: Signalish<'listbox' | undefined>;
 		  };
