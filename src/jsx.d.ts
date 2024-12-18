@@ -1067,7 +1067,6 @@ export namespace JSXInternal {
 		| 'feed'
 		| 'figure'
 		| 'form'
-		| 'generic'
 		| 'grid'
 		| 'gridcell'
 		| 'group'
