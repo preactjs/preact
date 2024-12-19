@@ -20,6 +20,28 @@ type Defaultize<Props, Defaults> =
 
 type Booleanish = boolean | 'true' | 'false';
 
+// Remove when bumping TS minimum to >5.2
+
+/** [MDN Reference](https://developer.mozilla.org/docs/Web/API/ToggleEvent) */
+interface ToggleEvent extends Event {
+    /** [MDN Reference](https://developer.mozilla.org/docs/Web/API/ToggleEvent/newState) */
+    readonly newState: string;
+    /** [MDN Reference](https://developer.mozilla.org/docs/Web/API/ToggleEvent/oldState) */
+    readonly oldState: string;
+}
+
+declare var ToggleEvent: {
+    prototype: ToggleEvent;
+    new(type: string, eventInitDict?: ToggleEventInit): ToggleEvent;
+};
+
+interface ToggleEventInit extends EventInit {
+    newState?: string;
+    oldState?: string;
+}
+
+// End TS >5.2
+
 export namespace JSXInternal {
 	export type LibraryManagedAttributes<Component, Props> = Component extends {
 		defaultProps: infer Defaults;
