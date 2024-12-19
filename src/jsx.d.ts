@@ -508,6 +508,10 @@ export namespace JSXInternal {
 		Target,
 		TouchEvent
 	>;
+	export type TargetedToggleEvent<Target extends EventTarget> = TargetedEvent<
+		Target,
+		ToggleEvent
+	>;
 	export type TargetedTransitionEvent<Target extends EventTarget> =
 		TargetedEvent<Target, TransitionEvent>;
 	export type TargetedUIEvent<Target extends EventTarget> = TargetedEvent<
@@ -535,6 +539,9 @@ export namespace JSXInternal {
 		EventHandler<TargetedCompositionEvent<Target>>;
 	export type DragEventHandler<Target extends EventTarget> = EventHandler<
 		TargetedDragEvent<Target>
+	>;
+	export type ToggleEventHandler<Target extends EventTarget> = EventHandler<
+		TargetedToggleEvent<Target>
 	>;
 	export type FocusEventHandler<Target extends EventTarget> = EventHandler<
 		TargetedFocusEvent<Target>
@@ -597,7 +604,7 @@ export namespace JSXInternal {
 		onCompositionUpdateCapture?: CompositionEventHandler<Target> | undefined;
 
 		// Details Events
-		onToggle?: GenericEventHandler<Target> | undefined;
+		onToggle?: ToggleEventHandler<Target> | undefined;
 
 		// Dialog Events
 		onClose?: GenericEventHandler<Target> | undefined;
