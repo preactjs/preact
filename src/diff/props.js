@@ -13,8 +13,6 @@ function setStyle(style, key, value) {
 	}
 }
 
-const CAPTURE_REGEX = /(PointerCapture)$|Capture$/i;
-
 // A logical clock to solve issues like https://github.com/preactjs/preact/issues/3927.
 // When the DOM performs an event it leaves micro-ticks in between bubbling up which means that
 // an event can trigger on a newly reated DOM-node while the event bubbles up.
@@ -66,7 +64,11 @@ export function setProperty(dom, name, value, oldValue, namespace) {
 	}
 	// Benchmark for comparison: https://esbench.com/bench/574c954bdb965b9a00965ac6
 	else if (name[0] == 'o' && name[1] == 'n') {
-		useCapture = name != (name = name.replace(CAPTURE_REGEX, '$1'));
+		if (/PointerCapture$/.test(name)) {
+			useCapture = false;
+		} else {
+			useCapture = name != (name = name.replace(/Capture$/, ''));
+		}
 
 		// Infer correct casing for DOM built-in events:
 		if (
