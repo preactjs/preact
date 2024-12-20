@@ -64,10 +64,10 @@ export function setProperty(dom, name, value, oldValue, namespace) {
 	}
 	// Benchmark for comparison: https://esbench.com/bench/574c954bdb965b9a00965ac6
 	else if (name[0] == 'o' && name[1] == 'n') {
-		if (/PointerCapture$/.test(name)) {
+		if (/PointerCapture$/i.test(name)) {
 			useCapture = false;
 		} else {
-			useCapture = name != (name = name.replace(/Capture$/, ''));
+			useCapture = name !== (name = name.replace(/Capture$/i, ''));
 		}
 
 		// Infer correct casing for DOM built-in events:
