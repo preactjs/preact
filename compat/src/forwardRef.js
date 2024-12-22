@@ -1,14 +1,4 @@
-import { options } from 'preact';
 import { assign } from './util';
-
-let oldDiffHook = options._diff;
-options._diff = vnode => {
-	if (vnode.type && vnode.type._forwarded && vnode.ref) {
-		vnode.props.ref = vnode.ref;
-		vnode.ref = null;
-	}
-	if (oldDiffHook) oldDiffHook(vnode);
-};
 
 export const REACT_FORWARD_SYMBOL = Symbol.for('react.forward_ref');
 
@@ -34,7 +24,7 @@ export function forwardRef(fn) {
 	// mobx-react throws.
 	Forwarded.render = Forwarded;
 
-	Forwarded.prototype.isReactComponent = Forwarded._forwarded = true;
+	Forwarded.prototype.isReactComponent = true;
 	Forwarded.displayName = 'ForwardRef(' + (fn.displayName || fn.name) + ')';
 	return Forwarded;
 }

@@ -230,7 +230,7 @@ export function initDebug() {
 			}
 
 			let values = vnode.props;
-			if (vnode.type._forwarded) {
+			if (typeof vnode.type === 'function' && vnode.props.ref) {
 				values = assign({}, values);
 				delete values.ref;
 			}

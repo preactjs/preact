@@ -268,6 +268,5 @@ export function lazy(loader) {
 	}
 
 	Lazy.displayName = 'Lazy';
-	Lazy._forwarded = true;
 	return Lazy;
 }
