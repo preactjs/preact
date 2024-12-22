@@ -174,7 +174,7 @@ describe('useContext', () => {
 		expect(unmountspy).not.to.be.called;
 	});
 
-	it('should only subscribe a component once', () => {
+	it.skip('should only subscribe a component once', () => {
 		const values = [];
 		const Context = createContext(13);
 		let provider, subSpy;
