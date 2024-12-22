@@ -19,9 +19,9 @@ const isArray = Array.isArray;
 
 /**
  * JSX.Element factory used by Babel's {runtime:"automatic"} JSX transform
- * @param {VNode['type']} type
- * @param {VNode['props']} props
- * @param {VNode['key']} [key]
+ * @param {import('../../src/internal').VNode['type']} type
+ * @param {import('../../src/internal').VNode['props']} props
+ * @param {import('../../src/internal').VNode['key']} [key]
  * @param {unknown} [isStaticChildren]
  * @param {unknown} [__source]
  * @param {unknown} [__self]
@@ -35,7 +35,7 @@ function createVNode(type, props, key, isStaticChildren, __source, __self) {
 		ref,
 		i;
 
-	if ('ref' in normalizedProps && typeof type != 'function') {
+	if (typeof type != 'function' && 'ref' in normalizedProps) {
 		normalizedProps = {};
 		for (i in props) {
 			if (i == 'ref') {
@@ -46,7 +46,7 @@ function createVNode(type, props, key, isStaticChildren, __source, __self) {
 		}
 	}
 
-	/** @type {VNode & { __source: any; __self: any }} */
+	/** @type {import('../../src/internal').VNode & { __source: any; __self: any }} */
 	const vnode = {
 		type,
 		props: normalizedProps,
@@ -82,8 +82,8 @@ function createVNode(type, props, key, isStaticChildren, __source, __self) {
  * Create a template vnode. This function is not expected to be
  * used directly, but rather through a precompile JSX transform
  * @param {string[]} templates
- * @param  {Array<string | null | VNode>} exprs
- * @returns {VNode}
+ * @param  {Array<string | null | import('../../src/internal').VNode>} exprs
+ * @returns {import('../../src/internal').VNode}
  */
 function jsxTemplate(templates, ...exprs) {
 	const vnode = createVNode(Fragment, { tpl: templates, exprs });
@@ -153,7 +153,7 @@ function jsxAttr(name, value) {
  * is not expected to be used directly, but rather through a
  * precompile JSX transform
  * @param {*} value
- * @returns {string | null | VNode | Array<string | null | VNode>}
+ * @returns {string | null | import('../../src/internal').VNode | Array<string | null | import('../../src/internal').VNode>}
  */
 function jsxEscape(value) {
 	if (
