@@ -8,7 +8,7 @@ let vnodeId = 0;
  * Create an virtual node (used for JSX)
  * @param {import('./internal').VNode["type"]} type The node name or Component constructor for this
  * virtual node
- * @param {object | null | undefined} [props] The properties of the virtual node
+ * @param {object | null | undefined | import('.').Context} [props] The properties of the virtual node
  * @param {Array<import('.').ComponentChildren>} [children] The children of the
  * virtual node
  * @returns {import('./internal').VNode}
@@ -18,6 +18,11 @@ export function createElement(type, props, children) {
 		key,
 		ref,
 		i;
+
+	if (typeof type === 'object' && type != null && 'Provider' in type) {
+		type = type.Provider;
+	}
+
 	for (i in props) {
 		if (i == 'key') key = props[i];
 		else if (i == 'ref') ref = props[i];
