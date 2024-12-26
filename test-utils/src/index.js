@@ -57,19 +57,19 @@ export function act(cb) {
 	const rerender = setupRerender();
 
 	/** @type {() => void} */
-	let flush, toFlush;
+	let flushes = [], toFlush;
 
 	// Override requestAnimationFrame so we can flush pending hooks.
-	options.requestAnimationFrame = fc => (flush = fc);
+	options.requestAnimationFrame = fc => flushes.push(fc);
 
 	const finish = () => {
 		try {
 			rerender();
-			while (flush) {
-				toFlush = flush;
-				flush = null;
+			while (flushes.length) {
+				toFlush = flushes;
+				flushes = [];
 
-				toFlush();
+				toFlush.forEach(x => x());
 				rerender();
 			}
 		} catch (e) {
