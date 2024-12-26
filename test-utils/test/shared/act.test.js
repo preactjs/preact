@@ -517,26 +517,26 @@ describe('act', () => {
 		});
 	});
 
-	describe('act function with finish implementations', function () {
+	describe('act function with finish implementations', () => {
 		let actDepth = 0;
 		beforeEach(function () {
-			actDepth = 0; // Reset actDepth before each test
-			options.requestAnimationFrame = null; // Reset before each test
+			actDepth = 0;
+			options.requestAnimationFrame = null;
 		});
 
-		it('should execute the flush callback using single flush', function () {
+		it('should execute the flush callback using single flush', () => {
 			let called = false;
 
 			act(() => {
 				options.requestAnimationFrame(() => {
-					called = true; // This should be called
+					called = true;
 				});
 			});
 
-			expect(called).to.be.true; // Verify the callback was executed
+			expect(called).to.be.true;
 		});
 
-		it.only('should execute all callbacks using array flush', function () {
+		it.only('should execute all callbacks using array flush', () => {
 			let callCount = 0;
 
 			act(() => {
@@ -545,10 +545,10 @@ describe('act', () => {
 				options.requestAnimationFrame(() => callCount++);
 			});
 
-			expect(callCount).to.equal(3); // Verify all callbacks were executed
+			expect(callCount).to.equal(3);
 		});
 
-		it('should handle errors in single flush', function () {
+		it('should handle errors in single flush', () => {
 			expect(() => {
 				act(() => {
 					options.requestAnimationFrame(() => {
@@ -558,7 +558,7 @@ describe('act', () => {
 			}).to.throw('Single flush error');
 		});
 
-		it('should handle errors in array flush', function () {
+		it('should handle errors in array flush', () => {
 			expect(() => {
 				act(() => {
 					options.requestAnimationFrame(() => {
