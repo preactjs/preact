@@ -516,4 +516,56 @@ describe('act', () => {
 			});
 		});
 	});
+
+	describe('act function with finish implementations', function () {
+		let actDepth = 0;
+		beforeEach(function () {
+			actDepth = 0; // Reset actDepth before each test
+			options.requestAnimationFrame = null; // Reset before each test
+		});
+
+		it('should execute the flush callback using single flush', function () {
+			let called = false;
+
+			act(() => {
+				options.requestAnimationFrame(() => {
+					called = true; // This should be called
+				});
+			});
+
+			expect(called).to.be.true; // Verify the callback was executed
+		});
+
+		it.only('should execute all callbacks using array flush', function () {
+			let callCount = 0;
+
+			act(() => {
+				options.requestAnimationFrame(() => callCount++);
+				options.requestAnimationFrame(() => callCount++);
+				options.requestAnimationFrame(() => callCount++);
+			});
+
+			expect(callCount).to.equal(3); // Verify all callbacks were executed
+		});
+
+		it('should handle errors in single flush', function () {
+			expect(() => {
+				act(() => {
+					options.requestAnimationFrame(() => {
+						throw new Error('Single flush error');
+					});
+				});
+			}).to.throw('Single flush error');
+		});
+
+		it('should handle errors in array flush', function () {
+			expect(() => {
+				act(() => {
+					options.requestAnimationFrame(() => {
+						throw new Error('Array flush error');
+					});
+				});
+			}).to.throw('Array flush error');
+		});
+	});
 });
