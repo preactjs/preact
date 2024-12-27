@@ -518,9 +518,7 @@ describe('act', () => {
 	});
 
 	describe('act function with finish implementations', () => {
-		let actDepth = 0;
 		beforeEach(function () {
-			actDepth = 0;
 			options.requestAnimationFrame = null;
 		});
 
