@@ -536,7 +536,7 @@ describe('act', () => {
 			expect(called).to.be.true;
 		});
 
-		it.only('should execute all callbacks using array flush', () => {
+		it('should execute all callbacks using array flush', () => {
 			let callCount = 0;
 
 			act(() => {
