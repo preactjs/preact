@@ -4,7 +4,6 @@ import * as _hooks from '../../hooks';
 import * as preact from 'preact';
 import { JSXInternal } from '../../src/jsx';
 import * as _Suspense from './suspense';
-import * as _SuspenseList from './suspense-list';
 
 interface SignalLike<T> {
 	value: T;
@@ -73,7 +72,6 @@ declare namespace React {
 	// Suspense
 	export import Suspense = _Suspense.Suspense;
 	export import lazy = _Suspense.lazy;
-	export import SuspenseList = _SuspenseList.SuspenseList;
 
 	// Compat
 	export import StrictMode = preact.Fragment;
@@ -308,11 +306,6 @@ declare namespace React {
 
 	export function flushSync<R>(fn: () => R): R;
 	export function flushSync<A, R>(fn: (a: A) => R, a: A): R;
-
-	export function unstable_batchedUpdates(
-		callback: (arg?: any) => void,
-		arg?: any
-	): void;
 
 	export type PropsWithChildren<P = unknown> = P & {
 		children?: preact.ComponentChildren | undefined;

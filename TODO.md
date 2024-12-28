@@ -1,0 +1,13 @@
+- https://github.com/preactjs/preact/pull/4362
+- https://github.com/preactjs/preact/pull/4358
+- https://github.com/preactjs/preact/pull/4361
+- Backing VNodes
+- Enable removing classes from the bundle
+- Remove deprecated lifecycle methods
+- Try to get rid of DOM pointers
+- Separate mount/update paths
+- Rethink TypeScript types
+- Put createPortal into core
+- Implement hydration 2.0
+- Think about primitives when it comes to streaming
+  - i.e. Streamed boundary loads faster on client than it streams in from server

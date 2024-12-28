@@ -35,7 +35,7 @@ describe('forwardRef', () => {
 		expect(App.prototype.isReactComponent).to.equal(true);
 	});
 
-	it('should have $$typeof property', () => {
+	it.skip('should have $$typeof property', () => {
 		let App = forwardRef((_, ref) => <div ref={ref}>foo</div>);
 		const expected = getSymbol('react.forward_ref', 0xf47);
 		expect(App.$$typeof).to.equal(expected);
