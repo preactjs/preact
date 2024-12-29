@@ -19,7 +19,9 @@ export function createElement(type, props, children) {
 		ref,
 		i;
 
-	if (typeof type === 'object' && type != null && 'Provider' in type) {
+	// @ts-expect-error type can't be null, however TS is confused
+	if (type != null && typeof type === 'object' && 'Provider' in type) {
+		// @ts-expect-error
 		type = type.Provider;
 	}
 
