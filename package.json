@@ -171,6 +171,8 @@
     "compat/test-utils.js",
     "compat/jsx-runtime.js",
     "compat/jsx-runtime.mjs",
+    "compat/react-19.js",
+    "compat/react-19.mjs",
     "compat/jsx-dev-runtime.js",
     "compat/jsx-dev-runtime.mjs",
     "compat/package.json",
