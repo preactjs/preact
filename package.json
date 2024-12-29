@@ -89,6 +89,11 @@
       "import": "./compat/jsx-runtime.mjs",
       "require": "./compat/jsx-runtime.js"
     },
+    "./compat/react-19": {
+      "types": "./compat/src/index.d.ts",
+      "import": "./compat/react-19.mjs",
+      "require": "./compat/react-19.js"
+    },
     "./compat/jsx-dev-runtime": {
       "types": "./jsx-runtime/src/index.d.ts",
       "import": "./compat/jsx-dev-runtime.mjs",
