@@ -82,41 +82,4 @@ class SimpleComponent extends Component {
 	}
 }
 
-class SimpleComponentWithContextAsProvider extends Component {
-	componentProp = 'componentProp';
-	render() {
-		// Render inside div to ensure standard JSX elements still work
-		return (
-			<Ctx value={{ contextValue: 'value' }}>
-				<div>
-					<clickable-ce
-						onClick={e => {
-							// `this` should be instance of SimpleComponent since this is an
-							// arrow function
-							console.log(this.componentProp);
-
-							// Validate `currentTarget` is HTMLElement
-							console.log('clicked ', e.currentTarget.style.display);
-						}}
-					></clickable-ce>
-					<color-picker space="rgb" dir="rtl"></color-picker>
-					<custom-whatever
-						dir="auto" // Inherited prop from HTMLAttributes
-						someattribute="string"
-						onsomeevent={function (e) {
-							// Validate `this` and `e` are the right type
-							console.log('clicked', this.instanceProp, e.eventProp);
-						}}
-					></custom-whatever>
-
-					{/* Ensure context still works */}
-					<Ctx.Consumer>
-						{({ contextValue }) => contextValue.toLowerCase()}
-					</Ctx.Consumer>
-				</div>
-			</Ctx>
-		);
-	}
-}
-
 const component = <SimpleComponent />;

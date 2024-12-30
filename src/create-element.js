@@ -8,7 +8,7 @@ let vnodeId = 0;
  * Create an virtual node (used for JSX)
  * @param {import('./internal').VNode["type"]} type The node name or Component constructor for this
  * virtual node
- * @param {object | null | undefined | import('.').Context} [props] The properties of the virtual node
+ * @param {object | null | undefined} [props] The properties of the virtual node
  * @param {Array<import('.').ComponentChildren>} [children] The children of the
  * virtual node
  * @returns {import('./internal').VNode}
@@ -18,13 +18,6 @@ export function createElement(type, props, children) {
 		key,
 		ref,
 		i;
-
-	// @ts-expect-error type can't be null, however TS is confused
-	if (type != null && typeof type === 'object' && 'Provider' in type) {
-		// @ts-expect-error
-		type = type.Provider;
-	}
-
 	for (i in props) {
 		if (i == 'key') key = props[i];
 		else if (i == 'ref') ref = props[i];

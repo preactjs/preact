@@ -5,7 +5,6 @@ export let i = 0;
 export function createContext(defaultValue, contextId) {
 	contextId = '__cC' + i++;
 
-	/** @type {any} */
 	const context = {
 		_id: contextId,
 		_defaultValue: defaultValue,

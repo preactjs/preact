@@ -388,7 +388,7 @@ export type ContextType<C extends Context<any>> = C extends Context<infer T>
 	? T
 	: never;
 
-export interface Context<T> extends Provider<T> {
+export interface Context<T> {
 	Consumer: Consumer<T>;
 	Provider: Provider<T>;
 	displayName?: string;

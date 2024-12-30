@@ -242,6 +242,16 @@ function handleDomVNode(vnode) {
 
 let oldVNodeHook = options.vnode;
 options.vnode = vnode => {
+	// @ts-expect-error type can't be null, however TS is confused
+	if (
+		vnode.type != null &&
+		typeof vnode.type === 'object' &&
+		'Provider' in vnode.type
+	) {
+		// @ts-expect-error
+		vnode.type = vnode.type.Provider;
+	}
+
 	// only normalize props on Element nodes
 	if (typeof vnode.type === 'string') {
 		handleDomVNode(vnode);
