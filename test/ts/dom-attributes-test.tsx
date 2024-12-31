@@ -34,6 +34,10 @@ const signalValidAriaValues2 = (
 );
 
 const validRole = <div role="button" />;
+// @ts-expect-error We should correctly type aria roles
+const invalidRole = <div role="invalid-role" />;
+// @ts-expect-error We should disallow `generic` as it should not ever be explicitly set
+const invalidRole2 = <div role="generic" />;
 const fallbackRole = <div role="none presentation" />;
 
 const booleanishTest = (
