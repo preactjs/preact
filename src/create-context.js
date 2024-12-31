@@ -3,7 +3,6 @@ import { enqueueRender } from './component';
 export let i = 0;
 
 export function createContext(defaultValue) {
-	/** @type {import('./internal').FunctionComponent} */
 	function Context(props) {
 		if (!this.getChildContext) {
 			/** @type {Set<import('./internal').Component> | null} */
@@ -18,6 +17,7 @@ export function createContext(defaultValue) {
 			};
 
 			this.shouldComponentUpdate = function (_props) {
+				// @ts-expect-error even
 				if (this.props.value !== _props.value) {
 					subs.forEach(c => {
 						c._force = true;

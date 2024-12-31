@@ -57,6 +57,40 @@ describe('createContext', () => {
 		expect(scratch.innerHTML).to.equal('<div><div>a</div></div>');
 	});
 
+	it('should pass context to a consumer (non-provider)', () => {
+		const Ctx = createContext(null);
+		const CONTEXT = { a: 'a' };
+
+		let receivedContext;
+
+		class Inner extends Component {
+			render(props) {
+				return <div>{props.a}</div>;
+			}
+		}
+
+		sinon.spy(Inner.prototype, 'render');
+
+		render(
+			<Ctx value={CONTEXT}>
+				<div>
+					<Ctx.Consumer>
+						{data => {
+							receivedContext = data;
+							return <Inner {...data} />;
+						}}
+					</Ctx.Consumer>
+				</div>
+			</Ctx>,
+			scratch
+		);
+
+		// initial render does not invoke anything but render():
+		expect(Inner.prototype.render).to.have.been.calledWithMatch(CONTEXT);
+		expect(receivedContext).to.equal(CONTEXT);
+		expect(scratch.innerHTML).to.equal('<div><div>a</div></div>');
+	});
+
 	// This optimization helps
 	// to prevent a Provider from rerendering the children, this means
 	// we only propagate to children.

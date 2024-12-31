@@ -83,3 +83,20 @@ class SimpleComponent extends Component {
 }
 
 const component = <SimpleComponent />;
+class SimpleComponentWithContextAsProvider extends Component {
+	componentProp = 'componentProp';
+	render() {
+		// Render inside div to ensure standard JSX elements still work
+		return (
+			<Ctx value={{ contextValue: 'value' }}>
+				<div>
+					{/* Ensure context still works */}
+					<Ctx.Consumer>
+						{({ contextValue }) => contextValue.toLowerCase()}
+					</Ctx.Consumer>
+				</div>
+			</Ctx>
+		);
+	}
+}
+const component2 = <SimpleComponentWithContextAsProvider />;
