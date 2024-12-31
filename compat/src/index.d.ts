@@ -50,21 +50,15 @@ declare namespace React {
 	): T;
 
 	// Preact Defaults
-	export interface Context<T> extends preact.Provider<T> {
-		Consumer: preact.Consumer<T>;
-		Provider: preact.Provider<T>;
-		displayName?: string;
-	}
-	export function createContext<T>(defaultValue: T): Context<T>;
-	export type ContextType<C extends Context<any>> = C extends Context<infer T>
-		? T
-		: never;
+	export import Context = preact.Context;
+	export import ContextType = preact.ContextType;
 	export import RefObject = preact.RefObject;
 	export import Component = preact.Component;
 	export import FunctionComponent = preact.FunctionComponent;
 	export import ComponentType = preact.ComponentType;
 	export import ComponentClass = preact.ComponentClass;
 	export import FC = preact.FunctionComponent;
+	export import createContext = preact.createContext;
 	export import Ref = preact.Ref;
 	export import createRef = preact.createRef;
 	export import Fragment = preact.Fragment;
