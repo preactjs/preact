@@ -37,8 +37,7 @@ describe('Babel jsx/jsxDEV', () => {
 		const props = { ref };
 		const vnode = jsx('div', props);
 		expect(vnode.ref).to.equal(ref);
-		expect(vnode.props).to.equal(props);
-		expect(vnode.props.ref).to.equal(undefined);
+		expect(vnode.props).to.not.equal(props);
 	});
 
 	it('should not copy props wen there is no ref in props', () => {
