@@ -34,6 +34,10 @@
       "import": "./server.mjs",
       "require": "./server.js"
     },
+    "./react-19": {
+      "import": "./react-19.mjs",
+      "require": "./react-19.js"
+    },
     "./jsx-runtime": {
       "import": "./jsx-runtime.mjs",
       "require": "./jsx-runtime.js"
