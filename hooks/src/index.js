@@ -320,8 +320,11 @@ export function useImperativeHandle(ref, createHandle, args) {
 	useLayoutEffect(
 		() => {
 			if (typeof ref == 'function') {
-				ref(createHandle());
-				return () => ref(null);
+				const result = ref(createHandle());
+				return () => {
+					ref(null);
+					if (result && typeof result == 'function') result();
+				};
 			} else if (ref) {
 				ref.current = createHandle();
 				return () => (ref.current = null);
