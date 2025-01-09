@@ -35,6 +35,30 @@ describe('useImperativeHandle', () => {
 		expect(ref.current.test()).to.equal('test');
 	});
 
+	it('Calls ref unmounting function', () => {
+		let ref;
+		const unmount = sinon.spy();
+
+		function Comp() {
+			useImperativeHandle(
+				r => {
+					ref = r;
+					return unmount;
+				},
+				() => ({ test: () => 'test' }),
+				[]
+			);
+			return <p>Test</p>;
+		}
+
+		render(<Comp />, scratch);
+		expect(ref).to.have.property('test');
+		expect(ref.test()).to.equal('test');
+		render(null, scratch);
+		expect(unmount).to.be.calledOnce;
+		expect(ref).to.equal(null);
+	});
+
 	it('calls createHandle after every render by default', () => {
 		let ref,
 			createHandleSpy = sinon.spy();
