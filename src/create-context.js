@@ -2,64 +2,58 @@ import { enqueueRender } from './component';
 
 export let i = 0;
 
-export function createContext(defaultValue, contextId) {
-	contextId = '__cC' + i++;
+export function createContext(defaultValue) {
+	function Context(props) {
+		if (!this.getChildContext) {
+			/** @type {Set<import('./internal').Component> | null} */
+			let subs = new Set();
+			let ctx = {};
+			ctx[Context._id] = this;
 
-	const context = {
-		_id: contextId,
-		_defaultValue: defaultValue,
-		/** @type {import('./internal').FunctionComponent} */
-		Consumer(props, contextValue) {
-			// return props.children(
-			// 	context[contextId] ? context[contextId].props.value : defaultValue
-			// );
-			return props.children(contextValue);
-		},
-		/** @type {import('./internal').FunctionComponent} */
-		Provider(props) {
-			if (!this.getChildContext) {
-				/** @type {Set<import('./internal').Component> | null} */
-				let subs = new Set();
-				let ctx = {};
-				ctx[contextId] = this;
+			this.getChildContext = () => ctx;
 
-				this.getChildContext = () => ctx;
+			this.componentWillUnmount = () => {
+				subs = null;
+			};
 
-				this.componentWillUnmount = () => {
-					subs = null;
-				};
+			this.shouldComponentUpdate = function (_props) {
+				// @ts-expect-error even
+				if (this.props.value !== _props.value) {
+					subs.forEach(c => {
+						c._force = true;
+						enqueueRender(c);
+					});
+				}
+			};
 
-				this.shouldComponentUpdate = function (_props) {
-					if (this.props.value !== _props.value) {
-						subs.forEach(c => {
-							c._force = true;
-							enqueueRender(c);
-						});
+			this.sub = c => {
+				subs.add(c);
+				let old = c.componentWillUnmount;
+				c.componentWillUnmount = () => {
+					if (subs) {
+						subs.delete(c);
 					}
+					if (old) old.call(c);
 				};
-
-				this.sub = c => {
-					subs.add(c);
-					let old = c.componentWillUnmount;
-					c.componentWillUnmount = () => {
-						if (subs) {
-							subs.delete(c);
-						}
-						if (old) old.call(c);
-					};
-				};
-			}
-
-			return props.children;
+			};
 		}
+
+		return props.children;
+	}
+
+	Context._id = '__cC' + i++;
+	Context._defaultValue = defaultValue;
+
+	/** @type {import('./internal').FunctionComponent} */
+	Context.Consumer = (props, contextValue) => {
+		return props.children(contextValue);
 	};
 
-	// Devtools needs access to the context object when it
-	// encounters a Provider. This is necessary to support
-	// setting `displayName` on the context object instead
-	// of on the component itself. See:
-	// https://reactjs.org/docs/context.html#contextdisplayname
+	// we could also get rid of _contextRef entirely
+	Context.Provider =
+		Context._contextRef =
+		Context.Consumer.contextType =
+			Context;
 
-	return (context.Provider._contextRef = context.Consumer.contextType =
-		context);
+	return Context;
 }

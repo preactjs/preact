@@ -15,3 +15,26 @@ React.unmountComponentAtNode(document.body.shadowRoot!);
 React.createPortal(<div />, document.createElement('div'));
 React.createPortal(<div />, document.createDocumentFragment());
 React.createPortal(<div />, document.body.shadowRoot!);
+
+const Ctx = React.createContext({ contextValue: '' });
+class SimpleComponentWithContextAsProvider extends React.Component {
+	componentProp = 'componentProp';
+	render() {
+		// Render inside div to ensure standard JSX elements still work
+		return (
+			<Ctx value={{ contextValue: 'value' }}>
+				<div>
+					{/* Ensure context still works */}
+					<Ctx.Consumer>
+						{({ contextValue }) => contextValue.toLowerCase()}
+					</Ctx.Consumer>
+				</div>
+			</Ctx>
+		);
+	}
+}
+
+React.render(
+	<SimpleComponentWithContextAsProvider />,
+	document.createElement('div')
+);
