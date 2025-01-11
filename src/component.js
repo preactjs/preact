@@ -215,7 +215,7 @@ export function enqueueRender(c) {
  * @param {import('./internal').Component} a
  * @param {import('./internal').Component} b
  */
-const depthSort = (a, b) => a._vnode._depth - b._vnode._depth;
+const depthSort = (a, b) => b._vnode._depth - a._vnode._depth;
 
 /** Flush the render queue by rerendering all queued components */
 function process() {
@@ -223,7 +223,7 @@ function process() {
 	rerenderQueue.sort(depthSort);
 	// Don't update `renderCount` yet. Keep its value non-zero to prevent unnecessary
 	// process() calls from getting scheduled while `queue` is still being consumed.
-	while ((c = rerenderQueue.shift())) {
+	while ((c = rerenderQueue.pop())) {
 		if (c._dirty) {
 			let renderQueueLength = rerenderQueue.length;
 			renderComponent(c);
