@@ -321,6 +321,7 @@ export function diff(
 								newVNode._component._excess.push(child);
 							}
 							done = commentMarkersToFind === 0;
+							oldDom = excessDomChildren[i];
 							excessDomChildren[i] = null;
 						} else if (commentMarkersToFind > 0) {
 							newVNode._component._excess.push(child);
