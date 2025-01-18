@@ -84,7 +84,7 @@ export type ComponentProps<
 	? P
 	: C extends keyof JSXInternal.IntrinsicElements
 		? JSXInternal.IntrinsicElements[C]
-		: never;
+		: {};
 
 export interface FunctionComponent<P = {}> {
 	(props: RenderableProps<P>, context?: any): ComponentChildren;
@@ -388,11 +388,12 @@ export type ContextType<C extends Context<any>> = C extends Context<infer T>
 	? T
 	: never;
 
-export interface Context<T> {
-	Consumer: Consumer<T>;
-	Provider: Provider<T>;
+export interface Context<T> extends preact.Provider<T> {
+	Consumer: preact.Consumer<T>;
+	Provider: preact.Provider<T>;
 	displayName?: string;
 }
+
 export interface PreactContext<T> extends Context<T> {}
 
 export function createContext<T>(defaultValue: T): Context<T>;
