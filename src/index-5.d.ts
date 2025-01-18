@@ -84,7 +84,7 @@ export type ComponentProps<
 	? P
 	: C extends keyof JSXInternal.IntrinsicElements
 		? JSXInternal.IntrinsicElements[C]
-		: never;
+		: {};
 
 export interface FunctionComponent<P = {}> {
 	(props: RenderableProps<P>, context?: any): VNode | null;

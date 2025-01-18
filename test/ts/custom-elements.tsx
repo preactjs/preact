@@ -41,7 +41,7 @@ interface WhateveElAttributes extends createElement.JSX.HTMLAttributes {
 }
 
 // Ensure context still works
-const { Provider, Consumer } = createContext({ contextValue: '' });
+const Ctx = createContext({ contextValue: '' });
 
 // Sample component that uses custom elements
 
@@ -50,7 +50,7 @@ class SimpleComponent extends Component {
 	render() {
 		// Render inside div to ensure standard JSX elements still work
 		return (
-			<Provider value={{ contextValue: 'value' }}>
+			<Ctx.Provider value={{ contextValue: 'value' }}>
 				<div>
 					<clickable-ce
 						onClick={e => {
@@ -73,13 +73,30 @@ class SimpleComponent extends Component {
 					></custom-whatever>
 
 					{/* Ensure context still works */}
-					<Consumer>
+					<Ctx.Consumer>
 						{({ contextValue }) => contextValue.toLowerCase()}
-					</Consumer>
+					</Ctx.Consumer>
 				</div>
-			</Provider>
+			</Ctx.Provider>
 		);
 	}
 }
 
 const component = <SimpleComponent />;
+class SimpleComponentWithContextAsProvider extends Component {
+	componentProp = 'componentProp';
+	render() {
+		// Render inside div to ensure standard JSX elements still work
+		return (
+			<Ctx value={{ contextValue: 'value' }}>
+				<div>
+					{/* Ensure context still works */}
+					<Ctx.Consumer>
+						{({ contextValue }) => contextValue.toLowerCase()}
+					</Ctx.Consumer>
+				</div>
+			</Ctx>
+		);
+	}
+}
+const component2 = <SimpleComponentWithContextAsProvider />;
