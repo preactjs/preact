@@ -130,15 +130,6 @@ export function diffChildren(
 			oldDom = insert(childVNode, oldDom, parentDom);
 		} else if (typeof childVNode.type == 'function' && result !== UNDEFINED) {
 			oldDom = result;
-			let toResolve = 0;
-			while ((oldDom && oldDom.nodeType == 8) || toResolve > 0) {
-				if (oldDom && oldDom.nodeType == 8 && oldDom.data == '$s') {
-					toResolve++;
-				} else if (oldDom && oldDom.nodeType == 8 && oldDom.data == '/$s') {
-					toResolve--;
-				}
-				oldDom = oldDom.nextSibling;
-			}
 		} else if (newDom) {
 			oldDom = newDom.nextSibling;
 		}
