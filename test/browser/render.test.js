@@ -92,7 +92,7 @@ describe('render()', () => {
 		});
 	}
 
-	it('should support the <template> tag', () => {
+	it.only('should support the <template> tag', () => {
 		function App() {
 			return (
 				<div>
@@ -104,7 +104,9 @@ describe('render()', () => {
 		}
 
 		render(<App />, scratch);
-		console.log(scratch.firstChild.firstChild.content.innerHTML);
+		expect(scratch.firstChild.firstChild.content.firstChild.outerHTML).to.eql(
+			`<h2>this should show up</h2>`
+		);
 	});
 
 	it('should not render when detecting JSON-injection', () => {
