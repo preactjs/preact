@@ -92,6 +92,21 @@ describe('render()', () => {
 		});
 	}
 
+	it('should support the <template> tag', () => {
+		function App() {
+			return (
+				<div>
+					<template>
+						<h2>this should show up</h2>
+					</template>
+				</div>
+			);
+		}
+
+		render(<App />, scratch);
+		console.log(scratch.firstChild.firstChild.content.innerHTML);
+	});
+
 	it('should not render when detecting JSON-injection', () => {
 		const vnode = JSON.parse('{"type":"span","children":"Malicious"}');
 		render(vnode, scratch);
