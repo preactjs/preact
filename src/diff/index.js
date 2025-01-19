@@ -526,7 +526,7 @@ function diffElementNodes(
 
 			diffChildren(
 				// @ts-expect-error
-				newVNode.type === 'template' && 'content' in dom ? dom.content : dom,
+				newVNode.type === 'template' ? dom.content : dom,
 				isArray(newChildren) ? newChildren : [newChildren],
 				newVNode,
 				oldVNode,
