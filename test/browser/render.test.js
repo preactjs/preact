@@ -92,7 +92,7 @@ describe('render()', () => {
 		});
 	}
 
-	it.only('should support the <template> tag', () => {
+	it('should support the <template> tag', () => {
 		function App() {
 			return (
 				<div>
