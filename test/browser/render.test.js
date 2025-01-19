@@ -95,18 +95,15 @@ describe('render()', () => {
 	it('should support the <template> tag', () => {
 		function App() {
 			return (
-				<div>
-					<template>
-						<h2>this should show up</h2>
-					</template>
-				</div>
+				<template>
+					<h1>it works</h1>
+				</template>
 			);
 		}
 
 		render(<App />, scratch);
-		expect(scratch.firstChild.firstChild.content.firstChild.outerHTML).to.eql(
-			`<h2>this should show up</h2>`
-		);
+		const clone = scratch.firstChild.content.cloneNode(true);
+		expect(clone.firstChild.outerHTML).to.eql('<h1>it works</h1>');
 	});
 
 	it('should not render when detecting JSON-injection', () => {
