@@ -525,7 +525,8 @@ function diffElementNodes(
 			if (oldHtml) dom.innerHTML = '';
 
 			diffChildren(
-				dom,
+				// @ts-expect-error
+				newVNode.type === 'template' ? dom.content : dom,
 				isArray(newChildren) ? newChildren : [newChildren],
 				newVNode,
 				oldVNode,

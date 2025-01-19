@@ -92,6 +92,20 @@ describe('render()', () => {
 		});
 	}
 
+	it('should support the <template> tag', () => {
+		function App() {
+			return (
+				<template>
+					<h1>it works</h1>
+				</template>
+			);
+		}
+
+		render(<App />, scratch);
+		const clone = scratch.firstChild.content.cloneNode(true);
+		expect(clone.firstChild.outerHTML).to.eql('<h1>it works</h1>');
+	});
+
 	it('should not render when detecting JSON-injection', () => {
 		const vnode = JSON.parse('{"type":"span","children":"Malicious"}');
 		render(vnode, scratch);
