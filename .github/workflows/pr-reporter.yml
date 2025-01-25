@@ -22,7 +22,7 @@ jobs:
       - uses: dorny/paths-filter@v3
         id: filter
         with:
-          ref: ${{ github.event.workflow_run.head_branch }}
+          ref: ${{ github.event.workflow_run.head_sha }}
           # Should be kept in sync with the filter in the CI workflow
           filters: |
             jsChanged: '**/src/**/*.js'
