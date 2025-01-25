@@ -5,7 +5,6 @@ on:
   # workflow_run workflow as a workaround
   workflow_run:
     workflows: ['CI']
-    branches: ['**']
     types:
       - completed
       - requested
