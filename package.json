@@ -89,17 +89,41 @@
       "import": "./compat/jsx-runtime.mjs",
       "require": "./compat/jsx-runtime.js"
     },
-    "./compat/react-19": {
-      "types": "./compat/src/index.d.ts",
-      "import": "./compat/react-19.mjs",
-      "require": "./compat/react-19.js"
-    },
     "./compat/jsx-dev-runtime": {
       "types": "./jsx-runtime/src/index.d.ts",
       "import": "./compat/jsx-dev-runtime.mjs",
       "require": "./compat/jsx-dev-runtime.js"
     },
     "./compat/scheduler": {
+      "import": "./compat/scheduler.mjs",
+      "require": "./compat/scheduler.js"
+    },
+    "./compat/react-19": {
+      "types": "./compat/src/index.d.ts",
+      "import": "./compat/react-19.mjs",
+      "require": "./compat/react-19.js"
+    },
+    "./compat/react-19/jsx-runtime": {
+      "types": "./jsx-runtime/src/index.d.ts",
+      "import": "./compat/jsx-runtime.mjs",
+      "require": "./compat/jsx-runtime.js"
+    },
+    "./compat/react-19/jsx-dev-runtime": {
+      "types": "./jsx-runtime/src/index.d.ts",
+      "import": "./compat/jsx-dev-runtime.mjs",
+      "require": "./compat/jsx-dev-runtime.js"
+    },
+    "./compat/react-19/server": {
+      "browser": "./compat/server.browser.js",
+      "import": "./compat/server.mjs",
+      "require": "./compat/server.js"
+    },
+    "./compat/react-19/client": {
+      "types": "./compat/client.d.ts",
+      "import": "./compat/client.mjs",
+      "require": "./compat/client.js"
+    },
+    "./compat/react-19/scheduler": {
       "import": "./compat/scheduler.mjs",
       "require": "./compat/scheduler.js"
     },

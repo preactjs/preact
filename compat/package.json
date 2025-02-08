@@ -34,10 +34,6 @@
       "import": "./server.mjs",
       "require": "./server.js"
     },
-    "./react-19": {
-      "import": "./react-19.mjs",
-      "require": "./react-19.js"
-    },
     "./jsx-runtime": {
       "import": "./jsx-runtime.mjs",
       "require": "./jsx-runtime.js"
@@ -47,6 +43,35 @@
       "require": "./jsx-dev-runtime.js"
     },
     "./scheduler": {
+      "import": "./scheduler.mjs",
+      "require": "./scheduler.js"
+    },
+    "./react-19": {
+      "types": "./src/index.d.ts",
+      "import": "./react-19.mjs",
+      "require": "./react-19.js"
+    },
+    "./react-19/jsx-runtime": {
+      "types": "./jsx-runtime/src/index.d.ts",
+      "import": "./jsx-runtime.mjs",
+      "require": "./jsx-runtime.js"
+    },
+    "./react-19/jsx-dev-runtime": {
+      "types": "./jsx-runtime/src/index.d.ts",
+      "import": "./jsx-dev-runtime.mjs",
+      "require": "./jsx-dev-runtime.js"
+    },
+    "./react-19/server": {
+      "browser": "./server.browser.js",
+      "import": "./server.mjs",
+      "require": "./server.js"
+    },
+    "./react-19/client": {
+      "types": "./client.d.ts",
+      "import": "./client.mjs",
+      "require": "./client.js"
+    },
+    "./react-19/scheduler": {
       "import": "./scheduler.mjs",
       "require": "./scheduler.js"
     },
