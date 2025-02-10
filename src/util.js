@@ -25,4 +25,21 @@ export function removeNode(node) {
 	if (node && node.parentNode) node.parentNode.removeChild(node);
 }
 
+/**
+ * Checks whether a given node is contained within a specified parent node's subtree.
+ * This function is a workaround for Internet Explorer 11's limited support for
+ * `Element.prototype.contains()`, which works only for DOM elements and does not
+ * support text nodes.
+ *
+ * @param {import('./internal').PreactElement} parent - The parent node within which to search for the `node`.
+ * @param {import('./index').ContainerNode} node - The node to check for containment within the `parent` subtree.
+ */
+export function contains(parent, node) {
+	while (node) {
+		if (node === parent) return true;
+		node = node.parentNode;
+	}
+	return false;
+}
+
 export const slice = EMPTY_ARR.slice;

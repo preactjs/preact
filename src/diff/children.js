@@ -7,7 +7,7 @@ import {
 	MATCHED,
 	UNDEFINED
 } from '../constants';
-import { isArray } from '../util';
+import { isArray, contains } from '../util';
 import { getDomSibling } from '../component';
 
 /**
@@ -339,7 +339,7 @@ function insert(parentVNode, oldDom, parentDom) {
 
 		return oldDom;
 	} else if (parentVNode._dom != oldDom) {
-		if (oldDom && parentVNode.type && !parentDom.contains(oldDom)) {
+		if (oldDom && parentVNode.type && !contains(parentDom, oldDom)) {
 			oldDom = getDomSibling(parentVNode);
 		}
 		parentDom.insertBefore(parentVNode._dom, oldDom || null);
