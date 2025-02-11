@@ -11,5 +11,5 @@ options.vnode = vnode => {
 	if (oldVNode) oldVNode(vnode);
 };
 
-export default all;
+export { default } from 'preact/compat';
 export * from 'preact/compat';
