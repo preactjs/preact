@@ -35,6 +35,8 @@ export function removeNode(node) {
  * @param {import('./index').ContainerNode} node - The node to check for containment within the `parent` subtree.
  */
 export function contains(parent, node) {
+	if ('isPortal' in parent) return true;
+
 	while (node) {
 		if (node === parent) return true;
 		node = node.parentNode;
