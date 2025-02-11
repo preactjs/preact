@@ -1,4 +1,4 @@
-import all from 'preact/compat';
+import 'preact/compat';
 
 import { options } from 'preact';
 
