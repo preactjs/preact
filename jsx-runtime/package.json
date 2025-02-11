@@ -5,7 +5,7 @@
   "private": true,
   "description": "Preact JSX runtime",
   "main": "dist/jsxRuntime.js",
-  "module": "dist/jsxRuntime.module.js",
+  "module": "dist/jsxRuntime.mjs",
   "umd:main": "dist/jsxRuntime.umd.js",
   "source": "src/index.js",
   "types": "src/index.d.ts",
@@ -19,7 +19,7 @@
   "exports": {
     ".": {
       "types": "./src/index.d.ts",
-      "browser": "./dist/jsxRuntime.module.js",
+      "module": "./dist/jsxRuntime.mjs",
       "umd": "./dist/jsxRuntime.umd.js",
       "import": "./dist/jsxRuntime.mjs",
       "require": "./dist/jsxRuntime.js"
