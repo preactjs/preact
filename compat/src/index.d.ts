@@ -84,7 +84,7 @@ declare namespace React {
 	export interface HTMLAttributes<T extends EventTarget>
 		extends JSXInternal.HTMLAttributes<T> {}
 	export interface HTMLProps<T extends EventTarget>
-		extends JSXInternal.HTMLAttributes<T>,
+		extends JSXInternal.AllHTMLAttributes<T>,
 			preact.ClassAttributes<T> {}
 	export interface AllHTMLAttributes<T extends EventTarget>
 		extends JSXInternal.AllHTMLAttributes<T> {}
