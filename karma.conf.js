@@ -62,7 +62,7 @@ const subPkgPath = pkgName => {
 	const stripped = pkgName.replace(/[/\\./]/g, '');
 	const pkgJson = path.join(__dirname, 'package.json');
 	const pkgExports = require(pkgJson).exports;
-	const file = pkgExports[stripped ? `./${stripped}` : '.'].browser;
+	const file = pkgExports[stripped ? `./${stripped}` : '.'].module;
 	return path.join(__dirname, file);
 };
 
