@@ -325,7 +325,7 @@ describe('Lifecycle methods', () => {
 		});
 
 		it('should be called when applying a Component ref', () => {
-			const Foo = () => <div />;
+			const Foo = props => <div ref={props.ref} />;
 
 			const ref = value => {
 				if (value) {
