@@ -35,7 +35,7 @@ function createVNode(type, props, key, isStaticChildren, __source, __self) {
 		ref,
 		i;
 
-	if ('ref' in normalizedProps) {
+	if ('ref' in normalizedProps && typeof type != 'function') {
 		normalizedProps = {};
 		for (i in props) {
 			if (i == 'ref') {

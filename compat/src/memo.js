@@ -29,6 +29,5 @@ export function memo(c, comparer) {
 	}
 	Memoed.displayName = 'Memo(' + (c.displayName || c.name) + ')';
 	Memoed.prototype.isReactComponent = true;
-	Memoed._forwarded = true;
 	return Memoed;
 }

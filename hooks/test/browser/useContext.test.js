@@ -185,6 +185,7 @@ describe('useContext', () => {
 		let provider, subSpy;
 
 		function Comp() {
+			provider = this._vnode._parent._component;
 			const value = useContext(Context);
 			values.push(value);
 			return null;
@@ -193,7 +194,7 @@ describe('useContext', () => {
 		render(<Comp />, scratch);
 
 		render(
-			<Context.Provider ref={p => (provider = p)} value={42}>
+			<Context.Provider value={42}>
 				<Comp />
 			</Context.Provider>,
 			scratch
@@ -217,6 +218,7 @@ describe('useContext', () => {
 		let provider, subSpy;
 
 		function Comp() {
+			provider = this._vnode._parent._component;
 			const value = useContext(Context);
 			values.push(value);
 			return null;
@@ -225,7 +227,7 @@ describe('useContext', () => {
 		render(<Comp />, scratch);
 
 		render(
-			<Context ref={p => (provider = p)} value={42}>
+			<Context value={42}>
 				<Comp />
 			</Context>,
 			scratch
