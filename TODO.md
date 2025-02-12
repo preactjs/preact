@@ -1,5 +1,0 @@
-- https://github.com/preactjs/preact/pull/4358
-- https://github.com/preactjs/preact/pull/4361
-- Remove deprecated lifecycle methods
-- Put createPortal into core
-- Implement hydration 2.0
