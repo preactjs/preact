@@ -11,14 +11,3 @@ export function shallowDiffers(a, b) {
 	for (let i in b) if (i !== '__source' && a[i] !== b[i]) return true;
 	return false;
 }
-
-/**
- * Check if two values are the same value
- * @param {*} x
- * @param {*} y
- * @returns {boolean}
- */
-export function is(x, y) {
-	// TODO: can we replace this with Object.is?
-	return (x === y && (x !== 0 || 1 / x === 1 / y)) || (x !== x && y !== y);
-}
