@@ -31,6 +31,10 @@ export function logCall(obj, method) {
 
 		let operation;
 		switch (method) {
+			case 'removeChild': {
+				operation = `${serialize(c)}.remove()`;
+				break;
+			}
 			case 'insertBefore': {
 				if (args[1] === null && args.length === 2) {
 					operation = `${serialize(this)}.appendChild(${serialize(args[0])})`;
