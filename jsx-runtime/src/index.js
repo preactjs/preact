@@ -65,7 +65,7 @@ function createVNode(type, props, key, isStaticChildren, __source, __self) {
 		__self
 	};
 
-	if (options.vnode) options.vnode(vnode);
+	options.vnode(vnode);
 	return vnode;
 }
 
