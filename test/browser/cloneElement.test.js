@@ -63,7 +63,6 @@ describe('cloneElement', () => {
 	it('should override ref if specified', () => {
 		function a() {}
 		function b() {}
-		function Foo() {}
 		const instance = <div ref={a}>hello</div>;
 
 		let clone = cloneElement(instance);
