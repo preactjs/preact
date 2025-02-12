@@ -25,7 +25,7 @@ export function cloneElement(vnode, props, children) {
 
 	for (i in props) {
 		if (i == 'key') key = props[i];
-		else if (i == 'ref') ref = props[i];
+		else if (i == 'ref' && typeof vnode.type != 'function') ref = props[i];
 		else if (props[i] === UNDEFINED && defaultProps !== UNDEFINED) {
 			normalizedProps[i] = defaultProps[i];
 		} else {
