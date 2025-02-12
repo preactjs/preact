@@ -643,7 +643,7 @@ export function unmount(vnode, parentVNode, skipRemove) {
 		}
 	}
 
-	if (!skipRemove && vnode._dom != null && typeof vnode.type != 'function') {
+	if (!skipRemove && vnode._dom != null && vnode._dom.parentNode) {
 		vnode._dom.remove();
 	}
 
