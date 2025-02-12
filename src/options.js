@@ -1,3 +1,4 @@
+import { UNDEFINED } from './constants';
 import { _catchError } from './diff/catch-error';
 
 /**
@@ -10,6 +11,18 @@ import { _catchError } from './diff/catch-error';
  * @type {import('./internal').Options}
  */
 const options = {
+	vnode: vnode => {
+		const { type, props } = vnode;
+		// If a Component VNode, check for and apply defaultProps
+		// Note: type may be undefined in development, must never error here.
+		if (typeof type == 'function' && type.defaultProps != null) {
+			for (const i in type.defaultProps) {
+				if (props[i] === UNDEFINED) {
+					props[i] = type.defaultProps[i];
+				}
+			}
+		}
+	},
 	_catchError
 };
 
