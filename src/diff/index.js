@@ -248,7 +248,7 @@ export function diff(
 			c.state = c._nextState;
 
 			if (c.getChildContext != null) {
-				globalContext = assign({}, globalContext, c.getChildContext());
+				globalContext = assign(assign({}, globalContext), c.getChildContext());
 			}
 
 			if (isClassComponent && !isNew && c.getSnapshotBeforeUpdate != null) {
@@ -300,9 +300,8 @@ export function diff(
 					newVNode._dom = oldDom;
 				} else {
 					for (let i = excessDomChildren.length; i--; ) {
-						if (excessDomChildren[i]) {
-							excessDomChildren[i].remove();
-						}
+						const child = excessDomChildren[i];
+						if (child) child.remove();
 					}
 				}
 			} else {
@@ -544,7 +543,8 @@ function diffElementNodes(
 			// Remove children that are not part of any vnode.
 			if (excessDomChildren != null) {
 				for (i = excessDomChildren.length; i--; ) {
-					if (excessDomChildren[i]) excessDomChildren[i].remove();
+					const child = excessDomChildren[i];
+					if (child) child.remove();
 				}
 			}
 		}
