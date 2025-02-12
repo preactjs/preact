@@ -181,7 +181,7 @@ function createEsbuildPlugin() {
 							coverage && [
 								'istanbul',
 								{
-									include: minify ? '**/dist/**/*.js' : '**/src/**/*.js'
+									include: minify ? '**/dist/**/*.{js,mjs}' : '**/src/**/*.js'
 								}
 							]
 						].filter(Boolean)
