@@ -271,7 +271,7 @@ describe('suspense', () => {
 	});
 
 	it('lazy should forward refs', () => {
-		const LazyComp = () => <div>Hello from LazyComp</div>;
+		const LazyComp = props => <div ref={props.ref} />;
 		let ref = {};
 
 		/** @type {() => Promise<void>} */
@@ -297,7 +297,7 @@ describe('suspense', () => {
 
 		return resolve().then(() => {
 			rerender();
-			expect(ref.current.constructor).to.equal(LazyComp);
+			expect(ref.current).to.equal(scratch.firstChild);
 		});
 	});
 
@@ -1501,8 +1501,8 @@ describe('suspense', () => {
 
 		/** @type {() => void} */
 		let hide,
-		/** @type {(v) => void} */
-		setValue;
+			/** @type {(v) => void} */
+			setValue;
 
 		class Conditional extends Component {
 			constructor(props) {
@@ -1674,8 +1674,17 @@ describe('suspense', () => {
 
 		// eslint-disable-next-line react/require-render-return
 		class Suspender extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { promise: new Promise(() => {}) };
+				if (typeof props.ref === 'function') {
+					props.ref(this);
+				} else if (props.ref) {
+					props.ref.current = this;
+				}
+			}
 			render() {
-				throw new Promise(() => {});
+				throw this.state.promise;
 			}
 		}
 
