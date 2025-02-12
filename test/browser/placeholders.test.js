@@ -117,6 +117,11 @@ describe('null placeholders', () => {
 		class Stateful extends Component {
 			constructor(props) {
 				super(props);
+				if (typeof props.ref === 'function') {
+					props.ref(this);
+				} else if (props.ref) {
+					props.ref.current = this;
+				}
 				this.state = { count: 0 };
 			}
 			increment() {
