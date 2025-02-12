@@ -716,7 +716,13 @@ describe('render()', () => {
 		});
 
 		it('should avoid reapplying innerHTML when __html property of dangerouslySetInnerHTML attr remains unchanged', () => {
+			/** @type {Component} */
+			let thing;
 			class Thing extends Component {
+				constructor(props) {
+					super(props);
+					thing = this;
+				}
 				render() {
 					// eslint-disable-next-line react/no-danger
 					return (
@@ -725,9 +731,7 @@ describe('render()', () => {
 				}
 			}
 
-			/** @type {Component} */
-			let thing;
-			render(<Thing ref={r => (thing = r)} />, scratch);
+			render(<Thing />, scratch);
 
 			let firstInnerHTMLChild = scratch.firstChild.firstChild;
 
@@ -961,6 +965,10 @@ describe('render()', () => {
 		let checkbox;
 
 		class Inputs extends Component {
+			constructor(props) {
+				super(props);
+				inputs = this;
+			}
 			render() {
 				return (
 					<div>
@@ -971,7 +979,7 @@ describe('render()', () => {
 			}
 		}
 
-		render(<Inputs ref={x => (inputs = x)} />, scratch);
+		render(<Inputs />, scratch);
 
 		expect(text.value).to.equal('Hello');
 		expect(checkbox.checked).to.equal(true);
@@ -1100,9 +1108,12 @@ describe('render()', () => {
 
 	// see preact/#1327
 	it('should not reuse unkeyed components', () => {
+		let ref;
 		class X extends Component {
 			constructor() {
 				super();
+				ref = this;
+				this.id = null;
 				this.state = { i: 0 };
 			}
 
@@ -1119,7 +1130,6 @@ describe('render()', () => {
 			}
 		}
 
-		let ref;
 		/** @type {() => void} */
 		let updateApp;
 		class App extends Component {
@@ -1133,7 +1143,7 @@ describe('render()', () => {
 				return (
 					<div>
 						{this.state.i === 0 && <X />}
-						<X ref={node => (ref = node)} />
+						<X />
 					</div>
 				);
 			}
