@@ -64,7 +64,7 @@ describe('cloneElement', () => {
 		function a() {}
 		function b() {}
 		function Foo() {}
-		const instance = <Foo ref={a}>hello</Foo>;
+		const instance = <div ref={a}>hello</div>;
 
 		let clone = cloneElement(instance);
 		expect(clone.ref).to.equal(a);
