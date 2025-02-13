@@ -89,14 +89,12 @@ export type ComponentProps<
 export interface FunctionComponent<P = {}> {
 	(props: RenderableProps<P>, context?: any): ComponentChildren;
 	displayName?: string;
-	defaultProps?: Partial<P> | undefined;
 }
 export interface FunctionalComponent<P = {}> extends FunctionComponent<P> {}
 
 export interface ComponentClass<P = {}, S = {}> {
 	new (props: P, context?: any): Component<P, S>;
 	displayName?: string;
-	defaultProps?: Partial<P>;
 	contextType?: Context<any>;
 	getDerivedStateFromProps?(
 		props: Readonly<P>,
@@ -141,7 +139,6 @@ export abstract class Component<P, S> {
 	constructor(props?: P, context?: any);
 
 	static displayName?: string;
-	static defaultProps?: any;
 	static contextType?: Context<any>;
 
 	// Static members cannot reference class type parameters. This is not
