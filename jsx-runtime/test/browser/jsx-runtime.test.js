@@ -51,40 +51,6 @@ describe('Babel jsx/jsxDEV', () => {
 		expect(vnode.key).to.equal('foo');
 	});
 
-	it('should apply defaultProps', () => {
-		class Foo extends Component {
-			render() {
-				return <div />;
-			}
-		}
-
-		Foo.defaultProps = {
-			foo: 'bar'
-		};
-
-		const vnode = jsx(Foo, {}, null);
-		expect(vnode.props).to.deep.equal({
-			foo: 'bar'
-		});
-	});
-
-	it('should keep props over defaultProps', () => {
-		class Foo extends Component {
-			render() {
-				return <div />;
-			}
-		}
-
-		Foo.defaultProps = {
-			foo: 'bar'
-		};
-
-		const vnode = jsx(Foo, { foo: 'baz' }, null);
-		expect(vnode.props).to.deep.equal({
-			foo: 'baz'
-		});
-	});
-
 	it('should set __source and __self', () => {
 		const vnode = jsx('div', { class: 'foo' }, 'key', false, 'source', 'self');
 		expect(vnode.__source).to.equal('source');
