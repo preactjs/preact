@@ -537,7 +537,7 @@ function argsChanged(oldArgs, newArgs) {
 	return (
 		!oldArgs ||
 		oldArgs.length !== newArgs.length ||
-		newArgs.some((arg, index) => arg !== oldArgs[index])
+		newArgs.some((arg, index) => !Object.is(arg, oldArgs[index]))
 	);
 }
 
