@@ -15,3 +15,11 @@ export function assign(obj, props) {
 	for (let i in props) obj[i] = props[i];
 	return /** @type {O & P} */ (obj);
 }
+
+/**
+ * Remove a child node from its parent if attached.
+ * @param {import('./internal').PreactElement | null} node The node to remove
+ */
+export function removeNode(node) {
+	if (node && node.parentNode) node.remove();
+}
