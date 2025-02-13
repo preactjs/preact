@@ -34,6 +34,8 @@ class SimpleComponentWithContextAsProvider extends React.Component {
 	}
 }
 
+SimpleComponentWithContextAsProvider.defaultProps = { foo: 'default' };
+
 React.render(
 	<SimpleComponentWithContextAsProvider />,
 	document.createElement('div')
