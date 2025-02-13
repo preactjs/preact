@@ -43,6 +43,7 @@ jobs:
         timeout-minutes: 2
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
+          fail-on-error: false
       - name: Package
         # Use --ignore-scripts here to avoid re-building again before pack
         run: |
