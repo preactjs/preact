@@ -723,61 +723,17 @@ describe('suspense hydration', () => {
 		});
 	});
 
-	// Currently not supported. Hydration doesn't set attributes... but should it
-	// when coming back from suspense if props were updated?
-	it.skip('should hydrate and update attributes with latest props', () => {
-		const originalHtml = '<p>Count: 0</p><p data-count="0">Lazy count: 0</p>';
-		scratch.innerHTML = originalHtml;
-		clearLog();
-
-		/** @type {() => void} */
-		let increment;
-		const [Lazy, resolve] = createLazy();
-		function App() {
-			const [count, setCount] = useState(0);
-			increment = () => setCount(c => c + 1);
-
-			return (
-				<Suspense>
-					<p>Count: {count}</p>
-					<Lazy count={count} />
-				</Suspense>
-			);
-		}
-
-		hydrate(<App />, scratch);
-		rerender(); // Flush rerender queue to mimic what preact will really do
-		expect(scratch.innerHTML).to.equal(originalHtml);
-		// Re: DOM OP below - Known issue with hydrating merged text nodes
-		expect(getLog()).to.deep.equal(['<p>Count: .appendChild(#text)']);
-		clearLog();
-
-		increment();
-		rerender();
-
-		expect(scratch.innerHTML).to.equal(
-			'<p>Count: 1</p><p data-count="0">Lazy count: 0</p>'
-		);
-		expect(getLog()).to.deep.equal([]);
-		clearLog();
-
-		return resolve(({ count }) => (
-			<p data-count={count}>Lazy count: {count}</p>
-		)).then(() => {
-			rerender();
-			expect(scratch.innerHTML).to.equal(
-				'<p>Count: 1</p><p data-count="1">Lazy count: 1</p>'
-			);
-			// Re: DOM OP below - Known issue with hydrating merged text nodes
-			expect(getLog()).to.deep.equal(['<p>Lazy count: .appendChild(#text)']);
-			clearLog();
-		});
-	});
-
-	// Currently not supported, but I wrote the test before I realized that so
-	// leaving it here in case we do support it eventually
-	it.skip('should properly hydrate suspense when resolves to a Fragment', () => {
-		const originalHtml = ul([li(0), li(1), li(2), li(3), li(4), li(5)]);
+	it('should properly hydrate suspense when resolves to a Fragment', () => {
+		const originalHtml = ul([
+			li(0),
+			li(1),
+			'<!--$s-->',
+			li(2),
+			li(3),
+			'<!--/$s-->',
+			li(4),
+			li(5)
+		]);
 
 		const listeners = [
 			sinon.spy(),
@@ -809,8 +765,8 @@ describe('suspense hydration', () => {
 			scratch
 		);
 		rerender(); // Flush rerender queue to mimic what preact will really do
-		expect(scratch.innerHTML).to.equal(originalHtml);
 		expect(getLog()).to.deep.equal([]);
+		expect(scratch.innerHTML).to.equal(originalHtml);
 		expect(listeners[5]).not.to.have.been.called;
 
 		clearLog();
@@ -837,6 +793,230 @@ describe('suspense hydration', () => {
 				.querySelector('li:last-child')
 				.dispatchEvent(createEvent('click'));
 			expect(listeners[5]).to.have.been.calledTwice;
+		});
+	});
+
+	it('should properly hydrate suspense when resolves to a Fragment without children', () => {
+		const originalHtml = ul([
+			li(0),
+			li(1),
+			'<!--$s-->',
+			'<!--/$s-->',
+			li(2),
+			li(3)
+		]);
+
+		const listeners = [sinon.spy(), sinon.spy(), sinon.spy(), sinon.spy()];
+
+		scratch.innerHTML = originalHtml;
+		clearLog();
+
+		const [Lazy, resolve] = createLazy();
+		hydrate(
+			<List>
+				<Fragment>
+					<ListItem onClick={listeners[0]}>0</ListItem>
+					<ListItem onClick={listeners[1]}>1</ListItem>
+				</Fragment>
+				<Suspense>
+					<Lazy />
+				</Suspense>
+				<Fragment>
+					<ListItem onClick={listeners[2]}>2</ListItem>
+					<ListItem onClick={listeners[3]}>3</ListItem>
+				</Fragment>
+			</List>,
+			scratch
+		);
+		rerender(); // Flush rerender queue to mimic what preact will really do
+		expect(getLog()).to.deep.equal([]);
+		expect(scratch.innerHTML).to.equal(originalHtml);
+		expect(listeners[3]).not.to.have.been.called;
+
+		clearLog();
+		scratch.querySelector('li:last-child').dispatchEvent(createEvent('click'));
+		expect(listeners[3]).to.have.been.calledOnce;
+
+		return resolve(() => null).then(() => {
+			rerender();
+			expect(scratch.innerHTML).to.equal(originalHtml);
+			expect(getLog()).to.deep.equal([]);
+			clearLog();
+
+			scratch
+				.querySelector('li:nth-child(2)')
+				.dispatchEvent(createEvent('click'));
+			expect(listeners[1]).to.have.been.calledOnce;
+
+			scratch
+				.querySelector('li:last-child')
+				.dispatchEvent(createEvent('click'));
+			expect(listeners[3]).to.have.been.calledTwice;
+		});
+	});
+
+	it('Should hydrate a fragment with multiple children correctly', () => {
+		scratch.innerHTML = '<!--$s--><div>Hello</div><div>World!</div><!--/$s-->';
+		clearLog();
+
+		const [Lazy, resolve] = createLazy();
+		hydrate(
+			<Suspense>
+				<Lazy />
+			</Suspense>,
+			scratch
+		);
+		rerender(); // Flush rerender queue to mimic what preact will really do
+		expect(scratch.innerHTML).to.equal(
+			'<!--$s--><div>Hello</div><div>World!</div><!--/$s-->'
+		);
+		expect(getLog()).to.deep.equal([]);
+		clearLog();
+
+		return resolve(() => (
+			<>
+				<div>Hello</div>
+				<div>World!</div>
+			</>
+		)).then(() => {
+			rerender();
+			expect(scratch.innerHTML).to.equal(
+				'<!--$s--><div>Hello</div><div>World!</div><!--/$s-->'
+			);
+			expect(getLog()).to.deep.equal([]);
+
+			clearLog();
+		});
+	});
+
+	it('Should hydrate a fragment with no children correctly', () => {
+		scratch.innerHTML = '<!--$s--><!--/$s--><div>Hello world</div>';
+		clearLog();
+
+		const [Lazy, resolve] = createLazy();
+		hydrate(
+			<>
+				<Suspense>
+					<Lazy />
+				</Suspense>
+				<div>Hello world</div>
+			</>,
+			scratch
+		);
+		rerender(); // Flush rerender queue to mimic what preact will really do
+		expect(scratch.innerHTML).to.equal(
+			'<!--$s--><!--/$s--><div>Hello world</div>'
+		);
+		expect(getLog()).to.deep.equal([]);
+		clearLog();
+
+		return resolve(() => null).then(() => {
+			rerender();
+			expect(scratch.innerHTML).to.equal(
+				'<!--$s--><!--/$s--><div>Hello world</div>'
+			);
+			expect(getLog()).to.deep.equal([]);
+
+			clearLog();
+		});
+	});
+
+	it('Should hydrate a fragment with no children correctly deeply', () => {
+		scratch.innerHTML =
+			'<!--$s--><!--$s--><!--/$s--><!--/$s--><div>Hello world</div>';
+		clearLog();
+
+		const [Lazy, resolve] = createLazy();
+		const [Lazy2, resolve2] = createLazy();
+		hydrate(
+			<>
+				<Suspense>
+					<Lazy>
+						<Suspense>
+							<Lazy2 />
+						</Suspense>
+					</Lazy>
+				</Suspense>
+				<div>Hello world</div>
+			</>,
+			scratch
+		);
+		rerender(); // Flush rerender queue to mimic what preact will really do
+		expect(scratch.innerHTML).to.equal(
+			'<!--$s--><!--$s--><!--/$s--><!--/$s--><div>Hello world</div>'
+		);
+		expect(getLog()).to.deep.equal([]);
+		clearLog();
+
+		return resolve(p => p.children).then(() => {
+			rerender();
+			expect(scratch.innerHTML).to.equal(
+				'<!--$s--><!--$s--><!--/$s--><!--/$s--><div>Hello world</div>'
+			);
+			expect(getLog()).to.deep.equal([]);
+
+			clearLog();
+			return resolve2(() => null).then(() => {
+				rerender();
+				expect(scratch.innerHTML).to.equal(
+					'<!--$s--><!--$s--><!--/$s--><!--/$s--><div>Hello world</div>'
+				);
+				expect(getLog()).to.deep.equal([]);
+
+				clearLog();
+			});
+		});
+	});
+
+	it('Should hydrate a fragment with multiple children correctly deeply', () => {
+		scratch.innerHTML =
+			'<!--$s--><!--$s--><p>I am</p><span>Fragment</span><!--/$s--><!--/$s--><div>Hello world</div>';
+		clearLog();
+
+		const [Lazy, resolve] = createLazy();
+		const [Lazy2, resolve2] = createLazy();
+		hydrate(
+			<>
+				<Suspense>
+					<Lazy>
+						<Suspense>
+							<Lazy2 />
+						</Suspense>
+					</Lazy>
+				</Suspense>
+				<div>Hello world</div>
+			</>,
+			scratch
+		);
+		rerender(); // Flush rerender queue to mimic what preact will really do
+		expect(scratch.innerHTML).to.equal(
+			'<!--$s--><!--$s--><p>I am</p><span>Fragment</span><!--/$s--><!--/$s--><div>Hello world</div>'
+		);
+		expect(getLog()).to.deep.equal([]);
+		clearLog();
+
+		return resolve(p => p.children).then(() => {
+			rerender();
+			expect(scratch.innerHTML).to.equal(
+				'<!--$s--><!--$s--><p>I am</p><span>Fragment</span><!--/$s--><!--/$s--><div>Hello world</div>'
+			);
+			expect(getLog()).to.deep.equal([]);
+
+			clearLog();
+			return resolve2(() => (
+				<>
+					<p>I am</p>
+					<span>Fragment</span>
+				</>
+			)).then(() => {
+				rerender();
+				expect(scratch.innerHTML).to.equal(
+					'<!--$s--><!--$s--><p>I am</p><span>Fragment</span><!--/$s--><!--/$s--><div>Hello world</div>'
+				);
+				expect(getLog()).to.deep.equal([]);
+
+				clearLog();
+			});
 		});
 	});
 });
