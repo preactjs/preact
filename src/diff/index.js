@@ -69,8 +69,8 @@ export function diff(
 	// If the previous diff bailed out, resume creating/hydrating.
 	if (oldVNode._flags & MODE_SUSPENDED) {
 		isHydrating = !!(oldVNode._flags & MODE_HYDRATE);
-		oldDom = newVNode._dom = oldVNode._dom;
-		excessDomChildren = [oldDom];
+		excessDomChildren = oldVNode._component._excess;
+		oldDom = newVNode._dom = oldVNode._dom = excessDomChildren[0];
 	}
 
 	if ((tmp = options._diff)) tmp(newVNode);
@@ -293,15 +293,56 @@ export function diff(
 			// if hydrating or creating initial tree, bailout preserves DOM:
 			if (isHydrating || excessDomChildren != NULL) {
 				if (e.then) {
+					let shouldFallback = true,
+						commentMarkersToFind = 0,
+						done = false;
+
 					newVNode._flags |= isHydrating
 						? MODE_HYDRATE | MODE_SUSPENDED
 						: MODE_SUSPENDED;
 
-					while (oldDom && oldDom.nodeType == 8 && oldDom.nextSibling) {
-						oldDom = oldDom.nextSibling;
+					newVNode._component._excess = [];
+					for (let i = 0; i < excessDomChildren.length; i++) {
+						let child = excessDomChildren[i];
+						if (child == NULL || done) continue;
+
+						// When we encounter a boundary with $s we are opening
+						// a boundary, this implies that we need to bump
+						// the amount of markers we need to find before closing
+						// the outer boundary.
+						// We exclude the open and closing marker from
+						// the future excessDomChildren but any nested one
+						// needs to be included for future suspensions.
+						if (child.nodeType == 8 && child.data == '$s') {
+							if (commentMarkersToFind > 0) {
+								newVNode._component._excess.push(child);
+							}
+							commentMarkersToFind++;
+							shouldFallback = false;
+							excessDomChildren[i] = NULL;
+						} else if (child.nodeType == 8 && child.data == '/$s') {
+							commentMarkersToFind--;
+							if (commentMarkersToFind > 0) {
+								newVNode._component._excess.push(child);
+							}
+							done = commentMarkersToFind === 0;
+							oldDom = excessDomChildren[i];
+							excessDomChildren[i] = NULL;
+						} else if (commentMarkersToFind > 0) {
+							newVNode._component._excess.push(child);
+							excessDomChildren[i] = NULL;
+						}
 					}
 
-					excessDomChildren[excessDomChildren.indexOf(oldDom)] = NULL;
+					if (shouldFallback) {
+						while (oldDom && oldDom.nodeType == 8 && oldDom.nextSibling) {
+							oldDom = oldDom.nextSibling;
+						}
+
+						excessDomChildren[excessDomChildren.indexOf(oldDom)] = NULL;
+						newVNode._component._excess.push(oldDom);
+					}
+
 					newVNode._dom = oldDom;
 				} else {
 					for (let i = excessDomChildren.length; i--; ) {
