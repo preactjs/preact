@@ -1,6 +1,17 @@
 import { UNDEFINED } from './constants';
 import { _catchError } from './diff/catch-error';
 
+export let vnodeOptionsHook = vnode => {
+	// If a Component VNode, check for and apply defaultProps
+	// Note: type may be undefined in development, must never error here.
+	if (typeof vnode.type == 'function' && vnode.type.defaultProps != null) {
+		for (const i in vnode.type.defaultProps) {
+			if (vnode.props[i] === UNDEFINED) {
+				vnode.props[i] = vnode.type.defaultProps[i];
+			}
+		}
+	}
+};
 /**
  * The `option` object can potentially contain callback functions
  * that are called during various stages of our renderer. This is the
@@ -11,18 +22,16 @@ import { _catchError } from './diff/catch-error';
  * @type {import('./internal').Options}
  */
 const options = {
-	vnode: vnode => {
-		// If a Component VNode, check for and apply defaultProps
-		// Note: type may be undefined in development, must never error here.
-		if (typeof vnode.type == 'function' && vnode.type.defaultProps != null) {
-			for (const i in vnode.type.defaultProps) {
-				if (vnode.props[i] === UNDEFINED) {
-					vnode.props[i] = vnode.type.defaultProps[i];
-				}
-			}
-		}
-	},
 	_catchError
 };
+
+Object.defineProperty(options, 'vnode', {
+	get() {
+		return vnodeOptionsHook;
+	},
+	set(value) {
+		vnodeOptionsHook = value;
+	}
+});
 
 export default options;

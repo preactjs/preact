@@ -1,5 +1,5 @@
 import { slice } from './util';
-import options from './options';
+import { vnodeOptionsHook } from './options';
 import { UNDEFINED } from './constants';
 
 let vnodeId = 0;
@@ -65,7 +65,7 @@ export function createVNode(type, props, key, ref, original) {
 	};
 
 	// Only invoke the vnode hook if this was *not* a direct copy:
-	if (original == null && options.vnode != null) options.vnode(vnode);
+	if (original == null) vnodeOptionsHook(vnode);
 
 	return vnode;
 }
