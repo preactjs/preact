@@ -248,7 +248,7 @@ export function diff(
 			c.state = c._nextState;
 
 			if (c.getChildContext != null) {
-				globalContext = assign(assign({}, globalContext), c.getChildContext());
+				globalContext = assign({}, globalContext, c.getChildContext());
 			}
 
 			if (isClassComponent && !isNew && c.getSnapshotBeforeUpdate != null) {
