@@ -1,6 +1,6 @@
 import { setupRerender } from 'preact/test-utils';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
-import React, { createElement, Component } from 'preact/compat';
+import React, { createElement } from 'preact/compat';
 
 describe('components', () => {
 	/** @type {HTMLDivElement} */
