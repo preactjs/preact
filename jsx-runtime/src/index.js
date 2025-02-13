@@ -65,15 +65,6 @@ function createVNode(type, props, key, isStaticChildren, __source, __self) {
 		__self
 	};
 
-	// If a Component VNode, check for and apply defaultProps.
-	// Note: `type` is often a String, and can be `undefined` in development.
-	if (typeof type === 'function' && (ref = type.defaultProps)) {
-		for (i in ref)
-			if (typeof normalizedProps[i] === 'undefined') {
-				normalizedProps[i] = ref[i];
-			}
-	}
-
 	if (options.vnode) options.vnode(vnode);
 	return vnode;
 }
