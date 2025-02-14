@@ -289,7 +289,6 @@ interface ContainerNode {
 	readonly firstChild: ContainerNode | null;
 	readonly childNodes: ArrayLike<ContainerNode>;
 
-	contains(other: ContainerNode | null): boolean;
 	insertBefore(node: ContainerNode, child: ContainerNode | null): ContainerNode;
 	appendChild(node: ContainerNode): ContainerNode;
 	removeChild(child: ContainerNode): ContainerNode;
