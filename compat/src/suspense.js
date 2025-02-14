@@ -122,8 +122,6 @@ Suspense.prototype._childDidSuspend = function (promise, suspendingVNode) {
 	}
 	c._suspenders.push(suspendingComponent);
 
-	const resolve = suspended(c._vnode);
-
 	let resolved = false;
 	const onResolved = () => {
 		if (resolved) return;
@@ -131,11 +129,7 @@ Suspense.prototype._childDidSuspend = function (promise, suspendingVNode) {
 		resolved = true;
 		suspendingComponent._onResolve = null;
 
-		if (resolve) {
-			resolve(onSuspensionComplete);
-		} else {
-			onSuspensionComplete();
-		}
+		onSuspensionComplete();
 	};
 
 	suspendingComponent._onResolve = onResolved;
@@ -214,29 +208,6 @@ Suspense.prototype.render = function (props, state) {
 		fallback
 	];
 };
-
-/**
- * Checks and calls the parent component's _suspended method, passing in the
- * suspended vnode. This is a way for a parent to get notified
- * that one of its children/descendants suspended.
- *
- * The parent MAY return a callback. The callback will get called when the
- * suspension resolves, notifying the parent of the fact.
- * Moreover, the callback gets function `unsuspend` as a parameter. The resolved
- * child descendant will not actually get unsuspended until `unsuspend` gets called.
- * This is a way for the parent to delay unsuspending.
- *
- * If the parent does not return a callback then the resolved vnode
- * gets unsuspended immediately when it resolves.
- *
- * @param {import('./internal').VNode} vnode
- * @returns {((unsuspend: () => void) => void)?}
- */
-function suspended(vnode) {
-	/** @type {import('./internal').Component} */
-	let component = vnode._parent._component;
-	return component && component._suspended && component._suspended(vnode);
-}
 
 export function lazy(loader) {
 	let prom;
