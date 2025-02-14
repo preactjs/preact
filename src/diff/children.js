@@ -358,7 +358,7 @@ function insert(parentVNode, oldDom, parentDom) {
 
 		return oldDom;
 	} else if (parentVNode._dom != oldDom) {
-		if (oldDom && parentVNode.type && !parentDom.contains(oldDom)) {
+		if (oldDom && parentVNode.type && !oldDom.parentNode) {
 			oldDom = getDomSibling(parentVNode);
 		}
 		parentDom.insertBefore(parentVNode._dom, oldDom || NULL);
