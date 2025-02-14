@@ -5,7 +5,7 @@
   "private": true,
   "description": "A React compatibility layer for Preact",
   "main": "dist/compat.js",
-  "module": "dist/compat.module.js",
+  "module": "dist/compat.mjs",
   "umd:main": "dist/compat.umd.js",
   "source": "src/index.js",
   "types": "src/index.d.ts",
@@ -19,7 +19,7 @@
   "exports": {
     ".": {
       "types": "./src/index.d.ts",
-      "browser": "./dist/compat.module.js",
+      "module": "./dist/compat.mjs",
       "umd": "./dist/compat.umd.js",
       "import": "./dist/compat.mjs",
       "require": "./dist/compat.js"
