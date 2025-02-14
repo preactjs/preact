@@ -42,6 +42,7 @@
       "$_mask": "__m",
       "$_detachOnNextRender": "__b",
       "$_force": "__e",
+      "$_excess": "__z",
       "$_nextState": "__s",
       "$_renderCallbacks": "__h",
       "$_stateCallbacks": "_sb",
