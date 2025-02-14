@@ -293,8 +293,7 @@ export function diff(
 			// if hydrating or creating initial tree, bailout preserves DOM:
 			if (isHydrating || excessDomChildren != NULL) {
 				if (e.then) {
-					let shouldFallback = true,
-						commentMarkersToFind = 0,
+					let commentMarkersToFind = 0,
 						done = false;
 
 					newVNode._flags |= isHydrating
@@ -318,7 +317,6 @@ export function diff(
 								newVNode._component._excess.push(child);
 							}
 							commentMarkersToFind++;
-							shouldFallback = false;
 							excessDomChildren[i] = NULL;
 						} else if (child.nodeType == 8 && child.data == '/$s') {
 							commentMarkersToFind--;
@@ -334,13 +332,13 @@ export function diff(
 						}
 					}
 
-					if (shouldFallback) {
+					if (!done) {
 						while (oldDom && oldDom.nodeType == 8 && oldDom.nextSibling) {
 							oldDom = oldDom.nextSibling;
 						}
 
 						excessDomChildren[excessDomChildren.indexOf(oldDom)] = NULL;
-						newVNode._component._excess.push(oldDom);
+						newVNode._component._excess = [oldDom];
 					}
 
 					newVNode._dom = oldDom;
