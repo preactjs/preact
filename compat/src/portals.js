@@ -46,7 +46,6 @@ function Portal(props) {
 			parentNode: container,
 			childNodes: [],
 			_children: { _mask: root._mask },
-			contains: () => true,
 			// Technically this isn't needed
 			appendChild(child) {
 				this.childNodes.push(child);
