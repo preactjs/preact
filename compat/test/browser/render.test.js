@@ -597,4 +597,209 @@ describe('compat render', () => {
 
 		expect(scratch.textContent).to.equal('foo');
 	});
+
+	it('should append "px" to unitless inline css values', () => {
+		// These are all CSS Properties that support a single <length> value
+		// that must have a unit. If we encounter a number we append "px" to it.
+		// The list is taken from: https://developer.mozilla.org/en-US/docs/Web/CSS/Reference
+		const unitless = {
+			'border-block': 2,
+			'border-block-end-width': 3,
+			'border-block-start-width': 4,
+			'border-block-width': 5,
+			'border-bottom-left-radius': 6,
+			'border-bottom-right-radius': 7,
+			'border-bottom-width': 8,
+			'border-end-end-radius': 9,
+			'border-end-start-radius': 10,
+			'border-image-outset': 11,
+			'border-image-width': 12,
+			'border-inline': 2,
+			'border-inline-end': 3,
+			'border-inline-end-width': 4,
+			'border-inline-start': 1,
+			'border-inline-start-width': 123,
+			'border-inline-width': 123,
+			'border-left': 123,
+			'border-left-width': 123,
+			'border-radius': 123,
+			'border-right': 123,
+			'border-right-width': 123,
+			'border-spacing': 123,
+			'border-start-end-radius': 123,
+			'border-start-start-radius': 123,
+			'border-top': 123,
+			'border-top-left-radius': 123,
+			'border-top-right-radius': 123,
+			'border-top-width': 123,
+			'border-width': 123,
+			bottom: 123,
+			'column-gap': 123,
+			'column-rule-width': 23,
+			'column-width': 23,
+			'flex-basis': 23,
+			'font-size': 123,
+			'grid-gap': 23,
+			'grid-auto-columns': 123,
+			'grid-auto-rows': 123,
+			'grid-template-columns': 23,
+			'grid-template-rows': 23,
+			height: 123,
+			'inline-size': 23,
+			inset: 23,
+			'inset-block-end': 12,
+			'inset-block-start': 12,
+			'inset-inline-end': 213,
+			'inset-inline-start': 213,
+			left: 213,
+			'letter-spacing': 213,
+			margin: 213,
+			'margin-block': 213,
+			'margin-block-end': 213,
+			'margin-block-start': 213,
+			'margin-bottom': 213,
+			'margin-inline': 213,
+			'margin-inline-end': 213,
+			'margin-inline-start': 213,
+			'margin-left': 213,
+			'margin-right': 213,
+			'margin-top': 213,
+			'mask-position': 23,
+			'mask-size': 23,
+			'max-block-size': 23,
+			'max-height': 23,
+			'max-inline-size': 23,
+			'max-width': 23,
+			'min-block-size': 23,
+			'min-height': 23,
+			'min-inline-size': 23,
+			'min-width': 23,
+			'object-position': 23,
+			'outline-offset': 23,
+			'outline-width': 123,
+			padding: 123,
+			'padding-block': 123,
+			'padding-block-end': 123,
+			'padding-block-start': 123,
+			'padding-bottom': 123,
+			'padding-inline': 123,
+			'padding-inline-end': 123,
+			'padding-inline-start': 123,
+			'padding-left': 123,
+			'padding-right': 123,
+			'padding-top': 123,
+			perspective: 123,
+			right: 123,
+			'scroll-margin': 123,
+			'scroll-margin-block': 123,
+			'scroll-margin-block-start': 123,
+			'scroll-margin-bottom': 123,
+			'scroll-margin-inline': 123,
+			'scroll-margin-inline-end': 123,
+			'scroll-margin-inline-start': 123,
+			'scroll-margin-inline-left': 123,
+			'scroll-margin-inline-right': 123,
+			'scroll-margin-inline-top': 123,
+			'scroll-padding': 123,
+			'scroll-padding-block': 123,
+			'scroll-padding-block-end': 123,
+			'scroll-padding-block-start': 123,
+			'scroll-padding-bottom': 123,
+			'scroll-padding-inline': 123,
+			'scroll-padding-inline-end': 123,
+			'scroll-padding-inline-start': 123,
+			'scroll-padding-left': 123,
+			'scroll-padding-right': 123,
+			'scroll-padding-top': 123,
+			'shape-margin': 123,
+			'text-decoration-thickness': 123,
+			'text-indent': 123,
+			'text-underline-offset': 123,
+			top: 123,
+			'transform-origin': 123,
+			translate: 123,
+			width: 123,
+			'word-spacing': 123
+		};
+
+		// These are all CSS properties that have valid numeric values.
+		// Our appending logic must not be applied here
+		const untouched = {
+			'-webkit-line-clamp': 2,
+			'animation-iteration-count': 3,
+			'column-count': 2,
+			// TODO: unsupported atm
+			// columns: 2,
+			flex: 1,
+			'flex-grow': 1,
+			'flex-shrink': 1,
+			'font-size-adjust': 123,
+			'font-weight': 12,
+			'grid-column': 2,
+			'grid-column-end': 2,
+			'grid-column-start': 2,
+			'grid-row': 2,
+			'grid-row-end': 2,
+			'grid-row-start': 2,
+			// TODO: unsupported atm
+			//'line-height': 2,
+			'mask-border-outset': 2,
+			'mask-border-slice': 2,
+			'mask-border-width': 2,
+			'max-zoom': 2,
+			'min-zoom': 2,
+			opacity: 123,
+			order: 123,
+			orphans: 2,
+			'grid-row-gap': 23,
+			scale: 23,
+			// TODO: unsupported atm
+			//'tab-size': 23,
+			widows: 123,
+			'z-index': 123,
+			zoom: 123
+		};
+
+		render(
+			<div
+				style={{
+					...unitless,
+					...untouched
+				}}
+			/>,
+			scratch
+		);
+
+		let style = scratch.firstChild.style;
+
+		// Check properties that MUST not be changed
+		for (const key in unitless) {
+			// Check if css property is supported
+			if (
+				window.CSS &&
+				typeof window.CSS.supports === 'function' &&
+				window.CSS.supports(key, unitless[key])
+			) {
+				expect(
+					String(style[key]).endsWith('px'),
+					`Should append px "${key}: ${unitless[key]}" === "${key}: ${style[key]}"`
+				).to.equal(true);
+			}
+		}
+
+		// Check properties that MUST not be changed
+		for (const key in untouched) {
+			// Check if css property is supported
+			if (
+				window.CSS &&
+				typeof window.CSS.supports === 'function' &&
+				window.CSS.supports(key, untouched[key])
+			) {
+				expect(
+					!String(style[key]).endsWith('px'),
+					`Should be left as is: "${key}: ${untouched[key]}" === "${key}: ${style[key]}"`
+				).to.equal(true);
+			}
+		}
+	});
 });
