@@ -353,12 +353,6 @@ export function diff(
 			}
 			options._catchError(e, newVNode, oldVNode);
 		}
-	} else if (
-		excessDomChildren == NULL &&
-		newVNode._original == oldVNode._original
-	) {
-		newVNode._children = oldVNode._children;
-		newVNode._dom = oldVNode._dom;
 	} else {
 		oldDom = newVNode._dom = diffElementNodes(
 			oldVNode._dom,
