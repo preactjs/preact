@@ -1,6 +1,5 @@
 import { options, Fragment } from 'preact';
 import { encodeEntities } from './utils';
-import { IS_NON_DIMENSIONAL } from '../../src/constants';
 
 let vnodeId = 0;
 
@@ -19,9 +18,9 @@ const isArray = Array.isArray;
 
 /**
  * JSX.Element factory used by Babel's {runtime:"automatic"} JSX transform
- * @param {VNode['type']} type
- * @param {VNode['props']} props
- * @param {VNode['key']} [key]
+ * @param {import('../../src/internal').VNode['type']} type
+ * @param {import('preact').VNode['props']} props
+ * @param {import('preact').VNode['key']} [key]
  * @param {unknown} [isStaticChildren]
  * @param {unknown} [__source]
  * @param {unknown} [__self]
@@ -46,7 +45,7 @@ function createVNode(type, props, key, isStaticChildren, __source, __self) {
 		}
 	}
 
-	/** @type {VNode & { __source: any; __self: any }} */
+	/** @type {import('../../src/internal').VNode & { __source: any; __self: any }} */
 	const vnode = {
 		type,
 		props: normalizedProps,
@@ -73,12 +72,13 @@ function createVNode(type, props, key, isStaticChildren, __source, __self) {
  * Create a template vnode. This function is not expected to be
  * used directly, but rather through a precompile JSX transform
  * @param {string[]} templates
- * @param  {Array<string | null | VNode>} exprs
- * @returns {VNode}
+ * @param  {Array<string | null | import('preact').VNode>} exprs
+ * @returns {import('preact').VNode}
  */
 function jsxTemplate(templates, ...exprs) {
 	const vnode = createVNode(Fragment, { tpl: templates, exprs });
 	// Bypass render to string top level Fragment optimization
+	// @ts-ignore
 	vnode.key = vnode._vnode;
 	return vnode;
 }
@@ -112,16 +112,7 @@ function jsxAttr(name, value) {
 						: JS_TO_CSS[prop] ||
 							(JS_TO_CSS[prop] = prop.replace(CSS_REGEX, '-$&').toLowerCase());
 
-				let suffix = ';';
-				if (
-					typeof val === 'number' &&
-					// Exclude custom-attributes
-					!name.startsWith('--') &&
-					!IS_NON_DIMENSIONAL.test(name)
-				) {
-					suffix = 'px;';
-				}
-				str = str + name + ':' + val + suffix;
+				str = str + name + ':' + val + ';';
 			}
 		}
 		return name + '="' + str + '"';
@@ -144,7 +135,7 @@ function jsxAttr(name, value) {
  * is not expected to be used directly, but rather through a
  * precompile JSX transform
  * @param {*} value
- * @returns {string | null | VNode | Array<string | null | VNode>}
+ * @returns {string | null | import('preact').VNode | Array<string | null | import('preact').VNode>}
  */
 function jsxEscape(value) {
 	if (
