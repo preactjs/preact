@@ -5,7 +5,7 @@
   "private": true,
   "description": "Preact bridge for Preact devtools",
   "main": "dist/devtools.js",
-  "module": "dist/devtools.module.js",
+  "module": "dist/devtools.mjs",
   "umd:main": "dist/devtools.umd.js",
   "source": "src/index.js",
   "license": "MIT",
@@ -16,7 +16,7 @@
   "exports": {
     ".": {
       "types": "./src/index.d.ts",
-      "browser": "./dist/devtools.module.js",
+      "module": "./dist/devtools.mjs",
       "umd": "./dist/devtools.umd.js",
       "import": "./dist/devtools.mjs",
       "require": "./dist/devtools.js"
