@@ -55,8 +55,8 @@ describe('style attribute', () => {
 			backgroundPosition: '10px 10px',
 			'background-size': 'cover',
 			gridRowStart: 1,
-			padding: 5,
-			top: 100,
+			padding: '5px',
+			top: '100px',
 			left: '100%'
 		};
 
