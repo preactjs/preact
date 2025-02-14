@@ -1,5 +1,7 @@
 import { options as _options } from 'preact';
 
+const ObjectIs = Object.is;
+
 /** @type {number} */
 let currentIndex;
 
@@ -190,7 +192,7 @@ export function useReducer(reducer, initialState, init) {
 					: hookState._value[0];
 				const nextValue = hookState._reducer(currentValue, action);
 
-				if (currentValue !== nextValue) {
+				if (!ObjectIs(currentValue, nextValue)) {
 					hookState._nextValue = [nextValue, hookState._value[1]];
 					hookState._component.setState({});
 				}
@@ -255,7 +257,8 @@ export function useReducer(reducer, initialState, init) {
 						const currentValue = hookItem._value[0];
 						hookItem._value = hookItem._nextValue;
 						hookItem._nextValue = undefined;
-						if (currentValue !== hookItem._value[0]) shouldUpdate = true;
+						if (!ObjectIs(currentValue, hookItem._value[0]))
+							shouldUpdate = true;
 					}
 				});
 
@@ -537,7 +540,7 @@ function argsChanged(oldArgs, newArgs) {
 	return (
 		!oldArgs ||
 		oldArgs.length !== newArgs.length ||
-		newArgs.some((arg, index) => arg !== oldArgs[index])
+		newArgs.some((arg, index) => !ObjectIs(arg, oldArgs[index]))
 	);
 }
 
