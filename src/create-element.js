@@ -29,7 +29,44 @@ export function createElement(type, props, children) {
 			arguments.length > 3 ? slice.call(arguments, 2) : children;
 	}
 
-	return createVNode(type, normalizedProps, key, ref, null);
+	return typeof type === 'function'
+		? createComponentVNode(type, normalizedProps, key, null)
+		: createDomVNode(type, normalizedProps, key, ref, null);
+}
+
+/**
+ * Create a VNode (used internally by Preact)
+ * @param {import('./internal').VNode["type"]} type The node name or Component
+ * Constructor for this virtual node
+ * @param {object | string | number | null} props The properties of this virtual node.
+ * If this virtual node represents a text node, this is the text of the node (string or number).
+ * @param {string | number | null} key The key for this virtual node, used when
+ * diffing it against its children
+ * @returns {import('./internal').VNode}
+ */
+export function createComponentVNode(type, props, key, original) {
+	// V8 seems to be better at detecting type shapes if the object is allocated from the same call site
+	// Do not inline into createElement and coerceToVNode!
+	/** @type {import('./internal').VNode} */
+	const vnode = {
+		type,
+		props,
+		key,
+		_children: null,
+		_parent: null,
+		_depth: 0,
+		_dom: null,
+		_component: null,
+		constructor: UNDEFINED,
+		_original: original == null ? ++vnodeId : original,
+		_index: -1,
+		_flags: 0
+	};
+
+	// Only invoke the vnode hook if this was *not* a direct copy:
+	if (original == null && options.vnode != null) options.vnode(vnode);
+
+	return vnode;
 }
 
 /**
@@ -44,10 +81,11 @@ export function createElement(type, props, children) {
  * receive a reference to its created child
  * @returns {import('./internal').VNode}
  */
-export function createVNode(type, props, key, ref, original) {
+export function createDomVNode(type, props, key, ref, original) {
 	// V8 seems to be better at detecting type shapes if the object is allocated from the same call site
 	// Do not inline into createElement and coerceToVNode!
 	/** @type {import('./internal').VNode} */
+	// @ts-expect-error
 	const vnode = {
 		type,
 		props,
@@ -57,11 +95,8 @@ export function createVNode(type, props, key, ref, original) {
 		_parent: null,
 		_depth: 0,
 		_dom: null,
-		_component: null,
 		constructor: UNDEFINED,
-		_original: original == null ? ++vnodeId : original,
-		_index: -1,
-		_flags: 0
+		_index: -1
 	};
 
 	// Only invoke the vnode hook if this was *not* a direct copy:

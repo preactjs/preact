@@ -45,12 +45,29 @@ function createVNode(type, props, key, isStaticChildren, __source, __self) {
 		}
 	}
 
-	/** @type {import('../../src/internal').VNode & { __source: any; __self: any }} */
+	return typeof type === 'function'
+		? createComponentVNode(type, normalizedProps, key, __source, __self)
+		: createDomVNode(type, normalizedProps, key, ref, __source, __self);
+}
+
+/**
+ * Create a VNode (used internally by Preact)
+ * @param {import('../../src/internal').VNode["type"]} type The node name or Component
+ * Constructor for this virtual node
+ * @param {object | string | number | null} props The properties of this virtual node.
+ * If this virtual node represents a text node, this is the text of the node (string or number).
+ * @param {string | number | null} key The key for this virtual node, used when
+ * diffing it against its children
+ * @returns {import('../../src/internal').VNode}
+ */
+export function createComponentVNode(type, props, key, __source, __self) {
+	// V8 seems to be better at detecting type shapes if the object is allocated from the same call site
+	// Do not inline into createElement and coerceToVNode!
+	/** @type {import('../../src/internal').VNode} */
 	const vnode = {
 		type,
-		props: normalizedProps,
+		props,
 		key,
-		ref,
 		_children: null,
 		_parent: null,
 		_depth: 0,
@@ -64,7 +81,46 @@ function createVNode(type, props, key, isStaticChildren, __source, __self) {
 		__self
 	};
 
-	if (options.vnode) options.vnode(vnode);
+	// Only invoke the vnode hook if this was *not* a direct copy:
+	if (options.vnode != null) options.vnode(vnode);
+
+	return vnode;
+}
+
+/**
+ * Create a VNode (used internally by Preact)
+ * @param {import('../../src/internal').VNode["type"]} type The node name or Component
+ * Constructor for this virtual node
+ * @param {object | string | number | null} props The properties of this virtual node.
+ * If this virtual node represents a text node, this is the text of the node (string or number).
+ * @param {string | number | null} key The key for this virtual node, used when
+ * diffing it against its children
+ * @param {import('../../src/internal').VNode["ref"]} ref The ref property that will
+ * receive a reference to its created child
+ * @returns {import('../../src/internal').VNode}
+ */
+export function createDomVNode(type, props, key, ref, __source, __self) {
+	// V8 seems to be better at detecting type shapes if the object is allocated from the same call site
+	// Do not inline into createElement and coerceToVNode!
+	/** @type {import('../../src/internal').VNode} */
+	const vnode = {
+		type,
+		props,
+		key,
+		ref,
+		_children: null,
+		_parent: null,
+		_depth: 0,
+		_dom: null,
+		constructor: undefined,
+		_index: -1,
+		__source,
+		__self
+	};
+
+	// Only invoke the vnode hook if this was *not* a direct copy:
+	if (options.vnode != null) options.vnode(vnode);
+
 	return vnode;
 }
 

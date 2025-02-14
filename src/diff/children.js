@@ -1,5 +1,9 @@
 import { diff, unmount, applyRef } from './index';
-import { createVNode, Fragment } from '../create-element';
+import {
+	createDomVNode,
+	createComponentVNode,
+	Fragment
+} from '../create-element';
 import {
 	EMPTY_OBJ,
 	EMPTY_ARR,
@@ -191,7 +195,7 @@ function constructNewChildrenArray(
 			typeof childVNode == 'bigint' ||
 			childVNode.constructor == String
 		) {
-			childVNode = newParentVNode._children[i] = createVNode(
+			childVNode = newParentVNode._children[i] = createDomVNode(
 				null,
 				childVNode,
 				null,
@@ -199,10 +203,9 @@ function constructNewChildrenArray(
 				null
 			);
 		} else if (isArray(childVNode)) {
-			childVNode = newParentVNode._children[i] = createVNode(
+			childVNode = newParentVNode._children[i] = createComponentVNode(
 				Fragment,
 				{ children: childVNode },
-				null,
 				null,
 				null
 			);
@@ -211,13 +214,21 @@ function constructNewChildrenArray(
 			// scenario:
 			//   const reuse = <div />
 			//   <div>{reuse}<span />{reuse}</div>
-			childVNode = newParentVNode._children[i] = createVNode(
-				childVNode.type,
-				childVNode.props,
-				childVNode.key,
-				childVNode.ref ? childVNode.ref : null,
-				childVNode._original
-			);
+			childVNode = newParentVNode._children[i] =
+				typeof childVNode.type === 'function'
+					? createComponentVNode(
+							childVNode.type,
+							childVNode.props,
+							childVNode.key,
+							childVNode._original
+						)
+					: createDomVNode(
+							childVNode.type,
+							childVNode.props,
+							childVNode.key,
+							childVNode.ref ? childVNode.ref : null,
+							childVNode._original
+						);
 		} else {
 			childVNode = newParentVNode._children[i] = childVNode;
 		}
