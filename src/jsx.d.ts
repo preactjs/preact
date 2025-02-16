@@ -751,6 +751,11 @@ export namespace JSXInternal {
 		onMouseOverCapture?: MouseEventHandler<Target> | undefined;
 		onMouseUp?: MouseEventHandler<Target> | undefined;
 		onMouseUpCapture?: MouseEventHandler<Target> | undefined;
+		// TODO: Spec for `auxclick` events was changed to make it a PointerEvent but only
+		// Chrome has support for it yet. When more browsers align we should change this.
+		// https://developer.mozilla.org/en-US/docs/Web/API/Element/auxclick_event#browser_compatibility
+		onAuxClick?: MouseEventHandler<Target> | undefined;
+		onAuxClickCapture?: MouseEventHandler<Target> | undefined;
 
 		// Selection Events
 		onSelect?: GenericEventHandler<Target> | undefined;
