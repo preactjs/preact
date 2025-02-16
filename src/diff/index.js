@@ -69,8 +69,11 @@ export function diff(
 	// If the previous diff bailed out, resume creating/hydrating.
 	if (oldVNode._flags & MODE_SUSPENDED) {
 		isHydrating = !!(oldVNode._flags & MODE_HYDRATE);
-		excessDomChildren = oldVNode._component._excess;
-		oldDom = newVNode._dom = oldVNode._dom = excessDomChildren[0];
+		if (oldVNode._component._excess) {
+			excessDomChildren = oldVNode._component._excess;
+			oldDom = newVNode._dom = oldVNode._dom = excessDomChildren[0];
+			oldVNode._component._excess = null;
+		}
 	}
 
 	if ((tmp = options._diff)) tmp(newVNode);
