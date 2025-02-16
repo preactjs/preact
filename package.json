@@ -121,7 +121,7 @@
     "build:devtools": "microbundle build --raw --no-generateTypes -f cjs,esm,umd --cwd devtools",
     "build:hooks": "microbundle build --raw --no-generateTypes -f cjs,esm,umd --cwd hooks",
     "build:test-utils": "microbundle build --raw --no-generateTypes -f cjs,esm,umd --cwd test-utils",
-    "build:compat": "microbundle build src/index.js src/scheduler.js --raw --no-generateTypes -f cjs,esm,umd --cwd compat --globals 'preact/hooks=preactHooks'",
+    "build:compat": "microbundle build --raw --no-generateTypes -f cjs,esm,umd --cwd compat --globals 'preact/hooks=preactHooks'",
     "build:jsx": "microbundle build --raw --no-generateTypes -f cjs,esm,umd --cwd jsx-runtime",
     "postbuild": "node ./config/node-13-exports.js && node ./config/compat-entries.js",
     "dev": "microbundle watch --raw --no-generateTypes --format cjs",
