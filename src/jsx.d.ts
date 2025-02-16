@@ -787,6 +787,8 @@ export namespace JSXInternal {
 		onGotPointerCaptureCapture?: PointerEventHandler<Target> | undefined;
 		onLostPointerCapture?: PointerEventHandler<Target> | undefined;
 		onLostPointerCaptureCapture?: PointerEventHandler<Target> | undefined;
+		onAuxClick?: PointerEventHandler<Target> | undefined;
+		onAuxClickCapture?: PointerEventHandler<Target> | undefined;
 
 		// UI Events
 		onScroll?: UIEventHandler<Target> | undefined;
