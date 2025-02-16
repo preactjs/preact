@@ -99,6 +99,8 @@ declare namespace React {
 
 	interface ReactSVG extends JSXInternal.IntrinsicSVGElements {}
 
+	export import AriaAttributes = JSXInternal.AriaAttributes;
+
 	export import HTMLAttributeReferrerPolicy = JSXInternal.HTMLAttributeReferrerPolicy;
 	export import HTMLAttributeAnchorTarget = JSXInternal.HTMLAttributeAnchorTarget;
 	export import HTMLInputTypeAttribute = JSXInternal.HTMLInputTypeAttribute;
