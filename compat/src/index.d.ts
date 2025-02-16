@@ -174,6 +174,7 @@ declare namespace React {
 	export import TransitionEvent = JSXInternal.TargetedTransitionEvent;
 
 	// Event Handler Types
+	export import EventHandler = JSXInternal.EventHandler;
 	export import ChangeEventHandler = JSXInternal.GenericEventHandler;
 	export import ClipboardEventHandler = JSXInternal.ClipboardEventHandler;
 	export import CompositionEventHandler = JSXInternal.CompositionEventHandler;
