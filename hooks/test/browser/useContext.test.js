@@ -57,7 +57,7 @@ describe('useContext', () => {
 		expect(spy).to.be.calledWith(42);
 	});
 
-	it('should update when value changes with nonUpdating Component on top', done => {
+	it('should update when value changes with nonUpdating Component on top', async () => {
 		const spy = sinon.spy();
 		const Ctx = createContext(0);
 
@@ -91,16 +91,18 @@ describe('useContext', () => {
 		expect(spy).to.be.calledWith(0);
 		render(<App value={1} />, scratch);
 
-		// Wait for enqueued hook update
-		setTimeout(() => {
-			// Should not be called a third time
-			expect(spy).to.be.calledTwice;
-			expect(spy).to.be.calledWith(1);
-			done();
-		}, 0);
+		return new Promise(resolve => {
+			// Wait for enqueued hook update
+			setTimeout(() => {
+				// Should not be called a third time
+				expect(spy).to.be.calledTwice;
+				expect(spy).to.be.calledWith(1);
+				resolve();
+			}, 0);
+		});
 	});
 
-	it('should only update when value has changed', done => {
+	it('should only update when value has changed', async () => {
 		const spy = sinon.spy();
 		const Ctx = createContext(0);
 
@@ -126,12 +128,14 @@ describe('useContext', () => {
 		expect(spy).to.be.calledTwice;
 		expect(spy).to.be.calledWith(1);
 
-		// Wait for enqueued hook update
-		setTimeout(() => {
-			// Should not be called a third time
-			expect(spy).to.be.calledTwice;
-			done();
-		}, 0);
+		return new Promise(resolve => {
+			// Wait for enqueued hook update
+			setTimeout(() => {
+				// Should not be called a third time
+				expect(spy).to.be.calledTwice;
+				resolve();
+			}, 0);
+		});
 	});
 
 	it('should allow multiple context hooks at the same time', () => {
@@ -238,7 +242,7 @@ describe('useContext', () => {
 		expect(values).to.deep.equal([13, 42, 69]);
 	});
 
-	it('should maintain context', done => {
+	it('should maintain context', async () => {
 		const context = createContext(null);
 		const { Provider } = context;
 		const first = { name: 'first' };
@@ -283,12 +287,14 @@ describe('useContext', () => {
 			render(<App config={second} />, div);
 		});
 
-		// Push the expect into the next frame
-		requestAnimationFrame(() => {
-			expect(scratch.innerHTML).equal(
-				'<div>first</div><div><div>second</div></div>'
-			);
-			done();
+		return new Promise(resolve => {
+			// Push the expect into the next frame
+			requestAnimationFrame(() => {
+				expect(scratch.innerHTML).equal(
+					'<div>first</div><div><div>second</div></div>'
+				);
+				resolve();
+			});
 		});
 	});
 

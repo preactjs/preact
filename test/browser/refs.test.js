@@ -420,9 +420,10 @@ describe('refs', () => {
 	});
 
 	// Test for #1177
-	it('should call ref after children are rendered', done => {
+	it('should call ref after children are rendered', async () => {
 		/** @type {HTMLInputElement} */
 		let input;
+		let res;
 		function autoFocus(el) {
 			if (el) {
 				input = el;
@@ -431,13 +432,17 @@ describe('refs', () => {
 				// See https://stackoverflow.com/questions/17384464/
 				setTimeout(() => {
 					el.focus();
-					done();
+					res();
 				}, 1);
 			}
 		}
 
 		render(<input type="text" ref={autoFocus} value="foo" />, scratch);
 		expect(input.value).to.equal('foo');
+
+		return new Promise(resolve => {
+			res = resolve;
+		});
 	});
 
 	it('should correctly set nested child refs', () => {
