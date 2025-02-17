@@ -261,7 +261,6 @@ export function diff(
 
 			if (isTopLevelFragment) {
 				tmp.props.children = null;
-				console.log('isTopLevelFragment', tmp);
 			}
 
 			oldDom = diffChildren(
