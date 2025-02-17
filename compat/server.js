@@ -9,6 +9,15 @@ try {
 	);
 }
 
+var renderToReadableStream;
+try {
+	const mod = require('preact-render-to-string/stream');
+	renderToReadableStream = mod.default || mod.renderToReadableStream || mod;
+} catch (e) {
+	throw Error(
+		'renderToReadableStream() error: update "preact-render-to-string" dependency to at least 6.5.0.'
+	);
+}
 var renderToPipeableStream;
 try {
 	const mod = require('preact-render-to-string/stream-node');
@@ -22,5 +31,6 @@ try {
 module.exports = {
 	renderToString: renderToString,
 	renderToStaticMarkup: renderToString,
-	renderToPipeableStream: renderToPipeableStream
+	renderToPipeableStream: renderToPipeableStream,
+	renderToReadableStream: renderToReadableStream
 };
