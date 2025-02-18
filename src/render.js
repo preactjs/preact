@@ -1,4 +1,4 @@
-import { EMPTY_OBJ } from './constants';
+import { EMPTY_OBJ, NULL } from './constants';
 import { commitRoot, diff } from './diff/index';
 import { createElement, Fragment } from './create-element';
 import options from './options';
@@ -30,11 +30,11 @@ export function render(vnode, parentDom, replaceNode) {
 	// to the last rendered tree. By default this property is not present, which
 	// means that we are mounting a new tree for the first time.
 	let oldVNode = isHydrating
-		? null
+		? NULL
 		: (replaceNode && replaceNode._children) || parentDom._children;
 
 	vnode = ((!isHydrating && replaceNode) || parentDom)._children =
-		createElement(Fragment, null, [vnode]);
+		createElement(Fragment, NULL, [vnode]);
 
 	// List of effects that need to be called after diffing.
 	let commitQueue = [],
@@ -50,10 +50,10 @@ export function render(vnode, parentDom, replaceNode) {
 		!isHydrating && replaceNode
 			? [replaceNode]
 			: oldVNode
-				? null
+				? NULL
 				: parentDom.firstChild
 					? slice.call(parentDom.childNodes)
-					: null,
+					: NULL,
 		commitQueue,
 		!isHydrating && replaceNode
 			? replaceNode

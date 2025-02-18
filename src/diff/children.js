@@ -5,7 +5,8 @@ import {
 	EMPTY_ARR,
 	INSERT_VNODE,
 	MATCHED,
-	UNDEFINED
+	UNDEFINED,
+	NULL
 } from '../constants';
 import { isArray } from '../util';
 import { getDomSibling } from '../component';
@@ -79,7 +80,7 @@ export function diffChildren(
 
 	for (i = 0; i < newChildrenLength; i++) {
 		childVNode = newParentVNode._children[i];
-		if (childVNode == null) continue;
+		if (childVNode == NULL) continue;
 
 		// At this point, constructNewChildrenArray has assigned _index to be the
 		// matchingIndex for this VNode's oldVNode (or -1 if there is no oldVNode).
@@ -110,7 +111,7 @@ export function diffChildren(
 		newDom = childVNode._dom;
 		if (childVNode.ref && oldVNode.ref != childVNode.ref) {
 			if (oldVNode.ref) {
-				applyRef(oldVNode.ref, null, childVNode);
+				applyRef(oldVNode.ref, NULL, childVNode);
 			}
 			refQueue.push(
 				childVNode.ref,
@@ -119,7 +120,7 @@ export function diffChildren(
 			);
 		}
 
-		if (firstChildDom == null && newDom != null) {
+		if (firstChildDom == NULL && newDom != NULL) {
 			firstChildDom = newDom;
 		}
 
@@ -174,11 +175,11 @@ function constructNewChildrenArray(
 		childVNode = renderResult[i];
 
 		if (
-			childVNode == null ||
+			childVNode == NULL ||
 			typeof childVNode == 'boolean' ||
 			typeof childVNode == 'function'
 		) {
-			newParentVNode._children[i] = null;
+			newParentVNode._children[i] = NULL;
 			continue;
 		}
 		// If this newVNode is being reused (e.g. <div>{reuse}{reuse}</div>) in the same diff,
@@ -192,19 +193,19 @@ function constructNewChildrenArray(
 			childVNode.constructor == String
 		) {
 			childVNode = newParentVNode._children[i] = createVNode(
-				null,
+				NULL,
 				childVNode,
-				null,
-				null,
-				null
+				NULL,
+				NULL,
+				NULL
 			);
 		} else if (isArray(childVNode)) {
 			childVNode = newParentVNode._children[i] = createVNode(
 				Fragment,
 				{ children: childVNode },
-				null,
-				null,
-				null
+				NULL,
+				NULL,
+				NULL
 			);
 		} else if (childVNode.constructor === UNDEFINED && childVNode._depth > 0) {
 			// VNode is already in use, clone it. This can happen in the following
@@ -215,7 +216,7 @@ function constructNewChildrenArray(
 				childVNode.type,
 				childVNode.props,
 				childVNode.key,
-				childVNode.ref ? childVNode.ref : null,
+				childVNode.ref ? childVNode.ref : NULL,
 				childVNode._original
 			);
 		} else {
@@ -236,7 +237,7 @@ function constructNewChildrenArray(
 			remainingOldChildren
 		));
 
-		oldVNode = null;
+		oldVNode = NULL;
 		if (matchingIndex !== -1) {
 			oldVNode = oldChildren[matchingIndex];
 			remainingOldChildren--;
@@ -248,7 +249,7 @@ function constructNewChildrenArray(
 		// Here, we define isMounting for the purposes of the skew diffing
 		// algorithm. Nodes that are unsuspending are considered mounting and we detect
 		// this by checking if oldVNode._original === null
-		const isMounting = oldVNode == null || oldVNode._original === null;
+		const isMounting = oldVNode == NULL || oldVNode._original === NULL;
 
 		if (isMounting) {
 			if (matchingIndex == -1) {
@@ -302,7 +303,7 @@ function constructNewChildrenArray(
 	if (remainingOldChildren) {
 		for (i = 0; i < oldChildrenLength; i++) {
 			oldVNode = oldChildren[i];
-			if (oldVNode != null && (oldVNode._flags & MATCHED) == 0) {
+			if (oldVNode != NULL && (oldVNode._flags & MATCHED) == 0) {
 				if (oldVNode._dom == oldDom) {
 					oldDom = getDomSibling(oldVNode);
 				}
@@ -342,13 +343,13 @@ function insert(parentVNode, oldDom, parentDom) {
 		if (oldDom && parentVNode.type && !parentDom.contains(oldDom)) {
 			oldDom = getDomSibling(parentVNode);
 		}
-		parentDom.insertBefore(parentVNode._dom, oldDom || null);
+		parentDom.insertBefore(parentVNode._dom, oldDom || NULL);
 		oldDom = parentVNode._dom;
 	}
 
 	do {
 		oldDom = oldDom && oldDom.nextSibling;
-	} while (oldDom != null && oldDom.nodeType == 8);
+	} while (oldDom != NULL && oldDom.nodeType == 8);
 
 	return oldDom;
 }
@@ -361,7 +362,7 @@ function insert(parentVNode, oldDom, parentDom) {
  */
 export function toChildArray(children, out) {
 	out = out || [];
-	if (children == null || typeof children == 'boolean') {
+	if (children == NULL || typeof children == 'boolean') {
 	} else if (isArray(children)) {
 		children.some(child => {
 			toChildArray(child, out);
@@ -403,10 +404,10 @@ function findMatchingIndex(
 	let shouldSearch =
 		// (typeof type != 'function' || type === Fragment || key) &&
 		remainingOldChildren >
-		(oldVNode != null && (oldVNode._flags & MATCHED) == 0 ? 1 : 0);
+		(oldVNode != NULL && (oldVNode._flags & MATCHED) == 0 ? 1 : 0);
 
 	if (
-		oldVNode === null ||
+		oldVNode === NULL ||
 		(oldVNode &&
 			key == oldVNode.key &&
 			type === oldVNode.type &&
