@@ -1674,6 +1674,8 @@ export namespace JSXInternal {
 		onCancel?: GenericEventHandler<T> | undefined;
 		onClose?: GenericEventHandler<T> | undefined;
 		open?: Signalish<boolean | undefined>;
+		closedby?: Signalish<'none' | 'closerequest' | 'any' | undefined>;
+		closedBy?: Signalish<'none' | 'closerequest' | 'any' | undefined>;
 	}
 
 	interface EmbedHTMLAttributes<T extends EventTarget = HTMLEmbedElement>
