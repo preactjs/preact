@@ -117,7 +117,6 @@ declare namespace React {
 	export import CreateHandle = _hooks.CreateHandle;
 	export import EffectCallback = _hooks.EffectCallback;
 	export import Inputs = _hooks.Inputs;
-	export import PropRef = _hooks.PropRef;
 	export import Reducer = _hooks.Reducer;
 	export import Dispatch = _hooks.Dispatch;
 	export import SetStateAction = _hooks.StateUpdater;
