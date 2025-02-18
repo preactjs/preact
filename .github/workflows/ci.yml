@@ -23,8 +23,11 @@ jobs:
         id: filter
         with:
           # Should be kept in sync with the filter in the PR Reporter workflow
+          predicate-quantifier: 'every'
           filters: |
-            jsChanged: '**/src/**/*.js'
+            jsChanged:
+              - '**/src/**/*.js'
+              - '!devtools/src/devtools.js'
 
   compressed_size:
     name: Compressed Size
