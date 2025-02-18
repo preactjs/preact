@@ -5,16 +5,6 @@ import * as preact1 from 'preact';
 import { JSXInternal } from '../../src/jsx';
 import * as _Suspense from './suspense';
 
-<<<<<<< HEAD
-=======
-interface SignalLike<T> {
-	value: T;
-	peek(): T;
-	subscribe(fn: (value: T) => void): () => void;
-}
-
-type Signalish<T> = T | SignalLike<T>;
-
 declare namespace preact {
 	export interface FunctionComponent<P = {}> {
 		(
@@ -108,7 +98,6 @@ declare namespace preact {
 	}
 }
 
->>>>>>> Move `defaultProps` into `preact/compat` (#4657)
 // export default React;
 export = React;
 export as namespace React;
@@ -120,7 +109,6 @@ declare namespace React {
 	export import CreateHandle = _hooks.CreateHandle;
 	export import EffectCallback = _hooks.EffectCallback;
 	export import Inputs = _hooks.Inputs;
-	export import PropRef = _hooks.PropRef;
 	export import Reducer = _hooks.Reducer;
 	export import Dispatch = _hooks.Dispatch;
 	export import SetStateAction = _hooks.StateUpdater;
@@ -356,7 +344,7 @@ declare namespace React {
 	}
 
 	export interface ForwardRefRenderFunction<T = any, P = {}> {
-		(props: P, ref: ForwardedRef<T>): preact.ComponentChild;
+		(props: P, ref: ForwardedRef<T>): preact1.ComponentChild;
 		displayName?: string;
 	}
 
@@ -366,13 +354,8 @@ declare namespace React {
 	}
 
 	export function forwardRef<R, P = {}>(
-<<<<<<< HEAD
 		fn: ForwardRefRenderFunction<R, P>
-	): preact.FunctionalComponent<PropsWithoutRef<P> & { ref?: preact.Ref<R> }>;
-=======
-		fn: ForwardFn<P, R>
 	): preact1.FunctionalComponent<PropsWithoutRef<P> & { ref?: preact1.Ref<R> }>;
->>>>>>> Move `defaultProps` into `preact/compat` (#4657)
 
 	export type PropsWithoutRef<P> = Omit<P, 'ref'>;
 
