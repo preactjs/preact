@@ -260,6 +260,10 @@ export function diff(
 				tmp != NULL && tmp.type === Fragment && tmp.key == NULL;
 			let renderResult = isTopLevelFragment ? tmp.props.children : tmp;
 
+			if (isTopLevelFragment) {
+				tmp.props.children = null;
+			}
+
 			oldDom = diffChildren(
 				parentDom,
 				isArray(renderResult) ? renderResult : [renderResult],
