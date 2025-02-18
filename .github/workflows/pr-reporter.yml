@@ -28,8 +28,11 @@ jobs:
           base: ${{ github.event.workflow_run.pull_requests[0].base.sha }}
           ref: ${{ github.event.workflow_run.pull_requests[0].head.sha }}
           # Should be kept in sync with the filter in the CI workflow
+          predicate-quantifier: 'every'
           filters: |
-            jsChanged: '**/src/**/*.js'
+            jsChanged:
+              - '**/src/**/*.js'
+              - '!devtools/src/devtools.js'
 
   report_running:
     name: Report benchmarks are in-progress
