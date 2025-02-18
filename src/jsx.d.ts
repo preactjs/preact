@@ -625,7 +625,8 @@ export namespace JSXInternal {
 		onCompositionUpdate?: CompositionEventHandler<Target> | undefined;
 		onCompositionUpdateCapture?: CompositionEventHandler<Target> | undefined;
 
-		// Details Events
+		// Popover Events
+		onBeforeToggle?: ToggleEventHandler<Target> | undefined;
 		onToggle?: ToggleEventHandler<Target> | undefined;
 
 		// Dialog Events
