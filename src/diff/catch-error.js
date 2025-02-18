@@ -1,3 +1,5 @@
+import { NULL } from '../constants';
+
 /**
  * Find the closest error boundary to a thrown error and call it
  * @param {object} error The thrown value
@@ -20,12 +22,12 @@ export function _catchError(error, vnode, oldVNode, errorInfo) {
 			try {
 				ctor = component.constructor;
 
-				if (ctor && ctor.getDerivedStateFromError != null) {
+				if (ctor && ctor.getDerivedStateFromError != NULL) {
 					component.setState(ctor.getDerivedStateFromError(error));
 					handled = component._dirty;
 				}
 
-				if (component.componentDidCatch != null) {
+				if (component.componentDidCatch != NULL) {
 					component.componentDidCatch(error, errorInfo || {});
 					handled = component._dirty;
 				}
