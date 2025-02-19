@@ -2,6 +2,8 @@ import { defineConfig } from 'vitest/config';
 import path from 'path';
 const root = path.resolve(__dirname);
 const alias = {
+	'^react$': 'preact/compat',
+	'^react-dom$': 'preact/compat',
 	'^preact$': path.join(root, 'src/index.js'),
 	'^preact/compat$': path.join(root, 'compat/src/index.js'),
 	'^preact/jsx-runtime$': path.join(root, 'jsx-runtime/src/index.js'),
@@ -40,6 +42,10 @@ export default defineConfig({
 		}
 	},
 	test: {
+		coverage: {
+			provider: 'istanbul',
+			reporter: ['text', 'json', 'html']
+		},
 		setupFiles: ['./vitest.setup.js'],
 		globals: true,
 		alias,
