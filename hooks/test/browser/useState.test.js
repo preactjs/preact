@@ -374,14 +374,14 @@ describe('useState', () => {
 
 	describe('Global sCU', () => {
 		let prevScu;
-		before(() => {
+		beforeAll(() => {
 			prevScu = Component.prototype.shouldComponentUpdate;
 			Component.prototype.shouldComponentUpdate = () => {
 				return true;
 			};
 		});
 
-		after(() => {
+		afterAll(() => {
 			Component.prototype.shouldComponentUpdate = prevScu;
 		});
 
