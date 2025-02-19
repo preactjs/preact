@@ -6,14 +6,6 @@ import { JSXInternal } from '../../src/jsx';
 import * as _Suspense from './suspense';
 import * as _SuspenseList from './suspense-list';
 
-interface SignalLike<T> {
-	value: T;
-	peek(): T;
-	subscribe(fn: (value: T) => void): () => void;
-}
-
-type Signalish<T> = T | SignalLike<T>;
-
 // export default React;
 export = React;
 export as namespace React;
@@ -272,7 +264,7 @@ declare namespace React {
 	}
 
 	export function forwardRef<R, P = {}>(
-		fn: ForwardFn<P, R>
+		fn: ForwardRefRenderFunction<R, P>
 	): preact.FunctionalComponent<PropsWithoutRef<P> & { ref?: preact.Ref<R> }>;
 
 	export type PropsWithoutRef<P> = Omit<P, 'ref'>;

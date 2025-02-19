@@ -1,4 +1,9 @@
 {
   "extends": "./jsconfig.json",
-  "include": ["src/**/*", "hooks/src/**/*"]
+  "include": [
+    "src/**/*",
+    "hooks/src/**/*",
+    "compat/**/*.d.ts",
+    "jsx-runtime/**/*.d.ts"
+  ]
 }
