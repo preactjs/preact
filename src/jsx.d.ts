@@ -1623,8 +1623,8 @@ export namespace JSXInternal {
 	interface ButtonHTMLAttributes<T extends EventTarget = HTMLButtonElement>
 		extends HTMLAttributes<T> {
 		command?: Signalish<string | undefined>;
-		commandfor?: Signalist<string | undefined>;
-		commandFor?: Signalist<string | undefined>;
+		commandfor?: Signalish<string | undefined>;
+		commandFor?: Signalish<string | undefined>;
 		disabled?: Signalish<boolean | undefined>;
 		form?: Signalish<string | undefined>;
 		formaction?: Signalish<string | undefined>;
