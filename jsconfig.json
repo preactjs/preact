@@ -13,7 +13,8 @@
       "preact/*": ["./*"]
     },
     "target": "es5",
-    "noEmit": true
+    "noEmit": true,
+    "skipLibCheck": false
   },
   "exclude": ["**/node_modules/**", "**/dist/**", "coverage", "demo"]
 }
