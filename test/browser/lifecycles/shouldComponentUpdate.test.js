@@ -51,8 +51,8 @@ describe('Lifecycle methods', () => {
 				this.state = { show: true };
 				setState = s => this.setState(s);
 			}
-			render(props, { show }) {
-				return show ? <div /> : null;
+			render() {
+				return this.state.show ? <div /> : null;
 			}
 		}
 
@@ -915,8 +915,8 @@ describe('Lifecycle methods', () => {
 				};
 				showText = () => this.setState({ show: true });
 			}
-			render(props, { show }) {
-				if (!show) return null;
+			render() {
+				if (!this.state.show) return null;
 
 				return <div>Component</div>;
 			}
