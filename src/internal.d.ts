@@ -109,7 +109,7 @@ export interface PreactElement extends preact.ContainerNode {
 	readonly style?: CSSStyleDeclaration;
 
 	// nextSibling required for inserting nodes
-	readonly nextSibling: ContainerNode | null;
+	readonly nextSibling: PreactElement | null;
 
 	// Used to match DOM nodes to VNodes during hydration. Note: doesn't exist
 	// on Text nodes
@@ -158,7 +158,7 @@ export interface VNode<P = {}> extends preact.VNode<P> {
 	_flags: number;
 }
 
-export interface Component<P = {}, S = {}> extends preact.Component<P, S> {
+export interface Component<P = {}, S = {}> extends Omit<preact.Component<P, S>, 'base'> {
 	// When component is functional component, this is reset to functional component
 	constructor: ComponentType<P>;
 	state: S; // Override Component["state"] to not be readonly for internal use, specifically Hooks

@@ -2,7 +2,9 @@ import {
 	Options as PreactOptions,
 	Component as PreactComponent,
 	VNode as PreactVNode,
-	Context as PreactContext,
+	PreactContext,
+	HookType,
+	ErrorInfo,
 } from '../../src/internal';
 import { Reducer, StateUpdater } from '.';
 
@@ -30,14 +32,14 @@ export interface ComponentHooks {
 	_pendingEffects: EffectHookState[];
 }
 
-export interface Component extends PreactComponent<any, any> {
+export interface Component extends Omit<PreactComponent<any, any>, '_renderCallbacks'> {
 	__hooks?: ComponentHooks;
 	// Extend to include HookStates
 	_renderCallbacks?: Array<HookState | (() => void)>;
 	_hasScuFromHooks?: boolean;
 }
 
-export interface VNode extends PreactVNode {
+export interface VNode extends Omit<PreactVNode, '_component'> {
 	_mask?: [number, number];
 	_component?: Component; // Override with our specific Component type
 }
@@ -52,12 +54,12 @@ export type HookState =
 
 interface BaseHookState {
 	_value?: unknown;
-	_nextValue?: undefined;
-	_pendingValue?: undefined;
-	_args?: undefined;
-	_pendingArgs?: undefined;
-	_component?: undefined;
-	_cleanup?: undefined;
+	_nextValue?: unknown;
+	_pendingValue?: unknown;
+	_args?: unknown;
+	_pendingArgs?: unknown;
+	_component?: unknown;
+	_cleanup?: unknown;
 }
 
 export type Effect = () => void | Cleanup;
