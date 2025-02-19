@@ -19,13 +19,13 @@ describe('Lifecycle methods', () => {
 	let resetRemoveChild;
 	let resetRemove;
 
-	before(() => {
+	beforeAll(() => {
 		resetInsertBefore = logCall(Element.prototype, 'insertBefore');
 		resetRemoveChild = logCall(Element.prototype, 'appendChild');
 		resetRemove = logCall(Element.prototype, 'removeChild');
 	});
 
-	after(() => {
+	afterAll(() => {
 		resetInsertBefore();
 		resetRemoveChild();
 		resetRemove();
