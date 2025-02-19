@@ -43,14 +43,14 @@ describe('render()', () => {
 		teardown(scratch);
 	});
 
-	before(() => {
+	beforeAll(() => {
 		resetAppendChild = logCall(Element.prototype, 'appendChild');
 		resetInsertBefore = logCall(Element.prototype, 'insertBefore');
 		resetRemoveChild = logCall(Element.prototype, 'removeChild');
 		resetRemove = logCall(Element.prototype, 'remove');
 	});
 
-	after(() => {
+	afterAll(() => {
 		resetAppendChild();
 		resetInsertBefore();
 		resetRemoveChild();
@@ -1963,8 +1963,8 @@ describe('render()', () => {
 			</Fragment>
 		);
 		render(<App />, document);
-		expect(document.documentElement.innerHTML).to.equal(
-			'<head><title>Test</title></head><body><p>Test</p></body>\n'
+		expect(document.documentElement.innerHTML.trim()).to.equal(
+			'<head><title>Test</title></head><body><p>Test</p></body>'
 		);
 	});
 });
