@@ -39,6 +39,7 @@ import { getDomSibling } from '../component';
  * siblings. In most cases, it starts out as `oldChildren[0]._dom`.
  * @param {boolean} isHydrating Whether or not we are in hydration
  * @param {any[]} refQueue an array of elements needed to invoke refs
+ * @param {Document} doc The owner document of the parentNode
  */
 export function diffChildren(
 	parentDom,
@@ -51,7 +52,8 @@ export function diffChildren(
 	commitQueue,
 	oldDom,
 	isHydrating,
-	refQueue
+	refQueue,
+	doc
 ) {
 	let i,
 		/** @type {VNode} */
@@ -104,7 +106,8 @@ export function diffChildren(
 			commitQueue,
 			oldDom,
 			isHydrating,
-			refQueue
+			refQueue,
+			doc
 		);
 
 		// Adjust DOM nodes
