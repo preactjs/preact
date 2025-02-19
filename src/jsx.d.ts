@@ -625,7 +625,8 @@ export namespace JSXInternal {
 		onCompositionUpdate?: CompositionEventHandler<Target> | undefined;
 		onCompositionUpdateCapture?: CompositionEventHandler<Target> | undefined;
 
-		// Details Events
+		// Popover Events
+		onBeforeToggle?: ToggleEventHandler<Target> | undefined;
 		onToggle?: ToggleEventHandler<Target> | undefined;
 
 		// Dialog Events
@@ -1674,6 +1675,8 @@ export namespace JSXInternal {
 		onCancel?: GenericEventHandler<T> | undefined;
 		onClose?: GenericEventHandler<T> | undefined;
 		open?: Signalish<boolean | undefined>;
+		closedby?: Signalish<'none' | 'closerequest' | 'any' | undefined>;
+		closedBy?: Signalish<'none' | 'closerequest' | 'any' | undefined>;
 	}
 
 	interface EmbedHTMLAttributes<T extends EventTarget = HTMLEmbedElement>
