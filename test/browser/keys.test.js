@@ -977,4 +977,151 @@ describe('keys', () => {
 			'mounted 1'
 		]);
 	});
+
+	it('should handle hole prepend', () => {
+		const actions = [];
+		class Comp extends Component {
+			componentDidMount() {
+				actions.push('mounted ' + this.props.i);
+			}
+			render() {
+				return <div>Hello</div>;
+			}
+		}
+
+		const App = props => {
+			return props.y === '2' ? (
+				<div>
+					<Comp key={1} i={1} />
+					<Comp key={2} i={2} />
+					<Comp key={3} i={3} />
+				</div>
+			) : (
+				<div>
+					{null}
+					<Comp key={1} i={1} />
+					<Comp key={2} i={2} />
+					<Comp key={3} i={3} />
+				</div>
+			);
+		};
+
+		render(<App y="1" />, scratch);
+		expect(actions).to.deep.equal(['mounted 1', 'mounted 2', 'mounted 3']);
+
+		render(<App y="2" />, scratch);
+		expect(actions).to.deep.equal(['mounted 1', 'mounted 2', 'mounted 3']);
+	});
+
+	it('should handle hole replace', () => {
+		const actions = [];
+		class Comp extends Component {
+			componentDidMount() {
+				actions.push('mounted ' + this.props.i);
+			}
+			render() {
+				return <div>Hello</div>;
+			}
+		}
+
+		const App = props => {
+			return props.y === '1' ? (
+				<div>
+					<Comp key={1} i={1} />
+					<Comp key={2} i={2} />
+					<Comp key={3} i={3} />
+				</div>
+			) : (
+				<div>
+					<Comp key={1} i={1} />
+					{null}
+					<Comp key={3} i={3} />
+				</div>
+			);
+		};
+
+		render(<App y="1" />, scratch);
+		expect(actions).to.deep.equal(['mounted 1', 'mounted 2', 'mounted 3']);
+
+		render(<App y="2" />, scratch);
+		expect(actions).to.deep.equal(['mounted 1', 'mounted 2', 'mounted 3']);
+
+		render(<App y="1" />, scratch);
+		expect(actions).to.deep.equal([
+			'mounted 1',
+			'mounted 2',
+			'mounted 3',
+			'mounted 2'
+		]);
+	});
+
+	it('should handle hole insert', () => {
+		const actions = [];
+		class Comp extends Component {
+			componentDidMount() {
+				actions.push('mounted ' + this.props.i);
+			}
+			render() {
+				return <div>Hello</div>;
+			}
+		}
+
+		const App = props => {
+			return props.y === '2' ? (
+				<div>
+					<Comp key={1} i={1} />
+					<Comp key={2} i={2} />
+					<Comp key={3} i={3} />
+				</div>
+			) : (
+				<div>
+					<Comp key={1} i={1} />
+					<Comp key={2} i={2} />
+					{null}
+					<Comp key={3} i={3} />
+				</div>
+			);
+		};
+
+		render(<App y="1" />, scratch);
+		expect(actions).to.deep.equal(['mounted 1', 'mounted 2', 'mounted 3']);
+
+		render(<App y="2" />, scratch);
+		expect(actions).to.deep.equal(['mounted 1', 'mounted 2', 'mounted 3']);
+	});
+
+	it('should handle hole apppend', () => {
+		const actions = [];
+		class Comp extends Component {
+			componentDidMount() {
+				actions.push('mounted ' + this.props.i);
+			}
+			render() {
+				return <div>Hello</div>;
+			}
+		}
+
+		const App = props => {
+			return props.y === '2' ? (
+				<div>
+					<Comp key={1} i={1} />
+					<Comp key={2} i={2} />
+					<Comp key={3} i={3} />
+				</div>
+			) : (
+				<div>
+					<Comp key={1} i={1} />
+					<Comp key={2} i={2} />
+					<Comp key={3} i={3} />
+					{null}
+				</div>
+			);
+		};
+
+		render(<App y="1" />, scratch);
+		expect(actions).to.deep.equal(['mounted 1', 'mounted 2', 'mounted 3']);
+
+		render(<App y="2" />, scratch);
+		expect(actions).to.deep.equal(['mounted 1', 'mounted 2', 'mounted 3']);
+	});
 });
