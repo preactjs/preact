@@ -252,8 +252,12 @@ function constructNewChildrenArray(
 		const isMounting = oldVNode == NULL || oldVNode._original === NULL;
 
 		if (isMounting) {
-			if (matchingIndex == -1 && oldChildrenLength !== newChildrenLength) {
-				skew--;
+			if (matchingIndex == -1) {
+				if (newChildrenLength > oldChildrenLength) {
+					skew--;
+				} else if (newChildrenLength < oldChildrenLength) {
+					skew++;
+				}
 			}
 
 			// If we are mounting a DOM VNode, mark it for insertion
