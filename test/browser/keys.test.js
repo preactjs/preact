@@ -943,4 +943,38 @@ describe('keys', () => {
 
 		expect(scratch.innerHTML).to.eq(`<div>${expected(sorted)}</div>`);
 	});
+
+	it('should handle keyed replacements', () => {
+		const actions = [];
+		class Comp extends Component {
+			componentDidMount() {
+				actions.push('mounted ' + this.props.i);
+			}
+			render() {
+				return <div>Hello</div>;
+			}
+		}
+
+		const App = props => {
+			return (
+				<div>
+					<Comp key={props.y} i={1} />
+					{false}
+					<Comp i={2} />
+					<Comp i={3} />
+				</div>
+			);
+		};
+
+		render(<App y="1" />, scratch);
+		expect(actions).to.deep.equal(['mounted 1', 'mounted 2', 'mounted 3']);
+
+		render(<App y="2" />, scratch);
+		expect(actions).to.deep.equal([
+			'mounted 1',
+			'mounted 2',
+			'mounted 3',
+			'mounted 1'
+		]);
+	});
 });

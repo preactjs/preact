@@ -252,7 +252,7 @@ function constructNewChildrenArray(
 		const isMounting = oldVNode == NULL || oldVNode._original === NULL;
 
 		if (isMounting) {
-			if (matchingIndex == -1) {
+			if (matchingIndex == -1 && oldChildrenLength !== newChildrenLength) {
 				skew--;
 			}
 

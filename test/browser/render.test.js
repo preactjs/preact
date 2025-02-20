@@ -1967,4 +1967,33 @@ describe('render()', () => {
 			'<head><title>Test</title></head><body><p>Test</p></body>\n'
 		);
 	});
+
+	it('should not remount components when replacing a component with a falsy value in-between', () => {
+		const actions = [];
+		class Comp extends Component {
+			componentDidMount() {
+				actions.push('mounted ' + this.props.i);
+			}
+			render() {
+				return <div>Hello</div>;
+			}
+		}
+
+		const App = props => {
+			return (
+				<div>
+					{props.y === '1' ? <Comp i={1} /> : <div />}
+					{false}
+					<Comp i={2} />
+					<Comp i={3} />
+				</div>
+			);
+		};
+
+		render(<App y="1" />, scratch);
+		expect(actions).to.deep.equal(['mounted 1', 'mounted 2', 'mounted 3']);
+
+		render(<App y="2" />, scratch);
+		expect(actions).to.deep.equal(['mounted 1', 'mounted 2', 'mounted 3']);
+	});
 });
