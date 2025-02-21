@@ -253,6 +253,20 @@ function constructNewChildrenArray(
 
 		if (isMounting) {
 			if (matchingIndex == -1) {
+				// When the array of children is growing we need to decrease the skew
+				// as we are adding a new element to the array.
+				// Example:
+				// [1, 2, 3] --> [0, 1, 2, 3]
+				// oldChildren   newChildren
+				//
+				// The new element is at index 0, so our skew is 0,
+				// we need to decrease the skew as we are adding a new element.
+				// The decrease will cause us to compare the element at position 1
+				// with value 1 with the element at position 0 with value 0.
+				//
+				// A linear concept is applied when the array is shrinking,
+				// if the length is unchanged we can assume that no skew
+				// changes are needed.
 				if (newChildrenLength > oldChildrenLength) {
 					skew--;
 				} else if (newChildrenLength < oldChildrenLength) {
