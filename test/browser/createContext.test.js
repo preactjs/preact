@@ -7,6 +7,7 @@ import {
 	Fragment
 } from 'preact';
 import { setupScratch, teardown } from '../_util/helpers';
+import { vi } from 'vitest';
 
 /** @jsx createElement */
 
@@ -684,7 +685,7 @@ describe('createContext', () => {
 	it('should not rerender consumers that have been unmounted', () => {
 		const { Provider, Consumer } = createContext(0);
 
-		const Inner = sinon.spy(props => <div>{props.value}</div>);
+		const Inner = vi.fn(props => <div>{props.value}</div>);
 
 		let toggleConsumer;
 		let changeValue;
@@ -711,22 +712,22 @@ describe('createContext', () => {
 
 		render(<App />, scratch);
 		expect(scratch.innerHTML).to.equal('<div><div>0</div></div>');
-		expect(Inner).to.have.been.calledOnce;
+		expect(Inner).toHaveBeenCalledOnce();
 
 		changeValue(1);
 		rerender();
 		expect(scratch.innerHTML).to.equal('<div><div>1</div></div>');
-		expect(Inner).to.have.been.calledTwice;
+		expect(Inner).toHaveBeenCalledTimes(2);
 
 		toggleConsumer();
 		rerender();
 		expect(scratch.innerHTML).to.equal('<div></div>');
-		expect(Inner).to.have.been.calledTwice;
+		expect(Inner).toHaveBeenCalledTimes(2);
 
 		changeValue(2);
 		rerender();
 		expect(scratch.innerHTML).to.equal('<div></div>');
-		expect(Inner).to.have.been.calledTwice;
+		expect(Inner).toHaveBeenCalledTimes(2);
 	});
 
 	describe('class.contextType', () => {
