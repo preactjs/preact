@@ -1,6 +1,7 @@
 import { setupRerender } from 'preact/test-utils';
 import { createElement, render, Component, createRef, Fragment } from 'preact';
 import { setupScratch, teardown } from '../_util/helpers';
+import { vi } from 'vitest';
 
 /** @jsx createElement */
 
@@ -273,9 +274,9 @@ describe('refs', () => {
 				return <div />;
 			}
 		}
-		const Bar = spy('Bar', () => <div />);
+		const Bar = vi.fn(() => <div />);
 
-		sinon.spy(Foo.prototype, 'render');
+		vi.spyOn(Foo.prototype, 'render');
 
 		render(
 			<div>
@@ -285,15 +286,8 @@ describe('refs', () => {
 			scratch
 		);
 
-		expect(Foo.prototype.render).to.have.been.calledWithMatch(
-			{ ref: sinon.match.falsy, a: 'a' },
-			{},
-			{}
-		);
-		expect(Bar).to.have.been.calledWithMatch(
-			{ b: 'b', ref: sinon.match.falsy },
-			{}
-		);
+		expect(Foo.prototype.render).toHaveBeenCalledWith({ a: 'a' }, {}, {});
+		expect(Bar).toHaveBeenCalledWith({ b: 'b' }, {});
 	});
 
 	// Test for #232
