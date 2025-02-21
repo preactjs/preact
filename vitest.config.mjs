@@ -40,6 +40,7 @@ export default defineConfig({
 		],
 		esbuildOptions: {
 			alias,
+
 			plugins: [
 				{
 					name: 'load-js-files-as-jsx',
@@ -68,7 +69,7 @@ export default defineConfig({
 			screenshotFailures: false,
 			headless: true,
 			// at least one instance is required
-			instances: [{ browser: 'firefox' }]
+			instances: [{ browser: 'chrome' }]
 		}
 	}
 });

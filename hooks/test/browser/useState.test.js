@@ -1,5 +1,6 @@
 import { setupRerender, act } from 'preact/test-utils';
 import { createElement, render, createContext, Component } from 'preact';
+import { vi } from 'vitest';
 import { useState, useContext, useEffect } from 'preact/hooks';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 
@@ -55,7 +56,7 @@ describe('useState', () => {
 		let lastState;
 		let doSetState;
 
-		const Comp = sinon.spy(() => {
+		const Comp = vi.fn(() => {
 			const [state, setState] = useState(0);
 			lastState = state;
 			doSetState = setState;
@@ -64,24 +65,24 @@ describe('useState', () => {
 
 		render(<Comp />, scratch);
 		expect(lastState).to.equal(0);
-		expect(Comp).to.be.calledOnce;
+		expect(Comp).toHaveBeenCalledOnce();
 
 		doSetState(0);
 		rerender();
 		expect(lastState).to.equal(0);
-		expect(Comp).to.be.calledOnce;
+		expect(Comp).toHaveBeenCalledOnce();
 
 		doSetState(() => 0);
 		rerender();
 		expect(lastState).to.equal(0);
-		expect(Comp).to.be.calledOnce;
+		expect(Comp).toHaveBeenCalledOnce();
 	});
 
 	it('rerenders when setting the state', () => {
 		let lastState;
 		let doSetState;
 
-		const Comp = sinon.spy(() => {
+		const Comp = vi.fn(() => {
 			const [state, setState] = useState(0);
 			lastState = state;
 			doSetState = setState;
@@ -90,18 +91,18 @@ describe('useState', () => {
 
 		render(<Comp />, scratch);
 		expect(lastState).to.equal(0);
-		expect(Comp).to.be.calledOnce;
+		expect(Comp).toHaveBeenCalledOnce();
 
 		doSetState(1);
 		rerender();
 		expect(lastState).to.equal(1);
-		expect(Comp).to.be.calledTwice;
+		expect(Comp).toHaveBeenCalledTimes(2);
 
 		// Updater function style
 		doSetState(current => current * 10);
 		rerender();
 		expect(lastState).to.equal(10);
-		expect(Comp).to.be.calledThrice;
+		expect(Comp).toHaveBeenCalledTimes(3);
 	});
 
 	it('can be set by another component', () => {
