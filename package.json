@@ -5,7 +5,7 @@
   "private": false,
   "description": "Fast 3kb React-compatible Virtual DOM library.",
   "main": "dist/preact.js",
-  "module": "dist/preact.module.js",
+  "module": "dist/preact.mjs",
   "umd:main": "dist/preact.umd.js",
   "unpkg": "dist/preact.min.js",
   "source": "src/index.js",
@@ -20,56 +20,56 @@
         "types": "./src/index-5.d.ts"
       },
       "types": "./src/index.d.ts",
-      "browser": "./dist/preact.module.js",
+      "module": "./dist/preact.mjs",
       "umd": "./dist/preact.umd.js",
       "import": "./dist/preact.mjs",
       "require": "./dist/preact.js"
     },
     "./compat": {
       "types": "./compat/src/index.d.ts",
-      "browser": "./compat/dist/compat.module.js",
+      "module": "./compat/dist/compat.mjs",
       "umd": "./compat/dist/compat.umd.js",
       "import": "./compat/dist/compat.mjs",
       "require": "./compat/dist/compat.js"
     },
     "./debug": {
       "types": "./debug/src/index.d.ts",
-      "browser": "./debug/dist/debug.module.js",
+      "module": "./debug/dist/debug.mjs",
       "umd": "./debug/dist/debug.umd.js",
       "import": "./debug/dist/debug.mjs",
       "require": "./debug/dist/debug.js"
     },
     "./devtools": {
       "types": "./devtools/src/index.d.ts",
-      "browser": "./devtools/dist/devtools.module.js",
+      "module": "./devtools/dist/devtools.mjs",
       "umd": "./devtools/dist/devtools.umd.js",
       "import": "./devtools/dist/devtools.mjs",
       "require": "./devtools/dist/devtools.js"
     },
     "./hooks": {
       "types": "./hooks/src/index.d.ts",
-      "browser": "./hooks/dist/hooks.module.js",
+      "module": "./hooks/dist/hooks.mjs",
       "umd": "./hooks/dist/hooks.umd.js",
       "import": "./hooks/dist/hooks.mjs",
       "require": "./hooks/dist/hooks.js"
     },
     "./test-utils": {
       "types": "./test-utils/src/index.d.ts",
-      "browser": "./test-utils/dist/testUtils.module.js",
+      "module": "./test-utils/dist/testUtils.mjs",
       "umd": "./test-utils/dist/testUtils.umd.js",
       "import": "./test-utils/dist/testUtils.mjs",
       "require": "./test-utils/dist/testUtils.js"
     },
     "./jsx-runtime": {
       "types": "./jsx-runtime/src/index.d.ts",
-      "browser": "./jsx-runtime/dist/jsxRuntime.module.js",
+      "module": "./jsx-runtime/dist/jsxRuntime.mjs",
       "umd": "./jsx-runtime/dist/jsxRuntime.umd.js",
       "import": "./jsx-runtime/dist/jsxRuntime.mjs",
       "require": "./jsx-runtime/dist/jsxRuntime.js"
     },
     "./jsx-dev-runtime": {
       "types": "./jsx-runtime/src/index.d.ts",
-      "browser": "./jsx-runtime/dist/jsxRuntime.module.js",
+      "module": "./jsx-runtime/dist/jsxRuntime.mjs",
       "umd": "./jsx-runtime/dist/jsxRuntime.umd.js",
       "import": "./jsx-runtime/dist/jsxRuntime.mjs",
       "require": "./jsx-runtime/dist/jsxRuntime.js"
@@ -116,14 +116,13 @@
     "prepare": "husky && run-s build && npm-merge-driver-install",
     "build": "npm-run-all --parallel build:*",
     "build:core": "microbundle build --raw --no-generateTypes -f cjs,esm,umd",
-    "build:core-min": "microbundle build --raw --no-generateTypes -f cjs,esm,umd,iife src/cjs.js -o dist/preact.min.js",
     "build:debug": "microbundle build --raw --no-generateTypes -f cjs,esm,umd --cwd debug",
     "build:devtools": "microbundle build --raw --no-generateTypes -f cjs,esm,umd --cwd devtools",
     "build:hooks": "microbundle build --raw --no-generateTypes -f cjs,esm,umd --cwd hooks",
     "build:test-utils": "microbundle build --raw --no-generateTypes -f cjs,esm,umd --cwd test-utils",
     "build:compat": "microbundle build --raw --no-generateTypes -f cjs,esm,umd --cwd compat --globals 'preact/hooks=preactHooks'",
     "build:jsx": "microbundle build --raw --no-generateTypes -f cjs,esm,umd --cwd jsx-runtime",
-    "postbuild": "node ./config/node-13-exports.js && node ./config/compat-entries.js",
+    "postbuild": "node ./config/compat-entries.js",
     "dev": "microbundle watch --raw --no-generateTypes --format cjs",
     "dev:hooks": "microbundle watch --raw --no-generateTypes --format cjs --cwd hooks",
     "dev:compat": "microbundle watch --raw --no-generateTypes --format cjs --cwd compat --globals 'preact/hooks=preactHooks'",
