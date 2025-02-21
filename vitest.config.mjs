@@ -2,8 +2,8 @@ import { defineConfig } from 'vitest/config';
 import path from 'path';
 const root = path.resolve(__dirname);
 const alias = {
-	'^react$': 'preact/compat',
-	'^react-dom$': 'preact/compat',
+	'^react$': path.join(root, 'compat/src/index.js'),
+	'^react-dom$': path.join(root, 'compat/src/index.js'),
 	'^preact$': path.join(root, 'src/index.js'),
 	'^preact/compat$': path.join(root, 'compat/src/index.js'),
 	'^preact/jsx-runtime$': path.join(root, 'jsx-runtime/src/index.js'),
@@ -16,7 +16,8 @@ const alias = {
 
 export default defineConfig({
 	resolve: {
-		alias
+		alias,
+		dedupe: ['preact']
 	},
 	esbuild: {
 		loader: 'jsx',
@@ -24,6 +25,19 @@ export default defineConfig({
 		exclude: []
 	},
 	optimizeDeps: {
+		exclude: [
+			'preact',
+			'preact/compat',
+			'preact/test-utils',
+			'preact/debug',
+			'preact/hooks',
+			'preact/devtools',
+			'preact/jsx-runtime',
+			'preact/jsx-dev-runtime',
+			'preact-router',
+			'react',
+			'react-dom'
+		],
 		esbuildOptions: {
 			alias,
 			plugins: [
@@ -48,13 +62,13 @@ export default defineConfig({
 		},
 		setupFiles: ['./vitest.setup.js'],
 		globals: true,
-		alias,
 		browser: {
 			provider: 'webdriverio', // or 'webdriverio'
 			enabled: true,
+			screenshotFailures: false,
 			headless: true,
 			// at least one instance is required
-			instances: [{ browser: 'chrome' }]
+			instances: [{ browser: 'firefox' }]
 		}
 	}
 });
