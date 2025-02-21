@@ -1,9 +1,10 @@
 import sinon from 'sinon';
-import { expect, chai } from 'vitest';
+import { expect, chai, describe } from 'vitest';
 import sinonChai from 'sinon-chai';
 
 chai.use(sinonChai);
 
+globalThis.context = describe;
 globalThis.sinon = sinon;
 
 // Something that's loaded before this file polyfills Symbol object.
