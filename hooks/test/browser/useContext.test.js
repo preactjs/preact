@@ -2,6 +2,7 @@ import { createElement, render, createContext, Component } from 'preact';
 import { act } from 'preact/test-utils';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { useContext, useEffect, useState } from 'preact/hooks';
+import { vi } from 'vitest';
 
 /** @jsx createElement */
 
@@ -302,7 +303,7 @@ describe('useContext', () => {
 		const context = createContext(0);
 		const Provider = context.Provider;
 
-		const Inner = sinon.spy(() => {
+		const Inner = vi.fn(() => {
 			const value = useContext(context);
 			return <div>{value}</div>;
 		});
@@ -328,19 +329,19 @@ describe('useContext', () => {
 
 		render(<App />, scratch);
 		expect(scratch.innerHTML).to.equal('<div><div>0</div></div>');
-		expect(Inner).to.have.been.calledOnce;
+		expect(Inner).toHaveBeenCalledOnce();
 
 		act(() => changeValue(1));
 		expect(scratch.innerHTML).to.equal('<div><div>1</div></div>');
-		expect(Inner).to.have.been.calledTwice;
+		expect(Inner).toHaveBeenCalledTimes(2);
 
 		act(() => toggleConsumer());
 		expect(scratch.innerHTML).to.equal('<div></div>');
-		expect(Inner).to.have.been.calledTwice;
+		expect(Inner).toHaveBeenCalledTimes(2);
 
 		act(() => changeValue(2));
 		expect(scratch.innerHTML).to.equal('<div></div>');
-		expect(Inner).to.have.been.calledTwice;
+		expect(Inner).toHaveBeenCalledTimes(2);
 	});
 
 	it('should rerender when reset to defaultValue', () => {
