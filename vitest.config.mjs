@@ -93,7 +93,7 @@ export default defineConfig({
 							}
 						]
 					],
-					include: ['**/{src,dist}/**/*.js']
+					include: ['**/{src,dist}/**/*.js', '**/test/**/*.js']
 				});
 
 				return {
@@ -137,10 +137,10 @@ export default defineConfig({
 	test: {
 		coverage: {
 			enabled: process.env.COVERAGE === 'true',
-			include: [MINIFY ? './**/dist/**/*' : './**/src/**/*', './**/test/**/*'],
+			include: [MINIFY ? './**/dist/**/*,' : './**/src/**/*', './**/test/**/*'],
 			extension: ['js', 'jsx', 'mjs'],
 			provider: 'istanbul',
-			reporter: ['text', 'json', 'html']
+			reporter: ['html']
 		},
 		setupFiles: ['./vitest.setup.js'],
 		globals: true,
