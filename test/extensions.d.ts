@@ -1,3 +1,5 @@
+import 'vitest/globals';
+
 declare global {
 	namespace Chai {
 		interface Assertion {

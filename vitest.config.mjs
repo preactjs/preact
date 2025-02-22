@@ -171,8 +171,7 @@ export default defineConfig({
 	test: {
 		coverage: {
 			enabled: process.env.COVERAGE === 'true',
-			include: ['./**/src/**/*', './**/test/**/*'],
-			extension: ['js', 'jsx', 'mjs'],
+			include: ['./**/src/**/*'],
 			provider: 'istanbul',
 			reporter: ['html'],
 			reportsDirectory: 'coverage'
