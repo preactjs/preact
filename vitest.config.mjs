@@ -174,7 +174,8 @@ export default defineConfig({
 			include: ['./**/src/**/*', './**/test/**/*'],
 			extension: ['js', 'jsx', 'mjs'],
 			provider: 'istanbul',
-			reporter: ['html']
+			reporter: ['html'],
+			reportsDirectory: 'coverage'
 		},
 		setupFiles: ['./vitest.setup.js'],
 		globals: true,
