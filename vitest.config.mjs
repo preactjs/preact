@@ -111,6 +111,9 @@ export default defineConfig({
 	},
 	test: {
 		coverage: {
+			enabled: process.env.COVERAGE === 'true',
+			include: ['./**/src/**/*', './**/test/**/*'],
+			extension: ['js', 'jsx', 'mjs'],
 			provider: 'istanbul',
 			reporter: ['text', 'json', 'html']
 		},
