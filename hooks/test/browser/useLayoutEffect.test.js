@@ -5,7 +5,7 @@ import {
 	teardown,
 	serializeHtml
 } from '../../../test/_util/helpers';
-import { useEffectAssertions } from './useEffectAssertions.test';
+import { useEffectAssertions } from './useEffectAssertions';
 import { useLayoutEffect, useRef, useState } from 'preact/hooks';
 
 /** @jsx createElement */

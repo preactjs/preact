@@ -38,7 +38,10 @@ export default defineConfig({
 	esbuild: {
 		loader: 'jsx',
 		include: /.*\.js$/,
-		exclude: ['node_nodules']
+		exclude: ['node_nodules'],
+		jsx: 'transform',
+		jsxImportSource: 'preact',
+		jsxDev: true
 	},
 	plugins: [
 		{
