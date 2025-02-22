@@ -1167,18 +1167,7 @@ describe('Components', () => {
 
 			expect(Inner).toHaveBeenCalledTimes(2);
 
-			// TODO: fix this
-			// expect(Inner.secondCall)
-			// 	.toHaveBeenCalledWithMatch({ foo: 'bar', i: 2 })
-			// 	.and.to.have.returned(
-			// 		sinon.match({
-			// 			props: {
-			// 				j: 2,
-			// 				i: 2,
-			// 				foo: 'bar'
-			// 			}
-			// 		})
-			// 	);
+			expect(Inner).toHaveBeenNthCalledWith(2, { foo: 'bar', i: 2 }, {});
 
 			expect(getAttributes(scratch.firstElementChild)).to.eql({
 				j: '2',
@@ -1192,18 +1181,7 @@ describe('Components', () => {
 
 			expect(Inner).toHaveBeenCalledTimes(3);
 
-			// TODO: fix this
-			// expect(Inner.thirdCall)
-			// 	.to.have.been.calledWithMatch({ foo: 'bar', i: 3 })
-			// 	.and.to.have.returned(
-			// 		sinon.match({
-			// 			props: {
-			// 				j: 3,
-			// 				i: 3,
-			// 				foo: 'bar'
-			// 			}
-			// 		})
-			// 	);
+			expect(Inner).toHaveBeenNthCalledWith(3, { foo: 'bar', i: 3 }, {});
 
 			expect(getAttributes(scratch.firstElementChild)).to.eql({
 				j: '3',
@@ -1267,18 +1245,12 @@ describe('Components', () => {
 			expect(Inner.prototype.componentDidMount).toHaveBeenCalledOnce();
 			expect(Inner.prototype.render).toHaveBeenCalledTimes(2);
 
-			// TODO: fix this
-			// expect(Inner.prototype.render.secondCall)
-			// 	.toHaveBeenCalledWithMatch({ foo: 'bar', i: 2 })
-			// 	.and.to.have.returned(
-			// 		sinon.match({
-			// 			props: {
-			// 				j: 2,
-			// 				i: 2,
-			// 				foo: 'bar'
-			// 			}
-			// 		})
-			// 	);
+			expect(Inner.prototype.render).toHaveBeenNthCalledWith(
+				2,
+				{ foo: 'bar', i: 2 },
+				{},
+				{}
+			);
 
 			expect(getAttributes(scratch.firstElementChild)).to.eql({
 				j: '2',
@@ -1299,18 +1271,12 @@ describe('Components', () => {
 			expect(Inner.prototype.componentDidMount).toHaveBeenCalledOnce();
 			expect(Inner.prototype.render).toHaveBeenCalledTimes(3);
 
-			// TODO: fix this
-			// expect(Inner.prototype.render.thirdCall)
-			// 	.toHaveBeenCalledWithMatch({ foo: 'bar', i: 3 })
-			// 	.and.to.have.returned(
-			// 		sinon.match({
-			// 			props: {
-			// 				j: 3,
-			// 				i: 3,
-			// 				foo: 'bar'
-			// 			}
-			// 		})
-			// 	);
+			expect(Inner.prototype.render).toHaveBeenNthCalledWith(
+				3,
+				{ foo: 'bar', i: 3 },
+				{},
+				{}
+			);
 
 			expect(getAttributes(scratch.firstElementChild)).to.eql({
 				j: '3',
@@ -1366,9 +1332,9 @@ describe('Components', () => {
 
 			expect(Inner.prototype.componentWillMount).toHaveBeenCalledOnce();
 			expect(Inner.prototype.componentDidMount).toHaveBeenCalledOnce();
-			// expect(Inner.prototype.componentWillMount).toHaveBeenCalledBefore(
-			// 	Inner.prototype.componentDidMount
-			// );
+			expect(Inner.prototype.componentWillMount).toHaveBeenCalledBefore(
+				Inner.prototype.componentDidMount
+			);
 
 			render(<asdf />, scratch);
 
