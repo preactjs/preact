@@ -4,18 +4,49 @@ import fs from 'fs/promises';
 import { readFileSync } from 'fs';
 import path from 'path';
 
+const MINIFY = true;
+
 const root = path.resolve(__dirname);
 const alias = {
-	'^react$': path.join(root, 'compat/src/index.js'),
-	'^react-dom$': path.join(root, 'compat/src/index.js'),
-	'^preact$': path.join(root, 'src/index.js'),
-	'^preact/compat$': path.join(root, 'compat/src/index.js'),
-	'^preact/jsx-runtime$': path.join(root, 'jsx-runtime/src/index.js'),
-	'^preact/jsx-runtime/src$': path.join(root, 'jsx-runtime/src'),
-	'^preact/jsx-dev-runtime$': path.join(root, 'jsx-dev-runtime/src/index.js'),
-	'^preact/debug$': path.join(root, 'debug/src/index.js'),
-	'^preact/hooks$': path.join(root, 'hooks/src/index.js'),
-	'^preact/test-utils$': path.join(root, 'test-utils/src/index.js')
+	'^react$': path.join(
+		root,
+		MINIFY ? 'compat/dist/compat.js' : 'compat/src/index.js'
+	),
+	'^react-dom$': path.join(
+		root,
+		MINIFY ? 'compat/dist/compat.js' : 'compat/src/index.js'
+	),
+	'^preact$': path.join(root, MINIFY ? 'dist/preact.js' : 'src/index.js'),
+	'^preact/compat$': path.join(
+		root,
+		MINIFY ? 'compat/dist/compat.js' : 'compat/src/index.js'
+	),
+	'^preact/jsx-runtime$': path.join(
+		root,
+		MINIFY ? 'jsx-runtime/dist/jsx-runtime.js' : 'jsx-runtime/src/index.js'
+	),
+	'^preact/jsx-runtime/src$': path.join(
+		root,
+		MINIFY ? 'jsx-runtime/dist/jsx-runtime.js' : 'jsx-runtime/src'
+	),
+	'^preact/jsx-dev-runtime$': path.join(
+		root,
+		MINIFY
+			? 'jsx-dev-runtime/dist/jsx-dev-runtime.js'
+			: 'jsx-dev-runtime/src/index.js'
+	),
+	'^preact/debug$': path.join(
+		root,
+		MINIFY ? 'debug/dist/debug.js' : 'debug/src/index.js'
+	),
+	'^preact/hooks$': path.join(
+		root,
+		MINIFY ? 'hooks/dist/hooks.js' : 'hooks/src/index.js'
+	),
+	'^preact/test-utils$': path.join(
+		root,
+		MINIFY ? 'test-utils/dist/test-utils.js' : 'test-utils/src/index.js'
+	)
 };
 
 const rename = {};
@@ -62,13 +93,7 @@ export default defineConfig({
 							}
 						]
 					],
-					include: ['**/src/**/*.js', '**/test/**/*.js'],
-					overrides: [
-						{
-							test: /(component-stack|debug)\.test\.js$/,
-							plugins: ['@babel/plugin-transform-react-jsx-source']
-						}
-					]
+					include: ['**/{src,dist}/**/*.js']
 				});
 
 				return {
@@ -112,7 +137,7 @@ export default defineConfig({
 	test: {
 		coverage: {
 			enabled: process.env.COVERAGE === 'true',
-			include: ['./**/src/**/*', './**/test/**/*'],
+			include: [MINIFY ? './**/dist/**/*' : './**/src/**/*', './**/test/**/*'],
 			extension: ['js', 'jsx', 'mjs'],
 			provider: 'istanbul',
 			reporter: ['text', 'json', 'html']
