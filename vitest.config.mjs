@@ -4,7 +4,7 @@ import fs from 'fs/promises';
 import { readFileSync } from 'fs';
 import path from 'path';
 
-const MINIFY = true;
+const MINIFY = process.env.MINIFY === 'true';
 
 const root = path.resolve(__dirname);
 const alias = {
