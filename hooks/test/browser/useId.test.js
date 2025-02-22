@@ -6,10 +6,7 @@ import { setupScratch, teardown } from '../../../test/_util/helpers';
 
 /** @jsx createElement */
 
-// TODO: nested aliases don't work in vitest
-// so when RTS imports Preact it will be
-// from its own copy
-describe.skip('useId', () => {
+describe('useId', () => {
 	/** @type {HTMLDivElement} */
 	let scratch, rerender;
 
