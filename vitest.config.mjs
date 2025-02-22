@@ -49,6 +49,40 @@ const alias = {
 	)
 };
 
+const rollupAlias = [
+	{ find: /^react$/, replacement: path.join(root, 'compat/src/index.js') },
+	{ find: /^react-dom$/, replacement: path.join(root, 'compat/src/index.js') },
+	{ find: /^preact$/, replacement: path.join(root, 'src/index.js') },
+	{
+		find: /^preact\/compat$/,
+		replacement: path.join(root, 'compat/src/index.js')
+	},
+	{
+		find: /^preact\/jsx-runtime$/,
+		replacement: path.join(root, 'jsx-runtime/src/index.js')
+	},
+	{
+		find: /^preact\/jsx-runtime\/src$/,
+		replacement: path.join(root, 'jsx-runtime/src')
+	},
+	{
+		find: /^preact\/jsx-dev-runtime$/,
+		replacement: path.join(root, 'jsx-dev-runtime/src/index.js')
+	},
+	{
+		find: /^preact\/debug$/,
+		replacement: path.join(root, 'debug/src/index.js')
+	},
+	{
+		find: /^preact\/hooks$/,
+		replacement: path.join(root, 'hooks/src/index.js')
+	},
+	{
+		find: /^preact\/test-utils$/,
+		replacement: path.join(root, 'test-utils/src/index.js')
+	}
+];
+
 const rename = {};
 const mangle = readFileSync('./mangle.json', 'utf8');
 const mangleJson = JSON.parse(mangle);
@@ -63,7 +97,7 @@ for (let prop in mangleJson.props.props) {
 
 export default defineConfig({
 	resolve: {
-		alias,
+		alias: rollupAlias,
 		dedupe: ['preact']
 	},
 	esbuild: {
@@ -93,7 +127,7 @@ export default defineConfig({
 							}
 						]
 					],
-					include: ['**/{src,dist}/**/*.js', '**/test/**/*.js']
+					include: ['**/src/**/*.js', '**/test/**/*.js']
 				});
 
 				return {
@@ -137,7 +171,7 @@ export default defineConfig({
 	test: {
 		coverage: {
 			enabled: process.env.COVERAGE === 'true',
-			include: [MINIFY ? './**/dist/**/*,' : './**/src/**/*', './**/test/**/*'],
+			include: ['./**/src/**/*', './**/test/**/*'],
 			extension: ['js', 'jsx', 'mjs'],
 			provider: 'istanbul',
 			reporter: ['html']
