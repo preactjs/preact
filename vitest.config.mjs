@@ -198,7 +198,7 @@ export default defineConfig({
 			include: ['./**/src/**/*'],
 			provider: 'istanbul',
 			reporter: ['html', 'lcovonly', 'text-summary'],
-			reportsDirectory: 'coverage'
+			reportsDirectory: './coverage'
 		},
 		setupFiles: ['./vitest.setup.js'],
 		globals: true,
