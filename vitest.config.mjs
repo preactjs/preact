@@ -197,7 +197,7 @@ export default defineConfig({
 			enabled: process.env.COVERAGE === 'true',
 			include: ['./**/src/**/*'],
 			provider: 'istanbul',
-			reporter: ['html'],
+			reporter: ['html', 'lcov', 'text-summary'],
 			reportsDirectory: 'coverage'
 		},
 		setupFiles: ['./vitest.setup.js'],
