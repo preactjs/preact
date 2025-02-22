@@ -23,11 +23,11 @@ const alias = {
 	),
 	'^preact/jsx-runtime$': path.join(
 		root,
-		MINIFY ? 'jsx-runtime/dist/jsx-runtime.js' : 'jsx-runtime/src/index.js'
+		MINIFY ? 'jsx-runtime/dist/jsxRuntime.js' : 'jsx-runtime/src/index.js'
 	),
 	'^preact/jsx-runtime/src$': path.join(
 		root,
-		MINIFY ? 'jsx-runtime/dist/jsx-runtime.js' : 'jsx-runtime/src'
+		MINIFY ? 'jsx-runtime/dist/jsxRuntime.js' : 'jsx-runtime/src'
 	),
 	'^preact/jsx-dev-runtime$': path.join(
 		root,
@@ -45,41 +45,65 @@ const alias = {
 	),
 	'^preact/test-utils$': path.join(
 		root,
-		MINIFY ? 'test-utils/dist/test-utils.js' : 'test-utils/src/index.js'
+		MINIFY ? 'test-utils/dist/testUtils.js' : 'test-utils/src/index.js'
 	)
 };
 
 const rollupAlias = [
-	{ find: /^react$/, replacement: path.join(root, 'compat/src/index.js') },
-	{ find: /^react-dom$/, replacement: path.join(root, 'compat/src/index.js') },
+	{
+		find: /^react$/,
+		replacement: MINIFY
+			? path.join(root, 'compat/dist/compat.mjs')
+			: path.join(root, 'compat/src/index.js')
+	},
+	{
+		find: /^react-dom$/,
+		replacement: MINIFY
+			? path.join(root, 'compat/dist/compat.mjs')
+			: path.join(root, 'compat/src/index.js')
+	},
 	{ find: /^preact$/, replacement: path.join(root, 'src/index.js') },
 	{
 		find: /^preact\/compat$/,
-		replacement: path.join(root, 'compat/src/index.js')
+		replacement: MINIFY
+			? path.join(root, 'compat/dist/compat.mjs')
+			: path.join(root, 'compat/src/index.js')
 	},
 	{
 		find: /^preact\/jsx-runtime$/,
-		replacement: path.join(root, 'jsx-runtime/src/index.js')
+		replacement: MINIFY
+			? path.join(root, 'jsx-runtime/dist/jsxRuntime.mjs')
+			: path.join(root, 'jsx-runtime/src/index.js')
 	},
 	{
 		find: /^preact\/jsx-runtime\/src$/,
-		replacement: path.join(root, 'jsx-runtime/src')
+		replacement: MINIFY
+			? path.join(root, 'jsx-runtime/dist/jsxRuntime.mjs')
+			: path.join(root, 'jsx-runtime/src')
 	},
 	{
 		find: /^preact\/jsx-dev-runtime$/,
-		replacement: path.join(root, 'jsx-dev-runtime/src/index.js')
+		replacement: MINIFY
+			? path.join(root, 'jsx-runtime/dist/jsxRuntime.mjs')
+			: path.join(root, 'jsx-runtime/src/index.js')
 	},
 	{
 		find: /^preact\/debug$/,
-		replacement: path.join(root, 'debug/src/index.js')
+		replacement: MINIFY
+			? path.join(root, 'debug/dist/debug.mjs')
+			: path.join(root, 'debug/src/index.js')
 	},
 	{
 		find: /^preact\/hooks$/,
-		replacement: path.join(root, 'hooks/src/index.js')
+		replacement: MINIFY
+			? path.join(root, 'hooks/dist/hooks.mjs')
+			: path.join(root, 'hooks/src/index.js')
 	},
 	{
 		find: /^preact\/test-utils$/,
-		replacement: path.join(root, 'test-utils/src/index.js')
+		replacement: MINIFY
+			? path.join(root, 'test-utils/dist/testUtils.mjs')
+			: path.join(root, 'test-utils/src/index.js')
 	}
 ];
 
