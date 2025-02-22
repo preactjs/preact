@@ -43,14 +43,16 @@ describe('PropTypes', () => {
 			text: PropTypes.string.isRequired
 		};
 
-		// @ts-ignore
 		render(
 			jsxDev(
 				Foo,
 				{ text: 123 },
 				null,
+				// @ts-ignore
 				false,
+				// @ts-ignore
 				{ fileName: './debug/test/browser/debug.test.js', lineNumber: 41 },
+				// @ts-ignore
 				'self'
 			),
 			scratch
