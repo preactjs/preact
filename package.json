@@ -129,7 +129,7 @@
     "dev:compat": "microbundle watch --raw --no-generateTypes --format cjs --cwd compat --globals 'preact/hooks=preactHooks'",
     "test": "npm-run-all build lint test:unit",
     "test:unit": "run-p test:mocha test:vitest test:ts",
-    "test:vitest": "vitest run --coverage",
+    "test:vitest": "COVERAGE=true vitest run",
     "test:ts": "run-p test:ts:*",
     "test:ts:core": "tsc -p test/ts/ && mocha --require \"@babel/register\" test/ts/**/*-test.js",
     "test:ts:compat": "tsc -p compat/test/ts/",
