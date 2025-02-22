@@ -40,6 +40,41 @@ export default defineConfig({
 		include: /.*\.js$/,
 		exclude: ['node_nodules']
 	},
+	plugins: [
+		{
+			name: 'rename-mangle-properties',
+			async transform(code, id) {
+				if (id.includes('node_modules')) {
+					return null;
+				}
+
+				const transformed = await transformAsync(code, {
+					filename: id,
+					configFile: false,
+					plugins: [
+						[
+							'babel-plugin-transform-rename-properties',
+							{
+								rename
+							}
+						]
+					],
+					include: ['**/src/**/*.js', '**/test/**/*.js'],
+					overrides: [
+						{
+							test: /(component-stack|debug)\.test\.js$/,
+							plugins: ['@babel/plugin-transform-react-jsx-source']
+						}
+					]
+				});
+
+				return {
+					code: transformed.code,
+					map: transformed.map
+				};
+			}
+		}
+	],
 	optimizeDeps: {
 		exclude: [
 			'preact',
@@ -57,32 +92,6 @@ export default defineConfig({
 		esbuildOptions: {
 			alias,
 			plugins: [
-				{
-					name: 'rename-mangle-properties',
-					setup(build) {
-						build.onLoad({ filter: /.*\.js$/ }, async args => {
-							if (args.path.includes('node_modules')) {
-								return null;
-							}
-
-							const code = await fs.readFile(args.path, 'utf8');
-							const transformed = await transformAsync(code, {
-								filename: args.path,
-								plugins: [
-									'babel-plugin-transform-rename-properties',
-									{
-										rename
-									}
-								]
-							});
-
-							return {
-								loader: 'jsx',
-								contents: transformed.code
-							};
-						});
-					}
-				},
 				{
 					name: 'load-js-files-as-jsx',
 					setup(build) {
