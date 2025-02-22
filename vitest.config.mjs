@@ -1,6 +1,7 @@
 import { defineConfig } from 'vitest/config';
 import { transformAsync } from '@babel/core';
 import fs from 'fs/promises';
+import { readFileSync } from 'fs';
 import path from 'path';
 
 const root = path.resolve(__dirname);
@@ -16,6 +17,18 @@ const alias = {
 	'^preact/hooks$': path.join(root, 'hooks/src/index.js'),
 	'^preact/test-utils$': path.join(root, 'test-utils/src/index.js')
 };
+
+const rename = {};
+const mangle = readFileSync('./mangle.json', 'utf8');
+const mangleJson = JSON.parse(mangle);
+for (let prop in mangleJson.props.props) {
+	let name = prop;
+	if (name[0] === '$') {
+		name = name.slice(1);
+	}
+
+	rename[name] = mangleJson.props.props[prop];
+}
 
 export default defineConfig({
 	resolve: {
@@ -47,15 +60,20 @@ export default defineConfig({
 				{
 					name: 'rename-mangle-properties',
 					setup(build) {
-						build.onLoad({ filter: /\.test\.js$/ }, async args => {
+						build.onLoad({ filter: /.*\.js$/ }, async args => {
 							if (args.path.includes('node_modules')) {
 								return null;
 							}
 
-							const contents = await fs.readFile(args.path, 'utf-8');
-							const transformed = await transformAsync(contents, {
+							const code = await fs.readFile(args.path, 'utf8');
+							const transformed = await transformAsync(code, {
 								filename: args.path,
-								plugins: ['babel-plugin-transform-rename-properties']
+								plugins: [
+									'babel-plugin-transform-rename-properties',
+									{
+										rename
+									}
+								]
 							});
 
 							return {
@@ -68,10 +86,12 @@ export default defineConfig({
 				{
 					name: 'load-js-files-as-jsx',
 					setup(build) {
-						build.onLoad({ filter: /.*\.js$/ }, async args => ({
-							loader: 'jsx',
-							contents: await fs.readFile(args.path, 'utf8')
-						}));
+						build.onLoad({ filter: /.*\.js$/ }, async args => {
+							return {
+								loader: 'jsx',
+								contents: await fs.readFile(args.path, 'utf8')
+							};
+						});
 					}
 				}
 			]
