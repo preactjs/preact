@@ -1,5 +1,8 @@
 import { defineConfig } from 'vitest/config';
+import { transformAsync } from '@babel/core';
+import fs from 'fs/promises';
 import path from 'path';
+
 const root = path.resolve(__dirname);
 const alias = {
 	'^react$': path.join(root, 'compat/src/index.js'),
@@ -22,7 +25,7 @@ export default defineConfig({
 	esbuild: {
 		loader: 'jsx',
 		include: /.*\.js$/,
-		exclude: []
+		exclude: ['node_nodules']
 	},
 	optimizeDeps: {
 		exclude: [
@@ -40,16 +43,34 @@ export default defineConfig({
 		],
 		esbuildOptions: {
 			alias,
-
 			plugins: [
+				{
+					name: 'rename-mangle-properties',
+					setup(build) {
+						build.onLoad({ filter: /\.test\.js$/ }, async args => {
+							if (args.path.includes('node_modules')) {
+								return null;
+							}
+
+							const contents = await fs.readFile(args.path, 'utf-8');
+							const transformed = await transformAsync(contents, {
+								filename: args.path,
+								plugins: ['babel-plugin-transform-rename-properties']
+							});
+
+							return {
+								loader: 'jsx',
+								contents: transformed.code
+							};
+						});
+					}
+				},
 				{
 					name: 'load-js-files-as-jsx',
 					setup(build) {
 						build.onLoad({ filter: /.*\.js$/ }, async args => ({
 							loader: 'jsx',
-							contents: await import('fs/promises').then(fs =>
-								fs.readFile(args.path, 'utf8')
-							)
+							contents: await fs.readFile(args.path, 'utf8')
 						}));
 					}
 				}
