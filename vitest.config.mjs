@@ -5,6 +5,7 @@ import { readFileSync } from 'fs';
 import path from 'path';
 
 const MINIFY = process.env.MINIFY === 'true';
+const COVERAGE = process.env.COVERAGE === 'true';
 
 const root = path.resolve(__dirname);
 const alias = {
@@ -194,15 +195,24 @@ export default defineConfig({
 	},
 	test: {
 		coverage: {
-			enabled: true,
-			include: [
-				'**/src/**/*',
-				'**/debug/src/**/*',
-				'**/hooks/src/**/*',
-				'**/compeat/src/**/*',
-				'**/jsx-runtime/src/**/*',
-				'**/test-utils/src/**/*'
-			],
+			enabled: COVERAGE,
+			include: MINIFY
+				? [
+						'**/dist/preact.mjs',
+						'**/compat/dist/compat.mjs',
+						'**/jsx-runtime/dist/jsxRuntime.mjs',
+						'**/debug/dist/debug.mjs',
+						'**/hooks/dist/hooks.mjs',
+						'**/test-utils/dist/testUtils.mjs'
+					]
+				: [
+						'**/src/**/*',
+						'**/debug/src/**/*',
+						'**/hooks/src/**/*',
+						'**/compeat/src/**/*',
+						'**/jsx-runtime/src/**/*',
+						'**/test-utils/src/**/*'
+					],
 			extension: ['.js'],
 			provider: 'istanbul',
 			reporter: ['html', 'lcovonly', 'text-summary'],
