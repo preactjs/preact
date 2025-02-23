@@ -200,6 +200,7 @@ export default defineConfig({
 				? [
 						'**/dist/preact.mjs',
 						'**/compat/dist/compat.mjs',
+						'**/devtools/dist/devtools.mjs',
 						'**/jsx-runtime/dist/jsxRuntime.mjs',
 						'**/debug/dist/debug.mjs',
 						'**/hooks/dist/hooks.mjs',
@@ -208,6 +209,7 @@ export default defineConfig({
 				: [
 						'**/src/**/*',
 						'**/debug/src/**/*',
+						'**/devtools/src/**/*',
 						'**/hooks/src/**/*',
 						'**/compeat/src/**/*',
 						'**/jsx-runtime/src/**/*',
