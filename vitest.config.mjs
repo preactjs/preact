@@ -204,6 +204,7 @@ export default defineConfig({
 		}
 	},
 	test: {
+		include: ['{debug,devtools,hooks,compat,test-utils,jsx-runtime,}/test/{browser,shared}/**/*.test.js'],
 		coverage: {
 			enabled: COVERAGE,
 			include: MINIFY
