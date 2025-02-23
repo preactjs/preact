@@ -7,11 +7,7 @@ import {
 	hydrate
 } from 'preact';
 import { useState } from 'preact/hooks';
-import {
-	setupScratch,
-	teardown,
-	serializeHtml
-} from '../../../test/_util/helpers';
+import { setupScratch, teardown } from '../../../test/_util/helpers';
 import './fakeDevTools';
 import 'preact/debug';
 import { setupRerender } from 'preact/test-utils';
