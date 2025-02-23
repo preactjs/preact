@@ -215,7 +215,8 @@ export default defineConfig({
 	},
 	test: {
 		include: [
-			'{debug,devtools,hooks,compat,test-utils,jsx-runtime,}/test/{browser,shared}/**/*.test.js'
+			'{debug,devtools,hooks,compat,test-utils,jsx-runtime}/test/{browser,shared}/**/*.test.js',
+			'./test/{browser,shared}/**/*.test.js'
 		],
 		cache: false,
 		coverage: {
