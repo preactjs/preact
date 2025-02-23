@@ -248,6 +248,7 @@ export default defineConfig({
 		setupFiles: ['./vitest.setup.js'],
 		globals: true,
 		browser: {
+			isolate: false,
 			provider: 'webdriverio',
 			enabled: true,
 			screenshotFailures: false,
