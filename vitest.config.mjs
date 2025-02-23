@@ -130,6 +130,7 @@ for (let prop in mangleJson.props.props) {
 	rename[name] = mangleJson.props.props[prop];
 }
 
+const cache = new Map();
 export default defineConfig({
 	resolve: {
 		alias: rollupAlias,
@@ -151,6 +152,11 @@ export default defineConfig({
 					return null;
 				}
 
+				const cached = cache.get(id);
+				if (cached && cached.input === code) {
+					return cached.result;
+				}
+
 				const transformed = await transformAsync(code, {
 					filename: id,
 					configFile: false,
@@ -163,6 +169,10 @@ export default defineConfig({
 						]
 					],
 					include: ['**/src/**/*.js', '**/test/**/*.js']
+				});
+				cache.set(id, {
+					input: code,
+					result: transformed
 				});
 
 				return {
@@ -204,7 +214,10 @@ export default defineConfig({
 		}
 	},
 	test: {
-		include: ['{debug,devtools,hooks,compat,test-utils,jsx-runtime,}/test/{browser,shared}/**/*.test.js'],
+		include: [
+			'{debug,devtools,hooks,compat,test-utils,jsx-runtime,}/test/{browser,shared}/**/*.test.js'
+		],
+		cache: false,
 		coverage: {
 			enabled: COVERAGE,
 			include: MINIFY
