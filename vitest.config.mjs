@@ -194,8 +194,16 @@ export default defineConfig({
 	},
 	test: {
 		coverage: {
-			enabled: process.env.COVERAGE === 'true',
-			include: ['./{src,debug,hooks,compeat,jsx-runtime,test-utils}/**/*'],
+			enabled: true,
+			include: [
+				'**/src/**/*',
+				'**/debug/src/**/*',
+				'**/hooks/src/**/*',
+				'**/compeat/src/**/*',
+				'**/jsx-runtime/src/**/*',
+				'**/test-utils/src/**/*'
+			],
+			extension: ['.js'],
 			provider: 'istanbul',
 			reporter: ['html', 'lcovonly', 'text-summary'],
 			reportsDirectory: './coverage'
