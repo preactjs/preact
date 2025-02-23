@@ -78,9 +78,6 @@ chai.use((chai, util) => {
 function patchConsole(method) {
 	const original = window.console[method];
 	window.console[method] = (...args) => {
-		// @ts-ignore
-		// eslint-disable-next-line no-undef
-		__karma__.log(method, ['__LOG_CUSTOM:' + serializeConsoleArgs(args)]);
 		original.apply(window.console, args);
 	};
 }
