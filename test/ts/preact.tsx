@@ -10,6 +10,18 @@ import {
 	JSX
 } from '../../';
 
+function createSignal<T>(value: T): JSX.SignalLike<T> {
+	return {
+		value,
+		peek() {
+			return value;
+		},
+		subscribe() {
+			return () => {};
+		}
+	};
+}
+
 interface DummyProps {
 	initialInput: string;
 }
@@ -406,3 +418,26 @@ function Checkbox({ onChange }: JSX.HTMLAttributes<HTMLInputElement>) {
 
 	return <input onChange={handleChange} />;
 }
+
+// `AllHTMLAttributes` should support all interfaces used within `JSX.IntrinsicElements`
+const allHTMLAttributes: JSX.AllHTMLAttributes<HTMLMarqueeElement> = {
+	// Global HTMLAttributes
+	class: 'foo',
+
+	// Per-element attributes
+	autoCapitalize: 'off',
+	dateTime: '2021-01-01',
+	href: createSignal('https://example.com'),
+	itemID: 'foo',
+	maxlength: createSignal(10),
+	playsInline: true,
+
+	// ClassAttributes
+	ref: createRef<HTMLMarqueeElement>(),
+
+	// DOMAttributes
+	onClick: (e: JSX.TargetedEvent<HTMLMarqueeElement>) => {},
+
+	// AriaAttributes
+	'aria-colcount': 1
+};
