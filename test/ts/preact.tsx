@@ -399,13 +399,15 @@ h('form', { onSubmit: onSubmit });
 
 // Should accept onToggle
 const onToggle = (e: h.JSX.TargetedToggleEvent<HTMLDetailsElement>) => {};
-<dialog onToggle={(e) => ({ newState: e.newState, oldState: e.oldState }) } />;
+<dialog onToggle={e => ({ newState: e.newState, oldState: e.oldState })} />;
 createElement('dialog', { onToggle: onToggle });
 h('dialog', { onToggle: onToggle });
 
 // Should default to correct event target element for the attribute interface
 h<JSX.InputHTMLAttributes>('input', { onClick: e => e.currentTarget.capture });
-createElement<JSX.InputHTMLAttributes>('input', { onClick: e => e.currentTarget.capture });
+createElement<JSX.InputHTMLAttributes>('input', {
+	onClick: e => e.currentTarget.capture
+});
 <input onClick={e => e.currentTarget.capture} />;
 
 function Checkbox({ onChange }: JSX.HTMLAttributes<HTMLInputElement>) {
