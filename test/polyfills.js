@@ -1,16 +1,3 @@
-// ES2015 APIs used by developer tools integration
-import 'core-js/es/map';
-import 'core-js/es/promise';
-import 'core-js/es/array/fill';
-import 'core-js/es/array/from';
-import 'core-js/es/array/find';
-import 'core-js/es/array/includes';
-import 'core-js/es/string/includes';
-import 'core-js/es/object/assign';
-import 'core-js/es/string/starts-with';
-import 'core-js/es/string/code-point-at';
-import 'core-js/es/string/from-code-point';
-import 'core-js/es/string/repeat';
 import * as kl from 'kolorist';
 
 // Something that's loaded before this file polyfills Symbol object.
