@@ -113,7 +113,7 @@
   },
   "types": "src/index.d.ts",
   "scripts": {
-    "prepare": "husky && playwright install chromium && run-s build",
+    "prepare": "husky && run-s build",
     "build": "npm-run-all --parallel build:*",
     "build:core": "microbundle build --raw --no-generateTypes -f cjs,esm,umd",
     "build:core-min": "microbundle build --raw --no-generateTypes -f cjs,esm,umd,iife src/cjs.js -o dist/preact.min.js",
@@ -214,8 +214,8 @@
     "@types/mocha": "^10.0.0",
     "@types/node": "^18.0.0",
     "@types/sinon": "^17.0.3",
-    "@vitest/browser": "^3.0.5",
-    "@vitest/coverage-istanbul": "^3.0.5",
+    "@vitest/browser": "^3.0.6",
+    "@vitest/coverage-istanbul": "^3.0.6",
     "babel-plugin-transform-rename-properties": "0.1.0",
     "chai": "^5.2.0",
     "coveralls": "^3.1.1",
@@ -228,7 +228,6 @@
     "mocha": "^11.0.0",
     "npm-run-all2": "^7.0.0",
     "oxlint": "^0.14.0",
-    "playwright": "^1.50.0",
     "preact-render-to-string": "^6.5.0",
     "prop-types": "^15.8.1",
     "sade": "^1.8.1",
@@ -237,7 +236,8 @@
     "terser": "5.16.0",
     "typescript": "5.1.6",
     "undici": "^4.12.0",
-    "vitest": "^3.0.5"
+    "vitest": "^3.0.6",
+    "webdriverio": "^8.42.0"
   },
   "volta": {
     "node": "20.18.3"
