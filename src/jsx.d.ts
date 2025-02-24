@@ -1263,19 +1263,24 @@ export namespace JSXInternal {
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/contextmenu */
 		contextmenu?: Signalish<string | undefined>;
 		controls?: Signalish<boolean | undefined>;
-		controlsList?: Signalish<string | undefined>;
+		controlslist?: Signalish<'nodownload' | 'nofullscreen' | 'noremoteplayback' | undefined>;
+		controlsList?: Signalish<'nodownload' | 'nofullscreen' | 'noremoteplayback' | undefined>;
 		coords?: Signalish<string | undefined>;
 		crossOrigin?: Signalish<string | undefined>;
 		crossorigin?: Signalish<string | undefined>;
+		currentTime?: Signalish<number | undefined>;
 		data?: Signalish<string | undefined>;
 		dateTime?: Signalish<string | undefined>;
 		datetime?: Signalish<string | undefined>;
 		default?: Signalish<boolean | undefined>;
 		defaultChecked?: Signalish<boolean | undefined>;
+		defaultMuted?: Signalish<boolean | undefined>;
+		defaultPlaybackRate?: Signalish<number | undefined>;
 		defaultValue?: Signalish<string | undefined>;
 		defer?: Signalish<boolean | undefined>;
 		dir?: Signalish<'auto' | 'rtl' | 'ltr' | undefined>;
 		disabled?: Signalish<boolean | undefined>;
+		disableremoteplayback?: Signalish<boolean | undefined>;
 		disableRemotePlayback?: Signalish<boolean | undefined>;
 		download?: Signalish<any | undefined>;
 		decoding?: Signalish<'sync' | 'async' | 'auto' | undefined>;
@@ -1363,13 +1368,15 @@ export namespace JSXInternal {
 		placeholder?: Signalish<string | undefined>;
 		playsInline?: Signalish<boolean | undefined>;
 		playsinline?: Signalish<boolean | undefined>;
+		playbackRate?: Signalish<number | undefined>;
 		popover?: Signalish<'auto' | 'hint' | 'manual' | boolean | undefined>;
 		popovertarget?: Signalish<string | undefined>;
 		popoverTarget?: Signalish<string | undefined>;
 		popovertargetaction?: Signalish<'hide' | 'show' | 'toggle' | undefined>;
 		popoverTargetAction?: Signalish<'hide' | 'show' | 'toggle' | undefined>;
 		poster?: Signalish<string | undefined>;
-		preload?: Signalish<string | undefined>;
+		preload?: Signalish<'auto' | 'metadata' | 'none' | undefined>;
+		preservesPitch?: Signalish<boolean | undefined>;
 		radioGroup?: Signalish<string | undefined>;
 		readonly?: Signalish<boolean | undefined>;
 		readOnly?: Signalish<boolean | undefined>;
@@ -1404,12 +1411,13 @@ export namespace JSXInternal {
 		span?: Signalish<number | undefined>;
 		spellcheck?: Signalish<boolean | undefined>;
 		src?: Signalish<string | undefined>;
-		srcSet?: Signalish<string | undefined>;
-		srcset?: Signalish<string | undefined>;
 		srcDoc?: Signalish<string | undefined>;
 		srcdoc?: Signalish<string | undefined>;
 		srcLang?: Signalish<string | undefined>;
 		srclang?: Signalish<string | undefined>;
+		srcSet?: Signalish<string | undefined>;
+		srcset?: Signalish<string | undefined>;
+		srcObject?: Signalish<MediaStream | MediaSource | Blob | File | null>;
 		start?: Signalish<number | undefined>;
 		step?: Signalish<number | string | undefined>;
 		style?: Signalish<string | CSSProperties | undefined>;
@@ -1917,16 +1925,23 @@ export namespace JSXInternal {
 		autoplay?: Signalish<boolean | undefined>;
 		autoPlay?: Signalish<boolean | undefined>;
 		controls?: Signalish<boolean | undefined>;
-		controlsList?: Signalish<string | undefined>;
+		controlslist?: Signalish<'nodownload' | 'nofullscreen' | 'noremoteplayback' | undefined>;
+		controlsList?: Signalish<'nodownload' | 'nofullscreen' | 'noremoteplayback' | undefined>;
 		crossorigin?: Signalish<HTMLAttributeCrossOrigin>;
 		crossOrigin?: Signalish<HTMLAttributeCrossOrigin>;
+		currentTime?: Signalish<number | undefined>;
+		defaultMuted?: Signalish<boolean | undefined>;
+		defaultPlaybackRate?: Signalish<number | undefined>;
+		disableremoteplayback?: Signalish<boolean | undefined>;
+		disableRemotePlayback?: Signalish<boolean | undefined>;
 		loop?: Signalish<boolean | undefined>;
 		mediaGroup?: Signalish<string | undefined>;
 		muted?: Signalish<boolean | undefined>;
-		playsinline?: Signalish<boolean | undefined>;
-		playsInline?: Signalish<boolean | undefined>;
-		preload?: Signalish<string | undefined>;
+		playbackRate?: Signalish<number | undefined>;
+		preload?: Signalish<'auto' | 'metadata' | 'none' | undefined>;
+		preservesPitch?: Signalish<boolean | undefined>;
 		src?: Signalish<string | undefined>;
+		srcObject?: Signalish<MediaStream | MediaSource | Blob | File | null>;
 		volume?: Signalish<string | number | undefined>;
 	}
 
@@ -2154,11 +2169,12 @@ export namespace JSXInternal {
 
 	interface VideoHTMLAttributes<T extends EventTarget = HTMLVideoElement>
 		extends MediaHTMLAttributes<T> {
+		disablePictureInPicture?: Signalish<boolean | undefined>;
 		height?: Signalish<number | string | undefined>;
+		playsinline?: Signalish<boolean | undefined>;
+		playsInline?: Signalish<boolean | undefined>;
 		poster?: Signalish<string | undefined>;
 		width?: Signalish<number | string | undefined>;
-		disablePictureInPicture?: Signalish<boolean | undefined>;
-		disableRemotePlayback?: Signalish<boolean | undefined>;
 	}
 
 	export type DetailedHTMLProps<
