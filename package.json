@@ -219,7 +219,6 @@
     "babel-plugin-istanbul": "^7.0.0",
     "babel-plugin-transform-rename-properties": "0.1.0",
     "chai": "^4.1.2",
-    "check-export-map": "^1.3.1",
     "coveralls": "^3.1.1",
     "cross-env": "^7.0.3",
     "errorstacks": "^2.4.1",
