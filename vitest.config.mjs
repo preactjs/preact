@@ -131,6 +131,7 @@ for (let prop in mangleJson.props.props) {
 }
 
 const cache = new Map();
+const pending = new Map();
 export default defineConfig({
 	resolve: {
 		alias: rollupAlias,
@@ -157,7 +158,16 @@ export default defineConfig({
 					return cached.result;
 				}
 
-				const transformed = await transformAsync(code, {
+				if (pending.has(id)) {
+					const result = await pending.get(id);
+					pending.delete(id);
+					return {
+						code: result.code,
+						map: result.map
+					};
+				}
+
+				const promise = transformAsync(code, {
 					filename: id,
 					configFile: false,
 					plugins: [
@@ -170,6 +180,9 @@ export default defineConfig({
 					],
 					include: ['**/src/**/*.js', '**/test/**/*.js']
 				});
+
+				pending.set(id, promise);
+				const transformed = await promise;
 				cache.set(id, {
 					input: code,
 					result: transformed
