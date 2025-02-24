@@ -113,7 +113,7 @@
   },
   "types": "src/index.d.ts",
   "scripts": {
-    "prepare": "husky && run-s build",
+    "prepare": "husky && playwright install chromium && run-s build",
     "build": "npm-run-all --parallel build:*",
     "build:core": "microbundle build --raw --no-generateTypes -f cjs,esm,umd",
     "build:core-min": "microbundle build --raw --no-generateTypes -f cjs,esm,umd,iife src/cjs.js -o dist/preact.min.js",
@@ -227,6 +227,7 @@
     "mocha": "^11.0.0",
     "npm-run-all2": "^7.0.0",
     "oxlint": "^0.14.0",
+    "playwright": "^1.50.0",
     "preact-render-to-string": "^6.5.0",
     "prop-types": "^15.8.1",
     "sade": "^1.8.1",
@@ -235,10 +236,9 @@
     "terser": "5.16.0",
     "typescript": "5.1.6",
     "undici": "^4.12.0",
-    "vitest": "^3.0.5",
-    "webdriverio": "^8.42.0"
+    "vitest": "^3.0.5"
   },
   "volta": {
-    "node": "20.9.0"
+    "node": "20.18.3"
   }
 }
