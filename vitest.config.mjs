@@ -153,6 +153,11 @@ export default defineConfig({
 					return null;
 				}
 
+				const shouldTransform = id.includes('src') || id.includes('test');
+				if (!shouldTransform) {
+					return null;
+				}
+
 				const cached = cache.get(id);
 				if (cached && cached.input === code) {
 					return cached.result;
