@@ -113,7 +113,7 @@
   },
   "types": "src/index.d.ts",
   "scripts": {
-    "prepare": "husky && run-s build && npm-merge-driver-install",
+    "prepare": "husky && run-s build",
     "build": "npm-run-all --parallel build:*",
     "build:core": "microbundle build --raw --no-generateTypes -f cjs,esm,umd",
     "build:core-min": "microbundle build --raw --no-generateTypes -f cjs,esm,umd,iife src/cjs.js -o dist/preact.min.js",
@@ -236,7 +236,6 @@
     "kolorist": "^1.8.0",
     "microbundle": "^0.15.1",
     "mocha": "^11.0.0",
-    "npm-merge-driver-install": "^3.0.0",
     "npm-run-all2": "^7.0.0",
     "oxlint": "^0.14.0",
     "preact-render-to-string": "^6.5.0",
