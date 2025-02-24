@@ -249,11 +249,11 @@ export default defineConfig({
 		globals: true,
 		browser: {
 			isolate: false,
-			provider: 'webdriverio',
+			provider: 'playwright',
 			enabled: true,
 			screenshotFailures: false,
 			headless: true,
-			instances: [{ browser: 'chrome' }]
+			instances: [{ browser: 'chromium' }]
 		}
 	}
 });
