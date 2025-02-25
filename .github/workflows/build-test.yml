@@ -35,9 +35,7 @@ jobs:
           COVERAGE: true
           FLAKEY: false
         # Not using `npm test` since it rebuilds source which npm ci has already done
-        run: |
-          npm run lint
-          npm run test:unit
+        run: npm run test:karma
       - name: Coveralls GitHub Action
         uses: coverallsapp/github-action@v2.3.0
         timeout-minutes: 2
