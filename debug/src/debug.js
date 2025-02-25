@@ -378,7 +378,6 @@ export function initDebug() {
 					domParentName !== 'td' &&
 					isTableElement(domParentName)
 				) {
-					console.log(domParentName, parent._dom);
 					console.error(
 						'Improper nesting of table. Your <table> should not have a table-node parent.' +
 							serializeVNode(vnode) +
