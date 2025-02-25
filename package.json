@@ -227,7 +227,7 @@
     "microbundle": "^0.15.1",
     "mocha": "^11.0.0",
     "npm-run-all2": "^7.0.0",
-    "oxlint": "^0.14.0",
+    "oxlint": "^0.15.12",
     "preact-render-to-string": "^6.5.0",
     "prop-types": "^15.8.1",
     "sade": "^1.8.1",
