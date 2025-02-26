@@ -225,10 +225,7 @@ describe('hydrate()', () => {
 		clearLog();
 		hydrate(vnode, scratch);
 
-		// IE11 doesn't support spying on Element.prototype
-		if (!/Trident/.test(navigator.userAgent)) {
-			expect(attributesSpy.get).to.not.have.been.called;
-		}
+		expect(attributesSpy.get).to.not.have.been.called;
 
 		expect(serializeHtml(scratch)).to.equal(
 			sortAttributes(
@@ -377,10 +374,7 @@ describe('hydrate()', () => {
 		);
 
 		hydrate(preactElement, scratch);
-		// IE11 doesn't support spies on built-in prototypes
-		if (!/Trident/.test(navigator.userAgent)) {
-			expect(attributesSpy.get).to.not.have.been.called;
-		}
+		expect(attributesSpy.get).to.not.have.been.called;
 		expect(scratch).to.have.property(
 			'innerHTML',
 			'<div><a foo="bar"></a></div>'
