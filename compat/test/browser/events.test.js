@@ -30,10 +30,6 @@ describe('preact/compat events', () => {
 
 	it('should patch events', () => {
 		let spy = sinon.spy(event => {
-			// Calling ev.preventDefault() outside of an event handler
-			// does nothing in IE11. So we move these asserts inside
-			// the event handler. We ensure that it's called once
-			// in another assertion
 			expect(event.isDefaultPrevented()).to.be.false;
 			event.preventDefault();
 			expect(event.isDefaultPrevented()).to.be.true;
@@ -89,16 +85,11 @@ describe('preact/compat events', () => {
 		expect(vnode.props).to.not.haveOwnProperty('oninputCapture');
 	});
 
-	it('should normalize onChange for range, except in IE11', () => {
-		// NOTE: we don't normalize `onchange` for range inputs in IE11.
-		const eventType = /Trident\//.test(navigator.userAgent)
-			? 'change'
-			: 'input';
-
+	it('should normalize onChange for range', () => {
 		render(<input type="range" onChange={() => null} />, scratch);
 		expect(proto.addEventListener).to.have.been.calledOnce;
 		expect(proto.addEventListener).to.have.been.calledWithExactly(
-			eventType,
+			'input',
 			sinon.match.func,
 			false
 		);
