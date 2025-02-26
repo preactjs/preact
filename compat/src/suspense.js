@@ -57,6 +57,9 @@ function detachedClone(vnode, detachedParent, parentDom) {
 			if (vnode._component._parentDom === parentDom) {
 				vnode._component._parentDom = detachedParent;
 			}
+
+			vnode._component._force = true;
+
 			vnode._component = null;
 		}
 
