@@ -13,7 +13,7 @@
 - Extensive React compatibility via a simple [preact/compat] alias
 - Everything you need: JSX, <abbr title="Virtual DOM">VDOM</abbr>, [DevTools], <abbr title="Hot Module Replacement">HMR</abbr>, <abbr title="Server-Side Rendering">SSR</abbr>.
 - Highly optimized diff algorithm and seamless hydration from Server Side Rendering
-- Supports all modern browsers and IE11
+- Supports all modern browsers
 - Transparent asynchronous rendering with a pluggable scheduler
 
 ### 💁 More information at the [Preact Website ➞](https://preactjs.com)
