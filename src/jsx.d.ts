@@ -4,7 +4,6 @@
 import {
 	ClassAttributes,
 	Component,
-	ComponentChild,
 	ComponentType,
 	FunctionComponent,
 	PreactDOMAttributes,
@@ -24,20 +23,20 @@ type Booleanish = boolean | 'true' | 'false';
 
 /** [MDN Reference](https://developer.mozilla.org/docs/Web/API/ToggleEvent) */
 interface ToggleEvent extends Event {
-    /** [MDN Reference](https://developer.mozilla.org/docs/Web/API/ToggleEvent/newState) */
-    readonly newState: string;
-    /** [MDN Reference](https://developer.mozilla.org/docs/Web/API/ToggleEvent/oldState) */
-    readonly oldState: string;
+	/** [MDN Reference](https://developer.mozilla.org/docs/Web/API/ToggleEvent/newState) */
+	readonly newState: string;
+	/** [MDN Reference](https://developer.mozilla.org/docs/Web/API/ToggleEvent/oldState) */
+	readonly oldState: string;
 }
 
 declare var ToggleEvent: {
-    prototype: ToggleEvent;
-    new(type: string, eventInitDict?: ToggleEventInit): ToggleEvent;
+	prototype: ToggleEvent;
+	new (type: string, eventInitDict?: ToggleEventInit): ToggleEvent;
 };
 
 interface ToggleEventInit extends EventInit {
-    newState?: string;
-    oldState?: string;
+	newState?: string;
+	oldState?: string;
 }
 
 // End TS >5.2
@@ -1240,257 +1239,60 @@ export namespace JSXInternal {
 	export type AriaRole = WAIAriaRole | DPubAriaRole;
 
 	export interface AllHTMLAttributes<RefType extends EventTarget = EventTarget>
-		extends ClassAttributes<RefType>,
-			DOMAttributes<RefType>,
-			AriaAttributes {
-		// Standard HTML Attributes
-		accept?: Signalish<string | undefined>;
-		acceptCharset?: Signalish<string | undefined>;
-		'accept-charset'?: Signalish<AllHTMLAttributes['acceptCharset']>;
-		accessKey?: Signalish<string | undefined>;
-		accesskey?: Signalish<AllHTMLAttributes['accessKey']>;
-		action?: Signalish<string | undefined>;
-		allow?: Signalish<string | undefined>;
-		allowFullScreen?: Signalish<boolean | undefined>;
-		allowTransparency?: Signalish<boolean | undefined>;
-		alt?: Signalish<string | undefined>;
-		as?: Signalish<string | undefined>;
-		async?: Signalish<boolean | undefined>;
-		autocomplete?: Signalish<string | undefined>;
-		autoComplete?: Signalish<string | undefined>;
-		autocorrect?: Signalish<string | undefined>;
-		autoCorrect?: Signalish<string | undefined>;
-		autofocus?: Signalish<boolean | undefined>;
-		autoFocus?: Signalish<boolean | undefined>;
-		autoPlay?: Signalish<boolean | undefined>;
-		autoplay?: Signalish<boolean | undefined>;
-		capture?: Signalish<boolean | string | undefined>;
-		cellPadding?: Signalish<number | string | undefined>;
-		cellSpacing?: Signalish<number | string | undefined>;
-		charSet?: Signalish<string | undefined>;
-		charset?: Signalish<string | undefined>;
-		challenge?: Signalish<string | undefined>;
-		checked?: Signalish<boolean | undefined>;
-		cite?: Signalish<string | undefined>;
-		class?: Signalish<string | undefined>;
-		className?: Signalish<string | undefined>;
-		cols?: Signalish<number | undefined>;
-		colSpan?: Signalish<number | undefined>;
-		colspan?: Signalish<number | undefined>;
-		content?: Signalish<string | undefined>;
-		contentEditable?: Signalish<
-			Booleanish | '' | 'plaintext-only' | 'inherit' | undefined
-		>;
-		contenteditable?: Signalish<AllHTMLAttributes['contentEditable']>;
-		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/contextmenu */
-		contextMenu?: Signalish<string | undefined>;
-		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/contextmenu */
-		contextmenu?: Signalish<string | undefined>;
-		controls?: Signalish<boolean | undefined>;
-		controlslist?: Signalish<'nodownload' | 'nofullscreen' | 'noremoteplayback' | undefined>;
-		controlsList?: Signalish<'nodownload' | 'nofullscreen' | 'noremoteplayback' | undefined>;
-		coords?: Signalish<string | undefined>;
-		crossOrigin?: Signalish<string | undefined>;
-		crossorigin?: Signalish<string | undefined>;
-		currentTime?: Signalish<number | undefined>;
-		data?: Signalish<string | undefined>;
-		dateTime?: Signalish<string | undefined>;
-		datetime?: Signalish<string | undefined>;
-		default?: Signalish<boolean | undefined>;
-		defaultChecked?: Signalish<boolean | undefined>;
-		defaultMuted?: Signalish<boolean | undefined>;
-		defaultPlaybackRate?: Signalish<number | undefined>;
-		defaultValue?: Signalish<string | undefined>;
-		defer?: Signalish<boolean | undefined>;
-		dir?: Signalish<'auto' | 'rtl' | 'ltr' | undefined>;
-		disabled?: Signalish<boolean | undefined>;
-		disableremoteplayback?: Signalish<boolean | undefined>;
-		disableRemotePlayback?: Signalish<boolean | undefined>;
-		download?: Signalish<any | undefined>;
-		decoding?: Signalish<'sync' | 'async' | 'auto' | undefined>;
-		draggable?: Signalish<boolean | undefined>;
-		encType?: Signalish<string | undefined>;
-		enctype?: Signalish<string | undefined>;
-		enterkeyhint?: Signalish<
-			| 'enter'
-			| 'done'
-			| 'go'
-			| 'next'
-			| 'previous'
-			| 'search'
-			| 'send'
-			| undefined
-		>;
-		elementTiming?: Signalish<string | undefined>;
-		elementtiming?: Signalish<AllHTMLAttributes['elementTiming']>;
-		exportparts?: Signalish<string | undefined>;
-		for?: Signalish<string | undefined>;
-		form?: Signalish<string | undefined>;
-		formAction?: Signalish<string | undefined>;
-		formaction?: Signalish<string | undefined>;
-		formEncType?: Signalish<string | undefined>;
-		formenctype?: Signalish<string | undefined>;
-		formMethod?: Signalish<string | undefined>;
-		formmethod?: Signalish<string | undefined>;
-		formNoValidate?: Signalish<boolean | undefined>;
-		formnovalidate?: Signalish<boolean | undefined>;
-		formTarget?: Signalish<string | undefined>;
-		formtarget?: Signalish<string | undefined>;
-		frameBorder?: Signalish<number | string | undefined>;
-		frameborder?: Signalish<number | string | undefined>;
-		headers?: Signalish<string | undefined>;
-		height?: Signalish<number | string | undefined>;
-		hidden?: Signalish<boolean | 'hidden' | 'until-found' | undefined>;
-		high?: Signalish<number | undefined>;
-		href?: Signalish<string | undefined>;
-		hrefLang?: Signalish<string | undefined>;
-		hreflang?: Signalish<string | undefined>;
-		htmlFor?: Signalish<string | undefined>;
-		httpEquiv?: Signalish<string | undefined>;
-		'http-equiv'?: Signalish<string | undefined>;
-		icon?: Signalish<string | undefined>;
-		id?: Signalish<string | undefined>;
-		indeterminate?: Signalish<boolean | undefined>;
-		inert?: Signalish<boolean | undefined>;
-		inputMode?: Signalish<string | undefined>;
-		inputmode?: Signalish<string | undefined>;
-		integrity?: Signalish<string | undefined>;
-		is?: Signalish<string | undefined>;
-		keyParams?: Signalish<string | undefined>;
-		keyType?: Signalish<string | undefined>;
-		kind?: Signalish<string | undefined>;
-		label?: Signalish<string | undefined>;
-		lang?: Signalish<string | undefined>;
-		list?: Signalish<string | undefined>;
-		loading?: Signalish<'eager' | 'lazy' | undefined>;
-		loop?: Signalish<boolean | undefined>;
-		low?: Signalish<number | undefined>;
-		manifest?: Signalish<string | undefined>;
-		marginHeight?: Signalish<number | undefined>;
-		marginWidth?: Signalish<number | undefined>;
-		max?: Signalish<number | string | undefined>;
-		maxLength?: Signalish<number | undefined>;
-		maxlength?: Signalish<number | undefined>;
-		media?: Signalish<string | undefined>;
-		mediaGroup?: Signalish<string | undefined>;
-		method?: Signalish<string | undefined>;
-		min?: Signalish<number | string | undefined>;
-		minLength?: Signalish<number | undefined>;
-		minlength?: Signalish<number | undefined>;
-		multiple?: Signalish<boolean | undefined>;
-		muted?: Signalish<boolean | undefined>;
-		name?: Signalish<string | undefined>;
-		nomodule?: Signalish<boolean | undefined>;
-		nonce?: Signalish<string | undefined>;
-		noValidate?: Signalish<boolean | undefined>;
-		novalidate?: Signalish<boolean | undefined>;
-		open?: Signalish<boolean | undefined>;
-		optimum?: Signalish<number | undefined>;
-		part?: Signalish<string | undefined>;
-		pattern?: Signalish<string | undefined>;
-		ping?: Signalish<string | undefined>;
-		placeholder?: Signalish<string | undefined>;
-		playsInline?: Signalish<boolean | undefined>;
-		playsinline?: Signalish<boolean | undefined>;
-		playbackRate?: Signalish<number | undefined>;
-		popover?: Signalish<'auto' | 'hint' | 'manual' | boolean | undefined>;
-		popovertarget?: Signalish<string | undefined>;
-		popoverTarget?: Signalish<string | undefined>;
-		popovertargetaction?: Signalish<'hide' | 'show' | 'toggle' | undefined>;
-		popoverTargetAction?: Signalish<'hide' | 'show' | 'toggle' | undefined>;
-		poster?: Signalish<string | undefined>;
-		preload?: Signalish<'auto' | 'metadata' | 'none' | undefined>;
-		preservesPitch?: Signalish<boolean | undefined>;
-		radioGroup?: Signalish<string | undefined>;
-		readonly?: Signalish<boolean | undefined>;
-		readOnly?: Signalish<boolean | undefined>;
-		referrerpolicy?: Signalish<
-			| 'no-referrer'
-			| 'no-referrer-when-downgrade'
-			| 'origin'
-			| 'origin-when-cross-origin'
-			| 'same-origin'
-			| 'strict-origin'
-			| 'strict-origin-when-cross-origin'
-			| 'unsafe-url'
-			| undefined
-		>;
-		rel?: Signalish<string | undefined>;
-		required?: Signalish<boolean | undefined>;
-		reversed?: Signalish<boolean | undefined>;
-		role?: Signalish<AriaRole | undefined>;
-		rows?: Signalish<number | undefined>;
-		rowSpan?: Signalish<number | undefined>;
-		rowspan?: Signalish<number | undefined>;
-		sandbox?: Signalish<string | undefined>;
-		scope?: Signalish<string | undefined>;
-		scoped?: Signalish<boolean | undefined>;
-		scrolling?: Signalish<string | undefined>;
-		seamless?: Signalish<boolean | undefined>;
-		selected?: Signalish<boolean | undefined>;
-		shape?: Signalish<string | undefined>;
-		size?: Signalish<number | undefined>;
-		sizes?: Signalish<string | undefined>;
-		slot?: Signalish<string | undefined>;
-		span?: Signalish<number | undefined>;
-		spellcheck?: Signalish<boolean | undefined>;
-		src?: Signalish<string | undefined>;
-		srcDoc?: Signalish<string | undefined>;
-		srcdoc?: Signalish<string | undefined>;
-		srcLang?: Signalish<string | undefined>;
-		srclang?: Signalish<string | undefined>;
-		srcSet?: Signalish<string | undefined>;
-		srcset?: Signalish<string | undefined>;
-		srcObject?: Signalish<MediaStream | MediaSource | Blob | File | null>;
-		start?: Signalish<number | undefined>;
-		step?: Signalish<number | string | undefined>;
-		style?: Signalish<string | CSSProperties | undefined>;
-		summary?: Signalish<string | undefined>;
-		tabIndex?: Signalish<number | undefined>;
-		tabindex?: Signalish<number | undefined>;
-		target?: Signalish<string | undefined>;
-		title?: Signalish<string | undefined>;
-		type?: Signalish<string | undefined>;
-		useMap?: Signalish<string | undefined>;
-		usemap?: Signalish<string | undefined>;
-		value?: Signalish<string | string[] | number | undefined>;
-		volume?: Signalish<string | number | undefined>;
-		width?: Signalish<number | string | undefined>;
-		wmode?: Signalish<string | undefined>;
-		wrap?: Signalish<string | undefined>;
-
-		// Non-standard Attributes
-		autocapitalize?: Signalish<
-			'off' | 'none' | 'on' | 'sentences' | 'words' | 'characters' | undefined
-		>;
-		autoCapitalize?: Signalish<
-			'off' | 'none' | 'on' | 'sentences' | 'words' | 'characters' | undefined
-		>;
-		disablePictureInPicture?: Signalish<boolean | undefined>;
-		results?: Signalish<number | undefined>;
-		translate?: Signalish<boolean | undefined>;
-
-		// RDFa Attributes
-		about?: Signalish<string | undefined>;
-		datatype?: Signalish<string | undefined>;
-		inlist?: Signalish<any>;
-		prefix?: Signalish<string | undefined>;
-		property?: Signalish<string | undefined>;
-		resource?: Signalish<string | undefined>;
-		typeof?: Signalish<string | undefined>;
-		vocab?: Signalish<string | undefined>;
-
-		// Microdata Attributes
-		itemProp?: Signalish<string | undefined>;
-		itemprop?: Signalish<string | undefined>;
-		itemScope?: Signalish<boolean | undefined>;
-		itemscope?: Signalish<boolean | undefined>;
-		itemType?: Signalish<string | undefined>;
-		itemtype?: Signalish<string | undefined>;
-		itemID?: Signalish<string | undefined>;
-		itemid?: Signalish<string | undefined>;
-		itemRef?: Signalish<string | undefined>;
-		itemref?: Signalish<string | undefined>;
+		extends AnchorHTMLAttributes<RefType>,
+			AreaHTMLAttributes<RefType>,
+			AudioHTMLAttributes<RefType>,
+			BaseHTMLAttributes<RefType>,
+			BlockquoteHTMLAttributes<RefType>,
+			ButtonHTMLAttributes<RefType>,
+			CanvasHTMLAttributes<RefType>,
+			ColHTMLAttributes<RefType>,
+			ColgroupHTMLAttributes<RefType>,
+			DataHTMLAttributes<RefType>,
+			DelHTMLAttributes<RefType>,
+			DetailsHTMLAttributes<RefType>,
+			DialogHTMLAttributes<RefType>,
+			EmbedHTMLAttributes<RefType>,
+			FieldsetHTMLAttributes<RefType>,
+			FormHTMLAttributes<RefType>,
+			IframeHTMLAttributes<RefType>,
+			ImgHTMLAttributes<RefType>,
+			InputHTMLAttributes<RefType>,
+			InsHTMLAttributes<RefType>,
+			KeygenHTMLAttributes<RefType>,
+			LabelHTMLAttributes<RefType>,
+			LiHTMLAttributes<RefType>,
+			LinkHTMLAttributes<RefType>,
+			MapHTMLAttributes<RefType>,
+			MarqueeHTMLAttributes<RefType>,
+			MediaHTMLAttributes<RefType>,
+			MenuHTMLAttributes<RefType>,
+			MetaHTMLAttributes<RefType>,
+			MeterHTMLAttributes<RefType>,
+			ObjectHTMLAttributes<RefType>,
+			OlHTMLAttributes<RefType>,
+			OptgroupHTMLAttributes<RefType>,
+			OptionHTMLAttributes<RefType>,
+			OutputHTMLAttributes<RefType>,
+			ParamHTMLAttributes<RefType>,
+			ProgressHTMLAttributes<RefType>,
+			QuoteHTMLAttributes<RefType>,
+			ScriptHTMLAttributes<RefType>,
+			SelectHTMLAttributes<RefType>,
+			SlotHTMLAttributes<RefType>,
+			SourceHTMLAttributes<RefType>,
+			StyleHTMLAttributes<RefType>,
+			TableHTMLAttributes<RefType>,
+			TdHTMLAttributes<RefType>,
+			TextareaHTMLAttributes<RefType>,
+			ThHTMLAttributes<RefType>,
+			TimeHTMLAttributes<RefType>,
+			TrackHTMLAttributes<RefType>,
+			VideoHTMLAttributes<RefType> {
+		/* Properties that are incompatible between elements */
+		loop?: Signalish<any | undefined>;
+		target?: Signalish<any | undefined>;
+		type?: Signalish<any | undefined>;
 	}
 
 	export interface HTMLAttributes<RefType extends EventTarget = EventTarget>
@@ -1627,7 +1429,7 @@ export namespace JSXInternal {
 		referrerPolicy?: Signalish<HTMLAttributeReferrerPolicy | undefined>;
 		rel?: Signalish<string | undefined>;
 		shape?: Signalish<string | undefined>;
-		target?: Signalish<string | undefined>;
+		target?: Signalish<HTMLAttributeAnchorTarget | undefined>;
 	}
 
 	interface AudioHTMLAttributes<T extends EventTarget = HTMLAudioElement>
@@ -1636,7 +1438,7 @@ export namespace JSXInternal {
 	interface BaseHTMLAttributes<T extends EventTarget = HTMLBaseElement>
 		extends HTMLAttributes<T> {
 		href?: Signalish<string | undefined>;
-		target?: Signalish<string | undefined>;
+		target?: Signalish<HTMLAttributeAnchorTarget | undefined>;
 	}
 
 	interface BlockquoteHTMLAttributes<T extends EventTarget = HTMLQuoteElement>
@@ -1702,7 +1504,6 @@ export namespace JSXInternal {
 	interface DetailsHTMLAttributes<T extends EventTarget = HTMLDetailsElement>
 		extends HTMLAttributes<T> {
 		open?: Signalish<boolean | undefined>;
-		onToggle?: GenericEventHandler<T> | undefined;
 	}
 
 	interface DialogHTMLAttributes<T extends EventTarget = HTMLDialogElement>
@@ -1756,7 +1557,7 @@ export namespace JSXInternal {
 		/** @deprecated */
 		frameBorder?: Signalish<number | string | undefined>;
 		height?: Signalish<number | string | undefined>;
-		loading?: 'eager' | 'lazy' | undefined;
+		loading?: Signalish<'eager' | 'lazy' | undefined>;
 		/** @deprecated */
 		marginHeight?: Signalish<number | undefined>;
 		/** @deprecated */
@@ -1913,7 +1714,8 @@ export namespace JSXInternal {
 		as?: Signalish<string | undefined>;
 		crossorigin?: Signalish<HTMLAttributeCrossOrigin>;
 		crossOrigin?: Signalish<HTMLAttributeCrossOrigin>;
-		fetchPriority?: Signalish<'high' | 'low' | 'auto'>;
+		fetchpriority?: Signalish<'high' | 'low' | 'auto' | undefined>;
+		fetchPriority?: Signalish<'high' | 'low' | 'auto' | undefined>;
 		href?: Signalish<string | undefined>;
 		hreflang?: Signalish<string | undefined>;
 		hrefLang?: Signalish<string | undefined>;
@@ -1921,7 +1723,7 @@ export namespace JSXInternal {
 		media?: Signalish<string | undefined>;
 		imageSrcSet?: Signalish<string | undefined>;
 		referrerpolicy?: Signalish<HTMLAttributeReferrerPolicy | undefined>;
-		referrerPolicy?: HTMLAttributeReferrerPolicy | undefined;
+		referrerPolicy?: Signalish<HTMLAttributeReferrerPolicy | undefined>;
 		rel?: Signalish<string | undefined>;
 		sizes?: Signalish<string | undefined>;
 		type?: Signalish<string | undefined>;
@@ -1954,8 +1756,12 @@ export namespace JSXInternal {
 		autoplay?: Signalish<boolean | undefined>;
 		autoPlay?: Signalish<boolean | undefined>;
 		controls?: Signalish<boolean | undefined>;
-		controlslist?: Signalish<'nodownload' | 'nofullscreen' | 'noremoteplayback' | undefined>;
-		controlsList?: Signalish<'nodownload' | 'nofullscreen' | 'noremoteplayback' | undefined>;
+		controlslist?: Signalish<
+			'nodownload' | 'nofullscreen' | 'noremoteplayback' | undefined
+		>;
+		controlsList?: Signalish<
+			'nodownload' | 'nofullscreen' | 'noremoteplayback' | undefined
+		>;
 		crossorigin?: Signalish<HTMLAttributeCrossOrigin>;
 		crossOrigin?: Signalish<HTMLAttributeCrossOrigin>;
 		currentTime?: Signalish<number | undefined>;
@@ -2075,7 +1881,7 @@ export namespace JSXInternal {
 		nomodule?: Signalish<boolean | undefined>;
 		noModule?: Signalish<boolean | undefined>;
 		referrerpolicy?: Signalish<HTMLAttributeReferrerPolicy | undefined>;
-		referrerPolicy?: HTMLAttributeReferrerPolicy | undefined;
+		referrerPolicy?: Signalish<HTMLAttributeReferrerPolicy | undefined>;
 		src?: Signalish<string | undefined>;
 		type?: Signalish<string | undefined>;
 	}
@@ -2149,7 +1955,7 @@ export namespace JSXInternal {
 		autocomplete?: Signalish<string | undefined>;
 		autoComplete?: Signalish<string | undefined>;
 		cols?: Signalish<number | undefined>;
-		defaultValue?: Signalish<string | undefined>;
+		defaultValue?: Signalish<string | number | undefined>;
 		dirName?: Signalish<string | undefined>;
 		disabled?: Signalish<boolean | undefined>;
 		form?: Signalish<string | undefined>;
