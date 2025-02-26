@@ -1290,9 +1290,9 @@ export namespace JSXInternal {
 			TrackHTMLAttributes<RefType>,
 			VideoHTMLAttributes<RefType> {
 		/* Properties that are incompatible between elements */
+		loop?: Signalish<any | undefined>;
 		target?: Signalish<any | undefined>;
 		type?: Signalish<any | undefined>;
-		loop?: Signalish<any | undefined>;
 	}
 
 	export interface HTMLAttributes<RefType extends EventTarget = EventTarget>
@@ -1714,7 +1714,8 @@ export namespace JSXInternal {
 		as?: Signalish<string | undefined>;
 		crossorigin?: Signalish<HTMLAttributeCrossOrigin>;
 		crossOrigin?: Signalish<HTMLAttributeCrossOrigin>;
-		fetchPriority?: Signalish<'high' | 'low' | 'auto'>;
+		fetchpriority?: Signalish<'high' | 'low' | 'auto' | undefined>;
+		fetchPriority?: Signalish<'high' | 'low' | 'auto' | undefined>;
 		href?: Signalish<string | undefined>;
 		hreflang?: Signalish<string | undefined>;
 		hrefLang?: Signalish<string | undefined>;
