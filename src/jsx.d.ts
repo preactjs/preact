@@ -1782,6 +1782,8 @@ export namespace JSXInternal {
 		crossorigin?: Signalish<HTMLAttributeCrossOrigin>;
 		crossOrigin?: Signalish<HTMLAttributeCrossOrigin>;
 		decoding?: Signalish<'async' | 'auto' | 'sync' | undefined>;
+		fetchpriority?: Signalish<'high' | 'auto' | 'low' | undefined>;
+		fetchPriority?: Signalish<'high' | 'auto' | 'low' | undefined>;
 		height?: Signalish<number | string | undefined>;
 		loading?: Signalish<'eager' | 'lazy' | undefined>;
 		referrerpolicy?: Signalish<HTMLAttributeReferrerPolicy | undefined>;
