@@ -1,5 +1,11 @@
 import { setupRerender } from 'preact/test-utils';
-import { createElement, render, Component, Fragment } from 'preact';
+import {
+	createElement,
+	render,
+	Component,
+	Fragment,
+	createContext
+} from 'preact';
 import { setupScratch, teardown } from '../_util/helpers';
 import { span, div, ul, ol, li, section } from '../_util/dom';
 import { logCall, clearLog, getLog } from '../_util/logCall';
@@ -3149,5 +3155,118 @@ describe('Fragment', () => {
 
 		expect(scratch.innerHTML).to.equal([div('A'), div(1), div(2)].join(''));
 		expectDomLogToBe(['<div>B.remove()', '<div>2A1.appendChild(<div>2)']);
+	});
+
+	it('Should retain content when parent rerenders', () => {
+		let toggle;
+		const ctx = createContext(null);
+
+		class Provider extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { value: props.value };
+				toggle = () => this.setState({ value: props.value + 1 });
+			}
+
+			render(props) {
+				return (
+					<ctx.Provider value={this.state.value}>{props.children}</ctx.Provider>
+				);
+			}
+		}
+
+		class App extends Component {
+			render() {
+				return (
+					<Provider value={1}>
+						<Fragment>
+							<p>Hello world</p>
+						</Fragment>
+					</Provider>
+				);
+			}
+		}
+
+		render(<App />, scratch);
+		expect(scratch.innerHTML).to.equal('<p>Hello world</p>');
+
+		toggle();
+		rerender();
+		expect(scratch.innerHTML).to.equal('<p>Hello world</p>');
+	});
+
+	it('Should retain content when parent rerenders w/ multiple children', () => {
+		let toggle;
+		const ctx = createContext(null);
+
+		class Provider extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { value: props.value };
+				toggle = () => this.setState({ value: props.value + 1 });
+			}
+
+			render(props) {
+				return (
+					<ctx.Provider value={this.state.value}>{props.children}</ctx.Provider>
+				);
+			}
+		}
+
+		class App extends Component {
+			render() {
+				return (
+					<Provider value={1}>
+						<Fragment>
+							<p>Hello</p>
+							<p>World</p>
+						</Fragment>
+					</Provider>
+				);
+			}
+		}
+
+		render(<App />, scratch);
+		expect(scratch.innerHTML).to.equal('<p>Hello</p><p>World</p>');
+
+		toggle();
+		rerender();
+		expect(scratch.innerHTML).to.equal('<p>Hello</p><p>World</p>');
+	});
+
+	it('Should retain content when parent rerenders w/ text children', () => {
+		let toggle;
+		const ctx = createContext(null);
+
+		class Provider extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { value: props.value };
+				toggle = () => this.setState({ value: props.value + 1 });
+			}
+
+			render(props) {
+				return (
+					<ctx.Provider value={this.state.value}>{props.children}</ctx.Provider>
+				);
+			}
+		}
+
+		class App extends Component {
+			render() {
+				return (
+					<Provider value={1}>
+						<Fragment>Hello world</Fragment>
+					</Provider>
+				);
+			}
+		}
+
+		render(<App />, scratch);
+		expect(scratch.innerHTML).to.equal('Hello world');
+
+		toggle();
+		rerender();
+		expect(scratch.innerHTML).to.equal('Hello world');
 	});
 });
