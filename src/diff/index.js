@@ -261,13 +261,7 @@ export function diff(
 			let renderResult = tmp;
 
 			if (isTopLevelFragment) {
-				renderResult = isArray(tmp.props.children)
-					? tmp.props.children.map(v =>
-							isArray(v) ? v : v != NULL && typeof v === 'object' ? { ...v } : v
-						)
-					: tmp.props.children != NULL && typeof tmp.props.children === 'object'
-						? { ...tmp.props.children }
-						: tmp.props.children;
+				renderResult = cloneNode(tmp.props.children);
 			}
 
 			oldDom = diffChildren(
@@ -372,6 +366,18 @@ export function commitRoot(commitQueue, root, refQueue) {
 			options._catchError(e, c._vnode);
 		}
 	});
+}
+
+function cloneNode(node) {
+	if (typeof node !== 'object' || node == NULL) {
+		return node;
+	}
+
+	if (isArray(node)) {
+		return node.map(cloneNode);
+	}
+
+	return assign({}, node);
 }
 
 /**
