@@ -1238,63 +1238,6 @@ export namespace JSXInternal {
 
 	export type AriaRole = WAIAriaRole | DPubAriaRole;
 
-	export interface AllHTMLAttributes<RefType extends EventTarget = EventTarget>
-		extends AnchorHTMLAttributes<RefType>,
-			AreaHTMLAttributes<RefType>,
-			AudioHTMLAttributes<RefType>,
-			BaseHTMLAttributes<RefType>,
-			BlockquoteHTMLAttributes<RefType>,
-			ButtonHTMLAttributes<RefType>,
-			CanvasHTMLAttributes<RefType>,
-			ColHTMLAttributes<RefType>,
-			ColgroupHTMLAttributes<RefType>,
-			DataHTMLAttributes<RefType>,
-			DelHTMLAttributes<RefType>,
-			DetailsHTMLAttributes<RefType>,
-			DialogHTMLAttributes<RefType>,
-			EmbedHTMLAttributes<RefType>,
-			FieldsetHTMLAttributes<RefType>,
-			FormHTMLAttributes<RefType>,
-			IframeHTMLAttributes<RefType>,
-			ImgHTMLAttributes<RefType>,
-			InputHTMLAttributes<RefType>,
-			InsHTMLAttributes<RefType>,
-			KeygenHTMLAttributes<RefType>,
-			LabelHTMLAttributes<RefType>,
-			LiHTMLAttributes<RefType>,
-			LinkHTMLAttributes<RefType>,
-			MapHTMLAttributes<RefType>,
-			MarqueeHTMLAttributes<RefType>,
-			MediaHTMLAttributes<RefType>,
-			MenuHTMLAttributes<RefType>,
-			MetaHTMLAttributes<RefType>,
-			MeterHTMLAttributes<RefType>,
-			ObjectHTMLAttributes<RefType>,
-			OlHTMLAttributes<RefType>,
-			OptgroupHTMLAttributes<RefType>,
-			OptionHTMLAttributes<RefType>,
-			OutputHTMLAttributes<RefType>,
-			ParamHTMLAttributes<RefType>,
-			ProgressHTMLAttributes<RefType>,
-			QuoteHTMLAttributes<RefType>,
-			ScriptHTMLAttributes<RefType>,
-			SelectHTMLAttributes<RefType>,
-			SlotHTMLAttributes<RefType>,
-			SourceHTMLAttributes<RefType>,
-			StyleHTMLAttributes<RefType>,
-			TableHTMLAttributes<RefType>,
-			TdHTMLAttributes<RefType>,
-			TextareaHTMLAttributes<RefType>,
-			ThHTMLAttributes<RefType>,
-			TimeHTMLAttributes<RefType>,
-			TrackHTMLAttributes<RefType>,
-			VideoHTMLAttributes<RefType> {
-		/* Properties that are incompatible between elements */
-		loop?: Signalish<any | undefined>;
-		target?: Signalish<any | undefined>;
-		type?: Signalish<any | undefined>;
-	}
-
 	export interface HTMLAttributes<RefType extends EventTarget = EventTarget>
 		extends ClassAttributes<RefType>,
 			DOMAttributes<RefType>,
