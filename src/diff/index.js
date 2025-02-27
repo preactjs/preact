@@ -258,10 +258,10 @@ export function diff(
 
 			let isTopLevelFragment =
 				tmp != NULL && tmp.type === Fragment && tmp.key == NULL;
-			let renderResult = isTopLevelFragment ? tmp.props.children : tmp;
+			let renderResult = tmp;
 
 			if (isTopLevelFragment) {
-				tmp.props.children = NULL;
+				renderResult = cloneNode(tmp.props.children);
 			}
 
 			oldDom = diffChildren(
@@ -366,6 +366,18 @@ export function commitRoot(commitQueue, root, refQueue) {
 			options._catchError(e, c._vnode);
 		}
 	});
+}
+
+function cloneNode(node) {
+	if (typeof node !== 'object' || node == NULL) {
+		return node;
+	}
+
+	if (isArray(node)) {
+		return node.map(cloneNode);
+	}
+
+	return assign({}, node);
 }
 
 /**
