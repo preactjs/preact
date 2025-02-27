@@ -3269,4 +3269,44 @@ describe('Fragment', () => {
 		rerender();
 		expect(scratch.innerHTML).to.equal('Hello world');
 	});
+
+	it('Should retain content when parent rerenders when deeper children are subscribed', () => {
+		let toggle;
+		const ctx = createContext(null);
+
+		class Provider extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { value: props.value };
+				toggle = () => this.setState({ value: props.value + 1 });
+			}
+
+			render(props) {
+				return (
+					<ctx.Provider value={this.state.value}>{props.children}</ctx.Provider>
+				);
+			}
+		}
+
+		class App extends Component {
+			render() {
+				return (
+					<Provider value={1}>
+						<Fragment>
+							<ctx.Consumer>
+								{value => <p>I can count to {value}</p>}
+							</ctx.Consumer>
+						</Fragment>
+					</Provider>
+				);
+			}
+		}
+
+		render(<App />, scratch);
+		expect(scratch.innerHTML).to.equal('<p>I can count to 1</p>');
+
+		toggle();
+		rerender();
+		expect(scratch.innerHTML).to.equal('<p>I can count to 2</p>');
+	});
 });
