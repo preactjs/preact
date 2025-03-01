@@ -3,7 +3,7 @@
   "amdName": "preact",
   "version": "10.26.8",
   "private": false,
-  "description": "Fast 3kb React-compatible Virtual DOM library.",
+  "description": "Fast 4kb React-compatible Virtual DOM library.",
   "main": "dist/preact.js",
   "module": "dist/preact.mjs",
   "umd:main": "dist/preact.umd.js",
