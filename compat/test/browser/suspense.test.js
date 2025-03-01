@@ -9,7 +9,8 @@ import React, {
 	createContext,
 	useState,
 	useEffect,
-	useLayoutEffect
+	useLayoutEffect,
+	memo
 } from 'preact/compat';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { createLazy, createSuspender } from './suspense-utils';
@@ -1501,8 +1502,8 @@ describe('suspense', () => {
 
 		/** @type {() => void} */
 		let hide,
-		/** @type {(v) => void} */
-		setValue;
+			/** @type {(v) => void} */
+			setValue;
 
 		class Conditional extends Component {
 			constructor(props) {
@@ -2157,6 +2158,40 @@ describe('suspense', () => {
 		return resolveLazy(() => <p>hello world</p>).then(() => {
 			rerender();
 			expect(scratch.innerHTML).to.equal('<div><p>hello world</p></div>');
+		});
+	});
+
+	it('should correctly render memod child component', () => {
+		const Memod = memo(() => <span>Memod Component has rendered</span>);
+
+		/** @type {() => Promise<void>} */
+		let resolve;
+		const Lazy = lazy(() => {
+			const p = new Promise(res => {
+				resolve = () => {
+					res({ default: Memod });
+					return p;
+				};
+			});
+
+			return p;
+		});
+
+		render(
+			<Suspense fallback={<div>Suspended...</div>}>
+				<Lazy />
+			</Suspense>,
+			scratch
+		);
+		rerender();
+
+		expect(scratch.innerHTML).to.eql(`<div>Suspended...</div>`);
+
+		return resolve().then(() => {
+			rerender();
+			expect(scratch.innerHTML).to.eql(
+				`<span>Memod Component has rendered</span>`
+			);
 		});
 	});
 });
