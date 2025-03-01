@@ -5,7 +5,7 @@
 
 </a>
 </p>
-<p align="center">Fast <b>3kB</b> alternative to React with the same modern API.</p>
+<p align="center">Fast <b>4kB</b> alternative to React with the same modern API.</p>
 
 **All the power of Virtual DOM components, without the overhead:**
 
