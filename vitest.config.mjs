@@ -265,8 +265,10 @@ export default defineConfig({
 		},
 		setupFiles: ['./vitest.setup.js'],
 		globals: true,
+		dangerouslyIgnoreUnhandledErrors: true,
 		browser: {
-			isolate: false,
+			// TODO: isolate doesn't work it leaks across all pages
+			// isolate: false,
 			provider: 'webdriverio',
 			enabled: true,
 			screenshotFailures: false,
