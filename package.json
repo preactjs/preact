@@ -214,8 +214,8 @@
     "@types/mocha": "^10.0.0",
     "@types/node": "^18.0.0",
     "@types/sinon": "^17.0.3",
-    "@vitest/browser": "^3.0.7",
-    "@vitest/coverage-istanbul": "^3.0.7",
+    "@vitest/browser": "^3.0.8",
+    "@vitest/coverage-istanbul": "^3.0.8",
     "babel-plugin-transform-rename-properties": "0.1.0",
     "chai": "^5.2.0",
     "coveralls": "^3.1.1",
@@ -237,8 +237,8 @@
     "typescript": "5.1.6",
     "undici": "^4.12.0",
     "vite": "^6.2.0",
-    "vitest": "^3.0.7",
-    "webdriverio": "^9.10.0"
+    "vitest": "^3.0.8",
+    "webdriverio": "^9.11.0"
   },
   "volta": {
     "node": "20.18.3"
