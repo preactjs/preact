@@ -50,17 +50,17 @@ function createVNode(type, props, key, isStaticChildren, __source, __self) {
 	const vnode = {
 		type,
 		props: normalizedProps,
-		key,
-		ref,
+		_dom: null,
 		_children: null,
 		_parent: null,
-		_depth: 0,
-		_dom: null,
-		_component: null,
-		constructor: undefined,
+		key,
+		ref,
 		_original: --vnodeId,
+		_depth: 0,
+		_component: null,
 		_index: -1,
 		_flags: 0,
+		constructor: undefined,
 		__source,
 		__self
 	};
