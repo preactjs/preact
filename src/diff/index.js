@@ -64,7 +64,7 @@ export function diff(
 
 	// When passing through createElement it assigns the object
 	// constructor as undefined. This to prevent JSON-injection.
-	if (newVNode.constructor !== UNDEFINED) return NULL;
+	if (newVNode.constructor != UNDEFINED) return NULL;
 
 	// If the previous diff bailed out, resume creating/hydrating.
 	if (oldVNode._flags & MODE_SUSPENDED) {
@@ -158,7 +158,7 @@ export function diff(
 				if (
 					isClassComponent &&
 					newType.getDerivedStateFromProps == NULL &&
-					newProps !== oldProps &&
+					newProps != oldProps &&
 					c.componentWillReceiveProps != NULL
 				) {
 					c.componentWillReceiveProps(newProps, componentContext);
@@ -171,7 +171,7 @@ export function diff(
 							newProps,
 							c._nextState,
 							componentContext
-						) === false) ||
+						) == false) ||
 						newVNode._original == oldVNode._original)
 				) {
 					// More info about this here: https://gist.github.com/JoviDeCroock/bec5f2ce93544d2e6070ef8e0036e4e8
@@ -257,7 +257,7 @@ export function diff(
 			}
 
 			let isTopLevelFragment =
-				tmp != NULL && tmp.type === Fragment && tmp.key == NULL;
+				tmp != NULL && tmp.type == Fragment && tmp.key == NULL;
 			let renderResult = tmp;
 
 			if (isTopLevelFragment) {
@@ -369,7 +369,7 @@ export function commitRoot(commitQueue, root, refQueue) {
 }
 
 function cloneNode(node) {
-	if (typeof node !== 'object' || node == NULL) {
+	if (typeof node != 'object' || node == NULL) {
 		return node;
 	}
 
@@ -467,9 +467,9 @@ function diffElementNodes(
 		excessDomChildren = NULL;
 	}
 
-	if (nodeType === NULL) {
+	if (nodeType == NULL) {
 		// During hydration, we still have to split merged text from SSR'd HTML.
-		if (oldProps !== newProps && (!isHydrating || dom.data !== newProps)) {
+		if (oldProps !== newProps && (!isHydrating || dom.data != newProps)) {
 			dom.data = newProps;
 		}
 	} else {
@@ -531,8 +531,8 @@ function diffElementNodes(
 			if (
 				!isHydrating &&
 				(!oldHtml ||
-					(newHtml.__html !== oldHtml.__html &&
-						newHtml.__html !== dom.innerHTML))
+					(newHtml.__html != oldHtml.__html &&
+						newHtml.__html != dom.innerHTML))
 			) {
 				dom.innerHTML = newHtml.__html;
 			}
@@ -543,7 +543,7 @@ function diffElementNodes(
 
 			diffChildren(
 				// @ts-expect-error
-				newVNode.type === 'template' ? dom.content : dom,
+				newVNode.type == 'template' ? dom.content : dom,
 				isArray(newChildren) ? newChildren : [newChildren],
 				newVNode,
 				oldVNode,
@@ -572,7 +572,7 @@ function diffElementNodes(
 			if (nodeType == 'progress' && inputValue == NULL) {
 				dom.removeAttribute('value');
 			} else if (
-				inputValue !== UNDEFINED &&
+				inputValue != UNDEFINED &&
 				// #2756 For the <progress>-element the initial value is 0,
 				// despite the attribute not being present. When the attribute
 				// is missing the progress bar is treated as indeterminate.
@@ -582,13 +582,13 @@ function diffElementNodes(
 					// This is only for IE 11 to fix <select> value not being updated.
 					// To avoid a stale select value we need to set the option.value
 					// again, which triggers IE11 to re-evaluate the select value
-					(nodeType == 'option' && inputValue !== oldProps[i]))
+					(nodeType == 'option' && inputValue != oldProps[i]))
 			) {
 				setProperty(dom, i, inputValue, oldProps[i], namespace);
 			}
 
 			i = 'checked';
-			if (checked !== UNDEFINED && checked !== dom[i]) {
+			if (checked != UNDEFINED && checked != dom[i]) {
 				setProperty(dom, i, checked, oldProps[i], namespace);
 			}
 		}
@@ -636,7 +636,7 @@ export function unmount(vnode, parentVNode, skipRemove) {
 	if (options.unmount) options.unmount(vnode);
 
 	if ((r = vnode.ref)) {
-		if (!r.current || r.current === vnode._dom) {
+		if (!r.current || r.current == vnode._dom) {
 			applyRef(r, NULL, parentVNode);
 		}
 	}
