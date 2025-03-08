@@ -158,7 +158,7 @@ export function diff(
 				if (
 					isClassComponent &&
 					newType.getDerivedStateFromProps == NULL &&
-					newProps != oldProps &&
+					newProps !== oldProps &&
 					c.componentWillReceiveProps != NULL
 				) {
 					c.componentWillReceiveProps(newProps, componentContext);
@@ -171,7 +171,7 @@ export function diff(
 							newProps,
 							c._nextState,
 							componentContext
-						) == false) ||
+						) === false) ||
 						newVNode._original == oldVNode._original)
 				) {
 					// More info about this here: https://gist.github.com/JoviDeCroock/bec5f2ce93544d2e6070ef8e0036e4e8
@@ -257,7 +257,7 @@ export function diff(
 			}
 
 			let isTopLevelFragment =
-				tmp != NULL && tmp.type == Fragment && tmp.key == NULL;
+				tmp != NULL && tmp.type === Fragment && tmp.key == NULL;
 			let renderResult = tmp;
 
 			if (isTopLevelFragment) {
