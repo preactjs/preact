@@ -61,17 +61,17 @@ export function createVNode(type, props, key, ref, original) {
 	const vnode = {
 		type,
 		props,
-		_dom: NULL,
-		_children: NULL,
-		_parent: NULL,
 		key,
 		ref,
-		_original: original == NULL ? ++vnodeId : original,
+		_children: NULL,
+		_parent: NULL,
 		_depth: 0,
+		_dom: NULL,
 		_component: NULL,
+		constructor: UNDEFINED,
+		_original: original == NULL ? ++vnodeId : original,
 		_index: -1,
-		_flags: 0,
-		constructor: UNDEFINED
+		_flags: 0
 	};
 
 	// Only invoke the vnode hook if this was *not* a direct copy:
