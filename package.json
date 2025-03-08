@@ -243,6 +243,7 @@
     "sade": "^1.8.1",
     "sinon": "^9.2.3",
     "sinon-chai": "^3.7.0",
+    "terser": "^5.16.1",
     "typescript": "5.1.6",
     "undici": "^4.12.0"
   },
