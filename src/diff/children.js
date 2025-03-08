@@ -419,20 +419,22 @@ function findMatchingIndex(
 	//
 	// If there is an unkeyed functional VNode, that isn't a built-in like our Fragment,
 	// we should not search as we risk re-using state of an unrelated VNode. (reverted for now)
-	let shouldSearch =
-		// (typeof type != 'function' || type === Fragment || key) &&
-		remainingOldChildren >
-		(oldVNode != NULL && (oldVNode._flags & MATCHED) == 0 ? 1 : 0);
-
+	//
+	//  Hot path 1, we have a match or replaced by null
 	if (
-		(oldVNode === NULL && childVNode.key == null) ||
+		(oldVNode === NULL && childVNode.key == NULL) ||
 		(oldVNode &&
 			key == oldVNode.key &&
 			type === oldVNode.type &&
 			(oldVNode._flags & MATCHED) == 0)
 	) {
 		return skewedIndex;
-	} else if (shouldSearch) {
+	}
+	//  Path 2, we need to search
+	if (
+		remainingOldChildren >
+		(oldVNode != NULL && (oldVNode._flags & MATCHED) == 0 ? 1 : 0)
+	) {
 		let x = skewedIndex - 1;
 		let y = skewedIndex + 1;
 		while (x >= 0 || y < oldChildren.length) {
