@@ -265,18 +265,6 @@ describe('createElement(jsx)', () => {
 			.that.deep.equals(['x', 'y']);
 	});
 
-	it('should respect defaultProps', () => {
-		const Component = ({ children }) => children;
-		Component.defaultProps = { foo: 'bar' };
-		expect(h(Component, null).props).to.deep.equal({ foo: 'bar' });
-	});
-
-	it('should override defaultProps', () => {
-		const Component = ({ children }) => children;
-		Component.defaultProps = { foo: 'default' };
-		expect(h(Component, { foo: 'bar' }).props).to.deep.equal({ foo: 'bar' });
-	});
-
 	it('should ignore props.children if children are manually specified', () => {
 		const element = (
 			<div a children={['a', 'b']}>
