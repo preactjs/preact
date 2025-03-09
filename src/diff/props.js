@@ -66,13 +66,8 @@ export function setProperty(dom, name, value, oldValue, namespace) {
 	else if (name[0] == 'o' && name[1] == 'n') {
 		useCapture = name != (name = name.replace(CAPTURE_REGEX, '$1'));
 
-		// Infer correct casing for DOM built-in events:
-		if (
-			name.toLowerCase() in dom ||
-			name == 'onFocusOut' ||
-			name == 'onFocusIn'
-		)
-			name = name.toLowerCase().slice(2);
+		// Infer correct casing for events:
+		if (name[2].toLowerCase() != name[2]) name = name.toLowerCase().slice(2);
 		else name = name.slice(2);
 
 		if (!dom._listeners) dom._listeners = {};
