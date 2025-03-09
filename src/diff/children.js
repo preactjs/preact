@@ -268,9 +268,9 @@ function constructNewChildrenArray(
 				// if the length is unchanged we can assume that no skew
 				// changes are needed.
 				if (newChildrenLength > oldChildrenLength) {
-					skew--;
+					skew = (skew - 1) | 0;
 				} else if (newChildrenLength < oldChildrenLength) {
-					skew++;
+					skew = (skew + 1) | 0;
 				}
 			}
 
@@ -296,14 +296,14 @@ function constructNewChildrenArray(
 			// only the first item be a re-scouting and all the others fall in their skewed counter-part.
 			// We could also further optimize for swaps
 			if (matchingIndex == skewedIndex - 1) {
-				skew--;
+				skew = (skew - 1) | 0;
 			} else if (matchingIndex == skewedIndex + 1) {
-				skew++;
+				skew = (skew + 1) | 0;
 			} else {
 				if (matchingIndex > skewedIndex) {
-					skew--;
+					skew = (skew - 1) | 0;
 				} else {
-					skew++;
+					skew = (skew + 1) | 0;
 				}
 
 				// Move this VNode's DOM if the original index (matchingIndex) doesn't
@@ -435,8 +435,8 @@ function findMatchingIndex(
 		remainingOldChildren >
 		(oldVNode != NULL && (oldVNode._flags & MATCHED) == 0 ? 1 : 0)
 	) {
-		let x = skewedIndex - 1;
-		let y = skewedIndex + 1;
+		let x = (skewedIndex - 1) | 0;
+		let y = (skewedIndex + 1) | 0;
 		while (x >= 0 || y < oldChildren.length) {
 			if (x >= 0) {
 				oldVNode = oldChildren[x];
@@ -448,7 +448,7 @@ function findMatchingIndex(
 				) {
 					return x;
 				}
-				x--;
+				x = (x - 1) | 0;
 			}
 
 			if (y < oldChildren.length) {
@@ -461,7 +461,7 @@ function findMatchingIndex(
 				) {
 					return y;
 				}
-				y++;
+				y = (y + 1) | 0;
 			}
 		}
 	}
