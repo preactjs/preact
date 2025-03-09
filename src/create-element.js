@@ -29,19 +29,6 @@ export function createElement(type, props, children) {
 			arguments.length > 3 ? slice.call(arguments, 2) : children;
 	}
 
-<<<<<<< HEAD
-	// If a Component VNode, check for and apply defaultProps
-	// Note: type may be undefined in development, must never error here.
-	if (typeof type == 'function' && type.defaultProps != NULL) {
-		for (i in type.defaultProps) {
-			if (normalizedProps[i] === UNDEFINED) {
-				normalizedProps[i] = type.defaultProps[i];
-			}
-		}
-	}
-
-=======
->>>>>>> 04457d6e (Move `defaultProps` into `preact/compat` (#4657))
 	return createVNode(type, normalizedProps, key, ref, NULL);
 }
 
