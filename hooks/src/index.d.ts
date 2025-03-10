@@ -52,13 +52,6 @@ export function useReducer<S, A, I>(
 	init: (arg: I) => S
 ): [S, Dispatch<A>];
 
-/** @deprecated Use the `Ref` type instead. */
-type PropRef<T> = MutableRef<T>;
-
-interface MutableRef<T> {
-	current: T;
-}
-
 /**
  * `useRef` returns a mutable ref object whose `.current` property is initialized to the passed argument
  * (`initialValue`). The returned object will persist for the full lifetime of the component.
@@ -68,9 +61,9 @@ interface MutableRef<T> {
  *
  * @param initialValue the initial value to store in the ref object
  */
-export function useRef<T>(initialValue: T): MutableRef<T>;
-export function useRef<T>(initialValue: T | null): RefObject<T>;
-export function useRef<T = undefined>(): MutableRef<T | undefined>;
+export function useRef<T>(initialValue: T): RefObject<T>;
+export function useRef<T>(initialValue: T | null): RefObject<T | null>;
+export function useRef<T>(initialValue: T | undefined): RefObject<T | undefined>;
 
 type EffectCallback = () => void | (() => void);
 /**
