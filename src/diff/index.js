@@ -172,7 +172,7 @@ export function diff(
 							c._nextState,
 							componentContext
 						) === false) ||
-						newVNode._original == oldVNode._original
+					newVNode._original == oldVNode._original
 				) {
 					// More info about this here: https://gist.github.com/JoviDeCroock/bec5f2ce93544d2e6070ef8e0036e4e8
 					if (newVNode._original != oldVNode._original) {
@@ -369,7 +369,11 @@ export function commitRoot(commitQueue, root, refQueue) {
 }
 
 function cloneNode(node) {
-	if (typeof node != 'object' || node == NULL) {
+	if (
+		typeof node != 'object' ||
+		node == NULL ||
+		(node._depth && node._depth > 1)
+	) {
 		return node;
 	}
 
@@ -531,8 +535,7 @@ function diffElementNodes(
 			if (
 				!isHydrating &&
 				(!oldHtml ||
-					(newHtml.__html != oldHtml.__html &&
-						newHtml.__html != dom.innerHTML))
+					(newHtml.__html != oldHtml.__html && newHtml.__html != dom.innerHTML))
 			) {
 				dom.innerHTML = newHtml.__html;
 			}
