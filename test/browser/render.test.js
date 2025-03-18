@@ -1996,4 +1996,35 @@ describe('render()', () => {
 		render(<App y="2" />, scratch);
 		expect(actions).to.deep.equal(['mounted 1', 'mounted 2', 'mounted 3']);
 	});
+
+	it('Should render intercepted component', () => {
+		class Test {
+			constructor(text) {
+				this.text = text;
+			}
+		}
+
+		const TestValue = props => {
+			return props.text;
+		};
+
+		Object.defineProperties(Test.prototype, {
+			constructor: { configurable: true, value: undefined },
+			type: { configurable: true, value: TestValue },
+			props: {
+				configurable: true,
+				get() {
+					return { text: this.text };
+				}
+			},
+			_depth: { configurable: true, value: 1 }
+		});
+
+		const test = new Test('hello world');
+
+		const App = () => <Fragment>{test}</Fragment>;
+
+		render(<App />, scratch);
+		expect(scratch.innerHTML).to.equal('hello world');
+	});
 });
