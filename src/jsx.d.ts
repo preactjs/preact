@@ -2587,13 +2587,13 @@ export namespace JSXInternal {
 		| {
 				multiple?: never;
 				// Spec states this branch is limited to "no `multiple` attribute AND no `size` attribute greater than 1".
-				// We can't really express that in TS though so we'll just ignore `size` for now.
-				//size?: never;
+				// `1` as a default, however, caused some web compat issues and forced Firefox to default to `0` instead.
+				size?: 0 | 1 | never;
 				role?: Signalish<'combobox' | 'menu' | undefined>;
 		  }
 		| {
-				multiple: Signalish<boolean | undefined>;
-				//size?: Signalish<number | undefined>;
+				multiple?: Signalish<boolean | undefined>;
+				size?: Signalish<number | undefined>;
 				role?: Signalish<'listbox' | undefined>;
 		  };
 
