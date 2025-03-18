@@ -192,8 +192,12 @@ const selectValid = <select role="menu" />;
 const selectInvalid = <select role="button" />;
 
 const selectMultipleValid = <select multiple={true} role="listbox" />;
-// @ts-expect-error A select multiple should not have a role of button
-const selectMultipleInvalid = <select multiple={true} role="button" />;
+// @ts-expect-error A select multiple should not have a role of menu
+const selectMultipleInvalid = <select multiple={true} role="menu" />;
+
+const selectSizeValid = <select size={5} role="listbox" />;
+// @ts-expect-error A select with a size other than `0` or `1` should not have a role of menu
+const selectSizeInvalid = <select size={5} role="menu" />;
 
 
 
