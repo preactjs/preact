@@ -372,7 +372,7 @@ function cloneNode(node) {
 	if (
 		typeof node != 'object' ||
 		node == NULL ||
-		(node._depth && node._depth > 1)
+		(node._depth && node._depth > 0)
 	) {
 		return node;
 	}
