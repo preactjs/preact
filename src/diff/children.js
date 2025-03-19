@@ -84,7 +84,7 @@ export function diffChildren(
 
 		// At this point, constructNewChildrenArray has assigned _index to be the
 		// matchingIndex for this VNode's oldVNode (or -1 if there is no oldVNode).
-		if (childVNode._index === -1) {
+		if (childVNode._index == -1) {
 			oldVNode = EMPTY_OBJ;
 		} else {
 			oldVNode = oldChildren[childVNode._index] || EMPTY_OBJ;
@@ -207,7 +207,7 @@ function constructNewChildrenArray(
 				NULL,
 				NULL
 			);
-		} else if (childVNode.constructor === UNDEFINED && childVNode._depth > 0) {
+		} else if (childVNode.constructor == UNDEFINED && childVNode._depth > 0) {
 			// VNode is already in use, clone it. This can happen in the following
 			// scenario:
 			//   const reuse = <div />
@@ -238,7 +238,7 @@ function constructNewChildrenArray(
 		));
 
 		oldVNode = NULL;
-		if (matchingIndex !== -1) {
+		if (matchingIndex != -1) {
 			oldVNode = oldChildren[matchingIndex];
 			remainingOldChildren--;
 			if (oldVNode) {
@@ -248,8 +248,8 @@ function constructNewChildrenArray(
 
 		// Here, we define isMounting for the purposes of the skew diffing
 		// algorithm. Nodes that are unsuspending are considered mounting and we detect
-		// this by checking if oldVNode._original === null
-		const isMounting = oldVNode == NULL || oldVNode._original === NULL;
+		// this by checking if oldVNode._original == null
+		const isMounting = oldVNode == NULL || oldVNode._original == NULL;
 
 		if (isMounting) {
 			if (matchingIndex == -1) {
@@ -428,7 +428,7 @@ function findMatchingIndex(
 		(oldVNode === NULL && childVNode.key == null) ||
 		(oldVNode &&
 			key == oldVNode.key &&
-			type === oldVNode.type &&
+			type == oldVNode.type &&
 			(oldVNode._flags & MATCHED) == 0)
 	) {
 		return skewedIndex;
@@ -442,7 +442,7 @@ function findMatchingIndex(
 					oldVNode &&
 					(oldVNode._flags & MATCHED) == 0 &&
 					key == oldVNode.key &&
-					type === oldVNode.type
+					type == oldVNode.type
 				) {
 					return x;
 				}
@@ -455,7 +455,7 @@ function findMatchingIndex(
 					oldVNode &&
 					(oldVNode._flags & MATCHED) == 0 &&
 					key == oldVNode.key &&
-					type === oldVNode.type
+					type == oldVNode.type
 				) {
 					return y;
 				}

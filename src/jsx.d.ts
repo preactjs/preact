@@ -4,7 +4,6 @@
 import {
 	ClassAttributes,
 	Component,
-	ComponentChild,
 	ComponentType,
 	FunctionComponent,
 	PreactDOMAttributes,
@@ -24,20 +23,20 @@ type Booleanish = boolean | 'true' | 'false';
 
 /** [MDN Reference](https://developer.mozilla.org/docs/Web/API/ToggleEvent) */
 interface ToggleEvent extends Event {
-    /** [MDN Reference](https://developer.mozilla.org/docs/Web/API/ToggleEvent/newState) */
-    readonly newState: string;
-    /** [MDN Reference](https://developer.mozilla.org/docs/Web/API/ToggleEvent/oldState) */
-    readonly oldState: string;
+	/** [MDN Reference](https://developer.mozilla.org/docs/Web/API/ToggleEvent/newState) */
+	readonly newState: string;
+	/** [MDN Reference](https://developer.mozilla.org/docs/Web/API/ToggleEvent/oldState) */
+	readonly oldState: string;
 }
 
 declare var ToggleEvent: {
-    prototype: ToggleEvent;
-    new(type: string, eventInitDict?: ToggleEventInit): ToggleEvent;
+	prototype: ToggleEvent;
+	new (type: string, eventInitDict?: ToggleEventInit): ToggleEvent;
 };
 
 interface ToggleEventInit extends EventInit {
-    newState?: string;
-    oldState?: string;
+	newState?: string;
+	oldState?: string;
 }
 
 // End TS >5.2
@@ -1627,7 +1626,7 @@ export namespace JSXInternal {
 		referrerPolicy?: Signalish<HTMLAttributeReferrerPolicy | undefined>;
 		rel?: Signalish<string | undefined>;
 		shape?: Signalish<string | undefined>;
-		target?: Signalish<string | undefined>;
+		target?: Signalish<HTMLAttributeAnchorTarget | undefined>;
 	}
 
 	interface AudioHTMLAttributes<T extends EventTarget = HTMLAudioElement>
@@ -1636,7 +1635,7 @@ export namespace JSXInternal {
 	interface BaseHTMLAttributes<T extends EventTarget = HTMLBaseElement>
 		extends HTMLAttributes<T> {
 		href?: Signalish<string | undefined>;
-		target?: Signalish<string | undefined>;
+		target?: Signalish<HTMLAttributeAnchorTarget | undefined>;
 	}
 
 	interface BlockquoteHTMLAttributes<T extends EventTarget = HTMLQuoteElement>
@@ -1702,7 +1701,6 @@ export namespace JSXInternal {
 	interface DetailsHTMLAttributes<T extends EventTarget = HTMLDetailsElement>
 		extends HTMLAttributes<T> {
 		open?: Signalish<boolean | undefined>;
-		onToggle?: GenericEventHandler<T> | undefined;
 	}
 
 	interface DialogHTMLAttributes<T extends EventTarget = HTMLDialogElement>
@@ -1756,7 +1754,7 @@ export namespace JSXInternal {
 		/** @deprecated */
 		frameBorder?: Signalish<number | string | undefined>;
 		height?: Signalish<number | string | undefined>;
-		loading?: 'eager' | 'lazy' | undefined;
+		loading?: Signalish<'eager' | 'lazy' | undefined>;
 		/** @deprecated */
 		marginHeight?: Signalish<number | undefined>;
 		/** @deprecated */
@@ -1782,6 +1780,8 @@ export namespace JSXInternal {
 		crossorigin?: Signalish<HTMLAttributeCrossOrigin>;
 		crossOrigin?: Signalish<HTMLAttributeCrossOrigin>;
 		decoding?: Signalish<'async' | 'auto' | 'sync' | undefined>;
+		fetchpriority?: Signalish<'high' | 'auto' | 'low' | undefined>;
+		fetchPriority?: Signalish<'high' | 'auto' | 'low' | undefined>;
 		height?: Signalish<number | string | undefined>;
 		loading?: Signalish<'eager' | 'lazy' | undefined>;
 		referrerpolicy?: Signalish<HTMLAttributeReferrerPolicy | undefined>;
@@ -1911,7 +1911,8 @@ export namespace JSXInternal {
 		as?: Signalish<string | undefined>;
 		crossorigin?: Signalish<HTMLAttributeCrossOrigin>;
 		crossOrigin?: Signalish<HTMLAttributeCrossOrigin>;
-		fetchPriority?: Signalish<'high' | 'low' | 'auto'>;
+		fetchpriority?: Signalish<'high' | 'low' | 'auto' | undefined>;
+		fetchPriority?: Signalish<'high' | 'low' | 'auto' | undefined>;
 		href?: Signalish<string | undefined>;
 		hreflang?: Signalish<string | undefined>;
 		hrefLang?: Signalish<string | undefined>;
@@ -1919,7 +1920,7 @@ export namespace JSXInternal {
 		media?: Signalish<string | undefined>;
 		imageSrcSet?: Signalish<string | undefined>;
 		referrerpolicy?: Signalish<HTMLAttributeReferrerPolicy | undefined>;
-		referrerPolicy?: HTMLAttributeReferrerPolicy | undefined;
+		referrerPolicy?: Signalish<HTMLAttributeReferrerPolicy | undefined>;
 		rel?: Signalish<string | undefined>;
 		sizes?: Signalish<string | undefined>;
 		type?: Signalish<string | undefined>;
@@ -1952,8 +1953,12 @@ export namespace JSXInternal {
 		autoplay?: Signalish<boolean | undefined>;
 		autoPlay?: Signalish<boolean | undefined>;
 		controls?: Signalish<boolean | undefined>;
-		controlslist?: Signalish<'nodownload' | 'nofullscreen' | 'noremoteplayback' | undefined>;
-		controlsList?: Signalish<'nodownload' | 'nofullscreen' | 'noremoteplayback' | undefined>;
+		controlslist?: Signalish<
+			'nodownload' | 'nofullscreen' | 'noremoteplayback' | undefined
+		>;
+		controlsList?: Signalish<
+			'nodownload' | 'nofullscreen' | 'noremoteplayback' | undefined
+		>;
 		crossorigin?: Signalish<HTMLAttributeCrossOrigin>;
 		crossOrigin?: Signalish<HTMLAttributeCrossOrigin>;
 		currentTime?: Signalish<number | undefined>;
@@ -2073,7 +2078,7 @@ export namespace JSXInternal {
 		nomodule?: Signalish<boolean | undefined>;
 		noModule?: Signalish<boolean | undefined>;
 		referrerpolicy?: Signalish<HTMLAttributeReferrerPolicy | undefined>;
-		referrerPolicy?: HTMLAttributeReferrerPolicy | undefined;
+		referrerPolicy?: Signalish<HTMLAttributeReferrerPolicy | undefined>;
 		src?: Signalish<string | undefined>;
 		type?: Signalish<string | undefined>;
 	}
@@ -2147,7 +2152,7 @@ export namespace JSXInternal {
 		autocomplete?: Signalish<string | undefined>;
 		autoComplete?: Signalish<string | undefined>;
 		cols?: Signalish<number | undefined>;
-		defaultValue?: Signalish<string | undefined>;
+		defaultValue?: Signalish<string | number | undefined>;
 		dirName?: Signalish<string | undefined>;
 		disabled?: Signalish<boolean | undefined>;
 		form?: Signalish<string | undefined>;

@@ -1005,4 +1005,36 @@ describe('createContext', () => {
 		expect(scratch.textContent).to.equal('bar');
 		expect(spy).not.to.be.called;
 	});
+
+	it('should pass context through strict equal children', () => {
+		const context = { foo: 'bar' };
+		const Ctx = createContext(null)
+
+		/** @type {(s: { foo: string }) => void} */
+		let set;
+		class Wrapper extends Component {
+			constructor(props) {
+				super(props);
+				this.state = context;
+				set = this.setState.bind(this)
+			}
+
+			getChildContext() {
+				return context;
+			}
+
+			render() {
+				return (
+					<Ctx.Provider value={this.state}>{this.props.children}</Ctx.Provider>
+				);
+			}
+		}
+
+		render(<Wrapper><Ctx.Consumer>{value => <p>{value.foo}</p>}</Ctx.Consumer></Wrapper>, scratch);
+		expect(scratch.innerHTML).to.equal('<p>bar</p>');
+
+		set({ foo: 'baz' })
+		rerender();
+		expect(scratch.innerHTML).to.equal('<p>baz</p>');
+	});
 });

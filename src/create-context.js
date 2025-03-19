@@ -19,7 +19,7 @@ export function createContext(defaultValue) {
 
 			this.shouldComponentUpdate = function (_props) {
 				// @ts-expect-error even
-				if (this.props.value !== _props.value) {
+				if (this.props.value != _props.value) {
 					subs.forEach(c => {
 						c._force = true;
 						enqueueRender(c);
