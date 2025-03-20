@@ -1,4 +1,4 @@
-import { setupRerender } from 'preact/test-utils';
+import { act, setupRerender } from 'preact/test-utils';
 import React, {
 	createElement,
 	render,
@@ -9,7 +9,8 @@ import React, {
 	createContext,
 	useState,
 	useEffect,
-	useLayoutEffect
+	useLayoutEffect,
+	memo
 } from 'preact/compat';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { createLazy, createSuspender } from './suspense-utils';
@@ -1501,8 +1502,8 @@ describe('suspense', () => {
 
 		/** @type {() => void} */
 		let hide,
-		/** @type {(v) => void} */
-		setValue;
+			/** @type {(v) => void} */
+			setValue;
 
 		class Conditional extends Component {
 			constructor(props) {
@@ -2158,5 +2159,58 @@ describe('suspense', () => {
 			rerender();
 			expect(scratch.innerHTML).to.equal('<div><p>hello world</p></div>');
 		});
+	});
+
+	it('should re-execute descendant memoed component effect when lazy boundary resolves', async () => {
+		const MemodComp = memo(() => {
+			const [state, setState] = useState('Memod effect not executed');
+			useEffect(() => {
+				setState('Memod effect executed');
+			}, []);
+			return <span>{state}</span>;
+		});
+
+		const NormalComp = () => {
+			const [state, setState] = useState('effect not executed');
+			useEffect(() => {
+				setState('effect executed');
+			}, []);
+			return <span>{state}</span>;
+		};
+
+		/** @type {() => Promise<void>} */
+		let resolve;
+		const LazyComp = lazy(() => {
+			const p = new Promise(res => {
+				resolve = () => {
+					res({ default: NormalComp });
+					return p;
+				};
+			});
+
+			return p;
+		});
+
+		render(
+			<Suspense fallback={<div>Suspended...</div>}>
+				<div>
+					<MemodComp />
+					<LazyComp />
+				</div>
+			</Suspense>,
+			scratch
+		);
+
+		rerender();
+
+		expect(scratch.innerHTML).to.eql(`<div>Suspended...</div>`);
+
+		await resolve();
+
+		await act(() => rerender());
+
+		return expect(scratch.innerHTML).to.eql(
+			`<div><span>Memod effect executed</span><span>effect executed</span></div>`
+		);
 	});
 });
