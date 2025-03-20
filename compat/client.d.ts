@@ -10,4 +10,4 @@ export function createRoot(container: preact.ContainerNode): {
 export function hydrateRoot(
 	container: preact.ContainerNode,
 	children: preact.ComponentChild
-): typeof createRoot;
+): ReturnType<typeof createRoot>;
