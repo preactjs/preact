@@ -4,7 +4,7 @@ import * as preact from '../../';
 describe('build artifact', () => {
 	// #1075 Check that the build artifact has the correct exports
 	it('should have exported properties', () => {
-		expect(preact).to.be.an('object');
+		expect(typeof preact).to.equal('object');
 		expect(preact).to.have.property('createElement');
 		expect(preact).to.have.property('h');
 		expect(preact).to.have.property('Component');
