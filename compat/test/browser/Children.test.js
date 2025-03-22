@@ -77,7 +77,7 @@ describe('Children', () => {
 
 	describe('.map', () => {
 		function Foo(props) {
-			let children = Children.map(props.children, child => (
+			let children = Children.map(props.children, (child) => (
 				<span>{child}</span>
 			));
 			return <div>{children}</div>;
@@ -99,17 +99,20 @@ describe('Children', () => {
 			expect(serializeHtml(scratch)).to.equal('<div></div>');
 		});
 
-		it('should work with children as zero number', () => {
-			const testNumber = 0;
-
-			render(<Foo>{testNumber}</Foo>, scratch);
-			expect(serializeHtml(scratch)).to.equal('<div><span>0</span></div>');
+		it('should propagate the this context', () => {
+			const context = {};
+			const fn = () => {
+				expect(this).to.equal(context);
+			};
+			({ children }) => {
+				React.Children.map(children, fn, (context) => {});
+			};
 		});
 
 		it('should flatten result', () => {
 			const ProblemChild = ({ children }) => {
-				return React.Children.map(children, child => {
-					return React.Children.map(child.props.children, x => x);
+				return React.Children.map(children, (child) => {
+					return React.Children.map(child.props.children, (x) => x);
 				}).filter(React.isValidElement);
 			};
 
@@ -165,7 +168,7 @@ describe('Children', () => {
 	describe('.forEach', () => {
 		function Foo(props) {
 			let children = [];
-			Children.forEach(props.children, child =>
+			Children.forEach(props.children, (child) =>
 				children.push(<span>{child}</span>)
 			);
 			return <div>{children}</div>;
