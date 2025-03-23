@@ -1,7 +1,6 @@
 import { setupRerender } from 'preact/test-utils';
 import { createElement, render, Component, createRef, Fragment } from 'preact';
 import { setupScratch, teardown } from '../_util/helpers';
-import { vi } from 'vitest';
 
 /** @jsx createElement */
 
