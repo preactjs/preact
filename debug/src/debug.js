@@ -11,7 +11,7 @@ import {
 	getCurrentVNode,
 	getDisplayName
 } from './component-stack';
-import { assign, isNaN } from './util';
+import { isNaN } from './util';
 
 const isWeakMapSupported = typeof WeakMap == 'function';
 
@@ -229,15 +229,12 @@ export function initDebug() {
 				}
 			}
 
-			let values = vnode.props;
-			if (vnode.type._forwarded) {
-				values = assign({}, values);
-				delete values.ref;
-			}
+			/* eslint-disable-next-line */
+			const { ref: _ref, ...props } = vnode.props;
 
 			checkPropTypes(
 				vnode.type.propTypes,
-				values,
+				props,
 				'prop',
 				getDisplayName(vnode),
 				() => getOwnerStack(vnode)

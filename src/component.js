@@ -159,11 +159,11 @@ function renderComponent(component) {
  */
 function updateParentDomPointers(vnode) {
 	if ((vnode = vnode._parent) != NULL && vnode._component != NULL) {
-		vnode._dom = vnode._component.base = NULL;
+		vnode._dom = NULL;
 		for (let i = 0; i < vnode._children.length; i++) {
 			let child = vnode._children[i];
 			if (child != NULL && child._dom != NULL) {
-				vnode._dom = vnode._component.base = child._dom;
+				vnode._dom = child._dom;
 				break;
 			}
 		}
@@ -189,11 +189,6 @@ let rerenderQueue = [];
 
 let prevDebounce;
 
-const defer =
-	typeof Promise == 'function'
-		? Promise.prototype.then.bind(Promise.resolve())
-		: setTimeout;
-
 /**
  * Enqueue a rerender of a component
  * @param {import('./internal').Component} c The component to rerender
@@ -207,7 +202,7 @@ export function enqueueRender(c) {
 		prevDebounce != options.debounceRendering
 	) {
 		prevDebounce = options.debounceRendering;
-		(prevDebounce || defer)(process);
+		(prevDebounce || queueMicrotask)(process);
 	}
 }
 
