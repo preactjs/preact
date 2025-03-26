@@ -174,6 +174,7 @@ export function diff(
 						) === false) ||
 					newVNode._original == oldVNode._original
 				) {
+					console.log('bailout', newVNode.type.name);
 					// More info about this here: https://gist.github.com/JoviDeCroock/bec5f2ce93544d2e6070ef8e0036e4e8
 					if (newVNode._original != oldVNode._original) {
 						// When we are dealing with a bail because of sCU we have to update

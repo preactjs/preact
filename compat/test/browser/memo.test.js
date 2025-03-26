@@ -9,7 +9,9 @@ import React, {
 	Component,
 	render,
 	memo,
-	useState
+	useState,
+	createContext,
+	useContext
 } from 'preact/compat';
 
 const h = React.createElement;
@@ -232,5 +234,58 @@ describe('memo()', () => {
 		expect(scratch.innerHTML).to.equal(
 			`<ol><li>A</li><li>B</li><li class="selected">C</li><li>D</li></ol>`
 		);
+	});
+
+	it('should update select element value with new option', () => {
+		let update;
+
+		const ctx = createContext();
+		const Select = function Select({ children }) {
+			const selectedItem = useContext(ctx).find(item => item.selected).id;
+			return <select value={selectedItem}>{children}</select>;
+		};
+
+		const Options = memo(function Options() {
+			const items = useContext(ctx);
+			return items.map(item => (
+				<option key={item.id} value={item.id}>
+					{item.id}
+				</option>
+			));
+		});
+
+		const App = () => {
+			const [values, setValue] = useState([
+				{ id: 0, selected: true },
+				{ id: 1, selected: false }
+			]);
+			update = () => {
+				setValue([
+					{ id: 0, selected: false },
+					{ id: 1, selected: false },
+					{ id: 2, selected: true }
+				]);
+			};
+			return (
+				<ctx.Provider value={values}>
+					<Select>
+						<Options />
+					</Select>
+				</ctx.Provider>
+			);
+		};
+
+		render(<App />, scratch);
+		expect(scratch.firstElementChild.value).to.equal('0');
+		expect(scratch.innerHTML).to.equal(
+			'<select><option value="0">0</option><option value="1">1</option></select>'
+		);
+
+		update();
+		rerender();
+		expect(scratch.innerHTML).to.equal(
+			'<select><option value="0">0</option><option value="1">1</option><option value="2">2</option></select>'
+		);
+		expect(scratch.firstElementChild.value).to.equal('2');
 	});
 });
