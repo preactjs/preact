@@ -11,6 +11,8 @@ import { shallowDiffers } from './util';
 export function memo(c, comparer) {
 	function shouldUpdate(nextProps) {
 		let ref = this.props.ref;
+		if (this._el._component._force) return true;
+
 		let updateRef = ref == nextProps.ref;
 		if (!updateRef && ref) {
 			ref.call ? ref(null) : (ref.current = null);
@@ -25,7 +27,9 @@ export function memo(c, comparer) {
 
 	function Memoed(props) {
 		this.shouldComponentUpdate = shouldUpdate;
-		return createElement(c, props);
+		const element = createElement(c, props);
+		this._el = element;
+		return element;
 	}
 	Memoed.displayName = 'Memo(' + (c.displayName || c.name) + ')';
 	Memoed.prototype.isReactComponent = true;
