@@ -51,7 +51,7 @@ interface CommandEvent extends Event {
 
 declare var CommandEvent: {
 	prototype: CommandEvent;
-	new(type: string, eventInitDict?: CommandEventInit): CommandEvent;
+	new (type: string, eventInitDict?: CommandEventInit): CommandEvent;
 };
 
 interface CommandEventInit extends EventInit {
@@ -513,8 +513,10 @@ export namespace JSXInternal {
 		TargetedEvent<Target, AnimationEvent>;
 	export type TargetedClipboardEvent<Target extends EventTarget> =
 		TargetedEvent<Target, ClipboardEvent>;
-	export type TargetedCommandEvent<Target extends EventTarget> =
-		TargetedEvent<Target, CommandEvent>;
+	export type TargetedCommandEvent<Target extends EventTarget> = TargetedEvent<
+		Target,
+		CommandEvent
+	>;
 	export type TargetedCompositionEvent<Target extends EventTarget> =
 		TargetedEvent<Target, CompositionEvent>;
 	export type TargetedDragEvent<Target extends EventTarget> = TargetedEvent<
@@ -576,8 +578,9 @@ export namespace JSXInternal {
 	export type ClipboardEventHandler<Target extends EventTarget> = EventHandler<
 		TargetedClipboardEvent<Target>
 	>;
-	export type CommandEventHandler<Target extends EventTarget> =
+	export type CommandEventHandler<Target extends EventTarget> = EventHandler<
 		TargetedCommandEvent<Target>
+	>;
 	export type CompositionEventHandler<Target extends EventTarget> =
 		EventHandler<TargetedCompositionEvent<Target>>;
 	export type DragEventHandler<Target extends EventTarget> = EventHandler<
@@ -850,7 +853,7 @@ export namespace JSXInternal {
 		onResize?: PictureInPictureEventHandler<Target>;
 		onResizeCapture?: PictureInPictureEventHandler<Target>;
 
-		onCommand?: CommandEventHandler<Target>
+		onCommand?: CommandEventHandler<Target>;
 	}
 
 	// All the WAI-ARIA 1.1 attributes from https://www.w3.org/TR/wai-aria-1.1/
@@ -1286,8 +1289,12 @@ export namespace JSXInternal {
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/contextmenu */
 		contextmenu?: Signalish<string | undefined>;
 		controls?: Signalish<boolean | undefined>;
-		controlslist?: Signalish<'nodownload' | 'nofullscreen' | 'noremoteplayback' | undefined>;
-		controlsList?: Signalish<'nodownload' | 'nofullscreen' | 'noremoteplayback' | undefined>;
+		controlslist?: Signalish<
+			'nodownload' | 'nofullscreen' | 'noremoteplayback' | undefined
+		>;
+		controlsList?: Signalish<
+			'nodownload' | 'nofullscreen' | 'noremoteplayback' | undefined
+		>;
 		coords?: Signalish<string | undefined>;
 		crossOrigin?: Signalish<string | undefined>;
 		crossorigin?: Signalish<string | undefined>;
