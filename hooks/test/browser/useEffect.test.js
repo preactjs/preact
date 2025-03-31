@@ -636,4 +636,26 @@ describe('useEffect', () => {
 		expect(calls.length).to.equal(1);
 		expect(calls).to.deep.equal(['doing effecthi']);
 	});
+
+	it('should not rerun when receiving NaN on subsequent renders', () => {
+		const calls = [];
+		const Component = ({ value }) => {
+			const [count, setCount] = useState(0);
+			useEffect(() => {
+				calls.push('doing effect' + count);
+				setCount(count + 1);
+				return () => {
+					calls.push('cleaning up' + count);
+				};
+			}, [value]);
+			return <p>{count}</p>;
+		};
+		const App = () => <Component value={NaN} />;
+
+		act(() => {
+			render(<App />, scratch);
+		});
+		expect(calls.length).to.equal(1);
+		expect(calls).to.deep.equal(['doing effect0']);
+	});
 });
