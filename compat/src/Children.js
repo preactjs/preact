@@ -1,8 +1,11 @@
 import { toChildArray } from 'preact';
 
-const mapFn = (children, fn) => {
-	if (children == null) return null;
-	return toChildArray(toChildArray(children).map(fn));
+const mapFn = (children, fn, context) => {
+	if (!children) return null;
+	return toChildArray(children).reduce(
+		(acc, value, index) => acc.concat(fn.call(context, value, index)),
+		[]
+	);
 };
 
 // This API is completely unnecessary for Preact, so it's basically passthrough.
