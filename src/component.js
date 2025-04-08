@@ -189,7 +189,7 @@ let rerenderQueue = [];
 
 let prevDebounce;
 
-const defer =
+export const defer =
 	typeof Promise == 'function'
 		? Promise.prototype.then.bind(Promise.resolve())
 		: setTimeout;

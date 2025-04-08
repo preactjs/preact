@@ -11,6 +11,7 @@ import { shallowDiffers } from './util';
 export function memo(c, comparer) {
 	function shouldUpdate(nextProps) {
 		let ref = this.props.ref;
+
 		let updateRef = ref == nextProps.ref;
 		if (!updateRef && ref) {
 			ref.call ? ref(null) : (ref.current = null);
