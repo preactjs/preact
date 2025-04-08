@@ -236,7 +236,7 @@ describe('memo()', () => {
 		);
 	});
 
-	it('should update select element value with new option', () => {
+	it('should update select element value with new option', done => {
 		let update;
 
 		const ctx = createContext();
@@ -286,6 +286,9 @@ describe('memo()', () => {
 		expect(scratch.innerHTML).to.equal(
 			'<select><option value="0">0</option><option value="1">1</option><option value="2">2</option></select>'
 		);
-		expect(scratch.firstElementChild.value).to.equal('2');
+		setTimeout(() => {
+			expect(scratch.firstElementChild.value).to.equal('2');
+			done();
+		});
 	});
 });
