@@ -1,4 +1,4 @@
-import { setupRerender } from 'preact/test-utils';
+import { act, setupRerender } from 'preact/test-utils';
 import {
 	createEvent,
 	setupScratch,
@@ -281,8 +281,9 @@ describe('memo()', () => {
 			'<select><option value="0">0</option><option value="1">1</option></select>'
 		);
 
-		update();
-		rerender();
+		act(() => {
+			update();
+		});
 		expect(scratch.innerHTML).to.equal(
 			'<select><option value="0">0</option><option value="1">1</option><option value="2">2</option></select>'
 		);

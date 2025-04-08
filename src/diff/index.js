@@ -9,7 +9,7 @@ import {
 	UNDEFINED,
 	XHTML_NAMESPACE
 } from '../constants';
-import { BaseComponent, getDomSibling } from '../component';
+import { BaseComponent, defer, getDomSibling } from '../component';
 import { Fragment } from '../create-element';
 import { diffChildren } from './children';
 import { setProperty } from './props';
@@ -587,7 +587,13 @@ function diffElementNodes(
 					// again, which triggers IE11 to re-evaluate the select value
 					(nodeType == 'option' && inputValue != oldProps[i]))
 			) {
-				setProperty(dom, i, inputValue, oldProps[i], namespace);
+				if (nodeType == 'select') {
+					(options.debounceRendering || defer)(() => {
+						setProperty(dom, 'value', inputValue, oldProps.value, namespace);
+					});
+				} else {
+					setProperty(dom, i, inputValue, oldProps[i], namespace);
+				}
 			}
 
 			i = 'checked';
