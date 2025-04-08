@@ -1289,12 +1289,8 @@ export namespace JSXInternal {
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/contextmenu */
 		contextmenu?: Signalish<string | undefined>;
 		controls?: Signalish<boolean | undefined>;
-		controlslist?: Signalish<
-			'nodownload' | 'nofullscreen' | 'noremoteplayback' | undefined
-		>;
-		controlsList?: Signalish<
-			'nodownload' | 'nofullscreen' | 'noremoteplayback' | undefined
-		>;
+		controlslist?: Signalish<string | undefined>;
+		controlsList?: Signalish<string | undefined>;
 		coords?: Signalish<string | undefined>;
 		crossOrigin?: Signalish<string | undefined>;
 		crossorigin?: Signalish<string | undefined>;
@@ -1960,12 +1956,8 @@ export namespace JSXInternal {
 		autoplay?: Signalish<boolean | undefined>;
 		autoPlay?: Signalish<boolean | undefined>;
 		controls?: Signalish<boolean | undefined>;
-		controlslist?: Signalish<
-			'nodownload' | 'nofullscreen' | 'noremoteplayback' | undefined
-		>;
-		controlsList?: Signalish<
-			'nodownload' | 'nofullscreen' | 'noremoteplayback' | undefined
-		>;
+		controlslist?: Signalish<string | undefined>;
+		controlsList?: Signalish<string | undefined>;
 		crossorigin?: Signalish<HTMLAttributeCrossOrigin>;
 		crossOrigin?: Signalish<HTMLAttributeCrossOrigin>;
 		currentTime?: Signalish<number | undefined>;
