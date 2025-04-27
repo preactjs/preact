@@ -500,8 +500,8 @@ function diffElementNodes(
 				oldHtml = value;
 			} else if (!(i in newProps)) {
 				if (
-					(i == 'value' && 'defaultValue' in newProps) ||
-					(i == 'checked' && 'defaultChecked' in newProps)
+					(i == VALUE && 'defaultValue' in newProps) ||
+					(i == CHECKED && 'defaultChecked' in newProps)
 				) {
 					continue;
 				}
@@ -517,9 +517,9 @@ function diffElementNodes(
 				newChildren = value;
 			} else if (i == 'dangerouslySetInnerHTML') {
 				newHtml = value;
-			} else if (i == 'value') {
+			} else if (i == VALUE) {
 				inputValue = value;
-			} else if (i == 'checked') {
+			} else if (i == CHECKED) {
 				checked = value;
 			} else if (
 				(!isHydrating || typeof value == 'function') &&
@@ -571,9 +571,9 @@ function diffElementNodes(
 
 		// As above, don't diff props during hydration
 		if (!isHydrating) {
-			i = 'value';
-			if (nodeType == 'progress' && inputValue == NULL) {
-				dom.removeAttribute('value');
+			i = VALUE;
+			if (nodeType == PROGRESS && inputValue == NULL) {
+				dom.removeAttribute(VALUE);
 			} else if (
 				inputValue != UNDEFINED &&
 				// #2756 For the <progress>-element the initial value is 0,
@@ -581,7 +581,7 @@ function diffElementNodes(
 				// is missing the progress bar is treated as indeterminate.
 				// To fix that we'll always update it when it is 0 for progress elements
 				(inputValue !== dom[i] ||
-					(nodeType == 'progress' && !inputValue) ||
+					(nodeType == PROGRESS && !inputValue) ||
 					// This is only for IE 11 to fix <select> value not being updated.
 					// To avoid a stale select value we need to set the option.value
 					// again, which triggers IE11 to re-evaluate the select value
@@ -590,7 +590,7 @@ function diffElementNodes(
 				setProperty(dom, i, inputValue, oldProps[i], namespace);
 			}
 
-			i = 'checked';
+			i = CHECKED;
 			if (checked != UNDEFINED && checked != dom[i]) {
 				setProperty(dom, i, checked, oldProps[i], namespace);
 			}
@@ -600,6 +600,9 @@ function diffElementNodes(
 	return dom;
 }
 
+const PROGRESS = 'progress';
+const VALUE = 'value';
+const CHECKED = 'checked';
 /**
  * Invoke or update a ref, depending on whether it is a function or object ref.
  * @param {Ref<any> & { _unmount?: unknown }} ref
