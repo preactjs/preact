@@ -1,6 +1,5 @@
 import { execFileSync } from 'child_process';
 import fs from 'fs';
-import { fetch, stream } from 'undici';
 import sade from 'sade';
 
 let DEBUG = false;
@@ -70,16 +69,23 @@ async function main(tag, opts) {
 
 	// 3. Download release asset
 	log.info(`\nDownloading ${packageAsset.name}...`);
-	await stream(
-		packageAsset.browser_download_url,
-		{
-			method: 'GET',
-			maxRedirections: 30
-		},
-		() => fs.createWriteStream(packageAsset.name)
-	);
 
-	// 3. Run npm publish
+	const assetResponse = await fetch(packageAsset.browser_download_url, {
+		redirect: 'follow'
+	});
+
+	if (!assetResponse.ok) {
+		log.error('Failed to download asset:');
+		log.error(`${assetResponse.status} ${assetResponse.statusText}`);
+		process.exit(1);
+	}
+
+	// Get the binary data as an ArrayBuffer
+	const arrayBuffer = await assetResponse.arrayBuffer();
+	// Write the buffer to file
+	fs.writeFileSync(packageAsset.name, Buffer.from(arrayBuffer));
+
+	// 4. Run npm publish
 	const args = ['publish', packageAsset.name];
 	if (opts['npm-tag']) {
 		args.push('--tag', opts['npm-tag']);

@@ -235,7 +235,6 @@
     "sinon-chai": "^4.0.0",
     "terser": "5.16.0",
     "typescript": "5.1.6",
-    "undici": "^4.12.0",
     "vite": "^6.2.0",
     "vitest": "^3.0.8",
     "webdriverio": "^9.11.0"

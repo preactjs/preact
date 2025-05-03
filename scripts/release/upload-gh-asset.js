@@ -55,6 +55,7 @@ async function upload({ require, github, context, glob, release }) {
 		...context.repo,
 		release_id: release.id,
 		name: assetName,
+		// @ts-ignore
 		data: fs.readFileSync(assetPath)
 	});
 
