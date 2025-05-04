@@ -32,6 +32,12 @@ function Portal(props) {
 	}
 
 	if (!_this._temp) {
+		// Ensure the element has a mask for useId invocations
+		let root = _this._vnode;
+		while (root !== null && !root._mask && root._parent !== null) {
+			root = root._parent;
+		}
+
 		_this._container = container;
 
 		// Create a fake DOM parent node that manages a subset of `container`'s children:
@@ -39,6 +45,7 @@ function Portal(props) {
 			nodeType: 1,
 			parentNode: container,
 			childNodes: [],
+			_children: { _mask: root._mask },
 			contains: () => true,
 			// Technically this isn't needed
 			appendChild(child) {
