@@ -56,11 +56,22 @@ function Portal(props) {
 		};
 	}
 
-	// Render our wrapping element into temp.
-	render(
-		createElement(ContextProvider, { context: _this.context }, props._vnode),
-		_this._temp
+	let element = createElement(
+		ContextProvider,
+		{ context: _this.context },
+		props._vnode
 	);
+
+	// Ensure the element has a mask for useId invocations
+	let root = _this._vnode;
+	while (root !== null && !root._mask && root._parent !== null) {
+		root = root._parent;
+	}
+
+	element._mask = root._mask;
+
+	// Render our wrapping element into temp.
+	render(element, _this._temp);
 }
 
 /**

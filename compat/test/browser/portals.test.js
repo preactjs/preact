@@ -5,10 +5,12 @@ import React, {
 	useState,
 	Component,
 	useEffect,
-	Fragment
+	Fragment,
+	useId
 } from 'preact/compat';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { setupRerender, act } from 'preact/test-utils';
+import { expect } from 'chai';
 
 /* eslint-disable react/jsx-boolean-value, react/display-name, prefer-arrow-callback */
 
@@ -212,6 +214,38 @@ describe('Portal', () => {
 		expect(scratch.firstChild.firstChild.childNodes.length).to.equal(0);
 	});
 
+	it('should have unique ids for each portal', () => {
+		let root = document.createElement('div');
+		let dialog = document.createElement('div');
+		dialog.id = 'container';
+
+		scratch.appendChild(root);
+		scratch.appendChild(dialog);
+
+		function Id() {
+			const id = useId();
+			return id;
+		}
+
+		function Dialog() {
+			return <Id />;
+		}
+
+		function App() {
+			return (
+				<div>
+					<Id />
+					{createPortal(<Dialog />, dialog)}
+				</div>
+			);
+		}
+
+		render(<App />, root);
+		expect(scratch.innerHTML).to.equal(
+			'<div><div>P0-0</div></div><div id="container">P0-1</div>'
+		);
+	});
+
 	it('should unmount Portal', () => {
 		let root = document.createElement('div');
 		let dialog = document.createElement('div');
@@ -237,8 +271,8 @@ describe('Portal', () => {
 	it('should leave a working root after the portal', () => {
 		/** @type {() => void} */
 		let toggle,
-		/** @type {() => void} */
-		toggle2;
+			/** @type {() => void} */
+			toggle2;
 
 		function Foo(props) {
 			const [mounted, setMounted] = useState(false);
@@ -289,8 +323,8 @@ describe('Portal', () => {
 	it('should work with stacking portals', () => {
 		/** @type {() => void} */
 		let toggle,
-		/** @type {() => void} */
-		toggle2;
+			/** @type {() => void} */
+			toggle2;
 
 		function Foo(props) {
 			const [mounted, setMounted] = useState(false);
@@ -377,8 +411,8 @@ describe('Portal', () => {
 	it('should work with replacing placeholder portals', () => {
 		/** @type {() => void} */
 		let toggle,
-		/** @type {() => void} */
-		toggle2;
+			/** @type {() => void} */
+			toggle2;
 
 		function Foo(props) {
 			const [mounted, setMounted] = useState(false);
@@ -463,8 +497,9 @@ describe('Portal', () => {
 	it('should support nested portals', () => {
 		/** @type {() => void} */
 		let toggle,
-		/** @type {() => void} */
-		toggle2, inner;
+			/** @type {() => void} */
+			toggle2,
+			inner;
 
 		function Bar() {
 			const [mounted, setMounted] = useState(false);
