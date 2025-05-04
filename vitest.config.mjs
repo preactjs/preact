@@ -265,7 +265,7 @@ export default defineConfig({
 		},
 		setupFiles: ['./vitest.setup.js'],
 		globals: true,
-		dangerouslyIgnoreUnhandledErrors: true,
+		// dangerouslyIgnoreUnhandledErrors: true,
 		browser: {
 			// TODO: isolate doesn't work it leaks across all pages
 			// isolate: false,
