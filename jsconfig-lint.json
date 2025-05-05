@@ -1,9 +1,16 @@
 {
   "extends": "./jsconfig.json",
+  "compilerOptions": {
+    "skipLibCheck": true,
+    "noEmit": true,
+    "typeRoots": ["./node_modules/@types", "./types"]
+  },
   "include": [
     "src/**/*",
     "hooks/src/**/*",
     "compat/**/*.d.ts",
-    "jsx-runtime/**/*.d.ts"
-  ]
+    "jsx-runtime/**/*.d.ts",
+    "types/**/*.d.ts"
+  ],
+  "exclude": ["**/node_modules/**", "node_modules"]
 }

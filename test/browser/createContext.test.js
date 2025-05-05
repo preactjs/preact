@@ -7,6 +7,7 @@ import {
 	Fragment
 } from 'preact';
 import { setupScratch, teardown } from '../_util/helpers';
+import { vi } from 'vitest';
 
 /** @jsx createElement */
 
@@ -128,7 +129,7 @@ describe('createContext', () => {
 		expect(renders).to.equal(1);
 	});
 
-	it('should preserve provider context through nesting providers', done => {
+	it('should preserve provider context through nesting providers', async () => {
 		const { Provider, Consumer } = createContext(null);
 		const CONTEXT = { a: 'a' };
 		const CHILD_CONTEXT = { b: 'b' };
@@ -177,10 +178,12 @@ describe('createContext', () => {
 		expect(parentContext).to.equal(CONTEXT);
 		expect(childContext).to.equal(CHILD_CONTEXT);
 		expect(scratch.innerHTML).to.equal('<div>a - b</div>');
-		setTimeout(() => {
-			expect(Inner.prototype.render).to.be.calledOnce;
-			done();
-		}, 0);
+		return new Promise(resolve => {
+			setTimeout(() => {
+				expect(Inner.prototype.render).to.be.calledOnce;
+				resolve();
+			}, 0);
+		});
 	});
 
 	it('should preserve provider context between different providers', () => {
@@ -393,7 +396,7 @@ describe('createContext', () => {
 		);
 	});
 
-	it('should propagates through shouldComponentUpdate false', done => {
+	it('should propagates through shouldComponentUpdate false', async () => {
 		const { Provider, Consumer } = createContext(null);
 		const CONTEXT = { a: 'a' };
 		const UPDATED_CONTEXT = { a: 'b' };
@@ -466,9 +469,11 @@ describe('createContext', () => {
 		expect(scratch.innerHTML).to.equal(
 			'<div><div><strong>b</strong></div></div>'
 		);
-		setTimeout(() => {
-			expect(Consumed.prototype.render).to.have.been.calledTwice;
-			done();
+		return new Promise(resolve => {
+			setTimeout(() => {
+				expect(Consumed.prototype.render).to.have.been.calledTwice;
+				resolve();
+			});
 		});
 	});
 
@@ -680,7 +685,7 @@ describe('createContext', () => {
 	it('should not rerender consumers that have been unmounted', () => {
 		const { Provider, Consumer } = createContext(0);
 
-		const Inner = sinon.spy(props => <div>{props.value}</div>);
+		const Inner = vi.fn(props => <div>{props.value}</div>);
 
 		let toggleConsumer;
 		let changeValue;
@@ -707,22 +712,22 @@ describe('createContext', () => {
 
 		render(<App />, scratch);
 		expect(scratch.innerHTML).to.equal('<div><div>0</div></div>');
-		expect(Inner).to.have.been.calledOnce;
+		expect(Inner).toHaveBeenCalledOnce();
 
 		changeValue(1);
 		rerender();
 		expect(scratch.innerHTML).to.equal('<div><div>1</div></div>');
-		expect(Inner).to.have.been.calledTwice;
+		expect(Inner).toHaveBeenCalledTimes(2);
 
 		toggleConsumer();
 		rerender();
 		expect(scratch.innerHTML).to.equal('<div></div>');
-		expect(Inner).to.have.been.calledTwice;
+		expect(Inner).toHaveBeenCalledTimes(2);
 
 		changeValue(2);
 		rerender();
 		expect(scratch.innerHTML).to.equal('<div></div>');
-		expect(Inner).to.have.been.calledTwice;
+		expect(Inner).toHaveBeenCalledTimes(2);
 	});
 
 	describe('class.contextType', () => {
