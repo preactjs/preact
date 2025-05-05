@@ -500,7 +500,7 @@ function diffElementNodes(
 				oldHtml = value;
 			} else if (!(i in newProps)) {
 				if (
-					(i == 'value' && 'defaultValue' in newProps) ||
+					(i == VALUE && 'defaultValue' in newProps) ||
 					(i == 'checked' && 'defaultChecked' in newProps)
 				) {
 					continue;
@@ -517,7 +517,7 @@ function diffElementNodes(
 				newChildren = value;
 			} else if (i == 'dangerouslySetInnerHTML') {
 				newHtml = value;
-			} else if (i == 'value') {
+			} else if (i == VALUE) {
 				inputValue = value;
 			} else if (i == 'checked') {
 				checked = value;
@@ -571,9 +571,9 @@ function diffElementNodes(
 
 		// As above, don't diff props during hydration
 		if (!isHydrating) {
-			i = 'value';
+			i = VALUE;
 			if (nodeType == 'progress' && inputValue == NULL) {
-				dom.removeAttribute('value');
+				dom.removeAttribute(i);
 			} else if (
 				inputValue != UNDEFINED &&
 				// #2756 For the <progress>-element the initial value is 0,
@@ -589,7 +589,7 @@ function diffElementNodes(
 			) {
 				if (nodeType == 'select') {
 					(options.debounceRendering || defer)(() => {
-						setProperty(dom, 'value', inputValue, oldProps.value, namespace);
+						setProperty(dom, VALUE, inputValue, oldProps.value, namespace);
 					});
 				} else {
 					setProperty(dom, i, inputValue, oldProps[i], namespace);
@@ -605,6 +605,8 @@ function diffElementNodes(
 
 	return dom;
 }
+
+const VALUE = 'value';
 
 /**
  * Invoke or update a ref, depending on whether it is a function or object ref.
