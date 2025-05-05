@@ -9,7 +9,7 @@ import {
 	jsxEscape
 } from 'preact/jsx-runtime';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
-import { encodeEntities } from 'preact/jsx-runtime/src/utils';
+import { encodeEntities } from '../../src/utils';
 
 describe('Babel jsx/jsxDEV', () => {
 	let scratch;
