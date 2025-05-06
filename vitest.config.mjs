@@ -1,8 +1,8 @@
 import { defineConfig } from 'vitest/config';
 import { transformAsync } from '@babel/core';
-import fs from 'fs/promises';
-import { readFileSync } from 'fs';
-import path from 'path';
+import fs from 'node:fs/promises';
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
 
 const MINIFY = process.env.MINIFY === 'true';
 const COVERAGE = process.env.COVERAGE === 'true';
