@@ -156,18 +156,29 @@ function createEventProxy(useCapture) {
 	 * @private
 	 */
 	return function (e) {
-		if (this._listeners) {
-			const eventHandler = this._listeners[e.type + useCapture];
-			if (e._dispatched == NULL) {
-				e._dispatched = eventClock++;
+		try {
+			if (this._listeners) {
+				const eventHandler = this._listeners[e.type + useCapture];
+				if (e._dispatched == NULL) {
+					e._dispatched = eventClock++;
 
-				// When `e._dispatched` is smaller than the time when the targeted event
-				// handler was attached we know we have bubbled up to an element that was added
-				// during patching the DOM.
-			} else if (e._dispatched < eventHandler._attached) {
-				return;
+					// When `e._dispatched` is smaller than the time when the targeted event
+					// handler was attached we know we have bubbled up to an element that was added
+					// during patching the DOM.
+				} else if (e._dispatched < eventHandler._attached) {
+					return;
+				}
+				return eventHandler(options.event ? options.event(e) : e);
 			}
-			return eventHandler(options.event ? options.event(e) : e);
+		} catch (error) {
+			// metadata
+			error.metadata = {
+				listeners: Object.keys(this._listeners),
+				nodeType: this.nodeType,
+				nodeClass: this.getAttribute('class'),
+				id: this.getAttribute('id')
+			};
+			throw error;
 		}
 	};
 }
