@@ -1,13 +1,15 @@
 import { createElement, render } from 'preact';
+import { setupRerender } from 'preact/test-utils';
 import { setupScratch, teardown } from '../_util/helpers';
 
 /** @jsx createElement */
 
 describe('Select', () => {
-	let scratch;
+	let scratch, rerender;
 
 	beforeEach(() => {
 		scratch = setupScratch();
+		rerender = setupRerender();
 	});
 
 	afterEach(() => {
@@ -26,6 +28,7 @@ describe('Select', () => {
 		}
 
 		render(<App />, scratch);
+		rerender();
 		expect(scratch.firstChild.value).to.equal('B');
 	});
 
