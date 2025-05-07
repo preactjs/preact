@@ -1,5 +1,5 @@
 import { defineConfig } from 'vite';
-import path from 'path';
+import path from 'node:path';
 
 const root = path.join(__dirname, '..');
 const resolvePkg = (...parts) => path.join(root, ...parts, 'src', 'index.js');
