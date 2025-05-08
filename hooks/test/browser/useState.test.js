@@ -1,6 +1,6 @@
 import { setupRerender, act } from 'preact/test-utils';
 import { createElement, render, createContext, Component } from 'preact';
-import { vi } from 'vitest';
+import { afterAll, beforeAll, expect, vi } from 'vitest';
 import {
 	useState,
 	useContext,
@@ -380,7 +380,7 @@ describe('useState', () => {
 		expect(scratch.innerHTML).to.equal('<p>hello world!!!</p>');
 	});
 
-	it('should limit rerenders when setting state to NaN', () => {
+	it('should exhaust renders when NaN state is set as a result of a props update', () => {
 		const calls = [];
 		const App = ({ i }) => {
 			calls.push('rendering' + i);
@@ -402,8 +402,55 @@ describe('useState', () => {
 		act(() => {
 			render(<App i={2} />, scratch);
 		});
-		expect(calls.length).to.equal(3);
+		expect(calls.length).to.equal(27);
 		expect(calls.slice(1).every(c => c === 'rendering2')).to.equal(true);
+	});
+
+	it('should bail correctly when setting NaN twice', () => {
+		const calls = [];
+		let set;
+		const Greeting = ({ greeting }) => {
+			calls.push('rendering ' + greeting);
+			return <p>{greeting}</p>;
+		};
+		const App = () => {
+			const [greeting, setGreeting] = useState(0);
+			set = setGreeting;
+
+			return <Greeting greeting={greeting} />;
+		};
+
+		act(() => {
+			render(<App />, scratch);
+		});
+		expect(calls.length).to.equal(1);
+		expect(calls).to.deep.equal(['rendering 0']);
+
+		act(() => {
+			set(1);
+		});
+		expect(calls.length).to.equal(2);
+		expect(calls).to.deep.equal(['rendering 0', 'rendering 1']);
+
+		act(() => {
+			set(NaN);
+		});
+		expect(calls.length).to.equal(3);
+		expect(calls).to.deep.equal([
+			'rendering 0',
+			'rendering 1',
+			'rendering NaN'
+		]);
+
+		act(() => {
+			set(NaN);
+		});
+		expect(calls.length).to.equal(3);
+		expect(calls).to.deep.equal([
+			'rendering 0',
+			'rendering 1',
+			'rendering NaN'
+		]);
 	});
 
 	describe('Global sCU', () => {
