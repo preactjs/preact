@@ -27,6 +27,8 @@ export interface ErrorInfo {
 }
 
 export interface Options extends preact.Options {
+	/** Attach a hook that is invoked after a vnode has rendered. */
+	_afterRender?(vnode: VNode, oldVNode: VNode): void;
 	/** Attach a hook that is invoked before render, mainly to check the arguments. */
 	_root?(vnode: ComponentChild, parent: preact.ContainerNode): void;
 	/** Attach a hook that is invoked before a vnode is diffed. */
@@ -156,7 +158,8 @@ export interface VNode<P = {}> extends preact.VNode<P> {
 	_flags: number;
 }
 
-export interface Component<P = {}, S = {}> extends Omit<preact.Component<P, S>, 'base'> {
+export interface Component<P = {}, S = {}>
+	extends Omit<preact.Component<P, S>, 'base'> {
 	// When component is functional component, this is reset to functional component
 	constructor: ComponentType<P>;
 	state: S; // Override Component["state"] to not be readonly for internal use, specifically Hooks

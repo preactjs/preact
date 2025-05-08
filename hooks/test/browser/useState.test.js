@@ -1,7 +1,14 @@
 import { setupRerender, act } from 'preact/test-utils';
 import { createElement, render, createContext, Component } from 'preact';
 import { vi } from 'vitest';
-import { useState, useContext, useEffect } from 'preact/hooks';
+import {
+	useState,
+	useContext,
+	useEffect,
+	useLayoutEffect,
+	useReducer,
+	useRef
+} from 'preact/hooks';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 
 /** @jsx createElement */
@@ -70,12 +77,12 @@ describe('useState', () => {
 		doSetState(0);
 		rerender();
 		expect(lastState).to.equal(0);
-		expect(Comp).toHaveBeenCalledOnce();
+		expect(Comp).toHaveBeenCalledTimes(2);
 
 		doSetState(() => 0);
 		rerender();
 		expect(lastState).to.equal(0);
-		expect(Comp).toHaveBeenCalledOnce();
+		expect(Comp).toHaveBeenCalledTimes(3);
 	});
 
 	it('rerenders when setting the state', () => {
@@ -345,7 +352,7 @@ describe('useState', () => {
 			render(<App />, scratch);
 		});
 
-		expect(renderSpy).to.be.calledTwice;
+		expect(renderSpy).to.be.calledThrice;
 	});
 
 	// see preactjs/preact#3731
@@ -439,5 +446,95 @@ describe('useState', () => {
 			expect(scratch.innerHTML).to.equal('<div>Unsaved!</div>');
 			expect(renders).to.equal(2);
 		});
+	});
+
+	it('Should capture the closure in the reducer', () => {
+		function createContext2() {
+			const context = createContext();
+
+			const ProviderOrig = context.Provider;
+			context.Provider = ({ value, children }) => {
+				const valueRef = useRef(value);
+				const contextValue = useRef();
+
+				if (!contextValue.current) {
+					contextValue.current = {
+						value: valueRef,
+						listener: null
+					};
+				}
+
+				useLayoutEffect(() => {
+					valueRef.current = value;
+					if (contextValue.current.listener) {
+						contextValue.current.listener([value]);
+					}
+				}, [value]);
+				return (
+					<ProviderOrig value={contextValue.current}>{children}</ProviderOrig>
+				);
+			};
+
+			return context;
+		}
+
+		function useContextSelector(context) {
+			const contextValue = useContext(context);
+			const {
+				value: { current: value }
+			} = contextValue;
+			const [state, dispatch] = useReducer(
+				() => {
+					return {
+						value
+					};
+				},
+				{
+					value
+				}
+			);
+			useLayoutEffect(() => {
+				contextValue.listener = dispatch;
+			}, []);
+			return state.value;
+		}
+
+		const context = createContext2();
+		let set;
+
+		function Child() {
+			const [count, setState] = useContextSelector(context);
+			const [c, setC] = useState(0);
+			set = () => {
+				setC(s => s + 1);
+				setState(s => s + 1);
+			};
+			return (
+				<div>
+					<div>Context count: {count}</div>
+					<div>Local count: {c}</div>
+				</div>
+			);
+		}
+
+		// Render this
+		function App() {
+			const [state, setState] = useState(0);
+			return (
+				<context.Provider value={[state, setState]}>
+					<Child />
+				</context.Provider>
+			);
+		}
+
+		act(() => {
+			render(<App />, scratch);
+		});
+		expect(scratch.textContent).to.equal('Context count: 0Local count: 0');
+
+		act(() => {
+			set();
+		});
+		expect(scratch.textContent).to.equal('Context count: 1Local count: 1');
 	});
 });
