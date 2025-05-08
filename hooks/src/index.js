@@ -25,7 +25,10 @@ let oldCommit = options._commit;
 let oldBeforeUnmount = options.unmount;
 let oldRoot = options._root;
 
-const RAF_TIMEOUT = 100;
+// We take the minimum timeout for requestAnimationFrame to ensure that
+// the callback is invoked after the next frame. 35ms is based on a 30hz
+// refresh rate, which is the minimum rate for a smooth user experience.
+const RAF_TIMEOUT = 35;
 let prevRaf;
 
 /** @type {(vnode: import('./internal').VNode) => void} */
