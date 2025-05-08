@@ -17,7 +17,20 @@ describe('keys', () => {
 
 	function createStateful(name) {
 		return class Stateful extends Component {
+			constructor(props) {
+				super(props);
+				if (typeof props.ref === 'function') {
+					props.ref(this);
+				} else if (props.ref) {
+					props.ref.current = this;
+				}
+			}
 			componentDidUpdate() {
+				if (typeof this.props.ref === 'function') {
+					this.props.ref(this);
+				} else if (this.props.ref) {
+					this.props.ref.current = this;
+				}
 				ops.push(`Update ${name}`);
 			}
 			componentDidMount() {
@@ -57,12 +70,14 @@ describe('keys', () => {
 	let resetInsertBefore;
 	let resetRemoveChild;
 	let resetRemove;
+	let resetRemoveText;
 
 	beforeAll(() => {
 		resetAppendChild = logCall(Element.prototype, 'appendChild');
 		resetInsertBefore = logCall(Element.prototype, 'insertBefore');
 		resetRemoveChild = logCall(Element.prototype, 'removeChild');
 		resetRemove = logCall(Element.prototype, 'remove');
+		resetRemoveText = logCall(Text.prototype, 'remove');
 	});
 
 	afterAll(() => {
@@ -70,6 +85,7 @@ describe('keys', () => {
 		resetInsertBefore();
 		resetRemoveChild();
 		resetRemove();
+		resetRemoveText();
 	});
 
 	beforeEach(() => {
