@@ -162,32 +162,6 @@ function getHookState(index, type) {
 	return hooks._list[index];
 }
 
-options._afterRender = (newVNode, oldVNode) => {
-	if (newVNode._component && newVNode._component.__hooks) {
-		const hooks = newVNode._component.__hooks._list;
-		const stateHooksThatExecuted = hooks.filter(
-			/** @type {(x: import('./internal').HookState) => x is import('./internal').ReducerHookState} */
-			// @ts-expect-error
-			x => x._component && x._didExecute
-		);
-
-		if (
-			stateHooksThatExecuted.length &&
-			!stateHooksThatExecuted.some(x => x._didUpdate) &&
-			oldVNode.props === newVNode.props
-		) {
-			newVNode._component.__hooks._pendingEffects = [];
-			newVNode._flags |= SKIP_CHILDREN;
-		}
-
-		stateHooksThatExecuted.some(hook => {
-			hook._didExecute = hook._didUpdate = false;
-		});
-	}
-
-	if (oldAfterRender) oldAfterRender(newVNode, oldVNode);
-};
-
 /**
  * @template {unknown} S
  * @param {import('./index').Dispatch<import('./index').StateUpdater<S>>} [initialState]
