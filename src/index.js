@@ -11,3 +11,4 @@ export { cloneElement } from './clone-element';
 export { createContext } from './create-context';
 export { toChildArray } from './diff/children';
 export { default as options } from './options';
+// Run size
