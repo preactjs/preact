@@ -10,7 +10,6 @@ import React, {
 } from 'preact/compat';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { setupRerender, act } from 'preact/test-utils';
-import { expect } from 'chai';
 
 /* eslint-disable react/jsx-boolean-value, react/display-name, prefer-arrow-callback */
 
@@ -638,8 +637,8 @@ describe('Portal', () => {
 
 		render(<App />, root);
 		let dom = document.getElementById('child');
-		expect(spyParent).to.be.called;
-		expect(spy).to.be.called;
+		expect(spyParent).to.be.calledOnce;
+		expect(spy).to.be.calledOnce;
 
 		// Render twice to trigger update scenario
 		render(<App />, root);
@@ -647,8 +646,8 @@ describe('Portal', () => {
 
 		let domNew = document.getElementById('child');
 		expect(dom).to.equal(domNew);
-		expect(spyParent).to.be.called;
-		expect(spy).to.be.called;
+		expect(spyParent).to.be.calledOnce;
+		expect(spy).to.be.calledOnce;
 	});
 
 	it('should switch between non portal and portal node (Modal as lastChild)', () => {
