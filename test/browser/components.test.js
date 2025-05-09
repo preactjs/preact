@@ -9,7 +9,6 @@ import {
 	sortAttributes
 } from '../_util/helpers';
 import { div, span, p } from '../_util/dom';
-import { vi } from 'vitest';
 
 /** @jsx createElement */
 const h = createElement;
@@ -69,15 +68,18 @@ describe('Components', () => {
 		});
 
 		it('should render functional components', () => {
-			const C3 = vi.fn(props => <div {...props} />);
+			const C3 = sinon.spy(props => <div {...props} />);
 
 			render(<C3 {...PROPS} />, scratch);
 
-			expect(C3).toHaveBeenCalledOnce().toHaveBeenCalledWith(PROPS, {});
-			// .toHaveReturnedWith({
-			// 	type: 'div',
-			// 	props: PROPS
-			// });
+			expect(C3)
+				.to.have.been.calledOnce.and.to.have.been.calledWithMatch(PROPS)
+				.and.to.have.returned(
+					sinon.match({
+						type: 'div',
+						props: PROPS
+					})
+				);
 
 			expect(scratch.innerHTML).to.equal('<div foo="bar"></div>');
 		});
@@ -1106,16 +1108,15 @@ describe('Components', () => {
 		it('should render nested functional components', () => {
 			const PROPS = { foo: 'bar', onBaz: () => {} };
 
-			const Outer = vi.fn(props => <Inner {...props} />);
+			const Outer = sinon.spy(props => <Inner {...props} />);
 
-			const Inner = vi.fn(props => <div {...props}>inner</div>);
+			const Inner = sinon.spy(props => <div {...props}>inner</div>);
 
 			render(<Outer {...PROPS} />, scratch);
 
 			expect(Outer)
-				.toHaveBeenCalledOnce()
-				.toHaveBeenCalledWith(PROPS, {})
-				.toHaveReturned(
+				.to.have.been.calledOnce.and.to.have.been.calledWithMatch(PROPS)
+				.and.to.have.returned(
 					sinon.match({
 						type: Inner,
 						props: PROPS
@@ -1123,9 +1124,8 @@ describe('Components', () => {
 				);
 
 			expect(Inner)
-				.toHaveBeenCalledOnce()
-				.toHaveBeenCalledWith(PROPS, {})
-				.toHaveReturned(
+				.to.have.been.calledOnce.and.to.have.been.calledWithMatch(PROPS)
+				.and.to.have.returned(
 					sinon.match({
 						type: 'div',
 						props: { ...PROPS, children: 'inner' }
@@ -1147,11 +1147,11 @@ describe('Components', () => {
 					return <Inner i={i} {...props} />;
 				}
 			}
-			vi.spyOn(Outer.prototype, 'render');
-			vi.spyOn(Outer.prototype, 'componentWillUnmount');
+			sinon.spy(Outer.prototype, 'render');
+			sinon.spy(Outer.prototype, 'componentWillUnmount');
 
 			let j = 0;
-			const Inner = vi.fn(props => (
+			const Inner = sinon.spy(props => (
 				<div j={++j} {...props}>
 					inner
 				</div>
@@ -1163,11 +1163,21 @@ describe('Components', () => {
 			doRender();
 			rerender();
 
-			expect(Outer.prototype.componentWillUnmount).toHaveBeenCalledTimes(0);
+			expect(Outer.prototype.componentWillUnmount).not.to.have.been.called;
 
-			expect(Inner).toHaveBeenCalledTimes(2);
+			expect(Inner).to.have.been.calledTwice;
 
-			expect(Inner).toHaveBeenNthCalledWith(2, { foo: 'bar', i: 2 }, {});
+			expect(Inner.secondCall)
+				.to.have.been.calledWithMatch({ foo: 'bar', i: 2 })
+				.and.to.have.returned(
+					sinon.match({
+						props: {
+							j: 2,
+							i: 2,
+							foo: 'bar'
+						}
+					})
+				);
 
 			expect(getAttributes(scratch.firstElementChild)).to.eql({
 				j: '2',
@@ -1179,9 +1189,19 @@ describe('Components', () => {
 			doRender();
 			rerender();
 
-			expect(Inner).toHaveBeenCalledTimes(3);
+			expect(Inner).to.have.been.calledThrice;
 
-			expect(Inner).toHaveBeenNthCalledWith(3, { foo: 'bar', i: 3 }, {});
+			expect(Inner.thirdCall)
+				.to.have.been.calledWithMatch({ foo: 'bar', i: 3 })
+				.and.to.have.returned(
+					sinon.match({
+						props: {
+							j: 3,
+							i: 3,
+							foo: 'bar'
+						}
+					})
+				);
 
 			expect(getAttributes(scratch.firstElementChild)).to.eql({
 				j: '3',
@@ -1205,9 +1225,9 @@ describe('Components', () => {
 					return <Inner i={i} {...props} />;
 				}
 			}
-			vi.spyOn(Outer.prototype, 'render');
-			vi.spyOn(Outer.prototype, 'componentDidMount');
-			vi.spyOn(Outer.prototype, 'componentWillUnmount');
+			sinon.spy(Outer.prototype, 'render');
+			sinon.spy(Outer.prototype, 'componentDidMount');
+			sinon.spy(Outer.prototype, 'componentWillUnmount');
 
 			let j = 0;
 			class Inner extends Component {
@@ -1225,32 +1245,37 @@ describe('Components', () => {
 					);
 				}
 			}
-			vi.spyOn(Inner.prototype, 'render');
-			vi.spyOn(Inner.prototype, 'componentWillMount');
-			vi.spyOn(Inner.prototype, 'componentDidMount');
-			vi.spyOn(Inner.prototype, 'componentWillUnmount');
+			sinon.spy(Inner.prototype, 'render');
+			sinon.spy(Inner.prototype, 'componentWillMount');
+			sinon.spy(Inner.prototype, 'componentDidMount');
+			sinon.spy(Inner.prototype, 'componentWillUnmount');
 
 			render(<Outer foo="bar" />, scratch);
 
-			expect(Outer.prototype.componentDidMount).toHaveBeenCalledOnce();
+			expect(Outer.prototype.componentDidMount).to.have.been.calledOnce;
 
 			// update & flush
 			doRender();
 			rerender();
 
-			expect(Outer.prototype.componentWillUnmount).toHaveBeenCalledTimes(0);
+			expect(Outer.prototype.componentWillUnmount).not.to.have.been.called;
 
-			expect(Inner.prototype.componentWillUnmount).toHaveBeenCalledTimes(0);
-			expect(Inner.prototype.componentWillMount).toHaveBeenCalledOnce();
-			expect(Inner.prototype.componentDidMount).toHaveBeenCalledOnce();
-			expect(Inner.prototype.render).toHaveBeenCalledTimes(2);
+			expect(Inner.prototype.componentWillUnmount).not.to.have.been.called;
+			expect(Inner.prototype.componentWillMount).to.have.been.calledOnce;
+			expect(Inner.prototype.componentDidMount).to.have.been.calledOnce;
+			expect(Inner.prototype.render).to.have.been.calledTwice;
 
-			expect(Inner.prototype.render).toHaveBeenNthCalledWith(
-				2,
-				{ foo: 'bar', i: 2 },
-				{},
-				{}
-			);
+			expect(Inner.prototype.render.secondCall)
+				.to.have.been.calledWithMatch({ foo: 'bar', i: 2 })
+				.and.to.have.returned(
+					sinon.match({
+						props: {
+							j: 2,
+							i: 2,
+							foo: 'bar'
+						}
+					})
+				);
 
 			expect(getAttributes(scratch.firstElementChild)).to.eql({
 				j: '2',
@@ -1266,17 +1291,22 @@ describe('Components', () => {
 			doRender();
 			rerender();
 
-			expect(Inner.prototype.componentWillUnmount).toHaveBeenCalledTimes(0);
-			expect(Inner.prototype.componentWillMount).toHaveBeenCalledOnce();
-			expect(Inner.prototype.componentDidMount).toHaveBeenCalledOnce();
-			expect(Inner.prototype.render).toHaveBeenCalledTimes(3);
+			expect(Inner.prototype.componentWillUnmount).not.to.have.been.called;
+			expect(Inner.prototype.componentWillMount).to.have.been.calledOnce;
+			expect(Inner.prototype.componentDidMount).to.have.been.calledOnce;
+			expect(Inner.prototype.render).to.have.been.calledThrice;
 
-			expect(Inner.prototype.render).toHaveBeenNthCalledWith(
-				3,
-				{ foo: 'bar', i: 3 },
-				{},
-				{}
-			);
+			expect(Inner.prototype.render.thirdCall)
+				.to.have.been.calledWithMatch({ foo: 'bar', i: 3 })
+				.and.to.have.returned(
+					sinon.match({
+						props: {
+							j: 3,
+							i: 3,
+							foo: 'bar'
+						}
+					})
+				);
 
 			expect(getAttributes(scratch.firstElementChild)).to.eql({
 				j: '3',
@@ -1289,7 +1319,7 @@ describe('Components', () => {
 			doRender();
 			rerender();
 
-			expect(Inner.prototype.componentWillUnmount).toHaveBeenCalledOnce();
+			expect(Inner.prototype.componentWillUnmount).to.have.been.calledOnce;
 
 			expect(scratch.innerHTML).to.equal('<div is-alt="true"></div>');
 
@@ -1323,22 +1353,22 @@ describe('Components', () => {
 				}
 			}
 
-			vi.spyOn(Inner.prototype, 'componentWillUnmount');
-			vi.spyOn(Inner.prototype, 'componentWillMount');
-			vi.spyOn(Inner.prototype, 'componentDidMount');
-			vi.spyOn(Inner.prototype, 'render');
+			sinon.spy(Inner.prototype, 'componentWillUnmount');
+			sinon.spy(Inner.prototype, 'componentWillMount');
+			sinon.spy(Inner.prototype, 'componentDidMount');
+			sinon.spy(Inner.prototype, 'render');
 
 			render(<Root />, scratch);
 
-			expect(Inner.prototype.componentWillMount).toHaveBeenCalledOnce();
-			expect(Inner.prototype.componentDidMount).toHaveBeenCalledOnce();
-			expect(Inner.prototype.componentWillMount).toHaveBeenCalledBefore(
+			expect(Inner.prototype.componentWillMount).to.have.been.calledOnce;
+			expect(Inner.prototype.componentDidMount).to.have.been.calledOnce;
+			expect(Inner.prototype.componentWillMount).to.have.been.calledBefore(
 				Inner.prototype.componentDidMount
 			);
 
 			render(<asdf />, scratch);
 
-			expect(Inner.prototype.componentWillUnmount).toHaveBeenCalledOnce();
+			expect(Inner.prototype.componentWillUnmount).to.have.been.calledOnce;
 		});
 
 		it('should unmount children of high-order components without unmounting parent', () => {
@@ -1361,10 +1391,10 @@ describe('Components', () => {
 					return <C />;
 				}
 			}
-			vi.spyOn(Outer.prototype, 'componentWillUnmount');
-			vi.spyOn(Outer.prototype, 'componentWillMount');
-			vi.spyOn(Outer.prototype, 'componentDidMount');
-			vi.spyOn(Outer.prototype, 'render');
+			sinon.spy(Outer.prototype, 'componentWillUnmount');
+			sinon.spy(Outer.prototype, 'componentWillMount');
+			sinon.spy(Outer.prototype, 'componentDidMount');
+			sinon.spy(Outer.prototype, 'render');
 
 			class Inner extends Component {
 				componentWillUnmount() {}
@@ -1374,10 +1404,10 @@ describe('Components', () => {
 					return h('element' + ++counter);
 				}
 			}
-			vi.spyOn(Inner.prototype, 'componentWillUnmount');
-			vi.spyOn(Inner.prototype, 'componentWillMount');
-			vi.spyOn(Inner.prototype, 'componentDidMount');
-			vi.spyOn(Inner.prototype, 'render');
+			sinon.spy(Inner.prototype, 'componentWillUnmount');
+			sinon.spy(Inner.prototype, 'componentWillMount');
+			sinon.spy(Inner.prototype, 'componentDidMount');
+			sinon.spy(Inner.prototype, 'render');
 
 			class Inner2 extends Component {
 				constructor(props, context) {
@@ -1391,46 +1421,61 @@ describe('Components', () => {
 					return h('element' + ++counter);
 				}
 			}
-			vi.spyOn(Inner2.prototype, 'componentWillUnmount');
-			vi.spyOn(Inner2.prototype, 'componentWillMount');
-			vi.spyOn(Inner2.prototype, 'componentDidMount');
-			vi.spyOn(Inner2.prototype, 'render');
+			sinon.spy(Inner2.prototype, 'componentWillUnmount');
+			sinon.spy(Inner2.prototype, 'componentWillMount');
+			sinon.spy(Inner2.prototype, 'componentDidMount');
+			sinon.spy(Inner2.prototype, 'render');
 
 			render(<Outer child={Inner} />, scratch);
 
 			// outer should only have been mounted once
-			expect(Outer.prototype.componentWillMount).toHaveBeenCalledOnce();
-			expect(Outer.prototype.componentDidMount).toHaveBeenCalledOnce();
-			expect(Outer.prototype.componentWillUnmount).toHaveBeenCalledTimes(0);
+			expect(Outer.prototype.componentWillMount, 'outer initial').to.have.been
+				.calledOnce;
+			expect(Outer.prototype.componentDidMount, 'outer initial').to.have.been
+				.calledOnce;
+			expect(Outer.prototype.componentWillUnmount, 'outer initial').not.to.have
+				.been.called;
 
 			// inner should only have been mounted once
-			expect(Inner.prototype.componentWillMount).toHaveBeenCalledOnce();
-			expect(Inner.prototype.componentDidMount).toHaveBeenCalledOnce();
-			expect(Inner.prototype.componentWillUnmount).toHaveBeenCalledTimes(0);
+			expect(Inner.prototype.componentWillMount, 'inner initial').to.have.been
+				.calledOnce;
+			expect(Inner.prototype.componentDidMount, 'inner initial').to.have.been
+				.calledOnce;
+			expect(Inner.prototype.componentWillUnmount, 'inner initial').not.to.have
+				.been.called;
 
 			outer.setState({ child: Inner2 });
 			outer.forceUpdate();
 			rerender();
 
-			expect(Inner2.prototype.render).toHaveBeenCalledOnce();
+			expect(Inner2.prototype.render).to.have.been.calledOnce;
 
 			// outer should still only have been mounted once
-			expect(Outer.prototype.componentWillMount).toHaveBeenCalledOnce();
-			expect(Outer.prototype.componentDidMount).toHaveBeenCalledOnce();
-			expect(Outer.prototype.componentWillUnmount).toHaveBeenCalledTimes(0);
+			expect(Outer.prototype.componentWillMount, 'outer swap').to.have.been
+				.calledOnce;
+			expect(Outer.prototype.componentDidMount, 'outer swap').to.have.been
+				.calledOnce;
+			expect(Outer.prototype.componentWillUnmount, 'outer swap').not.to.have
+				.been.called;
 
 			// inner should only have been mounted once
-			expect(Inner2.prototype.componentWillMount).toHaveBeenCalledOnce();
-			expect(Inner2.prototype.componentDidMount).toHaveBeenCalledOnce();
-			expect(Inner2.prototype.componentWillUnmount).toHaveBeenCalledTimes(0);
+			expect(Inner2.prototype.componentWillMount, 'inner2 swap').to.have.been
+				.calledOnce;
+			expect(Inner2.prototype.componentDidMount, 'inner2 swap').to.have.been
+				.calledOnce;
+			expect(Inner2.prototype.componentWillUnmount, 'inner2 swap').not.to.have
+				.been.called;
 
 			inner2.forceUpdate();
 			rerender();
 
-			expect(Inner2.prototype.render).toHaveBeenCalledTimes(2);
-			expect(Inner2.prototype.componentWillMount).toHaveBeenCalledOnce();
-			expect(Inner2.prototype.componentDidMount).toHaveBeenCalledOnce();
-			expect(Inner2.prototype.componentWillUnmount).toHaveBeenCalledTimes(0);
+			expect(Inner2.prototype.render, 'inner2 update').to.have.been.calledTwice;
+			expect(Inner2.prototype.componentWillMount, 'inner2 update').to.have.been
+				.calledOnce;
+			expect(Inner2.prototype.componentDidMount, 'inner2 update').to.have.been
+				.calledOnce;
+			expect(Inner2.prototype.componentWillUnmount, 'inner2 update').not.to.have
+				.been.called;
 		});
 
 		it('should remount when swapping between HOC child types', () => {
@@ -1447,28 +1492,34 @@ describe('Components', () => {
 					return <div class="inner">foo</div>;
 				}
 			}
-			vi.spyOn(Inner.prototype, 'componentWillMount');
-			vi.spyOn(Inner.prototype, 'componentWillUnmount');
-			vi.spyOn(Inner.prototype, 'render');
+			sinon.spy(Inner.prototype, 'componentWillMount');
+			sinon.spy(Inner.prototype, 'componentWillUnmount');
+			sinon.spy(Inner.prototype, 'render');
 
 			const InnerFunc = () => <div class="inner-func">bar</div>;
 
 			render(<Outer child={Inner} />, scratch);
 
-			expect(Inner.prototype.componentWillMount).toHaveBeenCalledOnce();
-			expect(Inner.prototype.componentWillUnmount).toHaveBeenCalledTimes(0);
+			expect(Inner.prototype.componentWillMount, 'initial mount').to.have.been
+				.calledOnce;
+			expect(Inner.prototype.componentWillUnmount, 'initial mount').not.to.have
+				.been.called;
 
-			Inner.prototype.componentWillMount.mockReset();
+			Inner.prototype.componentWillMount.resetHistory();
 			render(<Outer child={InnerFunc} />, scratch);
 
-			expect(Inner.prototype.componentWillMount).toHaveBeenCalledTimes(0);
-			expect(Inner.prototype.componentWillUnmount).toHaveBeenCalledOnce();
+			expect(Inner.prototype.componentWillMount, 'unmount').not.to.have.been
+				.called;
+			expect(Inner.prototype.componentWillUnmount, 'unmount').to.have.been
+				.calledOnce;
 
-			Inner.prototype.componentWillUnmount.mockReset();
+			Inner.prototype.componentWillUnmount.resetHistory();
 			render(<Outer child={Inner} />, scratch);
 
-			expect(Inner.prototype.componentWillMount).toHaveBeenCalledOnce();
-			expect(Inner.prototype.componentWillUnmount).toHaveBeenCalledTimes(0);
+			expect(Inner.prototype.componentWillMount, 'remount').to.have.been
+				.calledOnce;
+			expect(Inner.prototype.componentWillUnmount, 'remount').not.to.have.been
+				.called;
 		});
 	});
 
@@ -1484,12 +1535,12 @@ describe('Components', () => {
 					return <I>{children}</I>;
 				}
 			}
-			vi.spyOn(C.prototype, 'componentWillMount');
-			vi.spyOn(C.prototype, 'render');
+			sinon.spy(C.prototype, 'componentWillMount');
+			sinon.spy(C.prototype, 'render');
 			return C;
 		};
 
-		let createFunction = () => vi.fn(({ children }) => children);
+		let createFunction = () => sinon.spy(({ children }) => children);
 
 		let F1 = createFunction();
 		let F2 = createFunction();
@@ -1506,7 +1557,7 @@ describe('Components', () => {
 						acc.concat(c.prototype.render, c.prototype.componentWillMount),
 					[F1, F2, F3]
 				)
-				.forEach(c => c.mockReset());
+				.forEach(c => c.resetHistory());
 
 		it('should handle lifecycle for no intermediary in component tree', () => {
 			reset();
@@ -1519,9 +1570,12 @@ describe('Components', () => {
 				scratch
 			);
 
-			expect(C1.prototype.componentWillMount).toHaveBeenCalledOnce();
-			expect(C2.prototype.componentWillMount).toHaveBeenCalledOnce();
-			expect(C3.prototype.componentWillMount).toHaveBeenCalledOnce();
+			expect(C1.prototype.componentWillMount, 'initial mount').to.have.been
+				.calledOnce;
+			expect(C2.prototype.componentWillMount, 'initial mount').to.have.been
+				.calledOnce;
+			expect(C3.prototype.componentWillMount, 'initial mount').to.have.been
+				.calledOnce;
 
 			reset();
 			render(
@@ -1531,8 +1585,10 @@ describe('Components', () => {
 				scratch
 			);
 
-			expect(C1.prototype.componentWillMount).toHaveBeenCalledTimes(0);
-			expect(C2.prototype.componentWillMount).toHaveBeenCalledTimes(0);
+			expect(C1.prototype.componentWillMount, 'unmount innermost, C1').not.to
+				.have.been.called;
+			expect(C2.prototype.componentWillMount, 'unmount innermost, C2').not.to
+				.have.been.called;
 
 			reset();
 			render(
@@ -1542,8 +1598,10 @@ describe('Components', () => {
 				scratch
 			);
 
-			expect(C1.prototype.componentWillMount).toHaveBeenCalledTimes(0);
-			expect(C3.prototype.componentWillMount).toHaveBeenCalledOnce();
+			expect(C1.prototype.componentWillMount, 'swap innermost').not.to.have.been
+				.called;
+			expect(C3.prototype.componentWillMount, 'swap innermost').to.have.been
+				.calledOnce;
 
 			reset();
 			render(
@@ -1555,9 +1613,12 @@ describe('Components', () => {
 				scratch
 			);
 
-			expect(C1.prototype.componentWillMount).toHaveBeenCalledTimes(0);
-			expect(C2.prototype.componentWillMount).toHaveBeenCalledOnce();
-			expect(C3.prototype.componentWillMount).toHaveBeenCalledOnce();
+			expect(C1.prototype.componentWillMount, 'inject between, C1').not.to.have
+				.been.called;
+			expect(C2.prototype.componentWillMount, 'inject between, C2').to.have.been
+				.calledOnce;
+			expect(C3.prototype.componentWillMount, 'inject between, C3').to.have.been
+				.calledOnce;
 		});
 
 		it('should handle lifecycle for nested intermediary functional components', () => {
@@ -1577,15 +1638,15 @@ describe('Components', () => {
 			expect(
 				C1.prototype.componentWillMount,
 				'initial mount w/ intermediary fn, C1'
-			).toHaveBeenCalledOnce();
+			).to.have.been.calledOnce;
 			expect(
 				C2.prototype.componentWillMount,
 				'initial mount w/ intermediary fn, C2'
-			).toHaveBeenCalledOnce();
+			).to.have.been.calledOnce;
 			expect(
 				C3.prototype.componentWillMount,
 				'initial mount w/ intermediary fn, C3'
-			).toHaveBeenCalledOnce();
+			).to.have.been.calledOnce;
 
 			reset();
 			render(
@@ -1598,11 +1659,11 @@ describe('Components', () => {
 			expect(
 				C1.prototype.componentWillMount,
 				'unmount innermost w/ intermediary fn, C1'
-			).toHaveBeenCalledTimes(0);
+			).not.to.have.been.called;
 			expect(
 				C2.prototype.componentWillMount,
 				'unmount innermost w/ intermediary fn, C2'
-			).toHaveBeenCalledTimes(0);
+			).not.to.have.been.called;
 
 			reset();
 			render(
@@ -1615,11 +1676,11 @@ describe('Components', () => {
 			expect(
 				C1.prototype.componentWillMount,
 				'swap innermost w/ intermediary fn'
-			).toHaveBeenCalledTimes(0);
+			).not.to.have.been.called;
 			expect(
 				C3.prototype.componentWillMount,
 				'swap innermost w/ intermediary fn'
-			).toHaveBeenCalledOnce();
+			).to.have.been.calledOnce;
 
 			reset();
 			render(
@@ -1634,15 +1695,15 @@ describe('Components', () => {
 			expect(
 				C1.prototype.componentWillMount,
 				'inject between, C1 w/ intermediary fn'
-			).toHaveBeenCalledTimes(0);
+			).not.to.have.been.called;
 			expect(
 				C2.prototype.componentWillMount,
 				'inject between, C2 w/ intermediary fn'
-			).toHaveBeenCalledOnce();
+			).to.have.been.calledOnce;
 			expect(
 				C3.prototype.componentWillMount,
 				'inject between, C3 w/ intermediary fn'
-			).toHaveBeenCalledOnce();
+			).to.have.been.calledOnce;
 		});
 
 		it('should render components by depth', () => {
@@ -1697,15 +1758,15 @@ describe('Components', () => {
 			expect(
 				C1.prototype.componentWillMount,
 				'initial mount w/ intermediary div, C1'
-			).toHaveBeenCalledOnce();
+			).to.have.been.calledOnce;
 			expect(
 				C2.prototype.componentWillMount,
 				'initial mount w/ intermediary div, C2'
-			).toHaveBeenCalledOnce();
+			).to.have.been.calledOnce;
 			expect(
 				C3.prototype.componentWillMount,
 				'initial mount w/ intermediary div, C3'
-			).toHaveBeenCalledOnce();
+			).to.have.been.calledOnce;
 
 			reset();
 			render(
@@ -1718,11 +1779,11 @@ describe('Components', () => {
 			expect(
 				C1.prototype.componentWillMount,
 				'unmount innermost w/ intermediary div, C1'
-			).toHaveBeenCalledTimes(0);
+			).not.to.have.been.called;
 			expect(
 				C2.prototype.componentWillMount,
 				'unmount innermost w/ intermediary div, C2'
-			).toHaveBeenCalledTimes(0);
+			).not.to.have.been.called;
 
 			reset();
 			render(
@@ -1735,11 +1796,11 @@ describe('Components', () => {
 			expect(
 				C1.prototype.componentWillMount,
 				'swap innermost w/ intermediary div'
-			).toHaveBeenCalledTimes(0);
+			).not.to.have.been.called;
 			expect(
 				C3.prototype.componentWillMount,
 				'swap innermost w/ intermediary div'
-			).toHaveBeenCalledOnce();
+			).to.have.been.calledOnce;
 
 			reset();
 			render(
@@ -1754,15 +1815,15 @@ describe('Components', () => {
 			expect(
 				C1.prototype.componentWillMount,
 				'inject between, C1 w/ intermediary div'
-			).toHaveBeenCalledTimes(0);
+			).not.to.have.been.called;
 			expect(
 				C2.prototype.componentWillMount,
 				'inject between, C2 w/ intermediary div'
-			).toHaveBeenCalledOnce();
+			).to.have.been.calledOnce;
 			expect(
 				C3.prototype.componentWillMount,
 				'inject between, C3 w/ intermediary div'
-			).toHaveBeenCalledOnce();
+			).to.have.been.calledOnce;
 		});
 	});
 

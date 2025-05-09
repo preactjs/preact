@@ -2,7 +2,7 @@ import { act, teardown as teardownAct } from 'preact/test-utils';
 import { createElement, render, Fragment, Component } from 'preact';
 import { useEffect, useState, useRef } from 'preact/hooks';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
-import { useEffectAssertions } from './useEffectAssertions';
+import { useEffectAssertions } from './useEffectAssertions.test';
 import { scheduleEffectAssert } from '../_util/useEffectUtil';
 
 /** @jsx createElement */

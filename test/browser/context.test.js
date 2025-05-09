@@ -1,6 +1,5 @@
 import { createElement, render, Component, Fragment } from 'preact';
 import { setupScratch, teardown } from '../_util/helpers';
-import { vi } from 'vitest';
 
 /** @jsx createElement */
 
@@ -215,7 +214,7 @@ describe('context', () => {
 	it('should pass context through Fragments', () => {
 		const context = { foo: 'bar' };
 
-		const Foo = vi.fn(() => <div />);
+		const Foo = sinon.spy(() => <div />);
 
 		class Wrapper extends Component {
 			getChildContext() {
@@ -233,6 +232,6 @@ describe('context', () => {
 		}
 
 		render(<Wrapper />, scratch);
-		expect(Foo.mock.calls[0][1]).to.deep.equal(context);
+		expect(Foo.args[0][1]).to.deep.equal(context);
 	});
 });

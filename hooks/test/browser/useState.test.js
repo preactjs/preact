@@ -1,6 +1,5 @@
 import { setupRerender, act } from 'preact/test-utils';
 import { createElement, render, createContext, Component } from 'preact';
-import { vi } from 'vitest';
 import { useState, useContext, useEffect } from 'preact/hooks';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 
@@ -56,7 +55,7 @@ describe('useState', () => {
 		let lastState;
 		let doSetState;
 
-		const Comp = vi.fn(() => {
+		const Comp = sinon.spy(() => {
 			const [state, setState] = useState(0);
 			lastState = state;
 			doSetState = setState;
@@ -65,24 +64,24 @@ describe('useState', () => {
 
 		render(<Comp />, scratch);
 		expect(lastState).to.equal(0);
-		expect(Comp).toHaveBeenCalledOnce();
+		expect(Comp).to.be.calledOnce;
 
 		doSetState(0);
 		rerender();
 		expect(lastState).to.equal(0);
-		expect(Comp).toHaveBeenCalledOnce();
+		expect(Comp).to.be.calledOnce;
 
 		doSetState(() => 0);
 		rerender();
 		expect(lastState).to.equal(0);
-		expect(Comp).toHaveBeenCalledOnce();
+		expect(Comp).to.be.calledOnce;
 	});
 
 	it('rerenders when setting the state', () => {
 		let lastState;
 		let doSetState;
 
-		const Comp = vi.fn(() => {
+		const Comp = sinon.spy(() => {
 			const [state, setState] = useState(0);
 			lastState = state;
 			doSetState = setState;
@@ -91,18 +90,18 @@ describe('useState', () => {
 
 		render(<Comp />, scratch);
 		expect(lastState).to.equal(0);
-		expect(Comp).toHaveBeenCalledOnce();
+		expect(Comp).to.be.calledOnce;
 
 		doSetState(1);
 		rerender();
 		expect(lastState).to.equal(1);
-		expect(Comp).toHaveBeenCalledTimes(2);
+		expect(Comp).to.be.calledTwice;
 
 		// Updater function style
 		doSetState(current => current * 10);
 		rerender();
 		expect(lastState).to.equal(10);
-		expect(Comp).toHaveBeenCalledTimes(3);
+		expect(Comp).to.be.calledThrice;
 	});
 
 	it('can be set by another component', () => {
@@ -375,14 +374,14 @@ describe('useState', () => {
 
 	describe('Global sCU', () => {
 		let prevScu;
-		beforeAll(() => {
+		before(() => {
 			prevScu = Component.prototype.shouldComponentUpdate;
 			Component.prototype.shouldComponentUpdate = () => {
 				return true;
 			};
 		});
 
-		afterAll(() => {
+		after(() => {
 			Component.prototype.shouldComponentUpdate = prevScu;
 		});
 

@@ -58,14 +58,14 @@ describe('keys', () => {
 	let resetRemoveChild;
 	let resetRemove;
 
-	beforeAll(() => {
+	before(() => {
 		resetAppendChild = logCall(Element.prototype, 'appendChild');
 		resetInsertBefore = logCall(Element.prototype, 'insertBefore');
 		resetRemoveChild = logCall(Element.prototype, 'removeChild');
 		resetRemove = logCall(Element.prototype, 'remove');
 	});
 
-	afterAll(() => {
+	after(() => {
 		resetAppendChild();
 		resetInsertBefore();
 		resetRemoveChild();
@@ -686,7 +686,7 @@ describe('keys', () => {
 		expect(Stateful2Ref).to.equal(Stateful2MovedRef);
 	});
 
-	it('should effectively iterate on large lists', async () => {
+	it('should effectively iterate on large lists', done => {
 		const newItems = () =>
 			Array(100)
 				.fill(0)
@@ -741,15 +741,13 @@ describe('keys', () => {
 		set();
 		rerender();
 
-		return new Promise(resolve => {
-			setTimeout(() => {
-				expect(mutatedNodes.length).to.equal(0);
-				resolve();
-			});
+		setTimeout(() => {
+			expect(mutatedNodes.length).to.equal(0);
+			done();
 		});
 	});
 
-	it('should effectively iterate on large component lists', async () => {
+	it('should effectively iterate on large component lists', done => {
 		const newItems = () =>
 			Array(100)
 				.fill(0)
@@ -806,11 +804,9 @@ describe('keys', () => {
 		set();
 		rerender();
 
-		return new Promise(resolve => {
-			setTimeout(() => {
-				expect(mutatedNodes.length).to.equal(0);
-				resolve();
-			});
+		setTimeout(() => {
+			expect(mutatedNodes.length).to.equal(0);
+			done();
 		});
 	});
 

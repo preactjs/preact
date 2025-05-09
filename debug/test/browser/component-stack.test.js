@@ -1,6 +1,5 @@
 import { createElement, render, Component } from 'preact';
 import 'preact/debug';
-import { vi } from 'vitest';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 
 /** @jsx createElement */
@@ -19,12 +18,13 @@ describe('component stack', () => {
 
 		errors = [];
 		warnings = [];
-		vi.spyOn(console, 'error').mockImplementation(e => errors.push(e));
-		vi.spyOn(console, 'warn').mockImplementation(w => warnings.push(w));
+		sinon.stub(console, 'error').callsFake(e => errors.push(e));
+		sinon.stub(console, 'warn').callsFake(w => warnings.push(w));
 	});
 
 	afterEach(() => {
-		vi.resetAllMocks();
+		console.error.restore();
+		console.warn.restore();
 		teardown(scratch);
 	});
 
@@ -46,8 +46,6 @@ describe('component stack', () => {
 
 		render(<Foo />, scratch);
 
-		// This has a JSX transform warning, so we need to remove it
-		warnings.shift();
 		let lines = getStack(warnings).split('\n');
 		expect(lines[0].indexOf('Thrower') > -1).to.equal(true);
 		expect(lines[1].indexOf('Foo') > -1).to.equal(true);

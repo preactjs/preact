@@ -39,7 +39,7 @@ describe('Fragment', () => {
 	let resetAppendChild;
 	let resetRemoveChild;
 
-	beforeAll(() => {
+	before(() => {
 		resetInsertBefore = logCall(Element.prototype, 'insertBefore');
 		resetAppendChild = logCall(Element.prototype, 'appendChild');
 		resetRemoveChild = logCall(Element.prototype, 'removeChild');
@@ -55,7 +55,7 @@ describe('Fragment', () => {
 		// ```
 	});
 
-	afterAll(() => {
+	after(() => {
 		resetInsertBefore();
 		resetAppendChild();
 		resetRemoveChild();

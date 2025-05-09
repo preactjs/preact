@@ -2,7 +2,6 @@ import { createElement, render, createContext, Component } from 'preact';
 import { act } from 'preact/test-utils';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { useContext, useEffect, useState } from 'preact/hooks';
-import { vi } from 'vitest';
 
 /** @jsx createElement */
 
@@ -58,7 +57,7 @@ describe('useContext', () => {
 		expect(spy).to.be.calledWith(42);
 	});
 
-	it('should update when value changes with nonUpdating Component on top', async () => {
+	it('should update when value changes with nonUpdating Component on top', done => {
 		const spy = sinon.spy();
 		const Ctx = createContext(0);
 
@@ -92,18 +91,16 @@ describe('useContext', () => {
 		expect(spy).to.be.calledWith(0);
 		render(<App value={1} />, scratch);
 
-		return new Promise(resolve => {
-			// Wait for enqueued hook update
-			setTimeout(() => {
-				// Should not be called a third time
-				expect(spy).to.be.calledTwice;
-				expect(spy).to.be.calledWith(1);
-				resolve();
-			}, 0);
-		});
+		// Wait for enqueued hook update
+		setTimeout(() => {
+			// Should not be called a third time
+			expect(spy).to.be.calledTwice;
+			expect(spy).to.be.calledWith(1);
+			done();
+		}, 0);
 	});
 
-	it('should only update when value has changed', async () => {
+	it('should only update when value has changed', done => {
 		const spy = sinon.spy();
 		const Ctx = createContext(0);
 
@@ -129,14 +126,12 @@ describe('useContext', () => {
 		expect(spy).to.be.calledTwice;
 		expect(spy).to.be.calledWith(1);
 
-		return new Promise(resolve => {
-			// Wait for enqueued hook update
-			setTimeout(() => {
-				// Should not be called a third time
-				expect(spy).to.be.calledTwice;
-				resolve();
-			}, 0);
-		});
+		// Wait for enqueued hook update
+		setTimeout(() => {
+			// Should not be called a third time
+			expect(spy).to.be.calledTwice;
+			done();
+		}, 0);
 	});
 
 	it('should allow multiple context hooks at the same time', () => {
@@ -243,7 +238,7 @@ describe('useContext', () => {
 		expect(values).to.deep.equal([13, 42, 69]);
 	});
 
-	it('should maintain context', async () => {
+	it('should maintain context', done => {
 		const context = createContext(null);
 		const { Provider } = context;
 		const first = { name: 'first' };
@@ -288,14 +283,12 @@ describe('useContext', () => {
 			render(<App config={second} />, div);
 		});
 
-		return new Promise(resolve => {
-			// Push the expect into the next frame
-			requestAnimationFrame(() => {
-				expect(scratch.innerHTML).equal(
-					'<div>first</div><div><div>second</div></div>'
-				);
-				resolve();
-			});
+		// Push the expect into the next frame
+		requestAnimationFrame(() => {
+			expect(scratch.innerHTML).equal(
+				'<div>first</div><div><div>second</div></div>'
+			);
+			done();
 		});
 	});
 
@@ -303,7 +296,7 @@ describe('useContext', () => {
 		const context = createContext(0);
 		const Provider = context.Provider;
 
-		const Inner = vi.fn(() => {
+		const Inner = sinon.spy(() => {
 			const value = useContext(context);
 			return <div>{value}</div>;
 		});
@@ -329,19 +322,19 @@ describe('useContext', () => {
 
 		render(<App />, scratch);
 		expect(scratch.innerHTML).to.equal('<div><div>0</div></div>');
-		expect(Inner).toHaveBeenCalledOnce();
+		expect(Inner).to.have.been.calledOnce;
 
 		act(() => changeValue(1));
 		expect(scratch.innerHTML).to.equal('<div><div>1</div></div>');
-		expect(Inner).toHaveBeenCalledTimes(2);
+		expect(Inner).to.have.been.calledTwice;
 
 		act(() => toggleConsumer());
 		expect(scratch.innerHTML).to.equal('<div></div>');
-		expect(Inner).toHaveBeenCalledTimes(2);
+		expect(Inner).to.have.been.calledTwice;
 
 		act(() => changeValue(2));
 		expect(scratch.innerHTML).to.equal('<div></div>');
-		expect(Inner).toHaveBeenCalledTimes(2);
+		expect(Inner).to.have.been.calledTwice;
 	});
 
 	it('should rerender when reset to defaultValue', () => {

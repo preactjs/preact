@@ -1,6 +1,5 @@
 import { setupRerender } from 'preact/test-utils';
 import { createElement, render, Component, Fragment } from 'preact';
-import { vi } from 'vitest';
 import { setupScratch, teardown } from '../../_util/helpers';
 import { logCall, clearLog } from '../../_util/logCall';
 
@@ -20,13 +19,13 @@ describe('Lifecycle methods', () => {
 	let resetRemoveChild;
 	let resetRemove;
 
-	beforeAll(() => {
+	before(() => {
 		resetInsertBefore = logCall(Element.prototype, 'insertBefore');
 		resetRemoveChild = logCall(Element.prototype, 'appendChild');
 		resetRemove = logCall(Element.prototype, 'removeChild');
 	});
 
-	afterAll(() => {
+	after(() => {
 		resetInsertBefore();
 		resetRemoveChild();
 		resetRemove();
@@ -52,8 +51,8 @@ describe('Lifecycle methods', () => {
 				this.state = { show: true };
 				setState = s => this.setState(s);
 			}
-			render() {
-				return this.state.show ? <div /> : null;
+			render(props, { show }) {
+				return show ? <div /> : null;
 			}
 		}
 
@@ -63,18 +62,17 @@ describe('Lifecycle methods', () => {
 			}
 		}
 
-		beforeEach(() => {
-			vi.spyOn(Should.prototype, 'render');
-			vi.spyOn(ShouldNot.prototype, 'render');
-			vi.spyOn(ShouldNot.prototype, 'shouldComponentUpdate');
-		});
+		sinon.spy(Should.prototype, 'render');
+		sinon.spy(ShouldNot.prototype, 'shouldComponentUpdate');
+
+		beforeEach(() => Should.prototype.render.resetHistory());
 
 		it('should rerender component on change by default', () => {
 			render(<Should />, scratch);
 			setState({ show: false });
 			rerender();
 
-			expect(Should.prototype.render).toHaveBeenCalledTimes(2);
+			expect(Should.prototype.render).to.have.been.calledTwice;
 		});
 
 		it('should not rerender component if shouldComponentUpdate returns false', () => {
@@ -82,8 +80,8 @@ describe('Lifecycle methods', () => {
 			setState({ show: false });
 			rerender();
 
-			expect(ShouldNot.prototype.shouldComponentUpdate).toHaveBeenCalledOnce();
-			expect(ShouldNot.prototype.render).toHaveBeenCalledOnce();
+			expect(ShouldNot.prototype.shouldComponentUpdate).to.have.been.calledOnce;
+			expect(ShouldNot.prototype.render).to.have.been.calledOnce;
 		});
 
 		it('should reorder non-updating text children', () => {
@@ -917,8 +915,8 @@ describe('Lifecycle methods', () => {
 				};
 				showText = () => this.setState({ show: true });
 			}
-			render() {
-				if (!this.state.show) return null;
+			render(props, { show }) {
+				if (!show) return null;
 
 				return <div>Component</div>;
 			}

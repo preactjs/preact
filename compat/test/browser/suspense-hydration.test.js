@@ -37,14 +37,14 @@ describe('suspense hydration', () => {
 	let resetRemoveChild;
 	let resetRemove;
 
-	beforeAll(() => {
+	before(() => {
 		resetAppendChild = logCall(Element.prototype, 'appendChild');
 		resetInsertBefore = logCall(Element.prototype, 'insertBefore');
 		resetRemoveChild = logCall(Element.prototype, 'removeChild');
 		resetRemove = logCall(Element.prototype, 'remove');
 	});
 
-	afterAll(() => {
+	after(() => {
 		resetAppendChild();
 		resetInsertBefore();
 		resetRemoveChild();
