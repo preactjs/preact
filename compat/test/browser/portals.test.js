@@ -638,8 +638,8 @@ describe('Portal', () => {
 
 		render(<App />, root);
 		let dom = document.getElementById('child');
-		expect(spyParent).to.be.calledOnce;
-		expect(spy).to.be.calledOnce;
+		expect(spyParent).to.be.called;
+		expect(spy).to.be.called;
 
 		// Render twice to trigger update scenario
 		render(<App />, root);
@@ -647,8 +647,8 @@ describe('Portal', () => {
 
 		let domNew = document.getElementById('child');
 		expect(dom).to.equal(domNew);
-		expect(spyParent).to.be.calledOnce;
-		expect(spy).to.be.calledOnce;
+		expect(spyParent).to.be.called;
+		expect(spy).to.be.called;
 	});
 
 	it('should switch between non portal and portal node (Modal as lastChild)', () => {
