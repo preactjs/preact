@@ -1,4 +1,4 @@
-import { createElement } from '../../';
+import { createElement } from '../../src/index';
 import { expect } from 'chai';
 
 const h = createElement;

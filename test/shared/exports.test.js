@@ -11,7 +11,7 @@ import {
 	createRef,
 	toChildArray,
 	isValidElement
-} from '../../';
+} from '../../src/index';
 import { expect } from 'chai';
 
 describe('preact', () => {
