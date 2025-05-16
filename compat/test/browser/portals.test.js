@@ -246,6 +246,44 @@ describe('Portal', () => {
 		);
 	});
 
+	it('should have unique ids for each portal, even when a new one shows up', () => {
+		let root = document.createElement('div');
+		let dialog = document.createElement('div');
+		dialog.id = 'container';
+
+		scratch.appendChild(root);
+		scratch.appendChild(dialog);
+
+		function Id() {
+			const id = useId();
+			return id;
+		}
+
+		function Dialog(props) {
+			return <Id />;
+		}
+
+		function App(props) {
+			return (
+				<div>
+					<Id />
+					{createPortal(<Dialog />, dialog)}
+					{props.renderPortal && createPortal(<Dialog />, dialog)}
+				</div>
+			);
+		}
+
+		render(<App />, root);
+		expect(scratch.innerHTML).to.equal(
+			'<div><div>P0-0</div></div><div id="container">P0-1</div>'
+		);
+
+		render(<App renderPortal={true} />, root);
+		expect(scratch.innerHTML).to.equal(
+			'<div><div>P0-0</div></div><div id="container">P0-1P0-2</div>'
+		);
+	});
+
 	it('should unmount Portal', () => {
 		let root = document.createElement('div');
 		let dialog = document.createElement('div');
