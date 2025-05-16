@@ -1703,6 +1703,7 @@ export namespace JSXInternal {
 
 	interface DetailsHTMLAttributes<T extends EventTarget = HTMLDetailsElement>
 		extends HTMLAttributes<T> {
+		name?: Signalish<string | undefined>;
 		open?: Signalish<boolean | undefined>;
 	}
 
