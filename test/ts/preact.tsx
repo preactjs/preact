@@ -202,10 +202,6 @@ class ComponentWithLifecycle extends Component<DummyProps, DummyState> {
 		return <div>Hi</div>;
 	}
 
-	componentWillMount() {
-		console.log('componentWillMount');
-	}
-
 	componentDidMount() {
 		console.log('componentDidMount');
 	}
@@ -214,25 +210,12 @@ class ComponentWithLifecycle extends Component<DummyProps, DummyState> {
 		console.log('componentWillUnmount');
 	}
 
-	componentWillReceiveProps(nextProps: DummyProps, nextCtx: any) {
-		const { initialInput } = nextProps;
-		console.log('componentWillReceiveProps', initialInput, nextCtx);
-	}
-
 	shouldComponentUpdate(
 		nextProps: DummyProps,
 		nextState: DummyState,
 		nextContext: any
 	) {
 		return false;
-	}
-
-	componentWillUpdate(
-		nextProps: DummyProps,
-		nextState: DummyState,
-		nextContext: any
-	) {
-		console.log('componentWillUpdate', nextProps, nextState, nextContext);
 	}
 
 	componentDidUpdate(
