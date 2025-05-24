@@ -24,14 +24,12 @@ function getAttributes(node) {
 	return attrs;
 }
 
-const isIE11 = /Trident\//.test(navigator.userAgent);
-
 describe('render()', () => {
 	let scratch, rerender;
 
 	let resetAppendChild;
 	let resetInsertBefore;
-	let resetRemoveChild;
+	let resetRemoveText;
 	let resetRemove;
 
 	beforeEach(() => {
@@ -46,14 +44,14 @@ describe('render()', () => {
 	beforeAll(() => {
 		resetAppendChild = logCall(Element.prototype, 'appendChild');
 		resetInsertBefore = logCall(Element.prototype, 'insertBefore');
-		resetRemoveChild = logCall(Element.prototype, 'removeChild');
+		resetRemoveText = logCall(Text.prototype, 'remove');
 		resetRemove = logCall(Element.prototype, 'remove');
 	});
 
 	afterAll(() => {
 		resetAppendChild();
 		resetInsertBefore();
-		resetRemoveChild();
+		resetRemoveText();
 		resetRemove();
 	});
 
@@ -84,13 +82,10 @@ describe('render()', () => {
 		expect(scratch.innerHTML).to.eql(`<img width="100%" height="100%">`);
 	});
 
-	// IE11 doesn't support these.
-	if (!/Trident/.test(window.navigator.userAgent)) {
-		it('should render px width and height on img correctly', () => {
-			render(<img width="100px" height="100px" />, scratch);
-			expect(scratch.innerHTML).to.eql(`<img width="100px" height="100px">`);
-		});
-	}
+	it('should render px width and height on img correctly', () => {
+		render(<img width="100px" height="100px" />, scratch);
+		expect(scratch.innerHTML).to.eql(`<img width="100px" height="100px">`);
+	});
 
 	it('should support the <template> tag', () => {
 		function App() {
@@ -124,10 +119,6 @@ describe('render()', () => {
 		render(<span />, scratch);
 		expect(scratch.childNodes).to.have.length(1);
 		expect(scratch.childNodes[0].nodeName).to.equal('SPAN');
-	});
-
-	it('should not throw error in IE11 with type date', () => {
-		expect(() => render(<input type="date" />, scratch)).to.not.throw();
 	});
 
 	it('should support custom tag names', () => {
@@ -168,11 +159,8 @@ describe('render()', () => {
 		const button = div.childNodes[1];
 		const input = div.childNodes[2];
 
-		// IE11 doesn't support the form attribute
-		if (!isIE11) {
-			expect(button).to.have.property('form', form);
-			expect(input).to.have.property('form', form);
-		}
+		expect(button).to.have.property('form', form);
+		expect(input).to.have.property('form', form);
 	});
 
 	it('should allow VNode reuse', () => {
@@ -401,42 +389,38 @@ describe('render()', () => {
 		expect(scratch.firstChild.value).to.equal('0.5');
 	});
 
-	// IE or IE Edge will throw when attribute values don't conform to the
-	// spec. That's the correct behaviour, but bad for this test...
-	if (!/(Edge|MSIE|Trident)/.test(navigator.userAgent)) {
-		it('should not clear falsy DOM properties', () => {
-			function test(val) {
-				render(
-					<div>
-						<input value={val} />
-						<table border={val} />
-					</div>,
-					scratch
-				);
-			}
-
-			test('2');
-			test(false);
-			expect(scratch.innerHTML).to.equal(
-				'<div><input><table border="false"></table></div>',
-				'for false'
+	it('should not clear falsy DOM properties', () => {
+		function test(val) {
+			render(
+				<div>
+					<input value={val} />
+					<table border={val} />
+				</div>,
+				scratch
 			);
+		}
 
-			test('3');
-			test(null);
-			expect(scratch.innerHTML).to.equal(
-				'<div><input><table border=""></table></div>',
-				'for null'
-			);
+		test('2');
+		test(false);
+		expect(scratch.innerHTML).to.equal(
+			'<div><input><table border="false"></table></div>',
+			'for false'
+		);
 
-			test('4');
-			test(undefined);
-			expect(scratch.innerHTML).to.equal(
-				'<div><input><table border=""></table></div>',
-				'for undefined'
-			);
-		});
-	}
+		test('3');
+		test(null);
+		expect(scratch.innerHTML).to.equal(
+			'<div><input><table border=""></table></div>',
+			'for null'
+		);
+
+		test('4');
+		test(undefined);
+		expect(scratch.innerHTML).to.equal(
+			'<div><input><table border=""></table></div>',
+			'for undefined'
+		);
+	});
 
 	// Test for #3969
 	it('should clear rowspan and colspan', () => {
@@ -716,7 +700,13 @@ describe('render()', () => {
 		});
 
 		it('should avoid reapplying innerHTML when __html property of dangerouslySetInnerHTML attr remains unchanged', () => {
+			/** @type {Component} */
+			let thing;
 			class Thing extends Component {
+				constructor(props) {
+					super(props);
+					thing = this;
+				}
 				render() {
 					// eslint-disable-next-line react/no-danger
 					return (
@@ -725,9 +715,7 @@ describe('render()', () => {
 				}
 			}
 
-			/** @type {Component} */
-			let thing;
-			render(<Thing ref={r => (thing = r)} />, scratch);
+			render(<Thing />, scratch);
 
 			let firstInnerHTMLChild = scratch.firstChild.firstChild;
 
@@ -961,6 +949,10 @@ describe('render()', () => {
 		let checkbox;
 
 		class Inputs extends Component {
+			constructor(props) {
+				super(props);
+				inputs = this;
+			}
 			render() {
 				return (
 					<div>
@@ -971,7 +963,7 @@ describe('render()', () => {
 			}
 		}
 
-		render(<Inputs ref={x => (inputs = x)} />, scratch);
+		render(<Inputs />, scratch);
 
 		expect(text.value).to.equal('Hello');
 		expect(checkbox.checked).to.equal(true);
@@ -1100,9 +1092,12 @@ describe('render()', () => {
 
 	// see preact/#1327
 	it('should not reuse unkeyed components', () => {
+		let ref;
 		class X extends Component {
 			constructor() {
 				super();
+				ref = this;
+				this.id = null;
 				this.state = { i: 0 };
 			}
 
@@ -1119,7 +1114,6 @@ describe('render()', () => {
 			}
 		}
 
-		let ref;
 		/** @type {() => void} */
 		let updateApp;
 		class App extends Component {
@@ -1133,7 +1127,7 @@ describe('render()', () => {
 				return (
 					<div>
 						{this.state.i === 0 && <X />}
-						<X ref={node => (ref = node)} />
+						<X />
 					</div>
 				);
 			}
@@ -1306,11 +1300,7 @@ describe('render()', () => {
 			'<div id="wrapper"><div id="page1">Page 1</div></div>'
 		);
 
-		// IE11 doesn't allow modifying Element.prototype functions properly.
-		// Custom spies will never be called.
-		if (!isIE11) {
-			expect(attributesSpy.get).to.not.have.been.called;
-		}
+		expect(attributesSpy.get).to.not.have.been.called;
 
 		render(
 			<div id="wrapper">
@@ -1322,11 +1312,7 @@ describe('render()', () => {
 			'<div id="wrapper"><div id="page2">Page 2</div></div>'
 		);
 
-		// IE11 doesn't allow modifying Element.prototype functions properly.
-		// Custom spies will never be called.
-		if (!isIE11) {
-			expect(attributesSpy.get).to.not.have.been.called;
-		}
+		expect(attributesSpy.get).to.not.have.been.called;
 	});
 
 	// #2926
@@ -1360,7 +1346,7 @@ describe('render()', () => {
 
 	// #3060
 	it('should reset tabindex on undefined/null', () => {
-		const defaultValue = isIE11 ? 0 : -1;
+		const defaultValue = -1;
 
 		render(<div tabIndex={0} />, scratch);
 		expect(scratch.firstChild.tabIndex).to.equal(0);
