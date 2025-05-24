@@ -119,6 +119,11 @@ export interface Component<P = {}, S = {}> {
 		nextState: Readonly<S>,
 		nextContext: any
 	): boolean;
+	componentWillUpdate?(
+		nextProps: Readonly<P>,
+		nextState: Readonly<S>,
+		nextContext: any
+	): void;
 	getSnapshotBeforeUpdate?(oldProps: Readonly<P>, oldState: Readonly<S>): any;
 	componentDidUpdate?(
 		previousProps: Readonly<P>,
