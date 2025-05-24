@@ -111,11 +111,9 @@ export type AnyComponent<P = {}, S = {}> =
 	| ComponentConstructor<P, S>;
 
 export interface Component<P = {}, S = {}> {
-	componentWillMount?(): void;
 	componentDidMount?(): void;
 	componentWillUnmount?(): void;
 	getChildContext?(): object;
-	componentWillReceiveProps?(nextProps: Readonly<P>, nextContext: any): void;
 	shouldComponentUpdate?(
 		nextProps: Readonly<P>,
 		nextState: Readonly<S>,

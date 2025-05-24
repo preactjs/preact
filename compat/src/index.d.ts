@@ -28,21 +28,14 @@ declare namespace preact {
 	}
 
 	export interface Component<P = {}, S = {}> {
-		componentWillMount?(): void;
 		componentDidMount?(): void;
 		componentWillUnmount?(): void;
 		getChildContext?(): object;
-		componentWillReceiveProps?(nextProps: Readonly<P>, nextContext: any): void;
 		shouldComponentUpdate?(
 			nextProps: Readonly<P>,
 			nextState: Readonly<S>,
 			nextContext: any
 		): boolean;
-		componentWillUpdate?(
-			nextProps: Readonly<P>,
-			nextState: Readonly<S>,
-			nextContext: any
-		): void;
 		getSnapshotBeforeUpdate?(oldProps: Readonly<P>, oldState: Readonly<S>): any;
 		componentDidUpdate?(
 			previousProps: Readonly<P>,

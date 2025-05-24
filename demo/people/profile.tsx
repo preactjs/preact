@@ -14,8 +14,10 @@ export class Profile extends Component<ProfileProps> {
 		this.id = this.props.route;
 	}
 
-	componentWillReceiveProps(props: ProfileProps) {
-		this.id = props.route;
+	componentDidUpdate(prevProps: ProfileProps) {
+		if (prevProps.route !== this.props.route) {
+			this.id = this.props.route;
+		}
 	}
 
 	render() {
