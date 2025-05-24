@@ -344,6 +344,7 @@ export interface Options {
 	debounceRendering?(cb: () => void): void;
 	useDebugValue?(value: string | number): void;
 	_addHookName?(name: string | number): void;
+	_afterRender?(newVNode: VNode, oldVNode: VNode): void;
 	__suspenseDidResolve?(vnode: VNode, cb: () => void): void;
 	// __canSuspenseResolve?(vnode: VNode, cb: () => void): void;
 

@@ -1,4 +1,5 @@
 import { options as _options } from 'preact';
+import { SKIP_CHILDREN } from '../../src/constants';
 
 const ObjectIs = Object.is;
 
@@ -26,6 +27,7 @@ let oldAfterDiff = options.diffed;
 let oldCommit = options._commit;
 let oldBeforeUnmount = options.unmount;
 let oldRoot = options._root;
+let oldAfterRender = options._afterRender;
 
 // We take the minimum timeout for requestAnimationFrame to ensure that
 // the callback is invoked after the next frame. 35ms is based on a 30hz
@@ -60,10 +62,7 @@ options._render = vnode => {
 			hooks._pendingEffects = [];
 			currentComponent._renderCallbacks = [];
 			hooks._list.forEach(hookItem => {
-				if (hookItem._nextValue) {
-					hookItem._value = hookItem._nextValue;
-				}
-				hookItem._pendingArgs = hookItem._nextValue = undefined;
+				hookItem._pendingArgs = undefined;
 			});
 		} else {
 			hooks._pendingEffects.forEach(invokeCleanup);
@@ -186,19 +185,13 @@ export function useReducer(reducer, initialState, init) {
 	const hookState = getHookState(currentIndex++, 2);
 	hookState._reducer = reducer;
 	if (!hookState._component) {
+		hookState._actions = [];
 		hookState._value = [
 			!init ? invokeOrReturn(undefined, initialState) : init(initialState),
 
 			action => {
-				const currentValue = hookState._nextValue
-					? hookState._nextValue[0]
-					: hookState._value[0];
-				const nextValue = hookState._reducer(currentValue, action);
-
-				if (!ObjectIs(currentValue, nextValue)) {
-					hookState._nextValue = [nextValue, hookState._value[1]];
-					hookState._component.setState({});
-				}
+				hookState._actions.push(action);
+				hookState._component.setState({});
 			}
 		];
 
@@ -207,75 +200,55 @@ export function useReducer(reducer, initialState, init) {
 		if (!currentComponent._hasScuFromHooks) {
 			currentComponent._hasScuFromHooks = true;
 			let prevScu = currentComponent.shouldComponentUpdate;
-			const prevCWU = currentComponent.componentWillUpdate;
 
-			// If we're dealing with a forced update `shouldComponentUpdate` will
-			// not be called. But we use that to update the hook values, so we
-			// need to call it.
-			currentComponent.componentWillUpdate = function (p, s, c) {
-				if (this._force) {
-					let tmp = prevScu;
-					// Clear to avoid other sCU hooks from being called
-					prevScu = undefined;
-					updateHookState(p, s, c);
-					prevScu = tmp;
-				}
-
-				if (prevCWU) prevCWU.call(this, p, s, c);
-			};
-
-			// This SCU has the purpose of bailing out after repeated updates
-			// to stateful hooks.
-			// we store the next value in _nextValue[0] and keep doing that for all
-			// state setters, if we have next states and
-			// all next states within a component end up being equal to their original state
-			// we are safe to bail out for this specific component.
-			/**
-			 *
-			 * @type {import('./internal').Component["shouldComponentUpdate"]}
-			 */
-			// @ts-ignore - We don't use TS to downtranspile
-			// eslint-disable-next-line no-inner-declarations
-			function updateHookState(p, s, c) {
-				if (!hookState._component.__hooks) return true;
-
-				/** @type {(x: import('./internal').HookState) => x is import('./internal').ReducerHookState} */
-				const isStateHook = x => !!x._component;
-				const stateHooks =
-					hookState._component.__hooks._list.filter(isStateHook);
-
-				const allHooksEmpty = stateHooks.every(x => !x._nextValue);
-				// When we have no updated hooks in the component we invoke the previous SCU or
-				// traverse the VDOM tree further.
-				if (allHooksEmpty) {
-					return prevScu ? prevScu.call(this, p, s, c) : true;
-				}
-
-				// We check whether we have components with a nextValue set that
-				// have values that aren't equal to one another this pushes
-				// us to update further down the tree
-				let shouldUpdate = hookState._component.props !== p;
-				stateHooks.forEach(hookItem => {
-					if (hookItem._nextValue) {
-						const currentValue = hookItem._value[0];
-						hookItem._value = hookItem._nextValue;
-						hookItem._nextValue = undefined;
-						if (!ObjectIs(currentValue, hookItem._value[0]))
-							shouldUpdate = true;
-					}
-				});
-
+			currentComponent.shouldComponentUpdate = (p, s, c) => {
 				return prevScu
-					? prevScu.call(this, p, s, c) || shouldUpdate
-					: shouldUpdate;
-			}
-
-			currentComponent.shouldComponentUpdate = updateHookState;
+					? prevScu.call(this, p, s, c) || hookState._actions.length
+					: hookState._actions.length;
+			};
 		}
 	}
 
-	return hookState._nextValue || hookState._value;
+	if (hookState._actions.length) {
+		const initialValue = hookState._value[0];
+		hookState._actions.some(action => {
+			hookState._value[0] = hookState._reducer(hookState._value[0], action);
+		});
+
+		hookState._didUpdate = !ObjectIs(initialValue, hookState._value[0]);
+		hookState._value = [hookState._value[0], hookState._value[1]];
+		hookState._didExecute = true;
+		hookState._actions = [];
+	}
+
+	return hookState._value;
 }
+
+options._afterRender = (newVNode, oldVNode) => {
+	if (newVNode._component && newVNode._component.__hooks) {
+		const hooks = newVNode._component.__hooks._list;
+		const stateHooksThatExecuted = hooks.filter(
+			/** @type {(x: import('./internal').HookState) => x is import('./internal').ReducerHookState} */
+			// @ts-expect-error
+			x => x._component && x._didExecute
+		);
+
+		if (
+			stateHooksThatExecuted.length &&
+			!stateHooksThatExecuted.some(x => x._didUpdate) &&
+			oldVNode.props === newVNode.props
+		) {
+			newVNode._component.__hooks._pendingEffects = [];
+			newVNode._flags |= SKIP_CHILDREN;
+		}
+
+		stateHooksThatExecuted.some(hook => {
+			hook._didExecute = hook._didUpdate = false;
+		});
+	}
+
+	if (oldAfterRender) oldAfterRender(newVNode, oldVNode);
+};
 
 /**
  * @param {import('./internal').Effect} callback
