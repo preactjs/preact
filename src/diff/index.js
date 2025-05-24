@@ -190,6 +190,10 @@ export function diff(
 					break outer;
 				}
 
+				if (c.componentWillUpdate != NULL) {
+					c.componentWillUpdate(newProps, c._nextState, componentContext);
+				}
+
 				if (isClassComponent && c.componentDidUpdate != NULL) {
 					c._renderCallbacks.push(() => {
 						c.componentDidUpdate(oldProps, oldState, snapshot);
