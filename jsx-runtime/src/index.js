@@ -69,7 +69,7 @@ function createVNode(type, props, key, isStaticChildren, __source, __self) {
 	// Note: `type` is often a String, and can be `undefined` in development.
 	if (typeof type === 'function' && (ref = type.defaultProps)) {
 		for (i in ref)
-			if (typeof normalizedProps[i] === 'undefined') {
+			if (normalizedProps[i] === undefined) {
 				normalizedProps[i] = ref[i];
 			}
 	}

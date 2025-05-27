@@ -68,6 +68,12 @@ describe('Babel jsx/jsxDEV', () => {
 		});
 	});
 
+	it('should respect defaultProps when props are null', () => {
+		const Component = ({ children }) => children;
+		Component.defaultProps = { foo: 'bar' };
+		expect(jsx(Component, { foo: null }).props).to.deep.equal({ foo: null });
+	});
+
 	it('should keep props over defaultProps', () => {
 		class Foo extends Component {
 			render() {

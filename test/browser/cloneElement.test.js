@@ -97,4 +97,17 @@ describe('cloneElement', () => {
 		const clone = cloneElement(element, { color: undefined });
 		expect(clone.props.color).to.equal('blue');
 	});
+
+	it('should prevent undefined properties from overriding default props', () => {
+		class Example extends Component {
+			render(props) {
+				return <div style={{ color: props.color }}>thing</div>;
+			}
+		}
+		Example.defaultProps = { color: 'blue' };
+
+		const element = <Example color="red" />;
+		const clone = cloneElement(element, { color: null });
+		expect(clone.props.color).to.equal(null);
+	});
 });
