@@ -6,7 +6,7 @@ export const REACT_FORWARD_SYMBOL = Symbol.for('react.forward_ref');
  * Pass ref down to a child. This is mainly used in libraries with HOCs that
  * wrap components. Using `forwardRef` there is an easy way to get a reference
  * of the wrapped component instead of one of the wrapper itself.
- * @param {import('./index').ForwardFn} fn
+ * @param {import('./index').ForwardRefRenderFunction} fn
  * @returns {import('./internal').FunctionComponent}
  */
 export function forwardRef(fn) {
