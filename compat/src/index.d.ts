@@ -335,14 +335,6 @@ declare namespace React {
 		ref?: preact1.Ref<R> | undefined;
 	}
 
-	/**
-	 * @deprecated Please use `ForwardRefRenderFunction` instead.
-	 */
-	export interface ForwardFn<P = {}, T = any> {
-		(props: P, ref: ForwardedRef<T>): preact1.ComponentChild;
-		displayName?: string;
-	}
-
 	export interface ForwardRefRenderFunction<T = any, P = {}> {
 		(props: P, ref: ForwardedRef<T>): preact1.ComponentChild;
 		displayName?: string;
