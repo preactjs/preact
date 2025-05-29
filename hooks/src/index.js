@@ -201,7 +201,7 @@ export function useReducer(reducer, initialState, init) {
 			currentComponent._hasScuFromHooks = true;
 			let prevScu = currentComponent.shouldComponentUpdate;
 
-			currentComponent.shouldComponentUpdate = (p, s, c) => {
+			currentComponent.shouldComponentUpdate = function (p, s, c) {
 				return prevScu
 					? prevScu.call(this, p, s, c) || hookState._actions.length
 					: hookState._actions.length;
