@@ -159,6 +159,85 @@ describe('compat render', () => {
 		expect(scratch.firstElementChild.value).to.equal('0');
 	});
 
+	it('should use defaultProps when prop is undefined', () => {
+		function TestComponent({ message }) {
+			return <div>{message}</div>;
+		}
+		TestComponent.defaultProps = {
+			message: 'default message'
+		};
+
+		render(<TestComponent message={undefined} />, scratch);
+		expect(scratch.textContent).to.equal('default message');
+	});
+
+	it('should not use defaultProps when prop is null', () => {
+		function TestComponent({ message }) {
+			return <div>{message === null ? 'null value' : message}</div>;
+		}
+		TestComponent.defaultProps = {
+			message: 'default message'
+		};
+
+		render(<TestComponent message={null} />, scratch);
+		expect(scratch.textContent).to.equal('null value');
+	});
+
+	it('should not use defaultProps when prop has a value', () => {
+		function TestComponent({ message }) {
+			return <div>{message}</div>;
+		}
+		TestComponent.defaultProps = {
+			message: 'default message'
+		};
+
+		render(<TestComponent message="actual message" />, scratch);
+		expect(scratch.textContent).to.equal('actual message');
+	});
+
+	it('should use defaultProps when prop is missing entirely', () => {
+		function TestComponent({ message }) {
+			return <div>{message}</div>;
+		}
+		TestComponent.defaultProps = {
+			message: 'default message'
+		};
+
+		render(<TestComponent />, scratch);
+		expect(scratch.textContent).to.equal('default message');
+	});
+
+	it('should handle multiple defaultProps with mixed prop states', () => {
+		function TestComponent({ title, message, count }) {
+			return (
+				<div>
+					<h1>{title}</h1>
+					<p>{message}</p>
+					<span>{count}</span>
+				</div>
+			);
+		}
+		TestComponent.defaultProps = {
+			title: 'Default Title',
+			message: 'Default Message',
+			count: 42
+		};
+
+		// title is undefined (should use default), message is null (should not use default), count has value (should not use default)
+		render(
+			<TestComponent title={undefined} message={null} count={0} />,
+			scratch
+		);
+
+		const title = scratch.querySelector('h1');
+		const message = scratch.querySelector('p');
+		const count = scratch.querySelector('span');
+
+		expect(title.textContent).to.equal('Default Title');
+		expect(message.textContent).to.equal(''); // null renders as empty
+		expect(count.textContent).to.equal('0'); // 0 is a valid value
+	});
+
 	it('should call onChange and onInput when input event is dispatched', () => {
 		const onChange = sinon.spy();
 		const onInput = sinon.spy();
