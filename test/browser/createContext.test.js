@@ -129,7 +129,42 @@ describe('createContext', () => {
 		expect(renders).to.equal(1);
 	});
 
-	it('should preserve provider context through nesting providers', async () => {
+	it('skips referentially equal children to Provider w/ dom-node in between', () => {
+		const { Provider, Consumer } = createContext(null);
+		let set,
+			renders = 0;
+		const Layout = ({ children }) => {
+			renders++;
+			return children;
+		};
+		class State extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { i: 0 };
+				set = this.setState.bind(this);
+			}
+			render() {
+				const { children } = this.props;
+				return <Provider value={this.state}>{children}</Provider>;
+			}
+		}
+		const App = () => (
+			<State>
+				<div>
+					<Layout>
+						<Consumer>{({ i }) => <p>{i}</p>}</Consumer>
+					</Layout>
+				</div>
+			</State>
+		);
+		render(<App />, scratch);
+		expect(renders).to.equal(1);
+		set({ i: 2 });
+		rerender();
+		expect(renders).to.equal(1);
+	});
+
+	it('should preserve provider context through nesting providers', done => {
 		const { Provider, Consumer } = createContext(null);
 		const CONTEXT = { a: 'a' };
 		const CHILD_CONTEXT = { b: 'b' };

@@ -5,6 +5,7 @@ import {
 	MODE_SUSPENDED,
 	NULL,
 	RESET_MODE,
+	SKIP_CHILDREN,
 	SVG_NAMESPACE,
 	UNDEFINED,
 	XHTML_NAMESPACE
@@ -69,8 +70,11 @@ export function diff(
 	// If the previous diff bailed out, resume creating/hydrating.
 	if (oldVNode._flags & MODE_SUSPENDED) {
 		isHydrating = !!(oldVNode._flags & MODE_HYDRATE);
-		oldDom = newVNode._dom = oldVNode._dom;
-		excessDomChildren = [oldDom];
+		if (oldVNode._component._excess) {
+			excessDomChildren = oldVNode._component._excess;
+			oldDom = newVNode._dom = oldVNode._dom = excessDomChildren[0];
+			oldVNode._component._excess = null;
+		}
 	}
 
 	if ((tmp = options._diff)) tmp(newVNode);
@@ -220,6 +224,7 @@ export function diff(
 			c._force = false;
 
 			let renderHook = options._render,
+				afterRender = options._afterRender,
 				count = 0;
 			if (isClassComponent) {
 				c.state = c._nextState;
@@ -228,6 +233,7 @@ export function diff(
 				if (renderHook) renderHook(newVNode);
 
 				tmp = c.render(c.props, c.state, c.context);
+				if (afterRender) afterRender(newVNode, oldVNode);
 
 				for (let i = 0; i < c._stateCallbacks.length; i++) {
 					c._renderCallbacks.push(c._stateCallbacks[i]);
@@ -239,6 +245,18 @@ export function diff(
 					if (renderHook) renderHook(newVNode);
 
 					tmp = c.render(c.props, c.state, c.context);
+					if (afterRender) afterRender(newVNode, oldVNode);
+
+					if (newVNode._flags & SKIP_CHILDREN) {
+						c._dirty = false;
+						c._renderCallbacks = [];
+						newVNode._dom = oldVNode._dom;
+						newVNode._children = oldVNode._children;
+						newVNode._children.some(vnode => {
+							if (vnode) vnode._parent = newVNode;
+						});
+						break outer;
+					}
 
 					// Handle setState called in render, see #2553
 					c.state = c._nextState;
@@ -249,7 +267,7 @@ export function diff(
 			c.state = c._nextState;
 
 			if (c.getChildContext != NULL) {
-				globalContext = assign(assign({}, globalContext), c.getChildContext());
+				globalContext = assign({}, globalContext, c.getChildContext());
 			}
 
 			if (isClassComponent && !isNew && c.getSnapshotBeforeUpdate != NULL) {
@@ -278,8 +296,6 @@ export function diff(
 				refQueue
 			);
 
-			c.base = newVNode._dom;
-
 			// We successfully rendered this VNode, unset any stored hydration/bailout state:
 			newVNode._flags &= RESET_MODE;
 
@@ -295,15 +311,54 @@ export function diff(
 			// if hydrating or creating initial tree, bailout preserves DOM:
 			if (isHydrating || excessDomChildren != NULL) {
 				if (e.then) {
+					let commentMarkersToFind = 0,
+						done = false;
+
 					newVNode._flags |= isHydrating
 						? MODE_HYDRATE | MODE_SUSPENDED
 						: MODE_SUSPENDED;
 
-					while (oldDom && oldDom.nodeType == 8 && oldDom.nextSibling) {
-						oldDom = oldDom.nextSibling;
+					newVNode._component._excess = [];
+					for (let i = 0; i < excessDomChildren.length; i++) {
+						let child = excessDomChildren[i];
+						if (child == NULL || done) continue;
+
+						// When we encounter a boundary with $s we are opening
+						// a boundary, this implies that we need to bump
+						// the amount of markers we need to find before closing
+						// the outer boundary.
+						// We exclude the open and closing marker from
+						// the future excessDomChildren but any nested one
+						// needs to be included for future suspensions.
+						if (child.nodeType == 8 && child.data == '$s') {
+							if (commentMarkersToFind > 0) {
+								newVNode._component._excess.push(child);
+							}
+							commentMarkersToFind++;
+							excessDomChildren[i] = NULL;
+						} else if (child.nodeType == 8 && child.data == '/$s') {
+							commentMarkersToFind--;
+							if (commentMarkersToFind > 0) {
+								newVNode._component._excess.push(child);
+							}
+							done = commentMarkersToFind === 0;
+							oldDom = excessDomChildren[i];
+							excessDomChildren[i] = NULL;
+						} else if (commentMarkersToFind > 0) {
+							newVNode._component._excess.push(child);
+							excessDomChildren[i] = NULL;
+						}
 					}
 
-					excessDomChildren[excessDomChildren.indexOf(oldDom)] = NULL;
+					if (!done) {
+						while (oldDom && oldDom.nodeType == 8 && oldDom.nextSibling) {
+							oldDom = oldDom.nextSibling;
+						}
+
+						excessDomChildren[excessDomChildren.indexOf(oldDom)] = NULL;
+						newVNode._component._excess = [oldDom];
+					}
+
 					newVNode._dom = oldDom;
 				} else {
 					for (let i = excessDomChildren.length; i--; ) {
@@ -316,12 +371,6 @@ export function diff(
 			}
 			options._catchError(e, newVNode, oldVNode);
 		}
-	} else if (
-		excessDomChildren == NULL &&
-		newVNode._original == oldVNode._original
-	) {
-		newVNode._children = oldVNode._children;
-		newVNode._dom = oldVNode._dom;
 	} else {
 		oldDom = newVNode._dom = diffElementNodes(
 			oldVNode._dom,
@@ -580,12 +629,7 @@ function diffElementNodes(
 				// despite the attribute not being present. When the attribute
 				// is missing the progress bar is treated as indeterminate.
 				// To fix that we'll always update it when it is 0 for progress elements
-				(inputValue !== dom[i] ||
-					(nodeType == 'progress' && !inputValue) ||
-					// This is only for IE 11 to fix <select> value not being updated.
-					// To avoid a stale select value we need to set the option.value
-					// again, which triggers IE11 to re-evaluate the select value
-					(nodeType == 'option' && inputValue != oldProps[i]))
+				(inputValue !== dom[i] || (nodeType === 'progress' && !inputValue))
 			) {
 				setProperty(dom, i, inputValue, oldProps[i], namespace);
 			}
@@ -653,7 +697,7 @@ export function unmount(vnode, parentVNode, skipRemove) {
 			}
 		}
 
-		r.base = r._parentDom = NULL;
+		r._parentDom = NULL;
 	}
 
 	if ((r = vnode._children)) {

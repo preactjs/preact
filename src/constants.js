@@ -6,6 +6,8 @@ export const MODE_SUSPENDED = 1 << 7;
 export const INSERT_VNODE = 1 << 2;
 /** Indicates a VNode has been matched with another VNode in the diff */
 export const MATCHED = 1 << 1;
+/** Indicates that children should not be diffed */
+export const SKIP_CHILDREN = 1 << 3;
 
 /** Reset all mode flags */
 export const RESET_MODE = ~(MODE_HYDRATE | MODE_SUSPENDED);
@@ -18,5 +20,3 @@ export const NULL = null;
 export const UNDEFINED = undefined;
 export const EMPTY_OBJ = /** @type {any} */ ({});
 export const EMPTY_ARR = [];
-export const IS_NON_DIMENSIONAL =
-	/acit|ex(?:s|g|n|p|$)|rph|grid|ows|mnc|ntw|ine[ch]|zoo|^ord|itera/i;

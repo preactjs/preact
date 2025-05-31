@@ -72,9 +72,9 @@ describe('memo()', () => {
 
 		let ref = null;
 
-		function Foo() {
+		function Foo(props) {
 			spy();
-			return <h1>Hello World</h1>;
+			return <h1 ref={props.ref}>Hello World</h1>;
 		}
 
 		let Memoized = memo(Foo);
@@ -99,8 +99,7 @@ describe('memo()', () => {
 		update();
 		rerender();
 
-		expect(ref.current).not.to.be.undefined;
-
+		expect(ref.current).to.equal(scratch.firstChild);
 		// TODO: not sure whether this is in-line with react...
 		expect(spy).to.be.calledTwice;
 	});
@@ -175,8 +174,8 @@ describe('memo()', () => {
 
 	it('should pass ref through nested memos', () => {
 		class Foo extends Component {
-			render() {
-				return <h1>Hello World</h1>;
+			render(props) {
+				return <h1 ref={props.ref}>Hello World</h1>;
 			}
 		}
 
@@ -187,7 +186,7 @@ describe('memo()', () => {
 		render(<App ref={ref} />, scratch);
 
 		expect(ref.current).not.to.be.undefined;
-		expect(ref.current).to.be.instanceOf(Foo);
+		expect(ref.current).to.equal(scratch.firstChild);
 	});
 
 	it('should not unnecessarily reorder children #2895', () => {

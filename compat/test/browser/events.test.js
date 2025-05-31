@@ -30,10 +30,6 @@ describe('preact/compat events', () => {
 
 	it('should patch events', () => {
 		let spy = sinon.spy(event => {
-			// Calling ev.preventDefault() outside of an event handler
-			// does nothing in IE11. So we move these asserts inside
-			// the event handler. We ensure that it's called once
-			// in another assertion
 			expect(event.isDefaultPrevented()).to.be.false;
 			event.preventDefault();
 			expect(event.isDefaultPrevented()).to.be.true;
@@ -89,47 +85,14 @@ describe('preact/compat events', () => {
 		expect(vnode.props).to.not.haveOwnProperty('oninputCapture');
 	});
 
-	it('should normalize onChange for range, except in IE11', () => {
-		// NOTE: we don't normalize `onchange` for range inputs in IE11.
-		const eventType = /Trident\//.test(navigator.userAgent)
-			? 'change'
-			: 'input';
-
+	it('should normalize onChange for range', () => {
 		render(<input type="range" onChange={() => null} />, scratch);
 		expect(proto.addEventListener).to.have.been.calledOnce;
 		expect(proto.addEventListener).to.have.been.calledWithExactly(
-			eventType,
+			'input',
 			sinon.match.func,
 			false
 		);
-	});
-
-	it('should normalize onChange for range, except in IE11, including when IE11 has Symbol polyfill', () => {
-		// NOTE: we don't normalize `onchange` for range inputs in IE11.
-		// This test mimics a specific scenario when a Symbol polyfill may
-		// be present, in which case onChange should still not be normalized
-
-		const isIE11 = /Trident\//.test(navigator.userAgent);
-		const eventType = isIE11 ? 'change' : 'input';
-
-		if (isIE11) {
-			window.Symbol = () => 'mockSymbolPolyfill';
-		}
-		sinon.spy(window, 'Symbol');
-
-		render(<input type="range" onChange={() => null} />, scratch);
-		expect(window.Symbol).to.have.been.calledOnce;
-		expect(proto.addEventListener).to.have.been.calledOnce;
-		expect(proto.addEventListener).to.have.been.calledWithExactly(
-			eventType,
-			sinon.match.func,
-			false
-		);
-
-		window.Symbol.restore();
-		if (isIE11) {
-			window.Symbol = undefined;
-		}
 	});
 
 	it('should support onAnimationEnd', () => {
