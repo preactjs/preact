@@ -60,6 +60,13 @@
       "import": "./test-utils/dist/testUtils.mjs",
       "require": "./test-utils/dist/testUtils.js"
     },
+    "./compat/test-utils": {
+      "types": "./test-utils/src/index.d.ts",
+      "browser": "./test-utils/dist/testUtils.module.js",
+      "umd": "./test-utils/dist/testUtils.umd.js",
+      "import": "./test-utils/dist/testUtils.mjs",
+      "require": "./test-utils/dist/testUtils.js"
+    },
     "./jsx-runtime": {
       "types": "./jsx-runtime/src/index.d.ts",
       "browser": "./jsx-runtime/dist/jsxRuntime.module.js",
