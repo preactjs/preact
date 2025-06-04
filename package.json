@@ -169,6 +169,7 @@
     "compat/scheduler.js",
     "compat/scheduler.mjs",
     "compat/test-utils.js",
+    "compat/test-utils.mjs",
     "compat/jsx-runtime.js",
     "compat/jsx-runtime.mjs",
     "compat/jsx-dev-runtime.js",
