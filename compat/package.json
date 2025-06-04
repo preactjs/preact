@@ -46,6 +46,10 @@
       "import": "./scheduler.mjs",
       "require": "./scheduler.js"
     },
+    "./test-utils": {
+      "import": "./test-utils.mjs",
+      "require": "./test-utils.js"
+    },
     "./package.json": "./package.json"
   }
 }
