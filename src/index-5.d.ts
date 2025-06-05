@@ -86,12 +86,12 @@ export type ComponentProps<
 		? JSXInternal.IntrinsicElements[C]
 		: {};
 
-export interface FunctionComponent<P = {}> {
-	(props: RenderableProps<P>, context?: any): VNode | null;
+export interface FunctionComponent<P = {}, RefType = any> {
+	(props: RenderableProps<P, RefType>, context?: any): VNode | null;
 	displayName?: string;
 	defaultProps?: Partial<P> | undefined;
 }
-export interface FunctionalComponent<P = {}> extends FunctionComponent<P> {}
+export interface FunctionalComponent<P = {}, RefType = any> extends FunctionComponent<P, RefType> {}
 
 export interface ComponentClass<P = {}, S = {}> {
 	new (props: P, context?: any): Component<P, S>;
