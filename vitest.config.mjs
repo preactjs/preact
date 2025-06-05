@@ -158,21 +158,7 @@ export default defineConfig({
 					return null;
 				}
 
-				const cached = cache.get(id);
-				if (cached && cached.input === code) {
-					return cached.result;
-				}
-
-				if (pending.has(id)) {
-					const result = await pending.get(id);
-					pending.delete(id);
-					return {
-						code: result.code,
-						map: result.map
-					};
-				}
-
-				const promise = transformAsync(code, {
+				const transformed = await transformAsync(code, {
 					filename: id,
 					configFile: false,
 					plugins: [
@@ -184,13 +170,6 @@ export default defineConfig({
 						]
 					],
 					include: ['**/src/**/*.js', '**/test/**/*.js']
-				});
-
-				pending.set(id, promise);
-				const transformed = await promise;
-				cache.set(id, {
-					input: code,
-					result: transformed
 				});
 
 				return {
