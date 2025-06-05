@@ -265,7 +265,7 @@ declare namespace React {
 
 	export function forwardRef<R, P = {}>(
 		fn: ForwardRefRenderFunction<R, P>
-	): preact.FunctionalComponent<PropsWithoutRef<P> & { ref?: preact.Ref<R> }>;
+	): preact.FunctionalComponent<PropsWithoutRef<P>, R>;
 
 	export type PropsWithoutRef<P> = Omit<P, 'ref'>;
 
