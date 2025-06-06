@@ -32,7 +32,6 @@ import { memo } from './memo';
 import { forwardRef } from './forwardRef';
 import { Children } from './Children';
 import { Suspense, lazy } from './suspense';
-import { SuspenseList } from './suspense-list';
 import { createPortal } from './portals';
 import {
 	hydrate,
@@ -117,20 +116,11 @@ function unmountComponentAtNode(container) {
 function findDOMNode(component) {
 	return (
 		(component &&
-			(component.base || (component.nodeType === 1 && component))) ||
+			((component._vnode && component._vnode._dom) ||
+				(component.nodeType === 1 && component))) ||
 		null
 	);
 }
-
-/**
- * Deprecated way to control batched rendering inside the reconciler, but we
- * already schedule in batches inside our rendering code
- * @template Arg
- * @param {(arg: Arg) => void} callback function that triggers the updated
- * @param {Arg} [arg] Optional argument that can be passed to the callback
- */
-// eslint-disable-next-line camelcase
-const unstable_batchedUpdates = (callback, arg) => callback(arg);
 
 /**
  * In React, `flushSync` flushes the entire tree and forces a rerender. It's
@@ -180,11 +170,8 @@ export {
 	useDeferredValue,
 	useSyncExternalStore,
 	useTransition,
-	// eslint-disable-next-line camelcase
-	unstable_batchedUpdates,
 	StrictMode,
 	Suspense,
-	SuspenseList,
 	lazy,
 	__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED
 };
@@ -229,10 +216,8 @@ export default {
 	memo,
 	forwardRef,
 	flushSync,
-	unstable_batchedUpdates,
 	StrictMode,
 	Suspense,
-	SuspenseList,
 	lazy,
 	__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED
 };

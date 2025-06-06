@@ -20,23 +20,13 @@ export function createElement(type, props, children) {
 		i;
 	for (i in props) {
 		if (i == 'key') key = props[i];
-		else if (i == 'ref') ref = props[i];
+		else if (i == 'ref' && typeof type != 'function') ref = props[i];
 		else normalizedProps[i] = props[i];
 	}
 
 	if (arguments.length > 2) {
 		normalizedProps.children =
 			arguments.length > 3 ? slice.call(arguments, 2) : children;
-	}
-
-	// If a Component VNode, check for and apply defaultProps
-	// Note: type may be undefined in development, must never error here.
-	if (typeof type == 'function' && type.defaultProps != NULL) {
-		for (i in type.defaultProps) {
-			if (normalizedProps[i] === UNDEFINED) {
-				normalizedProps[i] = type.defaultProps[i];
-			}
-		}
 	}
 
 	return createVNode(type, normalizedProps, key, ref, NULL);

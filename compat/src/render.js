@@ -24,10 +24,9 @@ import {
 	useSyncExternalStore,
 	useTransition
 } from './index';
+import { assign, IS_NON_DIMENSIONAL } from './util';
 
-export const REACT_ELEMENT_TYPE =
-	(typeof Symbol != 'undefined' && Symbol.for && Symbol.for('react.element')) ||
-	0xeac7;
+export const REACT_ELEMENT_TYPE = Symbol.for('react.element');
 
 const CAMEL_PROPS =
 	/^(?:accent|alignment|arabic|baseline|cap|clip(?!PathU)|color|dominant|fill|flood|font|glyph(?!R)|horiz|image(!S)|letter|lighting|marker(?!H|W|U)|overline|paint|pointer|shape|stop|strikethrough|stroke|text(?!L)|transform|underline|unicode|units|v|vector|vert|word|writing|x(?!C))[A-Z]/;
@@ -36,43 +35,10 @@ const CAMEL_REPLACE = /[A-Z0-9]/g;
 const IS_DOM = typeof document !== 'undefined';
 
 // Input types for which onchange should not be converted to oninput.
-// type="file|checkbox|radio", plus "range" in IE11.
-// (IE11 doesn't support Symbol, which we use here to turn `rad` into `ra` which matches "range")
-const onChangeInputType = type =>
-	(typeof Symbol != 'undefined' && typeof Symbol() == 'symbol'
-		? /fil|che|rad/
-		: /fil|che|ra/
-	).test(type);
+const onChangeInputType = type => /fil|che|rad/.test(type);
 
 // Some libraries like `react-virtualized` explicitly check for this.
 Component.prototype.isReactComponent = {};
-
-// `UNSAFE_*` lifecycle hooks
-// Preact only ever invokes the unprefixed methods.
-// Here we provide a base "fallback" implementation that calls any defined UNSAFE_ prefixed method.
-// - If a component defines its own `componentDidMount()` (including via defineProperty), use that.
-// - If a component defines `UNSAFE_componentDidMount()`, `componentDidMount` is the alias getter/setter.
-// - If anything assigns to an `UNSAFE_*` property, the assignment is forwarded to the unprefixed property.
-// See https://github.com/preactjs/preact/issues/1941
-[
-	'componentWillMount',
-	'componentWillReceiveProps',
-	'componentWillUpdate'
-].forEach(key => {
-	Object.defineProperty(Component.prototype, key, {
-		configurable: true,
-		get() {
-			return this['UNSAFE_' + key];
-		},
-		set(v) {
-			Object.defineProperty(this, key, {
-				configurable: true,
-				writable: true,
-				value: v
-			});
-		}
-	});
-});
 
 /**
  * Proxy render() since React returns a Component reference.
@@ -151,7 +117,17 @@ function handleDomVNode(vnode) {
 		}
 
 		let lowerCased = i.toLowerCase();
-		if (i === 'defaultValue' && 'value' in props && props.value == null) {
+		if (i === 'style' && typeof value === 'object') {
+			for (let key in value) {
+				if (typeof value[key] === 'number' && !IS_NON_DIMENSIONAL.test(key)) {
+					value[key] += 'px';
+				}
+			}
+		} else if (
+			i === 'defaultValue' &&
+			'value' in props &&
+			props.value == null
+		) {
 			// `defaultValue` is treated as a fallback `value` when a value prop is present but null/undefined.
 			// `defaultValue` for Elements with no value prop is the same as the DOM defaultValue property.
 			i = 'value';
@@ -245,8 +221,15 @@ options.vnode = vnode => {
 	// only normalize props on Element nodes
 	if (typeof vnode.type === 'string') {
 		handleDomVNode(vnode);
+	} else if (typeof vnode.type === 'function' && vnode.type.defaultProps) {
+		let normalizedProps = assign({}, vnode.props);
+		for (let i in vnode.type.defaultProps) {
+			if (normalizedProps[i] === undefined) {
+				normalizedProps[i] = vnode.type.defaultProps[i];
+			}
+		}
+		vnode.props = normalizedProps;
 	}
-
 	vnode.$$typeof = REACT_ELEMENT_TYPE;
 
 	if (oldVNodeHook) oldVNodeHook(vnode);

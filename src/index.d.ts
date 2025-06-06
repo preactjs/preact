@@ -37,9 +37,9 @@ export interface VNode<P = {}> {
 
 export type Key = string | number | any;
 
-export type RefObject<T> = { current: T | null };
+export type RefObject<T> = { current: T };
 export type RefCallback<T> = (instance: T | null) => void;
-export type Ref<T> = RefObject<T> | RefCallback<T> | null;
+export type Ref<T> = RefCallback<T> | RefObject<T | null> | null;
 
 export type ComponentChild =
 	| VNode<any>
@@ -89,14 +89,12 @@ export type ComponentProps<
 export interface FunctionComponent<P = {}> {
 	(props: RenderableProps<P>, context?: any): ComponentChildren;
 	displayName?: string;
-	defaultProps?: Partial<P> | undefined;
 }
 export interface FunctionalComponent<P = {}> extends FunctionComponent<P> {}
 
 export interface ComponentClass<P = {}, S = {}> {
 	new (props: P, context?: any): Component<P, S>;
 	displayName?: string;
-	defaultProps?: Partial<P>;
 	contextType?: Context<any>;
 	getDerivedStateFromProps?(
 		props: Readonly<P>,
@@ -141,7 +139,6 @@ export abstract class Component<P, S> {
 	constructor(props?: P, context?: any);
 
 	static displayName?: string;
-	static defaultProps?: any;
 	static contextType?: Context<any>;
 
 	// Static members cannot reference class type parameters. This is not
@@ -159,7 +156,6 @@ export abstract class Component<P, S> {
 	state: Readonly<S>;
 	props: RenderableProps<P>;
 	context: any;
-	base?: Element | Text;
 
 	// From https://github.com/DefinitelyTyped/DefinitelyTyped/blob/e836acc75a78cf0655b5dfdbe81d69fdd4d8a252/types/react/index.d.ts#L402
 	// // We MUST keep setState() as a unified signature because it allows proper checking of the method return type.
@@ -293,23 +289,12 @@ interface ContainerNode {
 	readonly firstChild: ContainerNode | null;
 	readonly childNodes: ArrayLike<ContainerNode>;
 
-	contains(other: ContainerNode | null): boolean;
 	insertBefore(node: ContainerNode, child: ContainerNode | null): ContainerNode;
 	appendChild(node: ContainerNode): ContainerNode;
 	removeChild(child: ContainerNode): ContainerNode;
 }
 
 export function render(vnode: ComponentChild, parent: ContainerNode): void;
-/**
- * @deprecated Will be removed in v11.
- *
- * Replacement Preact 10+ implementation can be found here: https://gist.github.com/developit/f4c67a2ede71dc2fab7f357f39cff28c
- */
-export function render(
-	vnode: ComponentChild,
-	parent: ContainerNode,
-	replaceNode?: Element | Text
-): void;
 export function hydrate(vnode: ComponentChild, parent: ContainerNode): void;
 export function cloneElement(
 	vnode: VNode<any>,

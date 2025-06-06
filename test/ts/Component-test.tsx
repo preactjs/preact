@@ -146,10 +146,6 @@ describe('Component', () => {
 		expect(component.props.initialName).to.eq('da name');
 	});
 
-	it('has no base when not mounted', () => {
-		expect(component.base).to.not.exist;
-	});
-
 	describe('setState', () => {
 		// No need to execute these tests. because we only need to check if
 		// the types are working. Executing them would require the DOM.

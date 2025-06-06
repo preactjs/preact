@@ -25,8 +25,9 @@ describe('hydrate()', () => {
 
 	let resetAppendChild;
 	let resetInsertBefore;
-	let resetRemoveChild;
 	let resetRemove;
+	let resetRemoveText;
+	let resetRemoveComment;
 	let resetSetAttribute;
 	let resetRemoveAttribute;
 	let rerender;
@@ -34,8 +35,9 @@ describe('hydrate()', () => {
 	beforeAll(() => {
 		resetAppendChild = logCall(Element.prototype, 'appendChild');
 		resetInsertBefore = logCall(Element.prototype, 'insertBefore');
-		resetRemoveChild = logCall(Element.prototype, 'removeChild');
 		resetRemove = logCall(Element.prototype, 'remove');
+		resetRemoveComment = logCall(Comment.prototype, 'remove');
+		resetRemoveText = logCall(Text.prototype, 'remove');
 		resetSetAttribute = logCall(Element.prototype, 'setAttribute');
 		resetRemoveAttribute = logCall(Element.prototype, 'removeAttribute');
 	});
@@ -43,10 +45,11 @@ describe('hydrate()', () => {
 	afterAll(() => {
 		resetAppendChild();
 		resetInsertBefore();
-		resetRemoveChild();
 		resetRemove();
+		resetRemoveText();
 		resetSetAttribute();
 		resetRemoveAttribute();
+		resetRemoveComment();
 	});
 
 	beforeEach(() => {
@@ -222,10 +225,7 @@ describe('hydrate()', () => {
 		clearLog();
 		hydrate(vnode, scratch);
 
-		// IE11 doesn't support spying on Element.prototype
-		if (!/Trident/.test(navigator.userAgent)) {
-			expect(attributesSpy.get).to.not.have.been.called;
-		}
+		expect(attributesSpy.get).to.not.have.been.called;
 
 		expect(serializeHtml(scratch)).to.equal(
 			sortAttributes(
@@ -374,10 +374,7 @@ describe('hydrate()', () => {
 		);
 
 		hydrate(preactElement, scratch);
-		// IE11 doesn't support spies on built-in prototypes
-		if (!/Trident/.test(navigator.userAgent)) {
-			expect(attributesSpy.get).to.not.have.been.called;
-		}
+		expect(attributesSpy.get).to.not.have.been.called;
 		expect(scratch).to.have.property(
 			'innerHTML',
 			'<div><a foo="bar"></a></div>'

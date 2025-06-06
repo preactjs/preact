@@ -27,6 +27,8 @@ export interface ErrorInfo {
 }
 
 export interface Options extends preact.Options {
+	/** Attach a hook that is invoked after a vnode has rendered. */
+	_afterRender?(vnode: VNode, oldVNode: VNode): void;
 	/** Attach a hook that is invoked before render, mainly to check the arguments. */
 	_root?(vnode: ComponentChild, parent: preact.ContainerNode): void;
 	/** Attach a hook that is invoked before a vnode is diffed. */
@@ -62,8 +64,7 @@ export type ComponentChild =
 	| undefined;
 export type ComponentChildren = ComponentChild[] | ComponentChild;
 
-export interface FunctionComponent<P = {}>
-	extends preact.FunctionComponent<P> {
+export interface FunctionComponent<P = {}> extends preact.FunctionComponent<P> {
 	// Internally, createContext uses `contextType` on a Function component to
 	// implement the Consumer component
 	contextType?: PreactContext;
@@ -95,6 +96,7 @@ export interface PreactElement extends preact.ContainerNode {
 	data?: CharacterData['data'];
 	// Property to set __dangerouslySetInnerHTML
 	innerHTML?: Element['innerHTML'];
+	remove?: Element['remove'];
 
 	// Attribute reading and setting
 	readonly attributes?: Element['attributes'];
@@ -139,9 +141,7 @@ type RefCallback<T> = {
 export type Ref<T> = RefObject<T> | RefCallback<T>;
 
 export interface VNode<P = {}> extends preact.VNode<P> {
-	// Redefine type here using our internal ComponentType type, and specify
-	// string has an undefined `defaultProps` property to make TS happy
-	type: (string & { defaultProps: undefined }) | ComponentType<P>;
+	type: string | ComponentType<P>;
 	props: P & { children: ComponentChildren };
 	ref?: Ref<any> | null;
 	_children: Array<VNode<any>> | null;
@@ -158,12 +158,13 @@ export interface VNode<P = {}> extends preact.VNode<P> {
 	_flags: number;
 }
 
-export interface Component<P = {}, S = {}> extends Omit<preact.Component<P, S>, 'base'> {
+export interface Component<P = {}, S = {}>
+	extends Omit<preact.Component<P, S>, 'base'> {
 	// When component is functional component, this is reset to functional component
 	constructor: ComponentType<P>;
 	state: S; // Override Component["state"] to not be readonly for internal use, specifically Hooks
-	base?: PreactElement;
 
+	_excess?: PreactElement[];
 	_dirty: boolean;
 	_force?: boolean;
 	_renderCallbacks: Array<() => void>; // Only class components

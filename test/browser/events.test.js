@@ -58,7 +58,7 @@ describe('event handling', () => {
 		expect(
 			proto.addEventListener
 		).to.have.been.calledOnce.and.to.have.been.calledWithExactly(
-			'OtherClick',
+			'otherclick',
 			sinon.match.func,
 			false
 		);

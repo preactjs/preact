@@ -56,20 +56,20 @@ describe('null placeholders', () => {
 
 	let resetAppendChild;
 	let resetInsertBefore;
-	let resetRemoveChild;
+	let resetRemoveText;
 	let resetRemove;
 
 	beforeAll(() => {
 		resetAppendChild = logCall(Element.prototype, 'appendChild');
 		resetInsertBefore = logCall(Element.prototype, 'insertBefore');
-		resetRemoveChild = logCall(Element.prototype, 'removeChild');
 		resetRemove = logCall(Element.prototype, 'remove');
+		resetRemoveText = logCall(Text.prototype, 'remove');
 	});
 
 	afterAll(() => {
 		resetAppendChild();
 		resetInsertBefore();
-		resetRemoveChild();
+		resetRemoveText();
 		resetRemove();
 	});
 
@@ -117,6 +117,11 @@ describe('null placeholders', () => {
 		class Stateful extends Component {
 			constructor(props) {
 				super(props);
+				if (typeof props.ref === 'function') {
+					props.ref(this);
+				} else if (props.ref) {
+					props.ref.current = this;
+				}
 				this.state = { count: 0 };
 			}
 			increment() {
