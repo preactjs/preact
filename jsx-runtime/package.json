@@ -1,7 +1,6 @@
 {
   "name": "jsx-runtime",
   "amdName": "jsxRuntime",
-  "version": "1.0.0",
   "private": true,
   "description": "Preact JSX runtime",
   "main": "dist/jsxRuntime.js",
@@ -10,19 +9,10 @@
   "source": "src/index.js",
   "types": "src/index.d.ts",
   "license": "MIT",
-  "peerDependencies": {
-    "preact": "^10.0.0"
-  },
   "mangle": {
     "regex": "^_"
   },
-  "exports": {
-    ".": {
-      "types": "./src/index.d.ts",
-      "module": "./dist/jsxRuntime.mjs",
-      "umd": "./dist/jsxRuntime.umd.js",
-      "import": "./dist/jsxRuntime.mjs",
-      "require": "./dist/jsxRuntime.js"
-    }
+  "peerDependencies": {
+    "preact": "^10.0.0"
   }
 }
