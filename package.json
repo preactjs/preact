@@ -7,7 +7,6 @@
   "main": "dist/preact.js",
   "module": "dist/preact.mjs",
   "umd:main": "dist/preact.umd.js",
-  "unpkg": "dist/preact.min.js",
   "source": "src/index.js",
   "exports": {
     ".": {
