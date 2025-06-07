@@ -9,16 +9,8 @@
   "umd:main": "dist/preact.umd.js",
   "unpkg": "dist/preact.min.js",
   "source": "src/index.js",
-  "typesVersions": {
-    "<=5.0": {
-      ".": ["./src/index-5.d.ts"]
-    }
-  },
   "exports": {
     ".": {
-      "types@<=5.0": {
-        "types": "./src/index-5.d.ts"
-      },
       "types": "./src/index.d.ts",
       "module": "./dist/preact.mjs",
       "umd": "./dist/preact.umd.js",
