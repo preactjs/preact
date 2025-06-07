@@ -355,6 +355,44 @@ describe('useState', () => {
 		expect(renderSpy).to.be.calledThrice;
 	});
 
+	it('Cancels effect invocations correctly when bailing', () => {
+		const renderSpy = sinon.spy();
+		const cleanupSpy = sinon.spy();
+		const spy = sinon.spy();
+		let set;
+
+		function App() {
+			const [state, setState] = useState('initial');
+			set = setState;
+
+			renderSpy();
+			useEffect(() => {
+				spy();
+				return () => {
+					cleanupSpy();
+				};
+			});
+			return <p>{state}</p>;
+		}
+
+		act(() => {
+			render(<App />, scratch);
+		});
+
+		expect(renderSpy).to.be.calledOnce;
+		expect(spy).to.be.calledOnce;
+		expect(cleanupSpy).to.not.be.called;
+
+		act(() => {
+			set('updated');
+			set('initial');
+		});
+
+		expect(renderSpy).to.be.calledTwice;
+		expect(spy).to.be.calledOnce;
+		expect(cleanupSpy).to.not.be.called;
+	});
+
 	// see preactjs/preact#3731
 	it('respects updates initiated from the parent', () => {
 		let setChild, setParent;
