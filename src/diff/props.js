@@ -1,10 +1,9 @@
-import { NULL } from '../constants';
 import options from '../options';
 
 function setStyle(style, key, value) {
 	if (key[0] == '-') {
-		style.setProperty(key, value == NULL ? '' : value);
-	} else if (value == NULL) {
+		style.setProperty(key, value == null ? '' : value);
+	} else if (value == null) {
 		style[key] = '';
 	} else {
 		style[key] = value;
@@ -114,7 +113,7 @@ export function setProperty(dom, name, value, oldValue, namespace) {
 			name in dom
 		) {
 			try {
-				dom[name] = value == NULL ? '' : value;
+				dom[name] = value == null ? '' : value;
 				// labelled break is 1b smaller here than a return statement (sorry)
 				break o;
 			} catch (e) {}
@@ -129,7 +128,7 @@ export function setProperty(dom, name, value, oldValue, namespace) {
 
 		if (typeof value == 'function') {
 			// never serialize functions as attribute values
-		} else if (value != NULL && (value !== false || name[4] == '-')) {
+		} else if (value != null && (value !== false || name[4] == '-')) {
 			dom.setAttribute(name, name == 'popover' && value == true ? '' : value);
 		} else {
 			dom.removeAttribute(name);
@@ -151,7 +150,7 @@ function createEventProxy(useCapture) {
 	return function (e) {
 		if (this._listeners) {
 			const eventHandler = this._listeners[e.type + useCapture];
-			if (e._dispatched == NULL) {
+			if (e._dispatched == null) {
 				e._dispatched = eventClock++;
 
 				// When `e._dispatched` is smaller than the time when the targeted event

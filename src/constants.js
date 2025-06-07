@@ -12,7 +12,5 @@ export const SKIP_CHILDREN = 1 << 3;
 /** Reset all mode flags */
 export const RESET_MODE = ~(MODE_HYDRATE | MODE_SUSPENDED);
 
-export const NULL = null;
-export const UNDEFINED = undefined;
 export const EMPTY_OBJ = /** @type {any} */ ({});
 export const EMPTY_ARR = [];
