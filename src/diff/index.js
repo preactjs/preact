@@ -1,14 +1,11 @@
 import {
 	EMPTY_OBJ,
-	MATH_NAMESPACE,
 	MODE_HYDRATE,
 	MODE_SUSPENDED,
 	NULL,
 	RESET_MODE,
 	SKIP_CHILDREN,
-	SVG_NAMESPACE,
-	UNDEFINED,
-	XHTML_NAMESPACE
+	UNDEFINED
 } from '../constants';
 import { BaseComponent, getDomSibling } from '../component';
 import { Fragment } from '../create-element';
@@ -475,9 +472,9 @@ function diffElementNodes(
 	let checked;
 
 	// Tracks entering and exiting namespaces when descending through the tree.
-	if (nodeType == 'svg') namespace = SVG_NAMESPACE;
-	else if (nodeType == 'math') namespace = MATH_NAMESPACE;
-	else if (!namespace) namespace = XHTML_NAMESPACE;
+	if (nodeType == 'svg') namespace = 'http://www.w3.org/2000/svg';
+	else if (nodeType == 'math') namespace = 'http://www.w3.org/1998/Math/MathML';
+	else if (!namespace) namespace = 'http://www.w3.org/1999/xhtml';
 
 	if (excessDomChildren != NULL) {
 		for (i = 0; i < excessDomChildren.length; i++) {
@@ -600,7 +597,9 @@ function diffElementNodes(
 				newVNode,
 				oldVNode,
 				globalContext,
-				nodeType == 'foreignObject' ? XHTML_NAMESPACE : namespace,
+				nodeType == 'foreignObject'
+					? 'http://www.w3.org/1999/xhtml'
+					: namespace,
 				excessDomChildren,
 				commitQueue,
 				excessDomChildren

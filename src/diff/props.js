@@ -1,4 +1,4 @@
-import { NULL, SVG_NAMESPACE } from '../constants';
+import { NULL } from '../constants';
 import options from '../options';
 
 function setStyle(style, key, value) {
@@ -92,7 +92,7 @@ export function setProperty(dom, name, value, oldValue, namespace) {
 			);
 		}
 	} else {
-		if (namespace == SVG_NAMESPACE) {
+		if (namespace == 'http://www.w3.org/2000/svg') {
 			// Normalize incorrect prop usage for SVG:
 			// - xlink:href / xlinkHref --> href (xlink:href was removed from SVG and isn't needed)
 			// - className --> class
