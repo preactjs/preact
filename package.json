@@ -121,7 +121,8 @@
   "types": "src/index.d.ts",
   "scripts": {
     "prepare": "husky && run-s build",
-    "build": "npm-run-all --parallel 'build:*'",
+    "build": "node build.mjs && node ./config/compat-entries.js",
+    "build:microbundle": "npm-run-all --parallel 'build:*'",
     "build:core": "microbundle build --raw --no-generateTypes -f cjs,esm,umd",
     "build:debug": "microbundle build --raw --no-generateTypes -f cjs,esm,umd --cwd debug",
     "build:devtools": "microbundle build --raw --no-generateTypes -f cjs,esm,umd --cwd devtools",
