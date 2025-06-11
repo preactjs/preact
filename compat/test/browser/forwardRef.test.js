@@ -498,4 +498,15 @@ describe('forwardRef', () => {
 
 		expect(actual).to.equal(null);
 	});
+
+	// Issue #4769
+	it('should attach .render pointing to the original render function', () => {
+		function Foo(props, ref) {
+			return <div ref={ref} />;
+		}
+
+		const Forwarded = forwardRef(Foo);
+
+		expect(Forwarded.render).to.equal(Foo);
+  });
 });
