@@ -133,7 +133,7 @@ function jsxAttr(name, value) {
 				str = str + name + ':' + val + suffix;
 			}
 		}
-		return name + '="' + str + '"';
+		return name + '="' + encodeEntities(str) + '"';
 	}
 
 	if (
