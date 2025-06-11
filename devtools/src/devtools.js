@@ -13,7 +13,7 @@ export function initDevTools() {
 		globalVar !== undefined &&
 		globalVar.__PREACT_DEVTOOLS__
 	) {
-		globalVar.__PREACT_DEVTOOLS__.attachPreact('10.26.8', options, {
+		globalVar.__PREACT_DEVTOOLS__.attachPreact('10.26.9', options, {
 			Fragment,
 			Component
 		});
