@@ -162,6 +162,9 @@ describe('precompiled JSX', () => {
 
 		it('should escape values', () => {
 			expect(jsxAttr('foo', "&<'")).to.equal('foo="&amp;&lt;\'"');
+			expect(jsxAttr('style', { foo: `"&<'"` })).to.equal(
+				'style="foo:&quot;&amp;&lt;\'&quot;;"'
+			);
 		});
 
 		it('should call options.attr()', () => {
