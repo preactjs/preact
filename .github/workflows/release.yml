@@ -4,7 +4,7 @@ on: create
 jobs:
   build:
     if: github.ref_type == 'tag'
-    uses: preactjs/preact/.github/workflows/build-test.yml@main
+    uses: preactjs/preact/.github/workflows/build-test.yml@v10.x
 
   release:
     runs-on: ubuntu-latest
