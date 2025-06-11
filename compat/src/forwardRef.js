@@ -22,7 +22,7 @@ export function forwardRef(fn) {
 	// It expects an object here with a `render` property,
 	// and prototype.render will fail. Without this
 	// mobx-react throws.
-	Forwarded.render = Forwarded;
+	Forwarded.render = fn;
 
 	Forwarded.prototype.isReactComponent = true;
 	Forwarded.displayName = 'ForwardRef(' + (fn.displayName || fn.name) + ')';
