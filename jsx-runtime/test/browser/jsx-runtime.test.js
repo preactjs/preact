@@ -11,6 +11,24 @@ import {
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { encodeEntities } from '../../src/utils';
 
+function createSignal(value) {
+	return {
+		value,
+		peek() {
+			return value;
+		},
+		subscribe() {
+			return () => {};
+		},
+		valueOf() {
+			return value;
+		},
+		toString() {
+			return String(value);
+		}
+	};
+}
+
 describe('Babel jsx/jsxDEV', () => {
 	let scratch;
 	let prevVNodeOption;
@@ -125,6 +143,12 @@ describe('precompiled JSX', () => {
 			expect(jsxAttr('style', { foo: `"&<'"` })).to.equal(
 				'style="foo:&quot;&amp;&lt;\'&quot;;"'
 			);
+		});
+
+		it('should support signals', () => {
+			const sig = createSignal(`&<'"`);
+			expect(jsxAttr('foo', sig)).to.equal(`foo="&amp;&lt;'&quot;"`);
+			expect(jsxAttr('style', sig)).to.equal(`style="&amp;&lt;'&quot;"`);
 		});
 
 		it('should call options.attr()', () => {
