@@ -115,7 +115,7 @@ function jsxAttr(name, value) {
 				str = str + name + ':' + val + ';';
 			}
 		}
-		return name + '="' + str + '"';
+		return name + '="' + encodeEntities(str) + '"';
 	}
 
 	if (
