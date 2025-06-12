@@ -2,7 +2,7 @@ import { assign } from './util';
 import { diff, commitRoot } from './diff/index';
 import options from './options';
 import { Fragment } from './create-element';
-import { MODE_HYDRATE, NULL } from './constants';
+import { MODE_HYDRATE } from './constants';
 
 /**
  * Base Component class. Provides `setState()` and `forceUpdate()`, which
@@ -28,7 +28,7 @@ export function BaseComponent(props, context) {
 BaseComponent.prototype.setState = function (update, callback) {
 	// only clone state when copying to nextState the first time.
 	let s;
-	if (this._nextState != NULL && this._nextState != this.state) {
+	if (this._nextState != null && this._nextState != this.state) {
 		s = this._nextState;
 	} else {
 		s = this._nextState = assign({}, this.state);
@@ -45,7 +45,7 @@ BaseComponent.prototype.setState = function (update, callback) {
 	}
 
 	// Skip update if updater function returned null
-	if (update == NULL) return;
+	if (update == null) return;
 
 	if (this._vnode) {
 		if (callback) {
@@ -89,18 +89,18 @@ BaseComponent.prototype.render = Fragment;
  * @param {number | null} [childIndex]
  */
 export function getDomSibling(vnode, childIndex) {
-	if (childIndex == NULL) {
+	if (childIndex == null) {
 		// Use childIndex==null as a signal to resume the search from the vnode's sibling
 		return vnode._parent
 			? getDomSibling(vnode._parent, vnode._index + 1)
-			: NULL;
+			: null;
 	}
 
 	let sibling;
 	for (; childIndex < vnode._children.length; childIndex++) {
 		sibling = vnode._children[childIndex];
 
-		if (sibling != NULL && sibling._dom != NULL) {
+		if (sibling != null && sibling._dom != null) {
 			// Since updateParentDomPointers keeps _dom pointer correct,
 			// we can rely on _dom to tell us if this subtree contains a
 			// rendered DOM node, and what the first rendered DOM node is
@@ -113,7 +113,7 @@ export function getDomSibling(vnode, childIndex) {
 	// Only climb up and search the parent if we aren't searching through a DOM
 	// VNode (meaning we reached the DOM parent of the original vnode that began
 	// the search)
-	return typeof vnode.type == 'function' ? getDomSibling(vnode) : NULL;
+	return typeof vnode.type == 'function' ? getDomSibling(vnode) : null;
 }
 
 /**
@@ -137,9 +137,9 @@ function renderComponent(component) {
 			oldVNode,
 			component._globalContext,
 			component._parentDom.namespaceURI,
-			oldVNode._flags & MODE_HYDRATE ? [oldDom] : NULL,
+			oldVNode._flags & MODE_HYDRATE ? [oldDom] : null,
 			commitQueue,
-			oldDom == NULL ? getDomSibling(oldVNode) : oldDom,
+			oldDom == null ? getDomSibling(oldVNode) : oldDom,
 			!!(oldVNode._flags & MODE_HYDRATE),
 			refQueue
 		);
@@ -158,11 +158,11 @@ function renderComponent(component) {
  * @param {import('./internal').VNode} vnode
  */
 function updateParentDomPointers(vnode) {
-	if ((vnode = vnode._parent) != NULL && vnode._component != NULL) {
-		vnode._dom = NULL;
+	if ((vnode = vnode._parent) != null && vnode._component != null) {
+		vnode._dom = null;
 		for (let i = 0; i < vnode._children.length; i++) {
 			let child = vnode._children[i];
-			if (child != NULL && child._dom != NULL) {
+			if (child != null && child._dom != null) {
 				vnode._dom = child._dom;
 				break;
 			}

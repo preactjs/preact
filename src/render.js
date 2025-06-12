@@ -1,4 +1,4 @@
-import { EMPTY_OBJ, MODE_HYDRATE, NULL } from './constants';
+import { EMPTY_OBJ, MODE_HYDRATE } from './constants';
 import { commitRoot, diff } from './diff/index';
 import { createElement, Fragment } from './create-element';
 import options from './options';
@@ -25,9 +25,9 @@ export function render(vnode, parentDom) {
 	// this by assigning a new `_children` property to DOM nodes which points
 	// to the last rendered tree. By default this property is not present, which
 	// means that we are mounting a new tree for the first time.
-	let oldVNode = isHydrating ? NULL : parentDom._children;
+	let oldVNode = isHydrating ? null : parentDom._children;
 
-	vnode = parentDom._children = createElement(Fragment, NULL, [vnode]);
+	vnode = parentDom._children = createElement(Fragment, null, [vnode]);
 
 	// List of effects that need to be called after diffing.
 	let commitQueue = [],
@@ -41,11 +41,12 @@ export function render(vnode, parentDom) {
 		EMPTY_OBJ,
 		parentDom.namespaceURI,
 		oldVNode
-			? NULL
+			? null
 			: parentDom.firstChild
 				? slice.call(parentDom.childNodes)
-				: NULL,
+				: null,
 		commitQueue,
+		// @ts-expect-error TODO: Legitimate type mismatch that our use of `NULL` hid
 		oldVNode ? oldVNode._dom : parentDom.firstChild,
 		isHydrating,
 		refQueue
