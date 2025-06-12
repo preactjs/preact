@@ -38,7 +38,7 @@ export interface VNode<P = {}> {
 export type Key = string | number | any;
 
 export type RefObject<T> = { current: T };
-export type RefCallback<T> = (instance: T | null) => void;
+export type RefCallback<T> = (instance: T | null) => void | (() => void);
 export type Ref<T> = RefCallback<T> | RefObject<T | null> | null;
 
 export type ComponentChild =
