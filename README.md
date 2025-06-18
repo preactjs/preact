@@ -1,3 +1,6 @@
+> [!NOTE]
+> This is the branch for the upcoming release, for patches to v10 you need the [v10.x branch](https://github.com/preactjs/preact/tree/v10.x)
+
 <p align="center">
 <a href="https://preactjs.com" target="_blank">
 
