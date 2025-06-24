@@ -37,6 +37,7 @@ let prevRaf;
 
 /** @type {(vnode: import('./internal').VNode) => void} */
 options._diff = vnode => {
+	previousComponent = currentComponent;
 	currentComponent = null;
 	if (oldBeforeDiff) oldBeforeDiff(vnode);
 };
@@ -109,6 +110,8 @@ options._commit = (vnode, commitQueue) => {
 		}
 	});
 
+	previousComponent = null;
+	currentComponent = null;
 	if (oldCommit) oldCommit(vnode, commitQueue);
 };
 
