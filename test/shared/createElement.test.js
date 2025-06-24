@@ -3,7 +3,7 @@ import { expect } from 'chai';
 
 const h = createElement;
 /** @jsx createElement */
-/*eslint-env browser, mocha */
+/*eslint-env browser */
 
 // const buildVNode = (nodeName, attributes, children=[]) => ({
 // 	nodeName,

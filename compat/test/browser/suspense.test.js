@@ -16,7 +16,7 @@ import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { createLazy, createSuspender } from './suspense-utils';
 
 const h = React.createElement;
-/* eslint-env browser, mocha */
+/* eslint-env browser */
 
 class Catcher extends Component {
 	constructor(props) {

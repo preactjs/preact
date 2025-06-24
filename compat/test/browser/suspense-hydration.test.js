@@ -16,7 +16,7 @@ import {
 import { ul, li, div } from '../../../test/_util/dom';
 import { createLazy, createSuspenseLoader } from './suspense-utils';
 
-/* eslint-env browser, mocha */
+/* eslint-env browser */
 describe('suspense hydration', () => {
 	/** @type {HTMLDivElement} */
 	let scratch,
