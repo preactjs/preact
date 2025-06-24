@@ -2,7 +2,7 @@ import { createElement, createContext } from '../../src/index';
 import { expect } from 'chai';
 
 /** @jsx createElement */
-/* eslint-env browser, mocha */
+/* eslint-env browser */
 
 describe('createContext', () => {
 	it('should return a Provider and a Consumer', () => {

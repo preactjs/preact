@@ -5,7 +5,7 @@ import {
 	ComponentConstructor,
 	Component
 } from '../../';
-import { SimpleComponent, SimpleComponentProps } from './Component-test';
+import { SimpleComponent, SimpleComponentProps } from './Component.test';
 
 export interface highlightedProps {
 	isHighlighted: boolean;
