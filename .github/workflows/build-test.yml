@@ -29,8 +29,6 @@ jobs:
           cache: 'npm'
           cache-dependency-path: '**/package-lock.json'
       - run: npm ci
-      - name: Install Playwright
-        run: npx playwright install chromium
       - name: test
         env:
           CI: true

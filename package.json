@@ -111,7 +111,7 @@
   },
   "types": "src/index.d.ts",
   "scripts": {
-    "prepare": "husky && run-s build",
+    "prepare": "husky && npm run test:install && run-s build",
     "build": "npm-run-all --parallel 'build:*'",
     "build:core": "microbundle build --raw --no-generateTypes -f cjs,esm,umd",
     "build:debug": "microbundle build --raw --no-generateTypes -f cjs,esm,umd --cwd debug",
@@ -125,6 +125,7 @@
     "dev:hooks": "microbundle watch --raw --no-generateTypes --format cjs --cwd hooks",
     "dev:compat": "microbundle watch --raw --no-generateTypes --format cjs --cwd compat --globals 'preact/hooks=preactHooks'",
     "test": "npm-run-all build lint test:unit",
+    "test:install": "playwright install chromium",
     "test:unit": "run-p test:vitest:min test:ts",
     "test:vitest": "cross-env COVERAGE=true vitest run",
     "test:vitest:min": "cross-env MINIFY=true vitest run",
