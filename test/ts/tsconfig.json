@@ -5,12 +5,13 @@
     "moduleResolution": "node",
     "lib": ["es6", "dom"],
     "strict": true,
-    "typeRoots": ["../../"],
-    "types": [],
+    "typeRoots": ["../../", "../../node_modules"],
+    "types": ["vitest/globals"],
     "forceConsistentCasingInFileNames": true,
     "jsx": "react",
     "jsxFactory": "createElement",
     "jsxFragmentFactory": "Fragment",
+    "skipLibCheck": true,
     "paths": {
       "preact": ["../../"],
       "preact/*": ["../../*"]

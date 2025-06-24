@@ -130,8 +130,6 @@ for (let prop in mangleJson.props.props) {
 	rename[name] = mangleJson.props.props[prop];
 }
 
-const cache = new Map();
-const pending = new Map();
 export default defineConfig({
 	resolve: {
 		alias: rollupAlias,
@@ -211,11 +209,8 @@ export default defineConfig({
 		}
 	},
 	test: {
-		include: [
-			'{debug,devtools,hooks,compat,test-utils,jsx-runtime}/test/{browser,shared}/**/*.test.js',
-			'./test/{browser,shared}/**/*.test.js'
-		],
 		cache: false,
+		globals: true,
 		coverage: {
 			enabled: COVERAGE,
 			include: MINIFY
@@ -242,17 +237,33 @@ export default defineConfig({
 			reporter: ['html', 'lcovonly', 'text-summary'],
 			reportsDirectory: './coverage'
 		},
-		setupFiles: ['./vitest.setup.js'],
-		globals: true,
-		// dangerouslyIgnoreUnhandledErrors: true,
-		browser: {
-			// TODO: isolate doesn't work it leaks across all pages
-			// isolate: false,
-			provider: 'webdriverio',
-			enabled: true,
-			screenshotFailures: false,
-			headless: true,
-			instances: [{ browser: 'chrome' }]
-		}
+		projects: [
+			{
+				extends: true,
+				test: {
+					include: ['./test/{shared,node,ts}/**/*.test.js']
+				}
+			},
+			{
+				extends: true,
+				test: {
+					include: [
+						'{debug,devtools,hooks,compat,test-utils,jsx-runtime}/test/{browser,shared}/**/*.test.js',
+						'./test/{browser,shared}/**/*.test.js'
+					],
+					setupFiles: ['./vitest.setup.js'],
+					// dangerouslyIgnoreUnhandledErrors: true,
+					browser: {
+						// TODO: isolate doesn't work it leaks across all pages
+						// isolate: false,
+						provider: 'webdriverio',
+						enabled: true,
+						screenshotFailures: false,
+						headless: true,
+						instances: [{ browser: 'chrome' }]
+					}
+				}
+			}
+		]
 	}
 });

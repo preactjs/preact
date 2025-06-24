@@ -18,22 +18,20 @@ const validAriaRole = <button role="slider" />;
 const signalBadAriaRole = (
 	// @ts-expect-error A button should not have a role of presentation
 	<button role={createSignal('presentation' as const)} />
-)
-const signalValidAriaRole = (
-	<button role={createSignal('slider' as const)} />
-)
+);
+const signalValidAriaRole = <button role={createSignal('slider' as const)} />;
 
 // @ts-expect-error A map should never have any role set
 const invalidAriaRole = <map role="presentation" />;
 const signalInvalidAriaRole = (
 	// @ts-expect-error A map should never have any role set
 	<button role={createSignal('presentation' as const)} />
-)
-const validMissingAriaRole = <base href=""></base>
+);
+const validMissingAriaRole = <base href=""></base>;
 const signalValidMissingAriaRole = (
 	// @ts-expect-error A map should never have any role set
 	<button role={createSignal('presentation' as const)} />
-)
+);
 
 // More complex role tests w/ unions
 
@@ -43,7 +41,6 @@ const aWithHrefInvalid = <a href="foo" role="slider"></a>;
 
 const aWithoutHrefValid = <a role="button"></a>;
 
-
 const areaWithHrefValid = <area href="foo" role="link"></area>;
 // @ts-expect-error An area with an href should not have a role of button
 const areaWithHrefInvalid = <area href="foo" role="button"></area>;
@@ -52,15 +49,22 @@ const areaWithoutHrefValid = <area role="button"></area>;
 // @ts-expect-error An area with an href should not have a role of button
 const areaWithoutHrefInvalid = <area role="slider"></area>;
 
-
-const imgWithAccessibleNameAriaLabelValid = <img aria-label="foo" role="button" />;
-const imgWithAccessibleNameAriaLabelledByValid = <img aria-labelledby="foo" role="button" />;
+const imgWithAccessibleNameAriaLabelValid = (
+	<img aria-label="foo" role="button" />
+);
+const imgWithAccessibleNameAriaLabelledByValid = (
+	<img aria-labelledby="foo" role="button" />
+);
 const imgWithAccessibleNameAltValid = <img alt="foo" role="button" />;
 const imgWithAccessibleNameTitleValid = <img title="foo" role="button" />;
-// @ts-expect-error An img with an accessible name should not have a role of presentation
-const imgWithAccessibleNameAriaLabelInvalid = <img aria-label="foo" role="presentation" />;
-// @ts-expect-error An img with an accessible name should not have a role of presentation
-const imgWithAccessibleNameAriaLabelledByInvalid = <img aria-labelledby="foo" role="presentation" />;
+const imgWithAccessibleNameAriaLabelInvalid = (
+	// @ts-expect-error An img with an accessible name should not have a role of presentation
+	<img aria-label="foo" role="presentation" />
+);
+const imgWithAccessibleNameAriaLabelledByInvalid = (
+	// @ts-expect-error An img with an accessible name should not have a role of presentation
+	<img aria-labelledby="foo" role="presentation" />
+);
 // @ts-expect-error An img with an accessible name should not have a role of presentation
 const imgWithAccessibleNameAltInvalid = <img alt="foo" role="presentation" />;
 // @ts-expect-error An img with an accessible name should not have a role of presentation
@@ -70,12 +74,13 @@ const imgWithoutAccessibleNameValid = <img role="presentation" />;
 // @ts-expect-error An img without an accessible name should not have a role of button
 const imgWithoutAccessibleNameInvalid = <img role="button" />;
 
-
 const inputTypeButtonValid = <input type="button" role="checkbox" />;
 // @ts-expect-error An input of type button should not have a role of presentation
 const inputTypeButtonInvalid = <input type="button" role="presentation" />;
 
-const inputTypeCheckboxValid = <input type="checkbox" role="menuitemcheckbox" />;
+const inputTypeCheckboxValid = (
+	<input type="checkbox" role="menuitemcheckbox" />
+);
 // @ts-expect-error An input of type checkbox should not have a role of presentation
 const inputTypeCheckboxInvalid = <input type="checkbox" role="presentation" />;
 
@@ -88,8 +93,10 @@ const inputTypeDateValid = <input type="date" />;
 const inputTypeDateInvalid = <input type="date" role="button" />;
 
 const inputTypeDatetimeLocalValid = <input type="datetime-local" />;
-// @ts-expect-error An input of type datetime-local should not have a role
-const inputTypeDatetimeLocalInvalid = <input type="datetime-local" role="button" />;
+const inputTypeDatetimeLocalInvalid = (
+	// @ts-expect-error An input of type datetime-local should not have a role
+	<input type="datetime-local" role="button" />
+);
 
 const inputTypeEmailValid = <input type="email" role="textbox" />;
 // @ts-expect-error An input of type email, without a list attribute, should not have a role of button
@@ -151,11 +158,15 @@ const inputTypeOmittedValid = <input role="combobox" />;
 // @ts-expect-error An input of type text should not have a role of presentation
 const inputTypeOmittedInvalid = <input role="presentation" />;
 
-const inputTypeEmailListValid = <input type="email" list="foo" role="combobox" />;
+const inputTypeEmailListValid = (
+	<input type="email" list="foo" role="combobox" />
+);
 // @ts-expect-error An input of type email, with a list attribute, should not have a role of button
 const inputTypeEmailListInvalid = <input type="email" role="button" />;
 
-const inputTypeSearchListValid = <input type="search" list="foo" role="combobox" />;
+const inputTypeSearchListValid = (
+	<input type="search" list="foo" role="combobox" />
+);
 // @ts-expect-error An input of type search, with a list attribute, should not have a role of button
 const inputTypeSearchListInvalid = <input type="search" role="button" />;
 
@@ -167,7 +178,9 @@ const inputTypeTextListValid = <input type="text" list="foo" role="combobox" />;
 // @ts-expect-error An input of type text, with a list attribute, should not have a role of button
 const inputTypeTextListInvalid = <input type="text" role="button" />;
 
-const inputTypeOmittedListValid = <input type="text" list="foo" role="combobox" />;
+const inputTypeOmittedListValid = (
+	<input type="text" list="foo" role="combobox" />
+);
 // @ts-expect-error An input of type text, with a list attribute, should not have a role of button
 const inputTypeOmittedListInvalid = <input type="text" role="button" />;
 
@@ -198,8 +211,6 @@ const selectMultipleInvalid = <select multiple={true} role="menu" />;
 const selectSizeValid = <select size={5} role="listbox" />;
 // @ts-expect-error A select with a size other than `0` or `1` should not have a role of menu
 const selectSizeInvalid = <select size={5} role="menu" />;
-
-
 
 // @ts-expect-error We should correctly type aria attributes like autocomplete
 const badAriaValues = <div aria-autocomplete="bad-value" />;
