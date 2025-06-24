@@ -36,7 +36,7 @@ describe('createContext', () => {
 			}
 		}
 
-		sinon.spy(Inner.prototype, 'render');
+		vi.spyOn(Inner.prototype, 'render');
 
 		render(
 			<Provider value={CONTEXT}>
@@ -53,7 +53,11 @@ describe('createContext', () => {
 		);
 
 		// initial render does not invoke anything but render():
-		expect(Inner.prototype.render).to.have.been.calledWithMatch(CONTEXT);
+		expect(Inner.prototype.render).toHaveBeenCalledWith(
+			CONTEXT,
+			expect.anything(),
+			expect.anything()
+		);
 		expect(receivedContext).to.equal(CONTEXT);
 		expect(scratch.innerHTML).to.equal('<div><div>a</div></div>');
 	});
@@ -70,7 +74,7 @@ describe('createContext', () => {
 			}
 		}
 
-		sinon.spy(Inner.prototype, 'render');
+		vi.spyOn(Inner.prototype, 'render');
 
 		render(
 			<Ctx value={CONTEXT}>
@@ -87,7 +91,11 @@ describe('createContext', () => {
 		);
 
 		// initial render does not invoke anything but render():
-		expect(Inner.prototype.render).to.have.been.calledWithMatch(CONTEXT);
+		expect(Inner.prototype.render).toHaveBeenCalledWith(
+			CONTEXT,
+			expect.anything(),
+			expect.anything()
+		);
 		expect(receivedContext).to.equal(CONTEXT);
 		expect(scratch.innerHTML).to.equal('<div><div>a</div></div>');
 	});
@@ -181,7 +189,7 @@ describe('createContext', () => {
 			}
 		}
 
-		sinon.spy(Inner.prototype, 'render');
+		vi.spyOn(Inner.prototype, 'render');
 
 		render(
 			<Provider value={CONTEXT}>
@@ -205,17 +213,21 @@ describe('createContext', () => {
 		);
 
 		// initial render does not invoke anything but render():
-		expect(Inner.prototype.render).to.have.been.calledWithMatch({
-			...CONTEXT,
-			...CHILD_CONTEXT
-		});
-		expect(Inner.prototype.render).to.be.calledOnce;
+		expect(Inner.prototype.render).toHaveBeenCalledWith(
+			{
+				...CONTEXT,
+				...CHILD_CONTEXT
+			},
+			expect.anything(),
+			expect.anything()
+		);
+		expect(Inner.prototype.render).toHaveBeenCalledOnce();
 		expect(parentContext).to.equal(CONTEXT);
 		expect(childContext).to.equal(CHILD_CONTEXT);
 		expect(scratch.innerHTML).to.equal('<div>a - b</div>');
 		return new Promise(resolve => {
 			setTimeout(() => {
-				expect(Inner.prototype.render).to.be.calledOnce;
+				expect(Inner.prototype.render).toHaveBeenCalledOnce();
 				resolve();
 			}, 0);
 		});
@@ -242,7 +254,7 @@ describe('createContext', () => {
 			}
 		}
 
-		sinon.spy(Inner.prototype, 'render');
+		vi.spyOn(Inner.prototype, 'render');
 
 		render(
 			<ThemeProvider value={THEME_CONTEXT.theme}>
@@ -266,10 +278,14 @@ describe('createContext', () => {
 		);
 
 		// initial render does not invoke anything but render():
-		expect(Inner.prototype.render).to.have.been.calledWithMatch({
-			...THEME_CONTEXT,
-			...DATA_CONTEXT
-		});
+		expect(Inner.prototype.render).toHaveBeenCalledWith(
+			{
+				...THEME_CONTEXT,
+				...DATA_CONTEXT
+			},
+			expect.anything(),
+			expect.anything()
+		);
 		expect(receivedTheme).to.equal(THEME_CONTEXT.theme);
 		expect(receivedData).to.equal(DATA_CONTEXT);
 		expect(scratch.innerHTML).to.equal('<div>black - a</div>');
@@ -288,7 +304,7 @@ describe('createContext', () => {
 			}
 		}
 
-		sinon.spy(Inner.prototype, 'render');
+		vi.spyOn(Inner.prototype, 'render');
 
 		render(
 			<Provider value={CONTEXT}>
@@ -310,7 +326,11 @@ describe('createContext', () => {
 		);
 
 		// initial render does not invoke anything but render():
-		expect(Inner.prototype.render).to.have.been.calledWithMatch({ ...CONTEXT });
+		expect(Inner.prototype.render).toHaveBeenCalledWith(
+			{ ...CONTEXT },
+			expect.anything(),
+			expect.anything()
+		);
 		expect(receivedData).to.equal(CONTEXT);
 		expect(receivedChildData).to.equal(CONTEXT);
 		expect(scratch.innerHTML).to.equal('<div>a</div>');
@@ -336,7 +356,7 @@ describe('createContext', () => {
 			}
 		}
 
-		sinon.spy(Inner.prototype, 'render');
+		vi.spyOn(Inner.prototype, 'render');
 
 		render(
 			<div>
@@ -349,7 +369,7 @@ describe('createContext', () => {
 			scratch
 		);
 
-		expect(Inner.prototype.render).to.have.been.calledOnce;
+		expect(Inner.prototype.render).toHaveBeenCalledTimes(1);
 
 		render(
 			<div>
@@ -362,7 +382,7 @@ describe('createContext', () => {
 			scratch
 		);
 
-		expect(Inner.prototype.render).to.have.been.calledOnce;
+		expect(Inner.prototype.render).toHaveBeenCalledTimes(1);
 	});
 
 	it('should preserve provider context through nested components', () => {
@@ -377,7 +397,7 @@ describe('createContext', () => {
 			}
 		}
 
-		sinon.spy(Consumed.prototype, 'render');
+		vi.spyOn(Consumed.prototype, 'render');
 
 		class Outer extends Component {
 			render() {
@@ -422,9 +442,13 @@ describe('createContext', () => {
 		);
 
 		// initial render does not invoke anything but render():
-		expect(Consumed.prototype.render).to.have.been.calledWithMatch({
-			...CONTEXT
-		});
+		expect(Consumed.prototype.render).toHaveBeenCalledWith(
+			{
+				...CONTEXT
+			},
+			expect.anything(),
+			expect.anything()
+		);
 		expect(receivedContext).to.equal(CONTEXT);
 		expect(scratch.innerHTML).to.equal(
 			'<div><div><strong>a</strong></div></div>'
@@ -442,7 +466,7 @@ describe('createContext', () => {
 			}
 		}
 
-		sinon.spy(Consumed.prototype, 'render');
+		vi.spyOn(Consumed.prototype, 'render');
 
 		class Outer extends Component {
 			render() {
@@ -492,21 +516,21 @@ describe('createContext', () => {
 		expect(scratch.innerHTML).to.equal(
 			'<div><div><strong>a</strong></div></div>'
 		);
-		expect(Consumed.prototype.render).to.have.been.calledOnce;
+		expect(Consumed.prototype.render).toHaveBeenCalledTimes(1);
 
 		render(<App value={UPDATED_CONTEXT} />, scratch);
 
 		rerender();
 
 		// initial render does not invoke anything but render():
-		expect(Consumed.prototype.render).to.have.been.calledTwice;
+		expect(Consumed.prototype.render).toHaveBeenCalledTimes(2);
 		// expect(Consumed.prototype.render).to.have.been.calledWithMatch({ ...UPDATED_CONTEXT }, {}, { ['__cC' + (ctxId - 1)]: {} });
 		expect(scratch.innerHTML).to.equal(
 			'<div><div><strong>b</strong></div></div>'
 		);
 		return new Promise(resolve => {
 			setTimeout(() => {
-				expect(Consumed.prototype.render).to.have.been.calledTwice;
+				expect(Consumed.prototype.render).toHaveBeenCalledTimes(2);
 				resolve();
 			});
 		});
@@ -539,8 +563,8 @@ describe('createContext', () => {
 			}
 		}
 
-		sinon.spy(Inner.prototype, 'render');
-		sinon.spy(Nested.prototype, 'render');
+		vi.spyOn(Inner.prototype, 'render');
+		vi.spyOn(Nested.prototype, 'render');
 
 		render(
 			<Provider value={CONTEXT}>
@@ -563,10 +587,18 @@ describe('createContext', () => {
 		);
 
 		// initial render does not invoke anything but render():
-		expect(Nested.prototype.render).to.have.been.calledWithMatch({
-			...NESTED_CONTEXT
-		});
-		expect(Inner.prototype.render).to.have.been.calledWithMatch({ ...CONTEXT });
+		expect(Nested.prototype.render).toHaveBeenCalledWith(
+			{
+				...NESTED_CONTEXT
+			},
+			expect.anything(),
+			expect.anything()
+		);
+		expect(Inner.prototype.render).toHaveBeenCalledWith(
+			{ ...CONTEXT },
+			expect.anything(),
+			expect.anything()
+		);
 		expect(receivedData).to.equal(CONTEXT);
 		expect(receivedNestedData).to.equal(NESTED_CONTEXT);
 
@@ -593,7 +625,7 @@ describe('createContext', () => {
 			}
 		}
 
-		sinon.spy(Inner.prototype, 'render');
+		vi.spyOn(Inner.prototype, 'render');
 
 		render(
 			<Provider value={CONTEXT}>
@@ -614,8 +646,11 @@ describe('createContext', () => {
 		);
 
 		// Rendered twice, should called just one 'Consumer' render
-		expect(Inner.prototype.render).to.have.been.calledOnce.and.calledWithMatch(
-			CONTEXT
+		expect(Inner.prototype.render).toHaveBeenCalledOnce();
+		expect(Inner.prototype.render).toHaveBeenCalledWith(
+			CONTEXT,
+			expect.anything(),
+			expect.anything()
 		);
 		expect(scratch.innerHTML).to.equal('<div>1</div>');
 
@@ -631,8 +666,11 @@ describe('createContext', () => {
 		});
 
 		// Rendered three times, should call 'Consumer' render two times
-		expect(Inner.prototype.render).to.have.been.calledTwice.and.calledWithMatch(
-			{ i: 2 }
+		expect(Inner.prototype.render).toHaveBeenCalledTimes(2);
+		expect(Inner.prototype.render).toHaveBeenCalledWith(
+			{ i: 2 },
+			expect.anything(),
+			expect.anything()
 		);
 		expect(scratch.innerHTML).to.equal('<div>2</div>');
 	});
@@ -693,7 +731,7 @@ describe('createContext', () => {
 			}
 		}
 
-		sinon.spy(Inner.prototype, 'render');
+		vi.spyOn(Inner.prototype, 'render');
 
 		act(() => {
 			render(
@@ -713,7 +751,7 @@ describe('createContext', () => {
 		});
 
 		// Rendered twice, with two different children for consumer, should render twice
-		expect(Inner.prototype.render).to.have.been.calledTwice;
+		expect(Inner.prototype.render).toHaveBeenCalledTimes(2);
 		expect(scratch.innerHTML).to.equal('<div>1</div>');
 	});
 
@@ -810,7 +848,7 @@ describe('createContext', () => {
 
 		it('should restore legacy context for children', () => {
 			const Foo = createContext('foo');
-			const spy = sinon.spy();
+			const spy = vi.fn();
 
 			class NewContext extends Component {
 				render() {
@@ -848,12 +886,12 @@ describe('createContext', () => {
 				scratch
 			);
 
-			expect(spy).to.be.calledWithMatch({ foo: 'foo' });
+			expect(spy).toHaveBeenCalledWith(expect.objectContaining({ foo: 'foo' }));
 		});
 
 		it('should call componentWillUnmount', () => {
 			let Foo = createContext('foo');
-			let spy = sinon.spy();
+			let spy = vi.fn();
 
 			let instance;
 			class App extends Component {
@@ -882,8 +920,8 @@ describe('createContext', () => {
 
 			render(null, scratch);
 
-			expect(spy).to.be.calledOnce;
-			expect(spy.getCall(0).args[0]).to.equal(instance);
+			expect(spy).toHaveBeenCalledOnce();
+			expect(spy.mock.calls[0][0]).to.equal(instance);
 		});
 
 		it('should order updates correctly', () => {
@@ -1022,7 +1060,7 @@ describe('createContext', () => {
 			}
 		}
 
-		const spy = sinon.spy();
+		const spy = vi.fn();
 
 		class Child extends Component {
 			static contextType = Ctx;
@@ -1043,12 +1081,12 @@ describe('createContext', () => {
 		update('bar');
 		rerender();
 		expect(scratch.textContent).to.equal('bar');
-		expect(spy).not.to.be.called;
+		expect(spy).not.toHaveBeenCalled();
 	});
 
 	it('should pass context through strict equal children', () => {
 		const context = { foo: 'bar' };
-		const Ctx = createContext(null)
+		const Ctx = createContext(null);
 
 		/** @type {(s: { foo: string }) => void} */
 		let set;
@@ -1056,7 +1094,7 @@ describe('createContext', () => {
 			constructor(props) {
 				super(props);
 				this.state = context;
-				set = this.setState.bind(this)
+				set = this.setState.bind(this);
 			}
 
 			getChildContext() {
@@ -1070,10 +1108,15 @@ describe('createContext', () => {
 			}
 		}
 
-		render(<Wrapper><Ctx.Consumer>{value => <p>{value.foo}</p>}</Ctx.Consumer></Wrapper>, scratch);
+		render(
+			<Wrapper>
+				<Ctx.Consumer>{value => <p>{value.foo}</p>}</Ctx.Consumer>
+			</Wrapper>,
+			scratch
+		);
 		expect(scratch.innerHTML).to.equal('<p>bar</p>');
 
-		set({ foo: 'baz' })
+		set({ foo: 'baz' });
 		rerender();
 		expect(scratch.innerHTML).to.equal('<p>baz</p>');
 	});
