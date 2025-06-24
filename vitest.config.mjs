@@ -215,25 +215,25 @@ export default defineConfig({
 			enabled: COVERAGE,
 			include: MINIFY
 				? [
-						'**/dist/preact.mjs',
-						'**/compat/dist/compat.mjs',
-						'**/devtools/dist/devtools.mjs',
-						'**/jsx-runtime/dist/jsxRuntime.mjs',
-						'**/debug/dist/debug.mjs',
-						'**/hooks/dist/hooks.mjs',
-						'**/test-utils/dist/testUtils.mjs'
+						'dist/preact.mjs',
+						'compat/dist/compat.mjs',
+						'devtools/dist/devtools.mjs',
+						'jsx-runtime/dist/jsxRuntime.mjs',
+						'debug/dist/debug.mjs',
+						'hooks/dist/hooks.mjs',
+						'test-utils/dist/testUtils.mjs'
 					]
 				: [
-						'**/src/**/*',
-						'**/debug/src/**/*',
-						'**/devtools/src/**/*',
-						'**/hooks/src/**/*',
-						'**/compeat/src/**/*',
-						'**/jsx-runtime/src/**/*',
-						'**/test-utils/src/**/*'
+						'src/**/*',
+						'debug/src/**/*',
+						'devtools/src/**/*',
+						'hooks/src/**/*',
+						'compeat/src/**/*',
+						'jsx-runtime/src/**/*',
+						'test-utils/src/**/*'
 					],
-			extension: ['.js'],
-			provider: 'istanbul',
+			extension: ['.js', '.mjs'],
+			provider: 'v8',
 			reporter: ['html', 'lcovonly', 'text-summary'],
 			reportsDirectory: './coverage'
 		},
