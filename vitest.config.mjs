@@ -256,11 +256,11 @@ export default defineConfig({
 					browser: {
 						// TODO: isolate doesn't work it leaks across all pages
 						// isolate: false,
-						provider: 'webdriverio',
+						provider: 'playwright',
 						enabled: true,
 						screenshotFailures: false,
 						headless: true,
-						instances: [{ browser: 'chrome' }]
+						instances: [{ browser: 'chromium' }]
 					}
 				}
 			}
