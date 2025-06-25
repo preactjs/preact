@@ -3,6 +3,7 @@ import { setupRerender } from 'preact/test-utils';
 import { setupScratch, teardown } from '../_util/helpers';
 import { logCall, clearLog, getLog } from '../_util/logCall';
 import { div } from '../_util/dom';
+import { vi } from 'vitest';
 
 /** @jsx createElement */
 
@@ -436,7 +437,7 @@ describe('null placeholders', () => {
 
 		const Test2 = () => <div>Test2</div>;
 
-		const ref = sinon.spy();
+		const ref = vi.fn();
 
 		class App extends Component {
 			constructor(props) {
@@ -466,9 +467,9 @@ describe('null placeholders', () => {
 		expect(scratch.innerHTML).to.equal(
 			'<div><div>Test2</div><div>Test3</div><div>Iframe</div></div>'
 		);
-		expect(ref).to.have.been.calledOnce;
+		expect(ref).toHaveBeenCalledTimes(1);
 
-		ref.resetHistory();
+		ref.mockClear();
 		clearLog();
 		setState({ value: false });
 		rerender();
@@ -477,6 +478,6 @@ describe('null placeholders', () => {
 			'<div><div>Test2</div><div>Iframe</div></div>'
 		);
 		expect(getLog()).to.deep.equal(['<div>Test3.remove()']);
-		expect(ref).to.have.been.calledOnce;
+		expect(ref).toHaveBeenCalledTimes(1);
 	});
 });

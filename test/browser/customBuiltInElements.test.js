@@ -1,5 +1,6 @@
 import { createElement, render, Component } from 'preact';
 import { setupScratch, teardown } from '../_util/helpers';
+import { vi } from 'vitest';
 
 /** @jsx createElement */
 
@@ -23,7 +24,7 @@ runSuite('customised built-in elements', () => {
 			}
 		}
 
-		const spy = sinon.spy();
+		const spy = vi.fn();
 
 		class BuiltIn extends HTMLDivElement {
 			connectedCallback() {
@@ -35,6 +36,6 @@ runSuite('customised built-in elements', () => {
 
 		render(<Foo />, scratch);
 
-		expect(spy).to.have.been.calledOnce;
+		expect(spy).toHaveBeenCalledTimes(1);
 	});
 });

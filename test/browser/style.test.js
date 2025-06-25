@@ -1,5 +1,6 @@
 import { createElement, render } from 'preact';
 import { setupScratch, teardown, sortCss } from '../_util/helpers';
+import { vi } from 'vitest';
 
 /** @jsx createElement */
 
@@ -24,9 +25,11 @@ describe('style attribute', () => {
 
 	it('should not call CSSStyleDeclaration.setProperty for style strings', () => {
 		render(<div style="top: 5px; position: relative;" />, scratch);
-		sinon.stub(scratch.firstChild.style, 'setProperty');
+		vi.spyOn(scratch.firstChild.style, 'setProperty').mockImplementation(
+			() => {}
+		);
 		render(<div style="top: 10px; position: absolute;" />, scratch);
-		expect(scratch.firstChild.style.setProperty).to.not.be.called;
+		expect(scratch.firstChild.style.setProperty).not.toHaveBeenCalled();
 	});
 
 	it('should properly switch from string styles to object styles and back', () => {
@@ -194,12 +197,14 @@ describe('style attribute', () => {
 
 		it('should call CSSStyleDeclaration.setProperty for css vars', () => {
 			render(<div style={{ padding: '10px' }} />, scratch);
-			sinon.stub(scratch.firstChild.style, 'setProperty');
+			vi.spyOn(scratch.firstChild.style, 'setProperty').mockImplementation(
+				() => {}
+			);
 			render(
 				<div style={{ '--foo': '10px', padding: 'var(--foo)' }} />,
 				scratch
 			);
-			expect(scratch.firstChild.style.setProperty).to.be.calledWith(
+			expect(scratch.firstChild.style.setProperty).toHaveBeenCalledWith(
 				'--foo',
 				'10px'
 			);

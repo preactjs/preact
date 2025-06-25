@@ -1,6 +1,7 @@
 import { createElement, options } from 'preact';
 import { clearLog, getLog } from './logCall';
 import { teardown as testUtilTeardown } from 'preact/test-utils';
+import { vi } from 'vitest';
 
 /** @jsx createElement */
 
@@ -263,10 +264,11 @@ let attributesSpy, originalAttributesPropDescriptor;
 
 export function spyOnElementAttributes() {
 	const test = Object.getOwnPropertyDescriptor(Element.prototype, 'attributes');
+	const getter = test?.get;
 
 	// IE11 doesn't correctly restore the prototype methods so we have to check
-	// whether this prototype method is already a sinon spy.
-	if (!attributesSpy && !(test && test.get && test.get.isSinonProxy)) {
+	// whether this prototype method is already a spy.
+	if (!attributesSpy && !(getter && vi.isMockFunction(getter))) {
 		if (!originalAttributesPropDescriptor) {
 			originalAttributesPropDescriptor = Object.getOwnPropertyDescriptor(
 				Element.prototype,
@@ -274,13 +276,13 @@ export function spyOnElementAttributes() {
 			);
 		}
 
-		attributesSpy = sinon.spy(Element.prototype, 'attributes', ['get']);
-	} else if (test && test.get && test.get.isSinonProxy) {
+		attributesSpy = vi.spyOn(Element.prototype, 'attributes', 'get');
+	} else if (getter && vi.isMockFunction(getter)) {
 		// Due to IE11 not resetting we will do this manually when it is a proxy.
-		test.get.resetHistory();
+		getter.mockClear();
 	}
 
-	return attributesSpy || test;
+	return attributesSpy || getter;
 }
 
 function restoreElementAttributes() {
