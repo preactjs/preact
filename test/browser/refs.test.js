@@ -1,12 +1,13 @@
 import { setupRerender } from 'preact/test-utils';
 import { createElement, render, Component, createRef, Fragment } from 'preact';
 import { setupScratch, teardown } from '../_util/helpers';
+import { vi } from 'vitest';
 
 /** @jsx createElement */
 
 // gives call count and argument errors names (otherwise sinon just uses "spy"):
 let spy = (name, ...args) => {
-	let spy = sinon.spy(...args);
+	let spy = vi.fn(...args);
 	spy.displayName = `spy('${name}')`;
 	return spy;
 };
@@ -27,7 +28,8 @@ describe('refs', () => {
 	it('should invoke refs in render()', () => {
 		let ref = spy('ref');
 		render(<div ref={ref} />, scratch);
-		expect(ref).to.have.been.calledOnce.and.calledWith(scratch.firstChild);
+		expect(ref).toHaveBeenCalledOnce();
+		expect(ref).toHaveBeenCalledWith(scratch.firstChild);
 	});
 
 	it('should not call stale refs', () => {
@@ -37,12 +39,15 @@ describe('refs', () => {
 		const App = () => <div ref={bool ? ref : ref2} />;
 
 		render(<App />, scratch);
-		expect(ref).to.have.been.calledOnce.and.calledWith(scratch.firstChild);
+		expect(ref).toHaveBeenCalledOnce();
+		expect(ref).toHaveBeenCalledWith(scratch.firstChild);
 
 		bool = false;
 		render(<App />, scratch);
-		expect(ref).to.have.been.calledTwice.and.calledWith(null);
-		expect(ref2).to.have.been.calledOnce.and.calledWith(scratch.firstChild);
+		expect(ref).toHaveBeenCalledTimes(2);
+		expect(ref).toHaveBeenCalledWith(null);
+		expect(ref2).toHaveBeenCalledOnce();
+		expect(ref2).toHaveBeenCalledWith(scratch.firstChild);
 	});
 
 	it('should support createRef', () => {
@@ -67,8 +72,8 @@ describe('refs', () => {
 		}
 		render(<Foo />, scratch);
 
-		expect(outer).to.have.been.calledWith(scratch.firstChild);
-		expect(inner).to.have.been.calledWith(scratch.firstChild.firstChild);
+		expect(outer).toHaveBeenCalledWith(scratch.firstChild);
+		expect(inner).toHaveBeenCalledWith(scratch.firstChild.firstChild);
 	});
 
 	it('should pass component refs in props', () => {
@@ -133,7 +138,7 @@ describe('refs', () => {
 			}
 		}
 
-		sinon.spy(TestUnmount.prototype, 'componentWillUnmount');
+		vi.spyOn(TestUnmount.prototype, 'componentWillUnmount');
 
 		render(
 			<div>
@@ -144,10 +149,10 @@ describe('refs', () => {
 		outer = scratch.querySelector('#outer');
 		inner = scratch.querySelector('#inner');
 
-		expect(TestUnmount.prototype.componentWillUnmount).not.to.have.been.called;
+		expect(TestUnmount.prototype.componentWillUnmount).not.toHaveBeenCalled();
 
 		render(<div />, scratch);
-		expect(TestUnmount.prototype.componentWillUnmount).to.have.been.calledOnce;
+		expect(TestUnmount.prototype.componentWillUnmount).toHaveBeenCalledOnce();
 	});
 
 	it('should null and re-invoke refs when swapping component root element type', () => {
@@ -180,28 +185,31 @@ describe('refs', () => {
 				);
 			}
 		}
-		sinon.spy(Child.prototype, 'handleMount');
+		vi.spyOn(Child.prototype, 'handleMount');
 
 		render(<App />, scratch);
-		expect(inst.handleMount).to.have.been.calledOnce.and.calledWith(
+		expect(inst.handleMount).toHaveBeenCalledOnce();
+		expect(inst.handleMount).toHaveBeenCalledWith(
 			scratch.querySelector('#div')
 		);
-		inst.handleMount.resetHistory();
+		inst.handleMount.mockClear();
 
 		inst.setState({ show: true });
 		rerender();
-		expect(inst.handleMount).to.have.been.calledTwice;
-		expect(inst.handleMount.firstCall).to.have.been.calledWith(null);
-		expect(inst.handleMount.secondCall).to.have.been.calledWith(
+		expect(inst.handleMount).toHaveBeenCalledTimes(2);
+		expect(inst.handleMount).toHaveBeenNthCalledWith(1, null);
+		expect(inst.handleMount).toHaveBeenNthCalledWith(
+			2,
 			scratch.querySelector('#span')
 		);
-		inst.handleMount.resetHistory();
+		inst.handleMount.mockClear();
 
 		inst.setState({ show: false });
 		rerender();
-		expect(inst.handleMount).to.have.been.calledTwice;
-		expect(inst.handleMount.firstCall).to.have.been.calledWith(null);
-		expect(inst.handleMount.secondCall).to.have.been.calledWith(
+		expect(inst.handleMount).toHaveBeenCalledTimes(2);
+		expect(inst.handleMount).toHaveBeenNthCalledWith(1, null);
+		expect(inst.handleMount).toHaveBeenNthCalledWith(
+			2,
 			scratch.querySelector('#div')
 		);
 	});
@@ -515,8 +523,8 @@ describe('refs', () => {
 	});
 
 	it('should call ref cleanup on unmount', () => {
-		const cleanup = sinon.spy();
-		const ref = sinon.spy(() => cleanup);
+		const cleanup = vi.fn();
+		const ref = vi.fn(() => cleanup);
 
 		function App({ show = false }) {
 			return <div>{show && <p ref={ref}>hello</p>}</div>;
@@ -525,15 +533,15 @@ describe('refs', () => {
 		render(<App show />, scratch);
 		render(<App />, scratch);
 
-		expect(cleanup).to.be.calledOnce;
+		expect(cleanup).toHaveBeenCalledOnce();
 
 		// Ref should not be called with `null` when cleanup is present
-		expect(ref).to.be.calledOnce;
-		expect(ref).not.to.be.calledWith(null);
+		expect(ref).toHaveBeenCalledOnce();
+		expect(ref).not.toHaveBeenCalledWith(null);
 	});
 
 	it('should call ref cleanup when ref changes', () => {
-		const cleanup = sinon.spy();
+		const cleanup = vi.fn();
 
 		function App({ show = false, count = 0 }) {
 			return <div>{show && <p ref={() => cleanup}>hello {count}</p>}</div>;
@@ -543,6 +551,6 @@ describe('refs', () => {
 		render(<App show count={1} />, scratch);
 
 		// Cleanup should be invoked whenever ref function changes
-		expect(cleanup).to.be.calledOnce;
+		expect(cleanup).toHaveBeenCalledOnce();
 	});
 });
