@@ -432,13 +432,8 @@ function findMatchingIndex(
 	} else if (shouldSearch) {
 		let x = skewedIndex - 1;
 		let y = skewedIndex + 1;
-		let childIndex;
 		while (x >= 0 || y < oldChildren.length) {
-			if (x >= 0) {
-				childIndex = x--;
-			} else {
-				childIndex = y++;
-			}
+			const childIndex = x >= 0 ? x-- : y++;
 			oldVNode = oldChildren[childIndex];
 			if (
 				oldVNode != NULL &&
