@@ -1,6 +1,5 @@
 import { slice } from './util';
 import options from './options';
-import { NULL, UNDEFINED } from './constants';
 
 let vnodeId = 0;
 
@@ -29,7 +28,7 @@ export function createElement(type, props, children) {
 			arguments.length > 3 ? slice.call(arguments, 2) : children;
 	}
 
-	return createVNode(type, normalizedProps, key, ref, NULL);
+	return createVNode(type, normalizedProps, key, ref, null);
 }
 
 /**
@@ -53,25 +52,25 @@ export function createVNode(type, props, key, ref, original) {
 		props,
 		key,
 		ref,
-		_children: NULL,
-		_parent: NULL,
+		_children: null,
+		_parent: null,
 		_depth: 0,
-		_dom: NULL,
-		_component: NULL,
-		constructor: UNDEFINED,
-		_original: original == NULL ? ++vnodeId : original,
+		_dom: null,
+		_component: null,
+		constructor: void 0,
+		_original: original == null ? ++vnodeId : original,
 		_index: -1,
 		_flags: 0
 	};
 
 	// Only invoke the vnode hook if this was *not* a direct copy:
-	if (original == NULL && options.vnode != NULL) options.vnode(vnode);
+	if (original == null && options.vnode != null) options.vnode(vnode);
 
 	return vnode;
 }
 
 export function createRef() {
-	return { current: NULL };
+	return { current: null };
 }
 
 export function Fragment(props) {
@@ -84,4 +83,4 @@ export function Fragment(props) {
  * @returns {vnode is VNode}
  */
 export const isValidElement = vnode =>
-	vnode != NULL && vnode.constructor == UNDEFINED;
+	vnode != null && vnode.constructor == void 0;
