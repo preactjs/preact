@@ -10,6 +10,7 @@ import {
 } from '../_util/helpers';
 import { ul, li, div } from '../_util/dom';
 import { logCall, clearLog, getLog } from '../_util/logCall';
+import { vi } from 'vitest';
 
 /** @jsx createElement */
 
@@ -77,7 +78,7 @@ describe('hydrate()', () => {
 	});
 
 	it('should reuse existing DOM', () => {
-		const onClickSpy = sinon.spy();
+		const onClickSpy = vi.fn();
 		const html = ul([li('1'), li('2'), li('3')]);
 
 		scratch.innerHTML = html;
@@ -94,11 +95,11 @@ describe('hydrate()', () => {
 
 		expect(scratch.innerHTML).to.equal(html);
 		expect(getLog()).to.deep.equal([]);
-		expect(onClickSpy).not.to.have.been.called;
+		expect(onClickSpy).not.toHaveBeenCalled();
 
 		scratch.querySelector('li:last-child').dispatchEvent(createEvent('click'));
 
-		expect(onClickSpy).to.have.been.called.calledOnce;
+		expect(onClickSpy).toHaveBeenCalledOnce();
 	});
 
 	it('should skip comment nodes between dom nodes', () => {
@@ -115,7 +116,7 @@ describe('hydrate()', () => {
 	});
 
 	it('should reuse existing DOM when given components', () => {
-		const onClickSpy = sinon.spy();
+		const onClickSpy = vi.fn();
 		const html = ul([li('1'), li('2'), li('3')]);
 
 		scratch.innerHTML = html;
@@ -132,18 +133,18 @@ describe('hydrate()', () => {
 
 		expect(scratch.innerHTML).to.equal(html);
 		expect(getLog()).to.deep.equal([]);
-		expect(onClickSpy).not.to.have.been.called;
+		expect(onClickSpy).not.toHaveBeenCalled();
 
 		scratch.querySelector('li:last-child').dispatchEvent(createEvent('click'));
 
-		expect(onClickSpy).to.have.been.called.calledOnce;
+		expect(onClickSpy).toHaveBeenCalledOnce();
 	});
 
 	it('should properly set event handlers to existing DOM when given components', () => {
 		const proto = Element.prototype;
-		sinon.spy(proto, 'addEventListener');
+		vi.spyOn(proto, 'addEventListener');
 
-		const clickHandlers = [sinon.spy(), sinon.spy(), sinon.spy()];
+		const clickHandlers = [vi.fn(), vi.fn(), vi.fn()];
 
 		const html = ul([li('1'), li('2'), li('3')]);
 
@@ -161,11 +162,11 @@ describe('hydrate()', () => {
 
 		expect(scratch.innerHTML).to.equal(html);
 		expect(getLog()).to.deep.equal([]);
-		expect(proto.addEventListener).to.have.been.calledThrice;
-		expect(clickHandlers[2]).not.to.have.been.called;
+		expect(proto.addEventListener).toHaveBeenCalledTimes(3);
+		expect(clickHandlers[2]).not.toHaveBeenCalled();
 
 		scratch.querySelector('li:last-child').dispatchEvent(createEvent('click'));
-		expect(clickHandlers[2]).to.have.been.calledOnce;
+		expect(clickHandlers[2]).toHaveBeenCalledTimes(1);
 	});
 
 	it('should add missing nodes to existing DOM when hydrating', () => {
@@ -225,7 +226,7 @@ describe('hydrate()', () => {
 		clearLog();
 		hydrate(vnode, scratch);
 
-		expect(attributesSpy.get).to.not.have.been.called;
+		expect(attributesSpy).not.toHaveBeenCalled();
 
 		expect(serializeHtml(scratch)).to.equal(
 			sortAttributes(
@@ -247,7 +248,7 @@ describe('hydrate()', () => {
 		scratch.innerHTML = html;
 		clearLog();
 
-		const clickHandlers = [sinon.spy(), sinon.spy(), sinon.spy(), sinon.spy()];
+		const clickHandlers = [vi.fn(), vi.fn(), vi.fn(), vi.fn()];
 
 		hydrate(
 			<List>
@@ -263,13 +264,13 @@ describe('hydrate()', () => {
 
 		expect(scratch.innerHTML).to.equal(html);
 		expect(getLog()).to.deep.equal([]);
-		expect(clickHandlers[2]).not.to.have.been.called;
+		expect(clickHandlers[2]).not.toHaveBeenCalled();
 
 		scratch
 			.querySelector('li:nth-child(3)')
 			.dispatchEvent(createEvent('click'));
 
-		expect(clickHandlers[2]).to.have.been.called.calledOnce;
+		expect(clickHandlers[2]).toHaveBeenCalledOnce();
 	});
 
 	it('should correctly hydrate root Fragments', () => {
@@ -281,13 +282,7 @@ describe('hydrate()', () => {
 		scratch.innerHTML = html;
 		clearLog();
 
-		const clickHandlers = [
-			sinon.spy(),
-			sinon.spy(),
-			sinon.spy(),
-			sinon.spy(),
-			sinon.spy()
-		];
+		const clickHandlers = [vi.fn(), vi.fn(), vi.fn(), vi.fn(), vi.fn()];
 
 		hydrate(
 			<Fragment>
@@ -306,19 +301,19 @@ describe('hydrate()', () => {
 
 		expect(scratch.innerHTML).to.equal(html);
 		expect(getLog()).to.deep.equal([]);
-		expect(clickHandlers[2]).not.to.have.been.called;
+		expect(clickHandlers[2]).not.toHaveBeenCalled();
 
 		scratch
 			.querySelector('li:nth-child(3)')
 			.dispatchEvent(createEvent('click'));
 
-		expect(clickHandlers[2]).to.have.been.calledOnce;
-		expect(clickHandlers[4]).not.to.have.been.called;
+		expect(clickHandlers[2]).toHaveBeenCalledTimes(1);
+		expect(clickHandlers[4]).not.toHaveBeenCalled();
 
 		scratch.querySelector('div').dispatchEvent(createEvent('click'));
 
-		expect(clickHandlers[2]).to.have.been.calledOnce;
-		expect(clickHandlers[4]).to.have.been.calledOnce;
+		expect(clickHandlers[2]).toHaveBeenCalledTimes(1);
+		expect(clickHandlers[4]).toHaveBeenCalledTimes(1);
 	});
 
 	it('should override incorrect pre-existing DOM with VNodes passed into render', () => {
@@ -374,7 +369,7 @@ describe('hydrate()', () => {
 		);
 
 		hydrate(preactElement, scratch);
-		expect(attributesSpy.get).to.not.have.been.called;
+		expect(attributesSpy).not.toHaveBeenCalled();
 		expect(scratch).to.have.property(
 			'innerHTML',
 			'<div><a foo="bar"></a></div>'
@@ -382,14 +377,14 @@ describe('hydrate()', () => {
 	});
 
 	it('should attach event handlers', () => {
-		let spy = sinon.spy();
+		let spy = vi.fn();
 		scratch.innerHTML = '<span>Test</span>';
 		let vnode = <span onClick={spy}>Test</span>;
 
 		hydrate(vnode, scratch);
 
 		scratch.firstChild.click();
-		expect(spy).to.be.calledOnce;
+		expect(spy).toHaveBeenCalledOnce();
 	});
 
 	// #2237
