@@ -436,30 +436,22 @@ function findMatchingIndex(
 		let x = skewedIndex - 1;
 		let y = skewedIndex + 1;
 		while (x >= 0 || y < oldChildren.length) {
+			let childIndex;
 			if (x >= 0) {
-				oldVNode = oldChildren[x];
-				if (
-					oldVNode &&
-					(oldVNode._flags & MATCHED) == 0 &&
-					key == oldVNode.key &&
-					type == oldVNode.type
-				) {
-					return x;
-				}
+				childIndex = x;
 				x--;
-			}
-
-			if (y < oldChildren.length) {
-				oldVNode = oldChildren[y];
-				if (
-					oldVNode &&
-					(oldVNode._flags & MATCHED) == 0 &&
-					key == oldVNode.key &&
-					type == oldVNode.type
-				) {
-					return y;
-				}
+			} else {
+				childIndex = y;
 				y++;
+			}
+			oldVNode = oldChildren[childIndex];
+			if (
+				oldVNode &&
+				(oldVNode._flags & MATCHED) == 0 &&
+				key == oldVNode.key &&
+				type == oldVNode.type
+			) {
+				return childIndex;
 			}
 		}
 	}
