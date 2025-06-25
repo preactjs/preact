@@ -392,6 +392,14 @@ export function toChildArray(children, out) {
 }
 
 /**
+ * @param {VNode} node
+ * @returns {boolean}
+ */
+function nodeMatches(node) {
+	return node != NULL && (node._flags & MATCHED) == 0;
+}
+
+/**
  * @param {VNode} childVNode
  * @param {VNode[]} oldChildren
  * @param {number} skewedIndex
@@ -407,6 +415,7 @@ function findMatchingIndex(
 	const key = childVNode.key;
 	const type = childVNode.type;
 	let oldVNode = oldChildren[skewedIndex];
+	const matched = nodeMatches(oldVNode);
 
 	// We only need to perform a search if there are more children
 	// (remainingOldChildren) to search. However, if the oldVNode we just looked
@@ -421,33 +430,26 @@ function findMatchingIndex(
 	// we should not search as we risk re-using state of an unrelated VNode. (reverted for now)
 	let shouldSearch =
 		// (typeof type != 'function' || type === Fragment || key) &&
-		remainingOldChildren >
-		(oldVNode != NULL && (oldVNode._flags & MATCHED) == 0 ? 1 : 0);
+		remainingOldChildren > (matched ? 1 : 0);
 
 	if (
 		(oldVNode === NULL && childVNode.key == null) ||
-		(oldVNode &&
-			key == oldVNode.key &&
-			type == oldVNode.type &&
-			(oldVNode._flags & MATCHED) == 0)
+		(matched && key == oldVNode.key && type == oldVNode.type)
 	) {
 		return skewedIndex;
 	} else if (shouldSearch) {
 		let x = skewedIndex - 1;
 		let y = skewedIndex + 1;
+		let childIndex;
 		while (x >= 0 || y < oldChildren.length) {
-			let childIndex;
 			if (x >= 0) {
-				childIndex = x;
-				x--;
+				childIndex = x--;
 			} else {
-				childIndex = y;
-				y++;
+				childIndex = y++;
 			}
 			oldVNode = oldChildren[childIndex];
 			if (
-				oldVNode &&
-				(oldVNode._flags & MATCHED) == 0 &&
+				nodeMatches(oldVNode) &&
 				key == oldVNode.key &&
 				type == oldVNode.type
 			) {
