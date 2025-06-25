@@ -1,6 +1,7 @@
 import { setupRerender } from 'preact/test-utils';
 import { createElement, render, Component } from 'preact';
 import { setupScratch, teardown } from '../_util/helpers';
+import { vi } from 'vitest';
 
 /** @jsx createElement */
 
@@ -29,24 +30,26 @@ describe('Component spec', () => {
 					return <div />;
 				}
 			}
-			sinon.spy(ForceUpdateComponent.prototype, 'componentWillUpdate');
-			sinon.spy(ForceUpdateComponent.prototype, 'forceUpdate');
+			vi.spyOn(ForceUpdateComponent.prototype, 'componentWillUpdate');
+			vi.spyOn(ForceUpdateComponent.prototype, 'forceUpdate');
 			render(<ForceUpdateComponent />, scratch);
-			expect(ForceUpdateComponent.prototype.componentWillUpdate).not.to.have
-				.been.called;
+			expect(
+				ForceUpdateComponent.prototype.componentWillUpdate
+			).not.toHaveBeenCalled();
 
 			forceUpdate();
 			rerender();
 
-			expect(ForceUpdateComponent.prototype.componentWillUpdate).to.have.been
-				.called;
-			expect(ForceUpdateComponent.prototype.forceUpdate).to.have.been.called;
+			expect(
+				ForceUpdateComponent.prototype.componentWillUpdate
+			).toHaveBeenCalled();
+			expect(ForceUpdateComponent.prototype.forceUpdate).toHaveBeenCalled();
 		});
 
 		it('should add callback to renderCallbacks', () => {
 			/** @type {() => void} */
 			let forceUpdate;
-			let callback = sinon.spy();
+			let callback = vi.fn();
 			class ForceUpdateComponent extends Component {
 				componentDidMount() {
 					forceUpdate = () => this.forceUpdate(callback);
@@ -55,17 +58,17 @@ describe('Component spec', () => {
 					return <div />;
 				}
 			}
-			sinon.spy(ForceUpdateComponent.prototype, 'forceUpdate');
+			vi.spyOn(ForceUpdateComponent.prototype, 'forceUpdate');
 			render(<ForceUpdateComponent />, scratch);
 
 			forceUpdate();
 			rerender();
 
-			expect(ForceUpdateComponent.prototype.forceUpdate).to.have.been.called;
-			expect(
-				ForceUpdateComponent.prototype.forceUpdate
-			).to.have.been.calledWith(callback);
-			expect(callback).to.have.been.called;
+			expect(ForceUpdateComponent.prototype.forceUpdate).toHaveBeenCalled();
+			expect(ForceUpdateComponent.prototype.forceUpdate).toHaveBeenCalledWith(
+				callback
+			);
+			expect(callback).toHaveBeenCalled();
 		});
 	});
 });

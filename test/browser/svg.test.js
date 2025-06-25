@@ -1,6 +1,7 @@
 import { createElement, Component, render } from 'preact';
 import { setupRerender } from 'preact/test-utils';
 import { setupScratch, teardown, sortAttributes } from '../_util/helpers';
+import { vi } from 'vitest';
 
 /** @jsx createElement */
 
@@ -195,25 +196,22 @@ describe('svg', () => {
 		);
 		render(<Demo c="1" />, scratch);
 		let root = scratch.firstChild;
-		sinon.spy(root, 'removeAttribute');
+		vi.spyOn(root, 'removeAttribute');
 		render(<Demo />, scratch);
-		expect(root.removeAttribute).to.have.been.calledOnce.and.calledWith(
-			'class'
-		);
+		expect(root.removeAttribute).toHaveBeenCalledTimes(1);
+		expect(root.removeAttribute).toHaveBeenCalledWith('class');
 
-		root.removeAttribute.restore();
+		root.removeAttribute.mockRestore();
 
 		render(<div />, scratch);
 		render(<Demo />, scratch);
 		root = scratch.firstChild;
-		sinon.spy(root, 'setAttribute');
+		vi.spyOn(root, 'setAttribute');
 		render(<Demo c="2" />, scratch);
-		expect(root.setAttribute).to.have.been.calledOnce.and.calledWith(
-			'class',
-			'foo_2'
-		);
+		expect(root.setAttribute).toHaveBeenCalledTimes(1);
+		expect(root.setAttribute).toHaveBeenCalledWith('class', 'foo_2');
 
-		root.setAttribute.restore();
+		root.setAttribute.mockRestore();
 	});
 
 	it('should still support class attribute', () => {
