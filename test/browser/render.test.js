@@ -13,6 +13,7 @@ import {
 } from '../_util/helpers';
 import { clearLog, getLog, logCall } from '../_util/logCall';
 import { useState } from 'preact/hooks';
+import { vi } from 'vitest';
 
 /** @jsx createElement */
 
@@ -1236,19 +1237,17 @@ describe('render()', () => {
 		render(<A />, scratch);
 		expect(scratch.innerHTML).to.equal('<div>0</div>');
 
-		const sandbox = sinon.createSandbox();
+		const debounceSpy = vi.spyOn(options, 'debounceRendering');
 		try {
-			sandbox.spy(options, 'debounceRendering');
-
 			comp.setState({ updates: 1 }, () => {
 				comp.setState({ updates: 2 });
 			});
 			rerender();
 			expect(scratch.innerHTML).to.equal('<div>2</div>');
 
-			expect(options.debounceRendering).to.have.been.calledOnce;
+			expect(debounceSpy).toHaveBeenCalledTimes(1);
 		} finally {
-			sandbox.restore();
+			debounceSpy.mockRestore();
 		}
 	});
 
@@ -1300,7 +1299,7 @@ describe('render()', () => {
 			'<div id="wrapper"><div id="page1">Page 1</div></div>'
 		);
 
-		expect(attributesSpy.get).to.not.have.been.called;
+		expect(attributesSpy).not.toHaveBeenCalled();
 
 		render(
 			<div id="wrapper">
@@ -1312,7 +1311,7 @@ describe('render()', () => {
 			'<div id="wrapper"><div id="page2">Page 2</div></div>'
 		);
 
-		expect(attributesSpy.get).to.not.have.been.called;
+		expect(attributesSpy).not.toHaveBeenCalled();
 	});
 
 	// #2926

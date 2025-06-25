@@ -3,6 +3,7 @@ import { setupRerender } from 'preact/test-utils';
 import { setupScratch, teardown } from '../_util/helpers';
 import { logCall, clearLog, getLog } from '../_util/logCall';
 import { div } from '../_util/dom';
+import { vi } from 'vitest';
 
 /** @jsx createElement */
 
@@ -101,11 +102,11 @@ describe('keys', () => {
 
 	// https://fb.me/react-special-props
 	it('should not pass key in props', () => {
-		const Foo = sinon.spy(function Foo() {
+		const Foo = vi.fn(function Foo() {
 			return null;
 		});
 		render(<Foo key="foo" />, scratch);
-		expect(Foo.args[0][0]).to.deep.equal({});
+		expect(Foo.mock.calls[0][0]).to.deep.equal({});
 	});
 
 	it('should update in-place keyed DOM nodes', () => {
