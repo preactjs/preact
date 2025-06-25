@@ -4,6 +4,7 @@ import {
 	teardown,
 	supportsPassiveEvents
 } from '../_util/helpers';
+import { vi } from 'vitest';
 
 /** @jsx createElement */
 
@@ -21,15 +22,15 @@ describe('event handling', () => {
 
 		proto = document.createElement('div').constructor.prototype;
 
-		sinon.spy(proto, 'addEventListener');
-		sinon.spy(proto, 'removeEventListener');
+		vi.spyOn(proto, 'addEventListener');
+		vi.spyOn(proto, 'removeEventListener');
 	});
 
 	afterEach(() => {
 		teardown(scratch);
 
-		proto.addEventListener.restore();
-		proto.removeEventListener.restore();
+		proto.addEventListener.mockRestore();
+		proto.removeEventListener.mockRestore();
 	});
 
 	it('should only register on* functions as handlers', () => {
@@ -40,11 +41,10 @@ describe('event handling', () => {
 
 		expect(scratch.childNodes[0].attributes.length).to.equal(0);
 
-		expect(
-			proto.addEventListener
-		).to.have.been.calledOnce.and.to.have.been.calledWithExactly(
+		expect(proto.addEventListener).toHaveBeenCalledOnce();
+		expect(proto.addEventListener).toHaveBeenCalledWith(
 			'click',
-			sinon.match.func,
+			expect.any(Function),
 			false
 		);
 	});
@@ -55,99 +55,131 @@ describe('event handling', () => {
 
 		render(<div onClick={falsyHandler} onOtherClick={fooHandler} />, scratch);
 
-		expect(
-			proto.addEventListener
-		).to.have.been.calledOnce.and.to.have.been.calledWithExactly(
+		expect(proto.addEventListener).toHaveBeenCalledOnce();
+		expect(proto.addEventListener).toHaveBeenCalledWith(
 			'otherclick',
-			sinon.match.func,
+			expect.any(Function),
 			false
 		);
 
-		expect(proto.addEventListener).not.to.have.been.calledWith('Click');
-		expect(proto.addEventListener).not.to.have.been.calledWith('click');
+		expect(proto.addEventListener).not.toHaveBeenCalledWith(
+			'Click',
+			expect.anything(),
+			expect.anything()
+		);
+		expect(proto.addEventListener).not.toHaveBeenCalledWith(
+			'click',
+			expect.anything(),
+			expect.anything()
+		);
 	});
 
 	it('should support native event names', () => {
-		let click = sinon.spy(),
-			mousedown = sinon.spy();
+		let click = vi.fn(),
+			mousedown = vi.fn();
 
 		render(<div onclick={() => click(1)} onmousedown={mousedown} />, scratch);
 
-		expect(proto.addEventListener)
-			.to.have.been.calledTwice.and.to.have.been.calledWith('click')
-			.and.calledWith('mousedown');
+		expect(proto.addEventListener).toHaveBeenCalledTimes(2);
+		expect(proto.addEventListener).toHaveBeenCalledWith(
+			'click',
+			expect.any(Function),
+			false
+		);
+		expect(proto.addEventListener).toHaveBeenCalledWith(
+			'mousedown',
+			expect.any(Function),
+			false
+		);
 
 		fireEvent(scratch.childNodes[0], 'click');
-		expect(click).to.have.been.calledOnce.and.calledWith(1);
+		expect(click).toHaveBeenCalledOnce();
+		expect(click).toHaveBeenCalledWith(1);
 	});
 
 	it('should support camel-case event names', () => {
-		let click = sinon.spy(),
-			mousedown = sinon.spy();
+		let click = vi.fn(),
+			mousedown = vi.fn();
 
 		render(<div onClick={() => click(1)} onMouseDown={mousedown} />, scratch);
 
-		expect(proto.addEventListener)
-			.to.have.been.calledTwice.and.to.have.been.calledWith('click')
-			.and.calledWith('mousedown');
+		expect(proto.addEventListener).toHaveBeenCalledTimes(2);
+		expect(proto.addEventListener).toHaveBeenCalledWith(
+			'click',
+			expect.any(Function),
+			false
+		);
+		expect(proto.addEventListener).toHaveBeenCalledWith(
+			'mousedown',
+			expect.any(Function),
+			false
+		);
 
 		fireEvent(scratch.childNodes[0], 'click');
-		expect(click).to.have.been.calledOnce.and.calledWith(1);
+		expect(click).toHaveBeenCalledOnce();
+		expect(click).toHaveBeenCalledWith(1);
 	});
 
 	it('should update event handlers', () => {
-		let click1 = sinon.spy();
-		let click2 = sinon.spy();
+		let click1 = vi.fn();
+		let click2 = vi.fn();
 
 		render(<div onClick={click1} />, scratch);
 
 		fireEvent(scratch.childNodes[0], 'click');
-		expect(click1).to.have.been.calledOnce;
-		expect(click2).to.not.have.been.called;
+		expect(click1).toHaveBeenCalledOnce();
+		expect(click2).not.toHaveBeenCalled();
 
-		click1.resetHistory();
-		click2.resetHistory();
+		click1.mockClear();
+		click2.mockClear();
 
 		render(<div onClick={click2} />, scratch);
 
 		fireEvent(scratch.childNodes[0], 'click');
-		expect(click1).to.not.have.been.called;
-		expect(click2).to.have.been.called;
+		expect(click1).not.toHaveBeenCalled();
+		expect(click2).toHaveBeenCalled();
 	});
 
 	it('should remove event handlers', () => {
-		let click = sinon.spy(),
-			mousedown = sinon.spy();
+		let click = vi.fn(),
+			mousedown = vi.fn();
 
 		render(<div onClick={() => click(1)} onMouseDown={mousedown} />, scratch);
 		render(<div onClick={() => click(2)} />, scratch);
 
-		expect(proto.removeEventListener).to.have.been.calledWith('mousedown');
+		expect(proto.removeEventListener).toHaveBeenCalledWith(
+			'mousedown',
+			expect.any(Function),
+			false
+		);
 
 		fireEvent(scratch.childNodes[0], 'mousedown');
-		expect(mousedown).not.to.have.been.called;
+		expect(mousedown).not.toHaveBeenCalled();
 
-		proto.removeEventListener.resetHistory();
-		click.resetHistory();
-		mousedown.resetHistory();
+		proto.removeEventListener.mockClear();
+		click.mockClear();
+		mousedown.mockClear();
 
 		render(<div />, scratch);
 
-		expect(proto.removeEventListener).to.have.been.calledWith('click');
+		expect(proto.removeEventListener).toHaveBeenCalledWith(
+			'click',
+			expect.any(Function),
+			false
+		);
 
 		fireEvent(scratch.childNodes[0], 'click');
-		expect(click).not.to.have.been.called;
+		expect(click).not.toHaveBeenCalled();
 	});
 
 	it('should register events not appearing on dom nodes', () => {
 		let onAnimationEnd = () => {};
 
 		render(<div onanimationend={onAnimationEnd} />, scratch);
-		expect(
-			proto.addEventListener
-		).to.have.been.calledOnce.and.to.have.been.calledWithExactly(
+		expect(proto.addEventListener).toHaveBeenCalledOnce();
+		expect(proto.addEventListener).toHaveBeenCalledWith(
 			'animationend',
-			sinon.match.func,
+			expect.any(Function),
 			false
 		);
 	});
@@ -155,7 +187,7 @@ describe('event handling', () => {
 	// Skip test if browser doesn't support passive events
 	if (supportsPassiveEvents()) {
 		it('should use capturing for event props ending with *Capture', () => {
-			let click = sinon.spy();
+			let click = vi.fn();
 
 			render(
 				<div onClickCapture={click}>
@@ -167,17 +199,19 @@ describe('event handling', () => {
 			let btn = scratch.firstChild.firstElementChild;
 			btn.click();
 
-			expect(click, 'click').to.have.been.calledOnce;
+			expect(click).toHaveBeenCalledOnce();
 
 			// IE doesn't set it
 			if (!/Edge/.test(navigator.userAgent)) {
-				expect(click).to.have.been.calledWithMatch({ eventPhase: 0 }); // capturing
+				expect(click).toHaveBeenCalledWith(
+					expect.objectContaining({ eventPhase: 0 })
+				); // capturing
 			}
 		});
 
 		it('should support both capturing and non-capturing events on the same element', () => {
-			let click = sinon.spy(),
-				clickCapture = sinon.spy();
+			let click = vi.fn(),
+				clickCapture = vi.fn();
 
 			render(
 				<div onClick={click} onClickCapture={clickCapture}>
@@ -189,17 +223,17 @@ describe('event handling', () => {
 			let root = scratch.firstChild;
 			root.firstElementChild.click();
 
-			expect(clickCapture, 'click').to.have.been.calledOnce;
-			expect(click, 'click').to.have.been.calledOnce;
+			expect(clickCapture).toHaveBeenCalledOnce();
+			expect(click).toHaveBeenCalledOnce();
 		});
 	}
 
 	// Uniquely named in that the base event names end with 'Capture'
 	it('should support (got|lost)PointerCapture events', () => {
-		let gotPointerCapture = sinon.spy(),
-			gotPointerCaptureCapture = sinon.spy(),
-			lostPointerCapture = sinon.spy(),
-			lostPointerCaptureCapture = sinon.spy();
+		let gotPointerCapture = vi.fn(),
+			gotPointerCaptureCapture = vi.fn(),
+			lostPointerCapture = vi.fn(),
+			lostPointerCaptureCapture = vi.fn();
 
 		render(
 			<div
@@ -209,11 +243,19 @@ describe('event handling', () => {
 			scratch
 		);
 
-		expect(proto.addEventListener)
-			.to.have.been.calledTwice.and.to.have.been.calledWith('gotpointercapture')
-			.and.calledWith('lostpointercapture');
+		expect(proto.addEventListener).toHaveBeenCalledTimes(2);
+		expect(proto.addEventListener).toHaveBeenCalledWith(
+			'gotpointercapture',
+			expect.any(Function),
+			false
+		);
+		expect(proto.addEventListener).toHaveBeenCalledWith(
+			'lostpointercapture',
+			expect.any(Function),
+			false
+		);
 
-		proto.addEventListener.resetHistory();
+		proto.addEventListener.mockClear();
 
 		render(
 			<div
@@ -223,16 +265,32 @@ describe('event handling', () => {
 			scratch
 		);
 
-		expect(proto.addEventListener)
-			.to.have.been.calledTwice.and.to.have.been.calledWith('gotpointercapture')
-			.and.calledWith('lostpointercapture');
+		expect(proto.addEventListener).toHaveBeenCalledTimes(2);
+		expect(proto.addEventListener).toHaveBeenCalledWith(
+			'gotpointercapture',
+			expect.any(Function),
+			true
+		);
+		expect(proto.addEventListener).toHaveBeenCalledWith(
+			'lostpointercapture',
+			expect.any(Function),
+			true
+		);
 	});
 
 	it('should support camel-case focus event names', () => {
 		render(<div onFocusIn={() => {}} onFocusOut={() => {}} />, scratch);
 
-		expect(proto.addEventListener)
-			.to.have.been.calledTwice.and.to.have.been.calledWith('focusin')
-			.and.calledWith('focusout');
+		expect(proto.addEventListener).toHaveBeenCalledTimes(2);
+		expect(proto.addEventListener).toHaveBeenCalledWith(
+			'focusin',
+			expect.any(Function),
+			false
+		);
+		expect(proto.addEventListener).toHaveBeenCalledWith(
+			'focusout',
+			expect.any(Function),
+			false
+		);
 	});
 });
