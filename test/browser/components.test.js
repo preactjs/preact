@@ -57,12 +57,14 @@ describe('Components', () => {
 					return <div>C1</div>;
 				}
 			}
-			sinon.spy(C1.prototype, 'render');
+			vi.spyOn(C1.prototype, 'render');
 			render(<C1 />, scratch);
 
-			expect(C1.prototype.render)
-				.to.have.been.calledOnce.and.to.have.been.calledWithMatch({}, {})
-				.and.to.have.returned(sinon.match({ type: 'div' }));
+			expect(C1.prototype.render).toHaveBeenCalledTimes(1);
+			expect(C1.prototype.render).toHaveBeenCalledWith({}, {}, {});
+			expect(C1.prototype.render).toHaveReturned(
+				expect.objectContaining({ type: 'div' })
+			);
 
 			expect(scratch.innerHTML).to.equal('<div>C1</div>');
 		});
@@ -93,20 +95,20 @@ describe('Components', () => {
 					return <div {...props} />;
 				}
 			}
-			sinon.spy(C2.prototype, 'render');
+			vi.spyOn(C2.prototype, 'render');
 
 			render(<C2 {...PROPS} />, scratch);
 
 			expect(constructorProps).to.deep.equal(PROPS);
 
-			expect(C2.prototype.render)
-				.to.have.been.calledOnce.and.to.have.been.calledWithMatch(PROPS, {})
-				.and.to.have.returned(
-					sinon.match({
-						type: 'div',
-						props: PROPS
-					})
-				);
+			expect(C2.prototype.render).toHaveBeenCalledTimes(1);
+			expect(C2.prototype.render).toHaveBeenCalledWith(PROPS, {}, {});
+			expect(C2.prototype.render).toHaveReturned(
+				expect.objectContaining({
+					type: 'div',
+					props: PROPS
+				})
+			);
 
 			expect(scratch.innerHTML).to.equal('<div foo="bar"></div>');
 		});
@@ -126,7 +128,7 @@ describe('Components', () => {
 		});
 
 		it('should not crash when setting state with cb in constructor', () => {
-			let spy = sinon.spy();
+			let spy = vi.fn();
 			class Foo extends Component {
 				constructor(props) {
 					super(props);
@@ -136,11 +138,11 @@ describe('Components', () => {
 
 			expect(() => render(<Foo foo="bar" />, scratch)).not.to.throw();
 			rerender();
-			expect(spy).to.not.be.called;
+			expect(spy).not.toHaveBeenCalled();
 		});
 
 		it('should not crash when calling forceUpdate with cb in constructor', () => {
-			let spy = sinon.spy();
+			let spy = vi.fn();
 			class Foo extends Component {
 				constructor(props) {
 					super(props);
@@ -150,7 +152,7 @@ describe('Components', () => {
 
 			expect(() => render(<Foo foo="bar" />, scratch)).not.to.throw();
 			rerender();
-			expect(spy).to.not.be.called;
+			expect(spy).not.toHaveBeenCalled();
 		});
 
 		it('should accurately call nested setState callbacks', () => {
@@ -211,13 +213,15 @@ describe('Components', () => {
 				}
 			}
 
-			sinon.spy(Foo.prototype, 'render');
+			vi.spyOn(Foo.prototype, 'render');
 
 			render(<Foo {...PROPS} />, scratch);
 
-			expect(Foo.prototype.render)
-				.to.have.been.calledOnce.and.to.have.been.calledWithMatch(PROPS, {}, {})
-				.and.to.have.returned(sinon.match({ type: 'div', props: PROPS }));
+			expect(Foo.prototype.render).toHaveBeenCalledTimes(1);
+			expect(Foo.prototype.render).toHaveBeenCalledWith(PROPS, {}, {});
+			expect(Foo.prototype.render).toHaveReturned(
+				expect.objectContaining({ type: 'div', props: PROPS })
+			);
 			expect(instance.props).to.deep.equal(PROPS);
 			expect(instance.state).to.deep.equal({});
 			expect(instance.context).to.deep.equal({});
@@ -231,19 +235,17 @@ describe('Components', () => {
 				instance = this;
 				this.state = STATE;
 			}
-			Foo.prototype.render = sinon.spy((props, state) => (
+			Foo.prototype.render = vi.fn((props, state) => (
 				<div {...props}>{state.text}</div>
 			));
 
 			render(<Foo {...PROPS} />, scratch);
 
-			expect(Foo.prototype.render)
-				.to.have.been.calledOnce.and.to.have.been.calledWithMatch(
-					PROPS,
-					STATE,
-					{}
-				)
-				.and.to.have.returned(sinon.match({ type: 'div', props: PROPS }));
+			expect(Foo.prototype.render).toHaveBeenCalledTimes(1);
+			expect(Foo.prototype.render).toHaveBeenCalledWith(PROPS, STATE, {});
+			expect(Foo.prototype.render).toHaveReturned(
+				expect.objectContaining({ type: 'div', props: PROPS })
+			);
 			expect(instance.props).to.deep.equal(PROPS);
 			expect(instance.state).to.deep.equal(STATE);
 			expect(instance.context).to.deep.equal({});
@@ -386,7 +388,7 @@ describe('Components', () => {
 			function Wrapper() {
 				instance = this;
 				this.state = STATE;
-				this.render = sinon.spy((props, state) => (
+				this.render = vi.fn((props, state) => (
 					<div {...props}>{state.text}</div>
 				));
 			}
@@ -394,13 +396,11 @@ describe('Components', () => {
 
 			render(<Wrapper {...PROPS} />, scratch);
 
-			expect(instance.render)
-				.to.have.been.calledOnce.and.to.have.been.calledWithMatch(
-					PROPS,
-					STATE,
-					{}
-				)
-				.and.to.have.returned(sinon.match({ type: 'div', props: PROPS }));
+			expect(instance.render).toHaveBeenCalledTimes(1);
+			expect(instance.render).toHaveBeenCalledWith(PROPS, STATE, {});
+			expect(instance.render).toHaveReturned(
+				expect.objectContaining({ type: 'div', props: PROPS })
+			);
 			expect(instance.props).to.deep.equal(PROPS);
 			expect(instance.state).to.deep.equal(STATE);
 			expect(instance.context).to.deep.equal({});
@@ -414,19 +414,17 @@ describe('Components', () => {
 				this.state = STATE;
 			}
 			Foo.prototype = Object.create(Component);
-			Foo.prototype.render = sinon.spy((props, state) => (
+			Foo.prototype.render = vi.fn((props, state) => (
 				<div {...props}>{state.text}</div>
 			));
 
 			render(<Foo {...PROPS} />, scratch);
 
-			expect(Foo.prototype.render)
-				.to.have.been.calledOnce.and.to.have.been.calledWithMatch(
-					PROPS,
-					STATE,
-					{}
-				)
-				.and.to.have.returned(sinon.match({ type: 'div', props: PROPS }));
+			expect(Foo.prototype.render).toHaveBeenCalledTimes(1);
+			expect(Foo.prototype.render).toHaveBeenCalledWith(PROPS, STATE, {});
+			expect(Foo.prototype.render).toHaveReturned(
+				expect.objectContaining({ type: 'div', props: PROPS })
+			);
 			expect(instance.props).to.deep.equal(PROPS);
 			expect(instance.state).to.deep.equal(STATE);
 			expect(instance.context).to.deep.equal({});
@@ -438,13 +436,15 @@ describe('Components', () => {
 			function Foo() {
 				instance = this;
 			}
-			Foo.prototype.render = sinon.spy(props => <div {...props}>Hello</div>);
+			Foo.prototype.render = vi.fn(props => <div {...props}>Hello</div>);
 
 			render(<Foo {...PROPS} />, scratch);
 
-			expect(Foo.prototype.render)
-				.to.have.been.calledOnce.and.to.have.been.calledWithMatch(PROPS, {}, {})
-				.and.to.have.returned(sinon.match({ type: 'div', props: PROPS }));
+			expect(Foo.prototype.render).toHaveBeenCalledTimes(1);
+			expect(Foo.prototype.render).toHaveBeenCalledWith(PROPS, {}, {});
+			expect(Foo.prototype.render).toHaveReturned(
+				expect.objectContaining({ type: 'div', props: PROPS })
+			);
 			expect(instance.props).to.deep.equal(PROPS);
 			expect(instance.state).to.deep.equal({});
 			expect(instance.context).to.deep.equal({});
@@ -462,17 +462,15 @@ describe('Components', () => {
 					return <div {...props}>{state.text}</div>;
 				}
 			}
-			sinon.spy(Foo.prototype, 'render');
+			vi.spyOn(Foo.prototype, 'render');
 
 			render(<Foo {...PROPS} />, scratch);
 
-			expect(Foo.prototype.render)
-				.to.have.been.calledOnce.and.to.have.been.calledWithMatch(
-					PROPS,
-					STATE,
-					{}
-				)
-				.and.to.have.returned(sinon.match({ type: 'div', props: PROPS }));
+			expect(Foo.prototype.render).toHaveBeenCalledTimes(1);
+			expect(Foo.prototype.render).toHaveBeenCalledWith(PROPS, STATE, {});
+			expect(Foo.prototype.render).toHaveReturned(
+				expect.objectContaining({ type: 'div', props: PROPS })
+			);
 			expect(instance.props).to.deep.equal(PROPS);
 			expect(instance.state).to.deep.equal(STATE);
 			expect(instance.context).to.deep.equal({});
@@ -486,19 +484,17 @@ describe('Components', () => {
 				instance = this;
 				this.state = STATE;
 			}
-			Provider.prototype.render = sinon.spy((props, state) => (
+			Provider.prototype.render = vi.fn((props, state) => (
 				<div {...PROPS}>{state.text}</div>
 			));
 
 			render(<Provider {...PROPS} />, scratch);
 
-			expect(Provider.prototype.render)
-				.to.have.been.calledOnce.and.to.have.been.calledWithMatch(
-					PROPS,
-					STATE,
-					{}
-				)
-				.and.to.have.returned(sinon.match({ type: 'div', props: PROPS }));
+			expect(Provider.prototype.render).toHaveBeenCalledTimes(1);
+			expect(Provider.prototype.render).toHaveBeenCalledWith(PROPS, STATE, {});
+			expect(Provider.prototype.render).toHaveReturned(
+				expect.objectContaining({ type: 'div', props: PROPS })
+			);
 			expect(instance.props).to.deep.equal(PROPS);
 			expect(instance.state).to.deep.equal(STATE);
 			expect(instance.context).to.deep.equal({});
@@ -515,13 +511,15 @@ describe('Components', () => {
 					return <div {...props}>Hello</div>;
 				}
 			}
-			sinon.spy(Foo.prototype, 'render');
+			vi.spyOn(Foo.prototype, 'render');
 
 			render(<Foo {...PROPS} />, scratch);
 
-			expect(Foo.prototype.render)
-				.to.have.been.calledOnce.and.to.have.been.calledWithMatch(PROPS, {}, {})
-				.and.to.have.returned(sinon.match({ type: 'div', props: PROPS }));
+			expect(Foo.prototype.render).toHaveBeenCalledTimes(1);
+			expect(Foo.prototype.render).toHaveBeenCalledWith(PROPS, {}, {});
+			expect(Foo.prototype.render).toHaveReturned(
+				expect.objectContaining({ type: 'div', props: PROPS })
+			);
 			expect(instance.props).to.deep.equal(PROPS);
 			expect(instance.state).to.deep.equal({});
 			expect(instance.context).to.deep.equal({});
@@ -537,13 +535,13 @@ describe('Components', () => {
 				}
 			}
 
-			sinon.spy(Foo.prototype, 'render');
+			vi.spyOn(Foo.prototype, 'render');
 
 			render(<Foo {...PROPS} />, scratch);
 
-			expect(Foo.prototype.render)
-				.to.have.been.calledOnce.and.to.have.been.calledWithMatch(PROPS, {}, {})
-				.and.to.have.returned(undefined);
+			expect(Foo.prototype.render).toHaveBeenCalledTimes(1);
+			expect(Foo.prototype.render).toHaveBeenCalledWith(PROPS, {}, {});
+			expect(Foo.prototype.render).toHaveReturned(undefined);
 			expect(instance.props).to.deep.equal(PROPS);
 			expect(instance.state).to.deep.equal({});
 			expect(instance.context).to.deep.equal({});
@@ -733,7 +731,7 @@ describe('Components', () => {
 	it('should not recycle common class children with different keys', () => {
 		let idx = 0;
 		let msgs = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
-		let sideEffect = sinon.spy();
+		let sideEffect = vi.fn();
 
 		class Comp extends Component {
 			componentWillMount() {
@@ -744,7 +742,7 @@ describe('Components', () => {
 				return <div>{this.innerMsg}</div>;
 			}
 		}
-		sinon.spy(Comp.prototype, 'componentWillMount');
+		vi.spyOn(Comp.prototype, 'componentWillMount');
 
 		let good, bad;
 		class GoodContainer extends Component {
@@ -787,11 +785,11 @@ describe('Components', () => {
 		expect(scratch.textContent, 'new component with key present').to.equal(
 			'AB'
 		);
-		expect(Comp.prototype.componentWillMount).to.have.been.calledTwice;
-		expect(sideEffect).to.have.been.calledTwice;
+		expect(Comp.prototype.componentWillMount).toHaveBeenCalledTimes(2);
+		expect(sideEffect).toHaveBeenCalledTimes(2);
 
-		sideEffect.resetHistory();
-		Comp.prototype.componentWillMount.resetHistory();
+		sideEffect.mockClear();
+		Comp.prototype.componentWillMount.mockClear();
 		good.setState({ alt: true });
 		rerender();
 		expect(
@@ -799,18 +797,18 @@ describe('Components', () => {
 			'new component with key present re-rendered'
 		).to.equal('C');
 		//we are recycling the first 2 components already rendered, just need a new one
-		expect(Comp.prototype.componentWillMount).to.have.been.calledOnce;
-		expect(sideEffect).to.have.been.calledOnce;
+		expect(Comp.prototype.componentWillMount).toHaveBeenCalledTimes(1);
+		expect(sideEffect).toHaveBeenCalledTimes(1);
 
-		sideEffect.resetHistory();
-		Comp.prototype.componentWillMount.resetHistory();
+		sideEffect.mockClear();
+		Comp.prototype.componentWillMount.mockClear();
 		render(<BadContainer />, scratch);
 		expect(scratch.textContent, 'new component without key').to.equal('DE');
-		expect(Comp.prototype.componentWillMount).to.have.been.calledTwice;
-		expect(sideEffect).to.have.been.calledTwice;
+		expect(Comp.prototype.componentWillMount).toHaveBeenCalledTimes(2);
+		expect(sideEffect).toHaveBeenCalledTimes(2);
 
-		sideEffect.resetHistory();
-		Comp.prototype.componentWillMount.resetHistory();
+		sideEffect.mockClear();
+		Comp.prototype.componentWillMount.mockClear();
 		bad.setState({ alt: true });
 		rerender();
 
@@ -818,8 +816,8 @@ describe('Components', () => {
 			scratch.textContent,
 			'use null placeholders to detect new component is appended'
 		).to.equal('F');
-		expect(Comp.prototype.componentWillMount).to.be.calledOnce;
-		expect(sideEffect).to.be.calledOnce;
+		expect(Comp.prototype.componentWillMount).toHaveBeenCalledOnce();
+		expect(sideEffect).toHaveBeenCalledOnce();
 	});
 
 	describe('array children', () => {
@@ -1115,7 +1113,7 @@ describe('Components', () => {
 				.toHaveBeenCalledOnce()
 				.toHaveBeenCalledWith(PROPS, {})
 				.toHaveReturned(
-					sinon.match({
+					expect.objectContaining({
 						type: Inner,
 						props: PROPS
 					})
@@ -1125,7 +1123,7 @@ describe('Components', () => {
 				.toHaveBeenCalledOnce()
 				.toHaveBeenCalledWith(PROPS, {})
 				.toHaveReturned(
-					sinon.match({
+					expect.objectContaining({
 						type: 'div',
 						props: { ...PROPS, children: 'inner' }
 					})
@@ -1645,7 +1643,7 @@ describe('Components', () => {
 		});
 
 		it('should render components by depth', () => {
-			let spy = sinon.spy();
+			let spy = vi.fn();
 			let update;
 			class Child extends Component {
 				constructor(props) {
@@ -1672,11 +1670,11 @@ describe('Components', () => {
 			}
 
 			render(<Parent />, scratch);
-			expect(spy).to.be.calledOnce;
+			expect(spy).toHaveBeenCalledOnce();
 
 			update();
 			rerender();
-			expect(spy).to.be.calledTwice;
+			expect(spy).toHaveBeenCalledTimes(2);
 		});
 
 		it('should handle lifecycle for nested intermediary elements', () => {

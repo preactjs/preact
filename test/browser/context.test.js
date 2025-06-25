@@ -32,7 +32,7 @@ describe('context', () => {
 				);
 			}
 		}
-		sinon.spy(Outer.prototype, 'getChildContext');
+		vi.spyOn(Outer.prototype, 'getChildContext');
 
 		class Inner extends Component {
 			// constructor() {
@@ -49,42 +49,45 @@ describe('context', () => {
 				return <div>{context && context.a}</div>;
 			}
 		}
-		sinon.spy(Inner.prototype, 'shouldComponentUpdate');
-		sinon.spy(Inner.prototype, 'componentWillReceiveProps');
-		sinon.spy(Inner.prototype, 'componentWillUpdate');
-		sinon.spy(Inner.prototype, 'componentDidUpdate');
-		sinon.spy(Inner.prototype, 'render');
+		vi.spyOn(Inner.prototype, 'shouldComponentUpdate');
+		vi.spyOn(Inner.prototype, 'componentWillReceiveProps');
+		vi.spyOn(Inner.prototype, 'componentWillUpdate');
+		vi.spyOn(Inner.prototype, 'componentDidUpdate');
+		vi.spyOn(Inner.prototype, 'render');
 
 		render(<Outer />, scratch);
 
-		expect(Outer.prototype.getChildContext).to.have.been.calledOnce;
+		expect(Outer.prototype.getChildContext).toHaveBeenCalledTimes(1);
 
 		// initial render does not invoke anything but render():
-		expect(Inner.prototype.render).to.have.been.calledWith({}, {}, CONTEXT);
+		expect(Inner.prototype.render).toHaveBeenCalledWith({}, {}, CONTEXT);
 
 		CONTEXT.foo = 'bar';
 		render(<Outer {...PROPS} />, scratch);
 
-		expect(Outer.prototype.getChildContext).to.have.been.calledTwice;
+		expect(Outer.prototype.getChildContext).toHaveBeenCalledTimes(2);
 
-		expect(
-			Inner.prototype.shouldComponentUpdate
-		).to.have.been.calledOnce.and.calledWith(PROPS, {}, CONTEXT);
-		expect(Inner.prototype.componentWillReceiveProps).to.have.been.calledWith(
-			PROPS,
-			CONTEXT
-		);
-		expect(Inner.prototype.componentWillUpdate).to.have.been.calledWith(
+		expect(Inner.prototype.shouldComponentUpdate).toHaveBeenCalledTimes(1);
+		expect(Inner.prototype.shouldComponentUpdate).toHaveBeenCalledWith(
 			PROPS,
 			{},
 			CONTEXT
 		);
-		expect(Inner.prototype.componentDidUpdate).to.have.been.calledWith(
+		expect(Inner.prototype.componentWillReceiveProps).toHaveBeenCalledWith(
+			PROPS,
+			CONTEXT
+		);
+		expect(Inner.prototype.componentWillUpdate).toHaveBeenCalledWith(
+			PROPS,
+			{},
+			CONTEXT
+		);
+		expect(Inner.prototype.componentDidUpdate).toHaveBeenCalledWith(
 			{},
 			{},
 			undefined
 		);
-		expect(Inner.prototype.render).to.have.been.calledWith(PROPS, {}, CONTEXT);
+		expect(Inner.prototype.render).toHaveBeenCalledWith(PROPS, {}, CONTEXT);
 
 		/* Future:
 		 *  Newly created context objects are *not* currently cloned.
@@ -108,7 +111,7 @@ describe('context', () => {
 				return <Inner {...props} />;
 			}
 		}
-		sinon.spy(Outer.prototype, 'getChildContext');
+		vi.spyOn(Outer.prototype, 'getChildContext');
 
 		class Inner extends Component {
 			shouldComponentUpdate() {
@@ -121,46 +124,49 @@ describe('context', () => {
 				return <div>{context && context.a}</div>;
 			}
 		}
-		sinon.spy(Inner.prototype, 'shouldComponentUpdate');
-		sinon.spy(Inner.prototype, 'componentWillReceiveProps');
-		sinon.spy(Inner.prototype, 'componentWillUpdate');
-		sinon.spy(Inner.prototype, 'componentDidUpdate');
-		sinon.spy(Inner.prototype, 'render');
+		vi.spyOn(Inner.prototype, 'shouldComponentUpdate');
+		vi.spyOn(Inner.prototype, 'componentWillReceiveProps');
+		vi.spyOn(Inner.prototype, 'componentWillUpdate');
+		vi.spyOn(Inner.prototype, 'componentDidUpdate');
+		vi.spyOn(Inner.prototype, 'render');
 
 		render(<Outer />, scratch);
 
-		expect(Outer.prototype.getChildContext).to.have.been.calledOnce;
+		expect(Outer.prototype.getChildContext).toHaveBeenCalledTimes(1);
 
 		// initial render does not invoke anything but render():
-		expect(Inner.prototype.render).to.have.been.calledWith({}, {}, CONTEXT);
+		expect(Inner.prototype.render).toHaveBeenCalledWith({}, {}, CONTEXT);
 
 		CONTEXT.foo = 'bar';
 		render(<Outer {...PROPS} />, scratch);
 
-		expect(Outer.prototype.getChildContext).to.have.been.calledTwice;
+		expect(Outer.prototype.getChildContext).toHaveBeenCalledTimes(2);
 
-		expect(
-			Inner.prototype.shouldComponentUpdate
-		).to.have.been.calledOnce.and.calledWith(PROPS, {}, CONTEXT);
-		expect(Inner.prototype.componentWillReceiveProps).to.have.been.calledWith(
-			PROPS,
-			CONTEXT
-		);
-		expect(Inner.prototype.componentWillUpdate).to.have.been.calledWith(
+		expect(Inner.prototype.shouldComponentUpdate).toHaveBeenCalledTimes(1);
+		expect(Inner.prototype.shouldComponentUpdate).toHaveBeenCalledWith(
 			PROPS,
 			{},
 			CONTEXT
 		);
-		expect(Inner.prototype.componentDidUpdate).to.have.been.calledWith(
+		expect(Inner.prototype.componentWillReceiveProps).toHaveBeenCalledWith(
+			PROPS,
+			CONTEXT
+		);
+		expect(Inner.prototype.componentWillUpdate).toHaveBeenCalledWith(
+			PROPS,
+			{},
+			CONTEXT
+		);
+		expect(Inner.prototype.componentDidUpdate).toHaveBeenCalledWith(
 			{},
 			{},
 			undefined
 		);
-		expect(Inner.prototype.render).to.have.been.calledWith(PROPS, {}, CONTEXT);
+		expect(Inner.prototype.render).toHaveBeenCalledWith(PROPS, {}, CONTEXT);
 
 		// make sure render() could make use of context.a
-		expect(Inner.prototype.render).to.have.returned(
-			sinon.match({ props: { children: 'a' } })
+		expect(Inner.prototype.render).toHaveReturned(
+			expect.objectContaining({ props: { children: 'a' } })
 		);
 	});
 
@@ -195,17 +201,17 @@ describe('context', () => {
 			}
 		}
 
-		sinon.spy(Inner.prototype, 'render');
-		sinon.spy(InnerMost.prototype, 'render');
+		vi.spyOn(Inner.prototype, 'render');
+		vi.spyOn(InnerMost.prototype, 'render');
 
 		render(<Outer />, scratch);
 
-		expect(Inner.prototype.render).to.have.been.calledWith(
+		expect(Inner.prototype.render).toHaveBeenCalledWith(
 			{},
 			{},
 			{ outerContext }
 		);
-		expect(InnerMost.prototype.render).to.have.been.calledWith(
+		expect(InnerMost.prototype.render).toHaveBeenCalledWith(
 			{},
 			{},
 			{ outerContext, innerContext }
