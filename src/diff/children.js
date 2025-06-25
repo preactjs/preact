@@ -392,14 +392,6 @@ export function toChildArray(children, out) {
 }
 
 /**
- * @param {VNode} node
- * @returns {boolean}
- */
-function nodeMatches(node) {
-	return node != NULL && (node._flags & MATCHED) == 0;
-}
-
-/**
  * @param {VNode} childVNode
  * @param {VNode[]} oldChildren
  * @param {number} skewedIndex
@@ -415,7 +407,7 @@ function findMatchingIndex(
 	const key = childVNode.key;
 	const type = childVNode.type;
 	let oldVNode = oldChildren[skewedIndex];
-	const matched = nodeMatches(oldVNode);
+	const matched = oldVNode != NULL && (oldVNode._flags & MATCHED) == 0;
 
 	// We only need to perform a search if there are more children
 	// (remainingOldChildren) to search. However, if the oldVNode we just looked
@@ -449,7 +441,8 @@ function findMatchingIndex(
 			}
 			oldVNode = oldChildren[childIndex];
 			if (
-				nodeMatches(oldVNode) &&
+				oldVNode != NULL &&
+				(oldVNode._flags & MATCHED) == 0 &&
 				key == oldVNode.key &&
 				type == oldVNode.type
 			) {
