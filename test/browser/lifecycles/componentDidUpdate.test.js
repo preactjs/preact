@@ -1,6 +1,7 @@
 import { setupRerender } from 'preact/test-utils';
 import { createElement, render, Component } from 'preact';
 import { setupScratch, teardown } from '../../_util/helpers';
+import { vi } from 'vitest';
 
 /** @jsx createElement */
 
@@ -103,7 +104,7 @@ describe('Lifecycle methods', () => {
 		});
 
 		it('cDU should not be called when sDU returned false', () => {
-			let spy = sinon.spy();
+			let spy = vi.fn();
 			let c;
 
 			class App extends Component {
@@ -125,7 +126,7 @@ describe('Lifecycle methods', () => {
 			c.setState({});
 			rerender();
 
-			expect(spy).to.not.be.called;
+			expect(spy).not.toHaveBeenCalled();
 		});
 
 		it("prevState argument should be the same object if state doesn't change", () => {
@@ -269,13 +270,14 @@ describe('Lifecycle methods', () => {
 		});
 
 		it('is invoked after refs are set', () => {
-			const spy = sinon.spy();
+			const spy = vi.fn();
 			let inst;
 			let i = 0;
 
 			class App extends Component {
 				componentDidUpdate() {
-					expect(spy).to.have.been.calledOnceWith(scratch.firstChild);
+					expect(spy).toHaveBeenCalledOnce();
+					expect(spy).toHaveBeenCalledWith(scratch.firstChild);
 				}
 
 				render() {
@@ -293,12 +295,13 @@ describe('Lifecycle methods', () => {
 			}
 
 			render(<App />, scratch);
-			expect(spy).not.to.have.been.called;
+			expect(spy).not.toHaveBeenCalled();
 
 			inst.setState({});
 			rerender();
 
-			expect(spy).to.have.been.calledOnceWith(scratch.firstChild);
+			expect(spy).toHaveBeenCalledOnce();
+			expect(spy).toHaveBeenCalledWith(scratch.firstChild);
 		});
 
 		it('should be called after children are mounted', () => {
@@ -367,18 +370,18 @@ describe('Lifecycle methods', () => {
 				}
 			}
 
-			sinon.spy(Inner.prototype, 'componentDidUpdate');
+			vi.spyOn(Inner.prototype, 'componentDidUpdate');
 
 			// Initial render
 			render(<Outer />, scratch);
-			expect(Inner.prototype.componentDidUpdate).to.not.have.been.called;
+			expect(Inner.prototype.componentDidUpdate).not.toHaveBeenCalled();
 
 			// Set state with a new i
 			const newValue = 5;
 			setValue(newValue);
 			rerender();
 
-			expect(Inner.prototype.componentDidUpdate).to.have.been.called;
+			expect(Inner.prototype.componentDidUpdate).toHaveBeenCalled();
 			expect(outerChildText).to.equal(`Outer: ${newValue.toString()}`);
 		});
 

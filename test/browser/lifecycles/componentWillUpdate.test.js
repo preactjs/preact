@@ -28,10 +28,11 @@ describe('Lifecycle methods', () => {
 					return <div />;
 				}
 			}
-			sinon.spy(ReceivePropsComponent.prototype, 'componentWillUpdate');
+			vi.spyOn(ReceivePropsComponent.prototype, 'componentWillUpdate');
 			render(<ReceivePropsComponent />, scratch);
-			expect(ReceivePropsComponent.prototype.componentWillUpdate).not.to.have
-				.been.called;
+			expect(
+				ReceivePropsComponent.prototype.componentWillUpdate
+			).not.toHaveBeenCalled();
 		});
 
 		it('should be called when rerender with new props from parent', () => {
@@ -57,17 +58,17 @@ describe('Lifecycle methods', () => {
 					return <div />;
 				}
 			}
-			sinon.spy(Inner.prototype, 'componentWillUpdate');
-			sinon.spy(Outer.prototype, 'componentDidMount');
+			vi.spyOn(Inner.prototype, 'componentWillUpdate');
+			vi.spyOn(Outer.prototype, 'componentDidMount');
 
 			// Initial render
 			render(<Outer />, scratch);
-			expect(Inner.prototype.componentWillUpdate).not.to.have.been.called;
+			expect(Inner.prototype.componentWillUpdate).not.toHaveBeenCalled();
 
 			// Rerender inner with new props
 			doRender();
 			rerender();
-			expect(Inner.prototype.componentWillUpdate).to.have.been.called;
+			expect(Inner.prototype.componentWillUpdate).toHaveBeenCalled();
 		});
 
 		it('should be called on new state', () => {
@@ -81,15 +82,17 @@ describe('Lifecycle methods', () => {
 					return <div />;
 				}
 			}
-			sinon.spy(ReceivePropsComponent.prototype, 'componentWillUpdate');
+			vi.spyOn(ReceivePropsComponent.prototype, 'componentWillUpdate');
 			render(<ReceivePropsComponent />, scratch);
-			expect(ReceivePropsComponent.prototype.componentWillUpdate).not.to.have
-				.been.called;
+			expect(
+				ReceivePropsComponent.prototype.componentWillUpdate
+			).not.toHaveBeenCalled();
 
 			doRender();
 			rerender();
-			expect(ReceivePropsComponent.prototype.componentWillUpdate).to.have.been
-				.called;
+			expect(
+				ReceivePropsComponent.prototype.componentWillUpdate
+			).toHaveBeenCalled();
 		});
 	});
 });

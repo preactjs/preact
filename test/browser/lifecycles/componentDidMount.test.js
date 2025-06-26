@@ -1,6 +1,7 @@
 import { createElement, render, Component } from 'preact';
 import { setupRerender } from 'preact/test-utils';
 import { setupScratch, teardown } from '../../_util/helpers';
+import { vi } from 'vitest';
 
 /** @jsx createElement */
 
@@ -20,11 +21,12 @@ describe('Lifecycle methods', () => {
 
 	describe('#componentDidMount', () => {
 		it('is invoked after refs are set', () => {
-			const spy = sinon.spy();
+			const spy = vi.fn();
 
 			class App extends Component {
 				componentDidMount() {
-					expect(spy).to.have.been.calledOnceWith(scratch.firstChild);
+					expect(spy).toHaveBeenCalledOnce();
+					expect(spy).toHaveBeenCalledWith(scratch.firstChild);
 				}
 
 				render() {
@@ -33,11 +35,12 @@ describe('Lifecycle methods', () => {
 			}
 
 			render(<App />, scratch);
-			expect(spy).to.have.been.calledOnceWith(scratch.firstChild);
+			expect(spy).toHaveBeenCalledOnce();
+			expect(spy).toHaveBeenCalledWith(scratch.firstChild);
 		});
 
 		it('supports multiple setState callbacks', () => {
-			const spy = sinon.spy();
+			const spy = vi.fn();
 
 			class App extends Component {
 				constructor(props) {
@@ -60,7 +63,7 @@ describe('Lifecycle methods', () => {
 			render(<App />, scratch);
 
 			rerender();
-			expect(spy).to.have.been.calledTwice;
+			expect(spy).toHaveBeenCalledTimes(2);
 		});
 	});
 });

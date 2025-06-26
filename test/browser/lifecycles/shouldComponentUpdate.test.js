@@ -124,7 +124,7 @@ describe('Lifecycle methods', () => {
 
 		it('should rerender when sCU returned false before', () => {
 			let c;
-			let spy = sinon.spy();
+			let spy = vi.fn();
 
 			class App extends Component {
 				constructor() {
@@ -146,16 +146,16 @@ describe('Lifecycle methods', () => {
 
 			c.setState({});
 			rerender();
-			spy.resetHistory();
+			spy.mockClear();
 
 			c.setState({ update: true });
 			rerender();
-			expect(spy).to.be.calledOnce;
+			expect(spy).toHaveBeenCalledOnce();
 		});
 
 		it('should be called with nextState', () => {
 			let c;
-			let spy = sinon.spy();
+			let spy = vi.fn();
 
 			class App extends Component {
 				constructor() {
@@ -178,15 +178,15 @@ describe('Lifecycle methods', () => {
 
 			c.setState({});
 			rerender();
-			spy.resetHistory();
+			spy.mockClear();
 
 			c.setState({ a: true });
 			rerender();
-			expect(spy).to.be.calledOnce;
+			expect(spy).toHaveBeenCalledOnce();
 		});
 
 		it('should clear renderCallbacks', () => {
-			const spy = sinon.spy();
+			const spy = vi.fn();
 			let c,
 				renders = 0;
 
@@ -213,7 +213,7 @@ describe('Lifecycle methods', () => {
 			c.setState({}, spy);
 			rerender();
 			expect(renders).to.equal(1);
-			expect(spy).to.be.calledOnce;
+			expect(spy).toHaveBeenCalledOnce();
 		});
 
 		it('should not be called on forceUpdate', () => {
@@ -233,15 +233,15 @@ describe('Lifecycle methods', () => {
 				}
 			}
 
-			sinon.spy(Foo.prototype, 'shouldComponentUpdate');
-			sinon.spy(Foo.prototype, 'render');
+			vi.spyOn(Foo.prototype, 'shouldComponentUpdate');
+			vi.spyOn(Foo.prototype, 'render');
 
 			render(<Foo />, scratch);
 			Comp.forceUpdate();
 			rerender();
 
-			expect(Foo.prototype.shouldComponentUpdate).to.not.have.been.called;
-			expect(Foo.prototype.render).to.have.been.calledTwice;
+			expect(Foo.prototype.shouldComponentUpdate).not.toHaveBeenCalled();
+			expect(Foo.prototype.render).toHaveBeenCalledTimes(2);
 		});
 
 		it('should not be called on forceUpdate followed by setState', () => {
@@ -261,16 +261,16 @@ describe('Lifecycle methods', () => {
 				}
 			}
 
-			sinon.spy(Foo.prototype, 'shouldComponentUpdate');
-			sinon.spy(Foo.prototype, 'render');
+			vi.spyOn(Foo.prototype, 'shouldComponentUpdate');
+			vi.spyOn(Foo.prototype, 'render');
 
 			render(<Foo />, scratch);
 			Comp.forceUpdate();
 			Comp.setState({});
 			rerender();
 
-			expect(Foo.prototype.render).to.have.been.calledTwice;
-			expect(Foo.prototype.shouldComponentUpdate).to.not.have.been.called;
+			expect(Foo.prototype.render).toHaveBeenCalledTimes(2);
+			expect(Foo.prototype.shouldComponentUpdate).not.toHaveBeenCalled();
 		});
 
 		it('should not block queued child forceUpdate', () => {
@@ -396,7 +396,7 @@ describe('Lifecycle methods', () => {
 		});
 
 		it('should update props reference when sCU returns false', () => {
-			let spy = sinon.spy();
+			let spy = vi.fn();
 
 			let updateState;
 			class Foo extends Component {
@@ -416,16 +416,16 @@ describe('Lifecycle methods', () => {
 
 			render(<Foo foo="foo" />, scratch);
 			render(<Foo foo="bar" />, scratch);
-			expect(spy).to.be.calledOnce;
+			expect(spy).toHaveBeenCalledOnce();
 
 			updateState();
 			rerender();
 
-			expect(spy).to.be.calledOnce;
+			expect(spy).toHaveBeenCalledOnce();
 		});
 
 		it('should update state reference when sCU returns false', () => {
-			let spy = sinon.spy();
+			let spy = vi.fn();
 
 			let updateState;
 			class Foo extends Component {
@@ -448,14 +448,14 @@ describe('Lifecycle methods', () => {
 			updateState();
 			rerender();
 
-			expect(spy).to.be.calledOnce;
-			expect(spy).to.be.calledWithMatch({ foo: 1 }, { foo: 2 });
+			expect(spy).toHaveBeenCalledOnce();
+			expect(spy).toHaveBeenCalledWith({ foo: 1 }, { foo: 2 });
 
 			updateState();
 			rerender();
 
-			expect(spy).to.be.calledWithMatch({ foo: 2 }, { foo: 2 });
-			expect(spy).to.be.calledTwice;
+			expect(spy).toHaveBeenCalledWith({ foo: 2 }, { foo: 2 });
+			expect(spy).toHaveBeenCalledTimes(2);
 		});
 
 		// issue #1864

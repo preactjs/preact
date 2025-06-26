@@ -1,5 +1,6 @@
 import { createElement, render, Component } from 'preact';
 import { setupScratch, teardown } from '../../_util/helpers';
+import { vi } from 'vitest';
 
 /** @jsx createElement */
 
@@ -31,27 +32,23 @@ describe('Lifecycle methods', () => {
 					return 'bar';
 				}
 			}
-			sinon.spy(Foo.prototype, 'componentDidMount');
-			sinon.spy(Foo.prototype, 'componentWillUnmount');
-			sinon.spy(Foo.prototype, 'render');
+			vi.spyOn(Foo.prototype, 'componentDidMount');
+			vi.spyOn(Foo.prototype, 'componentWillUnmount');
+			vi.spyOn(Foo.prototype, 'render');
 
-			sinon.spy(Bar.prototype, 'componentDidMount');
-			sinon.spy(Bar.prototype, 'componentWillUnmount');
-			sinon.spy(Bar.prototype, 'render');
+			vi.spyOn(Bar.prototype, 'componentDidMount');
+			vi.spyOn(Bar.prototype, 'componentWillUnmount');
+			vi.spyOn(Bar.prototype, 'render');
 
 			render(<Foo />, scratch);
-			expect(Foo.prototype.componentDidMount, 'initial render').to.have.been
-				.calledOnce;
+			expect(Foo.prototype.componentDidMount).toHaveBeenCalledOnce();
 
 			render(<Bar />, scratch);
-			expect(Foo.prototype.componentWillUnmount, 'when replaced').to.have.been
-				.calledOnce;
-			expect(Bar.prototype.componentDidMount, 'when replaced').to.have.been
-				.calledOnce;
+			expect(Foo.prototype.componentWillUnmount).toHaveBeenCalledOnce();
+			expect(Bar.prototype.componentDidMount).toHaveBeenCalledOnce();
 
 			render(<div />, scratch);
-			expect(Bar.prototype.componentWillUnmount, 'when removed').to.have.been
-				.calledOnce;
+			expect(Bar.prototype.componentWillUnmount).toHaveBeenCalledOnce();
 		});
 
 		it('should only remove dom after componentWillUnmount was called', () => {
