@@ -1,6 +1,7 @@
 import { setupRerender } from 'preact/test-utils';
 import { createElement, render, Component, Fragment } from 'preact';
 import { setupScratch, teardown } from '../../_util/helpers';
+import { vi } from 'vitest';
 
 /** @jsx createElement */
 
@@ -42,8 +43,8 @@ describe('Lifecycle methods', () => {
 
 		let thrower;
 
-		sinon.spy(Receiver.prototype, 'componentDidCatch');
-		sinon.spy(Receiver.prototype, 'render');
+		vi.spyOn(Receiver.prototype, 'componentDidCatch');
+		vi.spyOn(Receiver.prototype, 'render');
 
 		function throwExpectedError() {
 			throw (expectedError = new Error('Error!'));
@@ -63,19 +64,19 @@ describe('Lifecycle methods', () => {
 					return <div>ThrowErr: componentDidCatch</div>;
 				}
 			};
-			sinon.spy(ThrowErr.prototype, 'componentDidCatch');
+			vi.spyOn(ThrowErr.prototype, 'componentDidCatch');
 
 			expectedError = undefined;
 
-			Receiver.prototype.componentDidCatch.resetHistory();
-			Receiver.prototype.render.resetHistory();
+			Receiver.prototype.componentDidCatch.mockClear();
+			Receiver.prototype.render.mockClear();
 		});
 
 		afterEach(() => {
 			expect(
 				ThrowErr.prototype.componentDidCatch,
 				"Throwing component should not catch it's own error."
-			).to.not.be.called;
+			).not.toHaveBeenCalled();
 			thrower = undefined;
 		});
 
@@ -101,8 +102,9 @@ describe('Lifecycle methods', () => {
 			);
 			rerender();
 
-			expect(Receiver.prototype.componentDidCatch).to.have.been.calledWith(
-				expectedError
+			expect(Receiver.prototype.componentDidCatch).toHaveBeenCalledWith(
+				expectedError,
+				expect.anything()
 			);
 		});
 
@@ -136,8 +138,9 @@ describe('Lifecycle methods', () => {
 				</Receiver>,
 				scratch
 			);
-			expect(Receiver.prototype.componentDidCatch).to.have.been.calledWith(
-				expectedError
+			expect(Receiver.prototype.componentDidCatch).toHaveBeenCalledWith(
+				expectedError,
+				expect.anything()
 			);
 		});
 
@@ -150,8 +153,9 @@ describe('Lifecycle methods', () => {
 				</Receiver>,
 				scratch
 			);
-			expect(Receiver.prototype.componentDidCatch).to.have.been.calledWith(
-				expectedError
+			expect(Receiver.prototype.componentDidCatch).toHaveBeenCalledWith(
+				expectedError,
+				expect.anything()
 			);
 		});
 
@@ -164,15 +168,16 @@ describe('Lifecycle methods', () => {
 				</Receiver>,
 				scratch
 			);
-			expect(Receiver.prototype.componentDidCatch).to.have.been.calledWith(
-				expectedError
+			expect(Receiver.prototype.componentDidCatch).toHaveBeenCalledWith(
+				expectedError,
+				expect.anything()
 			);
 		});
 
 		it('should be called when child fails in getDerivedStateFromProps', () => {
 			ThrowErr.getDerivedStateFromProps = throwExpectedError;
 
-			sinon.spy(ThrowErr.prototype, 'render');
+			vi.spyOn(ThrowErr.prototype, 'render');
 			render(
 				<Receiver>
 					<ThrowErr />
@@ -180,10 +185,11 @@ describe('Lifecycle methods', () => {
 				scratch
 			);
 
-			expect(Receiver.prototype.componentDidCatch).to.have.been.calledWith(
-				expectedError
+			expect(Receiver.prototype.componentDidCatch).toHaveBeenCalledWith(
+				expectedError,
+				expect.anything()
 			);
-			expect(ThrowErr.prototype.render).not.to.have.been.called;
+			expect(ThrowErr.prototype.render).not.toHaveBeenCalled();
 		});
 
 		it('should be called when child fails in getSnapshotBeforeUpdate', () => {
@@ -198,8 +204,9 @@ describe('Lifecycle methods', () => {
 			thrower.forceUpdate();
 			rerender();
 
-			expect(Receiver.prototype.componentDidCatch).to.have.been.calledWith(
-				expectedError
+			expect(Receiver.prototype.componentDidCatch).toHaveBeenCalledWith(
+				expectedError,
+				expect.anything()
 			);
 		});
 
@@ -215,8 +222,9 @@ describe('Lifecycle methods', () => {
 
 			thrower.forceUpdate();
 			rerender();
-			expect(Receiver.prototype.componentDidCatch).to.have.been.calledWith(
-				expectedError
+			expect(Receiver.prototype.componentDidCatch).toHaveBeenCalledWith(
+				expectedError,
+				expect.anything()
 			);
 		});
 
@@ -232,8 +240,9 @@ describe('Lifecycle methods', () => {
 
 			thrower.forceUpdate();
 			rerender();
-			expect(Receiver.prototype.componentDidCatch).to.have.been.calledWith(
-				expectedError
+			expect(Receiver.prototype.componentDidCatch).toHaveBeenCalledWith(
+				expectedError,
+				expect.anything()
 			);
 		});
 
@@ -259,14 +268,15 @@ describe('Lifecycle methods', () => {
 				}
 			}
 
-			sinon.spy(Receiver.prototype, 'componentDidCatch');
+			vi.spyOn(Receiver.prototype, 'componentDidCatch');
 			render(<Receiver />, scratch);
 
 			receiver.setState({ foo: 'baz' });
 			rerender();
 
-			expect(Receiver.prototype.componentDidCatch).to.have.been.calledWith(
-				expectedError
+			expect(Receiver.prototype.componentDidCatch).toHaveBeenCalledWith(
+				expectedError,
+				expect.anything()
 			);
 		});
 
@@ -292,14 +302,15 @@ describe('Lifecycle methods', () => {
 				}
 			}
 
-			sinon.spy(Receiver.prototype, 'componentDidCatch');
+			vi.spyOn(Receiver.prototype, 'componentDidCatch');
 			render(<Receiver />, scratch);
 
 			receiver.setState({ foo: 'baz' });
 			rerender();
 
-			expect(Receiver.prototype.componentDidCatch).to.have.been.calledWith(
-				expectedError
+			expect(Receiver.prototype.componentDidCatch).toHaveBeenCalledWith(
+				expectedError,
+				expect.anything()
 			);
 		});
 
@@ -318,8 +329,9 @@ describe('Lifecycle methods', () => {
 				</Receiver>,
 				scratch
 			);
-			expect(Receiver.prototype.componentDidCatch).to.have.been.calledWith(
-				expectedError
+			expect(Receiver.prototype.componentDidCatch).toHaveBeenCalledWith(
+				expectedError,
+				expect.anything()
 			);
 		});
 
@@ -347,10 +359,11 @@ describe('Lifecycle methods', () => {
 				}
 			}
 
-			sinon.spy(Receiver.prototype, 'componentDidCatch');
+			vi.spyOn(Receiver.prototype, 'componentDidCatch');
 			render(<Receiver />, scratch);
-			expect(Receiver.prototype.componentDidCatch).to.have.been.calledWith(
-				expectedError
+			expect(Receiver.prototype.componentDidCatch).toHaveBeenCalledWith(
+				expectedError,
+				expect.anything()
 			);
 		});
 
@@ -376,10 +389,11 @@ describe('Lifecycle methods', () => {
 				}
 			}
 
-			sinon.spy(Receiver.prototype, 'componentDidCatch');
+			vi.spyOn(Receiver.prototype, 'componentDidCatch');
 			render(<Receiver />, scratch);
-			expect(Receiver.prototype.componentDidCatch).to.have.been.calledWith(
-				expectedError
+			expect(Receiver.prototype.componentDidCatch).toHaveBeenCalledWith(
+				expectedError,
+				expect.anything()
 			);
 		});
 
@@ -404,8 +418,10 @@ describe('Lifecycle methods', () => {
 				</Receiver>,
 				scratch
 			);
-			expect(Receiver.prototype.componentDidCatch).to.have.been.calledOnceWith(
-				expectedError
+			expect(Receiver.prototype.componentDidCatch).toHaveBeenCalledOnce();
+			expect(Receiver.prototype.componentDidCatch).toHaveBeenCalledWith(
+				expectedError,
+				expect.anything()
 			);
 		});
 
@@ -420,8 +436,9 @@ describe('Lifecycle methods', () => {
 				</Receiver>,
 				scratch
 			);
-			expect(Receiver.prototype.componentDidCatch).to.have.been.calledWith(
-				expectedError
+			expect(Receiver.prototype.componentDidCatch).toHaveBeenCalledWith(
+				expectedError,
+				expect.anything()
 			);
 		});
 
@@ -438,8 +455,9 @@ describe('Lifecycle methods', () => {
 				</Receiver>,
 				scratch
 			);
-			expect(Receiver.prototype.componentDidCatch).to.have.been.calledWith(
-				expectedError
+			expect(Receiver.prototype.componentDidCatch).toHaveBeenCalledWith(
+				expectedError,
+				expect.anything()
 			);
 		});
 
@@ -481,7 +499,7 @@ describe('Lifecycle methods', () => {
 				throwExpectedError();
 			}
 
-			sinon.spy(Adapter.prototype, 'componentDidCatch');
+			vi.spyOn(Adapter.prototype, 'componentDidCatch');
 			render(
 				<Receiver>
 					<Adapter>
@@ -491,11 +509,13 @@ describe('Lifecycle methods', () => {
 				scratch
 			);
 
-			expect(Adapter.prototype.componentDidCatch).to.have.been.calledWith(
-				expectedError
+			expect(Adapter.prototype.componentDidCatch).toHaveBeenCalledWith(
+				expectedError,
+				expect.anything()
 			);
-			expect(Receiver.prototype.componentDidCatch).to.have.been.calledWith(
-				adaptedError
+			expect(Receiver.prototype.componentDidCatch).toHaveBeenCalledWith(
+				adaptedError,
+				expect.anything()
 			);
 
 			rerender();
@@ -521,7 +541,7 @@ describe('Lifecycle methods', () => {
 				throwExpectedError();
 			}
 
-			sinon.spy(Adapter.prototype, 'componentDidCatch');
+			vi.spyOn(Adapter.prototype, 'componentDidCatch');
 
 			render(
 				<Receiver>
@@ -533,11 +553,13 @@ describe('Lifecycle methods', () => {
 			);
 			rerender();
 
-			expect(Adapter.prototype.componentDidCatch).to.have.been.calledWith(
-				expectedError
+			expect(Adapter.prototype.componentDidCatch).toHaveBeenCalledWith(
+				expectedError,
+				expect.anything()
 			);
-			expect(Receiver.prototype.componentDidCatch).to.have.been.calledWith(
-				expectedError
+			expect(Receiver.prototype.componentDidCatch).toHaveBeenCalledWith(
+				expectedError,
+				expect.anything()
 			);
 			expect(scratch).to.have.property('textContent', 'Error: Error!');
 		});
@@ -556,7 +578,7 @@ describe('Lifecycle methods', () => {
 				throw new Error('Error!');
 			}
 
-			sinon.spy(Adapter.prototype, 'componentDidCatch');
+			vi.spyOn(Adapter.prototype, 'componentDidCatch');
 
 			render(
 				<Receiver>
@@ -568,10 +590,8 @@ describe('Lifecycle methods', () => {
 			);
 			rerender();
 
-			expect(Adapter.prototype.componentDidCatch, 'Adapter').to.have.been
-				.called;
-			expect(Receiver.prototype.componentDidCatch, 'Receiver').to.have.been
-				.called;
+			expect(Adapter.prototype.componentDidCatch).toHaveBeenCalled();
+			expect(Receiver.prototype.componentDidCatch).toHaveBeenCalled();
 			expect(scratch).to.have.property('textContent', 'Error: Error!');
 		});
 
@@ -595,7 +615,7 @@ describe('Lifecycle methods', () => {
 				throwExpectedError();
 			}
 
-			sinon.spy(TopReceiver.prototype, 'componentDidCatch');
+			vi.spyOn(TopReceiver.prototype, 'componentDidCatch');
 
 			render(
 				<TopReceiver>
@@ -607,9 +627,10 @@ describe('Lifecycle methods', () => {
 			);
 			rerender();
 
-			expect(TopReceiver.prototype.componentDidCatch).not.to.have.been.called;
-			expect(Receiver.prototype.componentDidCatch).to.have.been.calledWith(
-				expectedError
+			expect(TopReceiver.prototype.componentDidCatch).not.toHaveBeenCalled();
+			expect(Receiver.prototype.componentDidCatch).toHaveBeenCalledWith(
+				expectedError,
+				expect.anything()
 			);
 			expect(scratch).to.have.property('textContent', 'Error: Error!');
 		});
@@ -624,8 +645,9 @@ describe('Lifecycle methods', () => {
 				</Receiver>,
 				scratch
 			);
-			expect(Receiver.prototype.componentDidCatch).to.have.been.calledWith(
-				expectedError
+			expect(Receiver.prototype.componentDidCatch).toHaveBeenCalledWith(
+				expectedError,
+				expect.anything()
 			);
 		});
 
@@ -646,8 +668,9 @@ describe('Lifecycle methods', () => {
 				</Receiver>,
 				scratch
 			);
-			expect(Receiver.prototype.componentDidCatch).to.have.been.calledWith(
-				expectedError
+			expect(Receiver.prototype.componentDidCatch).toHaveBeenCalledWith(
+				expectedError,
+				expect.anything()
 			);
 		});
 

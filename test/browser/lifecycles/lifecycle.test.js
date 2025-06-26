@@ -1,6 +1,7 @@
 import { setupRerender } from 'preact/test-utils';
 import { createElement, render, Component } from 'preact';
 import { setupScratch, teardown } from '../../_util/helpers';
+import { vi } from 'vitest';
 
 /** @jsx createElement */
 
@@ -256,17 +257,17 @@ describe('Lifecycle methods', () => {
 
 		let verifyLifecycleMethods = TestComponent => {
 			let proto = TestComponent.prototype;
-			spies.forEach(s => sinon.spy(proto, s));
-			let reset = () => spies.forEach(s => proto[s].resetHistory());
+			spies.forEach(s => vi.spyOn(proto, s));
+			let reset = () => spies.forEach(s => proto[s].mockClear());
 
 			it('should be invoked for components on initial render', () => {
 				reset();
 				render(<Outer />, scratch);
-				expect(proto.componentDidMount).to.have.been.called;
-				expect(proto.componentWillMount).to.have.been.calledBefore(
+				expect(proto.componentDidMount).toHaveBeenCalled();
+				expect(proto.componentWillMount).toHaveBeenCalledBefore(
 					proto.componentDidMount
 				);
-				expect(proto.componentDidMount).to.have.been.called;
+				expect(proto.componentDidMount).toHaveBeenCalled();
 			});
 
 			it('should be invoked for components on unmount', () => {
@@ -274,7 +275,7 @@ describe('Lifecycle methods', () => {
 				setState({ show: false });
 				rerender();
 
-				expect(proto.componentWillUnmount).to.have.been.called;
+				expect(proto.componentWillUnmount).toHaveBeenCalled();
 			});
 
 			it('should be invoked for components on re-render', () => {
@@ -282,11 +283,11 @@ describe('Lifecycle methods', () => {
 				setState({ show: true });
 				rerender();
 
-				expect(proto.componentDidMount).to.have.been.called;
-				expect(proto.componentWillMount).to.have.been.calledBefore(
+				expect(proto.componentDidMount).toHaveBeenCalled();
+				expect(proto.componentWillMount).toHaveBeenCalledBefore(
 					proto.componentDidMount
 				);
-				expect(proto.componentDidMount).to.have.been.called;
+				expect(proto.componentDidMount).toHaveBeenCalled();
 			});
 		};
 
@@ -338,44 +339,44 @@ describe('Lifecycle methods', () => {
 				'componentDidMount',
 				'componentWillUnmount'
 			];
-			spies.forEach(s => sinon.spy(proto, s));
+			spies.forEach(s => vi.spyOn(proto, s));
 
-			let reset = () => spies.forEach(s => proto[s].resetHistory());
+			let reset = () => spies.forEach(s => proto[s].mockClear());
 
 			beforeEach(() => reset());
 
 			it('should be invoke normally on initial mount', () => {
 				render(<Outer />, scratch);
-				expect(proto.componentWillMount).to.have.been.called;
-				expect(proto.componentWillMount).to.have.been.calledBefore(
+				expect(proto.componentWillMount).toHaveBeenCalled();
+				expect(proto.componentWillMount).toHaveBeenCalledBefore(
 					proto.componentDidMount
 				);
-				expect(proto.componentDidMount).to.have.been.called;
+				expect(proto.componentDidMount).toHaveBeenCalled();
 			});
 
 			it('should be invoked normally on unmount', () => {
 				setState({ show: false });
 				rerender();
 
-				expect(proto.componentWillUnmount).to.have.been.called;
+				expect(proto.componentWillUnmount).toHaveBeenCalled();
 			});
 
 			it('should still invoke mount for shouldComponentUpdate():false', () => {
 				setState({ show: true });
 				rerender();
 
-				expect(proto.componentWillMount).to.have.been.called;
-				expect(proto.componentWillMount).to.have.been.calledBefore(
+				expect(proto.componentWillMount).toHaveBeenCalled();
+				expect(proto.componentWillMount).toHaveBeenCalledBefore(
 					proto.componentDidMount
 				);
-				expect(proto.componentDidMount).to.have.been.called;
+				expect(proto.componentDidMount).toHaveBeenCalled();
 			});
 
 			it('should still invoke unmount for shouldComponentUpdate():false', () => {
 				setState({ show: false });
 				rerender();
 
-				expect(proto.componentWillUnmount).to.have.been.called;
+				expect(proto.componentWillUnmount).toHaveBeenCalled();
 			});
 		});
 	});
@@ -435,13 +436,13 @@ describe('Lifecycle methods', () => {
 				}
 			}
 
-			let renderSpy = sinon.spy(Foo.prototype, 'render');
+			let renderSpy = vi.spyOn(Foo.prototype, 'render');
 			render(<Foo />, scratch);
-			renderSpy.resetHistory();
+			renderSpy.mockClear();
 
 			updateState();
 			rerender();
-			expect(renderSpy).to.not.be.called;
+			expect(renderSpy).not.toHaveBeenCalled();
 		});
 
 		it('should call callback with correct this binding', () => {
@@ -548,37 +549,37 @@ describe('Lifecycle methods', () => {
 				'componentDidMount',
 				'componentWillUnmount'
 			];
-			spies.forEach(s => sinon.spy(proto, s));
+			spies.forEach(s => vi.spyOn(proto, s));
 
-			let reset = () => spies.forEach(s => proto[s].resetHistory());
+			let reset = () => spies.forEach(s => proto[s].mockClear());
 
 			render(<Outer />, scratch);
-			expect(proto.componentWillMount).to.have.been.called;
-			expect(proto.componentWillMount).to.have.been.calledBefore(
+			expect(proto.componentWillMount).toHaveBeenCalled();
+			expect(proto.componentWillMount).toHaveBeenCalledBefore(
 				proto.componentDidMount
 			);
-			expect(proto.componentDidMount).to.have.been.called;
+			expect(proto.componentDidMount).toHaveBeenCalled();
 
 			reset();
 			setState({ show: false });
 			rerender();
 
-			expect(proto.componentWillUnmount).to.have.been.called;
+			expect(proto.componentWillUnmount).toHaveBeenCalled();
 
 			reset();
 			setState({ show: true });
 			rerender();
 
-			expect(proto.componentWillMount).to.have.been.called;
-			expect(proto.componentWillMount).to.have.been.calledBefore(
+			expect(proto.componentWillMount).toHaveBeenCalled();
+			expect(proto.componentWillMount).toHaveBeenCalledBefore(
 				proto.componentDidMount
 			);
-			expect(proto.componentDidMount).to.have.been.called;
+			expect(proto.componentDidMount).toHaveBeenCalled();
 		});
 
 		it('should be able to use getDerivedStateFromError and componentDidCatch together', () => {
-			let didCatch = sinon.spy(),
-				getDerived = sinon.spy();
+			let didCatch = vi.fn(),
+				getDerived = vi.fn();
 			const error = new Error('hi');
 
 			class Boundary extends Component {
@@ -608,9 +609,9 @@ describe('Lifecycle methods', () => {
 			);
 			rerender();
 
-			expect(didCatch).to.have.been.calledWith(error);
+			expect(didCatch).toHaveBeenCalledWith(error);
 
-			expect(getDerived).to.have.been.calledWith(error);
+			expect(getDerived).toHaveBeenCalledWith(error);
 		});
 	});
 });

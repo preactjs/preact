@@ -47,7 +47,7 @@ describe('Lifecycle methods', () => {
 
 		it('should invoke setState callbacks when setState is called in componentWillMount', () => {
 			let componentState;
-			let callback = sinon.spy();
+			let callback = vi.fn();
 
 			class Foo extends Component {
 				constructor(props) {
@@ -72,12 +72,12 @@ describe('Lifecycle methods', () => {
 			render(<Foo />, scratch);
 
 			expect(componentState).to.deep.equal({ value: 2 });
-			expect(callback).to.have.been.calledTwice;
+			expect(callback).toHaveBeenCalledTimes(2);
 
 			rerender();
 
 			expect(componentState).to.deep.equal({ value: 3 });
-			expect(callback).to.have.been.calledThrice;
+			expect(callback).toHaveBeenCalledTimes(3);
 		});
 	});
 });

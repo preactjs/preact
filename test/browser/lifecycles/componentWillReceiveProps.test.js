@@ -1,6 +1,7 @@
 import { setupRerender } from 'preact/test-utils';
 import { createElement, render, Component } from 'preact';
 import { setupScratch, teardown } from '../../_util/helpers';
+import { vi } from 'vitest';
 
 /** @jsx createElement */
 
@@ -92,16 +93,17 @@ describe('Lifecycle methods', () => {
 					return <div />;
 				}
 			}
-			sinon.spy(ReceivePropsComponent.prototype, 'componentWillReceiveProps');
+			vi.spyOn(ReceivePropsComponent.prototype, 'componentWillReceiveProps');
 			render(<ReceivePropsComponent />, scratch);
-			expect(ReceivePropsComponent.prototype.componentWillReceiveProps).not.to
-				.have.been.called;
+			expect(
+				ReceivePropsComponent.prototype.componentWillReceiveProps
+			).not.toHaveBeenCalled();
 		});
 
 		// See last paragraph of cWRP section https://reactjs.org/docs/react-component.html#unsafe_componentwillreceiveprops
 		it('should not be called on setState or forceUpdate', () => {
-			let spy = sinon.spy();
-			let spyInner = sinon.spy();
+			let spy = vi.fn();
+			let spyInner = vi.fn();
 			let c;
 
 			class Inner extends Component {
@@ -130,19 +132,19 @@ describe('Lifecycle methods', () => {
 			}
 
 			render(<Outer />, scratch);
-			expect(spy).to.not.be.called;
+			expect(spy).not.toHaveBeenCalled();
 
 			c.setState({});
 			rerender();
-			expect(spy).to.not.be.called;
-			expect(spyInner).to.be.calledOnce;
-			spy.resetHistory();
-			spyInner.resetHistory();
+			expect(spy).not.toHaveBeenCalled();
+			expect(spyInner).toHaveBeenCalledOnce();
+			spy.mockClear();
+			spyInner.mockClear();
 
 			c.forceUpdate();
 			rerender();
-			expect(spy).to.not.be.called;
-			expect(spyInner).to.be.calledOnce;
+			expect(spy).not.toHaveBeenCalled();
+			expect(spyInner).toHaveBeenCalledOnce();
 		});
 
 		it('should be called when rerender with new props from parent', () => {
@@ -170,23 +172,23 @@ describe('Lifecycle methods', () => {
 					return <div />;
 				}
 			}
-			sinon.spy(Inner.prototype, 'componentWillReceiveProps');
-			sinon.spy(Outer.prototype, 'componentDidMount');
+			vi.spyOn(Inner.prototype, 'componentWillReceiveProps');
+			vi.spyOn(Outer.prototype, 'componentDidMount');
 
 			// Initial render
 			render(<Outer />, scratch);
-			expect(Inner.prototype.componentWillReceiveProps).not.to.have.been.called;
+			expect(Inner.prototype.componentWillReceiveProps).not.toHaveBeenCalled();
 
 			// Rerender inner with new props
 			doRender();
 			rerender();
-			expect(Inner.prototype.componentWillReceiveProps).to.have.been.called;
+			expect(Inner.prototype.componentWillReceiveProps).toHaveBeenCalled();
 		});
 
 		it('should be called when rerender with new props from parent even with setState/forceUpdate in child', () => {
 			let setStateAndUpdateProps;
 			let forceUpdateAndUpdateProps;
-			let cWRPSpy = sinon.spy();
+			let cWRPSpy = vi.fn();
 
 			class Outer extends Component {
 				constructor(p, c) {
@@ -223,17 +225,17 @@ describe('Lifecycle methods', () => {
 			}
 			// Initial render
 			render(<Outer />, scratch);
-			expect(cWRPSpy).not.to.have.been.called;
+			expect(cWRPSpy).not.toHaveBeenCalled();
 
 			// setState in inner component and update with new props
 			setStateAndUpdateProps();
 			rerender();
-			expect(cWRPSpy).to.have.been.calledWith(1);
+			expect(cWRPSpy).toHaveBeenCalledWith(1);
 
 			// forceUpdate in inner component and update with new props
 			forceUpdateAndUpdateProps();
 			rerender();
-			expect(cWRPSpy).to.have.been.calledWith(2);
+			expect(cWRPSpy).toHaveBeenCalledWith(2);
 		});
 
 		it('should be called in right execution order', () => {
@@ -252,43 +254,43 @@ describe('Lifecycle methods', () => {
 			}
 			class Inner extends Component {
 				componentDidUpdate() {
-					expect(Inner.prototype.componentWillReceiveProps).to.have.been.called;
-					expect(Inner.prototype.componentWillUpdate).to.have.been.called;
+					expect(Inner.prototype.componentWillReceiveProps).toHaveBeenCalled();
+					expect(Inner.prototype.componentWillUpdate).toHaveBeenCalled();
 				}
 				componentWillReceiveProps() {
-					expect(Inner.prototype.componentWillUpdate).not.to.have.been.called;
-					expect(Inner.prototype.componentDidUpdate).not.to.have.been.called;
+					expect(Inner.prototype.componentWillUpdate).not.toHaveBeenCalled();
+					expect(Inner.prototype.componentDidUpdate).not.toHaveBeenCalled();
 				}
 				componentWillUpdate() {
-					expect(Inner.prototype.componentWillReceiveProps).to.have.been.called;
-					expect(Inner.prototype.componentDidUpdate).not.to.have.been.called;
+					expect(Inner.prototype.componentWillReceiveProps).toHaveBeenCalled();
+					expect(Inner.prototype.componentDidUpdate).not.toHaveBeenCalled();
 				}
 				shouldComponentUpdate() {
-					expect(Inner.prototype.componentWillReceiveProps).to.have.been.called;
-					expect(Inner.prototype.componentWillUpdate).not.to.have.been.called;
+					expect(Inner.prototype.componentWillReceiveProps).toHaveBeenCalled();
+					expect(Inner.prototype.componentWillUpdate).not.toHaveBeenCalled();
 					return true;
 				}
 				render() {
 					return <div />;
 				}
 			}
-			sinon.spy(Inner.prototype, 'componentWillReceiveProps');
-			sinon.spy(Inner.prototype, 'componentDidUpdate');
-			sinon.spy(Inner.prototype, 'componentWillUpdate');
-			sinon.spy(Inner.prototype, 'shouldComponentUpdate');
-			sinon.spy(Outer.prototype, 'componentDidMount');
+			vi.spyOn(Inner.prototype, 'componentWillReceiveProps');
+			vi.spyOn(Inner.prototype, 'componentDidUpdate');
+			vi.spyOn(Inner.prototype, 'componentWillUpdate');
+			vi.spyOn(Inner.prototype, 'shouldComponentUpdate');
+			vi.spyOn(Outer.prototype, 'componentDidMount');
 
 			render(<Outer />, scratch);
 			doRender();
 			rerender();
 
-			expect(
-				Inner.prototype.componentWillReceiveProps
-			).to.have.been.calledBefore(Inner.prototype.componentWillUpdate);
-			expect(
-				Inner.prototype.componentWillReceiveProps
-			).to.have.been.calledBefore(Inner.prototype.shouldComponentUpdate);
-			expect(Inner.prototype.componentWillUpdate).to.have.been.calledBefore(
+			expect(Inner.prototype.componentWillReceiveProps).toHaveBeenCalledBefore(
+				Inner.prototype.componentWillUpdate
+			);
+			expect(Inner.prototype.componentWillReceiveProps).toHaveBeenCalledBefore(
+				Inner.prototype.shouldComponentUpdate
+			);
+			expect(Inner.prototype.componentWillUpdate).toHaveBeenCalledBefore(
 				Inner.prototype.componentDidUpdate
 			);
 		});
