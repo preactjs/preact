@@ -11,6 +11,7 @@ import { setupScratch, teardown } from '../../../test/_util/helpers';
 import './fakeDevTools';
 import 'preact/debug';
 import { setupRerender } from 'preact/test-utils';
+import { vi } from 'vitest';
 
 const h = createElement;
 /** @jsx createElement */
@@ -27,19 +28,19 @@ describe('debug', () => {
 		warnings = [];
 		scratch = setupScratch();
 		rerender = setupRerender();
-		sinon.stub(console, 'error').callsFake(e => errors.push(e));
-		sinon.stub(console, 'warn').callsFake(w => warnings.push(w));
+		vi.spyOn(console, 'error').mockImplementation(e => errors.push(e));
+		vi.spyOn(console, 'warn').mockImplementation(w => warnings.push(w));
 	});
 
 	afterEach(() => {
 		/** @type {*} */
-		console.error.restore();
-		console.warn.restore();
+		console.error.mockRestore();
+		console.warn.mockRestore();
 		teardown(scratch);
 	});
 
 	it('should initialize devtools', () => {
-		expect(window.__PREACT_DEVTOOLS__.attachPreact).to.have.been.called;
+		expect(window.__PREACT_DEVTOOLS__.attachPreact).toHaveBeenCalled();
 	});
 
 	it('should print an error on rendering on undefined parent', () => {
@@ -128,37 +129,37 @@ describe('debug', () => {
 		const res = [];
 		res.push(vnode);
 		res.push(vnode.attributes);
-		expect(console.warn).to.be.calledOnce;
-		expect(console.warn.args[0]).to.match(/use vnode.props/);
+		expect(console.warn).toHaveBeenCalledOnce();
+		expect(console.warn.mock.calls[0]).to.match(/use vnode.props/);
 		res.push(vnode.nodeName);
-		expect(console.warn).to.be.calledTwice;
-		expect(console.warn.args[1]).to.match(/use vnode.type/);
+		expect(console.warn).toHaveBeenCalledTimes(2);
+		expect(console.warn.mock.calls[1]).to.match(/use vnode.type/);
 		res.push(vnode.children);
-		expect(console.warn).to.be.calledThrice;
-		expect(console.warn.args[2]).to.match(/use vnode.props.children/);
+		expect(console.warn).toHaveBeenCalledTimes(3);
+		expect(console.warn.mock.calls[2]).to.match(/use vnode.props.children/);
 
 		// Should only warn once
 		res.push(vnode.attributes);
-		expect(console.warn).to.be.calledThrice;
+		expect(console.warn).toHaveBeenCalledTimes(3);
 		res.push(vnode.nodeName);
-		expect(console.warn).to.be.calledThrice;
+		expect(console.warn).toHaveBeenCalledTimes(3);
 		res.push(vnode.children);
-		expect(console.warn).to.be.calledThrice;
+		expect(console.warn).toHaveBeenCalledTimes(3);
 
 		vnode.attributes = {};
-		expect(console.warn.args[3]).to.match(/use vnode.props/);
+		expect(console.warn.mock.calls[3]).to.match(/use vnode.props/);
 		vnode.nodeName = '';
-		expect(console.warn.args[4]).to.match(/use vnode.type/);
+		expect(console.warn.mock.calls[4]).to.match(/use vnode.type/);
 		vnode.children = [];
-		expect(console.warn.args[5]).to.match(/use vnode.props.children/);
+		expect(console.warn.mock.calls[5]).to.match(/use vnode.props.children/);
 
 		// Should only warn once
 		vnode.attributes = {};
-		expect(console.warn.args.length).to.equal(6);
+		expect(console.warn.mock.calls.length).to.equal(6);
 		vnode.nodeName = '';
-		expect(console.warn.args.length).to.equal(6);
+		expect(console.warn.mock.calls.length).to.equal(6);
 		vnode.children = [];
-		expect(console.warn.args.length).to.equal(6);
+		expect(console.warn.mock.calls.length).to.equal(6);
 
 		// Mark res as used, otherwise it will be dead code eliminated
 		expect(res.length).to.equal(7);
@@ -176,8 +177,8 @@ describe('debug', () => {
 		}
 
 		render(<Foo />, scratch);
-		expect(console.warn).to.be.calledOnce;
-		expect(console.warn.args[0]).to.match(/no-op/);
+		expect(console.warn).toHaveBeenCalledOnce();
+		expect(console.warn.mock.calls[0]).to.match(/no-op/);
 	});
 
 	it('should NOT warn when calling setState inside the cWM', () => {
@@ -191,7 +192,7 @@ describe('debug', () => {
 		}
 
 		render(<Foo />, scratch);
-		expect(console.warn).to.not.be.called;
+		expect(console.warn).not.toHaveBeenCalled();
 	});
 
 	it('should warn when calling forceUpdate inside the constructor', () => {
@@ -206,8 +207,8 @@ describe('debug', () => {
 		}
 
 		render(<Foo />, scratch);
-		expect(console.warn).to.be.calledOnce;
-		expect(console.warn.args[0]).to.match(/no-op/);
+		expect(console.warn).toHaveBeenCalledOnce();
+		expect(console.warn.mock.calls[0]).to.match(/no-op/);
 	});
 
 	it('should warn when calling forceUpdate on an unmounted Component', () => {
@@ -225,13 +226,13 @@ describe('debug', () => {
 
 		render(<Foo />, scratch);
 		forceUpdate();
-		expect(console.warn).to.not.be.called;
+		expect(console.warn).not.toHaveBeenCalled();
 
 		render(null, scratch);
 
 		forceUpdate();
-		expect(console.warn).to.be.calledOnce;
-		expect(console.warn.args[0]).to.match(/no-op/);
+		expect(console.warn).toHaveBeenCalledOnce();
+		expect(console.warn.mock.calls[0]).to.match(/no-op/);
 	});
 
 	it('should print an error when child is a plain object', () => {
@@ -271,7 +272,7 @@ describe('debug', () => {
 
 		let ref = createRef();
 		render(<div ref={ref} />, scratch);
-		expect(console.error).to.not.be.called;
+		expect(console.error).not.toHaveBeenCalled();
 	});
 
 	it('throws an error if a component rerenders too many times', () => {
@@ -333,7 +334,7 @@ describe('debug', () => {
 				</div>,
 				scratch
 			);
-			expect(console.error).to.be.calledOnce;
+			expect(console.error).toHaveBeenCalledOnce();
 		});
 
 		it('should allow distinct object keys', () => {
@@ -346,7 +347,7 @@ describe('debug', () => {
 				</div>,
 				scratch
 			);
-			expect(console.error).not.to.be.called;
+			expect(console.error).not.toHaveBeenCalled();
 		});
 
 		it('should print an error for duplicate object keys', () => {
@@ -358,7 +359,7 @@ describe('debug', () => {
 				</div>,
 				scratch
 			);
-			expect(console.error).to.be.calledOnce;
+			expect(console.error).toHaveBeenCalledOnce();
 		});
 
 		it('should print an error on duplicate keys with Components', () => {
@@ -374,7 +375,7 @@ describe('debug', () => {
 			}
 
 			render(<App />, scratch);
-			expect(console.error).to.be.calledOnce;
+			expect(console.error).toHaveBeenCalledOnce();
 		});
 
 		it('should print an error on duplicate keys with Fragments', () => {
@@ -398,7 +399,7 @@ describe('debug', () => {
 			}
 
 			render(<App />, scratch);
-			expect(console.error).to.be.calledTwice;
+			expect(console.error).toHaveBeenCalledTimes(2);
 		});
 	});
 
@@ -412,7 +413,7 @@ describe('debug', () => {
 				</div>
 			);
 			render(<Table />, scratch);
-			expect(console.error).to.be.calledOnce;
+			expect(console.error).toHaveBeenCalledOnce();
 		});
 
 		it('missing <table> with <thead>', () => {
@@ -426,7 +427,7 @@ describe('debug', () => {
 				</div>
 			);
 			render(<Table />, scratch);
-			expect(console.error).to.be.calledOnce;
+			expect(console.error).toHaveBeenCalledOnce();
 		});
 
 		it('missing <table> with <tbody>', () => {
@@ -440,7 +441,7 @@ describe('debug', () => {
 				</div>
 			);
 			render(<Table />, scratch);
-			expect(console.error).to.be.calledOnce;
+			expect(console.error).toHaveBeenCalledOnce();
 		});
 
 		it('missing <table> with <tfoot>', () => {
@@ -454,7 +455,7 @@ describe('debug', () => {
 				</div>
 			);
 			render(<Table />, scratch);
-			expect(console.error).to.be.calledOnce;
+			expect(console.error).toHaveBeenCalledOnce();
 		});
 
 		it('missing <tr>', () => {
@@ -466,7 +467,7 @@ describe('debug', () => {
 				</table>
 			);
 			render(<Table />, scratch);
-			expect(console.error).to.be.calledOnce;
+			expect(console.error).toHaveBeenCalledOnce();
 		});
 
 		it('missing <tr> with td component', () => {
@@ -479,7 +480,7 @@ describe('debug', () => {
 				</table>
 			);
 			render(<Table />, scratch);
-			expect(console.error).to.be.calledOnce;
+			expect(console.error).toHaveBeenCalledOnce();
 		});
 
 		it('missing <tr> with th component', () => {
@@ -492,7 +493,7 @@ describe('debug', () => {
 				</table>
 			);
 			render(<Table />, scratch);
-			expect(console.error).to.be.calledOnce;
+			expect(console.error).toHaveBeenCalledOnce();
 		});
 
 		it('Should accept <td> instead of <th> in <thead>', () => {
@@ -506,7 +507,7 @@ describe('debug', () => {
 				</table>
 			);
 			render(<Table />, scratch);
-			expect(console.error).to.not.be.called;
+			expect(console.error).not.toHaveBeenCalled();
 		});
 
 		it('Accepts well formed table with TD components', () => {
@@ -531,7 +532,7 @@ describe('debug', () => {
 				</table>
 			);
 			render(<Table />, scratch);
-			expect(console.error).to.not.be.called;
+			expect(console.error).not.toHaveBeenCalled();
 		});
 
 		it('Accepts well formed table', () => {
@@ -555,7 +556,7 @@ describe('debug', () => {
 				</table>
 			);
 			render(<Table />, scratch);
-			expect(console.error).to.not.be.called;
+			expect(console.error).not.toHaveBeenCalled();
 		});
 
 		it('Accepts minimal well formed table', () => {
@@ -572,7 +573,7 @@ describe('debug', () => {
 				</table>
 			);
 			render(<Table />, scratch);
-			expect(console.error).to.not.be.called;
+			expect(console.error).not.toHaveBeenCalled();
 		});
 
 		it('should include DOM parents outside of root node', () => {
@@ -585,7 +586,7 @@ describe('debug', () => {
 			const table = document.createElement('table');
 			scratch.appendChild(table);
 			render(<Table />, table);
-			expect(console.error).to.not.be.called;
+			expect(console.error).not.toHaveBeenCalled();
 		});
 
 		it('should warn for improper nested table', () => {
@@ -600,7 +601,7 @@ describe('debug', () => {
 			);
 
 			render(<Table />, scratch);
-			expect(console.error).to.be.calledOnce;
+			expect(console.error).toHaveBeenCalledOnce();
 		});
 
 		it('accepts valid nested tables', () => {
@@ -631,7 +632,7 @@ describe('debug', () => {
 			);
 
 			render(<Table />, scratch);
-			expect(console.error).to.not.be.called;
+			expect(console.error).not.toHaveBeenCalled();
 		});
 	});
 
@@ -640,14 +641,14 @@ describe('debug', () => {
 			const Paragraph = () => <p>Hello world</p>;
 
 			render(<Paragraph />, scratch);
-			expect(console.error).to.not.be.called;
+			expect(console.error).not.toHaveBeenCalled();
 		});
 
 		it('should not crash for an empty pragraph', () => {
 			const Paragraph = () => <p />;
 
 			render(<Paragraph />, scratch);
-			expect(console.error).to.not.be.called;
+			expect(console.error).not.toHaveBeenCalled();
 		});
 
 		it('should warn for nesting illegal dom-nodes under a paragraph', () => {
@@ -658,7 +659,7 @@ describe('debug', () => {
 			);
 
 			render(<Paragraph />, scratch);
-			expect(console.error).to.be.calledOnce;
+			expect(console.error).toHaveBeenCalledOnce();
 		});
 
 		it('should warn for nesting illegal dom-nodes under a paragraph with a parent', () => {
@@ -671,7 +672,7 @@ describe('debug', () => {
 			);
 
 			render(<Paragraph />, scratch);
-			expect(console.error).to.be.calledOnce;
+			expect(console.error).toHaveBeenCalledOnce();
 		});
 
 		it('should warn for nesting illegal dom-nodes under a paragraph as func', () => {
@@ -683,7 +684,7 @@ describe('debug', () => {
 			);
 
 			render(<Paragraph />, scratch);
-			expect(console.error).to.be.calledOnce;
+			expect(console.error).toHaveBeenCalledOnce();
 		});
 
 		it('should not warn for nesting span under a paragraph', () => {
@@ -694,7 +695,7 @@ describe('debug', () => {
 			);
 
 			render(<Paragraph />, scratch);
-			expect(console.error).to.not.be.called;
+			expect(console.error).not.toHaveBeenCalled();
 		});
 	});
 
@@ -703,7 +704,7 @@ describe('debug', () => {
 			const Button = () => <button>Hello world</button>;
 
 			render(<Button />, scratch);
-			expect(console.error).to.not.be.called;
+			expect(console.error).not.toHaveBeenCalled();
 		});
 
 		it('should warn for nesting illegal dom-nodes under a button', () => {
@@ -714,7 +715,7 @@ describe('debug', () => {
 			);
 
 			render(<Button />, scratch);
-			expect(console.error).to.be.calledOnce;
+			expect(console.error).toHaveBeenCalledOnce();
 		});
 
 		it('should warn for nesting illegal dom-nodes under a button as func', () => {
@@ -726,7 +727,7 @@ describe('debug', () => {
 			);
 
 			render(<Button />, scratch);
-			expect(console.error).to.be.calledOnce;
+			expect(console.error).toHaveBeenCalledOnce();
 		});
 
 		it('should not warn for nesting non-interactive content under a button', () => {
@@ -738,7 +739,7 @@ describe('debug', () => {
 			);
 
 			render(<Button />, scratch);
-			expect(console.error).to.not.be.called;
+			expect(console.error).not.toHaveBeenCalled();
 		});
 	});
 
@@ -747,7 +748,7 @@ describe('debug', () => {
 			const Anchor = () => <a>Hello world</a>;
 
 			render(<Anchor />, scratch);
-			expect(console.error).to.not.be.called;
+			expect(console.error).not.toHaveBeenCalled();
 		});
 
 		it('should warn for nesting illegal dom-nodes under an anchor', () => {
@@ -758,7 +759,7 @@ describe('debug', () => {
 			);
 
 			render(<Anchor />, scratch);
-			expect(console.error).to.be.calledOnce;
+			expect(console.error).toHaveBeenCalledOnce();
 		});
 
 		it('should warn for nesting illegal dom-nodes under an anchor as func', () => {
@@ -770,7 +771,7 @@ describe('debug', () => {
 			);
 
 			render(<Anchor />, scratch);
-			expect(console.error).to.be.calledOnce;
+			expect(console.error).toHaveBeenCalledOnce();
 		});
 
 		it('should not warn for nesting non-interactive content under an anchor', () => {
@@ -782,7 +783,7 @@ describe('debug', () => {
 			);
 
 			render(<Anchor />, scratch);
-			expect(console.error).to.not.be.called;
+			expect(console.error).not.toHaveBeenCalled();
 		});
 	});
 
@@ -795,9 +796,11 @@ describe('debug', () => {
 				</div>
 			);
 			hydrate(<App />, scratch);
-			expect(console.error).to.be.calledOnce;
-			expect(console.error).to.be.calledOnceWith(
-				sinon.match(/Expected a DOM node of type "p" but found "span"/)
+			expect(console.error).toHaveBeenCalledOnce();
+			expect(console.error).toHaveBeenCalledWith(
+				expect.objectContaining(
+					/Expected a DOM node of type "p" but found "span"/
+				)
 			);
 		});
 
@@ -809,7 +812,7 @@ describe('debug', () => {
 				</div>
 			);
 			hydrate(<App />, scratch);
-			expect(console.error).to.not.be.called;
+			expect(console.error).not.toHaveBeenCalled();
 		});
 
 		it('Should not warn for a well-formed tree', () => {
@@ -821,7 +824,7 @@ describe('debug', () => {
 				</div>
 			);
 			hydrate(<App />, scratch);
-			expect(console.error).to.not.be.called;
+			expect(console.error).not.toHaveBeenCalled();
 		});
 	});
 });
