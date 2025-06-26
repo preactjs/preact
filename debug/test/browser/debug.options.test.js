@@ -32,12 +32,12 @@ describe('debug options', () => {
 		scratch = setupScratch();
 		rerender = setupRerender();
 
-		vnodeSpy.resetHistory();
-		rootSpy.resetHistory();
-		beforeDiffSpy.resetHistory();
-		hookSpy.resetHistory();
-		afterDiffSpy.resetHistory();
-		catchErrorSpy.resetHistory();
+		vnodeSpy.mockClear();
+		rootSpy.mockClear();
+		beforeDiffSpy.mockClear();
+		hookSpy.mockClear();
+		afterDiffSpy.mockClear();
+		catchErrorSpy.mockClear();
 	});
 
 	afterEach(() => {
@@ -60,10 +60,10 @@ describe('debug options', () => {
 	it('should call old options on mount', () => {
 		render(<ClassApp />, scratch);
 
-		expect(vnodeSpy).to.have.been.called;
-		expect(rootSpy).to.have.been.called;
-		expect(beforeDiffSpy).to.have.been.called;
-		expect(afterDiffSpy).to.have.been.called;
+		expect(vnodeSpy).toHaveBeenCalled();
+		expect(rootSpy).toHaveBeenCalled();
+		expect(beforeDiffSpy).toHaveBeenCalled();
+		expect(afterDiffSpy).toHaveBeenCalled();
 	});
 
 	it('should call old options on update', () => {
@@ -72,20 +72,20 @@ describe('debug options', () => {
 		setCount(1);
 		rerender();
 
-		expect(vnodeSpy).to.have.been.called;
-		expect(rootSpy).to.have.been.called;
-		expect(beforeDiffSpy).to.have.been.called;
-		expect(afterDiffSpy).to.have.been.called;
+		expect(vnodeSpy).toHaveBeenCalled();
+		expect(rootSpy).toHaveBeenCalled();
+		expect(beforeDiffSpy).toHaveBeenCalled();
+		expect(afterDiffSpy).toHaveBeenCalled();
 	});
 
 	it('should call old options on unmount', () => {
 		render(<ClassApp />, scratch);
 		render(null, scratch);
 
-		expect(vnodeSpy).to.have.been.called;
-		expect(rootSpy).to.have.been.called;
-		expect(beforeDiffSpy).to.have.been.called;
-		expect(afterDiffSpy).to.have.been.called;
+		expect(vnodeSpy).toHaveBeenCalled();
+		expect(rootSpy).toHaveBeenCalled();
+		expect(beforeDiffSpy).toHaveBeenCalled();
+		expect(afterDiffSpy).toHaveBeenCalled();
 	});
 
 	it('should call old hook options for hook components', () => {
@@ -97,7 +97,7 @@ describe('debug options', () => {
 
 		render(<HookApp />, scratch);
 
-		expect(hookSpy).to.have.been.called;
+		expect(hookSpy).toHaveBeenCalled();
 	});
 
 	it('should call old options on error', () => {
@@ -128,7 +128,7 @@ describe('debug options', () => {
 		render(<ErrorApp />, scratch);
 		rerender();
 
-		expect(catchErrorSpy).to.have.been.called;
+		expect(catchErrorSpy).toHaveBeenCalled();
 
 		// we expect to throw after setTimeout to trigger a window.onerror
 		// this is to ensure react compat (i.e. with next.js' dev overlay)

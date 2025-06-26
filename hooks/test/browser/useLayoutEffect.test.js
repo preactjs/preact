@@ -7,6 +7,7 @@ import {
 } from '../../../test/_util/helpers';
 import { useEffectAssertions } from './useEffectAssertions';
 import { useLayoutEffect, useRef, useState } from 'preact/hooks';
+import { vi } from 'vitest';
 
 /** @jsx createElement */
 
@@ -32,8 +33,8 @@ describe('useLayoutEffect', () => {
 	useEffectAssertions(useLayoutEffect, scheduleEffectAssert);
 
 	it('calls the effect immediately after render', () => {
-		const cleanupFunction = sinon.spy();
-		const callback = sinon.spy(() => cleanupFunction);
+		const cleanupFunction = vi.fn();
+		const callback = vi.fn(() => cleanupFunction);
 
 		function Comp() {
 			useLayoutEffect(callback);
@@ -43,17 +44,17 @@ describe('useLayoutEffect', () => {
 		render(<Comp />, scratch);
 		render(<Comp />, scratch);
 
-		expect(cleanupFunction).to.be.calledOnce;
-		expect(callback).to.be.calledTwice;
+		expect(cleanupFunction).toHaveBeenCalledOnce();
+		expect(callback).toHaveBeenCalledTimes(2);
 
 		render(<Comp />, scratch);
 
-		expect(cleanupFunction).to.be.calledTwice;
-		expect(callback).to.be.calledThrice;
+		expect(cleanupFunction).toHaveBeenCalledTimes(2);
+		expect(callback).toHaveBeenCalledTimes(3);
 	});
 
 	it('works on a nested component', () => {
-		const callback = sinon.spy();
+		const callback = vi.fn();
 
 		function Parent() {
 			return (
@@ -70,7 +71,7 @@ describe('useLayoutEffect', () => {
 
 		render(<Parent />, scratch);
 
-		expect(callback).to.be.calledOnce;
+		expect(callback).toHaveBeenCalledOnce();
 	});
 
 	it('should execute multiple layout effects in same component in the right order', () => {
@@ -130,7 +131,7 @@ describe('useLayoutEffect', () => {
 
 	it('should invoke layout effects after subtree is fully connected', () => {
 		let ref;
-		let layoutEffect = sinon.spy(() => {
+		let layoutEffect = vi.fn(() => {
 			const isConnected = document.body.contains(ref.current);
 			expect(isConnected).to.equal(true, 'isConnected');
 		});
@@ -155,7 +156,7 @@ describe('useLayoutEffect', () => {
 		}
 
 		render(<Outer />, scratch);
-		expect(layoutEffect).to.have.been.calledOnce;
+		expect(layoutEffect).toHaveBeenCalledOnce();
 	});
 
 	// TODO: Make this test pass to resolve issue #1886
@@ -231,7 +232,7 @@ describe('useLayoutEffect', () => {
 	});
 
 	it('should throw an error upwards', () => {
-		const spy = sinon.spy();
+		const spy = vi.fn();
 		let errored = false;
 
 		const Page1 = () => {
@@ -266,21 +267,21 @@ describe('useLayoutEffect', () => {
 		}
 
 		act(() => render(<App page={1} />, scratch));
-		expect(spy).to.not.be.called;
+		expect(spy).not.toHaveBeenCalled();
 		expect(scratch.innerHTML).to.equal('<p>loaded</p>');
 
 		act(() => render(<App page={2} />, scratch));
-		expect(spy).to.be.calledOnce;
+		expect(spy).toHaveBeenCalledOnce();
 		expect(scratch.innerHTML).to.equal('<p>Error</p>');
 		errored = false;
 
 		act(() => render(<App page={1} />, scratch));
-		expect(spy).to.be.calledOnce;
+		expect(spy).toHaveBeenCalledOnce();
 		expect(scratch.innerHTML).to.equal('<p>loaded</p>');
 	});
 
 	it('should throw an error upwards from return', () => {
-		const spy = sinon.spy();
+		const spy = vi.fn();
 		let errored = false;
 
 		const Page1 = () => {
@@ -320,7 +321,7 @@ describe('useLayoutEffect', () => {
 		expect(scratch.innerHTML).to.equal('<p>Load</p>');
 
 		act(() => render(<App page={1} />, scratch));
-		expect(spy).to.be.calledOnce;
+		expect(spy).toHaveBeenCalledOnce();
 		expect(scratch.innerHTML).to.equal('<p>Error</p>');
 	});
 

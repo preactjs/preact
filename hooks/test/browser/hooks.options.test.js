@@ -20,6 +20,7 @@ import {
 	useContext,
 	useErrorBoundary
 } from 'preact/hooks';
+import { vi } from 'vitest';
 
 /** @jsx createElement */
 
@@ -37,10 +38,10 @@ describe('hook options', () => {
 		scratch = setupScratch();
 		rerender = setupRerender();
 
-		afterDiffSpy.resetHistory();
-		unmountSpy.resetHistory();
-		beforeRenderSpy.resetHistory();
-		hookSpy.resetHistory();
+		afterDiffSpy.mockClear();
+		unmountSpy.mockClear();
+		beforeRenderSpy.mockClear();
+		hookSpy.mockClear();
 	});
 
 	afterEach(() => {
@@ -56,8 +57,8 @@ describe('hook options', () => {
 	it('should call old options on mount', () => {
 		render(<App />, scratch);
 
-		expect(beforeRenderSpy).to.have.been.called;
-		expect(afterDiffSpy).to.have.been.called;
+		expect(beforeRenderSpy).toHaveBeenCalled();
+		expect(afterDiffSpy).toHaveBeenCalled();
 	});
 
 	it('should call old options.diffed on update', () => {
@@ -66,15 +67,15 @@ describe('hook options', () => {
 		increment();
 		rerender();
 
-		expect(beforeRenderSpy).to.have.been.called;
-		expect(afterDiffSpy).to.have.been.called;
+		expect(beforeRenderSpy).toHaveBeenCalled();
+		expect(afterDiffSpy).toHaveBeenCalled();
 	});
 
 	it('should call old options on unmount', () => {
 		render(<App />, scratch);
 		render(null, scratch);
 
-		expect(unmountSpy).to.have.been.called;
+		expect(unmountSpy).toHaveBeenCalled();
 	});
 
 	it('should detect hooks', () => {
@@ -111,7 +112,7 @@ describe('hook options', () => {
 			scratch
 		);
 
-		expect(hookSpy.args.map(arg => [arg[1], arg[2]])).to.deep.equal([
+		expect(hookSpy.mock.calls.map(arg => [arg[1], arg[2]])).to.deep.equal([
 			[0, USE_STATE],
 			[1, USE_REDUCER],
 			[2, USE_EFFECT],
@@ -137,7 +138,7 @@ describe('hook options', () => {
 		});
 
 		it('should skip effect hooks', () => {
-			const spy = sinon.spy();
+			const spy = vi.fn();
 			function App() {
 				useEffect(spy, []);
 				useLayoutEffect(spy, []);
@@ -148,7 +149,7 @@ describe('hook options', () => {
 				render(<App />, scratch);
 			});
 
-			expect(spy.callCount).to.equal(0);
+			expect(spy).not.toHaveBeenCalled();
 		});
 	});
 });

@@ -11,6 +11,7 @@ import {
 	useContext
 } from 'preact/hooks';
 import { scheduleEffectAssert } from '../_util/useEffectUtil';
+import { vi } from 'vitest';
 
 /** @jsx createElement */
 
@@ -74,7 +75,7 @@ describe('combinations', () => {
 	});
 
 	it('can rerender asynchronously from within an effect', () => {
-		const didRender = sinon.spy();
+		const didRender = vi.fn();
 
 		function Comp() {
 			const [counter, setCounter] = useState(0);
@@ -91,12 +92,13 @@ describe('combinations', () => {
 
 		return scheduleEffectAssert(() => {
 			rerender();
-			expect(didRender).to.have.been.calledTwice.and.calledWith(1);
+			expect(didRender).toHaveBeenCalledTimes(2);
+			expect(didRender).toHaveBeenCalledWith(1);
 		});
 	});
 
 	it('can rerender synchronously from within a layout effect', () => {
-		const didRender = sinon.spy();
+		const didRender = vi.fn();
 
 		function Comp() {
 			const [counter, setCounter] = useState(0);
@@ -112,7 +114,8 @@ describe('combinations', () => {
 		render(<Comp />, scratch);
 		rerender();
 
-		expect(didRender).to.have.been.calledTwice.and.calledWith(1);
+		expect(didRender).toHaveBeenCalledTimes(2);
+		expect(didRender).toHaveBeenCalledWith(1);
 	});
 
 	it('can access refs from within a layout effect callback', () => {
@@ -404,7 +407,7 @@ describe('combinations', () => {
 		const tooltipId = 'tooltip';
 		const effectLog = [];
 
-		let useRef2 = sinon.spy(init => {
+		let useRef2 = vi.fn(init => {
 			const realRef = useRef(init);
 			const ref = useRef(init);
 			Object.defineProperty(ref, 'current', {

@@ -29,8 +29,8 @@ describe('compat options', () => {
 		scratch = setupScratch();
 		rerender = setupRerender();
 
-		vnodeSpy.resetHistory();
-		eventSpy.resetHistory();
+		vnodeSpy.mockClear();
+		eventSpy.mockClear();
 
 		buttonRef = createRef();
 	});
@@ -61,7 +61,7 @@ describe('compat options', () => {
 	it('should call old options on mount', () => {
 		render(<ClassApp />, scratch);
 
-		expect(vnodeSpy).to.have.been.called;
+		expect(vnodeSpy).toHaveBeenCalled();
 	});
 
 	it('should call old options on event and update', () => {
@@ -72,14 +72,14 @@ describe('compat options', () => {
 		rerender();
 		expect(scratch.innerHTML).to.equal('<button>1</button>');
 
-		expect(vnodeSpy).to.have.been.called;
-		expect(eventSpy).to.have.been.called;
+		expect(vnodeSpy).toHaveBeenCalled();
+		expect(eventSpy).toHaveBeenCalled();
 	});
 
 	it('should call old options on unmount', () => {
 		render(<ClassApp />, scratch);
 		render(null, scratch);
 
-		expect(vnodeSpy).to.have.been.called;
+		expect(vnodeSpy).toHaveBeenCalled();
 	});
 });

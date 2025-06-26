@@ -1,6 +1,7 @@
 import { createElement, render, options } from 'preact';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { useDebugValue, useState } from 'preact/hooks';
+import { vi } from 'vitest';
 
 /** @jsx createElement */
 
@@ -32,7 +33,7 @@ describe('useDebugValue', () => {
 	});
 
 	it('should call options hook with value', () => {
-		let spy = (options.useDebugValue = sinon.spy());
+		let spy = (options.useDebugValue = vi.fn());
 
 		function useFoo() {
 			useDebugValue('foo');
@@ -46,12 +47,12 @@ describe('useDebugValue', () => {
 
 		render(<App />, scratch);
 
-		expect(spy).to.be.calledOnce;
-		expect(spy).to.be.calledWith('foo');
+		expect(spy).toHaveBeenCalledOnce();
+		expect(spy).toHaveBeenCalledWith('foo');
 	});
 
 	it('should apply optional formatter', () => {
-		let spy = (options.useDebugValue = sinon.spy());
+		let spy = (options.useDebugValue = vi.fn());
 
 		function useFoo() {
 			useDebugValue('foo', x => x + 'bar');
@@ -65,7 +66,7 @@ describe('useDebugValue', () => {
 
 		render(<App />, scratch);
 
-		expect(spy).to.be.calledOnce;
-		expect(spy).to.be.calledWith('foobar');
+		expect(spy).toHaveBeenCalledOnce();
+		expect(spy).toHaveBeenCalledWith('foobar');
 	});
 });

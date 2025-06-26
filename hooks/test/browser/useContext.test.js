@@ -47,7 +47,7 @@ describe('useContext', () => {
 
 	it('should use default value', () => {
 		const Foo = createContext(42);
-		const spy = sinon.spy();
+		const spy = vi.fn();
 
 		function App() {
 			spy(useContext(Foo));
@@ -55,11 +55,11 @@ describe('useContext', () => {
 		}
 
 		render(<App />, scratch);
-		expect(spy).to.be.calledWith(42);
+		expect(spy).toHaveBeenCalledWith(42);
 	});
 
 	it('should update when value changes with nonUpdating Component on top', async () => {
-		const spy = sinon.spy();
+		const spy = vi.fn();
 		const Ctx = createContext(0);
 
 		class NoUpdate extends Component {
@@ -88,23 +88,23 @@ describe('useContext', () => {
 		}
 
 		render(<App value={0} />, scratch);
-		expect(spy).to.be.calledOnce;
-		expect(spy).to.be.calledWith(0);
+		expect(spy).toHaveBeenCalledOnce();
+		expect(spy).toHaveBeenCalledWith(0);
 		render(<App value={1} />, scratch);
 
 		return new Promise(resolve => {
 			// Wait for enqueued hook update
 			setTimeout(() => {
 				// Should not be called a third time
-				expect(spy).to.be.calledTwice;
-				expect(spy).to.be.calledWith(1);
+				expect(spy).toHaveBeenCalledTimes(2);
+				expect(spy).toHaveBeenCalledWith(1);
 				resolve();
 			}, 0);
 		});
 	});
 
 	it('should only update when value has changed', async () => {
-		const spy = sinon.spy();
+		const spy = vi.fn();
 		const Ctx = createContext(0);
 
 		function App(props) {
@@ -122,18 +122,18 @@ describe('useContext', () => {
 		}
 
 		render(<App value={0} />, scratch);
-		expect(spy).to.be.calledOnce;
-		expect(spy).to.be.calledWith(0);
+		expect(spy).toHaveBeenCalledOnce();
+		expect(spy).toHaveBeenCalledWith(0);
 		render(<App value={1} />, scratch);
 
-		expect(spy).to.be.calledTwice;
-		expect(spy).to.be.calledWith(1);
+		expect(spy).toHaveBeenCalledTimes(2);
+		expect(spy).toHaveBeenCalledWith(1);
 
 		return new Promise(resolve => {
 			// Wait for enqueued hook update
 			setTimeout(() => {
 				// Should not be called a third time
-				expect(spy).to.be.calledTwice;
+				expect(spy).toHaveBeenCalledTimes(2);
 				resolve();
 			}, 0);
 		});
@@ -142,8 +142,8 @@ describe('useContext', () => {
 	it('should allow multiple context hooks at the same time', () => {
 		const Foo = createContext(0);
 		const Bar = createContext(10);
-		const spy = sinon.spy();
-		const unmountspy = sinon.spy();
+		const spy = vi.fn();
+		const unmountspy = vi.fn();
 
 		function Comp() {
 			const foo = useContext(Foo);
@@ -163,8 +163,8 @@ describe('useContext', () => {
 			scratch
 		);
 
-		expect(spy).to.be.calledOnce;
-		expect(spy).to.be.calledWith(0, 10);
+		expect(spy).toHaveBeenCalledOnce();
+		expect(spy).toHaveBeenCalledWith(0, 10);
 
 		render(
 			<Foo.Provider value={11}>
@@ -175,8 +175,8 @@ describe('useContext', () => {
 			scratch
 		);
 
-		expect(spy).to.be.calledTwice;
-		expect(unmountspy).not.to.be.called;
+		expect(spy).toHaveBeenCalledTimes(2);
+		expect(unmountspy).not.toHaveBeenCalled();
 	});
 
 	it('should only subscribe a component once', () => {
@@ -199,7 +199,7 @@ describe('useContext', () => {
 			</Context.Provider>,
 			scratch
 		);
-		subSpy = sinon.spy(provider, 'sub');
+		subSpy = vi.spyOn(provider, 'sub');
 
 		render(
 			<Context.Provider value={69}>
@@ -207,7 +207,7 @@ describe('useContext', () => {
 			</Context.Provider>,
 			scratch
 		);
-		expect(subSpy).to.not.have.been.called;
+		expect(subSpy).not.toHaveBeenCalled();
 
 		expect(values).to.deep.equal([13, 42, 69]);
 	});
@@ -232,7 +232,7 @@ describe('useContext', () => {
 			</Context>,
 			scratch
 		);
-		subSpy = sinon.spy(provider, 'sub');
+		subSpy = vi.spyOn(provider, 'sub');
 
 		render(
 			<Context value={69}>
@@ -240,7 +240,7 @@ describe('useContext', () => {
 			</Context>,
 			scratch
 		);
-		expect(subSpy).to.not.have.been.called;
+		expect(subSpy).not.toHaveBeenCalled();
 
 		expect(values).to.deep.equal([13, 42, 69]);
 	});
