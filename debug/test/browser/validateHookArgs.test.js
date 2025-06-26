@@ -10,6 +10,7 @@ import {
 import { setupRerender } from 'preact/test-utils';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import 'preact/debug';
+import { vi } from 'vitest';
 
 /** @jsx createElement */
 
@@ -32,8 +33,8 @@ describe('Hook argument validation', () => {
 
 		it(`should error if ${name} is mounted with NaN as an argument`, async () => {
 			render(<TestComponent initialValue={NaN} />, scratch);
-			expect(console.warn).to.be.calledOnce;
-			expect(console.warn.args[0]).to.match(
+			expect(console.warn).toHaveBeenCalledOnce();
+			expect(console.warn.mock.calls[0]).to.match(
 				/Hooks should not be called with NaN in the dependency array/
 			);
 		});
@@ -44,8 +45,8 @@ describe('Hook argument validation', () => {
 			scratch.querySelector('button').click();
 			rerender();
 
-			expect(console.warn).to.be.calledOnce;
-			expect(console.warn.args[0]).to.match(
+			expect(console.warn).toHaveBeenCalledOnce();
+			expect(console.warn.mock.calls[0]).to.match(
 				/Hooks should not be called with NaN in the dependency array/
 			);
 		});
@@ -61,12 +62,12 @@ describe('Hook argument validation', () => {
 		scratch = setupScratch();
 		rerender = setupRerender();
 		warnings = [];
-		sinon.stub(console, 'warn').callsFake(w => warnings.push(w));
+		vi.spyOn(console, 'warn').mockImplementation(w => warnings.push(w));
 	});
 
 	afterEach(() => {
 		teardown(scratch);
-		console.warn.restore();
+		console.warn.mockRestore();
 	});
 
 	validateHook('useEffect', arg => useEffect(() => {}, [arg]));

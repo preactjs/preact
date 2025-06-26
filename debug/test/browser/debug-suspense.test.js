@@ -6,6 +6,7 @@ import {
 	teardown,
 	serializeHtml
 } from '../../../test/_util/helpers';
+import { vi } from 'vitest';
 
 /** @jsx createElement */
 
@@ -21,13 +22,13 @@ describe('debug with suspense', () => {
 		warnings = [];
 		scratch = setupScratch();
 		rerender = setupRerender();
-		sinon.stub(console, 'error').callsFake(e => errors.push(e));
-		sinon.stub(console, 'warn').callsFake(w => warnings.push(w));
+		vi.spyOn(console, 'error').mockImplementation(e => errors.push(e));
+		vi.spyOn(console, 'warn').mockImplementation(w => warnings.push(w));
 	});
 
 	afterEach(() => {
-		console.error.restore();
-		console.warn.restore();
+		console.error.mockRestore();
+		console.warn.mockRestore();
 		teardown(scratch);
 	});
 
@@ -74,7 +75,7 @@ describe('debug with suspense', () => {
 			render(suspense, scratch);
 			rerender(); // render fallback
 
-			expect(console.error).to.not.be.called;
+			expect(console.error).not.toHaveBeenCalled();
 			expect(serializeHtml(scratch)).to.equal('<div>fallback...</div>');
 
 			return loader.then(() => {
@@ -106,7 +107,7 @@ describe('debug with suspense', () => {
 
 				return loader.then(() => {
 					rerender();
-					expect(console.warn).to.be.calledTwice;
+					expect(console.warn).toHaveBeenCalledTimes(2);
 					expect(warnings[1].includes('MyLazyLoaded')).to.equal(true);
 					expect(serializeHtml(scratch)).to.equal('<div>Hi there</div>');
 				});
@@ -132,7 +133,7 @@ describe('debug with suspense', () => {
 
 				return loader.then(() => {
 					rerender();
-					expect(console.warn).to.be.calledTwice;
+					expect(console.warn).toHaveBeenCalledTimes(2);
 					expect(warnings[1].includes('HelloLazy')).to.equal(true);
 					expect(serializeHtml(scratch)).to.equal('<div>Hi there</div>');
 				});
@@ -160,7 +161,7 @@ describe('debug with suspense', () => {
 					}
 
 					// Called once on initial render, and again when promise rejects
-					expect(console.warn).to.be.calledTwice;
+					expect(console.warn).toHaveBeenCalledTimes(2);
 				});
 			});
 
@@ -181,7 +182,7 @@ describe('debug with suspense', () => {
 					error = e;
 				}
 
-				expect(console.warn).to.be.calledOnce;
+				expect(console.warn).toHaveBeenCalledOnce();
 				expect(error).not.to.be.undefined;
 				expect(error.message).to.eql('Hello');
 			});

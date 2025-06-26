@@ -1,6 +1,7 @@
 import { createElement, render, Component } from 'preact';
 import 'preact/debug';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
+import { vi } from 'vitest';
 
 /** @jsx createElement */
 
@@ -19,13 +20,13 @@ describe('component stack', () => {
 
 		errors = [];
 		warnings = [];
-		sinon.stub(console, 'error').callsFake(e => errors.push(e));
-		sinon.stub(console, 'warn').callsFake(w => warnings.push(w));
+		vi.spyOn(console, 'error').mockImplementation(e => errors.push(e));
+		vi.spyOn(console, 'warn').mockImplementation(w => warnings.push(w));
 	});
 
 	afterEach(() => {
-		console.error.restore();
-		console.warn.restore();
+		console.error.mockRestore();
+		console.warn.mockRestore();
 		teardown(scratch);
 	});
 

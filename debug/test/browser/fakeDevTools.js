@@ -1,1 +1,1 @@
-window.__PREACT_DEVTOOLS__ = { attachPreact: sinon.spy() };
+window.__PREACT_DEVTOOLS__ = { attachPreact: vi.fn() };

@@ -12,6 +12,7 @@ import { useState } from 'preact/hooks';
 import { setupRerender } from 'preact/test-utils';
 import 'preact/debug';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
+import { vi } from 'vitest';
 
 /** @jsx createElement */
 
@@ -25,7 +26,7 @@ describe('debug options', () => {
 	/** @type {(count: number) => void} */
 	let setCount;
 
-	/** @type {import('sinon').SinonFakeTimers | undefined} */
+	/** @type {import('vitest').VitestUtils | undefined} */
 	let clock;
 
 	beforeEach(() => {
@@ -42,7 +43,7 @@ describe('debug options', () => {
 
 	afterEach(() => {
 		teardown(scratch);
-		if (clock) clock.restore();
+		if (clock) vi.useRealTimers();
 	});
 
 	class ClassApp extends Component {
@@ -123,7 +124,7 @@ describe('debug options', () => {
 			}
 		}
 
-		clock = sinon.useFakeTimers();
+		clock = vi.useFakeTimers();
 
 		render(<ErrorApp />, scratch);
 		rerender();
@@ -132,6 +133,6 @@ describe('debug options', () => {
 
 		// we expect to throw after setTimeout to trigger a window.onerror
 		// this is to ensure react compat (i.e. with next.js' dev overlay)
-		expect(() => clock.tick(0)).to.throw(e);
+		expect(() => clock.advanceTimersByTime(0)).to.throw(e);
 	});
 });

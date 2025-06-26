@@ -8,6 +8,7 @@ import './fakeDevTools';
 import { resetPropWarnings } from 'preact/debug';
 import * as PropTypes from 'prop-types';
 import { jsxDEV as jsxDev } from 'preact/jsx-runtime';
+import { vi } from 'vitest';
 
 describe('PropTypes', () => {
 	/** @type {HTMLDivElement} */
@@ -19,14 +20,14 @@ describe('PropTypes', () => {
 		errors = [];
 		warnings = [];
 		scratch = setupScratch();
-		sinon.stub(console, 'error').callsFake(e => errors.push(e));
-		sinon.stub(console, 'warn').callsFake(w => warnings.push(w));
+		vi.spyOn(console, 'error').mockImplementation(e => errors.push(e));
+		vi.spyOn(console, 'warn').mockImplementation(w => warnings.push(w));
 	});
 
 	afterEach(() => {
 		/** @type {*} */
-		console.error.restore();
-		console.warn.restore();
+		console.error.mockRestore();
+		console.warn.mockRestore();
 		teardown(scratch);
 	});
 
@@ -58,13 +59,14 @@ describe('PropTypes', () => {
 			scratch
 		);
 
-		expect(console.error).to.be.calledOnce;
+		expect(console.error).toHaveBeenCalledOnce();
 
 		// The message here may change when the "prop-types" library is updated,
 		// but we check it exactly to make sure all parameters were supplied
 		// correctly.
-		expect(console.error).to.have.been.calledOnceWith(
-			sinon.match(
+		expect(console.error).toHaveBeenCalledOnce();
+		expect(console.error).toHaveBeenCalledWith(
+			expect.stringMatching(
 				/^Failed prop type: Invalid prop `text` of type `number` supplied to `Foo`, expected `string`\.\n {2}in Foo \(at (.*)[/\\]debug[/\\]test[/\\]browser[/\\]debug\.test\.js:[0-9]+\)$/m
 			)
 		);
@@ -85,13 +87,13 @@ describe('PropTypes', () => {
 		render(jsxDev(Foo, { text: 123 }), scratch);
 		render(jsxDev(Foo, { text: 123 }), scratch);
 
-		expect(console.error).to.be.calledOnce;
+		expect(console.error).toHaveBeenCalledOnce();
 
 		// Trigger a different error. This should result in a new log
 		// message.
-		console.error.resetHistory();
+		console.error.mockClear();
 		render(jsxDev(Foo, { text: 'ok', count: '123' }), scratch);
-		expect(console.error).to.be.calledOnce;
+		expect(console.error).toHaveBeenCalledOnce();
 	});
 
 	it('should render with error logged when validator gets signal and throws exception', () => {
@@ -107,7 +109,7 @@ describe('PropTypes', () => {
 
 		render(jsxDev(Baz, { unhappy: 'signal' }), scratch);
 
-		expect(console.error).to.be.calledOnce;
+		expect(console.error).toHaveBeenCalledOnce();
 		expect(errors[0].includes('got prop')).to.equal(true);
 		expect(serializeHtml(scratch)).to.equal('<h1>signal</h1>');
 	});
@@ -122,6 +124,6 @@ describe('PropTypes', () => {
 		};
 
 		render(jsxDev(Bar, { text: 'foo' }), scratch);
-		expect(console.error).to.not.be.called;
+		expect(console.error).not.toHaveBeenCalled();
 	});
 });

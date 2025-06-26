@@ -3,6 +3,7 @@ import { useState, useEffect } from 'preact/hooks';
 import 'preact/debug';
 import { act } from 'preact/test-utils';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
+import { vi } from 'vitest';
 
 /** @jsx createElement */
 
@@ -15,13 +16,13 @@ describe('debug with hooks', () => {
 		errors = [];
 		warnings = [];
 		scratch = setupScratch();
-		sinon.stub(console, 'error').callsFake(e => errors.push(e));
-		sinon.stub(console, 'warn').callsFake(w => warnings.push(w));
+		vi.spyOn(console, 'error').mockImplementation(e => errors.push(e));
+		vi.spyOn(console, 'warn').mockImplementation(w => warnings.push(w));
 	});
 
 	afterEach(() => {
-		console.error.restore();
-		console.warn.restore();
+		console.error.mockRestore();
+		console.warn.mockRestore();
 		teardown(scratch);
 	});
 

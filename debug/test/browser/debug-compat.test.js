@@ -7,6 +7,7 @@ import * as PropTypes from 'prop-types';
 // eslint-disable-next-line no-duplicate-imports
 import { resetPropWarnings } from 'preact/debug';
 import { forwardRef, createPortal } from 'preact/compat';
+import { vi } from 'vitest';
 
 const h = createElement;
 /** @jsx createElement */
@@ -21,8 +22,8 @@ describe('debug compat', () => {
 		errors = [];
 		warnings = [];
 		scratch = setupScratch();
-		sinon.stub(console, 'error').callsFake(e => errors.push(e));
-		sinon.stub(console, 'warn').callsFake(w => warnings.push(w));
+		vi.spyOn(console, 'error').mockImplementation(e => errors.push(e));
+		vi.spyOn(console, 'warn').mockImplementation(w => warnings.push(w));
 
 		root = document.createElement('div');
 		document.body.appendChild(root);
@@ -30,8 +31,8 @@ describe('debug compat', () => {
 
 	afterEach(() => {
 		/** @type {*} */
-		console.error.restore();
-		console.warn.restore();
+		console.error.mockRestore();
+		console.warn.mockRestore();
 		teardown(scratch);
 
 		document.body.removeChild(root);
@@ -73,7 +74,7 @@ describe('debug compat', () => {
 
 			render(<Foo ref={ref} text="123" />, scratch);
 
-			expect(console.error).not.been.called;
+			expect(console.error).not.toHaveBeenCalled();
 
 			expect(ref.current).to.not.be.undefined;
 		});
