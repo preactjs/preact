@@ -1,4 +1,5 @@
 import { options as rawOptions } from 'preact';
+import { vi } from 'vitest';
 
 /** @type {import('preact/src/internal').Options} */
 let options = rawOptions;
@@ -15,17 +16,17 @@ let oldBeforeCommit = options._commit;
 let oldHook = options._hook;
 let oldCatchError = options._catchError;
 
-export const vnodeSpy = sinon.spy(oldVNode);
-export const eventSpy = sinon.spy(oldEvent);
-export const afterDiffSpy = sinon.spy(oldAfterDiff);
-export const unmountSpy = sinon.spy(oldUnmount);
+export const vnodeSpy = vi.fn(oldVNode);
+export const eventSpy = vi.fn(oldEvent);
+export const afterDiffSpy = vi.fn(oldAfterDiff);
+export const unmountSpy = vi.fn(oldUnmount);
 
-export const rootSpy = sinon.spy(oldRoot);
-export const beforeDiffSpy = sinon.spy(oldBeforeDiff);
-export const beforeRenderSpy = sinon.spy(oldBeforeRender);
-export const beforeCommitSpy = sinon.spy(oldBeforeCommit);
-export const hookSpy = sinon.spy(oldHook);
-export const catchErrorSpy = sinon.spy(oldCatchError);
+export const rootSpy = vi.fn(oldRoot);
+export const beforeDiffSpy = vi.fn(oldBeforeDiff);
+export const beforeRenderSpy = vi.fn(oldBeforeRender);
+export const beforeCommitSpy = vi.fn(oldBeforeCommit);
+export const hookSpy = vi.fn(oldHook);
+export const catchErrorSpy = vi.fn(oldCatchError);
 
 options.vnode = vnodeSpy;
 options.event = eventSpy;

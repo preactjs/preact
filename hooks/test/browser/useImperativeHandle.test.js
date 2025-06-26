@@ -2,6 +2,7 @@ import { createElement, render } from 'preact';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { useImperativeHandle, useRef, useState } from 'preact/hooks';
 import { setupRerender } from 'preact/test-utils';
+import { vi } from 'vitest';
 
 /** @jsx createElement */
 
@@ -37,7 +38,7 @@ describe('useImperativeHandle', () => {
 
 	it('Calls ref unmounting function', () => {
 		let ref;
-		const unmount = sinon.spy();
+		const unmount = vi.fn();
 
 		function Comp() {
 			useImperativeHandle(
@@ -55,13 +56,13 @@ describe('useImperativeHandle', () => {
 		expect(ref).to.have.property('test');
 		expect(ref.test()).to.equal('test');
 		render(null, scratch);
-		expect(unmount).to.be.calledOnce;
+		expect(unmount).toHaveBeenCalledOnce();
 		expect(ref).to.equal(null);
 	});
 
 	it('calls createHandle after every render by default', () => {
 		let ref,
-			createHandleSpy = sinon.spy();
+			createHandleSpy = vi.fn();
 
 		function Comp() {
 			ref = useRef({});
@@ -70,18 +71,18 @@ describe('useImperativeHandle', () => {
 		}
 
 		render(<Comp />, scratch);
-		expect(createHandleSpy).to.have.been.calledOnce;
+		expect(createHandleSpy).toHaveBeenCalledOnce();
 
 		render(<Comp />, scratch);
-		expect(createHandleSpy).to.have.been.calledTwice;
+		expect(createHandleSpy).toHaveBeenCalledTimes(2);
 
 		render(<Comp />, scratch);
-		expect(createHandleSpy).to.have.been.calledThrice;
+		expect(createHandleSpy).toHaveBeenCalledTimes(3);
 	});
 
 	it('calls createHandle only on mount if an empty array is passed', () => {
 		let ref,
-			createHandleSpy = sinon.spy();
+			createHandleSpy = vi.fn();
 
 		function Comp() {
 			ref = useRef({});
@@ -90,15 +91,15 @@ describe('useImperativeHandle', () => {
 		}
 
 		render(<Comp />, scratch);
-		expect(createHandleSpy).to.have.been.calledOnce;
+		expect(createHandleSpy).toHaveBeenCalledOnce();
 
 		render(<Comp />, scratch);
-		expect(createHandleSpy).to.have.been.calledOnce;
+		expect(createHandleSpy).toHaveBeenCalledOnce();
 	});
 
 	it('Updates given ref when args change', () => {
 		let ref,
-			createHandleSpy = sinon.spy();
+			createHandleSpy = vi.fn();
 
 		function Comp({ a }) {
 			ref = useRef({});
@@ -114,17 +115,17 @@ describe('useImperativeHandle', () => {
 		}
 
 		render(<Comp a={0} />, scratch);
-		expect(createHandleSpy).to.have.been.calledOnce;
+		expect(createHandleSpy).toHaveBeenCalledOnce();
 		expect(ref.current).to.have.property('test');
 		expect(ref.current.test()).to.equal('test0');
 
 		render(<Comp a={1} />, scratch);
-		expect(createHandleSpy).to.have.been.calledTwice;
+		expect(createHandleSpy).toHaveBeenCalledTimes(2);
 		expect(ref.current).to.have.property('test');
 		expect(ref.current.test()).to.equal('test1');
 
 		render(<Comp a={0} />, scratch);
-		expect(createHandleSpy).to.have.been.calledThrice;
+		expect(createHandleSpy).toHaveBeenCalledTimes(3);
 		expect(ref.current).to.have.property('test');
 		expect(ref.current.test()).to.equal('test0');
 	});
@@ -138,7 +139,7 @@ describe('useImperativeHandle', () => {
 		/** @type {() => void} */
 		let updateState;
 
-		const createHandleSpy = sinon.spy(() => ({
+		const createHandleSpy = vi.fn(() => ({
 			test: () => 'test'
 		}));
 
@@ -157,28 +158,28 @@ describe('useImperativeHandle', () => {
 		}
 
 		render(<Comp a={0} />, scratch);
-		expect(createHandleSpy).to.have.been.calledOnce;
+		expect(createHandleSpy).toHaveBeenCalledOnce();
 
 		updateState();
 		rerender();
-		expect(createHandleSpy).to.have.been.calledOnce;
+		expect(createHandleSpy).toHaveBeenCalledOnce();
 
 		setRef(ref2);
 		rerender();
-		expect(createHandleSpy).to.have.been.calledTwice;
+		expect(createHandleSpy).toHaveBeenCalledTimes(2);
 
 		updateState();
 		rerender();
-		expect(createHandleSpy).to.have.been.calledTwice;
+		expect(createHandleSpy).toHaveBeenCalledTimes(2);
 
 		setRef(ref1);
 		rerender();
-		expect(createHandleSpy).to.have.been.calledThrice;
+		expect(createHandleSpy).toHaveBeenCalledTimes(3);
 	});
 
 	it('should not update ref when args have not changed', () => {
 		let ref,
-			createHandleSpy = sinon.spy(() => ({ test: () => 'test' }));
+			createHandleSpy = vi.fn(() => ({ test: () => 'test' }));
 
 		function Comp() {
 			ref = useRef({});
@@ -187,11 +188,11 @@ describe('useImperativeHandle', () => {
 		}
 
 		render(<Comp />, scratch);
-		expect(createHandleSpy).to.have.been.calledOnce;
+		expect(createHandleSpy).toHaveBeenCalledOnce();
 		expect(ref.current.test()).to.equal('test');
 
 		render(<Comp />, scratch);
-		expect(createHandleSpy).to.have.been.calledOnce;
+		expect(createHandleSpy).toHaveBeenCalledOnce();
 		expect(ref.current.test()).to.equal('test');
 	});
 
@@ -206,7 +207,7 @@ describe('useImperativeHandle', () => {
 
 	it('should reset ref object to null when the component get unmounted', () => {
 		let ref,
-			createHandleSpy = sinon.spy(() => ({ test: () => 'test' }));
+			createHandleSpy = vi.fn(() => ({ test: () => 'test' }));
 
 		function Comp() {
 			ref = useRef({});
@@ -215,18 +216,18 @@ describe('useImperativeHandle', () => {
 		}
 
 		render(<Comp />, scratch);
-		expect(createHandleSpy).to.have.been.calledOnce;
+		expect(createHandleSpy).toHaveBeenCalledOnce();
 		expect(ref.current).to.not.equal(null);
 
 		render(<div />, scratch);
-		expect(createHandleSpy).to.have.been.calledOnce;
+		expect(createHandleSpy).toHaveBeenCalledOnce();
 		expect(ref.current).to.equal(null);
 	});
 
 	it('should reset ref callback to null when the component get unmounted', () => {
-		const ref = sinon.spy();
+		const ref = vi.fn();
 		const handle = { test: () => 'test' };
-		const createHandleSpy = sinon.spy(() => handle);
+		const createHandleSpy = vi.fn(() => handle);
 
 		function Comp() {
 			useImperativeHandle(ref, createHandleSpy, [1]);
@@ -234,13 +235,13 @@ describe('useImperativeHandle', () => {
 		}
 
 		render(<Comp />, scratch);
-		expect(createHandleSpy).to.have.been.calledOnce;
-		expect(ref).to.have.been.calledWith(handle);
+		expect(createHandleSpy).toHaveBeenCalledOnce();
+		expect(ref).toHaveBeenCalledWith(handle);
 
-		ref.resetHistory();
+		ref.mockClear();
 
 		render(<div />, scratch);
-		expect(createHandleSpy).to.have.been.calledOnce;
-		expect(ref).to.have.been.calledWith(null);
+		expect(createHandleSpy).toHaveBeenCalledOnce();
+		expect(ref).toHaveBeenCalledWith(null);
 	});
 });

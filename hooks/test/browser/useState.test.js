@@ -46,7 +46,7 @@ describe('useState', () => {
 	});
 
 	it('can initialize the state via a function', () => {
-		const initState = sinon.spy(() => 1);
+		const initState = vi.fn(() => 1);
 
 		function Comp() {
 			useState(initState);
@@ -56,7 +56,7 @@ describe('useState', () => {
 		render(<Comp />, scratch);
 		render(<Comp />, scratch);
 
-		expect(initState).to.be.calledOnce;
+		expect(initState).toHaveBeenCalledOnce();
 	});
 
 	it('does not rerender on equal state', () => {
@@ -163,7 +163,7 @@ describe('useState', () => {
 
 	it('should correctly re-initialize when first run threw an error', () => {
 		let hasThrown = false;
-		let setup = sinon.spy(() => {
+		let setup = vi.fn(() => {
 			if (!hasThrown) {
 				hasThrown = true;
 				throw new Error('test');
@@ -178,9 +178,9 @@ describe('useState', () => {
 		};
 
 		expect(() => render(<App />, scratch)).to.throw('test');
-		expect(setup).to.have.been.calledOnce;
+		expect(setup).toHaveBeenCalledOnce();
 		expect(() => render(<App />, scratch)).not.to.throw();
-		expect(setup).to.have.been.calledTwice;
+		expect(setup).toHaveBeenCalledTimes(2);
 		expect(scratch.innerHTML).to.equal('<p>hi</p>');
 	});
 
@@ -304,7 +304,7 @@ describe('useState', () => {
 	});
 
 	it('does not loop when states are equal after batches', () => {
-		const renderSpy = sinon.spy();
+		const renderSpy = vi.fn();
 		const Context = createContext(null);
 
 		function ModalProvider(props) {
@@ -352,13 +352,13 @@ describe('useState', () => {
 			render(<App />, scratch);
 		});
 
-		expect(renderSpy).to.be.calledThrice;
+		expect(renderSpy).toHaveBeenCalledTimes(3);
 	});
 
 	it('Cancels effect invocations correctly when bailing', () => {
-		const renderSpy = sinon.spy();
-		const cleanupSpy = sinon.spy();
-		const spy = sinon.spy();
+		const renderSpy = vi.fn();
+		const cleanupSpy = vi.fn();
+		const spy = vi.fn();
 		let set;
 
 		function App() {
@@ -379,18 +379,18 @@ describe('useState', () => {
 			render(<App />, scratch);
 		});
 
-		expect(renderSpy).to.be.calledOnce;
-		expect(spy).to.be.calledOnce;
-		expect(cleanupSpy).to.not.be.called;
+		expect(renderSpy).toHaveBeenCalledOnce();
+		expect(spy).toHaveBeenCalledOnce();
+		expect(cleanupSpy).not.toHaveBeenCalled();
 
 		act(() => {
 			set('updated');
 			set('initial');
 		});
 
-		expect(renderSpy).to.be.calledTwice;
-		expect(spy).to.be.calledOnce;
-		expect(cleanupSpy).to.not.be.called;
+		expect(renderSpy).toHaveBeenCalledTimes(2);
+		expect(spy).toHaveBeenCalledOnce();
+		expect(cleanupSpy).not.toHaveBeenCalled();
 	});
 
 	// see preactjs/preact#3731

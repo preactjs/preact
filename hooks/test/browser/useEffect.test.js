@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from 'preact/hooks';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { useEffectAssertions } from './useEffectAssertions';
 import { scheduleEffectAssert } from '../_util/useEffectUtil';
+import { vi } from 'vitest';
 
 /** @jsx createElement */
 
@@ -22,8 +23,8 @@ describe('useEffect', () => {
 	useEffectAssertions(useEffect, scheduleEffectAssert);
 
 	it('calls the effect immediately if another render is about to start', () => {
-		const cleanupFunction = sinon.spy();
-		const callback = sinon.spy(() => cleanupFunction);
+		const cleanupFunction = vi.fn();
+		const callback = vi.fn(() => cleanupFunction);
 
 		function Comp() {
 			useEffect(callback);
@@ -33,18 +34,18 @@ describe('useEffect', () => {
 		render(<Comp />, scratch);
 		render(<Comp />, scratch);
 
-		expect(cleanupFunction).to.be.not.called;
-		expect(callback).to.be.calledOnce;
+		expect(cleanupFunction).not.toHaveBeenCalled();
+		expect(callback).toHaveBeenCalledOnce();
 
 		render(<Comp />, scratch);
 
-		expect(cleanupFunction).to.be.calledOnce;
-		expect(callback).to.be.calledTwice;
+		expect(cleanupFunction).toHaveBeenCalledOnce();
+		expect(callback).toHaveBeenCalledTimes(2);
 	});
 
 	it('cancels the effect when the component get unmounted before it had the chance to run it', () => {
-		const cleanupFunction = sinon.spy();
-		const callback = sinon.spy(() => cleanupFunction);
+		const cleanupFunction = vi.fn();
+		const callback = vi.fn(() => cleanupFunction);
 
 		function Comp() {
 			useEffect(callback);
@@ -55,8 +56,8 @@ describe('useEffect', () => {
 		render(null, scratch);
 
 		return scheduleEffectAssert(() => {
-			expect(cleanupFunction).to.not.be.called;
-			expect(callback).to.not.be.called;
+			expect(cleanupFunction).not.toHaveBeenCalled();
+			expect(callback).not.toHaveBeenCalled();
 		});
 	});
 
@@ -133,7 +134,7 @@ describe('useEffect', () => {
 	});
 
 	it('should throw an error upwards', () => {
-		const spy = sinon.spy();
+		const spy = vi.fn();
 		let errored = false;
 
 		const Page1 = () => {
@@ -168,21 +169,21 @@ describe('useEffect', () => {
 		}
 
 		act(() => render(<App page={1} />, scratch));
-		expect(spy).to.not.be.called;
+		expect(spy).not.toHaveBeenCalled();
 		expect(scratch.innerHTML).to.equal('<p>loaded</p>');
 
 		act(() => render(<App page={2} />, scratch));
-		expect(spy).to.be.calledOnce;
+		expect(spy).toHaveBeenCalledOnce();
 		expect(scratch.innerHTML).to.equal('<p>Error</p>');
 		errored = false;
 
 		act(() => render(<App page={1} />, scratch));
-		expect(spy).to.be.calledOnce;
+		expect(spy).toHaveBeenCalledOnce();
 		expect(scratch.innerHTML).to.equal('<p>loaded</p>');
 	});
 
 	it('should throw an error upwards from return', () => {
-		const spy = sinon.spy();
+		const spy = vi.fn();
 		let errored = false;
 
 		const Page1 = () => {
@@ -222,12 +223,12 @@ describe('useEffect', () => {
 		expect(scratch.innerHTML).to.equal('<p>Load</p>');
 
 		act(() => render(<App page={1} />, scratch));
-		expect(spy).to.be.calledOnce;
+		expect(spy).toHaveBeenCalledOnce();
 		expect(scratch.innerHTML).to.equal('<p>Error</p>');
 	});
 
 	it('catches errors when error is invoked during render', () => {
-		const spy = sinon.spy();
+		const spy = vi.fn();
 		let errored;
 
 		function Comp() {
@@ -257,7 +258,7 @@ describe('useEffect', () => {
 		act(() => {
 			render(<App />, scratch);
 		});
-		expect(spy).to.be.calledOnce;
+		expect(spy).toHaveBeenCalledOnce();
 		expect(errored).to.be.an('Error').with.property('message', 'hi');
 		expect(scratch.innerHTML).to.equal('<p>Error</p>');
 	});
@@ -305,7 +306,7 @@ describe('useEffect', () => {
 	});
 
 	it('should not crash when effect returns truthy non-function value', () => {
-		const callback = sinon.spy(() => 'truthy');
+		const callback = vi.fn(() => 'truthy');
 		function Comp() {
 			useEffect(callback);
 			return null;
@@ -314,7 +315,7 @@ describe('useEffect', () => {
 		render(<Comp />, scratch);
 		render(<Comp />, scratch);
 
-		expect(callback).to.have.been.calledOnce;
+		expect(callback).toHaveBeenCalledOnce();
 
 		render(<div>Replacement</div>, scratch);
 	});
@@ -435,10 +436,10 @@ describe('useEffect', () => {
 		}
 
 		let update;
-		const firstEffectSpy = sinon.spy();
-		const firstEffectcleanup = sinon.spy();
-		const secondEffectSpy = sinon.spy();
-		const secondEffectcleanup = sinon.spy();
+		const firstEffectSpy = vi.fn();
+		const firstEffectcleanup = vi.fn();
+		const secondEffectSpy = vi.fn();
+		const secondEffectcleanup = vi.fn();
 
 		const MainContent = () => {
 			const [val, setVal] = useState(false);
@@ -471,17 +472,17 @@ describe('useEffect', () => {
 			);
 		});
 
-		expect(firstEffectSpy).to.be.calledOnce;
-		expect(secondEffectSpy).to.be.calledOnce;
+		expect(firstEffectSpy).toHaveBeenCalledOnce();
+		expect(secondEffectSpy).toHaveBeenCalledOnce();
 
 		act(() => {
 			update();
 		});
 
-		expect(firstEffectSpy).to.be.calledOnce;
-		expect(secondEffectSpy).to.be.calledOnce;
-		expect(firstEffectcleanup).to.be.calledOnce;
-		expect(secondEffectcleanup).to.be.calledOnce;
+		expect(firstEffectSpy).toHaveBeenCalledOnce();
+		expect(secondEffectSpy).toHaveBeenCalledOnce();
+		expect(firstEffectcleanup).toHaveBeenCalledOnce();
+		expect(secondEffectcleanup).toHaveBeenCalledOnce();
 	});
 
 	it('orders effects effectively', () => {
