@@ -14,6 +14,7 @@ import React, {
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { setupRerender, act } from 'preact/test-utils';
 import { getSymbol } from './testUtils';
+import { vi } from 'vitest';
 
 /* eslint-disable react/jsx-boolean-value, react/display-name, prefer-arrow-callback */
 
@@ -75,11 +76,11 @@ describe('forwardRef', () => {
 	});
 
 	it('should forward props', () => {
-		let spy = sinon.spy();
+		let spy = vi.fn();
 		let App = forwardRef(spy);
 		render(<App foo="bar" />, scratch);
 
-		expect(spy).to.be.calledWithMatch({ foo: 'bar' });
+		expect(spy).toHaveBeenCalledWith({ foo: 'bar' }, null);
 	});
 
 	it('should support nesting', () => {
@@ -272,26 +273,26 @@ describe('forwardRef', () => {
 			})
 		);
 
-		const ref = sinon.spy();
+		const ref = vi.fn();
 
 		render(<App ref={ref} optional="foo" />, scratch);
 		expect(renderCount).to.equal(1);
 
-		expect(ref).to.have.been.called;
+		expect(ref).toHaveBeenCalled();
 
-		ref.resetHistory();
+		ref.mockClear();
 		render(<App ref={ref} optional="foo" />, scratch);
 		expect(renderCount).to.equal(1);
 
-		const differentRef = sinon.spy();
+		const differentRef = vi.fn();
 
 		render(<App ref={differentRef} optional="foo" />, scratch);
 		expect(renderCount).to.equal(2);
 
-		expect(ref).to.have.been.calledWith(null);
-		expect(differentRef).to.have.been.called;
+		expect(ref).toHaveBeenCalledWith(null);
+		expect(differentRef).toHaveBeenCalled();
 
-		differentRef.resetHistory();
+		differentRef.mockClear();
 		render(<App ref={ref} optional="bar" />, scratch);
 		expect(renderCount).to.equal(3);
 	});
@@ -352,15 +353,15 @@ describe('forwardRef', () => {
 	});
 
 	it('calls ref when this is a function.', () => {
-		const spy = sinon.spy();
+		const spy = vi.fn();
 		const Bar = forwardRef((props, ref) => {
 			useImperativeHandle(ref, () => ({ foo: 100 }));
 			return null;
 		});
 
 		render(<Bar ref={spy} />, scratch);
-		expect(spy).to.be.calledOnce;
-		expect(spy).to.be.calledWithExactly({ foo: 100 });
+		expect(spy).toHaveBeenCalledOnce();
+		expect(spy).toHaveBeenCalledWith({ foo: 100 });
 	});
 
 	it('stale ref missing with passed useRef', () => {
@@ -508,5 +509,5 @@ describe('forwardRef', () => {
 		const Forwarded = forwardRef(Foo);
 
 		expect(Forwarded.render).to.equal(Foo);
-  });
+	});
 });

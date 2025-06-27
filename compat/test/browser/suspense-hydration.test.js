@@ -15,6 +15,7 @@ import {
 } from '../../../test/_util/helpers';
 import { ul, li, div } from '../../../test/_util/dom';
 import { createLazy, createSuspenseLoader } from './suspense-utils';
+import { vi } from 'vitest';
 
 /* eslint-env browser */
 describe('suspense hydration', () => {
@@ -125,8 +126,8 @@ describe('suspense hydration', () => {
 		scratch.innerHTML = '<div>Hello</div><div>World</div>';
 		clearLog();
 
-		const helloListener = sinon.spy();
-		const worldListener = sinon.spy();
+		const helloListener = vi.fn();
+		const worldListener = vi.fn();
 
 		const [Lazy, resolve] = createLazy();
 		hydrate(
@@ -142,7 +143,7 @@ describe('suspense hydration', () => {
 		clearLog();
 
 		scratch.querySelector('div:last-child').dispatchEvent(createEvent('click'));
-		expect(worldListener, 'worldListener 1').to.have.been.calledOnce;
+		expect(worldListener, 'worldListener 1').toHaveBeenCalledOnce();
 
 		return resolve(() => <div onClick={helloListener}>Hello</div>).then(() => {
 			rerender();
@@ -152,12 +153,12 @@ describe('suspense hydration', () => {
 			scratch
 				.querySelector('div:first-child')
 				.dispatchEvent(createEvent('click'));
-			expect(helloListener, 'helloListener').to.have.been.calledOnce;
+			expect(helloListener, 'helloListener').toHaveBeenCalledOnce();
 
 			scratch
 				.querySelector('div:last-child')
 				.dispatchEvent(createEvent('click'));
-			expect(worldListener, 'worldListener 2').to.have.been.calledTwice;
+			expect(worldListener, 'worldListener 2').toHaveBeenCalledTimes(2);
 
 			clearLog();
 		});
@@ -372,13 +373,7 @@ describe('suspense hydration', () => {
 	it('should properly hydrate suspense with Fragment siblings', () => {
 		const originalHtml = ul([li(0), li(1), li(2), li(3), li(4)]);
 
-		const listeners = [
-			sinon.spy(),
-			sinon.spy(),
-			sinon.spy(),
-			sinon.spy(),
-			sinon.spy()
-		];
+		const listeners = [vi.fn(), vi.fn(), vi.fn(), vi.fn(), vi.fn()];
 
 		scratch.innerHTML = originalHtml;
 		clearLog();
@@ -403,11 +398,11 @@ describe('suspense hydration', () => {
 		rerender(); // Flush rerender queue to mimic what preact will really do
 		expect(scratch.innerHTML).to.equal(originalHtml);
 		expect(getLog()).to.deep.equal([]);
-		expect(listeners[4]).not.to.have.been.called;
+		expect(listeners[4]).not.toHaveBeenCalled();
 
 		clearLog();
 		scratch.querySelector('li:last-child').dispatchEvent(createEvent('click'));
-		expect(listeners[4]).to.have.been.calledOnce;
+		expect(listeners[4]).toHaveBeenCalledOnce();
 
 		return resolve(() => (
 			<Fragment>
@@ -422,25 +417,19 @@ describe('suspense hydration', () => {
 			scratch
 				.querySelector('li:nth-child(3)')
 				.dispatchEvent(createEvent('click'));
-			expect(listeners[2]).to.have.been.calledOnce;
+			expect(listeners[2]).toHaveBeenCalledOnce();
 
 			scratch
 				.querySelector('li:last-child')
 				.dispatchEvent(createEvent('click'));
-			expect(listeners[4]).to.have.been.calledTwice;
+			expect(listeners[4]).toHaveBeenCalledTimes(2);
 		});
 	});
 
 	it('should properly hydrate suspense with Component & Fragment siblings', () => {
 		const originalHtml = ul([li(0), li(1), li(2), li(3), li(4)]);
 
-		const listeners = [
-			sinon.spy(),
-			sinon.spy(),
-			sinon.spy(),
-			sinon.spy(),
-			sinon.spy()
-		];
+		const listeners = [vi.fn(), vi.fn(), vi.fn(), vi.fn(), vi.fn()];
 
 		scratch.innerHTML = originalHtml;
 		clearLog();
@@ -465,11 +454,11 @@ describe('suspense hydration', () => {
 		rerender(); // Flush rerender queue to mimic what preact will really do
 		expect(scratch.innerHTML).to.equal(originalHtml);
 		expect(getLog()).to.deep.equal([]);
-		expect(listeners[4]).not.to.have.been.called;
+		expect(listeners[4]).not.toHaveBeenCalled();
 
 		clearLog();
 		scratch.querySelector('li:last-child').dispatchEvent(createEvent('click'));
-		expect(listeners[4]).to.have.been.calledOnce;
+		expect(listeners[4]).toHaveBeenCalledOnce();
 
 		return resolve(() => (
 			<Fragment>
@@ -484,12 +473,12 @@ describe('suspense hydration', () => {
 			scratch
 				.querySelector('li:nth-child(3)')
 				.dispatchEvent(createEvent('click'));
-			expect(listeners[2]).to.have.been.calledOnce;
+			expect(listeners[2]).toHaveBeenCalledOnce();
 
 			scratch
 				.querySelector('li:last-child')
 				.dispatchEvent(createEvent('click'));
-			expect(listeners[4]).to.have.been.calledTwice;
+			expect(listeners[4]).toHaveBeenCalledTimes(2);
 		});
 	});
 
@@ -530,7 +519,7 @@ describe('suspense hydration', () => {
 		expect(getLog()).to.deep.equal([]);
 		clearLog();
 
-		const lazySpy = sinon.spy();
+		const lazySpy = vi.fn();
 		return resolve(() => <div onClick={lazySpy}>Hello</div>).then(() => {
 			rerender();
 			expect(scratch.innerHTML).to.equal(html);
@@ -539,12 +528,12 @@ describe('suspense hydration', () => {
 
 			const lazyDiv = scratch.firstChild.firstChild.nextSibling;
 			expect(lazyDiv.textContent).to.equal('Hello');
-			expect(lazySpy).not.to.have.been.called;
+			expect(lazySpy).not.toHaveBeenCalled();
 
 			lazyDiv.dispatchEvent(createEvent('click'));
 			rerender();
 
-			expect(lazySpy).to.have.been.calledOnce;
+			expect(lazySpy).toHaveBeenCalledOnce();
 		});
 	});
 
@@ -593,7 +582,7 @@ describe('suspense hydration', () => {
 		expect(getLog()).to.deep.equal([]);
 		clearLog();
 
-		const lazySpy = sinon.spy();
+		const lazySpy = vi.fn();
 		return resolve(() => <div onClick={lazySpy}>Hello</div>).then(() => {
 			rerender();
 			expect(scratch.innerHTML).to.equal(html);
@@ -602,12 +591,12 @@ describe('suspense hydration', () => {
 
 			const lazyDiv = scratch.firstChild.nextSibling;
 			expect(lazyDiv.textContent).to.equal('Hello');
-			expect(lazySpy).not.to.have.been.called;
+			expect(lazySpy).not.toHaveBeenCalled();
 
 			lazyDiv.dispatchEvent(createEvent('click'));
 			rerender();
 
-			expect(lazySpy).to.have.been.calledOnce;
+			expect(lazySpy).toHaveBeenCalledOnce();
 		});
 	});
 
@@ -616,8 +605,8 @@ describe('suspense hydration', () => {
 		scratch.innerHTML = originalHtml;
 		clearLog();
 
-		const bOnClickSpy = sinon.spy();
-		const cOnClickSpy = sinon.spy();
+		const bOnClickSpy = vi.fn();
+		const cOnClickSpy = vi.fn();
 
 		const [Lazy, resolve] = createLazy();
 
@@ -647,7 +636,7 @@ describe('suspense hydration', () => {
 
 		scratch.lastChild.dispatchEvent(createEvent('click'));
 		rerender();
-		expect(cOnClickSpy).to.have.been.calledOnce;
+		expect(cOnClickSpy).toHaveBeenCalledOnce();
 
 		return resolve(() => <div onClick={bOnClickSpy}>b1</div>)
 			.then(() => {
@@ -658,7 +647,7 @@ describe('suspense hydration', () => {
 
 				scratch.firstChild.nextSibling.dispatchEvent(createEvent('click'));
 				rerender();
-				expect(bOnClickSpy).to.have.been.calledOnce;
+				expect(bOnClickSpy).toHaveBeenCalledOnce();
 
 				// suspend again and validate normal suspension works (fallback renders
 				// and result)
@@ -677,10 +666,10 @@ describe('suspense hydration', () => {
 				);
 
 				scratch.lastChild.dispatchEvent(createEvent('click'));
-				expect(cOnClickSpy).to.have.been.calledTwice;
+				expect(cOnClickSpy).toHaveBeenCalledTimes(2);
 
 				scratch.firstChild.nextSibling.dispatchEvent(createEvent('click'));
-				expect(bOnClickSpy).to.have.been.calledTwice;
+				expect(bOnClickSpy).toHaveBeenCalledTimes(2);
 			});
 	});
 
@@ -735,14 +724,7 @@ describe('suspense hydration', () => {
 			li(5)
 		]);
 
-		const listeners = [
-			sinon.spy(),
-			sinon.spy(),
-			sinon.spy(),
-			sinon.spy(),
-			sinon.spy(),
-			sinon.spy()
-		];
+		const listeners = [vi.fn(), vi.fn(), vi.fn(), vi.fn(), vi.fn(), vi.fn()];
 
 		scratch.innerHTML = originalHtml;
 		clearLog();
@@ -767,11 +749,11 @@ describe('suspense hydration', () => {
 		rerender(); // Flush rerender queue to mimic what preact will really do
 		expect(getLog()).to.deep.equal([]);
 		expect(scratch.innerHTML).to.equal(originalHtml);
-		expect(listeners[5]).not.to.have.been.called;
+		expect(listeners[5]).not.toHaveBeenCalled();
 
 		clearLog();
 		scratch.querySelector('li:last-child').dispatchEvent(createEvent('click'));
-		expect(listeners[5]).to.have.been.calledOnce;
+		expect(listeners[5]).toHaveBeenCalledOnce();
 
 		return resolve(() => (
 			<Fragment>
@@ -787,12 +769,12 @@ describe('suspense hydration', () => {
 			scratch
 				.querySelector('li:nth-child(4)')
 				.dispatchEvent(createEvent('click'));
-			expect(listeners[3]).to.have.been.calledOnce;
+			expect(listeners[3]).toHaveBeenCalledOnce();
 
 			scratch
 				.querySelector('li:last-child')
 				.dispatchEvent(createEvent('click'));
-			expect(listeners[5]).to.have.been.calledTwice;
+			expect(listeners[5]).toHaveBeenCalledTimes(2);
 		});
 	});
 
@@ -806,7 +788,7 @@ describe('suspense hydration', () => {
 			li(3)
 		]);
 
-		const listeners = [sinon.spy(), sinon.spy(), sinon.spy(), sinon.spy()];
+		const listeners = [vi.fn(), vi.fn(), vi.fn(), vi.fn()];
 
 		scratch.innerHTML = originalHtml;
 		clearLog();
@@ -831,11 +813,11 @@ describe('suspense hydration', () => {
 		rerender(); // Flush rerender queue to mimic what preact will really do
 		expect(getLog()).to.deep.equal([]);
 		expect(scratch.innerHTML).to.equal(originalHtml);
-		expect(listeners[3]).not.to.have.been.called;
+		expect(listeners[3]).not.toHaveBeenCalled();
 
 		clearLog();
 		scratch.querySelector('li:last-child').dispatchEvent(createEvent('click'));
-		expect(listeners[3]).to.have.been.calledOnce;
+		expect(listeners[3]).toHaveBeenCalledOnce();
 
 		return resolve(() => null).then(() => {
 			rerender();
@@ -846,12 +828,12 @@ describe('suspense hydration', () => {
 			scratch
 				.querySelector('li:nth-child(2)')
 				.dispatchEvent(createEvent('click'));
-			expect(listeners[1]).to.have.been.calledOnce;
+			expect(listeners[1]).toHaveBeenCalledOnce();
 
 			scratch
 				.querySelector('li:last-child')
 				.dispatchEvent(createEvent('click'));
-			expect(listeners[3]).to.have.been.calledTwice;
+			expect(listeners[3]).toHaveBeenCalledTimes(2);
 		});
 	});
 

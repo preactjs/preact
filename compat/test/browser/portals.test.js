@@ -11,6 +11,7 @@ import React, {
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { setupRerender, act } from 'preact/test-utils';
 import { expect } from 'chai';
+import { vi } from 'vitest';
 
 /* eslint-disable react/jsx-boolean-value, react/display-name, prefer-arrow-callback */
 
@@ -160,7 +161,7 @@ describe('Portal', () => {
 	});
 
 	it('should not unmount the portal component', () => {
-		let spy = sinon.spy();
+		let spy = vi.fn();
 		/** @type {(c) => void} */
 		let set;
 		class Child extends Component {
@@ -187,11 +188,11 @@ describe('Portal', () => {
 		}
 
 		render(<Foo />, scratch);
-		expect(spy).not.to.be.called;
+		expect(spy).not.toHaveBeenCalled();
 
 		set({});
 		rerender();
-		expect(spy).not.to.be.called;
+		expect(spy).not.toHaveBeenCalled();
 	});
 
 	it('should not render <undefined> for Portal nodes', () => {
@@ -653,7 +654,7 @@ describe('Portal', () => {
 		scratch.appendChild(root);
 		scratch.appendChild(dialog);
 
-		let spy = sinon.spy();
+		let spy = vi.fn();
 		class Child extends Component {
 			componentDidMount() {
 				spy();
@@ -664,7 +665,7 @@ describe('Portal', () => {
 			}
 		}
 
-		let spyParent = sinon.spy();
+		let spyParent = vi.fn();
 		class App extends Component {
 			componentDidMount() {
 				spyParent();
@@ -676,8 +677,8 @@ describe('Portal', () => {
 
 		render(<App />, root);
 		let dom = document.getElementById('child');
-		expect(spyParent).to.be.calledOnce;
-		expect(spy).to.be.calledOnce;
+		expect(spyParent).toHaveBeenCalledOnce();
+		expect(spy).toHaveBeenCalledOnce();
 
 		// Render twice to trigger update scenario
 		render(<App />, root);
@@ -685,8 +686,8 @@ describe('Portal', () => {
 
 		let domNew = document.getElementById('child');
 		expect(dom).to.equal(domNew);
-		expect(spyParent).to.be.calledOnce;
-		expect(spy).to.be.calledOnce;
+		expect(spyParent).toHaveBeenCalledOnce();
+		expect(spy).toHaveBeenCalledOnce();
 	});
 
 	it('should switch between non portal and portal node (Modal as lastChild)', () => {

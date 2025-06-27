@@ -1,6 +1,7 @@
 import React, { createElement } from 'preact/compat';
 import { setupRerender } from 'preact/test-utils';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
+import { vi } from 'vitest';
 
 describe('PureComponent', () => {
 	/** @type {HTMLDivElement} */
@@ -23,7 +24,7 @@ describe('PureComponent', () => {
 	});
 
 	it('should pass props in constructor', () => {
-		let spy = sinon.spy();
+		let spy = vi.fn();
 		class Foo extends React.PureComponent {
 			constructor(props) {
 				super(props);
@@ -34,7 +35,7 @@ describe('PureComponent', () => {
 		React.render(<Foo foo="bar" />, scratch);
 
 		let expected = { foo: 'bar' };
-		expect(spy).to.be.calledWithMatch(expected, expected);
+		expect(spy).toHaveBeenCalledWith(expected, expected);
 	});
 
 	it('should pass context in constructor', () => {
@@ -54,14 +55,14 @@ describe('PureComponent', () => {
 			}
 		}
 
-		sinon.spy(Foo.prototype, 'render');
+		vi.spyOn(Foo.prototype, 'render');
 
 		const PROPS = { foo: 'bar' };
 		React.render(<Foo {...PROPS} />, scratch);
 
-		expect(Foo.prototype.render)
-			.to.have.been.calledOnce.and.to.have.been.calledWithMatch(PROPS, {}, {})
-			.and.to.have.returned(sinon.match({ type: 'div', props: PROPS }));
+		expect(Foo.prototype.render).toHaveBeenCalledOnce();
+		expect(Foo.prototype.render).toHaveBeenCalledWith(PROPS, {}, {});
+		expect(Foo.prototype.render).toHaveReturned({ type: 'div', props: PROPS });
 		expect(instance.props).to.deep.equal(PROPS);
 		expect(instance.state).to.deep.equal({});
 		expect(instance.context).to.deep.equal({});
@@ -70,8 +71,8 @@ describe('PureComponent', () => {
 	});
 
 	it('should ignore the __source variable', () => {
-		const pureSpy = sinon.spy();
-		const appSpy = sinon.spy();
+		const pureSpy = vi.fn();
+		const appSpy = vi.fn();
 		/** @type {(v) => void} */
 		let set;
 		class Pure extends React.PureComponent {
@@ -89,13 +90,13 @@ describe('PureComponent', () => {
 		};
 
 		React.render(<App />, scratch);
-		expect(appSpy).to.be.calledOnce;
-		expect(pureSpy).to.be.calledOnce;
+		expect(appSpy).toHaveBeenCalledOnce();
+		expect(pureSpy).toHaveBeenCalledOnce();
 
 		set(1);
 		rerender();
-		expect(appSpy).to.be.calledTwice;
-		expect(pureSpy).to.be.calledOnce;
+		expect(appSpy).toHaveBeenCalledTimes(2);
+		expect(pureSpy).toHaveBeenCalledOnce();
 	});
 
 	it('should only re-render when props or state change', () => {
@@ -104,39 +105,39 @@ describe('PureComponent', () => {
 				return <div />;
 			}
 		}
-		let spy = sinon.spy(C.prototype, 'render');
+		let spy = vi.spyOn(C.prototype, 'render');
 
 		let inst = React.render(<C />, scratch);
-		expect(spy).to.have.been.calledOnce;
-		spy.resetHistory();
+		expect(spy).toHaveBeenCalledOnce();
+		spy.mockClear();
 
 		inst = React.render(<C />, scratch);
-		expect(spy).not.to.have.been.called;
+		expect(spy).not.toHaveBeenCalled();
 
 		let b = { foo: 'bar' };
 		inst = React.render(<C a="a" b={b} />, scratch);
-		expect(spy).to.have.been.calledOnce;
-		spy.resetHistory();
+		expect(spy).toHaveBeenCalledOnce();
+		spy.mockClear();
 
 		inst = React.render(<C a="a" b={b} />, scratch);
-		expect(spy).not.to.have.been.called;
+		expect(spy).not.toHaveBeenCalled();
 
 		inst.setState({});
 		rerender();
-		expect(spy).not.to.have.been.called;
+		expect(spy).not.toHaveBeenCalled();
 
 		inst.setState({ a: 'a', b });
 		rerender();
-		expect(spy).to.have.been.calledOnce;
-		spy.resetHistory();
+		expect(spy).toHaveBeenCalledOnce();
+		spy.mockClear();
 
 		inst.setState({ a: 'a', b });
 		rerender();
-		expect(spy).not.to.have.been.called;
+		expect(spy).not.toHaveBeenCalled();
 	});
 
 	it('should update when props are removed', () => {
-		let spy = sinon.spy();
+		let spy = vi.fn();
 		class App extends React.PureComponent {
 			render() {
 				spy();
@@ -146,7 +147,7 @@ describe('PureComponent', () => {
 
 		React.render(<App a="foo" />, scratch);
 		React.render(<App />, scratch);
-		expect(spy).to.be.calledTwice;
+		expect(spy).toHaveBeenCalledTimes(2);
 	});
 
 	it('should have "isPureReactComponent" property', () => {

@@ -7,25 +7,26 @@ import {
 	unstable_ImmediatePriority,
 	unstable_now
 } from 'preact/compat/scheduler';
+import { vi } from 'vitest';
 
 describe('scheduler', () => {
 	describe('runWithPriority', () => {
 		it('should call callback ', () => {
-			const spy = sinon.spy();
+			const spy = vi.fn();
 			unstable_runWithPriority(unstable_IdlePriority, spy);
-			expect(spy.callCount).to.equal(1);
+			expect(spy).toHaveBeenCalledTimes(1);
 
 			unstable_runWithPriority(unstable_LowPriority, spy);
-			expect(spy.callCount).to.equal(2);
+			expect(spy).toHaveBeenCalledTimes(2);
 
 			unstable_runWithPriority(unstable_NormalPriority, spy);
-			expect(spy.callCount).to.equal(3);
+			expect(spy).toHaveBeenCalledTimes(3);
 
 			unstable_runWithPriority(unstable_UserBlockingPriority, spy);
-			expect(spy.callCount).to.equal(4);
+			expect(spy).toHaveBeenCalledTimes(4);
 
 			unstable_runWithPriority(unstable_ImmediatePriority, spy);
-			expect(spy.callCount).to.equal(5);
+			expect(spy).toHaveBeenCalledTimes(5);
 		});
 	});
 

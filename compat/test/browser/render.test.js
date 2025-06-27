@@ -13,6 +13,7 @@ import {
 	createEvent,
 	sortAttributes
 } from '../../../test/_util/helpers';
+import { vi } from 'vitest';
 
 describe('compat render', () => {
 	/** @type {HTMLDivElement} */
@@ -239,32 +240,32 @@ describe('compat render', () => {
 	});
 
 	it('should call onChange and onInput when input event is dispatched', () => {
-		const onChange = sinon.spy();
-		const onInput = sinon.spy();
+		const onChange = vi.fn();
+		const onInput = vi.fn();
 
 		render(<input onChange={onChange} onInput={onInput} />, scratch);
 
 		scratch.firstChild.dispatchEvent(createEvent('input'));
 
-		expect(onChange).to.be.calledOnce;
-		expect(onInput).to.be.calledOnce;
+		expect(onChange).toHaveBeenCalledOnce();
+		expect(onInput).toHaveBeenCalledOnce();
 
-		onChange.resetHistory();
-		onInput.resetHistory();
+		onChange.mockClear();
+		onInput.mockClear();
 
 		// change props order
 		render(<input onInput={onInput} onChange={onChange} />, scratch);
 
 		scratch.firstChild.dispatchEvent(createEvent('input'));
 
-		expect(onChange).to.be.calledOnce;
-		expect(onInput).to.be.calledOnce;
+		expect(onChange).toHaveBeenCalledOnce();
+		expect(onInput).toHaveBeenCalledOnce();
 	});
 
 	it('should keep value of uncontrolled inputs using defaultValue', () => {
 		// See https://github.com/preactjs/preact/issues/2391
 
-		const spy = sinon.spy();
+		const spy = vi.fn();
 
 		class Input extends Component {
 			render() {
@@ -289,14 +290,14 @@ describe('compat render', () => {
 		scratch.firstChild.dispatchEvent(createEvent('input'));
 		rerender();
 		expect(scratch.firstChild.value).to.equal('foo');
-		expect(spy).to.be.calledOnce;
+		expect(spy).toHaveBeenCalledOnce();
 	});
 
 	it('should call the callback', () => {
-		let spy = sinon.spy();
+		let spy = vi.fn();
 		render(<div />, scratch, spy);
-		expect(spy).to.be.calledOnce;
-		expect(spy).to.be.calledWithExactly();
+		expect(spy).toHaveBeenCalledOnce();
+		expect(spy).toHaveBeenCalledWith();
 	});
 
 	// Issue #1727
@@ -511,9 +512,9 @@ describe('compat render', () => {
 	});
 
 	it('should support static content', () => {
-		const updateSpy = sinon.spy();
-		const mountSpy = sinon.spy();
-		const renderSpy = sinon.spy();
+		const updateSpy = vi.fn();
+		const mountSpy = vi.fn();
+		const renderSpy = vi.fn();
 
 		function StaticContent({ children, element = 'div', staticMode }) {
 			// if we're in the server or a spa navigation, just render it
@@ -554,9 +555,9 @@ describe('compat render', () => {
 		});
 
 		expect(scratch.innerHTML).to.eq('<div><div>Staticness</div></div>');
-		expect(renderSpy).to.be.calledOnce;
-		expect(mountSpy).to.be.calledOnce;
-		expect(updateSpy).to.not.be.calledOnce;
+		expect(renderSpy).toHaveBeenCalledOnce();
+		expect(mountSpy).toHaveBeenCalledOnce();
+		expect(updateSpy).not.toHaveBeenCalled();
 
 		act(() => {
 			hydrate(
@@ -568,9 +569,9 @@ describe('compat render', () => {
 		});
 
 		expect(scratch.innerHTML).to.eq('<div><div>Staticness</div></div>');
-		expect(renderSpy).to.be.calledOnce;
-		expect(mountSpy).to.be.calledOnce;
-		expect(updateSpy).to.not.be.calledOnce;
+		expect(renderSpy).toHaveBeenCalledOnce();
+		expect(mountSpy).toHaveBeenCalledOnce();
+		expect(updateSpy).not.toHaveBeenCalled();
 	});
 
 	it('should support the translate attribute w/ yes as a string', () => {
@@ -631,7 +632,7 @@ describe('compat render', () => {
 			}
 		}
 
-		sinon.spy(Inner.prototype, 'render');
+		vi.spyOn(Inner.prototype, 'render');
 
 		render(
 			<Context value={CONTEXT}>
@@ -648,7 +649,11 @@ describe('compat render', () => {
 		);
 
 		// initial render does not invoke anything but render():
-		expect(Inner.prototype.render).to.have.been.calledWithMatch(CONTEXT);
+		expect(Inner.prototype.render).toHaveBeenCalledWith(
+			CONTEXT,
+			{},
+			expect.anything()
+		);
 		expect(receivedContext).to.equal(CONTEXT);
 		expect(scratch.innerHTML).to.equal('<div><div>a</div></div>');
 	});

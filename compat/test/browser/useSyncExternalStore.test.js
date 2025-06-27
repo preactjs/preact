@@ -10,6 +10,7 @@ import React, {
 } from 'preact/compat';
 import { setupRerender, act } from 'preact/test-utils';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
+import { vi } from 'vitest';
 
 const ReactDOM = React;
 
@@ -84,8 +85,8 @@ describe('useSyncExternalStore', () => {
 	}
 
 	it('subscribes and follows effects', () => {
-		const subscribe = sinon.spy(() => () => {});
-		const getSnapshot = sinon.spy(() => 'hello world');
+		const subscribe = vi.fn(() => () => {});
+		const getSnapshot = vi.fn(() => 'hello world');
 
 		const App = () => {
 			const value = useSyncExternalStore(subscribe, getSnapshot);
@@ -96,19 +97,19 @@ describe('useSyncExternalStore', () => {
 			render(<App />, scratch);
 		});
 		expect(scratch.innerHTML).to.equal('<p>hello world</p>');
-		expect(subscribe).to.be.calledOnce;
-		expect(getSnapshot).to.be.calledThrice;
+		expect(subscribe).toHaveBeenCalledOnce();
+		expect(getSnapshot).toHaveBeenCalledTimes(3);
 	});
 
 	it('subscribes and rerenders when called', () => {
 		/** @type {() => void} */
 		let flush;
-		const subscribe = sinon.spy(cb => {
+		const subscribe = vi.fn(cb => {
 			flush = cb;
 			return () => {};
 		});
 		let called = false;
-		const getSnapshot = sinon.spy(() => {
+		const getSnapshot = vi.fn(() => {
 			if (called) {
 				return 'hello new world';
 			}
@@ -125,8 +126,8 @@ describe('useSyncExternalStore', () => {
 			render(<App />, scratch);
 		});
 		expect(scratch.innerHTML).to.equal('<p>hello world</p>');
-		expect(subscribe).to.be.calledOnce;
-		expect(getSnapshot).to.be.calledThrice;
+		expect(subscribe).toHaveBeenCalledOnce();
+		expect(getSnapshot).toHaveBeenCalledTimes(3);
 
 		called = true;
 		flush();
@@ -138,12 +139,12 @@ describe('useSyncExternalStore', () => {
 	it('getSnapshot can return NaN without causing infinite loop', () => {
 		/** @type {() => void} */
 		let flush;
-		const subscribe = sinon.spy(cb => {
+		const subscribe = vi.fn(cb => {
 			flush = cb;
 			return () => {};
 		});
 		let called = false;
-		const getSnapshot = sinon.spy(() => {
+		const getSnapshot = vi.fn(() => {
 			if (called) {
 				return NaN;
 			}
@@ -160,8 +161,8 @@ describe('useSyncExternalStore', () => {
 			render(<App />, scratch);
 		});
 		expect(scratch.innerHTML).to.equal('<p>1</p>');
-		expect(subscribe).to.be.calledOnce;
-		expect(getSnapshot).to.be.calledThrice;
+		expect(subscribe).toHaveBeenCalledOnce();
+		expect(getSnapshot).toHaveBeenCalledTimes(3);
 
 		called = true;
 		flush();
@@ -173,7 +174,7 @@ describe('useSyncExternalStore', () => {
 	it('should not call function values on subscription', () => {
 		/** @type {() => void} */
 		let flush;
-		const subscribe = sinon.spy(cb => {
+		const subscribe = vi.fn(cb => {
 			flush = cb;
 			return () => {};
 		});
@@ -181,7 +182,7 @@ describe('useSyncExternalStore', () => {
 		const func = () => 'value: ' + i++;
 
 		let i = 0;
-		const getSnapshot = sinon.spy(() => {
+		const getSnapshot = vi.fn(() => {
 			return func;
 		});
 
@@ -194,8 +195,8 @@ describe('useSyncExternalStore', () => {
 			render(<App />, scratch);
 		});
 		expect(scratch.innerHTML).to.equal('<p>value: 0</p>');
-		expect(subscribe).to.be.calledOnce;
-		expect(getSnapshot).to.be.calledThrice;
+		expect(subscribe).toHaveBeenCalledOnce();
+		expect(getSnapshot).toHaveBeenCalledTimes(3);
 
 		flush();
 		rerender();
@@ -206,7 +207,7 @@ describe('useSyncExternalStore', () => {
 	it('should work with changing getSnapshot', () => {
 		/** @type {() => void} */
 		let flush;
-		const subscribe = sinon.spy(cb => {
+		const subscribe = vi.fn(cb => {
 			flush = cb;
 			return () => {};
 		});
@@ -223,7 +224,7 @@ describe('useSyncExternalStore', () => {
 			render(<App />, scratch);
 		});
 		expect(scratch.innerHTML).to.equal('<p>value: 0</p>');
-		expect(subscribe).to.be.calledOnce;
+		expect(subscribe).toHaveBeenCalledOnce();
 
 		i++;
 		flush();

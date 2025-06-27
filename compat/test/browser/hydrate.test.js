@@ -1,5 +1,6 @@
 import React, { hydrate } from 'preact/compat';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
+import { vi } from 'vitest';
 
 describe('compat hydrate', () => {
 	/** @type {HTMLDivElement} */
@@ -26,9 +27,9 @@ describe('compat hydrate', () => {
 	it('should call the callback', () => {
 		scratch.innerHTML = '<div></div>';
 
-		let spy = sinon.spy();
+		let spy = vi.fn();
 		hydrate(<div />, scratch, spy);
-		expect(spy).to.be.calledOnce;
-		expect(spy).to.be.calledWithExactly();
+		expect(spy).toHaveBeenCalledOnce();
+		expect(spy).toHaveBeenCalledWith();
 	});
 });

@@ -7,6 +7,7 @@ import {
 } from '../../../test/_util/helpers';
 
 import React, { createElement } from 'preact/compat';
+import { vi } from 'vitest';
 
 describe('preact/compat events', () => {
 	/** @type {HTMLDivElement} */
@@ -17,19 +18,19 @@ describe('preact/compat events', () => {
 		scratch = setupScratch();
 
 		proto = Element.prototype;
-		sinon.spy(proto, 'addEventListener');
-		sinon.spy(proto, 'removeEventListener');
+		vi.spyOn(proto, 'addEventListener');
+		vi.spyOn(proto, 'removeEventListener');
 	});
 
 	afterEach(() => {
 		teardown(scratch);
 
-		proto.addEventListener.restore();
-		proto.removeEventListener.restore();
+		proto.addEventListener.mockRestore();
+		proto.removeEventListener.mockRestore();
 	});
 
 	it('should patch events', () => {
-		let spy = sinon.spy(event => {
+		let spy = vi.fn(event => {
 			expect(event.isDefaultPrevented()).to.be.false;
 			event.preventDefault();
 			expect(event.isDefaultPrevented()).to.be.true;
@@ -42,8 +43,8 @@ describe('preact/compat events', () => {
 		render(<div onClick={spy} />, scratch);
 		scratch.firstChild.click();
 
-		expect(spy).to.be.calledOnce;
-		const event = spy.args[0][0];
+		expect(spy).toHaveBeenCalledOnce();
+		const event = spy.mock.calls[0][0];
 		expect(event).to.haveOwnProperty('persist');
 		expect(event).to.haveOwnProperty('nativeEvent');
 		expect(event).to.haveOwnProperty('isDefaultPrevented');
@@ -87,44 +88,42 @@ describe('preact/compat events', () => {
 
 	it('should normalize onChange for range', () => {
 		render(<input type="range" onChange={() => null} />, scratch);
-		expect(proto.addEventListener).to.have.been.calledOnce;
-		expect(proto.addEventListener).to.have.been.calledWithExactly(
+		expect(proto.addEventListener).toHaveBeenCalledOnce();
+		expect(proto.addEventListener).toHaveBeenCalledWith(
 			'input',
-			sinon.match.func,
+			expect.any(Function),
 			false
 		);
 	});
 
 	it('should support onAnimationEnd', () => {
-		const func = sinon.spy(() => {});
+		const func = vi.fn(() => {});
 		render(<div onAnimationEnd={func} />, scratch);
 
-		expect(
-			proto.addEventListener
-		).to.have.been.calledOnce.and.to.have.been.calledWithExactly(
+		expect(proto.addEventListener).toHaveBeenCalledOnce();
+		expect(proto.addEventListener).toHaveBeenCalledWith(
 			'animationend',
-			sinon.match.func,
+			expect.any(Function),
 			false
 		);
 
 		scratch.firstChild.dispatchEvent(createEvent('animationend'));
-		expect(func).to.have.been.calledOnce;
+		expect(func).toHaveBeenCalledOnce();
 
 		render(<div />, scratch);
-		expect(
-			proto.removeEventListener
-		).to.have.been.calledOnce.and.to.have.been.calledWithExactly(
+		expect(proto.removeEventListener).toHaveBeenCalledOnce();
+		expect(proto.removeEventListener).toHaveBeenCalledWith(
 			'animationend',
-			sinon.match.func,
+			expect.any(Function),
 			false
 		);
 	});
 
 	it('should support onTouch* events', () => {
-		const onTouchStart = sinon.spy();
-		const onTouchEnd = sinon.spy();
-		const onTouchMove = sinon.spy();
-		const onTouchCancel = sinon.spy();
+		const onTouchStart = vi.fn();
+		const onTouchEnd = vi.fn();
+		const onTouchMove = vi.fn();
+		const onTouchCancel = vi.fn();
 
 		render(
 			<div
@@ -136,70 +135,68 @@ describe('preact/compat events', () => {
 			scratch
 		);
 
-		expect(proto.addEventListener.args.length).to.eql(4);
-		expect(proto.addEventListener.args[0].length).to.eql(3);
-		expect(proto.addEventListener.args[0][0]).to.eql('touchstart');
-		expect(proto.addEventListener.args[0][2]).to.eql(false);
-		expect(proto.addEventListener.args[1].length).to.eql(3);
-		expect(proto.addEventListener.args[1][0]).to.eql('touchend');
-		expect(proto.addEventListener.args[1][2]).to.eql(false);
-		expect(proto.addEventListener.args[2].length).to.eql(3);
-		expect(proto.addEventListener.args[2][0]).to.eql('touchmove');
-		expect(proto.addEventListener.args[2][2]).to.eql(false);
-		expect(proto.addEventListener.args[3].length).to.eql(3);
-		expect(proto.addEventListener.args[3][0]).to.eql('touchcancel');
-		expect(proto.addEventListener.args[3][2]).to.eql(false);
+		expect(proto.addEventListener.mock.calls.length).to.eql(4);
+		expect(proto.addEventListener.mock.calls[0].length).to.eql(3);
+		expect(proto.addEventListener.mock.calls[0][0]).to.eql('touchstart');
+		expect(proto.addEventListener.mock.calls[0][2]).to.eql(false);
+		expect(proto.addEventListener.mock.calls[1].length).to.eql(3);
+		expect(proto.addEventListener.mock.calls[1][0]).to.eql('touchend');
+		expect(proto.addEventListener.mock.calls[1][2]).to.eql(false);
+		expect(proto.addEventListener.mock.calls[2].length).to.eql(3);
+		expect(proto.addEventListener.mock.calls[2][0]).to.eql('touchmove');
+		expect(proto.addEventListener.mock.calls[2][2]).to.eql(false);
+		expect(proto.addEventListener.mock.calls[3].length).to.eql(3);
+		expect(proto.addEventListener.mock.calls[3][0]).to.eql('touchcancel');
+		expect(proto.addEventListener.mock.calls[3][2]).to.eql(false);
 
 		scratch.firstChild.dispatchEvent(createEvent('touchstart'));
-		expect(onTouchStart).to.have.been.calledOnce;
+		expect(onTouchStart).toHaveBeenCalledOnce();
 
 		scratch.firstChild.dispatchEvent(createEvent('touchmove'));
-		expect(onTouchMove).to.have.been.calledOnce;
+		expect(onTouchMove).toHaveBeenCalledOnce();
 
 		scratch.firstChild.dispatchEvent(createEvent('touchend'));
-		expect(onTouchEnd).to.have.been.calledOnce;
+		expect(onTouchEnd).toHaveBeenCalledOnce();
 
 		scratch.firstChild.dispatchEvent(createEvent('touchcancel'));
-		expect(onTouchCancel).to.have.been.calledOnce;
+		expect(onTouchCancel).toHaveBeenCalledOnce();
 
 		render(<div />, scratch);
 
-		expect(proto.removeEventListener.args.length).to.eql(4);
-		expect(proto.removeEventListener.args[0].length).to.eql(3);
-		expect(proto.removeEventListener.args[0][0]).to.eql('touchstart');
-		expect(proto.removeEventListener.args[0][2]).to.eql(false);
-		expect(proto.removeEventListener.args[1].length).to.eql(3);
-		expect(proto.removeEventListener.args[1][0]).to.eql('touchend');
-		expect(proto.removeEventListener.args[1][2]).to.eql(false);
-		expect(proto.removeEventListener.args[2].length).to.eql(3);
-		expect(proto.removeEventListener.args[2][0]).to.eql('touchmove');
-		expect(proto.removeEventListener.args[2][2]).to.eql(false);
-		expect(proto.removeEventListener.args[3].length).to.eql(3);
-		expect(proto.removeEventListener.args[3][0]).to.eql('touchcancel');
-		expect(proto.removeEventListener.args[3][2]).to.eql(false);
+		expect(proto.removeEventListener.mock.calls.length).to.eql(4);
+		expect(proto.removeEventListener.mock.calls[0].length).to.eql(3);
+		expect(proto.removeEventListener.mock.calls[0][0]).to.eql('touchstart');
+		expect(proto.removeEventListener.mock.calls[0][2]).to.eql(false);
+		expect(proto.removeEventListener.mock.calls[1].length).to.eql(3);
+		expect(proto.removeEventListener.mock.calls[1][0]).to.eql('touchend');
+		expect(proto.removeEventListener.mock.calls[1][2]).to.eql(false);
+		expect(proto.removeEventListener.mock.calls[2].length).to.eql(3);
+		expect(proto.removeEventListener.mock.calls[2][0]).to.eql('touchmove');
+		expect(proto.removeEventListener.mock.calls[2][2]).to.eql(false);
+		expect(proto.removeEventListener.mock.calls[3].length).to.eql(3);
+		expect(proto.removeEventListener.mock.calls[3][0]).to.eql('touchcancel');
+		expect(proto.removeEventListener.mock.calls[3][2]).to.eql(false);
 	});
 
 	it('should support onTransitionEnd', () => {
-		const func = sinon.spy(() => {});
+		const func = vi.fn(() => {});
 		render(<div onTransitionEnd={func} />, scratch);
 
-		expect(
-			proto.addEventListener
-		).to.have.been.calledOnce.and.to.have.been.calledWithExactly(
+		expect(proto.addEventListener).toHaveBeenCalledOnce();
+		expect(proto.addEventListener).toHaveBeenCalledWith(
 			'transitionend',
-			sinon.match.func,
+			expect.any(Function),
 			false
 		);
 
 		scratch.firstChild.dispatchEvent(createEvent('transitionend'));
-		expect(func).to.have.been.calledOnce;
+		expect(func).toHaveBeenCalledOnce();
 
 		render(<div />, scratch);
-		expect(
-			proto.removeEventListener
-		).to.have.been.calledOnce.and.to.have.been.calledWithExactly(
+		expect(proto.removeEventListener).toHaveBeenCalledOnce();
+		expect(proto.removeEventListener).toHaveBeenCalledWith(
 			'transitionend',
-			sinon.match.func,
+			expect.any(Function),
 			false
 		);
 	});
@@ -247,36 +244,36 @@ describe('preact/compat events', () => {
 	});
 
 	it('should normalize beforeinput event listener', () => {
-		let spy = sinon.spy();
+		let spy = vi.fn();
 		render(<input onBeforeInput={spy} />, scratch);
 		scratch.firstChild.dispatchEvent(createEvent('beforeinput'));
-		expect(spy).to.be.calledOnce;
+		expect(spy).toHaveBeenCalledOnce();
 	});
 
 	it('should normalize compositionstart event listener', () => {
-		let spy = sinon.spy();
+		let spy = vi.fn();
 		render(<input onCompositionStart={spy} />, scratch);
 		scratch.firstChild.dispatchEvent(createEvent('compositionstart'));
-		expect(spy).to.be.calledOnce;
+		expect(spy).toHaveBeenCalledOnce();
 	});
 
 	it('should normalize onFocus to onfocusin', () => {
-		let spy = sinon.spy();
+		let spy = vi.fn();
 		render(<input onFocus={spy} />, scratch);
 		scratch.firstChild.dispatchEvent(createEvent('focusin'));
-		expect(spy).to.be.calledOnce;
+		expect(spy).toHaveBeenCalledOnce();
 	});
 
 	it('should normalize onBlur to onfocusout', () => {
-		let spy = sinon.spy();
+		let spy = vi.fn();
 		render(<input onBlur={spy} />, scratch);
 		scratch.firstChild.dispatchEvent(createEvent('focusout'));
-		expect(spy).to.be.calledOnce;
+		expect(spy).toHaveBeenCalledOnce();
 	});
 
 	if (supportsPassiveEvents()) {
 		it('should use capturing for event props ending with *Capture', () => {
-			let click = sinon.spy();
+			let click = vi.fn();
 
 			render(
 				<div onTouchMoveCapture={click}>
@@ -285,10 +282,10 @@ describe('preact/compat events', () => {
 				scratch
 			);
 
-			expect(proto.addEventListener).to.have.been.calledOnce;
-			expect(proto.addEventListener).to.have.been.calledWithExactly(
+			expect(proto.addEventListener).toHaveBeenCalledOnce();
+			expect(proto.addEventListener).toHaveBeenCalledWith(
 				'touchmove',
-				sinon.match.func,
+				expect.any(Function),
 				true
 			);
 		});
