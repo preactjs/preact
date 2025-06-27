@@ -1,4 +1,5 @@
 import React, { Component, lazy } from 'preact/compat';
+import { vi } from 'vitest';
 
 const h = React.createElement;
 
@@ -101,7 +102,7 @@ export function createSuspender(DefaultComponent) {
 		}
 	}
 
-	sinon.spy(Suspender.prototype, 'render');
+	vi.spyOn(Suspender.prototype, 'render');
 
 	/**
 	 * @returns {Resolvers}

@@ -14,6 +14,7 @@ import React, {
 } from 'preact/compat';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { createLazy, createSuspender } from './suspense-utils';
+import { vi } from 'vitest';
 
 const h = React.createElement;
 /* eslint-env browser */
@@ -159,8 +160,8 @@ describe('suspense', () => {
 	it('should call effect cleanups', () => {
 		/** @type {(v) => void} */
 		let set;
-		const effectSpy = sinon.spy();
-		const layoutEffectSpy = sinon.spy();
+		const effectSpy = vi.fn();
+		const layoutEffectSpy = vi.fn();
 		const LazyComp = ({ name }) => <div>Hello from {name}</div>;
 
 		/** @type {() => Promise<void>} */
@@ -212,13 +213,13 @@ describe('suspense', () => {
 		set(true);
 		rerender();
 		expect(scratch.innerHTML).to.eql('<div>Suspended...</div>');
-		expect(effectSpy).to.be.calledOnce;
-		expect(layoutEffectSpy).to.be.calledOnce;
+		expect(effectSpy).toHaveBeenCalledOnce();
+		expect(layoutEffectSpy).toHaveBeenCalledOnce();
 
 		return resolve().then(() => {
 			rerender();
-			expect(effectSpy).to.be.calledOnce;
-			expect(layoutEffectSpy).to.be.calledOnce;
+			expect(effectSpy).toHaveBeenCalledOnce();
+			expect(layoutEffectSpy).toHaveBeenCalledOnce();
 			expect(scratch.innerHTML).to.eql(`<div><p>hi</p></div>`);
 		});
 	});
@@ -388,10 +389,10 @@ describe('suspense', () => {
 		}
 
 		const lifecycles = LifecycleSuspender.prototype;
-		sinon.spy(lifecycles, 'componentWillMount');
-		sinon.spy(lifecycles, 'componentDidMount');
-		sinon.spy(lifecycles, 'componentDidUpdate');
-		sinon.spy(lifecycles, 'componentWillUnmount');
+		vi.spyOn(lifecycles, 'componentWillMount');
+		vi.spyOn(lifecycles, 'componentDidMount');
+		vi.spyOn(lifecycles, 'componentDidUpdate');
+		vi.spyOn(lifecycles, 'componentWillUnmount');
 
 		render(
 			<Suspense fallback={<div>Suspended...</div>}>
@@ -401,28 +402,28 @@ describe('suspense', () => {
 		);
 
 		expect(scratch.innerHTML).to.eql(``);
-		expect(lifecycles.componentWillMount).to.have.been.calledOnce;
-		expect(lifecycles.componentDidMount).to.not.have.been.called;
-		expect(lifecycles.componentDidUpdate).to.not.have.been.called;
-		expect(lifecycles.componentWillUnmount).to.not.have.been.called;
+		expect(lifecycles.componentWillMount).toHaveBeenCalledOnce();
+		expect(lifecycles.componentDidMount).not.toHaveBeenCalled();
+		expect(lifecycles.componentDidUpdate).not.toHaveBeenCalled();
+		expect(lifecycles.componentWillUnmount).not.toHaveBeenCalled();
 
 		rerender();
 
 		expect(scratch.innerHTML).to.eql(`<div>Suspended...</div>`);
-		expect(lifecycles.componentWillMount).to.have.been.calledOnce;
-		expect(lifecycles.componentDidMount).to.not.have.been.called;
-		expect(lifecycles.componentDidUpdate).to.not.have.been.called;
-		expect(lifecycles.componentWillUnmount).to.not.have.been.called;
+		expect(lifecycles.componentWillMount).toHaveBeenCalledOnce();
+		expect(lifecycles.componentDidMount).not.toHaveBeenCalled();
+		expect(lifecycles.componentDidUpdate).not.toHaveBeenCalled();
+		expect(lifecycles.componentWillUnmount).not.toHaveBeenCalled();
 
 		return resolve().then(() => {
 			rerender();
 			expect(scratch.innerHTML).to.eql(`<div>Lifecycle</div>`);
 
-			expect(lifecycles.componentWillMount).to.have.been.calledOnce;
-			expect(lifecycles.componentDidMount).to.have.been.calledOnce;
+			expect(lifecycles.componentWillMount).toHaveBeenCalledOnce();
+			expect(lifecycles.componentDidMount).toHaveBeenCalledOnce();
 			// TODO: This is unexpected. See TODO in next test regarding this and preactjs/preact#2098
-			expect(lifecycles.componentDidUpdate).to.have.been.calledOnce;
-			expect(lifecycles.componentWillUnmount).to.not.have.been.called;
+			expect(lifecycles.componentDidUpdate).toHaveBeenCalledOnce();
+			expect(lifecycles.componentWillUnmount).not.toHaveBeenCalled();
 		});
 	});
 
@@ -466,10 +467,10 @@ describe('suspense', () => {
 		}
 
 		const lifecycles = LifecycleSuspender.prototype;
-		sinon.spy(lifecycles, 'componentWillMount');
-		sinon.spy(lifecycles, 'componentDidMount');
-		sinon.spy(lifecycles, 'componentDidUpdate');
-		sinon.spy(lifecycles, 'componentWillUnmount');
+		vi.spyOn(lifecycles, 'componentWillMount');
+		vi.spyOn(lifecycles, 'componentDidMount');
+		vi.spyOn(lifecycles, 'componentDidUpdate');
+		vi.spyOn(lifecycles, 'componentWillUnmount');
 
 		render(
 			<Suspense fallback={<div>Suspended...</div>}>
@@ -479,41 +480,41 @@ describe('suspense', () => {
 		);
 
 		expect(scratch.innerHTML).to.eql(`<p>Count: 0</p>`);
-		expect(lifecycles.componentWillMount).to.have.been.calledOnce;
-		expect(lifecycles.componentDidMount).to.have.been.calledOnce;
-		expect(lifecycles.componentDidUpdate).to.not.have.been.called;
-		expect(lifecycles.componentWillUnmount).to.not.have.been.called;
+		expect(lifecycles.componentWillMount).toHaveBeenCalledOnce();
+		expect(lifecycles.componentDidMount).toHaveBeenCalledOnce();
+		expect(lifecycles.componentDidUpdate).not.toHaveBeenCalled();
+		expect(lifecycles.componentWillUnmount).not.toHaveBeenCalled();
 
 		increment();
 		rerender();
 
 		expect(scratch.innerHTML).to.eql(`<p>Count: 1</p>`);
-		expect(lifecycles.componentWillMount).to.have.been.calledOnce;
-		expect(lifecycles.componentDidMount).to.have.been.calledOnce;
-		expect(lifecycles.componentDidUpdate).to.have.been.calledOnce;
-		expect(lifecycles.componentWillUnmount).to.not.have.been.called;
+		expect(lifecycles.componentWillMount).toHaveBeenCalledOnce();
+		expect(lifecycles.componentDidMount).toHaveBeenCalledOnce();
+		expect(lifecycles.componentDidUpdate).toHaveBeenCalledOnce();
+		expect(lifecycles.componentWillUnmount).not.toHaveBeenCalled();
 
 		increment();
 		rerender();
 
 		expect(scratch.innerHTML).to.eql(`<div>Suspended...</div>`);
-		expect(lifecycles.componentWillMount).to.have.been.calledOnce;
-		expect(lifecycles.componentDidMount).to.have.been.calledOnce;
-		expect(lifecycles.componentDidUpdate).to.have.been.calledOnce;
-		expect(lifecycles.componentWillUnmount).to.not.have.been.called;
+		expect(lifecycles.componentWillMount).toHaveBeenCalledOnce();
+		expect(lifecycles.componentDidMount).toHaveBeenCalledOnce();
+		expect(lifecycles.componentDidUpdate).toHaveBeenCalledOnce();
+		expect(lifecycles.componentWillUnmount).not.toHaveBeenCalled();
 
 		return resolve().then(() => {
 			rerender();
 
 			expect(scratch.innerHTML).to.eql(`<p>Count: 2</p>`);
-			expect(lifecycles.componentWillMount).to.have.been.calledOnce;
-			expect(lifecycles.componentDidMount).to.have.been.calledOnce;
+			expect(lifecycles.componentWillMount).toHaveBeenCalledOnce();
+			expect(lifecycles.componentDidMount).toHaveBeenCalledOnce();
 			// TODO: This is called thrice since the cDU queued up after the second
 			// increment is never cleared once the component suspends. So when it
 			// resumes and the component is rerendered, we queue up another cDU so
 			// cDU is called an extra time.
-			expect(lifecycles.componentDidUpdate).to.have.been.calledThrice;
-			expect(lifecycles.componentWillUnmount).to.not.have.been.called;
+			expect(lifecycles.componentDidUpdate).toHaveBeenCalledTimes(3);
+			expect(lifecycles.componentWillUnmount).not.toHaveBeenCalled();
 		});
 	});
 
@@ -529,10 +530,10 @@ describe('suspense', () => {
 		}
 
 		const lifecycles = LifecycleLogger.prototype;
-		sinon.spy(lifecycles, 'componentWillMount');
-		sinon.spy(lifecycles, 'componentDidMount');
-		sinon.spy(lifecycles, 'componentDidUpdate');
-		sinon.spy(lifecycles, 'componentWillUnmount');
+		vi.spyOn(lifecycles, 'componentWillMount');
+		vi.spyOn(lifecycles, 'componentDidMount');
+		vi.spyOn(lifecycles, 'componentDidUpdate');
+		vi.spyOn(lifecycles, 'componentWillUnmount');
 
 		const [Suspender, suspend] = createSuspender(() => <div>Suspense</div>);
 
@@ -545,20 +546,20 @@ describe('suspense', () => {
 		);
 
 		expect(scratch.innerHTML).to.eql(`<div>Suspense</div><div>Lifecycle</div>`);
-		expect(lifecycles.componentWillMount).to.have.been.calledOnce;
-		expect(lifecycles.componentDidMount).to.have.been.calledOnce;
-		expect(lifecycles.componentDidUpdate).to.not.have.been.called;
-		expect(lifecycles.componentWillUnmount).to.not.have.been.called;
+		expect(lifecycles.componentWillMount).toHaveBeenCalledOnce();
+		expect(lifecycles.componentDidMount).toHaveBeenCalledOnce();
+		expect(lifecycles.componentDidUpdate).not.toHaveBeenCalled();
+		expect(lifecycles.componentWillUnmount).not.toHaveBeenCalled();
 
 		const [resolve] = suspend();
 
 		rerender();
 
 		expect(scratch.innerHTML).to.eql(`<div>Suspended...</div>`);
-		expect(lifecycles.componentWillMount).to.have.been.calledOnce;
-		expect(lifecycles.componentDidMount).to.have.been.calledOnce;
-		expect(lifecycles.componentDidUpdate).to.not.have.been.called;
-		expect(lifecycles.componentWillUnmount).to.not.have.been.called;
+		expect(lifecycles.componentWillMount).toHaveBeenCalledOnce();
+		expect(lifecycles.componentDidMount).toHaveBeenCalledOnce();
+		expect(lifecycles.componentDidUpdate).not.toHaveBeenCalled();
+		expect(lifecycles.componentWillUnmount).not.toHaveBeenCalled();
 
 		return resolve(() => <div>Suspense 2</div>).then(() => {
 			rerender();
@@ -566,10 +567,10 @@ describe('suspense', () => {
 				`<div>Suspense 2</div><div>Lifecycle</div>`
 			);
 
-			expect(lifecycles.componentWillMount).to.have.been.calledOnce;
-			expect(lifecycles.componentDidMount).to.have.been.calledOnce;
-			expect(lifecycles.componentDidUpdate).to.have.been.calledOnce;
-			expect(lifecycles.componentWillUnmount).to.not.have.been.called;
+			expect(lifecycles.componentWillMount).toHaveBeenCalledOnce();
+			expect(lifecycles.componentDidMount).toHaveBeenCalledOnce();
+			expect(lifecycles.componentDidUpdate).toHaveBeenCalledOnce();
+			expect(lifecycles.componentWillUnmount).not.toHaveBeenCalled();
 		});
 	});
 
@@ -584,9 +585,9 @@ describe('suspense', () => {
 		}
 
 		const lifecycles = LifecycleLogger.prototype;
-		sinon.spy(lifecycles, 'componentWillMount');
-		sinon.spy(lifecycles, 'componentDidMount');
-		sinon.spy(lifecycles, 'componentWillUnmount');
+		vi.spyOn(lifecycles, 'componentWillMount');
+		vi.spyOn(lifecycles, 'componentDidMount');
+		vi.spyOn(lifecycles, 'componentWillUnmount');
 
 		const [Suspender, suspend] = createSuspender(() => <div>Suspense</div>);
 
@@ -598,26 +599,26 @@ describe('suspense', () => {
 		);
 
 		expect(scratch.innerHTML).to.eql(`<div>Suspense</div>`);
-		expect(lifecycles.componentWillMount).to.not.have.been.called;
-		expect(lifecycles.componentDidMount).to.not.have.been.called;
-		expect(lifecycles.componentWillUnmount).to.not.have.been.called;
+		expect(lifecycles.componentWillMount).not.toHaveBeenCalled();
+		expect(lifecycles.componentDidMount).not.toHaveBeenCalled();
+		expect(lifecycles.componentWillUnmount).not.toHaveBeenCalled();
 
 		const [resolve] = suspend();
 
 		rerender();
 
 		expect(scratch.innerHTML).to.eql(`<div>Lifecycle</div>`);
-		expect(lifecycles.componentWillMount).to.have.been.calledOnce;
-		expect(lifecycles.componentDidMount).to.have.been.calledOnce;
-		expect(lifecycles.componentWillUnmount).to.not.have.been.called;
+		expect(lifecycles.componentWillMount).toHaveBeenCalledOnce();
+		expect(lifecycles.componentDidMount).toHaveBeenCalledOnce();
+		expect(lifecycles.componentWillUnmount).not.toHaveBeenCalled();
 
 		return resolve(() => <div>Suspense 2</div>).then(() => {
 			rerender();
 			expect(scratch.innerHTML).to.eql(`<div>Suspense 2</div>`);
 
-			expect(lifecycles.componentWillMount).to.have.been.calledOnce;
-			expect(lifecycles.componentDidMount).to.have.been.calledOnce;
-			expect(lifecycles.componentWillUnmount).to.have.been.calledOnce;
+			expect(lifecycles.componentWillMount).toHaveBeenCalledOnce();
+			expect(lifecycles.componentDidMount).toHaveBeenCalledOnce();
+			expect(lifecycles.componentWillUnmount).toHaveBeenCalledOnce();
 		});
 	});
 
@@ -831,33 +832,33 @@ describe('suspense', () => {
 		expect(scratch.innerHTML).to.eql(
 			`<div>Hello first</div><div>Hello second</div>`
 		);
-		expect(Suspender1.prototype.render).to.have.been.calledOnce;
-		expect(Suspender2.prototype.render).to.have.been.calledOnce;
+		expect(Suspender1.prototype.render).toHaveBeenCalledOnce();
+		expect(Suspender2.prototype.render).toHaveBeenCalledOnce();
 
 		const [resolve1] = suspend1();
 		const [resolve2] = suspend2();
-		expect(Suspender1.prototype.render).to.have.been.calledOnce;
-		expect(Suspender2.prototype.render).to.have.been.calledOnce;
+		expect(Suspender1.prototype.render).toHaveBeenCalledOnce();
+		expect(Suspender2.prototype.render).toHaveBeenCalledOnce();
 
 		rerender();
 
 		expect(scratch.innerHTML).to.eql(`<div>Suspended...</div>`);
-		expect(Suspender1.prototype.render).to.have.been.calledTwice;
-		expect(Suspender2.prototype.render).to.have.been.calledTwice;
+		expect(Suspender1.prototype.render).toHaveBeenCalledTimes(2);
+		expect(Suspender2.prototype.render).toHaveBeenCalledTimes(2);
 
 		return resolve1(() => <div>Hello first 2</div>).then(() => {
 			rerender();
 			expect(scratch.innerHTML).to.eql(`<div>Suspended...</div>`);
-			expect(Suspender1.prototype.render).to.have.been.calledTwice;
-			expect(Suspender2.prototype.render).to.have.been.calledTwice;
+			expect(Suspender1.prototype.render).toHaveBeenCalledTimes(2);
+			expect(Suspender2.prototype.render).toHaveBeenCalledTimes(2);
 
 			return resolve2(() => <div>Hello second 2</div>).then(() => {
 				rerender();
 				expect(scratch.innerHTML).to.eql(
 					`<div>Hello first 2</div><div>Hello second 2</div>`
 				);
-				expect(Suspender1.prototype.render).to.have.been.calledThrice;
-				expect(Suspender2.prototype.render).to.have.been.calledThrice;
+				expect(Suspender1.prototype.render).toHaveBeenCalledTimes(3);
+				expect(Suspender2.prototype.render).toHaveBeenCalledTimes(3);
 			});
 		});
 	});
@@ -885,33 +886,33 @@ describe('suspense', () => {
 		expect(scratch.innerHTML).to.eql(
 			`<div>Hello first</div><div><div>Hello second</div></div>`
 		);
-		expect(Suspender1.prototype.render).to.have.been.calledOnce;
-		expect(Suspender2.prototype.render).to.have.been.calledOnce;
+		expect(Suspender1.prototype.render).toHaveBeenCalledOnce();
+		expect(Suspender2.prototype.render).toHaveBeenCalledOnce();
 
 		const [resolve1] = suspend1();
 		const [resolve2] = suspend2();
-		expect(Suspender1.prototype.render).to.have.been.calledOnce;
-		expect(Suspender2.prototype.render).to.have.been.calledOnce;
+		expect(Suspender1.prototype.render).toHaveBeenCalledOnce();
+		expect(Suspender2.prototype.render).toHaveBeenCalledOnce();
 
 		rerender();
 
 		expect(scratch.innerHTML).to.eql(`<div>Suspended...</div>`);
-		expect(Suspender1.prototype.render).to.have.been.calledTwice;
-		expect(Suspender2.prototype.render).to.have.been.calledTwice;
+		expect(Suspender1.prototype.render).toHaveBeenCalledTimes(2);
+		expect(Suspender2.prototype.render).toHaveBeenCalledTimes(2);
 
 		return resolve1(() => <div>Hello first 2</div>).then(() => {
 			rerender();
 			expect(scratch.innerHTML).to.eql(`<div>Suspended...</div>`);
-			expect(Suspender1.prototype.render).to.have.been.calledTwice;
-			expect(Suspender2.prototype.render).to.have.been.calledTwice;
+			expect(Suspender1.prototype.render).toHaveBeenCalledTimes(2);
+			expect(Suspender2.prototype.render).toHaveBeenCalledTimes(2);
 
 			return resolve2(() => <div>Hello second 2</div>).then(() => {
 				rerender();
 				expect(scratch.innerHTML).to.eql(
 					`<div>Hello first 2</div><div><div>Hello second 2</div></div>`
 				);
-				expect(Suspender1.prototype.render).to.have.been.calledThrice;
-				expect(Suspender2.prototype.render).to.have.been.calledThrice;
+				expect(Suspender1.prototype.render).toHaveBeenCalledTimes(3);
+				expect(Suspender2.prototype.render).toHaveBeenCalledTimes(3);
 			});
 		});
 	});
@@ -1410,7 +1411,7 @@ describe('suspense', () => {
 		expect(scratch.innerHTML).to.eql(
 			`<div>conditional show<div>Suspender</div></div>`
 		);
-		expect(Suspender.prototype.render).to.have.been.calledOnce;
+		expect(Suspender.prototype.render).toHaveBeenCalledOnce();
 
 		suspend();
 		rerender();
@@ -1647,7 +1648,7 @@ describe('suspense', () => {
 		);
 
 		expect(scratch.innerHTML).to.eql(`<div>i: 0<div>Suspender</div></div>`);
-		expect(Suspender.prototype.render).to.have.been.calledOnce;
+		expect(Suspender.prototype.render).toHaveBeenCalledOnce();
 
 		const [resolve] = suspend();
 		rerender();
@@ -1671,7 +1672,7 @@ describe('suspense', () => {
 	});
 
 	it('should call componentWillUnmount on a suspended component', () => {
-		const cWUSpy = sinon.spy();
+		const cWUSpy = vi.fn();
 
 		// eslint-disable-next-line react/require-render-return
 		class Suspender extends Component {
@@ -1730,15 +1731,15 @@ describe('suspense', () => {
 		);
 
 		expect(scratch.innerHTML).to.eql(`<div>conditional show</div>`);
-		expect(cWUSpy).to.not.have.been.called;
+		expect(cWUSpy).not.toHaveBeenCalled();
 
 		hide();
 		rerender();
 
-		expect(cWUSpy).to.have.been.calledOnce;
+		expect(cWUSpy).toHaveBeenCalledOnce();
 		expect(suspender).not.to.be.undefined;
 		expect(suspender).not.to.be.null;
-		expect(cWUSpy.getCall(0).thisValue).to.eql(suspender);
+		expect(cWUSpy.mock.contexts[0]).to.eql(suspender);
 		expect(scratch.innerHTML).to.eql(`<div>conditional hide</div>`);
 	});
 

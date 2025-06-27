@@ -11,6 +11,7 @@ import React, {
 	memo,
 	useState
 } from 'preact/compat';
+import { vi } from 'vitest';
 
 const h = React.createElement;
 
@@ -37,7 +38,7 @@ describe('memo()', () => {
 	});
 
 	it('should work with function components', () => {
-		let spy = sinon.spy();
+		let spy = vi.fn();
 
 		function Foo() {
 			spy();
@@ -59,16 +60,16 @@ describe('memo()', () => {
 		}
 		render(<App />, scratch);
 
-		expect(spy).to.be.calledOnce;
+		expect(spy).toHaveBeenCalledOnce();
 
 		update();
 		rerender();
 
-		expect(spy).to.be.calledOnce;
+		expect(spy).toHaveBeenCalledOnce();
 	});
 
 	it('should support adding refs', () => {
-		let spy = sinon.spy();
+		let spy = vi.fn();
 
 		let ref = null;
 
@@ -92,7 +93,7 @@ describe('memo()', () => {
 		}
 		render(<App />, scratch);
 
-		expect(spy).to.be.calledOnce;
+		expect(spy).toHaveBeenCalledOnce();
 
 		ref = {};
 
@@ -101,7 +102,7 @@ describe('memo()', () => {
 
 		expect(ref.current).to.equal(scratch.firstChild);
 		// TODO: not sure whether this is in-line with react...
-		expect(spy).to.be.calledTwice;
+		expect(spy).toHaveBeenCalledTimes(2);
 	});
 
 	it('should support custom comparer functions', () => {
@@ -109,7 +110,7 @@ describe('memo()', () => {
 			return <h1>Hello World</h1>;
 		}
 
-		let spy = sinon.spy(() => true);
+		let spy = vi.fn(() => true);
 		let Memoized = memo(Foo, spy);
 
 		/** @type {(v) => void} */
@@ -128,12 +129,12 @@ describe('memo()', () => {
 		update();
 		rerender();
 
-		expect(spy).to.be.calledOnce;
-		expect(spy).to.be.calledWith({}, {});
+		expect(spy).toHaveBeenCalledOnce();
+		expect(spy).toHaveBeenCalledWith({}, {});
 	});
 
 	it('should rerender when custom comparer returns false', () => {
-		const spy = sinon.spy();
+		const spy = vi.fn();
 		function Foo() {
 			spy();
 			return <h1>Hello World</h1>;
@@ -141,14 +142,14 @@ describe('memo()', () => {
 
 		const App = memo(Foo, () => false);
 		render(<App />, scratch);
-		expect(spy).to.be.calledOnce;
+		expect(spy).toHaveBeenCalledOnce();
 
 		render(<App foo="bar" />, scratch);
-		expect(spy).to.be.calledTwice;
+		expect(spy).toHaveBeenCalledTimes(2);
 	});
 
 	it('should pass props and nextProps to comparer fn', () => {
-		const spy = sinon.spy(() => false);
+		const spy = vi.fn(() => false);
 		function Foo() {
 			return <div>foo</div>;
 		}
@@ -159,7 +160,7 @@ describe('memo()', () => {
 		render(h(App, props), scratch);
 		render(h(App, nextProps), scratch);
 
-		expect(spy).to.be.calledWith(props, nextProps);
+		expect(spy).toHaveBeenCalledWith(props, nextProps);
 	});
 
 	it('should nest without errors', () => {

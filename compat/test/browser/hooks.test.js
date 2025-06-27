@@ -11,6 +11,7 @@ import React, {
 } from 'preact/compat';
 import { setupRerender, act } from 'preact/test-utils';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
+import { vi } from 'vitest';
 
 describe('React-18-hooks', () => {
 	/** @type {HTMLDivElement} */
@@ -43,7 +44,7 @@ describe('React-18-hooks', () => {
 
 	describe('useInsertionEffect', () => {
 		it('runs the effect', () => {
-			const spy = sinon.spy();
+			const spy = vi.fn();
 			const App = () => {
 				useInsertionEffect(spy, []);
 				return <p>hello world</p>;
@@ -54,13 +55,13 @@ describe('React-18-hooks', () => {
 			});
 
 			expect(scratch.innerHTML).to.equal('<p>hello world</p>');
-			expect(spy).to.be.calledOnce;
+			expect(spy).toHaveBeenCalledOnce();
 		});
 	});
 
 	describe('useTransition', () => {
 		it('runs transitions', () => {
-			const spy = sinon.spy();
+			const spy = vi.fn();
 
 			/** @type {(v) => void} */
 			let go;
@@ -75,7 +76,7 @@ describe('React-18-hooks', () => {
 
 			go(spy);
 			rerender();
-			expect(spy).to.be.calledOnce;
+			expect(spy).toHaveBeenCalledOnce();
 			expect(scratch.innerHTML).to.equal('<p>Pending: no</p>');
 		});
 	});
