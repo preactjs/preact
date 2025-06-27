@@ -1,5 +1,6 @@
 import { options, createElement, render, Component } from 'preact';
 import { teardown, setupRerender } from 'preact/test-utils';
+import { vi } from 'vitest';
 
 /** @jsx createElement */
 
@@ -12,7 +13,7 @@ describe('setupRerender & teardown', () => {
 	});
 
 	it('should restore previous debounce', () => {
-		let spy = (options.debounceRendering = sinon.spy());
+		let spy = (options.debounceRendering = vi.fn());
 
 		setupRerender();
 		teardown();
@@ -36,24 +37,24 @@ describe('setupRerender & teardown', () => {
 			}
 		}
 
-		sinon.spy(Counter.prototype, 'render');
+		vi.spyOn(Counter.prototype, 'render');
 
 		// Setup rerender
 		setupRerender();
 
 		// Initial render
 		render(<Counter />, scratch);
-		expect(Counter.prototype.render).to.have.been.calledOnce;
+		expect(Counter.prototype.render).toHaveBeenCalledOnce();
 		expect(scratch.innerHTML).to.equal('<div>0</div>');
 
 		// queue rerender
 		increment();
-		expect(Counter.prototype.render).to.have.been.calledOnce;
+		expect(Counter.prototype.render).toHaveBeenCalledOnce();
 		expect(scratch.innerHTML).to.equal('<div>0</div>');
 
 		// Pretend test forgot to call rerender. Teardown should do that
 		teardown();
-		expect(Counter.prototype.render).to.have.been.calledTwice;
+		expect(Counter.prototype.render).toHaveBeenCalledTimes(2);
 		expect(scratch.innerHTML).to.equal('<div>1</div>');
 	});
 });

@@ -2,6 +2,7 @@ import { createElement, render, options } from 'preact';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { useState } from 'preact/hooks';
 import { addHookName } from 'preact/devtools';
+import { vi } from 'vitest';
 
 /** @jsx createElement */
 
@@ -32,7 +33,7 @@ describe('addHookName', () => {
 	});
 
 	it('should call options hook with value', () => {
-		let spy = (options._addHookName = sinon.spy());
+		let spy = (options._addHookName = vi.fn());
 
 		function useFoo() {
 			return addHookName(useState(0), 'foo');
@@ -45,7 +46,7 @@ describe('addHookName', () => {
 
 		render(<App />, scratch);
 
-		expect(spy).to.be.calledOnce;
-		expect(spy).to.be.calledWith('foo');
+		expect(spy).toHaveBeenCalledOnce();
+		expect(spy).toHaveBeenCalledWith('foo');
 	});
 });
