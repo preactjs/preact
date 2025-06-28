@@ -407,6 +407,7 @@ function findMatchingIndex(
 	const key = childVNode.key;
 	const type = childVNode.type;
 	let oldVNode = oldChildren[skewedIndex];
+	const matched = oldVNode != NULL && (oldVNode._flags & MATCHED) == 0;
 
 	// We only need to perform a search if there are more children
 	// (remainingOldChildren) to search. However, if the oldVNode we just looked
@@ -421,45 +422,26 @@ function findMatchingIndex(
 	// we should not search as we risk re-using state of an unrelated VNode. (reverted for now)
 	let shouldSearch =
 		// (typeof type != 'function' || type === Fragment || key) &&
-		remainingOldChildren >
-		(oldVNode != NULL && (oldVNode._flags & MATCHED) == 0 ? 1 : 0);
+		remainingOldChildren > (matched ? 1 : 0);
 
 	if (
 		(oldVNode === NULL && childVNode.key == null) ||
-		(oldVNode &&
-			key == oldVNode.key &&
-			type == oldVNode.type &&
-			(oldVNode._flags & MATCHED) == 0)
+		(matched && key == oldVNode.key && type == oldVNode.type)
 	) {
 		return skewedIndex;
 	} else if (shouldSearch) {
 		let x = skewedIndex - 1;
 		let y = skewedIndex + 1;
 		while (x >= 0 || y < oldChildren.length) {
-			if (x >= 0) {
-				oldVNode = oldChildren[x];
-				if (
-					oldVNode &&
-					(oldVNode._flags & MATCHED) == 0 &&
-					key == oldVNode.key &&
-					type == oldVNode.type
-				) {
-					return x;
-				}
-				x--;
-			}
-
-			if (y < oldChildren.length) {
-				oldVNode = oldChildren[y];
-				if (
-					oldVNode &&
-					(oldVNode._flags & MATCHED) == 0 &&
-					key == oldVNode.key &&
-					type == oldVNode.type
-				) {
-					return y;
-				}
-				y++;
+			const childIndex = x >= 0 ? x-- : y++;
+			oldVNode = oldChildren[childIndex];
+			if (
+				oldVNode != NULL &&
+				(oldVNode._flags & MATCHED) == 0 &&
+				key == oldVNode.key &&
+				type == oldVNode.type
+			) {
+				return childIndex;
 			}
 		}
 	}
