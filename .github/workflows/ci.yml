@@ -19,7 +19,7 @@ jobs:
       jsChanged: ${{ steps.filter.outputs.jsChanged }}
     steps:
       - uses: actions/checkout@v4
-      - uses: dorny/paths-filter@v3
+      - uses: rschristian/paths-filter@v3
         id: filter
         with:
           # Should be kept in sync with the filter in the PR Reporter workflow
