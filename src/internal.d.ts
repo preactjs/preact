@@ -27,8 +27,6 @@ export interface ErrorInfo {
 }
 
 export interface Options extends preact.Options {
-	/** Attach a hook that is invoked after a vnode has rendered. */
-	_afterRender?(vnode: VNode, oldVNode: VNode): void;
 	/** Attach a hook that is invoked before render, mainly to check the arguments. */
 	_root?(vnode: ComponentChild, parent: preact.ContainerNode): void;
 	/** Attach a hook that is invoked before a vnode is diffed. */
