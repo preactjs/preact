@@ -55,6 +55,8 @@ export type HookState =
 
 interface BaseHookState {
 	_value?: unknown;
+	_nextValue?: unknown;
+	_pendingValue?: unknown;
 	_args?: unknown;
 	_pendingArgs?: unknown;
 	_component?: unknown;
@@ -73,6 +75,7 @@ export interface EffectHookState extends BaseHookState {
 
 export interface MemoHookState<T = unknown> extends BaseHookState {
 	_value?: T;
+	_pendingValue?: T;
 	_args?: unknown[];
 	_pendingArgs?: unknown[];
 	_factory?: () => T;
@@ -80,12 +83,10 @@ export interface MemoHookState<T = unknown> extends BaseHookState {
 
 export interface ReducerHookState<S = unknown, A = unknown>
 	extends BaseHookState {
+	_nextValue?: [S, StateUpdater<S>];
 	_value?: [S, StateUpdater<S>];
-	_actions?: any[];
 	_component?: Component;
 	_reducer?: Reducer<S, A>;
-	_didExecute?: boolean;
-	_didUpdate?: boolean;
 }
 
 export interface ContextHookState extends BaseHookState {

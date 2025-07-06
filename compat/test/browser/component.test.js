@@ -1,6 +1,7 @@
 import { setupRerender } from 'preact/test-utils';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
-import React, { createElement } from 'preact/compat';
+import React, { createElement, Component } from 'preact/compat';
+import { vi } from 'vitest';
 
 describe('components', () => {
 	/** @type {HTMLDivElement} */
@@ -78,7 +79,7 @@ describe('components', () => {
 
 	describe('UNSAFE_* lifecycle methods', () => {
 		it('should support UNSAFE_componentWillMount', () => {
-			let spy = sinon.spy();
+			let spy = vi.fn();
 
 			class Foo extends React.Component {
 				// eslint-disable-next-line camelcase
@@ -93,11 +94,11 @@ describe('components', () => {
 
 			React.render(<Foo />, scratch);
 
-			expect(spy).to.be.calledOnce;
+			expect(spy).toHaveBeenCalledOnce();
 		});
 
 		it('should support UNSAFE_componentWillMount #2', () => {
-			let spy = sinon.spy();
+			let spy = vi.fn();
 
 			class Foo extends React.Component {
 				render() {
@@ -110,11 +111,11 @@ describe('components', () => {
 			});
 
 			React.render(<Foo />, scratch);
-			expect(spy).to.be.calledOnce;
+			expect(spy).toHaveBeenCalledOnce();
 		});
 
 		it('should support UNSAFE_componentWillReceiveProps', () => {
-			let spy = sinon.spy();
+			let spy = vi.fn();
 
 			class Foo extends React.Component {
 				// eslint-disable-next-line camelcase
@@ -130,11 +131,11 @@ describe('components', () => {
 			React.render(<Foo />, scratch);
 			// Trigger an update
 			React.render(<Foo />, scratch);
-			expect(spy).to.be.calledOnce;
+			expect(spy).toHaveBeenCalledOnce();
 		});
 
 		it('should support UNSAFE_componentWillReceiveProps #2', () => {
-			let spy = sinon.spy();
+			let spy = vi.fn();
 
 			class Foo extends React.Component {
 				render() {
@@ -149,11 +150,11 @@ describe('components', () => {
 			React.render(<Foo />, scratch);
 			// Trigger an update
 			React.render(<Foo />, scratch);
-			expect(spy).to.be.calledOnce;
+			expect(spy).toHaveBeenCalledOnce();
 		});
 
 		it('should support UNSAFE_componentWillUpdate', () => {
-			let spy = sinon.spy();
+			let spy = vi.fn();
 
 			class Foo extends React.Component {
 				// eslint-disable-next-line camelcase
@@ -169,11 +170,11 @@ describe('components', () => {
 			React.render(<Foo />, scratch);
 			// Trigger an update
 			React.render(<Foo />, scratch);
-			expect(spy).to.be.calledOnce;
+			expect(spy).toHaveBeenCalledOnce();
 		});
 
 		it('should support UNSAFE_componentWillUpdate #2', () => {
-			let spy = sinon.spy();
+			let spy = vi.fn();
 
 			class Foo extends React.Component {
 				render() {
@@ -188,7 +189,7 @@ describe('components', () => {
 			React.render(<Foo />, scratch);
 			// Trigger an update
 			React.render(<Foo />, scratch);
-			expect(spy).to.be.calledOnce;
+			expect(spy).toHaveBeenCalledOnce();
 		});
 
 		it('should alias UNSAFE_* method to non-prefixed variant', () => {
@@ -227,7 +228,7 @@ describe('components', () => {
 
 			const Wrapper = () => <Page />;
 
-			sinon.spy(Page.prototype, 'UNSAFE_componentWillMount');
+			vi.spyOn(Page.prototype, 'UNSAFE_componentWillMount');
 
 			React.render(
 				<React.Suspense fallback={<div>fallback</div>}>
@@ -237,7 +238,7 @@ describe('components', () => {
 			);
 
 			expect(scratch.innerHTML).to.equal('<h1>Example</h1>');
-			expect(Page.prototype.UNSAFE_componentWillMount).to.have.been.called;
+			expect(Page.prototype.UNSAFE_componentWillMount).toHaveBeenCalled();
 		});
 	});
 
@@ -292,9 +293,9 @@ describe('components', () => {
 			WithDefaultProps.defaultProps = { fieldC: 1, fieldD: 1 };
 
 			let proto = WithDefaultProps.prototype;
-			sinon.spy(proto, 'ctor');
-			sinon.spy(proto, 'componentWillReceiveProps');
-			sinon.spy(proto, 'render');
+			vi.spyOn(proto, 'ctor');
+			vi.spyOn(proto, 'componentWillReceiveProps');
+			vi.spyOn(proto, 'render');
 
 			React.render(<Outer />, scratch);
 			doRender();
@@ -313,16 +314,14 @@ describe('components', () => {
 				fieldD: 2
 			};
 
-			expect(proto.ctor).to.have.been.calledWithMatch(PROPS1);
-			expect(proto.render).to.have.been.calledWithMatch(PROPS1);
+			expect(proto.ctor).toHaveBeenCalledWith(PROPS1, {});
+			expect(proto.render).toHaveBeenCalledWith(PROPS1, {}, {});
 
 			rerender();
 
 			// expect(proto.ctor).to.have.been.calledWith(PROPS2);
-			expect(proto.componentWillReceiveProps).to.have.been.calledWithMatch(
-				PROPS2
-			);
-			expect(proto.render).to.have.been.calledWithMatch(PROPS2);
+			expect(proto.componentWillReceiveProps).toHaveBeenCalledWith(PROPS2, {});
+			expect(proto.render).toHaveBeenCalledWith(PROPS2, {}, {});
 		});
 	});
 });
