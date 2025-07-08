@@ -53,7 +53,7 @@
     },
     "./compat/test-utils": {
       "types": "./test-utils/src/index.d.ts",
-      "browser": "./test-utils/dist/testUtils.module.js",
+      "module": "./test-utils/dist/testUtils.mjs",
       "umd": "./test-utils/dist/testUtils.umd.js",
       "import": "./test-utils/dist/testUtils.mjs",
       "require": "./test-utils/dist/testUtils.js"
