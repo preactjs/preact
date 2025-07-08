@@ -78,6 +78,7 @@
       "require": "./compat/client.js"
     },
     "./compat/server": {
+      "types": "./compat/server.d.ts",
       "browser": "./compat/server.browser.js",
       "import": "./compat/server.mjs",
       "require": "./compat/server.js"
@@ -93,6 +94,7 @@
       "require": "./compat/jsx-dev-runtime.js"
     },
     "./compat/scheduler": {
+      "types": "./compat/scheduler.d.ts",
       "import": "./compat/scheduler.mjs",
       "require": "./compat/scheduler.js"
     },
@@ -152,9 +154,11 @@
     "compat/client.d.ts",
     "compat/client.js",
     "compat/client.mjs",
+    "compat/server.d.ts",
     "compat/server.browser.js",
     "compat/server.js",
     "compat/server.mjs",
+    "compat/scheduler.d.ts",
     "compat/scheduler.js",
     "compat/scheduler.mjs",
     "compat/test-utils.js",
