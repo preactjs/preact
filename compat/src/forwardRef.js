@@ -26,5 +26,6 @@ export function forwardRef(fn) {
 
 	Forwarded.prototype.isReactComponent = true;
 	Forwarded.displayName = 'ForwardRef(' + (fn.displayName || fn.name) + ')';
+
 	return Forwarded;
 }

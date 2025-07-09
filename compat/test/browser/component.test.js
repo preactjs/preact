@@ -1,6 +1,6 @@
 import { setupRerender } from 'preact/test-utils';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
-import React, { createElement, Component } from 'preact/compat';
+import React, { createElement, Component, createRef } from 'preact/compat';
 import { vi } from 'vitest';
 
 describe('components', () => {
@@ -190,6 +190,28 @@ describe('components', () => {
 			// Trigger an update
 			React.render(<Foo />, scratch);
 			expect(spy).toHaveBeenCalledOnce();
+		});
+
+		it('should not forward refs on class components', () => {
+			const ref = createRef();
+			class Foo extends React.Component {
+				render() {
+					return <div>foo</div>;
+				}
+			}
+			React.render(<Foo ref={ref} />, scratch);
+			expect(ref.current).not.to.be.undefined;
+			expect(ref.current instanceof Foo).to.equal(true);
+			expect(scratch.innerHTML).to.equal('<div>foo</div>');
+		});
+
+		it('should forward refs on functional components', () => {
+			const ref = createRef();
+			const Foo = props => <div ref={props.ref}>foo</div>;
+			React.render(<Foo ref={ref} />, scratch);
+			expect(ref.current).not.to.be.undefined;
+			expect(ref.current.nodeName).to.equal('DIV');
+			expect(scratch.innerHTML).to.equal('<div>foo</div>');
 		});
 
 		it('should alias UNSAFE_* method to non-prefixed variant', () => {

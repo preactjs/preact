@@ -174,11 +174,7 @@ describe('memo()', () => {
 	});
 
 	it('should pass ref through nested memos', () => {
-		class Foo extends Component {
-			render(props) {
-				return <h1 ref={props.ref}>Hello World</h1>;
-			}
-		}
+		const Foo = props => <h1 ref={props.ref}>Hello World</h1>;
 
 		const App = memo(memo(Foo));
 
