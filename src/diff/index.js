@@ -445,12 +445,12 @@ function diffElementNodes(
 		}
 	}
 
-	if (dom == NULL) {
-		if (nodeType == NULL) {
-			return document.createTextNode(newProps);
+	if (dom == null) {
+		if (nodeType === null) {
+			return options.document.createTextNode(newProps);
 		}
 
-		dom = document.createElementNS(
+		dom = options.document.createElementNS(
 			namespace,
 			nodeType,
 			newProps.is && newProps
