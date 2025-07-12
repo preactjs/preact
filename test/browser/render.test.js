@@ -2012,4 +2012,11 @@ describe('render()', () => {
 		render(<App />, scratch);
 		expect(scratch.innerHTML).to.equal('hello world');
 	});
+	it('should hydrate <template> tags ', () => {
+		const App = () => <template><h1>it works</h1></template>;
+		scratch.innerHTML = `<template><h1>it works</h1></template>`;
+
+		render(<App />, scratch);
+		expect(scratch.innerHTML).to.equal(`<template><h1>it works</h1></template>`);
+	});
 });
