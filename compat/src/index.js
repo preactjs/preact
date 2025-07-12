@@ -134,6 +134,19 @@ function findDOMNode(component) {
 const flushSync = (callback, arg) => callback(arg);
 
 /**
+ * In React, `unstable_batchedUpdates` is a legacy feature that was made a no-op
+ * outside of legacy mode in React 18 and a no-op across the board in React 19.
+ * @template Arg
+ * @template Result
+ * @param {(arg: Arg) => Result} callback
+ * @param {Arg} [arg]
+ * @returns {Result}
+ */
+function unstable_batchedUpdates(callback, arg) {
+	return callback(arg);
+}
+
+/**
  * Strict Mode is not implemented in Preact, so we provide a stand-in for it
  * that just renders its children without imposing any restrictions.
  */
@@ -165,6 +178,7 @@ export {
 	memo,
 	forwardRef,
 	flushSync,
+	unstable_batchedUpdates,
 	useInsertionEffect,
 	startTransition,
 	useDeferredValue,
@@ -216,6 +230,7 @@ export default {
 	memo,
 	forwardRef,
 	flushSync,
+	unstable_batchedUpdates,
 	StrictMode,
 	Suspense,
 	lazy,

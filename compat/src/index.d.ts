@@ -394,6 +394,9 @@ declare namespace React {
 	export function flushSync<R>(fn: () => R): R;
 	export function flushSync<A, R>(fn: (a: A) => R, a: A): R;
 
+	export function unstable_batchedUpdates<A, R>(callback: (a: A) => R, a: A): R;
+	export function unstable_batchedUpdates<R>(callback: () => R): R;
+
 	export type PropsWithChildren<P = unknown> = P & {
 		children?: preact1.ComponentChildren | undefined;
 	};
