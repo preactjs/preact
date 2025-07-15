@@ -67,8 +67,8 @@ export function setProperty(dom, name, value, oldValue, namespace) {
 		useCapture = name != (name = name.replace(CAPTURE_REGEX, '$1'));
 
 		// Infer correct casing for DOM built-in events:
-		if (name[2].toLowerCase() != name[2]) name = name.slice(2).toLowerCase();
-		else name = name.slice(2);
+		name = name.slice(2);
+		if (name[0].toLowerCase() != name[0]) name = name.toLowerCase();
 
 		if (!dom._listeners) dom._listeners = {};
 		dom._listeners[name + useCapture] = value;
