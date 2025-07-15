@@ -60,6 +60,7 @@ describe('compat exports', () => {
 		expect(Compat.unmountComponentAtNode).to.exist.and.be.a('function');
 		expect(Compat.version).to.exist.and.be.a('string');
 		expect(Compat.startTransition).to.be.a('function');
+		expect(Compat.unstable_batchedUpdates).to.be.a('function');
 	});
 
 	it('should have named exports', () => {
@@ -99,5 +100,6 @@ describe('compat exports', () => {
 		expect(Named.Children.only).to.exist.and.be.a('function');
 		expect(Named.unmountComponentAtNode).to.exist.and.be.a('function');
 		expect(Named.version).to.exist.and.be.a('string');
+		expect(Named.unstable_batchedUpdates).to.be.a('function');
 	});
 });
