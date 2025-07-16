@@ -301,9 +301,10 @@ interface ContainerNode {
 
 export function render(vnode: ComponentChild, parent: ContainerNode): void;
 /**
- * @deprecated Will be removed in v11.
+ * @deprecated The `replaceNode` parameter will be removed in v11.
  *
- * Replacement Preact 10+ implementation can be found here: https://gist.github.com/developit/f4c67a2ede71dc2fab7f357f39cff28c
+ * Replacement Preact 10+ implementation can be found in the `preact-root-fragment` package.
+ * Docs: https://github.com/preactjs/preact-root-fragment
  */
 export function render(
 	vnode: ComponentChild,
