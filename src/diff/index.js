@@ -312,7 +312,7 @@ export function diff(
 				}
 			} else {
 				newVNode._dom = oldVNode._dom;
-				newVNode._children = oldVNode._children;
+				newVNode._children = oldVNode._children || [];
 			}
 			options._catchError(e, newVNode, oldVNode);
 		}
