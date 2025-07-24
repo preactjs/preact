@@ -33,7 +33,6 @@ export function render(vnode, parentDom) {
 	let commitQueue = [],
 		refQueue = [];
 
-	const doc = parentDom.ownerDocument;
 	diff(
 		parentDom,
 		// Determine the new vnode tree and store it on the DOM element on
@@ -51,7 +50,7 @@ export function render(vnode, parentDom) {
 		oldVNode ? oldVNode._dom : parentDom.firstChild,
 		isHydrating,
 		refQueue,
-		doc
+		parentDom.ownerDocument
 	);
 
 	// Flush all queued effects
