@@ -13,7 +13,7 @@ import {
 } from '../_util/helpers';
 import { clearLog, getLog, logCall } from '../_util/logCall';
 import { useState } from 'preact/hooks';
-import { vi } from 'vitest';
+import { expect, vi } from 'vitest';
 
 /** @jsx createElement */
 
@@ -2011,5 +2011,28 @@ describe('render()', () => {
 
 		render(<App />, scratch);
 		expect(scratch.innerHTML).to.equal('hello world');
+	});
+
+	describe('Alternative document', () => {
+		it('Renders in an iframe', () => {
+			const iframe = document.createElement('iframe');
+			scratch.appendChild(iframe);
+
+			const rootCreateElementSpy = vi.spyOn(document, 'createElementNS');
+			const iframeCreateElementSpy = vi.spyOn(
+				iframe.contentDocument,
+				'createElementNS'
+			);
+
+			const iframeBody = iframe.contentDocument.getElementsByTagName('body')[0];
+
+			render(<div>Hello world</div>, iframeBody);
+
+			expect(iframe.contentDocument.body.innerHTML).to.equal(
+				'<div>Hello world</div>'
+			);
+			expect(rootCreateElementSpy).not.toBeCalled();
+			expect(iframeCreateElementSpy).toBeCalled();
+		});
 	});
 });

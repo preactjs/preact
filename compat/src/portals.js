@@ -46,6 +46,7 @@ function Portal(props) {
 			parentNode: container,
 			childNodes: [],
 			_children: { _mask: root._mask },
+			ownerDocument: container.ownerDocument,
 			insertBefore(child, before) {
 				this.childNodes.push(child);
 				_this._container.insertBefore(child, before);
