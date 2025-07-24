@@ -223,7 +223,7 @@
     "kolorist": "^1.8.0",
     "microbundle": "^0.15.1",
     "npm-run-all2": "^7.0.0",
-    "oxlint": "^0.15.12",
+    "oxlint": "^1.8.0",
     "playwright": "^1.53.1",
     "preact-render-to-string": "^6.5.0",
     "prop-types": "^15.8.1",
