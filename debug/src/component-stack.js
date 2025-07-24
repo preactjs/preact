@@ -118,11 +118,11 @@ export function setupComponentStack() {
 		if (oldDiffed) oldDiffed(vnode);
 	};
 
-	options._diff = vnode => {
+	options._diff = (vnode, oldVnode) => {
 		if (isPossibleOwner(vnode)) {
 			renderStack.push(vnode);
 		}
-		if (oldDiff) oldDiff(vnode);
+		if (oldDiff) oldDiff(vnode, oldVnode);
 	};
 
 	options._root = (vnode, parent) => {
