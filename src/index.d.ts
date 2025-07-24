@@ -110,6 +110,7 @@ export type AnyComponent<P = {}, S = {}> =
 	| FunctionComponent<P>
 	| ComponentConstructor<P, S>;
 
+// eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
 export interface Component<P = {}, S = {}> {
 	componentWillMount?(): void;
 	componentDidMount?(): void;
