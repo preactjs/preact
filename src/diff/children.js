@@ -8,8 +8,9 @@ import {
 	UNDEFINED,
 	NULL
 } from '../constants';
-import { isArray } from '../util';
+import { isArray, slice } from '../util';
 import { getDomSibling } from '../component';
+
 
 /**
  * @typedef {import('../internal').ComponentChildren} ComponentChildren
@@ -53,6 +54,13 @@ export function diffChildren(
 	isHydrating,
 	refQueue
 ) {
+	if (
+		newParentVNode.type === 'template' &&
+		excessDomChildren?.length === 0 &&
+		parentDom instanceof DocumentFragment
+	) {
+		excessDomChildren = slice.call(parentDom.childNodes);
+	}
 	let i,
 		/** @type {VNode} */
 		oldVNode,
