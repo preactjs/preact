@@ -27,7 +27,7 @@ declare namespace preact {
 		getDerivedStateFromError?(error: any): Partial<S> | null;
 	}
 
-	// eslint-disablex-next-line @typescript-eslint/no-unsafe-declaration-merging
+	// eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
 	export interface Component<P = {}, S = {}> {
 		componentWillMount?(): void;
 		componentDidMount?(): void;
