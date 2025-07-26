@@ -1,5 +1,6 @@
 import {
 	EMPTY_OBJ,
+	FORCE_PROPS_REVALIDATE,
 	MATH_NAMESPACE,
 	MODE_HYDRATE,
 	MODE_SUSPENDED,
@@ -557,6 +558,8 @@ function diffElementNodes(
 				inputValue = value;
 			} else if (i == 'checked') {
 				checked = value;
+			} else if (oldVNode._flags & FORCE_PROPS_REVALIDATE) {
+				setProperty(dom, i, value, NULL, namespace);
 			} else if (
 				(!isHydrating || typeof value == 'function') &&
 				oldProps[i] !== value
@@ -701,6 +704,10 @@ export function unmount(vnode, parentVNode, skipRemove) {
 	}
 
 	if (!skipRemove) removeNode(vnode._dom);
+
+	if (vnode._dom) {
+		vnode._dom._listeners = UNDEFINED;
+	}
 
 	vnode._children = vnode._component = vnode._parent = vnode._dom = UNDEFINED;
 }

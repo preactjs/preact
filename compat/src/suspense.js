@@ -1,5 +1,5 @@
 import { Component, createElement, options, Fragment } from 'preact';
-import { MODE_HYDRATE } from '../../src/constants';
+import { MODE_HYDRATE, FORCE_PROPS_REVALIDATE } from '../../src/constants';
 import { assign } from './util';
 
 const oldCatchError = options._catchError;
@@ -75,6 +75,10 @@ function detachedClone(vnode, detachedParent, parentDom) {
 
 function removeOriginal(vnode, detachedParent, originalParent) {
 	if (vnode && originalParent) {
+		if (typeof vnode.type == 'string') {
+			vnode._flags |= FORCE_PROPS_REVALIDATE;
+		}
+
 		vnode._original = null;
 		vnode._children =
 			vnode._children &&
