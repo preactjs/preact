@@ -126,22 +126,24 @@ function renderComponent(component) {
 		commitQueue = [],
 		refQueue = [];
 
-	if (component._parentDom) {
+	const parentDom = component._parentDom;
+	if (parentDom) {
 		const newVNode = assign({}, oldVNode);
 		newVNode._original = oldVNode._original + 1;
 		if (options.vnode) options.vnode(newVNode);
 
 		diff(
-			component._parentDom,
+			parentDom,
 			newVNode,
 			oldVNode,
 			component._globalContext,
-			component._parentDom.namespaceURI,
+			parentDom.namespaceURI,
 			oldVNode._flags & MODE_HYDRATE ? [oldDom] : NULL,
 			commitQueue,
 			oldDom == NULL ? getDomSibling(oldVNode) : oldDom,
 			!!(oldVNode._flags & MODE_HYDRATE),
-			refQueue
+			refQueue,
+			parentDom.ownerDocument
 		);
 
 		newVNode._original = oldVNode._original;

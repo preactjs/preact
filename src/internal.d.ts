@@ -105,6 +105,9 @@ export interface PreactElement extends preact.ContainerNode {
 	addEventListener?: Element['addEventListener'];
 	removeEventListener?: Element['removeEventListener'];
 
+	// Used to match DOM nodes to VNodes during hydration
+	readonly ownerDocument: Document;
+
 	// Setting styles
 	readonly style?: CSSStyleDeclaration;
 
