@@ -697,11 +697,9 @@ export function unmount(vnode, parentVNode, skipRemove) {
 		}
 	}
 
-	if (!skipRemove) {
-		removeNode(vnode._dom);
-	}
+	if (!skipRemove) removeNode(vnode._dom);
 
-	vnode._component = vnode._parent = vnode._dom = UNDEFINED;
+	vnode._children = vnode._component = vnode._parent = vnode._dom = UNDEFINED;
 }
 
 /** The `.render()` method for a PFC backing instance. */

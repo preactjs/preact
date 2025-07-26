@@ -143,11 +143,21 @@ Suspense.prototype._childDidSuspend = function (promise, suspendingVNode) {
 			// suspended children into the _children array
 			if (c.state._suspended) {
 				const suspendedVNode = c.state._suspended;
-				c._vnode._children[0] = removeOriginal(
-					suspendedVNode,
-					suspendedVNode._component._parentDom,
-					suspendedVNode._component._originalParentDom
-				);
+				if (!c._vnode._children) {
+					c._vnode._children = [
+						removeOriginal(
+							suspendedVNode,
+							suspendedVNode._component._parentDom,
+							suspendedVNode._component._originalParentDom
+						)
+					];
+				} else {
+					c._vnode._children[0] = removeOriginal(
+						suspendedVNode,
+						suspendedVNode._component._parentDom,
+						suspendedVNode._component._originalParentDom
+					);
+				}
 			}
 
 			c.setState({ _suspended: (c._detachOnNextRender = null) });
