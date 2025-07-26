@@ -32,6 +32,7 @@ export function render(vnode, parentDom) {
 	// List of effects that need to be called after diffing.
 	let commitQueue = [],
 		refQueue = [];
+
 	diff(
 		parentDom,
 		// Determine the new vnode tree and store it on the DOM element on
@@ -48,7 +49,8 @@ export function render(vnode, parentDom) {
 		commitQueue,
 		oldVNode ? oldVNode._dom : parentDom.firstChild,
 		isHydrating,
-		refQueue
+		refQueue,
+		parentDom.ownerDocument
 	);
 
 	// Flush all queued effects
