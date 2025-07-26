@@ -656,6 +656,14 @@ describe('suspense hydration', () => {
 				rerender();
 
 				expect(scratch.innerHTML, 'second suspend').to.equal(div('fallback'));
+				expect(getLog()).to.deep.equal([
+					'<div>b1.remove()',
+					'<div>a.remove()',
+					'<div>c.remove()',
+					'<div>.appendChild(#text)',
+					'<div>.appendChild(<div>fallback)'
+				]);
+				clearLog();
 
 				return resolve2(() => <div onClick={bOnClickSpy}>b2</div>);
 			})
@@ -664,12 +672,20 @@ describe('suspense hydration', () => {
 				expect(scratch.innerHTML, 'second suspend resumes').to.equal(
 					[div('a'), div('b2'), div('c')].join('')
 				);
-
-				scratch.lastChild.dispatchEvent(createEvent('click'));
-				expect(cOnClickSpy).toHaveBeenCalledTimes(2);
+				expect(getLog()).to.deep.equal([
+					'<div>fallback.appendChild(<div>a)',
+					'<div>fallback.remove()',
+					'<div>a.appendChild(<div>a)',
+					'<div>.appendChild(#text)',
+					'<div>a.appendChild(<div>b2)',
+					'<div>ab2.appendChild(<div>c)'
+				]);
 
 				scratch.firstChild.nextSibling.dispatchEvent(createEvent('click'));
 				expect(bOnClickSpy).toHaveBeenCalledTimes(2);
+
+				scratch.lastChild.dispatchEvent(createEvent('click'));
+				expect(cOnClickSpy).toHaveBeenCalledTimes(2);
 			});
 	});
 
