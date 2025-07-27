@@ -97,6 +97,64 @@ describe('suspense hydration', () => {
 		});
 	});
 
+	it('Should not crash when oldVNode._children is null during shouldComponentUpdate optimization', () => {
+		const originalHtml = '<div>Hello</div>';
+		scratch.innerHTML = originalHtml;
+		clearLog();
+
+		class ErrorBoundary extends React.Component {
+			constructor(props) {
+				super(props);
+				this.state = { hasError: false };
+			}
+
+			static getDerivedStateFromError() {
+				return { hasError: true };
+			}
+
+			render() {
+				return this.props.children;
+			}
+		}
+
+		const [Lazy, resolve] = createLazy();
+		function App() {
+			return (
+				<Suspense>
+					<ErrorBoundary>
+						<Lazy />
+					</ErrorBoundary>
+				</Suspense>
+			);
+		}
+
+		hydrate(<App />, scratch);
+		rerender(); // Flush rerender queue to mimic what preact will really do
+		expect(scratch.innerHTML).to.equal(originalHtml);
+		expect(getLog()).to.deep.equal([]);
+		clearLog();
+
+		let i = 0;
+		class ThrowOrRender extends React.Component {
+			shouldComponentUpdate() {
+				return i === 0;
+			}
+			render() {
+				if (i === 0) {
+					i++;
+					throw new Error('Test error');
+				}
+				return <div>Hello</div>;
+			}
+		}
+
+		return resolve(ThrowOrRender).then(() => {
+			rerender();
+			expect(scratch.innerHTML).to.equal(originalHtml);
+			clearLog();
+		});
+	});
+
 	it('should leave DOM untouched when suspending while hydrating', () => {
 		scratch.innerHTML = '<!-- test --><div>Hello</div>';
 		clearLog();
