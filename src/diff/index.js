@@ -191,7 +191,7 @@ export function diff(
 					}
 
 					newVNode._dom = oldVNode._dom;
-					newVNode._children = oldVNode._children;
+					newVNode._children = oldVNode._children || [];
 					newVNode._children.some(vnode => {
 						if (vnode) vnode._parent = newVNode;
 					});
