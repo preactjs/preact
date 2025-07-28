@@ -309,10 +309,12 @@ export function diff(
 					for (let i = excessDomChildren.length; i--; ) {
 						removeNode(excessDomChildren[i]);
 					}
+					markAsForce(newVNode);
 				}
 			} else {
 				newVNode._dom = oldVNode._dom;
 				newVNode._children = oldVNode._children;
+				if (!e.then) markAsForce(newVNode);
 			}
 			options._catchError(e, newVNode, oldVNode);
 		}
@@ -339,6 +341,11 @@ export function diff(
 	if ((tmp = options.diffed)) tmp(newVNode);
 
 	return newVNode._flags & MODE_SUSPENDED ? undefined : oldDom;
+}
+
+function markAsForce(vnode) {
+	if (vnode && vnode._component) vnode._component._force = true;
+	if (vnode && vnode._children) vnode._children.forEach(markAsForce);
 }
 
 /**
