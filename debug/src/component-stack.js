@@ -132,7 +132,10 @@ export function setupComponentStack() {
 	};
 
 	options.vnode = vnode => {
-		ownerMap.set(vnode, ownerStack.length > 0 ? ownerStack[ownerStack.length - 1] : null);
+		ownerMap.set(
+			vnode,
+			ownerStack.length > 0 ? ownerStack[ownerStack.length - 1] : null
+		);
 		if (oldVNode) oldVNode(vnode);
 	};
 

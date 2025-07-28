@@ -437,21 +437,19 @@ describe('render()', () => {
 			render() {
 				return (
 					<div>
-						{this.state.active ? (
-							<table>
-								<tr>
-									<td rowSpan={2} colSpan={2}>
-										Foo
-									</td>
-								</tr>
-							</table>
-						) : (
-							<table>
-								<tr>
-									<td>Foo</td>
-								</tr>
-							</table>
-						)}
+						{this.state.active
+							? <table>
+									<tr>
+										<td rowSpan={2} colSpan={2}>
+											Foo
+										</td>
+									</tr>
+								</table>
+							: <table>
+									<tr>
+										<td>Foo</td>
+									</tr>
+								</table>}
 					</div>
 				);
 			}
@@ -668,11 +666,9 @@ describe('render()', () => {
 				}
 				render(props, { html }) {
 					// eslint-disable-next-line react/no-danger
-					return html ? (
-						<div dangerouslySetInnerHTML={{ __html: html }} />
-					) : (
-						<div />
-					);
+					return html
+						? <div dangerouslySetInnerHTML={{ __html: html }} />
+						: <div />;
 				}
 			}
 
@@ -1885,16 +1881,14 @@ describe('render()', () => {
 			//
 			// We insert <span /> which should amount to a skew of -1 which should
 			// make us correctly match the X component.
-			return condition ? (
-				<div>
-					<span />
-					<X name="B" />
-				</div>
-			) : (
-				<div>
-					<X name="A" />
-				</div>
-			);
+			return condition
+				? <div>
+						<span />
+						<X name="B" />
+					</div>
+				: <div>
+						<X name="A" />
+					</div>;
 		}
 
 		render(<Foo />, scratch);

@@ -252,14 +252,12 @@ describe('Fragment', () => {
 
 	it('should preserve state of children with 1 level nesting', () => {
 		function Foo({ condition }) {
-			return condition ? (
-				<Stateful key="a" />
-			) : (
-				<Fragment>
-					<Stateful key="a" />
-					<div key="b">World</div>
-				</Fragment>
-			);
+			return condition
+				? <Stateful key="a" />
+				: <Fragment>
+						<Stateful key="a" />
+						<div key="b">World</div>
+					</Fragment>;
 		}
 
 		render(<Foo condition={true} />, scratch);
@@ -276,15 +274,13 @@ describe('Fragment', () => {
 
 	it('should preserve state between top-level fragments', () => {
 		function Foo({ condition }) {
-			return condition ? (
-				<Fragment>
-					<Stateful />
-				</Fragment>
-			) : (
-				<Fragment>
-					<Stateful />
-				</Fragment>
-			);
+			return condition
+				? <Fragment>
+						<Stateful />
+					</Fragment>
+				: <Fragment>
+						<Stateful />
+					</Fragment>;
 		}
 
 		render(<Foo condition={true} />, scratch);
@@ -306,24 +302,22 @@ describe('Fragment', () => {
 
 	it('should preserve state of children nested at same level', () => {
 		function Foo({ condition }) {
-			return condition ? (
-				<Fragment>
-					<Fragment>
+			return condition
+				? <Fragment>
 						<Fragment>
-							<Stateful key="a" />
+							<Fragment>
+								<Stateful key="a" />
+							</Fragment>
 						</Fragment>
 					</Fragment>
-				</Fragment>
-			) : (
-				<Fragment>
-					<Fragment>
+				: <Fragment>
 						<Fragment>
-							<div />
-							<Stateful key="a" />
+							<Fragment>
+								<div />
+								<Stateful key="a" />
+							</Fragment>
 						</Fragment>
-					</Fragment>
-				</Fragment>
-			);
+					</Fragment>;
 		}
 
 		render(<Foo condition={true} />, scratch);
@@ -345,17 +339,15 @@ describe('Fragment', () => {
 
 	it('should not preserve state in non-top-level fragment nesting', () => {
 		function Foo({ condition }) {
-			return condition ? (
-				<Fragment>
-					<Fragment>
-						<Stateful key="a" />
+			return condition
+				? <Fragment>
+						<Fragment>
+							<Stateful key="a" />
+						</Fragment>
 					</Fragment>
-				</Fragment>
-			) : (
-				<Fragment>
-					<Stateful key="a" />
-				</Fragment>
-			);
+				: <Fragment>
+						<Stateful key="a" />
+					</Fragment>;
 		}
 
 		render(<Foo condition={true} />, scratch);
@@ -386,15 +378,13 @@ describe('Fragment', () => {
 
 	it('should not preserve state of children if nested 2 levels without siblings', () => {
 		function Foo({ condition }) {
-			return condition ? (
-				<Stateful key="a" />
-			) : (
-				<Fragment>
-					<Fragment>
-						<Stateful key="a" />
-					</Fragment>
-				</Fragment>
-			);
+			return condition
+				? <Stateful key="a" />
+				: <Fragment>
+						<Fragment>
+							<Stateful key="a" />
+						</Fragment>
+					</Fragment>;
 		}
 
 		render(<Foo condition={true} />, scratch);
@@ -440,16 +430,14 @@ describe('Fragment', () => {
 
 	it('should not preserve state of children if nested 2 levels with siblings', () => {
 		function Foo({ condition }) {
-			return condition ? (
-				<Stateful key="a" />
-			) : (
-				<Fragment>
-					<Fragment>
-						<Stateful key="a" />
-					</Fragment>
-					<div />
-				</Fragment>
-			);
+			return condition
+				? <Stateful key="a" />
+				: <Fragment>
+						<Fragment>
+							<Stateful key="a" />
+						</Fragment>
+						<div />
+					</Fragment>;
 		}
 
 		render(<Foo condition={true} />, scratch);
@@ -476,13 +464,11 @@ describe('Fragment', () => {
 		// and the state of Stateful is preserved
 
 		function Foo({ condition }) {
-			return condition ? (
-				<Fragment>
-					<Stateful key="a" />
-				</Fragment>
-			) : (
-				<Fragment>{[<Stateful key="a" />]}</Fragment>
-			);
+			return condition
+				? <Fragment>
+						<Stateful key="a" />
+					</Fragment>
+				: <Fragment>{[<Stateful key="a" />]}</Fragment>;
 		}
 
 		render(<Foo condition={true} />, scratch);
@@ -499,13 +485,11 @@ describe('Fragment', () => {
 
 	it('should preserve state between top level fragment and array', () => {
 		function Foo({ condition }) {
-			return condition ? (
-				[<Stateful key="a" />]
-			) : (
-				<Fragment>
-					<Stateful key="a" />
-				</Fragment>
-			);
+			return condition
+				? [<Stateful key="a" />]
+				: <Fragment>
+						<Stateful key="a" />
+					</Fragment>;
 		}
 
 		render(<Foo condition={true} />, scratch);
@@ -533,15 +517,13 @@ describe('Fragment', () => {
 		// separate the two Stateful VNodes into different trees and state is not preserved between them.
 
 		function Foo({ condition }) {
-			return condition ? (
-				<Fragment>{[<Stateful key="a" />]}</Fragment>
-			) : (
-				<Fragment>
-					<Fragment>
-						<Stateful key="a" />
-					</Fragment>
-				</Fragment>
-			);
+			return condition
+				? <Fragment>{[<Stateful key="a" />]}</Fragment>
+				: <Fragment>
+						<Fragment>
+							<Stateful key="a" />
+						</Fragment>
+					</Fragment>;
 		}
 
 		render(<Foo condition={true} />, scratch);
@@ -558,11 +540,9 @@ describe('Fragment', () => {
 
 	it('should not preserve state between array nested in fragment and double nested array', () => {
 		function Foo({ condition }) {
-			return condition ? (
-				<Fragment>{[<Stateful key="a" />]}</Fragment>
-			) : (
-				[[<Stateful key="a" />]]
-			);
+			return condition
+				? <Fragment>{[<Stateful key="a" />]}</Fragment>
+				: [[<Stateful key="a" />]];
 		}
 
 		render(<Foo condition={true} />, scratch);
@@ -579,15 +559,13 @@ describe('Fragment', () => {
 
 	it('should preserve state between double nested fragment and double nested array', () => {
 		function Foo({ condition }) {
-			return condition ? (
-				<Fragment>
-					<Fragment>
-						<Stateful key="a" />
+			return condition
+				? <Fragment>
+						<Fragment>
+							<Stateful key="a" />
+						</Fragment>
 					</Fragment>
-				</Fragment>
-			) : (
-				[[<Stateful key="a" />]]
-			);
+				: [[<Stateful key="a" />]];
 		}
 
 		render(<Foo condition={true} />, scratch);
@@ -604,16 +582,14 @@ describe('Fragment', () => {
 
 	it('should not preserve state of children when the keys are different', () => {
 		function Foo({ condition }) {
-			return condition ? (
-				<Fragment key="a">
-					<Stateful />
-				</Fragment>
-			) : (
-				<Fragment key="b">
-					<Stateful />
-					<span>World</span>
-				</Fragment>
-			);
+			return condition
+				? <Fragment key="a">
+						<Stateful />
+					</Fragment>
+				: <Fragment key="b">
+						<Stateful />
+						<span>World</span>
+					</Fragment>;
 		}
 
 		render(<Foo condition={true} />, scratch);
@@ -630,15 +606,13 @@ describe('Fragment', () => {
 
 	it('should not preserve state between unkeyed and keyed fragment', () => {
 		function Foo({ condition }) {
-			return condition ? (
-				<Fragment key="a">
-					<Stateful />
-				</Fragment>
-			) : (
-				<Fragment>
-					<Stateful />
-				</Fragment>
-			);
+			return condition
+				? <Fragment key="a">
+						<Stateful />
+					</Fragment>
+				: <Fragment>
+						<Stateful />
+					</Fragment>;
 		}
 
 		// React & Preact: has the same behavior for components
@@ -761,27 +735,25 @@ describe('Fragment', () => {
 
 	it('should preserve state with reordering in multiple levels', () => {
 		function Foo({ condition }) {
-			return condition ? (
-				<div>
-					<Fragment key="c">
-						<div>foo</div>
-						<div key="b">
-							<Stateful key="a" />
-						</div>
-					</Fragment>
-					<div>boop</div>
-				</div>
-			) : (
-				<div>
-					<div>beep</div>
-					<Fragment key="c">
-						<div key="b">
-							<Stateful key="a" />
-						</div>
-						<div>bar</div>
-					</Fragment>
-				</div>
-			);
+			return condition
+				? <div>
+						<Fragment key="c">
+							<div>foo</div>
+							<div key="b">
+								<Stateful key="a" />
+							</div>
+						</Fragment>
+						<div>boop</div>
+					</div>
+				: <div>
+						<div>beep</div>
+						<Fragment key="c">
+							<div key="b">
+								<Stateful key="a" />
+							</div>
+							<div>bar</div>
+						</Fragment>
+					</div>;
 		}
 
 		const htmlForTrue = div([div('foo'), div(div('Hello')), div('boop')]);
@@ -823,22 +795,20 @@ describe('Fragment', () => {
 
 	it('should not preserve state when switching between a keyed fragment and an array', () => {
 		function Foo({ condition }) {
-			return condition ? (
-				<div>
-					{
-						<Fragment key="foo">
-							<span>1</span>
-							<Stateful />
-						</Fragment>
-					}
-					<span>2</span>
-				</div>
-			) : (
-				<div>
-					{[<span>1</span>, <Stateful />]}
-					<span>2</span>
-				</div>
-			);
+			return condition
+				? <div>
+						{
+							<Fragment key="foo">
+								<span>1</span>
+								<Stateful />
+							</Fragment>
+						}
+						<span>2</span>
+					</div>
+				: <div>
+						{[<span>1</span>, <Stateful />]}
+						<span>2</span>
+					</div>;
 		}
 
 		const html = div([span('1'), div('Hello'), span('2')]);
@@ -1110,25 +1080,23 @@ describe('Fragment', () => {
 				return (
 					<div>
 						<h1>Heading</h1>
-						{!this.state.active ? (
-							<Fragment>
-								foobar
-								<Fragment>
-									Hello World
-									<h2>yo</h2>
+						{!this.state.active
+							? <Fragment>
+									foobar
+									<Fragment>
+										Hello World
+										<h2>yo</h2>
+									</Fragment>
+									<input type="text" />
 								</Fragment>
-								<input type="text" />
-							</Fragment>
-						) : (
-							<Fragment>
-								<Fragment>
-									Hello World
-									<h2>yo</h2>
-								</Fragment>
-								foobar
-								<input type="text" />
-							</Fragment>
-						)}
+							: <Fragment>
+									<Fragment>
+										Hello World
+										<h2>yo</h2>
+									</Fragment>
+									foobar
+									<input type="text" />
+								</Fragment>}
 					</div>
 				);
 			}
@@ -1224,14 +1192,12 @@ describe('Fragment', () => {
 		const Foo = ({ condition }) => (
 			<ol>
 				<li>0</li>
-				{condition ? (
-					<Fragment>
-						<li>1</li>
-						<li>2</li>
-					</Fragment>
-				) : (
-					[<li>1</li>, <li>2</li>]
-				)}
+				{condition
+					? <Fragment>
+							<li>1</li>
+							<li>2</li>
+						</Fragment>
+					: [<li>1</li>, <li>2</li>]}
 				<li>3</li>
 			</ol>
 		);
@@ -1271,12 +1237,12 @@ describe('Fragment', () => {
 		const Foo = ({ condition }) => (
 			<ol>
 				<li>0</li>
-				{condition ? (
-					<Fragment>
-						<li>1</li>
-						<li>2</li>
-					</Fragment>
-				) : null}
+				{condition
+					? <Fragment>
+							<li>1</li>
+							<li>2</li>
+						</Fragment>
+					: null}
 				<li>3</li>
 				<li>4</li>
 			</ol>
@@ -1409,20 +1375,20 @@ describe('Fragment', () => {
 	it('should support conditional beginning and end Fragments', () => {
 		const Foo = ({ condition }) => (
 			<ol>
-				{condition ? (
-					<Fragment>
-						<li>0</li>
-						<li>1</li>
-					</Fragment>
-				) : null}
+				{condition
+					? <Fragment>
+							<li>0</li>
+							<li>1</li>
+						</Fragment>
+					: null}
 				<li>2</li>
 				<li>2</li>
-				{condition ? null : (
-					<Fragment>
-						<li>3</li>
-						<li>4</li>
-					</Fragment>
-				)}
+				{condition
+					? null
+					: <Fragment>
+							<li>3</li>
+							<li>4</li>
+						</Fragment>}
 			</ol>
 		);
 
@@ -1472,28 +1438,28 @@ describe('Fragment', () => {
 	it('should support nested conditional beginning and end Fragments', () => {
 		const Foo = ({ condition }) => (
 			<ol>
-				{condition ? (
-					<Fragment>
-						<Fragment>
+				{condition
+					? <Fragment>
 							<Fragment>
-								<li>0</li>
-								<li>1</li>
+								<Fragment>
+									<li>0</li>
+									<li>1</li>
+								</Fragment>
 							</Fragment>
 						</Fragment>
-					</Fragment>
-				) : null}
+					: null}
 				<li>2</li>
 				<li>3</li>
-				{condition ? null : (
-					<Fragment>
-						<Fragment>
+				{condition
+					? null
+					: <Fragment>
 							<Fragment>
-								<li>4</li>
-								<li>5</li>
+								<Fragment>
+									<li>4</li>
+									<li>5</li>
+								</Fragment>
 							</Fragment>
-						</Fragment>
-					</Fragment>
-				)}
+						</Fragment>}
 			</ol>
 		);
 
@@ -1544,28 +1510,26 @@ describe('Fragment', () => {
 		// Also fails if the # of divs outside the Fragment equals or exceeds
 		// the # inside the Fragment for both conditions
 		function Foo({ condition }) {
-			return condition ? (
-				<div>
-					<Fragment key="c">
-						<div>foo</div>
-						<div key="b">
-							<Stateful key="a" />
-						</div>
-					</Fragment>
-					<div>boop</div>
-					<div>boop</div>
-				</div>
-			) : (
-				<div>
-					<div>beep</div>
-					<Fragment key="c">
-						<div key="b">
-							<Stateful key="a" />
-						</div>
-						<div>bar</div>
-					</Fragment>
-				</div>
-			);
+			return condition
+				? <div>
+						<Fragment key="c">
+							<div>foo</div>
+							<div key="b">
+								<Stateful key="a" />
+							</div>
+						</Fragment>
+						<div>boop</div>
+						<div>boop</div>
+					</div>
+				: <div>
+						<div>beep</div>
+						<Fragment key="c">
+							<div key="b">
+								<Stateful key="a" />
+							</div>
+							<div>bar</div>
+						</Fragment>
+					</div>;
 		}
 
 		const htmlForTrue = div([
@@ -1621,31 +1585,29 @@ describe('Fragment', () => {
 		// Also fails if the # of divs outside the Fragment equals or exceeds
 		// the # inside the Fragment for both conditions
 		function Foo({ condition }) {
-			return condition ? (
-				<div>
-					<Fragment key="c">
-						<div>foo</div>
-						<div key="b">
-							<Stateful key="a" />
-						</div>
-					</Fragment>
-					<div>boop</div>
-					<div>boop</div>
-					<div>boop</div>
-				</div>
-			) : (
-				<div>
-					<div>beep</div>
-					<div>beep</div>
-					<div>beep</div>
-					<Fragment key="c">
-						<div key="b">
-							<Stateful key="a" />
-						</div>
-						<div>bar</div>
-					</Fragment>
-				</div>
-			);
+			return condition
+				? <div>
+						<Fragment key="c">
+							<div>foo</div>
+							<div key="b">
+								<Stateful key="a" />
+							</div>
+						</Fragment>
+						<div>boop</div>
+						<div>boop</div>
+						<div>boop</div>
+					</div>
+				: <div>
+						<div>beep</div>
+						<div>beep</div>
+						<div>beep</div>
+						<Fragment key="c">
+							<div key="b">
+								<Stateful key="a" />
+							</div>
+							<div>bar</div>
+						</Fragment>
+					</div>;
 		}
 
 		const htmlForTrue = div([
@@ -1758,17 +1720,15 @@ describe('Fragment', () => {
 
 	it('should render components that conditionally return Fragments', () => {
 		const Foo = ({ condition }) =>
-			condition ? (
-				<Fragment>
-					<div>1</div>
-					<div>2</div>
-				</Fragment>
-			) : (
-				<div>
-					<div>3</div>
-					<div>4</div>
-				</div>
-			);
+			condition
+				? <Fragment>
+						<div>1</div>
+						<div>2</div>
+					</Fragment>
+				: <div>
+						<div>3</div>
+						<div>4</div>
+					</div>;
 
 		const htmlForTrue = [div(1), div(2)].join('');
 
@@ -1832,12 +1792,12 @@ describe('Fragment', () => {
 				<li>0</li>
 				<Fragment>
 					<li>1</li>
-					{condition ? (
-						<Fragment>
-							<li>2</li>
-							<li>3</li>
-						</Fragment>
-					) : null}
+					{condition
+						? <Fragment>
+								<li>2</li>
+								<li>3</li>
+							</Fragment>
+						: null}
 					<li>4</li>
 				</Fragment>
 				<li>5</li>
@@ -1948,14 +1908,12 @@ describe('Fragment', () => {
 			render() {
 				return (
 					<div>
-						{this.state.error ? (
-							<div>Error!</div>
-						) : (
-							<div>
-								<div>1</div>
-								<SubList prop1={this.state.error} />
-							</div>
-						)}
+						{this.state.error
+							? <div>Error!</div>
+							: <div>
+									<div>1</div>
+									<SubList prop1={this.state.error} />
+								</div>}
 					</div>
 				);
 			}
@@ -2080,17 +2038,15 @@ describe('Fragment', () => {
 			}
 
 			render() {
-				return this.state.active ? (
-					<Fragment>
-						<section>B3</section>
-						<section>B4</section>
-					</Fragment>
-				) : (
-					<Fragment>
-						<div>B1</div>
-						<div>B2</div>
-					</Fragment>
-				);
+				return this.state.active
+					? <Fragment>
+							<section>B3</section>
+							<section>B4</section>
+						</Fragment>
+					: <Fragment>
+							<div>B1</div>
+							<div>B2</div>
+						</Fragment>;
 			}
 		}
 
@@ -2248,12 +2204,12 @@ describe('Fragment', () => {
 			}
 
 			render() {
-				return this.state.active ? (
-					<Fragment>
-						<div>B1</div>
-						<div>B2</div>
-					</Fragment>
-				) : null;
+				return this.state.active
+					? <Fragment>
+							<div>B1</div>
+							<div>B2</div>
+						</Fragment>
+					: null;
 			}
 		}
 
@@ -2337,12 +2293,12 @@ describe('Fragment', () => {
 			}
 
 			render() {
-				return this.state.active ? (
-					<Fragment>
-						<div>B1</div>
-						<div>B2</div>
-					</Fragment>
-				) : null;
+				return this.state.active
+					? <Fragment>
+							<div>B1</div>
+							<div>B2</div>
+						</Fragment>
+					: null;
 			}
 		}
 
@@ -2742,26 +2698,24 @@ describe('Fragment', () => {
 	it('should efficiently unmount Fragment children', () => {
 		// <div>1 => <span>1 and Fragment sibling unmounts. Does <span>1 get correct _nextDom pointer?
 		function App({ condition }) {
-			return condition ? (
-				<div>
-					<Fragment>
-						<div>1</div>
-						<div>2</div>
-					</Fragment>
-					<Fragment>
-						<div>A</div>
-					</Fragment>
-				</div>
-			) : (
-				<div>
-					<Fragment>
-						<div>1</div>
-					</Fragment>
-					<Fragment>
-						<div>A</div>
-					</Fragment>
-				</div>
-			);
+			return condition
+				? <div>
+						<Fragment>
+							<div>1</div>
+							<div>2</div>
+						</Fragment>
+						<Fragment>
+							<div>A</div>
+						</Fragment>
+					</div>
+				: <div>
+						<Fragment>
+							<div>1</div>
+						</Fragment>
+						<Fragment>
+							<div>A</div>
+						</Fragment>
+					</div>;
 		}
 
 		render(<App condition={true} />, scratch);
@@ -2778,31 +2732,29 @@ describe('Fragment', () => {
 		// Fragment wrapping <div>2 and <div>3 unmounts. Does <div>1 get correct
 		// _nextDom pointer to efficiently update DOM? _nextDom should be <div>A
 		function App({ condition }) {
-			return condition ? (
-				<div>
-					<Fragment>
-						<div>1</div>
+			return condition
+				? <div>
 						<Fragment>
-							<div>2</div>
-							<div>3</div>
+							<div>1</div>
+							<Fragment>
+								<div>2</div>
+								<div>3</div>
+							</Fragment>
 						</Fragment>
-					</Fragment>
-					<Fragment>
-						<div>A</div>
-						<div>B</div>
-					</Fragment>
-				</div>
-			) : (
-				<div>
-					<Fragment>
-						<div>1</div>
-					</Fragment>
-					<Fragment>
-						<div>A</div>
-						<div>B</div>
-					</Fragment>
-				</div>
-			);
+						<Fragment>
+							<div>A</div>
+							<div>B</div>
+						</Fragment>
+					</div>
+				: <div>
+						<Fragment>
+							<div>1</div>
+						</Fragment>
+						<Fragment>
+							<div>A</div>
+							<div>B</div>
+						</Fragment>
+					</div>;
 		}
 
 		clearLog();
@@ -2911,32 +2863,30 @@ describe('Fragment', () => {
 	it('should efficiently place new children and unmount nested Fragment children', () => {
 		// <div>4 is added and Fragment sibling unmounts. Does <div>4 get correct _nextDom pointer?
 		function App({ condition }) {
-			return condition ? (
-				<div>
-					<Fragment>
-						<div>1</div>
+			return condition
+				? <div>
 						<Fragment>
-							<div>2</div>
-							<div>3</div>
+							<div>1</div>
+							<Fragment>
+								<div>2</div>
+								<div>3</div>
+							</Fragment>
 						</Fragment>
-					</Fragment>
-					<Fragment>
-						<div>A</div>
-						<div>B</div>
-					</Fragment>
-				</div>
-			) : (
-				<div>
-					<Fragment>
-						<div>1</div>
-						<div>4</div>
-					</Fragment>
-					<Fragment>
-						<div>A</div>
-						<div>B</div>
-					</Fragment>
-				</div>
-			);
+						<Fragment>
+							<div>A</div>
+							<div>B</div>
+						</Fragment>
+					</div>
+				: <div>
+						<Fragment>
+							<div>1</div>
+							<div>4</div>
+						</Fragment>
+						<Fragment>
+							<div>A</div>
+							<div>B</div>
+						</Fragment>
+					</div>;
 		}
 
 		render(<App condition={true} />, scratch);
@@ -3012,31 +2962,29 @@ describe('Fragment', () => {
 	it('should efficiently unmount nested Fragment children when changing node type', () => {
 		// <div>1 => <span>1 and Fragment sibling unmounts. Does <span>1 get correct _nextDom pointer?
 		function App({ condition }) {
-			return condition ? (
-				<div>
-					<Fragment>
-						<div>1</div>
+			return condition
+				? <div>
 						<Fragment>
-							<div>2</div>
-							<div>3</div>
+							<div>1</div>
+							<Fragment>
+								<div>2</div>
+								<div>3</div>
+							</Fragment>
 						</Fragment>
-					</Fragment>
-					<Fragment>
-						<div>A</div>
-						<div>B</div>
-					</Fragment>
-				</div>
-			) : (
-				<div>
-					<Fragment>
-						<span>1</span>
-					</Fragment>
-					<Fragment>
-						<div>A</div>
-						<div>B</div>
-					</Fragment>
-				</div>
-			);
+						<Fragment>
+							<div>A</div>
+							<div>B</div>
+						</Fragment>
+					</div>
+				: <div>
+						<Fragment>
+							<span>1</span>
+						</Fragment>
+						<Fragment>
+							<div>A</div>
+							<div>B</div>
+						</Fragment>
+					</div>;
 		}
 
 		render(<App condition={true} />, scratch);
@@ -3125,24 +3073,22 @@ describe('Fragment', () => {
 			}
 
 			render() {
-				return this.state.condition ? (
-					<Fragment>
-						<div>1</div>
-						<Fragment>
-							<div>A</div>
-							<div>B</div>
+				return this.state.condition
+					? <Fragment>
+							<div>1</div>
+							<Fragment>
+								<div>A</div>
+								<div>B</div>
+							</Fragment>
+							<div>2</div>
 						</Fragment>
-						<div>2</div>
-					</Fragment>
-				) : (
-					<Fragment>
-						<Fragment>
-							<div>A</div>
-						</Fragment>
-						<div>1</div>
-						<div>2</div>
-					</Fragment>
-				);
+					: <Fragment>
+							<Fragment>
+								<div>A</div>
+							</Fragment>
+							<div>1</div>
+							<div>2</div>
+						</Fragment>;
 			}
 		}
 

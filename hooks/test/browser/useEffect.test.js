@@ -427,11 +427,9 @@ describe('useEffect', () => {
 			}
 
 			render() {
-				return this.state.error ? (
-					<h2>Error! {this.state.error}</h2>
-				) : (
-					this.props.children
-				);
+				return this.state.error
+					? <h2>Error! {this.state.error}</h2>
+					: this.props.children;
 			}
 		}
 

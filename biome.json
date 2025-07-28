@@ -7,26 +7,27 @@
     "lineEnding": "lf",
     "lineWidth": 80,
     "attributePosition": "auto",
-    "ignore": [
-      "**/.DS_Store",
-      "**/node_modules",
-      "**/npm-debug.log",
-      "**/dist",
-      "*/package-lock.json",
-      "**/yarn.lock",
-      "**/.vscode",
-      "**/.idea",
-      "test/ts/**/*.js",
-      "**/coverage",
-      "**/*.sw[op]",
-      "**/*.log",
-      "**/package/",
-      "**/preact-*.tgz",
-      "**/preact.tgz",
-      "**/package-lock.json"
+    "includes": [
+      "**",
+      "!**/.DS_Store",
+      "!**/node_modules",
+      "!**/npm-debug.log",
+      "!**/dist",
+      "!**/*/package-lock.json",
+      "!**/yarn.lock",
+      "!**/.vscode",
+      "!**/.idea",
+      "!**/test/ts/**/*.js",
+      "!**/coverage",
+      "!**/*.sw\\[op\\]",
+      "!**/*.log",
+      "!**/package/",
+      "!**/preact-*.tgz",
+      "!**/preact.tgz",
+      "!**/package-lock.json"
     ]
   },
-  "organizeImports": { "enabled": true },
+  "assist": { "actions": { "source": { "organizeImports": "on" } } },
   "linter": { "enabled": true, "rules": { "recommended": true } },
   "javascript": {
     "formatter": {
@@ -43,7 +44,7 @@
   },
   "overrides": [
     {
-      "include": ["*.json", ".*rc", "*.yml"],
+      "includes": ["**/*.json", "**/.*rc/**", "**/*.yml"],
       "formatter": { "indentWidth": 2, "indentStyle": "space" }
     }
   ]

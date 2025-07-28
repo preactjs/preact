@@ -131,13 +131,11 @@ describe('errorBoundary', () => {
 
 		function App() {
 			const [err] = useErrorBoundary();
-			return err ? (
-				<p>Error</p>
-			) : (
-				<Child>
-					<EffectThrowsError />
-				</Child>
-			);
+			return err
+				? <p>Error</p>
+				: <Child>
+						<EffectThrowsError />
+					</Child>;
 		}
 
 		render(<App />, scratch);

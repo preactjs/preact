@@ -243,15 +243,13 @@ describe('refs', () => {
 	it('should correctly set nested child refs', () => {
 		const ref = createRef();
 		const App = ({ open }) =>
-			open ? (
-				<div class="open" key="open">
-					<div ref={ref} />
-				</div>
-			) : (
-				<div class="closes" key="closed">
-					<div ref={ref} />
-				</div>
-			);
+			open
+				? <div class="open" key="open">
+						<div ref={ref} />
+					</div>
+				: <div class="closes" key="closed">
+						<div ref={ref} />
+					</div>;
 
 		render(<App />, scratch);
 		expect(ref.current).to.not.be.null;
@@ -364,39 +362,8 @@ describe('refs', () => {
 			render(props, { phase }) {
 				return (
 					<Fragment>
-						{phase === 1 ? (
-							<div>
-								<div
-									ref={r =>
-										r
-											? calls.push('adding ref to two')
-											: calls.push('removing ref from two')
-									}
-								>
-									Element two
-								</div>
-								<div
-									ref={r =>
-										r
-											? calls.push('adding ref to three')
-											: calls.push('removing ref from three')
-									}
-								>
-									Element three
-								</div>
-							</div>
-						) : phase === 2 ? (
-							<div class="outer">
-								<div
-									ref={r =>
-										r
-											? calls.push('adding ref to one')
-											: calls.push('removing ref from one')
-									}
-								>
-									Element one
-								</div>
-								<div class="wrapper">
+						{phase === 1
+							? <div>
 									<div
 										ref={r =>
 											r
@@ -416,8 +383,39 @@ describe('refs', () => {
 										Element three
 									</div>
 								</div>
-							</div>
-						) : null}
+							: phase === 2
+								? <div class="outer">
+										<div
+											ref={r =>
+												r
+													? calls.push('adding ref to one')
+													: calls.push('removing ref from one')
+											}
+										>
+											Element one
+										</div>
+										<div class="wrapper">
+											<div
+												ref={r =>
+													r
+														? calls.push('adding ref to two')
+														: calls.push('removing ref from two')
+												}
+											>
+												Element two
+											</div>
+											<div
+												ref={r =>
+													r
+														? calls.push('adding ref to three')
+														: calls.push('removing ref from three')
+												}
+											>
+												Element three
+											</div>
+										</div>
+									</div>
+								: null}
 					</Fragment>
 				);
 			}
