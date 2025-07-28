@@ -314,7 +314,7 @@ export function diff(
 			} else {
 				newVNode._dom = oldVNode._dom;
 				newVNode._children = oldVNode._children;
-				markAsForce(newVNode);
+				if (!e.then) markAsForce(newVNode);
 			}
 			options._catchError(e, newVNode, oldVNode);
 		}
