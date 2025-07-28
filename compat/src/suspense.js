@@ -31,14 +31,6 @@ options.unmount = function (vnode) {
 		component._onResolve();
 	}
 
-	// if the component is still hydrating
-	// most likely it is because the component is suspended
-	// we set the vnode.type as `null` so that it is not a typeof function
-	// so the unmount will remove the vnode._dom
-	if (component && vnode._flags & MODE_HYDRATE) {
-		vnode.type = null;
-	}
-
 	if (oldUnmount) oldUnmount(vnode);
 };
 
@@ -200,15 +192,9 @@ Suspense.prototype.render = function (props, state) {
 		this._detachOnNextRender = null;
 	}
 
-	// Wrap fallback tree in a VNode that prevents itself from being marked as aborting mid-hydration:
-	/** @type {import('./internal').VNode} */
-	const fallback =
-		state._suspended && createElement(Fragment, null, props.fallback);
-	if (fallback) fallback._flags &= ~MODE_HYDRATE;
-
 	return [
 		createElement(Fragment, null, state._suspended ? null : props.children),
-		fallback
+		state._suspended && createElement(Fragment, null, props.fallback)
 	];
 };
 
