@@ -34,11 +34,9 @@ class Catcher extends Component {
 	}
 
 	render(props, state) {
-		return state.error ? (
-			<div>Catcher did catch: {state.error.message}</div>
-		) : (
-			props.children
-		);
+		return state.error
+			? <div>Catcher did catch: {state.error.message}</div>
+			: props.children;
 	}
 }
 
@@ -192,13 +190,11 @@ describe('suspense', () => {
 				};
 			}, []);
 
-			return state ? (
-				<div>{children}</div>
-			) : (
-				<div>
-					<p>hi</p>
-				</div>
-			);
+			return state
+				? <div>{children}</div>
+				: <div>
+						<p>hi</p>
+					</div>;
 		};
 
 		render(

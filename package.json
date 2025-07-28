@@ -210,7 +210,7 @@
     "@babel/plugin-transform-react-jsx-source": "^7.27.1",
     "@babel/preset-env": "^7.28.0",
     "@babel/register": "^7.27.1",
-    "@biomejs/biome": "^1.9.4",
+    "@biomejs/biome": "^2.1.2",
     "@types/node": "^18.19.87",
     "@vitest/browser": "^3.2.4",
     "@vitest/coverage-v8": "^3.2.4",

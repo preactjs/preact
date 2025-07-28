@@ -168,19 +168,17 @@ describe('useId', () => {
 				<main>
 					ID: {rootId}
 					<p>Hello world id: {paragraphId}</p>
-					{showStateful ? (
-						<Stateful />
-					) : (
-						<ChildReturn>
-							<SomeMessage msg="child-return" />
-							<ChildReturn>
+					{showStateful
+						? <Stateful />
+						: <ChildReturn>
 								<SomeMessage msg="child-return" />
 								<ChildReturn>
 									<SomeMessage msg="child-return" />
+									<ChildReturn>
+										<SomeMessage msg="child-return" />
+									</ChildReturn>
 								</ChildReturn>
-							</ChildReturn>
-						</ChildReturn>
-					)}
+							</ChildReturn>}
 					<ChildFragmentReturn>
 						<SomeMessage msg="child-fragment-return" />
 						<SomeMessage msg="child-fragment-return-2" />
@@ -239,19 +237,17 @@ describe('useId', () => {
 				<main>
 					ID: {rootId}
 					<p>Hello world id: {paragraphId}</p>
-					{showStateful ? (
-						<Stateful />
-					) : (
-						<ChildReturn>
-							<SomeMessage msg="child-return" />
-							<ChildReturn>
+					{showStateful
+						? <Stateful />
+						: <ChildReturn>
 								<SomeMessage msg="child-return" />
 								<ChildReturn>
 									<SomeMessage msg="child-return" />
+									<ChildReturn>
+										<SomeMessage msg="child-return" />
+									</ChildReturn>
 								</ChildReturn>
-							</ChildReturn>
-						</ChildReturn>
-					)}
+							</ChildReturn>}
 					<ChildFragmentReturn>
 						<SomeMessage msg="child-fragment-return" />
 						<SomeMessage msg="child-fragment-return-2" />

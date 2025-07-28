@@ -774,9 +774,9 @@ describe('createContext', () => {
 				return (
 					<Provider value={state.value}>
 						<div>
-							{state.show ? (
-								<Consumer>{data => <Inner value={data} />}</Consumer>
-							) : null}
+							{state.show
+								? <Consumer>{data => <Inner value={data} />}</Consumer>
+								: null}
 						</div>
 					</Provider>
 				);

@@ -6,13 +6,13 @@ import { expect } from 'chai';
 
 describe('createContext', () => {
 	it('should return a Provider and a Consumer', () => {
-		const context = createContext();
+		const context = createContext(null);
 		expect(context).to.have.property('Provider');
 		expect(context).to.have.property('Consumer');
 	});
 
 	it('should return a valid Provider Component', () => {
-		const { Provider } = createContext();
+		const { Provider } = createContext(null);
 		const contextValue = { value: 'test' };
 		const children = [<div>child1</div>, <div>child2</div>];
 

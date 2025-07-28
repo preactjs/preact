@@ -471,25 +471,23 @@ describe('focus', () => {
 				return (
 					<div>
 						<h1>Heading</h1>
-						{!this.state.active ? (
-							<Fragment>
-								foobar
-								<Fragment>
-									Hello World
-									<h2>yo</h2>
+						{!this.state.active
+							? <Fragment>
+									foobar
+									<Fragment>
+										Hello World
+										<h2>yo</h2>
+									</Fragment>
+									<input type="text" ref={i => (input = i)} />
 								</Fragment>
-								<input type="text" ref={i => (input = i)} />
-							</Fragment>
-						) : (
-							<Fragment>
-								<Fragment>
-									Hello World
-									<h2>yo</h2>
-								</Fragment>
-								foobar
-								<input type="text" ref={i => (input = i)} />
-							</Fragment>
-						)}
+							: <Fragment>
+									<Fragment>
+										Hello World
+										<h2>yo</h2>
+									</Fragment>
+									foobar
+									<input type="text" ref={i => (input = i)} />
+								</Fragment>}
 					</div>
 				);
 			}
@@ -527,25 +525,23 @@ describe('focus', () => {
 				return (
 					<div>
 						<h1>Heading</h1>
-						{!this.state.active ? (
-							<Fragment>
-								foobar
-								<Fragment>
-									Hello World
-									<h2>yo</h2>
+						{!this.state.active
+							? <Fragment>
+									foobar
+									<Fragment>
+										Hello World
+										<h2>yo</h2>
+									</Fragment>
+									<input type="text" ref={i => (input = i)} value="foobar" />
 								</Fragment>
-								<input type="text" ref={i => (input = i)} value="foobar" />
-							</Fragment>
-						) : (
-							<Fragment>
-								<Fragment>
-									Hello World
-									<h2>yo</h2>
-								</Fragment>
-								foobar
-								<input type="text" ref={i => (input = i)} value="foobar" />
-							</Fragment>
-						)}
+							: <Fragment>
+									<Fragment>
+										Hello World
+										<h2>yo</h2>
+									</Fragment>
+									foobar
+									<input type="text" ref={i => (input = i)} value="foobar" />
+								</Fragment>}
 					</div>
 				);
 			}

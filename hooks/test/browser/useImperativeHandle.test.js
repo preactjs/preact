@@ -103,14 +103,10 @@ describe('useImperativeHandle', () => {
 
 		function Comp({ a }) {
 			ref = useRef({});
-			useImperativeHandle(
-				ref,
-				() => {
-					createHandleSpy();
-					return { test: () => 'test' + a };
-				},
-				[a]
-			);
+			useImperativeHandle(ref, () => {
+				createHandleSpy();
+				return { test: () => 'test' + a };
+			}, [a]);
 			return <p>Test</p>;
 		}
 
