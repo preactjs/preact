@@ -196,7 +196,7 @@ rights to publish new releases on npm.
 
 1. Make a PR where **only** the version number is incremented in `package.json` and everywhere else. A simple search and replace works. (note: We follow `SemVer` conventions)
 2. Wait until the PR is approved and merged.
-3. Switch back to the `main` branch and pull the merged PR
+3. Switch back to the `v10.x` branch and pull the merged PR
 4. Create and push a tag for the new version you want to publish:
    1. `git tag 10.0.0`
    2. `git push --tags`
