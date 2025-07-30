@@ -87,7 +87,8 @@ declare namespace React {
 		extends JSXInternal.SVGAttributes<T>,
 			preact.ClassAttributes<T> {}
 
-	interface SVGAttributes extends JSXInternal.SVGAttributes {}
+	interface SVGAttributes<T extends EventTarget = SVGElement>
+		extends JSXInternal.SVGAttributes<T> {}
 
 	interface ReactSVG extends JSXInternal.IntrinsicSVGElements {}
 
