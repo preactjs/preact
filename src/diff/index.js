@@ -75,6 +75,7 @@ export function diff(
 	}
 
 	if ((tmp = options._diff)) tmp(newVNode);
+	if ((tmp = options._diff2)) tmp(newVNode, oldVNode);
 
 	outer: if (typeof newType == 'function') {
 		try {
