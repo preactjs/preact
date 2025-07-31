@@ -229,4 +229,13 @@ describe('memo()', () => {
 			`<ol><li>A</li><li>B</li><li class="selected">C</li><li>D</li></ol>`
 		);
 	});
+
+	it('should attach .type pointing to the original component', () => {
+		function Foo() {
+			return <div />;
+		}
+		const Memoized = memo(Foo);
+
+		expect(Memoized.type).to.equal(Foo);
+	});
 });
