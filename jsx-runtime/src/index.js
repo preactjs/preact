@@ -1,5 +1,6 @@
 import { options, Fragment } from 'preact';
 import { encodeEntities } from './utils';
+import { COMPONENT_FLAG, TEXT_FLAG, NULL } from '../../src/constants';
 
 let vnodeId = 0;
 
@@ -45,6 +46,13 @@ function createVNode(type, props, key, isStaticChildren, __source, __self) {
 		}
 	}
 
+	let flags = 0;
+	if (typeof type == 'function') {
+		flags |= COMPONENT_FLAG;
+	} else if (type == NULL) {
+		flags |= TEXT_FLAG;
+	}
+
 	/** @type {import('../../src/internal').VNode & { __source: any; __self: any }} */
 	const vnode = {
 		type,
@@ -59,7 +67,7 @@ function createVNode(type, props, key, isStaticChildren, __source, __self) {
 		constructor: undefined,
 		_original: --vnodeId,
 		_index: -1,
-		_flags: 0,
+		_flags: flags,
 		__source,
 		__self
 	};

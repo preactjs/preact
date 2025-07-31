@@ -1,6 +1,6 @@
 import { assign, slice } from './util';
 import { createVNode } from './create-element';
-import { NULL } from './constants';
+import { COMPONENT_FLAG, NULL } from './constants';
 
 /**
  * Clones the given VNode, optionally adding attributes/props and replacing its
@@ -19,7 +19,7 @@ export function cloneElement(vnode, props, children) {
 
 	for (i in props) {
 		if (i == 'key') key = props[i];
-		else if (i == 'ref' && typeof vnode.type != 'function') ref = props[i];
+		else if (i == 'ref' && !(vnode._flags & COMPONENT_FLAG)) ref = props[i];
 		else normalizedProps[i] = props[i];
 	}
 

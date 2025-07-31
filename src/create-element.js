@@ -1,6 +1,6 @@
 import { slice } from './util';
 import options from './options';
-import { NULL, UNDEFINED } from './constants';
+import { NULL, UNDEFINED, COMPONENT_FLAG, TEXT_FLAG } from './constants';
 
 let vnodeId = 0;
 
@@ -45,6 +45,12 @@ export function createElement(type, props, children) {
  * @returns {import('./internal').VNode}
  */
 export function createVNode(type, props, key, ref, original) {
+	let flags = 0;
+	if (typeof type == 'function') {
+		flags |= COMPONENT_FLAG;
+	} else if (type == NULL) {
+		flags |= TEXT_FLAG;
+	}
 	// V8 seems to be better at detecting type shapes if the object is allocated from the same call site
 	// Do not inline into createElement and coerceToVNode!
 	/** @type {import('./internal').VNode} */
@@ -61,7 +67,7 @@ export function createVNode(type, props, key, ref, original) {
 		constructor: UNDEFINED,
 		_original: original == NULL ? ++vnodeId : original,
 		_index: -1,
-		_flags: 0
+		_flags: flags
 	};
 
 	// Only invoke the vnode hook if this was *not* a direct copy:

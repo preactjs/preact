@@ -6,6 +6,10 @@ export const MODE_SUSPENDED = 1 << 7;
 export const INSERT_VNODE = 1 << 2;
 /** Indicates a VNode has been matched with another VNode in the diff */
 export const MATCHED = 1 << 1;
+/** Indicates that this VNode is a text node */
+export const TEXT_FLAG = 1 << 3;
+/** Indicates that this VNode is a Component */
+export const COMPONENT_FLAG = 1 << 0;
 
 /** Reset all mode flags */
 export const RESET_MODE = ~(MODE_HYDRATE | MODE_SUSPENDED);

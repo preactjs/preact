@@ -1,4 +1,5 @@
 import {
+	COMPONENT_FLAG,
 	EMPTY_OBJ,
 	MATH_NAMESPACE,
 	MODE_HYDRATE,
@@ -6,6 +7,7 @@ import {
 	NULL,
 	RESET_MODE,
 	SVG_NAMESPACE,
+	TEXT_FLAG,
 	UNDEFINED,
 	XHTML_NAMESPACE
 } from '../constants';
@@ -17,6 +19,7 @@ import { assign, isArray, removeNode, slice } from '../util';
 import options from '../options';
 
 /**
+ * @typedef {import('../internal').ComponentType} ComponentType
  * @typedef {import('../internal').ComponentChildren} ComponentChildren
  * @typedef {import('../internal').Component} Component
  * @typedef {import('../internal').PreactElement} PreactElement
@@ -61,8 +64,7 @@ export function diff(
 	doc
 ) {
 	/** @type {any} */
-	let tmp,
-		newType = newVNode.type;
+	let tmp;
 
 	// When passing through createElement it assigns the object
 	// constructor as undefined. This to prevent JSON-injection.
@@ -80,8 +82,11 @@ export function diff(
 
 	if ((tmp = options._diff)) tmp(newVNode);
 
-	outer: if (typeof newType == 'function') {
+	outer: if (newVNode._flags & COMPONENT_FLAG) {
 		try {
+			/** @type {ComponentType} */
+			// @ts-expect-error newVNode.type is a ComponentType
+			let newType = newVNode.type;
 			let c, isNew, oldProps, oldState, snapshot, clearProcessingException;
 			let newProps = newVNode.props;
 			const isClassComponent =
@@ -104,7 +109,7 @@ export function diff(
 			} else {
 				// Instantiate the new component
 				if (isClassComponent) {
-					// @ts-expect-error The check above verifies that newType is suppose to be constructed
+					// @ts-expect-error Trust me, Component implements the interface we want
 					newVNode._component = c = new newType(newProps, componentContext); // eslint-disable-line new-cap
 				} else {
 					// @ts-expect-error Trust me, Component implements the interface we want
@@ -112,6 +117,7 @@ export function diff(
 						newProps,
 						componentContext
 					);
+
 					c.constructor = newType;
 					c.render = doRender;
 				}
@@ -497,7 +503,7 @@ function diffElementNodes(
 	}
 
 	if (dom == NULL) {
-		if (nodeType == NULL) {
+		if (newVNode._flags & TEXT_FLAG) {
 			return doc.createTextNode(newProps);
 		}
 
@@ -514,7 +520,7 @@ function diffElementNodes(
 		excessDomChildren = NULL;
 	}
 
-	if (nodeType == NULL) {
+	if (newVNode._flags & TEXT_FLAG) {
 		// During hydration, we still have to split merged text from SSR'd HTML.
 		if (oldProps !== newProps && (!isHydrating || dom.data != newProps)) {
 			dom.data = newProps;
@@ -589,7 +595,7 @@ function diffElementNodes(
 
 			diffChildren(
 				// @ts-expect-error
-				newVNode.type == 'template' ? dom.content : dom,
+				nodeType == 'template' ? dom.content : dom,
 				isArray(newChildren) ? newChildren : [newChildren],
 				newVNode,
 				oldVNode,
