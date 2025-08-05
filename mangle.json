@@ -38,10 +38,8 @@
       "$_args": "__H",
       "$_factory": "__h",
       "$_depth": "__b",
-      "$_dirty": "__d",
       "$_mask": "__m",
       "$_detachOnNextRender": "__b",
-      "$_force": "__e",
       "$_excess": "__z",
       "$_nextState": "__s",
       "$_renderCallbacks": "__h",
@@ -58,8 +56,6 @@
       "$_flags": "__u",
       "$__html": "__html",
       "$_parent": "__",
-      "$_pendingError": "__E",
-      "$_processingException": "__",
       "$_globalContext": "__n",
       "$_context": "c",
       "$_defaultValue": "__",
@@ -81,7 +77,7 @@
       "$_rerenderCount": "__r",
       "$_forwarded": "__f",
       "$_isSuspended": "__i",
-      "$_bits": "__g"
+      "$_bits": "__"
     }
   }
 }

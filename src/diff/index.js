@@ -1,6 +1,7 @@
 import {
 	COMPONENT_FLAG,
 	COMPONENT_FORCE,
+	COMPONENT_DIRTY,
 	COMPONENT_PENDING_ERROR,
 	COMPONENT_PROCESSING_EXCEPTION,
 	EMPTY_OBJ,
@@ -133,7 +134,8 @@ export function diff(
 				if (!c.state) c.state = {};
 				c.context = componentContext;
 				c._globalContext = globalContext;
-				isNew = c._dirty = true;
+				isNew = true;
+				c._bits |= COMPONENT_DIRTY;
 				c._renderCallbacks = [];
 				c._stateCallbacks = [];
 			}
@@ -199,7 +201,7 @@ export function diff(
 						// be dirtied see #3883
 						c.props = newProps;
 						c.state = c._nextState;
-						c._dirty = false;
+						c._bits &= ~COMPONENT_DIRTY;
 					}
 
 					newVNode._dom = oldVNode._dom;
@@ -240,7 +242,7 @@ export function diff(
 				count = 0;
 			if (isClassComponent) {
 				c.state = c._nextState;
-				c._dirty = false;
+				c._bits &= ~COMPONENT_DIRTY;
 
 				if (renderHook) renderHook(newVNode);
 
@@ -252,14 +254,14 @@ export function diff(
 				c._stateCallbacks = [];
 			} else {
 				do {
-					c._dirty = false;
+					c._bits &= ~COMPONENT_DIRTY;
 					if (renderHook) renderHook(newVNode);
 
 					tmp = c.render(c.props, c.state, c.context);
 
 					// Handle setState called in render, see #2553
 					c.state = c._nextState;
-				} while (c._dirty && ++count < 25);
+				} while (c._bits & COMPONENT_DIRTY && ++count < 25);
 			}
 
 			// Handle setState called in render, see #2553

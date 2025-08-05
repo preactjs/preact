@@ -5,6 +5,7 @@ import { Fragment } from './create-element';
 import {
 	COMPONENT_FLAG,
 	COMPONENT_FORCE,
+	COMPONENT_DIRTY,
 	MODE_HYDRATE,
 	NULL
 } from './constants';
@@ -203,8 +204,8 @@ let prevDebounce;
  */
 export function enqueueRender(c) {
 	if (
-		(!c._dirty &&
-			(c._dirty = true) &&
+		(!(c._bits & COMPONENT_DIRTY) &&
+			(c._bits |= COMPONENT_DIRTY) &&
 			rerenderQueue.push(c) &&
 			!process._rerenderCount++) ||
 		prevDebounce != options.debounceRendering
@@ -241,7 +242,7 @@ function process() {
 		c = rerenderQueue.shift();
 		l = rerenderQueue.length;
 
-		if (c._dirty) {
+		if (c._bits & COMPONENT_DIRTY) {
 			renderComponent(c);
 		}
 	}

@@ -19,6 +19,8 @@ export const COMPONENT_PROCESSING_EXCEPTION = 1 << 0;
 export const COMPONENT_PENDING_ERROR = 1 << 1;
 /** Component should force update (skip shouldComponentUpdate) */
 export const COMPONENT_FORCE = 1 << 2;
+/** Component is queued for update */
+export const COMPONENT_DIRTY = 1 << 3;
 
 /** Reset all mode flags */
 export const RESET_MODE = ~(MODE_HYDRATE | MODE_SUSPENDED);

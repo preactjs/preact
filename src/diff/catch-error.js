@@ -1,5 +1,6 @@
 import {
 	NULL,
+	COMPONENT_DIRTY,
 	COMPONENT_PENDING_ERROR,
 	COMPONENT_PROCESSING_EXCEPTION
 } from '../constants';
@@ -18,7 +19,7 @@ export function _catchError(error, vnode, oldVNode, errorInfo) {
 	let component,
 		/** @type {import('../internal').ComponentType} */
 		ctor,
-		/** @type {boolean} */
+		/** @type {number} */
 		handled;
 
 	for (; (vnode = vnode._parent); ) {
@@ -31,12 +32,12 @@ export function _catchError(error, vnode, oldVNode, errorInfo) {
 
 				if (ctor && ctor.getDerivedStateFromError != NULL) {
 					component.setState(ctor.getDerivedStateFromError(error));
-					handled = component._dirty;
+					handled = component._bits & COMPONENT_DIRTY;
 				}
 
 				if (component.componentDidCatch != NULL) {
 					component.componentDidCatch(error, errorInfo || {});
-					handled = component._dirty;
+					handled = component._bits & COMPONENT_DIRTY;
 				}
 
 				// This is an error boundary. Mark it as having bailed out, and whether it was mid-hydration.
