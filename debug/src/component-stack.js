@@ -147,3 +147,11 @@ export function setupComponentStack() {
 		if (oldRender) oldRender(vnode);
 	};
 }
+
+/**
+ * Return the component stack that was captured up to this point.
+ * @returns {string}
+ */
+export function captureOwnerStack() {
+	return getOwnerStack(getCurrentVNode());
+}

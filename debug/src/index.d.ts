@@ -1,14 +1,7 @@
-import { VNode } from 'preact';
-
-/**
- * Get the currently rendered `vnode`
- */
-export function getCurrentVNode(): VNode | null;
-
 /**
  * Return the component stack that was captured up to this point.
  */
-export function getOwnerStack(vnode: VNode): string;
+export function captureOwnerStack(): string;
 
 /**
  * Setup code to capture the component trace while rendering. Note that
