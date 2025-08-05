@@ -1,4 +1,5 @@
 import { NULL } from '../constants';
+import { resetRenderCount } from '../component';
 
 /**
  * Find the closest error boundary to a thrown error and call it
@@ -42,5 +43,8 @@ export function _catchError(error, vnode, oldVNode, errorInfo) {
 		}
 	}
 
+	// Reset rerender count to 0, so that the next render will not be skipped
+	// when we leverage prefresh
+	resetRenderCount();
 	throw error;
 }
