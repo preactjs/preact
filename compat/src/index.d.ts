@@ -153,6 +153,7 @@ declare namespace React {
 	export import ReactElement = preact1.VNode;
 	export import Consumer = preact1.Consumer;
 	export import ErrorInfo = preact1.ErrorInfo;
+	export import Key = preact1.Key;
 
 	// Suspense
 	export import Suspense = _Suspense.Suspense;
@@ -178,7 +179,8 @@ declare namespace React {
 		extends JSXInternal.SVGAttributes<T>,
 			preact1.ClassAttributes<T> {}
 
-	interface SVGAttributes extends JSXInternal.SVGAttributes {}
+	interface SVGAttributes<T extends EventTarget = SVGElement>
+		extends JSXInternal.SVGAttributes<T> {}
 
 	interface ReactSVG extends JSXInternal.IntrinsicSVGElements {}
 
