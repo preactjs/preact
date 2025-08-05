@@ -1,5 +1,4 @@
 import {
-	COMPONENT_FLAG,
 	COMPONENT_FORCE,
 	COMPONENT_DIRTY,
 	COMPONENT_PENDING_ERROR,
@@ -11,7 +10,6 @@ import {
 	NULL,
 	RESET_MODE,
 	SVG_NAMESPACE,
-	TEXT_FLAG,
 	UNDEFINED,
 	XHTML_NAMESPACE
 } from '../constants';
@@ -68,7 +66,8 @@ export function diff(
 	doc
 ) {
 	/** @type {any} */
-	let tmp;
+	let tmp,
+		newType = newVNode.type;
 
 	// When passing through createElement it assigns the object
 	// constructor as undefined. This to prevent JSON-injection.
@@ -86,11 +85,8 @@ export function diff(
 
 	if ((tmp = options._diff)) tmp(newVNode);
 
-	outer: if (newVNode._flags & COMPONENT_FLAG) {
+	outer: if (typeof newType == 'function') {
 		try {
-			/** @type {ComponentType} */
-			// @ts-expect-error newVNode.type is a ComponentType
-			let newType = newVNode.type;
 			let c, isNew, oldProps, oldState, snapshot, clearProcessingException;
 			let newProps = newVNode.props;
 			const isClassComponent =
@@ -513,7 +509,7 @@ function diffElementNodes(
 	}
 
 	if (dom == NULL) {
-		if (newVNode._flags & TEXT_FLAG) {
+		if (nodeType == NULL) {
 			return doc.createTextNode(newProps);
 		}
 
@@ -530,7 +526,7 @@ function diffElementNodes(
 		excessDomChildren = NULL;
 	}
 
-	if (newVNode._flags & TEXT_FLAG) {
+	if (nodeType == NULL) {
 		// During hydration, we still have to split merged text from SSR'd HTML.
 		if (oldProps !== newProps && (!isHydrating || dom.data != newProps)) {
 			dom.data = newProps;

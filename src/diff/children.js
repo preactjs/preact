@@ -6,8 +6,7 @@ import {
 	INSERT_VNODE,
 	MATCHED,
 	UNDEFINED,
-	NULL,
-	COMPONENT_FLAG
+	NULL
 } from '../constants';
 import { isArray } from '../util';
 import { getDomSibling } from '../component';
@@ -134,7 +133,7 @@ export function diffChildren(
 			oldVNode._children === childVNode._children
 		) {
 			oldDom = insert(childVNode, oldDom, parentDom);
-		} else if (childVNode._flags & COMPONENT_FLAG && result !== UNDEFINED) {
+		} else if (typeof childVNode.type == 'function' && result !== UNDEFINED) {
 			oldDom = result;
 		} else if (newDom) {
 			oldDom = newDom.nextSibling;
@@ -280,7 +279,7 @@ function constructNewChildrenArray(
 			}
 
 			// If we are mounting a DOM VNode, mark it for insertion
-			if (!(childVNode._flags & COMPONENT_FLAG)) {
+			if (typeof childVNode.type != 'function') {
 				childVNode._flags |= INSERT_VNODE;
 			}
 		} else if (matchingIndex != skewedIndex) {
@@ -347,8 +346,7 @@ function constructNewChildrenArray(
  */
 function insert(parentVNode, oldDom, parentDom) {
 	// Note: VNodes in nested suspended trees may be missing _children.
-
-	if (parentVNode._flags & COMPONENT_FLAG) {
+	if (typeof parentVNode.type == 'function') {
 		let children = parentVNode._children;
 		for (let i = 0; children && i < children.length; i++) {
 			if (children[i]) {

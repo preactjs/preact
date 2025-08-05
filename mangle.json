@@ -77,7 +77,7 @@
       "$_rerenderCount": "__r",
       "$_forwarded": "__f",
       "$_isSuspended": "__i",
-      "$_bits": "__"
+      "$_bits": "__g"
     }
   }
 }

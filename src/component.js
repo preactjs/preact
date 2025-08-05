@@ -3,7 +3,6 @@ import { diff, commitRoot } from './diff/index';
 import options from './options';
 import { Fragment } from './create-element';
 import {
-	COMPONENT_FLAG,
 	COMPONENT_FORCE,
 	COMPONENT_DIRTY,
 	MODE_HYDRATE,
@@ -120,7 +119,7 @@ export function getDomSibling(vnode, childIndex) {
 	// Only climb up and search the parent if we aren't searching through a DOM
 	// VNode (meaning we reached the DOM parent of the original vnode that began
 	// the search)
-	return vnode._flags & COMPONENT_FLAG ? getDomSibling(vnode) : NULL;
+	return typeof vnode.type == 'function' ? getDomSibling(vnode) : NULL;
 }
 
 /**
