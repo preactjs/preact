@@ -286,7 +286,7 @@ export namespace h {
 //
 // Preact render
 // -----------------------------------
-interface ContainerNode {
+export interface ContainerNode {
 	readonly nodeType: number;
 	readonly parentNode: ContainerNode | null;
 	readonly firstChild: ContainerNode | null;

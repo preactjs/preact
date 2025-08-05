@@ -1,4 +1,4 @@
-import { createElement, Component, createContext, HTMLAttributes } from '../../';
+import { createElement, Component, createContext, HTMLAttributes, MouseEventHandler } from '../../';
 
 declare module '../../' {
 	namespace createElement.JSX {
