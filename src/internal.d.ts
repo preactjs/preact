@@ -166,8 +166,6 @@ export interface Component<P = {}, S = {}>
 	state: S; // Override Component["state"] to not be readonly for internal use, specifically Hooks
 
 	_excess?: PreactElement[];
-	_dirty: boolean;
-	_force?: boolean;
 	_renderCallbacks: Array<() => void>; // Only class components
 	_stateCallbacks: Array<() => void>; // Only class components
 	_globalContext?: any;
@@ -180,10 +178,7 @@ export interface Component<P = {}, S = {}>
 	 * components or array returns.
 	 */
 	_parentDom?: PreactElement | null;
-	// Always read, set only when handling error
-	_processingException?: Component<any, any> | null;
-	// Always read, set only when handling error. This is used to indicate at diffTime to set _processingException
-	_pendingError?: Component<any, any> | null;
+	_bits: number;
 }
 
 export interface PreactContext extends preact.Context<any> {

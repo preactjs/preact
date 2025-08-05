@@ -1,5 +1,5 @@
 import { Component, createElement, options, Fragment } from 'preact';
-import { MODE_HYDRATE } from '../../src/constants';
+import { MODE_HYDRATE, COMPONENT_FORCE } from '../../src/constants';
 import { assign } from './util';
 
 const oldCatchError = options._catchError;
@@ -50,7 +50,7 @@ function detachedClone(vnode, detachedParent, parentDom) {
 				vnode._component._parentDom = detachedParent;
 			}
 
-			vnode._component._force = true;
+			vnode._component._bits |= COMPONENT_FORCE;
 
 			vnode._component = null;
 		}
@@ -79,7 +79,7 @@ function removeOriginal(vnode, detachedParent, originalParent) {
 				if (vnode._dom) {
 					originalParent.appendChild(vnode._dom);
 				}
-				vnode._component._force = true;
+				vnode._component._bits |= COMPONENT_FORCE;
 				vnode._component._parentDom = originalParent;
 			}
 		}
