@@ -189,7 +189,8 @@ let rerenderQueue = [];
  * * [Callbacks synchronous and asynchronous](https://blog.ometer.com/2011/07/24/callbacks-synchronous-and-asynchronous/)
  */
 
-let prevDebounce;
+let prevDebounce,
+	rerenderCount = 0;
 
 /**
  * Enqueue a rerender of a component
@@ -200,7 +201,7 @@ export function enqueueRender(c) {
 		(!c._dirty &&
 			(c._dirty = true) &&
 			rerenderQueue.push(c) &&
-			!process._rerenderCount++) ||
+			!rerenderCount++) ||
 		prevDebounce != options.debounceRendering
 	) {
 		prevDebounce = options.debounceRendering;
@@ -216,30 +217,31 @@ const depthSort = (a, b) => a._vnode._depth - b._vnode._depth;
 
 /** Flush the render queue by rerendering all queued components */
 function process() {
-	let c,
-		l = 1;
+	try {
+		let c,
+			l = 1;
 
-	// Don't update `renderCount` yet. Keep its value non-zero to prevent unnecessary
-	// process() calls from getting scheduled while `queue` is still being consumed.
-	while (rerenderQueue.length) {
-		// Keep the rerender queue sorted by (depth, insertion order). The queue
-		// will initially be sorted on the first iteration only if it has more than 1 item.
-		//
-		// New items can be added to the queue e.g. when rerendering a provider, so we want to
-		// keep the order from top to bottom with those new items so we can handle them in a
-		// single pass
-		if (rerenderQueue.length > l) {
-			rerenderQueue.sort(depthSort);
+		// Don't update `renderCount` yet. Keep its value non-zero to prevent unnecessary
+		// process() calls from getting scheduled while `queue` is still being consumed.
+		while (rerenderQueue.length) {
+			// Keep the rerender queue sorted by (depth, insertion order). The queue
+			// will initially be sorted on the first iteration only if it has more than 1 item.
+			//
+			// New items can be added to the queue e.g. when rerendering a provider, so we want to
+			// keep the order from top to bottom with those new items so we can handle them in a
+			// single pass
+			if (rerenderQueue.length > l) {
+				rerenderQueue.sort(depthSort);
+			}
+
+			c = rerenderQueue.shift();
+			l = rerenderQueue.length;
+
+			if (c._dirty) {
+				renderComponent(c);
+			}
 		}
-
-		c = rerenderQueue.shift();
-		l = rerenderQueue.length;
-
-		if (c._dirty) {
-			renderComponent(c);
-		}
+	} finally {
+		rerenderCount = 0;
 	}
-	process._rerenderCount = 0;
 }
-
-process._rerenderCount = 0;
