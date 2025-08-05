@@ -195,7 +195,12 @@ let rerenderQueue = [];
  * * [Callbacks synchronous and asynchronous](https://blog.ometer.com/2011/07/24/callbacks-synchronous-and-asynchronous/)
  */
 
-let prevDebounce;
+let prevDebounce,
+	rerenderCount = 0;
+
+export function resetRenderCount() {
+	rerenderCount = 0;
+}
 
 /**
  * Enqueue a rerender of a component
@@ -206,7 +211,7 @@ export function enqueueRender(c) {
 		(!(c._bits & COMPONENT_DIRTY) &&
 			(c._bits |= COMPONENT_DIRTY) &&
 			rerenderQueue.push(c) &&
-			!process._rerenderCount++) ||
+			!rerenderCount++) ||
 		prevDebounce != options.debounceRendering
 	) {
 		prevDebounce = options.debounceRendering;
@@ -245,7 +250,6 @@ function process() {
 			renderComponent(c);
 		}
 	}
-	process._rerenderCount = 0;
-}
 
-process._rerenderCount = 0;
+	rerenderCount = 0;
+}

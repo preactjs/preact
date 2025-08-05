@@ -1,3 +1,4 @@
+import { resetRenderCount } from '../component';
 import {
 	NULL,
 	COMPONENT_DIRTY,
@@ -51,5 +52,8 @@ export function _catchError(error, vnode, oldVNode, errorInfo) {
 		}
 	}
 
+	// Reset rerender count to 0, so that the next render will not be skipped
+	// when we leverage prefresh
+	resetRenderCount();
 	throw error;
 }
