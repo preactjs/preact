@@ -2,7 +2,12 @@ import { assign } from './util';
 import { diff, commitRoot } from './diff/index';
 import options from './options';
 import { Fragment } from './create-element';
-import { COMPONENT_FLAG, MODE_HYDRATE, NULL } from './constants';
+import {
+	COMPONENT_FLAG,
+	COMPONENT_FORCE,
+	MODE_HYDRATE,
+	NULL
+} from './constants';
 
 /**
  * Base Component class. Provides `setState()` and `forceUpdate()`, which
@@ -14,7 +19,7 @@ import { COMPONENT_FLAG, MODE_HYDRATE, NULL } from './constants';
 export function BaseComponent(props, context) {
 	this.props = props;
 	this.context = context;
-	this._flags = 0;
+	this._bits = 0;
 }
 
 /**
@@ -67,7 +72,7 @@ BaseComponent.prototype.forceUpdate = function (callback) {
 		// Set render mode so that we can differentiate where the render request
 		// is coming from. We need this because forceUpdate should never call
 		// shouldComponentUpdate
-		this._force = true;
+		this._bits |= COMPONENT_FORCE;
 		if (callback) this._renderCallbacks.push(callback);
 		enqueueRender(this);
 	}

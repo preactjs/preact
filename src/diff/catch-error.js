@@ -24,7 +24,7 @@ export function _catchError(error, vnode, oldVNode, errorInfo) {
 	for (; (vnode = vnode._parent); ) {
 		if (
 			(component = vnode._component) &&
-			!(component._flags & COMPONENT_PROCESSING_EXCEPTION)
+			!(component._bits & COMPONENT_PROCESSING_EXCEPTION)
 		) {
 			try {
 				ctor = component.constructor;
@@ -41,7 +41,7 @@ export function _catchError(error, vnode, oldVNode, errorInfo) {
 
 				// This is an error boundary. Mark it as having bailed out, and whether it was mid-hydration.
 				if (handled) {
-					component._flags |= COMPONENT_PENDING_ERROR;
+					component._bits |= COMPONENT_PENDING_ERROR;
 					return;
 				}
 			} catch (e) {

@@ -1,4 +1,5 @@
 import { options as _options } from 'preact';
+import { COMPONENT_FORCE } from '../../src/constants';
 
 const ObjectIs = Object.is;
 
@@ -213,7 +214,7 @@ export function useReducer(reducer, initialState, init) {
 			// not be called. But we use that to update the hook values, so we
 			// need to call it.
 			currentComponent.componentWillUpdate = function (p, s, c) {
-				if (this._force) {
+				if (this._bits & COMPONENT_FORCE) {
 					let tmp = prevScu;
 					// Clear to avoid other sCU hooks from being called
 					prevScu = undefined;

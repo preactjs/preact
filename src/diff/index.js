@@ -1,5 +1,6 @@
 import {
 	COMPONENT_FLAG,
+	COMPONENT_FORCE,
 	COMPONENT_PENDING_ERROR,
 	COMPONENT_PROCESSING_EXCEPTION,
 	EMPTY_OBJ,
@@ -107,8 +108,8 @@ export function diff(
 			// Get component and set it to `c`
 			if (oldVNode._component) {
 				c = newVNode._component = oldVNode._component;
-				if (c._flags & COMPONENT_PENDING_ERROR) {
-					c._flags |= COMPONENT_PROCESSING_EXCEPTION;
+				if (c._bits & COMPONENT_PENDING_ERROR) {
+					c._bits |= COMPONENT_PROCESSING_EXCEPTION;
 					clearProcessingException = true;
 				}
 			} else {
@@ -181,7 +182,7 @@ export function diff(
 				}
 
 				if (
-					(!c._force &&
+					(!(c._bits & COMPONENT_FORCE) &&
 						c.shouldComponentUpdate != NULL &&
 						c.shouldComponentUpdate(
 							newProps,
@@ -233,7 +234,7 @@ export function diff(
 			c.context = componentContext;
 			c.props = newProps;
 			c._parentDom = parentDom;
-			c._force = false;
+			c._bits &= ~COMPONENT_FORCE;
 
 			let renderHook = options._render,
 				count = 0;
@@ -303,7 +304,7 @@ export function diff(
 			}
 
 			if (clearProcessingException) {
-				c._flags &= ~(COMPONENT_PROCESSING_EXCEPTION | COMPONENT_PENDING_ERROR);
+				c._bits &= ~(COMPONENT_PROCESSING_EXCEPTION | COMPONENT_PENDING_ERROR);
 			}
 		} catch (e) {
 			newVNode._original = NULL;
@@ -393,7 +394,9 @@ export function diff(
 }
 
 function markAsForce(vnode) {
-	if (vnode && vnode._component) vnode._component._force = true;
+	if (vnode && vnode._component) {
+		vnode._component._bits |= COMPONENT_FORCE;
+	}
 	if (vnode && vnode._children) vnode._children.forEach(markAsForce);
 }
 
