@@ -1,5 +1,7 @@
 import {
 	COMPONENT_FLAG,
+	COMPONENT_PENDING_ERROR,
+	COMPONENT_PROCESSING_EXCEPTION,
 	EMPTY_OBJ,
 	MATH_NAMESPACE,
 	MODE_HYDRATE,
@@ -105,7 +107,10 @@ export function diff(
 			// Get component and set it to `c`
 			if (oldVNode._component) {
 				c = newVNode._component = oldVNode._component;
-				clearProcessingException = c._processingException = c._pendingError;
+				if (c._flags & COMPONENT_PENDING_ERROR) {
+					c._flags |= COMPONENT_PROCESSING_EXCEPTION;
+					clearProcessingException = true;
+				}
 			} else {
 				// Instantiate the new component
 				if (isClassComponent) {
@@ -298,7 +303,7 @@ export function diff(
 			}
 
 			if (clearProcessingException) {
-				c._pendingError = c._processingException = NULL;
+				c._flags &= ~(COMPONENT_PROCESSING_EXCEPTION | COMPONENT_PENDING_ERROR);
 			}
 		} catch (e) {
 			newVNode._original = NULL;

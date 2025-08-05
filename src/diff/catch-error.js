@@ -1,4 +1,8 @@
-import { NULL } from '../constants';
+import {
+	NULL,
+	COMPONENT_PENDING_ERROR,
+	COMPONENT_PROCESSING_EXCEPTION
+} from '../constants';
 
 /**
  * Find the closest error boundary to a thrown error and call it
@@ -18,7 +22,10 @@ export function _catchError(error, vnode, oldVNode, errorInfo) {
 		handled;
 
 	for (; (vnode = vnode._parent); ) {
-		if ((component = vnode._component) && !component._processingException) {
+		if (
+			(component = vnode._component) &&
+			!(component._flags & COMPONENT_PROCESSING_EXCEPTION)
+		) {
 			try {
 				ctor = component.constructor;
 
@@ -34,7 +41,8 @@ export function _catchError(error, vnode, oldVNode, errorInfo) {
 
 				// This is an error boundary. Mark it as having bailed out, and whether it was mid-hydration.
 				if (handled) {
-					return (component._pendingError = component);
+					component._flags |= COMPONENT_PENDING_ERROR;
+					return;
 				}
 			} catch (e) {
 				error = e;

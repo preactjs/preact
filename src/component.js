@@ -14,6 +14,7 @@ import { COMPONENT_FLAG, MODE_HYDRATE, NULL } from './constants';
 export function BaseComponent(props, context) {
 	this.props = props;
 	this.context = context;
+	this._flags = 0;
 }
 
 /**

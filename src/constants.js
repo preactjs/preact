@@ -11,6 +11,11 @@ export const TEXT_FLAG = 1 << 3;
 /** Indicates that this VNode is a Component */
 export const COMPONENT_FLAG = 1 << 0;
 
+/** Component is processing an exception */
+export const COMPONENT_PROCESSING_EXCEPTION = 1 << 8;
+/** Component has a pending error */
+export const COMPONENT_PENDING_ERROR = 1 << 9;
+
 /** Reset all mode flags */
 export const RESET_MODE = ~(MODE_HYDRATE | MODE_SUSPENDED);
 
