@@ -1,4 +1,4 @@
-import { createElement, Component, createContext } from '../../';
+import { createElement, Component, createContext, HTMLAttributes } from '../../';
 
 declare module '../../' {
 	namespace createElement.JSX {
@@ -33,9 +33,7 @@ interface WhateverElementEvent {
 	eventProp: number;
 }
 
-// preact.JSX.HTMLAttributes also appears to work here but for consistency,
-// let's use createElement.JSX
-interface WhateveElAttributes extends createElement.JSX.HTMLAttributes {
+interface WhateveElAttributes extends HTMLAttributes {
 	someattribute?: string;
 	onsomeevent?: (this: WhateverElement, ev: WhateverElementEvent) => void;
 }
