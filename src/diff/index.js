@@ -1,4 +1,8 @@
 import {
+	COMPONENT_FORCE,
+	COMPONENT_DIRTY,
+	COMPONENT_PENDING_ERROR,
+	COMPONENT_PROCESSING_EXCEPTION,
 	EMPTY_OBJ,
 	MATH_NAMESPACE,
 	MODE_HYDRATE,
@@ -17,6 +21,7 @@ import { assign, isArray, removeNode, slice } from '../util';
 import options from '../options';
 
 /**
+ * @typedef {import('../internal').ComponentType} ComponentType
  * @typedef {import('../internal').ComponentChildren} ComponentChildren
  * @typedef {import('../internal').Component} Component
  * @typedef {import('../internal').PreactElement} PreactElement
@@ -100,11 +105,14 @@ export function diff(
 			// Get component and set it to `c`
 			if (oldVNode._component) {
 				c = newVNode._component = oldVNode._component;
-				clearProcessingException = c._processingException = c._pendingError;
+				if (c._bits & COMPONENT_PENDING_ERROR) {
+					c._bits |= COMPONENT_PROCESSING_EXCEPTION;
+					clearProcessingException = true;
+				}
 			} else {
 				// Instantiate the new component
 				if (isClassComponent) {
-					// @ts-expect-error The check above verifies that newType is suppose to be constructed
+					// @ts-expect-error Trust me, Component implements the interface we want
 					newVNode._component = c = new newType(newProps, componentContext); // eslint-disable-line new-cap
 				} else {
 					// @ts-expect-error Trust me, Component implements the interface we want
@@ -112,6 +120,7 @@ export function diff(
 						newProps,
 						componentContext
 					);
+
 					c.constructor = newType;
 					c.render = doRender;
 				}
@@ -121,7 +130,8 @@ export function diff(
 				if (!c.state) c.state = {};
 				c.context = componentContext;
 				c._globalContext = globalContext;
-				isNew = c._dirty = true;
+				isNew = true;
+				c._bits |= COMPONENT_DIRTY;
 				c._renderCallbacks = [];
 				c._stateCallbacks = [];
 			}
@@ -170,7 +180,7 @@ export function diff(
 				}
 
 				if (
-					(!c._force &&
+					(!(c._bits & COMPONENT_FORCE) &&
 						c.shouldComponentUpdate != NULL &&
 						c.shouldComponentUpdate(
 							newProps,
@@ -187,7 +197,7 @@ export function diff(
 						// be dirtied see #3883
 						c.props = newProps;
 						c.state = c._nextState;
-						c._dirty = false;
+						c._bits &= ~COMPONENT_DIRTY;
 					}
 
 					newVNode._dom = oldVNode._dom;
@@ -222,13 +232,13 @@ export function diff(
 			c.context = componentContext;
 			c.props = newProps;
 			c._parentDom = parentDom;
-			c._force = false;
+			c._bits &= ~COMPONENT_FORCE;
 
 			let renderHook = options._render,
 				count = 0;
 			if (isClassComponent) {
 				c.state = c._nextState;
-				c._dirty = false;
+				c._bits &= ~COMPONENT_DIRTY;
 
 				if (renderHook) renderHook(newVNode);
 
@@ -240,14 +250,14 @@ export function diff(
 				c._stateCallbacks = [];
 			} else {
 				do {
-					c._dirty = false;
+					c._bits &= ~COMPONENT_DIRTY;
 					if (renderHook) renderHook(newVNode);
 
 					tmp = c.render(c.props, c.state, c.context);
 
 					// Handle setState called in render, see #2553
 					c.state = c._nextState;
-				} while (c._dirty && ++count < 25);
+				} while (c._bits & COMPONENT_DIRTY && ++count < 25);
 			}
 
 			// Handle setState called in render, see #2553
@@ -292,7 +302,7 @@ export function diff(
 			}
 
 			if (clearProcessingException) {
-				c._pendingError = c._processingException = NULL;
+				c._bits &= ~(COMPONENT_PROCESSING_EXCEPTION | COMPONENT_PENDING_ERROR);
 			}
 		} catch (e) {
 			newVNode._original = NULL;
@@ -382,7 +392,9 @@ export function diff(
 }
 
 function markAsForce(vnode) {
-	if (vnode && vnode._component) vnode._component._force = true;
+	if (vnode && vnode._component) {
+		vnode._component._bits |= COMPONENT_FORCE;
+	}
 	if (vnode && vnode._children) vnode._children.forEach(markAsForce);
 }
 
@@ -589,7 +601,7 @@ function diffElementNodes(
 
 			diffChildren(
 				// @ts-expect-error
-				newVNode.type == 'template' ? dom.content : dom,
+				nodeType == 'template' ? dom.content : dom,
 				isArray(newChildren) ? newChildren : [newChildren],
 				newVNode,
 				oldVNode,

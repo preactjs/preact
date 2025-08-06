@@ -2,7 +2,12 @@ import { assign } from './util';
 import { diff, commitRoot } from './diff/index';
 import options from './options';
 import { Fragment } from './create-element';
-import { MODE_HYDRATE, NULL } from './constants';
+import {
+	COMPONENT_FORCE,
+	COMPONENT_DIRTY,
+	MODE_HYDRATE,
+	NULL
+} from './constants';
 
 /**
  * Base Component class. Provides `setState()` and `forceUpdate()`, which
@@ -14,6 +19,7 @@ import { MODE_HYDRATE, NULL } from './constants';
 export function BaseComponent(props, context) {
 	this.props = props;
 	this.context = context;
+	this._bits = 0;
 }
 
 /**
@@ -66,7 +72,7 @@ BaseComponent.prototype.forceUpdate = function (callback) {
 		// Set render mode so that we can differentiate where the render request
 		// is coming from. We need this because forceUpdate should never call
 		// shouldComponentUpdate
-		this._force = true;
+		this._bits |= COMPONENT_FORCE;
 		if (callback) this._renderCallbacks.push(callback);
 		enqueueRender(this);
 	}
@@ -189,7 +195,12 @@ let rerenderQueue = [];
  * * [Callbacks synchronous and asynchronous](https://blog.ometer.com/2011/07/24/callbacks-synchronous-and-asynchronous/)
  */
 
-let prevDebounce;
+let prevDebounce,
+	rerenderCount = 0;
+
+export function resetRenderCount() {
+	rerenderCount = 0;
+}
 
 /**
  * Enqueue a rerender of a component
@@ -197,10 +208,10 @@ let prevDebounce;
  */
 export function enqueueRender(c) {
 	if (
-		(!c._dirty &&
-			(c._dirty = true) &&
+		(!(c._bits & COMPONENT_DIRTY) &&
+			(c._bits |= COMPONENT_DIRTY) &&
 			rerenderQueue.push(c) &&
-			!process._rerenderCount++) ||
+			!rerenderCount++) ||
 		prevDebounce != options.debounceRendering
 	) {
 		prevDebounce = options.debounceRendering;
@@ -235,11 +246,10 @@ function process() {
 		c = rerenderQueue.shift();
 		l = rerenderQueue.length;
 
-		if (c._dirty) {
+		if (c._bits & COMPONENT_DIRTY) {
 			renderComponent(c);
 		}
 	}
-	process._rerenderCount = 0;
-}
 
-process._rerenderCount = 0;
+	rerenderCount = 0;
+}

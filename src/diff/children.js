@@ -346,7 +346,6 @@ function constructNewChildrenArray(
  */
 function insert(parentVNode, oldDom, parentDom) {
 	// Note: VNodes in nested suspended trees may be missing _children.
-
 	if (typeof parentVNode.type == 'function') {
 		let children = parentVNode._children;
 		for (let i = 0; children && i < children.length; i++) {

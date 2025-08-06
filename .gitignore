@@ -13,3 +13,4 @@ coverage
 package/
 preact-*.tgz
 preact.tgz
+*.local.*

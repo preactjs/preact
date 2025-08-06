@@ -81,7 +81,7 @@ describe('React-18-hooks', () => {
 		});
 	});
 
-	it('should release ._force on context-consumers', () => {
+	it('should release the force-flag on context-consumers', () => {
 		let sequence, setSubmitting;
 		const Ctx = createContext({
 			isSubmitting: false,
