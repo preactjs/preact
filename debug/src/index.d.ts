@@ -1,6 +1,11 @@
 import { VNode } from 'preact';
 
 /**
+ * Return the component stack that was captured up to this point.
+ */
+export function captureOwnerStack(): string;
+
+/**
  * Get the currently rendered `vnode`
  */
 export function getCurrentVNode(): VNode | null;
