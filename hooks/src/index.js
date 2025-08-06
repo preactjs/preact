@@ -35,9 +35,9 @@ const RAF_TIMEOUT = 35;
 let prevRaf;
 
 /** @type {(vnode: import('./internal').VNode) => void} */
-options._diff = vnode => {
+options._diff = (vnode, oldVNode) => {
 	currentComponent = null;
-	if (oldBeforeDiff) oldBeforeDiff(vnode);
+	if (oldBeforeDiff) oldBeforeDiff(vnode, oldVNode);
 };
 
 options._root = (vnode, parentDom) => {
