@@ -115,7 +115,7 @@ describe('Children', () => {
 			};
 			render(<Foo>foo</Foo>, scratch);
 
-			expect(spy.mock.calls[0]).to.equal(context);
+			expect(spy.mock.contexts[0]).to.equal(context);
 		});
 
 		it('should flatten result', () => {
