@@ -5,7 +5,7 @@ import {
 } from '../../../test/_util/helpers';
 import { div, span } from '../../../test/_util/dom';
 import React, { createElement, Children, render } from 'preact/compat';
-import sinon from 'sinon';
+import { vi } from 'vitest';
 
 describe('Children', () => {
 	/** @type {HTMLDivElement} */
@@ -109,13 +109,13 @@ describe('Children', () => {
 
 		it('should propagate "this" context', () => {
 			const context = {};
-			const spy = sinon.spy(child => child); // noop
+			const spy = vi.fn(child => child); // noop
 			const Foo = ({ children }) => {
 				return React.Children.map(children, spy, context);
 			};
 			render(<Foo>foo</Foo>, scratch);
 
-			expect(spy.thisValues[0]).to.equal(context);
+			expect(spy.mock.calls[0]).to.equal(context);
 		});
 
 		it('should flatten result', () => {
