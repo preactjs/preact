@@ -4,6 +4,7 @@ import {
 	COMPONENT_PENDING_ERROR,
 	COMPONENT_PROCESSING_EXCEPTION,
 	EMPTY_OBJ,
+	FORCE_PROPS_REVALIDATE,
 	MATH_NAMESPACE,
 	MODE_HYDRATE,
 	MODE_SUSPENDED,
@@ -388,7 +389,7 @@ export function diff(
 
 	if ((tmp = options.diffed)) tmp(newVNode);
 
-	return newVNode._flags & MODE_SUSPENDED ? undefined : oldDom;
+	return newVNode._flags & MODE_SUSPENDED ? UNDEFINED : oldDom;
 }
 
 function markAsForce(vnode) {
@@ -566,6 +567,7 @@ function diffElementNodes(
 
 		// During hydration, props are not diffed at all (including dangerouslySetInnerHTML)
 		// @TODO we should warn in debug mode when props don't match here.
+		const shouldRevalidateProps = oldVNode._flags & FORCE_PROPS_REVALIDATE;
 		for (i in newProps) {
 			value = newProps[i];
 			if (i == 'children') {
@@ -578,7 +580,7 @@ function diffElementNodes(
 				checked = value;
 			} else if (
 				(!isHydrating || typeof value == 'function') &&
-				oldProps[i] !== value
+				(oldProps[i] !== value || shouldRevalidateProps)
 			) {
 				setProperty(dom, i, value, oldProps[i], namespace);
 			}
@@ -723,7 +725,11 @@ export function unmount(vnode, parentVNode, skipRemove) {
 		removeNode(vnode._dom);
 	}
 
-	vnode._component = vnode._parent = vnode._dom = UNDEFINED;
+	if (vnode._dom && vnode._dom._listeners) {
+		vnode._dom._listeners = NULL;
+	}
+
+	vnode._dom = vnode._component = vnode._parent = NULL;
 }
 
 /** The `.render()` method for a PFC backing instance. */
