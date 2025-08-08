@@ -1681,295 +1681,297 @@ export namespace JSXInternal {
 	> &
 		AreaAriaRoles;
 
-	interface ArticleHTMLAttributes<T extends EventTarget = HTMLElement>
-		extends HTMLAttributes<T> {
-		role?: Signalish<
-			| 'article'
-			| 'application'
-			| 'document'
-			| 'feed'
-			| 'main'
-			| 'none'
-			| 'presentation'
-			| 'region'
-			| undefined
-		>;
-	}
+	type ArticleHTMLAttributes<T extends EventTarget = HTMLElement> =
+		HTMLAttributes<T> & {
+			role?: Signalish<
+				| 'article'
+				| 'application'
+				| 'document'
+				| 'feed'
+				| 'main'
+				| 'none'
+				| 'presentation'
+				| 'region'
+				| undefined
+			>;
+		};
 
-	interface AsideHTMLAttributes<T extends EventTarget = HTMLElement>
-		extends HTMLAttributes<T> {
-		role?: Signalish<
-			| 'complementary'
-			| 'feed'
-			| 'none'
-			| 'note'
-			| 'presentation'
-			| 'region'
-			| 'search'
-			| 'doc-dedication'
-			| 'doc-example'
-			| 'doc-footnote'
-			| 'doc-glossary'
-			| 'doc-pullquote'
-			| 'doc-tip'
-			| undefined
-		>;
-	}
+	type AsideHTMLAttributes<T extends EventTarget = HTMLElement> =
+		HTMLAttributes<T> & {
+			role?: Signalish<
+				| 'complementary'
+				| 'feed'
+				| 'none'
+				| 'note'
+				| 'presentation'
+				| 'region'
+				| 'search'
+				| 'doc-dedication'
+				| 'doc-example'
+				| 'doc-footnote'
+				| 'doc-glossary'
+				| 'doc-pullquote'
+				| 'doc-tip'
+				| undefined
+			>;
+		};
 
-	interface AudioHTMLAttributes<T extends EventTarget = HTMLAudioElement>
-		extends MediaHTMLAttributes<T> {
-		role?: Signalish<'application' | undefined>;
-	}
+	type AudioHTMLAttributes<T extends EventTarget = HTMLAudioElement> =
+		MediaHTMLAttributes<T> & {
+			role?: Signalish<'application' | undefined>;
+		};
 
-	interface BaseHTMLAttributes<T extends EventTarget = HTMLBaseElement>
-		extends HTMLAttributes<T> {
-		href?: Signalish<string | undefined>;
-		role?: never;
-		target?: Signalish<HTMLAttributeAnchorTarget | undefined>;
-	}
+	type BaseHTMLAttributes<T extends EventTarget = HTMLBaseElement> =
+		HTMLAttributes<T> & {
+			href?: Signalish<string | undefined>;
+			role?: never;
+			target?: Signalish<HTMLAttributeAnchorTarget | undefined>;
+		};
 
-	interface BlockquoteHTMLAttributes<T extends EventTarget = HTMLQuoteElement>
-		extends HTMLAttributes<T> {
-		cite?: Signalish<string | undefined>;
-	}
+	type BlockquoteHTMLAttributes<T extends EventTarget = HTMLQuoteElement> =
+		HTMLAttributes<T> & {
+			cite?: Signalish<string | undefined>;
+		};
 
-	interface BrHTMLAttributes<T extends EventTarget = HTMLBRElement>
-		extends HTMLAttributes<T> {
-		role?: Signalish<'none' | 'presentation' | undefined>;
-	}
+	type BrHTMLAttributes<T extends EventTarget = HTMLBRElement> =
+		HTMLAttributes<T> & {
+			role?: Signalish<'none' | 'presentation' | undefined>;
+		};
 
-	interface ButtonHTMLAttributes<T extends EventTarget = HTMLButtonElement>
-		extends HTMLAttributes<T> {
-		command?: Signalish<string | undefined>;
-		commandfor?: Signalish<string | undefined>;
-		commandFor?: Signalish<string | undefined>;
-		disabled?: Signalish<boolean | undefined>;
-		form?: Signalish<string | undefined>;
-		formaction?: Signalish<string | undefined>;
-		formAction?: Signalish<string | undefined>;
-		formenctype?: Signalish<string | undefined>;
-		formEncType?: Signalish<string | undefined>;
-		formmethod?: Signalish<string | undefined>;
-		formMethod?: Signalish<string | undefined>;
-		formnovalidate?: Signalish<boolean | undefined>;
-		formNoValidate?: Signalish<boolean | undefined>;
-		formtarget?: Signalish<string | undefined>;
-		formTarget?: Signalish<string | undefined>;
-		name?: Signalish<string | undefined>;
-		popovertarget?: Signalish<string | undefined>;
-		popoverTarget?: Signalish<string | undefined>;
-		popovertargetaction?: Signalish<'hide' | 'show' | 'toggle' | undefined>;
-		popoverTargetAction?: Signalish<'hide' | 'show' | 'toggle' | undefined>;
-		role?: Signalish<
-			| 'button'
-			| 'checkbox'
-			| 'combobox'
-			| 'gridcell'
-			| 'link'
-			| 'menuitem'
-			| 'menuitemcheckbox'
-			| 'menuitemradio'
-			| 'option'
-			| 'radio'
-			| 'separator'
-			| 'slider'
-			| 'switch'
-			| 'tab'
-			| 'treeitem'
-			| undefined
-		>;
-		type?: Signalish<'submit' | 'reset' | 'button' | undefined>;
-		value?: Signalish<string | number | undefined>;
-	}
+	type ButtonHTMLAttributes<T extends EventTarget = HTMLButtonElement> =
+		HTMLAttributes<T> & {
+			command?: Signalish<string | undefined>;
+			commandfor?: Signalish<string | undefined>;
+			commandFor?: Signalish<string | undefined>;
+			disabled?: Signalish<boolean | undefined>;
+			form?: Signalish<string | undefined>;
+			formaction?: Signalish<string | undefined>;
+			formAction?: Signalish<string | undefined>;
+			formenctype?: Signalish<string | undefined>;
+			formEncType?: Signalish<string | undefined>;
+			formmethod?: Signalish<string | undefined>;
+			formMethod?: Signalish<string | undefined>;
+			formnovalidate?: Signalish<boolean | undefined>;
+			formNoValidate?: Signalish<boolean | undefined>;
+			formtarget?: Signalish<string | undefined>;
+			formTarget?: Signalish<string | undefined>;
+			name?: Signalish<string | undefined>;
+			popovertarget?: Signalish<string | undefined>;
+			popoverTarget?: Signalish<string | undefined>;
+			popovertargetaction?: Signalish<'hide' | 'show' | 'toggle' | undefined>;
+			popoverTargetAction?: Signalish<'hide' | 'show' | 'toggle' | undefined>;
+			role?: Signalish<
+				| 'button'
+				| 'checkbox'
+				| 'combobox'
+				| 'gridcell'
+				| 'link'
+				| 'menuitem'
+				| 'menuitemcheckbox'
+				| 'menuitemradio'
+				| 'option'
+				| 'radio'
+				| 'separator'
+				| 'slider'
+				| 'switch'
+				| 'tab'
+				| 'treeitem'
+				| undefined
+			>;
+			type?: Signalish<'submit' | 'reset' | 'button' | undefined>;
+			value?: Signalish<string | number | undefined>;
+		};
 
-	interface CanvasHTMLAttributes<T extends EventTarget = HTMLCanvasElement>
-		extends HTMLAttributes<T> {
-		height?: Signalish<number | string | undefined>;
-		width?: Signalish<number | string | undefined>;
-	}
+	type CanvasHTMLAttributes<T extends EventTarget = HTMLCanvasElement> =
+		HTMLAttributes<T> & {
+			height?: Signalish<number | string | undefined>;
+			width?: Signalish<number | string | undefined>;
+		};
 
-	interface CaptionHTMLAttributes<T extends EventTarget = HTMLElement>
-		extends HTMLAttributes<T> {
-		role?: 'caption';
-	}
+	type CaptionHTMLAttributes<T extends EventTarget = HTMLElement> =
+		HTMLAttributes<T> & {
+			role?: 'caption';
+		};
 
-	interface ColHTMLAttributes<T extends EventTarget = HTMLTableColElement>
-		extends HTMLAttributes<T> {
-		role?: never;
-		span?: Signalish<number | undefined>;
-		width?: Signalish<number | string | undefined>;
-	}
+	type ColHTMLAttributes<T extends EventTarget = HTMLTableColElement> =
+		HTMLAttributes<T> & {
+			role?: never;
+			span?: Signalish<number | undefined>;
+			width?: Signalish<number | string | undefined>;
+		};
 
-	interface ColgroupHTMLAttributes<T extends EventTarget = HTMLTableColElement>
-		extends HTMLAttributes<T> {
-		role?: never;
-		span?: Signalish<number | undefined>;
-	}
+	type ColgroupHTMLAttributes<T extends EventTarget = HTMLTableColElement> =
+		HTMLAttributes<T> & {
+			role?: never;
+			span?: Signalish<number | undefined>;
+		};
 
-	interface DataHTMLAttributes<T extends EventTarget = HTMLDataElement>
-		extends HTMLAttributes<T> {
-		value?: Signalish<string | number | undefined>;
-	}
+	type DataHTMLAttributes<T extends EventTarget = HTMLDataElement> =
+		HTMLAttributes<T> & {
+			value?: Signalish<string | number | undefined>;
+		};
 
-	interface DataListHTMLAttributes<T extends EventTarget = HTMLDataListElement>
-		extends HTMLAttributes<T> {
-		role?: Signalish<'listbox' | undefined>;
-	}
+	type DataListHTMLAttributes<T extends EventTarget = HTMLDataListElement> =
+		HTMLAttributes<T> & {
+			role?: Signalish<'listbox' | undefined>;
+		};
 
-	interface DdHTMLAttributes<T extends EventTarget = HTMLElement>
-		extends HTMLAttributes<T> {
-		role?: never;
-	}
+	type DdHTMLAttributes<T extends EventTarget = HTMLElement> =
+		HTMLAttributes<T> & {
+			role?: never;
+		};
 
-	interface DelHTMLAttributes<T extends EventTarget = HTMLModElement>
-		extends HTMLAttributes<T> {
-		cite?: Signalish<string | undefined>;
-		datetime?: Signalish<string | undefined>;
-		dateTime?: Signalish<string | undefined>;
-	}
+	type DelHTMLAttributes<T extends EventTarget = HTMLModElement> =
+		HTMLAttributes<T> & {
+			cite?: Signalish<string | undefined>;
+			datetime?: Signalish<string | undefined>;
+			dateTime?: Signalish<string | undefined>;
+		};
 
-	interface DetailsHTMLAttributes<T extends EventTarget = HTMLDetailsElement>
-		extends HTMLAttributes<T> {
-		name?: Signalish<string | undefined>;
-		open?: Signalish<boolean | undefined>;
-		role?: Signalish<'group' | undefined>;
-	}
+	type DetailsHTMLAttributes<T extends EventTarget = HTMLDetailsElement> =
+		HTMLAttributes<T> & {
+			name?: Signalish<string | undefined>;
+			open?: Signalish<boolean | undefined>;
+			role?: Signalish<'group' | undefined>;
+		};
 
-	interface DialogHTMLAttributes<T extends EventTarget = HTMLDialogElement>
-		extends HTMLAttributes<T> {
-		onCancel?: GenericEventHandler<T> | undefined;
-		onClose?: GenericEventHandler<T> | undefined;
-		open?: Signalish<boolean | undefined>;
-		closedby?: Signalish<'none' | 'closerequest' | 'any' | undefined>;
-		closedBy?: Signalish<'none' | 'closerequest' | 'any' | undefined>;
-		role?: Signalish<'dialog' | 'alertdialog' | undefined>;
-	}
+	type DialogHTMLAttributes<T extends EventTarget = HTMLDialogElement> =
+		HTMLAttributes<T> & {
+			onCancel?: GenericEventHandler<T> | undefined;
+			onClose?: GenericEventHandler<T> | undefined;
+			open?: Signalish<boolean | undefined>;
+			closedby?: Signalish<'none' | 'closerequest' | 'any' | undefined>;
+			closedBy?: Signalish<'none' | 'closerequest' | 'any' | undefined>;
+			role?: Signalish<'dialog' | 'alertdialog' | undefined>;
+		};
 
-	interface DlHTMLAttributes<T extends EventTarget = HTMLDListElement>
-		extends HTMLAttributes<T> {
-		role?: Signalish<'group' | 'list' | 'none' | 'presentation' | undefined>;
-	}
+	type DlHTMLAttributes<T extends EventTarget = HTMLDListElement> =
+		HTMLAttributes<T> & {
+			role?: Signalish<'group' | 'list' | 'none' | 'presentation' | undefined>;
+		};
 
-	interface DtHTMLAttributes<T extends EventTarget = HTMLElement>
-		extends HTMLAttributes<T> {
-		role?: Signalish<'listitem' | undefined>;
-	}
+	type DtHTMLAttributes<T extends EventTarget = HTMLElement> =
+		HTMLAttributes<T> & {
+			role?: Signalish<'listitem' | undefined>;
+		};
 
-	interface EmbedHTMLAttributes<T extends EventTarget = HTMLEmbedElement>
-		extends HTMLAttributes<T> {
-		height?: Signalish<number | string | undefined>;
-		role?: Signalish<
-			'application' | 'document' | 'img' | 'none' | 'presentation' | undefined
-		>;
-		src?: Signalish<string | undefined>;
-		type?: Signalish<string | undefined>;
-		width?: Signalish<number | string | undefined>;
-	}
+	type EmbedHTMLAttributes<T extends EventTarget = HTMLEmbedElement> =
+		HTMLAttributes<T> & {
+			height?: Signalish<number | string | undefined>;
+			role?: Signalish<
+				'application' | 'document' | 'img' | 'none' | 'presentation' | undefined
+			>;
+			src?: Signalish<string | undefined>;
+			type?: Signalish<string | undefined>;
+			width?: Signalish<number | string | undefined>;
+		};
 
-	interface FieldsetHTMLAttributes<T extends EventTarget = HTMLFieldSetElement>
-		extends HTMLAttributes<T> {
-		disabled?: Signalish<boolean | undefined>;
-		form?: Signalish<string | undefined>;
-		name?: Signalish<string | undefined>;
-		role?: Signalish<
-			'group' | 'none' | 'presentation' | 'radiogroup' | undefined
-		>;
-	}
+	type FieldsetHTMLAttributes<T extends EventTarget = HTMLFieldSetElement> =
+		HTMLAttributes<T> & {
+			disabled?: Signalish<boolean | undefined>;
+			form?: Signalish<string | undefined>;
+			name?: Signalish<string | undefined>;
+			role?: Signalish<
+				'group' | 'none' | 'presentation' | 'radiogroup' | undefined
+			>;
+		};
 
-	interface FigcaptionHTMLAttributes<T extends EventTarget = HTMLElement>
-		extends HTMLAttributes<T> {
-		role?: Signalish<'group' | 'none' | 'presentation' | undefined>;
-	}
+	type FigcaptionHTMLAttributes<T extends EventTarget = HTMLElement> =
+		HTMLAttributes<T> & {
+			role?: Signalish<'group' | 'none' | 'presentation' | undefined>;
+		};
 
-	interface FooterHTMLAttributes<T extends EventTarget = HTMLElement>
-		extends HTMLAttributes<T> {
-		role?: Signalish<
-			| 'contentinfo'
-			| 'group'
-			| 'none'
-			| 'presentation'
-			| 'doc-footnote'
-			| undefined
-		>;
-	}
+	type FooterHTMLAttributes<T extends EventTarget = HTMLElement> =
+		HTMLAttributes<T> & {
+			role?: Signalish<
+				| 'contentinfo'
+				| 'group'
+				| 'none'
+				| 'presentation'
+				| 'doc-footnote'
+				| undefined
+			>;
+		};
 
-	interface FormHTMLAttributes<T extends EventTarget = HTMLFormElement>
-		extends HTMLAttributes<T> {
-		'accept-charset'?: Signalish<string | undefined>;
-		acceptCharset?: Signalish<string | undefined>;
-		action?: Signalish<string | undefined>;
-		autocomplete?: Signalish<string | undefined>;
-		autoComplete?: Signalish<string | undefined>;
-		enctype?: Signalish<string | undefined>;
-		encType?: Signalish<string | undefined>;
-		method?: Signalish<string | undefined>;
-		name?: Signalish<string | undefined>;
-		novalidate?: Signalish<boolean | undefined>;
-		noValidate?: Signalish<boolean | undefined>;
-		rel?: Signalish<string | undefined>;
-		role?: Signalish<'form' | 'none' | 'presentation' | 'search' | undefined>;
-		target?: Signalish<string | undefined>;
-	}
+	type FormHTMLAttributes<T extends EventTarget = HTMLFormElement> =
+		HTMLAttributes<T> & {
+			'accept-charset'?: Signalish<string | undefined>;
+			acceptCharset?: Signalish<string | undefined>;
+			action?: Signalish<string | undefined>;
+			autocomplete?: Signalish<string | undefined>;
+			autoComplete?: Signalish<string | undefined>;
+			enctype?: Signalish<string | undefined>;
+			encType?: Signalish<string | undefined>;
+			method?: Signalish<string | undefined>;
+			name?: Signalish<string | undefined>;
+			novalidate?: Signalish<boolean | undefined>;
+			noValidate?: Signalish<boolean | undefined>;
+			rel?: Signalish<string | undefined>;
+			role?: Signalish<'form' | 'none' | 'presentation' | 'search' | undefined>;
+			target?: Signalish<string | undefined>;
+		};
 
-	interface HeadingHTMLAttributes<T extends EventTarget = HTMLHeadingElement>
-		extends HTMLAttributes<T> {
-		role?: Signalish<
-			'heading' | 'none' | 'presentation' | 'tab' | 'doc-subtitle' | undefined
-		>;
-	}
+	type HeadingHTMLAttributes<T extends EventTarget = HTMLHeadingElement> =
+		HTMLAttributes<T> & {
+			role?: Signalish<
+				'heading' | 'none' | 'presentation' | 'tab' | 'doc-subtitle' | undefined
+			>;
+		};
 
-	interface HeadHTMLAttributes<T extends EventTarget = HTMLHeadElement>
-		extends HTMLAttributes<T> {
-		role?: never;
-	}
+	type HeadHTMLAttributes<T extends EventTarget = HTMLHeadElement> =
+		HTMLAttributes<T> & {
+			role?: never;
+		};
 
-	interface HeaderHTMLAttributes<T extends EventTarget = HTMLElement>
-		extends HTMLAttributes<T> {
-		role?: Signalish<'banner' | 'group' | 'none' | 'presentation' | undefined>;
-	}
+	type HeaderHTMLAttributes<T extends EventTarget = HTMLElement> =
+		HTMLAttributes<T> & {
+			role?: Signalish<
+				'banner' | 'group' | 'none' | 'presentation' | undefined
+			>;
+		};
 
-	interface HrHTMLAttributes<T extends EventTarget = HTMLHRElement>
-		extends HTMLAttributes<T> {
-		role?: Signalish<
-			'separator' | 'none' | 'presentation' | 'doc-pagebreak' | undefined
-		>;
-	}
+	type HrHTMLAttributes<T extends EventTarget = HTMLHRElement> =
+		HTMLAttributes<T> & {
+			role?: Signalish<
+				'separator' | 'none' | 'presentation' | 'doc-pagebreak' | undefined
+			>;
+		};
 
-	interface HtmlHTMLAttributes<T extends EventTarget = HTMLHtmlElement>
-		extends HTMLAttributes<T> {
-		role?: Signalish<'document' | undefined>;
-	}
+	type HtmlHTMLAttributes<T extends EventTarget = HTMLHtmlElement> =
+		HTMLAttributes<T> & {
+			role?: Signalish<'document' | undefined>;
+		};
 
-	interface IframeHTMLAttributes<T extends EventTarget = HTMLIFrameElement>
-		extends HTMLAttributes<T> {
-		allow?: Signalish<string | undefined>;
-		allowFullScreen?: Signalish<boolean | undefined>;
-		allowTransparency?: Signalish<boolean | undefined>;
-		/** @deprecated */
-		frameborder?: Signalish<number | string | undefined>;
-		/** @deprecated */
-		frameBorder?: Signalish<number | string | undefined>;
-		height?: Signalish<number | string | undefined>;
-		loading?: Signalish<'eager' | 'lazy' | undefined>;
-		/** @deprecated */
-		marginHeight?: Signalish<number | undefined>;
-		/** @deprecated */
-		marginWidth?: Signalish<number | undefined>;
-		name?: Signalish<string | undefined>;
-		referrerpolicy?: Signalish<HTMLAttributeReferrerPolicy | undefined>;
-		referrerPolicy?: Signalish<HTMLAttributeReferrerPolicy | undefined>;
-		role?: Signalish<
-			'application' | 'document' | 'img' | 'none' | 'presentation' | undefined
-		>;
-		sandbox?: Signalish<string | undefined>;
-		/** @deprecated */
-		scrolling?: Signalish<string | undefined>;
-		seamless?: Signalish<boolean | undefined>;
-		src?: Signalish<string | undefined>;
-		srcdoc?: Signalish<string | undefined>;
-		srcDoc?: Signalish<string | undefined>;
-		width?: Signalish<number | string | undefined>;
-	}
+	type IframeHTMLAttributes<T extends EventTarget = HTMLIFrameElement> =
+		HTMLAttributes<T> & {
+			allow?: Signalish<string | undefined>;
+			allowFullScreen?: Signalish<boolean | undefined>;
+			allowTransparency?: Signalish<boolean | undefined>;
+			/** @deprecated */
+			frameborder?: Signalish<number | string | undefined>;
+			/** @deprecated */
+			frameBorder?: Signalish<number | string | undefined>;
+			height?: Signalish<number | string | undefined>;
+			loading?: Signalish<'eager' | 'lazy' | undefined>;
+			/** @deprecated */
+			marginHeight?: Signalish<number | undefined>;
+			/** @deprecated */
+			marginWidth?: Signalish<number | undefined>;
+			name?: Signalish<string | undefined>;
+			referrerpolicy?: Signalish<HTMLAttributeReferrerPolicy | undefined>;
+			referrerPolicy?: Signalish<HTMLAttributeReferrerPolicy | undefined>;
+			role?: Signalish<
+				'application' | 'document' | 'img' | 'none' | 'presentation' | undefined
+			>;
+			sandbox?: Signalish<string | undefined>;
+			/** @deprecated */
+			scrolling?: Signalish<string | undefined>;
+			seamless?: Signalish<boolean | undefined>;
+			src?: Signalish<string | undefined>;
+			srcdoc?: Signalish<string | undefined>;
+			srcDoc?: Signalish<string | undefined>;
+			width?: Signalish<number | string | undefined>;
+		};
 
 	type HTMLAttributeCrossOrigin = 'anonymous' | 'use-credentials';
 
@@ -2284,290 +2286,290 @@ export namespace JSXInternal {
 	> &
 		InputAriaRoles;
 
-	interface InsHTMLAttributes<T extends EventTarget = HTMLModElement>
-		extends HTMLAttributes<T> {
-		cite?: Signalish<string | undefined>;
-		datetime?: Signalish<string | undefined>;
-		dateTime?: Signalish<string | undefined>;
-	}
+	type InsHTMLAttributes<T extends EventTarget = HTMLModElement> =
+		HTMLAttributes<T> & {
+			cite?: Signalish<string | undefined>;
+			datetime?: Signalish<string | undefined>;
+			dateTime?: Signalish<string | undefined>;
+		};
 
-	interface KeygenHTMLAttributes<T extends EventTarget = HTMLUnknownElement>
-		extends HTMLAttributes<T> {
-		challenge?: Signalish<string | undefined>;
-		disabled?: Signalish<boolean | undefined>;
-		form?: Signalish<string | undefined>;
-		keyType?: Signalish<string | undefined>;
-		keyParams?: Signalish<string | undefined>;
-		name?: Signalish<string | undefined>;
-	}
+	type KeygenHTMLAttributes<T extends EventTarget = HTMLUnknownElement> =
+		HTMLAttributes<T> & {
+			challenge?: Signalish<string | undefined>;
+			disabled?: Signalish<boolean | undefined>;
+			form?: Signalish<string | undefined>;
+			keyType?: Signalish<string | undefined>;
+			keyParams?: Signalish<string | undefined>;
+			name?: Signalish<string | undefined>;
+		};
 
-	interface LabelHTMLAttributes<T extends EventTarget = HTMLLabelElement>
-		extends HTMLAttributes<T> {
-		for?: Signalish<string | undefined>;
-		form?: Signalish<string | undefined>;
-		htmlFor?: Signalish<string | undefined>;
-		role?: never;
-	}
+	type LabelHTMLAttributes<T extends EventTarget = HTMLLabelElement> =
+		HTMLAttributes<T> & {
+			for?: Signalish<string | undefined>;
+			form?: Signalish<string | undefined>;
+			htmlFor?: Signalish<string | undefined>;
+			role?: never;
+		};
 
-	interface LegendHTMLAttributes<T extends EventTarget = HTMLLegendElement>
-		extends HTMLAttributes<T> {
-		role?: never;
-	}
+	type LegendHTMLAttributes<T extends EventTarget = HTMLLegendElement> =
+		HTMLAttributes<T> & {
+			role?: never;
+		};
 
-	interface LiHTMLAttributes<T extends EventTarget = HTMLLIElement>
-		extends HTMLAttributes<T> {
-		value?: Signalish<string | number | undefined>;
-	}
+	type LiHTMLAttributes<T extends EventTarget = HTMLLIElement> =
+		HTMLAttributes<T> & {
+			value?: Signalish<string | number | undefined>;
+		};
 
-	interface LinkHTMLAttributes<T extends EventTarget = HTMLLinkElement>
-		extends HTMLAttributes<T> {
-		as?: Signalish<string | undefined>;
-		crossorigin?: Signalish<HTMLAttributeCrossOrigin>;
-		crossOrigin?: Signalish<HTMLAttributeCrossOrigin>;
-		fetchpriority?: Signalish<'high' | 'low' | 'auto' | undefined>;
-		fetchPriority?: Signalish<'high' | 'low' | 'auto' | undefined>;
-		href?: Signalish<string | undefined>;
-		hreflang?: Signalish<string | undefined>;
-		hrefLang?: Signalish<string | undefined>;
-		integrity?: Signalish<string | undefined>;
-		media?: Signalish<string | undefined>;
-		imageSrcSet?: Signalish<string | undefined>;
-		referrerpolicy?: Signalish<HTMLAttributeReferrerPolicy | undefined>;
-		referrerPolicy?: Signalish<HTMLAttributeReferrerPolicy | undefined>;
-		rel?: Signalish<string | undefined>;
-		role?: never;
-		sizes?: Signalish<string | undefined>;
-		type?: Signalish<string | undefined>;
-		charset?: Signalish<string | undefined>;
-		charSet?: Signalish<string | undefined>;
-	}
+	type LinkHTMLAttributes<T extends EventTarget = HTMLLinkElement> =
+		HTMLAttributes<T> & {
+			as?: Signalish<string | undefined>;
+			crossorigin?: Signalish<HTMLAttributeCrossOrigin>;
+			crossOrigin?: Signalish<HTMLAttributeCrossOrigin>;
+			fetchpriority?: Signalish<'high' | 'low' | 'auto' | undefined>;
+			fetchPriority?: Signalish<'high' | 'low' | 'auto' | undefined>;
+			href?: Signalish<string | undefined>;
+			hreflang?: Signalish<string | undefined>;
+			hrefLang?: Signalish<string | undefined>;
+			integrity?: Signalish<string | undefined>;
+			media?: Signalish<string | undefined>;
+			imageSrcSet?: Signalish<string | undefined>;
+			referrerpolicy?: Signalish<HTMLAttributeReferrerPolicy | undefined>;
+			referrerPolicy?: Signalish<HTMLAttributeReferrerPolicy | undefined>;
+			rel?: Signalish<string | undefined>;
+			role?: never;
+			sizes?: Signalish<string | undefined>;
+			type?: Signalish<string | undefined>;
+			charset?: Signalish<string | undefined>;
+			charSet?: Signalish<string | undefined>;
+		};
 
-	interface MainHTMLAttributes<T extends EventTarget = HTMLElement>
-		extends HTMLAttributes<T> {
-		role?: Signalish<'main' | undefined>;
-	}
+	type MainHTMLAttributes<T extends EventTarget = HTMLElement> =
+		HTMLAttributes<T> & {
+			role?: Signalish<'main' | undefined>;
+		};
 
-	interface MapHTMLAttributes<T extends EventTarget = HTMLMapElement>
-		extends HTMLAttributes<T> {
-		name?: Signalish<string | undefined>;
-		role?: never;
-	}
+	type MapHTMLAttributes<T extends EventTarget = HTMLMapElement> =
+		HTMLAttributes<T> & {
+			name?: Signalish<string | undefined>;
+			role?: never;
+		};
 
-	interface MarqueeHTMLAttributes<T extends EventTarget = HTMLMarqueeElement>
-		extends HTMLAttributes<T> {
-		behavior?: Signalish<'scroll' | 'slide' | 'alternate' | undefined>;
-		bgColor?: Signalish<string | undefined>;
-		direction?: Signalish<'left' | 'right' | 'up' | 'down' | undefined>;
-		height?: Signalish<number | string | undefined>;
-		hspace?: Signalish<number | string | undefined>;
-		loop?: Signalish<number | string | undefined>;
-		scrollAmount?: Signalish<number | string | undefined>;
-		scrollDelay?: Signalish<number | string | undefined>;
-		trueSpeed?: Signalish<boolean | undefined>;
-		vspace?: Signalish<number | string | undefined>;
-		width?: Signalish<number | string | undefined>;
-	}
+	type MarqueeHTMLAttributes<T extends EventTarget = HTMLMarqueeElement> =
+		HTMLAttributes<T> & {
+			behavior?: Signalish<'scroll' | 'slide' | 'alternate' | undefined>;
+			bgColor?: Signalish<string | undefined>;
+			direction?: Signalish<'left' | 'right' | 'up' | 'down' | undefined>;
+			height?: Signalish<number | string | undefined>;
+			hspace?: Signalish<number | string | undefined>;
+			loop?: Signalish<number | string | undefined>;
+			scrollAmount?: Signalish<number | string | undefined>;
+			scrollDelay?: Signalish<number | string | undefined>;
+			trueSpeed?: Signalish<boolean | undefined>;
+			vspace?: Signalish<number | string | undefined>;
+			width?: Signalish<number | string | undefined>;
+		};
 
-	interface MediaHTMLAttributes<T extends EventTarget = HTMLMediaElement>
-		extends HTMLAttributes<T> {
-		autoplay?: Signalish<boolean | undefined>;
-		autoPlay?: Signalish<boolean | undefined>;
-		controls?: Signalish<boolean | undefined>;
-		controlslist?: Signalish<string | undefined>;
-		controlsList?: Signalish<string | undefined>;
-		crossorigin?: Signalish<HTMLAttributeCrossOrigin>;
-		crossOrigin?: Signalish<HTMLAttributeCrossOrigin>;
-		currentTime?: Signalish<number | undefined>;
-		defaultMuted?: Signalish<boolean | undefined>;
-		defaultPlaybackRate?: Signalish<number | undefined>;
-		disableremoteplayback?: Signalish<boolean | undefined>;
-		disableRemotePlayback?: Signalish<boolean | undefined>;
-		loop?: Signalish<boolean | undefined>;
-		mediaGroup?: Signalish<string | undefined>;
-		muted?: Signalish<boolean | undefined>;
-		playbackRate?: Signalish<number | undefined>;
-		preload?: Signalish<'auto' | 'metadata' | 'none' | undefined>;
-		preservesPitch?: Signalish<boolean | undefined>;
-		src?: Signalish<string | undefined>;
-		srcObject?: Signalish<MediaStream | MediaSource | Blob | File | null>;
-		volume?: Signalish<string | number | undefined>;
-	}
+	type MediaHTMLAttributes<T extends EventTarget = HTMLMediaElement> =
+		HTMLAttributes<T> & {
+			autoplay?: Signalish<boolean | undefined>;
+			autoPlay?: Signalish<boolean | undefined>;
+			controls?: Signalish<boolean | undefined>;
+			controlslist?: Signalish<string | undefined>;
+			controlsList?: Signalish<string | undefined>;
+			crossorigin?: Signalish<HTMLAttributeCrossOrigin>;
+			crossOrigin?: Signalish<HTMLAttributeCrossOrigin>;
+			currentTime?: Signalish<number | undefined>;
+			defaultMuted?: Signalish<boolean | undefined>;
+			defaultPlaybackRate?: Signalish<number | undefined>;
+			disableremoteplayback?: Signalish<boolean | undefined>;
+			disableRemotePlayback?: Signalish<boolean | undefined>;
+			loop?: Signalish<boolean | undefined>;
+			mediaGroup?: Signalish<string | undefined>;
+			muted?: Signalish<boolean | undefined>;
+			playbackRate?: Signalish<number | undefined>;
+			preload?: Signalish<'auto' | 'metadata' | 'none' | undefined>;
+			preservesPitch?: Signalish<boolean | undefined>;
+			src?: Signalish<string | undefined>;
+			srcObject?: Signalish<MediaStream | MediaSource | Blob | File | null>;
+			volume?: Signalish<string | number | undefined>;
+		};
 
-	interface MenuHTMLAttributes<T extends EventTarget = HTMLMenuElement>
-		extends HTMLAttributes<T> {
-		role:
-			| 'list'
-			| 'group'
-			| 'listbox'
-			| 'menu'
-			| 'menubar'
-			| 'none'
-			| 'presentation'
-			| 'radiogroup'
-			| 'tablist'
-			| 'toolbar'
-			| 'tree';
-		type?: Signalish<string | undefined>;
-	}
+	type MenuHTMLAttributes<T extends EventTarget = HTMLMenuElement> =
+		HTMLAttributes<T> & {
+			role:
+				| 'list'
+				| 'group'
+				| 'listbox'
+				| 'menu'
+				| 'menubar'
+				| 'none'
+				| 'presentation'
+				| 'radiogroup'
+				| 'tablist'
+				| 'toolbar'
+				| 'tree';
+			type?: Signalish<string | undefined>;
+		};
 
-	interface MetaHTMLAttributes<T extends EventTarget = HTMLMetaElement>
-		extends HTMLAttributes<T> {
-		charset?: Signalish<string | undefined>;
-		charSet?: Signalish<string | undefined>;
-		content?: Signalish<string | undefined>;
-		'http-equiv'?: Signalish<string | undefined>;
-		httpEquiv?: Signalish<string | undefined>;
-		name?: Signalish<string | undefined>;
-		media?: Signalish<string | undefined>;
-		role?: never;
-	}
+	type MetaHTMLAttributes<T extends EventTarget = HTMLMetaElement> =
+		HTMLAttributes<T> & {
+			charset?: Signalish<string | undefined>;
+			charSet?: Signalish<string | undefined>;
+			content?: Signalish<string | undefined>;
+			'http-equiv'?: Signalish<string | undefined>;
+			httpEquiv?: Signalish<string | undefined>;
+			name?: Signalish<string | undefined>;
+			media?: Signalish<string | undefined>;
+			role?: never;
+		};
 
-	interface MeterHTMLAttributes<T extends EventTarget = HTMLMeterElement>
-		extends HTMLAttributes<T> {
-		form?: Signalish<string | undefined>;
-		high?: Signalish<number | undefined>;
-		low?: Signalish<number | undefined>;
-		max?: Signalish<number | string | undefined>;
-		min?: Signalish<number | string | undefined>;
-		optimum?: Signalish<number | undefined>;
-		role?: Signalish<'meter' | undefined>;
-		value?: Signalish<string | number | undefined>;
-	}
+	type MeterHTMLAttributes<T extends EventTarget = HTMLMeterElement> =
+		HTMLAttributes<T> & {
+			form?: Signalish<string | undefined>;
+			high?: Signalish<number | undefined>;
+			low?: Signalish<number | undefined>;
+			max?: Signalish<number | string | undefined>;
+			min?: Signalish<number | string | undefined>;
+			optimum?: Signalish<number | undefined>;
+			role?: Signalish<'meter' | undefined>;
+			value?: Signalish<string | number | undefined>;
+		};
 
-	interface NavHTMLAttributes<T extends EventTarget = HTMLElement>
-		extends HTMLAttributes<T> {
-		role?: Signalish<
-			| 'navigation'
-			| 'menu'
-			| 'menubar'
-			| 'none'
-			| 'presentation'
-			| 'tablist'
-			| undefined
-		>;
-	}
+	type NavHTMLAttributes<T extends EventTarget = HTMLElement> =
+		HTMLAttributes<T> & {
+			role?: Signalish<
+				| 'navigation'
+				| 'menu'
+				| 'menubar'
+				| 'none'
+				| 'presentation'
+				| 'tablist'
+				| undefined
+			>;
+		};
 
-	interface NoScriptHTMLAttributes<T extends EventTarget = HTMLElement>
-		extends HTMLAttributes<T> {
-		role?: never;
-	}
+	type NoScriptHTMLAttributes<T extends EventTarget = HTMLElement> =
+		HTMLAttributes<T> & {
+			role?: never;
+		};
 
-	interface ObjectHTMLAttributes<T extends EventTarget = HTMLObjectElement>
-		extends HTMLAttributes<T> {
-		classID?: Signalish<string | undefined>;
-		data?: Signalish<string | undefined>;
-		form?: Signalish<string | undefined>;
-		height?: Signalish<number | string | undefined>;
-		name?: Signalish<string | undefined>;
-		role?: Signalish<'application' | 'document' | 'img' | undefined>;
-		type?: Signalish<string | undefined>;
-		usemap?: Signalish<string | undefined>;
-		useMap?: Signalish<string | undefined>;
-		width?: Signalish<number | string | undefined>;
-		wmode?: Signalish<string | undefined>;
-	}
+	type ObjectHTMLAttributes<T extends EventTarget = HTMLObjectElement> =
+		HTMLAttributes<T> & {
+			classID?: Signalish<string | undefined>;
+			data?: Signalish<string | undefined>;
+			form?: Signalish<string | undefined>;
+			height?: Signalish<number | string | undefined>;
+			name?: Signalish<string | undefined>;
+			role?: Signalish<'application' | 'document' | 'img' | undefined>;
+			type?: Signalish<string | undefined>;
+			usemap?: Signalish<string | undefined>;
+			useMap?: Signalish<string | undefined>;
+			width?: Signalish<number | string | undefined>;
+			wmode?: Signalish<string | undefined>;
+		};
 
-	interface OlHTMLAttributes<T extends EventTarget = HTMLOListElement>
-		extends HTMLAttributes<T> {
-		reversed?: Signalish<boolean | undefined>;
-		role?: Signalish<
-			| 'list'
-			| 'group'
-			| 'listbox'
-			| 'menu'
-			| 'menubar'
-			| 'none'
-			| 'presentation'
-			| 'radiogroup'
-			| 'tablist'
-			| 'toolbar'
-			| 'tree'
-			| undefined
-		>;
-		start?: Signalish<number | undefined>;
-		type?: Signalish<'1' | 'a' | 'A' | 'i' | 'I' | undefined>;
-	}
+	type OlHTMLAttributes<T extends EventTarget = HTMLOListElement> =
+		HTMLAttributes<T> & {
+			reversed?: Signalish<boolean | undefined>;
+			role?: Signalish<
+				| 'list'
+				| 'group'
+				| 'listbox'
+				| 'menu'
+				| 'menubar'
+				| 'none'
+				| 'presentation'
+				| 'radiogroup'
+				| 'tablist'
+				| 'toolbar'
+				| 'tree'
+				| undefined
+			>;
+			start?: Signalish<number | undefined>;
+			type?: Signalish<'1' | 'a' | 'A' | 'i' | 'I' | undefined>;
+		};
 
-	interface OptgroupHTMLAttributes<T extends EventTarget = HTMLOptGroupElement>
-		extends HTMLAttributes<T> {
-		disabled?: Signalish<boolean | undefined>;
-		label?: Signalish<string | undefined>;
-		role?: Signalish<'group' | undefined>;
-	}
+	type OptgroupHTMLAttributes<T extends EventTarget = HTMLOptGroupElement> =
+		HTMLAttributes<T> & {
+			disabled?: Signalish<boolean | undefined>;
+			label?: Signalish<string | undefined>;
+			role?: Signalish<'group' | undefined>;
+		};
 
-	interface OptionHTMLAttributes<T extends EventTarget = HTMLOptionElement>
-		extends HTMLAttributes<T> {
-		disabled?: Signalish<boolean | undefined>;
-		label?: Signalish<string | undefined>;
-		role?: Signalish<'option' | undefined>;
-		selected?: Signalish<boolean | undefined>;
-		value?: Signalish<string | number | undefined>;
-	}
+	type OptionHTMLAttributes<T extends EventTarget = HTMLOptionElement> =
+		HTMLAttributes<T> & {
+			disabled?: Signalish<boolean | undefined>;
+			label?: Signalish<string | undefined>;
+			role?: Signalish<'option' | undefined>;
+			selected?: Signalish<boolean | undefined>;
+			value?: Signalish<string | number | undefined>;
+		};
 
-	interface OutputHTMLAttributes<T extends EventTarget = HTMLOutputElement>
-		extends HTMLAttributes<T> {
-		for?: Signalish<string | undefined>;
-		form?: Signalish<string | undefined>;
-		htmlFor?: Signalish<string | undefined>;
-		name?: Signalish<string | undefined>;
-	}
+	type OutputHTMLAttributes<T extends EventTarget = HTMLOutputElement> =
+		HTMLAttributes<T> & {
+			for?: Signalish<string | undefined>;
+			form?: Signalish<string | undefined>;
+			htmlFor?: Signalish<string | undefined>;
+			name?: Signalish<string | undefined>;
+		};
 
-	interface ParamHTMLAttributes<T extends EventTarget = HTMLParamElement>
-		extends HTMLAttributes<T> {
-		name?: Signalish<string | undefined>;
-		role?: never;
-		value?: Signalish<string | number | undefined>;
-	}
+	type ParamHTMLAttributes<T extends EventTarget = HTMLParamElement> =
+		HTMLAttributes<T> & {
+			name?: Signalish<string | undefined>;
+			role?: never;
+			value?: Signalish<string | number | undefined>;
+		};
 
-	interface PictureHTMLAttributes<T extends EventTarget = HTMLPictureElement>
-		extends HTMLAttributes<T> {
-		role?: never;
-	}
+	type PictureHTMLAttributes<T extends EventTarget = HTMLPictureElement> =
+		HTMLAttributes<T> & {
+			role?: never;
+		};
 
-	interface ProgressHTMLAttributes<T extends EventTarget = HTMLProgressElement>
-		extends HTMLAttributes<T> {
-		max?: Signalish<number | string | undefined>;
-		role?: Signalish<'progressbar' | undefined>;
-		value?: Signalish<string | number | undefined>;
-	}
+	type ProgressHTMLAttributes<T extends EventTarget = HTMLProgressElement> =
+		HTMLAttributes<T> & {
+			max?: Signalish<number | string | undefined>;
+			role?: Signalish<'progressbar' | undefined>;
+			value?: Signalish<string | number | undefined>;
+		};
 
-	interface QuoteHTMLAttributes<T extends EventTarget = HTMLQuoteElement>
-		extends HTMLAttributes<T> {
-		cite?: Signalish<string | undefined>;
-	}
+	type QuoteHTMLAttributes<T extends EventTarget = HTMLQuoteElement> =
+		HTMLAttributes<T> & {
+			cite?: Signalish<string | undefined>;
+		};
 
-	interface ScriptHTMLAttributes<T extends EventTarget = HTMLScriptElement>
-		extends HTMLAttributes<T> {
-		async?: Signalish<boolean | undefined>;
-		/** @deprecated */
-		charset?: Signalish<string | undefined>;
-		/** @deprecated */
-		charSet?: Signalish<string | undefined>;
-		crossorigin?: Signalish<HTMLAttributeCrossOrigin>;
-		crossOrigin?: Signalish<HTMLAttributeCrossOrigin>;
-		defer?: Signalish<boolean | undefined>;
-		integrity?: Signalish<string | undefined>;
-		nomodule?: Signalish<boolean | undefined>;
-		noModule?: Signalish<boolean | undefined>;
-		referrerpolicy?: Signalish<HTMLAttributeReferrerPolicy | undefined>;
-		referrerPolicy?: Signalish<HTMLAttributeReferrerPolicy | undefined>;
-		role?: never;
-		src?: Signalish<string | undefined>;
-		type?: Signalish<string | undefined>;
-	}
+	type ScriptHTMLAttributes<T extends EventTarget = HTMLScriptElement> =
+		HTMLAttributes<T> & {
+			async?: Signalish<boolean | undefined>;
+			/** @deprecated */
+			charset?: Signalish<string | undefined>;
+			/** @deprecated */
+			charSet?: Signalish<string | undefined>;
+			crossorigin?: Signalish<HTMLAttributeCrossOrigin>;
+			crossOrigin?: Signalish<HTMLAttributeCrossOrigin>;
+			defer?: Signalish<boolean | undefined>;
+			integrity?: Signalish<string | undefined>;
+			nomodule?: Signalish<boolean | undefined>;
+			noModule?: Signalish<boolean | undefined>;
+			referrerpolicy?: Signalish<HTMLAttributeReferrerPolicy | undefined>;
+			referrerPolicy?: Signalish<HTMLAttributeReferrerPolicy | undefined>;
+			role?: never;
+			src?: Signalish<string | undefined>;
+			type?: Signalish<string | undefined>;
+		};
 
-	interface SearchHTMLAttributes<T extends EventTarget = HTMLElement>
-		extends HTMLAttributes<T> {
-		role?: Signalish<
-			| 'search'
-			| 'form'
-			| 'group'
-			| 'none'
-			| 'presentation'
-			| 'region'
-			| undefined
-		>;
-	}
+	type SearchHTMLAttributes<T extends EventTarget = HTMLElement> =
+		HTMLAttributes<T> & {
+			role?: Signalish<
+				| 'search'
+				| 'form'
+				| 'group'
+				| 'none'
+				| 'presentation'
+				| 'region'
+				| undefined
+			>;
+		};
 
 	interface PartialSelectHTMLAttributes<T extends EventTarget>
 		extends HTMLAttributes<T> {
@@ -2603,155 +2605,155 @@ export namespace JSXInternal {
 	> &
 		SelectAriaRoles;
 
-	interface SlotHTMLAttributes<T extends EventTarget = HTMLSlotElement>
-		extends HTMLAttributes<T> {
-		name?: Signalish<string | undefined>;
-		role?: never;
-	}
+	type SlotHTMLAttributes<T extends EventTarget = HTMLSlotElement> =
+		HTMLAttributes<T> & {
+			name?: Signalish<string | undefined>;
+			role?: never;
+		};
 
-	interface SourceHTMLAttributes<T extends EventTarget = HTMLSourceElement>
-		extends HTMLAttributes<T> {
-		height?: Signalish<number | string | undefined>;
-		media?: Signalish<string | undefined>;
-		role?: never;
-		sizes?: Signalish<string | undefined>;
-		src?: Signalish<string | undefined>;
-		srcset?: Signalish<string | undefined>;
-		srcSet?: Signalish<string | undefined>;
-		type?: Signalish<string | undefined>;
-		width?: Signalish<number | string | undefined>;
-	}
+	type SourceHTMLAttributes<T extends EventTarget = HTMLSourceElement> =
+		HTMLAttributes<T> & {
+			height?: Signalish<number | string | undefined>;
+			media?: Signalish<string | undefined>;
+			role?: never;
+			sizes?: Signalish<string | undefined>;
+			src?: Signalish<string | undefined>;
+			srcset?: Signalish<string | undefined>;
+			srcSet?: Signalish<string | undefined>;
+			type?: Signalish<string | undefined>;
+			width?: Signalish<number | string | undefined>;
+		};
 
-	interface StyleHTMLAttributes<T extends EventTarget = HTMLStyleElement>
-		extends HTMLAttributes<T> {
-		media?: Signalish<string | undefined>;
-		role?: never;
-		scoped?: Signalish<boolean | undefined>;
-		type?: Signalish<string | undefined>;
-	}
+	type StyleHTMLAttributes<T extends EventTarget = HTMLStyleElement> =
+		HTMLAttributes<T> & {
+			media?: Signalish<string | undefined>;
+			role?: never;
+			scoped?: Signalish<boolean | undefined>;
+			type?: Signalish<string | undefined>;
+		};
 
-	interface TableHTMLAttributes<T extends EventTarget = HTMLTableElement>
-		extends HTMLAttributes<T> {
-		cellPadding?: Signalish<string | undefined>;
-		cellSpacing?: Signalish<string | undefined>;
-		summary?: Signalish<string | undefined>;
-		width?: Signalish<number | string | undefined>;
-	}
+	type TableHTMLAttributes<T extends EventTarget = HTMLTableElement> =
+		HTMLAttributes<T> & {
+			cellPadding?: Signalish<string | undefined>;
+			cellSpacing?: Signalish<string | undefined>;
+			summary?: Signalish<string | undefined>;
+			width?: Signalish<number | string | undefined>;
+		};
 
-	interface TdHTMLAttributes<T extends EventTarget = HTMLTableCellElement>
-		extends HTMLAttributes<T> {
-		align?: Signalish<
-			'left' | 'center' | 'right' | 'justify' | 'char' | undefined
-		>;
-		colspan?: Signalish<number | undefined>;
-		colSpan?: Signalish<number | undefined>;
-		headers?: Signalish<string | undefined>;
-		rowspan?: Signalish<number | undefined>;
-		rowSpan?: Signalish<number | undefined>;
-		scope?: Signalish<string | undefined>;
-		abbr?: Signalish<string | undefined>;
-		height?: Signalish<number | string | undefined>;
-		width?: Signalish<number | string | undefined>;
-		valign?: Signalish<'top' | 'middle' | 'bottom' | 'baseline' | undefined>;
-	}
+	type TdHTMLAttributes<T extends EventTarget = HTMLTableCellElement> =
+		HTMLAttributes<T> & {
+			align?: Signalish<
+				'left' | 'center' | 'right' | 'justify' | 'char' | undefined
+			>;
+			colspan?: Signalish<number | undefined>;
+			colSpan?: Signalish<number | undefined>;
+			headers?: Signalish<string | undefined>;
+			rowspan?: Signalish<number | undefined>;
+			rowSpan?: Signalish<number | undefined>;
+			scope?: Signalish<string | undefined>;
+			abbr?: Signalish<string | undefined>;
+			height?: Signalish<number | string | undefined>;
+			width?: Signalish<number | string | undefined>;
+			valign?: Signalish<'top' | 'middle' | 'bottom' | 'baseline' | undefined>;
+		};
 
-	interface TemplateHTMLAttributes<T extends EventTarget = HTMLTemplateElement>
-		extends HTMLAttributes<T> {
-		role?: never;
-	}
+	type TemplateHTMLAttributes<T extends EventTarget = HTMLTemplateElement> =
+		HTMLAttributes<T> & {
+			role?: never;
+		};
 
-	interface TextareaHTMLAttributes<T extends EventTarget = HTMLTextAreaElement>
-		extends HTMLAttributes<T> {
-		autocomplete?: Signalish<string | undefined>;
-		autoComplete?: Signalish<string | undefined>;
-		cols?: Signalish<number | undefined>;
-		defaultValue?: Signalish<string | number | undefined>;
-		dirName?: Signalish<string | undefined>;
-		disabled?: Signalish<boolean | undefined>;
-		form?: Signalish<string | undefined>;
-		maxlength?: Signalish<number | undefined>;
-		maxLength?: Signalish<number | undefined>;
-		minlength?: Signalish<number | undefined>;
-		minLength?: Signalish<number | undefined>;
-		name?: Signalish<string | undefined>;
-		placeholder?: Signalish<string | undefined>;
-		readOnly?: Signalish<boolean | undefined>;
-		required?: Signalish<boolean | undefined>;
-		role?: Signalish<'textbox' | undefined>;
-		rows?: Signalish<number | undefined>;
-		value?: Signalish<string | number | undefined>;
-		wrap?: Signalish<string | undefined>;
-		onChange?: GenericEventHandler<T> | undefined;
-	}
+	type TextareaHTMLAttributes<T extends EventTarget = HTMLTextAreaElement> =
+		HTMLAttributes<T> & {
+			autocomplete?: Signalish<string | undefined>;
+			autoComplete?: Signalish<string | undefined>;
+			cols?: Signalish<number | undefined>;
+			defaultValue?: Signalish<string | number | undefined>;
+			dirName?: Signalish<string | undefined>;
+			disabled?: Signalish<boolean | undefined>;
+			form?: Signalish<string | undefined>;
+			maxlength?: Signalish<number | undefined>;
+			maxLength?: Signalish<number | undefined>;
+			minlength?: Signalish<number | undefined>;
+			minLength?: Signalish<number | undefined>;
+			name?: Signalish<string | undefined>;
+			placeholder?: Signalish<string | undefined>;
+			readOnly?: Signalish<boolean | undefined>;
+			required?: Signalish<boolean | undefined>;
+			role?: Signalish<'textbox' | undefined>;
+			rows?: Signalish<number | undefined>;
+			value?: Signalish<string | number | undefined>;
+			wrap?: Signalish<string | undefined>;
+			onChange?: GenericEventHandler<T> | undefined;
+		};
 
-	interface ThHTMLAttributes<T extends EventTarget = HTMLTableCellElement>
-		extends HTMLAttributes<T> {
-		align?: Signalish<
-			'left' | 'center' | 'right' | 'justify' | 'char' | undefined
-		>;
-		colspan?: Signalish<number | undefined>;
-		colSpan?: Signalish<number | undefined>;
-		headers?: Signalish<string | undefined>;
-		rowspan?: Signalish<number | undefined>;
-		rowSpan?: Signalish<number | undefined>;
-		scope?: Signalish<string | undefined>;
-		abbr?: Signalish<string | undefined>;
-	}
+	type ThHTMLAttributes<T extends EventTarget = HTMLTableCellElement> =
+		HTMLAttributes<T> & {
+			align?: Signalish<
+				'left' | 'center' | 'right' | 'justify' | 'char' | undefined
+			>;
+			colspan?: Signalish<number | undefined>;
+			colSpan?: Signalish<number | undefined>;
+			headers?: Signalish<string | undefined>;
+			rowspan?: Signalish<number | undefined>;
+			rowSpan?: Signalish<number | undefined>;
+			scope?: Signalish<string | undefined>;
+			abbr?: Signalish<string | undefined>;
+		};
 
-	interface TimeHTMLAttributes<T extends EventTarget = HTMLTimeElement>
-		extends HTMLAttributes<T> {
-		datetime?: Signalish<string | undefined>;
-		dateTime?: Signalish<string | undefined>;
-	}
+	type TimeHTMLAttributes<T extends EventTarget = HTMLTimeElement> =
+		HTMLAttributes<T> & {
+			datetime?: Signalish<string | undefined>;
+			dateTime?: Signalish<string | undefined>;
+		};
 
-	interface TitleHTMLAttributes<T extends EventTarget = HTMLTitleElement>
-		extends HTMLAttributes<T> {
-		role?: never;
-	}
+	type TitleHTMLAttributes<T extends EventTarget = HTMLTitleElement> =
+		HTMLAttributes<T> & {
+			role?: never;
+		};
 
-	interface TrackHTMLAttributes<T extends EventTarget = HTMLTrackElement>
-		extends MediaHTMLAttributes<T> {
-		default?: Signalish<boolean | undefined>;
-		kind?: Signalish<string | undefined>;
-		label?: Signalish<string | undefined>;
-		role?: never;
-		srclang?: Signalish<string | undefined>;
-		srcLang?: Signalish<string | undefined>;
-	}
+	type TrackHTMLAttributes<T extends EventTarget = HTMLTrackElement> =
+		MediaHTMLAttributes<T> & {
+			default?: Signalish<boolean | undefined>;
+			kind?: Signalish<string | undefined>;
+			label?: Signalish<string | undefined>;
+			role?: never;
+			srclang?: Signalish<string | undefined>;
+			srcLang?: Signalish<string | undefined>;
+		};
 
-	interface UlHTMLAttributes<T extends EventTarget = HTMLUListElement>
-		extends HTMLAttributes<T> {
-		role?: Signalish<
-			| 'list'
-			| 'group'
-			| 'listbox'
-			| 'menu'
-			| 'menubar'
-			| 'none'
-			| 'presentation'
-			| 'radiogroup'
-			| 'tablist'
-			| 'toolbar'
-			| 'tree'
-			| undefined
-		>;
-	}
+	type UlHTMLAttributes<T extends EventTarget = HTMLUListElement> =
+		HTMLAttributes<T> & {
+			role?: Signalish<
+				| 'list'
+				| 'group'
+				| 'listbox'
+				| 'menu'
+				| 'menubar'
+				| 'none'
+				| 'presentation'
+				| 'radiogroup'
+				| 'tablist'
+				| 'toolbar'
+				| 'tree'
+				| undefined
+			>;
+		};
 
-	interface VideoHTMLAttributes<T extends EventTarget = HTMLVideoElement>
-		extends MediaHTMLAttributes<T> {
-		disablePictureInPicture?: Signalish<boolean | undefined>;
-		height?: Signalish<number | string | undefined>;
-		playsinline?: Signalish<boolean | undefined>;
-		playsInline?: Signalish<boolean | undefined>;
-		poster?: Signalish<string | undefined>;
-		width?: Signalish<number | string | undefined>;
-		role?: Signalish<'application' | undefined>;
-	}
+	type VideoHTMLAttributes<T extends EventTarget = HTMLVideoElement> =
+		MediaHTMLAttributes<T> & {
+			disablePictureInPicture?: Signalish<boolean | undefined>;
+			height?: Signalish<number | string | undefined>;
+			playsinline?: Signalish<boolean | undefined>;
+			playsInline?: Signalish<boolean | undefined>;
+			poster?: Signalish<string | undefined>;
+			width?: Signalish<number | string | undefined>;
+			role?: Signalish<'application' | undefined>;
+		};
 
-	interface WbrHTMLAttributes<T extends EventTarget = HTMLElement>
-		extends HTMLAttributes<T> {
-		role?: Signalish<'none' | 'presentation' | undefined>;
-	}
+	type WbrHTMLAttributes<T extends EventTarget = HTMLElement> =
+		HTMLAttributes<T> & {
+			role?: Signalish<'none' | 'presentation' | undefined>;
+		};
 
 	export type DetailedHTMLProps<
 		HA extends HTMLAttributes<RefType>,
