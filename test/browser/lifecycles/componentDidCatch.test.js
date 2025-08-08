@@ -1,7 +1,7 @@
 import { setupRerender } from 'preact/test-utils';
 import { createElement, render, Component, Fragment } from 'preact';
 import { setupScratch, teardown } from '../../_util/helpers';
-import { vi } from 'vitest';
+import { vi, expect } from 'vitest';
 
 /** @jsx createElement */
 
@@ -713,6 +713,50 @@ describe('Lifecycle methods', () => {
 			);
 
 			expect(info).to.deep.equal({});
+		});
+
+		// New test mirroring React example but using shouldComponentUpdate instead of memo
+		it('should recover and render siblings when child throws once and uses shouldComponentUpdate', () => {
+			let causeError = true;
+
+			const Render = ({ n }) => <p>test {n}</p>;
+
+			class TestWithSCU extends Component {
+				shouldComponentUpdate(nextProps) {
+					return nextProps.n !== this.props.n;
+				}
+				render(props) {
+					const { n } = props;
+					if (n === 2 && causeError) {
+						throw new Error('test error');
+					}
+					return <Render n={n} />;
+				}
+			}
+
+			class App extends Component {
+				componentDidCatch() {
+					causeError = false;
+					this.setState({});
+				}
+				render() {
+					return (
+						<div>
+							<h1>Example</h1>
+							<TestWithSCU n={1} />
+							<TestWithSCU n={2} />
+							<TestWithSCU n={3} />
+						</div>
+					);
+				}
+			}
+
+			vi.spyOn(App.prototype, 'componentDidCatch');
+			render(<App />, scratch);
+			rerender();
+
+			expect(App.prototype.componentDidCatch).toHaveBeenCalledOnce();
+			expect(scratch.textContent).to.equal('Exampletest 1test 2test 3');
 		});
 	});
 });

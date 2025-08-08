@@ -11,7 +11,7 @@ import React, {
 	memo,
 	useState
 } from 'preact/compat';
-import { vi } from 'vitest';
+import { vi, expect } from 'vitest';
 
 const h = React.createElement;
 
@@ -237,5 +237,41 @@ describe('memo()', () => {
 		const Memoized = memo(Foo);
 
 		expect(Memoized.type).to.equal(Foo);
+	});
+
+	it('should recover and render siblings when memo child throws once', () => {
+		let causeError = true;
+
+		const TestWithMemo = /** @type {any} */ (memo(
+			/** @type {(props: { n: number }) => any} */ (props => {
+				const { n } = props;
+				if (n === 2 && causeError) {
+					throw new Error('test error');
+				}
+				return <p>test {n}</p>;
+			})
+		));
+
+		class App extends Component {
+			static getDerivedStateFromError() {
+				causeError = false;
+				return {};
+			}
+			render() {
+				return (
+					<div>
+						<h1>Example</h1>
+						<TestWithMemo n={1} />
+						<TestWithMemo n={2} />
+						<TestWithMemo n={3} />
+					</div>
+				);
+			}
+		}
+
+		render(<App />, scratch);
+		rerender();
+
+		expect(scratch.textContent).to.equal('Exampletest 1test 2test 3');
 	});
 });
