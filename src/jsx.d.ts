@@ -149,10 +149,10 @@ export namespace JSXInternal {
 	export interface IntrinsicElements
 		extends IntrinsicSVGElements,
 			IntrinsicMathMLElements {
-		a: dom.AnchorHTMLAttributes<HTMLAnchorElement>;
+		a: dom.AccessibleAnchorHTMLAttributes<HTMLAnchorElement>;
 		abbr: dom.HTMLAttributes<HTMLElement>;
 		address: dom.HTMLAttributes<HTMLElement>;
-		area: dom.AreaHTMLAttributes<HTMLAreaElement>;
+		area: dom.AccessibleAreaHTMLAttributes<HTMLAreaElement>;
 		article: dom.ArticleHTMLAttributes<HTMLElement>;
 		aside: dom.AsideHTMLAttributes<HTMLElement>;
 		audio: dom.AudioHTMLAttributes<HTMLAudioElement>;
@@ -201,8 +201,8 @@ export namespace JSXInternal {
 		html: dom.HtmlHTMLAttributes<HTMLHtmlElement>;
 		i: dom.HTMLAttributes<HTMLElement>;
 		iframe: dom.IframeHTMLAttributes<HTMLIFrameElement>;
-		img: dom.ImgHTMLAttributes<HTMLImageElement>;
-		input: dom.InputHTMLAttributes<HTMLInputElement>;
+		img: dom.AccessibleImgHTMLAttributes<HTMLImageElement>;
+		input: dom.AccessibleInputHTMLAttributes<HTMLInputElement>;
 		ins: dom.InsHTMLAttributes<HTMLModElement>;
 		kbd: dom.HTMLAttributes<HTMLElement>;
 		keygen: dom.KeygenHTMLAttributes<HTMLUnknownElement>;
@@ -239,7 +239,7 @@ export namespace JSXInternal {
 		script: dom.ScriptHTMLAttributes<HTMLScriptElement>;
 		search: dom.SearchHTMLAttributes<HTMLElement>;
 		section: dom.HTMLAttributes<HTMLElement>;
-		select: dom.SelectHTMLAttributes<HTMLSelectElement>;
+		select: dom.AccessibleSelectHTMLAttributes<HTMLSelectElement>;
 		slot: dom.SlotHTMLAttributes<HTMLSlotElement>;
 		small: dom.HTMLAttributes<HTMLElement>;
 		source: dom.SourceHTMLAttributes<HTMLSourceElement>;
