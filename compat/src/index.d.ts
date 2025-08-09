@@ -166,114 +166,114 @@ declare namespace React {
 
 	// HTML
 	export interface HTMLAttributes<T extends EventTarget>
-		extends JSXInternal.HTMLAttributes<T> {}
+		extends preact1.HTMLAttributes<T> {}
 	export interface HTMLProps<T extends EventTarget>
-		extends JSXInternal.AllHTMLAttributes<T>,
+		extends preact1.AllHTMLAttributes<T>,
 			preact1.ClassAttributes<T> {}
 	export interface AllHTMLAttributes<T extends EventTarget>
-		extends JSXInternal.AllHTMLAttributes<T> {}
-	export import DetailedHTMLProps = JSXInternal.DetailedHTMLProps;
-	export import CSSProperties = JSXInternal.CSSProperties;
+		extends preact1.AllHTMLAttributes<T> {}
+	export import DetailedHTMLProps = preact1.DetailedHTMLProps;
+	export import CSSProperties = preact1.CSSProperties;
 
 	export interface SVGProps<T extends EventTarget>
-		extends JSXInternal.SVGAttributes<T>,
+		extends preact1.SVGAttributes<T>,
 			preact1.ClassAttributes<T> {}
 
 	interface SVGAttributes<T extends EventTarget = SVGElement>
-		extends JSXInternal.SVGAttributes<T> {}
+		extends preact1.SVGAttributes<T> {}
 
 	interface ReactSVG extends JSXInternal.IntrinsicSVGElements {}
 
-	export import AriaAttributes = JSXInternal.AriaAttributes;
+	export import AriaAttributes = preact1.AriaAttributes;
 
-	export import HTMLAttributeReferrerPolicy = JSXInternal.HTMLAttributeReferrerPolicy;
-	export import HTMLAttributeAnchorTarget = JSXInternal.HTMLAttributeAnchorTarget;
-	export import HTMLInputTypeAttribute = JSXInternal.HTMLInputTypeAttribute;
-	export import HTMLAttributeCrossOrigin = JSXInternal.HTMLAttributeCrossOrigin;
+	export import HTMLAttributeReferrerPolicy = preact1.HTMLAttributeReferrerPolicy;
+	export import HTMLAttributeAnchorTarget = preact1.HTMLAttributeAnchorTarget;
+	export import HTMLInputTypeAttribute = preact1.HTMLInputTypeAttribute;
+	export import HTMLAttributeCrossOrigin = preact1.HTMLAttributeCrossOrigin;
 
-	export import AnchorHTMLAttributes = JSXInternal.AnchorHTMLAttributes;
-	export import AudioHTMLAttributes = JSXInternal.AudioHTMLAttributes;
-	export import AreaHTMLAttributes = JSXInternal.AreaHTMLAttributes;
-	export import BaseHTMLAttributes = JSXInternal.BaseHTMLAttributes;
-	export import BlockquoteHTMLAttributes = JSXInternal.BlockquoteHTMLAttributes;
-	export import ButtonHTMLAttributes = JSXInternal.ButtonHTMLAttributes;
-	export import CanvasHTMLAttributes = JSXInternal.CanvasHTMLAttributes;
-	export import ColHTMLAttributes = JSXInternal.ColHTMLAttributes;
-	export import ColgroupHTMLAttributes = JSXInternal.ColgroupHTMLAttributes;
-	export import DataHTMLAttributes = JSXInternal.DataHTMLAttributes;
-	export import DetailsHTMLAttributes = JSXInternal.DetailsHTMLAttributes;
-	export import DelHTMLAttributes = JSXInternal.DelHTMLAttributes;
-	export import DialogHTMLAttributes = JSXInternal.DialogHTMLAttributes;
-	export import EmbedHTMLAttributes = JSXInternal.EmbedHTMLAttributes;
-	export import FieldsetHTMLAttributes = JSXInternal.FieldsetHTMLAttributes;
-	export import FormHTMLAttributes = JSXInternal.FormHTMLAttributes;
-	export import IframeHTMLAttributes = JSXInternal.IframeHTMLAttributes;
-	export import ImgHTMLAttributes = JSXInternal.ImgHTMLAttributes;
-	export import InsHTMLAttributes = JSXInternal.InsHTMLAttributes;
-	export import InputHTMLAttributes = JSXInternal.InputHTMLAttributes;
-	export import KeygenHTMLAttributes = JSXInternal.KeygenHTMLAttributes;
-	export import LabelHTMLAttributes = JSXInternal.LabelHTMLAttributes;
-	export import LiHTMLAttributes = JSXInternal.LiHTMLAttributes;
-	export import LinkHTMLAttributes = JSXInternal.LinkHTMLAttributes;
-	export import MapHTMLAttributes = JSXInternal.MapHTMLAttributes;
-	export import MenuHTMLAttributes = JSXInternal.MenuHTMLAttributes;
-	export import MediaHTMLAttributes = JSXInternal.MediaHTMLAttributes;
-	export import MetaHTMLAttributes = JSXInternal.MetaHTMLAttributes;
-	export import MeterHTMLAttributes = JSXInternal.MeterHTMLAttributes;
-	export import QuoteHTMLAttributes = JSXInternal.QuoteHTMLAttributes;
-	export import ObjectHTMLAttributes = JSXInternal.ObjectHTMLAttributes;
-	export import OlHTMLAttributes = JSXInternal.OlHTMLAttributes;
-	export import OptgroupHTMLAttributes = JSXInternal.OptgroupHTMLAttributes;
-	export import OptionHTMLAttributes = JSXInternal.OptionHTMLAttributes;
-	export import OutputHTMLAttributes = JSXInternal.OutputHTMLAttributes;
-	export import ParamHTMLAttributes = JSXInternal.ParamHTMLAttributes;
-	export import ProgressHTMLAttributes = JSXInternal.ProgressHTMLAttributes;
-	export import SlotHTMLAttributes = JSXInternal.SlotHTMLAttributes;
-	export import ScriptHTMLAttributes = JSXInternal.ScriptHTMLAttributes;
-	export import SelectHTMLAttributes = JSXInternal.SelectHTMLAttributes;
-	export import SourceHTMLAttributes = JSXInternal.SourceHTMLAttributes;
-	export import StyleHTMLAttributes = JSXInternal.StyleHTMLAttributes;
-	export import TableHTMLAttributes = JSXInternal.TableHTMLAttributes;
-	export import TextareaHTMLAttributes = JSXInternal.TextareaHTMLAttributes;
-	export import TdHTMLAttributes = JSXInternal.TdHTMLAttributes;
-	export import ThHTMLAttributes = JSXInternal.ThHTMLAttributes;
-	export import TimeHTMLAttributes = JSXInternal.TimeHTMLAttributes;
-	export import TrackHTMLAttributes = JSXInternal.TrackHTMLAttributes;
-	export import VideoHTMLAttributes = JSXInternal.VideoHTMLAttributes;
+	export import AnchorHTMLAttributes = preact1.AnchorHTMLAttributes;
+	export import AudioHTMLAttributes = preact1.AudioHTMLAttributes;
+	export import AreaHTMLAttributes = preact1.AreaHTMLAttributes;
+	export import BaseHTMLAttributes = preact1.BaseHTMLAttributes;
+	export import BlockquoteHTMLAttributes = preact1.BlockquoteHTMLAttributes;
+	export import ButtonHTMLAttributes = preact1.ButtonHTMLAttributes;
+	export import CanvasHTMLAttributes = preact1.CanvasHTMLAttributes;
+	export import ColHTMLAttributes = preact1.ColHTMLAttributes;
+	export import ColgroupHTMLAttributes = preact1.ColgroupHTMLAttributes;
+	export import DataHTMLAttributes = preact1.DataHTMLAttributes;
+	export import DetailsHTMLAttributes = preact1.DetailsHTMLAttributes;
+	export import DelHTMLAttributes = preact1.DelHTMLAttributes;
+	export import DialogHTMLAttributes = preact1.DialogHTMLAttributes;
+	export import EmbedHTMLAttributes = preact1.EmbedHTMLAttributes;
+	export import FieldsetHTMLAttributes = preact1.FieldsetHTMLAttributes;
+	export import FormHTMLAttributes = preact1.FormHTMLAttributes;
+	export import IframeHTMLAttributes = preact1.IframeHTMLAttributes;
+	export import ImgHTMLAttributes = preact1.ImgHTMLAttributes;
+	export import InsHTMLAttributes = preact1.InsHTMLAttributes;
+	export import InputHTMLAttributes = preact1.InputHTMLAttributes;
+	export import KeygenHTMLAttributes = preact1.KeygenHTMLAttributes;
+	export import LabelHTMLAttributes = preact1.LabelHTMLAttributes;
+	export import LiHTMLAttributes = preact1.LiHTMLAttributes;
+	export import LinkHTMLAttributes = preact1.LinkHTMLAttributes;
+	export import MapHTMLAttributes = preact1.MapHTMLAttributes;
+	export import MenuHTMLAttributes = preact1.MenuHTMLAttributes;
+	export import MediaHTMLAttributes = preact1.MediaHTMLAttributes;
+	export import MetaHTMLAttributes = preact1.MetaHTMLAttributes;
+	export import MeterHTMLAttributes = preact1.MeterHTMLAttributes;
+	export import QuoteHTMLAttributes = preact1.QuoteHTMLAttributes;
+	export import ObjectHTMLAttributes = preact1.ObjectHTMLAttributes;
+	export import OlHTMLAttributes = preact1.OlHTMLAttributes;
+	export import OptgroupHTMLAttributes = preact1.OptgroupHTMLAttributes;
+	export import OptionHTMLAttributes = preact1.OptionHTMLAttributes;
+	export import OutputHTMLAttributes = preact1.OutputHTMLAttributes;
+	export import ParamHTMLAttributes = preact1.ParamHTMLAttributes;
+	export import ProgressHTMLAttributes = preact1.ProgressHTMLAttributes;
+	export import SlotHTMLAttributes = preact1.SlotHTMLAttributes;
+	export import ScriptHTMLAttributes = preact1.ScriptHTMLAttributes;
+	export import SelectHTMLAttributes = preact1.SelectHTMLAttributes;
+	export import SourceHTMLAttributes = preact1.SourceHTMLAttributes;
+	export import StyleHTMLAttributes = preact1.StyleHTMLAttributes;
+	export import TableHTMLAttributes = preact1.TableHTMLAttributes;
+	export import TextareaHTMLAttributes = preact1.TextareaHTMLAttributes;
+	export import TdHTMLAttributes = preact1.TdHTMLAttributes;
+	export import ThHTMLAttributes = preact1.ThHTMLAttributes;
+	export import TimeHTMLAttributes = preact1.TimeHTMLAttributes;
+	export import TrackHTMLAttributes = preact1.TrackHTMLAttributes;
+	export import VideoHTMLAttributes = preact1.VideoHTMLAttributes;
 
 	// Events
-	export import TargetedEvent = JSXInternal.TargetedEvent;
-	export import ChangeEvent = JSXInternal.TargetedEvent;
-	export import ClipboardEvent = JSXInternal.TargetedClipboardEvent;
-	export import CompositionEvent = JSXInternal.TargetedCompositionEvent;
-	export import DragEvent = JSXInternal.TargetedDragEvent;
-	export import PointerEvent = JSXInternal.TargetedPointerEvent;
-	export import FocusEvent = JSXInternal.TargetedFocusEvent;
-	export import FormEvent = JSXInternal.TargetedEvent;
-	export import InvalidEvent = JSXInternal.TargetedEvent;
-	export import KeyboardEvent = JSXInternal.TargetedKeyboardEvent;
-	export import MouseEvent = JSXInternal.TargetedMouseEvent;
-	export import TouchEvent = JSXInternal.TargetedTouchEvent;
-	export import UIEvent = JSXInternal.TargetedUIEvent;
-	export import AnimationEvent = JSXInternal.TargetedAnimationEvent;
-	export import TransitionEvent = JSXInternal.TargetedTransitionEvent;
+	export import TargetedEvent = preact1.TargetedEvent;
+	export import ChangeEvent = preact1.TargetedEvent;
+	export import ClipboardEvent = preact1.TargetedClipboardEvent;
+	export import CompositionEvent = preact1.TargetedCompositionEvent;
+	export import DragEvent = preact1.TargetedDragEvent;
+	export import PointerEvent = preact1.TargetedPointerEvent;
+	export import FocusEvent = preact1.TargetedFocusEvent;
+	export import FormEvent = preact1.TargetedEvent;
+	export import InvalidEvent = preact1.TargetedEvent;
+	export import KeyboardEvent = preact1.TargetedKeyboardEvent;
+	export import MouseEvent = preact1.TargetedMouseEvent;
+	export import TouchEvent = preact1.TargetedTouchEvent;
+	export import UIEvent = preact1.TargetedUIEvent;
+	export import AnimationEvent = preact1.TargetedAnimationEvent;
+	export import TransitionEvent = preact1.TargetedTransitionEvent;
 
 	// Event Handler Types
-	export import EventHandler = JSXInternal.EventHandler;
-	export import ChangeEventHandler = JSXInternal.GenericEventHandler;
-	export import ClipboardEventHandler = JSXInternal.ClipboardEventHandler;
-	export import CompositionEventHandler = JSXInternal.CompositionEventHandler;
-	export import DragEventHandler = JSXInternal.DragEventHandler;
-	export import PointerEventHandler = JSXInternal.PointerEventHandler;
-	export import FocusEventHandler = JSXInternal.FocusEventHandler;
-	export import FormEventHandler = JSXInternal.GenericEventHandler;
-	export import InvalidEventHandler = JSXInternal.GenericEventHandler;
-	export import KeyboardEventHandler = JSXInternal.KeyboardEventHandler;
-	export import MouseEventHandler = JSXInternal.MouseEventHandler;
-	export import TouchEventHandler = JSXInternal.TouchEventHandler;
-	export import UIEventHandler = JSXInternal.UIEventHandler;
-	export import AnimationEventHandler = JSXInternal.AnimationEventHandler;
-	export import TransitionEventHandler = JSXInternal.TransitionEventHandler;
+	export import EventHandler = preact1.EventHandler;
+	export import ChangeEventHandler = preact1.GenericEventHandler;
+	export import ClipboardEventHandler = preact1.ClipboardEventHandler;
+	export import CompositionEventHandler = preact1.CompositionEventHandler;
+	export import DragEventHandler = preact1.DragEventHandler;
+	export import PointerEventHandler = preact1.PointerEventHandler;
+	export import FocusEventHandler = preact1.FocusEventHandler;
+	export import FormEventHandler = preact1.GenericEventHandler;
+	export import InvalidEventHandler = preact1.GenericEventHandler;
+	export import KeyboardEventHandler = preact1.KeyboardEventHandler;
+	export import MouseEventHandler = preact1.MouseEventHandler;
+	export import TouchEventHandler = preact1.TouchEventHandler;
+	export import UIEventHandler = preact1.UIEventHandler;
+	export import AnimationEventHandler = preact1.AnimationEventHandler;
+	export import TransitionEventHandler = preact1.TransitionEventHandler;
 
 	export function createPortal(
 		vnode: preact1.ComponentChildren,

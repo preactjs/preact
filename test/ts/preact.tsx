@@ -7,10 +7,18 @@ import {
 	AnyComponent,
 	h,
 	createRef,
-	JSX
+	SignalLike,
+	ComponentChildren,
+	TargetedEvent,
+	TargetedInputEvent,
+	TargetedToggleEvent,
+	TargetedSubmitEvent,
+	AllHTMLAttributes,
+	HTMLAttributes,
+	InputHTMLAttributes,
 } from '../../';
 
-function createSignal<T>(value: T): JSX.SignalLike<T> {
+function createSignal<T>(value: T): SignalLike<T> {
 	return {
 		value,
 		peek() {
@@ -379,41 +387,41 @@ createElement(RefComponentTest, { ref: functionRef }, 'hi');
 h(RefComponentTest, { ref: functionRef }, 'hi');
 
 // Should accept onInput
-const onInput = (e: h.JSX.TargetedInputEvent<HTMLInputElement>) => {};
+const onInput = (e: TargetedInputEvent<HTMLInputElement>) => {};
 <input onInput={onInput} />;
 <input onInput={e => e.currentTarget.value} />;
 createElement('input', { onInput: onInput });
 h('input', { onInput: onInput });
 
 // Should accept onBeforeInput
-const onBeforeInput = (e: h.JSX.TargetedInputEvent<HTMLInputElement>) => {};
+const onBeforeInput = (e: TargetedInputEvent<HTMLInputElement>) => {};
 <input onBeforeInput={e => e.currentTarget.value} />;
 createElement('input', { onBeforeInput: onBeforeInput });
 h('input', { onBeforeInput: onBeforeInput });
 
 // Should accept onSubmit
-const onSubmit = (e: h.JSX.TargetedSubmitEvent<HTMLFormElement>) => {};
+const onSubmit = (e: TargetedSubmitEvent<HTMLFormElement>) => {};
 <form onSubmit={e => e.currentTarget.elements} />;
 createElement('form', { onSubmit: onSubmit });
 h('form', { onSubmit: onSubmit });
 
 // Should accept onToggle
-const onToggle = (e: h.JSX.TargetedToggleEvent<HTMLDetailsElement>) => {};
+const onToggle = (e: TargetedToggleEvent<HTMLDetailsElement>) => {};
 <dialog onToggle={e => ({ newState: e.newState, oldState: e.oldState })} />;
 createElement('dialog', { onToggle: onToggle });
 h('dialog', { onToggle: onToggle });
 
 // Should default to correct event target element for the attribute interface
-h<JSX.InputHTMLAttributes>('input', { onClick: e => e.currentTarget.capture });
-createElement<JSX.InputHTMLAttributes>('input', {
+h<InputHTMLAttributes>('input', { onClick: e => e.currentTarget.capture });
+createElement<InputHTMLAttributes>('input', {
 	onClick: e => e.currentTarget.capture
 });
 <input onClick={e => e.currentTarget.capture} />;
 
-function Checkbox({ onChange }: JSX.HTMLAttributes<HTMLInputElement>) {
+function Checkbox({ onChange }: HTMLAttributes<HTMLInputElement>) {
 	function handleChange(
 		this: void,
-		event: JSX.TargetedEvent<HTMLInputElement>
+		event: TargetedEvent<HTMLInputElement>
 	) {
 		onChange?.call(this, event);
 	}
@@ -422,7 +430,7 @@ function Checkbox({ onChange }: JSX.HTMLAttributes<HTMLInputElement>) {
 }
 
 // `AllHTMLAttributes` should support all interfaces used within `JSX.IntrinsicElements`
-const allHTMLAttributes: JSX.AllHTMLAttributes<HTMLMarqueeElement> = {
+const allHTMLAttributes: AllHTMLAttributes<HTMLMarqueeElement> = {
 	// Global HTMLAttributes
 	class: 'foo',
 
@@ -438,7 +446,7 @@ const allHTMLAttributes: JSX.AllHTMLAttributes<HTMLMarqueeElement> = {
 	ref: createRef<HTMLMarqueeElement>(),
 
 	// DOMAttributes
-	onClick: (e: JSX.TargetedEvent<HTMLMarqueeElement>) => {},
+	onClick: (e: TargetedEvent<HTMLMarqueeElement>) => {},
 
 	// AriaAttributes
 	'aria-colcount': 1
