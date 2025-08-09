@@ -30,7 +30,6 @@ export const REACT_ELEMENT_TYPE = Symbol.for('react.element');
 
 const CAMEL_PROPS =
 	/^(?:accent|alignment|arabic|baseline|cap|clip(?!PathU)|color|dominant|fill|flood|font|glyph(?!R)|horiz|image(!S)|letter|lighting|marker(?!H|W|U)|overline|paint|pointer|shape|stop|strikethrough|stroke|text(?!L)|transform|underline|unicode|units|v|vector|vert|word|writing|x(?!C))[A-Z]/;
-const ON_ANI = /^on(Ani|Tra|Tou|BeforeInp|Compo)/;
 const CAMEL_REPLACE = /[A-Z0-9]/g;
 const IS_DOM = typeof document !== 'undefined';
 
@@ -143,7 +142,6 @@ function handleDomVNode(vnode) {
 			continue;
 		}
 
-		let lowerCased = i.toLowerCase();
 		if (i === 'style' && typeof value === 'object') {
 			for (let key in value) {
 				if (typeof value[key] === 'number' && !IS_NON_DIMENSIONAL.test(key)) {
@@ -165,9 +163,10 @@ function handleDomVNode(vnode) {
 			// value will be used as the file name and the file will be called
 			// "true" upon downloading it.
 			value = '';
-		} else if (lowerCased === 'translate' && value === 'no') {
+		} else if (i === 'translate' && value === 'no') {
 			value = false;
-		} else if (lowerCased[0] === 'o' && lowerCased[1] === 'n') {
+		} else if (i[0] === 'o' && i[1] === 'n') {
+			let lowerCased = i.toLowerCase();
 			if (lowerCased === 'ondoubleclick') {
 				i = 'ondblclick';
 			} else if (
@@ -180,22 +179,20 @@ function handleDomVNode(vnode) {
 				i = 'onfocusin';
 			} else if (lowerCased === 'onblur') {
 				i = 'onfocusout';
-			} else if (ON_ANI.test(i)) {
+			}
+
+			// Add support for onInput and onChange, see #3561
+			// if we have an oninput prop already change it to oninputCapture
+			if (lowerCased === 'oninput') {
 				i = lowerCased;
+				if (normalizedProps[i]) {
+					i = 'oninputCapture';
+				}
 			}
 		} else if (isNonDashedType && CAMEL_PROPS.test(i)) {
 			i = i.replace(CAMEL_REPLACE, '-$&').toLowerCase();
 		} else if (value === null) {
 			value = undefined;
-		}
-
-		// Add support for onInput and onChange, see #3561
-		// if we have an oninput prop already change it to oninputCapture
-		if (lowerCased === 'oninput') {
-			i = lowerCased;
-			if (normalizedProps[i]) {
-				i = 'oninputCapture';
-			}
 		}
 
 		normalizedProps[i] = value;
