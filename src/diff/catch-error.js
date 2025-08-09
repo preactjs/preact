@@ -3,7 +3,8 @@ import {
 	NULL,
 	COMPONENT_DIRTY,
 	COMPONENT_PENDING_ERROR,
-	COMPONENT_PROCESSING_EXCEPTION
+	COMPONENT_PROCESSING_EXCEPTION,
+	COMPONENT_FORCE
 } from '../constants';
 
 /**
@@ -28,6 +29,7 @@ export function _catchError(error, vnode, oldVNode, errorInfo) {
 			(component = vnode._component) &&
 			!(component._bits & COMPONENT_PROCESSING_EXCEPTION)
 		) {
+			component._bits |= COMPONENT_FORCE;
 			try {
 				ctor = component.constructor;
 
