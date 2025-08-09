@@ -97,11 +97,9 @@ The short summary is:
 
 Scripts can be executed via `npm run [script]` or `yarn [script]` respectively.
 
-- `build` - compiles all packages ready for publishing to npm
-- `build:core` - builds just Preact itself
-- `build:debug` - builds the debug addon only
-- `build:hooks` - builds the hook addon only
-- `build:test-utils` - builds the test-utils addon only
+- `build` - compiles all packages (core + addons) via unified script (`scripts/build-packages.cjs`)
+- `build:core` - builds just Preact itself (alias for `node scripts/build-packages.cjs core`)
+- (Deprecated) Previous per-package commands like `build:hooks`, `build:debug`, etc. now proxy to the unified build and will be removed in a future major.
 - `test:ts` - Run all tests for TypeScript definitions
 - `test:karma` - Run all unit/integration tests.
 - `test:karma:watch` - Same as above, but it will automatically re-run the test suite if a code change was detected.
