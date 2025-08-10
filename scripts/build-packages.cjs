@@ -10,6 +10,7 @@ const { minify } = require('terser');
 const zlib = require('node:zlib');
 const { init: initEsmLexer, parse } = require('es-module-lexer');
 const MagicString = require('magic-string');
+const { platform } = require('node:os');
 
 /**
  * Transform ESM to CJS using destructured imports
@@ -223,18 +224,28 @@ async function main() {
 		compress: {
 			...mangleConfig.minify.compress,
 			pure_getters: true,
+			// For some reason this is needed else
+			// the var declarations will come before
+			// the imports
 			hoist_vars: false,
-			hoist_funs: false,
+			inline: 3,
+			sequences: 100,
 			keep_infinity: true,
+			reduce_vars: true,
+			reduce_funcs: false,
+			collapse_vars: true,
+			side_effects: true,
 			unsafe_proto: true,
 			passes: 10,
-			toplevel: true
+			ecma: 2020,
+			module: true
 		},
 		mangle: {
-			toplevel: true,
 			properties: { ...mangleConfig.minify.mangle.properties, reserved }
 		},
 		format: {
+			ascii_only: true,
+			wrap_iife: false,
 			shorthand: true,
 			wrap_func_args: false,
 			comments: /^\s*([@#]__[A-Z]+__\s*$|@cc_on)/,
@@ -292,12 +303,15 @@ async function main() {
 			bundle: true,
 			sourcemap: true,
 			sourcesContent: true,
+			treeShaking: true,
+			platform: 'browser',
+			jsxSideEffects: false,
 			plugins: [babelRenamePlugin()],
 			target: ['es2020'],
 			define: { 'process.env.NODE_ENV': '"production"' }
 		};
 
-		// Build ESM first
+		// @ts-expect-error
 		await build({
 			...shared,
 			format: 'esm',
@@ -333,7 +347,7 @@ async function main() {
 				params: { [zlib.constants.BROTLI_PARAM_QUALITY]: 11 }
 			}).length;
 			sizeRows.push({
-				pkg: pkg.id,
+				pkg: pkg.id + (ext === '.mjs' ? ' (esm)' : '(cjs)'),
 				file: path.relative(root, abs),
 				raw,
 				gz,
@@ -343,9 +357,26 @@ async function main() {
 	}
 
 	console.log('\n[build] Artifact sizes (bytes):');
-	console.log(['Package', 'File', 'Raw', 'Gzip', 'Brotli'].join('\t'));
-	for (const row of sizeRows) {
-		console.log([row.pkg, row.file, row.raw, row.gz, row.br].join('\t'));
+
+	const headers = ['Package', 'Raw', 'Gzip', 'Brotli'];
+	const rows = sizeRows.map(r => [
+		r.pkg,
+		String(r.raw),
+		String(r.gz),
+		String(r.br)
+	]);
+	const colWidths = headers.map((h, i) =>
+		Math.max(h.length, ...rows.map(r => r[i].length))
+	);
+
+	function pad(v, i) {
+		const w = colWidths[i];
+		return v + ' '.repeat(w - v.length);
+	}
+
+	console.log(headers.map(pad).join('  '));
+	for (const r of rows) {
+		console.log(r.map(pad).join('  '));
 	}
 	console.log('\nDone.');
 }
