@@ -10,7 +10,6 @@ const { minify } = require('terser');
 const zlib = require('node:zlib');
 const { init: initEsmLexer, parse } = require('es-module-lexer');
 const MagicString = require('magic-string');
-const { platform } = require('node:os');
 
 /**
  * Transform ESM to CJS using destructured imports
@@ -103,6 +102,82 @@ async function transformEsmToCjs(code, filePath, mode = 'default') {
 		// out.append(`Object.defineProperties(module.exports,{${descs.join(',')}})`);
 	}
 	return { code: out.toString(), map: out.generateMap({ hires: true }) };
+}
+
+/**
+ * Merge consecutive (or separated) static named import declarations that share the same source
+ * module into a single import statement. We do this only for simple named-import forms:
+ *   import { a, b as c } from 'mod';
+ * Skips:
+ *   - side-effect only imports: import 'mod';
+ *   - default imports: import React, { useState } from 'preact';
+ *   - namespace imports: import * as ns from 'mod';
+ *   - import assertions / attributes (future syntax)
+ * This conservative approach covers our compat case (multiple repeated named imports from 'preact/hooks')
+ * without risking semantic changes.
+ *
+ * NOTE: We run this BEFORE Terser so the minifier can benefit from longer repeated substrings.
+ */
+async function mergeSameSourceNamedImports(code) {
+	const [imports] = await parse(code, '');
+	// group: source => array of import metadata
+	const groups = new Map();
+	for (const im of imports) {
+		// Only static import declarations start with 'import'
+		if (!code.startsWith('import', im.ss)) continue;
+		const stmt = code.slice(im.ss, im.se);
+		// Skip side-effect only (no braces, no other specifiers)
+		if (/^import\s*['"]/.test(stmt)) continue;
+		// Skip namespace or default import patterns to stay conservative
+		// namespace: import * as X from 'mod'
+		if (/import\s*\*\s*as\s+/.test(stmt)) continue;
+		// default import pattern: import X, { a } from 'mod'
+		if (/import\s+[^\{]*,\s*\{/.test(stmt)) continue;
+		// If there is no { } block, skip
+		if (!/import\s*\{[^}]*\}\s*from/.test(stmt)) continue;
+		const source = code.slice(im.s, im.e); // includes quotes
+		if (!groups.has(source)) groups.set(source, []);
+		groups.get(source).push(im);
+	}
+
+	// Support different CJS/ESM shapes for magic-string export
+	// @ts-ignore
+	const ms = new (
+		MagicString.MagicString ||
+		MagicString.default ||
+		MagicString
+	)(code);
+	let mutated = false;
+	groups.forEach((list, source) => {
+		if (list.length < 2) return; // nothing to merge
+		const orderedSpecs = [];
+		const seen = new Set();
+		for (const im of list) {
+			const stmt = code.slice(im.ss, im.se);
+			const m = stmt.match(/import\s*\{([^}]*)\}/);
+			if (!m) continue;
+			const specs = m[1]
+				.split(',')
+				.map(s => s.trim())
+				.filter(Boolean);
+			for (const sp of specs) {
+				const norm = sp.replace(/\s+as\s+/, ' as ');
+				if (seen.has(norm)) continue;
+				seen.add(norm);
+				orderedSpecs.push(sp);
+			}
+		}
+		if (!orderedSpecs.length) return;
+		const first = list[0];
+		ms.overwrite(
+			first.ss,
+			first.se,
+			`import {${orderedSpecs.join(',')}} from ${JSON.stringify(source)}`
+		);
+		for (let i = 1; i < list.length; i++) ms.remove(list[i].ss, list[i].se);
+		mutated = true;
+	});
+	return mutated ? ms.toString() : code;
 }
 
 async function main() {
@@ -224,6 +299,7 @@ async function main() {
 		compress: {
 			...mangleConfig.minify.compress,
 			pure_getters: true,
+			unsafe: true,
 			// For some reason this is needed else
 			// the var declarations will come before
 			// the imports
@@ -321,7 +397,17 @@ async function main() {
 
 		// Transform to CJS
 		const esmFile = path.join(distDir, pkg.base + '.mjs');
-		const esmCode = await fs.readFile(esmFile, 'utf8');
+		let esmCode = await fs.readFile(esmFile, 'utf8');
+		// Merge duplicate named imports (scope-hoist style normalization) before minification.
+		try {
+			esmCode = await mergeSameSourceNamedImports(esmCode);
+			await fs.writeFile(esmFile, esmCode);
+		} catch (err) {
+			console.warn(
+				'[build] import merge skipped (non-fatal):',
+				err && err.message ? err.message : err
+			);
+		}
 		const cjs = await transformEsmToCjs(esmCode, esmFile, 'default');
 		const cjsFile = path.join(distDir, pkg.base + '.js');
 		await fs.writeFile(cjsFile, cjs.code + '\n');
