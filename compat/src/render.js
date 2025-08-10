@@ -321,7 +321,7 @@ export const __SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED = {
 			useInsertionEffect,
 			useLayoutEffect,
 			useMemo,
-			// useMutableSource, // experimental-only and replaced by uSES, likely not worth supporting
+			/* useMutableSource (omitted): experimental-only and replaced by uSES, likely not worth supporting */
 			useReducer,
 			useRef,
 			useState,

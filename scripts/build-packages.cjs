@@ -5,10 +5,6 @@
  * Usage:
  *   npm run build              # build all packages
  *   node scripts/build-packages.cjs core hooks  # build subset
- *
- * Pipeline per package:
- *  esbuild (ESM) -> manual CJS transform -> esbuild IIFE (UMD) -> terser minification (in-place)
- *  Property rename (internal) via babel-plugin-transform-rename-properties using root mangle.json
  */
 const path = require('node:path');
 const fs = require('node:fs/promises');
@@ -16,6 +12,292 @@ const { build } = require('esbuild');
 const babel = require('@babel/core');
 const { minify } = require('terser');
 const zlib = require('node:zlib');
+const { init: initEsmLexer, parse } = require('es-module-lexer');
+const MagicStringModule = require('magic-string');
+const MagicString = MagicStringModule.default || MagicStringModule;
+
+/**
+ * Very small ESM -> CJS transform tailored to the output shape we get from esbuild.
+ * We currently only need to support converting a final `export { a as b, c }` list
+ * (esbuild's style when there are no external static imports) into CJS named exports
+ * plus a CommonJS default export object. If later we re-introduce static imports,
+ * we can extend this to rewrite import statements into require() calls (see microbundle-2 approach).
+ *
+ * @param {string} code
+ * @param {{ filename?: string }} opts
+ */
+function transformEsmToCjs(code, opts = {}) {
+	// @ts-expect-error
+	const ms = new MagicString(code);
+	const originalCode = code;
+	// Initialize lexer parsing mainly for future extension; presently we just parse exports list.
+	let exportsMeta;
+	let importsMeta;
+	try {
+		const [imports, exports] = parse(code);
+		importsMeta = imports;
+		exportsMeta = exports;
+	} catch (e) {
+		// Fallback: continue without structured export info
+	}
+
+	// 1. Rewrite static import statements to CommonJS require (consolidated per source)
+	if (importsMeta && importsMeta.length) {
+		const perSource = new Map();
+		for (const im of importsMeta) {
+			if (im.d > -1) continue; // skip dynamic
+			const src = im.n;
+			if (!src) continue;
+			// capture original statement text
+			const start = im.ss; // statement start
+			let end = im.se; // statement end (after semicolon)
+			const stmtText = code.slice(start, end);
+			if (
+				/^\s*export\s+\*/.test(stmtText) ||
+				/^\s*export\s+\{/.test(stmtText)
+			) {
+				// skip re-export statements here; handle later
+				continue;
+			}
+			perSource.set(src, perSource.get(src) || { decls: [], ranges: [] });
+			perSource.get(src).ranges.push([start, end]);
+			perSource.get(src).decls.push(stmtText);
+		}
+		const insertionPieces = [];
+		perSource.forEach((info, src) => {
+			// Parse combined declarations for this source
+			let defaultName = null;
+			let nsName = null;
+			const namedSet = new Set();
+			for (const stmt of info.decls) {
+				// import ... from "src"; OR import "src";
+				if (/^\s*import\s+['"]/m.test(stmt)) {
+					// side-effect only
+					continue;
+				}
+				const fromIdx = stmt.lastIndexOf('from');
+				let head = fromIdx >= 0 ? stmt.slice(0, fromIdx) : stmt;
+				head = head.replace(/^\s*import\s*/, '').trim();
+				if (!head || head.startsWith('//')) continue;
+				if (head.startsWith('* as ')) {
+					nsName = head.slice(5).trim();
+					continue;
+				}
+				// default + optional named
+				if (head.startsWith('{')) {
+					// only named
+					collectNamed(head, namedSet);
+				} else if (head.includes('{')) {
+					const m = head.match(/([^,]+),\s*(\{.*\})/);
+					if (m) {
+						defaultName = defaultName || m[1].trim();
+						collectNamed(m[2], namedSet);
+					}
+				} else if (!head.startsWith('{')) {
+					defaultName = defaultName || head.trim();
+				}
+			}
+			const named = Array.from(namedSet);
+			const safeBase = src.replace(/[^a-zA-Z0-9_$]/g, '_');
+			const temp = `__req_${safeBase}`;
+			if (nsName) {
+				insertionPieces.push(
+					`const ${nsName} = require(${JSON.stringify(src)});`
+				);
+			}
+			if (defaultName && (named.length || nsName)) {
+				insertionPieces.push(
+					`const ${temp} = require(${JSON.stringify(src)});`
+				);
+				insertionPieces.push(
+					`const ${defaultName} = ${temp}.default || ${temp};`
+				);
+				if (named.length)
+					insertionPieces.push(`const { ${named.join(', ')} } = ${temp};`);
+			} else if (defaultName) {
+				insertionPieces.push(
+					`let ${defaultName} = require(${JSON.stringify(src)});`
+				);
+				insertionPieces.push(
+					`${defaultName} && ${defaultName}.__esModule && (${defaultName} = ${defaultName}.default);`
+				);
+			} else if (named.length && !nsName) {
+				insertionPieces.push(
+					`const { ${named.join(', ')} } = require(${JSON.stringify(src)});`
+				);
+			} else if (!defaultName && !named.length && !nsName) {
+				// side effect only
+				insertionPieces.push(`require(${JSON.stringify(src)});`);
+			}
+			// remove all original ranges
+			for (const [s, e] of info.ranges) ms.remove(s, e);
+		});
+		if (insertionPieces.length) {
+			let insertionPoint = 0;
+			if (code.startsWith('#!')) insertionPoint = code.indexOf('\n') + 1;
+			ms.prependLeft(insertionPoint, insertionPieces.join('\n') + '\n');
+		}
+	}
+
+	function collectNamed(block, set) {
+		const inner = block.replace(/[{}]/g, '').trim();
+		if (!inner) return;
+		inner.split(',').forEach(part => {
+			part = part.trim();
+			if (!part) return;
+			// transform alias syntax a as b -> a: b for object destructuring
+			const m = part.match(/^(.*?)\s+as\s+(.*)$/);
+			if (m) {
+				set.add(`${m[1].trim()}: ${m[2].trim()}`);
+			} else {
+				set.add(part);
+			}
+		});
+	}
+
+	// 2. Handle simple `export default <expr>;` (non function/class decl) patterns
+	code = ms.toString();
+	const exportDefaultRegex = /export\s+default\s+([^;]+);/g;
+	let exportDefaultMatch;
+	while ((exportDefaultMatch = exportDefaultRegex.exec(code))) {
+		const full = exportDefaultMatch[0];
+		const expr = exportDefaultMatch[1].trim();
+		const start = exportDefaultMatch.index;
+		const end = start + full.length;
+		ms.overwrite(start, end, `exports.default = ${expr};`);
+	}
+
+	// Gather export list matches from originalCode to avoid index drift
+	const exportListMatches = [];
+	{
+		const exportRegex = /export\s*\{([^}]*)\};?/g;
+		let m;
+		while ((m = exportRegex.exec(originalCode))) {
+			exportListMatches.push({
+				start: m.index,
+				end: m.index + m[0].length,
+				inner: m[1]
+			});
+		}
+	}
+
+	let allExports = [];
+	for (const m of exportListMatches) {
+		const parts = m.inner
+			.split(',')
+			.map(s => s.trim())
+			.filter(Boolean);
+		for (const part of parts) {
+			const mm = part.match(/^(.*?)\s+as\s+(.*)$/);
+			if (mm) {
+				allExports.push({ local: mm[1].trim(), exported: mm[2].trim() });
+			} else if (part) {
+				allExports.push({ local: part, exported: part });
+			}
+		}
+		ms.remove(m.start, m.end);
+	}
+
+	if (allExports.length === 0 && exportsMeta && exportsMeta.length) {
+		// Fallback: use lexer data if regex didn't match.
+		allExports = exportsMeta
+			.map(e => ({ local: e.n, exported: e.n }))
+			.filter(x => x.local);
+	}
+
+	// 3. Re-export handling (export * from / export { a as b } from)
+	// Collect re-export statements separately so we can generate getters in legacy mode.
+	/** @type {Array<{ kind: 'star', source: string } | { kind: 'named', source: string, items: Array<{ imported: string, exported: string }> }>} */
+	const reExports = [];
+	{
+		const starRe = /export\s*\*\s*from\s*['"]([^'\"]+)['"];?/g;
+		let m;
+		while ((m = starRe.exec(code))) {
+			reExports.push({ kind: 'star', source: m[1] });
+			ms.remove(m.index, m.index + m[0].length);
+		}
+		const namedRe = /export\s*\{([^}]+)\}\s*from\s*['"]([^'\"]+)['"];?/g;
+		while ((m = namedRe.exec(code))) {
+			const inner = m[1];
+			const source = m[2];
+			const items = inner
+				.split(',')
+				.map(s => s.trim())
+				.filter(Boolean)
+				.map(part => {
+					const mm = part.match(/^(.*?)\s+as\s+(.*)$/);
+					if (mm) return { imported: mm[1].trim(), exported: mm[2].trim() };
+					return { imported: part, exported: part };
+				});
+			reExports.push({ kind: 'named', source, items });
+			ms.remove(m.index, m.index + m[0].length);
+		}
+	}
+
+	// Unified getter-based mode with re-export support (always on)
+	const requireMap = new Map();
+	let reqIndex = 0;
+	for (const r of reExports) {
+		if (!requireMap.has(r.source)) {
+			const safe = r.source.replace(/[^a-zA-Z0-9_$]/g, '_');
+			const varName = `__reexp_${safe}_${reqIndex++}`;
+			requireMap.set(r.source, varName);
+		}
+	}
+	const exportGetters = [];
+	const exportNamesSet = new Set();
+	for (const { local, exported } of allExports) {
+		if (exported === 'default') continue;
+		if (exportNamesSet.has(exported)) continue;
+		exportNamesSet.add(exported);
+		exportGetters.push(
+			`Object.defineProperty(exports, ${JSON.stringify(exported)}, { enumerable: true, get: function () { return ${local}; } });`
+		);
+	}
+	for (const r of reExports) {
+		const modVar = requireMap.get(r.source);
+		if (r.kind === 'named') {
+			for (const it of r.items) {
+				if (it.exported === 'default' || exportNamesSet.has(it.exported))
+					continue;
+				exportNamesSet.add(it.exported);
+				exportGetters.push(
+					`Object.defineProperty(exports, ${JSON.stringify(it.exported)}, { enumerable: true, get: function () { return ${modVar}[${JSON.stringify(it.imported)}]; } });`
+				);
+			}
+		} else if (r.kind === 'star') {
+			exportGetters.push(
+				`for (var __k in ${modVar}) if (__k !== 'default' && __k !== '__esModule' && !Object.prototype.hasOwnProperty.call(exports, __k)) Object.defineProperty(exports, __k, { enumerable: true, get: (function(k){ return function(){ return ${modVar}[k]; }; })(__k) });`
+			);
+		}
+	}
+	exportGetters.unshift(
+		'Object.defineProperty(exports, "__esModule", { value: true });'
+	);
+	if (requireMap.size) {
+		let insertionPoint = 0;
+		const current = ms.toString();
+		if (current.startsWith('#!')) insertionPoint = current.indexOf('\n') + 1;
+		const reqLines = [];
+		requireMap.forEach((v, src) => {
+			reqLines.push(`var ${v} = require(${JSON.stringify(src)});`);
+		});
+		ms.prependLeft(insertionPoint, reqLines.join('\n') + '\n');
+	}
+	if (exportNamesSet.size) {
+		exportGetters.push('var __defaultCache;');
+		exportGetters.push(
+			'Object.defineProperty(exports, "default", { enumerable: true, get: function() { return __defaultCache || (__defaultCache = {' +
+				Array.from(exportNamesSet)
+					.map(n => `${JSON.stringify(n)}: exports[${JSON.stringify(n)}]`)
+					.join(',') +
+				'}); } });'
+		);
+	}
+	if (exportGetters.length) ms.append('\n' + exportGetters.join('\n'));
+
+	return { code: ms.toString(), map: ms.generateMap({ hires: true }) };
+}
 
 async function main() {
 	const root = path.join(__dirname, '..');
@@ -198,6 +480,10 @@ async function main() {
 			define: { 'process.env.NODE_ENV': '"production"' }
 		};
 
+		// Ensure lexer ready (async init is a promise)
+		await initEsmLexer;
+
+		// Build ESM authoritative bundle
 		await build({
 			...shared,
 			format: 'esm',
@@ -205,37 +491,21 @@ async function main() {
 			minify: false
 		});
 
-		// TODO: use es-module-lexer to transform
-		// ESM into CJS
-
-		// TODO: ensure UMD build uses globals rather than inlining
-		await build({
-			...shared,
-			format: 'iife',
-			globalName: pkg.globalName,
-			outfile: path.join(distDir, pkg.base + '.umd.js'),
-			minify: false
-		});
+		const esmFile = path.join(distDir, pkg.base + '.mjs');
+		const esmCode = String(await fs.readFile(esmFile));
+		const cjs = transformEsmToCjs(esmCode, { filename: pkg.base + '.mjs' });
+		const cjsFile = path.join(distDir, pkg.base + '.js');
+		await fs.writeFile(cjsFile, cjs.code + '\n');
+		if (cjs.map) {
+			await fs.writeFile(cjsFile + '.map', cjs.map.toString());
+		}
 
 		await Promise.all([
-			minifyFile(
-				path.join(distDir, pkg.base + '.js'),
-				path.join(distDir, pkg.base + '.js'),
-				{ module: true }
-			),
-			minifyFile(
-				path.join(distDir, pkg.base + '.mjs'),
-				path.join(distDir, pkg.base + '.mjs'),
-				{ module: true }
-			),
-			minifyFile(
-				path.join(distDir, pkg.base + '.umd.js'),
-				path.join(distDir, pkg.base + '.umd.js'),
-				{ module: false }
-			)
+			minifyFile(cjsFile, cjsFile, { module: true }),
+			minifyFile(esmFile, esmFile, { module: true })
 		]);
 
-		for (const ext of ['.js', '.mjs', '.umd.js']) {
+		for (const ext of ['.js', '.mjs']) {
 			const file = pkg.base + ext;
 			const abs = path.join(distDir, file);
 			const code = await fs.readFile(abs);

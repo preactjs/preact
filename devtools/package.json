@@ -5,7 +5,6 @@
   "description": "Preact bridge for Preact devtools",
   "main": "dist/devtools.js",
   "module": "dist/devtools.mjs",
-  "umd:main": "dist/devtools.umd.js",
   "source": "src/index.js",
   "types": "src/index.d.ts",
   "license": "MIT",
