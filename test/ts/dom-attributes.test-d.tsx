@@ -1,6 +1,6 @@
-import { createElement, Fragment, JSX } from 'preact';
+import { createElement, Fragment, SignalLike, UnpackSignal, AriaAttributes } from 'preact';
 
-function createSignal<T>(value: T): JSX.SignalLike<T> {
+function createSignal<T>(value: T): SignalLike<T> {
 	return {
 		value,
 		peek() {
@@ -228,7 +228,7 @@ const signalValidAriaValues = (
 const signalValidAriaValues2 = (
 	<div
 		aria-autocomplete={createSignal(
-			'none' as JSX.UnpackSignal<JSX.AriaAttributes['aria-autocomplete']>
+			'none' as UnpackSignal<AriaAttributes['aria-autocomplete']>
 		)}
 	/>
 );
