@@ -141,9 +141,7 @@ export namespace JSXInternal {
 		semantics: preact.SemanticsMathMLAttributes<MathMLElement>;
 	}
 
-	export interface IntrinsicElements
-		extends IntrinsicSVGElements,
-			IntrinsicMathMLElements {
+	export interface IntrinsicHTMLElements {
 		a: preact.AccessibleAnchorHTMLAttributes<HTMLAnchorElement>;
 		abbr: preact.HTMLAttributes<HTMLElement>;
 		address: preact.HTMLAttributes<HTMLElement>;
@@ -262,4 +260,9 @@ export namespace JSXInternal {
 		video: preact.VideoHTMLAttributes<HTMLVideoElement>;
 		wbr: preact.WbrHTMLAttributes<HTMLElement>;
 	}
+
+	export interface IntrinsicElements
+		extends IntrinsicSVGElements,
+			IntrinsicMathMLElements,
+			IntrinsicHTMLElements {}
 }
