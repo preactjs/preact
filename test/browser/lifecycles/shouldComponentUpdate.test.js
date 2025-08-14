@@ -2,7 +2,7 @@ import { setupRerender } from 'preact/test-utils';
 import { createElement, render, Component, Fragment } from 'preact';
 import { vi } from 'vitest';
 import { setupScratch, teardown } from '../../_util/helpers';
-import { logCall, clearLog } from '../../_util/logCall';
+import { logCall, getLog, clearLog } from '../../_util/logCall';
 
 /** @jsx createElement */
 
@@ -961,5 +961,62 @@ describe('Lifecycle methods', () => {
 		expect(scratch.innerHTML).to.equal(
 			`<div>Before</div><div>Component</div><div>After</div>`
 		);
+	});
+
+	it('should not re-insert memoized items that keep their relative order after swap', () => {
+		class MemoizedItem extends Component {
+			shouldComponentUpdate(nextProps) {
+				return nextProps.value !== this.props.value;
+			}
+			render() {
+				return <div>{this.props.value}</div>;
+			}
+		}
+
+		const App = ({ items }) => (
+			<div>
+				{items.map(value => (
+					<MemoizedItem key={value} value={value} />
+				))}
+			</div>
+		);
+
+		render(<App items={[1, 2, 3, 4, 5, 6, 7]} />, scratch);
+
+		function renderItemsAndAssert({ items, expectedLog }) {
+			clearLog();
+			render(<App items={items} />, scratch);
+			expect(scratch.innerHTML).to.equal(
+				`<div>${items.map(value => `<div>${value}</div>`).join('')}</div>`
+			);
+			expect(getLog()).to.deep.equal(expectedLog);
+		}
+
+		// Swap 1 and 7
+		renderItemsAndAssert({
+			items: [7, 2, 3, 4, 5, 6, 1],
+			expectedLog: [
+				'<div>1234567.insertBefore(<div>7, <div>1)',
+				'<div>7123456.appendChild(<div>1)'
+			]
+		});
+
+		// Swap 2 and 6
+		renderItemsAndAssert({
+			items: [7, 6, 3, 4, 5, 2, 1],
+			expectedLog: [
+				'<div>7234561.insertBefore(<div>6, <div>2)',
+				'<div>7623451.insertBefore(<div>2, <div>1)'
+			]
+		});
+
+		// Swap 3 and 5
+		renderItemsAndAssert({
+			items: [7, 6, 5, 4, 3, 2, 1],
+			expectedLog: [
+				'<div>7634521.insertBefore(<div>5, <div>3)',
+				'<div>7653421.insertBefore(<div>3, <div>2)'
+			]
+		});
 	});
 });
