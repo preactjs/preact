@@ -74,7 +74,12 @@ Unique to Preact we do support several ways to hook into our renderer. All our a
 
 ## Important Branches
 
-We merge every PR into the `main` branch which is the one that we'll use to publish code to npm. For the previous Preact release line we have a branch called `8` which is in maintenance mode. As a new contributor you won't have to deal with that ;)
+We have a couple of important branches to be aware of:
+
+- `main` - This is the main development branch and represents the upcoming v11 release line.
+- `v10.x` - This branch represents the current stable release line, v10.
+
+As we have yet to release v11, contributors are welcome to use either branch to build upon. We will try to port changes between the branches when possible, to keep them in sync, but if you're feeling generous, we'd love if you'd submit PRs to both branches!
 
 ## Creating your first Pull-Request
 
@@ -82,7 +87,7 @@ We try to make it as easy as possible to contribute to Preact and make heavy use
 
 Once a PR or a Draft PR has been created our community typically joins the discussion about the proposed change. Sometimes that includes ideas for test cases or even different ways to go about implementing a feature. Often this also includes ideas on how to make the code smaller. We usually refer to the latter as "code-golfing" or just "golfing".
 
-When everything is good to go someone will approve the PR and the changes will be merged into the `main` branch and we usually cut a release a few days/ a week later.
+When everything is good to go someone will approve the PR and the changes will be merged into the `main` or `v10.x` branches and we usually cut a release a few days/ a week later.
 
 _The big takeaway for you here is, that we will guide you along the way. We're here to help to make a PR ready for approval!_
 
@@ -90,27 +95,31 @@ The short summary is:
 
 1. Make changes and submit a PR
 2. Modify change according to feedback (if there is any)
-3. PR will be merged into `main`
+3. PR will be merged into `main` or `v10.x`
 4. A new release will be cut (every 2-3 weeks).
 
 ## Commonly used scripts for contributions
 
-Scripts can be executed via `npm run [script]` or `yarn [script]` respectively.
+Scripts can be executed via `npm run [script]`.
 
 - `build` - compiles all packages ready for publishing to npm
 - `build:core` - builds just Preact itself
 - `build:debug` - builds the debug addon only
+- `build:devtools` - builds the devtools addon only
 - `build:hooks` - builds the hook addon only
 - `build:test-utils` - builds the test-utils addon only
+- `build:compat` - builds the compat addon only
+- `build:jsx` - builds the JSX runtime addon only
+- `test` - Run all tests (linting, TypeScript definitions, unit/integration tests)
 - `test:ts` - Run all tests for TypeScript definitions
-- `test:karma` - Run all unit/integration tests.
-- `test:karma:watch` - Same as above, but it will automatically re-run the test suite if a code change was detected.
+- `test:vitest` - Run all unit/integration tests.
+- `test:vitest:watch` - Same as above, but it will automatically re-run the test suite if a code change was detected.
 
-But to be fair, the only ones we use ourselves are `build` and `test:karma:watch`. The other ones are mainly used on our CI pipeline and we rarely use them.
+But to be fair, the ones we mostly use locally are `build` and `test:vitest:watch`. The other ones are mainly used on our CI pipeline.
 
-_Note: Both `test:karma` and `test:karma:watch` listen to the environment variable `COVERAGE=true`. Disabling code coverage can significantly speed up the time it takes to complete the test suite._
+_Note: Both `test:vitest` and `test:vitest:watch` listen to the environment variable `COVERAGE=true`. Disabling code coverage can significantly speed up the time it takes to complete the test suite._
 
-_Note2: The test suite is based on `karma` and `mocha`. Individual tests can be executed by appending `.only`:_
+_Note2: Individual tests can be executed by appending `.only`:_
 
 ```jsx
 it.only('should test something', () => {
@@ -166,16 +175,6 @@ Luckily TypeScript has a mode where it can somewhat reliably typecheck JavaScrip
 Check out the [official TypeScript documentation](https://www.typescriptlang.org/docs/handbook/type-checking-javascript-files.html) for more information.
 
 _Note that we have separate tests for our TypeScript definition files. We only use `ts-check` for local development and don't check it anywhere else like on the CI._
-
-### Why does the code base often use `let` instead of `const`?
-
-There is no real reason for that other a historical one. Back before auto-formatting via prettier was a thing and minifiers weren't as advanced as they are today we used a pretty terse code-style. The code-style deliberately was aimed at making code look as concise and short as possible. The `let` keyword is a bit shorter than `const` to write, so we only used that. This was done only for stylistic reasons.
-
-This helped our minds to not lose sight of focusing on size, but made it difficult for newcomers to start contributing to Preact. For that reason alone we switched to `prettier` and loosened our rule regarding usage of `let` or `const`. Today we use both, but you can still find many existing places where `let` is still in use.
-
-In the end there is no effect on size regardless if you use `const`, `let` or use both. Our code is downtranspiled to `ES5` for npm so both will be replaced with `var` anyways. Therefore it doesn't really matter at all which one is used in our codebase.
-
-This will only become important once shipping modern JavaScript code on npm becomes a thing and bundlers follow suit.
 
 ## How to create a good bug report
 
