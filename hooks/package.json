@@ -5,7 +5,6 @@
   "description": "Hook addon for Preact",
   "main": "dist/hooks.js",
   "module": "dist/hooks.mjs",
-  "umd:main": "dist/hooks.umd.js",
   "source": "src/index.js",
   "types": "src/index.d.ts",
   "license": "MIT",

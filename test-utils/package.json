@@ -5,7 +5,6 @@
   "description": "Test-utils for Preact",
   "main": "dist/testUtils.js",
   "module": "dist/testUtils.mjs",
-  "umd:main": "dist/testUtils.umd.js",
   "source": "src/index.js",
   "types": "src/index.d.ts",
   "license": "MIT",
