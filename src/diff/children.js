@@ -132,7 +132,12 @@ export function diffChildren(
 			childVNode._flags & INSERT_VNODE ||
 			oldVNode._children === childVNode._children
 		) {
-			oldDom = insert(childVNode, oldDom, parentDom);
+			oldDom = insert(
+				childVNode,
+				oldDom,
+				parentDom,
+				!(childVNode._flags & INSERT_VNODE) /* shouldSkipDomUpdate */
+			);
 		} else if (typeof childVNode.type == 'function' && result !== UNDEFINED) {
 			oldDom = result;
 		} else if (newDom) {
@@ -342,9 +347,10 @@ function constructNewChildrenArray(
  * @param {VNode} parentVNode
  * @param {PreactElement} oldDom
  * @param {PreactElement} parentDom
+ * @param {boolean} shouldSkipDomUpdate
  * @returns {PreactElement}
  */
-function insert(parentVNode, oldDom, parentDom) {
+function insert(parentVNode, oldDom, parentDom, shouldSkipDomUpdate) {
 	// Note: VNodes in nested suspended trees may be missing _children.
 	if (typeof parentVNode.type == 'function') {
 		let children = parentVNode._children;
@@ -355,16 +361,18 @@ function insert(parentVNode, oldDom, parentDom) {
 				// children's _parent pointer to point to the newVNode (parentVNode
 				// here).
 				children[i]._parent = parentVNode;
-				oldDom = insert(children[i], oldDom, parentDom);
+				oldDom = insert(children[i], oldDom, parentDom, shouldSkipDomUpdate);
 			}
 		}
 
 		return oldDom;
 	} else if (parentVNode._dom != oldDom) {
-		if (oldDom && parentVNode.type && !oldDom.parentNode) {
-			oldDom = getDomSibling(parentVNode);
+		if (!shouldSkipDomUpdate) {
+			if (oldDom && parentVNode.type && !oldDom.parentNode) {
+				oldDom = getDomSibling(parentVNode);
+			}
+			parentDom.insertBefore(parentVNode._dom, oldDom || NULL);
 		}
-		parentDom.insertBefore(parentVNode._dom, oldDom || NULL);
 		oldDom = parentVNode._dom;
 	}
 
