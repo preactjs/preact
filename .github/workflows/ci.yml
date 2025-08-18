@@ -8,8 +8,7 @@ on:
   push:
     branches:
       - main
-      - restructure
-      - v11
+      - v10.x
 
 jobs:
   filter_jobs:
