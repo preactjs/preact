@@ -662,13 +662,11 @@ function diffElementNodes(
 export function applyRef(ref, value, vnode) {
 	try {
 		if (typeof ref == 'function') {
-			let hasRefUnmount = typeof ref._unmount == 'function';
-			if (hasRefUnmount) {
-				// @ts-ignore TS doesn't like moving narrowing checks into variables
+			if (typeof ref._unmount == 'function') {
 				ref._unmount();
 			}
 
-			if (!hasRefUnmount || value != NULL) {
+			if (typeof ref._unmount != 'function' || value != NULL) {
 				// Store the cleanup function on the function
 				// instance object itself to avoid shape
 				// transitioning vnode
