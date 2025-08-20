@@ -77,7 +77,8 @@ export function diff(
 	// If the previous diff bailed out, resume creating/hydrating.
 	if (
 		oldVNode._flags & MODE_SUSPENDED &&
-		(isHydrating = !!(oldVNode._flags & MODE_HYDRATE))
+		// @ts-expect-error This is 1 or 0 (true or false)
+		(isHydrating = oldVNode._flags & MODE_HYDRATE)
 	) {
 		excessDomChildren = oldVNode._component._excess;
 		oldDom = excessDomChildren[0];
