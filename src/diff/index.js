@@ -89,7 +89,6 @@ export function diff(
 	outer: if (typeof newType == 'function') {
 		try {
 			let c,
-				isNew,
 				oldProps,
 				oldState,
 				snapshot,
@@ -134,7 +133,6 @@ export function diff(
 				if (!c.state) c.state = {};
 				c.context = componentContext;
 				c._globalContext = globalContext;
-				isNew = true;
 				c._bits |= COMPONENT_DIRTY;
 				c._renderCallbacks = [];
 				c._stateCallbacks = [];
@@ -161,7 +159,7 @@ export function diff(
 			c._vnode = newVNode;
 
 			// Invoke pre-render lifecycle methods
-			if (isNew) {
+			if (!oldVNode._component) {
 				if (
 					isClassComponent &&
 					newType.getDerivedStateFromProps == NULL &&
@@ -271,7 +269,11 @@ export function diff(
 				globalContext = assign({}, globalContext, c.getChildContext());
 			}
 
-			if (isClassComponent && !isNew && c.getSnapshotBeforeUpdate != NULL) {
+			if (
+				isClassComponent &&
+				oldVNode._component &&
+				c.getSnapshotBeforeUpdate != NULL
+			) {
 				snapshot = c.getSnapshotBeforeUpdate(oldProps, oldState);
 			}
 
