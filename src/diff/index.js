@@ -88,8 +88,12 @@ export function diff(
 
 	outer: if (typeof newType == 'function') {
 		try {
-			let c, isNew, oldProps, oldState, snapshot, clearProcessingException;
-			let newProps = newVNode.props;
+			let c,
+				isNew,
+				oldProps,
+				oldState,
+				snapshot,
+				newProps = newVNode.props;
 			const isClassComponent =
 				'prototype' in newType && newType.prototype.render;
 
@@ -108,7 +112,6 @@ export function diff(
 				c = newVNode._component = oldVNode._component;
 				if (c._bits & COMPONENT_PENDING_ERROR) {
 					c._bits |= COMPONENT_PROCESSING_EXCEPTION;
-					clearProcessingException = true;
 				}
 			} else {
 				// Instantiate the new component
@@ -301,7 +304,7 @@ export function diff(
 				commitQueue.push(c);
 			}
 
-			if (clearProcessingException) {
+			if (c._bits & COMPONENT_PENDING_ERROR) {
 				c._bits &= ~(COMPONENT_PROCESSING_EXCEPTION | COMPONENT_PENDING_ERROR);
 			}
 		} catch (e) {
