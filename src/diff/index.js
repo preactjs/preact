@@ -80,7 +80,7 @@ export function diff(
 		(isHydrating = !!(oldVNode._flags & MODE_HYDRATE))
 	) {
 		excessDomChildren = oldVNode._component._excess;
-		oldDom = newVNode._dom = oldVNode._dom = excessDomChildren[0];
+		oldDom = excessDomChildren[0];
 		oldVNode._component._excess = NULL;
 	}
 
