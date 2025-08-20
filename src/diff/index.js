@@ -274,15 +274,14 @@ export function diff(
 
 			let isTopLevelFragment =
 				tmp != NULL && tmp.type === Fragment && tmp.key == NULL;
-			let renderResult = tmp;
 
 			if (isTopLevelFragment) {
-				renderResult = cloneNode(tmp.props.children);
+				tmp = cloneNode(tmp.props.children);
 			}
 
 			oldDom = diffChildren(
 				parentDom,
-				isArray(renderResult) ? renderResult : [renderResult],
+				isArray(tmp) ? tmp : [tmp],
 				newVNode,
 				oldVNode,
 				globalContext,
@@ -490,8 +489,7 @@ function diffElementNodes(
 	else if (nodeType == 'math') namespace = MATH_NAMESPACE;
 	else if (!namespace) namespace = XHTML_NAMESPACE;
 
-	let hasExcessDomChildren = excessDomChildren != NULL;
-	if (hasExcessDomChildren) {
+	if (excessDomChildren != NULL) {
 		for (i = 0; i < excessDomChildren.length; i++) {
 			value = excessDomChildren[i];
 
@@ -542,7 +540,7 @@ function diffElementNodes(
 		// If we are in a situation where we are not hydrating but are using
 		// existing DOM (e.g. replaceNode) we should read the existing DOM
 		// attributes to diff them
-		if (!isHydrating && hasExcessDomChildren) {
+		if (!isHydrating && excessDomChildren != NULL) {
 			oldProps = {};
 			for (i = 0; i < dom.attributes.length; i++) {
 				value = dom.attributes[i];
@@ -621,7 +619,7 @@ function diffElementNodes(
 			);
 
 			// Remove children that are not part of any vnode.
-			if (hasExcessDomChildren) {
+			if (excessDomChildren != NULL) {
 				for (i = excessDomChildren.length; i--; ) {
 					removeNode(excessDomChildren[i]);
 				}
