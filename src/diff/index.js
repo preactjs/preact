@@ -335,7 +335,6 @@ export function diff(
 									newVNode._component._excess.push(child);
 								}
 								commentMarkersToFind++;
-								excessDomChildren[i] = NULL;
 							} else if (child.data == '/$s') {
 								commentMarkersToFind--;
 								if (commentMarkersToFind) {
@@ -343,8 +342,8 @@ export function diff(
 								}
 								done = commentMarkersToFind == 0;
 								oldDom = excessDomChildren[i];
-								excessDomChildren[i] = NULL;
 							}
+							excessDomChildren[i] = NULL;
 						} else if (commentMarkersToFind) {
 							newVNode._component._excess.push(child);
 							excessDomChildren[i] = NULL;
