@@ -19,7 +19,8 @@
     },
     "compress": {
       "hoist_vars": true,
-      "reduce_funcs": false
+      "reduce_funcs": false,
+      "ecma": 2020
     }
   },
   "props": {
