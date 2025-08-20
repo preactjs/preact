@@ -490,7 +490,8 @@ function diffElementNodes(
 	else if (nodeType == 'math') namespace = MATH_NAMESPACE;
 	else if (!namespace) namespace = XHTML_NAMESPACE;
 
-	if (excessDomChildren != NULL) {
+	let hasExcessDomChildren = excessDomChildren != NULL;
+	if (hasExcessDomChildren) {
 		for (i = 0; i < excessDomChildren.length; i++) {
 			value = excessDomChildren[i];
 
@@ -541,7 +542,7 @@ function diffElementNodes(
 		// If we are in a situation where we are not hydrating but are using
 		// existing DOM (e.g. replaceNode) we should read the existing DOM
 		// attributes to diff them
-		if (!isHydrating && excessDomChildren != NULL) {
+		if (!isHydrating && hasExcessDomChildren) {
 			oldProps = {};
 			for (i = 0; i < dom.attributes.length; i++) {
 				value = dom.attributes[i];
@@ -620,7 +621,7 @@ function diffElementNodes(
 			);
 
 			// Remove children that are not part of any vnode.
-			if (excessDomChildren != NULL) {
+			if (hasExcessDomChildren) {
 				for (i = excessDomChildren.length; i--; ) {
 					removeNode(excessDomChildren[i]);
 				}
