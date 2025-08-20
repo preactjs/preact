@@ -331,21 +331,21 @@ export function diff(
 						// needs to be included for future suspensions.
 						if (child.nodeType == 8) {
 							if (child.data == '$s') {
-								if (commentMarkersToFind > 0) {
+								if (commentMarkersToFind) {
 									newVNode._component._excess.push(child);
 								}
 								commentMarkersToFind++;
 								excessDomChildren[i] = NULL;
 							} else if (child.data == '/$s') {
 								commentMarkersToFind--;
-								if (commentMarkersToFind > 0) {
+								if (commentMarkersToFind) {
 									newVNode._component._excess.push(child);
 								}
 								done = commentMarkersToFind == 0;
 								oldDom = excessDomChildren[i];
 								excessDomChildren[i] = NULL;
 							}
-						} else if (commentMarkersToFind > 0) {
+						} else if (commentMarkersToFind) {
 							newVNode._component._excess.push(child);
 							excessDomChildren[i] = NULL;
 						}
