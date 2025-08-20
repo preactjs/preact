@@ -18,7 +18,7 @@ export function render(vnode, parentDom) {
 	if (options._root) options._root(vnode, parentDom);
 
 	// @ts-expect-error
-	let isHydrating = !!(vnode && vnode._flags & MODE_HYDRATE);
+	let isHydrating = vnode && vnode._flags & MODE_HYDRATE;
 
 	// To be able to support calling `render()` multiple times on the same
 	// DOM node, we need to obtain a reference to the previous tree. We do
@@ -27,7 +27,7 @@ export function render(vnode, parentDom) {
 	// means that we are mounting a new tree for the first time.
 	let oldVNode = isHydrating ? NULL : parentDom._children;
 
-	vnode = parentDom._children = createElement(Fragment, NULL, [vnode]);
+	parentDom._children = createElement(Fragment, NULL, [vnode]);
 
 	// List of effects that need to be called after diffing.
 	let commitQueue = [],
@@ -37,7 +37,7 @@ export function render(vnode, parentDom) {
 		parentDom,
 		// Determine the new vnode tree and store it on the DOM element on
 		// our custom `_children` property.
-		vnode,
+		parentDom._children,
 		oldVNode || EMPTY_OBJ,
 		EMPTY_OBJ,
 		parentDom.namespaceURI,
@@ -48,13 +48,14 @@ export function render(vnode, parentDom) {
 				: NULL,
 		commitQueue,
 		oldVNode ? oldVNode._dom : parentDom.firstChild,
+		// @ts-expect-error we are doing a bit-wise operation so it's either 0 or true
 		isHydrating,
 		refQueue,
 		parentDom.ownerDocument
 	);
 
 	// Flush all queued effects
-	commitRoot(commitQueue, vnode, refQueue);
+	commitRoot(commitQueue, parentDom._children, refQueue);
 }
 
 /**
