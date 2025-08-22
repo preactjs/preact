@@ -75,13 +75,14 @@ export function diff(
 	if (newVNode.constructor != UNDEFINED) return NULL;
 
 	// If the previous diff bailed out, resume creating/hydrating.
-	if (oldVNode._flags & MODE_SUSPENDED) {
-		isHydrating = !!(oldVNode._flags & MODE_HYDRATE);
-		if (oldVNode._component._excess) {
-			excessDomChildren = oldVNode._component._excess;
-			oldDom = newVNode._dom = oldVNode._dom = excessDomChildren[0];
-			oldVNode._component._excess = null;
-		}
+	if (
+		oldVNode._flags & MODE_SUSPENDED &&
+		// @ts-expect-error This is 1 or 0 (true or false)
+		(isHydrating = oldVNode._flags & MODE_HYDRATE)
+	) {
+		excessDomChildren = oldVNode._component._excess;
+		oldDom = excessDomChildren[0];
+		oldVNode._component._excess = NULL;
 	}
 
 	if ((tmp = options._diff)) tmp(newVNode);
@@ -311,7 +312,7 @@ export function diff(
 			if (isHydrating || excessDomChildren != NULL) {
 				if (e.then) {
 					let commentMarkersToFind = 0,
-						done = false;
+						done;
 
 					newVNode._flags |= isHydrating
 						? MODE_HYDRATE | MODE_SUSPENDED
@@ -329,21 +330,22 @@ export function diff(
 						// We exclude the open and closing marker from
 						// the future excessDomChildren but any nested one
 						// needs to be included for future suspensions.
-						if (child.nodeType == 8 && child.data == '$s') {
-							if (commentMarkersToFind > 0) {
-								newVNode._component._excess.push(child);
+						if (child.nodeType == 8) {
+							if (child.data == '$s') {
+								if (commentMarkersToFind) {
+									newVNode._component._excess.push(child);
+								}
+								commentMarkersToFind++;
+							} else if (child.data == '/$s') {
+								commentMarkersToFind--;
+								if (commentMarkersToFind) {
+									newVNode._component._excess.push(child);
+								}
+								done = commentMarkersToFind == 0;
+								oldDom = excessDomChildren[i];
 							}
-							commentMarkersToFind++;
 							excessDomChildren[i] = NULL;
-						} else if (child.nodeType == 8 && child.data == '/$s') {
-							commentMarkersToFind--;
-							if (commentMarkersToFind > 0) {
-								newVNode._component._excess.push(child);
-							}
-							done = commentMarkersToFind === 0;
-							oldDom = excessDomChildren[i];
-							excessDomChildren[i] = NULL;
-						} else if (commentMarkersToFind > 0) {
+						} else if (commentMarkersToFind) {
 							newVNode._component._excess.push(child);
 							excessDomChildren[i] = NULL;
 						}
