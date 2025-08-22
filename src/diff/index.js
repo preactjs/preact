@@ -75,21 +75,25 @@ export function diff(
 	if (newVNode.constructor != UNDEFINED) return NULL;
 
 	// If the previous diff bailed out, resume creating/hydrating.
-	if (oldVNode._flags & MODE_SUSPENDED) {
-		isHydrating = !!(oldVNode._flags & MODE_HYDRATE);
-		if (oldVNode._component._excess) {
-			excessDomChildren = oldVNode._component._excess;
-			oldDom = newVNode._dom = oldVNode._dom = excessDomChildren[0];
-			oldVNode._component._excess = null;
-		}
+	if (
+		oldVNode._flags & MODE_SUSPENDED &&
+		// @ts-expect-error This is 1 or 0 (true or false)
+		(isHydrating = oldVNode._flags & MODE_HYDRATE)
+	) {
+		excessDomChildren = oldVNode._component._excess;
+		oldDom = excessDomChildren[0];
+		oldVNode._component._excess = NULL;
 	}
 
 	if ((tmp = options._diff)) tmp(newVNode);
 
 	outer: if (typeof newType == 'function') {
 		try {
-			let c, isNew, oldProps, oldState, snapshot, clearProcessingException;
-			let newProps = newVNode.props;
+			let c,
+				oldProps,
+				oldState,
+				snapshot,
+				newProps = newVNode.props;
 			const isClassComponent =
 				'prototype' in newType && newType.prototype.render;
 
@@ -108,7 +112,6 @@ export function diff(
 				c = newVNode._component = oldVNode._component;
 				if (c._bits & COMPONENT_PENDING_ERROR) {
 					c._bits |= COMPONENT_PROCESSING_EXCEPTION;
-					clearProcessingException = true;
 				}
 			} else {
 				// Instantiate the new component
@@ -131,7 +134,6 @@ export function diff(
 				if (!c.state) c.state = {};
 				c.context = componentContext;
 				c._globalContext = globalContext;
-				isNew = true;
 				c._bits |= COMPONENT_DIRTY;
 				c._renderCallbacks = [];
 				c._stateCallbacks = [];
@@ -158,7 +160,7 @@ export function diff(
 			c._vnode = newVNode;
 
 			// Invoke pre-render lifecycle methods
-			if (isNew) {
+			if (!oldVNode._component) {
 				if (
 					isClassComponent &&
 					newType.getDerivedStateFromProps == NULL &&
@@ -268,21 +270,24 @@ export function diff(
 				globalContext = assign({}, globalContext, c.getChildContext());
 			}
 
-			if (isClassComponent && !isNew && c.getSnapshotBeforeUpdate != NULL) {
+			if (
+				isClassComponent &&
+				oldVNode._component &&
+				c.getSnapshotBeforeUpdate != NULL
+			) {
 				snapshot = c.getSnapshotBeforeUpdate(oldProps, oldState);
 			}
 
 			let isTopLevelFragment =
 				tmp != NULL && tmp.type === Fragment && tmp.key == NULL;
-			let renderResult = tmp;
 
 			if (isTopLevelFragment) {
-				renderResult = cloneNode(tmp.props.children);
+				tmp = cloneNode(tmp.props.children);
 			}
 
 			oldDom = diffChildren(
 				parentDom,
-				isArray(renderResult) ? renderResult : [renderResult],
+				isArray(tmp) ? tmp : [tmp],
 				newVNode,
 				oldVNode,
 				globalContext,
@@ -302,7 +307,7 @@ export function diff(
 				commitQueue.push(c);
 			}
 
-			if (clearProcessingException) {
+			if (c._bits & COMPONENT_PENDING_ERROR) {
 				c._bits &= ~(COMPONENT_PROCESSING_EXCEPTION | COMPONENT_PENDING_ERROR);
 			}
 		} catch (e) {
@@ -311,7 +316,7 @@ export function diff(
 			if (isHydrating || excessDomChildren != NULL) {
 				if (e.then) {
 					let commentMarkersToFind = 0,
-						done = false;
+						done;
 
 					newVNode._flags |= isHydrating
 						? MODE_HYDRATE | MODE_SUSPENDED
@@ -329,21 +334,22 @@ export function diff(
 						// We exclude the open and closing marker from
 						// the future excessDomChildren but any nested one
 						// needs to be included for future suspensions.
-						if (child.nodeType == 8 && child.data == '$s') {
-							if (commentMarkersToFind > 0) {
-								newVNode._component._excess.push(child);
+						if (child.nodeType == 8) {
+							if (child.data == '$s') {
+								if (commentMarkersToFind) {
+									newVNode._component._excess.push(child);
+								}
+								commentMarkersToFind++;
+							} else if (child.data == '/$s') {
+								commentMarkersToFind--;
+								if (commentMarkersToFind) {
+									newVNode._component._excess.push(child);
+								}
+								done = commentMarkersToFind == 0;
+								oldDom = excessDomChildren[i];
 							}
-							commentMarkersToFind++;
 							excessDomChildren[i] = NULL;
-						} else if (child.nodeType == 8 && child.data == '/$s') {
-							commentMarkersToFind--;
-							if (commentMarkersToFind > 0) {
-								newVNode._component._excess.push(child);
-							}
-							done = commentMarkersToFind === 0;
-							oldDom = excessDomChildren[i];
-							excessDomChildren[i] = NULL;
-						} else if (commentMarkersToFind > 0) {
+						} else if (commentMarkersToFind) {
 							newVNode._component._excess.push(child);
 							excessDomChildren[i] = NULL;
 						}
@@ -662,13 +668,11 @@ function diffElementNodes(
 export function applyRef(ref, value, vnode) {
 	try {
 		if (typeof ref == 'function') {
-			let hasRefUnmount = typeof ref._unmount == 'function';
-			if (hasRefUnmount) {
-				// @ts-ignore TS doesn't like moving narrowing checks into variables
+			if (typeof ref._unmount == 'function') {
 				ref._unmount();
 			}
 
-			if (!hasRefUnmount || value != NULL) {
+			if (typeof ref._unmount != 'function' || value != NULL) {
 				// Store the cleanup function on the function
 				// instance object itself to avoid shape
 				// transitioning vnode
@@ -691,10 +695,8 @@ export function unmount(vnode, parentVNode, skipRemove) {
 	let r;
 	if (options.unmount) options.unmount(vnode);
 
-	if ((r = vnode.ref)) {
-		if (!r.current || r.current == vnode._dom) {
-			applyRef(r, NULL, parentVNode);
-		}
+	if ((r = vnode.ref) && (!r.current || r.current == vnode._dom)) {
+		applyRef(r, NULL, parentVNode);
 	}
 
 	if ((r = vnode._component) != NULL) {

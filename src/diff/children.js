@@ -128,7 +128,7 @@ export function diffChildren(
 			firstChildDom = newDom;
 		}
 
-		let shouldPlace = !!(childVNode._flags & INSERT_VNODE);
+		let shouldPlace = childVNode._flags & INSERT_VNODE;
 		if (shouldPlace || oldVNode._children === childVNode._children) {
 			oldDom = insert(childVNode, oldDom, parentDom, shouldPlace);
 		} else if (typeof childVNode.type == 'function' && result !== UNDEFINED) {
@@ -251,9 +251,7 @@ function constructNewChildrenArray(
 		// Here, we define isMounting for the purposes of the skew diffing
 		// algorithm. Nodes that are unsuspending are considered mounting and we detect
 		// this by checking if oldVNode._original == null
-		const isMounting = oldVNode == NULL || oldVNode._original == NULL;
-
-		if (isMounting) {
+		if (oldVNode == NULL || oldVNode._original == NULL) {
 			if (matchingIndex == -1) {
 				// When the array of children is growing we need to decrease the skew
 				// as we are adding a new element to the array.
@@ -340,7 +338,7 @@ function constructNewChildrenArray(
  * @param {VNode} parentVNode
  * @param {PreactElement} oldDom
  * @param {PreactElement} parentDom
- * @param {boolean} shouldPlace
+ * @param {number} shouldPlace
  * @returns {PreactElement}
  */
 function insert(parentVNode, oldDom, parentDom, shouldPlace) {
