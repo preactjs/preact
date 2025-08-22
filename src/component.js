@@ -48,10 +48,9 @@ BaseComponent.prototype.setState = function (update, callback) {
 
 	if (update) {
 		assign(s, update);
+	} else {
+		return;
 	}
-
-	// Skip update if updater function returned null
-	if (update == NULL) return;
 
 	if (this._vnode) {
 		if (callback) {

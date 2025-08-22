@@ -89,8 +89,11 @@ export function diff(
 
 	outer: if (typeof newType == 'function') {
 		try {
-			let c, isNew, oldProps, oldState, snapshot, clearProcessingException;
-			let newProps = newVNode.props;
+			let c,
+				oldProps,
+				oldState,
+				snapshot,
+				newProps = newVNode.props;
 			const isClassComponent =
 				'prototype' in newType && newType.prototype.render;
 
@@ -109,7 +112,6 @@ export function diff(
 				c = newVNode._component = oldVNode._component;
 				if (c._bits & COMPONENT_PENDING_ERROR) {
 					c._bits |= COMPONENT_PROCESSING_EXCEPTION;
-					clearProcessingException = true;
 				}
 			} else {
 				// Instantiate the new component
@@ -132,7 +134,6 @@ export function diff(
 				if (!c.state) c.state = {};
 				c.context = componentContext;
 				c._globalContext = globalContext;
-				isNew = true;
 				c._bits |= COMPONENT_DIRTY;
 				c._renderCallbacks = [];
 				c._stateCallbacks = [];
@@ -159,7 +160,7 @@ export function diff(
 			c._vnode = newVNode;
 
 			// Invoke pre-render lifecycle methods
-			if (isNew) {
+			if (!oldVNode._component) {
 				if (
 					isClassComponent &&
 					newType.getDerivedStateFromProps == NULL &&
@@ -269,21 +270,24 @@ export function diff(
 				globalContext = assign({}, globalContext, c.getChildContext());
 			}
 
-			if (isClassComponent && !isNew && c.getSnapshotBeforeUpdate != NULL) {
+			if (
+				isClassComponent &&
+				oldVNode._component &&
+				c.getSnapshotBeforeUpdate != NULL
+			) {
 				snapshot = c.getSnapshotBeforeUpdate(oldProps, oldState);
 			}
 
 			let isTopLevelFragment =
 				tmp != NULL && tmp.type === Fragment && tmp.key == NULL;
-			let renderResult = tmp;
 
 			if (isTopLevelFragment) {
-				renderResult = cloneNode(tmp.props.children);
+				tmp = cloneNode(tmp.props.children);
 			}
 
 			oldDom = diffChildren(
 				parentDom,
-				isArray(renderResult) ? renderResult : [renderResult],
+				isArray(tmp) ? tmp : [tmp],
 				newVNode,
 				oldVNode,
 				globalContext,
@@ -303,7 +307,7 @@ export function diff(
 				commitQueue.push(c);
 			}
 
-			if (clearProcessingException) {
+			if (c._bits & COMPONENT_PENDING_ERROR) {
 				c._bits &= ~(COMPONENT_PROCESSING_EXCEPTION | COMPONENT_PENDING_ERROR);
 			}
 		} catch (e) {
@@ -664,13 +668,11 @@ function diffElementNodes(
 export function applyRef(ref, value, vnode) {
 	try {
 		if (typeof ref == 'function') {
-			let hasRefUnmount = typeof ref._unmount == 'function';
-			if (hasRefUnmount) {
-				// @ts-ignore TS doesn't like moving narrowing checks into variables
+			if (typeof ref._unmount == 'function') {
 				ref._unmount();
 			}
 
-			if (!hasRefUnmount || value != NULL) {
+			if (typeof ref._unmount != 'function' || value != NULL) {
 				// Store the cleanup function on the function
 				// instance object itself to avoid shape
 				// transitioning vnode
@@ -693,10 +695,8 @@ export function unmount(vnode, parentVNode, skipRemove) {
 	let r;
 	if (options.unmount) options.unmount(vnode);
 
-	if ((r = vnode.ref)) {
-		if (!r.current || r.current == vnode._dom) {
-			applyRef(r, NULL, parentVNode);
-		}
+	if ((r = vnode.ref) && (!r.current || r.current == vnode._dom)) {
+		applyRef(r, NULL, parentVNode);
 	}
 
 	if ((r = vnode._component) != NULL) {
