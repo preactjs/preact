@@ -240,23 +240,15 @@ export function useReducer(reducer, initialState, init) {
 			function updateHookState(p, s, c) {
 				if (!hookState._component.__hooks) return true;
 
-				/** @type {(x: import('./internal').HookState) => x is import('./internal').ReducerHookState} */
-				const isStateHook = x => !!x._component;
-				const stateHooks =
-					hookState._component.__hooks._list.filter(isStateHook);
-
-				const allHooksEmpty = stateHooks.every(x => !x._nextValue);
-				// When we have no updated hooks in the component we invoke the previous SCU or
-				// traverse the VDOM tree further.
-				if (allHooksEmpty) {
-					return prevScu ? prevScu.call(this, p, s, c) : true;
-				}
+				const hooksList = hookState._component.__hooks._list;
 
 				// We check whether we have components with a nextValue set that
 				// have values that aren't equal to one another this pushes
 				// us to update further down the tree
-				let shouldUpdate = hookState._component.props !== p;
-				stateHooks.forEach(hookItem => {
+				let shouldUpdate =
+					hookState._component.props !== p ||
+					hooksList.every(x => !x._nextValue);
+				hooksList.forEach(hookItem => {
 					if (hookItem._nextValue) {
 						const currentValue = hookItem._value[0];
 						hookItem._value = hookItem._nextValue;
@@ -275,7 +267,7 @@ export function useReducer(reducer, initialState, init) {
 		}
 	}
 
-	return hookState._nextValue || hookState._value;
+	return hookState._value;
 }
 
 /**
