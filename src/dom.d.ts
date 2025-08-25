@@ -2,6 +2,8 @@
 
 import { ClassAttributes, PreactDOMAttributes } from 'preact';
 
+export interface TrustedHTML {}
+
 // Implementations of some DOM events that are not available in TS 5.1
 interface ToggleEvent extends Event {
 	readonly newState: string;
