@@ -6,8 +6,7 @@ import {
 	COMPONENT_FORCE,
 	COMPONENT_DIRTY,
 	MODE_HYDRATE,
-	NULL,
-	UNDEFINED
+	NULL
 } from './constants';
 
 /**
