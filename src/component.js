@@ -6,7 +6,8 @@ import {
 	COMPONENT_FORCE,
 	COMPONENT_DIRTY,
 	MODE_HYDRATE,
-	NULL
+	NULL,
+	UNDEFINED
 } from './constants';
 
 /**
@@ -154,6 +155,7 @@ function renderComponent(component) {
 		newVNode._original = oldVNode._original;
 		newVNode._parent._children[newVNode._index] = newVNode;
 		commitRoot(commitQueue, newVNode, refQueue);
+		oldVNode._parent = oldVNode._dom = NULL;
 
 		if (newVNode._dom != oldDom) {
 			updateParentDomPointers(newVNode);
