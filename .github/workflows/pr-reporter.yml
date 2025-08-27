@@ -19,7 +19,7 @@ jobs:
       jsChanged: ${{ steps.filter.outputs.jsChanged }}
     steps:
       - uses: actions/checkout@v4
-      - uses: dorny/paths-filter@v3
+      - uses: rschristian/paths-filter@v3
         id: filter
         with:
           # As this Workflow is triggered by a `workflow_run` event, the filter action
