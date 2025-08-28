@@ -19,13 +19,37 @@ jobs:
       jsChanged: ${{ steps.filter.outputs.jsChanged }}
     steps:
       - uses: actions/checkout@v4
+
+      # Warning: This is kinda gnarly and weird! GitHub doesn't expose the `pull_request`
+      # data if the PR is from a fork, nor does it let you access that data via their API
+      # (by querying for PRs associated with the commit or querying the commit itself, both
+      # come up empty for forked commits). As such, to get the base SHA of the PR we need to
+      # query for all PRs on the repo and match the owner+branch to find the right one and
+      # then extract the base SHA from that.
+      #
+      # I see no reason why GitHub shouldn't expose this, it's just an SHA, branch name, and
+      # URL, but they don't so we're doing it this way. Hopefully we can remove this one day.
+      - name: Get PR Base SHA
+        id: get_pr_base_sha
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          FORK_OWNER: ${{ github.event.workflow_run.head_repository.owner.login }}
+          FORK_BRANCH: ${{ github.event.workflow_run.head_branch }}
+        run: |
+          set -euo pipefail
+
+          PR_JSON=$(gh api "repos/preactjs/preact/pulls?state=all&head=$FORK_OWNER:$FORK_BRANCH")
+          BASE_SHA=$(jq -r '.[0].base.sha' <<< "$PR_JSON")
+
+          echo "base_sha=$BASE_SHA" >> "$GITHUB_OUTPUT"
+
       - uses: dorny/paths-filter@v3
         id: filter
         with:
           # As this Workflow is triggered by a `workflow_run` event, the filter action
           # can't automatically assume we're working with PR data. As such, we need to
           # wire it up manually with a base (merge target) and ref (source branch).
-          base: ${{ github.sha }}
+          base: ${{ steps.get_pr_base_sha.outputs.base_sha }}
           ref: ${{ github.event.workflow_run.head_sha }}
           # Should be kept in sync with the filter in the CI workflow
           predicate-quantifier: 'every'
