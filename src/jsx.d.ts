@@ -88,6 +88,7 @@ export namespace JSXInternal {
 		children: any;
 	}
 
+	/** @deprecated Please import from the Preact namespace instead */
 	export type DOMCSSProperties = {
 		[key in keyof Omit<
 			CSSStyleDeclaration,
@@ -98,23 +99,29 @@ export namespace JSXInternal {
 			| 'getPropertyPriority'
 		>]?: string | number | null | undefined;
 	};
+	/** @deprecated Please import from the Preact namespace instead */
 	export type AllCSSProperties = {
 		[key: string]: string | number | null | undefined;
 	};
+	/** @deprecated Please import from the Preact namespace instead */
 	export interface CSSProperties extends AllCSSProperties, DOMCSSProperties {
 		cssText?: string | null;
 	}
 
+	/** @deprecated Please import from the Preact namespace instead */
 	export interface SignalLike<T> {
 		value: T;
 		peek(): T;
 		subscribe(fn: (value: T) => void): () => void;
 	}
 
+	/** @deprecated Please import from the Preact namespace instead */
 	export type Signalish<T> = T | SignalLike<T>;
 
+	/** @deprecated Please import from the Preact namespace instead */
 	export type UnpackSignal<T> = T extends SignalLike<infer V> ? V : T;
 
+	/** @deprecated Please import from the Preact namespace instead */
 	export interface SVGAttributes<Target extends EventTarget = SVGElement>
 		extends HTMLAttributes<Target> {
 		accentHeight?: Signalish<number | string | undefined>;
@@ -498,10 +505,12 @@ export namespace JSXInternal {
 		zoomAndPan?: Signalish<string | undefined>;
 	}
 
+	/** @deprecated Please import from the Preact namespace instead */
 	export interface PathAttributes {
 		d: string;
 	}
 
+	/** @deprecated Please import from the Preact namespace instead */
 	export type TargetedEvent<
 		Target extends EventTarget = EventTarget,
 		TypedEvent extends Event = Event
@@ -509,122 +518,159 @@ export namespace JSXInternal {
 		readonly currentTarget: Target;
 	};
 
+	/** @deprecated Please import from the Preact namespace instead */
 	export type TargetedAnimationEvent<Target extends EventTarget> =
 		TargetedEvent<Target, AnimationEvent>;
+	/** @deprecated Please import from the Preact namespace instead */
 	export type TargetedClipboardEvent<Target extends EventTarget> =
 		TargetedEvent<Target, ClipboardEvent>;
+	/** @deprecated Please import from the Preact namespace instead */
 	export type TargetedCommandEvent<Target extends EventTarget> = TargetedEvent<
 		Target,
 		CommandEvent
 	>;
+	/** @deprecated Please import from the Preact namespace instead */
 	export type TargetedCompositionEvent<Target extends EventTarget> =
 		TargetedEvent<Target, CompositionEvent>;
+	/** @deprecated Please import from the Preact namespace instead */
 	export type TargetedDragEvent<Target extends EventTarget> = TargetedEvent<
 		Target,
 		DragEvent
 	>;
+	/** @deprecated Please import from the Preact namespace instead */
 	export type TargetedFocusEvent<Target extends EventTarget> = TargetedEvent<
 		Target,
 		FocusEvent
 	>;
+	/** @deprecated Please import from the Preact namespace instead */
 	export type TargetedInputEvent<Target extends EventTarget> = TargetedEvent<
 		Target,
 		InputEvent
 	>;
+	/** @deprecated Please import from the Preact namespace instead */
 	export type TargetedKeyboardEvent<Target extends EventTarget> = TargetedEvent<
 		Target,
 		KeyboardEvent
 	>;
+	/** @deprecated Please import from the Preact namespace instead */
 	export type TargetedMouseEvent<Target extends EventTarget> = TargetedEvent<
 		Target,
 		MouseEvent
 	>;
+	/** @deprecated Please import from the Preact namespace instead */
 	export type TargetedPointerEvent<Target extends EventTarget> = TargetedEvent<
 		Target,
 		PointerEvent
 	>;
+	/** @deprecated Please import from the Preact namespace instead */
 	export type TargetedSubmitEvent<Target extends EventTarget> = TargetedEvent<
 		Target,
 		SubmitEvent
 	>;
+	/** @deprecated Please import from the Preact namespace instead */
 	export type TargetedTouchEvent<Target extends EventTarget> = TargetedEvent<
 		Target,
 		TouchEvent
 	>;
+	/** @deprecated Please import from the Preact namespace instead */
 	export type TargetedToggleEvent<Target extends EventTarget> = TargetedEvent<
 		Target,
 		ToggleEvent
 	>;
+	/** @deprecated Please import from the Preact namespace instead */
 	export type TargetedTransitionEvent<Target extends EventTarget> =
 		TargetedEvent<Target, TransitionEvent>;
+	/** @deprecated Please import from the Preact namespace instead */
 	export type TargetedUIEvent<Target extends EventTarget> = TargetedEvent<
 		Target,
 		UIEvent
 	>;
+	/** @deprecated Please import from the Preact namespace instead */
 	export type TargetedWheelEvent<Target extends EventTarget> = TargetedEvent<
 		Target,
 		WheelEvent
 	>;
+	/** @deprecated Please import from the Preact namespace instead */
 	export type TargetedPictureInPictureEvent<Target extends EventTarget> =
 		TargetedEvent<Target, PictureInPictureEvent>;
 
+	/** @deprecated Please import from the Preact namespace instead */
 	export type EventHandler<E extends TargetedEvent> = {
 		bivarianceHack(event: E): void;
 	}['bivarianceHack'];
 
+	/** @deprecated Please import from the Preact namespace instead */
 	export type AnimationEventHandler<Target extends EventTarget> = EventHandler<
 		TargetedAnimationEvent<Target>
 	>;
+	/** @deprecated Please import from the Preact namespace instead */
 	export type ClipboardEventHandler<Target extends EventTarget> = EventHandler<
 		TargetedClipboardEvent<Target>
 	>;
+	/** @deprecated Please import from the Preact namespace instead */
 	export type CommandEventHandler<Target extends EventTarget> = EventHandler<
 		TargetedCommandEvent<Target>
 	>;
+	/** @deprecated Please import from the Preact namespace instead */
 	export type CompositionEventHandler<Target extends EventTarget> =
 		EventHandler<TargetedCompositionEvent<Target>>;
+	/** @deprecated Please import from the Preact namespace instead */
 	export type DragEventHandler<Target extends EventTarget> = EventHandler<
 		TargetedDragEvent<Target>
 	>;
+	/** @deprecated Please import from the Preact namespace instead */
 	export type ToggleEventHandler<Target extends EventTarget> = EventHandler<
 		TargetedToggleEvent<Target>
 	>;
+	/** @deprecated Please import from the Preact namespace instead */
 	export type FocusEventHandler<Target extends EventTarget> = EventHandler<
 		TargetedFocusEvent<Target>
 	>;
+	/** @deprecated Please import from the Preact namespace instead */
 	export type GenericEventHandler<Target extends EventTarget> = EventHandler<
 		TargetedEvent<Target>
 	>;
+	/** @deprecated Please import from the Preact namespace instead */
 	export type InputEventHandler<Target extends EventTarget> = EventHandler<
 		TargetedInputEvent<Target>
 	>;
+	/** @deprecated Please import from the Preact namespace instead */
 	export type KeyboardEventHandler<Target extends EventTarget> = EventHandler<
 		TargetedKeyboardEvent<Target>
 	>;
+	/** @deprecated Please import from the Preact namespace instead */
 	export type MouseEventHandler<Target extends EventTarget> = EventHandler<
 		TargetedMouseEvent<Target>
 	>;
+	/** @deprecated Please import from the Preact namespace instead */
 	export type PointerEventHandler<Target extends EventTarget> = EventHandler<
 		TargetedPointerEvent<Target>
 	>;
+	/** @deprecated Please import from the Preact namespace instead */
 	export type SubmitEventHandler<Target extends EventTarget> = EventHandler<
 		TargetedSubmitEvent<Target>
 	>;
+	/** @deprecated Please import from the Preact namespace instead */
 	export type TouchEventHandler<Target extends EventTarget> = EventHandler<
 		TargetedTouchEvent<Target>
 	>;
+	/** @deprecated Please import from the Preact namespace instead */
 	export type TransitionEventHandler<Target extends EventTarget> = EventHandler<
 		TargetedTransitionEvent<Target>
 	>;
+	/** @deprecated Please import from the Preact namespace instead */
 	export type UIEventHandler<Target extends EventTarget> = EventHandler<
 		TargetedUIEvent<Target>
 	>;
+	/** @deprecated Please import from the Preact namespace instead */
 	export type WheelEventHandler<Target extends EventTarget> = EventHandler<
 		TargetedWheelEvent<Target>
 	>;
+	/** @deprecated Please import from the Preact namespace instead */
 	export type PictureInPictureEventHandler<Target extends EventTarget> =
 		EventHandler<TargetedPictureInPictureEvent<Target>>;
 
+	/** @deprecated Please import from the Preact namespace instead */
 	export interface DOMAttributes<Target extends EventTarget>
 		extends PreactDOMAttributes {
 		// Image Events
@@ -857,6 +903,7 @@ export namespace JSXInternal {
 	}
 
 	// All the WAI-ARIA 1.1 attributes from https://www.w3.org/TR/wai-aria-1.1/
+	/** @deprecated Please import from the Preact namespace instead */
 	export interface AriaAttributes {
 		/** Identifies the currently active element when DOM focus is on a composite widget, textbox, group, or application. */
 		'aria-activedescendant'?: Signalish<string | undefined>;
@@ -1101,6 +1148,7 @@ export namespace JSXInternal {
 	}
 
 	// All the WAI-ARIA 1.2 role attribute values from https://www.w3.org/TR/wai-aria-1.2/#role_definitions
+	/** @deprecated Please import from the Preact namespace instead */
 	export type WAIAriaRole =
 		| 'alert'
 		| 'alertdialog'
@@ -1198,6 +1246,7 @@ export namespace JSXInternal {
 		| 'none presentation';
 
 	// All the Digital Publishing WAI-ARIA 1.0 role attribute values from https://www.w3.org/TR/dpub-aria-1.0/#role_definitions
+	/** @deprecated Please import from the Preact namespace instead */
 	export type DPubAriaRole =
 		| 'doc-abstract'
 		| 'doc-acknowledgments'
@@ -1239,8 +1288,10 @@ export namespace JSXInternal {
 		| 'doc-tip'
 		| 'doc-toc';
 
+	/** @deprecated Please import from the Preact namespace instead */
 	export type AriaRole = WAIAriaRole | DPubAriaRole;
 
+	/** @deprecated Please import from the Preact namespace instead */
 	export interface AllHTMLAttributes<RefType extends EventTarget = EventTarget>
 		extends ClassAttributes<RefType>,
 			DOMAttributes<RefType>,
@@ -1495,6 +1546,7 @@ export namespace JSXInternal {
 		itemref?: Signalish<string | undefined>;
 	}
 
+	/** @deprecated Please import from the Preact namespace instead */
 	export interface HTMLAttributes<RefType extends EventTarget = EventTarget>
 		extends ClassAttributes<RefType>,
 			DOMAttributes<RefType>,
@@ -1583,6 +1635,7 @@ export namespace JSXInternal {
 		itemType?: Signalish<string | undefined>;
 	}
 
+	/** @deprecated Please import from the Preact namespace instead */
 	type HTMLAttributeReferrerPolicy =
 		| ''
 		| 'no-referrer'
@@ -1594,6 +1647,7 @@ export namespace JSXInternal {
 		| 'strict-origin-when-cross-origin'
 		| 'unsafe-url';
 
+	/** @deprecated Please import from the Preact namespace instead */
 	type HTMLAttributeAnchorTarget =
 		| '_self'
 		| '_blank'
@@ -1601,6 +1655,7 @@ export namespace JSXInternal {
 		| '_top'
 		| (string & {});
 
+	/** @deprecated Please import from the Preact namespace instead */
 	interface AnchorHTMLAttributes<T extends EventTarget = HTMLAnchorElement>
 		extends HTMLAttributes<T> {
 		download?: Signalish<any>;
@@ -1616,6 +1671,7 @@ export namespace JSXInternal {
 		referrerPolicy?: Signalish<HTMLAttributeReferrerPolicy | undefined>;
 	}
 
+	/** @deprecated Please import from the Preact namespace instead */
 	interface AreaHTMLAttributes<T extends EventTarget = HTMLAreaElement>
 		extends HTMLAttributes<T> {
 		alt?: Signalish<string | undefined>;
@@ -1632,20 +1688,24 @@ export namespace JSXInternal {
 		target?: Signalish<HTMLAttributeAnchorTarget | undefined>;
 	}
 
+	/** @deprecated Please import from the Preact namespace instead */
 	interface AudioHTMLAttributes<T extends EventTarget = HTMLAudioElement>
 		extends MediaHTMLAttributes<T> {}
 
+	/** @deprecated Please import from the Preact namespace instead */
 	interface BaseHTMLAttributes<T extends EventTarget = HTMLBaseElement>
 		extends HTMLAttributes<T> {
 		href?: Signalish<string | undefined>;
 		target?: Signalish<HTMLAttributeAnchorTarget | undefined>;
 	}
 
+	/** @deprecated Please import from the Preact namespace instead */
 	interface BlockquoteHTMLAttributes<T extends EventTarget = HTMLQuoteElement>
 		extends HTMLAttributes<T> {
 		cite?: Signalish<string | undefined>;
 	}
 
+	/** @deprecated Please import from the Preact namespace instead */
 	interface ButtonHTMLAttributes<T extends EventTarget = HTMLButtonElement>
 		extends HTMLAttributes<T> {
 		command?: Signalish<string | undefined>;
@@ -1672,28 +1732,33 @@ export namespace JSXInternal {
 		value?: Signalish<string | number | undefined>;
 	}
 
+	/** @deprecated Please import from the Preact namespace instead */
 	interface CanvasHTMLAttributes<T extends EventTarget = HTMLCanvasElement>
 		extends HTMLAttributes<T> {
 		height?: Signalish<number | string | undefined>;
 		width?: Signalish<number | string | undefined>;
 	}
 
+	/** @deprecated Please import from the Preact namespace instead */
 	interface ColHTMLAttributes<T extends EventTarget = HTMLTableColElement>
 		extends HTMLAttributes<T> {
 		span?: Signalish<number | undefined>;
 		width?: Signalish<number | string | undefined>;
 	}
 
+	/** @deprecated Please import from the Preact namespace instead */
 	interface ColgroupHTMLAttributes<T extends EventTarget = HTMLTableColElement>
 		extends HTMLAttributes<T> {
 		span?: Signalish<number | undefined>;
 	}
 
+	/** @deprecated Please import from the Preact namespace instead */
 	interface DataHTMLAttributes<T extends EventTarget = HTMLDataElement>
 		extends HTMLAttributes<T> {
 		value?: Signalish<string | number | undefined>;
 	}
 
+	/** @deprecated Please import from the Preact namespace instead */
 	interface DelHTMLAttributes<T extends EventTarget = HTMLModElement>
 		extends HTMLAttributes<T> {
 		cite?: Signalish<string | undefined>;
@@ -1701,12 +1766,14 @@ export namespace JSXInternal {
 		dateTime?: Signalish<string | undefined>;
 	}
 
+	/** @deprecated Please import from the Preact namespace instead */
 	interface DetailsHTMLAttributes<T extends EventTarget = HTMLDetailsElement>
 		extends HTMLAttributes<T> {
 		name?: Signalish<string | undefined>;
 		open?: Signalish<boolean | undefined>;
 	}
 
+	/** @deprecated Please import from the Preact namespace instead */
 	interface DialogHTMLAttributes<T extends EventTarget = HTMLDialogElement>
 		extends HTMLAttributes<T> {
 		onCancel?: GenericEventHandler<T> | undefined;
@@ -1716,6 +1783,7 @@ export namespace JSXInternal {
 		closedBy?: Signalish<'none' | 'closerequest' | 'any' | undefined>;
 	}
 
+	/** @deprecated Please import from the Preact namespace instead */
 	interface EmbedHTMLAttributes<T extends EventTarget = HTMLEmbedElement>
 		extends HTMLAttributes<T> {
 		height?: Signalish<number | string | undefined>;
@@ -1724,6 +1792,7 @@ export namespace JSXInternal {
 		width?: Signalish<number | string | undefined>;
 	}
 
+	/** @deprecated Please import from the Preact namespace instead */
 	interface FieldsetHTMLAttributes<T extends EventTarget = HTMLFieldSetElement>
 		extends HTMLAttributes<T> {
 		disabled?: Signalish<boolean | undefined>;
@@ -1731,6 +1800,7 @@ export namespace JSXInternal {
 		name?: Signalish<string | undefined>;
 	}
 
+	/** @deprecated Please import from the Preact namespace instead */
 	interface FormHTMLAttributes<T extends EventTarget = HTMLFormElement>
 		extends HTMLAttributes<T> {
 		'accept-charset'?: Signalish<string | undefined>;
@@ -1748,6 +1818,7 @@ export namespace JSXInternal {
 		target?: Signalish<string | undefined>;
 	}
 
+	/** @deprecated Please import from the Preact namespace instead */
 	interface IframeHTMLAttributes<T extends EventTarget = HTMLIFrameElement>
 		extends HTMLAttributes<T> {
 		allow?: Signalish<string | undefined>;
@@ -1776,8 +1847,10 @@ export namespace JSXInternal {
 		width?: Signalish<number | string | undefined>;
 	}
 
+	/** @deprecated Please import from the Preact namespace instead */
 	type HTMLAttributeCrossOrigin = 'anonymous' | 'use-credentials';
 
+	/** @deprecated Please import from the Preact namespace instead */
 	interface ImgHTMLAttributes<T extends EventTarget = HTMLImageElement>
 		extends HTMLAttributes<T> {
 		alt?: Signalish<string | undefined>;
@@ -1799,6 +1872,7 @@ export namespace JSXInternal {
 		width?: Signalish<number | string | undefined>;
 	}
 
+	/** @deprecated Please import from the Preact namespace instead */
 	type HTMLInputTypeAttribute =
 		| 'button'
 		| 'checkbox'
@@ -1824,6 +1898,7 @@ export namespace JSXInternal {
 		| 'week'
 		| (string & {});
 
+	/** @deprecated Please import from the Preact namespace instead */
 	interface InputHTMLAttributes<T extends EventTarget = HTMLInputElement>
 		extends HTMLAttributes<T> {
 		accept?: Signalish<string | undefined>;
@@ -1881,6 +1956,7 @@ export namespace JSXInternal {
 		onChange?: GenericEventHandler<T> | undefined;
 	}
 
+	/** @deprecated Please import from the Preact namespace instead */
 	interface InsHTMLAttributes<T extends EventTarget = HTMLModElement>
 		extends HTMLAttributes<T> {
 		cite?: Signalish<string | undefined>;
@@ -1888,6 +1964,7 @@ export namespace JSXInternal {
 		dateTime?: Signalish<string | undefined>;
 	}
 
+	/** @deprecated Please import from the Preact namespace instead */
 	interface KeygenHTMLAttributes<T extends EventTarget = HTMLUnknownElement>
 		extends HTMLAttributes<T> {
 		challenge?: Signalish<string | undefined>;
@@ -1898,6 +1975,7 @@ export namespace JSXInternal {
 		name?: Signalish<string | undefined>;
 	}
 
+	/** @deprecated Please import from the Preact namespace instead */
 	interface LabelHTMLAttributes<T extends EventTarget = HTMLLabelElement>
 		extends HTMLAttributes<T> {
 		for?: Signalish<string | undefined>;
@@ -1905,11 +1983,13 @@ export namespace JSXInternal {
 		htmlFor?: Signalish<string | undefined>;
 	}
 
+	/** @deprecated Please import from the Preact namespace instead */
 	interface LiHTMLAttributes<T extends EventTarget = HTMLLIElement>
 		extends HTMLAttributes<T> {
 		value?: Signalish<string | number | undefined>;
 	}
 
+	/** @deprecated Please import from the Preact namespace instead */
 	interface LinkHTMLAttributes<T extends EventTarget = HTMLLinkElement>
 		extends HTMLAttributes<T> {
 		as?: Signalish<string | undefined>;
@@ -1932,11 +2012,13 @@ export namespace JSXInternal {
 		charSet?: Signalish<string | undefined>;
 	}
 
+	/** @deprecated Please import from the Preact namespace instead */
 	interface MapHTMLAttributes<T extends EventTarget = HTMLMapElement>
 		extends HTMLAttributes<T> {
 		name?: Signalish<string | undefined>;
 	}
 
+	/** @deprecated Please import from the Preact namespace instead */
 	interface MarqueeHTMLAttributes<T extends EventTarget = HTMLMarqueeElement>
 		extends HTMLAttributes<T> {
 		behavior?: Signalish<'scroll' | 'slide' | 'alternate' | undefined>;
@@ -1952,6 +2034,7 @@ export namespace JSXInternal {
 		width?: Signalish<number | string | undefined>;
 	}
 
+	/** @deprecated Please import from the Preact namespace instead */
 	interface MediaHTMLAttributes<T extends EventTarget = HTMLMediaElement>
 		extends HTMLAttributes<T> {
 		autoplay?: Signalish<boolean | undefined>;
@@ -1977,11 +2060,13 @@ export namespace JSXInternal {
 		volume?: Signalish<string | number | undefined>;
 	}
 
+	/** @deprecated Please import from the Preact namespace instead */
 	interface MenuHTMLAttributes<T extends EventTarget = HTMLMenuElement>
 		extends HTMLAttributes<T> {
 		type?: Signalish<string | undefined>;
 	}
 
+	/** @deprecated Please import from the Preact namespace instead */
 	interface MetaHTMLAttributes<T extends EventTarget = HTMLMetaElement>
 		extends HTMLAttributes<T> {
 		charset?: Signalish<string | undefined>;
@@ -1993,6 +2078,7 @@ export namespace JSXInternal {
 		media?: Signalish<string | undefined>;
 	}
 
+	/** @deprecated Please import from the Preact namespace instead */
 	interface MeterHTMLAttributes<T extends EventTarget = HTMLMeterElement>
 		extends HTMLAttributes<T> {
 		form?: Signalish<string | undefined>;
@@ -2004,6 +2090,7 @@ export namespace JSXInternal {
 		value?: Signalish<string | number | undefined>;
 	}
 
+	/** @deprecated Please import from the Preact namespace instead */
 	interface ObjectHTMLAttributes<T extends EventTarget = HTMLObjectElement>
 		extends HTMLAttributes<T> {
 		classID?: Signalish<string | undefined>;
@@ -2018,6 +2105,7 @@ export namespace JSXInternal {
 		wmode?: Signalish<string | undefined>;
 	}
 
+	/** @deprecated Please import from the Preact namespace instead */
 	interface OlHTMLAttributes<T extends EventTarget = HTMLOListElement>
 		extends HTMLAttributes<T> {
 		reversed?: Signalish<boolean | undefined>;
@@ -2025,12 +2113,14 @@ export namespace JSXInternal {
 		type?: Signalish<'1' | 'a' | 'A' | 'i' | 'I' | undefined>;
 	}
 
+	/** @deprecated Please import from the Preact namespace instead */
 	interface OptgroupHTMLAttributes<T extends EventTarget = HTMLOptGroupElement>
 		extends HTMLAttributes<T> {
 		disabled?: Signalish<boolean | undefined>;
 		label?: Signalish<string | undefined>;
 	}
 
+	/** @deprecated Please import from the Preact namespace instead */
 	interface OptionHTMLAttributes<T extends EventTarget = HTMLOptionElement>
 		extends HTMLAttributes<T> {
 		disabled?: Signalish<boolean | undefined>;
@@ -2039,6 +2129,7 @@ export namespace JSXInternal {
 		value?: Signalish<string | number | undefined>;
 	}
 
+	/** @deprecated Please import from the Preact namespace instead */
 	interface OutputHTMLAttributes<T extends EventTarget = HTMLOutputElement>
 		extends HTMLAttributes<T> {
 		for?: Signalish<string | undefined>;
@@ -2047,23 +2138,27 @@ export namespace JSXInternal {
 		name?: Signalish<string | undefined>;
 	}
 
+	/** @deprecated Please import from the Preact namespace instead */
 	interface ParamHTMLAttributes<T extends EventTarget = HTMLParamElement>
 		extends HTMLAttributes<T> {
 		name?: Signalish<string | undefined>;
 		value?: Signalish<string | number | undefined>;
 	}
 
+	/** @deprecated Please import from the Preact namespace instead */
 	interface ProgressHTMLAttributes<T extends EventTarget = HTMLProgressElement>
 		extends HTMLAttributes<T> {
 		max?: Signalish<number | string | undefined>;
 		value?: Signalish<string | number | undefined>;
 	}
 
+	/** @deprecated Please import from the Preact namespace instead */
 	interface QuoteHTMLAttributes<T extends EventTarget = HTMLQuoteElement>
 		extends HTMLAttributes<T> {
 		cite?: Signalish<string | undefined>;
 	}
 
+	/** @deprecated Please import from the Preact namespace instead */
 	interface ScriptHTMLAttributes<T extends EventTarget = HTMLScriptElement>
 		extends HTMLAttributes<T> {
 		async?: Signalish<boolean | undefined>;
@@ -2083,6 +2178,7 @@ export namespace JSXInternal {
 		type?: Signalish<string | undefined>;
 	}
 
+	/** @deprecated Please import from the Preact namespace instead */
 	interface SelectHTMLAttributes<T extends EventTarget = HTMLSelectElement>
 		extends HTMLAttributes<T> {
 		autocomplete?: Signalish<string | undefined>;
@@ -2098,11 +2194,13 @@ export namespace JSXInternal {
 		onChange?: GenericEventHandler<T> | undefined;
 	}
 
+	/** @deprecated Please import from the Preact namespace instead */
 	interface SlotHTMLAttributes<T extends EventTarget = HTMLSlotElement>
 		extends HTMLAttributes<T> {
 		name?: Signalish<string | undefined>;
 	}
 
+	/** @deprecated Please import from the Preact namespace instead */
 	interface SourceHTMLAttributes<T extends EventTarget = HTMLSourceElement>
 		extends HTMLAttributes<T> {
 		height?: Signalish<number | string | undefined>;
@@ -2115,6 +2213,7 @@ export namespace JSXInternal {
 		width?: Signalish<number | string | undefined>;
 	}
 
+	/** @deprecated Please import from the Preact namespace instead */
 	interface StyleHTMLAttributes<T extends EventTarget = HTMLStyleElement>
 		extends HTMLAttributes<T> {
 		media?: Signalish<string | undefined>;
@@ -2122,6 +2221,7 @@ export namespace JSXInternal {
 		type?: Signalish<string | undefined>;
 	}
 
+	/** @deprecated Please import from the Preact namespace instead */
 	interface TableHTMLAttributes<T extends EventTarget = HTMLTableElement>
 		extends HTMLAttributes<T> {
 		cellPadding?: Signalish<string | undefined>;
@@ -2130,6 +2230,7 @@ export namespace JSXInternal {
 		width?: Signalish<number | string | undefined>;
 	}
 
+	/** @deprecated Please import from the Preact namespace instead */
 	interface TdHTMLAttributes<T extends EventTarget = HTMLTableCellElement>
 		extends HTMLAttributes<T> {
 		align?: Signalish<
@@ -2147,6 +2248,7 @@ export namespace JSXInternal {
 		valign?: Signalish<'top' | 'middle' | 'bottom' | 'baseline' | undefined>;
 	}
 
+	/** @deprecated Please import from the Preact namespace instead */
 	interface TextareaHTMLAttributes<T extends EventTarget = HTMLTextAreaElement>
 		extends HTMLAttributes<T> {
 		autocomplete?: Signalish<string | undefined>;
@@ -2170,6 +2272,7 @@ export namespace JSXInternal {
 		onChange?: GenericEventHandler<T> | undefined;
 	}
 
+	/** @deprecated Please import from the Preact namespace instead */
 	interface ThHTMLAttributes<T extends EventTarget = HTMLTableCellElement>
 		extends HTMLAttributes<T> {
 		align?: Signalish<
@@ -2184,12 +2287,14 @@ export namespace JSXInternal {
 		abbr?: Signalish<string | undefined>;
 	}
 
+	/** @deprecated Please import from the Preact namespace instead */
 	interface TimeHTMLAttributes<T extends EventTarget = HTMLTimeElement>
 		extends HTMLAttributes<T> {
 		datetime?: Signalish<string | undefined>;
 		dateTime?: Signalish<string | undefined>;
 	}
 
+	/** @deprecated Please import from the Preact namespace instead */
 	interface TrackHTMLAttributes<T extends EventTarget = HTMLTrackElement>
 		extends MediaHTMLAttributes<T> {
 		default?: Signalish<boolean | undefined>;
@@ -2199,6 +2304,7 @@ export namespace JSXInternal {
 		srcLang?: Signalish<string | undefined>;
 	}
 
+	/** @deprecated Please import from the Preact namespace instead */
 	interface VideoHTMLAttributes<T extends EventTarget = HTMLVideoElement>
 		extends MediaHTMLAttributes<T> {
 		disablePictureInPicture?: Signalish<boolean | undefined>;
@@ -2209,11 +2315,13 @@ export namespace JSXInternal {
 		width?: Signalish<number | string | undefined>;
 	}
 
+	/** @deprecated Please import from the Preact namespace instead */
 	export type DetailedHTMLProps<
 		HA extends HTMLAttributes<RefType>,
 		RefType extends EventTarget = EventTarget
 	> = HA;
 
+	/** @deprecated Please import from the Preact namespace instead */
 	export interface MathMLAttributes<Target extends EventTarget = MathMLElement>
 		extends HTMLAttributes<Target> {
 		dir?: Signalish<'ltr' | 'rtl' | undefined>;
@@ -2230,6 +2338,7 @@ export namespace JSXInternal {
 		scriptlevel?: Signalish<string | undefined>;
 	}
 
+	/** @deprecated Please import from the Preact namespace instead */
 	export interface AnnotationMathMLAttributes<T extends EventTarget>
 		extends MathMLAttributes<T> {
 		encoding?: Signalish<string | undefined>;
@@ -2237,6 +2346,7 @@ export namespace JSXInternal {
 		src?: Signalish<string | undefined>;
 	}
 
+	/** @deprecated Please import from the Preact namespace instead */
 	export interface AnnotationXmlMathMLAttributes<T extends EventTarget>
 		extends MathMLAttributes<T> {
 		encoding?: Signalish<string | undefined>;
@@ -2244,6 +2354,7 @@ export namespace JSXInternal {
 		src?: Signalish<string | undefined>;
 	}
 
+	/** @deprecated Please import from the Preact namespace instead */
 	export interface MActionMathMLAttributes<T extends EventTarget>
 		extends MathMLAttributes<T> {
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/maction#actiontype */
@@ -2252,19 +2363,23 @@ export namespace JSXInternal {
 		selection?: Signalish<string | undefined>;
 	}
 
+	/** @deprecated Please import from the Preact namespace instead */
 	export interface MathMathMLAttributes<T extends EventTarget>
 		extends MathMLAttributes<T> {
 		display?: Signalish<'block' | 'inline' | undefined>;
 	}
 
+	/** @deprecated Please import from the Preact namespace instead */
 	export interface MEncloseMathMLAttributes<T extends EventTarget>
 		extends MathMLAttributes<T> {
 		notation?: Signalish<string | undefined>;
 	}
 
+	/** @deprecated Please import from the Preact namespace instead */
 	export interface MErrorMathMLAttributes<T extends EventTarget>
 		extends MathMLAttributes<T> {}
 
+	/** @deprecated Please import from the Preact namespace instead */
 	export interface MFencedMathMLAttributes<T extends EventTarget>
 		extends MathMLAttributes<T> {
 		close?: Signalish<string | undefined>;
@@ -2272,6 +2387,7 @@ export namespace JSXInternal {
 		separators?: Signalish<string | undefined>;
 	}
 
+	/** @deprecated Please import from the Preact namespace instead */
 	export interface MFracMathMLAttributes<T extends EventTarget>
 		extends MathMLAttributes<T> {
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mfrac#denomalign */
@@ -2281,6 +2397,7 @@ export namespace JSXInternal {
 		numalign?: Signalish<'center' | 'left' | 'right' | undefined>;
 	}
 
+	/** @deprecated Please import from the Preact namespace instead */
 	export interface MiMathMLAttributes<T extends EventTarget>
 		extends MathMLAttributes<T> {
 		/** The only value allowed in the current specification is normal (case insensitive)
@@ -2308,6 +2425,7 @@ export namespace JSXInternal {
 		>;
 	}
 
+	/** @deprecated Please import from the Preact namespace instead */
 	export interface MmultiScriptsMathMLAttributes<T extends EventTarget>
 		extends MathMLAttributes<T> {
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mmultiscripts#subscriptshift */
@@ -2316,9 +2434,11 @@ export namespace JSXInternal {
 		superscriptshift?: Signalish<string | undefined>;
 	}
 
+	/** @deprecated Please import from the Preact namespace instead */
 	export interface MNMathMLAttributes<T extends EventTarget>
 		extends MathMLAttributes<T> {}
 
+	/** @deprecated Please import from the Preact namespace instead */
 	export interface MOMathMLAttributes<T extends EventTarget>
 		extends MathMLAttributes<T> {
 		/** Non-standard attribute See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mo#accent */
@@ -2335,11 +2455,13 @@ export namespace JSXInternal {
 		symmetric?: Signalish<boolean | undefined>;
 	}
 
+	/** @deprecated Please import from the Preact namespace instead */
 	export interface MOverMathMLAttributes<T extends EventTarget>
 		extends MathMLAttributes<T> {
 		accent?: Signalish<boolean | undefined>;
 	}
 
+	/** @deprecated Please import from the Preact namespace instead */
 	export interface MPaddedMathMLAttributes<T extends EventTarget>
 		extends MathMLAttributes<T> {
 		depth?: Signalish<string | undefined>;
@@ -2349,18 +2471,23 @@ export namespace JSXInternal {
 		width?: Signalish<string | undefined>;
 	}
 
+	/** @deprecated Please import from the Preact namespace instead */
 	export interface MPhantomMathMLAttributes<T extends EventTarget>
 		extends MathMLAttributes<T> {}
 
+	/** @deprecated Please import from the Preact namespace instead */
 	export interface MPrescriptsMathMLAttributes<T extends EventTarget>
 		extends MathMLAttributes<T> {}
 
+	/** @deprecated Please import from the Preact namespace instead */
 	export interface MRootMathMLAttributes<T extends EventTarget>
 		extends MathMLAttributes<T> {}
 
+	/** @deprecated Please import from the Preact namespace instead */
 	export interface MRowMathMLAttributes<T extends EventTarget>
 		extends MathMLAttributes<T> {}
 
+	/** @deprecated Please import from the Preact namespace instead */
 	export interface MSMathMLAttributes<T extends EventTarget>
 		extends MathMLAttributes<T> {
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/ms#browser_compatibility */
@@ -2369,6 +2496,7 @@ export namespace JSXInternal {
 		rquote?: Signalish<string | undefined>;
 	}
 
+	/** @deprecated Please import from the Preact namespace instead */
 	export interface MSpaceMathMLAttributes<T extends EventTarget>
 		extends MathMLAttributes<T> {
 		depth?: Signalish<string | undefined>;
@@ -2376,9 +2504,11 @@ export namespace JSXInternal {
 		width?: Signalish<string | undefined>;
 	}
 
+	/** @deprecated Please import from the Preact namespace instead */
 	export interface MSqrtMathMLAttributes<T extends EventTarget>
 		extends MathMLAttributes<T> {}
 
+	/** @deprecated Please import from the Preact namespace instead */
 	export interface MStyleMathMLAttributes<T extends EventTarget>
 		extends MathMLAttributes<T> {
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mstyle#background */
@@ -2397,12 +2527,14 @@ export namespace JSXInternal {
 		scriptsizemultiplier?: Signalish<string | undefined>;
 	}
 
+	/** @deprecated Please import from the Preact namespace instead */
 	export interface MSubMathMLAttributes<T extends EventTarget>
 		extends MathMLAttributes<T> {
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/msub#subscriptshift */
 		subscriptshift?: Signalish<string | undefined>;
 	}
 
+	/** @deprecated Please import from the Preact namespace instead */
 	export interface MSubsupMathMLAttributes<T extends EventTarget>
 		extends MathMLAttributes<T> {
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/msubsup#subscriptshift */
@@ -2411,12 +2543,14 @@ export namespace JSXInternal {
 		superscriptshift?: Signalish<string | undefined>;
 	}
 
+	/** @deprecated Please import from the Preact namespace instead */
 	export interface MSupMathMLAttributes<T extends EventTarget>
 		extends MathMLAttributes<T> {
 		/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/msup#superscriptshift */
 		superscriptshift?: Signalish<string | undefined>;
 	}
 
+	/** @deprecated Please import from the Preact namespace instead */
 	export interface MTableMathMLAttributes<T extends EventTarget>
 		extends MathMLAttributes<T> {
 		/** Non-standard attribute See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mtable#align */
@@ -2445,6 +2579,7 @@ export namespace JSXInternal {
 		width?: Signalish<string | undefined>;
 	}
 
+	/** @deprecated Please import from the Preact namespace instead */
 	export interface MTdMathMLAttributes<T extends EventTarget>
 		extends MathMLAttributes<T> {
 		columnspan?: Signalish<number | undefined>;
@@ -2457,9 +2592,11 @@ export namespace JSXInternal {
 		>;
 	}
 
+	/** @deprecated Please import from the Preact namespace instead */
 	export interface MTextMathMLAttributes<T extends EventTarget>
 		extends MathMLAttributes<T> {}
 
+	/** @deprecated Please import from the Preact namespace instead */
 	export interface MTrMathMLAttributes<T extends EventTarget>
 		extends MathMLAttributes<T> {
 		/** Non-standard attribute See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mtr#columnalign */
@@ -2470,17 +2607,20 @@ export namespace JSXInternal {
 		>;
 	}
 
+	/** @deprecated Please import from the Preact namespace instead */
 	export interface MUnderMathMLAttributes<T extends EventTarget>
 		extends MathMLAttributes<T> {
 		accentunder?: Signalish<boolean | undefined>;
 	}
 
+	/** @deprecated Please import from the Preact namespace instead */
 	export interface MUnderoverMathMLAttributes<T extends EventTarget>
 		extends MathMLAttributes<T> {
 		accent?: Signalish<boolean | undefined>;
 		accentunder?: Signalish<boolean | undefined>;
 	}
 
+	/** @deprecated Please import from the Preact namespace instead */
 	export interface SemanticsMathMLAttributes<T extends EventTarget>
 		extends MathMLAttributes<T> {}
 

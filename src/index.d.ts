@@ -1,8 +1,10 @@
 export as namespace preact;
 
 import { JSXInternal } from './jsx';
+import { DOMAttributes, HTMLAttributes, SVGAttributes } from './dom';
 
 export import JSX = JSXInternal;
+export * from './dom';
 
 //
 // Preact Virtual DOM
@@ -190,16 +192,16 @@ export abstract class Component<P, S> {
 export function createElement(
 	type: 'input',
 	props:
-		| (JSXInternal.DOMAttributes<HTMLInputElement> &
+		| (DOMAttributes<HTMLInputElement> &
 				ClassAttributes<HTMLInputElement>)
 		| null,
 	...children: ComponentChildren[]
 ): VNode<
-	JSXInternal.DOMAttributes<HTMLInputElement> &
+	DOMAttributes<HTMLInputElement> &
 		ClassAttributes<HTMLInputElement>
 >;
 export function createElement<
-	P extends JSXInternal.HTMLAttributes<T>,
+	P extends HTMLAttributes<T>,
 	T extends HTMLElement
 >(
 	type: keyof JSXInternal.IntrinsicElements,
@@ -207,7 +209,7 @@ export function createElement<
 	...children: ComponentChildren[]
 ): VNode<ClassAttributes<T> & P>;
 export function createElement<
-	P extends JSXInternal.SVGAttributes<T>,
+	P extends SVGAttributes<T>,
 	T extends HTMLElement
 >(
 	type: keyof JSXInternal.IntrinsicSVGElements,
@@ -218,12 +220,12 @@ export function createElement<T extends HTMLElement>(
 	type: string,
 	props:
 		| (ClassAttributes<T> &
-				JSXInternal.HTMLAttributes &
-				JSXInternal.SVGAttributes)
+				HTMLAttributes &
+				SVGAttributes)
 		| null,
 	...children: ComponentChildren[]
 ): VNode<
-	ClassAttributes<T> & JSXInternal.HTMLAttributes & JSXInternal.SVGAttributes
+	ClassAttributes<T> & HTMLAttributes & SVGAttributes
 >;
 export function createElement<P>(
 	type: ComponentType<P> | string,
@@ -237,16 +239,16 @@ export namespace createElement {
 export function h(
 	type: 'input',
 	props:
-		| (JSXInternal.DOMAttributes<HTMLInputElement> &
+		| (DOMAttributes<HTMLInputElement> &
 				ClassAttributes<HTMLInputElement>)
 		| null,
 	...children: ComponentChildren[]
 ): VNode<
-	JSXInternal.DOMAttributes<HTMLInputElement> &
+	DOMAttributes<HTMLInputElement> &
 		ClassAttributes<HTMLInputElement>
 >;
 export function h<
-	P extends JSXInternal.HTMLAttributes<T>,
+	P extends HTMLAttributes<T>,
 	T extends HTMLElement
 >(
 	type: keyof JSXInternal.IntrinsicElements,
@@ -254,7 +256,7 @@ export function h<
 	...children: ComponentChildren[]
 ): VNode<ClassAttributes<T> & P>;
 export function h<
-	P extends JSXInternal.SVGAttributes<T>,
+	P extends SVGAttributes<T>,
 	T extends HTMLElement
 >(
 	type: keyof JSXInternal.IntrinsicSVGElements,
@@ -265,14 +267,14 @@ export function h<T extends HTMLElement>(
 	type: string,
 	props:
 		| (ClassAttributes<T> &
-				JSXInternal.HTMLAttributes &
-				JSXInternal.SVGAttributes)
+				HTMLAttributes &
+				SVGAttributes)
 		| null,
 	...children: ComponentChildren[]
 ): VNode<
 	| (ClassAttributes<T> &
-			JSXInternal.HTMLAttributes &
-			JSXInternal.SVGAttributes)
+			HTMLAttributes &
+			SVGAttributes)
 	| null
 >;
 export function h<P>(
@@ -287,7 +289,7 @@ export namespace h {
 //
 // Preact render
 // -----------------------------------
-interface ContainerNode {
+export interface ContainerNode {
 	readonly nodeType: number;
 	readonly parentNode: ContainerNode | null;
 	readonly firstChild: ContainerNode | null;
