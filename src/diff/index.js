@@ -86,7 +86,7 @@ export function diff(
 		oldVNode._component._excess = NULL;
 	}
 
-	if ((tmp = options._diff)) tmp(newVNode);
+	if ((tmp = options._diff)) tmp(newVNode, oldVNode);
 
 	outer: if (typeof newType == 'function') {
 		try {
