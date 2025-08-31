@@ -9,7 +9,7 @@ import {
 	sortAttributes
 } from '../_util/helpers';
 import { div, span, p } from '../_util/dom';
-import { vi } from 'vitest';
+import { expect, vi } from 'vitest';
 
 /** @jsx createElement */
 const h = createElement;
@@ -124,6 +124,37 @@ describe('Components', () => {
 
 			expect(() => render(<Foo foo="bar" />, scratch)).not.to.throw();
 			rerender();
+		});
+
+		it('should update the reference in parentDom children', () => {
+			let set;
+			class Foo extends Component {
+				constructor(props) {
+					super(props);
+					// the following line made `this._nextState !== this.state` be truthy prior to the fix for preactjs/preact#2638
+					this.state = { foo: 'baz' };
+					set = () => this.setState({ foo: 'bar' });
+				}
+
+				render() {
+					return <div>{this.state.foo}</div>;
+				}
+			}
+
+			const vnode = <Foo />;
+
+			render(vnode, scratch);
+
+			const rootChildren = scratch._children._children;
+			const rootProps = scratch._children.props;
+
+			expect(rootProps.children[0]).to.equal(vnode);
+			expect(rootChildren[0]).to.equal(vnode);
+
+			set();
+			rerender();
+			expect(rootChildren[0]).not.to.equal(vnode);
+			expect(rootProps.children[0]).not.to.equal(vnode);
 		});
 
 		it('should not crash when setting state with cb in constructor', () => {

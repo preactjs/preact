@@ -152,6 +152,11 @@ function renderComponent(component) {
 		if (newVNode._dom != oldDom) {
 			updateParentDomPointers(newVNode);
 		}
+
+		const rootVNode = component._parentDom._children;
+		if (rootVNode && rootVNode.props.children[0] === oldVNode) {
+			rootVNode._children[0] = rootVNode.props.children[0] = newVNode;
+		}
 	}
 }
 
