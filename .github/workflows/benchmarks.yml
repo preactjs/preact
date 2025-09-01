@@ -21,14 +21,14 @@ jobs:
           artifact: npm-package
           workflow: ci.yml
           required: false
-      - run: mv preact.tgz preact-main.tgz
-      - name: Upload locally build & base preact package
-        uses: actions/upload-artifact@v4
-        with:
-          name: bench-environment
-          path: |
-            preact-local.tgz
-            preact-main.tgz
+      #- run: mv preact.tgz preact-main.tgz
+      #- name: Upload locally build & base preact package
+      #  uses: actions/upload-artifact@v4
+      #  with:
+      #    name: bench-environment
+      #    path: |
+      #      preact-local.tgz
+      #      preact-main.tgz
 
   #bench_todo:
   #  name: Bench todo
