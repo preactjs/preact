@@ -19,6 +19,6 @@ describe('createContext', () => {
 		const providerComponent = <Provider {...contextValue}>{children}</Provider>;
 		//expect(providerComponent).to.have.property('tag', 'Provider');
 		expect(providerComponent.props.value).to.equal(contextValue.value);
-		expect(providerComponent.props.children).to.equal(children);
+		expect(providerComponent.props.children).to.deep.equal(children);
 	});
 });

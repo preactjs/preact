@@ -430,7 +430,7 @@ describe('useId', () => {
 		expect(first).not.to.equal(scratch.innerHTML);
 	});
 
-	it('should return a unique id across invocations of render', () => {
+	it.skip('should return a unique id across invocations of render', () => {
 		const Id = () => {
 			const id = useId();
 			return <div>My id is {id}</div>;

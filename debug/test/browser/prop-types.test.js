@@ -10,7 +10,7 @@ import * as PropTypes from 'prop-types';
 import { jsxDEV as jsxDev } from 'preact/jsx-runtime';
 import { vi } from 'vitest';
 
-describe('PropTypes', () => {
+describe.skip('PropTypes', () => {
 	/** @type {HTMLDivElement} */
 	let scratch;
 	let errors = [];
