@@ -433,7 +433,7 @@ export function commitRoot(commitQueue, root, refQueue) {
 	});
 }
 
-function cloneNode(node) {
+export function cloneNode(node) {
 	if (
 		typeof node != 'object' ||
 		node == NULL ||

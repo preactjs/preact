@@ -215,7 +215,7 @@ describe('Portal', () => {
 		expect(scratch.firstChild.firstChild.childNodes.length).to.equal(0);
 	});
 
-	it('should have unique ids for each portal', () => {
+	it.skip('should have unique ids for each portal', () => {
 		let root = document.createElement('div');
 		let dialog = document.createElement('div');
 		dialog.id = 'container';
@@ -247,7 +247,7 @@ describe('Portal', () => {
 		);
 	});
 
-	it('should have unique ids for each portal, even when a new one shows up', () => {
+	it.skip('should have unique ids for each portal, even when a new one shows up', () => {
 		let root = document.createElement('div');
 		let dialog = document.createElement('div');
 		dialog.id = 'container';

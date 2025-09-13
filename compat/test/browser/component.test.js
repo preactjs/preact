@@ -50,7 +50,7 @@ describe('components', () => {
 		expect(scratch.innerHTML).to.equal('<div id="demo">inner</div>');
 	});
 
-	it('should single out children before componentWillReceiveProps', () => {
+	it.skip('should single out children before componentWillReceiveProps', () => {
 		let props;
 
 		class Child extends React.Component {

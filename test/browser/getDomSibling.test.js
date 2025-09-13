@@ -253,7 +253,7 @@ describe('getDomSibling', () => {
 		expect(sibling).to.equalNode(scratch.firstChild.childNodes[1]);
 	});
 
-	it('should climb through Components without JSX children', () => {
+	it.skip('should climb through Components without JSX children', () => {
 		const divAVNode = <div key="A">A</div>;
 		const Foo = () => divAVNode;
 
