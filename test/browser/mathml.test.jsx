@@ -2,6 +2,9 @@ import { createElement, Component, render } from 'preact';
 import { setupRerender } from 'preact/test-utils';
 import { setupScratch, teardown } from '../_util/helpers';
 
+const XHTML_NAMESPACE = 'http://www.w3.org/1999/xhtml';
+const MATH_NAMESPACE = 'http://www.w3.org/1998/Math/MathML';
+
 describe('mathml', () => {
 	let scratch;
 
@@ -18,7 +21,7 @@ describe('mathml', () => {
 
 		let namespace = scratch.querySelector('math').namespaceURI;
 
-		expect(namespace).to.equal('http://www.w3.org/1998/Math/MathML');
+		expect(namespace).to.equal(MATH_NAMESPACE);
 	});
 
 	it('should render children with the correct namespace URI', () => {
@@ -31,12 +34,12 @@ describe('mathml', () => {
 
 		let namespace = scratch.querySelector('mrow').namespaceURI;
 
-		expect(namespace).to.equal('http://www.w3.org/1998/Math/MathML');
+		expect(namespace).to.equal(MATH_NAMESPACE);
 	});
 
 	it('should inherit correct namespace URI from parent', () => {
 		const math = document.createElementNS(
-			'http://www.w3.org/1998/Math/MathML',
+			MATH_NAMESPACE,
 			'math'
 		);
 		scratch.appendChild(math);
@@ -44,14 +47,14 @@ describe('mathml', () => {
 		render(<mrow />, scratch.firstChild);
 
 		let namespace = scratch.querySelector('mrow').namespaceURI;
-		expect(namespace).to.equal('http://www.w3.org/1998/Math/MathML');
+		expect(namespace).to.equal(MATH_NAMESPACE);
 	});
 
 	it('should inherit correct namespace URI from parent upon updating', () => {
 		setupRerender();
 
 		const math = document.createElementNS(
-			'http://www.w3.org/1998/Math/MathML',
+			MATH_NAMESPACE,
 			'math'
 		);
 		scratch.appendChild(math);
@@ -62,7 +65,7 @@ describe('mathml', () => {
 				// eslint-disable-next-line
 				this.setState({ show: false }, () => {
 					expect(scratch.querySelector('mo').namespaceURI).to.equal(
-						'http://www.w3.org/1998/Math/MathML'
+						MATH_NAMESPACE
 					);
 				});
 			}
@@ -89,5 +92,25 @@ describe('mathml', () => {
 
 		expect(scratch.firstChild).to.be.an('HTMLDivElement');
 		expect(scratch.firstChild.firstChild).to.be.an('MathMLElement');
+	});
+
+	it('should support XHTML phrasing content within MathML token elements', () => {
+		render(
+			<div>
+				<math>
+					<mrow>
+						<mi><ins>123</ins></mi>
+					</mrow>
+				</math>
+			</div>,
+			scratch
+		);
+
+		expect(scratch.querySelector('mi').namespaceURI).to.equal(
+			MATH_NAMESPACE
+		);
+		expect(scratch.querySelector('ins').namespaceURI).to.equal(
+			XHTML_NAMESPACE
+		);
 	});
 });
