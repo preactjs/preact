@@ -166,7 +166,7 @@ export default defineConfig({
 							}
 						]
 					],
-					include: ['**/src/**/*.js', '**/test/**/*.{js,jsx}'],
+					include: ['**/src/**/*.js', '**/test/**/*.js', '**/test/**/*.jsx'],
 				});
 
 				return {
