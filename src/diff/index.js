@@ -12,7 +12,8 @@ import {
 	RESET_MODE,
 	SVG_NAMESPACE,
 	UNDEFINED,
-	XHTML_NAMESPACE
+	XHTML_NAMESPACE,
+	MATHML_TOKEN_ELEMENTS
 } from '../constants';
 import { BaseComponent, getDomSibling } from '../component';
 import { Fragment } from '../create-element';
@@ -615,7 +616,11 @@ function diffElementNodes(
 				newVNode,
 				oldVNode,
 				globalContext,
-				nodeType == 'foreignObject' ? XHTML_NAMESPACE : namespace,
+				nodeType == 'foreignObject'
+					? XHTML_NAMESPACE
+					: MATHML_TOKEN_ELEMENTS.test(nodeType)
+						? XHTML_NAMESPACE
+						: namespace,
 				excessDomChildren,
 				commitQueue,
 				excessDomChildren
