@@ -609,6 +609,13 @@ function diffElementNodes(
 		} else {
 			if (oldHtml) dom.innerHTML = '';
 
+			if (
+				(namespace == SVG_NAMESPACE && nodeType == 'foreignObject') ||
+				(namespace == MATH_NAMESPACE && MATHML_TOKEN_ELEMENTS.test(nodeType))
+			) {
+				namespace = XHTML_NAMESPACE;
+			}
+
 			diffChildren(
 				// @ts-expect-error
 				nodeType == 'template' ? dom.content : dom,
@@ -616,11 +623,7 @@ function diffElementNodes(
 				newVNode,
 				oldVNode,
 				globalContext,
-				nodeType == 'foreignObject'
-					? XHTML_NAMESPACE
-					: MATHML_TOKEN_ELEMENTS.test(nodeType)
-						? XHTML_NAMESPACE
-						: namespace,
+				namespace,
 				excessDomChildren,
 				commitQueue,
 				excessDomChildren
