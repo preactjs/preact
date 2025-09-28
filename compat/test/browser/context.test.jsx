@@ -1,6 +1,6 @@
 import { setupRerender } from 'preact/test-utils';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
-import React, {
+import {
 	render,
 	createElement,
 	Fragment,
@@ -46,7 +46,7 @@ describe('components', () => {
 		}
 
 		/**
-		 * @extends {React.Component<{children: any}, {location: string}>}
+		 * @extends {Component<{children: any}, {location: string}>}
 		 */
 		class Router extends Component {
 			constructor(props) {
@@ -71,7 +71,7 @@ describe('components', () => {
 		}
 
 		/**
-		 * @extends {React.Component<{children: any}>}
+		 * @extends {Component<{children: any}>}
 		 */
 		class Route extends Component {
 			render() {

@@ -1,4 +1,4 @@
-import React, { createElement, hydrate } from 'preact/compat';
+import { createElement, hydrate } from 'preact/compat';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { vi } from 'vitest';
 

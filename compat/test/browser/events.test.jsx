@@ -6,7 +6,7 @@ import {
 	supportsPassiveEvents
 } from '../../../test/_util/helpers';
 
-import React, { createElement } from 'preact/compat';
+import { createElement } from 'preact/compat';
 import { vi } from 'vitest';
 
 describe('preact/compat events', () => {

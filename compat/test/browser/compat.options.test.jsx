@@ -1,5 +1,5 @@
 import { vnodeSpy, eventSpy } from '../../../test/_util/optionSpies';
-import React, {
+import {
 	createElement,
 	render,
 	Component,

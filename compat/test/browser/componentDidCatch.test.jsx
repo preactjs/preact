@@ -1,4 +1,4 @@
-import React, { createElement, render, Component } from 'preact/compat';
+import { createElement, render, Component } from 'preact/compat';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { act } from 'preact/test-utils';
 

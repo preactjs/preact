@@ -1,5 +1,5 @@
 import { createContext } from 'preact';
-import React, {
+import {
 	createElement,
 	useDeferredValue,
 	useInsertionEffect,
