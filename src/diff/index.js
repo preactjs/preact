@@ -610,7 +610,7 @@ function diffElementNodes(
 			if (oldHtml) dom.innerHTML = '';
 
 			if (
-				(namespace == SVG_NAMESPACE && nodeType == 'foreignObject') ||
+				nodeType == 'foreignObject' ||
 				(namespace == MATH_NAMESPACE && MATHML_TOKEN_ELEMENTS.test(nodeType))
 			) {
 				namespace = XHTML_NAMESPACE;
