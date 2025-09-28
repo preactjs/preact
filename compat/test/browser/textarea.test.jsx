@@ -1,4 +1,4 @@
-import React, { render, hydrate, useState } from 'preact/compat';
+import React, { createElement, render, hydrate, useState } from 'preact/compat';
 import ReactDOMServer from 'preact/compat/server';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { act } from 'preact/test-utils';

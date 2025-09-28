@@ -3,6 +3,7 @@ import { setupScratch, teardown } from '../../../test/_util/helpers';
 import React, {
 	render,
 	createElement,
+	Fragment,
 	createContext,
 	Component,
 	useState,
