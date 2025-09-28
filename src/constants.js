@@ -32,5 +32,4 @@ export const UNDEFINED = undefined;
 export const EMPTY_OBJ = /** @type {any} */ ({});
 export const EMPTY_ARR = [];
 
-//export const MATHML_TOKEN_ELEMENTS = ['mtext', 'mi', 'mn', 'mo', 'mspace', 'ms'];
-export const MATHML_TOKEN_ELEMENTS = /(mi|mn|mo|mtext|ms|mspace)$/;
+export const MATHML_TOKEN_ELEMENTS = /(mi|mn|mo|ms$|mte|msp)/;
