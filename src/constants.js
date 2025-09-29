@@ -31,3 +31,5 @@ export const NULL = null;
 export const UNDEFINED = undefined;
 export const EMPTY_OBJ = /** @type {any} */ ({});
 export const EMPTY_ARR = [];
+
+export const MATHML_TOKEN_ELEMENTS = /(mi|mn|mo|ms$|mte|msp)/;

@@ -12,7 +12,8 @@ import {
 	RESET_MODE,
 	SVG_NAMESPACE,
 	UNDEFINED,
-	XHTML_NAMESPACE
+	XHTML_NAMESPACE,
+	MATHML_TOKEN_ELEMENTS
 } from '../constants';
 import { BaseComponent, getDomSibling } from '../component';
 import { Fragment } from '../create-element';
@@ -608,6 +609,13 @@ function diffElementNodes(
 		} else {
 			if (oldHtml) dom.innerHTML = '';
 
+			if (
+				nodeType == 'foreignObject' ||
+				(namespace == MATH_NAMESPACE && MATHML_TOKEN_ELEMENTS.test(nodeType))
+			) {
+				namespace = XHTML_NAMESPACE;
+			}
+
 			diffChildren(
 				// @ts-expect-error
 				nodeType == 'template' ? dom.content : dom,
@@ -615,7 +623,7 @@ function diffElementNodes(
 				newVNode,
 				oldVNode,
 				globalContext,
-				nodeType == 'foreignObject' ? XHTML_NAMESPACE : namespace,
+				namespace,
 				excessDomChildren,
 				commitQueue,
 				excessDomChildren
