@@ -1,6 +1,5 @@
 import { defineConfig } from 'vitest/config';
 import { transformAsync } from '@babel/core';
-import fs from 'node:fs/promises';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 
@@ -137,11 +136,11 @@ export default defineConfig({
 	},
 	esbuild: {
 		loader: 'jsx',
-		include: /.*\.js$/,
+		include: /.*\.jsx$/,
 		exclude: ['node_nodules'],
 		jsx: 'transform',
-		jsxImportSource: 'preact',
-		jsxDev: true
+		jsxFactory: 'createElement',
+		jsxFragment: 'Fragment',
 	},
 	plugins: [
 		{
@@ -167,7 +166,7 @@ export default defineConfig({
 							}
 						]
 					],
-					include: ['**/src/**/*.js', '**/test/**/*.js']
+					include: ['**/src/**/*.js', '**/test/**/*.js', '**/test/**/*.jsx'],
 				});
 
 				return {
@@ -193,19 +192,6 @@ export default defineConfig({
 		],
 		esbuildOptions: {
 			alias,
-			plugins: [
-				{
-					name: 'load-js-files-as-jsx',
-					setup(build) {
-						build.onLoad({ filter: /.*\.js$/ }, async args => {
-							return {
-								loader: 'jsx',
-								contents: await fs.readFile(args.path, 'utf8')
-							};
-						});
-					}
-				}
-			]
 		}
 	},
 	test: {
@@ -241,15 +227,15 @@ export default defineConfig({
 			{
 				extends: true,
 				test: {
-					include: ['./test/{shared,node,ts}/**/*.test.js']
+					include: ['./test/{shared,node,ts}/**/*.test.js?(x)']
 				}
 			},
 			{
 				extends: true,
 				test: {
 					include: [
-						'{debug,devtools,hooks,compat,test-utils,jsx-runtime}/test/{browser,shared}/**/*.test.js',
-						'./test/{browser,shared}/**/*.test.js'
+						'{debug,devtools,hooks,compat,test-utils,jsx-runtime}/test/{browser,shared}/**/*.test.js?(x)',
+						'./test/{browser,shared}/**/*.test.js?(x)'
 					],
 					setupFiles: ['./vitest.setup.js'],
 					// dangerouslyIgnoreUnhandledErrors: true,
