@@ -11,3 +11,30 @@ export const assign = Object.assign;
 export function removeNode(node) {
 	if (node && node.parentNode) node.remove();
 }
+
+/**
+ * Check if a value is a function
+ * @param {*} value The value to check
+ * @returns {boolean}
+ */
+export function isFunction(value) {
+	return typeof value === 'function';
+}
+
+/**
+ * Check if a value is a string
+ * @param {*} value The value to check
+ * @returns {boolean}
+ */
+export function isString(value) {
+	return typeof value === 'string';
+}
+
+/**
+ * Check if a value is defined (not null or undefined)
+ * @param {*} value The value to check
+ * @returns {boolean}
+ */
+export function isDefined(value) {
+	return value != null;
+}

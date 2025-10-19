@@ -9,7 +9,7 @@ export default class Spiral extends Component {
 	state = { x: 0, y: 0, big: false, counter: 0 };
 
 	handleClick = e => {
-		console.log('click');
+		// Click handler for demo interaction
 	};
 
 	increment = () => {
@@ -30,8 +30,7 @@ export default class Spiral extends Component {
 	}
 
 	componentDidMount() {
-		console.log('mount');
-
+		// Component mounted - setup event listeners
 		// let touch = navigator.maxTouchPoints > 1;
 		let touch = false;
 
@@ -51,7 +50,7 @@ export default class Spiral extends Component {
 	}
 
 	componentWillUnmount() {
-		console.log('unmount');
+		// Stop animation loop before unmounting
 		this.stop = true;
 	}
 
