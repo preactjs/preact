@@ -1,4 +1,10 @@
-import { createElement, Fragment, SignalLike, UnpackSignal, AriaAttributes } from 'preact';
+import {
+	createElement,
+	Fragment,
+	SignalLike,
+	UnpackSignal,
+	AriaAttributes
+} from 'preact';
 
 function createSignal<T>(value: T): SignalLike<T> {
 	return {
@@ -247,5 +253,11 @@ const booleanishTest = (
 		<div aria-haspopup={'true'} />
 		<div aria-haspopup={'false'} />
 		<div aria-haspopup={'dialog'} />
+	</>
+);
+
+const dangerouslySetInnerHTML = (
+	<>
+		<div dangerouslySetInnerHTML={{ __html: 'string' }} />
 	</>
 );
