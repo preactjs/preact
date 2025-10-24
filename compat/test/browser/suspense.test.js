@@ -105,6 +105,59 @@ describe('suspense', () => {
 		});
 	});
 
+	it('should handle lazy component that rejects without returning a component', async () => {
+		const errorSpy = sinon.spy();
+		let renderCount = 0;
+
+		let resolve;
+		function fakeImport() {
+			const p = new Promise((_, reject) => {
+				resolve = () => {
+					reject(new Error('import failed'));
+					return p;
+				};
+			});
+			return p;
+		}
+
+		const SomeComponent = lazy(() =>
+			fakeImport().catch(e => {
+				console.log('caught', e);
+				errorSpy(e);
+			})
+		);
+
+		const App = () => {
+			renderCount++;
+			if (renderCount > 5) {
+				throw new Error('Infinite loop detected!');
+			}
+
+			console.log('RENDER COUNT', renderCount);
+			return (
+				<div>
+					<Suspense fallback={<div>loading</div>}>
+						<SomeComponent />
+					</Suspense>
+				</div>
+			);
+		};
+
+		render(<App />, scratch);
+		rerender();
+
+		expect(scratch.innerHTML).to.contain('loading');
+
+		const assert = () => {
+			rerender();
+
+			expect(scratch.innerHTML).to.contain('<div></div>');
+			expect(errorSpy).to.have.been.called;
+		};
+
+		resolve().then(assert).catch(assert);
+	});
+
 	it('should reset hooks of components', () => {
 		/** @type {(v) => void} */
 		let set;
