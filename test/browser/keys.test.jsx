@@ -65,6 +65,7 @@ describe('keys', () => {
 		values.splice(to, 0, value);
 	}
 
+	let resetMoveBefore;
 	let resetAppendChild;
 	let resetInsertBefore;
 	let resetRemoveChild;
@@ -72,6 +73,7 @@ describe('keys', () => {
 	let resetRemoveText;
 
 	beforeAll(() => {
+		resetMoveBefore = logCall(Element.prototype, 'moveBefore');
 		resetAppendChild = logCall(Element.prototype, 'appendChild');
 		resetInsertBefore = logCall(Element.prototype, 'insertBefore');
 		resetRemoveChild = logCall(Element.prototype, 'removeChild');
@@ -85,6 +87,7 @@ describe('keys', () => {
 		resetRemoveChild();
 		resetRemove();
 		resetRemoveText();
+		resetMoveBefore();
 	});
 
 	beforeEach(() => {
@@ -179,9 +182,11 @@ describe('keys', () => {
 			render({ children, busy }) {
 				return (
 					<div class={busy ? 'busy' : ''}>
-						{children && children.length
-							? children
-							: <div class="busy-placeholder" />}
+						{children && children.length ? (
+							children
+						) : (
+							<div class="busy-placeholder" />
+						)}
 						<div class="indicator">
 							<div>indicator</div>
 							<div>indicator</div>
@@ -566,19 +571,21 @@ describe('keys', () => {
 		let Stateful2MovedRef;
 
 		function Foo({ moved }) {
-			return moved
-				? <div>
-						<div>1</div>
-						<Stateful1 key="c" ref={c => (Stateful1MovedRef = c)} />
-						<div>2</div>
-						<Stateful2 key="d" ref={c => (Stateful2MovedRef = c)} />
-					</div>
-				: <div>
-						<div>1</div>
-						<Stateful1 key="a" ref={c => (Stateful1Ref = c)} />
-						<div>2</div>
-						<Stateful2 key="b" ref={c => (Stateful2Ref = c)} />
-					</div>;
+			return moved ? (
+				<div>
+					<div>1</div>
+					<Stateful1 key="c" ref={c => (Stateful1MovedRef = c)} />
+					<div>2</div>
+					<Stateful2 key="d" ref={c => (Stateful2MovedRef = c)} />
+				</div>
+			) : (
+				<div>
+					<div>1</div>
+					<Stateful1 key="a" ref={c => (Stateful1Ref = c)} />
+					<div>2</div>
+					<Stateful2 key="b" ref={c => (Stateful2Ref = c)} />
+				</div>
+			);
 		}
 
 		const expectedHtml = div([
@@ -635,31 +642,27 @@ describe('keys', () => {
 		let Stateful2MovedRef;
 
 		function Foo({ moved }) {
-			return moved
-				? <div>
-						<div>1</div>
-						<Stateful2
-							key="b"
-							ref={c => (c ? (Stateful2MovedRef = c) : undefined)}
-						/>
-						<div>2</div>
-						<Stateful1
-							key="a"
-							ref={c => (c ? (Stateful1MovedRef = c) : undefined)}
-						/>
-					</div>
-				: <div>
-						<div>1</div>
-						<Stateful1
-							key="a"
-							ref={c => (c ? (Stateful1Ref = c) : undefined)}
-						/>
-						<div>2</div>
-						<Stateful2
-							key="b"
-							ref={c => (c ? (Stateful2Ref = c) : undefined)}
-						/>
-					</div>;
+			return moved ? (
+				<div>
+					<div>1</div>
+					<Stateful2
+						key="b"
+						ref={c => (c ? (Stateful2MovedRef = c) : undefined)}
+					/>
+					<div>2</div>
+					<Stateful1
+						key="a"
+						ref={c => (c ? (Stateful1MovedRef = c) : undefined)}
+					/>
+				</div>
+			) : (
+				<div>
+					<div>1</div>
+					<Stateful1 key="a" ref={c => (c ? (Stateful1Ref = c) : undefined)} />
+					<div>2</div>
+					<Stateful2 key="b" ref={c => (c ? (Stateful2Ref = c) : undefined)} />
+				</div>
+			);
 		}
 
 		const htmlForFalse = div([
@@ -841,19 +844,21 @@ describe('keys', () => {
 		let Stateful2MovedRef;
 
 		function Foo({ unkeyed }) {
-			return unkeyed
-				? <div>
-						<div>1</div>
-						<Stateful1 ref={c => (Stateful2MovedRef = c)} />
-						<div>2</div>
-						<Stateful2 ref={c => (Stateful1MovedRef = c)} />
-					</div>
-				: <div>
-						<div>1</div>
-						<Stateful1 key="a" ref={c => (Stateful1Ref = c)} />
-						<div>2</div>
-						<Stateful2 key="b" ref={c => (Stateful2Ref = c)} />
-					</div>;
+			return unkeyed ? (
+				<div>
+					<div>1</div>
+					<Stateful1 ref={c => (Stateful2MovedRef = c)} />
+					<div>2</div>
+					<Stateful2 ref={c => (Stateful1MovedRef = c)} />
+				</div>
+			) : (
+				<div>
+					<div>1</div>
+					<Stateful1 key="a" ref={c => (Stateful1Ref = c)} />
+					<div>2</div>
+					<Stateful2 key="b" ref={c => (Stateful2Ref = c)} />
+				</div>
+			);
 		}
 
 		const expectedHtml = div([
@@ -1007,18 +1012,20 @@ describe('keys', () => {
 		}
 
 		const App = props => {
-			return props.y === '2'
-				? <div>
-						<Comp key={1} i={1} />
-						<Comp key={2} i={2} />
-						<Comp key={3} i={3} />
-					</div>
-				: <div>
-						{null}
-						<Comp key={1} i={1} />
-						<Comp key={2} i={2} />
-						<Comp key={3} i={3} />
-					</div>;
+			return props.y === '2' ? (
+				<div>
+					<Comp key={1} i={1} />
+					<Comp key={2} i={2} />
+					<Comp key={3} i={3} />
+				</div>
+			) : (
+				<div>
+					{null}
+					<Comp key={1} i={1} />
+					<Comp key={2} i={2} />
+					<Comp key={3} i={3} />
+				</div>
+			);
 		};
 
 		render(<App y="1" />, scratch);
@@ -1040,17 +1047,19 @@ describe('keys', () => {
 		}
 
 		const App = props => {
-			return props.y === '1'
-				? <div>
-						<Comp key={1} i={1} />
-						<Comp key={2} i={2} />
-						<Comp key={3} i={3} />
-					</div>
-				: <div>
-						<Comp key={1} i={1} />
-						{null}
-						<Comp key={3} i={3} />
-					</div>;
+			return props.y === '1' ? (
+				<div>
+					<Comp key={1} i={1} />
+					<Comp key={2} i={2} />
+					<Comp key={3} i={3} />
+				</div>
+			) : (
+				<div>
+					<Comp key={1} i={1} />
+					{null}
+					<Comp key={3} i={3} />
+				</div>
+			);
 		};
 
 		render(<App y="1" />, scratch);
@@ -1080,18 +1089,20 @@ describe('keys', () => {
 		}
 
 		const App = props => {
-			return props.y === '2'
-				? <div>
-						<Comp key={1} i={1} />
-						<Comp key={2} i={2} />
-						<Comp key={3} i={3} />
-					</div>
-				: <div>
-						<Comp key={1} i={1} />
-						<Comp key={2} i={2} />
-						{null}
-						<Comp key={3} i={3} />
-					</div>;
+			return props.y === '2' ? (
+				<div>
+					<Comp key={1} i={1} />
+					<Comp key={2} i={2} />
+					<Comp key={3} i={3} />
+				</div>
+			) : (
+				<div>
+					<Comp key={1} i={1} />
+					<Comp key={2} i={2} />
+					{null}
+					<Comp key={3} i={3} />
+				</div>
+			);
 		};
 
 		render(<App y="1" />, scratch);
@@ -1113,18 +1124,20 @@ describe('keys', () => {
 		}
 
 		const App = props => {
-			return props.y === '2'
-				? <div>
-						<Comp key={1} i={1} />
-						<Comp key={2} i={2} />
-						<Comp key={3} i={3} />
-					</div>
-				: <div>
-						<Comp key={1} i={1} />
-						<Comp key={2} i={2} />
-						<Comp key={3} i={3} />
-						{null}
-					</div>;
+			return props.y === '2' ? (
+				<div>
+					<Comp key={1} i={1} />
+					<Comp key={2} i={2} />
+					<Comp key={3} i={3} />
+				</div>
+			) : (
+				<div>
+					<Comp key={1} i={1} />
+					<Comp key={2} i={2} />
+					<Comp key={3} i={3} />
+					{null}
+				</div>
+			);
 		};
 
 		render(<App y="1" />, scratch);
