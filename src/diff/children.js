@@ -366,11 +366,19 @@ function insert(parentVNode, oldDom, parentDom, shouldPlace, isMounting) {
 				oldDom = getDomSibling(parentVNode);
 			}
 
+			const target = oldDom || NULL;
 			if (HAS_MOVE_BEFORE_SUPPORT && !isMounting) {
-				// @ts-expect-error This isn't added to TypeScript lib.d.ts yet
-				parentDom.moveBefore(parentVNode._dom, oldDom);
+				try {
+					// Technically this can throw in multiple scenario's one of which
+					// is a component that is mounting - we could consider removing
+					// the condition because we have a catch in place.
+					// @ts-expect-error This isn't added to TypeScript lib.d.ts yet
+					parentDom.moveBefore(parentVNode._dom, target);
+				} catch (error) {
+					parentDom.insertBefore(parentVNode._dom, target);
+				}
 			} else {
-				parentDom.insertBefore(parentVNode._dom, oldDom || NULL);
+				parentDom.insertBefore(parentVNode._dom, target);
 			}
 		}
 		oldDom = parentVNode._dom;
