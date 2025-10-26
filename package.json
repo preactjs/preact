@@ -91,6 +91,10 @@
       "import": "./compat/server.mjs",
       "require": "./compat/server.js"
     },
+    "./compat/server.browser": {
+      "types": "./compat/server.d.ts",
+      "default": "./compat/server.browser.js"
+    },
     "./compat/jsx-runtime": {
       "types": "./jsx-runtime/src/index.d.ts",
       "import": "./compat/jsx-runtime.mjs",
