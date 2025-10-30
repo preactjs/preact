@@ -774,8 +774,9 @@ export interface DOMAttributes<Target extends EventTarget>
 
 	// Scroll Events
 	onScroll?: GenericEventHandler<Target> | undefined;
-	onScrollEnd?: GenericEventHandler<Target> | undefined;
 	onScrollCapture?: GenericEventHandler<Target> | undefined;
+	onScrollEnd?: GenericEventHandler<Target> | undefined;
+	onScrollEndCapture?: GenericEventHandler<Target> | undefined;
 
 	// Wheel Events
 	onWheel?: WheelEventHandler<Target> | undefined;
