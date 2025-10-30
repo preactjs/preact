@@ -59,6 +59,22 @@ interface CommandEventInit extends EventInit {
 	command: string;
 }
 
+/** [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/API/SnapEvent) */
+interface SnapEvent extends Event {
+	readonly snapTargetBlock: Element | null;
+	readonly snapTargetInline: Element | null;
+}
+
+declare var SnapEvent: {
+	prototype: SnapEvent;
+	new (type: string, eventInitDict?: SnapEventInit): SnapEvent;
+}
+
+interface SnapEventInit extends EventInit {
+	snapTargetBlock?: Element | null;
+	snapTargetInline?: Element | null;
+}
+
 export namespace JSXInternal {
 	export type LibraryManagedAttributes<Component, Props> = Component extends {
 		defaultProps: infer Defaults;
@@ -563,6 +579,11 @@ export namespace JSXInternal {
 		PointerEvent
 	>;
 	/** @deprecated Please import from the Preact namespace instead */
+	export type TargetedSnapEvent<Target extends EventTarget> = TargetedEvent<
+		Target,
+		SnapEvent
+	>;
+	/** @deprecated Please import from the Preact namespace instead */
 	export type TargetedSubmitEvent<Target extends EventTarget> = TargetedEvent<
 		Target,
 		SubmitEvent
@@ -645,6 +666,10 @@ export namespace JSXInternal {
 	/** @deprecated Please import from the Preact namespace instead */
 	export type PointerEventHandler<Target extends EventTarget> = EventHandler<
 		TargetedPointerEvent<Target>
+	>;
+	/** @deprecated Please import from the Preact namespace instead */
+	export type SnapEventHandler<Target extends EventTarget> = EventHandler<
+		TargetedSnapEvent<Target>
 	>;
 	/** @deprecated Please import from the Preact namespace instead */
 	export type SubmitEventHandler<Target extends EventTarget> = EventHandler<
@@ -869,6 +894,10 @@ export namespace JSXInternal {
 		onScrollCapture?: GenericEventHandler<Target> | undefined;
 		onScrollEnd?: GenericEventHandler<Target> | undefined;
 		onScrollEndCapture?: GenericEventHandler<Target> | undefined;
+		onScrollSnapChange?: SnapEventHandler<Target> | undefined;
+		onScrollSnapChangeCapture?: SnapEventHandler<Target> | undefined;
+		onScrollSnapChanging?: SnapEventHandler<Target> | undefined;
+		onScrollSnapChangingCapture?: SnapEventHandler<Target> | undefined;
 
 		// Wheel Events
 		onWheel?: WheelEventHandler<Target> | undefined;
