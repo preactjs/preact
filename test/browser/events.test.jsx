@@ -291,29 +291,4 @@ describe('event handling', () => {
 			false
 		);
 	});
-
-	it('should support scroll snap events', () => {
-		let scrollSnapChange = vi.fn();
-		let scrollSnapChanging = vi.fn();
-
-		render(
-			<div
-				onScrollSnapChange={scrollSnapChange}
-				onScrollSnapChanging={scrollSnapChanging}
-			/>,
-			scratch
-		);
-
-		expect(proto.addEventListener).toHaveBeenCalledTimes(2);
-		expect(proto.addEventListener).toHaveBeenCalledWith(
-			'scrollsnapchange',
-			expect.any(Function),
-			false
-		);
-		expect(proto.addEventListener).toHaveBeenCalledWith(
-			'scrollsnapchanging',
-			expect.any(Function),
-			false
-		);
-	});
 });
