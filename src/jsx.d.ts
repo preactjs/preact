@@ -864,10 +864,11 @@ export namespace JSXInternal {
 		onLostPointerCapture?: PointerEventHandler<Target> | undefined;
 		onLostPointerCaptureCapture?: PointerEventHandler<Target> | undefined;
 
-		// UI Events
-		onScroll?: UIEventHandler<Target> | undefined;
-		onScrollEnd?: UIEventHandler<Target> | undefined;
-		onScrollCapture?: UIEventHandler<Target> | undefined;
+		// Scroll Events
+		onScroll?: GenericEventHandler<Target> | undefined;
+		onScrollCapture?: GenericEventHandler<Target> | undefined;
+		onScrollEnd?: GenericEventHandler<Target> | undefined;
+		onScrollEndCapture?: GenericEventHandler<Target> | undefined;
 
 		// Wheel Events
 		onWheel?: WheelEventHandler<Target> | undefined;
