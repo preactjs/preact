@@ -33,6 +33,22 @@ interface CommandEventInit extends EventInit {
 	command: string;
 }
 
+/** [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/API/SnapEvent) */
+interface SnapEvent extends Event {
+	readonly snapTargetBlock: Element | null;
+	readonly snapTargetInline: Element | null;
+}
+
+declare var SnapEvent: {
+	prototype: SnapEvent;
+	new (type: string, eventInitDict?: SnapEventInit): SnapEvent;
+}
+
+interface SnapEventInit extends EventInit {
+	snapTargetBlock?: Element | null;
+	snapTargetInline?: Element | null;
+}
+
 type Booleanish = boolean | 'true' | 'false';
 
 export interface SignalLike<T> {
@@ -494,6 +510,10 @@ export type TargetedPointerEvent<Target extends EventTarget> = TargetedEvent<
 	Target,
 	PointerEvent
 >;
+export type TargetedSnapEvent<Target extends EventTarget> = TargetedEvent<
+	Target,
+	SnapEvent
+>;
 export type TargetedSubmitEvent<Target extends EventTarget> = TargetedEvent<
 	Target,
 	SubmitEvent
@@ -560,6 +580,9 @@ export type MouseEventHandler<Target extends EventTarget> = EventHandler<
 >;
 export type PointerEventHandler<Target extends EventTarget> = EventHandler<
 	TargetedPointerEvent<Target>
+>;
+export type SnapEventHandler<Target extends EventTarget> = EventHandler<
+	TargetedSnapEvent<Target>
 >;
 export type SubmitEventHandler<Target extends EventTarget> = EventHandler<
 	TargetedSubmitEvent<Target>
@@ -777,6 +800,10 @@ export interface DOMAttributes<Target extends EventTarget>
 	onScrollCapture?: GenericEventHandler<Target> | undefined;
 	onScrollEnd?: GenericEventHandler<Target> | undefined;
 	onScrollEndCapture?: GenericEventHandler<Target> | undefined;
+	onScrollSnapChange?: SnapEventHandler<Target> | undefined;
+	onScrollSnapChangeCapture?: SnapEventHandler<Target> | undefined;
+	onScrollSnapChanging?: SnapEventHandler<Target> | undefined;
+	onScrollSnapChangingCapture?: SnapEventHandler<Target> | undefined;
 
 	// Wheel Events
 	onWheel?: WheelEventHandler<Target> | undefined;
