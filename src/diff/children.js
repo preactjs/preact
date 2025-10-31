@@ -427,7 +427,7 @@ function findMatchingIndex(
 		remainingOldChildren > (matched ? 1 : 0);
 
 	if (
-		(oldVNode === NULL && childVNode.key == null) ||
+		(oldVNode === NULL && key == null) ||
 		(matched && key == oldVNode.key && type == oldVNode.type)
 	) {
 		return skewedIndex;
