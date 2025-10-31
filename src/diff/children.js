@@ -222,7 +222,7 @@ function constructNewChildrenArray(
 				childVNode._original
 			);
 		} else {
-			childVNode = newParentVNode._children[i] = childVNode;
+			newParentVNode._children[i] = childVNode;
 		}
 
 		const skewedIndex = i + skew;
