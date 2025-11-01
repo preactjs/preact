@@ -13,9 +13,10 @@ export { PreactContext };
 export interface Options extends PreactOptions {
 	/** Attach a hook that is invoked before a vnode is diffed. */
 	_diff?(vnode: VNode): void;
-	diffed?(vnode: VNode): void;
 	/** Attach a hook that is invoked before a vnode has rendered. */
 	_render?(vnode: VNode): void;
+	/** Attach a hook that is invoked after a vnode has rendered. */
+	diffed?(vnode: VNode): void;
 	/** Attach a hook that is invoked after a tree was mounted or was updated. */
 	_commit?(vnode: VNode, commitQueue: Component[]): void;
 	_unmount?(vnode: VNode): void;
