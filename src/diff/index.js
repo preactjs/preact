@@ -132,9 +132,7 @@ export function diff(
 				}
 				if (provider) provider.sub(c);
 
-				c.props = newProps;
 				if (!c.state) c.state = {};
-				c.context = componentContext;
 				c._globalContext = globalContext;
 				c._bits |= COMPONENT_DIRTY;
 				c._renderCallbacks = [];
