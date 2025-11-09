@@ -11,6 +11,11 @@ export function captureOwnerStack(): string;
 export function getCurrentVNode(): VNode | null;
 
 /**
+ * Get human readable name of the component/dom node
+ */
+export function getDisplayName(vnode: VNode): string;
+
+/**
  * Return the component stack that was captured up to this point.
  */
 export function getOwnerStack(vnode: VNode): string;
