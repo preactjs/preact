@@ -2,7 +2,7 @@ import { options, Fragment } from 'preact';
 
 /**
  * Get human readable name of the component/dom node
- * @param {import('./internal').VNode} vnode
+ *
  * @param {import('./internal').VNode} vnode
  * @returns {string}
  */
