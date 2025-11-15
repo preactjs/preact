@@ -145,7 +145,7 @@ export function initDebug() {
 		if (oldRoot) oldRoot(vnode, parentNode);
 	};
 
-	options._diff = vnode => {
+	options._diff = (vnode, oldVNode) => {
 		let { type } = vnode;
 
 		hooksAllowed = true;
@@ -241,7 +241,7 @@ export function initDebug() {
 			);
 		}
 
-		if (oldBeforeDiff) oldBeforeDiff(vnode);
+		if (oldBeforeDiff) oldBeforeDiff(vnode, oldVNode);
 	};
 
 	let renderCount = 0;
