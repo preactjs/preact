@@ -49,3 +49,9 @@ const booleanishTest = (
 		<div aria-haspopup={'dialog'} />
 	</>
 );
+
+const dangerouslySetInnerHTML = (
+	<>
+		<div dangerouslySetInnerHTML={{ __html: 'string' }} />
+	</>
+);
