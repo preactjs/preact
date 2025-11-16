@@ -222,7 +222,7 @@ function constructNewChildrenArray(
 				childVNode._original
 			);
 		} else {
-			childVNode = newParentVNode._children[i] = childVNode;
+			newParentVNode._children[i] = childVNode;
 		}
 
 		const skewedIndex = i + skew;
@@ -239,7 +239,6 @@ function constructNewChildrenArray(
 			remainingOldChildren
 		));
 
-		oldVNode = NULL;
 		if (matchingIndex != -1) {
 			oldVNode = oldChildren[matchingIndex];
 			remainingOldChildren--;
@@ -427,7 +426,7 @@ function findMatchingIndex(
 		remainingOldChildren > (matched ? 1 : 0);
 
 	if (
-		(oldVNode === NULL && childVNode.key == null) ||
+		(oldVNode === NULL && key == null) ||
 		(matched && key == oldVNode.key && type == oldVNode.type)
 	) {
 		return skewedIndex;
