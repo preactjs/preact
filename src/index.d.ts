@@ -66,7 +66,7 @@ export interface ClassAttributes<T> extends Attributes {
 export interface PreactDOMAttributes {
 	children?: ComponentChildren;
 	dangerouslySetInnerHTML?: {
-		__html: string;
+		__html: Parameters<DOMParser['parseFromString']>[0];
 	};
 }
 
