@@ -126,7 +126,7 @@ function renderComponent(component) {
 		commitQueue = [],
 		refQueue = [];
 
-	if (component._parentDom) {
+	if (component._parentDom && oldVNode._parent) {
 		const newVNode = assign({}, oldVNode);
 		newVNode._original = oldVNode._original + 1;
 		if (options.vnode) options.vnode(newVNode);
