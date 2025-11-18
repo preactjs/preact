@@ -147,7 +147,7 @@ Suspense.prototype._childDidSuspend = function (promise, suspendingVNode) {
 		if (!--c._pendingSuspensionCount) {
 			// If the suspension was during hydration we don't need to restore the
 			// suspended children into the _children array
-			if (c.state._suspended) {
+			if (c.state._suspended && c.state._suspended._component) {
 				const suspendedVNode = c.state._suspended;
 				c._vnode._children[0] = removeOriginal(
 					suspendedVNode,
@@ -181,6 +181,7 @@ Suspense.prototype._childDidSuspend = function (promise, suspendingVNode) {
 
 Suspense.prototype.componentWillUnmount = function () {
 	this._suspenders = [];
+	this.state._suspended = this._detachOnNextRender = null;
 };
 
 /**
@@ -236,6 +237,7 @@ Suspense.prototype.render = function (props, state) {
  * @returns {((unsuspend: () => void) => void)?}
  */
 export function suspended(vnode) {
+	if (!vnode._parent) return null;
 	/** @type {import('./internal').Component} */
 	let component = vnode._parent._component;
 	return component && component._suspended && component._suspended(vnode);
