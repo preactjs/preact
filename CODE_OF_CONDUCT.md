@@ -22,6 +22,8 @@ Examples of unacceptable behavior by participants include:
 - Publishing others' private information, such as a physical or electronic address, without explicit permission
 - Other conduct which could reasonably be considered inappropriate in a professional setting
 
+We recognize that LLM's have become an integral tool for many users, however when using LLMs to help write issues or pull requests, disclose this. Transparency preserves the collaborative integrity that makes open-source communities work. It's the difference between "I used AI to help structure this bug report" (honest, helpful) and silently passing off generated content as your own analysis (deceptive, counterproductive). We as maintainers want to engage with humans rather than LLM-generated messages, put time in your issue report and that will be reflected back.
+
 ## Our Responsibilities
 
 Project maintainers are responsible for clarifying the standards of acceptable behavior and are expected to take appropriate and fair corrective action in response to any instances of unacceptable behavior.
