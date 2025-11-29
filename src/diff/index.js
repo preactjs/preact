@@ -165,14 +165,14 @@ export function diff(
 				}
 
 				if (
+					newVNode._original == oldVNode._original ||
 					(!c._force &&
 						c.shouldComponentUpdate != NULL &&
 						c.shouldComponentUpdate(
 							newProps,
 							c._nextState,
 							componentContext
-						) === false) ||
-					newVNode._original == oldVNode._original
+						) === false)
 				) {
 					// More info about this here: https://gist.github.com/JoviDeCroock/bec5f2ce93544d2e6070ef8e0036e4e8
 					if (newVNode._original != oldVNode._original) {

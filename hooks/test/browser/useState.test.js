@@ -19,6 +19,7 @@ describe('useState', () => {
 	});
 
 	afterEach(() => {
+		Component.prototype.shouldComponentUpdate = undefined;
 		teardown(scratch);
 	});
 
@@ -413,5 +414,65 @@ describe('useState', () => {
 			expect(scratch.innerHTML).to.equal('<div>Unsaved!</div>');
 			expect(renders).to.equal(2);
 		});
+	});
+
+	it('Works when we combine strict equality, signals bail and state settling', () => {
+		// In signals we bail when we are using no signals/computeds/....
+		Component.prototype.shouldComponentUpdate = function (
+			nextProps,
+			nextState
+		) {
+			return false;
+		};
+		let setA, setB;
+
+		const fooContext = createContext();
+		const barContext = createContext();
+
+		function FooProvider({ children }) {
+			const [a, _setA] = useState(0);
+			setA = _setA;
+			return <fooContext.Provider value={a}>{children}</fooContext.Provider>;
+		}
+
+		function BarProvider({ children }) {
+			const [b, _setB] = useState(0);
+			setB = _setB;
+			return <barContext.Provider value={b}>{children}</barContext.Provider>;
+		}
+
+		function Child() {
+			const a = useContext(fooContext);
+			const b = useContext(barContext);
+			return (
+				<p>
+					{a}-{b}
+				</p>
+			);
+		}
+
+		function App() {
+			return (
+				<FooProvider>
+					<BarProvider>
+						<Child />
+					</BarProvider>
+				</FooProvider>
+			);
+		}
+
+		render(<App />, scratch);
+		expect(scratch.innerHTML).to.equal('<p>0-0</p>');
+
+		act(() => {
+			// We update A first so that we have a top-down render going on
+			setA(1);
+			// The update will bail at B, we don't want sCU to run because
+			// else we risk the state's _nextValue being settled too early
+			// and thus applying the update too early and bailing on the subsequent
+			// render due to the values already being applied.
+			setB(1);
+		});
+		expect(scratch.innerHTML).to.equal('<p>1-1</p>');
 	});
 });
