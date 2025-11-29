@@ -112,9 +112,7 @@ export function diff(
 				}
 				if (provider) provider.sub(c);
 
-				c.props = newProps;
 				if (!c.state) c.state = {};
-				c.context = componentContext;
 				c._globalContext = globalContext;
 				isNew = c._dirty = true;
 				c._renderCallbacks = [];
@@ -417,7 +415,7 @@ function diffElementNodes(
 	isHydrating,
 	refQueue
 ) {
-	let oldProps = oldVNode.props;
+	let oldProps = oldVNode.props || EMPTY_OBJ;
 	let newProps = newVNode.props;
 	let nodeType = /** @type {string} */ (newVNode.type);
 	/** @type {any} */
@@ -486,8 +484,6 @@ function diffElementNodes(
 	} else {
 		// If excessDomChildren was not null, repopulate it with the current element's children:
 		excessDomChildren = excessDomChildren && slice.call(dom.childNodes);
-
-		oldProps = oldVNode.props || EMPTY_OBJ;
 
 		// If we are in a situation where we are not hydrating but are using
 		// existing DOM (e.g. replaceNode) we should read the existing DOM
