@@ -415,6 +415,49 @@ describe('suspense', () => {
 		});
 	});
 
+	it('should not crash when suspended child updates after unmount', () => {
+		/** @type {Component | null} */
+		let childInstance = null;
+		const neverResolvingPromise = new Promise(() => {});
+
+		class ThrowingChild extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { suspend: false, value: 0 };
+				childInstance = this;
+			}
+
+			render(props, state) {
+				if (state.suspend) {
+					throw neverResolvingPromise;
+				}
+
+				return <div>value:{state.value}</div>;
+			}
+		}
+
+		render(
+			<Suspense fallback={<div>Suspended...</div>}>
+				<ThrowingChild />
+			</Suspense>,
+			scratch
+		);
+
+		expect(childInstance).to.not.equal(null);
+		expect(scratch.innerHTML).to.equal('<div>value:0</div>');
+
+		act(() => childInstance.setState({ suspend: true }));
+		rerender();
+		expect(scratch.innerHTML).to.equal('<div>Suspended...</div>');
+
+		render(null, scratch);
+
+		childInstance.setState({ value: 1 });
+		rerender();
+
+		expect(scratch.innerHTML).to.equal('');
+	});
+
 	it('should properly call lifecycle methods of an initially suspending component', () => {
 		/** @type {() => Promise<void>} */
 		let resolve;
