@@ -1,5 +1,5 @@
 import { options as _options } from 'preact';
-import { COMPONENT_FORCE } from '../../src/constants';
+import { COMPONENT_FORCE, CONTEXT_TYPE } from '../../src/constants';
 
 const ObjectIs = Object.is;
 
@@ -162,6 +162,101 @@ function getHookState(index, type) {
 	}
 
 	return hooks._list[index];
+}
+
+const PROMISE_CACHE = new WeakMap();
+/**
+ * Preact implementation of React's use hook
+ * Supports Promise and Context consumption
+ *
+ * @template T
+ * @param {Promise<T> | import('preact').PreactContext<T>} usable
+ * @returns {T}
+ */
+export function use(usable) {
+	if (
+		usable != null &&
+		(typeof usable === 'object' || typeof usable === 'function')
+	) {
+		if ('then' in usable && typeof usable.then === 'function') {
+			return usePromise(usable);
+		}
+
+		if ('$$typeof' in usable && usable.$$typeof === CONTEXT_TYPE) {
+			return useContext(
+				/** @type {import('./internal').PreactContext} */ (
+					/** @type {unknown} */ (usable)
+				)
+			);
+		}
+	}
+
+	throw new Error(`An unsupported type was passed to use(): ${usable}`);
+}
+
+/**
+ * Internal function to handle Promise resources
+ * @template T
+ * @param {Promise<T>} promise
+ * @returns {T}
+ */
+function usePromise(promise) {
+	const [, forceUpdate] = useState(/** @type {object} */ ({}));
+
+	let promiseState = PROMISE_CACHE.get(promise);
+
+	if (!promiseState) {
+		promiseState = {
+			status: 'pending',
+			value: undefined,
+			reason: undefined,
+			subscribers: new Set()
+		};
+
+		PROMISE_CACHE.set(promise, promiseState);
+
+		promise.then(
+			value => {
+				if (promiseState.status === 'pending') {
+					promiseState.status = 'fulfilled';
+					promiseState.value = value;
+					promiseState.subscribers.forEach(cb => cb({}));
+					promiseState.subscribers.clear();
+				}
+			},
+			reason => {
+				if (promiseState.status === 'pending') {
+					promiseState.status = 'rejected';
+					promiseState.reason = reason;
+					promiseState.subscribers.forEach(cb => cb({}));
+					promiseState.subscribers.clear();
+				}
+			}
+		);
+	}
+
+	if (promiseState.status === 'pending') {
+		promiseState.subscribers.add(forceUpdate);
+	}
+
+	useEffect(() => {
+		return () => {
+			if (promiseState) {
+				promiseState.subscribers.delete(forceUpdate);
+			}
+		};
+	}, [promise]);
+
+	switch (promiseState.status) {
+		case 'fulfilled':
+			return promiseState.value;
+		case 'rejected':
+			throw promiseState.reason;
+		case 'pending':
+			throw promise;
+		default:
+			throw promise;
+	}
 }
 
 /**

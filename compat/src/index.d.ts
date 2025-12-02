@@ -125,6 +125,7 @@ declare namespace React {
 	export import useRef = _hooks.useRef;
 	export import useState = _hooks.useState;
 	// React 18 hooks
+	export import use = _hooks.use;
 	export import useInsertionEffect = _hooks.useLayoutEffect;
 	export function useTransition(): [false, typeof startTransition];
 	export function useDeferredValue<T = any>(val: T): T;
