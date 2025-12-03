@@ -191,62 +191,26 @@ export function use(resource) {
  * @returns {T}
  */
 function usePromise(promise) {
-	const [, forceUpdate] = useState(/** @type {object} */ ({}));
-
-	let promiseState = PROMISE_CACHE.get(promise);
-
-	if (!promiseState) {
-		promiseState = {
-			status: 'pending',
+	const [promiseState, update] = useState({
 			value: undefined,
 			reason: undefined,
-			subscribers: new Set()
-		};
+	});
 
-		PROMISE_CACHE.set(promise, promiseState);
-
+	if (!promiseState.value && !promiseState.reason) {
 		promise.then(
 			value => {
-				if (promiseState.status === 'pending') {
-					promiseState.status = 'fulfilled';
-					promiseState.value = value;
-					promiseState.subscribers.forEach(cb => cb({}));
-					promiseState.subscribers.clear();
-				}
+				update({ status: 'fulfilled', value })
 			},
 			reason => {
-				if (promiseState.status === 'pending') {
-					promiseState.status = 'rejected';
-					promiseState.reason = reason;
-					promiseState.subscribers.forEach(cb => cb({}));
-					promiseState.subscribers.clear();
-				}
+				update({ status: 'rejected', reason })
 			}
 		);
 	}
 
-	if (promiseState.status === 'pending') {
-		promiseState.subscribers.add(forceUpdate);
-	}
-
-	useEffect(() => {
-		return () => {
-			if (promiseState) {
-				promiseState.subscribers.delete(forceUpdate);
-			}
-		};
-	}, [promise]);
-
-	switch (promiseState.status) {
-		case 'fulfilled':
-			return promiseState.value;
-		case 'rejected':
-			throw promiseState.reason;
-		case 'pending':
-			throw promise;
-		default:
-			throw promise;
-	}
+    if (promiseState.value) return promiseState.value;
+    if (promiseState.reason) throw promiseState.reason;
+    
+    throw promise;
 }
 
 /**
