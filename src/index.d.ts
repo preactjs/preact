@@ -348,7 +348,6 @@ export type ContextType<C extends Context<any>> = C extends Context<infer T>
 	: never;
 
 export interface Context<T> extends preact.Provider<T> {
-	$$typeof?: symbol;
 	Consumer: preact.Consumer<T>;
 	Provider: preact.Provider<T>;
 	displayName?: string;

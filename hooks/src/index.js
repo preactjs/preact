@@ -191,25 +191,25 @@ export function use(resource) {
  */
 function usePromise(promise) {
 	const [promiseState, update] = useState({
-			value: undefined,
-			reason: undefined,
+		value: undefined,
+		reason: undefined
 	});
 
 	if (!promiseState.value && !promiseState.reason) {
 		promise.then(
 			value => {
-				update({ status: 'fulfilled', value })
+				update({ status: 'fulfilled', value });
 			},
 			reason => {
-				update({ status: 'rejected', reason })
+				update({ status: 'rejected', reason });
 			}
 		);
 	}
 
-    if (promiseState.value) return promiseState.value;
-    if (promiseState.reason) throw promiseState.reason;
-    
-    throw promise;
+	if (promiseState.value) return promiseState.value;
+	if (promiseState.reason) throw promiseState.reason;
+
+	throw promise;
 }
 
 /**
