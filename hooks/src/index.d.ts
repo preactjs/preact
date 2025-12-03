@@ -129,7 +129,7 @@ export function useContext<T>(context: PreactContext<T>): T;
  * Preact implementation of React's use hook
  * Supports Promise and Context consumption
  */
-export function use<T>(usable: Promise<T> | PreactContext<T>): T;
+export function use<T>(resource: Promise<T> | PreactContext<T>): T;
 
 /**
  * Customize the displayed value in the devtools panel.
