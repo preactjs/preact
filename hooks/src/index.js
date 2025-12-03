@@ -173,7 +173,7 @@ const PROMISE_CACHE = new WeakMap();
  * @param {Promise<T> | import('preact').PreactContext<T>} usable
  * @returns {T}
  */
-export function use(usable) {
+export function use(resource) {
 	if (
 		usable != null &&
 		(typeof usable === 'object' || typeof usable === 'function')
