@@ -174,24 +174,15 @@ const PROMISE_CACHE = new WeakMap();
  * @returns {T}
  */
 export function use(resource) {
-	if (
-		usable != null &&
-		(typeof usable === 'object' || typeof usable === 'function')
-	) {
-		if ('then' in usable && typeof usable.then === 'function') {
-			return usePromise(usable);
-		}
+  if (usable && typeof usable.then === 'function') {
+	  return usePromise(usable);
+  }
 
-		if ('$$typeof' in usable && usable.$$typeof === CONTEXT_TYPE) {
-			return useContext(
-				/** @type {import('./internal').PreactContext} */ (
-					/** @type {unknown} */ (usable)
-				)
-			);
-		}
-	}
-
-	throw new Error(`An unsupported type was passed to use(): ${usable}`);
+	return useContext(
+		/** @type {import('./internal').PreactContext} */ (
+			/** @type {unknown} */ (usable)
+		)
+	);
 }
 
 /**
