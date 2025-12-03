@@ -132,6 +132,8 @@ declare namespace React {
 		subscribe: (flush: () => void) => () => void,
 		getSnapshot: () => T
 	): T;
+	// React 19 hooks
+	export import use = _hooks.use;
 
 	// Preact Defaults
 	export import Context = preact1.Context;

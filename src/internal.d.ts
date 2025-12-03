@@ -14,7 +14,8 @@ export enum HookType {
 	useContext = 9,
 	useErrorBoundary = 10,
 	// Not a real hook, but the devtools treat is as such
-	useDebugvalue = 11
+	useDebugvalue = 11,
+	use = 12
 }
 
 export interface DevSource {
