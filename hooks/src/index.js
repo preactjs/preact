@@ -164,7 +164,6 @@ function getHookState(index, type) {
 	return hooks._list[index];
 }
 
-const PROMISE_CACHE = new WeakMap();
 /**
  * Supports Promise and Context consumption
  *
