@@ -1,5 +1,5 @@
 import { options as _options } from 'preact';
-import { COMPONENT_FORCE, CONTEXT_TYPE } from '../../src/constants';
+import { COMPONENT_FORCE } from '../../src/constants';
 
 const ObjectIs = Object.is;
 
@@ -166,21 +166,20 @@ function getHookState(index, type) {
 
 const PROMISE_CACHE = new WeakMap();
 /**
- * Preact implementation of React's use hook
  * Supports Promise and Context consumption
  *
  * @template T
- * @param {Promise<T> | import('preact').PreactContext<T>} usable
+ * @param {Promise<T> | import('preact').PreactContext<T>} resource
  * @returns {T}
  */
 export function use(resource) {
-  if (usable && typeof usable.then === 'function') {
-	  return usePromise(usable);
-  }
+	if ('then' in resource && typeof resource.then === 'function') {
+		return usePromise(resource);
+	}
 
 	return useContext(
 		/** @type {import('./internal').PreactContext} */ (
-			/** @type {unknown} */ (usable)
+			/** @type {unknown} */ (resource)
 		)
 	);
 }

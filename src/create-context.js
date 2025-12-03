@@ -1,5 +1,5 @@
 import { enqueueRender } from './component';
-import { NULL, COMPONENT_FORCE, CONTEXT_TYPE } from './constants';
+import { NULL, COMPONENT_FORCE } from './constants';
 
 export let i = 0;
 
@@ -42,7 +42,6 @@ export function createContext(defaultValue) {
 		return props.children;
 	}
 
-	Context.$$typeof = CONTEXT_TYPE;
 	Context._id = '__cC' + i++;
 	Context._defaultValue = defaultValue;
 
