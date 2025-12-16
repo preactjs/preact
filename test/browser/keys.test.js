@@ -1128,4 +1128,27 @@ describe('keys', () => {
 		render(<App y="2" />, scratch);
 		expect(actions).to.deep.equal(['mounted 1', 'mounted 2', 'mounted 3']);
 	});
+
+	// Issue #4973: Test growing list diff
+	it('should correctly diff a growing list of keyed children', () => {
+		let values = [0, 1, 2, 3, 4];
+
+		render(<List values={values} />, scratch);
+		expect(scratch.textContent).to.equal('01234');
+
+		values = [2, 3, 4, 5, 6];
+		clearLog();
+
+		render(<List values={values} />, scratch);
+		expect(scratch.textContent).to.equal('23456');
+
+		expect(getLog()).to.deep.equal([
+			'<li>0.remove()',
+			'<li>1.remove()',
+			'<li>.appendChild(#text)',
+			'<ol>234.appendChild(<li>5)',
+			'<li>.appendChild(#text)',
+			'<ol>2345.appendChild(<li>6)'
+		]);
+	});
 });
