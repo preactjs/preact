@@ -239,6 +239,7 @@ function constructNewChildrenArray(
 			remainingOldChildren
 		));
 
+		oldVNode = NULL;
 		if (matchingIndex != -1) {
 			oldVNode = oldChildren[matchingIndex];
 			remainingOldChildren--;
