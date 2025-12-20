@@ -76,7 +76,9 @@ function didSnapshotChange(inst) {
 }
 
 function missingGetServerSnapshot() {
-	throw new Error('Missing getServerSnapshot for server rendering');
+	throw new Error(
+		'Missing "getServerSnapshot" parameter for "useSyncExternalStore", this is required for server rendering & hydration of server-rendered content'
+	);
 }
 
 export function startTransition(cb) {
