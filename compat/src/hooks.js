@@ -1,6 +1,7 @@
 import { useState, useLayoutEffect, useEffect } from 'preact/hooks';
-import { MODE_HYDRATE } from '../../src/constants';
 import { options as _options } from 'preact';
+
+const MODE_HYDRATE = 1 << 5;
 
 /** @type {boolean} */
 let hydrating;
