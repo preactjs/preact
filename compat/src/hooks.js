@@ -1,12 +1,35 @@
 import { useState, useLayoutEffect, useEffect } from 'preact/hooks';
+import { MODE_HYDRATE } from '../../src/constants';
+import { options as _options } from 'preact';
+
+/** @type {boolean} */
+let hydrating;
+// Cast to use internal Options type
+const options = /** @type {import('../../src/internal').Options} */ (_options);
+let oldBeforeRender = options._render;
+
+/** @type {(vnode: import('./internal').VNode) => void} */
+options._render = _vnode => {
+	hydrating = !!(_vnode._flags & MODE_HYDRATE);
+	if (oldBeforeRender) oldBeforeRender(_vnode);
+};
 
 /**
  * This is taken from https://github.com/facebook/react/blob/main/packages/use-sync-external-store/src/useSyncExternalStoreShimClient.js#L84
  * on a high level this cuts out the warnings, ... and attempts a smaller implementation
  * @typedef {{ _value: any; _getSnapshot: () => any }} Store
  */
-export function useSyncExternalStore(subscribe, getSnapshot) {
-	const value = getSnapshot();
+export function useSyncExternalStore(
+	subscribe,
+	getSnapshot,
+	getServerSnapshot
+) {
+	const value =
+		typeof window === 'undefined' || hydrating
+			? getServerSnapshot
+				? getServerSnapshot()
+				: missingGetServerSnapshot()
+			: getSnapshot();
 
 	/**
 	 * @typedef {{ _instance: Store }} StoreRef
@@ -50,6 +73,10 @@ function didSnapshotChange(inst) {
 	} catch (error) {
 		return true;
 	}
+}
+
+function missingGetServerSnapshot() {
+	throw new Error('Missing getServerSnapshot for server rendering');
 }
 
 export function startTransition(cb) {
