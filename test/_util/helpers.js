@@ -208,8 +208,6 @@ export function clearOptions() {
  * @param {HTMLElement} scratch
  */
 export function teardown(scratch) {
-	if (!document.contains(scratch)) return;
-
 	if (scratch) {
 		scratch.parentNode.removeChild(scratch);
 	}

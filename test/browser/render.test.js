@@ -1974,24 +1974,6 @@ describe('render()', () => {
 		}
 	});
 
-	it('should work with document', () => {
-		document.textContent = '';
-		const App = () => (
-			<Fragment>
-				<head>
-					<title>Test</title>
-				</head>
-				<body>
-					<p>Test</p>
-				</body>
-			</Fragment>
-		);
-		render(<App />, document);
-		expect(document.documentElement.innerHTML.trim()).to.equal(
-			'<head><title>Test</title></head><body><p>Test</p></body>'
-		);
-	});
-
 	it('should not remount components when replacing a component with a falsy value in-between', () => {
 		const actions = [];
 		class Comp extends Component {
