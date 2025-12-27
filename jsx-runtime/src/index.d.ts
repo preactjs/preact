@@ -10,6 +10,7 @@ import {
 	HTMLAttributes,
 	SVGAttributes
 } from 'preact';
+import { JSXInternal } from '../../src/jsx';
 
 export function jsx(
 	type: string,
@@ -59,3 +60,5 @@ export function jsxAttr(name: string, value: any): string | null;
 export function jsxEscape<T>(
 	value: T
 ): string | null | VNode<any> | Array<string | null | VNode>;
+
+export { JSXInternal as JSX };
