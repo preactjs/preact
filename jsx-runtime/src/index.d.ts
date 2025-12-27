@@ -6,14 +6,15 @@ import {
 	ComponentChild,
 	ComponentChildren,
 	VNode,
-	Attributes
+	Attributes,
+	HTMLAttributes,
+	SVGAttributes
 } from 'preact';
-import { JSXInternal } from '../../src/jsx';
 
 export function jsx(
 	type: string,
-	props: JSXInternal.HTMLAttributes &
-		JSXInternal.SVGAttributes &
+	props: HTMLAttributes &
+		SVGAttributes &
 		Record<string, any> & { children?: ComponentChild },
 	key?: string
 ): VNode<any>;
@@ -25,8 +26,8 @@ export function jsx<P>(
 
 export function jsxs(
 	type: string,
-	props: JSXInternal.HTMLAttributes &
-		JSXInternal.SVGAttributes &
+	props: HTMLAttributes &
+		SVGAttributes &
 		Record<string, any> & { children?: ComponentChild[] },
 	key?: string
 ): VNode<any>;
@@ -38,8 +39,8 @@ export function jsxs<P>(
 
 export function jsxDEV(
 	type: string,
-	props: JSXInternal.HTMLAttributes &
-		JSXInternal.SVGAttributes &
+	props: HTMLAttributes &
+		SVGAttributes &
 		Record<string, any> & { children?: ComponentChildren },
 	key?: string
 ): VNode<any>;
@@ -58,5 +59,3 @@ export function jsxAttr(name: string, value: any): string | null;
 export function jsxEscape<T>(
 	value: T
 ): string | null | VNode<any> | Array<string | null | VNode>;
-
-export { JSXInternal as JSX };
