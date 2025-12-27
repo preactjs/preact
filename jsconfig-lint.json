@@ -1,0 +1,19 @@
+{
+  "extends": "./jsconfig.json",
+  "compilerOptions": {
+    // More modern settings as Vite & Vitest require them and TS doesn't allow
+    // silencing errors from `node_modules` alone.
+    "moduleResolution": "Node16",
+    "target": "ES2015",
+    "module": "Node16",
+    "checkJs": false
+  },
+  "include": [
+    "src/**/*",
+    "hooks/src/**/*",
+    "compat/**/*.d.ts",
+    "jsx-runtime/**/*.d.ts",
+    "types/**/*.d.ts"
+  ],
+  "exclude": ["**/node_modules/**", "node_modules"]
+}

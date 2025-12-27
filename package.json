@@ -140,6 +140,7 @@
     "test:ts:core": "tsc -p test/ts/",
     "test:ts:compat": "tsc -p compat/test/ts/",
     "lint": "run-s oxlint tsc",
+    "tsc": "tsc -p jsconfig-lint.json",
     "oxlint": "oxlint -c oxlint.json src test/browser test/node test/shared debug compat hooks test-utils",
     "format": "biome format --write .",
     "format:check": "biome format ."
