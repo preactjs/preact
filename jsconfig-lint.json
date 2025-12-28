@@ -1,9 +1,12 @@
 {
   "extends": "./jsconfig.json",
   "compilerOptions": {
-    "skipLibCheck": true,
-    "noEmit": true,
-    "typeRoots": ["./node_modules/@types", "./node_modules", "./types"]
+    // More modern settings as Vite & Vitest require them and TS doesn't allow
+    // silencing errors from `node_modules` alone.
+    "moduleResolution": "Node16",
+    "target": "ES2015",
+    "module": "Node16",
+    "checkJs": false
   },
   "include": [
     "src/**/*",
