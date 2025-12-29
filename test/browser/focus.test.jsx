@@ -5,6 +5,9 @@ import { div, span, input as inputStr, h1, h2 } from '../_util/dom';
 
 /* eslint-disable react/jsx-boolean-value */
 
+const supportsMove = 'moveBefore' in Element.prototype;
+console.log('SUPPORTS MOVE BEFORE:', supportsMove);
+
 describe('focus', () => {
 	/** @type {HTMLDivElement} */
 	let scratch;
@@ -155,28 +158,33 @@ describe('focus', () => {
 		teardown(scratch);
 	});
 
-	it.skip('should maintain focus when swapping elements', () => {
-		render(
-			<List>
-				<Input />
-				<ListItem>fooo</ListItem>
-			</List>,
-			scratch
-		);
+	(supportsMove ? it : it.skip)(
+		'should maintain focus when swapping elements',
+		() => {
+			render(
+				<List>
+					<Input />
+					<ListItem>fooo</ListItem>
+				</List>,
+				scratch
+			);
 
-		const input = focusInput();
-		expect(scratch.innerHTML).to.equal(getListHtml([], ['fooo']));
+			const input = focusInput();
+			expect(scratch.innerHTML).to.equal(getListHtml([], ['fooo']));
 
-		render(
-			<List>
-				<ListItem>fooo</ListItem>
-				<Input />
-			</List>,
-			scratch
-		);
-		validateFocus(input);
-		expect(scratch.innerHTML).to.equal(getListHtml(['fooo'], []));
-	});
+			render(
+				<List>
+					<ListItem>fooo</ListItem>
+					<Input />
+				</List>,
+				scratch
+			);
+
+			expect(scratch.innerHTML).to.equal(getListHtml(['fooo'], []));
+			// TODO: looks like currently the selection isn't retained when moving
+			validateFocus(input);
+		}
+	);
 
 	it('should maintain focus when moving the input around', () => {
 		function App({ showFirst, showLast }) {
@@ -470,23 +478,25 @@ describe('focus', () => {
 				return (
 					<div>
 						<h1>Heading</h1>
-						{!this.state.active
-							? <Fragment>
-									foobar
-									<Fragment>
-										Hello World
-										<h2>yo</h2>
-									</Fragment>
-									<input type="text" ref={i => (input = i)} />
+						{!this.state.active ? (
+							<Fragment>
+								foobar
+								<Fragment>
+									Hello World
+									<h2>yo</h2>
 								</Fragment>
-							: <Fragment>
-									<Fragment>
-										Hello World
-										<h2>yo</h2>
-									</Fragment>
-									foobar
-									<input type="text" ref={i => (input = i)} />
-								</Fragment>}
+								<input type="text" ref={i => (input = i)} />
+							</Fragment>
+						) : (
+							<Fragment>
+								<Fragment>
+									Hello World
+									<h2>yo</h2>
+								</Fragment>
+								foobar
+								<input type="text" ref={i => (input = i)} />
+							</Fragment>
+						)}
 					</div>
 				);
 			}
@@ -524,23 +534,25 @@ describe('focus', () => {
 				return (
 					<div>
 						<h1>Heading</h1>
-						{!this.state.active
-							? <Fragment>
-									foobar
-									<Fragment>
-										Hello World
-										<h2>yo</h2>
-									</Fragment>
-									<input type="text" ref={i => (input = i)} value="foobar" />
+						{!this.state.active ? (
+							<Fragment>
+								foobar
+								<Fragment>
+									Hello World
+									<h2>yo</h2>
 								</Fragment>
-							: <Fragment>
-									<Fragment>
-										Hello World
-										<h2>yo</h2>
-									</Fragment>
-									foobar
-									<input type="text" ref={i => (input = i)} value="foobar" />
-								</Fragment>}
+								<input type="text" ref={i => (input = i)} value="foobar" />
+							</Fragment>
+						) : (
+							<Fragment>
+								<Fragment>
+									Hello World
+									<h2>yo</h2>
+								</Fragment>
+								foobar
+								<input type="text" ref={i => (input = i)} value="foobar" />
+							</Fragment>
+						)}
 					</div>
 				);
 			}
