@@ -60,7 +60,7 @@ options._render = vnode => {
 		if (previousComponent === currentComponent) {
 			hooks._pendingEffects = [];
 			currentComponent._renderCallbacks = [];
-			hooks._list.forEach(hookItem => {
+			hooks._list.some(hookItem => {
 				if (hookItem._nextValue) {
 					hookItem._value = hookItem._nextValue;
 				}
@@ -83,7 +83,7 @@ options.diffed = vnode => {
 	const c = vnode._component;
 	if (c && c.__hooks) {
 		if (c.__hooks._pendingEffects.length) afterPaint(afterPaintEffects.push(c));
-		c.__hooks._list.forEach(hookItem => {
+		c.__hooks._list.some(hookItem => {
 			if (hookItem._pendingArgs) {
 				hookItem._args = hookItem._pendingArgs;
 			}
@@ -121,7 +121,7 @@ options.unmount = vnode => {
 	const c = vnode._component;
 	if (c && c.__hooks) {
 		let hasErrored;
-		c.__hooks._list.forEach(s => {
+		c.__hooks._list.some(s => {
 			try {
 				invokeCleanup(s);
 			} catch (e) {
@@ -132,6 +132,23 @@ options.unmount = vnode => {
 		if (hasErrored) options._catchError(hasErrored, c._vnode);
 	}
 };
+
+/**
+ *
+ * @returns {import('./internal').HookState}
+ */
+function createHookState() {
+	return {
+		_value: undefined,
+		_args: undefined,
+		_cleanup: undefined,
+		_pendingArgs: undefined,
+		_component: undefined,
+		_reducer: undefined,
+		_context: undefined,
+		_factory: undefined
+	};
+}
 
 /**
  * Get a hook's state from the currentComponent
@@ -158,7 +175,7 @@ function getHookState(index, type) {
 		});
 
 	if (index >= hooks._list.length) {
-		hooks._list.push({});
+		hooks._list.push(createHookState());
 	}
 
 	return hooks._list[index];
@@ -248,7 +265,7 @@ export function useReducer(reducer, initialState, init) {
 				let shouldUpdate =
 					hookState._component.props !== p ||
 					hooksList.every(x => !x._nextValue);
-				hooksList.forEach(hookItem => {
+				hooksList.some(hookItem => {
 					if (hookItem._nextValue) {
 						const currentValue = hookItem._value[0];
 						hookItem._value = hookItem._nextValue;
