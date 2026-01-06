@@ -10,6 +10,7 @@ on:
       - main
       - restructure
       - v11
+      - 10.26.x
 
 jobs:
   filter_jobs:
