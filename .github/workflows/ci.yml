@@ -9,6 +9,7 @@ on:
     branches:
       - main
       - v10.x
+      - 10.27.x
 
 jobs:
   filter_jobs:
