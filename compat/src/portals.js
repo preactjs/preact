@@ -47,6 +47,7 @@ function Portal(props) {
 			childNodes: [],
 			_children: { _mask: root._mask },
 			contains: () => true,
+			namespaceURI: container.namespaceURI,
 			insertBefore(child, before) {
 				this.childNodes.push(child);
 				_this._container.insertBefore(child, before);
