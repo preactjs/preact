@@ -101,7 +101,9 @@ describe('render()', () => {
 	});
 
 	it('should not render when detecting JSON-injection', () => {
-		const vnode = JSON.parse('{"type":"span","children":"Malicious"}');
+		const vnode = JSON.parse(
+			'{"type":"span","props":{ "children": "Malicious"}, "__v": 1, "constructor": null}'
+		);
 		render(vnode, scratch);
 		expect(scratch.firstChild).to.be.null;
 	});
