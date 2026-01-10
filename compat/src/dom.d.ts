@@ -1,14 +1,11 @@
 import { Signalish } from '../../src/dom';
 
 /**
- * React-compatible camelCase SVG attributes.
- * These are only supported when using preact/compat, which converts
- * camelCase attribute names to their kebab-case equivalents at runtime.
- *
- * Core Preact does not support these - use the kebab-case versions instead
- * (e.g., 'stroke-width' instead of 'strokeWidth').
+ * React-compatible SVG attributes available only in preact/compat.
+ * These camelCase attribute names are converted to their standard
+ * equivalents at runtime by preact/compat.
  */
-export interface CamelCaseSVGAttributes {
+export interface CompatSVGAttributes {
 	alignmentBaseline?: Signalish<
 		| 'auto'
 		| 'baseline'

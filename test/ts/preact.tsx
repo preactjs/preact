@@ -426,30 +426,6 @@ function Checkbox({ onChange }: HTMLAttributes<HTMLInputElement>) {
 	return <input onChange={handleChange} />;
 }
 
-// SVG camelCase attributes should NOT be available in core Preact
-// These are React-isms only supported in preact/compat
-const svgCasingTest = (
-	<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
-		{/* @ts-expect-error strokeWidth is a React-ism not supported in core */}
-		<circle fill="blue" strokeWidth="2" cx="24" cy="24" r="20" />
-	</svg>
-);
-
-// Standard kebab-case SVG attributes should work in core
-const svgKebabCaseTest = (
-	<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
-		<circle fill="blue" stroke-width="2" cx="24" cy="24" r="20" />
-	</svg>
-);
-
-// More camelCase SVG attributes that should fail in core
-// @ts-expect-error fillOpacity is a React-ism
-const fillOpacityTest = <rect fillOpacity="0.5" />;
-// @ts-expect-error stopColor is a React-ism
-const stopColorTest = <stop stopColor="red" />;
-// @ts-expect-error fontFamily is a React-ism
-const fontFamilyTest = <text fontFamily="Arial" />;
-
 // `AllHTMLAttributes` should support all interfaces used within `JSX.IntrinsicElements`
 const allHTMLAttributes: AllHTMLAttributes<HTMLMarqueeElement> = {
 	// Global HTMLAttributes

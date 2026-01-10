@@ -4,7 +4,8 @@ import * as _hooks from '../../hooks';
 import * as preact1 from 'preact';
 import { JSXInternal } from '../../src/jsx';
 import * as _Suspense from './suspense';
-import { CamelCaseSVGAttributes } from './svg-camel-case';
+import { CompatSVGAttributes } from './dom';
+import { CompatJSX } from './jsx';
 
 declare namespace preact {
 	export interface FunctionComponent<P = {}> {
@@ -103,36 +104,6 @@ declare namespace preact {
 // export default React;
 export = React;
 export as namespace React;
-// Compat JSX namespace with React-compatible camelCase SVG attributes
-declare namespace CompatJSX {
-	export type LibraryManagedAttributes<Component, Props> =
-		JSXInternal.LibraryManagedAttributes<Component, Props>;
-
-	export type IntrinsicAttributes = JSXInternal.IntrinsicAttributes;
-
-	export type ElementType<P = any> = JSXInternal.ElementType<P>;
-
-	export type Element = JSXInternal.Element;
-
-	export type ElementClass = JSXInternal.ElementClass;
-
-	export type ElementAttributesProperty = JSXInternal.ElementAttributesProperty;
-
-	export type ElementChildrenAttribute = JSXInternal.ElementChildrenAttribute;
-
-	// Use compat's IntrinsicSVGElements with camelCase SVG attributes
-	export interface IntrinsicSVGElements
-		extends React.CompatIntrinsicSVGElements {}
-
-	export type IntrinsicMathMLElements = JSXInternal.IntrinsicMathMLElements;
-
-	export type IntrinsicHTMLElements = JSXInternal.IntrinsicHTMLElements;
-
-	export interface IntrinsicElements
-		extends IntrinsicSVGElements,
-			IntrinsicMathMLElements,
-			IntrinsicHTMLElements {}
-}
 
 declare namespace React {
 	// Export JSX with React-compatible camelCase SVG attributes
@@ -212,76 +183,7 @@ declare namespace React {
 	export interface SVGProps<T extends EventTarget>
 		extends preact1.SVGAttributes<T>,
 			preact1.ClassAttributes<T>,
-			CamelCaseSVGAttributes {}
-
-	interface SVGAttributes<T extends EventTarget = SVGElement>
-		extends preact1.SVGAttributes<T>,
-			CamelCaseSVGAttributes {}
-
-	// Compat IntrinsicSVGElements uses SVGAttributes with camelCase properties
-	interface CompatIntrinsicSVGElements {
-		svg: SVGAttributes<SVGSVGElement>;
-		animate: SVGAttributes<SVGAnimateElement>;
-		circle: SVGAttributes<SVGCircleElement>;
-		animateMotion: SVGAttributes<SVGAnimateMotionElement>;
-		animateTransform: SVGAttributes<SVGAnimateTransformElement>;
-		clipPath: SVGAttributes<SVGClipPathElement>;
-		defs: SVGAttributes<SVGDefsElement>;
-		desc: SVGAttributes<SVGDescElement>;
-		ellipse: SVGAttributes<SVGEllipseElement>;
-		feBlend: SVGAttributes<SVGFEBlendElement>;
-		feColorMatrix: SVGAttributes<SVGFEColorMatrixElement>;
-		feComponentTransfer: SVGAttributes<SVGFEComponentTransferElement>;
-		feComposite: SVGAttributes<SVGFECompositeElement>;
-		feConvolveMatrix: SVGAttributes<SVGFEConvolveMatrixElement>;
-		feDiffuseLighting: SVGAttributes<SVGFEDiffuseLightingElement>;
-		feDisplacementMap: SVGAttributes<SVGFEDisplacementMapElement>;
-		feDistantLight: SVGAttributes<SVGFEDistantLightElement>;
-		feDropShadow: SVGAttributes<SVGFEDropShadowElement>;
-		feFlood: SVGAttributes<SVGFEFloodElement>;
-		feFuncA: SVGAttributes<SVGFEFuncAElement>;
-		feFuncB: SVGAttributes<SVGFEFuncBElement>;
-		feFuncG: SVGAttributes<SVGFEFuncGElement>;
-		feFuncR: SVGAttributes<SVGFEFuncRElement>;
-		feGaussianBlur: SVGAttributes<SVGFEGaussianBlurElement>;
-		feImage: SVGAttributes<SVGFEImageElement>;
-		feMerge: SVGAttributes<SVGFEMergeElement>;
-		feMergeNode: SVGAttributes<SVGFEMergeNodeElement>;
-		feMorphology: SVGAttributes<SVGFEMorphologyElement>;
-		feOffset: SVGAttributes<SVGFEOffsetElement>;
-		fePointLight: SVGAttributes<SVGFEPointLightElement>;
-		feSpecularLighting: SVGAttributes<SVGFESpecularLightingElement>;
-		feSpotLight: SVGAttributes<SVGFESpotLightElement>;
-		feTile: SVGAttributes<SVGFETileElement>;
-		feTurbulence: SVGAttributes<SVGFETurbulenceElement>;
-		filter: SVGAttributes<SVGFilterElement>;
-		foreignObject: SVGAttributes<SVGForeignObjectElement>;
-		g: SVGAttributes<SVGGElement>;
-		image: SVGAttributes<SVGImageElement>;
-		line: SVGAttributes<SVGLineElement>;
-		linearGradient: SVGAttributes<SVGLinearGradientElement>;
-		marker: SVGAttributes<SVGMarkerElement>;
-		mask: SVGAttributes<SVGMaskElement>;
-		metadata: SVGAttributes<SVGMetadataElement>;
-		mpath: SVGAttributes<SVGMPathElement>;
-		path: SVGAttributes<SVGPathElement>;
-		pattern: SVGAttributes<SVGPatternElement>;
-		polygon: SVGAttributes<SVGPolygonElement>;
-		polyline: SVGAttributes<SVGPolylineElement>;
-		radialGradient: SVGAttributes<SVGRadialGradientElement>;
-		rect: SVGAttributes<SVGRectElement>;
-		set: SVGAttributes<SVGSetElement>;
-		stop: SVGAttributes<SVGStopElement>;
-		switch: SVGAttributes<SVGSwitchElement>;
-		symbol: SVGAttributes<SVGSymbolElement>;
-		text: SVGAttributes<SVGTextElement>;
-		textPath: SVGAttributes<SVGTextPathElement>;
-		tspan: SVGAttributes<SVGTSpanElement>;
-		use: SVGAttributes<SVGUseElement>;
-		view: SVGAttributes<SVGViewElement>;
-	}
-
-	interface ReactSVG extends CompatIntrinsicSVGElements {}
+			CompatSVGAttributes {}
 
 	export import AriaAttributes = preact1.AriaAttributes;
 
