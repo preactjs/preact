@@ -433,3 +433,11 @@ declare namespace React {
 	): void;
 	export const unstable_now: () => number;
 }
+
+// Augment global JSX namespace when preact/compat is imported
+declare global {
+	// eslint-disable-next-line @typescript-eslint/no-namespace
+	namespace JSX {
+		interface IntrinsicElements extends CompatJSX.IntrinsicElements {}
+	}
+}
