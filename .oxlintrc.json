@@ -1,4 +1,9 @@
 {
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "ignorePatterns": [
+    "**/dist/**",
+    "benchmarks/**"
+  ],
   "rules": {
     "camelcase": [
       1,
