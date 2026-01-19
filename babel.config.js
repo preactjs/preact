@@ -1,10 +1,11 @@
-module.exports = function (api) {
+import mangle from './mangle.json' with { type: 'json' };
+
+export default function (api) {
 	api.cache(true);
 
 	const noModules = String(process.env.BABEL_NO_MODULES) === 'true';
 
 	const rename = {};
-	const mangle = require('./mangle.json');
 	for (let prop in mangle.props.props) {
 		let name = prop;
 		if (name[0] === '$') {
@@ -47,4 +48,4 @@ module.exports = function (api) {
 			}
 		]
 	};
-};
+}

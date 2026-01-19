@@ -13,6 +13,7 @@
       "preact/*": ["./*"]
     },
     "target": "es5",
+    "module": "esnext",
     "noEmit": true,
     "skipLibCheck": false,
     "types": ["vitest/globals"]

@@ -1,9 +1,11 @@
-const path = require('path');
-const fs = require('fs');
-const kl = require('kolorist');
+import path from 'node:path';
+import fs from 'node:fs';
+import * as kl from 'kolorist';
 
-const pkgFiles = new Set(require('../package.json').files);
-const compatDir = path.join(__dirname, '..', 'compat');
+import pkg from '../package.json' with { type: 'json' };
+
+const pkgFiles = new Set(pkg.files);
+const compatDir = path.resolve('compat');
 const files = fs.readdirSync(compatDir);
 
 let missing = 0;

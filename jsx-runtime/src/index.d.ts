@@ -10,7 +10,7 @@ import {
 	HTMLAttributes,
 	SVGAttributes
 } from 'preact';
-import { JSXInternal } from '../../src/jsx';
+import { JSXInternal } from '../../src/jsx.js';
 
 export function jsx(
 	type: string,

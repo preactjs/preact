@@ -1,1 +1,1 @@
-module.exports = require('preact/test-utils');
+export * from 'preact/test-utils';
