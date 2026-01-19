@@ -107,7 +107,8 @@
     "tsc": "tsc -p jsconfig-lint.json",
     "oxlint": "oxlint src test/browser test/node test/shared debug compat hooks test-utils",
     "format": "biome format --write .",
-    "format:check": "biome format ."
+    "format:check": "biome format .",
+    "postinstall": "patch-package"
   },
   "nano-staged": {
     "**/*.{js,jsx,mjs,cjs,ts,tsx,yml,json,html,md,css,scss}": [
@@ -186,6 +187,7 @@
     "microbundle": "^0.15.1",
     "npm-run-all2": "^7.0.0",
     "oxlint": "^1.8.0",
+    "patch-package": "^8.0.1",
     "playwright": "^1.54.1",
     "preact-render-to-string": "^6.5.0",
     "prop-types": "^15.8.1",
