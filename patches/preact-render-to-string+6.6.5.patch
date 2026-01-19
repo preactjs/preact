@@ -1,0 +1,27 @@
+diff --git a/node_modules/preact-render-to-string/dist/index.d.ts b/node_modules/preact-render-to-string/dist/index.d.ts
+index 81db2bd..081b441 100644
+--- a/node_modules/preact-render-to-string/dist/index.d.ts
++++ b/node_modules/preact-render-to-string/dist/index.d.ts
+@@ -1,3 +1,4 @@
++// @ts-nocheck
+ import { VNode } from 'preact';
+ 
+ export default function renderToString<P = {}>(
+diff --git a/node_modules/preact-render-to-string/dist/stream-node.d.ts b/node_modules/preact-render-to-string/dist/stream-node.d.ts
+index 990147b..ea8ada6 100644
+--- a/node_modules/preact-render-to-string/dist/stream-node.d.ts
++++ b/node_modules/preact-render-to-string/dist/stream-node.d.ts
+@@ -1,3 +1,4 @@
++// @ts-nocheck
+ import { VNode } from 'preact';
+ import { WritableStream } from 'node:stream';
+ 
+diff --git a/node_modules/preact-render-to-string/dist/stream.d.ts b/node_modules/preact-render-to-string/dist/stream.d.ts
+index 1ab9aa5..8547ee9 100644
+--- a/node_modules/preact-render-to-string/dist/stream.d.ts
++++ b/node_modules/preact-render-to-string/dist/stream.d.ts
+@@ -1,3 +1,4 @@
++// @ts-nocheck
+ import { VNode } from 'preact';
+ 
+ interface RenderStream extends ReadableStream<Uint8Array> {
