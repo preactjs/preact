@@ -1,3 +1,3 @@
-require('preact/compat');
+import 'preact/compat';
 
-module.exports = require('preact/jsx-runtime');
+export * from 'preact/jsx-runtime';
