@@ -7,8 +7,8 @@ import {
 	Attributes,
 	HTMLAttributes,
 	SVGAttributes
-} from '../../src/index';
-import { JSXInternal } from '../../src/jsx';
+} from 'preact';
+import { JSXInternal } from '../../src/jsx.js';
 
 export function jsx(
 	type: string,

@@ -4,84 +4,54 @@
   "version": "11.0.0-beta.1",
   "private": false,
   "description": "Fast 4kb React-compatible Virtual DOM library.",
-  "main": "dist/preact.js",
-  "module": "dist/preact.mjs",
-  "umd:main": "dist/preact.umd.js",
+  "type": "module",
+  "main": "dist/preact.esm.js",
   "source": "src/index.js",
   "exports": {
     ".": {
       "types": "./src/index.d.ts",
-      "module": "./dist/preact.mjs",
-      "umd": "./dist/preact.umd.js",
-      "import": "./dist/preact.mjs",
-      "require": "./dist/preact.js"
+      "import": "./dist/preact.esm.js"
     },
     "./compat": {
       "types": "./compat/src/index.d.ts",
-      "module": "./compat/dist/compat.mjs",
-      "umd": "./compat/dist/compat.umd.js",
-      "import": "./compat/dist/compat.mjs",
-      "require": "./compat/dist/compat.js"
+      "import": "./compat/dist/compat.esm.js"
     },
     "./debug": {
       "types": "./debug/src/index.d.ts",
-      "module": "./debug/dist/debug.mjs",
-      "umd": "./debug/dist/debug.umd.js",
-      "import": "./debug/dist/debug.mjs",
-      "require": "./debug/dist/debug.js"
+      "import": "./debug/dist/debug.esm.js"
     },
     "./devtools": {
       "types": "./devtools/src/index.d.ts",
-      "module": "./devtools/dist/devtools.mjs",
-      "umd": "./devtools/dist/devtools.umd.js",
-      "import": "./devtools/dist/devtools.mjs",
-      "require": "./devtools/dist/devtools.js"
+      "import": "./devtools/dist/devtools.esm.js"
     },
     "./hooks": {
       "types": "./hooks/src/index.d.ts",
-      "module": "./hooks/dist/hooks.mjs",
-      "umd": "./hooks/dist/hooks.umd.js",
-      "import": "./hooks/dist/hooks.mjs",
-      "require": "./hooks/dist/hooks.js"
+      "import": "./hooks/dist/hooks.esm.js"
     },
     "./test-utils": {
       "types": "./test-utils/src/index.d.ts",
-      "module": "./test-utils/dist/testUtils.mjs",
-      "umd": "./test-utils/dist/testUtils.umd.js",
-      "import": "./test-utils/dist/testUtils.mjs",
-      "require": "./test-utils/dist/testUtils.js"
+      "import": "./test-utils/dist/testUtils.esm.js"
     },
     "./compat/test-utils": {
       "types": "./test-utils/src/index.d.ts",
-      "module": "./test-utils/dist/testUtils.mjs",
-      "umd": "./test-utils/dist/testUtils.umd.js",
-      "import": "./test-utils/dist/testUtils.mjs",
-      "require": "./test-utils/dist/testUtils.js"
+      "import": "./test-utils/dist/testUtils.esm.js"
     },
     "./jsx-runtime": {
       "types": "./jsx-runtime/src/index.d.ts",
-      "module": "./jsx-runtime/dist/jsxRuntime.mjs",
-      "umd": "./jsx-runtime/dist/jsxRuntime.umd.js",
-      "import": "./jsx-runtime/dist/jsxRuntime.mjs",
-      "require": "./jsx-runtime/dist/jsxRuntime.js"
+      "import": "./jsx-runtime/dist/jsxRuntime.esm.js"
     },
     "./jsx-dev-runtime": {
       "types": "./jsx-runtime/src/index.d.ts",
-      "module": "./jsx-runtime/dist/jsxRuntime.mjs",
-      "umd": "./jsx-runtime/dist/jsxRuntime.umd.js",
-      "import": "./jsx-runtime/dist/jsxRuntime.mjs",
-      "require": "./jsx-runtime/dist/jsxRuntime.js"
+      "import": "./jsx-runtime/dist/jsxRuntime.esm.js"
     },
     "./compat/client": {
       "types": "./compat/client.d.ts",
-      "import": "./compat/client.mjs",
-      "require": "./compat/client.js"
+      "import": "./compat/client.js"
     },
     "./compat/server": {
       "types": "./compat/server.d.ts",
       "browser": "./compat/server.browser.js",
-      "import": "./compat/server.mjs",
-      "require": "./compat/server.js"
+      "import": "./compat/server.js"
     },
     "./compat/server.browser": {
       "types": "./compat/server.d.ts",
@@ -89,18 +59,15 @@
     },
     "./compat/jsx-runtime": {
       "types": "./jsx-runtime/src/index.d.ts",
-      "import": "./compat/jsx-runtime.mjs",
-      "require": "./compat/jsx-runtime.js"
+      "import": "./compat/jsx-runtime.js"
     },
     "./compat/jsx-dev-runtime": {
       "types": "./jsx-runtime/src/index.d.ts",
-      "import": "./compat/jsx-dev-runtime.mjs",
-      "require": "./compat/jsx-dev-runtime.js"
+      "import": "./compat/jsx-dev-runtime.js"
     },
     "./compat/scheduler": {
       "types": "./compat/scheduler.d.ts",
-      "import": "./compat/scheduler.mjs",
-      "require": "./compat/scheduler.js"
+      "import": "./compat/scheduler.js"
     },
     "./package.json": "./package.json",
     "./compat/package.json": "./compat/package.json",
@@ -119,17 +86,14 @@
   "scripts": {
     "prepare": "husky && npm run test:install && run-s build",
     "build": "npm-run-all --parallel 'build:*'",
-    "build:core": "microbundle build --raw --no-generateTypes -f cjs,esm,umd",
-    "build:debug": "microbundle build --raw --no-generateTypes -f cjs,esm,umd --cwd debug",
-    "build:devtools": "microbundle build --raw --no-generateTypes -f cjs,esm,umd --cwd devtools",
-    "build:hooks": "microbundle build --raw --no-generateTypes -f cjs,esm,umd --cwd hooks",
-    "build:test-utils": "microbundle build --raw --no-generateTypes -f cjs,esm,umd --cwd test-utils",
-    "build:compat": "microbundle build --raw --no-generateTypes -f cjs,esm,umd --cwd compat --globals 'preact/hooks=preactHooks'",
-    "build:jsx": "microbundle build --raw --no-generateTypes -f cjs,esm,umd --cwd jsx-runtime",
+    "build:core": "microbundle build --raw --no-generateTypes -f esm",
+    "build:debug": "microbundle build --raw --no-generateTypes -f esm --cwd debug",
+    "build:devtools": "microbundle build --raw --no-generateTypes -f esm --cwd devtools",
+    "build:hooks": "microbundle build --raw --no-generateTypes -f esm --cwd hooks",
+    "build:test-utils": "microbundle build --raw --no-generateTypes -f esm --cwd test-utils",
+    "build:compat": "microbundle build --raw --no-generateTypes -f esm --cwd compat",
+    "build:jsx": "microbundle build --raw --no-generateTypes -f esm --cwd jsx-runtime",
     "postbuild": "node ./config/compat-entries.js",
-    "dev": "microbundle watch --raw --no-generateTypes --format cjs",
-    "dev:hooks": "microbundle watch --raw --no-generateTypes --format cjs --cwd hooks",
-    "dev:compat": "microbundle watch --raw --no-generateTypes --format cjs --cwd compat --globals 'preact/hooks=preactHooks'",
     "test": "npm-run-all build lint test:unit",
     "test:install": "playwright install chromium",
     "test:unit": "run-p test:vitest:min test:ts",
@@ -157,20 +121,14 @@
     "compat/src",
     "compat/client.d.ts",
     "compat/client.js",
-    "compat/client.mjs",
     "compat/server.d.ts",
     "compat/server.browser.js",
     "compat/server.js",
-    "compat/server.mjs",
     "compat/scheduler.d.ts",
     "compat/scheduler.js",
-    "compat/scheduler.mjs",
     "compat/test-utils.js",
-    "compat/test-utils.mjs",
     "compat/jsx-runtime.js",
-    "compat/jsx-runtime.mjs",
     "compat/jsx-dev-runtime.js",
-    "compat/jsx-dev-runtime.mjs",
     "compat/package.json",
     "debug/dist",
     "debug/src",

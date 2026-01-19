@@ -1,7 +1,9 @@
-import * as _preact from '../../src/index';
-import { JSXInternal } from '../../src/jsx';
-import * as _hooks from '../../hooks';
-import * as _Suspense from './suspense';
+import * as _hooks from '../../hooks/src/index.js';
+// Intentionally not using a relative path to take advantage of
+// the TS version resolution mechanism
+import * as _preact from 'preact';
+import { JSXInternal } from '../../src/jsx.js';
+import * as _Suspense from './suspense.js';
 
 declare namespace preact {
 	export interface FunctionComponent<P = {}> {

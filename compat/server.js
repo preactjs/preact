@@ -1,36 +1,17 @@
-/* eslint-disable */
-var renderToString;
-try {
-	const mod = require('preact-render-to-string');
-	renderToString = mod.default || mod.renderToString || mod;
-} catch (e) {
-	throw Error(
-		'renderToString() error: missing "preact-render-to-string" dependency.'
-	);
-}
+import { renderToString } from 'preact-render-to-string';
+import { renderToPipeableStream } from 'preact-render-to-string/stream-node';
+import { renderToReadableStream } from 'preact-render-to-string/stream';
 
-var renderToReadableStream;
-try {
-	const mod = require('preact-render-to-string/stream');
-	renderToReadableStream = mod.default || mod.renderToReadableStream || mod;
-} catch (e) {
-	throw Error(
-		'renderToReadableStream() error: update "preact-render-to-string" dependency to at least 6.5.0.'
-	);
-}
-var renderToPipeableStream;
-try {
-	const mod = require('preact-render-to-string/stream-node');
-	renderToPipeableStream = mod.default || mod.renderToPipeableStream || mod;
-} catch (e) {
-	throw Error(
-		'renderToPipeableStream() error: update "preact-render-to-string" dependency to at least 6.5.0.'
-	);
-}
+export {
+	renderToString,
+	renderToString as renderToStaticMarkup
+} from 'preact-render-to-string';
 
-module.exports = {
-	renderToString: renderToString,
+export { renderToPipeableStream } from 'preact-render-to-string/stream-node';
+export { renderToReadableStream } from 'preact-render-to-string/stream';
+export default {
+	renderToString,
 	renderToStaticMarkup: renderToString,
-	renderToPipeableStream: renderToPipeableStream,
-	renderToReadableStream: renderToReadableStream
+	renderToPipeableStream,
+	renderToReadableStream
 };

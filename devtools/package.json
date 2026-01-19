@@ -1,11 +1,9 @@
 {
   "name": "preact-devtools",
-  "amdName": "preactDevtools",
   "private": true,
   "description": "Preact bridge for Preact devtools",
+  "type": "module",
   "main": "dist/devtools.js",
-  "module": "dist/devtools.mjs",
-  "umd:main": "dist/devtools.umd.js",
   "source": "src/index.js",
   "types": "src/index.d.ts",
   "license": "MIT",
