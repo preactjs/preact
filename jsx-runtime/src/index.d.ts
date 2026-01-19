@@ -1,4 +1,4 @@
-export { Fragment } from '../../src/index';
+export { Fragment } from '../../src/index.js';
 import {
 	ComponentType,
 	ComponentChild,
@@ -7,7 +7,7 @@ import {
 	Attributes,
 	HTMLAttributes,
 	SVGAttributes
-} from '../../src/index';
+} from '../../src/index.js';
 import { JSXInternal } from '../../src/jsx.js';
 
 export function jsx(

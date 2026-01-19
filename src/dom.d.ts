@@ -1,6 +1,6 @@
 // Most of our DOM-ish types
 
-import { ClassAttributes, PreactDOMAttributes } from './index';
+import { ClassAttributes, PreactDOMAttributes } from './index.js';
 
 // Implementations of some DOM events that are not available in TS 5.1
 interface ToggleEvent extends Event {

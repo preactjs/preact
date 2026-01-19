@@ -1,4 +1,4 @@
-import * as preact from '../src/index';
+import * as preact from '../src/index.js';
 
 export function createRoot(container: preact.ContainerNode): {
 	render(children: preact.ComponentChild): void;

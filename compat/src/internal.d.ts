@@ -1,12 +1,12 @@
-import {
+import type {
 	Component as PreactComponent,
 	VNode as PreactVNode,
 	FunctionComponent as PreactFunctionComponent,
 	PreactElement
-} from '../../src/internal';
-import { SuspenseProps } from './suspense';
+} from '../../src/internal.d.ts';
+import type { SuspenseProps } from './suspense.d.ts';
 
-export { ComponentChildren } from '../..';
+export type { ComponentChildren } from 'preact';
 
 export { PreactElement };
 

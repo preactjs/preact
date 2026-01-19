@@ -1,4 +1,4 @@
-import { ErrorInfo, PreactContext, Ref, RefObject } from '../../src/index';
+import { ErrorInfo, PreactContext, Ref, RefObject } from '../../src/index.js';
 
 type Inputs = ReadonlyArray<unknown>;
 
