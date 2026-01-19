@@ -14,6 +14,7 @@ import React, {
 } from 'preact/compat';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { createLazy, createSuspender } from './suspense-utils';
+import { expect } from 'chai';
 
 const h = React.createElement;
 /* eslint-env browser, mocha */
@@ -2227,6 +2228,159 @@ describe('suspense', () => {
 		rerender();
 
 		expect(scratch.innerHTML).to.equal('');
+	});
+
+	it('should not crash when suspended child updates after diffed unmount', () => {
+		let childInstance = null;
+		const neverResolvingPromise = new Promise(() => {});
+
+		class ThrowingChild extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { suspend: false, value: 0 };
+				childInstance = this;
+			}
+
+			render(props, state) {
+				if (state.suspend) {
+					throw neverResolvingPromise;
+				}
+				return <div>value:{state.value}</div>;
+			}
+		}
+
+		const HelloWorld = () => <p>Hello world</p>;
+
+		let set;
+		const App = () => {
+			const [show, setShow] = useState(true);
+			set = setShow;
+			return show ? (
+				<Suspense fallback={<div>Suspended...</div>}>
+					<ThrowingChild />
+				</Suspense>
+			) : (
+				<HelloWorld />
+			);
+		};
+
+		render(<App />, scratch);
+
+		expect(scratch.innerHTML).to.equal('<div>value:0</div>');
+
+		childInstance.setState({ suspend: true });
+		rerender();
+		expect(scratch.innerHTML).to.equal('<div>Suspended...</div>');
+
+		set(false);
+		rerender();
+		expect(scratch.innerHTML).to.equal('<p>Hello world</p>');
+
+		childInstance.setState({ value: 1 });
+		rerender();
+
+		expect(scratch.innerHTML).to.equal('<p>Hello world</p>');
+	});
+
+	it('should not crash when suspended child resolves after unmount', async () => {
+		let childInstance = null,
+			res;
+		const neverResolvingPromise = new Promise(r => {
+			res = r;
+		});
+
+		class ThrowingChild extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { suspend: false, value: 0 };
+				childInstance = this;
+			}
+
+			render(props, state) {
+				if (state.suspend) {
+					throw neverResolvingPromise;
+				}
+				return <div>value:{state.value}</div>;
+			}
+		}
+
+		render(
+			<Suspense fallback={<div>Suspended...</div>}>
+				<ThrowingChild />
+			</Suspense>,
+			scratch
+		);
+
+		expect(scratch.innerHTML).to.equal('<div>value:0</div>');
+
+		childInstance.setState({ suspend: true });
+		rerender();
+		expect(scratch.innerHTML).to.equal('<div>Suspended...</div>');
+
+		render(null, scratch);
+		expect(scratch.innerHTML).to.equal('');
+
+		res();
+		return neverResolvingPromise.then(() => {
+			rerender();
+			expect(scratch.innerHTML).to.equal('');
+		});
+	});
+
+	it('should not crash when suspended child resolves after diffed unmount', async () => {
+		let childInstance = null,
+			res;
+		const neverResolvingPromise = new Promise(r => {
+			res = r;
+		});
+
+		class ThrowingChild extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { suspend: false, value: 0 };
+				childInstance = this;
+			}
+
+			render(props, state) {
+				if (state.suspend) {
+					throw neverResolvingPromise;
+				}
+				return <div>value:{state.value}</div>;
+			}
+		}
+
+		const HelloWorld = () => <p>Hello world</p>;
+
+		let set;
+		const App = () => {
+			const [show, setShow] = useState(true);
+			set = setShow;
+			return show ? (
+				<Suspense fallback={<div>Suspended...</div>}>
+					<ThrowingChild />
+				</Suspense>
+			) : (
+				<HelloWorld />
+			);
+		};
+
+		render(<App />, scratch);
+
+		expect(scratch.innerHTML).to.equal('<div>value:0</div>');
+
+		childInstance.setState({ suspend: true });
+		rerender();
+		expect(scratch.innerHTML).to.equal('<div>Suspended...</div>');
+
+		set(false);
+		rerender();
+		expect(scratch.innerHTML).to.equal('<p>Hello world</p>');
+
+		res();
+		return neverResolvingPromise.then(() => {
+			rerender();
+			expect(scratch.innerHTML).to.equal('<p>Hello world</p>');
+		});
 	});
 
 	it('should not crash when suspense promise resolves after unmount', () => {
