@@ -100,7 +100,7 @@ declare namespace preact {
 }
 
 // export default React;
-export = React;
+export default React;
 export as namespace React;
 declare namespace React {
 	// Export JSX

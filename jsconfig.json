@@ -9,7 +9,7 @@
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "paths": {
-      "preact": ["."],
+      "preact": ["./src/index.d.ts"],
       "preact/*": ["./*"]
     },
     "target": "es5",
