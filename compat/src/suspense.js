@@ -31,6 +31,7 @@ const oldUnmount = options.unmount;
 options.unmount = function (vnode) {
 	/** @type {import('./internal').Component} */
 	const component = vnode._component;
+	if (component) component._unmounted = true;
 	if (component && component._onResolve) {
 		component._onResolve();
 	}
@@ -127,7 +128,7 @@ Suspense.prototype._childDidSuspend = function (promise, suspendingVNode) {
 
 	let resolved = false;
 	const onResolved = () => {
-		if (resolved) return;
+		if (resolved || c._unmounted) return;
 
 		resolved = true;
 		suspendingComponent._onResolve = null;
