@@ -2543,4 +2543,114 @@ describe('suspense', () => {
 			`<div><span>Memod effect executed</span><span>effect executed</span></div>`
 		);
 	});
+
+	it('should not schedule renders for setState on suspended component', async () => {
+		let suspenderSetState;
+		let renderCount = 0;
+
+		class Suspender extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { count: 0 };
+				suspenderSetState = this.setState.bind(this);
+			}
+
+			render(props, state) {
+				renderCount++;
+				if (props.suspend && !props.resolved) {
+					throw props.promise;
+				}
+				return <div>Count: {state.count}</div>;
+			}
+		}
+
+		let resolve;
+		const promise = new Promise(r => {
+			resolve = r;
+		});
+
+		act(() => {
+			render(
+				<Suspense fallback={<div>Loading...</div>}>
+					<Suspender suspend={true} resolved={false} promise={promise} />
+				</Suspense>,
+				scratch
+			);
+		});
+
+		rerender();
+
+		expect(scratch.innerHTML).to.equal('<div>Loading...</div>');
+		const renderCountAfterSuspend = renderCount;
+
+		// Call setState on the suspended component multiple times
+		suspenderSetState({ count: 1 });
+		suspenderSetState({ count: 2 });
+		suspenderSetState({ count: 3 });
+		rerender();
+
+		// Render count should not have increased - setState should not trigger re-renders while suspended
+		expect(renderCount).to.equal(renderCountAfterSuspend);
+		expect(scratch.innerHTML).to.equal('<div>Loading...</div>');
+
+		// Resolve the suspension
+		resolve();
+		await promise;
+
+		render(
+			<Suspense fallback={<div>Loading...</div>}>
+				<Suspender suspend={false} resolved={true} promise={promise} />
+			</Suspense>,
+			scratch
+		);
+		rerender();
+
+		// After resolving, the state should have been buffered and applied
+		expect(scratch.innerHTML).to.equal('<div>Count: 3</div>');
+	});
+
+	it('should not schedule renders for forceUpdate on suspended component', () => {
+		let suspenderForceUpdate;
+		let renderCount = 0;
+
+		class Suspender extends Component {
+			constructor(props) {
+				super(props);
+				suspenderForceUpdate = this.forceUpdate.bind(this);
+			}
+
+			render(props) {
+				renderCount++;
+				if (props.suspend && !props.resolved) {
+					throw props.promise;
+				}
+				return <div>Rendered {renderCount} times</div>;
+			}
+		}
+
+		const promise = new Promise(() => {});
+
+		act(() => {
+			render(
+				<Suspense fallback={<div>Loading...</div>}>
+					<Suspender suspend={true} resolved={false} promise={promise} />
+				</Suspense>,
+				scratch
+			);
+		});
+
+		rerender();
+
+		expect(scratch.innerHTML).to.equal('<div>Loading...</div>');
+		const renderCountAfterSuspend = renderCount;
+
+		// Call forceUpdate on the suspended component
+		suspenderForceUpdate();
+		suspenderForceUpdate();
+		rerender();
+
+		// Render count should not have increased
+		expect(renderCount).to.equal(renderCountAfterSuspend);
+		expect(scratch.innerHTML).to.equal('<div>Loading...</div>');
+	});
 });

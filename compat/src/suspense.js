@@ -144,6 +144,12 @@ Suspense.prototype._childDidSuspend = function (promise, suspendingVNode) {
 
 	suspendingComponent._onResolve = onResolved;
 
+	// Store and null _parentDom to prevent setState/forceUpdate from
+	// scheduling renders while suspended. Render would be a no-op anyway
+	// since renderComponent checks _parentDom, but this avoids queue churn.
+	const originalParentDom = suspendingComponent._parentDom;
+	suspendingComponent._parentDom = null;
+
 	const onSuspensionComplete = () => {
 		if (!--c._pendingSuspensionCount) {
 			// If the suspension was during hydration we don't need to restore the
@@ -161,6 +167,8 @@ Suspense.prototype._childDidSuspend = function (promise, suspendingVNode) {
 
 			let suspended;
 			while ((suspended = c._suspenders.pop())) {
+				// Restore _parentDom before forceUpdate so render can proceed
+				suspended._parentDom = originalParentDom;
 				suspended.forceUpdate();
 			}
 		}
