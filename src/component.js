@@ -145,7 +145,8 @@ function renderComponent(component) {
 		);
 
 		newVNode._original = oldVNode._original;
-		newVNode._parent._children[newVNode._index] = newVNode;
+		if (newVNode._parent)
+			newVNode._parent._children[newVNode._index] = newVNode;
 		commitRoot(commitQueue, newVNode, refQueue);
 		oldVNode._dom = oldVNode._parent = null;
 
@@ -206,7 +207,7 @@ export function enqueueRender(c) {
 		prevDebounce != options.debounceRendering
 	) {
 		prevDebounce = options.debounceRendering;
-		(prevDebounce || defer)(process);
+		(options.debounceRendering || defer)(process);
 	}
 }
 
