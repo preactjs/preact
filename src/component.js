@@ -219,8 +219,7 @@ const depthSort = (a, b) => a._vnode._depth - b._vnode._depth;
 /** Flush the render queue by rerendering all queued components */
 function process() {
 	let c,
-		l = 1,
-		e;
+		l = 1;
 
 	// Don't update `renderCount` yet. Keep its value non-zero to prevent unnecessary
 	// process() calls from getting scheduled while `queue` is still being consumed.
@@ -239,17 +238,10 @@ function process() {
 		l = rerenderQueue.length;
 
 		if (c._dirty) {
-			try {
-				renderComponent(c);
-			} catch (firstError) {
-				// unrecoverable errors in rendering should not prevent
-				// further renders from completing
-				if (!e) e = firstError;
-			}
+			renderComponent(c);
 		}
 	}
 	process._rerenderCount = 0;
-	if (e) throw e;
 }
 
 process._rerenderCount = 0;
