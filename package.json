@@ -1,7 +1,7 @@
 {
   "name": "preact",
   "amdName": "preact",
-  "version": "11.0.0-beta.0",
+  "version": "11.0.0-beta.1",
   "private": false,
   "description": "Fast 4kb React-compatible Virtual DOM library.",
   "main": "dist/preact.js",
