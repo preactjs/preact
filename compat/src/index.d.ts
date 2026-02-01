@@ -130,7 +130,8 @@ declare namespace React {
 	export function useDeferredValue<T = any>(val: T): T;
 	export function useSyncExternalStore<T>(
 		subscribe: (flush: () => void) => () => void,
-		getSnapshot: () => T
+		getSnapshot: () => T,
+		getServerSnapshot?: () => T
 	): T;
 
 	// Preact Defaults
