@@ -31,6 +31,7 @@ const oldUnmount = options.unmount;
 options.unmount = function (vnode) {
 	/** @type {import('./internal').Component} */
 	const component = vnode._component;
+	if (component) component._unmounted = true;
 	if (component && component._onResolve) {
 		component._onResolve();
 	}
@@ -127,7 +128,7 @@ Suspense.prototype._childDidSuspend = function (promise, suspendingVNode) {
 
 	let resolved = false;
 	const onResolved = () => {
-		if (resolved) return;
+		if (resolved || c._unmounted) return;
 
 		resolved = true;
 		suspendingComponent._onResolve = null;
@@ -136,6 +137,12 @@ Suspense.prototype._childDidSuspend = function (promise, suspendingVNode) {
 	};
 
 	suspendingComponent._onResolve = onResolved;
+
+	// Store and null _parentDom to prevent setState/forceUpdate from
+	// scheduling renders while suspended. Render would be a no-op anyway
+	// since renderComponent checks _parentDom, but this avoids queue churn.
+	const originalParentDom = suspendingComponent._parentDom;
+	suspendingComponent._parentDom = null;
 
 	const onSuspensionComplete = () => {
 		if (!--c._pendingSuspensionCount) {
@@ -154,6 +161,8 @@ Suspense.prototype._childDidSuspend = function (promise, suspendingVNode) {
 
 			let suspended;
 			while ((suspended = c._suspenders.pop())) {
+				// Restore _parentDom before forceUpdate so render can proceed
+				suspended._parentDom = originalParentDom;
 				suspended.forceUpdate();
 			}
 		}

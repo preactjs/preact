@@ -2198,6 +2198,282 @@ describe('suspense', () => {
 		});
 	});
 
+	it('should not crash when suspended child updates after unmount', () => {
+		let childInstance = null;
+		const neverResolvingPromise = new Promise(() => {});
+
+		class ThrowingChild extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { suspend: false, value: 0 };
+				childInstance = this;
+			}
+
+			render(props, state) {
+				if (state.suspend) {
+					throw neverResolvingPromise;
+				}
+				return <div>value:{state.value}</div>;
+			}
+		}
+
+		render(
+			<Suspense fallback={<div>Suspended...</div>}>
+				<ThrowingChild />
+			</Suspense>,
+			scratch
+		);
+
+		expect(scratch.innerHTML).to.equal('<div>value:0</div>');
+
+		childInstance.setState({ suspend: true });
+		rerender();
+		expect(scratch.innerHTML).to.equal('<div>Suspended...</div>');
+
+		render(null, scratch);
+		expect(scratch.innerHTML).to.equal('');
+
+		childInstance.setState({ value: 1 });
+		rerender();
+
+		expect(scratch.innerHTML).to.equal('');
+	});
+
+	it('should not crash when suspended child updates after diffed unmount', () => {
+		let childInstance = null;
+		const neverResolvingPromise = new Promise(() => {});
+
+		class ThrowingChild extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { suspend: false, value: 0 };
+				childInstance = this;
+			}
+
+			render(props, state) {
+				if (state.suspend) {
+					throw neverResolvingPromise;
+				}
+				return <div>value:{state.value}</div>;
+			}
+		}
+
+		const HelloWorld = () => <p>Hello world</p>;
+
+		let set;
+		const App = () => {
+			const [show, setShow] = useState(true);
+			set = setShow;
+			return show ? (
+				<Suspense fallback={<div>Suspended...</div>}>
+					<ThrowingChild />
+				</Suspense>
+			) : (
+				<HelloWorld />
+			);
+		};
+
+		render(<App />, scratch);
+
+		expect(scratch.innerHTML).to.equal('<div>value:0</div>');
+
+		childInstance.setState({ suspend: true });
+		rerender();
+		expect(scratch.innerHTML).to.equal('<div>Suspended...</div>');
+
+		set(false);
+		rerender();
+		expect(scratch.innerHTML).to.equal('<p>Hello world</p>');
+
+		childInstance.setState({ value: 1 });
+		rerender();
+
+		expect(scratch.innerHTML).to.equal('<p>Hello world</p>');
+	});
+
+	it('should not crash when suspended child resolves after unmount', async () => {
+		let childInstance = null,
+			res;
+		const neverResolvingPromise = new Promise(r => {
+			res = r;
+		});
+
+		class ThrowingChild extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { suspend: false, value: 0 };
+				childInstance = this;
+			}
+
+			render(props, state) {
+				if (state.suspend) {
+					throw neverResolvingPromise;
+				}
+				return <div>value:{state.value}</div>;
+			}
+		}
+
+		render(
+			<Suspense fallback={<div>Suspended...</div>}>
+				<ThrowingChild />
+			</Suspense>,
+			scratch
+		);
+
+		expect(scratch.innerHTML).to.equal('<div>value:0</div>');
+
+		childInstance.setState({ suspend: true });
+		rerender();
+		expect(scratch.innerHTML).to.equal('<div>Suspended...</div>');
+
+		render(null, scratch);
+		expect(scratch.innerHTML).to.equal('');
+
+		res();
+		return neverResolvingPromise.then(() => {
+			rerender();
+			expect(scratch.innerHTML).to.equal('');
+		});
+	});
+
+	it('should not crash when suspended child resolves after diffed unmount', async () => {
+		let childInstance = null,
+			res;
+		const neverResolvingPromise = new Promise(r => {
+			res = r;
+		});
+
+		class ThrowingChild extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { suspend: false, value: 0 };
+				childInstance = this;
+			}
+
+			render(props, state) {
+				if (state.suspend) {
+					throw neverResolvingPromise;
+				}
+				return <div>value:{state.value}</div>;
+			}
+		}
+
+		const HelloWorld = () => <p>Hello world</p>;
+
+		let set;
+		const App = () => {
+			const [show, setShow] = useState(true);
+			set = setShow;
+			return show ? (
+				<Suspense fallback={<div>Suspended...</div>}>
+					<ThrowingChild />
+				</Suspense>
+			) : (
+				<HelloWorld />
+			);
+		};
+
+		render(<App />, scratch);
+
+		expect(scratch.innerHTML).to.equal('<div>value:0</div>');
+
+		childInstance.setState({ suspend: true });
+		rerender();
+		expect(scratch.innerHTML).to.equal('<div>Suspended...</div>');
+
+		set(false);
+		rerender();
+		expect(scratch.innerHTML).to.equal('<p>Hello world</p>');
+
+		res();
+		return neverResolvingPromise.then(() => {
+			rerender();
+			expect(scratch.innerHTML).to.equal('<p>Hello world</p>');
+		});
+	});
+
+	it('should not crash when suspense promise resolves after unmount', () => {
+		let resolve;
+		const promise = new Promise(r => {
+			resolve = r;
+		});
+
+		class ThrowingChild extends Component {
+			render() {
+				throw promise;
+			}
+		}
+
+		render(
+			<Suspense fallback={<div>Suspended...</div>}>
+				<ThrowingChild />
+			</Suspense>,
+			scratch
+		);
+		rerender();
+
+		expect(scratch.innerHTML).to.equal('<div>Suspended...</div>');
+
+		render(null, scratch);
+		expect(scratch.innerHTML).to.equal('');
+
+		resolve();
+
+		return promise.then(() => {
+			rerender();
+			expect(scratch.innerHTML).to.equal('');
+		});
+	});
+
+	it('should not crash when useContext is used in a suspending component', () => {
+		const TestContext = createContext('default');
+		let resolve;
+		let shouldSuspend = false;
+		const promise = new Promise(r => {
+			resolve = r;
+		});
+
+		function ContextUser() {
+			const value = React.useContext(TestContext);
+			if (shouldSuspend) {
+				throw promise;
+			}
+			return <div>Context: {value}</div>;
+		}
+
+		render(
+			<TestContext.Provider value="test-value">
+				<Suspense fallback={<div>Suspended...</div>}>
+					<ContextUser />
+				</Suspense>
+			</TestContext.Provider>,
+			scratch
+		);
+
+		expect(scratch.innerHTML).to.equal('<div>Context: test-value</div>');
+
+		shouldSuspend = true;
+		render(
+			<TestContext.Provider value="test-value">
+				<Suspense fallback={<div>Suspended...</div>}>
+					<ContextUser />
+				</Suspense>
+			</TestContext.Provider>,
+			scratch
+		);
+		rerender();
+
+		expect(scratch.innerHTML).to.equal('<div>Suspended...</div>');
+
+		shouldSuspend = false;
+		resolve();
+
+		return promise.then(() => {
+			rerender();
+			expect(scratch.innerHTML).to.equal('<div>Context: test-value</div>');
+		});
+	});
+
 	it('should not crash if fallback has same DOM as suspended nodes', () => {
 		const [Lazy, resolveLazy] = createLazy();
 
@@ -2275,5 +2551,115 @@ describe('suspense', () => {
 		return expect(scratch.innerHTML).to.eql(
 			`<div><span>Memod effect executed</span><span>effect executed</span></div>`
 		);
+	});
+
+	it('should not schedule renders for setState on suspended component', async () => {
+		let suspenderSetState;
+		let renderCount = 0;
+
+		class Suspender extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { count: 0 };
+				suspenderSetState = this.setState.bind(this);
+			}
+
+			render(props, state) {
+				renderCount++;
+				if (props.suspend && !props.resolved) {
+					throw props.promise;
+				}
+				return <div>Count: {state.count}</div>;
+			}
+		}
+
+		let resolve;
+		const promise = new Promise(r => {
+			resolve = r;
+		});
+
+		act(() => {
+			render(
+				<Suspense fallback={<div>Loading...</div>}>
+					<Suspender suspend={true} resolved={false} promise={promise} />
+				</Suspense>,
+				scratch
+			);
+		});
+
+		rerender();
+
+		expect(scratch.innerHTML).to.equal('<div>Loading...</div>');
+		const renderCountAfterSuspend = renderCount;
+
+		// Call setState on the suspended component multiple times
+		suspenderSetState({ count: 1 });
+		suspenderSetState({ count: 2 });
+		suspenderSetState({ count: 3 });
+		rerender();
+
+		// Render count should not have increased - setState should not trigger re-renders while suspended
+		expect(renderCount).to.equal(renderCountAfterSuspend);
+		expect(scratch.innerHTML).to.equal('<div>Loading...</div>');
+
+		// Resolve the suspension
+		resolve();
+		await promise;
+
+		render(
+			<Suspense fallback={<div>Loading...</div>}>
+				<Suspender suspend={false} resolved={true} promise={promise} />
+			</Suspense>,
+			scratch
+		);
+		rerender();
+
+		// After resolving, the state should have been buffered and applied
+		expect(scratch.innerHTML).to.equal('<div>Count: 3</div>');
+	});
+
+	it('should not schedule renders for forceUpdate on suspended component', () => {
+		let suspenderForceUpdate;
+		let renderCount = 0;
+
+		class Suspender extends Component {
+			constructor(props) {
+				super(props);
+				suspenderForceUpdate = this.forceUpdate.bind(this);
+			}
+
+			render(props) {
+				renderCount++;
+				if (props.suspend && !props.resolved) {
+					throw props.promise;
+				}
+				return <div>Rendered {renderCount} times</div>;
+			}
+		}
+
+		const promise = new Promise(() => {});
+
+		act(() => {
+			render(
+				<Suspense fallback={<div>Loading...</div>}>
+					<Suspender suspend={true} resolved={false} promise={promise} />
+				</Suspense>,
+				scratch
+			);
+		});
+
+		rerender();
+
+		expect(scratch.innerHTML).to.equal('<div>Loading...</div>');
+		const renderCountAfterSuspend = renderCount;
+
+		// Call forceUpdate on the suspended component
+		suspenderForceUpdate();
+		suspenderForceUpdate();
+		rerender();
+
+		// Render count should not have increased
+		expect(renderCount).to.equal(renderCountAfterSuspend);
+		expect(scratch.innerHTML).to.equal('<div>Loading...</div>');
 	});
 });
