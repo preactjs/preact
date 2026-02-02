@@ -6,7 +6,7 @@ import {
 	unstable_UserBlockingPriority,
 	unstable_ImmediatePriority,
 	unstable_now
-} from '../../src';
+} from '../../src/index.cjs';
 
 const noop = () => null;
 unstable_runWithPriority(unstable_IdlePriority, noop);

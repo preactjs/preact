@@ -12,7 +12,7 @@
       "import": "./dist/preact.esm.js"
     },
     "./compat": {
-      "types": "./compat/src/index.d.ts",
+      "types": "./compat/src/index.d.cts",
       "import": "./compat/dist/compat.esm.js"
     },
     "./debug": {

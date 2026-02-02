@@ -1,4 +1,4 @@
-import * as React from '../../src';
+import * as React from '../../src/index.cjs';
 
 export interface LazyProps {
 	isProp: boolean;
