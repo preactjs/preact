@@ -1,7 +1,7 @@
-import * as _preact from '../../src/index.js';
-import { JSXInternal } from '../../src/jsx.js';
-import * as _hooks from '../../hooks/src/index.js';
-import * as _Suspense from './suspense.js';
+import * as _preact from '../../src';
+import { JSXInternal } from '../../src/jsx';
+import * as _hooks from '../../hooks';
+import * as _Suspense from './suspense';
 
 declare namespace preact {
 	export interface FunctionComponent<P = {}> {
@@ -98,7 +98,7 @@ declare namespace preact {
 }
 
 // export default React;
-export default React;
+export = React;
 export as namespace React;
 declare namespace React {
 	// Export JSX
