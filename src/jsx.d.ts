@@ -1,7 +1,7 @@
 // Users who only use Preact for SSR might not specify "dom" in their lib in tsconfig.json
 /// <reference lib="dom" />
 
-import * as preact from 'preact';
+import * as preact from './index';
 
 type Defaultize<Props, Defaults> =
 	// Distribute over unions
