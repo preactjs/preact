@@ -875,4 +875,35 @@ describe('Portal', () => {
 			'Portal'
 		]);
 	});
+
+	// #4992
+	it('should maintain SVG namespace when rendering through a portal', () => {
+		const svgRoot = document.createElementNS(
+			'http://www.w3.org/2000/svg',
+			'svg'
+		);
+		document.body.appendChild(svgRoot);
+
+		function App() {
+			return (
+				<svg>
+					<g>
+						<rect width="100" height="100" fill="red" />
+						{createPortal(
+							<g id="test-portal">
+								<rect width="50" height="50" fill="blue" />
+							</g>,
+							svgRoot
+						)}
+					</g>
+				</svg>
+			);
+		}
+
+		render(<App />, scratch);
+
+		const portalG = svgRoot.querySelector('g#test-portal');
+		expect(portalG.namespaceURI).to.equal('http://www.w3.org/2000/svg');
+		expect(portalG.constructor.name).to.equal('SVGGElement');
+	});
 });
