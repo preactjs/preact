@@ -437,19 +437,21 @@ describe('render()', () => {
 			render() {
 				return (
 					<div>
-						{this.state.active
-							? <table>
-									<tr>
-										<td rowSpan={2} colSpan={2}>
-											Foo
-										</td>
-									</tr>
-								</table>
-							: <table>
-									<tr>
-										<td>Foo</td>
-									</tr>
-								</table>}
+						{this.state.active ? (
+							<table>
+								<tr>
+									<td rowSpan={2} colSpan={2}>
+										Foo
+									</td>
+								</tr>
+							</table>
+						) : (
+							<table>
+								<tr>
+									<td>Foo</td>
+								</tr>
+							</table>
+						)}
 					</div>
 				);
 			}
@@ -512,6 +514,21 @@ describe('render()', () => {
 		expect(scratch.firstChild.checked).to.equal(true);
 		render(<input defaultChecked checked={false} />, scratch);
 		expect(scratch.firstChild.checked).to.equal(false);
+	});
+
+	it('should not try to set element.children', () => {
+		render(
+			<div>
+				<span />
+			</div>,
+			scratch
+		);
+		const spy = vi.fn();
+		Object.defineProperty(scratch.firstChild, 'children', {
+			set: spy
+		});
+		render(<div />, scratch);
+		expect(spy).not.toHaveBeenCalled();
 	});
 
 	it('should render download attribute', () => {
@@ -666,9 +683,11 @@ describe('render()', () => {
 				}
 				render(props, { html }) {
 					// eslint-disable-next-line react/no-danger
-					return html
-						? <div dangerouslySetInnerHTML={{ __html: html }} />
-						: <div />;
+					return html ? (
+						<div dangerouslySetInnerHTML={{ __html: html }} />
+					) : (
+						<div />
+					);
 				}
 			}
 
@@ -1881,14 +1900,16 @@ describe('render()', () => {
 			//
 			// We insert <span /> which should amount to a skew of -1 which should
 			// make us correctly match the X component.
-			return condition
-				? <div>
-						<span />
-						<X name="B" />
-					</div>
-				: <div>
-						<X name="A" />
-					</div>;
+			return condition ? (
+				<div>
+					<span />
+					<X name="B" />
+				</div>
+			) : (
+				<div>
+					<X name="A" />
+				</div>
+			);
 		}
 
 		render(<Foo />, scratch);
