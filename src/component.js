@@ -145,7 +145,8 @@ function renderComponent(component) {
 		);
 
 		newVNode._original = oldVNode._original;
-		newVNode._parent._children[newVNode._index] = newVNode;
+		if (newVNode._parent)
+			newVNode._parent._children[newVNode._index] = newVNode;
 		commitRoot(commitQueue, newVNode, refQueue);
 		oldVNode._dom = oldVNode._parent = null;
 
@@ -178,7 +179,10 @@ function updateParentDomPointers(vnode) {
  * @type {Array<import('./internal').Component>}
  */
 let rerenderQueue = [];
-
+const defer =
+	typeof Promise == 'function'
+		? Promise.prototype.then.bind(Promise.resolve())
+		: setTimeout;
 /*
  * The value of `Component.debounce` must asynchronously invoke the passed in callback. It is
  * important that contributors to Preact can consistently reason about what calls to `setState`, etc.
@@ -188,12 +192,7 @@ let rerenderQueue = [];
  * * [Callbacks synchronous and asynchronous](https://blog.ometer.com/2011/07/24/callbacks-synchronous-and-asynchronous/)
  */
 
-let prevDebounce;
-
-const defer =
-	typeof Promise == 'function'
-		? Promise.prototype.then.bind(Promise.resolve())
-		: setTimeout;
+let prevDebounce = options.debounceRendering || defer;
 
 /**
  * Enqueue a rerender of a component
@@ -208,7 +207,7 @@ export function enqueueRender(c) {
 		prevDebounce != options.debounceRendering
 	) {
 		prevDebounce = options.debounceRendering;
-		(prevDebounce || defer)(process);
+		(options.debounceRendering || defer)(process);
 	}
 }
 
