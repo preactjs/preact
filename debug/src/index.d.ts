@@ -1,4 +1,4 @@
-import { VNode } from 'preact';
+import { VNode } from '../../src/index';
 
 /**
  * Return the component stack that was captured up to this point.
