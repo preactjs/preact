@@ -88,12 +88,12 @@
       "default": "./compat/server.browser.js"
     },
     "./compat/jsx-runtime": {
-      "types": "./jsx-runtime/src/index.d.ts",
+      "types": "./compat/jsx-runtime.d.ts",
       "import": "./compat/jsx-runtime.mjs",
       "require": "./compat/jsx-runtime.js"
     },
     "./compat/jsx-dev-runtime": {
-      "types": "./jsx-runtime/src/index.d.ts",
+      "types": "./compat/jsx-runtime.d.ts",
       "import": "./compat/jsx-dev-runtime.mjs",
       "require": "./compat/jsx-dev-runtime.js"
     },

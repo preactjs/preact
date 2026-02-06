@@ -15,7 +15,7 @@ import {
 	TargetedSubmitEvent,
 	AllHTMLAttributes,
 	HTMLAttributes,
-	InputHTMLAttributes,
+	InputHTMLAttributes
 } from '../../';
 
 function createSignal<T>(value: T): SignalLike<T> {
@@ -419,10 +419,7 @@ createElement<InputHTMLAttributes>('input', {
 <input onClick={e => e.currentTarget.capture} />;
 
 function Checkbox({ onChange }: HTMLAttributes<HTMLInputElement>) {
-	function handleChange(
-		this: void,
-		event: TargetedEvent<HTMLInputElement>
-	) {
+	function handleChange(this: void, event: TargetedEvent<HTMLInputElement>) {
 		onChange?.call(this, event);
 	}
 
