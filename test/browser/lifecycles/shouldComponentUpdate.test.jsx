@@ -15,10 +15,13 @@ describe('Lifecycle methods', () => {
 	// 	expect(getLog()).to.deep.equal(expectedOperations, message);
 	// }
 	let resetInsertBefore;
+	let resetMoveBefore;
 	let resetRemoveChild;
 	let resetRemove;
 
 	beforeAll(() => {
+		// @ts-expect-error
+		resetMoveBefore = logCall(Element.prototype, 'moveBefore');
 		resetInsertBefore = logCall(Element.prototype, 'insertBefore');
 		resetRemoveChild = logCall(Element.prototype, 'appendChild');
 		resetRemove = logCall(Element.prototype, 'removeChild');
@@ -28,6 +31,7 @@ describe('Lifecycle methods', () => {
 		resetInsertBefore();
 		resetRemoveChild();
 		resetRemove();
+		resetMoveBefore();
 	});
 
 	beforeEach(() => {
