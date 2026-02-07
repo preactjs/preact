@@ -1,11 +1,9 @@
 {
   "name": "preact-hooks",
-  "amdName": "preactHooks",
   "private": true,
   "description": "Hook addon for Preact",
+  "type": "module",
   "main": "dist/hooks.js",
-  "module": "dist/hooks.mjs",
-  "umd:main": "dist/hooks.umd.js",
   "source": "src/index.js",
   "types": "src/index.d.ts",
   "license": "MIT",

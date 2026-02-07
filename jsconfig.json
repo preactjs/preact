@@ -9,10 +9,11 @@
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "paths": {
-      "preact": ["."],
+      "preact": ["./src/index.d.ts"],
       "preact/*": ["./*"]
     },
     "target": "es5",
+    "module": "esnext",
     "noEmit": true,
     "skipLibCheck": false,
     "types": ["vitest/globals"]

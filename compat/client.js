@@ -1,6 +1,6 @@
-const { render, hydrate, unmountComponentAtNode } = require('preact/compat');
+import { render, hydrate, unmountComponentAtNode } from 'preact/compat';
 
-function createRoot(container) {
+export function createRoot(container) {
 	return {
 		// eslint-disable-next-line
 		render: function (children) {
@@ -13,9 +13,12 @@ function createRoot(container) {
 	};
 }
 
-exports.createRoot = createRoot;
-
-exports.hydrateRoot = function (container, children) {
+export function hydrateRoot(container, children) {
 	hydrate(children, container);
 	return createRoot(container);
+}
+
+export default {
+	createRoot,
+	hydrateRoot
 };
