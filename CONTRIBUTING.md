@@ -1,10 +1,10 @@
 # Contributing
 
-This document is intended for developers interest in making contributions to Preact and document our internal processes like releasing a new version.
+This document is intended for developers interested in making contributions to Preact and documents our internal processes like releasing a new version.
 
 ## Getting Started
 
-This steps will help you to set up your development environment. That includes all dependencies we use to build Preact and developer tooling like git commit hooks.
+These steps will help you set up your development environment. That includes all dependencies we use to build Preact and developer tooling like git commit hooks.
 
 1. Clone the git repository: `git clone git@github.com:preactjs/preact.git`
 2. Go into the cloned folder: `cd preact/`
@@ -32,7 +32,7 @@ A quick overview of our repository:
   	dist/ # Build artifacts for publishing on npm (may not be present)
 
   # Sub-package, can be imported via `preact/hooks` by users.
-  # The hooks API is an effect based API to deal with component lifcycles.
+  # The hooks API is an effect based API to deal with component lifecycles.
   # It's similar to hooks in React
   hooks/
   	src/  # Source code of the hooks addon
@@ -41,7 +41,7 @@ A quick overview of our repository:
 
   # Sub-package, can be imported via `preact/debug` by users.
   # Includes debugging warnings and error messages for common mistakes found
-  # in Preact application. Also hosts the devtools bridge
+  # in Preact applications. Also hosts the devtools bridge
   debug/
   	src/  # Source code of the debug addon
   	test/ # Tests related to the debug addon
@@ -66,7 +66,7 @@ _Note: The code for rendering Preact on the server lives in another repo and is 
 
 ### What does `mangle.json` do?
 
-It's a special file that can be used to specify how `terser` (previously known as `uglify`) will minify variable names. Because each sub-package has it's own distribution files we need to ensure that the variable names stay consistent across bundles.
+It's a special file that can be used to specify how `terser` (previously known as `uglify`) will minify variable names. Because each sub-package has its own distribution files we need to ensure that the variable names stay consistent across bundles.
 
 ## What does `options.js` do?
 
@@ -170,7 +170,7 @@ Checkout the README in the benchmarks folder for more information on running ben
 
 Several members of the team are very fond of TypeScript and we wanted to leverage as many of its advantages, like improved autocompletion, for Preact. We even attempted to port Preact to TypeScript a few times, but we ran into many issues with the DOM typings. Those would force us to fill our codebase with many `any` castings, making our code very noisy.
 
-Luckily TypeScript has a mode where it can somewhat reliably typecheck JavaScript code by reusing the types defined in JSDoc blocks. It's not perfect and it often has trouble inferring the correct types the further one strays away from the function arguments, but it's good enough that it helps us a lot with autocompletion. Another plus is that we can make sure that our TypeScript definitons are correct at the same time.
+Luckily TypeScript has a mode where it can somewhat reliably typecheck JavaScript code by reusing the types defined in JSDoc blocks. It's not perfect and it often has trouble inferring the correct types the further one strays away from the function arguments, but it's good enough that it helps us a lot with autocompletion. Another plus is that we can make sure that our TypeScript definitions are correct at the same time.
 
 Check out the [official TypeScript documentation](https://www.typescriptlang.org/docs/handbook/type-checking-javascript-files.html) for more information.
 
