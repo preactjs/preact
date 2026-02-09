@@ -31,12 +31,20 @@ expect.extend({
 				pass: obj == null,
 				message: () => `expected node to "== null" but got ${obj} instead.`
 			};
-		} else {
-			return {
-				pass: obj.tagName === expected.tagName && obj === expected,
-				message: () =>
-					`expected node to have tagName ${expected.tagName} but got ${obj.tagName} instead.`
-			};
 		}
+
+		const pass =
+			obj != null && obj.tagName === expected.tagName && obj === expected;
+
+		return {
+			pass,
+			message: () => {
+				if (obj == null) {
+					return `expected node to have tagName ${expected.tagName} but got ${obj} instead.`;
+				}
+
+				return `expected node to have tagName ${expected.tagName} but got ${obj.tagName} instead.`;
+			}
+		};
 	}
 });
