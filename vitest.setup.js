@@ -38,13 +38,8 @@ expect.extend({
 
 		return {
 			pass,
-			message: () => {
-				if (obj == null) {
-					return `expected node to have tagName ${expected.tagName} but got ${obj} instead.`;
-				}
-
-				return `expected node to have tagName ${expected.tagName} but got ${obj.tagName} instead.`;
-			}
+			message: () =>
+				`expected node to have tagName ${expected.tagName} but got ${obj ? obj.tagName : obj} instead.`
 		};
 	}
 });
