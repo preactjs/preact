@@ -217,28 +217,31 @@ const depthSort = (a, b) => a._vnode._depth - b._vnode._depth;
 
 /** Flush the render queue by rerendering all queued components */
 function process() {
-	let c,
-		l = 1;
+	try {
+		let c,
+			l = 1;
 
-	// Don't update `renderCount` yet. Keep its value non-zero to prevent unnecessary
-	// process() calls from getting scheduled while `queue` is still being consumed.
-	while (rerenderQueue.length) {
-		// Keep the rerender queue sorted by (depth, insertion order). The queue
-		// will initially be sorted on the first iteration only if it has more than 1 item.
-		//
-		// New items can be added to the queue e.g. when rerendering a provider, so we want to
-		// keep the order from top to bottom with those new items so we can handle them in a
-		// single pass
-		if (rerenderQueue.length > l) {
-			rerenderQueue.sort(depthSort);
+		// Don't update `renderCount` yet. Keep its value non-zero to prevent unnecessary
+		// process() calls from getting scheduled while `queue` is still being consumed.
+		while (rerenderQueue.length) {
+			// Keep the rerender queue sorted by (depth, insertion order). The queue
+			// will initially be sorted on the first iteration only if it has more than 1 item.
+			//
+			// New items can be added to the queue e.g. when rerendering a provider, so we want to
+			// keep the order from top to bottom with those new items so we can handle them in a
+			// single pass
+			if (rerenderQueue.length > l) {
+				rerenderQueue.sort(depthSort);
+			}
+
+			c = rerenderQueue.shift();
+			l = rerenderQueue.length;
+
+			renderComponent(c);
 		}
-
-		c = rerenderQueue.shift();
-		l = rerenderQueue.length;
-
-		renderComponent(c);
+	} finally {
+		process._rerenderCount = 0;
 	}
-	process._rerenderCount = 0;
 }
 
 process._rerenderCount = 0;
