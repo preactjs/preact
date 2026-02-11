@@ -4,6 +4,8 @@ import * as _hooks from '../../hooks';
 import * as preact1 from 'preact';
 import { JSXInternal } from '../../src/jsx';
 import * as _Suspense from './suspense';
+import { CompatSVGAttributes } from './dom';
+import { CompatJSX } from './jsx';
 
 declare namespace preact {
 	export interface FunctionComponent<P = {}> {
@@ -102,9 +104,10 @@ declare namespace preact {
 // export default React;
 export = React;
 export as namespace React;
+
 declare namespace React {
-	// Export JSX
-	export import JSX = JSXInternal;
+	// Export JSX with React-compatible camelCase SVG attributes
+	export import JSX = CompatJSX;
 
 	// Hooks
 	export import CreateHandle = _hooks.CreateHandle;
@@ -175,14 +178,12 @@ declare namespace React {
 	export import DetailedHTMLProps = preact1.DetailedHTMLProps;
 	export import CSSProperties = preact1.CSSProperties;
 
+	// Compat SVG attributes include React-compatible camelCase properties
+	// that are not available in core Preact
 	export interface SVGProps<T extends EventTarget>
 		extends preact1.SVGAttributes<T>,
-			preact1.ClassAttributes<T> {}
-
-	interface SVGAttributes<T extends EventTarget = SVGElement>
-		extends preact1.SVGAttributes<T> {}
-
-	interface ReactSVG extends JSXInternal.IntrinsicSVGElements {}
+			preact1.ClassAttributes<T>,
+			CompatSVGAttributes {}
 
 	export import AriaAttributes = preact1.AriaAttributes;
 
@@ -431,4 +432,12 @@ declare namespace React {
 		callback: () => void
 	): void;
 	export const unstable_now: () => number;
+}
+
+// Augment global JSX namespace when preact/compat is imported
+declare global {
+	// eslint-disable-next-line @typescript-eslint/no-namespace
+	namespace JSX {
+		interface IntrinsicElements extends CompatJSX.IntrinsicElements {}
+	}
 }
