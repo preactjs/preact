@@ -1,11 +1,9 @@
 {
   "name": "preact-debug",
-  "amdName": "preactDebug",
   "private": true,
   "description": "Preact extensions for development",
+  "type": "module",
   "main": "dist/debug.js",
-  "module": "dist/debug.mjs",
-  "umd:main": "dist/debug.umd.js",
   "source": "src/index.js",
   "types": "src/index.d.ts",
   "license": "MIT",

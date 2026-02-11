@@ -1,4 +1,4 @@
-import React from '../../src';
+import React from '../../src/index.cjs';
 
 React.render(<div />, document.createElement('div'));
 React.render(<div />, document.createDocumentFragment());
