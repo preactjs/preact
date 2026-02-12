@@ -126,14 +126,13 @@ export function getDomSibling(vnode, childIndex) {
  * @param {import('./internal').Component} component The component to rerender
  */
 function renderComponent(component) {
-	let oldVNode = component._vnode,
-		oldDom = oldVNode._dom,
-		commitQueue = [],
-		refQueue = [];
-
 	const parentDom = component._parentDom;
-	if (parentDom) {
-		const newVNode = assign({}, oldVNode);
+	if (parentDom && component._bits & COMPONENT_DIRTY) {
+		let oldVNode = component._vnode,
+			oldDom = oldVNode._dom,
+			commitQueue = [],
+			refQueue = [],
+			newVNode = assign({}, oldVNode);
 		newVNode._original = oldVNode._original + 1;
 		if (options.vnode) options.vnode(newVNode);
 
@@ -246,9 +245,7 @@ function process() {
 		c = rerenderQueue.shift();
 		l = rerenderQueue.length;
 
-		if (c._bits & COMPONENT_DIRTY) {
-			renderComponent(c);
-		}
+		renderComponent(c);
 	}
 
 	rerenderCount = 0;
