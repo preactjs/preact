@@ -498,16 +498,14 @@ function diffElementNodes(
 
 		for (i in oldProps) {
 			value = oldProps[i];
-			if (i == 'children') {
-			} else if (i == 'dangerouslySetInnerHTML') {
+			if (i == 'dangerouslySetInnerHTML') {
 				oldHtml = value;
-			} else if (!(i in newProps)) {
-				if (
-					(i == 'value' && 'defaultValue' in newProps) ||
-					(i == 'checked' && 'defaultChecked' in newProps)
-				) {
-					continue;
-				}
+			} else if (
+				i != 'children' &&
+				!(i in newProps) &&
+				!(i == 'value' && 'defaultValue' in newProps) &&
+				!(i == 'checked' && 'defaultChecked' in newProps)
+			) {
 				setProperty(dom, i, NULL, value, namespace);
 			}
 		}
