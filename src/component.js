@@ -242,7 +242,7 @@ function process() {
 			renderComponent(c);
 		}
 	} finally {
-		process._rerenderCount = 0;
+		rerenderQueue.length = process._rerenderCount = 0;
 	}
 }
 
