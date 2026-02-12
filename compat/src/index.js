@@ -77,9 +77,7 @@ function isFragment(element) {
 function isMemo(element) {
 	return (
 		!!element &&
-		!!element.displayName &&
-		(typeof element.displayName === 'string' ||
-			element.displayName instanceof String) &&
+		typeof element.displayName == 'string' &&
 		element.displayName.startsWith('Memo(')
 	);
 }

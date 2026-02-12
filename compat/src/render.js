@@ -231,9 +231,7 @@ function handleDomVNode(vnode) {
 			'className',
 			classNameDescriptorNonEnumberable
 		);
-	} else if (props.className && !props.class) {
-		normalizedProps.class = normalizedProps.className = props.className;
-	} else if (props.class && props.className) {
+	} else if (props.className) {
 		normalizedProps.class = normalizedProps.className = props.className;
 	}
 
