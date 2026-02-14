@@ -209,9 +209,7 @@ export function diff(
 						if (vnode) vnode._parent = newVNode;
 					});
 
-					for (let i = 0; i < c._stateCallbacks.length; i++) {
-						c._renderCallbacks.push(c._stateCallbacks[i]);
-					}
+					c._renderCallbacks.push(...c._stateCallbacks);
 					c._stateCallbacks = [];
 
 					if (c._renderCallbacks.length) {
@@ -247,9 +245,7 @@ export function diff(
 
 				tmp = c.render(c.props, c.state, c.context);
 
-				for (let i = 0; i < c._stateCallbacks.length; i++) {
-					c._renderCallbacks.push(c._stateCallbacks[i]);
-				}
+				c._renderCallbacks.push(...c._stateCallbacks);
 				c._stateCallbacks = [];
 			} else {
 				do {
@@ -278,16 +274,14 @@ export function diff(
 				snapshot = c.getSnapshotBeforeUpdate(oldProps, oldState);
 			}
 
-			let isTopLevelFragment =
-				tmp != NULL && tmp.type === Fragment && tmp.key == NULL;
-
-			if (isTopLevelFragment) {
-				tmp = cloneNode(tmp.props.children);
-			}
+			let renderResult =
+				tmp != NULL && tmp.type === Fragment && tmp.key == NULL
+					? cloneNode(tmp.props.children)
+					: tmp;
 
 			oldDom = diffChildren(
 				parentDom,
-				isArray(tmp) ? tmp : [tmp],
+				isArray(renderResult) ? renderResult : [renderResult],
 				newVNode,
 				oldVNode,
 				globalContext,
@@ -399,10 +393,10 @@ export function diff(
 }
 
 function markAsForce(vnode) {
-	if (vnode && vnode._component) {
-		vnode._component._bits |= COMPONENT_FORCE;
+	if (vnode) {
+		if (vnode._component) vnode._component._force = true;
+		if (vnode._children) vnode._children.some(markAsForce);
 	}
-	if (vnode && vnode._children) vnode._children.forEach(markAsForce);
 }
 
 /**
@@ -433,11 +427,7 @@ export function commitRoot(commitQueue, root, refQueue) {
 }
 
 function cloneNode(node) {
-	if (
-		typeof node != 'object' ||
-		node == NULL ||
-		(node._depth && node._depth > 0)
-	) {
+	if (typeof node != 'object' || node == NULL || node._depth > 0) {
 		return node;
 	}
 
