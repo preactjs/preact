@@ -84,11 +84,8 @@ export function diffChildren(
 
 		// At this point, constructNewChildrenArray has assigned _index to be the
 		// matchingIndex for this VNode's oldVNode (or -1 if there is no oldVNode).
-		if (childVNode._index == -1) {
-			oldVNode = EMPTY_OBJ;
-		} else {
-			oldVNode = oldChildren[childVNode._index] || EMPTY_OBJ;
-		}
+		oldVNode =
+			(childVNode._index != -1 && oldChildren[childVNode._index]) || EMPTY_OBJ;
 
 		// Update childVNode._index to its final index
 		childVNode._index = i;
