@@ -189,14 +189,10 @@ export abstract class Component<P, S> {
 export function createElement(
 	type: 'input',
 	props:
-		| (DOMAttributes<HTMLInputElement> &
-				ClassAttributes<HTMLInputElement>)
+		| (DOMAttributes<HTMLInputElement> & ClassAttributes<HTMLInputElement>)
 		| null,
 	...children: ComponentChildren[]
-): VNode<
-	DOMAttributes<HTMLInputElement> &
-		ClassAttributes<HTMLInputElement>
->;
+): VNode<DOMAttributes<HTMLInputElement> & ClassAttributes<HTMLInputElement>>;
 export function createElement<
 	P extends HTMLAttributes<T>,
 	T extends HTMLElement
@@ -215,15 +211,9 @@ export function createElement<
 ): VNode<ClassAttributes<T> & P>;
 export function createElement<T extends HTMLElement>(
 	type: string,
-	props:
-		| (ClassAttributes<T> &
-				HTMLAttributes &
-				SVGAttributes)
-		| null,
+	props: (ClassAttributes<T> & HTMLAttributes & SVGAttributes) | null,
 	...children: ComponentChildren[]
-): VNode<
-	ClassAttributes<T> & HTMLAttributes & SVGAttributes
->;
+): VNode<ClassAttributes<T> & HTMLAttributes & SVGAttributes>;
 export function createElement<P>(
 	type: ComponentType<P> | string,
 	props: (Attributes & P) | null,
@@ -236,44 +226,25 @@ export namespace createElement {
 export function h(
 	type: 'input',
 	props:
-		| (DOMAttributes<HTMLInputElement> &
-				ClassAttributes<HTMLInputElement>)
+		| (DOMAttributes<HTMLInputElement> & ClassAttributes<HTMLInputElement>)
 		| null,
 	...children: ComponentChildren[]
-): VNode<
-	DOMAttributes<HTMLInputElement> &
-		ClassAttributes<HTMLInputElement>
->;
-export function h<
-	P extends HTMLAttributes<T>,
-	T extends HTMLElement
->(
+): VNode<DOMAttributes<HTMLInputElement> & ClassAttributes<HTMLInputElement>>;
+export function h<P extends HTMLAttributes<T>, T extends HTMLElement>(
 	type: keyof JSXInternal.IntrinsicElements,
 	props: (ClassAttributes<T> & P) | null,
 	...children: ComponentChildren[]
 ): VNode<ClassAttributes<T> & P>;
-export function h<
-	P extends SVGAttributes<T>,
-	T extends HTMLElement
->(
+export function h<P extends SVGAttributes<T>, T extends HTMLElement>(
 	type: keyof JSXInternal.IntrinsicSVGElements,
 	props: (ClassAttributes<T> & P) | null,
 	...children: ComponentChildren[]
 ): VNode<ClassAttributes<T> & P>;
 export function h<T extends HTMLElement>(
 	type: string,
-	props:
-		| (ClassAttributes<T> &
-				HTMLAttributes &
-				SVGAttributes)
-		| null,
+	props: (ClassAttributes<T> & HTMLAttributes & SVGAttributes) | null,
 	...children: ComponentChildren[]
-): VNode<
-	| (ClassAttributes<T> &
-			HTMLAttributes &
-			SVGAttributes)
-	| null
->;
+): VNode<(ClassAttributes<T> & HTMLAttributes & SVGAttributes) | null>;
 export function h<P>(
 	type: ComponentType<P> | string,
 	props: (Attributes & P) | null,
