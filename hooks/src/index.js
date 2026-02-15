@@ -57,15 +57,15 @@ options._render = vnode => {
 		if (previousComponent === currentComponent) {
 			hooks._pendingEffects = [];
 			currentComponent._renderCallbacks = [];
-			hooks._list.forEach(hookItem => {
+			hooks._list.some(hookItem => {
 				if (hookItem._nextValue) {
 					hookItem._value = hookItem._nextValue;
 				}
 				hookItem._pendingArgs = hookItem._nextValue = undefined;
 			});
 		} else {
-			hooks._pendingEffects.forEach(invokeCleanup);
-			hooks._pendingEffects.forEach(invokeEffect);
+			hooks._pendingEffects.some(invokeCleanup);
+			hooks._pendingEffects.some(invokeEffect);
 			hooks._pendingEffects = [];
 			currentIndex = 0;
 		}
@@ -80,7 +80,7 @@ options.diffed = vnode => {
 	const c = vnode._component;
 	if (c && c.__hooks) {
 		if (c.__hooks._pendingEffects.length) afterPaint(afterPaintEffects.push(c));
-		c.__hooks._list.forEach(hookItem => {
+		c.__hooks._list.some(hookItem => {
 			if (hookItem._pendingArgs) {
 				hookItem._args = hookItem._pendingArgs;
 			}
@@ -95,7 +95,7 @@ options.diffed = vnode => {
 options._commit = (vnode, commitQueue) => {
 	commitQueue.some(component => {
 		try {
-			component._renderCallbacks.forEach(invokeCleanup);
+			component._renderCallbacks.some(invokeCleanup);
 			component._renderCallbacks = component._renderCallbacks.filter(cb =>
 				cb._value ? invokeEffect(cb) : true
 			);
@@ -118,7 +118,7 @@ options.unmount = vnode => {
 	const c = vnode._component;
 	if (c && c.__hooks) {
 		let hasErrored;
-		c.__hooks._list.forEach(s => {
+		c.__hooks._list.some(s => {
 			try {
 				invokeCleanup(s);
 			} catch (e) {
@@ -237,10 +237,9 @@ export function useReducer(reducer, initialState, init) {
 			function updateHookState(p, s, c) {
 				if (!hookState._component.__hooks) return true;
 
-				/** @type {(x: import('./internal').HookState) => x is import('./internal').ReducerHookState} */
-				const isStateHook = x => !!x._component;
-				const stateHooks =
-					hookState._component.__hooks._list.filter(isStateHook);
+				const stateHooks = hookState._component.__hooks._list.filter(
+					x => x._component
+				);
 
 				const allHooksEmpty = stateHooks.every(x => !x._nextValue);
 				// When we have no updated hooks in the component we invoke the previous SCU or
@@ -253,7 +252,7 @@ export function useReducer(reducer, initialState, init) {
 				// have values that aren't equal to one another this pushes
 				// us to update further down the tree
 				let shouldUpdate = hookState._component.props !== p;
-				stateHooks.forEach(hookItem => {
+				stateHooks.some(hookItem => {
 					if (hookItem._nextValue) {
 						const currentValue = hookItem._value[0];
 						hookItem._value = hookItem._nextValue;
@@ -450,8 +449,8 @@ function flushAfterPaintEffects() {
 	while ((component = afterPaintEffects.shift())) {
 		if (!component._parentDom || !component.__hooks) continue;
 		try {
-			component.__hooks._pendingEffects.forEach(invokeCleanup);
-			component.__hooks._pendingEffects.forEach(invokeEffect);
+			component.__hooks._pendingEffects.some(invokeCleanup);
+			component.__hooks._pendingEffects.some(invokeEffect);
 			component.__hooks._pendingEffects = [];
 		} catch (e) {
 			component.__hooks._pendingEffects = [];
