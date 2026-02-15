@@ -393,10 +393,8 @@ export function diff(
 }
 
 function markAsForce(vnode) {
-	if (vnode) {
-		if (vnode._component) vnode._component._force = true;
-		if (vnode._children) vnode._children.some(markAsForce);
-	}
+	if (vnode && vnode._component) vnode._component._bits |= COMPONENT_FORCE;
+	if (vnode && vnode._children) vnode._children.forEach(markAsForce);
 }
 
 /**
