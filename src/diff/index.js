@@ -1,4 +1,5 @@
 import {
+	EMPTY_ARR,
 	EMPTY_OBJ,
 	MATH_NAMESPACE,
 	MODE_HYDRATE,
@@ -189,7 +190,7 @@ export function diff(
 						if (vnode) vnode._parent = newVNode;
 					});
 
-					c._renderCallbacks.push(...c._stateCallbacks);
+					EMPTY_ARR.push.apply(c._renderCallbacks, c._stateCallbacks);
 					c._stateCallbacks = [];
 
 					if (c._renderCallbacks.length) {
@@ -225,7 +226,7 @@ export function diff(
 
 				tmp = c.render(c.props, c.state, c.context);
 
-				c._renderCallbacks.push(...c._stateCallbacks);
+				EMPTY_ARR.push.apply(c._renderCallbacks, c._stateCallbacks);
 				c._stateCallbacks = [];
 			} else {
 				do {
