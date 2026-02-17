@@ -165,6 +165,54 @@ function getHookState(index, type) {
 }
 
 /**
+ * Supports Promise and Context consumption
+ *
+ * @template T
+ * @param {Promise<T> | import('preact').PreactContext<T>} resource
+ * @returns {T}
+ */
+export function use(resource) {
+	if ('then' in resource && typeof resource.then === 'function') {
+		return usePromise(resource);
+	}
+
+	return useContext(
+		/** @type {import('./internal').PreactContext} */ (
+			/** @type {unknown} */ (resource)
+		)
+	);
+}
+
+/**
+ * Internal function to handle Promise resources
+ * @template T
+ * @param {Promise<T>} promise
+ * @returns {T}
+ */
+function usePromise(promise) {
+	const [promiseState, update] = useState({
+		value: undefined,
+		reason: undefined
+	});
+
+	if (!promiseState.value && !promiseState.reason) {
+		promise.then(
+			value => {
+				update({ status: 'fulfilled', value });
+			},
+			reason => {
+				update({ status: 'rejected', reason });
+			}
+		);
+	}
+
+	if (promiseState.value) return promiseState.value;
+	if (promiseState.reason) throw promiseState.reason;
+
+	throw promise;
+}
+
+/**
  * @template {unknown} S
  * @param {import('./index').Dispatch<import('./index').StateUpdater<S>>} [initialState]
  * @returns {[S, (state: S) => void]}
