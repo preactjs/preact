@@ -636,4 +636,33 @@ describe('useEffect', () => {
 		expect(calls.length).to.equal(1);
 		expect(calls).to.deep.equal(['doing effecthi']);
 	});
+
+	it('should not crash when effect throws and component is unmounted by render(null) during flush', () => {
+		// In flushAfterPaintEffects():
+		//   1. Guard checks component.__hooks — truthy, passes
+		//   2. invokeEffect runs the effect callback
+		//   3. The callback calls render(null, scratch) which unmounts the tree
+		//      → options.unmount sets component.__hooks = undefined
+		//   4. Resetting the hooks array to an empty array would throw an error
+		let setVal;
+
+		function App() {
+			const [val, _setVal] = useState(0);
+			setVal = _setVal;
+			useEffect(() => {
+				if (val === 1) {
+					render(null, scratch);
+				}
+			}, [val]);
+			return <div>val: {val}</div>;
+		}
+
+		act(() => {
+			render(<App />, scratch);
+		});
+
+		act(() => {
+			setVal(1);
+		});
+	});
 });
