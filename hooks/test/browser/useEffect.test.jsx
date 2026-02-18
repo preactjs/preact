@@ -1,10 +1,10 @@
+import { Component, Fragment, createElement, render } from 'preact';
+import { useEffect, useRef, useState } from 'preact/hooks';
 import { act, teardown as teardownAct } from 'preact/test-utils';
-import { createElement, render, Fragment, Component } from 'preact';
-import { useEffect, useState, useRef } from 'preact/hooks';
-import { setupScratch, teardown } from '../../../test/_util/helpers';
-import { useEffectAssertions } from './useEffectAssertions';
-import { scheduleEffectAssert } from '../_util/useEffectUtil';
 import { vi } from 'vitest';
+import { setupScratch, teardown } from '../../../test/_util/helpers';
+import { scheduleEffectAssert } from '../_util/useEffectUtil';
+import { useEffectAssertions } from './useEffectAssertions';
 
 describe('useEffect', () => {
 	/** @type {HTMLDivElement} */
@@ -84,7 +84,7 @@ describe('useEffect', () => {
 	});
 
 	it('should execute effects in parent if child throws in effect', async () => {
-		let executionOrder = [];
+		const executionOrder = [];
 
 		const Child = () => {
 			useEffect(() => {
@@ -268,8 +268,8 @@ describe('useEffect', () => {
 		scratch.appendChild(global);
 
 		const Modal = props => {
-			let [, setCanProceed] = useState(true);
-			let ChildProp = props.content;
+			const [, setCanProceed] = useState(true);
+			const ChildProp = props.content;
 
 			return (
 				<div>
@@ -425,9 +425,11 @@ describe('useEffect', () => {
 			}
 
 			render() {
-				return this.state.error
-					? <h2>Error! {this.state.error}</h2>
-					: this.props.children;
+				return this.state.error ? (
+					<h2>Error! {this.state.error}</h2>
+				) : (
+					this.props.children
+				);
 			}
 		}
 
@@ -634,6 +636,35 @@ describe('useEffect', () => {
 		expect(calls).to.deep.equal(['doing effecthi']);
 	});
 
+	it('should not crash when effect throws and component is unmounted by render(null) during flush', () => {
+		// In flushAfterPaintEffects():
+		//   1. Guard checks component.__hooks — truthy, passes
+		//   2. invokeEffect runs the effect callback
+		//   3. The callback calls render(null, scratch) which unmounts the tree
+		//      → options.unmount sets component.__hooks = undefined
+		//   4. Resetting the hooks array to an empty array would throw an error
+		let setVal;
+
+		function App() {
+			const [val, _setVal] = useState(0);
+			setVal = _setVal;
+			useEffect(() => {
+				if (val === 1) {
+					render(null, scratch);
+				}
+			}, [val]);
+			return <div>val: {val}</div>;
+		}
+
+		act(() => {
+			render(<App />, scratch);
+		});
+
+		act(() => {
+			setVal(1);
+		});
+	});
+
 	it('should not rerun when receiving NaN on subsequent renders', () => {
 		const calls = [];
 		const Component = ({ value }) => {
@@ -647,7 +678,7 @@ describe('useEffect', () => {
 			}, [value]);
 			return <p>{count}</p>;
 		};
-		const App = () => <Component value={NaN} />;
+		const App = () => <Component value={Number.NaN} />;
 
 		act(() => {
 			render(<App />, scratch);
