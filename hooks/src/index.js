@@ -447,13 +447,14 @@ export function useId() {
 function flushAfterPaintEffects() {
 	let component;
 	while ((component = afterPaintEffects.shift())) {
-		if (!component._parentDom || !component.__hooks) continue;
+		const hooks = component.__hooks;
+		if (!component._parentDom || !hooks) continue;
 		try {
-			component.__hooks._pendingEffects.some(invokeCleanup);
-			component.__hooks._pendingEffects.some(invokeEffect);
-			component.__hooks._pendingEffects = [];
+			hooks._pendingEffects.some(invokeCleanup);
+			hooks._pendingEffects.some(invokeEffect);
+			hooks._pendingEffects = [];
 		} catch (e) {
-			component.__hooks._pendingEffects = [];
+			hooks._pendingEffects = [];
 			options._catchError(e, component._vnode);
 		}
 	}
