@@ -79,7 +79,7 @@ function isMemo(element) {
 	return (
 		!!element &&
 		typeof element.displayName == 'string' &&
-		element.displayName.startsWith('Memo(')
+		element.displayName.indexOf('Memo(') == 0
 	);
 }
 

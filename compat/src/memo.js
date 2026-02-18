@@ -11,16 +11,13 @@ import { shallowDiffers } from './util';
 export function memo(c, comparer) {
 	function shouldUpdate(nextProps) {
 		let ref = this.props.ref;
-		let updateRef = ref == nextProps.ref;
-		if (!updateRef && ref) {
-			ref.call ? ref(null) : (ref.current = null);
+		if (ref != nextProps.ref && ref) {
+			typeof ref == 'function' ? ref(null) : (ref.current = null);
 		}
 
-		if (!comparer) {
-			return shallowDiffers(this.props, nextProps);
-		}
-
-		return !comparer(this.props, nextProps) || !updateRef;
+		return comparer
+			? !comparer(this.props, nextProps) || ref != nextProps.ref
+			: shallowDiffers(this.props, nextProps);
 	}
 
 	function Memoed(props) {
@@ -28,8 +25,7 @@ export function memo(c, comparer) {
 		return createElement(c, props);
 	}
 	Memoed.displayName = 'Memo(' + (c.displayName || c.name) + ')';
-	Memoed.prototype.isReactComponent = true;
-	Memoed._forwarded = true;
+	Memoed._forwarded = Memoed.prototype.isReactComponent = true;
 	Memoed.type = c;
 	return Memoed;
 }
