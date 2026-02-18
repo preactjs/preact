@@ -245,9 +245,7 @@ Suspense.prototype.render = function (props, state) {
  * @returns {((unsuspend: () => void) => void)?}
  */
 export function suspended(vnode) {
-	if (!vnode._parent) return null;
-	/** @type {import('./internal').Component} */
-	let component = vnode._parent._component;
+	let component = vnode._parent && vnode._parent._component;
 	return component && component._suspended && component._suspended(vnode);
 }
 
