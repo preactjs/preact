@@ -12,15 +12,6 @@ import { slice } from './util';
  * existing DOM tree rooted at `replaceNode`
  */
 export function render(vnode, parentDom, replaceNode) {
-	// https://github.com/preactjs/preact/issues/3794
-	if (parentDom == document) {
-		parentDom = {
-			nodeType: 1,
-			firstChild: document.documentElement,
-			childNodes: [document.documentElement]
-		};
-	}
-
 	if (options._root) options._root(vnode, parentDom);
 
 	// We abuse the `replaceNode` parameter in `hydrate()` to signal if we are in
@@ -56,14 +47,18 @@ export function render(vnode, parentDom, replaceNode) {
 			: oldVNode
 				? NULL
 				: parentDom.firstChild
-					? slice.call(parentDom.childNodes)
+					? parentDom == Document
+						? [document.documentElement]
+						: slice.call(parentDom.childNodes)
 					: NULL,
 		commitQueue,
 		!isHydrating && replaceNode
 			? replaceNode
 			: oldVNode
 				? oldVNode._dom
-				: parentDom.firstChild,
+				: parentDom == Document
+					? document.documentElement
+					: parentDom.firstChild,
 		isHydrating,
 		refQueue
 	);
