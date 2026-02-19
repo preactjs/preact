@@ -151,6 +151,6 @@ describe('PureComponent', () => {
 
 	it('should have "isPureReactComponent" property', () => {
 		let Pure = new React.PureComponent();
-		expect(Pure.isReactComponent).to.deep.equal({});
+		expect(Pure.isReactComponent).to.deep.equal(true);
 	});
 });

@@ -20,7 +20,7 @@ describe('components', () => {
 
 	it('should have "isReactComponent" property', () => {
 		let Comp = new React.Component();
-		expect(Comp.isReactComponent).to.deep.equal({});
+		expect(Comp.isReactComponent).to.deep.equal(true);
 	});
 
 	it('should be sane', () => {
