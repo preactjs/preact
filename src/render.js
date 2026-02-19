@@ -12,6 +12,9 @@ import { slice } from './util';
  * existing DOM tree rooted at `replaceNode`
  */
 export function render(vnode, parentDom, replaceNode) {
+	const documentElement = document.documentElement,
+		isDocumentRender = parentDom == document;
+
 	if (options._root) options._root(vnode, parentDom);
 
 	// We abuse the `replaceNode` parameter in `hydrate()` to signal if we are in
@@ -35,7 +38,7 @@ export function render(vnode, parentDom, replaceNode) {
 	let commitQueue = [],
 		refQueue = [];
 	diff(
-		parentDom,
+		isDocumentRender ? documentElement : parentDom,
 		// Determine the new vnode tree and store it on the DOM element on
 		// our custom `_children` property.
 		vnode,
@@ -47,8 +50,8 @@ export function render(vnode, parentDom, replaceNode) {
 			: oldVNode
 				? NULL
 				: parentDom.firstChild
-					? parentDom == Document
-						? [document.documentElement]
+					? isDocumentRender
+						? [documentElement]
 						: slice.call(parentDom.childNodes)
 					: NULL,
 		commitQueue,
@@ -56,8 +59,8 @@ export function render(vnode, parentDom, replaceNode) {
 			? replaceNode
 			: oldVNode
 				? oldVNode._dom
-				: parentDom == Document
-					? document.documentElement
+				: isDocumentRender
+					? documentElement
 					: parentDom.firstChild,
 		isHydrating,
 		refQueue
