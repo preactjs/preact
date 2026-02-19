@@ -1,4 +1,4 @@
-import { createElement, render, Component, Fragment } from 'preact';
+import { createElement, render, Component, Fragment, options } from 'preact';
 import { setupRerender } from 'preact/test-utils';
 import {
 	setupScratch,
@@ -2730,5 +2730,62 @@ describe('Components', () => {
 			expect(isSCUCalled).to.be.false;
 			expect(scratch.innerHTML).to.equal('<div>Updated: yes</div>');
 		});
+	});
+
+	it('should reset the rerender queue if rendering throws', () => {
+		let shouldThrow = false;
+		let increment;
+		let debounceCount = 0;
+		let flush;
+
+		// Use a custom debounceRendering so we can track whether
+		// enqueueRender actually schedules a new process() call.
+		const prevDebounce = options.debounceRendering;
+		options.debounceRendering = cb => {
+			debounceCount++;
+			flush = cb;
+		};
+
+		class App extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { count: 0 };
+				increment = () => this.setState(s => ({ count: s.count + 1 }));
+			}
+			render(props, state) {
+				if (shouldThrow) throw new Error('test error');
+				return <div>{state.count}</div>;
+			}
+		}
+
+		render(<App />, scratch);
+		expect(scratch.innerHTML).to.equal('<div>0</div>');
+
+		// First setState to sync prevDebounce inside enqueueRender
+		increment();
+		expect(debounceCount).to.equal(1);
+		flush();
+		expect(scratch.innerHTML).to.equal('<div>1</div>');
+
+		// Trigger a rerender that will throw
+		debounceCount = 0;
+		shouldThrow = true;
+		increment();
+		expect(debounceCount).to.equal(1);
+		expect(() => flush()).to.throw();
+
+		// After the error, a subsequent setState must schedule a new
+		// process() via debounceRendering. Without the fix,
+		// _rerenderCount stays non-zero and enqueueRender won't
+		// call debounceRendering, leaving the component stuck.
+		debounceCount = 0;
+		shouldThrow = false;
+		increment();
+		expect(debounceCount).to.equal(1);
+
+		flush();
+		expect(scratch.innerHTML).to.equal('<div>3</div>');
+
+		options.debounceRendering = prevDebounce;
 	});
 });
