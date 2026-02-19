@@ -557,7 +557,10 @@ function diffElementNodes(
 			// Remove children that are not part of any vnode.
 			if (excessDomChildren != NULL) {
 				for (i = excessDomChildren.length; i--; ) {
-					removeNode(excessDomChildren[i]);
+					const nodeName =
+						excessDomChildren[i] && excessDomChildren[i].localName;
+					if (nodeName != 'script' && nodeName != 'style' && nodeName != 'link')
+						removeNode(excessDomChildren[i]);
 				}
 			}
 		}
