@@ -14,7 +14,11 @@ import { slice } from './util';
 export function render(vnode, parentDom, replaceNode) {
 	// https://github.com/preactjs/preact/issues/3794
 	if (parentDom == document) {
-		parentDom = document.documentElement;
+		parentDom = {
+			nodeType: 1,
+			firstChild: document.documentElement,
+			childNodes: [document.documentElement]
+		};
 	}
 
 	if (options._root) options._root(vnode, parentDom);
