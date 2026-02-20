@@ -1980,9 +1980,8 @@ describe('render()', () => {
 			</Fragment>
 		);
 		render(<App />, document);
-		expect(document.documentElement.innerHTML.trim()).to.equal(
-			'<head><title>Test</title></head><body><p>Test</p></body>'
-		);
+		expect(document.head.querySelector('title').textContent).to.equal('Test');
+		expect(document.body.innerHTML.trim()).to.equal('<p>Test</p>');
 	});
 
 	it('should not remount components when replacing a component with a falsy value in-between', () => {
