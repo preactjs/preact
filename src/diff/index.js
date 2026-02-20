@@ -558,9 +558,11 @@ function diffElementNodes(
 			if (excessDomChildren != NULL) {
 				for (i = excessDomChildren.length; i--; ) {
 					const nodeName =
-						excessDomChildren[i] && excessDomChildren[i].localName;
-					if (nodeName != 'script' && nodeName != 'style' && nodeName != 'link')
-						removeNode(excessDomChildren[i]);
+						excessDomChildren[i] &&
+						excessDomChildren[i].parentNode &&
+						excessDomChildren[i].parentNode.localName;
+
+					if (nodeName != 'head') removeNode(excessDomChildren[i]);
 				}
 			}
 		}
