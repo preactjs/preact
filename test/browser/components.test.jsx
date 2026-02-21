@@ -82,6 +82,34 @@ describe('Components', () => {
 			expect(scratch.innerHTML).to.equal('<div foo="bar"></div>');
 		});
 
+		it('should render functional components wrapped with a proxy that has prototype set to undefined', () => {
+			function MyComponent(props) {
+				return <div {...props} />;
+			}
+
+			const proxy = Object.create(null, {
+				prototype: { value: undefined },
+				apply: {
+					value: function (_target, _thisArg, args) {
+						return MyComponent(...args);
+					}
+				}
+			});
+
+			const WrappedComponent = new Proxy(MyComponent, {
+				get(target, prop) {
+					if (prop === 'prototype') return undefined;
+					return Reflect.get(target, prop);
+				}
+			});
+
+			expect(() => {
+				render(<WrappedComponent foo="bar" />, scratch);
+			}).not.to.throw();
+
+			expect(scratch.innerHTML).to.equal('<div foo="bar"></div>');
+		});
+
 		it('should render components with props', () => {
 			let constructorProps;
 
