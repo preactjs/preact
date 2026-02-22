@@ -63,7 +63,7 @@ export function setProperty(dom, name, value, oldValue, namespace) {
 		}
 	}
 	// Benchmark for comparison: https://esbench.com/bench/574c954bdb965b9a00965ac6
-	else if (name[0] == 'o' && name[1] == 'n') {
+	else if (name.startsWith('on')) {
 		useCapture = name != (name = name.replace(CAPTURE_REGEX, '$1'));
 
 		// Infer correct casing for DOM built-in events:
