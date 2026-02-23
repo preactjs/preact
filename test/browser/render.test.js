@@ -1969,6 +1969,7 @@ describe('render()', () => {
 
 	it('should work with document', () => {
 		document.textContent = '';
+		document.body.textContent = '';
 		const App = () => (
 			<Fragment>
 				<head>

@@ -555,15 +555,13 @@ function diffElementNodes(
 			);
 
 			// Remove children that are not part of any vnode.
-			if (excessDomChildren != NULL) {
+			if (
+				excessDomChildren != NULL &&
+				newVNode.type != 'body' &&
+				newVNode.type != 'head'
+			) {
 				for (i = excessDomChildren.length; i--; ) {
-					const nodeName =
-						excessDomChildren[i] &&
-						excessDomChildren[i].parentNode &&
-						excessDomChildren[i].parentNode.localName;
-
-					if (nodeName != 'head' && nodeName != 'body')
-						removeNode(excessDomChildren[i]);
+					removeNode(excessDomChildren[i]);
 				}
 			}
 		}
