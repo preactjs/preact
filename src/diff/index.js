@@ -83,8 +83,33 @@ export function diff(
 		(isHydrating = oldVNode._flags & MODE_HYDRATE) &&
 		oldVNode._component._excess
 	) {
-		excessDomChildren = oldVNode._component._excess;
-		oldDom = excessDomChildren[0];
+		let startMarker = oldVNode._component._excess[0];
+		if (
+			startMarker &&
+			startMarker.nodeType == 8 &&
+			startMarker.data.startsWith('$s')
+		) {
+			// Deferred restoration: re-scan current DOM from the stored start marker.
+			// This ensures we always hydrate against the most up-to-date DOM state,
+			// even if a streaming SSR patcher replaced the content between markers.
+			excessDomChildren = [];
+			let depth = 1;
+			let node = startMarker.nextSibling;
+			while (node && depth > 0) {
+				if (node.nodeType == 8) {
+					if (node.data.startsWith('$s')) depth++;
+					else if (node.data.startsWith('/$s')) {
+						if (--depth == 0) break;
+					}
+				}
+				excessDomChildren.push(node);
+				node = node.nextSibling;
+			}
+			oldDom = excessDomChildren[0];
+		} else {
+			excessDomChildren = oldVNode._component._excess;
+			oldDom = excessDomChildren[0];
+		}
 		oldVNode._component._excess = NULL;
 	}
 
@@ -311,46 +336,47 @@ export function diff(
 			if (isHydrating || excessDomChildren != NULL) {
 				if (e.then) {
 					let commentMarkersToFind = 0,
-						done;
+						done,
+						startMarker;
 
 					newVNode._flags |= isHydrating
 						? MODE_HYDRATE | MODE_SUSPENDED
 						: MODE_SUSPENDED;
 
-					newVNode._component._excess = [];
 					for (let i = 0; i < excessDomChildren.length; i++) {
 						let child = excessDomChildren[i];
 						if (child == NULL || done) continue;
 
-						// When we encounter a boundary with $s we are opening
-						// a boundary, this implies that we need to bump
-						// the amount of markers we need to find before closing
-						// the outer boundary.
-						// We exclude the open and closing marker from
-						// the future excessDomChildren but any nested one
-						// needs to be included for future suspensions.
+						// When we encounter a $s boundary marker we are opening a
+						// suspended region. Track nesting depth to find the matching
+						// close marker. We null out ALL nodes in the region so the
+						// parent diff doesn't try to remove them; the children will be
+						// re-scanned from the stored start marker on resume.
 						if (child.nodeType == 8) {
-							if (child.data == '$s') {
-								if (commentMarkersToFind) {
-									newVNode._component._excess.push(child);
+							if (child.data.startsWith('$s')) {
+								if (!commentMarkersToFind) {
+									// Store outermost start marker for deferred restoration
+									startMarker = child;
 								}
 								commentMarkersToFind++;
-							} else if (child.data == '/$s') {
-								commentMarkersToFind--;
-								if (commentMarkersToFind) {
-									newVNode._component._excess.push(child);
+							} else if (child.data.startsWith('/$s')) {
+								if (--commentMarkersToFind == 0) {
+									done = true;
+									oldDom = excessDomChildren[i];
 								}
-								done = commentMarkersToFind == 0;
-								oldDom = excessDomChildren[i];
 							}
 							excessDomChildren[i] = NULL;
 						} else if (commentMarkersToFind) {
-							newVNode._component._excess.push(child);
 							excessDomChildren[i] = NULL;
 						}
 					}
 
-					if (!done) {
+					if (done) {
+						// Store only the start marker; children are re-scanned on resume
+						// so we always hydrate against the current DOM state.
+						// TODO: consider just storing in _dom and getting rid of _excess altogether?
+						newVNode._component._excess = [startMarker];
+					} else {
 						while (oldDom && oldDom.nodeType == 8 && oldDom.nextSibling) {
 							oldDom = oldDom.nextSibling;
 						}
