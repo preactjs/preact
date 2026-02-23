@@ -562,7 +562,8 @@ function diffElementNodes(
 						excessDomChildren[i].parentNode &&
 						excessDomChildren[i].parentNode.localName;
 
-					if (nodeName != 'head') removeNode(excessDomChildren[i]);
+					if (nodeName != 'head' && nodeName != 'body')
+						removeNode(excessDomChildren[i]);
 				}
 			}
 		}
