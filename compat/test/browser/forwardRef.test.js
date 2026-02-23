@@ -509,5 +509,5 @@ describe('forwardRef', () => {
 		const Forwarded = forwardRef(Foo);
 
 		expect(Forwarded.render).to.equal(Foo);
-  });
+	});
 });

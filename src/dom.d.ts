@@ -42,7 +42,7 @@ interface SnapEvent extends Event {
 declare var SnapEvent: {
 	prototype: SnapEvent;
 	new (type: string, eventInitDict?: SnapEventInit): SnapEvent;
-}
+};
 
 interface SnapEventInit extends EventInit {
 	snapTargetBlock?: Element | null;
@@ -78,8 +78,9 @@ export interface CSSProperties extends AllCSSProperties, DOMCSSProperties {
 	cssText?: string | null;
 }
 
-export interface SVGAttributes<Target extends EventTarget = SVGElement>
-	extends HTMLAttributes<Target> {
+export interface SVGAttributes<
+	Target extends EventTarget = SVGElement
+> extends HTMLAttributes<Target> {
 	accentHeight?: Signalish<number | string | undefined>;
 	accumulate?: Signalish<'none' | 'sum' | undefined>;
 	additive?: Signalish<'replace' | 'sum' | undefined>;
@@ -602,8 +603,9 @@ export type WheelEventHandler<Target extends EventTarget> = EventHandler<
 export type PictureInPictureEventHandler<Target extends EventTarget> =
 	EventHandler<TargetedPictureInPictureEvent<Target>>;
 
-export interface DOMAttributes<Target extends EventTarget>
-	extends PreactDOMAttributes {
+export interface DOMAttributes<
+	Target extends EventTarget
+> extends PreactDOMAttributes {
 	// Image Events
 	onLoad?: GenericEventHandler<Target> | undefined;
 	onLoadCapture?: GenericEventHandler<Target> | undefined;
@@ -1224,9 +1226,7 @@ export type DPubAriaRole =
 export type AriaRole = WAIAriaRole | DPubAriaRole;
 
 export interface AllHTMLAttributes<RefType extends EventTarget = EventTarget>
-	extends ClassAttributes<RefType>,
-		DOMAttributes<RefType>,
-		AriaAttributes {
+	extends ClassAttributes<RefType>, DOMAttributes<RefType>, AriaAttributes {
 	// Standard HTML Attributes
 	accept?: Signalish<string | undefined>;
 	acceptCharset?: Signalish<string | undefined>;
@@ -1478,9 +1478,7 @@ export interface AllHTMLAttributes<RefType extends EventTarget = EventTarget>
 }
 
 export interface HTMLAttributes<RefType extends EventTarget = EventTarget>
-	extends ClassAttributes<RefType>,
-		DOMAttributes<RefType>,
-		AriaAttributes {
+	extends ClassAttributes<RefType>, DOMAttributes<RefType>, AriaAttributes {
 	// Standard HTML Attributes
 	accesskey?: Signalish<string | undefined>;
 	accessKey?: Signalish<string | undefined>;
@@ -1583,8 +1581,9 @@ export type HTMLAttributeAnchorTarget =
 	| '_top'
 	| (string & {});
 
-export interface AnchorHTMLAttributes<T extends EventTarget = HTMLAnchorElement>
-	extends HTMLAttributes<T> {
+export interface AnchorHTMLAttributes<
+	T extends EventTarget = HTMLAnchorElement
+> extends HTMLAttributes<T> {
 	download?: Signalish<any>;
 	href?: Signalish<string | undefined>;
 	hreflang?: Signalish<string | undefined>;
@@ -1598,8 +1597,9 @@ export interface AnchorHTMLAttributes<T extends EventTarget = HTMLAnchorElement>
 	referrerPolicy?: Signalish<HTMLAttributeReferrerPolicy | undefined>;
 }
 
-export interface AreaHTMLAttributes<T extends EventTarget = HTMLAreaElement>
-	extends HTMLAttributes<T> {
+export interface AreaHTMLAttributes<
+	T extends EventTarget = HTMLAreaElement
+> extends HTMLAttributes<T> {
 	alt?: Signalish<string | undefined>;
 	coords?: Signalish<string | undefined>;
 	download?: Signalish<any>;
@@ -1614,11 +1614,13 @@ export interface AreaHTMLAttributes<T extends EventTarget = HTMLAreaElement>
 	target?: Signalish<HTMLAttributeAnchorTarget | undefined>;
 }
 
-export interface AudioHTMLAttributes<T extends EventTarget = HTMLAudioElement>
-	extends MediaHTMLAttributes<T> {}
+export interface AudioHTMLAttributes<
+	T extends EventTarget = HTMLAudioElement
+> extends MediaHTMLAttributes<T> {}
 
-export interface BaseHTMLAttributes<T extends EventTarget = HTMLBaseElement>
-	extends HTMLAttributes<T> {
+export interface BaseHTMLAttributes<
+	T extends EventTarget = HTMLBaseElement
+> extends HTMLAttributes<T> {
 	href?: Signalish<string | undefined>;
 	target?: Signalish<HTMLAttributeAnchorTarget | undefined>;
 }
@@ -1629,8 +1631,9 @@ export interface BlockquoteHTMLAttributes<
 	cite?: Signalish<string | undefined>;
 }
 
-export interface ButtonHTMLAttributes<T extends EventTarget = HTMLButtonElement>
-	extends HTMLAttributes<T> {
+export interface ButtonHTMLAttributes<
+	T extends EventTarget = HTMLButtonElement
+> extends HTMLAttributes<T> {
 	command?: Signalish<string | undefined>;
 	commandfor?: Signalish<string | undefined>;
 	commandFor?: Signalish<string | undefined>;
@@ -1655,14 +1658,16 @@ export interface ButtonHTMLAttributes<T extends EventTarget = HTMLButtonElement>
 	value?: Signalish<string | number | undefined>;
 }
 
-export interface CanvasHTMLAttributes<T extends EventTarget = HTMLCanvasElement>
-	extends HTMLAttributes<T> {
+export interface CanvasHTMLAttributes<
+	T extends EventTarget = HTMLCanvasElement
+> extends HTMLAttributes<T> {
 	height?: Signalish<number | string | undefined>;
 	width?: Signalish<number | string | undefined>;
 }
 
-export interface ColHTMLAttributes<T extends EventTarget = HTMLTableColElement>
-	extends HTMLAttributes<T> {
+export interface ColHTMLAttributes<
+	T extends EventTarget = HTMLTableColElement
+> extends HTMLAttributes<T> {
 	span?: Signalish<number | undefined>;
 	width?: Signalish<number | string | undefined>;
 }
@@ -1673,13 +1678,15 @@ export interface ColgroupHTMLAttributes<
 	span?: Signalish<number | undefined>;
 }
 
-export interface DataHTMLAttributes<T extends EventTarget = HTMLDataElement>
-	extends HTMLAttributes<T> {
+export interface DataHTMLAttributes<
+	T extends EventTarget = HTMLDataElement
+> extends HTMLAttributes<T> {
 	value?: Signalish<string | number | undefined>;
 }
 
-export interface DelHTMLAttributes<T extends EventTarget = HTMLModElement>
-	extends HTMLAttributes<T> {
+export interface DelHTMLAttributes<
+	T extends EventTarget = HTMLModElement
+> extends HTMLAttributes<T> {
 	cite?: Signalish<string | undefined>;
 	datetime?: Signalish<string | undefined>;
 	dateTime?: Signalish<string | undefined>;
@@ -1692,8 +1699,9 @@ export interface DetailsHTMLAttributes<
 	open?: Signalish<boolean | undefined>;
 }
 
-export interface DialogHTMLAttributes<T extends EventTarget = HTMLDialogElement>
-	extends HTMLAttributes<T> {
+export interface DialogHTMLAttributes<
+	T extends EventTarget = HTMLDialogElement
+> extends HTMLAttributes<T> {
 	onCancel?: GenericEventHandler<T> | undefined;
 	onClose?: GenericEventHandler<T> | undefined;
 	open?: Signalish<boolean | undefined>;
@@ -1701,8 +1709,9 @@ export interface DialogHTMLAttributes<T extends EventTarget = HTMLDialogElement>
 	closedBy?: Signalish<'none' | 'closerequest' | 'any' | undefined>;
 }
 
-export interface EmbedHTMLAttributes<T extends EventTarget = HTMLEmbedElement>
-	extends HTMLAttributes<T> {
+export interface EmbedHTMLAttributes<
+	T extends EventTarget = HTMLEmbedElement
+> extends HTMLAttributes<T> {
 	height?: Signalish<number | string | undefined>;
 	src?: Signalish<string | undefined>;
 	type?: Signalish<string | undefined>;
@@ -1717,8 +1726,9 @@ export interface FieldsetHTMLAttributes<
 	name?: Signalish<string | undefined>;
 }
 
-export interface FormHTMLAttributes<T extends EventTarget = HTMLFormElement>
-	extends HTMLAttributes<T> {
+export interface FormHTMLAttributes<
+	T extends EventTarget = HTMLFormElement
+> extends HTMLAttributes<T> {
 	'accept-charset'?: Signalish<string | undefined>;
 	acceptCharset?: Signalish<string | undefined>;
 	action?: Signalish<string | undefined>;
@@ -1734,8 +1744,9 @@ export interface FormHTMLAttributes<T extends EventTarget = HTMLFormElement>
 	target?: Signalish<string | undefined>;
 }
 
-export interface IframeHTMLAttributes<T extends EventTarget = HTMLIFrameElement>
-	extends HTMLAttributes<T> {
+export interface IframeHTMLAttributes<
+	T extends EventTarget = HTMLIFrameElement
+> extends HTMLAttributes<T> {
 	allow?: Signalish<string | undefined>;
 	allowFullScreen?: Signalish<boolean | undefined>;
 	allowTransparency?: Signalish<boolean | undefined>;
@@ -1764,8 +1775,9 @@ export interface IframeHTMLAttributes<T extends EventTarget = HTMLIFrameElement>
 
 export type HTMLAttributeCrossOrigin = 'anonymous' | 'use-credentials';
 
-export interface ImgHTMLAttributes<T extends EventTarget = HTMLImageElement>
-	extends HTMLAttributes<T> {
+export interface ImgHTMLAttributes<
+	T extends EventTarget = HTMLImageElement
+> extends HTMLAttributes<T> {
 	alt?: Signalish<string | undefined>;
 	crossorigin?: Signalish<HTMLAttributeCrossOrigin>;
 	crossOrigin?: Signalish<HTMLAttributeCrossOrigin>;
@@ -1810,8 +1822,9 @@ export type HTMLInputTypeAttribute =
 	| 'week'
 	| (string & {});
 
-export interface InputHTMLAttributes<T extends EventTarget = HTMLInputElement>
-	extends HTMLAttributes<T> {
+export interface InputHTMLAttributes<
+	T extends EventTarget = HTMLInputElement
+> extends HTMLAttributes<T> {
 	accept?: Signalish<string | undefined>;
 	alt?: Signalish<string | undefined>;
 	autocomplete?: Signalish<string | undefined>;
@@ -1867,8 +1880,9 @@ export interface InputHTMLAttributes<T extends EventTarget = HTMLInputElement>
 	onChange?: GenericEventHandler<T> | undefined;
 }
 
-export interface InsHTMLAttributes<T extends EventTarget = HTMLModElement>
-	extends HTMLAttributes<T> {
+export interface InsHTMLAttributes<
+	T extends EventTarget = HTMLModElement
+> extends HTMLAttributes<T> {
 	cite?: Signalish<string | undefined>;
 	datetime?: Signalish<string | undefined>;
 	dateTime?: Signalish<string | undefined>;
@@ -1885,20 +1899,23 @@ export interface KeygenHTMLAttributes<
 	name?: Signalish<string | undefined>;
 }
 
-export interface LabelHTMLAttributes<T extends EventTarget = HTMLLabelElement>
-	extends HTMLAttributes<T> {
+export interface LabelHTMLAttributes<
+	T extends EventTarget = HTMLLabelElement
+> extends HTMLAttributes<T> {
 	for?: Signalish<string | undefined>;
 	form?: Signalish<string | undefined>;
 	htmlFor?: Signalish<string | undefined>;
 }
 
-export interface LiHTMLAttributes<T extends EventTarget = HTMLLIElement>
-	extends HTMLAttributes<T> {
+export interface LiHTMLAttributes<
+	T extends EventTarget = HTMLLIElement
+> extends HTMLAttributes<T> {
 	value?: Signalish<string | number | undefined>;
 }
 
-export interface LinkHTMLAttributes<T extends EventTarget = HTMLLinkElement>
-	extends HTMLAttributes<T> {
+export interface LinkHTMLAttributes<
+	T extends EventTarget = HTMLLinkElement
+> extends HTMLAttributes<T> {
 	as?: Signalish<string | undefined>;
 	crossorigin?: Signalish<HTMLAttributeCrossOrigin>;
 	crossOrigin?: Signalish<HTMLAttributeCrossOrigin>;
@@ -1919,8 +1936,9 @@ export interface LinkHTMLAttributes<T extends EventTarget = HTMLLinkElement>
 	charSet?: Signalish<string | undefined>;
 }
 
-export interface MapHTMLAttributes<T extends EventTarget = HTMLMapElement>
-	extends HTMLAttributes<T> {
+export interface MapHTMLAttributes<
+	T extends EventTarget = HTMLMapElement
+> extends HTMLAttributes<T> {
 	name?: Signalish<string | undefined>;
 }
 
@@ -1940,8 +1958,9 @@ export interface MarqueeHTMLAttributes<
 	width?: Signalish<number | string | undefined>;
 }
 
-export interface MediaHTMLAttributes<T extends EventTarget = HTMLMediaElement>
-	extends HTMLAttributes<T> {
+export interface MediaHTMLAttributes<
+	T extends EventTarget = HTMLMediaElement
+> extends HTMLAttributes<T> {
 	autoplay?: Signalish<boolean | undefined>;
 	autoPlay?: Signalish<boolean | undefined>;
 	controls?: Signalish<boolean | undefined>;
@@ -1965,13 +1984,15 @@ export interface MediaHTMLAttributes<T extends EventTarget = HTMLMediaElement>
 	volume?: Signalish<string | number | undefined>;
 }
 
-export interface MenuHTMLAttributes<T extends EventTarget = HTMLMenuElement>
-	extends HTMLAttributes<T> {
+export interface MenuHTMLAttributes<
+	T extends EventTarget = HTMLMenuElement
+> extends HTMLAttributes<T> {
 	type?: Signalish<string | undefined>;
 }
 
-export interface MetaHTMLAttributes<T extends EventTarget = HTMLMetaElement>
-	extends HTMLAttributes<T> {
+export interface MetaHTMLAttributes<
+	T extends EventTarget = HTMLMetaElement
+> extends HTMLAttributes<T> {
 	charset?: Signalish<string | undefined>;
 	charSet?: Signalish<string | undefined>;
 	content?: Signalish<string | undefined>;
@@ -1981,8 +2002,9 @@ export interface MetaHTMLAttributes<T extends EventTarget = HTMLMetaElement>
 	media?: Signalish<string | undefined>;
 }
 
-export interface MeterHTMLAttributes<T extends EventTarget = HTMLMeterElement>
-	extends HTMLAttributes<T> {
+export interface MeterHTMLAttributes<
+	T extends EventTarget = HTMLMeterElement
+> extends HTMLAttributes<T> {
 	form?: Signalish<string | undefined>;
 	high?: Signalish<number | undefined>;
 	low?: Signalish<number | undefined>;
@@ -1992,8 +2014,9 @@ export interface MeterHTMLAttributes<T extends EventTarget = HTMLMeterElement>
 	value?: Signalish<string | number | undefined>;
 }
 
-export interface ObjectHTMLAttributes<T extends EventTarget = HTMLObjectElement>
-	extends HTMLAttributes<T> {
+export interface ObjectHTMLAttributes<
+	T extends EventTarget = HTMLObjectElement
+> extends HTMLAttributes<T> {
 	classID?: Signalish<string | undefined>;
 	data?: Signalish<string | undefined>;
 	form?: Signalish<string | undefined>;
@@ -2006,8 +2029,9 @@ export interface ObjectHTMLAttributes<T extends EventTarget = HTMLObjectElement>
 	wmode?: Signalish<string | undefined>;
 }
 
-export interface OlHTMLAttributes<T extends EventTarget = HTMLOListElement>
-	extends HTMLAttributes<T> {
+export interface OlHTMLAttributes<
+	T extends EventTarget = HTMLOListElement
+> extends HTMLAttributes<T> {
 	reversed?: Signalish<boolean | undefined>;
 	start?: Signalish<number | undefined>;
 	type?: Signalish<'1' | 'a' | 'A' | 'i' | 'I' | undefined>;
@@ -2020,24 +2044,27 @@ export interface OptgroupHTMLAttributes<
 	label?: Signalish<string | undefined>;
 }
 
-export interface OptionHTMLAttributes<T extends EventTarget = HTMLOptionElement>
-	extends HTMLAttributes<T> {
+export interface OptionHTMLAttributes<
+	T extends EventTarget = HTMLOptionElement
+> extends HTMLAttributes<T> {
 	disabled?: Signalish<boolean | undefined>;
 	label?: Signalish<string | undefined>;
 	selected?: Signalish<boolean | undefined>;
 	value?: Signalish<string | number | undefined>;
 }
 
-export interface OutputHTMLAttributes<T extends EventTarget = HTMLOutputElement>
-	extends HTMLAttributes<T> {
+export interface OutputHTMLAttributes<
+	T extends EventTarget = HTMLOutputElement
+> extends HTMLAttributes<T> {
 	for?: Signalish<string | undefined>;
 	form?: Signalish<string | undefined>;
 	htmlFor?: Signalish<string | undefined>;
 	name?: Signalish<string | undefined>;
 }
 
-export interface ParamHTMLAttributes<T extends EventTarget = HTMLParamElement>
-	extends HTMLAttributes<T> {
+export interface ParamHTMLAttributes<
+	T extends EventTarget = HTMLParamElement
+> extends HTMLAttributes<T> {
 	name?: Signalish<string | undefined>;
 	value?: Signalish<string | number | undefined>;
 }
@@ -2049,13 +2076,15 @@ export interface ProgressHTMLAttributes<
 	value?: Signalish<string | number | undefined>;
 }
 
-export interface QuoteHTMLAttributes<T extends EventTarget = HTMLQuoteElement>
-	extends HTMLAttributes<T> {
+export interface QuoteHTMLAttributes<
+	T extends EventTarget = HTMLQuoteElement
+> extends HTMLAttributes<T> {
 	cite?: Signalish<string | undefined>;
 }
 
-export interface ScriptHTMLAttributes<T extends EventTarget = HTMLScriptElement>
-	extends HTMLAttributes<T> {
+export interface ScriptHTMLAttributes<
+	T extends EventTarget = HTMLScriptElement
+> extends HTMLAttributes<T> {
 	async?: Signalish<boolean | undefined>;
 	/** @deprecated */
 	charset?: Signalish<string | undefined>;
@@ -2073,8 +2102,9 @@ export interface ScriptHTMLAttributes<T extends EventTarget = HTMLScriptElement>
 	type?: Signalish<string | undefined>;
 }
 
-export interface SelectHTMLAttributes<T extends EventTarget = HTMLSelectElement>
-	extends HTMLAttributes<T> {
+export interface SelectHTMLAttributes<
+	T extends EventTarget = HTMLSelectElement
+> extends HTMLAttributes<T> {
 	autocomplete?: Signalish<string | undefined>;
 	autoComplete?: Signalish<string | undefined>;
 	defaultValue?: Signalish<string | number | undefined>;
@@ -2088,13 +2118,15 @@ export interface SelectHTMLAttributes<T extends EventTarget = HTMLSelectElement>
 	onChange?: GenericEventHandler<T> | undefined;
 }
 
-export interface SlotHTMLAttributes<T extends EventTarget = HTMLSlotElement>
-	extends HTMLAttributes<T> {
+export interface SlotHTMLAttributes<
+	T extends EventTarget = HTMLSlotElement
+> extends HTMLAttributes<T> {
 	name?: Signalish<string | undefined>;
 }
 
-export interface SourceHTMLAttributes<T extends EventTarget = HTMLSourceElement>
-	extends HTMLAttributes<T> {
+export interface SourceHTMLAttributes<
+	T extends EventTarget = HTMLSourceElement
+> extends HTMLAttributes<T> {
 	height?: Signalish<number | string | undefined>;
 	media?: Signalish<string | undefined>;
 	sizes?: Signalish<string | undefined>;
@@ -2105,23 +2137,26 @@ export interface SourceHTMLAttributes<T extends EventTarget = HTMLSourceElement>
 	width?: Signalish<number | string | undefined>;
 }
 
-export interface StyleHTMLAttributes<T extends EventTarget = HTMLStyleElement>
-	extends HTMLAttributes<T> {
+export interface StyleHTMLAttributes<
+	T extends EventTarget = HTMLStyleElement
+> extends HTMLAttributes<T> {
 	media?: Signalish<string | undefined>;
 	scoped?: Signalish<boolean | undefined>;
 	type?: Signalish<string | undefined>;
 }
 
-export interface TableHTMLAttributes<T extends EventTarget = HTMLTableElement>
-	extends HTMLAttributes<T> {
+export interface TableHTMLAttributes<
+	T extends EventTarget = HTMLTableElement
+> extends HTMLAttributes<T> {
 	cellPadding?: Signalish<string | undefined>;
 	cellSpacing?: Signalish<string | undefined>;
 	summary?: Signalish<string | undefined>;
 	width?: Signalish<number | string | undefined>;
 }
 
-export interface TdHTMLAttributes<T extends EventTarget = HTMLTableCellElement>
-	extends HTMLAttributes<T> {
+export interface TdHTMLAttributes<
+	T extends EventTarget = HTMLTableCellElement
+> extends HTMLAttributes<T> {
 	align?: Signalish<
 		'left' | 'center' | 'right' | 'justify' | 'char' | undefined
 	>;
@@ -2161,8 +2196,9 @@ export interface TextareaHTMLAttributes<
 	onChange?: GenericEventHandler<T> | undefined;
 }
 
-export interface ThHTMLAttributes<T extends EventTarget = HTMLTableCellElement>
-	extends HTMLAttributes<T> {
+export interface ThHTMLAttributes<
+	T extends EventTarget = HTMLTableCellElement
+> extends HTMLAttributes<T> {
 	align?: Signalish<
 		'left' | 'center' | 'right' | 'justify' | 'char' | undefined
 	>;
@@ -2175,14 +2211,16 @@ export interface ThHTMLAttributes<T extends EventTarget = HTMLTableCellElement>
 	abbr?: Signalish<string | undefined>;
 }
 
-export interface TimeHTMLAttributes<T extends EventTarget = HTMLTimeElement>
-	extends HTMLAttributes<T> {
+export interface TimeHTMLAttributes<
+	T extends EventTarget = HTMLTimeElement
+> extends HTMLAttributes<T> {
 	datetime?: Signalish<string | undefined>;
 	dateTime?: Signalish<string | undefined>;
 }
 
-export interface TrackHTMLAttributes<T extends EventTarget = HTMLTrackElement>
-	extends MediaHTMLAttributes<T> {
+export interface TrackHTMLAttributes<
+	T extends EventTarget = HTMLTrackElement
+> extends MediaHTMLAttributes<T> {
 	default?: Signalish<boolean | undefined>;
 	kind?: Signalish<string | undefined>;
 	label?: Signalish<string | undefined>;
@@ -2190,8 +2228,9 @@ export interface TrackHTMLAttributes<T extends EventTarget = HTMLTrackElement>
 	srcLang?: Signalish<string | undefined>;
 }
 
-export interface VideoHTMLAttributes<T extends EventTarget = HTMLVideoElement>
-	extends MediaHTMLAttributes<T> {
+export interface VideoHTMLAttributes<
+	T extends EventTarget = HTMLVideoElement
+> extends MediaHTMLAttributes<T> {
 	disablePictureInPicture?: Signalish<boolean | undefined>;
 	height?: Signalish<number | string | undefined>;
 	playsinline?: Signalish<boolean | undefined>;
@@ -2205,8 +2244,9 @@ export type DetailedHTMLProps<
 	RefType extends EventTarget = EventTarget
 > = HA;
 
-export interface MathMLAttributes<Target extends EventTarget = MathMLElement>
-	extends HTMLAttributes<Target> {
+export interface MathMLAttributes<
+	Target extends EventTarget = MathMLElement
+> extends HTMLAttributes<Target> {
 	dir?: Signalish<'ltr' | 'rtl' | undefined>;
 	displaystyle?: Signalish<boolean | undefined>;
 	/** @deprecated This feature is non-standard. See https://developer.mozilla.org/en-US/docs/Web/MathML/Global_attributes/href  */
@@ -2221,50 +2261,58 @@ export interface MathMLAttributes<Target extends EventTarget = MathMLElement>
 	scriptlevel?: Signalish<string | undefined>;
 }
 
-export interface AnnotationMathMLAttributes<T extends EventTarget>
-	extends MathMLAttributes<T> {
+export interface AnnotationMathMLAttributes<
+	T extends EventTarget
+> extends MathMLAttributes<T> {
 	encoding?: Signalish<string | undefined>;
 	/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/semantics#src */
 	src?: Signalish<string | undefined>;
 }
 
-export interface AnnotationXmlMathMLAttributes<T extends EventTarget>
-	extends MathMLAttributes<T> {
+export interface AnnotationXmlMathMLAttributes<
+	T extends EventTarget
+> extends MathMLAttributes<T> {
 	encoding?: Signalish<string | undefined>;
 	/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/semantics#src */
 	src?: Signalish<string | undefined>;
 }
 
-export interface MActionMathMLAttributes<T extends EventTarget>
-	extends MathMLAttributes<T> {
+export interface MActionMathMLAttributes<
+	T extends EventTarget
+> extends MathMLAttributes<T> {
 	/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/maction#actiontype */
 	actiontype?: Signalish<'statusline' | 'toggle' | undefined>;
 	/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/maction#selection */
 	selection?: Signalish<string | undefined>;
 }
 
-export interface MathMathMLAttributes<T extends EventTarget>
-	extends MathMLAttributes<T> {
+export interface MathMathMLAttributes<
+	T extends EventTarget
+> extends MathMLAttributes<T> {
 	display?: Signalish<'block' | 'inline' | undefined>;
 }
 
-export interface MEncloseMathMLAttributes<T extends EventTarget>
-	extends MathMLAttributes<T> {
+export interface MEncloseMathMLAttributes<
+	T extends EventTarget
+> extends MathMLAttributes<T> {
 	notation?: Signalish<string | undefined>;
 }
 
-export interface MErrorMathMLAttributes<T extends EventTarget>
-	extends MathMLAttributes<T> {}
+export interface MErrorMathMLAttributes<
+	T extends EventTarget
+> extends MathMLAttributes<T> {}
 
-export interface MFencedMathMLAttributes<T extends EventTarget>
-	extends MathMLAttributes<T> {
+export interface MFencedMathMLAttributes<
+	T extends EventTarget
+> extends MathMLAttributes<T> {
 	close?: Signalish<string | undefined>;
 	open?: Signalish<string | undefined>;
 	separators?: Signalish<string | undefined>;
 }
 
-export interface MFracMathMLAttributes<T extends EventTarget>
-	extends MathMLAttributes<T> {
+export interface MFracMathMLAttributes<
+	T extends EventTarget
+> extends MathMLAttributes<T> {
 	/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mfrac#denomalign */
 	denomalign?: Signalish<'center' | 'left' | 'right' | undefined>;
 	linethickness?: Signalish<string | undefined>;
@@ -2272,8 +2320,9 @@ export interface MFracMathMLAttributes<T extends EventTarget>
 	numalign?: Signalish<'center' | 'left' | 'right' | undefined>;
 }
 
-export interface MiMathMLAttributes<T extends EventTarget>
-	extends MathMLAttributes<T> {
+export interface MiMathMLAttributes<
+	T extends EventTarget
+> extends MathMLAttributes<T> {
 	/** The only value allowed in the current specification is normal (case insensitive)
 	 * See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mi#mathvariant */
 	mathvariant?: Signalish<
@@ -2299,19 +2348,22 @@ export interface MiMathMLAttributes<T extends EventTarget>
 	>;
 }
 
-export interface MmultiScriptsMathMLAttributes<T extends EventTarget>
-	extends MathMLAttributes<T> {
+export interface MmultiScriptsMathMLAttributes<
+	T extends EventTarget
+> extends MathMLAttributes<T> {
 	/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mmultiscripts#subscriptshift */
 	subscriptshift?: Signalish<string | undefined>;
 	/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mmultiscripts#superscriptshift */
 	superscriptshift?: Signalish<string | undefined>;
 }
 
-export interface MNMathMLAttributes<T extends EventTarget>
-	extends MathMLAttributes<T> {}
+export interface MNMathMLAttributes<
+	T extends EventTarget
+> extends MathMLAttributes<T> {}
 
-export interface MOMathMLAttributes<T extends EventTarget>
-	extends MathMLAttributes<T> {
+export interface MOMathMLAttributes<
+	T extends EventTarget
+> extends MathMLAttributes<T> {
 	/** Non-standard attribute See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mo#accent */
 	accent?: Signalish<boolean | undefined>;
 	fence?: Signalish<boolean | undefined>;
@@ -2326,13 +2378,15 @@ export interface MOMathMLAttributes<T extends EventTarget>
 	symmetric?: Signalish<boolean | undefined>;
 }
 
-export interface MOverMathMLAttributes<T extends EventTarget>
-	extends MathMLAttributes<T> {
+export interface MOverMathMLAttributes<
+	T extends EventTarget
+> extends MathMLAttributes<T> {
 	accent?: Signalish<boolean | undefined>;
 }
 
-export interface MPaddedMathMLAttributes<T extends EventTarget>
-	extends MathMLAttributes<T> {
+export interface MPaddedMathMLAttributes<
+	T extends EventTarget
+> extends MathMLAttributes<T> {
 	depth?: Signalish<string | undefined>;
 	height?: Signalish<string | undefined>;
 	lspace?: Signalish<string | undefined>;
@@ -2340,38 +2394,46 @@ export interface MPaddedMathMLAttributes<T extends EventTarget>
 	width?: Signalish<string | undefined>;
 }
 
-export interface MPhantomMathMLAttributes<T extends EventTarget>
-	extends MathMLAttributes<T> {}
+export interface MPhantomMathMLAttributes<
+	T extends EventTarget
+> extends MathMLAttributes<T> {}
 
-export interface MPrescriptsMathMLAttributes<T extends EventTarget>
-	extends MathMLAttributes<T> {}
+export interface MPrescriptsMathMLAttributes<
+	T extends EventTarget
+> extends MathMLAttributes<T> {}
 
-export interface MRootMathMLAttributes<T extends EventTarget>
-	extends MathMLAttributes<T> {}
+export interface MRootMathMLAttributes<
+	T extends EventTarget
+> extends MathMLAttributes<T> {}
 
-export interface MRowMathMLAttributes<T extends EventTarget>
-	extends MathMLAttributes<T> {}
+export interface MRowMathMLAttributes<
+	T extends EventTarget
+> extends MathMLAttributes<T> {}
 
-export interface MSMathMLAttributes<T extends EventTarget>
-	extends MathMLAttributes<T> {
+export interface MSMathMLAttributes<
+	T extends EventTarget
+> extends MathMLAttributes<T> {
 	/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/ms#browser_compatibility */
 	lquote?: Signalish<string | undefined>;
 	/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/ms#browser_compatibility */
 	rquote?: Signalish<string | undefined>;
 }
 
-export interface MSpaceMathMLAttributes<T extends EventTarget>
-	extends MathMLAttributes<T> {
+export interface MSpaceMathMLAttributes<
+	T extends EventTarget
+> extends MathMLAttributes<T> {
 	depth?: Signalish<string | undefined>;
 	height?: Signalish<string | undefined>;
 	width?: Signalish<string | undefined>;
 }
 
-export interface MSqrtMathMLAttributes<T extends EventTarget>
-	extends MathMLAttributes<T> {}
+export interface MSqrtMathMLAttributes<
+	T extends EventTarget
+> extends MathMLAttributes<T> {}
 
-export interface MStyleMathMLAttributes<T extends EventTarget>
-	extends MathMLAttributes<T> {
+export interface MStyleMathMLAttributes<
+	T extends EventTarget
+> extends MathMLAttributes<T> {
 	/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mstyle#background */
 	background?: Signalish<string | undefined>;
 	/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mstyle#color */
@@ -2388,28 +2450,32 @@ export interface MStyleMathMLAttributes<T extends EventTarget>
 	scriptsizemultiplier?: Signalish<string | undefined>;
 }
 
-export interface MSubMathMLAttributes<T extends EventTarget>
-	extends MathMLAttributes<T> {
+export interface MSubMathMLAttributes<
+	T extends EventTarget
+> extends MathMLAttributes<T> {
 	/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/msub#subscriptshift */
 	subscriptshift?: Signalish<string | undefined>;
 }
 
-export interface MSubsupMathMLAttributes<T extends EventTarget>
-	extends MathMLAttributes<T> {
+export interface MSubsupMathMLAttributes<
+	T extends EventTarget
+> extends MathMLAttributes<T> {
 	/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/msubsup#subscriptshift */
 	subscriptshift?: Signalish<string | undefined>;
 	/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/msubsup#superscriptshift */
 	superscriptshift?: Signalish<string | undefined>;
 }
 
-export interface MSupMathMLAttributes<T extends EventTarget>
-	extends MathMLAttributes<T> {
+export interface MSupMathMLAttributes<
+	T extends EventTarget
+> extends MathMLAttributes<T> {
 	/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/msup#superscriptshift */
 	superscriptshift?: Signalish<string | undefined>;
 }
 
-export interface MTableMathMLAttributes<T extends EventTarget>
-	extends MathMLAttributes<T> {
+export interface MTableMathMLAttributes<
+	T extends EventTarget
+> extends MathMLAttributes<T> {
 	/** Non-standard attribute See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mtable#align */
 	align?: Signalish<
 		'axis' | 'baseline' | 'bottom' | 'center' | 'top' | undefined
@@ -2436,8 +2502,9 @@ export interface MTableMathMLAttributes<T extends EventTarget>
 	width?: Signalish<string | undefined>;
 }
 
-export interface MTdMathMLAttributes<T extends EventTarget>
-	extends MathMLAttributes<T> {
+export interface MTdMathMLAttributes<
+	T extends EventTarget
+> extends MathMLAttributes<T> {
 	columnspan?: Signalish<number | undefined>;
 	rowspan?: Signalish<number | undefined>;
 	/** Non-standard attribute See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mtd#columnalign */
@@ -2448,11 +2515,13 @@ export interface MTdMathMLAttributes<T extends EventTarget>
 	>;
 }
 
-export interface MTextMathMLAttributes<T extends EventTarget>
-	extends MathMLAttributes<T> {}
+export interface MTextMathMLAttributes<
+	T extends EventTarget
+> extends MathMLAttributes<T> {}
 
-export interface MTrMathMLAttributes<T extends EventTarget>
-	extends MathMLAttributes<T> {
+export interface MTrMathMLAttributes<
+	T extends EventTarget
+> extends MathMLAttributes<T> {
 	/** Non-standard attribute See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mtr#columnalign */
 	columnalign?: Signalish<'center' | 'left' | 'right' | undefined>;
 	/** Non-standard attribute See https://developer.mozilla.org/en-US/docs/Web/MathML/Element/mtr#rowalign */
@@ -2461,16 +2530,19 @@ export interface MTrMathMLAttributes<T extends EventTarget>
 	>;
 }
 
-export interface MUnderMathMLAttributes<T extends EventTarget>
-	extends MathMLAttributes<T> {
+export interface MUnderMathMLAttributes<
+	T extends EventTarget
+> extends MathMLAttributes<T> {
 	accentunder?: Signalish<boolean | undefined>;
 }
 
-export interface MUnderoverMathMLAttributes<T extends EventTarget>
-	extends MathMLAttributes<T> {
+export interface MUnderoverMathMLAttributes<
+	T extends EventTarget
+> extends MathMLAttributes<T> {
 	accent?: Signalish<boolean | undefined>;
 	accentunder?: Signalish<boolean | undefined>;
 }
 
-export interface SemanticsMathMLAttributes<T extends EventTarget>
-	extends MathMLAttributes<T> {}
+export interface SemanticsMathMLAttributes<
+	T extends EventTarget
+> extends MathMLAttributes<T> {}
