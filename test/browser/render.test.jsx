@@ -520,6 +520,21 @@ describe('render()', () => {
 		expect(scratch.firstChild.checked).to.equal(false);
 	});
 
+	it('should not try to set element.children', () => {
+		render(
+			<div>
+				<span />
+			</div>,
+			scratch
+		);
+		const spy = vi.fn();
+		Object.defineProperty(scratch.firstChild, 'children', {
+			set: spy
+		});
+		render(<div />, scratch);
+		expect(spy).not.toHaveBeenCalled();
+	});
+
 	it('should render download attribute', () => {
 		render(<a download="" />, scratch);
 		expect(scratch.firstChild.getAttribute('download')).to.equal('');
