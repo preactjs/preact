@@ -1,44 +1,44 @@
 import {
-	createElement,
-	render as preactRender,
-	cloneElement as preactCloneElement,
-	createRef,
 	Component,
+	Fragment,
 	createContext,
-	Fragment
+	createElement,
+	createRef,
+	cloneElement as preactCloneElement,
+	render as preactRender
 } from 'preact';
 import {
-	useState,
-	useId,
-	useReducer,
-	useEffect,
-	useLayoutEffect,
-	useRef,
-	useImperativeHandle,
-	useMemo,
 	useCallback,
 	useContext,
-	useDebugValue
+	useDebugValue,
+	useEffect,
+	useId,
+	useImperativeHandle,
+	useLayoutEffect,
+	useMemo,
+	useReducer,
+	useRef,
+	useState
 } from 'preact/hooks';
+import { Children } from './Children';
+import { PureComponent } from './PureComponent';
+import { forwardRef } from './forwardRef';
 import {
-	useInsertionEffect,
 	startTransition,
 	useDeferredValue,
+	useInsertionEffect,
 	useSyncExternalStore,
 	useTransition
 } from './hooks';
-import { PureComponent } from './PureComponent';
 import { memo } from './memo';
-import { forwardRef } from './forwardRef';
-import { Children } from './Children';
-import { Suspense, lazy } from './suspense';
 import { createPortal } from './portals';
 import {
-	hydrate,
-	render,
 	REACT_ELEMENT_TYPE,
-	__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED
+	__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED,
+	hydrate,
+	render
 } from './render';
+import { Suspense, lazy } from './suspense';
 
 const version = '18.3.1'; // trick libraries to think we are react
 
@@ -77,7 +77,7 @@ function isMemo(element) {
 	return (
 		!!element &&
 		typeof element.displayName == 'string' &&
-		element.displayName.startsWith('Memo(')
+		element.displayName.indexOf('Memo(') == 0
 	);
 }
 
@@ -149,7 +149,6 @@ function unstable_batchedUpdates(callback, arg) {
  * that just renders its children without imposing any restrictions.
  */
 const StrictMode = Fragment;
-
 // compat to react-is
 export const isElement = isValidElement;
 
@@ -229,7 +228,7 @@ export default {
 	forwardRef,
 	flushSync,
 	unstable_batchedUpdates,
-	StrictMode,
+	StrictMode: Fragment,
 	Suspense,
 	lazy,
 	__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED
