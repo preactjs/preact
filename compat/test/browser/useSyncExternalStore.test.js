@@ -379,9 +379,11 @@ describe('useSyncExternalStore', () => {
 
 			// Switch stores and update in the same batch
 			await act(() => {
-				// This update will be disregarded
-				storeA.set(2);
-				setStore(storeB);
+				ReactDOM.flushSync(() => {
+					// This update will be disregarded
+					storeA.set(2);
+					setStore(storeB);
+				});
 			});
 			// Now reading from B instead of A
 			assertLog([0]);
@@ -498,7 +500,7 @@ describe('useSyncExternalStore', () => {
 			// Should flip back to 0
 			expect(container.textContent).to.equal('0');
 
-			// Preact: Wait for 'Passive effect: 0' to y from the rAF so it doesn't impact other tests
+			// Preact: Wait for 'Passive effect: 0' to flush from the rAF so it doesn't impact other tests
 			await new Promise(r => setTimeout(r, 32));
 		});
 
@@ -684,8 +686,10 @@ describe('useSyncExternalStore', () => {
 
 			// Update the store and getSnapshot at the same time
 			await act(() => {
-				setGetSnapshot(() => getSnapshotB);
-				store.set({ a: 1, b: 2 });
+				ReactDOM.flushSync(() => {
+					setGetSnapshot(() => getSnapshotB);
+					store.set({ a: 1, b: 2 });
+				});
 			});
 			// It should read from B instead of A
 			assertLog([2]);

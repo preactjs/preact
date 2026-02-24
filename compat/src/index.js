@@ -5,8 +5,7 @@ import {
 	createRef,
 	Component,
 	createContext,
-	Fragment,
-	options
+	Fragment
 } from 'preact';
 import {
 	useState,
@@ -140,13 +139,7 @@ const unstable_batchedUpdates = (callback, arg) => callback(arg);
  * @param {Arg} [arg] Optional argument that can be passed to the callback
  * @returns
  */
-const flushSync = (callback, arg) => {
-	const prevDebounce = options.debounceRendering;
-	options.debounceRendering = cb => cb();
-	const res = callback(arg);
-	options.debounceRendering = prevDebounce;
-	return res;
-};
+const flushSync = (callback, arg) => callback(arg);
 
 // compat to react-is
 export const isElement = isValidElement;
