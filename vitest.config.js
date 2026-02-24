@@ -10,46 +10,40 @@ const root = path.resolve(__dirname);
 const alias = {
 	'^react$': path.join(
 		root,
-		MINIFY ? 'compat/dist/compat.mjs' : 'compat/src/index.js'
+		MINIFY ? 'compat/dist/compat.esm.js' : 'compat/src/index.js'
 	),
 	'^react-dom$': path.join(
 		root,
-		MINIFY ? 'compat/dist/compat.mjs' : 'compat/src/index.js'
+		MINIFY ? 'compat/dist/compat.esm.js' : 'compat/src/index.js'
 	),
-	'^preact$': path.join(root, MINIFY ? 'dist/preact.mjs' : 'src/index.js'),
+	'^preact$': path.join(root, MINIFY ? 'dist/preact.esm.js' : 'src/index.js'),
 	'^preact/compat$': path.join(
 		root,
-		MINIFY ? 'compat/dist/compat.mjs' : 'compat/src/index.js'
+		MINIFY ? 'compat/dist/compat.esm.js' : 'compat/src/index.js'
 	),
 	'^preact/jsx-runtime$': path.join(
 		root,
-		MINIFY ? 'jsx-runtime/dist/jsxRuntime.mjs' : 'jsx-runtime/src/index.js'
+		MINIFY ? 'jsx-runtime/dist/jsxRuntime.esm.js' : 'jsx-runtime/src/index.js'
 	),
 	'^preact/jsx-runtime/src$': path.join(
 		root,
-		MINIFY ? 'jsx-runtime/dist/jsxRuntime.mjs' : 'jsx-runtime/src'
-	),
-	'^preact/jsx-dev-runtime$': path.join(
-		root,
-		MINIFY
-			? 'jsx-dev-runtime/dist/jsx-dev-runtime.js'
-			: 'jsx-dev-runtime/src/index.js'
+		MINIFY ? 'jsx-runtime/dist/jsxRuntime.esm.js' : 'jsx-runtime/src'
 	),
 	'^preact/debug$': path.join(
 		root,
-		MINIFY ? 'debug/dist/debug.mjs' : 'debug/src/index.js'
+		MINIFY ? 'debug/dist/debug.esm.js' : 'debug/src/index.js'
 	),
 	'^preact/devtools$': path.join(
 		root,
-		MINIFY ? 'devtools/dist/devtools.js' : 'devtools/src/index.js'
+		MINIFY ? 'devtools/dist/devtools.esm.js' : 'devtools/src/index.js'
 	),
 	'^preact/hooks$': path.join(
 		root,
-		MINIFY ? 'hooks/dist/hooks.mjs' : 'hooks/src/index.js'
+		MINIFY ? 'hooks/dist/hooks.esm.js' : 'hooks/src/index.js'
 	),
 	'^preact/test-utils$': path.join(
 		root,
-		MINIFY ? 'test-utils/dist/testUtils.mjs' : 'test-utils/src/index.js'
+		MINIFY ? 'test-utils/dist/testUtils.esm.js' : 'test-utils/src/index.js'
 	)
 };
 
@@ -57,62 +51,62 @@ const rollupAlias = [
 	{
 		find: /^react$/,
 		replacement: MINIFY
-			? path.join(root, 'compat/dist/compat.mjs')
+			? path.join(root, 'compat/dist/compat.esm.js')
 			: path.join(root, 'compat/src/index.js')
 	},
 	{
 		find: /^react-dom$/,
 		replacement: MINIFY
-			? path.join(root, 'compat/dist/compat.mjs')
+			? path.join(root, 'compat/dist/compat.esm.js')
 			: path.join(root, 'compat/src/index.js')
 	},
 	{ find: /^preact$/, replacement: path.join(root, 'src/index.js') },
 	{
 		find: /^preact\/compat$/,
 		replacement: MINIFY
-			? path.join(root, 'compat/dist/compat.mjs')
+			? path.join(root, 'compat/dist/compat.esm.js')
 			: path.join(root, 'compat/src/index.js')
 	},
 	{
 		find: /^preact\/jsx-runtime$/,
 		replacement: MINIFY
-			? path.join(root, 'jsx-runtime/dist/jsxRuntime.mjs')
+			? path.join(root, 'jsx-runtime/dist/jsxRuntime.esm.js')
 			: path.join(root, 'jsx-runtime/src/index.js')
 	},
 	{
 		find: /^preact\/jsx-runtime\/src$/,
 		replacement: MINIFY
-			? path.join(root, 'jsx-runtime/dist/jsxRuntime.mjs')
+			? path.join(root, 'jsx-runtime/dist/jsxRuntime.esm.js')
 			: path.join(root, 'jsx-runtime/src')
 	},
 	{
 		find: /^preact\/jsx-dev-runtime$/,
 		replacement: MINIFY
-			? path.join(root, 'jsx-runtime/dist/jsxRuntime.mjs')
+			? path.join(root, 'jsx-runtime/dist/jsxRuntime.esm.js')
 			: path.join(root, 'jsx-runtime/src/index.js')
 	},
 	{
 		find: /^preact\/debug$/,
 		replacement: MINIFY
-			? path.join(root, 'debug/dist/debug.mjs')
+			? path.join(root, 'debug/dist/debug.esm.js')
 			: path.join(root, 'debug/src/index.js')
 	},
 	{
 		find: /^preact\/devtools$/,
 		replacement: MINIFY
-			? path.join(root, 'devtools/dist/devtools.mjs')
+			? path.join(root, 'devtools/dist/devtools.esm.js')
 			: path.join(root, 'devtools/src/index.js')
 	},
 	{
 		find: /^preact\/hooks$/,
 		replacement: MINIFY
-			? path.join(root, 'hooks/dist/hooks.mjs')
+			? path.join(root, 'hooks/dist/hooks.esm.js')
 			: path.join(root, 'hooks/src/index.js')
 	},
 	{
 		find: /^preact\/test-utils$/,
 		replacement: MINIFY
-			? path.join(root, 'test-utils/dist/testUtils.mjs')
+			? path.join(root, 'test-utils/dist/testUtils.esm.js')
 			: path.join(root, 'test-utils/src/index.js')
 	}
 ];
@@ -140,7 +134,7 @@ export default defineConfig({
 		exclude: ['node_nodules'],
 		jsx: 'transform',
 		jsxFactory: 'createElement',
-		jsxFragment: 'Fragment',
+		jsxFragment: 'Fragment'
 	},
 	plugins: [
 		{
@@ -166,7 +160,7 @@ export default defineConfig({
 							}
 						]
 					],
-					include: ['**/src/**/*.js', '**/test/**/*.js', '**/test/**/*.jsx'],
+					include: ['**/src/**/*.js', '**/test/**/*.js', '**/test/**/*.jsx']
 				});
 
 				return {
@@ -191,7 +185,7 @@ export default defineConfig({
 			'react-dom'
 		],
 		esbuildOptions: {
-			alias,
+			alias
 		}
 	},
 	test: {
@@ -201,13 +195,13 @@ export default defineConfig({
 			enabled: COVERAGE,
 			include: MINIFY
 				? [
-						'dist/preact.mjs',
-						'compat/dist/compat.mjs',
-						'devtools/dist/devtools.mjs',
-						'jsx-runtime/dist/jsxRuntime.mjs',
-						'debug/dist/debug.mjs',
-						'hooks/dist/hooks.mjs',
-						'test-utils/dist/testUtils.mjs'
+						'dist/preact.esm.js',
+						'compat/dist/compat.esm.js',
+						'devtools/dist/devtools.esm.js',
+						'jsx-runtime/dist/jsxRuntime.esm.js',
+						'debug/dist/debug.esm.js',
+						'hooks/dist/hooks.esm.js',
+						'test-utils/dist/testUtils.esm.js'
 					]
 				: [
 						'src/**/*',
