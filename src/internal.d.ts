@@ -163,7 +163,7 @@ export interface Component<P = {}, S = {}>
 	constructor: ComponentType<P>;
 	state: S; // Override Component["state"] to not be readonly for internal use, specifically Hooks
 
-	_excess?: PreactElement[];
+	_excess?: PreactElement;
 	_renderCallbacks: Array<() => void>; // Only class components
 	_stateCallbacks: Array<() => void>; // Only class components
 	_globalContext?: any;
