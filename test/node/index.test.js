@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import * as preact from '../../';
+import * as preact from 'preact';
 
 describe('build artifact', () => {
 	// #1075 Check that the build artifact has the correct exports

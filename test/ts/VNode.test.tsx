@@ -10,7 +10,7 @@ import {
 	ComponentChildren,
 	cloneElement,
 	ComponentChild
-} from '../../';
+} from 'preact';
 
 function getDisplayType(vnode: VNode | string | number) {
 	if (typeof vnode === 'string' || typeof vnode == 'number') {

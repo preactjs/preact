@@ -4,7 +4,7 @@ import {
 	ComponentFactory,
 	ComponentConstructor,
 	Component
-} from '../../';
+} from 'preact';
 import { SimpleComponent, SimpleComponentProps } from './Component.test';
 
 export interface highlightedProps {

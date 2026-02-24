@@ -5,7 +5,7 @@
   "private": false,
   "description": "Fast 4kb React-compatible Virtual DOM library.",
   "type": "module",
-  "main": "dist/preact.esm.js",
+  "main": "dist/preact.js",
   "source": "src/index.js",
   "exports": {
     ".": {

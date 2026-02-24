@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { createElement, Component, RenderableProps, Fragment } from '../../';
+import { createElement, Component, RenderableProps, Fragment } from 'preact';
 
 export class ContextComponent extends Component<{ foo: string }> {
 	getChildContext() {
