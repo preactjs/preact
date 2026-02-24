@@ -78,7 +78,7 @@ function isMemo(element) {
 	return (
 		!!element &&
 		typeof element.displayName == 'string' &&
-		element.displayName.startsWith('Memo(')
+		element.displayName.indexOf('Memo(') == 0
 	);
 }
 
@@ -141,12 +141,6 @@ const unstable_batchedUpdates = (callback, arg) => callback(arg);
  */
 const flushSync = (callback, arg) => callback(arg);
 
-/**
- * Strict Mode is not implemented in Preact, so we provide a stand-in for it
- * that just renders its children without imposing any restrictions.
- */
-const StrictMode = Fragment;
-
 // compat to react-is
 export const isElement = isValidElement;
 
@@ -180,7 +174,7 @@ export {
 	useTransition,
 	// eslint-disable-next-line camelcase
 	unstable_batchedUpdates,
-	StrictMode,
+	Fragment as StrictMode,
 	Suspense,
 	SuspenseList,
 	lazy,
@@ -228,7 +222,7 @@ export default {
 	forwardRef,
 	flushSync,
 	unstable_batchedUpdates,
-	StrictMode,
+	StrictMode: Fragment,
 	Suspense,
 	SuspenseList,
 	lazy,

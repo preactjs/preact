@@ -45,7 +45,7 @@ const onChangeInputType = type =>
 	).test(type);
 
 // Some libraries like `react-virtualized` explicitly check for this.
-Component.prototype.isReactComponent = {};
+Component.prototype.isReactComponent = true;
 
 // `UNSAFE_*` lifecycle hooks
 // Preact only ever invokes the unprefixed methods.
@@ -105,24 +105,17 @@ let oldEventHook = options.event;
 options.event = e => {
 	if (oldEventHook) e = oldEventHook(e);
 
-	e.persist = empty;
-	e.isPropagationStopped = isPropagationStopped;
-	e.isDefaultPrevented = isDefaultPrevented;
+	e.persist = () => {};
+	e.isPropagationStopped = function isPropagationStopped() {
+		return this.cancelBubble;
+	};
+	e.isDefaultPrevented = function isDefaultPrevented() {
+		return this.defaultPrevented;
+	};
 	return (e.nativeEvent = e);
 };
 
-function empty() {}
-
-function isPropagationStopped() {
-	return this.cancelBubble;
-}
-
-function isDefaultPrevented() {
-	return this.defaultPrevented;
-}
-
 const classNameDescriptorNonEnumberable = {
-	enumerable: false,
 	configurable: true,
 	get() {
 		return this.class;
@@ -132,9 +125,9 @@ const classNameDescriptorNonEnumberable = {
 function handleDomVNode(vnode) {
 	let props = vnode.props,
 		type = vnode.type,
-		normalizedProps = {};
+		normalizedProps = {},
+		isNonDashedType = type.indexOf('-') == -1;
 
-	let isNonDashedType = type.indexOf('-') === -1;
 	for (let i in props) {
 		let value = props[i];
 
@@ -198,30 +191,28 @@ function handleDomVNode(vnode) {
 		normalizedProps[i] = value;
 	}
 
-	// Add support for array select values: <select multiple value={[]} />
-	if (
-		type == 'select' &&
-		normalizedProps.multiple &&
-		Array.isArray(normalizedProps.value)
-	) {
-		// forEach() always returns undefined, which we abuse here to unset the value prop.
-		normalizedProps.value = toChildArray(props.children).forEach(child => {
-			child.props.selected =
-				normalizedProps.value.indexOf(child.props.value) != -1;
-		});
-	}
+	if (type == 'select') {
+		// Add support for array select values: <select multiple value={[]} />
+		if (normalizedProps.multiple && Array.isArray(normalizedProps.value)) {
+			// forEach() always returns undefined, which we abuse here to unset the value prop.
+			normalizedProps.value = toChildArray(props.children).forEach(child => {
+				child.props.selected =
+					normalizedProps.value.indexOf(child.props.value) != -1;
+			});
+		}
 
-	// Adding support for defaultValue in select tag
-	if (type == 'select' && normalizedProps.defaultValue != null) {
-		normalizedProps.value = toChildArray(props.children).forEach(child => {
-			if (normalizedProps.multiple) {
-				child.props.selected =
-					normalizedProps.defaultValue.indexOf(child.props.value) != -1;
-			} else {
-				child.props.selected =
-					normalizedProps.defaultValue == child.props.value;
-			}
-		});
+		// Adding support for defaultValue in select tag
+		if (normalizedProps.defaultValue != null) {
+			normalizedProps.value = toChildArray(props.children).forEach(child => {
+				if (normalizedProps.multiple) {
+					child.props.selected =
+						normalizedProps.defaultValue.indexOf(child.props.value) != -1;
+				} else {
+					child.props.selected =
+						normalizedProps.defaultValue == child.props.value;
+				}
+			});
+		}
 	}
 
 	if (props.class && !props.className) {
