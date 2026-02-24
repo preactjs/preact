@@ -4,6 +4,7 @@ import {
 	createContext,
 	createElement,
 	createRef,
+	options,
 	cloneElement as preactCloneElement,
 	render as preactRender
 } from 'preact';
@@ -121,15 +122,20 @@ function findDOMNode(component) {
 }
 
 /**
- * In React, `flushSync` flushes the entire tree and forces a rerender. It's
- * implmented here as a no-op.
+ * In React, `flushSync` flushes the entire tree and forces a rerender.
  * @template Arg
  * @template Result
  * @param {(arg: Arg) => Result} callback function that runs before the flush
  * @param {Arg} [arg] Optional argument that can be passed to the callback
  * @returns
  */
-const flushSync = (callback, arg) => callback(arg);
+const flushSync = (callback, arg) => {
+	const prevDebounce = options.debounceRendering;
+	options.debounceRendering = cb => cb();
+	const res = callback(arg);
+	options.debounceRendering = prevDebounce;
+	return res;
+};
 
 /**
  * In React, `unstable_batchedUpdates` is a legacy feature that was made a no-op
