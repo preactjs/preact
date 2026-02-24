@@ -379,11 +379,9 @@ describe('useSyncExternalStore', () => {
 
 			// Switch stores and update in the same batch
 			await act(() => {
-				ReactDOM.flushSync(() => {
-					// This update will be disregarded
-					storeA.set(2);
-					setStore(storeB);
-				});
+				// This update will be disregarded
+				storeA.set(2);
+				setStore(storeB);
 			});
 			// Now reading from B instead of A
 			assertLog([0]);
@@ -686,10 +684,8 @@ describe('useSyncExternalStore', () => {
 
 			// Update the store and getSnapshot at the same time
 			await act(() => {
-				ReactDOM.flushSync(() => {
-					setGetSnapshot(() => getSnapshotB);
-					store.set({ a: 1, b: 2 });
-				});
+				setGetSnapshot(() => getSnapshotB);
+				store.set({ a: 1, b: 2 });
 			});
 			// It should read from B instead of A
 			assertLog([2]);
