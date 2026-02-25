@@ -80,8 +80,7 @@ export function diff(
 		try {
 			let c, isNew, oldProps, oldState, snapshot, clearProcessingException;
 			let newProps = newVNode.props;
-			const isClassComponent =
-				'prototype' in newType && newType.prototype.render;
+			const isClassComponent = newType.prototype && newType.prototype.render;
 
 			// Necessary for createContext api. Setting this property will pass
 			// the context value as `this.context` just for this component.
