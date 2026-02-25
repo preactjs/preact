@@ -106,6 +106,13 @@ describe('render()', () => {
 		expect(clone.firstChild.outerHTML).to.eql('<h1>it works</h1>');
 	});
 
+	it('should render function components with an undefined prototype', () => {
+		const Foo = () => <div>foo</div>;
+		Foo.prototype = undefined;
+		render(<Foo />, scratch);
+		expect(scratch.innerHTML).to.equal('<div>foo</div>');
+	});
+
 	it('should not render when detecting JSON-injection', () => {
 		const vnode = JSON.parse(
 			'{"type":"span","props":{ "children": "Malicious"}, "__v": 1, "constructor": null}'
