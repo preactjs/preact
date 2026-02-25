@@ -1,4 +1,4 @@
-import * as preact from './index';
+import * as preact from './index.js';
 
 export enum HookType {
 	useState = 1,

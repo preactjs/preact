@@ -1,10 +1,10 @@
 export as namespace preact;
 
-import { JSXInternal } from './jsx';
-import { DOMAttributes, HTMLAttributes, SVGAttributes } from './dom';
+import type { JSXInternal } from './jsx.d.ts';
+import type { DOMAttributes, HTMLAttributes, SVGAttributes } from './dom.d.ts';
 
-export import JSX = JSXInternal;
-export * from './dom';
+export { JSXInternal as JSX }
+export type * from './dom.d.ts';
 
 //
 // Preact Virtual DOM
@@ -230,7 +230,7 @@ export function createElement<P>(
 	...children: ComponentChildren[]
 ): VNode<P>;
 export namespace createElement {
-	export import JSX = JSXInternal;
+	export { JSXInternal as JSX };
 }
 
 export function h(
@@ -280,7 +280,7 @@ export function h<P>(
 	...children: ComponentChildren[]
 ): VNode<Attributes & P>;
 export namespace h {
-	export import JSX = JSXInternal;
+	export { JSXInternal as JSX };
 }
 
 //

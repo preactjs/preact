@@ -1,11 +1,9 @@
 {
   "name": "test-utils",
-  "amdName": "preactTestUtils",
   "private": true,
   "description": "Test-utils for Preact",
+  "type": "module",
   "main": "dist/testUtils.js",
-  "module": "dist/testUtils.mjs",
-  "umd:main": "dist/testUtils.umd.js",
   "source": "src/index.js",
   "types": "src/index.d.ts",
   "license": "MIT",

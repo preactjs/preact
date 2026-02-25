@@ -1,4 +1,4 @@
-import React from '../../src';
+import React from '../../src/index.cjs';
 
 const MyInput: React.ForwardRefRenderFunction<
 	{ focus(): void },

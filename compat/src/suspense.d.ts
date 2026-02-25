@@ -1,4 +1,4 @@
-import { Component, ComponentChild, ComponentChildren } from '../../src/index';
+import { Component, ComponentChild, ComponentChildren } from '../../src/index.js';
 
 //
 // Suspense/lazy

@@ -1,12 +1,12 @@
-import {
+import type {
 	Options as PreactOptions,
 	Component as PreactComponent,
 	VNode as PreactVNode,
 	PreactContext,
 	HookType,
 	ErrorInfo
-} from '../../src/internal';
-import { Reducer, StateUpdater } from '.';
+} from '../../src/internal.d.ts';
+import type { Reducer, StateUpdater } from './index.d.ts';
 
 export { PreactContext };
 

@@ -1,4 +1,4 @@
-import * as _preact from '../../src/index';
+import * as _preact from '../../src';
 import { JSXInternal } from '../../src/jsx';
 import * as _hooks from '../../hooks';
 import * as _Suspense from './suspense';
