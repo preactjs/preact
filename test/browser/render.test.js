@@ -1977,14 +1977,14 @@ describe('render()', () => {
 	it('should work with document', () => {
 		document.textContent = '';
 		const App = () => (
-			<Fragment>
+			<html>
 				<head>
 					<title>Test</title>
 				</head>
 				<body>
 					<p>Test</p>
 				</body>
-			</Fragment>
+			</html>
 		);
 		render(<App />, document);
 		expect(document.documentElement.innerHTML.trim()).to.equal(
