@@ -11,7 +11,9 @@
   "source": "src/index.js",
   "typesVersions": {
     "<=5.0": {
-      ".": ["./src/index-5.d.ts"]
+      ".": [
+        "./src/index-5.d.ts"
+      ]
     }
   },
   "exports": {
@@ -151,12 +153,12 @@
     "lint": "run-s oxlint tsc",
     "tsc": "tsc -p jsconfig-lint.json",
     "oxlint": "oxlint -c oxlint.json src test/browser test/node test/shared debug compat hooks test-utils",
-    "format": "biome format --write .",
-    "format:check": "biome format ."
+    "format": "oxfmt . --write",
+    "format:check": "oxfmt --check ."
   },
   "nano-staged": {
     "**/*.{js,jsx,mjs,cjs,ts,tsx,yml,json,html,md,css,scss}": [
-      "biome format --write --no-errors-on-unmatched"
+      "oxfmt --write --no-error-on-unmatched-pattern"
     ]
   },
   "files": [
@@ -221,7 +223,6 @@
     "@babel/plugin-transform-react-jsx-source": "^7.25.9",
     "@babel/preset-env": "^7.26.0",
     "@babel/register": "^7.25.9",
-    "@biomejs/biome": "^1.9.4",
     "@types/chai": "^5.0.1",
     "@types/mocha": "^10.0.0",
     "@types/node": "^18.19.87",
@@ -239,6 +240,7 @@
     "microbundle": "^0.15.1",
     "mocha": "^11.0.0",
     "npm-run-all2": "^7.0.0",
+    "oxfmt": "^0.32.0",
     "oxlint": "^0.15.12",
     "preact-render-to-string": "^6.5.0",
     "prop-types": "^15.8.1",

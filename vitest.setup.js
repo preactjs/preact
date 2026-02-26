@@ -7,7 +7,7 @@ chai.use(sinonChai);
 globalThis.context = describe;
 globalThis.sinon = sinon;
 
-window.addEventListener('error', () => {})
+window.addEventListener('error', () => {});
 
 // Something that's loaded before this file polyfills Symbol object.
 // We need to verify that it works in IE without that.
