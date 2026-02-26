@@ -554,7 +554,11 @@ function diffElementNodes(
 			);
 
 			// Remove children that are not part of any vnode.
-			if (excessDomChildren != NULL) {
+			if (
+				excessDomChildren != NULL &&
+				newVNode.type != 'body' &&
+				newVNode.type != 'head'
+			) {
 				for (i = excessDomChildren.length; i--; ) {
 					removeNode(excessDomChildren[i]);
 				}

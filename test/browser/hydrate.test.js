@@ -485,6 +485,33 @@ describe('hydrate()', () => {
 		expect(getLog()).to.deep.equal(['Comment.remove()', 'Comment.remove()']);
 	});
 
+	it('should preserve existing head children when hydrating document', () => {
+		document.textContent = '';
+		document.head.innerHTML =
+			'<title>Test</title><meta name="viewport" content="width=device-width">';
+		document.body.innerHTML = '<p>Test</p>';
+		clearLog();
+
+		const App = () => (
+			<Fragment>
+				<head>
+					<title>Test</title>
+				</head>
+				<body>
+					<p>Test</p>
+				</body>
+			</Fragment>
+		);
+
+		hydrate(<App />, document);
+
+		expect(document.head.querySelector('meta[name="viewport"]')).to.not.equal(
+			null
+		);
+		expect(document.head.querySelector('title').textContent).to.equal('Test');
+		expect(document.body.innerHTML).to.equal('<p>Test</p>');
+	});
+
 	it('should work with error boundaries', () => {
 		scratch.innerHTML = '<div>Hello, World!</div>';
 		class Root extends Component {
