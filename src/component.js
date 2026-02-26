@@ -1,13 +1,13 @@
-import { assign } from './util';
-import { diff, commitRoot } from './diff/index';
-import options from './options';
-import { Fragment } from './create-element';
 import {
-	COMPONENT_FORCE,
 	COMPONENT_DIRTY,
+	COMPONENT_FORCE,
 	MODE_HYDRATE,
 	NULL
 } from './constants';
+import { Fragment } from './create-element';
+import { commitRoot, diff } from './diff/index';
+import options from './options';
+import { assign } from './util';
 
 /**
  * Base Component class. Provides `setState()` and `forceUpdate()`, which
@@ -126,7 +126,7 @@ export function getDomSibling(vnode, childIndex) {
  * @param {import('./internal').Component} component The component to rerender
  */
 function renderComponent(component) {
-	let oldVNode = component._vnode,
+	const oldVNode = component._vnode,
 		oldDom = oldVNode._dom,
 		commitQueue = [],
 		refQueue = [];
@@ -182,7 +182,7 @@ function updateParentDomPointers(vnode) {
  * The render queue
  * @type {Array<import('./internal').Component>}
  */
-let rerenderQueue = [];
+const rerenderQueue = [];
 
 /*
  * The value of `Component.debounce` must asynchronously invoke the passed in callback. It is
@@ -225,29 +225,31 @@ const depthSort = (a, b) => a._vnode._depth - b._vnode._depth;
 
 /** Flush the render queue by rerendering all queued components */
 function process() {
-	let c,
-		l = 1;
+	try {
+		let c,
+			l = 1;
 
-	// Don't update `renderCount` yet. Keep its value non-zero to prevent unnecessary
-	// process() calls from getting scheduled while `queue` is still being consumed.
-	while (rerenderQueue.length) {
-		// Keep the rerender queue sorted by (depth, insertion order). The queue
-		// will initially be sorted on the first iteration only if it has more than 1 item.
-		//
-		// New items can be added to the queue e.g. when rerendering a provider, so we want to
-		// keep the order from top to bottom with those new items so we can handle them in a
-		// single pass
-		if (rerenderQueue.length > l) {
-			rerenderQueue.sort(depthSort);
+		// Don't update `renderCount` yet. Keep its value non-zero to prevent unnecessary
+		// process() calls from getting scheduled while `queue` is still being consumed.
+		while (rerenderQueue.length) {
+			// Keep the rerender queue sorted by (depth, insertion order). The queue
+			// will initially be sorted on the first iteration only if it has more than 1 item.
+			//
+			// New items can be added to the queue e.g. when rerendering a provider, so we want to
+			// keep the order from top to bottom with those new items so we can handle them in a
+			// single pass
+			if (rerenderQueue.length > l) {
+				rerenderQueue.sort(depthSort);
+			}
+
+			c = rerenderQueue.shift();
+			l = rerenderQueue.length;
+
+			if (c._bits & COMPONENT_DIRTY) {
+				renderComponent(c);
+			}
 		}
-
-		c = rerenderQueue.shift();
-		l = rerenderQueue.length;
-
-		if (c._bits & COMPONENT_DIRTY) {
-			renderComponent(c);
-		}
+	} finally {
+		rerenderQueue.length = rerenderCount = 0;
 	}
-
-	rerenderCount = 0;
 }
