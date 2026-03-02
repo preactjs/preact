@@ -5,12 +5,12 @@
  * @property {ReturnType<typeof import("@actions/github").getOctokit>} github
  * @property {typeof import("@actions/github").context} context
  *
- * @param {Params} params
+ * @param {Params & { tagName?: string }} params
  * @returns {Promise<Release>}
  */
-async function create({ github, context }) {
+async function create({ github, context, tagName }) {
 	const commitSha = process.env.GITHUB_SHA;
-	const tag_name = process.env.GITHUB_REF_NAME;
+	const tag_name = tagName || process.env.GITHUB_REF_NAME;
 	console.log('tag:', tag_name);
 
 	let releaseResult;
@@ -41,7 +41,7 @@ async function create({ github, context }) {
 			tag_name,
 			name: tag_name,
 			body: '', // TODO: Maybe run changelogged and prefill the body?
-			draft: true,
+			draft: false,
 			prerelease: tag_name.includes('-'),
 			target_commitish: commitSha
 		});

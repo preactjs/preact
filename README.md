@@ -16,6 +16,25 @@
 - Supports all modern browsers and IE11
 - Transparent asynchronous rendering with a pluggable scheduler
 
+---
+
+## Lynx Fork
+
+This is a fork of [Preact](https://github.com/preactjs/preact) maintained by the Lynx team (`lynx-family/internal-preact`).
+
+### Why Fork?
+
+We fork Preact to better suit the unique requirements of the [Lynx](https://github.com/lynx-family/lynx) ecosystem:
+
+- **Performance Optimization**: Removed DOM-specific logic (e.g., `handleDomVNode`) that is unnecessary in the Lynx environment, reducing overhead and bundle size.
+- **Environment Adaptation**: Adapted to Lynx's non-browser environment where standard Web APIs like `document` may not exist or behave differently.
+- **Internal Hooks**: Added specialized hooks (e.g., `_diff2`) for tracing, diagnostics, and component lifecycle management within Lynx.
+- **Improved Debugging**: Disabled code compression in development builds to facilitate easier debugging with Lynx DevTools (LDT).
+- **Multi-slot Support**: Optimized Snapshot generation logic to reduce the number of wrappers and improve performance.
+
+Despite the fork, we remain committed to contributing general-purpose improvements and bug fixes back to the [Preact upstream](https://github.com/preactjs/preact), aiming to keep the divergence as minimal as possible.
+
+
 ### 💁 More information at the [Preact Website ➞](https://preactjs.com)
 
 <table border="0">

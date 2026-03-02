@@ -42,5 +42,5 @@ jobs:
   benchmarks:
     name: Benchmarks
     needs: build_test
-    if: ${{ needs.filter_jobs.outputs.jsChanged == 'true' }}
+    if: ${{ needs.filter_jobs.outputs.jsChanged == 'true' && github.repository == 'preactjs/preact' }}
     uses: ./.github/workflows/benchmarks.yml

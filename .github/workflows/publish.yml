@@ -1,0 +1,38 @@
+name: Publish
+
+on:
+  workflow_call:
+    inputs:
+      release:
+        description: 'github release tag to publish'
+        type: string
+        required: true
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment: npm
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Add dependencies
+        run: |
+          npm install tar-stream@3.1.7
+
+      # https://docs.npmjs.com/trusted-publishers#step-2-configure-your-cicd-workflow
+      # Ensure npm 11.5.1 or later is installed
+      - name: Update npm
+        run: npm install -g npm@latest
+
+      - name: Publish to npm
+        run: |
+          unset NPM_TOKEN
+          unset NODE_AUTH_TOKEN
+          unset NPM_CONFIG_USERCONFIG
+          node scripts/release/publish.mjs ${{ inputs.release }}
