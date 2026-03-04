@@ -590,7 +590,7 @@ function diffElementNodes(
 
 			newVNode._children = [];
 		} else {
-			if (oldHtml) dom.innerHTML = '';
+			if (oldHtml) dom.textContent = '';
 
 			if (
 				nodeType == 'foreignObject' ||
