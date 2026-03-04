@@ -1018,6 +1018,120 @@ describe('suspense hydration', () => {
 		});
 	});
 
+	it('should properly hydrate suspense when resolves to a Fragment with $s:id markers', () => {
+		const originalHtml = ul([
+			li(0),
+			li(1),
+			'<!--$s:0-->',
+			li(2),
+			li(3),
+			'<!--/$s:0-->',
+			li(4),
+			li(5)
+		]);
+
+		const listeners = [vi.fn(), vi.fn(), vi.fn(), vi.fn(), vi.fn(), vi.fn()];
+
+		scratch.innerHTML = originalHtml;
+		clearLog();
+
+		const [Lazy, resolve] = createLazy();
+		hydrate(
+			<List>
+				<Fragment>
+					<ListItem onClick={listeners[0]}>0</ListItem>
+					<ListItem onClick={listeners[1]}>1</ListItem>
+				</Fragment>
+				<Suspense>
+					<Lazy />
+				</Suspense>
+				<Fragment>
+					<ListItem onClick={listeners[4]}>4</ListItem>
+					<ListItem onClick={listeners[5]}>5</ListItem>
+				</Fragment>
+			</List>,
+			scratch
+		);
+		rerender(); // Flush rerender queue to mimic what preact will really do
+		expect(getLog()).to.deep.equal([]);
+		expect(scratch.innerHTML).to.equal(originalHtml);
+		expect(listeners[5]).not.toHaveBeenCalled();
+
+		clearLog();
+		scratch.querySelector('li:last-child').dispatchEvent(createEvent('click'));
+		expect(listeners[5]).toHaveBeenCalledOnce();
+
+		return resolve(() => (
+			<Fragment>
+				<ListItem onClick={listeners[2]}>2</ListItem>
+				<ListItem onClick={listeners[3]}>3</ListItem>
+			</Fragment>
+		)).then(() => {
+			rerender();
+			expect(scratch.innerHTML).to.equal(originalHtml);
+			expect(getLog()).to.deep.equal([]);
+			clearLog();
+
+			scratch
+				.querySelector('li:nth-child(4)')
+				.dispatchEvent(createEvent('click'));
+			expect(listeners[3]).toHaveBeenCalledOnce();
+
+			scratch
+				.querySelector('li:last-child')
+				.dispatchEvent(createEvent('click'));
+			expect(listeners[5]).toHaveBeenCalledTimes(2);
+		});
+	});
+
+	it('should use updated DOM when stream patcher replaces content before suspend resolves', () => {
+		scratch.innerHTML =
+			'<!--$s:0--><span>Loading</span><!--/$s:0--><div>after</div>';
+		clearLog();
+
+		const [Lazy, resolve] = createLazy();
+		hydrate(
+			<>
+				<Suspense>
+					<Lazy />
+				</Suspense>
+				<div>after</div>
+			</>,
+			scratch
+		);
+		rerender();
+		expect(scratch.innerHTML).to.equal(
+			'<!--$s:0--><span>Loading</span><!--/$s:0--><div>after</div>'
+		);
+		expect(getLog()).to.deep.equal([]);
+		clearLog();
+
+		// Simulate stream patcher: replace fallback content while anchor comments
+		// remain. The deferred restoration should use the current DOM, not stale
+		// references to the removed <span>.
+		const endMarker = scratch.childNodes[2]; // <!--/$s:0-->
+		scratch.removeChild(scratch.childNodes[1]); // remove <span>Loading</span>
+		const resolved = document.createElement('div');
+		resolved.textContent = 'Resolved';
+		scratch.insertBefore(resolved, endMarker);
+
+		expect(scratch.innerHTML).to.equal(
+			'<!--$s:0--><div>Resolved</div><!--/$s:0--><div>after</div>'
+		);
+		// Clear the stream patcher's own DOM ops before asserting on rerender
+		clearLog();
+
+		return resolve(() => <div>Resolved</div>).then(() => {
+			rerender();
+			// Should match the stream-patched <div>Resolved</div>, no extra DOM ops
+			expect(scratch.innerHTML).to.equal(
+				'<!--$s:0--><div>Resolved</div><!--/$s:0--><div>after</div>'
+			);
+			expect(getLog()).to.deep.equal([]);
+			clearLog();
+		});
+	});
+
 	it('Should not crash when oldVNode._children is null during shouldComponentUpdate optimization', () => {
 		const originalHtml = '<div>Hello</div>';
 		scratch.innerHTML = originalHtml;
