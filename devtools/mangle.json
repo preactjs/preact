@@ -17,5 +17,11 @@
         ]
       }
     }
+  },
+  "props": {
+    "cname": 1,
+    "props": {
+      "$_addHookName": "a"
+    }
   }
 }

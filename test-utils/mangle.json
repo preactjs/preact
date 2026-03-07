@@ -1,29 +1,6 @@
 {
-  "help": {
-    "what is this file?": "It controls protected/private property mangling so that minified builds have consistent property names.",
-    "why are there duplicate minified properties?": "Most properties are only used on one type of objects, so they can have the same name since they will never collide. Doing this reduces size."
-  },
-  "minify": {
-    "compress": {
-      "hoist_vars": true,
-      "reduce_funcs": false
-    },
-    "mangle": {
-      "properties": {
-        "regex": "^_[^_]",
-        "reserved": [
-          "__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED",
-          "__REACT_DEVTOOLS_GLOBAL_HOOK__",
-          "__PREACT_DEVTOOLS__",
-          "_renderers",
-          "__source",
-          "__self"
-        ]
-      }
-    }
-  },
   "props": {
-    "cname": 15,
+    "cname": 8,
     "props": {
       "$__hooks": "__H",
       "$__html": "__html",
@@ -37,7 +14,6 @@
       "$_cleanup": "__c",
       "$_commit": "__c",
       "$_component": "__c",
-      "$_container": "i",
       "$_context": "c",
       "$_contextRef": "__l",
       "$_defaultValue": "__",
@@ -50,14 +26,12 @@
       "$_factory": "__h",
       "$_flags": "__u",
       "$_forwarded": "__f",
-      "$_getSnapshot": "j",
       "$_globalContext": "__n",
       "$_hasScuFromHooks": "__f",
       "$_hook": "__h",
       "$_hydrationMismatch": "__m",
       "$_id": "__c",
       "$_index": "__i",
-      "$_instance": "k",
       "$_isSuspended": "__i",
       "$_list": "__",
       "$_listeners": "__l",
@@ -70,19 +44,15 @@
       "$_owner": "__o",
       "$_parent": "__",
       "$_parentDom": "__P",
-      "$_pendingArgs": "n",
       "$_pendingEffects": "__h",
       "$_pendingSuspensionCount": "__u",
       "$_prevState": "__u",
-      "$_reducer": "o",
       "$_render": "__r",
       "$_renderCallbacks": "__h",
       "$_root": "__",
       "$_skipEffects": "__s",
       "$_stateCallbacks": "_sb",
       "$_suspended": "__a",
-      "$_suspenders": "l",
-      "$_temp": "m",
       "$_unmount": "__u",
       "$_unmounted": "__z",
       "$_value": "__",

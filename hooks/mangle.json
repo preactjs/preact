@@ -17,5 +17,38 @@
         ]
       }
     }
+  },
+  "props": {
+    "cname": 28,
+    "props": {
+      "$_args": "a",
+      "$_bits": "b",
+      "$_catchError": "c",
+      "$_children": "d",
+      "$_cleanup": "e",
+      "$_commit": "f",
+      "$_component": "g",
+      "$_context": "h",
+      "$_defaultValue": "i",
+      "$_diff": "j",
+      "$_factory": "k",
+      "$_hasScuFromHooks": "l",
+      "$_hook": "m",
+      "$_id": "n",
+      "$_list": "o",
+      "$_mask": "p",
+      "$_nextValue": "q",
+      "$_parent": "r",
+      "$_parentDom": "s",
+      "$_pendingArgs": "t",
+      "$_pendingEffects": "u",
+      "$_reducer": "v",
+      "$_render": "w",
+      "$_renderCallbacks": "x",
+      "$_root": "y",
+      "$_skipEffects": "z",
+      "$_value": "A",
+      "$_vnode": "B"
+    }
   }
 }

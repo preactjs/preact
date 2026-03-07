@@ -17,5 +17,25 @@
         ]
       }
     }
+  },
+  "props": {
+    "cname": 15,
+    "props": {
+      "$_args": "a",
+      "$_catchError": "b",
+      "$_childDidSuspend": "c",
+      "$_children": "d",
+      "$_component": "e",
+      "$_diff": "f",
+      "$_dom": "g",
+      "$_hook": "h",
+      "$_hydrationMismatch": "i",
+      "$_list": "j",
+      "$_parent": "k",
+      "$_parentDom": "l",
+      "$_render": "m",
+      "$_root": "n",
+      "$_vnode": "o"
+    }
   }
 }

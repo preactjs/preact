@@ -17,5 +17,39 @@
         ]
       }
     }
+  },
+  "props": {
+    "cname": 29,
+    "props": {
+      "$_bits": "a",
+      "$_catchError": "b",
+      "$_childDidSuspend": "c",
+      "$_children": "d",
+      "$_cleanup": "e",
+      "$_component": "f",
+      "$_container": "g",
+      "$_detachOnNextRender": "h",
+      "$_dom": "i",
+      "$_flags": "j",
+      "$_getSnapshot": "k",
+      "$_globalContext": "l",
+      "$_id": "m",
+      "$_instance": "n",
+      "$_list": "o",
+      "$_mask": "p",
+      "$_onResolve": "q",
+      "$_original": "r",
+      "$_originalParentDom": "s",
+      "$_parent": "t",
+      "$_parentDom": "u",
+      "$_pendingSuspensionCount": "v",
+      "$_render": "w",
+      "$_suspended": "x",
+      "$_suspenders": "y",
+      "$_temp": "z",
+      "$_unmounted": "A",
+      "$_value": "B",
+      "$_vnode": "C"
+    }
   }
 }

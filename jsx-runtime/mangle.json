@@ -17,5 +17,19 @@
         ]
       }
     }
+  },
+  "props": {
+    "cname": 9,
+    "props": {
+      "$_children": "a",
+      "$_component": "b",
+      "$_depth": "c",
+      "$_dom": "d",
+      "$_flags": "e",
+      "$_index": "f",
+      "$_original": "g",
+      "$_parent": "h",
+      "$_vnode": "i"
+    }
   }
 }
