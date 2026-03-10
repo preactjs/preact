@@ -12,10 +12,8 @@ import { slice } from './util';
  * existing DOM tree rooted at `replaceNode`
  */
 export function render(vnode, parentDom, replaceNode) {
-	// https://github.com/preactjs/preact/issues/3794
-	if (parentDom == document) {
-		parentDom = document.documentElement;
-	}
+	const documentElement = document.documentElement,
+		isDocumentRender = parentDom == document;
 
 	if (options._root) options._root(vnode, parentDom);
 
@@ -40,7 +38,7 @@ export function render(vnode, parentDom, replaceNode) {
 	let commitQueue = [],
 		refQueue = [];
 	diff(
-		parentDom,
+		isDocumentRender ? documentElement : parentDom,
 		// Determine the new vnode tree and store it on the DOM element on
 		// our custom `_children` property.
 		vnode,
@@ -52,14 +50,18 @@ export function render(vnode, parentDom, replaceNode) {
 			: oldVNode
 				? NULL
 				: parentDom.firstChild
-					? slice.call(parentDom.childNodes)
+					? isDocumentRender
+						? [documentElement]
+						: slice.call(parentDom.childNodes)
 					: NULL,
 		commitQueue,
 		!isHydrating && replaceNode
 			? replaceNode
 			: oldVNode
 				? oldVNode._dom
-				: parentDom.firstChild,
+				: isDocumentRender
+					? documentElement
+					: parentDom.firstChild,
 		isHydrating,
 		refQueue
 	);
