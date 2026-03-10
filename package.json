@@ -91,6 +91,16 @@
       "import": "./compat/server.mjs",
       "require": "./compat/server.js"
     },
+    "./compat/server.edge": {
+      "browser": "./compat/server.browser.js",
+      "import": "./compat/server.mjs",
+      "require": "./compat/server.js"
+    },
+    "./compat/server.static": {
+      "browser": "./compat/server.browser.js",
+      "import": "./compat/server.mjs",
+      "require": "./compat/server.js"
+    },
     "./compat/server.browser": {
       "types": "./compat/server.d.ts",
       "default": "./compat/server.browser.js"
