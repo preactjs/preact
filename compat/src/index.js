@@ -150,11 +150,6 @@ function unstable_batchedUpdates(callback, arg) {
 	return callback(arg);
 }
 
-/**
- * Strict Mode is not implemented in Preact, so we provide a stand-in for it
- * that just renders its children without imposing any restrictions.
- */
-const StrictMode = Fragment;
 // compat to react-is
 export const isElement = isValidElement;
 
@@ -187,7 +182,7 @@ export {
 	useDeferredValue,
 	useSyncExternalStore,
 	useTransition,
-	StrictMode,
+	Fragment as StrictMode,
 	Suspense,
 	lazy,
 	__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED
