@@ -57,7 +57,8 @@ export function act(cb) {
 	const rerender = setupRerender();
 
 	/** @type {() => void} */
-	let flushes = [], toFlush;
+	let flushes = [],
+		toFlush;
 
 	// Override requestAnimationFrame so we can flush pending hooks.
 	options.requestAnimationFrame = fc => flushes.push(fc);

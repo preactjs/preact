@@ -1,0 +1,45 @@
+{
+  "$schema": "./node_modules/oxfmt/configuration_schema.json",
+  "endOfLine": "lf",
+  "useTabs": true,
+  "tabWidth": 2,
+  "printWidth": 80,
+  "singleQuote": true,
+  "jsxSingleQuote": false,
+  "quoteProps": "as-needed",
+  "trailingComma": "none",
+  "semi": true,
+  "arrowParens": "avoid",
+  "bracketSameLine": false,
+  "bracketSpacing": true,
+  "singleAttributePerLine": false,
+  "experimentalSortPackageJson": false,
+  "ignorePatterns": [
+    "benchmarks/**",
+    "**/.DS_Store",
+    "**/node_modules",
+    "**/npm-debug.log",
+    "**/dist",
+    "*/package-lock.json",
+    "**/yarn.lock",
+    "**/.vscode",
+    "**/.idea",
+    "test/ts/**/*.js",
+    "**/coverage",
+    "**/*.sw[op]",
+    "**/*.log",
+    "**/package/",
+    "**/preact-*.tgz",
+    "**/preact.tgz",
+    "**/package-lock.json"
+  ],
+  "overrides": [
+    {
+      "files": ["*.json", ".*rc", "*.yml"],
+      "options": {
+        "useTabs": false,
+        "tabWidth": 2
+      }
+    }
+  ]
+}
