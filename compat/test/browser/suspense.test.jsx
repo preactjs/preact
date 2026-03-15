@@ -159,7 +159,7 @@ describe('suspense', () => {
 		resolve().then(assert).catch(assert);
 	});
 
-	it('should reset hooks of components', () => {
+	it('should preserve hooks of already-mounted components', () => {
 		/** @type {(v) => void} */
 		let set;
 		const LazyComp = ({ name }) => <div>Hello from {name}</div>;
@@ -206,7 +206,11 @@ describe('suspense', () => {
 
 		return resolve().then(() => {
 			rerender();
-			expect(scratch.innerHTML).to.eql(`<div><p>hi</p></div>`);
+			// Parent was already mounted so hook state is preserved (state
+			// stays true) and the resolved Lazy component renders.
+			expect(scratch.innerHTML).to.eql(
+				'<div><p>hi</p><div>Hello from LazyComp</div></div>'
+			);
 		});
 	});
 
@@ -273,7 +277,10 @@ describe('suspense', () => {
 			rerender();
 			expect(effectSpy).toHaveBeenCalledOnce();
 			expect(layoutEffectSpy).toHaveBeenCalledOnce();
-			expect(scratch.innerHTML).to.eql(`<div><p>hi</p></div>`);
+			// Parent state preserved: state=true so renders children branch
+			expect(scratch.innerHTML).to.eql(
+				'<div><div>Hello from LazyComp</div></div>'
+			);
 		});
 	});
 
@@ -2661,5 +2668,285 @@ describe('suspense', () => {
 		// Render count should not have increased
 		expect(renderCount).to.equal(renderCountAfterSuspend);
 		expect(scratch.innerHTML).to.equal('<div>Loading...</div>');
+	});
+
+	describe('suspension with never-resolving thenable', () => {
+		const neverResolve = { then() {} };
+
+		function ThrowWhen({ suspend, children }) {
+			if (suspend) {
+				throw neverResolve;
+			}
+			return createElement(Fragment, null, children);
+		}
+
+		it('should unsuspend when children stop throwing on parent re-render', () => {
+			/** @type {(v: boolean) => void} */
+			let setSuspend;
+			function App() {
+				const [suspend, ss] = useState(false);
+				setSuspend = ss;
+				return (
+					<Suspense fallback={<div>Loading...</div>}>
+						<ThrowWhen suspend={suspend}>
+							<div>Content</div>
+						</ThrowWhen>
+					</Suspense>
+				);
+			}
+
+			render(<App />, scratch);
+			expect(scratch.innerHTML).to.equal('<div>Content</div>');
+
+			act(() => setSuspend(true));
+			rerender();
+			expect(scratch.innerHTML).to.equal('<div>Loading...</div>');
+
+			act(() => setSuspend(false));
+			rerender();
+			expect(scratch.innerHTML).to.equal('<div>Content</div>');
+		});
+
+		it('should preserve child state across suspend/unsuspend', () => {
+			/** @type {(v: boolean) => void} */
+			let setSuspend;
+			/** @type {(v: number) => void} */
+			let setCount;
+
+			function Counter() {
+				const [count, sc] = useState(42);
+				setCount = sc;
+				return <div>Count: {count}</div>;
+			}
+
+			function App() {
+				const [suspend, ss] = useState(false);
+				setSuspend = ss;
+				return (
+					<Suspense fallback={<div>Loading...</div>}>
+						<ThrowWhen suspend={suspend}>
+							<Counter />
+						</ThrowWhen>
+					</Suspense>
+				);
+			}
+
+			render(<App />, scratch);
+			expect(scratch.innerHTML).to.equal('<div>Count: 42</div>');
+
+			act(() => setCount(100));
+			rerender();
+			expect(scratch.innerHTML).to.equal('<div>Count: 100</div>');
+
+			act(() => setSuspend(true));
+			rerender();
+			expect(scratch.innerHTML).to.equal('<div>Loading...</div>');
+
+			act(() => setSuspend(false));
+			rerender();
+			expect(scratch.innerHTML).to.equal('<div>Count: 100</div>');
+		});
+
+		it('should restore effects after unsuspend', () => {
+			/** @type {(v: boolean) => void} */
+			let setSuspend;
+
+			const effectSpy = vi.fn();
+			const cleanupSpy = vi.fn();
+			const layoutEffectSpy = vi.fn();
+			const layoutCleanupSpy = vi.fn();
+
+			function Child() {
+				useEffect(() => {
+					effectSpy();
+					return () => cleanupSpy();
+				});
+				useLayoutEffect(() => {
+					layoutEffectSpy();
+					return () => layoutCleanupSpy();
+				});
+				return <div>Child</div>;
+			}
+
+			function App() {
+				const [suspend, ss] = useState(false);
+				setSuspend = ss;
+				return (
+					<Suspense fallback={<div>Loading...</div>}>
+						<ThrowWhen suspend={suspend}>
+							<Child />
+						</ThrowWhen>
+					</Suspense>
+				);
+			}
+
+			act(() => {
+				render(<App />, scratch);
+			});
+			expect(scratch.innerHTML).to.equal('<div>Child</div>');
+			expect(effectSpy).toHaveBeenCalledTimes(1);
+			expect(layoutEffectSpy).toHaveBeenCalledTimes(1);
+
+			effectSpy.mockClear();
+			cleanupSpy.mockClear();
+			layoutEffectSpy.mockClear();
+			layoutCleanupSpy.mockClear();
+
+			act(() => setSuspend(true));
+			rerender();
+			expect(scratch.innerHTML).to.equal('<div>Loading...</div>');
+
+			// Both effect type cleanups should run during suspension
+			expect(layoutCleanupSpy).toHaveBeenCalledTimes(1);
+			expect(cleanupSpy).toHaveBeenCalledTimes(1);
+
+			effectSpy.mockClear();
+			cleanupSpy.mockClear();
+			layoutEffectSpy.mockClear();
+			layoutCleanupSpy.mockClear();
+
+			act(() => setSuspend(false));
+			rerender();
+			expect(scratch.innerHTML).to.equal('<div>Child</div>');
+			expect(effectSpy).toHaveBeenCalledTimes(1);
+			expect(layoutEffectSpy).toHaveBeenCalledTimes(1);
+		});
+
+		it('should handle parent re-rendering twice while children stay suspended', () => {
+			/** @type {(v: boolean) => void} */
+			let setSuspend;
+			/** @type {(v: number) => void} */
+			let setCount;
+
+			function App() {
+				const [suspend, ss] = useState(false);
+				const [count, sc] = useState(0);
+				setSuspend = ss;
+				setCount = sc;
+				return (
+					<Suspense fallback={<div>Loading...</div>}>
+						<ThrowWhen suspend={suspend}>
+							<div>Count: {count}</div>
+						</ThrowWhen>
+					</Suspense>
+				);
+			}
+
+			render(<App />, scratch);
+			expect(scratch.innerHTML).to.equal('<div>Count: 0</div>');
+
+			act(() => setSuspend(true));
+			rerender();
+			expect(scratch.innerHTML).to.equal('<div>Loading...</div>');
+
+			// Parent re-renders while still suspended - children re-throw
+			act(() => setCount(1));
+			rerender();
+			expect(scratch.innerHTML).to.equal('<div>Loading...</div>');
+
+			// Parent re-renders again while still suspended
+			act(() => setCount(2));
+			rerender();
+			expect(scratch.innerHTML).to.equal('<div>Loading...</div>');
+
+			// Now unsuspend
+			act(() => setSuspend(false));
+			rerender();
+			expect(scratch.innerHTML).to.equal('<div>Count: 2</div>');
+		});
+
+		it('should handle two consecutive suspend/unsuspend cycles', () => {
+			/** @type {(v: boolean) => void} */
+			let setSuspend;
+			/** @type {(v: number) => void} */
+			let setCount;
+
+			function Counter() {
+				const [count, sc] = useState(0);
+				setCount = sc;
+				return <div>Count: {count}</div>;
+			}
+
+			function App() {
+				const [suspend, ss] = useState(false);
+				setSuspend = ss;
+				return (
+					<Suspense fallback={<div>Loading...</div>}>
+						<ThrowWhen suspend={suspend}>
+							<Counter />
+						</ThrowWhen>
+					</Suspense>
+				);
+			}
+
+			render(<App />, scratch);
+			expect(scratch.innerHTML).to.equal('<div>Count: 0</div>');
+
+			// First cycle: suspend -> unsuspend
+			act(() => setSuspend(true));
+			rerender();
+			expect(scratch.innerHTML).to.equal('<div>Loading...</div>');
+
+			act(() => setSuspend(false));
+			rerender();
+			expect(scratch.innerHTML).to.equal('<div>Count: 0</div>');
+
+			// Update state between cycles
+			act(() => setCount(5));
+			rerender();
+			expect(scratch.innerHTML).to.equal('<div>Count: 5</div>');
+
+			// Second cycle: suspend -> unsuspend
+			act(() => setSuspend(true));
+			rerender();
+			expect(scratch.innerHTML).to.equal('<div>Loading...</div>');
+
+			act(() => setSuspend(false));
+			rerender();
+			expect(scratch.innerHTML).to.equal('<div>Count: 5</div>');
+		});
+
+		it('should not re-render suspended children when parent updates', () => {
+			/** @type {(v: boolean) => void} */
+			let setSuspend;
+			/** @type {(v: number) => void} */
+			let setParentCount;
+			const childRenderSpy = vi.fn();
+
+			function Child() {
+				childRenderSpy();
+				return <div>Child</div>;
+			}
+
+			function App() {
+				const [suspend, ss] = useState(false);
+				const [count, sc] = useState(0);
+				setSuspend = ss;
+				setParentCount = sc;
+				return (
+					<div>
+						<span>Parent: {count}</span>
+						<Suspense fallback={<div>Loading...</div>}>
+							<ThrowWhen suspend={suspend}>
+								<Child />
+							</ThrowWhen>
+						</Suspense>
+					</div>
+				);
+			}
+
+			act(() => {
+				render(<App />, scratch);
+			});
+			expect(childRenderSpy).toHaveBeenCalledTimes(1);
+
+			act(() => setSuspend(true));
+			rerender();
+			childRenderSpy.mockClear();
+
+			act(() => setParentCount(1));
+			rerender();
+			expect(childRenderSpy).not.toHaveBeenCalled();
+		});
 	});
 });
