@@ -77,7 +77,8 @@
       "$_skipEffects": "__s",
       "$_forwarded": "__f",
       "$_isSuspended": "__i",
-      "$_bits": "__g"
+      "$_bits": "__g",
+      "$_isLayout": "__L"
     }
   }
 }

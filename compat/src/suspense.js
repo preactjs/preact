@@ -42,11 +42,14 @@ options.unmount = function (vnode) {
 function detachedClone(vnode, detachedParent, parentDom) {
 	if (vnode) {
 		if (vnode._component && vnode._component.__hooks) {
+			// Only run cleanup for layout effects during suspension.
+			// React skips passive effect (useEffect) cleanup for Suspense.
 			vnode._component.__hooks._list.forEach(effect => {
-				if (typeof effect._cleanup == 'function') effect._cleanup();
+				if (effect._isLayout && typeof effect._cleanup == 'function') {
+					effect._cleanup();
+					effect._cleanup = undefined;
+				}
 			});
-
-			vnode._component.__hooks = null;
 		}
 
 		vnode = assign({}, vnode);
@@ -206,7 +209,34 @@ Suspense.prototype.render = function (props, state) {
 			);
 		}
 
+		// Save reference to this vnode. After diffChildren, its _children
+		// array becomes the "old children" for future diffs. We need this
+		// reference to swap in original vnodes when retrying after suspension.
+		this._suspendedVNode = this._vnode;
 		this._detachOnNextRender = null;
+	} else if (state._suspended) {
+		// Parent re-rendered while suspended (not from _childDidSuspend).
+		// Try rendering children again. If they re-throw, _childDidSuspend
+		// will re-catch and re-suspend. This supports patterns like
+		// react-freeze where a never-resolving thenable is thrown to freeze
+		// a subtree and later cleared by a parent re-render.
+
+		// Restore the original vnode tree into the old children array
+		// so the diff can reuse existing component instances (preserving
+		// hook state like useState).
+		const suspendedVNode = state._suspended;
+		if (this._suspendedVNode && this._suspendedVNode._children) {
+			this._suspendedVNode._children[0] = removeOriginal(
+				suspendedVNode,
+				suspendedVNode._component._parentDom,
+				suspendedVNode._component._originalParentDom
+			);
+		}
+
+		this._suspendedVNode = null;
+		this._pendingSuspensionCount = 0;
+		this._suspenders = null;
+		state._suspended = null;
 	}
 
 	return [

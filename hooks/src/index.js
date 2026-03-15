@@ -297,6 +297,7 @@ export function useLayoutEffect(callback, args) {
 	if (!options._skipEffects && argsChanged(state._args, args)) {
 		state._value = callback;
 		state._pendingArgs = args;
+		state._isLayout = true;
 
 		currentComponent._renderCallbacks.push(state);
 	}
