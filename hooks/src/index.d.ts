@@ -124,6 +124,11 @@ export function useMemo<T>(factory: () => T, inputs: Inputs | undefined): T;
 export function useContext<T>(context: PreactContext<T>): T;
 
 /**
+ * Supports Promise and Context consumption
+ */
+export function use<T>(resource: Promise<T> | PreactContext<T>): T;
+
+/**
  * Customize the displayed value in the devtools panel.
  *
  * @param value Custom hook name or object that is passed to formatter
