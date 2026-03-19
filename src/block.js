@@ -3,8 +3,15 @@ import { diff } from './diff/index';
 import { diffChildren } from './diff/children';
 import { setProperty } from './diff/props';
 import { getDomSibling } from './component';
-import { EMPTY_OBJ, NULL, UNDEFINED } from './constants';
-import { isArray } from './util';
+import {
+	EMPTY_OBJ,
+	NULL,
+	UNDEFINED,
+	SVG_NAMESPACE,
+	MATH_NAMESPACE
+} from './constants';
+import options from './options';
+import { isArray, slice } from './util';
 
 /** Sentinel symbol for prop slot markers in VNode props */
 const PROP_SLOT = Symbol.for('preact.propSlot');
@@ -17,30 +24,29 @@ const CONTENT_SLOT = Symbol.for('preact.contentSlot');
  *
  * Two forms:
  * 1. `block(renderFn)` — h()-based render function (runtime discovery)
- * 2. `block(html, descriptors)` — compiler-optimized template + cloneNode
+ * 2. `block(html, descriptors, ns?)` — compiler-optimized template + cloneNode
  *
  * @param {string | Function} htmlOrRenderFn
  * @param {Array} [descriptors]
+ * @param {string} [ns] — 'svg' or 'math' for namespace blocks
  * @returns {(...exprs: any[]) => import('./internal').VNode}
  */
-export function block(htmlOrRenderFn, descriptors) {
+export function block(htmlOrRenderFn, descriptors, ns) {
 	if (typeof htmlOrRenderFn === 'string') {
-		return createTemplateBlock(htmlOrRenderFn, descriptors);
+		return createTemplateBlock(htmlOrRenderFn, descriptors, ns);
 	}
 	return createRenderBlock(htmlOrRenderFn);
 }
 
 // ─── Template-based block (compiler-optimized) ───────────────────────
 
-/**
- * Create a template-based block. The compiler provides static HTML and
- * slot descriptors. Mount uses cloneNode, bypassing VNode creation and diff.
- */
-function createTemplateBlock(html, descriptors) {
+function createTemplateBlock(html, descriptors, ns) {
 	const blockDef = {
 		_tmpl: NULL,
 		_html: html,
-		_descriptors: descriptors
+		_descriptors: descriptors,
+		_ns: ns || NULL,
+		_rootTag: NULL
 	};
 
 	return function () {
@@ -53,7 +59,56 @@ function createTemplateBlock(html, descriptors) {
 }
 
 /**
- * Walk a cloned DOM tree following a childNodes path.
+ * Lazily initialize the <template> element and cache the root tag name.
+ * Handles SVG/MathML by wrapping in the appropriate namespace element.
+ */
+function initTemplate(blockDef, doc) {
+	if (blockDef._tmpl) return;
+
+	blockDef._tmpl = doc.createElement('template');
+
+	if (blockDef._ns === 'svg') {
+		blockDef._tmpl.innerHTML =
+			'<svg xmlns="http://www.w3.org/2000/svg">' +
+			blockDef._html +
+			'</svg>';
+	} else if (blockDef._ns === 'math') {
+		blockDef._tmpl.innerHTML =
+			'<math xmlns="http://www.w3.org/1998/Math/MathML">' +
+			blockDef._html +
+			'</math>';
+	} else {
+		blockDef._tmpl.innerHTML = blockDef._html;
+	}
+
+	// Cache root element reference and tag name.
+	// For namespaced blocks, unwrap the svg/math wrapper.
+	const root = blockDef._ns
+		? blockDef._tmpl.content.firstChild.firstChild
+		: blockDef._tmpl.content.firstChild;
+	blockDef._rootTag = root ? root.localName : NULL;
+}
+
+/**
+ * Get the clone source element from the template.
+ */
+function getCloneSource(blockDef) {
+	return blockDef._ns
+		? blockDef._tmpl.content.firstChild.firstChild
+		: blockDef._tmpl.content.firstChild;
+}
+
+/**
+ * Resolve the namespace string for setProperty calls.
+ */
+function resolveNamespace(blockDef, parentNamespace) {
+	if (blockDef._ns === 'svg') return SVG_NAMESPACE;
+	if (blockDef._ns === 'math') return MATH_NAMESPACE;
+	return parentNamespace;
+}
+
+/**
+ * Walk a DOM tree following a childNodes path.
  * Path [1, 0] means root.childNodes[1].childNodes[0].
  */
 function walkDomPath(root, desc, start, end) {
@@ -65,24 +120,31 @@ function walkDomPath(root, desc, start, end) {
 }
 
 /**
- * Mount a template-based block: cloneNode + set slot values.
- * Completely bypasses VNode creation and diff.
+ * Process slot descriptors against a DOM element. Sets prop values and
+ * creates/claims content nodes. Used by both mount and hydrate paths.
+ *
+ * @param {Element} dom - The root DOM element
+ * @param {Object} blockDef - Block definition
+ * @param {any[]} newExprs - Expression values
+ * @param {string} namespace - Resolved namespace for setProperty
+ * @param {object} globalContext
+ * @param {Array} commitQueue
+ * @param {any[]} refQueue
+ * @param {Document} doc
+ * @param {boolean} isHydrating - If true, skip static props and claim existing text nodes
+ * @returns {{ propSlots: Array, contentSlots: Array }}
  */
-function mountTemplateBlock(
+function processSlots(
+	dom,
 	blockDef,
 	newExprs,
-	parentDom,
-	oldDom,
 	namespace,
-	doc
+	globalContext,
+	commitQueue,
+	refQueue,
+	doc,
+	isHydrating
 ) {
-	// Lazily create the <template> element
-	if (!blockDef._tmpl) {
-		blockDef._tmpl = doc.createElement('template');
-		blockDef._tmpl.innerHTML = blockDef._html;
-	}
-
-	const dom = blockDef._tmpl.content.firstChild.cloneNode(true);
 	const descriptors = blockDef._descriptors;
 	const propSlots = [];
 	const contentSlots = [];
@@ -96,28 +158,218 @@ function mountTemplateBlock(
 			// Prop slot: [exprIdx, 'p', ...domPath, propName]
 			const propName = desc[desc.length - 1];
 			const target = walkDomPath(dom, desc, 2, desc.length - 1);
-			setProperty(target, propName, newExprs[exprIdx], NULL, namespace);
+
+			// During hydration, only set functions (event handlers).
+			// Static props are already in the SSR HTML.
+			if (
+				!isHydrating ||
+				typeof newExprs[exprIdx] == 'function'
+			) {
+				setProperty(
+					target,
+					propName,
+					newExprs[exprIdx],
+					NULL,
+					namespace
+				);
+			}
 			propSlots[exprIdx] = { dom: target, prop: propName };
 		} else {
 			// Content slot: [exprIdx, 'c', ...domPath]
 			const target = walkDomPath(dom, desc, 2, desc.length);
 			const expr = newExprs[exprIdx];
-			const textNode = doc.createTextNode(expr == NULL ? '' : expr);
-			target.appendChild(textNode);
 
-			// Create a minimal text VNode for tracking
-			const textVNode = createVNode(NULL, expr, NULL, NULL, NULL);
-			textVNode._dom = textNode;
-			contentSlots[exprIdx] = {
-				parentDom: target,
-				childVNode: textVNode
-			};
+			if (isHydrating) {
+				// Hydration: claim existing text node or diff VNode content
+				if (expr != NULL && typeof expr == 'object') {
+					// VNode or array: diff with existing DOM as excess children
+					const child = isArray(expr)
+						? createVNode(
+								Fragment,
+								{ children: expr },
+								NULL,
+								NULL,
+								NULL
+							)
+						: expr;
+					diff(
+						target,
+						child,
+						EMPTY_OBJ,
+						globalContext,
+						namespace,
+						target.firstChild
+							? slice.call(target.childNodes)
+							: NULL,
+						commitQueue,
+						target.firstChild,
+						true,
+						refQueue,
+						doc
+					);
+					contentSlots[exprIdx] = {
+						parentDom: target,
+						childVNode: child
+					};
+				} else {
+					// Primitive: find and claim existing text node
+					let textNode = target.firstChild;
+					while (textNode && textNode.nodeType !== 3)
+						textNode = textNode.nextSibling;
+
+					if (!textNode) {
+						// Mismatch: no text node found, create one
+						textNode = doc.createTextNode(
+							expr == NULL ? '' : expr
+						);
+						target.appendChild(textNode);
+					}
+
+					const textVNode = createVNode(
+						NULL,
+						expr,
+						NULL,
+						NULL,
+						NULL
+					);
+					textVNode._dom = textNode;
+					contentSlots[exprIdx] = {
+						parentDom: target,
+						childVNode: textVNode
+					};
+				}
+			} else {
+				// Normal mount: create content
+				if (expr != NULL && typeof expr == 'object') {
+					const child = isArray(expr)
+						? createVNode(
+								Fragment,
+								{ children: expr },
+								NULL,
+								NULL,
+								NULL
+							)
+						: expr;
+					diff(
+						target,
+						child,
+						EMPTY_OBJ,
+						globalContext,
+						namespace,
+						NULL,
+						commitQueue,
+						NULL,
+						false,
+						refQueue,
+						doc
+					);
+					contentSlots[exprIdx] = {
+						parentDom: target,
+						childVNode: child
+					};
+				} else {
+					const textNode = doc.createTextNode(
+						expr == NULL ? '' : expr
+					);
+					target.appendChild(textNode);
+
+					const textVNode = createVNode(
+						NULL,
+						expr,
+						NULL,
+						NULL,
+						NULL
+					);
+					textVNode._dom = textNode;
+					contentSlots[exprIdx] = {
+						parentDom: target,
+						childVNode: textVNode
+					};
+				}
+			}
 		}
 	}
 
-	// Insert into parent DOM
-	parentDom.insertBefore(dom, oldDom || NULL);
+	return { propSlots, contentSlots };
+}
 
+/**
+ * Mount a template-based block via cloneNode.
+ * Does NOT insert into DOM — diffChildren's insert() handles positioning.
+ */
+function mountTemplateBlock(
+	blockDef,
+	newExprs,
+	namespace,
+	globalContext,
+	commitQueue,
+	refQueue,
+	doc
+) {
+	const dom = getCloneSource(blockDef).cloneNode(true);
+	const ns = resolveNamespace(blockDef, namespace);
+	const { propSlots, contentSlots } = processSlots(
+		dom,
+		blockDef,
+		newExprs,
+		ns,
+		globalContext,
+		commitQueue,
+		refQueue,
+		doc,
+		false
+	);
+	return { dom, propSlots, contentSlots };
+}
+
+/**
+ * Hydrate a template-based block by claiming existing DOM nodes.
+ * Returns null if no matching root element found (mismatch).
+ */
+function hydrateTemplateBlock(
+	blockDef,
+	newExprs,
+	excessDomChildren,
+	namespace,
+	globalContext,
+	commitQueue,
+	refQueue,
+	doc,
+	newVNode
+) {
+	// Find root element in excess DOM children
+	let dom = NULL;
+	for (let i = 0; i < excessDomChildren.length; i++) {
+		const node = excessDomChildren[i];
+		if (
+			node &&
+			node.localName === blockDef._rootTag
+		) {
+			dom = node;
+			excessDomChildren[i] = NULL;
+			break;
+		}
+	}
+
+	if (!dom) {
+		// Mismatch: no matching element found
+		if (options._hydrationMismatch)
+			options._hydrationMismatch(newVNode, excessDomChildren);
+		return NULL;
+	}
+
+	const ns = resolveNamespace(blockDef, namespace);
+	const { propSlots, contentSlots } = processSlots(
+		dom,
+		blockDef,
+		newExprs,
+		ns,
+		globalContext,
+		commitQueue,
+		refQueue,
+		doc,
+		true
+	);
 	return { dom, propSlots, contentSlots };
 }
 
@@ -153,7 +405,11 @@ function resolveSentinels(
 	contentSlotPaths,
 	path
 ) {
-	if (!vnode || typeof vnode != 'object' || vnode.constructor !== UNDEFINED)
+	if (
+		!vnode ||
+		typeof vnode != 'object' ||
+		vnode.constructor !== UNDEFINED
+	)
 		return;
 
 	const props = vnode.props;
@@ -247,15 +503,40 @@ export function diffBlock(
 		// ── MOUNT ──
 
 		if (blockDef._html) {
-			// Template-based mount: cloneNode, no VNodes, no diff
-			const result = mountTemplateBlock(
-				blockDef,
-				newExprs,
-				parentDom,
-				oldDom,
-				namespace,
-				doc
-			);
+			// Template-based block
+			if (options._diff) options._diff(newVNode);
+
+			initTemplate(blockDef, doc);
+
+			let result;
+
+			if (isHydrating && excessDomChildren) {
+				// Hydration: claim existing DOM
+				result = hydrateTemplateBlock(
+					blockDef,
+					newExprs,
+					excessDomChildren,
+					namespace,
+					globalContext,
+					commitQueue,
+					refQueue,
+					doc,
+					newVNode
+				);
+			}
+
+			if (!result) {
+				// Normal mount (or hydration mismatch fallback)
+				result = mountTemplateBlock(
+					blockDef,
+					newExprs,
+					namespace,
+					globalContext,
+					commitQueue,
+					refQueue,
+					doc
+				);
+			}
 
 			newVNode._dom = result.dom;
 			result.dom._blockPropSlots = result.propSlots;
@@ -264,19 +545,22 @@ export function diffBlock(
 			newVNode._children = [];
 			collectChildVNodes(result.contentSlots, newVNode._children);
 
-			// Advance oldDom past the inserted block
-			oldDom = result.dom;
+			if (newVNode.ref) {
+				refQueue.push(newVNode.ref, newVNode._dom, newVNode);
+			}
+
+			if (options.diffed) options.diffed(newVNode);
 		} else {
-			// Render-function mount: h() + diff (runtime discovery)
+			// Render-function block
 			const isFirstMount = !blockDef._propSlotPaths;
 
 			const slotFn = isFirstMount
-				? i => ({ [CONTENT_SLOT]: i })
-				: i => wrapSlotExpr(newExprs[i]);
+				? (i) => ({ [CONTENT_SLOT]: i })
+				: (i) => wrapSlotExpr(newExprs[i]);
 
 			const propFn = isFirstMount
-				? i => ({ [PROP_SLOT]: i })
-				: i => newExprs[i];
+				? (i) => ({ [PROP_SLOT]: i })
+				: (i) => newExprs[i];
 
 			const tree = blockDef._render(slotFn, propFn);
 
@@ -316,7 +600,11 @@ export function diffBlock(
 				}
 
 				contentSlots = [];
-				for (let i = 0; i < blockDef._contentSlotPaths.length; i++) {
+				for (
+					let i = 0;
+					i < blockDef._contentSlotPaths.length;
+					i++
+				) {
 					const sp = blockDef._contentSlotPaths[i];
 					if (!sp) continue;
 					const parentVNode = resolveVNodeAtPath(tree, sp.path);
@@ -346,7 +634,10 @@ export function diffBlock(
 				const pPaths = blockDef._propSlotPaths;
 				for (let i = 0; i < pPaths.length; i++) {
 					if (pPaths[i]) {
-						const vnode = resolveVNodeAtPath(tree, pPaths[i].path);
+						const vnode = resolveVNodeAtPath(
+							tree,
+							pPaths[i].path
+						);
 						propSlots[i] = {
 							dom: vnode._dom,
 							prop: pPaths[i].prop
@@ -358,7 +649,10 @@ export function diffBlock(
 				const cPaths = blockDef._contentSlotPaths;
 				for (let i = 0; i < cPaths.length; i++) {
 					if (cPaths[i]) {
-						const parentVNode = resolveVNodeAtPath(tree, cPaths[i].path);
+						const parentVNode = resolveVNodeAtPath(
+							tree,
+							cPaths[i].path
+						);
 						contentSlots[i] = {
 							parentDom: parentVNode._dom,
 							childVNode: parentVNode._children
@@ -434,10 +728,22 @@ export function diffBlock(
 					);
 					cs.childVNode = newFrag;
 				} else {
-					const oldParent = createVNode(NULL, NULL, NULL, NULL, NULL);
+					const oldParent = createVNode(
+						NULL,
+						NULL,
+						NULL,
+						NULL,
+						NULL
+					);
 					oldParent._children = oldChild ? [oldChild] : [];
 
-					const newParent = createVNode(NULL, NULL, NULL, NULL, NULL);
+					const newParent = createVNode(
+						NULL,
+						NULL,
+						NULL,
+						NULL,
+						NULL
+					);
 
 					diffChildren(
 						cs.parentDom,
@@ -454,7 +760,9 @@ export function diffBlock(
 						doc
 					);
 
-					cs.childVNode = newParent._children ? newParent._children[0] : NULL;
+					cs.childVNode = newParent._children
+						? newParent._children[0]
+						: NULL;
 				}
 			}
 		}

@@ -1,5 +1,5 @@
 import { setupRerender } from 'preact/test-utils';
-import { createElement, render, Component, Fragment, block } from 'preact';
+import { createElement, render, hydrate, Component, Fragment, block } from 'preact';
 import { setupScratch, teardown } from '../_util/helpers';
 import { clearLog, getLog, logCall } from '../_util/logCall';
 import { useState } from 'preact/hooks';
@@ -774,5 +774,239 @@ describe('block()', () => {
 		expect(scratch.innerHTML).to.equal(
 			'<ul><li class="item">C</li><li class="item">B</li><li class="item">A</li></ul>'
 		);
+	});
+
+	it('should handle VNode content slot in template block', () => {
+		function Badge({ label }) {
+			return <span class="badge">{label}</span>;
+		}
+
+		const _b = block(
+			'<div><h1>Title</h1><div class="slot"></div></div>',
+			[[0, 'c', 1]]  // div.slot > content
+		);
+
+		let update;
+		function App() {
+			const [label, setLabel] = useState('New');
+			update = v => setLabel(v);
+			return _b(<Badge label={label} />);
+		}
+
+		render(<App />, scratch);
+		expect(scratch.innerHTML).to.equal(
+			'<div><h1>Title</h1><div class="slot"><span class="badge">New</span></div></div>'
+		);
+
+		update('Updated');
+		rerender();
+
+		expect(scratch.innerHTML).to.equal(
+			'<div><h1>Title</h1><div class="slot"><span class="badge">Updated</span></div></div>'
+		);
+	});
+
+	it('should handle null content slot in template block', () => {
+		const _b = block(
+			'<div><span></span></div>',
+			[[0, 'c', 0]]
+		);
+
+		function App() {
+			return _b(null);
+		}
+
+		render(<App />, scratch);
+		expect(scratch.innerHTML).to.equal('<div><span></span></div>');
+	});
+
+	it('should handle ref on template block VNode', () => {
+		const _b = block(
+			'<div><p></p></div>',
+			[[0, 'c', 0]]
+		);
+
+		let refValue = null;
+		function App() {
+			return h(_b('hello'), { ref: (el) => { refValue = el; } });
+		}
+
+		// Simpler: set ref directly on the vnode
+		function App2() {
+			const vnode = _b('hello');
+			vnode.ref = (el) => { refValue = el; };
+			return vnode;
+		}
+
+		render(<App2 />, scratch);
+		expect(scratch.innerHTML).to.equal('<div><p>hello</p></div>');
+		expect(refValue).to.equal(scratch.querySelector('div'));
+	});
+
+	it('should position template blocks correctly among siblings', () => {
+		const _b = block(
+			'<span></span>',
+			[[0, 'c']]
+		);
+
+		function App() {
+			return (
+				<div>
+					<p>before</p>
+					{_b('middle')}
+					<p>after</p>
+				</div>
+			);
+		}
+
+		render(<App />, scratch);
+		expect(scratch.innerHTML).to.equal(
+			'<div><p>before</p><span>middle</span><p>after</p></div>'
+		);
+	});
+
+	// --- Hydration tests ---
+
+	it('should hydrate a template block reusing existing DOM', () => {
+		scratch.innerHTML =
+			'<div><h1>Title</h1><p>hello</p></div>';
+
+		const h1Before = scratch.querySelector('h1');
+		const pBefore = scratch.querySelector('p');
+
+		const _b = block(
+			'<div><h1>Title</h1><p></p></div>',
+			[[0, 'c', 1]]
+		);
+
+		function App() {
+			return _b('hello');
+		}
+
+		hydrate(<App />, scratch);
+		expect(scratch.innerHTML).to.equal(
+			'<div><h1>Title</h1><p>hello</p></div>'
+		);
+
+		// DOM nodes should be reused, not recreated
+		expect(scratch.querySelector('h1')).to.equal(h1Before);
+		expect(scratch.querySelector('p')).to.equal(pBefore);
+	});
+
+	it('should attach event handlers during hydration', () => {
+		scratch.innerHTML = '<div><button>Click</button></div>';
+
+		let clicked = false;
+		const _b = block(
+			'<div><button>Click</button></div>',
+			[[0, 'p', 0, 'onclick']]
+		);
+
+		function App() {
+			return _b(() => { clicked = true; });
+		}
+
+		hydrate(<App />, scratch);
+
+		scratch.querySelector('button').click();
+		expect(clicked).to.equal(true);
+	});
+
+	it('should update slots after hydration', () => {
+		scratch.innerHTML = '<div><span>0</span></div>';
+
+		const _b = block(
+			'<div><span></span></div>',
+			[[0, 'c', 0]]
+		);
+
+		let update;
+		function App() {
+			const [count, setCount] = useState(0);
+			update = () => setCount(c => c + 1);
+			return _b(count);
+		}
+
+		hydrate(<App />, scratch);
+		expect(scratch.innerHTML).to.equal('<div><span>0</span></div>');
+
+		update();
+		rerender();
+
+		expect(scratch.innerHTML).to.equal('<div><span>1</span></div>');
+	});
+
+	it('should fall back to clone on hydration mismatch', () => {
+		// Wrong structure: server has <section>, client expects <div>
+		scratch.innerHTML = '<section>wrong</section>';
+
+		const _b = block(
+			'<div><p></p></div>',
+			[[0, 'c', 0]]
+		);
+
+		function App() {
+			return _b('content');
+		}
+
+		hydrate(<App />, scratch);
+		// Should have created the correct DOM despite mismatch
+		expect(scratch.querySelector('div')).to.not.equal(null);
+		expect(scratch.querySelector('p').textContent).to.equal('content');
+	});
+
+	// --- SVG namespace tests ---
+
+	it('should render SVG template blocks with correct namespace', () => {
+		const _b = block(
+			'<circle></circle>',
+			[
+				[0, 'p', 'cx'],
+				[1, 'p', 'cy'],
+				[2, 'p', 'r']
+			],
+			'svg'
+		);
+
+		function App() {
+			return h('svg', { width: 100, height: 100 }, _b('50', '50', '25'));
+		}
+
+		render(<App />, scratch);
+		const circle = scratch.querySelector('circle');
+		expect(circle).to.not.equal(null);
+		expect(circle.namespaceURI).to.equal('http://www.w3.org/2000/svg');
+		expect(circle.getAttribute('cx')).to.equal('50');
+		expect(circle.getAttribute('cy')).to.equal('50');
+		expect(circle.getAttribute('r')).to.equal('25');
+	});
+
+	it('should update SVG template block prop slots', () => {
+		const _b = block(
+			'<rect></rect>',
+			[
+				[0, 'p', 'width'],
+				[1, 'p', 'height'],
+				[2, 'p', 'fill']
+			],
+			'svg'
+		);
+
+		let update;
+		function App() {
+			const [w, setW] = useState('10');
+			update = v => setW(v);
+			return h('svg', null, _b(w, '20', 'red'));
+		}
+
+		render(<App />, scratch);
+		const rect = scratch.querySelector('rect');
+		expect(rect.getAttribute('width')).to.equal('10');
+
+		update('50');
+		rerender();
+
+		expect(rect.getAttribute('width')).to.equal('50');
+		expect(rect.getAttribute('height')).to.equal('20');
 	});
 });
