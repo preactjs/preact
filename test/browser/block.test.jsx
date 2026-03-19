@@ -53,7 +53,7 @@ describe('block()', () => {
 
 	it('should render a block with text slots on mount', () => {
 		const _b = block(
-			tpl('<div class="container"><h1></h1><p></p></div>'),
+			() => tpl('<div class="container"><h1></h1><p></p></div>'),
 			(r, p, c) => { c(0, r.firstChild); c(1, r.firstChild.nextSibling); }
 		);
 
@@ -70,7 +70,7 @@ describe('block()', () => {
 		}
 
 		const _b = block(
-			tpl('<div><h1>Title</h1><div class="slot"></div></div>'),
+			() => tpl('<div><h1>Title</h1><div class="slot"></div></div>'),
 			(r, p, c) => { c(0, r.childNodes[1]); }
 		);
 
@@ -83,7 +83,7 @@ describe('block()', () => {
 
 	it('should render a block with prop slots on mount', () => {
 		const _b = block(
-			tpl('<tr><td class="col-md-1"></td><td class="col-md-4"><a></a></td></tr>'),
+			() => tpl('<tr><td class="col-md-1"></td><td class="col-md-4"><a></a></td></tr>'),
 			(r, p, c) => {
 				p(0, r, 'className');
 				c(1, r.firstChild);
@@ -107,20 +107,20 @@ describe('block()', () => {
 	});
 
 	it('should handle null content slots', () => {
-		const _b = block(tpl('<div><span></span></div>'), (r, p, c) => { c(0, r.firstChild); });
+		const _b = block(() => tpl('<div><span></span></div>'), (r, p, c) => { c(0, r.firstChild); });
 		render(createElement(() => _b(null)), scratch);
 		expect(scratch.innerHTML).to.equal('<div><span></span></div>');
 	});
 
 	it('should support multiple instances of the same block', () => {
-		const _b = block(tpl('<li></li>'), (r, p, c) => { c(0, r); });
+		const _b = block(() => tpl('<li></li>'), (r, p, c) => { c(0, r); });
 		function App() { return h('ul', null, _b('A'), _b('B'), _b('C')); }
 		render(<App />, scratch);
 		expect(scratch.innerHTML).to.equal('<ul><li>A</li><li>B</li><li>C</li></ul>');
 	});
 
 	it('should position blocks correctly among siblings', () => {
-		const _b = block(tpl('<span></span>'), (r, p, c) => { c(0, r); });
+		const _b = block(() => tpl('<span></span>'), (r, p, c) => { c(0, r); });
 		function App() {
 			return (<div><p>before</p>{_b('middle')}<p>after</p></div>);
 		}
@@ -134,7 +134,7 @@ describe('block()', () => {
 
 	it('should update text slots on re-render', () => {
 		const _b = block(
-			tpl('<div><span></span><span></span></div>'),
+			() => tpl('<div><span></span><span></span></div>'),
 			(r, p, c) => { c(0, r.firstChild); c(1, r.firstChild.nextSibling); }
 		);
 
@@ -156,7 +156,7 @@ describe('block()', () => {
 
 	it('should update prop slots on re-render', () => {
 		const _b = block(
-			tpl('<tr><td class="static"></td><td class="static"><a></a></td></tr>'),
+			() => tpl('<tr><td class="static"></td><td class="static"><a></a></td></tr>'),
 			(r, p, c) => {
 				p(0, r, 'className');
 				c(1, r.firstChild);
@@ -190,7 +190,7 @@ describe('block()', () => {
 		}
 
 		const _b = block(
-			tpl('<div><h1>Title</h1><div class="slot"></div></div>'),
+			() => tpl('<div><h1>Title</h1><div class="slot"></div></div>'),
 			(r, p, c) => { c(0, r.childNodes[1]); }
 		);
 
@@ -211,7 +211,7 @@ describe('block()', () => {
 
 	it('should skip unchanged slots entirely', () => {
 		const _b = block(
-			tpl('<div><span></span><span></span></div>'),
+			() => tpl('<div><span></span><span></span></div>'),
 			(r, p, c) => { c(0, r.firstChild); c(1, r.firstChild.nextSibling); }
 		);
 
@@ -232,7 +232,7 @@ describe('block()', () => {
 
 	it('should skip unchanged prop slots', () => {
 		const _b = block(
-			tpl('<div></div>'),
+			() => tpl('<div></div>'),
 			(r, p, c) => { p(0, r, 'className'); p(1, r, 'data-id'); c(2, r); }
 		);
 
@@ -254,7 +254,7 @@ describe('block()', () => {
 	});
 
 	it('should handle slot type transitions', () => {
-		const _b = block(tpl('<div><span></span></div>'), (r, p, c) => { c(0, r.firstChild); });
+		const _b = block(() => tpl('<div><span></span></div>'), (r, p, c) => { c(0, r.firstChild); });
 
 		let update;
 		function App() {
@@ -280,7 +280,7 @@ describe('block()', () => {
 		}
 
 		const _b = block(
-			tpl('<div><p>Static</p><div class="slot"></div></div>'),
+			() => tpl('<div><p>Static</p><div class="slot"></div></div>'),
 			(r, p, c) => { c(0, r.childNodes[1]); }
 		);
 
@@ -302,7 +302,7 @@ describe('block()', () => {
 
 	it('should support keyed block instances', () => {
 		const _b = block(
-			tpl('<li></li>'),
+			() => tpl('<li></li>'),
 			(r, p, c) => { c(0, r); p(1, r, 'className'); }
 		);
 
@@ -334,7 +334,7 @@ describe('block()', () => {
 
 	it('should work alongside regular VNodes', () => {
 		const _b = block(
-			tpl('<section><h2>Block</h2><p></p></section>'),
+			() => tpl('<section><h2>Block</h2><p></p></section>'),
 			(r, p, c) => { c(0, r.childNodes[1]); }
 		);
 
@@ -363,9 +363,9 @@ describe('block()', () => {
 	});
 
 	it('should support nested blocks', () => {
-		const inner = block(tpl('<span></span>'), (r, p, c) => { c(0, r); });
+		const inner = block(() => tpl('<span></span>'), (r, p, c) => { c(0, r); });
 		const outer = block(
-			tpl('<div><h1>Outer</h1><div class="slot"></div></div>'),
+			() => tpl('<div><h1>Outer</h1><div class="slot"></div></div>'),
 			(r, p, c) => { c(0, r.childNodes[1]); }
 		);
 
@@ -390,7 +390,7 @@ describe('block()', () => {
 	// --- Ref ---
 
 	it('should handle ref on block VNode', () => {
-		const _b = block(tpl('<div><p></p></div>'), (r, p, c) => { c(0, r.firstChild); });
+		const _b = block(() => tpl('<div><p></p></div>'), (r, p, c) => { c(0, r.firstChild); });
 
 		let refValue = null;
 		function App() {
@@ -406,7 +406,7 @@ describe('block()', () => {
 
 	it('should support nested dynamic props', () => {
 		const _b = block(
-			tpl('<div><a></a></div>'),
+			() => tpl('<div><a></a></div>'),
 			(r, p, c) => {
 				var a = r.firstChild;
 				p(0, a, 'href');
@@ -442,7 +442,7 @@ describe('block()', () => {
 		const pBefore = scratch.querySelector('p');
 
 		const _b = block(
-			tpl('<div><h1>Title</h1><p></p></div>'),
+			() => tpl('<div><h1>Title</h1><p></p></div>'),
 			(r, p, c) => { c(0, r.childNodes[1]); }
 		);
 
@@ -458,7 +458,7 @@ describe('block()', () => {
 		let clicked = false;
 
 		const _b = block(
-			tpl('<div><button>Click</button></div>'),
+			() => tpl('<div><button>Click</button></div>'),
 			(r, p, c) => { p(0, r.firstChild, 'onclick'); }
 		);
 
@@ -472,7 +472,7 @@ describe('block()', () => {
 		scratch.innerHTML = '<div><span>0</span></div>';
 
 		const _b = block(
-			tpl('<div><span></span></div>'),
+			() => tpl('<div><span></span></div>'),
 			(r, p, c) => { c(0, r.firstChild); }
 		);
 
@@ -492,7 +492,7 @@ describe('block()', () => {
 	it('should fall back to clone on hydration mismatch', () => {
 		scratch.innerHTML = '<section>wrong</section>';
 
-		const _b = block(tpl('<div><p></p></div>'), (r, p, c) => { c(0, r.firstChild); });
+		const _b = block(() => tpl('<div><p></p></div>'), (r, p, c) => { c(0, r.firstChild); });
 
 		function App() { return _b('content'); }
 		hydrate(<App />, scratch);
@@ -504,7 +504,7 @@ describe('block()', () => {
 
 	it('should render SVG blocks with correct namespace', () => {
 		const _b = block(
-			svgTpl('<circle></circle>'),
+			() => svgTpl('<circle></circle>'),
 			(r, p, c) => { p(0, r, 'cx'); p(1, r, 'cy'); p(2, r, 'r'); }
 		);
 
@@ -521,7 +521,7 @@ describe('block()', () => {
 
 	it('should update SVG block prop slots', () => {
 		const _b = block(
-			svgTpl('<rect></rect>'),
+			() => svgTpl('<rect></rect>'),
 			(r, p, c) => { p(0, r, 'width'); p(1, r, 'height'); p(2, r, 'fill'); }
 		);
 

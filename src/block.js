@@ -15,7 +15,8 @@ import { isArray, slice } from './util';
 /**
  * Create a block definition.
  *
- * @param {Element} root - Template root element built by the compiler
+ * @param {() => Element} tplFn - Factory that builds and returns the
+ *   template root element. Called lazily on first use.
  * @param {(root: Element, p: Function, c: Function) => void} slotsFn
  *   Compiler-generated function that navigates the cloned/hydrated DOM
  *   and registers each slot via callbacks:
@@ -23,11 +24,12 @@ import { isArray, slice } from './util';
  *   - `c(exprIdx, dom)` — content slot
  * @returns {(...exprs: any[]) => import('./internal').VNode}
  */
-export function block(root, slotsFn) {
+export function block(tplFn, slotsFn) {
 	const blockDef = {
-		_root: root,
+		_tplFn: tplFn,
+		_root: NULL,
 		_slotsFn: slotsFn,
-		_rootTag: root.localName
+		_rootTag: NULL
 	};
 
 	return function () {
@@ -54,6 +56,12 @@ function mountOrHydrateBlock(
 	isHydrating,
 	newVNode
 ) {
+	// Lazy template init on first use
+	if (!blockDef._root) {
+		blockDef._root = blockDef._tplFn();
+		blockDef._rootTag = blockDef._root.localName;
+	}
+
 	let dom = NULL;
 	let hydrated = false;
 
