@@ -574,4 +574,205 @@ describe('block()', () => {
 			'<div><a href="/page2" class="link active">Click</a></div>'
 		);
 	});
+
+	// --- Template-based block tests ---
+
+	it('should render a template block on mount', () => {
+		const _b = block('<div class="container"><h1></h1><p></p></div>', [
+			[0, 'c', 0], // h1 > text
+			[1, 'c', 1] // p > text
+		]);
+
+		function App() {
+			return _b('Title', 'Body text');
+		}
+
+		render(<App />, scratch);
+		expect(scratch.innerHTML).to.equal(
+			'<div class="container"><h1>Title</h1><p>Body text</p></div>'
+		);
+	});
+
+	it('should update template block text slots', () => {
+		const _b = block('<div><span></span><span></span></div>', [
+			[0, 'c', 0],
+			[1, 'c', 1]
+		]);
+
+		let update;
+		function App() {
+			const [a, setA] = useState('hello');
+			const [b, setB] = useState('world');
+			update = (x, y) => {
+				setA(x);
+				setB(y);
+			};
+			return _b(a, b);
+		}
+
+		render(<App />, scratch);
+		expect(scratch.innerHTML).to.equal(
+			'<div><span>hello</span><span>world</span></div>'
+		);
+
+		const div = scratch.querySelector('div');
+
+		update('foo', 'bar');
+		rerender();
+
+		expect(scratch.innerHTML).to.equal(
+			'<div><span>foo</span><span>bar</span></div>'
+		);
+
+		// Same DOM element — not recreated
+		expect(scratch.querySelector('div')).to.equal(div);
+	});
+
+	it('should support prop slots in template blocks', () => {
+		const _b = block(
+			'<tr><td class="col-md-1"></td><td class="col-md-4"><a></a></td></tr>',
+			[
+				[0, 'p', 'className'], // tr.className
+				[1, 'c', 0], // td1 > text
+				[2, 'p', 1, 0, 'onclick'], // td2 > a.onclick
+				[3, 'c', 1, 0] // td2 > a > text
+			]
+		);
+
+		let update;
+		let clicked = false;
+		function App() {
+			const [cls, setCls] = useState('');
+			const [label, setLabel] = useState('Row 1');
+			update = (c, l) => {
+				setCls(c);
+				setLabel(l);
+			};
+			return _b(
+				cls,
+				42,
+				() => {
+					clicked = true;
+				},
+				label
+			);
+		}
+
+		render(<App />, scratch);
+		expect(scratch.innerHTML).to.equal(
+			'<tr class=""><td class="col-md-1">42</td><td class="col-md-4"><a>Row 1</a></td></tr>'
+		);
+
+		scratch.querySelector('a').click();
+		expect(clicked).to.equal(true);
+
+		update('danger', 'Row 1 !!!');
+		rerender();
+
+		expect(scratch.innerHTML).to.equal(
+			'<tr class="danger"><td class="col-md-1">42</td><td class="col-md-4"><a>Row 1 !!!</a></td></tr>'
+		);
+	});
+
+	it('should skip unchanged slots in template blocks', () => {
+		const _b = block('<div><span></span><span></span></div>', [
+			[0, 'c', 0],
+			[1, 'c', 1]
+		]);
+
+		let update;
+		function App() {
+			const [count, setCount] = useState(0);
+			update = () => setCount(c => c + 1);
+			return _b('static', count);
+		}
+
+		render(<App />, scratch);
+
+		const staticText = scratch.querySelectorAll('span')[0].firstChild;
+
+		update();
+		rerender();
+
+		expect(scratch.innerHTML).to.equal(
+			'<div><span>static</span><span>1</span></div>'
+		);
+
+		// Static text node should be the exact same reference
+		expect(scratch.querySelectorAll('span')[0].firstChild).to.equal(staticText);
+	});
+
+	it('should unmount template blocks correctly', () => {
+		const _b = block('<div><p></p></div>', [[0, 'c', 0]]);
+
+		let update;
+		function App() {
+			const [show, setShow] = useState(true);
+			update = v => setShow(v);
+			return show ? _b('content') : <span>gone</span>;
+		}
+
+		render(<App />, scratch);
+		expect(scratch.innerHTML).to.equal('<div><p>content</p></div>');
+
+		update(false);
+		rerender();
+
+		expect(scratch.innerHTML).to.equal('<span>gone</span>');
+	});
+
+	it('should support multiple template block instances', () => {
+		const _b = block('<li></li>', [[0, 'c']]);
+
+		function App() {
+			return h('ul', null, _b('A'), _b('B'), _b('C'));
+		}
+
+		render(<App />, scratch);
+		expect(scratch.innerHTML).to.equal(
+			'<ul><li>A</li><li>B</li><li>C</li></ul>'
+		);
+	});
+
+	it('should support keyed template block instances', () => {
+		const _b = block('<li></li>', [
+			[0, 'c'],
+			[1, 'p', 'className']
+		]);
+
+		let update;
+		function App() {
+			const [items, setItems] = useState([
+				{ id: 1, text: 'A' },
+				{ id: 2, text: 'B' },
+				{ id: 3, text: 'C' }
+			]);
+			update = v => setItems(v);
+			return h(
+				'ul',
+				null,
+				items.map(item => {
+					const vnode = _b(item.text, 'item');
+					vnode.key = item.id;
+					return vnode;
+				})
+			);
+		}
+
+		render(<App />, scratch);
+		expect(scratch.innerHTML).to.equal(
+			'<ul><li class="item">A</li><li class="item">B</li><li class="item">C</li></ul>'
+		);
+
+		update([
+			{ id: 3, text: 'C' },
+			{ id: 2, text: 'B' },
+			{ id: 1, text: 'A' }
+		]);
+		rerender();
+
+		expect(scratch.innerHTML).to.equal(
+			'<ul><li class="item">C</li><li class="item">B</li><li class="item">A</li></ul>'
+		);
+	});
 });
