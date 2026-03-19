@@ -13,22 +13,19 @@ import options from './options';
 import { isArray, slice } from './util';
 
 /**
- * Create a block definition. The compiler provides static HTML and slot
- * descriptors. Mount uses `<template>` + `cloneNode`, bypassing VNode
- * creation and diff for static structure.
+ * Create a block definition. The compiler builds the template DOM tree
+ * via createElement/appendChild calls and passes the root element directly.
+ * Mount uses `cloneNode(true)`, bypassing VNode creation and diff.
  *
- * @param {string} html
- * @param {Array} descriptors
- * @param {string} [ns] — 'svg' or 'math' for namespace blocks
+ * @param {Element} root - Template root element built by the compiler
+ * @param {Array} descriptors - Slot descriptors
  * @returns {(...exprs: any[]) => import('./internal').VNode}
  */
-export function block(html, descriptors, ns) {
+export function block(root, descriptors) {
 	const blockDef = {
-		_tmpl: NULL,
-		_html: html,
+		_root: root,
 		_descriptors: descriptors,
-		_ns: ns || NULL,
-		_rootTag: NULL
+		_rootTag: root.localName
 	};
 
 	return function () {
@@ -38,33 +35,6 @@ export function block(html, descriptors, ns) {
 				: Array.prototype.slice.call(arguments);
 		return createVNode(blockDef, exprs, NULL, NULL, NULL);
 	};
-}
-
-/**
- * Lazily initialize the <template> element and cache the root tag name.
- */
-function initTemplate(blockDef, doc) {
-	if (blockDef._tmpl) return;
-
-	const ns = blockDef._ns;
-	blockDef._tmpl = doc.createElement('template');
-	blockDef._tmpl.innerHTML = ns
-		? '<' +
-			ns +
-			(ns === 'svg'
-				? ' xmlns="http://www.w3.org/2000/svg"'
-				: ' xmlns="http://www.w3.org/1998/Math/MathML"') +
-			'>' +
-			blockDef._html +
-			'</' +
-			ns +
-			'>'
-		: blockDef._html;
-
-	const root = ns
-		? blockDef._tmpl.content.firstChild.firstChild
-		: blockDef._tmpl.content.firstChild;
-	blockDef._rootTag = root ? root.localName : NULL;
 }
 
 /** Walk a DOM tree following a childNodes path. */
@@ -78,7 +48,7 @@ function walkDomPath(root, desc, start, end) {
 
 /**
  * Mount or hydrate a block. If hydrating, claims existing DOM from
- * excessDomChildren. Otherwise clones from template.
+ * excessDomChildren. Otherwise clones from the template root.
  */
 function mountOrHydrateBlock(
 	blockDef,
@@ -95,7 +65,6 @@ function mountOrHydrateBlock(
 	let dom = NULL;
 	let hydrated = false;
 
-	// Hydration: try to claim existing root element
 	if (isHydrating && excessDomChildren) {
 		for (let i = 0; i < excessDomChildren.length; i++) {
 			const node = excessDomChildren[i];
@@ -111,21 +80,17 @@ function mountOrHydrateBlock(
 		}
 	}
 
-	// Clone from template if not hydrating or hydration mismatch
 	if (!dom) {
-		const src = blockDef._ns
-			? blockDef._tmpl.content.firstChild.firstChild
-			: blockDef._tmpl.content.firstChild;
-		dom = src.cloneNode(true);
+		dom = blockDef._root.cloneNode(true);
 	}
 
-	const ns = blockDef._ns === 'svg'
-		? SVG_NAMESPACE
-		: blockDef._ns === 'math'
-			? MATH_NAMESPACE
-			: namespace;
+	const ns =
+		dom.namespaceURI === SVG_NAMESPACE
+			? SVG_NAMESPACE
+			: dom.namespaceURI === MATH_NAMESPACE
+				? MATH_NAMESPACE
+				: namespace;
 
-	// Process all slot descriptors
 	const descriptors = blockDef._descriptors;
 	const propSlots = [];
 	const contentSlots = [];
@@ -136,22 +101,18 @@ function mountOrHydrateBlock(
 		const type = desc[1];
 
 		if (type === 'p') {
-			// Prop slot
 			const propName = desc[desc.length - 1];
 			const target = walkDomPath(dom, desc, 2, desc.length - 1);
 
-			// During hydration skip static props, only set functions
 			if (!hydrated || typeof newExprs[exprIdx] == 'function') {
 				setProperty(target, propName, newExprs[exprIdx], NULL, ns);
 			}
 			propSlots[exprIdx] = { dom: target, prop: propName };
 		} else {
-			// Content slot
 			const target = walkDomPath(dom, desc, 2, desc.length);
 			const expr = newExprs[exprIdx];
 
 			if (expr != NULL && typeof expr == 'object') {
-				// VNode or array
 				const child = isArray(expr)
 					? createVNode(Fragment, { children: expr }, NULL, NULL, NULL)
 					: expr;
@@ -178,7 +139,6 @@ function mountOrHydrateBlock(
 					childVNode: child
 				};
 			} else {
-				// Primitive text
 				let textNode;
 				if (hydrated) {
 					textNode = target.firstChild;
@@ -223,9 +183,6 @@ export function diffBlock(
 	const newExprs = newVNode.props;
 
 	if (oldVNode._dom == NULL || oldVNode.type !== blockDef) {
-		// ── MOUNT ──
-		initTemplate(blockDef, doc);
-
 		const result = mountOrHydrateBlock(
 			blockDef,
 			newExprs,
@@ -254,7 +211,6 @@ export function diffBlock(
 			refQueue.push(newVNode.ref, newVNode._dom, newVNode);
 		}
 	} else {
-		// ── UPDATE ──
 		const oldExprs = oldVNode.props;
 		const propSlots = oldVNode._dom._blockPropSlots;
 		const contentSlots = oldVNode._dom._blockContentSlots;
@@ -282,7 +238,6 @@ export function diffBlock(
 						typeof newExpr == 'number' ||
 						typeof newExpr == 'bigint')
 				) {
-					// Fast path: text → text
 					oldChild._dom.data = newExpr;
 					oldChild.props = newExpr;
 				} else if (
@@ -290,7 +245,6 @@ export function diffBlock(
 					oldChild.type === Fragment &&
 					oldChild._component
 				) {
-					// Array slot: diff Fragment
 					const newFrag = createVNode(
 						Fragment,
 						{ children: newExpr },
@@ -313,7 +267,6 @@ export function diffBlock(
 					);
 					cs.childVNode = newFrag;
 				} else {
-					// General path: diffChildren for type transitions
 					const oldParent = createVNode(NULL, NULL, NULL, NULL, NULL);
 					oldParent._children = oldChild ? [oldChild] : [];
 					const newParent = createVNode(NULL, NULL, NULL, NULL, NULL);
