@@ -1,6 +1,7 @@
 {
   "$schema": "./node_modules/oxfmt/configuration_schema.json",
   "endOfLine": "lf",
+  "insertFinalNewline": true,
   "useTabs": true,
   "tabWidth": 2,
   "printWidth": 80,
