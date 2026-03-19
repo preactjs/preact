@@ -13,18 +13,20 @@ import options from './options';
 import { isArray, slice } from './util';
 
 /**
- * Create a block definition. The compiler builds the template DOM tree
- * via createElement/appendChild calls and passes the root element directly.
- * Mount uses `cloneNode(true)`, bypassing VNode creation and diff.
+ * Create a block definition.
  *
  * @param {Element} root - Template root element built by the compiler
- * @param {Array} descriptors - Slot descriptors
+ * @param {(root: Element, p: Function, c: Function) => void} slotsFn
+ *   Compiler-generated function that navigates the cloned/hydrated DOM
+ *   and registers each slot via callbacks:
+ *   - `p(exprIdx, dom, propName)` — prop slot
+ *   - `c(exprIdx, dom)` — content slot
  * @returns {(...exprs: any[]) => import('./internal').VNode}
  */
-export function block(root, descriptors) {
+export function block(root, slotsFn) {
 	const blockDef = {
 		_root: root,
-		_descriptors: descriptors,
+		_slotsFn: slotsFn,
 		_rootTag: root.localName
 	};
 
@@ -37,18 +39,8 @@ export function block(root, descriptors) {
 	};
 }
 
-/** Walk a DOM tree following a childNodes path. */
-function walkDomPath(root, desc, start, end) {
-	let node = root;
-	for (let i = start; i < end; i++) {
-		node = node.childNodes[desc[i]];
-	}
-	return node;
-}
-
 /**
- * Mount or hydrate a block. If hydrating, claims existing DOM from
- * excessDomChildren. Otherwise clones from the template root.
+ * Mount or hydrate a block.
  */
 function mountOrHydrateBlock(
 	blockDef,
@@ -91,25 +83,20 @@ function mountOrHydrateBlock(
 				? MATH_NAMESPACE
 				: namespace;
 
-	const descriptors = blockDef._descriptors;
 	const propSlots = [];
 	const contentSlots = [];
 
-	for (let d = 0; d < descriptors.length; d++) {
-		const desc = descriptors[d];
-		const exprIdx = desc[0];
-		const type = desc[1];
-
-		if (type === 'p') {
-			const propName = desc[desc.length - 1];
-			const target = walkDomPath(dom, desc, 2, desc.length - 1);
-
+	blockDef._slotsFn(
+		dom,
+		// p — prop slot registration
+		(exprIdx, target, propName) => {
 			if (!hydrated || typeof newExprs[exprIdx] == 'function') {
 				setProperty(target, propName, newExprs[exprIdx], NULL, ns);
 			}
 			propSlots[exprIdx] = { dom: target, prop: propName };
-		} else {
-			const target = walkDomPath(dom, desc, 2, desc.length);
+		},
+		// c — content slot registration
+		(exprIdx, target) => {
 			const expr = newExprs[exprIdx];
 
 			if (expr != NULL && typeof expr == 'object') {
@@ -157,14 +144,13 @@ function mountOrHydrateBlock(
 				};
 			}
 		}
-	}
+	);
 
 	return { dom, propSlots, contentSlots };
 }
 
 /**
- * Diff a block VNode. On mount, clones the template and processes slots.
- * On update, only diffs changed slots via direct DOM manipulation.
+ * Diff a block VNode.
  */
 export function diffBlock(
 	parentDom,
