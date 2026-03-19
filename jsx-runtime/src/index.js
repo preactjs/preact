@@ -1,6 +1,5 @@
 import { options, Fragment } from 'preact';
 import { encodeEntities } from './utils';
-import { MODE_STATIC } from '../../src/constants';
 
 let vnodeId = 0;
 
@@ -177,27 +176,11 @@ function jsxEscape(value) {
 	return encodeEntities('' + value);
 }
 
-/**
- * Create a static VNode. The entire subtree will skip diffing on
- * re-renders. This function is not expected to be used directly,
- * but rather through a compiler transform that detects static subtrees.
- * @param {import('../../src/internal').VNode['type']} type
- * @param {import('preact').VNode['props']} props
- * @param {import('preact').VNode['key']} [key]
- */
-function jsxStatic(type, props, key) {
-	const vnode = createVNode(type, props, key);
-	vnode._flags |= MODE_STATIC;
-	return vnode;
-}
-
 export {
 	createVNode as jsx,
 	createVNode as jsxs,
 	createVNode as jsxDEV,
 	Fragment,
-	// static subtree optimization
-	jsxStatic,
 	// precompiled JSX transform
 	jsxTemplate,
 	jsxAttr,

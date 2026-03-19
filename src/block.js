@@ -1,5 +1,6 @@
 import { createVNode, Fragment } from './create-element';
 import { diff } from './diff/index';
+import { diffChildren } from './diff/children';
 import { setProperty } from './diff/props';
 import { getDomSibling } from './component';
 import { EMPTY_OBJ, NULL, UNDEFINED } from './constants';
@@ -7,6 +8,9 @@ import { isArray } from './util';
 
 /** Sentinel symbol for prop slot markers in VNode props */
 const PROP_SLOT = Symbol.for('preact.propSlot');
+
+/** Sentinel symbol for content slot markers in VNode children */
+const CONTENT_SLOT = Symbol.for('preact.contentSlot');
 
 /**
  * Create a block definition. A block collapses a static VNode tree into a
@@ -16,7 +20,11 @@ const PROP_SLOT = Symbol.for('preact.propSlot');
  * @returns {(...exprs: any[]) => import('./internal').VNode}
  */
 export function block(renderFn) {
-	const blockDef = { _render: renderFn, _propSlotPaths: NULL };
+	const blockDef = {
+		_render: renderFn,
+		_propSlotPaths: NULL,
+		_contentSlotPaths: NULL
+	};
 
 	return function () {
 		const exprs =
@@ -28,23 +36,35 @@ export function block(renderFn) {
 }
 
 /**
- * Walk a VNode tree to find prop slot sentinels, replace them with actual
- * values, and record tree paths. Called only on the first mount of a block
- * definition — subsequent mounts use the cached paths.
- *
- * @param {import('./internal').VNode} vnode
- * @param {any[]} exprs
- * @param {Array<{vnode: import('./internal').VNode, prop: string} | null>} propSlots
- * @param {Array<{path: number[], prop: string} | null>} propSlotPaths
- * @param {number[]} path
+ * Wrap array expressions in Fragment VNodes for proper multi-child
+ * management. Returns the expression as-is for non-arrays.
  */
-function resolvePropSentinels(vnode, exprs, propSlots, propSlotPaths, path) {
+function wrapSlotExpr(expr) {
+	return isArray(expr)
+		? createVNode(Fragment, { children: expr }, NULL, NULL, NULL)
+		: expr;
+}
+
+/**
+ * Walk a VNode tree to find prop and content slot sentinels. Replaces
+ * sentinels with actual expression values and records tree paths.
+ * Called only on the first mount of a block definition.
+ */
+function resolveSentinels(
+	vnode,
+	exprs,
+	propSlots,
+	propSlotPaths,
+	contentSlotPaths,
+	path
+) {
 	if (!vnode || typeof vnode != 'object' || vnode.constructor !== UNDEFINED)
 		return;
 
 	const props = vnode.props;
 	if (!props) return;
 
+	// Check props for prop slot sentinels
 	for (let key in props) {
 		if (key === 'children') continue;
 		const val = props[key];
@@ -56,26 +76,48 @@ function resolvePropSentinels(vnode, exprs, propSlots, propSlotPaths, path) {
 		}
 	}
 
-	// Recurse into children
-	const ch = props.children;
+	// Check children for content slot sentinels, recurse into VNode children
+	let ch = props.children;
 	if (isArray(ch)) {
 		for (let i = 0; i < ch.length; i++) {
-			path.push(i);
-			resolvePropSentinels(ch[i], exprs, propSlots, propSlotPaths, path);
-			path.pop();
+			const child = ch[i];
+			if (child && typeof child == 'object' && CONTENT_SLOT in child) {
+				const idx = child[CONTENT_SLOT];
+				contentSlotPaths[idx] = { path: path.slice(), childIdx: i };
+				ch[i] = wrapSlotExpr(exprs[idx]);
+			} else {
+				path.push(i);
+				resolveSentinels(
+					child,
+					exprs,
+					propSlots,
+					propSlotPaths,
+					contentSlotPaths,
+					path
+				);
+				path.pop();
+			}
 		}
+	} else if (ch && typeof ch == 'object' && CONTENT_SLOT in ch) {
+		const idx = ch[CONTENT_SLOT];
+		contentSlotPaths[idx] = { path: path.slice(), childIdx: 0 };
+		props.children = wrapSlotExpr(exprs[idx]);
 	} else {
 		path.push(0);
-		resolvePropSentinels(ch, exprs, propSlots, propSlotPaths, path);
+		resolveSentinels(
+			ch,
+			exprs,
+			propSlots,
+			propSlotPaths,
+			contentSlotPaths,
+			path
+		);
 		path.pop();
 	}
 }
 
 /**
  * Navigate a diffed VNode tree to find a VNode at a given path.
- * @param {import('./internal').VNode} tree
- * @param {number[]} path
- * @returns {import('./internal').VNode}
  */
 function resolveVNodeAtPath(tree, path) {
 	let node = tree;
@@ -83,6 +125,17 @@ function resolveVNodeAtPath(tree, path) {
 		node = node._children[path[i]];
 	}
 	return node;
+}
+
+/**
+ * Collect child VNodes from content slots into a flat array for unmount.
+ */
+function collectChildVNodes(contentSlots, out) {
+	for (let i = 0; i < contentSlots.length; i++) {
+		if (contentSlots[i] && contentSlots[i].childVNode) {
+			out.push(contentSlots[i].childVNode);
+		}
+	}
 }
 
 /**
@@ -107,34 +160,35 @@ export function diffBlock(
 	if (oldVNode._dom == NULL || oldVNode.type !== blockDef) {
 		// MOUNT
 		const isFirstMount = !blockDef._propSlotPaths;
-		const slotFragments = [];
 
-		const slotFn = i => {
-			const frag = createVNode(
-				Fragment,
-				{ children: newExprs[i] },
-				NULL,
-				NULL,
-				NULL
-			);
-			slotFragments[i] = frag;
-			return frag;
-		};
+		// Content slots: sentinels on first mount, raw values (with array
+		// wrapping) on subsequent mounts
+		const slotFn = isFirstMount
+			? i => ({ [CONTENT_SLOT]: i })
+			: i => wrapSlotExpr(newExprs[i]);
 
-		// On first mount: use sentinels to discover prop slot positions.
-		// On subsequent mounts: pass raw values (cached paths used after diff).
+		// Prop slots: sentinels on first mount, raw values on subsequent
 		const propFn = isFirstMount ? i => ({ [PROP_SLOT]: i }) : i => newExprs[i];
 
 		const tree = blockDef._render(slotFn, propFn);
 
-		let propSlots;
+		let propSlots, contentSlots;
 
 		if (isFirstMount) {
-			// First mount: walk to discover prop slot positions
+			// First mount: discover slot positions via sentinel walk
 			propSlots = [];
 			const propSlotPaths = [];
-			resolvePropSentinels(tree, newExprs, propSlots, propSlotPaths, []);
+			const contentSlotPaths = [];
+			resolveSentinels(
+				tree,
+				newExprs,
+				propSlots,
+				propSlotPaths,
+				contentSlotPaths,
+				[]
+			);
 			blockDef._propSlotPaths = propSlotPaths;
+			blockDef._contentSlotPaths = contentSlotPaths;
 
 			oldDom = diff(
 				parentDom,
@@ -150,9 +204,23 @@ export function diffBlock(
 				doc
 			);
 
-			// Resolve VNode refs to DOM
+			// Resolve prop slots from discovered VNodes
 			for (let i = 0; i < propSlots.length; i++) {
 				if (propSlots[i]) propSlots[i].dom = propSlots[i].vnode._dom;
+			}
+
+			// Resolve content slots from discovered paths
+			contentSlots = [];
+			for (let i = 0; i < contentSlotPaths.length; i++) {
+				const sp = contentSlotPaths[i];
+				if (!sp) continue;
+				const parentVNode = resolveVNodeAtPath(tree, sp.path);
+				contentSlots[i] = {
+					parentDom: parentVNode._dom,
+					childVNode: parentVNode._children
+						? parentVNode._children[sp.childIdx]
+						: NULL
+				};
 			}
 		} else {
 			// Subsequent mounts: no sentinels, no walk
@@ -172,39 +240,48 @@ export function diffBlock(
 
 			// Resolve prop slots from cached paths
 			propSlots = [];
-			const paths = blockDef._propSlotPaths;
-			for (let i = 0; i < paths.length; i++) {
-				if (paths[i]) {
-					const vnode = resolveVNodeAtPath(tree, paths[i].path);
-					propSlots[i] = { dom: vnode._dom, prop: paths[i].prop };
+			const pPaths = blockDef._propSlotPaths;
+			for (let i = 0; i < pPaths.length; i++) {
+				if (pPaths[i]) {
+					const vnode = resolveVNodeAtPath(tree, pPaths[i].path);
+					propSlots[i] = { dom: vnode._dom, prop: pPaths[i].prop };
+				}
+			}
+
+			// Resolve content slots from cached paths
+			contentSlots = [];
+			const cPaths = blockDef._contentSlotPaths;
+			for (let i = 0; i < cPaths.length; i++) {
+				if (cPaths[i]) {
+					const parentVNode = resolveVNodeAtPath(tree, cPaths[i].path);
+					contentSlots[i] = {
+						parentDom: parentVNode._dom,
+						childVNode: parentVNode._children
+							? parentVNode._children[cPaths[i].childIdx]
+							: NULL
+					};
 				}
 			}
 		}
 
 		newVNode._dom = tree._dom;
-		newVNode._children = slotFragments;
 		tree._dom._blockPropSlots = propSlots;
+		tree._dom._blockContentSlots = contentSlots;
 
-		for (let i = 0; i < slotFragments.length; i++) {
-			if (slotFragments[i]) slotFragments[i]._parent = newVNode;
-		}
+		// _children: flat list of slot child VNodes for unmount traversal
+		newVNode._children = [];
+		collectChildVNodes(contentSlots, newVNode._children);
 	} else {
 		// UPDATE: only diff changed slots
 		const oldExprs = oldVNode.props;
-		const oldSlots = oldVNode._children;
 		const propSlots = oldVNode._dom._blockPropSlots;
-		const newSlots = new Array(newExprs.length);
+		const contentSlots = oldVNode._dom._blockContentSlots;
 
 		for (let i = 0; i < newExprs.length; i++) {
-			if (newExprs[i] === oldExprs[i]) {
-				// Unchanged: carry forward
-				newSlots[i] = oldSlots[i];
-				if (oldSlots[i] && oldSlots[i]._parent) oldSlots[i]._parent = newVNode;
-				continue;
-			}
+			if (newExprs[i] === oldExprs[i]) continue;
 
 			if (propSlots[i]) {
-				// Prop slot: direct DOM update via setProperty
+				// Prop slot: direct DOM update
 				setProperty(
 					propSlots[i].dom,
 					propSlots[i].prop,
@@ -212,38 +289,80 @@ export function diffBlock(
 					oldExprs[i],
 					namespace
 				);
-			} else if (oldSlots[i]) {
-				// Content slot: create new Fragment and diff against old
-				const newSlotFrag = createVNode(
-					Fragment,
-					{ children: newExprs[i] },
-					NULL,
-					NULL,
-					NULL
-				);
+			} else if (contentSlots[i]) {
+				const cs = contentSlots[i];
+				const oldChild = cs.childVNode;
+				const newExpr = newExprs[i];
 
-				diff(
-					oldSlots[i]._component._parentDom,
-					newSlotFrag,
-					oldSlots[i],
-					globalContext,
-					namespace,
-					NULL,
-					commitQueue,
-					getDomSibling(oldSlots[i], 0),
-					false,
-					refQueue,
-					doc
-				);
+				if (
+					oldChild &&
+					oldChild.type === NULL &&
+					(typeof newExpr == 'string' ||
+						typeof newExpr == 'number' ||
+						typeof newExpr == 'bigint')
+				) {
+					// Fast path: text → text (no VNode allocation)
+					oldChild._dom.data = newExpr;
+					oldChild.props = newExpr;
+				} else if (
+					oldChild &&
+					oldChild.type === Fragment &&
+					oldChild._component
+				) {
+					// Array slot: diff new Fragment against old Fragment
+					const newFrag = createVNode(
+						Fragment,
+						{ children: newExpr },
+						NULL,
+						NULL,
+						NULL
+					);
+					diff(
+						oldChild._component._parentDom,
+						newFrag,
+						oldChild,
+						globalContext,
+						namespace,
+						NULL,
+						commitQueue,
+						getDomSibling(oldChild, 0),
+						false,
+						refQueue,
+						doc
+					);
+					cs.childVNode = newFrag;
+				} else {
+					// General path: use diffChildren for proper reconciliation
+					const oldParent = createVNode(NULL, NULL, NULL, NULL, NULL);
+					oldParent._children = oldChild ? [oldChild] : [];
 
-				newSlotFrag._parent = newVNode;
-				newSlots[i] = newSlotFrag;
+					const newParent = createVNode(NULL, NULL, NULL, NULL, NULL);
+
+					diffChildren(
+						cs.parentDom,
+						[wrapSlotExpr(newExpr)],
+						newParent,
+						oldParent,
+						globalContext,
+						namespace,
+						NULL,
+						commitQueue,
+						oldChild ? oldChild._dom : NULL,
+						false,
+						refQueue,
+						doc
+					);
+
+					cs.childVNode = newParent._children ? newParent._children[0] : NULL;
+				}
 			}
 		}
 
 		newVNode._dom = oldVNode._dom;
-		newVNode._children = newSlots;
-		oldDom = oldVNode._dom;
+
+		// Rebuild _children for unmount traversal
+		newVNode._children = [];
+		collectChildVNodes(contentSlots, newVNode._children);
 	}
 
 	return oldDom;

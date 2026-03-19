@@ -7,8 +7,6 @@ export const MODE_SUSPENDED = 1 << 7;
 export const INSERT_VNODE = 1 << 2;
 /** Indicates a VNode has been matched with another VNode in the diff */
 export const MATCHED = 1 << 1;
-/** Marks a VNode (and its entire subtree) as static — skip diffing on re-render */
-export const MODE_STATIC = 1 << 3;
 /** Indicates that this vnode has been unmounted before indicating the loss of event listeners */
 export const FORCE_PROPS_REVALIDATE = 1 << 0;
 
