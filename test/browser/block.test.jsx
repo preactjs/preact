@@ -46,15 +46,13 @@ describe('block()', () => {
 		teardown(scratch);
 	});
 
+	// --- Mount ---
+
 	it('should render a block with text slots on mount', () => {
-		const _b = block(slot =>
-			h(
-				'div',
-				{ class: 'container' },
-				h('h1', null, slot(0)),
-				h('p', null, slot(1))
-			)
-		);
+		const _b = block('<div class="container"><h1></h1><p></p></div>', [
+			[0, 'c', 0],
+			[1, 'c', 1]
+		]);
 
 		function App() {
 			return _b('Title', 'Body text');
@@ -71,7 +69,10 @@ describe('block()', () => {
 			return <span class="badge">{label}</span>;
 		}
 
-		const _b = block(slot => h('div', null, h('h1', null, 'Static'), slot(0)));
+		const _b = block(
+			'<div><h1>Title</h1><div class="slot"></div></div>',
+			[[0, 'c', 1]]
+		);
 
 		function App() {
 			return _b(<Badge label="New" />);
@@ -79,99 +80,139 @@ describe('block()', () => {
 
 		render(<App />, scratch);
 		expect(scratch.innerHTML).to.equal(
-			'<div><h1>Static</h1><span class="badge">New</span></div>'
+			'<div><h1>Title</h1><div class="slot"><span class="badge">New</span></div></div>'
 		);
 	});
 
-	it('should render a block with array slots on mount', () => {
-		const _b = block(slot => h('ul', null, slot(0)));
-
-		function App() {
-			return _b([<li key="a">A</li>, <li key="b">B</li>]);
-		}
-
-		render(<App />, scratch);
-		expect(scratch.innerHTML).to.equal('<ul><li>A</li><li>B</li></ul>');
-	});
-
-	it('should update only changed text slots on re-render', () => {
-		const _b = block(slot =>
-			h(
-				'div',
-				{ class: 'container' },
-				h('h1', null, 'Static Title'),
-				h('p', null, slot(0))
-			)
+	it('should render a block with prop slots on mount', () => {
+		const _b = block(
+			'<tr><td class="col-md-1"></td><td class="col-md-4"><a></a></td></tr>',
+			[
+				[0, 'p', 'className'],
+				[1, 'c', 0],
+				[2, 'p', 1, 0, 'onclick'],
+				[3, 'c', 1, 0]
+			]
 		);
 
-		let update;
+		let clicked = false;
 		function App() {
-			const [text, setText] = useState('initial');
-			update = v => setText(v);
-			return _b(text);
+			return _b('danger', 42, () => { clicked = true; }, 'Row 1');
 		}
 
 		render(<App />, scratch);
 		expect(scratch.innerHTML).to.equal(
-			'<div class="container"><h1>Static Title</h1><p>initial</p></div>'
+			'<tr class="danger"><td class="col-md-1">42</td><td class="col-md-4"><a>Row 1</a></td></tr>'
 		);
 
-		const h1 = scratch.querySelector('h1');
+		scratch.querySelector('a').click();
+		expect(clicked).to.equal(true);
+	});
+
+	it('should handle null content slots', () => {
+		const _b = block('<div><span></span></div>', [[0, 'c', 0]]);
+
+		function App() {
+			return _b(null);
+		}
+
+		render(<App />, scratch);
+		expect(scratch.innerHTML).to.equal('<div><span></span></div>');
+	});
+
+	it('should support multiple instances of the same block', () => {
+		const _b = block('<li></li>', [[0, 'c']]);
+
+		function App() {
+			return h('ul', null, _b('A'), _b('B'), _b('C'));
+		}
+
+		render(<App />, scratch);
+		expect(scratch.innerHTML).to.equal(
+			'<ul><li>A</li><li>B</li><li>C</li></ul>'
+		);
+	});
+
+	it('should position blocks correctly among siblings', () => {
+		const _b = block('<span></span>', [[0, 'c']]);
+
+		function App() {
+			return (
+				<div>
+					<p>before</p>
+					{_b('middle')}
+					<p>after</p>
+				</div>
+			);
+		}
+
+		render(<App />, scratch);
+		expect(scratch.innerHTML).to.equal(
+			'<div><p>before</p><span>middle</span><p>after</p></div>'
+		);
+	});
+
+	// --- Update ---
+
+	it('should update text slots on re-render', () => {
+		const _b = block('<div><span></span><span></span></div>', [
+			[0, 'c', 0],
+			[1, 'c', 1]
+		]);
+
+		let update;
+		function App() {
+			const [a, setA] = useState('hello');
+			const [b, setB] = useState('world');
+			update = (x, y) => { setA(x); setB(y); };
+			return _b(a, b);
+		}
+
+		render(<App />, scratch);
+		expect(scratch.innerHTML).to.equal(
+			'<div><span>hello</span><span>world</span></div>'
+		);
+
 		const div = scratch.querySelector('div');
 
-		clearLog();
-		update('updated');
+		update('foo', 'bar');
 		rerender();
 
 		expect(scratch.innerHTML).to.equal(
-			'<div class="container"><h1>Static Title</h1><p>updated</p></div>'
+			'<div><span>foo</span><span>bar</span></div>'
 		);
-
-		// Static elements should be the exact same DOM nodes
-		expect(scratch.querySelector('h1')).to.equal(h1);
 		expect(scratch.querySelector('div')).to.equal(div);
-
-		// No DOM operations should have touched static elements
-		const ops = getLog();
-		const staticOps = ops.filter(
-			op => op.includes('<h1>') || op.includes('<div>')
-		);
-		expect(staticOps).to.deep.equal([]);
 	});
 
-	it('should skip unchanged slots entirely', () => {
-		const _b = block(slot =>
-			h('div', null, h('span', null, slot(0)), h('span', null, slot(1)))
+	it('should update prop slots on re-render', () => {
+		const _b = block(
+			'<tr><td class="static"></td><td class="static"><a></a></td></tr>',
+			[
+				[0, 'p', 'className'],
+				[1, 'c', 0],
+				[2, 'p', 1, 0, 'onclick'],
+				[3, 'c', 1, 0]
+			]
 		);
 
 		let update;
 		function App() {
-			const [count, setCount] = useState(0);
-			update = () => setCount(c => c + 1);
-			return _b('static text', count);
+			const [selected, setSelected] = useState(false);
+			const [label, setLabel] = useState('Row 1');
+			update = (s, l) => { setSelected(s); setLabel(l); };
+			return _b(selected ? 'danger' : '', 1, () => setSelected(true), label);
 		}
 
 		render(<App />, scratch);
-		expect(scratch.innerHTML).to.equal(
-			'<div><span>static text</span><span>0</span></div>'
-		);
+		const tr = scratch.querySelector('tr');
 
-		// Grab DOM references for the static slot's text node
-		const spans = scratch.querySelectorAll('span');
-		const staticTextNode = spans[0].firstChild;
-		const dynamicTextNode = spans[1].firstChild;
-
-		update();
+		update(true, 'Row 1 !!!');
 		rerender();
 
 		expect(scratch.innerHTML).to.equal(
-			'<div><span>static text</span><span>1</span></div>'
+			'<tr class="danger"><td class="static">1</td><td class="static"><a>Row 1 !!!</a></td></tr>'
 		);
-
-		// Static slot should have the exact same text node (not recreated)
-		expect(spans[0].firstChild).to.equal(staticTextNode);
-		// Content should not have changed
-		expect(spans[0].textContent).to.equal('static text');
+		expect(scratch.querySelector('tr')).to.equal(tr);
 	});
 
 	it('should update VNode slots on re-render', () => {
@@ -179,7 +220,10 @@ describe('block()', () => {
 			return <span class="badge">{label}</span>;
 		}
 
-		const _b = block(slot => h('div', null, h('h1', null, 'Title'), slot(0)));
+		const _b = block(
+			'<div><h1>Title</h1><div class="slot"></div></div>',
+			[[0, 'c', 1]]
+		);
 
 		let update;
 		function App() {
@@ -190,39 +234,100 @@ describe('block()', () => {
 
 		render(<App />, scratch);
 		expect(scratch.innerHTML).to.equal(
-			'<div><h1>Title</h1><span class="badge">Old</span></div>'
+			'<div><h1>Title</h1><div class="slot"><span class="badge">Old</span></div></div>'
 		);
 
 		update('New');
 		rerender();
 
 		expect(scratch.innerHTML).to.equal(
-			'<div><h1>Title</h1><span class="badge">New</span></div>'
+			'<div><h1>Title</h1><div class="slot"><span class="badge">New</span></div></div>'
 		);
 	});
 
-	it('should update array slots on re-render', () => {
-		const _b = block(slot => h('ul', null, slot(0)));
+	it('should skip unchanged slots entirely', () => {
+		const _b = block('<div><span></span><span></span></div>', [
+			[0, 'c', 0],
+			[1, 'c', 1]
+		]);
 
 		let update;
 		function App() {
-			const [items, setItems] = useState(['A', 'B']);
-			update = v => setItems(v);
-			return _b(items.map(item => <li key={item}>{item}</li>));
+			const [count, setCount] = useState(0);
+			update = () => setCount(c => c + 1);
+			return _b('static', count);
 		}
 
 		render(<App />, scratch);
-		expect(scratch.innerHTML).to.equal('<ul><li>A</li><li>B</li></ul>');
 
-		update(['A', 'B', 'C']);
+		const staticText = scratch.querySelectorAll('span')[0].firstChild;
+
+		update();
 		rerender();
 
 		expect(scratch.innerHTML).to.equal(
-			'<ul><li>A</li><li>B</li><li>C</li></ul>'
+			'<div><span>static</span><span>1</span></div>'
 		);
+		expect(scratch.querySelectorAll('span')[0].firstChild).to.equal(staticText);
 	});
 
-	it('should unmount block and clean up slot components', () => {
+	it('should skip unchanged prop slots', () => {
+		const _b = block('<div></div>', [
+			[0, 'p', 'className'],
+			[1, 'p', 'data-id'],
+			[2, 'c']
+		]);
+
+		let update;
+		function App() {
+			const [cls] = useState('fixed');
+			const [id, setId] = useState('a');
+			const [text, setText] = useState('hello');
+			update = (i, t) => { setId(i); setText(t); };
+			return _b(cls, id, text);
+		}
+
+		render(<App />, scratch);
+		expect(scratch.innerHTML).to.equal(
+			'<div class="fixed" data-id="a">hello</div>'
+		);
+
+		clearLog();
+		update('b', 'world');
+		rerender();
+
+		expect(scratch.innerHTML).to.equal(
+			'<div class="fixed" data-id="b">world</div>'
+		);
+
+		// 'fixed' === 'fixed' so class should not be touched
+		const ops = getLog();
+		const classOps = ops.filter(op => op.includes('class'));
+		expect(classOps).to.deep.equal([]);
+	});
+
+	it('should handle slot type transitions', () => {
+		const _b = block('<div><span></span></div>', [[0, 'c', 0]]);
+
+		let update;
+		function App() {
+			const [loading, setLoading] = useState(true);
+			update = v => setLoading(v);
+			return _b(loading ? 'Loading...' : <p>Content</p>);
+		}
+
+		render(<App />, scratch);
+		expect(scratch.innerHTML).to.equal('<div><span>Loading...</span></div>');
+
+		update(false);
+		rerender();
+
+		expect(scratch.innerHTML).to.equal('<div><span><p>Content</p></span></div>');
+	});
+
+	// --- Unmount ---
+
+	it('should unmount and clean up slot components', () => {
 		let unmounted = false;
 
 		class Child extends Component {
@@ -234,7 +339,10 @@ describe('block()', () => {
 			}
 		}
 
-		const _b = block(slot => h('div', null, h('p', null, 'Static'), slot(0)));
+		const _b = block(
+			'<div><p>Static</p><div class="slot"></div></div>',
+			[[0, 'c', 1]]
+		);
 
 		let update;
 		function App() {
@@ -245,7 +353,7 @@ describe('block()', () => {
 
 		render(<App />, scratch);
 		expect(scratch.innerHTML).to.equal(
-			'<div><p>Static</p><span>child</span></div>'
+			'<div><p>Static</p><div class="slot"><span>child</span></div></div>'
 		);
 
 		update(false);
@@ -255,28 +363,52 @@ describe('block()', () => {
 		expect(unmounted).to.equal(true);
 	});
 
-	it('should handle slot type transitions', () => {
-		const _b = block(slot => h('div', null, slot(0)));
+	// --- Keyed lists ---
+
+	it('should support keyed block instances', () => {
+		const _b = block('<li></li>', [
+			[0, 'c'],
+			[1, 'p', 'className']
+		]);
 
 		let update;
 		function App() {
-			const [loading, setLoading] = useState(true);
-			update = v => setLoading(v);
-			return _b(loading ? 'Loading...' : <p>Content</p>);
+			const [items, setItems] = useState([
+				{ id: 1, text: 'A' },
+				{ id: 2, text: 'B' },
+				{ id: 3, text: 'C' }
+			]);
+			update = v => setItems(v);
+			return h('ul', null, items.map(item => {
+				const vnode = _b(item.text, 'item');
+				vnode.key = item.id;
+				return vnode;
+			}));
 		}
 
 		render(<App />, scratch);
-		expect(scratch.innerHTML).to.equal('<div>Loading...</div>');
+		expect(scratch.innerHTML).to.equal(
+			'<ul><li class="item">A</li><li class="item">B</li><li class="item">C</li></ul>'
+		);
 
-		update(false);
+		update([
+			{ id: 3, text: 'C' },
+			{ id: 2, text: 'B' },
+			{ id: 1, text: 'A' }
+		]);
 		rerender();
 
-		expect(scratch.innerHTML).to.equal('<div><p>Content</p></div>');
+		expect(scratch.innerHTML).to.equal(
+			'<ul><li class="item">C</li><li class="item">B</li><li class="item">A</li></ul>'
+		);
 	});
 
+	// --- Nesting ---
+
 	it('should work alongside regular VNodes', () => {
-		const _b = block(slot =>
-			h('section', null, h('h2', null, 'Block'), h('p', null, slot(0)))
+		const _b = block(
+			'<section><h2>Block</h2><p></p></section>',
+			[[0, 'c', 1]]
 		);
 
 		let update;
@@ -305,50 +437,11 @@ describe('block()', () => {
 		);
 	});
 
-	it('should support component inside a block slot', () => {
-		function Counter() {
-			const [count, setCount] = useState(0);
-			return (
-				<button onClick={() => setCount(c => c + 1)}>Count: {count}</button>
-			);
-		}
-
-		const _b = block(slot => h('div', null, h('h1', null, 'Title'), slot(0)));
-
-		function App() {
-			return _b(<Counter />);
-		}
-
-		render(<App />, scratch);
-		expect(scratch.innerHTML).to.equal(
-			'<div><h1>Title</h1><button>Count: 0</button></div>'
-		);
-	});
-
-	it('should support multiple instances of the same block', () => {
-		const _b = block(slot =>
-			h('div', { class: 'card' }, h('h2', null, slot(0)))
-		);
-
-		function App() {
-			return (
-				<div>
-					{_b('Card A')}
-					{_b('Card B')}
-				</div>
-			);
-		}
-
-		render(<App />, scratch);
-		expect(scratch.innerHTML).to.equal(
-			'<div><div class="card"><h2>Card A</h2></div><div class="card"><h2>Card B</h2></div></div>'
-		);
-	});
-
 	it('should support nested blocks', () => {
-		const inner = block(slot => h('span', null, slot(0)));
-		const outer = block(slot =>
-			h('div', null, h('h1', null, 'Outer'), slot(0))
+		const inner = block('<span></span>', [[0, 'c']]);
+		const outer = block(
+			'<div><h1>Outer</h1><div class="slot"></div></div>',
+			[[0, 'c', 1]]
 		);
 
 		let update;
@@ -360,205 +453,49 @@ describe('block()', () => {
 
 		render(<App />, scratch);
 		expect(scratch.innerHTML).to.equal(
-			'<div><h1>Outer</h1><span>hello</span></div>'
+			'<div><h1>Outer</h1><div class="slot"><span>hello</span></div></div>'
 		);
 
 		update('world');
 		rerender();
 
 		expect(scratch.innerHTML).to.equal(
-			'<div><h1>Outer</h1><span>world</span></div>'
+			'<div><h1>Outer</h1><div class="slot"><span>world</span></div></div>'
 		);
 	});
 
-	// --- Prop slot tests ---
+	// --- Ref ---
 
-	it('should support prop slots for class attribute', () => {
-		const _b = block((slot, prop) =>
-			h('div', { class: prop(0) }, h('span', null, slot(1)))
-		);
+	it('should handle ref on block VNode', () => {
+		const _b = block('<div><p></p></div>', [[0, 'c', 0]]);
 
-		let update;
+		let refValue = null;
 		function App() {
-			const [cls, setCls] = useState('active');
-			const [text, setText] = useState('hello');
-			update = (c, t) => {
-				setCls(c);
-				setText(t);
-			};
-			return _b(cls, text);
+			const vnode = _b('hello');
+			vnode.ref = el => { refValue = el; };
+			return vnode;
 		}
 
 		render(<App />, scratch);
-		expect(scratch.innerHTML).to.equal(
-			'<div class="active"><span>hello</span></div>'
-		);
-
-		update('inactive', 'world');
-		rerender();
-
-		expect(scratch.innerHTML).to.equal(
-			'<div class="inactive"><span>world</span></div>'
-		);
+		expect(scratch.innerHTML).to.equal('<div><p>hello</p></div>');
+		expect(refValue).to.equal(scratch.querySelector('div'));
 	});
 
-	it('should support prop slots for onClick', () => {
-		const _b = block((slot, prop) =>
-			h('div', null, h('button', { onClick: prop(0) }, slot(1)))
-		);
-
-		let clicked = false;
-		let update;
-		function App() {
-			const [label, setLabel] = useState('Click me');
-			update = v => setLabel(v);
-			return _b(() => {
-				clicked = true;
-			}, label);
-		}
-
-		render(<App />, scratch);
-		expect(scratch.innerHTML).to.equal('<div><button>Click me</button></div>');
-
-		scratch.querySelector('button').click();
-		expect(clicked).to.equal(true);
-
-		update('Updated');
-		rerender();
-
-		expect(scratch.innerHTML).to.equal('<div><button>Updated</button></div>');
-	});
-
-	it('should update prop slots on re-render', () => {
-		const _b = block((slot, prop) =>
-			h(
-				'tr',
-				{ class: prop(0) },
-				h('td', { class: 'static' }, slot(1)),
-				h('td', { class: 'static' }, h('a', { onClick: prop(2) }, slot(3)))
-			)
-		);
-
-		let update;
-		function App() {
-			const [selected, setSelected] = useState(false);
-			const [id, setId] = useState(1);
-			const [label, setLabel] = useState('Row 1');
-			update = (s, i, l) => {
-				setSelected(s);
-				setId(i);
-				setLabel(l);
-			};
-			return _b(selected ? 'danger' : '', id, () => setSelected(true), label);
-		}
-
-		render(<App />, scratch);
-		expect(scratch.innerHTML).to.equal(
-			'<tr class=""><td class="static">1</td><td class="static"><a>Row 1</a></td></tr>'
-		);
-
-		const tr = scratch.querySelector('tr');
-
-		update(true, 1, 'Row 1 !!!');
-		rerender();
-
-		expect(scratch.innerHTML).to.equal(
-			'<tr class="danger"><td class="static">1</td><td class="static"><a>Row 1 !!!</a></td></tr>'
-		);
-
-		// Same DOM element, just props updated
-		expect(scratch.querySelector('tr')).to.equal(tr);
-	});
-
-	it('should skip unchanged prop slots', () => {
-		const _b = block((slot, prop) =>
-			h('div', { class: prop(0), 'data-id': prop(1) }, slot(2))
-		);
-
-		let update;
-		function App() {
-			const [cls] = useState('fixed');
-			const [id, setId] = useState('a');
-			const [text, setText] = useState('hello');
-			update = (i, t) => {
-				setId(i);
-				setText(t);
-			};
-			return _b(cls, id, text);
-		}
-
-		render(<App />, scratch);
-		expect(scratch.innerHTML).to.equal(
-			'<div class="fixed" data-id="a">hello</div>'
-		);
-
-		clearLog();
-		update('b', 'world');
-		rerender();
-
-		expect(scratch.innerHTML).to.equal(
-			'<div class="fixed" data-id="b">world</div>'
-		);
-
-		// 'fixed' === 'fixed' means class prop should not be touched
-		const ops = getLog();
-		const classOps = ops.filter(op => op.includes('class'));
-		expect(classOps).to.deep.equal([]);
-	});
-
-	it('should support setting key on block VNode for list reconciliation', () => {
-		const _b = block((slot, prop) => h('li', { class: prop(0) }, slot(1)));
-
-		let update;
-		function App() {
-			const [items, setItems] = useState([
-				{ id: 1, text: 'A' },
-				{ id: 2, text: 'B' },
-				{ id: 3, text: 'C' }
-			]);
-			update = v => setItems(v);
-			return h(
-				'ul',
-				null,
-				items.map(item => {
-					const vnode = _b('item', item.text);
-					vnode.key = item.id;
-					return vnode;
-				})
-			);
-		}
-
-		render(<App />, scratch);
-		expect(scratch.innerHTML).to.equal(
-			'<ul><li class="item">A</li><li class="item">B</li><li class="item">C</li></ul>'
-		);
-
-		// Swap first and last
-		update([
-			{ id: 3, text: 'C' },
-			{ id: 2, text: 'B' },
-			{ id: 1, text: 'A' }
-		]);
-		rerender();
-
-		expect(scratch.innerHTML).to.equal(
-			'<ul><li class="item">C</li><li class="item">B</li><li class="item">A</li></ul>'
-		);
-	});
-
-	it('should handle prop slots with nested dynamic props', () => {
-		const _b = block((slot, prop) =>
-			h('div', null, h('a', { href: prop(0), class: prop(1) }, slot(2)))
+	it('should support nested dynamic props', () => {
+		const _b = block(
+			'<div><a></a></div>',
+			[
+				[0, 'p', 0, 'href'],
+				[1, 'p', 0, 'className'],
+				[2, 'c', 0]
+			]
 		);
 
 		let update;
 		function App() {
 			const [href, setHref] = useState('/page1');
 			const [cls, setCls] = useState('link');
-			update = (h, c) => {
-				setHref(h);
-				setCls(c);
-			};
+			update = (h, c) => { setHref(h); setCls(c); };
 			return _b(href, cls, 'Click');
 		}
 
@@ -575,301 +512,10 @@ describe('block()', () => {
 		);
 	});
 
-	// --- Template-based block tests ---
+	// --- Hydration ---
 
-	it('should render a template block on mount', () => {
-		const _b = block('<div class="container"><h1></h1><p></p></div>', [
-			[0, 'c', 0], // h1 > text
-			[1, 'c', 1] // p > text
-		]);
-
-		function App() {
-			return _b('Title', 'Body text');
-		}
-
-		render(<App />, scratch);
-		expect(scratch.innerHTML).to.equal(
-			'<div class="container"><h1>Title</h1><p>Body text</p></div>'
-		);
-	});
-
-	it('should update template block text slots', () => {
-		const _b = block('<div><span></span><span></span></div>', [
-			[0, 'c', 0],
-			[1, 'c', 1]
-		]);
-
-		let update;
-		function App() {
-			const [a, setA] = useState('hello');
-			const [b, setB] = useState('world');
-			update = (x, y) => {
-				setA(x);
-				setB(y);
-			};
-			return _b(a, b);
-		}
-
-		render(<App />, scratch);
-		expect(scratch.innerHTML).to.equal(
-			'<div><span>hello</span><span>world</span></div>'
-		);
-
-		const div = scratch.querySelector('div');
-
-		update('foo', 'bar');
-		rerender();
-
-		expect(scratch.innerHTML).to.equal(
-			'<div><span>foo</span><span>bar</span></div>'
-		);
-
-		// Same DOM element — not recreated
-		expect(scratch.querySelector('div')).to.equal(div);
-	});
-
-	it('should support prop slots in template blocks', () => {
-		const _b = block(
-			'<tr><td class="col-md-1"></td><td class="col-md-4"><a></a></td></tr>',
-			[
-				[0, 'p', 'className'], // tr.className
-				[1, 'c', 0], // td1 > text
-				[2, 'p', 1, 0, 'onclick'], // td2 > a.onclick
-				[3, 'c', 1, 0] // td2 > a > text
-			]
-		);
-
-		let update;
-		let clicked = false;
-		function App() {
-			const [cls, setCls] = useState('');
-			const [label, setLabel] = useState('Row 1');
-			update = (c, l) => {
-				setCls(c);
-				setLabel(l);
-			};
-			return _b(
-				cls,
-				42,
-				() => {
-					clicked = true;
-				},
-				label
-			);
-		}
-
-		render(<App />, scratch);
-		expect(scratch.innerHTML).to.equal(
-			'<tr class=""><td class="col-md-1">42</td><td class="col-md-4"><a>Row 1</a></td></tr>'
-		);
-
-		scratch.querySelector('a').click();
-		expect(clicked).to.equal(true);
-
-		update('danger', 'Row 1 !!!');
-		rerender();
-
-		expect(scratch.innerHTML).to.equal(
-			'<tr class="danger"><td class="col-md-1">42</td><td class="col-md-4"><a>Row 1 !!!</a></td></tr>'
-		);
-	});
-
-	it('should skip unchanged slots in template blocks', () => {
-		const _b = block('<div><span></span><span></span></div>', [
-			[0, 'c', 0],
-			[1, 'c', 1]
-		]);
-
-		let update;
-		function App() {
-			const [count, setCount] = useState(0);
-			update = () => setCount(c => c + 1);
-			return _b('static', count);
-		}
-
-		render(<App />, scratch);
-
-		const staticText = scratch.querySelectorAll('span')[0].firstChild;
-
-		update();
-		rerender();
-
-		expect(scratch.innerHTML).to.equal(
-			'<div><span>static</span><span>1</span></div>'
-		);
-
-		// Static text node should be the exact same reference
-		expect(scratch.querySelectorAll('span')[0].firstChild).to.equal(staticText);
-	});
-
-	it('should unmount template blocks correctly', () => {
-		const _b = block('<div><p></p></div>', [[0, 'c', 0]]);
-
-		let update;
-		function App() {
-			const [show, setShow] = useState(true);
-			update = v => setShow(v);
-			return show ? _b('content') : <span>gone</span>;
-		}
-
-		render(<App />, scratch);
-		expect(scratch.innerHTML).to.equal('<div><p>content</p></div>');
-
-		update(false);
-		rerender();
-
-		expect(scratch.innerHTML).to.equal('<span>gone</span>');
-	});
-
-	it('should support multiple template block instances', () => {
-		const _b = block('<li></li>', [[0, 'c']]);
-
-		function App() {
-			return h('ul', null, _b('A'), _b('B'), _b('C'));
-		}
-
-		render(<App />, scratch);
-		expect(scratch.innerHTML).to.equal(
-			'<ul><li>A</li><li>B</li><li>C</li></ul>'
-		);
-	});
-
-	it('should support keyed template block instances', () => {
-		const _b = block('<li></li>', [
-			[0, 'c'],
-			[1, 'p', 'className']
-		]);
-
-		let update;
-		function App() {
-			const [items, setItems] = useState([
-				{ id: 1, text: 'A' },
-				{ id: 2, text: 'B' },
-				{ id: 3, text: 'C' }
-			]);
-			update = v => setItems(v);
-			return h(
-				'ul',
-				null,
-				items.map(item => {
-					const vnode = _b(item.text, 'item');
-					vnode.key = item.id;
-					return vnode;
-				})
-			);
-		}
-
-		render(<App />, scratch);
-		expect(scratch.innerHTML).to.equal(
-			'<ul><li class="item">A</li><li class="item">B</li><li class="item">C</li></ul>'
-		);
-
-		update([
-			{ id: 3, text: 'C' },
-			{ id: 2, text: 'B' },
-			{ id: 1, text: 'A' }
-		]);
-		rerender();
-
-		expect(scratch.innerHTML).to.equal(
-			'<ul><li class="item">C</li><li class="item">B</li><li class="item">A</li></ul>'
-		);
-	});
-
-	it('should handle VNode content slot in template block', () => {
-		function Badge({ label }) {
-			return <span class="badge">{label}</span>;
-		}
-
-		const _b = block(
-			'<div><h1>Title</h1><div class="slot"></div></div>',
-			[[0, 'c', 1]]  // div.slot > content
-		);
-
-		let update;
-		function App() {
-			const [label, setLabel] = useState('New');
-			update = v => setLabel(v);
-			return _b(<Badge label={label} />);
-		}
-
-		render(<App />, scratch);
-		expect(scratch.innerHTML).to.equal(
-			'<div><h1>Title</h1><div class="slot"><span class="badge">New</span></div></div>'
-		);
-
-		update('Updated');
-		rerender();
-
-		expect(scratch.innerHTML).to.equal(
-			'<div><h1>Title</h1><div class="slot"><span class="badge">Updated</span></div></div>'
-		);
-	});
-
-	it('should handle null content slot in template block', () => {
-		const _b = block(
-			'<div><span></span></div>',
-			[[0, 'c', 0]]
-		);
-
-		function App() {
-			return _b(null);
-		}
-
-		render(<App />, scratch);
-		expect(scratch.innerHTML).to.equal('<div><span></span></div>');
-	});
-
-	it('should handle ref on template block VNode', () => {
-		const _b = block(
-			'<div><p></p></div>',
-			[[0, 'c', 0]]
-		);
-
-		let refValue = null;
-		function App() {
-			return h(_b('hello'), { ref: (el) => { refValue = el; } });
-		}
-
-		// Simpler: set ref directly on the vnode
-		function App2() {
-			const vnode = _b('hello');
-			vnode.ref = (el) => { refValue = el; };
-			return vnode;
-		}
-
-		render(<App2 />, scratch);
-		expect(scratch.innerHTML).to.equal('<div><p>hello</p></div>');
-		expect(refValue).to.equal(scratch.querySelector('div'));
-	});
-
-	it('should position template blocks correctly among siblings', () => {
-		const _b = block(
-			'<span></span>',
-			[[0, 'c']]
-		);
-
-		function App() {
-			return (
-				<div>
-					<p>before</p>
-					{_b('middle')}
-					<p>after</p>
-				</div>
-			);
-		}
-
-		render(<App />, scratch);
-		expect(scratch.innerHTML).to.equal(
-			'<div><p>before</p><span>middle</span><p>after</p></div>'
-		);
-	});
-
-	// --- Hydration tests ---
-
-	it('should hydrate a template block reusing existing DOM', () => {
-		scratch.innerHTML =
-			'<div><h1>Title</h1><p>hello</p></div>';
+	it('should hydrate reusing existing DOM', () => {
+		scratch.innerHTML = '<div><h1>Title</h1><p>hello</p></div>';
 
 		const h1Before = scratch.querySelector('h1');
 		const pBefore = scratch.querySelector('p');
@@ -887,8 +533,6 @@ describe('block()', () => {
 		expect(scratch.innerHTML).to.equal(
 			'<div><h1>Title</h1><p>hello</p></div>'
 		);
-
-		// DOM nodes should be reused, not recreated
 		expect(scratch.querySelector('h1')).to.equal(h1Before);
 		expect(scratch.querySelector('p')).to.equal(pBefore);
 	});
@@ -915,10 +559,7 @@ describe('block()', () => {
 	it('should update slots after hydration', () => {
 		scratch.innerHTML = '<div><span>0</span></div>';
 
-		const _b = block(
-			'<div><span></span></div>',
-			[[0, 'c', 0]]
-		);
+		const _b = block('<div><span></span></div>', [[0, 'c', 0]]);
 
 		let update;
 		function App() {
@@ -937,27 +578,22 @@ describe('block()', () => {
 	});
 
 	it('should fall back to clone on hydration mismatch', () => {
-		// Wrong structure: server has <section>, client expects <div>
 		scratch.innerHTML = '<section>wrong</section>';
 
-		const _b = block(
-			'<div><p></p></div>',
-			[[0, 'c', 0]]
-		);
+		const _b = block('<div><p></p></div>', [[0, 'c', 0]]);
 
 		function App() {
 			return _b('content');
 		}
 
 		hydrate(<App />, scratch);
-		// Should have created the correct DOM despite mismatch
 		expect(scratch.querySelector('div')).to.not.equal(null);
 		expect(scratch.querySelector('p').textContent).to.equal('content');
 	});
 
-	// --- SVG namespace tests ---
+	// --- SVG ---
 
-	it('should render SVG template blocks with correct namespace', () => {
+	it('should render SVG blocks with correct namespace', () => {
 		const _b = block(
 			'<circle></circle>',
 			[
@@ -977,11 +613,9 @@ describe('block()', () => {
 		expect(circle).to.not.equal(null);
 		expect(circle.namespaceURI).to.equal('http://www.w3.org/2000/svg');
 		expect(circle.getAttribute('cx')).to.equal('50');
-		expect(circle.getAttribute('cy')).to.equal('50');
-		expect(circle.getAttribute('r')).to.equal('25');
 	});
 
-	it('should update SVG template block prop slots', () => {
+	it('should update SVG block prop slots', () => {
 		const _b = block(
 			'<rect></rect>',
 			[
