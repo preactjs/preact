@@ -1013,7 +1013,7 @@ describe('createContext', () => {
 
 	it('should pass context through strict equal children', () => {
 		const context = { foo: 'bar' };
-		const Ctx = createContext(null)
+		const Ctx = createContext(null);
 
 		/** @type {(s: { foo: string }) => void} */
 		let set;
@@ -1021,7 +1021,7 @@ describe('createContext', () => {
 			constructor(props) {
 				super(props);
 				this.state = context;
-				set = this.setState.bind(this)
+				set = this.setState.bind(this);
 			}
 
 			getChildContext() {
@@ -1035,10 +1035,15 @@ describe('createContext', () => {
 			}
 		}
 
-		render(<Wrapper><Ctx.Consumer>{value => <p>{value.foo}</p>}</Ctx.Consumer></Wrapper>, scratch);
+		render(
+			<Wrapper>
+				<Ctx.Consumer>{value => <p>{value.foo}</p>}</Ctx.Consumer>
+			</Wrapper>,
+			scratch
+		);
 		expect(scratch.innerHTML).to.equal('<p>bar</p>');
 
-		set({ foo: 'baz' })
+		set({ foo: 'baz' });
 		rerender();
 		expect(scratch.innerHTML).to.equal('<p>baz</p>');
 	});
