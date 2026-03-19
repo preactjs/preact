@@ -7,6 +7,7 @@ import {
 	EMPTY_ARR,
 	EMPTY_OBJ,
 	FORCE_PROPS_REVALIDATE,
+	MODE_STATIC,
 	MATHML_TOKEN_ELEMENTS,
 	MATH_NAMESPACE,
 	MODE_HYDRATE,
@@ -541,39 +542,48 @@ function diffElementNodes(
 			}
 		}
 
-		for (i in oldProps) {
-			value = oldProps[i];
-			if (i == 'dangerouslySetInnerHTML') {
-				oldHtml = value;
-			} else if (
-				i != 'children' &&
-				!(i in newProps) &&
-				!(i == 'value' && 'defaultValue' in newProps) &&
-				!(i == 'checked' && 'defaultChecked' in newProps)
-			) {
-				setProperty(dom, i, NULL, value, namespace);
-			}
-		}
+		// Static element on re-render: skip prop diffing, only diff children.
+		// A static element's own props never change, but its children may.
+		const isStaticRerender =
+			newVNode._flags & MODE_STATIC && oldVNode._dom != NULL && !isHydrating;
 
-		// During hydration, props are not diffed at all (including dangerouslySetInnerHTML)
-		// @TODO we should warn in debug mode when props don't match here.
-		const shouldRevalidateProps = oldVNode._flags & FORCE_PROPS_REVALIDATE;
-		for (i in newProps) {
-			value = newProps[i];
-			if (i == 'children') {
-				newChildren = value;
-			} else if (i == 'dangerouslySetInnerHTML') {
-				newHtml = value;
-			} else if (i == 'value') {
-				inputValue = value;
-			} else if (i == 'checked') {
-				checked = value;
-			} else if (
-				(!isHydrating || typeof value == 'function') &&
-				(oldProps[i] !== value || shouldRevalidateProps)
-			) {
-				setProperty(dom, i, value, oldProps[i], namespace);
+		if (!isStaticRerender) {
+			for (i in oldProps) {
+				value = oldProps[i];
+				if (i == 'dangerouslySetInnerHTML') {
+					oldHtml = value;
+				} else if (
+					i != 'children' &&
+					!(i in newProps) &&
+					!(i == 'value' && 'defaultValue' in newProps) &&
+					!(i == 'checked' && 'defaultChecked' in newProps)
+				) {
+					setProperty(dom, i, NULL, value, namespace);
+				}
 			}
+
+			// During hydration, props are not diffed at all (including dangerouslySetInnerHTML)
+			// @TODO we should warn in debug mode when props don't match here.
+			const shouldRevalidateProps = oldVNode._flags & FORCE_PROPS_REVALIDATE;
+			for (i in newProps) {
+				value = newProps[i];
+				if (i == 'children') {
+					newChildren = value;
+				} else if (i == 'dangerouslySetInnerHTML') {
+					newHtml = value;
+				} else if (i == 'value') {
+					inputValue = value;
+				} else if (i == 'checked') {
+					checked = value;
+				} else if (
+					(!isHydrating || typeof value == 'function') &&
+					(oldProps[i] !== value || shouldRevalidateProps)
+				) {
+					setProperty(dom, i, value, oldProps[i], namespace);
+				}
+			}
+		} else {
+			newChildren = newProps.children;
 		}
 
 		// If the new vnode didn't have dangerouslySetInnerHTML, diff its children
@@ -625,7 +635,7 @@ function diffElementNodes(
 		}
 
 		// As above, don't diff props during hydration
-		if (!isHydrating) {
+		if (!isStaticRerender && !isHydrating) {
 			i = 'value';
 			if (nodeType == 'progress' && inputValue == NULL) {
 				dom.removeAttribute('value');
