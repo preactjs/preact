@@ -1,7 +1,12 @@
 import { createVNode, Fragment } from './create-element';
 import { diff } from './diff/index';
+import { setProperty } from './diff/props';
 import { getDomSibling } from './component';
 import { EMPTY_OBJ, NULL, UNDEFINED } from './constants';
+import { isArray } from './util';
+
+/** Sentinel symbol for prop slot markers */
+const PROP_SLOT = Symbol.for('preact.propSlot');
 
 /**
  * Create a block definition. A block collapses a static VNode tree into a
@@ -9,7 +14,7 @@ import { EMPTY_OBJ, NULL, UNDEFINED } from './constants';
  * function is called once on first render; subsequent renders only update
  * changed slot expressions.
  *
- * @param {(slot: (index: number) => import('./internal').VNode) => import('./internal').VNode} renderFn
+ * @param {(slot: (index: number) => import('./internal').VNode, prop: (index: number) => any) => import('./internal').VNode} renderFn
  * @returns {(...exprs: any[]) => import('./internal').VNode}
  */
 export function block(renderFn) {
@@ -26,9 +31,44 @@ export function block(renderFn) {
 }
 
 /**
+ * Walk a VNode tree to find prop slot sentinels, replace them with
+ * actual values, and record the VNode + prop name for direct updates.
+ * Runs once on mount, not on re-render.
+ * @param {import('./internal').VNode} vnode
+ * @param {any[]} exprs
+ * @param {Array<{vnode: import('./internal').VNode, prop: string} | null>} propSlots
+ */
+function resolvePropSentinels(vnode, exprs, propSlots) {
+	if (!vnode || typeof vnode != 'object' || vnode.constructor !== UNDEFINED)
+		return;
+
+	const props = vnode.props;
+	if (props) {
+		for (let key in props) {
+			if (key === 'children') continue;
+			const val = props[key];
+			if (val && typeof val == 'object' && PROP_SLOT in val) {
+				const idx = val[PROP_SLOT];
+				propSlots[idx] = { vnode, prop: key };
+				props[key] = exprs[idx];
+			}
+		}
+
+		// Recurse into children
+		const ch = props.children;
+		if (isArray(ch)) {
+			for (let i = 0; i < ch.length; i++)
+				resolvePropSentinels(ch[i], exprs, propSlots);
+		} else {
+			resolvePropSentinels(ch, exprs, propSlots);
+		}
+	}
+}
+
+/**
  * Diff a block VNode. On mount, calls the render function to create a full
  * VNode tree and diffs it normally. On re-render, only diffs changed slot
- * Fragments.
+ * Fragments and updates prop slots directly.
  *
  * @param {import('./internal').PreactElement} parentDom
  * @param {import('./internal').VNode} newVNode
@@ -62,6 +102,7 @@ export function diffBlock(
 	if (oldVNode._dom == NULL || oldVNode.type !== blockDef) {
 		// MOUNT: call render function, diff the full tree
 		const slotFragments = [];
+		const propSlots = [];
 
 		const slotFn = i => {
 			const frag = createVNode(
@@ -75,7 +116,14 @@ export function diffBlock(
 			return frag;
 		};
 
-		const tree = blockDef._render(slotFn);
+		const propFn = i => {
+			return { [PROP_SLOT]: i };
+		};
+
+		const tree = blockDef._render(slotFn, propFn);
+
+		// Walk tree to resolve prop sentinels before diffing
+		resolvePropSentinels(tree, newExprs, propSlots);
 
 		oldDom = diff(
 			parentDom,
@@ -91,8 +139,14 @@ export function diffBlock(
 			doc
 		);
 
+		// Resolve VNode references to actual DOM elements
+		for (let i = 0; i < propSlots.length; i++) {
+			if (propSlots[i]) propSlots[i].dom = propSlots[i].vnode._dom;
+		}
+
 		newVNode._dom = tree._dom;
 		newVNode._children = slotFragments;
+		tree._dom._blockPropSlots = propSlots;
 
 		for (let i = 0; i < slotFragments.length; i++) {
 			if (slotFragments[i]) slotFragments[i]._parent = newVNode;
@@ -101,17 +155,28 @@ export function diffBlock(
 		// UPDATE: only diff changed slots
 		const oldExprs = oldVNode.props;
 		const oldSlots = oldVNode._children;
+		const propSlots = oldVNode._dom._blockPropSlots;
 		const newSlots = new Array(newExprs.length);
 
 		for (let i = 0; i < newExprs.length; i++) {
-			const oldSlotFrag = oldSlots[i];
-
 			if (newExprs[i] === oldExprs[i]) {
 				// Unchanged slot: carry forward
-				newSlots[i] = oldSlotFrag;
-				if (oldSlotFrag) oldSlotFrag._parent = newVNode;
-			} else {
-				// Changed slot: create new Fragment and diff
+				newSlots[i] = oldSlots[i];
+				if (oldSlots[i] && oldSlots[i]._parent) oldSlots[i]._parent = newVNode;
+				continue;
+			}
+
+			if (propSlots[i]) {
+				// Prop slot: direct DOM update via setProperty
+				setProperty(
+					propSlots[i].dom,
+					propSlots[i].prop,
+					newExprs[i],
+					oldExprs[i],
+					namespace
+				);
+			} else if (oldSlots[i]) {
+				// Content slot: create new Fragment and diff
 				const newSlotFrag = createVNode(
 					Fragment,
 					{ children: newExprs[i] },
@@ -121,14 +186,14 @@ export function diffBlock(
 				);
 
 				diff(
-					oldSlotFrag._component._parentDom,
+					oldSlots[i]._component._parentDom,
 					newSlotFrag,
-					oldSlotFrag,
+					oldSlots[i],
 					globalContext,
 					namespace,
 					NULL,
 					commitQueue,
-					getDomSibling(oldSlotFrag, 0),
+					getDomSibling(oldSlots[i], 0),
 					false,
 					refQueue,
 					doc

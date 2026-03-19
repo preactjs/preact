@@ -370,4 +370,208 @@ describe('block()', () => {
 			'<div><h1>Outer</h1><span>world</span></div>'
 		);
 	});
+
+	// --- Prop slot tests ---
+
+	it('should support prop slots for class attribute', () => {
+		const _b = block((slot, prop) =>
+			h('div', { class: prop(0) }, h('span', null, slot(1)))
+		);
+
+		let update;
+		function App() {
+			const [cls, setCls] = useState('active');
+			const [text, setText] = useState('hello');
+			update = (c, t) => {
+				setCls(c);
+				setText(t);
+			};
+			return _b(cls, text);
+		}
+
+		render(<App />, scratch);
+		expect(scratch.innerHTML).to.equal(
+			'<div class="active"><span>hello</span></div>'
+		);
+
+		update('inactive', 'world');
+		rerender();
+
+		expect(scratch.innerHTML).to.equal(
+			'<div class="inactive"><span>world</span></div>'
+		);
+	});
+
+	it('should support prop slots for onClick', () => {
+		const _b = block((slot, prop) =>
+			h('div', null, h('button', { onClick: prop(0) }, slot(1)))
+		);
+
+		let clicked = false;
+		let update;
+		function App() {
+			const [label, setLabel] = useState('Click me');
+			update = v => setLabel(v);
+			return _b(() => {
+				clicked = true;
+			}, label);
+		}
+
+		render(<App />, scratch);
+		expect(scratch.innerHTML).to.equal('<div><button>Click me</button></div>');
+
+		scratch.querySelector('button').click();
+		expect(clicked).to.equal(true);
+
+		update('Updated');
+		rerender();
+
+		expect(scratch.innerHTML).to.equal('<div><button>Updated</button></div>');
+	});
+
+	it('should update prop slots on re-render', () => {
+		const _b = block((slot, prop) =>
+			h(
+				'tr',
+				{ class: prop(0) },
+				h('td', { class: 'static' }, slot(1)),
+				h('td', { class: 'static' }, h('a', { onClick: prop(2) }, slot(3)))
+			)
+		);
+
+		let update;
+		function App() {
+			const [selected, setSelected] = useState(false);
+			const [id, setId] = useState(1);
+			const [label, setLabel] = useState('Row 1');
+			update = (s, i, l) => {
+				setSelected(s);
+				setId(i);
+				setLabel(l);
+			};
+			return _b(selected ? 'danger' : '', id, () => setSelected(true), label);
+		}
+
+		render(<App />, scratch);
+		expect(scratch.innerHTML).to.equal(
+			'<tr class=""><td class="static">1</td><td class="static"><a>Row 1</a></td></tr>'
+		);
+
+		const tr = scratch.querySelector('tr');
+
+		update(true, 1, 'Row 1 !!!');
+		rerender();
+
+		expect(scratch.innerHTML).to.equal(
+			'<tr class="danger"><td class="static">1</td><td class="static"><a>Row 1 !!!</a></td></tr>'
+		);
+
+		// Same DOM element, just props updated
+		expect(scratch.querySelector('tr')).to.equal(tr);
+	});
+
+	it('should skip unchanged prop slots', () => {
+		const _b = block((slot, prop) =>
+			h('div', { class: prop(0), 'data-id': prop(1) }, slot(2))
+		);
+
+		let update;
+		function App() {
+			const [cls] = useState('fixed');
+			const [id, setId] = useState('a');
+			const [text, setText] = useState('hello');
+			update = (i, t) => {
+				setId(i);
+				setText(t);
+			};
+			return _b(cls, id, text);
+		}
+
+		render(<App />, scratch);
+		expect(scratch.innerHTML).to.equal(
+			'<div class="fixed" data-id="a">hello</div>'
+		);
+
+		clearLog();
+		update('b', 'world');
+		rerender();
+
+		expect(scratch.innerHTML).to.equal(
+			'<div class="fixed" data-id="b">world</div>'
+		);
+
+		// 'fixed' === 'fixed' means class prop should not be touched
+		const ops = getLog();
+		const classOps = ops.filter(op => op.includes('class'));
+		expect(classOps).to.deep.equal([]);
+	});
+
+	it('should support setting key on block VNode for list reconciliation', () => {
+		const _b = block((slot, prop) => h('li', { class: prop(0) }, slot(1)));
+
+		let update;
+		function App() {
+			const [items, setItems] = useState([
+				{ id: 1, text: 'A' },
+				{ id: 2, text: 'B' },
+				{ id: 3, text: 'C' }
+			]);
+			update = v => setItems(v);
+			return h(
+				'ul',
+				null,
+				items.map(item => {
+					const vnode = _b('item', item.text);
+					vnode.key = item.id;
+					return vnode;
+				})
+			);
+		}
+
+		render(<App />, scratch);
+		expect(scratch.innerHTML).to.equal(
+			'<ul><li class="item">A</li><li class="item">B</li><li class="item">C</li></ul>'
+		);
+
+		// Swap first and last
+		update([
+			{ id: 3, text: 'C' },
+			{ id: 2, text: 'B' },
+			{ id: 1, text: 'A' }
+		]);
+		rerender();
+
+		expect(scratch.innerHTML).to.equal(
+			'<ul><li class="item">C</li><li class="item">B</li><li class="item">A</li></ul>'
+		);
+	});
+
+	it('should handle prop slots with nested dynamic props', () => {
+		const _b = block((slot, prop) =>
+			h('div', null, h('a', { href: prop(0), class: prop(1) }, slot(2)))
+		);
+
+		let update;
+		function App() {
+			const [href, setHref] = useState('/page1');
+			const [cls, setCls] = useState('link');
+			update = (h, c) => {
+				setHref(h);
+				setCls(c);
+			};
+			return _b(href, cls, 'Click');
+		}
+
+		render(<App />, scratch);
+		expect(scratch.innerHTML).to.equal(
+			'<div><a href="/page1" class="link">Click</a></div>'
+		);
+
+		update('/page2', 'link active');
+		rerender();
+
+		expect(scratch.innerHTML).to.equal(
+			'<div><a href="/page2" class="link active">Click</a></div>'
+		);
+	});
 });
