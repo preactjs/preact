@@ -23,6 +23,7 @@ import options from '../options';
 import { assign, isArray, removeNode, slice } from '../util';
 import { diffChildren } from './children';
 import { setProperty } from './props';
+import { diffBlock } from '../block';
 
 /**
  * @typedef {import('../internal').ComponentType} ComponentType
@@ -373,6 +374,20 @@ export function diff(
 			}
 			options._catchError(e, newVNode, oldVNode);
 		}
+	} else if (newType !== NULL && typeof newType == 'object') {
+		oldDom = diffBlock(
+			parentDom,
+			newVNode,
+			oldVNode,
+			globalContext,
+			namespace,
+			excessDomChildren,
+			commitQueue,
+			oldDom,
+			isHydrating,
+			refQueue,
+			doc
+		);
 	} else {
 		oldDom = newVNode._dom = diffElementNodes(
 			oldVNode._dom,
