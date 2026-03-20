@@ -157,7 +157,7 @@ export function initDebug() {
 					serializeVNode(vnode) +
 					`\n\n${getOwnerStack(vnode)}`
 			);
-		} else if (type != null && typeof type == 'object') {
+		} else if (type != null && typeof type == 'object' && !type._slotsFn) {
 			if (type._children !== undefined && type._dom !== undefined) {
 				throw new Error(
 					`Invalid type passed to createElement(): ${type}\n\n` +

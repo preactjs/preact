@@ -27,6 +27,7 @@ import Contenteditable from './contenteditable';
 import { MobXDemo } from './mobx';
 import Zustand from './zustand';
 import ReduxToolkit from './redux-toolkit';
+import BlocksDemo from './blocks';
 
 let isBenchmark = /(\/spiral|\/pythagoras|[#&]bench)/g.test(
 	window.location.href
@@ -143,6 +144,9 @@ class App extends Component {
 						<Link href="/redux-toolkit" activeClassName="active">
 							redux-toolkit
 						</Link>
+						<Link href="/blocks" activeClassName="active">
+							Blocks
+						</Link>
 					</nav>
 				</header>
 				<main>
@@ -175,6 +179,7 @@ class App extends Component {
 						<Contenteditable path="/contenteditable" />
 						<Zustand path="/zustand" />
 						<ReduxToolkit path="/redux-toolkit" />
+						<BlocksDemo path="/blocks" />
 					</Router>
 				</main>
 			</div>
