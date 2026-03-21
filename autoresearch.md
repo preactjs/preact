@@ -62,4 +62,5 @@ The primary metric is the total gzip byte count across those 9 files.
 - Win: backported a compat Suspense simplification from `main` by dropping a hydration-only unmount mutation and inlining fallback creation; reduced compat gzip by another 70 bytes with tests still passing.
 - Win: replaced `process._rerenderCount` property access in `src/component.js` with a local `rerenderCount` variable; reduced core gzip by 13 bytes.
 - Win: simplified ref cleanup logic in `src/diff/index.js` by inlining the unmount checks and flattening the ref-unmount condition in `unmount()`; reduced core gzip by another 7 bytes.
-- Current insight: explicit compat export wiring compresses better than abstract helper/namespace approaches, but targeted backports from `main` and small hot-path condition cleanups can still unlock safe gzip wins.
+- Win: stopped coercing `INSERT_VNODE` placement state to a boolean in `src/diff/children.js`; reduced core gzip by another 9 bytes.
+- Current insight: explicit compat export wiring compresses better than abstract helper/namespace approaches, but targeted backports from `main` and tiny hot-path condition cleanups in core still add up.

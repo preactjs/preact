@@ -121,7 +121,7 @@ export function diffChildren(
 			firstChildDom = newDom;
 		}
 
-		let shouldPlace = !!(childVNode._flags & INSERT_VNODE);
+		let shouldPlace = childVNode._flags & INSERT_VNODE;
 		if (shouldPlace || oldVNode._children === childVNode._children) {
 			oldDom = insert(childVNode, oldDom, parentDom, shouldPlace);
 		} else if (typeof childVNode.type == 'function' && result !== UNDEFINED) {
