@@ -304,7 +304,9 @@ export function cloneElement<P>(
 // -----------------------------------
 
 // TODO: Revisit what the public type of this is...
-export const Fragment: FunctionComponent<{}>;
+export const Fragment: FunctionComponent<{
+	dangerouslySetInnerHTML?: PreactDOMAttributes['dangerouslySetInnerHTML'];
+}>;
 
 //
 // Preact options
