@@ -66,4 +66,5 @@ The primary metric is the total gzip byte count across those 9 files.
 - Win: backported the compat `render.js` change to only call `toLowerCase()` on event props when needed and to fold the `oninput` normalization into that branch; reduced compat gzip by another 74 bytes.
 - Failed: loosening core defaultProps undefined checks was not safe; it broke createElement null-props semantics.
 - Win: switched `src/util.js` to export `assign = Object.assign`; reduced core gzip by another 24 bytes with tests passing.
+- Win: switched `compat/src/util.js` to export `assign = Object.assign`; reduced compat gzip by another 5 bytes.
 - Current insight: explicit compat export wiring compresses better than abstract helper/namespace approaches, and the best remaining wins are likely targeted compat/core hot-path cleanups plus small builtin substitutions rather than broad refactors.
