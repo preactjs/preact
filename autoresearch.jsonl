@@ -1,0 +1,1 @@
+{"type":"config","name":"Optimize gzipped bundle size for core, hooks, and compat","metricName":"total_gzip_bytes","metricUnit":"","bestDirection":"lower"}
