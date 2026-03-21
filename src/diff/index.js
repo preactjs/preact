@@ -274,15 +274,13 @@ export function diff(
 					// We can't rely on oldDom because insert() skips comment nodes.
 					let startMarker, endMarker;
 					if (excessDomChildren) {
-						let claiming = false;
 						for (let j = 0; j < excessDomChildren.length; j++) {
 							const edc = excessDomChildren[j];
 							if (!edc) continue;
-							if (!claiming && edc.nodeType === 8 && edc.data === '$h') {
+							if (!startMarker && edc.nodeType === 8 && edc.data === '$h') {
 								startMarker = edc;
-								claiming = true;
 							}
-							if (claiming) {
+							if (startMarker) {
 								excessDomChildren[j] = NULL;
 								if (edc.nodeType === 8 && edc.data === '/$h') {
 									endMarker = edc;
@@ -303,17 +301,14 @@ export function diff(
 					newVNode._dom = startMarker;
 
 					if (html !== oldVNode.props.dangerouslySetInnerHTML.__html) {
+						// Clear content between markers
 						let node = startMarker.nextSibling;
 						while (node && node !== endMarker) {
 							let next = node.nextSibling;
 							removeNode(node);
 							node = next;
 						}
-						if (html) {
-							const tpl = document.createElement('template');
-							tpl.innerHTML = html;
-							parentDom.insertBefore(tpl.content, endMarker);
-						}
+						setHtmlContent(html, parentDom, endMarker);
 					}
 					oldDom = endMarker.nextSibling;
 				} else {
@@ -323,11 +318,7 @@ export function diff(
 					startMarker._endHtml = endMarker;
 
 					parentDom.insertBefore(startMarker, oldDom);
-					if (html) {
-						const tpl = document.createElement('template');
-						tpl.innerHTML = html;
-						parentDom.insertBefore(tpl.content, oldDom);
-					}
+					setHtmlContent(html, parentDom, oldDom);
 					parentDom.insertBefore(endMarker, oldDom);
 
 					newVNode._dom = startMarker;
@@ -337,13 +328,7 @@ export function diff(
 				if (newType === Fragment && oldVNode._dom && oldVNode._dom._endHtml) {
 					const endMarker = oldVNode._dom._endHtml;
 					oldDom = endMarker.nextSibling;
-					let node = oldVNode._dom;
-					while (node) {
-						let next = node.nextSibling;
-						removeNode(node);
-						if (node === endMarker) break;
-						node = next;
-					}
+					removeRange(oldVNode._dom, endMarker);
 				}
 
 				oldDom = diffChildren(
@@ -435,6 +420,26 @@ function markAsForce(vnode) {
 	if (vnode) {
 		if (vnode._component) vnode._component._force = true;
 		if (vnode._children) vnode._children.some(markAsForce);
+	}
+}
+
+/** Remove all DOM nodes from `start` through `end` inclusive. */
+function removeRange(start, end) {
+	let node = start;
+	while (node) {
+		let next = node.nextSibling;
+		removeNode(node);
+		if (node === end) break;
+		node = next;
+	}
+}
+
+/** Parse `html` and insert the resulting nodes before `ref` in `parent`. */
+function setHtmlContent(html, parent, ref) {
+	if (html) {
+		const tpl = document.createElement('template');
+		tpl.innerHTML = html;
+		parent.insertBefore(tpl.content, ref);
 	}
 }
 
@@ -759,15 +764,7 @@ export function unmount(vnode, parentVNode, skipRemove) {
 
 	if (!skipRemove) {
 		if (vnode.type === Fragment && vnode._dom && vnode._dom._endHtml) {
-			// HTML Fragment: remove start marker, all content, and end marker
-			const endMarker = vnode._dom._endHtml;
-			let node = vnode._dom;
-			while (node) {
-				let next = node.nextSibling;
-				removeNode(node);
-				if (node === endMarker) break;
-				node = next;
-			}
+			removeRange(vnode._dom, vnode._dom._endHtml);
 		} else {
 			removeNode(vnode._dom);
 		}
