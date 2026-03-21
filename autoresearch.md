@@ -55,5 +55,8 @@ The primary metric is the total gzip byte count across those 9 files.
 
 ## What's Been Tried
 
-- Session initialized; baseline not yet recorded.
-- Initial reading suggests likely opportunities in export structure and compat helper code, especially where React-compat wrappers duplicate references or introduce gzip-unfriendly patterns.
+- Baseline recorded at `total_gzip_bytes=31440` (`core=14220`, `hooks=4675`, `compat=12545`).
+- Failed: factoring compat `render`/`hydrate` through a shared helper increased compat gzip by 36 bytes.
+- Failed: building compat's default export from a hooks namespace plus `assign()` increased compat gzip by 164 bytes.
+- Win: simplified hooks `useReducer` bailout/update logic to iterate the hook list directly and always return `hookState._value`; reduced hooks gzip by 68 bytes.
+- Current insight: explicit compat export wiring compresses better than abstract helper/namespace approaches; hooks internals still look like the best source of small structural wins.
