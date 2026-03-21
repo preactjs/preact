@@ -255,6 +255,21 @@ export function diff(
 					? cloneNode(tmp.props.children)
 					: tmp;
 
+			// Teardown old html fragment markers if content changed or transitioning away
+			if (newType === Fragment && oldVNode._dom && oldVNode._dom._endHtml) {
+				const endMarker = oldVNode._dom._endHtml;
+				oldDom = endMarker.nextSibling;
+				const newDSIH = newVNode.props.dangerouslySetInnerHTML;
+				if (
+					!newDSIH ||
+					newDSIH.__html !== oldVNode.props.dangerouslySetInnerHTML.__html
+				) {
+					removeRange(oldVNode._dom, endMarker);
+				} else {
+					newVNode._dom = oldVNode._dom;
+				}
+			}
+
 			if (newType === Fragment && newVNode.props.dangerouslySetInnerHTML) {
 				const html = newVNode.props.dangerouslySetInnerHTML.__html;
 				newVNode._children = [];
@@ -294,43 +309,25 @@ export function diff(
 						startMarker._endHtml = endMarker;
 					}
 					oldDom = endMarker ? endMarker.nextSibling : NULL;
-				} else if (oldVNode._dom && oldVNode._dom._endHtml) {
-					// Update: old Fragment also had dangerouslySetInnerHTML
-					const startMarker = oldVNode._dom;
-					const endMarker = startMarker._endHtml;
-					newVNode._dom = startMarker;
+				}
 
-					if (html !== oldVNode.props.dangerouslySetInnerHTML.__html) {
-						// Clear content between markers
-						let node = startMarker.nextSibling;
-						while (node && node !== endMarker) {
-							let next = node.nextSibling;
-							removeNode(node);
-							node = next;
-						}
-						setHtmlContent(html, parentDom, endMarker);
-					}
-					oldDom = endMarker.nextSibling;
-				} else {
-					// First client-side mount
+				// Mount: first render or update that cleared old markers
+				if (!newVNode._dom) {
 					const startMarker = document.createComment('$h');
 					const endMarker = document.createComment('/$h');
 					startMarker._endHtml = endMarker;
 
 					parentDom.insertBefore(startMarker, oldDom);
-					setHtmlContent(html, parentDom, oldDom);
+					if (html) {
+						const tpl = document.createElement('template');
+						tpl.innerHTML = html;
+						parentDom.insertBefore(tpl.content, oldDom);
+					}
 					parentDom.insertBefore(endMarker, oldDom);
 
 					newVNode._dom = startMarker;
 				}
 			} else {
-				// Reverse transition: old had dangerouslySetInnerHTML, new has normal children
-				if (newType === Fragment && oldVNode._dom && oldVNode._dom._endHtml) {
-					const endMarker = oldVNode._dom._endHtml;
-					oldDom = endMarker.nextSibling;
-					removeRange(oldVNode._dom, endMarker);
-				}
-
 				oldDom = diffChildren(
 					parentDom,
 					isArray(renderResult) ? renderResult : [renderResult],
@@ -431,15 +428,6 @@ function removeRange(start, end) {
 		removeNode(node);
 		if (node === end) break;
 		node = next;
-	}
-}
-
-/** Parse `html` and insert the resulting nodes before `ref` in `parent`. */
-function setHtmlContent(html, parent, ref) {
-	if (html) {
-		const tpl = document.createElement('template');
-		tpl.innerHTML = html;
-		parent.insertBefore(tpl.content, ref);
 	}
 }
 
