@@ -255,19 +255,111 @@ export function diff(
 					? cloneNode(tmp.props.children)
 					: tmp;
 
-			oldDom = diffChildren(
-				parentDom,
-				isArray(renderResult) ? renderResult : [renderResult],
-				newVNode,
-				oldVNode,
-				globalContext,
-				namespace,
-				excessDomChildren,
-				commitQueue,
-				oldDom,
-				isHydrating,
-				refQueue
-			);
+			if (newType === Fragment && newVNode.props.dangerouslySetInnerHTML) {
+				const html = newVNode.props.dangerouslySetInnerHTML.__html;
+				newVNode._children = [];
+
+				// Unmount old children if transitioning from normal children
+				if (oldVNode._children && oldVNode._children.length) {
+					oldDom = getDomSibling(oldVNode);
+					for (let j = 0; j < oldVNode._children.length; j++) {
+						if (oldVNode._children[j]) {
+							unmount(oldVNode._children[j], newVNode);
+						}
+					}
+				}
+
+				if (isHydrating) {
+					// Find start/end markers in excessDomChildren.
+					// We can't rely on oldDom because insert() skips comment nodes.
+					let startMarker, endMarker;
+					if (excessDomChildren) {
+						let claiming = false;
+						for (let j = 0; j < excessDomChildren.length; j++) {
+							const edc = excessDomChildren[j];
+							if (!edc) continue;
+							if (!claiming && edc.nodeType === 8 && edc.data === '$h') {
+								startMarker = edc;
+								claiming = true;
+							}
+							if (claiming) {
+								excessDomChildren[j] = NULL;
+								if (edc.nodeType === 8 && edc.data === '/$h') {
+									endMarker = edc;
+									break;
+								}
+							}
+						}
+					}
+					if (startMarker) {
+						newVNode._dom = startMarker;
+						startMarker._endHtml = endMarker;
+					}
+					oldDom = endMarker ? endMarker.nextSibling : NULL;
+				} else if (oldVNode._dom && oldVNode._dom._endHtml) {
+					// Update: old Fragment also had dangerouslySetInnerHTML
+					const startMarker = oldVNode._dom;
+					const endMarker = startMarker._endHtml;
+					newVNode._dom = startMarker;
+
+					if (html !== oldVNode.props.dangerouslySetInnerHTML.__html) {
+						let node = startMarker.nextSibling;
+						while (node && node !== endMarker) {
+							let next = node.nextSibling;
+							removeNode(node);
+							node = next;
+						}
+						if (html) {
+							const tpl = document.createElement('template');
+							tpl.innerHTML = html;
+							parentDom.insertBefore(tpl.content, endMarker);
+						}
+					}
+					oldDom = endMarker.nextSibling;
+				} else {
+					// First client-side mount
+					const startMarker = document.createComment('$h');
+					const endMarker = document.createComment('/$h');
+					startMarker._endHtml = endMarker;
+
+					parentDom.insertBefore(startMarker, oldDom);
+					if (html) {
+						const tpl = document.createElement('template');
+						tpl.innerHTML = html;
+						parentDom.insertBefore(tpl.content, oldDom);
+					}
+					parentDom.insertBefore(endMarker, oldDom);
+
+					newVNode._dom = startMarker;
+				}
+			} else {
+				// Reverse transition: old had dangerouslySetInnerHTML, new has normal children
+				if (newType === Fragment && oldVNode._dom && oldVNode._dom._endHtml) {
+					const endMarker = oldVNode._dom._endHtml;
+					oldDom = endMarker.nextSibling;
+					let node = oldVNode._dom;
+					while (node) {
+						let next = node.nextSibling;
+						removeNode(node);
+						if (node === endMarker) break;
+						node = next;
+					}
+				}
+
+				oldDom = diffChildren(
+					parentDom,
+					isArray(renderResult) ? renderResult : [renderResult],
+					newVNode,
+					oldVNode,
+					globalContext,
+					namespace,
+					excessDomChildren,
+					commitQueue,
+					oldDom,
+					isHydrating,
+					refQueue
+				);
+			}
 
 			c.base = newVNode._dom;
 
@@ -330,6 +422,11 @@ export function diff(
 	}
 
 	if ((tmp = options.diffed)) tmp(newVNode);
+
+	// For html Fragments (bail-out path), advance oldDom past the end marker
+	if (newType === Fragment && newVNode._dom && newVNode._dom._endHtml) {
+		return newVNode._dom._endHtml.nextSibling;
+	}
 
 	return newVNode._flags & MODE_SUSPENDED ? undefined : oldDom;
 }
@@ -661,7 +758,19 @@ export function unmount(vnode, parentVNode, skipRemove) {
 	}
 
 	if (!skipRemove) {
-		removeNode(vnode._dom);
+		if (vnode.type === Fragment && vnode._dom && vnode._dom._endHtml) {
+			// HTML Fragment: remove start marker, all content, and end marker
+			const endMarker = vnode._dom._endHtml;
+			let node = vnode._dom;
+			while (node) {
+				let next = node.nextSibling;
+				removeNode(node);
+				if (node === endMarker) break;
+				node = next;
+			}
+		} else {
+			removeNode(vnode._dom);
+		}
 	}
 
 	vnode._component = vnode._parent = vnode._dom = UNDEFINED;

@@ -788,6 +788,212 @@ describe('render()', () => {
 			rerender();
 			expect(scratch.innerHTML).to.equal('');
 		});
+
+		describe('Fragment dangerouslySetInnerHTML', () => {
+			it('should mount Fragment with dangerouslySetInnerHTML', () => {
+				render(
+					<div>
+						before
+						<Fragment dangerouslySetInnerHTML={{ __html: '<b>foo</b>' }} />
+						after
+					</div>,
+					scratch
+				);
+				expect(serializeHtml(scratch)).to.equal(
+					'<div>before<!--$h--><b>foo</b><!--/$h-->after</div>'
+				);
+			});
+
+			it('should update Fragment dangerouslySetInnerHTML content', () => {
+				/** @type {(v) => void} */
+				let set;
+				class App extends Component {
+					constructor(props) {
+						super(props);
+						set = this.setState.bind(this);
+						this.state = { html: '<b>first</b>' };
+					}
+					render() {
+						return (
+							<div>
+								<Fragment
+									dangerouslySetInnerHTML={{ __html: this.state.html }}
+								/>
+							</div>
+						);
+					}
+				}
+
+				render(<App />, scratch);
+				expect(serializeHtml(scratch)).to.equal(
+					'<div><!--$h--><b>first</b><!--/$h--></div>'
+				);
+
+				set({ html: '<i>second</i>' });
+				rerender();
+				expect(serializeHtml(scratch)).to.equal(
+					'<div><!--$h--><i>second</i><!--/$h--></div>'
+				);
+			});
+
+			it('should not mutate DOM when __html is unchanged', () => {
+				/** @type {Component} */
+				let thing;
+				class Thing extends Component {
+					constructor(props) {
+						super(props);
+						thing = this;
+					}
+					render() {
+						return (
+							<div>
+								<Fragment
+									dangerouslySetInnerHTML={{ __html: '<span>same</span>' }}
+								/>
+							</div>
+						);
+					}
+				}
+
+				render(<Thing />, scratch);
+				const startMarker = scratch.firstChild.firstChild;
+				const innerSpan = startMarker.nextSibling;
+
+				thing.forceUpdate();
+				rerender();
+
+				expect(startMarker.nextSibling).to.equal(innerSpan);
+			});
+
+			it('should unmount Fragment with dangerouslySetInnerHTML', () => {
+				/** @type {(v) => void} */
+				let set;
+				class App extends Component {
+					constructor(props) {
+						super(props);
+						set = this.setState.bind(this);
+						this.state = { show: true };
+					}
+					render() {
+						return this.state.show ? (
+							<div>
+								<Fragment
+									dangerouslySetInnerHTML={{ __html: '<b>content</b>' }}
+								/>
+							</div>
+						) : (
+							<div />
+						);
+					}
+				}
+
+				render(<App />, scratch);
+				expect(serializeHtml(scratch)).to.equal(
+					'<div><!--$h--><b>content</b><!--/$h--></div>'
+				);
+
+				set({ show: false });
+				rerender();
+				expect(serializeHtml(scratch)).to.equal('<div></div>');
+			});
+
+			it('should handle falsy __html values', () => {
+				render(
+					<div>
+						<Fragment dangerouslySetInnerHTML={{ __html: '' }} />
+					</div>,
+					scratch
+				);
+				expect(serializeHtml(scratch)).to.equal(
+					'<div><!--$h--><!--/$h--></div>'
+				);
+			});
+
+			it('should handle multiple html Fragments as siblings', () => {
+				render(
+					<div>
+						<Fragment dangerouslySetInnerHTML={{ __html: '<b>a</b>' }} />
+						<Fragment dangerouslySetInnerHTML={{ __html: '<i>b</i>' }} />
+					</div>,
+					scratch
+				);
+				expect(serializeHtml(scratch)).to.equal(
+					'<div><!--$h--><b>a</b><!--/$h--><!--$h--><i>b</i><!--/$h--></div>'
+				);
+			});
+
+			it('should transition from normal children to dangerouslySetInnerHTML', () => {
+				/** @type {(v) => void} */
+				let set;
+				class App extends Component {
+					constructor(props) {
+						super(props);
+						set = this.setState.bind(this);
+						this.state = { useHtml: false };
+					}
+					render() {
+						return (
+							<div>
+								{this.state.useHtml ? (
+									<Fragment
+										dangerouslySetInnerHTML={{ __html: '<b>raw</b>' }}
+									/>
+								) : (
+									<Fragment>
+										<span>children</span>
+									</Fragment>
+								)}
+							</div>
+						);
+					}
+				}
+
+				render(<App />, scratch);
+				expect(scratch.innerHTML).to.equal('<div><span>children</span></div>');
+
+				set({ useHtml: true });
+				rerender();
+				expect(serializeHtml(scratch)).to.equal(
+					'<div><!--$h--><b>raw</b><!--/$h--></div>'
+				);
+			});
+
+			it('should transition from dangerouslySetInnerHTML to normal children', () => {
+				/** @type {(v) => void} */
+				let set;
+				class App extends Component {
+					constructor(props) {
+						super(props);
+						set = this.setState.bind(this);
+						this.state = { useHtml: true };
+					}
+					render() {
+						return (
+							<div>
+								{this.state.useHtml ? (
+									<Fragment
+										dangerouslySetInnerHTML={{ __html: '<b>raw</b>' }}
+									/>
+								) : (
+									<Fragment>
+										<span>children</span>
+									</Fragment>
+								)}
+							</div>
+						);
+					}
+				}
+
+				render(<App />, scratch);
+				expect(serializeHtml(scratch)).to.equal(
+					'<div><!--$h--><b>raw</b><!--/$h--></div>'
+				);
+
+				set({ useHtml: false });
+				rerender();
+				expect(scratch.innerHTML).to.equal('<div><span>children</span></div>');
+			});
+		});
 	});
 
 	it('should reconcile mutated DOM attributes', () => {

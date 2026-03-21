@@ -515,4 +515,99 @@ describe('hydrate()', () => {
 		rerender();
 		expect(scratch.innerHTML).to.equal('<div>Error!</div>');
 	});
+
+	describe('Fragment dangerouslySetInnerHTML', () => {
+		it('should hydrate Fragment with dangerouslySetInnerHTML', () => {
+			scratch.innerHTML =
+				'<div>before<!--$h--><b>content</b><!--/$h-->after</div>';
+			clearLog();
+
+			hydrate(
+				<div>
+					before
+					<Fragment dangerouslySetInnerHTML={{ __html: '<b>content</b>' }} />
+					after
+				</div>,
+				scratch
+			);
+
+			expect(serializeHtml(scratch)).to.equal(
+				'<div>before<!--$h--><b>content</b><!--/$h-->after</div>'
+			);
+			expect(getLog()).to.deep.equal([]);
+		});
+
+		it('should hydrate then update Fragment dangerouslySetInnerHTML', () => {
+			scratch.innerHTML = '<div><!--$h--><b>first</b><!--/$h--></div>';
+			clearLog();
+
+			/** @type {(v) => void} */
+			let set;
+			class App extends Component {
+				constructor(props) {
+					super(props);
+					set = this.setState.bind(this);
+					this.state = { html: '<b>first</b>' };
+				}
+				render() {
+					return (
+						<div>
+							<Fragment dangerouslySetInnerHTML={{ __html: this.state.html }} />
+						</div>
+					);
+				}
+			}
+
+			hydrate(<App />, scratch);
+			expect(serializeHtml(scratch)).to.equal(
+				'<div><!--$h--><b>first</b><!--/$h--></div>'
+			);
+			expect(getLog()).to.deep.equal([]);
+
+			set({ html: '<i>second</i>' });
+			rerender();
+			expect(serializeHtml(scratch)).to.equal(
+				'<div><!--$h--><i>second</i><!--/$h--></div>'
+			);
+		});
+
+		it('should hydrate with siblings around html Fragment', () => {
+			scratch.innerHTML =
+				'<div><span>before</span><!--$h--><b>html</b><!--/$h--><span>after</span></div>';
+			clearLog();
+
+			hydrate(
+				<div>
+					<span>before</span>
+					<Fragment dangerouslySetInnerHTML={{ __html: '<b>html</b>' }} />
+					<span>after</span>
+				</div>,
+				scratch
+			);
+
+			expect(serializeHtml(scratch)).to.equal(
+				'<div><span>before</span><!--$h--><b>html</b><!--/$h--><span>after</span></div>'
+			);
+			expect(getLog()).to.deep.equal([]);
+		});
+
+		it('should hydrate multiple html Fragments as siblings', () => {
+			scratch.innerHTML =
+				'<div><!--$h--><b>a</b><!--/$h--><!--$h--><i>b</i><!--/$h--></div>';
+			clearLog();
+
+			hydrate(
+				<div>
+					<Fragment dangerouslySetInnerHTML={{ __html: '<b>a</b>' }} />
+					<Fragment dangerouslySetInnerHTML={{ __html: '<i>b</i>' }} />
+				</div>,
+				scratch
+			);
+
+			expect(serializeHtml(scratch)).to.equal(
+				'<div><!--$h--><b>a</b><!--/$h--><!--$h--><i>b</i><!--/$h--></div>'
+			);
+			expect(getLog()).to.deep.equal([]);
+		});
+	});
 });
