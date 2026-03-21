@@ -60,4 +60,5 @@ The primary metric is the total gzip byte count across those 9 files.
 - Failed: building compat's default export from a hooks namespace plus `assign()` increased compat gzip by 164 bytes.
 - Win: simplified hooks `useReducer` bailout/update logic to iterate the hook list directly and always return `hookState._value`; reduced hooks gzip by 68 bytes.
 - Win: backported a compat Suspense simplification from `main` by dropping a hydration-only unmount mutation and inlining fallback creation; reduced compat gzip by another 70 bytes with tests still passing.
-- Current insight: explicit compat export wiring compresses better than abstract helper/namespace approaches, but targeted backports from `main` can still unlock safe gzip wins.
+- Win: replaced `process._rerenderCount` property access in `src/component.js` with a local `rerenderCount` variable; reduced core gzip by 13 bytes.
+- Current insight: explicit compat export wiring compresses better than abstract helper/namespace approaches, but targeted backports from `main` and local hot-path variable golfing can still unlock safe gzip wins.

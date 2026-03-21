@@ -185,7 +185,8 @@ let rerenderQueue = [];
  * * [Callbacks synchronous and asynchronous](https://blog.ometer.com/2011/07/24/callbacks-synchronous-and-asynchronous/)
  */
 
-let prevDebounce;
+let prevDebounce,
+	rerenderCount = 0;
 
 const defer =
 	typeof Promise == 'function'
@@ -201,7 +202,7 @@ export function enqueueRender(c) {
 		(!c._dirty &&
 			(c._dirty = true) &&
 			rerenderQueue.push(c) &&
-			!process._rerenderCount++) ||
+			!rerenderCount++) ||
 		prevDebounce != options.debounceRendering
 	) {
 		prevDebounce = options.debounceRendering;
@@ -240,8 +241,6 @@ function process() {
 			renderComponent(c);
 		}
 	} finally {
-		rerenderQueue.length = process._rerenderCount = 0;
+		rerenderQueue.length = rerenderCount = 0;
 	}
 }
-
-process._rerenderCount = 0;
