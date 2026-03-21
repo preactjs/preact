@@ -67,4 +67,5 @@ The primary metric is the total gzip byte count across those 9 files.
 - Failed: loosening core defaultProps undefined checks was not safe; it broke createElement null-props semantics.
 - Win: switched `src/util.js` to export `assign = Object.assign`; reduced core gzip by another 24 bytes with tests passing.
 - Win: switched `compat/src/util.js` to export `assign = Object.assign`; reduced compat gzip by another 5 bytes.
+- Win: collapsed `assign(assign({}, globalContext), ...)` to `assign({}, globalContext, ...)` in `src/diff/index.js` now that `assign` is `Object.assign`; reduced core gzip by another 10 bytes.
 - Current insight: explicit compat export wiring compresses better than abstract helper/namespace approaches, and the best remaining wins are likely targeted compat/core hot-path cleanups plus small builtin substitutions rather than broad refactors.
