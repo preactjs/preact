@@ -63,4 +63,6 @@ The primary metric is the total gzip byte count across those 9 files.
 - Win: replaced `process._rerenderCount` property access in `src/component.js` with a local `rerenderCount` variable; reduced core gzip by 13 bytes.
 - Win: simplified ref cleanup logic in `src/diff/index.js` by inlining the unmount checks and flattening the ref-unmount condition in `unmount()`; reduced core gzip by another 7 bytes.
 - Win: stopped coercing `INSERT_VNODE` placement state to a boolean in `src/diff/children.js`; reduced core gzip by another 9 bytes.
-- Current insight: explicit compat export wiring compresses better than abstract helper/namespace approaches, but targeted backports from `main` and tiny hot-path condition cleanups in core still add up.
+- Win: backported the compat `render.js` change to only call `toLowerCase()` on event props when needed and to fold the `oninput` normalization into that branch; reduced compat gzip by another 74 bytes.
+- Failed: loosening core defaultProps undefined checks was not safe; it broke createElement null-props semantics.
+- Current insight: explicit compat export wiring compresses better than abstract helper/namespace approaches, and the best remaining wins are likely targeted compat/core hot-path cleanups rather than broad refactors.
