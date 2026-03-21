@@ -3,6 +3,7 @@ import { EMPTY_ARR } from './constants';
 export const isArray = Array.isArray;
 
 export const assign = Object.assign;
+export const slice = EMPTY_ARR.slice;
 
 /**
  * Remove a child node from its parent if attached. This is a workaround for
@@ -13,5 +14,3 @@ export const assign = Object.assign;
 export function removeNode(node) {
 	if (node && node.parentNode) node.parentNode.removeChild(node);
 }
-
-export const slice = EMPTY_ARR.slice;
