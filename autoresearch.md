@@ -65,4 +65,5 @@ The primary metric is the total gzip byte count across those 9 files.
 - Win: stopped coercing `INSERT_VNODE` placement state to a boolean in `src/diff/children.js`; reduced core gzip by another 9 bytes.
 - Win: backported the compat `render.js` change to only call `toLowerCase()` on event props when needed and to fold the `oninput` normalization into that branch; reduced compat gzip by another 74 bytes.
 - Failed: loosening core defaultProps undefined checks was not safe; it broke createElement null-props semantics.
-- Current insight: explicit compat export wiring compresses better than abstract helper/namespace approaches, and the best remaining wins are likely targeted compat/core hot-path cleanups rather than broad refactors.
+- Win: switched `src/util.js` to export `assign = Object.assign`; reduced core gzip by another 24 bytes with tests passing.
+- Current insight: explicit compat export wiring compresses better than abstract helper/namespace approaches, and the best remaining wins are likely targeted compat/core hot-path cleanups plus small builtin substitutions rather than broad refactors.
