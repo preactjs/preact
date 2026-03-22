@@ -244,18 +244,18 @@ options.vnode = vnode => {
 // Only needed for react-relay
 let currentComponent;
 const oldBeforeRender = options._render;
-options._render = function (vnode) {
+options._render = function (vnode, backing) {
 	if (oldBeforeRender) {
-		oldBeforeRender(vnode);
+		oldBeforeRender(vnode, backing);
 	}
-	currentComponent = vnode._component;
+	currentComponent = backing && backing._component;
 };
 
 const oldDiffed = options.diffed;
-/** @type {(vnode: import('./internal').VNode) => void} */
-options.diffed = function (vnode) {
+/** @type {(vnode: import('./internal').VNode, backing: any) => void} */
+options.diffed = function (vnode, backing) {
 	if (oldDiffed) {
-		oldDiffed(vnode);
+		oldDiffed(vnode, backing);
 	}
 
 	const props = vnode.props;

@@ -28,6 +28,7 @@ import { getAnchorDom, getFirstDom, getLastDom } from '../range';
 import {
 	clearBacking,
 	ensureBacking,
+	getMountedBacking,
 	getOwnedChildren,
 	getOwnedFirstDom,
 	getOwnedVNode,
@@ -137,24 +138,28 @@ export function diff(
 					: tmp._defaultValue
 				: globalContext;
 
+			// Ensure backing exists for this component so hooks can access it.
+			let curBacking = ensureBacking(
+				newVNode,
+				newVNode.type === Fragment ? 1 : 2
+			);
+
 			// Get component and set it to `c`
-			if (oldVNode._component) {
-				c = newVNode._component = oldVNode._component;
+			if (curBacking._component) {
+				c = newVNode._component = curBacking._component;
 				clearProcessingException = c._processingException = c._pendingError;
 			} else {
 				// Instantiate the new component
 				if (isClassComponent) {
 					// @ts-expect-error The check above verifies that newType is suppose to be constructed
-					newVNode._component = c = new newType(newProps, componentContext); // eslint-disable-line new-cap
+					c = new newType(newProps, componentContext); // eslint-disable-line new-cap
 				} else {
 					// @ts-expect-error Trust me, Component implements the interface we want
-					newVNode._component = c = new BaseComponent(
-						newProps,
-						componentContext
-					);
+					c = new BaseComponent(newProps, componentContext);
 					c.constructor = newType;
 					c.render = doRender;
 				}
+				curBacking._component = newVNode._component = c;
 				if (provider) provider.sub(c);
 
 				if (!c.state) c.state = {};
@@ -268,7 +273,7 @@ export function diff(
 				c.state = c._nextState;
 				c._dirty = false;
 
-				if (renderHook) renderHook(newVNode);
+				if (renderHook) renderHook(newVNode, curBacking);
 
 				tmp = c.render(c.props, c.state, c.context);
 
@@ -277,7 +282,7 @@ export function diff(
 			} else {
 				do {
 					c._dirty = false;
-					if (renderHook) renderHook(newVNode);
+					if (renderHook) renderHook(newVNode, curBacking);
 
 					tmp = c.render(c.props, c.state, c.context);
 
@@ -458,7 +463,7 @@ export function diff(
 		);
 	}
 
-	if ((tmp = options.diffed)) tmp(newVNode);
+	if ((tmp = options.diffed)) tmp(newVNode, newVNode._backing);
 
 	return newVNode._flags & MODE_SUSPENDED ? undefined : oldDom;
 }
@@ -1235,7 +1240,7 @@ export function applyRef(ref, value, vnode) {
  */
 export function unmount(vnode, parentVNode, skipRemove) {
 	let r;
-	if (options.unmount) options.unmount(vnode);
+	if (options.unmount) options.unmount(vnode, vnode._backing);
 
 	if ((r = vnode.ref)) {
 		if (!r.current || r.current == getOwnedFirstDom(vnode)) {

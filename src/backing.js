@@ -169,16 +169,17 @@ export function setOwnedRange(vnode, firstDom, lastDom, anchorDom) {
 	backing._anchorDom = anchorDom;
 }
 
-function inferBackingKind(vnode) {
+function inferBackingKind(vnode, backing) {
 	if (vnode.type === Fragment) return BACKING_FRAGMENT;
-	if (vnode._component && vnode._component._childDidSuspend)
-		return BACKING_SUSPENSE;
-	if (vnode._component) return BACKING_COMPONENT;
+	let c = backing != NULL ? backing._component : vnode._component;
+	if (c && c._childDidSuspend) return BACKING_SUSPENSE;
+	if (c) return BACKING_COMPONENT;
 	return BACKING_HOST;
 }
 
 function ensureOwnedBacking(vnode) {
-	return ensureBacking(vnode, inferBackingKind(vnode));
+	let existing = getBacking(vnode);
+	return ensureBacking(vnode, inferBackingKind(vnode, existing));
 }
 
 /**
@@ -196,6 +197,7 @@ export function ensureBacking(vnode, kind) {
 		backing = vnode._backing = {
 			_parent: NULL,
 			_vnode: vnode,
+			_component: NULL,
 			_children: NULL,
 			_firstDom: NULL,
 			_lastDom: NULL,
@@ -267,6 +269,7 @@ export function clearBacking(vnode) {
 	if (backing != NULL) {
 		if (backing._vnode === vnode) {
 			backing._vnode = NULL;
+			backing._component = NULL;
 			backing._children = NULL;
 			backing._firstDom = NULL;
 			backing._lastDom = NULL;

@@ -18,16 +18,24 @@ export function _catchError(error, vnode, oldVNode, errorInfo) {
 		/** @type {boolean} */
 		handled;
 
-	// Walk the parent chain to find error boundaries.
-	// Try backing._parent first (authoritative). Fall back to vnode._parent
-	// for vnodes that don't have a backing yet (error thrown during first diff
-	// before setOwnedChildren runs).
+	// Walk the backing parent chain to find error boundaries.
 	let backing = getMountedBacking(vnode);
 	let cur = backing != NULL ? backing._parent : NULL;
-	let curVNode = cur != NULL ? cur._vnode : vnode._parent || NULL;
 
-	while (curVNode != NULL) {
-		if ((component = curVNode._component) && !component._processingException) {
+	// Fallback: if no backing parent chain, try vnode._parent for vnodes
+	// that haven't been fully mounted yet.
+	if (cur == NULL && vnode._parent) {
+		let parentBacking = getMountedBacking(vnode._parent);
+		if (parentBacking != NULL) cur = parentBacking;
+	}
+
+	while (cur != NULL) {
+		let curVNode = cur._vnode;
+		if (
+			curVNode != NULL &&
+			(component = curVNode._component) &&
+			!component._processingException
+		) {
 			try {
 				ctor = component.constructor;
 
@@ -49,14 +57,7 @@ export function _catchError(error, vnode, oldVNode, errorInfo) {
 			}
 		}
 
-		// Move to next parent
-		if (cur != NULL) {
-			cur = cur._parent;
-			curVNode = cur != NULL ? cur._vnode : NULL;
-		} else {
-			// No backing parent — fall back to vnode._parent
-			curVNode = curVNode._parent || NULL;
-		}
+		cur = cur._parent;
 	}
 
 	throw error;

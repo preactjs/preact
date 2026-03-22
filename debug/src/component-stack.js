@@ -110,12 +110,12 @@ export function setupComponentStack() {
 	let oldVNode = options.vnode;
 	let oldRender = options._render;
 
-	options.diffed = vnode => {
+	options.diffed = (vnode, backing) => {
 		if (isPossibleOwner(vnode)) {
 			ownerStack.pop();
 		}
 		renderStack.pop();
-		if (oldDiffed) oldDiffed(vnode);
+		if (oldDiffed) oldDiffed(vnode, backing);
 	};
 
 	options._diff = vnode => {
@@ -136,11 +136,11 @@ export function setupComponentStack() {
 		if (oldVNode) oldVNode(vnode);
 	};
 
-	options._render = vnode => {
+	options._render = (vnode, backing) => {
 		if (isPossibleOwner(vnode)) {
 			ownerStack.push(vnode);
 		}
 
-		if (oldRender) oldRender(vnode);
+		if (oldRender) oldRender(vnode, backing);
 	};
 }

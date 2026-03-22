@@ -249,13 +249,13 @@ export function initDebug() {
 
 	let renderCount = 0;
 	let currentComponent;
-	options._render = vnode => {
+	options._render = (vnode, backing) => {
 		if (oldRender) {
-			oldRender(vnode);
+			oldRender(vnode, backing);
 		}
 		hooksAllowed = true;
 
-		const nextComponent = vnode._component;
+		const nextComponent = backing && backing._component;
 		if (nextComponent === currentComponent) {
 			renderCount++;
 		} else {
@@ -332,7 +332,7 @@ export function initDebug() {
 		if (oldVnode) oldVnode(vnode);
 	};
 
-	options.diffed = vnode => {
+	options.diffed = (vnode, backing) => {
 		const { type, _parent: parent } = vnode;
 		// Check if the user passed plain objects as children. Note that we cannot
 		// move this check into `options.vnode` because components can receive
@@ -353,7 +353,7 @@ export function initDebug() {
 			});
 		}
 
-		if (vnode._component === currentComponent) {
+		if (backing && backing._component === currentComponent) {
 			renderCount = 0;
 		}
 
@@ -444,7 +444,7 @@ export function initDebug() {
 
 		hooksAllowed = false;
 
-		if (oldDiffed) oldDiffed(vnode);
+		if (oldDiffed) oldDiffed(vnode, backing);
 
 		if (vnode._children != null) {
 			const keys = [];

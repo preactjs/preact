@@ -45,11 +45,11 @@ options._root = (vnode, parentDom) => {
 	if (oldRoot) oldRoot(vnode, parentDom);
 };
 
-/** @type {(vnode: import('./internal').VNode) => void} */
-options._render = vnode => {
-	if (oldBeforeRender) oldBeforeRender(vnode);
+/** @type {(vnode: import('./internal').VNode, backing: any) => void} */
+options._render = (vnode, backing) => {
+	if (oldBeforeRender) oldBeforeRender(vnode, backing);
 
-	currentComponent = vnode._component;
+	currentComponent = backing && backing._component;
 	currentIndex = 0;
 
 	const hooks = currentComponent.__hooks;
@@ -74,10 +74,10 @@ options._render = vnode => {
 };
 
 /** @type {(vnode: import('./internal').VNode) => void} */
-options.diffed = vnode => {
-	if (oldAfterDiff) oldAfterDiff(vnode);
+options.diffed = (vnode, backing) => {
+	if (oldAfterDiff) oldAfterDiff(vnode, backing);
 
-	const c = vnode._component;
+	const c = backing && backing._component;
 	if (c && c.__hooks) {
 		if (c.__hooks._pendingEffects.length) afterPaint(afterPaintEffects.push(c));
 		c.__hooks._list.some(hookItem => {
@@ -112,10 +112,10 @@ options._commit = (vnode, commitQueue) => {
 };
 
 /** @type {(vnode: import('./internal').VNode) => void} */
-options.unmount = vnode => {
-	if (oldBeforeUnmount) oldBeforeUnmount(vnode);
+options.unmount = (vnode, backing) => {
+	if (oldBeforeUnmount) oldBeforeUnmount(vnode, backing);
 
-	const c = vnode._component;
+	const c = backing && backing._component;
 	if (c && c.__hooks) {
 		let hasErrored;
 		c.__hooks._list.some(s => {
