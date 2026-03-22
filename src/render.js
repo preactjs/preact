@@ -2,7 +2,7 @@ import { EMPTY_OBJ, NULL } from './constants';
 import { commitRoot, diff } from './diff/index';
 import { createElement, Fragment } from './create-element';
 import options from './options';
-import { getOwnedFirstDom } from './backing';
+import { getOwnedFirstDom, getMountedBacking } from './backing';
 import { slice } from './util';
 
 /**
@@ -68,6 +68,7 @@ export function render(vnode, parentDom, replaceNode) {
 		// our custom `_children` property.
 		vnode,
 		oldVNode || EMPTY_OBJ,
+		oldVNode ? getMountedBacking(oldVNode) : NULL,
 		EMPTY_OBJ,
 		parentDom.namespaceURI,
 		!isHydrating && replaceNode

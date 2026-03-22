@@ -143,8 +143,9 @@ export function getDomSibling(vnode, childIndex) {
  */
 export function updateVNodeDomPointers(vnode) {
 	updateRangeFromChildren(vnode);
-	if (vnode._component != NULL) {
-		vnode._component.base = getOwnedFirstDom(vnode);
+	let b = getMountedBacking(vnode);
+	if (b && b._component != NULL) {
+		b._component.base = getOwnedFirstDom(vnode);
 	}
 }
 
@@ -188,6 +189,7 @@ function renderComponent(component) {
 			component._parentDom,
 			newVNode,
 			oldVNode,
+			getMountedBacking(oldVNode),
 			component._globalContext,
 			component._parentDom.namespaceURI,
 			oldVNode._flags & MODE_HYDRATE ? [oldDom] : NULL,
@@ -251,11 +253,7 @@ function updateParentDomPointers(node) {
 		backing = getMountedBacking(node);
 		if (backing != NULL) backing = backing._parent;
 	}
-	if (
-		backing != NULL &&
-		backing._vnode != NULL &&
-		backing._vnode._component != NULL
-	) {
+	if (backing != NULL && backing._vnode != NULL && backing._component != NULL) {
 		updateVNodeDomPointers(backing._vnode);
 		return updateParentDomPointers(backing);
 	}

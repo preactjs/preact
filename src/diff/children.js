@@ -223,10 +223,15 @@ export function diffChildren(
 		}
 
 		// Morph the old element into the new one, but don't append it to the dom yet
+		let oldChildBacking =
+			matchingIndex != -1 && isBackingNode(oldChildren[matchingIndex])
+				? oldChildren[matchingIndex]
+				: NULL;
 		let result = diff(
 			parentDom,
 			childVNode,
 			oldVNode,
+			oldChildBacking,
 			globalContext,
 			namespace,
 			excessDomChildren,
@@ -248,15 +253,15 @@ export function diffChildren(
 			childDiffStats
 		);
 
-		// After diff, promote child to its backing node in the mounted child list
-		let childBacking = childVNode._backing;
+		// diff() returns the backing node — use it directly
+		let childBacking = result;
 		if (childBacking != NULL) {
 			children[i] = childBacking;
 		}
 
 		// Adjust DOM nodes
-		newDom = getFirstDom(childVNode);
-		lastDom = getLastDom(childVNode);
+		newDom = childBacking != NULL ? childBacking._firstDom : NULL;
+		lastDom = childBacking != NULL ? childBacking._lastDom : NULL;
 		placementFirstDom[i] =
 			newDom != NULL
 				? newDom
@@ -275,7 +280,7 @@ export function diffChildren(
 			}
 			refQueue.push(
 				childVNode.ref,
-				childVNode._component || newDom,
+				(childBacking && childBacking._component) || newDom,
 				childVNode
 			);
 		}
@@ -330,8 +335,8 @@ export function diffChildren(
 
 		if (!(childVNode._flags & INSERT_VNODE) && lastDom) {
 			oldDom = getDomSiblingAfter(lastDom);
-		} else if (typeof childVNode.type == 'function' && result !== UNDEFINED) {
-			oldDom = result;
+		} else if (typeof childVNode.type == 'function' && childBacking != NULL) {
+			oldDom = childBacking._oldDom;
 		}
 	}
 
@@ -438,10 +443,11 @@ function diffSingleTextChild(
 	let children = [childVNode];
 	setOwnedRange(newParentVNode, NULL, NULL, NULL);
 
-	diff(
+	let childBacking = diff(
 		parentDom,
 		childVNode,
 		oldVNode || EMPTY_OBJ,
+		oldVNode ? getMountedBacking(oldVNode) : NULL,
 		globalContext,
 		namespace,
 		excessDomChildren,
@@ -457,16 +463,17 @@ function diffSingleTextChild(
 		childDiffStats
 	);
 
-	// Promote child to its backing node
-	if (childVNode._backing != NULL) {
-		children[0] = childVNode._backing;
+	if (childBacking != NULL) {
+		children[0] = childBacking;
 	}
 
+	let childFirstDom = childBacking != NULL ? childBacking._firstDom : NULL;
+	let childLastDom = childBacking != NULL ? childBacking._lastDom : NULL;
 	setOwnedRange(
 		newParentVNode,
-		getFirstDom(childVNode),
-		getLastDom(childVNode),
-		getAnchorDom(childVNode)
+		childFirstDom,
+		childLastDom,
+		childBacking != NULL ? childBacking._anchorDom : NULL
 	);
 	setOwnedChildren(newParentVNode, children);
 
@@ -474,7 +481,6 @@ function diffSingleTextChild(
 		oldVNode._flags &= ~MATCHED;
 	}
 
-	let childLastDom = getLastDom(childVNode);
 	return childLastDom ? getDomSiblingAfter(childLastDom) : oldDom;
 }
 
@@ -575,10 +581,15 @@ function diffStrictUnkeyedChildren(
 			if (pb != NULL) ensureBacking(childVNode, 0)._parent = pb;
 		}
 
+		let oldChildBacking =
+			oldVNode !== EMPTY_OBJ && isBackingNode(oldChildren[i])
+				? oldChildren[i]
+				: NULL;
 		let result = diff(
 			parentDom,
 			childVNode,
 			oldVNode,
+			oldChildBacking,
 			globalContext,
 			namespace,
 			excessDomChildren,
@@ -597,21 +608,21 @@ function diffStrictUnkeyedChildren(
 			childDiffStats
 		);
 
-		// After diff, promote child to its backing node
-		let childBacking = childVNode._backing;
+		// diff() returns the backing node
+		let childBacking = result;
 		if (childBacking != NULL) {
 			children[i] = childBacking;
 		}
 
-		let newDom = getFirstDom(childVNode);
-		let lastDom = getLastDom(childVNode);
+		let newDom = childBacking != NULL ? childBacking._firstDom : NULL;
+		let lastDom = childBacking != NULL ? childBacking._lastDom : NULL;
 		if (childVNode.ref && oldVNode.ref != childVNode.ref) {
 			if (oldVNode.ref) {
 				applyRef(oldVNode.ref, NULL, childVNode);
 			}
 			refQueue.push(
 				childVNode.ref,
-				childVNode._component || newDom,
+				(childBacking && childBacking._component) || newDom,
 				childVNode
 			);
 		}
@@ -645,8 +656,8 @@ function diffStrictUnkeyedChildren(
 
 		if (oldVNode !== EMPTY_OBJ && lastDom) {
 			oldDom = getDomSiblingAfter(lastDom);
-		} else if (typeof childVNode.type == 'function' && result !== UNDEFINED) {
-			oldDom = result;
+		} else if (typeof childVNode.type == 'function' && childBacking != NULL) {
+			oldDom = childBacking._oldDom;
 		}
 
 		childVNode._flags &= ~(INSERT_VNODE | MATCHED);

@@ -1,42 +1,49 @@
 import { NULL } from './constants';
-import { getOwnedVNode, isBackingNode } from './backing';
+import { getOwnedVNode, getMountedBacking, isBackingNode } from './backing';
 
 /**
- * Return the first DOM node owned by a backing or vnode subtree.
+ * Return the first DOM node owned by a vnode or backing subtree.
  * @param {import('./internal').VNode | import('./internal').BackingNode} node
  * @returns {import('./internal').PreactElement | null}
  */
 export function getFirstDom(node) {
-	return isBackingNode(node) ? node._firstDom : NULL;
+	if (isBackingNode(node)) return node._firstDom;
+	let backing = getMountedBacking(node);
+	return backing != NULL ? backing._firstDom : NULL;
 }
 
 /**
- * Return the last DOM node owned by a backing or vnode subtree.
+ * Return the last DOM node owned by a vnode or backing subtree.
  * @param {import('./internal').VNode | import('./internal').BackingNode} node
  * @returns {import('./internal').PreactElement | null}
  */
 export function getLastDom(node) {
-	return isBackingNode(node) ? node._lastDom : NULL;
+	if (isBackingNode(node)) return node._lastDom;
+	let backing = getMountedBacking(node);
+	return backing != NULL ? backing._lastDom : NULL;
 }
 
 /**
- * Return the anchor DOM node for a backing or vnode subtree.
+ * Return the anchor DOM node for a vnode or backing subtree.
  * @param {import('./internal').VNode | import('./internal').BackingNode} node
  * @returns {import('./internal').PreactElement | null}
  */
 export function getAnchorDom(node) {
-	return isBackingNode(node) ? node._anchorDom : NULL;
+	if (isBackingNode(node)) return node._anchorDom;
+	let backing = getMountedBacking(node);
+	return backing != NULL ? backing._anchorDom : NULL;
 }
 
 /**
- * Recompute the owned DOM range for a backing node from its children.
- * @param {import('./internal').BackingNode} backing
+ * Recompute the owned DOM range for a vnode or backing from its children.
+ * @param {import('./internal').VNode | import('./internal').BackingNode} node
  */
-export function updateRangeFromChildren(backing) {
+export function updateRangeFromChildren(node) {
 	let firstDom = NULL;
 	let lastDom = NULL;
 	let anchorDom = NULL;
-	let children = backing._children;
+	let backing = isBackingNode(node) ? node : getMountedBacking(node);
+	let children = backing != NULL ? backing._children : NULL;
 
 	if (children != NULL) {
 		for (let i = 0; i < children.length; i++) {
@@ -58,7 +65,9 @@ export function updateRangeFromChildren(backing) {
 		}
 	}
 
-	backing._firstDom = firstDom;
-	backing._lastDom = lastDom;
-	backing._anchorDom = anchorDom;
+	if (backing != NULL) {
+		backing._firstDom = firstDom;
+		backing._lastDom = lastDom;
+		backing._anchorDom = anchorDom;
+	}
 }

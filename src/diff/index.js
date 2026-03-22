@@ -24,23 +24,20 @@ import { diffChildren } from './children';
 import { setProperty } from './props';
 import { assign, isArray, removeNode, slice } from '../util';
 import options from '../options';
-import {
-	getAnchorDom,
-	getFirstDom,
-	getLastDom,
-	updateRangeFromChildren
-} from '../range';
+import { getAnchorDom, getFirstDom, getLastDom } from '../range';
 import {
 	BACKING_COMPONENT,
 	BACKING_FRAGMENT,
-	BACKING_HOST,
-	BACKING_SUSPENSE,
 	clearBacking,
-	createBacking,
+	ensureBacking,
+	getMountedBacking,
+	getOwnedChildren,
+	getOwnedFirstDom,
 	getOwnedVNode,
 	isBackingNode,
-	setBackingChildren,
-	updateBackingVNode
+	reuseBacking,
+	setOwnedChildren,
+	setOwnedRange
 } from '../backing';
 
 /**
@@ -115,11 +112,32 @@ export function diff(
 
 	if ((tmp = options._diff)) tmp(newVNode);
 
+	// Reuse old backing or create new. This is the mounted instance for this vnode.
+	let curBacking = oldBacking;
+	if (curBacking != NULL) {
+		curBacking._vnode = newVNode;
+		// Temporarily set vnode._backing so internal helpers (setOwnedRange,
+		// setOwnedChildren) can find it. Will be removed once those helpers
+		// are converted to accept backing directly.
+		newVNode._backing = curBacking;
+	}
+
 	outer: if (typeof newType == 'function') {
 		try {
 			let c, isNew, oldProps, oldState, snapshot, clearProcessingException;
 			let newProps = newVNode.props;
 			const isClassComponent = newType.prototype && newType.prototype.render;
+
+			// Ensure backing exists for components
+			if (curBacking == NULL) {
+				curBacking = ensureBacking(
+					newVNode,
+					newVNode.type === Fragment ? BACKING_FRAGMENT : BACKING_COMPONENT
+				);
+			} else {
+				curBacking._kind =
+					newVNode.type === Fragment ? BACKING_FRAGMENT : BACKING_COMPONENT;
+			}
 
 			// Necessary for createContext api. Setting this property will pass
 			// the context value as `this.context` just for this component.
@@ -131,15 +149,9 @@ export function diff(
 					: tmp._defaultValue
 				: globalContext;
 
-			// Ensure backing exists for this component so hooks can access it.
-			let curBacking = ensureBacking(
-				newVNode,
-				newVNode.type === Fragment ? 1 : 2
-			);
-
-			// Get component and set it to `c`
+			// Get component from backing, not vnode
 			if (curBacking._component) {
-				c = newVNode._component = curBacking._component;
+				c = curBacking._component;
 				clearProcessingException = c._processingException = c._pendingError;
 			} else {
 				// Instantiate the new component
@@ -152,7 +164,7 @@ export function diff(
 					c.constructor = newType;
 					c.render = doRender;
 				}
-				curBacking._component = newVNode._component = c;
+				curBacking._component = c;
 				if (provider) provider.sub(c);
 
 				if (!c.state) c.state = {};
@@ -436,6 +448,7 @@ export function diff(
 			getLastDom(oldVNode),
 			getAnchorDom(oldVNode)
 		);
+		curBacking = getMountedBacking(newVNode);
 	} else {
 		oldDom = diffElementNodes(
 			getOwnedFirstDom(oldVNode),
@@ -454,16 +467,20 @@ export function diff(
 			hostOpCounts,
 			childDiffStats
 		);
+		curBacking = getMountedBacking(newVNode);
 	}
 
-	if ((tmp = options.diffed)) tmp(newVNode, newVNode._backing);
+	if ((tmp = options.diffed)) tmp(newVNode, curBacking);
 
-	return newVNode._flags & MODE_SUSPENDED ? undefined : oldDom;
+	// Store oldDom cursor on backing for callers that need it
+	if (curBacking != NULL) curBacking._oldDom = oldDom;
+	return newVNode._flags & MODE_SUSPENDED ? NULL : curBacking;
 }
 
 function markAsForce(vnode) {
 	if (vnode) {
-		if (vnode._component) vnode._component._force = true;
+		let b = getMountedBacking(vnode);
+		if (b && b._component) b._component._force = true;
 		let children = getOwnedChildren(vnode);
 		if (children) {
 			for (let i = 0; i < children.length; i++) {
@@ -1084,13 +1101,16 @@ function diffElementNodes(
 					isHydrating
 				)
 			) {
-				let oldTextVNode = getOwnedVNode(getOwnedChildren(oldVNode)[0]);
+				let oldTextChild = getOwnedChildren(oldVNode)[0];
+				let oldTextVNode = getOwnedVNode(oldTextChild);
+				let oldTextBacking = isBackingNode(oldTextChild) ? oldTextChild : NULL;
 				let textVNode = createTextVNode(newChildren, newVNode);
-				diff(
+				let textBacking = diff(
 					// @ts-expect-error
 					newVNode.type == 'template' ? dom.content : dom,
 					textVNode,
 					oldTextVNode,
+					oldTextBacking,
 					globalContext,
 					nodeType == 'foreignObject' ? XHTML_NAMESPACE : namespace,
 					excessDomChildren,
@@ -1098,16 +1118,14 @@ function diffElementNodes(
 					hostOps,
 					unmountQueue,
 					removeOps,
-					getOwnedFirstDom(oldTextVNode),
+					oldTextBacking != NULL ? oldTextBacking._firstDom : NULL,
 					isHydrating,
 					refQueue,
 					true,
 					hostOpCounts,
 					childDiffStats
 				);
-				// Store the backing node, not the vnode
-				let textChildren = [textVNode._backing || textVNode];
-				setOwnedChildren(newVNode, textChildren);
+				setOwnedChildren(newVNode, [textBacking || textVNode]);
 			} else if (
 				canBailHostSubtree(
 					newVNode,
@@ -1241,7 +1259,8 @@ export function unmount(vnode, parentVNode, skipRemove) {
 		}
 	}
 
-	if ((r = vnode._component) != NULL) {
+	let unmountBacking = getMountedBacking(vnode);
+	if (unmountBacking && (r = unmountBacking._component) != NULL) {
 		if (r.componentWillUnmount) {
 			try {
 				r.componentWillUnmount();
@@ -1270,7 +1289,6 @@ export function unmount(vnode, parentVNode, skipRemove) {
 		removeNode(getOwnedFirstDom(vnode));
 	}
 
-	vnode._component = UNDEFINED;
 	clearBacking(vnode);
 }
 

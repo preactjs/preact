@@ -30,12 +30,7 @@ export function _catchError(error, vnode, oldVNode, errorInfo) {
 	}
 
 	while (cur != NULL) {
-		let curVNode = cur._vnode;
-		if (
-			curVNode != NULL &&
-			(component = curVNode._component) &&
-			!component._processingException
-		) {
+		if ((component = cur._component) && !component._processingException) {
 			try {
 				ctor = component.constructor;
 
