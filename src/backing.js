@@ -30,6 +30,22 @@ export function getOwnedChildren(vnode) {
 }
 
 /**
+ * Update the mounted child list for this vnode and its current backing node.
+ *
+ * @param {VNode} vnode
+ * @param {Array<VNode<any> | BackingNode | null> | null} children
+ * @returns {Array<VNode<any> | BackingNode | null> | null}
+ */
+export function setOwnedChildren(vnode, children) {
+	vnode._children = children;
+	let backing = getBacking(vnode);
+	if (backing != NULL) {
+		backing._children = children;
+	}
+	return children;
+}
+
+/**
  * Return an existing backing node or create one for this vnode.
  * Stage 1 scope: backing nodes are only stable storage for ownership.
  * Planner and commit still consume vnode fields directly.

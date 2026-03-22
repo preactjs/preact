@@ -11,7 +11,7 @@ import {
 	NULL
 } from '../constants';
 import { isArray } from '../util';
-import { getOwnedChildren } from '../backing';
+import { getOwnedChildren, setOwnedChildren } from '../backing';
 import { getDomSibling } from '../component';
 import { getAnchorDom, getFirstDom, getLastDom } from '../range';
 
@@ -163,6 +163,7 @@ export function diffChildren(
 		hostOpCounts,
 		childDiffStats
 	);
+	let children = newParentVNode._children;
 	let matchingIndices = new Array(newChildrenLength);
 	let forcePlacement = new Uint8Array(newChildrenLength);
 	let placementFirstDom = new Array(newChildrenLength);
@@ -172,7 +173,7 @@ export function diffChildren(
 	newParentVNode._anchorDom = NULL;
 
 	for (i = 0; i < newChildrenLength; i++) {
-		childVNode = newParentVNode._children[i];
+		childVNode = children[i];
 		if (childVNode == NULL) continue;
 
 		// At this point, constructNewChildrenArray has assigned _index to be the
@@ -280,7 +281,7 @@ export function diffChildren(
 	if (needsPlacement) {
 		if (childDiffStats != NULL) childDiffStats.placementPasses++;
 		planPlacements(
-			newParentVNode._children,
+			getOwnedChildren(newParentVNode) || children,
 			matchingIndices,
 			forcePlacement,
 			placementFirstDom,
@@ -295,7 +296,7 @@ export function diffChildren(
 	}
 
 	for (i = 0; i < newChildrenLength; i++) {
-		childVNode = newParentVNode._children[i];
+		childVNode = children[i];
 		if (childVNode != NULL) {
 			childVNode._flags &= ~(INSERT_VNODE | MATCHED);
 		}
@@ -346,7 +347,7 @@ function diffSingleTextChild(
 	childVNode._parent = newParentVNode;
 	childVNode._depth = newParentVNode._depth + 1;
 	childVNode._index = 0;
-	newParentVNode._children = [childVNode];
+	setOwnedChildren(newParentVNode, [childVNode]);
 	newParentVNode._anchorDom = NULL;
 
 	diff(
@@ -405,7 +406,7 @@ function diffStrictUnkeyedChildren(
 	let lastChildDom;
 	newParentVNode._anchorDom = NULL;
 
-	newParentVNode._children = new Array(newChildrenLength);
+	let children = setOwnedChildren(newParentVNode, new Array(newChildrenLength));
 
 	for (i = 0; i < newChildrenLength; i++) {
 		let childVNode = normalizeChild(
@@ -414,7 +415,7 @@ function diffStrictUnkeyedChildren(
 			i,
 			childDiffStats
 		);
-		newParentVNode._children[i] = childVNode;
+		children[i] = childVNode;
 		let oldVNode = oldChildren[i];
 		if (childVNode == NULL) {
 			if (oldVNode != NULL) {
@@ -656,7 +657,7 @@ function constructNewChildrenArray(
 		remainingOldChildren = oldChildrenLength;
 
 	let skew = 0;
-	newParentVNode._children = new Array(newChildrenLength);
+	let children = setOwnedChildren(newParentVNode, new Array(newChildrenLength));
 	for (i = 0; i < newChildrenLength; i++) {
 		// @ts-expect-error We are reusing the childVNode variable to hold both the
 		// pre and post normalized childVNode
@@ -667,7 +668,7 @@ function constructNewChildrenArray(
 			typeof childVNode == 'boolean' ||
 			typeof childVNode == 'function'
 		) {
-			newParentVNode._children[i] = NULL;
+			children[i] = NULL;
 			continue;
 		}
 		// If this newVNode is being reused (e.g. <div>{reuse}{reuse}</div>) in the same diff,
@@ -680,7 +681,7 @@ function constructNewChildrenArray(
 			typeof childVNode == 'bigint' ||
 			childVNode.constructor == String
 		) {
-			childVNode = newParentVNode._children[i] = createVNode(
+			childVNode = children[i] = createVNode(
 				NULL,
 				childVNode,
 				NULL,
@@ -689,7 +690,7 @@ function constructNewChildrenArray(
 			);
 			if (childDiffStats != NULL) childDiffStats.normalizedText++;
 		} else if (isArray(childVNode)) {
-			childVNode = newParentVNode._children[i] = createVNode(
+			childVNode = children[i] = createVNode(
 				Fragment,
 				{ children: childVNode },
 				NULL,
@@ -702,7 +703,7 @@ function constructNewChildrenArray(
 			// scenario:
 			//   const reuse = <div />
 			//   <div>{reuse}<span />{reuse}</div>
-			childVNode = newParentVNode._children[i] = createVNode(
+			childVNode = children[i] = createVNode(
 				childVNode.type,
 				childVNode.props,
 				childVNode.key,
@@ -711,7 +712,7 @@ function constructNewChildrenArray(
 			);
 			if (childDiffStats != NULL) childDiffStats.clonedVNode++;
 		} else {
-			newParentVNode._children[i] = childVNode;
+			children[i] = childVNode;
 		}
 
 		const skewedIndex = i + skew;
