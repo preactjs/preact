@@ -126,6 +126,9 @@ function renderComponent(component) {
 			oldDom = oldVNode._dom,
 			commitQueue = [],
 			refQueue = [],
+			hostOps = [],
+			unmountQueue = [],
+			removeOps = [],
 			newVNode = assign({}, oldVNode);
 		newVNode._original = oldVNode._original + 1;
 		if (options.vnode) options.vnode(newVNode);
@@ -138,6 +141,9 @@ function renderComponent(component) {
 			component._parentDom.namespaceURI,
 			oldVNode._flags & MODE_HYDRATE ? [oldDom] : NULL,
 			commitQueue,
+			hostOps,
+			unmountQueue,
+			removeOps,
 			oldDom == NULL ? getDomSibling(oldVNode) : oldDom,
 			!!(oldVNode._flags & MODE_HYDRATE),
 			refQueue
@@ -145,8 +151,16 @@ function renderComponent(component) {
 
 		newVNode._original = oldVNode._original;
 		newVNode._parent._children[newVNode._index] = newVNode;
-		commitRoot(commitQueue, newVNode, refQueue);
+		commitRoot(
+			commitQueue,
+			newVNode,
+			refQueue,
+			hostOps,
+			unmountQueue,
+			removeOps
+		);
 		oldVNode._dom = oldVNode._parent = null;
+		oldVNode._lastDom = null;
 
 		if (newVNode._dom != oldDom) {
 			updateParentDomPointers(newVNode);
@@ -160,11 +174,20 @@ function renderComponent(component) {
 function updateParentDomPointers(vnode) {
 	if ((vnode = vnode._parent) != NULL && vnode._component != NULL) {
 		vnode._dom = vnode._component.base = NULL;
+		vnode._lastDom = NULL;
 		vnode._children.some(child => {
 			if (child != NULL && child._dom != NULL) {
-				return (vnode._dom = vnode._component.base = child._dom);
+				vnode._dom = vnode._component.base = child._dom;
+				return true;
 			}
 		});
+		for (let i = vnode._children.length; i--; ) {
+			let child = vnode._children[i];
+			if (child != NULL && child._lastDom != NULL) {
+				vnode._lastDom = child._lastDom;
+				break;
+			}
+		}
 
 		return updateParentDomPointers(vnode);
 	}

@@ -431,5 +431,43 @@ describe('Lifecycle methods', () => {
 			rerender();
 			expect(invocation.count).to.equal(10);
 		});
+
+		it('should observe sibling DOM inserted in the same commit', () => {
+			let update;
+			let seenHtml;
+
+			class Observed extends Component {
+				componentDidUpdate() {
+					seenHtml = this.base.parentNode.innerHTML;
+				}
+
+				render({ label }) {
+					return <span>{label}</span>;
+				}
+			}
+
+			class App extends Component {
+				constructor() {
+					super();
+					this.state = { showSibling: false, label: 'A' };
+					update = () => this.setState({ showSibling: true, label: 'B' });
+				}
+
+				render(props, state) {
+					return (
+						<div>
+							<Observed label={state.label} />
+							{state.showSibling && <strong>later</strong>}
+						</div>
+					);
+				}
+			}
+
+			render(<App />, scratch);
+			update();
+			rerender();
+
+			expect(seenHtml).to.equal('<span>B</span><strong>later</strong>');
+		});
 	});
 });

@@ -150,6 +150,10 @@ export interface VNode<P = {}> extends preact.VNode<P> {
 	 * The [first (for Fragments)] DOM child of a VNode
 	 */
 	_dom: PreactElement | null;
+	/**
+	 * The last DOM child rendered by this VNode subtree.
+	 */
+	_lastDom?: PreactElement | null;
 	_component: Component | null;
 	constructor: undefined;
 	_original: number;

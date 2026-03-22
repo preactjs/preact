@@ -40,6 +40,9 @@ import options from '../options';
  * @param {Array<PreactElement>} excessDomChildren
  * @param {Array<Component>} commitQueue List of components which have callbacks
  * to invoke in commitRoot
+ * @param {any[]} hostOps
+ * @param {VNode[]} unmountQueue
+ * @param {any[]} removeOps
  * @param {PreactElement} oldDom The current attached DOM element any new dom
  * elements should be placed around. Likely `null` on first render (except when
  * hydrating). Can be a sibling DOM element when diffing Fragments that have
@@ -55,6 +58,9 @@ export function diff(
 	namespace,
 	excessDomChildren,
 	commitQueue,
+	hostOps,
+	unmountQueue,
+	removeOps,
 	oldDom,
 	isHydrating,
 	refQueue
@@ -71,6 +77,7 @@ export function diff(
 	if (oldVNode._flags & MODE_SUSPENDED) {
 		isHydrating = !!(oldVNode._flags & MODE_HYDRATE);
 		oldDom = newVNode._dom = oldVNode._dom;
+		newVNode._lastDom = oldVNode._lastDom;
 		excessDomChildren = [oldDom];
 	}
 
@@ -184,6 +191,7 @@ export function diff(
 					}
 
 					newVNode._dom = oldVNode._dom;
+					newVNode._lastDom = oldVNode._lastDom;
 					newVNode._children = oldVNode._children;
 					newVNode._children.some(vnode => {
 						if (vnode) vnode._parent = newVNode;
@@ -264,6 +272,9 @@ export function diff(
 				namespace,
 				excessDomChildren,
 				commitQueue,
+				hostOps,
+				unmountQueue,
+				removeOps,
 				oldDom,
 				isHydrating,
 				refQueue
@@ -296,6 +307,7 @@ export function diff(
 
 					excessDomChildren[excessDomChildren.indexOf(oldDom)] = NULL;
 					newVNode._dom = oldDom;
+					newVNode._lastDom = oldDom;
 				} else {
 					for (let i = excessDomChildren.length; i--; ) {
 						removeNode(excessDomChildren[i]);
@@ -304,6 +316,7 @@ export function diff(
 				}
 			} else {
 				newVNode._dom = oldVNode._dom;
+				newVNode._lastDom = oldVNode._lastDom;
 				newVNode._children = oldVNode._children;
 				if (!e.then) markAsForce(newVNode);
 			}
@@ -315,6 +328,7 @@ export function diff(
 	) {
 		newVNode._children = oldVNode._children;
 		newVNode._dom = oldVNode._dom;
+		newVNode._lastDom = oldVNode._lastDom;
 	} else {
 		oldDom = newVNode._dom = diffElementNodes(
 			oldVNode._dom,
@@ -324,6 +338,9 @@ export function diff(
 			namespace,
 			excessDomChildren,
 			commitQueue,
+			hostOps,
+			unmountQueue,
+			removeOps,
 			isHydrating,
 			refQueue
 		);
@@ -346,7 +363,18 @@ function markAsForce(vnode) {
  * which have callbacks to invoke in commitRoot
  * @param {VNode} root
  */
-export function commitRoot(commitQueue, root, refQueue) {
+export function commitRoot(
+	commitQueue,
+	root,
+	refQueue,
+	hostOps,
+	unmountQueue,
+	removeOps
+) {
+	flushHostOps(hostOps);
+	flushUnmounts(unmountQueue, root);
+	flushRemoveOps(removeOps);
+
 	for (let i = 0; i < refQueue.length; i++) {
 		applyRef(refQueue[i], refQueue[++i], refQueue[++i]);
 	}
@@ -367,6 +395,125 @@ export function commitRoot(commitQueue, root, refQueue) {
 		}
 	});
 }
+
+/**
+ * @param {any[]} hostOps
+ */
+function flushHostOps(hostOps) {
+	for (let i = 0; i < hostOps.length; ) {
+		let op = hostOps[i];
+		if (op === OP_SET_TEXT) {
+			hostOps[i++] = NULL;
+			let node = hostOps[i];
+			let value = hostOps[i + 1];
+			node.data = value;
+			hostOps[i++] = hostOps[i++] = NULL;
+		} else if (op === OP_INSERT_NODE) {
+			hostOps[i++] = NULL;
+			let node = hostOps[i];
+			let parent = hostOps[i + 1];
+			let before = hostOps[i + 2];
+			parent.insertBefore(node, before || NULL);
+			hostOps[i++] = hostOps[i++] = hostOps[i++] = NULL;
+		} else if (op === OP_MOVE_RANGE) {
+			hostOps[i++] = NULL;
+			let first = hostOps[i];
+			let last = hostOps[i + 1];
+			let parent = hostOps[i + 2];
+			let before = hostOps[i + 3];
+			moveRange(first, last, parent, before);
+			hostOps[i++] = hostOps[i++] = hostOps[i++] = hostOps[i++] = NULL;
+		}
+	}
+
+	hostOps.length = 0;
+}
+
+/**
+ * @param {VNode[]} unmountQueue
+ * @param {VNode} root
+ */
+function flushUnmounts(unmountQueue, root) {
+	for (let i = 0; i < unmountQueue.length; i++) {
+		unmount(unmountQueue[i], root, true);
+		unmountQueue[i] = NULL;
+	}
+
+	unmountQueue.length = 0;
+}
+
+/**
+ * @param {any[]} removeOps
+ */
+function flushRemoveOps(removeOps) {
+	for (let i = 0; i < removeOps.length; ) {
+		let first = removeOps[i];
+		let last = removeOps[i + 1];
+		removeRange(first, last);
+		removeOps[i++] = removeOps[i++] = NULL;
+	}
+
+	removeOps.length = 0;
+}
+
+/**
+ * Move the contiguous DOM range [start..end] before `before`.
+ * @param {PreactElement} start
+ * @param {PreactElement} end
+ * @param {PreactElement} parentDom
+ * @param {PreactElement} before
+ */
+function moveRange(start, end, parentDom, before) {
+	let node = start;
+	let afterEnd = end.nextSibling;
+	while (node != afterEnd) {
+		let next = node.nextSibling;
+		parentDom.insertBefore(node, before || NULL);
+		node = next;
+	}
+}
+
+/**
+ * Remove the contiguous DOM range [start..end].
+ * @param {PreactElement} start
+ * @param {PreactElement} end
+ */
+function removeRange(start, end) {
+	let node = start;
+	let afterEnd = end.nextSibling;
+	while (node != afterEnd) {
+		let next = node.nextSibling;
+		removeNode(node);
+		node = next;
+	}
+}
+
+/**
+ * @param {VNode} vnode
+ * @param {PreactElement} before
+ * @param {PreactElement} parentDom
+ * @param {any[]} hostOps
+ */
+export function queuePlacement(vnode, before, parentDom, hostOps) {
+	let firstDom = vnode._dom;
+	let lastDom = vnode._lastDom || firstDom;
+
+	if (firstDom == NULL) return;
+
+	if (before === firstDom && firstDom.parentNode === parentDom) {
+		return;
+	}
+
+	if (firstDom === lastDom) {
+		hostOps.push(OP_INSERT_NODE, firstDom, parentDom, before || NULL);
+	} else {
+		hostOps.push(OP_MOVE_RANGE, firstDom, lastDom, parentDom, before || NULL);
+	}
+}
+
+const OP_SET_TEXT = 1;
+const OP_INSERT_NODE = 2;
+const OP_MOVE_RANGE = 3;
 
 function cloneNode(node) {
 	if (typeof node != 'object' || node == NULL || node._depth > 0) {
@@ -391,6 +538,9 @@ function cloneNode(node) {
  * @param {Array<PreactElement>} excessDomChildren
  * @param {Array<Component>} commitQueue List of components which have callbacks
  * to invoke in commitRoot
+ * @param {any[]} hostOps
+ * @param {VNode[]} unmountQueue
+ * @param {any[]} removeOps
  * @param {boolean} isHydrating Whether or not we are in hydration
  * @param {any[]} refQueue an array of elements needed to invoke refs
  * @returns {PreactElement}
@@ -403,6 +553,9 @@ function diffElementNodes(
 	namespace,
 	excessDomChildren,
 	commitQueue,
+	hostOps,
+	unmountQueue,
+	removeOps,
 	isHydrating,
 	refQueue
 ) {
@@ -470,8 +623,13 @@ function diffElementNodes(
 	if (nodeType == NULL) {
 		// During hydration, we still have to split merged text from SSR'd HTML.
 		if (oldProps !== newProps && (!isHydrating || dom.data != newProps)) {
-			dom.data = newProps;
+			if (!isHydrating && oldVNode._dom != NULL) {
+				hostOps.push(OP_SET_TEXT, dom, newProps);
+			} else {
+				dom.data = newProps;
+			}
 		}
+		newVNode._lastDom = dom;
 	} else {
 		// If excessDomChildren was not null, repopulate it with the current element's children:
 		excessDomChildren = excessDomChildren && slice.call(dom.childNodes);
@@ -546,6 +704,9 @@ function diffElementNodes(
 				nodeType == 'foreignObject' ? XHTML_NAMESPACE : namespace,
 				excessDomChildren,
 				commitQueue,
+				hostOps,
+				unmountQueue,
+				removeOps,
 				excessDomChildren
 					? excessDomChildren[0]
 					: oldVNode._children && getDomSibling(oldVNode, 0),
@@ -587,6 +748,8 @@ function diffElementNodes(
 				setProperty(dom, i, checked, oldProps[i], namespace);
 			}
 		}
+
+		newVNode._lastDom = dom;
 	}
 
 	return dom;
@@ -664,7 +827,7 @@ export function unmount(vnode, parentVNode, skipRemove) {
 		removeNode(vnode._dom);
 	}
 
-	vnode._component = vnode._parent = vnode._dom = UNDEFINED;
+	vnode._component = vnode._parent = vnode._dom = vnode._lastDom = UNDEFINED;
 }
 
 /** The `.render()` method for a PFC backing instance. */

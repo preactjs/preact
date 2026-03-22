@@ -1,4 +1,4 @@
-import { diff, unmount, applyRef } from './index';
+import { diff, applyRef, queuePlacement } from './index';
 import { createVNode, Fragment } from '../create-element';
 import {
 	EMPTY_OBJ,
@@ -33,6 +33,9 @@ import { getDomSibling } from '../component';
  * @param {Array<PreactElement>} excessDomChildren
  * @param {Array<Component>} commitQueue List of components which have callbacks
  * to invoke in commitRoot
+ * @param {any[]} hostOps
+ * @param {VNode[]} unmountQueue
+ * @param {any[]} removeOps
  * @param {PreactElement} oldDom The current attached DOM element any new dom
  * elements should be placed around. Likely `null` on first render (except when
  * hydrating). Can be a sibling DOM element when diffing Fragments that have
@@ -49,6 +52,9 @@ export function diffChildren(
 	namespace,
 	excessDomChildren,
 	commitQueue,
+	hostOps,
+	unmountQueue,
+	removeOps,
 	oldDom,
 	isHydrating,
 	refQueue
@@ -61,7 +67,12 @@ export function diffChildren(
 		/** @type {PreactElement} */
 		newDom,
 		/** @type {PreactElement} */
-		firstChildDom;
+		lastDom,
+		/** @type {PreactElement} */
+		firstChildDom,
+		/** @type {PreactElement} */
+		lastChildDom,
+		matchingIndex;
 
 	// This is a compression of oldParentVNode!=null && oldParentVNode != EMPTY_OBJ && oldParentVNode._children || EMPTY_ARR
 	// as EMPTY_OBJ._children should be `undefined`.
@@ -69,14 +80,21 @@ export function diffChildren(
 	let oldChildren = (oldParentVNode && oldParentVNode._children) || EMPTY_ARR;
 
 	let newChildrenLength = renderResult.length;
+	let hasKeys =
+		hasKeysInRawChildren(renderResult) || hasKeysInChildren(oldChildren);
 
 	oldDom = constructNewChildrenArray(
 		newParentVNode,
 		renderResult,
 		oldChildren,
+		unmountQueue,
+		removeOps,
 		oldDom,
-		newChildrenLength
+		newChildrenLength,
+		hasKeys
 	);
+	let matchingIndices = new Array(newChildrenLength);
+	let forcePlacement = new Uint8Array(newChildrenLength);
 
 	for (i = 0; i < newChildrenLength; i++) {
 		childVNode = newParentVNode._children[i];
@@ -84,8 +102,15 @@ export function diffChildren(
 
 		// At this point, constructNewChildrenArray has assigned _index to be the
 		// matchingIndex for this VNode's oldVNode (or -1 if there is no oldVNode).
-		oldVNode =
-			(childVNode._index != -1 && oldChildren[childVNode._index]) || EMPTY_OBJ;
+		matchingIndex = childVNode._index;
+		matchingIndices[i] = matchingIndex;
+		oldVNode = (matchingIndex != -1 && oldChildren[matchingIndex]) || EMPTY_OBJ;
+		if (
+			typeof childVNode.type != 'function' &&
+			(matchingIndex == -1 || oldChildren[matchingIndex] == NULL)
+		) {
+			forcePlacement[i] = 1;
+		}
 
 		// Update childVNode._index to its final index
 		childVNode._index = i;
@@ -99,6 +124,9 @@ export function diffChildren(
 			namespace,
 			excessDomChildren,
 			commitQueue,
+			hostOps,
+			unmountQueue,
+			removeOps,
 			oldDom,
 			isHydrating,
 			refQueue
@@ -106,6 +134,7 @@ export function diffChildren(
 
 		// Adjust DOM nodes
 		newDom = childVNode._dom;
+		lastDom = childVNode._lastDom || newDom;
 		if (childVNode.ref && oldVNode.ref != childVNode.ref) {
 			if (oldVNode.ref) {
 				applyRef(oldVNode.ref, NULL, childVNode);
@@ -120,21 +149,46 @@ export function diffChildren(
 		if (firstChildDom == NULL && newDom != NULL) {
 			firstChildDom = newDom;
 		}
-
-		let shouldPlace = !!(childVNode._flags & INSERT_VNODE);
-		if (shouldPlace || oldVNode._children === childVNode._children) {
-			oldDom = insert(childVNode, oldDom, parentDom, shouldPlace);
-		} else if (typeof childVNode.type == 'function' && result !== UNDEFINED) {
-			oldDom = result;
-		} else if (newDom) {
-			oldDom = newDom.nextSibling;
+		if (lastDom != NULL) {
+			lastChildDom = lastDom;
 		}
 
-		// Unset diffing flags
-		childVNode._flags &= ~(INSERT_VNODE | MATCHED);
+		if (
+			childVNode.key != NULL &&
+			typeof childVNode.type == 'function' &&
+			oldVNode !== EMPTY_OBJ &&
+			oldVNode._dom != NULL &&
+			newDom != NULL &&
+			oldVNode._dom !== newDom
+		) {
+			forcePlacement[i] = 1;
+		}
+
+		if (!(childVNode._flags & INSERT_VNODE) && lastDom) {
+			oldDom = getDomSiblingAfter(lastDom);
+		} else if (typeof childVNode.type == 'function' && result !== UNDEFINED) {
+			oldDom = result;
+		}
 	}
 
 	newParentVNode._dom = firstChildDom;
+	newParentVNode._lastDom = lastChildDom;
+
+	planPlacements(
+		newParentVNode._children,
+		matchingIndices,
+		forcePlacement,
+		parentDom,
+		hostOps,
+		typeof newParentVNode.type == 'function' ? oldDom : NULL
+	);
+
+	for (i = 0; i < newChildrenLength; i++) {
+		childVNode = newParentVNode._children[i];
+		if (childVNode != NULL) {
+			childVNode._flags &= ~(INSERT_VNODE | MATCHED);
+		}
+	}
 
 	return oldDom;
 }
@@ -148,8 +202,11 @@ function constructNewChildrenArray(
 	newParentVNode,
 	renderResult,
 	oldChildren,
+	unmountQueue,
+	removeOps,
 	oldDom,
-	newChildrenLength
+	newChildrenLength,
+	hasKeys
 ) {
 	/** @type {number} */
 	let i;
@@ -162,7 +219,6 @@ function constructNewChildrenArray(
 		remainingOldChildren = oldChildrenLength;
 
 	let skew = 0;
-
 	newParentVNode._children = new Array(newChildrenLength);
 	for (i = 0; i < newChildrenLength; i++) {
 		// @ts-expect-error We are reusing the childVNode variable to hold both the
@@ -229,7 +285,8 @@ function constructNewChildrenArray(
 			childVNode,
 			oldChildren,
 			skewedIndex,
-			remainingOldChildren
+			remainingOldChildren,
+			hasKeys
 		));
 
 		oldVNode = NULL;
@@ -320,8 +377,10 @@ function constructNewChildrenArray(
 				if (oldVNode._dom == oldDom) {
 					oldDom = getDomSibling(oldVNode);
 				}
-
-				unmount(oldVNode, oldVNode);
+				if (oldVNode._dom != NULL) {
+					removeOps.push(oldVNode._dom, oldVNode._lastDom || oldVNode._dom);
+				}
+				unmountQueue.push(oldVNode);
 			}
 		}
 	}
@@ -330,44 +389,96 @@ function constructNewChildrenArray(
 }
 
 /**
- * @param {VNode} parentVNode
- * @param {PreactElement} oldDom
- * @param {PreactElement} parentDom
- * @param {boolean} shouldPlace
+ * @param {PreactElement} dom
  * @returns {PreactElement}
  */
-function insert(parentVNode, oldDom, parentDom, shouldPlace) {
-	// Note: VNodes in nested suspended trees may be missing _children.
+function getDomSiblingAfter(dom) {
+	do {
+		dom = dom && dom.nextSibling;
+	} while (dom != NULL && dom.nodeType == 8);
+	return dom;
+}
 
-	if (typeof parentVNode.type == 'function') {
-		let children = parentVNode._children;
-		for (let i = 0; children && i < children.length; i++) {
-			if (children[i]) {
-				// If we enter this code path on sCU bailout, where we copy
-				// oldVNode._children to newVNode._children, we need to update the old
-				// children's _parent pointer to point to the newVNode (parentVNode
-				// here).
-				children[i]._parent = parentVNode;
-				oldDom = insert(children[i], oldDom, parentDom, shouldPlace);
-			}
+function planPlacements(
+	children,
+	matchingIndices,
+	forcePlacement,
+	parentDom,
+	hostOps,
+	oldDom
+) {
+	let stable = getStablePlacementSet(children, matchingIndices, forcePlacement);
+	let before = oldDom;
+
+	for (let i = children.length; i--; ) {
+		let child = children[i];
+		if (child == NULL || child._dom == NULL) continue;
+
+		if (
+			(matchingIndices[i] == -1 && typeof child.type != 'function') ||
+			forcePlacement[i] ||
+			(!stable[i] && matchingIndices[i] != -1)
+		) {
+			queuePlacement(child, before, parentDom, hostOps);
 		}
 
-		return oldDom;
-	} else if (parentVNode._dom != oldDom) {
-		if (shouldPlace) {
-			if (oldDom && parentVNode.type && !oldDom.parentNode) {
-				oldDom = getDomSibling(parentVNode);
-			}
-			parentDom.insertBefore(parentVNode._dom, oldDom || NULL);
+		before = child._dom;
+	}
+}
+
+function getStablePlacementSet(children, matchingIndices, forcePlacement) {
+	let positions = [];
+	let recordIndices = [];
+	let predecessors = [];
+	let tails = [];
+	let stable = new Uint8Array(children.length);
+
+	for (let i = 0; i < children.length; i++) {
+		let child = children[i];
+		let oldIndex = matchingIndices[i];
+		if (
+			child == NULL ||
+			child._dom == NULL ||
+			oldIndex == -1 ||
+			forcePlacement[i]
+		) {
+			continue;
 		}
-		oldDom = parentVNode._dom;
+
+		let tailIndex = lowerBound(tails, positions, oldIndex);
+		positions.push(oldIndex);
+		recordIndices.push(i);
+		predecessors.push(tailIndex > 0 ? tails[tailIndex - 1] : -1);
+
+		if (tailIndex == tails.length) {
+			tails.push(positions.length - 1);
+		} else {
+			tails[tailIndex] = positions.length - 1;
+		}
 	}
 
-	do {
-		oldDom = oldDom && oldDom.nextSibling;
-	} while (oldDom != NULL && oldDom.nodeType == 8);
+	for (
+		let i = tails.length ? tails[tails.length - 1] : -1;
+		i != -1;
+		i = predecessors[i]
+	) {
+		stable[recordIndices[i]] = 1;
+	}
 
-	return oldDom;
+	return stable;
+}
+
+function lowerBound(tails, positions, value) {
+	let low = 0;
+	let high = tails.length;
+
+	while (low < high) {
+		let mid = (low + high) >> 1;
+		if (positions[tails[mid]] < value) low = mid + 1;
+		else high = mid;
+	}
+
+	return low;
 }
 
 /**
@@ -400,7 +511,8 @@ function findMatchingIndex(
 	childVNode,
 	oldChildren,
 	skewedIndex,
-	remainingOldChildren
+	remainingOldChildren,
+	hasKeys
 ) {
 	const key = childVNode.key;
 	const type = childVNode.type;
@@ -419,8 +531,7 @@ function findMatchingIndex(
 	// If there is an unkeyed functional VNode, that isn't a built-in like our Fragment,
 	// we should not search as we risk re-using state of an unrelated VNode. (reverted for now)
 	let shouldSearch =
-		// (typeof type != 'function' || type === Fragment || key) &&
-		remainingOldChildren > (matched ? 1 : 0);
+		key != NULL && hasKeys && remainingOldChildren > (matched ? 1 : 0);
 
 	if (
 		(oldVNode === NULL && key == null) ||
@@ -445,4 +556,23 @@ function findMatchingIndex(
 	}
 
 	return -1;
+}
+
+function hasKeysInChildren(children) {
+	for (let i = 0; i < children.length; i++) {
+		if (children[i] != NULL && children[i].key != NULL) return true;
+	}
+	return false;
+}
+
+function hasKeysInRawChildren(children) {
+	for (let i = 0; i < children.length; i++) {
+		let child = children[i];
+		if (isArray(child)) {
+			if (hasKeysInRawChildren(child)) return true;
+		} else if (child != NULL && typeof child == 'object' && child.key != NULL) {
+			return true;
+		}
+	}
+	return false;
 }
