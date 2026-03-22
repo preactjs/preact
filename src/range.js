@@ -1,52 +1,42 @@
 import { NULL } from './constants';
-import {
-	getOwnedAnchorDom,
-	getOwnedChildren,
-	getOwnedFirstDom,
-	getOwnedLastDom,
-	getOwnedVNode,
-	isBackingNode,
-	setOwnedRange
-} from './backing';
+import { getOwnedVNode, isBackingNode } from './backing';
 
 /**
- * Return the first DOM node owned by a vnode subtree.
- * @param {import('./internal').VNode | import('./internal').BackingNode} vnode
+ * Return the first DOM node owned by a backing or vnode subtree.
+ * @param {import('./internal').VNode | import('./internal').BackingNode} node
  * @returns {import('./internal').PreactElement | null}
  */
-export function getFirstDom(vnode) {
-	return isBackingNode(vnode) ? vnode._firstDom : getOwnedFirstDom(vnode);
+export function getFirstDom(node) {
+	return isBackingNode(node) ? node._firstDom : NULL;
 }
 
 /**
- * Return the last DOM node owned by a vnode subtree.
- * @param {import('./internal').VNode | import('./internal').BackingNode} vnode
+ * Return the last DOM node owned by a backing or vnode subtree.
+ * @param {import('./internal').VNode | import('./internal').BackingNode} node
  * @returns {import('./internal').PreactElement | null}
  */
-export function getLastDom(vnode) {
-	return isBackingNode(vnode) ? vnode._lastDom : getOwnedLastDom(vnode);
+export function getLastDom(node) {
+	return isBackingNode(node) ? node._lastDom : NULL;
 }
 
 /**
- * Return the DOM node that should be used as this vnode subtree's anchor.
- * @param {import('./internal').VNode | import('./internal').BackingNode} vnode
+ * Return the anchor DOM node for a backing or vnode subtree.
+ * @param {import('./internal').VNode | import('./internal').BackingNode} node
  * @returns {import('./internal').PreactElement | null}
  */
-export function getAnchorDom(vnode) {
-	return isBackingNode(vnode) ? vnode._anchorDom : getOwnedAnchorDom(vnode);
+export function getAnchorDom(node) {
+	return isBackingNode(node) ? node._anchorDom : NULL;
 }
 
 /**
- * Recompute the owned DOM range for a vnode from its rendered children.
- * @param {import('./internal').VNode | import('./internal').BackingNode} vnode
+ * Recompute the owned DOM range for a backing node from its children.
+ * @param {import('./internal').BackingNode} backing
  */
-export function updateRangeFromChildren(vnode) {
+export function updateRangeFromChildren(backing) {
 	let firstDom = NULL;
 	let lastDom = NULL;
 	let anchorDom = NULL;
-	let children = isBackingNode(vnode)
-		? vnode._children
-		: getOwnedChildren(vnode);
+	let children = backing._children;
 
 	if (children != NULL) {
 		for (let i = 0; i < children.length; i++) {
@@ -68,11 +58,7 @@ export function updateRangeFromChildren(vnode) {
 		}
 	}
 
-	if (isBackingNode(vnode)) {
-		vnode._firstDom = firstDom;
-		vnode._lastDom = lastDom;
-		vnode._anchorDom = anchorDom;
-	} else {
-		setOwnedRange(vnode, firstDom, lastDom, anchorDom);
-	}
+	backing._firstDom = firstDom;
+	backing._lastDom = lastDom;
+	backing._anchorDom = anchorDom;
 }
