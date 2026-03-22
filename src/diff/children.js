@@ -324,7 +324,17 @@ export function diffChildren(
 		getAnchorDom(newParentVNode)
 	);
 
-	if (needsPlacement) {
+	// Fragment initial mount: skip placement. The parent's planner will
+	// handle positioning Fragment children with correct sibling anchors.
+	// Fragment updates (oldParentVNode !== EMPTY_OBJ) still run placement
+	// to handle internal reordering. Root Fragments (depth 0) must also
+	// run placement since they have no parent planner above them.
+	let skipPlacement =
+		newParentVNode.type === Fragment &&
+		oldParentVNode === EMPTY_OBJ &&
+		newParentVNode._depth > 0;
+
+	if (needsPlacement && !skipPlacement) {
 		if (childDiffStats != NULL) childDiffStats.placementPasses++;
 		let placementSeed =
 			newParentVNode.type === Fragment
@@ -335,50 +345,30 @@ export function diffChildren(
 					: typeof newParentVNode.type == 'function'
 						? oldDom
 						: NULL;
-		if (
-			newParentVNode.type === Fragment &&
-			oldParentVNode === EMPTY_OBJ &&
-			canPlaceFreshFragmentChildrenLeftToRight(
-				children,
-				matchingIndices,
-				placementStatus,
-				placementFirstDom
-			)
-		) {
-			for (i = 0; i < newChildrenLength; i++) {
-				childVNode = children[i];
-				if (childVNode != NULL && placementFirstDom[i] != NULL) {
-					queuePlacement(
-						childVNode,
-						placementSeed,
-						parentDom,
-						hostOps,
-						hostOpCounts
-					);
-				}
-			}
-		} else {
-			planPlacements(
-				children,
-				matchingIndices,
-				forcePlacement,
-				placementFirstDom,
-				placementAnchors,
-				placementBefore,
-				placementStatus,
-				parentDom,
-				hostOps,
-				placementSeed,
-				hasKeys,
-				hostOpCounts
-			);
-		}
+		planPlacements(
+			children,
+			matchingIndices,
+			forcePlacement,
+			placementFirstDom,
+			placementAnchors,
+			placementBefore,
+			placementStatus,
+			parentDom,
+			hostOps,
+			placementSeed,
+			hasKeys,
+			hostOpCounts
+		);
 	}
 
 	for (i = 0; i < newChildrenLength; i++) {
-		childVNode = children[i];
-		if (childVNode != NULL) {
-			childVNode._flags &= ~(INSERT_VNODE | MATCHED);
+		let child = children[i];
+		if (child != NULL) {
+			// Clear diff-time flags on the descriptor vnode, not the backing node
+			let cv = getOwnedVNode(child);
+			if (cv != NULL) {
+				cv._flags &= ~(INSERT_VNODE | MATCHED);
+			}
 		}
 	}
 
@@ -660,7 +650,12 @@ function diffStrictUnkeyedChildren(
 		lastChildDom,
 		getAnchorDom(newParentVNode)
 	);
-	if (needsPlacement) {
+	let skipPlacement =
+		newParentVNode.type === Fragment &&
+		oldChildren.length === 0 &&
+		newParentVNode._depth > 0;
+
+	if (needsPlacement && !skipPlacement) {
 		if (childDiffStats != NULL) childDiffStats.placementPasses++;
 		planPlacements(
 			children,

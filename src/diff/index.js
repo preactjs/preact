@@ -31,6 +31,7 @@ import {
 	getOwnedChildren,
 	getOwnedFirstDom,
 	getOwnedVNode,
+	isBackingNode,
 	reuseBacking,
 	setOwnedChildren,
 	setOwnedRange
@@ -674,9 +675,23 @@ export function queuePlacement(
 	if (firstDom === lastDom) {
 		if (hostOpCounts != NULL) hostOpCounts.insertNode++;
 		hostOps.push(OP_INSERT_NODE, firstDom, parentDom, before || NULL);
-	} else {
+	} else if (firstDom.parentNode != NULL) {
+		// Children already in DOM — move as contiguous range
 		if (hostOpCounts != NULL) hostOpCounts.moveRange++;
 		hostOps.push(OP_MOVE_RANGE, firstDom, lastDom, parentDom, before || NULL);
+	} else {
+		// Children not in DOM yet (initial Fragment mount). Walk backing
+		// children and insert each individually. Recurse for nested Fragments.
+		let children = isBackingNode(vnode)
+			? vnode._children
+			: getOwnedChildren(vnode);
+		if (children) {
+			for (let i = 0; i < children.length; i++) {
+				if (children[i] != NULL) {
+					queuePlacement(children[i], before, parentDom, hostOps, hostOpCounts);
+				}
+			}
+		}
 	}
 }
 
