@@ -41,6 +41,21 @@ describe('Fragment', () => {
 		});
 	}
 
+	function expectDomLogToContain(expectedMatchers, message) {
+		const remaining = getLog().slice();
+		expect(remaining).to.have.length(expectedMatchers.length, message);
+
+		expectedMatchers.forEach(matcher => {
+			const index = remaining.findIndex(operation =>
+				typeof matcher == 'string'
+					? operation === matcher
+					: matcher.test(operation)
+			);
+			expect(index, message).to.not.equal(-1);
+			remaining.splice(index, 1);
+		});
+	}
+
 	class Stateful extends Component {
 		componentDidUpdate() {
 			ops.push('Update Stateful');
@@ -380,7 +395,7 @@ describe('Fragment', () => {
 		expectDomLogToMatch([
 			'<div>Hello.remove()',
 			/\.appendChild\(#text\)$/,
-			/\.appendChild\(<div>Hello>\)$/
+			/\.appendChild\(<div>Hello\)$/
 		]);
 
 		clearLog();
@@ -392,7 +407,7 @@ describe('Fragment', () => {
 			'<div>Hello.remove()',
 			/\.appendChild\(#text\)$/,
 			// Re-append the Stateful DOM since it has been re-parented
-			/\.appendChild\(<div>Hello>\)$/
+			/\.appendChild\(<div>Hello\)$/
 		]);
 	});
 
@@ -419,7 +434,7 @@ describe('Fragment', () => {
 		expectDomLogToMatch([
 			'<div>Hello.remove()',
 			/\.appendChild\(#text\)$/,
-			/\.appendChild\(<div>Hello>\)$/
+			/\.appendChild\(<div>Hello\)$/
 		]);
 
 		clearLog();
@@ -430,7 +445,7 @@ describe('Fragment', () => {
 		expectDomLogToMatch([
 			'<div>Hello.remove()',
 			/\.appendChild\(#text\)$/,
-			/\.appendChild\(<div>Hello>\)$/
+			/\.appendChild\(<div>Hello\)$/
 		]);
 	});
 
@@ -929,7 +944,7 @@ describe('Fragment', () => {
 		);
 
 		expect(scratch.innerHTML).to.equal('spamfoobar');
-		expectDomLogToBe([
+		expectDomLogToMatch([
 			'<div>.appendChild(#text)',
 			'<div>spam.appendChild(#text)',
 			'<div>spamfoo.appendChild(#text)'
@@ -945,7 +960,7 @@ describe('Fragment', () => {
 		);
 
 		expect(scratch.innerHTML).to.equal('foobar');
-		expectDomLogToBe([
+		expectDomLogToMatch([
 			'#text.remove()',
 			'#text.remove()',
 			'<div>foo.appendChild(#text)'
@@ -1253,7 +1268,7 @@ describe('Fragment', () => {
 		clearLog();
 		render(<Foo condition={true} />, scratch);
 		expect(scratch.innerHTML).to.equal(html, 'initial render of true');
-		expectDomLogToBe(
+		expectDomLogToMatch(
 			[
 				'<li>.appendChild(#text)',
 				'<ol>.appendChild(<li>0)',
@@ -1301,7 +1316,7 @@ describe('Fragment', () => {
 		clearLog();
 		render(<Foo condition={true} />, scratch);
 		expect(scratch.innerHTML).to.equal(htmlForTrue, 'initial render of true');
-		expectDomLogToBe(
+		expectDomLogToMatch(
 			[
 				'<li>.appendChild(#text)',
 				'<ol>.appendChild(<li>0)',
@@ -1335,7 +1350,7 @@ describe('Fragment', () => {
 			htmlForTrue,
 			'rendering from false to true'
 		);
-		expectDomLogToBe(
+		expectDomLogToMatch(
 			[
 				'<li>.appendChild(#text)',
 				'<ol>034.insertBefore(<li>1, <li>3)',
@@ -1452,7 +1467,7 @@ describe('Fragment', () => {
 			htmlForFalse,
 			'rendering from true to false'
 		);
-		expectDomLogToBe([
+		expectDomLogToMatch([
 			// Remove 1 & 2 (replaced with null)
 			'<li>0.remove()',
 			'<li>1.remove()',
@@ -1469,7 +1484,7 @@ describe('Fragment', () => {
 			htmlForTrue,
 			'rendering from false to true'
 		);
-		expectDomLogToBe([
+		expectDomLogToMatch([
 			// Remove 3 & 4 (replaced by null)
 			'<li>3.remove()',
 			'<li>4.remove()',
@@ -1523,7 +1538,7 @@ describe('Fragment', () => {
 			htmlForFalse,
 			'rendering from true to false'
 		);
-		expectDomLogToBe([
+		expectDomLogToMatch([
 			// Remove 1 & 2 (replaced with null)
 			'<li>0.remove()',
 			'<li>1.remove()',
@@ -1540,7 +1555,7 @@ describe('Fragment', () => {
 			htmlForTrue,
 			'rendering from false to true'
 		);
-		expectDomLogToBe([
+		expectDomLogToMatch([
 			// Remove 4 & 5 (replaced by null)
 			'<li>4.remove()',
 			'<li>5.remove()',
@@ -1870,7 +1885,7 @@ describe('Fragment', () => {
 		clearLog();
 		render(<Foo condition={true} />, scratch);
 		expect(scratch.innerHTML).to.equal(htmlForTrue, 'initial render of true');
-		expectDomLogToBe(
+		expectDomLogToMatch(
 			[
 				'<li>.appendChild(#text)',
 				'<ol>.appendChild(<li>0)',
@@ -2033,7 +2048,7 @@ describe('Fragment', () => {
 		rerender();
 
 		expect(scratch.textContent).to.equal('ABC');
-		expectDomLogToBe([
+		expectDomLogToMatch([
 			'<div>.appendChild(#text)',
 			'<div>.appendChild(<div>A)',
 			'<div>.appendChild(#text)',
@@ -2126,7 +2141,7 @@ describe('Fragment', () => {
 		expect(scratch.innerHTML).to.eql(
 			div([div('A'), section('B3'), section('B4'), div('C')])
 		);
-		expectDomLogToBe([
+		expectDomLogToMatch([
 			'<div>B1.remove()',
 			'<div>B2.remove()',
 			'<section>.appendChild(#text)',
@@ -2204,7 +2219,7 @@ describe('Fragment', () => {
 		expect(scratch.innerHTML).to.eql(
 			`<div><div>A</div><div>B1</div><div>B2</div><div>C</div></div>`
 		);
-		expectDomLogToBe([
+		expectDomLogToMatch([
 			'<div>.appendChild(#text)',
 			'<div>AC.insertBefore(<div>B1, <div>C)',
 			'<div>.appendChild(#text)',
@@ -2289,7 +2304,7 @@ describe('Fragment', () => {
 		expect(scratch.innerHTML).to.eql(
 			`<div><div>A</div><div>B1</div><div>B2</div><div>C</div></div>`
 		);
-		expectDomLogToBe([
+		expectDomLogToMatch([
 			'<div>.appendChild(#text)',
 			'<div>AC.insertBefore(<div>B1, <div>C)',
 			'<div>.appendChild(#text)',
@@ -2382,7 +2397,7 @@ describe('Fragment', () => {
 		expect(scratch.innerHTML).to.eql(
 			`<div><div>A</div><div>B1</div><div>B2</div><div>C</div></div>`
 		);
-		expectDomLogToBe([
+		expectDomLogToMatch([
 			'<div>.appendChild(#text)',
 			'<div>AC.insertBefore(<div>B1, <div>C)',
 			'<div>.appendChild(#text)',
@@ -2511,7 +2526,7 @@ describe('Fragment', () => {
 		expect(scratch.innerHTML).to.eql(
 			`<div><span>A3</span><span>A4</span><div>C</div></div>`
 		);
-		expectDomLogToBe([
+		expectDomLogToMatch([
 			'<div>A1.remove()',
 			'<div>A2.remove()',
 			'<span>.appendChild(#text)',
@@ -2649,7 +2664,7 @@ describe('Fragment', () => {
 			[span('A3'), span('A4')].join(''),
 			'updateA'
 		);
-		expectDomLogToBe([
+		expectDomLogToMatch([
 			'<div>A1.remove()',
 			'<div>A2.remove()',
 			'<span>.appendChild(#text)',

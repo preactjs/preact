@@ -120,7 +120,8 @@ export function diffChildren(
 
 	let newChildrenLength = renderResult.length;
 	let hasKeys =
-		hasKeysInRawChildren(renderResult) || hasKeysInChildren(oldChildren);
+		!hasDuplicateKeysInRawChildren(renderResult) &&
+		(hasKeysInRawChildren(renderResult) || hasKeysInChildren(oldChildren));
 
 	if (
 		!hasKeys &&
@@ -313,27 +314,51 @@ export function diffChildren(
 		if (childDiffStats != NULL) childDiffStats.placementPasses++;
 		let placementSeed =
 			newParentVNode.type === Fragment
-				? placementOldDom
+				? getDomSibling(newParentVNode)
 				: typeof newParentVNode.type == 'function' &&
 					  countNonNullChildren(children) <= 1
 					? placementOldDom
 					: typeof newParentVNode.type == 'function'
 						? oldDom
 						: NULL;
-		planPlacements(
-			children,
-			matchingIndices,
-			forcePlacement,
-			placementFirstDom,
-			placementAnchors,
-			placementBefore,
-			placementStatus,
-			parentDom,
-			hostOps,
-			placementSeed,
-			hasKeys,
-			hostOpCounts
-		);
+		if (
+			newParentVNode.type === Fragment &&
+			oldParentVNode === EMPTY_OBJ &&
+			canPlaceFreshFragmentChildrenLeftToRight(
+				children,
+				matchingIndices,
+				placementStatus,
+				placementFirstDom
+			)
+		) {
+			for (i = 0; i < newChildrenLength; i++) {
+				childVNode = children[i];
+				if (childVNode != NULL && placementFirstDom[i] != NULL) {
+					queuePlacement(
+						childVNode,
+						placementSeed,
+						parentDom,
+						hostOps,
+						hostOpCounts
+					);
+				}
+			}
+		} else {
+			planPlacements(
+				children,
+				matchingIndices,
+				forcePlacement,
+				placementFirstDom,
+				placementAnchors,
+				placementBefore,
+				placementStatus,
+				parentDom,
+				hostOps,
+				placementSeed,
+				hasKeys,
+				hostOpCounts
+			);
+		}
 	}
 
 	for (i = 0; i < newChildrenLength; i++) {
@@ -1105,6 +1130,23 @@ function countNonNullChildren(children) {
 	return count;
 }
 
+function canPlaceFreshFragmentChildrenLeftToRight(
+	children,
+	matchingIndices,
+	placementStatus,
+	firstDoms
+) {
+	let sawChild = false;
+	for (let i = 0; i < children.length; i++) {
+		if (children[i] == NULL || firstDoms[i] == NULL) continue;
+		sawChild = true;
+		if (matchingIndices[i] != -1 || placementStatus[i] !== PLAN_INSERT) {
+			return false;
+		}
+	}
+	return sawChild;
+}
+
 /**
  * Flatten and loop through the children of a virtual node
  * @param {ComponentChildren} children The unflattened children of a virtual
@@ -1205,6 +1247,24 @@ function hasKeysInRawChildren(children) {
 			(child._flags & HAS_KEY) != 0
 		) {
 			return true;
+		}
+	}
+	return false;
+}
+
+function hasDuplicateKeysInRawChildren(children, seen) {
+	seen = seen || new Set();
+	for (let i = 0; i < children.length; i++) {
+		let child = children[i];
+		if (isArray(child)) {
+			if (hasDuplicateKeysInRawChildren(child, seen)) return true;
+		} else if (
+			child != NULL &&
+			typeof child == 'object' &&
+			(child._flags & HAS_KEY) != 0
+		) {
+			if (seen.has(child.key)) return true;
+			seen.add(child.key);
 		}
 	}
 	return false;
