@@ -472,8 +472,13 @@ export function diff(
 
 	if ((tmp = options.diffed)) tmp(newVNode, curBacking);
 
-	// Store oldDom cursor on backing for callers that need it
-	if (curBacking != NULL) curBacking._oldDom = oldDom;
+	// Keep vnode DOM mirrors in sync while backing nodes remain the source of truth.
+	if (curBacking != NULL) {
+		newVNode._dom = curBacking._firstDom;
+		newVNode._lastDom = curBacking._lastDom;
+		newVNode._anchorDom = curBacking._anchorDom;
+		curBacking._oldDom = oldDom;
+	}
 	return newVNode._flags & MODE_SUSPENDED ? NULL : curBacking;
 }
 

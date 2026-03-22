@@ -224,6 +224,7 @@ export function diffChildren(
 		// Eagerly create backing with parent set for error boundary traversal
 		if (parentBacking != NULL && oldChildBacking == NULL) {
 			oldChildBacking = createBacking(childVNode, 0);
+			oldChildBacking._vnode = NULL;
 			oldChildBacking._parent = parentBacking;
 		}
 
@@ -246,7 +247,8 @@ export function diffChildren(
 				matchingIndex != -1 &&
 				childVNode.type == NULL &&
 				oldVNode !== EMPTY_OBJ &&
-				getFirstDom(oldVNode) != NULL &&
+				oldChildBacking != NULL &&
+				oldChildBacking._firstDom != NULL &&
 				(childVNode._flags & INSERT_VNODE) == 0,
 			hostOpCounts,
 			childDiffStats
@@ -265,13 +267,15 @@ export function diffChildren(
 			newDom != NULL
 				? newDom
 				: matchingIndex != -1 && oldVNode !== EMPTY_OBJ
-					? getFirstDom(oldVNode)
+					? oldChildBacking != NULL
+						? oldChildBacking._firstDom
+						: NULL
 					: NULL;
 		placementAnchors[i] =
 			newDom != NULL
-				? childBacking || childVNode
+				? childBacking
 				: matchingIndex != -1 && oldVNode !== EMPTY_OBJ
-					? oldChildBacking || oldVNode
+					? oldChildBacking
 					: NULL;
 		if (childVNode.ref && oldVNode.ref != childVNode.ref) {
 			if (oldVNode.ref) {
@@ -290,7 +294,8 @@ export function diffChildren(
 			if (parentBacking != NULL) {
 				parentBacking._firstDom = firstChildDom;
 				parentBacking._lastDom = lastChildDom;
-				parentBacking._anchorDom = getAnchorDom(childVNode);
+				parentBacking._anchorDom =
+					childBacking != NULL ? childBacking._anchorDom : NULL;
 			}
 		}
 		if (lastDom != NULL) {
@@ -298,7 +303,8 @@ export function diffChildren(
 		}
 
 		if (typeof childVNode.type == 'function' && oldVNode !== EMPTY_OBJ) {
-			let oldFirstDom = getFirstDom(oldVNode);
+			let oldFirstDom =
+				oldChildBacking != NULL ? oldChildBacking._firstDom : NULL;
 			if (newDom != NULL && oldFirstDom == NULL) {
 				// Component that newly produces DOM (was empty before)
 				forcePlacement[i] = 1;
@@ -359,7 +365,7 @@ export function diffChildren(
 		if (childDiffStats != NULL) childDiffStats.placementPasses++;
 		let placementSeed =
 			newParentVNode.type === Fragment
-				? getDomSibling(newParentVNode)
+				? getDomSibling(parentBacking || newParentVNode)
 				: typeof newParentVNode.type == 'function' &&
 					  countNonNullChildren(children) <= 1
 					? placementOldDom
@@ -596,6 +602,7 @@ function diffStrictUnkeyedChildren(
 		// Eagerly create backing with parent set for error boundary traversal
 		if (parentBacking != NULL && oldChildBacking == NULL) {
 			oldChildBacking = createBacking(childVNode, 0);
+			oldChildBacking._vnode = NULL;
 			oldChildBacking._parent = parentBacking;
 		}
 
@@ -616,7 +623,8 @@ function diffStrictUnkeyedChildren(
 			(newParentVNode._flags & SINGLE_TEXT_CHILD) != 0 &&
 				childVNode.type == NULL &&
 				oldVNode !== EMPTY_OBJ &&
-				getFirstDom(oldVNode) != NULL,
+				oldChildBacking != NULL &&
+				oldChildBacking._firstDom != NULL,
 			hostOpCounts,
 			childDiffStats
 		);
@@ -646,7 +654,8 @@ function diffStrictUnkeyedChildren(
 			if (parentBacking != NULL) {
 				parentBacking._firstDom = firstChildDom;
 				parentBacking._lastDom = lastChildDom;
-				parentBacking._anchorDom = getAnchorDom(childVNode);
+				parentBacking._anchorDom =
+					childBacking != NULL ? childBacking._anchorDom : NULL;
 			}
 		}
 		if (lastDom != NULL) lastChildDom = lastDom;
@@ -655,13 +664,15 @@ function diffStrictUnkeyedChildren(
 			newDom != NULL
 				? newDom
 				: oldVNode !== EMPTY_OBJ
-					? getFirstDom(oldVNode)
+					? oldChildBacking != NULL
+						? oldChildBacking._firstDom
+						: NULL
 					: NULL;
 		placementAnchors[i] =
 			newDom != NULL
-				? childBacking || childVNode
+				? childBacking
 				: oldVNode !== EMPTY_OBJ
-					? oldChildBacking || oldVNode
+					? oldChildBacking
 					: NULL;
 		if (newDom != NULL && placementStatus[i] == PLAN_NONE) {
 			placementStatus[i] = oldVNode === EMPTY_OBJ ? PLAN_INSERT : PLAN_RETAIN;
@@ -1060,6 +1071,22 @@ function planPlacements(
 	hostOpCounts
 ) {
 	computePlacementBefores(firstDoms, anchors, befores, oldDom);
+
+	if (
+		canPlaceFreshFragmentChildrenLeftToRight(
+			children,
+			matchingIndices,
+			placementStatus,
+			firstDoms
+		)
+	) {
+		for (let i = 0; i < children.length; i++) {
+			let child = children[i];
+			if (child == NULL || firstDoms[i] == NULL) continue;
+			queuePlacement(child, oldDom, parentDom, hostOps, hostOpCounts);
+		}
+		return;
+	}
 
 	if (children.length === 1) {
 		let child = children[0];
