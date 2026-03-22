@@ -484,6 +484,11 @@ function diffSingleTextChild(
 		setBackingChildren(parentBacking, children);
 	}
 
+	// Queue placement for new text child
+	if (childFirstDom != NULL && oldVNode == NULL) {
+		queuePlacement(childBacking, oldDom, parentDom, hostOps, hostOpCounts);
+	}
+
 	if (oldVNode != NULL) {
 		oldVNode._flags &= ~MATCHED;
 	}

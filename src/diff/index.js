@@ -323,7 +323,8 @@ export function diff(
 				isHydrating,
 				refQueue,
 				hostOpCounts,
-				childDiffStats
+				childDiffStats,
+				curBacking
 			);
 
 			let newMountedChildren = curBacking._children;
@@ -1176,11 +1177,12 @@ function diffElementNodes(
 					removeOps,
 					excessDomChildren
 						? excessDomChildren[0]
-						: curBacking._children && getDomSibling(oldVNode, 0),
+						: curBacking._children && getDomSibling(curBacking, 0),
 					isHydrating,
 					refQueue,
 					hostOpCounts,
-					childDiffStats
+					childDiffStats,
+					curBacking
 				);
 			}
 
