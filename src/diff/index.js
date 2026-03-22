@@ -24,18 +24,23 @@ import { diffChildren } from './children';
 import { setProperty } from './props';
 import { assign, isArray, removeNode, slice } from '../util';
 import options from '../options';
-import { getAnchorDom, getFirstDom, getLastDom } from '../range';
 import {
+	getAnchorDom,
+	getFirstDom,
+	getLastDom,
+	updateRangeFromChildren
+} from '../range';
+import {
+	BACKING_COMPONENT,
+	BACKING_FRAGMENT,
+	BACKING_HOST,
+	BACKING_SUSPENSE,
 	clearBacking,
-	ensureBacking,
-	getMountedBacking,
-	getOwnedChildren,
-	getOwnedFirstDom,
+	createBacking,
 	getOwnedVNode,
 	isBackingNode,
-	reuseBacking,
-	setOwnedChildren,
-	setOwnedRange
+	setBackingChildren,
+	updateBackingVNode
 } from '../backing';
 
 /**
@@ -53,33 +58,32 @@ import {
  */
 
 /**
- * Diff two virtual nodes and apply proper changes to the DOM
+ * Diff two virtual nodes and apply proper changes to the DOM.
+ *
  * @param {PreactElement} parentDom The parent of the DOM element
- * @param {VNode} newVNode The new virtual node
- * @param {VNode} oldVNode The old virtual node
- * @param {object} globalContext The current context object. Modified by
- * getChildContext
- * @param {string} namespace Current namespace of the DOM node (HTML, SVG, or MathML)
+ * @param {VNode} newVNode The new virtual node (descriptor)
+ * @param {VNode} oldVNode The old virtual node (descriptor)
+ * @param {import('../internal').BackingNode | null} oldBacking The old mounted backing node
+ * @param {object} globalContext
+ * @param {string} namespace
  * @param {Array<PreactElement>} excessDomChildren
- * @param {Array<Component>} commitQueue List of components which have callbacks
- * to invoke in commitRoot
+ * @param {Array<Component>} commitQueue
  * @param {any[]} hostOps
- * @param {VNode[]} unmountQueue
+ * @param {import('../internal').BackingNode[]} unmountQueue
  * @param {any[]} removeOps
- * @param {PreactElement} oldDom The current attached DOM element any new dom
- * elements should be placed around. Likely `null` on first render (except when
- * hydrating). Can be a sibling DOM element when diffing Fragments that have
- * siblings. In most cases, it starts out as `oldChildren[0]._dom`.
- * @param {boolean} isHydrating Whether or not we are in hydration
- * @param {any[]} refQueue an array of elements needed to invoke refs
- * @param {boolean} allowInlineText Whether text writes can be applied inline
+ * @param {PreactElement} oldDom
+ * @param {boolean} isHydrating
+ * @param {any[]} refQueue
+ * @param {boolean} allowInlineText
  * @param {HostOpCounts | null} hostOpCounts
  * @param {ChildDiffStats | null} childDiffStats
+ * @returns {import('../internal').BackingNode | null} The new/updated backing node
  */
 export function diff(
 	parentDom,
 	newVNode,
 	oldVNode,
+	oldBacking,
 	globalContext,
 	namespace,
 	excessDomChildren,
@@ -105,22 +109,11 @@ export function diff(
 	// If the previous diff bailed out, resume creating/hydrating.
 	if (oldVNode._flags & MODE_SUSPENDED) {
 		isHydrating = !!(oldVNode._flags & MODE_HYDRATE);
-		oldDom = getOwnedFirstDom(oldVNode);
-		reuseBacking(newVNode, oldVNode);
-		setOwnedRange(
-			newVNode,
-			oldDom,
-			getLastDom(oldVNode),
-			getAnchorDom(oldVNode)
-		);
+		oldDom = oldBacking != NULL ? oldBacking._firstDom : NULL;
 		excessDomChildren = [oldDom];
 	}
 
 	if ((tmp = options._diff)) tmp(newVNode);
-
-	if (oldVNode !== EMPTY_OBJ) {
-		reuseBacking(newVNode, oldVNode);
-	}
 
 	outer: if (typeof newType == 'function') {
 		try {
