@@ -104,7 +104,13 @@ options._commit = (vnode, commitQueue) => {
 				if (c._renderCallbacks) c._renderCallbacks = [];
 			});
 			commitQueue = [];
-			options._catchError(e, component._vnode);
+			options._catchError(
+				e,
+				component._vnode,
+				undefined,
+				undefined,
+				component._backing
+			);
 		}
 	});
 
@@ -126,7 +132,14 @@ options.unmount = (vnode, backing) => {
 			}
 		});
 		c.__hooks = undefined;
-		if (hasErrored) options._catchError(hasErrored, c._vnode);
+		if (hasErrored)
+			options._catchError(
+				hasErrored,
+				c._vnode,
+				undefined,
+				undefined,
+				c._backing
+			);
 	}
 };
 
@@ -461,7 +474,13 @@ function flushAfterPaintEffects() {
 			hooks._pendingEffects = [];
 		} catch (e) {
 			hooks._pendingEffects = [];
-			options._catchError(e, component._vnode);
+			options._catchError(
+				e,
+				component._vnode,
+				undefined,
+				undefined,
+				component._backing
+			);
 		}
 	}
 }
