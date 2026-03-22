@@ -75,7 +75,6 @@ import {
 export function diff(
 	parentDom,
 	newVNode,
-	oldVNode,
 	oldBacking,
 	globalContext,
 	namespace,
@@ -93,7 +92,8 @@ export function diff(
 ) {
 	/** @type {any} */
 	let tmp,
-		newType = newVNode.type;
+		newType = newVNode.type,
+		oldVNode = oldBacking != NULL ? oldBacking._vnode || EMPTY_OBJ : EMPTY_OBJ;
 
 	// When passing through createElement it assigns the object
 	// constructor as undefined. This to prevent JSON-injection.
@@ -430,7 +430,7 @@ export function diff(
 				}
 				if (!e.then) markAsForce(curBacking);
 			}
-			options._catchError(e, newVNode, oldVNode, NULL, curBacking);
+			options._catchError(e, newVNode, NULL, NULL, curBacking);
 		}
 	} else if (
 		excessDomChildren == NULL &&
@@ -506,7 +506,7 @@ export function commitRoot(
 	hostOpCounts,
 	childDiffStats
 ) {
-	flushUnmounts(unmountQueue, root);
+	flushUnmounts(unmountQueue);
 	flushRemoveOps(removeOps);
 	flushHostOps(hostOps);
 
@@ -599,9 +599,9 @@ function resolvePlacementAnchor(before, parent) {
  * @param {VNode[]} unmountQueue
  * @param {VNode} root
  */
-function flushUnmounts(unmountQueue, root) {
+function flushUnmounts(unmountQueue) {
 	for (let i = 0; i < unmountQueue.length; i++) {
-		unmount(unmountQueue[i], root, true);
+		unmount(unmountQueue[i], NULL, true);
 		unmountQueue[i] = NULL;
 	}
 
@@ -1117,14 +1117,12 @@ function diffElementNodes(
 				)
 			) {
 				let oldTextChild = curBacking._children[0];
-				let oldTextVNode = getOwnedVNode(oldTextChild);
 				let oldTextBacking = isBackingNode(oldTextChild) ? oldTextChild : NULL;
 				let textVNode = createTextVNode(newChildren, newVNode);
 				let textBacking = diff(
 					// @ts-expect-error
 					newVNode.type == 'template' ? dom.content : dom,
 					textVNode,
-					oldTextVNode,
 					oldTextBacking,
 					globalContext,
 					nodeType == 'foreignObject' ? XHTML_NAMESPACE : namespace,
@@ -1261,59 +1259,49 @@ export function applyRef(ref, value, vnode, backing) {
  * @param {boolean} [skipRemove] Flag that indicates that a parent node of the
  * current element is already detached from the DOM.
  */
-export function unmount(vnode, parentVNode, skipRemove) {
+export function unmount(backing, parentBacking, skipRemove) {
 	let r;
-	// For the top-level unmount call, the backing comes from the unmount queue
-	// which contains BackingNodes. For recursive calls, we resolve backing from
-	// the children array.
-	let unmountBacking = NULL;
-	if (isBackingNode(vnode)) {
-		unmountBacking = vnode;
-		vnode = unmountBacking._vnode;
-		if (vnode == NULL) return;
-	}
+	if (!isBackingNode(backing)) return;
+	let vnode = backing._vnode;
 
-	if (options.unmount) options.unmount(vnode, unmountBacking);
+	if (options.unmount) options.unmount(vnode, backing);
 
-	if ((r = vnode.ref)) {
-		if (
-			!r.current ||
-			r.current == (unmountBacking != NULL ? unmountBacking._firstDom : NULL)
-		) {
-			applyRef(r, NULL, parentVNode, unmountBacking);
+	if (vnode && (r = vnode.ref)) {
+		if (!r.current || r.current == backing._firstDom) {
+			applyRef(r, NULL, vnode, backing);
 		}
 	}
 
-	if (unmountBacking && (r = unmountBacking._component) != NULL) {
+	if ((r = backing._component) != NULL) {
 		if (r.componentWillUnmount) {
 			try {
 				r.componentWillUnmount();
 			} catch (e) {
-				options._catchError(e, parentVNode, NULL, NULL, unmountBacking);
+				options._catchError(e, vnode, NULL, NULL, backing);
 			}
 		}
 
 		r.base = r._parentDom = NULL;
 	}
 
-	if (unmountBacking && (r = unmountBacking._children)) {
+	if ((r = backing._children)) {
 		for (let i = 0; i < r.length; i++) {
 			let child = r[i];
 			if (child != NULL) {
 				unmount(
 					child,
-					parentVNode,
-					skipRemove || typeof vnode.type != 'function'
+					backing,
+					skipRemove || (vnode != NULL && typeof vnode.type != 'function')
 				);
 			}
 		}
 	}
 
-	if (!skipRemove && unmountBacking) {
-		removeNode(unmountBacking._firstDom);
+	if (!skipRemove) {
+		removeNode(backing._firstDom);
 	}
 
-	clearBacking(unmountBacking);
+	clearBacking(backing);
 }
 
 /** The `.render()` method for a PFC backing instance. */

@@ -230,7 +230,6 @@ export function diffChildren(
 		let result = diff(
 			parentDom,
 			childVNode,
-			oldVNode,
 			oldChildBacking,
 			globalContext,
 			namespace,
@@ -453,7 +452,6 @@ function diffSingleTextChild(
 	let childBacking = diff(
 		parentDom,
 		childVNode,
-		oldVNode || EMPTY_OBJ,
 		oldTextBacking,
 		globalContext,
 		namespace,
@@ -539,11 +537,12 @@ function diffStrictUnkeyedChildren(
 			childDiffStats
 		);
 		children[i] = childVNode;
-		let oldVNode = getOwnedVNode(oldChildren[i]);
+		let oldChild = oldChildren[i];
+		let oldVNode = getOwnedVNode(oldChild);
 		if (childVNode == NULL) {
 			if (oldVNode != NULL) {
 				oldDom = queueRemoval(
-					oldVNode,
+					oldChild,
 					unmountQueue,
 					removeOps,
 					oldDom,
@@ -562,7 +561,7 @@ function diffStrictUnkeyedChildren(
 		if (!reused) {
 			if (oldVNode != NULL) {
 				oldDom = queueRemoval(
-					oldVNode,
+					oldChild,
 					unmountQueue,
 					removeOps,
 					oldDom,
@@ -598,7 +597,6 @@ function diffStrictUnkeyedChildren(
 		let result = diff(
 			parentDom,
 			childVNode,
-			oldVNode,
 			oldChildBacking,
 			globalContext,
 			namespace,
@@ -674,10 +672,10 @@ function diffStrictUnkeyedChildren(
 	}
 
 	for (; i < oldChildrenLength; i++) {
-		let oldVNode = getOwnedVNode(oldChildren[i]);
-		if (oldVNode != NULL) {
+		let oldChild = oldChildren[i];
+		if (oldChild != NULL) {
 			oldDom = queueRemoval(
-				oldVNode,
+				oldChild,
 				unmountQueue,
 				removeOps,
 				oldDom,
@@ -805,23 +803,23 @@ function normalizeChild(childVNode, newParentVNode, index, childDiffStats) {
 }
 
 function queueRemoval(
-	oldVNode,
+	oldChild,
 	unmountQueue,
 	removeOps,
 	oldDom,
 	hostOpCounts,
 	childDiffStats
 ) {
-	let oldFirstDom = getFirstDom(oldVNode);
+	let oldFirstDom = getFirstDom(oldChild);
 	if (oldFirstDom == oldDom) {
-		oldDom = getDomSibling(oldVNode);
+		oldDom = getDomSibling(oldChild);
 	}
 	if (oldFirstDom != NULL) {
 		if (hostOpCounts != NULL) hostOpCounts.removeRange++;
 		if (childDiffStats != NULL) childDiffStats.removals++;
-		removeOps.push(oldFirstDom, getLastDom(oldVNode));
+		removeOps.push(oldFirstDom, getLastDom(oldChild));
 	}
-	unmountQueue.push(oldVNode);
+	unmountQueue.push(oldChild);
 	return oldDom;
 }
 
@@ -1011,18 +1009,19 @@ function constructNewChildrenArray(
 	// unmounted.
 	if (remainingOldChildren) {
 		for (i = 0; i < oldChildrenLength; i++) {
-			oldVNode = getOwnedVNode(oldChildren[i]);
+			let oldChild = oldChildren[i];
+			oldVNode = getOwnedVNode(oldChild);
 			if (oldVNode != NULL && (oldVNode._flags & MATCHED) == 0) {
-				let oldFirstDom = getFirstDom(oldVNode);
+				let oldFirstDom = getFirstDom(oldChild);
 				if (oldFirstDom == oldDom) {
-					oldDom = getDomSibling(oldVNode);
+					oldDom = getDomSibling(oldChild);
 				}
 				if (oldFirstDom != NULL) {
 					if (hostOpCounts != NULL) hostOpCounts.removeRange++;
 					if (childDiffStats != NULL) childDiffStats.removals++;
-					removeOps.push(oldFirstDom, getLastDom(oldVNode));
+					removeOps.push(oldFirstDom, getLastDom(oldChild));
 				}
-				unmountQueue.push(oldVNode);
+				unmountQueue.push(oldChild);
 			}
 		}
 	}

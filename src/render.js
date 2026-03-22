@@ -68,7 +68,6 @@ export function render(vnode, parentDom, replaceNode) {
 	parentDom._backing = diff(
 		parentDom,
 		vnode,
-		oldVNode || EMPTY_OBJ,
 		oldBacking,
 		EMPTY_OBJ,
 		parentDom.namespaceURI,
