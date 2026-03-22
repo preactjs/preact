@@ -1,6 +1,5 @@
 import { defineConfig } from 'vitest/config';
 import { transformAsync } from '@babel/core';
-import fs from 'node:fs/promises';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 
@@ -162,6 +161,7 @@ export default defineConfig({
 					filename: id,
 					configFile: false,
 					plugins: [
+						'@babel/plugin-transform-react-jsx',
 						[
 							'babel-plugin-transform-rename-properties',
 							{
@@ -169,7 +169,7 @@ export default defineConfig({
 							}
 						]
 					],
-					include: ['**/src/**/*.js', '**/test/**/*.js']
+					include: ['**/src/**/*.js', '**/test/**/*.js', '**/test/**/*.jsx']
 				});
 
 				return {
@@ -180,6 +180,7 @@ export default defineConfig({
 		}
 	],
 	optimizeDeps: {
+		include: ['preact-render-to-string', 'prop-types'],
 		exclude: [
 			'preact',
 			'preact/compat',
@@ -194,26 +195,13 @@ export default defineConfig({
 			'react-dom'
 		],
 		esbuildOptions: {
-			alias,
-			plugins: [
-				{
-					name: 'load-js-files-as-jsx',
-					setup(build) {
-						build.onLoad({ filter: /.*\.js$/ }, async args => {
-							return {
-								loader: 'jsx',
-								contents: await fs.readFile(args.path, 'utf8')
-							};
-						});
-					}
-				}
-			]
+			alias
 		}
 	},
 	test: {
 		include: [
-			'{debug,devtools,hooks,compat,test-utils,jsx-runtime}/test/{browser,shared}/**/*.test.js',
-			'./test/{browser,shared}/**/*.test.js'
+			'{debug,devtools,hooks,compat,test-utils,jsx-runtime}/test/{browser,shared}/**/*.test.{js,jsx}',
+			'./test/{browser,shared}/**/*.test.{js,jsx}'
 		],
 		cache: false,
 		coverage: {

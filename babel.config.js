@@ -33,10 +33,10 @@ module.exports = function (api) {
 			'@babel/plugin-transform-react-jsx',
 			['babel-plugin-transform-rename-properties', { rename }]
 		],
-		include: ['**/src/**/*.js', '**/test/**/*.js'],
+		include: ['**/src/**/*.js', '**/test/**/*.js', '**/test/**/*.jsx'],
 		overrides: [
 			{
-				test: /(component-stack|debug)\.test\.js$/,
+				test: /(component-stack|debug)\.test\.jsx?$/,
 				plugins: ['@babel/plugin-transform-react-jsx-source']
 			}
 		]
