@@ -41,9 +41,7 @@ const PLAN_MOVE = 3;
  * diffed
  * @param {ComponentChildren[]} renderResult
  * @param {VNode} newParentVNode The new virtual node whose children should be
- * diff'ed against oldParentVNode
- * @param {VNode} oldParentVNode The old virtual node whose children should be
- * diff'ed against newParentVNode
+ * diff'ed
  * @param {object} globalContext The current context object - modified by
  * getChildContext
  * @param {string} namespace Current namespace of the DOM node (HTML, SVG, or MathML)
@@ -67,7 +65,6 @@ export function diffChildren(
 	parentDom,
 	renderResult,
 	newParentVNode,
-	oldParentVNode,
 	globalContext,
 	namespace,
 	excessDomChildren,
@@ -96,16 +93,26 @@ export function diffChildren(
 		/** @type {PreactElement} */
 		lastChildDom,
 		matchingIndex;
+	let parentFlags = newParentVNode._flags;
+	let parentType = newParentVNode.type;
+	let parentDepth = newParentVNode._depth;
+	let parentIsFragment = parentType === Fragment;
+	let parentIsComponent = typeof parentType == 'function';
+	let parentHasSingleTextChild = (parentFlags & SINGLE_TEXT_CHILD) != 0;
+	let parentHasKeys = (parentFlags & HAS_KEY) != 0;
+	let parentHasRawArrayChildren = (parentFlags & HAS_RAW_ARRAY_CHILDREN) != 0;
+	let hadMountedChildren =
+		parentBacking != NULL && parentBacking._children != NULL;
 
-	// This is a compression of oldParentVNode!=null && oldParentVNode != EMPTY_OBJ && oldParentVNode._children || EMPTY_ARR
-	// as EMPTY_OBJ._children should be `undefined`.
 	/** @type {(VNode | import('../internal').BackingNode | null)[]} */
 	let oldChildren =
 		(parentBacking ? parentBacking._children : null) || EMPTY_ARR;
 	let fastResult = diffSingleTextChild(
 		parentDom,
 		renderResult,
-		newParentVNode,
+		parentDepth,
+		parentHasSingleTextChild,
+		parentHasKeys,
 		oldChildren,
 		globalContext,
 		namespace,
@@ -135,7 +142,7 @@ export function diffChildren(
 		!hasKeys &&
 		canDiffStrictUnkeyedChildren(
 			parentDom,
-			newParentVNode,
+			parentHasRawArrayChildren,
 			renderResult,
 			oldChildren,
 			excessDomChildren,
@@ -145,7 +152,10 @@ export function diffChildren(
 		return diffStrictUnkeyedChildren(
 			parentDom,
 			renderResult,
-			newParentVNode,
+			parentDepth,
+			parentIsFragment,
+			parentHasSingleTextChild,
+			hadMountedChildren,
 			oldChildren,
 			globalContext,
 			namespace,
@@ -242,8 +252,8 @@ export function diffChildren(
 			oldDom,
 			isHydrating,
 			refQueue,
-			(newParentVNode._flags & SINGLE_TEXT_CHILD) != 0 &&
-				(newParentVNode._flags & HAS_KEY) == 0 &&
+			parentHasSingleTextChild &&
+				!parentHasKeys &&
 				matchingIndex != -1 &&
 				childVNode.type == NULL &&
 				oldVNode !== EMPTY_OBJ &&
@@ -353,25 +363,21 @@ export function diffChildren(
 
 	// Fragment initial mount: skip placement. The parent's planner will
 	// handle positioning Fragment children with correct sibling anchors.
-	// Fragment updates (oldParentVNode !== EMPTY_OBJ) still run placement
-	// to handle internal reordering. Root Fragments (depth 0) must also
+	// Fragment updates still run placement to handle internal reordering.
+	// Root Fragments (depth 0) must also
 	// run placement since they have no parent planner above them.
 	let skipPlacement =
-		newParentVNode.type === Fragment &&
-		oldParentVNode === EMPTY_OBJ &&
-		newParentVNode._depth > 0;
+		parentIsFragment && !hadMountedChildren && parentDepth > 0;
 
 	if (needsPlacement && !skipPlacement) {
 		if (childDiffStats != NULL) childDiffStats.placementPasses++;
-		let placementSeed =
-			newParentVNode.type === Fragment
-				? getDomSibling(parentBacking)
-				: typeof newParentVNode.type == 'function' &&
-					  countNonNullChildren(children) <= 1
-					? placementOldDom
-					: typeof newParentVNode.type == 'function'
-						? oldDom
-						: NULL;
+		let placementSeed = parentIsFragment
+			? getDomSibling(parentBacking)
+			: parentIsComponent && countNonNullChildren(children) <= 1
+				? placementOldDom
+				: parentIsComponent
+					? oldDom
+					: NULL;
 		planPlacements(
 			children,
 			matchingIndices,
@@ -408,7 +414,9 @@ export function diffChildren(
 function diffSingleTextChild(
 	parentDom,
 	renderResult,
-	newParentVNode,
+	parentDepth,
+	parentHasSingleTextChild,
+	parentHasKeys,
 	oldChildren,
 	globalContext,
 	namespace,
@@ -425,8 +433,8 @@ function diffSingleTextChild(
 	parentBacking
 ) {
 	if (
-		(newParentVNode._flags & SINGLE_TEXT_CHILD) == 0 ||
-		(newParentVNode._flags & HAS_KEY) != 0 ||
+		!parentHasSingleTextChild ||
+		parentHasKeys ||
 		renderResult.length !== 1 ||
 		oldChildren.length !== 1
 	) {
@@ -445,7 +453,7 @@ function diffSingleTextChild(
 	}
 
 	let childVNode = createVNode(NULL, value, NULL, NULL, NULL);
-	childVNode._depth = newParentVNode._depth + 1;
+	childVNode._depth = parentDepth + 1;
 	childVNode._index = 0;
 	let children = [childVNode];
 	if (parentBacking != NULL) {
@@ -505,7 +513,10 @@ function diffSingleTextChild(
 function diffStrictUnkeyedChildren(
 	parentDom,
 	renderResult,
-	newParentVNode,
+	parentDepth,
+	parentIsFragment,
+	parentHasSingleTextChild,
+	hadMountedChildren,
 	oldChildren,
 	globalContext,
 	namespace,
@@ -559,7 +570,7 @@ function diffStrictUnkeyedChildren(
 			continue;
 		}
 
-		childVNode._depth = newParentVNode._depth + 1;
+		childVNode._depth = parentDepth + 1;
 		childVNode._index = i;
 
 		let reused =
@@ -615,7 +626,7 @@ function diffStrictUnkeyedChildren(
 			oldDom,
 			isHydrating,
 			refQueue,
-			(newParentVNode._flags & SINGLE_TEXT_CHILD) != 0 &&
+			parentHasSingleTextChild &&
 				childVNode.type == NULL &&
 				oldVNode !== EMPTY_OBJ &&
 				oldChildBacking != NULL &&
@@ -702,9 +713,7 @@ function diffStrictUnkeyedChildren(
 		parentBacking._anchorDom = getAnchorDom(parentBacking);
 	}
 	let skipPlacement =
-		newParentVNode.type === Fragment &&
-		oldChildren.length === 0 &&
-		newParentVNode._depth > 0;
+		parentIsFragment && !hadMountedChildren && parentDepth > 0;
 
 	if (needsPlacement && !skipPlacement) {
 		if (childDiffStats != NULL) childDiffStats.placementPasses++;
@@ -731,7 +740,7 @@ function diffStrictUnkeyedChildren(
 
 function canDiffStrictUnkeyedChildren(
 	parentDom,
-	newParentVNode,
+	parentHasRawArrayChildren,
 	renderResult,
 	oldChildren,
 	excessDomChildren,
@@ -741,7 +750,7 @@ function canDiffStrictUnkeyedChildren(
 		isHydrating ||
 		excessDomChildren != NULL ||
 		parentDom.nodeType == 9 ||
-		(newParentVNode._flags & HAS_RAW_ARRAY_CHILDREN) != 0
+		parentHasRawArrayChildren
 	) {
 		return false;
 	}
