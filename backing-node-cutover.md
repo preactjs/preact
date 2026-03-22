@@ -258,6 +258,91 @@ Suspense should not be fixed on the mixed vnode/backing model anymore.
 
 ## Fragment Boundary Port
 
+Fragment is the first boundary shape that must be fully ported onto the
+backing-node model. The remaining fragment failures showed that trying to
+preserve old vnode-era flattening semantics in mounted storage makes identity
+and placement impossible to reason about.
+
+### Goal
+
+Make Fragment a first-class mounted boundary:
+
+- parent matching sees a Fragment backing child, not only flattened descendants
+- Fragment identity is decided at the boundary level
+- Fragment movement/removal is planned at the boundary level
+
+### Boundary Identity Rules
+
+Fragment preserves identity only when all of these are true:
+
+- it matches the same parent child slot after keyed/unkeyed matching
+- the matched mounted child is also a Fragment backing
+- key presence is unchanged
+- if keyed, the key value is unchanged
+- the boundary path shape is unchanged in cases where nesting depth currently
+  determines preservation vs remount
+
+Fragment remounts when any of these are false:
+
+- Fragment backing is matched against non-Fragment mounted child
+- keyed Fragment becomes unkeyed Fragment or vice versa
+- keyed Fragment key changes
+- nested Fragment path changes in a way that moves children across Fragment
+  boundaries
+- Fragment descriptor is replaced by array/flattened children in a case where
+  current semantics require remount
+
+### Descriptor vs Mounted Shape
+
+Descriptor side may still normalize raw arrays into `Fragment` descriptors.
+
+Mounted side must preserve Fragment boundaries explicitly:
+
+- `backing._children` contains Fragment backing children as first-class mounted
+  children
+- parent planning consumes those Fragment backing children directly
+- descendant host nodes must not become the implicit move target for a Fragment
+  boundary
+
+### Implementation Checklist
+
+1. Make Fragment backing the only mounted identity source for Fragment children.
+2. Make child matching in `src/diff/children.js` match Fragment descriptors only
+   against Fragment backings.
+3. On boundary mismatch, explicitly remount:
+   - unmount old Fragment backing subtree
+   - create or attach a new Fragment backing
+   - diff its children from empty mounted state
+4. Preserve descriptor-side flattening only where current semantics require it,
+   but never let descendant reuse preserve identity across a Fragment boundary
+   mismatch.
+5. After identity is correct, move reorder/move planning to operate on Fragment
+   backing ranges rather than descendant DOM anchors.
+
+### Validation Order
+
+Fix identity-preservation tests first:
+
+- `should not preserve state in non-top-level fragment nesting`
+- `should not preserve state of children if nested 2 levels without siblings`
+- `should not preserve state when switching between a keyed fragment and an array`
+
+Then move to boundary-level reorder/move cases:
+
+- `should preserve state with reordering in multiple levels`
+- `should preserve state with reordering in multiple levels with mixed # of Fragment siblings`
+- `should preserve state with reordering in multiple levels with lots of Fragment siblings`
+- `should support moving Fragments between beginning and end`
+
+Only after those are stable should the remaining DOM-log-only tests be revisited.
+
+### What Not To Do
+
+- Do not patch descendant anchor logic to simulate Fragment identity.
+- Do not let keyed child reuse preserve state across boundary-shape changes.
+- Do not flatten mounted Fragment boundaries away just to match old vnode-era
+  storage.
+
 Fragment is the first boundary shape that must be ported completely.
 
 The current fragment failures are a signal that the runtime is still relying on

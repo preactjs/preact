@@ -12,7 +12,14 @@ import {
 	NULL
 } from '../constants';
 import { isArray } from '../util';
-import { getOwnedVChildren, setOwnedChildren, setOwnedRange } from '../backing';
+import {
+	getOwnedChildren,
+	getOwnedVChildren,
+	getOwnedVNode,
+	isBackingNode,
+	setOwnedChildren,
+	setOwnedRange
+} from '../backing';
 import { getDomSibling } from '../component';
 import { getAnchorDom, getFirstDom, getLastDom } from '../range';
 
@@ -92,6 +99,9 @@ export function diffChildren(
 
 	// This is a compression of oldParentVNode!=null && oldParentVNode != EMPTY_OBJ && oldParentVNode._children || EMPTY_ARR
 	// as EMPTY_OBJ._children should be `undefined`.
+	/** @type {(VNode | import('../internal').BackingNode | null)[]} */
+	let oldMountedChildren =
+		(oldParentVNode && getOwnedChildren(oldParentVNode)) || EMPTY_ARR;
 	/** @type {VNode[]} */
 	let oldChildren =
 		(oldParentVNode && getOwnedVChildren(oldParentVNode)) || EMPTY_ARR;
@@ -157,7 +167,7 @@ export function diffChildren(
 	let constructed = constructNewChildrenArray(
 		newParentVNode,
 		renderResult,
-		oldChildren,
+		oldMountedChildren,
 		unmountQueue,
 		removeOps,
 		oldDom,
@@ -760,7 +770,7 @@ function queueRemoval(
 /**
  * @param {VNode} newParentVNode
  * @param {ComponentChildren[]} renderResult
- * @param {VNode[]} oldChildren
+ * @param {(VNode | import('../internal').BackingNode | null)[]} oldChildren
  */
 function constructNewChildrenArray(
 	newParentVNode,
@@ -852,6 +862,7 @@ function constructNewChildrenArray(
 		const matchingIndex = (childVNode._index = findMatchingIndex(
 			childVNode,
 			oldChildren,
+			i,
 			skewedIndex,
 			remainingOldChildren,
 			hasKeys,
@@ -860,9 +871,9 @@ function constructNewChildrenArray(
 
 		oldVNode = NULL;
 		if (matchingIndex != -1) {
-			oldVNode = oldChildren[matchingIndex];
-			remainingOldChildren--;
+			oldVNode = getOwnedVNode(oldChildren[matchingIndex]);
 			if (oldVNode) {
+				remainingOldChildren--;
 				oldVNode._flags |= MATCHED;
 			}
 		}
@@ -943,7 +954,7 @@ function constructNewChildrenArray(
 	// unmounted.
 	if (remainingOldChildren) {
 		for (i = 0; i < oldChildrenLength; i++) {
-			oldVNode = oldChildren[i];
+			oldVNode = getOwnedVNode(oldChildren[i]);
 			if (oldVNode != NULL && (oldVNode._flags & MATCHED) == 0) {
 				let oldFirstDom = getFirstDom(oldVNode);
 				if (oldFirstDom == oldDom) {
@@ -1176,19 +1187,39 @@ export function toChildArray(children, out) {
 function findMatchingIndex(
 	childVNode,
 	oldChildren,
+	index,
 	skewedIndex,
 	remainingOldChildren,
 	hasKeys,
 	childDiffStats
 ) {
 	const key = childVNode.key;
-	const type = childVNode.type;
-	let oldVNode = oldChildren[skewedIndex];
+	if (hasKeys && key == NULL) {
+		let oldChild = oldChildren[index];
+		let oldVNode = getOwnedVNode(oldChild);
+		if (
+			(oldVNode === NULL && key == null) ||
+			(oldVNode != NULL &&
+				(oldVNode._flags & MATCHED) == 0 &&
+				oldVNode.key == NULL &&
+				sameBoundaryIdentity(childVNode, oldChild, oldVNode))
+		) {
+			if (childDiffStats != NULL) childDiffStats.matchedByIndex++;
+			return index;
+		}
+
+		return -1;
+	}
+
+	let oldChild = oldChildren[skewedIndex];
+	let oldVNode = getOwnedVNode(oldChild);
 	const matched = oldVNode != NULL && (oldVNode._flags & MATCHED) == 0;
 
 	if (
 		(oldVNode === NULL && key == null) ||
-		(matched && key == oldVNode.key && type == oldVNode.type)
+		(matched &&
+			key == oldVNode.key &&
+			sameBoundaryIdentity(childVNode, oldChild, oldVNode))
 	) {
 		if (childDiffStats != NULL) childDiffStats.matchedByIndex++;
 		return skewedIndex;
@@ -1213,12 +1244,13 @@ function findMatchingIndex(
 		let y = skewedIndex + 1;
 		while (x >= 0 || y < oldChildren.length) {
 			const childIndex = x >= 0 ? x-- : y++;
-			oldVNode = oldChildren[childIndex];
+			oldChild = oldChildren[childIndex];
+			oldVNode = getOwnedVNode(oldChild);
 			if (
 				oldVNode != NULL &&
 				(oldVNode._flags & MATCHED) == 0 &&
 				key == oldVNode.key &&
-				type == oldVNode.type
+				sameBoundaryIdentity(childVNode, oldChild, oldVNode)
 			) {
 				if (childDiffStats != NULL) childDiffStats.matchedBySearch++;
 				return childIndex;
@@ -1227,6 +1259,18 @@ function findMatchingIndex(
 	}
 
 	return -1;
+}
+
+function sameBoundaryIdentity(newVNode, oldChild, oldVNode) {
+	if (newVNode.type !== oldVNode.type) {
+		return false;
+	}
+
+	if (newVNode.type === Fragment) {
+		return isBackingNode(oldChild) || oldVNode.type === Fragment;
+	}
+
+	return true;
 }
 
 function hasKeysInChildren(children) {
