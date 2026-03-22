@@ -428,13 +428,19 @@ export function useId() {
 	const state = getHookState(currentIndex++, 11);
 	if (!state._value) {
 		// Grab either the root node or the nearest async boundary node.
-		/** @type {import('./internal').VNode} */
-		let root = currentComponent._vnode;
-		while (root !== null && !root._mask && root._parent !== null) {
-			root = root._parent;
+		// Walk backing._parent to find the root.
+		let rootVNode = currentComponent._vnode;
+		let rootBacking = rootVNode && rootVNode._backing;
+		while (
+			rootBacking !== null &&
+			!rootVNode._mask &&
+			rootBacking._parent !== null
+		) {
+			rootBacking = rootBacking._parent;
+			rootVNode = rootBacking._vnode;
 		}
 
-		let mask = root._mask || (root._mask = [0, 0]);
+		let mask = rootVNode._mask || (rootVNode._mask = [0, 0]);
 		state._value = 'P' + mask[0] + '-' + mask[1]++;
 	}
 

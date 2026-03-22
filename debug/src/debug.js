@@ -19,16 +19,17 @@ const isWeakMapSupported = typeof WeakMap == 'function';
  * @param {import('./internal').VNode} vnode
  * @returns {Array<string>}
  */
-function getDomChildren(vnode) {
+function getDomChildren(backing) {
 	let domChildren = [];
+	if (!backing || !backing._children) return domChildren;
 
-	if (!vnode._children) return domChildren;
-
-	vnode._children.forEach(child => {
-		if (child && typeof child.type === 'function') {
+	backing._children.forEach(child => {
+		if (!child) return;
+		let vnode = child._vnode || child;
+		if (typeof vnode.type === 'function') {
 			domChildren.push.apply(domChildren, getDomChildren(child));
-		} else if (child && typeof child.type === 'string') {
-			domChildren.push(child.type);
+		} else if (typeof vnode.type === 'string') {
+			domChildren.push(vnode.type);
 		}
 	});
 
@@ -39,18 +40,20 @@ function getDomChildren(vnode) {
  * @param {import('./internal').VNode} parent
  * @returns {string}
  */
-function getClosestDomNodeParentName(parent) {
-	if (!parent) return '';
-	if (typeof parent.type == 'function') {
-		if (parent._parent == null) {
-			if (parent._dom != null && parent._dom.parentNode != null) {
-				return parent._dom.parentNode.localName;
+function getClosestDomNodeParentName(backing) {
+	if (!backing) return '';
+	let vnode = backing._vnode;
+	if (!vnode) return '';
+	if (typeof vnode.type == 'function') {
+		if (backing._parent == null) {
+			if (backing._firstDom != null && backing._firstDom.parentNode != null) {
+				return backing._firstDom.parentNode.localName;
 			}
 			return '';
 		}
-		return getClosestDomNodeParentName(parent._parent);
+		return getClosestDomNodeParentName(backing._parent);
 	}
-	return /** @type {string} */ (parent.type);
+	return /** @type {string} */ (vnode.type);
 }
 
 export function initDebug() {
@@ -76,7 +79,7 @@ export function initDebug() {
 	const deprecations = [];
 
 	options._catchError = (error, vnode, oldVNode, errorInfo) => {
-		let component = vnode && vnode._component;
+		let component = vnode && vnode._backing && vnode._backing._component;
 		if (component && typeof error.then == 'function') {
 			const promise = error;
 			error = new Error(
@@ -333,22 +336,34 @@ export function initDebug() {
 	};
 
 	options.diffed = (vnode, backing) => {
-		const { type, _parent: parent } = vnode;
-		// Check if the user passed plain objects as children. Note that we cannot
-		// move this check into `options.vnode` because components can receive
-		// children in any shape they want (e.g.
-		// `<MyJSONFormatter>{{ foo: 123, bar: "abc" }}</MyJSONFormatter>`).
-		// Putting this check in `options.diffed` ensures that
-		// `vnode._children` is set and that we only validate the children
-		// that were actually rendered.
-		if (vnode._children) {
-			vnode._children.forEach(child => {
-				if (typeof child === 'object' && child && child.type === undefined) {
-					const keys = Object.keys(child).join(',');
-					throw new Error(
-						`Objects are not valid as a child. Encountered an object with the keys {${keys}}.` +
-							`\n\n${getOwnerStack(vnode)}`
-					);
+		const type = vnode.type;
+		let backingChildren = backing ? backing._children : null;
+
+		// Check if the user passed plain objects as children.
+		// Walk backing children and resolve to vnodes to check their props.
+		if (backingChildren) {
+			backingChildren.forEach(child => {
+				if (!child) return;
+				let cv = child._vnode || child;
+				// Check the raw props.children of component vnodes for plain objects
+				if (cv.props && cv.props.children) {
+					let rawChildren = cv.props.children;
+					if (!Array.isArray(rawChildren)) rawChildren = [rawChildren];
+					rawChildren.forEach(rc => {
+						if (
+							typeof rc === 'object' &&
+							rc &&
+							rc.type === undefined &&
+							rc._vnode === undefined &&
+							rc.constructor === Object
+						) {
+							const keys = Object.keys(rc).join(',');
+							throw new Error(
+								`Objects are not valid as a child. Encountered an object with the keys {${keys}}.` +
+									`\n\n${getOwnerStack(vnode)}`
+							);
+						}
+					});
 				}
 			});
 		}
@@ -364,12 +379,8 @@ export function initDebug() {
 				type === 'a' ||
 				type === 'button')
 		) {
-			// Avoid false positives when Preact only partially rendered the
-			// HTML tree. Whilst we attempt to include the outer DOM in our
-			// validation, this wouldn't work on the server for
-			// `preact-render-to-string`. There we'd otherwise flood the terminal
-			// with false positives, which we'd like to avoid.
-			let domParentName = getClosestDomNodeParentName(parent);
+			let parentBacking = backing ? backing._parent : null;
+			let domParentName = getClosestDomNodeParentName(parentBacking);
 			if (domParentName !== '' && isTableElement(type)) {
 				if (
 					type === 'table' &&
@@ -417,8 +428,8 @@ export function initDebug() {
 					);
 				}
 			} else if (type === 'p') {
-				let illegalDomChildrenTypes = getDomChildren(vnode).filter(childType =>
-					ILLEGAL_PARAGRAPH_CHILD_ELEMENTS.test(childType)
+				let illegalDomChildrenTypes = getDomChildren(backing).filter(
+					childType => ILLEGAL_PARAGRAPH_CHILD_ELEMENTS.test(childType)
 				);
 				if (illegalDomChildrenTypes.length) {
 					console.error(
@@ -430,7 +441,7 @@ export function initDebug() {
 					);
 				}
 			} else if (type === 'a' || type === 'button') {
-				if (getDomChildren(vnode).indexOf(type) !== -1) {
+				if (getDomChildren(backing).indexOf(type) !== -1) {
 					console.error(
 						`Improper nesting of interactive content. Your <${type}>` +
 							` should not have other ${type === 'a' ? 'anchor' : 'button'}` +
@@ -446,13 +457,15 @@ export function initDebug() {
 
 		if (oldDiffed) oldDiffed(vnode, backing);
 
-		if (vnode._children != null) {
+		if (backingChildren != null) {
 			const keys = [];
-			for (let i = 0; i < vnode._children.length; i++) {
-				const child = vnode._children[i];
-				if (!child || child.key == null) continue;
+			for (let i = 0; i < backingChildren.length; i++) {
+				const child = backingChildren[i];
+				if (!child) continue;
+				let cv = child._vnode || child;
+				if (cv.key == null) continue;
 
-				const key = child.key;
+				const key = cv.key;
 				if (keys.indexOf(key) !== -1) {
 					console.error(
 						'Following component has two or more children with the ' +
@@ -470,10 +483,11 @@ export function initDebug() {
 			}
 		}
 
-		if (vnode._component != null && vnode._component.__hooks != null) {
+		let comp = backing && backing._component;
+		if (comp != null && comp.__hooks != null) {
 			// Validate that none of the hooks in this component contain arguments that are NaN.
 			// This is a common mistake that can be hard to debug, so we want to catch it early.
-			const hooks = vnode._component.__hooks._list;
+			const hooks = comp.__hooks._list;
 			if (hooks) {
 				for (let i = 0; i < hooks.length; i += 1) {
 					const hook = hooks[i];
