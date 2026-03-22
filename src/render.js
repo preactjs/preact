@@ -2,7 +2,7 @@ import { EMPTY_OBJ, NULL } from './constants';
 import { commitRoot, diff } from './diff/index';
 import { createElement, Fragment } from './create-element';
 import options from './options';
-import { getOwnedFirstDom, getMountedBacking } from './backing';
+import { isBackingNode } from './backing';
 import { slice } from './util';
 
 /**
@@ -62,13 +62,14 @@ export function render(vnode, parentDom, replaceNode) {
 		hostOpCounts = options._hostOps
 			? { setText: 0, insertNode: 0, moveRange: 0, removeRange: 0 }
 			: NULL;
-	diff(
+	let oldBacking = parentDom._backing || NULL;
+	let oldFirstDom = oldBacking ? oldBacking._firstDom : NULL;
+
+	parentDom._backing = diff(
 		parentDom,
-		// Determine the new vnode tree and store it on the DOM element on
-		// our custom `_children` property.
 		vnode,
 		oldVNode || EMPTY_OBJ,
-		oldVNode ? getMountedBacking(oldVNode) : NULL,
+		oldBacking,
 		EMPTY_OBJ,
 		parentDom.namespaceURI,
 		!isHydrating && replaceNode
@@ -85,7 +86,7 @@ export function render(vnode, parentDom, replaceNode) {
 		!isHydrating && replaceNode
 			? replaceNode
 			: oldVNode
-				? getOwnedFirstDom(oldVNode)
+				? oldFirstDom
 				: parentDom.firstChild,
 		isHydrating,
 		refQueue,

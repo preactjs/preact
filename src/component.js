@@ -3,15 +3,7 @@ import { diff, commitRoot } from './diff/index';
 import options from './options';
 import { Fragment } from './create-element';
 import { MODE_HYDRATE, NULL } from './constants';
-import {
-	getMountedBacking,
-	getOwnedChildren,
-	getOwnedFirstDom,
-	getOwnedVNode,
-	isBackingNode,
-	replaceOwnedChild,
-	setOwnedRange
-} from './backing';
+import { getOwnedVNode, isBackingNode } from './backing';
 import { getFirstDom, updateRangeFromChildren } from './range';
 
 /**
@@ -102,10 +94,9 @@ BaseComponent.prototype.render = Fragment;
  * @param {number | null} [childIndex]
  */
 export function getDomSibling(vnode, childIndex) {
-	let backing = isBackingNode(vnode) ? vnode : getMountedBacking(vnode);
+	let backing = isBackingNode(vnode) ? vnode : NULL;
 
 	if (childIndex == NULL) {
-		// Resume search from this node's next sibling in its parent's child list.
 		if (backing == NULL || backing._parent == NULL) return NULL;
 
 		let parentBacking = backing._parent;
@@ -120,8 +111,7 @@ export function getDomSibling(vnode, childIndex) {
 		return NULL;
 	}
 
-	let children = backing != NULL ? backing._children : NULL;
-	if (children == NULL) children = getOwnedChildren(vnode) || [];
+	let children = backing != NULL ? backing._children : [];
 	for (; childIndex < children.length; childIndex++) {
 		let sibling = children[childIndex];
 		if (sibling != NULL && getFirstDom(sibling) != NULL) {
@@ -129,8 +119,6 @@ export function getDomSibling(vnode, childIndex) {
 		}
 	}
 
-	// No DOM found in children. If this is a component/Fragment (not a DOM
-	// element), climb up to the parent's sibling list.
 	let vnodeRef = isBackingNode(vnode) ? vnode._vnode : vnode;
 	return vnodeRef != NULL && typeof vnodeRef.type == 'function'
 		? getDomSibling(backing || vnode)
@@ -141,11 +129,11 @@ export function getDomSibling(vnode, childIndex) {
  * Recompute the owned DOM range for a vnode from its rendered children.
  * @param {import('./internal').VNode} vnode
  */
-export function updateVNodeDomPointers(vnode) {
-	updateRangeFromChildren(vnode);
-	let b = getMountedBacking(vnode);
-	if (b && b._component != NULL) {
-		b._component.base = getOwnedFirstDom(vnode);
+export function updateVNodeDomPointers(backing) {
+	if (!isBackingNode(backing)) return;
+	updateRangeFromChildren(backing);
+	if (backing._component != NULL) {
+		backing._component.base = backing._firstDom;
 	}
 }
 
@@ -156,7 +144,8 @@ export function updateVNodeDomPointers(vnode) {
 function renderComponent(component) {
 	if (component._parentDom && component._dirty) {
 		let oldVNode = component._vnode,
-			oldDom = getOwnedFirstDom(oldVNode),
+			oldBacking = component._backing,
+			oldDom = oldBacking ? oldBacking._firstDom : NULL,
 			commitQueue = [],
 			refQueue = [],
 			hostOps = [],
@@ -185,11 +174,11 @@ function renderComponent(component) {
 		newVNode._original = oldVNode._original + 1;
 		if (options.vnode) options.vnode(newVNode);
 
-		diff(
+		let backing = diff(
 			component._parentDom,
 			newVNode,
 			oldVNode,
-			getMountedBacking(oldVNode),
+			oldBacking,
 			component._globalContext,
 			component._parentDom.namespaceURI,
 			oldVNode._flags & MODE_HYDRATE ? [oldDom] : NULL,
@@ -197,7 +186,7 @@ function renderComponent(component) {
 			hostOps,
 			unmountQueue,
 			removeOps,
-			oldDom == NULL ? getDomSibling(oldVNode) : oldDom,
+			oldDom == NULL ? getDomSibling(oldBacking) : oldDom,
 			!!(oldVNode._flags & MODE_HYDRATE),
 			refQueue,
 			false,
@@ -206,23 +195,6 @@ function renderComponent(component) {
 		);
 
 		newVNode._original = oldVNode._original;
-
-		// Replace this component's entry in the parent's mounted child list
-		// using the backing parent chain.
-		let backing = getMountedBacking(newVNode);
-		if (backing != NULL && backing._parent != NULL) {
-			let parentBacking = backing._parent;
-			let parentChildren = parentBacking._children;
-			if (parentChildren != NULL) {
-				for (let j = 0; j < parentChildren.length; j++) {
-					if (parentChildren[j] === backing) {
-						// Backing is already updated via reuseBacking — just
-						// ensure it stays in the parent's child list.
-						break;
-					}
-				}
-			}
-		}
 
 		commitRoot(
 			commitQueue,
@@ -234,9 +206,8 @@ function renderComponent(component) {
 			hostOpCounts,
 			childDiffStats
 		);
-		setOwnedRange(oldVNode, null, null, null);
 
-		if (getOwnedFirstDom(newVNode) != oldDom) {
+		if (backing != NULL && backing._firstDom != oldDom) {
 			updateParentDomPointers(backing);
 		}
 	}
@@ -248,13 +219,9 @@ function renderComponent(component) {
  * @param {import('./internal').BackingNode | import('./internal').VNode | null} node
  */
 function updateParentDomPointers(node) {
-	let backing = isBackingNode(node) ? node._parent : null;
-	if (backing == NULL && node != NULL) {
-		backing = getMountedBacking(node);
-		if (backing != NULL) backing = backing._parent;
-	}
-	if (backing != NULL && backing._vnode != NULL && backing._component != NULL) {
-		updateVNodeDomPointers(backing._vnode);
+	let backing = isBackingNode(node) ? node._parent : NULL;
+	if (backing != NULL && backing._component != NULL) {
+		updateVNodeDomPointers(backing);
 		return updateParentDomPointers(backing);
 	}
 }

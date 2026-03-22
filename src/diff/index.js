@@ -28,16 +28,12 @@ import { getAnchorDom, getFirstDom, getLastDom } from '../range';
 import {
 	BACKING_COMPONENT,
 	BACKING_FRAGMENT,
+	BACKING_HOST,
 	clearBacking,
-	ensureBacking,
-	getMountedBacking,
-	getOwnedChildren,
-	getOwnedFirstDom,
+	createBacking,
 	getOwnedVNode,
 	isBackingNode,
-	reuseBacking,
-	setOwnedChildren,
-	setOwnedRange
+	setBackingChildren
 } from '../backing';
 
 /**
@@ -116,10 +112,6 @@ export function diff(
 	let curBacking = oldBacking;
 	if (curBacking != NULL) {
 		curBacking._vnode = newVNode;
-		// Temporarily set vnode._backing so internal helpers (setOwnedRange,
-		// setOwnedChildren) can find it. Will be removed once those helpers
-		// are converted to accept backing directly.
-		newVNode._backing = curBacking;
 	}
 
 	outer: if (typeof newType == 'function') {
@@ -130,7 +122,7 @@ export function diff(
 
 			// Ensure backing exists for components
 			if (curBacking == NULL) {
-				curBacking = ensureBacking(
+				curBacking = createBacking(
 					newVNode,
 					newVNode.type === Fragment ? BACKING_FRAGMENT : BACKING_COMPONENT
 				);
@@ -152,6 +144,7 @@ export function diff(
 			// Get component from backing, not vnode
 			if (curBacking._component) {
 				c = curBacking._component;
+				c._backing = curBacking;
 				clearProcessingException = c._processingException = c._pendingError;
 			} else {
 				// Instantiate the new component
@@ -165,6 +158,7 @@ export function diff(
 					c.render = doRender;
 				}
 				curBacking._component = c;
+				c._backing = curBacking;
 				if (provider) provider.sub(c);
 
 				if (!c.state) c.state = {};
@@ -238,13 +232,10 @@ export function diff(
 						c._dirty = false;
 					}
 
-					setOwnedRange(
-						newVNode,
-						getOwnedFirstDom(oldVNode),
-						getLastDom(oldVNode),
-						getAnchorDom(oldVNode)
-					);
-					setOwnedChildren(newVNode, getOwnedChildren(oldVNode));
+					curBacking._firstDom = oldBacking._firstDom;
+					curBacking._lastDom = oldBacking._lastDom;
+					curBacking._anchorDom = oldBacking._anchorDom;
+					curBacking._children = oldBacking._children;
 
 					EMPTY_ARR.push.apply(c._renderCallbacks, c._stateCallbacks);
 					c._stateCallbacks = [];
@@ -335,8 +326,8 @@ export function diff(
 				childDiffStats
 			);
 
-			let newMountedChildren = getOwnedChildren(newVNode);
-			let oldMountedChildren = getOwnedChildren(oldVNode);
+			let newMountedChildren = curBacking._children;
+			let oldMountedChildren = oldBacking != NULL ? oldBacking._children : NULL;
 			if (c._childDidSuspend && newMountedChildren) {
 				let newChild0 = getOwnedVNode(newMountedChildren[0]);
 				let newChild1 = getOwnedVNode(newMountedChildren[1]);
@@ -367,32 +358,29 @@ export function diff(
 
 				let activeChild = c._activeChild;
 				if (activeChild != NULL) {
-					setOwnedRange(
-						newVNode,
-						getFirstDom(activeChild),
-						getLastDom(activeChild),
-						getAnchorDom(activeChild)
-					);
+					curBacking._firstDom = getFirstDom(activeChild);
+					curBacking._lastDom = getLastDom(activeChild);
+					curBacking._anchorDom = getAnchorDom(activeChild);
 				} else {
-					setOwnedRange(newVNode, NULL, NULL, NULL);
+					curBacking._firstDom = NULL;
+					curBacking._lastDom = NULL;
+					curBacking._anchorDom = NULL;
 				}
 			}
 
-			// Ensure backing node exists with correct kind.
-			// Parent is already set via reuseBacking from old vnode,
-			// or will be set by parent's setOwnedChildren.
+			// Ensure backing node has correct kind for suspense/fragment/component.
 			if (c._childDidSuspend) {
-				let backing = ensureBacking(newVNode, 3 /* SUSPENSE */);
-				backing._activeChild = c._activeChild || NULL;
-				backing._parkedChild = c._parkedChild || NULL;
-				backing._fallbackChild = c._fallbackChild || NULL;
+				curBacking._kind = 3 /* SUSPENSE */;
+				curBacking._activeChild = c._activeChild || NULL;
+				curBacking._parkedChild = c._parkedChild || NULL;
+				curBacking._fallbackChild = c._fallbackChild || NULL;
 			} else if (newVNode.type === Fragment) {
-				ensureBacking(newVNode, 1 /* FRAGMENT */);
+				curBacking._kind = 1 /* FRAGMENT */;
 			} else {
-				ensureBacking(newVNode, 2 /* COMPONENT */);
+				curBacking._kind = 2 /* COMPONENT */;
 			}
 
-			c.base = getOwnedFirstDom(newVNode);
+			c.base = curBacking._firstDom;
 
 			// We successfully rendered this VNode, unset any stored hydration/bailout state:
 			newVNode._flags &= RESET_MODE;
@@ -418,40 +406,51 @@ export function diff(
 					}
 
 					excessDomChildren[excessDomChildren.indexOf(oldDom)] = NULL;
-					setOwnedRange(newVNode, oldDom, oldDom, oldDom);
+					if (curBacking == NULL) {
+						curBacking = createBacking(newVNode, BACKING_COMPONENT);
+					}
+					curBacking._firstDom = oldDom;
+					curBacking._lastDom = oldDom;
+					curBacking._anchorDom = oldDom;
 				} else {
 					for (let i = excessDomChildren.length; i--; ) {
 						removeNode(excessDomChildren[i]);
 					}
-					markAsForce(newVNode);
+					markAsForce(curBacking);
 				}
 			} else {
-				setOwnedRange(
-					newVNode,
-					getOwnedFirstDom(oldVNode),
-					getLastDom(oldVNode),
-					getAnchorDom(oldVNode)
-				);
-				setOwnedChildren(newVNode, getOwnedChildren(oldVNode));
-				if (!e.then) markAsForce(newVNode);
+				if (curBacking == NULL) {
+					curBacking = createBacking(newVNode, BACKING_COMPONENT);
+				}
+				if (oldBacking != NULL) {
+					curBacking._firstDom = oldBacking._firstDom;
+					curBacking._lastDom = oldBacking._lastDom;
+					curBacking._anchorDom = oldBacking._anchorDom;
+					curBacking._children = oldBacking._children;
+				}
+				if (!e.then) markAsForce(curBacking);
 			}
-			options._catchError(e, newVNode, oldVNode);
+			options._catchError(e, newVNode, oldVNode, NULL, curBacking);
 		}
 	} else if (
 		excessDomChildren == NULL &&
 		newVNode._original == oldVNode._original
 	) {
-		setOwnedChildren(newVNode, getOwnedChildren(oldVNode));
-		setOwnedRange(
-			newVNode,
-			getOwnedFirstDom(oldVNode),
-			getLastDom(oldVNode),
-			getAnchorDom(oldVNode)
-		);
-		curBacking = getMountedBacking(newVNode);
+		if (curBacking == NULL) {
+			curBacking = createBacking(newVNode, BACKING_HOST);
+		}
+		if (oldBacking != NULL) {
+			curBacking._children = oldBacking._children;
+			curBacking._firstDom = oldBacking._firstDom;
+			curBacking._lastDom = oldBacking._lastDom;
+			curBacking._anchorDom = oldBacking._anchorDom;
+		}
 	} else {
+		if (curBacking == NULL) {
+			curBacking = createBacking(newVNode, BACKING_HOST);
+		}
 		oldDom = diffElementNodes(
-			getOwnedFirstDom(oldVNode),
+			oldBacking != NULL ? oldBacking._firstDom : NULL,
 			newVNode,
 			oldVNode,
 			globalContext,
@@ -465,9 +464,9 @@ export function diff(
 			refQueue,
 			allowInlineText,
 			hostOpCounts,
-			childDiffStats
+			childDiffStats,
+			curBacking
 		);
-		curBacking = getMountedBacking(newVNode);
 	}
 
 	if ((tmp = options.diffed)) tmp(newVNode, curBacking);
@@ -477,16 +476,15 @@ export function diff(
 	return newVNode._flags & MODE_SUSPENDED ? NULL : curBacking;
 }
 
-function markAsForce(vnode) {
-	if (vnode) {
-		let b = getMountedBacking(vnode);
-		if (b && b._component) b._component._force = true;
-		let children = getOwnedChildren(vnode);
+function markAsForce(backing) {
+	if (backing) {
+		if (backing._component) backing._component._force = true;
+		let children = backing._children;
 		if (children) {
 			for (let i = 0; i < children.length; i++) {
 				let child = children[i];
-				if (child != NULL) {
-					markAsForce(getOwnedVNode(child));
+				if (child != NULL && isBackingNode(child)) {
+					markAsForce(child);
 				}
 			}
 		}
@@ -513,7 +511,7 @@ export function commitRoot(
 	flushHostOps(hostOps);
 
 	for (let i = 0; i < refQueue.length; i++) {
-		applyRef(refQueue[i], refQueue[++i], refQueue[++i]);
+		applyRef(refQueue[i], refQueue[++i], refQueue[++i], refQueue[++i]);
 	}
 
 	if (options._commit) options._commit(root, commitQueue);
@@ -532,7 +530,7 @@ export function commitRoot(
 				cb.call(c);
 			});
 		} catch (e) {
-			options._catchError(e, c._vnode);
+			options._catchError(e, c._vnode, NULL, NULL, c._backing);
 		}
 	});
 }
@@ -723,9 +721,10 @@ function canFastDiffTextChild(
 	oldProps,
 	newChildren,
 	excessDomChildren,
-	isHydrating
+	isHydrating,
+	curBacking
 ) {
-	let oldOwnedChildren = getOwnedChildren(oldVNode);
+	let oldOwnedChildren = curBacking._children;
 	let oldChild0 =
 		oldOwnedChildren != NULL ? getOwnedVNode(oldOwnedChildren[0]) : NULL;
 	if (
@@ -774,9 +773,10 @@ function canBailHostSubtree(
 	oldProps,
 	newChildren,
 	excessDomChildren,
-	isHydrating
+	isHydrating,
+	curBacking
 ) {
-	let oldOwnedCh = getOwnedChildren(oldVNode);
+	let oldOwnedCh = curBacking._children;
 	if (
 		isHydrating ||
 		excessDomChildren != NULL ||
@@ -815,9 +815,15 @@ function areChildrenStructurallyEqual(childFlags, newChildren, oldChildren) {
 	}
 
 	if ((childFlags & SINGLE_CHILD) != 0) {
+		let oldChild0 = oldChildren[0];
+		let oldChild0Backing = isBackingNode(oldChild0) ? oldChild0 : NULL;
 		return (
 			oldChildren.length === 1 &&
-			isStructurallyEqualChild(newChildren, getOwnedVNode(oldChildren[0]))
+			isStructurallyEqualChild(
+				newChildren,
+				getOwnedVNode(oldChild0),
+				oldChild0Backing
+			)
 		);
 	}
 
@@ -827,8 +833,14 @@ function areChildrenStructurallyEqual(childFlags, newChildren, oldChildren) {
 		}
 
 		for (let i = 0; i < newChildren.length; i++) {
+			let oldChild = oldChildren[i];
+			let oldChildBacking = isBackingNode(oldChild) ? oldChild : NULL;
 			if (
-				!isStructurallyEqualChild(newChildren[i], getOwnedVNode(oldChildren[i]))
+				!isStructurallyEqualChild(
+					newChildren[i],
+					getOwnedVNode(oldChild),
+					oldChildBacking
+				)
 			) {
 				return false;
 			}
@@ -840,7 +852,7 @@ function areChildrenStructurallyEqual(childFlags, newChildren, oldChildren) {
 	return oldChildren.length === 0;
 }
 
-function isStructurallyEqualChild(rawChild, oldVNode) {
+function isStructurallyEqualChild(rawChild, oldVNode, oldBacking) {
 	if (
 		rawChild == NULL ||
 		typeof rawChild == 'boolean' ||
@@ -900,7 +912,7 @@ function isStructurallyEqualChild(rawChild, oldVNode) {
 	return areChildrenStructurallyEqual(
 		rawChild._flags,
 		newProps.children,
-		getOwnedChildren(oldVNode) || EMPTY_ARR
+		(oldBacking != NULL ? oldBacking._children : NULL) || EMPTY_ARR
 	);
 }
 
@@ -930,6 +942,7 @@ function createTextVNode(value, parentVNode) {
  * @param {boolean} allowInlineText Whether text writes can be applied inline
  * @param {HostOpCounts | null} hostOpCounts
  * @param {ChildDiffStats | null} childDiffStats
+ * @param {import('../internal').BackingNode} curBacking The backing node for this element
  * @returns {PreactElement}
  */
 function diffElementNodes(
@@ -947,7 +960,8 @@ function diffElementNodes(
 	refQueue,
 	allowInlineText,
 	hostOpCounts,
-	childDiffStats
+	childDiffStats,
+	curBacking
 ) {
 	let oldProps = oldVNode.props || EMPTY_OBJ;
 	let newProps = newVNode.props;
@@ -991,7 +1005,9 @@ function diffElementNodes(
 	if (dom == NULL) {
 		if (nodeType == NULL) {
 			dom = document.createTextNode(newProps);
-			setOwnedRange(newVNode, dom, dom, dom);
+			curBacking._firstDom = dom;
+			curBacking._lastDom = dom;
+			curBacking._anchorDom = dom;
 			return dom;
 		}
 
@@ -1015,18 +1031,16 @@ function diffElementNodes(
 	if (nodeType == NULL) {
 		// During hydration, we still have to split merged text from SSR'd HTML.
 		if (oldProps !== newProps && (!isHydrating || dom.data != newProps)) {
-			if (
-				allowInlineText ||
-				isHydrating ||
-				getOwnedFirstDom(oldVNode) == NULL
-			) {
+			if (allowInlineText || isHydrating || curBacking._firstDom == NULL) {
 				dom.data = newProps;
 			} else {
 				if (hostOpCounts != NULL) hostOpCounts.setText++;
 				hostOps.push(OP_SET_TEXT, dom, newProps);
 			}
 		}
-		setOwnedRange(newVNode, dom, dom, dom);
+		curBacking._firstDom = dom;
+		curBacking._lastDom = dom;
+		curBacking._anchorDom = dom;
 	} else {
 		// If excessDomChildren was not null, repopulate it with the current element's children:
 		excessDomChildren = excessDomChildren && slice.call(dom.childNodes);
@@ -1087,7 +1101,7 @@ function diffElementNodes(
 				dom.innerHTML = newHtml.__html;
 			}
 
-			setOwnedChildren(newVNode, []);
+			setBackingChildren(curBacking, []);
 		} else {
 			if (oldHtml) dom.innerHTML = '';
 			if (
@@ -1098,10 +1112,11 @@ function diffElementNodes(
 					oldProps,
 					newChildren,
 					excessDomChildren,
-					isHydrating
+					isHydrating,
+					curBacking
 				)
 			) {
-				let oldTextChild = getOwnedChildren(oldVNode)[0];
+				let oldTextChild = curBacking._children[0];
 				let oldTextVNode = getOwnedVNode(oldTextChild);
 				let oldTextBacking = isBackingNode(oldTextChild) ? oldTextChild : NULL;
 				let textVNode = createTextVNode(newChildren, newVNode);
@@ -1125,7 +1140,7 @@ function diffElementNodes(
 					hostOpCounts,
 					childDiffStats
 				);
-				setOwnedChildren(newVNode, [textBacking || textVNode]);
+				setBackingChildren(curBacking, [textBacking || textVNode]);
 			} else if (
 				canBailHostSubtree(
 					newVNode,
@@ -1134,18 +1149,15 @@ function diffElementNodes(
 					oldProps,
 					newChildren,
 					excessDomChildren,
-					isHydrating
+					isHydrating,
+					curBacking
 				)
 			) {
-				setOwnedChildren(newVNode, getOwnedChildren(oldVNode));
-				setOwnedRange(
-					newVNode,
-					dom,
-					getLastDom(oldVNode) || dom,
-					getAnchorDom(oldVNode) || dom
-				);
-				// Children are reused from old backing — no reparenting needed,
-				// backing._parent is already correct via setOwnedChildren.
+				// Children are reused — no reparenting needed,
+				// backing._parent is already correct via setBackingChildren.
+				curBacking._firstDom = dom;
+				curBacking._lastDom = getLastDom(curBacking) || dom;
+				curBacking._anchorDom = getAnchorDom(curBacking) || dom;
 			} else {
 				setNormalizedChildFlags(
 					newVNode,
@@ -1166,7 +1178,7 @@ function diffElementNodes(
 					removeOps,
 					excessDomChildren
 						? excessDomChildren[0]
-						: getOwnedChildren(oldVNode) && getDomSibling(oldVNode, 0),
+						: curBacking._children && getDomSibling(oldVNode, 0),
 					isHydrating,
 					refQueue,
 					hostOpCounts,
@@ -1209,7 +1221,9 @@ function diffElementNodes(
 			}
 		}
 
-		setOwnedRange(newVNode, dom, dom, dom);
+		curBacking._firstDom = dom;
+		curBacking._lastDom = dom;
+		curBacking._anchorDom = dom;
 	}
 
 	return dom;
@@ -1221,7 +1235,7 @@ function diffElementNodes(
  * @param {any} value
  * @param {VNode} vnode
  */
-export function applyRef(ref, value, vnode) {
+export function applyRef(ref, value, vnode, backing) {
 	try {
 		if (typeof ref == 'function') {
 			let hasRefUnmount = typeof ref._unmount == 'function';
@@ -1231,51 +1245,61 @@ export function applyRef(ref, value, vnode) {
 			}
 
 			if (!hasRefUnmount || value != NULL) {
-				// Store the cleanup function on the function
-				// instance object itself to avoid shape
-				// transitioning vnode
 				ref._unmount = ref(value);
 			}
 		} else ref.current = value;
 	} catch (e) {
-		options._catchError(e, vnode);
+		options._catchError(e, vnode, NULL, NULL, backing);
 	}
 }
 
 /**
  * Unmount a virtual node from the tree and apply DOM changes
  * @param {VNode} vnode The virtual node to unmount
+ * @param {import('../internal').BackingNode} unmountBacking The backing node
  * @param {VNode} parentVNode The parent of the VNode that initiated the unmount
  * @param {boolean} [skipRemove] Flag that indicates that a parent node of the
  * current element is already detached from the DOM.
  */
 export function unmount(vnode, parentVNode, skipRemove) {
 	let r;
-	if (options.unmount) options.unmount(vnode, vnode._backing);
+	// For the top-level unmount call, the backing comes from the unmount queue
+	// which contains BackingNodes. For recursive calls, we resolve backing from
+	// the children array.
+	let unmountBacking = NULL;
+	if (isBackingNode(vnode)) {
+		unmountBacking = vnode;
+		vnode = unmountBacking._vnode;
+		if (vnode == NULL) return;
+	}
+
+	if (options.unmount) options.unmount(vnode, unmountBacking);
 
 	if ((r = vnode.ref)) {
-		if (!r.current || r.current == getOwnedFirstDom(vnode)) {
-			applyRef(r, NULL, parentVNode);
+		if (
+			!r.current ||
+			r.current == (unmountBacking != NULL ? unmountBacking._firstDom : NULL)
+		) {
+			applyRef(r, NULL, parentVNode, unmountBacking);
 		}
 	}
 
-	let unmountBacking = getMountedBacking(vnode);
 	if (unmountBacking && (r = unmountBacking._component) != NULL) {
 		if (r.componentWillUnmount) {
 			try {
 				r.componentWillUnmount();
 			} catch (e) {
-				options._catchError(e, parentVNode);
+				options._catchError(e, parentVNode, NULL, NULL, unmountBacking);
 			}
 		}
 
 		r.base = r._parentDom = NULL;
 	}
 
-	if ((r = getOwnedChildren(vnode))) {
+	if (unmountBacking && (r = unmountBacking._children)) {
 		for (let i = 0; i < r.length; i++) {
-			let child = getOwnedVNode(r[i]);
-			if (child) {
+			let child = r[i];
+			if (child != NULL) {
 				unmount(
 					child,
 					parentVNode,
@@ -1285,11 +1309,11 @@ export function unmount(vnode, parentVNode, skipRemove) {
 		}
 	}
 
-	if (!skipRemove) {
-		removeNode(getOwnedFirstDom(vnode));
+	if (!skipRemove && unmountBacking) {
+		removeNode(unmountBacking._firstDom);
 	}
 
-	clearBacking(vnode);
+	clearBacking(unmountBacking);
 }
 
 /** The `.render()` method for a PFC backing instance. */

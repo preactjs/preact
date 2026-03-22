@@ -13,13 +13,10 @@ import {
 } from '../constants';
 import { isArray } from '../util';
 import {
-	ensureBacking,
-	getMountedBacking,
-	getOwnedChildren,
+	createBacking,
 	getOwnedVNode,
 	isBackingNode,
-	setOwnedChildren,
-	setOwnedRange
+	setBackingChildren
 } from '../backing';
 import { getDomSibling } from '../component';
 import { getAnchorDom, getFirstDom, getLastDom } from '../range';
@@ -64,6 +61,7 @@ const PLAN_MOVE = 3;
  * @param {any[]} refQueue an array of elements needed to invoke refs
  * @param {HostOpCounts | null} hostOpCounts
  * @param {ChildDiffStats | null} childDiffStats
+ * @param {import('../internal').BackingNode | null} parentBacking The backing node of the parent
  */
 export function diffChildren(
 	parentDom,
@@ -81,7 +79,8 @@ export function diffChildren(
 	isHydrating,
 	refQueue,
 	hostOpCounts,
-	childDiffStats
+	childDiffStats,
+	parentBacking
 ) {
 	let i,
 		/** @type {VNode} */
@@ -102,7 +101,7 @@ export function diffChildren(
 	// as EMPTY_OBJ._children should be `undefined`.
 	/** @type {(VNode | import('../internal').BackingNode | null)[]} */
 	let oldChildren =
-		(oldParentVNode && getOwnedChildren(oldParentVNode)) || EMPTY_ARR;
+		(parentBacking ? parentBacking._children : null) || EMPTY_ARR;
 	let fastResult = diffSingleTextChild(
 		parentDom,
 		renderResult,
@@ -119,7 +118,8 @@ export function diffChildren(
 		isHydrating,
 		refQueue,
 		hostOpCounts,
-		childDiffStats
+		childDiffStats,
+		parentBacking
 	);
 
 	if (fastResult !== UNDEFINED) {
@@ -158,7 +158,8 @@ export function diffChildren(
 			isHydrating,
 			refQueue,
 			hostOpCounts,
-			childDiffStats
+			childDiffStats,
+			parentBacking
 		);
 	}
 
@@ -184,12 +185,11 @@ export function diffChildren(
 	let placementBefore = new Array(newChildrenLength);
 	let placementStatus = new Uint8Array(newChildrenLength);
 	let needsPlacement = false;
-	setOwnedRange(
-		newParentVNode,
-		getFirstDom(newParentVNode),
-		getLastDom(newParentVNode),
-		NULL
-	);
+	if (parentBacking != NULL) {
+		parentBacking._firstDom = getFirstDom(parentBacking);
+		parentBacking._lastDom = getLastDom(parentBacking);
+		parentBacking._anchorDom = NULL;
+	}
 
 	for (i = 0; i < newChildrenLength; i++) {
 		childVNode = children[i];
@@ -215,18 +215,18 @@ export function diffChildren(
 		// Update childVNode._index to its final index
 		childVNode._index = i;
 
-		// Eagerly set backing parent so error boundaries can traverse
-		// upward even if the child throws during its first diff.
-		let parentBacking = getMountedBacking(newParentVNode);
-		if (parentBacking != NULL && oldVNode === EMPTY_OBJ) {
-			ensureBacking(childVNode, 0)._parent = parentBacking;
-		}
-
 		// Morph the old element into the new one, but don't append it to the dom yet
 		let oldChildBacking =
 			matchingIndex != -1 && isBackingNode(oldChildren[matchingIndex])
 				? oldChildren[matchingIndex]
 				: NULL;
+
+		// Eagerly create backing with parent set for error boundary traversal
+		if (parentBacking != NULL && oldChildBacking == NULL) {
+			oldChildBacking = createBacking(childVNode, 0);
+			oldChildBacking._parent = parentBacking;
+		}
+
 		let result = diff(
 			parentDom,
 			childVNode,
@@ -272,7 +272,7 @@ export function diffChildren(
 			newDom != NULL
 				? childBacking || childVNode
 				: matchingIndex != -1 && oldVNode !== EMPTY_OBJ
-					? oldVNode._backing || oldVNode
+					? oldChildBacking || oldVNode
 					: NULL;
 		if (childVNode.ref && oldVNode.ref != childVNode.ref) {
 			if (oldVNode.ref) {
@@ -281,18 +281,18 @@ export function diffChildren(
 			refQueue.push(
 				childVNode.ref,
 				(childBacking && childBacking._component) || newDom,
-				childVNode
+				childVNode,
+				childBacking
 			);
 		}
 
 		if (firstChildDom == NULL && newDom != NULL) {
 			firstChildDom = newDom;
-			setOwnedRange(
-				newParentVNode,
-				firstChildDom,
-				lastChildDom,
-				getAnchorDom(childVNode)
-			);
+			if (parentBacking != NULL) {
+				parentBacking._firstDom = firstChildDom;
+				parentBacking._lastDom = lastChildDom;
+				parentBacking._anchorDom = getAnchorDom(childVNode);
+			}
 		}
 		if (lastDom != NULL) {
 			lastChildDom = lastDom;
@@ -340,12 +340,11 @@ export function diffChildren(
 		}
 	}
 
-	setOwnedRange(
-		newParentVNode,
-		firstChildDom,
-		lastChildDom,
-		getAnchorDom(newParentVNode)
-	);
+	if (parentBacking != NULL) {
+		parentBacking._firstDom = firstChildDom;
+		parentBacking._lastDom = lastChildDom;
+		parentBacking._anchorDom = getAnchorDom(parentBacking);
+	}
 
 	// Fragment initial mount: skip placement. The parent's planner will
 	// handle positioning Fragment children with correct sibling anchors.
@@ -395,7 +394,9 @@ export function diffChildren(
 		}
 	}
 
-	setOwnedChildren(newParentVNode, children);
+	if (parentBacking != NULL) {
+		setBackingChildren(parentBacking, children);
+	}
 	return oldDom;
 }
 
@@ -415,7 +416,8 @@ function diffSingleTextChild(
 	isHydrating,
 	refQueue,
 	hostOpCounts,
-	childDiffStats
+	childDiffStats,
+	parentBacking
 ) {
 	if (
 		(newParentVNode._flags & SINGLE_TEXT_CHILD) == 0 ||
@@ -441,13 +443,18 @@ function diffSingleTextChild(
 	childVNode._depth = newParentVNode._depth + 1;
 	childVNode._index = 0;
 	let children = [childVNode];
-	setOwnedRange(newParentVNode, NULL, NULL, NULL);
+	if (parentBacking != NULL) {
+		parentBacking._firstDom = NULL;
+		parentBacking._lastDom = NULL;
+		parentBacking._anchorDom = NULL;
+	}
 
+	let oldTextBacking = isBackingNode(oldChildren[0]) ? oldChildren[0] : NULL;
 	let childBacking = diff(
 		parentDom,
 		childVNode,
 		oldVNode || EMPTY_OBJ,
-		oldVNode ? getMountedBacking(oldVNode) : NULL,
+		oldTextBacking,
 		globalContext,
 		namespace,
 		excessDomChildren,
@@ -469,13 +476,15 @@ function diffSingleTextChild(
 
 	let childFirstDom = childBacking != NULL ? childBacking._firstDom : NULL;
 	let childLastDom = childBacking != NULL ? childBacking._lastDom : NULL;
-	setOwnedRange(
-		newParentVNode,
-		childFirstDom,
-		childLastDom,
-		childBacking != NULL ? childBacking._anchorDom : NULL
-	);
-	setOwnedChildren(newParentVNode, children);
+	if (parentBacking != NULL) {
+		parentBacking._firstDom = childFirstDom;
+		parentBacking._lastDom = childLastDom;
+		parentBacking._anchorDom =
+			childBacking != NULL ? childBacking._anchorDom : NULL;
+	}
+	if (parentBacking != NULL) {
+		setBackingChildren(parentBacking, children);
+	}
 
 	if (oldVNode != NULL) {
 		oldVNode._flags &= ~MATCHED;
@@ -500,7 +509,8 @@ function diffStrictUnkeyedChildren(
 	isHydrating,
 	refQueue,
 	hostOpCounts,
-	childDiffStats
+	childDiffStats,
+	parentBacking
 ) {
 	let i;
 	let newChildrenLength = renderResult.length;
@@ -514,12 +524,11 @@ function diffStrictUnkeyedChildren(
 	let placementBefore = new Array(newChildrenLength);
 	let placementStatus = new Uint8Array(newChildrenLength);
 	let needsPlacement = false;
-	setOwnedRange(
-		newParentVNode,
-		getFirstDom(newParentVNode),
-		getLastDom(newParentVNode),
-		NULL
-	);
+	if (parentBacking != NULL) {
+		parentBacking._firstDom = getFirstDom(parentBacking);
+		parentBacking._lastDom = getLastDom(parentBacking);
+		parentBacking._anchorDom = NULL;
+	}
 
 	let children = new Array(newChildrenLength);
 	for (i = 0; i < newChildrenLength; i++) {
@@ -575,16 +584,17 @@ function diffStrictUnkeyedChildren(
 			if (childDiffStats != NULL) childDiffStats.matchedByIndex++;
 		}
 
-		// Eagerly set backing parent for error boundary traversal
-		if (oldVNode === EMPTY_OBJ) {
-			let pb = getMountedBacking(newParentVNode);
-			if (pb != NULL) ensureBacking(childVNode, 0)._parent = pb;
-		}
-
 		let oldChildBacking =
 			oldVNode !== EMPTY_OBJ && isBackingNode(oldChildren[i])
 				? oldChildren[i]
 				: NULL;
+
+		// Eagerly create backing with parent set for error boundary traversal
+		if (parentBacking != NULL && oldChildBacking == NULL) {
+			oldChildBacking = createBacking(childVNode, 0);
+			oldChildBacking._parent = parentBacking;
+		}
+
 		let result = diff(
 			parentDom,
 			childVNode,
@@ -623,18 +633,18 @@ function diffStrictUnkeyedChildren(
 			refQueue.push(
 				childVNode.ref,
 				(childBacking && childBacking._component) || newDom,
-				childVNode
+				childVNode,
+				childBacking
 			);
 		}
 
 		if (firstChildDom == NULL && newDom != NULL) {
 			firstChildDom = newDom;
-			setOwnedRange(
-				newParentVNode,
-				firstChildDom,
-				lastChildDom,
-				getAnchorDom(childVNode)
-			);
+			if (parentBacking != NULL) {
+				parentBacking._firstDom = firstChildDom;
+				parentBacking._lastDom = lastChildDom;
+				parentBacking._anchorDom = getAnchorDom(childVNode);
+			}
 		}
 		if (lastDom != NULL) lastChildDom = lastDom;
 
@@ -648,7 +658,7 @@ function diffStrictUnkeyedChildren(
 			newDom != NULL
 				? childBacking || childVNode
 				: oldVNode !== EMPTY_OBJ
-					? oldVNode._backing || oldVNode
+					? oldChildBacking || oldVNode
 					: NULL;
 		if (newDom != NULL && placementStatus[i] == PLAN_NONE) {
 			placementStatus[i] = oldVNode === EMPTY_OBJ ? PLAN_INSERT : PLAN_RETAIN;
@@ -677,12 +687,11 @@ function diffStrictUnkeyedChildren(
 		}
 	}
 
-	setOwnedRange(
-		newParentVNode,
-		firstChildDom,
-		lastChildDom,
-		getAnchorDom(newParentVNode)
-	);
+	if (parentBacking != NULL) {
+		parentBacking._firstDom = firstChildDom;
+		parentBacking._lastDom = lastChildDom;
+		parentBacking._anchorDom = getAnchorDom(parentBacking);
+	}
 	let skipPlacement =
 		newParentVNode.type === Fragment &&
 		oldChildren.length === 0 &&
@@ -705,7 +714,9 @@ function diffStrictUnkeyedChildren(
 			hostOpCounts
 		);
 	}
-	setOwnedChildren(newParentVNode, children);
+	if (parentBacking != NULL) {
+		setBackingChildren(parentBacking, children);
+	}
 	return oldDom;
 }
 
@@ -1245,8 +1256,8 @@ function findMatchingIndex(
 		let oldVNode = getOwnedVNode(oldChild);
 		if (
 			oldVNode != NULL &&
-			(oldVNode._flags & MATCHED) == 0 &&
 			oldVNode.key == NULL &&
+			(oldVNode._flags & MATCHED) == 0 &&
 			sameBoundaryIdentity(childVNode, oldChild, oldVNode)
 		) {
 			if (childDiffStats != NULL) childDiffStats.matchedByIndex++;

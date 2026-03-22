@@ -1,49 +1,42 @@
 import { NULL } from './constants';
-import { getOwnedVNode, getMountedBacking, isBackingNode } from './backing';
+import { isBackingNode } from './backing';
 
 /**
- * Return the first DOM node owned by a vnode or backing subtree.
- * @param {import('./internal').VNode | import('./internal').BackingNode} node
+ * Return the first DOM node owned by a backing node.
+ * @param {import('./internal').BackingNode | any} node
  * @returns {import('./internal').PreactElement | null}
  */
 export function getFirstDom(node) {
-	if (isBackingNode(node)) return node._firstDom;
-	let backing = getMountedBacking(node);
-	return backing != NULL ? backing._firstDom : NULL;
+	return isBackingNode(node) ? node._firstDom : NULL;
 }
 
 /**
- * Return the last DOM node owned by a vnode or backing subtree.
- * @param {import('./internal').VNode | import('./internal').BackingNode} node
+ * Return the last DOM node owned by a backing node.
+ * @param {import('./internal').BackingNode | any} node
  * @returns {import('./internal').PreactElement | null}
  */
 export function getLastDom(node) {
-	if (isBackingNode(node)) return node._lastDom;
-	let backing = getMountedBacking(node);
-	return backing != NULL ? backing._lastDom : NULL;
+	return isBackingNode(node) ? node._lastDom : NULL;
 }
 
 /**
- * Return the anchor DOM node for a vnode or backing subtree.
- * @param {import('./internal').VNode | import('./internal').BackingNode} node
+ * Return the anchor DOM node for a backing node.
+ * @param {import('./internal').BackingNode | any} node
  * @returns {import('./internal').PreactElement | null}
  */
 export function getAnchorDom(node) {
-	if (isBackingNode(node)) return node._anchorDom;
-	let backing = getMountedBacking(node);
-	return backing != NULL ? backing._anchorDom : NULL;
+	return isBackingNode(node) ? node._anchorDom : NULL;
 }
 
 /**
- * Recompute the owned DOM range for a vnode or backing from its children.
- * @param {import('./internal').VNode | import('./internal').BackingNode} node
+ * Recompute the owned DOM range for a backing node from its children.
+ * @param {import('./internal').BackingNode} backing
  */
-export function updateRangeFromChildren(node) {
+export function updateRangeFromChildren(backing) {
 	let firstDom = NULL;
 	let lastDom = NULL;
 	let anchorDom = NULL;
-	let backing = isBackingNode(node) ? node : getMountedBacking(node);
-	let children = backing != NULL ? backing._children : NULL;
+	let children = backing._children;
 
 	if (children != NULL) {
 		for (let i = 0; i < children.length; i++) {
@@ -65,9 +58,7 @@ export function updateRangeFromChildren(node) {
 		}
 	}
 
-	if (backing != NULL) {
-		backing._firstDom = firstDom;
-		backing._lastDom = lastDom;
-		backing._anchorDom = anchorDom;
-	}
+	backing._firstDom = firstDom;
+	backing._lastDom = lastDom;
+	backing._anchorDom = anchorDom;
 }

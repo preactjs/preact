@@ -1,16 +1,16 @@
 import { NULL } from '../constants';
-import { getMountedBacking } from '../backing';
 
 /**
- * Find the closest error boundary to a thrown error and call it
+ * Find the closest error boundary to a thrown error and call it.
+ * Walks backing._parent to find componentDidCatch/getDerivedStateFromError.
+ *
  * @param {object} error The thrown value
- * @param {import('../internal').VNode} vnode The vnode that threw the error that was caught (except
- * for unmounting when this parameter is the highest parent that was being
- * unmounted)
+ * @param {import('../internal').VNode} vnode The vnode that threw
  * @param {import('../internal').VNode} [oldVNode]
  * @param {import('../internal').ErrorInfo} [errorInfo]
+ * @param {import('../internal').BackingNode} [backing] The backing node for the throwing vnode
  */
-export function _catchError(error, vnode, oldVNode, errorInfo) {
+export function _catchError(error, vnode, oldVNode, errorInfo, backing) {
 	/** @type {import('../internal').Component} */
 	let component,
 		/** @type {import('../internal').ComponentType} */
@@ -19,15 +19,7 @@ export function _catchError(error, vnode, oldVNode, errorInfo) {
 		handled;
 
 	// Walk the backing parent chain to find error boundaries.
-	let backing = getMountedBacking(vnode);
 	let cur = backing != NULL ? backing._parent : NULL;
-
-	// Fallback: if no backing parent chain, try vnode._parent for vnodes
-	// that haven't been fully mounted yet.
-	if (cur == NULL && vnode._parent) {
-		let parentBacking = getMountedBacking(vnode._parent);
-		if (parentBacking != NULL) cur = parentBacking;
-	}
 
 	while (cur != NULL) {
 		if ((component = cur._component) && !component._processingException) {
