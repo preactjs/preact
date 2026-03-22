@@ -48,6 +48,25 @@ export interface ChildDiffStats {
 	placementPasses: number;
 }
 
+export const enum BackingKind {
+	Fragment = 1,
+	Component = 2,
+	Suspense = 3
+}
+
+export interface BackingNode {
+	_parent: BackingNode | null;
+	_vnode: VNode | null;
+	_children: Array<VNode<any> | BackingNode | null> | null;
+	_firstDom: PreactElement | null;
+	_lastDom: PreactElement | null;
+	_anchorDom: PreactElement | null;
+	_kind: BackingKind;
+	_activeChild?: VNode<any> | BackingNode | null;
+	_parkedChild?: VNode<any> | BackingNode | null;
+	_fallbackChild?: VNode<any> | BackingNode | null;
+}
+
 export interface Options extends preact.Options {
 	/** Attach a hook that is invoked before render, mainly to check the arguments. */
 	_root?(vnode: ComponentChild, parent: preact.ContainerNode): void;
@@ -184,6 +203,7 @@ export interface VNode<P = {}> extends preact.VNode<P> {
 	 * The DOM node that should be used as this subtree's placement anchor.
 	 */
 	_anchorDom?: PreactElement | null;
+	_backing?: BackingNode | null;
 	_component: Component | null;
 	constructor: undefined;
 	_original: number;

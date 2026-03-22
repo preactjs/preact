@@ -20,7 +20,13 @@ import { diffChildren } from './children';
 import { setProperty } from './props';
 import { assign, isArray, removeNode, slice } from '../util';
 import options from '../options';
-import { getAnchorDom, getLastDom } from '../range';
+import {
+	getAnchorDom,
+	getFirstDom,
+	getLastDom,
+	syncBackingOwnership
+} from '../range';
+import { clearBacking, reuseBacking } from '../backing';
 
 /**
  * @typedef {import('../internal').ComponentChildren} ComponentChildren
@@ -92,6 +98,7 @@ export function diff(
 		oldDom = newVNode._dom = oldVNode._dom;
 		newVNode._lastDom = oldVNode._lastDom;
 		newVNode._anchorDom = oldVNode._anchorDom;
+		reuseBacking(newVNode, oldVNode);
 		excessDomChildren = [oldDom];
 	}
 
@@ -323,13 +330,15 @@ export function diff(
 
 				let activeChild = c._activeChild;
 				if (activeChild != NULL) {
-					newVNode._dom = activeChild._dom;
+					newVNode._dom = getFirstDom(activeChild);
 					newVNode._anchorDom = getAnchorDom(activeChild);
 					newVNode._lastDom = getLastDom(activeChild);
 				} else {
 					newVNode._dom = newVNode._anchorDom = newVNode._lastDom = NULL;
 				}
 			}
+
+			syncBackingOwnership(newVNode);
 
 			c.base = newVNode._dom;
 
@@ -369,6 +378,7 @@ export function diff(
 				newVNode._dom = oldVNode._dom;
 				newVNode._lastDom = oldVNode._lastDom;
 				newVNode._anchorDom = oldVNode._anchorDom;
+				reuseBacking(newVNode, oldVNode);
 				newVNode._children = oldVNode._children;
 				if (!e.then) markAsForce(newVNode);
 			}
@@ -382,6 +392,7 @@ export function diff(
 		newVNode._dom = oldVNode._dom;
 		newVNode._lastDom = oldVNode._lastDom;
 		newVNode._anchorDom = oldVNode._anchorDom;
+		reuseBacking(newVNode, oldVNode);
 	} else {
 		oldDom = newVNode._dom = diffElementNodes(
 			oldVNode._dom,
@@ -591,7 +602,7 @@ export function queuePlacement(
 	hostOps,
 	hostOpCounts
 ) {
-	let firstDom = vnode._dom;
+	let firstDom = getFirstDom(vnode);
 	let lastDom = getLastDom(vnode);
 
 	if (firstDom == NULL) return;
@@ -1193,6 +1204,7 @@ export function unmount(vnode, parentVNode, skipRemove) {
 		vnode._lastDom =
 		vnode._anchorDom =
 			UNDEFINED;
+	clearBacking(vnode);
 }
 
 /** The `.render()` method for a PFC backing instance. */

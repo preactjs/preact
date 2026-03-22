@@ -16,6 +16,8 @@ options._catchError = function (error, newVNode, oldVNode, errorInfo) {
 					newVNode._dom = oldVNode._dom;
 					newVNode._lastDom = oldVNode._lastDom;
 					newVNode._anchorDom = oldVNode._anchorDom;
+					newVNode._backing = oldVNode._backing;
+					if (newVNode._backing) newVNode._backing._vnode = newVNode;
 					newVNode._children = oldVNode._children;
 					if (newVNode._children) {
 						newVNode._children.some(child => {

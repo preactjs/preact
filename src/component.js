@@ -3,7 +3,12 @@ import { diff, commitRoot } from './diff/index';
 import options from './options';
 import { Fragment } from './create-element';
 import { MODE_HYDRATE, NULL } from './constants';
-import { updateRangeFromChildren } from './range';
+import { getOwnedChildren } from './backing';
+import {
+	getFirstDom,
+	syncBackingOwnership,
+	updateRangeFromChildren
+} from './range';
 
 /**
  * Base Component class. Provides `setState()` and `forceUpdate()`, which
@@ -98,14 +103,15 @@ export function getDomSibling(vnode, childIndex) {
 	}
 
 	let sibling;
-	for (; childIndex < vnode._children.length; childIndex++) {
-		sibling = vnode._children[childIndex];
+	let children = getOwnedChildren(vnode) || [];
+	for (; childIndex < children.length; childIndex++) {
+		sibling = children[childIndex];
 
-		if (sibling != NULL && sibling._dom != NULL) {
+		if (sibling != NULL && getFirstDom(sibling) != NULL) {
 			// Since updateParentDomPointers keeps _dom pointer correct,
 			// we can rely on _dom to tell us if this subtree contains a
 			// rendered DOM node, and what the first rendered DOM node is
-			return sibling._dom;
+			return getFirstDom(sibling);
 		}
 	}
 
@@ -123,6 +129,7 @@ export function getDomSibling(vnode, childIndex) {
  */
 export function updateVNodeDomPointers(vnode) {
 	updateRangeFromChildren(vnode);
+	syncBackingOwnership(vnode);
 	if (vnode._component != NULL) {
 		vnode._component.base = vnode._dom;
 	}

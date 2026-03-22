@@ -11,8 +11,9 @@ import {
 	NULL
 } from '../constants';
 import { isArray } from '../util';
+import { getOwnedChildren } from '../backing';
 import { getDomSibling } from '../component';
-import { getAnchorDom, getLastDom } from '../range';
+import { getAnchorDom, getFirstDom, getLastDom } from '../range';
 
 const PLAN_NONE = 0;
 const PLAN_RETAIN = 1;
@@ -91,7 +92,8 @@ export function diffChildren(
 	// This is a compression of oldParentVNode!=null && oldParentVNode != EMPTY_OBJ && oldParentVNode._children || EMPTY_ARR
 	// as EMPTY_OBJ._children should be `undefined`.
 	/** @type {VNode[]} */
-	let oldChildren = (oldParentVNode && oldParentVNode._children) || EMPTY_ARR;
+	let oldChildren =
+		(oldParentVNode && getOwnedChildren(oldParentVNode)) || EMPTY_ARR;
 	let fastResult = diffSingleTextChild(
 		parentDom,
 		renderResult,
@@ -218,7 +220,7 @@ export function diffChildren(
 		);
 
 		// Adjust DOM nodes
-		newDom = childVNode._dom;
+		newDom = getFirstDom(childVNode);
 		lastDom = getLastDom(childVNode);
 		placementFirstDom[i] = newDom != NULL ? getAnchorDom(childVNode) : NULL;
 		if (childVNode.ref && oldVNode.ref != childVNode.ref) {
@@ -244,9 +246,9 @@ export function diffChildren(
 			childVNode.key != NULL &&
 			typeof childVNode.type == 'function' &&
 			oldVNode !== EMPTY_OBJ &&
-			oldVNode._dom != NULL &&
+			getFirstDom(oldVNode) != NULL &&
 			newDom != NULL &&
-			(oldVNode._dom !== newDom || getLastDom(oldVNode) !== lastDom)
+			(getFirstDom(oldVNode) !== newDom || getLastDom(oldVNode) !== lastDom)
 		) {
 			forcePlacement[i] = 1;
 			placementStatus[i] = PLAN_MOVE;
@@ -366,7 +368,7 @@ function diffSingleTextChild(
 		childDiffStats
 	);
 
-	newParentVNode._dom = childVNode._dom;
+	newParentVNode._dom = getFirstDom(childVNode);
 	newParentVNode._anchorDom = getAnchorDom(childVNode);
 	newParentVNode._lastDom = getLastDom(childVNode);
 
@@ -476,7 +478,7 @@ function diffStrictUnkeyedChildren(
 			childDiffStats
 		);
 
-		let newDom = childVNode._dom;
+		let newDom = getFirstDom(childVNode);
 		let lastDom = getLastDom(childVNode);
 		if (childVNode.ref && oldVNode.ref != childVNode.ref) {
 			if (oldVNode.ref) {
@@ -613,13 +615,14 @@ function queueRemoval(
 	hostOpCounts,
 	childDiffStats
 ) {
-	if (oldVNode._dom == oldDom) {
+	let oldFirstDom = getFirstDom(oldVNode);
+	if (oldFirstDom == oldDom) {
 		oldDom = getDomSibling(oldVNode);
 	}
-	if (oldVNode._dom != NULL) {
+	if (oldFirstDom != NULL) {
 		if (hostOpCounts != NULL) hostOpCounts.removeRange++;
 		if (childDiffStats != NULL) childDiffStats.removals++;
-		removeOps.push(oldVNode._dom, getLastDom(oldVNode));
+		removeOps.push(oldFirstDom, getLastDom(oldVNode));
 	}
 	unmountQueue.push(oldVNode);
 	return oldDom;
@@ -813,13 +816,14 @@ function constructNewChildrenArray(
 		for (i = 0; i < oldChildrenLength; i++) {
 			oldVNode = oldChildren[i];
 			if (oldVNode != NULL && (oldVNode._flags & MATCHED) == 0) {
-				if (oldVNode._dom == oldDom) {
+				let oldFirstDom = getFirstDom(oldVNode);
+				if (oldFirstDom == oldDom) {
 					oldDom = getDomSibling(oldVNode);
 				}
-				if (oldVNode._dom != NULL) {
+				if (oldFirstDom != NULL) {
 					if (hostOpCounts != NULL) hostOpCounts.removeRange++;
 					if (childDiffStats != NULL) childDiffStats.removals++;
-					removeOps.push(oldVNode._dom, getLastDom(oldVNode));
+					removeOps.push(oldFirstDom, getLastDom(oldVNode));
 				}
 				unmountQueue.push(oldVNode);
 			}
