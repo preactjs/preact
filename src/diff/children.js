@@ -256,9 +256,9 @@ export function diffChildren(
 					: NULL;
 		placementAnchors[i] =
 			newDom != NULL
-				? childVNode
+				? childBacking || childVNode
 				: matchingIndex != -1 && oldVNode !== EMPTY_OBJ
-					? oldVNode
+					? oldVNode._backing || oldVNode
 					: NULL;
 		if (childVNode.ref && oldVNode.ref != childVNode.ref) {
 			if (oldVNode.ref) {
@@ -622,7 +622,11 @@ function diffStrictUnkeyedChildren(
 					? getFirstDom(oldVNode)
 					: NULL;
 		placementAnchors[i] =
-			newDom != NULL ? childVNode : oldVNode !== EMPTY_OBJ ? oldVNode : NULL;
+			newDom != NULL
+				? childBacking || childVNode
+				: oldVNode !== EMPTY_OBJ
+					? oldVNode._backing || oldVNode
+					: NULL;
 		if (newDom != NULL && placementStatus[i] == PLAN_NONE) {
 			placementStatus[i] = oldVNode === EMPTY_OBJ ? PLAN_INSERT : PLAN_RETAIN;
 		}

@@ -148,12 +148,17 @@ export function replaceOwnedChild(vnode, index, child) {
 				child._vnode._parent = vnode;
 			}
 		} else if (child != NULL) {
+			// Promote vnode to its backing node if available
 			let childBacking = getMountedBacking(child);
-			if (childBacking != NULL && childBacking._kind === BACKING_FRAGMENT) {
+			if (childBacking != NULL) {
 				childBacking._parent = backing;
+				if (childBacking._vnode != NULL) {
+					childBacking._vnode._parent = vnode;
+				}
 				child = childBacking;
+			} else {
+				if (child._parent !== undefined) child._parent = vnode;
 			}
-			if (child._parent !== undefined) child._parent = vnode;
 		}
 		children[index] = child;
 	}
