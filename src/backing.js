@@ -36,16 +36,6 @@ export function getMountedBacking(vnode) {
 }
 
 /**
- * Return the descriptor child list for this vnode.
- *
- * @param {VNode} vnode
- * @returns {Array<VNode<any> | BackingNode | null> | null}
- */
-export function getDescriptorChildren(vnode) {
-	return vnode._children;
-}
-
-/**
  * @param {VNode<any> | BackingNode | null} child
  * @returns {child is BackingNode}
  */
@@ -62,25 +52,6 @@ export function isBackingNode(child) {
 export function getOwnedVNode(child) {
 	if (child == NULL) return NULL;
 	return isBackingNode(child) ? child._vnode : child;
-}
-
-/**
- * Return the current mounted child list normalized back to descriptor vnodes.
- * This keeps diff/matching logic descriptor-oriented while mounted storage
- * lives on backing nodes.
- *
- * @param {VNode} vnode
- * @returns {Array<VNode<any> | null> | null}
- */
-export function getOwnedVChildren(vnode) {
-	let children = getOwnedChildren(vnode);
-	if (children == NULL) return NULL;
-
-	let normalized = new Array(children.length);
-	for (let i = 0; i < children.length; i++) {
-		normalized[i] = getOwnedVNode(children[i]);
-	}
-	return normalized;
 }
 
 /**

@@ -674,9 +674,7 @@ export function queuePlacement(
 	} else {
 		// Children not in DOM yet (initial Fragment mount). Walk backing
 		// children and insert each individually. Recurse for nested Fragments.
-		let children = isBackingNode(vnode)
-			? vnode._children
-			: getOwnedChildren(vnode);
+		let children = vnode._children;
 		if (children) {
 			for (let i = 0; i < children.length; i++) {
 				if (children[i] != NULL) {
