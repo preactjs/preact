@@ -6,6 +6,14 @@ export const MODE_SUSPENDED = 1 << 7;
 export const INSERT_VNODE = 1 << 2;
 /** Indicates a VNode has been matched with another VNode in the diff */
 export const MATCHED = 1 << 1;
+/** Indicates a VNode has a key */
+export const HAS_KEY = 1 << 0;
+/** Indicates a VNode has array children */
+export const ARRAY_CHILDREN = 1 << 3;
+/** Indicates a VNode has exactly one child */
+export const SINGLE_CHILD = 1 << 4;
+/** Indicates a VNode has exactly one text-like child */
+export const SINGLE_TEXT_CHILD = 1 << 6;
 
 /** Reset all mode flags */
 export const RESET_MODE = ~(MODE_HYDRATE | MODE_SUSPENDED);

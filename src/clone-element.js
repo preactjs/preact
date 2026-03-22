@@ -1,5 +1,5 @@
 import { assign, slice } from './util';
-import { createVNode } from './create-element';
+import { createVNode, getChildFlags } from './create-element';
 import { NULL, UNDEFINED } from './constants';
 
 /**
@@ -15,7 +15,8 @@ export function cloneElement(vnode, props, children) {
 	let normalizedProps = assign({}, vnode.props),
 		key,
 		ref,
-		i;
+		i,
+		childFlags = 0;
 
 	let defaultProps;
 
@@ -36,6 +37,11 @@ export function cloneElement(vnode, props, children) {
 	if (arguments.length > 2) {
 		normalizedProps.children =
 			arguments.length > 3 ? slice.call(arguments, 2) : children;
+		childFlags = getChildFlags(
+			arguments.length,
+			children,
+			normalizedProps.children
+		);
 	}
 
 	return createVNode(
@@ -43,6 +49,7 @@ export function cloneElement(vnode, props, children) {
 		normalizedProps,
 		key || vnode.key,
 		ref || vnode.ref,
-		NULL
+		NULL,
+		childFlags
 	);
 }

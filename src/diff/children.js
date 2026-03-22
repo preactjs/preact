@@ -3,8 +3,10 @@ import { createVNode, Fragment } from '../create-element';
 import {
 	EMPTY_OBJ,
 	EMPTY_ARR,
+	HAS_KEY,
 	INSERT_VNODE,
 	MATCHED,
+	SINGLE_TEXT_CHILD,
 	UNDEFINED,
 	NULL
 } from '../constants';
@@ -13,7 +15,9 @@ import { getDomSibling } from '../component';
 
 /**
  * @typedef {import('../internal').ComponentChildren} ComponentChildren
+ * @typedef {import('../internal').ChildDiffStats} ChildDiffStats
  * @typedef {import('../internal').Component} Component
+ * @typedef {import('../internal').HostOpCounts} HostOpCounts
  * @typedef {import('../internal').PreactElement} PreactElement
  * @typedef {import('../internal').VNode} VNode
  */
@@ -42,6 +46,8 @@ import { getDomSibling } from '../component';
  * siblings. In most cases, it starts out as `oldChildren[0]._dom`.
  * @param {boolean} isHydrating Whether or not we are in hydration
  * @param {any[]} refQueue an array of elements needed to invoke refs
+ * @param {HostOpCounts | null} hostOpCounts
+ * @param {ChildDiffStats | null} childDiffStats
  */
 export function diffChildren(
 	parentDom,
@@ -57,7 +63,9 @@ export function diffChildren(
 	removeOps,
 	oldDom,
 	isHydrating,
-	refQueue
+	refQueue,
+	hostOpCounts,
+	childDiffStats
 ) {
 	let i,
 		/** @type {VNode} */
@@ -78,10 +86,62 @@ export function diffChildren(
 	// as EMPTY_OBJ._children should be `undefined`.
 	/** @type {VNode[]} */
 	let oldChildren = (oldParentVNode && oldParentVNode._children) || EMPTY_ARR;
+	let fastResult = diffSingleTextChild(
+		parentDom,
+		renderResult,
+		newParentVNode,
+		oldChildren,
+		globalContext,
+		namespace,
+		excessDomChildren,
+		commitQueue,
+		hostOps,
+		unmountQueue,
+		removeOps,
+		oldDom,
+		isHydrating,
+		refQueue,
+		hostOpCounts,
+		childDiffStats
+	);
+
+	if (fastResult !== UNDEFINED) {
+		return fastResult;
+	}
 
 	let newChildrenLength = renderResult.length;
 	let hasKeys =
 		hasKeysInRawChildren(renderResult) || hasKeysInChildren(oldChildren);
+
+	if (
+		!hasKeys &&
+		canDiffStrictUnkeyedChildren(
+			parentDom,
+			renderResult,
+			oldChildren,
+			excessDomChildren,
+			isHydrating
+		)
+	) {
+		return diffStrictUnkeyedChildren(
+			parentDom,
+			renderResult,
+			newParentVNode,
+			oldChildren,
+			globalContext,
+			namespace,
+			excessDomChildren,
+			commitQueue,
+			hostOps,
+			unmountQueue,
+			removeOps,
+			oldDom,
+			isHydrating,
+			refQueue,
+			hostOpCounts,
+			childDiffStats
+		);
+	}
 
 	oldDom = constructNewChildrenArray(
 		newParentVNode,
@@ -91,10 +151,13 @@ export function diffChildren(
 		removeOps,
 		oldDom,
 		newChildrenLength,
-		hasKeys
+		hasKeys,
+		hostOpCounts,
+		childDiffStats
 	);
 	let matchingIndices = new Array(newChildrenLength);
 	let forcePlacement = new Uint8Array(newChildrenLength);
+	let needsPlacement = false;
 
 	for (i = 0; i < newChildrenLength; i++) {
 		childVNode = newParentVNode._children[i];
@@ -110,6 +173,8 @@ export function diffChildren(
 			(matchingIndex == -1 || oldChildren[matchingIndex] == NULL)
 		) {
 			forcePlacement[i] = 1;
+			needsPlacement = true;
+			if (childDiffStats != NULL) childDiffStats.forcedPlacement++;
 		}
 
 		// Update childVNode._index to its final index
@@ -129,7 +194,16 @@ export function diffChildren(
 			removeOps,
 			oldDom,
 			isHydrating,
-			refQueue
+			refQueue,
+			(newParentVNode._flags & SINGLE_TEXT_CHILD) != 0 &&
+				(newParentVNode._flags & HAS_KEY) == 0 &&
+				matchingIndex != -1 &&
+				childVNode.type == NULL &&
+				oldVNode !== EMPTY_OBJ &&
+				oldVNode._dom != NULL &&
+				(childVNode._flags & INSERT_VNODE) == 0,
+			hostOpCounts,
+			childDiffStats
 		);
 
 		// Adjust DOM nodes
@@ -162,6 +236,12 @@ export function diffChildren(
 			oldVNode._dom !== newDom
 		) {
 			forcePlacement[i] = 1;
+			needsPlacement = true;
+			if (childDiffStats != NULL) childDiffStats.forcedPlacement++;
+		}
+
+		if (!needsPlacement && childVNode._flags & INSERT_VNODE && newDom != NULL) {
+			needsPlacement = true;
 		}
 
 		if (!(childVNode._flags & INSERT_VNODE) && lastDom) {
@@ -174,14 +254,19 @@ export function diffChildren(
 	newParentVNode._dom = firstChildDom;
 	newParentVNode._lastDom = lastChildDom;
 
-	planPlacements(
-		newParentVNode._children,
-		matchingIndices,
-		forcePlacement,
-		parentDom,
-		hostOps,
-		typeof newParentVNode.type == 'function' ? oldDom : NULL
-	);
+	if (needsPlacement) {
+		if (childDiffStats != NULL) childDiffStats.placementPasses++;
+		planPlacements(
+			newParentVNode._children,
+			matchingIndices,
+			forcePlacement,
+			parentDom,
+			hostOps,
+			typeof newParentVNode.type == 'function' ? oldDom : NULL,
+			hasKeys,
+			hostOpCounts
+		);
+	}
 
 	for (i = 0; i < newChildrenLength; i++) {
 		childVNode = newParentVNode._children[i];
@@ -190,6 +275,322 @@ export function diffChildren(
 		}
 	}
 
+	return oldDom;
+}
+
+function diffSingleTextChild(
+	parentDom,
+	renderResult,
+	newParentVNode,
+	oldChildren,
+	globalContext,
+	namespace,
+	excessDomChildren,
+	commitQueue,
+	hostOps,
+	unmountQueue,
+	removeOps,
+	oldDom,
+	isHydrating,
+	refQueue,
+	hostOpCounts,
+	childDiffStats
+) {
+	if (
+		(newParentVNode._flags & SINGLE_TEXT_CHILD) == 0 ||
+		(newParentVNode._flags & HAS_KEY) != 0 ||
+		renderResult.length !== 1 ||
+		oldChildren.length !== 1
+	) {
+		return UNDEFINED;
+	}
+	if (childDiffStats != NULL) childDiffStats.fastSingleText++;
+
+	let value = renderResult[0];
+	let oldVNode = oldChildren[0];
+	if (
+		oldVNode == NULL ||
+		oldVNode.type != NULL ||
+		(oldVNode._flags & MATCHED) != 0
+	) {
+		return UNDEFINED;
+	}
+
+	let childVNode = createVNode(NULL, value, NULL, NULL, NULL);
+	childVNode._parent = newParentVNode;
+	childVNode._depth = newParentVNode._depth + 1;
+	childVNode._index = 0;
+	newParentVNode._children = [childVNode];
+
+	diff(
+		parentDom,
+		childVNode,
+		oldVNode || EMPTY_OBJ,
+		globalContext,
+		namespace,
+		excessDomChildren,
+		commitQueue,
+		hostOps,
+		unmountQueue,
+		removeOps,
+		oldDom,
+		isHydrating,
+		refQueue,
+		true,
+		hostOpCounts,
+		childDiffStats
+	);
+
+	newParentVNode._dom = childVNode._dom;
+	newParentVNode._lastDom = childVNode._lastDom || childVNode._dom;
+
+	if (oldVNode != NULL) {
+		oldVNode._flags &= ~MATCHED;
+	}
+
+	return childVNode._lastDom ? getDomSiblingAfter(childVNode._lastDom) : oldDom;
+}
+
+function diffStrictUnkeyedChildren(
+	parentDom,
+	renderResult,
+	newParentVNode,
+	oldChildren,
+	globalContext,
+	namespace,
+	excessDomChildren,
+	commitQueue,
+	hostOps,
+	unmountQueue,
+	removeOps,
+	oldDom,
+	isHydrating,
+	refQueue,
+	hostOpCounts,
+	childDiffStats
+) {
+	let i;
+	let newChildrenLength = renderResult.length;
+	let oldChildrenLength = oldChildren.length;
+	let firstChildDom;
+	let lastChildDom;
+
+	newParentVNode._children = new Array(newChildrenLength);
+
+	for (i = 0; i < newChildrenLength; i++) {
+		let childVNode = normalizeChild(
+			renderResult[i],
+			newParentVNode,
+			i,
+			childDiffStats
+		);
+		newParentVNode._children[i] = childVNode;
+		let oldVNode = oldChildren[i];
+		if (childVNode == NULL) {
+			if (oldVNode != NULL) {
+				oldDom = queueRemoval(
+					oldVNode,
+					unmountQueue,
+					removeOps,
+					oldDom,
+					hostOpCounts,
+					childDiffStats
+				);
+			}
+			continue;
+		}
+
+		childVNode._parent = newParentVNode;
+		childVNode._depth = newParentVNode._depth + 1;
+		childVNode._index = i;
+
+		let reused =
+			oldVNode != NULL && getNormalizedType(renderResult[i]) === oldVNode.type;
+		if (!reused) {
+			if (oldVNode != NULL) {
+				oldDom = queueRemoval(
+					oldVNode,
+					unmountQueue,
+					removeOps,
+					oldDom,
+					hostOpCounts,
+					childDiffStats
+				);
+			}
+			oldVNode = EMPTY_OBJ;
+			if (typeof childVNode.type != 'function') {
+				childVNode._flags |= INSERT_VNODE;
+			}
+			if (childDiffStats != NULL) childDiffStats.mounts++;
+		} else {
+			if (childDiffStats != NULL) childDiffStats.matchedByIndex++;
+		}
+
+		let result = diff(
+			parentDom,
+			childVNode,
+			oldVNode,
+			globalContext,
+			namespace,
+			excessDomChildren,
+			commitQueue,
+			hostOps,
+			unmountQueue,
+			removeOps,
+			oldDom,
+			isHydrating,
+			refQueue,
+			(newParentVNode._flags & SINGLE_TEXT_CHILD) != 0 &&
+				childVNode.type == NULL &&
+				oldVNode !== EMPTY_OBJ &&
+				oldVNode._dom != NULL,
+			hostOpCounts,
+			childDiffStats
+		);
+
+		let newDom = childVNode._dom;
+		let lastDom = childVNode._lastDom || newDom;
+		if (childVNode.ref && oldVNode.ref != childVNode.ref) {
+			if (oldVNode.ref) {
+				applyRef(oldVNode.ref, NULL, childVNode);
+			}
+			refQueue.push(
+				childVNode.ref,
+				childVNode._component || newDom,
+				childVNode
+			);
+		}
+
+		if (firstChildDom == NULL && newDom != NULL) firstChildDom = newDom;
+		if (lastDom != NULL) lastChildDom = lastDom;
+
+		if (oldVNode === EMPTY_OBJ && newDom != NULL) {
+			queuePlacement(childVNode, oldDom, parentDom, hostOps, hostOpCounts);
+		}
+
+		if (oldVNode !== EMPTY_OBJ && lastDom) {
+			oldDom = getDomSiblingAfter(lastDom);
+		} else if (typeof childVNode.type == 'function' && result !== UNDEFINED) {
+			oldDom = result;
+		}
+
+		childVNode._flags &= ~(INSERT_VNODE | MATCHED);
+	}
+
+	for (; i < oldChildrenLength; i++) {
+		let oldVNode = oldChildren[i];
+		if (oldVNode != NULL) {
+			oldDom = queueRemoval(
+				oldVNode,
+				unmountQueue,
+				removeOps,
+				oldDom,
+				hostOpCounts,
+				childDiffStats
+			);
+		}
+	}
+
+	newParentVNode._dom = firstChildDom;
+	newParentVNode._lastDom = lastChildDom;
+	return oldDom;
+}
+
+function canDiffStrictUnkeyedChildren(
+	parentDom,
+	renderResult,
+	oldChildren,
+	excessDomChildren,
+	isHydrating
+) {
+	if (isHydrating || excessDomChildren != NULL || parentDom.nodeType == 9) {
+		return false;
+	}
+	return true;
+}
+
+function getNormalizedType(child) {
+	if (
+		child == NULL ||
+		typeof child == 'boolean' ||
+		typeof child == 'function'
+	) {
+		return NULL;
+	}
+
+	if (
+		typeof child == 'string' ||
+		typeof child == 'number' ||
+		typeof child == 'bigint' ||
+		child.constructor == String
+	) {
+		return NULL;
+	}
+
+	if (isArray(child)) {
+		return Fragment;
+	}
+
+	return child.type;
+}
+
+function normalizeChild(childVNode, newParentVNode, index, childDiffStats) {
+	if (
+		childVNode == NULL ||
+		typeof childVNode == 'boolean' ||
+		typeof childVNode == 'function'
+	) {
+		return NULL;
+	}
+
+	if (
+		typeof childVNode == 'string' ||
+		typeof childVNode == 'number' ||
+		typeof childVNode == 'bigint' ||
+		childVNode.constructor == String
+	) {
+		if (childDiffStats != NULL) childDiffStats.normalizedText++;
+		childVNode = createVNode(NULL, childVNode, NULL, NULL, NULL);
+	} else if (isArray(childVNode)) {
+		if (childDiffStats != NULL) childDiffStats.normalizedArray++;
+		childVNode = createVNode(
+			Fragment,
+			{ children: childVNode },
+			NULL,
+			NULL,
+			NULL
+		);
+	} else if (childVNode.constructor === UNDEFINED && childVNode._depth > 0) {
+		if (childDiffStats != NULL) childDiffStats.clonedVNode++;
+		childVNode = createVNode(
+			childVNode.type,
+			childVNode.props,
+			childVNode.key,
+			childVNode.ref ? childVNode.ref : NULL,
+			childVNode._original
+		);
+	}
+
+	return childVNode;
+}
+
+function queueRemoval(
+	oldVNode,
+	unmountQueue,
+	removeOps,
+	oldDom,
+	hostOpCounts,
+	childDiffStats
+) {
+	if (oldVNode._dom == oldDom) {
+		oldDom = getDomSibling(oldVNode);
+	}
+	if (oldVNode._dom != NULL) {
+		if (hostOpCounts != NULL) hostOpCounts.removeRange++;
+		if (childDiffStats != NULL) childDiffStats.removals++;
+		removeOps.push(oldVNode._dom, oldVNode._lastDom || oldVNode._dom);
+	}
+	unmountQueue.push(oldVNode);
 	return oldDom;
 }
 
@@ -206,7 +607,9 @@ function constructNewChildrenArray(
 	removeOps,
 	oldDom,
 	newChildrenLength,
-	hasKeys
+	hasKeys,
+	hostOpCounts,
+	childDiffStats
 ) {
 	/** @type {number} */
 	let i;
@@ -250,6 +653,7 @@ function constructNewChildrenArray(
 				NULL,
 				NULL
 			);
+			if (childDiffStats != NULL) childDiffStats.normalizedText++;
 		} else if (isArray(childVNode)) {
 			childVNode = newParentVNode._children[i] = createVNode(
 				Fragment,
@@ -258,6 +662,7 @@ function constructNewChildrenArray(
 				NULL,
 				NULL
 			);
+			if (childDiffStats != NULL) childDiffStats.normalizedArray++;
 		} else if (childVNode.constructor === UNDEFINED && childVNode._depth > 0) {
 			// VNode is already in use, clone it. This can happen in the following
 			// scenario:
@@ -270,6 +675,7 @@ function constructNewChildrenArray(
 				childVNode.ref ? childVNode.ref : NULL,
 				childVNode._original
 			);
+			if (childDiffStats != NULL) childDiffStats.clonedVNode++;
 		} else {
 			newParentVNode._children[i] = childVNode;
 		}
@@ -277,7 +683,6 @@ function constructNewChildrenArray(
 		const skewedIndex = i + skew;
 		childVNode._parent = newParentVNode;
 		childVNode._depth = newParentVNode._depth + 1;
-
 		// Temporarily store the matchingIndex on the _index property so we can pull
 		// out the oldVNode in diffChildren. We'll override this to the VNode's
 		// final index after using this property to get the oldVNode
@@ -286,7 +691,8 @@ function constructNewChildrenArray(
 			oldChildren,
 			skewedIndex,
 			remainingOldChildren,
-			hasKeys
+			hasKeys,
+			childDiffStats
 		));
 
 		oldVNode = NULL;
@@ -304,6 +710,7 @@ function constructNewChildrenArray(
 		const isMounting = oldVNode == NULL || oldVNode._original == NULL;
 
 		if (isMounting) {
+			if (childDiffStats != NULL) childDiffStats.mounts++;
 			if (matchingIndex == -1) {
 				// When the array of children is growing we need to decrease the skew
 				// as we are adding a new element to the array.
@@ -331,6 +738,7 @@ function constructNewChildrenArray(
 				childVNode._flags |= INSERT_VNODE;
 			}
 		} else if (matchingIndex != skewedIndex) {
+			if (childDiffStats != NULL) childDiffStats.moved++;
 			// When we move elements around i.e. [0, 1, 2] --> [1, 0, 2]
 			// --> we diff 1, we find it at position 1 while our skewed index is 0 and our skew is 0
 			//     we set the skew to 1 as we found an offset.
@@ -378,6 +786,8 @@ function constructNewChildrenArray(
 					oldDom = getDomSibling(oldVNode);
 				}
 				if (oldVNode._dom != NULL) {
+					if (hostOpCounts != NULL) hostOpCounts.removeRange++;
+					if (childDiffStats != NULL) childDiffStats.removals++;
 					removeOps.push(oldVNode._dom, oldVNode._lastDom || oldVNode._dom);
 				}
 				unmountQueue.push(oldVNode);
@@ -405,8 +815,44 @@ function planPlacements(
 	forcePlacement,
 	parentDom,
 	hostOps,
-	oldDom
+	oldDom,
+	hasKeys,
+	hostOpCounts
 ) {
+	if (children.length === 1) {
+		let child = children[0];
+		if (child != NULL && child._dom != NULL) {
+			let matchingIndex = matchingIndices[0];
+			if (
+				(matchingIndex == -1 && typeof child.type != 'function') ||
+				forcePlacement[0]
+			) {
+				queuePlacement(child, oldDom, parentDom, hostOps, hostOpCounts);
+			}
+		}
+		return;
+	}
+
+	if (!hasKeys) {
+		let before = oldDom;
+
+		for (let i = children.length; i--; ) {
+			let child = children[i];
+			if (child == NULL || child._dom == NULL) continue;
+
+			if (
+				(matchingIndices[i] == -1 && typeof child.type != 'function') ||
+				forcePlacement[i]
+			) {
+				queuePlacement(child, before, parentDom, hostOps, hostOpCounts);
+			}
+
+			before = child._dom;
+		}
+
+		return;
+	}
+
 	let stable = getStablePlacementSet(children, matchingIndices, forcePlacement);
 	let before = oldDom;
 
@@ -419,7 +865,7 @@ function planPlacements(
 			forcePlacement[i] ||
 			(!stable[i] && matchingIndices[i] != -1)
 		) {
-			queuePlacement(child, before, parentDom, hostOps);
+			queuePlacement(child, before, parentDom, hostOps, hostOpCounts);
 		}
 
 		before = child._dom;
@@ -512,12 +958,21 @@ function findMatchingIndex(
 	oldChildren,
 	skewedIndex,
 	remainingOldChildren,
-	hasKeys
+	hasKeys,
+	childDiffStats
 ) {
 	const key = childVNode.key;
 	const type = childVNode.type;
 	let oldVNode = oldChildren[skewedIndex];
 	const matched = oldVNode != NULL && (oldVNode._flags & MATCHED) == 0;
+
+	if (
+		(oldVNode === NULL && key == null) ||
+		(matched && key == oldVNode.key && type == oldVNode.type)
+	) {
+		if (childDiffStats != NULL) childDiffStats.matchedByIndex++;
+		return skewedIndex;
+	}
 
 	// We only need to perform a search if there are more children
 	// (remainingOldChildren) to search. However, if the oldVNode we just looked
@@ -532,13 +987,8 @@ function findMatchingIndex(
 	// we should not search as we risk re-using state of an unrelated VNode. (reverted for now)
 	let shouldSearch =
 		key != NULL && hasKeys && remainingOldChildren > (matched ? 1 : 0);
-
-	if (
-		(oldVNode === NULL && key == null) ||
-		(matched && key == oldVNode.key && type == oldVNode.type)
-	) {
-		return skewedIndex;
-	} else if (shouldSearch) {
+	if (shouldSearch) {
+		if (childDiffStats != NULL) childDiffStats.searches++;
 		let x = skewedIndex - 1;
 		let y = skewedIndex + 1;
 		while (x >= 0 || y < oldChildren.length) {
@@ -550,6 +1000,7 @@ function findMatchingIndex(
 				key == oldVNode.key &&
 				type == oldVNode.type
 			) {
+				if (childDiffStats != NULL) childDiffStats.matchedBySearch++;
 				return childIndex;
 			}
 		}
@@ -560,7 +1011,7 @@ function findMatchingIndex(
 
 function hasKeysInChildren(children) {
 	for (let i = 0; i < children.length; i++) {
-		if (children[i] != NULL && children[i].key != NULL) return true;
+		if (children[i] != NULL && children[i]._flags & HAS_KEY) return true;
 	}
 	return false;
 }
@@ -570,7 +1021,11 @@ function hasKeysInRawChildren(children) {
 		let child = children[i];
 		if (isArray(child)) {
 			if (hasKeysInRawChildren(child)) return true;
-		} else if (child != NULL && typeof child == 'object' && child.key != NULL) {
+		} else if (
+			child != NULL &&
+			typeof child == 'object' &&
+			(child._flags & HAS_KEY) != 0
+		) {
 			return true;
 		}
 	}

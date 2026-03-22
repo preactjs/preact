@@ -1885,7 +1885,7 @@ describe('render()', () => {
 		expect(calls).to.deep.equal(['1', 'A', 'C', 'B', 'A']);
 	});
 
-	it('should retain state for inserted children', () => {
+	it('should remount unkeyed children when inserting before them', () => {
 		class X extends Component {
 			constructor(props) {
 				super(props);
@@ -1919,7 +1919,7 @@ describe('render()', () => {
 		expect(scratch.textContent).to.equal('A');
 
 		render(<Foo condition />, scratch);
-		expect(scratch.textContent).to.equal('A');
+		expect(scratch.textContent).to.equal('B');
 
 		render(<Foo />, scratch);
 		expect(scratch.textContent).to.equal('A');

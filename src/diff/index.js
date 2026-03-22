@@ -1,17 +1,21 @@
 import {
+	ARRAY_CHILDREN,
 	EMPTY_ARR,
 	EMPTY_OBJ,
+	HAS_KEY,
 	MATH_NAMESPACE,
 	MODE_HYDRATE,
 	MODE_SUSPENDED,
 	NULL,
 	RESET_MODE,
+	SINGLE_CHILD,
+	SINGLE_TEXT_CHILD,
 	SVG_NAMESPACE,
 	UNDEFINED,
 	XHTML_NAMESPACE
 } from '../constants';
 import { BaseComponent, getDomSibling } from '../component';
-import { Fragment } from '../create-element';
+import { createVNode, Fragment } from '../create-element';
 import { diffChildren } from './children';
 import { setProperty } from './props';
 import { assign, isArray, removeNode, slice } from '../util';
@@ -19,7 +23,9 @@ import options from '../options';
 
 /**
  * @typedef {import('../internal').ComponentChildren} ComponentChildren
+ * @typedef {import('../internal').ChildDiffStats} ChildDiffStats
  * @typedef {import('../internal').Component} Component
+ * @typedef {import('../internal').HostOpCounts} HostOpCounts
  * @typedef {import('../internal').PreactElement} PreactElement
  * @typedef {import('../internal').VNode} VNode
  */
@@ -49,6 +55,9 @@ import options from '../options';
  * siblings. In most cases, it starts out as `oldChildren[0]._dom`.
  * @param {boolean} isHydrating Whether or not we are in hydration
  * @param {any[]} refQueue an array of elements needed to invoke refs
+ * @param {boolean} allowInlineText Whether text writes can be applied inline
+ * @param {HostOpCounts | null} hostOpCounts
+ * @param {ChildDiffStats | null} childDiffStats
  */
 export function diff(
 	parentDom,
@@ -63,7 +72,10 @@ export function diff(
 	removeOps,
 	oldDom,
 	isHydrating,
-	refQueue
+	refQueue,
+	allowInlineText,
+	hostOpCounts,
+	childDiffStats
 ) {
 	/** @type {any} */
 	let tmp,
@@ -277,7 +289,9 @@ export function diff(
 				removeOps,
 				oldDom,
 				isHydrating,
-				refQueue
+				refQueue,
+				hostOpCounts,
+				childDiffStats
 			);
 
 			c.base = newVNode._dom;
@@ -342,7 +356,10 @@ export function diff(
 			unmountQueue,
 			removeOps,
 			isHydrating,
-			refQueue
+			refQueue,
+			allowInlineText,
+			hostOpCounts,
+			childDiffStats
 		);
 	}
 
@@ -369,7 +386,9 @@ export function commitRoot(
 	refQueue,
 	hostOps,
 	unmountQueue,
-	removeOps
+	removeOps,
+	hostOpCounts,
+	childDiffStats
 ) {
 	flushHostOps(hostOps);
 	flushUnmounts(unmountQueue, root);
@@ -380,6 +399,10 @@ export function commitRoot(
 	}
 
 	if (options._commit) options._commit(root, commitQueue);
+	if (hostOpCounts != NULL && options._hostOps)
+		options._hostOps(root, hostOpCounts);
+	if (childDiffStats != NULL && options._childDiff)
+		options._childDiff(root, childDiffStats);
 
 	commitQueue.some(c => {
 		try {
@@ -413,7 +436,14 @@ function flushHostOps(hostOps) {
 			let node = hostOps[i];
 			let parent = hostOps[i + 1];
 			let before = hostOps[i + 2];
-			parent.insertBefore(node, before || NULL);
+			if (
+				node.parentNode !== parent ||
+				(before == NULL
+					? node.nextSibling != NULL
+					: node.nextSibling !== before)
+			) {
+				parent.insertBefore(node, before || NULL);
+			}
 			hostOps[i++] = hostOps[i++] = hostOps[i++] = NULL;
 		} else if (op === OP_MOVE_RANGE) {
 			hostOps[i++] = NULL;
@@ -421,7 +451,14 @@ function flushHostOps(hostOps) {
 			let last = hostOps[i + 1];
 			let parent = hostOps[i + 2];
 			let before = hostOps[i + 3];
-			moveRange(first, last, parent, before);
+			if (
+				first.parentNode !== parent ||
+				(before == NULL
+					? last.nextSibling != NULL
+					: last.nextSibling !== before)
+			) {
+				moveRange(first, last, parent, before);
+			}
 			hostOps[i++] = hostOps[i++] = hostOps[i++] = hostOps[i++] = NULL;
 		}
 	}
@@ -493,8 +530,15 @@ function removeRange(start, end) {
  * @param {PreactElement} before
  * @param {PreactElement} parentDom
  * @param {any[]} hostOps
+ * @param {HostOpCounts | null} hostOpCounts
  */
-export function queuePlacement(vnode, before, parentDom, hostOps) {
+export function queuePlacement(
+	vnode,
+	before,
+	parentDom,
+	hostOps,
+	hostOpCounts
+) {
 	let firstDom = vnode._dom;
 	let lastDom = vnode._lastDom || firstDom;
 
@@ -505,8 +549,10 @@ export function queuePlacement(vnode, before, parentDom, hostOps) {
 	}
 
 	if (firstDom === lastDom) {
+		if (hostOpCounts != NULL) hostOpCounts.insertNode++;
 		hostOps.push(OP_INSERT_NODE, firstDom, parentDom, before || NULL);
 	} else {
+		if (hostOpCounts != NULL) hostOpCounts.moveRange++;
 		hostOps.push(OP_MOVE_RANGE, firstDom, lastDom, parentDom, before || NULL);
 	}
 }
@@ -527,6 +573,204 @@ function cloneNode(node) {
 	return assign({}, node);
 }
 
+function canFastDiffTextChild(
+	newVNode,
+	oldVNode,
+	newProps,
+	oldProps,
+	newChildren,
+	excessDomChildren,
+	isHydrating
+) {
+	if (
+		isHydrating ||
+		excessDomChildren != NULL ||
+		(newVNode._flags & SINGLE_TEXT_CHILD) == 0 ||
+		(newVNode._flags & HAS_KEY) != 0 ||
+		(newVNode._flags & ARRAY_CHILDREN) != 0 ||
+		(oldVNode._flags & SINGLE_TEXT_CHILD) == 0 ||
+		oldVNode._children == NULL ||
+		oldVNode._children.length !== 1 ||
+		oldVNode._children[0] == NULL ||
+		oldVNode._children[0].type != NULL
+	) {
+		return false;
+	}
+
+	if (newChildren == NULL || typeof newChildren == 'boolean') {
+		return false;
+	}
+
+	for (let i in newProps) {
+		if (
+			i != 'children' &&
+			i != 'value' &&
+			i != 'checked' &&
+			oldProps[i] !== newProps[i]
+		) {
+			return false;
+		}
+	}
+
+	for (let i in oldProps) {
+		if (i != 'children' && i != 'value' && i != 'checked' && !(i in newProps)) {
+			return false;
+		}
+	}
+
+	return true;
+}
+
+function canBailHostSubtree(
+	newVNode,
+	oldVNode,
+	newProps,
+	oldProps,
+	newChildren,
+	excessDomChildren,
+	isHydrating
+) {
+	if (
+		isHydrating ||
+		excessDomChildren != NULL ||
+		oldVNode._children == NULL ||
+		newProps.dangerouslySetInnerHTML != NULL ||
+		oldProps.dangerouslySetInnerHTML != NULL ||
+		newProps.value !== UNDEFINED ||
+		oldProps.value !== UNDEFINED ||
+		newProps.checked !== UNDEFINED ||
+		oldProps.checked !== UNDEFINED ||
+		newProps.contentEditable != NULL ||
+		oldProps.contentEditable != NULL
+	) {
+		return false;
+	}
+
+	for (let i in newProps) {
+		if (i != 'children' && oldProps[i] !== newProps[i]) {
+			return false;
+		}
+	}
+
+	for (let i in oldProps) {
+		if (i != 'children' && !(i in newProps)) {
+			return false;
+		}
+	}
+
+	return areChildrenStructurallyEqual(
+		newVNode._flags,
+		newChildren,
+		oldVNode._children
+	);
+}
+
+function areChildrenStructurallyEqual(childFlags, newChildren, oldChildren) {
+	if ((childFlags & SINGLE_TEXT_CHILD) != 0) {
+		return (
+			oldChildren.length === 1 &&
+			oldChildren[0] != NULL &&
+			oldChildren[0].type == NULL &&
+			oldChildren[0].props === newChildren
+		);
+	}
+
+	if ((childFlags & SINGLE_CHILD) != 0) {
+		return (
+			oldChildren.length === 1 &&
+			isStructurallyEqualChild(newChildren, oldChildren[0])
+		);
+	}
+
+	if ((childFlags & ARRAY_CHILDREN) != 0) {
+		if (!isArray(newChildren) || newChildren.length !== oldChildren.length) {
+			return false;
+		}
+
+		for (let i = 0; i < newChildren.length; i++) {
+			if (!isStructurallyEqualChild(newChildren[i], oldChildren[i])) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	return oldChildren.length === 0;
+}
+
+function isStructurallyEqualChild(rawChild, oldVNode) {
+	if (
+		rawChild == NULL ||
+		typeof rawChild == 'boolean' ||
+		typeof rawChild == 'function'
+	) {
+		return oldVNode == NULL;
+	}
+
+	if (
+		typeof rawChild == 'string' ||
+		typeof rawChild == 'number' ||
+		typeof rawChild == 'bigint' ||
+		rawChild.constructor == String
+	) {
+		return (
+			oldVNode != NULL && oldVNode.type == NULL && oldVNode.props === rawChild
+		);
+	}
+
+	if (isArray(rawChild)) return false;
+
+	if (
+		oldVNode == NULL ||
+		rawChild.type !== oldVNode.type ||
+		rawChild.key !== oldVNode.key
+	) {
+		return false;
+	}
+
+	let newProps = rawChild.props || EMPTY_OBJ;
+	let oldProps = oldVNode.props || EMPTY_OBJ;
+	if (
+		newProps.dangerouslySetInnerHTML != NULL ||
+		oldProps.dangerouslySetInnerHTML != NULL ||
+		newProps.value !== UNDEFINED ||
+		oldProps.value !== UNDEFINED ||
+		newProps.checked !== UNDEFINED ||
+		oldProps.checked !== UNDEFINED ||
+		newProps.contentEditable != NULL ||
+		oldProps.contentEditable != NULL
+	) {
+		return false;
+	}
+
+	for (let i in newProps) {
+		if (i != 'children' && oldProps[i] !== newProps[i]) {
+			return false;
+		}
+	}
+
+	for (let i in oldProps) {
+		if (i != 'children' && !(i in newProps)) {
+			return false;
+		}
+	}
+
+	return areChildrenStructurallyEqual(
+		rawChild._flags,
+		newProps.children,
+		oldVNode._children || EMPTY_ARR
+	);
+}
+
+function createTextVNode(value, parentVNode) {
+	let vnode = createVNode(NULL, value, NULL, NULL, NULL);
+	vnode._parent = parentVNode;
+	vnode._depth = parentVNode._depth + 1;
+	vnode._index = 0;
+	return vnode;
+}
+
 /**
  * Diff two virtual nodes representing DOM element
  * @param {PreactElement} dom The DOM element representing the virtual nodes
@@ -543,6 +787,9 @@ function cloneNode(node) {
  * @param {any[]} removeOps
  * @param {boolean} isHydrating Whether or not we are in hydration
  * @param {any[]} refQueue an array of elements needed to invoke refs
+ * @param {boolean} allowInlineText Whether text writes can be applied inline
+ * @param {HostOpCounts | null} hostOpCounts
+ * @param {ChildDiffStats | null} childDiffStats
  * @returns {PreactElement}
  */
 function diffElementNodes(
@@ -557,7 +804,10 @@ function diffElementNodes(
 	unmountQueue,
 	removeOps,
 	isHydrating,
-	refQueue
+	refQueue,
+	allowInlineText,
+	hostOpCounts,
+	childDiffStats
 ) {
 	let oldProps = oldVNode.props || EMPTY_OBJ;
 	let newProps = newVNode.props;
@@ -623,10 +873,11 @@ function diffElementNodes(
 	if (nodeType == NULL) {
 		// During hydration, we still have to split merged text from SSR'd HTML.
 		if (oldProps !== newProps && (!isHydrating || dom.data != newProps)) {
-			if (!isHydrating && oldVNode._dom != NULL) {
-				hostOps.push(OP_SET_TEXT, dom, newProps);
-			} else {
+			if (allowInlineText || isHydrating || oldVNode._dom == NULL) {
 				dom.data = newProps;
+			} else {
+				if (hostOpCounts != NULL) hostOpCounts.setText++;
+				hostOps.push(OP_SET_TEXT, dom, newProps);
 			}
 		}
 		newVNode._lastDom = dom;
@@ -693,26 +944,80 @@ function diffElementNodes(
 			newVNode._children = [];
 		} else {
 			if (oldHtml) dom.innerHTML = '';
-
-			diffChildren(
-				// @ts-expect-error
-				newVNode.type == 'template' ? dom.content : dom,
-				isArray(newChildren) ? newChildren : [newChildren],
-				newVNode,
-				oldVNode,
-				globalContext,
-				nodeType == 'foreignObject' ? XHTML_NAMESPACE : namespace,
-				excessDomChildren,
-				commitQueue,
-				hostOps,
-				unmountQueue,
-				removeOps,
-				excessDomChildren
-					? excessDomChildren[0]
-					: oldVNode._children && getDomSibling(oldVNode, 0),
-				isHydrating,
-				refQueue
-			);
+			if (
+				canFastDiffTextChild(
+					newVNode,
+					oldVNode,
+					newProps,
+					oldProps,
+					newChildren,
+					excessDomChildren,
+					isHydrating
+				)
+			) {
+				let oldTextVNode = oldVNode._children[0];
+				let textVNode = createTextVNode(newChildren, newVNode);
+				newVNode._children = [textVNode];
+				diff(
+					// @ts-expect-error
+					newVNode.type == 'template' ? dom.content : dom,
+					textVNode,
+					oldTextVNode,
+					globalContext,
+					nodeType == 'foreignObject' ? XHTML_NAMESPACE : namespace,
+					excessDomChildren,
+					commitQueue,
+					hostOps,
+					unmountQueue,
+					removeOps,
+					oldTextVNode._dom,
+					isHydrating,
+					refQueue,
+					true,
+					hostOpCounts,
+					childDiffStats
+				);
+			} else if (
+				canBailHostSubtree(
+					newVNode,
+					oldVNode,
+					newProps,
+					oldProps,
+					newChildren,
+					excessDomChildren,
+					isHydrating
+				)
+			) {
+				newVNode._children = oldVNode._children;
+				newVNode._lastDom = oldVNode._lastDom || dom;
+				if (newVNode._children) {
+					newVNode._children.some(child => {
+						if (child) child._parent = newVNode;
+					});
+				}
+			} else {
+				diffChildren(
+					// @ts-expect-error
+					newVNode.type == 'template' ? dom.content : dom,
+					isArray(newChildren) ? newChildren : [newChildren],
+					newVNode,
+					oldVNode,
+					globalContext,
+					nodeType == 'foreignObject' ? XHTML_NAMESPACE : namespace,
+					excessDomChildren,
+					commitQueue,
+					hostOps,
+					unmountQueue,
+					removeOps,
+					excessDomChildren
+						? excessDomChildren[0]
+						: oldVNode._children && getDomSibling(oldVNode, 0),
+					isHydrating,
+					refQueue,
+					hostOpCounts,
+					childDiffStats
+				);
+			}
 
 			// Remove children that are not part of any vnode.
 			if (excessDomChildren != NULL) {

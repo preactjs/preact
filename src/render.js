@@ -41,7 +41,26 @@ export function render(vnode, parentDom, replaceNode) {
 		refQueue = [],
 		hostOps = [],
 		unmountQueue = [],
-		removeOps = [];
+		removeOps = [],
+		childDiffStats = options._childDiff
+			? {
+					fastSingleText: 0,
+					normalizedText: 0,
+					normalizedArray: 0,
+					clonedVNode: 0,
+					matchedByIndex: 0,
+					matchedBySearch: 0,
+					searches: 0,
+					mounts: 0,
+					moved: 0,
+					forcedPlacement: 0,
+					removals: 0,
+					placementPasses: 0
+				}
+			: NULL,
+		hostOpCounts = options._hostOps
+			? { setText: 0, insertNode: 0, moveRange: 0, removeRange: 0 }
+			: NULL;
 	diff(
 		parentDom,
 		// Determine the new vnode tree and store it on the DOM element on
@@ -67,11 +86,23 @@ export function render(vnode, parentDom, replaceNode) {
 				? oldVNode._dom
 				: parentDom.firstChild,
 		isHydrating,
-		refQueue
+		refQueue,
+		false,
+		hostOpCounts,
+		childDiffStats
 	);
 
 	// Flush all queued effects
-	commitRoot(commitQueue, vnode, refQueue, hostOps, unmountQueue, removeOps);
+	commitRoot(
+		commitQueue,
+		vnode,
+		refQueue,
+		hostOps,
+		unmountQueue,
+		removeOps,
+		hostOpCounts,
+		childDiffStats
+	);
 }
 
 /**

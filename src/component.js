@@ -129,6 +129,25 @@ function renderComponent(component) {
 			hostOps = [],
 			unmountQueue = [],
 			removeOps = [],
+			childDiffStats = options._childDiff
+				? {
+						fastSingleText: 0,
+						normalizedText: 0,
+						normalizedArray: 0,
+						clonedVNode: 0,
+						matchedByIndex: 0,
+						matchedBySearch: 0,
+						searches: 0,
+						mounts: 0,
+						moved: 0,
+						forcedPlacement: 0,
+						removals: 0,
+						placementPasses: 0
+					}
+				: null,
+			hostOpCounts = options._hostOps
+				? { setText: 0, insertNode: 0, moveRange: 0, removeRange: 0 }
+				: null,
 			newVNode = assign({}, oldVNode);
 		newVNode._original = oldVNode._original + 1;
 		if (options.vnode) options.vnode(newVNode);
@@ -146,7 +165,10 @@ function renderComponent(component) {
 			removeOps,
 			oldDom == NULL ? getDomSibling(oldVNode) : oldDom,
 			!!(oldVNode._flags & MODE_HYDRATE),
-			refQueue
+			refQueue,
+			false,
+			hostOpCounts,
+			childDiffStats
 		);
 
 		newVNode._original = oldVNode._original;
@@ -157,7 +179,9 @@ function renderComponent(component) {
 			refQueue,
 			hostOps,
 			unmountQueue,
-			removeOps
+			removeOps,
+			hostOpCounts,
+			childDiffStats
 		);
 		oldVNode._dom = oldVNode._parent = null;
 		oldVNode._lastDom = null;

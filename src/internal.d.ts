@@ -26,6 +26,28 @@ export interface ErrorInfo {
 	componentStack?: string;
 }
 
+export interface HostOpCounts {
+	setText: number;
+	insertNode: number;
+	moveRange: number;
+	removeRange: number;
+}
+
+export interface ChildDiffStats {
+	fastSingleText: number;
+	normalizedText: number;
+	normalizedArray: number;
+	clonedVNode: number;
+	matchedByIndex: number;
+	matchedBySearch: number;
+	searches: number;
+	mounts: number;
+	moved: number;
+	forcedPlacement: number;
+	removals: number;
+	placementPasses: number;
+}
+
 export interface Options extends preact.Options {
 	/** Attach a hook that is invoked before render, mainly to check the arguments. */
 	_root?(vnode: ComponentChild, parent: preact.ContainerNode): void;
@@ -33,6 +55,10 @@ export interface Options extends preact.Options {
 	_diff?(vnode: VNode): void;
 	/** Attach a hook that is invoked after a tree was mounted or was updated. */
 	_commit?(vnode: VNode, commitQueue: Component[]): void;
+	/** Attach a hook that is invoked with queued host-op counts for a commit. */
+	_hostOps?(vnode: VNode, counts: HostOpCounts): void;
+	/** Attach a hook that is invoked with child-diff stats for a commit. */
+	_childDiff?(vnode: VNode, stats: ChildDiffStats): void;
 	/** Attach a hook that is invoked before a vnode has rendered. */
 	_render?(vnode: VNode): void;
 	/** Attach a hook that is invoked before a hook's state is queried. */

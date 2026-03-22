@@ -1,6 +1,13 @@
 import { slice } from './util';
 import options from './options';
-import { NULL, UNDEFINED } from './constants';
+import {
+	ARRAY_CHILDREN,
+	HAS_KEY,
+	NULL,
+	SINGLE_CHILD,
+	SINGLE_TEXT_CHILD,
+	UNDEFINED
+} from './constants';
 
 let vnodeId = 0;
 
@@ -17,7 +24,8 @@ export function createElement(type, props, children) {
 	let normalizedProps = {},
 		key,
 		ref,
-		i;
+		i,
+		childFlags = 0;
 	for (i in props) {
 		if (i == 'key') key = props[i];
 		else if (i == 'ref') ref = props[i];
@@ -27,6 +35,11 @@ export function createElement(type, props, children) {
 	if (arguments.length > 2) {
 		normalizedProps.children =
 			arguments.length > 3 ? slice.call(arguments, 2) : children;
+		childFlags = getChildFlags(
+			arguments.length,
+			children,
+			normalizedProps.children
+		);
 	}
 
 	// If a Component VNode, check for and apply defaultProps
@@ -39,7 +52,7 @@ export function createElement(type, props, children) {
 		}
 	}
 
-	return createVNode(type, normalizedProps, key, ref, NULL);
+	return createVNode(type, normalizedProps, key, ref, NULL, childFlags);
 }
 
 /**
@@ -54,7 +67,9 @@ export function createElement(type, props, children) {
  * receive a reference to its created child
  * @returns {import('./internal').VNode}
  */
-export function createVNode(type, props, key, ref, original) {
+export function createVNode(type, props, key, ref, original, flags) {
+	flags = (flags || 0) | (key != NULL ? HAS_KEY : 0);
+
 	// V8 seems to be better at detecting type shapes if the object is allocated from the same call site
 	// Do not inline into createElement and coerceToVNode!
 	/** @type {import('./internal').VNode} */
@@ -71,7 +86,7 @@ export function createVNode(type, props, key, ref, original) {
 		constructor: UNDEFINED,
 		_original: original == NULL ? ++vnodeId : original,
 		_index: -1,
-		_flags: 0
+		_flags: flags
 	};
 
 	// Only invoke the vnode hook if this was *not* a direct copy:
@@ -95,3 +110,32 @@ export function Fragment(props) {
  */
 export const isValidElement = vnode =>
 	vnode != NULL && vnode.constructor === UNDEFINED;
+
+function isTextLike(value) {
+	return (
+		typeof value == 'string' ||
+		typeof value == 'number' ||
+		// eslint-disable-next-line valid-typeof
+		typeof value == 'bigint' ||
+		(value != NULL && value.constructor == String)
+	);
+}
+
+export function getChildFlags(argLength, rawChildren, normalizedChildren) {
+	if (argLength > 3) {
+		let flags = ARRAY_CHILDREN;
+		if (normalizedChildren.length === 1) {
+			flags |= SINGLE_CHILD;
+			if (isTextLike(normalizedChildren[0])) flags |= SINGLE_TEXT_CHILD;
+		}
+		return flags;
+	}
+
+	if (argLength > 2 && rawChildren != NULL) {
+		let flags = SINGLE_CHILD;
+		if (isTextLike(rawChildren)) flags |= SINGLE_TEXT_CHILD;
+		return flags;
+	}
+
+	return 0;
+}
