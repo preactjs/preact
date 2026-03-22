@@ -13,7 +13,13 @@ options._catchError = function (error, newVNode, oldVNode, errorInfo) {
 			if ((component = vnode._component) && component._childDidSuspend) {
 				if (newVNode._dom == null) {
 					newVNode._dom = oldVNode._dom;
+					newVNode._lastDom = oldVNode._lastDom;
 					newVNode._children = oldVNode._children;
+					if (newVNode._children) {
+						newVNode._children.some(child => {
+							if (child) child._parent = newVNode;
+						});
+					}
 				}
 				// Don't call oldCatchError if we found a Suspense
 				return component._childDidSuspend(error, newVNode);
@@ -86,7 +92,14 @@ function removeOriginal(vnode, detachedParent, originalParent) {
 		if (vnode._component) {
 			if (vnode._component._parentDom === detachedParent) {
 				if (vnode._dom) {
-					originalParent.appendChild(vnode._dom);
+					let node = vnode._dom;
+					let lastDom = vnode._lastDom || vnode._dom;
+					let afterEnd = lastDom.nextSibling;
+					while (node != afterEnd) {
+						let next = node.nextSibling;
+						originalParent.appendChild(node);
+						node = next;
+					}
 				}
 				vnode._component._force = true;
 				vnode._component._parentDom = originalParent;

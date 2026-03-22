@@ -117,6 +117,40 @@ export function getDomSibling(vnode, childIndex) {
 }
 
 /**
+ * Recompute the owned DOM range for a vnode from its rendered children.
+ * @param {import('./internal').VNode} vnode
+ */
+export function updateVNodeDomPointers(vnode) {
+	let firstDom = NULL;
+	let lastDom = NULL;
+	let children = vnode._children;
+
+	if (children != NULL) {
+		for (let i = 0; i < children.length; i++) {
+			let child = children[i];
+			if (child != NULL && child._dom != NULL) {
+				firstDom = child._dom;
+				break;
+			}
+		}
+
+		for (let i = children.length; i--; ) {
+			let child = children[i];
+			if (child != NULL) {
+				lastDom = child._lastDom || child._dom;
+				if (lastDom != NULL) break;
+			}
+		}
+	}
+
+	vnode._dom = firstDom;
+	vnode._lastDom = lastDom;
+	if (vnode._component != NULL) {
+		vnode._component.base = firstDom;
+	}
+}
+
+/**
  * Trigger in-place re-rendering of a component.
  * @param {import('./internal').Component} component The component to rerender
  */
@@ -197,21 +231,7 @@ function renderComponent(component) {
  */
 function updateParentDomPointers(vnode) {
 	if ((vnode = vnode._parent) != NULL && vnode._component != NULL) {
-		vnode._dom = vnode._component.base = NULL;
-		vnode._lastDom = NULL;
-		vnode._children.some(child => {
-			if (child != NULL && child._dom != NULL) {
-				vnode._dom = vnode._component.base = child._dom;
-				return true;
-			}
-		});
-		for (let i = vnode._children.length; i--; ) {
-			let child = vnode._children[i];
-			if (child != NULL && child._lastDom != NULL) {
-				vnode._lastDom = child._lastDom;
-				break;
-			}
-		}
+		updateVNodeDomPointers(vnode);
 
 		return updateParentDomPointers(vnode);
 	}
