@@ -13,6 +13,8 @@ import {
 } from '../constants';
 import { isArray } from '../util';
 import {
+	ensureBacking,
+	getMountedBacking,
 	getOwnedChildren,
 	getOwnedVNode,
 	isBackingNode,
@@ -213,6 +215,13 @@ export function diffChildren(
 		// Update childVNode._index to its final index
 		childVNode._index = i;
 
+		// Eagerly set backing parent so error boundaries can traverse
+		// upward even if the child throws during its first diff.
+		let parentBacking = getMountedBacking(newParentVNode);
+		if (parentBacking != NULL && oldVNode === EMPTY_OBJ) {
+			ensureBacking(childVNode, 0)._parent = parentBacking;
+		}
+
 		// Morph the old element into the new one, but don't append it to the dom yet
 		let result = diff(
 			parentDom,
@@ -286,13 +295,22 @@ export function diffChildren(
 
 		if (typeof childVNode.type == 'function' && oldVNode !== EMPTY_OBJ) {
 			let oldFirstDom = getFirstDom(oldVNode);
-			let oldLastDom = getLastDom(oldVNode);
-			if (
-				newDom != NULL &&
-				(oldFirstDom !== newDom || oldLastDom !== lastDom)
-			) {
+			if (newDom != NULL && oldFirstDom == NULL) {
+				// Component that newly produces DOM (was empty before)
 				forcePlacement[i] = 1;
-				placementStatus[i] = oldFirstDom == NULL ? PLAN_INSERT : PLAN_MOVE;
+				placementStatus[i] = PLAN_INSERT;
+				needsPlacement = true;
+				if (childDiffStats != NULL) childDiffStats.forcedPlacement++;
+			} else if (
+				newDom != NULL &&
+				matchingIndex !== i &&
+				matchingIndex !== -1
+			) {
+				// Component MOVED to a different position among siblings.
+				// Its own diffChildren handled internal content changes;
+				// the parent only needs to reposition the range.
+				forcePlacement[i] = 1;
+				placementStatus[i] = PLAN_MOVE;
 				needsPlacement = true;
 				if (childDiffStats != NULL) childDiffStats.forcedPlacement++;
 			}
@@ -415,7 +433,6 @@ function diffSingleTextChild(
 	}
 
 	let childVNode = createVNode(NULL, value, NULL, NULL, NULL);
-	childVNode._parent = newParentVNode;
 	childVNode._depth = newParentVNode._depth + 1;
 	childVNode._index = 0;
 	let children = [childVNode];
@@ -522,7 +539,6 @@ function diffStrictUnkeyedChildren(
 			continue;
 		}
 
-		childVNode._parent = newParentVNode;
 		childVNode._depth = newParentVNode._depth + 1;
 		childVNode._index = i;
 
@@ -551,6 +567,12 @@ function diffStrictUnkeyedChildren(
 		} else {
 			matchingIndices[i] = i;
 			if (childDiffStats != NULL) childDiffStats.matchedByIndex++;
+		}
+
+		// Eagerly set backing parent for error boundary traversal
+		if (oldVNode === EMPTY_OBJ) {
+			let pb = getMountedBacking(newParentVNode);
+			if (pb != NULL) ensureBacking(childVNode, 0)._parent = pb;
 		}
 
 		let result = diff(
@@ -868,7 +890,6 @@ function constructNewChildrenArray(
 		}
 
 		const skewedIndex = i + skew;
-		childVNode._parent = newParentVNode;
 		childVNode._depth = newParentVNode._depth + 1;
 		// Temporarily store the matchingIndex on the _index property so we can pull
 		// out the oldVNode in diffChildren. We'll override this to the VNode's

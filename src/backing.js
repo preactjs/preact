@@ -110,21 +110,15 @@ export function setOwnedChildren(vnode, children) {
 			if (child == NULL) continue;
 			if (isBackingNode(child)) {
 				child._parent = backing;
-				if (child._vnode != NULL) {
-					child._vnode._parent = vnode;
-				}
 			} else {
 				// VNode child — promote Fragment backings
 				let childBacking = getMountedBacking(child);
 				if (childBacking != NULL && childBacking._kind === BACKING_FRAGMENT) {
 					childBacking._parent = backing;
-					if (childBacking._vnode != NULL) {
-						childBacking._vnode._parent = vnode;
-					}
 					children[i] = childBacking;
-				} else {
-					child._parent = vnode;
 				}
+				// Plain vnodes without backings don't need parent tracking
+				// — they'll get a backing during diff
 			}
 		}
 	}
@@ -144,20 +138,12 @@ export function replaceOwnedChild(vnode, index, child) {
 	if (children != NULL) {
 		if (child != NULL && isBackingNode(child)) {
 			child._parent = backing;
-			if (child._vnode != NULL) {
-				child._vnode._parent = vnode;
-			}
 		} else if (child != NULL) {
 			// Promote vnode to its backing node if available
 			let childBacking = getMountedBacking(child);
 			if (childBacking != NULL) {
 				childBacking._parent = backing;
-				if (childBacking._vnode != NULL) {
-					childBacking._vnode._parent = vnode;
-				}
 				child = childBacking;
-			} else {
-				if (child._parent !== undefined) child._parent = vnode;
 			}
 		}
 		children[index] = child;
@@ -285,19 +271,18 @@ export function reuseBacking(newVNode, oldVNode) {
 }
 
 /**
- * Ensure backing exists and set its parent from the vnode's parent backing.
+ * Ensure backing exists and set its parent backing.
  *
  * @param {VNode} vnode
  * @param {BackingKind} kind
+ * @param {BackingNode | null} [parentBacking]
  * @returns {BackingNode}
  */
-export function ensureBackingWithParent(vnode, kind) {
+export function ensureBackingWithParent(vnode, kind, parentBacking) {
 	let backing = ensureBacking(vnode, kind);
-	let parentBacking =
-		vnode._parent && vnode._parent._backing ? vnode._parent._backing : NULL;
-
-	backing._parent = parentBacking;
-
+	if (parentBacking !== undefined) {
+		backing._parent = parentBacking || NULL;
+	}
 	return backing;
 }
 

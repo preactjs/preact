@@ -1,4 +1,5 @@
 import { NULL } from '../constants';
+import { getMountedBacking } from '../backing';
 
 /**
  * Find the closest error boundary to a thrown error and call it
@@ -17,8 +18,16 @@ export function _catchError(error, vnode, oldVNode, errorInfo) {
 		/** @type {boolean} */
 		handled;
 
-	for (; (vnode = vnode._parent); ) {
-		if ((component = vnode._component) && !component._processingException) {
+	// Walk the parent chain to find error boundaries.
+	// Try backing._parent first (authoritative). Fall back to vnode._parent
+	// for vnodes that don't have a backing yet (error thrown during first diff
+	// before setOwnedChildren runs).
+	let backing = getMountedBacking(vnode);
+	let cur = backing != NULL ? backing._parent : NULL;
+	let curVNode = cur != NULL ? cur._vnode : vnode._parent || NULL;
+
+	while (curVNode != NULL) {
+		if ((component = curVNode._component) && !component._processingException) {
 			try {
 				ctor = component.constructor;
 
@@ -32,13 +41,21 @@ export function _catchError(error, vnode, oldVNode, errorInfo) {
 					handled = component._dirty;
 				}
 
-				// This is an error boundary. Mark it as having bailed out, and whether it was mid-hydration.
 				if (handled) {
 					return (component._pendingError = component);
 				}
 			} catch (e) {
 				error = e;
 			}
+		}
+
+		// Move to next parent
+		if (cur != NULL) {
+			cur = cur._parent;
+			curVNode = cur != NULL ? cur._vnode : NULL;
+		} else {
+			// No backing parent — fall back to vnode._parent
+			curVNode = curVNode._parent || NULL;
 		}
 	}
 

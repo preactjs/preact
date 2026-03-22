@@ -27,7 +27,7 @@ import options from '../options';
 import { getAnchorDom, getFirstDom, getLastDom } from '../range';
 import {
 	clearBacking,
-	ensureBackingWithParent,
+	ensureBacking,
 	getOwnedChildren,
 	getOwnedFirstDom,
 	getOwnedVNode,
@@ -235,16 +235,6 @@ export function diff(
 						getAnchorDom(oldVNode)
 					);
 					setOwnedChildren(newVNode, getOwnedChildren(oldVNode));
-					let reusedChildren = getOwnedChildren(newVNode);
-					if (reusedChildren) {
-						for (let ri = 0; ri < reusedChildren.length; ri++) {
-							let rc = reusedChildren[ri];
-							if (rc != NULL) {
-								let rv = getOwnedVNode(rc);
-								if (rv) rv._parent = newVNode;
-							}
-						}
-					}
 
 					EMPTY_ARR.push.apply(c._renderCallbacks, c._stateCallbacks);
 					c._stateCallbacks = [];
@@ -378,16 +368,18 @@ export function diff(
 				}
 			}
 
-			// Ensure backing node exists with correct kind and parent
+			// Ensure backing node exists with correct kind.
+			// Parent is already set via reuseBacking from old vnode,
+			// or will be set by parent's setOwnedChildren.
 			if (c._childDidSuspend) {
-				let backing = ensureBackingWithParent(newVNode, 3 /* SUSPENSE */);
+				let backing = ensureBacking(newVNode, 3 /* SUSPENSE */);
 				backing._activeChild = c._activeChild || NULL;
 				backing._parkedChild = c._parkedChild || NULL;
 				backing._fallbackChild = c._fallbackChild || NULL;
 			} else if (newVNode.type === Fragment) {
-				ensureBackingWithParent(newVNode, 1 /* FRAGMENT */);
+				ensureBacking(newVNode, 1 /* FRAGMENT */);
 			} else {
-				ensureBackingWithParent(newVNode, 2 /* COMPONENT */);
+				ensureBacking(newVNode, 2 /* COMPONENT */);
 			}
 
 			c.base = getOwnedFirstDom(newVNode);
@@ -901,7 +893,6 @@ function isStructurallyEqualChild(rawChild, oldVNode) {
 
 function createTextVNode(value, parentVNode) {
 	let vnode = createVNode(NULL, value, NULL, NULL, NULL);
-	vnode._parent = parentVNode;
 	vnode._depth = parentVNode._depth + 1;
 	vnode._index = 0;
 	return vnode;
@@ -1139,16 +1130,8 @@ function diffElementNodes(
 					getLastDom(oldVNode) || dom,
 					getAnchorDom(oldVNode) || dom
 				);
-				let bailedChildren = getOwnedChildren(newVNode);
-				if (bailedChildren) {
-					for (let bi = 0; bi < bailedChildren.length; bi++) {
-						let bc = bailedChildren[bi];
-						if (bc != NULL) {
-							let bv = getOwnedVNode(bc);
-							if (bv) bv._parent = newVNode;
-						}
-					}
-				}
+				// Children are reused from old backing — no reparenting needed,
+				// backing._parent is already correct via setOwnedChildren.
 			} else {
 				setNormalizedChildFlags(
 					newVNode,
@@ -1291,12 +1274,7 @@ export function unmount(vnode, parentVNode, skipRemove) {
 		removeNode(getOwnedFirstDom(vnode));
 	}
 
-	vnode._component =
-		vnode._parent =
-		vnode._dom =
-		vnode._lastDom =
-		vnode._anchorDom =
-			UNDEFINED;
+	vnode._component = UNDEFINED;
 	clearBacking(vnode);
 }
 
