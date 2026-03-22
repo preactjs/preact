@@ -12,6 +12,12 @@ import {
 } from '../constants';
 import { isArray } from '../util';
 import { getDomSibling } from '../component';
+import { getAnchorDom, getLastDom } from '../range';
+
+const PLAN_NONE = 0;
+const PLAN_RETAIN = 1;
+const PLAN_INSERT = 2;
+const PLAN_MOVE = 3;
 
 /**
  * @typedef {import('../internal').ComponentChildren} ComponentChildren
@@ -157,7 +163,11 @@ export function diffChildren(
 	);
 	let matchingIndices = new Array(newChildrenLength);
 	let forcePlacement = new Uint8Array(newChildrenLength);
+	let placementFirstDom = new Array(newChildrenLength);
+	let placementBefore = new Array(newChildrenLength);
+	let placementStatus = new Uint8Array(newChildrenLength);
 	let needsPlacement = false;
+	newParentVNode._anchorDom = NULL;
 
 	for (i = 0; i < newChildrenLength; i++) {
 		childVNode = newParentVNode._children[i];
@@ -173,6 +183,7 @@ export function diffChildren(
 			(matchingIndex == -1 || oldChildren[matchingIndex] == NULL)
 		) {
 			forcePlacement[i] = 1;
+			placementStatus[i] = PLAN_INSERT;
 			needsPlacement = true;
 			if (childDiffStats != NULL) childDiffStats.forcedPlacement++;
 		}
@@ -208,7 +219,8 @@ export function diffChildren(
 
 		// Adjust DOM nodes
 		newDom = childVNode._dom;
-		lastDom = childVNode._lastDom || newDom;
+		lastDom = getLastDom(childVNode);
+		placementFirstDom[i] = newDom != NULL ? getAnchorDom(childVNode) : NULL;
 		if (childVNode.ref && oldVNode.ref != childVNode.ref) {
 			if (oldVNode.ref) {
 				applyRef(oldVNode.ref, NULL, childVNode);
@@ -222,6 +234,7 @@ export function diffChildren(
 
 		if (firstChildDom == NULL && newDom != NULL) {
 			firstChildDom = newDom;
+			newParentVNode._anchorDom = getAnchorDom(childVNode);
 		}
 		if (lastDom != NULL) {
 			lastChildDom = lastDom;
@@ -233,15 +246,23 @@ export function diffChildren(
 			oldVNode !== EMPTY_OBJ &&
 			oldVNode._dom != NULL &&
 			newDom != NULL &&
-			oldVNode._dom !== newDom
+			(oldVNode._dom !== newDom || getLastDom(oldVNode) !== lastDom)
 		) {
 			forcePlacement[i] = 1;
+			placementStatus[i] = PLAN_MOVE;
 			needsPlacement = true;
 			if (childDiffStats != NULL) childDiffStats.forcedPlacement++;
 		}
 
 		if (!needsPlacement && childVNode._flags & INSERT_VNODE && newDom != NULL) {
 			needsPlacement = true;
+		}
+		if (newDom != NULL && placementStatus[i] == PLAN_NONE) {
+			if (childVNode._flags & INSERT_VNODE) {
+				placementStatus[i] = matchingIndex == -1 ? PLAN_INSERT : PLAN_MOVE;
+			} else {
+				placementStatus[i] = PLAN_RETAIN;
+			}
 		}
 
 		if (!(childVNode._flags & INSERT_VNODE) && lastDom) {
@@ -260,6 +281,9 @@ export function diffChildren(
 			newParentVNode._children,
 			matchingIndices,
 			forcePlacement,
+			placementFirstDom,
+			placementBefore,
+			placementStatus,
 			parentDom,
 			hostOps,
 			typeof newParentVNode.type == 'function' ? oldDom : NULL,
@@ -321,6 +345,7 @@ function diffSingleTextChild(
 	childVNode._depth = newParentVNode._depth + 1;
 	childVNode._index = 0;
 	newParentVNode._children = [childVNode];
+	newParentVNode._anchorDom = NULL;
 
 	diff(
 		parentDom,
@@ -342,13 +367,15 @@ function diffSingleTextChild(
 	);
 
 	newParentVNode._dom = childVNode._dom;
-	newParentVNode._lastDom = childVNode._lastDom || childVNode._dom;
+	newParentVNode._anchorDom = getAnchorDom(childVNode);
+	newParentVNode._lastDom = getLastDom(childVNode);
 
 	if (oldVNode != NULL) {
 		oldVNode._flags &= ~MATCHED;
 	}
 
-	return childVNode._lastDom ? getDomSiblingAfter(childVNode._lastDom) : oldDom;
+	let childLastDom = getLastDom(childVNode);
+	return childLastDom ? getDomSiblingAfter(childLastDom) : oldDom;
 }
 
 function diffStrictUnkeyedChildren(
@@ -374,6 +401,7 @@ function diffStrictUnkeyedChildren(
 	let oldChildrenLength = oldChildren.length;
 	let firstChildDom;
 	let lastChildDom;
+	newParentVNode._anchorDom = NULL;
 
 	newParentVNode._children = new Array(newChildrenLength);
 
@@ -449,7 +477,7 @@ function diffStrictUnkeyedChildren(
 		);
 
 		let newDom = childVNode._dom;
-		let lastDom = childVNode._lastDom || newDom;
+		let lastDom = getLastDom(childVNode);
 		if (childVNode.ref && oldVNode.ref != childVNode.ref) {
 			if (oldVNode.ref) {
 				applyRef(oldVNode.ref, NULL, childVNode);
@@ -461,7 +489,10 @@ function diffStrictUnkeyedChildren(
 			);
 		}
 
-		if (firstChildDom == NULL && newDom != NULL) firstChildDom = newDom;
+		if (firstChildDom == NULL && newDom != NULL) {
+			firstChildDom = newDom;
+			newParentVNode._anchorDom = getAnchorDom(childVNode);
+		}
 		if (lastDom != NULL) lastChildDom = lastDom;
 
 		if (oldVNode === EMPTY_OBJ && newDom != NULL) {
@@ -588,7 +619,7 @@ function queueRemoval(
 	if (oldVNode._dom != NULL) {
 		if (hostOpCounts != NULL) hostOpCounts.removeRange++;
 		if (childDiffStats != NULL) childDiffStats.removals++;
-		removeOps.push(oldVNode._dom, oldVNode._lastDom || oldVNode._dom);
+		removeOps.push(oldVNode._dom, getLastDom(oldVNode));
 	}
 	unmountQueue.push(oldVNode);
 	return oldDom;
@@ -788,7 +819,7 @@ function constructNewChildrenArray(
 				if (oldVNode._dom != NULL) {
 					if (hostOpCounts != NULL) hostOpCounts.removeRange++;
 					if (childDiffStats != NULL) childDiffStats.removals++;
-					removeOps.push(oldVNode._dom, oldVNode._lastDom || oldVNode._dom);
+					removeOps.push(oldVNode._dom, getLastDom(oldVNode));
 				}
 				unmountQueue.push(oldVNode);
 			}
@@ -813,80 +844,111 @@ function planPlacements(
 	children,
 	matchingIndices,
 	forcePlacement,
+	firstDoms,
+	befores,
+	placementStatus,
 	parentDom,
 	hostOps,
 	oldDom,
 	hasKeys,
 	hostOpCounts
 ) {
+	computePlacementBefores(firstDoms, befores, oldDom, children);
+
 	if (children.length === 1) {
 		let child = children[0];
-		if (child != NULL && child._dom != NULL) {
-			let matchingIndex = matchingIndices[0];
+		if (child != NULL && firstDoms[0] != NULL) {
 			if (
-				(matchingIndex == -1 && typeof child.type != 'function') ||
-				forcePlacement[0]
+				shouldPlaceChild(
+					placementStatus[0],
+					matchingIndices[0],
+					forcePlacement[0]
+				)
 			) {
-				queuePlacement(child, oldDom, parentDom, hostOps, hostOpCounts);
+				queuePlacement(child, befores[0], parentDom, hostOps, hostOpCounts);
 			}
 		}
 		return;
 	}
 
 	if (!hasKeys) {
-		let before = oldDom;
-
 		for (let i = children.length; i--; ) {
 			let child = children[i];
-			if (child == NULL || child._dom == NULL) continue;
+			if (child == NULL || firstDoms[i] == NULL) continue;
 
 			if (
-				(matchingIndices[i] == -1 && typeof child.type != 'function') ||
-				forcePlacement[i]
+				shouldPlaceChild(
+					placementStatus[i],
+					matchingIndices[i],
+					forcePlacement[i]
+				)
 			) {
-				queuePlacement(child, before, parentDom, hostOps, hostOpCounts);
+				queuePlacement(child, befores[i], parentDom, hostOps, hostOpCounts);
 			}
-
-			before = child._dom;
 		}
 
 		return;
 	}
 
-	let stable = getStablePlacementSet(children, matchingIndices, forcePlacement);
-	let before = oldDom;
+	let stable = getStablePlacementSet(
+		firstDoms,
+		matchingIndices,
+		forcePlacement,
+		placementStatus
+	);
 
 	for (let i = children.length; i--; ) {
 		let child = children[i];
-		if (child == NULL || child._dom == NULL) continue;
+		if (child == NULL || firstDoms[i] == NULL) continue;
 
 		if (
-			(matchingIndices[i] == -1 && typeof child.type != 'function') ||
-			forcePlacement[i] ||
+			shouldPlaceChild(
+				placementStatus[i],
+				matchingIndices[i],
+				forcePlacement[i]
+			) ||
 			(!stable[i] && matchingIndices[i] != -1)
 		) {
-			queuePlacement(child, before, parentDom, hostOps, hostOpCounts);
+			queuePlacement(child, befores[i], parentDom, hostOps, hostOpCounts);
 		}
-
-		before = child._dom;
 	}
 }
 
-function getStablePlacementSet(children, matchingIndices, forcePlacement) {
+function computePlacementBefores(firstDoms, befores, oldDom, children) {
+	let before = oldDom;
+	for (let i = firstDoms.length; i--; ) {
+		befores[i] = before;
+		if (firstDoms[i] != NULL) before = children[i];
+	}
+}
+
+function shouldPlaceChild(status, matchingIndex, forcePlacement) {
+	return (
+		forcePlacement ||
+		status === PLAN_INSERT ||
+		(status === PLAN_MOVE && matchingIndex != -1)
+	);
+}
+
+function getStablePlacementSet(
+	firstDoms,
+	matchingIndices,
+	forcePlacement,
+	placementStatus
+) {
 	let positions = [];
 	let recordIndices = [];
 	let predecessors = [];
 	let tails = [];
-	let stable = new Uint8Array(children.length);
+	let stable = new Uint8Array(firstDoms.length);
 
-	for (let i = 0; i < children.length; i++) {
-		let child = children[i];
+	for (let i = 0; i < firstDoms.length; i++) {
 		let oldIndex = matchingIndices[i];
 		if (
-			child == NULL ||
-			child._dom == NULL ||
+			firstDoms[i] == NULL ||
 			oldIndex == -1 ||
-			forcePlacement[i]
+			forcePlacement[i] ||
+			placementStatus[i] !== PLAN_RETAIN
 		) {
 			continue;
 		}

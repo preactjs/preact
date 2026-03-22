@@ -180,6 +180,10 @@ export interface VNode<P = {}> extends preact.VNode<P> {
 	 * The last DOM child rendered by this VNode subtree.
 	 */
 	_lastDom?: PreactElement | null;
+	/**
+	 * The DOM node that should be used as this subtree's placement anchor.
+	 */
+	_anchorDom?: PreactElement | null;
 	_component: Component | null;
 	constructor: undefined;
 	_original: number;

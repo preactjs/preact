@@ -3,6 +3,7 @@ import { diff, commitRoot } from './diff/index';
 import options from './options';
 import { Fragment } from './create-element';
 import { MODE_HYDRATE, NULL } from './constants';
+import { updateRangeFromChildren } from './range';
 
 /**
  * Base Component class. Provides `setState()` and `forceUpdate()`, which
@@ -121,32 +122,9 @@ export function getDomSibling(vnode, childIndex) {
  * @param {import('./internal').VNode} vnode
  */
 export function updateVNodeDomPointers(vnode) {
-	let firstDom = NULL;
-	let lastDom = NULL;
-	let children = vnode._children;
-
-	if (children != NULL) {
-		for (let i = 0; i < children.length; i++) {
-			let child = children[i];
-			if (child != NULL && child._dom != NULL) {
-				firstDom = child._dom;
-				break;
-			}
-		}
-
-		for (let i = children.length; i--; ) {
-			let child = children[i];
-			if (child != NULL) {
-				lastDom = child._lastDom || child._dom;
-				if (lastDom != NULL) break;
-			}
-		}
-	}
-
-	vnode._dom = firstDom;
-	vnode._lastDom = lastDom;
+	updateRangeFromChildren(vnode);
 	if (vnode._component != NULL) {
-		vnode._component.base = firstDom;
+		vnode._component.base = vnode._dom;
 	}
 }
 
@@ -219,6 +197,7 @@ function renderComponent(component) {
 		);
 		oldVNode._dom = oldVNode._parent = null;
 		oldVNode._lastDom = null;
+		oldVNode._anchorDom = null;
 
 		if (newVNode._dom != oldDom) {
 			updateParentDomPointers(newVNode);

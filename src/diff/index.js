@@ -20,6 +20,7 @@ import { diffChildren } from './children';
 import { setProperty } from './props';
 import { assign, isArray, removeNode, slice } from '../util';
 import options from '../options';
+import { getAnchorDom, getLastDom } from '../range';
 
 /**
  * @typedef {import('../internal').ComponentChildren} ComponentChildren
@@ -90,6 +91,7 @@ export function diff(
 		isHydrating = !!(oldVNode._flags & MODE_HYDRATE);
 		oldDom = newVNode._dom = oldVNode._dom;
 		newVNode._lastDom = oldVNode._lastDom;
+		newVNode._anchorDom = oldVNode._anchorDom;
 		excessDomChildren = [oldDom];
 	}
 
@@ -204,6 +206,7 @@ export function diff(
 
 					newVNode._dom = oldVNode._dom;
 					newVNode._lastDom = oldVNode._lastDom;
+					newVNode._anchorDom = oldVNode._anchorDom;
 					newVNode._children = oldVNode._children;
 					newVNode._children.some(vnode => {
 						if (vnode) vnode._parent = newVNode;
@@ -294,6 +297,40 @@ export function diff(
 				childDiffStats
 			);
 
+			if (c._childDidSuspend && newVNode._children) {
+				c._primaryChild = newVNode._children[0] || NULL;
+				c._fallbackChild = newVNode._children[1] || NULL;
+				if (
+					!(c.state && c.state._suspended) &&
+					c._pendingSuspensionCount &&
+					oldVNode._children &&
+					oldVNode._children[0]
+				) {
+					c._parkedChild = oldVNode._children[0];
+				}
+				if (c.state && c.state._suspended) {
+					c._activeChild = c._fallbackChild;
+				} else if (c._pendingSuspensionCount && c._parkedChild) {
+					newVNode._children[0] = c._parkedChild;
+					newVNode._children[1] = NULL;
+					c._primaryChild = c._parkedChild;
+					c._fallbackChild = NULL;
+					c._activeChild = c._parkedChild;
+				} else {
+					c._activeChild = c._primaryChild;
+					c._parkedChild = NULL;
+				}
+
+				let activeChild = c._activeChild;
+				if (activeChild != NULL) {
+					newVNode._dom = activeChild._dom;
+					newVNode._anchorDom = getAnchorDom(activeChild);
+					newVNode._lastDom = getLastDom(activeChild);
+				} else {
+					newVNode._dom = newVNode._anchorDom = newVNode._lastDom = NULL;
+				}
+			}
+
 			c.base = newVNode._dom;
 
 			// We successfully rendered this VNode, unset any stored hydration/bailout state:
@@ -331,6 +368,7 @@ export function diff(
 			} else {
 				newVNode._dom = oldVNode._dom;
 				newVNode._lastDom = oldVNode._lastDom;
+				newVNode._anchorDom = oldVNode._anchorDom;
 				newVNode._children = oldVNode._children;
 				if (!e.then) markAsForce(newVNode);
 			}
@@ -343,6 +381,7 @@ export function diff(
 		newVNode._children = oldVNode._children;
 		newVNode._dom = oldVNode._dom;
 		newVNode._lastDom = oldVNode._lastDom;
+		newVNode._anchorDom = oldVNode._anchorDom;
 	} else {
 		oldDom = newVNode._dom = diffElementNodes(
 			oldVNode._dom,
@@ -435,8 +474,10 @@ function flushHostOps(hostOps) {
 			hostOps[i++] = NULL;
 			let node = hostOps[i];
 			let parent = hostOps[i + 1];
-			let before = hostOps[i + 2];
-			if (
+			let before = resolvePlacementAnchor(hostOps[i + 2], parent);
+			if ((before === node && node.parentNode === parent) || false) {
+				// already in the right spot
+			} else if (
 				node.parentNode !== parent ||
 				(before == NULL
 					? node.nextSibling != NULL
@@ -450,8 +491,10 @@ function flushHostOps(hostOps) {
 			let first = hostOps[i];
 			let last = hostOps[i + 1];
 			let parent = hostOps[i + 2];
-			let before = hostOps[i + 3];
-			if (
+			let before = resolvePlacementAnchor(hostOps[i + 3], parent);
+			if ((before === first && first.parentNode === parent) || false) {
+				// already in the right spot
+			} else if (
 				first.parentNode !== parent ||
 				(before == NULL
 					? last.nextSibling != NULL
@@ -464,6 +507,15 @@ function flushHostOps(hostOps) {
 	}
 
 	hostOps.length = 0;
+}
+
+function resolvePlacementAnchor(before, parent) {
+	if (before != NULL && typeof before == 'object' && before.nodeType == NULL) {
+		let dom = getAnchorDom(before);
+		return dom != NULL && dom.parentNode === parent ? dom : NULL;
+	}
+
+	return before;
 }
 
 /**
@@ -540,7 +592,7 @@ export function queuePlacement(
 	hostOpCounts
 ) {
 	let firstDom = vnode._dom;
-	let lastDom = vnode._lastDom || firstDom;
+	let lastDom = getLastDom(vnode);
 
 	if (firstDom == NULL) return;
 
@@ -880,6 +932,7 @@ function diffElementNodes(
 				hostOps.push(OP_SET_TEXT, dom, newProps);
 			}
 		}
+		newVNode._anchorDom = dom;
 		newVNode._lastDom = dom;
 	} else {
 		// If excessDomChildren was not null, repopulate it with the current element's children:
@@ -989,6 +1042,7 @@ function diffElementNodes(
 				)
 			) {
 				newVNode._children = oldVNode._children;
+				newVNode._anchorDom = oldVNode._anchorDom || dom;
 				newVNode._lastDom = oldVNode._lastDom || dom;
 				if (newVNode._children) {
 					newVNode._children.some(child => {
@@ -1054,6 +1108,7 @@ function diffElementNodes(
 			}
 		}
 
+		newVNode._anchorDom = dom;
 		newVNode._lastDom = dom;
 	}
 
@@ -1132,7 +1187,12 @@ export function unmount(vnode, parentVNode, skipRemove) {
 		removeNode(vnode._dom);
 	}
 
-	vnode._component = vnode._parent = vnode._dom = vnode._lastDom = UNDEFINED;
+	vnode._component =
+		vnode._parent =
+		vnode._dom =
+		vnode._lastDom =
+		vnode._anchorDom =
+			UNDEFINED;
 }
 
 /** The `.render()` method for a PFC backing instance. */

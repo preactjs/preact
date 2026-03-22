@@ -1,6 +1,7 @@
 import { Component, createElement, options, Fragment } from 'preact';
 import { MODE_HYDRATE } from '../../src/constants';
 import { assign } from './util';
+import { getLastDom } from '../../src/range';
 
 const oldCatchError = options._catchError;
 options._catchError = function (error, newVNode, oldVNode, errorInfo) {
@@ -14,6 +15,7 @@ options._catchError = function (error, newVNode, oldVNode, errorInfo) {
 				if (newVNode._dom == null) {
 					newVNode._dom = oldVNode._dom;
 					newVNode._lastDom = oldVNode._lastDom;
+					newVNode._anchorDom = oldVNode._anchorDom;
 					newVNode._children = oldVNode._children;
 					if (newVNode._children) {
 						newVNode._children.some(child => {
@@ -93,7 +95,7 @@ function removeOriginal(vnode, detachedParent, originalParent) {
 			if (vnode._component._parentDom === detachedParent) {
 				if (vnode._dom) {
 					let node = vnode._dom;
-					let lastDom = vnode._lastDom || vnode._dom;
+					let lastDom = getLastDom(vnode);
 					let afterEnd = lastDom.nextSibling;
 					while (node != afterEnd) {
 						let next = node.nextSibling;
@@ -116,6 +118,10 @@ export function Suspense() {
 	this._pendingSuspensionCount = 0;
 	this._suspenders = null;
 	this._detachOnNextRender = null;
+	this._primaryChild = null;
+	this._fallbackChild = null;
+	this._activeChild = null;
+	this._parkedChild = null;
 }
 
 // Things we do here to save some bytes but are not proper JS inheritance:
@@ -133,6 +139,8 @@ Suspense.prototype._childDidSuspend = function (promise, suspendingVNode) {
 
 	/** @type {import('./internal').SuspenseComponent} */
 	const c = this;
+	let currentPrimaryChild =
+		c._activeChild || (c._vnode && c._vnode._children && c._vnode._children[0]);
 
 	if (c._suspenders == null) {
 		c._suspenders = [];
@@ -176,6 +184,7 @@ Suspense.prototype._childDidSuspend = function (promise, suspendingVNode) {
 				);
 			}
 
+			c._parkedChild = null;
 			c.setState({ _suspended: (c._detachOnNextRender = null) });
 
 			let suspended;
@@ -196,13 +205,22 @@ Suspense.prototype._childDidSuspend = function (promise, suspendingVNode) {
 		!c._pendingSuspensionCount++ &&
 		!(suspendingVNode._flags & MODE_HYDRATE)
 	) {
+		c._parkedChild = currentPrimaryChild;
 		c.setState({ _suspended: (c._detachOnNextRender = c._vnode._children[0]) });
+	} else if (suspendingVNode._flags & MODE_HYDRATE) {
+		c._parkedChild = currentPrimaryChild;
+		c._activeChild = currentPrimaryChild;
 	}
 	promise.then(onResolved, onResolved);
 };
 
 Suspense.prototype.componentWillUnmount = function () {
 	this._suspenders = [];
+	this._primaryChild =
+		this._fallbackChild =
+		this._activeChild =
+		this._parkedChild =
+			null;
 };
 
 /**
@@ -233,6 +251,13 @@ Suspense.prototype.render = function (props, state) {
 	const fallback =
 		state._suspended && createElement(Fragment, null, props.fallback);
 	if (fallback) fallback._flags &= ~MODE_HYDRATE;
+
+	this._primaryChild = null;
+	this._fallbackChild = null;
+	if (!state._suspended && !this._pendingSuspensionCount) {
+		this._activeChild = null;
+		this._parkedChild = null;
+	}
 
 	return [
 		createElement(Fragment, null, state._suspended ? null : props.children),
