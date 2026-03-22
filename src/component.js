@@ -3,7 +3,12 @@ import { diff, commitRoot } from './diff/index';
 import options from './options';
 import { Fragment } from './create-element';
 import { MODE_HYDRATE, NULL } from './constants';
-import { getOwnedChildren, replaceOwnedChild, setOwnedRange } from './backing';
+import {
+	getOwnedChildren,
+	getOwnedFirstDom,
+	replaceOwnedChild,
+	setOwnedRange
+} from './backing';
 import {
 	getFirstDom,
 	syncBackingOwnership,
@@ -131,7 +136,7 @@ export function updateVNodeDomPointers(vnode) {
 	updateRangeFromChildren(vnode);
 	syncBackingOwnership(vnode);
 	if (vnode._component != NULL) {
-		vnode._component.base = vnode._dom;
+		vnode._component.base = getOwnedFirstDom(vnode);
 	}
 }
 
@@ -142,7 +147,7 @@ export function updateVNodeDomPointers(vnode) {
 function renderComponent(component) {
 	if (component._parentDom && component._dirty) {
 		let oldVNode = component._vnode,
-			oldDom = oldVNode._dom,
+			oldDom = getOwnedFirstDom(oldVNode),
 			commitQueue = [],
 			refQueue = [],
 			hostOps = [],
@@ -207,7 +212,7 @@ function renderComponent(component) {
 		oldVNode._anchorDom = null;
 		setOwnedRange(oldVNode, null, null, null);
 
-		if (newVNode._dom != oldDom) {
+		if (getOwnedFirstDom(newVNode) != oldDom) {
 			updateParentDomPointers(newVNode);
 		}
 	}

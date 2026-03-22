@@ -1,5 +1,13 @@
 import { Component, createElement, options, Fragment } from 'preact';
 import { MODE_HYDRATE } from '../../src/constants';
+import {
+	getOwnedChildren,
+	getOwnedAnchorDom,
+	getOwnedFirstDom,
+	replaceOwnedChild,
+	setOwnedChildren,
+	setOwnedRange
+} from '../../src/backing';
 import { assign } from './util';
 import { getLastDom } from '../../src/range';
 
@@ -12,15 +20,19 @@ options._catchError = function (error, newVNode, oldVNode, errorInfo) {
 
 		for (; (vnode = vnode._parent); ) {
 			if ((component = vnode._component) && component._childDidSuspend) {
-				if (newVNode._dom == null) {
-					newVNode._dom = oldVNode._dom;
-					newVNode._lastDom = oldVNode._lastDom;
-					newVNode._anchorDom = oldVNode._anchorDom;
+				if (getOwnedFirstDom(newVNode) == null) {
 					newVNode._backing = oldVNode._backing;
 					if (newVNode._backing) newVNode._backing._vnode = newVNode;
-					newVNode._children = oldVNode._children;
-					if (newVNode._children) {
-						newVNode._children.some(child => {
+					setOwnedRange(
+						newVNode,
+						getOwnedFirstDom(oldVNode),
+						getLastDom(oldVNode),
+						getOwnedAnchorDom(oldVNode)
+					);
+					setOwnedChildren(newVNode, getOwnedChildren(oldVNode));
+					let children = getOwnedChildren(newVNode);
+					if (children) {
+						children.some(child => {
 							if (child) child._parent = newVNode;
 						});
 					}
@@ -74,11 +86,12 @@ function detachedClone(vnode, detachedParent, parentDom) {
 			vnode._component = null;
 		}
 
-		vnode._children =
-			vnode._children &&
-			vnode._children.map(child =>
-				detachedClone(child, detachedParent, parentDom)
-			);
+		let children = getOwnedChildren(vnode);
+		setOwnedChildren(
+			vnode,
+			children &&
+				children.map(child => detachedClone(child, detachedParent, parentDom))
+		);
 	}
 
 	return vnode;
@@ -87,16 +100,19 @@ function detachedClone(vnode, detachedParent, parentDom) {
 function removeOriginal(vnode, detachedParent, originalParent) {
 	if (vnode && originalParent) {
 		vnode._original = null;
-		vnode._children =
-			vnode._children &&
-			vnode._children.map(child =>
-				removeOriginal(child, detachedParent, originalParent)
-			);
+		let children = getOwnedChildren(vnode);
+		setOwnedChildren(
+			vnode,
+			children &&
+				children.map(child =>
+					removeOriginal(child, detachedParent, originalParent)
+				)
+		);
 
 		if (vnode._component) {
 			if (vnode._component._parentDom === detachedParent) {
-				if (vnode._dom) {
-					let node = vnode._dom;
+				if (getOwnedFirstDom(vnode)) {
+					let node = getOwnedFirstDom(vnode);
 					let lastDom = getLastDom(vnode);
 					let afterEnd = lastDom.nextSibling;
 					while (node != afterEnd) {
@@ -142,7 +158,8 @@ Suspense.prototype._childDidSuspend = function (promise, suspendingVNode) {
 	/** @type {import('./internal').SuspenseComponent} */
 	const c = this;
 	let currentPrimaryChild =
-		c._activeChild || (c._vnode && c._vnode._children && c._vnode._children[0]);
+		c._activeChild ||
+		(c._vnode && getOwnedChildren(c._vnode) && getOwnedChildren(c._vnode)[0]);
 
 	if (c._suspenders == null) {
 		c._suspenders = [];
@@ -179,10 +196,14 @@ Suspense.prototype._childDidSuspend = function (promise, suspendingVNode) {
 			// suspended children into the _children array
 			if (c.state._suspended) {
 				const suspendedVNode = c.state._suspended;
-				c._vnode._children[0] = removeOriginal(
-					suspendedVNode,
-					suspendedVNode._component._parentDom,
-					suspendedVNode._component._originalParentDom
+				replaceOwnedChild(
+					c._vnode,
+					0,
+					removeOriginal(
+						suspendedVNode,
+						suspendedVNode._component._parentDom,
+						suspendedVNode._component._originalParentDom
+					)
 				);
 			}
 
@@ -208,7 +229,9 @@ Suspense.prototype._childDidSuspend = function (promise, suspendingVNode) {
 		!(suspendingVNode._flags & MODE_HYDRATE)
 	) {
 		c._parkedChild = currentPrimaryChild;
-		c.setState({ _suspended: (c._detachOnNextRender = c._vnode._children[0]) });
+		c.setState({
+			_suspended: (c._detachOnNextRender = getOwnedChildren(c._vnode)[0])
+		});
 	} else if (suspendingVNode._flags & MODE_HYDRATE) {
 		c._parkedChild = currentPrimaryChild;
 		c._activeChild = currentPrimaryChild;
@@ -235,13 +258,17 @@ Suspense.prototype.render = function (props, state) {
 		// When the Suspense's _vnode was created by a call to createVNode
 		// (i.e. due to a setState further up in the tree)
 		// it's _children prop is null, in this case we "forget" about the parked vnodes to detach
-		if (this._vnode._children) {
+		if (getOwnedChildren(this._vnode)) {
 			const detachedParent = document.createElement('div');
-			const detachedComponent = this._vnode._children[0]._component;
-			this._vnode._children[0] = detachedClone(
-				this._detachOnNextRender,
-				detachedParent,
-				(detachedComponent._originalParentDom = detachedComponent._parentDom)
+			const detachedComponent = getOwnedChildren(this._vnode)[0]._component;
+			replaceOwnedChild(
+				this._vnode,
+				0,
+				detachedClone(
+					this._detachOnNextRender,
+					detachedParent,
+					(detachedComponent._originalParentDom = detachedComponent._parentDom)
+				)
 			);
 		}
 

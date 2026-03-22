@@ -2,6 +2,7 @@ import { EMPTY_OBJ, NULL } from './constants';
 import { commitRoot, diff } from './diff/index';
 import { createElement, Fragment } from './create-element';
 import options from './options';
+import { getOwnedFirstDom } from './backing';
 import { slice } from './util';
 
 /**
@@ -83,7 +84,7 @@ export function render(vnode, parentDom, replaceNode) {
 		!isHydrating && replaceNode
 			? replaceNode
 			: oldVNode
-				? oldVNode._dom
+				? getOwnedFirstDom(oldVNode)
 				: parentDom.firstChild,
 		isHydrating,
 		refQueue,

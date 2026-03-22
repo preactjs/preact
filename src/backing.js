@@ -1,4 +1,10 @@
 import { NULL } from './constants';
+import { Fragment } from './create-element';
+
+const BACKING_HOST = 0;
+const BACKING_FRAGMENT = 1;
+const BACKING_COMPONENT = 2;
+const BACKING_SUSPENSE = 3;
 
 /**
  * @typedef {import('./internal').BackingKind} BackingKind
@@ -47,11 +53,8 @@ export function getOwnedChildren(vnode) {
  * @returns {Array<VNode<any> | BackingNode | null> | null}
  */
 export function setOwnedChildren(vnode, children) {
-	vnode._children = children;
-	let backing = getBacking(vnode);
-	if (backing != NULL) {
-		backing._children = children;
-	}
+	let backing = ensureOwnedBacking(vnode);
+	backing._children = children;
 	return children;
 }
 
@@ -66,10 +69,6 @@ export function replaceOwnedChild(vnode, index, child) {
 	let children = getOwnedChildren(vnode);
 	if (children != NULL) {
 		children[index] = child;
-	}
-
-	if (vnode._children != NULL && vnode._children !== children) {
-		vnode._children[index] = child;
 	}
 }
 
@@ -119,12 +118,22 @@ export function setOwnedRange(vnode, firstDom, lastDom, anchorDom) {
 	vnode._lastDom = lastDom;
 	vnode._anchorDom = anchorDom;
 
-	let backing = getBacking(vnode);
-	if (backing != NULL) {
-		backing._firstDom = firstDom;
-		backing._lastDom = lastDom;
-		backing._anchorDom = anchorDom;
-	}
+	let backing = ensureOwnedBacking(vnode);
+	backing._firstDom = firstDom;
+	backing._lastDom = lastDom;
+	backing._anchorDom = anchorDom;
+}
+
+function inferBackingKind(vnode) {
+	if (vnode.type === Fragment) return BACKING_FRAGMENT;
+	if (vnode._component && vnode._component._childDidSuspend)
+		return BACKING_SUSPENSE;
+	if (vnode._component) return BACKING_COMPONENT;
+	return BACKING_HOST;
+}
+
+function ensureOwnedBacking(vnode) {
+	return ensureBacking(vnode, inferBackingKind(vnode));
 }
 
 /**
@@ -137,7 +146,7 @@ export function setOwnedRange(vnode, firstDom, lastDom, anchorDom) {
  * @returns {BackingNode}
  */
 export function ensureBacking(vnode, kind) {
-	let backing = getBacking(vnode) || vnode._backing;
+	let backing = getBacking(vnode);
 	if (backing == NULL) {
 		backing = vnode._backing = {
 			_parent: NULL,
@@ -200,10 +209,12 @@ export function syncBackingFromVNode(vnode, kind) {
 		vnode._parent && vnode._parent._backing ? vnode._parent._backing : NULL;
 
 	backing._parent = parentBacking;
-	backing._children = vnode._children;
-	backing._firstDom = vnode._dom || NULL;
-	backing._lastDom = vnode._lastDom || vnode._dom || NULL;
-	backing._anchorDom = vnode._anchorDom || vnode._dom || NULL;
+	if (backing._children == NULL) backing._children = vnode._children;
+	if (backing._firstDom == NULL) backing._firstDom = vnode._dom || NULL;
+	if (backing._lastDom == NULL)
+		backing._lastDom = vnode._lastDom || vnode._dom || NULL;
+	if (backing._anchorDom == NULL)
+		backing._anchorDom = vnode._anchorDom || vnode._dom || NULL;
 
 	return backing;
 }

@@ -103,13 +103,13 @@ export function diff(
 	if (oldVNode._flags & MODE_SUSPENDED) {
 		isHydrating = !!(oldVNode._flags & MODE_HYDRATE);
 		oldDom = getOwnedFirstDom(oldVNode);
+		reuseBacking(newVNode, oldVNode);
 		setOwnedRange(
 			newVNode,
 			oldDom,
 			getLastDom(oldVNode),
 			getAnchorDom(oldVNode)
 		);
-		reuseBacking(newVNode, oldVNode);
 		excessDomChildren = [oldDom];
 	}
 
@@ -228,10 +228,14 @@ export function diff(
 						getLastDom(oldVNode),
 						getAnchorDom(oldVNode)
 					);
+					reuseBacking(newVNode, oldVNode);
 					setOwnedChildren(newVNode, getOwnedChildren(oldVNode));
-					getOwnedChildren(newVNode).some(vnode => {
-						if (vnode) vnode._parent = newVNode;
-					});
+					let reusedChildren = getOwnedChildren(newVNode);
+					if (reusedChildren) {
+						reusedChildren.some(vnode => {
+							if (vnode) vnode._parent = newVNode;
+						});
+					}
 
 					EMPTY_ARR.push.apply(c._renderCallbacks, c._stateCallbacks);
 					c._stateCallbacks = [];
@@ -359,7 +363,7 @@ export function diff(
 
 			syncBackingOwnership(newVNode);
 
-			c.base = newVNode._dom;
+			c.base = getOwnedFirstDom(newVNode);
 
 			// We successfully rendered this VNode, unset any stored hydration/bailout state:
 			newVNode._flags &= RESET_MODE;
@@ -393,13 +397,13 @@ export function diff(
 					markAsForce(newVNode);
 				}
 			} else {
+				reuseBacking(newVNode, oldVNode);
 				setOwnedRange(
 					newVNode,
 					getOwnedFirstDom(oldVNode),
 					getLastDom(oldVNode),
 					getAnchorDom(oldVNode)
 				);
-				reuseBacking(newVNode, oldVNode);
 				setOwnedChildren(newVNode, getOwnedChildren(oldVNode));
 				if (!e.then) markAsForce(newVNode);
 			}
@@ -409,6 +413,7 @@ export function diff(
 		excessDomChildren == NULL &&
 		newVNode._original == oldVNode._original
 	) {
+		reuseBacking(newVNode, oldVNode);
 		setOwnedChildren(newVNode, getOwnedChildren(oldVNode));
 		setOwnedRange(
 			newVNode,
@@ -416,10 +421,9 @@ export function diff(
 			getLastDom(oldVNode),
 			getAnchorDom(oldVNode)
 		);
-		reuseBacking(newVNode, oldVNode);
 	} else {
-		oldDom = newVNode._dom = diffElementNodes(
-			oldVNode._dom,
+		oldDom = diffElementNodes(
+			getOwnedFirstDom(oldVNode),
 			newVNode,
 			oldVNode,
 			globalContext,
@@ -938,7 +942,9 @@ function diffElementNodes(
 
 	if (dom == NULL) {
 		if (nodeType == NULL) {
-			return document.createTextNode(newProps);
+			dom = document.createTextNode(newProps);
+			setOwnedRange(newVNode, dom, dom, dom);
+			return dom;
 		}
 
 		dom = document.createElementNS(
@@ -961,7 +967,11 @@ function diffElementNodes(
 	if (nodeType == NULL) {
 		// During hydration, we still have to split merged text from SSR'd HTML.
 		if (oldProps !== newProps && (!isHydrating || dom.data != newProps)) {
-			if (allowInlineText || isHydrating || oldVNode._dom == NULL) {
+			if (
+				allowInlineText ||
+				isHydrating ||
+				getOwnedFirstDom(oldVNode) == NULL
+			) {
 				dom.data = newProps;
 			} else {
 				if (hostOpCounts != NULL) hostOpCounts.setText++;
@@ -1058,7 +1068,7 @@ function diffElementNodes(
 					hostOps,
 					unmountQueue,
 					removeOps,
-					oldTextVNode._dom,
+					getOwnedFirstDom(oldTextVNode),
 					isHydrating,
 					refQueue,
 					true,
@@ -1193,7 +1203,7 @@ export function unmount(vnode, parentVNode, skipRemove) {
 	if (options.unmount) options.unmount(vnode);
 
 	if ((r = vnode.ref)) {
-		if (!r.current || r.current == vnode._dom) {
+		if (!r.current || r.current == getOwnedFirstDom(vnode)) {
 			applyRef(r, NULL, parentVNode);
 		}
 	}
@@ -1223,7 +1233,7 @@ export function unmount(vnode, parentVNode, skipRemove) {
 	}
 
 	if (!skipRemove) {
-		removeNode(vnode._dom);
+		removeNode(getOwnedFirstDom(vnode));
 	}
 
 	vnode._component =
