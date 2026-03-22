@@ -14,7 +14,6 @@ import {
 import { isArray } from '../util';
 import {
 	getOwnedChildren,
-	getOwnedVChildren,
 	getOwnedVNode,
 	isBackingNode,
 	setOwnedChildren,
@@ -100,11 +99,8 @@ export function diffChildren(
 	// This is a compression of oldParentVNode!=null && oldParentVNode != EMPTY_OBJ && oldParentVNode._children || EMPTY_ARR
 	// as EMPTY_OBJ._children should be `undefined`.
 	/** @type {(VNode | import('../internal').BackingNode | null)[]} */
-	let oldMountedChildren =
-		(oldParentVNode && getOwnedChildren(oldParentVNode)) || EMPTY_ARR;
-	/** @type {VNode[]} */
 	let oldChildren =
-		(oldParentVNode && getOwnedVChildren(oldParentVNode)) || EMPTY_ARR;
+		(oldParentVNode && getOwnedChildren(oldParentVNode)) || EMPTY_ARR;
 	let fastResult = diffSingleTextChild(
 		parentDom,
 		renderResult,
@@ -167,7 +163,7 @@ export function diffChildren(
 	let constructed = constructNewChildrenArray(
 		newParentVNode,
 		renderResult,
-		oldMountedChildren,
+		oldChildren,
 		unmountQueue,
 		removeOps,
 		oldDom,
@@ -201,10 +197,12 @@ export function diffChildren(
 		// matchingIndex for this VNode's oldVNode (or -1 if there is no oldVNode).
 		matchingIndex = childVNode._index;
 		matchingIndices[i] = matchingIndex;
-		oldVNode = (matchingIndex != -1 && oldChildren[matchingIndex]) || EMPTY_OBJ;
+		oldVNode =
+			(matchingIndex != -1 && getOwnedVNode(oldChildren[matchingIndex])) ||
+			EMPTY_OBJ;
 		if (
 			typeof childVNode.type != 'function' &&
-			(matchingIndex == -1 || oldChildren[matchingIndex] == NULL)
+			(matchingIndex == -1 || oldVNode === EMPTY_OBJ)
 		) {
 			forcePlacement[i] = 1;
 			placementStatus[i] = PLAN_INSERT;
@@ -411,7 +409,7 @@ function diffSingleTextChild(
 	if (childDiffStats != NULL) childDiffStats.fastSingleText++;
 
 	let value = renderResult[0];
-	let oldVNode = oldChildren[0];
+	let oldVNode = getOwnedVNode(oldChildren[0]);
 	if (
 		oldVNode == NULL ||
 		oldVNode.type != NULL ||
@@ -508,7 +506,7 @@ function diffStrictUnkeyedChildren(
 			childDiffStats
 		);
 		children[i] = childVNode;
-		let oldVNode = oldChildren[i];
+		let oldVNode = getOwnedVNode(oldChildren[i]);
 		if (childVNode == NULL) {
 			if (oldVNode != NULL) {
 				oldDom = queueRemoval(
@@ -622,7 +620,7 @@ function diffStrictUnkeyedChildren(
 	}
 
 	for (; i < oldChildrenLength; i++) {
-		let oldVNode = oldChildren[i];
+		let oldVNode = getOwnedVNode(oldChildren[i]);
 		if (oldVNode != NULL) {
 			oldDom = queueRemoval(
 				oldVNode,
@@ -1273,7 +1271,8 @@ function sameBoundaryIdentity(newVNode, oldChild, oldVNode) {
 
 function hasKeysInChildren(children) {
 	for (let i = 0; i < children.length; i++) {
-		if (children[i] != NULL && children[i]._flags & HAS_KEY) return true;
+		let child = getOwnedVNode(children[i]);
+		if (child != NULL && child._flags & HAS_KEY) return true;
 	}
 	return false;
 }

@@ -24,17 +24,13 @@ import { diffChildren } from './children';
 import { setProperty } from './props';
 import { assign, isArray, removeNode, slice } from '../util';
 import options from '../options';
-import {
-	getAnchorDom,
-	getFirstDom,
-	getLastDom,
-	syncBackingOwnership
-} from '../range';
+import { getAnchorDom, getFirstDom, getLastDom } from '../range';
 import {
 	clearBacking,
+	ensureBackingWithParent,
 	getOwnedChildren,
 	getOwnedFirstDom,
-	getOwnedVChildren,
+	getOwnedVNode,
 	reuseBacking,
 	setOwnedChildren,
 	setOwnedRange
@@ -238,11 +234,15 @@ export function diff(
 						getAnchorDom(oldVNode)
 					);
 					setOwnedChildren(newVNode, getOwnedChildren(oldVNode));
-					let reusedChildren = getOwnedVChildren(newVNode);
+					let reusedChildren = getOwnedChildren(newVNode);
 					if (reusedChildren) {
-						reusedChildren.some(vnode => {
-							if (vnode) vnode._parent = newVNode;
-						});
+						for (let ri = 0; ri < reusedChildren.length; ri++) {
+							let rc = reusedChildren[ri];
+							if (rc != NULL) {
+								let rv = getOwnedVNode(rc);
+								if (rv) rv._parent = newVNode;
+							}
+						}
 					}
 
 					EMPTY_ARR.push.apply(c._renderCallbacks, c._stateCallbacks);
@@ -334,24 +334,28 @@ export function diff(
 				childDiffStats
 			);
 
-			let newChildrenList = getOwnedVChildren(newVNode);
-			let oldChildrenList = getOwnedVChildren(oldVNode);
-			if (c._childDidSuspend && newChildrenList) {
-				c._primaryChild = newChildrenList[0] || NULL;
-				c._fallbackChild = newChildrenList[1] || NULL;
+			let newMountedChildren = getOwnedChildren(newVNode);
+			let oldMountedChildren = getOwnedChildren(oldVNode);
+			if (c._childDidSuspend && newMountedChildren) {
+				let newChild0 = getOwnedVNode(newMountedChildren[0]);
+				let newChild1 = getOwnedVNode(newMountedChildren[1]);
+				c._primaryChild = newChild0 || NULL;
+				c._fallbackChild = newChild1 || NULL;
 				if (
 					!(c.state && c.state._suspended) &&
 					c._pendingSuspensionCount &&
-					oldChildrenList &&
-					oldChildrenList[0]
+					oldMountedChildren
 				) {
-					c._parkedChild = oldChildrenList[0];
+					let oldChild0 = getOwnedVNode(oldMountedChildren[0]);
+					if (oldChild0) {
+						c._parkedChild = oldChild0;
+					}
 				}
 				if (c.state && c.state._suspended) {
 					c._activeChild = c._fallbackChild;
 				} else if (c._pendingSuspensionCount && c._parkedChild) {
-					newChildrenList[0] = c._parkedChild;
-					newChildrenList[1] = NULL;
+					newMountedChildren[0] = c._parkedChild;
+					newMountedChildren[1] = NULL;
 					c._primaryChild = c._parkedChild;
 					c._fallbackChild = NULL;
 					c._activeChild = c._parkedChild;
@@ -373,7 +377,17 @@ export function diff(
 				}
 			}
 
-			syncBackingOwnership(newVNode);
+			// Ensure backing node exists with correct kind and parent
+			if (c._childDidSuspend) {
+				let backing = ensureBackingWithParent(newVNode, 3 /* SUSPENSE */);
+				backing._activeChild = c._activeChild || NULL;
+				backing._parkedChild = c._parkedChild || NULL;
+				backing._fallbackChild = c._fallbackChild || NULL;
+			} else if (newVNode.type === Fragment) {
+				ensureBackingWithParent(newVNode, 1 /* FRAGMENT */);
+			} else {
+				ensureBackingWithParent(newVNode, 2 /* COMPONENT */);
+			}
 
 			c.base = getOwnedFirstDom(newVNode);
 
@@ -459,8 +473,15 @@ export function diff(
 function markAsForce(vnode) {
 	if (vnode) {
 		if (vnode._component) vnode._component._force = true;
-		let children = getOwnedVChildren(vnode);
-		if (children) children.some(markAsForce);
+		let children = getOwnedChildren(vnode);
+		if (children) {
+			for (let i = 0; i < children.length; i++) {
+				let child = children[i];
+				if (child != NULL) {
+					markAsForce(getOwnedVNode(child));
+				}
+			}
+		}
 	}
 }
 
@@ -684,6 +705,9 @@ function canFastDiffTextChild(
 	excessDomChildren,
 	isHydrating
 ) {
+	let oldOwnedChildren = getOwnedChildren(oldVNode);
+	let oldChild0 =
+		oldOwnedChildren != NULL ? getOwnedVNode(oldOwnedChildren[0]) : NULL;
 	if (
 		isHydrating ||
 		excessDomChildren != NULL ||
@@ -691,10 +715,10 @@ function canFastDiffTextChild(
 		(newVNode._flags & HAS_KEY) != 0 ||
 		(newVNode._flags & ARRAY_CHILDREN) != 0 ||
 		(oldVNode._flags & SINGLE_TEXT_CHILD) == 0 ||
-		getOwnedVChildren(oldVNode) == NULL ||
-		getOwnedVChildren(oldVNode).length !== 1 ||
-		getOwnedVChildren(oldVNode)[0] == NULL ||
-		getOwnedVChildren(oldVNode)[0].type != NULL
+		oldOwnedChildren == NULL ||
+		oldOwnedChildren.length !== 1 ||
+		oldChild0 == NULL ||
+		oldChild0.type != NULL
 	) {
 		return false;
 	}
@@ -732,10 +756,11 @@ function canBailHostSubtree(
 	excessDomChildren,
 	isHydrating
 ) {
+	let oldOwnedCh = getOwnedChildren(oldVNode);
 	if (
 		isHydrating ||
 		excessDomChildren != NULL ||
-		getOwnedVChildren(oldVNode) == NULL ||
+		oldOwnedCh == NULL ||
 		newProps.dangerouslySetInnerHTML != NULL ||
 		oldProps.dangerouslySetInnerHTML != NULL ||
 		newProps.value !== UNDEFINED ||
@@ -760,27 +785,19 @@ function canBailHostSubtree(
 		}
 	}
 
-	return areChildrenStructurallyEqual(
-		newVNode._flags,
-		newChildren,
-		getOwnedVChildren(oldVNode)
-	);
+	return areChildrenStructurallyEqual(newVNode._flags, newChildren, oldOwnedCh);
 }
 
 function areChildrenStructurallyEqual(childFlags, newChildren, oldChildren) {
 	if ((childFlags & SINGLE_TEXT_CHILD) != 0) {
-		return (
-			oldChildren.length === 1 &&
-			oldChildren[0] != NULL &&
-			oldChildren[0].type == NULL &&
-			oldChildren[0].props === newChildren
-		);
+		let oc0 = oldChildren.length === 1 ? getOwnedVNode(oldChildren[0]) : NULL;
+		return oc0 != NULL && oc0.type == NULL && oc0.props === newChildren;
 	}
 
 	if ((childFlags & SINGLE_CHILD) != 0) {
 		return (
 			oldChildren.length === 1 &&
-			isStructurallyEqualChild(newChildren, oldChildren[0])
+			isStructurallyEqualChild(newChildren, getOwnedVNode(oldChildren[0]))
 		);
 	}
 
@@ -790,7 +807,9 @@ function areChildrenStructurallyEqual(childFlags, newChildren, oldChildren) {
 		}
 
 		for (let i = 0; i < newChildren.length; i++) {
-			if (!isStructurallyEqualChild(newChildren[i], oldChildren[i])) {
+			if (
+				!isStructurallyEqualChild(newChildren[i], getOwnedVNode(oldChildren[i]))
+			) {
 				return false;
 			}
 		}
@@ -861,7 +880,7 @@ function isStructurallyEqualChild(rawChild, oldVNode) {
 	return areChildrenStructurallyEqual(
 		rawChild._flags,
 		newProps.children,
-		getOwnedVChildren(oldVNode) || EMPTY_ARR
+		getOwnedChildren(oldVNode) || EMPTY_ARR
 	);
 }
 
@@ -1063,7 +1082,7 @@ function diffElementNodes(
 					isHydrating
 				)
 			) {
-				let oldTextVNode = getOwnedVChildren(oldVNode)[0];
+				let oldTextVNode = getOwnedVNode(getOwnedChildren(oldVNode)[0]);
 				let textVNode = createTextVNode(newChildren, newVNode);
 				setOwnedChildren(newVNode, [textVNode]);
 				diff(
@@ -1103,11 +1122,15 @@ function diffElementNodes(
 					getLastDom(oldVNode) || dom,
 					getAnchorDom(oldVNode) || dom
 				);
-				let children = getOwnedVChildren(newVNode);
-				if (children) {
-					children.some(child => {
-						if (child) child._parent = newVNode;
-					});
+				let bailedChildren = getOwnedChildren(newVNode);
+				if (bailedChildren) {
+					for (let bi = 0; bi < bailedChildren.length; bi++) {
+						let bc = bailedChildren[bi];
+						if (bc != NULL) {
+							let bv = getOwnedVNode(bc);
+							if (bv) bv._parent = newVNode;
+						}
+					}
 				}
 			} else {
 				setNormalizedChildFlags(
@@ -1236,9 +1259,10 @@ export function unmount(vnode, parentVNode, skipRemove) {
 
 	if ((r = getOwnedChildren(vnode))) {
 		for (let i = 0; i < r.length; i++) {
-			if (r[i]) {
+			let child = getOwnedVNode(r[i]);
+			if (child) {
 				unmount(
-					r[i],
+					child,
 					parentVNode,
 					skipRemove || typeof vnode.type != 'function'
 				);

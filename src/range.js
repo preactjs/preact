@@ -6,18 +6,12 @@ import {
 	getOwnedLastDom,
 	getOwnedVNode,
 	isBackingNode,
-	setOwnedRange,
-	syncBackingFromVNode
+	setOwnedRange
 } from './backing';
-import { Fragment } from './create-element';
-
-const BOUNDARY_FRAGMENT = 1;
-const BOUNDARY_COMPONENT = 2;
-const BOUNDARY_SUSPENSE = 3;
 
 /**
  * Return the first DOM node owned by a vnode subtree.
- * @param {import('./internal').VNode} vnode
+ * @param {import('./internal').VNode | import('./internal').BackingNode} vnode
  * @returns {import('./internal').PreactElement | null}
  */
 export function getFirstDom(vnode) {
@@ -26,7 +20,7 @@ export function getFirstDom(vnode) {
 
 /**
  * Return the last DOM node owned by a vnode subtree.
- * @param {import('./internal').VNode} vnode
+ * @param {import('./internal').VNode | import('./internal').BackingNode} vnode
  * @returns {import('./internal').PreactElement | null}
  */
 export function getLastDom(vnode) {
@@ -35,7 +29,7 @@ export function getLastDom(vnode) {
 
 /**
  * Return the DOM node that should be used as this vnode subtree's anchor.
- * @param {import('./internal').VNode} vnode
+ * @param {import('./internal').VNode | import('./internal').BackingNode} vnode
  * @returns {import('./internal').PreactElement | null}
  */
 export function getAnchorDom(vnode) {
@@ -80,27 +74,5 @@ export function updateRangeFromChildren(vnode) {
 		vnode._anchorDom = anchorDom;
 	} else {
 		setOwnedRange(vnode, firstDom, lastDom, anchorDom);
-	}
-
-	vnode = getOwnedVNode(vnode) || vnode;
-	if (!isBackingNode(vnode) && vnode.type === Fragment) {
-		syncBackingFromVNode(vnode, BOUNDARY_FRAGMENT);
-	}
-}
-
-/**
- * Synchronize a boundary-like vnode into its mounted boundary record.
- * @param {import('./internal').VNode} vnode
- */
-export function syncBackingOwnership(vnode) {
-	if (vnode.type === Fragment) {
-		syncBackingFromVNode(vnode, BOUNDARY_FRAGMENT);
-	} else if (vnode._component && vnode._component._childDidSuspend) {
-		let backing = syncBackingFromVNode(vnode, BOUNDARY_SUSPENSE);
-		backing._activeChild = vnode._component._activeChild || NULL;
-		backing._parkedChild = vnode._component._parkedChild || NULL;
-		backing._fallbackChild = vnode._component._fallbackChild || NULL;
-	} else if (vnode._component) {
-		syncBackingFromVNode(vnode, BOUNDARY_COMPONENT);
 	}
 }

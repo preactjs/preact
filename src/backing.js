@@ -271,13 +271,13 @@ export function reuseBacking(newVNode, oldVNode) {
 }
 
 /**
- * Synchronize mounted ownership from a vnode onto its backing node.
+ * Ensure backing exists and set its parent from the vnode's parent backing.
  *
  * @param {VNode} vnode
  * @param {BackingKind} kind
  * @returns {BackingNode}
  */
-export function syncBackingFromVNode(vnode, kind) {
+export function ensureBackingWithParent(vnode, kind) {
 	let backing = ensureBacking(vnode, kind);
 	let parentBacking =
 		vnode._parent && vnode._parent._backing ? vnode._parent._backing : NULL;

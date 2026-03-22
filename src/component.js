@@ -9,11 +9,7 @@ import {
 	replaceOwnedChild,
 	setOwnedRange
 } from './backing';
-import {
-	getFirstDom,
-	syncBackingOwnership,
-	updateRangeFromChildren
-} from './range';
+import { getFirstDom, updateRangeFromChildren } from './range';
 
 /**
  * Base Component class. Provides `setState()` and `forceUpdate()`, which
@@ -134,7 +130,6 @@ export function getDomSibling(vnode, childIndex) {
  */
 export function updateVNodeDomPointers(vnode) {
 	updateRangeFromChildren(vnode);
-	syncBackingOwnership(vnode);
 	if (vnode._component != NULL) {
 		vnode._component.base = getOwnedFirstDom(vnode);
 	}
