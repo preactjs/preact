@@ -1,4 +1,4 @@
-import { NULL } from './constants';
+import { NULL, UNDEFINED } from './constants';
 import { Fragment } from './create-element';
 
 const BACKING_HOST = 0;
@@ -46,6 +46,44 @@ export function getDescriptorChildren(vnode) {
 }
 
 /**
+ * @param {VNode<any> | BackingNode | null} child
+ * @returns {child is BackingNode}
+ */
+export function isBackingNode(child) {
+	return child != NULL && child._kind != NULL && child._vnode !== UNDEFINED;
+}
+
+/**
+ * Resolve a mounted child entry back to its current descriptor vnode.
+ *
+ * @param {VNode<any> | BackingNode | null} child
+ * @returns {VNode<any> | null}
+ */
+export function getOwnedVNode(child) {
+	if (child == NULL) return NULL;
+	return isBackingNode(child) ? child._vnode : child;
+}
+
+/**
+ * Return the current mounted child list normalized back to descriptor vnodes.
+ * This keeps diff/matching logic descriptor-oriented while mounted storage
+ * lives on backing nodes.
+ *
+ * @param {VNode} vnode
+ * @returns {Array<VNode<any> | null> | null}
+ */
+export function getOwnedVChildren(vnode) {
+	let children = getOwnedChildren(vnode);
+	if (children == NULL) return NULL;
+
+	let normalized = new Array(children.length);
+	for (let i = 0; i < children.length; i++) {
+		normalized[i] = getOwnedVNode(children[i]);
+	}
+	return normalized;
+}
+
+/**
  * Return the current mounted child list for this vnode.
  *
  * @param {VNode} vnode
@@ -65,7 +103,10 @@ export function getOwnedChildren(vnode) {
  */
 export function setOwnedChildren(vnode, children) {
 	let backing = ensureOwnedBacking(vnode);
-	backing._children = children;
+	backing._children =
+		children == NULL
+			? NULL
+			: children.map(child => toMountedChildWithParent(child, vnode, backing));
 	return children;
 }
 
@@ -79,7 +120,11 @@ export function setOwnedChildren(vnode, children) {
 export function replaceOwnedChild(vnode, index, child) {
 	let children = getOwnedChildren(vnode);
 	if (children != NULL) {
-		children[index] = child;
+		children[index] = toMountedChildWithParent(
+			child,
+			vnode,
+			ensureOwnedBacking(vnode)
+		);
 	}
 }
 
@@ -137,6 +182,28 @@ function inferBackingKind(vnode) {
 		return BACKING_SUSPENSE;
 	if (vnode._component) return BACKING_COMPONENT;
 	return BACKING_HOST;
+}
+
+function toMountedChildWithParent(child, parentVNode, parentBacking) {
+	if (child == NULL) return child;
+	if (isBackingNode(child)) {
+		child._parent = parentBacking;
+		if (child._vnode != NULL) {
+			child._vnode._parent = parentVNode;
+		}
+		return child;
+	}
+
+	let backing = getMountedBacking(child);
+	if (backing != NULL && backing._kind === BACKING_FRAGMENT) {
+		backing._parent = parentBacking;
+		if (backing._vnode != NULL) {
+			backing._vnode._parent = parentVNode;
+		}
+		return backing;
+	}
+
+	return child;
 }
 
 function ensureOwnedBacking(vnode) {

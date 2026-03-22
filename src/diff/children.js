@@ -11,7 +11,7 @@ import {
 	NULL
 } from '../constants';
 import { isArray } from '../util';
-import { getOwnedChildren, setOwnedChildren, setOwnedRange } from '../backing';
+import { getOwnedVChildren, setOwnedChildren, setOwnedRange } from '../backing';
 import { getDomSibling } from '../component';
 import { getAnchorDom, getFirstDom, getLastDom } from '../range';
 
@@ -93,7 +93,7 @@ export function diffChildren(
 	// as EMPTY_OBJ._children should be `undefined`.
 	/** @type {VNode[]} */
 	let oldChildren =
-		(oldParentVNode && getOwnedChildren(oldParentVNode)) || EMPTY_ARR;
+		(oldParentVNode && getOwnedVChildren(oldParentVNode)) || EMPTY_ARR;
 	let fastResult = diffSingleTextChild(
 		parentDom,
 		renderResult,
@@ -229,7 +229,7 @@ export function diffChildren(
 		// Adjust DOM nodes
 		newDom = getFirstDom(childVNode);
 		lastDom = getLastDom(childVNode);
-		placementFirstDom[i] = newDom != NULL ? getAnchorDom(childVNode) : NULL;
+		placementFirstDom[i] = newDom;
 		if (childVNode.ref && oldVNode.ref != childVNode.ref) {
 			if (oldVNode.ref) {
 				applyRef(oldVNode.ref, NULL, childVNode);
@@ -268,12 +268,13 @@ export function diffChildren(
 			if (childDiffStats != NULL) childDiffStats.forcedPlacement++;
 		}
 
-		if (!needsPlacement && childVNode._flags & INSERT_VNODE && newDom != NULL) {
-			needsPlacement = true;
-		}
 		if (newDom != NULL && placementStatus[i] == PLAN_NONE) {
-			if (childVNode._flags & INSERT_VNODE) {
+			if (matchingIndex == -1) {
+				placementStatus[i] = PLAN_INSERT;
+				needsPlacement = true;
+			} else if (childVNode._flags & INSERT_VNODE) {
 				placementStatus[i] = matchingIndex == -1 ? PLAN_INSERT : PLAN_MOVE;
+				needsPlacement = true;
 			} else {
 				placementStatus[i] = PLAN_RETAIN;
 			}
@@ -424,6 +425,12 @@ function diffStrictUnkeyedChildren(
 	let oldChildrenLength = oldChildren.length;
 	let firstChildDom;
 	let lastChildDom;
+	let matchingIndices = new Array(newChildrenLength);
+	let forcePlacement = new Uint8Array(newChildrenLength);
+	let placementFirstDom = new Array(newChildrenLength);
+	let placementBefore = new Array(newChildrenLength);
+	let placementStatus = new Uint8Array(newChildrenLength);
+	let needsPlacement = false;
 	setOwnedRange(
 		newParentVNode,
 		getFirstDom(newParentVNode),
@@ -476,8 +483,13 @@ function diffStrictUnkeyedChildren(
 			if (typeof childVNode.type != 'function') {
 				childVNode._flags |= INSERT_VNODE;
 			}
+			matchingIndices[i] = -1;
+			forcePlacement[i] = 1;
+			placementStatus[i] = PLAN_INSERT;
+			needsPlacement = true;
 			if (childDiffStats != NULL) childDiffStats.mounts++;
 		} else {
+			matchingIndices[i] = i;
 			if (childDiffStats != NULL) childDiffStats.matchedByIndex++;
 		}
 
@@ -527,8 +539,9 @@ function diffStrictUnkeyedChildren(
 		}
 		if (lastDom != NULL) lastChildDom = lastDom;
 
-		if (oldVNode === EMPTY_OBJ && newDom != NULL) {
-			queuePlacement(childVNode, oldDom, parentDom, hostOps, hostOpCounts);
+		placementFirstDom[i] = newDom;
+		if (newDom != NULL && placementStatus[i] == PLAN_NONE) {
+			placementStatus[i] = oldVNode === EMPTY_OBJ ? PLAN_INSERT : PLAN_RETAIN;
 		}
 
 		if (oldVNode !== EMPTY_OBJ && lastDom) {
@@ -560,6 +573,22 @@ function diffStrictUnkeyedChildren(
 		lastChildDom,
 		getAnchorDom(newParentVNode)
 	);
+	if (needsPlacement) {
+		if (childDiffStats != NULL) childDiffStats.placementPasses++;
+		planPlacements(
+			children,
+			matchingIndices,
+			forcePlacement,
+			placementFirstDom,
+			placementBefore,
+			placementStatus,
+			parentDom,
+			hostOps,
+			oldDom,
+			false,
+			hostOpCounts
+		);
+	}
 	setOwnedChildren(newParentVNode, children);
 	return oldDom;
 }

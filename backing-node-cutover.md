@@ -256,6 +256,150 @@ After core is stable:
 
 Suspense should not be fixed on the mixed vnode/backing model anymore.
 
+## Fragment Boundary Port
+
+Fragment is the first boundary shape that must be ported completely.
+
+The current fragment failures are a signal that the runtime is still relying on
+vnode-era behavior in exactly the wrong places:
+
+- fragment identity is still inferred from flattened descriptor children
+- state preservation/non-preservation is still an emergent side effect of child
+  matching
+- placement still reasons too much about old live DOM instead of mounted
+  boundary ranges
+
+This is not a bugfix-sized problem. It is the first full backing-boundary port.
+
+### Why local fixes are the wrong tool
+
+The current failure shape is architectural:
+
+- nested fragment state tests fail because identity is not owned at the
+  fragment boundary level
+- reorder and "correct place" tests fail because planning still treats fragment
+  descendants as implicit anchors
+- many mutation-log mismatches happen because removed fragment ranges are still
+  involved in placement decisions
+
+If the implementation keeps flattening fragment ownership back into vnode child
+lists, the regressions will continue.
+
+### Fragment target model
+
+After the fragment port:
+
+1. Fragment has a persistent `BackingNode` of kind `Fragment`.
+2. That backing node owns:
+   - `_children`
+   - `_firstDom`
+   - `_lastDom`
+   - `_anchorDom`
+3. Parent traversal and planner input consume the fragment backing node as a
+   mounted child boundary.
+4. Fragment identity decisions are made at the boundary level, not by
+   flattening children and hoping the result preserves the right state.
+5. Fragment placement/removal is always expressed as range operations over the
+   fragment backing node's owned range.
+
+### Architectural rules
+
+These rules should hold before fragment tests are expected to pass:
+
+1. Descriptor flattening is allowed only on the descriptor side.
+   Mounted storage must preserve fragment boundaries explicitly.
+2. A fragment child in a mounted child list is a boundary record, not just its
+   descendants spliced into the parent.
+3. State preservation/non-preservation for fragment nesting changes is a
+   boundary-matching rule, not a side effect of flattened child reuse.
+4. Placement anchors are derived from sibling backing boundaries in final
+   order.
+5. Removed fragment ranges are excluded from anchor planning from the start.
+
+Current constraint discovered during implementation:
+
+- non-`Fragment` components that return an unkeyed `<Fragment>` still rely on
+  descriptor-side flattening as part of today's tested semantics
+- simply preserving every component-returned fragment boundary changes
+  state-preservation rules in the wrong places
+
+So the fragment port must rebuild fragment identity below descriptor-side
+flattening, not by turning off that flattening wholesale.
+
+### Execution plan
+
+#### Step 1: Make fragment backing authoritative
+
+- Create/reuse a fragment backing node whenever a Fragment descriptor is
+  matched.
+- Store the mounted fragment child list only on that backing node.
+- Stop treating `vnode._children` as mounted fragment storage in core paths.
+
+Exit criteria:
+
+- `getOwnedChildren(fragmentVNode)` resolves through the fragment backing only
+- fragment range recomputation is driven by backing-owned children
+
+#### Step 2: Match fragment identity at the boundary level
+
+- Match old/new Fragment descriptors to old/new fragment backing nodes.
+- Preserve state only when the fragment boundary path is preserved.
+- Remount when fragment nesting/path changes in the cases covered by the
+  fragment state tests.
+
+Exit criteria:
+
+- nested fragment state-preservation tests are explainable as explicit boundary
+  rules
+- the runtime no longer depends on flattened child reuse to get those cases
+
+#### Step 3: Plan over fragment boundary siblings
+
+- Build sibling plans from mounted child boundaries, including fragment
+  backings.
+- Each plan entry uses the mounted boundary's range:
+  - `firstDom`
+  - `lastDom`
+  - `anchorDom`
+- Do not plan directly against fragment descendant vnode `_dom` surfaces.
+
+Exit criteria:
+
+- fragment reorder and "correct place" cases use fragment boundary ranges, not
+  descendant DOM guesses
+
+#### Step 4: Remove fragment-specific bridge behavior
+
+- Delete fragment code that copies mounted child/range ownership back onto vnode
+  fields for correctness.
+- Keep vnode fields as compatibility caches at most, not as the authoritative
+  mounted state.
+
+Exit criteria:
+
+- fragment correctness no longer depends on vnode/backing synchronization
+
+### Validation order
+
+Run these in order while porting Fragment:
+
+1. `test/browser/render.test.js`
+2. `test/browser/keys.test.js`
+3. `test/browser/focus.test.js`
+4. `test/browser/lifecycles/componentDidUpdate.test.js`
+5. `test/browser/fragments.test.js`
+
+Do not start fixing Suspense again until fragment boundary ownership is clean.
+
+### Success condition
+
+Fragment port is complete when:
+
+- all core fragment tests pass on backing-owned mounted state
+- fragment identity/state behavior is explained by boundary matching rules
+- placement/removal for fragment subtrees uses mounted ranges only
+- vnode child/range fields are no longer part of fragment correctness
+
 ## File-Level Refactor Plan
 
 ### `src/backing.js`

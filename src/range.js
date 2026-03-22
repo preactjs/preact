@@ -4,6 +4,8 @@ import {
 	getOwnedChildren,
 	getOwnedFirstDom,
 	getOwnedLastDom,
+	getOwnedVNode,
+	isBackingNode,
 	setOwnedRange,
 	syncBackingFromVNode
 } from './backing';
@@ -19,7 +21,7 @@ const BOUNDARY_SUSPENSE = 3;
  * @returns {import('./internal').PreactElement | null}
  */
 export function getFirstDom(vnode) {
-	return getOwnedFirstDom(vnode);
+	return isBackingNode(vnode) ? vnode._firstDom : getOwnedFirstDom(vnode);
 }
 
 /**
@@ -28,7 +30,7 @@ export function getFirstDom(vnode) {
  * @returns {import('./internal').PreactElement | null}
  */
 export function getLastDom(vnode) {
-	return getOwnedLastDom(vnode);
+	return isBackingNode(vnode) ? vnode._lastDom : getOwnedLastDom(vnode);
 }
 
 /**
@@ -37,18 +39,20 @@ export function getLastDom(vnode) {
  * @returns {import('./internal').PreactElement | null}
  */
 export function getAnchorDom(vnode) {
-	return getOwnedAnchorDom(vnode);
+	return isBackingNode(vnode) ? vnode._anchorDom : getOwnedAnchorDom(vnode);
 }
 
 /**
  * Recompute the owned DOM range for a vnode from its rendered children.
- * @param {import('./internal').VNode} vnode
+ * @param {import('./internal').VNode | import('./internal').BackingNode} vnode
  */
 export function updateRangeFromChildren(vnode) {
 	let firstDom = NULL;
 	let lastDom = NULL;
 	let anchorDom = NULL;
-	let children = getOwnedChildren(vnode);
+	let children = isBackingNode(vnode)
+		? vnode._children
+		: getOwnedChildren(vnode);
 
 	if (children != NULL) {
 		for (let i = 0; i < children.length; i++) {
@@ -70,9 +74,16 @@ export function updateRangeFromChildren(vnode) {
 		}
 	}
 
-	setOwnedRange(vnode, firstDom, lastDom, anchorDom);
+	if (isBackingNode(vnode)) {
+		vnode._firstDom = firstDom;
+		vnode._lastDom = lastDom;
+		vnode._anchorDom = anchorDom;
+	} else {
+		setOwnedRange(vnode, firstDom, lastDom, anchorDom);
+	}
 
-	if (vnode.type === Fragment) {
+	vnode = getOwnedVNode(vnode) || vnode;
+	if (!isBackingNode(vnode) && vnode.type === Fragment) {
 		syncBackingFromVNode(vnode, BOUNDARY_FRAGMENT);
 	}
 }

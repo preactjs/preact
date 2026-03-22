@@ -30,6 +30,7 @@ import {
 	clearBacking,
 	getOwnedChildren,
 	getOwnedFirstDom,
+	getOwnedVChildren,
 	reuseBacking,
 	setOwnedChildren,
 	setOwnedRange
@@ -233,7 +234,7 @@ export function diff(
 						getAnchorDom(oldVNode)
 					);
 					setOwnedChildren(newVNode, getOwnedChildren(oldVNode));
-					let reusedChildren = getOwnedChildren(newVNode);
+					let reusedChildren = getOwnedVChildren(newVNode);
 					if (reusedChildren) {
 						reusedChildren.some(vnode => {
 							if (vnode) vnode._parent = newVNode;
@@ -325,8 +326,8 @@ export function diff(
 				childDiffStats
 			);
 
-			let newChildrenList = getOwnedChildren(newVNode);
-			let oldChildrenList = getOwnedChildren(oldVNode);
+			let newChildrenList = getOwnedVChildren(newVNode);
+			let oldChildrenList = getOwnedVChildren(oldVNode);
 			if (c._childDidSuspend && newChildrenList) {
 				c._primaryChild = newChildrenList[0] || NULL;
 				c._fallbackChild = newChildrenList[1] || NULL;
@@ -450,7 +451,7 @@ export function diff(
 function markAsForce(vnode) {
 	if (vnode) {
 		if (vnode._component) vnode._component._force = true;
-		let children = getOwnedChildren(vnode);
+		let children = getOwnedVChildren(vnode);
 		if (children) children.some(markAsForce);
 	}
 }
@@ -470,9 +471,9 @@ export function commitRoot(
 	hostOpCounts,
 	childDiffStats
 ) {
-	flushHostOps(hostOps);
 	flushUnmounts(unmountQueue, root);
 	flushRemoveOps(removeOps);
+	flushHostOps(hostOps);
 
 	for (let i = 0; i < refQueue.length; i++) {
 		applyRef(refQueue[i], refQueue[++i], refQueue[++i]);
@@ -552,11 +553,11 @@ function flushHostOps(hostOps) {
 
 function resolvePlacementAnchor(before, parent) {
 	if (before != NULL && typeof before == 'object' && before.nodeType == NULL) {
-		let dom = getAnchorDom(before);
+		let dom = getAnchorDom(before) || getFirstDom(before);
 		return dom != NULL && dom.parentNode === parent ? dom : NULL;
 	}
 
-	return before;
+	return before != NULL && before.parentNode === parent ? before : NULL;
 }
 
 /**
@@ -682,10 +683,10 @@ function canFastDiffTextChild(
 		(newVNode._flags & HAS_KEY) != 0 ||
 		(newVNode._flags & ARRAY_CHILDREN) != 0 ||
 		(oldVNode._flags & SINGLE_TEXT_CHILD) == 0 ||
-		getOwnedChildren(oldVNode) == NULL ||
-		getOwnedChildren(oldVNode).length !== 1 ||
-		getOwnedChildren(oldVNode)[0] == NULL ||
-		getOwnedChildren(oldVNode)[0].type != NULL
+		getOwnedVChildren(oldVNode) == NULL ||
+		getOwnedVChildren(oldVNode).length !== 1 ||
+		getOwnedVChildren(oldVNode)[0] == NULL ||
+		getOwnedVChildren(oldVNode)[0].type != NULL
 	) {
 		return false;
 	}
@@ -726,7 +727,7 @@ function canBailHostSubtree(
 	if (
 		isHydrating ||
 		excessDomChildren != NULL ||
-		getOwnedChildren(oldVNode) == NULL ||
+		getOwnedVChildren(oldVNode) == NULL ||
 		newProps.dangerouslySetInnerHTML != NULL ||
 		oldProps.dangerouslySetInnerHTML != NULL ||
 		newProps.value !== UNDEFINED ||
@@ -754,7 +755,7 @@ function canBailHostSubtree(
 	return areChildrenStructurallyEqual(
 		newVNode._flags,
 		newChildren,
-		getOwnedChildren(oldVNode)
+		getOwnedVChildren(oldVNode)
 	);
 }
 
@@ -852,7 +853,7 @@ function isStructurallyEqualChild(rawChild, oldVNode) {
 	return areChildrenStructurallyEqual(
 		rawChild._flags,
 		newProps.children,
-		getOwnedChildren(oldVNode) || EMPTY_ARR
+		getOwnedVChildren(oldVNode) || EMPTY_ARR
 	);
 }
 
@@ -1054,7 +1055,7 @@ function diffElementNodes(
 					isHydrating
 				)
 			) {
-				let oldTextVNode = getOwnedChildren(oldVNode)[0];
+				let oldTextVNode = getOwnedVChildren(oldVNode)[0];
 				let textVNode = createTextVNode(newChildren, newVNode);
 				setOwnedChildren(newVNode, [textVNode]);
 				diff(
@@ -1094,7 +1095,7 @@ function diffElementNodes(
 					getLastDom(oldVNode) || dom,
 					getAnchorDom(oldVNode) || dom
 				);
-				let children = getOwnedChildren(newVNode);
+				let children = getOwnedVChildren(newVNode);
 				if (children) {
 					children.some(child => {
 						if (child) child._parent = newVNode;
