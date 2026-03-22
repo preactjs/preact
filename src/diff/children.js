@@ -1094,7 +1094,8 @@ function planPlacements(
 			children,
 			matchingIndices,
 			placementStatus,
-			firstDoms
+			firstDoms,
+			parentDom
 		)
 	) {
 		for (let i = 0; i < children.length; i++) {
@@ -1122,6 +1123,25 @@ function planPlacements(
 	}
 
 	if (!hasKeys) {
+		if (parentDom.nodeType == 9) {
+			for (let i = 0; i < children.length; i++) {
+				let child = children[i];
+				if (child == NULL || firstDoms[i] == NULL) continue;
+
+				if (
+					shouldPlaceChild(
+						placementStatus[i],
+						matchingIndices[i],
+						forcePlacement[i]
+					)
+				) {
+					queuePlacement(child, befores[i], parentDom, hostOps, hostOpCounts);
+				}
+			}
+
+			return;
+		}
+
 		for (let i = children.length; i--; ) {
 			let child = children[i];
 			if (child == NULL || firstDoms[i] == NULL) continue;
@@ -1250,8 +1270,13 @@ function canPlaceFreshFragmentChildrenLeftToRight(
 	children,
 	matchingIndices,
 	placementStatus,
-	firstDoms
+	firstDoms,
+	parentDom
 ) {
+	if (parentDom != NULL && parentDom.localName == 'html') {
+		return false;
+	}
+
 	let sawChild = false;
 	for (let i = 0; i < children.length; i++) {
 		if (children[i] == NULL || firstDoms[i] == NULL) continue;
