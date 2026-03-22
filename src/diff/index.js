@@ -921,9 +921,9 @@ function isStructurallyEqualChild(rawChild, oldVNode, oldBacking) {
 	);
 }
 
-function createTextVNode(value, parentVNode) {
+function createTextVNode(value, parentDepth) {
 	let vnode = createVNode(NULL, value, NULL, NULL, NULL);
-	vnode._depth = parentVNode._depth + 1;
+	vnode._depth = parentDepth + 1;
 	vnode._index = 0;
 	return vnode;
 }
@@ -1123,7 +1123,7 @@ function diffElementNodes(
 			) {
 				let oldTextChild = curBacking._children[0];
 				let oldTextBacking = isBackingNode(oldTextChild) ? oldTextChild : NULL;
-				let textVNode = createTextVNode(newChildren, newVNode);
+				let textVNode = createTextVNode(newChildren, newVNode._depth);
 				let textBacking = diff(
 					// @ts-expect-error
 					newVNode.type == 'template' ? dom.content : dom,

@@ -174,7 +174,7 @@ export function diffChildren(
 	}
 
 	let constructed = constructNewChildrenArray(
-		newParentVNode,
+		parentDepth,
 		renderResult,
 		oldChildren,
 		unmountQueue,
@@ -844,12 +844,12 @@ function queueRemoval(
 }
 
 /**
- * @param {VNode} newParentVNode
+ * @param {number} parentDepth
  * @param {ComponentChildren[]} renderResult
  * @param {(VNode | import('../internal').BackingNode | null)[]} oldChildren
  */
 function constructNewChildrenArray(
-	newParentVNode,
+	parentDepth,
 	renderResult,
 	oldChildren,
 	unmountQueue,
@@ -930,7 +930,7 @@ function constructNewChildrenArray(
 		}
 
 		const skewedIndex = i + skew;
-		childVNode._depth = newParentVNode._depth + 1;
+		childVNode._depth = parentDepth + 1;
 		// Temporarily store the matchingIndex on the _index property so we can pull
 		// out the oldVNode in diffChildren. We'll override this to the VNode's
 		// final index after using this property to get the oldVNode
