@@ -1198,11 +1198,10 @@ function findMatchingIndex(
 		let oldChild = oldChildren[index];
 		let oldVNode = getOwnedVNode(oldChild);
 		if (
-			(oldVNode === NULL && key == null) ||
-			(oldVNode != NULL &&
-				(oldVNode._flags & MATCHED) == 0 &&
-				oldVNode.key == NULL &&
-				sameBoundaryIdentity(childVNode, oldChild, oldVNode))
+			oldVNode != NULL &&
+			(oldVNode._flags & MATCHED) == 0 &&
+			oldVNode.key == NULL &&
+			sameBoundaryIdentity(childVNode, oldChild, oldVNode)
 		) {
 			if (childDiffStats != NULL) childDiffStats.matchedByIndex++;
 			return index;
@@ -1216,10 +1215,9 @@ function findMatchingIndex(
 	const matched = oldVNode != NULL && (oldVNode._flags & MATCHED) == 0;
 
 	if (
-		(oldVNode === NULL && key == null) ||
-		(matched &&
-			key == oldVNode.key &&
-			sameBoundaryIdentity(childVNode, oldChild, oldVNode))
+		matched &&
+		key == oldVNode.key &&
+		sameBoundaryIdentity(childVNode, oldChild, oldVNode)
 	) {
 		if (childDiffStats != NULL) childDiffStats.matchedByIndex++;
 		return skewedIndex;
