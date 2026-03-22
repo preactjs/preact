@@ -365,7 +365,7 @@ export function diffChildren(
 		if (childDiffStats != NULL) childDiffStats.placementPasses++;
 		let placementSeed =
 			newParentVNode.type === Fragment
-				? getDomSibling(parentBacking || newParentVNode)
+				? getDomSibling(parentBacking)
 				: typeof newParentVNode.type == 'function' &&
 					  countNonNullChildren(children) <= 1
 					? placementOldDom
@@ -541,12 +541,7 @@ function diffStrictUnkeyedChildren(
 
 	let children = new Array(newChildrenLength);
 	for (i = 0; i < newChildrenLength; i++) {
-		let childVNode = normalizeChild(
-			renderResult[i],
-			newParentVNode,
-			i,
-			childDiffStats
-		);
+		let childVNode = normalizeChild(renderResult[i], i, childDiffStats);
 		children[i] = childVNode;
 		let oldChild = oldChildren[i];
 		let oldVNode = getOwnedVNode(oldChild);
@@ -778,7 +773,7 @@ function getNormalizedType(child) {
 	return child.type;
 }
 
-function normalizeChild(childVNode, newParentVNode, index, childDiffStats) {
+function normalizeChild(childVNode, index, childDiffStats) {
 	if (
 		childVNode == NULL ||
 		typeof childVNode == 'boolean' ||
