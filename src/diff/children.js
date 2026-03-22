@@ -11,7 +11,7 @@ import {
 	NULL
 } from '../constants';
 import { isArray } from '../util';
-import { getOwnedChildren, setOwnedChildren } from '../backing';
+import { getOwnedChildren, setOwnedChildren, setOwnedRange } from '../backing';
 import { getDomSibling } from '../component';
 import { getAnchorDom, getFirstDom, getLastDom } from '../range';
 
@@ -151,7 +151,7 @@ export function diffChildren(
 		);
 	}
 
-	oldDom = constructNewChildrenArray(
+	let constructed = constructNewChildrenArray(
 		newParentVNode,
 		renderResult,
 		oldChildren,
@@ -163,14 +163,20 @@ export function diffChildren(
 		hostOpCounts,
 		childDiffStats
 	);
-	let children = newParentVNode._children;
+	let children = constructed._children;
+	oldDom = constructed._oldDom;
 	let matchingIndices = new Array(newChildrenLength);
 	let forcePlacement = new Uint8Array(newChildrenLength);
 	let placementFirstDom = new Array(newChildrenLength);
 	let placementBefore = new Array(newChildrenLength);
 	let placementStatus = new Uint8Array(newChildrenLength);
 	let needsPlacement = false;
-	newParentVNode._anchorDom = NULL;
+	setOwnedRange(
+		newParentVNode,
+		getFirstDom(newParentVNode),
+		getLastDom(newParentVNode),
+		NULL
+	);
 
 	for (i = 0; i < newChildrenLength; i++) {
 		childVNode = children[i];
@@ -237,7 +243,12 @@ export function diffChildren(
 
 		if (firstChildDom == NULL && newDom != NULL) {
 			firstChildDom = newDom;
-			newParentVNode._anchorDom = getAnchorDom(childVNode);
+			setOwnedRange(
+				newParentVNode,
+				firstChildDom,
+				lastChildDom,
+				getAnchorDom(childVNode)
+			);
 		}
 		if (lastDom != NULL) {
 			lastChildDom = lastDom;
@@ -275,13 +286,17 @@ export function diffChildren(
 		}
 	}
 
-	newParentVNode._dom = firstChildDom;
-	newParentVNode._lastDom = lastChildDom;
+	setOwnedRange(
+		newParentVNode,
+		firstChildDom,
+		lastChildDom,
+		newParentVNode._anchorDom || NULL
+	);
 
 	if (needsPlacement) {
 		if (childDiffStats != NULL) childDiffStats.placementPasses++;
 		planPlacements(
-			getOwnedChildren(newParentVNode) || children,
+			children,
 			matchingIndices,
 			forcePlacement,
 			placementFirstDom,
@@ -302,6 +317,7 @@ export function diffChildren(
 		}
 	}
 
+	setOwnedChildren(newParentVNode, children);
 	return oldDom;
 }
 
@@ -347,8 +363,8 @@ function diffSingleTextChild(
 	childVNode._parent = newParentVNode;
 	childVNode._depth = newParentVNode._depth + 1;
 	childVNode._index = 0;
-	setOwnedChildren(newParentVNode, [childVNode]);
-	newParentVNode._anchorDom = NULL;
+	let children = [childVNode];
+	setOwnedRange(newParentVNode, NULL, NULL, NULL);
 
 	diff(
 		parentDom,
@@ -369,9 +385,13 @@ function diffSingleTextChild(
 		childDiffStats
 	);
 
-	newParentVNode._dom = getFirstDom(childVNode);
-	newParentVNode._anchorDom = getAnchorDom(childVNode);
-	newParentVNode._lastDom = getLastDom(childVNode);
+	setOwnedRange(
+		newParentVNode,
+		getFirstDom(childVNode),
+		getLastDom(childVNode),
+		getAnchorDom(childVNode)
+	);
+	setOwnedChildren(newParentVNode, children);
 
 	if (oldVNode != NULL) {
 		oldVNode._flags &= ~MATCHED;
@@ -404,10 +424,14 @@ function diffStrictUnkeyedChildren(
 	let oldChildrenLength = oldChildren.length;
 	let firstChildDom;
 	let lastChildDom;
-	newParentVNode._anchorDom = NULL;
+	setOwnedRange(
+		newParentVNode,
+		getFirstDom(newParentVNode),
+		getLastDom(newParentVNode),
+		NULL
+	);
 
-	let children = setOwnedChildren(newParentVNode, new Array(newChildrenLength));
-
+	let children = new Array(newChildrenLength);
 	for (i = 0; i < newChildrenLength; i++) {
 		let childVNode = normalizeChild(
 			renderResult[i],
@@ -494,7 +518,12 @@ function diffStrictUnkeyedChildren(
 
 		if (firstChildDom == NULL && newDom != NULL) {
 			firstChildDom = newDom;
-			newParentVNode._anchorDom = getAnchorDom(childVNode);
+			setOwnedRange(
+				newParentVNode,
+				firstChildDom,
+				lastChildDom,
+				getAnchorDom(childVNode)
+			);
 		}
 		if (lastDom != NULL) lastChildDom = lastDom;
 
@@ -525,8 +554,13 @@ function diffStrictUnkeyedChildren(
 		}
 	}
 
-	newParentVNode._dom = firstChildDom;
-	newParentVNode._lastDom = lastChildDom;
+	setOwnedRange(
+		newParentVNode,
+		firstChildDom,
+		lastChildDom,
+		newParentVNode._anchorDom || NULL
+	);
+	setOwnedChildren(newParentVNode, children);
 	return oldDom;
 }
 
@@ -657,7 +691,7 @@ function constructNewChildrenArray(
 		remainingOldChildren = oldChildrenLength;
 
 	let skew = 0;
-	let children = setOwnedChildren(newParentVNode, new Array(newChildrenLength));
+	let children = new Array(newChildrenLength);
 	for (i = 0; i < newChildrenLength; i++) {
 		// @ts-expect-error We are reusing the childVNode variable to hold both the
 		// pre and post normalized childVNode
@@ -831,7 +865,7 @@ function constructNewChildrenArray(
 		}
 	}
 
-	return oldDom;
+	return { _children: children, _oldDom: oldDom };
 }
 
 /**

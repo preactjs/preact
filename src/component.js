@@ -3,7 +3,7 @@ import { diff, commitRoot } from './diff/index';
 import options from './options';
 import { Fragment } from './create-element';
 import { MODE_HYDRATE, NULL } from './constants';
-import { getOwnedChildren } from './backing';
+import { getOwnedChildren, replaceOwnedChild, setOwnedRange } from './backing';
 import {
 	getFirstDom,
 	syncBackingOwnership,
@@ -191,7 +191,7 @@ function renderComponent(component) {
 		);
 
 		newVNode._original = oldVNode._original;
-		newVNode._parent._children[newVNode._index] = newVNode;
+		replaceOwnedChild(newVNode._parent, newVNode._index, newVNode);
 		commitRoot(
 			commitQueue,
 			newVNode,
@@ -205,6 +205,7 @@ function renderComponent(component) {
 		oldVNode._dom = oldVNode._parent = null;
 		oldVNode._lastDom = null;
 		oldVNode._anchorDom = null;
+		setOwnedRange(oldVNode, null, null, null);
 
 		if (newVNode._dom != oldDom) {
 			updateParentDomPointers(newVNode);

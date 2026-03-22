@@ -1,5 +1,12 @@
 import { NULL } from './constants';
-import { getBacking, getOwnedChildren, syncBackingFromVNode } from './backing';
+import {
+	getOwnedAnchorDom,
+	getOwnedChildren,
+	getOwnedFirstDom,
+	getOwnedLastDom,
+	setOwnedRange,
+	syncBackingFromVNode
+} from './backing';
 import { Fragment } from './create-element';
 
 const BOUNDARY_FRAGMENT = 1;
@@ -12,8 +19,7 @@ const BOUNDARY_SUSPENSE = 3;
  * @returns {import('./internal').PreactElement | null}
  */
 export function getFirstDom(vnode) {
-	let backing = getBacking(vnode);
-	return backing != NULL ? backing._firstDom : vnode._dom;
+	return getOwnedFirstDom(vnode);
 }
 
 /**
@@ -22,8 +28,7 @@ export function getFirstDom(vnode) {
  * @returns {import('./internal').PreactElement | null}
  */
 export function getLastDom(vnode) {
-	let backing = getBacking(vnode);
-	return backing != NULL ? backing._lastDom : vnode._lastDom || vnode._dom;
+	return getOwnedLastDom(vnode);
 }
 
 /**
@@ -32,8 +37,7 @@ export function getLastDom(vnode) {
  * @returns {import('./internal').PreactElement | null}
  */
 export function getAnchorDom(vnode) {
-	let backing = getBacking(vnode);
-	return backing != NULL ? backing._anchorDom : vnode._anchorDom || vnode._dom;
+	return getOwnedAnchorDom(vnode);
 }
 
 /**
@@ -49,8 +53,9 @@ export function updateRangeFromChildren(vnode) {
 	if (children != NULL) {
 		for (let i = 0; i < children.length; i++) {
 			let child = children[i];
-			if (child != NULL && child._dom != NULL) {
-				firstDom = child._dom;
+			let childFirstDom = child != NULL ? getFirstDom(child) : NULL;
+			if (childFirstDom != NULL) {
+				firstDom = childFirstDom;
 				anchorDom = getAnchorDom(child);
 				break;
 			}
@@ -65,9 +70,7 @@ export function updateRangeFromChildren(vnode) {
 		}
 	}
 
-	vnode._dom = firstDom;
-	vnode._lastDom = lastDom;
-	vnode._anchorDom = anchorDom;
+	setOwnedRange(vnode, firstDom, lastDom, anchorDom);
 
 	if (vnode.type === Fragment) {
 		syncBackingFromVNode(vnode, BOUNDARY_FRAGMENT);

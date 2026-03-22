@@ -26,7 +26,14 @@ import {
 	getLastDom,
 	syncBackingOwnership
 } from '../range';
-import { clearBacking, reuseBacking } from '../backing';
+import {
+	clearBacking,
+	getOwnedChildren,
+	getOwnedFirstDom,
+	reuseBacking,
+	setOwnedChildren,
+	setOwnedRange
+} from '../backing';
 
 /**
  * @typedef {import('../internal').ComponentChildren} ComponentChildren
@@ -95,9 +102,13 @@ export function diff(
 	// If the previous diff bailed out, resume creating/hydrating.
 	if (oldVNode._flags & MODE_SUSPENDED) {
 		isHydrating = !!(oldVNode._flags & MODE_HYDRATE);
-		oldDom = newVNode._dom = oldVNode._dom;
-		newVNode._lastDom = oldVNode._lastDom;
-		newVNode._anchorDom = oldVNode._anchorDom;
+		oldDom = getOwnedFirstDom(oldVNode);
+		setOwnedRange(
+			newVNode,
+			oldDom,
+			getLastDom(oldVNode),
+			getAnchorDom(oldVNode)
+		);
 		reuseBacking(newVNode, oldVNode);
 		excessDomChildren = [oldDom];
 	}
@@ -211,11 +222,14 @@ export function diff(
 						c._dirty = false;
 					}
 
-					newVNode._dom = oldVNode._dom;
-					newVNode._lastDom = oldVNode._lastDom;
-					newVNode._anchorDom = oldVNode._anchorDom;
-					newVNode._children = oldVNode._children;
-					newVNode._children.some(vnode => {
+					setOwnedRange(
+						newVNode,
+						getOwnedFirstDom(oldVNode),
+						getLastDom(oldVNode),
+						getAnchorDom(oldVNode)
+					);
+					setOwnedChildren(newVNode, getOwnedChildren(oldVNode));
+					getOwnedChildren(newVNode).some(vnode => {
 						if (vnode) vnode._parent = newVNode;
 					});
 
@@ -304,22 +318,24 @@ export function diff(
 				childDiffStats
 			);
 
-			if (c._childDidSuspend && newVNode._children) {
-				c._primaryChild = newVNode._children[0] || NULL;
-				c._fallbackChild = newVNode._children[1] || NULL;
+			let newChildrenList = getOwnedChildren(newVNode);
+			let oldChildrenList = getOwnedChildren(oldVNode);
+			if (c._childDidSuspend && newChildrenList) {
+				c._primaryChild = newChildrenList[0] || NULL;
+				c._fallbackChild = newChildrenList[1] || NULL;
 				if (
 					!(c.state && c.state._suspended) &&
 					c._pendingSuspensionCount &&
-					oldVNode._children &&
-					oldVNode._children[0]
+					oldChildrenList &&
+					oldChildrenList[0]
 				) {
-					c._parkedChild = oldVNode._children[0];
+					c._parkedChild = oldChildrenList[0];
 				}
 				if (c.state && c.state._suspended) {
 					c._activeChild = c._fallbackChild;
 				} else if (c._pendingSuspensionCount && c._parkedChild) {
-					newVNode._children[0] = c._parkedChild;
-					newVNode._children[1] = NULL;
+					newChildrenList[0] = c._parkedChild;
+					newChildrenList[1] = NULL;
 					c._primaryChild = c._parkedChild;
 					c._fallbackChild = NULL;
 					c._activeChild = c._parkedChild;
@@ -330,11 +346,14 @@ export function diff(
 
 				let activeChild = c._activeChild;
 				if (activeChild != NULL) {
-					newVNode._dom = getFirstDom(activeChild);
-					newVNode._anchorDom = getAnchorDom(activeChild);
-					newVNode._lastDom = getLastDom(activeChild);
+					setOwnedRange(
+						newVNode,
+						getFirstDom(activeChild),
+						getLastDom(activeChild),
+						getAnchorDom(activeChild)
+					);
 				} else {
-					newVNode._dom = newVNode._anchorDom = newVNode._lastDom = NULL;
+					setOwnedRange(newVNode, NULL, NULL, NULL);
 				}
 			}
 
@@ -366,8 +385,7 @@ export function diff(
 					}
 
 					excessDomChildren[excessDomChildren.indexOf(oldDom)] = NULL;
-					newVNode._dom = oldDom;
-					newVNode._lastDom = oldDom;
+					setOwnedRange(newVNode, oldDom, oldDom, oldDom);
 				} else {
 					for (let i = excessDomChildren.length; i--; ) {
 						removeNode(excessDomChildren[i]);
@@ -375,11 +393,14 @@ export function diff(
 					markAsForce(newVNode);
 				}
 			} else {
-				newVNode._dom = oldVNode._dom;
-				newVNode._lastDom = oldVNode._lastDom;
-				newVNode._anchorDom = oldVNode._anchorDom;
+				setOwnedRange(
+					newVNode,
+					getOwnedFirstDom(oldVNode),
+					getLastDom(oldVNode),
+					getAnchorDom(oldVNode)
+				);
 				reuseBacking(newVNode, oldVNode);
-				newVNode._children = oldVNode._children;
+				setOwnedChildren(newVNode, getOwnedChildren(oldVNode));
 				if (!e.then) markAsForce(newVNode);
 			}
 			options._catchError(e, newVNode, oldVNode);
@@ -388,10 +409,13 @@ export function diff(
 		excessDomChildren == NULL &&
 		newVNode._original == oldVNode._original
 	) {
-		newVNode._children = oldVNode._children;
-		newVNode._dom = oldVNode._dom;
-		newVNode._lastDom = oldVNode._lastDom;
-		newVNode._anchorDom = oldVNode._anchorDom;
+		setOwnedChildren(newVNode, getOwnedChildren(oldVNode));
+		setOwnedRange(
+			newVNode,
+			getOwnedFirstDom(oldVNode),
+			getLastDom(oldVNode),
+			getAnchorDom(oldVNode)
+		);
 		reuseBacking(newVNode, oldVNode);
 	} else {
 		oldDom = newVNode._dom = diffElementNodes(
@@ -421,7 +445,8 @@ export function diff(
 function markAsForce(vnode) {
 	if (vnode) {
 		if (vnode._component) vnode._component._force = true;
-		if (vnode._children) vnode._children.some(markAsForce);
+		let children = getOwnedChildren(vnode);
+		if (children) children.some(markAsForce);
 	}
 }
 
@@ -652,10 +677,10 @@ function canFastDiffTextChild(
 		(newVNode._flags & HAS_KEY) != 0 ||
 		(newVNode._flags & ARRAY_CHILDREN) != 0 ||
 		(oldVNode._flags & SINGLE_TEXT_CHILD) == 0 ||
-		oldVNode._children == NULL ||
-		oldVNode._children.length !== 1 ||
-		oldVNode._children[0] == NULL ||
-		oldVNode._children[0].type != NULL
+		getOwnedChildren(oldVNode) == NULL ||
+		getOwnedChildren(oldVNode).length !== 1 ||
+		getOwnedChildren(oldVNode)[0] == NULL ||
+		getOwnedChildren(oldVNode)[0].type != NULL
 	) {
 		return false;
 	}
@@ -696,7 +721,7 @@ function canBailHostSubtree(
 	if (
 		isHydrating ||
 		excessDomChildren != NULL ||
-		oldVNode._children == NULL ||
+		getOwnedChildren(oldVNode) == NULL ||
 		newProps.dangerouslySetInnerHTML != NULL ||
 		oldProps.dangerouslySetInnerHTML != NULL ||
 		newProps.value !== UNDEFINED ||
@@ -724,7 +749,7 @@ function canBailHostSubtree(
 	return areChildrenStructurallyEqual(
 		newVNode._flags,
 		newChildren,
-		oldVNode._children
+		getOwnedChildren(oldVNode)
 	);
 }
 
@@ -822,7 +847,7 @@ function isStructurallyEqualChild(rawChild, oldVNode) {
 	return areChildrenStructurallyEqual(
 		rawChild._flags,
 		newProps.children,
-		oldVNode._children || EMPTY_ARR
+		getOwnedChildren(oldVNode) || EMPTY_ARR
 	);
 }
 
@@ -943,8 +968,7 @@ function diffElementNodes(
 				hostOps.push(OP_SET_TEXT, dom, newProps);
 			}
 		}
-		newVNode._anchorDom = dom;
-		newVNode._lastDom = dom;
+		setOwnedRange(newVNode, dom, dom, dom);
 	} else {
 		// If excessDomChildren was not null, repopulate it with the current element's children:
 		excessDomChildren = excessDomChildren && slice.call(dom.childNodes);
@@ -1005,7 +1029,7 @@ function diffElementNodes(
 				dom.innerHTML = newHtml.__html;
 			}
 
-			newVNode._children = [];
+			setOwnedChildren(newVNode, []);
 		} else {
 			if (oldHtml) dom.innerHTML = '';
 			if (
@@ -1019,9 +1043,9 @@ function diffElementNodes(
 					isHydrating
 				)
 			) {
-				let oldTextVNode = oldVNode._children[0];
+				let oldTextVNode = getOwnedChildren(oldVNode)[0];
 				let textVNode = createTextVNode(newChildren, newVNode);
-				newVNode._children = [textVNode];
+				setOwnedChildren(newVNode, [textVNode]);
 				diff(
 					// @ts-expect-error
 					newVNode.type == 'template' ? dom.content : dom,
@@ -1052,11 +1076,16 @@ function diffElementNodes(
 					isHydrating
 				)
 			) {
-				newVNode._children = oldVNode._children;
-				newVNode._anchorDom = oldVNode._anchorDom || dom;
-				newVNode._lastDom = oldVNode._lastDom || dom;
-				if (newVNode._children) {
-					newVNode._children.some(child => {
+				setOwnedChildren(newVNode, getOwnedChildren(oldVNode));
+				setOwnedRange(
+					newVNode,
+					dom,
+					getLastDom(oldVNode) || dom,
+					getAnchorDom(oldVNode) || dom
+				);
+				let children = getOwnedChildren(newVNode);
+				if (children) {
+					children.some(child => {
 						if (child) child._parent = newVNode;
 					});
 				}
@@ -1076,7 +1105,7 @@ function diffElementNodes(
 					removeOps,
 					excessDomChildren
 						? excessDomChildren[0]
-						: oldVNode._children && getDomSibling(oldVNode, 0),
+						: getOwnedChildren(oldVNode) && getDomSibling(oldVNode, 0),
 					isHydrating,
 					refQueue,
 					hostOpCounts,
@@ -1119,8 +1148,7 @@ function diffElementNodes(
 			}
 		}
 
-		newVNode._anchorDom = dom;
-		newVNode._lastDom = dom;
+		setOwnedRange(newVNode, dom, dom, dom);
 	}
 
 	return dom;
@@ -1182,7 +1210,7 @@ export function unmount(vnode, parentVNode, skipRemove) {
 		r.base = r._parentDom = NULL;
 	}
 
-	if ((r = vnode._children)) {
+	if ((r = getOwnedChildren(vnode))) {
 		for (let i = 0; i < r.length; i++) {
 			if (r[i]) {
 				unmount(
