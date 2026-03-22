@@ -207,9 +207,7 @@ function renderComponent(component) {
 			hostOpCounts,
 			childDiffStats
 		);
-		oldVNode._dom = oldVNode._parent = null;
-		oldVNode._lastDom = null;
-		oldVNode._anchorDom = null;
+		oldVNode._parent = null;
 		setOwnedRange(oldVNode, null, null, null);
 
 		if (getOwnedFirstDom(newVNode) != oldDom) {

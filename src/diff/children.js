@@ -220,7 +220,7 @@ export function diffChildren(
 				matchingIndex != -1 &&
 				childVNode.type == NULL &&
 				oldVNode !== EMPTY_OBJ &&
-				oldVNode._dom != NULL &&
+				getFirstDom(oldVNode) != NULL &&
 				(childVNode._flags & INSERT_VNODE) == 0,
 			hostOpCounts,
 			childDiffStats
@@ -290,7 +290,7 @@ export function diffChildren(
 		newParentVNode,
 		firstChildDom,
 		lastChildDom,
-		newParentVNode._anchorDom || NULL
+		getAnchorDom(newParentVNode)
 	);
 
 	if (needsPlacement) {
@@ -498,7 +498,7 @@ function diffStrictUnkeyedChildren(
 			(newParentVNode._flags & SINGLE_TEXT_CHILD) != 0 &&
 				childVNode.type == NULL &&
 				oldVNode !== EMPTY_OBJ &&
-				oldVNode._dom != NULL,
+				getFirstDom(oldVNode) != NULL,
 			hostOpCounts,
 			childDiffStats
 		);
@@ -558,7 +558,7 @@ function diffStrictUnkeyedChildren(
 		newParentVNode,
 		firstChildDom,
 		lastChildDom,
-		newParentVNode._anchorDom || NULL
+		getAnchorDom(newParentVNode)
 	);
 	setOwnedChildren(newParentVNode, children);
 	return oldDom;

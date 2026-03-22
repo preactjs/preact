@@ -115,6 +115,10 @@ export function diff(
 
 	if ((tmp = options._diff)) tmp(newVNode);
 
+	if (oldVNode !== EMPTY_OBJ) {
+		reuseBacking(newVNode, oldVNode);
+	}
+
 	outer: if (typeof newType == 'function') {
 		try {
 			let c, isNew, oldProps, oldState, snapshot, clearProcessingException;
@@ -228,7 +232,6 @@ export function diff(
 						getLastDom(oldVNode),
 						getAnchorDom(oldVNode)
 					);
-					reuseBacking(newVNode, oldVNode);
 					setOwnedChildren(newVNode, getOwnedChildren(oldVNode));
 					let reusedChildren = getOwnedChildren(newVNode);
 					if (reusedChildren) {
@@ -397,7 +400,6 @@ export function diff(
 					markAsForce(newVNode);
 				}
 			} else {
-				reuseBacking(newVNode, oldVNode);
 				setOwnedRange(
 					newVNode,
 					getOwnedFirstDom(oldVNode),
@@ -413,7 +415,6 @@ export function diff(
 		excessDomChildren == NULL &&
 		newVNode._original == oldVNode._original
 	) {
-		reuseBacking(newVNode, oldVNode);
 		setOwnedChildren(newVNode, getOwnedChildren(oldVNode));
 		setOwnedRange(
 			newVNode,

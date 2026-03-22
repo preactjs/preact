@@ -25,6 +25,17 @@ export function getBacking(vnode) {
 }
 
 /**
+ * Return the mounted backing node referenced by this descriptor, even if this
+ * vnode is no longer the backing node's current descriptor.
+ *
+ * @param {VNode} vnode
+ * @returns {BackingNode | null}
+ */
+export function getMountedBacking(vnode) {
+	return vnode._backing || NULL;
+}
+
+/**
  * Return the descriptor child list for this vnode.
  *
  * @param {VNode} vnode
@@ -41,8 +52,8 @@ export function getDescriptorChildren(vnode) {
  * @returns {Array<VNode<any> | BackingNode | null> | null}
  */
 export function getOwnedChildren(vnode) {
-	let backing = getBacking(vnode);
-	return backing != NULL ? backing._children : vnode._children;
+	let backing = getMountedBacking(vnode);
+	return backing != NULL ? backing._children : NULL;
 }
 
 /**
@@ -79,8 +90,8 @@ export function replaceOwnedChild(vnode, index, child) {
  * @returns {import('./internal').PreactElement | null}
  */
 export function getOwnedFirstDom(vnode) {
-	let backing = getBacking(vnode);
-	return backing != NULL ? backing._firstDom : vnode._dom;
+	let backing = getMountedBacking(vnode);
+	return backing != NULL ? backing._firstDom : NULL;
 }
 
 /**
@@ -90,8 +101,8 @@ export function getOwnedFirstDom(vnode) {
  * @returns {import('./internal').PreactElement | null}
  */
 export function getOwnedLastDom(vnode) {
-	let backing = getBacking(vnode);
-	return backing != NULL ? backing._lastDom : vnode._lastDom || vnode._dom;
+	let backing = getMountedBacking(vnode);
+	return backing != NULL ? backing._lastDom : NULL;
 }
 
 /**
@@ -101,8 +112,8 @@ export function getOwnedLastDom(vnode) {
  * @returns {import('./internal').PreactElement | null}
  */
 export function getOwnedAnchorDom(vnode) {
-	let backing = getBacking(vnode);
-	return backing != NULL ? backing._anchorDom : vnode._anchorDom || vnode._dom;
+	let backing = getMountedBacking(vnode);
+	return backing != NULL ? backing._anchorDom : NULL;
 }
 
 /**
@@ -114,10 +125,6 @@ export function getOwnedAnchorDom(vnode) {
  * @param {import('./internal').PreactElement | null} anchorDom
  */
 export function setOwnedRange(vnode, firstDom, lastDom, anchorDom) {
-	vnode._dom = firstDom;
-	vnode._lastDom = lastDom;
-	vnode._anchorDom = anchorDom;
-
 	let backing = ensureOwnedBacking(vnode);
 	backing._firstDom = firstDom;
 	backing._lastDom = lastDom;
@@ -209,12 +216,6 @@ export function syncBackingFromVNode(vnode, kind) {
 		vnode._parent && vnode._parent._backing ? vnode._parent._backing : NULL;
 
 	backing._parent = parentBacking;
-	if (backing._children == NULL) backing._children = vnode._children;
-	if (backing._firstDom == NULL) backing._firstDom = vnode._dom || NULL;
-	if (backing._lastDom == NULL)
-		backing._lastDom = vnode._lastDom || vnode._dom || NULL;
-	if (backing._anchorDom == NULL)
-		backing._anchorDom = vnode._anchorDom || vnode._dom || NULL;
 
 	return backing;
 }
