@@ -168,6 +168,7 @@ export function diffChildren(
 	let matchingIndices = new Array(newChildrenLength);
 	let forcePlacement = new Uint8Array(newChildrenLength);
 	let placementFirstDom = new Array(newChildrenLength);
+	let placementAnchors = new Array(newChildrenLength);
 	let placementBefore = new Array(newChildrenLength);
 	let placementStatus = new Uint8Array(newChildrenLength);
 	let needsPlacement = false;
@@ -229,7 +230,18 @@ export function diffChildren(
 		// Adjust DOM nodes
 		newDom = getFirstDom(childVNode);
 		lastDom = getLastDom(childVNode);
-		placementFirstDom[i] = newDom;
+		placementFirstDom[i] =
+			newDom != NULL
+				? newDom
+				: matchingIndex != -1 && oldVNode !== EMPTY_OBJ
+					? getFirstDom(oldVNode)
+					: NULL;
+		placementAnchors[i] =
+			newDom != NULL
+				? childVNode
+				: matchingIndex != -1 && oldVNode !== EMPTY_OBJ
+					? oldVNode
+					: NULL;
 		if (childVNode.ref && oldVNode.ref != childVNode.ref) {
 			if (oldVNode.ref) {
 				applyRef(oldVNode.ref, NULL, childVNode);
@@ -301,6 +313,7 @@ export function diffChildren(
 			matchingIndices,
 			forcePlacement,
 			placementFirstDom,
+			placementAnchors,
 			placementBefore,
 			placementStatus,
 			parentDom,
@@ -428,6 +441,7 @@ function diffStrictUnkeyedChildren(
 	let matchingIndices = new Array(newChildrenLength);
 	let forcePlacement = new Uint8Array(newChildrenLength);
 	let placementFirstDom = new Array(newChildrenLength);
+	let placementAnchors = new Array(newChildrenLength);
 	let placementBefore = new Array(newChildrenLength);
 	let placementStatus = new Uint8Array(newChildrenLength);
 	let needsPlacement = false;
@@ -539,7 +553,14 @@ function diffStrictUnkeyedChildren(
 		}
 		if (lastDom != NULL) lastChildDom = lastDom;
 
-		placementFirstDom[i] = newDom;
+		placementFirstDom[i] =
+			newDom != NULL
+				? newDom
+				: oldVNode !== EMPTY_OBJ
+					? getFirstDom(oldVNode)
+					: NULL;
+		placementAnchors[i] =
+			newDom != NULL ? childVNode : oldVNode !== EMPTY_OBJ ? oldVNode : NULL;
 		if (newDom != NULL && placementStatus[i] == PLAN_NONE) {
 			placementStatus[i] = oldVNode === EMPTY_OBJ ? PLAN_INSERT : PLAN_RETAIN;
 		}
@@ -580,6 +601,7 @@ function diffStrictUnkeyedChildren(
 			matchingIndices,
 			forcePlacement,
 			placementFirstDom,
+			placementAnchors,
 			placementBefore,
 			placementStatus,
 			parentDom,
@@ -913,6 +935,7 @@ function planPlacements(
 	matchingIndices,
 	forcePlacement,
 	firstDoms,
+	anchors,
 	befores,
 	placementStatus,
 	parentDom,
@@ -921,7 +944,7 @@ function planPlacements(
 	hasKeys,
 	hostOpCounts
 ) {
-	computePlacementBefores(firstDoms, befores, oldDom, children);
+	computePlacementBefores(firstDoms, anchors, befores, oldDom);
 
 	if (children.length === 1) {
 		let child = children[0];
@@ -982,11 +1005,11 @@ function planPlacements(
 	}
 }
 
-function computePlacementBefores(firstDoms, befores, oldDom, children) {
+function computePlacementBefores(firstDoms, anchors, befores, oldDom) {
 	let before = oldDom;
 	for (let i = firstDoms.length; i--; ) {
 		befores[i] = before;
-		if (firstDoms[i] != NULL) before = children[i];
+		if (firstDoms[i] != NULL) before = anchors[i];
 	}
 }
 
