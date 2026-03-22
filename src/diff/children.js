@@ -95,13 +95,12 @@ export function diffChildren(
 		matchingIndex;
 	let parentFlags = newParentVNode._flags;
 	let parentType = newParentVNode.type;
-	let parentDepth =
-		parentBacking != NULL ? parentBacking._depth : newParentVNode._depth;
 	let parentIsFragment = parentType === Fragment;
 	let parentIsComponent = typeof parentType == 'function';
 	let parentHasSingleTextChild = (parentFlags & SINGLE_TEXT_CHILD) != 0;
 	let parentHasKeys = (parentFlags & HAS_KEY) != 0;
 	let parentHasRawArrayChildren = (parentFlags & HAS_RAW_ARRAY_CHILDREN) != 0;
+	let parentDepth = parentBacking != NULL ? parentBacking._depth : 0;
 	let hadMountedChildren =
 		parentBacking != NULL && parentBacking._children != NULL;
 
@@ -111,7 +110,7 @@ export function diffChildren(
 	let fastResult = diffSingleTextChild(
 		parentDom,
 		renderResult,
-		parentDepth,
+		newParentVNode,
 		parentHasSingleTextChild,
 		parentHasKeys,
 		oldChildren,
@@ -153,7 +152,7 @@ export function diffChildren(
 		return diffStrictUnkeyedChildren(
 			parentDom,
 			renderResult,
-			parentDepth,
+			newParentVNode,
 			parentIsFragment,
 			parentHasSingleTextChild,
 			hadMountedChildren,
@@ -175,7 +174,7 @@ export function diffChildren(
 	}
 
 	let constructed = constructNewChildrenArray(
-		parentDepth,
+		newParentVNode,
 		renderResult,
 		oldChildren,
 		unmountQueue,
@@ -418,7 +417,7 @@ export function diffChildren(
 function diffSingleTextChild(
 	parentDom,
 	renderResult,
-	parentDepth,
+	newParentVNode,
 	parentHasSingleTextChild,
 	parentHasKeys,
 	oldChildren,
@@ -457,7 +456,7 @@ function diffSingleTextChild(
 	}
 
 	let childVNode = createVNode(NULL, value, NULL, NULL, NULL);
-	childVNode._depth = parentDepth + 1;
+	childVNode._parent = newParentVNode;
 	childVNode._index = 0;
 	let children = [childVNode];
 	if (parentBacking != NULL) {
@@ -517,7 +516,7 @@ function diffSingleTextChild(
 function diffStrictUnkeyedChildren(
 	parentDom,
 	renderResult,
-	parentDepth,
+	newParentVNode,
 	parentIsFragment,
 	parentHasSingleTextChild,
 	hadMountedChildren,
@@ -537,6 +536,7 @@ function diffStrictUnkeyedChildren(
 	parentBacking
 ) {
 	let i;
+	let parentDepth = parentBacking != NULL ? parentBacking._depth : 0;
 	let newChildrenLength = renderResult.length;
 	let oldChildrenLength = oldChildren.length;
 	let firstChildDom;
@@ -574,7 +574,7 @@ function diffStrictUnkeyedChildren(
 			continue;
 		}
 
-		childVNode._depth = parentDepth + 1;
+		childVNode._parent = newParentVNode;
 		childVNode._index = i;
 
 		let reused =
@@ -815,7 +815,10 @@ function normalizeChild(childVNode, index, childDiffStats) {
 			NULL,
 			NULL
 		);
-	} else if (childVNode.constructor === UNDEFINED && childVNode._depth > 0) {
+	} else if (
+		childVNode.constructor === UNDEFINED &&
+		childVNode._parent != NULL
+	) {
 		if (childDiffStats != NULL) childDiffStats.clonedVNode++;
 		childVNode = createVNode(
 			childVNode.type,
@@ -851,12 +854,12 @@ function queueRemoval(
 }
 
 /**
- * @param {number} parentDepth
+ * @param {VNode} newParentVNode
  * @param {ComponentChildren[]} renderResult
  * @param {(VNode | import('../internal').BackingNode | null)[]} oldChildren
  */
 function constructNewChildrenArray(
-	parentDepth,
+	newParentVNode,
 	renderResult,
 	oldChildren,
 	unmountQueue,
@@ -919,7 +922,10 @@ function constructNewChildrenArray(
 				NULL
 			);
 			if (childDiffStats != NULL) childDiffStats.normalizedArray++;
-		} else if (childVNode.constructor === UNDEFINED && childVNode._depth > 0) {
+		} else if (
+			childVNode.constructor === UNDEFINED &&
+			childVNode._parent != NULL
+		) {
 			// VNode is already in use, clone it. This can happen in the following
 			// scenario:
 			//   const reuse = <div />
@@ -937,7 +943,7 @@ function constructNewChildrenArray(
 		}
 
 		const skewedIndex = i + skew;
-		childVNode._depth = parentDepth + 1;
+		childVNode._parent = newParentVNode;
 		// Temporarily store the matchingIndex on the _index property so we can pull
 		// out the oldVNode in diffChildren. We'll override this to the VNode's
 		// final index after using this property to get the oldVNode

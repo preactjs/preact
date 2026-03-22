@@ -477,7 +477,6 @@ export function diff(
 
 	// Keep vnode DOM mirrors in sync while backing nodes remain the source of truth.
 	if (curBacking != NULL) {
-		newVNode._depth = curBacking._depth;
 		newVNode._dom = curBacking._firstDom;
 		newVNode._lastDom = curBacking._lastDom;
 		newVNode._anchorDom = curBacking._anchorDom;
@@ -713,7 +712,7 @@ const OP_INSERT_NODE = 2;
 const OP_MOVE_RANGE = 3;
 
 function cloneNode(node) {
-	if (typeof node != 'object' || node == NULL || node._depth > 0) {
+	if (typeof node != 'object' || node == NULL || node._parent != NULL) {
 		return node;
 	}
 
@@ -926,9 +925,9 @@ function isStructurallyEqualChild(rawChild, oldVNode, oldBacking) {
 	);
 }
 
-function createTextVNode(value, parentDepth) {
+function createTextVNode(value, parentVNode) {
 	let vnode = createVNode(NULL, value, NULL, NULL, NULL);
-	vnode._depth = parentDepth + 1;
+	vnode._parent = parentVNode;
 	vnode._index = 0;
 	return vnode;
 }
@@ -1128,7 +1127,7 @@ function diffElementNodes(
 			) {
 				let oldTextChild = curBacking._children[0];
 				let oldTextBacking = isBackingNode(oldTextChild) ? oldTextChild : NULL;
-				let textVNode = createTextVNode(newChildren, curBacking._depth);
+				let textVNode = createTextVNode(newChildren, newVNode);
 				let textBacking = diff(
 					// @ts-expect-error
 					newVNode.type == 'template' ? dom.content : dom,

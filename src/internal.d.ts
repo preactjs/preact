@@ -191,7 +191,6 @@ export interface VNode<P = {}> extends preact.VNode<P> {
 	ref?: Ref<any> | null;
 	_children: Array<VNode<any>> | null;
 	_parent: VNode | null;
-	_depth: number | null;
 	/**
 	 * The [first (for Fragments)] DOM child of a VNode
 	 */

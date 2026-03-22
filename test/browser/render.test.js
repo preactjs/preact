@@ -2020,7 +2020,7 @@ describe('render()', () => {
 					return { text: this.text };
 				}
 			},
-			_depth: { configurable: true, value: 1 }
+			_parent: { configurable: true, value: {} }
 		});
 
 		const test = new Test('hello world');
