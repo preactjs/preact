@@ -3,11 +3,13 @@ import options from './options';
 import {
 	ARRAY_CHILDREN,
 	HAS_KEY,
+	HAS_RAW_ARRAY_CHILDREN,
 	NULL,
 	SINGLE_CHILD,
 	SINGLE_TEXT_CHILD,
 	UNDEFINED
 } from './constants';
+import { isArray } from './util';
 
 let vnodeId = 0;
 
@@ -128,14 +130,57 @@ export function getChildFlags(argLength, rawChildren, normalizedChildren) {
 			flags |= SINGLE_CHILD;
 			if (isTextLike(normalizedChildren[0])) flags |= SINGLE_TEXT_CHILD;
 		}
+		if (hasRawArrayChildren(normalizedChildren)) {
+			flags |= HAS_RAW_ARRAY_CHILDREN;
+		}
 		return flags;
 	}
 
 	if (argLength > 2 && rawChildren != NULL) {
 		let flags = SINGLE_CHILD;
 		if (isTextLike(rawChildren)) flags |= SINGLE_TEXT_CHILD;
+		else if (isArray(rawChildren)) flags |= HAS_RAW_ARRAY_CHILDREN;
 		return flags;
 	}
 
 	return 0;
+}
+
+export function getNormalizedChildFlags(children) {
+	if (isArray(children)) {
+		let flags = ARRAY_CHILDREN;
+		if (children.length === 1) {
+			flags |= SINGLE_CHILD;
+			if (isTextLike(children[0])) flags |= SINGLE_TEXT_CHILD;
+		}
+		if (hasRawArrayChildren(children)) flags |= HAS_RAW_ARRAY_CHILDREN;
+		return flags;
+	}
+
+	if (children != NULL) {
+		let flags = SINGLE_CHILD;
+		if (isTextLike(children)) flags |= SINGLE_TEXT_CHILD;
+		return flags;
+	}
+
+	return 0;
+}
+
+export function setNormalizedChildFlags(vnode, children) {
+	vnode._flags =
+		(vnode._flags &
+			~(
+				ARRAY_CHILDREN |
+				SINGLE_CHILD |
+				SINGLE_TEXT_CHILD |
+				HAS_RAW_ARRAY_CHILDREN
+			)) |
+		getNormalizedChildFlags(children);
+}
+
+function hasRawArrayChildren(children) {
+	for (let i = 0; i < children.length; i++) {
+		if (isArray(children[i])) return true;
+	}
+	return false;
 }

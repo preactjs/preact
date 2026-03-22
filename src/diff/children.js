@@ -4,6 +4,7 @@ import {
 	EMPTY_OBJ,
 	EMPTY_ARR,
 	HAS_KEY,
+	HAS_RAW_ARRAY_CHILDREN,
 	INSERT_VNODE,
 	MATCHED,
 	SINGLE_TEXT_CHILD,
@@ -125,6 +126,7 @@ export function diffChildren(
 		!hasKeys &&
 		canDiffStrictUnkeyedChildren(
 			parentDom,
+			newParentVNode,
 			renderResult,
 			oldChildren,
 			excessDomChildren,
@@ -617,12 +619,18 @@ function diffStrictUnkeyedChildren(
 
 function canDiffStrictUnkeyedChildren(
 	parentDom,
+	newParentVNode,
 	renderResult,
 	oldChildren,
 	excessDomChildren,
 	isHydrating
 ) {
-	if (isHydrating || excessDomChildren != NULL || parentDom.nodeType == 9) {
+	if (
+		isHydrating ||
+		excessDomChildren != NULL ||
+		parentDom.nodeType == 9 ||
+		(newParentVNode._flags & HAS_RAW_ARRAY_CHILDREN) != 0
+	) {
 		return false;
 	}
 	return true;

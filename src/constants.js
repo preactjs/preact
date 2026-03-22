@@ -14,6 +14,8 @@ export const ARRAY_CHILDREN = 1 << 3;
 export const SINGLE_CHILD = 1 << 4;
 /** Indicates a VNode has exactly one text-like child */
 export const SINGLE_TEXT_CHILD = 1 << 6;
+/** Indicates a VNode's direct render result includes raw array children */
+export const HAS_RAW_ARRAY_CHILDREN = 1 << 8;
 
 /** Reset all mode flags */
 export const RESET_MODE = ~(MODE_HYDRATE | MODE_SUSPENDED);

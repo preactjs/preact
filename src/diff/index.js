@@ -15,7 +15,11 @@ import {
 	XHTML_NAMESPACE
 } from '../constants';
 import { BaseComponent, getDomSibling } from '../component';
-import { createVNode, Fragment } from '../create-element';
+import {
+	createVNode,
+	Fragment,
+	setNormalizedChildFlags
+} from '../create-element';
 import { diffChildren } from './children';
 import { setProperty } from './props';
 import { assign, isArray, removeNode, slice } from '../util';
@@ -306,6 +310,10 @@ export function diff(
 				tmp != NULL && tmp.type === Fragment && tmp.key == NULL
 					? cloneNode(tmp.props.children)
 					: tmp;
+			setNormalizedChildFlags(
+				newVNode,
+				isArray(renderResult) ? renderResult : [renderResult]
+			);
 
 			oldDom = diffChildren(
 				parentDom,
@@ -1102,6 +1110,10 @@ function diffElementNodes(
 					});
 				}
 			} else {
+				setNormalizedChildFlags(
+					newVNode,
+					isArray(newChildren) ? newChildren : [newChildren]
+				);
 				diffChildren(
 					// @ts-expect-error
 					newVNode.type == 'template' ? dom.content : dom,
