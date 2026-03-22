@@ -91,14 +91,20 @@ export function render(vnode, parent, callback) {
 	preactRender(vnode, parent);
 	if (typeof callback == 'function') callback();
 
-	return vnode ? vnode._component : null;
+	let backing = parent._backing;
+	return backing && backing._children && backing._children[0]
+		? backing._children[0]._component || null
+		: null;
 }
 
 export function hydrate(vnode, parent, callback) {
 	preactHydrate(vnode, parent);
 	if (typeof callback == 'function') callback();
 
-	return vnode ? vnode._component : null;
+	let backing = parent._backing;
+	return backing && backing._children && backing._children[0]
+		? backing._children[0]._component || null
+		: null;
 }
 
 let oldEventHook = options.event;
