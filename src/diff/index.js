@@ -1084,7 +1084,6 @@ function diffElementNodes(
 			) {
 				let oldTextVNode = getOwnedVNode(getOwnedChildren(oldVNode)[0]);
 				let textVNode = createTextVNode(newChildren, newVNode);
-				setOwnedChildren(newVNode, [textVNode]);
 				diff(
 					// @ts-expect-error
 					newVNode.type == 'template' ? dom.content : dom,
@@ -1104,6 +1103,9 @@ function diffElementNodes(
 					hostOpCounts,
 					childDiffStats
 				);
+				// Store the backing node, not the vnode
+				let textChildren = [textVNode._backing || textVNode];
+				setOwnedChildren(newVNode, textChildren);
 			} else if (
 				canBailHostSubtree(
 					newVNode,

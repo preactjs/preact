@@ -96,18 +96,39 @@ export function getOwnedChildren(vnode) {
 
 /**
  * Update the mounted child list for this vnode's current backing node.
+ * Children may be BackingNodes or VNodes. VNodes without backings are
+ * stored as-is (host elements during first render).
  *
  * @param {VNode} vnode
  * @param {Array<VNode<any> | BackingNode | null> | null} children
- * @returns {Array<VNode<any> | BackingNode | null> | null}
  */
 export function setOwnedChildren(vnode, children) {
 	let backing = ensureOwnedBacking(vnode);
-	backing._children =
-		children == NULL
-			? NULL
-			: children.map(child => toMountedChildWithParent(child, vnode, backing));
-	return children;
+	if (children != NULL) {
+		for (let i = 0; i < children.length; i++) {
+			let child = children[i];
+			if (child == NULL) continue;
+			if (isBackingNode(child)) {
+				child._parent = backing;
+				if (child._vnode != NULL) {
+					child._vnode._parent = vnode;
+				}
+			} else {
+				// VNode child — promote Fragment backings
+				let childBacking = getMountedBacking(child);
+				if (childBacking != NULL && childBacking._kind === BACKING_FRAGMENT) {
+					childBacking._parent = backing;
+					if (childBacking._vnode != NULL) {
+						childBacking._vnode._parent = vnode;
+					}
+					children[i] = childBacking;
+				} else {
+					child._parent = vnode;
+				}
+			}
+		}
+	}
+	backing._children = children;
 }
 
 /**
@@ -118,13 +139,23 @@ export function setOwnedChildren(vnode, children) {
  * @param {VNode<any> | BackingNode | null} child
  */
 export function replaceOwnedChild(vnode, index, child) {
-	let children = getOwnedChildren(vnode);
+	let backing = ensureOwnedBacking(vnode);
+	let children = backing._children;
 	if (children != NULL) {
-		children[index] = toMountedChildWithParent(
-			child,
-			vnode,
-			ensureOwnedBacking(vnode)
-		);
+		if (child != NULL && isBackingNode(child)) {
+			child._parent = backing;
+			if (child._vnode != NULL) {
+				child._vnode._parent = vnode;
+			}
+		} else if (child != NULL) {
+			let childBacking = getMountedBacking(child);
+			if (childBacking != NULL && childBacking._kind === BACKING_FRAGMENT) {
+				childBacking._parent = backing;
+				child = childBacking;
+			}
+			if (child._parent !== undefined) child._parent = vnode;
+		}
+		children[index] = child;
 	}
 }
 
@@ -182,28 +213,6 @@ function inferBackingKind(vnode) {
 		return BACKING_SUSPENSE;
 	if (vnode._component) return BACKING_COMPONENT;
 	return BACKING_HOST;
-}
-
-function toMountedChildWithParent(child, parentVNode, parentBacking) {
-	if (child == NULL) return child;
-	if (isBackingNode(child)) {
-		child._parent = parentBacking;
-		if (child._vnode != NULL) {
-			child._vnode._parent = parentVNode;
-		}
-		return child;
-	}
-
-	let backing = getMountedBacking(child);
-	if (backing != NULL && backing._kind === BACKING_FRAGMENT) {
-		backing._parent = parentBacking;
-		if (backing._vnode != NULL) {
-			backing._vnode._parent = parentVNode;
-		}
-		return backing;
-	}
-
-	return child;
 }
 
 function ensureOwnedBacking(vnode) {

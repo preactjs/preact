@@ -239,6 +239,12 @@ export function diffChildren(
 			childDiffStats
 		);
 
+		// After diff, promote child to its backing node in the mounted child list
+		let childBacking = childVNode._backing;
+		if (childBacking != NULL) {
+			children[i] = childBacking;
+		}
+
 		// Adjust DOM nodes
 		newDom = getFirstDom(childVNode);
 		lastDom = getLastDom(childVNode);
@@ -444,6 +450,11 @@ function diffSingleTextChild(
 		childDiffStats
 	);
 
+	// Promote child to its backing node
+	if (childVNode._backing != NULL) {
+		children[0] = childVNode._backing;
+	}
+
 	setOwnedRange(
 		newParentVNode,
 		getFirstDom(childVNode),
@@ -573,6 +584,12 @@ function diffStrictUnkeyedChildren(
 			hostOpCounts,
 			childDiffStats
 		);
+
+		// After diff, promote child to its backing node
+		let childBacking = childVNode._backing;
+		if (childBacking != NULL) {
+			children[i] = childBacking;
+		}
 
 		let newDom = getFirstDom(childVNode);
 		let lastDom = getLastDom(childVNode);
