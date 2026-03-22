@@ -56,6 +56,7 @@ export const enum BackingKind {
 
 export interface BackingNode {
 	_parent: BackingNode | null;
+	_depth: number;
 	_vnode: VNode | null;
 	_children: Array<VNode<any> | BackingNode | null> | null;
 	_firstDom: PreactElement | null;

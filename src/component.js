@@ -268,7 +268,7 @@ export function enqueueRender(c) {
  * @param {import('./internal').Component} a
  * @param {import('./internal').Component} b
  */
-const depthSort = (a, b) => a._vnode._depth - b._vnode._depth;
+const depthSort = (a, b) => a._backing._depth - b._backing._depth;
 
 /** Flush the render queue by rerendering all queued components */
 function process() {

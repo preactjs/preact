@@ -113,6 +113,10 @@ export function diff(
 	if (curBacking != NULL) {
 		curBacking._vnode = newVNode;
 	}
+	if (curBacking != NULL) {
+		curBacking._depth =
+			curBacking._parent != NULL ? curBacking._parent._depth + 1 : 0;
+	}
 
 	outer: if (typeof newType == 'function') {
 		try {
@@ -473,6 +477,7 @@ export function diff(
 
 	// Keep vnode DOM mirrors in sync while backing nodes remain the source of truth.
 	if (curBacking != NULL) {
+		newVNode._depth = curBacking._depth;
 		newVNode._dom = curBacking._firstDom;
 		newVNode._lastDom = curBacking._lastDom;
 		newVNode._anchorDom = curBacking._anchorDom;
@@ -1123,7 +1128,7 @@ function diffElementNodes(
 			) {
 				let oldTextChild = curBacking._children[0];
 				let oldTextBacking = isBackingNode(oldTextChild) ? oldTextChild : NULL;
-				let textVNode = createTextVNode(newChildren, newVNode._depth);
+				let textVNode = createTextVNode(newChildren, curBacking._depth);
 				let textBacking = diff(
 					// @ts-expect-error
 					newVNode.type == 'template' ? dom.content : dom,

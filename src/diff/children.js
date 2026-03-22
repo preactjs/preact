@@ -95,7 +95,8 @@ export function diffChildren(
 		matchingIndex;
 	let parentFlags = newParentVNode._flags;
 	let parentType = newParentVNode.type;
-	let parentDepth = newParentVNode._depth;
+	let parentDepth =
+		parentBacking != NULL ? parentBacking._depth : newParentVNode._depth;
 	let parentIsFragment = parentType === Fragment;
 	let parentIsComponent = typeof parentType == 'function';
 	let parentHasSingleTextChild = (parentFlags & SINGLE_TEXT_CHILD) != 0;
@@ -230,6 +231,9 @@ export function diffChildren(
 			matchingIndex != -1 && isBackingNode(oldChildren[matchingIndex])
 				? oldChildren[matchingIndex]
 				: NULL;
+		if (parentBacking != NULL && oldChildBacking != NULL) {
+			oldChildBacking._parent = parentBacking;
+		}
 
 		// Eagerly create backing with parent set for error boundary traversal
 		if (parentBacking != NULL && oldChildBacking == NULL) {
@@ -604,6 +608,9 @@ function diffStrictUnkeyedChildren(
 			oldVNode !== EMPTY_OBJ && isBackingNode(oldChildren[i])
 				? oldChildren[i]
 				: NULL;
+		if (parentBacking != NULL && oldChildBacking != NULL) {
+			oldChildBacking._parent = parentBacking;
+		}
 
 		// Eagerly create backing with parent set for error boundary traversal
 		if (parentBacking != NULL && oldChildBacking == NULL) {

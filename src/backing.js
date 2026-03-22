@@ -40,6 +40,7 @@ export function getOwnedVNode(child) {
 export function createBacking(vnode, kind) {
 	return {
 		_parent: NULL,
+		_depth: 0,
 		_vnode: vnode,
 		_component: NULL,
 		_children: NULL,
@@ -82,6 +83,7 @@ export function clearBacking(backing) {
 		backing._vnode = NULL;
 		backing._component = NULL;
 		backing._children = NULL;
+		backing._depth = 0;
 		backing._firstDom = NULL;
 		backing._lastDom = NULL;
 		backing._anchorDom = NULL;
