@@ -886,7 +886,8 @@ function isStructurallyEqualChild(rawChild, oldVNode, oldBacking) {
 	if (
 		oldVNode == NULL ||
 		rawChild.type !== oldVNode.type ||
-		rawChild.key !== oldVNode.key
+		rawChild.key !== oldVNode.key ||
+		rawChild.ref !== oldVNode.ref
 	) {
 		return false;
 	}
