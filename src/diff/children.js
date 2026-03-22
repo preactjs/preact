@@ -167,6 +167,7 @@ export function diffChildren(
 	);
 	let children = constructed._children;
 	oldDom = constructed._oldDom;
+	let placementOldDom = oldDom;
 	let matchingIndices = new Array(newChildrenLength);
 	let forcePlacement = new Uint8Array(newChildrenLength);
 	let placementFirstDom = new Array(newChildrenLength);
@@ -310,6 +311,15 @@ export function diffChildren(
 
 	if (needsPlacement) {
 		if (childDiffStats != NULL) childDiffStats.placementPasses++;
+		let placementSeed =
+			newParentVNode.type === Fragment
+				? placementOldDom
+				: typeof newParentVNode.type == 'function' &&
+					  countNonNullChildren(children) <= 1
+					? placementOldDom
+					: typeof newParentVNode.type == 'function'
+						? oldDom
+						: NULL;
 		planPlacements(
 			children,
 			matchingIndices,
@@ -320,7 +330,7 @@ export function diffChildren(
 			placementStatus,
 			parentDom,
 			hostOps,
-			typeof newParentVNode.type == 'function' ? oldDom : NULL,
+			placementSeed,
 			hasKeys,
 			hostOpCounts
 		);
@@ -1085,6 +1095,14 @@ function lowerBound(tails, positions, value) {
 	}
 
 	return low;
+}
+
+function countNonNullChildren(children) {
+	let count = 0;
+	for (let i = 0; i < children.length; i++) {
+		if (children[i] != NULL) count++;
+	}
+	return count;
 }
 
 /**
