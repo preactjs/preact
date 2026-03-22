@@ -268,18 +268,18 @@ export function diffChildren(
 			lastChildDom = lastDom;
 		}
 
-		if (
-			childVNode.key != NULL &&
-			typeof childVNode.type == 'function' &&
-			oldVNode !== EMPTY_OBJ &&
-			getFirstDom(oldVNode) != NULL &&
-			newDom != NULL &&
-			(getFirstDom(oldVNode) !== newDom || getLastDom(oldVNode) !== lastDom)
-		) {
-			forcePlacement[i] = 1;
-			placementStatus[i] = PLAN_MOVE;
-			needsPlacement = true;
-			if (childDiffStats != NULL) childDiffStats.forcedPlacement++;
+		if (typeof childVNode.type == 'function' && oldVNode !== EMPTY_OBJ) {
+			let oldFirstDom = getFirstDom(oldVNode);
+			let oldLastDom = getLastDom(oldVNode);
+			if (
+				newDom != NULL &&
+				(oldFirstDom !== newDom || oldLastDom !== lastDom)
+			) {
+				forcePlacement[i] = 1;
+				placementStatus[i] = oldFirstDom == NULL ? PLAN_INSERT : PLAN_MOVE;
+				needsPlacement = true;
+				if (childDiffStats != NULL) childDiffStats.forcedPlacement++;
+			}
 		}
 
 		if (newDom != NULL && placementStatus[i] == PLAN_NONE) {
@@ -999,7 +999,6 @@ function planPlacements(
 	for (let i = children.length; i--; ) {
 		let child = children[i];
 		if (child == NULL || firstDoms[i] == NULL) continue;
-
 		if (
 			shouldPlaceChild(
 				placementStatus[i],
