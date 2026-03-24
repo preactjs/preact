@@ -1,44 +1,45 @@
 import {
-	createElement,
-	render as preactRender,
-	cloneElement as preactCloneElement,
-	createRef,
 	Component,
+	Fragment,
 	createContext,
-	Fragment
+	createElement,
+	createRef,
+	options,
+	cloneElement as preactCloneElement,
+	render as preactRender
 } from 'preact';
 import {
-	useState,
-	useId,
-	useReducer,
-	useEffect,
-	useLayoutEffect,
-	useRef,
-	useImperativeHandle,
-	useMemo,
 	useCallback,
 	useContext,
-	useDebugValue
+	useDebugValue,
+	useEffect,
+	useId,
+	useImperativeHandle,
+	useLayoutEffect,
+	useMemo,
+	useReducer,
+	useRef,
+	useState
 } from 'preact/hooks';
+import { Children } from './Children';
+import { PureComponent } from './PureComponent';
+import { forwardRef } from './forwardRef';
 import {
-	useInsertionEffect,
 	startTransition,
 	useDeferredValue,
+	useInsertionEffect,
 	useSyncExternalStore,
 	useTransition
 } from './hooks';
-import { PureComponent } from './PureComponent';
 import { memo } from './memo';
-import { forwardRef } from './forwardRef';
-import { Children } from './Children';
-import { Suspense, lazy } from './suspense';
 import { createPortal } from './portals';
 import {
-	hydrate,
-	render,
 	REACT_ELEMENT_TYPE,
-	__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED
+	__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED,
+	hydrate,
+	render
 } from './render';
+import { Suspense, lazy } from './suspense';
 
 const version = '18.3.1'; // trick libraries to think we are react
 
@@ -77,7 +78,7 @@ function isMemo(element) {
 	return (
 		!!element &&
 		typeof element.displayName == 'string' &&
-		element.displayName.startsWith('Memo(')
+		element.displayName.indexOf('Memo(') == 0
 	);
 }
 
@@ -121,15 +122,20 @@ function findDOMNode(component) {
 }
 
 /**
- * In React, `flushSync` flushes the entire tree and forces a rerender. It's
- * implmented here as a no-op.
+ * In React, `flushSync` flushes the entire tree and forces a rerender.
  * @template Arg
  * @template Result
  * @param {(arg: Arg) => Result} callback function that runs before the flush
  * @param {Arg} [arg] Optional argument that can be passed to the callback
  * @returns
  */
-const flushSync = (callback, arg) => callback(arg);
+const flushSync = (callback, arg) => {
+	const prevDebounce = options.debounceRendering;
+	options.debounceRendering = cb => cb();
+	const res = callback(arg);
+	options.debounceRendering = prevDebounce;
+	return res;
+};
 
 /**
  * In React, `unstable_batchedUpdates` is a legacy feature that was made a no-op
@@ -143,12 +149,6 @@ const flushSync = (callback, arg) => callback(arg);
 function unstable_batchedUpdates(callback, arg) {
 	return callback(arg);
 }
-
-/**
- * Strict Mode is not implemented in Preact, so we provide a stand-in for it
- * that just renders its children without imposing any restrictions.
- */
-const StrictMode = Fragment;
 
 // compat to react-is
 export const isElement = isValidElement;
@@ -182,7 +182,7 @@ export {
 	useDeferredValue,
 	useSyncExternalStore,
 	useTransition,
-	StrictMode,
+	Fragment as StrictMode,
 	Suspense,
 	lazy,
 	__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED
@@ -229,7 +229,7 @@ export default {
 	forwardRef,
 	flushSync,
 	unstable_batchedUpdates,
-	StrictMode,
+	StrictMode: Fragment,
 	Suspense,
 	lazy,
 	__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED

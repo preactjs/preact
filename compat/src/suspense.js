@@ -1,19 +1,19 @@
-import { Component, createElement, options, Fragment } from 'preact';
+import { Component, Fragment, createElement, options } from 'preact';
 import {
-	MODE_HYDRATE,
+	COMPONENT_FORCE,
 	FORCE_PROPS_REVALIDATE,
-	COMPONENT_FORCE
+	MODE_HYDRATE
 } from '../../src/constants';
 import { assign } from './util';
 
 const oldCatchError = options._catchError;
-options._catchError = function (error, newVNode, oldVNode, errorInfo) {
+options._catchError = (error, newVNode, oldVNode, errorInfo) => {
 	if (error.then) {
 		/** @type {import('./internal').Component} */
 		let component;
 		let vnode = newVNode;
 
-		for (; (vnode = vnode._parent); ) {
+		while ((vnode = vnode._parent)) {
 			if ((component = vnode._component) && component._childDidSuspend) {
 				if (newVNode._dom == null) {
 					newVNode._dom = oldVNode._dom;
@@ -28,7 +28,7 @@ options._catchError = function (error, newVNode, oldVNode, errorInfo) {
 };
 
 const oldUnmount = options.unmount;
-options.unmount = function (vnode) {
+options.unmount = vnode => {
 	/** @type {import('./internal').Component} */
 	const component = vnode._component;
 	if (component) component._unmounted = true;
@@ -118,17 +118,14 @@ Suspense.prototype = new Component();
 Suspense.prototype._childDidSuspend = function (promise, suspendingVNode) {
 	const suspendingComponent = suspendingVNode._component;
 
-	/** @type {import('./internal').SuspenseComponent} */
-	const c = this;
-
-	if (c._suspenders == null) {
-		c._suspenders = [];
+	if (this._suspenders == null) {
+		this._suspenders = [];
 	}
-	c._suspenders.push(suspendingComponent);
+	this._suspenders.push(suspendingComponent);
 
 	let resolved = false;
 	const onResolved = () => {
-		if (resolved || c._unmounted) return;
+		if (resolved || this._unmounted) return;
 
 		resolved = true;
 		suspendingComponent._onResolve = null;
@@ -145,22 +142,22 @@ Suspense.prototype._childDidSuspend = function (promise, suspendingVNode) {
 	suspendingComponent._parentDom = null;
 
 	const onSuspensionComplete = () => {
-		if (!--c._pendingSuspensionCount) {
+		if (!--this._pendingSuspensionCount) {
 			// If the suspension was during hydration we don't need to restore the
 			// suspended children into the _children array
-			if (c.state._suspended) {
-				const suspendedVNode = c.state._suspended;
-				c._vnode._children[0] = removeOriginal(
+			if (this.state._suspended) {
+				const suspendedVNode = this.state._suspended;
+				this._vnode._children[0] = removeOriginal(
 					suspendedVNode,
 					suspendedVNode._component._parentDom,
 					suspendedVNode._component._originalParentDom
 				);
 			}
 
-			c.setState({ _suspended: (c._detachOnNextRender = null) });
+			this.setState({ _suspended: (this._detachOnNextRender = null) });
 
 			let suspended;
-			while ((suspended = c._suspenders.pop())) {
+			while ((suspended = this._suspenders.pop())) {
 				// Restore _parentDom before forceUpdate so render can proceed
 				suspended._parentDom = originalParentDom;
 				suspended.forceUpdate();
@@ -174,10 +171,12 @@ Suspense.prototype._childDidSuspend = function (promise, suspendingVNode) {
 	 * While in non-hydration cases the usual fallback -> component flow would occour.
 	 */
 	if (
-		!c._pendingSuspensionCount++ &&
+		!this._pendingSuspensionCount++ &&
 		!(suspendingVNode._flags & MODE_HYDRATE)
 	) {
-		c.setState({ _suspended: (c._detachOnNextRender = c._vnode._children[0]) });
+		this.setState({
+			_suspended: (this._detachOnNextRender = this._vnode._children[0])
+		});
 	}
 	promise.then(onResolved, onResolved);
 };

@@ -1,10 +1,13 @@
+import { BaseComponent, getDomSibling } from '../component';
 import {
-	COMPONENT_FORCE,
 	COMPONENT_DIRTY,
+	COMPONENT_FORCE,
 	COMPONENT_PENDING_ERROR,
 	COMPONENT_PROCESSING_EXCEPTION,
+	EMPTY_ARR,
 	EMPTY_OBJ,
 	FORCE_PROPS_REVALIDATE,
+	MATHML_TOKEN_ELEMENTS,
 	MATH_NAMESPACE,
 	MODE_HYDRATE,
 	MODE_SUSPENDED,
@@ -12,16 +15,13 @@ import {
 	RESET_MODE,
 	SVG_NAMESPACE,
 	UNDEFINED,
-	XHTML_NAMESPACE,
-	MATHML_TOKEN_ELEMENTS,
-	EMPTY_ARR
+	XHTML_NAMESPACE
 } from '../constants';
-import { BaseComponent, getDomSibling } from '../component';
 import { Fragment } from '../create-element';
+import options from '../options';
+import { assign, isArray, removeNode, slice } from '../util';
 import { diffChildren } from './children';
 import { setProperty } from './props';
-import { assign, isArray, removeNode, slice } from '../util';
-import options from '../options';
 
 /**
  * @typedef {import('../internal').ComponentType} ComponentType
@@ -97,14 +97,13 @@ export function diff(
 				oldState,
 				snapshot,
 				newProps = newVNode.props;
-			const isClassComponent =
-				'prototype' in newType && newType.prototype.render;
+			const isClassComponent = newType.prototype && newType.prototype.render;
 
 			// Necessary for createContext api. Setting this property will pass
 			// the context value as `this.context` just for this component.
 			tmp = newType.contextType;
-			let provider = tmp && globalContext[tmp._id];
-			let componentContext = tmp
+			const provider = tmp && globalContext[tmp._id];
+			const componentContext = tmp
 				? provider
 					? provider.props.value
 					: tmp._defaultValue
@@ -275,7 +274,7 @@ export function diff(
 				snapshot = c.getSnapshotBeforeUpdate(oldProps, oldState);
 			}
 
-			let renderResult =
+			const renderResult =
 				tmp != NULL && tmp.type === Fragment && tmp.key == NULL
 					? cloneNode(tmp.props.children)
 					: tmp;
@@ -319,7 +318,7 @@ export function diff(
 
 					newVNode._component._excess = [];
 					for (let i = 0; i < excessDomChildren.length; i++) {
-						let child = excessDomChildren[i];
+						const child = excessDomChildren[i];
 						if (child == NULL || done) continue;
 
 						// When we encounter a boundary with $s we are opening
@@ -466,8 +465,8 @@ function diffElementNodes(
 	doc
 ) {
 	let oldProps = oldVNode.props || EMPTY_OBJ;
-	let newProps = newVNode.props;
-	let nodeType = /** @type {string} */ (newVNode.type);
+	const newProps = newVNode.props;
+	const nodeType = /** @type {string} */ (newVNode.type);
 	/** @type {any} */
 	let i;
 	/** @type {{ __html?: string }} */
