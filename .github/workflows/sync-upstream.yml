@@ -1,0 +1,44 @@
+name: Sync Upstream (PR)
+
+on:
+  # ⏰ Run daily at 09:30 Singapore Time (01:30 UTC)
+  schedule:
+    - cron: "30 1 * * *"
+
+  # 🖱 Allow manual trigger from GitHub UI
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Sync upstream via PR
+        uses: wei/pull@v1
+        with:
+          # 🔁 Upstream repository (CHANGE THIS)
+          source: original-owner/original-repo
+
+          # 🌿 Upstream branch
+          source_branch: main
+
+          # 🎯 Target branch in your fork
+          destination_branch: main
+
+          # 📝 Pull request title & description
+          pr_title: "chore: sync upstream"
+          pr_body: |
+            🤖 Auto-sync from upstream.
+
+          # 🌱 Prefix for generated PR branches
+          pr_branch_prefix: "sync-upstream"
+
+          # 📦 Current repository
+          destination_repo: ${{ github.repository }}
+
+          # 🔑 GitHub token (default is sufficient)
+          github_token: ${{ secrets.GITHUB_TOKEN }}
