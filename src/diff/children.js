@@ -124,6 +124,14 @@ export function diffChildren(
 		let shouldPlace = !!(childVNode._flags & INSERT_VNODE);
 		if (shouldPlace || oldVNode._children === childVNode._children) {
 			oldDom = insert(childVNode, oldDom, parentDom, shouldPlace);
+
+			// When a matched VNode is physically moved via INSERT_VNODE, its old
+			// _dom pointer becomes a stale positional reference. Clear it so that
+			// getDomSibling (called from nested diffs) won't return this stale
+			// reference and mis-place subsequent DOM nodes. See #5065.
+			if (shouldPlace && oldVNode._dom) {
+				oldVNode._dom = NULL;
+			}
 		} else if (typeof childVNode.type == 'function' && result !== UNDEFINED) {
 			oldDom = result;
 		} else if (newDom) {

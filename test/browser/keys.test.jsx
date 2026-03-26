@@ -1,4 +1,11 @@
-import { createElement, Component, render, createRef } from 'preact';
+import {
+	createElement,
+	Component,
+	render,
+	createRef,
+	createContext,
+	Fragment
+} from 'preact';
 import { setupRerender } from 'preact/test-utils';
 import { setupScratch, teardown } from '../_util/helpers';
 import { logCall, clearLog, getLog } from '../_util/logCall';
@@ -1150,5 +1157,218 @@ describe('keys', () => {
 			'<li>.appendChild(#text)',
 			'<ol>2345.appendChild(<li>6)'
 		]);
+	});
+
+	// https://github.com/preactjs/preact/issues/5065
+	it('should maintain correct DOM order with conditional ContextProvider and inner keys', () => {
+		const Ctx = createContext(null);
+
+		class Label extends Component {
+			render({ todo }) {
+				return <li key={todo.text}>{todo.text}</li>;
+			}
+		}
+
+		class App extends Component {
+			render() {
+				const { todos } = this.props;
+				return (
+					<ul>
+						{todos.map((todo, index) =>
+							todo.text === '1' || todo.text === '2' || todo.text === '3' ? (
+								<Ctx.Provider value={null}>
+									<Label todo={todo} index={index} />
+								</Ctx.Provider>
+							) : (
+								<Label todo={todo} index={index} />
+							)
+						)}
+					</ul>
+				);
+			}
+		}
+
+		// Initial: 3 collapsed rows
+		render(
+			<App todos={[{ text: '1' }, { text: '2' }, { text: '3' }]} />,
+			scratch
+		);
+		expect(scratch.querySelector('ul').textContent).to.equal('123');
+
+		// Expand row 1: adds sub-items 1A, 1B, 1C (not wrapped in Provider)
+		render(
+			<App
+				todos={[
+					{ text: '1' },
+					{ text: '1A' },
+					{ text: '1B' },
+					{ text: '1C' },
+					{ text: '2' },
+					{ text: '3' }
+				]}
+			/>,
+			scratch
+		);
+		expect(scratch.querySelector('ul').textContent).to.equal('11A1B1C23');
+
+		// Expand row 2: adds sub-items 2A, 2B, 2C
+		render(
+			<App
+				todos={[
+					{ text: '1' },
+					{ text: '1A' },
+					{ text: '1B' },
+					{ text: '1C' },
+					{ text: '2' },
+					{ text: '2A' },
+					{ text: '2B' },
+					{ text: '2C' },
+					{ text: '3' }
+				]}
+			/>,
+			scratch
+		);
+		expect(scratch.querySelector('ul').textContent).to.equal('11A1B1C22A2B2C3');
+
+		// Collapse row 1: removes 1A, 1B, 1C
+		render(
+			<App
+				todos={[
+					{ text: '1' },
+					{ text: '2' },
+					{ text: '2A' },
+					{ text: '2B' },
+					{ text: '2C' },
+					{ text: '3' }
+				]}
+			/>,
+			scratch
+		);
+		expect(scratch.querySelector('ul').textContent).to.equal('122A2B2C3');
+	});
+
+	// https://github.com/preactjs/preact/issues/5065
+	it('should maintain correct DOM order when collapsing row 2 with conditional Provider', () => {
+		const Ctx = createContext(null);
+
+		class Label extends Component {
+			render({ todo }) {
+				return <li key={todo.text}>{todo.text}</li>;
+			}
+		}
+
+		class App extends Component {
+			render() {
+				const { todos } = this.props;
+				return (
+					<ul>
+						{todos.map((todo, index) =>
+							todo.text === '1' || todo.text === '2' || todo.text === '3' ? (
+								<Ctx.Provider value={null}>
+									<Label todo={todo} index={index} />
+								</Ctx.Provider>
+							) : (
+								<Label todo={todo} index={index} />
+							)
+						)}
+					</ul>
+				);
+			}
+		}
+
+		// Both rows expanded
+		render(
+			<App
+				todos={[
+					{ text: '1' },
+					{ text: '1A' },
+					{ text: '1B' },
+					{ text: '1C' },
+					{ text: '2' },
+					{ text: '2A' },
+					{ text: '2B' },
+					{ text: '2C' },
+					{ text: '3' }
+				]}
+			/>,
+			scratch
+		);
+		expect(scratch.querySelector('ul').textContent).to.equal('11A1B1C22A2B2C3');
+
+		// Collapse row 2: removes 2A, 2B, 2C
+		render(
+			<App
+				todos={[
+					{ text: '1' },
+					{ text: '1A' },
+					{ text: '1B' },
+					{ text: '1C' },
+					{ text: '2' },
+					{ text: '3' }
+				]}
+			/>,
+			scratch
+		);
+		expect(scratch.querySelector('ul').textContent).to.equal('11A1B1C23');
+	});
+
+	// https://github.com/preactjs/preact/issues/5065
+	it('should maintain correct DOM order expanding then collapsing with conditional Provider', () => {
+		const Ctx = createContext(null);
+
+		class Label extends Component {
+			render({ todo }) {
+				return <li key={todo.text}>{todo.text}</li>;
+			}
+		}
+
+		class App extends Component {
+			render() {
+				const { todos } = this.props;
+				return (
+					<ul>
+						{todos.map((todo, index) =>
+							todo.text === '1' || todo.text === '2' || todo.text === '3' ? (
+								<Ctx.Provider value={null}>
+									<Label todo={todo} index={index} />
+								</Ctx.Provider>
+							) : (
+								<Label todo={todo} index={index} />
+							)
+						)}
+					</ul>
+				);
+			}
+		}
+
+		// Initial: 3 rows collapsed
+		render(
+			<App todos={[{ text: '1' }, { text: '2' }, { text: '3' }]} />,
+			scratch
+		);
+		expect(scratch.querySelector('ul').textContent).to.equal('123');
+
+		// Expand row 1
+		render(
+			<App
+				todos={[
+					{ text: '1' },
+					{ text: '1A' },
+					{ text: '1B' },
+					{ text: '1C' },
+					{ text: '2' },
+					{ text: '3' }
+				]}
+			/>,
+			scratch
+		);
+		expect(scratch.querySelector('ul').textContent).to.equal('11A1B1C23');
+
+		// Collapse row 1
+		render(
+			<App todos={[{ text: '1' }, { text: '2' }, { text: '3' }]} />,
+			scratch
+		);
+		expect(scratch.querySelector('ul').textContent).to.equal('123');
 	});
 });
