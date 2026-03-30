@@ -4,7 +4,9 @@ import options from '../options';
 // Per-instance unique key for event clock stamps. Each Preact copy on the page
 // gets its own random suffix so that `_dispatched` / `_attached` properties on
 // shared event objects and handler functions cannot collide across instances.
-let _id = Math.random().toString(36).slice(2, 7);
+// ~1 in 60M collision odds - if you have that many praect versions on the page,
+// you deserve some weird bugs.
+let _id = Math.random().toString(8);
 let EVENT_DISPATCHED = '__d' + _id;
 let EVENT_ATTACHED = '__a' + _id;
 
