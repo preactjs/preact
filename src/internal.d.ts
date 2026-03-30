@@ -125,7 +125,9 @@ export interface PreactElement extends preact.ContainerNode {
 }
 
 export interface PreactEvent extends Event {
-	_dispatched?: number;
+	// Keyed by a per-instance unique string (e.g. `__dXXXXX`) so that
+	// multiple Preact copies on the same page don't share event clock stamps.
+	[key: string]: any;
 }
 
 // We use the `current` property to differentiate between the two kinds of Refs so
