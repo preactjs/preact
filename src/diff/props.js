@@ -6,6 +6,8 @@ import options from '../options';
 // shared event objects and handler functions cannot collide across instances.
 // ~1 in 60M collision odds - if you have that many praect versions on the page,
 // you deserve some weird bugs.
+// In 11 we can replace this with a
+// Symbol
 let _id = Math.random().toString(8),
 	EVENT_DISPATCHED = '__d' + _id,
 	EVENT_ATTACHED = '__a' + _id;
