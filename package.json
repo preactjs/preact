@@ -3,6 +3,10 @@
   "amdName": "preact",
   "version": "10.29.0",
   "private": false,
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
   "description": "Fast 3kb React-compatible Virtual DOM library.",
   "main": "dist/preact.js",
   "module": "dist/preact.module.js",
