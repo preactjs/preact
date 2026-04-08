@@ -39,6 +39,9 @@ jobs:
   publish:
     needs: [build, release]
     runs-on: ubuntu-latest
+    environment:
+      name: npm
+      url: https://www.npmjs.com/package/preact
     permissions:
       contents: read
       id-token: write
@@ -46,6 +49,9 @@ jobs:
       - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
           name: npm-package
+
+      - name: Update npm
+        run: npm install -g npm@11.12
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version-file: 'package.json'
@@ -63,8 +69,5 @@ jobs:
           else
             echo "tag=latest" >> "$GITHUB_OUTPUT"
           fi
-      # TODO: Decide whether to add a GitHub environment (e.g. "npm") with
-      # required reviewers as an approval gate before publishing. This would
-      # prevent accidental publishes while still keeping the workflow automated.
       - name: Publish to npm
-        run: npm publish preact.tgz --tag ${{ steps.dist-tag.outputs.tag }}
+        run: npm publish preact.tgz --provenance --tag ${{ steps.dist-tag.outputs.tag }}

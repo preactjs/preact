@@ -200,7 +200,7 @@ rights to publish new releases on npm.
 4. Create and push a tag for the new version you want to publish:
    1. `git tag 10.0.0`
    2. `git push --tags`
-5. Wait for the Release workflow to complete
+5. Wait for the Release workflow to reach the `npm` environment approval gate, approve it, and let it complete
    - It'll create a draft release and upload the built npm package as an asset to the release
 6. [Fill in the release notes](#writing-release-notes) in GitHub and publish them
 7. Tweet it out
