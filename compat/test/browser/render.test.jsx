@@ -823,7 +823,7 @@ describe('compat render', () => {
 			'grid-row-end': 2,
 			'grid-row-gap': 23,
 			'grid-row-start': 2,
-			'inital-letter': 2,
+			'initial-letter': 2,
 			'line-height': 2,
 			'line-clamp': 2,
 			'mask-border': 2,

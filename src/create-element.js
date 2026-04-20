@@ -5,7 +5,7 @@ import { NULL, UNDEFINED } from './constants';
 let vnodeId = 0;
 
 /**
- * Create an virtual node (used for JSX)
+ * Create a virtual node (used for JSX)
  * @param {import('./internal').VNode["type"]} type The node name or Component constructor for this
  * virtual node
  * @param {object | null | undefined} [props] The properties of the virtual node
@@ -79,7 +79,7 @@ export function Fragment(props) {
 }
 
 /**
- * Check if a the argument is a valid Preact VNode.
+ * Check if the argument is a valid Preact VNode.
  * @param {*} vnode
  * @returns {vnode is VNode}
  */
