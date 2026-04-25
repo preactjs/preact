@@ -66,12 +66,16 @@ describe('createElement(jsx)', () => {
 	});
 
 	it('should have ordered VNode properties', () => {
+		// `constructor` is allocated first so the vnode shape stays identical
+		// when `cloneVNode` shallow-copies into a target that pre-seeds
+		// `constructor: undefined` (required to be safe under Hardened
+		// JavaScript or frozen `Object.prototype` — see src/util.js).
 		expect(Object.keys(<div />).filter(key => !/^_/.test(key))).to.deep.equal([
+			'constructor',
 			'type',
 			'props',
 			'key',
-			'ref',
-			'constructor'
+			'ref'
 		]);
 	});
 

@@ -49,6 +49,13 @@ export function createVNode(type, props, key, ref, original) {
 	// Do not inline into createElement and coerceToVNode!
 	/** @type {import('./internal').VNode} */
 	const vnode = {
+		// `constructor` is first so the shape matches `cloneVNode` (which has
+		// to pre-seed the target with `constructor: undefined` to be safe
+		// under Hardened JavaScript — https://hardenedjs.org/ — or
+		// `Object.freeze(Object.prototype)`). Keeping the same key order
+		// across freshly-created and cloned vnodes preserves V8's hidden
+		// class for both.
+		constructor: UNDEFINED,
 		type,
 		props,
 		key,
@@ -58,7 +65,6 @@ export function createVNode(type, props, key, ref, original) {
 		_depth: 0,
 		_dom: NULL,
 		_component: NULL,
-		constructor: UNDEFINED,
 		_original: original == NULL ? ++vnodeId : original,
 		_index: -1,
 		_flags: 0
