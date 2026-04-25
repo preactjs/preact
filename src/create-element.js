@@ -49,6 +49,10 @@ export function createVNode(type, props, key, ref, original) {
 	// Do not inline into createElement and coerceToVNode!
 	/** @type {import('./internal').VNode} */
 	const vnode = {
+		// `constructor` first so the shape matches the target object pre-seeded
+		// in `cloneVNode`, keeping the same hidden class for freshly-created
+		// and cloned vnodes.
+		constructor: UNDEFINED,
 		type,
 		props,
 		key,
@@ -58,7 +62,6 @@ export function createVNode(type, props, key, ref, original) {
 		_depth: 0,
 		_dom: NULL,
 		_component: NULL,
-		constructor: UNDEFINED,
 		_original: original == NULL ? ++vnodeId : original,
 		_index: -1,
 		_flags: 0
