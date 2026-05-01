@@ -7,7 +7,7 @@ import {
 import { Fragment } from './create-element';
 import { commitRoot, diff } from './diff/index';
 import options from './options';
-import { assign } from './util';
+import { assign, cloneVNode } from './util';
 
 /**
  * Base Component class. Provides `setState()` and `forceUpdate()`, which
@@ -133,7 +133,7 @@ function renderComponent(component) {
 
 	const parentDom = component._parentDom;
 	if (parentDom) {
-		const newVNode = assign({}, oldVNode);
+		const newVNode = cloneVNode(oldVNode);
 		newVNode._original = oldVNode._original + 1;
 		if (options.vnode) options.vnode(newVNode);
 
