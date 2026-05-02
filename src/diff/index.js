@@ -474,7 +474,10 @@ function diffElementNodes(
 		}
 	} else {
 		// If excessDomChildren was not null, repopulate it with the current element's children:
-		excessDomChildren = excessDomChildren && slice.call(dom.childNodes);
+		excessDomChildren =
+			nodeType == 'textarea' && newProps.defaultValue != NULL
+				? NULL
+				: excessDomChildren && slice.call(dom.childNodes);
 
 		// If we are in a situation where we are not hydrating but are using
 		// existing DOM (e.g. replaceNode) we should read the existing DOM
@@ -562,7 +565,7 @@ function diffElementNodes(
 		}
 
 		// As above, don't diff props during hydration
-		if (!isHydrating) {
+		if (!isHydrating || nodeType == 'textarea') {
 			i = 'value';
 			if (nodeType == 'progress' && inputValue == NULL) {
 				dom.removeAttribute('value');

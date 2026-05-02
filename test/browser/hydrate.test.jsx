@@ -67,6 +67,20 @@ describe('hydrate()', () => {
 		expect(scratch.firstChild.value).to.equal('foo');
 	});
 
+	// Test for preactjs/preact#5080
+	it('should respect textarea defaultValue in hydrate', () => {
+		scratch.innerHTML = '<textarea>foo</textarea>';
+		hydrate(<textarea defaultValue="foo" />, scratch);
+		expect(scratch.firstChild.value).to.equal('foo');
+		expect(scratch.firstChild.defaultValue).to.equal('foo');
+	});
+
+	it('should respect textarea value in hydrate', () => {
+		scratch.innerHTML = '<textarea>foo</textarea>';
+		hydrate(<textarea value="foo" />, scratch);
+		expect(scratch.firstChild.value).to.equal('foo');
+	});
+
 	it('should respect defaultChecked in hydrate', () => {
 		scratch.innerHTML = '<input checked="true">';
 		hydrate(<input defaultChecked />, scratch);
