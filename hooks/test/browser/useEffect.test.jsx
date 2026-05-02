@@ -1,5 +1,5 @@
 import { act, teardown as teardownAct } from 'preact/test-utils';
-import { createElement, render, Fragment, Component } from 'preact';
+import { createElement, render, Fragment, Component, options } from 'preact';
 import { useEffect, useState, useRef } from 'preact/hooks';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { useEffectAssertions } from './useEffectAssertions';
@@ -664,5 +664,63 @@ describe('useEffect', () => {
 		act(() => {
 			setVal(1);
 		});
+	});
+
+	it('should flush all pending effects when one component re-renders before afterPaint', () => {
+		// Regression test: when only one component re-renders (via setState)
+		// before afterPaint has flushed effects, ALL pending effects from
+		// ALL components should be flushed as a batch before the re-render
+		// proceeds. This matches React's flushPendingEffects() behavior.
+		//
+		// Without the fix, only the re-rendering component's stale effects
+		// were flushed in _render, leaving sibling effects unflushed until
+		// they got their own re-render or afterPaint fired.
+		const order = [];
+		let setB;
+
+		function A() {
+			useEffect(() => {
+				order.push('A effect');
+			}, []);
+			return <div>A</div>;
+		}
+
+		function B() {
+			const [val, _setB] = useState(0);
+			setB = _setB;
+			useEffect(() => {
+				order.push('B effect');
+			}, []);
+			return <div>{val}</div>;
+		}
+
+		function App() {
+			return (
+				<div>
+					<A />
+					<B />
+				</div>
+			);
+		}
+
+		render(<App />, scratch);
+
+		// Effects are queued but not yet flushed (afterPaint hasn't fired).
+		expect(order).to.deep.equal([]);
+
+		// Force B to re-render synchronously by overriding debounceRendering.
+		// This simulates what happens when a store subscription or
+		// useLayoutEffect triggers a re-render before afterPaint.
+		const prev = options.debounceRendering;
+		options.debounceRendering = cb => cb();
+		setB(1);
+		options.debounceRendering = prev;
+
+		// With the fix: B's _render detects stale effects and calls
+		// flushAfterPaintEffects(), which flushes BOTH A's and B's effects.
+		// Without the fix: only B's effects would flush here; A's effect
+		// would be deferred.
+		expect(order).to.include('A effect');
+		expect(order).to.include('B effect');
 	});
 });
