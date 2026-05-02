@@ -200,14 +200,10 @@ rights to publish new releases on npm.
 4. Create and push a tag for the new version you want to publish:
    1. `git tag 10.0.0`
    2. `git push --tags`
-5. Wait for the Release workflow to complete
+5. Wait for the Release workflow to reach the `npm` environment approval gate, approve it, and let it complete
    - It'll create a draft release and upload the built npm package as an asset to the release
 6. [Fill in the release notes](#writing-release-notes) in GitHub and publish them
-7. Run the publish script with the tag you created
-   1. `node ./scripts/release/publish.mjs 10.0.0`
-   2. Make sure you have 2FA enabled in npm, otherwise the above command will fail.
-   3. If you're doing a pre-release add `--npm-tag next` to the `publish.mjs` command to publish it under a different tag (default is `latest`)
-8. Tweet it out
+7. Tweet it out
 
 ## Legacy Releases (8.x)
 
