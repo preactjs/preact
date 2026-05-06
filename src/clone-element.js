@@ -31,8 +31,8 @@ export function cloneElement(vnode, props, children) {
 	return createVNode(
 		vnode.type,
 		normalizedProps,
-		key || vnode.key,
-		ref || vnode.ref,
+		key !== undefined ? key : vnode.key,
+		ref !== undefined ? ref : vnode.ref,
 		NULL
 	);
 }
