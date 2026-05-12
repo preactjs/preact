@@ -193,20 +193,19 @@ We closely watch our issues and have a pretty active [Slack workspace](https://c
 This guide is intended for core team members that have the necessary
 rights to publish new releases on npm.
 
+Before using the automated npm publishing flow, make sure npm trusted publishing is configured for the `preactjs/preact` repository, the `release.yml` workflow, and the `npm` environment. The GitHub `npm` environment should require reviewer approval, and repository rules should protect `11.*` tags.
+
 1. Make a PR where **only** the version number is incremented in `package.json` and everywhere else. A simple search and replace works. (note: We follow `SemVer` conventions)
 2. Wait until the PR is approved and merged.
 3. Switch back to the `main` branch and pull the merged PR
 4. Create and push a tag for the new version you want to publish:
-   1. `git tag 10.0.0`
-   2. `git push --tags`
-5. Wait for the Release workflow to complete
-   - It'll create a draft release and upload the built npm package as an asset to the release
+   1. `git tag 11.0.0`
+   2. `git push origin 11.0.0`
+5. Wait for the Release workflow to reach the `npm` environment approval gate, approve it, and let it complete
+   - It'll validate that the tag matches the package version, create a draft release, upload the built npm package as a release asset, and publish it to npm.
+   - Stable releases publish to the `latest` npm dist-tag; prereleases publish to the approved prerelease dist-tag (`alpha`, `beta`, `rc`, or `next`).
 6. [Fill in the release notes](#writing-release-notes) in GitHub and publish them
-7. Run the publish script with the tag you created
-   1. `node ./scripts/release/publish.mjs 10.0.0`
-   2. Make sure you have 2FA enabled in npm, otherwise the above command will fail.
-   3. If you're doing a pre-release add `--npm-tag next` to the `publish.mjs` command to publish it under a different tag (default is `latest`)
-8. Tweet it out
+7. Tweet it out
 
 ## Legacy Releases (8.x)
 

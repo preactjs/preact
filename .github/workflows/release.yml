@@ -1,29 +1,117 @@
 name: Release
-on: create
+
+on:
+  push:
+    tags:
+      - '11.*'
+
+permissions:
+  contents: read
 
 jobs:
   build:
-    if: github.ref_type == 'tag'
-    uses: preactjs/preact/.github/workflows/build-test.yml@main
+    if: github.event.deleted == false
+    permissions:
+      contents: read
+    uses: ./.github/workflows/build-test.yml
 
   release:
     runs-on: ubuntu-latest
     needs: build
+    permissions:
+      contents: write
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
           name: npm-package
       - name: Create draft release
         id: create-release
-        uses: actions/github-script@v6
+        uses: actions/github-script@d7906e4ad0b1822421a7e6a35d5ca353c962f410 # v6.4.1
         with:
           script: |
             const script = require('./scripts/release/create-gh-release.js')
             return script({ github, context })
       - name: Upload release artifact
-        uses: actions/github-script@v6
+        uses: actions/github-script@d7906e4ad0b1822421a7e6a35d5ca353c962f410 # v6.4.1
+        env:
+          RELEASE_DATA: ${{ steps.create-release.outputs.result }}
         with:
           script: |
             const script = require('./scripts/release/upload-gh-asset.js')
-            return script({ require, github, context, glob, release: ${{ steps.create-release.outputs.result }} })
+            const release = JSON.parse(process.env.RELEASE_DATA)
+            return script({ require, github, context, glob, release })
+
+  publish:
+    needs: [build, release]
+    runs-on: ubuntu-latest
+    environment:
+      name: npm
+      url: https://www.npmjs.com/package/preact
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: npm-package
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '24'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Update npm
+        run: npm install -g npm@11.11.1
+
+      - name: Validate package
+        run: |
+          set -euo pipefail
+
+          TAG="${GITHUB_REF_NAME}"
+          mkdir -p package-metadata
+          tar -xOf preact.tgz package/package.json > package-metadata/package.json
+
+          PACKAGE_NAME="$(node -p "require('./package-metadata/package.json').name")"
+          PACKAGE_VERSION="$(node -p "require('./package-metadata/package.json').version")"
+
+          if [[ "$PACKAGE_NAME" != "preact" ]]; then
+            echo "::error::Expected package name 'preact', got '$PACKAGE_NAME'"
+            exit 1
+          fi
+
+          if [[ "$PACKAGE_VERSION" != "$TAG" ]]; then
+            echo "::error::Tag '$TAG' does not match package version '$PACKAGE_VERSION'"
+            exit 1
+          fi
+
+      # Determine the npm dist-tag from the git tag:
+      # - Stable versions publish with --tag latest
+      # - Prerelease versions must use an approved prerelease identifier as the
+      #   dist-tag (11.0.0-rc.1 -> rc, 11.0.0-beta.1 -> beta)
+      - name: Determine dist-tag
+        id: dist-tag
+        run: |
+          set -euo pipefail
+
+          TAG="${GITHUB_REF_NAME}"
+          if [[ "$TAG" =~ ^11\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]]; then
+            echo "tag=latest" >> "$GITHUB_OUTPUT"
+          elif [[ "$TAG" =~ ^11\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)-([0-9A-Za-z-]+)(\.[0-9A-Za-z-]+)*$ ]]; then
+            DIST_TAG="${BASH_REMATCH[3]}"
+            case "$DIST_TAG" in
+              alpha|beta|rc|next)
+                echo "tag=$DIST_TAG" >> "$GITHUB_OUTPUT"
+                ;;
+              *)
+                echo "::error::Refusing to publish prerelease '$TAG' with unapproved npm dist-tag '$DIST_TAG'"
+                exit 1
+                ;;
+            esac
+          else
+            echo "::error::Unexpected release tag '$TAG'"
+            exit 1
+          fi
+
+      - name: Publish to npm
+        run: npm publish preact.tgz --provenance --access public --tag "${{ steps.dist-tag.outputs.tag }}"
