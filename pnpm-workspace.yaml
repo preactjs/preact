@@ -1,0 +1,33 @@
+packages:
+  - "."
+  - "compat"
+  - "debug"
+  - "demo"
+  - "devtools"
+  - "hooks"
+  - "jsx-runtime"
+  - "test-utils"
+  - "test/ts"
+
+minimumReleaseAge: 1440
+minimumReleaseAgeStrict: true
+minimumReleaseAgeIgnoreMissingTime: false
+blockExoticSubdeps: true
+trustPolicy: no-downgrade
+# Keep trust exceptions version-specific so new downgrades still fail closed.
+trustPolicyExclude:
+  - "chokidar@4.0.3"
+  - "preact-render-to-string@6.5.0"
+  - "reselect@5.1.1"
+  - "semver@6.3.1"
+strictDepBuilds: true
+
+nodeVersion: 24.15.0
+engineStrict: true
+
+# Allow only required install-time builds; deny optional native/watch helpers.
+allowBuilds:
+  '@parcel/watcher': false
+  esbuild: true
+  fsevents: false
+  styled-components: false

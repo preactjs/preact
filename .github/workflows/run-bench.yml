@@ -4,7 +4,7 @@ name: Benchmark Worker
 #
 # This workflow expects calling workflows to have uploaded an artifact named
 # "bench-environment" that contains any built artifacts required to run the
-# benchmark. This typically is the dist/ folder that running `npm run build`
+# benchmark. This typically is the dist/ folder that running `pnpm run build`
 # produces and/or a tarball of a previous build to bench the local build against
 
 on:
@@ -34,29 +34,16 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: 'recursive'
+      - uses: pnpm/action-setup@v6
+        with:
+          run_install: false
       - uses: actions/setup-node@v4
         with:
           node-version-file: 'package.json'
-          cache: 'npm'
-          cache-dependency-path: '**/package-lock.json'
-
-      # Setup pnpm
-      - name: Install pnpm
-        uses: pnpm/action-setup@v3
-        with:
-          version: 8
-          run_install: false
-      - name: Get pnpm store directory
-        id: pnpm-cache
-        run: |
-          echo "pnpm_cache_dir=$(pnpm store path)" >> $GITHUB_OUTPUT
-      - uses: actions/cache@v4
-        name: Setup pnpm cache
-        with:
-          path: ${{ steps.pnpm-cache.outputs.pnpm_cache_dir }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
+          cache: 'pnpm'
+          cache-dependency-path: |
+            pnpm-lock.yaml
+            benchmarks/pnpm-lock.yaml
 
       # Install benchmark dependencies
       - uses: actions/download-artifact@v4
