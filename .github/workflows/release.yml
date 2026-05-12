@@ -5,9 +5,15 @@ on:
     tags:
       - '10.*'
 
+permissions:
+  contents: read
+
 jobs:
   build:
-    uses: preactjs/preact/.github/workflows/build-test.yml@v10.x
+    if: github.event.deleted == false
+    permissions:
+      contents: read
+    uses: ./.github/workflows/build-test.yml
 
   release:
     runs-on: ubuntu-latest
@@ -50,25 +56,62 @@ jobs:
         with:
           name: npm-package
 
-      - name: Update npm
-        run: npm install -g npm@11.11
-
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
-          node-version-file: 'package.json'
+          node-version: '24'
           registry-url: 'https://registry.npmjs.org'
+
+      - name: Update npm
+        run: npm install -g npm@11.11.1
+
+      - name: Validate package
+        run: |
+          set -euo pipefail
+
+          TAG="${GITHUB_REF_NAME}"
+          mkdir -p package-metadata
+          tar -xOf preact.tgz package/package.json > package-metadata/package.json
+
+          PACKAGE_NAME="$(node -p "require('./package-metadata/package.json').name")"
+          PACKAGE_VERSION="$(node -p "require('./package-metadata/package.json').version")"
+
+          if [[ "$PACKAGE_NAME" != "preact" ]]; then
+            echo "::error::Expected package name 'preact', got '$PACKAGE_NAME'"
+            exit 1
+          fi
+
+          if [[ "$PACKAGE_VERSION" != "$TAG" ]]; then
+            echo "::error::Tag '$TAG' does not match package version '$PACKAGE_VERSION'"
+            exit 1
+          fi
+
       # Determine the npm dist-tag from the git tag:
-      # - Prerelease versions (e.g. 10.29.0-rc.1) publish with --tag matching
-      #   the prerelease identifier (rc, alpha, beta, etc.)
       # - Stable versions publish with --tag latest
+      # - Prerelease versions must use an approved prerelease identifier as the
+      #   dist-tag (10.29.0-rc.1 -> rc, 10.29.0-beta.1 -> beta)
       - name: Determine dist-tag
         id: dist-tag
         run: |
-          TAG="${GITHUB_REF#refs/tags/}"
-          if [[ "$TAG" =~ -([a-zA-Z]+) ]]; then
-            echo "tag=${BASH_REMATCH[1]}" >> "$GITHUB_OUTPUT"
-          else
+          set -euo pipefail
+
+          TAG="${GITHUB_REF_NAME}"
+          if [[ "$TAG" =~ ^10\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]]; then
             echo "tag=latest" >> "$GITHUB_OUTPUT"
+          elif [[ "$TAG" =~ ^10\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)-([0-9A-Za-z-]+)(\.[0-9A-Za-z-]+)*$ ]]; then
+            DIST_TAG="${BASH_REMATCH[3]}"
+            case "$DIST_TAG" in
+              alpha|beta|rc|next)
+                echo "tag=$DIST_TAG" >> "$GITHUB_OUTPUT"
+                ;;
+              *)
+                echo "::error::Refusing to publish prerelease '$TAG' with unapproved npm dist-tag '$DIST_TAG'"
+                exit 1
+                ;;
+            esac
+          else
+            echo "::error::Unexpected release tag '$TAG'"
+            exit 1
           fi
+
       - name: Publish to npm
-        run: npm publish preact.tgz --provenance --tag ${{ steps.dist-tag.outputs.tag }}
+        run: npm publish preact.tgz --provenance --access public --tag "${{ steps.dist-tag.outputs.tag }}"
