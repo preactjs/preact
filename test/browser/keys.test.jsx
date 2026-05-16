@@ -3,8 +3,7 @@ import {
 	Component,
 	render,
 	createRef,
-	createContext,
-	Fragment
+	createContext
 } from 'preact';
 import { setupRerender } from 'preact/test-utils';
 import { setupScratch, teardown } from '../_util/helpers';
