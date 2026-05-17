@@ -121,6 +121,19 @@ describe('render()', () => {
 		expect(scratch.firstChild).to.be.null;
 	});
 
+	it('should not render when detecting JSON-injection deeply', () => {
+		const payload = JSON.parse(
+			'{"type":"span","props":{ "children": "Malicious"}, "__v": 1, "__proto__": null}'
+		);
+
+		const App = () => <Fragment>{payload}</Fragment>;
+
+		render(<App />, scratch);
+		console.log(scratch.innerHTML);
+		expect(scratch.firstChild).to.be.null;
+		expect(scratch.innerHTML).to.equal('');
+	});
+
 	it('should create empty nodes (<* />)', () => {
 		render(<div />, scratch);
 		expect(scratch.childNodes).to.have.length(1);
