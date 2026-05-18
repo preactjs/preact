@@ -122,6 +122,9 @@ Become a sponsor and get your logo on our README on GitHub with a link to your s
 <a href="https://opencollective.com/preact/sponsor/14/website" target="_blank"><img src="https://opencollective.com/preact/sponsor/14/avatar.svg"></a>
 <a href="https://opencollective.com/preact/sponsor/15/website" target="_blank"><img src="https://opencollective.com/preact/sponsor/15/avatar.svg"></a>
 <a href="https://github.com/guardian" target="_blank"> &nbsp; &nbsp; &nbsp; <img src="https://github.com/guardian.png" width="64" height="64"> &nbsp; &nbsp; &nbsp; </a>
+<a href="https://www.sent.dm" target="_blank"><img src="https://github.com/sentdm.png?size=64" alt="SentDM" width="64" height="64" hspace="96"></a>
+<a href="https://www.songsterr.com/" target="_blank"><img src="https://github.com/songsterr.png?size=64" alt="Songsterr" width="64" height="64" hspace="96"></a>
+<a href="https://deno.land" target="_blank"><img src="https://github.com/denoland.png?size=64" alt="Deno" width="64" height="64" hspace="96"></a>
 <a href="https://opencollective.com/preact/sponsor/16/website" target="_blank"><img src="https://opencollective.com/preact/sponsor/16/avatar.svg"></a>
 <a href="https://opencollective.com/preact/sponsor/17/website" target="_blank"><img src="https://opencollective.com/preact/sponsor/17/avatar.svg"></a>
 <a href="https://opencollective.com/preact/sponsor/18/website" target="_blank"><img src="https://opencollective.com/preact/sponsor/18/avatar.svg"></a>
