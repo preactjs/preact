@@ -1874,7 +1874,7 @@ export interface InputHTMLAttributes<
 	size?: Signalish<number | undefined>;
 	src?: Signalish<string | undefined>;
 	step?: Signalish<number | string | undefined>;
-	type?: HTMLInputTypeAttribute | undefined;
+	type?: Signalish<HTMLInputTypeAttribute | undefined>;
 	value?: Signalish<string | number | undefined>;
 	width?: Signalish<number | string | undefined>;
 	onChange?: GenericEventHandler<T> | undefined;
