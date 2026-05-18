@@ -2130,6 +2130,7 @@ export interface PartialInputHTMLAttributes<T extends EventTarget>
 	size?: Signalish<number | undefined>;
 	src?: Signalish<string | undefined>;
 	step?: Signalish<number | string | undefined>;
+	type?: Signalish<HTMLInputTypeAttribute | undefined>;
 	value?: Signalish<string | number | undefined>;
 	width?: Signalish<number | string | undefined>;
 	onChange?: GenericEventHandler<T> | undefined;

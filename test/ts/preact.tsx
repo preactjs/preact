@@ -416,6 +416,15 @@ h<InputHTMLAttributes>('input', { onClick: e => e.currentTarget.capture });
 createElement<InputHTMLAttributes>('input', {
 	onClick: e => e.currentTarget.capture
 });
+
+const inputAttributesWithSignalType: InputHTMLAttributes<HTMLInputElement> = {
+	type: createSignal('text' as const)
+};
+
+createElement<InputHTMLAttributes>('input', {
+	type: createSignal('email' as const)
+});
+
 <input onClick={e => e.currentTarget.capture} />;
 
 function Checkbox({ onChange }: HTMLAttributes<HTMLInputElement>) {
