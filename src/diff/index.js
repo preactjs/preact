@@ -433,6 +433,8 @@ function cloneNode(node) {
 		return node.map(cloneNode);
 	}
 
+	if (node.constructor !== UNDEFINED) return null;
+
 	return assign({}, node);
 }
 
