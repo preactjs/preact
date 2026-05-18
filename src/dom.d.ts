@@ -2639,7 +2639,6 @@ export interface SelectHTMLAttributes<T extends EventTarget = HTMLSelectElement>
 	extends PartialSelectHTMLAttributes<T> {
 	multiple?: Signalish<boolean | undefined>;
 	size?: Signalish<number | undefined>;
-	type?: Signalish<HTMLInputTypeAttribute | undefined>;
 	role?: Signalish<'combobox' | 'listbox' | 'menu' | undefined>;
 }
 
