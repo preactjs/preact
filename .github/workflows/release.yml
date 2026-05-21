@@ -62,7 +62,7 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
 
       - name: Update npm
-        run: npm install -g npm@11.11.1
+        run: npm install -g npm@11.15.0
 
       - name: Validate package
         run: |
@@ -114,4 +114,4 @@ jobs:
           fi
 
       - name: Publish to npm
-        run: npm publish preact.tgz --provenance --access public --tag "${{ steps.dist-tag.outputs.tag }}"
+        run: npm stage publish preact.tgz --provenance --access public --tag "${{ steps.dist-tag.outputs.tag }}"
