@@ -11,6 +11,9 @@ on:
       - restructure
       - v11
 
+permissions:
+  contents: read
+
 jobs:
   filter_jobs:
     name: Filter jobs
