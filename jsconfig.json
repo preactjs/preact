@@ -14,7 +14,8 @@
     },
     "target": "es5",
     "noEmit": true,
-    "skipLibCheck": false
+    "skipLibCheck": false,
+    "types": ["vitest/globals"]
   },
   "exclude": ["**/node_modules/**", "**/dist/**", "coverage", "demo"]
 }

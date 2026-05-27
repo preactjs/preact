@@ -1,9 +1,9 @@
 import React from '../../src';
 
-const MyInput: React.ForwardFn<{ id: string }, { focus(): void }> = (
-	props,
-	ref
-) => {
+const MyInput: React.ForwardRefRenderFunction<
+	{ focus(): void },
+	{ id: string }
+> = (props, ref) => {
 	const inputRef = React.useRef<HTMLInputElement>(null);
 
 	React.useImperativeHandle(ref, () => ({

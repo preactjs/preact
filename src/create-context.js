@@ -1,5 +1,5 @@
 import { enqueueRender } from './component';
-import { NULL } from './constants';
+import { NULL, COMPONENT_FORCE } from './constants';
 
 export let i = 0;
 
@@ -21,7 +21,7 @@ export function createContext(defaultValue) {
 				// @ts-expect-error even
 				if (this.props.value != _props.value) {
 					subs.forEach(c => {
-						c._force = true;
+						c._bits |= COMPONENT_FORCE;
 						enqueueRender(c);
 					});
 				}

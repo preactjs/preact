@@ -1,15 +1,24 @@
-import { IS_NON_DIMENSIONAL, NULL, SVG_NAMESPACE } from '../constants';
+import { NULL, SVG_NAMESPACE } from '../constants';
 import options from '../options';
+
+// Per-instance unique key for event clock stamps. Each Preact copy on the page
+// gets its own random suffix so that `_dispatched` / `_attached` properties on
+// shared event objects and handler functions cannot collide across instances.
+// ~1 in 60M collision odds - if you have that many praect versions on the page,
+// you deserve some weird bugs.
+// In 11 we can replace this with a
+// Symbol
+let _id = Math.random().toString(8),
+	EVENT_DISPATCHED = '__d' + _id,
+	EVENT_ATTACHED = '__a' + _id;
 
 function setStyle(style, key, value) {
 	if (key[0] == '-') {
 		style.setProperty(key, value == NULL ? '' : value);
 	} else if (value == NULL) {
 		style[key] = '';
-	} else if (typeof value != 'number' || IS_NON_DIMENSIONAL.test(key)) {
-		style[key] = value;
 	} else {
-		style[key] = value + 'px';
+		style[key] = value;
 	}
 }
 
@@ -67,26 +76,23 @@ export function setProperty(dom, name, value, oldValue, namespace) {
 	// Benchmark for comparison: https://esbench.com/bench/574c954bdb965b9a00965ac6
 	else if (name[0] == 'o' && name[1] == 'n') {
 		useCapture = name != (name = name.replace(CAPTURE_REGEX, '$1'));
-		const lowerCaseName = name.toLowerCase();
 
 		// Infer correct casing for DOM built-in events:
-		if (lowerCaseName in dom || name == 'onFocusOut' || name == 'onFocusIn')
-			name = lowerCaseName.slice(2);
-		else name = name.slice(2);
+		name = name.slice(2).toLowerCase();
 
 		if (!dom._listeners) dom._listeners = {};
 		dom._listeners[name + useCapture] = value;
 
 		if (value) {
 			if (!oldValue) {
-				value._attached = eventClock;
+				value[EVENT_ATTACHED] = eventClock;
 				dom.addEventListener(
 					name,
 					useCapture ? eventProxyCapture : eventProxy,
 					useCapture
 				);
 			} else {
-				value._attached = oldValue._attached;
+				value[EVENT_ATTACHED] = oldValue[EVENT_ATTACHED];
 			}
 		} else {
 			dom.removeEventListener(
@@ -155,13 +161,13 @@ function createEventProxy(useCapture) {
 	return function (e) {
 		if (this._listeners) {
 			const eventHandler = this._listeners[e.type + useCapture];
-			if (e._dispatched == NULL) {
-				e._dispatched = eventClock++;
+			if (e[EVENT_DISPATCHED] == NULL) {
+				e[EVENT_DISPATCHED] = eventClock++;
 
-				// When `e._dispatched` is smaller than the time when the targeted event
+				// When `e[EVENT_DISPATCHED]` is smaller than the time when the targeted event
 				// handler was attached we know we have bubbled up to an element that was added
 				// during patching the DOM.
-			} else if (e._dispatched < eventHandler._attached) {
+			} else if (e[EVENT_DISPATCHED] < eventHandler[EVENT_ATTACHED]) {
 				return;
 			}
 			return eventHandler(options.event ? options.event(e) : e);

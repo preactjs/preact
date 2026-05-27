@@ -1,4 +1,7 @@
 import { options as _options } from 'preact';
+import { COMPONENT_FORCE } from '../../src/constants';
+
+const ObjectIs = Object.is;
 
 /** @type {number} */
 let currentIndex;
@@ -57,15 +60,15 @@ options._render = vnode => {
 		if (previousComponent === currentComponent) {
 			hooks._pendingEffects = [];
 			currentComponent._renderCallbacks = [];
-			hooks._list.forEach(hookItem => {
+			hooks._list.some(hookItem => {
 				if (hookItem._nextValue) {
 					hookItem._value = hookItem._nextValue;
 				}
 				hookItem._pendingArgs = hookItem._nextValue = undefined;
 			});
 		} else {
-			hooks._pendingEffects.forEach(invokeCleanup);
-			hooks._pendingEffects.forEach(invokeEffect);
+			hooks._pendingEffects.some(invokeCleanup);
+			hooks._pendingEffects.some(invokeEffect);
 			hooks._pendingEffects = [];
 			currentIndex = 0;
 		}
@@ -80,7 +83,7 @@ options.diffed = vnode => {
 	const c = vnode._component;
 	if (c && c.__hooks) {
 		if (c.__hooks._pendingEffects.length) afterPaint(afterPaintEffects.push(c));
-		c.__hooks._list.forEach(hookItem => {
+		c.__hooks._list.some(hookItem => {
 			if (hookItem._pendingArgs) {
 				hookItem._args = hookItem._pendingArgs;
 			}
@@ -95,7 +98,7 @@ options.diffed = vnode => {
 options._commit = (vnode, commitQueue) => {
 	commitQueue.some(component => {
 		try {
-			component._renderCallbacks.forEach(invokeCleanup);
+			component._renderCallbacks.some(invokeCleanup);
 			component._renderCallbacks = component._renderCallbacks.filter(cb =>
 				cb._value ? invokeEffect(cb) : true
 			);
@@ -118,7 +121,7 @@ options.unmount = vnode => {
 	const c = vnode._component;
 	if (c && c.__hooks) {
 		let hasErrored;
-		c.__hooks._list.forEach(s => {
+		c.__hooks._list.some(s => {
 			try {
 				invokeCleanup(s);
 			} catch (e) {
@@ -193,7 +196,7 @@ export function useReducer(reducer, initialState, init) {
 					: hookState._value[0];
 				const nextValue = hookState._reducer(currentValue, action);
 
-				if (currentValue !== nextValue) {
+				if (!ObjectIs(currentValue, nextValue)) {
 					hookState._nextValue = [nextValue, hookState._value[1]];
 					hookState._component.setState({});
 				}
@@ -211,7 +214,7 @@ export function useReducer(reducer, initialState, init) {
 			// not be called. But we use that to update the hook values, so we
 			// need to call it.
 			currentComponent.componentWillUpdate = function (p, s, c) {
-				if (this._force) {
+				if (this._bits & COMPONENT_FORCE) {
 					let tmp = prevScu;
 					// Clear to avoid other sCU hooks from being called
 					prevScu = undefined;
@@ -237,28 +240,21 @@ export function useReducer(reducer, initialState, init) {
 			function updateHookState(p, s, c) {
 				if (!hookState._component.__hooks) return true;
 
-				/** @type {(x: import('./internal').HookState) => x is import('./internal').ReducerHookState} */
-				const isStateHook = x => !!x._component;
-				const stateHooks =
-					hookState._component.__hooks._list.filter(isStateHook);
-
-				const allHooksEmpty = stateHooks.every(x => !x._nextValue);
-				// When we have no updated hooks in the component we invoke the previous SCU or
-				// traverse the VDOM tree further.
-				if (allHooksEmpty) {
-					return prevScu ? prevScu.call(this, p, s, c) : true;
-				}
-
+				const hooksList = hookState._component.__hooks._list;
 				// We check whether we have components with a nextValue set that
 				// have values that aren't equal to one another this pushes
 				// us to update further down the tree
-				let shouldUpdate = hookState._component.props !== p;
-				stateHooks.forEach(hookItem => {
+				let shouldUpdate =
+					hookState._component.props !== p ||
+					hooksList.every(x => !x._nextValue);
+
+				hooksList.some(hookItem => {
 					if (hookItem._nextValue) {
 						const currentValue = hookItem._value[0];
 						hookItem._value = hookItem._nextValue;
 						hookItem._nextValue = undefined;
-						if (currentValue !== hookItem._value[0]) shouldUpdate = true;
+						if (!ObjectIs(currentValue, hookItem._value[0]))
+							shouldUpdate = true;
 					}
 				});
 
@@ -271,7 +267,7 @@ export function useReducer(reducer, initialState, init) {
 		}
 	}
 
-	return hookState._nextValue || hookState._value;
+	return hookState._value;
 }
 
 /**
@@ -448,13 +444,14 @@ export function useId() {
 function flushAfterPaintEffects() {
 	let component;
 	while ((component = afterPaintEffects.shift())) {
-		if (!component._parentDom || !component.__hooks) continue;
+		const hooks = component.__hooks;
+		if (!component._parentDom || !hooks) continue;
 		try {
-			component.__hooks._pendingEffects.forEach(invokeCleanup);
-			component.__hooks._pendingEffects.forEach(invokeEffect);
-			component.__hooks._pendingEffects = [];
+			hooks._pendingEffects.some(invokeCleanup);
+			hooks._pendingEffects.some(invokeEffect);
+			hooks._pendingEffects = [];
 		} catch (e) {
-			component.__hooks._pendingEffects = [];
+			hooks._pendingEffects = [];
 			options._catchError(e, component._vnode);
 		}
 	}
@@ -540,7 +537,7 @@ function argsChanged(oldArgs, newArgs) {
 	return (
 		!oldArgs ||
 		oldArgs.length !== newArgs.length ||
-		newArgs.some((arg, index) => arg !== oldArgs[index])
+		newArgs.some((arg, index) => !ObjectIs(arg, oldArgs[index]))
 	);
 }
 

@@ -1,6 +1,5 @@
 import { defineConfig } from 'vitest/config';
 import { transformAsync } from '@babel/core';
-import fs from 'node:fs/promises';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 
@@ -130,8 +129,6 @@ for (let prop in mangleJson.props.props) {
 	rename[name] = mangleJson.props.props[prop];
 }
 
-const cache = new Map();
-const pending = new Map();
 export default defineConfig({
 	resolve: {
 		alias: rollupAlias,
@@ -139,11 +136,11 @@ export default defineConfig({
 	},
 	esbuild: {
 		loader: 'jsx',
-		include: /.*\.js$/,
+		include: /.*\.jsx$/,
 		exclude: ['node_nodules'],
 		jsx: 'transform',
-		jsxImportSource: 'preact',
-		jsxDev: true
+		jsxFactory: 'createElement',
+		jsxFragment: 'Fragment',
 	},
 	plugins: [
 		{
@@ -158,21 +155,7 @@ export default defineConfig({
 					return null;
 				}
 
-				const cached = cache.get(id);
-				if (cached && cached.input === code) {
-					return cached.result;
-				}
-
-				if (pending.has(id)) {
-					const result = await pending.get(id);
-					pending.delete(id);
-					return {
-						code: result.code,
-						map: result.map
-					};
-				}
-
-				const promise = transformAsync(code, {
+				const transformed = await transformAsync(code, {
 					filename: id,
 					configFile: false,
 					plugins: [
@@ -183,14 +166,7 @@ export default defineConfig({
 							}
 						]
 					],
-					include: ['**/src/**/*.js', '**/test/**/*.js']
-				});
-
-				pending.set(id, promise);
-				const transformed = await promise;
-				cache.set(id, {
-					input: code,
-					result: transformed
+					include: ['**/src/**/*.js', '**/test/**/*.js', '**/test/**/*.jsx'],
 				});
 
 				return {
@@ -216,64 +192,64 @@ export default defineConfig({
 		],
 		esbuildOptions: {
 			alias,
-			plugins: [
-				{
-					name: 'load-js-files-as-jsx',
-					setup(build) {
-						build.onLoad({ filter: /.*\.js$/ }, async args => {
-							return {
-								loader: 'jsx',
-								contents: await fs.readFile(args.path, 'utf8')
-							};
-						});
-					}
-				}
-			]
 		}
 	},
 	test: {
-		include: [
-			'{debug,devtools,hooks,compat,test-utils,jsx-runtime}/test/{browser,shared}/**/*.test.js',
-			'./test/{browser,shared}/**/*.test.js'
-		],
 		cache: false,
+		globals: true,
 		coverage: {
 			enabled: COVERAGE,
 			include: MINIFY
 				? [
-						'**/dist/preact.mjs',
-						'**/compat/dist/compat.mjs',
-						'**/devtools/dist/devtools.mjs',
-						'**/jsx-runtime/dist/jsxRuntime.mjs',
-						'**/debug/dist/debug.mjs',
-						'**/hooks/dist/hooks.mjs',
-						'**/test-utils/dist/testUtils.mjs'
+						'dist/preact.mjs',
+						'compat/dist/compat.mjs',
+						'devtools/dist/devtools.mjs',
+						'jsx-runtime/dist/jsxRuntime.mjs',
+						'debug/dist/debug.mjs',
+						'hooks/dist/hooks.mjs',
+						'test-utils/dist/testUtils.mjs'
 					]
 				: [
-						'**/src/**/*',
-						'**/debug/src/**/*',
-						'**/devtools/src/**/*',
-						'**/hooks/src/**/*',
-						'**/compeat/src/**/*',
-						'**/jsx-runtime/src/**/*',
-						'**/test-utils/src/**/*'
+						'src/**/*',
+						'debug/src/**/*',
+						'devtools/src/**/*',
+						'hooks/src/**/*',
+						'compeat/src/**/*',
+						'jsx-runtime/src/**/*',
+						'test-utils/src/**/*'
 					],
-			extension: ['.js'],
-			provider: 'istanbul',
+			extension: ['.js', '.mjs'],
+			provider: 'v8',
 			reporter: ['html', 'lcovonly', 'text-summary'],
 			reportsDirectory: './coverage'
 		},
-		setupFiles: ['./vitest.setup.js'],
-		globals: true,
-		// dangerouslyIgnoreUnhandledErrors: true,
-		browser: {
-			// TODO: isolate doesn't work it leaks across all pages
-			// isolate: false,
-			provider: 'webdriverio',
-			enabled: true,
-			screenshotFailures: false,
-			headless: true,
-			instances: [{ browser: 'chrome' }]
-		}
+		projects: [
+			{
+				extends: true,
+				test: {
+					include: ['./test/{shared,node,ts}/**/*.test.js?(x)']
+				}
+			},
+			{
+				extends: true,
+				test: {
+					include: [
+						'{debug,devtools,hooks,compat,test-utils,jsx-runtime}/test/{browser,shared}/**/*.test.js?(x)',
+						'./test/{browser,shared}/**/*.test.js?(x)'
+					],
+					setupFiles: ['./vitest.setup.js'],
+					// dangerouslyIgnoreUnhandledErrors: true,
+					browser: {
+						// TODO: isolate doesn't work it leaks across all pages
+						// isolate: false,
+						provider: 'playwright',
+						enabled: true,
+						screenshotFailures: false,
+						headless: true,
+						instances: [{ browser: 'chromium' }]
+					}
+				}
+			}
+		]
 	}
 });

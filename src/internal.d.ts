@@ -1,6 +1,4 @@
-// Intentionally not using a relative path to take advantage of
-// the TS version resolution mechanism
-import * as preact from 'preact';
+import * as preact from './index';
 
 export enum HookType {
 	useState = 1,
@@ -62,8 +60,7 @@ export type ComponentChild =
 	| undefined;
 export type ComponentChildren = ComponentChild[] | ComponentChild;
 
-export interface FunctionComponent<P = {}>
-	extends preact.FunctionComponent<P> {
+export interface FunctionComponent<P = {}> extends preact.FunctionComponent<P> {
 	// Internally, createContext uses `contextType` on a Function component to
 	// implement the Consumer component
 	contextType?: PreactContext;
@@ -95,6 +92,7 @@ export interface PreactElement extends preact.ContainerNode {
 	data?: CharacterData['data'];
 	// Property to set __dangerouslySetInnerHTML
 	innerHTML?: Element['innerHTML'];
+	remove?: Element['remove'];
 
 	// Attribute reading and setting
 	readonly attributes?: Element['attributes'];
@@ -104,6 +102,9 @@ export interface PreactElement extends preact.ContainerNode {
 	// Event listeners
 	addEventListener?: Element['addEventListener'];
 	removeEventListener?: Element['removeEventListener'];
+
+	// Used to match DOM nodes to VNodes during hydration
+	readonly ownerDocument: Document;
 
 	// Setting styles
 	readonly style?: CSSStyleDeclaration;
@@ -126,7 +127,9 @@ export interface PreactElement extends preact.ContainerNode {
 }
 
 export interface PreactEvent extends Event {
-	_dispatched?: number;
+	// Keyed by a per-instance unique string (e.g. `__dXXXXX`) so that
+	// multiple Preact copies on the same page don't share event clock stamps.
+	[key: string]: any;
 }
 
 // We use the `current` property to differentiate between the two kinds of Refs so
@@ -139,9 +142,7 @@ type RefCallback<T> = {
 export type Ref<T> = RefObject<T> | RefCallback<T>;
 
 export interface VNode<P = {}> extends preact.VNode<P> {
-	// Redefine type here using our internal ComponentType type, and specify
-	// string has an undefined `defaultProps` property to make TS happy
-	type: (string & { defaultProps: undefined }) | ComponentType<P>;
+	type: string | ComponentType<P>;
 	props: P & { children: ComponentChildren };
 	ref?: Ref<any> | null;
 	_children: Array<VNode<any>> | null;
@@ -158,14 +159,13 @@ export interface VNode<P = {}> extends preact.VNode<P> {
 	_flags: number;
 }
 
-export interface Component<P = {}, S = {}> extends Omit<preact.Component<P, S>, 'base'> {
+export interface Component<P = {}, S = {}>
+	extends Omit<preact.Component<P, S>, 'base'> {
 	// When component is functional component, this is reset to functional component
 	constructor: ComponentType<P>;
 	state: S; // Override Component["state"] to not be readonly for internal use, specifically Hooks
-	base?: PreactElement;
 
-	_dirty: boolean;
-	_force?: boolean;
+	_excess?: PreactElement[];
 	_renderCallbacks: Array<() => void>; // Only class components
 	_stateCallbacks: Array<() => void>; // Only class components
 	_globalContext?: any;
@@ -178,10 +178,7 @@ export interface Component<P = {}, S = {}> extends Omit<preact.Component<P, S>, 
 	 * components or array returns.
 	 */
 	_parentDom?: PreactElement | null;
-	// Always read, set only when handling error
-	_processingException?: Component<any, any> | null;
-	// Always read, set only when handling error. This is used to indicate at diffTime to set _processingException
-	_pendingError?: Component<any, any> | null;
+	_bits: number;
 }
 
 export interface PreactContext extends preact.Context<any> {

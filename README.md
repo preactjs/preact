@@ -1,3 +1,6 @@
+> [!NOTE]
+> This is the branch for the upcoming release, for patches to v10 you need the [v10.x branch](https://github.com/preactjs/preact/tree/v10.x)
+
 <p align="center">
 <a href="https://preactjs.com" target="_blank">
 
@@ -5,7 +8,7 @@
 
 </a>
 </p>
-<p align="center">Fast <b>3kB</b> alternative to React with the same modern API.</p>
+<p align="center">Fast <b>4kB</b> alternative to React with the same modern API.</p>
 
 **All the power of Virtual DOM components, without the overhead:**
 
@@ -13,7 +16,7 @@
 - Extensive React compatibility via a simple [preact/compat] alias
 - Everything you need: JSX, <abbr title="Virtual DOM">VDOM</abbr>, [DevTools], <abbr title="Hot Module Replacement">HMR</abbr>, <abbr title="Server-Side Rendering">SSR</abbr>.
 - Highly optimized diff algorithm and seamless hydration from Server Side Rendering
-- Supports all modern browsers and IE11
+- Supports all modern browsers
 - Transparent asynchronous rendering with a pluggable scheduler
 
 ### 💁 More information at the [Preact Website ➞](https://preactjs.com)
@@ -47,7 +50,7 @@ You can find some awesome libraries in the [awesome-preact list](https://github.
 
 #### Tutorial: Building UI with Preact
 
-With Preact, you create user interfaces by assembling trees of components and elements. Components are functions or classes that return a description of what their tree should output. These descriptions are typically written in [JSX](https://facebook.github.io/jsx/) (shown underneath), or [HTM](https://github.com/developit/htm) which leverages standard JavaScript Tagged Templates. Both syntaxes can express trees of elements with "props" (similar to HTML attributes) and children.
+With Preact, you create user interfaces by assembling trees of components and elements. Components are functions or classes that return a description of what their tree should output. These descriptions are typically written in [JSX](https://react.dev/learn/writing-markup-with-jsx) (shown underneath), or [HTM](https://github.com/developit/htm) which leverages standard JavaScript Tagged Templates. Both syntaxes can express trees of elements with "props" (similar to HTML attributes) and children.
 
 To get started using Preact, first look at the render() function. This function accepts a tree description and creates the structure described. Next, it appends this structure to a parent DOM element provided as the second argument. Future calls to render() will reuse the existing tree and update it in-place in the DOM. Internally, render() will calculate the difference from previous outputted structures in an attempt to perform as few DOM operations as possible.
 
@@ -122,6 +125,9 @@ Become a sponsor and get your logo on our README on GitHub with a link to your s
 <a href="https://opencollective.com/preact/sponsor/14/website" target="_blank"><img src="https://opencollective.com/preact/sponsor/14/avatar.svg"></a>
 <a href="https://opencollective.com/preact/sponsor/15/website" target="_blank"><img src="https://opencollective.com/preact/sponsor/15/avatar.svg"></a>
 <a href="https://github.com/guardian" target="_blank"> &nbsp; &nbsp; &nbsp; <img src="https://github.com/guardian.png" width="64" height="64"> &nbsp; &nbsp; &nbsp; </a>
+<a href="https://www.sent.dm" target="_blank"><img src="https://github.com/sentdm.png?size=64" alt="SentDM" width="64" height="64" hspace="96"></a>
+<a href="https://www.songsterr.com/" target="_blank"><img src="https://github.com/songsterr.png?size=64" alt="Songsterr" width="64" height="64" hspace="96"></a>
+<a href="https://deno.land" target="_blank"><img src="https://github.com/denoland.png?size=64" alt="Deno" width="64" height="64" hspace="96"></a>
 <a href="https://opencollective.com/preact/sponsor/16/website" target="_blank"><img src="https://opencollective.com/preact/sponsor/16/avatar.svg"></a>
 <a href="https://opencollective.com/preact/sponsor/17/website" target="_blank"><img src="https://opencollective.com/preact/sponsor/17/avatar.svg"></a>
 <a href="https://opencollective.com/preact/sponsor/18/website" target="_blank"><img src="https://opencollective.com/preact/sponsor/18/avatar.svg"></a>

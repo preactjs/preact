@@ -1,10 +1,10 @@
 # Contributing
 
-This document is intended for developers interest in making contributions to Preact and document our internal processes like releasing a new version.
+This document is intended for developers interested in making contributions to Preact and documents our internal processes like releasing a new version.
 
 ## Getting Started
 
-This steps will help you to set up your development environment. That includes all dependencies we use to build Preact and developer tooling like git commit hooks.
+These steps will help you set up your development environment. That includes all dependencies we use to build Preact and developer tooling like git commit hooks.
 
 1. Clone the git repository: `git clone git@github.com:preactjs/preact.git`
 2. Go into the cloned folder: `cd preact/`
@@ -32,7 +32,7 @@ A quick overview of our repository:
   	dist/ # Build artifacts for publishing on npm (may not be present)
 
   # Sub-package, can be imported via `preact/hooks` by users.
-  # The hooks API is an effect based API to deal with component lifcycles.
+  # The hooks API is an effect based API to deal with component lifecycles.
   # It's similar to hooks in React
   hooks/
   	src/  # Source code of the hooks addon
@@ -41,7 +41,7 @@ A quick overview of our repository:
 
   # Sub-package, can be imported via `preact/debug` by users.
   # Includes debugging warnings and error messages for common mistakes found
-  # in Preact application. Also hosts the devtools bridge
+  # in Preact applications. Also hosts the devtools bridge
   debug/
   	src/  # Source code of the debug addon
   	test/ # Tests related to the debug addon
@@ -66,7 +66,7 @@ _Note: The code for rendering Preact on the server lives in another repo and is 
 
 ### What does `mangle.json` do?
 
-It's a special file that can be used to specify how `terser` (previously known as `uglify`) will minify variable names. Because each sub-package has it's own distribution files we need to ensure that the variable names stay consistent across bundles.
+It's a special file that can be used to specify how `terser` (previously known as `uglify`) will minify variable names. Because each sub-package has its own distribution files we need to ensure that the variable names stay consistent across bundles.
 
 ## What does `options.js` do?
 
@@ -74,7 +74,12 @@ Unique to Preact we do support several ways to hook into our renderer. All our a
 
 ## Important Branches
 
-We merge every PR into the `main` branch which is the one that we'll use to publish code to npm. For the previous Preact release line we have a branch called `8` which is in maintenance mode. As a new contributor you won't have to deal with that ;)
+We have a couple of important branches to be aware of:
+
+- `main` - This is the main development branch and represents the upcoming v11 release line.
+- `v10.x` - This branch represents the current stable release line, v10.
+
+As we have yet to release v11, contributors are welcome to use either branch to build upon. We will try to port changes between the branches when possible, to keep them in sync, but if you're feeling generous, we'd love if you'd submit PRs to both branches!
 
 ## Creating your first Pull-Request
 
@@ -82,7 +87,7 @@ We try to make it as easy as possible to contribute to Preact and make heavy use
 
 Once a PR or a Draft PR has been created our community typically joins the discussion about the proposed change. Sometimes that includes ideas for test cases or even different ways to go about implementing a feature. Often this also includes ideas on how to make the code smaller. We usually refer to the latter as "code-golfing" or just "golfing".
 
-When everything is good to go someone will approve the PR and the changes will be merged into the `main` branch and we usually cut a release a few days/ a week later.
+When everything is good to go someone will approve the PR and the changes will be merged into the `main` or `v10.x` branches and we usually cut a release a few days/ a week later.
 
 _The big takeaway for you here is, that we will guide you along the way. We're here to help to make a PR ready for approval!_
 
@@ -90,27 +95,31 @@ The short summary is:
 
 1. Make changes and submit a PR
 2. Modify change according to feedback (if there is any)
-3. PR will be merged into `main`
+3. PR will be merged into `main` or `v10.x`
 4. A new release will be cut (every 2-3 weeks).
 
 ## Commonly used scripts for contributions
 
-Scripts can be executed via `npm run [script]` or `yarn [script]` respectively.
+Scripts can be executed via `npm run [script]`.
 
 - `build` - compiles all packages ready for publishing to npm
 - `build:core` - builds just Preact itself
 - `build:debug` - builds the debug addon only
+- `build:devtools` - builds the devtools addon only
 - `build:hooks` - builds the hook addon only
 - `build:test-utils` - builds the test-utils addon only
+- `build:compat` - builds the compat addon only
+- `build:jsx` - builds the JSX runtime addon only
+- `test` - Run all tests (linting, TypeScript definitions, unit/integration tests)
 - `test:ts` - Run all tests for TypeScript definitions
-- `test:karma` - Run all unit/integration tests.
-- `test:karma:watch` - Same as above, but it will automatically re-run the test suite if a code change was detected.
+- `test:vitest` - Run all unit/integration tests.
+- `test:vitest:watch` - Same as above, but it will automatically re-run the test suite if a code change was detected.
 
-But to be fair, the only ones we use ourselves are `build` and `test:karma:watch`. The other ones are mainly used on our CI pipeline and we rarely use them.
+But to be fair, the ones we mostly use locally are `build` and `test:vitest:watch`. The other ones are mainly used on our CI pipeline.
 
-_Note: Both `test:karma` and `test:karma:watch` listen to the environment variable `COVERAGE=true`. Disabling code coverage can significantly speed up the time it takes to complete the test suite._
+_Note: Both `test:vitest` and `test:vitest:watch` listen to the environment variable `COVERAGE=true`. Disabling code coverage can significantly speed up the time it takes to complete the test suite._
 
-_Note2: The test suite is based on `karma` and `mocha`. Individual tests can be executed by appending `.only`:_
+_Note2: Individual tests can be executed by appending `.only`:_
 
 ```jsx
 it.only('should test something', () => {
@@ -161,21 +170,11 @@ Checkout the README in the benchmarks folder for more information on running ben
 
 Several members of the team are very fond of TypeScript and we wanted to leverage as many of its advantages, like improved autocompletion, for Preact. We even attempted to port Preact to TypeScript a few times, but we ran into many issues with the DOM typings. Those would force us to fill our codebase with many `any` castings, making our code very noisy.
 
-Luckily TypeScript has a mode where it can somewhat reliably typecheck JavaScript code by reusing the types defined in JSDoc blocks. It's not perfect and it often has trouble inferring the correct types the further one strays away from the function arguments, but it's good enough that it helps us a lot with autocompletion. Another plus is that we can make sure that our TypeScript definitons are correct at the same time.
+Luckily TypeScript has a mode where it can somewhat reliably typecheck JavaScript code by reusing the types defined in JSDoc blocks. It's not perfect and it often has trouble inferring the correct types the further one strays away from the function arguments, but it's good enough that it helps us a lot with autocompletion. Another plus is that we can make sure that our TypeScript definitions are correct at the same time.
 
 Check out the [official TypeScript documentation](https://www.typescriptlang.org/docs/handbook/type-checking-javascript-files.html) for more information.
 
 _Note that we have separate tests for our TypeScript definition files. We only use `ts-check` for local development and don't check it anywhere else like on the CI._
-
-### Why does the code base often use `let` instead of `const`?
-
-There is no real reason for that other a historical one. Back before auto-formatting via prettier was a thing and minifiers weren't as advanced as they are today we used a pretty terse code-style. The code-style deliberately was aimed at making code look as concise and short as possible. The `let` keyword is a bit shorter than `const` to write, so we only used that. This was done only for stylistic reasons.
-
-This helped our minds to not lose sight of focusing on size, but made it difficult for newcomers to start contributing to Preact. For that reason alone we switched to `prettier` and loosened our rule regarding usage of `let` or `const`. Today we use both, but you can still find many existing places where `let` is still in use.
-
-In the end there is no effect on size regardless if you use `const`, `let` or use both. Our code is downtranspiled to `ES5` for npm so both will be replaced with `var` anyways. Therefore it doesn't really matter at all which one is used in our codebase.
-
-This will only become important once shipping modern JavaScript code on npm becomes a thing and bundlers follow suit.
 
 ## How to create a good bug report
 
@@ -194,20 +193,19 @@ We closely watch our issues and have a pretty active [Slack workspace](https://c
 This guide is intended for core team members that have the necessary
 rights to publish new releases on npm.
 
+Before using the automated npm publishing flow, make sure npm trusted publishing is configured for the `preactjs/preact` repository, the `release.yml` workflow, and the `npm` environment. The GitHub `npm` environment should require reviewer approval, and repository rules should protect `11.*` tags.
+
 1. Make a PR where **only** the version number is incremented in `package.json` and everywhere else. A simple search and replace works. (note: We follow `SemVer` conventions)
 2. Wait until the PR is approved and merged.
 3. Switch back to the `main` branch and pull the merged PR
 4. Create and push a tag for the new version you want to publish:
-   1. `git tag 10.0.0`
-   2. `git push --tags`
-5. Wait for the Release workflow to complete
-   - It'll create a draft release and upload the built npm package as an asset to the release
+   1. `git tag 11.0.0`
+   2. `git push origin 11.0.0`
+5. Wait for the Release workflow to reach the `npm` environment approval gate, approve it, and let it complete
+   - It'll validate that the tag matches the package version, create a draft release, upload the built npm package as a release asset, and publish it to npm.
+   - Stable releases publish to the `latest` npm dist-tag; prereleases publish to the approved prerelease dist-tag (`alpha`, `beta`, `rc`, or `next`).
 6. [Fill in the release notes](#writing-release-notes) in GitHub and publish them
-7. Run the publish script with the tag you created
-   1. `node ./scripts/release/publish.mjs 10.0.0`
-   2. Make sure you have 2FA enabled in npm, otherwise the above command will fail.
-   3. If you're doing a pre-release add `--npm-tag next` to the `publish.mjs` command to publish it under a different tag (default is `latest`)
-8. Tweet it out
+7. Tweet it out
 
 ## Legacy Releases (8.x)
 

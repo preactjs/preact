@@ -10,6 +10,25 @@ import {
 } from 'preact/jsx-runtime';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { encodeEntities } from '../../src/utils';
+import { vi } from 'vitest';
+
+function createSignal(value) {
+	return {
+		value,
+		peek() {
+			return value;
+		},
+		subscribe() {
+			return () => {};
+		},
+		valueOf() {
+			return value;
+		},
+		toString() {
+			return String(value);
+		}
+	};
+}
 
 describe('Babel jsx/jsxDEV', () => {
 	let scratch;
@@ -51,46 +70,6 @@ describe('Babel jsx/jsxDEV', () => {
 		expect(vnode.key).to.equal('foo');
 	});
 
-	it('should apply defaultProps', () => {
-		class Foo extends Component {
-			render() {
-				return <div />;
-			}
-		}
-
-		Foo.defaultProps = {
-			foo: 'bar'
-		};
-
-		const vnode = jsx(Foo, {}, null);
-		expect(vnode.props).to.deep.equal({
-			foo: 'bar'
-		});
-	});
-
-	it('should respect defaultProps when props are null', () => {
-		const Component = ({ children }) => children;
-		Component.defaultProps = { foo: 'bar' };
-		expect(jsx(Component, { foo: null }).props).to.deep.equal({ foo: null });
-	});
-
-	it('should keep props over defaultProps', () => {
-		class Foo extends Component {
-			render() {
-				return <div />;
-			}
-		}
-
-		Foo.defaultProps = {
-			foo: 'bar'
-		};
-
-		const vnode = jsx(Foo, { foo: 'baz' }, null);
-		expect(vnode.props).to.deep.equal({
-			foo: 'baz'
-		});
-	});
-
 	it('should set __source and __self', () => {
 		const vnode = jsx('div', { class: 'foo' }, 'key', false, 'source', 'self');
 		expect(vnode.__source).to.equal('source');
@@ -119,9 +98,9 @@ describe('Babel jsx/jsxDEV', () => {
 	});
 
 	it('should call options.vnode with the vnode', () => {
-		options.vnode = sinon.spy();
+		options.vnode = vi.fn();
 		const vnode = jsx('div', { class: 'foo' }, 'key');
-		expect(options.vnode).to.have.been.calledWith(vnode);
+		expect(options.vnode).toHaveBeenCalledWith(vnode);
 	});
 });
 
@@ -162,6 +141,15 @@ describe('precompiled JSX', () => {
 
 		it('should escape values', () => {
 			expect(jsxAttr('foo', "&<'")).to.equal('foo="&amp;&lt;\'"');
+			expect(jsxAttr('style', { foo: `"&<'"` })).to.equal(
+				'style="foo:&quot;&amp;&lt;\'&quot;;"'
+			);
+		});
+
+		it('should support signals', () => {
+			const sig = createSignal(`&<'"`);
+			expect(jsxAttr('foo', sig)).to.equal(`foo="&amp;&lt;'&quot;"`);
+			expect(jsxAttr('style', sig)).to.equal(`style="&amp;&lt;'&quot;"`);
 		});
 
 		it('should call options.attr()', () => {
@@ -173,7 +161,9 @@ describe('precompiled JSX', () => {
 		});
 
 		it('should serialize style object', () => {
-			expect(jsxAttr('style', { padding: 3 })).to.equal('style="padding:3px;"');
+			expect(jsxAttr('style', { padding: '3px' })).to.equal(
+				'style="padding:3px;"'
+			);
 		});
 	});
 

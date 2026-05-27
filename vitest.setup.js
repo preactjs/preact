@@ -1,13 +1,8 @@
-import sinon from 'sinon';
-import { expect, chai, describe } from 'vitest';
-import sinonChai from 'sinon-chai';
-
-chai.use(sinonChai);
+import { expect, describe } from 'vitest';
 
 globalThis.context = describe;
-globalThis.sinon = sinon;
 
-window.addEventListener('error', () => {})
+window.addEventListener('error', () => {});
 
 // Something that's loaded before this file polyfills Symbol object.
 // We need to verify that it works in IE without that.

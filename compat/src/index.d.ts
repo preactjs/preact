@@ -1,10 +1,101 @@
-import * as _hooks from '../../hooks';
-// Intentionally not using a relative path to take advantage of
-// the TS version resolution mechanism
-import * as preact from 'preact';
+import * as _preact from '../../src/index';
 import { JSXInternal } from '../../src/jsx';
+import * as _hooks from '../../hooks';
 import * as _Suspense from './suspense';
-import * as _SuspenseList from './suspense-list';
+
+declare namespace preact {
+	export interface FunctionComponent<P = {}> {
+		(
+			props: _preact.RenderableProps<P>,
+			context?: any
+		): _preact.ComponentChildren;
+		displayName?: string;
+		defaultProps?: Partial<P> | undefined;
+	}
+
+	export interface ComponentClass<P = {}, S = {}> {
+		new (props: P, context?: any): _preact.Component<P, S>;
+		displayName?: string;
+		defaultProps?: Partial<P>;
+		contextType?: _preact.Context<any>;
+		getDerivedStateFromProps?(
+			props: Readonly<P>,
+			state: Readonly<S>
+		): Partial<S> | null;
+		getDerivedStateFromError?(error: any): Partial<S> | null;
+	}
+
+	// eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
+	export interface Component<P = {}, S = {}> {
+		componentWillMount?(): void;
+		componentDidMount?(): void;
+		componentWillUnmount?(): void;
+		getChildContext?(): object;
+		componentWillReceiveProps?(nextProps: Readonly<P>, nextContext: any): void;
+		shouldComponentUpdate?(
+			nextProps: Readonly<P>,
+			nextState: Readonly<S>,
+			nextContext: any
+		): boolean;
+		componentWillUpdate?(
+			nextProps: Readonly<P>,
+			nextState: Readonly<S>,
+			nextContext: any
+		): void;
+		getSnapshotBeforeUpdate?(oldProps: Readonly<P>, oldState: Readonly<S>): any;
+		componentDidUpdate?(
+			previousProps: Readonly<P>,
+			previousState: Readonly<S>,
+			snapshot: any
+		): void;
+		componentDidCatch?(error: any, errorInfo: _preact.ErrorInfo): void;
+	}
+
+	export abstract class Component<P, S> {
+		constructor(props?: P, context?: any);
+
+		static displayName?: string;
+		static defaultProps?: any;
+		static contextType?: _preact.Context<any>;
+
+		// Static members cannot reference class type parameters. This is not
+		// supported in TypeScript. Reusing the same type arguments from `Component`
+		// will lead to an impossible state where one cannot satisfy the type
+		// constraint under no circumstances, see #1356.In general type arguments
+		// seem to be a bit buggy and not supported well at the time of this
+		// writing with TS 3.3.3333.
+		static getDerivedStateFromProps?(
+			props: Readonly<object>,
+			state: Readonly<object>
+		): object | null;
+		static getDerivedStateFromError?(error: any): object | null;
+
+		state: Readonly<S>;
+		props: _preact.RenderableProps<P>;
+		context: any;
+
+		// From https://github.com/DefinitelyTyped/DefinitelyTyped/blob/e836acc75a78cf0655b5dfdbe81d69fdd4d8a252/types/react/index.d.ts#L402
+		// // We MUST keep setState() as a unified signature because it allows proper checking of the method return type.
+		// // See: https://github.com/DefinitelyTyped/DefinitelyTyped/issues/18365#issuecomment-351013257
+		setState<K extends keyof S>(
+			state:
+				| ((
+						prevState: Readonly<S>,
+						props: Readonly<P>
+				  ) => Pick<S, K> | Partial<S> | null)
+				| (Pick<S, K> | Partial<S> | null),
+			callback?: () => void
+		): void;
+
+		forceUpdate(callback?: () => void): void;
+
+		abstract render(
+			props?: _preact.RenderableProps<P>,
+			state?: Readonly<S>,
+			context?: any
+		): _preact.ComponentChildren;
+	}
+}
 
 // export default React;
 export = React;
@@ -17,7 +108,6 @@ declare namespace React {
 	export import CreateHandle = _hooks.CreateHandle;
 	export import EffectCallback = _hooks.EffectCallback;
 	export import Inputs = _hooks.Inputs;
-	export import PropRef = _hooks.PropRef;
 	export import Reducer = _hooks.Reducer;
 	export import Dispatch = _hooks.Dispatch;
 	export import SetStateAction = _hooks.StateUpdater;
@@ -42,230 +132,223 @@ declare namespace React {
 	): T;
 
 	// Preact Defaults
-	export import Context = preact.Context;
-	export import ContextType = preact.ContextType;
-	export import RefObject = preact.RefObject;
+	export import Context = _preact.Context;
+	export import ContextType = _preact.ContextType;
+	export import RefObject = _preact.RefObject;
 	export import Component = preact.Component;
 	export import FunctionComponent = preact.FunctionComponent;
-	export import ComponentType = preact.ComponentType;
+	export import ComponentType = _preact.ComponentType;
 	export import ComponentClass = preact.ComponentClass;
-	export import FC = preact.FunctionComponent;
-	export import createContext = preact.createContext;
-	export import Ref = preact.Ref;
-	export import createRef = preact.createRef;
-	export import Fragment = preact.Fragment;
-	export import createElement = preact.createElement;
-	export import cloneElement = preact.cloneElement;
-	export import ComponentProps = preact.ComponentProps;
-	export import ReactNode = preact.ComponentChild;
-	export import ReactElement = preact.VNode;
-	export import Consumer = preact.Consumer;
-	export import ErrorInfo = preact.ErrorInfo;
+	export import FC = _preact.FunctionComponent;
+	export import createContext = _preact.createContext;
+	export import Ref = _preact.Ref;
+	export import createRef = _preact.createRef;
+	export import Fragment = _preact.Fragment;
+	export import createElement = _preact.createElement;
+	export import cloneElement = _preact.cloneElement;
+	export import ComponentProps = _preact.ComponentProps;
+	export import ReactNode = _preact.ComponentChild;
+	export import ReactElement = _preact.VNode;
+	export import Consumer = _preact.Consumer;
+	export import ErrorInfo = _preact.ErrorInfo;
+	export import Key = _preact.Key;
 
 	// Suspense
 	export import Suspense = _Suspense.Suspense;
 	export import lazy = _Suspense.lazy;
-	export import SuspenseList = _SuspenseList.SuspenseList;
 
 	// Compat
-	export import StrictMode = preact.Fragment;
+	export import StrictMode = _preact.Fragment;
 	export const version: string;
 	export function startTransition(cb: () => void): void;
 
 	// HTML
 	export interface HTMLAttributes<T extends EventTarget>
-		extends JSXInternal.HTMLAttributes<T> {}
+		extends _preact.HTMLAttributes<T> {}
 	export interface HTMLProps<T extends EventTarget>
-		extends JSXInternal.AllHTMLAttributes<T>,
-			preact.ClassAttributes<T> {}
+		extends _preact.AllHTMLAttributes<T>,
+			_preact.ClassAttributes<T> {}
 	export interface AllHTMLAttributes<T extends EventTarget>
-		extends JSXInternal.AllHTMLAttributes<T> {}
-	export import DetailedHTMLProps = JSXInternal.DetailedHTMLProps;
-	export import CSSProperties = JSXInternal.CSSProperties;
+		extends _preact.AllHTMLAttributes<T> {}
+	export import DetailedHTMLProps = _preact.DetailedHTMLProps;
+	export import CSSProperties = _preact.CSSProperties;
 
 	export interface SVGProps<T extends EventTarget>
-		extends JSXInternal.SVGAttributes<T>,
-			preact.ClassAttributes<T> {}
+		extends _preact.SVGAttributes<T>,
+			_preact.ClassAttributes<T> {}
 
-	interface SVGAttributes extends JSXInternal.SVGAttributes {}
+	interface SVGAttributes<T extends EventTarget = SVGElement>
+		extends _preact.SVGAttributes<T> {}
 
 	interface ReactSVG extends JSXInternal.IntrinsicSVGElements {}
 
-	export import AriaAttributes = JSXInternal.AriaAttributes;
+	export import AriaAttributes = _preact.AriaAttributes;
 
-	export import HTMLAttributeReferrerPolicy = JSXInternal.HTMLAttributeReferrerPolicy;
-	export import HTMLAttributeAnchorTarget = JSXInternal.HTMLAttributeAnchorTarget;
-	export import HTMLInputTypeAttribute = JSXInternal.HTMLInputTypeAttribute;
-	export import HTMLAttributeCrossOrigin = JSXInternal.HTMLAttributeCrossOrigin;
+	export import HTMLAttributeReferrerPolicy = _preact.HTMLAttributeReferrerPolicy;
+	export import HTMLAttributeAnchorTarget = _preact.HTMLAttributeAnchorTarget;
+	export import HTMLInputTypeAttribute = _preact.HTMLInputTypeAttribute;
+	export import HTMLAttributeCrossOrigin = _preact.HTMLAttributeCrossOrigin;
 
-	export import AnchorHTMLAttributes = JSXInternal.AnchorHTMLAttributes;
-	export import AudioHTMLAttributes = JSXInternal.AudioHTMLAttributes;
-	export import AreaHTMLAttributes = JSXInternal.AreaHTMLAttributes;
-	export import BaseHTMLAttributes = JSXInternal.BaseHTMLAttributes;
-	export import BlockquoteHTMLAttributes = JSXInternal.BlockquoteHTMLAttributes;
-	export import ButtonHTMLAttributes = JSXInternal.ButtonHTMLAttributes;
-	export import CanvasHTMLAttributes = JSXInternal.CanvasHTMLAttributes;
-	export import ColHTMLAttributes = JSXInternal.ColHTMLAttributes;
-	export import ColgroupHTMLAttributes = JSXInternal.ColgroupHTMLAttributes;
-	export import DataHTMLAttributes = JSXInternal.DataHTMLAttributes;
-	export import DetailsHTMLAttributes = JSXInternal.DetailsHTMLAttributes;
-	export import DelHTMLAttributes = JSXInternal.DelHTMLAttributes;
-	export import DialogHTMLAttributes = JSXInternal.DialogHTMLAttributes;
-	export import EmbedHTMLAttributes = JSXInternal.EmbedHTMLAttributes;
-	export import FieldsetHTMLAttributes = JSXInternal.FieldsetHTMLAttributes;
-	export import FormHTMLAttributes = JSXInternal.FormHTMLAttributes;
-	export import IframeHTMLAttributes = JSXInternal.IframeHTMLAttributes;
-	export import ImgHTMLAttributes = JSXInternal.ImgHTMLAttributes;
-	export import InsHTMLAttributes = JSXInternal.InsHTMLAttributes;
-	export import InputHTMLAttributes = JSXInternal.InputHTMLAttributes;
-	export import KeygenHTMLAttributes = JSXInternal.KeygenHTMLAttributes;
-	export import LabelHTMLAttributes = JSXInternal.LabelHTMLAttributes;
-	export import LiHTMLAttributes = JSXInternal.LiHTMLAttributes;
-	export import LinkHTMLAttributes = JSXInternal.LinkHTMLAttributes;
-	export import MapHTMLAttributes = JSXInternal.MapHTMLAttributes;
-	export import MenuHTMLAttributes = JSXInternal.MenuHTMLAttributes;
-	export import MediaHTMLAttributes = JSXInternal.MediaHTMLAttributes;
-	export import MetaHTMLAttributes = JSXInternal.MetaHTMLAttributes;
-	export import MeterHTMLAttributes = JSXInternal.MeterHTMLAttributes;
-	export import QuoteHTMLAttributes = JSXInternal.QuoteHTMLAttributes;
-	export import ObjectHTMLAttributes = JSXInternal.ObjectHTMLAttributes;
-	export import OlHTMLAttributes = JSXInternal.OlHTMLAttributes;
-	export import OptgroupHTMLAttributes = JSXInternal.OptgroupHTMLAttributes;
-	export import OptionHTMLAttributes = JSXInternal.OptionHTMLAttributes;
-	export import OutputHTMLAttributes = JSXInternal.OutputHTMLAttributes;
-	export import ParamHTMLAttributes = JSXInternal.ParamHTMLAttributes;
-	export import ProgressHTMLAttributes = JSXInternal.ProgressHTMLAttributes;
-	export import SlotHTMLAttributes = JSXInternal.SlotHTMLAttributes;
-	export import ScriptHTMLAttributes = JSXInternal.ScriptHTMLAttributes;
-	export import SelectHTMLAttributes = JSXInternal.SelectHTMLAttributes;
-	export import SourceHTMLAttributes = JSXInternal.SourceHTMLAttributes;
-	export import StyleHTMLAttributes = JSXInternal.StyleHTMLAttributes;
-	export import TableHTMLAttributes = JSXInternal.TableHTMLAttributes;
-	export import TextareaHTMLAttributes = JSXInternal.TextareaHTMLAttributes;
-	export import TdHTMLAttributes = JSXInternal.TdHTMLAttributes;
-	export import ThHTMLAttributes = JSXInternal.ThHTMLAttributes;
-	export import TimeHTMLAttributes = JSXInternal.TimeHTMLAttributes;
-	export import TrackHTMLAttributes = JSXInternal.TrackHTMLAttributes;
-	export import VideoHTMLAttributes = JSXInternal.VideoHTMLAttributes;
+	export import AnchorHTMLAttributes = _preact.AnchorHTMLAttributes;
+	export import AudioHTMLAttributes = _preact.AudioHTMLAttributes;
+	export import AreaHTMLAttributes = _preact.AreaHTMLAttributes;
+	export import BaseHTMLAttributes = _preact.BaseHTMLAttributes;
+	export import BlockquoteHTMLAttributes = _preact.BlockquoteHTMLAttributes;
+	export import ButtonHTMLAttributes = _preact.ButtonHTMLAttributes;
+	export import CanvasHTMLAttributes = _preact.CanvasHTMLAttributes;
+	export import ColHTMLAttributes = _preact.ColHTMLAttributes;
+	export import ColgroupHTMLAttributes = _preact.ColgroupHTMLAttributes;
+	export import DataHTMLAttributes = _preact.DataHTMLAttributes;
+	export import DetailsHTMLAttributes = _preact.DetailsHTMLAttributes;
+	export import DelHTMLAttributes = _preact.DelHTMLAttributes;
+	export import DialogHTMLAttributes = _preact.DialogHTMLAttributes;
+	export import EmbedHTMLAttributes = _preact.EmbedHTMLAttributes;
+	export import FieldsetHTMLAttributes = _preact.FieldsetHTMLAttributes;
+	export import FormHTMLAttributes = _preact.FormHTMLAttributes;
+	export import IframeHTMLAttributes = _preact.IframeHTMLAttributes;
+	export import ImgHTMLAttributes = _preact.ImgHTMLAttributes;
+	export import InsHTMLAttributes = _preact.InsHTMLAttributes;
+	export import InputHTMLAttributes = _preact.InputHTMLAttributes;
+	export import KeygenHTMLAttributes = _preact.KeygenHTMLAttributes;
+	export import LabelHTMLAttributes = _preact.LabelHTMLAttributes;
+	export import LiHTMLAttributes = _preact.LiHTMLAttributes;
+	export import LinkHTMLAttributes = _preact.LinkHTMLAttributes;
+	export import MapHTMLAttributes = _preact.MapHTMLAttributes;
+	export import MenuHTMLAttributes = _preact.MenuHTMLAttributes;
+	export import MediaHTMLAttributes = _preact.MediaHTMLAttributes;
+	export import MetaHTMLAttributes = _preact.MetaHTMLAttributes;
+	export import MeterHTMLAttributes = _preact.MeterHTMLAttributes;
+	export import QuoteHTMLAttributes = _preact.QuoteHTMLAttributes;
+	export import ObjectHTMLAttributes = _preact.ObjectHTMLAttributes;
+	export import OlHTMLAttributes = _preact.OlHTMLAttributes;
+	export import OptgroupHTMLAttributes = _preact.OptgroupHTMLAttributes;
+	export import OptionHTMLAttributes = _preact.OptionHTMLAttributes;
+	export import OutputHTMLAttributes = _preact.OutputHTMLAttributes;
+	export import ParamHTMLAttributes = _preact.ParamHTMLAttributes;
+	export import ProgressHTMLAttributes = _preact.ProgressHTMLAttributes;
+	export import SlotHTMLAttributes = _preact.SlotHTMLAttributes;
+	export import ScriptHTMLAttributes = _preact.ScriptHTMLAttributes;
+	export import SelectHTMLAttributes = _preact.SelectHTMLAttributes;
+	export import SourceHTMLAttributes = _preact.SourceHTMLAttributes;
+	export import StyleHTMLAttributes = _preact.StyleHTMLAttributes;
+	export import TableHTMLAttributes = _preact.TableHTMLAttributes;
+	export import TextareaHTMLAttributes = _preact.TextareaHTMLAttributes;
+	export import TdHTMLAttributes = _preact.TdHTMLAttributes;
+	export import ThHTMLAttributes = _preact.ThHTMLAttributes;
+	export import TimeHTMLAttributes = _preact.TimeHTMLAttributes;
+	export import TrackHTMLAttributes = _preact.TrackHTMLAttributes;
+	export import VideoHTMLAttributes = _preact.VideoHTMLAttributes;
 
 	// Events
-	export import TargetedEvent = JSXInternal.TargetedEvent;
-	export import ChangeEvent = JSXInternal.TargetedEvent;
-	export import ClipboardEvent = JSXInternal.TargetedClipboardEvent;
-	export import CompositionEvent = JSXInternal.TargetedCompositionEvent;
-	export import DragEvent = JSXInternal.TargetedDragEvent;
-	export import PointerEvent = JSXInternal.TargetedPointerEvent;
-	export import FocusEvent = JSXInternal.TargetedFocusEvent;
-	export import FormEvent = JSXInternal.TargetedEvent;
-	export import InvalidEvent = JSXInternal.TargetedEvent;
-	export import KeyboardEvent = JSXInternal.TargetedKeyboardEvent;
-	export import MouseEvent = JSXInternal.TargetedMouseEvent;
-	export import TouchEvent = JSXInternal.TargetedTouchEvent;
-	export import UIEvent = JSXInternal.TargetedUIEvent;
-	export import AnimationEvent = JSXInternal.TargetedAnimationEvent;
-	export import TransitionEvent = JSXInternal.TargetedTransitionEvent;
+	export import TargetedEvent = _preact.TargetedEvent;
+	export import ChangeEvent = _preact.TargetedEvent;
+	export import ClipboardEvent = _preact.TargetedClipboardEvent;
+	export import CompositionEvent = _preact.TargetedCompositionEvent;
+	export import DragEvent = _preact.TargetedDragEvent;
+	export import PointerEvent = _preact.TargetedPointerEvent;
+	export import FocusEvent = _preact.TargetedFocusEvent;
+	export import FormEvent = _preact.TargetedEvent;
+	export import InvalidEvent = _preact.TargetedEvent;
+	export import KeyboardEvent = _preact.TargetedKeyboardEvent;
+	export import MouseEvent = _preact.TargetedMouseEvent;
+	export import TouchEvent = _preact.TargetedTouchEvent;
+	export import UIEvent = _preact.TargetedUIEvent;
+	export import AnimationEvent = _preact.TargetedAnimationEvent;
+	export import TransitionEvent = _preact.TargetedTransitionEvent;
 
 	// Event Handler Types
-	export import EventHandler = JSXInternal.EventHandler;
-	export import ChangeEventHandler = JSXInternal.GenericEventHandler;
-	export import ClipboardEventHandler = JSXInternal.ClipboardEventHandler;
-	export import CompositionEventHandler = JSXInternal.CompositionEventHandler;
-	export import DragEventHandler = JSXInternal.DragEventHandler;
-	export import PointerEventHandler = JSXInternal.PointerEventHandler;
-	export import FocusEventHandler = JSXInternal.FocusEventHandler;
-	export import FormEventHandler = JSXInternal.GenericEventHandler;
-	export import InvalidEventHandler = JSXInternal.GenericEventHandler;
-	export import KeyboardEventHandler = JSXInternal.KeyboardEventHandler;
-	export import MouseEventHandler = JSXInternal.MouseEventHandler;
-	export import TouchEventHandler = JSXInternal.TouchEventHandler;
-	export import UIEventHandler = JSXInternal.UIEventHandler;
-	export import AnimationEventHandler = JSXInternal.AnimationEventHandler;
-	export import TransitionEventHandler = JSXInternal.TransitionEventHandler;
+	export import EventHandler = _preact.EventHandler;
+	export import ChangeEventHandler = _preact.GenericEventHandler;
+	export import ClipboardEventHandler = _preact.ClipboardEventHandler;
+	export import CompositionEventHandler = _preact.CompositionEventHandler;
+	export import DragEventHandler = _preact.DragEventHandler;
+	export import PointerEventHandler = _preact.PointerEventHandler;
+	export import FocusEventHandler = _preact.FocusEventHandler;
+	export import FormEventHandler = _preact.GenericEventHandler;
+	export import InvalidEventHandler = _preact.GenericEventHandler;
+	export import KeyboardEventHandler = _preact.KeyboardEventHandler;
+	export import MouseEventHandler = _preact.MouseEventHandler;
+	export import TouchEventHandler = _preact.TouchEventHandler;
+	export import UIEventHandler = _preact.UIEventHandler;
+	export import AnimationEventHandler = _preact.AnimationEventHandler;
+	export import TransitionEventHandler = _preact.TransitionEventHandler;
 
 	export function createPortal(
-		vnode: preact.ComponentChildren,
-		container: preact.ContainerNode
-	): preact.VNode<any>;
+		vnode: _preact.ComponentChildren,
+		container: _preact.ContainerNode
+	): _preact.VNode<any>;
 
 	export function render(
-		vnode: preact.ComponentChild,
-		parent: preact.ContainerNode,
+		vnode: _preact.ComponentChild,
+		parent: _preact.ContainerNode,
 		callback?: () => void
 	): Component | null;
 
 	export function hydrate(
-		vnode: preact.ComponentChild,
-		parent: preact.ContainerNode,
+		vnode: _preact.ComponentChild,
+		parent: _preact.ContainerNode,
 		callback?: () => void
 	): Component | null;
 
 	export function unmountComponentAtNode(
-		container: preact.ContainerNode
+		container: _preact.ContainerNode
 	): boolean;
 
 	export function createFactory(
-		type: preact.VNode<any>['type']
+		type: _preact.VNode<any>['type']
 	): (
 		props?: any,
-		...children: preact.ComponentChildren[]
-	) => preact.VNode<any>;
+		...children: _preact.ComponentChildren[]
+	) => _preact.VNode<any>;
 	export function isValidElement(element: any): boolean;
 	export function isFragment(element: any): boolean;
 	export function isMemo(element: any): boolean;
 	export function findDOMNode(
-		component: preact.Component | Element
+		component: _preact.Component | Element
 	): Element | null;
 
 	export abstract class PureComponent<
 		P = {},
 		S = {},
 		SS = any
-	> extends preact.Component<P, S> {
+	> extends _preact.Component<P, S> {
 		isPureReactComponent: boolean;
 	}
 
-	export type MemoExoticComponent<C extends preact.FunctionalComponent<any>> =
-		preact.FunctionComponent<ComponentProps<C>> & {
+	export type MemoExoticComponent<C extends _preact.FunctionalComponent<any>> =
+		_preact.FunctionComponent<ComponentProps<C>> & {
 			readonly type: C;
 		};
 
 	export function memo<P = {}>(
-		component: preact.FunctionalComponent<P>,
+		component: _preact.FunctionalComponent<P>,
 		comparer?: (prev: P, next: P) => boolean
-	): preact.FunctionComponent<P>;
-	export function memo<C extends preact.FunctionalComponent<any>>(
+	): _preact.FunctionComponent<P>;
+	export function memo<C extends _preact.FunctionalComponent<any>>(
 		component: C,
 		comparer?: (
-			prev: preact.ComponentProps<C>,
-			next: preact.ComponentProps<C>
+			prev: _preact.ComponentProps<C>,
+			next: _preact.ComponentProps<C>
 		) => boolean
 	): C;
 
-	export interface RefAttributes<R> extends preact.Attributes {
-		ref?: preact.Ref<R> | undefined;
-	}
-
-	/**
-	 * @deprecated Please use `ForwardRefRenderFunction` instead.
-	 */
-	export interface ForwardFn<P = {}, T = any> {
-		(props: P, ref: ForwardedRef<T>): preact.ComponentChild;
-		displayName?: string;
+	export interface RefAttributes<R> extends _preact.Attributes {
+		ref?: _preact.Ref<R> | undefined;
 	}
 
 	export interface ForwardRefRenderFunction<T = any, P = {}> {
-		(props: P, ref: ForwardedRef<T>): preact.ComponentChild;
+		(props: P, ref: ForwardedRef<T>): _preact.ComponentChild;
 		displayName?: string;
 	}
 
 	export interface ForwardRefExoticComponent<P>
-		extends preact.FunctionComponent<P> {
+		extends _preact.FunctionComponent<P> {
 		defaultProps?: Partial<P> | undefined;
 	}
 
 	export function forwardRef<R, P = {}>(
 		fn: ForwardRefRenderFunction<R, P>
-	): preact.FunctionalComponent<PropsWithoutRef<P> & { ref?: preact.Ref<R> }>;
+	): _preact.FunctionalComponent<PropsWithoutRef<P> & { ref?: _preact.Ref<R> }>;
 
 	export type PropsWithoutRef<P> = Omit<P, 'ref'>;
 
@@ -312,27 +395,27 @@ declare namespace React {
 	export function flushSync<R>(fn: () => R): R;
 	export function flushSync<A, R>(fn: (a: A) => R, a: A): R;
 
-	export function unstable_batchedUpdates(
-		callback: (arg?: any) => void,
-		arg?: any
-	): void;
+	export function unstable_batchedUpdates<A, R>(callback: (a: A) => R, a: A): R;
+	export function unstable_batchedUpdates<R>(callback: () => R): R;
 
 	export type PropsWithChildren<P = unknown> = P & {
-		children?: preact.ComponentChildren | undefined;
+		children?: _preact.ComponentChildren | undefined;
 	};
 
 	export const Children: {
-		map<T extends preact.ComponentChild, R>(
+		map<T extends _preact.ComponentChild, R>(
 			children: T | T[],
-			fn: (child: T, i: number) => R
+			fn: (child: T, i: number) => R,
+			context: any
 		): R[];
-		forEach<T extends preact.ComponentChild>(
+		forEach<T extends _preact.ComponentChild>(
 			children: T | T[],
-			fn: (child: T, i: number) => void
+			fn: (child: T, i: number) => void,
+			context: any
 		): void;
-		count: (children: preact.ComponentChildren) => number;
-		only: (children: preact.ComponentChildren) => preact.ComponentChild;
-		toArray: (children: preact.ComponentChildren) => preact.VNode<{}>[];
+		count: (children: _preact.ComponentChildren) => number;
+		only: (children: _preact.ComponentChildren) => _preact.ComponentChild;
+		toArray: (children: _preact.ComponentChildren) => _preact.VNode<{}>[];
 	};
 
 	// scheduler

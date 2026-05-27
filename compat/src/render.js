@@ -24,28 +24,20 @@ import {
 	useSyncExternalStore,
 	useTransition
 } from './index';
+import { assign, IS_NON_DIMENSIONAL } from './util';
 
-export const REACT_ELEMENT_TYPE =
-	(typeof Symbol != 'undefined' && Symbol.for && Symbol.for('react.element')) ||
-	0xeac7;
+export const REACT_ELEMENT_TYPE = Symbol.for('react.element');
 
 const CAMEL_PROPS =
 	/^(?:accent|alignment|arabic|baseline|cap|clip(?!PathU)|color|dominant|fill|flood|font|glyph(?!R)|horiz|image(!S)|letter|lighting|marker(?!H|W|U)|overline|paint|pointer|shape|stop|strikethrough|stroke|text(?!L)|transform|underline|unicode|units|v|vector|vert|word|writing|x(?!C))[A-Z]/;
-const ON_ANI = /^on(Ani|Tra|Tou|BeforeInp|Compo)/;
 const CAMEL_REPLACE = /[A-Z0-9]/g;
 const IS_DOM = typeof document !== 'undefined';
 
 // Input types for which onchange should not be converted to oninput.
-// type="file|checkbox|radio", plus "range" in IE11.
-// (IE11 doesn't support Symbol, which we use here to turn `rad` into `ra` which matches "range")
-const onChangeInputType = type =>
-	(typeof Symbol != 'undefined' && typeof Symbol() == 'symbol'
-		? /fil|che|rad/
-		: /fil|che|ra/
-	).test(type);
+const onChangeInputType = type => /fil|che|rad/.test(type);
 
 // Some libraries like `react-virtualized` explicitly check for this.
-Component.prototype.isReactComponent = {};
+Component.prototype.isReactComponent = true;
 
 // `UNSAFE_*` lifecycle hooks
 // Preact only ever invokes the unprefixed methods.
@@ -105,24 +97,17 @@ let oldEventHook = options.event;
 options.event = e => {
 	if (oldEventHook) e = oldEventHook(e);
 
-	e.persist = empty;
-	e.isPropagationStopped = isPropagationStopped;
-	e.isDefaultPrevented = isDefaultPrevented;
+	e.persist = () => {};
+	e.isPropagationStopped = function isPropagationStopped() {
+		return this.cancelBubble;
+	};
+	e.isDefaultPrevented = function isDefaultPrevented() {
+		return this.defaultPrevented;
+	};
 	return (e.nativeEvent = e);
 };
 
-function empty() {}
-
-function isPropagationStopped() {
-	return this.cancelBubble;
-}
-
-function isDefaultPrevented() {
-	return this.defaultPrevented;
-}
-
 const classNameDescriptorNonEnumberable = {
-	enumerable: false,
 	configurable: true,
 	get() {
 		return this.class;
@@ -132,9 +117,9 @@ const classNameDescriptorNonEnumberable = {
 function handleDomVNode(vnode) {
 	let props = vnode.props,
 		type = vnode.type,
-		normalizedProps = {};
+		normalizedProps = {},
+		isNonDashedType = type.indexOf('-') == -1;
 
-	let isNonDashedType = type.indexOf('-') === -1;
 	for (let i in props) {
 		let value = props[i];
 
@@ -150,8 +135,17 @@ function handleDomVNode(vnode) {
 			continue;
 		}
 
-		let lowerCased = i.toLowerCase();
-		if (i === 'defaultValue' && 'value' in props && props.value == null) {
+		if (i === 'style' && typeof value === 'object') {
+			for (let key in value) {
+				if (typeof value[key] === 'number' && !IS_NON_DIMENSIONAL.test(key)) {
+					value[key] += 'px';
+				}
+			}
+		} else if (
+			i === 'defaultValue' &&
+			'value' in props &&
+			props.value == null
+		) {
 			// `defaultValue` is treated as a fallback `value` when a value prop is present but null/undefined.
 			// `defaultValue` for Elements with no value prop is the same as the DOM defaultValue property.
 			i = 'value';
@@ -162,9 +156,10 @@ function handleDomVNode(vnode) {
 			// value will be used as the file name and the file will be called
 			// "true" upon downloading it.
 			value = '';
-		} else if (lowerCased === 'translate' && value === 'no') {
+		} else if (i === 'translate' && value === 'no') {
 			value = false;
-		} else if (lowerCased[0] === 'o' && lowerCased[1] === 'n') {
+		} else if (i[0] === 'o' && i[1] === 'n') {
+			let lowerCased = i.toLowerCase();
 			if (lowerCased === 'ondoubleclick') {
 				i = 'ondblclick';
 			} else if (
@@ -177,8 +172,15 @@ function handleDomVNode(vnode) {
 				i = 'onfocusin';
 			} else if (lowerCased === 'onblur') {
 				i = 'onfocusout';
-			} else if (ON_ANI.test(i)) {
+			}
+
+			// Add support for onInput and onChange, see #3561
+			// if we have an oninput prop already change it to oninputCapture
+			if (lowerCased === 'oninput') {
 				i = lowerCased;
+				if (normalizedProps[i]) {
+					i = 'oninputCapture';
+				}
 			}
 		} else if (isNonDashedType && CAMEL_PROPS.test(i)) {
 			i = i.replace(CAMEL_REPLACE, '-$&').toLowerCase();
@@ -186,42 +188,31 @@ function handleDomVNode(vnode) {
 			value = undefined;
 		}
 
-		// Add support for onInput and onChange, see #3561
-		// if we have an oninput prop already change it to oninputCapture
-		if (lowerCased === 'oninput') {
-			i = lowerCased;
-			if (normalizedProps[i]) {
-				i = 'oninputCapture';
-			}
-		}
-
 		normalizedProps[i] = value;
 	}
 
-	// Add support for array select values: <select multiple value={[]} />
-	if (
-		type == 'select' &&
-		normalizedProps.multiple &&
-		Array.isArray(normalizedProps.value)
-	) {
-		// forEach() always returns undefined, which we abuse here to unset the value prop.
-		normalizedProps.value = toChildArray(props.children).forEach(child => {
-			child.props.selected =
-				normalizedProps.value.indexOf(child.props.value) != -1;
-		});
-	}
+	if (type == 'select') {
+		// Add support for array select values: <select multiple value={[]} />
+		if (normalizedProps.multiple && Array.isArray(normalizedProps.value)) {
+			// forEach() always returns undefined, which we abuse here to unset the value prop.
+			normalizedProps.value = toChildArray(props.children).forEach(child => {
+				child.props.selected =
+					normalizedProps.value.indexOf(child.props.value) != -1;
+			});
+		}
 
-	// Adding support for defaultValue in select tag
-	if (type == 'select' && normalizedProps.defaultValue != null) {
-		normalizedProps.value = toChildArray(props.children).forEach(child => {
-			if (normalizedProps.multiple) {
-				child.props.selected =
-					normalizedProps.defaultValue.indexOf(child.props.value) != -1;
-			} else {
-				child.props.selected =
-					normalizedProps.defaultValue == child.props.value;
-			}
-		});
+		// Adding support for defaultValue in select tag
+		if (normalizedProps.defaultValue != null) {
+			normalizedProps.value = toChildArray(props.children).forEach(child => {
+				if (normalizedProps.multiple) {
+					child.props.selected =
+						normalizedProps.defaultValue.indexOf(child.props.value) != -1;
+				} else {
+					child.props.selected =
+						normalizedProps.defaultValue == child.props.value;
+				}
+			});
+		}
 	}
 
 	if (props.class && !props.className) {
@@ -231,9 +222,7 @@ function handleDomVNode(vnode) {
 			'className',
 			classNameDescriptorNonEnumberable
 		);
-	} else if (props.className && !props.class) {
-		normalizedProps.class = normalizedProps.className = props.className;
-	} else if (props.class && props.className) {
+	} else if (props.className) {
 		normalizedProps.class = normalizedProps.className = props.className;
 	}
 
@@ -245,8 +234,24 @@ options.vnode = vnode => {
 	// only normalize props on Element nodes
 	if (typeof vnode.type === 'string') {
 		handleDomVNode(vnode);
-	}
+	} else if (typeof vnode.type === 'function') {
+		const shouldApplyRef =
+			'prototype' in vnode.type && vnode.type.prototype.render;
+		if ('ref' in vnode.props && shouldApplyRef) {
+			vnode.ref = vnode.props.ref;
+			delete vnode.props.ref;
+		}
 
+		if (vnode.type.defaultProps) {
+			let normalizedProps = assign({}, vnode.props);
+			for (let i in vnode.type.defaultProps) {
+				if (normalizedProps[i] === undefined) {
+					normalizedProps[i] = vnode.type.defaultProps[i];
+				}
+			}
+			vnode.props = normalizedProps;
+		}
+	}
 	vnode.$$typeof = REACT_ELEMENT_TYPE;
 
 	if (oldVNodeHook) oldVNodeHook(vnode);

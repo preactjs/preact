@@ -17,20 +17,10 @@ export function cloneElement(vnode, props, children) {
 		ref,
 		i;
 
-	let defaultProps;
-
-	if (vnode.type && vnode.type.defaultProps) {
-		defaultProps = vnode.type.defaultProps;
-	}
-
 	for (i in props) {
 		if (i == 'key') key = props[i];
-		else if (i == 'ref') ref = props[i];
-		else if (props[i] === UNDEFINED && defaultProps != UNDEFINED) {
-			normalizedProps[i] = defaultProps[i];
-		} else {
-			normalizedProps[i] = props[i];
-		}
+		else if (i == 'ref' && typeof vnode.type != 'function') ref = props[i];
+		else normalizedProps[i] = props[i];
 	}
 
 	if (arguments.length > 2) {
@@ -41,8 +31,8 @@ export function cloneElement(vnode, props, children) {
 	return createVNode(
 		vnode.type,
 		normalizedProps,
-		key || vnode.key,
-		ref || vnode.ref,
+		key !== UNDEFINED ? key : vnode.key,
+		ref !== UNDEFINED ? ref : vnode.ref,
 		NULL
 	);
 }

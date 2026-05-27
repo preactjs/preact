@@ -39,6 +39,8 @@ import { getDomSibling } from '../component';
  * siblings. In most cases, it starts out as `oldChildren[0]._dom`.
  * @param {boolean} isHydrating Whether or not we are in hydration
  * @param {any[]} refQueue an array of elements needed to invoke refs
+ * @param {Document} doc The document object to use for creating elements
+ * @returns {PreactElement} The next sibling DOM element to insert new elements
  */
 export function diffChildren(
 	parentDom,
@@ -51,7 +53,8 @@ export function diffChildren(
 	commitQueue,
 	oldDom,
 	isHydrating,
-	refQueue
+	refQueue,
+	doc
 ) {
 	let i,
 		/** @type {VNode} */
@@ -84,11 +87,8 @@ export function diffChildren(
 
 		// At this point, constructNewChildrenArray has assigned _index to be the
 		// matchingIndex for this VNode's oldVNode (or -1 if there is no oldVNode).
-		if (childVNode._index == -1) {
-			oldVNode = EMPTY_OBJ;
-		} else {
-			oldVNode = oldChildren[childVNode._index] || EMPTY_OBJ;
-		}
+		oldVNode =
+			(childVNode._index != -1 && oldChildren[childVNode._index]) || EMPTY_OBJ;
 
 		// Update childVNode._index to its final index
 		childVNode._index = i;
@@ -104,7 +104,8 @@ export function diffChildren(
 			commitQueue,
 			oldDom,
 			isHydrating,
-			refQueue
+			refQueue,
+			doc
 		);
 
 		// Adjust DOM nodes
@@ -124,11 +125,17 @@ export function diffChildren(
 			firstChildDom = newDom;
 		}
 
-		if (
-			childVNode._flags & INSERT_VNODE ||
-			oldVNode._children === childVNode._children
-		) {
-			oldDom = insert(childVNode, oldDom, parentDom);
+		let shouldPlace = childVNode._flags & INSERT_VNODE;
+		if (shouldPlace || oldVNode._children === childVNode._children) {
+			oldDom = insert(childVNode, oldDom, parentDom, shouldPlace);
+
+			// When a matched VNode is physically moved via INSERT_VNODE, its old
+			// _dom pointer becomes a stale positional reference. Clear it so that
+			// getDomSibling (called from nested diffs) won't return this stale
+			// reference and mis-place subsequent DOM nodes. See #5065.
+			if (shouldPlace && oldVNode._dom) {
+				oldVNode._dom = NULL;
+			}
 		} else if (typeof childVNode.type == 'function' && result !== UNDEFINED) {
 			oldDom = result;
 		} else if (newDom) {
@@ -207,7 +214,7 @@ function constructNewChildrenArray(
 				NULL,
 				NULL
 			);
-		} else if (childVNode.constructor == UNDEFINED && childVNode._depth > 0) {
+		} else if (childVNode.constructor === UNDEFINED && childVNode._depth > 0) {
 			// VNode is already in use, clone it. This can happen in the following
 			// scenario:
 			//   const reuse = <div />
@@ -220,7 +227,7 @@ function constructNewChildrenArray(
 				childVNode._original
 			);
 		} else {
-			childVNode = newParentVNode._children[i] = childVNode;
+			newParentVNode._children[i] = childVNode;
 		}
 
 		const skewedIndex = i + skew;
@@ -249,9 +256,7 @@ function constructNewChildrenArray(
 		// Here, we define isMounting for the purposes of the skew diffing
 		// algorithm. Nodes that are unsuspending are considered mounting and we detect
 		// this by checking if oldVNode._original == null
-		const isMounting = oldVNode == NULL || oldVNode._original == NULL;
-
-		if (isMounting) {
+		if (oldVNode == NULL || oldVNode._original == NULL) {
 			if (matchingIndex == -1) {
 				// When the array of children is growing we need to decrease the skew
 				// as we are adding a new element to the array.
@@ -338,11 +343,11 @@ function constructNewChildrenArray(
  * @param {VNode} parentVNode
  * @param {PreactElement} oldDom
  * @param {PreactElement} parentDom
+ * @param {number} shouldPlace
  * @returns {PreactElement}
  */
-function insert(parentVNode, oldDom, parentDom) {
+function insert(parentVNode, oldDom, parentDom, shouldPlace) {
 	// Note: VNodes in nested suspended trees may be missing _children.
-
 	if (typeof parentVNode.type == 'function') {
 		let children = parentVNode._children;
 		for (let i = 0; children && i < children.length; i++) {
@@ -352,16 +357,18 @@ function insert(parentVNode, oldDom, parentDom) {
 				// children's _parent pointer to point to the newVNode (parentVNode
 				// here).
 				children[i]._parent = parentVNode;
-				oldDom = insert(children[i], oldDom, parentDom);
+				oldDom = insert(children[i], oldDom, parentDom, shouldPlace);
 			}
 		}
 
 		return oldDom;
 	} else if (parentVNode._dom != oldDom) {
-		if (oldDom && parentVNode.type && !parentDom.contains(oldDom)) {
-			oldDom = getDomSibling(parentVNode);
+		if (shouldPlace) {
+			if (oldDom && parentVNode.type && !oldDom.parentNode) {
+				oldDom = getDomSibling(parentVNode);
+			}
+			parentDom.insertBefore(parentVNode._dom, oldDom || NULL);
 		}
-		parentDom.insertBefore(parentVNode._dom, oldDom || NULL);
 		oldDom = parentVNode._dom;
 	}
 
@@ -407,6 +414,7 @@ function findMatchingIndex(
 	const key = childVNode.key;
 	const type = childVNode.type;
 	let oldVNode = oldChildren[skewedIndex];
+	const matched = oldVNode != NULL && (oldVNode._flags & MATCHED) == 0;
 
 	// We only need to perform a search if there are more children
 	// (remainingOldChildren) to search. However, if the oldVNode we just looked
@@ -421,45 +429,26 @@ function findMatchingIndex(
 	// we should not search as we risk re-using state of an unrelated VNode. (reverted for now)
 	let shouldSearch =
 		// (typeof type != 'function' || type === Fragment || key) &&
-		remainingOldChildren >
-		(oldVNode != NULL && (oldVNode._flags & MATCHED) == 0 ? 1 : 0);
+		remainingOldChildren > (matched ? 1 : 0);
 
 	if (
-		(oldVNode === NULL && childVNode.key == null) ||
-		(oldVNode &&
-			key == oldVNode.key &&
-			type == oldVNode.type &&
-			(oldVNode._flags & MATCHED) == 0)
+		(oldVNode === NULL && key == null) ||
+		(matched && key == oldVNode.key && type == oldVNode.type)
 	) {
 		return skewedIndex;
 	} else if (shouldSearch) {
 		let x = skewedIndex - 1;
 		let y = skewedIndex + 1;
 		while (x >= 0 || y < oldChildren.length) {
-			if (x >= 0) {
-				oldVNode = oldChildren[x];
-				if (
-					oldVNode &&
-					(oldVNode._flags & MATCHED) == 0 &&
-					key == oldVNode.key &&
-					type == oldVNode.type
-				) {
-					return x;
-				}
-				x--;
-			}
-
-			if (y < oldChildren.length) {
-				oldVNode = oldChildren[y];
-				if (
-					oldVNode &&
-					(oldVNode._flags & MATCHED) == 0 &&
-					key == oldVNode.key &&
-					type == oldVNode.type
-				) {
-					return y;
-				}
-				y++;
+			const childIndex = x >= 0 ? x-- : y++;
+			oldVNode = oldChildren[childIndex];
+			if (
+				oldVNode != NULL &&
+				(oldVNode._flags & MATCHED) == 0 &&
+				key == oldVNode.key &&
+				type == oldVNode.type
+			) {
+				return childIndex;
 			}
 		}
 	}

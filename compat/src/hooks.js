@@ -1,5 +1,4 @@
 import { useState, useLayoutEffect, useEffect } from 'preact/hooks';
-import { is } from './util';
 
 /**
  * This is taken from https://github.com/facebook/react/blob/main/packages/use-sync-external-store/src/useSyncExternalStoreShimClient.js#L84
@@ -43,11 +42,8 @@ export function useSyncExternalStore(subscribe, getSnapshot) {
 
 /** @type {(inst: Store) => boolean} */
 function didSnapshotChange(inst) {
-	const latestGetSnapshot = inst._getSnapshot;
-	const prevValue = inst._value;
 	try {
-		const nextValue = latestGetSnapshot();
-		return !is(prevValue, nextValue);
+		return !Object.is(inst._value, inst._getSnapshot());
 	} catch (error) {
 		return true;
 	}

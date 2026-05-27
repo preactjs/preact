@@ -2,7 +2,7 @@ import { options, Fragment } from 'preact';
 
 /**
  * Get human readable name of the component/dom node
- * @param {import('./internal').VNode} vnode
+ *
  * @param {import('./internal').VNode} vnode
  * @returns {string}
  */
@@ -40,9 +40,11 @@ let renderStack = [];
  * ```
  *
  * Note: A `vnode` may be hoisted to the root scope due to compiler
- * optimiztions. In these cases the `_owner` will be different.
+ * optimiztions. In these cases the owner will be different.
  */
 let ownerStack = [];
+
+const ownerMap = new WeakMap();
 
 /**
  * Get the currently rendered `vnode`
@@ -76,9 +78,8 @@ function isPossibleOwner(vnode) {
 export function getOwnerStack(vnode) {
 	const stack = [vnode];
 	let next = vnode;
-	while (next._owner != null) {
-		stack.push(next._owner);
-		next = next._owner;
+	while ((next = ownerMap.get(next)) != null) {
+		stack.push(next);
 	}
 
 	return stack.reduce((acc, owner) => {
@@ -131,8 +132,10 @@ export function setupComponentStack() {
 	};
 
 	options.vnode = vnode => {
-		vnode._owner =
-			ownerStack.length > 0 ? ownerStack[ownerStack.length - 1] : null;
+		ownerMap.set(
+			vnode,
+			ownerStack.length > 0 ? ownerStack[ownerStack.length - 1] : null
+		);
 		if (oldVNode) oldVNode(vnode);
 	};
 
@@ -143,4 +146,12 @@ export function setupComponentStack() {
 
 		if (oldRender) oldRender(vnode);
 	};
+}
+
+/**
+ * Return the component stack that was captured up to this point.
+ * @returns {string}
+ */
+export function captureOwnerStack() {
+	return getOwnerStack(getCurrentVNode());
 }
