@@ -97,6 +97,54 @@ describe('suspense hydration', () => {
 		});
 	});
 
+	it('should remove server-rendered DOM when suspending while hydrating then resolving to different content', () => {
+		scratch.innerHTML = '<div>Hello</div>';
+		clearLog();
+
+		const [Lazy, resolve] = createLazy();
+		hydrate(
+			<Suspense>
+				<Lazy />
+			</Suspense>,
+			scratch
+		);
+		rerender(); // Flush rerender queue to mimic what preact will really do
+		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
+		clearLog();
+
+		return resolve(() => <section>Goodbye</section>).then(() => {
+			rerender();
+			// The boundary resolved to content that does NOT reuse the
+			// server-rendered <div>. The stale server DOM must be removed, not
+			// left orphaned alongside the new content.
+			expect(scratch.innerHTML).to.equal('<section>Goodbye</section>');
+		});
+	});
+
+	it('should remove server-rendered DOM when suspending while hydrating then resolving to null', () => {
+		scratch.innerHTML = '<div>Hello</div>';
+		clearLog();
+
+		const [Lazy, resolve] = createLazy();
+		hydrate(
+			<Suspense>
+				<Lazy />
+			</Suspense>,
+			scratch
+		);
+		rerender(); // Flush rerender queue to mimic what preact will really do
+		expect(scratch.innerHTML).to.equal('<div>Hello</div>');
+		clearLog();
+
+		// Mirrors a client-middleware redirect: the suspended boundary resolves
+		// to null (renders nothing) once the async work completes.
+		return resolve(() => null).then(() => {
+			rerender();
+			// The server-rendered <div> must be removed, not orphaned.
+			expect(scratch.innerHTML).to.equal('');
+		});
+	});
+
 	it('Should not crash when oldVNode._children is null during shouldComponentUpdate optimization', () => {
 		const originalHtml = '<div>Hello</div>';
 		scratch.innerHTML = originalHtml;
