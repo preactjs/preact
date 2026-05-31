@@ -269,6 +269,23 @@ export function diff(
 				refQueue
 			);
 
+			// When resuming a suspension that began while hydrating, the resume
+			// block above rebuilt excessDomChildren from the parked server DOM. If
+			// the resolved content did not reuse a parked node (it rendered a
+			// different element, or nothing), that node has no element ancestor in
+			// this re-entrant diff to clean it up the way diffElementNodes does for
+			// element children, so remove the leftovers here to avoid orphaning it.
+			if (oldVNode._flags & MODE_SUSPENDED && excessDomChildren != NULL) {
+				for (let i = excessDomChildren.length; i--; ) {
+					if (excessDomChildren[i] != NULL) {
+						if (excessDomChildren[i] == oldDom) {
+							oldDom = oldDom.nextSibling;
+						}
+						removeNode(excessDomChildren[i]);
+					}
+				}
+			}
+
 			c.base = newVNode._dom;
 
 			// We successfully rendered this VNode, unset any stored hydration/bailout state:
