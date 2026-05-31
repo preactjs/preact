@@ -145,6 +145,35 @@ describe('suspense hydration', () => {
 		});
 	});
 
+	it('should remove server-rendered DOM but keep later siblings when resolving to different content', () => {
+		scratch.innerHTML = '<p>region</p><div>After</div>';
+		clearLog();
+
+		const [Lazy, resolve] = createLazy();
+		hydrate(
+			<Fragment>
+				<Suspense>
+					<Lazy />
+				</Suspense>
+				<div>After</div>
+			</Fragment>,
+			scratch
+		);
+		rerender(); // Flush rerender queue to mimic what preact will really do
+		expect(scratch.innerHTML).to.equal('<p>region</p><div>After</div>');
+		clearLog();
+
+		// The parked <p> is removed, but the sibling <div>After</div> that
+		// follows the boundary must stay in place. Guards against the leftover
+		// removal disturbing trailing siblings.
+		return resolve(() => <section>Goodbye</section>).then(() => {
+			rerender();
+			expect(scratch.innerHTML).to.equal(
+				'<section>Goodbye</section><div>After</div>'
+			);
+		});
+	});
+
 	it('Should not crash when oldVNode._children is null during shouldComponentUpdate optimization', () => {
 		const originalHtml = '<div>Hello</div>';
 		scratch.innerHTML = originalHtml;

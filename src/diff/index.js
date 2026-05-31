@@ -278,6 +278,10 @@ export function diff(
 			if (oldVNode._flags & MODE_SUSPENDED && excessDomChildren != NULL) {
 				for (let i = excessDomChildren.length; i--; ) {
 					if (excessDomChildren[i] != NULL) {
+						// If oldDom points at the node we're about to remove, advance it
+						// first so a stale, detached reference isn't returned as the
+						// insertion point (mirrors the oldDom handling before unmount in
+						// diffChildren's remaining-old-children removal).
 						if (excessDomChildren[i] == oldDom) {
 							oldDom = oldDom.nextSibling;
 						}
