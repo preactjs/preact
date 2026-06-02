@@ -32,6 +32,9 @@ importers:
       '@biomejs/biome':
         specifier: ^2.1.2
         version: 2.1.2
+      '@types/chai':
+        specifier: ^5.2.2
+        version: 5.2.2
       '@types/node':
         specifier: ^18.19.87
         version: 18.19.87
