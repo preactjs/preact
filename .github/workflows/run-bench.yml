@@ -36,14 +36,13 @@ jobs:
           submodules: 'recursive'
       - uses: pnpm/action-setup@v6
         with:
+          version: 8
           run_install: false
       - uses: actions/setup-node@v4
         with:
-          node-version-file: 'package.json'
+          node-version-file: 'benchmarks/package.json'
           cache: 'pnpm'
-          cache-dependency-path: |
-            pnpm-lock.yaml
-            benchmarks/pnpm-lock.yaml
+          cache-dependency-path: benchmarks/pnpm-lock.yaml
 
       # Install benchmark dependencies
       - uses: actions/download-artifact@v4
@@ -61,13 +60,6 @@ jobs:
         # Set the CHROMEDRIVER_FILEPATH so the chromedriver npm package uses the
         # correct binary when its installed
         run: |
-          cat >> pnpm-workspace.yaml <<'EOF'
-          allowBuilds:
-            chromedriver: true
-            esbuild: true
-            preact: true
-          EOF
-
           export CHROMEDRIVER_FILEPATH=$(which chromedriver)
           pnpm install
           # Install local dependencies with --no-frozen-lockfile to ensure local tarballs
