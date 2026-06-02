@@ -1,4 +1,3 @@
-// Temporary GHA trigger for PR #5085; remove before merge.
 export { render, hydrate } from './render';
 export {
 	createElement,
