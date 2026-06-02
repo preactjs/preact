@@ -37,6 +37,7 @@ jobs:
       - uses: pnpm/action-setup@v6
         with:
           version: 8
+          package_json_file: benchmarks/package.json
           run_install: false
       - uses: actions/setup-node@v4
         with:
