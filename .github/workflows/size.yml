@@ -21,4 +21,4 @@ jobs:
           repo-token: '${{ secrets.GITHUB_TOKEN }}'
           # Our `prepare` script already builds the app post-install,
           # building it again would be redundant
-          build-script: 'pnpm run --if-present noop'
+          build-script: '--if-present noop'

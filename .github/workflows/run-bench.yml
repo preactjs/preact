@@ -61,6 +61,13 @@ jobs:
         # Set the CHROMEDRIVER_FILEPATH so the chromedriver npm package uses the
         # correct binary when its installed
         run: |
+          cat >> pnpm-workspace.yaml <<'EOF'
+          allowBuilds:
+            chromedriver: true
+            esbuild: true
+            preact: true
+          EOF
+
           export CHROMEDRIVER_FILEPATH=$(which chromedriver)
           pnpm install
           # Install local dependencies with --no-frozen-lockfile to ensure local tarballs
