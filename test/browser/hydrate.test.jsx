@@ -529,4 +529,74 @@ describe('hydrate()', () => {
 		rerender();
 		expect(scratch.innerHTML).to.equal('<div>Error!</div>');
 	});
+
+	it('should not crash when hydrating a suspending component without excess DOM children', () => {
+		const promise = Promise.resolve();
+		let caught;
+
+		class Boundary extends Component {
+			componentDidCatch(error) {
+				caught = error;
+				this.setState({ error });
+			}
+
+			render() {
+				return this.state && this.state.error ? (
+					<div>Loading</div>
+				) : (
+					<textarea defaultValue="">
+						<Suspender />
+					</textarea>
+				);
+			}
+		}
+
+		function Suspender() {
+			throw promise;
+		}
+
+		scratch.innerHTML = '<textarea></textarea>';
+
+		expect(() => {
+			hydrate(<Boundary />, scratch);
+		}).to.not.throw();
+
+		expect(caught).to.equal(promise);
+	});
+
+	it('should pass the original error to boundaries when hydrating without excess DOM children', () => {
+		let caught;
+		const error = new Error('real error');
+
+		class Boundary extends Component {
+			componentDidCatch(error) {
+				caught = error;
+				this.setState({ error });
+			}
+
+			render() {
+				return this.state && this.state.error ? <div>Error!</div> : <Wrapper />;
+			}
+		}
+
+		function Wrapper() {
+			return (
+				<textarea defaultValue="">
+					<Boom />
+				</textarea>
+			);
+		}
+
+		function Boom() {
+			throw error;
+		}
+
+		scratch.innerHTML = '<textarea></textarea>';
+
+		hydrate(<Boundary />, scratch);
+		rerender();
+
+		expect(caught).to.equal(error);
+		expect(caught.message).to.equal('real error');
+	});
 });

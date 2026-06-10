@@ -294,11 +294,15 @@ export function diff(
 						oldDom = oldDom.nextSibling;
 					}
 
-					excessDomChildren[excessDomChildren.indexOf(oldDom)] = NULL;
+					if (excessDomChildren != NULL) {
+						excessDomChildren[excessDomChildren.indexOf(oldDom)] = NULL;
+					}
 					newVNode._dom = oldDom;
 				} else {
-					for (let i = excessDomChildren.length; i--; ) {
-						removeNode(excessDomChildren[i]);
+					if (excessDomChildren != NULL) {
+						for (let i = excessDomChildren.length; i--; ) {
+							removeNode(excessDomChildren[i]);
+						}
 					}
 					markAsForce(newVNode);
 				}
