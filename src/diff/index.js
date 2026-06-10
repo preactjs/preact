@@ -333,24 +333,26 @@ export function diff(
 						? MODE_HYDRATE | MODE_SUSPENDED
 						: MODE_SUSPENDED;
 
-					for (let i = 0; i < excessDomChildren.length; i++) {
-						let child = excessDomChildren[i];
-						if (child == NULL) continue;
+					if (excessDomChildren != NULL) {
+						for (let i = 0; i < excessDomChildren.length; i++) {
+							let child = excessDomChildren[i];
+							if (child == NULL) continue;
 
-						if (child.nodeType == 8) {
-							if (child.data.startsWith('$s')) {
-								if (!commentMarkersToFind) startMarker = child;
-								commentMarkersToFind++;
-							} else if (child.data.startsWith('/$s')) {
-								if (--commentMarkersToFind == 0) {
-									oldDom = child;
-									excessDomChildren[i] = NULL;
-									break;
+							if (child.nodeType == 8) {
+								if (child.data.startsWith('$s')) {
+									if (!commentMarkersToFind) startMarker = child;
+									commentMarkersToFind++;
+								} else if (child.data.startsWith('/$s')) {
+									if (--commentMarkersToFind == 0) {
+										oldDom = child;
+										excessDomChildren[i] = NULL;
+										break;
+									}
 								}
+								excessDomChildren[i] = NULL;
+							} else if (commentMarkersToFind) {
+								excessDomChildren[i] = NULL;
 							}
-							excessDomChildren[i] = NULL;
-						} else if (commentMarkersToFind) {
-							excessDomChildren[i] = NULL;
 						}
 					}
 
@@ -362,14 +364,17 @@ export function diff(
 							oldDom = oldDom.nextSibling;
 						}
 
-						excessDomChildren[excessDomChildren.indexOf(oldDom)] = NULL;
+						if (excessDomChildren != NULL) {
+							excessDomChildren[excessDomChildren.indexOf(oldDom)] = NULL;
+						}
 						newVNode._component._excess = oldDom;
 					}
-
 					newVNode._dom = oldDom;
 				} else {
-					for (let i = excessDomChildren.length; i--; ) {
-						removeNode(excessDomChildren[i]);
+					if (excessDomChildren != NULL) {
+						for (let i = excessDomChildren.length; i--; ) {
+							removeNode(excessDomChildren[i]);
+						}
 					}
 					markAsForce(newVNode);
 				}
