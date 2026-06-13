@@ -137,7 +137,7 @@ export default defineConfig({
 	esbuild: {
 		loader: 'jsx',
 		include: /.*\.jsx$/,
-		exclude: ['node_nodules'],
+		exclude: ['node_modules'],
 		jsx: 'transform',
 		jsxFactory: 'createElement',
 		jsxFragment: 'Fragment',
