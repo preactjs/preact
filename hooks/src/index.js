@@ -83,8 +83,8 @@ options.diffed = vnode => {
 		c.__hooks._list.some(hookItem => {
 			if (hookItem._pendingArgs) {
 				hookItem._args = hookItem._pendingArgs;
+				hookItem._pendingArgs = undefined;
 			}
-			hookItem._pendingArgs = undefined;
 		});
 	}
 	previousComponent = currentComponent = null;
@@ -237,23 +237,14 @@ export function useReducer(reducer, initialState, init) {
 			function updateHookState(p, s, c) {
 				if (!hookState._component.__hooks) return true;
 
-				const stateHooks = hookState._component.__hooks._list.filter(
-					x => x._component
-				);
-
-				const allHooksEmpty = stateHooks.every(x => !x._nextValue);
-				// When we have no updated hooks in the component we invoke the previous SCU or
-				// traverse the VDOM tree further.
-				if (allHooksEmpty) {
-					return prevScu ? prevScu.call(this, p, s, c) : true;
-				}
-
 				// We check whether we have components with a nextValue set that
 				// have values that aren't equal to one another this pushes
 				// us to update further down the tree
+				let updatedHook = false;
 				let shouldUpdate = hookState._component.props !== p;
-				stateHooks.some(hookItem => {
+				hookState._component.__hooks._list.some(hookItem => {
 					if (hookItem._nextValue) {
+						updatedHook = true;
 						const currentValue = hookItem._value[0];
 						hookItem._value = hookItem._nextValue;
 						hookItem._nextValue = undefined;
@@ -261,9 +252,12 @@ export function useReducer(reducer, initialState, init) {
 					}
 				});
 
-				return prevScu
-					? prevScu.call(this, p, s, c) || shouldUpdate
-					: shouldUpdate;
+				if (prevScu) {
+					const result = prevScu.call(this, p, s, c);
+					return updatedHook ? result || shouldUpdate : result;
+				}
+
+				return !updatedHook || shouldUpdate;
 			}
 
 			currentComponent.shouldComponentUpdate = updateHookState;
