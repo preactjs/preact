@@ -56,6 +56,9 @@ export function render(vnode, parentDom) {
 
 	// Flush all queued effects
 	commitRoot(commitQueue, parentDom._children, refQueue);
+
+	// The live children are tracked on _children after diffing.
+	parentDom._children.props.children = NULL;
 }
 
 /**

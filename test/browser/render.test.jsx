@@ -227,6 +227,30 @@ describe('render()', () => {
 		expect(scratch.innerHTML).to.equal('<span class="hello">Hello!</span>');
 	});
 
+	it('should not keep the root input vnode in props.children', () => {
+		let update;
+		class App extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { value: 'a' };
+				update = this.setState.bind(this);
+			}
+
+			render() {
+				return <button>{this.state.value}</button>;
+			}
+		}
+
+		render(<App />, scratch);
+		let firstAppVNode = scratch._children._children[0];
+
+		update({ value: 'b' });
+		rerender();
+
+		expect(scratch._children._children[0]).to.not.equal(firstAppVNode);
+		expect(scratch._children.props.children).to.equal(null);
+	});
+
 	it('should nest empty nodes', () => {
 		render(
 			<div>
