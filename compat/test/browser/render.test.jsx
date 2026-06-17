@@ -886,4 +886,21 @@ describe('compat render', () => {
 			}
 		}
 	});
+
+	it('should not mutate the original style object when appending px', () => {
+		const style = { margin: 10, opacity: 0.5 };
+		const originalMargin = style.margin;
+		const originalOpacity = style.opacity;
+
+		render(<div style={style} />, scratch);
+
+		expect(style.margin).to.equal(
+			originalMargin,
+			'style.margin should not be mutated'
+		);
+		expect(style.opacity).to.equal(
+			originalOpacity,
+			'style.opacity should not be mutated'
+		);
+	});
 });

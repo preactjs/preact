@@ -136,6 +136,7 @@ function handleDomVNode(vnode) {
 		}
 
 		if (i === 'style' && typeof value === 'object') {
+			value = assign({}, value);
 			for (let key in value) {
 				if (typeof value[key] === 'number' && !IS_NON_DIMENSIONAL.test(key)) {
 					value[key] += 'px';
