@@ -105,6 +105,8 @@ export interface PreactElement extends preact.ContainerNode {
 
 	// Used to match DOM nodes to VNodes during hydration
 	readonly ownerDocument: Document;
+	// Used to retarget a Document render to its root element
+	readonly documentElement?: PreactElement | null;
 
 	// Setting styles
 	readonly style?: CSSStyleDeclaration;
