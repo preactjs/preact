@@ -11,8 +11,9 @@ import { slice } from './util';
  */
 export function render(vnode, parentDom) {
 	// https://github.com/preactjs/preact/issues/3794
-	if (parentDom == document) {
-		parentDom = document.documentElement;
+	// https://github.com/preactjs/preact/issues/5118
+	if (parentDom.nodeType == 9) {
+		parentDom = parentDom.documentElement;
 	}
 
 	if (options._root) options._root(vnode, parentDom);
