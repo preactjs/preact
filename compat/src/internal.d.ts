@@ -34,6 +34,7 @@ export interface FunctionComponent<P = {}> extends PreactFunctionComponent<P> {
 export interface VNode<T = any> extends PreactVNode<T> {
 	$$typeof?: symbol | string;
 	preactCompatNormalized?: boolean;
+	_mask?: [number, number];
 }
 
 export interface SuspenseState {
