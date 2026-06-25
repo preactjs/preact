@@ -77,6 +77,7 @@ export function diff(
 	if ((tmp = options._diff)) tmp(newVNode);
 
 	outer: if (typeof newType == 'function') {
+		let oldCommitQueueLength = commitQueue.length;
 		try {
 			let c, isNew, oldProps, oldState, snapshot, clearProcessingException;
 			let newProps = newVNode.props;
@@ -282,6 +283,10 @@ export function diff(
 				c._pendingError = c._processingException = NULL;
 			}
 		} catch (e) {
+			// We remove any componentDidMount, ...
+			// that have been invalidated by us
+			// intercepting the error.
+			commitQueue.length = oldCommitQueueLength;
 			newVNode._original = NULL;
 			// if hydrating or creating initial tree, bailout preserves DOM:
 			if (isHydrating || excessDomChildren != NULL) {
@@ -308,7 +313,9 @@ export function diff(
 				}
 			} else {
 				newVNode._dom = oldVNode._dom;
-				newVNode._children = oldVNode._children;
+				if (!newVNode._children && oldVNode._children) {
+					newVNode._children = oldVNode._children;
+				}
 				if (!e.then) markAsForce(newVNode);
 			}
 			options._catchError(e, newVNode, oldVNode);
