@@ -143,8 +143,7 @@ function handleDomVNode(vnode) {
 			}
 		} else if (
 			i === 'defaultValue' &&
-			'value' in props &&
-			props.value == null
+			(!('value' in props) || props.value == null)
 		) {
 			// `defaultValue` is treated as a fallback `value` when a value prop is present but null/undefined.
 			// `defaultValue` for Elements with no value prop is the same as the DOM defaultValue property.
