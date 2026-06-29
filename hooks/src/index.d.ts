@@ -123,6 +123,8 @@ export function useMemo<T>(factory: () => T, inputs: Inputs | undefined): T;
  */
 export function useContext<T>(context: PreactContext<T>): T;
 
+export function use<T>(resource: Promise<T> | PreactContext<T>): T;
+
 /**
  * Customize the displayed value in the devtools panel.
  *

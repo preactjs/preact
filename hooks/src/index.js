@@ -165,6 +165,65 @@ function getHookState(index, type) {
 }
 
 /**
+ * @template T
+ * @param {Promise<T> | import('preact').PreactContext<T>} resource
+ * @returns {T}
+ */
+export function use(resource) {
+	if (options._hook) {
+		options._hook(currentComponent, currentIndex, 12);
+	}
+
+	if (resource && typeof resource.then == 'function') {
+		return usePromise(/** @type {Promise<T>} */ (resource));
+	}
+
+	const context = /** @type {import('./internal').PreactContext} */ (
+		/** @type {unknown} */ (resource)
+	);
+	const provider = currentComponent.context[context._id];
+	if (!provider) return context._defaultValue;
+
+	const contexts =
+		currentComponent._contexts || (currentComponent._contexts = {});
+	if (!contexts[context._id]) {
+		contexts[context._id] = true;
+		provider.sub(currentComponent);
+	}
+
+	return provider.props.value;
+}
+
+/**
+ * @template T
+ * @param {Promise<T>} promise
+ * @returns {T}
+ */
+function usePromise(promise) {
+	/** @type {Promise<T> & { status?: string, value?: T, reason?: unknown }} */
+	const p = promise;
+
+	if (p.status == 'fulfilled') return /** @type {T} */ (p.value);
+	if (p.status == 'rejected') throw p.reason;
+
+	if (p.status != 'pending') {
+		p.status = 'pending';
+		p.then(
+			value => {
+				p.status = 'fulfilled';
+				p.value = value;
+			},
+			reason => {
+				p.status = 'rejected';
+				p.reason = reason;
+			}
+		);
+	}
+
+	throw p;
+}
+
+/**
  * @template {unknown} S
  * @param {import('./index').Dispatch<import('./index').StateUpdater<S>>} [initialState]
  * @returns {[S, (state: S) => void]}

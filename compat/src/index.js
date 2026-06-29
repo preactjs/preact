@@ -19,7 +19,8 @@ import {
 	useMemo,
 	useReducer,
 	useRef,
-	useState
+	useState,
+	use
 } from 'preact/hooks';
 import { Children } from './Children';
 import { PureComponent } from './PureComponent';
@@ -208,6 +209,7 @@ export default {
 	useMemo,
 	useCallback,
 	useContext,
+	use,
 	useDebugValue,
 	version,
 	Children,
