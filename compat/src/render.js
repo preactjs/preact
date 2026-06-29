@@ -144,7 +144,7 @@ function handleDomVNode(vnode) {
 		}
 
 		let lowerCased = i.toLowerCase();
-		if (i === 'defaultValue' && 'value' in props && props.value == null) {
+		if (i === 'defaultValue' && (!('value' in props) || props.value == null)) {
 			// `defaultValue` is treated as a fallback `value` when a value prop is present but null/undefined.
 			// `defaultValue` for Elements with no value prop is the same as the DOM defaultValue property.
 			i = 'value';
