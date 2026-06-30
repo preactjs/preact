@@ -1,5 +1,4 @@
 /** Normal hydration that attaches to a DOM tree but does not diff it. */
-/** Temporary CI trigger for pnpm migration validation. */
 export const MODE_HYDRATE = 1 << 5;
 /** Signifies this VNode suspended on the previous render */
 export const MODE_SUSPENDED = 1 << 7;
