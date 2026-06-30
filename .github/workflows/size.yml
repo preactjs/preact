@@ -19,7 +19,6 @@ jobs:
       - uses: preactjs/compressed-size-action@66325aad6443cb7cf89c4bfcd414aea2367cda94 # 2.9.1
         with:
           repo-token: '${{ secrets.GITHUB_TOKEN }}'
-          install-script: 'pnpm install --frozen-lockfile'
           # Our `prepare` script already builds the app post-install,
           # building it again would be redundant
           build-script: '--if-present noop'
