@@ -135,7 +135,7 @@
     "dev": "microbundle watch --raw --no-generateTypes --format cjs",
     "dev:hooks": "microbundle watch --raw --no-generateTypes --format cjs --cwd hooks",
     "dev:compat": "microbundle watch --raw --no-generateTypes --format cjs --cwd compat --globals 'preact/hooks=preactHooks'",
-    "test": "npm-run-all build lint test:unit",
+    "test": "run-s build lint test:unit",
     "test:install": "playwright install chromium",
     "test:unit": "run-p test:vitest:min test:ts",
     "test:vitest": "cross-env COVERAGE=true vitest run",
