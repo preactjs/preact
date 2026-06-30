@@ -78,9 +78,10 @@ options.diffed = vnode => {
 	if (oldAfterDiff) oldAfterDiff(vnode);
 
 	const c = vnode._component;
-	if (c && c.__hooks) {
-		if (c.__hooks._pendingEffects.length) afterPaint(afterPaintEffects.push(c));
-		c.__hooks._list.some(hookItem => {
+	const hooks = c && c.__hooks;
+	if (hooks) {
+		if (hooks._pendingEffects.length) afterPaint(afterPaintEffects.push(c));
+		hooks._list.some(hookItem => {
 			if (hookItem._pendingArgs) {
 				hookItem._args = hookItem._pendingArgs;
 				hookItem._pendingArgs = undefined;
@@ -116,9 +117,10 @@ options.unmount = vnode => {
 	if (oldBeforeUnmount) oldBeforeUnmount(vnode);
 
 	const c = vnode._component;
-	if (c && c.__hooks) {
+	const hooks = c && c.__hooks;
+	if (hooks) {
 		let hasErrored;
-		c.__hooks._list.some(s => {
+		hooks._list.some(s => {
 			try {
 				invokeCleanup(s);
 			} catch (e) {
