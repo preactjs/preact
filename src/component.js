@@ -89,31 +89,35 @@ BaseComponent.prototype.render = Fragment;
  * @param {number | null} [childIndex]
  */
 export function getDomSibling(vnode, childIndex) {
-	if (childIndex == NULL) {
-		// Use childIndex==null as a signal to resume the search from the vnode's sibling
-		return vnode._parent
-			? getDomSibling(vnode._parent, vnode._index + 1)
-			: NULL;
-	}
-
 	let sibling;
-	for (; childIndex < vnode._children.length; childIndex++) {
-		sibling = vnode._children[childIndex];
-
-		if (sibling != NULL && sibling._dom != NULL) {
-			// Since updateParentDomPointers keeps _dom pointer correct,
-			// we can rely on _dom to tell us if this subtree contains a
-			// rendered DOM node, and what the first rendered DOM node is
-			return sibling._dom;
+	while (vnode) {
+		if (childIndex == NULL) {
+			// Use childIndex==null as a signal to resume the search from the vnode's sibling
+			childIndex = vnode._index + 1;
+			vnode = vnode._parent;
+			if (vnode == NULL) return NULL;
 		}
-	}
 
-	// If we get here, we have not found a DOM node in this vnode's children.
-	// We must resume from this vnode's sibling (in it's parent _children array)
-	// Only climb up and search the parent if we aren't searching through a DOM
-	// VNode (meaning we reached the DOM parent of the original vnode that began
-	// the search)
-	return typeof vnode.type == 'function' ? getDomSibling(vnode) : NULL;
+		for (; childIndex < vnode._children.length; childIndex++) {
+			sibling = vnode._children[childIndex];
+
+			if (sibling != NULL && sibling._dom != NULL) {
+				// Since updateParentDomPointers keeps _dom pointer correct,
+				// we can rely on _dom to tell us if this subtree contains a
+				// rendered DOM node, and what the first rendered DOM node is
+				return sibling._dom;
+			}
+		}
+
+		// If we get here, we have not found a DOM node in this vnode's children.
+		// We must resume from this vnode's sibling (in it's parent _children array)
+		// Only climb up and search the parent if we aren't searching through a DOM
+		// VNode (meaning we reached the DOM parent of the original vnode that began
+		// the search)
+		if (typeof vnode.type != 'function') return NULL;
+		childIndex = NULL;
+	}
+	return NULL;
 }
 
 /**
