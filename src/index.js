@@ -1,3 +1,4 @@
+// Temporary benchmark trigger.
 export { render, hydrate } from './render';
 export {
 	createElement,
