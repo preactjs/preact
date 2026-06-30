@@ -48,7 +48,8 @@ BaseComponent.prototype.setState = function (update, callback) {
 
 	if (update) {
 		assign(s, update);
-	} else {
+	} else if (!callback) {
+		// nothing to apply and no callback to flush, so this is a true no-op
 		return;
 	}
 

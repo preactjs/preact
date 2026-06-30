@@ -1985,6 +1985,50 @@ describe('Components', () => {
 				rerender();
 			}).to.not.throw();
 		});
+
+		it('should still invoke the callback when the updater function bails out by returning null', () => {
+			let spy = vi.fn();
+			let update;
+			class Foo extends Component {
+				constructor(props) {
+					super(props);
+					this.state = { count: 0 };
+					update = () => this.setState(() => null, spy);
+				}
+
+				render() {
+					return <div>{this.state.count}</div>;
+				}
+			}
+
+			render(<Foo />, scratch);
+			update();
+			rerender();
+
+			expect(spy).toHaveBeenCalledOnce();
+		});
+
+		it('should still invoke the callback when passing a falsy update directly', () => {
+			let spy = vi.fn();
+			let update;
+			class Foo extends Component {
+				constructor(props) {
+					super(props);
+					this.state = { count: 0 };
+					update = () => this.setState(null, spy);
+				}
+
+				render() {
+					return <div>{this.state.count}</div>;
+				}
+			}
+
+			render(<Foo />, scratch);
+			update();
+			rerender();
+
+			expect(spy).toHaveBeenCalledOnce();
+		});
 	});
 
 	describe('forceUpdate', () => {
