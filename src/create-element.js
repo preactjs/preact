@@ -17,11 +17,13 @@ export function createElement(type, props, children) {
 	let normalizedProps = {},
 		key,
 		ref,
-		i;
+		i,
+		value;
 	for (i in props) {
-		if (i == 'key') key = props[i];
-		else if (i == 'ref') ref = props[i];
-		else normalizedProps[i] = props[i];
+		value = props[i];
+		if (i == 'key') key = value;
+		else if (i == 'ref') ref = value;
+		else normalizedProps[i] = value;
 	}
 
 	if (arguments.length > 2) {
