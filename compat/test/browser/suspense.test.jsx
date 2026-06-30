@@ -106,6 +106,49 @@ describe('suspense', () => {
 		});
 	});
 
+	it('should not materialize undefined DOM props when suspense resumes', () => {
+		const LazyComp = () => <span>Done</span>;
+
+		/** @type {() => Promise<void>} */
+		let resolve;
+		const Lazy = lazy(() => {
+			const p = new Promise(res => {
+				resolve = () => {
+					res({ default: LazyComp });
+					return p;
+				};
+			});
+
+			return p;
+		});
+
+		render(
+			<Suspense fallback={<span>Loading</span>}>
+				<>
+					<input id="test-input" type="text" maxLength={undefined} />
+					<textarea id="test-textarea" minLength={null} />
+					<Lazy />
+				</>
+			</Suspense>,
+			scratch
+		);
+		rerender();
+
+		expect(scratch.innerHTML).to.eql(`<span>Loading</span>`);
+
+		return resolve().then(() => {
+			rerender();
+
+			const input = scratch.querySelector('#test-input');
+			expect(input.getAttribute('maxlength')).to.equal(null);
+			expect(input.maxLength).to.equal(-1);
+
+			const textarea = scratch.querySelector('#test-textarea');
+			expect(textarea.getAttribute('minlength')).to.equal(null);
+			expect(textarea.minLength).to.equal(-1);
+		});
+	});
+
 	it('should handle lazy component that rejects without returning a component', async () => {
 		const errorSpy = vi.fn();
 		let renderCount = 0;

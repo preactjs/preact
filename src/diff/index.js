@@ -595,7 +595,7 @@ function diffElementNodes(
 				checked = value;
 			} else if (
 				(!isHydrating || typeof value == 'function') &&
-				(oldProps[i] !== value || shouldRevalidateProps)
+				(oldProps[i] !== value || (shouldRevalidateProps && value != NULL))
 			) {
 				setProperty(dom, i, value, oldProps[i], namespace);
 			}
