@@ -4,7 +4,9 @@ import React, {
 	hydrate,
 	Fragment,
 	Suspense,
+	lazy,
 	memo,
+	useId,
 	useState
 } from 'preact/compat';
 import { logCall, getLog, clearLog } from '../../../test/_util/logCall';
@@ -15,6 +17,7 @@ import {
 } from '../../../test/_util/helpers';
 import { ul, li, div } from '../../../test/_util/dom';
 import { createLazy, createSuspenseLoader } from './suspense-utils';
+import { renderToString, renderToStringAsync } from 'preact-render-to-string';
 import { vi } from 'vitest';
 
 /* eslint-env browser */
@@ -72,6 +75,196 @@ describe('suspense hydration', () => {
 				throw unhandledEvents[0].reason;
 			}
 		}
+	});
+
+	it('is stable for async Suspense siblings resolving in different orders', async () => {
+		const getIds = html =>
+			Object.fromEntries(
+				[...html.matchAll(/<span id="([^"]+)">([AB])<\/span>/g)].map(
+					([, id, name]) => [name, id]
+				)
+			);
+
+		async function renderWithResolveOrder(order) {
+			const loaders = {};
+
+			function Field({ name }) {
+				const id = useId();
+				return <span id={id}>{name}</span>;
+			}
+
+			const createLazy = name =>
+				lazy(
+					() =>
+						new Promise(resolve => {
+							loaders[name] = () =>
+								resolve({ default: () => <Field name={name} /> });
+						})
+				);
+
+			const A = createLazy('A');
+			const B = createLazy('B');
+			const rendered = renderToStringAsync(
+				<div>
+					<Suspense fallback={null}>
+						<A />
+					</Suspense>
+					<Suspense fallback={null}>
+						<B />
+					</Suspense>
+				</div>
+			);
+
+			await Promise.resolve();
+			order.some(name => loaders[name]());
+
+			return getIds(await rendered);
+		}
+
+		const ordered = await renderWithResolveOrder(['A', 'B']);
+		const reversed = await renderWithResolveOrder(['B', 'A']);
+
+		expect(new Set(Object.values(ordered)).size).to.equal(2);
+		expect(new Set(Object.values(reversed)).size).to.equal(2);
+		expect(reversed).to.deep.equal(ordered);
+	});
+
+	it('is stable for nested async Suspense siblings resolving in different orders', async () => {
+		const getIds = html =>
+			Object.fromEntries(
+				[...html.matchAll(/<span id="([^"]+)">([AB])<\/span>/g)].map(
+					([, id, name]) => [name, id]
+				)
+			);
+
+		async function renderWithResolveOrder(order) {
+			const loaders = {};
+
+			function Field({ name }) {
+				const id = useId();
+				return <span id={id}>{name}</span>;
+			}
+
+			const createLazy = name =>
+				lazy(
+					() =>
+						new Promise(resolve => {
+							loaders[name] = () =>
+								resolve({ default: () => <Field name={name} /> });
+						})
+				);
+
+			const A = createLazy('A');
+			const B = createLazy('B');
+			const rendered = renderToStringAsync(
+				<Suspense fallback={null}>
+					<Suspense fallback={null}>
+						<A />
+					</Suspense>
+					<Suspense fallback={null}>
+						<B />
+					</Suspense>
+				</Suspense>
+			);
+
+			await Promise.resolve();
+			order.some(name => loaders[name]());
+
+			return getIds(await rendered);
+		}
+
+		const ordered = await renderWithResolveOrder(['A', 'B']);
+		const reversed = await renderWithResolveOrder(['B', 'A']);
+
+		expect(ordered).to.deep.equal({ A: 'P1-0', B: 'P2-0' });
+		expect(reversed).to.deep.equal(ordered);
+	});
+
+	it('does not leak Suspense useId masks across abandoned renderToString attempts', () => {
+		const idsIn = html => [...html.matchAll(/P\d+-\d+/g)].map(([id]) => id);
+
+		function Field() {
+			return <i>{useId()}</i>;
+		}
+
+		function Suspends() {
+			throw Promise.resolve();
+		}
+
+		const tree = () => (
+			<>
+				<Suspense fallback={null}>
+					<Field />
+				</Suspense>
+				<Suspense fallback={null}>
+					<Field />
+				</Suspense>
+			</>
+		);
+
+		const first = idsIn(renderToString(tree()));
+		expect(first).to.deep.equal(['P0-0', 'P1-0']);
+
+		expect(() =>
+			renderToString(
+				<Suspense fallback={null}>
+					<Suspends />
+				</Suspense>
+			)
+		).to.throw(/renderToStringAsync/);
+
+		expect(idsIn(renderToString(tree()))).to.deep.equal(first);
+	});
+
+	it('keeps deeply nested Suspense useId masks compact', async () => {
+		function Field() {
+			const id = useId();
+			return <span id={id}>field</span>;
+		}
+
+		const Wrapper = ({ children }) => children;
+		let child = (
+			<Suspense fallback={null}>
+				<Field />
+			</Suspense>
+		);
+
+		for (let i = 0; i < 10; i++) {
+			child = <Wrapper>{child}</Wrapper>;
+		}
+
+		const html = await renderToStringAsync(
+			<Suspense fallback={null}>{child}</Suspense>
+		);
+
+		expect(html).to.equal('<span id="P1-0">field</span>');
+	});
+
+	it('keeps nested Suspense ids distinct from parent useId calls', async () => {
+		const ids = [];
+
+		function Field() {
+			ids.push(useId());
+			return <span id={ids[1]}>field</span>;
+		}
+
+		function Wrapper() {
+			ids.push(useId());
+			return (
+				<Suspense fallback={null}>
+					<Field />
+				</Suspense>
+			);
+		}
+
+		await renderToStringAsync(
+			<Suspense fallback={null}>
+				<Wrapper />
+			</Suspense>
+		);
+
+		expect(ids[0]).to.equal('P0-0');
+		expect(ids[1]).to.equal('P1-0');
 	});
 
 	it('should leave DOM untouched when suspending while hydrating', () => {
@@ -1015,6 +1208,120 @@ describe('suspense hydration', () => {
 
 				clearLog();
 			});
+		});
+	});
+
+	it('should properly hydrate suspense when resolves to a Fragment with $s:id markers', () => {
+		const originalHtml = ul([
+			li(0),
+			li(1),
+			'<!--$s:0-->',
+			li(2),
+			li(3),
+			'<!--/$s:0-->',
+			li(4),
+			li(5)
+		]);
+
+		const listeners = [vi.fn(), vi.fn(), vi.fn(), vi.fn(), vi.fn(), vi.fn()];
+
+		scratch.innerHTML = originalHtml;
+		clearLog();
+
+		const [Lazy, resolve] = createLazy();
+		hydrate(
+			<List>
+				<Fragment>
+					<ListItem onClick={listeners[0]}>0</ListItem>
+					<ListItem onClick={listeners[1]}>1</ListItem>
+				</Fragment>
+				<Suspense>
+					<Lazy />
+				</Suspense>
+				<Fragment>
+					<ListItem onClick={listeners[4]}>4</ListItem>
+					<ListItem onClick={listeners[5]}>5</ListItem>
+				</Fragment>
+			</List>,
+			scratch
+		);
+		rerender(); // Flush rerender queue to mimic what preact will really do
+		expect(getLog()).to.deep.equal([]);
+		expect(scratch.innerHTML).to.equal(originalHtml);
+		expect(listeners[5]).not.toHaveBeenCalled();
+
+		clearLog();
+		scratch.querySelector('li:last-child').dispatchEvent(createEvent('click'));
+		expect(listeners[5]).toHaveBeenCalledOnce();
+
+		return resolve(() => (
+			<Fragment>
+				<ListItem onClick={listeners[2]}>2</ListItem>
+				<ListItem onClick={listeners[3]}>3</ListItem>
+			</Fragment>
+		)).then(() => {
+			rerender();
+			expect(scratch.innerHTML).to.equal(originalHtml);
+			expect(getLog()).to.deep.equal([]);
+			clearLog();
+
+			scratch
+				.querySelector('li:nth-child(4)')
+				.dispatchEvent(createEvent('click'));
+			expect(listeners[3]).toHaveBeenCalledOnce();
+
+			scratch
+				.querySelector('li:last-child')
+				.dispatchEvent(createEvent('click'));
+			expect(listeners[5]).toHaveBeenCalledTimes(2);
+		});
+	});
+
+	it('should use updated DOM when stream patcher replaces content before suspend resolves', () => {
+		scratch.innerHTML =
+			'<!--$s:0--><span>Loading</span><!--/$s:0--><div>after</div>';
+		clearLog();
+
+		const [Lazy, resolve] = createLazy();
+		hydrate(
+			<>
+				<Suspense>
+					<Lazy />
+				</Suspense>
+				<div>after</div>
+			</>,
+			scratch
+		);
+		rerender();
+		expect(scratch.innerHTML).to.equal(
+			'<!--$s:0--><span>Loading</span><!--/$s:0--><div>after</div>'
+		);
+		expect(getLog()).to.deep.equal([]);
+		clearLog();
+
+		// Simulate stream patcher: replace fallback content while anchor comments
+		// remain. The deferred restoration should use the current DOM, not stale
+		// references to the removed <span>.
+		const endMarker = scratch.childNodes[2]; // <!--/$s:0-->
+		scratch.removeChild(scratch.childNodes[1]); // remove <span>Loading</span>
+		const resolved = document.createElement('div');
+		resolved.textContent = 'Resolved';
+		scratch.insertBefore(resolved, endMarker);
+
+		expect(scratch.innerHTML).to.equal(
+			'<!--$s:0--><div>Resolved</div><!--/$s:0--><div>after</div>'
+		);
+		// Clear the stream patcher's own DOM ops before asserting on rerender
+		clearLog();
+
+		return resolve(() => <div>Resolved</div>).then(() => {
+			rerender();
+			// Should match the stream-patched <div>Resolved</div>, no extra DOM ops
+			expect(scratch.innerHTML).to.equal(
+				'<!--$s:0--><div>Resolved</div><!--/$s:0--><div>after</div>'
+			);
+			expect(getLog()).to.deep.equal([]);
+			clearLog();
 		});
 	});
 
