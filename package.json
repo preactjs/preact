@@ -2,7 +2,7 @@
   "name": "preact",
   "amdName": "preact",
   "version": "10.29.3",
-  "packageManager": "pnpm@11.1.0",
+  "packageManager": "pnpm@11.3.0",
   "private": false,
   "publishConfig": {
     "access": "public",
