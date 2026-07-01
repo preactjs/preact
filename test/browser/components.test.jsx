@@ -2029,6 +2029,111 @@ describe('Components', () => {
 
 			expect(spy).toHaveBeenCalledOnce();
 		});
+
+		it('should not schedule a render when flushing a callback for a no-op update', () => {
+			let spy = vi.fn();
+			let update;
+			class Foo extends Component {
+				constructor(props) {
+					super(props);
+					this.state = { count: 0 };
+					update = () => this.setState(() => null, spy);
+				}
+
+				render() {
+					return <div>{this.state.count}</div>;
+				}
+			}
+
+			vi.spyOn(Foo.prototype, 'render');
+
+			render(<Foo />, scratch);
+			expect(Foo.prototype.render).toHaveBeenCalledOnce();
+
+			update();
+			// The callback should have fired immediately/synchronously, without
+			// waiting on the render queue, since there's nothing to commit.
+			expect(spy).toHaveBeenCalledOnce();
+			// No render was enqueued to flush it, so draining the render queue
+			// must not cause an additional render call.
+			rerender();
+
+			expect(Foo.prototype.render).toHaveBeenCalledOnce();
+		});
+
+		it('should invoke the callback exactly once for multiple stacked no-op updates', () => {
+			let spy = vi.fn();
+			let update;
+			class Foo extends Component {
+				constructor(props) {
+					super(props);
+					this.state = { count: 0 };
+					update = () => {
+						this.setState(() => null, spy);
+						this.setState(() => null, spy);
+						this.setState(() => null, spy);
+					};
+				}
+
+				render() {
+					return <div>{this.state.count}</div>;
+				}
+			}
+
+			vi.spyOn(Foo.prototype, 'render');
+
+			render(<Foo />, scratch);
+			expect(Foo.prototype.render).toHaveBeenCalledOnce();
+
+			update();
+
+			expect(spy).toHaveBeenCalledTimes(3);
+			rerender();
+
+			expect(Foo.prototype.render).toHaveBeenCalledOnce();
+		});
+
+		it('should batch a no-op callback onto an already-pending render instead of firing it early', () => {
+			let calls = [];
+			let update;
+			class Foo extends Component {
+				constructor(props) {
+					super(props);
+					this.state = { count: 0 };
+					update = () => {
+						// A real update enqueues a render for this component...
+						this.setState({ count: 1 }, () => calls.push('real'));
+						// ...so this no-op callback should be attached to that same
+						// pending render instead of being invoked synchronously.
+						this.setState(
+							() => null,
+							() => calls.push('noop')
+						);
+					};
+				}
+
+				render() {
+					return <div>{this.state.count}</div>;
+				}
+			}
+
+			vi.spyOn(Foo.prototype, 'render');
+
+			render(<Foo />, scratch);
+			expect(Foo.prototype.render).toHaveBeenCalledOnce();
+
+			update();
+			// Neither callback should have run yet: both are attached to the
+			// still-pending render triggered by the real update.
+			expect(calls).to.deep.equal([]);
+
+			rerender();
+
+			// Exactly one additional render for the real update, and both
+			// callbacks fired, in the order they were registered.
+			expect(Foo.prototype.render).toHaveBeenCalledTimes(2);
+			expect(calls).to.deep.equal(['real', 'noop']);
+		});
 	});
 
 	describe('forceUpdate', () => {

@@ -51,6 +51,18 @@ BaseComponent.prototype.setState = function (update, callback) {
 	} else if (!callback) {
 		// nothing to apply and no callback to flush, so this is a true no-op
 		return;
+	} else if (this._vnode && !(this._bits & COMPONENT_DIRTY)) {
+		// The update itself was a no-op (e.g. an updater bailing out by
+		// returning null/undefined), and there's no render already queued to
+		// piggyback the callback on. This mirrors React: a no-op update
+		// doesn't schedule a render, but the callback still fires. Calling it
+		// directly here avoids enqueueing a render cycle just to flush it.
+		try {
+			callback.call(this);
+		} catch (e) {
+			options._catchError(e, this._vnode);
+		}
+		return;
 	}
 
 	if (this._vnode) {
