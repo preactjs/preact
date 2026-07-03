@@ -8,7 +8,7 @@ This steps will help you to set up your development environment. That includes a
 
 1. Clone the git repository: `git clone git@github.com:preactjs/preact.git`
 2. Go into the cloned folder: `cd preact/`
-3. Install all dependencies: `npm install`
+3. Install all dependencies: `pnpm install`
 
 ## The Repo Structure
 
@@ -95,7 +95,7 @@ The short summary is:
 
 ## Commonly used scripts for contributions
 
-Scripts can be executed via `npm run [script]` or `yarn [script]` respectively.
+Scripts can be executed via `pnpm run [script]`.
 
 - `build` - compiles all packages ready for publishing to npm
 - `build:core` - builds just Preact itself
@@ -133,7 +133,7 @@ it.only('should test something', () => {
 
 ## Benchmarks
 
-We have a benchmark suite that we use to measure the performance of Preact. Our benchmark suite lives in our [preactjs/benchmarks repository](https://github.com/preactjs/benchmarks), but is included here as Git submodule. To run the benchmarks, first ensure [PNPM](https://pnpm.io/installation) is installed on your system and initialize and setup the submodule (it uses `pnpm` as a package manager):
+We have a benchmark suite that we use to measure the performance of Preact. Our benchmark suite lives in our [preactjs/benchmarks repository](https://github.com/preactjs/benchmarks), but is included here as Git submodule. To run the benchmarks, first ensure [pnpm](https://pnpm.io/installation) is installed on your system and initialize and setup the submodule:
 
 ```bash
 pnpm -v # Make sure pnpm is installed
@@ -213,13 +213,13 @@ Before using the automated npm publishing flow, make sure npm trusted publishing
 > **ATTENTION:** Make sure that you've cleared the project correctly
 > when switching from a 10.x branch.
 
-0. Run `rm -rf dist node_modules && npm i` to make sure to have the correct dependencies.
+0. Run `rm -rf dist node_modules && pnpm install` to make sure to have the correct dependencies.
 1. [Write the release notes](#writing-release-notes) and keep them as a draft in GitHub
    1. I'd recommend writing them in an offline editor because each edit to a draft will change the URL in GitHub.
 2. Make a PR where **only** the version number is incremented in `package.json` (note: We follow `SemVer` conventions)
 3. Wait until the PR is approved and merged.
 4. Switch back to the `main` branch and pull the merged PR
-5. Run `npm run build && npm publish`
+5. Run `pnpm run build && npm publish`
    1. Make sure you have 2FA enabled in npm, otherwise the above command will fail.
    2. If you're doing a pre-release add `--tag next` to the `npm publish` command to publish it under a different tag (default is `latest`)
 6. Publish the release notes and create the correct git tag.
