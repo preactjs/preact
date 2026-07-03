@@ -108,6 +108,7 @@ export function diff(
 	if ((tmp = options._diff)) tmp(newVNode);
 
 	outer: if (typeof newType == 'function') {
+		let oldCommitQueueLength = commitQueue.length;
 		try {
 			let c,
 				oldProps,
@@ -322,6 +323,10 @@ export function diff(
 				c._bits &= ~(COMPONENT_PROCESSING_EXCEPTION | COMPONENT_PENDING_ERROR);
 			}
 		} catch (e) {
+			// We remove any componentDidMount, ...
+			// that have been invalidated by us
+			// intercepting the error.
+			commitQueue.length = oldCommitQueueLength;
 			newVNode._original = NULL;
 			// if hydrating or creating initial tree, bailout preserves DOM:
 			if (isHydrating || excessDomChildren != NULL) {
@@ -333,24 +338,26 @@ export function diff(
 						? MODE_HYDRATE | MODE_SUSPENDED
 						: MODE_SUSPENDED;
 
-					for (let i = 0; i < excessDomChildren.length; i++) {
-						let child = excessDomChildren[i];
-						if (child == NULL) continue;
+					if (excessDomChildren != NULL) {
+						for (let i = 0; i < excessDomChildren.length; i++) {
+							let child = excessDomChildren[i];
+							if (child == NULL) continue;
 
-						if (child.nodeType == 8) {
-							if (child.data.startsWith('$s')) {
-								if (!commentMarkersToFind) startMarker = child;
-								commentMarkersToFind++;
-							} else if (child.data.startsWith('/$s')) {
-								if (--commentMarkersToFind == 0) {
-									oldDom = child;
-									excessDomChildren[i] = NULL;
-									break;
+							if (child.nodeType == 8) {
+								if (child.data.startsWith('$s')) {
+									if (!commentMarkersToFind) startMarker = child;
+									commentMarkersToFind++;
+								} else if (child.data.startsWith('/$s')) {
+									if (--commentMarkersToFind == 0) {
+										oldDom = child;
+										excessDomChildren[i] = NULL;
+										break;
+									}
 								}
+								excessDomChildren[i] = NULL;
+							} else if (commentMarkersToFind) {
+								excessDomChildren[i] = NULL;
 							}
-							excessDomChildren[i] = NULL;
-						} else if (commentMarkersToFind) {
-							excessDomChildren[i] = NULL;
 						}
 					}
 
@@ -362,20 +369,25 @@ export function diff(
 							oldDom = oldDom.nextSibling;
 						}
 
-						excessDomChildren[excessDomChildren.indexOf(oldDom)] = NULL;
+						if (excessDomChildren != NULL) {
+							excessDomChildren[excessDomChildren.indexOf(oldDom)] = NULL;
+						}
 						newVNode._component._excess = oldDom;
 					}
-
 					newVNode._dom = oldDom;
 				} else {
-					for (let i = excessDomChildren.length; i--; ) {
-						removeNode(excessDomChildren[i]);
+					if (excessDomChildren != NULL) {
+						for (let i = excessDomChildren.length; i--; ) {
+							removeNode(excessDomChildren[i]);
+						}
 					}
 					markAsForce(newVNode);
 				}
 			} else {
 				newVNode._dom = oldVNode._dom;
-				newVNode._children = oldVNode._children;
+				if (!newVNode._children && oldVNode._children) {
+					newVNode._children = oldVNode._children;
+				}
 				if (!e.then) markAsForce(newVNode);
 			}
 			options._catchError(e, newVNode, oldVNode);
@@ -583,7 +595,7 @@ function diffElementNodes(
 				checked = value;
 			} else if (
 				(!isHydrating || typeof value == 'function') &&
-				(oldProps[i] !== value || shouldRevalidateProps)
+				(oldProps[i] !== value || (shouldRevalidateProps && value != NULL))
 			) {
 				setProperty(dom, i, value, oldProps[i], namespace);
 			}
@@ -712,7 +724,7 @@ export function unmount(vnode, parentVNode, skipRemove) {
 			}
 		}
 
-		r._parentDom = NULL;
+		r._parentDom = r._globalContext = NULL;
 	}
 
 	if ((r = vnode._children)) {
