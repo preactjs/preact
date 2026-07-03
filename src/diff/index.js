@@ -303,21 +303,20 @@ export function diff(
 						excessDomChildren[excessDomChildren.indexOf(oldDom)] = NULL;
 					}
 					newVNode._dom = oldDom;
-				} else {
-					if (excessDomChildren != NULL) {
-						for (let i = excessDomChildren.length; i--; ) {
-							removeNode(excessDomChildren[i]);
-						}
+				} else if (excessDomChildren != NULL) {
+					for (let i = excessDomChildren.length; i--; ) {
+						removeNode(excessDomChildren[i]);
 					}
-					markAsForce(newVNode);
 				}
 			} else {
 				newVNode._dom = oldVNode._dom;
-				if (!newVNode._children && oldVNode._children) {
-					newVNode._children = oldVNode._children;
-				}
-				if (!e.then) markAsForce(newVNode);
 			}
+
+			if (newVNode._children == NULL) {
+				newVNode._children = oldVNode._children || [];
+			}
+
+			if (!e.then) markAsForce(newVNode);
 			options._catchError(e, newVNode, oldVNode);
 		}
 	} else if (
