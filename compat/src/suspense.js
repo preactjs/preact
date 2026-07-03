@@ -191,23 +191,14 @@ Suspense.prototype.componentWillUnmount = function () {
  * @param {import('./internal').SuspenseState} state
  */
 Suspense.prototype.render = function (props, state) {
-	let vnode = this._vnode;
-	if (!vnode._mask && !(vnode._mask = this._mask)) {
-		let root = vnode;
-		while (root._parent) root = root._parent;
-
-		root = root._mask || (root._mask = [0, 0]);
-		vnode._mask = this._mask = [root[1]++, 0];
-	}
-
 	if (this._detachOnNextRender) {
 		// When the Suspense's _vnode was created by a call to createVNode
 		// (i.e. due to a setState further up in the tree)
 		// it's _children prop is null, in this case we "forget" about the parked vnodes to detach
-		if (vnode._children) {
+		if (this._vnode._children) {
 			const detachedParent = document.createElement('div');
-			const detachedComponent = vnode._children[0]._component;
-			vnode._children[0] = detachedClone(
+			const detachedComponent = this._vnode._children[0]._component;
+			this._vnode._children[0] = detachedClone(
 				this._detachOnNextRender,
 				detachedParent,
 				(detachedComponent._originalParentDom = detachedComponent._parentDom)
