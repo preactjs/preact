@@ -192,12 +192,12 @@ Suspense.prototype.componentWillUnmount = function () {
  */
 Suspense.prototype.render = function (props, state) {
 	let vnode = this._vnode;
-	if (!vnode._mask) {
+	if (!vnode._mask && !(vnode._mask = this._mask)) {
 		let root = vnode;
 		while (root._parent) root = root._parent;
 
 		root = root._mask || (root._mask = [0, 0]);
-		vnode._mask = [root[1]++, 0];
+		vnode._mask = this._mask = [root[1]++, 0];
 	}
 
 	if (this._detachOnNextRender) {

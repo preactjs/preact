@@ -267,6 +267,60 @@ describe('suspense hydration', () => {
 		expect(ids[1]).to.equal('P1-0');
 	});
 
+	it('keeps Suspense useId masks stable across updates while hydration is suspended', async () => {
+		let shouldSuspend = false;
+		let resolvePromise;
+		let suspendPromise;
+		let update;
+		let renderedIds = [];
+
+		function Field() {
+			const id = useId();
+			renderedIds.push(id);
+			return <form id={id}>Pay</form>;
+		}
+
+		function MaybeSuspend() {
+			if (shouldSuspend) {
+				throw suspendPromise;
+			}
+			return <Field />;
+		}
+
+		function App() {
+			const [tick, setTick] = useState(0);
+			update = () => setTick(tick + 1);
+			return (
+				<Suspense fallback={null}>
+					<MaybeSuspend tick={tick} />
+				</Suspense>
+			);
+		}
+
+		const html = renderToString(<App />);
+		const serverId = /id="([^"]+)"/.exec(html)[1];
+		scratch.innerHTML = html;
+
+		renderedIds = [];
+		shouldSuspend = true;
+		suspendPromise = new Promise(resolve => {
+			resolvePromise = resolve;
+		});
+		hydrate(<App />, scratch);
+		rerender();
+
+		update();
+		rerender();
+
+		shouldSuspend = false;
+		resolvePromise();
+		await Promise.resolve();
+		await new Promise(resolve => setTimeout(resolve));
+		rerender();
+
+		expect(renderedIds).to.deep.equal([serverId]);
+	});
+
 	it('should leave DOM untouched when suspending while hydrating', () => {
 		scratch.innerHTML = '<div>Hello</div>';
 		clearLog();
@@ -289,6 +343,107 @@ describe('suspense hydration', () => {
 			expect(getLog()).to.deep.equal([]);
 			clearLog();
 		});
+	});
+
+	it('Should not crash when oldVNode._children is null during shouldComponentUpdate optimization', () => {
+		const originalHtml = '<div>Hello</div>';
+		scratch.innerHTML = originalHtml;
+		clearLog();
+
+		class ErrorBoundary extends React.Component {
+			constructor(props) {
+				super(props);
+				this.state = { hasError: false };
+			}
+
+			static getDerivedStateFromError() {
+				return { hasError: true };
+			}
+
+			render() {
+				return this.props.children;
+			}
+		}
+
+		const [Lazy, resolve] = createLazy();
+		function App() {
+			return (
+				<Suspense>
+					<ErrorBoundary>
+						<Lazy />
+					</ErrorBoundary>
+				</Suspense>
+			);
+		}
+
+		hydrate(<App />, scratch);
+		rerender(); // Flush rerender queue to mimic what preact will really do
+		expect(scratch.innerHTML).to.equal(originalHtml);
+		expect(getLog()).to.deep.equal([]);
+		clearLog();
+
+		let i = 0;
+		class ThrowOrRender extends React.Component {
+			shouldComponentUpdate() {
+				return i === 0;
+			}
+			render() {
+				if (i === 0) {
+					i++;
+					throw new Error('Test error');
+				}
+				return <div>Hello</div>;
+			}
+		}
+
+		return resolve(ThrowOrRender).then(() => {
+			rerender();
+			expect(scratch.innerHTML).to.equal(originalHtml);
+			clearLog();
+		});
+	});
+
+	it('does not crash when a hydrated suspended component bails out with shouldComponentUpdate', () => {
+		scratch.innerHTML = '<div>ssr</div>';
+		clearLog();
+
+		const promise = new Promise(() => {});
+		let update;
+
+		class Suspender extends React.Component {
+			shouldComponentUpdate() {
+				return false;
+			}
+
+			render() {
+				throw promise;
+			}
+		}
+
+		class App extends React.Component {
+			constructor(props) {
+				super(props);
+				this.state = { tick: 0 };
+				update = () => this.setState({ tick: this.state.tick + 1 });
+			}
+
+			render() {
+				return (
+					<Suspense fallback={<div>loading</div>}>
+						<Suspender tick={this.state.tick} />
+					</Suspense>
+				);
+			}
+		}
+
+		hydrate(<App />, scratch);
+		expect(scratch.innerHTML).to.equal('<div>ssr</div>');
+
+		update();
+		expect(() => rerender()).not.to.throw();
+		expect(scratch.innerHTML).to.equal('<div>ssr</div>');
+		expect(getLog()).to.deep.equal([]);
+		clearLog();
 	});
 
 	it('should leave DOM untouched when suspending while hydrating', () => {
