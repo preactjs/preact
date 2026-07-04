@@ -10,12 +10,13 @@ import { slice } from './util';
  * @param {import('./internal').PreactElement} parentDom The DOM element to render into
  */
 export function render(vnode, parentDom) {
-	// https://github.com/preactjs/preact/issues/3794
-	if (parentDom == document) {
-		parentDom = document.documentElement;
-	}
-
 	if (options._root) options._root(vnode, parentDom);
+
+	// https://github.com/preactjs/preact/issues/3794
+	// https://github.com/preactjs/preact/issues/5118
+	if (parentDom.nodeType == 9) {
+		parentDom = parentDom.documentElement;
+	}
 
 	// @ts-expect-error
 	let isHydrating = vnode && vnode._flags & MODE_HYDRATE;
