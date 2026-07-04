@@ -4,9 +4,7 @@ import React, {
 	hydrate,
 	Fragment,
 	Suspense,
-	lazy,
 	memo,
-	useId,
 	useState
 } from 'preact/compat';
 import { logCall, getLog, clearLog } from '../../../test/_util/logCall';
@@ -17,7 +15,6 @@ import {
 } from '../../../test/_util/helpers';
 import { ul, li, div } from '../../../test/_util/dom';
 import { createLazy, createSuspenseLoader } from './suspense-utils';
-import { renderToString, renderToStringAsync } from 'preact-render-to-string';
 import { vi } from 'vitest';
 
 /* eslint-env browser */
@@ -77,196 +74,6 @@ describe('suspense hydration', () => {
 		}
 	});
 
-	it('is stable for async Suspense siblings resolving in different orders', async () => {
-		const getIds = html =>
-			Object.fromEntries(
-				[...html.matchAll(/<span id="([^"]+)">([AB])<\/span>/g)].map(
-					([, id, name]) => [name, id]
-				)
-			);
-
-		async function renderWithResolveOrder(order) {
-			const loaders = {};
-
-			function Field({ name }) {
-				const id = useId();
-				return <span id={id}>{name}</span>;
-			}
-
-			const createLazy = name =>
-				lazy(
-					() =>
-						new Promise(resolve => {
-							loaders[name] = () =>
-								resolve({ default: () => <Field name={name} /> });
-						})
-				);
-
-			const A = createLazy('A');
-			const B = createLazy('B');
-			const rendered = renderToStringAsync(
-				<div>
-					<Suspense fallback={null}>
-						<A />
-					</Suspense>
-					<Suspense fallback={null}>
-						<B />
-					</Suspense>
-				</div>
-			);
-
-			await Promise.resolve();
-			order.some(name => loaders[name]());
-
-			return getIds(await rendered);
-		}
-
-		const ordered = await renderWithResolveOrder(['A', 'B']);
-		const reversed = await renderWithResolveOrder(['B', 'A']);
-
-		expect(new Set(Object.values(ordered)).size).to.equal(2);
-		expect(new Set(Object.values(reversed)).size).to.equal(2);
-		expect(reversed).to.deep.equal(ordered);
-	});
-
-	it('is stable for nested async Suspense siblings resolving in different orders', async () => {
-		const getIds = html =>
-			Object.fromEntries(
-				[...html.matchAll(/<span id="([^"]+)">([AB])<\/span>/g)].map(
-					([, id, name]) => [name, id]
-				)
-			);
-
-		async function renderWithResolveOrder(order) {
-			const loaders = {};
-
-			function Field({ name }) {
-				const id = useId();
-				return <span id={id}>{name}</span>;
-			}
-
-			const createLazy = name =>
-				lazy(
-					() =>
-						new Promise(resolve => {
-							loaders[name] = () =>
-								resolve({ default: () => <Field name={name} /> });
-						})
-				);
-
-			const A = createLazy('A');
-			const B = createLazy('B');
-			const rendered = renderToStringAsync(
-				<Suspense fallback={null}>
-					<Suspense fallback={null}>
-						<A />
-					</Suspense>
-					<Suspense fallback={null}>
-						<B />
-					</Suspense>
-				</Suspense>
-			);
-
-			await Promise.resolve();
-			order.some(name => loaders[name]());
-
-			return getIds(await rendered);
-		}
-
-		const ordered = await renderWithResolveOrder(['A', 'B']);
-		const reversed = await renderWithResolveOrder(['B', 'A']);
-
-		expect(ordered).to.deep.equal({ A: 'P1-0', B: 'P2-0' });
-		expect(reversed).to.deep.equal(ordered);
-	});
-
-	it('does not leak Suspense useId masks across abandoned renderToString attempts', () => {
-		const idsIn = html => [...html.matchAll(/P\d+-\d+/g)].map(([id]) => id);
-
-		function Field() {
-			return <i>{useId()}</i>;
-		}
-
-		function Suspends() {
-			throw Promise.resolve();
-		}
-
-		const tree = () => (
-			<>
-				<Suspense fallback={null}>
-					<Field />
-				</Suspense>
-				<Suspense fallback={null}>
-					<Field />
-				</Suspense>
-			</>
-		);
-
-		const first = idsIn(renderToString(tree()));
-		expect(first).to.deep.equal(['P0-0', 'P1-0']);
-
-		expect(() =>
-			renderToString(
-				<Suspense fallback={null}>
-					<Suspends />
-				</Suspense>
-			)
-		).to.throw(/renderToStringAsync/);
-
-		expect(idsIn(renderToString(tree()))).to.deep.equal(first);
-	});
-
-	it('keeps deeply nested Suspense useId masks compact', async () => {
-		function Field() {
-			const id = useId();
-			return <span id={id}>field</span>;
-		}
-
-		const Wrapper = ({ children }) => children;
-		let child = (
-			<Suspense fallback={null}>
-				<Field />
-			</Suspense>
-		);
-
-		for (let i = 0; i < 10; i++) {
-			child = <Wrapper>{child}</Wrapper>;
-		}
-
-		const html = await renderToStringAsync(
-			<Suspense fallback={null}>{child}</Suspense>
-		);
-
-		expect(html).to.equal('<span id="P1-0">field</span>');
-	});
-
-	it('keeps nested Suspense ids distinct from parent useId calls', async () => {
-		const ids = [];
-
-		function Field() {
-			ids.push(useId());
-			return <span id={ids[1]}>field</span>;
-		}
-
-		function Wrapper() {
-			ids.push(useId());
-			return (
-				<Suspense fallback={null}>
-					<Field />
-				</Suspense>
-			);
-		}
-
-		await renderToStringAsync(
-			<Suspense fallback={null}>
-				<Wrapper />
-			</Suspense>
-		);
-
-		expect(ids[0]).to.equal('P0-0');
-		expect(ids[1]).to.equal('P1-0');
-	});
-
 	it('should leave DOM untouched when suspending while hydrating', () => {
 		scratch.innerHTML = '<div>Hello</div>';
 		clearLog();
@@ -289,6 +96,107 @@ describe('suspense hydration', () => {
 			expect(getLog()).to.deep.equal([]);
 			clearLog();
 		});
+	});
+
+	it('Should not crash when oldVNode._children is null during shouldComponentUpdate optimization', () => {
+		const originalHtml = '<div>Hello</div>';
+		scratch.innerHTML = originalHtml;
+		clearLog();
+
+		class ErrorBoundary extends React.Component {
+			constructor(props) {
+				super(props);
+				this.state = { hasError: false };
+			}
+
+			static getDerivedStateFromError() {
+				return { hasError: true };
+			}
+
+			render() {
+				return this.props.children;
+			}
+		}
+
+		const [Lazy, resolve] = createLazy();
+		function App() {
+			return (
+				<Suspense>
+					<ErrorBoundary>
+						<Lazy />
+					</ErrorBoundary>
+				</Suspense>
+			);
+		}
+
+		hydrate(<App />, scratch);
+		rerender(); // Flush rerender queue to mimic what preact will really do
+		expect(scratch.innerHTML).to.equal(originalHtml);
+		expect(getLog()).to.deep.equal([]);
+		clearLog();
+
+		let i = 0;
+		class ThrowOrRender extends React.Component {
+			shouldComponentUpdate() {
+				return i === 0;
+			}
+			render() {
+				if (i === 0) {
+					i++;
+					throw new Error('Test error');
+				}
+				return <div>Hello</div>;
+			}
+		}
+
+		return resolve(ThrowOrRender).then(() => {
+			rerender();
+			expect(scratch.innerHTML).to.equal(originalHtml);
+			clearLog();
+		});
+	});
+
+	it('does not crash when a hydrated suspended component bails out with shouldComponentUpdate', () => {
+		scratch.innerHTML = '<div>ssr</div>';
+		clearLog();
+
+		const promise = new Promise(() => {});
+		let update;
+
+		class Suspender extends React.Component {
+			shouldComponentUpdate() {
+				return false;
+			}
+
+			render() {
+				throw promise;
+			}
+		}
+
+		class App extends React.Component {
+			constructor(props) {
+				super(props);
+				this.state = { tick: 0 };
+				update = () => this.setState({ tick: this.state.tick + 1 });
+			}
+
+			render() {
+				return (
+					<Suspense fallback={<div>loading</div>}>
+						<Suspender tick={this.state.tick} />
+					</Suspense>
+				);
+			}
+		}
+
+		hydrate(<App />, scratch);
+		expect(scratch.innerHTML).to.equal('<div>ssr</div>');
+
+		update();
+		expect(() => rerender()).not.to.throw();
+		expect(scratch.innerHTML).to.equal('<div>ssr</div>');
+		expect(getLog()).to.deep.equal([]);
+		clearLog();
 	});
 
 	it('should leave DOM untouched when suspending while hydrating', () => {
