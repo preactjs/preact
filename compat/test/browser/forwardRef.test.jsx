@@ -1,5 +1,6 @@
 import {
 	createElement,
+	createContext,
 	render,
 	createRef,
 	forwardRef,
@@ -475,12 +476,11 @@ describe('forwardRef', () => {
 	});
 
 	it('should not leak context into refs', () => {
+		const Ctx = createContext(0);
+
 		class Provider extends Component {
-			getChildContext() {
-				return { foo: 2 };
-			}
 			render() {
-				return this.props.children;
+				return <Ctx.Provider value={2}>{this.props.children}</Ctx.Provider>;
 			}
 		}
 

@@ -2,10 +2,6 @@ import { expect } from 'chai';
 import { createElement, Component, RenderableProps, Fragment } from '../../';
 
 export class ContextComponent extends Component<{ foo: string }> {
-	getChildContext() {
-		return { something: 2 };
-	}
-
 	render() {
 		return null;
 	}

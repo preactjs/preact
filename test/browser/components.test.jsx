@@ -1,4 +1,11 @@
-import { createElement, render, Component, Fragment, options } from 'preact';
+import {
+	createElement,
+	createContext,
+	render,
+	Component,
+	Fragment,
+	options
+} from 'preact';
 import { setupRerender } from 'preact/test-utils';
 import {
 	setupScratch,
@@ -1044,20 +1051,23 @@ describe('Components', () => {
 	describe('High-Order Components', () => {
 		it('should render wrapper HOCs', () => {
 			const text = "We'll throw some happy little limbs on this tree.";
+			const Text = createContext('');
 
 			function withBobRoss(ChildComponent) {
 				return class BobRossIpsum extends Component {
-					getChildContext() {
-						return { text };
-					}
-
 					render(props) {
-						return <ChildComponent {...props} />;
+						return (
+							<Text.Provider value={text}>
+								<ChildComponent {...props} />
+							</Text.Provider>
+						);
 					}
 				};
 			}
 
-			const PaintSomething = (props, context) => <div>{context.text}</div>;
+			const PaintSomething = () => (
+				<Text.Consumer>{text => <div>{text}</div>}</Text.Consumer>
+			);
 			const Paint = withBobRoss(PaintSomething);
 
 			render(<Paint />, scratch);
@@ -1067,19 +1077,16 @@ describe('Components', () => {
 		it('should render HOCs with generic children', () => {
 			const text =
 				"Let your imagination just wonder around when you're doing these things.";
+			const Text = createContext('');
 
 			class BobRossProvider extends Component {
-				getChildContext() {
-					return { text };
-				}
-
 				render(props) {
-					return props.children;
+					return <Text.Provider value={text}>{props.children}</Text.Provider>;
 				}
 			}
 
-			function BobRossConsumer(props, context) {
-				return props.children(context.text);
+			function BobRossConsumer(props) {
+				return <Text.Consumer>{props.children}</Text.Consumer>;
 			}
 
 			const Say = props => <div>{props.text}</div>;
@@ -1300,11 +1307,7 @@ describe('Components', () => {
 		});
 
 		it('should resolve intermediary functional component', () => {
-			let ctx = {};
 			class Root extends Component {
-				getChildContext() {
-					return { ctx };
-				}
 				render() {
 					return <Func />;
 				}

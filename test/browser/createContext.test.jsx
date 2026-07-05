@@ -772,9 +772,9 @@ describe('createContext', () => {
 				return (
 					<Provider value={state.value}>
 						<div>
-							{state.show
-								? <Consumer>{data => <Inner value={data} />}</Consumer>
-								: null}
+							{state.show ? (
+								<Consumer>{data => <Inner value={data} />}</Consumer>
+							) : null}
 						</div>
 					</Provider>
 				);
@@ -842,49 +842,6 @@ describe('createContext', () => {
 				scratch
 			);
 			expect(actual).to.deep.equal('bob');
-		});
-
-		it('should restore legacy context for children', () => {
-			const Foo = createContext('foo');
-			const spy = vi.fn();
-
-			class NewContext extends Component {
-				render() {
-					return <div>{this.props.children}</div>;
-				}
-			}
-
-			class OldContext extends Component {
-				getChildContext() {
-					return { foo: 'foo' };
-				}
-
-				render() {
-					return <div>{this.props.children}</div>;
-				}
-			}
-
-			class Inner extends Component {
-				render() {
-					spy(this.context);
-					return <div>Inner</div>;
-				}
-			}
-
-			NewContext.contextType = Foo;
-
-			render(
-				<Foo.Provider value="bar">
-					<OldContext>
-						<NewContext>
-							<Inner />
-						</NewContext>
-					</OldContext>
-				</Foo.Provider>,
-				scratch
-			);
-
-			expect(spy).toHaveBeenCalledWith(expect.objectContaining({ foo: 'foo' }));
 		});
 
 		it('should call componentWillUnmount', () => {
@@ -1093,10 +1050,6 @@ describe('createContext', () => {
 				super(props);
 				this.state = context;
 				set = this.setState.bind(this);
-			}
-
-			getChildContext() {
-				return context;
 			}
 
 			render() {

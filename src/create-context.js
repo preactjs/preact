@@ -5,13 +5,13 @@ export let i = 0;
 
 export function createContext(defaultValue) {
 	function Context(props) {
-		if (!this.getChildContext) {
+		if (!this.sub) {
 			/** @type {Set<import('./internal').Component> | null} */
 			let subs = new Set();
 			let ctx = {};
 			ctx[Context._id] = this;
 
-			this.getChildContext = () => ctx;
+			this._childContext = ctx;
 
 			this.componentWillUnmount = () => {
 				subs = NULL;

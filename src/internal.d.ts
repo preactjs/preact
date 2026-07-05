@@ -171,6 +171,11 @@ export interface Component<P = {}, S = {}>
 	_renderCallbacks: Array<() => void>; // Only class components
 	_stateCallbacks: Array<() => void>; // Only class components
 	_globalContext?: any;
+	/**
+	 * Context published to children, keyed by context id. Set internally by
+	 * context providers (`createContext` and compat's portal ContextProvider).
+	 */
+	_childContext?: any;
 	_vnode?: VNode<P> | null;
 	_nextState?: S | null; // Only class components
 	/** Only used in the devtools to later dirty check if state has changed */

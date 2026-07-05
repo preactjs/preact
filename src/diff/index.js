@@ -42,7 +42,7 @@ import { setProperty } from './props';
  * @param {VNode} newVNode The new virtual node
  * @param {VNode} oldVNode The old virtual node
  * @param {object} globalContext The current context object. Modified by
- * getChildContext
+ * context providers
  * @param {string} namespace Current namespace of the DOM node (HTML, SVG, or MathML)
  * @param {Array<PreactElement>} excessDomChildren
  * @param {Array<Component>} commitQueue List of components which have callbacks
@@ -280,8 +280,8 @@ export function diff(
 			// Handle setState called in render, see #2553
 			c.state = c._nextState;
 
-			if (c.getChildContext != NULL) {
-				globalContext = assign({}, globalContext, c.getChildContext());
+			if (c._childContext != NULL) {
+				globalContext = assign({}, globalContext, c._childContext);
 			}
 
 			if (

@@ -58,6 +58,7 @@
       "$__html": "__html",
       "$_parent": "__",
       "$_globalContext": "__n",
+      "$_childContext": "__x",
       "$_context": "c",
       "$_defaultValue": "__",
       "$_id": "__c",

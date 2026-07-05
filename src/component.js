@@ -13,8 +13,7 @@ import { assign } from './util';
  * Base Component class. Provides `setState()` and `forceUpdate()`, which
  * trigger rendering
  * @param {object} props The initial component props
- * @param {object} context The initial context from parent components'
- * getChildContext
+ * @param {object} context The initial context from parent context providers
  */
 export function BaseComponent(props, context) {
 	this.props = props;
@@ -83,8 +82,8 @@ BaseComponent.prototype.forceUpdate = function (callback) {
  * @param {object} props Props (eg: JSX attributes) received from parent
  * element/component
  * @param {object} state The component's current state
- * @param {object} context Context object, as returned by the nearest
- * ancestor's `getChildContext()`
+ * @param {object} context Context object, provided by the nearest
+ * ancestor context provider
  * @returns {ComponentChildren | void}
  */
 BaseComponent.prototype.render = Fragment;
