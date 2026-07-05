@@ -1,4 +1,4 @@
-import { useState, useLayoutEffect, useEffect } from 'preact/hooks';
+import { useState, useLayoutEffect, useEffect, useRef } from 'preact/hooks';
 
 /**
  * This is taken from https://github.com/facebook/react/blob/main/packages/use-sync-external-store/src/useSyncExternalStoreShimClient.js#L84
@@ -64,3 +64,15 @@ export function useTransition() {
 // TODO: in theory this should be done after a VNode is diffed as we want to insert
 // styles/... before it attaches
 export const useInsertionEffect = useLayoutEffect;
+
+export function useEffectEvent(cb) {
+	const cbRef = useRef(cb);
+	cbRef.current = cb;
+
+	// React docs: "Effect Event functions do not have a stable identity. Their identity intentionally changes on every render."
+	return (...params) => {
+		// Avoid overriding cb's `this` by not calling as a method.
+		const cb = cbRef.current;
+		return cb(...params);
+	};
+}
