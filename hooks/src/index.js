@@ -67,9 +67,9 @@ options._render = vnode => {
 				hookItem._pendingArgs = hookItem._nextValue = undefined;
 			});
 		} else {
-			if (hooks._pendingEffects.length) {
-				flushAfterPaintEffects();
-			}
+			hooks._pendingEffects.some(invokeCleanup);
+			hooks._pendingEffects.some(invokeEffect);
+			hooks._pendingEffects = [];
 			currentIndex = 0;
 		}
 	}
