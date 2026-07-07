@@ -199,6 +199,49 @@ describe('suspense hydration', () => {
 		clearLog();
 	});
 
+	it('does not crash when a hydrated suspended component with no DOM bails out with shouldComponentUpdate', () => {
+		scratch.innerHTML = '';
+		clearLog();
+
+		const promise = new Promise(() => {});
+		let update;
+
+		class Suspender extends React.Component {
+			shouldComponentUpdate() {
+				return false;
+			}
+
+			render() {
+				throw promise;
+			}
+		}
+
+		class App extends React.Component {
+			constructor(props) {
+				super(props);
+				this.state = { tick: 0 };
+				update = () => this.setState({ tick: this.state.tick + 1 });
+			}
+
+			render() {
+				return (
+					<Suspense fallback={<div>loading</div>}>
+						<Suspender tick={this.state.tick} />
+					</Suspense>
+				);
+			}
+		}
+
+		hydrate(<App />, scratch);
+		expect(scratch.innerHTML).to.equal('');
+
+		update();
+		expect(() => rerender()).not.to.throw();
+		expect(scratch.innerHTML).to.equal('');
+		expect(getLog()).to.deep.equal([]);
+		clearLog();
+	});
+
 	it('should leave DOM untouched when suspending while hydrating', () => {
 		scratch.innerHTML = '<!-- test --><div>Hello</div>';
 		clearLog();
