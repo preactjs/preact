@@ -1,7 +1,7 @@
 {
   "name": "preact",
   "amdName": "preact",
-  "version": "10.29.4",
+  "version": "10.29.5",
   "private": false,
   "publishConfig": {
     "access": "public",
