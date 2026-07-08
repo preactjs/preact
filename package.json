@@ -259,6 +259,14 @@
     "vitest": "^3.2.1",
     "playwright": "^1.52.0"
   },
+  "peerDependencies": {
+    "preact-render-to-string": ">=5"
+  },
+  "peerDependenciesMeta": {
+    "preact-render-to-string": {
+      "optional": true
+    }
+  },
   "volta": {
     "node": "20.19.1"
   }
