@@ -243,6 +243,14 @@
     "vite": "^6.2.0",
     "vitest": "^3.2.4"
   },
+  "peerDependencies": {
+    "preact-render-to-string": ">=5"
+  },
+  "peerDependenciesMeta": {
+    "preact-render-to-string": {
+      "optional": true
+    }
+  },
   "volta": {
     "node": "20.19.1"
   }
