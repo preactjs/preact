@@ -175,6 +175,10 @@ function constructNewChildrenArray(
 
 	let skew = 0;
 
+	// Hoisted out of the per-child loop below, it can't change while diffing
+	// this set of children.
+	let childDepth = newParentVNode._depth + 1;
+
 	newParentVNode._children = new Array(newChildrenLength);
 	for (i = 0; i < newChildrenLength; i++) {
 		// @ts-expect-error We are reusing the childVNode variable to hold both the
@@ -232,7 +236,7 @@ function constructNewChildrenArray(
 
 		const skewedIndex = i + skew;
 		childVNode._parent = newParentVNode;
-		childVNode._depth = newParentVNode._depth + 1;
+		childVNode._depth = childDepth;
 
 		// Temporarily store the matchingIndex on the _index property so we can pull
 		// out the oldVNode in diffChildren. We'll override this to the VNode's
