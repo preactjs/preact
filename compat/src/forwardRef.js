@@ -1,5 +1,4 @@
 import { options } from 'preact';
-import { assign } from './util';
 
 let oldDiffHook = options._diff;
 options._diff = vnode => {
@@ -26,8 +25,8 @@ export const REACT_FORWARD_SYMBOL =
 export function forwardRef(fn) {
 	function Forwarded(props) {
 		if (!('ref' in props)) return fn(props, null);
-		let clone = assign({}, props);
-		delete clone.ref;
+		let clone = {};
+		for (let i in props) if (i != 'ref') clone[i] = props[i];
 		return fn(clone, props.ref || null);
 	}
 
