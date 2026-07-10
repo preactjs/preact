@@ -143,7 +143,6 @@ function handleDomVNode(vnode) {
 			continue;
 		}
 
-		let lowerCased = i.toLowerCase();
 		if (i === 'defaultValue' && 'value' in props && props.value == null) {
 			// `defaultValue` is treated as a fallback `value` when a value prop is present but null/undefined.
 			// `defaultValue` for Elements with no value prop is the same as the DOM defaultValue property.
@@ -155,9 +154,10 @@ function handleDomVNode(vnode) {
 			// value will be used as the file name and the file will be called
 			// "true" upon downloading it.
 			value = '';
-		} else if (lowerCased === 'translate' && value === 'no') {
+		} else if (i === 'translate' && value === 'no') {
 			value = false;
-		} else if (lowerCased[0] === 'o' && lowerCased[1] === 'n') {
+		} else if (i[0] === 'o' && i[1] === 'n') {
+			let lowerCased = i.toLowerCase();
 			if (lowerCased === 'ondoubleclick') {
 				i = 'ondblclick';
 			} else if (
@@ -173,19 +173,19 @@ function handleDomVNode(vnode) {
 			} else if (ON_ANI.test(i)) {
 				i = lowerCased;
 			}
+
+			// Add support for onInput and onChange, see #3561
+			// if we have an oninput prop already change it to oninputCapture
+			if (lowerCased === 'oninput') {
+				i = lowerCased;
+				if (normalizedProps[i]) {
+					i = 'oninputCapture';
+				}
+			}
 		} else if (isNonDashedType && CAMEL_PROPS.test(i)) {
 			i = i.replace(CAMEL_REPLACE, '-$&').toLowerCase();
 		} else if (value === null) {
 			value = undefined;
-		}
-
-		// Add support for onInput and onChange, see #3561
-		// if we have an oninput prop already change it to oninputCapture
-		if (lowerCased === 'oninput') {
-			i = lowerCased;
-			if (normalizedProps[i]) {
-				i = 'oninputCapture';
-			}
 		}
 
 		normalizedProps[i] = value;
