@@ -102,16 +102,18 @@ export function hydrate(vnode, parent, callback) {
 }
 
 let oldEventHook = options.event;
+function isPropagationStopped() {
+	return this.cancelBubble;
+}
+function isDefaultPrevented() {
+	return this.defaultPrevented;
+}
 options.event = e => {
 	if (oldEventHook) e = oldEventHook(e);
 
-	e.persist = () => {};
-	e.isPropagationStopped = function isPropagationStopped() {
-		return this.cancelBubble;
-	};
-	e.isDefaultPrevented = function isDefaultPrevented() {
-		return this.defaultPrevented;
-	};
+	e.persist = Function.prototype;
+	e.isPropagationStopped = isPropagationStopped;
+	e.isDefaultPrevented = isDefaultPrevented;
 	return (e.nativeEvent = e);
 };
 
