@@ -1,1 +1,1 @@
-npx nano-staged
+pnpm exec nano-staged

@@ -62,8 +62,10 @@ jobs:
           node-version: '24'
           registry-url: 'https://registry.npmjs.org'
 
-      - name: Update npm
-        run: npm install -g npm@11.15.0
+      - uses: pnpm/action-setup@0e279bb959325dab635dd2c09392533439d90093 # v6.0.8
+        with:
+          version: 11.3.0
+          run_install: false
 
       - name: Validate package
         run: |
@@ -115,4 +117,4 @@ jobs:
           fi
 
       - name: Publish to npm
-        run: npm stage publish preact.tgz --provenance --access public --tag "${{ steps.dist-tag.outputs.tag }}"
+        run: pnpm stage publish preact.tgz --provenance --access public --tag "${{ steps.dist-tag.outputs.tag }}"
