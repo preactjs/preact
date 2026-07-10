@@ -388,9 +388,8 @@ export function toChildArray(children, out) {
 	out = out || [];
 	if (children == NULL || typeof children == 'boolean') {
 	} else if (isArray(children)) {
-		children.some(child => {
-			toChildArray(child, out);
-		});
+		let i = 0;
+		while (i < children.length) toChildArray(children[i++], out);
 	} else {
 		out.push(children);
 	}
