@@ -25,6 +25,7 @@ export const REACT_FORWARD_SYMBOL =
  */
 export function forwardRef(fn) {
 	function Forwarded(props) {
+		if (!('ref' in props)) return fn(props, null);
 		let clone = assign({}, props);
 		delete clone.ref;
 		return fn(clone, props.ref || null);
