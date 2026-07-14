@@ -44,5 +44,5 @@ export interface SuspenseComponent
 	_pendingSuspensionCount: number;
 	_suspenders: Component[];
 	_detachOnNextRender: null | VNode<any>;
-	_mask?: [number, number];
+	_mask?: [string | number, number];
 }
