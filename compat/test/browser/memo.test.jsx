@@ -242,15 +242,19 @@ describe('memo()', () => {
 	it('should recover and render siblings when memo child throws once', () => {
 		let causeError = true;
 
-		const TestWithMemo = /** @type {any} */ (memo(
-			/** @type {(props: { n: number }) => any} */ (props => {
-				const { n } = props;
-				if (n === 2 && causeError) {
-					throw new Error('test error');
-				}
-				return <p>test {n}</p>;
-			})
-		));
+		const TestWithMemo = /** @type {any} */ (
+			memo(
+				/** @type {(props: { n: number }) => any} */ (
+					props => {
+						const { n } = props;
+						if (n === 2 && causeError) {
+							throw new Error('test error');
+						}
+						return <p>test {n}</p>;
+					}
+				)
+			)
+		);
 
 		class App extends Component {
 			static getDerivedStateFromError() {

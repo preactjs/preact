@@ -146,12 +146,12 @@
     "lint": "run-s oxlint tsc",
     "tsc": "tsc -p jsconfig-lint.json",
     "oxlint": "oxlint src test/browser test/node test/shared debug compat hooks test-utils",
-    "format": "biome format --write .",
-    "format:check": "biome format ."
+    "format": "oxfmt . --write",
+    "format:check": "oxfmt --check ."
   },
   "nano-staged": {
     "**/*.{js,jsx,mjs,cjs,ts,tsx,yml,json,html,md,css,scss}": [
-      "biome format --write --no-errors-on-unmatched"
+      "oxfmt --write --no-error-on-unmatched-pattern"
     ]
   },
   "files": [
@@ -218,7 +218,6 @@
     "@babel/plugin-transform-react-jsx-source": "^7.27.1",
     "@babel/preset-env": "^7.28.0",
     "@babel/register": "^7.27.1",
-    "@biomejs/biome": "^2.1.2",
     "@types/node": "^18.19.87",
     "@vitest/browser": "^3.2.4",
     "@vitest/coverage-v8": "^3.2.4",
@@ -232,6 +231,7 @@
     "kolorist": "^1.8.0",
     "microbundle": "^0.15.1",
     "npm-run-all2": "^7.0.0",
+    "oxfmt": "^0.32.0",
     "oxlint": "^1.8.0",
     "playwright": "^1.54.1",
     "preact-render-to-string": "^6.5.0",

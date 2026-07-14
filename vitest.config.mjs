@@ -140,7 +140,7 @@ export default defineConfig({
 		exclude: ['node_modules'],
 		jsx: 'transform',
 		jsxFactory: 'createElement',
-		jsxFragment: 'Fragment',
+		jsxFragment: 'Fragment'
 	},
 	plugins: [
 		{
@@ -166,7 +166,7 @@ export default defineConfig({
 							}
 						]
 					],
-					include: ['**/src/**/*.js', '**/test/**/*.js', '**/test/**/*.jsx'],
+					include: ['**/src/**/*.js', '**/test/**/*.js', '**/test/**/*.jsx']
 				});
 
 				return {
@@ -191,7 +191,7 @@ export default defineConfig({
 			'react-dom'
 		],
 		esbuildOptions: {
-			alias,
+			alias
 		}
 	},
 	test: {

@@ -163,22 +163,23 @@ declare namespace React {
 	export function startTransition(cb: () => void): void;
 
 	// HTML
-	export interface HTMLAttributes<T extends EventTarget>
-		extends _preact.HTMLAttributes<T> {}
+	export interface HTMLAttributes<
+		T extends EventTarget
+	> extends _preact.HTMLAttributes<T> {}
 	export interface HTMLProps<T extends EventTarget>
-		extends _preact.AllHTMLAttributes<T>,
-			_preact.ClassAttributes<T> {}
-	export interface AllHTMLAttributes<T extends EventTarget>
-		extends _preact.AllHTMLAttributes<T> {}
+		extends _preact.AllHTMLAttributes<T>, _preact.ClassAttributes<T> {}
+	export interface AllHTMLAttributes<
+		T extends EventTarget
+	> extends _preact.AllHTMLAttributes<T> {}
 	export import DetailedHTMLProps = _preact.DetailedHTMLProps;
 	export import CSSProperties = _preact.CSSProperties;
 
 	export interface SVGProps<T extends EventTarget>
-		extends _preact.SVGAttributes<T>,
-			_preact.ClassAttributes<T> {}
+		extends _preact.SVGAttributes<T>, _preact.ClassAttributes<T> {}
 
-	interface SVGAttributes<T extends EventTarget = SVGElement>
-		extends _preact.SVGAttributes<T> {}
+	interface SVGAttributes<
+		T extends EventTarget = SVGElement
+	> extends _preact.SVGAttributes<T> {}
 
 	interface ReactSVG extends JSXInternal.IntrinsicSVGElements {}
 
@@ -341,8 +342,9 @@ declare namespace React {
 		displayName?: string;
 	}
 
-	export interface ForwardRefExoticComponent<P>
-		extends _preact.FunctionComponent<P> {
+	export interface ForwardRefExoticComponent<
+		P
+	> extends _preact.FunctionComponent<P> {
 		defaultProps?: Partial<P> | undefined;
 	}
 
