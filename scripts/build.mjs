@@ -23,18 +23,12 @@ const ROOT = path.resolve(fileURLToPath(import.meta.url), '../..');
 
 const PACKAGES = [
 	{ cwd: '.' },
-	{ cwd: 'compat', globals: { 'preact/hooks': 'preactHooks' } },
+	{ cwd: 'compat' },
 	{ cwd: 'debug' },
 	{ cwd: 'devtools' },
 	{ cwd: 'hooks' },
 	{ cwd: 'jsx-runtime' },
 	{ cwd: 'test-utils' }
-];
-
-const FORMATS = [
-	{ format: 'cjs', main: 'main' },
-	{ format: 'es', main: 'module' },
-	{ format: 'umd', main: 'umd:main' }
 ];
 
 const BROWSER_TARGETS = [
@@ -89,15 +83,8 @@ function loadMangle(cwd) {
 function minifyPlugin(pkg) {
 	return {
 		name: 'minify',
-		async renderChunk(code, chunk, outputOptions) {
+		async renderChunk(code) {
 			const mangle = loadMangle(pkg.cwd);
-			const format = outputOptions.format;
-
-			// restore the shorter re-export guard rollup 2 used to emit
-			code = code.replace(
-				/Object\.prototype\.hasOwnProperty\.call\(exports,\s*([a-zA-Z$_][\w$]*)\)/g,
-				'exports.hasOwnProperty($1)'
-			);
 
 			const result = await minify(code, {
 				compress: {
@@ -113,7 +100,7 @@ function minifyPlugin(pkg) {
 				},
 				module: false,
 				ecma: 5,
-				toplevel: format === 'cjs' || format === 'es',
+				toplevel: true,
 				mangle: { properties: mangle.properties },
 				nameCache: mangle.nameCache,
 				sourceMap: true
@@ -126,36 +113,24 @@ function minifyPlugin(pkg) {
 				const fresh = Object.keys(after).filter(k => !(k in mangle.knownProps));
 				if (fresh.length) {
 					console.warn(
-						`WARN [${pkg.name}/${format}]: properties mangled without a ${path.relative(ROOT, mangle.file)} entry: ` +
+						`WARN [${pkg.name}]: properties mangled without a ${path.relative(ROOT, mangle.file)} entry: ` +
 							fresh.map(k => k.slice(1)).join(', ')
 					);
 				}
 			}
 
-			let out = result.code;
-			if (format === 'umd') {
-				// the globalThis check only makes sense for ESM
-				out = out.replace(
-					/([a-zA-Z$_]+)="undefined"!=typeof globalThis\?globalThis:(\1\|\|self)/,
-					'$2'
-				);
-			}
-			return { code: out, map: result.map };
+			return { code: result.code, map: result.map };
 		}
 	};
 }
 
-function outputOptions(pkg, format, file) {
+function outputOptions(pkg, file) {
 	return {
-		format,
+		format: 'es',
 		file,
-		name: pkg.meta.amdName,
 		sourcemap: true,
 		strict: false,
 		freeze: false,
-		esModule: false,
-		exports: 'auto',
-		globals: { preact: 'preact', ...(pkg.globals || {}) },
 		plugins: [minifyPlugin(pkg)]
 	};
 }
@@ -206,16 +181,11 @@ function createBundle(pkg) {
 
 async function buildPackage(pkg) {
 	const bundle = await createBundle(pkg);
-
-	const written = [];
-	for (const { format, main } of FORMATS) {
-		const file = path.resolve(pkg.cwd, pkg.meta[main]);
-		const { output } = await bundle.write(outputOptions(pkg, format, file));
-		written.push({ file, code: output[0].code });
-	}
+	const file = path.resolve(pkg.cwd, pkg.meta.module);
+	const { output } = await bundle.write(outputOptions(pkg, file));
 	await bundle.close();
 
-	return { name: pkg.name, written };
+	return { name: pkg.name, written: [{ file, code: output[0].code }] };
 }
 
 function printSizes(results) {
