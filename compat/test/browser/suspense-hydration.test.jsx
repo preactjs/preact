@@ -4,7 +4,9 @@ import React, {
 	hydrate,
 	Fragment,
 	Suspense,
+	lazy,
 	memo,
+	useId,
 	useState
 } from 'preact/compat';
 import { logCall, getLog, clearLog } from '../../../test/_util/logCall';
@@ -15,6 +17,7 @@ import {
 } from '../../../test/_util/helpers';
 import { ul, li, div } from '../../../test/_util/dom';
 import { createLazy, createSuspenseLoader } from './suspense-utils';
+import { renderToString, renderToStringAsync } from 'preact-render-to-string';
 
 /* eslint-env browser, mocha */
 describe('suspense hydration', () => {
@@ -71,6 +74,118 @@ describe('suspense hydration', () => {
 				throw unhandledEvents[0].reason;
 			}
 		}
+	});
+
+	it('keeps named Suspense ids stable across async resolution order', async () => {
+		const getIds = html =>
+			Object.fromEntries(
+				[...html.matchAll(/<span id="([^"]+)">([AB])<\/span>/g)].map(
+					([, id, name]) => [name, id]
+				)
+			);
+
+		async function renderWithResolveOrder(order) {
+			const loaders = {};
+
+			function Field({ name }) {
+				return <span id={useId()}>{name}</span>;
+			}
+
+			const createNamedLazy = name =>
+				lazy(
+					() =>
+						new Promise(resolve => {
+							loaders[name] = () =>
+								resolve({ default: () => <Field name={name} /> });
+						})
+				);
+
+			const A = createNamedLazy('A');
+			const B = createNamedLazy('B');
+			const rendered = renderToStringAsync(
+				<div>
+					<Suspense name="A" fallback={null}>
+						<A />
+					</Suspense>
+					<Suspense name="B" fallback={null}>
+						<B />
+					</Suspense>
+				</div>
+			);
+
+			await Promise.resolve();
+			order.some(name => loaders[name]());
+
+			return getIds(await rendered);
+		}
+
+		const ordered = await renderWithResolveOrder(['A', 'B']);
+		const reversed = await renderWithResolveOrder(['B', 'A']);
+
+		expect(ordered).to.deep.equal({ A: 'PSA-0', B: 'PSB-0' });
+		expect(reversed).to.deep.equal(ordered);
+	});
+
+	it('keeps named Suspense ids stable when client-only work renders during hydration', async () => {
+		let renderedIds;
+		function Field({ name }) {
+			const id = useId();
+			if (renderedIds) renderedIds[name] = id;
+			return <span id={id}>{name}</span>;
+		}
+
+		function ResolvedContent() {
+			return (
+				<>
+					<Field name="outer" />
+					<Suspense name="nested" fallback={null}>
+						<Field name="nested" />
+					</Suspense>
+				</>
+			);
+		}
+
+		scratch.innerHTML = renderToString(
+			<Suspense name="outer" fallback={null}>
+				<ResolvedContent />
+			</Suspense>
+		);
+		expect(scratch.innerHTML).to.equal(
+			'<span id="PSouter-0">outer</span><span id="PSnested-0">nested</span>'
+		);
+
+		const [Lazy, resolve] = createLazy();
+		renderedIds = {};
+		let showClientContent;
+		function App() {
+			const [showClient, setShowClient] = useState(false);
+			showClientContent = () => setShowClient(true);
+			return (
+				<>
+					{showClient && (
+						<Suspense name="client" fallback={null}>
+							<Field name="client" />
+						</Suspense>
+					)}
+					<Suspense name="outer" fallback={null}>
+						<Lazy />
+					</Suspense>
+				</>
+			);
+		}
+
+		hydrate(<App />, scratch);
+		rerender();
+		showClientContent();
+		rerender();
+		await resolve(ResolvedContent);
+		rerender();
+
+		expect(renderedIds).to.deep.equal({
+			client: 'PSclient-0',
+			outer: 'PSouter-0',
+			nested: 'PSnested-0'
+		});
 	});
 
 	it('should leave DOM untouched when suspending while hydrating', () => {
