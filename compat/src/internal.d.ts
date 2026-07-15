@@ -39,8 +39,10 @@ export interface SuspenseState {
 	_suspended?: null | VNode<any>;
 }
 
-export interface SuspenseComponent
-	extends PreactComponent<SuspenseProps, SuspenseState> {
+export interface SuspenseComponent extends PreactComponent<
+	SuspenseProps,
+	SuspenseState
+> {
 	_pendingSuspensionCount: number;
 	_suspenders: Component[];
 	_detachOnNextRender: null | VNode<any>;
