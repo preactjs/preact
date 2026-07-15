@@ -41,7 +41,7 @@ const alias = {
 	),
 	'^preact/devtools$': path.join(
 		root,
-		MINIFY ? 'devtools/dist/devtools.js' : 'devtools/src/index.js'
+		MINIFY ? 'devtools/dist/devtools.mjs' : 'devtools/src/index.js'
 	),
 	'^preact/hooks$': path.join(
 		root,
