@@ -70,7 +70,17 @@ export function setProperty(dom, name, value, oldValue, namespace) {
 		}
 	}
 	// Benchmark for comparison: https://esbench.com/bench/574c954bdb965b9a00965ac6
-	else if (name[0] == 'o' && name[1] == 'n') {
+	// Custom elements may have non-event properties/attributes starting with
+	// `on` (https://github.com/preactjs/preact/issues/4085), so for tag names
+	// containing a `-` only treat `on*` props as event handlers when the new
+	// or old value is a function.
+	else if (
+		name[0] == 'o' &&
+		name[1] == 'n' &&
+		(typeof value == 'function' ||
+			typeof oldValue == 'function' ||
+			dom.localName.indexOf('-') == -1)
+	) {
 		useCapture = name != (name = name.replace(CAPTURE_REGEX, '$1'));
 
 		// Infer correct casing for DOM built-in events:

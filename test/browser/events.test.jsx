@@ -276,6 +276,32 @@ describe('event handling', () => {
 		);
 	});
 
+	// see https://github.com/preactjs/preact/issues/4085
+	it('should set non-function on* props on custom elements as attributes', () => {
+		render(<my-tooltip only-when-overflow={true} for="a1" />, scratch);
+
+		let el = scratch.firstChild;
+		expect(el.getAttribute('only-when-overflow')).to.equal('true');
+		expect(el._listeners).to.equal(undefined);
+
+		render(<my-tooltip for="a1" />, scratch);
+		expect(el.hasAttribute('only-when-overflow')).to.equal(false);
+	});
+
+	it('should register function on* props on custom elements as handlers', () => {
+		let click = vi.fn();
+
+		render(<my-tooltip onClick={click} />, scratch);
+
+		fireEvent(scratch.firstChild, 'click');
+		expect(click).toHaveBeenCalledOnce();
+
+		render(<my-tooltip onClick={null} />, scratch);
+
+		fireEvent(scratch.firstChild, 'click');
+		expect(click).toHaveBeenCalledOnce();
+	});
+
 	it('should support camel-case focus event names', () => {
 		render(<div onFocusIn={() => {}} onFocusOut={() => {}} />, scratch);
 
