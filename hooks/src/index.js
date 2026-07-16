@@ -27,6 +27,14 @@ let oldAfterDiff = options.diffed;
 let oldCommit = options._commit;
 let oldBeforeUnmount = options.unmount;
 let oldRoot = options._root;
+let oldDebounce = options.debounceRendering || queueMicrotask;
+
+options.debounceRendering = callback => {
+	oldDebounce(() => {
+		flushAfterPaintEffects();
+		callback();
+	});
+};
 
 // We take the minimum timeout for requestAnimationFrame to ensure that
 // the callback is invoked after the next frame. 35ms is based on a 30hz
