@@ -253,6 +253,13 @@ export function diff(
 			c._parentDom = parentDom;
 			c._bits &= ~COMPONENT_FORCE;
 
+			// Freshly mounting components during hydration may self-suspend to
+			// slice up the hydration walk; the hook throws a thenable to bail
+			// out here and resume from `_excess` later.
+			if (isHydrating && !oldVNode._component && (tmp = options._yield)) {
+				tmp(newVNode);
+			}
+
 			let renderHook = options._render,
 				count = 0;
 			if (isClassComponent) {
@@ -333,6 +340,11 @@ export function diff(
 				if (e.then) {
 					let commentMarkersToFind = 0,
 						startMarker;
+
+					// Components that suspend before their first render still have
+					// COMPONENT_DIRTY set from instantiation; clear it so that the
+					// resuming forceUpdate isn't ignored by enqueueRender.
+					newVNode._component._bits &= ~COMPONENT_DIRTY;
 
 					newVNode._flags |= isHydrating
 						? MODE_HYDRATE | MODE_SUSPENDED
