@@ -48,8 +48,12 @@ options._diff = vnode => {
 };
 
 options._root = (vnode, parentDom) => {
-	if (vnode && parentDom._children && parentDom._children._mask) {
-		vnode._mask = parentDom._children._mask;
+	if (vnode) {
+		flushAfterPaintEffects();
+
+		if (parentDom._children && parentDom._children._mask) {
+			vnode._mask = parentDom._children._mask;
+		}
 	}
 
 	if (oldRoot) oldRoot(vnode, parentDom);
@@ -65,13 +69,9 @@ options._render = vnode => {
 	const hooks = currentComponent.__hooks;
 	if (hooks) {
 		if (previousComponent === currentComponent) {
+			hooks._pendingEffects = [];
 			currentComponent._renderCallbacks = [];
-		} else {
-			hooks._pendingEffects.some(invokeCleanup);
-			hooks._pendingEffects.some(invokeEffect);
-			currentIndex = 0;
 		}
-		hooks._pendingEffects = [];
 
 		// Runs before every render, forced or not, so `shouldComponentUpdate`
 		// never has to apply these itself.

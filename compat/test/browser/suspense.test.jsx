@@ -1,4 +1,5 @@
 import { act, setupRerender } from 'preact/test-utils';
+import { options } from 'preact';
 import React, {
 	createElement,
 	render,
@@ -18,6 +19,11 @@ import { vi } from 'vitest';
 
 const h = React.createElement;
 /* eslint-env browser */
+
+// The scheduler installed by preact/hooks, which flushes pending passive
+// effects before running a scheduled rerender. Captured here so tests can
+// opt back into default scheduling after `setupRerender()` replaced it.
+const defaultDebounce = options.debounceRendering;
 
 class Catcher extends Component {
 	constructor(props) {
@@ -253,7 +259,7 @@ describe('suspense', () => {
 		});
 	});
 
-	it('should call effect cleanups', () => {
+	it('should call effect cleanups', async () => {
 		/** @type {(v) => void} */
 		let set;
 		const effectSpy = vi.fn();
@@ -306,18 +312,22 @@ describe('suspense', () => {
 			scratch
 		);
 
+		// Use the default scheduler: pending passive effects must flush before
+		// the rerender that suspends, so their cleanups run when the boundary
+		// unmounts the subtree. `rerender()` would bypass that scheduler.
+		options.debounceRendering = defaultDebounce;
+
 		set(true);
-		rerender();
+		await new Promise(r => setTimeout(r));
 		expect(scratch.innerHTML).to.eql('<div>Suspended...</div>');
 		expect(effectSpy).toHaveBeenCalledOnce();
 		expect(layoutEffectSpy).toHaveBeenCalledOnce();
 
-		return resolve().then(() => {
-			rerender();
-			expect(effectSpy).toHaveBeenCalledOnce();
-			expect(layoutEffectSpy).toHaveBeenCalledOnce();
-			expect(scratch.innerHTML).to.eql(`<div><p>hi</p></div>`);
-		});
+		await resolve();
+		await new Promise(r => setTimeout(r));
+		expect(effectSpy).toHaveBeenCalledOnce();
+		expect(layoutEffectSpy).toHaveBeenCalledOnce();
+		expect(scratch.innerHTML).to.eql(`<div><p>hi</p></div>`);
 	});
 
 	it('should support a call to setState before rendering the fallback', () => {

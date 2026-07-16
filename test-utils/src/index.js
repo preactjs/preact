@@ -1,5 +1,10 @@
 import { options } from 'preact';
 
+// The scheduler in place when test-utils loads (e.g. the effect-flushing
+// scheduler installed by preact/hooks). Used as the reset value on teardown
+// so that resetting does not strip renderer-installed schedulers.
+const initialDebounce = options.debounceRendering;
+
 /**
  * Setup a rerender function that will drain the queue of pending renders
  * @returns {() => void}
@@ -121,10 +126,16 @@ export function teardown() {
 		delete options.__test__drainQueue;
 	}
 
-	if (typeof options.__test__previousDebounce != 'undefined') {
+	// The `in` check tells a saved `undefined` apart from "setupRerender was
+	// never called": act() must restore `undefined` when the scheduler was
+	// explicitly unset before it ran. Without a saved value we reset to the
+	// scheduler present at load time instead of `undefined`, so that
+	// schedulers installed by renderers (e.g. the effect-flushing scheduler
+	// from preact/hooks) survive test teardowns.
+	if ('__test__previousDebounce' in options) {
 		options.debounceRendering = options.__test__previousDebounce;
 		delete options.__test__previousDebounce;
 	} else {
-		options.debounceRendering = undefined;
+		options.debounceRendering = initialDebounce;
 	}
 }
