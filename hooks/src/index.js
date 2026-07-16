@@ -49,8 +49,12 @@ options._diff = vnode => {
 };
 
 options._root = (vnode, parentDom) => {
-	if (vnode && parentDom._children && parentDom._children._mask) {
-		vnode._mask = parentDom._children._mask;
+	if (vnode) {
+		flushAfterPaintEffects();
+
+		if (parentDom._children && parentDom._children._mask) {
+			vnode._mask = parentDom._children._mask;
+		}
 	}
 
 	if (oldRoot) oldRoot(vnode, parentDom);
@@ -74,11 +78,6 @@ options._render = vnode => {
 				}
 				hookItem._pendingArgs = hookItem._nextValue = undefined;
 			});
-		} else {
-			hooks._pendingEffects.some(invokeCleanup);
-			hooks._pendingEffects.some(invokeEffect);
-			hooks._pendingEffects = [];
-			currentIndex = 0;
 		}
 	}
 	previousComponent = currentComponent;

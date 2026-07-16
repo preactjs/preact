@@ -8,11 +8,17 @@ import React, {
 	useEffect,
 	useLayoutEffect
 } from 'preact/compat';
+import { options } from 'preact';
 import { setupRerender, act } from 'preact/test-utils';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { vi } from 'vitest';
 
 const ReactDOM = React;
+
+// The scheduler installed by preact/hooks, which flushes pending passive
+// effects before running a scheduled rerender. Captured here so tests can
+// opt back into default scheduling after `setupRerender()` replaced it.
+const defaultDebounce = options.debounceRendering;
 
 describe('useSyncExternalStore', () => {
 	/** @type {HTMLDivElement} */
@@ -476,9 +482,11 @@ describe('useSyncExternalStore', () => {
 
 			// Schedule an update. We'll intentionally not use `act` so that we can
 			// insert a mutation before React subscribes to the store in a
-			// passive effect.
+			// passive effect. Use the default scheduler so pending passive
+			// effects flush before rerenders, like they do in a real app.
+			options.debounceRendering = defaultDebounce;
 			store.set(1);
-			rerender();
+			await null;
 			assertLog([
 				1
 				// Passive effect hasn't fired yet
@@ -487,7 +495,7 @@ describe('useSyncExternalStore', () => {
 
 			// Flip the store state back to the previous value.
 			store.set(0);
-			rerender();
+			await null;
 			assertLog([
 				'Passive effect: 1',
 				// Re-render. If the current state were tracked by updating a ref in a
