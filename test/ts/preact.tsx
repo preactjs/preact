@@ -15,7 +15,7 @@ import {
 	TargetedSubmitEvent,
 	AllHTMLAttributes,
 	HTMLAttributes,
-	InputHTMLAttributes,
+	InputHTMLAttributes
 } from '../../';
 
 function createSignal<T>(value: T): SignalLike<T> {
@@ -416,13 +416,19 @@ h<InputHTMLAttributes>('input', { onClick: e => e.currentTarget.capture });
 createElement<InputHTMLAttributes>('input', {
 	onClick: e => e.currentTarget.capture
 });
+
+const inputAttributesWithSignalType: InputHTMLAttributes<HTMLInputElement> = {
+	type: createSignal('text' as const)
+};
+
+createElement<InputHTMLAttributes>('input', {
+	type: createSignal('email' as const)
+});
+
 <input onClick={e => e.currentTarget.capture} />;
 
 function Checkbox({ onChange }: HTMLAttributes<HTMLInputElement>) {
-	function handleChange(
-		this: void,
-		event: TargetedEvent<HTMLInputElement>
-	) {
+	function handleChange(this: void, event: TargetedEvent<HTMLInputElement>) {
 		onChange?.call(this, event);
 	}
 

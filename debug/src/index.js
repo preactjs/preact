@@ -9,5 +9,6 @@ export {
 	captureOwnerStack,
 	getCurrentVNode,
 	getDisplayName,
-	getOwnerStack
+	getOwnerStack,
+	setupComponentStack
 } from './component-stack';

@@ -1,7 +1,7 @@
 // Users who only use Preact for SSR might not specify "dom" in their lib in tsconfig.json
 /// <reference lib="dom" />
 
-import * as preact from 'preact';
+import * as preact from './index';
 
 type Defaultize<Props, Defaults> =
 	// Distribute over unions
@@ -262,7 +262,8 @@ export namespace JSXInternal {
 	}
 
 	export interface IntrinsicElements
-		extends IntrinsicSVGElements,
+		extends
+			IntrinsicSVGElements,
 			IntrinsicMathMLElements,
 			IntrinsicHTMLElements {}
 }

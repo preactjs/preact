@@ -87,11 +87,8 @@ export function diffChildren(
 
 		// At this point, constructNewChildrenArray has assigned _index to be the
 		// matchingIndex for this VNode's oldVNode (or -1 if there is no oldVNode).
-		if (childVNode._index == -1) {
-			oldVNode = EMPTY_OBJ;
-		} else {
-			oldVNode = oldChildren[childVNode._index] || EMPTY_OBJ;
-		}
+		oldVNode =
+			(childVNode._index != -1 && oldChildren[childVNode._index]) || EMPTY_OBJ;
 
 		// Update childVNode._index to its final index
 		childVNode._index = i;
@@ -131,6 +128,14 @@ export function diffChildren(
 		let shouldPlace = childVNode._flags & INSERT_VNODE;
 		if (shouldPlace || oldVNode._children === childVNode._children) {
 			oldDom = insert(childVNode, oldDom, parentDom, shouldPlace);
+
+			// When a matched VNode is physically moved via INSERT_VNODE, its old
+			// _dom pointer becomes a stale positional reference. Clear it so that
+			// getDomSibling (called from nested diffs) won't return this stale
+			// reference and mis-place subsequent DOM nodes. See #5065.
+			if (shouldPlace && oldVNode._dom) {
+				oldVNode._dom = NULL;
+			}
 		} else if (typeof childVNode.type == 'function' && result !== UNDEFINED) {
 			oldDom = result;
 		} else if (newDom) {
@@ -209,7 +214,7 @@ function constructNewChildrenArray(
 				NULL,
 				NULL
 			);
-		} else if (childVNode.constructor == UNDEFINED && childVNode._depth > 0) {
+		} else if (childVNode.constructor === UNDEFINED && childVNode._depth > 0) {
 			// VNode is already in use, clone it. This can happen in the following
 			// scenario:
 			//   const reuse = <div />
@@ -222,7 +227,7 @@ function constructNewChildrenArray(
 				childVNode._original
 			);
 		} else {
-			childVNode = newParentVNode._children[i] = childVNode;
+			newParentVNode._children[i] = childVNode;
 		}
 
 		const skewedIndex = i + skew;
@@ -427,7 +432,7 @@ function findMatchingIndex(
 		remainingOldChildren > (matched ? 1 : 0);
 
 	if (
-		(oldVNode === NULL && childVNode.key == null) ||
+		(oldVNode === NULL && key == null) ||
 		(matched && key == oldVNode.key && type == oldVNode.type)
 	) {
 		return skewedIndex;

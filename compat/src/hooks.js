@@ -42,11 +42,8 @@ export function useSyncExternalStore(subscribe, getSnapshot) {
 
 /** @type {(inst: Store) => boolean} */
 function didSnapshotChange(inst) {
-	const latestGetSnapshot = inst._getSnapshot;
-	const prevValue = inst._value;
 	try {
-		const nextValue = latestGetSnapshot();
-		return !Object.is(prevValue, nextValue);
+		return !Object.is(inst._value, inst._getSnapshot());
 	} catch (error) {
 		return true;
 	}

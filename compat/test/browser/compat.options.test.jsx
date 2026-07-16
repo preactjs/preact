@@ -1,10 +1,5 @@
 import { vnodeSpy, eventSpy } from '../../../test/_util/optionSpies';
-import {
-	createElement,
-	render,
-	Component,
-	createRef
-} from 'preact/compat';
+import { createElement, render, Component, createRef } from 'preact/compat';
 import { setupRerender } from 'preact/test-utils';
 import {
 	setupScratch,

@@ -1,6 +1,4 @@
-// Intentionally not using a relative path to take advantage of
-// the TS version resolution mechanism
-import { Component, ComponentChild, ComponentChildren } from 'preact';
+import { Component, ComponentChild, ComponentChildren } from '../../src/index';
 
 //
 // Suspense/lazy

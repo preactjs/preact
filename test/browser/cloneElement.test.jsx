@@ -81,4 +81,23 @@ describe('cloneElement', () => {
 		const clone = cloneElement(div, { key: 'myKey' });
 		expect(clone.props.key).to.equal(undefined);
 	});
+
+	it('should preserve falsy key values', () => {
+		function Foo() {}
+		const instance = <Foo key="original">hello</Foo>;
+
+		let clone = cloneElement(instance, { key: 0 });
+		expect(clone.key).to.equal(0);
+
+		clone = cloneElement(instance, { key: '' });
+		expect(clone.key).to.equal('');
+	});
+
+	it('should preserve falsy ref values', () => {
+		function a() {}
+		const instance = <div ref={a}>hello</div>;
+
+		const clone = cloneElement(instance, { ref: null });
+		expect(clone.ref).to.equal(null);
+	});
 });
