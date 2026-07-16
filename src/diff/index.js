@@ -529,7 +529,9 @@ function diffElementNodes(
 			return doc.createTextNode(newProps);
 		}
 
-		dom = doc.createElementNS(namespace, nodeType, newProps.is && newProps);
+		dom = doc.createElementNS
+			? doc.createElementNS(namespace, nodeType, newProps.is && newProps)
+			: doc.createElement(nodeType);
 
 		// we are creating a new node, so we can assume this is a new subtree (in
 		// case we are hydrating), this deopts the hydrate

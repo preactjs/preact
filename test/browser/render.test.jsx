@@ -2093,5 +2093,24 @@ describe('render()', () => {
 			expect(rootCreateElementSpy).not.toBeCalled();
 			expect(iframeCreateElementSpy).toBeCalled();
 		});
+
+		it('falls back to createElement when createElementNS is unavailable', () => {
+			const iframe = document.createElement('iframe');
+			scratch.appendChild(iframe);
+
+			const iframeDocument = iframe.contentDocument;
+			const iframeCreateElementSpy = vi.spyOn(iframeDocument, 'createElement');
+			Object.defineProperty(iframeDocument, 'createElementNS', {
+				configurable: true,
+				value: undefined
+			});
+
+			const iframeBody = iframeDocument.getElementsByTagName('body')[0];
+
+			render(<div />, iframeBody);
+
+			expect(iframeDocument.body.innerHTML).to.equal('<div></div>');
+			expect(iframeCreateElementSpy).toBeCalledWith('div');
+		});
 	});
 });
