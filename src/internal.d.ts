@@ -92,6 +92,7 @@ export interface PreactElement extends preact.ContainerNode {
 	data?: CharacterData['data'];
 	// Property to set __dangerouslySetInnerHTML
 	innerHTML?: Element['innerHTML'];
+	textContent?: Element['textContent'];
 	remove?: Element['remove'];
 
 	// Attribute reading and setting
