@@ -83,5 +83,6 @@ export function Fragment(props) {
  * @param {*} vnode
  * @returns {vnode is VNode}
  */
-export const isValidElement = vnode =>
-	vnode != NULL && vnode.constructor === UNDEFINED;
+export function isValidElement(vnode) {
+	return vnode != NULL && vnode.constructor === UNDEFINED;
+}

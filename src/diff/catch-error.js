@@ -20,9 +20,7 @@ export function _catchError(error, vnode, oldVNode, errorInfo) {
 	/** @type {import('../internal').Component} */
 	let component,
 		/** @type {import('../internal').ComponentType} */
-		ctor,
-		/** @type {number} */
-		handled;
+		ctor;
 
 	for (; (vnode = vnode._parent); ) {
 		if (
@@ -35,16 +33,14 @@ export function _catchError(error, vnode, oldVNode, errorInfo) {
 
 				if (ctor && ctor.getDerivedStateFromError != NULL) {
 					component.setState(ctor.getDerivedStateFromError(error));
-					handled = component._bits & COMPONENT_DIRTY;
 				}
 
 				if (component.componentDidCatch != NULL) {
 					component.componentDidCatch(error, errorInfo || {});
-					handled = component._bits & COMPONENT_DIRTY;
 				}
 
 				// This is an error boundary. Mark it as having bailed out, and whether it was mid-hydration.
-				if (handled) {
+				if (component._bits & COMPONENT_DIRTY) {
 					component._bits |= COMPONENT_PENDING_ERROR;
 					return;
 				}

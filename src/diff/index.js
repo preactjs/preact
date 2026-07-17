@@ -448,8 +448,10 @@ export function diff(
 }
 
 function markAsForce(vnode) {
-	if (vnode && vnode._component) vnode._component._bits |= COMPONENT_FORCE;
-	if (vnode && vnode._children) vnode._children.forEach(markAsForce);
+	if (vnode) {
+		if (vnode._component) vnode._component._bits |= COMPONENT_FORCE;
+		if (vnode._children) vnode._children.some(markAsForce);
+	}
 }
 
 /**
@@ -488,7 +490,7 @@ function cloneNode(node) {
 		return node.map(cloneNode);
 	}
 
-	if (node.constructor !== UNDEFINED) return null;
+	if (node.constructor !== UNDEFINED) return NULL;
 
 	return assign({}, node);
 }

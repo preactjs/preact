@@ -88,8 +88,7 @@ export function diffChildren(
 
 		// At this point, constructNewChildrenArray has assigned _index to be the
 		// matchingIndex for this VNode's oldVNode (or -1 if there is no oldVNode).
-		oldVNode =
-			(childVNode._index != -1 && oldChildren[childVNode._index]) || EMPTY_OBJ;
+		oldVNode = oldChildren[childVNode._index] || EMPTY_OBJ;
 
 		// Update childVNode._index to its final index
 		childVNode._index = i;
@@ -133,7 +132,7 @@ export function diffChildren(
 				oldDom,
 				parentDom,
 				shouldPlace,
-				oldVNode == NULL || oldVNode._original == NULL
+				oldVNode._original == NULL
 			);
 
 			// When a matched VNode is physically moved via INSERT_VNODE, its old
@@ -446,10 +445,10 @@ function findMatchingIndex(
 	// we should not search as we risk re-using state of an unrelated VNode. (reverted for now)
 	let shouldSearch =
 		// (typeof type != 'function' || type === Fragment || key) &&
-		remainingOldChildren > (matched ? 1 : 0);
+		remainingOldChildren > matched;
 
 	if (
-		(oldVNode === NULL && key == null) ||
+		(oldVNode === NULL && key == NULL) ||
 		(matched && key == oldVNode.key && type == oldVNode.type)
 	) {
 		return skewedIndex;
