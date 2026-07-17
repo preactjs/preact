@@ -15,7 +15,6 @@ import {
 } from 'node:zlib';
 import { rollup } from 'rollup';
 import { babel } from '@rollup/plugin-babel';
-import { nodeResolve } from '@rollup/plugin-node-resolve';
 import { minify } from 'terser';
 import fastRest from './babel-plugin-fast-rest.mjs';
 
@@ -146,12 +145,6 @@ function createBundle(pkg) {
 			warn(warning);
 		},
 		plugins: [
-			nodeResolve({
-				mainFields: ['module', 'jsnext', 'main'],
-				browser: true,
-				exportConditions: ['browser'],
-				extensions: ['.mjs', '.js', '.jsx', '.json', '.node']
-			}),
 			babel({
 				babelHelpers: 'bundled',
 				extensions: ['.js', '.jsx', '.mjs'],
