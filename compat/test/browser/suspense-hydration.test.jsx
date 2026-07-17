@@ -1228,6 +1228,78 @@ describe('suspense hydration', () => {
 		});
 	});
 
+	it('should remove stream directives and keep markers around multiple nodes when hydration resolves before stream patch', () => {
+		scratch.innerHTML =
+			'<!--$s:0--><?start name="0"><p>Loading</p><?end name="0"><!--/$s:0--><p>after</p>';
+		clearLog();
+
+		const [Lazy, resolve] = createLazy();
+		hydrate(
+			<>
+				<Suspense fallback={<p>Loading</p>}>
+					<Lazy />
+				</Suspense>
+				<p>after</p>
+			</>,
+			scratch
+		);
+		rerender();
+		clearLog();
+
+		return resolve(() => (
+			<>
+				<p>Resolved</p>
+				<div>Counter</div>
+			</>
+		)).then(() => {
+			rerender();
+			expect(scratch.innerHTML).to.equal(
+				'<!--$s:0--><p>Resolved</p><div>Counter</div><!--/$s:0--><p>after</p>'
+			);
+			clearLog();
+		});
+	});
+
+	it('should remove native processing instructions when hydration resolves before stream patch', () => {
+		scratch.appendChild(document.createComment('$s:0'));
+		scratch.appendChild(
+			document.createProcessingInstruction('start', 'name="0"')
+		);
+		scratch.appendChild(document.createElement('p')).textContent = 'Loading';
+		scratch.appendChild(
+			document.createProcessingInstruction('end', 'name="0"')
+		);
+		scratch.appendChild(document.createComment('/$s:0'));
+		scratch.appendChild(document.createElement('p')).textContent = 'after';
+		clearLog();
+
+		const [Lazy, resolve] = createLazy();
+		hydrate(
+			<>
+				<Suspense fallback={<p>Loading</p>}>
+					<Lazy />
+				</Suspense>
+				<p>after</p>
+			</>,
+			scratch
+		);
+		rerender();
+		clearLog();
+
+		return resolve(() => (
+			<>
+				<p>Resolved</p>
+				<div>Counter</div>
+			</>
+		)).then(() => {
+			rerender();
+			expect(scratch.innerHTML).to.equal(
+				'<!--$s:0--><p>Resolved</p><div>Counter</div><!--/$s:0--><p>after</p>'
+			);
+			clearLog();
+		});
+	});
+
 	it('should use updated DOM when stream patcher replaces content before suspend resolves', () => {
 		scratch.innerHTML =
 			'<!--$s:0--><span>Loading</span><!--/$s:0--><div>after</div>';

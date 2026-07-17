@@ -70,7 +70,8 @@ export function diff(
 ) {
 	/** @type {any} */
 	let tmp,
-		newType = newVNode.type;
+		newType = newVNode.type,
+		streamedHydrationStartMarker = NULL;
 
 	// When passing through createElement it assigns the object
 	// constructor as undefined. This to prevent JSON-injection.
@@ -85,17 +86,16 @@ export function diff(
 	) {
 		let excess = oldVNode._component._excess;
 		excessDomChildren = [];
-		if (excess.nodeType == 8) {
+		if (isStreamStartMarker(excess)) {
+			streamedHydrationStartMarker = excess;
 			// Re-scan DOM from stored start marker for streamed hydration
 			for (
 				let depth = 1, node = excess.nextSibling;
 				node && depth > 0;
 				node = node.nextSibling
 			) {
-				if (node.nodeType == 8) {
-					if (node.data.startsWith('$s')) depth++;
-					else if (node.data.startsWith('/$s') && !--depth) break;
-				}
+				if (isStreamStartMarker(node)) depth++;
+				else if (isStreamEndMarker(node) && !--depth) break;
 				excessDomChildren.push(node);
 			}
 		} else {
@@ -297,6 +297,8 @@ export function diff(
 					? cloneNode(tmp.props.children)
 					: tmp;
 
+			let hydrationStartMarker = streamedHydrationStartMarker;
+
 			oldDom = diffChildren(
 				parentDom,
 				isArray(renderResult) ? renderResult : [renderResult],
@@ -311,6 +313,10 @@ export function diff(
 				refQueue,
 				doc
 			);
+
+			if (hydrationStartMarker) {
+				finishStreamHydration(hydrationStartMarker, oldDom);
+			}
 
 			// We successfully rendered this VNode, unset any stored hydration/bailout state:
 			newVNode._flags &= RESET_MODE;
@@ -344,10 +350,10 @@ export function diff(
 							if (child == NULL) continue;
 
 							if (child.nodeType == 8) {
-								if (child.data.startsWith('$s')) {
+								if (isStreamStartMarker(child)) {
 									if (!commentMarkersToFind) startMarker = child;
 									commentMarkersToFind++;
-								} else if (child.data.startsWith('/$s')) {
+								} else if (isStreamEndMarker(child)) {
 									if (--commentMarkersToFind == 0) {
 										oldDom = child;
 										excessDomChildren[i] = NULL;
@@ -409,6 +415,63 @@ export function diff(
 	if ((tmp = options.diffed)) tmp(newVNode);
 
 	return newVNode._flags & MODE_SUSPENDED ? UNDEFINED : oldDom;
+}
+
+function isStreamStartMarker(node) {
+	return node && node.nodeType == 8 && node.data.startsWith('$s');
+}
+
+function isStreamEndMarker(node) {
+	return node && node.nodeType == 8 && node.data.startsWith('/$s');
+}
+
+function isStreamDirectiveMarker(node) {
+	return (
+		node &&
+		((node.nodeType == 8 &&
+			(node.data.startsWith('?start name="') ||
+				node.data.startsWith('?end name="'))) ||
+			(node.nodeType == 7 &&
+				((node.target == 'start' && node.data.startsWith('name="')) ||
+					(node.target == 'end' && node.data.startsWith('name="')) ||
+					node.data.startsWith('start name="') ||
+					node.data.startsWith('end name="'))))
+	);
+}
+
+function finishStreamHydration(startMarker, oldDom) {
+	let markerIdIndex = startMarker.data.indexOf(':');
+	if (markerIdIndex == -1) return;
+
+	let markerId = startMarker.data.slice(markerIdIndex + 1),
+		endMarker = NULL,
+		afterMarker = NULL;
+	for (let depth = 1, node = startMarker.nextSibling; node && depth > 0; ) {
+		let next = node.nextSibling;
+		if (isStreamStartMarker(node)) depth++;
+		else if (isStreamEndMarker(node) && !--depth) {
+			endMarker = node;
+			afterMarker = node.nextSibling;
+			break;
+		} else if (depth == 1 && isStreamDirectiveMarker(node)) {
+			removeNode(node);
+		}
+		node = next;
+	}
+
+	if (endMarker && oldDom != endMarker && oldDom != endMarker.nextSibling) {
+		let parent = endMarker.parentNode,
+			reference = oldDom && oldDom.parentNode == parent ? oldDom : afterMarker;
+		parent.insertBefore(
+			endMarker,
+			reference && reference.parentNode == parent ? reference : NULL
+		);
+	}
+
+	let templates = startMarker.ownerDocument.getElementsByTagName('template');
+	for (let i = templates.length; i--; ) {
+		if (templates[i].getAttribute('for') == markerId) removeNode(templates[i]);
+	}
 }
 
 function markAsForce(vnode) {
