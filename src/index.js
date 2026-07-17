@@ -4,10 +4,10 @@ export {
 	createElement as h,
 	Fragment,
 	createRef,
+	cloneElement,
 	isValidElement
 } from './create-element';
 export { BaseComponent as Component } from './component';
-export { cloneElement } from './clone-element';
 export { createContext } from './create-context';
 export { createPortal } from './create-portal';
 export { toChildArray } from './diff/children';
