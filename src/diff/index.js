@@ -70,6 +70,7 @@ export function diff(
 ) {
 	/** @type {any} */
 	let tmp,
+		resumedExcess,
 		newType = newVNode.type;
 
 	// When passing through createElement it assigns the object
@@ -84,7 +85,7 @@ export function diff(
 		oldVNode._component._excess
 	) {
 		let excess = oldVNode._component._excess;
-		excessDomChildren = [];
+		resumedExcess = excessDomChildren = [];
 		if (excess.nodeType == 8) {
 			// Re-scan DOM from stored start marker for streamed hydration
 			for (
@@ -321,6 +322,15 @@ export function diff(
 
 			// We successfully rendered this VNode, unset any stored hydration/bailout state:
 			newVNode._flags &= RESET_MODE;
+
+			// The resume-owned excess array is not shared with any parent frame,
+			// so nodes the resumed subtree didn't adopt are SSR leftovers (e.g. a
+			// node claimed by a component that then rendered null) — remove them.
+			if (resumedExcess) {
+				for (tmp = resumedExcess.length; tmp--; ) {
+					removeNode(resumedExcess[tmp]);
+				}
+			}
 
 			if (c._renderCallbacks.length) {
 				commitQueue.push(c);

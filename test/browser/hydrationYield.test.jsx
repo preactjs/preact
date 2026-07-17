@@ -506,9 +506,10 @@ describe('hydration yielding (#407)', () => {
 			expect(lis[1]).to.not.equal(li2);
 		});
 
-		it('null-root: steals the next sibling node, duplicating it permanently', () => {
+		it('null-root: transiently duplicates the stolen sibling node until resume', () => {
 			const Nothing = () => null;
 			scratch.innerHTML = '<ul><li>3</li></ul>';
+			const li = scratch.querySelector('li');
 
 			budget = 0;
 			hydrate(
@@ -518,11 +519,16 @@ describe('hydration yielding (#407)', () => {
 				</ul>,
 				scratch
 			);
+			// The suspended null-renderer claimed <li>3</li> as its resume
+			// point, so the real sibling deopted and created a duplicate
+			expect(scratch.innerHTML).to.equal('<ul><li>3</li><li>3</li></ul>');
+
 			flushSlice(Infinity);
 
-			// The suspended null-renderer claimed <li>3</li> as its resume
-			// point, so the real sibling deopted and created a duplicate.
-			expect(scratch.innerHTML).to.equal('<ul><li>3</li><li>3</li></ul>');
+			// On resume the unclaimed stolen node is removed again: the final
+			// markup is correct, but the surviving <li> is the recreated one
+			expect(scratch.innerHTML).to.equal('<ul><li>3</li></ul>');
+			expect(scratch.querySelector('li')).to.not.equal(li);
 		});
 
 		it('a shape-learning policy avoids both pitfalls', () => {
