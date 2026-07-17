@@ -25,22 +25,29 @@ jobs:
       - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: npm-package
-      - name: Create draft release
-        id: create-release
-        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
-        with:
-          script: |
-            const script = require('./scripts/release/create-gh-release.js')
-            return script({ github, context })
-      - name: Upload release artifact
-        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+      - name: Create draft release and upload artifact
         env:
-          RELEASE_DATA: ${{ steps.create-release.outputs.result }}
-        with:
-          script: |
-            const script = require('./scripts/release/upload-gh-asset.js')
-            const release = JSON.parse(process.env.RELEASE_DATA)
-            return script({ require, github, context, glob, release })
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          TAG="$GITHUB_REF_NAME"
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            if [[ "$(gh release view "$TAG" --json isDraft --jq .isDraft)" != "true" ]]; then
+              echo "::error::Release '$TAG' already exists and is not a draft"
+              exit 1
+            fi
+          else
+            ARGS=(--draft --target "$GITHUB_SHA" --title "$TAG")
+            if [[ "$TAG" == *-* ]]; then
+              ARGS+=(--prerelease)
+            fi
+            gh release create "$TAG" "${ARGS[@]}"
+          fi
+
+          ASSET="preact-${TAG#v}.tgz"
+          mv preact.tgz "$ASSET"
+          gh release upload "$TAG" "$ASSET" --clobber
 
   publish:
     needs: [build, release]
