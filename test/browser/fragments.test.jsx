@@ -38,9 +38,12 @@ describe('Fragment', () => {
 	let resetAppendChild;
 	let resetRemove;
 	let resetRemoveText;
+	let resetMoveBefore;
 
 	beforeAll(() => {
 		resetInsertBefore = logCall(Element.prototype, 'insertBefore');
+		// @ts-expect-error
+		resetMoveBefore = logCall(Element.prototype, 'moveBefore');
 		resetAppendChild = logCall(Element.prototype, 'appendChild');
 		resetRemove = logCall(Element.prototype, 'remove');
 		resetRemoveText = logCall(Text.prototype, 'remove');
@@ -57,6 +60,7 @@ describe('Fragment', () => {
 	});
 
 	afterAll(() => {
+		resetMoveBefore();
 		resetInsertBefore();
 		resetAppendChild();
 		resetRemove();

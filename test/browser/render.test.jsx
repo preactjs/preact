@@ -30,6 +30,7 @@ describe('render()', () => {
 	let resetInsertBefore;
 	let resetRemoveText;
 	let resetRemove;
+	let resetMoveBefore;
 
 	beforeEach(() => {
 		scratch = setupScratch();
@@ -43,12 +44,15 @@ describe('render()', () => {
 	beforeAll(() => {
 		resetAppendChild = logCall(Element.prototype, 'appendChild');
 		resetInsertBefore = logCall(Element.prototype, 'insertBefore');
+		// @ts-expect-error
+		resetMoveBefore = logCall(Element.prototype, 'moveBefore');
 		resetRemoveText = logCall(Text.prototype, 'remove');
 		resetRemove = logCall(Element.prototype, 'remove');
 	});
 
 	afterAll(() => {
 		resetAppendChild();
+		resetMoveBefore();
 		resetInsertBefore();
 		resetRemoveText();
 		resetRemove();
