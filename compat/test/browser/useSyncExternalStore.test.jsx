@@ -804,7 +804,7 @@ describe('useSyncExternalStore', () => {
 			const store = createExternalStore('client');
 
 			const ref = React.createRef();
-			function App() {
+			function Child() {
 				const text = useSyncExternalStore(
 					store.subscribe,
 					store.getState,
@@ -818,6 +818,10 @@ describe('useSyncExternalStore', () => {
 						<Text text={text} />
 					</div>
 				);
+			}
+
+			function App() {
+				return <Child />;
 			}
 
 			const container = document.createElement('div');

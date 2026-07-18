@@ -40,7 +40,7 @@ export interface Options extends preact.Options {
 	/** Bypass effect registration during hooks inspection and server rendering. */
 	_skipEffects?: boolean;
 	/** The root of a compat hydration pass. */
-	_hydrating?: boolean;
+	_hydrationRoot?: VNode | null;
 	/** Attach a hook that is invoked after an error is caught in a component but before calling lifecycle hooks */
 	_catchError(
 		error: any,

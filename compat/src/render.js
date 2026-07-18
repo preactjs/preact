@@ -277,7 +277,7 @@ options._render = function (vnode) {
 	if (oldBeforeRender) {
 		oldBeforeRender(vnode);
 	}
-	if (vnode._flags & MODE_HYDRATE) options._hydrating = true;
+	if (vnode._flags & MODE_HYDRATE) options._hydrationRoot = vnode;
 	currentComponent = vnode._component;
 };
 
@@ -301,6 +301,7 @@ options.diffed = function (vnode) {
 	}
 
 	currentComponent = null;
+	if (options._hydrationRoot == vnode) options._hydrationRoot = null;
 };
 
 // This is a very very private internal function for React it
