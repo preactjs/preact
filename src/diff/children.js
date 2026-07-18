@@ -357,6 +357,9 @@ function constructNewChildrenArray(
 function insert(parentVNode, oldDom, parentDom, shouldPlace, isMounting) {
 	// Note: VNodes in nested suspended trees may be missing _children.
 	if (typeof parentVNode.type == 'function') {
+		// Root children live in another container, they never move with the
+		// host tree and contribute nothing to the host insertion cursor.
+		if (parentVNode.props._parentDom) return oldDom;
 		let children = parentVNode._children;
 		for (let i = 0; children && i < children.length; i++) {
 			if (children[i]) {

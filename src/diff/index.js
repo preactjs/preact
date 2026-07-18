@@ -297,6 +297,35 @@ export function diff(
 					? cloneNode(tmp.props.children)
 					: tmp;
 
+			// A vnode carrying a `_parentDom` prop, considered a new root,
+			// continues rendering into that container. The subtree must stay
+			// invisible to the host tree's DOM bookkeeping: the portal vnode
+			// keeps a `null` `_dom` and the host insertion cursor (`oldDom`)
+			// passes through unchanged.
+			let hostOldDom = oldDom;
+			if (newProps._parentDom) {
+				parentDom = newProps._parentDom;
+				// If we portal into a math or svg element we need
+				// to swap the namespace (chart libraries often do this)
+				// same for an iframe (different ownerDocument)
+				namespace = parentDom.namespaceURI;
+				doc = parentDom.ownerDocument;
+
+				// Changing the container remounts the children into the new one
+				if (
+					oldVNode.props &&
+					oldVNode.props._parentDom != parentDom &&
+					oldVNode._children
+				) {
+					oldVNode._children.forEach(child => {
+						if (child) unmount(child, child);
+					});
+					oldVNode._children = NULL;
+				}
+
+				oldDom = oldVNode._children ? getDomSibling(oldVNode, 0) : NULL;
+			}
+
 			oldDom = diffChildren(
 				parentDom,
 				isArray(renderResult) ? renderResult : [renderResult],
@@ -311,6 +340,13 @@ export function diff(
 				refQueue,
 				doc
 			);
+
+			// When we exit a portal we
+			// change up the oldDom
+			if (newProps._parentDom) {
+				newVNode._dom = NULL;
+				oldDom = hostOldDom;
+			}
 
 			// We successfully rendered this VNode, unset any stored hydration/bailout state:
 			newVNode._flags &= RESET_MODE;
@@ -732,7 +768,11 @@ export function unmount(vnode, parentVNode, skipRemove) {
 				unmount(
 					r[i],
 					parentVNode,
-					skipRemove || typeof vnode.type != 'function'
+					// A portal's children live in another container, so a removed
+					// host ancestor doesn't detach them; always remove them.
+					typeof vnode.type == 'function'
+						? skipRemove && !vnode.props._parentDom
+						: true
 				);
 			}
 		}

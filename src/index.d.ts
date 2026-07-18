@@ -273,6 +273,10 @@ export interface ContainerNode {
 
 export function render(vnode: ComponentChild, parent: ContainerNode): void;
 export function hydrate(vnode: ComponentChild, parent: ContainerNode): void;
+export function createPortal(
+	vnode: ComponentChildren,
+	container: ContainerNode
+): VNode<any>;
 export function cloneElement(
 	vnode: VNode<any>,
 	props?: any,
