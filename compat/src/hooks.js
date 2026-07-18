@@ -1,19 +1,8 @@
 import { useState, useLayoutEffect, useEffect } from 'preact/hooks';
 import { options as _options } from 'preact';
 
-const MODE_HYDRATE = 1 << 5;
-
-/** @type {boolean} */
-let hydrating;
 // Cast to use internal Options type
 const options = /** @type {import('../../src/internal').Options} */ (_options);
-let oldBeforeRender = options._render;
-
-/** @type {(vnode: import('./internal').VNode) => void} */
-options._render = _vnode => {
-	hydrating = !!(_vnode._flags & MODE_HYDRATE);
-	if (oldBeforeRender) oldBeforeRender(_vnode);
-};
 
 /**
  * This is taken from https://github.com/facebook/react/blob/main/packages/use-sync-external-store/src/useSyncExternalStoreShimClient.js#L84
@@ -26,7 +15,7 @@ export function useSyncExternalStore(
 	getServerSnapshot
 ) {
 	const value =
-		typeof window === 'undefined' || hydrating
+		options._skipEffects || options._hydrationRoot
 			? getServerSnapshot
 				? getServerSnapshot()
 				: missingGetServerSnapshot()
@@ -77,9 +66,7 @@ function didSnapshotChange(inst) {
 }
 
 function missingGetServerSnapshot() {
-	throw new Error(
-		'Missing "getServerSnapshot" parameter for "useSyncExternalStore", this is required for server rendering & hydration of server-rendered content'
-	);
+	throw new Error('Missing getServerSnapshot');
 }
 
 export function startTransition(cb) {

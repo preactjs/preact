@@ -74,6 +74,7 @@
       "$_unmount": "__u",
       "$_owner": "__o",
       "$_skipEffects": "__s",
+      "$_hydrating": "__y",
       "$_forwarded": "__f",
       "$_isSuspended": "__i",
       "$_bits": "__g"

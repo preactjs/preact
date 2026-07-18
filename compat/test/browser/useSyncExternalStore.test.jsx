@@ -9,6 +9,7 @@ import React, {
 	useEffect,
 	useLayoutEffect
 } from 'preact/compat';
+import ReactDOMServer from 'preact/compat/server';
 import { setupRerender, act } from 'preact/test-utils';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { vi } from 'vitest';
@@ -308,6 +309,23 @@ describe('useSyncExternalStore', () => {
 	// The following tests are taken from the React test suite:
 	// https://github.com/facebook/react/blob/3e09c27b880e1fecdb1eca5db510ecce37ea6be2/packages/use-sync-external-store/src/__tests__/useSyncExternalStoreShared-test.js
 	describe('React useSyncExternalStore test suite', () => {
+		it('uses the server snapshot during server rendering', () => {
+			const getSnapshot = vi.fn(() => 'client');
+			const getServerSnapshot = vi.fn(() => 'server');
+
+			function App() {
+				return useSyncExternalStore(
+					() => () => {},
+					getSnapshot,
+					getServerSnapshot
+				);
+			}
+
+			expect(ReactDOMServer.renderToString(<App />)).to.equal('server');
+			expect(getSnapshot).not.toHaveBeenCalled();
+			expect(getServerSnapshot).toHaveBeenCalledOnce();
+		});
+
 		it('basic usage', async () => {
 			const store = createExternalStore('Initial');
 
