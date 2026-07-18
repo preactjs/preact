@@ -123,6 +123,15 @@ export function useMemo<T>(factory: () => T, inputs: Inputs | undefined): T;
  */
 export function useContext<T>(context: PreactContext<T>): T;
 
+/**
+ * Read the value of a resource like a Promise or a Context. Unlike other
+ * hooks, `use` may be called conditionally.
+ *
+ * When passed a pending Promise the component suspends until it settles,
+ * rethrowing the rejection reason if it rejects.
+ *
+ * @param resource The Promise or Context to read
+ */
 export function use<T>(resource: Promise<T> | PreactContext<T>): T;
 
 /**
