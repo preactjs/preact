@@ -102,14 +102,9 @@ The short summary is:
 
 Scripts can be executed via `npm run [script]`.
 
-- `build` - compiles all packages ready for publishing to npm
-- `build:core` - builds just Preact itself
-- `build:debug` - builds the debug addon only
-- `build:devtools` - builds the devtools addon only
-- `build:hooks` - builds the hook addon only
-- `build:test-utils` - builds the test-utils addon only
-- `build:compat` - builds the compat addon only
-- `build:jsx` - builds the JSX runtime addon only
+- `build` - compiles all packages ready for publishing to npm. Pass package
+  directories after `--` to build only selected packages, for example
+  `npm run build -- . hooks compat`
 - `test` - Run all tests (linting, TypeScript definitions, unit/integration tests)
 - `test:ts` - Run all tests for TypeScript definitions
 - `test:vitest` - Run all unit/integration tests.
