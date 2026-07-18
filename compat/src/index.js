@@ -42,7 +42,7 @@ import {
 } from './render';
 import { Suspense, lazy } from './suspense';
 
-const version = '18.3.1'; // trick libraries to think we are react
+const version = '19.0.0'; // trick libraries to think we are react
 
 /**
  * Legacy version of createElement.
