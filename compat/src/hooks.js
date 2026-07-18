@@ -65,14 +65,18 @@ export function useTransition() {
 // styles/... before it attaches
 export const useInsertionEffect = useLayoutEffect;
 
-export function useEffectEvent(cb) {
-	const cbRef = useRef(cb);
-	cbRef.current = cb;
+**
+ * @template {Function} T
+ * @param {T} callback
+ * @returns {T}
+ */
+export function useEffectEvent(callback) {
+	const ref = useRef(callback);
+	ref.current = callback;
 
-	// React docs: "Effect Event functions do not have a stable identity. Their identity intentionally changes on every render."
-	return (...params) => {
-		// Avoid overriding cb's `this` by not calling as a method.
-		const cb = cbRef.current;
-		return cb(...params);
-	};
+	return /** @type {T} */ (
+		function () {
+			return ref.current.apply(undefined, arguments);
+		}
+	);
 }
