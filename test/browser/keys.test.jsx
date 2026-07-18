@@ -1,4 +1,10 @@
-import { createElement, Component, render, createRef } from 'preact';
+import {
+	createElement,
+	Component,
+	render,
+	createRef,
+	createContext
+} from 'preact';
 import { setupRerender } from 'preact/test-utils';
 import { setupScratch, teardown } from '../_util/helpers';
 import { logCall, clearLog, getLog } from '../_util/logCall';
@@ -65,6 +71,7 @@ describe('keys', () => {
 		values.splice(to, 0, value);
 	}
 
+	let resetMoveBefore;
 	let resetAppendChild;
 	let resetInsertBefore;
 	let resetRemoveChild;
@@ -72,6 +79,7 @@ describe('keys', () => {
 	let resetRemoveText;
 
 	beforeAll(() => {
+		resetMoveBefore = logCall(Element.prototype, 'moveBefore');
 		resetAppendChild = logCall(Element.prototype, 'appendChild');
 		resetInsertBefore = logCall(Element.prototype, 'insertBefore');
 		resetRemoveChild = logCall(Element.prototype, 'removeChild');
@@ -85,6 +93,7 @@ describe('keys', () => {
 		resetRemoveChild();
 		resetRemove();
 		resetRemoveText();
+		resetMoveBefore();
 	});
 
 	beforeEach(() => {
@@ -179,9 +188,11 @@ describe('keys', () => {
 			render({ children, busy }) {
 				return (
 					<div class={busy ? 'busy' : ''}>
-						{children && children.length
-							? children
-							: <div class="busy-placeholder" />}
+						{children && children.length ? (
+							children
+						) : (
+							<div class="busy-placeholder" />
+						)}
 						<div class="indicator">
 							<div>indicator</div>
 							<div>indicator</div>
@@ -566,19 +577,21 @@ describe('keys', () => {
 		let Stateful2MovedRef;
 
 		function Foo({ moved }) {
-			return moved
-				? <div>
-						<div>1</div>
-						<Stateful1 key="c" ref={c => (Stateful1MovedRef = c)} />
-						<div>2</div>
-						<Stateful2 key="d" ref={c => (Stateful2MovedRef = c)} />
-					</div>
-				: <div>
-						<div>1</div>
-						<Stateful1 key="a" ref={c => (Stateful1Ref = c)} />
-						<div>2</div>
-						<Stateful2 key="b" ref={c => (Stateful2Ref = c)} />
-					</div>;
+			return moved ? (
+				<div>
+					<div>1</div>
+					<Stateful1 key="c" ref={c => (Stateful1MovedRef = c)} />
+					<div>2</div>
+					<Stateful2 key="d" ref={c => (Stateful2MovedRef = c)} />
+				</div>
+			) : (
+				<div>
+					<div>1</div>
+					<Stateful1 key="a" ref={c => (Stateful1Ref = c)} />
+					<div>2</div>
+					<Stateful2 key="b" ref={c => (Stateful2Ref = c)} />
+				</div>
+			);
 		}
 
 		const expectedHtml = div([
@@ -635,31 +648,27 @@ describe('keys', () => {
 		let Stateful2MovedRef;
 
 		function Foo({ moved }) {
-			return moved
-				? <div>
-						<div>1</div>
-						<Stateful2
-							key="b"
-							ref={c => (c ? (Stateful2MovedRef = c) : undefined)}
-						/>
-						<div>2</div>
-						<Stateful1
-							key="a"
-							ref={c => (c ? (Stateful1MovedRef = c) : undefined)}
-						/>
-					</div>
-				: <div>
-						<div>1</div>
-						<Stateful1
-							key="a"
-							ref={c => (c ? (Stateful1Ref = c) : undefined)}
-						/>
-						<div>2</div>
-						<Stateful2
-							key="b"
-							ref={c => (c ? (Stateful2Ref = c) : undefined)}
-						/>
-					</div>;
+			return moved ? (
+				<div>
+					<div>1</div>
+					<Stateful2
+						key="b"
+						ref={c => (c ? (Stateful2MovedRef = c) : undefined)}
+					/>
+					<div>2</div>
+					<Stateful1
+						key="a"
+						ref={c => (c ? (Stateful1MovedRef = c) : undefined)}
+					/>
+				</div>
+			) : (
+				<div>
+					<div>1</div>
+					<Stateful1 key="a" ref={c => (c ? (Stateful1Ref = c) : undefined)} />
+					<div>2</div>
+					<Stateful2 key="b" ref={c => (c ? (Stateful2Ref = c) : undefined)} />
+				</div>
+			);
 		}
 
 		const htmlForFalse = div([
@@ -841,19 +850,21 @@ describe('keys', () => {
 		let Stateful2MovedRef;
 
 		function Foo({ unkeyed }) {
-			return unkeyed
-				? <div>
-						<div>1</div>
-						<Stateful1 ref={c => (Stateful2MovedRef = c)} />
-						<div>2</div>
-						<Stateful2 ref={c => (Stateful1MovedRef = c)} />
-					</div>
-				: <div>
-						<div>1</div>
-						<Stateful1 key="a" ref={c => (Stateful1Ref = c)} />
-						<div>2</div>
-						<Stateful2 key="b" ref={c => (Stateful2Ref = c)} />
-					</div>;
+			return unkeyed ? (
+				<div>
+					<div>1</div>
+					<Stateful1 ref={c => (Stateful2MovedRef = c)} />
+					<div>2</div>
+					<Stateful2 ref={c => (Stateful1MovedRef = c)} />
+				</div>
+			) : (
+				<div>
+					<div>1</div>
+					<Stateful1 key="a" ref={c => (Stateful1Ref = c)} />
+					<div>2</div>
+					<Stateful2 key="b" ref={c => (Stateful2Ref = c)} />
+				</div>
+			);
 		}
 
 		const expectedHtml = div([
@@ -1007,18 +1018,20 @@ describe('keys', () => {
 		}
 
 		const App = props => {
-			return props.y === '2'
-				? <div>
-						<Comp key={1} i={1} />
-						<Comp key={2} i={2} />
-						<Comp key={3} i={3} />
-					</div>
-				: <div>
-						{null}
-						<Comp key={1} i={1} />
-						<Comp key={2} i={2} />
-						<Comp key={3} i={3} />
-					</div>;
+			return props.y === '2' ? (
+				<div>
+					<Comp key={1} i={1} />
+					<Comp key={2} i={2} />
+					<Comp key={3} i={3} />
+				</div>
+			) : (
+				<div>
+					{null}
+					<Comp key={1} i={1} />
+					<Comp key={2} i={2} />
+					<Comp key={3} i={3} />
+				</div>
+			);
 		};
 
 		render(<App y="1" />, scratch);
@@ -1040,17 +1053,19 @@ describe('keys', () => {
 		}
 
 		const App = props => {
-			return props.y === '1'
-				? <div>
-						<Comp key={1} i={1} />
-						<Comp key={2} i={2} />
-						<Comp key={3} i={3} />
-					</div>
-				: <div>
-						<Comp key={1} i={1} />
-						{null}
-						<Comp key={3} i={3} />
-					</div>;
+			return props.y === '1' ? (
+				<div>
+					<Comp key={1} i={1} />
+					<Comp key={2} i={2} />
+					<Comp key={3} i={3} />
+				</div>
+			) : (
+				<div>
+					<Comp key={1} i={1} />
+					{null}
+					<Comp key={3} i={3} />
+				</div>
+			);
 		};
 
 		render(<App y="1" />, scratch);
@@ -1080,18 +1095,20 @@ describe('keys', () => {
 		}
 
 		const App = props => {
-			return props.y === '2'
-				? <div>
-						<Comp key={1} i={1} />
-						<Comp key={2} i={2} />
-						<Comp key={3} i={3} />
-					</div>
-				: <div>
-						<Comp key={1} i={1} />
-						<Comp key={2} i={2} />
-						{null}
-						<Comp key={3} i={3} />
-					</div>;
+			return props.y === '2' ? (
+				<div>
+					<Comp key={1} i={1} />
+					<Comp key={2} i={2} />
+					<Comp key={3} i={3} />
+				</div>
+			) : (
+				<div>
+					<Comp key={1} i={1} />
+					<Comp key={2} i={2} />
+					{null}
+					<Comp key={3} i={3} />
+				</div>
+			);
 		};
 
 		render(<App y="1" />, scratch);
@@ -1113,18 +1130,20 @@ describe('keys', () => {
 		}
 
 		const App = props => {
-			return props.y === '2'
-				? <div>
-						<Comp key={1} i={1} />
-						<Comp key={2} i={2} />
-						<Comp key={3} i={3} />
-					</div>
-				: <div>
-						<Comp key={1} i={1} />
-						<Comp key={2} i={2} />
-						<Comp key={3} i={3} />
-						{null}
-					</div>;
+			return props.y === '2' ? (
+				<div>
+					<Comp key={1} i={1} />
+					<Comp key={2} i={2} />
+					<Comp key={3} i={3} />
+				</div>
+			) : (
+				<div>
+					<Comp key={1} i={1} />
+					<Comp key={2} i={2} />
+					<Comp key={3} i={3} />
+					{null}
+				</div>
+			);
 		};
 
 		render(<App y="1" />, scratch);
@@ -1132,5 +1151,241 @@ describe('keys', () => {
 
 		render(<App y="2" />, scratch);
 		expect(actions).to.deep.equal(['mounted 1', 'mounted 2', 'mounted 3']);
+	});
+
+	// Issue #4973: Test growing list diff
+	it('should correctly diff a growing list of keyed children', () => {
+		let values = [0, 1, 2, 3, 4];
+
+		render(<List values={values} />, scratch);
+		expect(scratch.textContent).to.equal('01234');
+
+		values = [2, 3, 4, 5, 6];
+		clearLog();
+
+		render(<List values={values} />, scratch);
+		expect(scratch.textContent).to.equal('23456');
+
+		expect(getLog()).to.deep.equal([
+			'<li>0.remove()',
+			'<li>1.remove()',
+			'<li>.appendChild(#text)',
+			'<ol>234.appendChild(<li>5)',
+			'<li>.appendChild(#text)',
+			'<ol>2345.appendChild(<li>6)'
+		]);
+	});
+
+	// https://github.com/preactjs/preact/issues/5065
+	it('should maintain correct DOM order with conditional ContextProvider and inner keys', () => {
+		const Ctx = createContext(null);
+
+		class Label extends Component {
+			render({ todo }) {
+				return <li key={todo.text}>{todo.text}</li>;
+			}
+		}
+
+		class App extends Component {
+			render() {
+				const { todos } = this.props;
+				return (
+					<ul>
+						{todos.map((todo, index) =>
+							todo.text === '1' || todo.text === '2' || todo.text === '3' ? (
+								<Ctx.Provider value={null}>
+									<Label todo={todo} index={index} />
+								</Ctx.Provider>
+							) : (
+								<Label todo={todo} index={index} />
+							)
+						)}
+					</ul>
+				);
+			}
+		}
+
+		// Initial: 3 collapsed rows
+		render(
+			<App todos={[{ text: '1' }, { text: '2' }, { text: '3' }]} />,
+			scratch
+		);
+		expect(scratch.querySelector('ul').textContent).to.equal('123');
+
+		// Expand row 1: adds sub-items 1A, 1B, 1C (not wrapped in Provider)
+		render(
+			<App
+				todos={[
+					{ text: '1' },
+					{ text: '1A' },
+					{ text: '1B' },
+					{ text: '1C' },
+					{ text: '2' },
+					{ text: '3' }
+				]}
+			/>,
+			scratch
+		);
+		expect(scratch.querySelector('ul').textContent).to.equal('11A1B1C23');
+
+		// Expand row 2: adds sub-items 2A, 2B, 2C
+		render(
+			<App
+				todos={[
+					{ text: '1' },
+					{ text: '1A' },
+					{ text: '1B' },
+					{ text: '1C' },
+					{ text: '2' },
+					{ text: '2A' },
+					{ text: '2B' },
+					{ text: '2C' },
+					{ text: '3' }
+				]}
+			/>,
+			scratch
+		);
+		expect(scratch.querySelector('ul').textContent).to.equal('11A1B1C22A2B2C3');
+
+		// Collapse row 1: removes 1A, 1B, 1C
+		render(
+			<App
+				todos={[
+					{ text: '1' },
+					{ text: '2' },
+					{ text: '2A' },
+					{ text: '2B' },
+					{ text: '2C' },
+					{ text: '3' }
+				]}
+			/>,
+			scratch
+		);
+		expect(scratch.querySelector('ul').textContent).to.equal('122A2B2C3');
+	});
+
+	// https://github.com/preactjs/preact/issues/5065
+	it('should maintain correct DOM order when collapsing row 2 with conditional Provider', () => {
+		const Ctx = createContext(null);
+
+		class Label extends Component {
+			render({ todo }) {
+				return <li key={todo.text}>{todo.text}</li>;
+			}
+		}
+
+		class App extends Component {
+			render() {
+				const { todos } = this.props;
+				return (
+					<ul>
+						{todos.map((todo, index) =>
+							todo.text === '1' || todo.text === '2' || todo.text === '3' ? (
+								<Ctx.Provider value={null}>
+									<Label todo={todo} index={index} />
+								</Ctx.Provider>
+							) : (
+								<Label todo={todo} index={index} />
+							)
+						)}
+					</ul>
+				);
+			}
+		}
+
+		// Both rows expanded
+		render(
+			<App
+				todos={[
+					{ text: '1' },
+					{ text: '1A' },
+					{ text: '1B' },
+					{ text: '1C' },
+					{ text: '2' },
+					{ text: '2A' },
+					{ text: '2B' },
+					{ text: '2C' },
+					{ text: '3' }
+				]}
+			/>,
+			scratch
+		);
+		expect(scratch.querySelector('ul').textContent).to.equal('11A1B1C22A2B2C3');
+
+		// Collapse row 2: removes 2A, 2B, 2C
+		render(
+			<App
+				todos={[
+					{ text: '1' },
+					{ text: '1A' },
+					{ text: '1B' },
+					{ text: '1C' },
+					{ text: '2' },
+					{ text: '3' }
+				]}
+			/>,
+			scratch
+		);
+		expect(scratch.querySelector('ul').textContent).to.equal('11A1B1C23');
+	});
+
+	// https://github.com/preactjs/preact/issues/5065
+	it('should maintain correct DOM order expanding then collapsing with conditional Provider', () => {
+		const Ctx = createContext(null);
+
+		class Label extends Component {
+			render({ todo }) {
+				return <li key={todo.text}>{todo.text}</li>;
+			}
+		}
+
+		class App extends Component {
+			render() {
+				const { todos } = this.props;
+				return (
+					<ul>
+						{todos.map((todo, index) =>
+							todo.text === '1' || todo.text === '2' || todo.text === '3' ? (
+								<Ctx.Provider value={null}>
+									<Label todo={todo} index={index} />
+								</Ctx.Provider>
+							) : (
+								<Label todo={todo} index={index} />
+							)
+						)}
+					</ul>
+				);
+			}
+		}
+
+		// Initial: 3 rows collapsed
+		render(
+			<App todos={[{ text: '1' }, { text: '2' }, { text: '3' }]} />,
+			scratch
+		);
+		expect(scratch.querySelector('ul').textContent).to.equal('123');
+
+		// Expand row 1
+		render(
+			<App
+				todos={[
+					{ text: '1' },
+					{ text: '1A' },
+					{ text: '1B' },
+					{ text: '1C' },
+					{ text: '2' },
+					{ text: '3' }
+				]}
+			/>,
+			scratch
+		);
+		expect(scratch.querySelector('ul').textContent).to.equal('11A1B1C23');
+
+		// Collapse row 1
+		render(
+			<App todos={[{ text: '1' }, { text: '2' }, { text: '3' }]} />,
+			scratch
+		);
+		expect(scratch.querySelector('ul').textContent).to.equal('123');
 	});
 });

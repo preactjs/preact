@@ -1,4 +1,4 @@
-import { useState, useLayoutEffect, useEffect } from 'preact/hooks';
+import { useState, useLayoutEffect, useEffect, useRef } from 'preact/hooks';
 import { options as _options } from 'preact';
 
 // Cast to use internal Options type
@@ -55,11 +55,8 @@ export function useSyncExternalStore(
 
 /** @type {(inst: Store) => boolean} */
 function didSnapshotChange(inst) {
-	const latestGetSnapshot = inst._getSnapshot;
-	const prevValue = inst._value;
 	try {
-		const nextValue = latestGetSnapshot();
-		return !Object.is(prevValue, nextValue);
+		return !Object.is(inst._value, inst._getSnapshot());
 	} catch (error) {
 		return true;
 	}
@@ -84,3 +81,19 @@ export function useTransition() {
 // TODO: in theory this should be done after a VNode is diffed as we want to insert
 // styles/... before it attaches
 export const useInsertionEffect = useLayoutEffect;
+
+/**
+ * @template {Function} T
+ * @param {T} callback
+ * @returns {T}
+ */
+export function useEffectEvent(callback) {
+	const ref = useRef(callback);
+	ref.current = callback;
+
+	return /** @type {T} */ (
+		function () {
+			return ref.current.apply(undefined, arguments);
+		}
+	);
+}

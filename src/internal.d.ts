@@ -1,6 +1,4 @@
-// Intentionally not using a relative path to take advantage of
-// the TS version resolution mechanism
-import * as preact from 'preact';
+import * as preact from './index';
 
 export enum HookType {
 	useState = 1,
@@ -96,6 +94,7 @@ export interface PreactElement extends preact.ContainerNode {
 	data?: CharacterData['data'];
 	// Property to set __dangerouslySetInnerHTML
 	innerHTML?: Element['innerHTML'];
+	textContent?: Element['textContent'];
 	remove?: Element['remove'];
 
 	// Attribute reading and setting
@@ -109,6 +108,8 @@ export interface PreactElement extends preact.ContainerNode {
 
 	// Used to match DOM nodes to VNodes during hydration
 	readonly ownerDocument: Document;
+	// Used to retarget a Document render to its root element
+	readonly documentElement?: PreactElement | null;
 
 	// Setting styles
 	readonly style?: CSSStyleDeclaration;
@@ -131,7 +132,9 @@ export interface PreactElement extends preact.ContainerNode {
 }
 
 export interface PreactEvent extends Event {
-	_dispatched?: number;
+	// Keyed by a per-instance unique Symbol so that multiple Preact copies
+	// on the same page don't share event clock stamps.
+	[key: symbol]: any;
 }
 
 // We use the `current` property to differentiate between the two kinds of Refs so
@@ -161,13 +164,15 @@ export interface VNode<P = {}> extends preact.VNode<P> {
 	_flags: number;
 }
 
-export interface Component<P = {}, S = {}>
-	extends Omit<preact.Component<P, S>, 'base'> {
+export interface Component<P = {}, S = {}> extends Omit<
+	preact.Component<P, S>,
+	'base'
+> {
 	// When component is functional component, this is reset to functional component
 	constructor: ComponentType<P>;
 	state: S; // Override Component["state"] to not be readonly for internal use, specifically Hooks
 
-	_excess?: PreactElement[];
+	_excess?: PreactElement;
 	_renderCallbacks: Array<() => void>; // Only class components
 	_stateCallbacks: Array<() => void>; // Only class components
 	_globalContext?: any;

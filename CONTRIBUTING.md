@@ -1,10 +1,10 @@
 # Contributing
 
-This document is intended for developers interest in making contributions to Preact and document our internal processes like releasing a new version.
+This document is intended for developers interested in making contributions to Preact and documents our internal processes like releasing a new version.
 
 ## Getting Started
 
-This steps will help you to set up your development environment. That includes all dependencies we use to build Preact and developer tooling like git commit hooks.
+These steps will help you set up your development environment. That includes all dependencies we use to build Preact and developer tooling like git commit hooks.
 
 1. Clone the git repository: `git clone git@github.com:preactjs/preact.git`
 2. Go into the cloned folder: `cd preact/`
@@ -32,7 +32,7 @@ A quick overview of our repository:
   	dist/ # Build artifacts for publishing on npm (may not be present)
 
   # Sub-package, can be imported via `preact/hooks` by users.
-  # The hooks API is an effect based API to deal with component lifcycles.
+  # The hooks API is an effect based API to deal with component lifecycles.
   # It's similar to hooks in React
   hooks/
   	src/  # Source code of the hooks addon
@@ -41,7 +41,7 @@ A quick overview of our repository:
 
   # Sub-package, can be imported via `preact/debug` by users.
   # Includes debugging warnings and error messages for common mistakes found
-  # in Preact application. Also hosts the devtools bridge
+  # in Preact applications. Also hosts the devtools bridge
   debug/
   	src/  # Source code of the debug addon
   	test/ # Tests related to the debug addon
@@ -66,7 +66,7 @@ _Note: The code for rendering Preact on the server lives in another repo and is 
 
 ### What does `mangle.json` do?
 
-It's a special file that can be used to specify how `terser` (previously known as `uglify`) will minify variable names. Because each sub-package has it's own distribution files we need to ensure that the variable names stay consistent across bundles.
+It's a special file that can be used to specify how `terser` (previously known as `uglify`) will minify variable names. Because each sub-package has its own distribution files we need to ensure that the variable names stay consistent across bundles.
 
 ## What does `options.js` do?
 
@@ -102,14 +102,9 @@ The short summary is:
 
 Scripts can be executed via `npm run [script]`.
 
-- `build` - compiles all packages ready for publishing to npm
-- `build:core` - builds just Preact itself
-- `build:debug` - builds the debug addon only
-- `build:devtools` - builds the devtools addon only
-- `build:hooks` - builds the hook addon only
-- `build:test-utils` - builds the test-utils addon only
-- `build:compat` - builds the compat addon only
-- `build:jsx` - builds the JSX runtime addon only
+- `build` - compiles all packages ready for publishing to npm. Pass package
+  directories after `--` to build only selected packages, for example
+  `npm run build -- . hooks compat`
 - `test` - Run all tests (linting, TypeScript definitions, unit/integration tests)
 - `test:ts` - Run all tests for TypeScript definitions
 - `test:vitest` - Run all unit/integration tests.
@@ -170,7 +165,7 @@ Checkout the README in the benchmarks folder for more information on running ben
 
 Several members of the team are very fond of TypeScript and we wanted to leverage as many of its advantages, like improved autocompletion, for Preact. We even attempted to port Preact to TypeScript a few times, but we ran into many issues with the DOM typings. Those would force us to fill our codebase with many `any` castings, making our code very noisy.
 
-Luckily TypeScript has a mode where it can somewhat reliably typecheck JavaScript code by reusing the types defined in JSDoc blocks. It's not perfect and it often has trouble inferring the correct types the further one strays away from the function arguments, but it's good enough that it helps us a lot with autocompletion. Another plus is that we can make sure that our TypeScript definitons are correct at the same time.
+Luckily TypeScript has a mode where it can somewhat reliably typecheck JavaScript code by reusing the types defined in JSDoc blocks. It's not perfect and it often has trouble inferring the correct types the further one strays away from the function arguments, but it's good enough that it helps us a lot with autocompletion. Another plus is that we can make sure that our TypeScript definitions are correct at the same time.
 
 Check out the [official TypeScript documentation](https://www.typescriptlang.org/docs/handbook/type-checking-javascript-files.html) for more information.
 
@@ -193,20 +188,19 @@ We closely watch our issues and have a pretty active [Slack workspace](https://c
 This guide is intended for core team members that have the necessary
 rights to publish new releases on npm.
 
+Before using the automated npm publishing flow, make sure npm trusted publishing is configured for the `preactjs/preact` repository, the `release.yml` workflow, and the `npm` environment. The GitHub `npm` environment should require reviewer approval, and repository rules should protect `11.*` tags.
+
 1. Make a PR where **only** the version number is incremented in `package.json` and everywhere else. A simple search and replace works. (note: We follow `SemVer` conventions)
 2. Wait until the PR is approved and merged.
 3. Switch back to the `main` branch and pull the merged PR
 4. Create and push a tag for the new version you want to publish:
-   1. `git tag 10.0.0`
-   2. `git push --tags`
-5. Wait for the Release workflow to complete
-   - It'll create a draft release and upload the built npm package as an asset to the release
+   1. `git tag 11.0.0`
+   2. `git push origin 11.0.0`
+5. Wait for the Release workflow to reach the `npm` environment approval gate, approve it, and let it complete
+   - It'll validate that the tag matches the package version, create a draft release, upload the built npm package as a release asset, and publish it to npm.
+   - Stable releases publish to the `latest` npm dist-tag; prereleases publish to the approved prerelease dist-tag (`alpha`, `beta`, `rc`, or `next`).
 6. [Fill in the release notes](#writing-release-notes) in GitHub and publish them
-7. Run the publish script with the tag you created
-   1. `node ./scripts/release/publish.mjs 10.0.0`
-   2. Make sure you have 2FA enabled in npm, otherwise the above command will fail.
-   3. If you're doing a pre-release add `--npm-tag next` to the `publish.mjs` command to publish it under a different tag (default is `latest`)
-8. Tweet it out
+7. Tweet it out
 
 ## Legacy Releases (8.x)
 

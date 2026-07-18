@@ -30,6 +30,7 @@ describe('render()', () => {
 	let resetInsertBefore;
 	let resetRemoveText;
 	let resetRemove;
+	let resetMoveBefore;
 
 	beforeEach(() => {
 		scratch = setupScratch();
@@ -43,12 +44,15 @@ describe('render()', () => {
 	beforeAll(() => {
 		resetAppendChild = logCall(Element.prototype, 'appendChild');
 		resetInsertBefore = logCall(Element.prototype, 'insertBefore');
+		// @ts-expect-error
+		resetMoveBefore = logCall(Element.prototype, 'moveBefore');
 		resetRemoveText = logCall(Text.prototype, 'remove');
 		resetRemove = logCall(Element.prototype, 'remove');
 	});
 
 	afterAll(() => {
 		resetAppendChild();
+		resetMoveBefore();
 		resetInsertBefore();
 		resetRemoveText();
 		resetRemove();
@@ -100,10 +104,32 @@ describe('render()', () => {
 		expect(clone.firstChild.outerHTML).to.eql('<h1>it works</h1>');
 	});
 
+	it('should render function components with an undefined prototype', () => {
+		const Foo = () => <div>foo</div>;
+		Foo.prototype = undefined;
+		render(<Foo />, scratch);
+		expect(scratch.innerHTML).to.equal('<div>foo</div>');
+	});
+
 	it('should not render when detecting JSON-injection', () => {
-		const vnode = JSON.parse('{"type":"span","children":"Malicious"}');
+		const vnode = JSON.parse(
+			'{"type":"span","props":{ "children": "Malicious"}, "__v": 1, "constructor": null}'
+		);
 		render(vnode, scratch);
 		expect(scratch.firstChild).to.be.null;
+	});
+
+	it('should not render when detecting JSON-injection deeply', () => {
+		const payload = JSON.parse(
+			'{"type":"span","props":{ "children": "Malicious"}, "__v": 1, "__proto__": null}'
+		);
+
+		const App = () => <Fragment>{payload}</Fragment>;
+
+		render(<App />, scratch);
+		console.log(scratch.innerHTML);
+		expect(scratch.firstChild).to.be.null;
+		expect(scratch.innerHTML).to.equal('');
 	});
 
 	it('should create empty nodes (<* />)', () => {
@@ -203,6 +229,30 @@ describe('render()', () => {
 		expect(scratch.childNodes).to.have.length(1);
 		expect(scratch.firstChild).to.have.property('nodeName', 'SPAN');
 		expect(scratch.innerHTML).to.equal('<span class="hello">Hello!</span>');
+	});
+
+	it('should not keep the root input vnode in props.children', () => {
+		let update;
+		class App extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { value: 'a' };
+				update = this.setState.bind(this);
+			}
+
+			render() {
+				return <button>{this.state.value}</button>;
+			}
+		}
+
+		render(<App />, scratch);
+		let firstAppVNode = scratch._children._children[0];
+
+		update({ value: 'b' });
+		rerender();
+
+		expect(scratch._children._children[0]).to.not.equal(firstAppVNode);
+		expect(scratch._children.props.children).to.equal(null);
 	});
 
 	it('should nest empty nodes', () => {
@@ -435,19 +485,21 @@ describe('render()', () => {
 			render() {
 				return (
 					<div>
-						{this.state.active
-							? <table>
-									<tr>
-										<td rowSpan={2} colSpan={2}>
-											Foo
-										</td>
-									</tr>
-								</table>
-							: <table>
-									<tr>
-										<td>Foo</td>
-									</tr>
-								</table>}
+						{this.state.active ? (
+							<table>
+								<tr>
+									<td rowSpan={2} colSpan={2}>
+										Foo
+									</td>
+								</tr>
+							</table>
+						) : (
+							<table>
+								<tr>
+									<td>Foo</td>
+								</tr>
+							</table>
+						)}
 					</div>
 				);
 			}
@@ -510,6 +562,21 @@ describe('render()', () => {
 		expect(scratch.firstChild.checked).to.equal(true);
 		render(<input defaultChecked checked={false} />, scratch);
 		expect(scratch.firstChild.checked).to.equal(false);
+	});
+
+	it('should not try to set element.children', () => {
+		render(
+			<div>
+				<span />
+			</div>,
+			scratch
+		);
+		const spy = vi.fn();
+		Object.defineProperty(scratch.firstChild, 'children', {
+			set: spy
+		});
+		render(<div />, scratch);
+		expect(spy).not.toHaveBeenCalled();
 	});
 
 	it('should render download attribute', () => {
@@ -664,9 +731,11 @@ describe('render()', () => {
 				}
 				render(props, { html }) {
 					// eslint-disable-next-line react/no-danger
-					return html
-						? <div dangerouslySetInnerHTML={{ __html: html }} />
-						: <div />;
+					return html ? (
+						<div dangerouslySetInnerHTML={{ __html: html }} />
+					) : (
+						<div />
+					);
 				}
 			}
 
@@ -1879,14 +1948,16 @@ describe('render()', () => {
 			//
 			// We insert <span /> which should amount to a skew of -1 which should
 			// make us correctly match the X component.
-			return condition
-				? <div>
-						<span />
-						<X name="B" />
-					</div>
-				: <div>
-						<X name="A" />
-					</div>;
+			return condition ? (
+				<div>
+					<span />
+					<X name="B" />
+				</div>
+			) : (
+				<div>
+					<X name="A" />
+				</div>
+			);
 		}
 
 		render(<Foo />, scratch);

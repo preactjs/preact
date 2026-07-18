@@ -6,7 +6,8 @@ import {
 	INSERT_VNODE,
 	MATCHED,
 	UNDEFINED,
-	NULL
+	NULL,
+	HAS_MOVE_BEFORE_SUPPORT
 } from '../constants';
 import { isArray } from '../util';
 import { getDomSibling } from '../component';
@@ -87,11 +88,8 @@ export function diffChildren(
 
 		// At this point, constructNewChildrenArray has assigned _index to be the
 		// matchingIndex for this VNode's oldVNode (or -1 if there is no oldVNode).
-		if (childVNode._index == -1) {
-			oldVNode = EMPTY_OBJ;
-		} else {
-			oldVNode = oldChildren[childVNode._index] || EMPTY_OBJ;
-		}
+		oldVNode =
+			(childVNode._index != -1 && oldChildren[childVNode._index]) || EMPTY_OBJ;
 
 		// Update childVNode._index to its final index
 		childVNode._index = i;
@@ -130,7 +128,21 @@ export function diffChildren(
 
 		let shouldPlace = childVNode._flags & INSERT_VNODE;
 		if (shouldPlace || oldVNode._children === childVNode._children) {
-			oldDom = insert(childVNode, oldDom, parentDom, shouldPlace);
+			oldDom = insert(
+				childVNode,
+				oldDom,
+				parentDom,
+				shouldPlace,
+				oldVNode == NULL || oldVNode._original == NULL
+			);
+
+			// When a matched VNode is physically moved via INSERT_VNODE, its old
+			// _dom pointer becomes a stale positional reference. Clear it so that
+			// getDomSibling (called from nested diffs) won't return this stale
+			// reference and mis-place subsequent DOM nodes. See #5065.
+			if (shouldPlace && oldVNode._dom) {
+				oldVNode._dom = NULL;
+			}
 		} else if (typeof childVNode.type == 'function' && result !== UNDEFINED) {
 			oldDom = result;
 		} else if (newDom) {
@@ -209,7 +221,7 @@ function constructNewChildrenArray(
 				NULL,
 				NULL
 			);
-		} else if (childVNode.constructor == UNDEFINED && childVNode._depth > 0) {
+		} else if (childVNode.constructor === UNDEFINED && childVNode._depth > 0) {
 			// VNode is already in use, clone it. This can happen in the following
 			// scenario:
 			//   const reuse = <div />
@@ -239,6 +251,7 @@ function constructNewChildrenArray(
 			remainingOldChildren
 		));
 
+		oldVNode = NULL;
 		if (matchingIndex != -1) {
 			oldVNode = oldChildren[matchingIndex];
 			remainingOldChildren--;
@@ -338,9 +351,10 @@ function constructNewChildrenArray(
  * @param {PreactElement} oldDom
  * @param {PreactElement} parentDom
  * @param {number} shouldPlace
+ * @param {boolean} isMounting
  * @returns {PreactElement}
  */
-function insert(parentVNode, oldDom, parentDom, shouldPlace) {
+function insert(parentVNode, oldDom, parentDom, shouldPlace, isMounting) {
 	// Note: VNodes in nested suspended trees may be missing _children.
 	if (typeof parentVNode.type == 'function') {
 		let children = parentVNode._children;
@@ -351,7 +365,7 @@ function insert(parentVNode, oldDom, parentDom, shouldPlace) {
 				// children's _parent pointer to point to the newVNode (parentVNode
 				// here).
 				children[i]._parent = parentVNode;
-				oldDom = insert(children[i], oldDom, parentDom, shouldPlace);
+				oldDom = insert(children[i], oldDom, parentDom, shouldPlace, false);
 			}
 		}
 
@@ -361,7 +375,13 @@ function insert(parentVNode, oldDom, parentDom, shouldPlace) {
 			if (oldDom && parentVNode.type && !oldDom.parentNode) {
 				oldDom = getDomSibling(parentVNode);
 			}
-			parentDom.insertBefore(parentVNode._dom, oldDom || NULL);
+
+			if (HAS_MOVE_BEFORE_SUPPORT && !isMounting) {
+				// @ts-expect-error This isn't added to TypeScript lib.d.ts yet
+				parentDom.moveBefore(parentVNode._dom, oldDom);
+			} else {
+				parentDom.insertBefore(parentVNode._dom, oldDom || NULL);
+			}
 		}
 		oldDom = parentVNode._dom;
 	}

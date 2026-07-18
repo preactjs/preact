@@ -1,19 +1,19 @@
-// Intentionally not using a relative path to take advantage of
-// the TS version resolution mechanism
-export { Fragment } from 'preact';
+export { Fragment } from '../../src/index';
 import {
 	ComponentType,
 	ComponentChild,
 	ComponentChildren,
 	VNode,
-	Attributes
-} from 'preact';
+	Attributes,
+	HTMLAttributes,
+	SVGAttributes
+} from '../../src/index';
 import { JSXInternal } from '../../src/jsx';
 
 export function jsx(
 	type: string,
-	props: JSXInternal.HTMLAttributes &
-		JSXInternal.SVGAttributes &
+	props: HTMLAttributes &
+		SVGAttributes &
 		Record<string, any> & { children?: ComponentChild },
 	key?: string
 ): VNode<any>;
@@ -25,8 +25,8 @@ export function jsx<P>(
 
 export function jsxs(
 	type: string,
-	props: JSXInternal.HTMLAttributes &
-		JSXInternal.SVGAttributes &
+	props: HTMLAttributes &
+		SVGAttributes &
 		Record<string, any> & { children?: ComponentChild[] },
 	key?: string
 ): VNode<any>;
@@ -38,8 +38,8 @@ export function jsxs<P>(
 
 export function jsxDEV(
 	type: string,
-	props: JSXInternal.HTMLAttributes &
-		JSXInternal.SVGAttributes &
+	props: HTMLAttributes &
+		SVGAttributes &
 		Record<string, any> & { children?: ComponentChildren },
 	key?: string
 ): VNode<any>;

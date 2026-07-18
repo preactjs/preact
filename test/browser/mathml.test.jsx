@@ -38,10 +38,7 @@ describe('mathml', () => {
 	});
 
 	it('should inherit correct namespace URI from parent', () => {
-		const math = document.createElementNS(
-			MATH_NAMESPACE,
-			'math'
-		);
+		const math = document.createElementNS(MATH_NAMESPACE, 'math');
 		scratch.appendChild(math);
 
 		render(<mrow />, scratch.firstChild);
@@ -53,10 +50,7 @@ describe('mathml', () => {
 	it('should inherit correct namespace URI from parent upon updating', () => {
 		setupRerender();
 
-		const math = document.createElementNS(
-			MATH_NAMESPACE,
-			'math'
-		);
+		const math = document.createElementNS(MATH_NAMESPACE, 'math');
 		scratch.appendChild(math);
 
 		class App extends Component {
@@ -99,18 +93,16 @@ describe('mathml', () => {
 			<div>
 				<math>
 					<mrow>
-						<mi><ins>123</ins></mi>
+						<mi>
+							<ins>123</ins>
+						</mi>
 					</mrow>
 				</math>
 			</div>,
 			scratch
 		);
 
-		expect(scratch.querySelector('mi').namespaceURI).to.equal(
-			MATH_NAMESPACE
-		);
-		expect(scratch.querySelector('ins').namespaceURI).to.equal(
-			XHTML_NAMESPACE
-		);
+		expect(scratch.querySelector('mi').namespaceURI).to.equal(MATH_NAMESPACE);
+		expect(scratch.querySelector('ins').namespaceURI).to.equal(XHTML_NAMESPACE);
 	});
 });

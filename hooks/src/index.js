@@ -60,15 +60,15 @@ options._render = vnode => {
 		if (previousComponent === currentComponent) {
 			hooks._pendingEffects = [];
 			currentComponent._renderCallbacks = [];
-			hooks._list.forEach(hookItem => {
+			hooks._list.some(hookItem => {
 				if (hookItem._nextValue) {
 					hookItem._value = hookItem._nextValue;
 				}
 				hookItem._pendingArgs = hookItem._nextValue = undefined;
 			});
 		} else {
-			hooks._pendingEffects.forEach(invokeCleanup);
-			hooks._pendingEffects.forEach(invokeEffect);
+			hooks._pendingEffects.some(invokeCleanup);
+			hooks._pendingEffects.some(invokeEffect);
 			hooks._pendingEffects = [];
 			currentIndex = 0;
 		}
@@ -83,11 +83,11 @@ options.diffed = vnode => {
 	const c = vnode._component;
 	if (c && c.__hooks) {
 		if (c.__hooks._pendingEffects.length) afterPaint(afterPaintEffects.push(c));
-		c.__hooks._list.forEach(hookItem => {
+		c.__hooks._list.some(hookItem => {
 			if (hookItem._pendingArgs) {
 				hookItem._args = hookItem._pendingArgs;
+				hookItem._pendingArgs = undefined;
 			}
-			hookItem._pendingArgs = undefined;
 		});
 	}
 	previousComponent = currentComponent = null;
@@ -98,7 +98,7 @@ options.diffed = vnode => {
 options._commit = (vnode, commitQueue) => {
 	commitQueue.some(component => {
 		try {
-			component._renderCallbacks.forEach(invokeCleanup);
+			component._renderCallbacks.some(invokeCleanup);
 			component._renderCallbacks = component._renderCallbacks.filter(cb =>
 				cb._value ? invokeEffect(cb) : true
 			);
@@ -121,7 +121,7 @@ options.unmount = vnode => {
 	const c = vnode._component;
 	if (c && c.__hooks) {
 		let hasErrored;
-		c.__hooks._list.forEach(s => {
+		c.__hooks._list.some(s => {
 			try {
 				invokeCleanup(s);
 			} catch (e) {
@@ -240,16 +240,14 @@ export function useReducer(reducer, initialState, init) {
 			function updateHookState(p, s, c) {
 				if (!hookState._component.__hooks) return true;
 
-				const hooksList = hookState._component.__hooks._list;
-
 				// We check whether we have components with a nextValue set that
 				// have values that aren't equal to one another this pushes
 				// us to update further down the tree
-				let shouldUpdate =
-					hookState._component.props !== p ||
-					hooksList.every(x => !x._nextValue);
-				hooksList.forEach(hookItem => {
+				let updatedHook = false;
+				let shouldUpdate = hookState._component.props !== p;
+				hookState._component.__hooks._list.some(hookItem => {
 					if (hookItem._nextValue) {
+						updatedHook = true;
 						const currentValue = hookItem._value[0];
 						hookItem._value = hookItem._nextValue;
 						hookItem._nextValue = undefined;
@@ -258,9 +256,12 @@ export function useReducer(reducer, initialState, init) {
 					}
 				});
 
-				return prevScu
-					? prevScu.call(this, p, s, c) || shouldUpdate
-					: shouldUpdate;
+				if (prevScu) {
+					const result = prevScu.call(this, p, s, c);
+					return updatedHook ? result || shouldUpdate : result;
+				}
+
+				return !updatedHook || shouldUpdate;
 			}
 
 			currentComponent.shouldComponentUpdate = updateHookState;
@@ -444,13 +445,14 @@ export function useId() {
 function flushAfterPaintEffects() {
 	let component;
 	while ((component = afterPaintEffects.shift())) {
-		if (!component._parentDom || !component.__hooks) continue;
+		const hooks = component.__hooks;
+		if (!component._parentDom || !hooks) continue;
 		try {
-			component.__hooks._pendingEffects.forEach(invokeCleanup);
-			component.__hooks._pendingEffects.forEach(invokeEffect);
-			component.__hooks._pendingEffects = [];
+			hooks._pendingEffects.some(invokeCleanup);
+			hooks._pendingEffects.some(invokeEffect);
+			hooks._pendingEffects = [];
 		} catch (e) {
-			component.__hooks._pendingEffects = [];
+			hooks._pendingEffects = [];
 			options._catchError(e, component._vnode);
 		}
 	}
