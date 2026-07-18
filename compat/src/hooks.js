@@ -65,7 +65,7 @@ export function useTransition() {
 // styles/... before it attaches
 export const useInsertionEffect = useLayoutEffect;
 
-**
+/**
  * @template {Function} T
  * @param {T} callback
  * @returns {T}
