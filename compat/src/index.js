@@ -27,6 +27,7 @@ import { forwardRef } from './forwardRef';
 import {
 	startTransition,
 	useDeferredValue,
+	useEffectEvent,
 	useInsertionEffect,
 	useSyncExternalStore,
 	useTransition
@@ -182,6 +183,7 @@ export {
 	useDeferredValue,
 	useSyncExternalStore,
 	useTransition,
+	useEffectEvent,
 	Fragment as StrictMode,
 	Suspense,
 	lazy,
@@ -199,6 +201,7 @@ export default {
 	useTransition,
 	useDeferredValue,
 	useSyncExternalStore,
+	useEffectEvent,
 	startTransition,
 	useRef,
 	useImperativeHandle,

@@ -130,6 +130,7 @@ declare namespace React {
 		subscribe: (flush: () => void) => () => void,
 		getSnapshot: () => T
 	): T;
+	export function useEffectEvent<T extends Function>(cb: T): T;
 
 	// Preact Defaults
 	export import Context = _preact.Context;
