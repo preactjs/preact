@@ -1,6 +1,7 @@
 import * as _preact from '../../src/index';
 import { JSXInternal } from '../../src/jsx';
 import * as _hooks from '../../hooks';
+import * as _Activity from './activity';
 import * as _Suspense from './suspense';
 
 declare namespace preact {
@@ -154,6 +155,8 @@ declare namespace React {
 	export import Key = _preact.Key;
 
 	// Suspense
+	export const Activity: typeof _Activity.Activity;
+	export type ActivityProps = _Activity.ActivityProps;
 	export import Suspense = _Suspense.Suspense;
 	export import lazy = _Suspense.lazy;
 

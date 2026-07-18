@@ -43,6 +43,7 @@ describe('compat exports', () => {
 		expect(Compat.useDeferredValue).to.be.a('function');
 
 		// Suspense
+		expect(Compat.Activity).to.be.a('function');
 		expect(Compat.Suspense).to.be.a('function');
 		expect(Compat.lazy).to.be.a('function');
 
@@ -84,6 +85,7 @@ describe('compat exports', () => {
 		expect(Named.useContext).to.be.a('function');
 
 		// Suspense
+		expect(Named.Activity).to.be.a('function');
 		expect(Named.Suspense).to.be.a('function');
 		expect(Named.lazy).to.be.a('function');
 
