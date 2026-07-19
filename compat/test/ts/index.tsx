@@ -17,6 +17,12 @@ React.createPortal(<div />, document.createDocumentFragment());
 React.createPortal(<div />, document.body.shadowRoot!);
 
 const Ctx = React.createContext({ contextValue: '' });
+const contextValue: { contextValue: string } = React.use(Ctx);
+const promiseValue: string = React.use(Promise.resolve('value'));
+
+contextValue.contextValue.toLowerCase();
+promiseValue.toLowerCase();
+
 class SimpleComponentWithContextAsProvider extends React.Component {
 	componentProp = 'componentProp';
 	render() {

@@ -130,6 +130,8 @@ declare namespace React {
 		subscribe: (flush: () => void) => () => void,
 		getSnapshot: () => T
 	): T;
+	// React 19 hooks
+	export import use = _hooks.use;
 	export function useEffectEvent<T extends Function>(cb: T): T;
 
 	// Preact Defaults

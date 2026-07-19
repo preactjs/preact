@@ -165,6 +165,48 @@ function getHookState(index, type) {
 }
 
 /**
+ * Read the value of a Promise (suspending while pending) or a Context.
+ * Unlike other hooks, `use` may be called conditionally.
+ * @template T
+ * @param {Promise<T> | import('preact').PreactContext<T>} resource
+ * @returns {T}
+ */
+export function use(resource) {
+	if (options._hook) {
+		options._hook(currentComponent, currentIndex, 12);
+	}
+
+	if (typeof resource.then == 'function') {
+		const thenable =
+			/** @type {Promise<T> & { status?: string, value?: T, reason?: any }} */ (
+				resource
+			);
+		if (thenable.status == 'fulfilled') return thenable.value;
+		if (thenable.status == 'rejected') throw thenable.reason;
+		if (thenable.status != 'pending') {
+			thenable.status = 'pending';
+			thenable.then(
+				value => {
+					thenable.status = 'fulfilled';
+					thenable.value = value;
+				},
+				reason => {
+					thenable.status = 'rejected';
+					thenable.reason = reason;
+				}
+			);
+		}
+		throw thenable;
+	}
+
+	const context = /** @type {import('./internal').PreactContext} */ (resource);
+	const provider = currentComponent.context[context._id];
+	if (!provider) return context._defaultValue;
+	provider.sub(currentComponent);
+	return provider.props.value;
+}
+
+/**
  * @template {unknown} S
  * @param {import('./index').Dispatch<import('./index').StateUpdater<S>>} [initialState]
  * @returns {[S, (state: S) => void]}
