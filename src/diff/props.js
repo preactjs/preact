@@ -85,7 +85,13 @@ export function setProperty(dom, name, value, oldValue, namespace) {
 				dom.addEventListener(
 					name,
 					useCapture ? eventProxyCapture : eventProxy,
-					useCapture
+					// touchstart/touchmove/wheel are attached passively to keep
+					// scrolling off the main thread; matches React 18. Calling
+					// `preventDefault()` in these handlers is a no-op — attach a
+					// non-passive listener via a ref for that.
+					name == 'touchstart' || name == 'touchmove' || name == 'wheel'
+						? { passive: true, capture: useCapture }
+						: useCapture
 				);
 			} else {
 				value[EVENT_ATTACHED] = oldValue[EVENT_ATTACHED];

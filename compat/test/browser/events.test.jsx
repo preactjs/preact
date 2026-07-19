@@ -138,13 +138,19 @@ describe('preact/compat events', () => {
 		expect(proto.addEventListener.mock.calls.length).to.eql(4);
 		expect(proto.addEventListener.mock.calls[0].length).to.eql(3);
 		expect(proto.addEventListener.mock.calls[0][0]).to.eql('touchstart');
-		expect(proto.addEventListener.mock.calls[0][2]).to.eql(false);
+		expect(proto.addEventListener.mock.calls[0][2]).to.eql({
+			passive: true,
+			capture: false
+		});
 		expect(proto.addEventListener.mock.calls[1].length).to.eql(3);
 		expect(proto.addEventListener.mock.calls[1][0]).to.eql('touchend');
 		expect(proto.addEventListener.mock.calls[1][2]).to.eql(false);
 		expect(proto.addEventListener.mock.calls[2].length).to.eql(3);
 		expect(proto.addEventListener.mock.calls[2][0]).to.eql('touchmove');
-		expect(proto.addEventListener.mock.calls[2][2]).to.eql(false);
+		expect(proto.addEventListener.mock.calls[2][2]).to.eql({
+			passive: true,
+			capture: false
+		});
 		expect(proto.addEventListener.mock.calls[3].length).to.eql(3);
 		expect(proto.addEventListener.mock.calls[3][0]).to.eql('touchcancel');
 		expect(proto.addEventListener.mock.calls[3][2]).to.eql(false);
@@ -286,7 +292,7 @@ describe('preact/compat events', () => {
 			expect(proto.addEventListener).toHaveBeenCalledWith(
 				'touchmove',
 				expect.any(Function),
-				true
+				{ passive: true, capture: true }
 			);
 		});
 	}

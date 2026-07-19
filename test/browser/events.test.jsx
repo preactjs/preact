@@ -182,6 +182,80 @@ describe('event handling', () => {
 		);
 	});
 
+	it('should attach touch and wheel listeners as passive', () => {
+		render(
+			<div
+				onTouchStart={() => {}}
+				onTouchMove={() => {}}
+				onWheel={() => {}}
+				onTouchEnd={() => {}}
+			/>,
+			scratch
+		);
+
+		expect(proto.addEventListener).toHaveBeenCalledTimes(4);
+		expect(proto.addEventListener).toHaveBeenCalledWith(
+			'touchstart',
+			expect.any(Function),
+			{ passive: true, capture: false }
+		);
+		expect(proto.addEventListener).toHaveBeenCalledWith(
+			'touchmove',
+			expect.any(Function),
+			{ passive: true, capture: false }
+		);
+		expect(proto.addEventListener).toHaveBeenCalledWith(
+			'wheel',
+			expect.any(Function),
+			{ passive: true, capture: false }
+		);
+		expect(proto.addEventListener).toHaveBeenCalledWith(
+			'touchend',
+			expect.any(Function),
+			false
+		);
+	});
+
+	it('should attach capturing passive listeners with capture: true', () => {
+		render(<div onTouchMoveCapture={() => {}} />, scratch);
+
+		expect(proto.addEventListener).toHaveBeenCalledWith(
+			'touchmove',
+			expect.any(Function),
+			{ passive: true, capture: true }
+		);
+	});
+
+	it('should invoke and swap passive handlers without re-attaching', () => {
+		let first = vi.fn(),
+			second = vi.fn();
+
+		render(<div onTouchMove={first} />, scratch);
+		render(<div onTouchMove={second} />, scratch);
+
+		expect(proto.addEventListener).toHaveBeenCalledOnce();
+
+		fireEvent(scratch.childNodes[0], 'touchmove');
+		expect(first).not.toHaveBeenCalled();
+		expect(second).toHaveBeenCalledOnce();
+	});
+
+	it('should remove passive listeners', () => {
+		let wheel = vi.fn();
+
+		render(<div onWheel={wheel} />, scratch);
+		render(<div />, scratch);
+
+		expect(proto.removeEventListener).toHaveBeenCalledWith(
+			'wheel',
+			expect.any(Function),
+			false
+		);
+
+		fireEvent(scratch.childNodes[0], 'wheel');
+		expect(wheel).not.toHaveBeenCalled();
+	});
+
 	// Skip test if browser doesn't support passive events
 	if (supportsPassiveEvents()) {
 		it('should use capturing for event props ending with *Capture', () => {
