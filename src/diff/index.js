@@ -70,6 +70,7 @@ export function diff(
 ) {
 	/** @type {any} */
 	let tmp,
+		resumedExcess,
 		newType = newVNode.type;
 
 	// When passing through createElement it assigns the object
@@ -84,7 +85,7 @@ export function diff(
 		oldVNode._component._excess
 	) {
 		let excess = oldVNode._component._excess;
-		excessDomChildren = [];
+		resumedExcess = excessDomChildren = [];
 		if (excess.nodeType == 8) {
 			// Re-scan DOM from stored start marker for streamed hydration
 			for (
@@ -253,6 +254,13 @@ export function diff(
 			c._parentDom = parentDom;
 			c._bits &= ~COMPONENT_FORCE;
 
+			// Freshly mounting components during hydration may self-suspend to
+			// slice up the hydration walk; the hook throws a thenable to bail
+			// out here and resume from `_excess` later.
+			if (isHydrating && !oldVNode._component && (tmp = options._yield)) {
+				tmp(newVNode);
+			}
+
 			let renderHook = options._render,
 				count = 0;
 			if (isClassComponent) {
@@ -351,6 +359,15 @@ export function diff(
 			// We successfully rendered this VNode, unset any stored hydration/bailout state:
 			newVNode._flags &= RESET_MODE;
 
+			// The resume-owned excess array is not shared with any parent frame,
+			// so nodes the resumed subtree didn't adopt are SSR leftovers (e.g. a
+			// node claimed by a component that then rendered null) — remove them.
+			if (resumedExcess) {
+				for (tmp = resumedExcess.length; tmp--; ) {
+					removeNode(resumedExcess[tmp]);
+				}
+			}
+
 			if (c._renderCallbacks.length) {
 				commitQueue.push(c);
 			}
@@ -369,6 +386,11 @@ export function diff(
 				if (e.then) {
 					let commentMarkersToFind = 0,
 						startMarker;
+
+					// Components that suspend before their first render still have
+					// COMPONENT_DIRTY set from instantiation; clear it so that the
+					// resuming forceUpdate isn't ignored by enqueueRender.
+					newVNode._component._bits &= ~COMPONENT_DIRTY;
 
 					newVNode._flags |= isHydrating
 						? MODE_HYDRATE | MODE_SUSPENDED

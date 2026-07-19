@@ -49,6 +49,12 @@ export interface Options extends preact.Options {
 		vnode: VNode,
 		excessDomChildren: Array<PreactElement | null>
 	): void;
+	/**
+	 * Attach a hook that is invoked before a freshly mounting component renders
+	 * during hydration. Throwing a thenable from this hook suspends the
+	 * component, allowing the hydration walk to be sliced into multiple tasks.
+	 */
+	_yield?(vnode: VNode): void;
 }
 
 export type ComponentChild =
