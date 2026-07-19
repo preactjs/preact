@@ -12,7 +12,6 @@ import {
 	createEvent
 } from '../_util/helpers';
 import { clearLog, getLog, logCall } from '../_util/logCall';
-import { useState } from 'preact/hooks';
 import { expect, vi } from 'vitest';
 
 function getAttributes(node) {
@@ -1046,16 +1045,20 @@ describe('render()', () => {
 		// This tests that we do not cause any cursor jumps in contenteditable fields
 		// See https://github.com/preactjs/preact/issues/2691
 
-		function Editable() {
-			const [value, setValue] = useState('Hello');
-
-			return (
-				<div
-					contentEditable
-					dangerouslySetInnerHTML={{ __html: value }}
-					onInput={e => setValue(e.currentTarget.innerHTML)}
-				/>
-			);
+		class Editable extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { value: 'Hello' };
+			}
+			render(props, state) {
+				return (
+					<div
+						contentEditable
+						dangerouslySetInnerHTML={{ __html: state.value }}
+						onInput={e => this.setState({ value: e.currentTarget.innerHTML })}
+					/>
+				);
+			}
 		}
 
 		render(<Editable />, scratch);
