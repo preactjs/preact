@@ -160,6 +160,11 @@ export interface VNode<P = {}> extends preact.VNode<P> {
 	_original: number;
 	_index: number;
 	_flags: number;
+	/**
+	 * The id namespace for useId, restored from the server-emitted boundary
+	 * marker when a suspended subtree resumes hydration
+	 */
+	_mask?: [string | number, number];
 }
 
 export interface Component<P = {}, S = {}> extends Omit<
