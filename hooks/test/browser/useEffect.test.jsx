@@ -1,10 +1,12 @@
-import { Component, Fragment, createElement, render } from 'preact';
+import { Component, Fragment, createElement, options, render } from 'preact';
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { act, teardown as teardownAct } from 'preact/test-utils';
 import { vi } from 'vitest';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { scheduleEffectAssert } from '../_util/useEffectUtil';
 import { useEffectAssertions } from './useEffectAssertions';
+
+const debounceRendering = options.debounceRendering;
 
 describe('useEffect', () => {
 	/** @type {HTMLDivElement} */
@@ -39,6 +41,74 @@ describe('useEffect', () => {
 
 		expect(cleanupFunction).toHaveBeenCalledOnce();
 		expect(callback).toHaveBeenCalledTimes(2);
+	});
+
+	it('flushes pending effects before a callback ref update renders', async () => {
+		const calls = [];
+		teardownAct();
+		options.debounceRendering = debounceRendering;
+
+		function PendingEffect() {
+			useEffect(() => {
+				calls.push('effect');
+			}, []);
+			return null;
+		}
+
+		function RefUpdate() {
+			const [element, setElement] = useState(null);
+			if (element) calls.push('render');
+			return <div ref={setElement} />;
+		}
+
+		render(
+			<>
+				<PendingEffect />
+				<RefUpdate />
+			</>,
+			scratch
+		);
+
+		await new Promise(queueMicrotask);
+
+		expect(calls).to.deep.equal(['effect', 'render']);
+	});
+
+	it('flushes all pending effects before a scheduled render', async () => {
+		const calls = [];
+		let setValue;
+		teardownAct();
+		options.debounceRendering = debounceRendering;
+
+		function A() {
+			useEffect(() => {
+				calls.push('A effect');
+			}, []);
+			return null;
+		}
+
+		function B() {
+			const [value, updateValue] = useState(0);
+			setValue = updateValue;
+			useEffect(() => {
+				calls.push('B effect');
+			}, []);
+			if (value) calls.push('B render');
+			return null;
+		}
+
+		render(
+			<>
+				<A />
+				<B />
+			</>,
+			scratch
+		);
+
+		setValue(1);
+		await new Promise(queueMicrotask);
+
+		expect(calls).to.deep.equal(['A effect', 'B effect', 'B render']);
 	});
 
 	it('cancels the effect when the component get unmounted before it had the chance to run it', () => {

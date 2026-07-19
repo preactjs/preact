@@ -27,6 +27,14 @@ let oldAfterDiff = options.diffed;
 let oldCommit = options._commit;
 let oldBeforeUnmount = options.unmount;
 let oldRoot = options._root;
+let oldDebounce = options.debounceRendering || queueMicrotask;
+
+options.debounceRendering = callback => {
+	oldDebounce(() => {
+		flushAfterPaintEffects();
+		callback();
+	});
+};
 
 // We take the minimum timeout for requestAnimationFrame to ensure that
 // the callback is invoked after the next frame. 35ms is based on a 30hz
@@ -41,8 +49,12 @@ options._diff = vnode => {
 };
 
 options._root = (vnode, parentDom) => {
-	if (vnode && parentDom._children && parentDom._children._mask) {
-		vnode._mask = parentDom._children._mask;
+	if (vnode) {
+		flushAfterPaintEffects();
+
+		if (parentDom._children && parentDom._children._mask) {
+			vnode._mask = parentDom._children._mask;
+		}
 	}
 
 	if (oldRoot) oldRoot(vnode, parentDom);
@@ -66,11 +78,6 @@ options._render = vnode => {
 				}
 				hookItem._pendingArgs = hookItem._nextValue = undefined;
 			});
-		} else {
-			hooks._pendingEffects.some(invokeCleanup);
-			hooks._pendingEffects.some(invokeEffect);
-			hooks._pendingEffects = [];
-			currentIndex = 0;
 		}
 	}
 	previousComponent = currentComponent;
