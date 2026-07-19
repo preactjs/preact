@@ -136,8 +136,13 @@ function handleDomVNode(vnode) {
 		}
 
 		if (i === 'style' && typeof value === 'object') {
+			let cloned = false;
 			for (let key in value) {
 				if (typeof value[key] === 'number' && !IS_NON_DIMENSIONAL.test(key)) {
+					if (!cloned) {
+						value = assign({}, value);
+						cloned = true;
+					}
 					value[key] += 'px';
 				}
 			}
