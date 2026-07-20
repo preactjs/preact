@@ -35,10 +35,8 @@ export interface Options extends preact.Options {
 	_render?(vnode: VNode): void;
 	/** Attach a hook that is invoked before a hook's state is queried. */
 	_hook?(component: Component, index: number, type: HookType): void;
-	/** Bypass effect registration during hooks inspection and server rendering. */
+	/** Bypass effect execution. Currenty only used in devtools for hooks inspection */
 	_skipEffects?: boolean;
-	/** The root of a compat hydration pass. */
-	_hydrationRoot?: VNode | null;
 	/** Attach a hook that is invoked after an error is caught in a component but before calling lifecycle hooks */
 	_catchError(
 		error: any,
