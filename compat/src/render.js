@@ -41,10 +41,9 @@ export function useSyncExternalStore(
 	getServerSnapshot
 ) {
 	const serverRendering = options._skipEffects || hydrationRoot;
-	if (serverRendering && !getServerSnapshot) {
-		throw new Error('Missing getServerSnapshot');
-	}
-	const value = serverRendering ? getServerSnapshot() : getSnapshot();
+	const value = serverRendering
+		? (getServerSnapshot || getSnapshot)()
+		: getSnapshot();
 
 	/**
 	 * @typedef {{ _instance: Store }} StoreRef

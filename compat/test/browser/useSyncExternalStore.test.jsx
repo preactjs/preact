@@ -326,6 +326,17 @@ describe('useSyncExternalStore', () => {
 			expect(getServerSnapshot).toHaveBeenCalledOnce();
 		});
 
+		it('falls back to the snapshot during server rendering', () => {
+			const getSnapshot = vi.fn(() => 'client');
+
+			function App() {
+				return useSyncExternalStore(() => () => {}, getSnapshot);
+			}
+
+			expect(ReactDOMServer.renderToString(<App />)).to.equal('client');
+			expect(getSnapshot).toHaveBeenCalledOnce();
+		});
+
 		it('basic usage', async () => {
 			const store = createExternalStore('Initial');
 
