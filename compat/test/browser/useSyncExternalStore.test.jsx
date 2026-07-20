@@ -3,11 +3,13 @@ import React, {
 	Fragment,
 	useSyncExternalStore,
 	render,
+	hydrate,
 	useState,
 	useCallback,
 	useEffect,
 	useLayoutEffect
 } from 'preact/compat';
+import ReactDOMServer from 'preact/compat/server';
 import { setupRerender, act } from 'preact/test-utils';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { vi } from 'vitest';
@@ -307,6 +309,34 @@ describe('useSyncExternalStore', () => {
 	// The following tests are taken from the React test suite:
 	// https://github.com/facebook/react/blob/3e09c27b880e1fecdb1eca5db510ecce37ea6be2/packages/use-sync-external-store/src/__tests__/useSyncExternalStoreShared-test.js
 	describe('React useSyncExternalStore test suite', () => {
+		it('uses the server snapshot during server rendering', () => {
+			const getSnapshot = vi.fn(() => 'client');
+			const getServerSnapshot = vi.fn(() => 'server');
+
+			function App() {
+				return useSyncExternalStore(
+					() => () => {},
+					getSnapshot,
+					getServerSnapshot
+				);
+			}
+
+			expect(ReactDOMServer.renderToString(<App />)).to.equal('server');
+			expect(getSnapshot).not.toHaveBeenCalled();
+			expect(getServerSnapshot).toHaveBeenCalledOnce();
+		});
+
+		it('falls back to the snapshot during server rendering', () => {
+			const getSnapshot = vi.fn(() => 'client');
+
+			function App() {
+				return useSyncExternalStore(() => () => {}, getSnapshot);
+			}
+
+			expect(ReactDOMServer.renderToString(<App />)).to.equal('client');
+			expect(getSnapshot).toHaveBeenCalledOnce();
+		});
+
 		it('basic usage', async () => {
 			const store = createExternalStore('Initial');
 
@@ -775,6 +805,50 @@ describe('useSyncExternalStore', () => {
 			// Update back to NaN
 			await act(() => store.set('not a number'));
 			expect(container.textContent).to.equal('NaN');
+		});
+
+		it('basic server hydration', async () => {
+			const store = createExternalStore('client');
+
+			const ref = React.createRef();
+			function Child() {
+				const text = useSyncExternalStore(
+					store.subscribe,
+					store.getState,
+					() => 'server'
+				);
+				useEffect(() => {
+					Scheduler.log('Passive effect: ' + text);
+				}, [text]);
+				return (
+					<div ref={ref}>
+						<Text text={text} />
+					</div>
+				);
+			}
+
+			function App() {
+				return <Child />;
+			}
+
+			const container = document.createElement('div');
+			container.innerHTML = '<div>server</div>';
+			const serverRenderedDiv = container.getElementsByTagName('div')[0];
+
+			await act(() => {
+				hydrate(<App />, container);
+			});
+			assertLog([
+				// First it hydrates the server rendered HTML
+				'server',
+				'Passive effect: server',
+				// Then in a second paint, it re-renders with the client state
+				'client',
+				'Passive effect: client'
+			]);
+
+			expect(container.textContent).toEqual('client');
+			expect(ref.current).toEqual(serverRenderedDiv);
 		});
 
 		it('regression test for facebook/react#23150', async () => {

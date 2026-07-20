@@ -83,6 +83,7 @@ export function diff(
 		(isHydrating = oldVNode._flags & MODE_HYDRATE) &&
 		oldVNode._component._excess
 	) {
+		newVNode._flags |= MODE_HYDRATE;
 		let excess = oldVNode._component._excess;
 		excessDomChildren = [];
 		if (excess.nodeType == 8) {

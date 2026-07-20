@@ -18,20 +18,73 @@ import {
 	useRef,
 	useState
 } from 'preact/hooks';
-import {
-	useDeferredValue,
-	useInsertionEffect,
-	useSyncExternalStore,
-	useTransition
-} from './index';
+import { useDeferredValue, useInsertionEffect, useTransition } from './index';
 import { assign, IS_NON_DIMENSIONAL } from './util';
 
 export const REACT_ELEMENT_TYPE = Symbol.for('react.element');
+
+const MODE_HYDRATE = 1 << 5;
 
 const CAMEL_PROPS =
 	/^(?:accent|alignment|arabic|baseline|cap|clip(?!PathU)|color|dominant|fill|flood|font|glyph(?!R)|horiz|image(!S)|letter|lighting|marker(?!H|W|U)|overline|paint|pointer|shape|stop|strikethrough|stroke|text(?!L)|transform|underline|unicode|units|v|vector|vert|word|writing|x(?!C))[A-Z]/;
 const CAMEL_REPLACE = /[A-Z0-9]/g;
 const IS_DOM = typeof document !== 'undefined';
+
+/**
+ * This is taken from https://github.com/facebook/react/blob/main/packages/use-sync-external-store/src/useSyncExternalStoreShimClient.js#L84
+ * on a high level this cuts out the warnings, ... and attempts a smaller implementation
+ * @typedef {{ _value: any; _getSnapshot: () => any }} Store
+ */
+export function useSyncExternalStore(
+	subscribe,
+	getSnapshot,
+	getServerSnapshot
+) {
+	const serverRendering = options._skipEffects || hydrationRoot;
+	const value = serverRendering
+		? (getServerSnapshot || getSnapshot)()
+		: getSnapshot();
+
+	/**
+	 * @typedef {{ _instance: Store }} StoreRef
+	 * @type {[StoreRef, (store: StoreRef) => void]}
+	 */
+	const [{ _instance }, forceUpdate] = useState({
+		_instance: { _value: value, _getSnapshot: getSnapshot }
+	});
+
+	useLayoutEffect(() => {
+		_instance._value = value;
+		_instance._getSnapshot = getSnapshot;
+
+		if (didSnapshotChange(_instance)) {
+			forceUpdate({ _instance });
+		}
+	}, [subscribe, value, getSnapshot]);
+
+	useEffect(() => {
+		if (didSnapshotChange(_instance)) {
+			forceUpdate({ _instance });
+		}
+
+		return subscribe(() => {
+			if (didSnapshotChange(_instance)) {
+				forceUpdate({ _instance });
+			}
+		});
+	}, [subscribe]);
+
+	return value;
+}
+
+/** @type {(inst: Store) => boolean} */
+function didSnapshotChange(inst) {
+	try {
+		return !Object.is(inst._value, inst._getSnapshot());
+	} catch (error) {
+		return true;
+	}
+}
 
 // Input types for which onchange should not be converted to oninput.
 const onChangeInputType = type => /fil|che|rad/.test(type);
@@ -258,12 +311,13 @@ options.vnode = vnode => {
 };
 
 // Only needed for react-relay
-let currentComponent;
+let currentComponent, hydrationRoot;
 const oldBeforeRender = options._render;
 options._render = function (vnode) {
 	if (oldBeforeRender) {
 		oldBeforeRender(vnode);
 	}
+	if (vnode._flags & MODE_HYDRATE) hydrationRoot = vnode;
 	currentComponent = vnode._component;
 };
 
@@ -287,6 +341,7 @@ options.diffed = function (vnode) {
 	}
 
 	currentComponent = null;
+	if (hydrationRoot == vnode) hydrationRoot = null;
 };
 
 // This is a very very private internal function for React it
