@@ -40,12 +40,11 @@ export function useSyncExternalStore(
 	getSnapshot,
 	getServerSnapshot
 ) {
-	const value =
-		options._skipEffects || hydrationRoot
-			? getServerSnapshot
-				? getServerSnapshot()
-				: missingGetServerSnapshot()
-			: getSnapshot();
+	const serverRendering = options._skipEffects || hydrationRoot;
+	if (serverRendering && !getServerSnapshot) {
+		throw new Error('Missing getServerSnapshot');
+	}
+	const value = serverRendering ? getServerSnapshot() : getSnapshot();
 
 	/**
 	 * @typedef {{ _instance: Store }} StoreRef
@@ -86,10 +85,6 @@ function didSnapshotChange(inst) {
 	} catch (error) {
 		return true;
 	}
-}
-
-function missingGetServerSnapshot() {
-	throw new Error('Missing getServerSnapshot');
 }
 
 // Input types for which onchange should not be converted to oninput.
