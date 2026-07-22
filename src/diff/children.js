@@ -302,16 +302,27 @@ function constructNewChildrenArray(
 				skew--;
 			} else if (matchingIndex == skewedIndex + 1) {
 				skew++;
-			} else {
-				if (matchingIndex > skewedIndex) {
-					skew--;
+			} else if (matchingIndex > skewedIndex) {
+				if (
+					matchingIndex - skewedIndex < oldChildrenLength - matchingIndex &&
+					renderResult[i + 1] != NULL &&
+					oldChildren[matchingIndex + 1] != NULL &&
+					renderResult[i + 1].key == oldChildren[matchingIndex + 1].key &&
+					renderResult[i + 1].type == oldChildren[matchingIndex + 1].type
+				) {
+					// A short prefix was moved to the end. The match starts a longer
+					// contiguous suffix, so keep that suffix in place and insert the
+					// displaced prefix when reconciliation reaches it.
+					skew += matchingIndex - skewedIndex;
 				} else {
-					skew++;
-				}
+					skew--;
 
-				// Move this VNode's DOM if the original index (matchingIndex) doesn't
-				// match the new skew index (i + new skew)
-				// In the former two branches we know that it matches after skewing
+					// Move this VNode's DOM if the original index (matchingIndex)
+					// doesn't match the new skew index (i + new skew)
+					childVNode._flags |= INSERT_VNODE;
+				}
+			} else {
+				skew++;
 				childVNode._flags |= INSERT_VNODE;
 			}
 		}
