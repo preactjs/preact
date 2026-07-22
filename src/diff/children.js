@@ -182,6 +182,10 @@ function constructNewChildrenArray(
 
 	let skew = 0;
 
+	/** Whether any matched child was found far from its skewed index, i.e. a
+	 * real reorder happened and we need to compute the minimal set of moves. */
+	let moved = false;
+
 	newParentVNode._children = new Array(newChildrenLength);
 	for (i = 0; i < newChildrenLength; i++) {
 		// @ts-expect-error We are reusing the childVNode variable to hold both the
@@ -290,38 +294,74 @@ function constructNewChildrenArray(
 			if (typeof childVNode.type != 'function') {
 				childVNode._flags |= INSERT_VNODE;
 			}
-		} else if (matchingIndex != skewedIndex) {
-			// When we move elements around i.e. [0, 1, 2] --> [1, 0, 2]
-			// --> we diff 1, we find it at position 1 while our skewed index is 0 and our skew is 0
-			//     we set the skew to 1 as we found an offset.
-			// --> we diff 0, we find it at position 0 while our skewed index is at 2 and our skew is 1
-			//     this makes us increase the skew again.
-			// --> we diff 2, we find it at position 2 while our skewed index is at 4 and our skew is 2
-			//
-			// this becomes an optimization question where currently we see a 1 element offset as an insertion
-			// or deletion i.e. we optimize for [0, 1, 2] --> [9, 0, 1, 2]
-			// while a more than 1 offset we see as a swap.
-			// We could probably build heuristics for having an optimized course of action here as well, but
-			// might go at the cost of some bytes.
-			//
-			// If we wanted to optimize for i.e. only swaps we'd just do the last two code-branches and have
-			// only the first item be a re-scouting and all the others fall in their skewed counter-part.
-			// We could also further optimize for swaps
+		} else {
+			// Matched children are candidates for the minimal-move pass below;
+			// MATCHED on a _new_ vnode is cleared in diffChildren's placement loop.
+			childVNode._flags |= MATCHED;
+
+			// The skew adjustments keep findMatchingIndex's search centered for
+			// shift patterns (insertions/removals at the front). A match further
+			// than one position away means children were genuinely reordered:
+			// flag it so the minimal set of moves is computed below. Off-by-one
+			// matches provably keep matched old indices in increasing order, so
+			// no moves are needed for them.
 			if (matchingIndex == skewedIndex - 1) {
 				skew--;
 			} else if (matchingIndex == skewedIndex + 1) {
 				skew++;
-			} else {
+			} else if (matchingIndex != skewedIndex) {
 				if (matchingIndex > skewedIndex) {
 					skew--;
 				} else {
 					skew++;
 				}
 
-				// Move this VNode's DOM if the original index (matchingIndex) doesn't
-				// match the new skew index (i + new skew)
-				// In the former two branches we know that it matches after skewing
-				childVNode._flags |= INSERT_VNODE;
+				moved = true;
+			}
+		}
+	}
+
+	if (moved) {
+		// Children were reordered: mark the minimal set of matched (MATCHED flag)
+		// children for insertion by finding the longest increasing subsequence of
+		// old indices (patience sorting). Children on the subsequence stay in
+		// place, all others get INSERT_VNODE. `_index` still holds the
+		// matchingIndex here.
+		/** @type {number[]} tails[x] is the smallest old index ending an increasing subsequence of length x+1 */
+		let tails = [];
+		/** @type {number[]} length of the longest increasing subsequence ending at child i */
+		let lisLengths = [];
+		for (i = 0; i < newChildrenLength; i++) {
+			childVNode = newParentVNode._children[i];
+			if (childVNode && childVNode._flags & MATCHED) {
+				// Binary search for the insertion point, keeping the pass at
+				// O(n log n) even for pathological reorders.
+				let lo = 0,
+					hi = tails.length;
+				while (lo < hi) {
+					const mid = (lo + hi) >> 1;
+					if (tails[mid] < childVNode._index) {
+						lo = mid + 1;
+					} else {
+						hi = mid;
+					}
+				}
+				tails[lo] = childVNode._index;
+				lisLengths[i] = lo + 1;
+			}
+		}
+
+		// `skew` is dead after the main loop; reuse it as the remaining
+		// subsequence length while walking backwards. Likewise `i` is left at
+		// newChildrenLength by the loop above.
+		skew = tails.length;
+		while (i--) {
+			if (lisLengths[i]) {
+				if (lisLengths[i] == skew) {
+					skew--;
+				} else {
+					newParentVNode._children[i]._flags |= INSERT_VNODE;
+				}
 			}
 		}
 	}
