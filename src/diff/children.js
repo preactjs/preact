@@ -88,8 +88,10 @@ export function diffChildren(
 
 		// At this point, constructNewChildrenArray has assigned _index to be the
 		// matchingIndex for this VNode's oldVNode (or -1 if there is no oldVNode).
+		// ~_index guards the -1 case: a negative array index is a named property
+		// access which V8 can't serve from the fast elements path.
 		oldVNode =
-			(childVNode._index != -1 && oldChildren[childVNode._index]) || EMPTY_OBJ;
+			(~childVNode._index && oldChildren[childVNode._index]) || EMPTY_OBJ;
 
 		// Update childVNode._index to its final index
 		childVNode._index = i;
@@ -133,7 +135,7 @@ export function diffChildren(
 				oldDom,
 				parentDom,
 				shouldPlace,
-				oldVNode == NULL || oldVNode._original == NULL
+				oldVNode._original == NULL
 			);
 
 			// When a matched VNode is physically moved via INSERT_VNODE, its old
@@ -446,10 +448,12 @@ function findMatchingIndex(
 	// we should not search as we risk re-using state of an unrelated VNode. (reverted for now)
 	let shouldSearch =
 		// (typeof type != 'function' || type === Fragment || key) &&
+		// The ternary keeps this a Smi comparison; `> matched` would compare
+		// number to boolean which V8 can't serve from the fast path.
 		remainingOldChildren > (matched ? 1 : 0);
 
 	if (
-		(oldVNode === NULL && key == null) ||
+		(oldVNode === NULL && key == NULL) ||
 		(matched && key == oldVNode.key && type == oldVNode.type)
 	) {
 		return skewedIndex;

@@ -448,8 +448,10 @@ export function diff(
 }
 
 function markAsForce(vnode) {
-	if (vnode && vnode._component) vnode._component._bits |= COMPONENT_FORCE;
-	if (vnode && vnode._children) vnode._children.forEach(markAsForce);
+	if (vnode) {
+		if (vnode._component) vnode._component._bits |= COMPONENT_FORCE;
+		if (vnode._children) vnode._children.some(markAsForce);
+	}
 }
 
 /**
@@ -488,7 +490,7 @@ function cloneNode(node) {
 		return node.map(cloneNode);
 	}
 
-	if (node.constructor !== UNDEFINED) return null;
+	if (node.constructor !== UNDEFINED) return NULL;
 
 	return assign({}, node);
 }
@@ -695,7 +697,7 @@ function diffElementNodes(
 				// despite the attribute not being present. When the attribute
 				// is missing the progress bar is treated as indeterminate.
 				// To fix that we'll always update it when it is 0 for progress elements
-				(inputValue !== dom[i] || (nodeType === 'progress' && !inputValue))
+				(inputValue !== dom[i] || (nodeType == 'progress' && !inputValue))
 			) {
 				setProperty(dom, i, inputValue, oldProps[i], namespace);
 			}
