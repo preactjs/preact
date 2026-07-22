@@ -141,10 +141,17 @@ const unstable_batchedUpdates = (callback, arg) => callback(arg);
  */
 const flushSync = (callback, arg) => {
 	const prevDebounce = options.debounceRendering;
-	options.debounceRendering = cb => cb();
-	const res = callback(arg);
-	options.debounceRendering = prevDebounce;
-	return res;
+	let flush;
+	options.debounceRendering = cb => {
+		flush = cb;
+	};
+	try {
+		const res = callback(arg);
+		if (flush) flush();
+		return res;
+	} finally {
+		options.debounceRendering = prevDebounce;
+	}
 };
 
 // compat to react-is
