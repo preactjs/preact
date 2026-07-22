@@ -395,6 +395,24 @@ describe('keys', () => {
 		);
 	});
 
+	it('should displace multiple keyed children to the end efficiently', () => {
+		const values = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'];
+
+		render(<List values={values} />, scratch);
+		expect(scratch.textContent).to.equal('abcdefghij');
+
+		values.push(...values.splice(0, 3));
+		clearLog();
+
+		render(<List values={values} />, scratch);
+		expect(scratch.textContent).to.equal('defghijabc');
+		expect(getLog()).to.deep.equal([
+			'<ol>abcdefghij.appendChild(<li>a)',
+			'<ol>bcdefghija.appendChild(<li>b)',
+			'<ol>cdefghijab.appendChild(<li>c)'
+		]);
+	});
+
 	it('should move keyed children to the beginning on longer list', () => {
 		// Preact v10 worst case
 		const values = ['a', 'b', 'c', 'd', 'e', 'f'];

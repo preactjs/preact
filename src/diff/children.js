@@ -298,7 +298,18 @@ function constructNewChildrenArray(
 			// If we wanted to optimize for i.e. only swaps we'd just do the last two code-branches and have
 			// only the first item be a re-scouting and all the others fall in their skewed counter-part.
 			// We could also further optimize for swaps
-			if (matchingIndex == skewedIndex - 1) {
+			if (
+				matchingIndex > skewedIndex + 1 &&
+				matchingIndex - skewedIndex < oldChildrenLength - matchingIndex &&
+				renderResult[i + 1] != NULL &&
+				oldChildren[matchingIndex + 1] != NULL &&
+				renderResult[i + 1].key == oldChildren[matchingIndex + 1].key &&
+				renderResult[i + 1].type == oldChildren[matchingIndex + 1].type
+			) {
+				// A short prefix was moved to the end. Keep the long contiguous
+				// suffix in place and insert the displaced prefix when we reach it.
+				skew += matchingIndex - skewedIndex;
+			} else if (matchingIndex == skewedIndex - 1) {
 				skew--;
 			} else if (matchingIndex == skewedIndex + 1) {
 				skew++;
