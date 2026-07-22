@@ -1017,7 +1017,7 @@ describe('Lifecycle methods', () => {
 			items: [7, 6, 5, 4, 3, 2, 1],
 			expectedLog: [
 				'<div>7634521.insertBefore(<div>5, <div>3)',
-				'<div>7653421.insertBefore(<div>3, <div>2)'
+				'<div>7653421.insertBefore(<div>4, <div>3)'
 			]
 		});
 	});
