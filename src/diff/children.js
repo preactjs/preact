@@ -333,7 +333,7 @@ function constructNewChildrenArray(
 		let lisLengths = [];
 		for (i = 0; i < newChildrenLength; i++) {
 			childVNode = newParentVNode._children[i];
-			if (childVNode != NULL && childVNode._flags & MATCHED) {
+			if (childVNode && childVNode._flags & MATCHED) {
 				// Binary search for the insertion point, keeping the pass at
 				// O(n log n) even for pathological reorders.
 				let lo = 0,
@@ -352,9 +352,10 @@ function constructNewChildrenArray(
 		}
 
 		// `skew` is dead after the main loop; reuse it as the remaining
-		// subsequence length while walking backwards.
+		// subsequence length while walking backwards. Likewise `i` is left at
+		// newChildrenLength by the loop above.
 		skew = tails.length;
-		for (i = newChildrenLength; i--; ) {
+		while (i--) {
 			if (lisLengths[i]) {
 				if (lisLengths[i] == skew) {
 					skew--;
