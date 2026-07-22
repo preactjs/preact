@@ -334,10 +334,18 @@ function constructNewChildrenArray(
 		for (i = 0; i < newChildrenLength; i++) {
 			childVNode = newParentVNode._children[i];
 			if (childVNode != NULL && childVNode._flags & MATCHED) {
-				// Find the insertion point from the top; for in-order children this
-				// exits immediately, making the common case O(1) per child.
-				let lo = tails.length;
-				while (lo && tails[lo - 1] > childVNode._index) lo--;
+				// Binary search for the insertion point, keeping the pass at
+				// O(n log n) even for pathological reorders.
+				let lo = 0,
+					hi = tails.length;
+				while (lo < hi) {
+					const mid = (lo + hi) >> 1;
+					if (tails[mid] < childVNode._index) {
+						lo = mid + 1;
+					} else {
+						hi = mid;
+					}
+				}
 				tails[lo] = childVNode._index;
 				lisLengths[i] = lo + 1;
 			}
