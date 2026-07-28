@@ -92,8 +92,9 @@ export function diffChildren(
 		oldVNode =
 			(~childVNode._index && oldChildren[childVNode._index]) || EMPTY_OBJ;
 
-		// Update childVNode._index to its final index
+		// Update childVNode._index and ._depth to their final values
 		childVNode._index = i;
+		childVNode._depth = newParentVNode._depth + 1;
 
 		// Morph the old element into the new one, but don't append it to the dom yet
 		let result = diff(
@@ -174,13 +175,18 @@ function constructNewChildrenArray(
 	let childVNode;
 	/** @type {VNode} */
 	let oldVNode;
+	/** @type {number} */
+	let lo;
+	/** @type {number} */
+	let mid;
+	/** @type {number | undefined} */
+	let hi;
 
 	let oldChildrenLength = oldChildren.length,
 		remainingOldChildren = oldChildrenLength;
 
 	let skew = 0;
-
-	newParentVNode._children = new Array(newChildrenLength);
+	let children = (newParentVNode._children = new Array(newChildrenLength));
 	for (i = 0; i < newChildrenLength; i++) {
 		// @ts-expect-error We are reusing the childVNode variable to hold both the
 		// pre and post normalized childVNode
@@ -191,7 +197,7 @@ function constructNewChildrenArray(
 			typeof childVNode == 'boolean' ||
 			typeof childVNode == 'function'
 		) {
-			newParentVNode._children[i] = NULL;
+			children[i] = NULL;
 			continue;
 		}
 		// If this newVNode is being reused (e.g. <div>{reuse}{reuse}</div>) in the same diff,
@@ -204,7 +210,7 @@ function constructNewChildrenArray(
 			typeof childVNode != 'object' ||
 			childVNode.constructor == String
 		) {
-			childVNode = newParentVNode._children[i] = createVNode(
+			childVNode = children[i] = createVNode(
 				NULL,
 				childVNode,
 				NULL,
@@ -212,19 +218,19 @@ function constructNewChildrenArray(
 				NULL
 			);
 		} else if (isArray(childVNode)) {
-			childVNode = newParentVNode._children[i] = createVNode(
+			childVNode = children[i] = createVNode(
 				Fragment,
 				{ children: childVNode },
 				NULL,
 				NULL,
 				NULL
 			);
-		} else if (childVNode.constructor === UNDEFINED && childVNode._depth > 0) {
+		} else if (childVNode.constructor === UNDEFINED && childVNode._depth) {
 			// VNode is already in use, clone it. This can happen in the following
 			// scenario:
 			//   const reuse = <div />
 			//   <div>{reuse}<span />{reuse}</div>
-			childVNode = newParentVNode._children[i] = createVNode(
+			childVNode = children[i] = createVNode(
 				childVNode.type,
 				childVNode.props,
 				childVNode.key,
@@ -232,16 +238,19 @@ function constructNewChildrenArray(
 				childVNode._original
 			);
 		} else {
-			newParentVNode._children[i] = childVNode;
+			children[i] = childVNode;
 		}
 
-		const skewedIndex = i + skew;
 		childVNode._parent = newParentVNode;
-		childVNode._depth = newParentVNode._depth + 1;
+		// Temporarily reuse the _depth property for storing the longest increasing
+		// subsequence length that ends at the current node. The correct depth value
+		// will be restored in diffChildren.
+		childVNode._depth = 1;
 
 		// Temporarily store the matchingIndex on the _index property so we can pull
 		// out the oldVNode in diffChildren. We'll override this to the VNode's
 		// final index after using this property to get the oldVNode
+		const skewedIndex = i + skew;
 		const matchingIndex = (childVNode._index = findMatchingIndex(
 			childVNode,
 			oldChildren,
@@ -249,47 +258,36 @@ function constructNewChildrenArray(
 			remainingOldChildren
 		));
 
-		oldVNode = NULL;
 		// ~matchingIndex is only falsy for -1, i.e. when no match was found
 		if (~matchingIndex) {
 			oldVNode = oldChildren[matchingIndex];
-			remainingOldChildren--;
 			if (oldVNode) {
 				oldVNode._flags |= MATCHED;
 			}
+			remainingOldChildren--;
+		} else {
+			// When the array of children is growing we need to decrease the skew
+			// as we are adding a new element to the array.
+			// Example:
+			// [1, 2, 3] --> [0, 1, 2, 3]
+			// oldChildren   newChildren
+			//
+			// The new element is at index 0, so our skew is 0,
+			// we need to decrease the skew as we are adding a new element.
+			// The decrease will cause us to compare the element at position 1
+			// with value 1 with the element at position 0 with value 0.
+			//
+			// A linear concept is applied when the array is shrinking,
+			// if the length is unchanged we can assume that no skew
+			// changes are needed.
+			skew += Math.sign(oldChildrenLength - newChildrenLength);
+			oldVNode = NULL;
 		}
 
 		// Here, we define isMounting for the purposes of the skew diffing
 		// algorithm. Nodes that are unsuspending are considered mounting and we detect
 		// this by checking if oldVNode._original == null
-		if (!oldVNode || !oldVNode._original) {
-			if (!~matchingIndex) {
-				// When the array of children is growing we need to decrease the skew
-				// as we are adding a new element to the array.
-				// Example:
-				// [1, 2, 3] --> [0, 1, 2, 3]
-				// oldChildren   newChildren
-				//
-				// The new element is at index 0, so our skew is 0,
-				// we need to decrease the skew as we are adding a new element.
-				// The decrease will cause us to compare the element at position 1
-				// with value 1 with the element at position 0 with value 0.
-				//
-				// A linear concept is applied when the array is shrinking,
-				// if the length is unchanged we can assume that no skew
-				// changes are needed.
-				if (newChildrenLength > oldChildrenLength) {
-					skew--;
-				} else if (newChildrenLength < oldChildrenLength) {
-					skew++;
-				}
-			}
-
-			// If we are mounting a DOM VNode, mark it for insertion
-			if (typeof childVNode.type != 'function') {
-				childVNode._flags |= INSERT_VNODE;
-			}
-		} else if (matchingIndex != skewedIndex) {
+		if (oldVNode && oldVNode._original) {
 			// When we move elements around i.e. [0, 1, 2] --> [1, 0, 2]
 			// --> we diff 1, we find it at position 1 while our skewed index is 0 and our skew is 0
 			//     we set the skew to 1 as we found an offset.
@@ -306,21 +304,58 @@ function constructNewChildrenArray(
 			// If we wanted to optimize for i.e. only swaps we'd just do the last two code-branches and have
 			// only the first item be a re-scouting and all the others fall in their skewed counter-part.
 			// We could also further optimize for swaps
-			if (matchingIndex == skewedIndex - 1) {
-				skew--;
-			} else if (matchingIndex == skewedIndex + 1) {
-				skew++;
+			if (Math.abs(skewedIndex - matchingIndex) < 2) {
+				skew -= Math.sign(skewedIndex - matchingIndex);
 			} else {
-				if (matchingIndex > skewedIndex) {
-					skew--;
-				} else {
-					skew++;
-				}
+				skew += Math.sign(skewedIndex - matchingIndex);
 
-				// Move this VNode's DOM if the original index (matchingIndex) doesn't
-				// match the new skew index (i + new skew)
-				// In the former two branches we know that it matches after skewing
-				childVNode._flags |= INSERT_VNODE;
+				// Take note that the matched nodes may not be in correct relative order,
+				// and the longest increasing subsequence algorithm needs to run.
+				hi = 1;
+			}
+			childVNode._flags |= MATCHED;
+		} else if (typeof childVNode.type != 'function') {
+			// If we are mounting a DOM VNode, mark it for insertion
+			childVNode._flags |= INSERT_VNODE;
+		}
+	}
+
+	if (hi) {
+		// The matched nodes may not be in the correct relative order.
+		// Discover the longest increasing subsequence of old node indexes
+		// in the new node array. Mark matched nodes that do NOT belong
+		// to this subsequnce to be moved (i.e. reinserted) in DOM.
+
+		/** @type {number[]} */
+		const piles = [];
+
+		for (i = 0; i < newChildrenLength; i++) {
+			childVNode = children[i];
+			if (childVNode && childVNode._flags & MATCHED) {
+				lo = 0;
+				hi = piles.length;
+				while (lo < hi) {
+					mid = (lo + hi) >> 1;
+					if (piles[mid] < childVNode._index) {
+						lo = mid + 1;
+					} else {
+						hi = mid;
+					}
+				}
+				piles[lo++] = childVNode._index;
+				childVNode._depth = lo;
+			}
+		}
+
+		hi = piles.length;
+		while (i--) {
+			childVNode = children[i];
+			if (childVNode && childVNode._flags & MATCHED) {
+				if (childVNode._depth == hi) {
+					hi--;
+				} else {
+					childVNode._flags |= INSERT_VNODE;
+				}
 			}
 		}
 	}
