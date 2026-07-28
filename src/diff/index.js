@@ -312,12 +312,8 @@ export function diff(
 				doc = parentDom.ownerDocument;
 
 				// Changing the container remounts the children into the new one
-				if (
-					oldVNode.props &&
-					oldVNode.props._parentDom != parentDom &&
-					oldVNode._children
-				) {
-					oldVNode._children.forEach(child => {
+				if (oldVNode.props && oldVNode.props._parentDom != parentDom) {
+					/** @type {VNode[]} */ (oldVNode._children).forEach(child => {
 						if (child) unmount(child, child);
 					});
 					oldVNode._children = NULL;
