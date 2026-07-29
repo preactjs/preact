@@ -121,8 +121,7 @@ export function diffChildren(
 			firstChildDom = newDom;
 		}
 
-		let shouldPlace = !!(childVNode._flags & INSERT_VNODE);
-		if (shouldPlace) {
+		if (childVNode._flags & INSERT_VNODE) {
 			oldDom = insert(childVNode, oldDom, parentDom);
 
 			// When a matched VNode is physically moved via INSERT_VNODE, its old
@@ -132,11 +131,6 @@ export function diffChildren(
 			if (oldVNode._dom) {
 				oldVNode._dom = NULL;
 			}
-		} else if (
-			childVNode._children != NULL &&
-			oldVNode._children === childVNode._children
-		) {
-			oldDom = getDomSibling(oldVNode);
 		} else if (typeof childVNode.type == 'function' && result !== UNDEFINED) {
 			oldDom = result;
 		} else if (newDom) {
@@ -369,8 +363,7 @@ function insert(parentVNode, oldDom, parentDom) {
 		if (oldDom && parentVNode.type && !oldDom.parentNode) {
 			oldDom = getDomSibling(parentVNode);
 		}
-		parentDom.insertBefore(parentVNode._dom, oldDom || NULL);
-		oldDom = parentVNode._dom;
+		oldDom = parentDom.insertBefore(parentVNode._dom, oldDom || NULL);
 	}
 
 	do {
