@@ -148,9 +148,8 @@ function renderComponent(component) {
 			oldVNode._flags & MODE_HYDRATE ? [oldDom] : NULL,
 			commitQueue,
 			oldDom == NULL ? getDomSibling(oldVNode) : oldDom,
-			!!(oldVNode._flags & MODE_HYDRATE),
-			refQueue,
-			parentDom.ownerDocument
+			oldVNode._flags & MODE_HYDRATE,
+			refQueue
 		);
 
 		newVNode._original = oldVNode._original;
@@ -170,8 +169,8 @@ function renderComponent(component) {
 function updateParentDomPointers(vnode) {
 	// Stop at root boundaries (_parentDom)
 	if (
-		(vnode = vnode._parent) != NULL &&
-		vnode._component != NULL &&
+		(vnode = vnode._parent) &&
+		vnode._component &&
 		!vnode.props._parentDom
 	) {
 		vnode._dom = NULL;
