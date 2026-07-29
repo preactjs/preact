@@ -16,6 +16,9 @@
           "__self"
         ]
       }
+    },
+    "compress": {
+      "unsafe_arrows": true
     }
   }
 }

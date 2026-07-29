@@ -98,7 +98,7 @@ function minifyPlugin(pkg) {
 					preserve_annotations: true
 				},
 				module: false,
-				ecma: 5,
+				ecma: 2017,
 				toplevel: true,
 				mangle: { properties: mangle.properties },
 				nameCache: mangle.nameCache,
