@@ -53,7 +53,6 @@ import { setProperty } from './props';
  * siblings. In most cases, it starts out as `oldChildren[0]._dom`.
  * @param {boolean} isHydrating Whether or not we are in hydration
  * @param {any[]} refQueue an array of elements needed to invoke refs
- * @param {Document} doc The document object to use for creating elements
  */
 export function diff(
 	parentDom,
@@ -65,8 +64,7 @@ export function diff(
 	commitQueue,
 	oldDom,
 	isHydrating,
-	refQueue,
-	doc
+	refQueue
 ) {
 	/** @type {any} */
 	let tmp,
@@ -306,10 +304,10 @@ export function diff(
 			if (newProps._parentDom) {
 				parentDom = newProps._parentDom;
 				// If we portal into a math or svg element we need
-				// to swap the namespace (chart libraries often do this)
-				// same for an iframe (different ownerDocument)
+				// to swap the namespace (chart libraries often do this).
+				// The document follows the container too (e.g. iframes) as
+				// diffElementNodes derives it from its parentDom.
 				namespace = parentDom.namespaceURI;
-				doc = parentDom.ownerDocument;
 
 				// Changing the container remounts the children into the new one
 				if (oldVNode.props && oldVNode.props._parentDom != parentDom) {
@@ -333,8 +331,7 @@ export function diff(
 				commitQueue,
 				oldDom,
 				isHydrating,
-				refQueue,
-				doc
+				refQueue
 			);
 
 			// When we exit a portal we
@@ -434,7 +431,7 @@ export function diff(
 			commitQueue,
 			isHydrating,
 			refQueue,
-			doc
+			parentDom
 		);
 	}
 
@@ -502,7 +499,8 @@ function cloneNode(node) {
  * to invoke in commitRoot
  * @param {boolean} isHydrating Whether or not we are in hydration
  * @param {any[]} refQueue an array of elements needed to invoke refs
- * @param {Document} doc The document object to use for creating elements
+ * @param {PreactElement} parentDom The parent this element will be inserted
+ * into; new nodes are created from its ownerDocument (e.g. iframes)
  * @returns {PreactElement}
  */
 function diffElementNodes(
@@ -515,7 +513,7 @@ function diffElementNodes(
 	commitQueue,
 	isHydrating,
 	refQueue,
-	doc
+	parentDom
 ) {
 	let oldProps = oldVNode.props || EMPTY_OBJ;
 	const newProps = newVNode.props;
@@ -557,6 +555,7 @@ function diffElementNodes(
 	}
 
 	if (dom == NULL) {
+		const doc = parentDom.ownerDocument;
 		if (nodeType == NULL) {
 			return doc.createTextNode(newProps);
 		}
@@ -668,8 +667,7 @@ function diffElementNodes(
 					? excessDomChildren[0]
 					: oldVNode._children && getDomSibling(oldVNode, 0),
 				isHydrating,
-				refQueue,
-				doc
+				refQueue
 			);
 
 			// Remove children that are not part of any vnode.
