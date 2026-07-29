@@ -51,8 +51,7 @@ export function render(vnode, parentDom) {
 		oldVNode ? oldVNode._dom : parentDom.firstChild,
 		// @ts-expect-error we are doing a bit-wise operation so it's either 0 or true
 		isHydrating,
-		refQueue,
-		parentDom.ownerDocument
+		refQueue
 	);
 
 	// Flush all queued effects

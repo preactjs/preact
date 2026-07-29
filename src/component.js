@@ -149,8 +149,7 @@ function renderComponent(component) {
 			commitQueue,
 			oldDom == NULL ? getDomSibling(oldVNode) : oldDom,
 			!!(oldVNode._flags & MODE_HYDRATE),
-			refQueue,
-			parentDom.ownerDocument
+			refQueue
 		);
 
 		newVNode._original = oldVNode._original;
