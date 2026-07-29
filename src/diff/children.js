@@ -126,13 +126,11 @@ export function diffChildren(
 			firstChildDom = newDom;
 		}
 
-		let shouldPlace = childVNode._flags & INSERT_VNODE;
-		if (shouldPlace || oldVNode._children === childVNode._children) {
+		if (childVNode._flags & INSERT_VNODE) {
 			oldDom = insert(
 				childVNode,
 				oldDom,
 				parentDom,
-				shouldPlace,
 				oldVNode._original == NULL
 			);
 
@@ -140,7 +138,7 @@ export function diffChildren(
 			// _dom pointer becomes a stale positional reference. Clear it so that
 			// getDomSibling (called from nested diffs) won't return this stale
 			// reference and mis-place subsequent DOM nodes. See #5065.
-			if (shouldPlace && oldVNode._dom) {
+			if (oldVNode._dom) {
 				oldVNode._dom = NULL;
 			}
 		} else if (typeof childVNode.type == 'function' && result !== UNDEFINED) {
@@ -351,11 +349,10 @@ function constructNewChildrenArray(
  * @param {VNode} parentVNode
  * @param {PreactElement} oldDom
  * @param {PreactElement} parentDom
- * @param {number} shouldPlace
  * @param {boolean} isMounting
  * @returns {PreactElement}
  */
-function insert(parentVNode, oldDom, parentDom, shouldPlace, isMounting) {
+function insert(parentVNode, oldDom, parentDom, isMounting) {
 	// Note: VNodes in nested suspended trees may be missing _children.
 	if (typeof parentVNode.type == 'function') {
 		// Root children live in another container, they never move with the
@@ -369,23 +366,21 @@ function insert(parentVNode, oldDom, parentDom, shouldPlace, isMounting) {
 				// children's _parent pointer to point to the newVNode (parentVNode
 				// here).
 				children[i]._parent = parentVNode;
-				oldDom = insert(children[i], oldDom, parentDom, shouldPlace, false);
+				oldDom = insert(children[i], oldDom, parentDom, false);
 			}
 		}
 
 		return oldDom;
 	} else if (parentVNode._dom != oldDom) {
-		if (shouldPlace) {
-			if (oldDom && parentVNode.type && !oldDom.parentNode) {
-				oldDom = getDomSibling(parentVNode);
-			}
+		if (oldDom && parentVNode.type && !oldDom.parentNode) {
+			oldDom = getDomSibling(parentVNode);
+		}
 
-			if (HAS_MOVE_BEFORE_SUPPORT && !isMounting) {
-				// @ts-expect-error This isn't added to TypeScript lib.d.ts yet
-				parentDom.moveBefore(parentVNode._dom, oldDom);
-			} else {
-				parentDom.insertBefore(parentVNode._dom, oldDom || NULL);
-			}
+		if (HAS_MOVE_BEFORE_SUPPORT && !isMounting) {
+			// @ts-expect-error This isn't added to TypeScript lib.d.ts yet
+			parentDom.moveBefore(parentVNode._dom, oldDom);
+		} else {
+			parentDom.insertBefore(parentVNode._dom, oldDom || NULL);
 		}
 		oldDom = parentVNode._dom;
 	}
