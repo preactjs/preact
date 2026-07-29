@@ -14,7 +14,9 @@
 		font-weight: 600;
 		letter-spacing: 0.08em;
 		text-transform: uppercase;
-		transition: background 300ms, color 200ms;
+		transition:
+			background 300ms,
+			color 200ms;
 		white-space: nowrap;
 	}
 
@@ -56,7 +58,9 @@
 		background-size: 20000%;
 		content: '';
 		opacity: 0;
-		transition: opacity 700ms, background 400ms;
+		transition:
+			opacity 700ms,
+			background 400ms;
 	}
 
 	button:active:not(:disabled)::after {

@@ -157,6 +157,108 @@ describe('Lifecycle methods', () => {
 			);
 		});
 
+		it('should discard commit callbacks from a partially rendered subtree', () => {
+			let componentDidMount = vi.fn();
+
+			class NullBoundary extends Component {
+				componentDidCatch(error) {
+					this.setState({ error });
+				}
+
+				render() {
+					return this.state.error ? null : this.props.children;
+				}
+			}
+
+			class MountingChild extends Component {
+				componentDidMount() {
+					componentDidMount();
+				}
+
+				render() {
+					return null;
+				}
+			}
+
+			function Parent() {
+				return [
+					<MountingChild />,
+					// Throw from diffing after MountingChild has queued its mount
+					// callback, but before Parent has completed rendering.
+					createElement('div', { 'bad name': 'x' })
+				];
+			}
+
+			render(
+				<NullBoundary>
+					<Parent />
+				</NullBoundary>,
+				scratch
+			);
+
+			expect(componentDidMount).not.toHaveBeenCalled();
+			rerender();
+			expect(componentDidMount).not.toHaveBeenCalled();
+			expect(scratch.innerHTML).to.equal('');
+		});
+
+		it('should clean up pending updates in a partially rendered subtree when rendering null', () => {
+			let child;
+			let childRenders = 0;
+			let componentDidMount = vi.fn();
+
+			class NullBoundary extends Component {
+				componentDidCatch(error) {
+					this.setState({ error });
+				}
+
+				render() {
+					return this.state.error ? null : this.props.children;
+				}
+			}
+
+			class NullChild extends Component {
+				constructor(props) {
+					super(props);
+					child = this;
+				}
+
+				componentDidMount() {
+					componentDidMount();
+				}
+
+				render() {
+					childRenders++;
+					if (!this.state.tick) this.setState({ tick: 1 });
+					return null;
+				}
+			}
+
+			function Parent() {
+				return [
+					<NullChild />,
+					// Throw from diffing after NullChild has been diffed, but before
+					// Parent has completed rendering its children.
+					createElement('div', { 'bad name': 'x' })
+				];
+			}
+
+			render(
+				<NullBoundary>
+					<Parent />
+				</NullBoundary>,
+				scratch
+			);
+
+			expect(childRenders).to.equal(1);
+			expect(scratch.innerHTML).to.equal('');
+			expect(() => rerender()).not.to.throw();
+			expect(childRenders).to.equal(1);
+			expect(componentDidMount).not.toHaveBeenCalled();
+			expect(child._parentDom).to.equal(null);
+			expect(scratch.innerHTML).to.equal('');
+		});
+
 		it('should be called when child fails in componentDidMount', () => {
 			ThrowErr.prototype.componentDidMount = throwExpectedError;
 
@@ -258,9 +360,11 @@ describe('Lifecycle methods', () => {
 					this.setState({ error });
 				}
 				render() {
-					return this.state.error
-						? String(this.state.error)
-						: <ThrowErr foo={this.state.foo} />;
+					return this.state.error ? (
+						String(this.state.error)
+					) : (
+						<ThrowErr foo={this.state.foo} />
+					);
 				}
 			}
 
@@ -290,9 +394,11 @@ describe('Lifecycle methods', () => {
 					this.setState({ error });
 				}
 				render() {
-					return this.state.error
-						? String(this.state.error)
-						: <ThrowErr foo={this.state.foo} />;
+					return this.state.error ? (
+						String(this.state.error)
+					) : (
+						<ThrowErr foo={this.state.foo} />
+					);
 				}
 			}
 
@@ -345,9 +451,11 @@ describe('Lifecycle methods', () => {
 					this.setState({ error });
 				}
 				render() {
-					return this.state.error
-						? String(this.state.error)
-						: <Foo ref={ref} />;
+					return this.state.error ? (
+						String(this.state.error)
+					) : (
+						<Foo ref={ref} />
+					);
 				}
 			}
 
@@ -373,9 +481,11 @@ describe('Lifecycle methods', () => {
 					this.setState({ error });
 				}
 				render() {
-					return this.state.error
-						? String(this.state.error)
-						: <div ref={ref} />;
+					return this.state.error ? (
+						String(this.state.error)
+					) : (
+						<div ref={ref} />
+					);
 				}
 			}
 

@@ -12,7 +12,6 @@ import {
 	createEvent
 } from '../_util/helpers';
 import { clearLog, getLog, logCall } from '../_util/logCall';
-import { useState } from 'preact/hooks';
 import { expect, vi } from 'vitest';
 
 function getAttributes(node) {
@@ -30,6 +29,7 @@ describe('render()', () => {
 	let resetInsertBefore;
 	let resetRemoveText;
 	let resetRemove;
+	let resetMoveBefore;
 
 	beforeEach(() => {
 		scratch = setupScratch();
@@ -43,12 +43,15 @@ describe('render()', () => {
 	beforeAll(() => {
 		resetAppendChild = logCall(Element.prototype, 'appendChild');
 		resetInsertBefore = logCall(Element.prototype, 'insertBefore');
+		// @ts-expect-error
+		resetMoveBefore = logCall(Element.prototype, 'moveBefore');
 		resetRemoveText = logCall(Text.prototype, 'remove');
 		resetRemove = logCall(Element.prototype, 'remove');
 	});
 
 	afterAll(() => {
 		resetAppendChild();
+		resetMoveBefore();
 		resetInsertBefore();
 		resetRemoveText();
 		resetRemove();
@@ -225,6 +228,30 @@ describe('render()', () => {
 		expect(scratch.childNodes).to.have.length(1);
 		expect(scratch.firstChild).to.have.property('nodeName', 'SPAN');
 		expect(scratch.innerHTML).to.equal('<span class="hello">Hello!</span>');
+	});
+
+	it('should not keep the root input vnode in props.children', () => {
+		let update;
+		class App extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { value: 'a' };
+				update = this.setState.bind(this);
+			}
+
+			render() {
+				return <button>{this.state.value}</button>;
+			}
+		}
+
+		render(<App />, scratch);
+		let firstAppVNode = scratch._children._children[0];
+
+		update({ value: 'b' });
+		rerender();
+
+		expect(scratch._children._children[0]).to.not.equal(firstAppVNode);
+		expect(scratch._children.props.children).to.equal(null);
 	});
 
 	it('should nest empty nodes', () => {
@@ -1018,16 +1045,20 @@ describe('render()', () => {
 		// This tests that we do not cause any cursor jumps in contenteditable fields
 		// See https://github.com/preactjs/preact/issues/2691
 
-		function Editable() {
-			const [value, setValue] = useState('Hello');
-
-			return (
-				<div
-					contentEditable
-					dangerouslySetInnerHTML={{ __html: value }}
-					onInput={e => setValue(e.currentTarget.innerHTML)}
-				/>
-			);
+		class Editable extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { value: 'Hello' };
+			}
+			render(props, state) {
+				return (
+					<div
+						contentEditable
+						dangerouslySetInnerHTML={{ __html: state.value }}
+						onInput={e => this.setState({ value: e.currentTarget.innerHTML })}
+					/>
+				);
+			}
 		}
 
 		render(<Editable />, scratch);

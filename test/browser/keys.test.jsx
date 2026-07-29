@@ -71,6 +71,7 @@ describe('keys', () => {
 		values.splice(to, 0, value);
 	}
 
+	let resetMoveBefore;
 	let resetAppendChild;
 	let resetInsertBefore;
 	let resetRemoveChild;
@@ -78,6 +79,7 @@ describe('keys', () => {
 	let resetRemoveText;
 
 	beforeAll(() => {
+		resetMoveBefore = logCall(Element.prototype, 'moveBefore');
 		resetAppendChild = logCall(Element.prototype, 'appendChild');
 		resetInsertBefore = logCall(Element.prototype, 'insertBefore');
 		resetRemoveChild = logCall(Element.prototype, 'removeChild');
@@ -91,6 +93,7 @@ describe('keys', () => {
 		resetRemoveChild();
 		resetRemove();
 		resetRemoveText();
+		resetMoveBefore();
 	});
 
 	beforeEach(() => {

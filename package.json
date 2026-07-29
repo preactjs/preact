@@ -1,80 +1,52 @@
 {
   "name": "preact",
   "amdName": "preact",
-  "version": "11.0.0-beta.1",
+  "version": "11.0.0-beta.2",
   "private": false,
   "publishConfig": {
     "access": "public",
     "provenance": true
   },
   "description": "Fast 4kb React-compatible Virtual DOM library.",
-  "main": "dist/preact.js",
+  "main": "dist/preact.mjs",
   "module": "dist/preact.mjs",
-  "umd:main": "dist/preact.umd.js",
   "source": "src/index.js",
   "exports": {
     ".": {
       "types": "./src/index.d.ts",
-      "module": "./dist/preact.mjs",
-      "umd": "./dist/preact.umd.js",
-      "import": "./dist/preact.mjs",
-      "require": "./dist/preact.js"
+      "default": "./dist/preact.mjs"
     },
     "./compat": {
       "types": "./compat/src/index.d.ts",
-      "module": "./compat/dist/compat.mjs",
-      "umd": "./compat/dist/compat.umd.js",
-      "import": "./compat/dist/compat.mjs",
-      "require": "./compat/dist/compat.js"
+      "default": "./compat/dist/compat.mjs"
     },
     "./debug": {
       "types": "./debug/src/index.d.ts",
-      "module": "./debug/dist/debug.mjs",
-      "umd": "./debug/dist/debug.umd.js",
-      "import": "./debug/dist/debug.mjs",
-      "require": "./debug/dist/debug.js"
+      "default": "./debug/dist/debug.mjs"
     },
     "./devtools": {
       "types": "./devtools/src/index.d.ts",
-      "module": "./devtools/dist/devtools.mjs",
-      "umd": "./devtools/dist/devtools.umd.js",
-      "import": "./devtools/dist/devtools.mjs",
-      "require": "./devtools/dist/devtools.js"
+      "default": "./devtools/dist/devtools.mjs"
     },
     "./hooks": {
       "types": "./hooks/src/index.d.ts",
-      "module": "./hooks/dist/hooks.mjs",
-      "umd": "./hooks/dist/hooks.umd.js",
-      "import": "./hooks/dist/hooks.mjs",
-      "require": "./hooks/dist/hooks.js"
+      "default": "./hooks/dist/hooks.mjs"
     },
     "./test-utils": {
       "types": "./test-utils/src/index.d.ts",
-      "module": "./test-utils/dist/testUtils.mjs",
-      "umd": "./test-utils/dist/testUtils.umd.js",
-      "import": "./test-utils/dist/testUtils.mjs",
-      "require": "./test-utils/dist/testUtils.js"
+      "default": "./test-utils/dist/testUtils.mjs"
     },
     "./compat/test-utils": {
       "types": "./test-utils/src/index.d.ts",
-      "module": "./test-utils/dist/testUtils.mjs",
-      "umd": "./test-utils/dist/testUtils.umd.js",
-      "import": "./test-utils/dist/testUtils.mjs",
-      "require": "./test-utils/dist/testUtils.js"
+      "default": "./test-utils/dist/testUtils.mjs"
     },
     "./jsx-runtime": {
       "types": "./jsx-runtime/src/index.d.ts",
-      "module": "./jsx-runtime/dist/jsxRuntime.mjs",
-      "umd": "./jsx-runtime/dist/jsxRuntime.umd.js",
-      "import": "./jsx-runtime/dist/jsxRuntime.mjs",
-      "require": "./jsx-runtime/dist/jsxRuntime.js"
+      "default": "./jsx-runtime/dist/jsxRuntime.mjs"
     },
     "./jsx-dev-runtime": {
       "types": "./jsx-runtime/src/index.d.ts",
-      "module": "./jsx-runtime/dist/jsxRuntime.mjs",
-      "umd": "./jsx-runtime/dist/jsxRuntime.umd.js",
-      "import": "./jsx-runtime/dist/jsxRuntime.mjs",
-      "require": "./jsx-runtime/dist/jsxRuntime.js"
+      "default": "./jsx-runtime/dist/jsxRuntime.mjs"
     },
     "./compat/client": {
       "types": "./compat/client.d.ts",
@@ -122,18 +94,11 @@
   "types": "src/index.d.ts",
   "scripts": {
     "prepare": "husky && npm run test:install && run-s build",
-    "build": "npm-run-all --parallel 'build:*'",
-    "build:core": "microbundle build --raw --no-generateTypes -f cjs,esm,umd",
-    "build:debug": "microbundle build --raw --no-generateTypes -f cjs,esm,umd --cwd debug",
-    "build:devtools": "microbundle build --raw --no-generateTypes -f cjs,esm,umd --cwd devtools",
-    "build:hooks": "microbundle build --raw --no-generateTypes -f cjs,esm,umd --cwd hooks",
-    "build:test-utils": "microbundle build --raw --no-generateTypes -f cjs,esm,umd --cwd test-utils",
-    "build:compat": "microbundle build --raw --no-generateTypes -f cjs,esm,umd --cwd compat --globals 'preact/hooks=preactHooks'",
-    "build:jsx": "microbundle build --raw --no-generateTypes -f cjs,esm,umd --cwd jsx-runtime",
+    "build": "node ./scripts/build.mjs",
     "postbuild": "node ./config/compat-entries.js",
-    "dev": "microbundle watch --raw --no-generateTypes --format cjs",
-    "dev:hooks": "microbundle watch --raw --no-generateTypes --format cjs --cwd hooks",
-    "dev:compat": "microbundle watch --raw --no-generateTypes --format cjs --cwd compat --globals 'preact/hooks=preactHooks'",
+    "dev": "node ./scripts/build.mjs --watch",
+    "dev:hooks": "node ./scripts/build.mjs --watch hooks",
+    "dev:compat": "node ./scripts/build.mjs --watch compat",
     "test": "npm-run-all build lint test:unit",
     "test:install": "playwright install chromium",
     "test:unit": "run-p test:vitest:min test:ts",
@@ -146,12 +111,12 @@
     "lint": "run-s oxlint tsc",
     "tsc": "tsc -p jsconfig-lint.json",
     "oxlint": "oxlint src test/browser test/node test/shared debug compat hooks test-utils",
-    "format": "biome format --write .",
-    "format:check": "biome format ."
+    "format": "oxfmt . --write",
+    "format:check": "oxfmt --check ."
   },
   "nano-staged": {
     "**/*.{js,jsx,mjs,cjs,ts,tsx,yml,json,html,md,css,scss}": [
-      "biome format --write --no-errors-on-unmatched"
+      "oxfmt --write --no-error-on-unmatched-pattern"
     ]
   },
   "files": [
@@ -211,37 +176,35 @@
   "bugs": "https://github.com/preactjs/preact/issues",
   "homepage": "https://preactjs.com",
   "devDependencies": {
-    "@actions/github": "^6.0.1",
-    "@actions/glob": "^0.5.0",
     "@babel/core": "^7.28.0",
-    "@babel/plugin-transform-react-jsx": "^7.27.1",
-    "@babel/plugin-transform-react-jsx-source": "^7.27.1",
-    "@babel/preset-env": "^7.28.0",
-    "@babel/register": "^7.27.1",
-    "@biomejs/biome": "^2.1.2",
+    "@babel/preset-env": "^7.29.7",
+    "@rollup/plugin-babel": "^6.1.0",
     "@types/node": "^18.19.87",
     "@vitest/browser": "^3.2.4",
     "@vitest/coverage-v8": "^3.2.4",
     "babel-plugin-transform-rename-properties": "0.1.0",
     "chai": "^6.2.2",
-    "coveralls": "^3.1.1",
     "cross-env": "^7.0.3",
-    "errorstacks": "^2.4.1",
-    "esbuild": "^0.25.8",
     "husky": "^9.1.7",
     "kolorist": "^1.8.0",
-    "microbundle": "^0.15.1",
     "npm-run-all2": "^7.0.0",
+    "oxfmt": "^0.32.0",
     "oxlint": "^1.8.0",
     "playwright": "^1.54.1",
     "preact-render-to-string": "^6.5.0",
     "prop-types": "^15.8.1",
-    "sade": "^1.8.1",
-    "terser": "5.16.0",
+    "rollup": "^4.62.2",
+    "terser": "^5.49.0",
     "typescript": "5.1.6",
-    "undici": "^4.12.0",
-    "vite": "^6.2.0",
     "vitest": "^3.2.4"
+  },
+  "peerDependencies": {
+    "preact-render-to-string": ">=5"
+  },
+  "peerDependenciesMeta": {
+    "preact-render-to-string": {
+      "optional": true
+    }
   },
   "volta": {
     "node": "20.19.1"

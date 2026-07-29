@@ -252,9 +252,11 @@ describe('Lifecycle methods', () => {
 					return { error };
 				}
 				render() {
-					return this.state.error
-						? String(this.state.error)
-						: <ThrowErr foo={this.state.foo} />;
+					return this.state.error ? (
+						String(this.state.error)
+					) : (
+						<ThrowErr foo={this.state.foo} />
+					);
 				}
 			}
 
@@ -282,9 +284,11 @@ describe('Lifecycle methods', () => {
 					return { error };
 				}
 				render() {
-					return this.state.error
-						? String(this.state.error)
-						: <ThrowErr foo={this.state.foo} />;
+					return this.state.error ? (
+						String(this.state.error)
+					) : (
+						<ThrowErr foo={this.state.foo} />
+					);
 				}
 			}
 
@@ -335,9 +339,11 @@ describe('Lifecycle methods', () => {
 					return { error };
 				}
 				render() {
-					return this.state.error
-						? String(this.state.error)
-						: <Foo ref={ref} />;
+					return this.state.error ? (
+						String(this.state.error)
+					) : (
+						<Foo ref={ref} />
+					);
 				}
 			}
 
@@ -362,9 +368,11 @@ describe('Lifecycle methods', () => {
 					return { error };
 				}
 				render() {
-					return this.state.error
-						? String(this.state.error)
-						: <div ref={ref} />;
+					return this.state.error ? (
+						String(this.state.error)
+					) : (
+						<div ref={ref} />
+					);
 				}
 			}
 

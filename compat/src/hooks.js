@@ -1,4 +1,4 @@
-import { useState, useLayoutEffect, useEffect } from 'preact/hooks';
+import { useState, useLayoutEffect, useEffect, useRef } from 'preact/hooks';
 
 /**
  * This is taken from https://github.com/facebook/react/blob/main/packages/use-sync-external-store/src/useSyncExternalStoreShimClient.js#L84
@@ -64,3 +64,19 @@ export function useTransition() {
 // TODO: in theory this should be done after a VNode is diffed as we want to insert
 // styles/... before it attaches
 export const useInsertionEffect = useLayoutEffect;
+
+/**
+ * @template {Function} T
+ * @param {T} callback
+ * @returns {T}
+ */
+export function useEffectEvent(callback) {
+	const ref = useRef(callback);
+	ref.current = callback;
+
+	return /** @type {T} */ (
+		function () {
+			return ref.current.apply(undefined, arguments);
+		}
+	);
+}

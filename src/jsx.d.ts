@@ -262,7 +262,8 @@ export namespace JSXInternal {
 	}
 
 	export interface IntrinsicElements
-		extends IntrinsicSVGElements,
+		extends
+			IntrinsicSVGElements,
 			IntrinsicMathMLElements,
 			IntrinsicHTMLElements {}
 }

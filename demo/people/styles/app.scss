@@ -76,7 +76,9 @@
 		background-size: 10000%;
 		content: '';
 		opacity: 0;
-		transition: opacity 700ms, background 300ms;
+		transition:
+			opacity 700ms,
+			background 300ms;
 	}
 
 	> nav li > a:active::after {

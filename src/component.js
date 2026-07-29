@@ -117,8 +117,10 @@ export function getDomSibling(vnode, childIndex) {
 	// We must resume from this vnode's sibling (in it's parent _children array)
 	// Only climb up and search the parent if we aren't searching through a DOM
 	// VNode (meaning we reached the DOM parent of the original vnode that began
-	// the search)
-	return typeof vnode.type == 'function' ? getDomSibling(vnode) : NULL;
+	// the search). New roots (_parentDom) are a DOM boundary too.
+	return typeof vnode.type == 'function' && !vnode.props._parentDom
+		? getDomSibling(vnode)
+		: NULL;
 }
 
 /**
@@ -166,7 +168,12 @@ function renderComponent(component) {
  * @param {import('./internal').VNode} vnode
  */
 function updateParentDomPointers(vnode) {
-	if ((vnode = vnode._parent) != NULL && vnode._component != NULL) {
+	// Stop at root boundaries (_parentDom)
+	if (
+		(vnode = vnode._parent) != NULL &&
+		vnode._component != NULL &&
+		!vnode.props._parentDom
+	) {
 		vnode._dom = NULL;
 		vnode._children.some(child => {
 			if (child != NULL && child._dom != NULL) {

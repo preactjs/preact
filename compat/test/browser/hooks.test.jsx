@@ -7,7 +7,8 @@ import {
 	render,
 	useState,
 	useContext,
-	useEffect
+	useEffect,
+	useEffectEvent
 } from 'preact/compat';
 import { setupRerender, act } from 'preact/test-utils';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
@@ -78,6 +79,40 @@ describe('React-18-hooks', () => {
 			rerender();
 			expect(spy).toHaveBeenCalledOnce();
 			expect(scratch.innerHTML).to.equal('<p>Pending: no</p>');
+		});
+	});
+
+	describe('useEffectEvent', () => {
+		it('sees latest values from render', () => {
+			const spy = vi.fn();
+
+			let triggerEvent;
+
+			const App = ({ val }) => {
+				const onEvent = useEffectEvent(() => {
+					spy(val);
+				});
+
+				useEffect(() => {
+					triggerEvent = () => {
+						onEvent();
+					};
+				}, []);
+			};
+
+			act(() => {
+				render(<App val={0} />, scratch);
+			});
+
+			triggerEvent();
+			expect(spy).toHaveBeenCalledWith(0);
+
+			act(() => {
+				render(<App val={1} />, scratch);
+			});
+
+			triggerEvent();
+			expect(spy).toHaveBeenCalledWith(1);
 		});
 	});
 
