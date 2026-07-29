@@ -32,7 +32,7 @@ export const UNDEFINED = undefined;
 export const EMPTY_OBJ = /** @type {any} */ ({});
 export const EMPTY_ARR = [];
 
-export const MATHML_TOKEN_ELEMENTS = /(mi|mn|mo|ms$|mte|msp)/;
+export const MATHML_TOKEN_ELEMENTS = /m(i|n|o|s$|te|sp)/;
 
 export const HAS_MOVE_BEFORE_SUPPORT =
 	typeof window !== 'undefined' && 'moveBefore' in Element.prototype;
