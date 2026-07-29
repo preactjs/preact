@@ -94,13 +94,13 @@ export function createVNode(type, props, key, ref, original) {
 		_dom: NULL,
 		_component: NULL,
 		constructor: UNDEFINED,
-		_original: original == NULL ? ++vnodeId : original,
+		_original: original || ++vnodeId,
 		_index: -1,
 		_flags: 0
 	};
 
 	// Only invoke the vnode hook if this was *not* a direct copy:
-	if (original == NULL && options.vnode != NULL) options.vnode(vnode);
+	if (!original && options.vnode) options.vnode(vnode);
 
 	return vnode;
 }
