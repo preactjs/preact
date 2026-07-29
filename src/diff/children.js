@@ -122,16 +122,21 @@ export function diffChildren(
 		}
 
 		let shouldPlace = !!(childVNode._flags & INSERT_VNODE);
-		if (shouldPlace || oldVNode._children === childVNode._children) {
-			oldDom = insert(childVNode, oldDom, parentDom, shouldPlace);
+		if (shouldPlace) {
+			oldDom = insert(childVNode, oldDom, parentDom);
 
 			// When a matched VNode is physically moved via INSERT_VNODE, its old
 			// _dom pointer becomes a stale positional reference. Clear it so that
 			// getDomSibling (called from nested diffs) won't return this stale
 			// reference and mis-place subsequent DOM nodes. See #5065.
-			if (shouldPlace && oldVNode._dom) {
+			if (oldVNode._dom) {
 				oldVNode._dom = NULL;
 			}
+		} else if (
+			childVNode._children != NULL &&
+			oldVNode._children === childVNode._children
+		) {
+			oldDom = getDomSibling(oldVNode);
 		} else if (typeof childVNode.type == 'function' && result !== UNDEFINED) {
 			oldDom = result;
 		} else if (newDom) {
@@ -341,10 +346,9 @@ function constructNewChildrenArray(
  * @param {VNode} parentVNode
  * @param {PreactElement} oldDom
  * @param {PreactElement} parentDom
- * @param {boolean} shouldPlace
  * @returns {PreactElement}
  */
-function insert(parentVNode, oldDom, parentDom, shouldPlace) {
+function insert(parentVNode, oldDom, parentDom) {
 	// Note: VNodes in nested suspended trees may be missing _children.
 
 	if (typeof parentVNode.type == 'function') {
@@ -356,18 +360,16 @@ function insert(parentVNode, oldDom, parentDom, shouldPlace) {
 				// children's _parent pointer to point to the newVNode (parentVNode
 				// here).
 				children[i]._parent = parentVNode;
-				oldDom = insert(children[i], oldDom, parentDom, shouldPlace);
+				oldDom = insert(children[i], oldDom, parentDom);
 			}
 		}
 
 		return oldDom;
 	} else if (parentVNode._dom != oldDom) {
-		if (shouldPlace) {
-			if (oldDom && parentVNode.type && !oldDom.parentNode) {
-				oldDom = getDomSibling(parentVNode);
-			}
-			parentDom.insertBefore(parentVNode._dom, oldDom || NULL);
+		if (oldDom && parentVNode.type && !oldDom.parentNode) {
+			oldDom = getDomSibling(parentVNode);
 		}
+		parentDom.insertBefore(parentVNode._dom, oldDom || NULL);
 		oldDom = parentVNode._dom;
 	}
 
