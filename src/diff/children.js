@@ -141,7 +141,7 @@ export function diffChildren(
 			if (oldVNode._dom) {
 				oldVNode._dom = NULL;
 			}
-		} else if (typeof childVNode.type == 'function' && result !== UNDEFINED) {
+		} else if (result !== UNDEFINED) {
 			oldDom = result;
 		} else if (newDom) {
 			oldDom = newDom.nextSibling;

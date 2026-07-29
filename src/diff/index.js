@@ -72,7 +72,7 @@ export function diff(
 
 	// When passing through createElement it assigns the object
 	// constructor as undefined. This to prevent JSON-injection.
-	if (newVNode.constructor !== UNDEFINED) return NULL;
+	if (newVNode.constructor !== UNDEFINED) return UNDEFINED;
 
 	// If the previous diff bailed out, resume creating/hydrating.
 	if (
@@ -426,7 +426,7 @@ export function diff(
 			options._catchError(e, newVNode, oldVNode);
 		}
 	} else {
-		oldDom = newVNode._dom = diffElementNodes(
+		oldDom = (newVNode._dom = diffElementNodes(
 			oldVNode._dom,
 			newVNode,
 			oldVNode,
@@ -437,7 +437,7 @@ export function diff(
 			isHydrating,
 			refQueue,
 			parentDom
-		);
+		)).nextSibling;
 	}
 
 	if ((tmp = options.diffed)) tmp(newVNode);
