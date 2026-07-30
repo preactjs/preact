@@ -232,6 +232,11 @@ export function diff(
 						commitQueue.push(c);
 					}
 
+					// Skip over the retained subtree without traversing it; the
+					// `result` branch in diffChildren picks this up as the next
+					// oldDom.
+					oldDom = getDomSibling(oldVNode);
+
 					break outer;
 				}
 

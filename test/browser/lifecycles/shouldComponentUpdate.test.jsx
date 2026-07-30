@@ -88,6 +88,57 @@ describe('Lifecycle methods', () => {
 			expect(ShouldNot.prototype.render).toHaveBeenCalledOnce();
 		});
 
+		it('should not traverse a retained subtree after bailing out', () => {
+			const Inner = () => (
+				<Fragment>
+					<span>A</span>
+					<span>B</span>
+				</Fragment>
+			);
+
+			class Bailout extends Component {
+				shouldComponentUpdate() {
+					return false;
+				}
+
+				render() {
+					return <Inner />;
+				}
+			}
+
+			render(
+				<div>
+					<Bailout value={0} />
+					<span>C</span>
+				</div>,
+				scratch
+			);
+
+			const root = scratch._children;
+			const bailoutVNode = root._children[0]._children[0];
+			const innerVNode = bailoutVNode._children[0];
+			const children = innerVNode._children;
+			let reads = 0;
+			bailoutVNode._children[0] = new Proxy(innerVNode, {
+				get(target, property, receiver) {
+					const value = Reflect.get(target, property, receiver);
+					if (value === children) reads++;
+					return value;
+				}
+			});
+
+			render(
+				<div>
+					<Bailout value={1} />
+					<span>C</span>
+				</div>,
+				scratch
+			);
+
+			expect(scratch.textContent).to.equal('ABC');
+			expect(reads).to.equal(0);
+		});
+
 		it('should reorder non-updating text children', () => {
 			const rows = [
 				{ id: '1', a: 5, b: 100 },
