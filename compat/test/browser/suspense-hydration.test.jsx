@@ -5,6 +5,7 @@ import React, {
 	Fragment,
 	Suspense,
 	memo,
+	useId,
 	useState
 } from 'preact/compat';
 import { logCall, getLog, clearLog } from '../../../test/_util/logCall';
@@ -995,6 +996,135 @@ describe('suspense hydration', () => {
 				.dispatchEvent(createEvent('click'));
 			expect(listeners[3]).toHaveBeenCalledTimes(2);
 		});
+	});
+
+	it('restores useId namespaces from boundary markers regardless of resolution order', async () => {
+		const originalHtml =
+			'<div>' +
+			'<!--$s:0--><span id="PS0-0">A</span><!--/$s:0-->' +
+			'<!--$s:1--><span id="PS1-0">B</span><!--/$s:1-->' +
+			'</div>';
+		scratch.innerHTML = originalHtml;
+
+		const ids = {};
+		function Field({ name }) {
+			const id = useId();
+			ids[name] = id;
+			return <span id={id}>{name}</span>;
+		}
+
+		const [LazyA, resolveA] = createLazy();
+		const [LazyB, resolveB] = createLazy();
+		hydrate(
+			<div>
+				<Suspense fallback={null}>
+					<LazyA />
+				</Suspense>
+				<Suspense fallback={null}>
+					<LazyB />
+				</Suspense>
+			</div>,
+			scratch
+		);
+		rerender();
+
+		// Resolve in the reverse of the order the server resolved in
+		await resolveB(() => <Field name="B" />);
+		rerender();
+		await resolveA(() => <Field name="A" />);
+		rerender();
+
+		expect(ids).to.deep.equal({ A: 'PS0-0', B: 'PS1-0' });
+		expect(scratch.innerHTML).to.equal(originalHtml);
+	});
+
+	it('keeps marker-derived ids stable when client-only boundaries render during hydration', async () => {
+		scratch.innerHTML =
+			'<!--$s:0-->' +
+			'<span id="PS0-0">outer</span>' +
+			'<!--$s:1--><span id="PS1-0">nested</span><!--/$s:1-->' +
+			'<!--/$s:0-->';
+
+		const ids = {};
+		function Field({ name }) {
+			const id = useId();
+			ids[name] = id;
+			return <span id={id}>{name}</span>;
+		}
+
+		const [LazyOuter, resolveOuter] = createLazy();
+		const [LazyNested, resolveNested] = createLazy();
+
+		let showClientContent;
+		function App() {
+			const [showClient, setShowClient] = useState(false);
+			showClientContent = () => setShowClient(true);
+			return (
+				<Fragment>
+					{showClient && (
+						<Suspense fallback={null}>
+							<Field name="client" />
+						</Suspense>
+					)}
+					<Suspense fallback={null}>
+						<LazyOuter />
+					</Suspense>
+				</Fragment>
+			);
+		}
+
+		hydrate(<App />, scratch);
+		rerender();
+
+		// Client-only content appears while the boundary is still suspended
+		showClientContent();
+		rerender();
+
+		await resolveOuter(() => (
+			<Fragment>
+				<Field name="outer" />
+				<Suspense fallback={null}>
+					<LazyNested />
+				</Suspense>
+			</Fragment>
+		));
+		rerender();
+
+		await resolveNested(() => <Field name="nested" />);
+		rerender();
+
+		// The hydrated boundaries keep the ids the server rendered, the
+		// client-only boundary draws from the root id space and cannot
+		// collide with a marker namespace
+		expect(ids).to.deep.equal({
+			client: 'P0-0',
+			outer: 'PS0-0',
+			nested: 'PS1-0'
+		});
+	});
+
+	it('falls back to the root id space when the marker carries no namespace', async () => {
+		scratch.innerHTML = '<!--$s--><span id="P0-0">A</span><!--/$s-->';
+
+		let renderedId;
+		function Field() {
+			renderedId = useId();
+			return <span id={renderedId}>A</span>;
+		}
+
+		const [Lazy, resolve] = createLazy();
+		hydrate(
+			<Suspense fallback={null}>
+				<Lazy />
+			</Suspense>,
+			scratch
+		);
+		rerender();
+
+		await resolve(() => <Field />);
+		rerender();
+
+		expect(renderedId).to.equal('P0-0');
 	});
 
 	it('Should hydrate a fragment with multiple children correctly', () => {

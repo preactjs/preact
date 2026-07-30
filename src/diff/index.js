@@ -84,6 +84,12 @@ export function diff(
 		let excess = oldVNode._component._excess;
 		excessDomChildren = [];
 		if (excess.nodeType == 8) {
+			// The opening marker can carry the boundary id the server rendered
+			// with (<!--$s:1-->). Anchoring useId to it keeps ids stable no
+			// matter the order in which boundaries resume.
+			if (excess.data[2] == ':') {
+				newVNode._mask = ['S' + excess.data.slice(3), 0];
+			}
 			// Re-scan DOM from stored start marker for streamed hydration
 			for (
 				let depth = 1, node = excess.nextSibling;
@@ -100,7 +106,6 @@ export function diff(
 			excessDomChildren.push(excess);
 		}
 		oldDom = excessDomChildren[0];
-		oldVNode._component._excess = NULL;
 	}
 
 	if ((tmp = options._diff)) tmp(newVNode);
@@ -348,6 +353,7 @@ export function diff(
 
 			// We successfully rendered this VNode, unset any stored hydration/bailout state:
 			newVNode._flags &= RESET_MODE;
+			c._excess = NULL;
 
 			if (c._renderCallbacks.length) {
 				commitQueue.push(c);
@@ -395,10 +401,7 @@ export function diff(
 						}
 					}
 
-					if (startMarker) {
-						// Store start marker directly; children re-scanned on resume
-						newVNode._component._excess = startMarker;
-					} else {
+					if (!startMarker) {
 						while (oldDom && oldDom.nodeType == 8 && oldDom.nextSibling) {
 							oldDom = oldDom.nextSibling;
 						}
@@ -406,7 +409,13 @@ export function diff(
 						if (excessDomChildren) {
 							excessDomChildren[excessDomChildren.indexOf(oldDom)] = NULL;
 						}
-						newVNode._component._excess = oldDom;
+					}
+
+					// Store the start marker directly; children are re-scanned on
+					// resume. When a resumed boundary suspends again we keep the
+					// marker it originally started from.
+					if (!newVNode._component._excess) {
+						newVNode._component._excess = startMarker || oldDom;
 					}
 					newVNode._dom = oldDom;
 				} else if (excessDomChildren) {
