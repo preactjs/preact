@@ -843,9 +843,17 @@ describe('useSyncExternalStore', () => {
 			container.innerHTML = '<div>server</div>';
 			const serverRenderedDiv = container.getElementsByTagName('div')[0];
 
-			await act(() => {
-				hydrate(<App />, container);
-			});
+			// Use the default scheduler: the passive effect queued by the
+			// hydration pass must flush before the rerender that swaps in the
+			// client snapshot, so each snapshot gets its own effect run. `act`
+			// replaces the scheduler and would drain renders before effects.
+			options.debounceRendering = defaultDebounce;
+
+			hydrate(<App />, container);
+			// Passive effects are flushed on the next frame, so wait past the
+			// requestAnimationFrame timeout the hooks scheduler falls back to.
+			await new Promise(r => setTimeout(r, 100));
+
 			assertLog([
 				// First it hydrates the server rendered HTML
 				'server',
