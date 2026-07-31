@@ -214,7 +214,7 @@ export default defineConfig({
 						'debug/src/**/*',
 						'devtools/src/**/*',
 						'hooks/src/**/*',
-						'compeat/src/**/*',
+						'compat/src/**/*',
 						'jsx-runtime/src/**/*',
 						'test-utils/src/**/*'
 					],

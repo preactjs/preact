@@ -18,20 +18,73 @@ import {
 	useRef,
 	useState
 } from 'preact/hooks';
-import {
-	useDeferredValue,
-	useInsertionEffect,
-	useSyncExternalStore,
-	useTransition
-} from './index';
+import { useDeferredValue, useInsertionEffect, useTransition } from './index';
 import { assign, IS_NON_DIMENSIONAL } from './util';
 
 export const REACT_ELEMENT_TYPE = Symbol.for('react.element');
+
+const MODE_HYDRATE = 1 << 5;
 
 const CAMEL_PROPS =
 	/^(?:accent|alignment|arabic|baseline|cap|clip(?!PathU)|color|dominant|fill|flood|font|glyph(?!R)|horiz|image(!S)|letter|lighting|marker(?!H|W|U)|overline|paint|pointer|shape|stop|strikethrough|stroke|text(?!L)|transform|underline|unicode|units|v|vector|vert|word|writing|x(?!C))[A-Z]/;
 const CAMEL_REPLACE = /[A-Z0-9]/g;
 const IS_DOM = typeof document !== 'undefined';
+
+/**
+ * This is taken from https://github.com/facebook/react/blob/main/packages/use-sync-external-store/src/useSyncExternalStoreShimClient.js#L84
+ * on a high level this cuts out the warnings, ... and attempts a smaller implementation
+ * @typedef {{ _value: any; _getSnapshot: () => any }} Store
+ */
+export function useSyncExternalStore(
+	subscribe,
+	getSnapshot,
+	getServerSnapshot
+) {
+	const serverRendering = options._skipEffects || hydrationRoot;
+	const value = serverRendering
+		? (getServerSnapshot || getSnapshot)()
+		: getSnapshot();
+
+	/**
+	 * @typedef {{ _instance: Store }} StoreRef
+	 * @type {[StoreRef, (store: StoreRef) => void]}
+	 */
+	const [{ _instance }, forceUpdate] = useState({
+		_instance: { _value: value, _getSnapshot: getSnapshot }
+	});
+
+	useLayoutEffect(() => {
+		_instance._value = value;
+		_instance._getSnapshot = getSnapshot;
+
+		if (didSnapshotChange(_instance)) {
+			forceUpdate({ _instance });
+		}
+	}, [subscribe, value, getSnapshot]);
+
+	useEffect(() => {
+		if (didSnapshotChange(_instance)) {
+			forceUpdate({ _instance });
+		}
+
+		return subscribe(() => {
+			if (didSnapshotChange(_instance)) {
+				forceUpdate({ _instance });
+			}
+		});
+	}, [subscribe]);
+
+	return value;
+}
+
+/** @type {(inst: Store) => boolean} */
+function didSnapshotChange(inst) {
+	try {
+		return !Object.is(inst._value, inst._getSnapshot());
+	} catch (error) {
+		return true;
+	}
+}
 
 // Input types for which onchange should not be converted to oninput.
 const onChangeInputType = type => /fil|che|rad/.test(type);
@@ -136,8 +189,12 @@ function handleDomVNode(vnode) {
 		}
 
 		if (i === 'style' && typeof value === 'object') {
+			let cloned;
 			for (let key in value) {
 				if (typeof value[key] === 'number' && !IS_NON_DIMENSIONAL.test(key)) {
+					if (!cloned) {
+						cloned = value = assign({}, value);
+					}
 					value[key] += 'px';
 				}
 			}
@@ -258,12 +315,13 @@ options.vnode = vnode => {
 };
 
 // Only needed for react-relay
-let currentComponent;
+let currentComponent, hydrationRoot;
 const oldBeforeRender = options._render;
 options._render = function (vnode) {
 	if (oldBeforeRender) {
 		oldBeforeRender(vnode);
 	}
+	if (vnode._flags & MODE_HYDRATE) hydrationRoot = vnode;
 	currentComponent = vnode._component;
 };
 
@@ -287,6 +345,48 @@ options.diffed = function (vnode) {
 	}
 
 	currentComponent = null;
+	if (hydrationRoot == vnode) hydrationRoot = null;
+};
+
+/**
+ * Read the value of a Promise (suspending while pending) or a Context.
+ * Unlike other hooks, `use` may be called conditionally.
+ * @template T
+ * @param {(Promise<T> & { status?: string, value?: T, reason?: any }) | import('../../src/internal').PreactContext} resource
+ * @returns {T}
+ */
+export const use = resource => {
+	// A Context is a function without a `then`, a thenable has one.
+	if (resource.then) {
+		if (resource.status == 'fulfilled') return resource.value;
+		if (resource.status == 'rejected') throw resource.reason;
+		if (!resource.status) {
+			resource.status = 'pending';
+			resource.then(
+				value => {
+					resource.status = 'fulfilled';
+					resource.value = value;
+				},
+				reason => {
+					resource.status = 'rejected';
+					resource.reason = reason;
+				}
+			);
+		}
+		throw resource;
+	}
+
+	const id = resource._id;
+	const provider = currentComponent._globalContext[id];
+	if (!provider) return resource._defaultValue;
+	// `use` runs on every render without hook state, while `provider.sub`
+	// wraps `componentWillUnmount` on each call — mark the component so we
+	// only subscribe it once.
+	if (!currentComponent[id]) {
+		currentComponent[id] = true;
+		provider.sub(currentComponent);
+	}
+	return provider.props.value;
 };
 
 // This is a very very private internal function for React it
@@ -294,9 +394,7 @@ options.diffed = function (vnode) {
 export const __SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED = {
 	ReactCurrentDispatcher: {
 		current: {
-			readContext(context) {
-				return currentComponent._globalContext[context._id].props.value;
-			},
+			readContext: use,
 			useCallback,
 			useContext,
 			useDebugValue,

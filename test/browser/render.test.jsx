@@ -12,7 +12,6 @@ import {
 	createEvent
 } from '../_util/helpers';
 import { clearLog, getLog, logCall } from '../_util/logCall';
-import { useState } from 'preact/hooks';
 import { expect, vi } from 'vitest';
 
 function getAttributes(node) {
@@ -1046,16 +1045,20 @@ describe('render()', () => {
 		// This tests that we do not cause any cursor jumps in contenteditable fields
 		// See https://github.com/preactjs/preact/issues/2691
 
-		function Editable() {
-			const [value, setValue] = useState('Hello');
-
-			return (
-				<div
-					contentEditable
-					dangerouslySetInnerHTML={{ __html: value }}
-					onInput={e => setValue(e.currentTarget.innerHTML)}
-				/>
-			);
+		class Editable extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { value: 'Hello' };
+			}
+			render(props, state) {
+				return (
+					<div
+						contentEditable
+						dangerouslySetInnerHTML={{ __html: state.value }}
+						onInput={e => this.setState({ value: e.currentTarget.innerHTML })}
+					/>
+				);
+			}
 		}
 
 		render(<Editable />, scratch);
@@ -1751,10 +1754,10 @@ describe('render()', () => {
 		expect(getLog()).to.deep.equal([
 			'<div>.appendChild(#text)',
 			'<div>1352640.insertBefore(<div>11, <div>1)',
-			'<div>111352640.insertBefore(<div>1, <div>5)',
-			'<div>113152640.insertBefore(<div>6, <div>0)',
-			'<div>113152460.insertBefore(<div>2, <div>0)',
-			'<div>113154620.insertBefore(<div>5, <div>0)',
+			'<div>111352640.insertBefore(<div>3, <div>1)',
+			'<div>113152640.insertBefore(<div>4, <div>5)',
+			'<div>113145260.insertBefore(<div>6, <div>5)',
+			'<div>113146520.insertBefore(<div>2, <div>5)',
 			'<div>.appendChild(#text)',
 			'<div>113146250.appendChild(<div>9)',
 			'<div>.appendChild(#text)',

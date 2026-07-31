@@ -29,7 +29,6 @@ import {
 	useDeferredValue,
 	useEffectEvent,
 	useInsertionEffect,
-	useSyncExternalStore,
 	useTransition
 } from './hooks';
 import { memo } from './memo';
@@ -38,7 +37,9 @@ import {
 	REACT_ELEMENT_TYPE,
 	__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED,
 	hydrate,
-	render
+	render,
+	use,
+	useSyncExternalStore
 } from './render';
 import { Suspense, lazy } from './suspense';
 
@@ -132,10 +133,21 @@ function findDOMNode(component) {
  */
 const flushSync = (callback, arg) => {
 	const prevDebounce = options.debounceRendering;
-	options.debounceRendering = cb => cb();
-	const res = callback(arg);
-	options.debounceRendering = prevDebounce;
-	return res;
+
+	// Capture the scheduled render callback so that all updates performed
+	// inside the user callback are batched into a single synchronous commit
+	// instead of every state setter rendering independently.
+	let flush;
+	options.debounceRendering = cb => {
+		flush = cb;
+	};
+	try {
+		const res = callback(arg);
+		if (flush) flush();
+		return res;
+	} finally {
+		options.debounceRendering = prevDebounce;
+	}
 };
 
 /**
@@ -184,6 +196,7 @@ export {
 	useSyncExternalStore,
 	useTransition,
 	useEffectEvent,
+	use,
 	Fragment as StrictMode,
 	Suspense,
 	lazy,
@@ -208,6 +221,7 @@ export default {
 	useMemo,
 	useCallback,
 	useContext,
+	use,
 	useDebugValue,
 	version,
 	Children,

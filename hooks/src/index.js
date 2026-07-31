@@ -1,5 +1,4 @@
 import { options as _options } from 'preact';
-import { COMPONENT_FORCE } from '../../src/constants';
 
 const ObjectIs = Object.is;
 
@@ -58,20 +57,22 @@ options._render = vnode => {
 	const hooks = currentComponent.__hooks;
 	if (hooks) {
 		if (previousComponent === currentComponent) {
-			hooks._pendingEffects = [];
 			currentComponent._renderCallbacks = [];
-			hooks._list.some(hookItem => {
-				if (hookItem._nextValue) {
-					hookItem._value = hookItem._nextValue;
-				}
-				hookItem._pendingArgs = hookItem._nextValue = undefined;
-			});
 		} else {
 			hooks._pendingEffects.some(invokeCleanup);
 			hooks._pendingEffects.some(invokeEffect);
-			hooks._pendingEffects = [];
 			currentIndex = 0;
 		}
+		hooks._pendingEffects = [];
+
+		// Runs before every render, forced or not, so `shouldComponentUpdate`
+		// never has to apply these itself.
+		hooks._list.some(hookItem => {
+			if (hookItem._nextValue) {
+				hookItem._value = hookItem._nextValue;
+			}
+			hookItem._pendingArgs = hookItem._nextValue = undefined;
+		});
 	}
 	previousComponent = currentComponent;
 };
@@ -207,52 +208,28 @@ export function useReducer(reducer, initialState, init) {
 
 		if (!currentComponent._hasScuFromHooks) {
 			currentComponent._hasScuFromHooks = true;
-			let prevScu = currentComponent.shouldComponentUpdate;
-			const prevCWU = currentComponent.componentWillUpdate;
-
-			// If we're dealing with a forced update `shouldComponentUpdate` will
-			// not be called. But we use that to update the hook values, so we
-			// need to call it.
-			currentComponent.componentWillUpdate = function (p, s, c) {
-				if (this._bits & COMPONENT_FORCE) {
-					let tmp = prevScu;
-					// Clear to avoid other sCU hooks from being called
-					prevScu = undefined;
-					updateHookState(p, s, c);
-					prevScu = tmp;
-				}
-
-				if (prevCWU) prevCWU.call(this, p, s, c);
-			};
+			const prevScu = currentComponent.shouldComponentUpdate;
 
 			// This SCU has the purpose of bailing out after repeated updates
-			// to stateful hooks.
-			// we store the next value in _nextValue[0] and keep doing that for all
-			// state setters, if we have next states and
-			// all next states within a component end up being equal to their original state
-			// we are safe to bail out for this specific component.
-			/**
-			 *
-			 * @type {import('./internal').Component["shouldComponentUpdate"]}
-			 */
-			// @ts-ignore - We don't use TS to downtranspile
-			// eslint-disable-next-line no-inner-declarations
-			function updateHookState(p, s, c) {
-				if (!hookState._component.__hooks) return true;
+			// to stateful hooks. We store the next value in `_nextValue[0]` and
+			// keep doing that for all state setters; if we have next states and
+			// all next states within a component end up being equal to their
+			// original state we are safe to bail out for this specific component.
+			currentComponent.shouldComponentUpdate = function (p, s, c) {
+				const hooks = this.__hooks;
+				if (!hooks) return true;
 
 				// We check whether we have components with a nextValue set that
 				// have values that aren't equal to one another this pushes
 				// us to update further down the tree
 				let updatedHook = false;
-				let shouldUpdate = hookState._component.props !== p;
-				hookState._component.__hooks._list.some(hookItem => {
+				let shouldUpdate = this.props !== p;
+				hooks._list.some(hookItem => {
 					if (hookItem._nextValue) {
 						updatedHook = true;
-						const currentValue = hookItem._value[0];
-						hookItem._value = hookItem._nextValue;
-						hookItem._nextValue = undefined;
-						if (!ObjectIs(currentValue, hookItem._value[0]))
+						if (!ObjectIs(hookItem._value[0], hookItem._nextValue[0])) {
 							shouldUpdate = true;
+						}
 					}
 				});
 
@@ -262,9 +239,7 @@ export function useReducer(reducer, initialState, init) {
 				}
 
 				return !updatedHook || shouldUpdate;
-			}
-
-			currentComponent.shouldComponentUpdate = updateHookState;
+			};
 		}
 	}
 

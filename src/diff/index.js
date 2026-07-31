@@ -53,7 +53,6 @@ import { setProperty } from './props';
  * siblings. In most cases, it starts out as `oldChildren[0]._dom`.
  * @param {boolean} isHydrating Whether or not we are in hydration
  * @param {any[]} refQueue an array of elements needed to invoke refs
- * @param {Document} doc The document object to use for creating elements
  */
 export function diff(
 	parentDom,
@@ -65,8 +64,7 @@ export function diff(
 	commitQueue,
 	oldDom,
 	isHydrating,
-	refQueue,
-	doc
+	refQueue
 ) {
 	/** @type {any} */
 	let tmp,
@@ -83,6 +81,7 @@ export function diff(
 		(isHydrating = oldVNode._flags & MODE_HYDRATE) &&
 		oldVNode._component._excess
 	) {
+		newVNode._flags |= MODE_HYDRATE;
 		let excess = oldVNode._component._excess;
 		excessDomChildren = [];
 		if (excess.nodeType == 8) {
@@ -158,11 +157,11 @@ export function diff(
 			}
 
 			// Invoke getDerivedStateFromProps
-			if (isClassComponent && c._nextState == NULL) {
+			if (isClassComponent && !c._nextState) {
 				c._nextState = c.state;
 			}
 
-			if (isClassComponent && newType.getDerivedStateFromProps != NULL) {
+			if (isClassComponent && newType.getDerivedStateFromProps) {
 				if (c._nextState == c.state) {
 					c._nextState = assign({}, c._nextState);
 				}
@@ -181,21 +180,21 @@ export function diff(
 			if (!oldVNode._component) {
 				if (
 					isClassComponent &&
-					newType.getDerivedStateFromProps == NULL &&
-					c.componentWillMount != NULL
+					!newType.getDerivedStateFromProps &&
+					c.componentWillMount
 				) {
 					c.componentWillMount();
 				}
 
-				if (isClassComponent && c.componentDidMount != NULL) {
+				if (isClassComponent && c.componentDidMount) {
 					c._renderCallbacks.push(c.componentDidMount);
 				}
 			} else {
 				if (
 					isClassComponent &&
-					newType.getDerivedStateFromProps == NULL &&
+					!newType.getDerivedStateFromProps &&
 					newProps !== oldProps &&
-					c.componentWillReceiveProps != NULL
+					c.componentWillReceiveProps
 				) {
 					c.componentWillReceiveProps(newProps, componentContext);
 				}
@@ -203,7 +202,7 @@ export function diff(
 				if (
 					newVNode._original == oldVNode._original ||
 					(!(c._bits & COMPONENT_FORCE) &&
-						c.shouldComponentUpdate != NULL &&
+						c.shouldComponentUpdate &&
 						c.shouldComponentUpdate(
 							newProps,
 							c._nextState,
@@ -234,14 +233,19 @@ export function diff(
 						commitQueue.push(c);
 					}
 
+					// Skip over the retained subtree without traversing it; the
+					// `result` branch in diffChildren picks this up as the next
+					// oldDom.
+					oldDom = getDomSibling(oldVNode);
+
 					break outer;
 				}
 
-				if (c.componentWillUpdate != NULL) {
+				if (c.componentWillUpdate) {
 					c.componentWillUpdate(newProps, c._nextState, componentContext);
 				}
 
-				if (isClassComponent && c.componentDidUpdate != NULL) {
+				if (isClassComponent && c.componentDidUpdate) {
 					c._renderCallbacks.push(() => {
 						c.componentDidUpdate(oldProps, oldState, snapshot);
 					});
@@ -280,22 +284,47 @@ export function diff(
 			// Handle setState called in render, see #2553
 			c.state = c._nextState;
 
-			if (c.getChildContext != NULL) {
+			if (c.getChildContext) {
 				globalContext = assign({}, globalContext, c.getChildContext());
 			}
 
 			if (
 				isClassComponent &&
 				oldVNode._component &&
-				c.getSnapshotBeforeUpdate != NULL
+				c.getSnapshotBeforeUpdate
 			) {
 				snapshot = c.getSnapshotBeforeUpdate(oldProps, oldState);
 			}
 
 			const renderResult =
-				tmp != NULL && tmp.type === Fragment && tmp.key == NULL
+				tmp && tmp.type === Fragment && tmp.key == NULL
 					? cloneNode(tmp.props.children)
 					: tmp;
+
+			// A vnode carrying a `_parentDom` prop, considered a new root,
+			// continues rendering into that container. The subtree must stay
+			// invisible to the host tree's DOM bookkeeping: the portal vnode
+			// keeps a `null` `_dom` and the host insertion cursor (`oldDom`)
+			// passes through unchanged.
+			let hostOldDom = oldDom;
+			if (newProps._parentDom) {
+				parentDom = newProps._parentDom;
+				// If we portal into a math or svg element we need
+				// to swap the namespace (chart libraries often do this).
+				// The document follows the container too (e.g. iframes) as
+				// diffElementNodes derives it from its parentDom.
+				namespace = parentDom.namespaceURI;
+
+				// Changing the container remounts the children into the new one
+				if (oldVNode.props && oldVNode.props._parentDom != parentDom) {
+					/** @type {VNode[]} */ (oldVNode._children).forEach(child => {
+						if (child) unmount(child, child);
+					});
+					oldVNode._children = NULL;
+				}
+
+				oldDom = oldVNode._children ? getDomSibling(oldVNode, 0) : NULL;
+			}
 
 			oldDom = diffChildren(
 				parentDom,
@@ -308,9 +337,15 @@ export function diff(
 				commitQueue,
 				oldDom,
 				isHydrating,
-				refQueue,
-				doc
+				refQueue
 			);
+
+			// When we exit a portal we
+			// change up the oldDom
+			if (newProps._parentDom) {
+				newVNode._dom = NULL;
+				oldDom = hostOldDom;
+			}
 
 			// We successfully rendered this VNode, unset any stored hydration/bailout state:
 			newVNode._flags &= RESET_MODE;
@@ -329,7 +364,7 @@ export function diff(
 			commitQueue.length = oldCommitQueueLength;
 			newVNode._original = NULL;
 			// if hydrating or creating initial tree, bailout preserves DOM:
-			if (isHydrating || excessDomChildren != NULL) {
+			if (isHydrating || excessDomChildren) {
 				if (e.then) {
 					let commentMarkersToFind = 0,
 						startMarker;
@@ -338,10 +373,10 @@ export function diff(
 						? MODE_HYDRATE | MODE_SUSPENDED
 						: MODE_SUSPENDED;
 
-					if (excessDomChildren != NULL) {
+					if (excessDomChildren) {
 						for (let i = 0; i < excessDomChildren.length; i++) {
 							let child = excessDomChildren[i];
-							if (child == NULL) continue;
+							if (!child) continue;
 
 							if (child.nodeType == 8) {
 								if (child.data.startsWith('$s')) {
@@ -369,13 +404,13 @@ export function diff(
 							oldDom = oldDom.nextSibling;
 						}
 
-						if (excessDomChildren != NULL) {
+						if (excessDomChildren) {
 							excessDomChildren[excessDomChildren.indexOf(oldDom)] = NULL;
 						}
 						newVNode._component._excess = oldDom;
 					}
 					newVNode._dom = oldDom;
-				} else if (excessDomChildren != NULL) {
+				} else if (excessDomChildren) {
 					for (let i = excessDomChildren.length; i--; ) {
 						removeNode(excessDomChildren[i]);
 					}
@@ -384,7 +419,7 @@ export function diff(
 				newVNode._dom = oldVNode._dom;
 			}
 
-			if (newVNode._children == NULL) {
+			if (!newVNode._children) {
 				newVNode._children = oldVNode._children || [];
 			}
 
@@ -402,7 +437,7 @@ export function diff(
 			commitQueue,
 			isHydrating,
 			refQueue,
-			doc
+			parentDom
 		);
 	}
 
@@ -412,8 +447,10 @@ export function diff(
 }
 
 function markAsForce(vnode) {
-	if (vnode && vnode._component) vnode._component._bits |= COMPONENT_FORCE;
-	if (vnode && vnode._children) vnode._children.forEach(markAsForce);
+	if (vnode) {
+		if (vnode._component) vnode._component._bits |= COMPONENT_FORCE;
+		if (vnode._children) vnode._children.some(markAsForce);
+	}
 }
 
 /**
@@ -452,7 +489,7 @@ function cloneNode(node) {
 		return node.map(cloneNode);
 	}
 
-	if (node.constructor !== UNDEFINED) return null;
+	if (node.constructor !== UNDEFINED) return NULL;
 
 	return assign({}, node);
 }
@@ -470,7 +507,8 @@ function cloneNode(node) {
  * to invoke in commitRoot
  * @param {boolean} isHydrating Whether or not we are in hydration
  * @param {any[]} refQueue an array of elements needed to invoke refs
- * @param {Document} doc The document object to use for creating elements
+ * @param {PreactElement} parentDom The parent this element will be inserted
+ * into; new nodes are created from its ownerDocument (e.g. iframes)
  * @returns {PreactElement}
  */
 function diffElementNodes(
@@ -483,7 +521,7 @@ function diffElementNodes(
 	commitQueue,
 	isHydrating,
 	refQueue,
-	doc
+	parentDom
 ) {
 	let oldProps = oldVNode.props || EMPTY_OBJ;
 	const newProps = newVNode.props;
@@ -505,7 +543,7 @@ function diffElementNodes(
 	else if (nodeType == 'math') namespace = MATH_NAMESPACE;
 	else if (!namespace) namespace = XHTML_NAMESPACE;
 
-	if (excessDomChildren != NULL) {
+	if (excessDomChildren) {
 		for (i = 0; i < excessDomChildren.length; i++) {
 			value = excessDomChildren[i];
 
@@ -524,8 +562,9 @@ function diffElementNodes(
 		}
 	}
 
-	if (dom == NULL) {
-		if (nodeType == NULL) {
+	if (!dom) {
+		const doc = parentDom.ownerDocument;
+		if (!nodeType) {
 			return doc.createTextNode(newProps);
 		}
 
@@ -542,7 +581,7 @@ function diffElementNodes(
 		excessDomChildren = NULL;
 	}
 
-	if (nodeType == NULL) {
+	if (!nodeType) {
 		// During hydration, we still have to split merged text from SSR'd HTML.
 		if (oldProps !== newProps && (!isHydrating || dom.data != newProps)) {
 			dom.data = newProps;
@@ -557,7 +596,7 @@ function diffElementNodes(
 		// If we are in a situation where we are not hydrating but are using
 		// existing DOM (e.g. replaceNode) we should read the existing DOM
 		// attributes to diff them
-		if (!isHydrating && excessDomChildren != NULL) {
+		if (!isHydrating && excessDomChildren) {
 			oldProps = {};
 			for (i = 0; i < dom.attributes.length; i++) {
 				value = dom.attributes[i];
@@ -636,12 +675,11 @@ function diffElementNodes(
 					? excessDomChildren[0]
 					: oldVNode._children && getDomSibling(oldVNode, 0),
 				isHydrating,
-				refQueue,
-				doc
+				refQueue
 			);
 
 			// Remove children that are not part of any vnode.
-			if (excessDomChildren != NULL) {
+			if (excessDomChildren) {
 				for (i = excessDomChildren.length; i--; ) {
 					removeNode(excessDomChildren[i]);
 				}
@@ -659,7 +697,7 @@ function diffElementNodes(
 				// despite the attribute not being present. When the attribute
 				// is missing the progress bar is treated as indeterminate.
 				// To fix that we'll always update it when it is 0 for progress elements
-				(inputValue !== dom[i] || (nodeType === 'progress' && !inputValue))
+				(inputValue !== dom[i] || (nodeType == 'progress' && !inputValue))
 			) {
 				setProperty(dom, i, inputValue, oldProps[i], namespace);
 			}
@@ -687,7 +725,7 @@ export function applyRef(ref, value, vnode) {
 				ref._unmount();
 			}
 
-			if (typeof ref._unmount != 'function' || value != NULL) {
+			if (typeof ref._unmount != 'function' || value) {
 				// Store the cleanup function on the function
 				// instance object itself to avoid shape
 				// transitioning vnode
@@ -714,7 +752,7 @@ export function unmount(vnode, parentVNode, skipRemove) {
 		applyRef(r, NULL, parentVNode);
 	}
 
-	if ((r = vnode._component) != NULL) {
+	if ((r = vnode._component)) {
 		if (r.componentWillUnmount) {
 			try {
 				r.componentWillUnmount();
@@ -732,18 +770,19 @@ export function unmount(vnode, parentVNode, skipRemove) {
 				unmount(
 					r[i],
 					parentVNode,
-					skipRemove || typeof vnode.type != 'function'
+					// A portal's children live in another container, so a removed
+					// host ancestor doesn't detach them; always remove them.
+					typeof vnode.type == 'function'
+						? skipRemove && !vnode.props._parentDom
+						: true
 				);
 			}
 		}
 	}
 
-	if (!skipRemove) {
-		removeNode(vnode._dom);
-	}
-
-	if (vnode._dom && vnode._dom._listeners) {
-		vnode._dom._listeners = NULL;
+	if ((r = vnode._dom)) {
+		if (!skipRemove) removeNode(r);
+		if (r._listeners) r._listeners = NULL;
 	}
 
 	vnode._dom = vnode._component = vnode._parent = NULL;
