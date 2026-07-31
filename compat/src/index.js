@@ -38,6 +38,7 @@ import {
 	__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED,
 	hydrate,
 	render,
+	use,
 	useSyncExternalStore
 } from './render';
 import { Suspense, lazy } from './suspense';
@@ -195,6 +196,7 @@ export {
 	useSyncExternalStore,
 	useTransition,
 	useEffectEvent,
+	use,
 	Fragment as StrictMode,
 	Suspense,
 	lazy,
@@ -219,6 +221,7 @@ export default {
 	useMemo,
 	useCallback,
 	useContext,
+	use,
 	useDebugValue,
 	version,
 	Children,

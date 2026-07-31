@@ -132,6 +132,8 @@ declare namespace React {
 		getServerSnapshot?: () => T
 	): T;
 	export function useEffectEvent<T extends Function>(cb: T): T;
+	// React 19 hooks
+	export function use<T>(resource: Promise<T> | _preact.Context<T>): T;
 
 	// Preact Defaults
 	export import Context = _preact.Context;
