@@ -41,6 +41,7 @@ describe('compat exports', () => {
 		expect(Compat.useInsertionEffect).to.be.a('function');
 		expect(Compat.useTransition).to.be.a('function');
 		expect(Compat.useDeferredValue).to.be.a('function');
+		expect(Compat.use).to.be.a('function');
 
 		// Suspense
 		expect(Compat.Suspense).to.be.a('function');
@@ -82,6 +83,7 @@ describe('compat exports', () => {
 		expect(Named.useMemo).to.be.a('function');
 		expect(Named.useCallback).to.be.a('function');
 		expect(Named.useContext).to.be.a('function');
+		expect(Named.use).to.be.a('function');
 
 		// Suspense
 		expect(Named.Suspense).to.be.a('function');
