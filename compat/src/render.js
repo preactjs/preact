@@ -348,14 +348,53 @@ options.diffed = function (vnode) {
 	if (hydrationRoot == vnode) hydrationRoot = null;
 };
 
+/**
+ * Read the value of a Promise (suspending while pending) or a Context.
+ * Unlike other hooks, `use` may be called conditionally.
+ * @template T
+ * @param {(Promise<T> & { status?: string, value?: T, reason?: any }) | import('../../src/internal').PreactContext} resource
+ * @returns {T}
+ */
+export const use = resource => {
+	// A Context is a function without a `then`, a thenable has one.
+	if (resource.then) {
+		if (resource.status == 'fulfilled') return resource.value;
+		if (resource.status == 'rejected') throw resource.reason;
+		if (!resource.status) {
+			resource.status = 'pending';
+			resource.then(
+				value => {
+					resource.status = 'fulfilled';
+					resource.value = value;
+				},
+				reason => {
+					resource.status = 'rejected';
+					resource.reason = reason;
+				}
+			);
+		}
+		throw resource;
+	}
+
+	const id = resource._id;
+	const provider = currentComponent._globalContext[id];
+	if (!provider) return resource._defaultValue;
+	// `use` runs on every render without hook state, while `provider.sub`
+	// wraps `componentWillUnmount` on each call — mark the component so we
+	// only subscribe it once.
+	if (!currentComponent[id]) {
+		currentComponent[id] = true;
+		provider.sub(currentComponent);
+	}
+	return provider.props.value;
+};
+
 // This is a very very private internal function for React it
 // is used to sort-of do runtime dependency injection.
 export const __SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED = {
 	ReactCurrentDispatcher: {
 		current: {
-			readContext(context) {
-				return currentComponent._globalContext[context._id].props.value;
-			},
+			readContext: use,
 			useCallback,
 			useContext,
 			useDebugValue,
