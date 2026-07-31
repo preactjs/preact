@@ -17,8 +17,7 @@ import {
 	useImperativeHandle,
 	useMemo,
 	useCallback,
-	useContext,
-	useErrorBoundary
+	useContext
 } from 'preact/hooks';
 import { vi } from 'vitest';
 
@@ -86,7 +85,6 @@ describe('hook options', () => {
 		const USE_MEMO = 7;
 		const USE_CALLBACK = 8;
 		const USE_CONTEXT = 9;
-		const USE_ERROR_BOUNDARY = 10;
 
 		const Ctx = createContext(null);
 
@@ -100,7 +98,6 @@ describe('hook options', () => {
 			useMemo(() => null, []);
 			useCallback(() => null, []);
 			useContext(Ctx);
-			useErrorBoundary(() => null);
 		}
 
 		render(
@@ -119,10 +116,7 @@ describe('hook options', () => {
 			[5, USE_IMPERATIVE_HANDLE],
 			[6, USE_MEMO],
 			[7, USE_CALLBACK],
-			[8, USE_CONTEXT],
-			[9, USE_ERROR_BOUNDARY],
-			// Belongs to useErrorBoundary that uses multiple native hooks.
-			[10, USE_STATE]
+			[8, USE_CONTEXT]
 		]);
 	});
 

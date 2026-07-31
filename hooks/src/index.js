@@ -397,29 +397,6 @@ export function useDebugValue(value, formatter) {
 	}
 }
 
-/**
- * @param {(error: unknown, errorInfo: import('preact').ErrorInfo) => void} cb
- * @returns {[unknown, () => void]}
- */
-export function useErrorBoundary(cb) {
-	/** @type {import('./internal').ErrorBoundaryHookState} */
-	const state = getHookState(currentIndex++, 10);
-	const errState = useState();
-	state._value = cb;
-	if (!currentComponent.componentDidCatch) {
-		currentComponent.componentDidCatch = (err, errorInfo) => {
-			if (state._value) state._value(err, errorInfo);
-			errState[1](err);
-		};
-	}
-	return [
-		errState[0],
-		() => {
-			errState[1](undefined);
-		}
-	];
-}
-
 /** @type {() => string} */
 export function useId() {
 	/** @type {import('./internal').IdHookState} */
