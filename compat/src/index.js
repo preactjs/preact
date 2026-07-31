@@ -29,7 +29,6 @@ import {
 	useDeferredValue,
 	useEffectEvent,
 	useInsertionEffect,
-	useSyncExternalStore,
 	useTransition
 } from './hooks';
 import { memo } from './memo';
@@ -38,7 +37,8 @@ import {
 	REACT_ELEMENT_TYPE,
 	__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED,
 	hydrate,
-	render
+	render,
+	useSyncExternalStore
 } from './render';
 import { Suspense, lazy } from './suspense';
 

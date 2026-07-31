@@ -5,7 +5,8 @@ import React, {
 	Fragment,
 	Suspense,
 	memo,
-	useState
+	useState,
+	useSyncExternalStore
 } from 'preact/compat';
 import { logCall, getLog, clearLog } from '../../../test/_util/logCall';
 import {
@@ -96,6 +97,46 @@ describe('suspense hydration', () => {
 			expect(getLog()).to.deep.equal([]);
 			clearLog();
 		});
+	});
+
+	it('should use the server snapshot when suspended hydration resumes', async () => {
+		scratch.innerHTML = '<div>server</div>';
+		clearLog();
+
+		const snapshots = [];
+		const [Lazy, resolve] = createLazy();
+
+		function StoreValue() {
+			const value = useSyncExternalStore(
+				() => () => {},
+				() => {
+					snapshots.push('client');
+					return 'client';
+				},
+				() => {
+					snapshots.push('server');
+					return 'server';
+				}
+			);
+			return <div>{value}</div>;
+		}
+
+		hydrate(
+			<Suspense>
+				<Lazy />
+			</Suspense>,
+			scratch
+		);
+		rerender();
+		expect(snapshots).to.deep.equal([]);
+
+		await resolve(() => <StoreValue />);
+		rerender();
+
+		const [first, ...rest] = snapshots;
+		expect(first).to.equal('server');
+		expect(rest.every(snap => snap === 'client')).to.equal(true);
+		expect(scratch.innerHTML).to.equal('<div>client</div>');
 	});
 
 	it('Should not crash when oldVNode._children is null during shouldComponentUpdate optimization', () => {
