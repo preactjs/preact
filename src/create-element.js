@@ -1,4 +1,4 @@
-import { slice } from './util';
+import { assign, slice } from './util';
 import options from './options';
 import { NULL, UNDEFINED } from './constants';
 
@@ -17,19 +17,54 @@ export function createElement(type, props, children) {
 	let normalizedProps = {},
 		key,
 		ref,
-		i;
+		i,
+		length = arguments.length;
 	for (i in props) {
 		if (i == 'key') key = props[i];
 		else if (i == 'ref' && typeof type != 'function') ref = props[i];
 		else normalizedProps[i] = props[i];
 	}
 
-	if (arguments.length > 2) {
-		normalizedProps.children =
-			arguments.length > 3 ? slice.call(arguments, 2) : children;
+	if (length > 2) {
+		normalizedProps.children = length > 3 ? slice.call(arguments, 2) : children;
 	}
 
 	return createVNode(type, normalizedProps, key, ref, NULL);
+}
+
+/**
+ * Clones the given VNode, optionally adding attributes/props and replacing its
+ * children.
+ * @param {import('./internal').VNode} vnode The virtual DOM element to clone
+ * @param {object} props Attributes/props to add when cloning
+ * @param {Array<import('./internal').ComponentChildren>} children Any additional arguments will be used
+ * as replacement children.
+ * @returns {import('./internal').VNode}
+ */
+export function cloneElement(vnode, props, children) {
+	let normalizedProps = assign({}, vnode.props),
+		key,
+		ref,
+		i,
+		length = arguments.length;
+
+	for (i in props) {
+		if (i == 'key') key = props[i];
+		else if (i == 'ref' && typeof vnode.type != 'function') ref = props[i];
+		else normalizedProps[i] = props[i];
+	}
+
+	if (length > 2) {
+		normalizedProps.children = length > 3 ? slice.call(arguments, 2) : children;
+	}
+
+	return createVNode(
+		vnode.type,
+		normalizedProps,
+		key !== UNDEFINED ? key : vnode.key,
+		ref !== UNDEFINED ? ref : vnode.ref,
+		NULL
+	);
 }
 
 /**
@@ -59,13 +94,13 @@ export function createVNode(type, props, key, ref, original) {
 		_dom: NULL,
 		_component: NULL,
 		constructor: UNDEFINED,
-		_original: original == NULL ? ++vnodeId : original,
+		_original: original || ++vnodeId,
 		_index: -1,
 		_flags: 0
 	};
 
 	// Only invoke the vnode hook if this was *not* a direct copy:
-	if (original == NULL && options.vnode != NULL) options.vnode(vnode);
+	if (!original && options.vnode) options.vnode(vnode);
 
 	return vnode;
 }

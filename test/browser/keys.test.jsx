@@ -351,7 +351,7 @@ describe('keys', () => {
 		render(<List values={['b', 'a']} />, scratch);
 		expect(scratch.textContent).to.equal('ba');
 
-		expect(getLog()).to.deep.equal(['<ol>ab.appendChild(<li>a)']);
+		expect(getLog()).to.deep.equal(['<ol>ab.insertBefore(<li>b, <li>a)']);
 	});
 
 	it('should swap existing keyed children in the middle of a list efficiently', () => {
@@ -367,7 +367,7 @@ describe('keys', () => {
 		render(<List values={values} />, scratch);
 		expect(scratch.textContent).to.equal('acbd', 'initial swap');
 		expect(getLog()).to.deep.equal(
-			['<ol>abcd.insertBefore(<li>b, <li>d)'],
+			['<ol>abcd.insertBefore(<li>c, <li>b)'],
 			'initial swap'
 		);
 
@@ -378,8 +378,173 @@ describe('keys', () => {
 		render(<List values={values} />, scratch);
 		expect(scratch.textContent).to.equal('abcd', 'swap back');
 		expect(getLog()).to.deep.equal(
-			['<ol>acbd.insertBefore(<li>c, <li>d)'],
+			['<ol>acbd.insertBefore(<li>b, <li>c)'],
 			'swap back'
+		);
+	});
+
+	it('should displace multiple keyed children to the end efficiently', () => {
+		const values = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'];
+
+		render(<List values={values} />, scratch);
+		expect(scratch.textContent).to.equal('abcdefghij');
+
+		values.push(...values.splice(0, 3));
+		clearLog();
+
+		render(<List values={values} />, scratch);
+		expect(scratch.textContent).to.equal('defghijabc');
+		expect(getLog()).to.deep.equal([
+			'<ol>abcdefghij.appendChild(<li>a)',
+			'<ol>bcdefghija.appendChild(<li>b)',
+			'<ol>cdefghijab.appendChild(<li>c)'
+		]);
+	});
+
+	it('should not displace when the suffix after the match is shorter than the jump', () => {
+		const values = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'];
+
+		render(<List values={values} />, scratch);
+		expect(scratch.textContent).to.equal('abcdefghij');
+
+		// Swap two far apart children; only the two swapped children are out of
+		// order, so only those two may move.
+		[values[1], values[8]] = [values[8], values[1]];
+		clearLog();
+
+		render(<List values={values} />, scratch);
+		expect(scratch.textContent).to.equal('aicdefghbj');
+		expect(getLog()).to.deep.equal([
+			'<ol>abcdefghij.insertBefore(<li>i, <li>b)',
+			'<ol>aibcdefghj.insertBefore(<li>b, <li>j)'
+		]);
+	});
+
+	it('should move the shorter suffix when more than half the list is displaced', () => {
+		const values = ['a', 'b', 'c', 'd', 'e', 'f'];
+
+		render(<List values={values} />, scratch);
+		expect(scratch.textContent).to.equal('abcdef');
+
+		// Displacing 4 of 6 children: moving the two-child suffix is the
+		// minimal set of moves.
+		values.push(...values.splice(0, 4));
+		clearLog();
+
+		render(<List values={values} />, scratch);
+		expect(scratch.textContent).to.equal('efabcd');
+		expect(getLog()).to.deep.equal([
+			'<ol>abcdef.insertBefore(<li>e, <li>a)',
+			'<ol>eabcdf.insertBefore(<li>f, <li>a)'
+		]);
+	});
+
+	it('should displace multiple keyed children to the end while the list grows', () => {
+		const values = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'];
+
+		render(<List values={values} />, scratch);
+		expect(scratch.textContent).to.equal('abcdefghij');
+
+		values.push(...values.splice(0, 3));
+		values.push('k');
+		clearLog();
+
+		render(<List values={values} />, scratch);
+		expect(scratch.textContent).to.equal('defghijabck');
+		expect(getLog()).to.deep.equal([
+			'<ol>abcdefghij.appendChild(<li>a)',
+			'<ol>bcdefghija.appendChild(<li>b)',
+			'<ol>cdefghijab.appendChild(<li>c)',
+			'<li>.appendChild(#text)',
+			'<ol>defghijabc.appendChild(<li>k)'
+		]);
+	});
+
+	it('should displace multiple keyed children to the end while another is removed', () => {
+		const values = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'];
+
+		render(<List values={values} />, scratch);
+		expect(scratch.textContent).to.equal('abcdefghij');
+
+		values.push(...values.splice(0, 3));
+		values.splice(values.indexOf('j'), 1);
+		clearLog();
+
+		render(<List values={values} />, scratch);
+		expect(scratch.textContent).to.equal('defghiabc');
+		expect(getLog()).to.deep.equal([
+			'<li>j.remove()',
+			'<ol>abcdefghi.appendChild(<li>a)',
+			'<ol>bcdefghia.appendChild(<li>b)',
+			'<ol>cdefghiab.appendChild(<li>c)'
+		]);
+	});
+
+	it('should displace keyed children to the end repeatedly', () => {
+		const values = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'];
+		const expectedDisplaceLogs = [
+			[
+				'<ol>abcdefghij.appendChild(<li>a)',
+				'<ol>bcdefghija.appendChild(<li>b)',
+				'<ol>cdefghijab.appendChild(<li>c)'
+			],
+			[
+				'<ol>defghijabc.appendChild(<li>d)',
+				'<ol>efghijabcd.appendChild(<li>e)',
+				'<ol>fghijabcde.appendChild(<li>f)'
+			],
+			[
+				'<ol>ghijabcdef.appendChild(<li>g)',
+				'<ol>hijabcdefg.appendChild(<li>h)',
+				'<ol>ijabcdefgh.appendChild(<li>i)'
+			]
+		];
+
+		render(<List values={values} />, scratch);
+		expect(scratch.textContent).to.equal('abcdefghij');
+
+		for (let n = 0; n < 3; n++) {
+			values.push(...values.splice(0, 3));
+			clearLog();
+
+			render(<List values={values} />, scratch);
+			expect(scratch.textContent).to.equal(values.join(''));
+			expect(getLog()).to.deep.equal(expectedDisplaceLogs[n], `round ${n}`);
+		}
+	});
+
+	it('should keep text siblings correct around displaced keyed children', () => {
+		const content = condition => (
+			<ol>
+				{condition
+					? [
+							<li key="a">a</li>,
+							<li key="b">b</li>,
+							<li key="c">c</li>,
+							'mid',
+							<li key="d">d</li>,
+							<li key="e">e</li>
+						]
+					: [
+							<li key="c">c</li>,
+							'mid',
+							<li key="a">a</li>,
+							<li key="b">b</li>,
+							<li key="d">d</li>,
+							<li key="e">e</li>
+						]}
+			</ol>
+		);
+
+		render(content(true), scratch);
+		expect(scratch.innerHTML).to.equal(
+			'<ol><li>a</li><li>b</li><li>c</li>mid<li>d</li><li>e</li></ol>'
+		);
+
+		clearLog();
+		render(content(false), scratch);
+		expect(scratch.innerHTML).to.equal(
+			'<ol><li>c</li>mid<li>a</li><li>b</li><li>d</li><li>e</li></ol>'
 		);
 	});
 
@@ -463,7 +628,7 @@ describe('keys', () => {
 			'<ol>jihgfabcde.insertBefore(<li>e, <li>a)',
 			'<ol>jihgfeabcd.insertBefore(<li>d, <li>a)',
 			'<ol>jihgfedabc.insertBefore(<li>c, <li>a)',
-			'<ol>jihgfedcab.appendChild(<li>a)'
+			'<ol>jihgfedcab.insertBefore(<li>b, <li>a)'
 		]);
 	});
 

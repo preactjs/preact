@@ -132,10 +132,21 @@ function findDOMNode(component) {
  */
 const flushSync = (callback, arg) => {
 	const prevDebounce = options.debounceRendering;
-	options.debounceRendering = cb => cb();
-	const res = callback(arg);
-	options.debounceRendering = prevDebounce;
-	return res;
+
+	// Capture the scheduled render callback so that all updates performed
+	// inside the user callback are batched into a single synchronous commit
+	// instead of every state setter rendering independently.
+	let flush;
+	options.debounceRendering = cb => {
+		flush = cb;
+	};
+	try {
+		const res = callback(arg);
+		if (flush) flush();
+		return res;
+	} finally {
+		options.debounceRendering = prevDebounce;
+	}
 };
 
 /**

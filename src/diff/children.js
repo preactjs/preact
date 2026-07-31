@@ -40,7 +40,6 @@ import { getDomSibling } from '../component';
  * siblings. In most cases, it starts out as `oldChildren[0]._dom`.
  * @param {boolean} isHydrating Whether or not we are in hydration
  * @param {any[]} refQueue an array of elements needed to invoke refs
- * @param {Document} doc The document object to use for creating elements
  * @returns {PreactElement} The next sibling DOM element to insert new elements
  */
 export function diffChildren(
@@ -54,8 +53,7 @@ export function diffChildren(
 	commitQueue,
 	oldDom,
 	isHydrating,
-	refQueue,
-	doc
+	refQueue
 ) {
 	let i,
 		/** @type {VNode} */
@@ -67,10 +65,11 @@ export function diffChildren(
 		/** @type {PreactElement} */
 		firstChildDom;
 
-	// This is a compression of oldParentVNode!=null && oldParentVNode != EMPTY_OBJ && oldParentVNode._children || EMPTY_ARR
-	// as EMPTY_OBJ._children should be `undefined`.
+	// This is a compression of oldParentVNode != EMPTY_OBJ && oldParentVNode._children || EMPTY_ARR
+	// as EMPTY_OBJ._children should be `undefined`. Callers always pass at
+	// least EMPTY_OBJ, so a null check isn't needed.
 	/** @type {VNode[]} */
-	let oldChildren = (oldParentVNode && oldParentVNode._children) || EMPTY_ARR;
+	let oldChildren = oldParentVNode._children || EMPTY_ARR;
 
 	let newChildrenLength = renderResult.length;
 
@@ -88,8 +87,10 @@ export function diffChildren(
 
 		// At this point, constructNewChildrenArray has assigned _index to be the
 		// matchingIndex for this VNode's oldVNode (or -1 if there is no oldVNode).
+		// ~_index guards the -1 case: a negative array index is a named property
+		// access which V8 can't serve from the fast elements path.
 		oldVNode =
-			(childVNode._index != -1 && oldChildren[childVNode._index]) || EMPTY_OBJ;
+			(~childVNode._index && oldChildren[childVNode._index]) || EMPTY_OBJ;
 
 		// Update childVNode._index to its final index
 		childVNode._index = i;
@@ -105,8 +106,7 @@ export function diffChildren(
 			commitQueue,
 			oldDom,
 			isHydrating,
-			refQueue,
-			doc
+			refQueue
 		);
 
 		// Adjust DOM nodes
@@ -122,25 +122,23 @@ export function diffChildren(
 			);
 		}
 
-		if (firstChildDom == NULL && newDom != NULL) {
+		if (!firstChildDom && newDom) {
 			firstChildDom = newDom;
 		}
 
-		let shouldPlace = childVNode._flags & INSERT_VNODE;
-		if (shouldPlace || oldVNode._children === childVNode._children) {
+		if (childVNode._flags & INSERT_VNODE) {
 			oldDom = insert(
 				childVNode,
 				oldDom,
 				parentDom,
-				shouldPlace,
-				oldVNode == NULL || oldVNode._original == NULL
+				oldVNode._original == NULL
 			);
 
 			// When a matched VNode is physically moved via INSERT_VNODE, its old
 			// _dom pointer becomes a stale positional reference. Clear it so that
 			// getDomSibling (called from nested diffs) won't return this stale
 			// reference and mis-place subsequent DOM nodes. See #5065.
-			if (shouldPlace && oldVNode._dom) {
+			if (oldVNode._dom) {
 				oldVNode._dom = NULL;
 			}
 		} else if (typeof childVNode.type == 'function' && result !== UNDEFINED) {
@@ -182,6 +180,10 @@ function constructNewChildrenArray(
 
 	let skew = 0;
 
+	/** Whether any matched child was found far from its skewed index, i.e. a
+	 * real reorder happened and we need to compute the minimal set of moves. */
+	let moved = false;
+
 	newParentVNode._children = new Array(newChildrenLength);
 	for (i = 0; i < newChildrenLength; i++) {
 		// @ts-expect-error We are reusing the childVNode variable to hold both the
@@ -199,11 +201,11 @@ function constructNewChildrenArray(
 		// If this newVNode is being reused (e.g. <div>{reuse}{reuse}</div>) in the same diff,
 		// or we are rendering a component (e.g. setState) copy the oldVNodes so it can have
 		// it's own DOM & etc. pointers
+		// Anything that isn't an object at this point is a string, number or
+		// bigint (null, booleans and functions are handled above), String
+		// objects are the lone object type rendered as text.
 		else if (
-			typeof childVNode == 'string' ||
-			typeof childVNode == 'number' ||
-			// eslint-disable-next-line valid-typeof
-			typeof childVNode == 'bigint' ||
+			typeof childVNode != 'object' ||
 			childVNode.constructor == String
 		) {
 			childVNode = newParentVNode._children[i] = createVNode(
@@ -252,7 +254,8 @@ function constructNewChildrenArray(
 		));
 
 		oldVNode = NULL;
-		if (matchingIndex != -1) {
+		// ~matchingIndex is only falsy for -1, i.e. when no match was found
+		if (~matchingIndex) {
 			oldVNode = oldChildren[matchingIndex];
 			remainingOldChildren--;
 			if (oldVNode) {
@@ -263,8 +266,8 @@ function constructNewChildrenArray(
 		// Here, we define isMounting for the purposes of the skew diffing
 		// algorithm. Nodes that are unsuspending are considered mounting and we detect
 		// this by checking if oldVNode._original == null
-		if (oldVNode == NULL || oldVNode._original == NULL) {
-			if (matchingIndex == -1) {
+		if (!oldVNode || !oldVNode._original) {
+			if (!~matchingIndex) {
 				// When the array of children is growing we need to decrease the skew
 				// as we are adding a new element to the array.
 				// Example:
@@ -290,38 +293,74 @@ function constructNewChildrenArray(
 			if (typeof childVNode.type != 'function') {
 				childVNode._flags |= INSERT_VNODE;
 			}
-		} else if (matchingIndex != skewedIndex) {
-			// When we move elements around i.e. [0, 1, 2] --> [1, 0, 2]
-			// --> we diff 1, we find it at position 1 while our skewed index is 0 and our skew is 0
-			//     we set the skew to 1 as we found an offset.
-			// --> we diff 0, we find it at position 0 while our skewed index is at 2 and our skew is 1
-			//     this makes us increase the skew again.
-			// --> we diff 2, we find it at position 2 while our skewed index is at 4 and our skew is 2
-			//
-			// this becomes an optimization question where currently we see a 1 element offset as an insertion
-			// or deletion i.e. we optimize for [0, 1, 2] --> [9, 0, 1, 2]
-			// while a more than 1 offset we see as a swap.
-			// We could probably build heuristics for having an optimized course of action here as well, but
-			// might go at the cost of some bytes.
-			//
-			// If we wanted to optimize for i.e. only swaps we'd just do the last two code-branches and have
-			// only the first item be a re-scouting and all the others fall in their skewed counter-part.
-			// We could also further optimize for swaps
+		} else {
+			// Matched children are candidates for the minimal-move pass below;
+			// MATCHED on a _new_ vnode is cleared in diffChildren's placement loop.
+			childVNode._flags |= MATCHED;
+
+			// The skew adjustments keep findMatchingIndex's search centered for
+			// shift patterns (insertions/removals at the front). A match further
+			// than one position away means children were genuinely reordered:
+			// flag it so the minimal set of moves is computed below. Off-by-one
+			// matches provably keep matched old indices in increasing order, so
+			// no moves are needed for them.
 			if (matchingIndex == skewedIndex - 1) {
 				skew--;
 			} else if (matchingIndex == skewedIndex + 1) {
 				skew++;
-			} else {
+			} else if (matchingIndex != skewedIndex) {
 				if (matchingIndex > skewedIndex) {
 					skew--;
 				} else {
 					skew++;
 				}
 
-				// Move this VNode's DOM if the original index (matchingIndex) doesn't
-				// match the new skew index (i + new skew)
-				// In the former two branches we know that it matches after skewing
-				childVNode._flags |= INSERT_VNODE;
+				moved = true;
+			}
+		}
+	}
+
+	if (moved) {
+		// Children were reordered: mark the minimal set of matched (MATCHED flag)
+		// children for insertion by finding the longest increasing subsequence of
+		// old indices (patience sorting). Children on the subsequence stay in
+		// place, all others get INSERT_VNODE. `_index` still holds the
+		// matchingIndex here.
+		/** @type {number[]} tails[x] is the smallest old index ending an increasing subsequence of length x+1 */
+		let tails = [];
+		/** @type {number[]} length of the longest increasing subsequence ending at child i */
+		let lisLengths = [];
+		for (i = 0; i < newChildrenLength; i++) {
+			childVNode = newParentVNode._children[i];
+			if (childVNode && childVNode._flags & MATCHED) {
+				// Binary search for the insertion point, keeping the pass at
+				// O(n log n) even for pathological reorders.
+				let lo = 0,
+					hi = tails.length;
+				while (lo < hi) {
+					const mid = (lo + hi) >> 1;
+					if (tails[mid] < childVNode._index) {
+						lo = mid + 1;
+					} else {
+						hi = mid;
+					}
+				}
+				tails[lo] = childVNode._index;
+				lisLengths[i] = lo + 1;
+			}
+		}
+
+		// `skew` is dead after the main loop; reuse it as the remaining
+		// subsequence length while walking backwards. Likewise `i` is left at
+		// newChildrenLength by the loop above.
+		skew = tails.length;
+		while (i--) {
+			if (lisLengths[i]) {
+				if (lisLengths[i] == skew) {
+					skew--;
+				} else {
+					newParentVNode._children[i]._flags |= INSERT_VNODE;
+				}
 			}
 		}
 	}
@@ -333,7 +372,7 @@ function constructNewChildrenArray(
 	if (remainingOldChildren) {
 		for (i = 0; i < oldChildrenLength; i++) {
 			oldVNode = oldChildren[i];
-			if (oldVNode != NULL && (oldVNode._flags & MATCHED) == 0) {
+			if (oldVNode && !(oldVNode._flags & MATCHED)) {
 				if (oldVNode._dom == oldDom) {
 					oldDom = getDomSibling(oldVNode);
 				}
@@ -350,13 +389,15 @@ function constructNewChildrenArray(
  * @param {VNode} parentVNode
  * @param {PreactElement} oldDom
  * @param {PreactElement} parentDom
- * @param {number} shouldPlace
  * @param {boolean} isMounting
  * @returns {PreactElement}
  */
-function insert(parentVNode, oldDom, parentDom, shouldPlace, isMounting) {
+function insert(parentVNode, oldDom, parentDom, isMounting) {
 	// Note: VNodes in nested suspended trees may be missing _children.
 	if (typeof parentVNode.type == 'function') {
+		// Root children live in another container, they never move with the
+		// host tree and contribute nothing to the host insertion cursor.
+		if (parentVNode.props._parentDom) return oldDom;
 		let children = parentVNode._children;
 		for (let i = 0; children && i < children.length; i++) {
 			if (children[i]) {
@@ -365,30 +406,28 @@ function insert(parentVNode, oldDom, parentDom, shouldPlace, isMounting) {
 				// children's _parent pointer to point to the newVNode (parentVNode
 				// here).
 				children[i]._parent = parentVNode;
-				oldDom = insert(children[i], oldDom, parentDom, shouldPlace, false);
+				oldDom = insert(children[i], oldDom, parentDom, false);
 			}
 		}
 
 		return oldDom;
 	} else if (parentVNode._dom != oldDom) {
-		if (shouldPlace) {
-			if (oldDom && parentVNode.type && !oldDom.parentNode) {
-				oldDom = getDomSibling(parentVNode);
-			}
+		if (oldDom && parentVNode.type && !oldDom.parentNode) {
+			oldDom = getDomSibling(parentVNode);
+		}
 
-			if (HAS_MOVE_BEFORE_SUPPORT && !isMounting) {
-				// @ts-expect-error This isn't added to TypeScript lib.d.ts yet
-				parentDom.moveBefore(parentVNode._dom, oldDom);
-			} else {
-				parentDom.insertBefore(parentVNode._dom, oldDom || NULL);
-			}
+		if (HAS_MOVE_BEFORE_SUPPORT && !isMounting) {
+			// @ts-expect-error This isn't added to TypeScript lib.d.ts yet
+			parentDom.moveBefore(parentVNode._dom, oldDom);
+		} else {
+			parentDom.insertBefore(parentVNode._dom, oldDom || NULL);
 		}
 		oldDom = parentVNode._dom;
 	}
 
 	do {
 		oldDom = oldDom && oldDom.nextSibling;
-	} while (oldDom != NULL && oldDom.nodeType == 8);
+	} while (oldDom && oldDom.nodeType == 8);
 
 	return oldDom;
 }
@@ -428,7 +467,7 @@ function findMatchingIndex(
 	const key = childVNode.key;
 	const type = childVNode.type;
 	let oldVNode = oldChildren[skewedIndex];
-	const matched = oldVNode != NULL && (oldVNode._flags & MATCHED) == 0;
+	const matched = oldVNode && !(oldVNode._flags & MATCHED);
 
 	// We only need to perform a search if there are more children
 	// (remainingOldChildren) to search. However, if the oldVNode we just looked
@@ -443,10 +482,12 @@ function findMatchingIndex(
 	// we should not search as we risk re-using state of an unrelated VNode. (reverted for now)
 	let shouldSearch =
 		// (typeof type != 'function' || type === Fragment || key) &&
+		// The ternary keeps this a Smi comparison; `> matched` would compare
+		// number to boolean which V8 can't serve from the fast path.
 		remainingOldChildren > (matched ? 1 : 0);
 
 	if (
-		(oldVNode === NULL && key == null) ||
+		(oldVNode === NULL && key == NULL) ||
 		(matched && key == oldVNode.key && type == oldVNode.type)
 	) {
 		return skewedIndex;
@@ -457,8 +498,8 @@ function findMatchingIndex(
 			const childIndex = x >= 0 ? x-- : y++;
 			oldVNode = oldChildren[childIndex];
 			if (
-				oldVNode != NULL &&
-				(oldVNode._flags & MATCHED) == 0 &&
+				oldVNode &&
+				!(oldVNode._flags & MATCHED) &&
 				key == oldVNode.key &&
 				type == oldVNode.type
 			) {
