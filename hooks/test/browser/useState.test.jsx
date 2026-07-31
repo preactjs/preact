@@ -537,4 +537,42 @@ describe('useState', () => {
 		});
 		expect(scratch.innerHTML).to.equal('<p>1-1</p>');
 	});
+
+	it('applies pending state on a forced update', () => {
+		const ctx = createContext(0);
+		let setValue, setCount;
+
+		function Provider({ children }) {
+			const [value, _setValue] = useState(0);
+			setValue = _setValue;
+			return <ctx.Provider value={value}>{children}</ctx.Provider>;
+		}
+
+		function Child() {
+			const value = useContext(ctx);
+			const [count, _setCount] = useState(0);
+			setCount = _setCount;
+			return (
+				<p>
+					{value}-{count}
+				</p>
+			);
+		}
+
+		render(
+			<Provider>
+				<Child />
+			</Provider>,
+			scratch
+		);
+		expect(scratch.innerHTML).to.equal('<p>0-0</p>');
+
+		act(() => {
+			// A context change force-updates its subscribers, so Child renders
+			// with sCU skipped entirely.
+			setValue(1);
+			setCount(1);
+		});
+		expect(scratch.innerHTML).to.equal('<p>1-1</p>');
+	});
 });

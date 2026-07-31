@@ -192,6 +192,28 @@ describe('components', () => {
 			expect(spy).toHaveBeenCalledOnce();
 		});
 
+		it('should support assigning componentWillUpdate on an instance', () => {
+			let spy = vi.fn();
+
+			class Foo extends React.Component {
+				constructor(props) {
+					super(props);
+					// The unprefixed methods are getter/setter aliases, so a plain
+					// assignment has to be forwarded onto the instance itself.
+					this.componentWillUpdate = spy;
+				}
+
+				render() {
+					return <h1>foo</h1>;
+				}
+			}
+
+			React.render(<Foo />, scratch);
+			// Trigger an update
+			React.render(<Foo />, scratch);
+			expect(spy).toHaveBeenCalledOnce();
+		});
+
 		it('should not forward refs on class components', () => {
 			const ref = createRef();
 			class Foo extends React.Component {
