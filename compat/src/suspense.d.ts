@@ -12,6 +12,8 @@ export function lazy<T>(
 export interface SuspenseProps {
 	children?: ComponentChildren;
 	fallback: ComponentChildren;
+	/** A stable, unique name for useId calls during resumed hydration. */
+	name?: string;
 }
 
 export class Suspense extends Component<SuspenseProps> {
