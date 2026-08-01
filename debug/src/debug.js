@@ -98,21 +98,15 @@ export function initDebug() {
 			}
 		}
 
-		try {
-			errorInfo = errorInfo || {};
-			errorInfo.componentStack = getOwnerStack(vnode);
-			oldCatchError(error, vnode, oldVNode, errorInfo);
+		errorInfo = errorInfo || {};
+		errorInfo.componentStack = getOwnerStack(vnode);
+		oldCatchError(error, vnode, oldVNode, errorInfo);
 
-			// when an error was handled by an ErrorBoundary we will nonetheless emit an error
-			// event on the window object. This is to make up for react compatibility in dev mode
-			// and thus make the Next.js dev overlay work.
-			if (typeof error.then != 'function') {
-				setTimeout(() => {
-					throw error;
-				});
-			}
-		} catch (e) {
-			throw e;
+		// when an error was handled by an ErrorBoundary we still log it, matching what
+		// React does in development. Errors that were not handled are rethrown by the
+		// core and thus surface as regular uncaught errors.
+		if (typeof error.then != 'function') {
+			console.error(error);
 		}
 	};
 

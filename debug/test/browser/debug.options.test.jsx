@@ -24,9 +24,6 @@ describe('debug options', () => {
 	/** @type {(count: number) => void} */
 	let setCount;
 
-	/** @type {import('vitest').VitestUtils | undefined} */
-	let clock;
-
 	beforeEach(() => {
 		scratch = setupScratch();
 		rerender = setupRerender();
@@ -41,7 +38,6 @@ describe('debug options', () => {
 
 	afterEach(() => {
 		teardown(scratch);
-		if (clock) vi.useRealTimers();
 	});
 
 	class ClassApp extends Component {
@@ -122,15 +118,20 @@ describe('debug options', () => {
 			}
 		}
 
-		clock = vi.useFakeTimers();
+		// even though the error was handled by an error boundary we still log it,
+		// this matches what React does in development
+		const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
-		render(<ErrorApp />, scratch);
-		rerender();
+		let loggedErrors;
+		try {
+			render(<ErrorApp />, scratch);
+			rerender();
+		} finally {
+			loggedErrors = errorSpy.mock.calls.map(args => args[0]);
+			errorSpy.mockRestore();
+		}
 
 		expect(catchErrorSpy).toHaveBeenCalled();
-
-		// we expect to throw after setTimeout to trigger a window.onerror
-		// this is to ensure react compat (i.e. with next.js' dev overlay)
-		expect(() => clock.advanceTimersByTime(0)).to.throw(e);
+		expect(loggedErrors).to.deep.equal([e]);
 	});
 });
