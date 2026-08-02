@@ -1,4 +1,3 @@
-import { createElement } from 'preact';
 import { shallowDiffers } from './util';
 
 /**
@@ -9,6 +8,8 @@ import { shallowDiffers } from './util';
  * @returns {import('./internal').FunctionComponent}
  */
 export function memo(c, comparer) {
+	const instances = new WeakSet();
+
 	function shouldUpdate(nextProps) {
 		const ref = this.props.ref;
 		if (ref != nextProps.ref && ref) {
@@ -20,9 +21,25 @@ export function memo(c, comparer) {
 			: shallowDiffers(this.props, nextProps);
 	}
 
-	function Memoed(props) {
-		this.shouldComponentUpdate = shouldUpdate;
-		return createElement(c, props);
+	function Memoed(props, context) {
+		if (!instances.has(this)) {
+			instances.add(this);
+			const shouldComponentUpdate = this.shouldComponentUpdate;
+			this.shouldComponentUpdate = shouldComponentUpdate
+				? function (nextProps, nextState, nextContext) {
+						return (
+							shouldComponentUpdate.call(
+								this,
+								nextProps,
+								nextState,
+								nextContext
+							) && shouldUpdate.call(this, nextProps)
+						);
+					}
+				: shouldUpdate;
+		}
+
+		return c.call(this, props, context);
 	}
 	Memoed.displayName = 'Memo(' + (c.displayName || c.name) + ')';
 	Memoed.prototype.isReactComponent = true;

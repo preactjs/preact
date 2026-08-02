@@ -68,6 +68,40 @@ describe('memo()', () => {
 		expect(spy).toHaveBeenCalledOnce();
 	});
 
+	it('should render the wrapped component without an extra component vnode', () => {
+		function Foo() {
+			return <div>foo</div>;
+		}
+
+		const Memoized = memo(Foo);
+		render(<Memoized />, scratch);
+
+		const memoVNode = scratch._children._children[0];
+		expect(memoVNode.type).to.equal(Memoized);
+		expect(memoVNode._children[0].type).to.equal('div');
+	});
+
+	it('should rerender when the underlying component has a state update', () => {
+		let setValue;
+		const spy = vi.fn();
+		const Memoized = memo(() => {
+			const [value, set] = useState(0);
+			setValue = set;
+			spy();
+			return <div>{value}</div>;
+		});
+
+		render(<Memoized />, scratch);
+		render(<Memoized />, scratch);
+		expect(spy).toHaveBeenCalledOnce();
+
+		setValue(1);
+		rerender();
+
+		expect(spy).toHaveBeenCalledTimes(2);
+		expect(scratch.textContent).to.equal('1');
+	});
+
 	it('should support adding refs', () => {
 		let spy = vi.fn();
 
