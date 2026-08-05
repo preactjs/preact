@@ -11,7 +11,6 @@ export const REACT_FORWARD_SYMBOL = Symbol.for('react.forward_ref');
  */
 export function forwardRef(fn) {
 	function Forwarded(props) {
-		if (!('ref' in props)) return fn(props, null);
 		let clone = assign({}, props);
 		delete clone.ref;
 		return fn(clone, props.ref || null);
