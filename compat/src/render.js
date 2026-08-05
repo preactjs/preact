@@ -191,11 +191,12 @@ function handleDomVNode(vnode) {
 		if (i === 'style' && typeof value === 'object') {
 			let cloned;
 			for (let key in value) {
-				if (typeof value[key] === 'number' && !IS_NON_DIMENSIONAL.test(key)) {
+				const styleValue = value[key];
+				if (typeof styleValue === 'number' && !IS_NON_DIMENSIONAL.test(key)) {
 					if (!cloned) {
 						cloned = value = assign({}, value);
 					}
-					value[key] += 'px';
+					value[key] = styleValue + 'px';
 				}
 			}
 		} else if (
