@@ -168,19 +168,19 @@ function renderComponent(component) {
  */
 function updateParentDomPointers(vnode) {
 	// Stop at root boundaries (_parentDom)
-	if (
+	while (
 		(vnode = vnode._parent) &&
 		vnode._component &&
 		!vnode.props._parentDom
 	) {
 		vnode._dom = NULL;
-		vnode._children.some(child => {
+		for (let i = 0; i < vnode._children.length; i++) {
+			const child = vnode._children[i];
 			if (child != NULL && child._dom != NULL) {
-				return (vnode._dom = child._dom);
+				vnode._dom = child._dom;
+				break;
 			}
-		});
-
-		return updateParentDomPointers(vnode);
+		}
 	}
 }
 
