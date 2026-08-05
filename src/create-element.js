@@ -1,4 +1,4 @@
-import { assign } from './util';
+import { assign, slice } from './util';
 import options from './options';
 import { NULL, UNDEFINED } from './constants';
 
@@ -26,14 +26,7 @@ export function createElement(type, props, children) {
 	}
 
 	if (length > 2) {
-		if (length > 3) {
-			normalizedProps.children = new Array(length - 2);
-			for (i = 2; i < length; i++) {
-				normalizedProps.children[i - 2] = arguments[i];
-			}
-		} else {
-			normalizedProps.children = children;
-		}
+		normalizedProps.children = length > 3 ? slice.call(arguments, 2) : children;
 	}
 
 	return createVNode(type, normalizedProps, key, ref, NULL);
@@ -62,14 +55,7 @@ export function cloneElement(vnode, props, children) {
 	}
 
 	if (length > 2) {
-		if (length > 3) {
-			normalizedProps.children = new Array(length - 2);
-			for (i = 2; i < length; i++) {
-				normalizedProps.children[i - 2] = arguments[i];
-			}
-		} else {
-			normalizedProps.children = children;
-		}
+		normalizedProps.children = length > 3 ? slice.call(arguments, 2) : children;
 	}
 
 	return createVNode(
