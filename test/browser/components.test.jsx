@@ -2083,6 +2083,52 @@ describe('Components', () => {
 			expect(isSCUCalled).to.be.false;
 			expect(scratch.innerHTML).to.equal('<div>Updated: yes</div>');
 		});
+
+		it('should render a dirty child through strict equality in a single pass', () => {
+			// A child holding on to a reused vnode has to render as part of its
+			// parent's diff when it's already scheduled, so that both land in the
+			// same commit. See #4737
+			let updateChild, updateParent;
+			let commits = 0;
+			let prevCommit = options._commit;
+			options._commit = () => commits++;
+
+			class Child extends Component {
+				constructor(props) {
+					super(props);
+					this.state = { value: 'old' };
+					updateChild = () => this.setState({ value: 'new' });
+				}
+				render() {
+					return <div>{this.state.value}</div>;
+				}
+			}
+
+			class App extends Component {
+				constructor(props) {
+					super(props);
+					this.children = <Child />;
+					updateParent = () => this.setState({});
+				}
+				render() {
+					return this.children;
+				}
+			}
+
+			try {
+				render(<App />, scratch);
+				commits = 0;
+
+				updateParent();
+				updateChild();
+				rerender();
+
+				expect(scratch.innerHTML).to.equal('<div>new</div>');
+				expect(commits).to.equal(1);
+			} finally {
+				options._commit = prevCommit;
+			}
+		});
 	});
 
 	it('should reset the rerender queue if rendering throws', () => {

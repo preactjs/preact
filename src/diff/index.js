@@ -200,7 +200,8 @@ export function diff(
 				}
 
 				if (
-					newVNode._original == oldVNode._original ||
+					(newVNode._original == oldVNode._original &&
+						!(c._bits & COMPONENT_DIRTY)) ||
 					(!(c._bits & COMPONENT_FORCE) &&
 						c.shouldComponentUpdate &&
 						c.shouldComponentUpdate(
