@@ -442,9 +442,9 @@ export function toChildArray(children, out) {
 	out = out || [];
 	if (children == NULL || typeof children == 'boolean') {
 	} else if (isArray(children)) {
-		for (let i = 0; i < children.length; i++) {
-			toChildArray(children[i], out);
-		}
+		children.some(child => {
+			toChildArray(child, out);
+		});
 	} else {
 		out.push(children);
 	}
