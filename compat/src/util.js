@@ -7,6 +7,7 @@ export const assign = Object.assign;
  * @returns {boolean}
  */
 export function shallowDiffers(a, b) {
+	if (a == b) return false;
 	for (let i in a) if (i !== '__source' && a[i] !== b[i]) return true;
 	for (let i in b) if (i !== '__source' && !(i in a)) return true;
 	return false;
