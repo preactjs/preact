@@ -224,14 +224,16 @@ export function useReducer(reducer, initialState, init) {
 				// us to update further down the tree
 				let updatedHook = false;
 				let shouldUpdate = this.props !== p;
-				hooks._list.some(hookItem => {
+				let i = hooks._list.length;
+				while (i--) {
+					const hookItem = hooks._list[i];
 					if (hookItem._nextValue) {
 						updatedHook = true;
 						if (!ObjectIs(hookItem._value[0], hookItem._nextValue[0])) {
 							shouldUpdate = true;
 						}
 					}
-				});
+				}
 
 				if (prevScu) {
 					const result = prevScu.call(this, p, s, c);
