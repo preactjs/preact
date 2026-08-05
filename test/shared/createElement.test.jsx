@@ -66,12 +66,14 @@ describe('createElement(jsx)', () => {
 	});
 
 	it('should have ordered VNode properties', () => {
+		// `constructor` comes first to match the vnode shape produced by
+		// `cloneVNode` (see src/util.js).
 		expect(Object.keys(<div />).filter(key => !/^_/.test(key))).to.deep.equal([
+			'constructor',
 			'type',
 			'props',
 			'key',
-			'ref',
-			'constructor'
+			'ref'
 		]);
 	});
 

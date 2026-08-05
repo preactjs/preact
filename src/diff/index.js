@@ -19,7 +19,7 @@ import {
 } from '../constants';
 import { Fragment } from '../create-element';
 import options from '../options';
-import { assign, isArray, removeNode, slice } from '../util';
+import { assign, cloneVNode, isArray, removeNode, slice } from '../util';
 import { diffChildren } from './children';
 import { setProperty } from './props';
 
@@ -491,7 +491,7 @@ function cloneNode(node) {
 
 	if (node.constructor !== UNDEFINED) return NULL;
 
-	return assign({}, node);
+	return cloneVNode(node);
 }
 
 /**
