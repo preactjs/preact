@@ -4,7 +4,6 @@ import {
 	COMPONENT_FORCE,
 	COMPONENT_PENDING_ERROR,
 	COMPONENT_PROCESSING_EXCEPTION,
-	EMPTY_ARR,
 	EMPTY_OBJ,
 	FORCE_PROPS_REVALIDATE,
 	MATHML_TOKEN_ELEMENTS,
@@ -226,7 +225,7 @@ export function diff(
 						if (vnode) vnode._parent = newVNode;
 					});
 
-					EMPTY_ARR.push.apply(c._renderCallbacks, c._stateCallbacks);
+					appendCallbacks(c);
 					c._stateCallbacks = [];
 
 					if (c._renderCallbacks.length) {
@@ -267,7 +266,7 @@ export function diff(
 
 				tmp = c.render(c.props, c.state, c.context);
 
-				EMPTY_ARR.push.apply(c._renderCallbacks, c._stateCallbacks);
+				appendCallbacks(c);
 				c._stateCallbacks = [];
 			} else {
 				do {
@@ -465,19 +464,16 @@ export function commitRoot(commitQueue, root, refQueue) {
 
 	if (options._commit) options._commit(root, commitQueue);
 
-	commitQueue.some(c => {
+	for (let i = 0; i < commitQueue.length; i++) {
+		const c = commitQueue[i];
 		try {
-			// @ts-expect-error Reuse the commitQueue variable here so the type changes
-			commitQueue = c._renderCallbacks;
+			const callbacks = c._renderCallbacks;
 			c._renderCallbacks = [];
-			commitQueue.some(cb => {
-				// @ts-expect-error See above comment on commitQueue
-				cb.call(c);
-			});
+			for (let j = 0; j < callbacks.length; j++) callbacks[j].call(c);
 		} catch (e) {
 			options._catchError(e, c._vnode);
 		}
-	});
+	}
 }
 
 function cloneNode(node) {
@@ -492,6 +488,12 @@ function cloneNode(node) {
 	if (node.constructor !== UNDEFINED) return NULL;
 
 	return assign({}, node);
+}
+
+function appendCallbacks(component) {
+	for (let i = 0; i < component._stateCallbacks.length; i++) {
+		component._renderCallbacks.push(component._stateCallbacks[i]);
+	}
 }
 
 /**
