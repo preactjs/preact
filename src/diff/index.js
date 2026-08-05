@@ -221,10 +221,9 @@ export function diff(
 
 					newVNode._dom = oldVNode._dom;
 					newVNode._children = oldVNode._children;
-					let i = newVNode._children.length;
-					while (i--) {
-						if ((tmp = newVNode._children[i])) tmp._parent = newVNode;
-					}
+					newVNode._children.some(vnode => {
+						if (vnode) vnode._parent = newVNode;
+					});
 
 					appendCallbacks(c);
 					c._stateCallbacks = [];
