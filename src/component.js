@@ -2,12 +2,13 @@ import {
 	COMPONENT_DIRTY,
 	COMPONENT_FORCE,
 	MODE_HYDRATE,
-	NULL
+	NULL,
+	UNDEFINED
 } from './constants';
 import { Fragment } from './create-element';
 import { commitRoot, diff } from './diff/index';
 import options from './options';
-import { assign, cloneVNode } from './util';
+import { assign } from './util';
 
 /**
  * Base Component class. Provides `setState()` and `forceUpdate()`, which
@@ -135,7 +136,7 @@ function renderComponent(component) {
 
 	const parentDom = component._parentDom;
 	if (parentDom) {
-		const newVNode = cloneVNode(oldVNode);
+		const newVNode = assign({ constructor: UNDEFINED }, oldVNode);
 		newVNode._original = oldVNode._original + 1;
 		if (options.vnode) options.vnode(newVNode);
 
