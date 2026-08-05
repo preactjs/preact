@@ -62,8 +62,9 @@ export function setProperty(dom, name, value, oldValue, namespace) {
 
 			if (value) {
 				for (name in value) {
-					if (!oldValue || value[name] != oldValue[name]) {
-						setStyle(dom.style, name, value[name]);
+					const styleValue = value[name];
+					if (!oldValue || styleValue != oldValue[name]) {
+						setStyle(dom.style, name, styleValue);
 					}
 				}
 			}
