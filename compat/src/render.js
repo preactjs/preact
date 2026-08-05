@@ -289,12 +289,15 @@ function handleDomVNode(vnode) {
 let oldVNodeHook = options.vnode;
 options.vnode = vnode => {
 	// only normalize props on Element nodes
-	if (typeof vnode.type === 'string') {
+	const type = typeof vnode.type;
+	if (type === 'string') {
 		handleDomVNode(vnode);
-	} else if (typeof vnode.type === 'function') {
-		const shouldApplyRef =
-			'prototype' in vnode.type && vnode.type.prototype.render;
-		if ('ref' in vnode.props && shouldApplyRef) {
+	} else if (type === 'function') {
+		if (
+			vnode.type.prototype &&
+			vnode.type.prototype.render &&
+			'ref' in vnode.props
+		) {
 			vnode.ref = vnode.props.ref;
 			delete vnode.props.ref;
 		}
