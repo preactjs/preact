@@ -103,6 +103,54 @@ describe('render()', () => {
 		expect(clone.firstChild.outerHTML).to.eql('<h1>it works</h1>');
 	});
 
+	it('should reuse existing <template> content', () => {
+		function App() {
+			return (
+				<template>
+					<h1>it works</h1>
+				</template>
+			);
+		}
+
+		scratch.innerHTML = `<template><h1>it works</h1></template>`;
+		const template = scratch.firstChild;
+		const h1 = template.content.firstChild;
+
+		render(<App />, scratch);
+
+		expect(scratch.firstChild).to.equal(template);
+		expect(template.content.childNodes).to.have.length(1);
+		expect(template.content.firstChild).to.equal(h1);
+	});
+
+	it('should update the children of a <template>', () => {
+		function App({ items }) {
+			return (
+				<div>
+					<template>
+						{items.map(i => (
+							<h1 key={i}>{i}</h1>
+						))}
+					</template>
+					<p>after</p>
+				</div>
+			);
+		}
+
+		render(<App items={[1, 2]} />, scratch);
+		let template = scratch.firstChild.firstChild;
+		expect(template.content.textContent).to.equal('12');
+
+		render(<App items={[1, 2, 3]} />, scratch);
+		expect(template.content.textContent).to.equal('123');
+
+		render(<App items={[3]} />, scratch);
+		expect(template.content.textContent).to.equal('3');
+		expect(scratch.innerHTML).to.equal(
+			'<div><template><h1>3</h1></template><p>after</p></div>'
+		);
+	});
+
 	it('should render function components with an undefined prototype', () => {
 		const Foo = () => <div>foo</div>;
 		Foo.prototype = undefined;
