@@ -306,7 +306,7 @@ export interface Options {
 	/** Attach a hook that is invoked whenever a VNode is created. */
 	vnode?(vnode: VNode): void;
 	/** Attach a hook that is invoked immediately before a vnode is unmounted. */
-	unmount?(vnode: VNode, parentVNode?: VNode): void;
+	unmount?(vnode: VNode): void;
 	/** Attach a hook that is invoked after a vnode has rendered. */
 	diffed?(vnode: VNode): void;
 	event?(e: Event): any;

@@ -124,18 +124,23 @@ options._commit = (vnode, commitQueue) => {
 	if (oldCommit) oldCommit(vnode, commitQueue);
 };
 
-/** @type {(vnode: import('./internal').VNode, parentVNode?: import('./internal').VNode) => void} */
-options.unmount = (vnode, parentVNode) => {
-	if (oldBeforeUnmount) oldBeforeUnmount(vnode, parentVNode);
+/** @type {(vnode: import('./internal').VNode) => void} */
+options.unmount = vnode => {
+	if (oldBeforeUnmount) oldBeforeUnmount(vnode);
 
 	const c = vnode._component;
 	if (c && c.__hooks) {
 		let hasErrored,
-			errorParent = parentVNode && parentVNode._parent;
+			errorParent = vnode._parent;
 		// The removed subtree is detached (`_parent` nulled) by flush time, so
 		// grab the nearest surviving component now; its current vnode can still
-		// route deferred cleanup errors to a mounted error boundary.
-		while (errorParent && !errorParent._component) {
+		// route deferred cleanup errors to a mounted error boundary. Unmounting
+		// is pre-order and nulls each component's `_parentDom` before its
+		// children unmount, so removed ancestors are already recognizable here.
+		while (
+			errorParent &&
+			!(errorParent._component && errorParent._component._parentDom)
+		) {
 			errorParent = errorParent._parent;
 		}
 		c.__hooks._list.some(s => {
