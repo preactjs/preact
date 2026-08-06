@@ -412,9 +412,7 @@ export function diff(
 					}
 					newVNode._dom = oldDom;
 				} else if (excessDomChildren) {
-					for (let i = excessDomChildren.length; i--; ) {
-						removeNode(excessDomChildren[i]);
-					}
+					excessDomChildren.some(removeNode);
 				}
 			} else {
 				newVNode._dom = oldVNode._dom;
@@ -686,11 +684,7 @@ function diffElementNodes(
 			);
 
 			// Remove children that are not part of any vnode.
-			if (excessDomChildren) {
-				for (i = excessDomChildren.length; i--; ) {
-					removeNode(excessDomChildren[i]);
-				}
-			}
+			if (excessDomChildren) excessDomChildren.some(removeNode);
 		}
 
 		// As above, don't diff props during hydration
