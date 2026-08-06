@@ -59,7 +59,7 @@ function createFactory(type) {
  * @returns {boolean}
  */
 function isValidElement(element) {
-	return !!element && element.$$typeof === REACT_ELEMENT_TYPE;
+	return !!element && element.$$typeof == REACT_ELEMENT_TYPE;
 }
 
 /**
@@ -68,7 +68,7 @@ function isValidElement(element) {
  * @returns {boolean}
  */
 function isFragment(element) {
-	return isValidElement(element) && element.type === Fragment;
+	return isValidElement(element) && element.type == Fragment;
 }
 
 /**
@@ -118,7 +118,7 @@ function findDOMNode(component) {
 	return (
 		(component &&
 			((component._vnode && component._vnode._dom) ||
-				(component.nodeType === 1 && component))) ||
+				(component.nodeType == 1 && component))) ||
 		null
 	);
 }

@@ -56,7 +56,7 @@ options._render = vnode => {
 
 	const hooks = currentComponent.__hooks;
 	if (hooks) {
-		if (previousComponent === currentComponent) {
+		if (previousComponent == currentComponent) {
 			currentComponent._renderCallbacks = [];
 		} else {
 			hooks._pendingEffects.some(invokeCleanup);
@@ -223,7 +223,7 @@ export function useReducer(reducer, initialState, init) {
 				// have values that aren't equal to one another this pushes
 				// us to update further down the tree
 				let updatedHook = false;
-				let shouldUpdate = this.props !== p;
+				let shouldUpdate = this.props != p;
 				hooks._list.some(hookItem => {
 					if (hookItem._nextValue) {
 						updatedHook = true;
@@ -468,7 +468,7 @@ function afterNextFrame(callback) {
  * @returns {void}
  */
 function afterPaint(newQueueLength) {
-	if (newQueueLength === 1 || prevRaf !== options.requestAnimationFrame) {
+	if (newQueueLength == 1 || prevRaf != options.requestAnimationFrame) {
 		prevRaf = options.requestAnimationFrame;
 		(prevRaf || afterNextFrame)(flushAfterPaintEffects);
 	}
@@ -512,7 +512,7 @@ function invokeEffect(hook) {
 function argsChanged(oldArgs, newArgs) {
 	return (
 		!oldArgs ||
-		oldArgs.length !== newArgs.length ||
+		oldArgs.length != newArgs.length ||
 		newArgs.some((arg, index) => !ObjectIs(arg, oldArgs[index]))
 	);
 }
