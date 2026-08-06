@@ -85,10 +85,12 @@ export function diff(
 		let excess = oldVNode._component._excess;
 		excessDomChildren = [];
 		if (excess.nodeType == 8) {
-			// Re-scan DOM from stored start marker for streamed hydration
+			// Re-scan DOM from stored start marker for streamed hydration.
+			// `depth` only ever reaches 0 through the `break` below, so it
+			// doesn't need to be re-tested in the loop condition.
 			for (
 				let depth = 1, node = excess.nextSibling;
-				node && depth > 0;
+				node;
 				node = node.nextSibling
 			) {
 				if (node.nodeType == 8) {
@@ -383,12 +385,13 @@ export function diff(
 								if (child.data.startsWith('$s')) {
 									if (!commentMarkersToFind) startMarker = child;
 									commentMarkersToFind++;
-								} else if (child.data.startsWith('/$s')) {
-									if (--commentMarkersToFind == 0) {
-										oldDom = child;
-										excessDomChildren[i] = NULL;
-										break;
-									}
+								} else if (
+									child.data.startsWith('/$s') &&
+									!--commentMarkersToFind
+								) {
+									oldDom = child;
+									excessDomChildren[i] = NULL;
+									break;
 								}
 								excessDomChildren[i] = NULL;
 							} else if (commentMarkersToFind) {
