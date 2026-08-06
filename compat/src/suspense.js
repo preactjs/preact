@@ -29,7 +29,7 @@ options._catchError = (error, newVNode, oldVNode, errorInfo) => {
 };
 
 const oldUnmount = options.unmount;
-options.unmount = vnode => {
+options.unmount = (vnode, parentVNode) => {
 	/** @type {import('./internal').Component} */
 	const component = vnode._component;
 	if (component) component._unmounted = true;
@@ -37,7 +37,7 @@ options.unmount = vnode => {
 		component._onResolve();
 	}
 
-	if (oldUnmount) oldUnmount(vnode);
+	if (oldUnmount) oldUnmount(vnode, parentVNode);
 };
 
 function detachedClone(vnode, detachedParent, parentDom) {

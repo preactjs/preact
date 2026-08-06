@@ -752,7 +752,7 @@ export function applyRef(ref, value, vnode) {
  */
 export function unmount(vnode, parentVNode, skipRemove) {
 	let r;
-	if (options.unmount) options.unmount(vnode);
+	if (options.unmount) options.unmount(vnode, parentVNode);
 
 	if ((r = vnode.ref) && (!r.current || r.current == vnode._dom)) {
 		applyRef(r, NULL, parentVNode);

@@ -157,8 +157,10 @@ describe('useLayoutEffect', () => {
 		expect(layoutEffect).toHaveBeenCalledOnce();
 	});
 
-	// TODO: Make this test pass to resolve issue #1886
-	it.skip('should call effects correctly when unmounting', () => {
+	// Removed children are unmounted before the new children are inserted, so a
+	// cleanup only ever observes the tree it was rendered into (#1886). These
+	// expectations match React 19.
+	it('should call effects correctly when unmounting', () => {
 		let onClick, calledFoo, calledBar, calledFooCleanup, calledBarCleanup;
 
 		const Foo = () => {
@@ -214,7 +216,7 @@ describe('useLayoutEffect', () => {
 
 		act(() => onClick());
 		expect(calledFooCleanup).to.equal(
-			'<button>next</button><div><p>Bar</p></div>',
+			'<button>next</button><div><p>Foo</p></div>',
 			'calledFooCleanup'
 		);
 		expect(calledBar).to.equal(
@@ -224,7 +226,7 @@ describe('useLayoutEffect', () => {
 
 		act(() => onClick());
 		expect(calledBarCleanup).to.equal(
-			'<button>next</button><div><p>Foo</p></div>',
+			'<button>next</button><div><p>Bar</p></div>',
 			'calledBarCleanup'
 		);
 	});
@@ -510,6 +512,35 @@ describe('useLayoutEffect', () => {
 			'callback ref inner',
 			'callback ref outer',
 			'doing effect'
+		]);
+	});
+
+	it('should not have the new DOM in place when cleaning up a swapped child (#1886)', () => {
+		const calls = [];
+
+		const Foo = () => {
+			useLayoutEffect(
+				() => () => calls.push(`foo cleanup: ${scratch.innerHTML}`),
+				[]
+			);
+			return <p>Foo</p>;
+		};
+
+		const Bar = () => {
+			useLayoutEffect(() => {
+				calls.push(`bar effect: ${scratch.innerHTML}`);
+			}, []);
+			return <p>Bar</p>;
+		};
+
+		const App = ({ page }) => (page === 0 ? <Foo /> : <Bar />);
+
+		act(() => render(<App page={0} />, scratch));
+		act(() => render(<App page={1} />, scratch));
+
+		expect(calls).to.deep.equal([
+			'foo cleanup: <p>Foo</p>',
+			'bar effect: <p>Bar</p>'
 		]);
 	});
 });
