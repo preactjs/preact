@@ -84,11 +84,10 @@ options.diffed = vnode => {
 	const c = vnode._component;
 	if (c && c.__hooks) {
 		if (c.__hooks._pendingEffects.length) afterPaint(afterPaintEffects.push(c));
+		// `_pendingArgs` is cleared again by `options._render` before anything
+		// can read it, so committing it here is enough.
 		c.__hooks._list.some(hookItem => {
-			if (hookItem._pendingArgs) {
-				hookItem._args = hookItem._pendingArgs;
-				hookItem._pendingArgs = undefined;
-			}
+			if (hookItem._pendingArgs) hookItem._args = hookItem._pendingArgs;
 		});
 	}
 	previousComponent = currentComponent = null;
