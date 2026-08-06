@@ -368,16 +368,15 @@ function constructNewChildrenArray(
 	// point to the next child, which needs to be the first DOM node that won't be
 	// unmounted.
 	if (remainingOldChildren) {
-		for (i = 0; i < oldChildrenLength; i++) {
-			oldVNode = oldChildren[i];
-			if (oldVNode && !(oldVNode._flags & MATCHED)) {
-				if (oldVNode._dom == oldDom) {
-					oldDom = getDomSibling(oldVNode);
+		oldChildren.some(oldChild => {
+			if (oldChild && !(oldChild._flags & MATCHED)) {
+				if (oldChild._dom == oldDom) {
+					oldDom = getDomSibling(oldChild);
 				}
 
-				unmount(oldVNode, oldVNode);
+				unmount(oldChild, oldChild);
 			}
-		}
+		});
 	}
 
 	return oldDom;
