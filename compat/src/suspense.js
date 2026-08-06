@@ -2,7 +2,8 @@ import { Component, Fragment, createElement, options } from 'preact';
 import {
 	COMPONENT_FORCE,
 	FORCE_PROPS_REVALIDATE,
-	MODE_HYDRATE
+	MODE_HYDRATE,
+	UNDEFINED
 } from '../../src/constants';
 import { assign } from './util';
 
@@ -49,7 +50,7 @@ function detachedClone(vnode, detachedParent, parentDom) {
 			vnode._component.__hooks = null;
 		}
 
-		vnode = assign({}, vnode);
+		vnode = assign({ constructor: UNDEFINED }, vnode);
 		if (vnode._component != null) {
 			if (vnode._component._parentDom === parentDom) {
 				vnode._component._parentDom = detachedParent;

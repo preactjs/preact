@@ -492,7 +492,7 @@ function cloneNode(node) {
 
 	if (node.constructor !== UNDEFINED) return NULL;
 
-	return assign({}, node);
+	return assign({ constructor: UNDEFINED }, node);
 }
 
 /**
