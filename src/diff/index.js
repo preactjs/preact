@@ -156,20 +156,20 @@ export function diff(
 				c._stateCallbacks = [];
 			}
 
-			// Invoke getDerivedStateFromProps
-			if (isClassComponent && !c._nextState) {
-				c._nextState = c.state;
-			}
+			if (isClassComponent) {
+				if (!c._nextState) c._nextState = c.state;
 
-			if (isClassComponent && newType.getDerivedStateFromProps) {
-				if (c._nextState == c.state) {
-					c._nextState = assign({}, c._nextState);
+				// Invoke getDerivedStateFromProps
+				if (newType.getDerivedStateFromProps) {
+					if (c._nextState == c.state) {
+						c._nextState = assign({}, c._nextState);
+					}
+
+					assign(
+						c._nextState,
+						newType.getDerivedStateFromProps(newProps, c._nextState)
+					);
 				}
-
-				assign(
-					c._nextState,
-					newType.getDerivedStateFromProps(newProps, c._nextState)
-				);
 			}
 
 			oldProps = c.props;
@@ -550,10 +550,11 @@ function diffElementNodes(
 
 			// if newVNode matches an element in excessDomChildren or the `dom`
 			// argument matches an element in excessDomChildren, remove it from
-			// excessDomChildren so it isn't later removed in diffChildren
+			// excessDomChildren so it isn't later removed in diffChildren.
+			// `localName` is only present on elements, so it doubles as the
+			// element check for the non-text branch.
 			if (
 				value &&
-				'setAttribute' in value == !!nodeType &&
 				(nodeType ? value.localName == nodeType : value.nodeType == 3)
 			) {
 				dom = value;
@@ -696,7 +697,7 @@ function diffElementNodes(
 		if (!isHydrating || nodeType == 'textarea') {
 			i = 'value';
 			if (nodeType == 'progress' && inputValue == NULL) {
-				dom.removeAttribute('value');
+				dom.removeAttribute(i);
 			} else if (
 				inputValue != UNDEFINED &&
 				// #2756 For the <progress>-element the initial value is 0,
