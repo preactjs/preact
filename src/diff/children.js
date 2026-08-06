@@ -232,7 +232,7 @@ function constructNewChildrenArray(
 				childVNode.type,
 				childVNode.props,
 				childVNode.key,
-				childVNode.ref ? childVNode.ref : NULL,
+				childVNode.ref || NULL,
 				childVNode._original
 			);
 		} else {
