@@ -588,11 +588,17 @@ function diffElementNodes(
 			dom.data = newProps;
 		}
 	} else {
+		// A <template> holds its children in a separate document-fragment, both
+		// when reading existing DOM and when inserting new nodes. `parentDom` is
+		// unused from here on, so we reuse it as the container for our children.
+		// @ts-expect-error
+		parentDom = nodeType == 'template' ? dom.content : dom;
+
 		// If excessDomChildren was not null, repopulate it with the current element's children:
 		excessDomChildren =
 			nodeType == 'textarea' && newProps.defaultValue != NULL
 				? NULL
-				: excessDomChildren && slice.call(dom.childNodes);
+				: excessDomChildren && slice.call(parentDom.childNodes);
 
 		// If we are in a situation where we are not hydrating but are using
 		// existing DOM (e.g. replaceNode) we should read the existing DOM
@@ -663,8 +669,7 @@ function diffElementNodes(
 			}
 
 			diffChildren(
-				// @ts-expect-error
-				nodeType == 'template' ? dom.content : dom,
+				parentDom,
 				isArray(newChildren) ? newChildren : [newChildren],
 				newVNode,
 				oldVNode,

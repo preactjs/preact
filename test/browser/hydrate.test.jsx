@@ -589,4 +589,24 @@ describe('hydrate()', () => {
 		expect(caught).to.equal(error);
 		expect(caught.message).to.equal('real error');
 	});
+
+	it('should hydrate <template> tags', () => {
+		function App() {
+			return (
+				<template>
+					<h1>it works</h1>
+				</template>
+			);
+		}
+
+		scratch.innerHTML = '<template><h1>it works</h1></template>';
+		const h1 = scratch.firstChild.content.firstChild;
+
+		hydrate(<App />, scratch);
+
+		expect(scratch.innerHTML).to.equal(
+			'<template><h1>it works</h1></template>'
+		);
+		expect(scratch.firstChild.content.firstChild).to.equal(h1);
+	});
 });
