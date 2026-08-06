@@ -607,10 +607,9 @@ function diffElementNodes(
 		// attributes to diff them
 		if (!isHydrating && excessDomChildren) {
 			oldProps = {};
-			for (i = 0; i < dom.attributes.length; i++) {
-				value = dom.attributes[i];
-				oldProps[value.name] = value.value;
-			}
+			slice.call(dom.attributes).some(attr => {
+				oldProps[attr.name] = attr.value;
+			});
 		}
 
 		for (i in oldProps) {
