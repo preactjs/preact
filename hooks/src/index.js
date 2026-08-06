@@ -403,7 +403,7 @@ export function useId() {
 		// Grab either the root node or the nearest async boundary node.
 		/** @type {import('./internal').VNode} */
 		let root = currentComponent._vnode;
-		while (root !== null && !root._mask && root._parent !== null) {
+		while (!root._mask && root._parent) {
 			root = root._parent;
 		}
 
