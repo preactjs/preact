@@ -122,9 +122,7 @@ export function diffChildren(
 			);
 		}
 
-		if (!firstChildDom && newDom) {
-			firstChildDom = newDom;
-		}
+		firstChildDom = firstChildDom || newDom;
 
 		if (childVNode._flags & INSERT_VNODE) {
 			oldDom = insert(
