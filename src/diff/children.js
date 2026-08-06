@@ -425,9 +425,7 @@ function insert(parentVNode, oldDom, parentDom, isMounting) {
 		oldDom = parentVNode._dom;
 	}
 
-	do {
-		oldDom = oldDom && oldDom.nextSibling;
-	} while (oldDom && oldDom.nodeType == 8);
+	while ((oldDom = oldDom && oldDom.nextSibling) && oldDom.nodeType == 8);
 
 	return oldDom;
 }
