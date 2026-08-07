@@ -366,17 +366,19 @@ function constructNewChildrenArray(
 	// Remove remaining oldChildren if there are any. Loop forwards so that as we
 	// unmount DOM from the beginning of the oldChildren, we can adjust oldDom to
 	// point to the next child, which needs to be the first DOM node that won't be
-	// unmounted.
+	// unmounted. Keep this a plain loop: an arrow function here would capture
+	// `oldDom`, forcing V8 to context-allocate it on every call to this function.
 	if (remainingOldChildren) {
-		oldChildren.some(oldChild => {
-			if (oldChild && !(oldChild._flags & MATCHED)) {
-				if (oldChild._dom == oldDom) {
-					oldDom = getDomSibling(oldChild);
+		for (i = 0; i < oldChildrenLength; i++) {
+			oldVNode = oldChildren[i];
+			if (oldVNode && !(oldVNode._flags & MATCHED)) {
+				if (oldVNode._dom == oldDom) {
+					oldDom = getDomSibling(oldVNode);
 				}
 
-				unmount(oldChild, oldChild);
+				unmount(oldVNode, oldVNode);
 			}
-		});
+		}
 	}
 
 	return oldDom;

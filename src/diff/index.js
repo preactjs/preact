@@ -606,10 +606,14 @@ function diffElementNodes(
 		// existing DOM (e.g. replaceNode) we should read the existing DOM
 		// attributes to diff them
 		if (!isHydrating && excessDomChildren) {
+			// Keep this a plain loop: an arrow function here would capture
+			// `oldProps`, forcing V8 to context-allocate it and slowing down the
+			// hot `for (i in oldProps)` loop below for every element we diff.
 			oldProps = {};
-			slice.call(dom.attributes).some(attr => {
-				oldProps[attr.name] = attr.value;
-			});
+			for (i = 0; i < dom.attributes.length; i++) {
+				value = dom.attributes[i];
+				oldProps[value.name] = value.value;
+			}
 		}
 
 		for (i in oldProps) {
