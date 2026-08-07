@@ -76,7 +76,8 @@
       "$_owner": "__o",
       "$_skipEffects": "__s",
       "$_isSuspended": "__i",
-      "$_bits": "__g"
+      "$_bits": "__g",
+      "$_yield": "__y"
     }
   }
 }
