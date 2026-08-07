@@ -1,5 +1,5 @@
 import { Component, Fragment, createElement, render } from 'preact';
-import { useEffect, useRef, useState } from 'preact/hooks';
+import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
 import { act, teardown as teardownAct } from 'preact/test-utils';
 import { vi } from 'vitest';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
@@ -225,6 +225,52 @@ describe('useEffect', () => {
 		expect(scratch.innerHTML).to.equal('<p>Error</p>');
 	});
 
+	it('should route deferred cleanup errors after a state update', () => {
+		const spy = vi.fn();
+		let hide;
+
+		function ThrowOnUnmount() {
+			useEffect(
+				() => () => {
+					throw new Error('err');
+				},
+				[]
+			);
+			return <span>Child</span>;
+		}
+
+		function StatefulParent() {
+			const [show, setShow] = useState(true);
+			hide = () => setShow(false);
+			return <div>{show ? <ThrowOnUnmount /> : <span>Gone</span>}</div>;
+		}
+
+		class ErrorBoundary extends Component {
+			componentDidCatch(error) {
+				spy(error);
+				this.setState({ error: true });
+			}
+
+			render(props, state) {
+				return state.error ? <p>Error</p> : props.children;
+			}
+		}
+
+		act(() =>
+			render(
+				<ErrorBoundary>
+					<StatefulParent />
+				</ErrorBoundary>,
+				scratch
+			)
+		);
+		act(() => hide());
+
+		expect(spy).toHaveBeenCalledOnce();
+		expect(spy.mock.calls[0][0]).to.have.property('message', 'err');
+		expect(scratch.innerHTML).to.equal('<p>Error</p>');
+	});
+
 	it('catches errors when error is invoked during render', () => {
 		const spy = vi.fn();
 		let errored;
@@ -259,6 +305,35 @@ describe('useEffect', () => {
 		expect(spy).toHaveBeenCalledOnce();
 		expect(errored).to.be.an('Error').with.property('message', 'hi');
 		expect(scratch.innerHTML).to.equal('<p>Error</p>');
+	});
+
+	it('should flush cleanups of a root unmounted from within an effect', async () => {
+		const log = [];
+		const host = document.createElement('div');
+		const other = document.createElement('div');
+		scratch.appendChild(host);
+		scratch.appendChild(other);
+
+		function Other() {
+			useEffect(() => () => log.push('other cleanup'), []);
+			return <p>other</p>;
+		}
+
+		function Trigger() {
+			useEffect(() => {
+				log.push('trigger effect');
+				render(null, other);
+			}, []);
+			return <p>trigger</p>;
+		}
+
+		render(<Other />, other);
+		await new Promise(r => setTimeout(r, 60));
+
+		render(<Trigger />, host);
+		await new Promise(r => setTimeout(r, 60));
+
+		expect(log).to.deep.equal(['trigger effect', 'other cleanup']);
 	});
 
 	it('should allow creating a new root', () => {
@@ -663,6 +738,147 @@ describe('useEffect', () => {
 		act(() => {
 			setVal(1);
 		});
+	});
+
+	it('should run cleanup of an unmounted child after the parent commits (#4299)', () => {
+		const log = [];
+
+		function Child() {
+			useEffect(() => {
+				log.push('child effect');
+				return () => {
+					log.push('child cleanup');
+				};
+			}, []);
+			return null;
+		}
+
+		function Parent({ show }) {
+			log.push('parent render');
+			useLayoutEffect(() => {
+				log.push('parent layout effect');
+			});
+			return show ? <Child /> : null;
+		}
+
+		act(() => render(<Parent show={true} />, scratch));
+		act(() => render(<Parent show={false} />, scratch));
+
+		expect(log).to.deep.equal([
+			'parent render',
+			'parent layout effect',
+			'child effect',
+			'parent render',
+			'parent layout effect',
+			'child cleanup'
+		]);
+	});
+
+	it('should run cleanups of a deep removed subtree in tree order (#4299)', () => {
+		const log = [];
+
+		const Level = ({ name, children }) => {
+			useLayoutEffect(() => () => log.push(`${name} layout cleanup`), []);
+			useEffect(() => () => log.push(`${name} passive cleanup`), []);
+			return <div class={name}>{children}</div>;
+		};
+
+		const App = ({ show }) => (
+			<section>
+				{show ? (
+					<Level name="A">
+						<Level name="B">
+							<Level name="C">
+								<span>leaf</span>
+							</Level>
+						</Level>
+					</Level>
+				) : null}
+			</section>
+		);
+
+		act(() => render(<App show />, scratch));
+		log.length = 0;
+		act(() => render(<App show={false} />, scratch));
+
+		// All layout cleanups run in the commit, then all passive ones after
+		// paint, each top-down. Matches React 19.
+		expect(log).to.deep.equal([
+			'A layout cleanup',
+			'B layout cleanup',
+			'C layout cleanup',
+			'A passive cleanup',
+			'B passive cleanup',
+			'C passive cleanup'
+		]);
+	});
+
+	it('should route a deferred cleanup error past boundaries inside the removed subtree', () => {
+		const log = [];
+
+		class Boundary extends Component {
+			componentDidCatch(err) {
+				log.push(`${this.props.name} caught: ${err.message}`);
+				this.setState({ errored: true });
+			}
+
+			render(props, state) {
+				return state.errored ? <p>{props.name} error</p> : props.children;
+			}
+		}
+
+		const Deep = () => {
+			useEffect(
+				() => () => {
+					throw new Error('deep');
+				},
+				[]
+			);
+			return <i>deep</i>;
+		};
+
+		// `Inner` is itself being removed, so it must not handle the error; the
+		// still-mounted `Outer` boundary has to.
+		const Removed = () => (
+			<Boundary name="Inner">
+				<div>
+					<Deep />
+				</div>
+			</Boundary>
+		);
+
+		const App = ({ show }) => (
+			<Boundary name="Outer">
+				<div>{show ? <Removed /> : null}</div>
+			</Boundary>
+		);
+
+		act(() => render(<App show />, scratch));
+		log.length = 0;
+		act(() => render(<App show={false} />, scratch));
+
+		expect(log).to.deep.equal(['Outer caught: deep']);
+		expect(scratch.innerHTML).to.equal('<p>Outer error</p>');
+	});
+
+	it('should run cleanups of unmounted components before new effects (#4299)', () => {
+		const log = [];
+
+		function Child({ name }) {
+			useEffect(() => {
+				log.push(`${name} effect`);
+				return () => {
+					log.push(`${name} cleanup`);
+				};
+			}, []);
+			return <p>{name}</p>;
+		}
+
+		act(() => render(<Child key="a" name="A" />, scratch));
+		log.length = 0;
+		act(() => render(<Child key="b" name="B" />, scratch));
+
+		expect(log).to.deep.equal(['A cleanup', 'B effect']);
 	});
 
 	it('should not rerun when receiving NaN on subsequent renders', () => {
