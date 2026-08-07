@@ -42,6 +42,7 @@ import {
 	useSyncExternalStore
 } from './render';
 import { Suspense, lazy } from './suspense';
+import { Activity } from './activity';
 
 const version = '19.0.0'; // trick libraries to think we are react
 
@@ -198,6 +199,7 @@ export {
 	useEffectEvent,
 	use,
 	Fragment as StrictMode,
+	Activity,
 	Suspense,
 	lazy,
 	__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED
@@ -247,6 +249,7 @@ export default {
 	flushSync,
 	unstable_batchedUpdates,
 	StrictMode: Fragment,
+	Activity,
 	Suspense,
 	lazy,
 	__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED
