@@ -14,7 +14,7 @@ export const Children = {
 	},
 	only(children) {
 		const normalized = toChildArray(children);
-		if (normalized.length !== 1) throw 'Children.only';
+		if (normalized.length != 1) throw 'Children.only';
 		return normalized[0];
 	},
 	toArray: toChildArray

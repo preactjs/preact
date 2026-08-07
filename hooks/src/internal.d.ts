@@ -74,6 +74,12 @@ export interface EffectHookState extends BaseHookState {
 	_args?: unknown[];
 	_pendingArgs?: unknown[];
 	_cleanup?: Cleanup | void;
+	/**
+	 * Whether this is a passive effect (useEffect), whose unmount cleanup runs
+	 * after paint. Once unmounted it holds the surviving component that deferred
+	 * cleanup errors are routed to instead.
+	 */
+	_passive?: boolean | Component;
 }
 
 export interface MemoHookState<T = unknown> extends BaseHookState {

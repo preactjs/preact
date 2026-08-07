@@ -28,7 +28,7 @@ const MODE_HYDRATE = 1 << 5;
 const CAMEL_PROPS =
 	/^(?:accent|alignment|arabic|baseline|cap|clip(?!PathU)|color|dominant|fill|flood|font|glyph(?!R)|horiz|image(!S)|letter|lighting|marker(?!H|W|U)|overline|paint|pointer|shape|stop|strikethrough|stroke|text(?!L)|transform|underline|unicode|units|v|vector|vert|word|writing|x(?!C))[A-Z]/;
 const CAMEL_REPLACE = /[A-Z0-9]/g;
-const IS_DOM = typeof document !== 'undefined';
+const IS_DOM = typeof document != 'undefined';
 
 /**
  * This is taken from https://github.com/facebook/react/blob/main/packages/use-sync-external-store/src/useSyncExternalStoreShimClient.js#L84
@@ -177,63 +177,59 @@ function handleDomVNode(vnode) {
 		let value = props[i];
 
 		if (
-			(i === 'value' && 'defaultValue' in props && value == null) ||
+			(i == 'value' && 'defaultValue' in props && value == null) ||
 			// Emulate React's behavior of not rendering the contents of noscript tags on the client.
-			(IS_DOM && i === 'children' && type === 'noscript') ||
-			i === 'class' ||
-			i === 'className'
+			(IS_DOM && i == 'children' && type == 'noscript') ||
+			i == 'class' ||
+			i == 'className'
 		) {
 			// Skip applying value if it is null/undefined and we already set
 			// a default value
 			continue;
 		}
 
-		if (i === 'style' && typeof value === 'object') {
+		if (i == 'style' && typeof value == 'object') {
 			let cloned;
 			for (let key in value) {
-				if (typeof value[key] === 'number' && !IS_NON_DIMENSIONAL.test(key)) {
+				if (typeof value[key] == 'number' && !IS_NON_DIMENSIONAL.test(key)) {
 					if (!cloned) {
 						cloned = value = assign({}, value);
 					}
 					value[key] += 'px';
 				}
 			}
-		} else if (
-			i === 'defaultValue' &&
-			'value' in props &&
-			props.value == null
-		) {
+		} else if (i == 'defaultValue' && 'value' in props && props.value == null) {
 			// `defaultValue` is treated as a fallback `value` when a value prop is present but null/undefined.
 			// `defaultValue` for Elements with no value prop is the same as the DOM defaultValue property.
 			i = 'value';
-		} else if (i === 'download' && value === true) {
+		} else if (i == 'download' && value === true) {
 			// Calling `setAttribute` with a truthy value will lead to it being
 			// passed as a stringified value, e.g. `download="true"`. React
 			// converts it to an empty string instead, otherwise the attribute
 			// value will be used as the file name and the file will be called
 			// "true" upon downloading it.
 			value = '';
-		} else if (i === 'translate' && value === 'no') {
+		} else if (i == 'translate' && value === 'no') {
 			value = false;
-		} else if (i[0] === 'o' && i[1] === 'n') {
+		} else if (i[0] == 'o' && i[1] == 'n') {
 			let lowerCased = i.toLowerCase();
-			if (lowerCased === 'ondoubleclick') {
+			if (lowerCased == 'ondoubleclick') {
 				i = 'ondblclick';
 			} else if (
-				lowerCased === 'onchange' &&
-				(type === 'input' || type === 'textarea') &&
+				lowerCased == 'onchange' &&
+				(type == 'input' || type == 'textarea') &&
 				!onChangeInputType(props.type)
 			) {
 				lowerCased = i = 'oninput';
-			} else if (lowerCased === 'onfocus') {
+			} else if (lowerCased == 'onfocus') {
 				i = 'onfocusin';
-			} else if (lowerCased === 'onblur') {
+			} else if (lowerCased == 'onblur') {
 				i = 'onfocusout';
 			}
 
 			// Add support for onInput and onChange, see #3561
 			// if we have an oninput prop already change it to oninputCapture
-			if (lowerCased === 'oninput') {
+			if (lowerCased == 'oninput') {
 				i = lowerCased;
 				if (normalizedProps[i]) {
 					i = 'oninputCapture';
@@ -289,9 +285,9 @@ function handleDomVNode(vnode) {
 let oldVNodeHook = options.vnode;
 options.vnode = vnode => {
 	// only normalize props on Element nodes
-	if (typeof vnode.type === 'string') {
+	if (typeof vnode.type == 'string') {
 		handleDomVNode(vnode);
-	} else if (typeof vnode.type === 'function') {
+	} else if (typeof vnode.type == 'function') {
 		const shouldApplyRef =
 			'prototype' in vnode.type && vnode.type.prototype.render;
 		if ('ref' in vnode.props && shouldApplyRef) {
@@ -337,7 +333,7 @@ options.diffed = function (vnode) {
 
 	if (
 		dom != null &&
-		vnode.type === 'textarea' &&
+		vnode.type == 'textarea' &&
 		'value' in props &&
 		props.value !== dom.value
 	) {

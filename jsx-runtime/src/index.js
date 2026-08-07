@@ -92,9 +92,9 @@ const CSS_REGEX = /[A-Z]/g;
  * @returns {*}
  */
 function normalizeAttrValue(value) {
-	return value !== null &&
-		typeof value === 'object' &&
-		typeof value.valueOf === 'function'
+	return value != null &&
+		typeof value == 'object' &&
+		typeof value.valueOf == 'function'
 		? value.valueOf()
 		: value;
 }
@@ -110,13 +110,13 @@ function normalizeAttrValue(value) {
 function jsxAttr(name, value) {
 	if (options.attr) {
 		const result = options.attr(name, value);
-		if (typeof result === 'string') return result;
+		if (typeof result == 'string') return result;
 	}
 
 	value = normalizeAttrValue(value);
 
-	if (name === 'ref' || name === 'key') return '';
-	if (name === 'style' && typeof value === 'object') {
+	if (name == 'ref' || name == 'key') return '';
+	if (name == 'style' && typeof value == 'object') {
 		let str = '';
 		for (let prop in value) {
 			let val = value[prop];
@@ -136,8 +136,8 @@ function jsxAttr(name, value) {
 	if (
 		value == null ||
 		value === false ||
-		typeof value === 'function' ||
-		typeof value === 'object'
+		typeof value == 'function' ||
+		typeof value == 'object'
 	) {
 		return '';
 	} else if (value === true) return name;
@@ -155,13 +155,13 @@ function jsxAttr(name, value) {
 function jsxEscape(value) {
 	if (
 		value == null ||
-		typeof value === 'boolean' ||
-		typeof value === 'function'
+		typeof value == 'boolean' ||
+		typeof value == 'function'
 	) {
 		return null;
 	}
 
-	if (typeof value === 'object') {
+	if (typeof value == 'object') {
 		// Check for VNode
 		if (value.constructor === undefined) return value;
 

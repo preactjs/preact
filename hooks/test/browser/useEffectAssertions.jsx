@@ -133,8 +133,11 @@ export function useEffectAssertions(useEffect, scheduleEffectAssert) {
 		return scheduleEffectAssert(() => {
 			render(null, scratch);
 			rerender();
-			expect(cleanupFunction).toHaveBeenCalledOnce();
-		});
+		}).then(() =>
+			// Passive cleanups of unmounted components run in the after-paint
+			// flush (like React); layout cleanups have already run by now.
+			scheduleEffectAssert(() => expect(cleanupFunction).toHaveBeenCalledOnce())
+		);
 	});
 
 	it('works with closure effect callbacks capturing props', () => {

@@ -52,7 +52,7 @@ function detachedClone(vnode, detachedParent, parentDom) {
 
 		vnode = assign({ constructor: UNDEFINED }, vnode);
 		if (vnode._component != null) {
-			if (vnode._component._parentDom === parentDom) {
+			if (vnode._component._parentDom == parentDom) {
 				vnode._component._parentDom = detachedParent;
 			}
 
@@ -85,7 +85,7 @@ function removeOriginal(vnode, detachedParent, originalParent) {
 			);
 
 		if (vnode._component) {
-			if (vnode._component._parentDom === detachedParent) {
+			if (vnode._component._parentDom == detachedParent) {
 				if (vnode._dom) {
 					originalParent.appendChild(vnode._dom);
 				}

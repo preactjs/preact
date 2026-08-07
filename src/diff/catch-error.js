@@ -1,6 +1,5 @@
 import { resetRenderCount } from '../component';
 import {
-	NULL,
 	COMPONENT_DIRTY,
 	COMPONENT_PENDING_ERROR,
 	COMPONENT_PROCESSING_EXCEPTION,
@@ -31,11 +30,11 @@ export function _catchError(error, vnode, oldVNode, errorInfo) {
 			try {
 				ctor = component.constructor;
 
-				if (ctor && ctor.getDerivedStateFromError != NULL) {
+				if (ctor && ctor.getDerivedStateFromError) {
 					component.setState(ctor.getDerivedStateFromError(error));
 				}
 
-				if (component.componentDidCatch != NULL) {
+				if (component.componentDidCatch) {
 					component.componentDidCatch(error, errorInfo || {});
 				}
 

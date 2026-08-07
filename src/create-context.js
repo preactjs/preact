@@ -1,5 +1,5 @@
 import { enqueueRender } from './component';
-import { NULL, COMPONENT_FORCE } from './constants';
+import { COMPONENT_FORCE } from './constants';
 
 export let i = 0;
 
@@ -12,10 +12,6 @@ export function createContext(defaultValue) {
 			ctx[Context._id] = this;
 
 			this.getChildContext = () => ctx;
-
-			this.componentWillUnmount = () => {
-				subs = NULL;
-			};
 
 			this.shouldComponentUpdate = function (_props) {
 				// @ts-expect-error even
@@ -31,9 +27,7 @@ export function createContext(defaultValue) {
 				subs.add(c);
 				let old = c.componentWillUnmount;
 				c.componentWillUnmount = () => {
-					if (subs) {
-						subs.delete(c);
-					}
+					subs.delete(c);
 					if (old) old.call(c);
 				};
 			};
