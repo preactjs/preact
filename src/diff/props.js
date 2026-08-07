@@ -75,8 +75,7 @@ export function setProperty(dom, name, value, oldValue, namespace) {
 		// Infer correct casing for DOM built-in events:
 		name = name.slice(2).toLowerCase();
 
-		if (!dom._listeners) dom._listeners = {};
-		dom._listeners[name + useCapture] = value;
+		(dom._listeners || (dom._listeners = {}))[name + useCapture] = value;
 
 		if (value) {
 			if (!oldValue) {

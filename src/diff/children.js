@@ -125,12 +125,7 @@ export function diffChildren(
 		firstChildDom = firstChildDom || newDom;
 
 		if (childVNode._flags & INSERT_VNODE) {
-			oldDom = insert(
-				childVNode,
-				oldDom,
-				parentDom,
-				oldVNode._original == NULL
-			);
+			oldDom = insert(childVNode, oldDom, parentDom, !oldVNode._original);
 
 			// When a matched VNode is physically moved via INSERT_VNODE, its old
 			// _dom pointer becomes a stale positional reference. Clear it so that
@@ -185,7 +180,7 @@ function constructNewChildrenArray(
 	// Hoisted: every normalization branch below writes through this array, so
 	// reading `_children` off the vnode each time is a wasted property load.
 	/** @type {VNode[]} */
-	let newChildren = (newParentVNode._children = new Array(newChildrenLength));
+	let newChildren = (newParentVNode._children = Array(newChildrenLength));
 	for (i = 0; i < newChildrenLength; i++) {
 		// @ts-expect-error We are reusing the childVNode variable to hold both the
 		// pre and post normalized childVNode
@@ -209,22 +204,12 @@ function constructNewChildrenArray(
 			typeof childVNode != 'object' ||
 			childVNode.constructor == String
 		) {
-			childVNode = newChildren[i] = createVNode(
-				NULL,
-				childVNode,
-				NULL,
-				NULL,
-				NULL
-			);
+			childVNode = newChildren[i] = createVNode(NULL, childVNode);
 		} else if (isArray(childVNode)) {
-			childVNode = newChildren[i] = createVNode(
-				Fragment,
-				{ children: childVNode },
-				NULL,
-				NULL,
-				NULL
-			);
-		} else if (childVNode.constructor === UNDEFINED && childVNode._depth > 0) {
+			childVNode = newChildren[i] = createVNode(Fragment, {
+				children: childVNode
+			});
+		} else if (childVNode.constructor === UNDEFINED && childVNode._depth) {
 			// VNode is already in use, clone it. This can happen in the following
 			// scenario:
 			//   const reuse = <div />
@@ -233,7 +218,7 @@ function constructNewChildrenArray(
 				childVNode.type,
 				childVNode.props,
 				childVNode.key,
-				childVNode.ref || NULL,
+				childVNode.ref,
 				childVNode._original
 			);
 		} else {
@@ -334,18 +319,14 @@ function constructNewChildrenArray(
 		for (i = 0; i < newChildrenLength; i++) {
 			childVNode = newChildren[i];
 			if (childVNode && childVNode._flags & MATCHED) {
-				// Binary search for the insertion point, keeping the pass at
-				// O(n log n) even for pathological reorders.
-				let lo = 0,
-					hi = tails.length;
-				while (lo < hi) {
-					const mid = (lo + hi) >> 1;
-					if (tails[mid] < childVNode._index) {
-						lo = mid + 1;
-					} else {
-						hi = mid;
-					}
-				}
+				// `tails` is strictly increasing, so walking back from its end is a
+				// lower-bound search. It settles in O(1) for the shapes that
+				// dominate real reorders — appends land past the end, reversals
+				// keep `tails` a single entry — and costs a handful of extra
+				// comparisons for the shuffles in between. (A forward scan would
+				// be smaller still but degenerates to O(n²) on swap-rows.)
+				let lo = tails.length;
+				while (lo && tails[lo - 1] >= childVNode._index) lo--;
 				tails[lo] = childVNode._index;
 				lisLengths[i] = lo + 1;
 			}
@@ -401,14 +382,16 @@ function insert(parentVNode, oldDom, parentDom, isMounting) {
 		// host tree and contribute nothing to the host insertion cursor.
 		if (parentVNode.props._parentDom) return oldDom;
 		let children = parentVNode._children;
-		for (let i = 0; children && i < children.length; i++) {
-			if (children[i]) {
-				// If we enter this code path on sCU bailout, where we copy
-				// oldVNode._children to newVNode._children, we need to update the old
-				// children's _parent pointer to point to the newVNode (parentVNode
-				// here).
-				children[i]._parent = parentVNode;
-				oldDom = insert(children[i], oldDom, parentDom, false);
+		if (children) {
+			for (let i = 0; i < children.length; i++) {
+				if (children[i]) {
+					// If we enter this code path on sCU bailout, where we copy
+					// oldVNode._children to newVNode._children, we need to update the old
+					// children's _parent pointer to point to the newVNode (parentVNode
+					// here).
+					children[i]._parent = parentVNode;
+					oldDom = insert(children[i], oldDom, parentDom, false);
+				}
 			}
 		}
 

@@ -34,5 +34,7 @@ export const EMPTY_ARR = [];
 
 export const MATHML_TOKEN_ELEMENTS = /m(i|n|o|s$|te|sp)/;
 
+// `typeof x < 'u'` is `!= 'undefined'`: every other typeof result sorts
+// before "u", while "undefined" sorts after it.
 export const HAS_MOVE_BEFORE_SUPPORT =
-	typeof window !== 'undefined' && 'moveBefore' in Element.prototype;
+	typeof Element < 'u' && 'moveBefore' in Element.prototype;
