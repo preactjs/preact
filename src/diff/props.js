@@ -9,10 +9,9 @@ let EVENT_DISPATCHED = Symbol(),
 	EVENT_ATTACHED = Symbol();
 
 function setStyle(style, key, value) {
+	if (value == NULL) value = '';
 	if (key[0] == '-') {
-		style.setProperty(key, value == NULL ? '' : value);
-	} else if (value == NULL) {
-		style[key] = '';
+		style.setProperty(key, value);
 	} else {
 		style[key] = value;
 	}

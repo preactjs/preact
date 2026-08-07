@@ -3,7 +3,7 @@ const ENCODED_ENTITIES = /["&<]/;
 /** @param {string} str */
 export function encodeEntities(str) {
 	// Skip all work for strings with no entities needing encoding:
-	if (str.length === 0 || ENCODED_ENTITIES.test(str) === false) return str;
+	if (!str.length || !ENCODED_ENTITIES.test(str)) return str;
 
 	let last = 0,
 		i = 0,
@@ -26,11 +26,11 @@ export function encodeEntities(str) {
 				continue;
 		}
 		// Append skipped/buffered characters and the encoded entity:
-		if (i !== last) out += str.slice(last, i);
+		if (i != last) out += str.slice(last, i);
 		out += ch;
 		// Start the next seek/buffer after the entity's offset:
 		last = i + 1;
 	}
-	if (i !== last) out += str.slice(last, i);
+	if (i != last) out += str.slice(last, i);
 	return out;
 }

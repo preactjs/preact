@@ -122,9 +122,7 @@ export function diffChildren(
 			);
 		}
 
-		if (!firstChildDom && newDom) {
-			firstChildDom = newDom;
-		}
+		firstChildDom = firstChildDom || newDom;
 
 		if (childVNode._flags & INSERT_VNODE) {
 			oldDom = insert(
@@ -232,7 +230,7 @@ function constructNewChildrenArray(
 				childVNode.type,
 				childVNode.props,
 				childVNode.key,
-				childVNode.ref ? childVNode.ref : NULL,
+				childVNode.ref || NULL,
 				childVNode._original
 			);
 		} else {
@@ -368,7 +366,8 @@ function constructNewChildrenArray(
 	// Remove remaining oldChildren if there are any. Loop forwards so that as we
 	// unmount DOM from the beginning of the oldChildren, we can adjust oldDom to
 	// point to the next child, which needs to be the first DOM node that won't be
-	// unmounted.
+	// unmounted. Keep this a plain loop: an arrow function here would capture
+	// `oldDom`, forcing V8 to context-allocate it on every call to this function.
 	if (remainingOldChildren) {
 		for (i = 0; i < oldChildrenLength; i++) {
 			oldVNode = oldChildren[i];
@@ -425,9 +424,7 @@ function insert(parentVNode, oldDom, parentDom, isMounting) {
 		oldDom = parentVNode._dom;
 	}
 
-	do {
-		oldDom = oldDom && oldDom.nextSibling;
-	} while (oldDom && oldDom.nodeType == 8);
+	while ((oldDom = oldDom && oldDom.nextSibling) && oldDom.nodeType == 8);
 
 	return oldDom;
 }

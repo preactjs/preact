@@ -12,6 +12,12 @@ describe('isValidElement', () => {
 		expect(isValidElement({})).to.equal(false);
 	});
 
+	it('should reject a boxed react element symbol', () => {
+		expect(
+			isValidElement({ $$typeof: Object(Symbol.for('react.element')) })
+		).to.equal(false);
+	});
+
 	it('should detect a preact vnode', () => {
 		expect(isValidElement(preactCreateElement('div', {}))).to.equal(true);
 	});

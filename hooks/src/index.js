@@ -65,7 +65,7 @@ options._render = vnode => {
 
 	const hooks = currentComponent.__hooks;
 	if (hooks) {
-		if (previousComponent === currentComponent) {
+		if (previousComponent == currentComponent) {
 			currentComponent._renderCallbacks = [];
 		} else {
 			hooks._pendingEffects.some(invokeCleanup);
@@ -93,11 +93,10 @@ options.diffed = vnode => {
 	const c = vnode._component;
 	if (c && c.__hooks) {
 		if (c.__hooks._pendingEffects.length) afterPaint(afterPaintEffects.push(c));
+		// `_pendingArgs` is cleared again by `options._render` before anything
+		// can read it, so committing it here is enough.
 		c.__hooks._list.some(hookItem => {
-			if (hookItem._pendingArgs) {
-				hookItem._args = hookItem._pendingArgs;
-				hookItem._pendingArgs = undefined;
-			}
+			if (hookItem._pendingArgs) hookItem._args = hookItem._pendingArgs;
 		});
 	}
 	previousComponent = currentComponent = null;
@@ -253,7 +252,7 @@ export function useReducer(reducer, initialState, init) {
 				// have values that aren't equal to one another this pushes
 				// us to update further down the tree
 				let updatedHook = false;
-				let shouldUpdate = this.props !== p;
+				let shouldUpdate = this.props != p;
 				hooks._list.some(hookItem => {
 					if (hookItem._nextValue) {
 						updatedHook = true;
@@ -434,7 +433,7 @@ export function useId() {
 		// Grab either the root node or the nearest async boundary node.
 		/** @type {import('./internal').VNode} */
 		let root = currentComponent._vnode;
-		while (root !== null && !root._mask && root._parent !== null) {
+		while (!root._mask && root._parent) {
 			root = root._parent;
 		}
 
@@ -514,7 +513,7 @@ function afterNextFrame(callback) {
  * @returns {void}
  */
 function afterPaint(newQueueLength) {
-	if (newQueueLength === 1 || prevRaf !== options.requestAnimationFrame) {
+	if (newQueueLength == 1 || prevRaf != options.requestAnimationFrame) {
 		prevRaf = options.requestAnimationFrame;
 		(prevRaf || afterNextFrame)(flushAfterPaintEffects);
 	}
@@ -558,7 +557,7 @@ function invokeEffect(hook) {
 function argsChanged(oldArgs, newArgs) {
 	return (
 		!oldArgs ||
-		oldArgs.length !== newArgs.length ||
+		oldArgs.length != newArgs.length ||
 		newArgs.some((arg, index) => !ObjectIs(arg, oldArgs[index]))
 	);
 }

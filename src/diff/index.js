@@ -85,10 +85,12 @@ export function diff(
 		let excess = oldVNode._component._excess;
 		excessDomChildren = [];
 		if (excess.nodeType == 8) {
-			// Re-scan DOM from stored start marker for streamed hydration
+			// Re-scan DOM from stored start marker for streamed hydration.
+			// `depth` only ever reaches 0 through the `break` below, so it
+			// doesn't need to be re-tested in the loop condition.
 			for (
 				let depth = 1, node = excess.nextSibling;
-				node && depth > 0;
+				node;
 				node = node.nextSibling
 			) {
 				if (node.nodeType == 8) {
@@ -156,20 +158,20 @@ export function diff(
 				c._stateCallbacks = [];
 			}
 
-			// Invoke getDerivedStateFromProps
-			if (isClassComponent && !c._nextState) {
-				c._nextState = c.state;
-			}
+			if (isClassComponent) {
+				if (!c._nextState) c._nextState = c.state;
 
-			if (isClassComponent && newType.getDerivedStateFromProps) {
-				if (c._nextState == c.state) {
-					c._nextState = assign({}, c._nextState);
+				// Invoke getDerivedStateFromProps
+				if (newType.getDerivedStateFromProps) {
+					if (c._nextState == c.state) {
+						c._nextState = assign({}, c._nextState);
+					}
+
+					assign(
+						c._nextState,
+						newType.getDerivedStateFromProps(newProps, c._nextState)
+					);
 				}
-
-				assign(
-					c._nextState,
-					newType.getDerivedStateFromProps(newProps, c._nextState)
-				);
 			}
 
 			oldProps = c.props;
@@ -318,7 +320,7 @@ export function diff(
 
 				// Changing the container remounts the children into the new one
 				if (oldVNode.props && oldVNode.props._parentDom != parentDom) {
-					/** @type {VNode[]} */ (oldVNode._children).forEach(child => {
+					/** @type {VNode[]} */ (oldVNode._children).some(child => {
 						if (child) unmount(child, child);
 					});
 					oldVNode._children = NULL;
@@ -383,12 +385,13 @@ export function diff(
 								if (child.data.startsWith('$s')) {
 									if (!commentMarkersToFind) startMarker = child;
 									commentMarkersToFind++;
-								} else if (child.data.startsWith('/$s')) {
-									if (--commentMarkersToFind == 0) {
-										oldDom = child;
-										excessDomChildren[i] = NULL;
-										break;
-									}
+								} else if (
+									child.data.startsWith('/$s') &&
+									!--commentMarkersToFind
+								) {
+									oldDom = child;
+									excessDomChildren[i] = NULL;
+									break;
 								}
 								excessDomChildren[i] = NULL;
 							} else if (commentMarkersToFind) {
@@ -412,9 +415,7 @@ export function diff(
 					}
 					newVNode._dom = oldDom;
 				} else if (excessDomChildren) {
-					for (let i = excessDomChildren.length; i--; ) {
-						removeNode(excessDomChildren[i]);
-					}
+					excessDomChildren.some(removeNode);
 				}
 			} else {
 				newVNode._dom = oldVNode._dom;
@@ -550,10 +551,11 @@ function diffElementNodes(
 
 			// if newVNode matches an element in excessDomChildren or the `dom`
 			// argument matches an element in excessDomChildren, remove it from
-			// excessDomChildren so it isn't later removed in diffChildren
+			// excessDomChildren so it isn't later removed in diffChildren.
+			// `localName` is only present on elements, so it doubles as the
+			// element check for the non-text branch.
 			if (
 				value &&
-				'setAttribute' in value == !!nodeType &&
 				(nodeType ? value.localName == nodeType : value.nodeType == 3)
 			) {
 				dom = value;
@@ -604,6 +606,9 @@ function diffElementNodes(
 		// existing DOM (e.g. replaceNode) we should read the existing DOM
 		// attributes to diff them
 		if (!isHydrating && excessDomChildren) {
+			// Keep this a plain loop: an arrow function here would capture
+			// `oldProps`, forcing V8 to context-allocate it and slowing down the
+			// hot `for (i in oldProps)` loop below for every element we diff.
 			oldProps = {};
 			for (i = 0; i < dom.attributes.length; i++) {
 				value = dom.attributes[i];
@@ -685,18 +690,14 @@ function diffElementNodes(
 			);
 
 			// Remove children that are not part of any vnode.
-			if (excessDomChildren) {
-				for (i = excessDomChildren.length; i--; ) {
-					removeNode(excessDomChildren[i]);
-				}
-			}
+			if (excessDomChildren) excessDomChildren.some(removeNode);
 		}
 
 		// As above, don't diff props during hydration
 		if (!isHydrating || nodeType == 'textarea') {
 			i = 'value';
 			if (nodeType == 'progress' && inputValue == NULL) {
-				dom.removeAttribute('value');
+				dom.removeAttribute(i);
 			} else if (
 				inputValue != UNDEFINED &&
 				// #2756 For the <progress>-element the initial value is 0,

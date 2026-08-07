@@ -35,7 +35,7 @@ export function BaseComponent(props, context) {
 BaseComponent.prototype.setState = function (update, callback) {
 	// only clone state when copying to nextState the first time.
 	let s;
-	if (this._nextState != NULL && this._nextState != this.state) {
+	if (this._nextState && this._nextState != this.state) {
 		s = this._nextState;
 	} else {
 		s = this._nextState = assign({}, this.state);
@@ -106,7 +106,7 @@ export function getDomSibling(vnode, childIndex) {
 	for (; childIndex < vnode._children.length; childIndex++) {
 		sibling = vnode._children[childIndex];
 
-		if (sibling != NULL && sibling._dom != NULL) {
+		if (sibling && sibling._dom) {
 			// Since updateParentDomPointers keeps _dom pointer correct,
 			// we can rely on _dom to tell us if this subtree contains a
 			// rendered DOM node, and what the first rendered DOM node is
@@ -169,14 +169,10 @@ function renderComponent(component) {
  */
 function updateParentDomPointers(vnode) {
 	// Stop at root boundaries (_parentDom)
-	if (
-		(vnode = vnode._parent) &&
-		vnode._component &&
-		!vnode.props._parentDom
-	) {
+	if ((vnode = vnode._parent) && vnode._component && !vnode.props._parentDom) {
 		vnode._dom = NULL;
 		vnode._children.some(child => {
-			if (child != NULL && child._dom != NULL) {
+			if (child && child._dom) {
 				return (vnode._dom = child._dom);
 			}
 		});
