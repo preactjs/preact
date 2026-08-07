@@ -1,8 +1,7 @@
 {
   "help": {
     "what is this file?": "It controls protected/private property mangling so that minified builds have consistent property names.",
-    "why are there duplicate minified properties?": "Most properties are only used on one type of objects, so they can have the same name since they will never collide. Doing this reduces size, and reusing a name that is already frequent compresses better than introducing a new one.",
-    "careful": "Aliases are only safe while the owning object types stay disjoint. Today: _bits/_listeners share __e with _dom/_catchError (Component / DOM element / VNode / options), and _stateCallbacks shares __k with _children (Component / VNode + root container). Adding one of these props to another owner type silently corrupts state."
+    "why are there duplicate minified properties?": "Most properties are only used on one type of objects, so they can have the same name since they will never collide. Doing this reduces size."
   },
   "minify": {
     "mangle": {
@@ -76,7 +75,7 @@
       "$_owner": "__o",
       "$_skipEffects": "__s",
       "$_isSuspended": "__i",
-      "$_bits": "__e"
+      "$_bits": "__g"
     }
   }
 }
