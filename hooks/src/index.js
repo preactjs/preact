@@ -17,6 +17,15 @@ let currentHook = 0;
 /** @type {Array<import('./internal').Component>} */
 let afterPaintEffects = [];
 
+/**
+ * Passive (useEffect) hook states of unmounted components whose cleanup is
+ * still pending. Deferred to the after-paint flush to match React, which runs
+ * passive destroys after the commit has painted. Each state's `_passive` holds
+ * the surviving component its errors should be routed to.
+ * @type {Array<import('./internal').EffectHookState>}
+ */
+let unmountCleanups = [];
+
 // Cast to use internal Options type
 const options = /** @type {import('./internal').Options} */ (_options);
 
@@ -121,10 +130,31 @@ options.unmount = vnode => {
 
 	const c = vnode._component;
 	if (c && c.__hooks) {
-		let hasErrored;
+		let hasErrored,
+			errorParent = vnode._parent;
+		// The removed subtree is detached (`_parent` nulled) by flush time, so
+		// grab the nearest surviving component now; its current vnode can still
+		// route deferred cleanup errors to a mounted error boundary. Unmounting
+		// is pre-order and nulls each component's `_parentDom` before its
+		// children unmount, so removed ancestors are already recognizable here.
+		while (
+			errorParent &&
+			!(errorParent._component && errorParent._component._parentDom)
+		) {
+			errorParent = errorParent._parent;
+		}
 		c.__hooks._list.some(s => {
 			try {
-				invokeCleanup(s);
+				// Layout cleanups have to run before the new DOM is in place, so
+				// they stay in the commit phase (see #1886). Passive cleanups run
+				// after paint, before any new passive effect (see #4299), with
+				// `_passive` repurposed to hold the error-routing component.
+				if (s._passive) {
+					s._passive = errorParent && errorParent._component;
+					afterPaint(unmountCleanups.push(s));
+				} else {
+					invokeCleanup(s);
+				}
 			} catch (e) {
 				hasErrored = e;
 			}
@@ -255,6 +285,7 @@ export function useEffect(callback, args) {
 	/** @type {import('./internal').EffectHookState} */
 	const state = getHookState(currentIndex++, 3);
 	if (!options._skipEffects && argsChanged(state._args, args)) {
+		state._passive = true;
 		state._value = callback;
 		state._pendingArgs = args;
 
@@ -419,18 +450,33 @@ export function useId() {
  */
 function flushAfterPaintEffects() {
 	let component;
-	while ((component = afterPaintEffects.shift())) {
-		const hooks = component.__hooks;
-		if (!component._parentDom || !hooks) continue;
-		try {
-			hooks._pendingEffects.some(invokeCleanup);
-			hooks._pendingEffects.some(invokeEffect);
-			hooks._pendingEffects = [];
-		} catch (e) {
-			hooks._pendingEffects = [];
-			options._catchError(e, component._vnode);
+	// The loop picks up components unmounted by an effect we just invoked, which
+	// don't necessarily schedule a flush of their own.
+	do {
+		// Unmounted components' passive cleanups run before any new passive
+		// effect, mirroring React running all destroys before any create.
+		while ((component = unmountCleanups.shift())) {
+			try {
+				invokeCleanup(component);
+			} catch (e) {
+				component = /** @type {any} */ (component._passive);
+				options._catchError(e, { _parent: component && component._vnode });
+			}
 		}
-	}
+
+		while ((component = afterPaintEffects.shift())) {
+			const hooks = component.__hooks;
+			if (!component._parentDom || !hooks) continue;
+			try {
+				hooks._pendingEffects.some(invokeCleanup);
+				hooks._pendingEffects.some(invokeEffect);
+				hooks._pendingEffects = [];
+			} catch (e) {
+				hooks._pendingEffects = [];
+				options._catchError(e, component._vnode);
+			}
+		}
+	} while (unmountCleanups.length);
 }
 
 let HAS_RAF = typeof requestAnimationFrame == 'function';
