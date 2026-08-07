@@ -34,10 +34,8 @@ export function BaseComponent(props, context) {
  */
 BaseComponent.prototype.setState = function (update, callback) {
 	// only clone state when copying to nextState the first time.
-	let s;
-	if (this._nextState && this._nextState != this.state) {
-		s = this._nextState;
-	} else {
+	let s = this._nextState;
+	if (!s || s == this.state) {
 		s = this._nextState = assign({}, this.state);
 	}
 
@@ -148,7 +146,7 @@ function renderComponent(component) {
 			parentDom.namespaceURI,
 			oldVNode._flags & MODE_HYDRATE ? [oldDom] : NULL,
 			commitQueue,
-			oldDom == NULL ? getDomSibling(oldVNode) : oldDom,
+			oldDom || getDomSibling(oldVNode),
 			oldVNode._flags & MODE_HYDRATE,
 			refQueue
 		);
@@ -170,12 +168,10 @@ function renderComponent(component) {
 function updateParentDomPointers(vnode) {
 	// Stop at root boundaries (_parentDom)
 	if ((vnode = vnode._parent) && vnode._component && !vnode.props._parentDom) {
+		// _dom starts nulled, so re-assigning a null child._dom is a no-op and
+		// the first truthy _dom stops the walk.
 		vnode._dom = NULL;
-		vnode._children.some(child => {
-			if (child && child._dom) {
-				return (vnode._dom = child._dom);
-			}
-		});
+		vnode._children.some(child => child && (vnode._dom = child._dom));
 
 		return updateParentDomPointers(vnode);
 	}

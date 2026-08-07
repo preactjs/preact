@@ -65,10 +65,6 @@ export interface FunctionComponent<P = {}> extends preact.FunctionComponent<P> {
 	// implement the Consumer component
 	contextType?: PreactContext;
 
-	// Internally, createContext stores a ref to the context object on the Provider
-	// Function component to help devtools
-	_contextRef?: PreactContext;
-
 	// Define these properties as undefined on FunctionComponent to get rid of
 	// some errors in `diff()`
 	getDerivedStateFromProps?: undefined;
@@ -76,8 +72,6 @@ export interface FunctionComponent<P = {}> extends preact.FunctionComponent<P> {
 }
 
 export interface ComponentClass<P = {}> extends preact.ComponentClass<P> {
-	_contextRef?: any;
-
 	// Override public contextType with internal PreactContext type
 	contextType?: PreactContext;
 }

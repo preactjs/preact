@@ -75,21 +75,21 @@ export function diff(
 	if (newVNode.constructor !== UNDEFINED) return NULL;
 
 	// If the previous diff bailed out, resume creating/hydrating.
+	// `tmp` holds the stored excess node until the options._diff call below.
 	if (
 		oldVNode._flags & MODE_SUSPENDED &&
 		// @ts-expect-error This is 1 or 0 (true or false)
 		(isHydrating = oldVNode._flags & MODE_HYDRATE) &&
-		oldVNode._component._excess
+		(tmp = oldVNode._component._excess)
 	) {
 		newVNode._flags |= MODE_HYDRATE;
-		let excess = oldVNode._component._excess;
 		excessDomChildren = [];
-		if (excess.nodeType == 8) {
+		if (tmp.nodeType == 8) {
 			// Re-scan DOM from stored start marker for streamed hydration.
 			// `depth` only ever reaches 0 through the `break` below, so it
 			// doesn't need to be re-tested in the loop condition.
 			for (
-				let depth = 1, node = excess.nextSibling;
+				let depth = 1, node = tmp.nextSibling;
 				node;
 				node = node.nextSibling
 			) {
@@ -100,7 +100,7 @@ export function diff(
 				excessDomChildren.push(node);
 			}
 		} else {
-			excessDomChildren.push(excess);
+			excessDomChildren.push(tmp);
 		}
 		oldDom = excessDomChildren[0];
 		oldVNode._component._excess = NULL;
@@ -116,7 +116,7 @@ export function diff(
 				oldState,
 				snapshot,
 				newProps = newVNode.props;
-			const isClassComponent = newType.prototype && newType.prototype.render;
+			const isClassComponent = (tmp = newType.prototype) && tmp.render;
 
 			// Necessary for createContext api. Setting this property will pass
 			// the context value as `this.context` just for this component.
@@ -309,8 +309,11 @@ export function diff(
 			// invisible to the host tree's DOM bookkeeping: the portal vnode
 			// keeps a `null` `_dom` and the host insertion cursor (`oldDom`)
 			// passes through unchanged.
-			let hostOldDom = oldDom;
+			// `tmp` (the raw render result, already unwrapped into renderResult)
+			// doubles as the saved host insertion cursor while we render into
+			// the portal's container.
 			if (newProps._parentDom) {
+				tmp = oldDom;
 				parentDom = newProps._parentDom;
 				// If we portal into a math or svg element we need
 				// to swap the namespace (chart libraries often do this).
@@ -347,7 +350,7 @@ export function diff(
 			// change up the oldDom
 			if (newProps._parentDom) {
 				newVNode._dom = NULL;
-				oldDom = hostOldDom;
+				oldDom = tmp;
 			}
 
 			// We successfully rendered this VNode, unset any stored hydration/bailout state:
@@ -357,9 +360,9 @@ export function diff(
 				commitQueue.push(c);
 			}
 
-			if (c._bits & COMPONENT_PENDING_ERROR) {
-				c._bits &= ~(COMPONENT_PROCESSING_EXCEPTION | COMPONENT_PENDING_ERROR);
-			}
+			// PROCESSING_EXCEPTION is only ever set together with PENDING_ERROR,
+			// so the clear doesn't need a guard.
+			c._bits &= ~(COMPONENT_PROCESSING_EXCEPTION | COMPONENT_PENDING_ERROR);
 		} catch (e) {
 			// We remove any componentDidMount, ...
 			// that have been invalidated by us
@@ -382,28 +385,23 @@ export function diff(
 							if (!child) continue;
 
 							if (child.nodeType == 8) {
+								excessDomChildren[i] = NULL;
 								if (child.data.startsWith('$s')) {
-									if (!commentMarkersToFind) startMarker = child;
-									commentMarkersToFind++;
+									if (!commentMarkersToFind++) startMarker = child;
 								} else if (
 									child.data.startsWith('/$s') &&
 									!--commentMarkersToFind
 								) {
 									oldDom = child;
-									excessDomChildren[i] = NULL;
 									break;
 								}
-								excessDomChildren[i] = NULL;
 							} else if (commentMarkersToFind) {
 								excessDomChildren[i] = NULL;
 							}
 						}
 					}
 
-					if (startMarker) {
-						// Store start marker directly; children re-scanned on resume
-						newVNode._component._excess = startMarker;
-					} else {
+					if (!startMarker) {
 						while (oldDom && oldDom.nodeType == 8 && oldDom.nextSibling) {
 							oldDom = oldDom.nextSibling;
 						}
@@ -411,8 +409,10 @@ export function diff(
 						if (excessDomChildren) {
 							excessDomChildren[excessDomChildren.indexOf(oldDom)] = NULL;
 						}
-						newVNode._component._excess = oldDom;
+						startMarker = oldDom;
 					}
+					// Store the start marker directly; children re-scanned on resume
+					newVNode._component._excess = startMarker;
 					newVNode._dom = oldDom;
 				} else if (excessDomChildren) {
 					excessDomChildren.some(removeNode);
@@ -461,8 +461,8 @@ function markAsForce(vnode) {
  * @param {VNode} root
  */
 export function commitRoot(commitQueue, root, refQueue) {
-	for (let i = 0; i < refQueue.length; i++) {
-		applyRef(refQueue[i], refQueue[++i], refQueue[++i]);
+	for (let i = 0; i < refQueue.length; ) {
+		applyRef(refQueue[i++], refQueue[i++], refQueue[i++]);
 	}
 
 	if (options._commit) options._commit(root, commitQueue);
@@ -483,7 +483,7 @@ export function commitRoot(commitQueue, root, refQueue) {
 }
 
 function cloneNode(node) {
-	if (typeof node != 'object' || node == NULL || node._depth > 0) {
+	if (typeof node != 'object' || node == NULL || node._depth) {
 		return node;
 	}
 

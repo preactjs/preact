@@ -44,11 +44,7 @@ export function createContext(defaultValue) {
 		return props.children(contextValue);
 	};
 
-	// we could also get rid of _contextRef entirely
-	Context.Provider =
-		Context._contextRef =
-		Context.Consumer.contextType =
-			Context;
+	Context.Provider = Context.Consumer.contextType = Context;
 
 	return Context;
 }
