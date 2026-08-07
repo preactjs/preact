@@ -319,14 +319,18 @@ function constructNewChildrenArray(
 		for (i = 0; i < newChildrenLength; i++) {
 			childVNode = newChildren[i];
 			if (childVNode && childVNode._flags & MATCHED) {
-				// `tails` is strictly increasing, so walking back from its end is a
-				// lower-bound search. It settles in O(1) for the shapes that
-				// dominate real reorders — appends land past the end, reversals
-				// keep `tails` a single entry — and costs a handful of extra
-				// comparisons for the shuffles in between. (A forward scan would
-				// be smaller still but degenerates to O(n²) on swap-rows.)
-				let lo = tails.length;
-				while (lo && tails[lo - 1] >= childVNode._index) lo--;
+				// Binary search for the insertion point, keeping the pass at
+				// O(n log n) even for pathological reorders.
+				let lo = 0,
+					hi = tails.length;
+				while (lo < hi) {
+					const mid = (lo + hi) >> 1;
+					if (tails[mid] < childVNode._index) {
+						lo = mid + 1;
+					} else {
+						hi = mid;
+					}
+				}
 				tails[lo] = childVNode._index;
 				lisLengths[i] = lo + 1;
 			}
