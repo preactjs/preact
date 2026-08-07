@@ -184,7 +184,10 @@ function constructNewChildrenArray(
 	 * real reorder happened and we need to compute the minimal set of moves. */
 	let moved = false;
 
-	newParentVNode._children = new Array(newChildrenLength);
+	// Hoisted: every normalization branch below writes through this array, so
+	// reading `_children` off the vnode each time is a wasted property load.
+	/** @type {VNode[]} */
+	let newChildren = (newParentVNode._children = new Array(newChildrenLength));
 	for (i = 0; i < newChildrenLength; i++) {
 		// @ts-expect-error We are reusing the childVNode variable to hold both the
 		// pre and post normalized childVNode
@@ -195,7 +198,7 @@ function constructNewChildrenArray(
 			typeof childVNode == 'boolean' ||
 			typeof childVNode == 'function'
 		) {
-			newParentVNode._children[i] = NULL;
+			newChildren[i] = NULL;
 			continue;
 		}
 		// If this newVNode is being reused (e.g. <div>{reuse}{reuse}</div>) in the same diff,
@@ -208,7 +211,7 @@ function constructNewChildrenArray(
 			typeof childVNode != 'object' ||
 			childVNode.constructor == String
 		) {
-			childVNode = newParentVNode._children[i] = createVNode(
+			childVNode = newChildren[i] = createVNode(
 				NULL,
 				childVNode,
 				NULL,
@@ -216,7 +219,7 @@ function constructNewChildrenArray(
 				NULL
 			);
 		} else if (isArray(childVNode)) {
-			childVNode = newParentVNode._children[i] = createVNode(
+			childVNode = newChildren[i] = createVNode(
 				Fragment,
 				{ children: childVNode },
 				NULL,
@@ -228,7 +231,7 @@ function constructNewChildrenArray(
 			// scenario:
 			//   const reuse = <div />
 			//   <div>{reuse}<span />{reuse}</div>
-			childVNode = newParentVNode._children[i] = createVNode(
+			childVNode = newChildren[i] = createVNode(
 				childVNode.type,
 				childVNode.props,
 				childVNode.key,
@@ -236,7 +239,7 @@ function constructNewChildrenArray(
 				childVNode._original
 			);
 		} else {
-			newParentVNode._children[i] = childVNode;
+			newChildren[i] = childVNode;
 		}
 
 		const skewedIndex = i + skew;
@@ -331,7 +334,7 @@ function constructNewChildrenArray(
 		/** @type {number[]} length of the longest increasing subsequence ending at child i */
 		let lisLengths = [];
 		for (i = 0; i < newChildrenLength; i++) {
-			childVNode = newParentVNode._children[i];
+			childVNode = newChildren[i];
 			if (childVNode && childVNode._flags & MATCHED) {
 				// Binary search for the insertion point, keeping the pass at
 				// O(n log n) even for pathological reorders.
@@ -359,7 +362,7 @@ function constructNewChildrenArray(
 				if (lisLengths[i] == skew) {
 					skew--;
 				} else {
-					newParentVNode._children[i]._flags |= INSERT_VNODE;
+					newChildren[i]._flags |= INSERT_VNODE;
 				}
 			}
 		}
