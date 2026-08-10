@@ -17,5 +17,13 @@
         ]
       }
     }
+  },
+  "props": {
+    "props": {
+      "$_unmounts": "t",
+      "$_reducer": "u",
+      "$_passive": "i",
+      "$_pendingArgs": "o"
+    }
   }
 }

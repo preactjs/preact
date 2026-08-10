@@ -22,9 +22,9 @@ let afterPaintEffects = [];
  * still pending. Deferred to the after-paint flush to match React, which runs
  * passive destroys after the commit has painted. Each state's `_passive` holds
  * the surviving component its errors should be routed to.
- * @type {Array<import('./internal').EffectHookState>}
  */
-let unmountCleanups = [];
+flushAfterPaintEffects._unmounts =
+	/** @type {Array<import('./internal').EffectHookState>} */ ([]);
 
 // Cast to use internal Options type
 const options = /** @type {import('./internal').Options} */ (_options);
@@ -150,7 +150,7 @@ options.unmount = vnode => {
 				// `_passive` repurposed to hold the error-routing component.
 				if (s._passive) {
 					s._passive = errorParent && errorParent._component;
-					afterPaint(unmountCleanups.push(s));
+					afterPaint(flushAfterPaintEffects._unmounts.push(s));
 				} else {
 					invokeCleanup(s);
 				}
@@ -454,7 +454,7 @@ function flushAfterPaintEffects() {
 	do {
 		// Unmounted components' passive cleanups run before any new passive
 		// effect, mirroring React running all destroys before any create.
-		while ((component = unmountCleanups.shift())) {
+		while ((component = flushAfterPaintEffects._unmounts.shift())) {
 			try {
 				invokeCleanup(component);
 			} catch (e) {
@@ -475,7 +475,7 @@ function flushAfterPaintEffects() {
 				options._catchError(e, component._vnode);
 			}
 		}
-	} while (unmountCleanups.length);
+	} while (flushAfterPaintEffects._unmounts.length);
 }
 
 let HAS_RAF = typeof requestAnimationFrame == 'function';
