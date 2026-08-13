@@ -24,6 +24,7 @@ import { assign, IS_NON_DIMENSIONAL } from './util';
 export const REACT_ELEMENT_TYPE = Symbol.for('react.element');
 
 const MODE_HYDRATE = 1 << 5;
+let currentComponent, hydrationRoot, renderTrackingInitialized;
 
 const CAMEL_PROPS =
 	/^(?:accent|alignment|arabic|baseline|cap|clip(?!PathU)|color|dominant|fill|flood|font|glyph(?!R)|horiz|image(!S)|letter|lighting|marker(?!H|W|U)|overline|paint|pointer|shape|stop|strikethrough|stroke|text(?!L)|transform|underline|unicode|units|v|vector|vert|word|writing|x(?!C))[A-Z]/;
@@ -35,47 +36,45 @@ const IS_DOM = typeof document != 'undefined';
  * on a high level this cuts out the warnings, ... and attempts a smaller implementation
  * @typedef {{ _value: any; _getSnapshot: () => any }} Store
  */
-export function useSyncExternalStore(
-	subscribe,
-	getSnapshot,
-	getServerSnapshot
-) {
-	const serverRendering = options._skipEffects || hydrationRoot;
-	const value = serverRendering
-		? (getServerSnapshot || getSnapshot)()
-		: getSnapshot();
+export const useSyncExternalStore = /* @__PURE__ */ initRenderTracking(
+	function useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot) {
+		const serverRendering = options._skipEffects || hydrationRoot;
+		const value = serverRendering
+			? (getServerSnapshot || getSnapshot)()
+			: getSnapshot();
 
-	/**
-	 * @typedef {{ _instance: Store }} StoreRef
-	 * @type {[StoreRef, (store: StoreRef) => void]}
-	 */
-	const [{ _instance }, forceUpdate] = useState({
-		_instance: { _value: value, _getSnapshot: getSnapshot }
-	});
+		/**
+		 * @typedef {{ _instance: Store }} StoreRef
+		 * @type {[StoreRef, (store: StoreRef) => void]}
+		 */
+		const [{ _instance }, forceUpdate] = useState({
+			_instance: { _value: value, _getSnapshot: getSnapshot }
+		});
 
-	useLayoutEffect(() => {
-		_instance._value = value;
-		_instance._getSnapshot = getSnapshot;
+		useLayoutEffect(() => {
+			_instance._value = value;
+			_instance._getSnapshot = getSnapshot;
 
-		if (didSnapshotChange(_instance)) {
-			forceUpdate({ _instance });
-		}
-	}, [subscribe, value, getSnapshot]);
-
-	useEffect(() => {
-		if (didSnapshotChange(_instance)) {
-			forceUpdate({ _instance });
-		}
-
-		return subscribe(() => {
 			if (didSnapshotChange(_instance)) {
 				forceUpdate({ _instance });
 			}
-		});
-	}, [subscribe]);
+		}, [subscribe, value, getSnapshot]);
 
-	return value;
-}
+		useEffect(() => {
+			if (didSnapshotChange(_instance)) {
+				forceUpdate({ _instance });
+			}
+
+			return subscribe(() => {
+				if (didSnapshotChange(_instance)) {
+					forceUpdate({ _instance });
+				}
+			});
+		}, [subscribe]);
+
+		return value;
+	}
+);
 
 /** @type {(inst: Store) => boolean} */
 function didSnapshotChange(inst) {
@@ -310,17 +309,6 @@ options.vnode = vnode => {
 	if (oldVNodeHook) oldVNodeHook(vnode);
 };
 
-// Only needed for react-relay
-let currentComponent, hydrationRoot;
-const oldBeforeRender = options._render;
-options._render = function (vnode) {
-	if (oldBeforeRender) {
-		oldBeforeRender(vnode);
-	}
-	if (vnode._flags & MODE_HYDRATE) hydrationRoot = vnode;
-	currentComponent = vnode._component;
-};
-
 const oldDiffed = options.diffed;
 /** @type {(vnode: import('./internal').VNode) => void} */
 options.diffed = function (vnode) {
@@ -339,10 +327,30 @@ options.diffed = function (vnode) {
 	) {
 		dom.value = props.value == null ? '' : props.value;
 	}
-
-	currentComponent = null;
-	if (hydrationRoot == vnode) hydrationRoot = null;
 };
+
+// Only needed for react-relay and useSyncExternalStore hydration.
+function initRenderTracking(value) {
+	if (!renderTrackingInitialized) {
+		renderTrackingInitialized = true;
+
+		const oldBeforeRender = options._render;
+		options._render = vnode => {
+			if (oldBeforeRender) oldBeforeRender(vnode);
+			if (vnode._flags & MODE_HYDRATE) hydrationRoot = vnode;
+			currentComponent = vnode._component;
+		};
+
+		const oldDiffed = options.diffed;
+		options.diffed = vnode => {
+			if (oldDiffed) oldDiffed(vnode);
+			currentComponent = null;
+			if (hydrationRoot == vnode) hydrationRoot = null;
+		};
+	}
+
+	return value;
+}
 
 /**
  * Read the value of a Promise (suspending while pending) or a Context.
@@ -351,7 +359,7 @@ options.diffed = function (vnode) {
  * @param {(Promise<T> & { status?: string, value?: T, reason?: any }) | import('../../src/internal').PreactContext} resource
  * @returns {T}
  */
-export const use = resource => {
+export const use = /* @__PURE__ */ initRenderTracking(function use(resource) {
 	// A Context is a function without a `then`, a thenable has one.
 	if (resource.then) {
 		if (resource.status == 'fulfilled') return resource.value;
@@ -383,7 +391,7 @@ export const use = resource => {
 		provider.sub(currentComponent);
 	}
 	return provider.props.value;
-};
+});
 
 // This is a very very private internal function for React it
 // is used to sort-of do runtime dependency injection.
