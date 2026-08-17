@@ -188,7 +188,7 @@ We closely watch our issues and have a pretty active [Slack workspace](https://c
 This guide is intended for core team members that have the necessary
 rights to publish new releases on npm.
 
-Before using the automated npm publishing flow, make sure npm trusted publishing is configured for the `preactjs/preact` repository, the `release.yml` workflow, and the `npm` environment. The GitHub `npm` environment should require reviewer approval, and repository rules should protect `11.*` tags.
+Before using the automated npm publishing flow, make sure npm trusted publishing is configured for the `preactjs/preact` repository, the `release.yml` workflow, and the `npm` environment. The trusted publisher must allow `npm stage publish`. The GitHub `npm` environment should require reviewer approval, and repository rules should protect `11.*` tags.
 
 1. Make a PR where **only** the version number is incremented in `package.json` and everywhere else. A simple search and replace works. (note: We follow `SemVer` conventions)
 2. Wait until the PR is approved and merged.
@@ -196,11 +196,16 @@ Before using the automated npm publishing flow, make sure npm trusted publishing
 4. Create and push a tag for the new version you want to publish:
    1. `git tag 11.0.0`
    2. `git push origin 11.0.0`
-5. Wait for the Release workflow to reach the `npm` environment approval gate, approve it, and let it complete
-   - It'll validate that the tag matches the package version, create a draft release, upload the built npm package as a release asset, and publish it to npm.
-   - Stable releases publish to the `latest` npm dist-tag; prereleases publish to the approved prerelease dist-tag (`alpha`, `beta`, `rc`, or `next`).
-6. [Fill in the release notes](#writing-release-notes) in GitHub and publish them
-7. Tweet it out
+5. Open the tag's **Release** workflow in GitHub Actions and wait for the `publish` job to request approval for the `npm` environment.
+   - Before this gate, the workflow builds and tests the tag, creates a draft GitHub release, and uploads the exact npm tarball as a release asset.
+   - Review the workflow, tag, commit, and tarball. Then approve the deployment to the `npm` environment.
+   - The `publish` job validates that the package name and version match the tag, selects the npm dist-tag, and submits the tarball with `npm stage publish`. A successful job means the package is staged; it is **not public yet**.
+6. Open the **Staged Packages** tab on npmjs.com and review the staged `preact` package.
+   - Stable releases use the `latest` npm dist-tag; prereleases use the approved prerelease dist-tag (`alpha`, `beta`, `rc`, or `next`).
+   - Approve the staged package and complete the 2FA challenge. This is the step that publishes it to the live npm registry.
+   - Verify the new version and expected dist-tag with `npm view preact@11.0.0 version dist-tags --json`.
+7. [Fill in the release notes](#writing-release-notes) in GitHub and publish them
+8. Tweet it out
 
 ## Legacy Releases (8.x)
 
