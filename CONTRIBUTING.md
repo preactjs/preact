@@ -188,7 +188,7 @@ We closely watch our issues and have a pretty active [Slack workspace](https://c
 This guide is intended for core team members that have the necessary
 rights to publish new releases on npm.
 
-Before using the automated npm publishing flow, make sure npm trusted publishing is configured for the `preactjs/preact` repository, the `release.yml` workflow, and the `npm` environment. The trusted publisher must allow `npm stage publish`. The GitHub `npm` environment should require reviewer approval, and repository rules should protect `11.*` tags.
+Before using the automated npm publishing flow, make sure npm trusted publishing is configured for the `preactjs/preact` repository, the `release.yml` workflow, and the `npm` environment. The GitHub `npm` environment should require reviewer approval, and repository rules should protect `11.*` tags.
 
 1. Make a PR where **only** the version number is incremented in `package.json` and everywhere else. A simple search and replace works. (note: We follow `SemVer` conventions)
 2. Wait until the PR is approved and merged.
