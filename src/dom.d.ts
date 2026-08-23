@@ -1235,7 +1235,9 @@ export interface AllHTMLAttributes<RefType extends EventTarget = EventTarget>
 	accesskey?: Signalish<AllHTMLAttributes['accessKey']>;
 	action?: Signalish<string | undefined>;
 	allow?: Signalish<string | undefined>;
+	allowfullscreen?: Signalish<boolean | undefined>;
 	allowFullScreen?: Signalish<boolean | undefined>;
+	allowtransparency?: Signalish<boolean | undefined>;
 	allowTransparency?: Signalish<boolean | undefined>;
 	alt?: Signalish<string | undefined>;
 	as?: Signalish<string | undefined>;
@@ -1249,7 +1251,9 @@ export interface AllHTMLAttributes<RefType extends EventTarget = EventTarget>
 	autoPlay?: Signalish<boolean | undefined>;
 	autoplay?: Signalish<boolean | undefined>;
 	capture?: Signalish<boolean | string | undefined>;
+	cellpadding?: Signalish<number | string | undefined>;
 	cellPadding?: Signalish<number | string | undefined>;
+	cellspacing?: Signalish<number | string | undefined>;
 	cellSpacing?: Signalish<number | string | undefined>;
 	charSet?: Signalish<string | undefined>;
 	charset?: Signalish<string | undefined>;
@@ -1340,7 +1344,9 @@ export interface AllHTMLAttributes<RefType extends EventTarget = EventTarget>
 	inputmode?: Signalish<string | undefined>;
 	integrity?: Signalish<string | undefined>;
 	is?: Signalish<string | undefined>;
+	keyparams?: Signalish<string | undefined>;
 	keyParams?: Signalish<string | undefined>;
+	keytype?: Signalish<string | undefined>;
 	keyType?: Signalish<string | undefined>;
 	kind?: Signalish<string | undefined>;
 	label?: Signalish<string | undefined>;
@@ -1350,7 +1356,9 @@ export interface AllHTMLAttributes<RefType extends EventTarget = EventTarget>
 	loop?: Signalish<boolean | undefined>;
 	low?: Signalish<number | undefined>;
 	manifest?: Signalish<string | undefined>;
+	marginheight?: Signalish<number | undefined>;
 	marginHeight?: Signalish<number | undefined>;
+	marginwidth?: Signalish<number | undefined>;
 	marginWidth?: Signalish<number | undefined>;
 	max?: Signalish<number | string | undefined>;
 	maxLength?: Signalish<number | undefined>;
@@ -1537,6 +1545,7 @@ export interface HTMLAttributes<RefType extends EventTarget = EventTarget>
 	role?: Signalish<AriaRole | undefined>;
 
 	// Non-standard Attributes
+	disablepictureinpicture?: Signalish<boolean | undefined>;
 	disablePictureInPicture?: Signalish<boolean | undefined>;
 	elementtiming?: Signalish<string | undefined>;
 	elementTiming?: Signalish<string | undefined>;
@@ -1965,7 +1974,9 @@ export interface IframeHTMLAttributes<
 	T extends EventTarget = HTMLIFrameElement
 > extends HTMLAttributes<T> {
 	allow?: Signalish<string | undefined>;
+	allowfullscreen?: Signalish<boolean | undefined>;
 	allowFullScreen?: Signalish<boolean | undefined>;
+	allowtransparency?: Signalish<boolean | undefined>;
 	allowTransparency?: Signalish<boolean | undefined>;
 	/** @deprecated */
 	frameborder?: Signalish<number | string | undefined>;
@@ -1974,7 +1985,11 @@ export interface IframeHTMLAttributes<
 	height?: Signalish<number | string | undefined>;
 	loading?: Signalish<'eager' | 'lazy' | undefined>;
 	/** @deprecated */
+	marginheight?: Signalish<number | undefined>;
+	/** @deprecated */
 	marginHeight?: Signalish<number | undefined>;
+	/** @deprecated */
+	marginwidth?: Signalish<number | undefined>;
 	/** @deprecated */
 	marginWidth?: Signalish<number | undefined>;
 	name?: Signalish<string | undefined>;
@@ -2363,7 +2378,9 @@ export interface KeygenHTMLAttributes<
 	challenge?: Signalish<string | undefined>;
 	disabled?: Signalish<boolean | undefined>;
 	form?: Signalish<string | undefined>;
+	keytype?: Signalish<string | undefined>;
 	keyType?: Signalish<string | undefined>;
+	keyparams?: Signalish<string | undefined>;
 	keyParams?: Signalish<string | undefined>;
 	name?: Signalish<string | undefined>;
 }
@@ -2430,13 +2447,17 @@ export interface MarqueeHTMLAttributes<
 	T extends EventTarget = HTMLMarqueeElement
 > extends HTMLAttributes<T> {
 	behavior?: Signalish<'scroll' | 'slide' | 'alternate' | undefined>;
+	bgcolor?: Signalish<string | undefined>;
 	bgColor?: Signalish<string | undefined>;
 	direction?: Signalish<'left' | 'right' | 'up' | 'down' | undefined>;
 	height?: Signalish<number | string | undefined>;
 	hspace?: Signalish<number | string | undefined>;
 	loop?: Signalish<number | string | undefined>;
+	scrollamount?: Signalish<number | string | undefined>;
 	scrollAmount?: Signalish<number | string | undefined>;
+	scrolldelay?: Signalish<number | string | undefined>;
 	scrollDelay?: Signalish<number | string | undefined>;
+	truespeed?: Signalish<boolean | undefined>;
 	trueSpeed?: Signalish<boolean | undefined>;
 	vspace?: Signalish<number | string | undefined>;
 	width?: Signalish<number | string | undefined>;
@@ -2535,6 +2556,7 @@ export interface NoScriptHTMLAttributes<
 export interface ObjectHTMLAttributes<
 	T extends EventTarget = HTMLObjectElement
 > extends HTMLAttributes<T> {
+	classid?: Signalish<string | undefined>;
 	classID?: Signalish<string | undefined>;
 	data?: Signalish<string | undefined>;
 	form?: Signalish<string | undefined>;
@@ -2728,7 +2750,9 @@ export interface StyleHTMLAttributes<
 export interface TableHTMLAttributes<
 	T extends EventTarget = HTMLTableElement
 > extends HTMLAttributes<T> {
+	cellpadding?: Signalish<string | undefined>;
 	cellPadding?: Signalish<string | undefined>;
+	cellspacing?: Signalish<string | undefined>;
 	cellSpacing?: Signalish<string | undefined>;
 	summary?: Signalish<string | undefined>;
 	width?: Signalish<number | string | undefined>;
@@ -2765,6 +2789,7 @@ export interface TextareaHTMLAttributes<
 	autoComplete?: Signalish<string | undefined>;
 	cols?: Signalish<number | undefined>;
 	defaultValue?: Signalish<string | number | undefined>;
+	dirname?: Signalish<string | undefined>;
 	dirName?: Signalish<string | undefined>;
 	disabled?: Signalish<boolean | undefined>;
 	form?: Signalish<string | undefined>;
@@ -2774,6 +2799,7 @@ export interface TextareaHTMLAttributes<
 	minLength?: Signalish<number | undefined>;
 	name?: Signalish<string | undefined>;
 	placeholder?: Signalish<string | undefined>;
+	readonly?: Signalish<boolean | undefined>;
 	readOnly?: Signalish<boolean | undefined>;
 	required?: Signalish<boolean | undefined>;
 	role?: Signalish<'textbox' | undefined>;
@@ -2844,6 +2870,7 @@ export interface UlHTMLAttributes<
 export interface VideoHTMLAttributes<
 	T extends EventTarget = HTMLVideoElement
 > extends MediaHTMLAttributes<T> {
+	disablepictureinpicture?: Signalish<boolean | undefined>;
 	disablePictureInPicture?: Signalish<boolean | undefined>;
 	height?: Signalish<number | string | undefined>;
 	playsinline?: Signalish<boolean | undefined>;
