@@ -166,7 +166,7 @@ options.unmount = vnode => {
 /**
  * Get a hook's state from the currentComponent
  * @param {number} index The index of the hook to get
- * @param {number} type The index of the hook to get
+ * @param {number} type The type of the hook to get
  * @returns {any}
  */
 function getHookState(index, type) {
