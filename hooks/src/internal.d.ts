@@ -87,7 +87,6 @@ export interface MemoHookState<T = unknown> extends BaseHookState {
 	_pendingValue?: T;
 	_args?: unknown[];
 	_pendingArgs?: unknown[];
-	_factory?: () => T;
 }
 
 export interface ReducerHookState<

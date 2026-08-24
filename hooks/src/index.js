@@ -351,7 +351,6 @@ export function useMemo(factory, args) {
 	if (argsChanged(state._args, args)) {
 		state._value = factory();
 		state._args = args;
-		state._factory = factory;
 	}
 
 	return state._value;
