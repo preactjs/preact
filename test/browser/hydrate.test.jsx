@@ -77,10 +77,10 @@ describe('hydrate()', () => {
 		expect(scratch.firstChild.defaultValue).to.equal('foo');
 	});
 
-	it('should respect textarea value in hydrate', () => {
-		scratch.innerHTML = '<textarea>foo</textarea>';
-		hydrate(<textarea value="foo" />, scratch);
-		expect(scratch.firstChild.value).to.equal('foo');
+	it('should synchronize textarea values during hydration', () => {
+		scratch.innerHTML = '<textarea>server</textarea>';
+		hydrate(<textarea value="client" />, scratch);
+		expect(scratch.firstChild.value).to.equal('client');
 	});
 
 	it('should respect defaultChecked in hydrate', () => {
