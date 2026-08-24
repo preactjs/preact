@@ -427,13 +427,14 @@ function insert(parentVNode, oldDom, parentDom, isMounting) {
  */
 export function toChildArray(children, out) {
 	out = out || [];
-	if (children == NULL || typeof children == 'boolean') {
-	} else if (isArray(children)) {
-		children.some(child => {
-			toChildArray(child, out);
-		});
-	} else {
-		out.push(children);
+	if (children != NULL && typeof children != 'boolean') {
+		if (isArray(children)) {
+			children.some(child => {
+				toChildArray(child, out);
+			});
+		} else {
+			out.push(children);
+		}
 	}
 	return out;
 }
