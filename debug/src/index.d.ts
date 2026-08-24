@@ -1,9 +1,9 @@
 import { VNode } from '../../src/index';
 
 /**
- * Return the component stack that was captured up to this point.
+ * Return the owner stack captured for the current render, or null when unavailable.
  */
-export function captureOwnerStack(): string;
+export function captureOwnerStack(): string | null;
 
 /**
  * Get the currently rendered `vnode`

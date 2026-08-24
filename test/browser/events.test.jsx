@@ -118,6 +118,31 @@ describe('event handling', () => {
 		expect(click).toHaveBeenCalledWith(1);
 	});
 
+	it('should not invoke an ancestor handler attached while an event bubbles', () => {
+		const onAncestorClick = vi.fn();
+		const onButtonClick = () => {
+			render(
+				<div onClick={onAncestorClick}>
+					<button onClick={onButtonClick}>Click me</button>
+				</div>,
+				scratch
+			);
+		};
+
+		render(
+			<div>
+				<button onClick={onButtonClick}>Click me</button>
+			</div>,
+			scratch
+		);
+
+		fireEvent(scratch.querySelector('button'), 'click');
+		expect(onAncestorClick).not.toHaveBeenCalled();
+
+		fireEvent(scratch.querySelector('button'), 'click');
+		expect(onAncestorClick).toHaveBeenCalledOnce();
+	});
+
 	it('should update event handlers', () => {
 		let click1 = vi.fn();
 		let click2 = vi.fn();
