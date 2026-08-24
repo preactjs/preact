@@ -1,5 +1,5 @@
 import { createElement, render, Component } from 'preact';
-import 'preact/debug';
+import { captureOwnerStack } from 'preact/debug';
 import { vi } from 'vitest';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 
@@ -82,6 +82,24 @@ describe('component stack', () => {
 		expect(lines[0].indexOf('tr') > -1).to.equal(true);
 		expect(lines[1].indexOf('Thrower') > -1).to.equal(true);
 		expect(lines[2].indexOf('Bar') > -1).to.equal(true);
+	});
+
+	it('should capture the owner stack during render and return null otherwise', () => {
+		let capturedStack;
+
+		function Child() {
+			capturedStack = captureOwnerStack();
+			return null;
+		}
+
+		function Parent() {
+			return <Child />;
+		}
+
+		expect(captureOwnerStack()).to.equal(null);
+		render(<Parent />, scratch);
+		expect(capturedStack).to.match(/in Child[\s\S]*in Parent/);
+		expect(captureOwnerStack()).to.equal(null);
 	});
 
 	it('should not print a warning when "@babel/plugin-transform-react-jsx-source" is installed', () => {
