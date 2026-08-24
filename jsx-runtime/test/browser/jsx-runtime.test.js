@@ -1,4 +1,4 @@
-import { Component, createElement, createRef, options } from 'preact';
+import { Component, createElement, options } from 'preact';
 import {
 	jsx,
 	jsxs,
@@ -51,12 +51,15 @@ describe('Babel jsx/jsxDEV', () => {
 		expect(typeof Fragment).to.equal('function');
 	});
 
-	it('should keep ref in props', () => {
+	it('should separate ref from intrinsic VNode props without mutating the input', () => {
 		const ref = () => null;
-		const props = { ref };
+		const props = { ref, id: 'foo', children: 'bar' };
 		const vnode = jsx('div', props);
+
 		expect(vnode.ref).to.equal(ref);
+		expect(vnode.props).to.deep.equal({ id: 'foo', children: 'bar' });
 		expect(vnode.props).to.not.equal(props);
+		expect(props).to.deep.equal({ ref, id: 'foo', children: 'bar' });
 	});
 
 	it('should not copy props wen there is no ref in props', () => {
@@ -87,14 +90,6 @@ describe('Babel jsx/jsxDEV', () => {
 		delete jsxVNode._original;
 		delete elementVNode._original;
 		expect(jsxVNode).to.deep.equal(elementVNode);
-	});
-
-	// #2839
-	it('should remove ref from props', () => {
-		const ref = createRef();
-		const vnode = jsx('div', { ref }, null);
-		expect(vnode.props).to.deep.equal({});
-		expect(vnode.ref).to.equal(ref);
 	});
 
 	it('should call options.vnode with the vnode', () => {
