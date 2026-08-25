@@ -81,25 +81,10 @@ export interface CSSProperties extends AllCSSProperties, DOMCSSProperties {
 export interface SVGAttributes<
 	Target extends EventTarget = SVGElement
 > extends HTMLAttributes<Target> {
+	'accent-height'?: Signalish<number | string | undefined>;
 	accentHeight?: Signalish<number | string | undefined>;
 	accumulate?: Signalish<'none' | 'sum' | undefined>;
 	additive?: Signalish<'replace' | 'sum' | undefined>;
-	alignmentBaseline?: Signalish<
-		| 'auto'
-		| 'baseline'
-		| 'before-edge'
-		| 'text-before-edge'
-		| 'middle'
-		| 'central'
-		| 'after-edge'
-		| 'text-after-edge'
-		| 'ideographic'
-		| 'alphabetic'
-		| 'hanging'
-		| 'mathematical'
-		| 'inherit'
-		| undefined
-	>;
 	'alignment-baseline'?: Signalish<
 		| 'auto'
 		| 'baseline'
@@ -116,16 +101,32 @@ export interface SVGAttributes<
 		| 'inherit'
 		| undefined
 	>;
-	allowReorder?: Signalish<'no' | 'yes' | undefined>;
+	alignmentBaseline?: Signalish<
+		| 'auto'
+		| 'baseline'
+		| 'before-edge'
+		| 'text-before-edge'
+		| 'middle'
+		| 'central'
+		| 'after-edge'
+		| 'text-after-edge'
+		| 'ideographic'
+		| 'alphabetic'
+		| 'hanging'
+		| 'mathematical'
+		| 'inherit'
+		| undefined
+	>;
 	'allow-reorder'?: Signalish<'no' | 'yes' | undefined>;
+	allowReorder?: Signalish<'no' | 'yes' | undefined>;
 	alphabetic?: Signalish<number | string | undefined>;
 	amplitude?: Signalish<number | string | undefined>;
 	/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/arabic-form */
-	arabicForm?: Signalish<
+	'arabic-form'?: Signalish<
 		'initial' | 'medial' | 'terminal' | 'isolated' | undefined
 	>;
 	/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/arabic-form */
-	'arabic-form'?: Signalish<
+	arabicForm?: Signalish<
 		'initial' | 'medial' | 'terminal' | 'isolated' | undefined
 	>;
 	ascent?: Signalish<number | string | undefined>;
@@ -133,38 +134,38 @@ export interface SVGAttributes<
 	attributeType?: Signalish<string | undefined>;
 	azimuth?: Signalish<number | string | undefined>;
 	baseFrequency?: Signalish<number | string | undefined>;
-	baselineShift?: Signalish<number | string | undefined>;
 	'baseline-shift'?: Signalish<number | string | undefined>;
+	baselineShift?: Signalish<number | string | undefined>;
 	baseProfile?: Signalish<number | string | undefined>;
 	bbox?: Signalish<number | string | undefined>;
 	begin?: Signalish<number | string | undefined>;
 	bias?: Signalish<number | string | undefined>;
 	by?: Signalish<number | string | undefined>;
 	calcMode?: Signalish<number | string | undefined>;
-	capHeight?: Signalish<number | string | undefined>;
 	'cap-height'?: Signalish<number | string | undefined>;
+	capHeight?: Signalish<number | string | undefined>;
 	clip?: Signalish<number | string | undefined>;
-	clipPath?: Signalish<string | undefined>;
 	'clip-path'?: Signalish<string | undefined>;
+	clipPath?: Signalish<string | undefined>;
 	clipPathUnits?: Signalish<number | string | undefined>;
-	clipRule?: Signalish<number | string | undefined>;
 	'clip-rule'?: Signalish<number | string | undefined>;
-	colorInterpolation?: Signalish<number | string | undefined>;
+	clipRule?: Signalish<number | string | undefined>;
 	'color-interpolation'?: Signalish<number | string | undefined>;
-	colorInterpolationFilters?: Signalish<
-		'auto' | 'sRGB' | 'linearRGB' | 'inherit' | undefined
-	>;
+	colorInterpolation?: Signalish<number | string | undefined>;
 	'color-interpolation-filters'?: Signalish<
 		'auto' | 'sRGB' | 'linearRGB' | 'inherit' | undefined
 	>;
-	colorProfile?: Signalish<number | string | undefined>;
+	colorInterpolationFilters?: Signalish<
+		'auto' | 'sRGB' | 'linearRGB' | 'inherit' | undefined
+	>;
 	'color-profile'?: Signalish<number | string | undefined>;
-	colorRendering?: Signalish<number | string | undefined>;
+	colorProfile?: Signalish<number | string | undefined>;
 	'color-rendering'?: Signalish<number | string | undefined>;
-	contentScriptType?: Signalish<number | string | undefined>;
+	colorRendering?: Signalish<number | string | undefined>;
 	'content-script-type'?: Signalish<number | string | undefined>;
-	contentStyleType?: Signalish<number | string | undefined>;
+	contentScriptType?: Signalish<number | string | undefined>;
 	'content-style-type'?: Signalish<number | string | undefined>;
+	contentStyleType?: Signalish<number | string | undefined>;
 	cursor?: Signalish<number | string | undefined>;
 	cx?: Signalish<number | string | undefined>;
 	cy?: Signalish<number | string | undefined>;
@@ -175,72 +176,72 @@ export interface SVGAttributes<
 	direction?: Signalish<number | string | undefined>;
 	display?: Signalish<number | string | undefined>;
 	divisor?: Signalish<number | string | undefined>;
-	dominantBaseline?: Signalish<number | string | undefined>;
 	'dominant-baseline'?: Signalish<number | string | undefined>;
+	dominantBaseline?: Signalish<number | string | undefined>;
 	dur?: Signalish<number | string | undefined>;
 	dx?: Signalish<number | string | undefined>;
 	dy?: Signalish<number | string | undefined>;
 	edgeMode?: Signalish<number | string | undefined>;
 	elevation?: Signalish<number | string | undefined>;
-	enableBackground?: Signalish<number | string | undefined>;
 	'enable-background'?: Signalish<number | string | undefined>;
+	enableBackground?: Signalish<number | string | undefined>;
 	end?: Signalish<number | string | undefined>;
 	exponent?: Signalish<number | string | undefined>;
 	externalResourcesRequired?: Signalish<number | string | undefined>;
 	fill?: Signalish<string | undefined>;
-	fillOpacity?: Signalish<number | string | undefined>;
 	'fill-opacity'?: Signalish<number | string | undefined>;
-	fillRule?: Signalish<'nonzero' | 'evenodd' | 'inherit' | undefined>;
+	fillOpacity?: Signalish<number | string | undefined>;
 	'fill-rule'?: Signalish<'nonzero' | 'evenodd' | 'inherit' | undefined>;
+	fillRule?: Signalish<'nonzero' | 'evenodd' | 'inherit' | undefined>;
 	filter?: Signalish<string | undefined>;
 	filterRes?: Signalish<number | string | undefined>;
 	filterUnits?: Signalish<number | string | undefined>;
-	floodColor?: Signalish<number | string | undefined>;
 	'flood-color'?: Signalish<number | string | undefined>;
-	floodOpacity?: Signalish<number | string | undefined>;
+	floodColor?: Signalish<number | string | undefined>;
 	'flood-opacity'?: Signalish<number | string | undefined>;
+	floodOpacity?: Signalish<number | string | undefined>;
 	focusable?: Signalish<number | string | undefined>;
-	fontFamily?: Signalish<string | undefined>;
 	'font-family'?: Signalish<string | undefined>;
-	fontSize?: Signalish<number | string | undefined>;
+	fontFamily?: Signalish<string | undefined>;
 	'font-size'?: Signalish<number | string | undefined>;
-	fontSizeAdjust?: Signalish<number | string | undefined>;
+	fontSize?: Signalish<number | string | undefined>;
 	'font-size-adjust'?: Signalish<number | string | undefined>;
-	fontStretch?: Signalish<number | string | undefined>;
+	fontSizeAdjust?: Signalish<number | string | undefined>;
 	'font-stretch'?: Signalish<number | string | undefined>;
-	fontStyle?: Signalish<number | string | undefined>;
+	fontStretch?: Signalish<number | string | undefined>;
 	'font-style'?: Signalish<number | string | undefined>;
-	fontVariant?: Signalish<number | string | undefined>;
+	fontStyle?: Signalish<number | string | undefined>;
 	'font-variant'?: Signalish<number | string | undefined>;
-	fontWeight?: Signalish<number | string | undefined>;
+	fontVariant?: Signalish<number | string | undefined>;
 	'font-weight'?: Signalish<number | string | undefined>;
+	fontWeight?: Signalish<number | string | undefined>;
 	format?: Signalish<number | string | undefined>;
 	from?: Signalish<number | string | undefined>;
 	fx?: Signalish<number | string | undefined>;
 	fy?: Signalish<number | string | undefined>;
 	g1?: Signalish<number | string | undefined>;
 	g2?: Signalish<number | string | undefined>;
-	glyphName?: Signalish<number | string | undefined>;
 	'glyph-name'?: Signalish<number | string | undefined>;
-	glyphOrientationHorizontal?: Signalish<number | string | undefined>;
+	glyphName?: Signalish<number | string | undefined>;
 	'glyph-orientation-horizontal'?: Signalish<number | string | undefined>;
-	glyphOrientationVertical?: Signalish<number | string | undefined>;
+	glyphOrientationHorizontal?: Signalish<number | string | undefined>;
 	'glyph-orientation-vertical'?: Signalish<number | string | undefined>;
+	glyphOrientationVertical?: Signalish<number | string | undefined>;
 	glyphRef?: Signalish<number | string | undefined>;
 	gradientTransform?: Signalish<string | undefined>;
 	gradientUnits?: Signalish<string | undefined>;
 	hanging?: Signalish<number | string | undefined>;
 	height?: Signalish<number | string | undefined>;
-	horizAdvX?: Signalish<number | string | undefined>;
 	'horiz-adv-x'?: Signalish<number | string | undefined>;
-	horizOriginX?: Signalish<number | string | undefined>;
+	horizAdvX?: Signalish<number | string | undefined>;
 	'horiz-origin-x'?: Signalish<number | string | undefined>;
+	horizOriginX?: Signalish<number | string | undefined>;
 	href?: Signalish<string | undefined>;
 	hreflang?: Signalish<string | undefined>;
 	hrefLang?: Signalish<string | undefined>;
 	ideographic?: Signalish<number | string | undefined>;
-	imageRendering?: Signalish<number | string | undefined>;
 	'image-rendering'?: Signalish<number | string | undefined>;
+	imageRendering?: Signalish<number | string | undefined>;
 	in2?: Signalish<number | string | undefined>;
 	in?: Signalish<string | undefined>;
 	intercept?: Signalish<number | string | undefined>;
@@ -256,19 +257,19 @@ export interface SVGAttributes<
 	keySplines?: Signalish<number | string | undefined>;
 	keyTimes?: Signalish<number | string | undefined>;
 	lengthAdjust?: Signalish<number | string | undefined>;
-	letterSpacing?: Signalish<number | string | undefined>;
 	'letter-spacing'?: Signalish<number | string | undefined>;
-	lightingColor?: Signalish<number | string | undefined>;
+	letterSpacing?: Signalish<number | string | undefined>;
 	'lighting-color'?: Signalish<number | string | undefined>;
+	lightingColor?: Signalish<number | string | undefined>;
 	limitingConeAngle?: Signalish<number | string | undefined>;
 	local?: Signalish<number | string | undefined>;
-	markerEnd?: Signalish<string | undefined>;
 	'marker-end'?: Signalish<string | undefined>;
+	markerEnd?: Signalish<string | undefined>;
 	markerHeight?: Signalish<number | string | undefined>;
-	markerMid?: Signalish<string | undefined>;
 	'marker-mid'?: Signalish<string | undefined>;
-	markerStart?: Signalish<string | undefined>;
+	markerMid?: Signalish<string | undefined>;
 	'marker-start'?: Signalish<string | undefined>;
+	markerStart?: Signalish<string | undefined>;
 	markerUnits?: Signalish<number | string | undefined>;
 	markerWidth?: Signalish<number | string | undefined>;
 	mask?: Signalish<string | undefined>;
@@ -285,20 +286,20 @@ export interface SVGAttributes<
 	orientation?: Signalish<number | string | undefined>;
 	origin?: Signalish<number | string | undefined>;
 	overflow?: Signalish<number | string | undefined>;
-	overlinePosition?: Signalish<number | string | undefined>;
 	'overline-position'?: Signalish<number | string | undefined>;
-	overlineThickness?: Signalish<number | string | undefined>;
+	overlinePosition?: Signalish<number | string | undefined>;
 	'overline-thickness'?: Signalish<number | string | undefined>;
-	paintOrder?: Signalish<number | string | undefined>;
+	overlineThickness?: Signalish<number | string | undefined>;
 	'paint-order'?: Signalish<number | string | undefined>;
-	panose1?: Signalish<number | string | undefined>;
+	paintOrder?: Signalish<number | string | undefined>;
 	'panose-1'?: Signalish<number | string | undefined>;
+	panose1?: Signalish<number | string | undefined>;
 	pathLength?: Signalish<number | string | undefined>;
 	patternContentUnits?: Signalish<string | undefined>;
 	patternTransform?: Signalish<number | string | undefined>;
 	patternUnits?: Signalish<string | undefined>;
-	pointerEvents?: Signalish<number | string | undefined>;
 	'pointer-events'?: Signalish<number | string | undefined>;
+	pointerEvents?: Signalish<number | string | undefined>;
 	points?: Signalish<string | undefined>;
 	pointsAtX?: Signalish<number | string | undefined>;
 	pointsAtY?: Signalish<number | string | undefined>;
@@ -310,12 +311,10 @@ export interface SVGAttributes<
 	radius?: Signalish<number | string | undefined>;
 	refX?: Signalish<number | string | undefined>;
 	refY?: Signalish<number | string | undefined>;
-	renderingIntent?: Signalish<number | string | undefined>;
 	'rendering-intent'?: Signalish<number | string | undefined>;
+	renderingIntent?: Signalish<number | string | undefined>;
 	repeatCount?: Signalish<number | string | undefined>;
-	'repeat-count'?: Signalish<number | string | undefined>;
 	repeatDur?: Signalish<number | string | undefined>;
-	'repeat-dur'?: Signalish<number | string | undefined>;
 	requiredExtensions?: Signalish<number | string | undefined>;
 	requiredFeatures?: Signalish<number | string | undefined>;
 	restart?: Signalish<number | string | undefined>;
@@ -325,8 +324,8 @@ export interface SVGAttributes<
 	ry?: Signalish<number | string | undefined>;
 	scale?: Signalish<number | string | undefined>;
 	seed?: Signalish<number | string | undefined>;
-	shapeRendering?: Signalish<number | string | undefined>;
 	'shape-rendering'?: Signalish<number | string | undefined>;
+	shapeRendering?: Signalish<number | string | undefined>;
 	slope?: Signalish<number | string | undefined>;
 	spacing?: Signalish<number | string | undefined>;
 	specularConstant?: Signalish<number | string | undefined>;
@@ -338,122 +337,122 @@ export interface SVGAttributes<
 	stemh?: Signalish<number | string | undefined>;
 	stemv?: Signalish<number | string | undefined>;
 	stitchTiles?: Signalish<number | string | undefined>;
-	stopColor?: Signalish<string | undefined>;
 	'stop-color'?: Signalish<string | undefined>;
-	stopOpacity?: Signalish<number | string | undefined>;
+	stopColor?: Signalish<string | undefined>;
 	'stop-opacity'?: Signalish<number | string | undefined>;
-	strikethroughPosition?: Signalish<number | string | undefined>;
+	stopOpacity?: Signalish<number | string | undefined>;
 	'strikethrough-position'?: Signalish<number | string | undefined>;
-	strikethroughThickness?: Signalish<number | string | undefined>;
+	strikethroughPosition?: Signalish<number | string | undefined>;
 	'strikethrough-thickness'?: Signalish<number | string | undefined>;
+	strikethroughThickness?: Signalish<number | string | undefined>;
 	string?: Signalish<number | string | undefined>;
 	stroke?: Signalish<string | undefined>;
-	strokeDasharray?: Signalish<string | number | undefined>;
 	'stroke-dasharray'?: Signalish<string | number | undefined>;
-	strokeDashoffset?: Signalish<string | number | undefined>;
+	strokeDasharray?: Signalish<string | number | undefined>;
 	'stroke-dashoffset'?: Signalish<string | number | undefined>;
-	strokeLinecap?: Signalish<
-		'butt' | 'round' | 'square' | 'inherit' | undefined
-	>;
+	strokeDashoffset?: Signalish<string | number | undefined>;
 	'stroke-linecap'?: Signalish<
 		'butt' | 'round' | 'square' | 'inherit' | undefined
 	>;
-	strokeLinejoin?: Signalish<
-		'miter' | 'round' | 'bevel' | 'inherit' | undefined
+	strokeLinecap?: Signalish<
+		'butt' | 'round' | 'square' | 'inherit' | undefined
 	>;
 	'stroke-linejoin'?: Signalish<
 		'miter' | 'round' | 'bevel' | 'inherit' | undefined
 	>;
-	strokeMiterlimit?: Signalish<string | number | undefined>;
+	strokeLinejoin?: Signalish<
+		'miter' | 'round' | 'bevel' | 'inherit' | undefined
+	>;
 	'stroke-miterlimit'?: Signalish<string | number | undefined>;
-	strokeOpacity?: Signalish<number | string | undefined>;
+	strokeMiterlimit?: Signalish<string | number | undefined>;
 	'stroke-opacity'?: Signalish<number | string | undefined>;
-	strokeWidth?: Signalish<number | string | undefined>;
+	strokeOpacity?: Signalish<number | string | undefined>;
 	'stroke-width'?: Signalish<number | string | undefined>;
+	strokeWidth?: Signalish<number | string | undefined>;
 	surfaceScale?: Signalish<number | string | undefined>;
 	systemLanguage?: Signalish<number | string | undefined>;
 	tableValues?: Signalish<number | string | undefined>;
 	targetX?: Signalish<number | string | undefined>;
 	targetY?: Signalish<number | string | undefined>;
-	textAnchor?: Signalish<string | undefined>;
 	'text-anchor'?: Signalish<string | undefined>;
-	textDecoration?: Signalish<number | string | undefined>;
+	textAnchor?: Signalish<string | undefined>;
 	'text-decoration'?: Signalish<number | string | undefined>;
+	textDecoration?: Signalish<number | string | undefined>;
 	textLength?: Signalish<number | string | undefined>;
-	textRendering?: Signalish<number | string | undefined>;
 	'text-rendering'?: Signalish<number | string | undefined>;
+	textRendering?: Signalish<number | string | undefined>;
 	to?: Signalish<number | string | undefined>;
 	transform?: Signalish<string | undefined>;
-	transformOrigin?: Signalish<string | undefined>;
 	'transform-origin'?: Signalish<string | undefined>;
+	transformOrigin?: Signalish<string | undefined>;
 	type?: Signalish<string | undefined>;
 	u1?: Signalish<number | string | undefined>;
 	u2?: Signalish<number | string | undefined>;
-	underlinePosition?: Signalish<number | string | undefined>;
 	'underline-position'?: Signalish<number | string | undefined>;
-	underlineThickness?: Signalish<number | string | undefined>;
+	underlinePosition?: Signalish<number | string | undefined>;
 	'underline-thickness'?: Signalish<number | string | undefined>;
+	underlineThickness?: Signalish<number | string | undefined>;
 	unicode?: Signalish<number | string | undefined>;
-	unicodeBidi?: Signalish<number | string | undefined>;
 	'unicode-bidi'?: Signalish<number | string | undefined>;
-	unicodeRange?: Signalish<number | string | undefined>;
+	unicodeBidi?: Signalish<number | string | undefined>;
 	'unicode-range'?: Signalish<number | string | undefined>;
-	unitsPerEm?: Signalish<number | string | undefined>;
+	unicodeRange?: Signalish<number | string | undefined>;
 	'units-per-em'?: Signalish<number | string | undefined>;
-	vAlphabetic?: Signalish<number | string | undefined>;
+	unitsPerEm?: Signalish<number | string | undefined>;
 	'v-alphabetic'?: Signalish<number | string | undefined>;
+	vAlphabetic?: Signalish<number | string | undefined>;
 	values?: Signalish<string | undefined>;
-	vectorEffect?: Signalish<number | string | undefined>;
 	'vector-effect'?: Signalish<number | string | undefined>;
+	vectorEffect?: Signalish<number | string | undefined>;
 	version?: Signalish<string | undefined>;
-	vertAdvY?: Signalish<number | string | undefined>;
 	'vert-adv-y'?: Signalish<number | string | undefined>;
-	vertOriginX?: Signalish<number | string | undefined>;
+	vertAdvY?: Signalish<number | string | undefined>;
 	'vert-origin-x'?: Signalish<number | string | undefined>;
-	vertOriginY?: Signalish<number | string | undefined>;
+	vertOriginX?: Signalish<number | string | undefined>;
 	'vert-origin-y'?: Signalish<number | string | undefined>;
-	vHanging?: Signalish<number | string | undefined>;
+	vertOriginY?: Signalish<number | string | undefined>;
 	'v-hanging'?: Signalish<number | string | undefined>;
-	vIdeographic?: Signalish<number | string | undefined>;
+	vHanging?: Signalish<number | string | undefined>;
 	'v-ideographic'?: Signalish<number | string | undefined>;
+	vIdeographic?: Signalish<number | string | undefined>;
 	viewBox?: Signalish<string | undefined>;
 	viewTarget?: Signalish<number | string | undefined>;
 	visibility?: Signalish<number | string | undefined>;
-	vMathematical?: Signalish<number | string | undefined>;
 	'v-mathematical'?: Signalish<number | string | undefined>;
+	vMathematical?: Signalish<number | string | undefined>;
 	width?: Signalish<number | string | undefined>;
-	wordSpacing?: Signalish<number | string | undefined>;
 	'word-spacing'?: Signalish<number | string | undefined>;
-	writingMode?: Signalish<number | string | undefined>;
+	wordSpacing?: Signalish<number | string | undefined>;
 	'writing-mode'?: Signalish<number | string | undefined>;
+	writingMode?: Signalish<number | string | undefined>;
 	x1?: Signalish<number | string | undefined>;
 	x2?: Signalish<number | string | undefined>;
 	x?: Signalish<number | string | undefined>;
 	xChannelSelector?: Signalish<string | undefined>;
-	xHeight?: Signalish<number | string | undefined>;
 	'x-height'?: Signalish<number | string | undefined>;
-	xlinkActuate?: Signalish<string | undefined>;
+	xHeight?: Signalish<number | string | undefined>;
 	'xlink:actuate'?: Signalish<SVGAttributes['xlinkActuate']>;
-	xlinkArcrole?: Signalish<string | undefined>;
+	xlinkActuate?: Signalish<string | undefined>;
 	'xlink:arcrole'?: Signalish<string | undefined>;
-	xlinkHref?: Signalish<string | undefined>;
+	xlinkArcrole?: Signalish<string | undefined>;
 	'xlink:href'?: Signalish<string | undefined>;
-	xlinkRole?: Signalish<string | undefined>;
+	xlinkHref?: Signalish<string | undefined>;
 	'xlink:role'?: Signalish<string | undefined>;
-	xlinkShow?: Signalish<string | undefined>;
+	xlinkRole?: Signalish<string | undefined>;
 	'xlink:show'?: Signalish<string | undefined>;
-	xlinkTitle?: Signalish<string | undefined>;
+	xlinkShow?: Signalish<string | undefined>;
 	'xlink:title'?: Signalish<string | undefined>;
-	xlinkType?: Signalish<string | undefined>;
+	xlinkTitle?: Signalish<string | undefined>;
 	'xlink:type'?: Signalish<string | undefined>;
-	xmlBase?: Signalish<string | undefined>;
+	xlinkType?: Signalish<string | undefined>;
 	'xml:base'?: Signalish<string | undefined>;
-	xmlLang?: Signalish<string | undefined>;
+	xmlBase?: Signalish<string | undefined>;
 	'xml:lang'?: Signalish<string | undefined>;
+	xmlLang?: Signalish<string | undefined>;
 	xmlns?: Signalish<string | undefined>;
 	xmlnsXlink?: Signalish<string | undefined>;
-	xmlSpace?: Signalish<string | undefined>;
 	'xml:space'?: Signalish<string | undefined>;
+	xmlSpace?: Signalish<string | undefined>;
 	y1?: Signalish<number | string | undefined>;
 	y2?: Signalish<number | string | undefined>;
 	y?: Signalish<number | string | undefined>;
@@ -1229,10 +1228,10 @@ export interface AllHTMLAttributes<RefType extends EventTarget = EventTarget>
 	extends ClassAttributes<RefType>, DOMAttributes<RefType>, AriaAttributes {
 	// Standard HTML Attributes
 	accept?: Signalish<string | undefined>;
-	acceptCharset?: Signalish<string | undefined>;
 	'accept-charset'?: Signalish<AllHTMLAttributes['acceptCharset']>;
-	accessKey?: Signalish<string | undefined>;
+	acceptCharset?: Signalish<string | undefined>;
 	accesskey?: Signalish<AllHTMLAttributes['accessKey']>;
+	accessKey?: Signalish<string | undefined>;
 	action?: Signalish<string | undefined>;
 	allow?: Signalish<string | undefined>;
 	allowfullscreen?: Signalish<boolean | undefined>;
@@ -1248,45 +1247,45 @@ export interface AllHTMLAttributes<RefType extends EventTarget = EventTarget>
 	autoCorrect?: Signalish<string | undefined>;
 	autofocus?: Signalish<boolean | undefined>;
 	autoFocus?: Signalish<boolean | undefined>;
-	autoPlay?: Signalish<boolean | undefined>;
 	autoplay?: Signalish<boolean | undefined>;
+	autoPlay?: Signalish<boolean | undefined>;
 	capture?: Signalish<boolean | string | undefined>;
 	cellpadding?: Signalish<number | string | undefined>;
 	cellPadding?: Signalish<number | string | undefined>;
 	cellspacing?: Signalish<number | string | undefined>;
 	cellSpacing?: Signalish<number | string | undefined>;
-	charSet?: Signalish<string | undefined>;
 	charset?: Signalish<string | undefined>;
+	charSet?: Signalish<string | undefined>;
 	challenge?: Signalish<string | undefined>;
 	checked?: Signalish<boolean | undefined>;
 	cite?: Signalish<string | undefined>;
 	class?: Signalish<string | undefined>;
 	className?: Signalish<string | undefined>;
 	cols?: Signalish<number | undefined>;
-	colSpan?: Signalish<number | undefined>;
 	colspan?: Signalish<number | undefined>;
+	colSpan?: Signalish<number | undefined>;
 	command?: Signalish<string | undefined>;
 	commandfor?: Signalish<string | undefined>;
 	commandFor?: Signalish<string | undefined>;
 	content?: Signalish<string | undefined>;
+	contenteditable?: Signalish<AllHTMLAttributes['contentEditable']>;
 	contentEditable?: Signalish<
 		Booleanish | '' | 'plaintext-only' | 'inherit' | undefined
 	>;
-	contenteditable?: Signalish<AllHTMLAttributes['contentEditable']>;
-	/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/contextmenu */
-	contextMenu?: Signalish<string | undefined>;
 	/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/contextmenu */
 	contextmenu?: Signalish<string | undefined>;
+	/** @deprecated See https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/contextmenu */
+	contextMenu?: Signalish<string | undefined>;
 	controls?: Signalish<boolean | undefined>;
 	controlslist?: Signalish<string | undefined>;
 	controlsList?: Signalish<string | undefined>;
 	coords?: Signalish<string | undefined>;
-	crossOrigin?: Signalish<string | undefined>;
 	crossorigin?: Signalish<string | undefined>;
+	crossOrigin?: Signalish<string | undefined>;
 	currentTime?: Signalish<number | undefined>;
 	data?: Signalish<string | undefined>;
-	dateTime?: Signalish<string | undefined>;
 	datetime?: Signalish<string | undefined>;
+	dateTime?: Signalish<string | undefined>;
 	default?: Signalish<boolean | undefined>;
 	defaultChecked?: Signalish<boolean | undefined>;
 	defaultMuted?: Signalish<boolean | undefined>;
@@ -1300,8 +1299,8 @@ export interface AllHTMLAttributes<RefType extends EventTarget = EventTarget>
 	download?: Signalish<any | undefined>;
 	decoding?: Signalish<'sync' | 'async' | 'auto' | undefined>;
 	draggable?: Signalish<boolean | undefined>;
-	encType?: Signalish<string | undefined>;
 	enctype?: Signalish<string | undefined>;
+	encType?: Signalish<string | undefined>;
 	enterkeyhint?: Signalish<
 		| 'enter'
 		| 'done'
@@ -1312,39 +1311,39 @@ export interface AllHTMLAttributes<RefType extends EventTarget = EventTarget>
 		| 'send'
 		| undefined
 	>;
-	elementTiming?: Signalish<string | undefined>;
 	elementtiming?: Signalish<AllHTMLAttributes['elementTiming']>;
+	elementTiming?: Signalish<string | undefined>;
 	exportparts?: Signalish<string | undefined>;
 	for?: Signalish<string | undefined>;
 	form?: Signalish<string | undefined>;
-	formAction?: Signalish<string | undefined>;
 	formaction?: Signalish<string | undefined>;
-	formEncType?: Signalish<string | undefined>;
+	formAction?: Signalish<string | undefined>;
 	formenctype?: Signalish<string | undefined>;
-	formMethod?: Signalish<string | undefined>;
+	formEncType?: Signalish<string | undefined>;
 	formmethod?: Signalish<string | undefined>;
-	formNoValidate?: Signalish<boolean | undefined>;
+	formMethod?: Signalish<string | undefined>;
 	formnovalidate?: Signalish<boolean | undefined>;
-	formTarget?: Signalish<string | undefined>;
+	formNoValidate?: Signalish<boolean | undefined>;
 	formtarget?: Signalish<string | undefined>;
-	frameBorder?: Signalish<number | string | undefined>;
+	formTarget?: Signalish<string | undefined>;
 	frameborder?: Signalish<number | string | undefined>;
+	frameBorder?: Signalish<number | string | undefined>;
 	headers?: Signalish<string | undefined>;
 	height?: Signalish<number | string | undefined>;
 	hidden?: Signalish<boolean | 'hidden' | 'until-found' | undefined>;
 	high?: Signalish<number | undefined>;
 	href?: Signalish<string | undefined>;
-	hrefLang?: Signalish<string | undefined>;
 	hreflang?: Signalish<string | undefined>;
+	hrefLang?: Signalish<string | undefined>;
 	htmlFor?: Signalish<string | undefined>;
-	httpEquiv?: Signalish<string | undefined>;
 	'http-equiv'?: Signalish<string | undefined>;
+	httpEquiv?: Signalish<string | undefined>;
 	icon?: Signalish<string | undefined>;
 	id?: Signalish<string | undefined>;
 	indeterminate?: Signalish<boolean | undefined>;
 	inert?: Signalish<boolean | undefined>;
-	inputMode?: Signalish<string | undefined>;
 	inputmode?: Signalish<string | undefined>;
+	inputMode?: Signalish<string | undefined>;
 	integrity?: Signalish<string | undefined>;
 	is?: Signalish<string | undefined>;
 	keyparams?: Signalish<string | undefined>;
@@ -1364,29 +1363,29 @@ export interface AllHTMLAttributes<RefType extends EventTarget = EventTarget>
 	marginwidth?: Signalish<number | undefined>;
 	marginWidth?: Signalish<number | undefined>;
 	max?: Signalish<number | string | undefined>;
-	maxLength?: Signalish<number | undefined>;
 	maxlength?: Signalish<number | undefined>;
+	maxLength?: Signalish<number | undefined>;
 	media?: Signalish<string | undefined>;
 	mediaGroup?: Signalish<string | undefined>;
 	method?: Signalish<string | undefined>;
 	min?: Signalish<number | string | undefined>;
-	minLength?: Signalish<number | undefined>;
 	minlength?: Signalish<number | undefined>;
+	minLength?: Signalish<number | undefined>;
 	multiple?: Signalish<boolean | undefined>;
 	muted?: Signalish<boolean | undefined>;
 	name?: Signalish<string | undefined>;
 	nomodule?: Signalish<boolean | undefined>;
 	nonce?: Signalish<string | undefined>;
-	noValidate?: Signalish<boolean | undefined>;
 	novalidate?: Signalish<boolean | undefined>;
+	noValidate?: Signalish<boolean | undefined>;
 	open?: Signalish<boolean | undefined>;
 	optimum?: Signalish<number | undefined>;
 	part?: Signalish<string | undefined>;
 	pattern?: Signalish<string | undefined>;
 	ping?: Signalish<string | undefined>;
 	placeholder?: Signalish<string | undefined>;
-	playsInline?: Signalish<boolean | undefined>;
 	playsinline?: Signalish<boolean | undefined>;
+	playsInline?: Signalish<boolean | undefined>;
 	playbackRate?: Signalish<number | undefined>;
 	popover?: Signalish<'auto' | 'hint' | 'manual' | boolean | undefined>;
 	popovertarget?: Signalish<string | undefined>;
@@ -1415,8 +1414,8 @@ export interface AllHTMLAttributes<RefType extends EventTarget = EventTarget>
 	reversed?: Signalish<boolean | undefined>;
 	role?: Signalish<AriaRole | undefined>;
 	rows?: Signalish<number | undefined>;
-	rowSpan?: Signalish<number | undefined>;
 	rowspan?: Signalish<number | undefined>;
+	rowSpan?: Signalish<number | undefined>;
 	sandbox?: Signalish<string | undefined>;
 	scope?: Signalish<string | undefined>;
 	scoped?: Signalish<boolean | undefined>;
@@ -1430,24 +1429,24 @@ export interface AllHTMLAttributes<RefType extends EventTarget = EventTarget>
 	span?: Signalish<number | undefined>;
 	spellcheck?: Signalish<boolean | undefined>;
 	src?: Signalish<string | undefined>;
-	srcDoc?: Signalish<string | undefined>;
 	srcdoc?: Signalish<string | undefined>;
-	srcLang?: Signalish<string | undefined>;
+	srcDoc?: Signalish<string | undefined>;
 	srclang?: Signalish<string | undefined>;
-	srcSet?: Signalish<string | undefined>;
+	srcLang?: Signalish<string | undefined>;
 	srcset?: Signalish<string | undefined>;
+	srcSet?: Signalish<string | undefined>;
 	srcObject?: Signalish<MediaStream | MediaSource | Blob | File | null>;
 	start?: Signalish<number | undefined>;
 	step?: Signalish<number | string | undefined>;
 	style?: Signalish<string | CSSProperties | undefined>;
 	summary?: Signalish<string | undefined>;
-	tabIndex?: Signalish<number | undefined>;
 	tabindex?: Signalish<number | undefined>;
+	tabIndex?: Signalish<number | undefined>;
 	target?: Signalish<string | undefined>;
 	title?: Signalish<string | undefined>;
 	type?: Signalish<string | undefined>;
-	useMap?: Signalish<string | undefined>;
 	usemap?: Signalish<string | undefined>;
+	useMap?: Signalish<string | undefined>;
 	value?: Signalish<string | string[] | number | undefined>;
 	volume?: Signalish<string | number | undefined>;
 	width?: Signalish<number | string | undefined>;
@@ -1476,16 +1475,16 @@ export interface AllHTMLAttributes<RefType extends EventTarget = EventTarget>
 	vocab?: Signalish<string | undefined>;
 
 	// Microdata Attributes
-	itemProp?: Signalish<string | undefined>;
 	itemprop?: Signalish<string | undefined>;
-	itemScope?: Signalish<boolean | undefined>;
+	itemProp?: Signalish<string | undefined>;
 	itemscope?: Signalish<boolean | undefined>;
-	itemType?: Signalish<string | undefined>;
+	itemScope?: Signalish<boolean | undefined>;
 	itemtype?: Signalish<string | undefined>;
-	itemID?: Signalish<string | undefined>;
+	itemType?: Signalish<string | undefined>;
 	itemid?: Signalish<string | undefined>;
-	itemRef?: Signalish<string | undefined>;
+	itemID?: Signalish<string | undefined>;
 	itemref?: Signalish<string | undefined>;
+	itemRef?: Signalish<string | undefined>;
 }
 
 export interface HTMLAttributes<RefType extends EventTarget = EventTarget>
