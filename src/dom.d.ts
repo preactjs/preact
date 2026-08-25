@@ -1265,6 +1265,9 @@ export interface AllHTMLAttributes<RefType extends EventTarget = EventTarget>
 	cols?: Signalish<number | undefined>;
 	colSpan?: Signalish<number | undefined>;
 	colspan?: Signalish<number | undefined>;
+	command?: Signalish<string | undefined>;
+	commandfor?: Signalish<string | undefined>;
+	commandFor?: Signalish<string | undefined>;
 	content?: Signalish<string | undefined>;
 	contentEditable?: Signalish<
 		Booleanish | '' | 'plaintext-only' | 'inherit' | undefined
