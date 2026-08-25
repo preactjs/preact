@@ -166,7 +166,7 @@ options.unmount = vnode => {
 /**
  * Get a hook's state from the currentComponent
  * @param {number} index The index of the hook to get
- * @param {number} type The index of the hook to get
+ * @param {number} type The type of the hook to get
  * @returns {any}
  */
 function getHookState(index, type) {
@@ -351,7 +351,6 @@ export function useMemo(factory, args) {
 	if (argsChanged(state._args, args)) {
 		state._value = factory();
 		state._args = args;
-		state._factory = factory;
 	}
 
 	return state._value;

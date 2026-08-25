@@ -60,6 +60,36 @@ describe('toChildArray', () => {
 		expect(scratch.innerHTML).to.equal('<div></div>');
 	});
 
+	it('filters nullish and boolean values', () => {
+		expect(toChildArray(null)).to.deep.equal([]);
+		expect(toChildArray(undefined)).to.deep.equal([]);
+		expect(toChildArray(false)).to.deep.equal([]);
+		expect(toChildArray(true)).to.deep.equal([]);
+	});
+
+	it('preserves zero and empty string values', () => {
+		expect(toChildArray(0)).to.deep.equal([0]);
+		expect(toChildArray('')).to.deep.equal(['']);
+	});
+
+	it('flattens sparse nested arrays', () => {
+		const nested = [0, ''];
+		nested.length = 3;
+		const sparse = [null];
+		sparse[2] = [undefined, false, nested];
+		sparse[4] = true;
+		sparse[6] = 'last';
+
+		expect(toChildArray(sparse)).to.deep.equal([0, '', 'last']);
+	});
+
+	it('flattens Array subclasses', () => {
+		class ChildrenArray extends Array {}
+		const children = new ChildrenArray('first', [null, 'second']);
+
+		expect(toChildArray(children)).to.deep.equal(['first', 'second']);
+	});
+
 	it('should skip a function child', () => {
 		const child = num => num.toFixed(2);
 		render(<Foo>{child}</Foo>, scratch);

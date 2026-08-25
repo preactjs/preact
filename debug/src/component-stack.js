@@ -149,9 +149,10 @@ export function setupComponentStack() {
 }
 
 /**
- * Return the component stack that was captured up to this point.
- * @returns {string}
+ * Return the owner stack captured for the current render, or null when unavailable.
+ * @returns {string | null}
  */
 export function captureOwnerStack() {
-	return getOwnerStack(getCurrentVNode());
+	const vnode = getCurrentVNode();
+	return vnode ? getOwnerStack(vnode) : null;
 }

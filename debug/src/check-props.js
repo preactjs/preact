@@ -19,7 +19,7 @@ export function resetPropWarnings() {
  * @param {object} values Runtime values that need to be type-checked
  * @param {string} location e.g. "prop", "context", "child context"
  * @param {string} componentName Name of the component for error messages.
- * @param {?Function} getStack Returns the component stack.
+ * @param {Function} getStack Returns the component stack.
  */
 export function checkPropTypes(
 	typeSpecs,
@@ -44,11 +44,7 @@ export function checkPropTypes(
 		}
 		if (error && !(error.message in loggedTypeFailures)) {
 			loggedTypeFailures[error.message] = true;
-			console.error(
-				`Failed ${location} type: ${error.message}${
-					(getStack && `\n${getStack()}`) || ''
-				}`
-			);
+			console.error(`Failed ${location} type: ${error.message}\n${getStack()}`);
 		}
 	});
 }

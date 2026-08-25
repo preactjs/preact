@@ -309,26 +309,6 @@ options.vnode = vnode => {
 	if (oldVNodeHook) oldVNodeHook(vnode);
 };
 
-const oldDiffed = options.diffed;
-/** @type {(vnode: import('./internal').VNode) => void} */
-options.diffed = function (vnode) {
-	if (oldDiffed) {
-		oldDiffed(vnode);
-	}
-
-	const props = vnode.props;
-	const dom = vnode._dom;
-
-	if (
-		dom != null &&
-		vnode.type == 'textarea' &&
-		'value' in props &&
-		props.value !== dom.value
-	) {
-		dom.value = props.value == null ? '' : props.value;
-	}
-};
-
 // Only needed for react-relay and useSyncExternalStore hydration.
 function initRenderTracking(value) {
 	if (!renderTrackingInitialized) {
