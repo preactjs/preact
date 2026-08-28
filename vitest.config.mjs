@@ -227,7 +227,10 @@ export default defineConfig({
 			{
 				extends: true,
 				test: {
-					include: ['./test/{shared,node,ts}/**/*.test.js?(x)']
+					include: [
+						'./codemods/**/*.test.js',
+						'./test/{shared,node,ts}/**/*.test.js?(x)'
+					]
 				}
 			},
 			{

@@ -48,6 +48,10 @@ You can find some awesome libraries in the [awesome-preact list](https://github.
 
 > 💁 _**Note:** You [don't need ES2015 to use Preact](https://github.com/developit/preact-in-es3)... but give it a try!_
 
+Upgrading an existing application from Preact 10? Read the
+[Preact 11 upgrade guide](https://preactjs.com/guide/v11/upgrade-guide/) and use
+the bundled [10-to-11 codemod](./codemods/README.md) for the mechanical changes.
+
 #### Tutorial: Building UI with Preact
 
 With Preact, you create user interfaces by assembling trees of components and elements. Components are functions or classes that return a description of what their tree should output. These descriptions are typically written in [JSX](https://react.dev/learn/writing-markup-with-jsx) (shown underneath), or [HTM](https://github.com/developit/htm) which leverages standard JavaScript Tagged Templates. Both syntaxes can express trees of elements with "props" (similar to HTML attributes) and children.

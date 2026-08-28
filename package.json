@@ -78,6 +78,7 @@
       "import": "./compat/scheduler.mjs",
       "require": "./compat/scheduler.js"
     },
+    "./codemods/10-to-11": "./codemods/10-to-11.cjs",
     "./package.json": "./package.json",
     "./compat/package.json": "./compat/package.json",
     "./debug/package.json": "./debug/package.json",
@@ -110,7 +111,7 @@
     "test:ts:compat": "tsc -p compat/test/ts/",
     "lint": "run-s oxlint tsc",
     "tsc": "tsc -p jsconfig-lint.json",
-    "oxlint": "oxlint src test/browser test/node test/shared debug compat hooks test-utils",
+    "oxlint": "oxlint src test/browser test/node test/shared debug compat hooks test-utils codemods",
     "format": "oxfmt . --write",
     "format:check": "oxfmt --check ."
   },
@@ -141,6 +142,8 @@
     "compat/jsx-dev-runtime.js",
     "compat/jsx-dev-runtime.mjs",
     "compat/package.json",
+    "codemods/10-to-11.cjs",
+    "codemods/README.md",
     "debug/dist",
     "debug/src",
     "debug/package.json",
@@ -186,6 +189,7 @@
     "chai": "^6.2.2",
     "cross-env": "^7.0.3",
     "husky": "^9.1.7",
+    "jscodeshift": "^17.4.0",
     "kolorist": "^1.8.0",
     "npm-run-all2": "^7.0.0",
     "oxfmt": "^0.32.0",
