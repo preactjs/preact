@@ -221,9 +221,10 @@ describe('components', () => {
 					return <div>foo</div>;
 				}
 			}
-			React.render(<Foo ref={ref} />, scratch);
+			React.render(<Foo ref={ref} value="bar" />, scratch);
 			expect(ref.current).not.to.be.undefined;
 			expect(ref.current instanceof Foo).to.equal(true);
+			expect(ref.current.props).to.deep.equal({ value: 'bar' });
 			expect(scratch.innerHTML).to.equal('<div>foo</div>');
 		});
 

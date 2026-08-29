@@ -291,7 +291,11 @@ options.vnode = vnode => {
 			'prototype' in vnode.type && vnode.type.prototype.render;
 		if ('ref' in vnode.props && shouldApplyRef) {
 			vnode.ref = vnode.props.ref;
-			delete vnode.props.ref;
+			let normalizedProps = {};
+			for (let i in vnode.props) {
+				if (i != 'ref') normalizedProps[i] = vnode.props[i];
+			}
+			vnode.props = normalizedProps;
 		}
 
 		if (vnode.type.defaultProps) {
