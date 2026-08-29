@@ -41,6 +41,7 @@ export interface Component extends Omit<
 	// Extend to include HookStates
 	_renderCallbacks?: Array<HookState | (() => void)>;
 	_hasScuFromHooks?: boolean;
+	_originalShouldComponentUpdate?: PreactComponent['shouldComponentUpdate'];
 }
 
 export interface VNode extends Omit<PreactVNode, '_component'> {

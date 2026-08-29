@@ -36,6 +36,41 @@ let oldCommit = options._commit;
 let oldBeforeUnmount = options.unmount;
 let oldRoot = options._root;
 
+/**
+ * This SCU has the purpose of bailing out after repeated updates to stateful
+ * hooks. We store the next value in `_nextValue[0]` and keep doing that for all
+ * state setters; if we have next states and all next states within a component
+ * end up being equal to their original state we are safe to bail out for this
+ * specific component.
+ * @this {import('./internal').Component}
+ */
+function shouldComponentUpdate(p, s, c) {
+	const hooks = this.__hooks;
+	if (!hooks) return true;
+
+	// We check whether we have components with a nextValue set that
+	// have values that aren't equal to one another this pushes
+	// us to update further down the tree
+	let updatedHook = false;
+	let shouldUpdate = this.props != p;
+	hooks._list.some(hookItem => {
+		if (hookItem._nextValue) {
+			updatedHook = true;
+			if (!ObjectIs(hookItem._value[0], hookItem._nextValue[0])) {
+				shouldUpdate = true;
+			}
+		}
+	});
+
+	const prevScu = this._originalShouldComponentUpdate;
+	if (prevScu) {
+		const result = prevScu.call(this, p, s, c);
+		return updatedHook ? result || shouldUpdate : result;
+	}
+
+	return !updatedHook || shouldUpdate;
+}
+
 // We take the minimum timeout for requestAnimationFrame to ensure that
 // the callback is invoked after the next frame. 35ms is based on a 30hz
 // refresh rate, which is the minimum rate for a smooth user experience.
@@ -237,38 +272,11 @@ export function useReducer(reducer, initialState, init) {
 
 		if (!currentComponent._hasScuFromHooks) {
 			currentComponent._hasScuFromHooks = true;
-			const prevScu = currentComponent.shouldComponentUpdate;
-
-			// This SCU has the purpose of bailing out after repeated updates
-			// to stateful hooks. We store the next value in `_nextValue[0]` and
-			// keep doing that for all state setters; if we have next states and
-			// all next states within a component end up being equal to their
-			// original state we are safe to bail out for this specific component.
-			currentComponent.shouldComponentUpdate = function (p, s, c) {
-				const hooks = this.__hooks;
-				if (!hooks) return true;
-
-				// We check whether we have components with a nextValue set that
-				// have values that aren't equal to one another this pushes
-				// us to update further down the tree
-				let updatedHook = false;
-				let shouldUpdate = this.props != p;
-				hooks._list.some(hookItem => {
-					if (hookItem._nextValue) {
-						updatedHook = true;
-						if (!ObjectIs(hookItem._value[0], hookItem._nextValue[0])) {
-							shouldUpdate = true;
-						}
-					}
-				});
-
-				if (prevScu) {
-					const result = prevScu.call(this, p, s, c);
-					return updatedHook ? result || shouldUpdate : result;
-				}
-
-				return !updatedHook || shouldUpdate;
-			};
+			if (currentComponent.shouldComponentUpdate) {
+				currentComponent._originalShouldComponentUpdate =
+					currentComponent.shouldComponentUpdate;
+			}
+			currentComponent.shouldComponentUpdate = shouldComponentUpdate;
 		}
 	}
 
