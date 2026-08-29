@@ -30,7 +30,7 @@ export interface ComponentHooks {
 	/** The list of hooks a component uses */
 	_list: HookState[];
 	/** List of Effects to be invoked after the next frame is rendered */
-	_pendingEffects: EffectHookState[];
+	_pendingEffects?: EffectHookState[];
 }
 
 export interface Component extends Omit<

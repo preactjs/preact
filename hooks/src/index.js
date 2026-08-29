@@ -67,12 +67,12 @@ options._render = vnode => {
 	if (hooks) {
 		if (previousComponent == currentComponent) {
 			currentComponent._renderCallbacks = [];
-		} else {
+		} else if (hooks._pendingEffects) {
 			hooks._pendingEffects.some(invokeCleanup);
 			hooks._pendingEffects.some(invokeEffect);
 			currentIndex = 0;
 		}
-		hooks._pendingEffects = [];
+		hooks._pendingEffects = undefined;
 
 		// Runs before every render, forced or not, so `shouldComponentUpdate`
 		// never has to apply these itself.
@@ -92,7 +92,7 @@ options.diffed = vnode => {
 
 	const c = vnode._component;
 	if (c && c.__hooks) {
-		if (c.__hooks._pendingEffects.length) afterPaint(afterPaintEffects.push(c));
+		if (c.__hooks._pendingEffects) afterPaint(afterPaintEffects.push(c));
 		// `_pendingArgs` is cleared again by `options._render` before anything
 		// can read it, so committing it here is enough.
 		c.__hooks._list.some(hookItem => {
@@ -184,7 +184,7 @@ function getHookState(index, type) {
 		currentComponent.__hooks ||
 		(currentComponent.__hooks = {
 			_list: [],
-			_pendingEffects: []
+			_pendingEffects: undefined
 		});
 
 	if (index >= hooks._list.length) {
@@ -288,7 +288,8 @@ export function useEffect(callback, args) {
 		state._value = callback;
 		state._pendingArgs = args;
 
-		currentComponent.__hooks._pendingEffects.push(state);
+		const hooks = currentComponent.__hooks;
+		(hooks._pendingEffects || (hooks._pendingEffects = [])).push(state);
 	}
 }
 
@@ -466,11 +467,14 @@ function flushAfterPaintEffects() {
 			const hooks = component.__hooks;
 			if (!component._parentDom || !hooks) continue;
 			try {
-				hooks._pendingEffects.some(invokeCleanup);
-				hooks._pendingEffects.some(invokeEffect);
-				hooks._pendingEffects = [];
+				const pendingEffects = hooks._pendingEffects;
+				if (pendingEffects) {
+					pendingEffects.some(invokeCleanup);
+					pendingEffects.some(invokeEffect);
+					hooks._pendingEffects = undefined;
+				}
 			} catch (e) {
-				hooks._pendingEffects = [];
+				hooks._pendingEffects = undefined;
 				options._catchError(e, component._vnode);
 			}
 		}

@@ -151,11 +151,11 @@ export function diff(
 				}
 				if (provider) provider.sub(c);
 
-				if (!c.state) c.state = {};
+				if (!c.state) c.state = isClassComponent ? {} : EMPTY_OBJ;
 				c._globalContext = globalContext;
 				c._bits |= COMPONENT_DIRTY;
 				c._renderCallbacks = [];
-				c._stateCallbacks = [];
+				c._stateCallbacks = isClassComponent ? [] : EMPTY_ARR;
 			}
 
 			if (isClassComponent) {
@@ -229,8 +229,10 @@ export function diff(
 						if (vnode) vnode._parent = newVNode;
 					});
 
-					EMPTY_ARR.push.apply(c._renderCallbacks, c._stateCallbacks);
-					c._stateCallbacks = [];
+					if (c._stateCallbacks && c._stateCallbacks.length) {
+						EMPTY_ARR.push.apply(c._renderCallbacks, c._stateCallbacks);
+						c._stateCallbacks = [];
+					}
 
 					if (c._renderCallbacks.length) {
 						commitQueue.push(c);
@@ -270,8 +272,10 @@ export function diff(
 
 				tmp = c.render(c.props, c.state, c.context);
 
-				EMPTY_ARR.push.apply(c._renderCallbacks, c._stateCallbacks);
-				c._stateCallbacks = [];
+				if (c._stateCallbacks.length) {
+					EMPTY_ARR.push.apply(c._renderCallbacks, c._stateCallbacks);
+					c._stateCallbacks = [];
+				}
 			} else {
 				do {
 					c._bits &= ~COMPONENT_DIRTY;
