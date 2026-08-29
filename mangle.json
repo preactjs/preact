@@ -26,6 +26,7 @@
     "cname": 6,
     "props": {
       "$_hasScuFromHooks": "__f",
+      "$_originalShouldComponentUpdate": "__o",
       "$_listeners": "__e",
       "$_cleanup": "__c",
       "$__hooks": "__H",
