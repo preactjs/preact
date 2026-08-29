@@ -79,14 +79,18 @@ describe('Babel jsx/jsxDEV', () => {
 		expect(vnode.__self).to.equal('self');
 	});
 
+	it('should omit dev-only fields from production vnodes', () => {
+		const vnode = jsx('div', { class: 'foo' }, 'key');
+		expect(vnode).to.not.have.own.property('__source');
+		expect(vnode).to.not.have.own.property('__self');
+	});
+
 	it('should return a vnode like createElement', () => {
 		const elementVNode = createElement('div', {
 			class: 'foo',
 			key: 'key'
 		});
 		const jsxVNode = jsx('div', { class: 'foo' }, 'key');
-		delete jsxVNode.__self;
-		delete jsxVNode.__source;
 		delete jsxVNode._original;
 		delete elementVNode._original;
 		expect(jsxVNode).to.deep.equal(elementVNode);

@@ -45,7 +45,7 @@ function createVNode(type, props, key, isStaticChildren, __source, __self) {
 		}
 	}
 
-	/** @type {import('../../src/internal').VNode & { __source: any; __self: any }} */
+	/** @type {import('../../src/internal').VNode & { __source?: any; __self?: any }} */
 	const vnode = {
 		type,
 		props: normalizedProps,
@@ -59,10 +59,13 @@ function createVNode(type, props, key, isStaticChildren, __source, __self) {
 		constructor: undefined,
 		_original: --vnodeId,
 		_index: -1,
-		_flags: 0,
-		__source,
-		__self
+		_flags: 0
 	};
+
+	if (__source || __self) {
+		vnode.__source = __source;
+		vnode.__self = __self;
+	}
 
 	if (options.vnode) options.vnode(vnode);
 	return vnode;
