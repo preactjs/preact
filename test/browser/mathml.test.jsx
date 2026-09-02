@@ -105,4 +105,25 @@ describe('mathml', () => {
 		expect(scratch.querySelector('mi').namespaceURI).to.equal(MATH_NAMESPACE);
 		expect(scratch.querySelector('ins').namespaceURI).to.equal(XHTML_NAMESPACE);
 	});
+
+	it('should keep children of layout elements whose name contains a token-element name in the MathML namespace', () => {
+		render(
+			<math>
+				<mover>
+					<mi>x</mi>
+					<mo>^</mo>
+				</mover>
+				<msup>
+					<mi>y</mi>
+					<mn>2</mn>
+				</msup>
+			</math>,
+			scratch
+		);
+		const mathml = 'http://www.w3.org/1998/Math/MathML';
+		expect(scratch.querySelector('mover').namespaceURI).to.equal(mathml);
+		scratch.querySelectorAll('mi, mo, mn').forEach(el => {
+			expect(el.namespaceURI, el.localName).to.equal(mathml);
+		});
+	});
 });

@@ -32,7 +32,7 @@ export const UNDEFINED = undefined;
 export const EMPTY_OBJ = /** @type {any} */ ({});
 export const EMPTY_ARR = [];
 
-export const MATHML_TOKEN_ELEMENTS = /m(i|n|o|s$|te|sp)/;
+export const MATHML_TOKEN_ELEMENTS = /^m(i|n|o|s|text|space)$/;
 
 // `typeof x < 'u'` is `!= 'undefined'`: every other typeof result sorts
 // before "u", while "undefined" sorts after it.
