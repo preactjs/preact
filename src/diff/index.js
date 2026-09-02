@@ -360,9 +360,11 @@ export function diff(
 				commitQueue.push(c);
 			}
 
-			// PROCESSING_EXCEPTION is only ever set together with PENDING_ERROR,
-			// so the clear doesn't need a guard.
-			c._bits &= ~(COMPONENT_PROCESSING_EXCEPTION | COMPONENT_PENDING_ERROR);
+			// Only clear when this render was the retry; PENDING_ERROR set by a
+			// descendant during this render must survive until then.
+			if (c._bits & COMPONENT_PROCESSING_EXCEPTION) {
+				c._bits &= ~(COMPONENT_PROCESSING_EXCEPTION | COMPONENT_PENDING_ERROR);
+			}
 		} catch (e) {
 			// We remove any componentDidMount, ...
 			// that have been invalidated by us

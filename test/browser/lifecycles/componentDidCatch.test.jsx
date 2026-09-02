@@ -702,6 +702,45 @@ describe('Lifecycle methods', () => {
 			expect(scratch).to.have.property('textContent', 'Error: Error!');
 		});
 
+		it('should skip the boundary when the retry render throws again', () => {
+			let catches = 0;
+			class Boundary extends Component {
+				componentDidCatch() {
+					catches++;
+					this.setState({ attempt: catches });
+				}
+				render() {
+					return (
+						<div>
+							<Thrower />
+						</div>
+					);
+				}
+			}
+			function Thrower() {
+				throwExpectedError();
+			}
+
+			render(
+				<Receiver>
+					<Boundary />
+				</Receiver>,
+				scratch
+			);
+			expect(catches).to.equal(1);
+
+			// The retry render throws again: Boundary is now processing that
+			// error and must be skipped so it bubbles up to Receiver instead of
+			// being re-caught (which would schedule retries forever).
+			rerender();
+			expect(catches).to.equal(1);
+			expect(Receiver.prototype.componentDidCatch).toHaveBeenCalledWith(
+				expectedError,
+				expect.anything()
+			);
+			expect(scratch).to.have.property('textContent', 'Error: Error!');
+		});
+
 		it('should bubble on ignored errors', () => {
 			class Adapter extends Component {
 				componentDidCatch() {
