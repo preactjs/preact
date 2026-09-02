@@ -622,6 +622,44 @@ describe('Lifecycle methods', () => {
 			expect(scratch).to.have.property('textContent', 'Error: Adapted Error!');
 		});
 
+		it('should not treat a dirty ancestor without error handling as a boundary', () => {
+			let parent;
+			class Parent extends Component {
+				render() {
+					parent = this;
+					return <div>{this.props.children}</div>;
+				}
+			}
+			class Sibling extends Component {
+				componentDidMount() {
+					// Leaves Parent dirty (a pending update) when ThrowErr's
+					// componentDidMount throws right after this one.
+					parent.setState({ x: 1 });
+				}
+				render() {
+					return <i>a</i>;
+				}
+			}
+			class ThrowErr extends Component {
+				componentDidMount() {
+					throwExpectedError();
+				}
+				render() {
+					return <i>b</i>;
+				}
+			}
+
+			expect(() =>
+				render(
+					<Parent>
+						<Sibling />
+						<ThrowErr />
+					</Parent>,
+					scratch
+				)
+			).to.throw(expectedError);
+		});
+
 		it('should bubble on repeated errors', () => {
 			class Adapter extends Component {
 				componentDidCatch(error) {
