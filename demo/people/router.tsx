@@ -4,7 +4,7 @@ import {
 	createContext,
 	FunctionalComponent,
 	h,
-	JSX
+	HTMLAttributes
 } from 'preact';
 import {
 	useCallback,
@@ -96,7 +96,7 @@ export const Route: FunctionalComponent<RouteProps> = props => {
 	return <RouterContext.Provider children={children} value={innerRouter} />;
 };
 
-export type LinkProps = JSX.HTMLAttributes & {
+export type LinkProps = HTMLAttributes & {
 	active?: boolean | string;
 };
 export const Link: FunctionalComponent<LinkProps> = props => {
