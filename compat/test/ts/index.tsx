@@ -46,3 +46,10 @@ React.render(
 	<SimpleComponentWithContextAsProvider />,
 	document.createElement('div')
 );
+
+// Children.map / Children.forEach accept an optional context argument
+const mappedChildren: string[] = React.Children.map([<div />], () => 'child');
+React.Children.forEach([<div />], () => {});
+React.Children.map([<div />], () => 'child', {});
+React.Children.forEach([<div />], () => {}, {});
+mappedChildren.length;
