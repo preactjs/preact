@@ -83,26 +83,7 @@ export function diff(
 		(tmp = oldVNode._component._excess)
 	) {
 		newVNode._flags |= MODE_HYDRATE;
-		excessDomChildren = [];
-		if (tmp.nodeType == 8) {
-			// Re-scan DOM from stored start marker for streamed hydration.
-			// `depth` only ever reaches 0 through the `break` below, so it
-			// doesn't need to be re-tested in the loop condition.
-			for (
-				let depth = 1, node = tmp.nextSibling;
-				node;
-				node = node.nextSibling
-			) {
-				if (node.nodeType == 8) {
-					if (node.data.startsWith('$s')) depth++;
-					else if (node.data.startsWith('/$s') && !--depth) break;
-				}
-				excessDomChildren.push(node);
-			}
-		} else {
-			excessDomChildren.push(tmp);
-		}
-		oldDom = excessDomChildren[0];
+		oldDom = (excessDomChildren = collectExcess(tmp))[0];
 		oldVNode._component._excess = NULL;
 	}
 
@@ -372,48 +353,10 @@ export function diff(
 			// if hydrating or creating initial tree, bailout preserves DOM:
 			if (isHydrating || excessDomChildren) {
 				if (e.then) {
-					let commentMarkersToFind = 0,
-						startMarker;
-
 					newVNode._flags |= isHydrating
 						? MODE_HYDRATE | MODE_SUSPENDED
 						: MODE_SUSPENDED;
-
-					if (excessDomChildren) {
-						for (let i = 0; i < excessDomChildren.length; i++) {
-							let child = excessDomChildren[i];
-							if (!child) continue;
-
-							if (child.nodeType == 8) {
-								excessDomChildren[i] = NULL;
-								if (child.data.startsWith('$s')) {
-									if (!commentMarkersToFind++) startMarker = child;
-								} else if (
-									child.data.startsWith('/$s') &&
-									!--commentMarkersToFind
-								) {
-									oldDom = child;
-									break;
-								}
-							} else if (commentMarkersToFind) {
-								excessDomChildren[i] = NULL;
-							}
-						}
-					}
-
-					if (!startMarker) {
-						while (oldDom && oldDom.nodeType == 8 && oldDom.nextSibling) {
-							oldDom = oldDom.nextSibling;
-						}
-
-						if (excessDomChildren) {
-							excessDomChildren[excessDomChildren.indexOf(oldDom)] = NULL;
-						}
-						startMarker = oldDom;
-					}
-					// Store the start marker directly; children re-scanned on resume
-					newVNode._component._excess = startMarker;
-					newVNode._dom = oldDom;
+					newVNode._dom = suspendVNode(newVNode, excessDomChildren, oldDom);
 				} else if (excessDomChildren) {
 					excessDomChildren.some(removeNode);
 				}
@@ -798,4 +741,79 @@ export function unmount(vnode, parentVNode, skipRemove) {
 /** The `.render()` method for a PFC backing instance. */
 function doRender(props, state, context) {
 	return this.constructor(props, context);
+}
+
+/**
+ * Collect the DOM nodes a suspended (streamed) hydration boundary should
+ * resume against, starting from its stored start marker.
+ * @param {import('../internal').PreactElement} startMarker
+ * @returns {import('../internal').PreactElement[]}
+ */
+function collectExcess(startMarker) {
+	let excessDomChildren = [];
+	if (startMarker.nodeType == 8) {
+		// Re-scan DOM from stored start marker for streamed hydration.
+		// `depth` only ever reaches 0 through the `break` below, so it
+		// doesn't need to be re-tested in the loop condition.
+		for (
+			let depth = 1, node = startMarker.nextSibling;
+			node;
+			node = node.nextSibling
+		) {
+			if (node.nodeType == 8) {
+				if (node.data.startsWith('$s')) depth++;
+				else if (node.data.startsWith('/$s') && !--depth) break;
+			}
+			excessDomChildren.push(node);
+		}
+	} else {
+		excessDomChildren.push(startMarker);
+	}
+	return excessDomChildren;
+}
+
+/**
+ * Record where a suspending vnode's DOM starts so the diff can resume there,
+ * skipping streamed `$s` comment markers.
+ * @param {import('../internal').VNode} newVNode
+ * @param {import('../internal').PreactElement[]} excessDomChildren
+ * @param {import('../internal').PreactElement} oldDom
+ * @returns {import('../internal').PreactElement} The dom to store on the vnode
+ */
+function suspendVNode(newVNode, excessDomChildren, oldDom) {
+	let commentMarkersToFind = 0,
+		startMarker;
+
+	if (excessDomChildren) {
+		for (let i = 0; i < excessDomChildren.length; i++) {
+			let child = excessDomChildren[i];
+			if (!child) continue;
+
+			if (child.nodeType == 8) {
+				excessDomChildren[i] = NULL;
+				if (child.data.startsWith('$s')) {
+					if (!commentMarkersToFind++) startMarker = child;
+				} else if (child.data.startsWith('/$s') && !--commentMarkersToFind) {
+					oldDom = child;
+					break;
+				}
+			} else if (commentMarkersToFind) {
+				excessDomChildren[i] = NULL;
+			}
+		}
+	}
+
+	if (!startMarker) {
+		while (oldDom && oldDom.nodeType == 8 && oldDom.nextSibling) {
+			oldDom = oldDom.nextSibling;
+		}
+
+		if (excessDomChildren) {
+			excessDomChildren[excessDomChildren.indexOf(oldDom)] = NULL;
+		}
+		startMarker = oldDom;
+	}
+	// Store the start marker directly; children re-scanned on resume
+	newVNode._component._excess = startMarker;
+	return oldDom;
 }

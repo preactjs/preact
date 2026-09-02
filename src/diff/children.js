@@ -306,50 +306,7 @@ function constructNewChildrenArray(
 		}
 	}
 
-	if (moved) {
-		// Children were reordered: mark the minimal set of matched (MATCHED flag)
-		// children for insertion by finding the longest increasing subsequence of
-		// old indices (patience sorting). Children on the subsequence stay in
-		// place, all others get INSERT_VNODE. `_index` still holds the
-		// matchingIndex here.
-		/** @type {number[]} tails[x] is the smallest old index ending an increasing subsequence of length x+1 */
-		let tails = [];
-		/** @type {number[]} length of the longest increasing subsequence ending at child i */
-		let lisLengths = [];
-		for (i = 0; i < newChildrenLength; i++) {
-			childVNode = newChildren[i];
-			if (childVNode && childVNode._flags & MATCHED) {
-				// Binary search for the insertion point, keeping the pass at
-				// O(n log n) even for pathological reorders.
-				let lo = 0,
-					hi = tails.length;
-				while (lo < hi) {
-					const mid = (lo + hi) >> 1;
-					if (tails[mid] < childVNode._index) {
-						lo = mid + 1;
-					} else {
-						hi = mid;
-					}
-				}
-				tails[lo] = childVNode._index;
-				lisLengths[i] = lo + 1;
-			}
-		}
-
-		// `skew` is dead after the main loop; reuse it as the remaining
-		// subsequence length while walking backwards. Likewise `i` is left at
-		// newChildrenLength by the loop above.
-		skew = tails.length;
-		while (i--) {
-			if (lisLengths[i]) {
-				if (lisLengths[i] == skew) {
-					skew--;
-				} else {
-					newChildren[i]._flags |= INSERT_VNODE;
-				}
-			}
-		}
-	}
+	if (moved) markMoves(newChildren);
 
 	// Remove remaining oldChildren if there are any. Loop forwards so that as we
 	// unmount DOM from the beginning of the oldChildren, we can adjust oldDom to
@@ -497,4 +454,52 @@ function findMatchingIndex(
 	}
 
 	return -1;
+}
+
+/**
+ * Children were reordered: mark the minimal set of matched (MATCHED flag)
+ * children for insertion by finding the longest increasing subsequence of
+ * old indices (patience sorting). Children on the subsequence stay in
+ * place, all others get INSERT_VNODE. `_index` still holds the
+ * matchingIndex here.
+ * @param {VNode[]} newChildren
+ */
+function markMoves(newChildren) {
+	/** @type {number[]} tails[x] is the smallest old index ending an increasing subsequence of length x+1 */
+	let tails = [];
+	/** @type {number[]} length of the longest increasing subsequence ending at child i */
+	let lisLengths = [];
+	let i, childVNode;
+	for (i = 0; i < newChildren.length; i++) {
+		childVNode = newChildren[i];
+		if (childVNode && childVNode._flags & MATCHED) {
+			// Binary search for the insertion point, keeping the pass at
+			// O(n log n) even for pathological reorders.
+			let lo = 0,
+				hi = tails.length;
+			while (lo < hi) {
+				const mid = (lo + hi) >> 1;
+				if (tails[mid] < childVNode._index) {
+					lo = mid + 1;
+				} else {
+					hi = mid;
+				}
+			}
+			tails[lo] = childVNode._index;
+			lisLengths[i] = lo + 1;
+		}
+	}
+
+	// Walk backwards matching the running subsequence length; `i` is left at
+	// newChildren.length by the loop above.
+	let remaining = tails.length;
+	while (i--) {
+		if (lisLengths[i]) {
+			if (lisLengths[i] == remaining) {
+				remaining--;
+			} else {
+				newChildren[i]._flags |= INSERT_VNODE;
+			}
+		}
+	}
 }
