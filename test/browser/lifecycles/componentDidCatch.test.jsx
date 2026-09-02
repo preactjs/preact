@@ -622,6 +622,44 @@ describe('Lifecycle methods', () => {
 			expect(scratch).to.have.property('textContent', 'Error: Adapted Error!');
 		});
 
+		it('should not treat a dirty ancestor without error handling as a boundary', () => {
+			let parent;
+			class Parent extends Component {
+				render() {
+					parent = this;
+					return <div>{this.props.children}</div>;
+				}
+			}
+			class Sibling extends Component {
+				componentDidMount() {
+					// Leaves Parent dirty (a pending update) when ThrowErr's
+					// componentDidMount throws right after this one.
+					parent.setState({ x: 1 });
+				}
+				render() {
+					return <i>a</i>;
+				}
+			}
+			class ThrowErr extends Component {
+				componentDidMount() {
+					throwExpectedError();
+				}
+				render() {
+					return <i>b</i>;
+				}
+			}
+
+			expect(() =>
+				render(
+					<Parent>
+						<Sibling />
+						<ThrowErr />
+					</Parent>,
+					scratch
+				)
+			).to.throw(expectedError);
+		});
+
 		it('should bubble on repeated errors', () => {
 			class Adapter extends Component {
 				componentDidCatch(error) {
@@ -657,6 +695,45 @@ describe('Lifecycle methods', () => {
 				expectedError,
 				expect.anything()
 			);
+			expect(Receiver.prototype.componentDidCatch).toHaveBeenCalledWith(
+				expectedError,
+				expect.anything()
+			);
+			expect(scratch).to.have.property('textContent', 'Error: Error!');
+		});
+
+		it('should skip the boundary when the retry render throws again', () => {
+			let catches = 0;
+			class Boundary extends Component {
+				componentDidCatch() {
+					catches++;
+					this.setState({ attempt: catches });
+				}
+				render() {
+					return (
+						<div>
+							<Thrower />
+						</div>
+					);
+				}
+			}
+			function Thrower() {
+				throwExpectedError();
+			}
+
+			render(
+				<Receiver>
+					<Boundary />
+				</Receiver>,
+				scratch
+			);
+			expect(catches).to.equal(1);
+
+			// The retry render throws again: Boundary is now processing that
+			// error and must be skipped so it bubbles up to Receiver instead of
+			// being re-caught (which would schedule retries forever).
+			rerender();
+			expect(catches).to.equal(1);
 			expect(Receiver.prototype.componentDidCatch).toHaveBeenCalledWith(
 				expectedError,
 				expect.anything()
