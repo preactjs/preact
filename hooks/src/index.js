@@ -129,27 +129,25 @@ options.unmount = vnode => {
 
 	const c = vnode._component;
 	if (c && c.__hooks) {
-		let hasErrored,
-			errorParent = vnode._parent;
-		// The removed subtree is detached (`_parent` nulled) by flush time, so
-		// grab the nearest surviving component now; its current vnode can still
-		// route deferred cleanup errors to a mounted error boundary. Unmounting
-		// is pre-order and nulls each component's `_parentDom` before its
-		// children unmount, so removed ancestors are already recognizable here.
-		while (
-			errorParent &&
-			!(errorParent._component && errorParent._component._parentDom)
-		) {
-			errorParent = errorParent._parent;
-		}
+		let hasErrored, errorParent;
 		c.__hooks._list.some(s => {
 			try {
 				// Layout cleanups have to run before the new DOM is in place, so
 				// they stay in the commit phase (see #1886). Passive cleanups run
 				// after paint, before any new passive effect (see #4299), with
 				// `_passive` repurposed to hold the error-routing component.
-				if (s._passive) {
-					s._passive = errorParent && errorParent._component;
+				if (s._passive && s._cleanup) {
+					if (errorParent === undefined) {
+						errorParent = vnode._parent;
+						while (
+							errorParent &&
+							!(errorParent._component && errorParent._component._parentDom)
+						) {
+							errorParent = errorParent._parent;
+						}
+						errorParent = errorParent && errorParent._component;
+					}
+					s._passive = errorParent;
 					afterPaint(unmountCleanups.push(s));
 				} else {
 					invokeCleanup(s);
