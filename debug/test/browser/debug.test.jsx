@@ -39,7 +39,7 @@ describe('debug', () => {
 	});
 
 	it('should initialize devtools', () => {
-		expect(window.__PREACT_DEVTOOLS__.attachPreact).toHaveBeenCalled();
+		expect(window.__PREACT_DEVTOOLS__.attached).to.be.true;
 	});
 
 	it('should print an error on rendering on undefined parent', () => {

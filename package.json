@@ -180,8 +180,9 @@
     "@babel/preset-env": "^7.29.7",
     "@rollup/plugin-babel": "^6.1.0",
     "@types/node": "^22.20.1",
-    "@vitest/browser": "^3.2.4",
-    "@vitest/coverage-v8": "^3.2.4",
+    "@vitest/browser": "^5.0.0",
+    "@vitest/browser-playwright": "^5.0.0",
+    "@vitest/coverage-v8": "^5.0.0",
     "babel-plugin-transform-rename-properties": "0.1.0",
     "chai": "^6.2.2",
     "cross-env": "^7.0.3",
@@ -196,7 +197,7 @@
     "rollup": "^4.62.2",
     "terser": "^5.49.0",
     "typescript": "5.1.6",
-    "vitest": "^3.2.4"
+    "vitest": "^5.0.0"
   },
   "peerDependencies": {
     "preact-render-to-string": ">=6.7.0"
