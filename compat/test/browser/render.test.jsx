@@ -893,4 +893,28 @@ describe('compat render', () => {
 
 		expect(style).to.deep.equal({ margin: 10, opacity: 0.5 });
 	});
+
+	it('should not append "px" to unitless SVG paint and aspect-ratio values', () => {
+		// None of these accepts a <length>, so appending "px" makes the value
+		// invalid and the declaration is dropped entirely. React lists all of
+		// them in `isUnitlessNumber` for the same reason.
+		const style = {
+			aspectRatio: 2,
+			fillOpacity: 0.5,
+			stopOpacity: 0.5,
+			strokeOpacity: 0.5,
+			strokeMiterlimit: 3,
+			strokeWidth: 2
+		};
+		render(<div style={style} />, scratch);
+
+		const rendered = scratch.firstChild.style;
+		for (const key in style) {
+			expect(rendered[key], `${key} should not be dropped`).to.not.equal('');
+			expect(
+				rendered[key].endsWith('px'),
+				`${key} should not have "px" appended, got "${rendered[key]}"`
+			).to.equal(false);
+		}
+	});
 });
