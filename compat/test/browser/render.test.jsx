@@ -3,7 +3,8 @@ import React, {
 	render,
 	Component,
 	hydrate,
-	createContext
+	createContext,
+	createRef
 } from 'preact/compat';
 import { setupRerender, act } from 'preact/test-utils';
 import {
@@ -892,5 +893,21 @@ describe('compat render', () => {
 		render(<div style={style} />, scratch);
 
 		expect(style).to.deep.equal({ margin: 10, opacity: 0.5 });
+	});
+
+	it('should null class-component object ref on unmount', () => {
+		const ref = createRef();
+
+		class Foo extends Component {
+			render() {
+				return <div>foo</div>;
+			}
+		}
+
+		render(<Foo ref={ref} />, scratch);
+		expect(ref.current).to.be.instanceof(Foo);
+
+		render(null, scratch);
+		expect(ref.current).to.equal(null);
 	});
 });
