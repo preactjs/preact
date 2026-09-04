@@ -17,10 +17,6 @@ function initSuspenseHooks() {
 
 			while ((vnode = vnode._parent)) {
 				if ((component = vnode._component) && component._childDidSuspend) {
-					if (newVNode._dom == null) {
-						newVNode._dom = oldVNode._dom;
-						newVNode._children = oldVNode._children || [];
-					}
 					// Don't call oldCatchError if we found a Suspense
 					return component._childDidSuspend(error, newVNode);
 				}
