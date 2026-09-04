@@ -30,7 +30,12 @@ const rollupAlias = [
 		find: /^react\/jsx-dev-runtime$/,
 		replacement: path.join(root, 'compat/jsx-dev-runtime.mjs')
 	},
-	{ find: /^preact$/, replacement: path.join(root, 'src/index.js') },
+	{
+		find: /^preact$/,
+		replacement: MINIFY
+			? path.join(root, 'dist/preact.mjs')
+			: path.join(root, 'src/index.js')
+	},
 	{
 		find: /^preact\/compat$/,
 		replacement: MINIFY
