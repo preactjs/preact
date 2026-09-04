@@ -334,7 +334,7 @@ export function diff(
 
 			oldDom = diffChildren(
 				parentDom,
-				isArray(renderResult) ? renderResult : [renderResult],
+				renderResult,
 				newVNode,
 				oldVNode,
 				globalContext,
@@ -677,7 +677,7 @@ function diffElementNodes(
 
 			diffChildren(
 				parentDom,
-				isArray(newChildren) ? newChildren : [newChildren],
+				newChildren,
 				newVNode,
 				oldVNode,
 				globalContext,

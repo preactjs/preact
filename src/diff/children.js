@@ -71,7 +71,7 @@ export function diffChildren(
 	/** @type {VNode[]} */
 	let oldChildren = oldParentVNode._children || EMPTY_ARR;
 
-	let newChildrenLength = renderResult.length;
+	let newChildrenLength = isArray(renderResult) ? renderResult.length : 1;
 
 	oldDom = constructNewChildrenArray(
 		newParentVNode,
@@ -184,7 +184,7 @@ function constructNewChildrenArray(
 	for (i = 0; i < newChildrenLength; i++) {
 		// @ts-expect-error We are reusing the childVNode variable to hold both the
 		// pre and post normalized childVNode
-		childVNode = renderResult[i];
+		childVNode = isArray(renderResult) ? renderResult[i] : renderResult;
 
 		if (
 			childVNode == NULL ||
