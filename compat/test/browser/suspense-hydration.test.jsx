@@ -2,8 +2,10 @@ import { setupRerender } from 'preact/test-utils';
 import React, {
 	createElement,
 	hydrate,
+	render,
 	Fragment,
 	Suspense,
+	use,
 	memo,
 	useState,
 	useSyncExternalStore
@@ -872,6 +874,75 @@ describe('suspense hydration', () => {
 				scratch.lastChild.dispatchEvent(createEvent('click'));
 				expect(cOnClickSpy).toHaveBeenCalledTimes(2);
 			});
+	});
+
+	it('should preserve component state when re-suspending after streaming-style hydration', async () => {
+		scratch.innerHTML =
+			'<!--$s:2--><div><p>Hello</p><button>Count: 0</button></div><!--/$s:2-->';
+
+		let promise = Promise.resolve('Hello');
+		let increment;
+		function App() {
+			const message = use(promise);
+			const [count, setCount] = useState(0);
+			increment = () => setCount(value => value + 1);
+			return (
+				<div>
+					<p>{message}</p>
+					<button>Count: {count}</button>
+				</div>
+			);
+		}
+
+		hydrate(
+			<Suspense fallback={<div>Fallback</div>}>
+				<App />
+			</Suspense>,
+			scratch
+		);
+		await promise;
+		rerender();
+		rerender();
+
+		increment();
+		rerender();
+		expect(scratch.querySelector('button').textContent).to.equal('Count: 1');
+
+		promise = Promise.resolve('Hello');
+		increment();
+		rerender();
+		await promise;
+		rerender();
+		rerender();
+
+		expect(scratch.querySelector('button').textContent).to.equal('Count: 2');
+	});
+
+	it('should preserve component state when re-suspending after client render', async () => {
+		let promise = Promise.resolve('Hello');
+		let increment;
+		function App() {
+			use(promise);
+			const [count, setCount] = useState(0);
+			increment = () => setCount(value => value + 1);
+			return <button>Count: {count}</button>;
+		}
+
+		render(<Suspense fallback="Fallback"><App /></Suspense>, scratch);
+		await promise;
+		rerender();
+		rerender();
+		increment();
+		rerender();
+		expect(scratch.textContent).to.equal('Count: 1');
+
+		promise = Promise.resolve('Hello');
+		increment();
+		rerender();
+		await promise;
+		rerender();
+		rerender();
+		expect(scratch.textContent).to.equal('Count: 2');
 	});
 
 	it('should correctly hydrate and rerender a memoized lazy data loader', () => {

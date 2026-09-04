@@ -8,6 +8,7 @@ import React, {
 	Fragment,
 	createContext,
 	useState,
+	useRef,
 	useEffect,
 	useLayoutEffect,
 	memo
@@ -202,9 +203,43 @@ describe('suspense', () => {
 		resolve().then(assert).catch(assert);
 	});
 
-	it('should reset hooks of components', () => {
+	it('should reset hooks when a component subtree suspends during mount', async () => {
+		let resolve;
+		let resolved = false;
+		let initializations = 0;
+		const promise = new Promise(r => {
+			resolve = () => {
+				resolved = true;
+				r();
+				return promise;
+			};
+		});
+
+		function App() {
+			const [value] = useState(() => ++initializations);
+			if (!resolved) throw promise;
+			return <p>{value}</p>;
+		}
+
+		render(
+			<Suspense fallback="loading">
+				<App />
+			</Suspense>,
+			scratch
+		);
+		rerender();
+		expect(scratch.textContent).to.equal('loading');
+
+		await resolve();
+		rerender();
+		expect(scratch.innerHTML).to.equal('<p>2</p>');
+		expect(initializations).to.equal(2);
+	});
+
+	it('should preserve hooks of mounted components', () => {
 		/** @type {(v) => void} */
 		let set;
+		let initialRef;
 		const LazyComp = ({ name }) => <div>Hello from {name}</div>;
 
 		/** @type {() => Promise<void>} */
@@ -222,7 +257,10 @@ describe('suspense', () => {
 
 		const Parent = ({ children }) => {
 			const [state, setState] = useState(false);
+			const ref = useRef({});
 			set = setState;
+			if (!initialRef) initialRef = ref;
+			else expect(ref).to.equal(initialRef);
 
 			return (
 				<div>
@@ -249,15 +287,21 @@ describe('suspense', () => {
 
 		return resolve().then(() => {
 			rerender();
-			expect(scratch.innerHTML).to.eql(`<div><p>hi</p></div>`);
+			expect(scratch.innerHTML).to.eql(
+				`<div><p>hi</p><div>Hello from LazyComp</div></div>`
+			);
 		});
 	});
 
-	it('should call effect cleanups', () => {
+	it('should call effect cleanups and setups when hiding and revealing', async () => {
 		/** @type {(v) => void} */
 		let set;
+		const effectSetupSpy = vi.fn();
 		const effectSpy = vi.fn();
+		const effectWithoutCleanupSpy = vi.fn();
+		const layoutEffectSetupSpy = vi.fn();
 		const layoutEffectSpy = vi.fn();
+		const layoutEffectWithoutCleanupSpy = vi.fn();
 		const LazyComp = ({ name }) => <div>Hello from {name}</div>;
 
 		/** @type {() => Promise<void>} */
@@ -277,16 +321,20 @@ describe('suspense', () => {
 			const [state, setState] = useState(false);
 			set = setState;
 			useEffect(() => {
+				effectSetupSpy();
 				return () => {
 					effectSpy();
 				};
-			}, []);
+			}, [state]);
+			useEffect(effectWithoutCleanupSpy, [state]);
 
 			useLayoutEffect(() => {
+				layoutEffectSetupSpy();
 				return () => {
 					layoutEffectSpy();
 				};
 			}, []);
+			useLayoutEffect(layoutEffectWithoutCleanupSpy, []);
 
 			return state ? (
 				<div>{children}</div>
@@ -305,19 +353,29 @@ describe('suspense', () => {
 			</Suspense>,
 			scratch
 		);
+		expect(layoutEffectSetupSpy).toHaveBeenCalledOnce();
+		expect(layoutEffectWithoutCleanupSpy).toHaveBeenCalledOnce();
 
 		set(true);
 		rerender();
 		expect(scratch.innerHTML).to.eql('<div>Suspended...</div>');
+
+		expect(effectSetupSpy).toHaveBeenCalledOnce();
+		expect(effectWithoutCleanupSpy).toHaveBeenCalledOnce();
 		expect(effectSpy).toHaveBeenCalledOnce();
 		expect(layoutEffectSpy).toHaveBeenCalledOnce();
 
-		return resolve().then(() => {
-			rerender();
-			expect(effectSpy).toHaveBeenCalledOnce();
-			expect(layoutEffectSpy).toHaveBeenCalledOnce();
-			expect(scratch.innerHTML).to.eql(`<div><p>hi</p></div>`);
-		});
+		await resolve();
+		await act(() => rerender());
+		expect(effectSpy).toHaveBeenCalledOnce();
+		expect(layoutEffectSpy).toHaveBeenCalledOnce();
+		expect(effectSetupSpy).toHaveBeenCalledTimes(2);
+		expect(effectWithoutCleanupSpy).toHaveBeenCalledTimes(2);
+		expect(layoutEffectSetupSpy).toHaveBeenCalledTimes(2);
+		expect(layoutEffectWithoutCleanupSpy).toHaveBeenCalledTimes(2);
+		expect(scratch.innerHTML).to.eql(
+			`<div><div>Hello from LazyComp</div></div>`
+		);
 	});
 
 	it('should support a call to setState before rendering the fallback', () => {
