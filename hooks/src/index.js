@@ -299,6 +299,7 @@ export function useLayoutEffect(callback, args) {
 	/** @type {import('./internal').EffectHookState} */
 	const state = getHookState(currentIndex++, 4);
 	if (!options._skipEffects && argsChanged(state._args, args)) {
+		state._passive = false;
 		state._value = callback;
 		state._pendingArgs = args;
 

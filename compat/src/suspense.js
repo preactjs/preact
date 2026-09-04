@@ -38,14 +38,19 @@ function initSuspenseHooks() {
 	};
 }
 
-function detachedClone(vnode, detachedParent, parentDom) {
+function detachedClone(vnode, detachedParent, parentDom, preserveHooks) {
 	if (vnode) {
 		if (vnode._component && vnode._component.__hooks) {
-			vnode._component.__hooks._list.forEach(effect => {
-				if (typeof effect._cleanup == 'function') effect._cleanup();
+			const hooks = vnode._component.__hooks;
+			hooks._list.forEach(effect => {
+				if (!preserveHooks || effect._passive != null) {
+					const cleanup = effect._cleanup;
+					effect._cleanup = effect._args = UNDEFINED;
+					if (typeof cleanup == 'function') cleanup();
+				}
 			});
-
-			vnode._component.__hooks = null;
+			if (preserveHooks) hooks._pendingEffects = [];
+			else vnode._component.__hooks = null;
 		}
 
 		vnode = assign({ constructor: UNDEFINED }, vnode);
@@ -62,7 +67,7 @@ function detachedClone(vnode, detachedParent, parentDom) {
 		vnode._children =
 			vnode._children &&
 			vnode._children.map(child =>
-				detachedClone(child, detachedParent, parentDom)
+				detachedClone(child, detachedParent, parentDom, preserveHooks)
 			);
 	}
 
@@ -186,6 +191,10 @@ function createSuspense() {
 	Suspense.prototype.componentWillUnmount = function () {
 		this._suspenders = [];
 	};
+	Suspense.prototype.componentDidMount =
+		Suspense.prototype.componentDidUpdate = function () {
+			if (!this._pendingSuspensionCount) this._unmounted = false;
+		};
 
 	/**
 	 * @this {import('./internal').SuspenseComponent}
@@ -203,7 +212,8 @@ function createSuspense() {
 				this._vnode._children[0] = detachedClone(
 					this._detachOnNextRender,
 					detachedParent,
-					(detachedComponent._originalParentDom = detachedComponent._parentDom)
+					(detachedComponent._originalParentDom = detachedComponent._parentDom),
+					this._unmounted == false
 				);
 			}
 
