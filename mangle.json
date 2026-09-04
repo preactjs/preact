@@ -32,6 +32,7 @@
       "$_hydrationMismatch": "__m",
       "$_list": "__",
       "$_pendingEffects": "__h",
+      "$_passive": "__P",
       "$_value": "__",
       "$_nextValue": "__N",
       "$_original": "__v",

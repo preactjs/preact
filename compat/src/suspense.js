@@ -17,10 +17,10 @@ function initSuspenseHooks() {
 
 			while ((vnode = vnode._parent)) {
 				if ((component = vnode._component) && component._childDidSuspend) {
-					if (newVNode._dom == null) {
-						newVNode._dom = oldVNode._dom;
-						newVNode._children = oldVNode._children || [];
-					}
+					// A component that suspends before ever committing has no state
+					// worth keeping; mounted ones keep their hooks while parked.
+					if (oldVNode && !oldVNode._component)
+						newVNode._component.__hooks = UNDEFINED;
 					// Don't call oldCatchError if we found a Suspense
 					return component._childDidSuspend(error, newVNode);
 				}
@@ -44,12 +44,20 @@ function initSuspenseHooks() {
 
 function detachedClone(vnode, detachedParent, parentDom) {
 	if (vnode) {
-		if (vnode._component && vnode._component.__hooks) {
-			vnode._component.__hooks._list.forEach(effect => {
-				if (typeof effect._cleanup == 'function') effect._cleanup();
+		const hooks = vnode._component && vnode._component.__hooks;
+		if (hooks) {
+			hooks._list.forEach(effect => {
+				// Only effects carry `_passive`; clearing `_args` makes them run
+				// again when the tree is revealed, memo/ref state stays intact.
+				if (effect._passive != null) {
+					if (typeof effect._cleanup == 'function') effect._cleanup();
+					effect._cleanup = effect._args = UNDEFINED;
+				}
 			});
-
-			vnode._component.__hooks = null;
+			// Drop effects queued by the aborted render; `options._render` swaps in
+			// a fresh `_pendingEffects` array before anything is pushed again, so
+			// sharing one empty array here is safe.
+			hooks._pendingEffects = vnode._component._renderCallbacks = [];
 		}
 
 		vnode = assign({ constructor: UNDEFINED }, vnode);

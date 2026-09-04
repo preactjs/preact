@@ -1,1 +1,6 @@
-window.__PREACT_DEVTOOLS__ = { attachPreact: vi.fn() };
+window.__PREACT_DEVTOOLS__ = {
+	attached: false,
+	attachPreact() {
+		this.attached = true;
+	}
+};

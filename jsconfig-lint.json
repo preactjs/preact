@@ -6,6 +6,7 @@
     "moduleResolution": "Node16",
     "target": "ES2015",
     "module": "Node16",
+    "lib": ["dom", "es2015"],
     "checkJs": false
   },
   "include": [

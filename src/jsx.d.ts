@@ -233,6 +233,7 @@ export namespace JSXInternal {
 		search: preact.SearchHTMLAttributes<HTMLElement>;
 		section: preact.HTMLAttributes<HTMLElement>;
 		select: preact.AccessibleSelectHTMLAttributes<HTMLSelectElement>;
+		selectedcontent: preact.HTMLAttributes<HTMLElement>;
 		slot: preact.SlotHTMLAttributes<HTMLSlotElement>;
 		small: preact.HTMLAttributes<HTMLElement>;
 		source: preact.SourceHTMLAttributes<HTMLSourceElement>;

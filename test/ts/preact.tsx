@@ -365,6 +365,11 @@ let elementProps: ComponentProps<'button'> = {
 	type: 'button'
 };
 
+let selectedContentProps: ComponentProps<'selectedcontent'> = {
+	id: 'selected-option'
+};
+const selectedContent = <selectedcontent ref={createRef<HTMLElement>()} />;
+
 // Typing of style property
 const acceptsNumberAsLength = <div style={{ marginTop: 20 }} />;
 const acceptsStringAsLength = <div style={{ marginTop: '20px' }} />;
