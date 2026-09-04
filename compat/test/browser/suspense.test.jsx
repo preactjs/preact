@@ -378,6 +378,67 @@ describe('suspense', () => {
 		);
 	});
 
+	it('should run a layout effect with changed deps once when revealed', async () => {
+		let promise = Promise.resolve();
+		let set;
+		let first = true;
+		const setup = vi.fn();
+		const cleanup = vi.fn();
+		function App() {
+			const [n, setN] = useState(0);
+			set = setN;
+			useLayoutEffect(() => {
+				setup(n);
+				return () => cleanup(n);
+			}, [n]);
+			if (n && first) {
+				first = false;
+				throw promise;
+			}
+			return <p>{n}</p>;
+		}
+
+		render(
+			<Suspense fallback="loading">
+				<App />
+			</Suspense>,
+			scratch
+		);
+		expect(setup).toHaveBeenCalledTimes(1);
+
+		set(1);
+		rerender();
+		expect(scratch.textContent).to.equal('loading');
+		expect(cleanup).toHaveBeenCalledTimes(1);
+
+		await promise;
+		await act(() => rerender());
+		expect(scratch.textContent).to.equal('1');
+		expect(setup.mock.calls).to.deep.equal([[0], [1]]);
+		expect(cleanup).toHaveBeenCalledTimes(1);
+	});
+
+	it('should handle a promise thrown from a layout effect', () => {
+		let threw = false;
+		function App() {
+			useLayoutEffect(() => {
+				if (!threw) {
+					threw = true;
+					throw Promise.resolve();
+				}
+			});
+			return <p>x</p>;
+		}
+
+		render(
+			<Suspense fallback="loading">
+				<App />
+			</Suspense>,
+			scratch
+		);
+		rerender();
+	});
+
 	it('should support a call to setState before rendering the fallback', () => {
 		const LazyComp = ({ name }) => <div>Hello from {name}</div>;
 
