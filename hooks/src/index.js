@@ -258,6 +258,7 @@ export function useReducer(reducer, initialState, init) {
 							shouldUpdate = true;
 						}
 					}
+					return updatedHook && shouldUpdate;
 				});
 
 				if (prevScu) {
