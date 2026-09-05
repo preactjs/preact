@@ -1,4 +1,4 @@
-import { createElement } from './create-element';
+import { createVNode } from './create-element';
 
 /**
  * Portal component. A unique type is used instead of Fragment so that a
@@ -16,5 +16,5 @@ function Portal(props) {
  * @param {import('./internal').PreactElement} container The DOM node to continue rendering in to
  */
 export function createPortal(vnode, container) {
-	return createElement(Portal, { _parentDom: container }, vnode);
+	return createVNode(Portal, { _parentDom: container, children: vnode });
 }
