@@ -1,6 +1,6 @@
 import { EMPTY_OBJ, MODE_HYDRATE, NULL } from './constants';
 import { commitRoot, diff } from './diff/index';
-import { createElement, Fragment } from './create-element';
+import { createVNode, Fragment } from './create-element';
 import options from './options';
 import { slice } from './util';
 
@@ -28,7 +28,7 @@ export function render(vnode, parentDom) {
 	// means that we are mounting a new tree for the first time.
 	let oldVNode = isHydrating ? NULL : parentDom._children;
 
-	parentDom._children = createElement(Fragment, NULL, [vnode]);
+	parentDom._children = createVNode(Fragment, { children: [vnode] });
 
 	// List of effects that need to be called after diffing.
 	let commitQueue = [],
