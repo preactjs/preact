@@ -209,11 +209,11 @@ Before using the automated npm publishing flow, make sure npm trusted publishing
 5. Open the tag's **Release** workflow in GitHub Actions and wait for the `publish` job to request approval for the `npm` environment.
    - Before this gate, the workflow builds and tests the tag, creates a draft GitHub release, and uploads the exact npm tarball as a release asset.
    - Review the workflow, tag, commit, and tarball. Then approve the deployment to the `npm` environment.
-   - The `publish` job validates that the package name and version match the tag, selects the npm dist-tag, and submits the tarball with `npm stage publish`. A successful job means the package is staged; it is **not public yet**.
+   - The `publish` job validates that the package name and version match the tag, selects the npm dist-tag, and submits the tarball with `pnpm stage publish`. A successful job means the package is staged; it is **not public yet**.
 6. Open the **Staged Packages** tab on npmjs.com and review the staged `preact` package.
    - Stable releases use the `latest` npm dist-tag; prereleases use the approved prerelease dist-tag (`alpha`, `beta`, `rc`, or `next`).
    - Approve the staged package and complete the 2FA challenge. This is the step that publishes it to the live npm registry.
-   - Verify the new version and expected dist-tag with `npm view preact@11.0.0 version dist-tags --json`.
+   - Verify the new version and expected dist-tag with `pnpm view preact@11.0.0 version dist-tags --json`.
 7. [Fill in the release notes](#writing-release-notes) in GitHub and publish them
 8. Tweet it out
 
@@ -228,9 +228,9 @@ Before using the automated npm publishing flow, make sure npm trusted publishing
 2. Make a PR where **only** the version number is incremented in `package.json` (note: We follow `SemVer` conventions)
 3. Wait until the PR is approved and merged.
 4. Switch back to the `main` branch and pull the merged PR
-5. Run `pnpm run build && npm publish`
+5. Run `pnpm run build && pnpm publish`
    1. Make sure you have 2FA enabled in npm, otherwise the above command will fail.
-   2. If you're doing a pre-release add `--tag next` to the `npm publish` command to publish it under a different tag (default is `latest`)
+   2. If you're doing a pre-release add `--tag next` to the `pnpm publish` command to publish it under a different tag (default is `latest`)
 6. Publish the release notes and create the correct git tag.
 7. Tweet it out
 

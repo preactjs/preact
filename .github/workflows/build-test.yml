@@ -49,9 +49,9 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           fail-on-error: false
       - name: Package
-        # Use --ignore-scripts here to avoid re-building again before pack
+        # The install already built the package; skip pack lifecycle scripts.
         run: |
-          npm pack --ignore-scripts
+          pnpm pack --config.ignore-scripts=true
           mv preact-*.tgz preact.tgz
       - name: Upload npm package
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
