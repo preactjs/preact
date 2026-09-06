@@ -1,0 +1,31 @@
+# Only independently installed projects belong here. Preact's entry-point
+# manifests are build/publish metadata, and the root is included automatically.
+packages:
+  - demo
+
+minimumReleaseAge: 1440
+minimumReleaseAgeStrict: true
+minimumReleaseAgeIgnoreMissingTime: false
+blockExoticSubdeps: true
+trustPolicy: no-downgrade
+trustPolicyExclude:
+  # Preserve main's SSR test artifact (verified identical SHA-512). Version
+  # 6.7.0 currently has invalid stream-node declarations under our TS checks.
+  - preact-render-to-string@6.5.0
+  # Babel requires semver 6. This exact artifact (including SHA-512 integrity)
+  # already exists in main's npm lockfile; 6.3.1 lacks earlier releases' provenance.
+  - semver@6.3.1
+  # @types/node 22 requires this release; its SHA-512 also matches main's
+  # npm lockfile. The release lacks earlier-published versions' provenance.
+  - undici-types@6.21.0
+strictDepBuilds: true
+
+# Check dependency engines against the Node version used by contributors and CI.
+nodeVersion: 22.22.2
+engineStrict: true
+
+allowBuilds:
+  esbuild: true
+  '@parcel/watcher': false
+  fsevents: false
+  styled-components: false
