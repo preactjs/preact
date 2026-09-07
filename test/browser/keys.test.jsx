@@ -1553,4 +1553,34 @@ describe('keys', () => {
 		);
 		expect(scratch.querySelector('ul').textContent).to.equal('123');
 	});
+
+	it('should reorder keyed children after a third party removed one of them', () => {
+		let update;
+		class List extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { order: [1, 2, 3] };
+				update = order => this.setState({ order });
+			}
+			render() {
+				return (
+					<ul>
+						{this.state.order.map(i => (
+							<li key={i}>{i}</li>
+						))}
+					</ul>
+				);
+			}
+		}
+
+		render(<List />, scratch);
+		// e.g. an ad blocker or a drag-and-drop library detaching the node
+		scratch.querySelector('li:nth-child(3)').remove();
+
+		update([3, 1, 2]);
+		rerender();
+		expect(scratch.innerHTML).to.equal(
+			'<ul><li>3</li><li>1</li><li>2</li></ul>'
+		);
+	});
 });
