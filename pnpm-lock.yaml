@@ -57,13 +57,13 @@ importers:
         specifier: ^0.32.0
         version: 0.32.0
       oxlint:
-        specifier: 1.8.0
+        specifier: ^1.8.0
         version: 1.8.0
       playwright:
         specifier: ^1.54.1
         version: 1.63.0
       preact-render-to-string:
-        specifier: 6.5.0
+        specifier: ^6.5.0
         version: 6.5.0(preact@10.29.8)
       prop-types:
         specifier: ^15.8.1
