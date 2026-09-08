@@ -8,7 +8,17 @@ These steps will help you set up your development environment. That includes all
 
 1. Clone the git repository: `git clone git@github.com:preactjs/preact.git`
 2. Go into the cloned folder: `cd preact/`
-3. Install all dependencies: `npm install`
+3. Install pnpm 11.3.0 (for example, `npm install -g pnpm@11.3.0`) using the Node version in `package.json`.
+4. Install all dependencies: `pnpm install`
+
+The pnpm workspace contains the root library and `demo` only. Entry-point
+`package.json` files are build and publishing metadata, not separate workspace
+projects. The benchmark submodule keeps its own pnpm 8 workspace and lockfile.
+
+Dependency updates must pass the 24-hour release-age and publishing-trust checks.
+Review new install scripts explicitly in `allowBuilds`; keep any required trust
+exceptions version-specific and document why they are needed. CI uses frozen
+installs; commit `pnpm-lock.yaml` with dependency changes.
 
 ## The Repo Structure
 
@@ -100,11 +110,11 @@ The short summary is:
 
 ## Commonly used scripts for contributions
 
-Scripts can be executed via `npm run [script]`.
+Scripts can be executed via `pnpm run [script]`.
 
 - `build` - compiles all packages ready for publishing to npm. Pass package
-  directories after `--` to build only selected packages, for example
-  `npm run build -- . hooks compat`
+  directories as arguments to build only selected packages, for example
+  `pnpm run build . hooks compat`
 - `test` - Run all tests (linting, TypeScript definitions, unit/integration tests)
 - `test:ts` - Run all tests for TypeScript definitions
 - `test:vitest` - Run all unit/integration tests.
@@ -199,11 +209,11 @@ Before using the automated npm publishing flow, make sure npm trusted publishing
 5. Open the tag's **Release** workflow in GitHub Actions and wait for the `publish` job to request approval for the `npm` environment.
    - Before this gate, the workflow builds and tests the tag, creates a draft GitHub release, and uploads the exact npm tarball as a release asset.
    - Review the workflow, tag, commit, and tarball. Then approve the deployment to the `npm` environment.
-   - The `publish` job validates that the package name and version match the tag, selects the npm dist-tag, and submits the tarball with `npm stage publish`. A successful job means the package is staged; it is **not public yet**.
+   - The `publish` job validates that the package name and version match the tag, selects the npm dist-tag, and submits the tarball with `pnpm stage publish`. A successful job means the package is staged; it is **not public yet**.
 6. Open the **Staged Packages** tab on npmjs.com and review the staged `preact` package.
    - Stable releases use the `latest` npm dist-tag; prereleases use the approved prerelease dist-tag (`alpha`, `beta`, `rc`, or `next`).
    - Approve the staged package and complete the 2FA challenge. This is the step that publishes it to the live npm registry.
-   - Verify the new version and expected dist-tag with `npm view preact@11.0.0 version dist-tags --json`.
+   - Verify the new version and expected dist-tag with `pnpm view preact@11.0.0 version dist-tags --json`.
 7. [Fill in the release notes](#writing-release-notes) in GitHub and publish them
 8. Tweet it out
 
@@ -212,15 +222,15 @@ Before using the automated npm publishing flow, make sure npm trusted publishing
 > **ATTENTION:** Make sure that you've cleared the project correctly
 > when switching from a 10.x branch.
 
-0. Run `rm -rf dist node_modules && npm i` to make sure to have the correct dependencies.
+0. Run `rm -rf dist node_modules demo/node_modules && pnpm install` to make sure to have the correct dependencies.
 1. [Write the release notes](#writing-release-notes) and keep them as a draft in GitHub
    1. I'd recommend writing them in an offline editor because each edit to a draft will change the URL in GitHub.
 2. Make a PR where **only** the version number is incremented in `package.json` (note: We follow `SemVer` conventions)
 3. Wait until the PR is approved and merged.
 4. Switch back to the `main` branch and pull the merged PR
-5. Run `npm run build && npm publish`
+5. Run `pnpm run build && pnpm publish`
    1. Make sure you have 2FA enabled in npm, otherwise the above command will fail.
-   2. If you're doing a pre-release add `--tag next` to the `npm publish` command to publish it under a different tag (default is `latest`)
+   2. If you're doing a pre-release add `--tag next` to the `pnpm publish` command to publish it under a different tag (default is `latest`)
 6. Publish the release notes and create the correct git tag.
 7. Tweet it out
 

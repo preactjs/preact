@@ -93,7 +93,7 @@
   },
   "types": "src/index.d.ts",
   "scripts": {
-    "prepare": "husky && npm run test:install && run-s build",
+    "prepare": "husky && pnpm run test:install && run-s build",
     "build": "node ./scripts/build.mjs",
     "postbuild": "node ./config/compat-entries.js",
     "dev": "node ./scripts/build.mjs --watch",
@@ -179,6 +179,7 @@
     "@babel/core": "^7.28.0",
     "@babel/preset-env": "^7.29.7",
     "@rollup/plugin-babel": "^6.1.0",
+    "@types/chai": "^5.2.2",
     "@types/node": "^22.20.1",
     "@vitest/browser": "^5.0.0",
     "@vitest/browser-playwright": "^5.0.0",
@@ -188,6 +189,7 @@
     "cross-env": "^7.0.3",
     "husky": "^9.1.7",
     "kolorist": "^1.8.0",
+    "nano-staged": "^1.0.2",
     "npm-run-all2": "^7.0.0",
     "oxfmt": "^0.32.0",
     "oxlint": "^1.8.0",
@@ -209,5 +211,6 @@
   },
   "volta": {
     "node": "22.22.2"
-  }
+  },
+  "packageManager": "pnpm@11.3.0"
 }
