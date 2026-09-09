@@ -38,12 +38,12 @@ jobs:
           package-manager-cache: false
           cache-dependency-path: pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile
+      - run: pnpm run build
       - name: test
         env:
           CI: true
           COVERAGE: true
           FLAKEY: false
-        # The install already runs prepare, including the build.
         run: pnpm run lint && pnpm run test:unit
       - name: Coveralls GitHub Action
         uses: coverallsapp/github-action@5cbfd81b66ca5d10c19b062c04de0199c215fb6e # v2.3.7
@@ -52,7 +52,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           fail-on-error: false
       - name: Package
-        # The install already built the package; skip pack lifecycle scripts.
+        # Package the tested build without running pack lifecycle scripts.
         run: |
           pnpm pack --config.ignore-scripts=true
           mv preact-*.tgz preact.tgz
