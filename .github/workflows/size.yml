@@ -19,6 +19,4 @@ jobs:
       - uses: preactjs/compressed-size-action@66325aad6443cb7cf89c4bfcd414aea2367cda94 # 2.9.1
         with:
           repo-token: '${{ secrets.GITHUB_TOKEN }}'
-          # pnpm can skip prepare when dependencies are unchanged between refs.
-          # Rebuild each ref so the base cannot reuse the PR's bundles.
           build-script: 'build'
