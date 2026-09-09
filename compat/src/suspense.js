@@ -3,6 +3,7 @@ import {
 	COMPONENT_FORCE,
 	FORCE_PROPS_REVALIDATE,
 	MODE_HYDRATE,
+	REF_DETACHED,
 	UNDEFINED
 } from '../../src/constants';
 import { assign } from './util';
@@ -59,6 +60,10 @@ function detachedClone(vnode, detachedParent, parentDom) {
 			// sharing one empty array here is safe.
 			hooks._pendingEffects = vnode._component._renderCallbacks = [];
 		}
+
+		// Unmounting the clone detaches DOM refs; flag the original so the
+		// reveal attaches them again.
+		if (typeof vnode.type == 'string') vnode._flags |= REF_DETACHED;
 
 		vnode = assign({ constructor: UNDEFINED }, vnode);
 		if (vnode._component != null) {

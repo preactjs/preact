@@ -5,6 +5,7 @@ import {
 	EMPTY_ARR,
 	INSERT_VNODE,
 	MATCHED,
+	REF_DETACHED,
 	UNDEFINED,
 	NULL,
 	HAS_MOVE_BEFORE_SUPPORT
@@ -111,8 +112,13 @@ export function diffChildren(
 
 		// Adjust DOM nodes
 		newDom = childVNode._dom;
-		if (childVNode.ref && oldVNode.ref != childVNode.ref) {
-			if (oldVNode.ref) {
+		// A ref detached while its subtree was parked by Suspense is attached
+		// again on reveal.
+		if (
+			childVNode.ref &&
+			(oldVNode.ref != childVNode.ref || oldVNode._flags & REF_DETACHED)
+		) {
+			if (oldVNode.ref != childVNode.ref && oldVNode.ref) {
 				applyRef(oldVNode.ref, NULL, childVNode);
 			}
 			refQueue.push(

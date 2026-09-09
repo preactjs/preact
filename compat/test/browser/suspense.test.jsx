@@ -12,7 +12,8 @@ import React, {
 	useEffect,
 	useLayoutEffect,
 	memo,
-	createPortal
+	createPortal,
+	createRef
 } from 'preact/compat';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { createLazy, createSuspender } from './suspense-utils';
@@ -2886,6 +2887,31 @@ describe('suspense', () => {
 		// Render count should not have increased
 		expect(renderCount).to.equal(renderCountAfterSuspend);
 		expect(scratch.innerHTML).to.equal('<div>Loading...</div>');
+	});
+
+	it('should detach DOM refs while parked and attach them again on reveal', async () => {
+		const [Suspender, suspend] = createSuspender(() => <p>content</p>);
+		const ref = createRef();
+		render(
+			<Suspense fallback={<div>fallback</div>}>
+				<b ref={ref}>host</b>
+				<Suspender />
+			</Suspense>,
+			scratch
+		);
+		const host = scratch.firstChild;
+		expect(ref.current).to.equal(host);
+
+		const [resolve] = suspend();
+		rerender();
+		expect(scratch.innerHTML).to.equal('<div>fallback</div>');
+		expect(ref.current).to.equal(null);
+
+		await resolve(() => <p>resolved</p>);
+		rerender();
+		expect(scratch.innerHTML).to.equal('<b>host</b><p>resolved</p>');
+		expect(scratch.firstChild).to.equal(host);
+		expect(ref.current).to.equal(host);
 	});
 
 	describe('portals', () => {
