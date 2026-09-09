@@ -1,4 +1,5 @@
 import { options as _options } from 'preact';
+import { MODE_PARKED } from '../../src/constants';
 
 const ObjectIs = Object.is;
 
@@ -91,13 +92,18 @@ options.diffed = vnode => {
 	if (oldAfterDiff) oldAfterDiff(vnode);
 
 	const c = vnode._component;
-	if (c && c.__hooks) {
-		if (c.__hooks._pendingEffects.length) afterPaint(afterPaintEffects.push(c));
-		// `_pendingArgs` is cleared again by `options._render` before anything
-		// can read it, so committing it here is enough.
-		c.__hooks._list.some(hookItem => {
-			if (hookItem._pendingArgs) hookItem._args = hookItem._pendingArgs;
-		});
+	const hooks = c && c.__hooks;
+	if (hooks) {
+		if (vnode._flags & MODE_PARKED) {
+			hooks._pendingEffects = [];
+		} else {
+			if (hooks._pendingEffects.length) afterPaint(afterPaintEffects.push(c));
+			// `_pendingArgs` is cleared again by `options._render` before anything
+			// can read it, so committing it here is enough.
+			hooks._list.some(hookItem => {
+				if (hookItem._pendingArgs) hookItem._args = hookItem._pendingArgs;
+			});
+		}
 	}
 	previousComponent = currentComponent = null;
 };
@@ -107,9 +113,10 @@ options.diffed = vnode => {
 options._commit = (vnode, commitQueue) => {
 	commitQueue.some(component => {
 		try {
-			component._renderCallbacks.some(invokeCleanup);
+			const parked = component._vnode._flags & MODE_PARKED;
+			if (!parked) component._renderCallbacks.some(invokeCleanup);
 			component._renderCallbacks = component._renderCallbacks.filter(cb =>
-				cb._value ? invokeEffect(cb) : true
+				cb._value ? !parked && invokeEffect(cb) : true
 			);
 		} catch (e) {
 			commitQueue.some(c => {

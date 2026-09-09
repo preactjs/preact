@@ -10,6 +10,8 @@ import {
 	MATHML_TOKEN_ELEMENTS,
 	MATH_NAMESPACE,
 	MODE_HYDRATE,
+	MODE_PARKED,
+	REF_PENDING,
 	MODE_SUSPENDED,
 	NULL,
 	RESET_MODE,
@@ -470,6 +472,7 @@ export function commitRoot(commitQueue, root, refQueue) {
 	if (options._commit) options._commit(root, commitQueue);
 
 	commitQueue.some(c => {
+		if (c._vnode._flags & MODE_PARKED) return;
 		try {
 			// @ts-expect-error Reuse the commitQueue variable here so the type changes
 			commitQueue = c._renderCallbacks;
@@ -728,6 +731,13 @@ function diffElementNodes(
  * @param {VNode} vnode
  */
 export function applyRef(ref, value, vnode) {
+	if (value) {
+		if (vnode._flags & MODE_PARKED) {
+			vnode._flags |= REF_PENDING;
+			return;
+		}
+		vnode._flags &= ~REF_PENDING;
+	}
 	try {
 		if (typeof ref == 'function') {
 			if (typeof ref._unmount == 'function') {
@@ -757,7 +767,11 @@ export function unmount(vnode, parentVNode, skipRemove) {
 	let r;
 	if (options.unmount) options.unmount(vnode);
 
-	if ((r = vnode.ref) && (!r.current || r.current == vnode._dom)) {
+	if (
+		(r = vnode.ref) &&
+		!(vnode._flags & REF_PENDING) &&
+		(!r.current || r.current == vnode._dom)
+	) {
 		applyRef(r, NULL, parentVNode);
 	}
 

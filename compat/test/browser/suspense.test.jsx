@@ -1039,12 +1039,10 @@ describe('suspense', () => {
 		// that was removed from the document, which used to throw NotFoundError
 		setSlot(true);
 		expect(() => rerender()).not.to.throw();
-		expect(ref).toHaveBeenCalledTimes(1);
-		expect(layout).toHaveBeenCalledTimes(1);
+		expect(ref).not.toHaveBeenCalled();
+		expect(layout).not.toHaveBeenCalled();
 		// The new DOM went into the detached container, not the document
 		expect(scratch.innerHTML).to.equal('<div>Suspended...</div>');
-		expect(document.contains(ref.mock.calls[0][0])).to.equal(false);
-		expect(ref.mock.calls[0][0].parentNode.nodeName).to.equal('DIV');
 
 		// 3. Any further update while parked must not re-run mount work
 		setSlot(true);
@@ -1947,6 +1945,190 @@ describe('suspense', () => {
 
 		expect(scratch.innerHTML).to.equal(`<div>i: 2<div>Resolved</div></div>`);
 	});
+
+	it('should commit new children when a parked sibling updates twice', async () => {
+		let updateSlot, suspendPage, resolve;
+		let resolved = false;
+		const promise = new Promise(r => {
+			resolve = () => {
+				resolved = true;
+				r();
+				return promise;
+			};
+		});
+		const headerRef = vi.fn(node => {
+			if (node) node.style.color = 'red';
+		});
+		const layoutEffect = vi.fn();
+
+		function Header({ count }) {
+			useLayoutEffect(() => {
+				layoutEffect(scratch.querySelector('header').isConnected);
+			}, []);
+			return <header ref={headerRef}>bar {count}</header>;
+		}
+
+		function Slot() {
+			const [count, setCount] = useState(0);
+			updateSlot = setCount;
+			return count > 0 ? <Header count={count} /> : null;
+		}
+
+		function Page() {
+			const [suspended, setSuspended] = useState(false);
+			suspendPage = () => setSuspended(true);
+			if (suspended && !resolved) throw promise;
+			return <div>page</div>;
+		}
+
+		render(
+			<Suspense fallback={<p>Loading</p>}>
+				<Slot />
+				<Page />
+				<footer>foot</footer>
+			</Suspense>,
+			scratch
+		);
+		suspendPage();
+		rerender();
+		expect(scratch.innerHTML).to.equal('<p>Loading</p>');
+
+		updateSlot(1);
+		rerender();
+		expect(scratch.innerHTML).to.equal('<p>Loading</p>');
+
+		updateSlot(2);
+		rerender();
+		expect(scratch.innerHTML).to.equal('<p>Loading</p>');
+		expect(headerRef).not.toHaveBeenCalled();
+		expect(layoutEffect).not.toHaveBeenCalled();
+
+		await resolve();
+		rerender();
+		expect(scratch.innerHTML).to.equal(
+			'<header style="color: red;">bar 2</header><div>page</div><footer>foot</footer>'
+		);
+		expect(headerRef).toHaveBeenCalledOnce();
+		expect(headerRef.mock.calls[0][0]).to.equal(scratch.firstChild);
+		expect(layoutEffect).toHaveBeenCalledExactlyOnceWith(true);
+	});
+
+	for (const innerFirst of [true, false]) {
+		it(`should defer parked updates until both boundaries reveal (inner first: ${innerFirst})`, async () => {
+			const [InnerPage, suspendInner] = createSuspender(() => <div>inner</div>);
+			const [OuterPage, suspendOuter] = createSuspender(() => <div>outer</div>);
+			let update;
+			const effect = vi.fn();
+			const ref = vi.fn();
+
+			function Header({ count }) {
+				useLayoutEffect(effect, []);
+				return <header ref={ref}>{count}</header>;
+			}
+
+			function Slot() {
+				const [count, setCount] = useState(0);
+				update = setCount;
+				return count ? <Header count={count} /> : null;
+			}
+
+			render(
+				<Suspense fallback={<p>outer loading</p>}>
+					<Suspense fallback={<p>inner loading</p>}>
+						<section>
+							<Slot />
+						</section>
+						<InnerPage />
+					</Suspense>
+					<OuterPage />
+				</Suspense>,
+				scratch
+			);
+			const [resolveInner] = suspendInner();
+			rerender();
+			update(1);
+			rerender();
+			const [resolveOuter] = suspendOuter();
+			rerender();
+			expect(ref).not.toHaveBeenCalled();
+			expect(effect).not.toHaveBeenCalled();
+
+			if (innerFirst) await resolveInner(() => <div>inner done</div>);
+			else await resolveOuter(() => <div>outer done</div>);
+			rerender();
+			update(2);
+			rerender();
+			expect(ref).not.toHaveBeenCalled();
+			expect(effect).not.toHaveBeenCalled();
+
+			if (innerFirst) await resolveOuter(() => <div>outer done</div>);
+			else await resolveInner(() => <div>inner done</div>);
+			rerender();
+			expect(scratch.innerHTML).to.equal(
+				'<section><header>2</header></section><div>inner done</div><div>outer done</div>'
+			);
+			expect(ref).toHaveBeenCalledOnce();
+			expect(effect).toHaveBeenCalledOnce();
+		});
+	}
+
+	for (const removeBeforeReveal of [false, true]) {
+		it(`should defer replaced refs and memoized effects (remove before reveal: ${removeBeforeReveal})`, async () => {
+			const [Page, suspend] = createSuspender(() => <div>page</div>);
+			let update;
+			const firstRef = vi.fn();
+			const secondRef = vi.fn();
+			const layout = vi.fn();
+			const passive = vi.fn();
+			const Header = memo(function Header({ count }) {
+				useLayoutEffect(layout, []);
+				useEffect(passive, []);
+				return (
+					<header ref={count === 1 ? firstRef : secondRef}>{count}</header>
+				);
+			});
+			function Slot() {
+				const [count, setCount] = useState(0);
+				update = setCount;
+				return count ? <Header count={count} /> : null;
+			}
+			render(
+				<Suspense fallback={<p>Loading</p>}>
+					<section>
+						<Slot />
+					</section>
+					<Page />
+				</Suspense>,
+				scratch
+			);
+			const [resolve] = suspend();
+			rerender();
+			await act(() => update(1));
+			await act(() => update(2));
+			if (removeBeforeReveal) await act(() => update(0));
+			expect(firstRef).not.toHaveBeenCalled();
+			expect(secondRef).not.toHaveBeenCalled();
+			expect(layout).not.toHaveBeenCalled();
+			expect(passive).not.toHaveBeenCalled();
+			await act(() => resolve(() => <div>done</div>));
+			expect(firstRef).not.toHaveBeenCalled();
+			if (removeBeforeReveal) {
+				expect(secondRef).not.toHaveBeenCalled();
+				expect(layout).not.toHaveBeenCalled();
+				expect(passive).not.toHaveBeenCalled();
+				expect(scratch.innerHTML).to.equal(
+					'<section></section><div>done</div>'
+				);
+			} else {
+				expect(secondRef).toHaveBeenCalledOnce();
+				expect(layout).toHaveBeenCalledOnce();
+				expect(passive).toHaveBeenCalledOnce();
+				expect(scratch.innerHTML).to.equal(
+					'<section><header>2</header></section><div>done</div>'
+				);
+			}
+		});
+	}
 
 	it('should call componentWillUnmount on a suspended component', () => {
 		const cWUSpy = vi.fn();

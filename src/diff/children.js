@@ -5,6 +5,8 @@ import {
 	EMPTY_ARR,
 	INSERT_VNODE,
 	MATCHED,
+	MODE_PARKED,
+	REF_PENDING,
 	UNDEFINED,
 	NULL,
 	HAS_MOVE_BEFORE_SUPPORT
@@ -111,8 +113,11 @@ export function diffChildren(
 
 		// Adjust DOM nodes
 		newDom = childVNode._dom;
-		if (childVNode.ref && oldVNode.ref != childVNode.ref) {
-			if (oldVNode.ref) {
+		if (
+			childVNode.ref &&
+			(oldVNode.ref != childVNode.ref || oldVNode._flags & REF_PENDING)
+		) {
+			if (oldVNode.ref && !(oldVNode._flags & REF_PENDING)) {
 				applyRef(oldVNode.ref, NULL, childVNode);
 			}
 			refQueue.push(
@@ -226,6 +231,7 @@ function constructNewChildrenArray(
 		}
 
 		const skewedIndex = i + skew;
+		childVNode._flags |= newParentVNode._flags & MODE_PARKED;
 		childVNode._parent = newParentVNode;
 		childVNode._depth = newParentVNode._depth + 1;
 

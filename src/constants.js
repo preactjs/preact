@@ -10,6 +10,11 @@ export const MATCHED = 1 << 1;
 /** Indicates that this vnode has been unmounted before indicating the loss of event listeners */
 export const FORCE_PROPS_REVALIDATE = 1 << 0;
 
+/** The subtree is hidden by Suspense. */
+export const MODE_PARKED = 1 << 4;
+/** A ref has not been attached while its subtree is hidden. */
+export const REF_PENDING = 1 << 3;
+
 // component._bits
 /** Component is processing an exception */
 export const COMPONENT_PROCESSING_EXCEPTION = 1 << 0;

@@ -3,6 +3,8 @@ import {
 	COMPONENT_FORCE,
 	FORCE_PROPS_REVALIDATE,
 	MODE_HYDRATE,
+	MODE_PARKED,
+	REF_PENDING,
 	UNDEFINED
 } from '../../src/constants';
 import { assign } from './util';
@@ -60,7 +62,12 @@ function detachedClone(vnode, detachedParent, parentDom) {
 			hooks._pendingEffects = vnode._component._renderCallbacks = [];
 		}
 
-		vnode = assign({ constructor: UNDEFINED }, vnode);
+		vnode._flags |= MODE_PARKED;
+		const clone = assign({ constructor: UNDEFINED }, vnode);
+		// The clone detaches previously attached refs; the retained tree
+		// attaches them again on reveal. Already pending refs stay pending.
+		if (vnode.ref) vnode._flags |= REF_PENDING;
+		vnode = clone;
 		if (vnode._component != null) {
 			if (vnode._component._parentDom == parentDom) {
 				vnode._component._parentDom = detachedParent;
@@ -81,25 +88,27 @@ function detachedClone(vnode, detachedParent, parentDom) {
 	return vnode;
 }
 
-function removeOriginal(vnode, detachedParent, originalParent) {
+function removeOriginal(vnode, detachedParent, originalParent, stillParked) {
 	if (vnode && originalParent) {
 		if (typeof vnode.type == 'string') {
 			vnode._flags |= FORCE_PROPS_REVALIDATE;
 		}
 
+		vnode._flags &= stillParked | ~MODE_PARKED;
 		vnode._original = null;
 		vnode._children =
 			vnode._children &&
 			vnode._children.map(child =>
-				removeOriginal(child, detachedParent, originalParent)
+				removeOriginal(child, detachedParent, originalParent, stillParked)
 			);
 
 		if (vnode._component) {
+			// Hidden updates may have consumed the force flag set when parking.
+			vnode._component._bits |= COMPONENT_FORCE;
 			if (vnode._component._parentDom == detachedParent) {
 				if (vnode._dom) {
 					originalParent.appendChild(vnode._dom);
 				}
-				vnode._component._bits |= COMPONENT_FORCE;
 				vnode._component._parentDom = originalParent;
 			}
 		}
@@ -164,7 +173,8 @@ function createSuspense() {
 					this._vnode._children[0] = removeOriginal(
 						suspendedVNode,
 						suspendedVNode._component._parentDom,
-						suspendedVNode._component._originalParentDom
+						suspendedVNode._component._originalParentDom,
+						this._vnode._flags & MODE_PARKED
 					);
 				}
 
