@@ -93,7 +93,7 @@
   },
   "types": "src/index.d.ts",
   "scripts": {
-    "prepare": "husky && pnpm run test:install && run-s build",
+    "prepare": "husky && pnpm run test:install",
     "build": "node ./scripts/build.mjs",
     "postbuild": "node ./config/compat-entries.js",
     "dev": "node ./scripts/build.mjs --watch",
