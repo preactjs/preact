@@ -400,16 +400,28 @@ function insert(parentVNode, oldDom, parentDom, isMounting) {
 		}
 
 		return oldDom;
-	} else if (parentVNode._dom != oldDom) {
-		if (oldDom && parentVNode.type && !oldDom.parentNode) {
+	} else {
+		if (oldDom && !oldDom.parentNode) {
 			oldDom = getDomSibling(parentVNode);
 		}
 
-		if (HAS_MOVE_BEFORE_SUPPORT && !isMounting && parentVNode._dom.parentNode) {
-			// @ts-expect-error This isn't added to TypeScript lib.d.ts yet
-			parentDom.moveBefore(parentVNode._dom, oldDom);
-		} else {
-			parentDom.insertBefore(parentVNode._dom, oldDom || NULL);
+		// A cursor outside the container (another root's container, or a node a
+		// parked Suspense subtree detached) can't be a reference node.
+		if (oldDom && oldDom.parentNode != parentDom) {
+			oldDom = NULL;
+		}
+
+		if (parentVNode._dom != oldDom) {
+			if (
+				HAS_MOVE_BEFORE_SUPPORT &&
+				!isMounting &&
+				parentVNode._dom.parentNode
+			) {
+				// @ts-expect-error This isn't added to TypeScript lib.d.ts yet
+				parentDom.moveBefore(parentVNode._dom, oldDom);
+			} else {
+				parentDom.insertBefore(parentVNode._dom, oldDom || NULL);
+			}
 		}
 		oldDom = parentVNode._dom;
 	}
