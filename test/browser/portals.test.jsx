@@ -1,6 +1,7 @@
 import {
 	createElement,
 	render,
+	hydrate,
 	createPortal,
 	Component,
 	Fragment
@@ -782,5 +783,70 @@ describe('createPortal', () => {
 		expect(portalG.constructor.name).to.equal('SVGGElement');
 
 		svgRoot.parentNode.removeChild(svgRoot);
+	});
+
+	describe('hydration', () => {
+		/** @type {HTMLDivElement} */
+		let root;
+
+		beforeEach(() => {
+			root = document.createElement('div');
+			root.innerHTML = '<em>existing</em>';
+			document.body.appendChild(root);
+		});
+
+		afterEach(() => {
+			root.remove();
+		});
+
+		it('should mount a portal fresh without claiming host nodes', () => {
+			scratch.innerHTML = '<div><p>a</p><p>c</p></div>';
+			const div = scratch.firstChild;
+			const a = div.firstChild;
+			const c = div.lastChild;
+
+			function App() {
+				return (
+					<div>
+						<p>a</p>
+						{createPortal(<p>b</p>, root)}
+						<p>c</p>
+					</div>
+				);
+			}
+
+			hydrate(<App />, scratch);
+
+			expect(scratch.innerHTML).to.equal('<div><p>a</p><p>c</p></div>');
+			expect(root.innerHTML).to.equal('<em>existing</em><p>b</p>');
+			expect(scratch.firstChild).to.equal(div);
+			expect(div.firstChild).to.equal(a);
+			expect(div.lastChild).to.equal(c);
+		});
+
+		it('should hydrate host text after a leading portal', () => {
+			scratch.innerHTML = '<div>text<p>c</p></div>';
+
+			function App() {
+				return (
+					<div>
+						{createPortal(<p>b</p>, root)}
+						text
+						<p>c</p>
+					</div>
+				);
+			}
+
+			hydrate(<App />, scratch);
+			expect(scratch.innerHTML).to.equal('<div>text<p>c</p></div>');
+			expect(root.innerHTML).to.equal('<em>existing</em><p>b</p>');
+
+			render(<App />, scratch);
+			expect(root.innerHTML).to.equal('<em>existing</em><p>b</p>');
+
+			render(null, scratch);
+			expect(scratch.innerHTML).to.equal('');
+			expect(root.innerHTML).to.equal('<em>existing</em>');
+		});
 	});
 });

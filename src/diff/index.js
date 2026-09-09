@@ -320,6 +320,9 @@ export function diff(
 				// The document follows the container too (e.g. iframes) as
 				// diffElementNodes derives it from its parentDom.
 				namespace = parentDom.namespaceURI;
+				// Portals are never server-rendered: hydration must not claim the
+				// host parent's excess nodes for the container's children.
+				isHydrating = excessDomChildren = NULL;
 
 				// Changing the container remounts the children into the new one
 				if (oldVNode.props && oldVNode.props._parentDom != parentDom) {
