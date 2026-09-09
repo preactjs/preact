@@ -405,6 +405,10 @@ function insert(parentVNode, oldDom, parentDom, isMounting) {
 			oldDom = getDomSibling(parentVNode);
 		}
 
+		if (oldDom && oldDom.parentNode != parentDom) {
+			oldDom = NULL;
+		}
+
 		if (HAS_MOVE_BEFORE_SUPPORT && !isMounting && parentVNode._dom.parentNode) {
 			// @ts-expect-error This isn't added to TypeScript lib.d.ts yet
 			parentDom.moveBefore(parentVNode._dom, oldDom);

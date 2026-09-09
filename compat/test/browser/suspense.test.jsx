@@ -999,6 +999,68 @@ describe('suspense', () => {
 		});
 	});
 
+	it('should mount DOM in a parked component without throwing and keep its refs (#5251)', () => {
+		/** @type {(v: boolean) => void} */
+		let setSlot;
+		const ref = vi.fn();
+		const layout = vi.fn();
+
+		function Slot() {
+			const [show, set] = useState(false);
+			setSlot = set;
+			useLayoutEffect(() => {
+				if (show) layout();
+			}, [show]);
+			return show ? <header ref={ref}>bar</header> : null;
+		}
+
+		const [Suspender, suspend] = createSuspender(() => (
+			<div id="page">page</div>
+		));
+
+		render(
+			<Suspense fallback={<div>Suspended...</div>}>
+				<Slot />
+				<Suspender />
+				<footer>foot</footer>
+			</Suspense>,
+			scratch
+		);
+		expect(scratch.innerHTML).to.equal(
+			'<div id="page">page</div><footer>foot</footer>'
+		);
+
+		// 1. Park the subtree
+		const [resolve] = suspend();
+		rerender();
+		expect(scratch.innerHTML).to.equal('<div>Suspended...</div>');
+
+		// 2. Mount new DOM while parked: the insertion reference is a sibling
+		// that was removed from the document, which used to throw NotFoundError
+		setSlot(true);
+		expect(() => rerender()).not.to.throw();
+		expect(ref).toHaveBeenCalledTimes(1);
+		expect(layout).toHaveBeenCalledTimes(1);
+		// The new DOM went into the detached container, not the document
+		expect(scratch.innerHTML).to.equal('<div>Suspended...</div>');
+		expect(document.contains(ref.mock.calls[0][0])).to.equal(false);
+		expect(ref.mock.calls[0][0].parentNode.nodeName).to.equal('DIV');
+
+		// 3. Any further update while parked must not re-run mount work
+		setSlot(true);
+		rerender();
+
+		// 4. Resolve: the new DOM is restored at the right position
+		return resolve(() => <div id="page">page2</div>).then(() => {
+			rerender();
+			expect(scratch.innerHTML).to.equal(
+				'<header>bar</header><div id="page">page2</div><footer>foot</footer>'
+			);
+			expect(ref).toHaveBeenCalledTimes(1);
+			expect(ref.mock.calls[0][0]).to.equal(scratch.firstChild);
+			expect(layout).toHaveBeenCalledTimes(1);
+		});
+	});
 	it('should suspend with custom error boundary', () => {
 		const [Suspender, suspend] = createSuspender(() => (
 			<div>within error boundary</div>
