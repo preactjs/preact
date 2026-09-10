@@ -5,6 +5,7 @@ import {
 	EMPTY_ARR,
 	INSERT_VNODE,
 	MATCHED,
+	REF_DETACHED,
 	UNDEFINED,
 	NULL,
 	HAS_MOVE_BEFORE_SUPPORT
@@ -111,8 +112,13 @@ export function diffChildren(
 
 		// Adjust DOM nodes
 		newDom = childVNode._dom;
-		if (childVNode.ref && oldVNode.ref != childVNode.ref) {
-			if (oldVNode.ref) {
+		// A ref detached while its subtree was parked by Suspense is attached
+		// again on reveal.
+		if (
+			childVNode.ref &&
+			(oldVNode.ref != childVNode.ref || oldVNode._flags & REF_DETACHED)
+		) {
+			if (oldVNode.ref != childVNode.ref && oldVNode.ref) {
 				applyRef(oldVNode.ref, NULL, childVNode);
 			}
 			refQueue.push(
@@ -400,16 +406,28 @@ function insert(parentVNode, oldDom, parentDom, isMounting) {
 		}
 
 		return oldDom;
-	} else if (parentVNode._dom != oldDom) {
-		if (oldDom && parentVNode.type && !oldDom.parentNode) {
+	} else {
+		if (oldDom && !oldDom.parentNode) {
 			oldDom = getDomSibling(parentVNode);
 		}
 
-		if (HAS_MOVE_BEFORE_SUPPORT && !isMounting && parentVNode._dom.parentNode) {
-			// @ts-expect-error This isn't added to TypeScript lib.d.ts yet
-			parentDom.moveBefore(parentVNode._dom, oldDom);
-		} else {
-			parentDom.insertBefore(parentVNode._dom, oldDom || NULL);
+		// A cursor outside the container (another root's container, or a node a
+		// parked Suspense subtree detached) can't be a reference node.
+		if (oldDom && oldDom.parentNode != parentDom) {
+			oldDom = NULL;
+		}
+
+		if (parentVNode._dom != oldDom) {
+			if (
+				HAS_MOVE_BEFORE_SUPPORT &&
+				!isMounting &&
+				parentVNode._dom.parentNode
+			) {
+				// @ts-expect-error This isn't added to TypeScript lib.d.ts yet
+				parentDom.moveBefore(parentVNode._dom, oldDom);
+			} else {
+				parentDom.insertBefore(parentVNode._dom, oldDom || NULL);
+			}
 		}
 		oldDom = parentVNode._dom;
 	}

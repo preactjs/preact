@@ -9,6 +9,8 @@ export const INSERT_VNODE = 1 << 2;
 export const MATCHED = 1 << 1;
 /** Indicates that this vnode has been unmounted before indicating the loss of event listeners */
 export const FORCE_PROPS_REVALIDATE = 1 << 0;
+/** The vnode's ref was detached while its subtree was parked by Suspense */
+export const REF_DETACHED = 1 << 3;
 
 // component._bits
 /** Component is processing an exception */

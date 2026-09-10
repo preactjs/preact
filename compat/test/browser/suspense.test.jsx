@@ -11,7 +11,9 @@ import React, {
 	useRef,
 	useEffect,
 	useLayoutEffect,
-	memo
+	memo,
+	createPortal,
+	createRef
 } from 'preact/compat';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { createLazy, createSuspender } from './suspense-utils';
@@ -999,6 +1001,68 @@ describe('suspense', () => {
 		});
 	});
 
+	it('should mount DOM in a parked component without throwing and keep its refs (#5251)', () => {
+		/** @type {(v: boolean) => void} */
+		let setSlot;
+		const ref = vi.fn();
+		const layout = vi.fn();
+
+		function Slot() {
+			const [show, set] = useState(false);
+			setSlot = set;
+			useLayoutEffect(() => {
+				if (show) layout();
+			}, [show]);
+			return show ? <header ref={ref}>bar</header> : null;
+		}
+
+		const [Suspender, suspend] = createSuspender(() => (
+			<div id="page">page</div>
+		));
+
+		render(
+			<Suspense fallback={<div>Suspended...</div>}>
+				<Slot />
+				<Suspender />
+				<footer>foot</footer>
+			</Suspense>,
+			scratch
+		);
+		expect(scratch.innerHTML).to.equal(
+			'<div id="page">page</div><footer>foot</footer>'
+		);
+
+		// 1. Park the subtree
+		const [resolve] = suspend();
+		rerender();
+		expect(scratch.innerHTML).to.equal('<div>Suspended...</div>');
+
+		// 2. Mount new DOM while parked: the insertion reference is a sibling
+		// that was removed from the document, which used to throw NotFoundError
+		setSlot(true);
+		expect(() => rerender()).not.to.throw();
+		expect(ref).toHaveBeenCalledTimes(1);
+		expect(layout).toHaveBeenCalledTimes(1);
+		// The new DOM went into the detached container, not the document
+		expect(scratch.innerHTML).to.equal('<div>Suspended...</div>');
+		expect(document.contains(ref.mock.calls[0][0])).to.equal(false);
+		expect(ref.mock.calls[0][0].parentNode.nodeName).to.equal('DIV');
+
+		// 3. Any further update while parked must not re-run mount work
+		setSlot(true);
+		rerender();
+
+		// 4. Resolve: the new DOM is restored at the right position
+		return resolve(() => <div id="page">page2</div>).then(() => {
+			rerender();
+			expect(scratch.innerHTML).to.equal(
+				'<header>bar</header><div id="page">page2</div><footer>foot</footer>'
+			);
+			expect(ref).toHaveBeenCalledTimes(1);
+			expect(ref.mock.calls[0][0]).to.equal(scratch.firstChild);
+			expect(layout).toHaveBeenCalledTimes(1);
+		});
+	});
 	it('should suspend with custom error boundary', () => {
 		const [Suspender, suspend] = createSuspender(() => (
 			<div>within error boundary</div>
@@ -2823,5 +2887,136 @@ describe('suspense', () => {
 		// Render count should not have increased
 		expect(renderCount).to.equal(renderCountAfterSuspend);
 		expect(scratch.innerHTML).to.equal('<div>Loading...</div>');
+	});
+
+	it('should detach DOM refs while parked and attach them again on reveal', async () => {
+		const [Suspender, suspend] = createSuspender(() => <p>content</p>);
+		const ref = createRef();
+		render(
+			<Suspense fallback={<div>fallback</div>}>
+				<b ref={ref}>host</b>
+				<Suspender />
+			</Suspense>,
+			scratch
+		);
+		const host = scratch.firstChild;
+		expect(ref.current).to.equal(host);
+
+		const [resolve] = suspend();
+		rerender();
+		expect(scratch.innerHTML).to.equal('<div>fallback</div>');
+		expect(ref.current).to.equal(null);
+
+		await resolve(() => <p>resolved</p>);
+		rerender();
+		expect(scratch.innerHTML).to.equal('<b>host</b><p>resolved</p>');
+		expect(scratch.firstChild).to.equal(host);
+		expect(ref.current).to.equal(host);
+	});
+
+	describe('portals', () => {
+		/** @type {HTMLDivElement} */
+		let portalRoot;
+
+		beforeEach(() => {
+			portalRoot = document.createElement('div');
+			document.body.appendChild(portalRoot);
+		});
+
+		afterEach(() => {
+			portalRoot.remove();
+		});
+
+		it('should hide and restore a portal sibling of a suspender', async () => {
+			const [Suspender, suspend] = createSuspender(() => <p>content</p>);
+			render(
+				<Suspense fallback={<div>fallback</div>}>
+					<Suspender />
+					{createPortal(<span>portal</span>, portalRoot)}
+				</Suspense>,
+				scratch
+			);
+			expect(scratch.innerHTML).to.equal('<p>content</p>');
+			expect(portalRoot.innerHTML).to.equal('<span>portal</span>');
+			const portalDom = portalRoot.firstChild;
+
+			const [resolve] = suspend();
+			rerender();
+			expect(scratch.innerHTML).to.equal('<div>fallback</div>');
+			expect(portalRoot.innerHTML).to.equal('');
+
+			await resolve(() => <p>resolved</p>);
+			rerender();
+			expect(scratch.innerHTML).to.equal('<p>resolved</p>');
+			expect(portalRoot.innerHTML).to.equal('<span>portal</span>');
+			expect(portalRoot.firstChild).to.equal(portalDom);
+		});
+
+		it('should hide and restore a portal whose child suspends', async () => {
+			const [Suspender, suspend] = createSuspender(() => <p>content</p>);
+			render(
+				<Suspense fallback={<div>fallback</div>}>
+					<b>host</b>
+					{createPortal(
+						<div>
+							<span>portal</span>
+							<Suspender />
+						</div>,
+						portalRoot
+					)}
+				</Suspense>,
+				scratch
+			);
+			expect(scratch.innerHTML).to.equal('<b>host</b>');
+			expect(portalRoot.innerHTML).to.equal(
+				'<div><span>portal</span><p>content</p></div>'
+			);
+
+			const [resolve] = suspend();
+			rerender();
+			expect(scratch.innerHTML).to.equal('<div>fallback</div>');
+			expect(portalRoot.innerHTML).to.equal('');
+
+			await resolve(() => <p>resolved</p>);
+			rerender();
+			expect(scratch.innerHTML).to.equal('<b>host</b>');
+			expect(portalRoot.innerHTML).to.equal(
+				'<div><span>portal</span><p>resolved</p></div>'
+			);
+		});
+
+		it('should restore a portal nested in a host element and keep updating it', async () => {
+			const [Suspender, suspend] = createSuspender(() => <p>content</p>);
+			let update;
+			function Counter() {
+				const [n, setN] = useState(0);
+				update = () => setN(n => n + 1);
+				return <i>{n}</i>;
+			}
+			render(
+				<Suspense fallback={<div>fallback</div>}>
+					<section>
+						<Suspender />
+						{createPortal(<Counter />, portalRoot)}
+					</section>
+				</Suspense>,
+				scratch
+			);
+			expect(portalRoot.innerHTML).to.equal('<i>0</i>');
+
+			const [resolve] = suspend();
+			rerender();
+			expect(scratch.innerHTML).to.equal('<div>fallback</div>');
+			expect(portalRoot.innerHTML).to.equal('');
+
+			await resolve(() => <p>resolved</p>);
+			rerender();
+			expect(scratch.innerHTML).to.equal('<section><p>resolved</p></section>');
+			expect(portalRoot.innerHTML).to.equal('<i>0</i>');
+
+			update();
+			rerender();
+			expect(portalRoot.innerHTML).to.equal('<i>1</i>');
+		});
 	});
 });

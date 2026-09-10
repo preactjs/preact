@@ -8,7 +8,8 @@ import React, {
 	use,
 	memo,
 	useState,
-	useSyncExternalStore
+	useSyncExternalStore,
+	createPortal
 } from 'preact/compat';
 import { logCall, getLog, clearLog } from '../../../test/_util/logCall';
 import {
@@ -928,7 +929,12 @@ describe('suspense hydration', () => {
 			return <button>Count: {count}</button>;
 		}
 
-		render(<Suspense fallback="Fallback"><App /></Suspense>, scratch);
+		render(
+			<Suspense fallback="Fallback">
+				<App />
+			</Suspense>,
+			scratch
+		);
 		await promise;
 		rerender();
 		rerender();
@@ -1444,5 +1450,37 @@ describe('suspense hydration', () => {
 			expect(scratch.innerHTML).to.equal(originalHtml);
 			clearLog();
 		});
+	});
+
+	it('should mount a portal fresh while a sibling suspends during hydration', async () => {
+		scratch.innerHTML = '<p>a</p><p>lazy</p>';
+		const portalRoot = document.createElement('div');
+		portalRoot.innerHTML = '<em>existing</em>';
+		document.body.appendChild(portalRoot);
+
+		const [Lazy, resolve] = createLazy();
+		function App() {
+			return (
+				<Suspense fallback={<div>fallback</div>}>
+					<p>a</p>
+					{createPortal(<p>b</p>, portalRoot)}
+					<Lazy />
+				</Suspense>
+			);
+		}
+
+		try {
+			hydrate(<App />, scratch);
+			rerender();
+			expect(scratch.innerHTML).to.equal('<p>a</p><p>lazy</p>');
+			expect(portalRoot.innerHTML).to.equal('<em>existing</em><p>b</p>');
+
+			await resolve(() => <p>lazy</p>);
+			rerender();
+			expect(scratch.innerHTML).to.equal('<p>a</p><p>lazy</p>');
+			expect(portalRoot.innerHTML).to.equal('<em>existing</em><p>b</p>');
+		} finally {
+			portalRoot.remove();
+		}
 	});
 });
