@@ -332,7 +332,6 @@ export function diff(
 					oldDom,
 					excessDomChildren
 				);
-				oldDom = recovery[0];
 				isHydrating = false;
 			}
 

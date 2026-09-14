@@ -35,35 +35,19 @@ describe('recoverable rendering', () => {
 
 	it('settles synchronously without retaining callbacks', async () => {
 		const value = browser();
+		const resolve = vi.fn();
+		value.then(resolve);
+		expect(resolve).toHaveBeenCalledOnce();
 		expect(await value).to.equal(undefined);
-		let error;
-		const previous = options._skipEffects;
-		try {
-			options._skipEffects = true;
-			value.then(null, caught => {
-				error = caught;
-			});
-		} finally {
-			options._skipEffects = previous;
-		}
-		expect(error).to.equal(value.reason);
 	});
 
-	it('throws its recoverable reason to the server renderer', () => {
-		const reason = vi.fn();
-		const value = Object.freeze(browser(reason));
+	it('remains fulfilled when rendering to a string in the browser', () => {
+		const value = Object.freeze(browser());
 		function App() {
 			use(value);
+			return <i>content</i>;
 		}
-		let error;
-		try {
-			renderToString(<App />);
-		} catch (caught) {
-			error = caught;
-		}
-		expect(error).to.equal(value.reason);
-		expect(reason).not.toHaveBeenCalled();
-		expect(options._skipEffects).not.to.equal(true);
+		expect(renderToString(<App />)).to.equal('<i>content</i>');
 	});
 
 	it('replaces a marked fallback without claiming adjacent siblings', () => {

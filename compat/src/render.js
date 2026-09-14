@@ -31,12 +31,10 @@ export function browser(reason) {
 	return {
 		// oxlint-disable-next-line unicorn/no-thenable -- `use` consumes instrumented thenables.
 		then(resolve, reject) {
-			if (options._skipEffects) reject(this.reason);
-			else resolve();
+			if (IS_DOM) resolve();
+			else reject(this.reason);
 		},
-		get status() {
-			return options._skipEffects ? 'rejected' : 'fulfilled';
-		},
+		status: IS_DOM,
 		reason: { $$typeof: Symbol.for('react.recoverable'), _reason: reason }
 	};
 }
@@ -354,23 +352,25 @@ function initRenderTracking(value) {
  * Read the value of a Promise (suspending while pending) or a Context.
  * Unlike other hooks, `use` may be called conditionally.
  * @template T
- * @param {(Promise<T> & { status?: string, value?: T, reason?: any }) | import('../../src/internal').PreactContext} resource
+ * @param {(Promise<T> & { status?: string | boolean, value?: T, reason?: any }) | import('../../src/internal').PreactContext} resource
  * @returns {T}
  */
 export const use = /* @__PURE__ */ initRenderTracking(function use(resource) {
 	// A Context is a function without a `then`, a thenable has one.
 	if (resource.then) {
-		if (resource.status == 'fulfilled') return resource.value;
-		if (resource.status == 'rejected') throw resource.reason;
+		if (resource.status === true || resource.status == 'fulfilled')
+			return resource.value;
+		if (resource.status === false || resource.status == 'rejected')
+			throw resource.reason;
 		if (!resource.status) {
 			resource.status = 'pending';
 			resource.then(
 				value => {
-					resource.status = 'fulfilled';
+					resource.status = true;
 					resource.value = value;
 				},
 				reason => {
-					resource.status = 'rejected';
+					resource.status = false;
 					resource.reason = reason;
 				}
 			);
