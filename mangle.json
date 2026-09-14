@@ -48,7 +48,6 @@
       "$_children": "__k",
       "$_pendingSuspensionCount": "__u",
       "$_childDidSuspend": "__c",
-      "$_hydrate": "__y",
       "$_unmounted": "__z",
       "$_onResolve": "__R",
       "$_suspended": "__a",

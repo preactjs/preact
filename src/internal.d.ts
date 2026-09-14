@@ -165,10 +165,7 @@ export interface Component<P = {}, S = {}> extends Omit<
 	state: S; // Override Component["state"] to not be readonly for internal use, specifically Hooks
 
 	_excess?: PreactElement;
-	_hydrate?: (
-		oldDom: PreactElement,
-		excess: PreactElement[] | false
-	) => PreactElement[];
+	_childDidSuspend?: (promise: any, vnode: VNode) => void;
 	_renderCallbacks: Array<() => void>; // Only class components
 	_stateCallbacks: Array<() => void>; // Only class components
 	_globalContext?: any;

@@ -30,7 +30,10 @@ export const REACT_ELEMENT_TYPE = Symbol.for('react.element');
 export function browser(reason) {
 	return {
 		// oxlint-disable-next-line unicorn/no-thenable -- `use` consumes instrumented thenables.
-		then() {},
+		then(resolve, reject) {
+			if (options._skipEffects) reject(this.reason);
+			else resolve();
+		},
 		get status() {
 			return options._skipEffects ? 'rejected' : 'fulfilled';
 		},
