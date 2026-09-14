@@ -68,6 +68,7 @@ export function diff(
 ) {
 	/** @type {any} */
 	let tmp,
+		recovery,
 		newType = newVNode.type;
 
 	// When passing through createElement it assigns the object
@@ -83,25 +84,9 @@ export function diff(
 		(tmp = oldVNode._component._excess)
 	) {
 		newVNode._flags |= MODE_HYDRATE;
-		excessDomChildren = [];
-		if (tmp.nodeType == 8) {
-			// Re-scan DOM from stored start marker for streamed hydration.
-			// `depth` only ever reaches 0 through the `break` below, so it
-			// doesn't need to be re-tested in the loop condition.
-			for (
-				let depth = 1, node = tmp.nextSibling;
-				node;
-				node = node.nextSibling
-			) {
-				if (node.nodeType == 8) {
-					if (node.data.startsWith('$s')) depth++;
-					else if (node.data.startsWith('/$s') && !--depth) break;
-				}
-				excessDomChildren.push(node);
-			}
-		} else {
-			excessDomChildren.push(tmp);
-		}
+		if (tmp.nodeType == 8 && !tmp.data.startsWith('$s!')) {
+			excessDomChildren = collectSuspenseBoundary(tmp).slice(1, -1);
+		} else excessDomChildren = [tmp];
 		oldDom = excessDomChildren[0];
 		oldVNode._component._excess = NULL;
 	}
@@ -335,6 +320,21 @@ export function diff(
 				oldDom = oldVNode._children ? getDomSibling(oldVNode, 0) : NULL;
 			}
 
+			// Reconcile the server fallback within this boundary.
+			if (
+				isHydrating &&
+				(c._childDidSuspend || oldVNode._flags & MODE_SUSPENDED) &&
+				oldDom &&
+				oldDom.nodeType == 8 &&
+				oldDom.data.startsWith('$s!')
+			) {
+				excessDomChildren = recovery = collectSuspenseBoundary(
+					oldDom,
+					excessDomChildren
+				);
+				isHydrating = false;
+			}
+
 			oldDom = diffChildren(
 				parentDom,
 				isArray(renderResult) ? renderResult : [renderResult],
@@ -348,6 +348,7 @@ export function diff(
 				isHydrating,
 				refQueue
 			);
+			if (recovery) recovery.some(removeNode);
 
 			// When we exit a portal we
 			// change up the oldDom
@@ -392,6 +393,7 @@ export function diff(
 							if (child.nodeType == 8) {
 								excessDomChildren[i] = NULL;
 								if (child.data.startsWith('$s')) {
+									newVNode._flags |= MODE_HYDRATE;
 									if (!commentMarkersToFind++) startMarker = child;
 								} else if (
 									child.data.startsWith('/$s') &&
@@ -803,4 +805,20 @@ export function unmount(vnode, parentVNode, skipRemove) {
 /** The `.render()` method for a PFC backing instance. */
 function doRender(props, state, context) {
 	return this.constructor(props, context);
+}
+
+/** Collect candidates without claiming DOM from neighboring boundaries. */
+function collectSuspenseBoundary(node, parent) {
+	let nodes = [],
+		depth = 0;
+	do {
+		nodes.push(node);
+		if (parent) parent[parent.indexOf(node)] = NULL;
+		if (node.nodeType == 8) {
+			if (node.data.startsWith('$s')) depth++;
+			else if (node.data.startsWith('/$s')) depth--;
+		}
+		node = node.nextSibling;
+	} while (node && depth);
+	return nodes;
 }

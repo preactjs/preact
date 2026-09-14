@@ -36,6 +36,7 @@ import { createPortal } from './portals';
 import {
 	REACT_ELEMENT_TYPE,
 	__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED,
+	browser,
 	hydrate,
 	render,
 	use,
@@ -171,6 +172,7 @@ export {
 	version,
 	Children,
 	render,
+	browser,
 	hydrate,
 	unmountComponentAtNode,
 	createPortal,
@@ -226,6 +228,7 @@ export default {
 	version,
 	Children,
 	render,
+	browser,
 	hydrate,
 	unmountComponentAtNode,
 	createPortal,

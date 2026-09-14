@@ -12,6 +12,7 @@
           "__REACT_DEVTOOLS_GLOBAL_HOOK__",
           "__PREACT_DEVTOOLS__",
           "_renderers",
+          "_reason",
           "__source",
           "__self"
         ]

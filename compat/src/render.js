@@ -23,6 +23,22 @@ import { assign, IS_NON_DIMENSIONAL } from './util';
 
 export const REACT_ELEMENT_TYPE = Symbol.for('react.element');
 
+/**
+ * Create a thenable that resolves in the browser and defers server rendering.
+ * @param {string | (() => any)} [reason]
+ */
+export function browser(reason) {
+	return {
+		// oxlint-disable-next-line unicorn/no-thenable -- `use` consumes instrumented thenables.
+		then(resolve, reject) {
+			if (IS_DOM) resolve();
+			else reject(this.reason);
+		},
+		status: IS_DOM ? 'fulfilled' : 'rejected',
+		reason: { $$typeof: Symbol.for('react.recoverable'), _reason: reason }
+	};
+}
+
 const MODE_HYDRATE = 1 << 5;
 let currentComponent, hydrationRoot, renderTrackingInitialized;
 
