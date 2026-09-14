@@ -22,6 +22,16 @@ import { useDeferredValue, useInsertionEffect, useTransition } from './index';
 import { assign, IS_NON_DIMENSIONAL } from './util';
 
 export const REACT_ELEMENT_TYPE = Symbol.for('react.element');
+const RECOVERABLE_TYPE = Symbol.for('react.recoverable');
+
+/**
+ * Create a value that defers server rendering to the nearest Suspense boundary
+ * when passed to `use`. The reason is only evaluated by the server renderer.
+ * @param {string | (() => any)} [reason]
+ */
+export function browser(reason) {
+	return { $$typeof: RECOVERABLE_TYPE, _reason: reason };
+}
 
 const MODE_HYDRATE = 1 << 5;
 let currentComponent, hydrationRoot, renderTrackingInitialized;
@@ -333,11 +343,11 @@ function initRenderTracking(value) {
 }
 
 /**
- * Read the value of a Promise (suspending while pending) or a Context.
+ * Read a Promise or Context, or defer a recoverable to a downstream renderer.
  * Unlike other hooks, `use` may be called conditionally.
  * @template T
- * @param {(Promise<T> & { status?: string, value?: T, reason?: any }) | import('../../src/internal').PreactContext} resource
- * @returns {T}
+ * @param {(Promise<T> & { status?: string, value?: T, reason?: any }) | import('../../src/internal').PreactContext | { $$typeof: symbol, _reason?: any }} resource
+ * @returns {T | undefined}
  */
 export const use = /* @__PURE__ */ initRenderTracking(function use(resource) {
 	// A Context is a function without a `then`, a thenable has one.
@@ -358,6 +368,25 @@ export const use = /* @__PURE__ */ initRenderTracking(function use(resource) {
 			);
 		}
 		throw resource;
+	}
+
+	if (resource.$$typeof === RECOVERABLE_TYPE) {
+		if (options._skipEffects) {
+			let reason = resource._reason;
+			if (typeof reason == 'function') {
+				try {
+					reason = reason();
+				} catch {
+					reason =
+						'The browser-only rendering reason could not be initialized.';
+				}
+			}
+			const error = new Error('Browser-only rendering was requested.');
+			if (resource._reason !== undefined) error.cause = reason;
+			Object.defineProperty(error, RECOVERABLE_TYPE, { value: true });
+			throw error;
+		}
+		return;
 	}
 
 	const id = resource._id;

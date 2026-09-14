@@ -432,7 +432,11 @@ function insert(parentVNode, oldDom, parentDom, isMounting) {
 		oldDom = parentVNode._dom;
 	}
 
-	while ((oldDom = oldDom && oldDom.nextSibling) && oldDom.nodeType == 8);
+	while (
+		(oldDom = oldDom && oldDom.nextSibling) &&
+		oldDom.nodeType == 8 &&
+		!oldDom.data.startsWith('$s!')
+	);
 
 	return oldDom;
 }
