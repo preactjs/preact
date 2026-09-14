@@ -133,10 +133,7 @@ declare namespace React {
 	): T;
 	export function useEffectEvent<T extends Function>(cb: T): T;
 	// React 19 hooks
-	export interface ReactRecoverable {
-		$$typeof: symbol;
-		_reason?: string | (() => unknown);
-	}
+	export interface ReactRecoverable extends PromiseLike<undefined> {}
 	export function browser(reason?: string | (() => unknown)): ReactRecoverable;
 	export function use(resource: ReactRecoverable): undefined;
 	export function use<T>(resource: Promise<T> | _preact.Context<T>): T;

@@ -22,15 +22,20 @@ import { useDeferredValue, useInsertionEffect, useTransition } from './index';
 import { assign, IS_NON_DIMENSIONAL } from './util';
 
 export const REACT_ELEMENT_TYPE = Symbol.for('react.element');
-const RECOVERABLE_TYPE = Symbol.for('react.recoverable');
 
 /**
- * Create a value that defers server rendering to the nearest Suspense boundary
- * when passed to `use`. The renderer receives the optional reason unchanged.
+ * Create a thenable that resolves in the browser and defers server rendering.
  * @param {string | (() => any)} [reason]
  */
 export function browser(reason) {
-	return { $$typeof: RECOVERABLE_TYPE, _reason: reason };
+	return {
+		// oxlint-disable-next-line unicorn/no-thenable -- `use` consumes instrumented thenables.
+		then() {},
+		get status() {
+			return options._skipEffects ? 'rejected' : 'fulfilled';
+		},
+		reason: { $$typeof: Symbol.for('react.recoverable'), _reason: reason }
+	};
 }
 
 const MODE_HYDRATE = 1 << 5;
@@ -343,11 +348,11 @@ function initRenderTracking(value) {
 }
 
 /**
- * Read a Promise or Context, or defer a recoverable to a downstream renderer.
+ * Read the value of a Promise (suspending while pending) or a Context.
  * Unlike other hooks, `use` may be called conditionally.
  * @template T
- * @param {(Promise<T> & { status?: string, value?: T, reason?: any }) | import('../../src/internal').PreactContext | { $$typeof: symbol, _reason?: any }} resource
- * @returns {T | undefined}
+ * @param {(Promise<T> & { status?: string, value?: T, reason?: any }) | import('../../src/internal').PreactContext} resource
+ * @returns {T}
  */
 export const use = /* @__PURE__ */ initRenderTracking(function use(resource) {
 	// A Context is a function without a `then`, a thenable has one.
@@ -368,11 +373,6 @@ export const use = /* @__PURE__ */ initRenderTracking(function use(resource) {
 			);
 		}
 		throw resource;
-	}
-
-	if (resource.$$typeof === RECOVERABLE_TYPE) {
-		if (options._skipEffects) throw resource;
-		return;
 	}
 
 	const id = resource._id;

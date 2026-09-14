@@ -129,6 +129,35 @@ function createSuspense() {
 	// - do not set `Suspense.prototype.constructor` to `Suspense`
 	Suspense.prototype = new Component();
 
+	Suspense.prototype._hydrate = function (oldDom, excess) {
+		oldDom = this._excess || (excess && oldDom);
+		if (oldDom && oldDom.nodeType == 8 && oldDom.data.startsWith('$s!')) {
+			this._excess = null;
+			this._hydrateFallback = 1;
+			let children = [],
+				depth = 1,
+				start = oldDom;
+			if (excess) excess[excess.indexOf(oldDom)] = null;
+			while ((oldDom = oldDom.nextSibling)) {
+				if (excess) excess[excess.indexOf(oldDom)] = null;
+				if (oldDom.nodeType == 8) {
+					if (oldDom.data.startsWith('$s')) depth++;
+					else if (oldDom.data.startsWith('/$s') && !--depth) {
+						oldDom.remove();
+						break;
+					}
+				}
+				children.push(oldDom);
+			}
+			start.remove();
+			this._renderCallbacks.push(() => {
+				children.forEach(node => node && node.remove());
+				this.forceUpdate();
+			});
+			return children;
+		}
+	};
+
 	/**
 	 * @this {import('./internal').SuspenseComponent}
 	 * @param {Promise} promise The thrown promise
@@ -136,6 +165,14 @@ function createSuspense() {
 	 */
 	Suspense.prototype._childDidSuspend = function (promise, suspendingVNode) {
 		const suspendingComponent = suspendingVNode._component;
+		// Streamed recovery wakes this boundary after marking its fallback.
+		const marker = suspendingComponent._excess;
+		if (marker && marker.nodeType == 8) {
+			marker.__r = () => {
+				this._excess = marker;
+				this.forceUpdate();
+			};
+		}
 
 		if (this._suspenders == null) {
 			this._suspenders = [];
@@ -150,6 +187,7 @@ function createSuspense() {
 			suspendingComponent._onResolve = null;
 
 			onSuspensionComplete();
+			if (marker && !this._pendingSuspensionCount) marker.__r = null;
 		};
 
 		suspendingComponent._onResolve = onResolved;
@@ -210,26 +248,36 @@ function createSuspense() {
 	 * @param {import('./internal').SuspenseState} state
 	 */
 	Suspense.prototype.render = function (props, state) {
+		// Keep the fallback in slot 1 while trying the primary tree.
+		if (this._hydrateFallback == 1) {
+			this._hydrateFallback = 2;
+			return [null, createElement(Fragment, null, props.fallback)];
+		}
+		if (this._hydrateFallback) {
+			this._renderCallbacks.push(function () {
+				this._hydrateFallback = null;
+				if (!this._pendingSuspensionCount) this.forceUpdate();
+			});
+		}
+
 		if (this._detachOnNextRender) {
-			// When the Suspense's _vnode was created by a call to createVNode
-			// (i.e. due to a setState further up in the tree)
-			// it's _children prop is null, in this case we "forget" about the parked vnodes to detach
-			if (this._vnode._children) {
-				const detachedParent = document.createElement('div');
-				const detachedComponent = this._vnode._children[0]._component;
-				this._vnode._children[0] = detachedClone(
-					this._detachOnNextRender,
-					detachedParent,
-					(detachedComponent._originalParentDom = detachedComponent._parentDom)
-				);
-			}
+			const parked = this._detachOnNextRender;
+			const detachedParent = document.createElement('div');
+			const detachedComponent = parked._component;
+			// A parent update may have already replaced this boundary's vnode.
+			parked._parent._children[0] = detachedClone(
+				parked,
+				detachedParent,
+				(detachedComponent._originalParentDom = detachedComponent._parentDom)
+			);
 
 			this._detachOnNextRender = null;
 		}
 
 		return [
 			createElement(Fragment, null, state._suspended ? null : props.children),
-			state._suspended && createElement(Fragment, null, props.fallback)
+			(state._suspended || this._hydrateFallback) &&
+				createElement(Fragment, null, props.fallback)
 		];
 	};
 

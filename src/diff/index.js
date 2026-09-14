@@ -84,11 +84,7 @@ export function diff(
 	) {
 		newVNode._flags |= MODE_HYDRATE;
 		excessDomChildren = [];
-		if (tmp.nodeType == 8 && tmp.data.startsWith('$s!')) {
-			oldDom = clearClientBoundary(tmp, excessDomChildren);
-			newVNode._flags &= RESET_MODE;
-			isHydrating = false;
-		} else if (tmp.nodeType == 8) {
+		if (tmp.nodeType == 8) {
 			// Re-scan DOM from stored start marker for streamed hydration.
 			// `depth` only ever reaches 0 through the `break` below, so it
 			// doesn't need to be re-tested in the loop condition.
@@ -106,7 +102,7 @@ export function diff(
 		} else {
 			excessDomChildren.push(tmp);
 		}
-		if (isHydrating) oldDom = excessDomChildren[0];
+		oldDom = excessDomChildren[0];
 		oldVNode._component._excess = NULL;
 	}
 
@@ -263,6 +259,14 @@ export function diff(
 			c.props = newProps;
 			c._parentDom = parentDom;
 			c._bits &= ~COMPONENT_FORCE;
+			if (
+				c._hydrate &&
+				(tmp = c._hydrate(oldDom, isHydrating && excessDomChildren))
+			) {
+				oldDom = tmp[0];
+				excessDomChildren = tmp;
+				isHydrating = true;
+			}
 
 			let renderHook = options._render,
 				count = 0;
@@ -337,19 +341,6 @@ export function diff(
 				}
 
 				oldDom = oldVNode._children ? getDomSibling(oldVNode, 0) : NULL;
-			}
-
-			// The server left a fallback here. It is not the primary tree's DOM.
-			if (
-				isHydrating &&
-				c._childDidSuspend &&
-				oldDom &&
-				oldDom.nodeType == 8 &&
-				oldDom.data.startsWith('$s!')
-			) {
-				oldDom = clearClientBoundary(oldDom, excessDomChildren);
-				excessDomChildren = NULL;
-				isHydrating = false;
 			}
 
 			oldDom = diffChildren(
@@ -820,25 +811,4 @@ export function unmount(vnode, parentVNode, skipRemove) {
 /** The `.render()` method for a PFC backing instance. */
 function doRender(props, state, context) {
 	return this.constructor(props, context);
-}
-
-/**
- * Remove only this boundary's fallback, including nested boundary markers.
- * @param {any} node
- * @param {any[]} excess
- * @returns {any}
- */
-function clearClientBoundary(node, excess) {
-	let depth = 0;
-	do {
-		if (node.nodeType == 8) {
-			if (node.data.startsWith('$s')) depth++;
-			else if (node.data.startsWith('/$s')) depth--;
-		}
-		const next = node.nextSibling;
-		if (excess) excess[excess.indexOf(node)] = NULL;
-		removeNode(node);
-		node = next;
-	} while (node && depth);
-	return node;
 }
