@@ -44,7 +44,7 @@ import { setProperty } from './props';
  * @param {object} globalContext The current context object. Modified by
  * getChildContext
  * @param {string} namespace Current namespace of the DOM node (HTML, SVG, or MathML)
- * @param {Array<PreactElement> & { _flags?: boolean }} excessDomChildren
+ * @param {Array<PreactElement>} excessDomChildren
  * @param {Array<Component>} commitQueue List of components which have callbacks
  * to invoke in commitRoot
  * @param {PreactElement} oldDom The current attached DOM element any new dom
@@ -77,16 +77,15 @@ export function diff(
 
 	// If the previous diff bailed out, resume creating/hydrating.
 	// `tmp` holds the stored excess node until the options._diff call below.
-	if (oldVNode._flags & MODE_SUSPENDED && (tmp = oldVNode._component._excess)) {
+	if (
+		oldVNode._flags & MODE_SUSPENDED &&
 		// @ts-expect-error This is 1 or 0 (true or false)
-		isHydrating = oldVNode._flags & MODE_HYDRATE;
-		if (isHydrating) newVNode._flags |= MODE_HYDRATE;
-		if (tmp.nodeType == 8) {
-			excessDomChildren = collectSuspenseBoundary(tmp);
-			if (tmp.data.startsWith('$s!')) {
-				recovery = excessDomChildren;
-				isHydrating = false;
-			} else excessDomChildren = excessDomChildren.slice(1, -1);
+		(isHydrating = oldVNode._flags & MODE_HYDRATE) &&
+		(tmp = oldVNode._component._excess)
+	) {
+		newVNode._flags |= MODE_HYDRATE;
+		if (tmp.nodeType == 8 && !tmp.data.startsWith('$s!')) {
+			excessDomChildren = collectSuspenseBoundary(tmp).slice(1, -1);
 		} else excessDomChildren = [tmp];
 		oldDom = excessDomChildren[0];
 		oldVNode._component._excess = NULL;
@@ -324,7 +323,7 @@ export function diff(
 			// Reconcile the server fallback within this boundary.
 			if (
 				isHydrating &&
-				c._childDidSuspend &&
+				(c._childDidSuspend || oldVNode._flags & MODE_SUSPENDED) &&
 				oldDom &&
 				oldDom.nodeType == 8 &&
 				oldDom.data.startsWith('$s!')
@@ -383,10 +382,9 @@ export function diff(
 					let commentMarkersToFind = 0,
 						startMarker;
 
-					newVNode._flags |=
-						isHydrating || (excessDomChildren && excessDomChildren._flags)
-							? MODE_HYDRATE | MODE_SUSPENDED
-							: MODE_SUSPENDED;
+					newVNode._flags |= isHydrating
+						? MODE_HYDRATE | MODE_SUSPENDED
+						: MODE_SUSPENDED;
 
 					if (excessDomChildren) {
 						for (let i = 0; i < excessDomChildren.length; i++) {
@@ -396,6 +394,7 @@ export function diff(
 							if (child.nodeType == 8) {
 								excessDomChildren[i] = NULL;
 								if (child.data.startsWith('$s')) {
+									newVNode._flags |= MODE_HYDRATE;
 									if (!commentMarkersToFind++) startMarker = child;
 								} else if (
 									child.data.startsWith('/$s') &&
@@ -811,7 +810,7 @@ function doRender(props, state, context) {
 
 /** Collect candidates without claiming DOM from neighboring boundaries. */
 function collectSuspenseBoundary(node, parent) {
-	let nodes = /** @type {PreactElement[] & { _flags?: boolean }} */ ([]),
+	let nodes = [],
 		depth = 0;
 	do {
 		nodes.push(node);
@@ -822,7 +821,5 @@ function collectSuspenseBoundary(node, parent) {
 		}
 		node = node.nextSibling;
 	} while (node && depth);
-	// A further suspension must preserve this range for another client retry.
-	nodes._flags = true;
 	return nodes;
 }
