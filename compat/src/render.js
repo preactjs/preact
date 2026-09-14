@@ -34,7 +34,7 @@ export function browser(reason) {
 			if (IS_DOM) resolve();
 			else reject(this.reason);
 		},
-		status: IS_DOM,
+		status: IS_DOM ? 'fulfilled' : 'rejected',
 		reason: { $$typeof: Symbol.for('react.recoverable'), _reason: reason }
 	};
 }
@@ -352,25 +352,23 @@ function initRenderTracking(value) {
  * Read the value of a Promise (suspending while pending) or a Context.
  * Unlike other hooks, `use` may be called conditionally.
  * @template T
- * @param {(Promise<T> & { status?: string | boolean, value?: T, reason?: any }) | import('../../src/internal').PreactContext} resource
+ * @param {(Promise<T> & { status?: string, value?: T, reason?: any }) | import('../../src/internal').PreactContext} resource
  * @returns {T}
  */
 export const use = /* @__PURE__ */ initRenderTracking(function use(resource) {
 	// A Context is a function without a `then`, a thenable has one.
 	if (resource.then) {
-		if (resource.status === true || resource.status == 'fulfilled')
-			return resource.value;
-		if (resource.status === false || resource.status == 'rejected')
-			throw resource.reason;
+		if (resource.status == 'fulfilled') return resource.value;
+		if (resource.status == 'rejected') throw resource.reason;
 		if (!resource.status) {
 			resource.status = 'pending';
 			resource.then(
 				value => {
-					resource.status = true;
+					resource.status = 'fulfilled';
 					resource.value = value;
 				},
 				reason => {
-					resource.status = false;
+					resource.status = 'rejected';
 					resource.reason = reason;
 				}
 			);
