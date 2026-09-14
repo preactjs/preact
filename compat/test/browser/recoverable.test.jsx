@@ -37,10 +37,9 @@ describe('recoverable rendering', () => {
 		expect(value._reason).to.equal(reason);
 	});
 
-	it('creates a branded error at each server use site', () => {
-		const cause = new Error('requires a browser');
-		const reason = vi.fn(() => cause);
-		const value = browser(reason);
+	it('throws the recoverable to the server renderer', () => {
+		const reason = vi.fn();
+		const value = Object.freeze(browser(reason));
 		function App() {
 			use(value);
 			return <div>unreachable</div>;
@@ -54,31 +53,10 @@ describe('recoverable rendering', () => {
 			}
 		}
 		expect(errors).to.have.length(2);
-		expect(errors[0]).not.to.equal(errors[1]);
-		expect(errors[0].cause).to.equal(cause);
-		expect(errors[0][Symbol.for('react.recoverable')]).to.equal(true);
-		expect(reason).toHaveBeenCalledTimes(2);
+		expect(errors[0]).to.equal(value);
+		expect(errors[1]).to.equal(value);
+		expect(reason).not.toHaveBeenCalled();
 		expect(options._skipEffects).not.to.equal(true);
-	});
-
-	it('still defers if the reason initializer throws', () => {
-		function App() {
-			use(
-				browser(() => {
-					throw new Error('diagnostic');
-				})
-			);
-		}
-		let caught;
-		try {
-			renderToString(<App />);
-		} catch (error) {
-			caught = error;
-		}
-		expect(caught[Symbol.for('react.recoverable')]).to.equal(true);
-		expect(caught.cause).to.equal(
-			'The browser-only rendering reason could not be initialized.'
-		);
 	});
 
 	it('freshly renders a marked fallback without claiming adjacent siblings', () => {

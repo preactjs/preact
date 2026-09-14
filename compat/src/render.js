@@ -26,7 +26,7 @@ const RECOVERABLE_TYPE = Symbol.for('react.recoverable');
 
 /**
  * Create a value that defers server rendering to the nearest Suspense boundary
- * when passed to `use`. The reason is only evaluated by the server renderer.
+ * when passed to `use`. The renderer receives the optional reason unchanged.
  * @param {string | (() => any)} [reason]
  */
 export function browser(reason) {
@@ -371,21 +371,7 @@ export const use = /* @__PURE__ */ initRenderTracking(function use(resource) {
 	}
 
 	if (resource.$$typeof === RECOVERABLE_TYPE) {
-		if (options._skipEffects) {
-			let reason = resource._reason;
-			if (typeof reason == 'function') {
-				try {
-					reason = reason();
-				} catch {
-					reason =
-						'The browser-only rendering reason could not be initialized.';
-				}
-			}
-			const error = new Error('Browser-only rendering was requested.');
-			if (resource._reason !== undefined) error.cause = reason;
-			Object.defineProperty(error, RECOVERABLE_TYPE, { value: true });
-			throw error;
-		}
+		if (options._skipEffects) throw resource;
 		return;
 	}
 
