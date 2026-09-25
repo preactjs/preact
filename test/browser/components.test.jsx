@@ -2187,4 +2187,103 @@ describe('Components', () => {
 
 		options.debounceRendering = prevDebounce;
 	});
+
+	it('should keep rendering components queued alongside one that throws', () => {
+		let thrower, counter;
+
+		class Thrower extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { throwing: false };
+				thrower = this;
+			}
+			render() {
+				if (this.state.throwing) throw new Error('boom');
+				return (
+					<div>
+						<Deep />
+					</div>
+				);
+			}
+		}
+
+		const Deep = () => <Counter />;
+
+		class Counter extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { n: 0 };
+				counter = this;
+			}
+			render() {
+				return <p>{this.state.n}</p>;
+			}
+		}
+
+		render(<Thrower />, scratch);
+		expect(scratch.innerHTML).to.equal('<div><p>0</p></div>');
+
+		// Same pass: the shallower component throws, the deeper one has a
+		// pending update behind it in the queue.
+		thrower.setState({ throwing: true });
+		counter.setState({ n: 1 });
+		expect(() => rerender()).to.throw('boom');
+
+		rerender();
+		expect(scratch.innerHTML).to.equal('<div><p>1</p></div>');
+
+		counter.setState({ n: 2 });
+		rerender();
+		expect(scratch.innerHTML).to.equal('<div><p>2</p></div>');
+	});
+
+	it('should keep rendering siblings queued alongside one that throws', () => {
+		let updateA, updateB;
+
+		class A extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { throwing: false };
+				updateA = s => this.setState(s);
+			}
+			render() {
+				if (this.state.throwing) throw new Error('boom');
+				return <span>a</span>;
+			}
+		}
+
+		class B extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { n: 0 };
+				updateB = s => this.setState(s);
+			}
+			render() {
+				return <span>{this.state.n}</span>;
+			}
+		}
+
+		render(
+			<div>
+				<A />
+				<B />
+			</div>,
+			scratch
+		);
+
+		updateA({ throwing: true });
+		updateB({ n: 1 });
+		expect(() => rerender()).to.throw('boom');
+
+		rerender();
+		expect(scratch.innerHTML).to.equal(
+			'<div><span>a</span><span>1</span></div>'
+		);
+
+		updateB({ n: 2 });
+		rerender();
+		expect(scratch.innerHTML).to.equal(
+			'<div><span>a</span><span>2</span></div>'
+		);
+	});
 });
