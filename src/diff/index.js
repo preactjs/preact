@@ -103,7 +103,6 @@ export function diff(
 			excessDomChildren.push(tmp);
 		}
 		oldDom = excessDomChildren[0];
-		oldVNode._component._excess = NULL;
 	}
 
 	if ((tmp = options._diff)) tmp(newVNode);
@@ -358,6 +357,7 @@ export function diff(
 
 			// We successfully rendered this VNode, unset any stored hydration/bailout state:
 			newVNode._flags &= RESET_MODE;
+			if (oldVNode._flags & MODE_SUSPENDED) c._excess = NULL;
 
 			if (c._renderCallbacks.length) {
 				commitQueue.push(c);
@@ -416,8 +416,11 @@ export function diff(
 						}
 						startMarker = oldDom;
 					}
-					// Store the start marker directly; children re-scanned on resume
-					newVNode._component._excess = startMarker;
+					// Store the start marker directly; children re-scanned on resume.
+					// A re-suspension keeps the marker it originally started from.
+					if (!newVNode._component._excess) {
+						newVNode._component._excess = startMarker;
+					}
 					newVNode._dom = oldDom;
 				} else if (excessDomChildren) {
 					excessDomChildren.some(removeNode);
