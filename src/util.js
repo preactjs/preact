@@ -4,6 +4,8 @@ export const isArray = Array.isArray;
 export const slice = EMPTY_ARR.slice;
 export const assign = Object.assign;
 
+// temp to run CI
+
 /**
  * Remove a child node from its parent if attached.
  * @param {import('./internal').PreactElement | null} node The node to remove
