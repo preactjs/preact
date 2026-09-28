@@ -72,8 +72,11 @@ export function setProperty(dom, name, value, oldValue, namespace) {
 	else if (name[0] == 'o' && name[1] == 'n') {
 		useCapture = name != (name = name.replace(CAPTURE_REGEX, '$1'));
 
-		// Infer correct casing for DOM built-in events:
-		name = name.slice(2).toLowerCase();
+		// Infer correct casing for DOM built-in events: `onClick` -> `click`.
+		// Only names starting with an uppercase letter are lowercased, so
+		// camelCase custom events keep their casing: `onionChange` -> `ionChange`.
+		name = name.slice(2);
+		if (name[0] < 'a') name = name.toLowerCase();
 
 		(dom._listeners || (dom._listeners = {}))[name + useCapture] = value;
 
