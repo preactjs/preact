@@ -2149,4 +2149,68 @@ describe('render()', () => {
 			expect(iframeCreateElementSpy).toBeCalled();
 		});
 	});
+
+	describe('fake containers (preact-root-fragment)', () => {
+		/**
+		 * A container that owns a slice of a real parent's children, like
+		 * `createRootFragment(parent, children)`. Its children's `parentNode` is
+		 * the real parent, not the container.
+		 */
+		function createRootFragment(parent, children) {
+			const end = children[children.length - 1].nextSibling;
+			const insert = (c, r) => parent.insertBefore(c, r || end);
+			return {
+				nodeType: 1,
+				parentNode: parent,
+				firstChild: children[0],
+				childNodes: children,
+				ownerDocument: parent.ownerDocument,
+				namespaceURI: parent.namespaceURI,
+				insertBefore: insert,
+				appendChild: insert,
+				moveBefore: (c, r) =>
+					parent.moveBefore ? parent.moveBefore(c, r || end) : insert(c, r),
+				removeChild: c => parent.removeChild(c)
+			};
+		}
+
+		const List = ({ items }) => items.map(i => <li key={i}>{i}</li>);
+		const html = items =>
+			'<li id="before"></li>' +
+			items.map(i => `<li>${i}</li>`).join('') +
+			'<li id="after"></li>';
+
+		it('should render into existing children without re-inserting them', () => {
+			scratch.innerHTML = html([1, 2]);
+			const [, a, b] = scratch.children;
+			const root = createRootFragment(scratch, [a, b]);
+
+			clearLog();
+			render(<List items={[1, 2]} />, root);
+			expect(getLog()).to.deep.equal([]);
+			expect(scratch.children[1]).to.equal(a);
+			expect(scratch.children[2]).to.equal(b);
+		});
+
+		it('should insert and reorder children at the right position', () => {
+			scratch.innerHTML = html([1, 2]);
+			const root = createRootFragment(scratch, [
+				scratch.children[1],
+				scratch.children[2]
+			]);
+
+			render(<List items={[1, 2]} />, root);
+			render(<List items={[0, 1, 2]} />, root);
+			expect(scratch.innerHTML).to.equal(html([0, 1, 2]));
+
+			render(<List items={[0, 3, 1, 2]} />, root);
+			expect(scratch.innerHTML).to.equal(html([0, 3, 1, 2]));
+
+			render(<List items={[2, 0, 3, 1]} />, root);
+			expect(scratch.innerHTML).to.equal(html([2, 0, 3, 1]));
+
+			render(<List items={[1, 3, 0, 2]} />, root);
+			expect(scratch.innerHTML).to.equal(html([1, 3, 0, 2]));
+		});
+	});
 });
