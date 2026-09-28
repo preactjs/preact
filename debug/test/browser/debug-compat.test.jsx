@@ -44,6 +44,41 @@ describe('debug compat', () => {
 			}
 			expect(() => render(<Foo>foobar</Foo>, scratch)).not.to.throw();
 		});
+
+		it('should validate DOM nesting against the portal container', () => {
+			const tbody = document
+				.createElement('table')
+				.appendChild(document.createElement('tbody'));
+			render(
+				<p>
+					{createPortal(
+						<tr>
+							<td>row</td>
+						</tr>,
+						tbody
+					)}
+					{createPortal(<div>modal</div>, root)}
+				</p>,
+				scratch
+			);
+			expect(console.error).not.toHaveBeenCalled();
+
+			render(
+				<table>
+					<tbody>
+						{createPortal(
+							<tr>
+								<td>row</td>
+							</tr>,
+							root
+						)}
+					</tbody>
+				</table>,
+				scratch
+			);
+			expect(console.error).toHaveBeenCalledOnce();
+			expect(errors[0]).to.match(/Your <tr> should have/);
+		});
 	});
 
 	describe('PropTypes', () => {
