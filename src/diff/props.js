@@ -70,33 +70,30 @@ export function setProperty(dom, name, value, oldValue, namespace) {
 	}
 	// Benchmark for comparison: https://esbench.com/bench/574c954bdb965b9a00965ac6
 	else if (name[0] == 'o' && name[1] == 'n') {
-		useCapture = name != (name = name.replace(CAPTURE_REGEX, '$1'));
+		// Handlers are keyed by prop name and every prop name gets its own proxy,
+		// so swapping one (e.g. an inline arrow function on every render) is a
+		// single store. The event name is only derived to attach or remove it.
+		(dom._listeners || (dom._listeners = {}))[name] = value;
 
-		// Infer correct casing for DOM built-in events: `onClick` -> `click`.
-		// Only names starting with an uppercase letter are lowercased, so
-		// camelCase custom events keep their casing: `onionChange` -> `ionChange`.
-		name = name.slice(2);
-		if (name[0] < 'a') name = name.toLowerCase();
-
-		(dom._listeners || (dom._listeners = {}))[name + useCapture] = value;
-
-		if (value) {
-			if (!oldValue) {
-				value[EVENT_ATTACHED] = eventClock;
-				dom.addEventListener(
-					name,
-					useCapture ? eventProxyCapture : eventProxy,
-					useCapture
-				);
-			} else {
-				value[EVENT_ATTACHED] = oldValue[EVENT_ATTACHED];
-			}
+		if (value && oldValue) {
+			value[EVENT_ATTACHED] = oldValue[EVENT_ATTACHED];
 		} else {
-			dom.removeEventListener(
-				name,
-				useCapture ? eventProxyCapture : eventProxy,
-				useCapture
-			);
+			const proxy =
+				eventProxies[name] || (eventProxies[name] = createEventProxy(name));
+			useCapture = name != (name = name.replace(CAPTURE_REGEX, '$1'));
+
+			// Infer correct casing for DOM built-in events: `onClick` -> `click`.
+			// Only names starting with an uppercase letter are lowercased, so
+			// camelCase custom events keep their casing: `onionChange` -> `ionChange`.
+			name = name.slice(2);
+			if (name[0] < 'a') name = name.toLowerCase();
+
+			if (value) {
+				value[EVENT_ATTACHED] = eventClock;
+				dom.addEventListener(name, proxy, useCapture);
+			} else {
+				dom.removeEventListener(name, proxy, useCapture);
+			}
 		}
 	} else {
 		if (namespace == SVG_NAMESPACE) {
@@ -146,10 +143,10 @@ export function setProperty(dom, name, value, oldValue, namespace) {
 
 /**
  * Create an event proxy function.
- * @param {boolean} useCapture Is the event handler for the capture phase.
+ * @param {string} name The prop name the handler is stored under.
  * @private
  */
-function createEventProxy(useCapture) {
+function createEventProxy(name) {
 	/**
 	 * Proxy an event to hooked event handlers
 	 * @param {import('../internal').PreactEvent} e The event object from the browser
@@ -157,7 +154,7 @@ function createEventProxy(useCapture) {
 	 */
 	return function (e) {
 		if (this._listeners) {
-			const eventHandler = this._listeners[e.type + useCapture];
+			const eventHandler = this._listeners[name];
 			if (e[EVENT_DISPATCHED] == NULL) {
 				e[EVENT_DISPATCHED] = eventClock++;
 
@@ -172,5 +169,5 @@ function createEventProxy(useCapture) {
 	};
 }
 
-const eventProxy = createEventProxy(false);
-const eventProxyCapture = createEventProxy(true);
+/** @type {Record<string, (e: Event) => any>} */
+const eventProxies = {};
