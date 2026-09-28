@@ -316,4 +316,281 @@ describe('event handling', () => {
 			false
 		);
 	});
+
+	describe('event name casing', () => {
+		it('should lowercase event names starting with an uppercase letter', () => {
+			const click = vi.fn(),
+				touchStart = vi.fn(),
+				dblClick = vi.fn(),
+				focusIn = vi.fn();
+
+			render(
+				<div
+					onClick={click}
+					onTouchStart={touchStart}
+					onDblClick={dblClick}
+					onFocusIn={focusIn}
+				/>,
+				scratch
+			);
+
+			expect(proto.addEventListener).toHaveBeenCalledTimes(4);
+			for (const type of ['click', 'touchstart', 'dblclick', 'focusin']) {
+				expect(proto.addEventListener).toHaveBeenCalledWith(
+					type,
+					expect.any(Function),
+					false
+				);
+				fireEvent(scratch.firstChild, type);
+			}
+
+			expect(click).toHaveBeenCalledOnce();
+			expect(touchStart).toHaveBeenCalledOnce();
+			expect(dblClick).toHaveBeenCalledOnce();
+			expect(focusIn).toHaveBeenCalledOnce();
+		});
+
+		it('should keep the casing of event names starting with a lowercase letter', () => {
+			const click = vi.fn(),
+				dblClick = vi.fn(),
+				focusOut = vi.fn(),
+				ionChange = vi.fn(),
+				valueChanged = vi.fn();
+
+			render(
+				<div
+					onclick={click}
+					ondblclick={dblClick}
+					onfocusout={focusOut}
+					onionChange={ionChange}
+					onvalueChanged={valueChanged}
+				/>,
+				scratch
+			);
+
+			expect(proto.addEventListener).toHaveBeenCalledTimes(5);
+			for (const type of [
+				'click',
+				'dblclick',
+				'focusout',
+				'ionChange',
+				'valueChanged'
+			]) {
+				expect(proto.addEventListener).toHaveBeenCalledWith(
+					type,
+					expect.any(Function),
+					false
+				);
+			}
+
+			// Event types are case-sensitive
+			fireEvent(scratch.firstChild, 'ionchange');
+			fireEvent(scratch.firstChild, 'valuechanged');
+			expect(ionChange).not.toHaveBeenCalled();
+			expect(valueChanged).not.toHaveBeenCalled();
+
+			for (const type of [
+				'click',
+				'dblclick',
+				'focusout',
+				'ionChange',
+				'valueChanged'
+			]) {
+				fireEvent(scratch.firstChild, type);
+			}
+			expect(click).toHaveBeenCalledOnce();
+			expect(dblClick).toHaveBeenCalledOnce();
+			expect(focusOut).toHaveBeenCalledOnce();
+			expect(ionChange).toHaveBeenCalledOnce();
+			expect(valueChanged).toHaveBeenCalledOnce();
+		});
+
+		it('should register differently cased props as separate listeners', () => {
+			const lower = vi.fn(),
+				upper = vi.fn();
+
+			render(<div onvalueChanged={lower} onValueChanged={upper} />, scratch);
+
+			expect(proto.addEventListener).toHaveBeenCalledWith(
+				'valueChanged',
+				expect.any(Function),
+				false
+			);
+			expect(proto.addEventListener).toHaveBeenCalledWith(
+				'valuechanged',
+				expect.any(Function),
+				false
+			);
+
+			fireEvent(scratch.firstChild, 'valueChanged');
+			expect(lower).toHaveBeenCalledOnce();
+			expect(upper).not.toHaveBeenCalled();
+
+			fireEvent(scratch.firstChild, 'valuechanged');
+			expect(lower).toHaveBeenCalledOnce();
+			expect(upper).toHaveBeenCalledOnce();
+		});
+
+		it('should lowercase PascalCase custom event names', () => {
+			const myEvent = vi.fn();
+
+			render(<div onMyEvent={myEvent} />, scratch);
+
+			expect(proto.addEventListener).toHaveBeenCalledWith(
+				'myevent',
+				expect.any(Function),
+				false
+			);
+
+			fireEvent(scratch.firstChild, 'MyEvent');
+			expect(myEvent).not.toHaveBeenCalled();
+
+			fireEvent(scratch.firstChild, 'myevent');
+			expect(myEvent).toHaveBeenCalledOnce();
+		});
+
+		it('should support capturing custom event names', () => {
+			const calls = [];
+
+			render(
+				<div
+					onClickCapture={() => calls.push('clickCapture')}
+					onClick={() => calls.push('click')}
+					onionChangeCapture={() => calls.push('ionChangeCapture')}
+					onionChange={() => calls.push('ionChange')}
+				>
+					<span />
+				</div>,
+				scratch
+			);
+
+			expect(proto.addEventListener).toHaveBeenCalledWith(
+				'click',
+				expect.any(Function),
+				true
+			);
+			expect(proto.addEventListener).toHaveBeenCalledWith(
+				'ionChange',
+				expect.any(Function),
+				true
+			);
+			expect(proto.addEventListener).toHaveBeenCalledWith(
+				'ionChange',
+				expect.any(Function),
+				false
+			);
+
+			fireEvent(scratch.firstChild.firstChild, 'ionchange');
+			expect(calls).to.deep.equal([]);
+
+			fireEvent(scratch.firstChild.firstChild, 'click');
+			fireEvent(scratch.firstChild.firstChild, 'ionChange');
+			expect(calls).to.deep.equal([
+				'clickCapture',
+				'click',
+				'ionChangeCapture',
+				'ionChange'
+			]);
+		});
+
+		it('should update and remove listeners with preserved casing', () => {
+			const first = vi.fn(),
+				second = vi.fn();
+
+			const App = ({ fn }) => (
+				<div
+					onionChange={fn && (() => fn('ionChange'))}
+					onionChangeCapture={fn && (() => fn('ionChangeCapture'))}
+					onvalueChanged={fn && (() => fn('valueChanged'))}
+					onTouchStart={fn && (() => fn('touchstart'))}
+				/>
+			);
+
+			render(<App fn={first} />, scratch);
+			expect(proto.addEventListener).toHaveBeenCalledTimes(4);
+
+			proto.addEventListener.mockClear();
+			render(<App fn={second} />, scratch);
+			// Swapping handlers doesn't touch the DOM listeners
+			expect(proto.addEventListener).not.toHaveBeenCalled();
+			expect(proto.removeEventListener).not.toHaveBeenCalled();
+
+			const dom = scratch.firstChild;
+			fireEvent(dom, 'ionChange');
+			fireEvent(dom, 'valueChanged');
+			fireEvent(dom, 'touchstart');
+			expect(first).not.toHaveBeenCalled();
+			expect(second.mock.calls).to.deep.equal([
+				['ionChangeCapture'],
+				['ionChange'],
+				['valueChanged'],
+				['touchstart']
+			]);
+
+			second.mockClear();
+			render(<App />, scratch);
+
+			expect(proto.removeEventListener).toHaveBeenCalledTimes(4);
+			for (const [type, capture] of [
+				['ionChange', false],
+				['ionChange', true],
+				['valueChanged', false],
+				['touchstart', false]
+			]) {
+				expect(proto.removeEventListener).toHaveBeenCalledWith(
+					type,
+					expect.any(Function),
+					capture
+				);
+			}
+
+			fireEvent(dom, 'ionChange');
+			fireEvent(dom, 'valueChanged');
+			fireEvent(dom, 'touchstart');
+			expect(second).not.toHaveBeenCalled();
+		});
+
+		it('should listen for camelCase custom events on custom elements', () => {
+			if (!customElements.get('x-event-casing')) {
+				customElements.define(
+					'x-event-casing',
+					class extends HTMLElement {
+						fire(type) {
+							this.dispatchEvent(new CustomEvent(type, { bubbles: true }));
+						}
+					}
+				);
+			}
+
+			const ionChange = vi.fn(),
+				valueChanged = vi.fn(),
+				click = vi.fn(),
+				parentIonChange = vi.fn();
+
+			render(
+				<div onionChange={parentIonChange}>
+					<x-event-casing
+						onionChange={ionChange}
+						onvalueChanged={valueChanged}
+						onClick={click}
+					/>
+				</div>,
+				scratch
+			);
+
+			const el = scratch.firstChild.firstChild;
+			el.fire('ionchange');
+			el.fire('valuechanged');
+			expect(ionChange).not.toHaveBeenCalled();
+			expect(valueChanged).not.toHaveBeenCalled();
+
+			el.fire('ionChange');
+			el.fire('valueChanged');
+			el.click();
+			expect(ionChange).toHaveBeenCalledOnce();
+			expect(parentIonChange).toHaveBeenCalledOnce();
+			expect(valueChanged).toHaveBeenCalledOnce();
+			expect(click).toHaveBeenCalledOnce();
+		});
+	});
 });
