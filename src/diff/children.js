@@ -7,8 +7,7 @@ import {
 	MATCHED,
 	REF_DETACHED,
 	UNDEFINED,
-	NULL,
-	HAS_MOVE_BEFORE_SUPPORT
+	NULL
 } from '../constants';
 import { isArray } from '../util';
 import { getDomSibling } from '../component';
@@ -415,11 +414,8 @@ function insert(parentVNode, oldDom, parentDom, isMounting) {
 		}
 
 		if (parentVNode._dom != oldDom) {
-			if (
-				HAS_MOVE_BEFORE_SUPPORT &&
-				!isMounting &&
-				parentVNode._dom.parentNode
-			) {
+			// Containers that aren't DOM nodes may not implement moveBefore()
+			if (!isMounting && parentDom.moveBefore && parentVNode._dom.parentNode) {
 				// @ts-expect-error This isn't added to TypeScript lib.d.ts yet
 				parentDom.moveBefore(parentVNode._dom, oldDom);
 			} else {

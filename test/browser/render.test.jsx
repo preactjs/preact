@@ -2231,5 +2231,22 @@ describe('render()', () => {
 			render(<List items={[1, 3, 0, 2]} />, root);
 			expect(scratch.innerHTML).to.equal(html([1, 3, 0, 2]));
 		});
+
+		it('should reorder children in containers without moveBefore()', () => {
+			scratch.innerHTML = html([1, 2, 3]);
+			const root = createRootFragment(scratch, [
+				scratch.children[1],
+				scratch.children[2],
+				scratch.children[3]
+			]);
+			delete root.moveBefore;
+
+			render(<List items={[1, 2, 3]} />, root);
+			render(<List items={[3, 1, 2]} />, root);
+			expect(scratch.innerHTML).to.equal(html([3, 1, 2]));
+
+			render(<List items={[2, 3, 1]} />, root);
+			expect(scratch.innerHTML).to.equal(html([2, 3, 1]));
+		});
 	});
 });
