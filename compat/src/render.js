@@ -217,7 +217,7 @@ function handleDomVNode(vnode, props, type) {
 				(type == 'input' || type == 'textarea') &&
 				!onChangeInputType(props.type)
 			) {
-				lowerCased = i = 'oninput';
+				lowerCased = 'oninput';
 			} else if (lowerCased == 'onfocus') {
 				i = 'onfocusin';
 			} else if (lowerCased == 'onblur') {
@@ -265,15 +265,15 @@ function handleDomVNode(vnode, props, type) {
 		}
 	}
 
-	if (props.class && !props.className) {
+	if (props.className) {
+		normalizedProps.class = normalizedProps.className = props.className;
+	} else if (props.class) {
 		normalizedProps.class = props.class;
 		Object.defineProperty(
 			normalizedProps,
 			'className',
 			classNameDescriptorNonEnumberable
 		);
-	} else if (props.className) {
-		normalizedProps.class = normalizedProps.className = props.className;
 	}
 
 	vnode.props = normalizedProps;

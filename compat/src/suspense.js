@@ -9,7 +9,8 @@ import { assign } from './util';
 
 function detachedClone(vnode, detachedParent, parentDom) {
 	if (vnode) {
-		const hooks = vnode._component && vnode._component.__hooks;
+		const component = vnode._component;
+		const hooks = component && component.__hooks;
 		if (hooks) {
 			hooks._list.forEach(effect => {
 				// Only effects carry `_passive`; clearing `_args` makes them run
@@ -22,7 +23,7 @@ function detachedClone(vnode, detachedParent, parentDom) {
 			// Drop effects queued by the aborted render; `options._render` swaps in
 			// a fresh `_pendingEffects` array before anything is pushed again, so
 			// sharing one empty array here is safe.
-			hooks._pendingEffects = vnode._component._renderCallbacks = [];
+			hooks._pendingEffects = component._renderCallbacks = [];
 		}
 
 		// Unmounting the clone detaches DOM refs; flag the original so the
@@ -30,15 +31,14 @@ function detachedClone(vnode, detachedParent, parentDom) {
 		if (typeof vnode.type == 'string') vnode._flags |= REF_DETACHED;
 
 		vnode = assign({ constructor: undefined }, vnode);
-		if (vnode._component) {
-			if (vnode._component._parentDom == parentDom) {
-				vnode._component._parentDom = detachedParent;
+		if (component) {
+			if (component._parentDom == parentDom) {
+				component._parentDom = detachedParent;
 			}
 
-			vnode._component._bits |= COMPONENT_FORCE;
-
-			vnode._component = null;
+			component._bits |= COMPONENT_FORCE;
 		}
+		vnode._component = null;
 
 		vnode._children =
 			vnode._children &&
@@ -63,14 +63,13 @@ function removeOriginal(vnode, detachedParent, originalParent) {
 				removeOriginal(child, detachedParent, originalParent)
 			);
 
-		if (vnode._component) {
-			if (vnode._component._parentDom == detachedParent) {
-				if (vnode._dom) {
-					originalParent.appendChild(vnode._dom);
-				}
-				vnode._component._bits |= COMPONENT_FORCE;
-				vnode._component._parentDom = originalParent;
+		const component = vnode._component;
+		if (component && component._parentDom == detachedParent) {
+			if (vnode._dom) {
+				originalParent.appendChild(vnode._dom);
 			}
+			component._bits |= COMPONENT_FORCE;
+			component._parentDom = originalParent;
 		}
 	}
 
@@ -143,8 +142,8 @@ function createSuspense() {
 			if (!--this._pendingSuspensionCount) {
 				// If the suspension was during hydration we don't need to restore the
 				// suspended children into the _children array
-				if (this.state._suspended) {
-					const suspendedVNode = this.state._suspended;
+				const suspendedVNode = this.state._suspended;
+				if (suspendedVNode) {
 					this._vnode._children[0] = removeOriginal(
 						suspendedVNode,
 						suspendedVNode._component._parentDom,
