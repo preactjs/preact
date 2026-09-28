@@ -3,45 +3,9 @@ import {
 	COMPONENT_FORCE,
 	FORCE_PROPS_REVALIDATE,
 	MODE_HYDRATE,
-	REF_DETACHED,
-	UNDEFINED
+	REF_DETACHED
 } from '../../src/constants';
 import { assign } from './util';
-
-function initSuspenseHooks() {
-	const oldCatchError = options._catchError;
-	options._catchError = (error, newVNode, oldVNode, errorInfo) => {
-		if (error.then) {
-			/** @type {import('./internal').Component} */
-			let component;
-			let vnode = newVNode;
-
-			while ((vnode = vnode._parent)) {
-				if ((component = vnode._component) && component._childDidSuspend) {
-					// A component that suspends before ever committing has no state
-					// worth keeping; mounted ones keep their hooks while parked.
-					if (oldVNode && !oldVNode._component)
-						newVNode._component.__hooks = UNDEFINED;
-					// Don't call oldCatchError if we found a Suspense
-					return component._childDidSuspend(error, newVNode);
-				}
-			}
-		}
-		oldCatchError(error, newVNode, oldVNode, errorInfo);
-	};
-
-	const oldUnmount = options.unmount;
-	options.unmount = vnode => {
-		/** @type {import('./internal').Component} */
-		const component = vnode._component;
-		if (component) component._unmounted = true;
-		if (component && component._onResolve) {
-			component._onResolve();
-		}
-
-		if (oldUnmount) oldUnmount(vnode);
-	};
-}
 
 function detachedClone(vnode, detachedParent, parentDom) {
 	if (vnode) {
@@ -52,7 +16,7 @@ function detachedClone(vnode, detachedParent, parentDom) {
 				// again when the tree is revealed, memo/ref state stays intact.
 				if (effect._passive != null) {
 					if (typeof effect._cleanup == 'function') effect._cleanup();
-					effect._cleanup = effect._args = UNDEFINED;
+					effect._cleanup = effect._args = undefined;
 				}
 			});
 			// Drop effects queued by the aborted render; `options._render` swaps in
@@ -65,8 +29,8 @@ function detachedClone(vnode, detachedParent, parentDom) {
 		// reveal attaches them again.
 		if (typeof vnode.type == 'string') vnode._flags |= REF_DETACHED;
 
-		vnode = assign({ constructor: UNDEFINED }, vnode);
-		if (vnode._component != null) {
+		vnode = assign({ constructor: undefined }, vnode);
+		if (vnode._component) {
 			if (vnode._component._parentDom == parentDom) {
 				vnode._component._parentDom = detachedParent;
 			}
@@ -115,12 +79,42 @@ function removeOriginal(vnode, detachedParent, originalParent) {
 
 // having custom inheritance instead of a class here saves a lot of bytes
 function createSuspense() {
-	initSuspenseHooks();
+	const oldCatchError = options._catchError;
+	options._catchError = (error, newVNode, oldVNode, errorInfo) => {
+		if (error.then) {
+			/** @type {import('./internal').Component} */
+			let component;
+			let vnode = newVNode;
+
+			while ((vnode = vnode._parent)) {
+				if ((component = vnode._component) && component._childDidSuspend) {
+					// A component that suspends before ever committing has no state
+					// worth keeping; mounted ones keep their hooks while parked.
+					if (oldVNode && !oldVNode._component)
+						newVNode._component.__hooks = undefined;
+					// Don't call oldCatchError if we found a Suspense
+					return component._childDidSuspend(error, newVNode);
+				}
+			}
+		}
+		oldCatchError(error, newVNode, oldVNode, errorInfo);
+	};
+
+	const oldUnmount = options.unmount;
+	options.unmount = vnode => {
+		/** @type {import('./internal').Component} */
+		const component = vnode._component;
+		if (component && component._onResolve) {
+			component._onResolve();
+		}
+
+		if (oldUnmount) oldUnmount(vnode);
+	};
 
 	function Suspense() {
 		// we do not call super here to golf some bytes...
 		this._pendingSuspensionCount = 0;
-		this._suspenders = null;
+		this._suspenders = [];
 		this._detachOnNextRender = null;
 	}
 
@@ -137,30 +131,15 @@ function createSuspense() {
 	Suspense.prototype._childDidSuspend = function (promise, suspendingVNode) {
 		const suspendingComponent = suspendingVNode._component;
 
-		if (this._suspenders == null) {
-			this._suspenders = [];
-		}
 		this._suspenders.push(suspendingComponent);
 
-		let resolved = false;
+		let resolved;
 		const onResolved = () => {
-			if (resolved || this._unmounted) return;
+			// Core nulls `_parentDom` when the boundary unmounts.
+			if (resolved || !this._parentDom) return;
 
 			resolved = true;
 			suspendingComponent._onResolve = null;
-
-			onSuspensionComplete();
-		};
-
-		suspendingComponent._onResolve = onResolved;
-
-		// Store and null _parentDom to prevent setState/forceUpdate from
-		// scheduling renders while suspended. Render would be a no-op anyway
-		// since renderComponent checks _parentDom, but this avoids queue churn.
-		const originalParentDom = suspendingComponent._parentDom;
-		suspendingComponent._parentDom = null;
-
-		const onSuspensionComplete = () => {
 			if (!--this._pendingSuspensionCount) {
 				// If the suspension was during hydration we don't need to restore the
 				// suspended children into the _children array
@@ -184,6 +163,14 @@ function createSuspense() {
 			}
 		};
 
+		suspendingComponent._onResolve = onResolved;
+
+		// Store and null _parentDom to prevent setState/forceUpdate from
+		// scheduling renders while suspended. Render would be a no-op anyway
+		// since renderComponent checks _parentDom, but this avoids queue churn.
+		const originalParentDom = suspendingComponent._parentDom;
+		suspendingComponent._parentDom = null;
+
 		/**
 		 * We do not set `suspended: true` during hydration because we want the actual markup
 		 * to remain on screen and hydrate it when the suspense actually gets resolved.
@@ -198,10 +185,6 @@ function createSuspense() {
 			});
 		}
 		promise.then(onResolved, onResolved);
-	};
-
-	Suspense.prototype.componentWillUnmount = function () {
-		this._suspenders = [];
 	};
 
 	/**
@@ -240,7 +223,7 @@ export const Suspense = /* @__PURE__ */ createSuspense();
 
 export function lazy(loader) {
 	let prom;
-	let component = null;
+	let component;
 	let error;
 	let resolved;
 
