@@ -301,7 +301,7 @@ export function diff(
 
 			const renderResult =
 				tmp && tmp.type === Fragment && tmp.key == NULL
-					? cloneNode(tmp.props.children)
+					? tmp.props.children
 					: tmp;
 
 			// A vnode carrying a `_parentDom` prop, considered a new root,
@@ -485,20 +485,6 @@ export function commitRoot(commitQueue, root, refQueue) {
 			options._catchError(e, c._vnode);
 		}
 	});
-}
-
-function cloneNode(node) {
-	if (typeof node != 'object' || node == NULL || node._depth) {
-		return node;
-	}
-
-	if (isArray(node)) {
-		return node.map(cloneNode);
-	}
-
-	if (node.constructor !== UNDEFINED) return NULL;
-
-	return assign({ constructor: UNDEFINED }, node);
 }
 
 /**
