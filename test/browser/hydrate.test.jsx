@@ -610,3 +610,43 @@ describe('hydrate()', () => {
 		expect(scratch.firstChild.content.firstChild).to.equal(h1);
 	});
 });
+
+describe('hydrate() with non-vnode children', () => {
+	/** @type {HTMLElement} */
+	let scratch;
+
+	beforeEach(() => {
+		scratch = setupScratch();
+	});
+
+	afterEach(() => {
+		teardown(scratch);
+	});
+
+	it('should hydrate a string', () => {
+		scratch.innerHTML = 'text';
+		const text = scratch.firstChild;
+
+		hydrate('text', scratch);
+		expect(scratch.innerHTML).to.equal('text');
+		expect(scratch.firstChild).to.equal(text);
+	});
+
+	it('should hydrate a number', () => {
+		scratch.innerHTML = '0';
+		const text = scratch.firstChild;
+
+		hydrate(0, scratch);
+		expect(scratch.innerHTML).to.equal('0');
+		expect(scratch.firstChild).to.equal(text);
+	});
+
+	it('should hydrate null, undefined and booleans like Preact 10', () => {
+		for (const child of [null, undefined, false, true]) {
+			scratch.innerHTML = '<p>ssr</p>';
+			delete scratch._children;
+			expect(() => hydrate(child, scratch)).not.to.throw();
+			expect(scratch.innerHTML).to.equal('<p>ssr</p>');
+		}
+	});
+});
