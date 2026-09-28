@@ -300,7 +300,7 @@ export function diff(
 
 			const renderResult =
 				tmp && tmp.type === Fragment && tmp.key == NULL
-					? cloneNode(tmp.props.children)
+					? tmp.props.children
 					: tmp;
 
 			// A vnode carrying a `_parentDom` prop, considered a new root,
@@ -490,20 +490,6 @@ export function commitRoot(commitQueue, root, refQueue) {
 	});
 }
 
-function cloneNode(node) {
-	if (typeof node != 'object' || node == NULL || node._depth) {
-		return node;
-	}
-
-	if (isArray(node)) {
-		return node.map(cloneNode);
-	}
-
-	if (node.constructor !== UNDEFINED) return NULL;
-
-	return assign({ constructor: UNDEFINED }, node);
-}
-
 /**
  * Diff two virtual nodes representing DOM element
  * @param {PreactElement} dom The DOM element representing the virtual nodes
@@ -518,7 +504,8 @@ function cloneNode(node) {
  * @param {boolean} isHydrating Whether or not we are in hydration
  * @param {any[]} refQueue an array of elements needed to invoke refs
  * @param {PreactElement} parentDom The parent this element will be inserted
- * into; new nodes are created from its ownerDocument (e.g. iframes)
+ * into; new nodes are created from its ownerDocument (e.g. iframes), or from
+ * the global document for containers that don't have one
  * @returns {PreactElement}
  */
 function diffElementNodes(
@@ -574,7 +561,7 @@ function diffElementNodes(
 	}
 
 	if (!dom) {
-		const doc = parentDom.ownerDocument;
+		const doc = parentDom.ownerDocument || document;
 		if (!nodeType) {
 			return doc.createTextNode(newProps);
 		}
