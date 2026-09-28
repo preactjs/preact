@@ -26,6 +26,9 @@ function getDomChildren(vnode) {
 
 	vnode._children.forEach(child => {
 		if (child && typeof child.type === 'function') {
+			// Portal children are mounted into another DOM parent (v11 keeps
+			// them in the vnode tree), so they are not DOM children of `vnode`.
+			if (child.props._parentDom) return;
 			domChildren.push.apply(domChildren, getDomChildren(child));
 		} else if (child && typeof child.type === 'string') {
 			domChildren.push(child.type);
@@ -42,6 +45,11 @@ function getDomChildren(vnode) {
 function getClosestDomNodeParentName(parent) {
 	if (!parent) return '';
 	if (typeof parent.type == 'function') {
+		// Crossing a portal boundary: the DOM parent is the portal container.
+		// ShadowRoot/DocumentFragment containers have no localName -> skip.
+		if (parent.props._parentDom) {
+			return parent.props._parentDom.localName || '';
+		}
 		if (parent._parent == null) {
 			if (parent._dom != null && parent._dom.parentNode != null) {
 				return parent._dom.parentNode.localName;
