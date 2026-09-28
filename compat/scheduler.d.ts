@@ -9,4 +9,4 @@ export function unstable_runWithPriority(
 	callback: () => void
 ): void;
 
-export var unstable_now: DOMHighResTimeStamp;
+export function unstable_now(): DOMHighResTimeStamp;
