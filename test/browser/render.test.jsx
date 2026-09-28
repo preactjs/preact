@@ -2148,5 +2148,24 @@ describe('render()', () => {
 			expect(rootCreateElementSpy).not.toBeCalled();
 			expect(iframeCreateElementSpy).toBeCalled();
 		});
+
+		it('falls back to the global document for containers without an ownerDocument', () => {
+			// A fake container like `createRootFragment()` from preact-root-fragment
+			const container = {
+				nodeType: 1,
+				parentNode: scratch,
+				firstChild: null,
+				childNodes: [],
+				insertBefore: (c, r) => scratch.insertBefore(c, r),
+				appendChild: c => scratch.appendChild(c),
+				removeChild: c => scratch.removeChild(c)
+			};
+
+			render(<div>Hello world</div>, container);
+			expect(scratch.innerHTML).to.equal('<div>Hello world</div>');
+
+			render('Hello text', container);
+			expect(scratch.innerHTML).to.equal('Hello text');
+		});
 	});
 });
