@@ -90,19 +90,6 @@ const JS_TO_CSS = {};
 const CSS_REGEX = /[A-Z]/g;
 
 /**
- * Unwrap potential signals.
- * @param {*} value
- * @returns {*}
- */
-function normalizeAttrValue(value) {
-	return value != null &&
-		typeof value == 'object' &&
-		typeof value.valueOf == 'function'
-		? value.valueOf()
-		: value;
-}
-
-/**
  * Serialize an HTML attribute to a string. This function is not
  * expected to be used directly, but rather through a precompile
  * JSX transform
@@ -116,7 +103,10 @@ function jsxAttr(name, value) {
 		if (typeof result == 'string') return result;
 	}
 
-	value = normalizeAttrValue(value);
+	// Unwrap potential signals.
+	if (value && typeof value == 'object' && typeof value.valueOf == 'function') {
+		value = value.valueOf();
+	}
 
 	if (name == 'ref' || name == 'key') return '';
 	if (name == 'style' && typeof value == 'object') {

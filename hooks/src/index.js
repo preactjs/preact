@@ -243,7 +243,7 @@ export function useReducer(reducer, initialState, init) {
 				// We check whether we have components with a nextValue set that
 				// have values that aren't equal to one another this pushes
 				// us to update further down the tree
-				let updatedHook = false;
+				let updatedHook;
 				let shouldUpdate = this.props != p;
 				hooks._list.some(hookItem => {
 					if (hookItem._nextValue) {
@@ -321,7 +321,7 @@ export function useImperativeHandle(ref, createHandle, args) {
 				const result = ref(createHandle());
 				return () => {
 					ref(null);
-					if (result && typeof result == 'function') result();
+					if (typeof result == 'function') result();
 				};
 			} else if (ref) {
 				ref.current = createHandle();
@@ -412,7 +412,7 @@ export function useErrorBoundary(cb) {
 	return [
 		errState[0],
 		() => {
-			errState[1](undefined);
+			errState[1]();
 		}
 	];
 }
