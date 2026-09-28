@@ -304,6 +304,17 @@ options.vnode = vnode => {
 			vnode.props = normalizedProps;
 		}
 	}
+
+	// React 19 keeps `ref` in element.props for every element type, and that's
+	// where libraries detecting React 19 read it (e.g. MUI's getReactElementRef).
+	// DOM and class vnodes keep theirs on vnode.ref.
+	if (vnode.ref && !('ref' in vnode.props)) {
+		Object.defineProperty(vnode.props, 'ref', {
+			value: vnode.ref,
+			configurable: true,
+			writable: true
+		});
+	}
 	vnode.$$typeof = REACT_ELEMENT_TYPE;
 
 	if (oldVNodeHook) oldVNodeHook(vnode);
