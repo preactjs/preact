@@ -515,7 +515,8 @@ function cloneNode(node) {
  * @param {boolean} isHydrating Whether or not we are in hydration
  * @param {any[]} refQueue an array of elements needed to invoke refs
  * @param {PreactElement} parentDom The parent this element will be inserted
- * into; new nodes are created from its ownerDocument (e.g. iframes)
+ * into; new nodes are created from its ownerDocument (e.g. iframes), or from
+ * the global document for containers that don't have one
  * @returns {PreactElement}
  */
 function diffElementNodes(
@@ -571,7 +572,7 @@ function diffElementNodes(
 	}
 
 	if (!dom) {
-		const doc = parentDom.ownerDocument;
+		const doc = parentDom.ownerDocument || document;
 		if (!nodeType) {
 			return doc.createTextNode(newProps);
 		}
