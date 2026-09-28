@@ -431,6 +431,21 @@ describe('event handling', () => {
 			expect(upper).toHaveBeenCalledOnce();
 		});
 
+		it('should keep props for the same event independent', () => {
+			const upper = vi.fn(),
+				lower = vi.fn();
+
+			render(<div onClick={upper} onclick={lower} />, scratch);
+			fireEvent(scratch.firstChild, 'click');
+			expect(upper).toHaveBeenCalledOnce();
+			expect(lower).toHaveBeenCalledOnce();
+
+			render(<div onClick={upper} />, scratch);
+			fireEvent(scratch.firstChild, 'click');
+			expect(upper).toHaveBeenCalledTimes(2);
+			expect(lower).toHaveBeenCalledOnce();
+		});
+
 		it('should lowercase PascalCase custom event names', () => {
 			const myEvent = vi.fn();
 
