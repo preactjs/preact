@@ -407,14 +407,11 @@ function insert(parentVNode, oldDom, parentDom, isMounting) {
 
 		return oldDom;
 	} else {
+		// A cursor a parked Suspense subtree detached can't be a reference node:
+		// retry from the vnode tree, then give up and append.
 		if (oldDom && !oldDom.parentNode) {
 			oldDom = getDomSibling(parentVNode);
-		}
-
-		// A cursor outside the container (another root's container, or a node a
-		// parked Suspense subtree detached) can't be a reference node.
-		if (oldDom && oldDom.parentNode != parentDom) {
-			oldDom = NULL;
+			if (oldDom && !oldDom.parentNode) oldDom = NULL;
 		}
 
 		if (parentVNode._dom != oldDom) {
