@@ -1346,6 +1346,61 @@ describe('suspense hydration', () => {
 		});
 	});
 
+	it('should keep its own markers when re-rendered by a parent while suspended during hydration', async () => {
+		const originalHtml =
+			'<!--$s:0--><p>outer</p><!--$s:1--><p>nested</p><!--/$s:1--><!--/$s:0--><div>0</div>';
+		scratch.innerHTML = originalHtml;
+		const outer = scratch.childNodes[1];
+		const nested = scratch.childNodes[3];
+		clearLog();
+
+		const [LazyOuter, resolveOuter] = createLazy();
+		const [LazyNested, resolveNested] = createLazy();
+
+		let update;
+		function App() {
+			const [count, setCount] = useState(0);
+			update = () => setCount(count + 1);
+			return (
+				<>
+					<Suspense>
+						<LazyOuter />
+					</Suspense>
+					<div>{count}</div>
+				</>
+			);
+		}
+
+		hydrate(<App />, scratch);
+		rerender();
+
+		update();
+		rerender();
+		expect(scratch.innerHTML).to.equal(
+			'<!--$s:0--><p>outer</p><!--$s:1--><p>nested</p><!--/$s:1--><!--/$s:0--><div>1</div>'
+		);
+		clearLog();
+
+		await resolveOuter(() => (
+			<>
+				<p>outer</p>
+				<Suspense>
+					<LazyNested />
+				</Suspense>
+			</>
+		));
+		rerender();
+		await resolveNested(() => <p>nested</p>);
+		rerender();
+
+		expect(scratch.innerHTML).to.equal(
+			'<!--$s:0--><p>outer</p><!--$s:1--><p>nested</p><!--/$s:1--><!--/$s:0--><div>1</div>'
+		);
+		expect(scratch.childNodes[1]).to.equal(outer);
+		expect(scratch.childNodes[3]).to.equal(nested);
+		expect(getLog()).to.deep.equal([]);
+	});
+
 	it('should use updated DOM when stream patcher replaces content before suspend resolves', () => {
 		scratch.innerHTML =
 			'<!--$s:0--><span>Loading</span><!--/$s:0--><div>after</div>';
@@ -1482,5 +1537,41 @@ describe('suspense hydration', () => {
 		} finally {
 			portalRoot.remove();
 		}
+	});
+});
+
+describe('suspense hydration resuming into mismatched server DOM', () => {
+	/** @type {HTMLDivElement} */
+	let scratch, rerender;
+
+	beforeEach(() => {
+		scratch = setupScratch();
+		rerender = setupRerender();
+	});
+
+	afterEach(() => {
+		teardown(scratch);
+	});
+
+	it('should remove server-rendered nodes the resumed boundary does not claim', async () => {
+		scratch.innerHTML = '<!--$s--><section>About</section><!--/$s-->';
+
+		const [Lazy, resolve] = createLazy();
+		hydrate(
+			<Suspense>
+				<Lazy />
+			</Suspense>,
+			scratch
+		);
+		rerender();
+		expect(scratch.innerHTML).to.equal(
+			'<!--$s--><section>About</section><!--/$s-->'
+		);
+
+		await resolve(() => <article>User</article>);
+		rerender();
+		expect(scratch.innerHTML).to.equal(
+			'<!--$s--><article>User</article><!--/$s-->'
+		);
 	});
 });

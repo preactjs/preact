@@ -68,22 +68,25 @@ export function diff(
 ) {
 	/** @type {any} */
 	let tmp,
+		resumed,
 		newType = newVNode.type;
 
 	// When passing through createElement it assigns the object
 	// constructor as undefined. This to prevent JSON-injection.
 	if (newVNode.constructor !== UNDEFINED) return NULL;
 
-	// If the previous diff bailed out, resume creating/hydrating.
-	// `tmp` holds the stored excess node until the options._diff call below.
+	// If the previous diff bailed out, resume creating/hydrating into the DOM
+	// that was kept while suspended (server-rendered, or already in the
+	// container we rendered into). `tmp` holds the stored excess node until the
+	// options._diff call below.
 	if (
 		oldVNode._flags & MODE_SUSPENDED &&
-		// @ts-expect-error This is 1 or 0 (true or false)
-		(isHydrating = oldVNode._flags & MODE_HYDRATE) &&
-		(tmp = oldVNode._component._excess)
+		// @ts-expect-error This is MODE_HYDRATE or 0
+		((isHydrating = oldVNode._flags & MODE_HYDRATE),
+		(tmp = oldVNode._component._excess))
 	) {
-		newVNode._flags |= MODE_HYDRATE;
-		excessDomChildren = [];
+		newVNode._flags |= isHydrating;
+		resumed = excessDomChildren = [];
 		if (tmp.nodeType == 8) {
 			// Re-scan DOM from stored start marker for streamed hydration.
 			// `depth` only ever reaches 0 through the `break` below, so it
@@ -103,7 +106,6 @@ export function diff(
 			excessDomChildren.push(tmp);
 		}
 		oldDom = excessDomChildren[0];
-		oldVNode._component._excess = NULL;
 	}
 
 	if ((tmp = options._diff)) tmp(newVNode);
@@ -358,6 +360,10 @@ export function diff(
 
 			// We successfully rendered this VNode, unset any stored hydration/bailout state:
 			newVNode._flags &= RESET_MODE;
+			if (oldVNode._flags & MODE_SUSPENDED) c._excess = NULL;
+
+			// Remove the kept DOM this resumed render didn't claim
+			if (resumed) resumed.some(removeNode);
 
 			if (c._renderCallbacks.length) {
 				commitQueue.push(c);
@@ -416,8 +422,11 @@ export function diff(
 						}
 						startMarker = oldDom;
 					}
-					// Store the start marker directly; children re-scanned on resume
-					newVNode._component._excess = startMarker;
+					// Store the start marker directly; children re-scanned on resume.
+					// A re-suspension keeps the marker it originally started from.
+					if (!newVNode._component._excess) {
+						newVNode._component._excess = startMarker;
+					}
 					newVNode._dom = oldDom;
 				} else if (excessDomChildren) {
 					excessDomChildren.some(removeNode);
