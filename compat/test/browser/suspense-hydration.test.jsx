@@ -1484,3 +1484,39 @@ describe('suspense hydration', () => {
 		}
 	});
 });
+
+describe('suspense hydration resuming into mismatched server DOM', () => {
+	/** @type {HTMLDivElement} */
+	let scratch, rerender;
+
+	beforeEach(() => {
+		scratch = setupScratch();
+		rerender = setupRerender();
+	});
+
+	afterEach(() => {
+		teardown(scratch);
+	});
+
+	it('should remove server-rendered nodes the resumed boundary does not claim', async () => {
+		scratch.innerHTML = '<!--$s--><section>About</section><!--/$s-->';
+
+		const [Lazy, resolve] = createLazy();
+		hydrate(
+			<Suspense>
+				<Lazy />
+			</Suspense>,
+			scratch
+		);
+		rerender();
+		expect(scratch.innerHTML).to.equal(
+			'<!--$s--><section>About</section><!--/$s-->'
+		);
+
+		await resolve(() => <article>User</article>);
+		rerender();
+		expect(scratch.innerHTML).to.equal(
+			'<!--$s--><article>User</article><!--/$s-->'
+		);
+	});
+});

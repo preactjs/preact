@@ -1,4 +1,5 @@
 import { act, setupRerender } from 'preact/test-utils';
+import { render as coreRender } from 'preact';
 import React, {
 	createElement,
 	render,
@@ -3018,5 +3019,60 @@ describe('suspense', () => {
 			rerender();
 			expect(portalRoot.innerHTML).to.equal('<i>1</i>');
 		});
+	});
+});
+
+describe('suspense resuming into existing DOM', () => {
+	/** @type {HTMLDivElement} */
+	let scratch, rerender;
+
+	beforeEach(() => {
+		scratch = setupScratch();
+		rerender = setupRerender();
+	});
+
+	afterEach(() => {
+		teardown(scratch);
+	});
+
+	it('should reuse DOM kept while suspended when rendering into a non-empty container', async () => {
+		scratch.innerHTML = '<button class="placeholder">placeholder</button>';
+		const placeholder = scratch.firstChild;
+
+		const [Lazy, resolve] = createLazy();
+		coreRender(
+			<Suspense>
+				<Lazy />
+			</Suspense>,
+			scratch
+		);
+		// Kept until the boundary parks it for the fallback
+		expect(scratch.innerHTML).to.equal(
+			'<button class="placeholder">placeholder</button>'
+		);
+		rerender();
+
+		await resolve(() => <button class="real">real</button>);
+		rerender();
+		expect(scratch.innerHTML).to.equal('<button class="real">real</button>');
+		expect(scratch.firstChild).to.equal(placeholder);
+	});
+
+	it('should remove DOM kept while suspended that the resumed render does not use', async () => {
+		scratch.innerHTML = '<span>placeholder</span>';
+
+		const [Lazy, resolve] = createLazy();
+		coreRender(
+			<Suspense>
+				<Lazy />
+			</Suspense>,
+			scratch
+		);
+		expect(scratch.innerHTML).to.equal('<span>placeholder</span>');
+		rerender();
+
+		await resolve(() => <div>real</div>);
+		rerender();
+		expect(scratch.innerHTML).to.equal('<div>real</div>');
 	});
 });
