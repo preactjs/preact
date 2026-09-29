@@ -29,7 +29,7 @@ let currentComponent, hydrationRoot, renderTrackingInitialized;
 const CAMEL_PROPS =
 	/^(?:accent|alignment|arabic|baseline|cap|clip(?!PathU)|color|dominant|fill|flood|font|glyph(?!R)|horiz|image(?!S)|letter|lighting|marker(?!H|W|U)|overline|paint|pointer|shape|stop|strikethrough|stroke|text(?!L)|transform|underline|unicode|units|v|vector|vert|word|writing|x(?!C))[A-Z]/;
 const CAMEL_REPLACE = /[A-Z0-9]/g;
-const IS_DOM = typeof document != 'undefined';
+const IS_DOM = typeof document < 'u';
 
 /**
  * This is taken from https://github.com/facebook/react/blob/main/packages/use-sync-external-store/src/useSyncExternalStoreShimClient.js#L84
@@ -303,6 +303,17 @@ options.vnode = vnode => {
 			}
 			vnode.props = normalizedProps;
 		}
+	}
+
+	// React 19 keeps `ref` in element.props for every element type, and that's
+	// where libraries detecting React 19 read it (e.g. MUI's getReactElementRef).
+	// DOM and class vnodes keep theirs on vnode.ref.
+	if (vnode.ref && !('ref' in vnode.props)) {
+		Object.defineProperty(vnode.props, 'ref', {
+			value: vnode.ref,
+			configurable: true,
+			writable: true
+		});
 	}
 	vnode.$$typeof = REACT_ELEMENT_TYPE;
 
