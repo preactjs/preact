@@ -113,7 +113,7 @@ options._commit = (vnode, commitQueue) => {
 			);
 		} catch (e) {
 			commitQueue.some(c => {
-				if (c._renderCallbacks) c._renderCallbacks = [];
+				c._renderCallbacks = [];
 			});
 			commitQueue = [];
 			options._catchError(e, component._vnode);
@@ -137,7 +137,7 @@ options.unmount = vnode => {
 				// after paint, before any new passive effect (see #4299), with
 				// `_passive` repurposed to hold the error-routing component.
 				if (s._passive && s._cleanup) {
-					if (errorParent === undefined) {
+					if (!errorParent) {
 						errorParent = vnode._parent;
 						while (
 							errorParent &&
@@ -185,11 +185,7 @@ function getHookState(index, type) {
 			_pendingEffects: []
 		});
 
-	if (index >= hooks._list.length) {
-		hooks._list.push({});
-	}
-
-	return hooks._list[index];
+	return hooks._list[index] || (hooks._list[index] = {});
 }
 
 /**
@@ -219,9 +215,7 @@ export function useReducer(reducer, initialState, init) {
 			!init ? invokeOrReturn(undefined, initialState) : init(initialState),
 
 			action => {
-				const currentValue = hookState._nextValue
-					? hookState._nextValue[0]
-					: hookState._value[0];
+				const currentValue = (hookState._nextValue || hookState._value)[0];
 				const nextValue = hookState._reducer(currentValue, action);
 
 				if (!ObjectIs(currentValue, nextValue)) {
@@ -249,7 +243,7 @@ export function useReducer(reducer, initialState, init) {
 				// We check whether we have components with a nextValue set that
 				// have values that aren't equal to one another this pushes
 				// us to update further down the tree
-				let updatedHook = false;
+				let updatedHook;
 				let shouldUpdate = this.props != p;
 				hooks._list.some(hookItem => {
 					if (hookItem._nextValue) {
@@ -327,7 +321,7 @@ export function useImperativeHandle(ref, createHandle, args) {
 				const result = ref(createHandle());
 				return () => {
 					ref(null);
-					if (result && typeof result == 'function') result();
+					if (typeof result == 'function') result();
 				};
 			} else if (ref) {
 				ref.current = createHandle();
@@ -418,7 +412,7 @@ export function useErrorBoundary(cb) {
 	return [
 		errState[0],
 		() => {
-			errState[1](undefined);
+			errState[1]();
 		}
 	];
 }
@@ -489,17 +483,15 @@ let HAS_RAF = typeof requestAnimationFrame == 'function';
  * @param {() => void} callback
  */
 function afterNextFrame(callback) {
+	// Declared up front so a synchronous rAF polyfill can't hit the TDZ in `done`
+	let raf;
 	const done = () => {
 		clearTimeout(timeout);
 		if (HAS_RAF) cancelAnimationFrame(raf);
 		setTimeout(callback);
 	};
 	const timeout = setTimeout(done, RAF_TIMEOUT);
-
-	let raf;
-	if (HAS_RAF) {
-		raf = requestAnimationFrame(done);
-	}
+	raf = HAS_RAF && requestAnimationFrame(done);
 }
 
 // Note: if someone used options.debounceRendering = requestAnimationFrame,

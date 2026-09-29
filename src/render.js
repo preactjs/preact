@@ -31,8 +31,7 @@ export function render(vnode, parentDom) {
 	parentDom._children = createVNode(Fragment, { children: [vnode] });
 
 	// List of effects that need to be called after diffing.
-	let commitQueue = [],
-		refQueue = [];
+	let commitQueue, refQueue;
 
 	diff(
 		parentDom,
@@ -47,11 +46,11 @@ export function render(vnode, parentDom) {
 			: parentDom.firstChild
 				? slice.call(parentDom.childNodes)
 				: NULL,
-		commitQueue,
+		(commitQueue = []),
 		oldVNode ? oldVNode._dom : parentDom.firstChild,
-		// @ts-expect-error we are doing a bit-wise operation so it's either 0 or true
+		// @ts-expect-error we are doing a bit-wise operation so it's either MODE_HYDRATE or falsy
 		isHydrating,
-		refQueue
+		(refQueue = [])
 	);
 
 	// Flush all queued effects

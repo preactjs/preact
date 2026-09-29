@@ -167,7 +167,7 @@ function constructNewChildrenArray(
 	newChildrenLength
 ) {
 	/** @type {number} */
-	let i;
+	let i, skewedIndex, matchingIndex;
 	/** @type {VNode} */
 	let childVNode;
 	/** @type {VNode} */
@@ -230,19 +230,19 @@ function constructNewChildrenArray(
 			newChildren[i] = childVNode;
 		}
 
-		const skewedIndex = i + skew;
+		skewedIndex = i + skew;
 		childVNode._parent = newParentVNode;
 		childVNode._depth = newParentVNode._depth + 1;
 
 		// Temporarily store the matchingIndex on the _index property so we can pull
 		// out the oldVNode in diffChildren. We'll override this to the VNode's
 		// final index after using this property to get the oldVNode
-		const matchingIndex = (childVNode._index = findMatchingIndex(
+		matchingIndex = childVNode._index = findMatchingIndex(
 			childVNode,
 			oldChildren,
 			skewedIndex,
 			remainingOldChildren
-		));
+		);
 
 		oldVNode = NULL;
 		// ~matchingIndex is only falsy for -1, i.e. when no match was found
@@ -325,19 +325,20 @@ function constructNewChildrenArray(
 			childVNode = newChildren[i];
 			if (childVNode && childVNode._flags & MATCHED) {
 				// Binary search for the insertion point, keeping the pass at
-				// O(n log n) even for pathological reorders.
-				let lo = 0,
-					hi = tails.length;
-				while (lo < hi) {
-					const mid = (lo + hi) >> 1;
+				// O(n log n) even for pathological reorders. `skewedIndex` and
+				// `matchingIndex` are free here and double as the lo/hi bounds.
+				skewedIndex = 0;
+				matchingIndex = tails.length;
+				while (skewedIndex < matchingIndex) {
+					const mid = (skewedIndex + matchingIndex) >> 1;
 					if (tails[mid] < childVNode._index) {
-						lo = mid + 1;
+						skewedIndex = mid + 1;
 					} else {
-						hi = mid;
+						matchingIndex = mid;
 					}
 				}
-				tails[lo] = childVNode._index;
-				lisLengths[i] = lo + 1;
+				tails[skewedIndex] = childVNode._index;
+				lisLengths[i] = skewedIndex + 1;
 			}
 		}
 
@@ -491,10 +492,10 @@ function findMatchingIndex(
 	) {
 		return skewedIndex;
 	} else if (shouldSearch) {
-		let x = skewedIndex - 1;
-		let y = skewedIndex + 1;
-		while (x >= 0 || y < oldChildren.length) {
-			const childIndex = x >= 0 ? x-- : y++;
+		// `skewedIndex` walks forwards from here, `x` backwards
+		let x = skewedIndex++ - 1;
+		while (x >= 0 || skewedIndex < oldChildren.length) {
+			const childIndex = x >= 0 ? x-- : skewedIndex++;
 			oldVNode = oldChildren[childIndex];
 			if (
 				oldVNode &&

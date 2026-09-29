@@ -29,7 +29,7 @@ let currentComponent, hydrationRoot, renderTrackingInitialized;
 const CAMEL_PROPS =
 	/^(?:accent|alignment|arabic|baseline|cap|clip(?!PathU)|color|dominant|fill|flood|font|glyph(?!R)|horiz|image(?!S)|letter|lighting|marker(?!H|W|U)|overline|paint|pointer|shape|stop|strikethrough|stroke|text(?!L)|transform|underline|unicode|units|v|vector|vert|word|writing|x(?!C))[A-Z]/;
 const CAMEL_REPLACE = /[A-Z0-9]/g;
-const IS_DOM = typeof document != 'undefined';
+const IS_DOM = typeof document < 'u';
 
 /**
  * This is taken from https://github.com/facebook/react/blob/main/packages/use-sync-external-store/src/useSyncExternalStoreShimClient.js#L84
@@ -166,10 +166,8 @@ const classNameDescriptorNonEnumberable = {
 	}
 };
 
-function handleDomVNode(vnode) {
-	let props = vnode.props,
-		type = vnode.type,
-		normalizedProps = {},
+function handleDomVNode(vnode, props, type) {
+	let normalizedProps = {},
 		isNonDashedType = type.indexOf('-') == -1;
 
 	for (let i in props) {
@@ -219,7 +217,7 @@ function handleDomVNode(vnode) {
 				(type == 'input' || type == 'textarea') &&
 				!onChangeInputType(props.type)
 			) {
-				lowerCased = i = 'oninput';
+				lowerCased = 'oninput';
 			} else if (lowerCased == 'onfocus') {
 				i = 'onfocusin';
 			} else if (lowerCased == 'onblur') {
@@ -267,15 +265,15 @@ function handleDomVNode(vnode) {
 		}
 	}
 
-	if (props.class && !props.className) {
+	if (props.className) {
+		normalizedProps.class = normalizedProps.className = props.className;
+	} else if (props.class) {
 		normalizedProps.class = props.class;
 		Object.defineProperty(
 			normalizedProps,
 			'className',
 			classNameDescriptorNonEnumberable
 		);
-	} else if (props.className) {
-		normalizedProps.class = normalizedProps.className = props.className;
 	}
 
 	vnode.props = normalizedProps;
@@ -283,22 +281,23 @@ function handleDomVNode(vnode) {
 
 let oldVNodeHook = options.vnode;
 options.vnode = vnode => {
+	let props = vnode.props,
+		type = vnode.type;
+
 	// only normalize props on Element nodes
-	if (typeof vnode.type == 'string') {
-		handleDomVNode(vnode);
-	} else if (typeof vnode.type == 'function') {
-		const shouldApplyRef =
-			'prototype' in vnode.type && vnode.type.prototype.render;
-		if ('ref' in vnode.props && shouldApplyRef) {
-			vnode.ref = vnode.props.ref;
-			delete vnode.props.ref;
+	if (typeof type == 'string') {
+		handleDomVNode(vnode, props, type);
+	} else if (typeof type == 'function') {
+		if ('ref' in props && 'prototype' in type && type.prototype.render) {
+			vnode.ref = props.ref;
+			delete props.ref;
 		}
 
-		if (vnode.type.defaultProps) {
-			let normalizedProps = assign({}, vnode.props);
-			for (let i in vnode.type.defaultProps) {
+		if (type.defaultProps) {
+			let normalizedProps = assign({}, props);
+			for (let i in type.defaultProps) {
 				if (normalizedProps[i] === undefined) {
-					normalizedProps[i] = vnode.type.defaultProps[i];
+					normalizedProps[i] = type.defaultProps[i];
 				}
 			}
 			vnode.props = normalizedProps;

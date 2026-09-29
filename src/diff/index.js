@@ -89,18 +89,20 @@ export function diff(
 		resumed = excessDomChildren = [];
 		if (tmp.nodeType == 8) {
 			// Re-scan DOM from stored start marker for streamed hydration.
-			// `depth` only ever reaches 0 through the `break` below, so it
-			// doesn't need to be re-tested in the loop condition.
+			// `tmp` becomes the marker depth once we've stepped past the marker;
+			// it only ever reaches 0 through the `break` below, so it doesn't
+			// need to be re-tested in the loop condition. `oldDom` is reassigned
+			// right after the scan, so it doubles as the cursor.
 			for (
-				let depth = 1, node = tmp.nextSibling;
-				node;
-				node = node.nextSibling
+				oldDom = tmp.nextSibling, tmp = 1;
+				oldDom;
+				oldDom = oldDom.nextSibling
 			) {
-				if (node.nodeType == 8) {
-					if (node.data.startsWith('$s')) depth++;
-					else if (node.data.startsWith('/$s') && !--depth) break;
+				if (oldDom.nodeType == 8) {
+					if (oldDom.data.startsWith('$s')) tmp++;
+					else if (oldDom.data.startsWith('/$s') && !--tmp) break;
 				}
-				excessDomChildren.push(node);
+				excessDomChildren.push(oldDom);
 			}
 		} else {
 			excessDomChildren.push(tmp);
@@ -386,17 +388,16 @@ export function diff(
 					let commentMarkersToFind = 0,
 						startMarker;
 
-					newVNode._flags |= isHydrating
-						? MODE_HYDRATE | MODE_SUSPENDED
-						: MODE_SUSPENDED;
+					// @ts-expect-error isHydrating is MODE_HYDRATE or falsy
+					newVNode._flags |= MODE_SUSPENDED | isHydrating;
 
 					if (excessDomChildren) {
-						for (let i = 0; i < excessDomChildren.length; i++) {
-							let child = excessDomChildren[i];
+						for (tmp = 0; tmp < excessDomChildren.length; tmp++) {
+							let child = excessDomChildren[tmp];
 							if (!child) continue;
 
 							if (child.nodeType == 8) {
-								excessDomChildren[i] = NULL;
+								excessDomChildren[tmp] = NULL;
 								if (child.data.startsWith('$s')) {
 									if (!commentMarkersToFind++) startMarker = child;
 								} else if (
@@ -407,7 +408,7 @@ export function diff(
 									break;
 								}
 							} else if (commentMarkersToFind) {
-								excessDomChildren[i] = NULL;
+								excessDomChildren[tmp] = NULL;
 							}
 						}
 					}
@@ -567,12 +568,17 @@ function diffElementNodes(
 	}
 
 	if (!dom) {
-		const doc = parentDom.ownerDocument || document;
+		// `parentDom` is only needed for its document from here on
+		parentDom = parentDom.ownerDocument || document;
 		if (!nodeType) {
-			return doc.createTextNode(newProps);
+			return parentDom.createTextNode(newProps);
 		}
 
-		dom = doc.createElementNS(namespace, nodeType, newProps.is && newProps);
+		dom = parentDom.createElementNS(
+			namespace,
+			nodeType,
+			newProps.is && newProps
+		);
 
 		// we are creating a new node, so we can assume this is a new subtree (in
 		// case we are hydrating), this deopts the hydrate
