@@ -722,23 +722,23 @@ function diffElementNodes(
 
 /**
  * Invoke or update a ref, depending on whether it is a function or object ref.
- * @param {Ref<any> & { _unmount?: unknown }} ref
- * @param {any} value
+ * @param {Ref<any>} ref
+ * @param {any} value The element or component to attach, or `null` to detach
  * @param {VNode} vnode
+ * @param {any} [owner] The element or component the ref is detached from
  */
-export function applyRef(ref, value, vnode) {
+export function applyRef(ref, value, vnode, owner) {
 	try {
 		if (typeof ref == 'function') {
-			if (typeof ref._unmount == 'function') {
-				ref._unmount();
-			}
-
-			if (typeof ref._unmount != 'function' || value) {
-				// Store the cleanup function on the function
-				// instance object itself to avoid shape
-				// transitioning vnode
-				ref._unmount = ref(value);
-			}
+			if (value) {
+				// Store the cleanup on the element or component rather than on the
+				// ref function, which can be shared between several of them
+				value._refCleanup = ref(value);
+			} else if (owner && typeof owner._refCleanup == 'function') {
+				value = owner._refCleanup;
+				owner._refCleanup = NULL;
+				value();
+			} else ref(NULL);
 		} else ref.current = value;
 	} catch (e) {
 		options._catchError(e, vnode);
@@ -757,7 +757,7 @@ export function unmount(vnode, parentVNode, skipRemove) {
 	if (options.unmount) options.unmount(vnode);
 
 	if ((r = vnode.ref) && (!r.current || r.current == vnode._dom)) {
-		applyRef(r, NULL, parentVNode);
+		applyRef(r, NULL, parentVNode, vnode._component || vnode._dom);
 	}
 
 	if ((r = vnode._component)) {
