@@ -622,6 +622,67 @@ describe('Lifecycle methods', () => {
 			expect(scratch).to.have.property('textContent', 'Error: Adapted Error!');
 		});
 
+		describe('when getDerivedStateFromError succeeds and componentDidCatch rethrows', () => {
+			let adaptedError;
+			class Adapter extends Component {
+				static getDerivedStateFromError() {
+					return { failed: true };
+				}
+				componentDidCatch(error) {
+					throw (adaptedError = new Error('Adapted ' + error.message));
+				}
+				render() {
+					return this.state.failed ? 'Adapter fallback' : this.props.children;
+				}
+			}
+
+			// No error handling: must never be treated as the boundary
+			function Plain(props) {
+				return <div>{props.children}</div>;
+			}
+
+			function ThrowErr() {
+				throwExpectedError();
+			}
+
+			it('should bubble the new error past ancestors without error handling', () => {
+				render(
+					<Receiver>
+						<Plain>
+							<Adapter>
+								<ThrowErr />
+							</Adapter>
+						</Plain>
+					</Receiver>,
+					scratch
+				);
+
+				expect(Receiver.prototype.componentDidCatch).toHaveBeenCalledWith(
+					adaptedError,
+					expect.anything()
+				);
+
+				rerender();
+				expect(scratch).to.have.property(
+					'textContent',
+					'Error: Adapted Error!'
+				);
+			});
+
+			it('should throw the new error when no ancestor handles it', () => {
+				expect(() =>
+					render(
+						<Plain>
+							<Adapter>
+								<ThrowErr />
+							</Adapter>
+						</Plain>,
+						scratch
+					)
+				).to.throw('Adapted Error!');
+			});
+		});
+
 		it('should not treat a dirty ancestor without error handling as a boundary', () => {
 			let parent;
 			class Parent extends Component {
