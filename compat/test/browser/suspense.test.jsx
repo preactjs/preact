@@ -2915,6 +2915,38 @@ describe('suspense', () => {
 		expect(ref.current).to.equal(host);
 	});
 
+	it('should call a ref cleanup once when parked and once more on unmount', async () => {
+		const [Suspender, suspend] = createSuspender(() => <p>content</p>);
+		const log = [];
+		const ref = el => {
+			log.push('ref ' + el.textContent);
+			return () => log.push('cleanup ' + el.textContent);
+		};
+		render(
+			<Suspense fallback={<div>fallback</div>}>
+				<b ref={ref}>host</b>
+				<Suspender />
+			</Suspense>,
+			scratch
+		);
+
+		const [resolve] = suspend();
+		rerender();
+		expect(log).to.deep.equal(['ref host', 'cleanup host']);
+
+		await resolve(() => <p>resolved</p>);
+		rerender();
+		expect(log).to.deep.equal(['ref host', 'cleanup host', 'ref host']);
+
+		render(null, scratch);
+		expect(log).to.deep.equal([
+			'ref host',
+			'cleanup host',
+			'ref host',
+			'cleanup host'
+		]);
+	});
+
 	describe('portals', () => {
 		/** @type {HTMLDivElement} */
 		let portalRoot;
