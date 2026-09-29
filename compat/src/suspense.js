@@ -34,7 +34,6 @@ function initSuspenseHooks() {
 	options.unmount = vnode => {
 		/** @type {import('./internal').Component} */
 		const component = vnode._component;
-		if (component) component._unmounted = true;
 		if (component && component._onResolve) {
 			component._onResolve();
 		}
@@ -144,7 +143,8 @@ function createSuspense() {
 
 		let resolved = false;
 		const onResolved = () => {
-			if (resolved || this._unmounted) return;
+			// Core nulls `_parentDom` when the boundary unmounts.
+			if (resolved || !this._parentDom) return;
 
 			resolved = true;
 			suspendingComponent._onResolve = null;
