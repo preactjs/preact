@@ -2947,6 +2947,47 @@ describe('suspense', () => {
 		]);
 	});
 
+	it('should not run a child ref cleanup for a parked class ref', async () => {
+		const [Suspender, suspend] = createSuspender(() => <p>content</p>);
+		const log = [];
+		const classRef = () => {
+			log.push('ref class');
+			return () => log.push('cleanup class');
+		};
+		const hostRef = () => {
+			log.push('ref host');
+			return () => log.push('cleanup host');
+		};
+		class Host extends Component {
+			render() {
+				return <b ref={hostRef}>host</b>;
+			}
+		}
+		render(
+			<Suspense fallback={<div>fallback</div>}>
+				<Host ref={classRef} />
+				<Suspender />
+			</Suspense>,
+			scratch
+		);
+
+		const [resolve] = suspend();
+		rerender();
+		expect(log).to.deep.equal(['ref host', 'ref class', 'cleanup host']);
+
+		await resolve(() => <p>resolved</p>);
+		rerender();
+		render(null, scratch);
+		expect(log).to.deep.equal([
+			'ref host',
+			'ref class',
+			'cleanup host',
+			'ref host',
+			'cleanup class',
+			'cleanup host'
+		]);
+	});
+
 	describe('portals', () => {
 		/** @type {HTMLDivElement} */
 		let portalRoot;
