@@ -118,12 +118,7 @@ export function diffChildren(
 			(oldVNode.ref != childVNode.ref || oldVNode._flags & REF_DETACHED)
 		) {
 			if (oldVNode.ref != childVNode.ref && oldVNode.ref) {
-				applyRef(
-					oldVNode.ref,
-					NULL,
-					childVNode,
-					oldVNode._component || oldVNode._dom
-				);
+				applyRef(oldVNode.ref, NULL, childVNode, oldVNode);
 			}
 			refQueue.push(
 				childVNode.ref,
