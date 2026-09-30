@@ -85,29 +85,18 @@ jobs:
             exit 1
           fi
 
-      # Determine the npm dist-tag from the git tag:
-      # - Stable versions publish with --tag latest
-      # - Prerelease versions must use an approved prerelease identifier as the
-      #   dist-tag (10.29.0-rc.1 -> rc, 10.29.0-beta.1 -> beta)
+      # Determine the npm dist-tag from the git tag. `latest`, `rc` and `beta`
+      # belong to v11, so every 10.x release (stable and prerelease) publishes
+      # with --tag v10-latest. npm rejects tags that parse as a semver range,
+      # which rules out `v10` and `10.x`.
       - name: Determine dist-tag
         id: dist-tag
         run: |
           set -euo pipefail
 
           TAG="${GITHUB_REF_NAME}"
-          if [[ "$TAG" =~ ^10\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]]; then
-            echo "tag=latest" >> "$GITHUB_OUTPUT"
-          elif [[ "$TAG" =~ ^10\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)-([0-9A-Za-z-]+)(\.[0-9A-Za-z-]+)*$ ]]; then
-            DIST_TAG="${BASH_REMATCH[3]}"
-            case "$DIST_TAG" in
-              alpha|beta|rc|next)
-                echo "tag=$DIST_TAG" >> "$GITHUB_OUTPUT"
-                ;;
-              *)
-                echo "::error::Refusing to publish prerelease '$TAG' with unapproved npm dist-tag '$DIST_TAG'"
-                exit 1
-                ;;
-            esac
+          if [[ "$TAG" =~ ^10\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-[0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*)?$ ]]; then
+            echo "tag=v10-latest" >> "$GITHUB_OUTPUT"
           else
             echo "::error::Unexpected release tag '$TAG'"
             exit 1
