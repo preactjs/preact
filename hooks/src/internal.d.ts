@@ -19,7 +19,6 @@ export interface Options extends PreactOptions {
 	diffed?(vnode: VNode): void;
 	/** Attach a hook that is invoked after a tree was mounted or was updated. */
 	_commit?(vnode: VNode, commitQueue: Component[]): void;
-	_unmount?(vnode: VNode): void;
 	/** Attach a hook that is invoked before a hook's state is queried. */
 	_hook?(component: Component, index: number, type: HookType): void;
 }
