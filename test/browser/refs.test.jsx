@@ -430,6 +430,7 @@ describe('refs', () => {
 		rerender();
 		expect(calls).to.deep.equal([
 			'removing ref from two',
+			'removing ref from three',
 			'adding ref to one',
 			'adding ref to two',
 			'adding ref to three'
@@ -594,5 +595,28 @@ describe('refs', () => {
 
 		render(<App />, scratch);
 		expect(log).to.deep.equal(['ref a', 'ref b', 'cleanup a', 'cleanup b']);
+	});
+
+	it('should call the ref cleanup when the ref moves to another element', () => {
+		const log = [];
+		const ref = el => {
+			log.push('ref ' + el.id);
+			return () => log.push('cleanup ' + el.id);
+		};
+
+		function App({ active }) {
+			return (
+				<ul>
+					{['a', 'b'].map(id => (
+						<li key={id} id={id} ref={id === active ? ref : undefined} />
+					))}
+				</ul>
+			);
+		}
+
+		render(<App active="a" />, scratch);
+		render(<App active="b" />, scratch);
+		render(null, scratch);
+		expect(log).to.deep.equal(['ref a', 'cleanup a', 'ref b', 'cleanup b']);
 	});
 });

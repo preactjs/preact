@@ -731,17 +731,18 @@ export function applyRef(ref, value, vnode, owner) {
 	try {
 		if (typeof ref == 'function') {
 			// Store the cleanup on the element or component rather than on the
-			// ref function, which can be shared between several of them
-			if (value) value._refCleanup = ref(value);
+			// ref function, which can be shared between several of them. The
+			// slot is cleared on detach, so detaching twice is a no-op.
+			if (value) value._refCleanup = ref(value) || 1;
 			else if (
 				owner &&
 				(owner = owner._component || owner._dom) &&
-				typeof owner._refCleanup == 'function'
+				(value = owner._refCleanup)
 			) {
-				value = owner._refCleanup;
 				owner._refCleanup = NULL;
-				value();
-			} else ref(value);
+				if (typeof value == 'function') value();
+				else ref(NULL);
+			}
 		} else ref.current = value;
 	} catch (e) {
 		options._catchError(e, vnode);
