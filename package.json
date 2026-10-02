@@ -172,7 +172,10 @@
   "authors": [
     "The Preact Authors (https://github.com/preactjs/preact/contributors)"
   ],
-  "repository": "preactjs/preact",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/preactjs/preact.git"
+  },
   "bugs": "https://github.com/preactjs/preact/issues",
   "homepage": "https://preactjs.com",
   "devDependencies": {
