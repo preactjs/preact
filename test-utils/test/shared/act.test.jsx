@@ -412,6 +412,39 @@ describe('act', () => {
 				renderWorking();
 				expect(effectCount).to.equal(1);
 			});
+
+			it('should not affect future renders when several queued components throw', () => {
+				const setters = [];
+				function Toggle({ name }) {
+					const [broken, setBroken] = useState(false);
+					setters.push(setBroken);
+					if (broken) throw new Error(`${name} is broken`);
+					return null;
+				}
+
+				act(() => {
+					render(
+						<div>
+							<Toggle name="A" />
+							<Toggle name="B" />
+						</div>,
+						scratch
+					);
+				});
+
+				const prevRaf = options.requestAnimationFrame;
+				expect(() =>
+					act(() => {
+						setters.forEach(setBroken => setBroken(true));
+					})
+				).to.throw('A is broken');
+				expect(options.requestAnimationFrame).to.equal(prevRaf);
+				expect(options.debounceRendering).to.equal(undefined);
+
+				renderWorking();
+				expect(scratch.textContent).to.equal('1');
+				expect(effectCount).to.equal(1);
+			});
 		});
 
 		describe('asynchronously', () => {
