@@ -72,7 +72,8 @@ function detachedClone(vnode, detachedParent, parentDom) {
 
 			vnode._component._bits |= COMPONENT_FORCE;
 
-			vnode._component = null;
+			// Keep component refs attached while parked, as object refs already are
+			vnode._component = vnode.ref = null;
 		}
 
 		vnode._children =
