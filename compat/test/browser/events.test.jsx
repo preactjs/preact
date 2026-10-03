@@ -63,6 +63,21 @@ describe('preact/compat events', () => {
 		expect(vnode.props).to.haveOwnProperty('ondblclick');
 	});
 
+	it('should normalize ondoubleclickcapture event', () => {
+		const func = vi.fn(() => {});
+		render(<div onDoubleClickCapture={func} />, scratch);
+
+		expect(proto.addEventListener).toHaveBeenCalledOnce();
+		expect(proto.addEventListener).toHaveBeenCalledWith(
+			'dblclick',
+			expect.any(Function),
+			true
+		);
+
+		scratch.firstChild.dispatchEvent(createEvent('dblclick'));
+		expect(func).toHaveBeenCalledOnce();
+	});
+
 	it('should normalize onChange for textarea', () => {
 		let vnode = <textarea onChange={() => null} />;
 		expect(vnode.props).to.haveOwnProperty('oninput');
