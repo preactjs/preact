@@ -3,7 +3,20 @@ import {
 	Fragment,
 	SignalLike,
 	UnpackSignal,
-	AriaAttributes
+	AriaAttributes,
+	AccessibleAnchorHTMLAttributes,
+	AccessibleAreaHTMLAttributes,
+	AccessibleImgHTMLAttributes,
+	AccessibleInputHTMLAttributes,
+	AccessibleSelectHTMLAttributes,
+	AnchorHTMLAttributes,
+	AreaHTMLAttributes,
+	ComponentChildren,
+	ComponentProps,
+	HTMLInputTypeAttribute,
+	ImgHTMLAttributes,
+	InputHTMLAttributes,
+	SelectHTMLAttributes
 } from 'preact';
 
 function createSignal<T>(value: T): SignalLike<T> {
@@ -39,184 +52,434 @@ const signalValidMissingAriaRole = (
 	<button role={createSignal('presentation' as const)} />
 );
 
-// More complex role tests w/ unions
+// More complex role tests w/ unions, the role pairing lives on the opt-in
+// `Accessible*HTMLAttributes` types
 
-const aWithHrefValid = <a href="foo" role="button"></a>;
+const aWithHrefValid: AccessibleAnchorHTMLAttributes = {
+	href: 'foo',
+	role: 'button'
+};
 // @ts-expect-error An anchor with an href should not have a role of slider
-const aWithHrefInvalid = <a href="foo" role="slider"></a>;
+const aWithHrefInvalid: AccessibleAnchorHTMLAttributes = {
+	href: 'foo',
+	role: 'slider'
+};
 
-const aWithoutHrefValid = <a role="button"></a>;
+const aWithoutHrefValid: AccessibleAnchorHTMLAttributes = { role: 'button' };
 
-const areaWithHrefValid = <area href="foo" role="link"></area>;
+const areaWithHrefValid: AccessibleAreaHTMLAttributes = {
+	href: 'foo',
+	role: 'link'
+};
 // @ts-expect-error An area with an href should not have a role of button
-const areaWithHrefInvalid = <area href="foo" role="button"></area>;
+const areaWithHrefInvalid: AccessibleAreaHTMLAttributes = {
+	href: 'foo',
+	role: 'button'
+};
 
-const areaWithoutHrefValid = <area role="button"></area>;
+const areaWithoutHrefValid: AccessibleAreaHTMLAttributes = { role: 'button' };
 // @ts-expect-error An area with an href should not have a role of button
-const areaWithoutHrefInvalid = <area role="slider"></area>;
+const areaWithoutHrefInvalid: AccessibleAreaHTMLAttributes = { role: 'slider' };
 
-const imgWithAccessibleNameAriaLabelValid = (
-	<img aria-label="foo" role="button" />
-);
-const imgWithAccessibleNameAriaLabelledByValid = (
-	<img aria-labelledby="foo" role="button" />
-);
-const imgWithAccessibleNameAltValid = <img alt="foo" role="button" />;
-const imgWithAccessibleNameTitleValid = <img title="foo" role="button" />;
-const imgWithAccessibleNameAriaLabelInvalid = (
-	// @ts-expect-error An img with an accessible name should not have a role of presentation
-	<img aria-label="foo" role="presentation" />
-);
-const imgWithAccessibleNameAriaLabelledByInvalid = (
-	// @ts-expect-error An img with an accessible name should not have a role of presentation
-	<img aria-labelledby="foo" role="presentation" />
-);
+const imgWithAccessibleNameAriaLabelValid: AccessibleImgHTMLAttributes = {
+	'aria-label': 'foo',
+	role: 'button'
+};
+const imgWithAccessibleNameAriaLabelledByValid: AccessibleImgHTMLAttributes = {
+	'aria-labelledby': 'foo',
+	role: 'button'
+};
+const imgWithAccessibleNameAltValid: AccessibleImgHTMLAttributes = {
+	alt: 'foo',
+	role: 'button'
+};
+const imgWithAccessibleNameTitleValid: AccessibleImgHTMLAttributes = {
+	title: 'foo',
+	role: 'button'
+};
 // @ts-expect-error An img with an accessible name should not have a role of presentation
-const imgWithAccessibleNameAltInvalid = <img alt="foo" role="presentation" />;
+const imgWithAccessibleNameAriaLabelInvalid: AccessibleImgHTMLAttributes = {
+	'aria-label': 'foo',
+	role: 'presentation'
+};
 // @ts-expect-error An img with an accessible name should not have a role of presentation
-const imgWithAccessibleNameValid = <img title="foo" role="presentation" />;
+const imgWithAccessibleNameAriaLabelledByInvalid: AccessibleImgHTMLAttributes =
+	{ 'aria-labelledby': 'foo', role: 'presentation' };
+// @ts-expect-error An img with an accessible name should not have a role of presentation
+const imgWithAccessibleNameAltInvalid: AccessibleImgHTMLAttributes = {
+	alt: 'foo',
+	role: 'presentation'
+};
+// @ts-expect-error An img with an accessible name should not have a role of presentation
+const imgWithAccessibleNameValid: AccessibleImgHTMLAttributes = {
+	title: 'foo',
+	role: 'presentation'
+};
 
-const imgWithoutAccessibleNameValid = <img role="presentation" />;
+const imgWithoutAccessibleNameValid: AccessibleImgHTMLAttributes = {
+	role: 'presentation'
+};
 // @ts-expect-error An img without an accessible name should not have a role of button
-const imgWithoutAccessibleNameInvalid = <img role="button" />;
+const imgWithoutAccessibleNameInvalid: AccessibleImgHTMLAttributes = {
+	role: 'button'
+};
 
-const inputTypeButtonValid = <input type="button" role="checkbox" />;
-// @ts-expect-error An input of type button should not have a role of presentation
-const inputTypeButtonInvalid = <input type="button" role="presentation" />;
+const inputTypeButtonValid: AccessibleInputHTMLAttributes = {
+	type: 'button',
+	role: 'checkbox'
+};
+const inputTypeButtonInvalid: AccessibleInputHTMLAttributes = {
+	type: 'button',
+	// @ts-expect-error An input of type button should not have a role of presentation
+	role: 'presentation'
+};
 
-const inputTypeCheckboxValid = (
-	<input type="checkbox" role="menuitemcheckbox" />
-);
-// @ts-expect-error An input of type checkbox should not have a role of presentation
-const inputTypeCheckboxInvalid = <input type="checkbox" role="presentation" />;
+const inputTypeCheckboxValid: AccessibleInputHTMLAttributes = {
+	type: 'checkbox',
+	role: 'menuitemcheckbox'
+};
+const inputTypeCheckboxInvalid: AccessibleInputHTMLAttributes = {
+	type: 'checkbox',
+	// @ts-expect-error An input of type checkbox should not have a role of presentation
+	role: 'presentation'
+};
 
-const inputTypeColorValid = <input type="color" />;
+const inputTypeColorValid: AccessibleInputHTMLAttributes = { type: 'color' };
 // @ts-expect-error An input of type color should not have a role
-const inputTypeColorInvalid = <input type="color" role="button" />;
+const inputTypeColorInvalid: AccessibleInputHTMLAttributes = {
+	type: 'color',
+	role: 'button'
+};
 
-const inputTypeDateValid = <input type="date" />;
+const inputTypeDateValid: AccessibleInputHTMLAttributes = { type: 'date' };
 // @ts-expect-error An input of type date should not have a role
-const inputTypeDateInvalid = <input type="date" role="button" />;
+const inputTypeDateInvalid: AccessibleInputHTMLAttributes = {
+	type: 'date',
+	role: 'button'
+};
 
-const inputTypeDatetimeLocalValid = <input type="datetime-local" />;
-const inputTypeDatetimeLocalInvalid = (
-	// @ts-expect-error An input of type datetime-local should not have a role
-	<input type="datetime-local" role="button" />
-);
+const inputTypeDatetimeLocalValid: AccessibleInputHTMLAttributes = {
+	type: 'datetime-local'
+};
+// @ts-expect-error An input of type datetime-local should not have a role
+const inputTypeDatetimeLocalInvalid: AccessibleInputHTMLAttributes = {
+	type: 'datetime-local',
+	role: 'button'
+};
 
-const inputTypeEmailValid = <input type="email" role="textbox" />;
+const inputTypeEmailValid: AccessibleInputHTMLAttributes = {
+	type: 'email',
+	role: 'textbox'
+};
 // @ts-expect-error An input of type email, without a list attribute, should not have a role of button
-const inputTypeEmailInvalid = <input type="email" role="button" />;
+const inputTypeEmailInvalid: AccessibleInputHTMLAttributes = {
+	type: 'email',
+	role: 'button'
+};
 
-const inputTypeFileValid = <input type="file" />;
+const inputTypeFileValid: AccessibleInputHTMLAttributes = { type: 'file' };
 // @ts-expect-error An input of type file should not have a role
-const inputTypeFileInvalid = <input type="file" role="button" />;
+const inputTypeFileInvalid: AccessibleInputHTMLAttributes = {
+	type: 'file',
+	role: 'button'
+};
 
-const inputTypeHiddenValid = <input type="hidden" />;
+const inputTypeHiddenValid: AccessibleInputHTMLAttributes = { type: 'hidden' };
 // @ts-expect-error An input of type hidden should not have a role
-const inputTypeHiddenInvalid = <input type="hidden" role="button" />;
+const inputTypeHiddenInvalid: AccessibleInputHTMLAttributes = {
+	type: 'hidden',
+	role: 'button'
+};
 
-const inputTypeImageValid = <input type="image" role="button" />;
-// @ts-expect-error An input of type image should not have a role of presentation
-const inputTypeImageInvalid = <input type="image" role="presentation" />;
+const inputTypeImageValid: AccessibleInputHTMLAttributes = {
+	type: 'image',
+	role: 'button'
+};
+const inputTypeImageInvalid: AccessibleInputHTMLAttributes = {
+	type: 'image',
+	// @ts-expect-error An input of type image should not have a role of presentation
+	role: 'presentation'
+};
 
-const inputTypeMonthValid = <input type="month" />;
+const inputTypeMonthValid: AccessibleInputHTMLAttributes = { type: 'month' };
 // @ts-expect-error An input of type month should not have a role
-const inputTypeMonthInvalid = <input type="month" role="button" />;
+const inputTypeMonthInvalid: AccessibleInputHTMLAttributes = {
+	type: 'month',
+	role: 'button'
+};
 
-const inputTypeNumberValid = <input type="number" role="spinbutton" />;
+const inputTypeNumberValid: AccessibleInputHTMLAttributes = {
+	type: 'number',
+	role: 'spinbutton'
+};
 // @ts-expect-error An input of type number should not have a role of button
-const inputTypeNumberInvalid = <input type="number" role="button" />;
+const inputTypeNumberInvalid: AccessibleInputHTMLAttributes = {
+	type: 'number',
+	role: 'button'
+};
 
-const inputTypePasswordValid = <input type="password" />;
+const inputTypePasswordValid: AccessibleInputHTMLAttributes = {
+	type: 'password'
+};
 // @ts-expect-error An input of type password should not have a role
-const inputTypePasswordInvalid = <input type="password" role="button" />;
+const inputTypePasswordInvalid: AccessibleInputHTMLAttributes = {
+	type: 'password',
+	role: 'button'
+};
 
-const inputTypeRadioValid = <input type="radio" role="menuitemradio" />;
+const inputTypeRadioValid: AccessibleInputHTMLAttributes = {
+	type: 'radio',
+	role: 'menuitemradio'
+};
 // @ts-expect-error An input of type radio should not have a role of button
-const inputTypeRadioInvalid = <input type="radio" role="button" />;
+const inputTypeRadioInvalid: AccessibleInputHTMLAttributes = {
+	type: 'radio',
+	role: 'button'
+};
 
-const inputTypeRangeValid = <input type="range" role="slider" />;
+const inputTypeRangeValid: AccessibleInputHTMLAttributes = {
+	type: 'range',
+	role: 'slider'
+};
 // @ts-expect-error An input of type range should not have a role of button
-const inputTypeRangeInvalid = <input type="range" role="button" />;
+const inputTypeRangeInvalid: AccessibleInputHTMLAttributes = {
+	type: 'range',
+	role: 'button'
+};
 
-const inputTypeResetValid = <input type="reset" role="slider" />;
-// @ts-expect-error An input of type reset should not have a role of presentation
-const inputTypeResetInvalid = <input type="reset" role="presentation" />;
+const inputTypeResetValid: AccessibleInputHTMLAttributes = {
+	type: 'reset',
+	role: 'slider'
+};
+const inputTypeResetInvalid: AccessibleInputHTMLAttributes = {
+	type: 'reset',
+	// @ts-expect-error An input of type reset should not have a role of presentation
+	role: 'presentation'
+};
 
-const inputTypeSearchValid = <input type="search" role="searchbox" />;
+const inputTypeSearchValid: AccessibleInputHTMLAttributes = {
+	type: 'search',
+	role: 'searchbox'
+};
 // @ts-expect-error An input of type search should not have a role of button
-const inputTypeSearchInvalid = <input type="search" role="button" />;
+const inputTypeSearchInvalid: AccessibleInputHTMLAttributes = {
+	type: 'search',
+	role: 'button'
+};
 
-const inputTypeSubmitValid = <input type="submit" role="button" />;
-// @ts-expect-error An input of type submit should not have a role of presentation
-const inputTypeSubmitInvalid = <input type="submit" role="presentation" />;
+const inputTypeSubmitValid: AccessibleInputHTMLAttributes = {
+	type: 'submit',
+	role: 'button'
+};
+const inputTypeSubmitInvalid: AccessibleInputHTMLAttributes = {
+	type: 'submit',
+	// @ts-expect-error An input of type submit should not have a role of presentation
+	role: 'presentation'
+};
 
-const inputTypeTelValid = <input type="tel" role="textbox" />;
-// @ts-expect-error An input of type tel should not have a role of presentation
-const inputTypeTelInvalid = <input type="tel" role="presentation" />;
+const inputTypeTelValid: AccessibleInputHTMLAttributes = {
+	type: 'tel',
+	role: 'textbox'
+};
+const inputTypeTelInvalid: AccessibleInputHTMLAttributes = {
+	type: 'tel',
+	// @ts-expect-error An input of type tel should not have a role of presentation
+	role: 'presentation'
+};
 
-const inputTypeTextValid = <input type="text" role="combobox" />;
-// @ts-expect-error An input of type text should not have a role of presentation
-const inputTypeTextInvalid = <input type="text" role="presentation" />;
+const inputTypeTextValid: AccessibleInputHTMLAttributes = {
+	type: 'text',
+	role: 'combobox'
+};
+const inputTypeTextInvalid: AccessibleInputHTMLAttributes = {
+	type: 'text',
+	// @ts-expect-error An input of type text should not have a role of presentation
+	role: 'presentation'
+};
 
-const inputTypeOmittedValid = <input role="combobox" />;
-// @ts-expect-error An input of type text should not have a role of presentation
-const inputTypeOmittedInvalid = <input role="presentation" />;
+const inputTypeOmittedValid: AccessibleInputHTMLAttributes = {
+	role: 'combobox'
+};
+const inputTypeOmittedInvalid: AccessibleInputHTMLAttributes = {
+	// @ts-expect-error An input of type text should not have a role of presentation
+	role: 'presentation'
+};
 
-const inputTypeEmailListValid = (
-	<input type="email" list="foo" role="combobox" />
-);
+const inputTypeEmailListValid: AccessibleInputHTMLAttributes = {
+	type: 'email',
+	list: 'foo',
+	role: 'combobox'
+};
 // @ts-expect-error An input of type email, with a list attribute, should not have a role of button
-const inputTypeEmailListInvalid = <input type="email" role="button" />;
+const inputTypeEmailListInvalid: AccessibleInputHTMLAttributes = {
+	type: 'email',
+	role: 'button'
+};
 
-const inputTypeSearchListValid = (
-	<input type="search" list="foo" role="combobox" />
-);
+const inputTypeSearchListValid: AccessibleInputHTMLAttributes = {
+	type: 'search',
+	list: 'foo',
+	role: 'combobox'
+};
 // @ts-expect-error An input of type search, with a list attribute, should not have a role of button
-const inputTypeSearchListInvalid = <input type="search" role="button" />;
+const inputTypeSearchListInvalid: AccessibleInputHTMLAttributes = {
+	type: 'search',
+	role: 'button'
+};
 
-const inputTypeTelListValid = <input type="tel" list="foo" role="combobox" />;
+const inputTypeTelListValid: AccessibleInputHTMLAttributes = {
+	type: 'tel',
+	list: 'foo',
+	role: 'combobox'
+};
 // @ts-expect-error An input of type tel, with a list attribute, should not have a role of button
-const inputTypeTelListInvalid = <input type="tel" role="button" />;
+const inputTypeTelListInvalid: AccessibleInputHTMLAttributes = {
+	type: 'tel',
+	role: 'button'
+};
 
-const inputTypeTextListValid = <input type="text" list="foo" role="combobox" />;
+const inputTypeTextListValid: AccessibleInputHTMLAttributes = {
+	type: 'text',
+	list: 'foo',
+	role: 'combobox'
+};
 // @ts-expect-error An input of type text, with a list attribute, should not have a role of button
-const inputTypeTextListInvalid = <input type="text" role="button" />;
+const inputTypeTextListInvalid: AccessibleInputHTMLAttributes = {
+	type: 'text',
+	role: 'button'
+};
 
-const inputTypeOmittedListValid = (
-	<input type="text" list="foo" role="combobox" />
-);
+const inputTypeOmittedListValid: AccessibleInputHTMLAttributes = {
+	type: 'text',
+	list: 'foo',
+	role: 'combobox'
+};
 // @ts-expect-error An input of type text, with a list attribute, should not have a role of button
-const inputTypeOmittedListInvalid = <input type="text" role="button" />;
+const inputTypeOmittedListInvalid: AccessibleInputHTMLAttributes = {
+	type: 'text',
+	role: 'button'
+};
 
-const inputTypeUrlListValid = <input type="url" list="foo" role="combobox" />;
+const inputTypeUrlListValid: AccessibleInputHTMLAttributes = {
+	type: 'url',
+	list: 'foo',
+	role: 'combobox'
+};
 // @ts-expect-error An input of type url, with a list attribute, should not have a role of button
-const inputTypeUrlListInvalid = <input type="url" role="button" />;
+const inputTypeUrlListInvalid: AccessibleInputHTMLAttributes = {
+	type: 'url',
+	role: 'button'
+};
 
-const inputTypeTimeValid = <input type="time" />;
+const inputTypeTimeValid: AccessibleInputHTMLAttributes = { type: 'time' };
 // @ts-expect-error An input of type time should not have a role
-const inputTypeTimeInvalid = <input type="time" role="button" />;
+const inputTypeTimeInvalid: AccessibleInputHTMLAttributes = {
+	type: 'time',
+	role: 'button'
+};
 
-const inputTypeUrlValid = <input type="url" role="textbox" />;
+const inputTypeUrlValid: AccessibleInputHTMLAttributes = {
+	type: 'url',
+	role: 'textbox'
+};
 // @ts-expect-error An input of type url should not have a role of button
-const inputTypeUrlInvalid = <input type="url" role="button" />;
+const inputTypeUrlInvalid: AccessibleInputHTMLAttributes = {
+	type: 'url',
+	role: 'button'
+};
 
-const inputTypeWeekValid = <input type="week" />;
+const inputTypeWeekValid: AccessibleInputHTMLAttributes = { type: 'week' };
 // @ts-expect-error An input of type week should not have a role
-const inputTypeWeekInvalid = <input type="week" role="button" />;
+const inputTypeWeekInvalid: AccessibleInputHTMLAttributes = {
+	type: 'week',
+	role: 'button'
+};
 
-const selectValid = <select role="menu" />;
+const selectValid: AccessibleSelectHTMLAttributes = { role: 'menu' };
 // @ts-expect-error A select should not have a role of button
-const selectInvalid = <select role="button" />;
+const selectInvalid: AccessibleSelectHTMLAttributes = { role: 'button' };
 
-const selectMultipleValid = <select multiple={true} role="listbox" />;
+const selectMultipleValid: AccessibleSelectHTMLAttributes = {
+	multiple: true,
+	role: 'listbox'
+};
 // @ts-expect-error A select multiple should not have a role of menu
-const selectMultipleInvalid = <select multiple={true} role="menu" />;
+const selectMultipleInvalid: AccessibleSelectHTMLAttributes = {
+	multiple: true,
+	role: 'menu'
+};
 
-const selectSizeValid = <select size={5} role="listbox" />;
+const selectSizeValid: AccessibleSelectHTMLAttributes = {
+	size: 5,
+	role: 'listbox'
+};
 // @ts-expect-error A select with a size other than `0` or `1` should not have a role of menu
-const selectSizeInvalid = <select size={5} role="menu" />;
+const selectSizeInvalid: AccessibleSelectHTMLAttributes = {
+	size: 5,
+	role: 'menu'
+};
+
+// Intrinsic elements still restrict the role per element
+// @ts-expect-error An area should not have a role of slider
+const areaInvalidRole = <area role="slider" />;
+// @ts-expect-error An input should not have a role of presentation
+const inputInvalidRole = <input type="text" role="presentation" />;
+// @ts-expect-error A select should not have a role of button
+const selectInvalidRole = <select role="button" />;
+
+// Wrappers spreading the element's attribute interface
+function Link(props: AnchorHTMLAttributes<HTMLAnchorElement>) {
+	return <a {...props} />;
+}
+function MapArea(props: AreaHTMLAttributes<HTMLAreaElement>) {
+	return <area {...props} />;
+}
+function Picture(props: ImgHTMLAttributes<HTMLImageElement>) {
+	return <img {...props} />;
+}
+function TextInput(props: InputHTMLAttributes<HTMLInputElement>) {
+	return <input {...props} />;
+}
+function Dropdown(props: SelectHTMLAttributes<HTMLSelectElement>) {
+	return <select {...props} />;
+}
+function SizedInput({
+	size,
+	...rest
+}: Omit<ComponentProps<'input'>, 'size'> & { size?: 'sm' | 'lg' }) {
+	return <input {...rest} data-size={size} />;
+}
+
+// Non-literal input types
+declare const showPassword: boolean;
+declare const numberOrDate: 'number' | 'date';
+declare const inputType: HTMLInputTypeAttribute;
+const passwordToggle = <input type={showPassword ? 'text' : 'password'} />;
+const unionInputType = <input type={numberOrDate} />;
+const attributeInputType = <input type={inputType} />;
+const signalInputType = (
+	<input type={createSignal<'text' | 'password'>('password')} />
+);
+
+// Polymorphic components rendering these elements. With the Accessible*
+// unions mapped in, this took ~60 s and 4+ GB to check before failing (TS2589).
+function Polymorphic({
+	as,
+	children,
+	...rest
+}: {
+	as?: 'a' | 'area' | 'img' | 'input' | 'select' | 'div';
+	children?: ComponentChildren;
+	class?: string;
+}) {
+	const Tag = as ?? 'div';
+	return <Tag {...rest}>{children}</Tag>;
+}
+const polymorphic = (
+	<Polymorphic as="a" class="foo">
+		bar
+	</Polymorphic>
+);
 
 // @ts-expect-error We should correctly type aria attributes like autocomplete
 const badAriaValues = <div aria-autocomplete="bad-value" />;
