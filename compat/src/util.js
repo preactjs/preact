@@ -12,5 +12,7 @@ export function shallowDiffers(a, b) {
 	return false;
 }
 
+// Style keys whose numeric values stay unitless, matched case-insensitively
+// after an optional webkit prefix, e.g. flexGrow, WebkitFlexGrow, --foo.
 export const IS_NON_DIMENSIONAL =
-	/^(-|f[lo].*[^se]$|g.{5,}[^ps]$|z|o[pr]|(W.{5})?[lL]i.*(t|mp)$|an|(bo|s).{4}Im|sca|m.{6}[ds]|ta|c.*[st]$|wido|ini)/;
+	/^(w.{5})?(-|a[^g]*$|(bo|s).{4}im|box|c.*n[st]$|[fg].*[^pse]$|ini|li|ma.{5}(d|s$)|o[pr]|sca|st|ta|wido|z)/i;
