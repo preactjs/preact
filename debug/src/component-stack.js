@@ -47,8 +47,9 @@ let ownerStack = [];
 const ownerMap = new WeakMap();
 
 /**
- * The stack lengths from before each `vnode` was diffed, so the entries of
- * components whose diff threw can be dropped (their `diffed` never runs).
+ * The stack lengths from before each component `vnode` that is still being
+ * diffed. Restoring them afterwards, rather than popping, keeps the stacks
+ * right when a descendant threw or the component didn't render.
  * @type {WeakMap<import('./internal').VNode, [number, number]>}
  */
 const stackLevels = new WeakMap();
@@ -114,47 +115,59 @@ export function getOwnerStack(vnode) {
 export function setupComponentStack() {
 	let oldDiff = options._diff;
 	let oldDiffed = options.diffed;
-	let oldRoot = options._root;
 	let oldVNode = options.vnode;
 	let oldRender = options._render;
 	let oldCatchError = options._catchError;
 
+	/**
+	 * @param {[number, number]} level
+	 * @param {number} renderLength
+	 * @param {number} ownerLength
+	 */
+	const restore = (level, renderLength, ownerLength) => {
+		renderStack.length = Math.min(renderStack.length, level[0] + renderLength);
+		ownerStack.length = Math.min(ownerStack.length, level[1] + ownerLength);
+	};
+
 	options.diffed = vnode => {
-		if (isPossibleOwner(vnode)) {
-			ownerStack.pop();
+		const level = stackLevels.get(vnode);
+		if (level) {
+			stackLevels.delete(vnode);
+			restore(level, 0, 0);
 		}
-		renderStack.pop();
 		if (oldDiffed) oldDiffed(vnode);
 	};
 
 	options._diff = vnode => {
-		stackLevels.set(vnode, [renderStack.length, ownerStack.length]);
-		if (isPossibleOwner(vnode)) {
-			renderStack.push(vnode);
+		if (typeof vnode.type == 'function') {
+			stackLevels.set(vnode, [renderStack.length, ownerStack.length]);
+			if (vnode.type != Fragment) renderStack.push(vnode);
 		}
 		if (oldDiff) oldDiff(vnode);
 	};
 
 	options._catchError = (error, vnode, oldVNode, errorInfo) => {
-		// Drop what the components below `vnode` pushed before throwing. `vnode`
-		// keeps its own entries when the error is handled, as its `diffed` runs.
+		// Errors from commits and effects arrive for components that aren't
+		// being diffed, and leave the stacks alone.
 		const level = stackLevels.get(vnode);
 		if (level) {
-			renderStack.length = Math.min(
-				renderStack.length,
-				level[0] + (renderStack[level[0]] == vnode)
-			);
-			ownerStack.length = Math.min(
-				ownerStack.length,
-				level[1] + (ownerStack[level[1]] == vnode)
+			// Drop what the components below `vnode` pushed before throwing.
+			restore(
+				level,
+				+(renderStack[level[0]] == vnode),
+				+(ownerStack[level[1]] == vnode)
 			);
 		}
-		oldCatchError(error, vnode, oldVNode, errorInfo);
-	};
-
-	options._root = (vnode, parent) => {
-		ownerStack = [];
-		if (oldRoot) oldRoot(vnode, parent);
+		try {
+			oldCatchError(error, vnode, oldVNode, errorInfo);
+		} catch (e) {
+			// The error escapes `vnode` too, so its `diffed` won't run.
+			if (level) {
+				stackLevels.delete(vnode);
+				restore(level, 0, 0);
+			}
+			throw e;
+		}
 	};
 
 	options.vnode = vnode => {
