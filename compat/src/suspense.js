@@ -203,6 +203,7 @@ function createSuspense() {
 
 	Suspense.prototype.componentWillUnmount = function () {
 		this._suspenders = [];
+		if (this.state._suspended) this._vnode._children[0] = this.state._suspended;
 	};
 
 	/**

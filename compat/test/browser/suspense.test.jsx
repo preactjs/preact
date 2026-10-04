@@ -3047,6 +3047,82 @@ describe('suspense', () => {
 		]);
 	});
 
+	it('should unmount a parked subtree when the boundary unmounts', () => {
+		const [Suspender, suspend] = createSuspender(() => <p>content</p>);
+		const log = [];
+		let host;
+		class Host extends Component {
+			componentDidMount() {
+				host = this;
+			}
+			componentWillUnmount() {
+				log.push('unmount');
+			}
+			render() {
+				log.push('render');
+				return <b>host</b>;
+			}
+		}
+		const ref = () => {
+			log.push('ref');
+			return () => log.push('cleanup');
+		};
+		render(
+			<Suspense fallback={<div>fallback</div>}>
+				<Host ref={ref} />
+				<Suspender />
+			</Suspense>,
+			scratch
+		);
+
+		suspend();
+		rerender();
+		expect(log).to.deep.equal(['render', 'ref']);
+
+		render(null, scratch);
+		expect(log).to.deep.equal(['render', 'ref', 'cleanup', 'unmount']);
+
+		host.forceUpdate();
+		rerender();
+		expect(log).to.deep.equal(['render', 'ref', 'cleanup', 'unmount']);
+	});
+
+	it('should unmount each instance once when the boundary suspends during a parent update', () => {
+		const [Lazy] = createLazy();
+		const log = [];
+		let id = 0;
+		class Host extends Component {
+			componentDidMount() {
+				this.id = ++id;
+				log.push('mount ' + this.id);
+			}
+			componentWillUnmount() {
+				log.push('unmount ' + this.id);
+			}
+			render() {
+				return <b>host</b>;
+			}
+		}
+		function App() {
+			const [, update] = useState(false);
+			useLayoutEffect(() => update(true), []);
+			return (
+				<Suspense fallback={<div>fallback</div>}>
+					<Host />
+					<Lazy />
+				</Suspense>
+			);
+		}
+
+		render(<App />, scratch);
+		rerender();
+		expect(scratch.innerHTML).to.equal('<div>fallback</div>');
+		expect(log).to.deep.equal(['mount 1', 'unmount 1', 'mount 2']);
+
+		render(null, scratch);
+		expect(log).to.deep.equal(['mount 1', 'unmount 1', 'mount 2', 'unmount 2']);
+	});
+
 	describe('portals', () => {
 		/** @type {HTMLDivElement} */
 		let portalRoot;
