@@ -3,7 +3,7 @@ import options from '../options';
 
 // Per-instance unique keys for event clock stamps. Each Preact copy on the
 // page gets its own Symbols so that `_dispatched` / `_attached` stamps on
-// shared event objects and handler functions can never collide across
+// shared event objects and listener maps can never collide across
 // instances.
 let EVENT_DISPATCHED = Symbol(),
 	EVENT_ATTACHED = Symbol();
@@ -78,18 +78,21 @@ export function setProperty(dom, name, value, oldValue, namespace) {
 		name = name.slice(2);
 		if (name[0] < 'a') name = name.toLowerCase();
 
-		(dom._listeners || (dom._listeners = {}))[name + useCapture] = value;
+		let listeners = dom._listeners || (dom._listeners = {});
+		listeners[name + useCapture] = value;
 
 		if (value) {
 			if (!oldValue) {
-				value[EVENT_ATTACHED] = eventClock;
+				// Each DOM listener keeps its own attachment time, even when its
+				// callback is shared with other nodes, event types or phases.
+				(listeners[EVENT_ATTACHED] || (listeners[EVENT_ATTACHED] = {}))[
+					name + useCapture
+				] = eventClock;
 				dom.addEventListener(
 					name,
 					useCapture ? eventProxyCapture : eventProxy,
 					useCapture
 				);
-			} else {
-				value[EVENT_ATTACHED] = oldValue[EVENT_ATTACHED];
 			}
 		} else {
 			dom.removeEventListener(
@@ -164,7 +167,9 @@ function createEventProxy(useCapture) {
 				// When `e[EVENT_DISPATCHED]` is smaller than the time when the targeted event
 				// handler was attached we know we have bubbled up to an element that was added
 				// during patching the DOM.
-			} else if (e[EVENT_DISPATCHED] < eventHandler[EVENT_ATTACHED]) {
+			} else if (
+				e[EVENT_DISPATCHED] < this._listeners[EVENT_ATTACHED][e.type + useCapture]
+			) {
 				return;
 			}
 			return eventHandler(options.event ? options.event(e) : e);

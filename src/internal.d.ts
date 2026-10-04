@@ -120,7 +120,9 @@ export interface PreactElement extends preact.ContainerNode {
 	// Internal properties
 	_children?: VNode<any> | null;
 	/** Event listeners to support event delegation */
-	_listeners?: Record<string, (e: Event) => void>;
+	_listeners?: Record<string, (e: Event) => void> & {
+		[key: symbol]: Record<string, number>;
+	};
 }
 
 export interface PreactEvent extends Event {
