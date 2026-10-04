@@ -1,6 +1,6 @@
 import { Component, Fragment, createElement, render } from 'preact';
 import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
-import { act, teardown as teardownAct } from 'preact/test-utils';
+import { act, setupRerender, teardown as teardownAct } from 'preact/test-utils';
 import { vi } from 'vitest';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { scheduleEffectAssert } from '../_util/useEffectUtil';
@@ -901,5 +901,99 @@ describe('useEffect', () => {
 		});
 		expect(calls.length).to.equal(1);
 		expect(calls).to.deep.equal(['doing effect0']);
+	});
+});
+
+// Kept out of the `useEffect` describe, whose assertions install
+// `setupRerender` and would replace the default scheduler.
+describe('useEffect before a queued rerender', () => {
+	/** @type {HTMLDivElement} */
+	let scratch;
+
+	beforeEach(() => {
+		scratch = setupScratch();
+	});
+
+	afterEach(() => {
+		teardown(scratch);
+	});
+
+	// A ref setting state is enough to queue a rerender before the effects of
+	// the commit that attached it have run (#3666).
+	function setup() {
+		const seen = [];
+		let ran = false;
+
+		function Child() {
+			useEffect(() => {
+				ran = true;
+			}, []);
+			return null;
+		}
+
+		function Parent() {
+			const [, setNode] = useState(null);
+			seen.push(ran);
+			return (
+				<div ref={setNode}>
+					<Child />
+				</div>
+			);
+		}
+
+		return { seen, App: Parent };
+	}
+
+	it('runs pending effects before the queued rerender', async () => {
+		const { seen, App } = setup();
+
+		render(<App />, scratch);
+		await Promise.resolve();
+
+		expect(seen).to.deep.equal([false, true]);
+	});
+
+	it('runs pending effects before the queued rerender inside act', () => {
+		const { seen, App } = setup();
+
+		act(() => {
+			render(<App />, scratch);
+		});
+
+		expect(seen).to.deep.equal([false, true]);
+	});
+
+	it('still rerenders queued components when a pending effect throws', () => {
+		const rerender = setupRerender();
+		let setCount;
+
+		function Thrower() {
+			useEffect(() => {
+				throw new Error('effect');
+			}, []);
+			return null;
+		}
+
+		function Counter() {
+			const [count, set] = useState(0);
+			setCount = set;
+			return count;
+		}
+
+		render(
+			<Fragment>
+				<Thrower />
+				<Counter />
+			</Fragment>,
+			scratch
+		);
+		setCount(1);
+
+		expect(() => rerender()).to.throw('effect');
+		expect(scratch.textContent).to.equal('1');
+
+		setCount(2);
+		rerender();
+		expect(scratch.textContent).to.equal('2');
 	});
 });

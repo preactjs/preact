@@ -42,6 +42,8 @@ let oldRoot = options._root;
 const RAF_TIMEOUT = 35;
 let prevRaf;
 
+options._flushEffects = flushAfterPaintEffects;
+
 /** @type {(vnode: import('./internal').VNode) => void} */
 options._diff = vnode => {
 	currentComponent = null;
@@ -65,14 +67,16 @@ options._render = vnode => {
 
 	const hooks = currentComponent.__hooks;
 	if (hooks) {
+		// Taken before running them, so an effect that throws can't run again.
+		const pendingEffects = hooks._pendingEffects;
+		hooks._pendingEffects = [];
 		if (previousComponent == currentComponent) {
 			currentComponent._renderCallbacks = [];
 		} else {
-			hooks._pendingEffects.some(invokeCleanup);
-			hooks._pendingEffects.some(invokeEffect);
+			pendingEffects.some(invokeCleanup);
+			pendingEffects.some(invokeEffect);
 			currentIndex = 0;
 		}
-		hooks._pendingEffects = [];
 
 		// Runs before every render, forced or not, so `shouldComponentUpdate`
 		// never has to apply these itself.
