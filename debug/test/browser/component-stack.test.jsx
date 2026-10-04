@@ -142,6 +142,70 @@ describe('component stack', () => {
 		expect(getStack(errors)).to.contain('Thrower');
 	});
 
+	it('should not keep components from a render that threw', () => {
+		function Thrower() {
+			throw new Error('boom');
+		}
+
+		function Foo() {
+			return <Thrower />;
+		}
+
+		expect(() => render(<Foo />, scratch)).to.throw('boom');
+		expect(captureOwnerStack()).to.equal(null);
+
+		errors = [];
+		class Bar extends Component {
+			componentDidMount() {
+				throw new Error('bar');
+			}
+
+			render() {
+				return null;
+			}
+		}
+
+		expect(() => render(<Bar />, scratch)).to.throw('bar');
+		expect(getStack(errors)).to.equal('  in Bar\n');
+	});
+
+	it('should not keep components below an error boundary that caught', () => {
+		let siblingStack;
+
+		function Thrower() {
+			throw new Error('boom');
+		}
+
+		class Boundary extends Component {
+			componentDidCatch() {
+				this.setState({ error: true });
+			}
+
+			render() {
+				return this.state.error ? null : <Thrower />;
+			}
+		}
+
+		function Sibling() {
+			siblingStack = captureOwnerStack();
+			return null;
+		}
+
+		function App() {
+			return (
+				<div>
+					<Boundary />
+					<Sibling />
+				</div>
+			);
+		}
+
+		render(<App />, scratch);
+
+		expect(siblingStack).to.equal('  in Sibling\n  in App\n');
+		expect(captureOwnerStack()).to.equal(null);
+	});
+
 	it('should not print a warning when "@babel/plugin-transform-react-jsx-source" is installed', () => {
 		function Thrower() {
 			throw new Error('foo');

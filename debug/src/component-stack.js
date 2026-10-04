@@ -47,6 +47,13 @@ let ownerStack = [];
 const ownerMap = new WeakMap();
 
 /**
+ * The stack lengths from before each `vnode` was diffed, so the entries of
+ * components whose diff threw can be dropped (their `diffed` never runs).
+ * @type {WeakMap<import('./internal').VNode, [number, number]>}
+ */
+const stackLevels = new WeakMap();
+
+/**
  * Get the currently rendered `vnode`
  * @returns {import('./internal').VNode | null}
  */
@@ -110,6 +117,7 @@ export function setupComponentStack() {
 	let oldRoot = options._root;
 	let oldVNode = options.vnode;
 	let oldRender = options._render;
+	let oldCatchError = options._catchError;
 
 	options.diffed = vnode => {
 		if (isPossibleOwner(vnode)) {
@@ -120,10 +128,28 @@ export function setupComponentStack() {
 	};
 
 	options._diff = vnode => {
+		stackLevels.set(vnode, [renderStack.length, ownerStack.length]);
 		if (isPossibleOwner(vnode)) {
 			renderStack.push(vnode);
 		}
 		if (oldDiff) oldDiff(vnode);
+	};
+
+	options._catchError = (error, vnode, oldVNode, errorInfo) => {
+		// Drop what the components below `vnode` pushed before throwing. `vnode`
+		// keeps its own entries when the error is handled, as its `diffed` runs.
+		const level = stackLevels.get(vnode);
+		if (level) {
+			renderStack.length = Math.min(
+				renderStack.length,
+				level[0] + (renderStack[level[0]] == vnode)
+			);
+			ownerStack.length = Math.min(
+				ownerStack.length,
+				level[1] + (ownerStack[level[1]] == vnode)
+			);
+		}
+		oldCatchError(error, vnode, oldVNode, errorInfo);
 	};
 
 	options._root = (vnode, parent) => {
