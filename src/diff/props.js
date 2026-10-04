@@ -168,7 +168,8 @@ function createEventProxy(useCapture) {
 				// handler was attached we know we have bubbled up to an element that was added
 				// during patching the DOM.
 			} else if (
-				e[EVENT_DISPATCHED] < this._listeners[EVENT_ATTACHED][e.type + useCapture]
+				e[EVENT_DISPATCHED] <
+				this._listeners[EVENT_ATTACHED][e.type + useCapture]
 			) {
 				return;
 			}
