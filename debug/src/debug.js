@@ -82,6 +82,7 @@ export function initDebug() {
 				lazyPropTypes: new WeakMap()
 			};
 	const deprecations = [];
+	let lastUncaughtError;
 
 	options._catchError = (error, vnode, oldVNode, errorInfo) => {
 		let component = vnode && vnode._component;
@@ -108,7 +109,19 @@ export function initDebug() {
 
 		errorInfo = errorInfo || {};
 		errorInfo.componentStack = getOwnerStack(vnode);
-		oldCatchError(error, vnode, oldVNode, errorInfo);
+		try {
+			oldCatchError(error, vnode, oldVNode, errorInfo);
+		} catch (e) {
+			// Nothing handled the error. Its own stack only points into Preact, so
+			// say which component it came from before it escapes.
+			if (e !== lastUncaughtError) {
+				lastUncaughtError = e;
+				console.error(
+					`An error occurred in the <${getDisplayName(vnode)}> component, and no error boundary handled it.\n\n${errorInfo.componentStack}`
+				);
+			}
+			throw e;
+		}
 
 		// when an error was handled by an ErrorBoundary we still log it, matching what
 		// React does in development. Errors that were not handled are rethrown by the

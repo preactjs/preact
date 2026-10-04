@@ -102,6 +102,46 @@ describe('component stack', () => {
 		expect(captureOwnerStack()).to.equal(null);
 	});
 
+	it('should print the component stack once for an error no boundary handles', () => {
+		const error = new Error('boom');
+		function Thrower() {
+			throw error;
+		}
+
+		function Foo() {
+			return (
+				<div>
+					<Thrower />
+				</div>
+			);
+		}
+
+		expect(() => render(<Foo />, scratch)).to.throw(error);
+
+		expect(errors).to.have.length(1);
+		expect(errors[0]).to.match(/<Thrower> component/);
+		let lines = getStack(errors).split('\n');
+		expect(lines[0]).to.contain('Thrower');
+		expect(lines[1]).to.contain('Foo');
+	});
+
+	it('should print the component stack for an error thrown after render', () => {
+		class Thrower extends Component {
+			componentDidMount() {
+				throw new Error('boom');
+			}
+
+			render() {
+				return <div>foo</div>;
+			}
+		}
+
+		expect(() => render(<Thrower />, scratch)).to.throw('boom');
+
+		expect(errors).to.have.length(1);
+		expect(getStack(errors)).to.contain('Thrower');
+	});
+
 	it('should not print a warning when "@babel/plugin-transform-react-jsx-source" is installed', () => {
 		function Thrower() {
 			throw new Error('foo');
