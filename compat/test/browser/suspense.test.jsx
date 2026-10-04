@@ -2915,6 +2915,138 @@ describe('suspense', () => {
 		expect(ref.current).to.equal(host);
 	});
 
+	it('should call a ref cleanup once when parked and once more on unmount', async () => {
+		const [Suspender, suspend] = createSuspender(() => <p>content</p>);
+		const log = [];
+		const ref = el => {
+			log.push('ref ' + el.textContent);
+			return () => log.push('cleanup ' + el.textContent);
+		};
+		render(
+			<Suspense fallback={<div>fallback</div>}>
+				<b ref={ref}>host</b>
+				<Suspender />
+			</Suspense>,
+			scratch
+		);
+
+		const [resolve] = suspend();
+		rerender();
+		expect(log).to.deep.equal(['ref host', 'cleanup host']);
+
+		await resolve(() => <p>resolved</p>);
+		rerender();
+		expect(log).to.deep.equal(['ref host', 'cleanup host', 'ref host']);
+
+		render(null, scratch);
+		expect(log).to.deep.equal([
+			'ref host',
+			'cleanup host',
+			'ref host',
+			'cleanup host'
+		]);
+	});
+
+	it('should not detach a parked ref again when it changes before the reveal', async () => {
+		const [Suspender, suspend] = createSuspender(() => <p>content</p>);
+		const log = [];
+		let update;
+		function App() {
+			const [n, setN] = useState(0);
+			update = setN;
+			return (
+				<Suspense fallback={<div>fallback</div>}>
+					<b
+						ref={el => {
+							log.push('ref ' + n + ' ' + el.textContent);
+							return () => log.push('cleanup ' + n);
+						}}
+					>
+						host
+					</b>
+					<Suspender />
+				</Suspense>
+			);
+		}
+		render(<App />, scratch);
+
+		const [resolve] = suspend();
+		rerender();
+		update(1);
+		rerender();
+		expect(log).to.deep.equal(['ref 0 host', 'cleanup 0']);
+
+		await resolve(() => <p>resolved</p>);
+		rerender();
+		expect(log).to.deep.equal(['ref 0 host', 'cleanup 0', 'ref 1 host']);
+	});
+
+	it('should not detach a parked ref again when its element is removed', async () => {
+		const [Suspender, suspend] = createSuspender(() => <p>content</p>);
+		const log = [];
+		const ref = el => {
+			log.push('ref ' + el.textContent);
+			return () => log.push('cleanup ' + el.textContent);
+		};
+		function App({ show }) {
+			return (
+				<Suspense fallback={<div>fallback</div>}>
+					{show && <b ref={ref}>host</b>}
+					<Suspender />
+				</Suspense>
+			);
+		}
+		render(<App show />, scratch);
+
+		const [resolve] = suspend();
+		rerender();
+		render(<App show={false} />, scratch);
+		await resolve(() => <p>resolved</p>);
+		rerender();
+		expect(log).to.deep.equal(['ref host', 'cleanup host']);
+	});
+
+	it('should not run a child ref cleanup for a parked class ref', async () => {
+		const [Suspender, suspend] = createSuspender(() => <p>content</p>);
+		const log = [];
+		const classRef = () => {
+			log.push('ref class');
+			return () => log.push('cleanup class');
+		};
+		const hostRef = () => {
+			log.push('ref host');
+			return () => log.push('cleanup host');
+		};
+		class Host extends Component {
+			render() {
+				return <b ref={hostRef}>host</b>;
+			}
+		}
+		render(
+			<Suspense fallback={<div>fallback</div>}>
+				<Host ref={classRef} />
+				<Suspender />
+			</Suspense>,
+			scratch
+		);
+
+		const [resolve] = suspend();
+		rerender();
+		expect(log).to.deep.equal(['ref host', 'ref class', 'cleanup host']);
+
+		await resolve(() => <p>resolved</p>);
+		rerender();
+		render(null, scratch);
+		expect(log).to.deep.equal([
+			'ref host',
+			'ref class',
+			'cleanup host',
+			'ref host',
+			'cleanup class',
+			'cleanup host'
+		]);
+	});
+
 	describe('portals', () => {
 		/** @type {HTMLDivElement} */
 		let portalRoot;

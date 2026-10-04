@@ -113,18 +113,15 @@ export function diffChildren(
 		newDom = childVNode._dom;
 		// A ref detached while its subtree was parked by Suspense is attached
 		// again on reveal.
-		if (
-			childVNode.ref &&
-			(oldVNode.ref != childVNode.ref || oldVNode._flags & REF_DETACHED)
-		) {
-			if (oldVNode.ref != childVNode.ref && oldVNode.ref) {
-				applyRef(oldVNode.ref, NULL, childVNode);
+		if (oldVNode.ref != childVNode.ref || oldVNode._flags & REF_DETACHED) {
+			if (oldVNode.ref) applyRef(oldVNode.ref, NULL, childVNode, oldVNode);
+			if (childVNode.ref) {
+				refQueue.push(
+					childVNode.ref,
+					childVNode._component || newDom,
+					childVNode
+				);
 			}
-			refQueue.push(
-				childVNode.ref,
-				childVNode._component || newDom,
-				childVNode
-			);
 		}
 
 		firstChildDom = firstChildDom || newDom;
