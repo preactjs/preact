@@ -1,4 +1,4 @@
-import { Component, Fragment, createElement, render } from 'preact';
+import { Component, Fragment, createElement, options, render } from 'preact';
 import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
 import { act, setupRerender, teardown as teardownAct } from 'preact/test-utils';
 import { vi } from 'vitest';
@@ -963,9 +963,9 @@ describe('useEffect before a queued rerender', () => {
 		expect(seen).to.deep.equal([false, true]);
 	});
 
-	it('still rerenders queued components when a pending effect throws', () => {
+	it('reports an effect error before rendering, and the render error after', () => {
 		const rerender = setupRerender();
-		let setCount;
+		let setBroken;
 
 		function Thrower() {
 			useEffect(() => {
@@ -974,26 +974,98 @@ describe('useEffect before a queued rerender', () => {
 			return null;
 		}
 
-		function Counter() {
-			const [count, set] = useState(0);
-			setCount = set;
-			return count;
+		function Breaker() {
+			const [broken, set] = useState(false);
+			setBroken = set;
+			if (broken) throw new Error('render');
+			return null;
 		}
 
 		render(
 			<Fragment>
 				<Thrower />
-				<Counter />
+				<Breaker />
 			</Fragment>,
 			scratch
 		);
-		setCount(1);
+		setBroken(true);
 
 		expect(() => rerender()).to.throw('effect');
-		expect(scratch.textContent).to.equal('1');
+		expect(() => rerender()).to.throw('render');
+	});
 
-		setCount(2);
-		rerender();
-		expect(scratch.textContent).to.equal('2');
+	it('does not run effects of a tree an error boundary discards', async () => {
+		const log = [];
+
+		function Sibling() {
+			useEffect(() => {
+				log.push('mount');
+				return () => log.push('cleanup');
+			}, []);
+			return null;
+		}
+
+		function Thrower() {
+			throw new Error('boom');
+		}
+
+		class Boundary extends Component {
+			static getDerivedStateFromError() {
+				return { error: true };
+			}
+
+			render() {
+				return this.state.error ? 'fallback' : this.props.children;
+			}
+		}
+
+		render(
+			<Boundary>
+				<Sibling />
+				<Thrower />
+			</Boundary>,
+			scratch
+		);
+		await new Promise(r => setTimeout(r, 60));
+
+		expect(scratch.textContent).to.equal('fallback');
+		expect(log).to.deep.equal([]);
+	});
+
+	it('runs layout effects of a commit before its effects when it rerenders synchronously', async () => {
+		const prevDebounce = options.debounceRendering;
+		const log = [];
+		options.debounceRendering = cb => cb();
+
+		function Updater() {
+			const [value, set] = useState(0);
+			useLayoutEffect(() => set(1), []);
+			return value;
+		}
+
+		function Logger() {
+			useLayoutEffect(() => {
+				log.push('layout');
+			}, []);
+			useEffect(() => {
+				log.push('effect');
+			}, []);
+			return null;
+		}
+
+		try {
+			render(
+				<Fragment>
+					<Updater />
+					<Logger />
+				</Fragment>,
+				scratch
+			);
+		} finally {
+			options.debounceRendering = prevDebounce;
+		}
+		await new Promise(r => setTimeout(r, 60));
+
+		expect(log).to.deep.equal(['layout', 'effect']);
 	});
 });
