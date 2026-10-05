@@ -1,12 +1,10 @@
 import { NULL, SVG_NAMESPACE } from '../constants';
 import options from '../options';
 
-// Per-instance unique keys for event clock stamps. Each Preact copy on the
-// page gets its own Symbols so that `_dispatched` / `_attached` stamps on
-// shared event objects and listener maps can never collide across
-// instances.
-let EVENT_DISPATCHED = Symbol(),
-	EVENT_ATTACHED = Symbol();
+// Per-instance unique key for the event clock stamp. Each Preact copy on the
+// page gets its own Symbol so that stamps on shared event objects can never
+// collide across instances.
+let EVENT_DISPATCHED = Symbol();
 
 function setStyle(style, key, value) {
 	if (value == NULL) value = '';
@@ -73,17 +71,16 @@ export function setProperty(dom, name, value, oldValue, namespace) {
 		// Handlers are keyed by prop name and every prop name gets its own proxy,
 		// so swapping one (e.g. an inline arrow function on every render) is a
 		// single store. The event name is only derived to attach or remove it.
-		let listeners = dom._listeners || (dom._listeners = {});
-		listeners[name] = value;
+		(dom._listeners || (dom._listeners = {}))[name] = value;
 
 		if (!value || !oldValue) {
 			const proxy =
 				eventProxies[name] || (eventProxies[name] = createEventProxy(name));
 			// The attach time belongs to the listener, not to the handler: one
 			// function can back several listeners that were attached at different
-			// times.
-			(listeners[EVENT_ATTACHED] || (listeners[EVENT_ATTACHED] = {}))[name] =
-				eventClock;
+			// times. It lives outside `_listeners`, which unmount resets even when
+			// a re-suspended Suspense boundary keeps the DOM and its listeners.
+			(dom._attached || (dom._attached = {}))[name] = eventClock;
 			useCapture = name != (name = name.replace(CAPTURE_REGEX, '$1'));
 
 			// Infer correct casing for DOM built-in events: `onClick` -> `click`.
@@ -164,7 +161,7 @@ function createEventProxy(name) {
 				// When `e[EVENT_DISPATCHED]` is smaller than the time when the targeted event
 				// listener was attached we know we have bubbled up to an element that was added
 				// during patching the DOM.
-			} else if (e[EVENT_DISPATCHED] < this._listeners[EVENT_ATTACHED][name]) {
+			} else if (e[EVENT_DISPATCHED] < this._attached[name]) {
 				return;
 			}
 			return eventHandler(options.event ? options.event(e) : e);

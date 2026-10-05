@@ -27,6 +27,7 @@
     "props": {
       "$_hasScuFromHooks": "__f",
       "$_listeners": "__e",
+      "$_attached": "__a",
       "$_cleanup": "__c",
       "$__hooks": "__H",
       "$_hydrationMismatch": "__m",
