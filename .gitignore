@@ -15,3 +15,4 @@ package/
 preact-*.tgz
 preact.tgz
 *.local.*
+.vitest/

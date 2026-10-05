@@ -93,7 +93,7 @@
   },
   "types": "src/index.d.ts",
   "scripts": {
-    "prepare": "husky && pnpm run test:install",
+    "prepare": "vp config --hooks --no-agent && pnpm run test:install",
     "build": "node ./scripts/build.mjs",
     "postbuild": "node ./config/compat-entries.js",
     "dev": "node ./scripts/build.mjs --watch",
@@ -102,22 +102,17 @@
     "test": "npm-run-all build lint test:unit",
     "test:install": "playwright install chromium",
     "test:unit": "run-p test:vitest:min test:ts",
-    "test:vitest": "cross-env COVERAGE=true vitest run",
-    "test:vitest:min": "cross-env MINIFY=true vitest run",
-    "test:vitest:watch": "vitest",
+    "test:vitest": "cross-env COVERAGE=true vp test run",
+    "test:vitest:min": "cross-env MINIFY=true vp test run",
+    "test:vitest:watch": "vp test",
     "test:ts": "run-p 'test:ts:*'",
     "test:ts:core": "tsc -p test/ts/",
     "test:ts:compat": "tsc -p compat/test/ts/",
     "lint": "run-s oxlint tsc",
     "tsc": "tsc -p jsconfig-lint.json",
-    "oxlint": "oxlint src test/browser test/node test/shared debug compat hooks test-utils",
-    "format": "oxfmt . --write",
-    "format:check": "oxfmt --check ."
-  },
-  "nano-staged": {
-    "**/*.{js,jsx,mjs,cjs,ts,tsx,yml,json,html,md,css,scss}": [
-      "oxfmt --write --no-error-on-unmatched-pattern"
-    ]
+    "oxlint": "vp lint src test/browser test/node test/shared debug compat hooks test-utils",
+    "format": "vp fmt . --write",
+    "format:check": "vp fmt --check ."
   },
   "files": [
     "src",
@@ -184,25 +179,21 @@
     "@rollup/plugin-babel": "^6.1.0",
     "@types/chai": "^5.2.2",
     "@types/node": "^22.20.1",
-    "@vitest/browser": "^5.0.0",
-    "@vitest/browser-playwright": "^5.0.0",
-    "@vitest/coverage-v8": "^5.0.0",
+    "@vitest/browser-playwright": "catalog:",
+    "@vitest/coverage-v8": "catalog:",
     "babel-plugin-transform-rename-properties": "0.1.0",
     "chai": "^6.2.2",
     "cross-env": "^7.0.3",
-    "husky": "^9.1.7",
     "kolorist": "^1.8.0",
-    "nano-staged": "^1.0.2",
     "npm-run-all2": "^7.0.0",
-    "oxfmt": "^0.32.0",
-    "oxlint": "^1.8.0",
     "playwright": "^1.54.1",
     "preact-render-to-string": "^6.5.0",
     "prop-types": "^15.8.1",
     "rollup": "^4.62.2",
     "terser": "5.16.0",
     "typescript": "5.1.6",
-    "vitest": "^5.0.0"
+    "vitest": "catalog:",
+    "vite-plus": "catalog:"
   },
   "peerDependencies": {
     "preact-render-to-string": ">=6.7.0"
@@ -211,9 +202,6 @@
     "preact-render-to-string": {
       "optional": true
     }
-  },
-  "volta": {
-    "node": "22.22.2"
   },
   "packageManager": "pnpm@11.3.0"
 }

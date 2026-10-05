@@ -1,4 +1,4 @@
-import { defineConfig } from 'vite';
+import { defineConfig } from 'vite-plus';
 import path from 'node:path';
 
 const root = path.join(__dirname, '..');

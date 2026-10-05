@@ -6,7 +6,8 @@
     "jsxFactory": "createElement",
     "jsxFragmentFactory": "Fragment",
     "lib": ["dom", "es5"],
-    "moduleResolution": "node",
+    "module": "esnext",
+    "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "paths": {
       "preact": ["."],

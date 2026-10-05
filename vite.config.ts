@@ -1,5 +1,5 @@
-import { defineConfig } from 'vitest/config';
-import { playwright } from '@vitest/browser-playwright';
+import { defineConfig } from 'vite-plus';
+import { playwright } from 'vite-plus/test/browser-playwright';
 import { transformAsync } from '@babel/core';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
@@ -86,7 +86,7 @@ const rollupAlias = [
 	}
 ];
 
-const rename = {};
+const rename: Record<string, string> = {};
 const mangle = readFileSync('./mangle.json', 'utf8');
 const mangleJson = JSON.parse(mangle);
 for (let prop in mangleJson.props.props) {
@@ -99,6 +99,97 @@ for (let prop in mangleJson.props.props) {
 }
 
 export default defineConfig({
+	staged: {
+		'**/*.{js,jsx,mjs,cjs,ts,tsx,yml,json,html,md,css,scss}':
+			'vp fmt --write --no-error-on-unmatched-pattern'
+	},
+	fmt: {
+		endOfLine: 'lf',
+		insertFinalNewline: true,
+		useTabs: true,
+		tabWidth: 2,
+		printWidth: 80,
+		singleQuote: true,
+		jsxSingleQuote: false,
+		quoteProps: 'as-needed',
+		trailingComma: 'none',
+		semi: true,
+		arrowParens: 'avoid',
+		bracketSameLine: false,
+		bracketSpacing: true,
+		singleAttributePerLine: false,
+		experimentalSortPackageJson: false,
+		ignorePatterns: [
+			'benchmarks/**',
+			'**/.DS_Store',
+			'**/node_modules',
+			'**/npm-debug.log',
+			'**/dist',
+			'*/package-lock.json',
+			'**/yarn.lock',
+			'**/.vscode',
+			'**/.idea',
+			'test/ts/**/*.js',
+			'**/coverage',
+			'**/*.sw[op]',
+			'**/*.log',
+			'**/package/',
+			'**/preact-*.tgz',
+			'**/preact.tgz',
+			'**/package-lock.json'
+		],
+		overrides: [
+			{
+				files: ['*.json', '.*rc', '*.yml'],
+				options: {
+					useTabs: false,
+					tabWidth: 2
+				}
+			}
+		]
+	},
+	lint: {
+		ignorePatterns: ['**/dist/**', 'benchmarks/**'],
+		rules: {
+			'no-unused-vars': [
+				2,
+				{
+					args: 'none',
+					caughtErrors: 'none',
+					varsIgnorePattern: '^h|React|createElement|Fragment$'
+				}
+			],
+			'typescript/no-namespace': 0,
+			'no-constant-binary-expression': 0,
+			'no-useless-catch': 0,
+			'no-empty-pattern': 0,
+			'prefer-rest-params': 0,
+			'prefer-spread': 0,
+			'no-cond-assign': 0,
+			'react/no-danger': 0,
+			'react/no-danger-with-children': 0,
+			'jest/valid-expect': 0,
+			'jest/no-disabled-tests': 0,
+			'jest/expect-expect': 0,
+			'jest/no-standalone-expect': 0,
+			'jest/no-export': 0,
+			'react/no-find-dom-node': 0,
+			'react/no-direct-mutation-state': 0,
+			'react/no-children-prop': 0,
+			'react/jsx-key': 0,
+			'react/no-string-refs': 0,
+			'react/require-render-return': 0,
+			'unicorn/no-new-array': 0,
+			'unicorn/prefer-string-starts-ends-with': 0,
+			'vite-plus/prefer-vite-plus-imports': 'error'
+		},
+		jsPlugins: [
+			{
+				name: 'vite-plus',
+				specifier: 'vite-plus/oxlint-plugin'
+			}
+		]
+	},
 	resolve: {
 		alias: rollupAlias,
 		dedupe: ['preact']
@@ -139,6 +230,10 @@ export default defineConfig({
 					],
 					include: ['**/src/**/*.js', '**/test/**/*.js', '**/test/**/*.jsx']
 				});
+
+				if (!transformed?.code) {
+					return null;
+				}
 
 				return {
 					code: transformed.code,
