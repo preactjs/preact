@@ -143,6 +143,201 @@ describe('event handling', () => {
 		expect(onAncestorClick).toHaveBeenCalledOnce();
 	});
 
+	it('should preserve an ancestor timestamp when a shared handler is attached to a sibling', () => {
+		const shared = vi.fn();
+		const onButtonClick = () => {
+			render(
+				<div onClick={shared}>
+					<button onClick={onButtonClick}>Dispatch</button>
+					<button onClick={shared}>New listener</button>
+				</div>,
+				scratch
+			);
+		};
+
+		render(
+			<div onClick={shared}>
+				<button onClick={onButtonClick}>Dispatch</button>
+			</div>,
+			scratch
+		);
+		fireEvent(scratch.querySelector('button'), 'click');
+		expect(shared).toHaveBeenCalledOnce();
+
+		shared.mockClear();
+		fireEvent(scratch.querySelectorAll('button')[1], 'click');
+		expect(shared).toHaveBeenCalledTimes(2);
+	});
+
+	it('should skip only the newly attached ancestor when ancestors share a handler', () => {
+		const targets = [];
+		const shared = e => targets.push(e.currentTarget.id);
+		const onButtonClick = () => {
+			render(tree(shared), scratch);
+		};
+		const tree = innerHandler => (
+			<div id="outer" onClick={shared}>
+				<div id="inner" onClick={innerHandler}>
+					<button onClick={onButtonClick}>Dispatch</button>
+				</div>
+			</div>
+		);
+
+		render(tree(undefined), scratch);
+		fireEvent(scratch.querySelector('button'), 'click');
+		expect(targets).toEqual(['outer']);
+
+		targets.length = 0;
+		fireEvent(scratch.querySelector('button'), 'click');
+		expect(targets).toEqual(['inner', 'outer']);
+	});
+
+	it('should preserve a click timestamp when the same handler is added for another event', () => {
+		const events = [];
+		const shared = e => events.push(e.type);
+		const onButtonClick = () => render(tree(shared), scratch);
+		const tree = mouseDownHandler => (
+			<div onClick={shared} onMouseDown={mouseDownHandler}>
+				<button onClick={onButtonClick}>Dispatch</button>
+			</div>
+		);
+
+		render(tree(undefined), scratch);
+		fireEvent(scratch.querySelector('button'), 'click');
+		expect(events).toEqual(['click']);
+
+		fireEvent(scratch.querySelector('button'), 'mousedown');
+		expect(events).toEqual(['click', 'mousedown']);
+		fireEvent(scratch.querySelector('button'), 'click');
+		expect(events).toEqual(['click', 'mousedown', 'click']);
+	});
+
+	it('should keep capture and bubble timestamps independent for a shared handler', () => {
+		const phases = [];
+		const shared = e => phases.push(e.eventPhase);
+		const onButtonClick = () => render(tree(shared), scratch);
+		const tree = captureHandler => (
+			<div onClick={shared} onClickCapture={captureHandler}>
+				<button onClick={onButtonClick}>Dispatch</button>
+			</div>
+		);
+
+		render(tree(undefined), scratch);
+		fireEvent(scratch.querySelector('button'), 'click');
+		expect(phases).toEqual([Event.BUBBLING_PHASE]);
+
+		phases.length = 0;
+		fireEvent(scratch.querySelector('button'), 'click');
+		expect(phases).toEqual([Event.CAPTURING_PHASE, Event.BUBBLING_PHASE]);
+	});
+
+	it('should preserve a replaced listener timestamp without changing a shared new listener', () => {
+		const original = vi.fn();
+		const targets = [];
+		const shared = e => targets.push(e.currentTarget.id);
+		const onButtonClick = () => render(tree(shared, shared), scratch);
+		const tree = (outerHandler, innerHandler) => (
+			<div id="outer" onClick={outerHandler}>
+				<div id="inner" onClick={innerHandler}>
+					<button onClick={onButtonClick}>Dispatch</button>
+				</div>
+			</div>
+		);
+
+		render(tree(original, undefined), scratch);
+		fireEvent(scratch.querySelector('button'), 'click');
+		expect(original).not.toHaveBeenCalled();
+		expect(targets).toEqual(['outer']);
+
+		targets.length = 0;
+		fireEvent(scratch.querySelector('button'), 'click');
+		expect(targets).toEqual(['inner', 'outer']);
+	});
+
+	it('should reset a listener timestamp after removal and reattachment', () => {
+		const ancestor = vi.fn();
+		let reattach = true;
+		const onButtonClick = () => {
+			if (reattach) {
+				reattach = false;
+				render(tree(undefined), scratch);
+				render(tree(ancestor), scratch);
+			}
+		};
+		const tree = handler => (
+			<div onClick={handler}>
+				<button onClick={onButtonClick}>Dispatch</button>
+			</div>
+		);
+
+		render(tree(ancestor), scratch);
+		fireEvent(scratch.querySelector('button'), 'click');
+		expect(ancestor).not.toHaveBeenCalled();
+		fireEvent(scratch.querySelector('button'), 'click');
+		expect(ancestor).toHaveBeenCalledOnce();
+	});
+
+	it('should support frozen callbacks when mounting, replacing and removing listeners', () => {
+		const calls = [];
+		const first = Object.freeze(() => calls.push('first'));
+		const second = Object.freeze(() => calls.push('second'));
+
+		expect(() => render(<div onClick={first} />, scratch)).not.toThrow();
+		fireEvent(scratch.firstChild, 'click');
+		expect(calls).toEqual(['first']);
+
+		expect(() => render(<div onClick={second} />, scratch)).not.toThrow();
+		fireEvent(scratch.firstChild, 'click');
+		expect(calls).toEqual(['first', 'second']);
+		expect(proto.addEventListener).toHaveBeenCalledOnce();
+
+		render(<div />, scratch);
+		fireEvent(scratch.firstChild, 'click');
+		expect(calls).toEqual(['first', 'second']);
+		expect(proto.removeEventListener).toHaveBeenCalledOnce();
+	});
+
+	it('should invoke an ancestor handler when its function is attached elsewhere while an event bubbles', () => {
+		const shared = vi.fn();
+		const App = ({ extra }) => (
+			<div onClick={shared}>
+				<button onClick={() => render(<App extra />, scratch)} />
+				{extra && <span onClick={shared} />}
+			</div>
+		);
+
+		render(<App />, scratch);
+		fireEvent(scratch.querySelector('button'), 'click');
+		expect(shared).toHaveBeenCalledOnce();
+	});
+
+	it('should invoke an ancestor handler when its function is attached to another event while an event bubbles', () => {
+		const shared = vi.fn();
+		const App = ({ extra }) => (
+			<div onClick={shared} onMouseDown={extra ? shared : undefined}>
+				<button onClick={() => render(<App extra />, scratch)} />
+			</div>
+		);
+
+		render(<App />, scratch);
+		fireEvent(scratch.querySelector('button'), 'click');
+		expect(shared).toHaveBeenCalledOnce();
+	});
+
+	it('should not invoke an ancestor handler attached while an event bubbles when its function is swapped in elsewhere', () => {
+		const shared = vi.fn();
+		const App = ({ step }) => (
+			<div onClick={step ? shared : undefined}>
+				<button onClick={() => render(<App step />, scratch)} />
+				<i onClick={step ? shared : () => {}} />
+			</div>
+		);
+
+		render(<App />, scratch);
+		fireEvent(scratch.querySelector('button'), 'click');
+		expect(shared).not.toHaveBeenCalled();
+	});
+
 	it('should update event handlers', () => {
 		let click1 = vi.fn();
 		let click2 = vi.fn();
