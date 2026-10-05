@@ -6,14 +6,14 @@
 			simple,
 			i,
 			children = EMPTY_CHILDREN;
-		for (i = arguments.length; i-- > 2; ) stack.push(arguments[i]);
+		for (i = arguments.length; i-- > 2;) stack.push(arguments[i]);
 		if (attributes && null != attributes.children) {
 			if (!stack.length) stack.push(attributes.children);
 			delete attributes.children;
 		}
 		while (stack.length)
 			if ((child = stack.pop()) && void 0 !== child.pop)
-				for (i = child.length; i--; ) stack.push(child[i]);
+				for (i = child.length; i--;) stack.push(child[i]);
 			else {
 				if ('boolean' == typeof child) child = null;
 				if ((simple = 'function' != typeof nodeName))
@@ -206,7 +206,7 @@
 			vchildren = vnode.children;
 		if (null == props) {
 			props = out.__preactattr_ = {};
-			for (var a = out.attributes, i = a.length; i--; )
+			for (var a = out.attributes, i = a.length; i--;)
 				props[a[i].name] = a[i].value;
 		}
 		if (

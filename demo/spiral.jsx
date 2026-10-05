@@ -68,7 +68,7 @@ export default class Spiral extends Component {
 			cursors = [];
 
 		// the advantage of JSX is that you can use the entirety of JS to "template":
-		for (let i = max; i--; ) {
+		for (let i = max; i--;) {
 			let f = (i / max) * LOOPS,
 				θ = f * 2 * Math.PI,
 				m = 20 + i * 2,

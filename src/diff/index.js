@@ -475,7 +475,7 @@ function markAsForce(vnode) {
  * @param {VNode} root
  */
 export function commitRoot(commitQueue, root, refQueue) {
-	for (let i = 0; i < refQueue.length; ) {
+	for (let i = 0; i < refQueue.length;) {
 		applyRef(refQueue[i++], refQueue[i++], refQueue[i++]);
 	}
 

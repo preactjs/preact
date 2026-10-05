@@ -62,14 +62,16 @@ export type Signalish<T> = T | SignalLike<T>;
 export type UnpackSignal<T> = T extends SignalLike<infer V> ? V : T;
 
 export type DOMCSSProperties = {
-	[key in keyof Omit<
-		CSSStyleDeclaration,
-		| 'item'
-		| 'setProperty'
-		| 'removeProperty'
-		| 'getPropertyValue'
-		| 'getPropertyPriority'
-	>]?: string | number | null | undefined;
+	[
+		key in keyof Omit<
+			CSSStyleDeclaration,
+			| 'item'
+			| 'setProperty'
+			| 'removeProperty'
+			| 'getPropertyValue'
+			| 'getPropertyPriority'
+		>
+	]?: string | number | null | undefined;
 };
 export type AllCSSProperties = {
 	[key: string]: string | number | null | undefined;

@@ -23,7 +23,7 @@ export function _catchError(error, vnode, oldVNode, errorInfo) {
 		/** @type {number} */
 		handled;
 
-	for (; (vnode = vnode._parent); ) {
+	for (; (vnode = vnode._parent);) {
 		if (
 			(component = vnode._component) &&
 			!(component._bits & COMPONENT_PROCESSING_EXCEPTION)
