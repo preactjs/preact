@@ -3,7 +3,7 @@ import { useState, useEffect } from 'preact/hooks';
 import 'preact/debug';
 import { act } from 'preact/test-utils';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
-import { vi } from 'vitest';
+import { vi } from 'vite-plus/test';
 
 describe('debug with hooks', () => {
 	let scratch;

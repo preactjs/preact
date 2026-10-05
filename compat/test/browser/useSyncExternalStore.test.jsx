@@ -12,7 +12,7 @@ import React, {
 import ReactDOMServer from 'preact/compat/server';
 import { setupRerender, act } from 'preact/test-utils';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
-import { vi } from 'vitest';
+import { vi } from 'vite-plus/test';
 
 const ReactDOM = React;
 

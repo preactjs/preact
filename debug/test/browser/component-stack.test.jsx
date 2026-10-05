@@ -1,6 +1,6 @@
 import { createElement, render, Component } from 'preact';
 import { captureOwnerStack } from 'preact/debug';
-import { vi } from 'vitest';
+import { vi } from 'vite-plus/test';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 
 describe('component stack', () => {

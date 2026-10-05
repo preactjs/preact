@@ -13,7 +13,7 @@ import {
 	createEvent,
 	sortAttributes
 } from '../../../test/_util/helpers';
-import { vi } from 'vitest';
+import { vi } from 'vite-plus/test';
 
 describe('compat render', () => {
 	/** @type {HTMLDivElement} */

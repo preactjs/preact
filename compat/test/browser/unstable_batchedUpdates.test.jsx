@@ -1,7 +1,7 @@
 import { createElement, render } from 'preact';
 import { useState } from 'preact/hooks';
 import { unstable_batchedUpdates, flushSync } from 'preact/compat';
-import { vi } from 'vitest';
+import { vi } from 'vite-plus/test';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 
 describe('unstable_batchedUpdates', () => {

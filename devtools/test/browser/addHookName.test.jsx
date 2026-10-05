@@ -2,7 +2,7 @@ import { createElement, render, options } from 'preact';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { useState } from 'preact/hooks';
 import { addHookName } from 'preact/devtools';
-import { vi } from 'vitest';
+import { vi } from 'vite-plus/test';
 
 describe('addHookName', () => {
 	/** @type {HTMLDivElement} */

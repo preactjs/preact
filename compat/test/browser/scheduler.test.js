@@ -7,7 +7,7 @@ import {
 	unstable_ImmediatePriority,
 	unstable_now
 } from 'preact/compat/scheduler';
-import { vi } from 'vitest';
+import { vi } from 'vite-plus/test';
 
 describe('scheduler', () => {
 	describe('runWithPriority', () => {

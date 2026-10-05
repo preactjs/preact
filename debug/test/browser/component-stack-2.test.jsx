@@ -1,7 +1,7 @@
 import { createElement, render, Component } from 'preact';
 import 'preact/debug';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
-import { vi } from 'vitest';
+import { vi } from 'vite-plus/test';
 
 // This test is not part of component-stack.test.js to avoid it being
 // transpiled with '@babel/plugin-transform-react-jsx-source' enabled.

@@ -12,11 +12,11 @@ import {
 	createEvent
 } from '../_util/helpers';
 import { clearLog, getLog, logCall } from '../_util/logCall';
-import { expect, vi } from 'vitest';
+import { expect, vi } from 'vite-plus/test';
 
 function getAttributes(node) {
 	let attrs = {};
-	for (let i = node.attributes.length; i--; ) {
+	for (let i = node.attributes.length; i--;) {
 		attrs[node.attributes[i].name] = node.attributes[i].value;
 	}
 	return attrs;

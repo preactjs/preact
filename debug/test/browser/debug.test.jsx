@@ -12,7 +12,7 @@ import { setupScratch, teardown } from '../../../test/_util/helpers';
 import './fakeDevTools';
 import 'preact/debug';
 import { setupRerender } from 'preact/test-utils';
-import { vi } from 'vitest';
+import { vi } from 'vite-plus/test';
 
 const h = createElement;
 

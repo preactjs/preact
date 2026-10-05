@@ -7,7 +7,7 @@ import {
 	Fragment
 } from 'preact';
 import { setupScratch, teardown } from '../_util/helpers';
-import { vi } from 'vitest';
+import { vi } from 'vite-plus/test';
 
 describe('createContext', () => {
 	let scratch;

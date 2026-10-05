@@ -1,7 +1,7 @@
 import { createElement, render, options } from 'preact';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { useDebugValue, useState } from 'preact/hooks';
-import { vi } from 'vitest';
+import { vi } from 'vite-plus/test';
 
 describe('useDebugValue', () => {
 	/** @type {HTMLDivElement} */

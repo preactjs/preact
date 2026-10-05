@@ -19,7 +19,7 @@ import {
 } from '../../../test/_util/helpers';
 import { ul, li, div } from '../../../test/_util/dom';
 import { createLazy, createSuspenseLoader } from './suspense-utils';
-import { vi } from 'vitest';
+import { vi } from 'vite-plus/test';
 
 /* eslint-env browser */
 describe('suspense hydration', () => {

@@ -8,14 +8,14 @@ import {
 	serializeHtml,
 	sortAttributes
 } from '../_util/helpers';
-import { vi } from 'vitest';
+import { vi } from 'vite-plus/test';
 
 const h = createElement;
 
 function getAttributes(node) {
 	let attrs = {};
 	if (node.attributes) {
-		for (let i = node.attributes.length; i--; ) {
+		for (let i = node.attributes.length; i--;) {
 			attrs[node.attributes[i].name] = node.attributes[i].value;
 		}
 	}

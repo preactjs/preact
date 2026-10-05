@@ -2,7 +2,7 @@ import { options, createElement, render } from 'preact';
 import { useEffect, useReducer, useState } from 'preact/hooks';
 import { act } from 'preact/test-utils';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
-import { vi } from 'vitest';
+import { vi } from 'vite-plus/test';
 
 // IE11 doesn't support `new Event()`
 function createEvent(name) {

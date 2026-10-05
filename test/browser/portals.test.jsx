@@ -9,7 +9,7 @@ import {
 import { setupScratch, teardown } from '../_util/helpers';
 import { setupRerender, act } from 'preact/test-utils';
 import { expect } from 'chai';
-import { vi } from 'vitest';
+import { vi } from 'vite-plus/test';
 
 /* eslint-disable react/jsx-boolean-value, react/display-name, prefer-arrow-callback */
 

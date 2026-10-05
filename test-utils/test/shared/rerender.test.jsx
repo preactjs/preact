@@ -1,6 +1,6 @@
 import { options, createElement, render, Component } from 'preact';
 import { teardown, setupRerender } from 'preact/test-utils';
-import { vi } from 'vitest';
+import { vi } from 'vite-plus/test';
 
 describe('setupRerender & teardown', () => {
 	/** @type {HTMLDivElement} */

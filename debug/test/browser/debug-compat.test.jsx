@@ -7,7 +7,7 @@ import * as PropTypes from 'prop-types';
 // eslint-disable-next-line no-duplicate-imports
 import { resetPropWarnings } from 'preact/debug';
 import { forwardRef, createPortal } from 'preact/compat';
-import { vi } from 'vitest';
+import { vi } from 'vite-plus/test';
 
 const h = createElement;
 

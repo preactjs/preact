@@ -11,7 +11,7 @@ import React, {
 	memo,
 	useState
 } from 'preact/compat';
-import { vi, expect } from 'vitest';
+import { vi, expect } from 'vite-plus/test';
 
 const h = React.createElement;
 

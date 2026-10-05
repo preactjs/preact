@@ -1,6 +1,6 @@
 import { setupRerender, act } from 'preact/test-utils';
 import { createElement, render, createContext, Component } from 'preact';
-import { vi } from 'vitest';
+import { vi } from 'vite-plus/test';
 import { useState, useContext, useEffect } from 'preact/hooks';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 

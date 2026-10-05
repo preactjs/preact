@@ -1,7 +1,7 @@
 import { setupRerender } from 'preact/test-utils';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import React, { createElement, Component, createRef } from 'preact/compat';
-import { vi } from 'vitest';
+import { vi } from 'vite-plus/test';
 
 describe('components', () => {
 	/** @type {HTMLDivElement} */

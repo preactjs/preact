@@ -1,7 +1,7 @@
 import { createElement, options } from 'preact';
 import { clearLog, getLog } from './logCall';
 import { teardown as testUtilTeardown } from 'preact/test-utils';
-import { vi } from 'vitest';
+import { vi } from 'vite-plus/test';
 
 /** @jsx createElement */
 

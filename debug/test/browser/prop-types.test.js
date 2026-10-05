@@ -8,7 +8,7 @@ import './fakeDevTools';
 import { resetPropWarnings } from 'preact/debug';
 import * as PropTypes from 'prop-types';
 import { jsxDEV as jsxDev } from 'preact/jsx-runtime';
-import { vi } from 'vitest';
+import { vi } from 'vite-plus/test';
 
 describe('PropTypes', () => {
 	/** @type {HTMLDivElement} */

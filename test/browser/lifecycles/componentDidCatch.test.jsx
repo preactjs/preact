@@ -1,7 +1,7 @@
 import { setupRerender } from 'preact/test-utils';
 import { createElement, render, Component, Fragment } from 'preact';
 import { setupScratch, teardown } from '../../_util/helpers';
-import { vi, expect } from 'vitest';
+import { vi, expect } from 'vite-plus/test';
 
 describe('Lifecycle methods', () => {
 	/* eslint-disable react/display-name */

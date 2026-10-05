@@ -2,7 +2,7 @@ import { act, setupRerender } from 'preact/test-utils';
 import { createElement, render, Suspense } from 'preact/compat';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { createLazy } from './suspense-utils';
-import { expect } from 'vitest';
+import { expect } from 'vite-plus/test';
 
 /** @jsx createElement */
 

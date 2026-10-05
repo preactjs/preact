@@ -5,7 +5,7 @@ import {
 } from '../../../test/_util/helpers';
 import { div, span } from '../../../test/_util/dom';
 import React, { createElement, Children, render } from 'preact/compat';
-import { vi } from 'vitest';
+import { vi } from 'vite-plus/test';
 
 describe('Children', () => {
 	/** @type {HTMLDivElement} */

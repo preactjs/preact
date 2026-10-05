@@ -11,7 +11,7 @@ import {
 	useContext
 } from 'preact/hooks';
 import { scheduleEffectAssert } from '../_util/useEffectUtil';
-import { vi } from 'vitest';
+import { vi } from 'vite-plus/test';
 
 describe('combinations', () => {
 	/** @type {HTMLDivElement} */

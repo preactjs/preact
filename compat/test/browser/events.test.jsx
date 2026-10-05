@@ -7,7 +7,7 @@ import {
 } from '../../../test/_util/helpers';
 
 import { createElement } from 'preact/compat';
-import { vi } from 'vitest';
+import { vi } from 'vite-plus/test';
 
 describe('preact/compat events', () => {
 	/** @type {HTMLDivElement} */

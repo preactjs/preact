@@ -4,7 +4,7 @@ import {
 	teardown,
 	supportsPassiveEvents
 } from '../_util/helpers';
-import { vi } from 'vitest';
+import { vi } from 'vite-plus/test';
 
 describe('event handling', () => {
 	let scratch, proto;

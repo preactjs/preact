@@ -12,7 +12,7 @@ import {
 } from 'preact/compat';
 import { setupRerender, act } from 'preact/test-utils';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
-import { vi } from 'vitest';
+import { vi } from 'vite-plus/test';
 
 describe('React-18-hooks', () => {
 	/** @type {HTMLDivElement} */

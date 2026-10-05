@@ -1,6 +1,6 @@
 import { createElement, render } from 'preact';
 import { setupScratch, teardown, sortCss } from '../_util/helpers';
-import { vi } from 'vitest';
+import { vi } from 'vite-plus/test';
 
 describe('style attribute', () => {
 	/** @type {HTMLElement} */

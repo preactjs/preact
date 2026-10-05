@@ -1,7 +1,7 @@
 import { createElement, render, Component, Fragment } from 'preact';
 import { setupRerender } from 'preact/test-utils';
 import { setupScratch, teardown } from '../_util/helpers';
-import { expect } from 'vitest';
+import { expect } from 'vite-plus/test';
 
 /** @jsx createElement */
 /** @jsxFrag Fragment */

@@ -7,7 +7,7 @@ import {
 } from '../../../test/_util/helpers';
 import { useEffectAssertions } from './useEffectAssertions';
 import { useLayoutEffect, useRef, useState } from 'preact/hooks';
-import { vi } from 'vitest';
+import { vi } from 'vite-plus/test';
 
 describe('useLayoutEffect', () => {
 	/** @type {HTMLDivElement} */

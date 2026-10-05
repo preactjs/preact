@@ -2,7 +2,7 @@ import { createElement, render } from 'preact';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { useMemo, useState } from 'preact/hooks';
 import { act } from 'preact/test-utils';
-import { vi } from 'vitest';
+import { vi } from 'vite-plus/test';
 
 describe('useMemo', () => {
 	/** @type {HTMLDivElement} */

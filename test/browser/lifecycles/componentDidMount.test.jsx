@@ -1,7 +1,7 @@
 import { createElement, render, Component } from 'preact';
 import { setupRerender } from 'preact/test-utils';
 import { setupScratch, teardown } from '../../_util/helpers';
-import { vi } from 'vitest';
+import { vi } from 'vite-plus/test';
 
 describe('Lifecycle methods', () => {
 	/** @type {HTMLDivElement} */

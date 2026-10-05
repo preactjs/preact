@@ -1,6 +1,6 @@
 import { setupRerender } from 'preact/test-utils';
 import { createElement, render, Component, Fragment } from 'preact';
-import { vi } from 'vitest';
+import { vi } from 'vite-plus/test';
 import { setupScratch, teardown } from '../../_util/helpers';
 import { logCall, getLog, clearLog } from '../../_util/logCall';
 

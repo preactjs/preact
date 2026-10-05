@@ -1,5 +1,5 @@
 import { options as rawOptions } from 'preact';
-import { vi } from 'vitest';
+import { vi } from 'vite-plus/test';
 
 /** @type {import('preact/src/internal').Options} */
 let options = rawOptions;

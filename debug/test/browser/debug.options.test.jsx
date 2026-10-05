@@ -12,7 +12,7 @@ import { useState } from 'preact/hooks';
 import { setupRerender } from 'preact/test-utils';
 import 'preact/debug';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
-import { vi } from 'vitest';
+import { vi } from 'vite-plus/test';
 
 describe('debug options', () => {
 	/** @type {HTMLDivElement} */

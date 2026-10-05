@@ -10,7 +10,7 @@ import {
 } from 'preact/jsx-runtime';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { encodeEntities } from '../../src/utils';
-import { vi } from 'vitest';
+import { vi } from 'vite-plus/test';
 
 function createSignal(value) {
 	return {

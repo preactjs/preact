@@ -2,7 +2,7 @@ import { Fragment, createElement, render } from 'preact';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { useErrorBoundary, useLayoutEffect, useState } from 'preact/hooks';
 import { setupRerender } from 'preact/test-utils';
-import { vi } from 'vitest';
+import { vi } from 'vite-plus/test';
 
 describe('errorBoundary', () => {
 	/** @type {HTMLDivElement} */

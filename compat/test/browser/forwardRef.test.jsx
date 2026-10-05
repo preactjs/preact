@@ -14,7 +14,7 @@ import {
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { setupRerender, act } from 'preact/test-utils';
 import { getSymbol } from './testUtils';
-import { vi } from 'vitest';
+import { vi } from 'vite-plus/test';
 
 /* eslint-disable react/jsx-boolean-value, react/display-name, prefer-arrow-callback */
 

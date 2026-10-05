@@ -1,4 +1,4 @@
-import { expect, describe } from 'vitest';
+import { expect, describe } from 'vite-plus/test';
 
 globalThis.context = describe;
 
