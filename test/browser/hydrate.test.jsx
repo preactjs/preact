@@ -127,6 +127,28 @@ describe('hydrate()', () => {
 		expect(getLog()).to.deep.equal(['Comment.remove()']);
 	});
 
+	it('should not move nodes that follow comment nodes', () => {
+		scratch.innerHTML = '<p><!-- a --><i>0</i><!-- b --><!-- c --><b>1</b></p>';
+		const i = scratch.querySelector('i');
+		const b = scratch.querySelector('b');
+		clearLog();
+		hydrate(
+			<p>
+				<i>0</i>
+				<b>1</b>
+			</p>,
+			scratch
+		);
+		expect(scratch.innerHTML).to.equal('<p><i>0</i><b>1</b></p>');
+		expect(scratch.querySelector('i')).to.equal(i);
+		expect(scratch.querySelector('b')).to.equal(b);
+		expect(getLog()).to.deep.equal([
+			'Comment.remove()',
+			'Comment.remove()',
+			'Comment.remove()'
+		]);
+	});
+
 	it('should reuse existing DOM when given components', () => {
 		const onClickSpy = vi.fn();
 		const html = ul([li('1'), li('2'), li('3')]);

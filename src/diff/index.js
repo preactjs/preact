@@ -391,23 +391,33 @@ export function diff(
 						: MODE_SUSPENDED;
 
 					if (excessDomChildren) {
-						for (let i = 0; i < excessDomChildren.length; i++) {
-							let child = excessDomChildren[i];
+						let i = excessDomChildren.indexOf(oldDom || UNDEFINED),
+							child;
+						if (!~i) i = excessDomChildren.length;
+
+						// The cursor skips comments: step back to this component's markers.
+						while ((child = excessDomChildren[i - 1]) && child.nodeType == 8) {
+							i--;
+						}
+
+						for (; i < excessDomChildren.length; i++) {
+							child = excessDomChildren[i];
 							if (!child) continue;
+							excessDomChildren[i] = NULL;
 
 							if (child.nodeType == 8) {
-								excessDomChildren[i] = NULL;
 								if (child.data.startsWith('$s')) {
 									if (!commentMarkersToFind++) startMarker = child;
 								} else if (
+									commentMarkersToFind &&
 									child.data.startsWith('/$s') &&
 									!--commentMarkersToFind
 								) {
 									oldDom = child;
 									break;
 								}
-							} else if (commentMarkersToFind) {
-								excessDomChildren[i] = NULL;
+							} else if (!commentMarkersToFind) {
+								break;
 							}
 						}
 					}
@@ -415,10 +425,6 @@ export function diff(
 					if (!startMarker) {
 						while (oldDom && oldDom.nodeType == 8 && oldDom.nextSibling) {
 							oldDom = oldDom.nextSibling;
-						}
-
-						if (excessDomChildren) {
-							excessDomChildren[excessDomChildren.indexOf(oldDom)] = NULL;
 						}
 						startMarker = oldDom;
 					}

@@ -410,7 +410,12 @@ function insert(parentVNode, oldDom, parentDom, isMounting) {
 			if (oldDom && !oldDom.parentNode) oldDom = NULL;
 		}
 
-		if (parentVNode._dom != oldDom) {
+		// Comments (e.g. server `$s` markers) are never ours: a node right after
+		// them is already in place.
+		let next = oldDom;
+		while (next && next.nodeType == 8) next = next.nextSibling;
+
+		if (parentVNode._dom != next) {
 			// Containers that aren't DOM nodes may not implement moveBefore()
 			if (!isMounting && parentDom.moveBefore && parentVNode._dom.parentNode) {
 				// @ts-expect-error This isn't added to TypeScript lib.d.ts yet
