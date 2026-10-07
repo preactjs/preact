@@ -1,5 +1,5 @@
 import { checkPropTypes } from './check-props';
-import { options, Component } from 'preact';
+import { options, Component, Fragment } from 'preact';
 import {
 	ELEMENT_NODE,
 	DOCUMENT_NODE,
@@ -61,6 +61,20 @@ function getClosestDomNodeParentName(parent) {
 	return /** @type {string} */ (parent.type);
 }
 
+/**
+ * The closest component to `vnode`: errors from refs and from unmounted
+ * components' cleanups arrive with a DOM or placeholder vnode.
+ * @param {import('./internal').VNode} vnode
+ * @returns {import('./internal').VNode}
+ */
+function getOwningComponent(vnode) {
+	let owner = vnode;
+	while (owner && (typeof owner.type != 'function' || owner.type == Fragment)) {
+		owner = owner._parent;
+	}
+	return owner || vnode;
+}
+
 export function initDebug() {
 	setupComponentStack();
 
@@ -82,33 +96,62 @@ export function initDebug() {
 				lazyPropTypes: new WeakMap()
 			};
 	const deprecations = [];
+	/** @type {{ error: any, vnode: import('./internal').VNode, done?: boolean }} */
+	let escaping;
 
 	options._catchError = (error, vnode, oldVNode, errorInfo) => {
-		let component = vnode && vnode._component;
-		if (component && typeof error.then == 'function') {
-			const promise = error;
-			error = new Error(
-				`Missing Suspense. The throwing component was: ${getDisplayName(vnode)}`
-			);
+		// A frame below already reported this error as escaping, and this one
+		// gets to decide what happens to it now.
+		const previous = escaping && escaping.error === error && escaping;
+		if (previous) previous.done = true;
 
-			let parent = vnode;
-			for (; parent; parent = parent._parent) {
-				if (parent._component && parent._component._childDidSuspend) {
-					error = promise;
-					break;
+		try {
+			let component = vnode && vnode._component;
+			if (component && typeof error.then == 'function') {
+				const promise = error;
+				error = new Error(
+					`Missing Suspense. The throwing component was: ${getDisplayName(vnode)}`
+				);
+
+				let parent = vnode;
+				for (; parent; parent = parent._parent) {
+					if (parent._component && parent._component._childDidSuspend) {
+						error = promise;
+						break;
+					}
+				}
+
+				// We haven't recovered and we know at this point that there is no
+				// Suspense component higher up in the tree
+				if (error instanceof Error) {
+					throw error;
 				}
 			}
 
-			// We haven't recovered and we know at this point that there is no
-			// Suspense component higher up in the tree
-			if (error instanceof Error) {
-				throw error;
-			}
+			errorInfo = errorInfo || {};
+			errorInfo.componentStack = getOwnerStack(vnode);
+			oldCatchError(error, vnode, oldVNode, errorInfo);
+		} catch (e) {
+			const report = (escaping = {
+				error: e,
+				// Keep pointing at the component that threw while the error passes
+				// unchanged through the frames above it.
+				vnode: previous && e === previous.error ? previous.vnode : vnode
+			});
+			// Logged once the throw has unwound, so that an outer tree catching it
+			// (around a nested `render()`) can still cancel the report. Its own
+			// stack only points into Preact, so name the component it came from.
+			queueMicrotask(() => {
+				if (!report.done) {
+					const owner = getOwningComponent(report.vnode);
+					console.error(
+						`An error occurred in the <${getDisplayName(owner)}> component, and no error boundary handled it.\n\n${getOwnerStack(owner)}`
+					);
+				}
+				if (escaping == report) escaping = undefined;
+			});
+			throw e;
 		}
-
-		errorInfo = errorInfo || {};
-		errorInfo.componentStack = getOwnerStack(vnode);
-		oldCatchError(error, vnode, oldVNode, errorInfo);
 
 		// when an error was handled by an ErrorBoundary we still log it, matching what
 		// React does in development. Errors that were not handled are rethrown by the
@@ -148,6 +191,9 @@ export function initDebug() {
 	};
 
 	options._diff = vnode => {
+		// Unwinding never diffs, so whatever was escaping has finished doing so.
+		escaping = undefined;
+
 		let { type } = vnode;
 
 		hooksAllowed = true;
