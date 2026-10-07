@@ -3047,6 +3047,131 @@ describe('suspense', () => {
 		]);
 	});
 
+	it('should unmount a parked subtree when the boundary unmounts', () => {
+		const [Suspender, suspend] = createSuspender(() => <p>content</p>);
+		const log = [];
+		let host;
+		class Host extends Component {
+			componentDidMount() {
+				host = this;
+			}
+			componentWillUnmount() {
+				log.push('unmount');
+			}
+			render() {
+				log.push('render');
+				return <b>host</b>;
+			}
+		}
+		const ref = () => {
+			log.push('ref');
+			return () => log.push('cleanup');
+		};
+		render(
+			<Suspense fallback={<div>fallback</div>}>
+				<Host ref={ref} />
+				<Suspender />
+			</Suspense>,
+			scratch
+		);
+
+		suspend();
+		rerender();
+		expect(log).to.deep.equal(['render', 'ref']);
+
+		render(null, scratch);
+		expect(log).to.deep.equal(['render', 'ref', 'cleanup', 'unmount']);
+
+		host.forceUpdate();
+		rerender();
+		expect(log).to.deep.equal(['render', 'ref', 'cleanup', 'unmount']);
+	});
+
+	it('should unmount each instance once when the boundary suspends during a parent update', () => {
+		const [Lazy] = createLazy();
+		const log = [];
+		let id = 0;
+		class Host extends Component {
+			componentDidMount() {
+				this.id = ++id;
+				log.push('mount ' + this.id);
+			}
+			componentWillUnmount() {
+				log.push('unmount ' + this.id);
+			}
+			render() {
+				return <b>host</b>;
+			}
+		}
+		function App() {
+			const [, update] = useState(false);
+			useLayoutEffect(() => update(true), []);
+			return (
+				<Suspense fallback={<div>fallback</div>}>
+					<Host />
+					<Lazy />
+				</Suspense>
+			);
+		}
+
+		render(<App />, scratch);
+		rerender();
+		expect(scratch.innerHTML).to.equal('<div>fallback</div>');
+		expect(log).to.deep.equal(['mount 1', 'unmount 1', 'mount 2']);
+
+		render(null, scratch);
+		expect(log).to.deep.equal(['mount 1', 'unmount 1', 'mount 2', 'unmount 2']);
+	});
+
+	it('should bubble events through listeners revealed after re-suspending', async () => {
+		const outer = vi.fn(),
+			inner = vi.fn();
+		const [Lazy, resolve] = createLazy();
+		let setChild;
+		function App() {
+			const [child, setChildInternal] = useState(<Lazy />);
+			setChild = setChildInternal;
+			return (
+				<Suspense fallback={<div>fallback</div>}>
+					<div onClick={outer}>
+						<button onClick={inner}>x</button>
+					</div>
+					{child}
+				</Suspense>
+			);
+		}
+
+		render(<App />, scratch);
+		rerender();
+		await resolve(() => <div>b1</div>);
+		rerender();
+
+		// Unmount resets `_listeners` while the parked DOM keeps its listeners
+		const [Lazy2, resolve2] = createLazy();
+		setChild(<Lazy2 />);
+		rerender();
+		expect(scratch.textContent).to.contain('fallback');
+		await resolve2(() => <div>b2</div>);
+		rerender();
+
+		const errors = [];
+		const onError = e => {
+			errors.push(String(e.error || e.message));
+			e.preventDefault();
+		};
+		window.addEventListener('error', onError);
+		try {
+			scratch
+				.querySelector('button')
+				.dispatchEvent(new Event('click', { bubbles: true }));
+		} finally {
+			window.removeEventListener('error', onError);
+		}
+		expect(errors).to.deep.equal([]);
+		expect(inner).toHaveBeenCalledOnce();
+		expect(outer).toHaveBeenCalledOnce();
+	});
+
 	describe('portals', () => {
 		/** @type {HTMLDivElement} */
 		let portalRoot;
