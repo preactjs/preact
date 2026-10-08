@@ -249,6 +249,8 @@ function process() {
 			}
 		}
 	} finally {
-		rerenderQueue.length = rerenderCount = 0;
+		if ((rerenderCount = rerenderQueue.length)) {
+			(prevDebounce || queueMicrotask)(process);
+		}
 	}
 }
