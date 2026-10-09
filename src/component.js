@@ -222,9 +222,13 @@ export function enqueueRender(c) {
  */
 const depthSort = (a, b) => a._vnode._depth - b._vnode._depth;
 
-/** Flush the render queue by rerendering all queued components */
+/** Flush pending effects, then rerender all queued components */
 function process() {
 	try {
+		// Effects from the previous commit run before the next render starts, so
+		// the render sees what they wrote.
+		if (options._flushEffects) options._flushEffects();
+
 		let c,
 			l = 1;
 
@@ -249,6 +253,8 @@ function process() {
 			}
 		}
 	} finally {
-		rerenderQueue.length = rerenderCount = 0;
+		if ((rerenderCount = rerenderQueue.length)) {
+			(prevDebounce || queueMicrotask)(process);
+		}
 	}
 }

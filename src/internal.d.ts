@@ -35,6 +35,8 @@ export interface Options extends preact.Options {
 	_render?(vnode: VNode): void;
 	/** Attach a hook that is invoked before a hook's state is queried. */
 	_hook?(component: Component, index: number, type: HookType): void;
+	/** Attach a hook that is invoked before the render queue is flushed, to run pending effects. */
+	_flushEffects?(): void;
 	/** Bypass effect execution. Currenty only used in devtools for hooks inspection */
 	_skipEffects?: boolean;
 	/** Attach a hook that is invoked after an error is caught in a component but before calling lifecycle hooks */
