@@ -128,7 +128,7 @@
     "compat/client.js",
     "compat/client.mjs",
     "compat/server.d.ts",
-    "compat/server.browser.js",
+    "compat/server.browser.mjs",
     "compat/server.js",
     "compat/server.mjs",
     "compat/scheduler.d.ts",
