@@ -55,13 +55,13 @@
     },
     "./compat/server": {
       "types": "./compat/server.d.ts",
-      "browser": "./compat/server.browser.js",
+      "browser": "./compat/server.browser.mjs",
       "import": "./compat/server.mjs",
       "require": "./compat/server.js"
     },
     "./compat/server.browser": {
       "types": "./compat/server.d.ts",
-      "default": "./compat/server.browser.js"
+      "default": "./compat/server.browser.mjs"
     },
     "./compat/jsx-runtime": {
       "types": "./jsx-runtime/src/index.d.ts",
@@ -128,7 +128,7 @@
     "compat/client.js",
     "compat/client.mjs",
     "compat/server.d.ts",
-    "compat/server.browser.js",
+    "compat/server.browser.mjs",
     "compat/server.js",
     "compat/server.mjs",
     "compat/scheduler.d.ts",
