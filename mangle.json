@@ -48,7 +48,7 @@
       "$_vnode": "__v",
       "$_children": "__k",
       "$_pendingSuspensionCount": "__u",
-      "$_childDidSuspend": "__c",
+      "$_childDidSuspend": "__D",
       "$_onResolve": "__R",
       "$_suspended": "__a",
       "$_dom": "__e",
