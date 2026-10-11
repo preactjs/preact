@@ -249,9 +249,10 @@ function process() {
 			}
 		}
 	} finally {
-		rerenderQueue.some(c => {
-			c._bits &= ~COMPONENT_DIRTY;
-		});
-		rerenderQueue.length = rerenderCount = 0;
+		// If a render threw, the components still queued keep their place and
+		// render in another flush, so their pending updates aren't lost.
+		if ((rerenderCount = rerenderQueue.length)) {
+			(prevDebounce || queueMicrotask)(process);
+		}
 	}
 }

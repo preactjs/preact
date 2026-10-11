@@ -2227,11 +2227,51 @@ describe('Components', () => {
 		sibling.setState({ count: 1 });
 		expect(() => rerender()).to.throw('test error');
 
-		// Sibling was dropped from the queue, but it must not be left marked
-		// dirty, otherwise enqueueRender ignores every later update to it.
+		// Sibling must not be left marked dirty without being queued,
+		// otherwise enqueueRender ignores every later update to it.
 		shouldThrow = false;
 		sibling.setState({ count: 2 });
 		rerender();
 		expect(scratch.innerHTML).to.equal('<div><p>a</p><p>2</p></div>');
+	});
+
+	it('should render updates that were queued behind a render that threw', () => {
+		let throwing, sibling;
+
+		class Thrower extends Component {
+			render() {
+				throwing = this;
+				if (this.state.boom) throw new Error('test error');
+				return <p>a</p>;
+			}
+		}
+
+		class Sibling extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { count: 0 };
+			}
+			render(props, state) {
+				sibling = this;
+				return <p>{state.count}</p>;
+			}
+		}
+
+		render(
+			<div>
+				<Thrower />
+				<Sibling />
+			</div>,
+			scratch
+		);
+
+		throwing.setState({ boom: true });
+		sibling.setState({ count: 1 });
+		expect(() => rerender()).to.throw('test error');
+
+		// The error must not drop Sibling's pending update: it renders in the
+		// flush scheduled after the one that threw.
+		rerender();
+		expect(scratch.innerHTML).to.equal('<div><p>a</p><p>1</p></div>');
 	});
 });
