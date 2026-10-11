@@ -249,6 +249,9 @@ function process() {
 			}
 		}
 	} finally {
+		rerenderQueue.some(c => {
+			c._bits &= ~COMPONENT_DIRTY;
+		});
 		rerenderQueue.length = rerenderCount = 0;
 	}
 }

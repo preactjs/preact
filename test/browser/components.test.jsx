@@ -2187,4 +2187,51 @@ describe('Components', () => {
 
 		options.debounceRendering = prevDebounce;
 	});
+
+	it('should keep updating components that were still queued when rendering threw', () => {
+		let shouldThrow = false;
+		let throwing, sibling;
+
+		class Thrower extends Component {
+			render() {
+				throwing = this;
+				if (shouldThrow) throw new Error('test error');
+				return <p>a</p>;
+			}
+		}
+
+		class Sibling extends Component {
+			constructor(props) {
+				super(props);
+				this.state = { count: 0 };
+			}
+			render(props, state) {
+				sibling = this;
+				return <p>{state.count}</p>;
+			}
+		}
+
+		render(
+			<div>
+				<Thrower />
+				<Sibling />
+			</div>,
+			scratch
+		);
+		expect(scratch.innerHTML).to.equal('<div><p>a</p><p>0</p></div>');
+
+		// Both are queued in the same batch; Thrower renders first and throws
+		// before Sibling gets its turn.
+		shouldThrow = true;
+		throwing.forceUpdate();
+		sibling.setState({ count: 1 });
+		expect(() => rerender()).to.throw('test error');
+
+		// Sibling was dropped from the queue, but it must not be left marked
+		// dirty, otherwise enqueueRender ignores every later update to it.
+		shouldThrow = false;
+		sibling.setState({ count: 2 });
+		rerender();
+		expect(scratch.innerHTML).to.equal('<div><p>a</p><p>2</p></div>');
+	});
 });
