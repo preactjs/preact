@@ -30,7 +30,7 @@
 
 [![coveralls](https://img.shields.io/coveralls/preactjs/preact/main.svg)](https://coveralls.io/github/preactjs/preact)
 [![gzip size](https://img.badgesize.io/https://unpkg.com/preact/dist/preact.mjs?compression=gzip&label=gzip)](https://unpkg.com/preact/dist/preact.mjs)
-[![brotli size](https://img.badgesize.io/https://unpkg.com/preact/dist/preact.mjs?compression=brotli&label=brotli)](https://unpkg.com/preact/dist/preact.mjs)
+[![Drydock review](https://img.shields.io/endpoint?url=https%3A%2F%2Fdrydock.org%2Fpublic%2Fbadge%2Fnpm%2Fpreact)](https://drydock.org/diff/preact)
 
 </td>
 </tr>
