@@ -77,8 +77,16 @@ export function act(cb) {
 			if (!err) {
 				err = e;
 			}
-		} finally {
+		}
+
+		// A failed render leaves the rest of the render queue for `teardown` to
+		// drain, which can throw too.
+		try {
 			teardown();
+		} catch (e) {
+			if (!err) {
+				err = e;
+			}
 		}
 
 		options.requestAnimationFrame = previousRequestAnimationFrame;
@@ -115,16 +123,19 @@ export function act(cb) {
  * Teardown test environment and reset preact's internal state
  */
 export function teardown() {
-	if (options.__test__drainQueue) {
-		// Flush any pending updates leftover by test
-		options.__test__drainQueue();
+	try {
+		if (options.__test__drainQueue) {
+			// Flush any pending updates leftover by test
+			options.__test__drainQueue();
+		}
+	} finally {
 		delete options.__test__drainQueue;
-	}
 
-	if (typeof options.__test__previousDebounce != 'undefined') {
-		options.debounceRendering = options.__test__previousDebounce;
-		delete options.__test__previousDebounce;
-	} else {
-		options.debounceRendering = undefined;
+		if (typeof options.__test__previousDebounce != 'undefined') {
+			options.debounceRendering = options.__test__previousDebounce;
+			delete options.__test__previousDebounce;
+		} else {
+			options.debounceRendering = undefined;
+		}
 	}
 }
