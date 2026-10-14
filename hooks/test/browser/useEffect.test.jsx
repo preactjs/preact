@@ -1,6 +1,6 @@
-import { Component, Fragment, createElement, render } from 'preact';
+import { Component, Fragment, createElement, options, render } from 'preact';
 import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
-import { act, teardown as teardownAct } from 'preact/test-utils';
+import { act, setupRerender, teardown as teardownAct } from 'preact/test-utils';
 import { vi } from 'vitest';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { scheduleEffectAssert } from '../_util/useEffectUtil';
@@ -901,5 +901,171 @@ describe('useEffect', () => {
 		});
 		expect(calls.length).to.equal(1);
 		expect(calls).to.deep.equal(['doing effect0']);
+	});
+});
+
+// Kept out of the `useEffect` describe, whose assertions install
+// `setupRerender` and would replace the default scheduler.
+describe('useEffect before a queued rerender', () => {
+	/** @type {HTMLDivElement} */
+	let scratch;
+
+	beforeEach(() => {
+		scratch = setupScratch();
+	});
+
+	afterEach(() => {
+		teardown(scratch);
+	});
+
+	// A ref setting state is enough to queue a rerender before the effects of
+	// the commit that attached it have run (#3666).
+	function setup() {
+		const seen = [];
+		let ran = false;
+
+		function Child() {
+			useEffect(() => {
+				ran = true;
+			}, []);
+			return null;
+		}
+
+		function Parent() {
+			const [, setNode] = useState(null);
+			seen.push(ran);
+			return (
+				<div ref={setNode}>
+					<Child />
+				</div>
+			);
+		}
+
+		return { seen, App: Parent };
+	}
+
+	it('runs pending effects before the queued rerender', async () => {
+		const { seen, App } = setup();
+
+		render(<App />, scratch);
+		await Promise.resolve();
+
+		expect(seen).to.deep.equal([false, true]);
+	});
+
+	it('runs pending effects before the queued rerender inside act', () => {
+		const { seen, App } = setup();
+
+		act(() => {
+			render(<App />, scratch);
+		});
+
+		expect(seen).to.deep.equal([false, true]);
+	});
+
+	it('reports an effect error before rendering, and the render error after', () => {
+		const rerender = setupRerender();
+		let setBroken;
+
+		function Thrower() {
+			useEffect(() => {
+				throw new Error('effect');
+			}, []);
+			return null;
+		}
+
+		function Breaker() {
+			const [broken, set] = useState(false);
+			setBroken = set;
+			if (broken) throw new Error('render');
+			return null;
+		}
+
+		render(
+			<Fragment>
+				<Thrower />
+				<Breaker />
+			</Fragment>,
+			scratch
+		);
+		setBroken(true);
+
+		expect(() => rerender()).to.throw('effect');
+		expect(() => rerender()).to.throw('render');
+	});
+
+	it('does not run effects of a tree an error boundary discards', async () => {
+		const log = [];
+
+		function Sibling() {
+			useEffect(() => {
+				log.push('mount');
+				return () => log.push('cleanup');
+			}, []);
+			return null;
+		}
+
+		function Thrower() {
+			throw new Error('boom');
+		}
+
+		class Boundary extends Component {
+			static getDerivedStateFromError() {
+				return { error: true };
+			}
+
+			render() {
+				return this.state.error ? 'fallback' : this.props.children;
+			}
+		}
+
+		render(
+			<Boundary>
+				<Sibling />
+				<Thrower />
+			</Boundary>,
+			scratch
+		);
+		await new Promise(r => setTimeout(r, 60));
+
+		expect(scratch.textContent).to.equal('fallback');
+		expect(log).to.deep.equal([]);
+	});
+
+	it('runs layout effects of a commit before its effects when it rerenders synchronously', async () => {
+		const prevDebounce = options.debounceRendering;
+		const log = [];
+		options.debounceRendering = cb => cb();
+
+		function Updater() {
+			const [value, set] = useState(0);
+			useLayoutEffect(() => set(1), []);
+			return value;
+		}
+
+		function Logger() {
+			useLayoutEffect(() => {
+				log.push('layout');
+			}, []);
+			useEffect(() => {
+				log.push('effect');
+			}, []);
+			return null;
+		}
+
+		try {
+			render(
+				<Fragment>
+					<Updater />
+					<Logger />
+				</Fragment>,
+				scratch
+			);
+		} finally {
+			options.debounceRendering = prevDebounce;
+		}
+		await new Promise(r => setTimeout(r, 60));
+
+		expect(log).to.deep.equal(['layout', 'effect']);
 	});
 });
