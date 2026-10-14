@@ -14,6 +14,9 @@ let previousComponent;
 /** @type {number} */
 let currentHook = 0;
 
+/** @type {number} */
+let rootIdCounter = 0;
+
 /** @type {Array<import('./internal').Component>} */
 let afterPaintEffects = [];
 
@@ -435,7 +438,7 @@ export function useId() {
 			root = root._parent;
 		}
 
-		let mask = root._mask || (root._mask = [0, 0]);
+		let mask = root._mask || (root._mask = [rootIdCounter++, 0]);
 		state._value = 'P' + mask[0] + '-' + mask[1]++;
 	}
 
