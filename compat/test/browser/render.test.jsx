@@ -894,6 +894,60 @@ describe('compat render', () => {
 		}
 	});
 
+	it('should not append "px" to numeric values of unitless properties', () => {
+		// These don't accept a <length>, appending "px" makes the browser drop
+		// the declaration. React lists all of them in `isUnitlessNumber`.
+		const style = {
+			aspectRatio: 2,
+			fillOpacity: 0.5,
+			stopOpacity: 0.5,
+			strokeOpacity: 0.5,
+			strokeMiterlimit: 3,
+			strokeWidth: 2,
+			WebkitAnimationIterationCount: 2,
+			WebkitBoxFlex: 2,
+			WebkitBoxOrdinalGroup: 2,
+			WebkitColumnCount: 2,
+			WebkitFlexGrow: 2,
+			WebkitFlexShrink: 2,
+			WebkitLineClamp: 2,
+			'--foo': 2
+		};
+		render(<div style={style} />, scratch);
+
+		const rendered = scratch.firstChild.style;
+		for (const key in style) {
+			const value =
+				key[0] == '-' ? rendered.getPropertyValue(key) : rendered[key];
+			expect(value, key).to.equal(
+				key == 'aspectRatio' ? '2 / 1' : String(style[key])
+			);
+		}
+	});
+
+	it('should append "px" to numeric values of dimensional properties', () => {
+		const style = {
+			animationRangeStart: 2,
+			columnHeight: 2,
+			columnRuleInset: 2,
+			columnWidth: 2,
+			containIntrinsicHeight: 2,
+			flexBasis: 2,
+			fontSize: 2,
+			gridRowGap: 2,
+			shapeMargin: 2,
+			WebkitColumnWidth: 2,
+			WebkitFlexBasis: 2
+		};
+		render(<div style={style} />, scratch);
+
+		const rendered = scratch.firstChild.style;
+		for (const key in style) {
+			// Newer properties may not be implemented by the test browser
+			if (key in rendered) expect(rendered[key], key).to.equal('2px');
+		}
+	});
+
 	it('should not mutate the original style object when appending px', () => {
 		const style = { margin: 10, opacity: 0.5 };
 		render(<div style={style} />, scratch);
