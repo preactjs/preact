@@ -261,3 +261,6 @@ const dangerouslySetInnerHTML = (
 		<div dangerouslySetInnerHTML={{ __html: 'string' }} />
 	</>
 );
+
+const someConditional = true;
+const conditionalInputType = <input type={someConditional ? 'radio' : 'checkbox'} />;
