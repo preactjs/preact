@@ -69,6 +69,7 @@ export function diff(
 	/** @type {any} */
 	let tmp,
 		resumed,
+		resumedEnd,
 		newType = newVNode.type;
 
 	// When passing through createElement it assigns the object
@@ -98,7 +99,10 @@ export function diff(
 			) {
 				if (node.nodeType == 8) {
 					if (node.data.startsWith('$s')) depth++;
-					else if (node.data.startsWith('/$s') && !--depth) break;
+					else if (node.data.startsWith('/$s') && !--depth) {
+						resumedEnd = node;
+						break;
+					}
 				}
 				excessDomChildren.push(node);
 			}
@@ -432,8 +436,11 @@ export function diff(
 					// A re-suspension keeps the marker it originally started from.
 					if (!newVNode._component._excess) {
 						newVNode._component._excess = startMarker;
+						if (startMarker && startMarker.nodeType == 8)
+							newVNode._component._hydrationBoundary = startMarker;
 					}
-					newVNode._dom = oldDom;
+					// A sibling must be inserted after the retained range, not inside it.
+					newVNode._dom = resumedEnd || oldDom;
 				} else if (excessDomChildren) {
 					excessDomChildren.some(removeNode);
 				}
@@ -764,6 +771,8 @@ export function applyRef(ref, value, vnode, owner) {
  */
 export function unmount(vnode, parentVNode, skipRemove) {
 	let r;
+	// Hydration can reserve DOM that never became ordinary child VNodes.
+	const start = vnode._component && vnode._component._hydrationBoundary;
 	if (options.unmount) options.unmount(vnode);
 
 	if ((r = vnode.ref) && (!r.current || r.current == vnode._dom)) {
@@ -798,6 +807,25 @@ export function unmount(vnode, parentVNode, skipRemove) {
 		}
 	}
 
+	if (!skipRemove && start && start.parentNode) {
+		let depth = 1,
+			end = start.nextSibling;
+		for (; end; end = end.nextSibling) {
+			if (end.nodeType == 8) {
+				if (end.data.startsWith('$s')) depth++;
+				else if (end.data.startsWith('/$s') && !--depth) break;
+			}
+		}
+		if (end) {
+			let node = start;
+			while (node != end) {
+				const next = node.nextSibling;
+				removeNode(node);
+				node = next;
+			}
+			removeNode(end);
+		}
+	}
 	if ((r = vnode._dom)) {
 		if (!skipRemove) removeNode(r);
 		if (r._listeners) r._listeners = NULL;

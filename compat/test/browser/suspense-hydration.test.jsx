@@ -78,6 +78,83 @@ describe('suspense hydration', () => {
 		}
 	});
 
+	for (const settled of [false, true]) {
+		it(`should remove only the abandoned marked range after ${settled ? 'resumed' : 'pending'} hydration`, async () => {
+			scratch.innerHTML =
+				'<main><input value="draft"><!--$s:0--><p>root pending</p><!--/$s:0--><!--$s:1--><p>route pending</p><!--/$s:1--></main>';
+			const input = scratch.querySelector('input');
+			const [RootPending, resolveRoot] = createLazy();
+			const [RoutePending, resolveRoute] = createLazy();
+			let leave;
+			function Home() {
+				return (
+					<Suspense>
+						<RoutePending />
+					</Suspense>
+				);
+			}
+			function App() {
+				const [left, setLeft] = useState(false);
+				leave = () => setLeft(true);
+				return (
+					<main>
+						<input defaultValue="draft" />
+						<Suspense>
+							<RootPending />
+						</Suspense>
+						{left ? <h2>destination</h2> : <Home />}
+					</main>
+				);
+			}
+			hydrate(<App />, scratch);
+			rerender();
+			input.value = 'retain input';
+			input.focus();
+			if (settled) {
+				await resolveRoute(() => <p>route resolved</p>);
+				rerender();
+			}
+			leave();
+			rerender();
+			expect(scratch.textContent).to.equal('root pendingdestination');
+			expect(scratch.innerHTML).not.to.contain('$s:1');
+			expect(scratch.querySelector('input')).to.equal(input);
+			expect(input.value).to.equal('retain input');
+			expect(document.activeElement).to.equal(input);
+			if (!settled) await resolveRoute(() => <p>route resolved</p>);
+			await resolveRoot(() => <p>root resolved</p>);
+			rerender();
+			expect(scratch.textContent).to.equal('root resolveddestination');
+		});
+	}
+
+	it('should insert a new sibling after a boundary that suspends again', async () => {
+		scratch.innerHTML = '<main><!--$s:0--><p>pending</p><!--/$s:0--></main>';
+		const end = scratch.querySelector('main').lastChild;
+		const [Pending, resolve] = createLazy();
+		let addSibling;
+		function App() {
+			const [added, setAdded] = useState(false);
+			addSibling = () => setAdded(true);
+			return (
+				<main>
+					<Suspense>
+						<Pending />
+					</Suspense>
+					{added && <h2>destination</h2>}
+				</main>
+			);
+		}
+		hydrate(<App />, scratch);
+		rerender();
+		addSibling();
+		rerender();
+		expect(scratch.querySelector('h2').previousSibling).to.equal(end);
+		await resolve(() => <p>resolved</p>);
+		rerender();
+		expect(scratch.textContent).to.equal('resolveddestination');
+	});
+
 	it('should leave DOM untouched when suspending while hydrating', () => {
 		scratch.innerHTML = '<div>Hello</div>';
 		clearLog();

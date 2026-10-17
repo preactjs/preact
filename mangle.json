@@ -72,7 +72,8 @@
       "$_catchError": "__e",
       "$_refCleanup": "__x",
       "$_skipEffects": "__s",
-      "$_bits": "__g"
+      "$_bits": "__g",
+      "$_hydrationBoundary": "__hb"
     }
   }
 }
