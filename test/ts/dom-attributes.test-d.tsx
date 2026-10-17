@@ -206,6 +206,20 @@ const inputTypeWeekValid = <input type="week" />;
 // @ts-expect-error An input of type week should not have a role
 const inputTypeWeekInvalid = <input type="week" role="button" />;
 
+const inputTypeUnionOmittedRole = <input type={true ? 'radio' : 'checkbox'} />;
+const inputTypeUnionSharedRole = <input type={true ? 'button' : 'checkbox'} role="button" />;
+// @ts-expect-error An input of type email should not have a role of button
+const inputTypeUnionConflictingRole = <input type={true ? 'button' : 'email'} role="button" />;
+// @ts-expect-error An input of type button or email should not have a role of form
+const inputTypeUnionInvalidRole = <input type={true ? 'button' : 'email'} role="form" />;
+
+const inputTypeSignal = <input type={createSignal('button' as const)} />;
+const inputTypeSignalRole = <input type={createSignal('button' as const)} role="checkbox" />;
+// @ts-expect-error An input of type button should not have a role of form
+const inputTypeSignalBadRole = <input type={createSignal('button' as const)} role="form" />;
+// @ts-expect-error Unsupported, can't have a signal with a union inside of it
+const inputTypeSignalUnion = <input type={createSignal<'button' | 'form'>('button')} />;
+
 const selectValid = <select role="menu" />;
 // @ts-expect-error A select should not have a role of button
 const selectInvalid = <select role="button" />;
@@ -217,6 +231,19 @@ const selectMultipleInvalid = <select multiple={true} role="menu" />;
 const selectSizeValid = <select size={5} role="listbox" />;
 // @ts-expect-error A select with a size other than `0` or `1` should not have a role of menu
 const selectSizeInvalid = <select size={5} role="menu" />;
+
+const selectSizeUnionOmittedRole = <select size={true ? 0 : 1} role="menu" />;
+// @ts-expect-error A select with a size other than `0` or `1` should not have a role of menu
+const selectSizeUnionConflictingRole = <select size={true ? 0 : 4} role="menu" />;
+// @ts-expect-error An select of any size should not have a role of form
+const selectSizeUnionInvalidRole = <select size={true ? 0 : 4} role="form" />;
+
+const selectSizeSignal = <select size={createSignal<0 | 1>(1)} />;
+// Really this should only be numbers > 1, but we can't enforce that with TS. This just
+// ensures we don't break this in the future, it's not really "correct".
+const selectSizeSignalRole = <select size={createSignal<number>(5)} role="listbox" />;
+// @ts-expect-error A select with a size `number` may exceed `1` and should not have a role of menu
+const selectSizeSignalBadRole = <input type={createSignal<number>(5)} role="menu" />;
 
 // @ts-expect-error We should correctly type aria attributes like autocomplete
 const badAriaValues = <div aria-autocomplete="bad-value" />;
@@ -261,6 +288,3 @@ const dangerouslySetInnerHTML = (
 		<div dangerouslySetInnerHTML={{ __html: 'string' }} />
 	</>
 );
-
-const someConditional = true;
-const conditionalInputType = <input type={someConditional ? 'radio' : 'checkbox'} />;

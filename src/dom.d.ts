@@ -2702,7 +2702,12 @@ export type SelectAriaRoles =
 			multiple?: never;
 			// Spec states this branch is limited to "no `multiple` attribute AND no `size` attribute greater than 1".
 			// `1` as a default, however, caused some web compat issues and forced Firefox to default to `0` instead.
-			size?: 0 | 1 | never;
+			size?: 0 | 1;
+			role?: Signalish<'combobox' | 'menu' | undefined>;
+	  }
+	| {
+			multiple?: never;
+			size?: SignalLike<0 | 1>;
 			role?: Signalish<'combobox' | 'menu' | undefined>;
 	  }
 	| {
@@ -2713,7 +2718,7 @@ export type SelectAriaRoles =
 
 export type AccessibleSelectHTMLAttributes<
 	T extends EventTarget = HTMLSelectElement
-> = Omit<PartialSelectHTMLAttributes<T>, 'role'> & SelectAriaRoles;
+> = Omit<PartialSelectHTMLAttributes<T>, 'role' | 'size'> & SelectAriaRoles;
 
 export interface SelectHTMLAttributes<
 	T extends EventTarget = HTMLSelectElement
