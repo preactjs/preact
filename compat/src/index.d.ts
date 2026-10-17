@@ -356,7 +356,7 @@ declare namespace React {
 		fn: ForwardRefRenderFunction<R, P>
 	): _preact.FunctionalComponent<PropsWithoutRef<P> & { ref?: _preact.Ref<R> }>;
 
-	export type PropsWithoutRef<P> = Omit<P, 'ref'>;
+	export type PropsWithoutRef<P> = P extends any ? Omit<P, 'ref'> : never;
 
 	interface MutableRefObject<T> {
 		current: T;
