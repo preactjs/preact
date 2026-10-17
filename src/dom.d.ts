@@ -1636,11 +1636,11 @@ export type AnchorAriaRoles =
 			role?: Signalish<AriaRole | undefined>;
 	  };
 
-export type AccessibleAnchorHTMLAttributes<
+export type AnchorHTMLAttributes<
 	T extends EventTarget = HTMLAnchorElement
 > = Omit<PartialAnchorHTMLAttributes<T>, 'role'> & AnchorAriaRoles;
 
-export interface AnchorHTMLAttributes<
+export interface LooseAnchorHTMLAttributes<
 	T extends EventTarget = HTMLAnchorElement
 > extends PartialAnchorHTMLAttributes<T> {
 	href?: Signalish<string | undefined>;
@@ -1673,11 +1673,11 @@ export type AreaAriaRoles =
 			role?: Signalish<'button' | 'link' | undefined>;
 	  };
 
-export type AccessibleAreaHTMLAttributes<
+export type AreaHTMLAttributes<
 	T extends EventTarget = HTMLAreaElement
 > = Omit<PartialAreaHTMLAttributes<T>, 'role'> & AreaAriaRoles;
 
-export interface AreaHTMLAttributes<
+export interface LooseAreaHTMLAttributes<
 	T extends EventTarget = HTMLAreaElement
 > extends PartialAreaHTMLAttributes<T> {
 	href?: Signalish<string | undefined>;
@@ -2080,7 +2080,7 @@ export type ImgAriaRoles =
 			role?: Signalish<'img' | 'none' | 'presentation' | undefined>;
 	  };
 
-export type AccessibleImgHTMLAttributes<
+export type ImgHTMLAttributes<
 	T extends EventTarget = HTMLImageElement
 > = Omit<
 	PartialImgHTMLAttributes<T>,
@@ -2088,7 +2088,7 @@ export type AccessibleImgHTMLAttributes<
 > &
 	ImgAriaRoles;
 
-export interface ImgHTMLAttributes<
+export interface LooseImgHTMLAttributes<
 	T extends EventTarget = HTMLImageElement
 > extends PartialImgHTMLAttributes<T> {
 	alt?: Signalish<string | undefined>;
@@ -2339,11 +2339,11 @@ export type InputAriaRoles = WithSignalType<
 			role?: never;
 	  }>;
 
-export type AccessibleInputHTMLAttributes<
+export type InputHTMLAttributes<
 	T extends EventTarget = HTMLInputElement
 > = Omit<PartialInputHTMLAttributes<T>, 'role' | 'type'> & InputAriaRoles;
 
-export interface InputHTMLAttributes<
+export interface LooseInputHTMLAttributes<
 	T extends EventTarget = HTMLInputElement
 > extends PartialInputHTMLAttributes<T> {
 	type?: Signalish<HTMLInputTypeAttribute | undefined>;
@@ -2716,11 +2716,11 @@ export type SelectAriaRoles =
 			role?: Signalish<'listbox' | undefined>;
 	  };
 
-export type AccessibleSelectHTMLAttributes<
+export type SelectHTMLAttributes<
 	T extends EventTarget = HTMLSelectElement
 > = Omit<PartialSelectHTMLAttributes<T>, 'role' | 'size'> & SelectAriaRoles;
 
-export interface SelectHTMLAttributes<
+export interface LooseSelectHTMLAttributes<
 	T extends EventTarget = HTMLSelectElement
 > extends PartialSelectHTMLAttributes<T> {
 	multiple?: Signalish<boolean | undefined>;
