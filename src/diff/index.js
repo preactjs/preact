@@ -348,8 +348,8 @@ export function diff(
 			}
 
 			// We successfully rendered this VNode, unset any stored hydration/bailout state:
+			// `_excess` stays: unmount removes the markers it points at.
 			newVNode._flags &= RESET_MODE;
-			if (oldVNode._flags & MODE_SUSPENDED) c._excess = NULL;
 
 			// Remove the kept DOM this resumed render didn't claim
 			if (resumed) resumed.some(removeNode);
@@ -814,14 +814,20 @@ export function unmount(vnode, parentVNode, skipRemove) {
 		}
 	}
 
+	// A component that suspended while hydrating owns its range's markers,
+	// and its content too while still pending.
+	if (
+		!skipRemove &&
+		(r = vnode._component) &&
+		(end = rangeEnd((r = r._excess)))
+	) {
+		if (r == vnode._dom) while ((node = r.nextSibling) != end) removeNode(node);
+		removeNode(end);
+		removeNode(r);
+	}
+
 	if ((r = vnode._dom)) {
-		if (!skipRemove) {
-			// A suspended hydration owns its whole streamed range, which never
-			// became child vnodes.
-			for (end = rangeEnd(r); end && node != end; )
-				removeNode((node = r.nextSibling));
-			removeNode(r);
-		}
+		if (!skipRemove) removeNode(r);
 		if (r._listeners) r._listeners = NULL;
 	}
 

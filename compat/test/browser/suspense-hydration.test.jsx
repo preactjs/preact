@@ -2211,4 +2211,77 @@ describe('suspense hydration owning a streamed range', () => {
 		rerender();
 		expect(scratch.textContent).to.equal('beforelateafter');
 	});
+
+	it('should drop its markers when a resolved boundary unmounts', async () => {
+		scratch.innerHTML =
+			'<main><!--$s:0--><p>server</p><!--/$s:0--><span>s</span></main>';
+		const [Lazy, resolve] = createLazy();
+		let hide;
+		function App() {
+			const [shown, setShown] = useState(true);
+			hide = () => setShown(false);
+			return (
+				<main>
+					{shown && (
+						<Suspense>
+							<Lazy />
+						</Suspense>
+					)}
+					<span>s</span>
+				</main>
+			);
+		}
+
+		hydrate(<App />, scratch);
+		rerender();
+		await resolve(() => <p>server</p>);
+		rerender();
+		expect(scratch.innerHTML).to.equal(
+			'<main><!--$s:0--><p>server</p><!--/$s:0--><span>s</span></main>'
+		);
+
+		// A stream chunk arriving later must not find the range to patch.
+		hide();
+		rerender();
+		expect(scratch.innerHTML).to.equal('<main><span>s</span></main>');
+	});
+
+	it('should only drop the markers of a resolved boundary that moved', async () => {
+		scratch.innerHTML =
+			'<main><!--$s--><p>a</p><!--/$s--><!--$s--><p>b</p><!--/$s--><!--$s--><p>c</p><!--/$s--></main>';
+		const lazies = {};
+		const resolvers = {};
+		for (const key of ['a', 'b', 'c']) {
+			[lazies[key], resolvers[key]] = createLazy();
+		}
+		let setOrder;
+		function App() {
+			const [order, set] = useState(['a', 'b', 'c']);
+			setOrder = set;
+			return (
+				<main>
+					{order.map(key => (
+						<Suspense key={key}>{createElement(lazies[key])}</Suspense>
+					))}
+				</main>
+			);
+		}
+
+		hydrate(<App />, scratch);
+		rerender();
+		for (const key of ['a', 'b', 'c']) await resolvers[key](() => <p>{key}</p>);
+		rerender();
+
+		// Content moves without its markers, so markers can end up around a
+		// sibling's content.
+		setOrder(['c', 'a', 'b']);
+		rerender();
+		expect(scratch.textContent).to.equal('cab');
+		setOrder(['c', 'b']);
+		rerender();
+		expect(scratch.textContent).to.equal('cb');
+		setOrder([]);
+		rerender();
+		expect(scratch.innerHTML).to.equal('<main></main>');
+	});
 });
