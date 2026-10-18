@@ -1950,3 +1950,244 @@ describe('suspense hydration resuming into mismatched server DOM', () => {
 		);
 	});
 });
+
+describe('suspense hydration owning a streamed range', () => {
+	/** @type {HTMLDivElement} */
+	let scratch, rerender;
+
+	beforeEach(() => {
+		scratch = setupScratch();
+		rerender = setupRerender();
+	});
+
+	afterEach(() => {
+		teardown(scratch);
+	});
+
+	it('should remove the whole range when unmounted while suspended', async () => {
+		scratch.innerHTML =
+			'<main><!--$s--><p>a</p><p>b</p><!--/$s--><footer>f</footer></main>';
+		const footer = scratch.querySelector('footer');
+		const [Lazy, resolve] = createLazy();
+		let leave;
+		function App() {
+			const [left, setLeft] = useState(false);
+			leave = () => setLeft(true);
+			return (
+				<main>
+					{left ? (
+						<h2>gone</h2>
+					) : (
+						<Suspense>
+							<Lazy />
+						</Suspense>
+					)}
+					<footer>f</footer>
+				</main>
+			);
+		}
+
+		hydrate(<App />, scratch);
+		rerender();
+		leave();
+		rerender();
+		expect(scratch.innerHTML).to.equal(
+			'<main><h2>gone</h2><footer>f</footer></main>'
+		);
+		expect(scratch.querySelector('footer')).to.equal(footer);
+
+		await resolve(() => <p>resolved</p>);
+		rerender();
+		expect(scratch.innerHTML).to.equal(
+			'<main><h2>gone</h2><footer>f</footer></main>'
+		);
+	});
+
+	it('should remove the whole range when unmounted after re-suspending', async () => {
+		scratch.innerHTML = '<main><!--$s--><p>a</p><p>b</p><!--/$s--></main>';
+		const [Lazy] = createLazy();
+		let step;
+		function App() {
+			const [n, setN] = useState(0);
+			step = () => setN(n => n + 1);
+			return (
+				<main>
+					{n < 2 ? (
+						<Suspense>
+							<Lazy n={n} />
+						</Suspense>
+					) : (
+						<h2>gone</h2>
+					)}
+				</main>
+			);
+		}
+
+		hydrate(<App />, scratch);
+		rerender();
+		step();
+		rerender();
+		expect(scratch.innerHTML).to.equal(
+			'<main><!--$s--><p>a</p><p>b</p><!--/$s--></main>'
+		);
+		step();
+		rerender();
+		expect(scratch.innerHTML).to.equal('<main><h2>gone</h2></main>');
+	});
+
+	it('should remove nested ranges with their suspended owner and leave sibling ranges', async () => {
+		scratch.innerHTML =
+			'<main><input><!--$s--><p>root</p><!--/$s--><!--$s--><p>route</p><!--$s--><p>nested</p><!--/$s--><!--/$s--></main>';
+		const input = scratch.querySelector('input');
+		const [RootLazy, resolveRoot] = createLazy();
+		const [RouteLazy, resolveRoute] = createLazy();
+		let leave;
+		function Route() {
+			return (
+				<Suspense>
+					<RouteLazy />
+				</Suspense>
+			);
+		}
+		function App() {
+			const [left, setLeft] = useState(false);
+			leave = () => setLeft(true);
+			return (
+				<main>
+					<input />
+					<Suspense>
+						<RootLazy />
+					</Suspense>
+					{left ? <h2>destination</h2> : <Route />}
+				</main>
+			);
+		}
+
+		hydrate(<App />, scratch);
+		rerender();
+		input.value = 'draft';
+		input.focus();
+		leave();
+		rerender();
+		expect(scratch.innerHTML).to.equal(
+			'<main><input><!--$s--><p>root</p><!--/$s--><h2>destination</h2></main>'
+		);
+		expect(scratch.querySelector('input')).to.equal(input);
+		expect(input.value).to.equal('draft');
+		expect(document.activeElement).to.equal(input);
+
+		await resolveRoute(() => <p>route</p>);
+		await resolveRoot(() => <p>root resolved</p>);
+		rerender();
+		expect(scratch.innerHTML).to.equal(
+			'<main><input><!--$s--><p>root resolved</p><!--/$s--><h2>destination</h2></main>'
+		);
+	});
+
+	it('should mount a sibling after a range that re-suspended', async () => {
+		scratch.innerHTML = '<main><!--$s--><p>server</p><!--/$s--></main>';
+		const [Lazy, resolve] = createLazy();
+		let set;
+		function App() {
+			const [label, setLabel] = useState(null);
+			set = setLabel;
+			return (
+				<main>
+					<Suspense>
+						<Lazy />
+					</Suspense>
+					{label && <h2>{label}</h2>}
+				</main>
+			);
+		}
+
+		hydrate(<App />, scratch);
+		rerender();
+		set('after');
+		rerender();
+		expect(scratch.innerHTML).to.equal(
+			'<main><!--$s--><p>server</p><!--/$s--><h2>after</h2></main>'
+		);
+		const h2 = scratch.querySelector('h2');
+
+		await resolve(() => <p>resolved</p>);
+		rerender();
+		expect(scratch.innerHTML).to.equal(
+			'<main><!--$s--><p>resolved</p><!--/$s--><h2>after</h2></main>'
+		);
+		expect(scratch.querySelector('h2')).to.equal(h2);
+
+		set('updated');
+		rerender();
+		expect(scratch.querySelector('h2').textContent).to.equal('updated');
+	});
+
+	it('should mount a sibling before a suspended range', async () => {
+		scratch.innerHTML = '<main><!--$s--><p>server</p><!--/$s--></main>';
+		const [Lazy, resolve] = createLazy();
+		let show;
+		function App() {
+			const [shown, setShown] = useState(0);
+			show = () => setShown(n => n + 1);
+			return (
+				<main>
+					{shown > 0 && <h2>first</h2>}
+					{shown > 1 && <h3>second</h3>}
+					<Suspense>
+						<Lazy />
+					</Suspense>
+				</main>
+			);
+		}
+
+		hydrate(<App />, scratch);
+		rerender();
+		// First suspension, then a re-suspension while mounting the second one.
+		show();
+		rerender();
+		show();
+		rerender();
+		expect(scratch.innerHTML).to.equal(
+			'<main><h2>first</h2><h3>second</h3><!--$s--><p>server</p><!--/$s--></main>'
+		);
+
+		await resolve(() => <p>resolved</p>);
+		rerender();
+		expect(scratch.innerHTML).to.equal(
+			'<main><h2>first</h2><h3>second</h3><!--$s--><p>resolved</p><!--/$s--></main>'
+		);
+	});
+
+	it('should mount several siblings at once before a suspended range', async () => {
+		scratch.innerHTML = '<main><!--$s--><p>server</p><!--/$s--></main>';
+		const [Lazy, resolve] = createLazy();
+		let show;
+		function App() {
+			const [shown, setShown] = useState(false);
+			show = () => setShown(true);
+			return (
+				<main>
+					{shown && <h2>first</h2>}
+					{shown && <h3>second</h3>}
+					<Suspense>
+						<Lazy />
+					</Suspense>
+				</main>
+			);
+		}
+
+		hydrate(<App />, scratch);
+		rerender();
+		show();
+		rerender();
+		expect(scratch.innerHTML).to.equal(
+			'<main><h2>first</h2><h3>second</h3><!--$s--><p>server</p><!--/$s--></main>'
+		);
+
+		await resolve(() => <p>resolved</p>);
+		rerender();
+		expect(scratch.innerHTML).to.equal(
+			'<main><h2>first</h2><h3>second</h3><!--$s--><p>resolved</p><!--/$s--></main>'
+		);
+	});
+});
