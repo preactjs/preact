@@ -423,7 +423,7 @@ export function diff(
 						(newVNode._component._excess = startMarker);
 					// A streamed range is owned as a whole: siblings insert before its
 					// start marker and continue after its end marker.
-					if (isRangeStart(tmp) && (end = rangeEnd(tmp))) {
+					if ((end = rangeEnd(tmp))) {
 						newVNode._dom = tmp;
 						oldDom = end;
 					} else newVNode._dom = oldDom;
@@ -463,30 +463,25 @@ export function diff(
 }
 
 /**
- * @param {PreactElement} node
- * @returns {boolean}
- */
-function isRangeStart(node) {
-	return node && node.nodeType == 8 && node.data.startsWith('$s');
-}
-
-/**
  * Find the marker closing the streamed range `start` opens. `depth` only ever
  * reaches 0 through the `break` below, so it isn't re-tested in the loop
  * condition.
- * @param {PreactElement} start The `$s` marker opening the range
+ * @param {PreactElement} start A `$s` marker opening a range
  * @param {PreactElement[]} [nodes] Collects the nodes inside the range
- * @returns {PreactElement} The closing marker, or null for an unclosed range
+ * @returns {PreactElement} The closing marker, or null when `start` doesn't
+ * open a range or the range is unclosed
  */
 function rangeEnd(start, nodes) {
-	for (let depth = 1; (start = start.nextSibling); ) {
-		if (start.nodeType == 8) {
-			if (start.data.startsWith('$s')) depth++;
-			else if (start.data.startsWith('/$s') && !--depth) break;
+	if (start && start.nodeType == 8 && start.data.startsWith('$s')) {
+		for (let depth = 1; (start = start.nextSibling); ) {
+			if (start.nodeType == 8) {
+				if (start.data.startsWith('$s')) depth++;
+				else if (start.data.startsWith('/$s') && !--depth) break;
+			}
+			if (nodes) nodes.push(start);
 		}
-		if (nodes) nodes.push(start);
+		return start;
 	}
-	return start;
 }
 
 function markAsForce(vnode) {
@@ -823,10 +818,8 @@ export function unmount(vnode, parentVNode, skipRemove) {
 		if (!skipRemove) {
 			// A suspended hydration owns its whole streamed range, which never
 			// became child vnodes.
-			if (isRangeStart(r) && (end = rangeEnd(r))) {
-				do removeNode((node = r.nextSibling));
-				while (node != end);
-			}
+			for (end = rangeEnd(r); end && node != end; )
+				removeNode((node = r.nextSibling));
 			removeNode(r);
 		}
 		if (r._listeners) r._listeners = NULL;
