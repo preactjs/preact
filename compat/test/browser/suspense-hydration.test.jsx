@@ -2190,4 +2190,25 @@ describe('suspense hydration owning a streamed range', () => {
 			'<main><h2>first</h2><h3>second</h3><!--$s--><p>resolved</p><!--/$s--></main>'
 		);
 	});
+
+	it('should resume an empty range in place', async () => {
+		scratch.innerHTML =
+			'<main><h2>before</h2><!--$s--><!--/$s--><span>after</span></main>';
+		const [Lazy, resolve] = createLazy();
+		hydrate(
+			<main>
+				<h2>before</h2>
+				<Suspense>
+					<Lazy />
+				</Suspense>
+				<span>after</span>
+			</main>,
+			scratch
+		);
+		rerender();
+
+		await resolve(() => <p>late</p>);
+		rerender();
+		expect(scratch.textContent).to.equal('beforelateafter');
+	});
 });

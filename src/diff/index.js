@@ -90,11 +90,11 @@ export function diff(
 		resumed = excessDomChildren = [];
 		if (tmp.nodeType == 8) {
 			// Re-scan DOM from stored start marker for streamed hydration.
-			rangeEnd(tmp, excessDomChildren);
+			end = rangeEnd(tmp, excessDomChildren);
 		} else {
 			excessDomChildren.push(tmp);
 		}
-		oldDom = excessDomChildren[0];
+		oldDom = excessDomChildren[0] || end;
 	}
 
 	if ((tmp = options._diff)) tmp(newVNode);
