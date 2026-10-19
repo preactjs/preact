@@ -323,18 +323,18 @@ function constructNewChildrenArray(
 			if (childVNode && childVNode._flags & MATCHED) {
 				// Binary search for the insertion point, keeping the pass at
 				// O(n log n) even for pathological reorders.
-				let lo = 0,
-					hi = tails.length;
-				while (lo < hi) {
-					const mid = (lo + hi) >> 1;
+				skew = 0;
+				let hi = tails.length;
+				while (skew < hi) {
+					const mid = (skew + hi) >> 1;
 					if (tails[mid] < childVNode._index) {
-						lo = mid + 1;
+						skew = mid + 1;
 					} else {
 						hi = mid;
 					}
 				}
-				tails[lo] = childVNode._index;
-				lisLengths[i] = lo + 1;
+				tails[skew] = childVNode._index;
+				lisLengths[i] = skew + 1;
 			}
 		}
 
@@ -493,19 +493,26 @@ function findMatchingIndex(
 	) {
 		return skewedIndex;
 	} else if (shouldSearch) {
-		let x = skewedIndex - 1;
-		let y = skewedIndex + 1;
-		while (x >= 0 || y < oldChildren.length) {
-			const childIndex = x >= 0 ? x-- : y++;
-			oldVNode = oldChildren[childIndex];
+		let x;
+		for (x = skewedIndex - 1; x >= 0; x--) {
+			oldVNode = oldChildren[x];
 			if (
 				oldVNode &&
 				!(oldVNode._flags & MATCHED) &&
 				key == oldVNode.key &&
 				type == oldVNode.type
-			) {
-				return childIndex;
-			}
+			)
+				return x;
+		}
+		for (x = skewedIndex + 1; x < oldChildren.length; x++) {
+			oldVNode = oldChildren[x];
+			if (
+				oldVNode &&
+				!(oldVNode._flags & MATCHED) &&
+				key == oldVNode.key &&
+				type == oldVNode.type
+			)
+				return x;
 		}
 	}
 
