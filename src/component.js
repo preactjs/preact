@@ -95,9 +95,7 @@ BaseComponent.prototype.render = Fragment;
 export function getDomSibling(vnode, childIndex) {
 	if (childIndex == NULL) {
 		// Use childIndex==null as a signal to resume the search from the vnode's sibling
-		return vnode._parent
-			? getDomSibling(vnode._parent, vnode._index + 1)
-			: NULL;
+		return vnode._parent && getDomSibling(vnode._parent, vnode._index + 1);
 	}
 
 	let sibling;
@@ -206,9 +204,9 @@ export function resetRenderCount() {
 export function enqueueRender(c) {
 	if (
 		(!(c._bits & COMPONENT_DIRTY) &&
-			(c._bits |= COMPONENT_DIRTY) &&
-			rerenderQueue.push(c) &&
-			!rerenderCount++) ||
+			((c._bits |= COMPONENT_DIRTY),
+			rerenderQueue.push(c),
+			!rerenderCount++)) ||
 		prevDebounce != options.debounceRendering
 	) {
 		prevDebounce = options.debounceRendering;

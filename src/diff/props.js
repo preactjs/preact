@@ -153,8 +153,9 @@ function createEventProxy(name) {
 	 * @private
 	 */
 	return function (e) {
-		if (this._listeners) {
-			const eventHandler = this._listeners[name];
+		let eventHandler = this._listeners;
+		if (eventHandler) {
+			eventHandler = eventHandler[name];
 			if (e[EVENT_DISPATCHED] == NULL) {
 				e[EVENT_DISPATCHED] = eventClock++;
 
