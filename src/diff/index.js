@@ -69,7 +69,6 @@ export function diff(
 	/** @type {any} */
 	let tmp,
 		resumed,
-		end,
 		newType = newVNode.type;
 
 	// When passing through createElement it assigns the object
@@ -90,11 +89,11 @@ export function diff(
 		resumed = excessDomChildren = [];
 		if (tmp.nodeType == 8) {
 			// Re-scan DOM from stored start marker for streamed hydration.
-			end = rangeEnd(tmp, excessDomChildren);
+			oldDom = rangeEnd(tmp, excessDomChildren);
 		} else {
 			excessDomChildren.push(tmp);
 		}
-		oldDom = excessDomChildren[0] || end;
+		oldDom = excessDomChildren[0] || oldDom;
 	}
 
 	if ((tmp = options._diff)) tmp(newVNode);
@@ -418,14 +417,14 @@ export function diff(
 					}
 					// Store the start marker directly; children re-scanned on resume.
 					// A re-suspension keeps the marker it originally started from.
-					tmp =
+					startMarker =
 						newVNode._component._excess ||
 						(newVNode._component._excess = startMarker);
 					// A streamed range is owned as a whole: siblings insert before its
 					// start marker and continue after its end marker.
-					if ((end = rangeEnd(tmp))) {
-						newVNode._dom = tmp;
-						oldDom = end;
+					if ((tmp = rangeEnd(startMarker))) {
+						newVNode._dom = startMarker;
+						oldDom = tmp;
 					} else newVNode._dom = oldDom;
 					oldDom = oldDom && oldDom.nextSibling;
 				} else if (excessDomChildren) {
@@ -464,11 +463,11 @@ export function diff(
 
 /**
  * Find the marker closing the streamed range `start` opens. `depth` only ever
- * reaches 0 through the `break` below, so it isn't re-tested in the loop
+ * reaches 0 through the `return` below, so it isn't re-tested in the loop
  * condition.
  * @param {PreactElement} start A `$s` marker opening a range
  * @param {PreactElement[]} [nodes] Collects the nodes inside the range
- * @returns {PreactElement} The closing marker, or null when `start` doesn't
+ * @returns {PreactElement} The closing marker, or undefined when `start` doesn't
  * open a range or the range is unclosed
  */
 function rangeEnd(start, nodes) {
@@ -476,11 +475,10 @@ function rangeEnd(start, nodes) {
 		for (let depth = 1; (start = start.nextSibling); ) {
 			if (start.nodeType == 8) {
 				if (start.data.startsWith('$s')) depth++;
-				else if (start.data.startsWith('/$s') && !--depth) break;
+				else if (start.data.startsWith('/$s') && !--depth) return start;
 			}
 			if (nodes) nodes.push(start);
 		}
-		return start;
 	}
 }
 
@@ -819,7 +817,8 @@ export function unmount(vnode, parentVNode, skipRemove) {
 	if (
 		!skipRemove &&
 		(r = vnode._component) &&
-		(end = rangeEnd((r = r._excess)))
+		(r = r._excess) &&
+		(end = rangeEnd(r))
 	) {
 		if (r == vnode._dom) while ((node = r.nextSibling) != end) removeNode(node);
 		removeNode(end);
