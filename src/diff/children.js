@@ -177,7 +177,7 @@ function constructNewChildrenArray(
 
 	/** Whether any matched child was found far from its skewed index, i.e. a
 	 * real reorder happened and we need to compute the minimal set of moves. */
-	let moved = false;
+	let moved = 0;
 
 	// Hoisted: every normalization branch below writes through this array, so
 	// reading `_children` off the vnode each time is a wasted property load.
@@ -303,7 +303,7 @@ function constructNewChildrenArray(
 					skew++;
 				}
 
-				moved = true;
+				moved = 1;
 			}
 		}
 	}
@@ -323,18 +323,18 @@ function constructNewChildrenArray(
 			if (childVNode && childVNode._flags & MATCHED) {
 				// Binary search for the insertion point, keeping the pass at
 				// O(n log n) even for pathological reorders.
-				let lo = 0,
-					hi = tails.length;
-				while (lo < hi) {
-					const mid = (lo + hi) >> 1;
+				skew = 0;
+				let hi = tails.length;
+				while (skew < hi) {
+					const mid = (skew + hi) >> 1;
 					if (tails[mid] < childVNode._index) {
-						lo = mid + 1;
+						skew = mid + 1;
 					} else {
 						hi = mid;
 					}
 				}
-				tails[lo] = childVNode._index;
-				lisLengths[i] = lo + 1;
+				tails[skew] = childVNode._index;
+				lisLengths[i] = skew + 1;
 			}
 		}
 
@@ -412,19 +412,20 @@ function insert(parentVNode, oldDom, parentDom, isMounting) {
 
 		// Comments (e.g. server `$s` markers) are never ours: a node right after
 		// them is already in place.
+		let dom = parentVNode._dom;
 		let next = oldDom;
 		while (next && next.nodeType == 8) next = next.nextSibling;
 
-		if (parentVNode._dom != next) {
+		if (dom != next) {
 			// Containers that aren't DOM nodes may not implement moveBefore()
-			if (!isMounting && parentDom.moveBefore && parentVNode._dom.parentNode) {
+			if (!isMounting && parentDom.moveBefore && dom.parentNode) {
 				// @ts-expect-error This isn't added to TypeScript lib.d.ts yet
-				parentDom.moveBefore(parentVNode._dom, oldDom);
+				parentDom.moveBefore(dom, oldDom);
 			} else {
-				parentDom.insertBefore(parentVNode._dom, oldDom || NULL);
+				parentDom.insertBefore(dom, oldDom || NULL);
 			}
 		}
-		oldDom = parentVNode._dom;
+		oldDom = dom;
 	}
 
 	while (
@@ -497,19 +498,26 @@ function findMatchingIndex(
 	) {
 		return skewedIndex;
 	} else if (shouldSearch) {
-		let x = skewedIndex - 1;
-		let y = skewedIndex + 1;
-		while (x >= 0 || y < oldChildren.length) {
-			const childIndex = x >= 0 ? x-- : y++;
-			oldVNode = oldChildren[childIndex];
+		let x;
+		for (x = skewedIndex - 1; x >= 0; x--) {
+			oldVNode = oldChildren[x];
 			if (
 				oldVNode &&
 				!(oldVNode._flags & MATCHED) &&
 				key == oldVNode.key &&
 				type == oldVNode.type
-			) {
-				return childIndex;
-			}
+			)
+				return x;
+		}
+		for (x = skewedIndex + 1; x < oldChildren.length; x++) {
+			oldVNode = oldChildren[x];
+			if (
+				oldVNode &&
+				!(oldVNode._flags & MATCHED) &&
+				key == oldVNode.key &&
+				type == oldVNode.type
+			)
+				return x;
 		}
 	}
 
