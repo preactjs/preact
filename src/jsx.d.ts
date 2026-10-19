@@ -142,10 +142,10 @@ export namespace JSXInternal {
 	}
 
 	export interface IntrinsicHTMLElements {
-		a: preact.AccessibleAnchorHTMLAttributes<HTMLAnchorElement>;
+		a: preact.AnchorHTMLAttributes<HTMLAnchorElement>;
 		abbr: preact.HTMLAttributes<HTMLElement>;
 		address: preact.HTMLAttributes<HTMLElement>;
-		area: preact.AccessibleAreaHTMLAttributes<HTMLAreaElement>;
+		area: preact.AreaHTMLAttributes<HTMLAreaElement>;
 		article: preact.ArticleHTMLAttributes<HTMLElement>;
 		aside: preact.AsideHTMLAttributes<HTMLElement>;
 		audio: preact.AudioHTMLAttributes<HTMLAudioElement>;
@@ -194,8 +194,8 @@ export namespace JSXInternal {
 		html: preact.HtmlHTMLAttributes<HTMLHtmlElement>;
 		i: preact.HTMLAttributes<HTMLElement>;
 		iframe: preact.IframeHTMLAttributes<HTMLIFrameElement>;
-		img: preact.AccessibleImgHTMLAttributes<HTMLImageElement>;
-		input: preact.AccessibleInputHTMLAttributes<HTMLInputElement>;
+		img: preact.ImgHTMLAttributes<HTMLImageElement>;
+		input: preact.InputHTMLAttributes<HTMLInputElement>;
 		ins: preact.InsHTMLAttributes<HTMLModElement>;
 		kbd: preact.HTMLAttributes<HTMLElement>;
 		keygen: preact.KeygenHTMLAttributes<HTMLUnknownElement>;
@@ -232,7 +232,7 @@ export namespace JSXInternal {
 		script: preact.ScriptHTMLAttributes<HTMLScriptElement>;
 		search: preact.SearchHTMLAttributes<HTMLElement>;
 		section: preact.HTMLAttributes<HTMLElement>;
-		select: preact.AccessibleSelectHTMLAttributes<HTMLSelectElement>;
+		select: preact.SelectHTMLAttributes<HTMLSelectElement>;
 		selectedcontent: preact.HTMLAttributes<HTMLElement>;
 		slot: preact.SlotHTMLAttributes<HTMLSlotElement>;
 		small: preact.HTMLAttributes<HTMLElement>;

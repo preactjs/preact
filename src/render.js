@@ -67,7 +67,11 @@ export function render(vnode, parentDom) {
  * @param {import('./internal').PreactElement} parentDom The DOM element to update
  */
 export function hydrate(vnode, parentDom) {
-	// @ts-expect-error
-	vnode._flags |= MODE_HYDRATE;
+	// Only objects can carry the flag. Primitives (null, strings, numbers,
+	// booleans) render into the existing DOM the same way hydrating would.
+	if (vnode && typeof vnode == 'object') {
+		// @ts-expect-error
+		vnode._flags |= MODE_HYDRATE;
+	}
 	render(vnode, parentDom);
 }

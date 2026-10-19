@@ -25,10 +25,10 @@ importers:
         version: 22.20.1
       '@vitest/browser':
         specifier: ^5.0.0
-        version: 5.0.0(vite@8.2.2(@types/node@22.20.1)(sass@1.104.0)(terser@5.51.2))(vitest@5.0.0)
+        version: 5.0.0(vite@8.2.2(@types/node@22.20.1)(sass@1.104.0)(terser@5.16.0))(vitest@5.0.0)
       '@vitest/browser-playwright':
         specifier: ^5.0.0
-        version: 5.0.0(playwright@1.63.0)(vite@8.2.2(@types/node@22.20.1)(sass@1.104.0)(terser@5.51.2))(vitest@5.0.0)
+        version: 5.0.0(playwright@1.63.0)(vite@8.2.2(@types/node@22.20.1)(sass@1.104.0)(terser@5.16.0))(vitest@5.0.0)
       '@vitest/coverage-v8':
         specifier: ^5.0.0
         version: 5.0.0(@vitest/browser@5.0.0)(vitest@5.0.0)
@@ -72,14 +72,14 @@ importers:
         specifier: ^4.62.2
         version: 4.63.1
       terser:
-        specifier: ^5.49.0
-        version: 5.51.2
+        specifier: 5.16.0
+        version: 5.16.0
       typescript:
         specifier: 5.1.6
         version: 5.1.6
       vitest:
         specifier: ^5.0.0
-        version: 5.0.0(@types/node@22.20.1)(@vitest/browser-playwright@5.0.0)(@vitest/coverage-v8@5.0.0)(@vitest/ui@5.0.0)(vite@8.2.2(@types/node@22.20.1)(sass@1.104.0)(terser@5.51.2))
+        version: 5.0.0(@types/node@22.20.1)(@vitest/browser-playwright@5.0.0)(@vitest/coverage-v8@5.0.0)(@vitest/ui@5.0.0)(vite@8.2.2(@types/node@22.20.1)(sass@1.104.0)(terser@5.16.0))
 
   demo:
     dependencies:
@@ -143,7 +143,7 @@ importers:
         version: 1.104.0
       vite:
         specifier: ^8.2.2
-        version: 8.2.2(@types/node@22.20.1)(sass@1.104.0)(terser@5.51.2)
+        version: 8.2.2(@types/node@22.20.1)(sass@1.104.0)(terser@5.16.0)
 
 packages:
 
@@ -2131,8 +2131,8 @@ packages:
     resolution: {integrity: sha512-ot0WnXS9fgdkgIcePe6RHNk1WA8+muPa6cSjeR3V8K27q9BB1rTE3R1p7Hv0z1ZyAc8s6Vvv8DIyWf681MAt0w==}
     engines: {node: '>= 0.4'}
 
-  terser@5.51.2:
-    resolution: {integrity: sha512-bWnjSNscmuI+GJze6ZupnHP8G/cTcsJF+bXCeQknk2SHQsgbNJnLrqiH9jZ2W4STPVXH2mDKKRX3iwPhc9Cn/Q==}
+  terser@5.16.0:
+    resolution: {integrity: sha512-KjTV81QKStSfwbNiwlBXfcgMcOloyuRdb62/iLFPGBcVNF4EXjhdYBhYHmbJpiBrVxZhDvltE11j+LBQUxEEJg==}
     engines: {node: '>=10'}
     hasBin: true
 
@@ -3462,30 +3462,30 @@ snapshots:
     dependencies:
       csstype: 3.2.3
 
-  '@vitest/browser-playwright@5.0.0(playwright@1.63.0)(vite@8.2.2(@types/node@22.20.1)(sass@1.104.0)(terser@5.51.2))(vitest@5.0.0)':
+  '@vitest/browser-playwright@5.0.0(playwright@1.63.0)(vite@8.2.2(@types/node@22.20.1)(sass@1.104.0)(terser@5.16.0))(vitest@5.0.0)':
     dependencies:
-      '@vitest/browser': 5.0.0(vite@8.2.2(@types/node@22.20.1)(sass@1.104.0)(terser@5.51.2))(vitest@5.0.0)
-      '@vitest/mocker': 5.0.0(vite@8.2.2(@types/node@22.20.1)(sass@1.104.0)(terser@5.51.2))
+      '@vitest/browser': 5.0.0(vite@8.2.2(@types/node@22.20.1)(sass@1.104.0)(terser@5.16.0))(vitest@5.0.0)
+      '@vitest/mocker': 5.0.0(vite@8.2.2(@types/node@22.20.1)(sass@1.104.0)(terser@5.16.0))
       playwright: 1.63.0
       tinyrainbow: 3.1.1
-      vitest: 5.0.0(@types/node@22.20.1)(@vitest/browser-playwright@5.0.0)(@vitest/coverage-v8@5.0.0)(@vitest/ui@5.0.0)(vite@8.2.2(@types/node@22.20.1)(sass@1.104.0)(terser@5.51.2))
+      vitest: 5.0.0(@types/node@22.20.1)(@vitest/browser-playwright@5.0.0)(@vitest/coverage-v8@5.0.0)(@vitest/ui@5.0.0)(vite@8.2.2(@types/node@22.20.1)(sass@1.104.0)(terser@5.16.0))
     transitivePeerDependencies:
       - bufferutil
       - msw
       - utf-8-validate
       - vite
 
-  '@vitest/browser@5.0.0(vite@8.2.2(@types/node@22.20.1)(sass@1.104.0)(terser@5.51.2))(vitest@5.0.0)':
+  '@vitest/browser@5.0.0(vite@8.2.2(@types/node@22.20.1)(sass@1.104.0)(terser@5.16.0))(vitest@5.0.0)':
     dependencies:
       '@blazediff/core': 1.10.0
-      '@vitest/mocker': 5.0.0(vite@8.2.2(@types/node@22.20.1)(sass@1.104.0)(terser@5.51.2))
+      '@vitest/mocker': 5.0.0(vite@8.2.2(@types/node@22.20.1)(sass@1.104.0)(terser@5.16.0))
       '@vitest/ui': 5.0.0(vitest@5.0.0)
       '@vitest/utils': 5.0.0
       magic-string: 1.2.3
       pngjs: 7.0.0
       sirv: 3.0.2
       tinyrainbow: 3.1.1
-      vitest: 5.0.0(@types/node@22.20.1)(@vitest/browser-playwright@5.0.0)(@vitest/coverage-v8@5.0.0)(@vitest/ui@5.0.0)(vite@8.2.2(@types/node@22.20.1)(sass@1.104.0)(terser@5.51.2))
+      vitest: 5.0.0(@types/node@22.20.1)(@vitest/browser-playwright@5.0.0)(@vitest/coverage-v8@5.0.0)(@vitest/ui@5.0.0)(vite@8.2.2(@types/node@22.20.1)(sass@1.104.0)(terser@5.16.0))
       ws: 8.21.3
     transitivePeerDependencies:
       - bufferutil
@@ -3503,9 +3503,9 @@ snapshots:
       obug: 2.1.4
       std-env: 4.2.0
       tinyrainbow: 3.1.1
-      vitest: 5.0.0(@types/node@22.20.1)(@vitest/browser-playwright@5.0.0)(@vitest/coverage-v8@5.0.0)(@vitest/ui@5.0.0)(vite@8.2.2(@types/node@22.20.1)(sass@1.104.0)(terser@5.51.2))
+      vitest: 5.0.0(@types/node@22.20.1)(@vitest/browser-playwright@5.0.0)(@vitest/coverage-v8@5.0.0)(@vitest/ui@5.0.0)(vite@8.2.2(@types/node@22.20.1)(sass@1.104.0)(terser@5.16.0))
     optionalDependencies:
-      '@vitest/browser': 5.0.0(vite@8.2.2(@types/node@22.20.1)(sass@1.104.0)(terser@5.51.2))(vitest@5.0.0)
+      '@vitest/browser': 5.0.0(vite@8.2.2(@types/node@22.20.1)(sass@1.104.0)(terser@5.16.0))(vitest@5.0.0)
 
   '@vitest/istanbul-lib-coverage@1.0.1': {}
 
@@ -3513,14 +3513,14 @@ snapshots:
     dependencies:
       '@vitest/istanbul-lib-coverage': 1.0.1
 
-  '@vitest/mocker@5.0.0(vite@8.2.2(@types/node@22.20.1)(sass@1.104.0)(terser@5.51.2))':
+  '@vitest/mocker@5.0.0(vite@8.2.2(@types/node@22.20.1)(sass@1.104.0)(terser@5.16.0))':
     dependencies:
       '@jridgewell/trace-mapping': 0.3.31
       '@vitest/spy': 5.0.0
       estree-walker: 3.0.3
       magic-string: 1.2.3
     optionalDependencies:
-      vite: 8.2.2(@types/node@22.20.1)(sass@1.104.0)(terser@5.51.2)
+      vite: 8.2.2(@types/node@22.20.1)(sass@1.104.0)(terser@5.16.0)
 
   '@vitest/pretty-format@5.0.0':
     dependencies:
@@ -3536,7 +3536,7 @@ snapshots:
       pathe: 2.0.3
       sirv: 3.0.2
       tinyrainbow: 3.1.1
-      vitest: 5.0.0(@types/node@22.20.1)(@vitest/browser-playwright@5.0.0)(@vitest/coverage-v8@5.0.0)(@vitest/ui@5.0.0)(vite@8.2.2(@types/node@22.20.1)(sass@1.104.0)(terser@5.51.2))
+      vitest: 5.0.0(@types/node@22.20.1)(@vitest/browser-playwright@5.0.0)(@vitest/coverage-v8@5.0.0)(@vitest/ui@5.0.0)(vite@8.2.2(@types/node@22.20.1)(sass@1.104.0)(terser@5.16.0))
 
   '@vitest/utils@5.0.0':
     dependencies:
@@ -4320,7 +4320,7 @@ snapshots:
 
   supports-preserve-symlinks-flag@1.0.0: {}
 
-  terser@5.51.2:
+  terser@5.16.0:
     dependencies:
       '@jridgewell/source-map': 0.3.11
       acorn: 8.18.0
@@ -4373,7 +4373,7 @@ snapshots:
 
   value-equal@1.0.1: {}
 
-  vite@8.2.2(@types/node@22.20.1)(sass@1.104.0)(terser@5.51.2):
+  vite@8.2.2(@types/node@22.20.1)(sass@1.104.0)(terser@5.16.0):
     dependencies:
       lightningcss: 1.33.0
       picomatch: 4.0.7
@@ -4384,12 +4384,12 @@ snapshots:
       '@types/node': 22.20.1
       fsevents: 2.3.3
       sass: 1.104.0
-      terser: 5.51.2
+      terser: 5.16.0
 
-  vitest@5.0.0(@types/node@22.20.1)(@vitest/browser-playwright@5.0.0)(@vitest/coverage-v8@5.0.0)(@vitest/ui@5.0.0)(vite@8.2.2(@types/node@22.20.1)(sass@1.104.0)(terser@5.51.2)):
+  vitest@5.0.0(@types/node@22.20.1)(@vitest/browser-playwright@5.0.0)(@vitest/coverage-v8@5.0.0)(@vitest/ui@5.0.0)(vite@8.2.2(@types/node@22.20.1)(sass@1.104.0)(terser@5.16.0)):
     dependencies:
       '@types/chai': 5.2.3
-      '@vitest/mocker': 5.0.0(vite@8.2.2(@types/node@22.20.1)(sass@1.104.0)(terser@5.51.2))
+      '@vitest/mocker': 5.0.0(vite@8.2.2(@types/node@22.20.1)(sass@1.104.0)(terser@5.16.0))
       chai: 6.2.2
       es-module-lexer: 2.3.2
       expect-type: 1.4.0
@@ -4400,11 +4400,11 @@ snapshots:
       tinybench: 6.1.4
       tinyexec: 1.3.0
       tinyglobby: 0.2.17
-      vite: 8.2.2(@types/node@22.20.1)(sass@1.104.0)(terser@5.51.2)
+      vite: 8.2.2(@types/node@22.20.1)(sass@1.104.0)(terser@5.16.0)
       why-is-node-running: 2.3.0
     optionalDependencies:
       '@types/node': 22.20.1
-      '@vitest/browser-playwright': 5.0.0(playwright@1.63.0)(vite@8.2.2(@types/node@22.20.1)(sass@1.104.0)(terser@5.51.2))(vitest@5.0.0)
+      '@vitest/browser-playwright': 5.0.0(playwright@1.63.0)(vite@8.2.2(@types/node@22.20.1)(sass@1.104.0)(terser@5.16.0))(vitest@5.0.0)
       '@vitest/coverage-v8': 5.0.0(@vitest/browser@5.0.0)(vitest@5.0.0)
       '@vitest/ui': 5.0.0(vitest@5.0.0)
     transitivePeerDependencies:

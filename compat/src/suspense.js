@@ -34,7 +34,6 @@ function initSuspenseHooks() {
 	options.unmount = vnode => {
 		/** @type {import('./internal').Component} */
 		const component = vnode._component;
-		if (component) component._unmounted = true;
 		if (component && component._onResolve) {
 			component._onResolve();
 		}
@@ -73,7 +72,8 @@ function detachedClone(vnode, detachedParent, parentDom) {
 
 			vnode._component._bits |= COMPONENT_FORCE;
 
-			vnode._component = null;
+			// Keep component refs attached while parked, as object refs already are
+			vnode._component = vnode.ref = null;
 		}
 
 		vnode._children =
@@ -144,7 +144,8 @@ function createSuspense() {
 
 		let resolved = false;
 		const onResolved = () => {
-			if (resolved || this._unmounted) return;
+			// Core nulls `_parentDom` when the boundary unmounts.
+			if (resolved || !this._parentDom) return;
 
 			resolved = true;
 			suspendingComponent._onResolve = null;
@@ -202,6 +203,7 @@ function createSuspense() {
 
 	Suspense.prototype.componentWillUnmount = function () {
 		this._suspenders = [];
+		if (this.state._suspended) this._vnode._children[0] = this.state._suspended;
 	};
 
 	/**

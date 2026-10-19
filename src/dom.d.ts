@@ -1636,11 +1636,11 @@ export type AnchorAriaRoles =
 			role?: Signalish<AriaRole | undefined>;
 	  };
 
-export type AccessibleAnchorHTMLAttributes<
+export type AnchorHTMLAttributes<
 	T extends EventTarget = HTMLAnchorElement
 > = Omit<PartialAnchorHTMLAttributes<T>, 'role'> & AnchorAriaRoles;
 
-export interface AnchorHTMLAttributes<
+export interface LooseAnchorHTMLAttributes<
 	T extends EventTarget = HTMLAnchorElement
 > extends PartialAnchorHTMLAttributes<T> {
 	href?: Signalish<string | undefined>;
@@ -1673,11 +1673,11 @@ export type AreaAriaRoles =
 			role?: Signalish<'button' | 'link' | undefined>;
 	  };
 
-export type AccessibleAreaHTMLAttributes<
+export type AreaHTMLAttributes<
 	T extends EventTarget = HTMLAreaElement
 > = Omit<PartialAreaHTMLAttributes<T>, 'role'> & AreaAriaRoles;
 
-export interface AreaHTMLAttributes<
+export interface LooseAreaHTMLAttributes<
 	T extends EventTarget = HTMLAreaElement
 > extends PartialAreaHTMLAttributes<T> {
 	href?: Signalish<string | undefined>;
@@ -2080,7 +2080,7 @@ export type ImgAriaRoles =
 			role?: Signalish<'img' | 'none' | 'presentation' | undefined>;
 	  };
 
-export type AccessibleImgHTMLAttributes<
+export type ImgHTMLAttributes<
 	T extends EventTarget = HTMLImageElement
 > = Omit<
 	PartialImgHTMLAttributes<T>,
@@ -2088,7 +2088,7 @@ export type AccessibleImgHTMLAttributes<
 > &
 	ImgAriaRoles;
 
-export interface ImgHTMLAttributes<
+export interface LooseImgHTMLAttributes<
 	T extends EventTarget = HTMLImageElement
 > extends PartialImgHTMLAttributes<T> {
 	alt?: Signalish<string | undefined>;
@@ -2182,9 +2182,13 @@ export interface PartialInputHTMLAttributes<
 	onChange?: GenericEventHandler<T> | undefined;
 }
 
-export type InputAriaRoles =
+type WithSignalType<U> = U extends { type?: infer V }
+	? U | (Omit<U, 'type'> & { type: SignalLike<Exclude<V, undefined>> })
+	: never;
+
+export type InputAriaRoles = WithSignalType<
 	| {
-			type: Signalish<'button'>;
+			type: 'button';
 			role?: Signalish<
 				| 'button'
 				| 'checkbox'
@@ -2205,7 +2209,7 @@ export type InputAriaRoles =
 			>;
 	  }
 	| {
-			type: Signalish<'checkbox'>;
+			type: 'checkbox';
 			role?: Signalish<
 				| 'checkbox'
 				| 'button'
@@ -2216,12 +2220,12 @@ export type InputAriaRoles =
 			>;
 	  }
 	| {
-			type: Signalish<'email'>;
+			type: 'email';
 			list?: never;
 			role?: Signalish<'textbox' | undefined>;
 	  }
 	| {
-			type: Signalish<'image'>;
+			type: 'image';
 			role?: Signalish<
 				| 'button'
 				| 'checkbox'
@@ -2240,19 +2244,19 @@ export type InputAriaRoles =
 			>;
 	  }
 	| {
-			type: Signalish<'number'>;
+			type: 'number';
 			role?: Signalish<'spinbutton' | undefined>;
 	  }
 	| {
-			type: Signalish<'radio'>;
+			type: 'radio';
 			role?: Signalish<'radio' | 'menuitemradio' | undefined>;
 	  }
 	| {
-			type: Signalish<'range'>;
+			type: 'range';
 			role?: Signalish<'slider' | undefined>;
 	  }
 	| {
-			type: Signalish<'reset'>;
+			type: 'reset';
 			role?: Signalish<
 				| 'button'
 				| 'checkbox'
@@ -2273,12 +2277,12 @@ export type InputAriaRoles =
 			>;
 	  }
 	| {
-			type: Signalish<'search'>;
+			type: 'search';
 			list?: never;
 			role?: Signalish<'searchbox' | undefined>;
 	  }
 	| {
-			type: Signalish<'submit'>;
+			type: 'submit';
 			role?: Signalish<
 				| 'button'
 				| 'checkbox'
@@ -2299,29 +2303,29 @@ export type InputAriaRoles =
 			>;
 	  }
 	| {
-			type: Signalish<'tel'>;
+			type: 'tel';
 			list?: never;
 			role?: Signalish<'textbox' | undefined>;
 	  }
 	| {
-			type?: Signalish<'text'>;
+			type?: 'text';
 			list?: never;
 			role?: Signalish<
 				'textbox' | 'combobox' | 'searchbox' | 'spinbutton' | undefined
 			>;
 	  }
 	| {
-			type?: Signalish<'text' | 'search' | 'tel' | 'url' | 'email'>;
+			type?: 'text' | 'search' | 'tel' | 'url' | 'email';
 			list: Signalish<string | undefined>;
 			role?: Signalish<'combobox' | undefined>;
 	  }
 	| {
-			type: Signalish<'url'>;
+			type: 'url';
 			list?: never;
 			role?: Signalish<'textbox' | undefined>;
 	  }
 	| {
-			type: Signalish<
+			type:
 				| 'color'
 				| 'date'
 				| 'datetime-local'
@@ -2331,15 +2335,15 @@ export type InputAriaRoles =
 				| 'password'
 				| 'time'
 				| 'week'
-			>;
+			;
 			role?: never;
-	  };
+	  }>;
 
-export type AccessibleInputHTMLAttributes<
+export type InputHTMLAttributes<
 	T extends EventTarget = HTMLInputElement
-> = Omit<PartialInputHTMLAttributes<T>, 'role'> & InputAriaRoles;
+> = Omit<PartialInputHTMLAttributes<T>, 'role' | 'type'> & InputAriaRoles;
 
-export interface InputHTMLAttributes<
+export interface LooseInputHTMLAttributes<
 	T extends EventTarget = HTMLInputElement
 > extends PartialInputHTMLAttributes<T> {
 	type?: Signalish<HTMLInputTypeAttribute | undefined>;
@@ -2698,7 +2702,12 @@ export type SelectAriaRoles =
 			multiple?: never;
 			// Spec states this branch is limited to "no `multiple` attribute AND no `size` attribute greater than 1".
 			// `1` as a default, however, caused some web compat issues and forced Firefox to default to `0` instead.
-			size?: 0 | 1 | never;
+			size?: 0 | 1;
+			role?: Signalish<'combobox' | 'menu' | undefined>;
+	  }
+	| {
+			multiple?: never;
+			size?: SignalLike<0 | 1>;
 			role?: Signalish<'combobox' | 'menu' | undefined>;
 	  }
 	| {
@@ -2707,11 +2716,11 @@ export type SelectAriaRoles =
 			role?: Signalish<'listbox' | undefined>;
 	  };
 
-export type AccessibleSelectHTMLAttributes<
+export type SelectHTMLAttributes<
 	T extends EventTarget = HTMLSelectElement
-> = Omit<PartialSelectHTMLAttributes<T>, 'role'> & SelectAriaRoles;
+> = Omit<PartialSelectHTMLAttributes<T>, 'role' | 'size'> & SelectAriaRoles;
 
-export interface SelectHTMLAttributes<
+export interface LooseSelectHTMLAttributes<
 	T extends EventTarget = HTMLSelectElement
 > extends PartialSelectHTMLAttributes<T> {
 	multiple?: Signalish<boolean | undefined>;

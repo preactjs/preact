@@ -77,6 +77,31 @@ describe('components', () => {
 		});
 	});
 
+	it('should call the ref cleanup of each class component sharing a ref', () => {
+		const log = [];
+		const ref = inst => {
+			log.push('ref ' + inst.props.name);
+			return () => log.push('cleanup ' + inst.props.name);
+		};
+		class Item extends React.Component {
+			render() {
+				return <li>{this.props.name}</li>;
+			}
+		}
+
+		React.render(
+			<ul>
+				<Item ref={ref} name="a" />
+				<Item ref={ref} name="b" />
+			</ul>,
+			scratch
+		);
+		expect(log).to.deep.equal(['ref a', 'ref b']);
+
+		React.render(<ul />, scratch);
+		expect(log).to.deep.equal(['ref a', 'ref b', 'cleanup a', 'cleanup b']);
+	});
+
 	describe('UNSAFE_* lifecycle methods', () => {
 		it('should support UNSAFE_componentWillMount', () => {
 			let spy = vi.fn();

@@ -35,8 +35,3 @@ export const EMPTY_OBJ = /** @type {any} */ ({});
 export const EMPTY_ARR = [];
 
 export const MATHML_TOKEN_ELEMENTS = /^m(i|n|o|s|text|space)$/;
-
-// `typeof x < 'u'` is `!= 'undefined'`: every other typeof result sorts
-// before "u", while "undefined" sorts after it.
-export const HAS_MOVE_BEFORE_SUPPORT =
-	typeof Element < 'u' && 'moveBefore' in Element.prototype;

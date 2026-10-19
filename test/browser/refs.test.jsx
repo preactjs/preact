@@ -430,6 +430,7 @@ describe('refs', () => {
 		rerender();
 		expect(calls).to.deep.equal([
 			'removing ref from two',
+			'removing ref from three',
 			'adding ref to one',
 			'adding ref to two',
 			'adding ref to three'
@@ -550,5 +551,72 @@ describe('refs', () => {
 
 		// Cleanup should be invoked whenever ref function changes
 		expect(cleanup).toHaveBeenCalledOnce();
+	});
+
+	it('should not call a ref cleanup again when the same ref is mounted again', () => {
+		const cleanup = vi.fn();
+		const ref = vi.fn(() => cleanup);
+
+		function App({ show = false }) {
+			return <div>{show && <p ref={ref}>hello</p>}</div>;
+		}
+
+		render(<App show />, scratch);
+		render(<App />, scratch);
+		expect(cleanup).toHaveBeenCalledOnce();
+
+		render(<App show />, scratch);
+		expect(ref).toHaveBeenCalledTimes(2);
+		expect(cleanup).toHaveBeenCalledOnce();
+	});
+
+	it('should call the cleanup of each element sharing a ref', () => {
+		const log = [];
+		const ref = el => {
+			log.push('ref ' + el.textContent);
+			return () => log.push('cleanup ' + el.textContent);
+		};
+
+		function App({ show = false }) {
+			return (
+				<ul>
+					{show && (
+						<Fragment>
+							<li ref={ref}>a</li>
+							<li ref={ref}>b</li>
+						</Fragment>
+					)}
+				</ul>
+			);
+		}
+
+		render(<App show />, scratch);
+		expect(log).to.deep.equal(['ref a', 'ref b']);
+
+		render(<App />, scratch);
+		expect(log).to.deep.equal(['ref a', 'ref b', 'cleanup a', 'cleanup b']);
+	});
+
+	it('should call the ref cleanup when the ref moves to another element', () => {
+		const log = [];
+		const ref = el => {
+			log.push('ref ' + el.id);
+			return () => log.push('cleanup ' + el.id);
+		};
+
+		function App({ active }) {
+			return (
+				<ul>
+					{['a', 'b'].map(id => (
+						<li key={id} id={id} ref={id === active ? ref : undefined} />
+					))}
+				</ul>
+			);
+		}
+
+		render(<App active="a" />, scratch);
+		render(<App active="b" />, scratch);
+		render(null, scratch);
+		expect(log).to.deep.equal(['ref a', 'cleanup a', 'ref b', 'cleanup b']);
 	});
 });

@@ -349,6 +349,13 @@ describe('compat render', () => {
 		);
 	});
 
+	it('should transform imageRendering', () => {
+		render(<svg imageRendering="pixelated" />, scratch);
+		expect(scratch.innerHTML).to.equal(
+			'<svg image-rendering="pixelated"></svg>'
+		);
+	});
+
 	it('should correctly allow for "className"', () => {
 		const Foo = props => {
 			const { className, ...rest } = props;

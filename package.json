@@ -1,7 +1,7 @@
 {
   "name": "preact",
   "amdName": "preact",
-  "version": "11.0.0-rc.2",
+  "version": "11.0.1",
   "private": false,
   "publishConfig": {
     "access": "public",
@@ -55,13 +55,13 @@
     },
     "./compat/server": {
       "types": "./compat/server.d.ts",
-      "browser": "./compat/server.browser.js",
+      "browser": "./compat/server.browser.mjs",
       "import": "./compat/server.mjs",
       "require": "./compat/server.js"
     },
     "./compat/server.browser": {
       "types": "./compat/server.d.ts",
-      "default": "./compat/server.browser.js"
+      "default": "./compat/server.browser.mjs"
     },
     "./compat/jsx-runtime": {
       "types": "./jsx-runtime/src/index.d.ts",
@@ -128,7 +128,7 @@
     "compat/client.js",
     "compat/client.mjs",
     "compat/server.d.ts",
-    "compat/server.browser.js",
+    "compat/server.browser.mjs",
     "compat/server.js",
     "compat/server.mjs",
     "compat/scheduler.d.ts",
@@ -172,7 +172,10 @@
   "authors": [
     "The Preact Authors (https://github.com/preactjs/preact/contributors)"
   ],
-  "repository": "preactjs/preact",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/preactjs/preact.git"
+  },
   "bugs": "https://github.com/preactjs/preact/issues",
   "homepage": "https://preactjs.com",
   "devDependencies": {
@@ -197,7 +200,7 @@
     "preact-render-to-string": "^6.5.0",
     "prop-types": "^15.8.1",
     "rollup": "^4.62.2",
-    "terser": "^5.49.0",
+    "terser": "5.16.0",
     "typescript": "5.1.6",
     "vitest": "^5.0.0"
   },

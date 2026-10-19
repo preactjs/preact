@@ -49,6 +49,10 @@ export function _catchError(error, vnode, oldVNode, errorInfo) {
 				}
 			} catch (e) {
 				error = e;
+				// This component failed to handle the error, so what its
+				// getDerivedStateFromError did must not make the next ancestor a
+				// boundary.
+				handled = 0;
 			}
 		}
 	}

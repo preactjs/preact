@@ -2148,5 +2148,105 @@ describe('render()', () => {
 			expect(rootCreateElementSpy).not.toBeCalled();
 			expect(iframeCreateElementSpy).toBeCalled();
 		});
+
+		it('falls back to the global document for containers without an ownerDocument', () => {
+			// A fake container like `createRootFragment()` from preact-root-fragment
+			const container = {
+				nodeType: 1,
+				parentNode: scratch,
+				firstChild: null,
+				childNodes: [],
+				insertBefore: (c, r) => scratch.insertBefore(c, r),
+				appendChild: c => scratch.appendChild(c),
+				removeChild: c => scratch.removeChild(c)
+			};
+
+			render(<div>Hello world</div>, container);
+			expect(scratch.innerHTML).to.equal('<div>Hello world</div>');
+
+			render('Hello text', container);
+			expect(scratch.innerHTML).to.equal('Hello text');
+		});
+	});
+
+	describe('fake containers (preact-root-fragment)', () => {
+		/**
+		 * A container that owns a slice of a real parent's children, like
+		 * `createRootFragment(parent, children)`. Its children's `parentNode` is
+		 * the real parent, not the container.
+		 */
+		function createRootFragment(parent, children) {
+			const end = children[children.length - 1].nextSibling;
+			const insert = (c, r) => parent.insertBefore(c, r || end);
+			return {
+				nodeType: 1,
+				parentNode: parent,
+				firstChild: children[0],
+				childNodes: children,
+				ownerDocument: parent.ownerDocument,
+				namespaceURI: parent.namespaceURI,
+				insertBefore: insert,
+				appendChild: insert,
+				moveBefore: (c, r) =>
+					parent.moveBefore ? parent.moveBefore(c, r || end) : insert(c, r),
+				removeChild: c => parent.removeChild(c)
+			};
+		}
+
+		const List = ({ items }) => items.map(i => <li key={i}>{i}</li>);
+		const html = items =>
+			'<li id="before"></li>' +
+			items.map(i => `<li>${i}</li>`).join('') +
+			'<li id="after"></li>';
+
+		it('should render into existing children without re-inserting them', () => {
+			scratch.innerHTML = html([1, 2]);
+			const [, a, b] = scratch.children;
+			const root = createRootFragment(scratch, [a, b]);
+
+			clearLog();
+			render(<List items={[1, 2]} />, root);
+			expect(getLog()).to.deep.equal([]);
+			expect(scratch.children[1]).to.equal(a);
+			expect(scratch.children[2]).to.equal(b);
+		});
+
+		it('should insert and reorder children at the right position', () => {
+			scratch.innerHTML = html([1, 2]);
+			const root = createRootFragment(scratch, [
+				scratch.children[1],
+				scratch.children[2]
+			]);
+
+			render(<List items={[1, 2]} />, root);
+			render(<List items={[0, 1, 2]} />, root);
+			expect(scratch.innerHTML).to.equal(html([0, 1, 2]));
+
+			render(<List items={[0, 3, 1, 2]} />, root);
+			expect(scratch.innerHTML).to.equal(html([0, 3, 1, 2]));
+
+			render(<List items={[2, 0, 3, 1]} />, root);
+			expect(scratch.innerHTML).to.equal(html([2, 0, 3, 1]));
+
+			render(<List items={[1, 3, 0, 2]} />, root);
+			expect(scratch.innerHTML).to.equal(html([1, 3, 0, 2]));
+		});
+
+		it('should reorder children in containers without moveBefore()', () => {
+			scratch.innerHTML = html([1, 2, 3]);
+			const root = createRootFragment(scratch, [
+				scratch.children[1],
+				scratch.children[2],
+				scratch.children[3]
+			]);
+			delete root.moveBefore;
+
+			render(<List items={[1, 2, 3]} />, root);
+			render(<List items={[3, 1, 2]} />, root);
+			expect(scratch.innerHTML).to.equal(html([3, 1, 2]));
+
+			render(<List items={[2, 3, 1]} />, root);
+			expect(scratch.innerHTML).to.equal(html([2, 3, 1]));
+		});
 	});
 });

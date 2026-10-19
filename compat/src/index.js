@@ -163,9 +163,6 @@ function unstable_batchedUpdates(callback, arg) {
 	return callback(arg);
 }
 
-// compat to react-is
-export const isElement = isValidElement;
-
 export * from 'preact/hooks';
 export {
 	version,
@@ -181,6 +178,8 @@ export {
 	createRef,
 	Fragment,
 	isValidElement,
+	// compat to react-is
+	isValidElement as isElement,
 	isFragment,
 	isMemo,
 	findDOMNode,
@@ -236,7 +235,7 @@ export default {
 	createRef,
 	Fragment,
 	isValidElement,
-	isElement,
+	isElement: isValidElement,
 	isFragment,
 	isMemo,
 	findDOMNode,

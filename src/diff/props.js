@@ -1,12 +1,10 @@
 import { NULL, SVG_NAMESPACE } from '../constants';
 import options from '../options';
 
-// Per-instance unique keys for event clock stamps. Each Preact copy on the
-// page gets its own Symbols so that `_dispatched` / `_attached` stamps on
-// shared event objects and handler functions can never collide across
-// instances.
-let EVENT_DISPATCHED = Symbol(),
-	EVENT_ATTACHED = Symbol();
+// Per-instance unique key for the event clock stamp. Each Preact copy on the
+// page gets its own Symbol so that stamps on shared event objects can never
+// collide across instances.
+let EVENT_DISPATCHED = Symbol();
 
 function setStyle(style, key, value) {
 	if (value == NULL) value = '';
@@ -43,7 +41,7 @@ let eventClock = 0;
 export function setProperty(dom, name, value, oldValue, namespace) {
 	let useCapture;
 
-	o: if (name == 'style') {
+	if (name == 'style') {
 		if (typeof value == 'string') {
 			dom.style.cssText = value;
 		} else {
@@ -70,30 +68,32 @@ export function setProperty(dom, name, value, oldValue, namespace) {
 	}
 	// Benchmark for comparison: https://esbench.com/bench/574c954bdb965b9a00965ac6
 	else if (name[0] == 'o' && name[1] == 'n') {
-		useCapture = name != (name = name.replace(CAPTURE_REGEX, '$1'));
+		// Handlers are keyed by prop name and every prop name gets its own proxy,
+		// so swapping one (e.g. an inline arrow function on every render) is a
+		// single store. The event name is only derived to attach or remove it.
+		(dom._listeners || (dom._listeners = {}))[name] = value;
 
-		// Infer correct casing for DOM built-in events:
-		name = name.slice(2).toLowerCase();
+		if (!value || !oldValue) {
+			const proxy =
+				eventProxies[name] || (eventProxies[name] = createEventProxy(name));
+			// The attach time belongs to the listener, not to the handler: one
+			// function can back several listeners that were attached at different
+			// times. It lives outside `_listeners`, which unmount resets even when
+			// a re-suspended Suspense boundary keeps the DOM and its listeners.
+			(dom._attached || (dom._attached = {}))[name] = eventClock;
+			useCapture = name != (name = name.replace(CAPTURE_REGEX, '$1'));
 
-		(dom._listeners || (dom._listeners = {}))[name + useCapture] = value;
+			// Infer correct casing for DOM built-in events: `onClick` -> `click`.
+			// Only names starting with an uppercase letter are lowercased, so
+			// camelCase custom events keep their casing: `onionChange` -> `ionChange`.
+			name = name.slice(2);
+			if (name[0] < 'a') name = name.toLowerCase();
 
-		if (value) {
-			if (!oldValue) {
-				value[EVENT_ATTACHED] = eventClock;
-				dom.addEventListener(
-					name,
-					useCapture ? eventProxyCapture : eventProxy,
-					useCapture
-				);
+			if (value) {
+				dom.addEventListener(name, proxy, useCapture);
 			} else {
-				value[EVENT_ATTACHED] = oldValue[EVENT_ATTACHED];
+				dom.removeEventListener(name, proxy, useCapture);
 			}
-		} else {
-			dom.removeEventListener(
-				name,
-				useCapture ? eventProxyCapture : eventProxy,
-				useCapture
-			);
 		}
 	} else {
 		if (namespace == SVG_NAMESPACE) {
@@ -119,8 +119,7 @@ export function setProperty(dom, name, value, oldValue, namespace) {
 		) {
 			try {
 				dom[name] = value == NULL ? '' : value;
-				// labelled break is 1b smaller here than a return statement (sorry)
-				break o;
+				return;
 			} catch (e) {}
 		}
 
@@ -131,9 +130,9 @@ export function setProperty(dom, name, value, oldValue, namespace) {
 		// amount of exceptions would cost too many bytes. On top of
 		// that other frameworks generally stringify `false`.
 
-		if (typeof value == 'function') {
-			// never serialize functions as attribute values
-		} else if (value != NULL && (value !== false || name[4] == '-')) {
+		// Never serialize functions as attribute values.
+		if (typeof value == 'function') return;
+		if (value != NULL && (value !== false || name[4] == '-')) {
 			dom.setAttribute(name, name == 'popover' && value == true ? '' : value);
 		} else {
 			dom.removeAttribute(name);
@@ -143,25 +142,26 @@ export function setProperty(dom, name, value, oldValue, namespace) {
 
 /**
  * Create an event proxy function.
- * @param {boolean} useCapture Is the event handler for the capture phase.
+ * @param {string} name The prop name the handler is stored under.
  * @private
  */
-function createEventProxy(useCapture) {
+function createEventProxy(name) {
 	/**
 	 * Proxy an event to hooked event handlers
 	 * @param {import('../internal').PreactEvent} e The event object from the browser
 	 * @private
 	 */
 	return function (e) {
-		if (this._listeners) {
-			const eventHandler = this._listeners[e.type + useCapture];
+		let eventHandler = this._listeners;
+		if (eventHandler) {
+			eventHandler = eventHandler[name];
 			if (e[EVENT_DISPATCHED] == NULL) {
 				e[EVENT_DISPATCHED] = eventClock++;
 
 				// When `e[EVENT_DISPATCHED]` is smaller than the time when the targeted event
-				// handler was attached we know we have bubbled up to an element that was added
+				// listener was attached we know we have bubbled up to an element that was added
 				// during patching the DOM.
-			} else if (e[EVENT_DISPATCHED] < eventHandler[EVENT_ATTACHED]) {
+			} else if (e[EVENT_DISPATCHED] < this._attached[name]) {
 				return;
 			}
 			return eventHandler(options.event ? options.event(e) : e);
@@ -169,5 +169,5 @@ function createEventProxy(useCapture) {
 	};
 }
 
-const eventProxy = createEventProxy(false);
-const eventProxyCapture = createEventProxy(true);
+/** @type {Record<string, (e: Event) => any>} */
+const eventProxies = {};
