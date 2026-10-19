@@ -177,7 +177,7 @@ function constructNewChildrenArray(
 
 	/** Whether any matched child was found far from its skewed index, i.e. a
 	 * real reorder happened and we need to compute the minimal set of moves. */
-	let moved = false;
+	let moved = 0;
 
 	// Hoisted: every normalization branch below writes through this array, so
 	// reading `_children` off the vnode each time is a wasted property load.
@@ -303,7 +303,7 @@ function constructNewChildrenArray(
 					skew++;
 				}
 
-				moved = true;
+				moved = 1;
 			}
 		}
 	}
@@ -412,19 +412,20 @@ function insert(parentVNode, oldDom, parentDom, isMounting) {
 
 		// Comments (e.g. server `$s` markers) are never ours: a node right after
 		// them is already in place.
+		let dom = parentVNode._dom;
 		let next = oldDom;
 		while (next && next.nodeType == 8) next = next.nextSibling;
 
-		if (parentVNode._dom != next) {
+		if (dom != next) {
 			// Containers that aren't DOM nodes may not implement moveBefore()
-			if (!isMounting && parentDom.moveBefore && parentVNode._dom.parentNode) {
+			if (!isMounting && parentDom.moveBefore && dom.parentNode) {
 				// @ts-expect-error This isn't added to TypeScript lib.d.ts yet
-				parentDom.moveBefore(parentVNode._dom, oldDom);
+				parentDom.moveBefore(dom, oldDom);
 			} else {
-				parentDom.insertBefore(parentVNode._dom, oldDom || NULL);
+				parentDom.insertBefore(dom, oldDom || NULL);
 			}
 		}
-		oldDom = parentVNode._dom;
+		oldDom = dom;
 	}
 
 	while ((oldDom = oldDom && oldDom.nextSibling) && oldDom.nodeType == 8);
