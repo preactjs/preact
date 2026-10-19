@@ -346,8 +346,7 @@ export function diff(
 				oldDom = tmp;
 			}
 
-			// We successfully rendered this VNode, unset any stored hydration/bailout state:
-			// `_excess` stays: unmount removes the markers it points at.
+			// Keep `_excess` so unmount can remove the range markers.
 			newVNode._flags &= RESET_MODE;
 
 			// Remove the kept DOM this resumed render didn't claim
@@ -415,13 +414,11 @@ export function diff(
 						}
 						startMarker = oldDom;
 					}
-					// Store the start marker directly; children re-scanned on resume.
-					// A re-suspension keeps the marker it originally started from.
+					// Preserve the original range when re-suspending.
 					startMarker =
 						newVNode._component._excess ||
 						(newVNode._component._excess = startMarker);
-					// A streamed range is owned as a whole: siblings insert before its
-					// start marker and continue after its end marker.
+					// Insert before the range; continue diffing after it.
 					if ((tmp = rangeEnd(startMarker))) {
 						newVNode._dom = startMarker;
 						oldDom = tmp;
@@ -462,9 +459,7 @@ export function diff(
 }
 
 /**
- * Find the marker closing the streamed range `start` opens. `depth` only ever
- * reaches 0 through the `return` below, so it isn't re-tested in the loop
- * condition.
+ * Find the closing marker of a streamed range.
  * @param {PreactElement} start A `$s` marker opening a range
  * @param {PreactElement[]} [nodes] Collects the nodes inside the range
  * @returns {PreactElement} The closing marker, or undefined when `start` doesn't

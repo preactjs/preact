@@ -2142,7 +2142,6 @@ describe('suspense hydration owning a streamed range', () => {
 
 		hydrate(<App />, scratch);
 		rerender();
-		// First suspension, then a re-suspension while mounting the second one.
 		show();
 		rerender();
 		show();
@@ -2240,7 +2239,6 @@ describe('suspense hydration owning a streamed range', () => {
 			'<main><!--$s:0--><p>server</p><!--/$s:0--><span>s</span></main>'
 		);
 
-		// A stream chunk arriving later must not find the range to patch.
 		hide();
 		rerender();
 		expect(scratch.innerHTML).to.equal('<main><span>s</span></main>');
