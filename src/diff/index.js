@@ -131,8 +131,8 @@ export function diff(
 				: globalContext;
 
 			// Get component and set it to `c`
-			if (oldVNode._component) {
-				c = newVNode._component = oldVNode._component;
+			if ((c = oldVNode._component)) {
+				newVNode._component = c;
 				if (c._bits & COMPONENT_PENDING_ERROR) {
 					c._bits |= COMPONENT_PROCESSING_EXCEPTION;
 				}

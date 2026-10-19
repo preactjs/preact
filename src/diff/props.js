@@ -41,7 +41,7 @@ let eventClock = 0;
 export function setProperty(dom, name, value, oldValue, namespace) {
 	let useCapture;
 
-	o: if (name == 'style') {
+	if (name == 'style') {
 		if (typeof value == 'string') {
 			dom.style.cssText = value;
 		} else {
@@ -119,8 +119,7 @@ export function setProperty(dom, name, value, oldValue, namespace) {
 		) {
 			try {
 				dom[name] = value == NULL ? '' : value;
-				// labelled break is 1b smaller here than a return statement (sorry)
-				break o;
+				return;
 			} catch (e) {}
 		}
 
@@ -131,9 +130,9 @@ export function setProperty(dom, name, value, oldValue, namespace) {
 		// amount of exceptions would cost too many bytes. On top of
 		// that other frameworks generally stringify `false`.
 
-		if (typeof value == 'function') {
-			// never serialize functions as attribute values
-		} else if (value != NULL && (value !== false || name[4] == '-')) {
+		// Never serialize functions as attribute values.
+		if (typeof value == 'function') return;
+		if (value != NULL && (value !== false || name[4] == '-')) {
 			dom.setAttribute(name, name == 'popover' && value == true ? '' : value);
 		} else {
 			dom.removeAttribute(name);
