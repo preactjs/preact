@@ -52,7 +52,7 @@ export function setProperty(dom, name, value, oldValue, namespace) {
 			if (oldValue) {
 				for (name in oldValue) {
 					if (!(value && name in value)) {
-						setStyle(dom.style, name, '');
+						setStyle(dom.style, name);
 					}
 				}
 			}
