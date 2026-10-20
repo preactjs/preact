@@ -32,27 +32,24 @@ export function _catchError(error, vnode, oldVNode, errorInfo) {
 			try {
 				ctor = component.constructor;
 
-				if (ctor && ctor.getDerivedStateFromError) {
+				// `handled` is reassigned before any read on every boundary
+				// candidate, so nothing carries over to the next ancestor.
+				if ((handled = ctor && ctor.getDerivedStateFromError)) {
 					component.setState(ctor.getDerivedStateFromError(error));
-					handled = component._bits & COMPONENT_DIRTY;
 				}
 
 				if (component.componentDidCatch) {
 					component.componentDidCatch(error, errorInfo || {});
-					handled = component._bits & COMPONENT_DIRTY;
+					handled = 1;
 				}
 
 				// This is an error boundary. Mark it as having bailed out, and whether it was mid-hydration.
-				if (handled) {
+				if (handled && component._bits & COMPONENT_DIRTY) {
 					component._bits |= COMPONENT_PENDING_ERROR;
 					return;
 				}
 			} catch (e) {
 				error = e;
-				// This component failed to handle the error, so what its
-				// getDerivedStateFromError did must not make the next ancestor a
-				// boundary.
-				handled = 0;
 			}
 		}
 	}
