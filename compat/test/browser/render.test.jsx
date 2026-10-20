@@ -900,4 +900,17 @@ describe('compat render', () => {
 
 		expect(style).to.deep.equal({ margin: 10, opacity: 0.5 });
 	});
+
+	it('should pass non-plain style objects (e.g. signals) through untouched', () => {
+		// Mirrors the shape of a minified signal: a value plus numeric internals
+		class FakeSignal {
+			constructor() {
+				this.v = 'color: red';
+				this.i = 0;
+			}
+		}
+		const style = new FakeSignal();
+
+		expect(<div style={style} />).to.have.nested.property('props.style', style);
+	});
 });

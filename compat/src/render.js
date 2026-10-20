@@ -187,7 +187,7 @@ function handleDomVNode(vnode) {
 			continue;
 		}
 
-		if (i == 'style' && typeof value == 'object') {
+		if (i == 'style' && value && value.constructor == Object) {
 			let cloned;
 			for (let key in value) {
 				if (typeof value[key] == 'number' && !IS_NON_DIMENSIONAL.test(key)) {
