@@ -149,8 +149,6 @@ describe('errorBoundary', () => {
 		expect(scratch.innerHTML).to.equal('<p>Error</p>');
 		expect(thrower).toHaveBeenCalledOnce();
 		expect(badEffect).toHaveBeenCalledOnce();
-		// Child committed, so its layout effect still runs, like in React. Only
-		// the throwing component skips the rest of its effects.
 		expect(goodEffect).toHaveBeenCalledTimes(2);
 	});
 
@@ -240,8 +238,6 @@ describe('errorBoundary', () => {
 				scratch
 			);
 
-			// The rest of Bad's effects are skipped, everything else still runs
-			// before the error reaches the boundary.
 			expect(log).to.deep.equal([
 				'before effect',
 				'bad effect 1',
