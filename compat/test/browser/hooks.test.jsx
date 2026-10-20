@@ -1,7 +1,14 @@
 import { createContext } from 'preact';
 import {
+	Component,
+	Fragment,
+	Suspense,
 	createElement,
+	flushSync,
+	lazy,
 	useDeferredValue,
+	useLayoutEffect,
+	useRef,
 	useInsertionEffect,
 	useTransition,
 	render,
@@ -188,5 +195,178 @@ describe('React-18-hooks', () => {
 		expect(scratch.innerHTML).to.equal(
 			'<p>isSubmitting: true | shouldSubmit: false</p>'
 		);
+	});
+});
+
+// Kept out of the describe above, whose `setupRerender` replaces the default
+// scheduler.
+describe('effects before a queued rerender', () => {
+	/** @type {HTMLDivElement} */
+	let scratch;
+
+	const afterPaint = () => new Promise(r => setTimeout(r, 60));
+
+	beforeEach(() => {
+		scratch = setupScratch();
+	});
+
+	afterEach(() => {
+		teardown(scratch);
+	});
+
+	function Logger({ name, log }) {
+		useLayoutEffect(() => {
+			log.push(`${name} layout`);
+		}, []);
+		useEffect(() => {
+			log.push(`${name} effect`);
+		}, []);
+		return null;
+	}
+
+	function createOther(log) {
+		let set;
+		function Other() {
+			const [value, setValue] = useState(0);
+			set = setValue;
+			if (value) log.push('other render');
+			return null;
+		}
+		return [Other, () => flushSync(() => set(1))];
+	}
+
+	it('runs the layout work of a commit before its effects when it calls flushSync', async () => {
+		const log = [];
+		const [Other, sync] = createOther(log);
+
+		function FromLayout() {
+			useLayoutEffect(sync, []);
+			return null;
+		}
+
+		function FromRef() {
+			return <div ref={el => el && sync()} />;
+		}
+
+		class FromDidMount extends Component {
+			componentDidMount() {
+				sync();
+			}
+			render() {
+				return null;
+			}
+		}
+
+		class Later extends Component {
+			componentDidMount() {
+				log.push('later didMount');
+			}
+			render() {
+				return null;
+			}
+		}
+
+		for (const Sync of [FromLayout, FromRef, FromDidMount]) {
+			log.length = 0;
+			render(
+				<Fragment>
+					<Other />
+					<Logger name="a" log={log} />
+					<Sync />
+					<Logger name="b" log={log} />
+					<Later />
+				</Fragment>,
+				scratch
+			);
+			await afterPaint();
+			render(null, scratch);
+
+			const effects = log.indexOf('a effect');
+			expect(effects).to.be.greaterThan(log.indexOf('b layout'));
+			expect(effects).to.be.greaterThan(log.indexOf('later didMount'));
+		}
+	});
+
+	it('runs effects of a revealed lazy tree before the rerender a ref queued', async () => {
+		const log = [];
+		const registry = new Set();
+
+		function Slot({ item, children }) {
+			useEffect(() => {
+				registry.add(item);
+			}, []);
+			return children;
+		}
+
+		function Item() {
+			const [node, setNode] = useState(null);
+			const ref = useRef(null);
+			if (node) log.push([...registry].findIndex(r => r.current == node));
+			return (
+				<Slot item={ref}>
+					<span
+						ref={el => {
+							ref.current = el;
+							if (el && el != node) setNode(el);
+						}}
+					/>
+				</Slot>
+			);
+		}
+
+		let resolve;
+		const Lazy = lazy(() => new Promise(r => (resolve = r)));
+
+		render(
+			<Suspense fallback="loading">
+				<Lazy />
+			</Suspense>,
+			scratch
+		);
+		// Resolved before the frame that would flush the suspended commit's effects.
+		await Promise.resolve();
+		resolve({
+			default: () => (
+				<Fragment>
+					<Item />
+					<Item />
+				</Fragment>
+			)
+		});
+		await afterPaint();
+
+		expect(log).to.deep.equal([0, 1]);
+	});
+
+	it('does not run effects of siblings a suspending lazy discards before it resolves', async () => {
+		const log = [];
+
+		function Sibling() {
+			useEffect(() => {
+				log.push('mount');
+				return () => log.push('cleanup');
+			}, []);
+			return null;
+		}
+
+		let resolve;
+		const Lazy = lazy(() => new Promise(r => (resolve = r)));
+
+		render(
+			<Suspense fallback="loading">
+				<Sibling />
+				<Lazy />
+			</Suspense>,
+			scratch
+		);
+		await Promise.resolve();
+		await Promise.resolve();
+		expect(log).to.deep.equal([]);
+
+		resolve({ default: () => 'lazy' });
+		await afterPaint();
+
+		expect(scratch.textContent).to.equal('lazy');
+		expect(log).to.deep.equal(['mount']);
 	});
 });
