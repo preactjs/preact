@@ -540,13 +540,11 @@ describe('render()', () => {
 		);
 
 		const [input, textarea, ol, p] = scratch.firstChild.children;
-		// A leftover `maxlength="0"` would prevent typing into the input
 		expect(getAttributes(input)).to.eql({});
 		expect(input.maxLength).to.equal(-1);
 		expect(input.type).to.equal('text');
 		expect(getAttributes(textarea)).to.eql({});
 		expect(getAttributes(ol)).to.eql({});
-		// An empty `title`/`lang` would break inheritance from the parent
 		expect(getAttributes(p)).to.eql({});
 		expect(p.matches(':lang(fr)')).to.equal(true);
 	});
