@@ -119,7 +119,10 @@ export function setProperty(dom, name, value, oldValue, namespace) {
 		) {
 			try {
 				dom[name] = value == NULL ? '' : value;
-				return;
+				// Resetting a reflected property (`maxLength`, `title`, ...) to `''`
+				// leaves a stale attribute behind (`maxlength="0"`, `title=""`), so
+				// a removal falls through to `removeAttribute` below.
+				if (value != NULL) return;
 			} catch (e) {}
 		}
 
