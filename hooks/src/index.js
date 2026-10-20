@@ -18,14 +18,7 @@ let currentHook = 0;
 let afterPaintEffects = [];
 
 /**
- * Pending effects of the commit being rendered, `options._commit` moves them
- * to `afterPaintEffects` or `heldEffects`.
- * @type {Array<import('./internal').Component>}
- */
-let commitEffects = [];
-
-/**
- * Pending effects of a commit that caught an error or suspended, only flushed
+ * Effects pending when a commit caught an error or suspended, only flushed
  * after paint since the boundary's rerender may discard their tree.
  * @type {Array<import('./internal').Component>}
  */
@@ -108,11 +101,11 @@ options.diffed = vnode => {
 	if (oldAfterDiff) oldAfterDiff(vnode);
 
 	// Core clears `_original` when this vnode's render threw and got caught.
-	if (vnode._original == null) holdEffects = true;
+	if (vnode._original == null) holdEffects = 1;
 
 	const c = vnode._component;
 	if (c && c.__hooks) {
-		if (c.__hooks._pendingEffects.length) commitEffects.push(c);
+		if (c.__hooks._pendingEffects.length) afterPaint(afterPaintEffects.push(c));
 		// `_pendingArgs` is cleared again by `options._render` before anything
 		// can read it, so committing it here is enough.
 		c.__hooks._list.some(hookItem => {
@@ -125,11 +118,11 @@ options.diffed = vnode => {
 // TODO: Improve typing of commitQueue parameter
 /** @type {(vnode: import('./internal').VNode, commitQueue: any) => void} */
 options._commit = (vnode, commitQueue) => {
-	commitEffects.some(c => {
-		afterPaint((holdEffects ? heldEffects : afterPaintEffects).push(c));
-	});
-	commitEffects = [];
-	holdEffects = false;
+	if (holdEffects) {
+		heldEffects = heldEffects.concat(afterPaintEffects);
+		afterPaintEffects = [];
+		holdEffects = 0;
+	}
 
 	commitQueue.some(component => {
 		try {
