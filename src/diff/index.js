@@ -183,9 +183,9 @@ export function diff(
 				}
 			} else {
 				if (
+					newProps !== oldProps &&
 					isClassComponent &&
 					!newType.getDerivedStateFromProps &&
-					newProps !== oldProps &&
 					c.componentWillReceiveProps
 				) {
 					c.componentWillReceiveProps(newProps, componentContext);
