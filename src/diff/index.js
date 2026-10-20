@@ -772,7 +772,7 @@ export function applyRef(ref, value, vnode, owner) {
  * current element is already detached from the DOM.
  */
 export function unmount(vnode, parentVNode, skipRemove) {
-	let r, end, node;
+	let r, end, nodes;
 	if (options.unmount) options.unmount(vnode);
 
 	if ((r = vnode.ref) && (!r.current || r.current == vnode._dom)) {
@@ -813,9 +813,9 @@ export function unmount(vnode, parentVNode, skipRemove) {
 		!skipRemove &&
 		(r = vnode._component) &&
 		(r = r._excess) &&
-		(end = rangeEnd(r))
+		(end = rangeEnd(r, (nodes = [])))
 	) {
-		if (r == vnode._dom) while ((node = r.nextSibling) != end) removeNode(node);
+		if (r == vnode._dom) nodes.some(removeNode);
 		removeNode(end);
 		removeNode(r);
 	}
