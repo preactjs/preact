@@ -112,11 +112,16 @@ options._commit = (vnode, commitQueue) => {
 				cb._value ? invokeEffect(cb) : true
 			);
 		} catch (e) {
-			commitQueue.some(c => {
-				if (c._renderCallbacks) c._renderCallbacks = [];
-			});
-			commitQueue = [];
-			options._catchError(e, component._vnode);
+			// Skip the rest of this component's effects but let every other
+			// component run its layout effects, they all committed. commitRoot
+			// rethrows the error to this component's boundary afterwards, so an
+			// unhandled error can't strand hook states a later render would queue
+			// a second time.
+			component._renderCallbacks = [
+				() => {
+					throw e;
+				}
+			];
 		}
 	});
 
