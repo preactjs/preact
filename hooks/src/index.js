@@ -14,29 +14,23 @@ let previousComponent;
 /** @type {number} */
 let currentHook = 0;
 
-/**
- * Components with pending effects from finished commits.
- * @type {Array<import('./internal').Component>}
- */
+/** @type {Array<import('./internal').Component>} */
 let afterPaintEffects = [];
 
 /**
- * Components with pending effects from a commit that hasn't reached its
- * commit phase yet. Core doesn't flush effects while a commit runs, so they
- * become flushable before the next render once `options._commit` moved them.
+ * Pending effects of the commit being rendered, `options._commit` moves them
+ * to `afterPaintEffects` or `heldEffects`.
  * @type {Array<import('./internal').Component>}
  */
 let commitEffects = [];
 
 /**
- * Components with pending effects from a commit whose render caught an error
- * or suspended. The boundary's rerender discards part of that tree, so these
- * only run after paint, never before the next render.
+ * Pending effects of a commit that caught an error or suspended, only flushed
+ * after paint since the boundary's rerender may discard their tree.
  * @type {Array<import('./internal').Component>}
  */
 let heldEffects = [];
 
-/** Set when the render of the current commit caught an error or suspended. */
 let holdEffects;
 
 /**
@@ -506,8 +500,7 @@ function flushAfterPaintEffects() {
 }
 
 /**
- * Taken before running them, so that an effect that throws, or a render one
- * triggers, can't run them a second time.
+ * Taken first so a throwing effect, or a render it triggers, can't rerun them.
  * @param {import('./internal').ComponentHooks} hooks
  */
 function invokePendingEffects(hooks) {

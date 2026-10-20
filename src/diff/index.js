@@ -483,10 +483,7 @@ function markAsForce(vnode) {
 	}
 }
 
-/**
- * The number of commits on the stack. A render that runs synchronously from a
- * ref, layout effect or lifecycle of one doesn't flush its effects early.
- */
+/** Commits on the stack, effects aren't flushed while one is running. */
 export let committing = 0;
 
 /**
