@@ -14,8 +14,30 @@ let previousComponent;
 /** @type {number} */
 let currentHook = 0;
 
-/** @type {Array<import('./internal').Component>} */
+/**
+ * Components with pending effects from finished commits.
+ * @type {Array<import('./internal').Component>}
+ */
 let afterPaintEffects = [];
+
+/**
+ * Components with pending effects from a commit that hasn't reached its
+ * commit phase yet. Core doesn't flush effects while a commit runs, so they
+ * become flushable before the next render once `options._commit` moved them.
+ * @type {Array<import('./internal').Component>}
+ */
+let commitEffects = [];
+
+/**
+ * Components with pending effects from a commit whose render caught an error
+ * or suspended. The boundary's rerender discards part of that tree, so these
+ * only run after paint, never before the next render.
+ * @type {Array<import('./internal').Component>}
+ */
+let heldEffects = [];
+
+/** Set when the render of the current commit caught an error or suspended. */
+let holdEffects;
 
 /**
  * Passive (useEffect) hook states of unmounted components whose cleanup is
@@ -42,6 +64,8 @@ let oldRoot = options._root;
 const RAF_TIMEOUT = 35;
 let prevRaf;
 
+options._flushEffects = flushAfterPaintEffects;
+
 /** @type {(vnode: import('./internal').VNode) => void} */
 options._diff = vnode => {
 	currentComponent = null;
@@ -67,12 +91,11 @@ options._render = vnode => {
 	if (hooks) {
 		if (previousComponent == currentComponent) {
 			currentComponent._renderCallbacks = [];
+			hooks._pendingEffects = [];
 		} else {
-			hooks._pendingEffects.some(invokeCleanup);
-			hooks._pendingEffects.some(invokeEffect);
+			invokePendingEffects(hooks);
 			currentIndex = 0;
 		}
-		hooks._pendingEffects = [];
 
 		// Runs before every render, forced or not, so `shouldComponentUpdate`
 		// never has to apply these itself.
@@ -90,9 +113,12 @@ options._render = vnode => {
 options.diffed = vnode => {
 	if (oldAfterDiff) oldAfterDiff(vnode);
 
+	// Core clears `_original` when this vnode's render threw and got caught.
+	if (vnode._original == null) holdEffects = true;
+
 	const c = vnode._component;
 	if (c && c.__hooks) {
-		if (c.__hooks._pendingEffects.length) afterPaint(afterPaintEffects.push(c));
+		if (c.__hooks._pendingEffects.length) commitEffects.push(c);
 		// `_pendingArgs` is cleared again by `options._render` before anything
 		// can read it, so committing it here is enough.
 		c.__hooks._list.some(hookItem => {
@@ -105,6 +131,12 @@ options.diffed = vnode => {
 // TODO: Improve typing of commitQueue parameter
 /** @type {(vnode: import('./internal').VNode, commitQueue: any) => void} */
 options._commit = (vnode, commitQueue) => {
+	commitEffects.some(c => {
+		afterPaint((holdEffects ? heldEffects : afterPaintEffects).push(c));
+	});
+	commitEffects = [];
+	holdEffects = false;
+
 	commitQueue.some(component => {
 		try {
 			component._renderCallbacks.some(invokeCleanup);
@@ -465,15 +497,31 @@ function flushAfterPaintEffects() {
 			const hooks = component.__hooks;
 			if (!component._parentDom || !hooks) continue;
 			try {
-				hooks._pendingEffects.some(invokeCleanup);
-				hooks._pendingEffects.some(invokeEffect);
-				hooks._pendingEffects = [];
+				invokePendingEffects(hooks);
 			} catch (e) {
-				hooks._pendingEffects = [];
 				options._catchError(e, component._vnode);
 			}
 		}
 	} while (unmountCleanups.length);
+}
+
+/**
+ * Taken before running them, so that an effect that throws, or a render one
+ * triggers, can't run them a second time.
+ * @param {import('./internal').ComponentHooks} hooks
+ */
+function invokePendingEffects(hooks) {
+	const effects = hooks._pendingEffects;
+	hooks._pendingEffects = [];
+	effects.some(invokeCleanup);
+	effects.some(invokeEffect);
+}
+
+/** The after-paint flush also runs the effects that were held back. */
+function flushAllEffects() {
+	afterPaintEffects = heldEffects.concat(afterPaintEffects);
+	heldEffects = [];
+	flushAfterPaintEffects();
 }
 
 let HAS_RAF = typeof requestAnimationFrame == 'function';
@@ -513,7 +561,7 @@ function afterNextFrame(callback) {
 function afterPaint(newQueueLength) {
 	if (newQueueLength == 1 || prevRaf != options.requestAnimationFrame) {
 		prevRaf = options.requestAnimationFrame;
-		(prevRaf || afterNextFrame)(flushAfterPaintEffects);
+		(prevRaf || afterNextFrame)(flushAllEffects);
 	}
 }
 
