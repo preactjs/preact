@@ -183,9 +183,9 @@ export function diff(
 				}
 			} else {
 				if (
+					newProps !== oldProps &&
 					isClassComponent &&
 					!newType.getDerivedStateFromProps &&
-					newProps !== oldProps &&
 					c.componentWillReceiveProps
 				) {
 					c.componentWillReceiveProps(newProps, componentContext);
@@ -373,9 +373,8 @@ export function diff(
 					let commentMarkersToFind = 0,
 						startMarker;
 
-					newVNode._flags |= isHydrating
-						? MODE_HYDRATE | MODE_SUSPENDED
-						: MODE_SUSPENDED;
+					// isHydrating is MODE_HYDRATE or falsy
+					newVNode._flags |= MODE_SUSPENDED | isHydrating;
 
 					if (excessDomChildren) {
 						let i = excessDomChildren.indexOf(oldDom || UNDEFINED),
