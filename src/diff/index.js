@@ -89,23 +89,11 @@ export function diff(
 		resumed = excessDomChildren = [];
 		if (tmp.nodeType == 8) {
 			// Re-scan DOM from stored start marker for streamed hydration.
-			// `depth` only ever reaches 0 through the `break` below, so it
-			// doesn't need to be re-tested in the loop condition.
-			for (
-				let depth = 1, node = tmp.nextSibling;
-				node;
-				node = node.nextSibling
-			) {
-				if (node.nodeType == 8) {
-					if (node.data.startsWith('$s')) depth++;
-					else if (node.data.startsWith('/$s') && !--depth) break;
-				}
-				excessDomChildren.push(node);
-			}
+			oldDom = rangeEnd(tmp, excessDomChildren);
 		} else {
 			excessDomChildren.push(tmp);
 		}
-		oldDom = excessDomChildren[0];
+		oldDom = excessDomChildren[0] || oldDom;
 	}
 
 	if ((tmp = options._diff)) tmp(newVNode);
@@ -358,9 +346,8 @@ export function diff(
 				oldDom = tmp;
 			}
 
-			// We successfully rendered this VNode, unset any stored hydration/bailout state:
+			// Keep `_excess` so unmount can remove the range markers.
 			newVNode._flags &= RESET_MODE;
-			if (oldVNode._flags & MODE_SUSPENDED) c._excess = NULL;
 
 			// Remove the kept DOM this resumed render didn't claim
 			if (resumed) resumed.some(removeNode);
@@ -413,7 +400,6 @@ export function diff(
 									child.data.startsWith('/$s') &&
 									!--commentMarkersToFind
 								) {
-									oldDom = child;
 									break;
 								}
 							} else if (!commentMarkersToFind) {
@@ -428,12 +414,16 @@ export function diff(
 						}
 						startMarker = oldDom;
 					}
-					// Store the start marker directly; children re-scanned on resume.
-					// A re-suspension keeps the marker it originally started from.
-					if (!newVNode._component._excess) {
-						newVNode._component._excess = startMarker;
-					}
-					newVNode._dom = oldDom;
+					// Preserve the original range when re-suspending.
+					startMarker =
+						newVNode._component._excess ||
+						(newVNode._component._excess = startMarker);
+					// Insert before the range; continue diffing after it.
+					if ((tmp = rangeEnd(startMarker))) {
+						newVNode._dom = startMarker;
+						oldDom = tmp;
+					} else newVNode._dom = oldDom;
+					oldDom = oldDom && oldDom.nextSibling;
 				} else if (excessDomChildren) {
 					excessDomChildren.some(removeNode);
 				}
@@ -465,7 +455,26 @@ export function diff(
 
 	if ((tmp = options.diffed)) tmp(newVNode);
 
-	return newVNode._flags & MODE_SUSPENDED ? UNDEFINED : oldDom;
+	return oldDom;
+}
+
+/**
+ * Find the closing marker of a streamed range.
+ * @param {PreactElement} start A `$s` marker opening a range
+ * @param {PreactElement[]} [nodes] Collects the nodes inside the range
+ * @returns {PreactElement} The closing marker, or undefined when `start` doesn't
+ * open a range or the range is unclosed
+ */
+function rangeEnd(start, nodes) {
+	if (start && start.nodeType == 8 && start.data.startsWith('$s')) {
+		for (let depth = 1; (start = start.nextSibling); ) {
+			if (start.nodeType == 8) {
+				if (start.data.startsWith('$s')) depth++;
+				else if (start.data.startsWith('/$s') && !--depth) return start;
+			}
+			if (nodes) nodes.push(start);
+		}
+	}
 }
 
 function markAsForce(vnode) {
@@ -763,7 +772,7 @@ export function applyRef(ref, value, vnode, owner) {
  * current element is already detached from the DOM.
  */
 export function unmount(vnode, parentVNode, skipRemove) {
-	let r;
+	let r, end, nodes;
 	if (options.unmount) options.unmount(vnode);
 
 	if ((r = vnode.ref) && (!r.current || r.current == vnode._dom)) {
@@ -796,6 +805,19 @@ export function unmount(vnode, parentVNode, skipRemove) {
 				);
 			}
 		}
+	}
+
+	// A component that suspended while hydrating owns its range's markers,
+	// and its content too while still pending.
+	if (
+		!skipRemove &&
+		(r = vnode._component) &&
+		(r = r._excess) &&
+		(end = rangeEnd(r, (nodes = [])))
+	) {
+		if (r == vnode._dom) nodes.some(removeNode);
+		removeNode(end);
+		removeNode(r);
 	}
 
 	if ((r = vnode._dom)) {
