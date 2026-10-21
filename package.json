@@ -73,6 +73,11 @@
       "import": "./compat/jsx-dev-runtime.mjs",
       "require": "./compat/jsx-dev-runtime.js"
     },
+    "./compat/compiler-runtime": {
+      "types": "./compat/compiler-runtime.d.ts",
+      "import": "./compat/compiler-runtime.mjs",
+      "require": "./compat/compiler-runtime.js"
+    },
     "./compat/scheduler": {
       "types": "./compat/scheduler.d.ts",
       "import": "./compat/scheduler.mjs",
@@ -127,6 +132,9 @@
     "compat/client.d.ts",
     "compat/client.js",
     "compat/client.mjs",
+    "compat/compiler-runtime.d.ts",
+    "compat/compiler-runtime.js",
+    "compat/compiler-runtime.mjs",
     "compat/server.d.ts",
     "compat/server.browser.mjs",
     "compat/server.js",
