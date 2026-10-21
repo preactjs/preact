@@ -391,6 +391,13 @@ const RefComponentTest = () => <p>hi</p>;
 createElement(RefComponentTest, { ref: functionRef }, 'hi');
 h(RefComponentTest, { ref: functionRef }, 'hi');
 
+// Refs should always be nullable
+const nullRef = createRef<string>();
+nullRef.current = 'foo';
+nullRef.current = null;
+// @ts-expect-error `number` isn't assignable to `string | null`
+nullRef.current = 5;
+
 // Should accept onInput
 const onInput = (e: TargetedInputEvent<HTMLInputElement>) => {};
 <input onInput={onInput} />;
