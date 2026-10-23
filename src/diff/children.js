@@ -282,10 +282,6 @@ function constructNewChildrenArray(
 				childVNode._flags |= INSERT_VNODE;
 			}
 		} else {
-			// Matched children are candidates for the minimal-move pass below;
-			// MATCHED on a _new_ vnode is cleared in diffChildren's placement loop.
-			childVNode._flags |= MATCHED;
-
 			// The skew adjustments keep findMatchingIndex's search centered for
 			// shift patterns (insertions/removals at the front). A match further
 			// than one position away means children were genuinely reordered:
@@ -309,18 +305,28 @@ function constructNewChildrenArray(
 	}
 
 	if (moved) {
-		// Children were reordered: mark the minimal set of matched (MATCHED flag)
-		// children for insertion by finding the longest increasing subsequence of
-		// old indices (patience sorting). Children on the subsequence stay in
-		// place, all others get INSERT_VNODE. `_index` still holds the
-		// matchingIndex here.
+		// Children were reordered: mark the minimal set of matched children for
+		// insertion by finding the longest increasing subsequence of old indices
+		// (patience sorting). Children on the subsequence stay in place, all
+		// others get INSERT_VNODE. `_index` still holds the matchingIndex here.
+		//
+		// A child takes part when it matched an old vnode that is not mounting.
+		// This is read from `_index` and not from a flag on the new vnode: if a
+		// child throws, diffChildren never clears such a flag, and the new vnodes
+		// become the old tree of the next render, where MATCHED makes
+		// findMatchingIndex and the unmount loop skip them.
 		/** @type {number[]} tails[x] is the smallest old index ending an increasing subsequence of length x+1 */
 		let tails = [];
 		/** @type {number[]} length of the longest increasing subsequence ending at child i */
 		let lisLengths = [];
 		for (i = 0; i < newChildrenLength; i++) {
 			childVNode = newChildren[i];
-			if (childVNode && childVNode._flags & MATCHED) {
+			if (
+				childVNode &&
+				~childVNode._index &&
+				(oldVNode = oldChildren[childVNode._index]) &&
+				oldVNode._original
+			) {
 				// Binary search for the insertion point, keeping the pass at
 				// O(n log n) even for pathological reorders.
 				skew = 0;

@@ -2127,6 +2127,43 @@ describe('render()', () => {
 		expect(scratch.innerHTML).to.equal('hello world');
 	});
 
+	describe('after a render error', () => {
+		const Thrower = ({ shouldThrow }) => {
+			if (shouldThrow) throw new Error('boom');
+			return <b>x</b>;
+		};
+
+		it('should not duplicate the children of a Fragment', () => {
+			const App = ({ title, shouldThrow }) => (
+				<Fragment>
+					<h1>{title}</h1>
+					<Thrower shouldThrow={shouldThrow} />
+					<i>z</i>
+				</Fragment>
+			);
+
+			render(<App title="A" shouldThrow={false} />, scratch);
+			expect(scratch.innerHTML).to.equal('<h1>A</h1><b>x</b><i>z</i>');
+
+			expect(() =>
+				render(<App title="B" shouldThrow={true} />, scratch)
+			).to.throw('boom');
+
+			render(<App title="C" shouldThrow={false} />, scratch);
+			expect(scratch.innerHTML).to.equal('<h1>C</h1><b>x</b><i>z</i>');
+		});
+
+		it('should not duplicate a component rendered at the root', () => {
+			render(<Thrower shouldThrow={false} />, scratch);
+			expect(() => render(<Thrower shouldThrow={true} />, scratch)).to.throw(
+				'boom'
+			);
+
+			render(<Thrower shouldThrow={false} />, scratch);
+			expect(scratch.innerHTML).to.equal('<b>x</b>');
+		});
+	});
+
 	describe('Alternative document', () => {
 		it('Renders in an iframe', () => {
 			const iframe = document.createElement('iframe');
