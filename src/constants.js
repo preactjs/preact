@@ -35,3 +35,6 @@ export const EMPTY_OBJ = /** @type {any} */ ({});
 export const EMPTY_ARR = [];
 
 export const MATHML_TOKEN_ELEMENTS = /^m(i|n|o|s|text|space)$/;
+
+/** Matched new vnode eligible for the longest increasing subsequence. */
+export const LIS_CANDIDATE = 1 << 4;
