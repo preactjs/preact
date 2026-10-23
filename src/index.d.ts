@@ -329,7 +329,7 @@ export const options: Options;
 //
 // Preact helpers
 // -----------------------------------
-export function createRef<T = any>(): RefObject<T>;
+export function createRef<T>(): RefObject<T | null>;
 export function toChildArray(
 	children: ComponentChildren
 ): Array<VNode | string | number>;
