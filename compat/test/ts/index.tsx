@@ -54,7 +54,6 @@ React.Children.map([<div />], () => 'child', {});
 React.Children.forEach([<div />], () => {}, {});
 mappedChildren.length;
 
-
 // React-style attribute interfaces can be spread onto their element
 export function TextField(props: React.InputHTMLAttributes<HTMLInputElement>) {
 	return <input {...props} />;

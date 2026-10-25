@@ -1249,6 +1249,9 @@ export interface AllHTMLAttributes<RefType extends EventTarget = EventTarget>
 	autoFocus?: Signalish<boolean | undefined>;
 	autoplay?: Signalish<boolean | undefined>;
 	autoPlay?: Signalish<boolean | undefined>;
+	attributionsrc?: Signalish<boolean | string | undefined>;
+	attributionSrc?: Signalish<boolean | string | undefined>;
+	blocking?: Signalish<string | undefined>;
 	capture?: Signalish<boolean | string | undefined>;
 	cellpadding?: Signalish<number | string | undefined>;
 	cellPadding?: Signalish<number | string | undefined>;
@@ -1314,6 +1317,8 @@ export interface AllHTMLAttributes<RefType extends EventTarget = EventTarget>
 	elementtiming?: Signalish<AllHTMLAttributes['elementTiming']>;
 	elementTiming?: Signalish<string | undefined>;
 	exportparts?: Signalish<string | undefined>;
+	fetchpriority?: Signalish<'high' | 'low' | 'auto' | undefined>;
+	fetchPriority?: Signalish<'high' | 'low' | 'auto' | undefined>;
 	for?: Signalish<string | undefined>;
 	form?: Signalish<string | undefined>;
 	formaction?: Signalish<string | undefined>;
@@ -1597,6 +1602,8 @@ export type HTMLAttributeAnchorTarget =
 export interface PartialAnchorHTMLAttributes<
 	T extends EventTarget
 > extends HTMLAttributes<T> {
+	attributionsrc?: Signalish<boolean | string | undefined>;
+	attributionSrc?: Signalish<boolean | string | undefined>;
 	download?: Signalish<any>;
 	hreflang?: Signalish<string | undefined>;
 	hrefLang?: Signalish<string | undefined>;
@@ -1650,6 +1657,8 @@ export interface PartialAreaHTMLAttributes<
 	T extends EventTarget
 > extends HTMLAttributes<T> {
 	alt?: Signalish<string | undefined>;
+	attributionsrc?: Signalish<boolean | string | undefined>;
+	attributionSrc?: Signalish<boolean | string | undefined>;
 	coords?: Signalish<string | undefined>;
 	download?: Signalish<any>;
 	hreflang?: Signalish<string | undefined>;
@@ -2016,6 +2025,8 @@ export type HTMLAttributeCrossOrigin = 'anonymous' | 'use-credentials';
 export interface PartialImgHTMLAttributes<
 	T extends EventTarget
 > extends HTMLAttributes<T> {
+	attributionsrc?: Signalish<boolean | string | undefined>;
+	attributionSrc?: Signalish<boolean | string | undefined>;
 	crossorigin?: Signalish<HTMLAttributeCrossOrigin>;
 	crossOrigin?: Signalish<HTMLAttributeCrossOrigin>;
 	decoding?: Signalish<'async' | 'auto' | 'sync' | undefined>;
@@ -2412,6 +2423,7 @@ export interface LinkHTMLAttributes<
 	T extends EventTarget = HTMLLinkElement
 > extends HTMLAttributes<T> {
 	as?: Signalish<string | undefined>;
+	blocking?: Signalish<string | undefined>;
 	crossorigin?: Signalish<HTMLAttributeCrossOrigin>;
 	crossOrigin?: Signalish<HTMLAttributeCrossOrigin>;
 	fetchpriority?: Signalish<'high' | 'low' | 'auto' | undefined>;
@@ -2653,6 +2665,9 @@ export interface ScriptHTMLAttributes<
 	T extends EventTarget = HTMLScriptElement
 > extends HTMLAttributes<T> {
 	async?: Signalish<boolean | undefined>;
+	attributionsrc?: Signalish<boolean | string | undefined>;
+	attributionSrc?: Signalish<boolean | string | undefined>;
+	blocking?: Signalish<string | undefined>;
 	/** @deprecated */
 	charset?: Signalish<string | undefined>;
 	/** @deprecated */
@@ -2660,6 +2675,8 @@ export interface ScriptHTMLAttributes<
 	crossorigin?: Signalish<HTMLAttributeCrossOrigin>;
 	crossOrigin?: Signalish<HTMLAttributeCrossOrigin>;
 	defer?: Signalish<boolean | undefined>;
+	fetchpriority?: Signalish<'high' | 'low' | 'auto' | undefined>;
+	fetchPriority?: Signalish<'high' | 'low' | 'auto' | undefined>;
 	integrity?: Signalish<string | undefined>;
 	nomodule?: Signalish<boolean | undefined>;
 	noModule?: Signalish<boolean | undefined>;
@@ -2747,6 +2764,7 @@ export interface SourceHTMLAttributes<
 export interface StyleHTMLAttributes<
 	T extends EventTarget = HTMLStyleElement
 > extends HTMLAttributes<T> {
+	blocking?: Signalish<string | undefined>;
 	media?: Signalish<string | undefined>;
 	role?: never;
 	scoped?: Signalish<boolean | undefined>;

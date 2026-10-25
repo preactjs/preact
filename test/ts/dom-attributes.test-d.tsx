@@ -344,3 +344,32 @@ const dangerouslySetInnerHTML = (
 		<div dangerouslySetInnerHTML={{ __html: 'string' }} />
 	</>
 );
+
+const scriptAttributes = (
+	<script
+		src="foo.js"
+		fetchpriority="high"
+		fetchPriority="high"
+		blocking="render"
+		attributionsrc=""
+		attributionSrc=""
+	/>
+);
+
+const linkAttributes = (
+	<link rel="stylesheet" href="foo.css" blocking="render" />
+);
+
+const styleAttributes = <style blocking="render" />;
+
+const imgAttribution = (
+	<img src="foo.jpg" attributionsrc="" attributionSrc="" />
+);
+
+const anchorAttribution = (
+	<a href="https://example.com" attributionsrc="" attributionSrc="" />
+);
+
+const areaAttribution = (
+	<area href="https://example.com" attributionsrc="" attributionSrc="" />
+);
