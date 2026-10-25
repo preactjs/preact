@@ -344,3 +344,17 @@ const dangerouslySetInnerHTML = (
 		<div dangerouslySetInnerHTML={{ __html: 'string' }} />
 	</>
 );
+
+const inputInvokerAndPopoverAttributes = (
+	<>
+		<input type="button" popovertarget="my-popover" />
+		<input type="button" popoverTarget="my-popover" />
+		<input type="button" popovertargetaction="toggle" />
+		<input type="button" popoverTargetAction="show" />
+		<input type="button" commandfor="my-dialog" />
+		<input type="button" commandFor="my-dialog" />
+		<input type="button" command="show-modal" />
+		<input type="submit" popoverTarget="my-popover" />
+		<input type="reset" commandFor="my-dialog" />
+	</>
+);

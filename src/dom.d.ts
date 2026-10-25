@@ -2133,6 +2133,9 @@ export interface PartialInputHTMLAttributes<
 	autoComplete?: Signalish<string | undefined>;
 	capture?: Signalish<'user' | 'environment' | undefined>; // https://www.w3.org/TR/html-media-capture/#the-capture-attribute
 	checked?: Signalish<boolean | undefined>;
+	command?: Signalish<string | undefined>;
+	commandfor?: Signalish<string | undefined>;
+	commandFor?: Signalish<string | undefined>;
 	defaultChecked?: Signalish<boolean | undefined>;
 	defaultValue?: Signalish<string | number | undefined>;
 	disabled?: Signalish<boolean | undefined>;
@@ -2169,6 +2172,10 @@ export interface PartialInputHTMLAttributes<
 	name?: Signalish<string | undefined>;
 	pattern?: Signalish<string | undefined>;
 	placeholder?: Signalish<string | undefined>;
+	popovertarget?: Signalish<string | undefined>;
+	popoverTarget?: Signalish<string | undefined>;
+	popovertargetaction?: Signalish<'hide' | 'show' | 'toggle' | undefined>;
+	popoverTargetAction?: Signalish<'hide' | 'show' | 'toggle' | undefined>;
 	readonly?: Signalish<boolean | undefined>;
 	readOnly?: Signalish<boolean | undefined>;
 	required?: Signalish<boolean | undefined>;
