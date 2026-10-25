@@ -194,6 +194,44 @@ const inputTypeUrlListValid = <input type="url" list="foo" role="combobox" />;
 // @ts-expect-error An input of type url, with a list attribute, should not have a role of button
 const inputTypeUrlListInvalid = <input type="url" role="button" />;
 
+const inputTypeRangeListValid = <input type="range" list="ticks" />;
+const inputTypeRangeListWithRoleValid = (
+	<input type="range" list="ticks" role="slider" />
+);
+
+const inputTypeNumberListValid = <input type="number" list="nums" />;
+const inputTypeNumberListWithRoleValid = (
+	<input type="number" list="nums" role="spinbutton" />
+);
+
+const inputTypeColorListValid = <input type="color" list="colors" />;
+const inputTypeDateListValid = <input type="date" list="dates" />;
+const inputTypeDatetimeLocalListValid = (
+	<input type="datetime-local" list="datetimes" />
+);
+const inputTypeMonthListValid = <input type="month" list="months" />;
+const inputTypeTimeListValid = <input type="time" list="times" />;
+const inputTypeWeekListValid = <input type="week" list="weeks" />;
+
+// @ts-expect-error An input of type button should not accept a list attribute
+const inputTypeButtonListInvalid = <input type="button" list="foo" />;
+// @ts-expect-error An input of type checkbox should not accept a list attribute
+const inputTypeCheckboxListInvalid = <input type="checkbox" list="foo" />;
+// @ts-expect-error An input of type file should not accept a list attribute
+const inputTypeFileListInvalid = <input type="file" list="foo" />;
+// @ts-expect-error An input of type hidden should not accept a list attribute
+const inputTypeHiddenListInvalid = <input type="hidden" list="foo" />;
+// @ts-expect-error An input of type image should not accept a list attribute
+const inputTypeImageListInvalid = <input type="image" list="foo" />;
+// @ts-expect-error An input of type password should not accept a list attribute
+const inputTypePasswordListInvalid = <input type="password" list="foo" />;
+// @ts-expect-error An input of type radio should not accept a list attribute
+const inputTypeRadioListInvalid = <input type="radio" list="foo" />;
+// @ts-expect-error An input of type reset should not accept a list attribute
+const inputTypeResetListInvalid = <input type="reset" list="foo" />;
+// @ts-expect-error An input of type submit should not accept a list attribute
+const inputTypeSubmitListInvalid = <input type="submit" list="foo" />;
+
 const inputTypeTimeValid = <input type="time" />;
 // @ts-expect-error An input of type time should not have a role
 const inputTypeTimeInvalid = <input type="time" role="button" />;
@@ -207,18 +245,30 @@ const inputTypeWeekValid = <input type="week" />;
 const inputTypeWeekInvalid = <input type="week" role="button" />;
 
 const inputTypeUnionOmittedRole = <input type={true ? 'radio' : 'checkbox'} />;
-const inputTypeUnionSharedRole = <input type={true ? 'button' : 'checkbox'} role="button" />;
-// @ts-expect-error An input of type email should not have a role of button
-const inputTypeUnionConflictingRole = <input type={true ? 'button' : 'email'} role="button" />;
-// @ts-expect-error An input of type button or email should not have a role of form
-const inputTypeUnionInvalidRole = <input type={true ? 'button' : 'email'} role="form" />;
+const inputTypeUnionSharedRole = (
+	<input type={true ? 'button' : 'checkbox'} role="button" />
+);
+const inputTypeUnionConflictingRole = (
+	// @ts-expect-error An input of type email should not have a role of button
+	<input type={true ? 'button' : 'email'} role="button" />
+);
+const inputTypeUnionInvalidRole = (
+	// @ts-expect-error An input of type button or email should not have a role of form
+	<input type={true ? 'button' : 'email'} role="form" />
+);
 
 const inputTypeSignal = <input type={createSignal('button' as const)} />;
-const inputTypeSignalRole = <input type={createSignal('button' as const)} role="checkbox" />;
-// @ts-expect-error An input of type button should not have a role of form
-const inputTypeSignalBadRole = <input type={createSignal('button' as const)} role="form" />;
-// @ts-expect-error Unsupported, can't have a signal with a union inside of it
-const inputTypeSignalUnion = <input type={createSignal<'button' | 'form'>('button')} />;
+const inputTypeSignalRole = (
+	<input type={createSignal('button' as const)} role="checkbox" />
+);
+const inputTypeSignalBadRole = (
+	// @ts-expect-error An input of type button should not have a role of form
+	<input type={createSignal('button' as const)} role="form" />
+);
+const inputTypeSignalUnion = (
+	// @ts-expect-error Unsupported, can't have a signal with a union inside of it
+	<input type={createSignal<'button' | 'form'>('button')} />
+);
 
 const selectValid = <select role="menu" />;
 // @ts-expect-error A select should not have a role of button
@@ -233,17 +283,23 @@ const selectSizeValid = <select size={5} role="listbox" />;
 const selectSizeInvalid = <select size={5} role="menu" />;
 
 const selectSizeUnionOmittedRole = <select size={true ? 0 : 1} role="menu" />;
-// @ts-expect-error A select with a size other than `0` or `1` should not have a role of menu
-const selectSizeUnionConflictingRole = <select size={true ? 0 : 4} role="menu" />;
+const selectSizeUnionConflictingRole = (
+	// @ts-expect-error A select with a size other than `0` or `1` should not have a role of menu
+	<select size={true ? 0 : 4} role="menu" />
+);
 // @ts-expect-error An select of any size should not have a role of form
 const selectSizeUnionInvalidRole = <select size={true ? 0 : 4} role="form" />;
 
 const selectSizeSignal = <select size={createSignal<0 | 1>(1)} />;
 // Really this should only be numbers > 1, but we can't enforce that with TS. This just
 // ensures we don't break this in the future, it's not really "correct".
-const selectSizeSignalRole = <select size={createSignal<number>(5)} role="listbox" />;
-// @ts-expect-error A select with a size `number` may exceed `1` and should not have a role of menu
-const selectSizeSignalBadRole = <input type={createSignal<number>(5)} role="menu" />;
+const selectSizeSignalRole = (
+	<select size={createSignal<number>(5)} role="listbox" />
+);
+const selectSizeSignalBadRole = (
+	// @ts-expect-error A select with a size `number` may exceed `1` and should not have a role of menu
+	<input type={createSignal<number>(5)} role="menu" />
+);
 
 // @ts-expect-error We should correctly type aria attributes like autocomplete
 const badAriaValues = <div aria-autocomplete="bad-value" />;
