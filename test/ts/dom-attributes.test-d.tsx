@@ -344,3 +344,22 @@ const dangerouslySetInnerHTML = (
 		<div dangerouslySetInnerHTML={{ __html: 'string' }} />
 	</>
 );
+
+const testCaptureEvents = (
+	<div>
+		<div
+			onBeforeToggle={e => {}}
+			onBeforeToggleCapture={e => {}}
+			onToggle={e => {}}
+			onToggleCapture={e => {}}
+		/>
+		<dialog
+			onCancel={e => {}}
+			onCancelCapture={e => {}}
+			onClose={e => {}}
+			onCloseCapture={e => {}}
+		/>
+		<button onCommand={e => {}} onCommandCapture={e => {}} />
+		<details onToggle={e => {}} onToggleCapture={e => {}} />
+	</div>
+);
