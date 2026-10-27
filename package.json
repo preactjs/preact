@@ -189,6 +189,7 @@
   "devDependencies": {
     "@babel/core": "^7.28.0",
     "@babel/preset-env": "^7.29.7",
+    "@preact/signals": "^2.11.4",
     "@rollup/plugin-babel": "^6.1.0",
     "@types/chai": "^5.2.2",
     "@types/node": "^22.20.1",
@@ -205,7 +206,7 @@
     "oxfmt": "^0.32.0",
     "oxlint": "^1.8.0",
     "playwright": "^1.54.1",
-    "preact-render-to-string": "^6.5.0",
+    "preact-render-to-string": "^6.8.2",
     "prop-types": "^15.8.1",
     "rollup": "^4.62.2",
     "terser": "5.16.0",
@@ -213,7 +214,7 @@
     "vitest": "^5.0.0"
   },
   "peerDependencies": {
-    "preact-render-to-string": ">=6.7.0"
+    "preact-render-to-string": ">=6.8.2"
   },
   "peerDependenciesMeta": {
     "preact-render-to-string": {
