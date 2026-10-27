@@ -214,7 +214,7 @@
     "vitest": "^5.0.0"
   },
   "peerDependencies": {
-    "preact-render-to-string": ">=6.8.2"
+    "preact-render-to-string": ">=6.7.0"
   },
   "peerDependenciesMeta": {
     "preact-render-to-string": {
