@@ -206,7 +206,7 @@ function constructNewChildrenArray(
 		// objects are the lone object type rendered as text.
 		else if (
 			typeof childVNode != 'object' ||
-			childVNode.constructor == String
+			childVNode.constructor === String
 		) {
 			childVNode = newChildren[i] = createVNode(NULL, childVNode);
 		} else if (isArray(childVNode)) {
