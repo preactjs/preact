@@ -31,6 +31,7 @@ export const MATH_NAMESPACE = 'http://www.w3.org/1998/Math/MathML';
 
 export const NULL = null;
 export const UNDEFINED = undefined;
+export const VNODE_MARKER = Symbol.for('pv');
 export const EMPTY_OBJ = /** @type {any} */ ({});
 export const EMPTY_ARR = [];
 

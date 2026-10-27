@@ -9,7 +9,7 @@ import { expect } from 'vitest';
 // Hardened JavaScript environments (SES `lockdown()`, `node
 // --frozen-intrinsics`, LavaMoat) freeze `Object.prototype`, which makes
 // `Object.prototype.constructor` non-writable. Copying a vnode — which carries
-// `constructor: undefined` as its JSON-injection guard — onto a bare `{}` then
+// a symbol-valued `constructor` marker — onto a bare `{}` then
 // hits the "override mistake" and throws. See #5109.
 //
 // Making `constructor` non-writable is the narrowest reproduction of that and,

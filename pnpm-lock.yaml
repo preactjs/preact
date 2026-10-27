@@ -14,6 +14,9 @@ importers:
       '@babel/preset-env':
         specifier: ^7.29.7
         version: 7.29.7(@babel/core@7.29.7)
+      '@preact/signals':
+        specifier: ^2.11.4
+        version: 2.11.4(preact@10.29.8)
       '@rollup/plugin-babel':
         specifier: ^6.1.0
         version: 6.1.0(@babel/core@7.29.7)(rollup@4.63.1)
@@ -63,8 +66,8 @@ importers:
         specifier: ^1.54.1
         version: 1.63.0
       preact-render-to-string:
-        specifier: ^6.5.0
-        version: 6.5.0(preact@10.29.8)
+        specifier: ^6.8.2
+        version: 6.8.2(preact@10.29.8)
       prop-types:
         specifier: ^15.8.1
         version: 15.8.1
@@ -108,8 +111,8 @@ importers:
         specifier: ^3.16.0
         version: 3.17.3(mobx@5.15.7)
       preact-render-to-string:
-        specifier: ^5.0.2
-        version: 5.2.6(preact@10.29.8)
+        specifier: ^6.8.2
+        version: 6.8.2(preact@10.29.8)
       preact-router:
         specifier: ^3.0.0
         version: 3.2.1(preact@10.29.8)
@@ -1022,6 +1025,14 @@ packages:
   '@polka/url@1.0.0-next.29':
     resolution: {integrity: sha512-wwQAWhWSuHaag8c4q/KN/vCoeOJYshAIvMQwD4GpSb3OiZklFfvAgmj0VCBBImRpuF/aFgIRzllXlVX93Jevww==}
 
+  '@preact/signals-core@1.14.5':
+    resolution: {integrity: sha512-vcRv7Ityz5JVmeiVqIluLFzT/PDS/AlhHUpw3/aUWqcVUs6bDGIPXE/6RSC4evBNWYvnniozg5Syfj33al3gkg==}
+
+  '@preact/signals@2.11.4':
+    resolution: {integrity: sha512-Rb+5RPo9gWSaHtzJeauhHxiC8KP/IF2DEPkHPEOGOnuy2wnJzRqyeLRankUCYd6ADqtxS6GnWGv6Ie343d8aYw==}
+    peerDependencies:
+      preact: '>= 10.25.0 || >=11.0.0-0'
+
   '@reduxjs/toolkit@2.12.0':
     resolution: {integrity: sha512-KiT+RzZbp6mQET+Mg+h2c97+9j1sNflUxQkIHI7Yuzf6Peu+OYpmkn6nbHWmLLWj+1ZODUJFwGZ7gx3L9R9EOw==}
     peerDependencies:
@@ -1931,15 +1942,10 @@ packages:
     resolution: {integrity: sha512-RRuzqDtt5Y9h3quz5hWhK+TPnsmVs6WwSU6LkJMeY4HstUEDuYTG8UJSdawMRzmzAtV+KEoG8N3Qg2qLy5vM/A==}
     engines: {node: ^10 || ^12 || >=14}
 
-  preact-render-to-string@5.2.6:
-    resolution: {integrity: sha512-JyhErpYOvBV1hEPwIxc/fHWXPfnEGdRKxc8gFdAZ7XV4tlzyzG847XAyEZqoDnynP88akM4eaHcSOzNcLWFguw==}
+  preact-render-to-string@6.8.2:
+    resolution: {integrity: sha512-Hdx7cKD3AMYgt795TdddBpUbuGEFoL/VeA6s7VrBt9Gjt0r6rCy5wMp5xkDjQ9cbKj62frHsEx1x8yV6EjoOpg==}
     peerDependencies:
-      preact: '>=10'
-
-  preact-render-to-string@6.5.0:
-    resolution: {integrity: sha512-4vTsKlL51D6zAJObcyjDEnFCY5OBH/oaW+97X8z4IM6DK/BYD6exzaRZblTZhCeqzdBpQejPsfoS20xFc05SPA==}
-    peerDependencies:
-      preact: '>=10'
+      preact: '>=10 || >= 11.0.0-0'
 
   preact-router@3.2.1:
     resolution: {integrity: sha512-KEN2VN1DxUlTwzW5IFkF13YIA2OdQ2OvgJTkQREF+AA2NrHRLaGbB68EjS4IeZOa1shvQ1FvEm3bSLta4sXBhg==}
@@ -1953,9 +1959,6 @@ packages:
     peerDependenciesMeta:
       preact-render-to-string:
         optional: true
-
-  pretty-format@3.8.0:
-    resolution: {integrity: sha512-WuxUnVtlWL1OfZFQFuqvnvs6MiAGk9UNsBostyBOB0Is9wb5uRESevA6rnl/rkksXaGX3GzZhPup5d6Vp1nFew==}
 
   prop-types@15.8.1:
     resolution: {integrity: sha512-oj87CgZICdulUohogVAR7AjlC0327U4el4L6eAvOqCeudMDVU0NThNaV+b9Df4dXgSP1gXMTnPdhfe/2qDH5cg==}
@@ -3273,6 +3276,13 @@ snapshots:
 
   '@polka/url@1.0.0-next.29': {}
 
+  '@preact/signals-core@1.14.5': {}
+
+  '@preact/signals@2.11.4(preact@10.29.8)':
+    dependencies:
+      '@preact/signals-core': 1.14.5
+      preact: 10.29.8(preact-render-to-string@6.8.2)
+
   '@reduxjs/toolkit@2.12.0(react-redux@7.2.9(react-dom@16.14.0(react@16.14.0))(react@16.14.0))(react@16.14.0)':
     dependencies:
       '@standard-schema/spec': 1.1.0
@@ -3757,7 +3767,7 @@ snapshots:
 
   htm@2.1.1(preact@10.29.8):
     dependencies:
-      preact: 10.29.8(preact-render-to-string@5.2.6)
+      preact: 10.29.8(preact-render-to-string@6.8.2)
 
   husky@9.1.7: {}
 
@@ -4049,29 +4059,17 @@ snapshots:
       picocolors: 1.1.1
       source-map-js: 1.2.1
 
-  preact-render-to-string@5.2.6(preact@10.29.8):
+  preact-render-to-string@6.8.2(preact@10.29.8):
     dependencies:
-      preact: 10.29.8(preact-render-to-string@5.2.6)
-      pretty-format: 3.8.0
-
-  preact-render-to-string@6.5.0(preact@10.29.8):
-    dependencies:
-      preact: 10.29.8(preact-render-to-string@6.5.0)
-      pretty-format: 3.8.0
+      preact: 10.29.8(preact-render-to-string@6.8.2)
 
   preact-router@3.2.1(preact@10.29.8):
     dependencies:
-      preact: 10.29.8(preact-render-to-string@5.2.6)
+      preact: 10.29.8(preact-render-to-string@6.8.2)
 
-  preact@10.29.8(preact-render-to-string@5.2.6):
+  preact@10.29.8(preact-render-to-string@6.8.2):
     optionalDependencies:
-      preact-render-to-string: 5.2.6(preact@10.29.8)
-
-  preact@10.29.8(preact-render-to-string@6.5.0):
-    optionalDependencies:
-      preact-render-to-string: 6.5.0(preact@10.29.8)
-
-  pretty-format@3.8.0: {}
+      preact-render-to-string: 6.8.2(preact@10.29.8)
 
   prop-types@15.8.1:
     dependencies:

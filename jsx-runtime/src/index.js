@@ -1,5 +1,6 @@
 import { options, Fragment } from 'preact';
 import { encodeEntities } from './utils';
+import { VNODE_MARKER } from '../../src/constants';
 
 let vnodeId = 0;
 
@@ -56,7 +57,7 @@ function createVNode(type, props, key, isStaticChildren, __source, __self) {
 		_depth: 0,
 		_dom: null,
 		_component: null,
-		constructor: undefined,
+		constructor: VNODE_MARKER,
 		_original: --vnodeId,
 		_index: -1,
 		_flags: 0
@@ -166,7 +167,7 @@ function jsxEscape(value) {
 
 	if (typeof value == 'object') {
 		// Check for VNode
-		if (value.constructor === undefined) return value;
+		if (value.constructor === VNODE_MARKER) return value;
 
 		if (isArray(value)) {
 			for (let i = 0; i < value.length; i++) {

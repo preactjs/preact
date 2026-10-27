@@ -4,7 +4,8 @@ import {
 	FORCE_PROPS_REVALIDATE,
 	MODE_HYDRATE,
 	REF_DETACHED,
-	UNDEFINED
+	UNDEFINED,
+	VNODE_MARKER
 } from '../../src/constants';
 import { assign } from './util';
 
@@ -64,7 +65,7 @@ function detachedClone(vnode, detachedParent, parentDom) {
 		// reveal attaches them again.
 		if (typeof vnode.type == 'string') vnode._flags |= REF_DETACHED;
 
-		vnode = assign({ constructor: UNDEFINED }, vnode);
+		vnode = assign({ constructor: VNODE_MARKER }, vnode);
 		if (vnode._component != null) {
 			if (vnode._component._parentDom == parentDom) {
 				vnode._component._parentDom = detachedParent;
