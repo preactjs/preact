@@ -30,9 +30,9 @@ describe('createElement(jsx)', () => {
 		expect(<Test />).to.have.property('type', Test);
 	});
 
-	it('should set VNode.constructor property to prevent json injection', () => {
+	it('should mark VNodes with a shared symbol', () => {
 		const vnode = <span />;
-		expect(vnode.constructor).to.equal(undefined);
+		expect(vnode.constructor).to.equal(Symbol.for('preact.vnode'));
 	});
 
 	it('should set VNode#props property', () => {

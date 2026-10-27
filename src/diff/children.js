@@ -7,6 +7,7 @@ import {
 	MATCHED,
 	REF_DETACHED,
 	UNDEFINED,
+	VNODE_MARKER,
 	NULL
 } from '../constants';
 import { isArray } from '../util';
@@ -211,7 +212,7 @@ function constructNewChildrenArray(
 			childVNode = newChildren[i] = createVNode(Fragment, {
 				children: childVNode
 			});
-		} else if (childVNode.constructor === UNDEFINED && childVNode._depth) {
+		} else if (childVNode.constructor === VNODE_MARKER && childVNode._depth) {
 			// VNode is already in use, clone it. This can happen in the following
 			// scenario:
 			//   const reuse = <div />

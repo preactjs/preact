@@ -15,6 +15,7 @@ import {
 	RESET_MODE,
 	SVG_NAMESPACE,
 	UNDEFINED,
+	VNODE_MARKER,
 	XHTML_NAMESPACE
 } from '../constants';
 import { Fragment } from '../create-element';
@@ -71,9 +72,8 @@ export function diff(
 		resumed,
 		newType = newVNode.type;
 
-	// When passing through createElement it assigns the object
-	// constructor as undefined. This to prevent JSON-injection.
-	if (newVNode.constructor !== UNDEFINED) return NULL;
+	// Only diff VNodes created by Preact.
+	if (newVNode.constructor !== VNODE_MARKER) return NULL;
 
 	// If the previous diff bailed out, resume creating/hydrating into the DOM
 	// that was kept while suspended (server-rendered, or already in the

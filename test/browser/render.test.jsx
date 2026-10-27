@@ -2108,7 +2108,7 @@ describe('render()', () => {
 		};
 
 		Object.defineProperties(Test.prototype, {
-			constructor: { configurable: true, value: undefined },
+			constructor: { configurable: true, value: Symbol.for('preact.vnode') },
 			type: { configurable: true, value: TestValue },
 			props: {
 				configurable: true,
