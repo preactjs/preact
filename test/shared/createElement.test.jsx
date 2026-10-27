@@ -32,7 +32,7 @@ describe('createElement(jsx)', () => {
 
 	it('should mark VNodes with a shared symbol', () => {
 		const vnode = <span />;
-		expect(vnode.constructor).to.equal(Symbol.for('preact.vnode'));
+		expect(vnode.constructor).to.equal(Symbol.for('pv'));
 	});
 
 	it('should set VNode#props property', () => {

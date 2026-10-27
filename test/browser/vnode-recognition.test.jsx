@@ -22,7 +22,7 @@ describe('VNode recognition', () => {
 	]) {
 		it('should recognize ' + name + ' VNodes', () => {
 			const vnode = create();
-			expect(vnode.constructor).to.equal(Symbol.for('preact.vnode'));
+			expect(vnode.constructor).to.equal(Symbol.for('pv'));
 			expect(isValidElement(vnode)).to.equal(true);
 			expect(() => structuredClone(vnode)).to.throw();
 			render(vnode, scratch);
