@@ -1636,9 +1636,8 @@ export type AnchorAriaRoles =
 			role?: Signalish<AriaRole | undefined>;
 	  };
 
-export type AnchorHTMLAttributes<
-	T extends EventTarget = HTMLAnchorElement
-> = Omit<PartialAnchorHTMLAttributes<T>, 'role'> & AnchorAriaRoles;
+export type AnchorHTMLAttributes<T extends EventTarget = HTMLAnchorElement> =
+	Omit<PartialAnchorHTMLAttributes<T>, 'role'> & AnchorAriaRoles;
 
 export interface LooseAnchorHTMLAttributes<
 	T extends EventTarget = HTMLAnchorElement
@@ -1673,9 +1672,11 @@ export type AreaAriaRoles =
 			role?: Signalish<'button' | 'link' | undefined>;
 	  };
 
-export type AreaHTMLAttributes<
-	T extends EventTarget = HTMLAreaElement
-> = Omit<PartialAreaHTMLAttributes<T>, 'role'> & AreaAriaRoles;
+export type AreaHTMLAttributes<T extends EventTarget = HTMLAreaElement> = Omit<
+	PartialAreaHTMLAttributes<T>,
+	'role'
+> &
+	AreaAriaRoles;
 
 export interface LooseAreaHTMLAttributes<
 	T extends EventTarget = HTMLAreaElement
@@ -2080,9 +2081,7 @@ export type ImgAriaRoles =
 			role?: Signalish<'img' | 'none' | 'presentation' | undefined>;
 	  };
 
-export type ImgHTMLAttributes<
-	T extends EventTarget = HTMLImageElement
-> = Omit<
+export type ImgHTMLAttributes<T extends EventTarget = HTMLImageElement> = Omit<
 	PartialImgHTMLAttributes<T>,
 	'role' | 'aria-label' | 'aria-labelledby' | 'title'
 > &
@@ -2245,6 +2244,7 @@ export type InputAriaRoles = WithSignalType<
 	  }
 	| {
 			type: 'number';
+			list?: Signalish<string | undefined>;
 			role?: Signalish<'spinbutton' | undefined>;
 	  }
 	| {
@@ -2253,6 +2253,7 @@ export type InputAriaRoles = WithSignalType<
 	  }
 	| {
 			type: 'range';
+			list?: Signalish<string | undefined>;
 			role?: Signalish<'slider' | undefined>;
 	  }
 	| {
@@ -2325,23 +2326,18 @@ export type InputAriaRoles = WithSignalType<
 			role?: Signalish<'textbox' | undefined>;
 	  }
 	| {
-			type:
-				| 'color'
-				| 'date'
-				| 'datetime-local'
-				| 'file'
-				| 'hidden'
-				| 'month'
-				| 'password'
-				| 'time'
-				| 'week'
-			;
+			type: 'color' | 'date' | 'datetime-local' | 'month' | 'time' | 'week';
+			list?: Signalish<string | undefined>;
 			role?: never;
-	  }>;
+	  }
+	| {
+			type: 'file' | 'hidden' | 'password';
+			role?: never;
+	  }
+>;
 
-export type InputHTMLAttributes<
-	T extends EventTarget = HTMLInputElement
-> = Omit<PartialInputHTMLAttributes<T>, 'role' | 'type'> & InputAriaRoles;
+export type InputHTMLAttributes<T extends EventTarget = HTMLInputElement> =
+	Omit<PartialInputHTMLAttributes<T>, 'role' | 'type'> & InputAriaRoles;
 
 export interface LooseInputHTMLAttributes<
 	T extends EventTarget = HTMLInputElement
@@ -2716,9 +2712,8 @@ export type SelectAriaRoles =
 			role?: Signalish<'listbox' | undefined>;
 	  };
 
-export type SelectHTMLAttributes<
-	T extends EventTarget = HTMLSelectElement
-> = Omit<PartialSelectHTMLAttributes<T>, 'role' | 'size'> & SelectAriaRoles;
+export type SelectHTMLAttributes<T extends EventTarget = HTMLSelectElement> =
+	Omit<PartialSelectHTMLAttributes<T>, 'role' | 'size'> & SelectAriaRoles;
 
 export interface LooseSelectHTMLAttributes<
 	T extends EventTarget = HTMLSelectElement

@@ -5,6 +5,7 @@ import {
 	EMPTY_ARR,
 	INSERT_VNODE,
 	MATCHED,
+	LIS_CANDIDATE,
 	REF_DETACHED,
 	UNDEFINED,
 	VNODE_MARKER,
@@ -143,8 +144,8 @@ export function diffChildren(
 			oldDom = newDom.nextSibling;
 		}
 
-		// Unset diffing flags
-		childVNode._flags &= ~(INSERT_VNODE | MATCHED);
+		// Clear placement and LIS flags; MATCHED only belongs to old vnodes.
+		childVNode._flags &= ~(INSERT_VNODE | LIS_CANDIDATE);
 	}
 
 	newParentVNode._dom = firstChildDom;
@@ -283,16 +284,12 @@ function constructNewChildrenArray(
 				childVNode._flags |= INSERT_VNODE;
 			}
 		} else {
-			// Matched children are candidates for the minimal-move pass below;
-			// MATCHED on a _new_ vnode is cleared in diffChildren's placement loop.
-			childVNode._flags |= MATCHED;
+			// Keep LIS eligibility separate from MATCHED on old vnodes: if a child
+			// throws, uncleared new-vnode flags must not prevent the next match.
+			childVNode._flags |= LIS_CANDIDATE;
 
-			// The skew adjustments keep findMatchingIndex's search centered for
-			// shift patterns (insertions/removals at the front). A match further
-			// than one position away means children were genuinely reordered:
-			// flag it so the minimal set of moves is computed below. Off-by-one
-			// matches provably keep matched old indices in increasing order, so
-			// no moves are needed for them.
+			// Center the next search for shifts. Only matches farther than one
+			// position away require the minimal-move pass.
 			if (matchingIndex == skewedIndex - 1) {
 				skew--;
 			} else if (matchingIndex == skewedIndex + 1) {
@@ -310,7 +307,7 @@ function constructNewChildrenArray(
 	}
 
 	if (moved) {
-		// Children were reordered: mark the minimal set of matched (MATCHED flag)
+		// Children were reordered: mark the minimal set of matched (LIS_CANDIDATE flag)
 		// children for insertion by finding the longest increasing subsequence of
 		// old indices (patience sorting). Children on the subsequence stay in
 		// place, all others get INSERT_VNODE. `_index` still holds the
@@ -321,7 +318,7 @@ function constructNewChildrenArray(
 		let lisLengths = [];
 		for (i = 0; i < newChildrenLength; i++) {
 			childVNode = newChildren[i];
-			if (childVNode && childVNode._flags & MATCHED) {
+			if (childVNode && childVNode._flags & LIS_CANDIDATE) {
 				// Binary search for the insertion point, keeping the pass at
 				// O(n log n) even for pathological reorders.
 				skew = 0;
