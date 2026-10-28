@@ -2786,6 +2786,14 @@ export interface TemplateHTMLAttributes<
 	T extends EventTarget = HTMLTemplateElement
 > extends HTMLAttributes<T> {
 	role?: never;
+	shadowrootclonable?: Signalish<boolean | undefined>;
+	shadowRootClonable?: Signalish<boolean | undefined>;
+	shadowrootdelegatesfocus?: Signalish<boolean | undefined>;
+	shadowRootDelegatesFocus?: Signalish<boolean | undefined>;
+	shadowrootmode?: Signalish<'open' | 'closed' | undefined>;
+	shadowRootMode?: Signalish<'open' | 'closed' | undefined>;
+	shadowrootserializable?: Signalish<boolean | undefined>;
+	shadowRootSerializable?: Signalish<boolean | undefined>;
 }
 
 export interface TextareaHTMLAttributes<
