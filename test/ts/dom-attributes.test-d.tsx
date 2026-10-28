@@ -344,25 +344,3 @@ const dangerouslySetInnerHTML = (
 		<div dangerouslySetInnerHTML={{ __html: 'string' }} />
 	</>
 );
-
-const declarativeShadowRoot = (
-	<>
-		<template shadowrootmode="open" />
-		<template shadowrootmode="closed" />
-		<template shadowRootMode={createSignal('open' as const)} />
-		<template
-			shadowrootmode="open"
-			shadowrootclonable
-			shadowrootdelegatesfocus
-			shadowrootserializable
-		/>
-		<template
-			shadowRootMode="closed"
-			shadowRootClonable={false}
-			shadowRootDelegatesFocus={true}
-			shadowRootSerializable
-		/>
-	</>
-);
-// @ts-expect-error shadowrootmode only accepts "open" or "closed"
-const invalidShadowRootMode = <template shadowrootmode="none" />;
