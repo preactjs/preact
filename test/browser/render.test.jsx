@@ -151,6 +151,72 @@ describe('render()', () => {
 		);
 	});
 
+	for (const [tag, childTag, namespace] of [
+		['svg', 'g', 'http://www.w3.org/2000/svg'],
+		['math', 'mrow', 'http://www.w3.org/1998/Math/MathML']
+	]) {
+		it(`should render and update <template> in ${tag}`, () => {
+			const App = ({ items }) =>
+				createElement(
+					tag,
+					null,
+					createElement(
+						'template',
+						null,
+						items.map(i => createElement(childTag, { key: i }, i))
+					)
+				);
+
+			render(<App items={[1, 2]} />, scratch);
+			const template = scratch.firstChild.firstChild;
+			const child = template.firstChild;
+			expect(template.namespaceURI).to.equal(namespace);
+			expect(template.content).to.equal(undefined);
+			expect(template.textContent).to.equal('12');
+			expect(child.namespaceURI).to.equal(namespace);
+
+			render(<App items={[2, 1, 3]} />, scratch);
+			expect(template.textContent).to.equal('213');
+			expect(template.childNodes[1]).to.equal(child);
+
+			render(<App items={[1]} />, scratch);
+			expect(template.firstChild).to.equal(child);
+			expect(template.childNodes).to.have.length(1);
+
+			render(null, scratch);
+			expect(scratch.childNodes).to.have.length(0);
+		});
+	}
+
+	it('should use HTML <template> content inside namespace integration points', () => {
+		render(
+			<div>
+				<svg>
+					<foreignObject>
+						<template>
+							<span>svg</span>
+						</template>
+					</foreignObject>
+				</svg>
+				<math>
+					<mtext>
+						<template>
+							<span>math</span>
+						</template>
+					</mtext>
+				</math>
+			</div>,
+			scratch
+		);
+		for (const template of scratch.querySelectorAll('template')) {
+			expect(template.namespaceURI).to.equal('http://www.w3.org/1999/xhtml');
+			expect(template.childNodes).to.have.length(0);
+			expect(template.content.firstChild.namespaceURI).to.equal(
+				'http://www.w3.org/1999/xhtml'
+			);
+		}
+	});
+
 	it('should render function components with an undefined prototype', () => {
 		const Foo = () => <div>foo</div>;
 		Foo.prototype = undefined;
