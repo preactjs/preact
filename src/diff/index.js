@@ -483,31 +483,39 @@ function markAsForce(vnode) {
 	}
 }
 
+/** Commits on the stack, effects aren't flushed while one is running. */
+export let committing = 0;
+
 /**
  * @param {Array<Component>} commitQueue List of components
  * which have callbacks to invoke in commitRoot
  * @param {VNode} root
  */
 export function commitRoot(commitQueue, root, refQueue) {
-	for (let i = 0; i < refQueue.length; ) {
-		applyRef(refQueue[i++], refQueue[i++], refQueue[i++]);
-	}
-
-	if (options._commit) options._commit(root, commitQueue);
-
-	commitQueue.some(c => {
-		try {
-			// @ts-expect-error Reuse the commitQueue variable here so the type changes
-			commitQueue = c._renderCallbacks;
-			c._renderCallbacks = [];
-			commitQueue.some(cb => {
-				// @ts-expect-error See above comment on commitQueue
-				cb.call(c);
-			});
-		} catch (e) {
-			options._catchError(e, c._vnode);
+	committing++;
+	try {
+		for (let i = 0; i < refQueue.length; ) {
+			applyRef(refQueue[i++], refQueue[i++], refQueue[i++]);
 		}
-	});
+
+		if (options._commit) options._commit(root, commitQueue);
+
+		commitQueue.some(c => {
+			try {
+				// @ts-expect-error Reuse the commitQueue variable here so the type changes
+				commitQueue = c._renderCallbacks;
+				c._renderCallbacks = [];
+				commitQueue.some(cb => {
+					// @ts-expect-error See above comment on commitQueue
+					cb.call(c);
+				});
+			} catch (e) {
+				options._catchError(e, c._vnode);
+			}
+		});
+	} finally {
+		committing--;
+	}
 }
 
 /**

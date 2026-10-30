@@ -18,6 +18,15 @@ let currentHook = 0;
 let afterPaintEffects = [];
 
 /**
+ * Effects pending when a commit caught an error or suspended, only flushed
+ * after paint since the boundary's rerender may discard their tree.
+ * @type {Array<import('./internal').Component>}
+ */
+let heldEffects = [];
+
+let holdEffects;
+
+/**
  * Passive (useEffect) hook states of unmounted components whose cleanup is
  * still pending. Deferred to the after-paint flush to match React, which runs
  * passive destroys after the commit has painted. Each state's `_passive` holds
@@ -41,6 +50,8 @@ let oldRoot = options._root;
 // refresh rate, which is the minimum rate for a smooth user experience.
 const RAF_TIMEOUT = 35;
 let prevRaf;
+
+options._flushEffects = flushAfterPaintEffects;
 
 /** @type {(vnode: import('./internal').VNode) => void} */
 options._diff = vnode => {
@@ -67,12 +78,11 @@ options._render = vnode => {
 	if (hooks) {
 		if (previousComponent == currentComponent) {
 			currentComponent._renderCallbacks = [];
+			hooks._pendingEffects = [];
 		} else {
-			hooks._pendingEffects.some(invokeCleanup);
-			hooks._pendingEffects.some(invokeEffect);
+			invokePendingEffects(hooks);
 			currentIndex = 0;
 		}
-		hooks._pendingEffects = [];
 
 		// Runs before every render, forced or not, so `shouldComponentUpdate`
 		// never has to apply these itself.
@@ -90,6 +100,9 @@ options._render = vnode => {
 options.diffed = vnode => {
 	if (oldAfterDiff) oldAfterDiff(vnode);
 
+	// Core clears `_original` when this vnode's render threw and got caught.
+	if (vnode._original == null) holdEffects = 1;
+
 	const c = vnode._component;
 	if (c && c.__hooks) {
 		if (c.__hooks._pendingEffects.length) afterPaint(afterPaintEffects.push(c));
@@ -105,6 +118,12 @@ options.diffed = vnode => {
 // TODO: Improve typing of commitQueue parameter
 /** @type {(vnode: import('./internal').VNode, commitQueue: any) => void} */
 options._commit = (vnode, commitQueue) => {
+	if (holdEffects) {
+		heldEffects = heldEffects.concat(afterPaintEffects);
+		afterPaintEffects = [];
+		holdEffects = 0;
+	}
+
 	commitQueue.some(component => {
 		try {
 			component._renderCallbacks.some(invokeCleanup);
@@ -467,15 +486,30 @@ function flushAfterPaintEffects() {
 			const hooks = component.__hooks;
 			if (!component._parentDom || !hooks) continue;
 			try {
-				hooks._pendingEffects.some(invokeCleanup);
-				hooks._pendingEffects.some(invokeEffect);
-				hooks._pendingEffects = [];
+				invokePendingEffects(hooks);
 			} catch (e) {
-				hooks._pendingEffects = [];
 				options._catchError(e, component._vnode);
 			}
 		}
 	} while (unmountCleanups.length);
+}
+
+/**
+ * Taken first so a throwing effect, or a render it triggers, can't rerun them.
+ * @param {import('./internal').ComponentHooks} hooks
+ */
+function invokePendingEffects(hooks) {
+	const effects = hooks._pendingEffects;
+	hooks._pendingEffects = [];
+	effects.some(invokeCleanup);
+	effects.some(invokeEffect);
+}
+
+/** The after-paint flush also runs the effects that were held back. */
+function flushAllEffects() {
+	afterPaintEffects = heldEffects.concat(afterPaintEffects);
+	heldEffects = [];
+	flushAfterPaintEffects();
 }
 
 let HAS_RAF = typeof requestAnimationFrame == 'function';
@@ -515,7 +549,7 @@ function afterNextFrame(callback) {
 function afterPaint(newQueueLength) {
 	if (newQueueLength == 1 || prevRaf != options.requestAnimationFrame) {
 		prevRaf = options.requestAnimationFrame;
-		(prevRaf || afterNextFrame)(flushAfterPaintEffects);
+		(prevRaf || afterNextFrame)(flushAllEffects);
 	}
 }
 

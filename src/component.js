@@ -6,7 +6,7 @@ import {
 	VNODE_MARKER
 } from './constants';
 import { Fragment } from './create-element';
-import { commitRoot, diff } from './diff/index';
+import { commitRoot, committing, diff } from './diff/index';
 import options from './options';
 import { assign } from './util';
 
@@ -229,6 +229,10 @@ function process() {
 		// Don't update `renderCount` yet. Keep its value non-zero to prevent unnecessary
 		// process() calls from getting scheduled while `queue` is still being consumed.
 		while (rerenderQueue.length) {
+			// Effects of finished commits run before the next render, so it sees
+			// what they wrote, as in React.
+			if (!committing && options._flushEffects) options._flushEffects();
+
 			// Keep the rerender queue sorted by (depth, insertion order). The queue
 			// will initially be sorted on the first iteration only if it has more than 1 item.
 			//
