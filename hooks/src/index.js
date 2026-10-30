@@ -221,9 +221,7 @@ export function useReducer(reducer, initialState, init) {
 			!init ? invokeOrReturn(undefined, initialState) : init(initialState),
 
 			action => {
-				const currentValue = hookState._nextValue
-					? hookState._nextValue[0]
-					: hookState._value[0];
+				const currentValue = (hookState._nextValue || hookState._value)[0];
 				const nextValue = hookState._reducer(currentValue, action);
 
 				if (!ObjectIs(currentValue, nextValue)) {
