@@ -244,25 +244,20 @@ function handleDomVNode(vnode) {
 	}
 
 	if (type == 'select') {
-		// Add support for array select values: <select multiple value={[]} />
-		if (normalizedProps.multiple && Array.isArray(normalizedProps.value)) {
+		// Select the matching options for a defaultValue, or for an array value
+		// of <select multiple value={[]} />.
+		let selected =
+			normalizedProps.defaultValue != null
+				? normalizedProps.defaultValue
+				: normalizedProps.multiple && Array.isArray(normalizedProps.value)
+					? normalizedProps.value
+					: null;
+		if (selected != null) {
 			// forEach() always returns undefined, which we abuse here to unset the value prop.
 			normalizedProps.value = toChildArray(props.children).forEach(child => {
-				child.props.selected =
-					normalizedProps.value.indexOf(child.props.value) != -1;
-			});
-		}
-
-		// Adding support for defaultValue in select tag
-		if (normalizedProps.defaultValue != null) {
-			normalizedProps.value = toChildArray(props.children).forEach(child => {
-				if (normalizedProps.multiple) {
-					child.props.selected =
-						normalizedProps.defaultValue.indexOf(child.props.value) != -1;
-				} else {
-					child.props.selected =
-						normalizedProps.defaultValue == child.props.value;
-				}
+				child.props.selected = normalizedProps.multiple
+					? selected.indexOf(child.props.value) != -1
+					: selected == child.props.value;
 			});
 		}
 	}
