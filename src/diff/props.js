@@ -102,6 +102,9 @@ export function setProperty(dom, name, value, oldValue, namespace) {
 			// - className --> class
 			name = name.replace(/xlink(H|:h)/, 'h').replace(/sName$/, 's');
 		} else if (
+			// `class` is never a DOM property (that's `className`): skip the
+			// prototype chain lookup in the hot path of creating elements.
+			name != 'class' &&
 			name != 'width' &&
 			name != 'height' &&
 			name != 'href' &&
