@@ -1,4 +1,11 @@
-import { createElement, render, Component, Fragment, options } from 'preact';
+import {
+	createElement,
+	render,
+	Component,
+	Fragment,
+	options,
+	createContext
+} from 'preact';
 import { setupRerender } from 'preact/test-utils';
 import {
 	setupScratch,
@@ -2146,6 +2153,154 @@ describe('Components', () => {
 			} finally {
 				options._commit = prevCommit;
 			}
+		});
+	});
+
+	describe('reused element vnodes', () => {
+		it('should skip diffing an element vnode rendered again as is', () => {
+			let update;
+			class App extends Component {
+				constructor(props) {
+					super(props);
+					this.state = { n: 0 };
+					update = () => this.setState({ n: this.state.n + 1 });
+				}
+				render() {
+					return <div data-n={this.state.n}>{this.props.children}</div>;
+				}
+			}
+
+			const diffedSpans = vi.fn();
+			const prevDiffed = options.diffed;
+			options.diffed = vnode => {
+				if (vnode.type == 'span') diffedSpans();
+				if (prevDiffed) prevDiffed(vnode);
+			};
+
+			try {
+				render(
+					<App>
+						<p>
+							<span>a</span>
+							<span>b</span>
+						</p>
+					</App>,
+					scratch
+				);
+				expect(diffedSpans).toHaveBeenCalledTimes(2);
+
+				update();
+				rerender();
+				expect(diffedSpans).toHaveBeenCalledTimes(2);
+				expect(scratch.innerHTML).to.equal(
+					'<div data-n="1"><p><span>a</span><span>b</span></p></div>'
+				);
+			} finally {
+				options.diffed = prevDiffed;
+			}
+		});
+
+		it('should render a dirty child inside a reused element in a single pass', () => {
+			// Same as #4737, with the reused vnode being an element.
+			let updateChild, updateParent;
+			let commits = 0;
+			let prevCommit = options._commit;
+			options._commit = () => commits++;
+
+			class Child extends Component {
+				constructor(props) {
+					super(props);
+					this.state = { value: 'old' };
+					updateChild = () => this.setState({ value: 'new' });
+				}
+				render() {
+					return <span>{this.state.value}</span>;
+				}
+			}
+
+			class App extends Component {
+				constructor(props) {
+					super(props);
+					this.children = (
+						<div>
+							<Child />
+						</div>
+					);
+					updateParent = () => this.setState({});
+				}
+				render() {
+					return this.children;
+				}
+			}
+
+			try {
+				render(<App />, scratch);
+				commits = 0;
+
+				updateParent();
+				updateChild();
+				rerender();
+
+				expect(scratch.innerHTML).to.equal('<div><span>new</span></div>');
+				expect(commits).to.equal(1);
+			} finally {
+				options._commit = prevCommit;
+			}
+		});
+
+		it('should update context consumers inside a reused element', () => {
+			const Ctx = createContext('a');
+			let set;
+			class App extends Component {
+				constructor(props) {
+					super(props);
+					this.state = { value: 'a' };
+					set = value => this.setState({ value });
+					this.children = (
+						<div>
+							<Ctx.Consumer>{value => <span>{value}</span>}</Ctx.Consumer>
+						</div>
+					);
+				}
+				render() {
+					return (
+						<Ctx.Provider value={this.state.value}>
+							{this.children}
+						</Ctx.Provider>
+					);
+				}
+			}
+
+			render(<App />, scratch);
+			expect(scratch.innerHTML).to.equal('<div><span>a</span></div>');
+
+			set('b');
+			rerender();
+			expect(scratch.innerHTML).to.equal('<div><span>b</span></div>');
+		});
+
+		it('should move reused keyed element vnodes', () => {
+			const a = <li key="a">a</li>;
+			const b = <li key="b">b</li>;
+			const c = <li key="c">c</li>;
+
+			render(<ul>{[a, b, c]}</ul>, scratch);
+			const [liA, liB, liC] = scratch.querySelectorAll('li');
+
+			render(<ul>{[c, a, b]}</ul>, scratch);
+			expect(scratch.innerHTML).to.equal(
+				'<ul><li>c</li><li>a</li><li>b</li></ul>'
+			);
+			expect([...scratch.querySelectorAll('li')]).to.deep.equal([
+				liC,
+				liA,
+				liB
+			]);
+
+			render(<ul>{[b, <li key="d">d</li>, c]}</ul>, scratch);
+			expect(scratch.innerHTML).to.equal(
+				'<ul><li>b</li><li>d</li><li>c</li></ul>'
+			);
 		});
 	});
 

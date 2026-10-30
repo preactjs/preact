@@ -179,7 +179,7 @@ function updateParentDomPointers(vnode) {
  * The render queue
  * @type {Array<import('./internal').Component>}
  */
-const rerenderQueue = [];
+export const rerenderQueue = [];
 
 /*
  * The value of `Component.debounce` must asynchronously invoke the passed in callback. It is

@@ -1,4 +1,4 @@
-import { BaseComponent, getDomSibling } from '../component';
+import { BaseComponent, getDomSibling, rerenderQueue } from '../component';
 import {
 	COMPONENT_DIRTY,
 	COMPONENT_FORCE,
@@ -437,6 +437,19 @@ export function diff(
 			if (!e.then) markAsForce(newVNode);
 			options._catchError(e, newVNode, oldVNode);
 		}
+	} else if (
+		newVNode._original == oldVNode._original &&
+		!excessDomChildren &&
+		!rerenderQueue.length
+	) {
+		// The same element as last render, e.g. `props.children` passed through
+		// a re-rendering component: its subtree is unchanged, so keep it without
+		// diffing. Not while components wait to rerender, as one of them could
+		// be inside and has to render in this pass (see #4737).
+		oldDom = newVNode._dom = oldVNode._dom;
+		(newVNode._children = oldVNode._children).some(vnode => {
+			if (vnode) vnode._parent = newVNode;
+		});
 	} else {
 		oldDom = newVNode._dom = diffElementNodes(
 			oldVNode._dom,
