@@ -166,6 +166,20 @@ const classNameDescriptorNonEnumberable = {
 	}
 };
 
+/**
+ * Call `fn` for every option of a select, including those inside an optgroup
+ * @param {import('./internal').ComponentChildren} children The select's children
+ * @param {(option: import('./internal').VNode) => void} fn
+ * @returns {undefined}
+ */
+function forEachOption(children, fn) {
+	toChildArray(children).forEach(child =>
+		child.type == 'optgroup'
+			? forEachOption(child.props.children, fn)
+			: fn(child)
+	);
+}
+
 function handleDomVNode(vnode) {
 	let props = vnode.props,
 		type = vnode.type,
@@ -246,8 +260,8 @@ function handleDomVNode(vnode) {
 	if (type == 'select') {
 		// Add support for array select values: <select multiple value={[]} />
 		if (normalizedProps.multiple && Array.isArray(normalizedProps.value)) {
-			// forEach() always returns undefined, which we abuse here to unset the value prop.
-			normalizedProps.value = toChildArray(props.children).forEach(child => {
+			// forEachOption() always returns undefined, which we abuse here to unset the value prop.
+			normalizedProps.value = forEachOption(props.children, child => {
 				child.props.selected =
 					normalizedProps.value.indexOf(child.props.value) != -1;
 			});
@@ -255,7 +269,7 @@ function handleDomVNode(vnode) {
 
 		// Adding support for defaultValue in select tag
 		if (normalizedProps.defaultValue != null) {
-			normalizedProps.value = toChildArray(props.children).forEach(child => {
+			normalizedProps.value = forEachOption(props.children, child => {
 				if (normalizedProps.multiple) {
 					child.props.selected =
 						normalizedProps.defaultValue.indexOf(child.props.value) != -1;

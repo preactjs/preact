@@ -155,6 +155,58 @@ describe('compat render', () => {
 		expect(options[2]).to.have.property('selected', true);
 	});
 
+	it('should support defaultValue for select tag with options in an optgroup', () => {
+		render(
+			<select defaultValue="b">
+				<optgroup label="Group">
+					<option value="a">A</option>
+					<option value="b">B</option>
+				</optgroup>
+			</select>,
+			scratch
+		);
+		const options = scratch.querySelectorAll('option');
+		expect(options[0]).to.have.property('selected', false);
+		expect(options[1]).to.have.property('selected', true);
+		expect(scratch.firstChild.value).to.equal('b');
+	});
+
+	it('should support defaultValue for multi selection with options in optgroups', () => {
+		render(
+			<select multiple defaultValue={['a', 'c']}>
+				<optgroup label="One">
+					<option value="a">A</option>
+					<option value="b">B</option>
+				</optgroup>
+				<optgroup label="Two">
+					<option value="c">C</option>
+				</optgroup>
+			</select>,
+			scratch
+		);
+		const options = scratch.querySelectorAll('option');
+		expect(options[0]).to.have.property('selected', true);
+		expect(options[1]).to.have.property('selected', false);
+		expect(options[2]).to.have.property('selected', true);
+	});
+
+	it('should support array values for multi selection with options in optgroups', () => {
+		render(
+			<select multiple value={['b', 'c']} onChange={() => {}}>
+				<optgroup label="One">
+					<option value="a">A</option>
+					<option value="b">B</option>
+				</optgroup>
+				<option value="c">C</option>
+			</select>,
+			scratch
+		);
+		const options = scratch.querySelectorAll('option');
+		expect(options[0]).to.have.property('selected', false);
+		expect(options[1]).to.have.property('selected', true);
+		expect(options[2]).to.have.property('selected', true);
+	});
+
 	it('should ignore defaultValue when value is 0', () => {
 		render(<input defaultValue={2} value={0} />, scratch);
 		expect(scratch.firstElementChild.value).to.equal('0');
