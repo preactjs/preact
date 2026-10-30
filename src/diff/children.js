@@ -25,7 +25,8 @@ import { getDomSibling } from '../component';
  * Diff the children of a virtual node
  * @param {PreactElement} parentDom The DOM element whose children are being
  * diffed
- * @param {ComponentChildren[]} renderResult
+ * @param {ComponentChildren} renderResult The children to diff, an array or
+ * a lone child (passed as is to save allocating a one-element array)
  * @param {VNode} newParentVNode The new virtual node whose children should be
  * diff'ed against oldParentVNode
  * @param {VNode} oldParentVNode The old virtual node whose children should be
@@ -73,18 +74,16 @@ export function diffChildren(
 	/** @type {VNode[]} */
 	let oldChildren = oldParentVNode._children || EMPTY_ARR;
 
-	let newChildrenLength = renderResult.length;
-
 	oldDom = constructNewChildrenArray(
 		newParentVNode,
 		renderResult,
 		oldChildren,
-		oldDom,
-		newChildrenLength
+		oldDom
 	);
 
-	for (i = 0; i < newChildrenLength; i++) {
-		childVNode = newParentVNode._children[i];
+	let newChildren = newParentVNode._children;
+	for (i = 0; i < newChildren.length; i++) {
+		childVNode = newChildren[i];
 		if (childVNode == NULL) continue;
 
 		// At this point, constructNewChildrenArray has assigned _index to be the
@@ -155,15 +154,14 @@ export function diffChildren(
 
 /**
  * @param {VNode} newParentVNode
- * @param {ComponentChildren[]} renderResult
+ * @param {ComponentChildren} renderResult
  * @param {VNode[]} oldChildren
  */
 function constructNewChildrenArray(
 	newParentVNode,
 	renderResult,
 	oldChildren,
-	oldDom,
-	newChildrenLength
+	oldDom
 ) {
 	/** @type {number} */
 	let i;
@@ -172,7 +170,9 @@ function constructNewChildrenArray(
 	/** @type {VNode} */
 	let oldVNode;
 
-	let oldChildrenLength = oldChildren.length,
+	let isList = isArray(renderResult),
+		newChildrenLength = isList ? renderResult.length : 1,
+		oldChildrenLength = oldChildren.length,
 		remainingOldChildren = oldChildrenLength;
 
 	let skew = 0;
@@ -188,7 +188,7 @@ function constructNewChildrenArray(
 	for (i = 0; i < newChildrenLength; i++) {
 		// @ts-expect-error We are reusing the childVNode variable to hold both the
 		// pre and post normalized childVNode
-		childVNode = renderResult[i];
+		childVNode = isList ? renderResult[i] : renderResult;
 
 		if (
 			childVNode == NULL ||
