@@ -250,28 +250,19 @@ export function diff(
 			c._parentDom = parentDom;
 			c._bits &= ~COMPONENT_FORCE;
 
+			// Function components re-render until they stop calling setState
+			// during render (see #2553), class components render exactly once.
 			let renderHook = options._render,
-				count = 0;
-			if (isClassComponent) {
-				c.state = c._nextState;
+				count = isClassComponent ? 25 : 0;
+			do {
 				c._bits &= ~COMPONENT_DIRTY;
-
 				if (renderHook) renderHook(newVNode);
+				tmp = c.render(c.props, (c.state = c._nextState), c.context);
+			} while (c._bits & COMPONENT_DIRTY && ++count < 25);
 
-				tmp = c.render(c.props, c.state, c.context);
-
+			if (isClassComponent) {
 				EMPTY_ARR.push.apply(c._renderCallbacks, c._stateCallbacks);
 				c._stateCallbacks = [];
-			} else {
-				do {
-					c._bits &= ~COMPONENT_DIRTY;
-					if (renderHook) renderHook(newVNode);
-
-					tmp = c.render(c.props, c.state, c.context);
-
-					// Handle setState called in render, see #2553
-					c.state = c._nextState;
-				} while (c._bits & COMPONENT_DIRTY && ++count < 25);
 			}
 
 			// Handle setState called in render, see #2553
@@ -370,8 +361,7 @@ export function diff(
 			// if hydrating or creating initial tree, bailout preserves DOM:
 			if (isHydrating || excessDomChildren) {
 				if (e.then) {
-					let commentMarkersToFind = 0,
-						startMarker;
+					let startMarker, end;
 
 					// isHydrating is MODE_HYDRATE or falsy
 					newVNode._flags |= MODE_SUSPENDED | isHydrating;
@@ -386,23 +376,19 @@ export function diff(
 							i--;
 						}
 
+						// Keep what this component would have claimed: its whole
+						// streamed range (all of it when unclosed), or else the first
+						// node that isn't a comment.
 						for (; i < excessDomChildren.length; i++) {
-							child = excessDomChildren[i];
-							if (!child) continue;
-							excessDomChildren[i] = NULL;
-
-							if (child.nodeType == 8) {
-								if (child.data.startsWith('$s')) {
-									if (!commentMarkersToFind++) startMarker = child;
-								} else if (
-									commentMarkersToFind &&
-									child.data.startsWith('/$s') &&
-									!--commentMarkersToFind
-								) {
+							if ((child = excessDomChildren[i])) {
+								excessDomChildren[i] = NULL;
+								if (startMarker) {
+									if (child == end) break;
+								} else if (child.nodeType != 8) {
 									break;
+								} else if (child.data.startsWith('$s')) {
+									end = rangeEnd((startMarker = child));
 								}
-							} else if (!commentMarkersToFind) {
-								break;
 							}
 						}
 					}
