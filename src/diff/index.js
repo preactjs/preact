@@ -609,7 +609,7 @@ function diffElementNodes(
 		// when reading existing DOM and when inserting new nodes. `parentDom` is
 		// unused from here on, so we reuse it as the container for our children.
 		// @ts-expect-error
-		parentDom = nodeType == 'template' ? dom.content : dom;
+		parentDom = (nodeType == 'template' && dom.content) || dom;
 
 		// If excessDomChildren was not null, repopulate it with the current element's children:
 		excessDomChildren =

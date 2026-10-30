@@ -612,6 +612,32 @@ describe('hydrate()', () => {
 		expect(caught.message).to.equal('real error');
 	});
 
+	for (const [tag, childTag, namespace] of [
+		['svg', 'g', 'http://www.w3.org/2000/svg'],
+		['math', 'mrow', 'http://www.w3.org/1998/Math/MathML']
+	]) {
+		it(`should hydrate <template> in ${tag}`, () => {
+			scratch.innerHTML = `<${tag}><template><${childTag}>child</${childTag}></template></${tag}>`;
+			const template = scratch.firstChild.firstChild;
+			const child = template.firstChild;
+			const vnode = createElement(
+				tag,
+				null,
+				createElement('template', null, createElement(childTag, null, 'child'))
+			);
+
+			hydrate(vnode, scratch);
+
+			expect(scratch.firstChild.firstChild).to.equal(template);
+			expect(template.namespaceURI).to.equal(namespace);
+			expect(template.content).to.equal(undefined);
+			expect(template.childNodes).to.have.length(1);
+			expect(template.firstChild).to.equal(child);
+			expect(child.namespaceURI).to.equal(namespace);
+			expect(template.textContent).to.equal('child');
+		});
+	}
+
 	it('should hydrate <template> tags', () => {
 		function App() {
 			return (
