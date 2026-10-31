@@ -2293,6 +2293,34 @@ describe('render()', () => {
 			expect(iframeCreateElementSpy).toBeCalled();
 		});
 
+		it.skipIf(
+			typeof CustomElementRegistry == 'undefined' ||
+				!('initialize' in CustomElementRegistry.prototype)
+		)('uses the scoped custom element registry of the container', () => {
+			const registry = new CustomElementRegistry();
+			class ScopedEl extends HTMLElement {}
+			registry.define('x-scoped', ScopedEl);
+
+			const host = document.createElement('div');
+			scratch.appendChild(host);
+			const root = host.attachShadow({
+				mode: 'open',
+				customElementRegistry: registry
+			});
+
+			render(
+				<div>
+					<x-scoped />
+				</div>,
+				root
+			);
+
+			const div = root.firstChild;
+			expect(div.customElementRegistry).to.equal(registry);
+			expect(div.firstChild).to.be.instanceOf(ScopedEl);
+			expect(div.firstChild.customElementRegistry).to.equal(registry);
+		});
+
 		it('falls back to the global document for containers without an ownerDocument', () => {
 			// A fake container like `createRootFragment()` from preact-root-fragment
 			const container = {
