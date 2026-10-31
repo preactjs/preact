@@ -592,7 +592,7 @@ function diffElementNodes(
 		dom = doc.createElementNS(
 			namespace,
 			nodeType,
-			newProps.is || newProps.customElementRegistry ? newProps : parentDom
+			newProps.is ? newProps : parentDom
 		);
 
 		// we are creating a new node, so we can assume this is a new subtree (in
