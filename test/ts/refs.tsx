@@ -46,9 +46,9 @@ class CallbackRef extends Component {
 }
 
 class CreateRefComponent extends Component {
-	private divRef: RefObject<HTMLDivElement> = createRef();
-	private fooRef: RefObject<Component> = createRef();
-	private barRef: RefObject<Bar> = createRef();
+	private divRef = createRef<HTMLDivElement>();
+	private fooRef = createRef<Component>();
+	private barRef = createRef<Bar>();
 
 	componentDidMount() {
 		if (this.divRef.current != null) {

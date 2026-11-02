@@ -6,12 +6,14 @@ packages:
 minimumReleaseAge: 1440
 minimumReleaseAgeStrict: true
 minimumReleaseAgeIgnoreMissingTime: false
+# These releases add support for symbol-marked VNodes used by Preact 11.
+minimumReleaseAgeExclude:
+  - '@preact/signals@2.11.4'
+  - '@preact/signals-core@1.14.5'
+  - preact-render-to-string@6.8.2
 blockExoticSubdeps: true
 trustPolicy: no-downgrade
 trustPolicyExclude:
-  # Preserve main's SSR test artifact (verified identical SHA-512). Version
-  # 6.7.0 currently has invalid stream-node declarations under our TS checks.
-  - preact-render-to-string@6.5.0
   # Babel requires semver 6. This exact artifact (including SHA-512 integrity)
   # already exists in main's npm lockfile; 6.3.1 lacks earlier releases' provenance.
   - semver@6.3.1

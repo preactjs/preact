@@ -151,6 +151,72 @@ describe('render()', () => {
 		);
 	});
 
+	for (const [tag, childTag, namespace] of [
+		['svg', 'g', 'http://www.w3.org/2000/svg'],
+		['math', 'mrow', 'http://www.w3.org/1998/Math/MathML']
+	]) {
+		it(`should render and update <template> in ${tag}`, () => {
+			const App = ({ items }) =>
+				createElement(
+					tag,
+					null,
+					createElement(
+						'template',
+						null,
+						items.map(i => createElement(childTag, { key: i }, i))
+					)
+				);
+
+			render(<App items={[1, 2]} />, scratch);
+			const template = scratch.firstChild.firstChild;
+			const child = template.firstChild;
+			expect(template.namespaceURI).to.equal(namespace);
+			expect(template.content).to.equal(undefined);
+			expect(template.textContent).to.equal('12');
+			expect(child.namespaceURI).to.equal(namespace);
+
+			render(<App items={[2, 1, 3]} />, scratch);
+			expect(template.textContent).to.equal('213');
+			expect(template.childNodes[1]).to.equal(child);
+
+			render(<App items={[1]} />, scratch);
+			expect(template.firstChild).to.equal(child);
+			expect(template.childNodes).to.have.length(1);
+
+			render(null, scratch);
+			expect(scratch.childNodes).to.have.length(0);
+		});
+	}
+
+	it('should use HTML <template> content inside namespace integration points', () => {
+		render(
+			<div>
+				<svg>
+					<foreignObject>
+						<template>
+							<span>svg</span>
+						</template>
+					</foreignObject>
+				</svg>
+				<math>
+					<mtext>
+						<template>
+							<span>math</span>
+						</template>
+					</mtext>
+				</math>
+			</div>,
+			scratch
+		);
+		for (const template of scratch.querySelectorAll('template')) {
+			expect(template.namespaceURI).to.equal('http://www.w3.org/1999/xhtml');
+			expect(template.childNodes).to.have.length(0);
+			expect(template.content.firstChild.namespaceURI).to.equal(
+				'http://www.w3.org/1999/xhtml'
+			);
+		}
+	});
+
 	it('should render function components with an undefined prototype', () => {
 		const Foo = () => <div>foo</div>;
 		Foo.prototype = undefined;
@@ -2108,7 +2174,7 @@ describe('render()', () => {
 		};
 
 		Object.defineProperties(Test.prototype, {
-			constructor: { configurable: true, value: undefined },
+			constructor: { configurable: true, value: Symbol.for('pv') },
 			type: { configurable: true, value: TestValue },
 			props: {
 				configurable: true,
@@ -2125,6 +2191,84 @@ describe('render()', () => {
 
 		render(<App />, scratch);
 		expect(scratch.innerHTML).to.equal('hello world');
+	});
+
+	describe('after a render error', () => {
+		const Thrower = ({ shouldThrow }) => {
+			if (shouldThrow) throw new Error('boom');
+			return <b>x</b>;
+		};
+
+		it('should not duplicate the children of a Fragment', () => {
+			const App = ({ title, shouldThrow }) => (
+				<Fragment>
+					<h1>{title}</h1>
+					<Thrower shouldThrow={shouldThrow} />
+					<i>z</i>
+				</Fragment>
+			);
+
+			render(<App title="A" shouldThrow={false} />, scratch);
+			expect(scratch.innerHTML).to.equal('<h1>A</h1><b>x</b><i>z</i>');
+
+			expect(() =>
+				render(<App title="B" shouldThrow={true} />, scratch)
+			).to.throw('boom');
+
+			render(<App title="C" shouldThrow={false} />, scratch);
+			expect(scratch.innerHTML).to.equal('<h1>C</h1><b>x</b><i>z</i>');
+		});
+
+		it('should not duplicate a component rendered at the root', () => {
+			render(<Thrower shouldThrow={false} />, scratch);
+			expect(() => render(<Thrower shouldThrow={true} />, scratch)).to.throw(
+				'boom'
+			);
+
+			render(<Thrower shouldThrow={false} />, scratch);
+			expect(scratch.innerHTML).to.equal('<b>x</b>');
+		});
+
+		it('should detach refs and unmount after repeated render errors', () => {
+			let mounts = 0;
+			let unmounts = 0;
+			const ref = vi.fn();
+			class Tracked extends Component {
+				componentDidMount() {
+					mounts++;
+				}
+				componentWillUnmount() {
+					unmounts++;
+				}
+				render({ shouldThrow }) {
+					if (shouldThrow) throw new Error('boom');
+					return <b ref={ref}>x</b>;
+				}
+			}
+
+			for (let i = 0; i < 5; i++) {
+				render(<Tracked shouldThrow={false} />, scratch);
+				const dom = scratch.firstChild;
+				for (let j = 0; j < 3; j++) {
+					expect(() => render(<Tracked shouldThrow />, scratch)).to.throw(
+						'boom'
+					);
+					render(<Tracked shouldThrow={false} />, scratch);
+					expect(scratch.innerHTML).to.equal('<b>x</b>');
+					expect(scratch.firstChild).to.equal(dom);
+				}
+				render(null, scratch);
+				expect(scratch.innerHTML).to.equal('');
+				expect(mounts).to.equal(i + 1);
+				expect(unmounts).to.equal(i + 1);
+				expect(
+					ref.mock.calls.filter(([value]) => value !== null)
+				).to.have.length(i + 1);
+				expect(
+					ref.mock.calls.filter(([value]) => value === null)
+				).to.have.length(i + 1);
+			}
+		});
 	});
 
 	describe('Alternative document', () => {
@@ -2147,6 +2291,34 @@ describe('render()', () => {
 			);
 			expect(rootCreateElementSpy).not.toBeCalled();
 			expect(iframeCreateElementSpy).toBeCalled();
+		});
+
+		it.skipIf(
+			typeof CustomElementRegistry == 'undefined' ||
+				!('initialize' in CustomElementRegistry.prototype)
+		)('uses the scoped custom element registry of the container', () => {
+			const registry = new CustomElementRegistry();
+			class ScopedEl extends HTMLElement {}
+			registry.define('x-scoped', ScopedEl);
+
+			const host = document.createElement('div');
+			scratch.appendChild(host);
+			const root = host.attachShadow({
+				mode: 'open',
+				customElementRegistry: registry
+			});
+
+			render(
+				<div>
+					<x-scoped />
+				</div>,
+				root
+			);
+
+			const div = root.firstChild;
+			expect(div.customElementRegistry).to.equal(registry);
+			expect(div.firstChild).to.be.instanceOf(ScopedEl);
+			expect(div.firstChild.customElementRegistry).to.equal(registry);
 		});
 
 		it('falls back to the global document for containers without an ownerDocument', () => {

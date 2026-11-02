@@ -1,7 +1,7 @@
 {
   "name": "preact",
   "amdName": "preact",
-  "version": "11.0.1",
+  "version": "11.1.1",
   "private": false,
   "publishConfig": {
     "access": "public",
@@ -73,6 +73,11 @@
       "import": "./compat/jsx-dev-runtime.mjs",
       "require": "./compat/jsx-dev-runtime.js"
     },
+    "./compat/compiler-runtime": {
+      "types": "./compat/compiler-runtime.d.ts",
+      "import": "./compat/compiler-runtime.mjs",
+      "require": "./compat/compiler-runtime.js"
+    },
     "./compat/scheduler": {
       "types": "./compat/scheduler.d.ts",
       "import": "./compat/scheduler.mjs",
@@ -127,6 +132,9 @@
     "compat/client.d.ts",
     "compat/client.js",
     "compat/client.mjs",
+    "compat/compiler-runtime.d.ts",
+    "compat/compiler-runtime.js",
+    "compat/compiler-runtime.mjs",
     "compat/server.d.ts",
     "compat/server.browser.mjs",
     "compat/server.js",
@@ -181,6 +189,7 @@
   "devDependencies": {
     "@babel/core": "^7.28.0",
     "@babel/preset-env": "^7.29.7",
+    "@preact/signals": "^2.11.4",
     "@rollup/plugin-babel": "^6.1.0",
     "@types/chai": "^5.2.2",
     "@types/node": "^22.20.1",
@@ -197,7 +206,7 @@
     "oxfmt": "^0.32.0",
     "oxlint": "^1.8.0",
     "playwright": "^1.54.1",
-    "preact-render-to-string": "^6.5.0",
+    "preact-render-to-string": "^6.8.2",
     "prop-types": "^15.8.1",
     "rollup": "^4.62.2",
     "terser": "5.16.0",
