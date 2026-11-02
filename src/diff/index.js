@@ -586,7 +586,14 @@ function diffElementNodes(
 			return doc.createTextNode(newProps);
 		}
 
-		dom = doc.createElementNS(namespace, nodeType, newProps.is && newProps);
+		// Without `is`, the parent doubles as the creation options so its
+		// `customElementRegistry` (scoped registries on shadow roots/elements) is
+		// inherited. The spec throws when `is` and a registry are both passed.
+		dom = doc.createElementNS(
+			namespace,
+			nodeType,
+			newProps.is ? newProps : parentDom
+		);
 
 		// we are creating a new node, so we can assume this is a new subtree (in
 		// case we are hydrating), this deopts the hydrate
