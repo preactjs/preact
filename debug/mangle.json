@@ -16,6 +16,9 @@
           "__self"
         ]
       }
+    },
+    "compress": {
+      "inline": 1
     }
   }
 }
