@@ -1,5 +1,5 @@
 import { setupRerender } from 'preact/test-utils';
-import { createElement, render, Component, Fragment } from 'preact';
+import { createElement, render, hydrate, Component, Fragment } from 'preact';
 import { setupScratch, teardown } from '../../_util/helpers';
 import { vi, expect } from 'vitest';
 
@@ -540,6 +540,56 @@ describe('Lifecycle methods', () => {
 				expectedError,
 				expect.anything()
 			);
+		});
+
+		[null, undefined].forEach(value => {
+			describe(`when a child throws ${value}`, () => {
+				let caught;
+
+				class Boundary extends Component {
+					componentDidCatch(error) {
+						caught.push(error);
+						this.setState({ failed: true });
+					}
+
+					render() {
+						return this.state.failed ? 'caught' : this.props.children;
+					}
+				}
+
+				function Thrower() {
+					throw value;
+				}
+
+				beforeEach(() => {
+					caught = [];
+				});
+
+				it('should be called on render', () => {
+					render(
+						<Boundary>
+							<Thrower />
+						</Boundary>,
+						scratch
+					);
+					rerender();
+					expect(caught).to.deep.equal([value]);
+					expect(scratch.innerHTML).to.equal('caught');
+				});
+
+				it('should be called on hydrate', () => {
+					scratch.innerHTML = '<div>server</div>';
+					hydrate(
+						<Boundary>
+							<Thrower />
+						</Boundary>,
+						scratch
+					);
+					rerender();
+					expect(caught).to.deep.equal([value]);
+					expect(scratch.innerHTML).to.equal('caught');
+				});
+			});
 		});
 
 		it('should be called when child inside a Fragment fails', () => {

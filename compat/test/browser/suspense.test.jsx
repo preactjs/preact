@@ -1312,6 +1312,39 @@ describe('suspense', () => {
 		expect(scratch.innerHTML).to.eql(`<div>Catcher did catch: {Promise}</div>`);
 	});
 
+	[null, undefined].forEach(value => {
+		it(`should pass a thrown ${value} to the error boundary`, () => {
+			const caught = [];
+			class Boundary extends Component {
+				componentDidCatch(error) {
+					caught.push(error);
+					this.setState({ failed: true });
+				}
+
+				render(props, state) {
+					return state.failed ? 'caught' : props.children;
+				}
+			}
+
+			function Thrower() {
+				throw value;
+			}
+
+			render(
+				<Boundary>
+					<Suspense fallback={<div>Suspended...</div>}>
+						<Thrower />
+					</Suspense>
+				</Boundary>,
+				scratch
+			);
+			rerender();
+
+			expect(caught).to.deep.equal([value]);
+			expect(scratch.innerHTML).to.equal('caught');
+		});
+	});
+
 	it("should throw when lazy's loader throws", () => {
 		/** @type {() => Promise<any>} */
 		let reject;
