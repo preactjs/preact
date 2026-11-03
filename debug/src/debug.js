@@ -77,7 +77,7 @@ export function initDebug() {
 
 	options._catchError = (error, vnode, oldVNode, errorInfo) => {
 		let component = vnode && vnode._component;
-		if (component && typeof error.then == 'function') {
+		if (component && error && typeof error.then == 'function') {
 			const promise = error;
 			error = new Error(
 				`Missing Suspense. The throwing component was: ${getDisplayName(vnode)}`
@@ -106,7 +106,7 @@ export function initDebug() {
 			// when an error was handled by an ErrorBoundary we will nonetheless emit an error
 			// event on the window object. This is to make up for react compatibility in dev mode
 			// and thus make the Next.js dev overlay work.
-			if (typeof error.then != 'function') {
+			if (!error || typeof error.then != 'function') {
 				setTimeout(() => {
 					throw error;
 				});

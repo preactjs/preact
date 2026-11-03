@@ -295,7 +295,7 @@ export function diff(
 			newVNode._original = NULL;
 			// if hydrating or creating initial tree, bailout preserves DOM:
 			if (isHydrating || excessDomChildren != NULL) {
-				if (e.then) {
+				if (e && e.then) {
 					newVNode._flags |= isHydrating
 						? MODE_HYDRATE | MODE_SUSPENDED
 						: MODE_SUSPENDED;
@@ -321,7 +321,7 @@ export function diff(
 				newVNode._children = oldVNode._children || [];
 			}
 
-			if (!e.then) markAsForce(newVNode);
+			if (!(e && e.then)) markAsForce(newVNode);
 			options._catchError(e, newVNode, oldVNode);
 		}
 	} else if (

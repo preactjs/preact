@@ -4,7 +4,7 @@ import { assign } from './util';
 
 const oldCatchError = options._catchError;
 options._catchError = function (error, newVNode, oldVNode, errorInfo) {
-	if (error.then) {
+	if (error && error.then) {
 		/** @type {import('./internal').Component} */
 		let component;
 		let vnode = newVNode;

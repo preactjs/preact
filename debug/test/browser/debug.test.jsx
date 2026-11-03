@@ -47,6 +47,45 @@ describe('debug', () => {
 		expect(fn).to.throw(/render/);
 	});
 
+	[null, undefined].forEach(value => {
+		it(`should pass a thrown ${value} to the error boundary and rethrow it`, () => {
+			const caught = [];
+			class Boundary extends Component {
+				componentDidCatch(error) {
+					caught.push(error);
+					this.setState({ failed: true });
+				}
+
+				render() {
+					return this.state.failed ? 'caught' : this.props.children;
+				}
+			}
+
+			function Thrower() {
+				throw value;
+			}
+
+			// debug rethrows handled errors from a timeout. Fake timers hold that
+			// rethrow back so it doesn't surface as an uncaught error.
+			const clock = sinon.useFakeTimers();
+			try {
+				render(
+					<Boundary>
+						<Thrower />
+					</Boundary>,
+					scratch
+				);
+				rerender();
+
+				expect(caught).to.deep.equal([value]);
+				expect(scratch.innerHTML).to.equal('caught');
+				expect(clock.countTimers()).to.equal(1);
+			} finally {
+				clock.restore();
+			}
+		});
+	});
+
 	it('should print an error on rendering on invalid parent', () => {
 		let fn = () => render(<div />, 6);
 		expect(fn).to.throw(/valid HTML node/);
