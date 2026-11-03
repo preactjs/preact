@@ -68,6 +68,9 @@ export function setProperty(dom, name, value, oldValue, namespace) {
 	}
 	// Benchmark for comparison: https://esbench.com/bench/574c954bdb965b9a00965ac6
 	else if (name[0] == 'o' && name[1] == 'n') {
+		if (typeof value != 'function') value = NULL;
+		if (typeof oldValue != 'function') oldValue = NULL;
+
 		// Handlers are keyed by prop name and every prop name gets its own proxy,
 		// so swapping one (e.g. an inline arrow function on every render) is a
 		// single store. The event name is only derived to attach or remove it.

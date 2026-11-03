@@ -72,6 +72,36 @@ describe('event handling', () => {
 		);
 	});
 
+	it('should ignore non-function values', () => {
+		render(<div onclick="foo()" onMouseDown={{}} />, scratch);
+
+		expect(scratch.innerHTML).to.equal('<div></div>');
+		expect(proto.addEventListener).not.toHaveBeenCalled();
+		expect(() => fireEvent(scratch.firstChild, 'click')).not.toThrow();
+	});
+
+	it('should switch between function and non-function values', () => {
+		let click = vi.fn();
+
+		render(<div onClick="foo()" />, scratch);
+		render(<div onClick={click} />, scratch);
+
+		fireEvent(scratch.firstChild, 'click');
+		expect(click).toHaveBeenCalledOnce();
+
+		click.mockClear();
+		render(<div onClick="foo()" />, scratch);
+
+		expect(proto.removeEventListener).toHaveBeenCalledWith(
+			'click',
+			expect.any(Function),
+			false
+		);
+		fireEvent(scratch.firstChild, 'click');
+		expect(click).not.toHaveBeenCalled();
+		expect(scratch.innerHTML).to.equal('<div></div>');
+	});
+
 	it('should support native event names', () => {
 		let click = vi.fn(),
 			mousedown = vi.fn();
