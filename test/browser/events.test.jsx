@@ -148,6 +148,29 @@ describe('event handling', () => {
 		expect(click).toHaveBeenCalledWith(1);
 	});
 
+	it('should preserve default prevention when an option unmounts its list', () => {
+		const onListMouseDown = vi.fn(e => e.preventDefault());
+		const onOptionMouseDown = vi.fn(() => render(null, scratch));
+		render(
+			<ul onMouseDown={onListMouseDown}>
+				<li onMouseDown={onOptionMouseDown}>Choose address</li>
+			</ul>,
+			scratch
+		);
+		const option = scratch.querySelector('li');
+		const event = new MouseEvent('mousedown', {
+			bubbles: true,
+			cancelable: true
+		});
+
+		option.dispatchEvent(event);
+
+		expect(onOptionMouseDown).toHaveBeenCalledOnce();
+		expect(option.isConnected).toBe(false);
+		expect(onListMouseDown).toHaveBeenCalledOnce();
+		expect(event.defaultPrevented).toBe(true);
+	});
+
 	it('should not invoke an ancestor handler attached while an event bubbles', () => {
 		const onAncestorClick = vi.fn();
 		const onButtonClick = () => {

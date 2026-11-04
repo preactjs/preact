@@ -81,8 +81,7 @@ export function setProperty(dom, name, value, oldValue, namespace) {
 				eventProxies[name] || (eventProxies[name] = createEventProxy(name));
 			// The attach time belongs to the listener, not to the handler: one
 			// function can back several listeners that were attached at different
-			// times. It lives outside `_listeners`, which unmount resets even when
-			// a re-suspended Suspense boundary keeps the DOM and its listeners.
+			// times.
 			(dom._attached || (dom._attached = {}))[name] = eventClock;
 			useCapture = name != (name = name.replace(CAPTURE_REGEX, '$1'));
 

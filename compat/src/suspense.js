@@ -1,7 +1,6 @@
 import { Component, Fragment, createElement, options } from 'preact';
 import {
 	COMPONENT_FORCE,
-	FORCE_PROPS_REVALIDATE,
 	MODE_HYDRATE,
 	REF_DETACHED,
 	UNDEFINED,
@@ -89,10 +88,6 @@ function detachedClone(vnode, detachedParent, parentDom) {
 
 function removeOriginal(vnode, detachedParent, originalParent) {
 	if (vnode && originalParent) {
-		if (typeof vnode.type == 'string') {
-			vnode._flags |= FORCE_PROPS_REVALIDATE;
-		}
-
 		vnode._original = null;
 		vnode._children =
 			vnode._children &&
