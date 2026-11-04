@@ -12,7 +12,7 @@ import { assign } from './util';
 function initSuspenseHooks() {
 	const oldCatchError = options._catchError;
 	options._catchError = (error, newVNode, oldVNode, errorInfo) => {
-		if (error.then) {
+		if (error && error.then) {
 			/** @type {import('./internal').Component} */
 			let component;
 			let vnode = newVNode;

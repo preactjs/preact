@@ -360,7 +360,7 @@ export function diff(
 			newVNode._original = NULL;
 			// if hydrating or creating initial tree, bailout preserves DOM:
 			if (isHydrating || excessDomChildren) {
-				if (e.then) {
+				if (e && e.then) {
 					let startMarker, end;
 
 					// isHydrating is MODE_HYDRATE or falsy
@@ -420,7 +420,7 @@ export function diff(
 				newVNode._children = oldVNode._children || [];
 			}
 
-			if (!e.then) markAsForce(newVNode);
+			if (!(e && e.then)) markAsForce(newVNode);
 			options._catchError(e, newVNode, oldVNode);
 		}
 	} else {
