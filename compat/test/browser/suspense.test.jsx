@@ -3179,7 +3179,6 @@ describe('suspense', () => {
 		await resolve(() => <div>b1</div>);
 		rerender();
 
-		// Unmount resets `_listeners` while the parked DOM keeps its listeners
 		const [Lazy2, resolve2] = createLazy();
 		setChild(<Lazy2 />);
 		rerender();

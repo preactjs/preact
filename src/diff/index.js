@@ -6,7 +6,6 @@ import {
 	COMPONENT_PROCESSING_EXCEPTION,
 	EMPTY_ARR,
 	EMPTY_OBJ,
-	FORCE_PROPS_REVALIDATE,
 	MATHML_TOKEN_ELEMENTS,
 	MATH_NAMESPACE,
 	MODE_HYDRATE,
@@ -640,7 +639,6 @@ function diffElementNodes(
 
 		// During hydration, props are not diffed at all (including dangerouslySetInnerHTML)
 		// @TODO we should warn in debug mode when props don't match here.
-		const shouldRevalidateProps = oldVNode._flags & FORCE_PROPS_REVALIDATE;
 		for (i in newProps) {
 			value = newProps[i];
 			if (i == 'children') {
@@ -653,7 +651,7 @@ function diffElementNodes(
 				checked = value;
 			} else if (
 				(!isHydrating || typeof value == 'function') &&
-				(oldProps[i] !== value || (shouldRevalidateProps && value != NULL))
+				oldProps[i] !== value
 			) {
 				setProperty(dom, i, value, oldProps[i], namespace);
 			}
@@ -812,10 +810,7 @@ export function unmount(vnode, parentVNode, skipRemove) {
 		removeNode(r);
 	}
 
-	if ((r = vnode._dom)) {
-		if (!skipRemove) removeNode(r);
-		if (r._listeners) r._listeners = NULL;
-	}
+	if (!skipRemove) removeNode(vnode._dom);
 
 	vnode._dom = vnode._component = vnode._parent = NULL;
 }
