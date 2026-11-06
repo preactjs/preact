@@ -12,7 +12,7 @@ on:
 jobs:
   filter_jobs:
     name: Filter jobs
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     if: |
       github.event.workflow_run.event == 'pull_request'
     outputs:
@@ -61,7 +61,7 @@ jobs:
   report_running:
     name: Report benchmarks are in-progress
     needs: filter_jobs
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     # Only add the "benchmarks are running" text when a workflow_run is
     # requested (a.k.a starting)
     if: |
@@ -78,7 +78,7 @@ jobs:
   report_results:
     name: Report benchmark results
     needs: filter_jobs
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     # Only run this job if the event action was "completed" and the triggering
     # workflow_run was successful
     if: |

@@ -50,7 +50,7 @@ jobs:
 
   prepare:
     name: Prepare environment
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     needs:
       - build_local
       - build_base

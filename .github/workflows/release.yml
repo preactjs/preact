@@ -16,7 +16,7 @@ jobs:
     uses: ./.github/workflows/build-test.yml
 
   release:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     needs: build
     permissions:
       contents: write
@@ -51,7 +51,7 @@ jobs:
 
   publish:
     needs: [build, release]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     environment:
       name: npm
       url: https://www.npmjs.com/package/preact
