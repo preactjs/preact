@@ -455,6 +455,50 @@ describe('useId', () => {
 		);
 	});
 
+	[render, hydrate].forEach(initialRender => {
+		it(`should keep document root ids unique after ${initialRender.name}`, () => {
+			const doc = document.implementation.createHTMLDocument('');
+			function Field() {
+				return <input id={useId()} />;
+			}
+			const App = ({ second }) => (
+				<body>
+					<Field />
+					{second && <Field />}
+				</body>
+			);
+
+			initialRender(<App second={false} />, doc);
+			const first = doc.body.firstChild;
+			expect(first.id).to.equal('P0-0');
+
+			render(<App second />, doc);
+			expect(doc.body.firstChild).to.equal(first);
+			expect(
+				Array.from(doc.querySelectorAll('input'), input => input.id)
+			).to.deep.equal(['P0-0', 'P0-1']);
+			render(null, doc);
+		});
+	});
+
+	['text', 42, true, false, null, undefined].forEach(child => {
+		it(`should replace document root ids with ${String(child)}`, () => {
+			const doc = document.implementation.createHTMLDocument('');
+			function Field() {
+				return <input id={useId()} />;
+			}
+			render(<Field />, doc);
+
+			expect(() => render(child, doc)).not.to.throw();
+			expect(doc.documentElement.textContent).to.equal(
+				typeof child == 'string' || typeof child == 'number'
+					? String(child)
+					: ''
+			);
+			render(null, doc);
+		});
+	});
+
 	it('should not crash for rendering null after a non-null render', () => {
 		const Id = () => {
 			const id = useId();
