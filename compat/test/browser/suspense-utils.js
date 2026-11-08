@@ -4,7 +4,7 @@ import { vi } from 'vitest';
 const h = React.createElement;
 
 /**
- * Create a Lazy component whose promise is controlled by by the test. This
+ * Create a Lazy component whose promise is controlled by the test. This
  * function returns 3 values: The Lazy component to render, a `resolve`
  * function, and a `reject` function. Call `resolve` with the component the Lazy
  * component should resolve with. Call `reject` with the error the Lazy
