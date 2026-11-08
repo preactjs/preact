@@ -478,7 +478,7 @@ let HAS_RAF = typeof requestAnimationFrame == 'function';
  * Do this by combining requestAnimationFrame (rAF) + setTimeout to invoke a callback after
  * the next browser frame.
  *
- * Also, schedule a timeout in parallel to the the rAF to ensure the callback is invoked
+ * Also, schedule a timeout in parallel to the rAF to ensure the callback is invoked
  * even if RAF doesn't fire (for example if the browser tab is not visible)
  *
  * @param {() => void} callback
