@@ -1,17 +1,17 @@
 import { Component, Fragment, createElement, options } from 'preact';
 import {
 	COMPONENT_FORCE,
-	FORCE_PROPS_REVALIDATE,
 	MODE_HYDRATE,
 	REF_DETACHED,
-	UNDEFINED
+	UNDEFINED,
+	VNODE_MARKER
 } from '../../src/constants';
 import { assign } from './util';
 
 function initSuspenseHooks() {
 	const oldCatchError = options._catchError;
 	options._catchError = (error, newVNode, oldVNode, errorInfo) => {
-		if (error.then) {
+		if (error && error.then) {
 			/** @type {import('./internal').Component} */
 			let component;
 			let vnode = newVNode;
@@ -64,7 +64,7 @@ function detachedClone(vnode, detachedParent, parentDom) {
 		// reveal attaches them again.
 		if (typeof vnode.type == 'string') vnode._flags |= REF_DETACHED;
 
-		vnode = assign({ constructor: UNDEFINED }, vnode);
+		vnode = assign({ constructor: VNODE_MARKER }, vnode);
 		if (vnode._component != null) {
 			if (vnode._component._parentDom == parentDom) {
 				vnode._component._parentDom = detachedParent;
@@ -88,10 +88,6 @@ function detachedClone(vnode, detachedParent, parentDom) {
 
 function removeOriginal(vnode, detachedParent, originalParent) {
 	if (vnode && originalParent) {
-		if (typeof vnode.type == 'string') {
-			vnode._flags |= FORCE_PROPS_REVALIDATE;
-		}
-
 		vnode._original = null;
 		vnode._children =
 			vnode._children &&

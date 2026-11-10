@@ -112,11 +112,13 @@ options._commit = (vnode, commitQueue) => {
 				cb._value ? invokeEffect(cb) : true
 			);
 		} catch (e) {
-			commitQueue.some(c => {
-				if (c._renderCallbacks) c._renderCallbacks = [];
-			});
-			commitQueue = [];
-			options._catchError(e, component._vnode);
+			// Only this component skips its remaining effects, commitRoot rethrows
+			// the error to its boundary after the others ran.
+			component._renderCallbacks = [
+				() => {
+					throw e;
+				}
+			];
 		}
 	});
 
@@ -219,9 +221,7 @@ export function useReducer(reducer, initialState, init) {
 			!init ? invokeOrReturn(undefined, initialState) : init(initialState),
 
 			action => {
-				const currentValue = hookState._nextValue
-					? hookState._nextValue[0]
-					: hookState._value[0];
+				const currentValue = (hookState._nextValue || hookState._value)[0];
 				const nextValue = hookState._reducer(currentValue, action);
 
 				if (!ObjectIs(currentValue, nextValue)) {
@@ -327,7 +327,7 @@ export function useImperativeHandle(ref, createHandle, args) {
 				const result = ref(createHandle());
 				return () => {
 					ref(null);
-					if (result && typeof result == 'function') result();
+					if (typeof result == 'function') result();
 				};
 			} else if (ref) {
 				ref.current = createHandle();
@@ -415,12 +415,7 @@ export function useErrorBoundary(cb) {
 			errState[1](err);
 		};
 	}
-	return [
-		errState[0],
-		() => {
-			errState[1](undefined);
-		}
-	];
+	return [errState[0], () => errState[1]()];
 }
 
 /** @type {() => string} */
@@ -483,7 +478,7 @@ let HAS_RAF = typeof requestAnimationFrame == 'function';
  * Do this by combining requestAnimationFrame (rAF) + setTimeout to invoke a callback after
  * the next browser frame.
  *
- * Also, schedule a timeout in parallel to the the rAF to ensure the callback is invoked
+ * Also, schedule a timeout in parallel to the rAF to ensure the callback is invoked
  * even if RAF doesn't fire (for example if the browser tab is not visible)
  *
  * @param {() => void} callback

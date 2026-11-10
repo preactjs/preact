@@ -571,6 +571,24 @@ describe('Components', () => {
 		expect(scratch.innerHTML).to.equal('42');
 	});
 
+	it('should not coerce String when identifying VNode children', () => {
+		const vnode = (
+			<div>
+				<span>child</span>
+			</div>
+		);
+		const toString = vi.spyOn(Function.prototype, 'toString');
+		let calls;
+		try {
+			render(vnode, scratch);
+			calls = toString.mock.calls.length;
+		} finally {
+			toString.mockRestore();
+		}
+		expect(calls).to.equal(0);
+		expect(scratch.innerHTML).to.equal('<div><span>child</span></div>');
+	});
+
 	it('should render a new String()', () => {
 		class ConstructedStringComponent extends Component {
 			render() {

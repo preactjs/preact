@@ -6,7 +6,6 @@ import {
 	COMPONENT_PROCESSING_EXCEPTION,
 	EMPTY_ARR,
 	EMPTY_OBJ,
-	FORCE_PROPS_REVALIDATE,
 	MATHML_TOKEN_ELEMENTS,
 	MATH_NAMESPACE,
 	MODE_HYDRATE,
@@ -15,6 +14,7 @@ import {
 	RESET_MODE,
 	SVG_NAMESPACE,
 	UNDEFINED,
+	VNODE_MARKER,
 	XHTML_NAMESPACE
 } from '../constants';
 import { Fragment } from '../create-element';
@@ -71,9 +71,8 @@ export function diff(
 		resumed,
 		newType = newVNode.type;
 
-	// When passing through createElement it assigns the object
-	// constructor as undefined. This to prevent JSON-injection.
-	if (newVNode.constructor !== UNDEFINED) return NULL;
+	// Only diff VNodes created by Preact.
+	if (newVNode.constructor !== VNODE_MARKER) return NULL;
 
 	// If the previous diff bailed out, resume creating/hydrating into the DOM
 	// that was kept while suspended (server-rendered, or already in the
@@ -250,28 +249,19 @@ export function diff(
 			c._parentDom = parentDom;
 			c._bits &= ~COMPONENT_FORCE;
 
+			// Function components re-render until they stop calling setState
+			// during render (see #2553), class components render exactly once.
 			let renderHook = options._render,
-				count = 0;
-			if (isClassComponent) {
-				c.state = c._nextState;
+				count = isClassComponent ? 25 : 0;
+			do {
 				c._bits &= ~COMPONENT_DIRTY;
-
 				if (renderHook) renderHook(newVNode);
+				tmp = c.render(c.props, (c.state = c._nextState), c.context);
+			} while (c._bits & COMPONENT_DIRTY && ++count < 25);
 
-				tmp = c.render(c.props, c.state, c.context);
-
+			if (isClassComponent) {
 				EMPTY_ARR.push.apply(c._renderCallbacks, c._stateCallbacks);
 				c._stateCallbacks = [];
-			} else {
-				do {
-					c._bits &= ~COMPONENT_DIRTY;
-					if (renderHook) renderHook(newVNode);
-
-					tmp = c.render(c.props, c.state, c.context);
-
-					// Handle setState called in render, see #2553
-					c.state = c._nextState;
-				} while (c._bits & COMPONENT_DIRTY && ++count < 25);
 			}
 
 			// Handle setState called in render, see #2553
@@ -369,9 +359,8 @@ export function diff(
 			newVNode._original = NULL;
 			// if hydrating or creating initial tree, bailout preserves DOM:
 			if (isHydrating || excessDomChildren) {
-				if (e.then) {
-					let commentMarkersToFind = 0,
-						startMarker;
+				if (e && e.then) {
+					let startMarker, end;
 
 					// isHydrating is MODE_HYDRATE or falsy
 					newVNode._flags |= MODE_SUSPENDED | isHydrating;
@@ -386,23 +375,19 @@ export function diff(
 							i--;
 						}
 
+						// Keep what this component would have claimed: its whole
+						// streamed range (all of it when unclosed), or else the first
+						// node that isn't a comment.
 						for (; i < excessDomChildren.length; i++) {
-							child = excessDomChildren[i];
-							if (!child) continue;
-							excessDomChildren[i] = NULL;
-
-							if (child.nodeType == 8) {
-								if (child.data.startsWith('$s')) {
-									if (!commentMarkersToFind++) startMarker = child;
-								} else if (
-									commentMarkersToFind &&
-									child.data.startsWith('/$s') &&
-									!--commentMarkersToFind
-								) {
+							if ((child = excessDomChildren[i])) {
+								excessDomChildren[i] = NULL;
+								if (startMarker) {
+									if (child == end) break;
+								} else if (child.nodeType != 8) {
 									break;
+								} else if (child.data.startsWith('$s')) {
+									end = rangeEnd((startMarker = child));
 								}
-							} else if (!commentMarkersToFind) {
-								break;
 							}
 						}
 					}
@@ -434,7 +419,7 @@ export function diff(
 				newVNode._children = oldVNode._children || [];
 			}
 
-			if (!e.then) markAsForce(newVNode);
+			if (!(e && e.then)) markAsForce(newVNode);
 			options._catchError(e, newVNode, oldVNode);
 		}
 	} else {
@@ -586,7 +571,14 @@ function diffElementNodes(
 			return doc.createTextNode(newProps);
 		}
 
-		dom = doc.createElementNS(namespace, nodeType, newProps.is && newProps);
+		// Without `is`, the parent doubles as the creation options so its
+		// `customElementRegistry` (scoped registries on shadow roots/elements) is
+		// inherited. The spec throws when `is` and a registry are both passed.
+		dom = doc.createElementNS(
+			namespace,
+			nodeType,
+			newProps.is ? newProps : parentDom
+		);
 
 		// we are creating a new node, so we can assume this is a new subtree (in
 		// case we are hydrating), this deopts the hydrate
@@ -609,7 +601,7 @@ function diffElementNodes(
 		// when reading existing DOM and when inserting new nodes. `parentDom` is
 		// unused from here on, so we reuse it as the container for our children.
 		// @ts-expect-error
-		parentDom = nodeType == 'template' ? dom.content : dom;
+		parentDom = (nodeType == 'template' && dom.content) || dom;
 
 		// If excessDomChildren was not null, repopulate it with the current element's children:
 		excessDomChildren =
@@ -647,7 +639,6 @@ function diffElementNodes(
 
 		// During hydration, props are not diffed at all (including dangerouslySetInnerHTML)
 		// @TODO we should warn in debug mode when props don't match here.
-		const shouldRevalidateProps = oldVNode._flags & FORCE_PROPS_REVALIDATE;
 		for (i in newProps) {
 			value = newProps[i];
 			if (i == 'children') {
@@ -660,7 +651,7 @@ function diffElementNodes(
 				checked = value;
 			} else if (
 				(!isHydrating || typeof value == 'function') &&
-				(oldProps[i] !== value || (shouldRevalidateProps && value != NULL))
+				oldProps[i] !== value
 			) {
 				setProperty(dom, i, value, oldProps[i], namespace);
 			}
@@ -819,10 +810,7 @@ export function unmount(vnode, parentVNode, skipRemove) {
 		removeNode(r);
 	}
 
-	if ((r = vnode._dom)) {
-		if (!skipRemove) removeNode(r);
-		if (r._listeners) r._listeners = NULL;
-	}
+	if (!skipRemove) removeNode(vnode._dom);
 
 	vnode._dom = vnode._component = vnode._parent = NULL;
 }

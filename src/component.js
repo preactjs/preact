@@ -3,7 +3,7 @@ import {
 	COMPONENT_FORCE,
 	MODE_HYDRATE,
 	NULL,
-	UNDEFINED
+	VNODE_MARKER
 } from './constants';
 import { Fragment } from './create-element';
 import { commitRoot, diff } from './diff/index';
@@ -132,7 +132,7 @@ function renderComponent(component) {
 
 	const parentDom = component._parentDom;
 	if (parentDom) {
-		const newVNode = assign({ constructor: UNDEFINED }, oldVNode);
+		const newVNode = assign({ constructor: VNODE_MARKER }, oldVNode);
 		newVNode._original = oldVNode._original + 1;
 		if (options.vnode) options.vnode(newVNode);
 

@@ -107,7 +107,7 @@ export function initDebug() {
 
 		try {
 			let component = vnode && vnode._component;
-			if (component && typeof error.then == 'function') {
+			if (component && error && typeof error.then == 'function') {
 				const promise = error;
 				error = new Error(
 					`Missing Suspense. The throwing component was: ${getDisplayName(vnode)}`
@@ -156,7 +156,7 @@ export function initDebug() {
 		// when an error was handled by an ErrorBoundary we still log it, matching what
 		// React does in development. Errors that were not handled are rethrown by the
 		// core and thus surface as regular uncaught errors.
-		if (typeof error.then != 'function') {
+		if (!error || typeof error.then != 'function') {
 			console.error(error);
 		}
 	};

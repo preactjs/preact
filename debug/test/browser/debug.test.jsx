@@ -48,6 +48,38 @@ describe('debug', () => {
 		expect(fn).to.throw(/render/);
 	});
 
+	[null, undefined].forEach(value => {
+		it(`should pass a thrown ${value} to the error boundary and log it`, () => {
+			const caught = [];
+			class Boundary extends Component {
+				componentDidCatch(error) {
+					caught.push(error);
+					this.setState({ failed: true });
+				}
+
+				render() {
+					return this.state.failed ? 'caught' : this.props.children;
+				}
+			}
+
+			function Thrower() {
+				throw value;
+			}
+
+			render(
+				<Boundary>
+					<Thrower />
+				</Boundary>,
+				scratch
+			);
+			rerender();
+
+			expect(caught).to.deep.equal([value]);
+			expect(errors).to.deep.equal([value]);
+			expect(scratch.innerHTML).to.equal('caught');
+		});
+	});
+
 	it('should print an error on rendering on invalid parent', () => {
 		let fn = () => render(<div />, 6);
 		expect(fn).to.throw(/valid HTML node/);

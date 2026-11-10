@@ -22,7 +22,7 @@
     "mobx": "^5.15.4",
     "mobx-react": "^6.2.2",
     "mobx-state-tree": "^3.16.0",
-    "preact-render-to-string": "^5.0.2",
+    "preact-render-to-string": "^6.8.2",
     "preact-router": "^3.0.0",
     "react-redux": "^7.1.0",
     "react-router": "^5.0.1",

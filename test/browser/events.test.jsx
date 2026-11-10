@@ -72,6 +72,36 @@ describe('event handling', () => {
 		);
 	});
 
+	it('should ignore non-function values', () => {
+		render(<div onclick="foo()" onMouseDown={{}} />, scratch);
+
+		expect(scratch.innerHTML).to.equal('<div></div>');
+		expect(proto.addEventListener).not.toHaveBeenCalled();
+		expect(() => fireEvent(scratch.firstChild, 'click')).not.toThrow();
+	});
+
+	it('should switch between function and non-function values', () => {
+		let click = vi.fn();
+
+		render(<div onClick="foo()" />, scratch);
+		render(<div onClick={click} />, scratch);
+
+		fireEvent(scratch.firstChild, 'click');
+		expect(click).toHaveBeenCalledOnce();
+
+		click.mockClear();
+		render(<div onClick="foo()" />, scratch);
+
+		expect(proto.removeEventListener).toHaveBeenCalledWith(
+			'click',
+			expect.any(Function),
+			false
+		);
+		fireEvent(scratch.firstChild, 'click');
+		expect(click).not.toHaveBeenCalled();
+		expect(scratch.innerHTML).to.equal('<div></div>');
+	});
+
 	it('should support native event names', () => {
 		let click = vi.fn(),
 			mousedown = vi.fn();
@@ -116,6 +146,29 @@ describe('event handling', () => {
 		fireEvent(scratch.childNodes[0], 'click');
 		expect(click).toHaveBeenCalledOnce();
 		expect(click).toHaveBeenCalledWith(1);
+	});
+
+	it('should preserve default prevention when an option unmounts its list', () => {
+		const onListMouseDown = vi.fn(e => e.preventDefault());
+		const onOptionMouseDown = vi.fn(() => render(null, scratch));
+		render(
+			<ul onMouseDown={onListMouseDown}>
+				<li onMouseDown={onOptionMouseDown}>Choose address</li>
+			</ul>,
+			scratch
+		);
+		const option = scratch.querySelector('li');
+		const event = new MouseEvent('mousedown', {
+			bubbles: true,
+			cancelable: true
+		});
+
+		option.dispatchEvent(event);
+
+		expect(onOptionMouseDown).toHaveBeenCalledOnce();
+		expect(option.isConnected).toBe(false);
+		expect(onListMouseDown).toHaveBeenCalledOnce();
+		expect(event.defaultPrevented).toBe(true);
 	});
 
 	it('should not invoke an ancestor handler attached while an event bubbles', () => {

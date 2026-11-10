@@ -1,6 +1,6 @@
 import { assign, slice } from './util';
 import options from './options';
-import { NULL, UNDEFINED } from './constants';
+import { NULL, UNDEFINED, VNODE_MARKER } from './constants';
 
 let vnodeId = 0;
 
@@ -93,7 +93,7 @@ export function createVNode(type, props, key, ref, original) {
 		_depth: 0,
 		_dom: NULL,
 		_component: NULL,
-		constructor: UNDEFINED,
+		constructor: VNODE_MARKER,
 		_original: original || ++vnodeId,
 		_index: -1,
 		_flags: 0
@@ -119,4 +119,4 @@ export function Fragment(props) {
  * @returns {vnode is VNode}
  */
 export const isValidElement = vnode =>
-	vnode != NULL && vnode.constructor === UNDEFINED;
+	vnode != NULL && vnode.constructor === VNODE_MARKER;
