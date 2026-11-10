@@ -551,7 +551,7 @@ describe('render()', () => {
 		expect(scratch.firstChild.value).to.equal('0.5');
 	});
 
-	it('should not clear falsy DOM properties', () => {
+	it('should not clear false DOM properties but remove nullish ones', () => {
 		function test(val) {
 			render(
 				<div>
@@ -572,16 +572,82 @@ describe('render()', () => {
 		test('3');
 		test(null);
 		expect(scratch.innerHTML).to.equal(
-			'<div><input><table border=""></table></div>',
+			'<div><input><table></table></div>',
 			'for null'
 		);
 
 		test('4');
 		test(undefined);
 		expect(scratch.innerHTML).to.equal(
-			'<div><input><table border=""></table></div>',
+			'<div><input><table></table></div>',
 			'for undefined'
 		);
+	});
+
+	it('should remove reflected attributes when a DOM property is removed', () => {
+		render(
+			<div lang="fr">
+				<input maxLength={5} minLength={2} type="number" placeholder="p" />
+				<textarea rows={3} />
+				<ol start={3} />
+				<p lang="en" title="t" dir="rtl" />
+			</div>,
+			scratch
+		);
+
+		render(
+			<div lang="fr">
+				<input />
+				<textarea />
+				<ol />
+				<p />
+			</div>,
+			scratch
+		);
+
+		const [input, textarea, ol, p] = scratch.firstChild.children;
+		expect(getAttributes(input)).to.eql({});
+		expect(input.maxLength).to.equal(-1);
+		expect(input.type).to.equal('text');
+		expect(getAttributes(textarea)).to.eql({});
+		expect(getAttributes(ol)).to.eql({});
+		expect(getAttributes(p)).to.eql({});
+		expect(p.matches(':lang(fr)')).to.equal(true);
+	});
+
+	it('should remove reflected attributes when a DOM property is set to null or undefined', () => {
+		render(<div title="a" id="b" />, scratch);
+		render(<div title={null} id={undefined} />, scratch);
+		expect(scratch.innerHTML).to.equal('<div></div>');
+	});
+
+	it('should fall back to the option text when its value is removed', () => {
+		render(
+			<select>
+				<option value="a">Text</option>
+			</select>,
+			scratch
+		);
+		render(
+			<select>
+				<option>Text</option>
+			</select>,
+			scratch
+		);
+		expect(scratch.innerHTML).to.equal(
+			'<select><option>Text</option></select>'
+		);
+		expect(scratch.firstChild.value).to.equal('Text');
+	});
+
+	it('should still reset non-reflected DOM properties on removal', () => {
+		render(<input value="abc" />, scratch);
+		render(<input />, scratch);
+		expect(scratch.firstChild.value).to.equal('');
+
+		render(<input type="checkbox" checked />, scratch);
+		render(<input type="checkbox" />, scratch);
+		expect(scratch.firstChild.checked).to.equal(false);
 	});
 
 	// Test for #3969
