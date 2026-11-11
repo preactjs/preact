@@ -40,7 +40,7 @@ let renderStack = [];
  * ```
  *
  * Note: A `vnode` may be hoisted to the root scope due to compiler
- * optimiztions. In these cases the owner will be different.
+ * optimizations. In these cases the owner will be different.
  */
 let ownerStack = [];
 

@@ -184,7 +184,7 @@ function createSuspense() {
 		/**
 		 * We do not set `suspended: true` during hydration because we want the actual markup
 		 * to remain on screen and hydrate it when the suspense actually gets resolved.
-		 * While in non-hydration cases the usual fallback -> component flow would occour.
+		 * While in non-hydration cases the usual fallback -> component flow would occur.
 		 */
 		if (
 			!this._pendingSuspensionCount++ &&
