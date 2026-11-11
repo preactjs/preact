@@ -1,7 +1,7 @@
 /* eslint-disable */
 
 // This file includes experimental React APIs exported from the "scheduler"
-// npm package. Despite being explicitely marked as unstable some libraries
+// npm package. Despite being explicitly marked as unstable some libraries
 // already make use of them. This file is not a full replacement for the
 // scheduler package, but includes the necessary shims to make those libraries
 // work with Preact.
