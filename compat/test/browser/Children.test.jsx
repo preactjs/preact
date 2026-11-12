@@ -41,6 +41,20 @@ describe('Children', () => {
 			);
 			expect(count).to.equal(2);
 		});
+
+		it('should count 0, an empty string and NaN as children', () => {
+			render(<Foo>{0}</Foo>, scratch);
+			expect(count).to.equal(1);
+
+			render(<Foo>{''}</Foo>, scratch);
+			expect(count).to.equal(1);
+
+			render(<Foo>{NaN}</Foo>, scratch);
+			expect(count).to.equal(1);
+
+			render(<Foo>{false}</Foo>, scratch);
+			expect(count).to.equal(0);
+		});
 	});
 
 	describe('.only', () => {
