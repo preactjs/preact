@@ -9,10 +9,17 @@ on:
       - completed
       - requested
 
+# This workflow handles artifacts produced by pull requests from forks, so every
+# job only gets the permissions it needs.
+permissions: {}
+
 jobs:
   filter_jobs:
     name: Filter jobs
     runs-on: ubuntu-26.04
+    permissions:
+      contents: read
+      pull-requests: read
     if: |
       github.event.workflow_run.event == 'pull_request'
     outputs:
@@ -62,6 +69,8 @@ jobs:
     name: Report benchmarks are in-progress
     needs: filter_jobs
     runs-on: ubuntu-26.04
+    permissions:
+      pull-requests: write
     # Only add the "benchmarks are running" text when a workflow_run is
     # requested (a.k.a starting)
     if: |
@@ -79,6 +88,10 @@ jobs:
     name: Report benchmark results
     needs: filter_jobs
     runs-on: ubuntu-26.04
+    permissions:
+      # Download the results from the triggering workflow run
+      actions: read
+      pull-requests: write
     # Only run this job if the event action was "completed" and the triggering
     # workflow_run was successful
     if: |

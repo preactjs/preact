@@ -25,6 +25,9 @@ on:
         required: false
         default: 20
 
+permissions:
+  contents: read
+
 jobs:
   run_bench:
     name: Bench ${{ inputs.benchmark }}

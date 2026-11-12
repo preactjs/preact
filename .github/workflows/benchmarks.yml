@@ -4,6 +4,11 @@ on:
   workflow_dispatch:
   workflow_call:
 
+permissions:
+  contents: read
+  # download-base-artifact fetches the package built by the latest run on main
+  actions: read
+
 jobs:
   prepare:
     name: Prepare environment

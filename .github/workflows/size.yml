@@ -3,6 +3,11 @@ name: Compressed Size
 on:
   workflow_call:
 
+permissions:
+  contents: read
+  # compressed-size-action reports its results in a PR comment
+  pull-requests: write
+
 jobs:
   build:
     runs-on: ubuntu-26.04
