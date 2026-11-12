@@ -214,6 +214,8 @@ function handleDomVNode(vnode) {
 			let lowerCased = i.toLowerCase();
 			if (lowerCased == 'ondoubleclick') {
 				i = 'ondblclick';
+			} else if (lowerCased == 'ondoubleclickcapture') {
+				i = 'ondblclickCapture';
 			} else if (
 				lowerCased == 'onchange' &&
 				(type == 'input' || type == 'textarea') &&
