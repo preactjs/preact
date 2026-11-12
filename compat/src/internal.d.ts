@@ -33,6 +33,7 @@ export interface FunctionComponent<P = {}> extends PreactFunctionComponent<P> {
 export interface VNode<T = any> extends PreactVNode<T> {
 	$$typeof?: symbol;
 	preactCompatNormalized?: boolean;
+	_mask?: [string | number, number];
 }
 
 export interface SuspenseState {
@@ -46,5 +47,5 @@ export interface SuspenseComponent extends PreactComponent<
 	_pendingSuspensionCount: number;
 	_suspenders: Component[];
 	_detachOnNextRender: null | VNode<any>;
-	_mask?: [number, number];
+	_mask?: [string | number, number];
 }
