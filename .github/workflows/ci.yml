@@ -11,10 +11,17 @@ on:
       - restructure
       - v11
 
+permissions:
+  contents: read
+
 jobs:
   filter_jobs:
     name: Filter jobs
     runs-on: ubuntu-26.04
+    permissions:
+      contents: read
+      # dorny/paths-filter lists the changed files of a PR through the API
+      pull-requests: read
     outputs:
       jsChanged: ${{ steps.filter.outputs.jsChanged }}
     steps:
@@ -33,6 +40,9 @@ jobs:
     name: Compressed Size
     needs: filter_jobs
     if: ${{ needs.filter_jobs.outputs.jsChanged == 'true' }}
+    permissions:
+      contents: read
+      pull-requests: write
     uses: ./.github/workflows/size.yml
 
   build_test:
@@ -44,4 +54,7 @@ jobs:
     name: Benchmarks
     needs: build_test
     if: ${{ needs.filter_jobs.outputs.jsChanged == 'true' }}
+    permissions:
+      contents: read
+      actions: read
     uses: ./.github/workflows/benchmarks.yml
