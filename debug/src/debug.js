@@ -19,23 +19,25 @@ const isWeakMapSupported = typeof WeakMap == 'function';
  * @param {import('./internal').VNode} vnode
  * @returns {Array<string>}
  */
-function getDomChildren(vnode) {
-	let domChildren = [];
+function getDomDescendants(vnode) {
+	let domDescendants = /** @type {string[]} */ ([]);
 
-	if (!vnode._children) return domChildren;
+	if (!vnode._children) return domDescendants;
 
 	vnode._children.forEach(child => {
-		if (child && typeof child.type === 'function') {
+		if (!child) return;
+		if (typeof child.type === 'function') {
 			// Portal children are mounted into another DOM parent (v11 keeps
 			// them in the vnode tree), so they are not DOM children of `vnode`.
 			if (child.props._parentDom) return;
-			domChildren.push.apply(domChildren, getDomChildren(child));
-		} else if (child && typeof child.type === 'string') {
-			domChildren.push(child.type);
+			domDescendants.push.apply(domDescendants, getDomDescendants(child));
+		} else if (typeof child.type === 'string') {
+			domDescendants.push(child.type);
+			domDescendants.push.apply(domDescendants, getDomDescendants(child));
 		}
 	});
 
-	return domChildren;
+	return domDescendants;
 }
 
 /**
@@ -462,8 +464,8 @@ export function initDebug() {
 					);
 				}
 			} else if (type === 'p') {
-				let illegalDomChildrenTypes = getDomChildren(vnode).filter(childType =>
-					ILLEGAL_PARAGRAPH_CHILD_ELEMENTS.test(childType)
+				let illegalDomChildrenTypes = getDomDescendants(vnode).filter(childType =>
+					ILLEGAL_PARAGRAPH_CHILD_ELEMENTS.has(childType)
 				);
 				if (illegalDomChildrenTypes.length) {
 					console.error(
@@ -475,7 +477,7 @@ export function initDebug() {
 					);
 				}
 			} else if (type === 'a' || type === 'button') {
-				if (getDomChildren(vnode).indexOf(type) !== -1) {
+				if (getDomDescendants(vnode).indexOf(type) !== -1) {
 					console.error(
 						`Improper nesting of interactive content. Your <${type}>` +
 							` should not have other ${type === 'a' ? 'anchor' : 'button'}` +
@@ -570,8 +572,12 @@ function isTableElement(type) {
 	);
 }
 
-const ILLEGAL_PARAGRAPH_CHILD_ELEMENTS =
-	/^(address|article|aside|blockquote|details|div|dl|fieldset|figcaption|figure|footer|form|h1|h2|h3|h4|h5|h6|header|hgroup|hr|main|menu|nav|ol|p|pre|search|section|table|ul)$/;
+const ILLEGAL_PARAGRAPH_CHILD_ELEMENTS = new Set([
+	'address', 'article', 'aside', 'blockquote', 'details', 'div', 'dl',
+	'fieldset', 'figcaption', 'figure', 'footer', 'form', 'h1', 'h2', 'h3',
+	'h4', 'h5', 'h6', 'header', 'hgroup', 'hr', 'main', 'menu', 'nav', 'ol',
+	'p', 'pre', 'search', 'section', 'table', 'ul'
+]);
 
 const forceUpdate = Component.prototype.forceUpdate;
 Component.prototype.forceUpdate = function (callback) {

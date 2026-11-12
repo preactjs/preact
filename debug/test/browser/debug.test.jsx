@@ -694,6 +694,19 @@ describe('debug', () => {
 			expect(console.error).toHaveBeenCalledOnce();
 		});
 
+		it('should warn for deeply nesting illegal dom-nodes under a paragraph', () => {
+			const Paragraph = () => (
+				<p>
+					<b>
+						<h1>Hello world</h1>
+					</b>
+				</p>
+			);
+
+			render(<Paragraph />, scratch);
+			expect(console.error).toHaveBeenCalledOnce();
+		});
+
 		it('should warn for nesting illegal dom-nodes under a paragraph with a parent', () => {
 			const Paragraph = () => (
 				<div>
@@ -750,6 +763,19 @@ describe('debug', () => {
 			expect(console.error).toHaveBeenCalledOnce();
 		});
 
+		it('should warn for deeply nesting illegal dom-nodes under a button', () => {
+			const Button = () => (
+				<button>
+					<div>
+						<button>Hello world</button>
+					</div>
+				</button>
+			);
+
+			render(<Button />, scratch);
+			expect(console.error).toHaveBeenCalledOnce();
+		});
+
 		it('should warn for nesting illegal dom-nodes under a button as func', () => {
 			const ButtonChild = ({ children }) => <button>{children}</button>;
 			const Button = () => (
@@ -793,6 +819,19 @@ describe('debug', () => {
 			render(<Anchor />, scratch);
 			expect(console.error).toHaveBeenCalledOnce();
 		});
+
+		it('should warn for deeply nesting illegal dom-nodes under an anchor', () => {
+			const Anchor = () => (
+				<a>
+					<div>
+						<a>Hello world</a>
+					</div>
+				</a>
+			);
+
+			render(<Anchor />, scratch);
+			expect(console.error).toHaveBeenCalledOnce();
+		})
 
 		it('should warn for nesting illegal dom-nodes under an anchor as func', () => {
 			const AnchorChild = ({ children }) => <a>{children}</a>;
