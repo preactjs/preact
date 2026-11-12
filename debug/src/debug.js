@@ -25,12 +25,13 @@ function getDomDescendants(vnode) {
 	if (!vnode._children) return domDescendants;
 
 	vnode._children.forEach(child => {
-		if (child && typeof child.type === 'function') {
+		if (!child) return;
+		if (typeof child.type === 'function') {
 			// Portal children are mounted into another DOM parent (v11 keeps
 			// them in the vnode tree), so they are not DOM children of `vnode`.
 			if (child.props._parentDom) return;
 			domDescendants.push.apply(domDescendants, getDomDescendants(child));
-		} else if (child && typeof child.type === 'string') {
+		} else if (typeof child.type === 'string') {
 			domDescendants.push(child.type);
 			domDescendants.push.apply(domDescendants, getDomDescendants(child));
 		}
