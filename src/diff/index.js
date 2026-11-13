@@ -69,6 +69,8 @@ export function diff(
 	/** @type {any} */
 	let tmp,
 		resumed,
+		// What follows the range a boundary took over, in an array
+		rangeNext,
 		newType = newVNode.type;
 
 	// Only diff VNodes created by Preact.
@@ -89,10 +91,34 @@ export function diff(
 		if (tmp.nodeType == 8) {
 			// Re-scan DOM from stored start marker for streamed hydration.
 			oldDom = rangeEnd(tmp, excessDomChildren);
+			// The client resolved before the server's chunk: this is the fallback.
+			excessDomChildren._excess = tmp.data[2] != ':' && tmp.data[2];
 		} else {
 			excessDomChildren.push(tmp);
 		}
 		oldDom = excessDomChildren[0] || oldDom;
+	} else if (
+		isHydrating &&
+		newType &&
+		(tmp = newType.prototype) &&
+		tmp._childDidSuspend
+	) {
+		// A boundary in front of a range that holds a fallback, because the
+		// server is still streaming it or gave up on it (`$s!`): its children
+		// only get that range, and diff the attributes of what they adopt.
+		resumed = [oldDom];
+		if (
+			(tmp = rangeEnd(oldDom, resumed)) &&
+			oldDom.data[2] != ':' &&
+			oldDom.data[2]
+		) {
+			resumed.push(tmp);
+			rangeNext = [tmp.nextSibling];
+			resumed.some(node => {
+				excessDomChildren[excessDomChildren.indexOf(node)] = NULL;
+			});
+			(excessDomChildren = resumed)._excess = 1;
+		} else resumed = NULL;
 	}
 
 	if ((tmp = options._diff)) tmp(newVNode);
@@ -341,6 +367,8 @@ export function diff(
 
 			// Remove the kept DOM this resumed render didn't claim
 			if (resumed) resumed.some(removeNode);
+			// The markers the cursor stopped at are gone with it
+			if (rangeNext) oldDom = rangeNext[0];
 
 			if (c._renderCallbacks.length) {
 				commitQueue.push(c);
@@ -546,6 +574,9 @@ function diffElementNodes(
 	else if (!namespace) namespace = XHTML_NAMESPACE;
 
 	if (excessDomChildren) {
+		// DOM that held a fallback isn't what we render: diff its attributes too
+		if (excessDomChildren._excess) isHydrating = false;
+
 		for (i = 0; i < excessDomChildren.length; i++) {
 			value = excessDomChildren[i];
 
