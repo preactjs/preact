@@ -121,8 +121,7 @@ export function setProperty(dom, name, value, oldValue, namespace) {
 		) {
 			try {
 				dom[name] = value == NULL ? '' : value;
-				// A removal also drops the reflected attribute (`maxlength="0"`)
-				if (value != NULL) return;
+				return;
 			} catch (e) {}
 		}
 
