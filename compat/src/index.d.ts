@@ -305,7 +305,8 @@ declare namespace React {
 		props?: any,
 		...children: _preact.ComponentChildren[]
 	) => _preact.VNode<any>;
-	export function isValidElement(element: any): boolean;
+	export function isValidElement(element: any): element is _preact.VNode;
+	export function isElement(element: any): element is _preact.VNode;
 	export function isFragment(element: any): boolean;
 	export function isMemo(element: any): boolean;
 	export function findDOMNode(
