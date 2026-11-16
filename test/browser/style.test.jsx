@@ -149,6 +149,17 @@ describe('style attribute', () => {
 		expect(scratch.firstChild.style.visibility).to.equal('');
 	});
 
+	it('should update styles that switch between 0 and an empty string', () => {
+		render(<div style={{ opacity: '' }} />, scratch);
+		expect(scratch.firstChild.style.opacity).to.equal('');
+
+		render(<div style={{ opacity: 0 }} />, scratch);
+		expect(scratch.firstChild.style.opacity).to.equal('0');
+
+		render(<div style={{ opacity: '' }} />, scratch);
+		expect(scratch.firstChild.style.opacity).to.equal('');
+	});
+
 	// Skip test if the currently running browser doesn't support CSS Custom Properties
 	if (window.CSS && CSS.supports('color', 'var(--fake-var)')) {
 		it('should support css custom properties', () => {
