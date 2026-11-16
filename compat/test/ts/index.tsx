@@ -68,3 +68,12 @@ export function Picture(props: React.ImgHTMLAttributes<HTMLImageElement>) {
 export function Field(props: React.ComponentPropsWithoutRef<'input'>) {
 	return <input {...props} />;
 }
+
+// isValidElement and isElement narrow to an element like in React
+const maybeElement: React.ReactNode = <div title="x" />;
+if (React.isValidElement(maybeElement)) {
+	maybeElement.props;
+}
+if (React.isElement(maybeElement)) {
+	maybeElement.props;
+}
