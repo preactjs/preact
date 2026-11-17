@@ -43,7 +43,7 @@ export interface Component extends Omit<
 }
 
 export interface VNode extends Omit<PreactVNode, '_component'> {
-	_mask?: [number, number];
+	_mask?: [string | number, number];
 	_component?: Component; // Override with our specific Component type
 }
 

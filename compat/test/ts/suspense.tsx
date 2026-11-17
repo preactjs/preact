@@ -30,7 +30,7 @@ const IsLazyFunc = React.lazy(() => componentPromise);
 class ReactSuspensefulFunc extends React.Component {
 	render() {
 		return (
-			<React.Suspense fallback={<FallBack />}>
+			<React.Suspense name="lazy-function" fallback={<FallBack />}>
 				<IsLazyFunc isProp={false} />
 			</React.Suspense>
 		);
