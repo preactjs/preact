@@ -102,6 +102,42 @@ describe('components', () => {
 		expect(log).to.deep.equal(['ref a', 'ref b', 'cleanup a', 'cleanup b']);
 	});
 
+	it('should clear an object ref to a class component on unmount', () => {
+		class Foo extends Component {
+			render() {
+				return <div />;
+			}
+		}
+
+		const ref = createRef();
+		React.render(<Foo ref={ref} />, scratch);
+		expect(ref.current).to.be.instanceOf(Foo);
+
+		React.render(<span />, scratch);
+		expect(ref.current).to.equal(null);
+	});
+
+	it('should not clear an object ref that moved to another class component', () => {
+		class Foo extends Component {
+			render() {
+				return <div />;
+			}
+		}
+		class Bar extends Component {
+			render() {
+				return <span />;
+			}
+		}
+
+		const ref = createRef();
+		React.render(<Foo ref={ref} />, scratch);
+		React.render([<Bar key="bar" ref={ref} />, <Foo key="foo" />], scratch);
+		expect(ref.current).to.be.instanceOf(Bar);
+
+		React.render(<Bar key="bar" ref={ref} />, scratch);
+		expect(ref.current).to.be.instanceOf(Bar);
+	});
+
 	describe('UNSAFE_* lifecycle methods', () => {
 		it('should support UNSAFE_componentWillMount', () => {
 			let spy = vi.fn();
