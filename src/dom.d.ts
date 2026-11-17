@@ -6,6 +6,7 @@ import { ClassAttributes, PreactDOMAttributes } from './index';
 interface ToggleEvent extends Event {
 	readonly newState: string;
 	readonly oldState: string;
+	readonly source: Element | null;
 }
 
 declare var ToggleEvent: {
@@ -16,6 +17,7 @@ declare var ToggleEvent: {
 interface ToggleEventInit extends EventInit {
 	newState?: string;
 	oldState?: string;
+	source?: Element | null;
 }
 
 interface CommandEvent extends Event {
