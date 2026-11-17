@@ -42,18 +42,32 @@ let oldRoot = options._root;
 const RAF_TIMEOUT = 35;
 let prevRaf;
 
+/**
+ * The `useId` mask of the tree previously rendered into the container that
+ * `render()` is currently being called on.
+ * @type {[number, number] | undefined}
+ */
+let rootMask;
+
 /** @type {(vnode: import('./internal').VNode) => void} */
 options._diff = vnode => {
 	currentComponent = null;
+	// The first diff after `options._root` is the one of the new root Fragment.
+	// Carrying the mask over to it (rather than to the vnode passed to
+	// `render()`) keeps it reachable for every subsequent `render()` call.
+	if (rootMask) {
+		vnode._mask = rootMask;
+		rootMask = undefined;
+	}
 	if (oldBeforeDiff) oldBeforeDiff(vnode);
 };
 
 options._root = (vnode, parentDom) => {
-	if (vnode && parentDom._children && parentDom._children._mask) {
-		vnode._mask = parentDom._children._mask;
-	}
-
 	if (oldRoot) oldRoot(vnode, parentDom);
+
+	// Set this last so that a throwing or re-entrant `_root` hook can't leave
+	// a stale mask behind or consume ours.
+	rootMask = parentDom._children && parentDom._children._mask;
 };
 
 /** @type {(vnode: import('./internal').VNode) => void} */
