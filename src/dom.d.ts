@@ -2013,7 +2013,7 @@ export interface IframeHTMLAttributes<
 	width?: Signalish<number | string | undefined>;
 }
 
-export type HTMLAttributeCrossOrigin = 'anonymous' | 'use-credentials';
+export type HTMLAttributeCrossOrigin = '' | 'anonymous' | 'use-credentials';
 
 export interface PartialImgHTMLAttributes<
 	T extends EventTarget

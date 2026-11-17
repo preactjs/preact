@@ -344,3 +344,45 @@ const dangerouslySetInnerHTML = (
 		<div dangerouslySetInnerHTML={{ __html: 'string' }} />
 	</>
 );
+
+// An empty CORS settings attribute enables anonymous CORS.
+const emptyCrossOrigin = (
+	<>
+		<img crossorigin="" crossOrigin="" />
+		<link crossorigin="" crossOrigin="" />
+		<script crossorigin="" crossOrigin="" />
+		<audio crossorigin="" crossOrigin="" />
+		<video crossorigin="" crossOrigin="" />
+	</>
+);
+const emptyCrossOriginSignal = createSignal('' as const);
+const signalCrossOrigin = (
+	<>
+		<img
+			crossorigin={emptyCrossOriginSignal}
+			crossOrigin={emptyCrossOriginSignal}
+		/>
+		<link
+			crossorigin={emptyCrossOriginSignal}
+			crossOrigin={emptyCrossOriginSignal}
+		/>
+		<script
+			crossorigin={emptyCrossOriginSignal}
+			crossOrigin={emptyCrossOriginSignal}
+		/>
+		<audio
+			crossorigin={emptyCrossOriginSignal}
+			crossOrigin={emptyCrossOriginSignal}
+		/>
+		<video
+			crossorigin={emptyCrossOriginSignal}
+			crossOrigin={emptyCrossOriginSignal}
+		/>
+	</>
+);
+const anonymousCrossOrigin = <img crossorigin="anonymous" />;
+const credentialedCrossOrigin = <img crossOrigin="use-credentials" />;
+// @ts-expect-error CORS settings attributes do not accept booleans.
+const booleanCrossOrigin = <img crossOrigin />;
+// @ts-expect-error Misspelled CORS states must still be rejected.
+const invalidCrossOrigin = <img crossOrigin="use-credential" />;
