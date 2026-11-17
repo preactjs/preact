@@ -421,10 +421,7 @@ export function useId() {
 			root = root._parent;
 		}
 
-		// `render()` creates a new root vnode on every call but reuses its
-		// component, so the counter is kept there to survive repeated renders.
-		// Roots without a component (e.g. preact-render-to-string) and async
-		// boundaries that already carry a mask keep it on the vnode.
+		// The root vnode is replaced on every `render()`, its component isn't.
 		if (!root._mask && root._component) root = root._component;
 
 		let mask = root._mask || (root._mask = [0, 0]);

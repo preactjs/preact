@@ -37,7 +37,6 @@ export interface Component extends Omit<
 	'_renderCallbacks'
 > {
 	__hooks?: ComponentHooks;
-	/** `useId` counter of the tree, set on the component of the root vnode */
 	_mask?: [number, number];
 	// Extend to include HookStates
 	_renderCallbacks?: Array<HookState | (() => void)>;
