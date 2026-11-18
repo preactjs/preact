@@ -8,9 +8,6 @@ let currentIndex;
 /** @type {import('./internal').Component} */
 let currentComponent;
 
-/** @type {import('./internal').Component} */
-let previousComponent;
-
 /** @type {number} */
 let currentHook = 0;
 
@@ -29,7 +26,6 @@ let unmountCleanups = [];
 // Cast to use internal Options type
 const options = /** @type {import('./internal').Options} */ (_options);
 
-let oldBeforeDiff = options._diff;
 let oldBeforeRender = options._render;
 let oldAfterDiff = options.diffed;
 let oldCommit = options._commit;
@@ -42,26 +38,18 @@ const RAF_TIMEOUT = 35;
 let prevRaf;
 
 /** @type {(vnode: import('./internal').VNode) => void} */
-options._diff = vnode => {
-	currentComponent = null;
-	if (oldBeforeDiff) oldBeforeDiff(vnode);
-};
-
-/** @type {(vnode: import('./internal').VNode) => void} */
 options._render = vnode => {
 	if (oldBeforeRender) oldBeforeRender(vnode);
 
-	currentComponent = vnode._component;
-	currentIndex = 0;
-
-	const hooks = currentComponent.__hooks;
+	const component = vnode._component;
+	const hooks = component.__hooks;
 	if (hooks) {
-		if (previousComponent == currentComponent) {
-			currentComponent._renderCallbacks = [];
+		// Still current: the render loop is running this component again.
+		if (currentComponent == component) {
+			component._renderCallbacks = [];
 		} else {
 			hooks._pendingEffects.some(invokeCleanup);
 			hooks._pendingEffects.some(invokeEffect);
-			currentIndex = 0;
 		}
 		hooks._pendingEffects = [];
 
@@ -74,7 +62,10 @@ options._render = vnode => {
 			hookItem._pendingArgs = hookItem._nextValue = undefined;
 		});
 	}
-	previousComponent = currentComponent;
+
+	// Set last: an effect flushed above can render another root.
+	currentComponent = component;
+	currentIndex = 0;
 };
 
 /** @type {(vnode: import('./internal').VNode) => void} */
@@ -90,7 +81,7 @@ options.diffed = vnode => {
 			if (hookItem._pendingArgs) hookItem._args = hookItem._pendingArgs;
 		});
 	}
-	previousComponent = currentComponent = null;
+	currentComponent = null;
 };
 
 // TODO: Improve typing of commitQueue parameter
@@ -504,16 +495,11 @@ function afterPaint(newQueueLength) {
  * @returns {void}
  */
 function invokeCleanup(hook) {
-	// A hook cleanup can introduce a call to render which creates a new root, this will call options.vnode
-	// and move the currentComponent away.
-	const comp = currentComponent;
 	let cleanup = hook._cleanup;
 	if (typeof cleanup == 'function') {
 		hook._cleanup = undefined;
 		cleanup();
 	}
-
-	currentComponent = comp;
 }
 
 /**
@@ -522,11 +508,7 @@ function invokeCleanup(hook) {
  * @returns {void}
  */
 function invokeEffect(hook) {
-	// A hook call can introduce a call to render which creates a new root, this will call options.vnode
-	// and move the currentComponent away.
-	const comp = currentComponent;
 	hook._cleanup = hook._value();
-	currentComponent = comp;
 }
 
 /**
