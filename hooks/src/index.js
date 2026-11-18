@@ -155,12 +155,12 @@ options.unmount = vnode => {
 };
 
 /**
- * Get a hook's state from the currentComponent
- * @param {number} index The index of the hook to get
+ * Get the state of the next hook of the currentComponent
  * @param {number} type The type of the hook to get
  * @returns {any}
  */
-function getHookState(index, type) {
+function getHookState(type) {
+	const index = currentIndex++;
 	if (options._hook) {
 		options._hook(currentComponent, index, currentHook || type);
 	}
@@ -178,11 +178,7 @@ function getHookState(index, type) {
 			_pendingEffects: []
 		});
 
-	if (index >= hooks._list.length) {
-		hooks._list.push({});
-	}
-
-	return hooks._list[index];
+	return hooks._list[index] || (hooks._list[index] = {});
 }
 
 /**
@@ -205,7 +201,7 @@ export function useState(initialState) {
  */
 export function useReducer(reducer, initialState, init) {
 	/** @type {import('./internal').ReducerHookState} */
-	const hookState = getHookState(currentIndex++, 2);
+	const hookState = getHookState(2);
 	hookState._reducer = reducer;
 	if (!hookState._component) {
 		hookState._value = [
@@ -271,7 +267,7 @@ export function useReducer(reducer, initialState, init) {
  */
 export function useEffect(callback, args) {
 	/** @type {import('./internal').EffectHookState} */
-	const state = getHookState(currentIndex++, 3);
+	const state = getHookState(3);
 	if (!options._skipEffects && argsChanged(state._args, args)) {
 		state._passive = true;
 		state._value = callback;
@@ -288,7 +284,7 @@ export function useEffect(callback, args) {
  */
 export function useLayoutEffect(callback, args) {
 	/** @type {import('./internal').EffectHookState} */
-	const state = getHookState(currentIndex++, 4);
+	const state = getHookState(4);
 	if (!options._skipEffects && argsChanged(state._args, args)) {
 		state._passive = false;
 		state._value = callback;
@@ -337,7 +333,7 @@ export function useImperativeHandle(ref, createHandle, args) {
  */
 export function useMemo(factory, args) {
 	/** @type {import('./internal').MemoHookState<T>} */
-	const state = getHookState(currentIndex++, 7);
+	const state = getHookState(7);
 	if (argsChanged(state._args, args)) {
 		state._value = factory();
 		state._args = args;
@@ -365,7 +361,7 @@ export function useContext(context) {
 	// `options._hook`. We need to do that in order to make
 	// the devtools aware of this hook.
 	/** @type {import('./internal').ContextHookState} */
-	const state = getHookState(currentIndex++, 9);
+	const state = getHookState(9);
 	// The devtools needs access to the context object to
 	// be able to pull of the default value when no provider
 	// is present in the tree.
@@ -397,7 +393,7 @@ export function useDebugValue(value, formatter) {
  */
 export function useErrorBoundary(cb) {
 	/** @type {import('./internal').ErrorBoundaryHookState} */
-	const state = getHookState(currentIndex++, 10);
+	const state = getHookState(10);
 	const errState = useState();
 	state._value = cb;
 	if (!currentComponent.componentDidCatch) {
@@ -412,7 +408,7 @@ export function useErrorBoundary(cb) {
 /** @type {() => string} */
 export function useId() {
 	/** @type {import('./internal').IdHookState} */
-	const state = getHookState(currentIndex++, 11);
+	const state = getHookState(11);
 	if (!state._value) {
 		// Grab either the root node or the nearest async boundary node.
 		/** @type {import('./internal').VNode | import('./internal').Component} */
