@@ -3563,13 +3563,11 @@ describe('suspense', () => {
 		expect(spy).not.toHaveBeenCalled();
 	});
 
-	it('should not notify a context consumer while it is suspended', async () => {
+	it('should update a context consumer that was suspended while the value changed', async () => {
 		const Ctx = createContext('a');
 		let resolve;
 		let promise;
-		let child;
 		function Child({ suspend }) {
-			child = this;
 			const value = useContext(Ctx);
 			if (suspend && !promise) promise = new Promise(r => (resolve = r));
 			if (suspend && promise.pending !== false) throw promise;
@@ -3598,10 +3596,8 @@ describe('suspense', () => {
 		rerender();
 		expect(scratch.innerHTML).to.equal('<div>Suspended...</div>');
 
-		const spy = vi.spyOn(child, 'forceUpdate');
 		act(() => setValue('b'));
-		expect(spy).not.toHaveBeenCalled();
-		spy.mockRestore();
+		expect(scratch.innerHTML).to.equal('<div>Suspended...</div>');
 
 		promise.pending = false;
 		resolve();

@@ -370,7 +370,7 @@ export function useContext(context) {
 					return -1;
 				},
 				set _bits(_) {
-					if (c._parentDom) c.forceUpdate();
+					c.forceUpdate();
 				}
 			};
 			provider.sub(proxy);
