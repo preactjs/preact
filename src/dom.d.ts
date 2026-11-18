@@ -2130,11 +2130,14 @@ export interface PartialInputHTMLAttributes<
 	T extends EventTarget
 > extends HTMLAttributes<T> {
 	accept?: Signalish<string | undefined>;
+	alpha?: Signalish<boolean | undefined>;
 	alt?: Signalish<string | undefined>;
 	autocomplete?: Signalish<string | undefined>;
 	autoComplete?: Signalish<string | undefined>;
 	capture?: Signalish<'user' | 'environment' | undefined>; // https://www.w3.org/TR/html-media-capture/#the-capture-attribute
 	checked?: Signalish<boolean | undefined>;
+	colorspace?: Signalish<'limited-srgb' | 'display-p3' | undefined>;
+	colorSpace?: Signalish<'limited-srgb' | 'display-p3' | undefined>;
 	defaultChecked?: Signalish<boolean | undefined>;
 	defaultValue?: Signalish<string | number | undefined>;
 	disabled?: Signalish<boolean | undefined>;

@@ -344,3 +344,35 @@ const dangerouslySetInnerHTML = (
 		<div dangerouslySetInnerHTML={{ __html: 'string' }} />
 	</>
 );
+
+const colorInputs = (
+	<>
+		<input type="color" alpha />
+		<input type="color" alpha={false} colorspace="limited-srgb" />
+		<input type="color" colorSpace="display-p3" />
+		<input type="color" alpha={createSignal(true)} />
+		<input type="color" colorspace={createSignal('display-p3' as const)} />
+		<input type="color" colorSpace={createSignal('limited-srgb' as const)} />
+		<input
+			type="color"
+			alpha={undefined}
+			colorspace={undefined}
+			colorSpace={undefined}
+		/>
+	</>
+);
+
+// @ts-expect-error Alpha is a boolean attribute.
+const invalidColorAlpha = <input type="color" alpha="true" />;
+// @ts-expect-error Unsupported color space.
+const invalidColorSpace = <input type="color" colorspace="srgb" />;
+// @ts-expect-error The camelCase alias accepts the same color spaces.
+const invalidColorSpaceAlias = <input type="color" colorSpace="rgb" />;
+const invalidColorAlphaSignal = (
+	// @ts-expect-error Signals retain boolean alpha typing.
+	<input type="color" alpha={createSignal('true')} />
+);
+const invalidColorSpaceSignal = (
+	// @ts-expect-error Signals retain color-space typing.
+	<input type="color" colorspace={createSignal('unknown')} />
+);
