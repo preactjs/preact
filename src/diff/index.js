@@ -799,18 +799,19 @@ export function unmount(vnode, parentVNode, skipRemove) {
 
 	// A component that suspended while hydrating owns its range's markers,
 	// and its content too while still pending.
-	if (
-		!skipRemove &&
-		(r = vnode._component) &&
-		(r = r._excess) &&
-		(end = rangeEnd(r, (nodes = [])))
-	) {
-		if (r == vnode._dom) nodes.some(removeNode);
-		removeNode(end);
-		removeNode(r);
-	}
+	if (!skipRemove) {
+		if (
+			(r = vnode._component) &&
+			(r = r._excess) &&
+			(end = rangeEnd(r, (nodes = [])))
+		) {
+			if (r == vnode._dom) nodes.some(removeNode);
+			removeNode(end);
+			removeNode(r);
+		}
 
-	if (!skipRemove) removeNode(vnode._dom);
+		removeNode(vnode._dom);
+	}
 
 	vnode._dom = vnode._component = vnode._parent = NULL;
 }
