@@ -13,26 +13,18 @@ export { PreactElement };
 export interface Component<P = {}, S = {}> extends PreactComponent<P, S> {
 	isReactComponent?: object;
 	isPureReactComponent?: true;
-	_patchedLifecycles?: true;
 
 	// Suspense internal properties
 	_childDidSuspend?(error: Promise<void>, suspendingVNode: VNode): void;
-	_suspended: (vnode: VNode) => (unsuspend: () => void) => void;
 	_onResolve?(): void;
-
-	// Portal internal properties
-	_temp: any;
-	_container: PreactElement;
 }
 
 export interface FunctionComponent<P = {}> extends PreactFunctionComponent<P> {
 	shouldComponentUpdate?(nextProps: Readonly<P>): boolean;
-	_patchedLifecycles?: true;
 }
 
 export interface VNode<T = any> extends PreactVNode<T> {
 	$$typeof?: symbol;
-	preactCompatNormalized?: boolean;
 }
 
 export interface SuspenseState {
@@ -46,5 +38,4 @@ export interface SuspenseComponent extends PreactComponent<
 	_pendingSuspensionCount: number;
 	_suspenders: Component[];
 	_detachOnNextRender: null | VNode<any>;
-	_mask?: [number, number];
 }
