@@ -455,6 +455,60 @@ describe('useId', () => {
 		);
 	});
 
+	it('should return a unique id across more than two invocations of render', () => {
+		const Id = () => <span>{useId()}</span>;
+		const Ids = ({ count }) =>
+			Array.from({ length: count }, (_, i) => <Id key={i} />);
+
+		render(<Ids count={1} />, scratch);
+		render(<Ids count={2} />, scratch);
+		render(<Ids count={3} />, scratch);
+		render(<Ids count={4} />, scratch);
+		expect(scratch.innerHTML).to.equal(
+			'<span>P0-0</span><span>P0-1</span><span>P0-2</span><span>P0-3</span>'
+		);
+	});
+
+	it('should return a unique id when re-rendering the same vnode', () => {
+		let set;
+		const Id = () => <span>{useId()}</span>;
+		const Ids = () => {
+			const [count, setCount] = useState(1);
+			set = setCount;
+			return Array.from({ length: count }, (_, i) => <Id key={i} />);
+		};
+
+		const vnode = <Ids />;
+		render(vnode, scratch);
+		render(vnode, scratch);
+		render(vnode, scratch);
+		set(3);
+		rerender();
+		expect(scratch.innerHTML).to.equal(
+			'<span>P0-0</span><span>P0-1</span><span>P0-2</span>'
+		);
+	});
+
+	it('should match rts on hydrate and stay unique across later renders', () => {
+		const Id = () => <span>{useId()}</span>;
+		const Ids = ({ count }) =>
+			Array.from({ length: count }, (_, i) => <Id key={i} />);
+
+		const html = rts(<Ids count={2} />);
+		expect(html).to.equal('<span>P0-0</span><span>P0-1</span>');
+
+		scratch.innerHTML = html;
+		hydrate(<Ids count={2} />, scratch);
+		expect(scratch.innerHTML).to.equal(html);
+
+		render(<Ids count={3} />, scratch);
+		render(<Ids count={4} />, scratch);
+		render(<Ids count={5} />, scratch);
+		expect(scratch.innerHTML).to.equal(
+			'<span>P0-0</span><span>P0-1</span><span>P0-2</span><span>P0-3</span><span>P0-4</span>'
+		);
+	});
+
 	it('should not crash for rendering null after a non-null render', () => {
 		const Id = () => {
 			const id = useId();

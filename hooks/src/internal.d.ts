@@ -37,6 +37,7 @@ export interface Component extends Omit<
 	'_renderCallbacks'
 > {
 	__hooks?: ComponentHooks;
+	_mask?: [number, number];
 	// Extend to include HookStates
 	_renderCallbacks?: Array<HookState | (() => void)>;
 	_hasScuFromHooks?: boolean;

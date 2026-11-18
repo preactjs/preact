@@ -34,7 +34,6 @@ let oldBeforeRender = options._render;
 let oldAfterDiff = options.diffed;
 let oldCommit = options._commit;
 let oldBeforeUnmount = options.unmount;
-let oldRoot = options._root;
 
 // We take the minimum timeout for requestAnimationFrame to ensure that
 // the callback is invoked after the next frame. 35ms is based on a 30hz
@@ -46,14 +45,6 @@ let prevRaf;
 options._diff = vnode => {
 	currentComponent = null;
 	if (oldBeforeDiff) oldBeforeDiff(vnode);
-};
-
-options._root = (vnode, parentDom) => {
-	if (vnode && parentDom._children && parentDom._children._mask) {
-		vnode._mask = parentDom._children._mask;
-	}
-
-	if (oldRoot) oldRoot(vnode, parentDom);
 };
 
 /** @type {(vnode: import('./internal').VNode) => void} */
@@ -424,11 +415,14 @@ export function useId() {
 	const state = getHookState(currentIndex++, 11);
 	if (!state._value) {
 		// Grab either the root node or the nearest async boundary node.
-		/** @type {import('./internal').VNode} */
+		/** @type {import('./internal').VNode | import('./internal').Component} */
 		let root = currentComponent._vnode;
 		while (!root._mask && root._parent) {
 			root = root._parent;
 		}
+
+		// The root vnode is replaced on every `render()`, its component isn't.
+		if (!root._mask && root._component) root = root._component;
 
 		let mask = root._mask || (root._mask = [0, 0]);
 		state._value = 'P' + mask[0] + '-' + mask[1]++;
