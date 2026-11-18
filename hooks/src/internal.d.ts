@@ -58,7 +58,6 @@ export type HookState =
 interface BaseHookState {
 	_value?: unknown;
 	_nextValue?: unknown;
-	_pendingValue?: unknown;
 	_args?: unknown;
 	_pendingArgs?: unknown;
 	_component?: unknown;
@@ -83,7 +82,6 @@ export interface EffectHookState extends BaseHookState {
 
 export interface MemoHookState<T = unknown> extends BaseHookState {
 	_value?: T;
-	_pendingValue?: T;
 	_args?: unknown[];
 	_pendingArgs?: unknown[];
 }
