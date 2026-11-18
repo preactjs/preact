@@ -1913,6 +1913,148 @@ describe('suspense hydration', () => {
 			portalRoot.remove();
 		}
 	});
+
+	describe('unmounting a suspender while a sibling is pending', () => {
+		let setShow, setKey;
+		const Box = ({ children }) => {
+			const [show, set] = useState(true);
+			setShow = set;
+			return <div>{show ? children : null}</div>;
+		};
+		// Same DOM parent as its sibling: restoring suspenders that live in
+		// different DOM parents is a separate issue.
+		const Keyed = ({ Lazy }) => {
+			const [key, set] = useState(1);
+			setKey = set;
+			return <Lazy key={key} />;
+		};
+
+		it('should not re-render a resolved suspender unmounted before the boundary completes', async () => {
+			const [LazyA, resolveA] = createLazy();
+			const [LazyB, resolveB] = createLazy();
+			scratch.innerHTML = '<div><p>a</p></div><p>b</p>';
+			hydrate(
+				<Suspense fallback={null}>
+					<Box>
+						<LazyA />
+					</Box>
+					<LazyB />
+				</Suspense>,
+				scratch
+			);
+			rerender();
+			await resolveA(() => <p>a</p>);
+			rerender();
+			setShow(false);
+			rerender();
+			expect(scratch.innerHTML).to.equal('<div></div><p>b</p>');
+
+			await resolveB(() => <p>b</p>);
+			rerender();
+			expect(scratch.innerHTML).to.equal('<div></div><p>b</p>');
+		});
+
+		it('should not re-render a pending suspender unmounted before the boundary completes', async () => {
+			const [LazyA, resolveA] = createLazy();
+			const [LazyB, resolveB] = createLazy();
+			scratch.innerHTML = '<div><p>a</p></div><p>b</p>';
+			hydrate(
+				<Suspense fallback={null}>
+					<Box>
+						<LazyA />
+					</Box>
+					<LazyB />
+				</Suspense>,
+				scratch
+			);
+			rerender();
+			setShow(false);
+			rerender();
+			expect(scratch.innerHTML).to.equal('<div></div><p>b</p>');
+
+			await resolveB(() => <p>b</p>);
+			rerender();
+			expect(scratch.innerHTML).to.equal('<div></div><p>b</p>');
+
+			await resolveA(() => <p>a</p>);
+			rerender();
+			expect(scratch.innerHTML).to.equal('<div></div><p>b</p>');
+			setShow(true);
+			rerender();
+			expect(scratch.innerHTML).to.equal('<div><p>a</p></div><p>b</p>');
+		});
+
+		it('should complete the boundary when the last pending suspender unmounts', async () => {
+			const [LazyA, resolveA] = createLazy();
+			const [LazyB, resolveB] = createLazy();
+			scratch.innerHTML = '<div><p>a</p></div><p>b</p>';
+			hydrate(
+				<Suspense fallback={null}>
+					<Box>
+						<LazyA />
+					</Box>
+					<LazyB />
+				</Suspense>,
+				scratch
+			);
+			rerender();
+			await resolveB(() => <p>b</p>);
+			rerender();
+			setShow(false);
+			rerender();
+			expect(scratch.innerHTML).to.equal('<div></div><p>b</p>');
+
+			await resolveA(() => <p>a</p>);
+			rerender();
+			expect(scratch.innerHTML).to.equal('<div></div><p>b</p>');
+		});
+
+		it('should render a new instance mounted in place of an unmounted suspender', async () => {
+			const [LazyA, resolveA] = createLazy();
+			const [LazyB, resolveB] = createLazy();
+			scratch.innerHTML = '<p>a</p><p>b</p>';
+			hydrate(
+				<Suspense fallback={null}>
+					<Keyed Lazy={LazyA} />
+					<LazyB />
+				</Suspense>,
+				scratch
+			);
+			rerender();
+			setKey(2);
+			rerender();
+			expect(scratch.innerHTML).to.equal('<p>b</p>');
+
+			await resolveA(() => <p>a</p>);
+			rerender();
+			await resolveB(() => <p>b</p>);
+			rerender();
+			expect(scratch.innerHTML).to.equal('<p>a</p><p>b</p>');
+		});
+
+		it('should render a resolved new instance mounted in place of an unmounted suspender', async () => {
+			const [LazyA, resolveA] = createLazy();
+			const [LazyB, resolveB] = createLazy();
+			scratch.innerHTML = '<p>a</p><p>b</p>';
+			hydrate(
+				<Suspense fallback={null}>
+					<Keyed Lazy={LazyA} />
+					<LazyB />
+				</Suspense>,
+				scratch
+			);
+			rerender();
+			await resolveA(() => <p>a</p>);
+			rerender();
+			setKey(2);
+			rerender();
+			expect(scratch.innerHTML).to.equal('<p>a</p><p>b</p>');
+
+			await resolveB(() => <p>b</p>);
+			rerender();
+			expect(scratch.innerHTML).to.equal('<p>a</p><p>b</p>');
+		});
+	});
 });
 
 describe('suspense hydration resuming into mismatched server DOM', () => {

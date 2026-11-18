@@ -3309,6 +3309,210 @@ describe('suspense', () => {
 			expect(portalRoot.innerHTML).to.equal('<i>1</i>');
 		});
 	});
+
+	describe('unmounting a suspender while a sibling is pending', () => {
+		let setShow, setOn, setKey;
+		const Box = ({ children }) => {
+			const [show, set] = useState(true);
+			setShow = set;
+			return <div>{show ? children : null}</div>;
+		};
+
+		it('should not re-render a resolved suspender unmounted before the boundary completes', async () => {
+			const [LazyA, resolveA] = createLazy();
+			const [LazyB, resolveB] = createLazy();
+			render(
+				<Suspense fallback={<i>…</i>}>
+					<Box>
+						<LazyA />
+					</Box>
+					<LazyB />
+				</Suspense>,
+				scratch
+			);
+			rerender();
+			expect(scratch.innerHTML).to.equal('<i>…</i>');
+
+			await resolveA(() => <p>a</p>);
+			rerender();
+			setShow(false);
+			rerender();
+			expect(scratch.innerHTML).to.equal('<i>…</i>');
+
+			await resolveB(() => <p>b</p>);
+			rerender();
+			expect(scratch.innerHTML).to.equal('<div></div><p>b</p>');
+		});
+
+		it('should not re-render a pending suspender unmounted before the boundary completes', async () => {
+			const [LazyA, resolveA] = createLazy();
+			const [LazyB, resolveB] = createLazy();
+			render(
+				<Suspense fallback={<i>…</i>}>
+					<Box>
+						<LazyA />
+					</Box>
+					<LazyB />
+				</Suspense>,
+				scratch
+			);
+			rerender();
+			setShow(false);
+			rerender();
+			expect(scratch.innerHTML).to.equal('<i>…</i>');
+
+			await resolveB(() => <p>b</p>);
+			rerender();
+			expect(scratch.innerHTML).to.equal('<div></div><p>b</p>');
+
+			await resolveA(() => <p>a</p>);
+			rerender();
+			expect(scratch.innerHTML).to.equal('<div></div><p>b</p>');
+			setShow(true);
+			rerender();
+			expect(scratch.innerHTML).to.equal('<div><p>a</p></div><p>b</p>');
+		});
+
+		it('should complete the boundary when the last pending suspender unmounts', async () => {
+			const [LazyA, resolveA] = createLazy();
+			const [LazyB, resolveB] = createLazy();
+			render(
+				<Suspense fallback={<i>…</i>}>
+					<Box>
+						<LazyA />
+					</Box>
+					<LazyB />
+				</Suspense>,
+				scratch
+			);
+			rerender();
+			await resolveB(() => <p>b</p>);
+			rerender();
+			expect(scratch.innerHTML).to.equal('<i>…</i>');
+			setShow(false);
+			rerender();
+			expect(scratch.innerHTML).to.equal('<div></div><p>b</p>');
+
+			await resolveA(() => <p>a</p>);
+			rerender();
+			expect(scratch.innerHTML).to.equal('<div></div><p>b</p>');
+		});
+
+		it('should not re-render an unmounted suspender when suspending on update', async () => {
+			const [LazyA, resolveA] = createLazy();
+			const [LazyB, resolveB] = createLazy();
+			const App = () => {
+				const [on, set] = useState(false);
+				setOn = set;
+				return (
+					<Suspense fallback={<i>…</i>}>
+						<Box>{on && <LazyA />}</Box>
+						{on && <LazyB />}
+					</Suspense>
+				);
+			};
+			render(<App />, scratch);
+			expect(scratch.innerHTML).to.equal('<div></div>');
+
+			setOn(true);
+			rerender();
+			expect(scratch.innerHTML).to.equal('<i>…</i>');
+
+			await resolveA(() => <p>a</p>);
+			rerender();
+			setShow(false);
+			rerender();
+			expect(scratch.innerHTML).to.equal('<i>…</i>');
+
+			await resolveB(() => <p>b</p>);
+			rerender();
+			expect(scratch.innerHTML).to.equal('<div></div><p>b</p>');
+		});
+
+		it('should not re-render a mounted component that re-suspended and was unmounted', async () => {
+			let suspendA = false,
+				suspendB = false,
+				resolveA,
+				resolveB,
+				setA,
+				setB;
+			const promiseA = new Promise(r => (resolveA = r));
+			const promiseB = new Promise(r => (resolveB = r));
+			const A = () => {
+				const [n, set] = useState(0);
+				setA = set;
+				if (suspendA) throw promiseA;
+				return <p>a{n}</p>;
+			};
+			const B = () => {
+				const [n, set] = useState(0);
+				setB = set;
+				if (suspendB) throw promiseB;
+				return <p>b{n}</p>;
+			};
+			render(
+				<Suspense fallback={<i>…</i>}>
+					<Box>
+						<A />
+					</Box>
+					<B />
+				</Suspense>,
+				scratch
+			);
+			expect(scratch.innerHTML).to.equal('<div><p>a0</p></div><p>b0</p>');
+
+			suspendA = suspendB = true;
+			setA(1);
+			setB(1);
+			rerender();
+			expect(scratch.innerHTML).to.equal('<i>…</i>');
+
+			suspendA = false;
+			resolveA();
+			await promiseA;
+			rerender();
+			setShow(false);
+			rerender();
+			expect(scratch.innerHTML).to.equal('<i>…</i>');
+
+			suspendB = false;
+			resolveB();
+			await promiseB;
+			rerender();
+			expect(scratch.innerHTML).to.equal('<div></div><p>b1</p>');
+		});
+
+		it('should render a new instance mounted in place of an unmounted suspender', async () => {
+			const [LazyA, resolveA] = createLazy();
+			const [LazyB, resolveB] = createLazy();
+			// Same DOM parent as its sibling: restoring suspenders that live in
+			// different DOM parents is a separate issue.
+			const Keyed = () => {
+				const [key, set] = useState(1);
+				setKey = set;
+				return <LazyA key={key} />;
+			};
+			render(
+				<Suspense fallback={<i>…</i>}>
+					<Keyed />
+					<LazyB />
+				</Suspense>,
+				scratch
+			);
+			rerender();
+			setKey(2);
+			rerender();
+			expect(scratch.innerHTML).to.equal('<i>…</i>');
+
+			await resolveA(() => <p>a</p>);
+			rerender();
+			expect(scratch.innerHTML).to.equal('<i>…</i>');
+
+			await resolveB(() => <p>b</p>);
+			rerender();
+			expect(scratch.innerHTML).to.equal('<p>a</p><p>b</p>');
+		});
+	});
 });
 
 describe('suspense resuming into existing DOM', () => {
