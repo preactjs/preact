@@ -312,7 +312,7 @@ export function diff(
 					oldVNode._children = NULL;
 				}
 
-				oldDom = oldVNode._children ? getDomSibling(oldVNode, 0) : NULL;
+				oldDom = oldVNode._children && getDomSibling(oldVNode, 0);
 			}
 
 			oldDom = diffChildren(
