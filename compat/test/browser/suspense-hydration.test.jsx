@@ -2436,7 +2436,7 @@ describe('suspense hydration owning a streamed range', () => {
 
 		pending.forEach(([name, start, end]) => {
 			it(`should not adopt the fallback for content that rendered first (${name})`, () => {
-				scratch.innerHTML = `<div><!--$s?:1-->${start}<p class="fb" id="fallback">loading</p>${end}<!--/$s:1--><footer>foot</footer></div>`;
+				scratch.innerHTML = `<div><!--$s?:1-->${start}<p class="fb" data-fallback="1">loading</p>${end}<!--/$s:1--><footer>foot</footer></div>`;
 				const footer = scratch.querySelector('footer');
 				const onClick = vi.fn();
 
