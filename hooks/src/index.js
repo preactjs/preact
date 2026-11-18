@@ -480,11 +480,8 @@ function afterNextFrame(callback) {
 		setTimeout(callback);
 	};
 	const timeout = setTimeout(done, RAF_TIMEOUT);
-
-	let raf;
-	if (HAS_RAF) {
-		raf = requestAnimationFrame(done);
-	}
+	// `var`: a synchronous rAF makes `done` read it before it is assigned.
+	var raf = HAS_RAF && requestAnimationFrame(done);
 }
 
 // Note: if someone used options.debounceRendering = requestAnimationFrame,
