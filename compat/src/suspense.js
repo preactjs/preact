@@ -174,9 +174,13 @@ function createSuspense() {
 
 				let suspended;
 				while ((suspended = this._suspenders.pop())) {
-					// Restore _parentDom before forceUpdate so render can proceed
-					suspended._parentDom = originalParentDom;
-					suspended.forceUpdate();
+					// Skip suspenders unmounted meanwhile: unmount() nulls
+					// _globalContext, and a dead vnode can't be re-rendered.
+					if (suspended._globalContext) {
+						// Restore _parentDom before forceUpdate so render can proceed
+						suspended._parentDom = originalParentDom;
+						suspended.forceUpdate();
+					}
 				}
 			}
 		};
