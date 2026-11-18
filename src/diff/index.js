@@ -68,6 +68,9 @@ export function diff(
 ) {
 	/** @type {any} */
 	let tmp,
+		// The closing marker of the range a boundary takes over, then what
+		// followed it
+		rangeNext,
 		resumed,
 		newType = newVNode.type;
 
@@ -76,8 +79,7 @@ export function diff(
 
 	// If the previous diff bailed out, resume creating/hydrating into the DOM
 	// that was kept while suspended (server-rendered, or already in the
-	// container we rendered into). `tmp` holds the stored excess node until the
-	// options._diff call below.
+	// container we rendered into).
 	if (
 		oldVNode._flags & MODE_SUSPENDED &&
 		// @ts-expect-error This is MODE_HYDRATE or 0
@@ -85,14 +87,27 @@ export function diff(
 		(tmp = oldVNode._component._excess))
 	) {
 		newVNode._flags |= isHydrating;
-		resumed = excessDomChildren = [];
-		if (tmp.nodeType == 8) {
-			// Re-scan DOM from stored start marker for streamed hydration.
-			oldDom = rangeEnd(tmp, excessDomChildren);
-		} else {
-			excessDomChildren.push(tmp);
-		}
-		oldDom = excessDomChildren[0] || oldDom;
+		// Re-scan DOM from stored start marker for streamed hydration.
+		tmp = rangeEnd(tmp, (resumed = excessDomChildren = []));
+		oldDom = excessDomChildren[0];
+		// The closing marker stays until unmount.
+		if (tmp) excessDomChildren.pop();
+	} else if (
+		isHydrating &&
+		newType &&
+		(tmp = newType.prototype) &&
+		tmp._childDidSuspend &&
+		(rangeNext = rangeEnd(oldDom, (tmp = [oldDom]))) &&
+		tmp._excess
+	) {
+		// A boundary in front of a range that holds a fallback, because the
+		// server is still streaming it or gave up on it (`$s!`): its children
+		// only get that range, and diff the attributes of what they adopt.
+		rangeNext = rangeNext.nextSibling;
+		tmp.some(node => {
+			excessDomChildren[excessDomChildren.indexOf(node)] = NULL;
+		});
+		resumed = excessDomChildren = tmp;
 	}
 
 	if ((tmp = options._diff)) tmp(newVNode);
@@ -341,6 +356,8 @@ export function diff(
 
 			// Remove the kept DOM this resumed render didn't claim
 			if (resumed) resumed.some(removeNode);
+			// The markers the cursor stopped at go with a range a boundary took
+			if (resumed && rangeNext !== UNDEFINED) oldDom = rangeNext;
 
 			if (c._renderCallbacks.length) {
 				commitQueue.push(c);
@@ -445,20 +462,26 @@ export function diff(
 /**
  * Find the closing marker of a streamed range.
  * @param {PreactElement} start A `$s` marker opening a range
- * @param {PreactElement[]} [nodes] Collects the nodes inside the range
+ * @param {PreactElement[]} [nodes] Collects the nodes after `start` up to and
+ * including the closing marker, or `start` itself when it isn't a comment. For
+ * a comment its `_excess` tells whether the range holds a fallback (`$s?`,
+ * `$s!`).
  * @returns {PreactElement} The closing marker, or undefined when `start` doesn't
  * open a range or the range is unclosed
  */
 function rangeEnd(start, nodes) {
-	if (start && start.nodeType == 8 && start.data.startsWith('$s')) {
-		for (let depth = 1; (start = start.nextSibling); ) {
-			if (start.nodeType == 8) {
-				if (start.data.startsWith('$s')) depth++;
-				else if (start.data.startsWith('/$s') && !--depth) return start;
+	if (start && start.nodeType == 8) {
+		if (nodes) nodes._excess = start.data[2] && start.data[2] != ':';
+		if (start.data.startsWith('$s')) {
+			for (let depth = 1; (start = start.nextSibling); ) {
+				if (nodes) nodes.push(start);
+				if (start.nodeType == 8) {
+					if (start.data.startsWith('$s')) depth++;
+					else if (start.data.startsWith('/$s') && !--depth) return start;
+				}
 			}
-			if (nodes) nodes.push(start);
 		}
-	}
+	} else if (nodes) nodes.push(start);
 }
 
 function markAsForce(vnode) {
@@ -546,6 +569,9 @@ function diffElementNodes(
 	else if (!namespace) namespace = XHTML_NAMESPACE;
 
 	if (excessDomChildren) {
+		// DOM that held a fallback isn't what we render: diff its attributes too
+		if (excessDomChildren._excess) isHydrating = false;
+
 		for (i = 0; i < excessDomChildren.length; i++) {
 			value = excessDomChildren[i];
 
