@@ -31,6 +31,14 @@ describe('isMemo', () => {
 		expect(isMemo(preactCreateElement(Fragment, {}))).to.equal(false);
 	});
 
+	it('should not detect a non-memo component with a Memo displayName', () => {
+		function Foo() {
+			return <h1>Hello World</h1>;
+		}
+		Foo.displayName = 'Memo(Foo)';
+		expect(isMemo(Foo)).to.equal(false);
+	});
+
 	it('should detect a compat vnode as false', () => {
 		expect(isMemo(React.createElement(Fragment, {}))).to.equal(false);
 	});
