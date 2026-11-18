@@ -153,7 +153,7 @@ function createSuspense() {
 
 		// Store and null _parentDom to prevent setState/forceUpdate from
 		// scheduling renders while suspended. Render would be a no-op anyway
-		// since renderComponent checks _parentDom, but this avoids queue churn.
+		// since process() checks _parentDom, but this avoids queue churn.
 		const originalParentDom = suspendingComponent._parentDom;
 		suspendingComponent._parentDom = null;
 
