@@ -98,8 +98,9 @@ export interface ReducerHookState<
 }
 
 export interface ContextHookState extends BaseHookState {
-	/** Whether this hooks as subscribed to updates yet */
-	_value?: boolean;
+	/** The provider this hook is currently subscribed to. */
+	_value?: Component;
+	_cleanup?: () => void;
 	_context?: PreactContext;
 }
 

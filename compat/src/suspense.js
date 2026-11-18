@@ -20,8 +20,16 @@ function initSuspenseHooks() {
 				if ((component = vnode._component) && component._childDidSuspend) {
 					// A component that suspends before ever committing has no state
 					// worth keeping; mounted ones keep their hooks while parked.
-					if (oldVNode && !oldVNode._component)
-						newVNode._component.__hooks = UNDEFINED;
+					// Its effects never ran, so only subscriptions (useContext) have
+					// a cleanup to release.
+					if (oldVNode && !oldVNode._component) {
+						let c = newVNode._component;
+						if (c.__hooks)
+							c.__hooks._list.forEach(
+								s => typeof s._cleanup == 'function' && s._cleanup()
+							);
+						c.__hooks = UNDEFINED;
+					}
 					// Don't call oldCatchError if we found a Suspense
 					return component._childDidSuspend(error, newVNode);
 				}

@@ -357,13 +357,31 @@ export function useContext(context) {
 	// be able to pull of the default value when no provider
 	// is present in the tree.
 	state._context = context;
-	if (!provider) return context._defaultValue;
-	// This is probably not safe to convert to "!"
-	if (state._value == null) {
-		state._value = true;
-		provider.sub(currentComponent);
+	if (state._value != provider) {
+		invokeCleanup(state);
+		state._value = provider;
+		if (provider) {
+			const c = currentComponent;
+			// Subscribe a proxy rather than the component, so that the hook can
+			// unsubscribe on its own when it switches to another provider.
+			// `sub()` wraps the proxy's `componentWillUnmount` into an unsubscribe
+			// and notifies it with `_bits |= COMPONENT_FORCE; enqueueRender()`:
+			// reading `_bits` as dirty keeps the proxy out of the render queue,
+			// while setting it forwards the update to the component, unless it is
+			// parked by Suspense, which rerenders it when it resumes.
+			const proxy = {
+				get _bits() {
+					return -1;
+				},
+				set _bits(_) {
+					if (c._parentDom) c.forceUpdate();
+				}
+			};
+			provider.sub(proxy);
+			state._cleanup = proxy.componentWillUnmount;
+		}
 	}
-	return provider.props.value;
+	return provider ? provider.props.value : context._defaultValue;
 }
 
 /**
