@@ -198,7 +198,7 @@ export function initDebug() {
 
 		let { type } = vnode;
 
-		hooksAllowed = true;
+		hooksAllowed = false;
 
 		if (type === undefined) {
 			throw new Error(
@@ -464,8 +464,8 @@ export function initDebug() {
 					);
 				}
 			} else if (type === 'p') {
-				let illegalDomChildrenTypes = getDomDescendants(vnode).filter(childType =>
-					ILLEGAL_PARAGRAPH_CHILD_ELEMENTS.has(childType)
+				let illegalDomChildrenTypes = getDomDescendants(vnode).filter(
+					childType => ILLEGAL_PARAGRAPH_CHILD_ELEMENTS.has(childType)
 				);
 				if (illegalDomChildrenTypes.length) {
 					console.error(
@@ -573,10 +573,37 @@ function isTableElement(type) {
 }
 
 const ILLEGAL_PARAGRAPH_CHILD_ELEMENTS = new Set([
-	'address', 'article', 'aside', 'blockquote', 'details', 'div', 'dl',
-	'fieldset', 'figcaption', 'figure', 'footer', 'form', 'h1', 'h2', 'h3',
-	'h4', 'h5', 'h6', 'header', 'hgroup', 'hr', 'main', 'menu', 'nav', 'ol',
-	'p', 'pre', 'search', 'section', 'table', 'ul'
+	'address',
+	'article',
+	'aside',
+	'blockquote',
+	'details',
+	'div',
+	'dl',
+	'fieldset',
+	'figcaption',
+	'figure',
+	'footer',
+	'form',
+	'h1',
+	'h2',
+	'h3',
+	'h4',
+	'h5',
+	'h6',
+	'header',
+	'hgroup',
+	'hr',
+	'main',
+	'menu',
+	'nav',
+	'ol',
+	'p',
+	'pre',
+	'search',
+	'section',
+	'table',
+	'ul'
 ]);
 
 const forceUpdate = Component.prototype.forceUpdate;
