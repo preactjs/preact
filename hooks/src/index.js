@@ -362,13 +362,9 @@ export function useContext(context) {
 		state._value = provider;
 		if (provider) {
 			const c = currentComponent;
-			// Subscribe a proxy rather than the component, so that the hook can
-			// unsubscribe on its own when it switches to another provider.
-			// `sub()` wraps the proxy's `componentWillUnmount` into an unsubscribe
-			// and notifies it with `_bits |= COMPONENT_FORCE; enqueueRender()`:
-			// reading `_bits` as dirty keeps the proxy out of the render queue,
-			// while setting it forwards the update to the component, unless it is
-			// parked by Suspense, which rerenders it when it resumes.
+			// `sub()` turns the proxy's `componentWillUnmount` into an unsubscribe
+			// and notifies it with `_bits |= COMPONENT_FORCE`. Reading `_bits` as
+			// dirty keeps the proxy itself out of the render queue.
 			const proxy = {
 				get _bits() {
 					return -1;
