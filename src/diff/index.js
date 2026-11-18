@@ -767,7 +767,7 @@ export function unmount(vnode, parentVNode, skipRemove) {
 
 	if (
 		(r = vnode.ref) &&
-		(!r.current || r.current == (vnode._component || vnode._dom))
+		(!r.current || r.current == vnode._dom || r.current == vnode._component)
 	) {
 		applyRef(r, NULL, parentVNode, vnode);
 	}

@@ -138,6 +138,42 @@ describe('components', () => {
 		expect(ref.current).to.be.instanceOf(Bar);
 	});
 
+	it('should clear a ref to a class component that stores its DOM node', () => {
+		class Button extends Component {
+			render() {
+				return <button />;
+			}
+		}
+
+		let node = null;
+		const objectRef = {
+			get current() {
+				return node;
+			},
+			set current(instance) {
+				node = React.findDOMNode(instance);
+			}
+		};
+		let cleanups = 0;
+		function functionRef(instance) {
+			functionRef.current = React.findDOMNode(instance);
+			return () => cleanups++;
+		}
+
+		React.render(
+			[
+				<Button key="a" ref={objectRef} />,
+				<Button key="b" ref={functionRef} />
+			],
+			scratch
+		);
+		expect(objectRef.current).to.equal(scratch.firstChild);
+
+		React.render(null, scratch);
+		expect(objectRef.current).to.equal(null);
+		expect(cleanups).to.equal(1);
+	});
+
 	describe('UNSAFE_* lifecycle methods', () => {
 		it('should support UNSAFE_componentWillMount', () => {
 			let spy = vi.fn();
