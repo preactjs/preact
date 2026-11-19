@@ -631,11 +631,15 @@ export interface DOMAttributes<
 
 	// Popover Events
 	onBeforeToggle?: ToggleEventHandler<Target> | undefined;
+	onBeforeToggleCapture?: ToggleEventHandler<Target> | undefined;
 	onToggle?: ToggleEventHandler<Target> | undefined;
+	onToggleCapture?: ToggleEventHandler<Target> | undefined;
 
 	// Dialog Events
 	onClose?: GenericEventHandler<Target> | undefined;
+	onCloseCapture?: GenericEventHandler<Target> | undefined;
 	onCancel?: GenericEventHandler<Target> | undefined;
+	onCancelCapture?: GenericEventHandler<Target> | undefined;
 
 	// Focus Events
 	onFocus?: FocusEventHandler<Target> | undefined;
@@ -839,6 +843,7 @@ export interface DOMAttributes<
 	onResizeCapture?: PictureInPictureEventHandler<Target>;
 
 	onCommand?: CommandEventHandler<Target>;
+	onCommandCapture?: CommandEventHandler<Target>;
 }
 
 // All the WAI-ARIA 1.1 attributes from https://www.w3.org/TR/wai-aria-1.1/
@@ -1861,7 +1866,9 @@ export interface DialogHTMLAttributes<
 	T extends EventTarget = HTMLDialogElement
 > extends HTMLAttributes<T> {
 	onCancel?: GenericEventHandler<T> | undefined;
+	onCancelCapture?: GenericEventHandler<T> | undefined;
 	onClose?: GenericEventHandler<T> | undefined;
+	onCloseCapture?: GenericEventHandler<T> | undefined;
 	open?: Signalish<boolean | undefined>;
 	closedby?: Signalish<'none' | 'closerequest' | 'any' | undefined>;
 	closedBy?: Signalish<'none' | 'closerequest' | 'any' | undefined>;
