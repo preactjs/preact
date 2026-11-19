@@ -344,3 +344,21 @@ const dangerouslySetInnerHTML = (
 		<div dangerouslySetInnerHTML={{ __html: 'string' }} />
 	</>
 );
+
+// Capture variants of popover, dialog and command events, which Preact
+// registers with `addEventListener(name, handler, true)`
+const testCaptureEvents = (
+	<div>
+		<div
+			popover="auto"
+			onBeforeToggleCapture={e => e.newState}
+			onToggleCapture={e => e.oldState}
+		/>
+		<dialog
+			onCancelCapture={e => e.currentTarget.returnValue}
+			onCloseCapture={e => e.currentTarget.returnValue}
+		/>
+		<details onToggleCapture={e => e.currentTarget.open} />
+		<div onCommandCapture={e => e.command} />
+	</div>
+);
