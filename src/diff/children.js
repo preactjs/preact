@@ -410,11 +410,11 @@ function insert(parentVNode, oldDom, parentDom, isMounting) {
 			if (oldDom && !oldDom.parentNode) oldDom = NULL;
 		}
 
-		// Comments (e.g. server `$s` markers) are never ours: a node right after
-		// them is already in place.
+		// Comments and processing instructions (server `$s` markers, `<?start>`)
+		// are never ours: a node right after them is already in place.
 		let dom = parentVNode._dom;
 		let next = oldDom;
-		while (next && next.nodeType == 8) next = next.nextSibling;
+		while (next && next.nodeType > 6) next = next.nextSibling;
 
 		if (dom != next) {
 			// Containers that aren't DOM nodes may not implement moveBefore()
@@ -430,7 +430,7 @@ function insert(parentVNode, oldDom, parentDom, isMounting) {
 
 	while (
 		(oldDom = oldDom && oldDom.nextSibling) &&
-		oldDom.nodeType == 8 &&
+		oldDom.nodeType > 6 &&
 		!oldDom.data.startsWith('$s')
 	);
 

@@ -2463,6 +2463,35 @@ describe('suspense hydration owning a streamed range', () => {
 				expect(onClick).toHaveBeenCalledOnce();
 			});
 
+			it(`should not move the element it adopts from the fallback (${name})`, () => {
+				scratch.innerHTML = `<div><!--$s!:1-->${start}<input id="fallback">${end}<!--/$s:1--><footer>foot</footer></div>`;
+				const input = scratch.querySelector('input');
+				const removed = [];
+				const observer = new MutationObserver(records =>
+					records.forEach(r => removed.push(...r.removedNodes))
+				);
+				observer.observe(scratch, { childList: true, subtree: true });
+
+				hydrate(
+					<div>
+						<Suspense fallback={<input id="fallback" />}>
+							<input id="content" />
+						</Suspense>
+						<footer>foot</footer>
+					</div>,
+					scratch
+				);
+				rerender();
+				removed.push(
+					...observer.takeRecords().flatMap(r => [...r.removedNodes])
+				);
+				observer.disconnect();
+
+				expect(scratch.querySelector('input')).to.equal(input);
+				expect(input.id).to.equal('content');
+				expect(removed).not.to.include(input);
+			});
+
 			it(`should not adopt the fallback when the client resolves before the chunk (${name})`, async () => {
 				scratch.innerHTML = `<div><!--$s?:1-->${start}<p class="fb">loading</p>${end}<!--/$s:1--><footer>foot</footer></div>`;
 				const footer = scratch.querySelector('footer');
