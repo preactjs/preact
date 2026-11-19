@@ -404,6 +404,18 @@ export function diff(
 									break;
 								} else if (child.data.startsWith('$s')) {
 									end = rangeEnd((startMarker = child));
+								} else if (
+									excessDomChildren._excess &&
+									i == excessDomChildren.length - 1
+								) {
+									// The end of the fallback's range its boundary renders
+									// into: nothing of its own is left, so hold its place
+									// instead of claiming what follows the boundary.
+									oldDom = startMarker = parentDom.insertBefore(
+										parentDom.ownerDocument.createTextNode(''),
+										child
+									);
+									break;
 								}
 							}
 						}

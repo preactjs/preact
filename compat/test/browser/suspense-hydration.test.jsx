@@ -2518,6 +2518,36 @@ describe('suspense hydration owning a streamed range', () => {
 				);
 				expect(scratch.querySelector('p').nextElementSibling).to.equal(footer);
 			});
+
+			it(`should keep a child that suspends after the fallback was adopted inside the range (${name})`, async () => {
+				scratch.innerHTML = `<div><!--$s?:1-->${start}<p class="fb">loading</p>${end}<!--/$s:1--><footer>foot</footer></div>`;
+				const footer = scratch.querySelector('footer');
+				const [Lazy, resolve] = createLazy();
+
+				hydrate(
+					<div>
+						<Suspense fallback={<p class="fb">loading</p>}>
+							<p class="static">static</p>
+							<Lazy />
+						</Suspense>
+						<footer>foot</footer>
+					</div>,
+					scratch
+				);
+				rerender();
+
+				await resolve(() => <p class="content">content</p>);
+				rerender();
+
+				expect(
+					[...scratch.firstChild.children].map(el => el.outerHTML)
+				).to.deep.equal([
+					'<p class="static">static</p>',
+					'<p class="content">content</p>',
+					'<footer>foot</footer>'
+				]);
+				expect(scratch.querySelector('footer')).to.equal(footer);
+			});
 		});
 
 		it('should not adopt fallback text', () => {
