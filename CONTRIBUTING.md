@@ -2,6 +2,8 @@
 
 This document is intended for developers interested in making contributions to Preact and documents our internal processes like releasing a new version.
 
+Preact follows the [Human Voice AI contribution policy](https://github.com/preactjs/.github/blob/master/AI_POLICY.md). You're welcome to use AI tools when writing code. Review and test what you submit, and write issues, pull request descriptions, and comments in your own words.
+
 ## Getting Started
 
 These steps will help you set up your development environment. That includes all dependencies we use to build Preact and developer tooling like git commit hooks.
