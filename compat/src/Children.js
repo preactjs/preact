@@ -10,7 +10,7 @@ export const Children = {
 	map: mapFn,
 	forEach: mapFn,
 	count(children) {
-		return children ? toChildArray(children).length : 0;
+		return toChildArray(children).length;
 	},
 	only(children) {
 		const normalized = toChildArray(children);
