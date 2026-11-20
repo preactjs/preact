@@ -14,17 +14,49 @@ function initSuspenseHooks() {
 		if (error && error.then) {
 			/** @type {import('./internal').Component} */
 			let component;
+			let boundary;
+			let marker;
+			let child;
 			let vnode = newVNode;
 
-			while ((vnode = vnode._parent)) {
+			while ((vnode = (child = vnode)._parent)) {
 				if ((component = vnode._component) && component._childDidSuspend) {
-					// A component that suspends before ever committing has no state
-					// worth keeping; mounted ones keep their hooks while parked.
-					if (oldVNode && !oldVNode._component)
-						newVNode._component.__hooks = UNDEFINED;
-					// Don't call oldCatchError if we found a Suspense
-					return component._childDidSuspend(error, newVNode);
+					// While hydrating, the content of a boundary in front of a
+					// streamed range suspends as a whole: the server marks the
+					// range, not what each component rendered in it, so nothing in it
+					// can keep a part of it while its siblings go on. The content
+					// kept the range before, or core left its marker on the
+					// boundary's `_dom`. Only a server that marks every boundary
+					// writes `$s?`, `$s::` and `$s:`: with an older one, the marker
+					// may be that of a boundary further down.
+					if (
+						newVNode._flags & MODE_HYDRATE &&
+						((marker = (child._component || 0)._excess) ||
+							/^\$s([?!]|:(:|$))/.test(((marker = vnode._dom) || 0).data))
+					) {
+						// Thrown on until the content itself catches it
+						if (newVNode != child) throw error;
+						newVNode._component._excess = marker;
+						// What it rendered so far is rendered again when it resumes.
+						// A range that held a fallback loses what was put in it.
+						park(newVNode._children, marker.data[2] != ':');
+						newVNode._children = [];
+						boundary = component;
+						break;
+					}
+					// A boundary the server didn't get to is part of the range of
+					// one further up
+					boundary = boundary || component;
 				}
+			}
+
+			if (boundary) {
+				// A component that suspends before ever committing has no state
+				// worth keeping; mounted ones keep their hooks while parked.
+				if (oldVNode && !oldVNode._component)
+					newVNode._component.__hooks = UNDEFINED;
+				// Don't call oldCatchError if we found a Suspense
+				return boundary._childDidSuspend(error, newVNode);
 			}
 		}
 		oldCatchError(error, newVNode, oldVNode, errorInfo);
@@ -40,6 +72,23 @@ function initSuspenseHooks() {
 
 		if (oldUnmount) oldUnmount(vnode);
 	};
+}
+
+/**
+ * Detach the components of a hydration pass that was given up on, and remove
+ * the DOM it created when asked to, or when it is a portal's.
+ */
+function park(children, remove) {
+	(children || []).some(vnode => {
+		if (vnode) {
+			if (vnode._component) {
+				vnode._component._parentDom = vnode._component._globalContext = null;
+			} else if (remove && vnode._dom) {
+				vnode._dom.remove();
+			}
+			park(vnode._children, remove || vnode.props._parentDom);
+		}
+	});
 }
 
 function detachedClone(vnode, detachedParent, parentDom) {
