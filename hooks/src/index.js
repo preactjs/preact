@@ -357,13 +357,12 @@ export function useContext(context) {
 	// be able to pull of the default value when no provider
 	// is present in the tree.
 	state._context = context;
-	if (!provider) return context._defaultValue;
-	// This is probably not safe to convert to "!"
-	if (state._value == null) {
-		state._value = true;
-		provider.sub(currentComponent);
+	if (state._value !== provider) {
+		if (state._cleanup) state._cleanup();
+		state._value = provider;
+		state._cleanup = provider && provider.sub(currentComponent);
 	}
-	return provider.props.value;
+	return provider ? provider.props.value : context._defaultValue;
 }
 
 /**

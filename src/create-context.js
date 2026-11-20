@@ -6,8 +6,8 @@ export let i = 0;
 export function createContext(defaultValue) {
 	function Context(props) {
 		if (!this.getChildContext) {
-			/** @type {Set<import('./internal').Component> | null} */
-			let subs = new Set();
+			/** @type {Map<import('./internal').Component, number>} */
+			let subs = new Map();
 			let ctx = {};
 			ctx[Context._id] = this;
 
@@ -16,20 +16,34 @@ export function createContext(defaultValue) {
 			this.shouldComponentUpdate = function (_props) {
 				// @ts-expect-error even
 				if (this.props.value != _props.value) {
-					subs.forEach(c => {
+					subs.forEach((_, c) => {
 						c._bits |= COMPONENT_FORCE;
 						enqueueRender(c);
 					});
 				}
 			};
 
+			// A hook can leave while another hook or an implicit consumer still uses it.
 			this.sub = c => {
-				subs.add(c);
-				let old = c.componentWillUnmount;
-				c.componentWillUnmount = () => {
-					subs.delete(c);
-					if (old) old.call(c);
+				subs.set(c, (subs.get(c) || 0) + 1);
+				let cleanups = c._contextSubs;
+				if (!cleanups) {
+					cleanups = c._contextSubs = new Set();
+					let old = c.componentWillUnmount;
+					c.componentWillUnmount = () => {
+						cleanups.forEach(cleanup => cleanup());
+						if (old) old.call(c);
+					};
+				}
+				const unsubscribe = () => {
+					if (cleanups.delete(unsubscribe)) {
+						const count = subs.get(c) - 1;
+						if (count) subs.set(c, count);
+						else subs.delete(c);
+					}
 				};
+				cleanups.add(unsubscribe);
+				return unsubscribe;
 			};
 		}
 

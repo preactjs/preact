@@ -170,6 +170,7 @@ export interface Component<P = {}, S = {}> extends Omit<
 	_renderCallbacks: Array<() => void>; // Only class components
 	_stateCallbacks: Array<() => void>; // Only class components
 	_globalContext?: any;
+	_contextSubs?: Set<() => void>;
 	_vnode?: VNode<P> | null;
 	_nextState?: S | null; // Only class components
 	/**
