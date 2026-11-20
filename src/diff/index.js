@@ -97,8 +97,11 @@ export function diff(
 		newType &&
 		(tmp = newType.prototype) &&
 		tmp._childDidSuspend &&
-		(rangeNext = rangeEnd(oldDom, (tmp = [oldDom]))) &&
-		tmp._excess
+		// While its content diffs, a boundary's `_dom` is the marker it is in
+		// front of: compat tells from it that the content is a streamed range's.
+		// The content starts past the marker, a boundary in it has its own.
+		(rangeNext = rangeEnd((newVNode._dom = oldDom), (tmp = [oldDom]))) &&
+		((oldDom = tmp[1]), tmp._excess)
 	) {
 		// A boundary in front of a range that holds a fallback, because the
 		// server is still streaming it or gave up on it (`$s!`): its children
@@ -113,7 +116,8 @@ export function diff(
 	if ((tmp = options._diff)) tmp(newVNode);
 
 	outer: if (typeof newType == 'function') {
-		let oldCommitQueueLength = commitQueue.length;
+		let oldCommitQueueLength = commitQueue.length,
+			oldRefQueueLength = refQueue.length;
 		try {
 			let c,
 				oldProps,
@@ -369,11 +373,16 @@ export function diff(
 				c._bits &= ~(COMPONENT_PROCESSING_EXCEPTION | COMPONENT_PENDING_ERROR);
 			}
 		} catch (e) {
-			// We remove any componentDidMount, ...
+			// We remove any componentDidMount, ... and refs
 			// that have been invalidated by us
 			// intercepting the error.
 			commitQueue.length = oldCommitQueueLength;
+			refQueue.length = oldRefQueueLength;
 			newVNode._original = NULL;
+			if (!newVNode._children) {
+				newVNode._children = oldVNode._children || [];
+			}
+
 			// if hydrating or creating initial tree, bailout preserves DOM:
 			if (isHydrating || excessDomChildren) {
 				if (e && e.then) {
@@ -382,13 +391,25 @@ export function diff(
 					// isHydrating is MODE_HYDRATE or falsy
 					newVNode._flags |= MODE_SUSPENDED | isHydrating;
 
+					// Before keeping any DOM for this vnode: the handler may throw
+					// to have a vnode further up keep it instead.
+					options._catchError(e, newVNode, oldVNode);
+
+					// A range that was kept before, or that the handler gave this
+					// vnode, is kept from its marker on.
+					if ((tmp = newVNode._component._excess)) oldDom = tmp;
+
 					if (excessDomChildren) {
 						let i = excessDomChildren.indexOf(oldDom || UNDEFINED),
 							child;
 						if (!~i) i = excessDomChildren.length;
 
 						// The cursor skips comments: step back to this component's markers.
-						while ((child = excessDomChildren[i - 1]) && child.nodeType == 8) {
+						while (
+							!tmp &&
+							(child = excessDomChildren[i - 1]) &&
+							child.nodeType == 8
+						) {
 							i--;
 						}
 
@@ -425,15 +446,12 @@ export function diff(
 						oldDom = tmp;
 					} else newVNode._dom = oldDom;
 					oldDom = oldDom && oldDom.nextSibling;
+					break outer;
 				} else if (excessDomChildren) {
 					excessDomChildren.some(removeNode);
 				}
 			} else {
 				newVNode._dom = oldVNode._dom;
-			}
-
-			if (!newVNode._children) {
-				newVNode._children = oldVNode._children || [];
 			}
 
 			if (!(e && e.then)) markAsForce(newVNode);
