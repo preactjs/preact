@@ -13,9 +13,15 @@ import {
 	TargetedInputEvent,
 	TargetedToggleEvent,
 	TargetedSubmitEvent,
+	TargetedAnimationEvent,
+	TargetedPointerEvent,
+	TargetedContentVisibilityAutoStateChangeEvent,
+	TargetedSecurityPolicyViolationEvent,
 	AllHTMLAttributes,
 	HTMLAttributes,
-	InputHTMLAttributes
+	InputHTMLAttributes,
+	CanvasHTMLAttributes,
+	TrackHTMLAttributes
 } from '../../';
 
 function createSignal<T>(value: T): SignalLike<T> {
@@ -422,6 +428,77 @@ const onToggle = (e: TargetedToggleEvent<HTMLDetailsElement>) => {};
 <dialog onToggle={e => ({ newState: e.newState, oldState: e.oldState })} />;
 createElement('dialog', { onToggle: onToggle });
 h('dialog', { onToggle: onToggle });
+
+// Should accept onSlotChange
+const onSlotChange = (e: TargetedEvent<HTMLSlotElement>) => {};
+<slot onSlotChange={e => e.currentTarget.assignedNodes()} />;
+createElement('slot', { onSlotChange });
+h('slot', { onSlotChange });
+
+// Should accept onBeforeMatch
+<div onBeforeMatch={e => e.currentTarget} />;
+createElement('div', { onBeforeMatch: e => e.currentTarget });
+h('div', { onBeforeMatch: e => e.currentTarget });
+
+// Should accept onContentVisibilityAutoStateChange
+const onContentVisibilityAutoStateChange = (
+	e: TargetedContentVisibilityAutoStateChangeEvent<HTMLDivElement>
+) => {};
+<div onContentVisibilityAutoStateChange={e => e.skipped} />;
+createElement('div', { onContentVisibilityAutoStateChange });
+h('div', { onContentVisibilityAutoStateChange });
+
+// Should accept onFullscreenChange and onFullscreenError
+<div
+	onFullscreenChange={e => e.currentTarget}
+	onFullscreenError={e => e.currentTarget}
+/>;
+createElement('div', { onFullscreenChange: e => e.currentTarget });
+h('div', { onFullscreenError: e => e.currentTarget });
+
+// Should accept onPointerRawUpdate
+const onPointerRawUpdate = (e: TargetedPointerEvent<HTMLDivElement>) => {};
+<div onPointerRawUpdate={e => e.pointerId} />;
+createElement('div', { onPointerRawUpdate });
+h('div', { onPointerRawUpdate });
+
+// Should accept onSecurityPolicyViolation
+const onSecurityPolicyViolation = (
+	e: TargetedSecurityPolicyViolationEvent<HTMLDivElement>
+) => {};
+<div onSecurityPolicyViolation={e => e.violatedDirective} />;
+createElement('div', { onSecurityPolicyViolation });
+h('div', { onSecurityPolicyViolation });
+
+// Should accept onSelectStart and onSelectionChange
+<div
+	onSelectStart={e => e.currentTarget}
+	onSelectionChange={e => e.currentTarget}
+/>;
+createElement('div', { onSelectStart: e => e.currentTarget });
+h('div', { onSelectionChange: e => e.currentTarget });
+
+// Should accept onAnimationCancel
+const onAnimationCancel = (e: TargetedAnimationEvent<HTMLDivElement>) => {};
+<div onAnimationCancel={e => e.animationName} />;
+createElement('div', { onAnimationCancel });
+h('div', { onAnimationCancel });
+
+// Should accept onContextLost and onContextRestored
+const onContextLost = (e: TargetedEvent<HTMLCanvasElement>) => {};
+const onContextRestored = (e: TargetedEvent<HTMLCanvasElement>) => {};
+<canvas
+	onContextLost={e => e.currentTarget}
+	onContextRestored={e => e.currentTarget}
+/>;
+createElement<CanvasHTMLAttributes>('canvas', { onContextLost });
+h<CanvasHTMLAttributes>('canvas', { onContextRestored });
+
+// Should accept onCueChange
+const onCueChange = (e: TargetedEvent<HTMLTrackElement>) => {};
+<track onCueChange={e => e.currentTarget.track} />;
+createElement<TrackHTMLAttributes>('track', { onCueChange });
+h<TrackHTMLAttributes>('track', { onCueChange });
 
 // Should default to correct event target element for the attribute interface
 h<InputHTMLAttributes>('input', { onClick: e => e.currentTarget.capture });
