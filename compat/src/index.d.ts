@@ -310,7 +310,7 @@ declare namespace React {
 	export function isFragment(element: any): boolean;
 	export function isMemo(element: any): boolean;
 	export function findDOMNode(
-		component: _preact.Component | Element
+		component: _preact.Component | Element | null | undefined
 	): Element | null;
 
 	export abstract class PureComponent<
@@ -411,12 +411,12 @@ declare namespace React {
 
 	export const Children: {
 		map<T extends _preact.ComponentChild, R>(
-			children: T | T[],
+			children: T | readonly T[],
 			fn: (child: T, i: number) => R,
 			context?: any
 		): R[];
 		forEach<T extends _preact.ComponentChild>(
-			children: T | T[],
+			children: T | readonly T[],
 			fn: (child: T, i: number) => void,
 			context?: any
 		): void;
