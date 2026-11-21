@@ -84,7 +84,7 @@ type CreateHandle = () => object;
  * @param inputs If present, effect will only activate if the values in the list change (using ===).
  */
 export function useImperativeHandle<T, R extends T>(
-	ref: Ref<T>,
+	ref: Ref<T> | undefined,
 	create: () => R,
 	inputs?: Inputs
 ): void;
