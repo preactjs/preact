@@ -146,6 +146,15 @@ export function diffChildren(
 			oldDom = newDom.nextSibling;
 		}
 
+		// A caught error or suspension can retain the old child subtree.
+		if (
+			oldVNode != childVNode &&
+			oldVNode._parent == oldParentVNode &&
+			childVNode._original != NULL
+		) {
+			oldVNode._parent = NULL;
+		}
+
 		// Clear placement and LIS flags; MATCHED only belongs to old vnodes.
 		childVNode._flags &= ~(INSERT_VNODE | LIS_CANDIDATE);
 	}

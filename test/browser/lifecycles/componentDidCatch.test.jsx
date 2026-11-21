@@ -157,6 +157,57 @@ describe('Lifecycle methods', () => {
 			);
 		});
 
+		it('should retain child ancestry when a replacement throws', () => {
+			function Child({ fail, text }) {
+				if (fail) throw new Error('failed');
+				return <span>{text}</span>;
+			}
+			const first = (
+				<div>
+					<Child text="first" />
+				</div>
+			);
+			const receiver = <Receiver>{first}</Receiver>;
+			render(receiver, scratch);
+			const boundary = receiver._component;
+			const oldChild = first._children[0];
+			const descendant = oldChild._children[0];
+			expect(oldChild._parent).to.equal(first);
+			expect(descendant._parent).to.equal(oldChild);
+
+			const second = (
+				<div>
+					<Child fail />
+				</div>
+			);
+			render(<Receiver>{second}</Receiver>, scratch);
+			expect(oldChild._parent).to.equal(first);
+			expect(descendant._parent).to.equal(oldChild);
+			rerender();
+			expect(scratch.textContent).to.equal('Error: failed');
+
+			boundary.setState({ error: null });
+			render(
+				<Receiver>
+					<div>
+						<Child text="recovered" />
+					</div>
+				</Receiver>,
+				scratch
+			);
+			rerender();
+			expect(scratch.textContent).to.equal('recovered');
+			render(
+				<Receiver>
+					<div>
+						<Child text="updated" />
+					</div>
+				</Receiver>,
+				scratch
+			);
+			expect(scratch.textContent).to.equal('updated');
+		});
+
 		it('should discard commit callbacks from a partially rendered subtree', () => {
 			let componentDidMount = vi.fn();
 

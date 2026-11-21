@@ -368,6 +368,27 @@ describe('render()', () => {
 		expect(scratch._children.props.children).to.equal(null);
 	});
 
+	it('should release the parent of a replaced child vnode', () => {
+		const first = (
+			<div>
+				<span>first</span>
+			</div>
+		);
+		render(first, scratch);
+		const oldChild = first._children[0];
+		const span = scratch.querySelector('span');
+		expect(oldChild._parent).to.equal(first);
+
+		const child = <span>second</span>;
+		const second = <div>{child}</div>;
+		render(second, scratch);
+		expect(oldChild._parent).to.equal(null);
+		expect(child._parent).to.equal(second);
+		expect(second._children[0]).to.equal(child);
+		expect(scratch.querySelector('span')).to.equal(span);
+		expect(span.textContent).to.equal('second');
+	});
+
 	it('should nest empty nodes', () => {
 		render(
 			<div>

@@ -110,6 +110,52 @@ describe('suspense', () => {
 		});
 	});
 
+	it('should retain child ancestry when a replacement suspends', async () => {
+		let resolve;
+		let pending = true;
+		const promise = new Promise(r => (resolve = r));
+		function Child({ suspend, text }) {
+			if (suspend && pending) throw promise;
+			return <span>{text}</span>;
+		}
+		const first = (
+			<div>
+				<Child text="first" />
+			</div>
+		);
+		render(<Suspense fallback="loading">{first}</Suspense>, scratch);
+		const oldChild = first._children[0];
+		const descendant = oldChild._children[0];
+		expect(oldChild._parent).to.equal(first);
+		expect(descendant._parent).to.equal(oldChild);
+
+		const second = (
+			<div>
+				<Child suspend text="recovered" />
+			</div>
+		);
+		render(<Suspense fallback="loading">{second}</Suspense>, scratch);
+		expect(oldChild._parent).to.equal(first);
+		expect(descendant._parent).to.equal(oldChild);
+		rerender();
+		expect(scratch.textContent).to.equal('loading');
+
+		pending = false;
+		resolve();
+		await promise;
+		rerender();
+		expect(scratch.textContent).to.equal('recovered');
+		render(
+			<Suspense fallback="loading">
+				<div>
+					<Child text="updated" />
+				</div>
+			</Suspense>,
+			scratch
+		);
+		expect(scratch.textContent).to.equal('updated');
+	});
+
 	it('should not materialize undefined DOM props when suspense resumes', () => {
 		const LazyComp = () => <span>Done</span>;
 
