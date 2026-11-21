@@ -246,6 +246,7 @@ declare namespace React {
 
 	// Events
 	export import TargetedEvent = _preact.TargetedEvent;
+	export import SyntheticEvent = _preact.TargetedEvent;
 	export import ChangeEvent = _preact.TargetedEvent;
 	export import ClipboardEvent = _preact.TargetedClipboardEvent;
 	export import CompositionEvent = _preact.TargetedCompositionEvent;
@@ -256,8 +257,10 @@ declare namespace React {
 	export import InvalidEvent = _preact.TargetedEvent;
 	export import KeyboardEvent = _preact.TargetedKeyboardEvent;
 	export import MouseEvent = _preact.TargetedMouseEvent;
+	export import ToggleEvent = _preact.TargetedToggleEvent;
 	export import TouchEvent = _preact.TargetedTouchEvent;
 	export import UIEvent = _preact.TargetedUIEvent;
+	export import WheelEvent = _preact.TargetedWheelEvent;
 	export import AnimationEvent = _preact.TargetedAnimationEvent;
 	export import TransitionEvent = _preact.TargetedTransitionEvent;
 
@@ -270,11 +273,15 @@ declare namespace React {
 	export import PointerEventHandler = _preact.PointerEventHandler;
 	export import FocusEventHandler = _preact.FocusEventHandler;
 	export import FormEventHandler = _preact.GenericEventHandler;
+	export import InputEventHandler = _preact.InputEventHandler;
 	export import InvalidEventHandler = _preact.GenericEventHandler;
 	export import KeyboardEventHandler = _preact.KeyboardEventHandler;
 	export import MouseEventHandler = _preact.MouseEventHandler;
+	export import SubmitEventHandler = _preact.SubmitEventHandler;
+	export import ToggleEventHandler = _preact.ToggleEventHandler;
 	export import TouchEventHandler = _preact.TouchEventHandler;
 	export import UIEventHandler = _preact.UIEventHandler;
+	export import WheelEventHandler = _preact.WheelEventHandler;
 	export import AnimationEventHandler = _preact.AnimationEventHandler;
 	export import TransitionEventHandler = _preact.TransitionEventHandler;
 
