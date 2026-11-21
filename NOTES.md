@@ -83,20 +83,54 @@ An earlier combined prototype that stopped claiming `$s:id` ranges (the
 
 ## What the feature branches do
 
-- Preact: #5399, plus "Claim only a component's own streamed range while
-  hydrating". A suspending component keeps its own range (all of it when
-  unclosed), or else the first node that isn't a comment. It never claims a
-  boundary's `$s:id` range. The step-back loop and the no-excess fallback
-  are gone.
-- RTS: inside a streamed chunk, each component the boundary renders directly
-  gets `<!--$s-->…<!--/$s-->`, the same marker `renderToStringAsync` uses. A
-  boundary that didn't suspend but starts with a streamed one gets its own
-  `$s:id` range ("RTS-min"). Shell markup and `renderToStringAsync` output
-  don't change.
+The first two commits on each branch are the lean version: #5399, a
+suspending component claims only its own range, and RTS marks the components
+a streamed boundary renders. On top of that, the branches now carry every fix
+we found, so streaming and `renderToStringAsync` hydrate correctly in every
+shape the harness has.
 
-The preact change needs the RTS markers. Lean preact with RTS main regresses
-4 shapes (multiRoot, html, tickProp, nest3). With the RTS change it regresses
-none.
+Preact:
+
+1. `insert()` moves the server DOM a suspended component kept when its keyed
+   list reorders. This path runs for all hydration. (keyed, keyedNoStream)
+2. A component only claims a numbered marker (`<!--$s3-->`) whose number is
+   its own depth: the components between it and the closest element, not
+   counting Fragments. Only `$s?` and `$s!` ranges count as fallback ranges.
+   (innerPlain, wrapFirstServer)
+3. Each Suspense gets its own useId counter, so ids inside a boundary don't
+   depend on when it resolves. Ids inside a Suspense look like `PP0-1-0`.
+   (useId)
+4. A boundary leaves its own `$s:id` range, and a range a boundary above it
+   took over, to its children. A suspender claims a fallback range only when
+   it comes first and the client hasn't rendered into it yet. Otherwise it
+   keeps the first fallback node and diffs its attributes when it resumes,
+   and the leftover markers and PIs are removed so the chunk can't patch over
+   client DOM. (outerNoRange, outerNoRangeLazy, lazySecond, lazyRef,
+   serverWaterfall, nest3)
+5. A boundary skips numbered markers that belong to components above it.
+
+RTS:
+
+1. Every component range gets its depth number.
+2. Each component a Suspense renders directly gets markers, in every render
+   mode. (multiRootClient, gateAboveNoWrap, wrapFirstClient)
+3. The streamed-chunk and `renderToStringAsync` retries restart the
+   boundary's useId counter.
+4. Every component in a streamed chunk, and every component
+   `renderToStringAsync` renders again after it suspended, gets markers.
+   (lazyMulti)
+
+Risky changes to look at in review:
+
+- A `$s:id` range can be claimed when it's the first node of a range a
+  boundary took over. The lean version never claimed one.
+- When a suspender doesn't claim the whole taken-over range, that range can no
+  longer receive its chunk.
+- `_excess` is now also an expando on DOM nodes, and set to `2` on the list
+  when the client renders into a taken-over fallback range.
+- The keyed `insert()` change affects all hydration.
+- useId values inside a Suspense change format.
+- More markers in the HTML (see below).
 
 ## Harness
 
@@ -111,23 +145,43 @@ lazy resolution.
 
 Results land in `out/<label>/results.json`.
 
-| preact / rts                | shapes passing | failing runs |
-| --------------------------- | -------------- | ------------ |
-| main / main                 | 36             | 329          |
-| #5399 / main                | 36             | 311          |
-| combined prototype          | 35             | 295          |
-| v5 / main                   | 45             | 200          |
-| v5 / RTS-min                | 48             | 132          |
-| v5 / RTS-all                | 49             | 98           |
-| lean / main                 | 38             | 322          |
-| lean / lean RTS (these PRs) | 40             | 263          |
+| preact / rts       | shapes passing | failing runs |
+| ------------------ | -------------- | ------------ |
+| main / main        | 36             | 329          |
+| #5399 / main       | 36             | 311          |
+| combined prototype | 35             | 295          |
+| v5 / main          | 45             | 200          |
+| v5 / RTS-min       | 48             | 132          |
+| v5 / RTS-all       | 49             | 98           |
+| lean / main        | 38             | 322          |
+| lean / lean RTS    | 40             | 263          |
 
 v5 passes more shapes but costs a lot more in preact. We left it out because
 it's unclear how much streaming will be used.
 
-Shapes still failing on these branches: nest3 (2/40), gateAboveNoWrap,
-keyed, lazySecond, multiRootClient, keyedNoStream, serverWaterfall,
-outerNoRange, outerNoRangeLazy, innerPlain, lazyMulti, lazyRef, useId.
+The harness copy at `/tmp/prs/harness/fb` adds 4 shapes (wrapFirstClient,
+wrapMidClient, wrapFirstServer, twoChildrenFirstClient), 57 in total.
+
+| harness             | lean branches           | these branches, seed 57 | these branches, seed 99 |
+| ------------------- | ----------------------- | ----------------------- | ----------------------- |
+| streaming           | 43/57, 283 failing runs | 57/57, 0                | 56/57, 1 (twoInOne)     |
+| renderToStringAsync | 46/57, 230 failing runs | 54/57 (serverError\*)   | 54/57 (serverError\*)   |
+
+The one twoInOne run is a rare race that the lean branches fail in the same
+way (1 of 381 runs with 400 schedules, seed 99). The page hydrates while the
+boundary's range is still pending, both chunks arrive, then both lazy children
+resolve before the next render. The second child kept no DOM, and when it
+resumes it lands after the boundary's next sibling (`1, z, 2`). Not
+fixed yet.
+
+useId variants (`/tmp/prs/harness/idcheck`, "DOM id equals the client's
+`useId()`"): 9 of 11 pass in each mode. The two left are the counter's limit:
+a client that suspends while hydrating while a later sibling takes the id
+first, or a retry caught below the boundary. Only tree-position ids fix those.
+
+HTML grows with the extra markers, about 19 B per marked component: +10.7%
+over the harness shapes when streaming, +21.4% through `renderToStringAsync`
+(inflated, since almost every harness shape suspends).
 
 ## renderToStringAsync
 
@@ -206,12 +260,15 @@ tests whose expected markup now has numbered markers (`<!--$s2-->`).
    that may suspend while hydrating renders a single root or sits directly
    under a Suspense.
 
-Open PRs, all drafts against `main`:
+PRs against `main`:
 
-- preactjs/preact#5402 and preactjs/preact-render-to-string#505: fix 4.
-- preactjs/preact-render-to-string#506: fix 3. Shouldn't merge before fix 2.
+- preactjs/preact-render-to-string#505 (fix 4, server half): merged.
+- preactjs/preact#5402 (fix 4, client half): draft.
+- JoviDeCroock/preact-suspense#9 (fix 4 for preact-suspense): draft.
+- preactjs/preact-render-to-string#506 (fix 3): draft. Shouldn't merge before
+  fix 2.
 
-Fixes 1, 2 and 5 aren't PRs yet.
+Fixes 1, 2 and 5 aren't PRs on their own; 1 to 4 are all on these branches.
 
 ## Size (preact, gzip)
 
@@ -220,26 +277,30 @@ Fixes 1, 2 and 5 aren't PRs yet.
 | main (with #5360)           | 5027  |
 | #5399                       | 5034  |
 | v5                          | 5086  |
-| feature branch              | 5008  |
+| lean feature branch         | 5008  |
 | revert branch               | 4961  |
 | revert + async fixes 1 to 3 | 5041  |
+| feature branch, all fixes   | 5173  |
 
 ## How we're weighing it
 
 If streaming gets better, that's a win. If `renderToStringAsync` doesn't
-regress, that's a win too. The branches aim for both without growing preact
-much: they cost 47 B over the revert and are smaller than main today.
+regress, that's a win too. The lean version cost 47 B over the revert. With
+every fix, the branches cost 212 B over the revert (146 B over main before the
+revert), plus 3 B in hooks and 14 B in compat. About 80 B of that also fixes
+`renderToStringAsync`, which has these bugs without streaming.
 
 ## Open questions
 
 - Do we ship DPU streaming at all, or keep it on this branch for now?
-- Marking every component in a chunk (RTS-all) helps more, but only after a
-  client fix for the cursor issue (cause 5).
-- Which `renderToStringAsync` fixes to land: 1 to 3 cost 80 B in core
-  together, 4 is up as #5402/#505, 5 is an API decision.
-- Whether fix 2's numbered markers should replace the plain `$s` markers in
-  streamed chunks too.
-- lazyMulti: whole-boundary suspension, or a documented single-root rule.
+- Which fixes to take to main for `renderToStringAsync` alone: keyed,
+  ownership and direct-child markers cost about 80 B in core together.
+- Whether the extra HTML from marking every component in a chunk or async
+  retry is worth it, or whether lazyMulti gets a documented single-root rule
+  instead.
+- serverError: whether `renderToStringAsync` should render the fallback on
+  errors (opt-in `onError`, prototyped in `/tmp/prs/fixes/async/`).
+- useId: tree-position ids would fix the last two variants.
 
 ---
 
