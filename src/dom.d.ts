@@ -634,6 +634,23 @@ export type PictureInPictureEventHandler<Target extends EventTarget> =
 export interface DOMAttributes<
 	Target extends EventTarget
 > extends PreactDOMAttributes {
+	onFullscreenChange?: GenericEventHandler<Target> | undefined;
+	onFullscreenChangeCapture?: GenericEventHandler<Target> | undefined;
+	onFullscreenError?: GenericEventHandler<Target> | undefined;
+	onFullscreenErrorCapture?: GenericEventHandler<Target> | undefined;
+	onContentVisibilityAutoStateChange?:
+		| ContentVisibilityAutoStateChangeEventHandler<Target>
+		| undefined;
+	onContentVisibilityAutoStateChangeCapture?:
+		| ContentVisibilityAutoStateChangeEventHandler<Target>
+		| undefined;
+	onSecurityPolicyViolation?:
+		| SecurityPolicyViolationEventHandler<Target>
+		| undefined;
+	onSecurityPolicyViolationCapture?:
+		| SecurityPolicyViolationEventHandler<Target>
+		| undefined;
+
 	// Image Events
 	onLoad?: GenericEventHandler<Target> | undefined;
 	onLoadCapture?: GenericEventHandler<Target> | undefined;
@@ -662,31 +679,9 @@ export interface DOMAttributes<
 	onToggle?: ToggleEventHandler<Target> | undefined;
 	onToggleCapture?: ToggleEventHandler<Target> | undefined;
 
-	// Fullscreen Events
-	onFullscreenChange?: GenericEventHandler<Target> | undefined;
-	onFullscreenChangeCapture?: GenericEventHandler<Target> | undefined;
-	onFullscreenError?: GenericEventHandler<Target> | undefined;
-	onFullscreenErrorCapture?: GenericEventHandler<Target> | undefined;
-
 	// Hidden-until-found Events
 	onBeforeMatch?: GenericEventHandler<Target> | undefined;
 	onBeforeMatchCapture?: GenericEventHandler<Target> | undefined;
-
-	// Content Visibility Events
-	onContentVisibilityAutoStateChange?:
-		| ContentVisibilityAutoStateChangeEventHandler<Target>
-		| undefined;
-	onContentVisibilityAutoStateChangeCapture?:
-		| ContentVisibilityAutoStateChangeEventHandler<Target>
-		| undefined;
-
-	// Content Security Policy Events
-	onSecurityPolicyViolation?:
-		| SecurityPolicyViolationEventHandler<Target>
-		| undefined;
-	onSecurityPolicyViolationCapture?:
-		| SecurityPolicyViolationEventHandler<Target>
-		| undefined;
 
 	// Dialog Events
 	onClose?: GenericEventHandler<Target> | undefined;
