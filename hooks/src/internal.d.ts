@@ -37,14 +37,14 @@ export interface Component extends Omit<
 	'_renderCallbacks'
 > {
 	__hooks?: ComponentHooks;
-	_mask?: [number, number];
+	_mask?: [number | string, number];
 	// Extend to include HookStates
 	_renderCallbacks?: Array<HookState | (() => void)>;
 	_hasScuFromHooks?: boolean;
 }
 
 export interface VNode extends Omit<PreactVNode, '_component'> {
-	_mask?: [number, number];
+	_mask?: [number | string, number];
 	_component?: Component; // Override with our specific Component type
 }
 
