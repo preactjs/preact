@@ -131,21 +131,98 @@ outerNoRange, outerNoRangeLazy, innerPlain, lazyMulti, lazyRef, useId.
 
 ## renderToStringAsync
 
-Through `renderToStringAsync`, main and these branches fail the same runs
-(209). So there's no regression. Seven shapes fail for real: gateAboveNoWrap,
-keyed, keyedNoStream, multiRootClient, innerPlain, lazyMulti and useId. The
-three `serverError*` shapes only fail because of how the harness records
-them. These failures exist without streaming, so streaming inherits them.
+Through `renderToStringAsync`, main, the revert branches and these branches
+fail the same runs (209). So there's no regression, and the revert fixes
+nothing either. The same shapes fail on 11.2.0 with RTS 6.8.3. These failures
+exist without streaming, so streaming inherits them.
+
+We prototyped a fix for each one on top of the revert branches. Patches are in
+`/tmp/prs/fixes/async/`, one per fix, plus `combined/` with 1 to 3 applied
+together.
+
+| failure                          | fix                                                           | where                | preact bytes (min+gzip)      |
+| -------------------------------- | ------------------------------------------------------------- | -------------------- | ---------------------------- |
+| keyed, keyedNoStream             | 1. `insert()` moves the DOM a suspended component kept        | core                 | +33                          |
+| innerPlain, wrapFirstServer      | 2. numbered markers, so a component knows its own marker      | core + RTS           | +48                          |
+| multiRootClient, gateAboveNoWrap | 3. markers around each component a Suspense renders directly  | RTS                  | 0                            |
+| useId                            | 4. each Suspense gets its own useId counter                   | compat + hooks + RTS | core 0, compat +14, hooks +3 |
+| serverError\*                    | 5. opt-in `onError` renders the fallback instead of rejecting | RTS                  | 0                            |
+| lazyMulti                        | none that's cheap                                             |                      |                              |
+
+1 to 3 together take the async harness from 46 to 52 of 57 shapes passing (the
+53 plus 4 extra shapes in `/tmp/prs/harness/fxm`), with no regressions. Core
+goes from 4961 to 5041 B (+80 B). Preact tests pass (1472). RTS fails only 14
+tests whose expected markup now has numbered markers (`<!--$s2-->`).
+
+1. **Keyed reorder.** A component that suspends while hydrating keeps its
+   server DOM, but its vnode has no children. When a keyed list reorders,
+   `insert()` walks the empty child list and moves nothing, so the kept DOM
+   stays put (got `c,a,b`, want `c,b,a`). The fix places such a component like
+   a DOM node and moves its whole `$s` range. This path runs for all
+   hydration, not just streaming. Fixes keyed 14/37 and keyedNoStream 21/39.
+2. **Marker ownership.** The cursor isn't moved until a DOM node is used. So
+   the component that owns `<!--$s-->` and a descendant that suspends on the
+   client both start on the same marker, and the descendant claims the whole
+   range. No HTML layout alone can separate them. RTS writes the owner's depth
+   (components between it and the closest element, not counting Fragments)
+   into the marker: `<!--$s3-->`. The client only claims a numbered marker
+   whose number matches its own depth. Unnumbered markers are claimed as
+   before, so an old RTS keeps working. A 37 B variant drops that, at the cost
+   of breaking with an old RTS. An empty sibling at the same depth right
+   before the owner can still take its range; that's broken today too.
+3. **Direct-child markers.** A component that suspends while hydrating keeps
+   only its first server node, because nothing tells the client where its
+   output ends. The leftover nodes get adopted by the wrong siblings. Wrapping
+   each component a Suspense renders directly fixes that (about 19 B of HTML
+   each). On its own it breaks wrapFirstClient (0/21 to 21/21): a wrapper's
+   first child that suspends on the client takes the wrapper's marker. Fix 2
+   solves that, so 3 needs 2. This is the same idea the RTS feature branch
+   uses for streamed chunks.
+4. **useId.** Preact's useId is one counter per root, in render order. The
+   server renders a suspended subtree last, so the sibling after it takes the
+   lower id. The harness's useId shape doesn't actually show this: in every
+   schedule it generates the client also suspends while hydrating, so its ids
+   match the server DOM, and the 21/21 failures compare against a tree-order
+   render no real client produces. The bug is real when the client doesn't
+   suspend, or when the server hands out an id on an attempt it throws away. A
+   copy of the harness at `/tmp/prs/harness/idcheck` checks "DOM id equals the
+   client's `useId()`" over 11 variants: 8 fail before the fix, 2 after. The
+   fix: each compat Suspense takes one id from its parent, in tree order on
+   both sides, and numbers its subtree from it (`PP0-1-0`). RTS restarts that
+   counter when it retries a boundary. A server-only fix can't work, because
+   the client numbers in render order. The 2 left need React-style
+   tree-position ids.
+5. **serverError.** `renderToStringAsync` rejects on any error that isn't
+   marked recoverable, so there's no HTML to hydrate. The streaming renderer
+   reports the error and emits a `$s!` fallback instead. The prototype adds
+   `renderToStringAsync(vnode, context, { onError })`: with it, the nearest
+   Suspense reports the error and renders its fallback as `<!--$s!-->`. It
+   swallows errors if `onError` ignores them, and a Suspense inside a class
+   error boundary doesn't get it. Making it the default is a product call.
+6. **lazyMulti.** The suspender sits deep inside the boundary, and the server
+   can't know which component will suspend on the client. Options are
+   whole-boundary suspension in core (#5394's approach, bytes not measured,
+   siblings stay inert until it resolves), or documenting that a component
+   that may suspend while hydrating renders a single root or sits directly
+   under a Suspense.
+
+Open PRs, all drafts against `main`:
+
+- preactjs/preact#5402 and preactjs/preact-render-to-string#505: fix 4.
+- preactjs/preact-render-to-string#506: fix 3. Shouldn't merge before fix 2.
+
+Fixes 1, 2 and 5 aren't PRs yet.
 
 ## Size (preact, gzip)
 
-| build             | bytes |
-| ----------------- | ----- |
-| main (with #5360) | 5027  |
-| #5399             | 5034  |
-| v5                | 5086  |
-| feature branch    | 5008  |
-| revert branch     | 4961  |
+| build                       | bytes |
+| --------------------------- | ----- |
+| main (with #5360)           | 5027  |
+| #5399                       | 5034  |
+| v5                          | 5086  |
+| feature branch              | 5008  |
+| revert branch               | 4961  |
+| revert + async fixes 1 to 3 | 5041  |
 
 ## How we're weighing it
 
@@ -158,9 +235,11 @@ much: they cost 47 B over the revert and are smaller than main today.
 - Do we ship DPU streaming at all, or keep it on this branch for now?
 - Marking every component in a chunk (RTS-all) helps more, but only after a
   client fix for the cursor issue (cause 5).
-- The keyed insert bug while hydrating (keyed, keyedNoStream).
-- `useId` order differs between server and client inside boundaries.
-- lazyMulti: several lazy siblings in one boundary.
+- Which `renderToStringAsync` fixes to land: 1 to 3 cost 80 B in core
+  together, 4 is up as #5402/#505, 5 is an API decision.
+- Whether fix 2's numbered markers should replace the plain `$s` markers in
+  streamed chunks too.
+- lazyMulti: whole-boundary suspension, or a documented single-root rule.
 
 ---
 
