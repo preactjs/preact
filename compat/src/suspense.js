@@ -6,6 +6,7 @@ import {
 	UNDEFINED,
 	VNODE_MARKER
 } from '../../src/constants';
+import { useId } from 'preact/hooks';
 import { assign } from './util';
 
 function initSuspenseHooks() {
@@ -212,6 +213,10 @@ function createSuspense() {
 	 * @param {import('./internal').SuspenseState} state
 	 */
 	Suspense.prototype.render = function (props, state) {
+		// Ids inside a boundary come from its own counter, so they don't depend
+		// on when it resolves on the server or hydrates on the client.
+		this._mask || (this._mask = [useId(), 0]);
+
 		if (this._detachOnNextRender) {
 			// When the Suspense's _vnode was created by a call to createVNode
 			// (i.e. due to a setState further up in the tree)
