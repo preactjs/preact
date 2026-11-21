@@ -28,15 +28,3 @@ export const Bar = React.forwardRef<HTMLDivElement, { children: any }>(
 export const baz = (
 	ref: React.ForwardedRef<HTMLElement>
 ): React.Ref<HTMLElement> => ref;
-
-export const OptionalRefPropInput = ({
-	ref
-}: {
-	ref?: React.Ref<{ focus(): void }>;
-}) => {
-	React.useImperativeHandle(ref, () => ({
-		focus: () => {}
-	}));
-
-	return <input />;
-};

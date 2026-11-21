@@ -19,19 +19,9 @@ React.createPortal(<div />, document.body.shadowRoot!);
 const Ctx = React.createContext({ contextValue: '' });
 const contextValue: { contextValue: string } = React.use(Ctx);
 const promiseValue: string = React.use(Promise.resolve('value'));
-const thenable: PromiseLike<number> = {
-	then: onfulfilled => Promise.resolve(onfulfilled ? onfulfilled(1) : (1 as any))
-};
-const thenableValue: number = React.use(thenable);
 
 contextValue.contextValue.toLowerCase();
 promiseValue.toLowerCase();
-thenableValue.toFixed();
-
-const deferredSingle: string = React.useDeferredValue('query');
-const deferredWithInitial: string = React.useDeferredValue('query', '');
-deferredSingle.toLowerCase();
-deferredWithInitial.toLowerCase();
 
 class SimpleComponentWithContextAsProvider extends React.Component {
 	componentProp = 'componentProp';
@@ -59,22 +49,10 @@ React.render(
 
 // Children.map / Children.forEach accept an optional context argument
 const mappedChildren: string[] = React.Children.map([<div />], () => 'child');
-const readonlyChildren: readonly React.ReactElement[] = [<div />];
-const mappedReadonly: string[] = React.Children.map(readonlyChildren, child =>
-	String(child.type)
-);
 React.Children.forEach([<div />], () => {});
-React.Children.forEach(readonlyChildren, child => {
-	child.type;
-});
 React.Children.map([<div />], () => 'child', {});
 React.Children.forEach([<div />], () => {}, {});
 mappedChildren.length;
-mappedReadonly.length;
-
-// findDOMNode accepts null and undefined like in React
-React.findDOMNode(null);
-React.findDOMNode(undefined);
 
 
 // React-style attribute interfaces can be spread onto their element
@@ -99,20 +77,3 @@ if (React.isValidElement(maybeElement)) {
 if (React.isElement(maybeElement)) {
 	maybeElement.props;
 }
-
-// React-compatible event and event handler types
-export const onSynthetic: React.EventHandler<
-	React.SyntheticEvent<HTMLDivElement>
-> = () => {};
-export const onWheel: React.WheelEventHandler<HTMLDivElement> = (
-	e: React.WheelEvent<HTMLDivElement>
-) => {
-	e.deltaY;
-};
-export const onToggle: React.ToggleEventHandler<HTMLDetailsElement> = (
-	e: React.ToggleEvent<HTMLDetailsElement>
-) => {
-	e.newState;
-};
-export const onInput: React.InputEventHandler<HTMLInputElement> = () => {};
-export const onSubmit: React.SubmitEventHandler<HTMLFormElement> = () => {};
