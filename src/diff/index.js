@@ -387,6 +387,16 @@ export function diff(
 							child;
 						if (!~i) i = excessDomChildren.length;
 
+						// A numbered marker belongs to the component that many levels
+						// below the closest element; an ancestor at the same spot isn't ours.
+						for (
+							end = 0, tmp = newVNode;
+							tmp && typeof tmp.type == 'function';
+							tmp = tmp._parent
+						) {
+							end += tmp.type != Fragment;
+						}
+
 						// Keep what this component would have claimed: its whole
 						// streamed range (all of it when unclosed), or else the first
 						// node that isn't a comment. A boundary's range (`$s:id`) is
@@ -398,7 +408,8 @@ export function diff(
 										startMarker = end = child;
 									} else if (
 										child.data.startsWith('$s') &&
-										child.data[2] != ':'
+										child.data[2] != ':' &&
+										!(child.data[2] > -1 && child.data.slice(2) != end)
 									) {
 										end = rangeEnd((startMarker = child));
 									} else continue;
@@ -467,7 +478,9 @@ export function diff(
  */
 export function rangeEnd(start, nodes) {
 	if (start && start.nodeType == 8) {
-		if (nodes) nodes._excess = start.data[2] && start.data[2] != ':';
+		if (nodes)
+			nodes._excess =
+				start.data[2] && start.data[2] != ':' && !(start.data[2] > -1);
 		if (start.data.startsWith('$s')) {
 			for (let depth = 1; (start = start.nextSibling); ) {
 				if (nodes) nodes.push(start);
