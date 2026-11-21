@@ -2617,6 +2617,122 @@ describe('suspense hydration owning a streamed range', () => {
 			expect(getLog()).to.deep.equal([]);
 		});
 
+		it('should take over a pending range inside the range of a boundary that did not suspend', () => {
+			scratch.innerHTML =
+				'<div><!--$s:0--><!--$s?:1--><!--?start name="1"--><p class="fb">loading</p><!--?end--><!--/$s:1--><p class="two">two</p><!--/$s:0--><footer>foot</footer></div>';
+			const two = scratch.querySelector('.two');
+			const footer = scratch.querySelector('footer');
+
+			hydrate(
+				<div>
+					<Suspense fallback={<p>outer</p>}>
+						<Suspense fallback={<p class="fb">loading</p>}>
+							<p class="one">one</p>
+						</Suspense>
+						<p class="two">two</p>
+					</Suspense>
+					<footer>foot</footer>
+				</div>,
+				scratch
+			);
+			rerender();
+
+			expect(
+				[...scratch.querySelectorAll('p')].map(p => p.className)
+			).to.deep.equal(['one', 'two']);
+			expect(scratch.querySelector('.two')).to.equal(two);
+			expect(scratch.querySelector('footer')).to.equal(footer);
+		});
+
+		it('should not let a chunk patch a pending range the client rendered into', async () => {
+			scratch.innerHTML =
+				'<div><!--$s?:1--><!--?start name="1"--><i>loading</i><!--?end--><!--/$s:1--><footer>foot</footer></div>';
+			const [Lazy, resolve] = createLazy();
+
+			hydrate(
+				<div>
+					<Suspense fallback={<i>loading</i>}>
+						<p class="a">a</p>
+						<Lazy />
+					</Suspense>
+					<footer>foot</footer>
+				</div>,
+				scratch
+			);
+			rerender();
+
+			// Nothing is left for the stream to patch
+			expect(scratch.innerHTML).not.to.contain('?start');
+
+			await resolve(() => <p class="b">b</p>);
+			rerender();
+			expect(
+				[...scratch.querySelectorAll('p')].map(p => p.className)
+			).to.deep.equal(['a', 'b']);
+			expect(
+				scratch.querySelector('p.b').nextElementSibling.localName
+			).to.equal('footer');
+		});
+
+		it('should not let a nested boundary take a range a boundary above it took', async () => {
+			scratch.innerHTML =
+				'<div><!--$s?:1--><!--?start name="1"--><i>loading</i><!--?end--><!--/$s:1--></div>';
+			const [Lazy, resolve] = createLazy();
+
+			hydrate(
+				<div>
+					<Suspense fallback={<i>loading</i>}>
+						<p class="a">a</p>
+						<Suspense fallback={<i>inner</i>}>
+							<Lazy />
+						</Suspense>
+					</Suspense>
+				</div>,
+				scratch
+			);
+			rerender();
+			expect(scratch.innerHTML).not.to.contain('?start');
+
+			await resolve(() => <p class="b">b</p>);
+			rerender();
+			expect(
+				[...scratch.querySelectorAll('p')].map(p => p.className)
+			).to.deep.equal(['a', 'b']);
+		});
+
+		it('should diff the attributes of the fallback a suspended component kept', async () => {
+			scratch.innerHTML =
+				'<div><!--$s?:1--><!--?start name="1"--><div id="k" data-state="fb">F</div><!--?end--><!--/$s:1--></div>';
+			const [Lazy, resolve] = createLazy();
+
+			hydrate(
+				<div>
+					<Suspense
+						fallback={
+							<div id="k" data-state="fb">
+								F
+							</div>
+						}
+					>
+						<p>a</p>
+						<Lazy />
+					</Suspense>
+				</div>,
+				scratch
+			);
+			rerender();
+
+			await resolve(() => (
+				<div id="k" data-state="ok">
+					ok
+				</div>
+			));
+			rerender();
+			expect(scratch.querySelector('#k').outerHTML).to.equal(
+				'<div id="k" data-state="ok">ok</div>'
+			);
+		});
+
 		it('should render nested boundaries of a pending range', () => {
 			scratch.innerHTML =
 				'<div><!--$s?:1--><!--?start name="1"--><p class="fb">outer</p><!--?end--><!--/$s:1--><p class="after">after</p></div>';

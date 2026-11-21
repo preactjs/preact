@@ -97,6 +97,20 @@ export function diff(
 		newType &&
 		(tmp = newType.prototype) &&
 		tmp._childDidSuspend &&
+		// A boundary doesn't take over the `$s:id` range it starts at (it's its
+		// own, so a range its children start with is theirs)
+		!(
+			oldDom &&
+			oldDom.nodeType == 8 &&
+			oldDom.data[2] == ':' &&
+			(oldDom = oldDom.nextSibling)
+		) &&
+		// nor a range a boundary above it took
+		!(
+			excessDomChildren &&
+			excessDomChildren._excess &&
+			excessDomChildren[0] == oldDom
+		) &&
 		(rangeNext = rangeEnd(oldDom, (tmp = [oldDom]))) &&
 		tmp._excess
 	) {
@@ -400,7 +414,7 @@ export function diff(
 						// Keep what this component would have claimed: its whole
 						// streamed range (all of it when unclosed), or else the first
 						// node that isn't a comment. A boundary's range (`$s:id`) is
-						// never a component's: the server marks each component in it.
+						// never a component's.
 						for (; i < excessDomChildren.length; i++) {
 							if ((child = excessDomChildren[i])) {
 								if (!startMarker) {
@@ -408,11 +422,17 @@ export function diff(
 										startMarker = end = child;
 									} else if (
 										child.data.startsWith('$s') &&
-										child.data[2] != ':' &&
-										!(child.data[2] > -1 && child.data.slice(2) != end)
+										// A fallback's range is a component's only while it's
+										// first and the client hasn't rendered into it.
+										((tmp = child.data.slice(2)) > -1
+											? !tmp || tmp == end
+											: !i && excessDomChildren._excess === true)
 									) {
 										end = rangeEnd((startMarker = child));
 									} else continue;
+									// What it keeps of a fallback isn't its own: when it
+									// resumes, the attributes are diffed too.
+									child._excess = excessDomChildren._excess;
 								}
 								excessDomChildren[i] = NULL;
 								if (child == end) break;
@@ -478,9 +498,7 @@ export function diff(
  */
 export function rangeEnd(start, nodes) {
 	if (start && start.nodeType == 8) {
-		if (nodes)
-			nodes._excess =
-				start.data[2] && start.data[2] != ':' && !(start.data[2] > -1);
+		if (nodes) nodes._excess = '?!'.includes(start.data[2]);
 		if (start.data.startsWith('$s')) {
 			for (let depth = 1; (start = start.nextSibling); ) {
 				if (nodes) nodes.push(start);
@@ -490,7 +508,10 @@ export function rangeEnd(start, nodes) {
 				}
 			}
 		}
-	} else if (nodes) nodes.push(start);
+	} else if (nodes) {
+		nodes.push(start);
+		nodes._excess = start && start._excess;
+	}
 }
 
 function markAsForce(vnode) {
@@ -601,6 +622,10 @@ function diffElementNodes(
 	}
 
 	if (!dom) {
+		// The client rendered into a range that held a fallback
+		if (excessDomChildren && excessDomChildren._excess) {
+			excessDomChildren._excess = 2;
+		}
 		const doc = parentDom.ownerDocument || document;
 		if (!nodeType) {
 			return doc.createTextNode(newProps);
