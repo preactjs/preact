@@ -51,6 +51,23 @@ interface SnapEventInit extends EventInit {
 	snapTargetInline?: Element | null;
 }
 
+/** [MDN Reference](https://developer.mozilla.org/en-US/docs/Web/API/ContentVisibilityAutoStateChangeEvent) */
+interface ContentVisibilityAutoStateChangeEvent extends Event {
+	readonly skipped: boolean;
+}
+
+declare var ContentVisibilityAutoStateChangeEvent: {
+	prototype: ContentVisibilityAutoStateChangeEvent;
+	new (
+		type: string,
+		eventInitDict?: ContentVisibilityAutoStateChangeEventInit
+	): ContentVisibilityAutoStateChangeEvent;
+};
+
+interface ContentVisibilityAutoStateChangeEventInit extends EventInit {
+	skipped?: boolean;
+}
+
 type Booleanish = boolean | 'true' | 'false';
 
 export interface SignalLike<T> {
@@ -516,6 +533,11 @@ export type TargetedSnapEvent<Target extends EventTarget> = TargetedEvent<
 	Target,
 	SnapEvent
 >;
+export type TargetedContentVisibilityAutoStateChangeEvent<
+	Target extends EventTarget
+> = TargetedEvent<Target, ContentVisibilityAutoStateChangeEvent>;
+export type TargetedSecurityPolicyViolationEvent<Target extends EventTarget> =
+	TargetedEvent<Target, SecurityPolicyViolationEvent>;
 export type TargetedSubmitEvent<Target extends EventTarget> = TargetedEvent<
 	Target,
 	SubmitEvent
@@ -559,6 +581,9 @@ export type CommandEventHandler<Target extends EventTarget> = EventHandler<
 export type CompositionEventHandler<Target extends EventTarget> = EventHandler<
 	TargetedCompositionEvent<Target>
 >;
+export type ContentVisibilityAutoStateChangeEventHandler<
+	Target extends EventTarget
+> = EventHandler<TargetedContentVisibilityAutoStateChangeEvent<Target>>;
 export type DragEventHandler<Target extends EventTarget> = EventHandler<
 	TargetedDragEvent<Target>
 >;
@@ -583,6 +608,8 @@ export type MouseEventHandler<Target extends EventTarget> = EventHandler<
 export type PointerEventHandler<Target extends EventTarget> = EventHandler<
 	TargetedPointerEvent<Target>
 >;
+export type SecurityPolicyViolationEventHandler<Target extends EventTarget> =
+	EventHandler<TargetedSecurityPolicyViolationEvent<Target>>;
 export type SnapEventHandler<Target extends EventTarget> = EventHandler<
 	TargetedSnapEvent<Target>
 >;
@@ -607,6 +634,23 @@ export type PictureInPictureEventHandler<Target extends EventTarget> =
 export interface DOMAttributes<
 	Target extends EventTarget
 > extends PreactDOMAttributes {
+	onFullscreenChange?: GenericEventHandler<Target> | undefined;
+	onFullscreenChangeCapture?: GenericEventHandler<Target> | undefined;
+	onFullscreenError?: GenericEventHandler<Target> | undefined;
+	onFullscreenErrorCapture?: GenericEventHandler<Target> | undefined;
+	onContentVisibilityAutoStateChange?:
+		| ContentVisibilityAutoStateChangeEventHandler<Target>
+		| undefined;
+	onContentVisibilityAutoStateChangeCapture?:
+		| ContentVisibilityAutoStateChangeEventHandler<Target>
+		| undefined;
+	onSecurityPolicyViolation?:
+		| SecurityPolicyViolationEventHandler<Target>
+		| undefined;
+	onSecurityPolicyViolationCapture?:
+		| SecurityPolicyViolationEventHandler<Target>
+		| undefined;
+
 	// Image Events
 	onLoad?: GenericEventHandler<Target> | undefined;
 	onLoadCapture?: GenericEventHandler<Target> | undefined;
@@ -634,6 +678,10 @@ export interface DOMAttributes<
 	onBeforeToggleCapture?: ToggleEventHandler<Target> | undefined;
 	onToggle?: ToggleEventHandler<Target> | undefined;
 	onToggleCapture?: ToggleEventHandler<Target> | undefined;
+
+	// Hidden-until-found Events
+	onBeforeMatch?: GenericEventHandler<Target> | undefined;
+	onBeforeMatchCapture?: GenericEventHandler<Target> | undefined;
 
 	// Dialog Events
 	onClose?: GenericEventHandler<Target> | undefined;
@@ -769,6 +817,10 @@ export interface DOMAttributes<
 	// Selection Events
 	onSelect?: GenericEventHandler<Target> | undefined;
 	onSelectCapture?: GenericEventHandler<Target> | undefined;
+	onSelectStart?: GenericEventHandler<Target> | undefined;
+	onSelectStartCapture?: GenericEventHandler<Target> | undefined;
+	onSelectionChange?: GenericEventHandler<Target> | undefined;
+	onSelectionChangeCapture?: GenericEventHandler<Target> | undefined;
 
 	// Touch Events
 	onTouchCancel?: TouchEventHandler<Target> | undefined;
@@ -801,6 +853,8 @@ export interface DOMAttributes<
 	onGotPointerCaptureCapture?: PointerEventHandler<Target> | undefined;
 	onLostPointerCapture?: PointerEventHandler<Target> | undefined;
 	onLostPointerCaptureCapture?: PointerEventHandler<Target> | undefined;
+	onPointerRawUpdate?: PointerEventHandler<Target> | undefined;
+	onPointerRawUpdateCapture?: PointerEventHandler<Target> | undefined;
 
 	// Scroll Events
 	onScroll?: GenericEventHandler<Target> | undefined;
@@ -817,6 +871,8 @@ export interface DOMAttributes<
 	onWheelCapture?: WheelEventHandler<Target> | undefined;
 
 	// Animation Events
+	onAnimationCancel?: AnimationEventHandler<Target> | undefined;
+	onAnimationCancelCapture?: AnimationEventHandler<Target> | undefined;
 	onAnimationStart?: AnimationEventHandler<Target> | undefined;
 	onAnimationStartCapture?: AnimationEventHandler<Target> | undefined;
 	onAnimationEnd?: AnimationEventHandler<Target> | undefined;
@@ -1803,6 +1859,10 @@ export interface ButtonHTMLAttributes<
 export interface CanvasHTMLAttributes<
 	T extends EventTarget = HTMLCanvasElement
 > extends HTMLAttributes<T> {
+	onContextLost?: GenericEventHandler<T> | undefined;
+	onContextLostCapture?: GenericEventHandler<T> | undefined;
+	onContextRestored?: GenericEventHandler<T> | undefined;
+	onContextRestoredCapture?: GenericEventHandler<T> | undefined;
 	height?: Signalish<number | string | undefined>;
 	width?: Signalish<number | string | undefined>;
 }
@@ -2020,7 +2080,7 @@ export interface IframeHTMLAttributes<
 	width?: Signalish<number | string | undefined>;
 }
 
-export type HTMLAttributeCrossOrigin = 'anonymous' | 'use-credentials';
+export type HTMLAttributeCrossOrigin = '' | 'anonymous' | 'use-credentials';
 
 export interface PartialImgHTMLAttributes<
 	T extends EventTarget
@@ -2137,11 +2197,14 @@ export interface PartialInputHTMLAttributes<
 	T extends EventTarget
 > extends HTMLAttributes<T> {
 	accept?: Signalish<string | undefined>;
+	alpha?: Signalish<boolean | undefined>;
 	alt?: Signalish<string | undefined>;
 	autocomplete?: Signalish<string | undefined>;
 	autoComplete?: Signalish<string | undefined>;
 	capture?: Signalish<'user' | 'environment' | undefined>; // https://www.w3.org/TR/html-media-capture/#the-capture-attribute
 	checked?: Signalish<boolean | undefined>;
+	colorspace?: Signalish<'limited-srgb' | 'display-p3' | undefined>;
+	colorSpace?: Signalish<'limited-srgb' | 'display-p3' | undefined>;
 	defaultChecked?: Signalish<boolean | undefined>;
 	defaultValue?: Signalish<string | number | undefined>;
 	disabled?: Signalish<boolean | undefined>;
@@ -2735,6 +2798,8 @@ export interface LooseSelectHTMLAttributes<
 export interface SlotHTMLAttributes<
 	T extends EventTarget = HTMLSlotElement
 > extends HTMLAttributes<T> {
+	onSlotChange?: GenericEventHandler<T> | undefined;
+	onSlotChangeCapture?: GenericEventHandler<T> | undefined;
 	name?: Signalish<string | undefined>;
 	role?: never;
 }
@@ -2863,6 +2928,8 @@ export interface TitleHTMLAttributes<
 export interface TrackHTMLAttributes<
 	T extends EventTarget = HTMLTrackElement
 > extends MediaHTMLAttributes<T> {
+	onCueChange?: GenericEventHandler<T> | undefined;
+	onCueChangeCapture?: GenericEventHandler<T> | undefined;
 	default?: Signalish<boolean | undefined>;
 	kind?: Signalish<string | undefined>;
 	label?: Signalish<string | undefined>;
