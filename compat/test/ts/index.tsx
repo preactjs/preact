@@ -59,10 +59,22 @@ React.render(
 
 // Children.map / Children.forEach accept an optional context argument
 const mappedChildren: string[] = React.Children.map([<div />], () => 'child');
+const readonlyChildren: readonly React.ReactElement[] = [<div />];
+const mappedReadonly: string[] = React.Children.map(readonlyChildren, child =>
+	String(child.type)
+);
 React.Children.forEach([<div />], () => {});
+React.Children.forEach(readonlyChildren, child => {
+	child.type;
+});
 React.Children.map([<div />], () => 'child', {});
 React.Children.forEach([<div />], () => {}, {});
 mappedChildren.length;
+mappedReadonly.length;
+
+// findDOMNode accepts null and undefined like in React
+React.findDOMNode(null);
+React.findDOMNode(undefined);
 
 
 // React-style attribute interfaces can be spread onto their element
