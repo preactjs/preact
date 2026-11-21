@@ -397,19 +397,18 @@ export function diff(
 						// node that isn't a comment.
 						for (; i < excessDomChildren.length; i++) {
 							if ((child = excessDomChildren[i])) {
-								excessDomChildren[i] = NULL;
-								if (startMarker) {
-									if (child == end) break;
-								} else if (child.nodeType != 8) {
-									break;
-								} else if (child.data.startsWith('$s')) {
-									end = rangeEnd((startMarker = child));
+								if (!startMarker) {
+									if (child.nodeType != 8) {
+										startMarker = end = child;
+									} else if (child.data.startsWith('$s')) {
+										end = rangeEnd((startMarker = child));
+									} else continue;
 								}
+								excessDomChildren[i] = NULL;
+								if (child == end) break;
 							}
 						}
-					}
-
-					if (!startMarker) {
+					} else {
 						while (oldDom && oldDom.nodeType == 8 && oldDom.nextSibling) {
 							oldDom = oldDom.nextSibling;
 						}
@@ -419,12 +418,11 @@ export function diff(
 					startMarker =
 						newVNode._component._excess ||
 						(newVNode._component._excess = startMarker);
-					// Insert before the range; continue diffing after it.
-					if ((tmp = rangeEnd(startMarker))) {
+					// Insert before what was kept; continue diffing after it.
+					if (startMarker) {
 						newVNode._dom = startMarker;
-						oldDom = tmp;
-					} else newVNode._dom = oldDom;
-					oldDom = oldDom && oldDom.nextSibling;
+						oldDom = (rangeEnd(startMarker) || startMarker).nextSibling;
+					}
 				} else if (excessDomChildren) {
 					excessDomChildren.some(removeNode);
 				}
