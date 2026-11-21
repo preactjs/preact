@@ -31,7 +31,7 @@ import {
 	useInsertionEffect,
 	useTransition
 } from './hooks';
-import { memo } from './memo';
+import { memo, REACT_MEMO_SYMBOL } from './memo';
 import { createPortal } from './portals';
 import {
 	REACT_ELEMENT_TYPE,
@@ -77,11 +77,7 @@ function isFragment(element) {
  * @returns {boolean}
  */
 function isMemo(element) {
-	return (
-		!!element &&
-		typeof element.displayName == 'string' &&
-		element.displayName.indexOf('Memo(') == 0
-	);
+	return !!element && element.$$typeof === REACT_MEMO_SYMBOL;
 }
 
 /**

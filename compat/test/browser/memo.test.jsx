@@ -1,3 +1,4 @@
+import { getSymbol } from './testUtils';
 import { setupRerender } from 'preact/test-utils';
 import {
 	createEvent,
@@ -35,6 +36,13 @@ describe('memo()', () => {
 		// eslint-disable-next-line react/display-name
 		let App = memo(() => <div>foo</div>);
 		expect(App.prototype.isReactComponent).to.equal(true);
+	});
+
+	it('should have $$typeof property', () => {
+		// eslint-disable-next-line react/display-name
+		let App = memo(() => <div>foo</div>);
+		const expected = getSymbol('react.memo', 0xead3);
+		expect(App.$$typeof).to.equal(expected);
 	});
 
 	it('should work with function components', () => {

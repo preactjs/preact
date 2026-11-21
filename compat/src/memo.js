@@ -1,6 +1,8 @@
 import { createElement } from 'preact';
 import { shallowDiffers } from './util';
 
+export const REACT_MEMO_SYMBOL = Symbol.for('react.memo');
+
 /**
  * Memoize a component, so that it only updates when the props actually have
  * changed. This was previously known as `React.pure`.
@@ -27,5 +29,8 @@ export function memo(c, comparer) {
 	Memoed.displayName = 'Memo(' + (c.displayName || c.name) + ')';
 	Memoed.prototype.isReactComponent = true;
 	Memoed.type = c;
+	// Libraries (e.g. react-is) detect memo components via this marker,
+	// mirroring React's `Symbol.for('react.memo')` and our `forwardRef`.
+	Memoed.$$typeof = REACT_MEMO_SYMBOL;
 	return Memoed;
 }
