@@ -2,6 +2,7 @@ import { Component, Fragment, createElement, options } from 'preact';
 import {
 	COMPONENT_FORCE,
 	MODE_HYDRATE,
+	MODE_SUSPENDED,
 	REF_DETACHED,
 	UNDEFINED,
 	VNODE_MARKER
@@ -17,8 +18,23 @@ function initSuspenseHooks() {
 			let component;
 			let vnode = newVNode;
 
-			while ((vnode = vnode._parent)) {
+			// A boundary that is still to hydrate suspends itself, so the search
+			// starts at the vnode that threw.
+			for (; vnode; vnode = vnode._parent) {
 				if ((component = vnode._component) && component._childDidSuspend) {
+					// Below a boundary that hydrates its range (it has `_excess`
+					// for as long as that takes), suspending is the boundary's
+					// call: the error travels up to it, the range stays as the
+					// server sent it and hydrates in one go later. Core flags
+					// what suspended while it was taking over existing DOM.
+					if (
+						component._excess &&
+						vnode != newVNode &&
+						newVNode._flags & MODE_SUSPENDED
+					) {
+						throw error;
+					}
+
 					// A component that suspends before ever committing has no state
 					// worth keeping; mounted ones keep their hooks while parked.
 					if (oldVNode && !oldVNode._component)
@@ -43,8 +59,30 @@ function initSuspenseHooks() {
 	};
 }
 
+/**
+ * Detach the components of a render that is thrown away, and the handlers it
+ * attached: the DOM is the server's again.
+ */
+function discard(vnode) {
+	if (vnode) {
+		if (vnode._component) vnode._component._parentDom = null;
+		else if (vnode._dom) vnode._dom._listeners = null;
+		if (vnode._children) vnode._children.some(discard);
+	}
+}
+
 function detachedClone(vnode, detachedParent, parentDom) {
 	if (vnode) {
+		// A boundary that is still to hydrate has no DOM of its own to park,
+		// only the range the server sent. Unmounting this copy drops that range
+		// and the boundary mounts anew when the tree is revealed.
+		if (vnode._flags & MODE_SUSPENDED && vnode._component._childDidSuspend) {
+			const clone = assign({ constructor: VNODE_MARKER }, vnode);
+			vnode._component = vnode._dom = null;
+			vnode._flags &= ~MODE_SUSPENDED;
+			return clone;
+		}
+
 		const hooks = vnode._component && vnode._component.__hooks;
 		if (hooks) {
 			hooks._list.forEach(effect => {
@@ -98,7 +136,8 @@ function removeOriginal(vnode, detachedParent, originalParent) {
 
 		if (vnode._component) {
 			if (vnode._component._parentDom == detachedParent) {
-				if (vnode._dom) {
+				// (`__w` is 0 on the marker of a range that was dropped above)
+				if (vnode._dom && vnode._dom.__w !== 0) {
 					originalParent.appendChild(vnode._dom);
 				}
 				vnode._component._bits |= COMPONENT_FORCE;
@@ -155,8 +194,16 @@ function createSuspense() {
 		// Store and null _parentDom to prevent setState/forceUpdate from
 		// scheduling renders while suspended. Render would be a no-op anyway
 		// since process() checks _parentDom, but this avoids queue churn.
+		// A boundary that waits to hydrate is the one that suspended: its own
+		// `_parentDom` tells `onResolved` whether it is still mounted. What
+		// hydrated below it before something suspended is thrown away, the
+		// range hydrates from scratch when it resumes.
 		const originalParentDom = suspendingComponent._parentDom;
-		suspendingComponent._parentDom = null;
+		if (suspendingComponent != this) suspendingComponent._parentDom = null;
+		else {
+			suspendingVNode._children.some(discard);
+			suspendingVNode._children = [];
+		}
 
 		const onSuspensionComplete = () => {
 			if (!--this._pendingSuspensionCount) {
@@ -193,7 +240,9 @@ function createSuspense() {
 		 */
 		if (
 			!this._pendingSuspensionCount++ &&
-			!(suspendingVNode._flags & MODE_HYDRATE)
+			!(suspendingVNode._flags & MODE_HYDRATE) &&
+			// A boundary that is still to hydrate keeps its server DOM instead
+			suspendingComponent != this
 		) {
 			this.setState({
 				_suspended: (this._detachOnNextRender = this._vnode._children[0])
@@ -202,9 +251,40 @@ function createSuspense() {
 		promise.then(onResolved, onResolved);
 	};
 
+	/**
+	 * A boundary that waits to hydrate keeps waiting when its parent renders it
+	 * again, only its own retry gets through (forceUpdate() skips this).
+	 * @this {import('./internal').SuspenseComponent}
+	 */
+	Suspense.prototype.shouldComponentUpdate = function () {
+		return !this._excess;
+	};
+
 	Suspense.prototype.componentWillUnmount = function () {
 		this._suspenders = [];
 		if (this.state._suspended) this._vnode._children[0] = this.state._suspended;
+
+		// The browser may be streaming this boundary's chunk into its range, so
+		// only the fallback goes: the markers and the instructions between them
+		// stay, and the script that ends the chunk clears a range whose `__w`
+		// is 0. Without its name `<?start>` is no target for a chunk that is
+		// still to come.
+		let marker = this._excess,
+			node,
+			next;
+		if (marker && marker.data[2] == '?') {
+			this._excess = null;
+			marker.__w = 0;
+			for (
+				node = marker.nextSibling;
+				node && node.data != '/' + marker.data;
+				node = next
+			) {
+				next = node.nextSibling;
+				if (node.nodeType == 7) node.data = '';
+				else node.remove();
+			}
+		}
 	};
 
 	/**
@@ -216,6 +296,35 @@ function createSuspense() {
 		// Ids inside a boundary come from its own counter, so they don't depend
 		// on when it resolves on the server or hydrates on the client.
 		this._mask || (this._mask = [useId(), 0]);
+
+		// Set while this boundary hydrates the range the server marked for it
+		const marker = this._excess;
+		if (marker) {
+			// Nothing below has rendered yet, whatever an earlier attempt did
+			this._mask[1] = 0;
+
+			// `?` is the only pending kind. Island `$s:id` keeps that text after
+			// the swap, with the real nodes between the markers.
+			if (marker.data[2] == '?') {
+				if (marker.ownerDocument.readyState != 'loading') {
+					// The response ended without this boundary's content
+					marker.data = '$s!';
+				} else {
+					// The content is still to come: the script that ends its chunk
+					// wakes us up, and so does the end of the response.
+					throw (
+						marker._promise ||
+						(marker._promise = new Promise(resolve => {
+							marker.__w = resolve;
+							marker.ownerDocument.addEventListener(
+								'DOMContentLoaded',
+								resolve
+							);
+						}))
+					);
+				}
+			}
+		}
 
 		if (this._detachOnNextRender) {
 			// When the Suspense's _vnode was created by a call to createVNode

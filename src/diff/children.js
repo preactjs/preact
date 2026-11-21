@@ -1,10 +1,11 @@
-import { diff, unmount, applyRef } from './index';
+import { diff, unmount, applyRef, rangeEnd, isRangeOpen } from './index';
 import { createVNode, Fragment } from '../create-element';
 import {
 	EMPTY_OBJ,
 	EMPTY_ARR,
 	INSERT_VNODE,
 	MATCHED,
+	MODE_SUSPENDED,
 	LIS_CANDIDATE,
 	REF_DETACHED,
 	UNDEFINED,
@@ -257,8 +258,12 @@ function constructNewChildrenArray(
 
 		// Here, we define isMounting for the purposes of the skew diffing
 		// algorithm. Nodes that are unsuspending are considered mounting and we detect
-		// this by checking if oldVNode._original == null
-		if (!oldVNode || !oldVNode._original) {
+		// this by checking if oldVNode._original == null. A component that is still
+		// to hydrate is not: the DOM it kept has a place, and moves with it.
+		if (
+			!oldVNode ||
+			(!oldVNode._original && !(oldVNode._flags & MODE_SUSPENDED))
+		) {
 			if (!~matchingIndex) {
 				// When the array of children is growing we need to decrease the skew
 				// as we are adding a new element to the array.
@@ -387,6 +392,21 @@ function insert(parentVNode, oldDom, parentDom, isMounting) {
 		// Root children live in another container, they never move with the
 		// host tree and contribute nothing to the host insertion cursor.
 		if (parentVNode.props._parentDom) return oldDom;
+
+		// A component that is still to hydrate moves with all of its range.
+		let node =
+			parentVNode._flags & MODE_SUSPENDED && parentVNode._component._excess;
+		if (node) {
+			let end = rangeEnd(node) || node,
+				next;
+			if (node == oldDom) return end.nextSibling;
+			do {
+				next = node.nextSibling;
+				parentDom.insertBefore(node, oldDom || NULL);
+			} while (node != end && (node = next));
+			return oldDom;
+		}
+
 		let children = parentVNode._children;
 		if (children) {
 			for (let i = 0; i < children.length; i++) {
@@ -431,7 +451,7 @@ function insert(parentVNode, oldDom, parentDom, isMounting) {
 	while (
 		(oldDom = oldDom && oldDom.nextSibling) &&
 		oldDom.nodeType == 8 &&
-		!oldDom.data.startsWith('$s')
+		!isRangeOpen(oldDom.data)
 	);
 
 	return oldDom;

@@ -69,6 +69,7 @@ export function diff(
 	/** @type {any} */
 	let tmp,
 		resumed,
+		boundary,
 		newType = newVNode.type;
 
 	// Only diff VNodes created by Preact.
@@ -84,7 +85,18 @@ export function diff(
 		((isHydrating = oldVNode._flags & MODE_HYDRATE),
 		(tmp = oldVNode._component._excess))
 	) {
-		newVNode._flags |= isHydrating;
+		// The server DOM of a Suspense boundary that was rendered again while
+		// it waited may no longer match: it adopts that DOM and diffs its
+		// attributes, like render().
+		if (
+			newVNode.props !== oldVNode.props &&
+			oldVNode._component._childDidSuspend
+		) {
+			isHydrating = 0;
+		}
+		// Still suspended until this render gets through, also when
+		// shouldComponentUpdate() stops it before it starts.
+		newVNode._flags |= MODE_SUSPENDED | isHydrating;
 		resumed = excessDomChildren = [];
 		if (tmp.nodeType == 8) {
 			// Re-scan DOM from stored start marker for streamed hydration.
@@ -128,6 +140,26 @@ export function diff(
 				if (isClassComponent) {
 					// @ts-expect-error Trust me, Component implements the interface we want
 					newVNode._component = c = new newType(newProps, componentContext); // eslint-disable-line new-cap
+
+					// A Suspense boundary hydrates the range the server marked for
+					// it and nothing else. `$s=` is content, `$s?id` is still
+					// streaming, `$s!` is a client render. Shipped `$s` and island
+					// `$s:id` are not in this set: they hydrate in place and keep
+					// their comments, including after an island swaps.
+					if (excessDomChildren && c._childDidSuspend) {
+						for (
+							tmp = excessDomChildren.indexOf(oldDom);
+							(boundary = excessDomChildren[tmp++]) &&
+							boundary.nodeType == 8 &&
+							!/^\$s[=?!]/.test(boundary.data);
+						);
+						if (boundary && boundary.nodeType == 8) {
+							oldDom = rangeEnd((c._excess = boundary), (resumed = []));
+							excessDomChildren.fill(NULL, tmp - 1, tmp + resumed.length + 1);
+							excessDomChildren = resumed;
+							oldDom = resumed[0] || oldDom;
+						}
+					}
 				} else {
 					// @ts-expect-error Trust me, Component implements the interface we want
 					newVNode._component = c = new BaseComponent(
@@ -315,6 +347,17 @@ export function diff(
 				oldDom = oldVNode._children && getDomSibling(oldVNode, 0);
 			}
 
+			// The server left this boundary to the client (`$s!`): drop what it
+			// sent and render in its place.
+			if (
+				(boundary = c._childDidSuspend && c._excess) &&
+				boundary.data[2] == '!'
+			) {
+				resumed.some(removeNode);
+				excessDomChildren = isHydrating = NULL;
+				oldDom = rangeEnd(boundary);
+			}
+
 			oldDom = diffChildren(
 				parentDom,
 				renderResult,
@@ -336,11 +379,21 @@ export function diff(
 				oldDom = tmp;
 			}
 
-			// Keep `_excess` so unmount can remove the range markers.
 			newVNode._flags &= RESET_MODE;
 
 			// Remove the kept DOM this resumed render didn't claim
 			if (resumed) resumed.some(removeNode);
+
+			// A boundary is done with its range. Other components keep `_excess`
+			// so unmount can remove the range markers.
+			if (boundary) {
+				if ((tmp = rangeEnd(boundary))) {
+					oldDom = tmp.nextSibling;
+					removeNode(tmp);
+				}
+				removeNode(boundary);
+				c._excess = NULL;
+			}
 
 			if (c._renderCallbacks.length) {
 				commitQueue.push(c);
@@ -385,7 +438,7 @@ export function diff(
 									if (child == end) break;
 								} else if (child.nodeType != 8) {
 									break;
-								} else if (child.data.startsWith('$s')) {
+								} else if (isRangeOpen(child.data)) {
 									end = rangeEnd((startMarker = child));
 								}
 							}
@@ -449,14 +502,39 @@ export function diff(
  * @returns {PreactElement} The closing marker, or undefined when `start` doesn't
  * open a range or the range is unclosed
  */
-function rangeEnd(start, nodes) {
-	if (start && start.nodeType == 8 && start.data.startsWith('$s')) {
-		for (let depth = 1; (start = start.nextSibling); ) {
-			if (start.nodeType == 8) {
-				if (start.data.startsWith('$s')) depth++;
-				else if (start.data.startsWith('/$s') && !--depth) return start;
+/**
+ * A Suspense range comment. The third character is the kind (`=`, `!`, `?`,
+ * `:`) or the comment ends at `$s` / `/$s`. `$save` is a user comment.
+ * @param {string} data
+ */
+export function isRangeOpen(data) {
+	return /^\$s(?:[=!?:]|$)/.test(data);
+}
+
+/** @param {string} data */
+function isRangeClose(data) {
+	return /^\/\$s(?:[=!?:]|$)/.test(data);
+}
+
+export function rangeEnd(start, nodes) {
+	if (start && start.nodeType == 8 && isRangeOpen(start.data)) {
+		// While a `$s?id` chunk is still arriving, nested ranges may be unclosed,
+		// so that one range closes on the marker that repeats its id. The old
+		// `$s?:id` spelling and a shipped `$s!:id` close with `/$s` and
+		// `/$s:id`, which do not repeat the open text, so they pair by nesting.
+		for (let depth = 0, pending, data, node = start; node; ) {
+			if (node.nodeType == 8) {
+				data = node.data;
+				if (pending ? data == pending : isRangeClose(data)) {
+					pending = 0;
+					if (!--depth) return node;
+				} else if (!pending && isRangeOpen(data)) {
+					depth++;
+					if (data[2] == '?' && data[3] != ':') pending = '/' + data;
+				}
 			}
-			if (nodes) nodes.push(start);
+			if (nodes && node != start) nodes.push(node);
+			node = node.nextSibling;
 		}
 	}
 }
@@ -810,7 +888,9 @@ export function unmount(vnode, parentVNode, skipRemove) {
 			removeNode(r);
 		}
 
-		removeNode(vnode._dom);
+		// The marker of a range the browser may still stream into stays (compat
+		// sets `__w` to 0), also when a component that starts with it unmounts.
+		if (!(r = vnode._dom) || r.__w !== 0) removeNode(r);
 	}
 
 	vnode._dom = vnode._component = vnode._parent = NULL;
