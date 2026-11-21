@@ -465,7 +465,7 @@ export function diff(
  * @returns {PreactElement} The closing marker, or undefined when `start` doesn't
  * open a range or the range is unclosed
  */
-function rangeEnd(start, nodes) {
+export function rangeEnd(start, nodes) {
 	if (start && start.nodeType == 8) {
 		if (nodes) nodes._excess = start.data[2] && start.data[2] != ':';
 		if (start.data.startsWith('$s')) {

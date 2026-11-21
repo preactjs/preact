@@ -2813,4 +2813,40 @@ describe('suspense hydration with a client suspend in a boundary range', () => {
 		).to.deep.equal(['in', 'z']);
 		expect(scratch.querySelector('#z')).to.equal(z);
 	});
+
+	it('should move server DOM kept by a suspended item when the list reorders', async () => {
+		for (const html of [
+			'<ul><li>a</li><li>b</li><li>c</li></ul>',
+			'<ul><!--$s--><li>a</li><!--/$s--><!--$s--><li>b</li><!--/$s--><!--$s--><li>c</li><!--/$s--></ul>'
+		]) {
+			scratch.innerHTML = html;
+			const [LazyA, resolveA] = createLazy();
+			const [LazyB, resolveB] = createLazy();
+			const items = { a: LazyA, b: LazyB, c: () => <li>c</li> };
+			let setOrder;
+			function App() {
+				const [order, set] = useState(['a', 'b', 'c']);
+				setOrder = set;
+				return (
+					<ul>
+						{order.map(key => (
+							<Suspense key={key}>{createElement(items[key])}</Suspense>
+						))}
+					</ul>
+				);
+			}
+
+			hydrate(<App />, scratch);
+			rerender();
+			setOrder(['c', 'b', 'a']);
+			rerender();
+			expect(scratch.textContent).to.equal('cba');
+
+			await resolveA(() => <li>a</li>);
+			await resolveB(() => <li>b</li>);
+			rerender();
+			expect(scratch.textContent).to.equal('cba');
+			render(null, scratch);
+		}
+	});
 });
