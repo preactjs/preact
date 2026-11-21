@@ -438,12 +438,15 @@ describe('suspense hydration', () => {
 
 	it('should hydrate nested empty ranges after a marked sibling', async () => {
 		scratch.innerHTML =
-			'<div><!--$s:0--><button id="before">before</button><!--/$s:0--><!--$s:1--><!--$s:2--><!--/$s:2--><!--/$s:1--></div>';
+			'<div><!--$s:0--><button id="before">before</button><!--/$s:0--><!--$s:1--><!--$s--><!--$s:2--><!--$s--><!--/$s--><!--/$s:2--><!--/$s--><!--/$s:1--></div>';
 		const before = scratch.querySelector('#before');
 		const onClick = vi.fn();
 		const [LazyOuter, resolveOuter] = createLazy();
 		const [LazyInner, resolveInner] = createLazy();
-		const expectedRange = '<!--$s:1--><!--$s:2--><!--/$s:2--><!--/$s:1-->';
+		// Each lazy keeps its own range; the boundaries' markers go with the excess
+		const pendingRange =
+			'<!--$s--><!--$s:2--><!--$s--><!--/$s--><!--/$s:2--><!--/$s-->';
+		const expectedRange = '<!--$s--><!--$s--><!--/$s--><!--/$s-->';
 
 		hydrate(
 			<div>
@@ -463,7 +466,7 @@ describe('suspense hydration', () => {
 			scratch
 		);
 		rerender();
-		expect(scratch.innerHTML).to.contain(expectedRange);
+		expect(scratch.innerHTML).to.contain(pendingRange);
 
 		await resolveOuter(props => props.children);
 		rerender();
@@ -1660,8 +1663,10 @@ describe('suspense hydration', () => {
 			li(0),
 			li(1),
 			'<!--$s:0-->',
+			'<!--$s-->',
 			li(2),
 			li(3),
+			'<!--/$s-->',
 			'<!--/$s:0-->',
 			li(4),
 			li(5)
@@ -1670,6 +1675,8 @@ describe('suspense hydration', () => {
 		const listeners = [vi.fn(), vi.fn(), vi.fn(), vi.fn(), vi.fn(), vi.fn()];
 
 		scratch.innerHTML = originalHtml;
+		// The boundary's markers go with the excess, the lazy keeps its own
+		const hydratedHtml = originalHtml.replace(/<!--\/?\$s:0-->/g, '');
 		clearLog();
 
 		const [Lazy, resolve] = createLazy();
@@ -1691,7 +1698,7 @@ describe('suspense hydration', () => {
 		);
 		rerender(); // Flush rerender queue to mimic what preact will really do
 		expect(getLog()).to.deep.equal([]);
-		expect(scratch.innerHTML).to.equal(originalHtml);
+		expect(scratch.innerHTML).to.equal(hydratedHtml);
 		expect(listeners[5]).not.toHaveBeenCalled();
 
 		clearLog();
@@ -1705,7 +1712,7 @@ describe('suspense hydration', () => {
 			</Fragment>
 		)).then(() => {
 			rerender();
-			expect(scratch.innerHTML).to.equal(originalHtml);
+			expect(scratch.innerHTML).to.equal(hydratedHtml);
 			expect(getLog()).to.deep.equal([]);
 			clearLog();
 
@@ -1723,10 +1730,10 @@ describe('suspense hydration', () => {
 
 	it('should keep its own markers when re-rendered by a parent while suspended during hydration', async () => {
 		const originalHtml =
-			'<!--$s:0--><p>outer</p><!--$s:1--><p>nested</p><!--/$s:1--><!--/$s:0--><div>0</div>';
+			'<!--$s:0--><!--$s--><p>outer</p><!--$s:1--><!--$s--><p>nested</p><!--/$s--><!--/$s:1--><!--/$s--><!--/$s:0--><div>0</div>';
 		scratch.innerHTML = originalHtml;
-		const outer = scratch.childNodes[1];
-		const nested = scratch.childNodes[3];
+		const outer = scratch.childNodes[2];
+		const nested = scratch.childNodes[5];
 		clearLog();
 
 		const [LazyOuter, resolveOuter] = createLazy();
@@ -1752,7 +1759,7 @@ describe('suspense hydration', () => {
 		update();
 		rerender();
 		expect(scratch.innerHTML).to.equal(
-			'<!--$s:0--><p>outer</p><!--$s:1--><p>nested</p><!--/$s:1--><!--/$s:0--><div>1</div>'
+			'<!--$s:0--><!--$s--><p>outer</p><!--$s:1--><!--$s--><p>nested</p><!--/$s--><!--/$s:1--><!--/$s--><!--/$s:0--><div>1</div>'
 		);
 		clearLog();
 
@@ -1769,16 +1776,16 @@ describe('suspense hydration', () => {
 		rerender();
 
 		expect(scratch.innerHTML).to.equal(
-			'<!--$s:0--><p>outer</p><!--$s:1--><p>nested</p><!--/$s:1--><!--/$s:0--><div>1</div>'
+			'<!--$s:0--><!--$s--><p>outer</p><!--$s--><p>nested</p><!--/$s--><!--/$s--><!--/$s:0--><div>1</div>'
 		);
-		expect(scratch.childNodes[1]).to.equal(outer);
-		expect(scratch.childNodes[3]).to.equal(nested);
+		expect(scratch.childNodes[2]).to.equal(outer);
+		expect(scratch.childNodes[4]).to.equal(nested);
 		expect(getLog()).to.deep.equal([]);
 	});
 
 	it('should use updated DOM when stream patcher replaces content before suspend resolves', () => {
 		scratch.innerHTML =
-			'<!--$s:0--><span>Loading</span><!--/$s:0--><div>after</div>';
+			'<!--$s:0--><!--$s--><span>Loading</span><!--/$s--><!--/$s:0--><div>after</div>';
 		clearLog();
 
 		const [Lazy, resolve] = createLazy();
@@ -1793,7 +1800,7 @@ describe('suspense hydration', () => {
 		);
 		rerender();
 		expect(scratch.innerHTML).to.equal(
-			'<!--$s:0--><span>Loading</span><!--/$s:0--><div>after</div>'
+			'<!--$s:0--><!--$s--><span>Loading</span><!--/$s--><!--/$s:0--><div>after</div>'
 		);
 		expect(getLog()).to.deep.equal([]);
 		clearLog();
@@ -1801,14 +1808,14 @@ describe('suspense hydration', () => {
 		// Simulate stream patcher: replace fallback content while anchor comments
 		// remain. The deferred restoration should use the current DOM, not stale
 		// references to the removed <span>.
-		const endMarker = scratch.childNodes[2]; // <!--/$s:0-->
-		scratch.removeChild(scratch.childNodes[1]); // remove <span>Loading</span>
+		const endMarker = scratch.childNodes[3]; // <!--/$s-->
+		scratch.removeChild(scratch.childNodes[2]); // remove <span>Loading</span>
 		const resolved = document.createElement('div');
 		resolved.textContent = 'Resolved';
 		scratch.insertBefore(resolved, endMarker);
 
 		expect(scratch.innerHTML).to.equal(
-			'<!--$s:0--><div>Resolved</div><!--/$s:0--><div>after</div>'
+			'<!--$s:0--><!--$s--><div>Resolved</div><!--/$s--><!--/$s:0--><div>after</div>'
 		);
 		// Clear the stream patcher's own DOM ops before asserting on rerender
 		clearLog();
@@ -1817,7 +1824,7 @@ describe('suspense hydration', () => {
 			rerender();
 			// Should match the stream-patched <div>Resolved</div>, no extra DOM ops
 			expect(scratch.innerHTML).to.equal(
-				'<!--$s:0--><div>Resolved</div><!--/$s:0--><div>after</div>'
+				'<!--$s:0--><!--$s--><div>Resolved</div><!--/$s--><!--/$s:0--><div>after</div>'
 			);
 			expect(getLog()).to.deep.equal([]);
 			clearLog();
@@ -2355,7 +2362,7 @@ describe('suspense hydration owning a streamed range', () => {
 
 	it('should drop its markers when a resolved boundary unmounts', async () => {
 		scratch.innerHTML =
-			'<main><!--$s:0--><p>server</p><!--/$s:0--><span>s</span></main>';
+			'<main><!--$s:0--><!--$s--><p>server</p><!--/$s--><!--/$s:0--><span>s</span></main>';
 		const [Lazy, resolve] = createLazy();
 		let hide;
 		function App() {
@@ -2378,7 +2385,7 @@ describe('suspense hydration owning a streamed range', () => {
 		await resolve(() => <p>server</p>);
 		rerender();
 		expect(scratch.innerHTML).to.equal(
-			'<main><!--$s:0--><p>server</p><!--/$s:0--><span>s</span></main>'
+			'<main><!--$s--><p>server</p><!--/$s--><span>s</span></main>'
 		);
 
 		hide();

@@ -387,20 +387,19 @@ export function diff(
 							child;
 						if (!~i) i = excessDomChildren.length;
 
-						// The cursor skips comments: step back to this component's markers.
-						while ((child = excessDomChildren[i - 1]) && child.nodeType == 8) {
-							i--;
-						}
-
 						// Keep what this component would have claimed: its whole
 						// streamed range (all of it when unclosed), or else the first
-						// node that isn't a comment.
+						// node that isn't a comment. A boundary's range (`$s:id`) is
+						// never a component's: the server marks each component in it.
 						for (; i < excessDomChildren.length; i++) {
 							if ((child = excessDomChildren[i])) {
 								if (!startMarker) {
-									if (child.nodeType != 8) {
+									if (child.nodeType < 7) {
 										startMarker = end = child;
-									} else if (child.data.startsWith('$s')) {
+									} else if (
+										child.data.startsWith('$s') &&
+										child.data[2] != ':'
+									) {
 										end = rangeEnd((startMarker = child));
 									} else continue;
 								}
@@ -408,11 +407,6 @@ export function diff(
 								if (child == end) break;
 							}
 						}
-					} else {
-						while (oldDom && oldDom.nodeType == 8 && oldDom.nextSibling) {
-							oldDom = oldDom.nextSibling;
-						}
-						startMarker = oldDom;
 					}
 					// Preserve the original range when re-suspending.
 					startMarker =
@@ -420,8 +414,12 @@ export function diff(
 						(newVNode._component._excess = startMarker);
 					// Insert before what was kept; continue diffing after it.
 					if (startMarker) {
-						newVNode._dom = startMarker;
-						oldDom = (rangeEnd(startMarker) || startMarker).nextSibling;
+						oldDom = rangeEnd((newVNode._dom = startMarker)) || startMarker;
+						while (
+							(oldDom = oldDom.nextSibling) &&
+							oldDom.nodeType == 8 &&
+							!oldDom.data.startsWith('$s')
+						);
 					}
 				} else if (excessDomChildren) {
 					excessDomChildren.some(removeNode);
