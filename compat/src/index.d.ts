@@ -125,7 +125,7 @@ declare namespace React {
 	// React 18 hooks
 	export import useInsertionEffect = _hooks.useLayoutEffect;
 	export function useTransition(): [false, typeof startTransition];
-	export function useDeferredValue<T = any>(val: T): T;
+	export function useDeferredValue<T = any>(val: T, initialValue?: T): T;
 	export function useSyncExternalStore<T>(
 		subscribe: (flush: () => void) => () => void,
 		getSnapshot: () => T,
@@ -133,7 +133,7 @@ declare namespace React {
 	): T;
 	export function useEffectEvent<T extends Function>(cb: T): T;
 	// React 19 hooks
-	export function use<T>(resource: Promise<T> | _preact.Context<T>): T;
+	export function use<T>(resource: PromiseLike<T> | _preact.Context<T>): T;
 
 	// Preact Defaults
 	export import Context = _preact.Context;

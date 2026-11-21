@@ -19,9 +19,19 @@ React.createPortal(<div />, document.body.shadowRoot!);
 const Ctx = React.createContext({ contextValue: '' });
 const contextValue: { contextValue: string } = React.use(Ctx);
 const promiseValue: string = React.use(Promise.resolve('value'));
+const thenable: PromiseLike<number> = {
+	then: onfulfilled => Promise.resolve(onfulfilled ? onfulfilled(1) : (1 as any))
+};
+const thenableValue: number = React.use(thenable);
 
 contextValue.contextValue.toLowerCase();
 promiseValue.toLowerCase();
+thenableValue.toFixed();
+
+const deferredSingle: string = React.useDeferredValue('query');
+const deferredWithInitial: string = React.useDeferredValue('query', '');
+deferredSingle.toLowerCase();
+deferredWithInitial.toLowerCase();
 
 class SimpleComponentWithContextAsProvider extends React.Component {
 	componentProp = 'componentProp';
