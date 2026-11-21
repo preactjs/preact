@@ -2709,3 +2709,101 @@ describe('suspense hydration owning a streamed range', () => {
 		});
 	});
 });
+
+describe('suspense hydration with a client suspend in a boundary range', () => {
+	/** @type {HTMLDivElement} */
+	let scratch, rerender;
+
+	beforeEach(() => {
+		scratch = setupScratch();
+		rerender = setupRerender();
+	});
+
+	afterEach(() => {
+		teardown(scratch);
+	});
+
+	function streamChunk(id, html) {
+		const walker = document.createTreeWalker(scratch, NodeFilter.SHOW_COMMENT);
+		let start, end;
+		while (walker.nextNode()) {
+			if (walker.currentNode.data == '$s?:' + id) start = walker.currentNode;
+			if (walker.currentNode.data == '/$s:' + id) end = walker.currentNode;
+		}
+		// it only patches a range that still holds its fallback
+		if (!start || !end || (start.nextSibling.data || '')[0] != '?') return;
+		while (start.nextSibling != end) start.nextSibling.remove();
+		const t = document.createElement('template');
+		t.innerHTML = html;
+		end.before(t.content);
+		start.data = '$s:' + id;
+	}
+
+	it('should not claim a node after a pending range for a component with nothing left in it', async () => {
+		scratch.innerHTML =
+			'<div><!--$s?:1--><!--?start name="1"--><p>loading</p><!--?end--><!--/$s:1--><button id="z">z</button></div>';
+		const z = scratch.querySelector('#z');
+		const [Lazy, resolve] = createLazy();
+
+		hydrate(
+			<div>
+				<Suspense fallback={<p>loading</p>}>
+					<p>title</p>
+					<Lazy />
+				</Suspense>
+				<button id="z">z</button>
+			</div>,
+			scratch
+		);
+		rerender();
+
+		expect(scratch.innerHTML).to.equal(
+			'<div><p>title</p><button id="z">z</button></div>'
+		);
+
+		// the client took the range over: the chunk is dropped
+		streamChunk('1', '<p>title</p><button id="one">1</button>');
+
+		await resolve(() => <button id="one">1</button>);
+		rerender();
+
+		expect(scratch.innerHTML).to.equal(
+			'<div><p>title</p><button id="one">1</button><button id="z">z</button></div>'
+		);
+		expect(scratch.querySelector('#z')).to.equal(z);
+	});
+
+	it('should not leave a range the client rendered into to the stream', async () => {
+		scratch.innerHTML =
+			'<div><!--$s?:1--><!--?start name="1"--><p>loading</p><!--?end--><!--/$s:1--><button id="z">z</button></div>';
+		const z = scratch.querySelector('#z');
+		const [Outer, resolveOuter] = createLazy();
+		const [Inner, resolveInner] = createLazy();
+
+		hydrate(
+			<div>
+				<Suspense fallback={<p>loading</p>}>
+					<Outer>
+						<Inner />
+					</Outer>
+				</Suspense>
+				<button id="z">z</button>
+			</div>,
+			scratch
+		);
+		rerender();
+
+		await resolveOuter(({ children }) => children);
+		rerender();
+
+		streamChunk('1', '<button id="in">in</button>');
+
+		await resolveInner(() => <button id="in">in</button>);
+		rerender();
+
+		expect(
+			[...scratch.querySelectorAll('button')].map(b => b.id)
+		).to.deep.equal(['in', 'z']);
+		expect(scratch.querySelector('#z')).to.equal(z);
+	});
+});
