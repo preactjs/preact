@@ -96,32 +96,41 @@ export function diff(
 		isHydrating &&
 		newType &&
 		(tmp = newType.prototype) &&
-		tmp._childDidSuspend &&
-		// A boundary doesn't take over the `$s:id` range it starts at (it's its
-		// own, so a range its children start with is theirs)
-		!(
+		tmp._childDidSuspend
+	) {
+		// The markers of components above a boundary aren't its own
+		while (
 			oldDom &&
 			oldDom.nodeType == 8 &&
-			oldDom.data[2] == ':' &&
-			(oldDom = oldDom.nextSibling)
-		) &&
-		// nor a range a boundary above it took
-		!(
-			excessDomChildren &&
-			excessDomChildren._excess &&
-			excessDomChildren[0] == oldDom
-		) &&
-		(rangeNext = rangeEnd(oldDom, (tmp = [oldDom]))) &&
-		tmp._excess
-	) {
-		// A boundary in front of a range that holds a fallback, because the
-		// server is still streaming it or gave up on it (`$s!`): its children
-		// only get that range, and diff the attributes of what they adopt.
-		rangeNext = rangeNext.nextSibling;
-		tmp.some(node => {
-			excessDomChildren[excessDomChildren.indexOf(node)] = NULL;
-		});
-		resumed = excessDomChildren = tmp;
+			oldDom.data.startsWith('$s') &&
+			(tmp = oldDom.data.slice(2)) > 0 &&
+			tmp < depth(newVNode)
+		) {
+			oldDom = oldDom.nextSibling;
+		}
+		// The `$s:id` range a boundary starts at is its own, so a range its
+		// children start with is theirs.
+		if (oldDom && oldDom.nodeType == 8 && oldDom.data[2] == ':') {
+			oldDom = oldDom.nextSibling;
+		} else if (
+			// nor a range a boundary above it took
+			!(
+				excessDomChildren &&
+				excessDomChildren._excess &&
+				excessDomChildren[0] == oldDom
+			) &&
+			(rangeNext = rangeEnd(oldDom, (tmp = [oldDom]))) &&
+			tmp._excess
+		) {
+			// A boundary in front of a range that holds a fallback, because the
+			// server is still streaming it or gave up on it (`$s!`): its children
+			// only get that range, and diff the attributes of what they adopt.
+			rangeNext = rangeNext.nextSibling;
+			tmp.some(node => {
+				excessDomChildren[excessDomChildren.indexOf(node)] = NULL;
+			});
+			resumed = excessDomChildren = tmp;
+		}
 	}
 
 	if ((tmp = options._diff)) tmp(newVNode);
@@ -403,13 +412,7 @@ export function diff(
 
 						// A numbered marker belongs to the component that many levels
 						// below the closest element; an ancestor at the same spot isn't ours.
-						for (
-							end = 0, tmp = newVNode;
-							tmp && typeof tmp.type == 'function';
-							tmp = tmp._parent
-						) {
-							end += tmp.type != Fragment;
-						}
+						end = depth(newVNode);
 
 						// Keep what this component would have claimed: its whole
 						// streamed range (all of it when unclosed), or else the first
@@ -512,6 +515,19 @@ export function rangeEnd(start, nodes) {
 		nodes.push(start);
 		nodes._excess = start && start._excess;
 	}
+}
+
+/**
+ * How many components (not counting Fragments) sit between `vnode` and the
+ * closest element, the number the server writes into the markers it owns.
+ * @param {VNode} vnode
+ */
+function depth(vnode) {
+	let d = 0;
+	for (; vnode && typeof vnode.type == 'function'; vnode = vnode._parent) {
+		d += vnode.type != Fragment;
+	}
+	return d;
 }
 
 function markAsForce(vnode) {

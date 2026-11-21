@@ -2617,6 +2617,35 @@ describe('suspense hydration owning a streamed range', () => {
 			expect(getLog()).to.deep.equal([]);
 		});
 
+		it('should skip the markers of components above a boundary', () => {
+			scratch.innerHTML =
+				'<div><!--$s3--><!--$s?:1--><!--?start name="1"--><p class="fb">loading</p><!--?end--><!--/$s:1--><!--/$s--><!--$s3--><p class="two">two</p><!--/$s--><footer>foot</footer></div>';
+			const two = scratch.querySelector('.two');
+			const footer = scratch.querySelector('footer');
+			const Boundary = props => <Suspense {...props} />;
+			const Two = () => <p class="two">two</p>;
+
+			hydrate(
+				<div>
+					<Boundary fallback={<p>outer</p>}>
+						<Boundary fallback={<p class="fb">loading</p>}>
+							<p class="one">one</p>
+						</Boundary>
+						<Two />
+					</Boundary>
+					<footer>foot</footer>
+				</div>,
+				scratch
+			);
+			rerender();
+
+			expect(
+				[...scratch.querySelectorAll('p')].map(p => p.className)
+			).to.deep.equal(['one', 'two']);
+			expect(scratch.querySelector('.two')).to.equal(two);
+			expect(scratch.querySelector('footer')).to.equal(footer);
+		});
+
 		it('should take over a pending range inside the range of a boundary that did not suspend', () => {
 			scratch.innerHTML =
 				'<div><!--$s:0--><!--$s?:1--><!--?start name="1"--><p class="fb">loading</p><!--?end--><!--/$s:1--><p class="two">two</p><!--/$s:0--><footer>foot</footer></div>';
