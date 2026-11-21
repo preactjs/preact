@@ -77,3 +77,20 @@ if (React.isValidElement(maybeElement)) {
 if (React.isElement(maybeElement)) {
 	maybeElement.props;
 }
+
+// React-compatible event and event handler types
+export const onSynthetic: React.EventHandler<
+	React.SyntheticEvent<HTMLDivElement>
+> = () => {};
+export const onWheel: React.WheelEventHandler<HTMLDivElement> = (
+	e: React.WheelEvent<HTMLDivElement>
+) => {
+	e.deltaY;
+};
+export const onToggle: React.ToggleEventHandler<HTMLDetailsElement> = (
+	e: React.ToggleEvent<HTMLDetailsElement>
+) => {
+	e.newState;
+};
+export const onInput: React.InputEventHandler<HTMLInputElement> = () => {};
+export const onSubmit: React.SubmitEventHandler<HTMLFormElement> = () => {};
