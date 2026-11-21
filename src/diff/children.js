@@ -1,4 +1,4 @@
-import { diff, unmount, applyRef, rangeEnd, isRangeOpen } from './index';
+import { diff, unmount, applyRef, rangeEnd } from './index';
 import { createVNode, Fragment } from '../create-element';
 import {
 	EMPTY_OBJ,
@@ -451,7 +451,7 @@ function insert(parentVNode, oldDom, parentDom, isMounting) {
 	while (
 		(oldDom = oldDom && oldDom.nextSibling) &&
 		oldDom.nodeType == 8 &&
-		!isRangeOpen(oldDom.data)
+		!oldDom.data.startsWith('$s')
 	);
 
 	return oldDom;

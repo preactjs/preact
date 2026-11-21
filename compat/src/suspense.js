@@ -10,6 +10,9 @@ import {
 import { useId } from 'preact/hooks';
 import { assign } from './util';
 
+/** Core's `rangeEnd()`, handed over with the first range a boundary takes. */
+let rangeEnd;
+
 function initSuspenseHooks() {
 	const oldCatchError = options._catchError;
 	options._catchError = (error, newVNode, oldVNode, errorInfo) => {
@@ -45,6 +48,35 @@ function initSuspenseHooks() {
 			}
 		}
 		oldCatchError(error, newVNode, oldVNode, errorInfo);
+	};
+
+	// A boundary hydrates the range the server marked for it and nothing else.
+	// The comment that opens it reads `$s=` when its content is there, `$s?id`
+	// while the server is still to send it and `$s!` when the client has to
+	// render it (`$s!:id` from the island format too).
+	options._claim = (component, nodes, cursor, end) => {
+		if (component._childDidSuspend) {
+			// The marker is the first node from the cursor on that is neither a
+			// comment nor an instruction, past the ones already hydrated. The
+			// cursor can be gone: the leftovers of the range before it.
+			let i = nodes.indexOf(cursor),
+				range = [],
+				marker;
+			for (
+				rangeEnd = end, i = i < 0 ? 0 : i;
+				(marker = nodes[i++]) === null ||
+				(marker && marker.nodeType > 6 && !/^\$s[=?!]/.test(marker.data));
+			);
+			if (marker && marker.nodeType == 8) {
+				range.push(
+					(marker = rangeEnd((component._excess = marker), range)) &&
+						marker.nextSibling
+				);
+				// The parent doesn't hydrate any of it
+				nodes.fill(null, i - 1, i + range.length);
+				return range;
+			}
+		}
 	};
 
 	const oldUnmount = options.unmount;
@@ -275,6 +307,10 @@ function createSuspense() {
 		if (marker && marker.data[2] == '?') {
 			this._excess = null;
 			marker.__w = 0;
+			// Neither this boundary nor a component above it that starts with the
+			// marker removes it when it unmounts
+			for (node = this._vnode; node && node._dom == marker; node = node._parent)
+				node._dom = null;
 			for (
 				node = marker.nextSibling;
 				node && node.data != '/' + marker.data;
@@ -299,31 +335,39 @@ function createSuspense() {
 
 		// Set while this boundary hydrates the range the server marked for it
 		const marker = this._excess;
+		let fallback = state._suspended;
 		if (marker) {
 			// Nothing below has rendered yet, whatever an earlier attempt did
 			this._mask[1] = 0;
 
-			// `?` is the only pending kind. Island `$s:id` keeps that text after
-			// the swap, with the real nodes between the markers.
 			if (marker.data[2] == '?') {
-				if (marker.ownerDocument.readyState != 'loading') {
-					// The response ended without this boundary's content
-					marker.data = '$s!';
-				} else {
-					// The content is still to come: the script that ends its chunk
-					// wakes us up, and so does the end of the response.
+				// The content is still to come: the script that ends its chunk
+				// wakes us up, and so does the end of the response.
+				if (marker.ownerDocument.readyState == 'loading') {
 					throw (
 						marker._promise ||
-						(marker._promise = new Promise(resolve => {
-							marker.__w = resolve;
-							marker.ownerDocument.addEventListener(
-								'DOMContentLoaded',
-								resolve
-							);
-						}))
+						(marker._promise = new Promise(resolve => (marker.__w = resolve)))
 					);
 				}
+				// The response ended without this boundary's content
+				marker.data = '$s!';
 			}
+
+			// The server left `$s!` to the client: this render hydrates the
+			// fallback it sent, and the next one renders the content.
+			const clientRender = (fallback = marker.data[2] == '!');
+
+			// Once this render commits the range is hydrated, and its markers go.
+			// (A shouldComponentUpdate() bailout also runs pending callbacks, with
+			// the boundary still suspended.)
+			this._renderCallbacks.push(() => {
+				if (this._excess == marker && !(this._vnode._flags & MODE_SUSPENDED)) {
+					this._excess = null;
+					(rangeEnd(marker) || marker).remove();
+					marker.remove();
+					if (clientRender) this.forceUpdate();
+				}
+			});
 		}
 
 		if (this._detachOnNextRender) {
@@ -344,8 +388,8 @@ function createSuspense() {
 		}
 
 		return [
-			createElement(Fragment, null, state._suspended ? null : props.children),
-			state._suspended && createElement(Fragment, null, props.fallback)
+			createElement(Fragment, null, fallback ? null : props.children),
+			fallback && createElement(Fragment, null, props.fallback)
 		];
 	};
 

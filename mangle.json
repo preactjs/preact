@@ -73,6 +73,7 @@
       "$_catchError": "__e",
       "$_refCleanup": "__x",
       "$_skipEffects": "__s",
+      "$_claim": "__y",
       "$_bits": "__g"
     }
   }

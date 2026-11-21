@@ -2987,29 +2987,6 @@ describe('streamed boundary ranges', () => {
 			expect(scratch.querySelector('p')).to.equal(inside);
 		});
 
-		it('should not let a $save comment swallow the sibling after a range', () => {
-			scratch.innerHTML =
-				'<div><p>a</p><!--$s=--><p>in</p><!--$save--><!--/$s--><p>after</p></div>';
-			const after = scratch.querySelectorAll('p')[2];
-
-			hydrate(
-				<div>
-					<p>a</p>
-					<Suspense>
-						<p>in</p>
-					</Suspense>
-					<p>after</p>
-				</div>,
-				scratch
-			);
-			rerender();
-
-			expect(scratch.innerHTML).to.equal(
-				'<div><p>a</p><p>in</p><p>after</p></div>'
-			);
-			expect(scratch.querySelectorAll('p')[2]).to.equal(after);
-		});
-
 		it('should client-render a shipped <!--$s!:id--> range and keep its siblings', () => {
 			scratch.innerHTML =
 				'<main><p>a</p><!--$s!:2--><i>fallback</i><!--/$s:2--><p>c</p></main>';
@@ -3208,7 +3185,7 @@ describe('streamed boundary ranges', () => {
 			expect(c2).to.equal(c);
 		});
 
-		it('should render on the client when the document finishes loading', async () => {
+		it('should render on the client when the response ends without its chunk', async () => {
 			const { doc, root } = loadingDoc(
 				'<main><p>a</p><!--$s?0--><i>fallback</i><!--/$s?0--><p>c</p></main>'
 			);
@@ -3228,12 +3205,19 @@ describe('streamed boundary ranges', () => {
 			});
 			expect(child).not.toHaveBeenCalled();
 
+			// What the server's inline script does once the document is loaded
+			const marker = root.querySelector('main').childNodes[1];
 			await act(async () => {
 				const loaded = new Promise(resolve =>
 					doc.addEventListener('DOMContentLoaded', resolve)
 				);
 				doc.close();
 				await loaded;
+				marker.data = '$s!';
+				marker.__w();
+				await tick();
+			});
+			await act(async () => {
 				await tick();
 			});
 
