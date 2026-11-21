@@ -7,6 +7,7 @@ import React, {
 	Suspense,
 	use,
 	memo,
+	useId,
 	useState,
 	useSyncExternalStore,
 	createPortal
@@ -2061,6 +2062,29 @@ describe('suspense hydration', () => {
 			rerender();
 			expect(scratch.innerHTML).to.equal('<p>a</p><p>b</p>');
 		});
+	});
+
+	it('should give ids inside a boundary the same value whenever it resolves', async () => {
+		const Id = () => <input id={useId()} />;
+		const [Lazy, resolve] = createLazy();
+		const App = ({ Inner }) => (
+			<Fragment>
+				<Id />
+				<Suspense fallback={<i>f</i>}>
+					<Inner />
+				</Suspense>
+				<Id />
+			</Fragment>
+		);
+		const ids = el => [...el.querySelectorAll('input')].map(i => i.id);
+
+		const other = document.createElement('div');
+		render(<App Inner={Id} />, other);
+
+		render(<App Inner={Lazy} />, scratch);
+		await resolve(Id);
+		rerender();
+		expect(ids(scratch)).to.deep.equal(ids(other));
 	});
 });
 

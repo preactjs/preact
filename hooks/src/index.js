@@ -401,15 +401,14 @@ export function useId() {
 	/** @type {import('./internal').IdHookState} */
 	const state = getHookState(11);
 	if (!state._value) {
-		// Grab either the root node or the nearest async boundary node.
+		// Grab either the root node or the nearest Suspense boundary. Both keep
+		// their mask on the component: their vnodes get replaced, it doesn't.
 		/** @type {import('./internal').VNode | import('./internal').Component} */
 		let root = currentComponent._vnode;
-		while (!root._mask && root._parent) {
+		while (!(root._component || root)._mask && root._parent) {
 			root = root._parent;
 		}
-
-		// The root vnode is replaced on every `render()`, its component isn't.
-		if (!root._mask && root._component) root = root._component;
+		root = root._component || root;
 
 		let mask = root._mask || (root._mask = [0, 0]);
 		state._value = 'P' + mask[0] + '-' + mask[1]++;
