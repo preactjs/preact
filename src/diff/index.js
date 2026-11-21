@@ -68,6 +68,9 @@ export function diff(
 ) {
 	/** @type {any} */
 	let tmp,
+		// The closing marker of the range a boundary takes over, then what
+		// followed it
+		rangeNext,
 		resumed,
 		newType = newVNode.type;
 
@@ -76,8 +79,7 @@ export function diff(
 
 	// If the previous diff bailed out, resume creating/hydrating into the DOM
 	// that was kept while suspended (server-rendered, or already in the
-	// container we rendered into). `tmp` holds the stored excess node until the
-	// options._diff call below.
+	// container we rendered into).
 	if (
 		oldVNode._flags & MODE_SUSPENDED &&
 		// @ts-expect-error This is MODE_HYDRATE or 0
@@ -85,14 +87,50 @@ export function diff(
 		(tmp = oldVNode._component._excess))
 	) {
 		newVNode._flags |= isHydrating;
-		resumed = excessDomChildren = [];
-		if (tmp.nodeType == 8) {
-			// Re-scan DOM from stored start marker for streamed hydration.
-			oldDom = rangeEnd(tmp, excessDomChildren);
-		} else {
-			excessDomChildren.push(tmp);
+		// Re-scan DOM from stored start marker for streamed hydration.
+		tmp = rangeEnd(tmp, (resumed = excessDomChildren = []));
+		oldDom = excessDomChildren[0];
+		// The closing marker stays until unmount.
+		if (tmp) excessDomChildren.pop();
+	} else if (
+		isHydrating &&
+		newType &&
+		(tmp = newType.prototype) &&
+		tmp._childDidSuspend
+	) {
+		// The markers of components above a boundary aren't its own
+		while (
+			oldDom &&
+			oldDom.nodeType == 8 &&
+			oldDom.data.startsWith('$s') &&
+			(tmp = oldDom.data.slice(2)) > 0 &&
+			tmp < depth(newVNode)
+		) {
+			oldDom = oldDom.nextSibling;
 		}
-		oldDom = excessDomChildren[0] || oldDom;
+		// The `$s:id` range a boundary starts at is its own, so a range its
+		// children start with is theirs.
+		if (oldDom && oldDom.nodeType == 8 && oldDom.data[2] == ':') {
+			oldDom = oldDom.nextSibling;
+		} else if (
+			// nor a range a boundary above it took
+			!(
+				excessDomChildren &&
+				excessDomChildren._excess &&
+				excessDomChildren[0] == oldDom
+			) &&
+			(rangeNext = rangeEnd(oldDom, (tmp = [oldDom]))) &&
+			tmp._excess
+		) {
+			// A boundary in front of a range that holds a fallback, because the
+			// server is still streaming it or gave up on it (`$s!`): its children
+			// only get that range, and diff the attributes of what they adopt.
+			rangeNext = rangeNext.nextSibling;
+			tmp.some(node => {
+				excessDomChildren[excessDomChildren.indexOf(node)] = NULL;
+			});
+			resumed = excessDomChildren = tmp;
+		}
 	}
 
 	if ((tmp = options._diff)) tmp(newVNode);
@@ -341,6 +379,8 @@ export function diff(
 
 			// Remove the kept DOM this resumed render didn't claim
 			if (resumed) resumed.some(removeNode);
+			// The markers the cursor stopped at go with a range a boundary took
+			if (resumed && rangeNext !== UNDEFINED) oldDom = rangeNext;
 
 			if (c._renderCallbacks.length) {
 				commitQueue.push(c);
@@ -370,44 +410,51 @@ export function diff(
 							child;
 						if (!~i) i = excessDomChildren.length;
 
-						// The cursor skips comments: step back to this component's markers.
-						while ((child = excessDomChildren[i - 1]) && child.nodeType == 8) {
-							i--;
-						}
+						// A numbered marker belongs to the component that many levels
+						// below the closest element; an ancestor at the same spot isn't ours.
+						end = depth(newVNode);
 
 						// Keep what this component would have claimed: its whole
 						// streamed range (all of it when unclosed), or else the first
-						// node that isn't a comment.
+						// node that isn't a comment. A boundary's range (`$s:id`) is
+						// never a component's.
 						for (; i < excessDomChildren.length; i++) {
 							if ((child = excessDomChildren[i])) {
-								excessDomChildren[i] = NULL;
-								if (startMarker) {
-									if (child == end) break;
-								} else if (child.nodeType != 8) {
-									break;
-								} else if (child.data.startsWith('$s')) {
-									end = rangeEnd((startMarker = child));
+								if (!startMarker) {
+									if (child.nodeType < 7) {
+										startMarker = end = child;
+									} else if (
+										child.data.startsWith('$s') &&
+										// A fallback's range is a component's only while it's
+										// first and the client hasn't rendered into it.
+										((tmp = child.data.slice(2)) > -1
+											? !tmp || tmp == end
+											: !i && excessDomChildren._excess === true)
+									) {
+										end = rangeEnd((startMarker = child));
+									} else continue;
+									// What it keeps of a fallback isn't its own: when it
+									// resumes, the attributes are diffed too.
+									child._excess = excessDomChildren._excess;
 								}
+								excessDomChildren[i] = NULL;
+								if (child == end) break;
 							}
 						}
-					}
-
-					if (!startMarker) {
-						while (oldDom && oldDom.nodeType == 8 && oldDom.nextSibling) {
-							oldDom = oldDom.nextSibling;
-						}
-						startMarker = oldDom;
 					}
 					// Preserve the original range when re-suspending.
 					startMarker =
 						newVNode._component._excess ||
 						(newVNode._component._excess = startMarker);
-					// Insert before the range; continue diffing after it.
-					if ((tmp = rangeEnd(startMarker))) {
-						newVNode._dom = startMarker;
-						oldDom = tmp;
-					} else newVNode._dom = oldDom;
-					oldDom = oldDom && oldDom.nextSibling;
+					// Insert before what was kept; continue diffing after it.
+					if (startMarker) {
+						oldDom = rangeEnd((newVNode._dom = startMarker)) || startMarker;
+						while (
+							(oldDom = oldDom.nextSibling) &&
+							oldDom.nodeType == 8 &&
+							!oldDom.data.startsWith('$s')
+						);
+					}
 				} else if (excessDomChildren) {
 					excessDomChildren.some(removeNode);
 				}
@@ -445,20 +492,42 @@ export function diff(
 /**
  * Find the closing marker of a streamed range.
  * @param {PreactElement} start A `$s` marker opening a range
- * @param {PreactElement[]} [nodes] Collects the nodes inside the range
+ * @param {PreactElement[]} [nodes] Collects the nodes after `start` up to and
+ * including the closing marker, or `start` itself when it isn't a comment. For
+ * a comment its `_excess` tells whether the range holds a fallback (`$s?`,
+ * `$s!`).
  * @returns {PreactElement} The closing marker, or undefined when `start` doesn't
  * open a range or the range is unclosed
  */
-function rangeEnd(start, nodes) {
-	if (start && start.nodeType == 8 && start.data.startsWith('$s')) {
-		for (let depth = 1; (start = start.nextSibling); ) {
-			if (start.nodeType == 8) {
-				if (start.data.startsWith('$s')) depth++;
-				else if (start.data.startsWith('/$s') && !--depth) return start;
+export function rangeEnd(start, nodes) {
+	if (start && start.nodeType == 8) {
+		if (nodes) nodes._excess = '?!'.includes(start.data[2]);
+		if (start.data.startsWith('$s')) {
+			for (let depth = 1; (start = start.nextSibling); ) {
+				if (nodes) nodes.push(start);
+				if (start.nodeType == 8) {
+					if (start.data.startsWith('$s')) depth++;
+					else if (start.data.startsWith('/$s') && !--depth) return start;
+				}
 			}
-			if (nodes) nodes.push(start);
 		}
+	} else if (nodes) {
+		nodes.push(start);
+		nodes._excess = start && start._excess;
 	}
+}
+
+/**
+ * How many components (not counting Fragments) sit between `vnode` and the
+ * closest element, the number the server writes into the markers it owns.
+ * @param {VNode} vnode
+ */
+function depth(vnode) {
+	let d = 0;
+	for (; vnode && typeof vnode.type == 'function'; vnode = vnode._parent) {
+		d += vnode.type != Fragment;
+	}
+	return d;
 }
 
 function markAsForce(vnode) {
@@ -546,6 +615,9 @@ function diffElementNodes(
 	else if (!namespace) namespace = XHTML_NAMESPACE;
 
 	if (excessDomChildren) {
+		// DOM that held a fallback isn't what we render: diff its attributes too
+		if (excessDomChildren._excess) isHydrating = false;
+
 		for (i = 0; i < excessDomChildren.length; i++) {
 			value = excessDomChildren[i];
 
@@ -566,6 +638,10 @@ function diffElementNodes(
 	}
 
 	if (!dom) {
+		// The client rendered into a range that held a fallback
+		if (excessDomChildren && excessDomChildren._excess) {
+			excessDomChildren._excess = 2;
+		}
 		const doc = parentDom.ownerDocument || document;
 		if (!nodeType) {
 			return doc.createTextNode(newProps);
