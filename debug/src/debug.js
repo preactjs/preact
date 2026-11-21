@@ -615,7 +615,9 @@ Component.prototype.forceUpdate = function (callback) {
 					getCurrentVNode()
 				)}`
 		);
-	} else if (this._parentDom == null) {
+	} else if (!this._globalContext) {
+		// Suspense parks components by nulling `_parentDom`, unmounting also
+		// nulls `_globalContext`.
 		console.warn(
 			`Can't call "this.forceUpdate" on an unmounted component. This is a no-op, ` +
 				`but it indicates a memory leak in your application. To fix, cancel all ` +

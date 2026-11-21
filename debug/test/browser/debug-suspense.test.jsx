@@ -1,6 +1,14 @@
-import { createElement, render, lazy, Suspense } from 'preact/compat';
+import {
+	createElement,
+	createContext,
+	render,
+	lazy,
+	Suspense,
+	useContext,
+	useState
+} from 'preact/compat';
 import 'preact/debug';
-import { setupRerender } from 'preact/test-utils';
+import { act, setupRerender } from 'preact/test-utils';
 import {
 	setupScratch,
 	teardown,
@@ -185,5 +193,44 @@ describe('debug with suspense', () => {
 				expect(error.message).to.eql('Hello');
 			});
 		});
+	});
+
+	it('should not warn when a suspended context consumer is notified', async () => {
+		const Ctx = createContext('a');
+		let resolve;
+		let promise;
+		function Child({ suspend }) {
+			const value = useContext(Ctx);
+			if (suspend && !promise) promise = new Promise(r => (resolve = r));
+			if (suspend && promise.pending !== false) throw promise;
+			return <div>{value}</div>;
+		}
+
+		let setValue, setSuspend;
+		function App() {
+			const [value, _setValue] = useState('a');
+			const [suspend, _setSuspend] = useState(false);
+			setValue = _setValue;
+			setSuspend = _setSuspend;
+			return (
+				<Ctx.Provider value={value}>
+					<Suspense fallback={<div>Suspended...</div>}>
+						<Child suspend={suspend} />
+					</Suspense>
+				</Ctx.Provider>
+			);
+		}
+
+		render(<App />, scratch);
+		act(() => setSuspend(true));
+		rerender();
+		act(() => setValue('b'));
+		expect(warnings).to.deep.equal([]);
+
+		promise.pending = false;
+		resolve();
+		await promise;
+		rerender();
+		expect(scratch.innerHTML).to.equal('<div>b</div>');
 	});
 });
