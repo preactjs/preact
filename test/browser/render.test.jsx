@@ -79,6 +79,20 @@ describe('render()', () => {
 		expect(scratch.innerHTML).to.eql(`<div>Good</div>`);
 	});
 
+	it('should release the parent link of a matched child that was replaced (#5403)', () => {
+		const oldChild = createElement('span', null, 'before');
+		const oldParent = createElement('div', null, oldChild);
+		render(oldParent, scratch);
+
+		const newChild = createElement('span', null, 'after');
+		const newParent = createElement('div', null, newChild);
+		render(newParent, scratch);
+
+		expect(scratch.textContent).to.equal('after');
+		expect(newChild._parent).to.equal(newParent);
+		expect(oldChild._parent).to.equal(null);
+	});
+
 	it('should render % width and height on img correctly', () => {
 		render(<img width="100%" height="100%" />, scratch);
 		expect(scratch.innerHTML).to.eql(`<img width="100%" height="100%">`);

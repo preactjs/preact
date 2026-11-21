@@ -113,6 +113,12 @@ export function diffChildren(
 			refQueue
 		);
 
+		// A matched oldVNode is replaced by childVNode: release its link to
+		// the old parent so the previous render tree can be collected. See #5403.
+		if (oldVNode !== EMPTY_OBJ && oldVNode !== childVNode) {
+			oldVNode._parent = NULL;
+		}
+
 		// Adjust DOM nodes
 		newDom = childVNode._dom;
 		// A ref detached while its subtree was parked by Suspense is attached
