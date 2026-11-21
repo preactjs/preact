@@ -125,7 +125,7 @@ declare namespace React {
 	// React 18 hooks
 	export import useInsertionEffect = _hooks.useLayoutEffect;
 	export function useTransition(): [false, typeof startTransition];
-	export function useDeferredValue<T = any>(val: T): T;
+	export function useDeferredValue<T = any>(val: T, initialValue?: T): T;
 	export function useSyncExternalStore<T>(
 		subscribe: (flush: () => void) => () => void,
 		getSnapshot: () => T,
@@ -133,7 +133,7 @@ declare namespace React {
 	): T;
 	export function useEffectEvent<T extends Function>(cb: T): T;
 	// React 19 hooks
-	export function use<T>(resource: Promise<T> | _preact.Context<T>): T;
+	export function use<T>(resource: PromiseLike<T> | _preact.Context<T>): T;
 
 	// Preact Defaults
 	export import Context = _preact.Context;
@@ -246,6 +246,7 @@ declare namespace React {
 
 	// Events
 	export import TargetedEvent = _preact.TargetedEvent;
+	export import SyntheticEvent = _preact.TargetedEvent;
 	export import ChangeEvent = _preact.TargetedEvent;
 	export import ClipboardEvent = _preact.TargetedClipboardEvent;
 	export import CompositionEvent = _preact.TargetedCompositionEvent;
@@ -256,8 +257,10 @@ declare namespace React {
 	export import InvalidEvent = _preact.TargetedEvent;
 	export import KeyboardEvent = _preact.TargetedKeyboardEvent;
 	export import MouseEvent = _preact.TargetedMouseEvent;
+	export import ToggleEvent = _preact.TargetedToggleEvent;
 	export import TouchEvent = _preact.TargetedTouchEvent;
 	export import UIEvent = _preact.TargetedUIEvent;
+	export import WheelEvent = _preact.TargetedWheelEvent;
 	export import AnimationEvent = _preact.TargetedAnimationEvent;
 	export import TransitionEvent = _preact.TargetedTransitionEvent;
 
@@ -270,11 +273,15 @@ declare namespace React {
 	export import PointerEventHandler = _preact.PointerEventHandler;
 	export import FocusEventHandler = _preact.FocusEventHandler;
 	export import FormEventHandler = _preact.GenericEventHandler;
+	export import InputEventHandler = _preact.InputEventHandler;
 	export import InvalidEventHandler = _preact.GenericEventHandler;
 	export import KeyboardEventHandler = _preact.KeyboardEventHandler;
 	export import MouseEventHandler = _preact.MouseEventHandler;
+	export import SubmitEventHandler = _preact.SubmitEventHandler;
+	export import ToggleEventHandler = _preact.ToggleEventHandler;
 	export import TouchEventHandler = _preact.TouchEventHandler;
 	export import UIEventHandler = _preact.UIEventHandler;
+	export import WheelEventHandler = _preact.WheelEventHandler;
 	export import AnimationEventHandler = _preact.AnimationEventHandler;
 	export import TransitionEventHandler = _preact.TransitionEventHandler;
 
@@ -310,7 +317,7 @@ declare namespace React {
 	export function isFragment(element: any): boolean;
 	export function isMemo(element: any): boolean;
 	export function findDOMNode(
-		component: _preact.Component | Element
+		component: _preact.Component | Element | null | undefined
 	): Element | null;
 
 	export abstract class PureComponent<
@@ -411,12 +418,12 @@ declare namespace React {
 
 	export const Children: {
 		map<T extends _preact.ComponentChild, R>(
-			children: T | T[],
+			children: T | readonly T[],
 			fn: (child: T, i: number) => R,
 			context?: any
 		): R[];
 		forEach<T extends _preact.ComponentChild>(
-			children: T | T[],
+			children: T | readonly T[],
 			fn: (child: T, i: number) => void,
 			context?: any
 		): void;
