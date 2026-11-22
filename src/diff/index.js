@@ -423,8 +423,6 @@ export function diff(
 			});
 
 			if (!(e && e.then)) markAsForce(newVNode);
-
-			// Threw before the instance took over newVNode (contextType, gDSFP)
 			if ((tmp = oldVNode._component) && tmp._vnode != newVNode) {
 				(newVNode._component = tmp)._vnode = newVNode;
 			}

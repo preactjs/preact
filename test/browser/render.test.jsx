@@ -451,8 +451,6 @@ describe('render()', () => {
 			addRow();
 			rerender();
 
-			// The row vnode held in state was cloned on later renders, it must
-			// not keep the tree it was first rendered into alive.
 			expect(firstRow._parent).to.equal(null);
 			expect(firstTree._parent).to.equal(null);
 			expect(scratch.innerHTML).to.equal('<div><p>0</p><p>1</p><p>2</p></div>');
@@ -603,8 +601,6 @@ describe('render()', () => {
 			);
 			expect(scratch.innerHTML).to.equal('<span>0-0</span>');
 
-			// Keep re-renders after catching, but Outer bails out on strict
-			// equality so the throwing Child isn't diffed again.
 			shouldThrow = true;
 			setOuter(1);
 			rerender();

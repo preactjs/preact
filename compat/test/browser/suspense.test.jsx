@@ -2007,8 +2007,6 @@ describe('suspense', () => {
 				return <Child />;
 			}
 
-			// Re-renders without recreating its children, so the Suspense
-			// boundary below bails out on strict equality.
 			function Layout({ children }) {
 				const [, set] = useState(0);
 				updateLayout = () => set(v => v + 1);

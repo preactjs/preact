@@ -24,7 +24,6 @@ export function _catchError(error, vnode, oldVNode, errorInfo) {
 		handled;
 
 	for (; (vnode = vnode._parent); ) {
-		// Replaced vnodes have their _parent released, continue from the current one
 		if (
 			(component = vnode._component) &&
 			(vnode = component._vnode) &&

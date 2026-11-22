@@ -237,13 +237,11 @@ describe('Lifecycle methods', () => {
 			);
 			const original = child;
 
-			// Rejected before the instance took over the update
 			fail = first;
 			setValue(1);
 			rerender();
 			expect(scratch.innerHTML).to.equal('<span>0</span>');
 
-			// Taken over, then failed
 			fail = second;
 			setValue(2);
 			rerender();
