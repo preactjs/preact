@@ -62,12 +62,14 @@ function initSuspenseHooks() {
 			let i = nodes.indexOf(cursor),
 				range = [],
 				marker;
+			// Any other boundary marker (an opener in an older format, or the
+			// end of the range around us) ends the search.
 			for (
 				rangeEnd = end, i = i < 0 ? 0 : i;
 				(marker = nodes[i++]) === null ||
-				(marker && marker.nodeType > 6 && !/^\$s[=?!]/.test(marker.data));
+				(marker && marker.nodeType > 6 && !/^\/?\$s/.test(marker.data));
 			);
-			if (marker && marker.nodeType == 8) {
+			if (marker && /^\$s[=?!]/.test(marker.data)) {
 				range.push(
 					(marker = rangeEnd((component._excess = marker), range)) &&
 						marker.nextSibling
@@ -97,10 +99,32 @@ function initSuspenseHooks() {
  */
 function discard(vnode) {
 	if (vnode) {
+		// A portal mounted fresh: its DOM isn't the server's, it goes
+		if (vnode.props._parentDom) removeDom(vnode);
 		if (vnode._component) vnode._component._parentDom = null;
 		else if (vnode._dom) vnode._dom._listeners = null;
 		if (vnode._children) vnode._children.some(discard);
 	}
+}
+
+/** Remove the DOM nodes a vnode rendered */
+function removeDom(vnode) {
+	if (vnode) {
+		if (typeof vnode.type == 'string') vnode._dom.remove();
+		else if (vnode._children) vnode._children.some(removeDom);
+		else if (vnode._dom) vnode._dom.remove();
+	}
+}
+
+/**
+ * The markers of a range still to come stay for the server's script (see
+ * componentWillUnmount), so no copy that starts with one removes it.
+ */
+function clone(vnode, tmp) {
+	vnode = assign({ constructor: VNODE_MARKER }, vnode);
+	if ((tmp = vnode._dom) && tmp.nodeType == 8 && tmp.data[2] == '?')
+		vnode._dom = null;
+	return vnode;
 }
 
 function detachedClone(vnode, detachedParent, parentDom) {
@@ -109,10 +133,10 @@ function detachedClone(vnode, detachedParent, parentDom) {
 		// only the range the server sent. Unmounting this copy drops that range
 		// and the boundary mounts anew when the tree is revealed.
 		if (vnode._flags & MODE_SUSPENDED && vnode._component._childDidSuspend) {
-			const clone = assign({ constructor: VNODE_MARKER }, vnode);
+			const copy = clone(vnode);
 			vnode._component = vnode._dom = null;
 			vnode._flags &= ~MODE_SUSPENDED;
-			return clone;
+			return copy;
 		}
 
 		const hooks = vnode._component && vnode._component.__hooks;
@@ -135,7 +159,7 @@ function detachedClone(vnode, detachedParent, parentDom) {
 		// reveal attaches them again.
 		if (typeof vnode.type == 'string') vnode._flags |= REF_DETACHED;
 
-		vnode = assign({ constructor: VNODE_MARKER }, vnode);
+		vnode = clone(vnode);
 		if (vnode._component != null) {
 			if (vnode._component._parentDom == parentDom) {
 				vnode._component._parentDom = detachedParent;
@@ -303,7 +327,7 @@ function createSuspense() {
 		// still to come.
 		let marker = this._excess,
 			node,
-			next;
+			end = marker;
 		if (marker && marker.data[2] == '?') {
 			this._excess = null;
 			marker.__w = 0;
@@ -311,14 +335,13 @@ function createSuspense() {
 			// marker removes it when it unmounts
 			for (node = this._vnode; node && node._dom == marker; node = node._parent)
 				node._dom = null;
-			for (
-				node = marker.nextSibling;
-				node && node.data != '/' + marker.data;
-				node = next
-			) {
-				next = node.nextSibling;
-				if (node.nodeType == 7) node.data = '';
-				else node.remove();
+			// Nothing goes when the closer isn't a later sibling (yet)
+			while ((end = end.nextSibling) && end.data != '/' + marker.data);
+			while (end && (node = marker.nextSibling) != end) {
+				if (node.nodeType == 7) {
+					node.data = '';
+					marker = node;
+				} else node.remove();
 			}
 		}
 	};
@@ -342,7 +365,8 @@ function createSuspense() {
 
 			if (marker.data[2] == '?') {
 				// The content is still to come: the script that ends its chunk
-				// wakes us up, and so does the end of the response.
+				// wakes us up, and so does the init script's DOMContentLoaded
+				// handler when the response ends without it.
 				if (marker.ownerDocument.readyState == 'loading') {
 					throw (
 						marker._promise ||
@@ -355,19 +379,23 @@ function createSuspense() {
 
 			// The server left `$s!` to the client: this render hydrates the
 			// fallback it sent, and the next one renders the content.
-			const clientRender = (fallback = marker.data[2] == '!');
+			fallback = marker.data[2] == '!';
 
 			// Once this render commits the range is hydrated, and its markers go.
 			// (A shouldComponentUpdate() bailout also runs pending callbacks, with
-			// the boundary still suspended.)
-			this._renderCallbacks.push(() => {
-				if (this._excess == marker && !(this._vnode._flags & MODE_SUSPENDED)) {
+			// the boundary still suspended.) One callback however often this
+			// render is tried.
+			this._done = this._done || (() => {
+				const m = this._excess;
+				if (m && !(this._vnode._flags & MODE_SUSPENDED)) {
 					this._excess = null;
-					(rangeEnd(marker) || marker).remove();
-					marker.remove();
-					if (clientRender) this.forceUpdate();
+					(rangeEnd(m) || m).remove();
+					m.remove();
+					if (m.data[2] == '!') this.forceUpdate();
 				}
 			});
+			if (!this._renderCallbacks.includes(this._done))
+				this._renderCallbacks.push(this._done);
 		}
 
 		if (this._detachOnNextRender) {

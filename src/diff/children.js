@@ -262,7 +262,8 @@ function constructNewChildrenArray(
 		// to hydrate is not: the DOM it kept has a place, and moves with it.
 		if (
 			!oldVNode ||
-			(!oldVNode._original && !(oldVNode._flags & MODE_SUSPENDED))
+			(!oldVNode._original &&
+				!(oldVNode._flags & MODE_SUSPENDED && oldVNode._component._excess))
 		) {
 			if (!~matchingIndex) {
 				// When the array of children is growing we need to decrease the skew
@@ -380,6 +381,21 @@ function constructNewChildrenArray(
 }
 
 /**
+ * A cursor a parked Suspense subtree detached can't be a reference node:
+ * retry from the vnode tree, then give up and append.
+ * @param {VNode} vnode
+ * @param {PreactElement} oldDom
+ * @returns {PreactElement}
+ */
+function cursor(vnode, oldDom) {
+	if (oldDom && !oldDom.parentNode) {
+		oldDom = getDomSibling(vnode);
+		if (oldDom && !oldDom.parentNode) oldDom = NULL;
+	}
+	return oldDom;
+}
+
+/**
  * @param {VNode} parentVNode
  * @param {PreactElement} oldDom
  * @param {PreactElement} parentDom
@@ -400,6 +416,7 @@ function insert(parentVNode, oldDom, parentDom, isMounting) {
 			let end = rangeEnd(node) || node,
 				next;
 			if (node == oldDom) return end.nextSibling;
+			oldDom = cursor(parentVNode, oldDom);
 			do {
 				next = node.nextSibling;
 				parentDom.insertBefore(node, oldDom || NULL);
@@ -423,12 +440,7 @@ function insert(parentVNode, oldDom, parentDom, isMounting) {
 
 		return oldDom;
 	} else {
-		// A cursor a parked Suspense subtree detached can't be a reference node:
-		// retry from the vnode tree, then give up and append.
-		if (oldDom && !oldDom.parentNode) {
-			oldDom = getDomSibling(parentVNode);
-			if (oldDom && !oldDom.parentNode) oldDom = NULL;
-		}
+		oldDom = cursor(parentVNode, oldDom);
 
 		// Comments (e.g. server `$s` markers) are never ours: a node right after
 		// them is already in place.

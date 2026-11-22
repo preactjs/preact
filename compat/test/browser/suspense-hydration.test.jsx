@@ -2819,6 +2819,75 @@ describe('streamed boundary ranges', () => {
 	});
 
 	describe('a render that is thrown away', () => {
+		it('should call a callback ref once, and its cleanup on unmount only', async () => {
+			scratch.innerHTML =
+				'<main><!--$s=--><p>a</p><button id="l">l</button><!--/$s--></main>';
+			const [Lazy, resolve] = createLazy();
+			const log = [];
+			const ref = el => {
+				log.push('ref:' + el.textContent);
+				return () => log.push('cleanup');
+			};
+			let hide;
+			function App() {
+				const [shown, setShown] = useState(true);
+				hide = () => setShown(false);
+				return (
+					<main>
+						{shown && (
+							<Suspense>
+								<p ref={ref}>a</p>
+								<Lazy />
+							</Suspense>
+						)}
+					</main>
+				);
+			}
+			act(() => {
+				hydrate(<App />, scratch);
+			});
+			expect(log).to.deep.equal([]);
+
+			await act(async () => {
+				await resolve(() => <button id="l">l</button>);
+				await tick();
+			});
+			expect(log).to.deep.equal(['ref:a']);
+
+			await act(async () => {
+				hide();
+			});
+			expect(log).to.deep.equal(['ref:a', 'cleanup']);
+		});
+
+		it('should not leave a portal it mounted behind', async () => {
+			scratch.innerHTML =
+				'<main><!--$s=--><p>a</p><button id="l">l</button><!--/$s--></main>';
+			const portalRoot = document.createElement('div');
+			scratch.appendChild(portalRoot);
+			const [Lazy, resolve] = createLazy();
+
+			act(() => {
+				hydrate(
+					<main>
+						<Suspense>
+							<p>a</p>
+							{createPortal(<b>modal</b>, portalRoot)}
+							<Lazy />
+						</Suspense>
+					</main>,
+					scratch.firstChild.parentNode
+				);
+			});
+			expect(portalRoot.innerHTML).to.equal('');
+
+			await act(async () => {
+				await resolve(() => <button id="l">l</button>);
+				await tick();
+			});
+			expect(portalRoot.innerHTML).to.equal('<b>modal</b>');
+		});
+
 		it('should not run the effect of an instance that rendered before the suspending sibling', async () => {
 			scratch.innerHTML =
 				'<main><!--$s=--><button id="a">a</button><button id="l">l</button><!--/$s--></main>';
@@ -2942,6 +3011,29 @@ describe('streamed boundary ranges', () => {
 	});
 
 	describe('shipped markers', () => {
+		it('should not claim a new range inside a range of an older format', () => {
+			scratch.innerHTML =
+				'<div><!--$s:4--><!--$s=--><p>in</p><!--/$s--><!--/$s:4--><p>after</p></div>';
+			const inside = scratch.querySelector('p');
+
+			hydrate(
+				<div>
+					<Suspense>
+						<Suspense>
+							<p>in</p>
+						</Suspense>
+					</Suspense>
+					<p>after</p>
+				</div>,
+				scratch
+			);
+			rerender();
+
+			expect(scratch.querySelectorAll('p').length).to.equal(2);
+			expect(scratch.querySelector('p')).to.equal(inside);
+			expect(scratch.textContent).to.equal('inafter');
+		});
+
 		it('should hydrate a <!--$s--> range and keep its nodes', () => {
 			scratch.innerHTML =
 				'<div><p>a</p><!--$s--><p>in</p><!--/$s--><p>after</p></div>';
@@ -3380,6 +3472,38 @@ describe('streamed boundary ranges', () => {
 	});
 
 	describe('unmounting a boundary that waits', () => {
+		it('should not remove siblings when the closing marker is not one of them', async () => {
+			// A fallback whose raw HTML left a <p> open: the parser puts the
+			// closing marker inside it
+			const { root } = loadingDoc(
+				'<main><p>a</p><!--$s?0--><p>open<!--/$s?0--><p>c</p></main>'
+			);
+			let hide;
+			function App() {
+				const [shown, setShown] = useState(true);
+				hide = () => setShown(false);
+				return (
+					<main>
+						<p>a</p>
+						{shown && (
+							<Suspense fallback={<p>open</p>}>
+								<p>content</p>
+							</Suspense>
+						)}
+					</main>
+				);
+			}
+			act(() => {
+				hydrate(<App />, root);
+			});
+			const open = comment(root, '$s?0');
+			await act(async () => {
+				hide();
+			});
+			expect(open.__w).to.equal(0);
+			expect(root.lastChild.lastChild.textContent).to.equal('c');
+		});
+
 		it('should remove the whole range of a boundary waiting on a lazy', async () => {
 			scratch.innerHTML =
 				'<main><p>a</p><!--$s=--><i>x</i><i>y</i><!--/$s--><p>c</p></main>';
@@ -3723,8 +3847,10 @@ describe('streamed boundary ranges', () => {
 			expect(root.querySelectorAll('u').length).to.equal(1);
 			expect(root.querySelector('em')).to.equal(null);
 			expect(root.querySelectorAll('i').length).to.equal(0);
+			// The markers stay for the chunk's script, which drops the range
 			const open = comment(root, '$s?1');
-			if (open) expect(open.__w).to.equal(0);
+			expect(open).to.not.equal(undefined);
+			expect(open.__w).to.equal(0);
 		});
 	});
 

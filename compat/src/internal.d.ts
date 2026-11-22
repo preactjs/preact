@@ -39,4 +39,6 @@ export interface SuspenseComponent extends PreactComponent<
 	_suspenders: Component[];
 	_detachOnNextRender: null | VNode<any>;
 	_mask?: [string, number];
+	/** Removes the markers once the range hydrated */
+	_done?: () => void;
 }

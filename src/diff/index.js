@@ -86,7 +86,8 @@ export function diff(
 	) {
 		// The server DOM of a Suspense boundary that was rendered again while
 		// it waited may no longer match: it adopts that DOM and diffs its
-		// attributes, like render().
+		// attributes, like render(). (Its retry skips shouldComponentUpdate(),
+		// so compat can't see new props there.)
 		if (
 			newVNode.props !== oldVNode.props &&
 			oldVNode._component._childDidSuspend
@@ -109,7 +110,8 @@ export function diff(
 	if ((tmp = options._diff)) tmp(newVNode);
 
 	outer: if (typeof newType == 'function') {
-		let oldCommitQueueLength = commitQueue.length;
+		let oldCommitQueueLength = commitQueue.length,
+			oldRefQueueLength = refQueue.length;
 		try {
 			let c,
 				oldProps,
@@ -380,6 +382,7 @@ export function diff(
 			// that have been invalidated by us
 			// intercepting the error.
 			commitQueue.length = oldCommitQueueLength;
+			refQueue.length = oldRefQueueLength;
 			newVNode._original = NULL;
 			// if hydrating or creating initial tree, bailout preserves DOM:
 			if (isHydrating || excessDomChildren) {
