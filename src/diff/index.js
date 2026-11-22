@@ -418,8 +418,16 @@ export function diff(
 			if (!newVNode._children) {
 				newVNode._children = oldVNode._children || [];
 			}
+			newVNode._children.some(vnode => {
+				if (vnode) vnode._parent = newVNode;
+			});
 
 			if (!(e && e.then)) markAsForce(newVNode);
+
+			// Threw before the instance took over newVNode (contextType, gDSFP)
+			if ((tmp = oldVNode._component) && tmp._vnode != newVNode) {
+				(newVNode._component = tmp)._vnode = newVNode;
+			}
 			options._catchError(e, newVNode, oldVNode);
 		}
 	} else {

@@ -128,6 +128,8 @@ export function diffChildren(
 			}
 		}
 
+		if (oldVNode._parent) oldVNode._parent = NULL;
+
 		firstChildDom = firstChildDom || newDom;
 
 		if (childVNode._flags & INSERT_VNODE) {
