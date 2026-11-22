@@ -62,14 +62,14 @@ function initSuspenseHooks() {
 			let i = nodes.indexOf(cursor),
 				range = [],
 				marker;
-			// Any other boundary marker (an opener in an older format, or the
-			// end of the range around us) ends the search.
+			// (renderToStringAsync() also wraps a component that suspended in
+			// `$s`, inside the boundary's range: such markers are skipped.)
 			for (
 				rangeEnd = end, i = i < 0 ? 0 : i;
 				(marker = nodes[i++]) === null ||
-				(marker && marker.nodeType > 6 && !/^\/?\$s/.test(marker.data));
+				(marker && marker.nodeType > 6 && !/^\$s[=?!]/.test(marker.data));
 			);
-			if (marker && /^\$s[=?!]/.test(marker.data)) {
+			if (marker && marker.nodeType == 8) {
 				range.push(
 					(marker = rangeEnd((component._excess = marker), range)) &&
 						marker.nextSibling

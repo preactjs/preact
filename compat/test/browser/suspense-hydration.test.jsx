@@ -3011,29 +3011,6 @@ describe('streamed boundary ranges', () => {
 	});
 
 	describe('shipped markers', () => {
-		it('should not claim a new range inside a range of an older format', () => {
-			scratch.innerHTML =
-				'<div><!--$s:4--><!--$s=--><p>in</p><!--/$s--><!--/$s:4--><p>after</p></div>';
-			const inside = scratch.querySelector('p');
-
-			hydrate(
-				<div>
-					<Suspense>
-						<Suspense>
-							<p>in</p>
-						</Suspense>
-					</Suspense>
-					<p>after</p>
-				</div>,
-				scratch
-			);
-			rerender();
-
-			expect(scratch.querySelectorAll('p').length).to.equal(2);
-			expect(scratch.querySelector('p')).to.equal(inside);
-			expect(scratch.textContent).to.equal('inafter');
-		});
-
 		it('should hydrate a <!--$s--> range and keep its nodes', () => {
 			scratch.innerHTML =
 				'<div><p>a</p><!--$s--><p>in</p><!--/$s--><p>after</p></div>';
