@@ -28,6 +28,7 @@ import {
 	createSuspenseLoader
 } from './suspense-utils';
 import { vi } from 'vitest';
+import { render as renderToString } from 'preact-render-to-string';
 
 /* eslint-env browser */
 describe('suspense hydration', () => {
@@ -3832,46 +3833,35 @@ describe('streamed boundary ranges', () => {
 	});
 
 	describe('useId', () => {
-		function Id({ children }) {
-			return <span id={useId()}>{children}</span>;
+		function Id() {
+			return <span>{useId()}</span>;
 		}
 
 		it('should give the ids of the server HTML after a render that was thrown away', async () => {
-			// The ids the server HTML has: render the same tree once on the client
-			const [RefLazy, resolveRef] = createLazy();
+			// Hydration keeps attributes, so the ids are rendered as text
 			const detached = document.createElement('div');
-			render(
-				<main>
-					<Suspense>
-						<Id>a</Id>
-						<RefLazy />
-						<Id>c</Id>
-					</Suspense>
-				</main>,
-				detached
+			detached.innerHTML = renderToString(
+				<Suspense>
+					<Id />
+					<Id />
+					<Id />
+				</Suspense>
 			);
-			await act(async () => {
-				await resolveRef(() => <Id>b</Id>);
-				await tick();
-			});
-			const ids = [...detached.querySelectorAll('span')].map(s => s.id);
+			const ids = [...detached.querySelectorAll('span')].map(
+				s => s.textContent
+			);
 			expect(ids.length).to.equal(3);
-			render(null, detached);
 
 			scratch.innerHTML =
-				'<main><!--$s=-->' +
-				['a', 'b', 'c']
-					.map((t, i) => `<span id="${ids[i]}">${t}</span>`)
-					.join('') +
-				'<!--/$s--></main>';
+				'<main><!--$s=-->' + detached.innerHTML + '<!--/$s--></main>';
 			const [Lazy, resolve] = createLazy();
 			act(() => {
 				hydrate(
 					<main>
 						<Suspense>
-							<Id>a</Id>
+							<Id />
 							<Lazy />
-							<Id>c</Id>
+							<Id />
 						</Suspense>
 					</main>,
 					scratch
@@ -3879,11 +3869,11 @@ describe('streamed boundary ranges', () => {
 			});
 
 			await act(async () => {
-				await resolve(() => <Id>b</Id>);
+				await resolve(Id);
 				await tick();
 			});
 			expect(
-				[...scratch.querySelectorAll('span')].map(s => s.id)
+				[...scratch.querySelectorAll('span')].map(s => s.textContent)
 			).to.deep.equal(ids);
 			expect(commentData(scratch)).to.deep.equal([]);
 		});

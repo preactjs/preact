@@ -192,8 +192,7 @@ function removeOriginal(vnode, detachedParent, originalParent) {
 
 		if (vnode._component) {
 			if (vnode._component._parentDom == detachedParent) {
-				// (`__w` is 0 on the marker of a range that was dropped above)
-				if (vnode._dom && vnode._dom.__w !== 0) {
+				if (vnode._dom) {
 					originalParent.appendChild(vnode._dom);
 				}
 				vnode._component._bits |= COMPONENT_FORCE;
@@ -327,7 +326,7 @@ function createSuspense() {
 		// still to come.
 		let marker = this._excess,
 			node,
-			end = marker;
+			end;
 		if (marker && marker.data[2] == '?') {
 			this._excess = null;
 			marker.__w = 0;
@@ -336,7 +335,7 @@ function createSuspense() {
 			for (node = this._vnode; node && node._dom == marker; node = node._parent)
 				node._dom = null;
 			// Nothing goes when the closer isn't a later sibling (yet)
-			while ((end = end.nextSibling) && end.data != '/' + marker.data);
+			end = rangeEnd(marker);
 			while (end && (node = marker.nextSibling) != end) {
 				if (node.nodeType == 7) {
 					node.data = '';
@@ -383,9 +382,8 @@ function createSuspense() {
 
 			// Once this render commits the range is hydrated, and its markers go.
 			// (A shouldComponentUpdate() bailout also runs pending callbacks, with
-			// the boundary still suspended.) One callback however often this
-			// render is tried.
-			this._done = this._done || (() => {
+			// the boundary still suspended.)
+			this._renderCallbacks.push(() => {
 				const m = this._excess;
 				if (m && !(this._vnode._flags & MODE_SUSPENDED)) {
 					this._excess = null;
@@ -394,8 +392,6 @@ function createSuspense() {
 					if (m.data[2] == '!') this.forceUpdate();
 				}
 			});
-			if (!this._renderCallbacks.includes(this._done))
-				this._renderCallbacks.push(this._done);
 		}
 
 		if (this._detachOnNextRender) {

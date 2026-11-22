@@ -482,19 +482,20 @@ export function rangeEnd(start, nodes) {
 		// ranges in what has arrived so far may not be closed yet. So `pending`
 		// holds the one marker that closes it (`/$s?id`), and nothing before
 		// that marker counts.
-		for (let depth = 0, pending, data, node = start; node; ) {
-			if (node.nodeType == 8) {
-				data = node.data;
-				if (pending ? data == pending : data.startsWith('/$s')) {
+		for (
+			let depth = 1, pending = start.data[2] == '?' && '/' + start.data;
+			(start = start.nextSibling);
+		) {
+			if (start.nodeType == 8) {
+				if (pending ? start.data == pending : start.data.startsWith('/$s')) {
 					pending = 0;
-					if (!--depth) return node;
-				} else if (!pending && data.startsWith('$s')) {
+					if (!--depth) return start;
+				} else if (!pending && start.data.startsWith('$s')) {
 					depth++;
-					if (data[2] == '?') pending = '/' + data;
+					if (start.data[2] == '?') pending = '/' + start.data;
 				}
 			}
-			if (nodes && node != start) nodes.push(node);
-			node = node.nextSibling;
+			if (nodes) nodes.push(start);
 		}
 	}
 }
