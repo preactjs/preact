@@ -84,18 +84,15 @@ export function diff(
 		((isHydrating = oldVNode._flags & MODE_HYDRATE),
 		(tmp = oldVNode._component._excess))
 	) {
-		// The server DOM of a Suspense boundary that was rendered again while
-		// it waited may no longer match: it adopts that DOM and diffs its
-		// attributes, like render(). (Its retry skips shouldComponentUpdate(),
-		// so compat can't see new props there.)
+		// New props while waiting to hydrate: diff the server DOM rather than
+		// hydrate it, so attributes are updated
 		if (
 			newVNode.props !== oldVNode.props &&
 			oldVNode._component._childDidSuspend
 		) {
 			isHydrating = 0;
 		}
-		// Still suspended until this render gets through, also when
-		// shouldComponentUpdate() stops it before it starts.
+		// Suspended until this render completes
 		newVNode._flags |= MODE_SUSPENDED | isHydrating;
 		resumed = excessDomChildren = [];
 		if (tmp.nodeType == 8) {
@@ -142,9 +139,7 @@ export function diff(
 					// @ts-expect-error Trust me, Component implements the interface we want
 					newVNode._component = c = new newType(newProps, componentContext); // eslint-disable-line new-cap
 
-					// A component can take a range of the DOM it hydrates (compat's
-					// Suspense takes the range the server marked for it). The hook
-					// returns the nodes in it, followed by the node after it.
+					// Let compat's Suspense claim the server range it hydrates
 					if (
 						excessDomChildren &&
 						(tmp = options._claim) &&
@@ -478,10 +473,8 @@ export function diff(
  */
 export function rangeEnd(start, nodes) {
 	if (start && start.nodeType == 8 && start.data.startsWith('$s')) {
-		// While the browser streams a chunk into a pending range (`$s?id`), the
-		// ranges in what has arrived so far may not be closed yet. So `pending`
-		// holds the one marker that closes it (`/$s?id`), and nothing before
-		// that marker counts.
+		// A pending `$s?id` range may hold streamed content that is cut off
+		// mid-range, so skip to its `/$s?id` closer instead of counting
 		for (
 			let depth = 1, pending = start.data[2] == '?' && '/' + start.data;
 			(start = start.nextSibling);

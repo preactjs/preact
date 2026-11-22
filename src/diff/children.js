@@ -258,8 +258,8 @@ function constructNewChildrenArray(
 
 		// Here, we define isMounting for the purposes of the skew diffing
 		// algorithm. Nodes that are unsuspending are considered mounting and we detect
-		// this by checking if oldVNode._original == null. A component that is still
-		// to hydrate is not: the DOM it kept has a place, and moves with it.
+		// this by checking if oldVNode._original == null, except for components
+		// still waiting to hydrate, which keep their server DOM.
 		if (
 			!oldVNode ||
 			(!oldVNode._original &&
@@ -409,7 +409,7 @@ function insert(parentVNode, oldDom, parentDom, isMounting) {
 		// host tree and contribute nothing to the host insertion cursor.
 		if (parentVNode.props._parentDom) return oldDom;
 
-		// A component that is still to hydrate moves with all of its range.
+		// A component waiting to hydrate moves its whole server range
 		let node =
 			parentVNode._flags & MODE_SUSPENDED && parentVNode._component._excess;
 		if (node) {

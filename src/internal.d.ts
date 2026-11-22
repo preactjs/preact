@@ -38,8 +38,8 @@ export interface Options extends preact.Options {
 	/** Bypass effect execution. Currenty only used in devtools for hooks inspection */
 	_skipEffects?: boolean;
 	/**
-	 * Let a component that is about to hydrate take a range of the DOM: return
-	 * the nodes in the range followed by the node after it, or nothing.
+	 * Claim a DOM range for a component about to hydrate. Returns the nodes in
+	 * the range followed by the node after it.
 	 */
 	_claim?(
 		component: Component,

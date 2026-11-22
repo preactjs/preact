@@ -10,7 +10,7 @@ import {
 import { useId } from 'preact/hooks';
 import { assign } from './util';
 
-/** Core's `rangeEnd()`, handed over with the first range a boundary takes. */
+/** Core's `rangeEnd()`, passed in by `options._claim` */
 let rangeEnd;
 
 function initSuspenseHooks() {
@@ -21,15 +21,11 @@ function initSuspenseHooks() {
 			let component;
 			let vnode = newVNode;
 
-			// A boundary that is still to hydrate suspends itself, so the search
-			// starts at the vnode that threw.
+			// Start at the vnode that threw: a boundary waiting to hydrate suspends itself
 			for (; vnode; vnode = vnode._parent) {
 				if ((component = vnode._component) && component._childDidSuspend) {
-					// Below a boundary that hydrates its range (it has `_excess`
-					// for as long as that takes), suspending is the boundary's
-					// call: the error travels up to it, the range stays as the
-					// server sent it and hydrates in one go later. Core flags
-					// what suspended while it was taking over existing DOM.
+					// Below a boundary that is hydrating its server range, the
+					// boundary suspends instead, so the range stays intact
 					if (
 						component._excess &&
 						vnode != newVNode &&
@@ -50,20 +46,15 @@ function initSuspenseHooks() {
 		oldCatchError(error, newVNode, oldVNode, errorInfo);
 	};
 
-	// A boundary hydrates the range the server marked for it and nothing else.
-	// The comment that opens it reads `$s=` when its content is there, `$s?id`
-	// while the server is still to send it and `$s!` when the client has to
-	// render it (`$s!:id` from the island format too).
+	// Give a Suspense boundary the range the server marked for it: `$s=` has
+	// the content, `$s?id` is still streaming, `$s!` is left to the client.
 	options._claim = (component, nodes, cursor, end) => {
 		if (component._childDidSuspend) {
-			// The marker is the first node from the cursor on that is neither a
-			// comment nor an instruction, past the ones already hydrated. The
-			// cursor can be gone: the leftovers of the range before it.
+			// Find the opening marker at or after the cursor
 			let i = nodes.indexOf(cursor),
 				range = [],
 				marker;
-			// (renderToStringAsync() also wraps a component that suspended in
-			// `$s`, inside the boundary's range: such markers are skipped.)
+			// (skipping the `$s` markers renderToStringAsync adds)
 			for (
 				rangeEnd = end, i = i < 0 ? 0 : i;
 				(marker = nodes[i++]) === null ||
@@ -74,7 +65,7 @@ function initSuspenseHooks() {
 					(marker = rangeEnd((component._excess = marker), range)) &&
 						marker.nextSibling
 				);
-				// The parent doesn't hydrate any of it
+				// Hide the range from the parent
 				nodes.fill(null, i - 1, i + range.length);
 				return range;
 			}
@@ -93,13 +84,10 @@ function initSuspenseHooks() {
 	};
 }
 
-/**
- * Detach the components of a render that is thrown away, and the handlers it
- * attached: the DOM is the server's again.
- */
+/** Detach a thrown away render from the server DOM it hydrated */
 function discard(vnode) {
 	if (vnode) {
-		// A portal mounted fresh: its DOM isn't the server's, it goes
+		// Portal DOM was created on the client
 		if (vnode.props._parentDom) removeDom(vnode);
 		if (vnode._component) vnode._component._parentDom = null;
 		else if (vnode._dom) vnode._dom._listeners = null;
@@ -116,10 +104,7 @@ function removeDom(vnode) {
 	}
 }
 
-/**
- * The markers of a range still to come stay for the server's script (see
- * componentWillUnmount), so no copy that starts with one removes it.
- */
+/** Copy a vnode, without a pending `$s?` marker its unmount would remove */
 function clone(vnode, tmp) {
 	vnode = assign({ constructor: VNODE_MARKER }, vnode);
 	if ((tmp = vnode._dom) && tmp.nodeType == 8 && tmp.data[2] == '?')
@@ -129,9 +114,8 @@ function clone(vnode, tmp) {
 
 function detachedClone(vnode, detachedParent, parentDom) {
 	if (vnode) {
-		// A boundary that is still to hydrate has no DOM of its own to park,
-		// only the range the server sent. Unmounting this copy drops that range
-		// and the boundary mounts anew when the tree is revealed.
+		// A boundary waiting to hydrate has nothing to park: drop its server
+		// range and mount it again on reveal
 		if (vnode._flags & MODE_SUSPENDED && vnode._component._childDidSuspend) {
 			const copy = clone(vnode);
 			vnode._component = vnode._dom = null;
@@ -249,10 +233,8 @@ function createSuspense() {
 		// Store and null _parentDom to prevent setState/forceUpdate from
 		// scheduling renders while suspended. Render would be a no-op anyway
 		// since process() checks _parentDom, but this avoids queue churn.
-		// A boundary that waits to hydrate is the one that suspended: its own
-		// `_parentDom` tells `onResolved` whether it is still mounted. What
-		// hydrated below it before something suspended is thrown away, the
-		// range hydrates from scratch when it resumes.
+		// A boundary waiting to hydrate suspends itself. Keep its _parentDom so
+		// onResolved knows it's mounted, and throw away its partial render.
 		const originalParentDom = suspendingComponent._parentDom;
 		if (suspendingComponent != this) suspendingComponent._parentDom = null;
 		else {
@@ -296,7 +278,7 @@ function createSuspense() {
 		if (
 			!this._pendingSuspensionCount++ &&
 			!(suspendingVNode._flags & MODE_HYDRATE) &&
-			// A boundary that is still to hydrate keeps its server DOM instead
+			// A boundary waiting to hydrate keeps showing the server DOM
 			suspendingComponent != this
 		) {
 			this.setState({
@@ -307,8 +289,7 @@ function createSuspense() {
 	};
 
 	/**
-	 * A boundary that waits to hydrate keeps waiting when its parent renders it
-	 * again, only its own retry gets through (forceUpdate() skips this).
+	 * Ignore parent renders while waiting to hydrate, the retry uses forceUpdate()
 	 * @this {import('./internal').SuspenseComponent}
 	 */
 	Suspense.prototype.shouldComponentUpdate = function () {
@@ -319,22 +300,19 @@ function createSuspense() {
 		this._suspenders = [];
 		if (this.state._suspended) this._vnode._children[0] = this.state._suspended;
 
-		// The browser may be streaming this boundary's chunk into its range, so
-		// only the fallback goes: the markers and the instructions between them
-		// stay, and the script that ends the chunk clears a range whose `__w`
-		// is 0. Without its name `<?start>` is no target for a chunk that is
-		// still to come.
+		// A pending boundary's chunk may still stream into its range: leave the
+		// markers for the server script to remove (`__w` is 0), and blank
+		// `<?start>` so no chunk targets it.
 		let marker = this._excess,
 			node,
 			end;
 		if (marker && marker.data[2] == '?') {
 			this._excess = null;
 			marker.__w = 0;
-			// Neither this boundary nor a component above it that starts with the
-			// marker removes it when it unmounts
+			// Keep unmount from removing the marker
 			for (node = this._vnode; node && node._dom == marker; node = node._parent)
 				node._dom = null;
-			// Nothing goes when the closer isn't a later sibling (yet)
+			// Only when the closing marker is a sibling
 			end = rangeEnd(marker);
 			while (end && (node = marker.nextSibling) != end) {
 				if (node.nodeType == 7) {
@@ -355,34 +333,31 @@ function createSuspense() {
 		// on when it resolves on the server or hydrates on the client.
 		this._mask || (this._mask = [useId(), 0]);
 
-		// Set while this boundary hydrates the range the server marked for it
+		// Set while hydrating a server range
 		const marker = this._excess;
 		let fallback = state._suspended;
 		if (marker) {
-			// Nothing below has rendered yet, whatever an earlier attempt did
+			// Restart useId numbering for this attempt
 			this._mask[1] = 0;
 
 			if (marker.data[2] == '?') {
-				// The content is still to come: the script that ends its chunk
-				// wakes us up, and so does the init script's DOMContentLoaded
-				// handler when the response ends without it.
+				// Wait for the chunk. The server script calls `__w` when it
+				// arrives, or when the document has loaded without it.
 				if (marker.ownerDocument.readyState == 'loading') {
 					throw (
 						marker._promise ||
 						(marker._promise = new Promise(resolve => (marker.__w = resolve)))
 					);
 				}
-				// The response ended without this boundary's content
+				// The document loaded without the chunk
 				marker.data = '$s!';
 			}
 
-			// The server left `$s!` to the client: this render hydrates the
-			// fallback it sent, and the next one renders the content.
+			// `$s!`: hydrate the fallback, then render the content
 			fallback = marker.data[2] == '!';
 
-			// Once this render commits the range is hydrated, and its markers go.
-			// (A shouldComponentUpdate() bailout also runs pending callbacks, with
-			// the boundary still suspended.)
+			// Remove the markers once hydrated (render callbacks also run after
+			// an sCU bailout, while still suspended)
 			this._renderCallbacks.push(() => {
 				const m = this._excess;
 				if (m && !(this._vnode._flags & MODE_SUSPENDED)) {
