@@ -1085,6 +1085,50 @@ describe('useEffect before a queued rerender', () => {
 		expect(log).to.deep.equal(['outside mount']);
 	});
 
+	it('retries a sibling effect held when another root catches an error during the passive flush', () => {
+		const otherRoot = document.createElement('div');
+		const subscribe = vi.fn();
+
+		class Boundary extends Component {
+			static getDerivedStateFromError() {
+				return { failed: true };
+			}
+			render() {
+				return this.state.failed ? 'fallback' : this.props.children;
+			}
+		}
+		function Broken() {
+			throw new Error('caught');
+		}
+		function Open() {
+			useEffect(() => {
+				render(
+					<Boundary>
+						<Broken />
+					</Boundary>,
+					otherRoot
+				);
+			}, []);
+			return null;
+		}
+		function Subscriber() {
+			useEffect(subscribe, []);
+			return null;
+		}
+
+		act(() =>
+			render(
+				<>
+					<Open />
+					<Subscriber />
+				</>,
+				scratch
+			)
+		);
+		expect(otherRoot.textContent).to.equal('fallback');
+		expect(subscribe).toHaveBeenCalledOnce();
+	});
+
 	it('runs effects of a commit whose layout effect threw before the boundary rerenders', async () => {
 		const log = [];
 

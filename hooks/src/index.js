@@ -483,6 +483,7 @@ function flushAllEffects() {
 	afterPaintEffects = heldEffects.concat(afterPaintEffects);
 	heldEffects = [];
 	flushAfterPaintEffects();
+	if (heldEffects.length) afterPaint(1);
 }
 
 let HAS_RAF = typeof requestAnimationFrame == 'function';
