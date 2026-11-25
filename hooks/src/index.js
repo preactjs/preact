@@ -23,12 +23,6 @@ let afterPaintEffects = [];
  */
 let unmountCleanups = [];
 
-/**
- * How many `unmountCleanups`, counted from the front, were queued by commits
- * that have finished. The rest belongs to the tree that is still rendering.
- */
-let committedCleanups = 0;
-
 // Cast to use internal Options type
 const options = /** @type {import('./internal').Options} */ (_options);
 
@@ -55,13 +49,10 @@ options._render = vnode => {
 		// Still current: the render loop is running this component again.
 		if (currentComponent == component) {
 			component._renderCallbacks = [];
-			hooks._pendingEffects = [];
 		} else {
-			// Its effects run early, but still after the passive cleanups of the
-			// components that earlier commits unmounted (see #5410).
-			if (hooks._pendingEffects.length) flushUnmountCleanups();
 			invokePendingEffects(hooks);
 		}
+		hooks._pendingEffects = [];
 
 		// Runs before every render, forced or not, so `shouldComponentUpdate`
 		// never has to apply these itself.
@@ -113,8 +104,6 @@ options._commit = (vnode, commitQueue) => {
 			];
 		}
 	});
-
-	committedCleanups = unmountCleanups.length;
 
 	if (oldCommit) oldCommit(vnode, commitQueue);
 };
@@ -430,42 +419,32 @@ export function useId() {
 }
 
 /**
- * Run the passive cleanups of components that finished commits unmounted.
- * They run before any new passive effect, mirroring React running all
- * destroys before any create.
- */
-function flushUnmountCleanups() {
-	let hook;
-	while (committedCleanups) {
-		committedCleanups--;
-		hook = unmountCleanups.shift();
-		try {
-			invokeCleanup(hook);
-		} catch (e) {
-			hook = /** @type {any} */ (hook._passive);
-			options._catchError(e, { _parent: hook && hook._vnode });
-		}
-	}
-}
-
-/**
- * After paint effects consumer. Core also calls it ahead of the rerenders a
- * commit queued, at a point where nothing is rendering.
+ * After paint effects consumer. Core also calls it before new work renders,
+ * at a point where nothing is rendering.
  */
 function flushAfterPaintEffects() {
-	let component, hooks;
+	let component;
 	// The loop picks up components unmounted by an effect we just invoked, which
 	// don't necessarily schedule a flush of their own.
 	do {
-		committedCleanups = unmountCleanups.length;
-		flushUnmountCleanups();
+		// Unmounted components' passive cleanups run before any new passive
+		// effect, mirroring React running all destroys before any create.
+		while ((component = unmountCleanups.shift())) {
+			try {
+				invokeCleanup(component);
+			} catch (e) {
+				component = /** @type {any} */ (component._passive);
+				options._catchError(e, { _parent: component && component._vnode });
+			}
+		}
 
 		while ((component = afterPaintEffects.shift())) {
-			hooks = component.__hooks;
+			const hooks = component.__hooks;
 			if (!component._parentDom || !hooks) continue;
 			try {
 				invokePendingEffects(hooks);
 			} catch (e) {
+				hooks._pendingEffects = [];
 				options._catchError(e, component._vnode);
 			}
 		}
@@ -473,14 +452,14 @@ function flushAfterPaintEffects() {
 }
 
 /**
- * Taken first so a throwing effect, or a render it triggers, can't rerun them.
+ * Each effect leaves the list before it runs, so a render it triggers can't
+ * run it again.
  * @param {import('./internal').ComponentHooks} hooks
  */
 function invokePendingEffects(hooks) {
 	const effects = hooks._pendingEffects;
-	hooks._pendingEffects = [];
 	effects.some(invokeCleanup);
-	effects.some(invokeEffect);
+	while (effects.length) invokeEffect(effects.shift());
 }
 
 let HAS_RAF = typeof requestAnimationFrame == 'function';

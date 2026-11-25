@@ -274,6 +274,29 @@ describe('effects before a queued rerender', () => {
 		]);
 	});
 
+	it('allows an effect to drain the render queue with flushSync before new work', () => {
+		const log = [];
+		const [Other, sync] = createOther(log);
+		let update;
+
+		function App() {
+			const [value, setValue] = useState(0);
+			update = setValue;
+			useEffect(sync, []);
+			return (
+				<>
+					{value}
+					<Other />
+				</>
+			);
+		}
+
+		render(<App />, scratch);
+		flushSync(() => update(1));
+		expect(scratch.textContent).to.equal('1');
+		expect(log).to.deep.equal(['other render']);
+	});
+
 	it('allows an effect to drain the render queue with flushSync', async () => {
 		const log = [];
 		const [Other, sync] = createOther(log);
@@ -359,6 +382,133 @@ describe('effects before a queued rerender', () => {
 			]);
 			render(null, scratch);
 		}
+	});
+
+	it('keeps the DOM intact when the cleanup of an unmounted component calls flushSync', async () => {
+		let show, bump, setTitle;
+
+		function Old() {
+			useEffect(() => () => flushSync(() => setTitle('closed')), []);
+			return <s>old</s>;
+		}
+
+		function New() {
+			const [n, setN] = useState(0);
+			bump = () => setN(1);
+			useEffect(() => {}, [n]);
+			return <u>{n}</u>;
+		}
+
+		function App() {
+			const [which, setWhich] = useState('old');
+			const [title, set] = useState('open');
+			show = setWhich;
+			setTitle = set;
+			return <div title={title}>{which == 'old' ? <Old /> : <New />}</div>;
+		}
+
+		render(<App />, scratch);
+		await afterPaint();
+		show('new');
+		await Promise.resolve();
+		// `New` rerenders before the frame that would run `Old`'s cleanup.
+		bump();
+		await afterPaint();
+
+		expect(scratch.innerHTML).to.equal('<div title="closed"><u>1</u></div>');
+	});
+
+	it('keeps the cleanup of a component the current render unmounts after paint when that render commits another root', async () => {
+		const log = [];
+		const other = document.createElement('div');
+
+		function X() {
+			useEffect(() => () => log.push('X cleanup'), []);
+			return null;
+		}
+
+		class LegacyPortal extends Component {
+			componentDidMount() {
+				render(<i />, other);
+			}
+			componentWillUnmount() {
+				render(null, other);
+			}
+			render() {
+				return null;
+			}
+		}
+
+		function Y({ n }) {
+			useLayoutEffect(() => {
+				log.push('Y layout ' + n);
+			});
+			useEffect(() => {
+				log.push('Y effect ' + n);
+			});
+			return null;
+		}
+
+		const App = ({ n, showX }) => (
+			<Fragment>
+				{showX && <X />}
+				{showX && <LegacyPortal />}
+				<Y n={n} />
+			</Fragment>
+		);
+
+		render(<App n={0} showX />, scratch);
+		await afterPaint();
+		log.length = 0;
+
+		render(<App n={1} showX />, scratch);
+		render(<App n={2} showX={false} />, scratch);
+		await afterPaint();
+
+		expect(log).to.deep.equal([
+			'Y layout 1',
+			'Y effect 1',
+			'Y layout 2',
+			'X cleanup',
+			'Y effect 2'
+		]);
+	});
+
+	it('renders the rest of the queue after flushSync threw the error of an effect', async () => {
+		let setV;
+
+		function Bad({ v }) {
+			useEffect(() => {
+				if (v) throw new Error('bad effect');
+			}, [v]);
+			return null;
+		}
+
+		function Item({ v }) {
+			const [n, setN] = useState(0);
+			useLayoutEffect(() => {
+				if (v && !n) setN(1);
+			}, [v, n]);
+			return <i>{n}</i>;
+		}
+
+		function App() {
+			const [v, set] = useState(0);
+			setV = set;
+			return (
+				<div>
+					<Bad v={v} />
+					<Item v={v} />
+				</div>
+			);
+		}
+
+		render(<App />, scratch);
+		await afterPaint();
+
+		expect(() => flushSync(() => setV(1))).to.throw('bad effect');
+		await afterPaint();
+		expect(scratch.innerHTML).to.equal('<div><i>1</i></div>');
 	});
 
 	it('runs the layout work of a commit before its effects when it calls flushSync', async () => {

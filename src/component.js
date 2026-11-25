@@ -127,12 +127,13 @@ export function getDomSibling(vnode, childIndex) {
 const rerenderQueue = [];
 
 /**
- * Queued components whose rerender was requested by a commit (a ref, a layout
- * effect, a lifecycle). Like in React those renders are a new update, which
- * starts after the passive effects of the commit that asked for it.
+ * Queued components that start new work: everything but the rerenders a
+ * render in progress asks for (context, error boundaries, Suspense), which
+ * belong to that render. Like in React, new work starts after the passive
+ * effects of what was rendered before.
  * @type {Set<import('./internal').Component>}
  */
-const queuedByCommit = new Set();
+const newWork = new Set();
 
 /*
  * The value of `Component.debounce` must asynchronously invoke the passed in callback. It is
@@ -159,7 +160,7 @@ export function enqueueRender(c) {
 		(!(c._bits & COMPONENT_DIRTY) &&
 			((c._bits |= COMPONENT_DIRTY),
 			rerenderQueue.push(c),
-			phase > 1 && queuedByCommit.add(c),
+			phase != 1 && newWork.add(c),
 			!rerenderCount++)) ||
 		prevDebounce != options.debounceRendering
 	) {
@@ -201,21 +202,24 @@ function process() {
 				rerenderQueue.sort(depthSort);
 			}
 
-			// Nothing older is left to render and nothing is rendering, so the
-			// passive effects of the commits that queued the rest can run without
-			// seeing a stale sibling or a tree that is not committed yet.
+			// Only new work is left and nothing is rendering, so the passive effects
+			// of what was rendered so far can run without seeing a stale sibling
+			// or a tree that is not committed yet.
+			c = rerenderQueue[0];
 			if (
-				queuedByCommit.size == rerenderQueue.length &&
+				newWork.size == rerenderQueue.length &&
 				!outerPhase &&
-				options._flushEffects
+				options._flushEffects &&
+				c._bits & COMPONENT_DIRTY &&
+				c._parentDom
 			) {
-				queuedByCommit.clear();
 				options._flushEffects();
+				newWork.clear();
 				continue;
 			}
 
-			c = rerenderQueue.shift();
-			queuedByCommit.delete(c);
+			rerenderQueue.shift();
+			newWork.delete(c);
 			l = rerenderQueue.length;
 
 			// Re-render the component in place, unless it was unmounted.

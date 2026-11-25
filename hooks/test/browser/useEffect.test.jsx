@@ -1266,6 +1266,37 @@ describe('useEffect before a queued rerender', () => {
 		expect(log).to.deep.equal(['mount', 'cleanup']);
 	});
 
+	it('reports an effect error before rendering, and the render error after', () => {
+		const rerender = setupRerender();
+		let setBroken;
+
+		function Thrower() {
+			useEffect(() => {
+				throw new Error('effect');
+			}, []);
+			return null;
+		}
+
+		function Breaker() {
+			const [broken, set] = useState(false);
+			setBroken = set;
+			if (broken) throw new Error('render');
+			return null;
+		}
+
+		render(
+			<Fragment>
+				<Thrower />
+				<Breaker />
+			</Fragment>,
+			scratch
+		);
+		setBroken(true);
+
+		expect(() => rerender()).to.throw('effect');
+		expect(() => rerender()).to.throw('render');
+	});
+
 	it('reports an effect error before the rerender a commit queued, and the render error after', () => {
 		const rerender = setupRerender();
 

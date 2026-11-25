@@ -143,10 +143,16 @@ const flushSync = (callback, arg) => {
 	};
 	try {
 		const res = callback(arg);
-		if (flush) flush();
+		if ((callback = flush)) {
+			flush = 0;
+			callback();
+		}
 		return res;
 	} finally {
 		options.debounceRendering = prevDebounce;
+		// Something threw and left renders queued on the callback we captured:
+		// hand them to the real scheduler rather than strand them.
+		if (flush) (prevDebounce || queueMicrotask)(flush);
 	}
 };
 
