@@ -1002,6 +1002,88 @@ describe('useEffect before a queued rerender', () => {
 		expect(log).to.deep.equal(['a: 0', 'b: 1']);
 	});
 
+	it('lets an effect read sibling DOM updated by the same click', async () => {
+		const reads = [];
+		let setA, setB;
+
+		function A() {
+			const [value, set] = useState(0);
+			setA = set;
+			useEffect(() => {
+				if (value) reads.push(scratch.querySelector('output').textContent);
+			}, [value]);
+			return null;
+		}
+
+		function B() {
+			const [value, set] = useState(0);
+			setB = set;
+			return <output>{value}</output>;
+		}
+
+		render(
+			<button
+				onClick={() => {
+					setA(1);
+					setB(1);
+				}}
+			>
+				<A />
+				<B />
+			</button>,
+			scratch
+		);
+		scratch.firstChild.click();
+		await afterPaint();
+
+		expect(reads).to.deep.equal(['1']);
+	});
+
+	it('lets a newly queued parent remove a pending child before flushing effects', async () => {
+		let setTrigger, setChild, setVisible;
+		const log = [];
+
+		function Trigger() {
+			const [active, set] = useState(false);
+			setTrigger = set;
+			useLayoutEffect(() => {
+				if (active) setVisible(false);
+			}, [active]);
+			useEffect(() => {
+				if (active) log.push(scratch.textContent);
+			}, [active]);
+			return null;
+		}
+
+		function Child() {
+			const [value, set] = useState(0);
+			setChild = set;
+			useLayoutEffect(() => {
+				if (value) log.push('child updated');
+			}, [value]);
+			return <output>{value}</output>;
+		}
+
+		function Parent() {
+			const [visible, set] = useState(true);
+			setVisible = set;
+			return visible && <Child />;
+		}
+
+		render(
+			<>
+				<Trigger />
+				<Parent />
+			</>,
+			scratch
+		);
+		setTrigger(true);
+		setChild(1);
+		await afterPaint();
+
+		expect(log).to.deep.equal(['']);
+	});
+
 	it('runs the effect and cleanup of a component a layout effect unmounts again', async () => {
 		const log = [];
 
