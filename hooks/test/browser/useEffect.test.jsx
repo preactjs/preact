@@ -1541,6 +1541,108 @@ describe('useEffect before a queued rerender', () => {
 		expect(log).to.deep.equal(['a: 0', 'b: 1']);
 	});
 
+	// Distinguishes the Set from a counter that is never decremented: the
+	// commit-queued `Shallow` renders first (no flush, `Deep` is older), and
+	// `Deep` is still stale when it is the only one left.
+	it('keeps effects after an older queued component that renders after a commit-queued one', async () => {
+		const reads = [];
+		let setTrigger, setShallow, setDeep;
+
+		function Trigger() {
+			const [active, set] = useState(false);
+			setTrigger = set;
+			useLayoutEffect(() => {
+				if (active) setShallow(1);
+			}, [active]);
+			useEffect(() => {
+				if (active) reads.push(scratch.querySelector('output').textContent);
+			}, [active]);
+			return null;
+		}
+
+		function Shallow() {
+			const [value, set] = useState(0);
+			setShallow = set;
+			return <i>{value}</i>;
+		}
+
+		function Deep() {
+			const [value, set] = useState(0);
+			setDeep = set;
+			return <output>{value}</output>;
+		}
+
+		render(
+			<Fragment>
+				<Trigger />
+				<Shallow />
+				<div>
+					<p>
+						<Deep />
+					</p>
+				</div>
+			</Fragment>,
+			scratch
+		);
+		await afterPaint();
+		setTrigger(true);
+		setDeep(1);
+		await afterPaint();
+
+		expect(scratch.innerHTML).to.equal(
+			'<i>1</i><div><p><output>1</output></p></div>'
+		);
+		expect(reads).to.deep.equal(['1']);
+	});
+
+	// Distinguishes the `_pendingEffects.length` guard: a rerender with nothing
+
+	it('lets an effect read a sibling that an effect of the same flush rerendered', async () => {
+		const reads = [];
+		let setTrigger, setLate, setOther;
+
+		function Trigger() {
+			const [active, set] = useState(false);
+			setTrigger = set;
+			useLayoutEffect(() => {
+				if (active) setLate(1);
+			}, [active]);
+			useEffect(() => {
+				if (active) setOther(1);
+			}, [active]);
+			return null;
+		}
+
+		function Late() {
+			const [value, set] = useState(0);
+			setLate = set;
+			useEffect(() => {
+				if (value) reads.push(scratch.querySelector('output').textContent);
+			}, [value]);
+			return null;
+		}
+
+		function Other() {
+			const [value, set] = useState(0);
+			setOther = set;
+			return <output>{value}</output>;
+		}
+
+		render(
+			<Fragment>
+				<Trigger />
+				<Late />
+				<Other />
+			</Fragment>,
+			scratch
+		);
+		await afterPaint();
+		setTrigger(true);
+		await afterPaint();
+
+		expect(reads).to.deep.equal(['1']);
+	});
+
 	describe('with a synchronous scheduler', () => {
 		function Logger({ name, log }) {
 			useLayoutEffect(() => {

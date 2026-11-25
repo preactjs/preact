@@ -297,28 +297,45 @@ describe('effects before a queued rerender', () => {
 		expect(log).to.deep.equal(['other render']);
 	});
 
-	it('allows an effect to drain the render queue with flushSync', async () => {
+	it('does not throw when an effect drains the render queue with flushSync', async () => {
+		const errors = [];
+		const onError = e => {
+			errors.push(String(e.message || e.reason));
+			e.preventDefault();
+		};
+		window.addEventListener('error', onError);
+		window.addEventListener('unhandledrejection', onError);
 		const log = [];
-		const [Other, sync] = createOther(log);
-
+		let set;
+		function Other() {
+			const [value, setValue] = useState(0);
+			set = setValue;
+			if (value) log.push('other render');
+			return null;
+		}
+		const sync = () => flushSync(() => set(1));
 		function App() {
 			const [value, setValue] = useState(0);
-			// Queued by the commit, so the effect below runs ahead of this rerender.
 			useLayoutEffect(() => setValue(1), []);
 			useEffect(sync, []);
 			return (
-				<>
+				<Fragment>
 					{value}
 					<Other />
-				</>
+				</Fragment>
 			);
 		}
-
 		render(<App />, scratch);
 		await Promise.resolve();
+		await afterPaint();
+		window.removeEventListener('error', onError);
+		window.removeEventListener('unhandledrejection', onError);
+		expect(errors).to.deep.equal([]);
 		expect(scratch.textContent).to.equal('1');
 		expect(log).to.deep.equal(['other render']);
 	});
+
+	// Distinguishes marking the diff phase in the render queue as well: the
 
 	it('keeps effects of a rendering tree for its commit when the render flushes the queue', async () => {
 		for (const trigger of ['ref', 'layout cleanup']) {
@@ -382,6 +399,70 @@ describe('effects before a queued rerender', () => {
 			]);
 			render(null, scratch);
 		}
+	});
+
+	// same as 'keeps effects of a rendering tree for its commit when the render
+	// flushes the queue', with a state update instead of a `render()` call.
+	it('keeps effects of a rerendering tree for its commit when the rerender flushes the queue', async () => {
+		const log = [];
+		let setOther, setNext;
+
+		function Other() {
+			const [value, setValue] = useState(0);
+			setOther = setValue;
+			if (value) log.push('other render');
+			return null;
+		}
+		const sync = () => flushSync(() => setOther(1));
+
+		// Leaves a rerender queued by a commit in the render queue.
+		function Late() {
+			const [node, setNode] = useState(null);
+			return <b ref={el => el && el != node && setNode(el)} />;
+		}
+
+		function Fresh() {
+			const ref = useRef(null);
+			useLayoutEffect(() => {
+				log.push('layout');
+			}, []);
+			useEffect(() => {
+				log.push(ref.current);
+			}, []);
+			return <span ref={ref} />;
+		}
+
+		function App() {
+			const [next, set] = useState(false);
+			setNext = set;
+			return (
+				<div>
+					{next && <Fresh />}
+					<i ref={next ? null : node => node || sync()} />
+				</div>
+			);
+		}
+
+		render(<Other />, document.createElement('div'));
+		render(<App />, scratch);
+		await afterPaint();
+		render(
+			<section>
+				<div>
+					<Late />
+				</div>
+			</section>,
+			document.createElement('div')
+		);
+		// Detaching flushes the queue, deep inside the rerender of `App`.
+		setNext(true);
+		await afterPaint();
+
+		expect(log).to.deep.equal([
+			'other render',
+			'layout',
+			scratch.querySelector('span')
+		]);
 	});
 
 	it('keeps the DOM intact when the cleanup of an unmounted component calls flushSync', async () => {

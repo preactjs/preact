@@ -480,14 +480,9 @@ function markAsForce(vnode) {
  */
 export let phase = 0;
 
-/**
- * @param {number} next
- * @returns {number} The phase to restore once the render is done
- */
+/** @param {number} next */
 export function setPhase(next) {
-	const prev = phase;
 	phase = next;
-	return prev;
 }
 
 /**
