@@ -48,6 +48,11 @@ options._render = vnode => {
 		if (currentComponent == component) {
 			component._renderCallbacks = [];
 		} else {
+			// A component rendering again has to observe the same destroy-before-
+			// create order as the after-paint flush. Otherwise a passive cleanup
+			// queued by a component unmounted in this commit is still waiting when
+			// this component's new passive effect runs.
+			flushUnmountCleanups();
 			hooks._pendingEffects.some(invokeCleanup);
 			hooks._pendingEffects.some(invokeEffect);
 		}
@@ -420,21 +425,26 @@ export function useId() {
 /**
  * After paint effects consumer.
  */
+function flushUnmountCleanups() {
+	let component;
+	// Unmounted components' passive cleanups run before any new passive effect,
+	// mirroring React running all destroys before any create.
+	while ((component = unmountCleanups.shift())) {
+		try {
+			invokeCleanup(component);
+		} catch (e) {
+			component = /** @type {any} */ (component._passive);
+			options._catchError(e, { _parent: component && component._vnode });
+		}
+	}
+}
+
 function flushAfterPaintEffects() {
 	let component;
 	// The loop picks up components unmounted by an effect we just invoked, which
 	// don't necessarily schedule a flush of their own.
 	do {
-		// Unmounted components' passive cleanups run before any new passive
-		// effect, mirroring React running all destroys before any create.
-		while ((component = unmountCleanups.shift())) {
-			try {
-				invokeCleanup(component);
-			} catch (e) {
-				component = /** @type {any} */ (component._passive);
-				options._catchError(e, { _parent: component && component._vnode });
-			}
-		}
+		flushUnmountCleanups();
 
 		while ((component = afterPaintEffects.shift())) {
 			const hooks = component.__hooks;

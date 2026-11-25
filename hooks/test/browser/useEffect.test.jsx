@@ -902,4 +902,48 @@ describe('useEffect', () => {
 		expect(calls.length).to.equal(1);
 		expect(calls).to.deep.equal(['doing effect0']);
 	});
+
+	it('should run a queued unmount cleanup before a new effect when the new component rerenders before the after-paint flush', async () => {
+		const log = [];
+		let registered = null;
+		let swap;
+
+		function Old() {
+			useEffect(() => {
+				registered = 'Old';
+				return () => {
+					log.push('Old cleanup');
+					registered = null;
+				};
+			}, []);
+			return null;
+		}
+
+		function New() {
+			const [renders, setRenders] = useState(0);
+			useLayoutEffect(() => {
+				if (renders === 0) setRenders(1);
+			}, [renders]);
+			useEffect(() => {
+				log.push(`New effect, registered: ${registered}`);
+				registered = 'New';
+			}, []);
+			return null;
+		}
+
+		function App() {
+			const [showOld, setShowOld] = useState(true);
+			swap = setShowOld;
+			return showOld ? <Old /> : <New />;
+		}
+
+		render(<App />, scratch);
+		await new Promise(r => setTimeout(r, 60));
+		expect(registered).to.equal('Old');
+
+		swap(false);
+		await new Promise(r => setTimeout(r, 60));
+
+		expect(log).to.deep.equal(['Old cleanup', 'New effect, registered: null']);
+	});
 });
