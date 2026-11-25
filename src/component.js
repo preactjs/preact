@@ -163,7 +163,6 @@ function process() {
 			l = 1,
 			oldVNode,
 			newVNode,
-			parent,
 			oldDom,
 			parentDom,
 			commitQueue,
@@ -213,14 +212,20 @@ function process() {
 				commitRoot(commitQueue, newVNode, refQueue);
 				oldVNode._parent = oldVNode._dom = NULL;
 
-				// Stop at root boundaries (_parentDom).
-				parent = newVNode._dom != oldDom && newVNode._parent;
-				while (parent && parent._component && !parent.props._parentDom) {
-					// _dom starts nulled, so re-assigning a null child._dom is a no-op and
-					// the first truthy _dom stops the walk.
-					parent._dom = NULL;
-					parent._children.some(child => child && (parent._dom = child._dom));
-					parent = parent._parent;
+				// Stop at root boundaries (_parentDom)
+				if (newVNode._dom != oldDom) {
+					while (
+						(newVNode = newVNode._parent) &&
+						newVNode._component &&
+						!newVNode.props._parentDom
+					) {
+						// _dom starts nulled, so re-assigning a null child._dom is a no-op and
+						// the first truthy _dom stops the walk.
+						newVNode._dom = NULL;
+						newVNode._children.some(
+							child => child && (newVNode._dom = child._dom)
+						);
+					}
 				}
 			}
 		}
