@@ -513,6 +513,11 @@ export function commitRoot(commitQueue, root, refQueue) {
  * the global document for containers that don't have one
  * @returns {PreactElement}
  */
+/** A keyed read that the engine does not tie to the surrounding for…in. */
+function get(obj, key) {
+	return obj[key];
+}
+
 function diffElementNodes(
 	dom,
 	newVNode,
@@ -539,6 +544,7 @@ function diffElementNodes(
 	let value;
 	let inputValue;
 	let checked;
+	let oldValue;
 
 	// Tracks entering and exiting namespaces when descending through the tree.
 	if (nodeType == 'svg') namespace = SVG_NAMESPACE;
@@ -651,9 +657,9 @@ function diffElementNodes(
 				checked = value;
 			} else if (
 				(!isHydrating || typeof value == 'function') &&
-				oldProps[i] !== value
+				(oldValue = get(oldProps, i)) !== value
 			) {
-				setProperty(dom, i, value, oldProps[i], namespace);
+				setProperty(dom, i, value, oldValue, namespace);
 			}
 		}
 
