@@ -235,6 +235,45 @@ describe('effects before a queued rerender', () => {
 		return [Other, () => flushSync(() => set(1))];
 	}
 
+	it('finishes attaching refs before a detached ref can flush passive effects', async () => {
+		const log = [];
+		const [Other, sync] = createOther(log);
+		const onRef = node => {
+			if (!node) sync();
+		};
+
+		function Fresh() {
+			const ref = useRef(null);
+			useLayoutEffect(() => {
+				log.push('layout');
+			}, []);
+			useEffect(() => {
+				log.push(ref.current);
+			}, []);
+			return <span ref={ref} />;
+		}
+
+		function App({ next }) {
+			return (
+				<>
+					{next && <Fresh />}
+					<i ref={next ? null : onRef} />
+				</>
+			);
+		}
+
+		render(<Other />, document.createElement('div'));
+		render(<App next={false} />, scratch);
+		render(<App next={true} />, scratch);
+		await afterPaint();
+
+		expect(log).to.deep.equal([
+			'other render',
+			'layout',
+			scratch.querySelector('span')
+		]);
+	});
+
 	it('allows an effect to drain the render queue with flushSync', () => {
 		const log = [];
 		const [Other, sync] = createOther(log);

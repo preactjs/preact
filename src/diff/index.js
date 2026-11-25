@@ -744,6 +744,8 @@ function diffElementNodes(
  * @param {any} [owner] The vnode the ref is detached from
  */
 export function applyRef(ref, value, vnode, owner) {
+	// A ref can flush a queued render when it detaches during the diff.
+	committing++;
 	try {
 		if (typeof ref == 'function') {
 			// Store the cleanup on the element or component rather than on the
@@ -762,6 +764,8 @@ export function applyRef(ref, value, vnode, owner) {
 		} else ref.current = value;
 	} catch (e) {
 		options._catchError(e, vnode);
+	} finally {
+		committing--;
 	}
 }
 
