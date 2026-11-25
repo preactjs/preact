@@ -475,11 +475,28 @@ function markAsForce(vnode) {
 }
 
 /**
+ * What the innermost render on the stack is doing: 0 when nothing renders,
+ * 1 while it diffs, 2 once it commits.
+ */
+export let phase = 0;
+
+/**
+ * @param {number} next
+ * @returns {number} The phase to restore once the render is done
+ */
+export function setPhase(next) {
+	const prev = phase;
+	phase = next;
+	return prev;
+}
+
+/**
  * @param {Array<Component>} commitQueue List of components
  * which have callbacks to invoke in commitRoot
  * @param {VNode} root
  */
 export function commitRoot(commitQueue, root, refQueue) {
+	phase = 2;
 	for (let i = 0; i < refQueue.length; ) {
 		applyRef(refQueue[i++], refQueue[i++], refQueue[i++]);
 	}

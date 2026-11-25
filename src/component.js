@@ -6,7 +6,7 @@ import {
 	VNODE_MARKER
 } from './constants';
 import { Fragment } from './create-element';
-import { commitRoot, diff } from './diff/index';
+import { commitRoot, diff, phase, setPhase } from './diff/index';
 import options from './options';
 import { assign } from './util';
 
@@ -126,6 +126,14 @@ export function getDomSibling(vnode, childIndex) {
  */
 const rerenderQueue = [];
 
+/**
+ * Queued components whose rerender was requested by a commit (a ref, a layout
+ * effect, a lifecycle). Like in React those renders are a new update, which
+ * starts after the passive effects of the commit that asked for it.
+ * @type {Set<import('./internal').Component>}
+ */
+const queuedByCommit = new Set();
+
 /*
  * The value of `Component.debounce` must asynchronously invoke the passed in callback. It is
  * important that contributors to Preact can consistently reason about what calls to `setState`, etc.
@@ -151,6 +159,7 @@ export function enqueueRender(c) {
 		(!(c._bits & COMPONENT_DIRTY) &&
 			((c._bits |= COMPONENT_DIRTY),
 			rerenderQueue.push(c),
+			phase > 1 && queuedByCommit.add(c),
 			!rerenderCount++)) ||
 		prevDebounce != options.debounceRendering
 	) {
@@ -167,6 +176,8 @@ const depthSort = (a, b) => a._vnode._depth - b._vnode._depth;
 
 /** Flush the render queue by rerendering all queued components */
 function process() {
+	// Not 0 when a ref, an effect or a lifecycle flushes the queue synchronously.
+	const outerPhase = phase;
 	try {
 		let c,
 			l = 1,
@@ -190,7 +201,21 @@ function process() {
 				rerenderQueue.sort(depthSort);
 			}
 
+			// Nothing older is left to render and nothing is rendering, so the
+			// passive effects of the commits that queued the rest can run without
+			// seeing a stale sibling or a tree that is not committed yet.
+			if (
+				queuedByCommit.size == rerenderQueue.length &&
+				!outerPhase &&
+				options._flushEffects
+			) {
+				queuedByCommit.clear();
+				options._flushEffects();
+				continue;
+			}
+
 			c = rerenderQueue.shift();
+			queuedByCommit.delete(c);
 			l = rerenderQueue.length;
 
 			// Re-render the component in place, unless it was unmounted.
@@ -203,6 +228,7 @@ function process() {
 				newVNode._original = oldVNode._original + 1;
 				if (options.vnode) options.vnode(newVNode);
 
+				setPhase(1);
 				diff(
 					parentDom,
 					newVNode,
@@ -219,6 +245,7 @@ function process() {
 				newVNode._original = oldVNode._original;
 				newVNode._parent._children[newVNode._index] = newVNode;
 				commitRoot(commitQueue, newVNode, refQueue);
+				setPhase(outerPhase);
 				oldVNode._parent = oldVNode._dom = NULL;
 
 				// Stop at root boundaries (_parentDom)
@@ -239,6 +266,7 @@ function process() {
 			}
 		}
 	} finally {
+		setPhase(outerPhase);
 		if ((rerenderCount = rerenderQueue.length)) {
 			(prevDebounce || queueMicrotask)(process);
 		}

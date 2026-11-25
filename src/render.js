@@ -1,5 +1,5 @@
 import { EMPTY_OBJ, MODE_HYDRATE, NULL } from './constants';
-import { commitRoot, diff } from './diff/index';
+import { commitRoot, diff, setPhase } from './diff/index';
 import { createVNode, Fragment } from './create-element';
 import options from './options';
 import { slice } from './util';
@@ -32,30 +32,35 @@ export function render(vnode, parentDom) {
 
 	// List of effects that need to be called after diffing.
 	let commitQueue = [],
-		refQueue = [];
+		refQueue = [],
+		outerPhase = setPhase(1);
 
-	diff(
-		parentDom,
-		// Determine the new vnode tree and store it on the DOM element on
-		// our custom `_children` property.
-		parentDom._children,
-		oldVNode || EMPTY_OBJ,
-		EMPTY_OBJ,
-		parentDom.namespaceURI,
-		oldVNode
-			? NULL
-			: parentDom.firstChild
-				? slice.call(parentDom.childNodes)
-				: NULL,
-		commitQueue,
-		oldVNode ? oldVNode._dom : parentDom.firstChild,
-		// @ts-expect-error we are doing a bit-wise operation so it's either 0 or true
-		isHydrating,
-		refQueue
-	);
+	try {
+		diff(
+			parentDom,
+			// Determine the new vnode tree and store it on the DOM element on
+			// our custom `_children` property.
+			parentDom._children,
+			oldVNode || EMPTY_OBJ,
+			EMPTY_OBJ,
+			parentDom.namespaceURI,
+			oldVNode
+				? NULL
+				: parentDom.firstChild
+					? slice.call(parentDom.childNodes)
+					: NULL,
+			commitQueue,
+			oldVNode ? oldVNode._dom : parentDom.firstChild,
+			// @ts-expect-error we are doing a bit-wise operation so it's either 0 or true
+			isHydrating,
+			refQueue
+		);
 
-	// Flush all queued effects
-	commitRoot(commitQueue, parentDom._children, refQueue);
+		// Flush all queued effects
+		commitRoot(commitQueue, parentDom._children, refQueue);
+	} finally {
+		setPhase(outerPhase);
+	}
 
 	// The live children are tracked on _children after diffing.
 	parentDom._children.props.children = NULL;

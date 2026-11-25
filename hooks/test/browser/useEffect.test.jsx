@@ -1,6 +1,19 @@
-import { Component, Fragment, createElement, render } from 'preact';
-import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
-import { act, teardown as teardownAct } from 'preact/test-utils';
+import {
+	Component,
+	Fragment,
+	createContext,
+	createElement,
+	options,
+	render
+} from 'preact';
+import {
+	useContext,
+	useEffect,
+	useLayoutEffect,
+	useRef,
+	useState
+} from 'preact/hooks';
+import { act, setupRerender, teardown as teardownAct } from 'preact/test-utils';
 import { vi } from 'vitest';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { scheduleEffectAssert } from '../_util/useEffectUtil';
@@ -901,5 +914,722 @@ describe('useEffect', () => {
 		});
 		expect(calls.length).to.equal(1);
 		expect(calls).to.deep.equal(['doing effect0']);
+	});
+});
+
+// Kept out of the `useEffect` describe, whose assertions install
+// `setupRerender` and would replace the default scheduler.
+describe('useEffect before a queued rerender', () => {
+	/** @type {HTMLDivElement} */
+	let scratch;
+	let prevDebounce;
+
+	const afterPaint = () => new Promise(r => setTimeout(r, 60));
+
+	beforeEach(() => {
+		scratch = setupScratch();
+		prevDebounce = options.debounceRendering;
+	});
+
+	afterEach(() => {
+		options.debounceRendering = prevDebounce;
+		teardown(scratch);
+	});
+
+	// The shape Radix collections have (#3666): a child slot registers the item
+	// in an effect, and the item's ref callback queues a rerender that reads it.
+	function createList(log) {
+		const registry = new Set();
+
+		function Slot({ item, children }) {
+			useEffect(() => {
+				registry.add(item);
+				return () => registry.delete(item);
+			}, []);
+			return children;
+		}
+
+		function Item({ name }) {
+			const [node, setNode] = useState(null);
+			const ref = useRef(null);
+			if (node) {
+				log.push(`${name}: ${[...registry].findIndex(r => r.current == node)}`);
+			}
+			return (
+				<Slot item={ref}>
+					<span
+						ref={el => {
+							ref.current = el;
+							if (el && el != node) setNode(el);
+						}}
+					/>
+				</Slot>
+			);
+		}
+
+		return () => (
+			<Fragment>
+				<Item name="a" />
+				<Item name="b" />
+			</Fragment>
+		);
+	}
+
+	it('runs effects of the mounting render before the rerender a ref queued', async () => {
+		const log = [];
+		const List = createList(log);
+
+		render(<List />, scratch);
+		await Promise.resolve();
+
+		expect(log).to.deep.equal(['a: 0', 'b: 1']);
+	});
+
+	it('runs them before the queued rerender inside act', () => {
+		const log = [];
+		const List = createList(log);
+
+		act(() => {
+			render(<List />, scratch);
+		});
+
+		expect(log).to.deep.equal(['a: 0', 'b: 1']);
+	});
+
+	it('runs them before a rerender queued by a commit of the same render queue', async () => {
+		const log = [];
+		const List = createList(log);
+		let show;
+
+		function App() {
+			const [visible, setVisible] = useState(false);
+			show = () => setVisible(true);
+			return visible ? <List /> : null;
+		}
+
+		render(<App />, scratch);
+		await afterPaint();
+		show();
+		await afterPaint();
+
+		expect(log).to.deep.equal(['a: 0', 'b: 1']);
+	});
+
+	it('lets an effect read sibling DOM updated by the same click', async () => {
+		const reads = [];
+		let setA, setB;
+
+		function A() {
+			const [value, set] = useState(0);
+			setA = set;
+			useEffect(() => {
+				if (value) reads.push(scratch.querySelector('output').textContent);
+			}, [value]);
+			return null;
+		}
+
+		function B() {
+			const [value, set] = useState(0);
+			setB = set;
+			return <output>{value}</output>;
+		}
+
+		render(
+			<button
+				onClick={() => {
+					setA(1);
+					setB(1);
+				}}
+			>
+				<A />
+				<B />
+			</button>,
+			scratch
+		);
+		scratch.firstChild.click();
+		await afterPaint();
+
+		expect(reads).to.deep.equal(['1']);
+	});
+
+	it('lets a newly queued parent remove a pending child before flushing effects', async () => {
+		let setTrigger, setChild, setVisible;
+		const log = [];
+
+		function Trigger() {
+			const [active, set] = useState(false);
+			setTrigger = set;
+			useLayoutEffect(() => {
+				if (active) setVisible(false);
+			}, [active]);
+			useEffect(() => {
+				if (active) log.push(scratch.textContent);
+			}, [active]);
+			return null;
+		}
+
+		function Child() {
+			const [value, set] = useState(0);
+			setChild = set;
+			useLayoutEffect(() => {
+				if (value) log.push('child updated');
+			}, [value]);
+			return <output>{value}</output>;
+		}
+
+		function Parent() {
+			const [visible, set] = useState(true);
+			setVisible = set;
+			return visible && <Child />;
+		}
+
+		render(
+			<>
+				<Trigger />
+				<Parent />
+			</>,
+			scratch
+		);
+		setTrigger(true);
+		setChild(1);
+		await afterPaint();
+
+		expect(log).to.deep.equal(['']);
+	});
+
+	it('runs the effect and cleanup of a component a layout effect unmounts again', async () => {
+		const log = [];
+
+		function Short() {
+			useEffect(() => {
+				log.push('mount');
+				return () => log.push('cleanup');
+			}, []);
+			return null;
+		}
+
+		let show;
+		function App() {
+			const [visible, setVisible] = useState(false);
+			show = () => setVisible(true);
+			useLayoutEffect(() => {
+				if (visible) setVisible(false);
+			}, [visible]);
+			return visible ? <Short /> : null;
+		}
+
+		render(<App />, scratch);
+		await afterPaint();
+		show();
+		await afterPaint();
+
+		expect(log).to.deep.equal(['mount', 'cleanup']);
+	});
+
+	it('does not run effects of a tree an error boundary discards', async () => {
+		const log = [];
+
+		function Sibling({ name }) {
+			useEffect(() => {
+				log.push(`${name} mount`);
+				return () => log.push(`${name} cleanup`);
+			}, []);
+			return null;
+		}
+
+		function Thrower() {
+			throw new Error('boom');
+		}
+
+		class Derived extends Component {
+			static getDerivedStateFromError() {
+				return { error: true };
+			}
+			render() {
+				return this.state.error ? 'fallback' : this.props.children;
+			}
+		}
+
+		class DidCatch extends Component {
+			componentDidCatch() {
+				this.setState({ error: true });
+			}
+			render() {
+				return this.state.error ? 'fallback' : this.props.children;
+			}
+		}
+
+		render(
+			<Fragment>
+				<Derived>
+					<Sibling name="derived" />
+					<Thrower />
+				</Derived>
+				<DidCatch>
+					<Sibling name="didCatch" />
+					<Thrower />
+				</DidCatch>
+				<Sibling name="outside" />
+			</Fragment>,
+			scratch
+		);
+		await afterPaint();
+
+		expect(scratch.textContent).to.equal('fallbackfallback');
+		// Held back until after paint rather than dropped.
+		expect(log).to.deep.equal(['outside mount']);
+	});
+
+	it('retries a sibling effect held when another root catches an error during the passive flush', () => {
+		const otherRoot = document.createElement('div');
+		const subscribe = vi.fn();
+
+		class Boundary extends Component {
+			static getDerivedStateFromError() {
+				return { failed: true };
+			}
+			render() {
+				return this.state.failed ? 'fallback' : this.props.children;
+			}
+		}
+		function Broken() {
+			throw new Error('caught');
+		}
+		function Open() {
+			useEffect(() => {
+				render(
+					<Boundary>
+						<Broken />
+					</Boundary>,
+					otherRoot
+				);
+			}, []);
+			return null;
+		}
+		function Subscriber() {
+			useEffect(subscribe, []);
+			return null;
+		}
+
+		act(() =>
+			render(
+				<>
+					<Open />
+					<Subscriber />
+				</>,
+				scratch
+			)
+		);
+		expect(otherRoot.textContent).to.equal('fallback');
+		expect(subscribe).toHaveBeenCalledOnce();
+	});
+
+	it('runs effects of a commit whose layout effect threw before the boundary rerenders', async () => {
+		const log = [];
+
+		function Sibling() {
+			useEffect(() => {
+				log.push('mount');
+				return () => log.push('cleanup');
+			}, []);
+			return null;
+		}
+
+		function Thrower() {
+			useLayoutEffect(() => {
+				throw new Error('layout');
+			}, []);
+			return null;
+		}
+
+		class Boundary extends Component {
+			static getDerivedStateFromError() {
+				return { error: true };
+			}
+			render() {
+				return this.state.error ? 'fallback' : this.props.children;
+			}
+		}
+
+		render(
+			<Boundary>
+				<Sibling />
+				<Thrower />
+			</Boundary>,
+			scratch
+		);
+		await afterPaint();
+
+		// The commit finished, so like React its effects run before the boundary
+		// unmounts the tree.
+		expect(scratch.textContent).to.equal('fallback');
+		expect(log).to.deep.equal(['mount', 'cleanup']);
+	});
+
+	it('reports an effect error before the rerender a commit queued, and the render error after', () => {
+		const rerender = setupRerender();
+
+		function Thrower() {
+			useEffect(() => {
+				throw new Error('effect');
+			}, []);
+			return null;
+		}
+
+		function Breaker() {
+			const [broken, set] = useState(false);
+			useLayoutEffect(() => set(true), []);
+			if (broken) throw new Error('render');
+			return null;
+		}
+
+		render(
+			<Fragment>
+				<Thrower />
+				<Breaker />
+			</Fragment>,
+			scratch
+		);
+
+		expect(() => rerender()).to.throw('effect');
+		expect(() => rerender()).to.throw('render');
+	});
+
+	// The reproduction from #5410.
+	function createNavigators(log, rerenderFromLayout) {
+		let registered = null;
+		const api = {};
+
+		function Old() {
+			useEffect(() => {
+				registered = 'Old';
+				return () => {
+					log.push('Old cleanup');
+					registered = null;
+				};
+			}, []);
+			return null;
+		}
+
+		function New() {
+			const [renders, setRenders] = useState(0);
+			api.bump = () => setRenders(r => r + 1);
+			useLayoutEffect(() => {
+				if (rerenderFromLayout && renders == 0) setRenders(1);
+			}, [renders]);
+			useEffect(() => {
+				log.push('New effect, registered: ' + registered);
+				registered = 'New';
+			}, []);
+			return null;
+		}
+
+		api.App = function App() {
+			const [which, setWhich] = useState('old');
+			api.show = setWhich;
+			return which == 'old' ? <Old /> : <New />;
+		};
+
+		return api;
+	}
+
+	it('runs the cleanup of an unmounted component before the effect of its replacement that a layout effect rerenders (#5410)', async () => {
+		const log = [];
+		const api = createNavigators(log, true);
+
+		render(<api.App />, scratch);
+		await afterPaint();
+		api.show('new');
+		await afterPaint();
+
+		expect(log).to.deep.equal(['Old cleanup', 'New effect, registered: null']);
+	});
+
+	it('runs the cleanup of an unmounted component before the effect of its replacement that rerenders before paint (#5410)', async () => {
+		const log = [];
+		const api = createNavigators(log, false);
+
+		render(<api.App />, scratch);
+		await afterPaint();
+		api.show('new');
+		// Past the render of `New`, ahead of the frame that flushes its effects.
+		await Promise.resolve();
+		expect(log).to.deep.equal([]);
+		api.bump();
+		await Promise.resolve();
+
+		expect(log).to.deep.equal(['Old cleanup', 'New effect, registered: null']);
+	});
+
+	it('keeps the cleanup of a component the current render unmounts after paint', async () => {
+		const log = [];
+
+		function X() {
+			useEffect(() => () => log.push('X cleanup'), []);
+			return null;
+		}
+
+		function Y({ n }) {
+			useLayoutEffect(() => {
+				log.push('Y layout ' + n);
+			});
+			useEffect(() => {
+				log.push('Y effect ' + n);
+			});
+			return null;
+		}
+
+		const App = ({ n, showX }) => (
+			<Fragment>
+				{showX && <X />}
+				<Y n={n} />
+			</Fragment>
+		);
+
+		render(<App n={0} showX />, scratch);
+		await afterPaint();
+		log.length = 0;
+
+		// `Y` rerenders with an effect pending, in the render that unmounts `X`.
+		render(<App n={1} showX />, scratch);
+		render(<App n={2} showX={false} />, scratch);
+		await afterPaint();
+
+		expect(log).to.deep.equal([
+			'Y layout 1',
+			'Y effect 1',
+			'Y layout 2',
+			'X cleanup',
+			'Y effect 2'
+		]);
+	});
+
+	it('lets a provider effect read a consumer updated through context', async () => {
+		const log = [];
+		const Ctx = createContext(0);
+		let setValue;
+
+		function Consumer() {
+			return <output>{useContext(Ctx)}</output>;
+		}
+
+		class Blocker extends Component {
+			shouldComponentUpdate() {
+				return false;
+			}
+			render() {
+				return <Consumer />;
+			}
+		}
+
+		function Wrapper() {
+			const [value, set] = useState(0);
+			setValue = set;
+			useEffect(() => {
+				log.push(scratch.querySelector('output').textContent);
+			}, [value]);
+			return (
+				<Ctx.Provider value={value}>
+					<Blocker />
+				</Ctx.Provider>
+			);
+		}
+
+		render(<Wrapper />, scratch);
+		await afterPaint();
+		setValue(1);
+		await afterPaint();
+
+		expect(log).to.deep.equal(['0', '1']);
+	});
+
+	it('lets an effect read a sibling a layout effect of the same commit rerendered', async () => {
+		const reads = [];
+		let setTrigger, setA, setB;
+
+		function Trigger() {
+			const [active, set] = useState(false);
+			setTrigger = set;
+			useLayoutEffect(() => {
+				if (active) {
+					setA(1);
+					setB(1);
+				}
+			}, [active]);
+			return null;
+		}
+
+		function A() {
+			const [value, set] = useState(0);
+			setA = set;
+			useEffect(() => {
+				if (value) reads.push(scratch.querySelector('output').textContent);
+			}, [value]);
+			return null;
+		}
+
+		function B() {
+			const [value, set] = useState(0);
+			setB = set;
+			return <output>{value}</output>;
+		}
+
+		render(
+			<Fragment>
+				<Trigger />
+				<A />
+				<B />
+			</Fragment>,
+			scratch
+		);
+		await afterPaint();
+		setTrigger(true);
+		await afterPaint();
+
+		expect(reads).to.deep.equal(['1']);
+	});
+
+	it('still runs effects before the rerender a ref queued after an uncaught commit error', async () => {
+		class Broken extends Component {
+			componentDidMount() {
+				throw new Error('didMount');
+			}
+			render() {
+				return null;
+			}
+		}
+		expect(() => render(<Broken />, document.createElement('div'))).to.throw(
+			'didMount'
+		);
+
+		const log = [];
+		const List = createList(log);
+		render(<List />, scratch);
+		await Promise.resolve();
+
+		expect(log).to.deep.equal(['a: 0', 'b: 1']);
+	});
+
+	describe('with a synchronous scheduler', () => {
+		function Logger({ name, log }) {
+			useLayoutEffect(() => {
+				log.push(`${name} layout`);
+			}, []);
+			useEffect(() => {
+				log.push(`${name} effect`);
+			}, []);
+			return null;
+		}
+
+		it('runs the layout effects of a commit before its effects when a layout effect rerenders', async () => {
+			const log = [];
+
+			function Updater() {
+				const [value, set] = useState(0);
+				useLayoutEffect(() => set(1), []);
+				return value;
+			}
+
+			options.debounceRendering = cb => cb();
+			render(
+				<Fragment>
+					<Logger name="a" log={log} />
+					<Updater />
+					<Logger name="b" log={log} />
+				</Fragment>,
+				scratch
+			);
+			await afterPaint();
+
+			expect(log).to.deep.equal([
+				'a layout',
+				'b layout',
+				'a effect',
+				'b effect'
+			]);
+		});
+
+		it('runs componentDidMount of a commit before its effects when one rerenders', async () => {
+			const log = [];
+
+			class Updater extends Component {
+				componentDidMount() {
+					this.setState({ value: 1 });
+				}
+				render() {
+					return this.state.value;
+				}
+			}
+
+			class Later extends Component {
+				componentDidMount() {
+					log.push('later didMount');
+				}
+				render() {
+					return null;
+				}
+			}
+
+			options.debounceRendering = cb => cb();
+			render(
+				<Fragment>
+					<Logger name="a" log={log} />
+					<Updater />
+					<Later />
+				</Fragment>,
+				scratch
+			);
+			await afterPaint();
+
+			expect(log).to.deep.equal(['a layout', 'later didMount', 'a effect']);
+		});
+
+		it('runs the layout effects of a commit before its effects when a ref rerenders', async () => {
+			const log = [];
+
+			function Updater() {
+				const [node, setNode] = useState(null);
+				return <div ref={el => el && el != node && setNode(el)} />;
+			}
+
+			options.debounceRendering = cb => cb();
+			render(
+				<Fragment>
+					<Logger name="a" log={log} />
+					<Updater />
+					<Updater />
+					<Logger name="b" log={log} />
+				</Fragment>,
+				scratch
+			);
+			await afterPaint();
+
+			expect(log).to.deep.equal([
+				'a layout',
+				'b layout',
+				'a effect',
+				'b effect'
+			]);
+		});
+
+		it('runs an effect once when it rerenders its own component', async () => {
+			const log = [];
+
+			function App() {
+				const [value, set] = useState(0);
+				useEffect(() => {
+					log.push(`effect ${value}`);
+					set(1);
+				}, []);
+				return value;
+			}
+
+			render(<App />, scratch);
+			options.debounceRendering = cb => cb();
+			await afterPaint();
+
+			expect(log).to.deep.equal(['effect 0']);
+			expect(scratch.textContent).to.equal('1');
+		});
 	});
 });
