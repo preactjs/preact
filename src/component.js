@@ -195,6 +195,8 @@ function process() {
 			}
 
 			c = rerenderQueue.shift();
+			// A pending effect can synchronously drain the queue.
+			if (!c) break;
 			l = rerenderQueue.length;
 
 			// Re-render the component in place, unless it was unmounted.

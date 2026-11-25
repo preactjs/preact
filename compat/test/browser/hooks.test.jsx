@@ -235,6 +235,29 @@ describe('effects before a queued rerender', () => {
 		return [Other, () => flushSync(() => set(1))];
 	}
 
+	it('allows an effect to drain the render queue with flushSync', () => {
+		const log = [];
+		const [Other, sync] = createOther(log);
+		let update;
+
+		function App() {
+			const [value, setValue] = useState(0);
+			update = setValue;
+			useEffect(sync, []);
+			return (
+				<>
+					{value}
+					<Other />
+				</>
+			);
+		}
+
+		render(<App />, scratch);
+		flushSync(() => update(1));
+		expect(scratch.textContent).to.equal('1');
+		expect(log).to.deep.equal(['other render']);
+	});
+
 	it('runs the layout work of a commit before its effects when it calls flushSync', async () => {
 		const log = [];
 		const [Other, sync] = createOther(log);
