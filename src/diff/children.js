@@ -392,13 +392,14 @@ function insert(parentVNode, oldDom, parentDom, isMounting) {
 		let children = parentVNode._children;
 		if (children) {
 			for (let i = 0; i < children.length; i++) {
-				if (children[i]) {
+				const child = children[i];
+				if (child) {
 					// If we enter this code path on sCU bailout, where we copy
 					// oldVNode._children to newVNode._children, we need to update the old
 					// children's _parent pointer to point to the newVNode (parentVNode
 					// here).
-					children[i]._parent = parentVNode;
-					oldDom = insert(children[i], oldDom, parentDom, false);
+					child._parent = parentVNode;
+					oldDom = insert(child, oldDom, parentDom, false);
 				}
 			}
 		}
