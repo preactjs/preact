@@ -592,6 +592,213 @@ describe('effects before a queued rerender', () => {
 		expect(scratch.innerHTML).to.equal('<div><i>1</i></div>');
 	});
 
+	describe('lets an effect read a sibling updated in the same tick as a root render', () => {
+		function setup(Mid) {
+			const api = { reads: [] };
+			function A() {
+				const [v, set] = useState(0);
+				api.setA = set;
+				useEffect(() => {
+					if (v) api.reads.push(scratch.querySelector('output').textContent);
+				}, [v]);
+				return null;
+			}
+			function C() {
+				const [v, set] = useState(0);
+				api.setC = set;
+				return <output>{v}</output>;
+			}
+			api.App = ({ v }) => (
+				<div>
+					<A />
+					<div>
+						<Mid v={v} />
+						{/* Deeper than anything `Mid` renders, so `C` renders last. */}
+						<section>
+							<p>
+								<span>
+									<b>
+										<em>
+											<C />
+										</em>
+									</b>
+								</span>
+							</p>
+						</section>
+					</div>
+				</div>
+			);
+			return api;
+		}
+
+		async function run(api, wrap = fn => fn()) {
+			render(<api.App v={0} />, scratch);
+			await afterPaint();
+			// One tick: the root rerenders and two components get new state.
+			wrap(() => {
+				render(<api.App v={1} />, scratch);
+				api.setA(1);
+				api.setC(1);
+			});
+			await afterPaint();
+			return api.reads;
+		}
+
+		it('without anything queued by the root render', async () => {
+			expect(await run(setup(() => null))).to.deep.equal(['1']);
+		});
+
+		it('when the root render queued a context consumer', async () => {
+			const Ctx = createContext(0);
+			const Consumer = () => <i>{useContext(Ctx)}</i>;
+			class Pure extends Component {
+				shouldComponentUpdate() {
+					return false;
+				}
+				render() {
+					return <Consumer />;
+				}
+			}
+			const Mid = ({ v }) => (
+				<Ctx.Provider value={v}>
+					<Pure />
+				</Ctx.Provider>
+			);
+			expect(await run(setup(Mid))).to.deep.equal(['1']);
+		});
+
+		it('when the root render queued an error boundary', async () => {
+			class Boundary extends Component {
+				componentDidCatch() {
+					this.setState({ failed: true });
+				}
+				render() {
+					return this.state.failed ? <s /> : this.props.children;
+				}
+			}
+			const Bad = ({ v }) => {
+				if (v) throw new Error('bad');
+				return null;
+			};
+			const Mid = ({ v }) => (
+				<Boundary>
+					<Bad v={v} />
+				</Boundary>
+			);
+			expect(await run(setup(Mid))).to.deep.equal(['1']);
+		});
+
+		it('when the root render queued a Suspense', async () => {
+			const never = new Promise(() => {});
+			const Wait = ({ v }) => {
+				if (v) throw never;
+				return null;
+			};
+			const Mid = ({ v }) => (
+				<Suspense fallback={<s />}>
+					<Wait v={v} />
+				</Suspense>
+			);
+			expect(await run(setup(Mid))).to.deep.equal(['1']);
+		});
+
+		it('inside act, with a context consumer', async () => {
+			const Ctx = createContext(0);
+			const Consumer = () => <i>{useContext(Ctx)}</i>;
+			class Pure extends Component {
+				shouldComponentUpdate() {
+					return false;
+				}
+				render() {
+					return <Consumer />;
+				}
+			}
+			const Mid = ({ v }) => (
+				<Ctx.Provider value={v}>
+					<Pure />
+				</Ctx.Provider>
+			);
+			expect(await run(setup(Mid), act)).to.deep.equal(['1']);
+		});
+	});
+
+	// 2. `process` only sorts when the queue grew past `l`. A flush in the
+	// middle of a `process` call can drain the queue (flushSync in an effect)
+	// and refill it to no more than `l` entries, which then render unsorted:
+
+	it('renders a parent before its child when a flushed effect drains the queue and queues both', async () => {
+		const log = [];
+		const set = {};
+		let gone = false;
+
+		function Child() {
+			const [, s] = useState(0);
+			set.child = s;
+			log.push(gone ? 'Child render after its parent dropped it' : 'Child');
+			return null;
+		}
+
+		function Parent() {
+			const [show, s] = useState(true);
+			set.parent = s;
+			return show ? <Child /> : null;
+		}
+
+		function Leaf({ name }) {
+			const [, s] = useState(0);
+			set[name] = s;
+			return null;
+		}
+
+		function A() {
+			const [n, s] = useState(0);
+			set.a = s;
+			// Two rerenders queued by the commit of the first batch member.
+			useLayoutEffect(() => {
+				if (n) {
+					set.x(1);
+					set.y(1);
+				}
+			}, [n]);
+			return null;
+		}
+
+		function B() {
+			const [n, s] = useState(0);
+			set.b = s;
+			useEffect(() => {
+				if (n) {
+					flushSync(() => set.z(1));
+					// Child first, then the parent that removes it.
+					gone = true;
+					set.child(1);
+					set.parent(false);
+				}
+			}, [n]);
+			return null;
+		}
+
+		render(
+			<div>
+				<A />
+				<B />
+				<Leaf name="x" />
+				<Leaf name="y" />
+				<Leaf name="z" />
+				<Parent />
+			</div>,
+			scratch
+		);
+		await afterPaint();
+		log.length = 0;
+
+		set.a(1);
+		set.b(1);
+		await afterPaint();
+
+		expect(log).to.deep.equal([]);
+	});
+
 	it('runs the layout work of a commit before its effects when it calls flushSync', async () => {
 		const log = [];
 		const [Other, sync] = createOther(log);

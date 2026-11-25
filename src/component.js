@@ -215,11 +215,16 @@ function process() {
 			) {
 				options._flushEffects();
 				newWork.clear();
+				// An effect can have drained and refilled the queue.
+				l = 0;
 				continue;
 			}
 
 			rerenderQueue.shift();
-			newWork.delete(c);
+			// New work that renders without a flush started a batch: what was
+			// queued with it is no longer new, a flush between them would show
+			// one the stale DOM of the other.
+			if (newWork.delete(c)) newWork.clear();
 			l = rerenderQueue.length;
 
 			// Re-render the component in place, unless it was unmounted.
