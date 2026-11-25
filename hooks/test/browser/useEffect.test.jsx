@@ -881,6 +881,34 @@ describe('useEffect', () => {
 		expect(log).to.deep.equal(['A cleanup', 'B effect']);
 	});
 
+	it('unregisters before the replacement navigator rerenders from layout (#5410)', () => {
+		let owner;
+		const seen = [];
+		function Old() {
+			useEffect(() => {
+				owner = 'old';
+				return () => {
+					owner = undefined;
+				};
+			}, []);
+			return null;
+		}
+		function Replacement() {
+			const [, setReady] = useState(false);
+			useLayoutEffect(() => setReady(true), []);
+			useEffect(() => {
+				seen.push(owner);
+				owner = 'new';
+			}, []);
+			return null;
+		}
+
+		act(() => render(<Old />, scratch));
+		act(() => render(<Replacement />, scratch));
+		expect(seen).to.deep.equal([undefined]);
+		expect(owner).to.equal('new');
+	});
+
 	it('should not rerun when receiving NaN on subsequent renders', () => {
 		const calls = [];
 		const Component = ({ value }) => {

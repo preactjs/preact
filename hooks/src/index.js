@@ -48,6 +48,7 @@ options._render = vnode => {
 		if (currentComponent == component) {
 			component._renderCallbacks = [];
 		} else {
+			if (hooks._pendingEffects.length) flushUnmountCleanups();
 			hooks._pendingEffects.some(invokeCleanup);
 			hooks._pendingEffects.some(invokeEffect);
 		}
@@ -417,6 +418,18 @@ export function useId() {
 	return state._value;
 }
 
+function flushUnmountCleanups() {
+	let component;
+	while ((component = unmountCleanups.shift())) {
+		try {
+			invokeCleanup(component);
+		} catch (e) {
+			component = /** @type {any} */ (component._passive);
+			options._catchError(e, { _parent: component && component._vnode });
+		}
+	}
+}
+
 /**
  * After paint effects consumer.
  */
@@ -427,14 +440,7 @@ function flushAfterPaintEffects() {
 	do {
 		// Unmounted components' passive cleanups run before any new passive
 		// effect, mirroring React running all destroys before any create.
-		while ((component = unmountCleanups.shift())) {
-			try {
-				invokeCleanup(component);
-			} catch (e) {
-				component = /** @type {any} */ (component._passive);
-				options._catchError(e, { _parent: component && component._vnode });
-			}
-		}
+		flushUnmountCleanups();
 
 		while ((component = afterPaintEffects.shift())) {
 			const hooks = component.__hooks;
