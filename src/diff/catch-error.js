@@ -26,6 +26,7 @@ export function _catchError(error, vnode, oldVNode, errorInfo) {
 	for (; (vnode = vnode._parent); ) {
 		if (
 			(component = vnode._component) &&
+			(vnode = component._vnode) &&
 			!(component._bits & COMPONENT_PROCESSING_EXCEPTION)
 		) {
 			component._bits |= COMPONENT_FORCE;

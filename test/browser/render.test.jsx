@@ -40,6 +40,32 @@ describe('render()', () => {
 		teardown(scratch);
 	});
 
+	it('detaches a replaced vnode still held in props.children', () => {
+		let wrapper;
+		class Wrapper extends Component {
+			render() {
+				wrapper = this;
+				return <div class={this.state.className}>{this.props.children}</div>;
+			}
+		}
+		const child = createElement('span', null, 'child');
+		render(<Wrapper>{child}</Wrapper>, scratch);
+		const parent = child._parent;
+		const dom = scratch.firstChild.firstChild;
+		expect(parent).to.equal(wrapper._vnode._children[0]);
+
+		wrapper.setState({ className: 'updated' });
+		rerender();
+
+		expect(wrapper.props.children).to.equal(child);
+		expect(child._parent).to.equal(null);
+		const current = wrapper._vnode._children[0];
+		expect(current).not.to.equal(parent);
+		expect(current._children[0]._parent).to.equal(current);
+		expect(scratch.firstChild.firstChild).to.equal(dom);
+		expect(scratch.firstChild.className).to.equal('updated');
+	});
+
 	beforeAll(() => {
 		resetAppendChild = logCall(Element.prototype, 'appendChild');
 		resetInsertBefore = logCall(Element.prototype, 'insertBefore');
@@ -366,6 +392,280 @@ describe('render()', () => {
 
 		expect(scratch._children._children[0]).to.not.equal(firstAppVNode);
 		expect(scratch._children.props.children).to.equal(null);
+	});
+
+	describe('stale parent pointers', () => {
+		function expectConsistentParents(vnode) {
+			if (!vnode._children) return;
+			vnode._children.forEach(child => {
+				if (child) {
+					expect(child._parent).to.equal(vnode);
+					expectConsistentParents(child);
+				}
+			});
+		}
+
+		it('should release the parent of a matched child after it is replaced (#5403)', () => {
+			const oldChild = <span>before</span>;
+			const oldParent = <div>{oldChild}</div>;
+			render(oldParent, scratch);
+			const span = scratch.firstChild.firstChild;
+
+			const newChild = <span>after</span>;
+			const newParent = <div>{newChild}</div>;
+			render(newParent, scratch);
+
+			expect(oldChild._parent).to.equal(null);
+			expect(oldParent._parent).to.equal(null);
+			expect(newChild._parent).to.equal(newParent);
+			expect(newParent._parent).to.equal(scratch._children);
+			expect(scratch.firstChild.firstChild).to.equal(span);
+			expect(scratch.innerHTML).to.equal('<div><span>after</span></div>');
+			expectConsistentParents(scratch._children);
+		});
+
+		it('should not let reused vnodes retain previous render trees', () => {
+			let addRow;
+			class Log extends Component {
+				constructor(props) {
+					super(props);
+					this.state = { rows: [<p key={0}>0</p>] };
+					addRow = () =>
+						this.setState(s => ({
+							rows: s.rows.concat(<p key={s.rows.length}>{s.rows.length}</p>)
+						}));
+				}
+
+				render() {
+					return <div>{this.state.rows}</div>;
+				}
+			}
+
+			render(<Log />, scratch);
+			const firstRow = scratch._children._children[0]._children[0]._children[0];
+			const firstTree = scratch._children._children[0]._children[0];
+			expect(firstRow._parent).to.equal(firstTree);
+
+			addRow();
+			rerender();
+			addRow();
+			rerender();
+
+			expect(firstRow._parent).to.equal(null);
+			expect(firstTree._parent).to.equal(null);
+			expect(scratch.innerHTML).to.equal('<div><p>0</p><p>1</p><p>2</p></div>');
+			expectConsistentParents(scratch._children);
+		});
+
+		it('should keep parent pointers consistent when keyed children move', () => {
+			const list = keys => (
+				<ul>
+					{keys.map(k => (
+						<li key={k}>{k}</li>
+					))}
+				</ul>
+			);
+
+			render(list(['a', 'b', 'c', 'd']), scratch);
+			const oldChildren = scratch._children._children[0]._children.slice();
+
+			render(list(['d', 'b', 'a', 'e']), scratch);
+			expect(scratch.innerHTML).to.equal(
+				'<ul><li>d</li><li>b</li><li>a</li><li>e</li></ul>'
+			);
+			oldChildren.forEach(child => expect(child._parent).to.equal(null));
+			expectConsistentParents(scratch._children);
+
+			render(list(['e', 'a', 'b', 'd']), scratch);
+			expect(scratch.innerHTML).to.equal(
+				'<ul><li>e</li><li>a</li><li>b</li><li>d</li></ul>'
+			);
+			expectConsistentParents(scratch._children);
+		});
+
+		it('should point adopted children at the new vnode after a child throws on update', () => {
+			let shouldThrow = false,
+				updateGrandChild,
+				grandChildThrows = false;
+			const caught = [];
+
+			class Boundary extends Component {
+				componentDidCatch(error) {
+					caught.push(error.message);
+					this.setState({});
+				}
+				render() {
+					return this.props.children;
+				}
+			}
+
+			class GrandChild extends Component {
+				constructor(props) {
+					super(props);
+					updateGrandChild = () => this.forceUpdate();
+				}
+				render() {
+					if (grandChildThrows) {
+						grandChildThrows = false;
+						throw new Error('grandchild');
+					}
+					return <span>grandchild</span>;
+				}
+			}
+
+			function Thrower() {
+				if (shouldThrow) {
+					shouldThrow = false;
+					throw new Error('thrower');
+				}
+				return <GrandChild />;
+			}
+
+			function App() {
+				return (
+					<Boundary>
+						<div>
+							<Thrower />
+						</div>
+					</Boundary>
+				);
+			}
+
+			render(<App />, scratch);
+			shouldThrow = true;
+			render(<App />, scratch);
+
+			expect(caught).to.deep.equal(['thrower']);
+			expectConsistentParents(scratch._children);
+
+			rerender();
+			expect(scratch.innerHTML).to.equal('<div><span>grandchild</span></div>');
+			expectConsistentParents(scratch._children);
+
+			grandChildThrows = true;
+			updateGrandChild();
+			rerender();
+			expect(caught).to.deep.equal(['thrower', 'grandchild']);
+			expect(scratch.innerHTML).to.equal('<div><span>grandchild</span></div>');
+			expectConsistentParents(scratch._children);
+		});
+
+		it('should update in place after getDerivedStateFromProps threw and its parent bailed out', () => {
+			let shouldThrow = false,
+				setOuter,
+				child;
+
+			class Keep extends Component {
+				componentDidCatch() {
+					this.setState({});
+				}
+				render() {
+					return this.props.children;
+				}
+			}
+
+			class Child extends Component {
+				static getDerivedStateFromProps() {
+					if (shouldThrow) {
+						shouldThrow = false;
+						throw new Error('gdsfp');
+					}
+					return null;
+				}
+				render() {
+					child = this;
+					return (
+						<span>
+							{this.props.value}-{this.state.count || 0}
+						</span>
+					);
+				}
+			}
+
+			class Outer extends Component {
+				constructor(props) {
+					super(props);
+					this.state = { value: 0 };
+					setOuter = value => this.setState({ value });
+				}
+				render() {
+					return <Child value={this.state.value} />;
+				}
+			}
+
+			render(
+				<Keep>
+					<Outer />
+				</Keep>,
+				scratch
+			);
+			expect(scratch.innerHTML).to.equal('<span>0-0</span>');
+
+			shouldThrow = true;
+			setOuter(1);
+			rerender();
+			expect(scratch.innerHTML).to.equal('<span>0-0</span>');
+			expectConsistentParents(scratch._children);
+
+			child.setState({ count: 5 });
+			rerender();
+			expect(scratch.innerHTML).to.equal('<span>1-5</span>');
+			expectConsistentParents(scratch._children);
+
+			setOuter(2);
+			rerender();
+			expect(scratch.innerHTML).to.equal('<span>2-5</span>');
+			expectConsistentParents(scratch._children);
+		});
+
+		it('should keep parent pointers consistent after getDerivedStateFromProps throws', () => {
+			let shouldThrow = false;
+			const caught = [];
+
+			class Boundary extends Component {
+				componentDidCatch(error) {
+					caught.push(error.message);
+					this.setState({});
+				}
+				render() {
+					return this.props.children;
+				}
+			}
+
+			class Child extends Component {
+				static getDerivedStateFromProps() {
+					if (shouldThrow) {
+						shouldThrow = false;
+						throw new Error('gdsfp');
+					}
+					return null;
+				}
+				render() {
+					return <span>{this.props.value}</span>;
+				}
+			}
+
+			render(
+				<Boundary>
+					<Child value="a" />
+				</Boundary>,
+				scratch
+			);
+			shouldThrow = true;
+			render(
+				<Boundary>
+					<Child value="b" />
+				</Boundary>,
+				scratch
+			);
+
+			expect(caught).to.deep.equal(['gdsfp']);
+			expectConsistentParents(scratch._children);
+
+			rerender();
+			expect(scratch.innerHTML).to.equal('<span>b</span>');
+			expectConsistentParents(scratch._children);
+		});
 	});
 
 	it('should nest empty nodes', () => {

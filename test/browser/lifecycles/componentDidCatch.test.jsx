@@ -21,6 +21,238 @@ describe('Lifecycle methods', () => {
 		teardown(scratch);
 	});
 
+	it('preserves insertion order when a handled error retains children', () => {
+		let leaf;
+		class Leaf extends Component {
+			render() {
+				leaf = this;
+				return this.state.visible ? <b /> : null;
+			}
+		}
+		function Failer({ fail }) {
+			if (fail) throw new Error('render failed');
+			return <Leaf />;
+		}
+		class Gate extends Component {
+			shouldComponentUpdate(next) {
+				return next.fail !== this.props.fail;
+			}
+			render() {
+				return <Failer fail={this.props.fail} />;
+			}
+		}
+		const gates = [<Gate fail={false} />, <Gate fail />];
+		class Boundary extends Component {
+			componentDidCatch() {
+				this.setState({ handled: true });
+			}
+			render() {
+				return [gates[+this.props.fail], <i />];
+			}
+		}
+		render(<Boundary fail={false} />, scratch);
+		render(<Boundary fail />, scratch);
+		rerender();
+		leaf.setState({ visible: true });
+		rerender();
+		expect(scratch.innerHTML).to.equal('<b></b><i></i>');
+	});
+
+	it('preserves a mounted component and DOM order after derived state threw', () => {
+		let failer,
+			thrown = false;
+		const onError = vi.fn();
+		class Failer extends Component {
+			static getDerivedStateFromProps(props) {
+				if (props.fail && !thrown) {
+					thrown = true;
+					throw new Error('lifecycle failed');
+				}
+				return null;
+			}
+			render() {
+				failer = this;
+				return this.state.visible ? <b /> : null;
+			}
+		}
+		class Gate extends Component {
+			shouldComponentUpdate(next) {
+				return next.fail !== this.props.fail;
+			}
+			render() {
+				return <Failer fail={this.props.fail} />;
+			}
+		}
+		const gates = [<Gate fail={false} />, <Gate fail />];
+		class Boundary extends Component {
+			componentDidCatch(error) {
+				onError(error);
+				this.setState({ handled: true });
+			}
+			render() {
+				return [gates[+this.props.fail], <i />];
+			}
+		}
+		render(<Boundary fail={false} />, scratch);
+		render(<Boundary fail />, scratch);
+		rerender();
+		failer.setState({ visible: true });
+		rerender();
+		expect(scratch.innerHTML).to.equal('<b></b><i></i>');
+
+		expect(onError).toHaveBeenCalledTimes(1);
+	});
+
+	it('retries incoming props when forceUpdate bypasses a failed SCU', () => {
+		let child;
+		class Child extends Component {
+			shouldComponentUpdate(next) {
+				if (next.value === 'new') throw new Error('SCU failed');
+				return true;
+			}
+			render({ value }) {
+				child = this;
+				return <b>{value}</b>;
+			}
+		}
+		function Gate({ value }) {
+			return <Child value={value} />;
+		}
+		const gates = [<Gate value="old" />, <Gate value="new" />];
+		class Boundary extends Component {
+			componentDidCatch() {
+				this.setState({ handled: true });
+			}
+			render({ value }) {
+				return gates[+(value === 'new')];
+			}
+		}
+		render(<Boundary value="old" />, scratch);
+		render(<Boundary value="new" />, scratch);
+		rerender();
+		expect(scratch.textContent).to.equal('old');
+		child.forceUpdate();
+		rerender();
+		expect(scratch.textContent).to.equal('new');
+	});
+
+	it('keeps the mounted instance when contextType lookup throws', () => {
+		let child,
+			fail = false;
+		const scu = vi.fn(() => false);
+		class Child extends Component {
+			static get contextType() {
+				if (fail) {
+					fail = false;
+					throw new Error('context lookup failed');
+				}
+				return undefined;
+			}
+			shouldComponentUpdate() {
+				return scu();
+			}
+			render() {
+				child = this;
+				return <b>{this.state.count || 0}</b>;
+			}
+		}
+		const Gate = () => <Child />;
+		const gates = [<Gate />, <Gate />];
+		class Boundary extends Component {
+			componentDidCatch() {
+				this.setState({ handled: true });
+			}
+			render({ step }) {
+				return gates[step];
+			}
+		}
+		render(<Boundary step={0} />, scratch);
+		const original = child;
+		fail = true;
+		render(<Boundary step={1} />, scratch);
+		rerender();
+		original.setState({ count: 1 });
+		rerender();
+		expect(scu).toHaveBeenCalledTimes(1);
+		expect(scratch.innerHTML).to.equal('<b>0</b>');
+		original.forceUpdate();
+		rerender();
+		expect(child).to.equal(original);
+		expect(scratch.innerHTML).to.equal('<b>1</b>');
+	});
+
+	[
+		['getDerivedStateFromProps', 'componentWillUpdate'],
+		['contextType', 'componentWillUpdate']
+	].forEach(([first, second]) => {
+		it(`retries the latest props after ${first} and then ${second} threw`, () => {
+			let fail, child, setValue;
+			const hit = where => {
+				if (fail == where) {
+					fail = null;
+					throw new Error(where);
+				}
+			};
+			class Child extends Component {
+				static get contextType() {
+					hit('contextType');
+					return undefined;
+				}
+				static getDerivedStateFromProps() {
+					hit('getDerivedStateFromProps');
+					return null;
+				}
+				componentWillUpdate() {
+					hit('componentWillUpdate');
+				}
+				render() {
+					child = this;
+					return <span>{this.props.value}</span>;
+				}
+			}
+			class Outer extends Component {
+				constructor(props) {
+					super(props);
+					this.state = { value: 0 };
+					setValue = value => this.setState({ value });
+				}
+				render() {
+					return <Child value={this.state.value} />;
+				}
+			}
+			class Keep extends Component {
+				componentDidCatch() {
+					this.setState({});
+				}
+				render() {
+					return this.props.children;
+				}
+			}
+
+			render(
+				<Keep>
+					<Outer />
+				</Keep>,
+				scratch
+			);
+			const original = child;
+
+			fail = first;
+			setValue(1);
+			rerender();
+			expect(scratch.innerHTML).to.equal('<span>0</span>');
+
+			fail = second;
+			setValue(2);
+			rerender();
+
+			original.forceUpdate();
+			rerender();
+			expect(scratch.innerHTML).to.equal('<span>2</span>');
+			expect(child).to.equal(original);
+		});
+	});
+
 	describe('#componentDidCatch', () => {
 		/** @type {Error} */
 		let expectedError;

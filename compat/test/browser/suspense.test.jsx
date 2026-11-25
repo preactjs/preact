@@ -1984,6 +1984,244 @@ describe('suspense', () => {
 		expect(scratch.innerHTML).to.equal(`<div>i: 2<div>Resolved</div></div>`);
 	});
 
+	[false, true].forEach(bailout => {
+		it(`should route errors from a parked child of a component that suspended on update${bailout ? ' after its boundary bailed out' : ''}`, async () => {
+			let resolve,
+				setValue,
+				updateLayout,
+				childThrows = false;
+			const promise = new Promise(r => (resolve = r));
+
+			function Child() {
+				const [value, set] = useState(0);
+				setValue = set;
+				if (childThrows) {
+					childThrows = false;
+					throw new Error('child');
+				}
+				return <span>{value}</span>;
+			}
+
+			function Suspender({ suspend }) {
+				if (suspend) throw promise;
+				return <Child />;
+			}
+
+			function Layout({ children }) {
+				const [, set] = useState(0);
+				updateLayout = () => set(v => v + 1);
+				return children;
+			}
+
+			const App = ({ suspend }) => (
+				<Catcher>
+					<Layout>
+						<Suspense fallback={<div>Suspended...</div>}>
+							<Suspender suspend={suspend} />
+						</Suspense>
+					</Layout>
+				</Catcher>
+			);
+
+			render(<App suspend={false} />, scratch);
+			expect(scratch.innerHTML).to.equal('<span>0</span>');
+
+			render(<App suspend={true} />, scratch);
+			rerender();
+			expect(scratch.innerHTML).to.equal('<div>Suspended...</div>');
+
+			if (bailout) {
+				updateLayout();
+				rerender();
+				updateLayout();
+				rerender();
+				expect(scratch.innerHTML).to.equal('<div>Suspended...</div>');
+			}
+
+			childThrows = true;
+			setValue(1);
+			rerender();
+			expect(scratch.innerHTML).to.equal('<div>Catcher did catch: child</div>');
+
+			resolve();
+			await promise;
+			rerender();
+			expect(scratch.innerHTML).to.equal('<div>Catcher did catch: child</div>');
+		});
+	});
+
+	[false, true].forEach(innerBoundary => {
+		it(`should route errors from a parked child after its parent suspended on its own update (${innerBoundary ? 'inner' : 'outer'} boundary)`, () => {
+			let setValue,
+				forceSuspender,
+				childThrows = false,
+				suspend = false;
+			const promise = new Promise(() => {});
+
+			function Child() {
+				const [value, set] = useState(0);
+				setValue = set;
+				if (childThrows) {
+					childThrows = false;
+					throw new Error('child');
+				}
+				return <span>{value}</span>;
+			}
+
+			class Suspender extends Component {
+				render() {
+					forceSuspender = () => this.forceUpdate();
+					if (suspend) throw promise;
+					return <Child />;
+				}
+			}
+
+			const suspender = innerBoundary ? (
+				<Catcher>
+					<Suspender />
+				</Catcher>
+			) : (
+				<Suspender />
+			);
+			const boundary = (
+				<Suspense fallback={<div>Suspended...</div>}>{suspender}</Suspense>
+			);
+			render(innerBoundary ? boundary : <Catcher>{boundary}</Catcher>, scratch);
+			expect(scratch.innerHTML).to.equal('<span>0</span>');
+
+			suspend = true;
+			forceSuspender();
+			rerender();
+			expect(scratch.innerHTML).to.equal('<div>Suspended...</div>');
+
+			const didCatch = vi.spyOn(Catcher.prototype, 'componentDidCatch');
+			childThrows = true;
+			setValue(1);
+			expect(() => rerender()).not.to.throw();
+			expect(didCatch).toHaveBeenCalledOnce();
+			expect(didCatch.mock.calls[0][0].message).to.equal('child');
+			if (!innerBoundary) {
+				expect(scratch.innerHTML).to.equal(
+					'<div>Catcher did catch: child</div>'
+				);
+			}
+			didCatch.mockRestore();
+		});
+	});
+
+	[
+		['changes its root element', v => (v ? <p>b</p> : <span>a</span>)],
+		['goes from null to DOM', v => (v ? <p>b</p> : null)]
+	].forEach(([name, view]) => {
+		it(`should keep DOM of a parked sibling that ${name} in the parked subtree`, async () => {
+			let resolve, setB, forceSuspender;
+			const promise = new Promise(r => (resolve = r));
+			let suspend = false;
+
+			class Suspender extends Component {
+				render() {
+					forceSuspender = () => this.forceUpdate();
+					if (suspend) throw promise;
+					return <i>s</i>;
+				}
+			}
+
+			function B() {
+				const [v, set] = useState(false);
+				setB = set;
+				return view(v);
+			}
+
+			render(
+				<div>
+					<Suspense fallback={<div>Suspended...</div>}>
+						<Suspender />
+						<B />
+					</Suspense>
+					<footer />
+				</div>,
+				scratch
+			);
+
+			suspend = true;
+			forceSuspender();
+			rerender();
+			expect(scratch.innerHTML).to.equal(
+				'<div><div>Suspended...</div><footer></footer></div>'
+			);
+
+			setB(true);
+			rerender();
+			expect(scratch.innerHTML).to.equal(
+				'<div><div>Suspended...</div><footer></footer></div>'
+			);
+
+			suspend = false;
+			resolve();
+			await promise;
+			rerender();
+			expect(scratch.innerHTML).to.equal(
+				'<div><i>s</i><p>b</p><footer></footer></div>'
+			);
+		});
+	});
+
+	it('should reveal a parked subtree after its boundary bailed out', async () => {
+		let resolve, updateLayout;
+		const promise = new Promise(r => (resolve = r));
+		let suspend = false;
+
+		function Suspender() {
+			if (suspend) throw promise;
+			return <span>content</span>;
+		}
+
+		function Layout({ children }) {
+			const [, set] = useState(0);
+			updateLayout = () => set(v => v + 1);
+			return children;
+		}
+
+		let forceSuspender;
+		class Wrapper extends Component {
+			render() {
+				forceSuspender = () => this.forceUpdate();
+				return <Suspender />;
+			}
+		}
+
+		render(
+			<Layout>
+				<Suspense fallback={<div>Suspended...</div>}>
+					<Wrapper />
+				</Suspense>
+			</Layout>,
+			scratch
+		);
+		expect(scratch.innerHTML).to.equal('<span>content</span>');
+
+		suspend = true;
+		forceSuspender();
+		rerender();
+		expect(scratch.innerHTML).to.equal('<div>Suspended...</div>');
+
+		updateLayout();
+		rerender();
+		expect(scratch.innerHTML).to.equal('<div>Suspended...</div>');
+
+		suspend = false;
+		resolve();
+		await promise;
+		rerender();
+		expect(scratch.innerHTML).to.equal('<span>content</span>');
+
+		updateLayout();
+		rerender();
+		forceSuspender();
+		rerender();
+		expect(scratch.innerHTML).to.equal('<span>content</span>');
+	});
+
 	it('should call componentWillUnmount on a suspended component', () => {
 		const cWUSpy = vi.fn();
 
