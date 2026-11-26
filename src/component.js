@@ -6,7 +6,7 @@ import {
 	VNODE_MARKER
 } from './constants';
 import { Fragment } from './create-element';
-import { commitRoot, diff } from './diff/index';
+import { commitRoot, committing, diff } from './diff/index';
 import options from './options';
 import { assign } from './util';
 
@@ -117,6 +117,9 @@ export function getDomSibling(vnode, childIndex) {
  */
 const rerenderQueue = [];
 
+/** @type {Set<import('./internal').Component> | undefined} */
+let batch;
+
 /*
  * The value of `Component.debounce` must asynchronously invoke the passed in callback. It is
  * important that contributors to Preact can consistently reason about what calls to `setState`, etc.
@@ -171,6 +174,13 @@ function process() {
 		// Don't update `renderCount` yet. Keep its value non-zero to prevent unnecessary
 		// process() calls from getting scheduled while `queue` is still being consumed.
 		while (rerenderQueue.length) {
+			if (options._flushEffects && !committing && !(batch && batch.size)) {
+				options._flushEffects();
+				// A shallower update can jump ahead of a queued sibling. Track the
+				// components we started with before flushing between queued renders.
+				if (rerenderQueue.length > 1) batch = new Set(rerenderQueue);
+			}
+
 			// Keep the rerender queue sorted by (depth, insertion order). The queue
 			// will initially be sorted on the first iteration only if it has more than 1 item.
 			//
@@ -182,6 +192,9 @@ function process() {
 			}
 
 			c = rerenderQueue.shift();
+			// A pending effect can synchronously drain the queue.
+			if (!c) break;
+			if (batch) batch.delete(c);
 			l = rerenderQueue.length;
 
 			// Re-render the component in place, unless it was unmounted.

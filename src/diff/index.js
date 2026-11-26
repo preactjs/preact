@@ -474,12 +474,16 @@ function markAsForce(vnode) {
 	}
 }
 
+/** Commits on the stack, effects aren't flushed while one is running. */
+export let committing = 0;
+
 /**
  * @param {Array<Component>} commitQueue List of components
  * which have callbacks to invoke in commitRoot
  * @param {VNode} root
  */
 export function commitRoot(commitQueue, root, refQueue) {
+	committing++;
 	for (let i = 0; i < refQueue.length; ) {
 		applyRef(refQueue[i++], refQueue[i++], refQueue[i++]);
 	}
@@ -499,6 +503,7 @@ export function commitRoot(commitQueue, root, refQueue) {
 			options._catchError(e, c._vnode);
 		}
 	});
+	committing--;
 }
 
 /**
@@ -739,6 +744,8 @@ function diffElementNodes(
  * @param {any} [owner] The vnode the ref is detached from
  */
 export function applyRef(ref, value, vnode, owner) {
+	// A ref can flush a queued render when it detaches during the diff.
+	committing++;
 	try {
 		if (typeof ref == 'function') {
 			// Store the cleanup on the element or component rather than on the
@@ -757,6 +764,8 @@ export function applyRef(ref, value, vnode, owner) {
 		} else ref.current = value;
 	} catch (e) {
 		options._catchError(e, vnode);
+	} finally {
+		committing--;
 	}
 }
 
