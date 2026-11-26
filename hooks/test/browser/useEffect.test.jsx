@@ -1,10 +1,6 @@
 import { Component, Fragment, createElement, render } from 'preact';
 import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
-import {
-	act,
-	setupRerender,
-	teardown as teardownAct
-} from 'preact/test-utils';
+import { act, setupRerender, teardown as teardownAct } from 'preact/test-utils';
 import { vi } from 'vitest';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { scheduleEffectAssert } from '../_util/useEffectUtil';
