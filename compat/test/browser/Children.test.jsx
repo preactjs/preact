@@ -4,7 +4,13 @@ import {
 	serializeHtml
 } from '../../../test/_util/helpers';
 import { div, span } from '../../../test/_util/dom';
-import React, { createElement, Children, render } from 'preact/compat';
+import React, {
+	createElement,
+	createRef,
+	Children,
+	Fragment,
+	render
+} from 'preact/compat';
 import { vi } from 'vitest';
 
 describe('Children', () => {
@@ -192,6 +198,73 @@ describe('Children', () => {
 			);
 			let expected = div([span('foo'), span(div('bar'))]);
 			expect(serializeHtml(scratch)).to.equal(expected);
+		});
+	});
+
+	describe('.toArray', () => {
+		const keys = arr => arr.map(child => (child == null ? child : child.key));
+
+		it('should key unkeyed elements by their index #2888', () => {
+			const res = Children.toArray([<div />, <span />, <Fragment />]);
+			expect(keys(res)).to.deep.equal(['.0', '.1', '.2']);
+		});
+
+		it('should prefix explicit keys like React #3403', () => {
+			const res = Children.toArray([<div key="a" />, <span key={1} />]);
+			expect(keys(res)).to.deep.equal(['.$a', '.$1']);
+		});
+
+		it('should key a single child', () => {
+			expect(keys(Children.toArray(<div />))).to.deep.equal(['.0']);
+			expect(keys(Children.toArray(<div key="a" />))).to.deep.equal(['.$a']);
+		});
+
+		it('should scope keys to nested arrays', () => {
+			const res = Children.toArray([<i />, [<b key="x" />, <u />], [[<p />]]]);
+			expect(keys(res)).to.deep.equal(['.0', '.1:$x', '.1:1', '.2:0:0']);
+		});
+
+		it('should count skipped holes and keep non-elements untouched', () => {
+			const res = Children.toArray(['foo', null, false, <div />, 0]);
+			expect(res.length).to.equal(3);
+			expect(res[0]).to.equal('foo');
+			expect(res[1].key).to.equal('.3');
+			expect(res[2]).to.equal(0);
+		});
+
+		it('should escape "=" and ":" in explicit keys', () => {
+			const res = Children.toArray([<div key="a:b=c" />]);
+			expect(res[0].key).to.equal('.$a=2b=0c');
+		});
+
+		it('should not mutate the passed children', () => {
+			const a = <div />;
+			const b = <div key="b" />;
+			const res = Children.toArray([a, b]);
+			expect(a.key).to.equal(undefined);
+			expect(b.key).to.equal('b');
+			expect(res[0]).not.to.equal(a);
+			expect(res[0].type).to.equal('div');
+		});
+
+		it('should keep refs and render the keyed children', () => {
+			const ref = createRef();
+			function Foo(props) {
+				return <div>{Children.toArray(props.children)}</div>;
+			}
+
+			render(
+				<Foo>
+					<span ref={ref}>a</span>
+					{[<span key="b">b</span>, <span key="c">c</span>]}
+				</Foo>,
+				scratch
+			);
+
+			expect(serializeHtml(scratch)).to.equal(
+				'<div><span>a</span><span>b</span><span>c</span></div>'
+			);
+			expect(ref.current).to.equal(scratch.firstChild.firstChild);
 		});
 	});
 });
