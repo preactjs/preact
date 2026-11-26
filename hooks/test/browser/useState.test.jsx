@@ -212,6 +212,17 @@ describe('useState', () => {
 		expect(scratch.innerHTML).to.equal('');
 	});
 
+	it('caps a render-phase update loop at 25 renders', () => {
+		function App() {
+			const [count, setCount] = useState(0);
+			if (count < 30) setCount(count + 1);
+			return String(count);
+		}
+
+		render(<App />, scratch);
+		expect(scratch.textContent).to.equal('24');
+	});
+
 	it('should render a second time when the render function updates state', () => {
 		const calls = [];
 		const App = () => {
