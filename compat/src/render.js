@@ -166,6 +166,23 @@ const classNameDescriptorNonEnumberable = {
 	}
 };
 
+function normalizeSelect(props, normalizedProps) {
+	let selected =
+		normalizedProps.defaultValue != null
+			? normalizedProps.defaultValue
+			: normalizedProps.multiple && Array.isArray(normalizedProps.value)
+				? normalizedProps.value
+				: null;
+	if (selected != null) {
+		// Assigning the forEach result clears value after selecting the options.
+		normalizedProps.value = toChildArray(props.children).forEach(child => {
+			child.props.selected = normalizedProps.multiple
+				? selected.indexOf(child.props.value) != -1
+				: selected == child.props.value;
+		});
+	}
+}
+
 function handleDomVNode(vnode) {
 	let props = vnode.props,
 		type = vnode.type,
@@ -234,7 +251,7 @@ function handleDomVNode(vnode) {
 					i = 'oninputCapture';
 				}
 			}
-		} else if (isNonDashedType && CAMEL_PROPS.test(i)) {
+		} else if (isNonDashedType && i != 'children' && CAMEL_PROPS.test(i)) {
 			i = i.replace(CAMEL_REPLACE, '-$&').toLowerCase();
 		} else if (value === null) {
 			value = undefined;
@@ -243,24 +260,7 @@ function handleDomVNode(vnode) {
 		normalizedProps[i] = value;
 	}
 
-	if (type == 'select') {
-		// Select the matching options for a defaultValue, or for an array value
-		// of <select multiple value={[]} />.
-		let selected =
-			normalizedProps.defaultValue != null
-				? normalizedProps.defaultValue
-				: normalizedProps.multiple && Array.isArray(normalizedProps.value)
-					? normalizedProps.value
-					: null;
-		if (selected != null) {
-			// forEach() always returns undefined, which we abuse here to unset the value prop.
-			normalizedProps.value = toChildArray(props.children).forEach(child => {
-				child.props.selected = normalizedProps.multiple
-					? selected.indexOf(child.props.value) != -1
-					: selected == child.props.value;
-			});
-		}
-	}
+	if (type == 'select') normalizeSelect(props, normalizedProps);
 
 	if (props.class && !props.className) {
 		normalizedProps.class = props.class;
