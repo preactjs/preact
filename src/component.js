@@ -90,34 +90,25 @@ BaseComponent.prototype.render = Fragment;
 
 /**
  * @param {import('./internal').VNode} vnode
- * @param {number | null} [childIndex]
+ * @param {number | null} [childIndex] Child to start at. When omitted, search
+ * the siblings following vnode.
  */
 export function getDomSibling(vnode, childIndex) {
-	if (childIndex == NULL) {
-		// Use childIndex==null as a signal to resume the search from the vnode's sibling
-		return vnode._parent && getDomSibling(vnode._parent, vnode._index + 1);
-	}
+	if (childIndex != NULL) {
+		let sibling;
+		for (; childIndex < vnode._children.length; childIndex++) {
+			sibling = vnode._children[childIndex];
 
-	let sibling;
-	for (; childIndex < vnode._children.length; childIndex++) {
-		sibling = vnode._children[childIndex];
-
-		if (sibling && sibling._dom) {
-			// Since process() keeps the _dom pointers correct,
-			// we can rely on _dom to tell us if this subtree contains a
-			// rendered DOM node, and what the first rendered DOM node is
-			return sibling._dom;
+			if (sibling && sibling._dom) {
+				// _dom is the first DOM node rendered by this subtree.
+				return sibling._dom;
+			}
 		}
-	}
 
-	// If we get here, we have not found a DOM node in this vnode's children.
-	// We must resume from this vnode's sibling (in it's parent _children array)
-	// Only climb up and search the parent if we aren't searching through a DOM
-	// VNode (meaning we reached the DOM parent of the original vnode that began
-	// the search). New roots (_parentDom) are a DOM boundary too.
-	return typeof vnode.type == 'function' && !vnode.props._parentDom
-		? getDomSibling(vnode)
-		: NULL;
+		// DOM elements and portals bound the sibling search.
+		if (typeof vnode.type != 'function' || vnode.props._parentDom) return NULL;
+	}
+	return vnode._parent && getDomSibling(vnode._parent, vnode._index + 1);
 }
 
 /**
