@@ -37,6 +37,8 @@ let oldBeforeUnmount = options.unmount;
 const RAF_TIMEOUT = 35;
 let prevRaf;
 
+options._flushEffects = flushUnmountCleanups;
+
 /** @type {(vnode: import('./internal').VNode) => void} */
 options._render = vnode => {
 	if (oldBeforeRender) oldBeforeRender(vnode);
@@ -418,6 +420,22 @@ export function useId() {
 }
 
 /**
+ * Unmounted components' passive cleanups run before any new passive effect,
+ * mirroring React running all destroys before any create.
+ */
+function flushUnmountCleanups() {
+	let state;
+	while ((state = unmountCleanups.shift())) {
+		try {
+			invokeCleanup(state);
+		} catch (e) {
+			state = /** @type {any} */ (state._passive);
+			options._catchError(e, { _parent: state && state._vnode });
+		}
+	}
+}
+
+/**
  * After paint effects consumer.
  */
 function flushAfterPaintEffects() {
@@ -425,16 +443,7 @@ function flushAfterPaintEffects() {
 	// The loop picks up components unmounted by an effect we just invoked, which
 	// don't necessarily schedule a flush of their own.
 	do {
-		// Unmounted components' passive cleanups run before any new passive
-		// effect, mirroring React running all destroys before any create.
-		while ((component = unmountCleanups.shift())) {
-			try {
-				invokeCleanup(component);
-			} catch (e) {
-				component = /** @type {any} */ (component._passive);
-				options._catchError(e, { _parent: component && component._vnode });
-			}
-		}
+		flushUnmountCleanups();
 
 		while ((component = afterPaintEffects.shift())) {
 			const hooks = component.__hooks;

@@ -72,6 +72,7 @@
       "$_hook": "__h",
       "$_catchError": "__e",
       "$_refCleanup": "__x",
+      "$_flushEffects": "__f",
       "$_skipEffects": "__s",
       "$_bits": "__g"
     }

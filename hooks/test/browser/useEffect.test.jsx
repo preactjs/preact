@@ -1,6 +1,10 @@
 import { Component, Fragment, createElement, render } from 'preact';
 import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
-import { act, teardown as teardownAct } from 'preact/test-utils';
+import {
+	act,
+	setupRerender,
+	teardown as teardownAct
+} from 'preact/test-utils';
 import { vi } from 'vitest';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { scheduleEffectAssert } from '../_util/useEffectUtil';
@@ -901,5 +905,137 @@ describe('useEffect', () => {
 		});
 		expect(calls.length).to.equal(1);
 		expect(calls).to.deep.equal(['doing effect0']);
+	});
+});
+
+describe('useEffect cleanups of unmounted components (#5410)', () => {
+	/** @type {HTMLDivElement} */
+	let scratch;
+
+	/** @type {() => void} */
+	let rerender;
+
+	beforeEach(() => {
+		scratch = setupScratch();
+		rerender = setupRerender();
+	});
+
+	afterEach(() => {
+		teardown(scratch);
+	});
+
+	function createScreens(log) {
+		let registered = null;
+		function Old() {
+			useEffect(() => {
+				registered = 'Old';
+				return () => {
+					registered = null;
+				};
+			}, []);
+			return null;
+		}
+		function New() {
+			const [, setReady] = useState(false);
+			useLayoutEffect(() => setReady(true), []);
+			useEffect(() => {
+				log.push(`New sees ${registered}`);
+				registered = 'New';
+			}, []);
+			return null;
+		}
+		return { Old, New };
+	}
+
+	it('run before the replacement rerenders from a layout effect', () => {
+		const log = [];
+		const { Old, New } = createScreens(log);
+
+		act(() => render(<Old />, scratch));
+		act(() => render(<New />, scratch));
+
+		expect(log).to.deep.equal(['New sees null']);
+	});
+
+	it('run when a deeper component is queued alongside', () => {
+		const log = [];
+		const { Old, New } = createScreens(log);
+
+		let replace, notify;
+		function Screen() {
+			const [next, setNext] = useState(false);
+			replace = setNext;
+			return next ? <New /> : <Old />;
+		}
+		function Other() {
+			const [value, setValue] = useState(0);
+			notify = setValue;
+			return value;
+		}
+
+		act(() =>
+			render(
+				<>
+					<Screen />
+					<div>
+						<Other />
+					</div>
+				</>,
+				scratch
+			)
+		);
+		act(() => {
+			replace(true);
+			notify(1);
+		});
+
+		expect(log).to.deep.equal(['New sees null']);
+	});
+
+	it('do not run during the render that unmounts them', () => {
+		const log = [];
+		let rendering = false;
+
+		function Leaving() {
+			useEffect(
+				() => () => log.push(rendering ? 'during render' : 'after render'),
+				[]
+			);
+			return null;
+		}
+		function Pending({ n }) {
+			useEffect(() => {}, [n]);
+			return null;
+		}
+		function Done() {
+			rendering = false;
+			return null;
+		}
+
+		let set;
+		function App() {
+			const [n, setN] = useState(0);
+			set = setN;
+			rendering = true;
+			return (
+				<>
+					<div>{n < 2 && <Leaving />}</div>
+					<Pending n={n} />
+					<Done />
+				</>
+			);
+		}
+
+		act(() => render(<App />, scratch));
+		set(1);
+		rerender();
+		// Pending still has an effect waiting when this unmounts Leaving.
+		set(2);
+		rerender();
+		expect(log).to.deep.equal([]);
+
+		return scheduleEffectAssert(() =>
+			expect(log).to.deep.equal(['after render'])
+		);
 	});
 });

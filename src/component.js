@@ -180,6 +180,10 @@ function process() {
 		// Don't update `renderCount` yet. Keep its value non-zero to prevent unnecessary
 		// process() calls from getting scheduled while `queue` is still being consumed.
 		while (rerenderQueue.length) {
+			// Passive cleanups of what earlier commits unmounted run before any
+			// effect the next render flushes (see #5410).
+			if (options._flushEffects) options._flushEffects();
+
 			// Keep the rerender queue sorted by (depth, insertion order). The queue
 			// will initially be sorted on the first iteration only if it has more than 1 item.
 			//
@@ -193,8 +197,9 @@ function process() {
 			c = rerenderQueue.shift();
 			l = rerenderQueue.length;
 
-			// Re-render the component in place, unless it was unmounted.
-			if (c._bits & COMPONENT_DIRTY && (parentDom = c._parentDom)) {
+			// Re-render the component in place, unless it was unmounted or a
+			// cleanup above already flushed the queue.
+			if (c && c._bits & COMPONENT_DIRTY && (parentDom = c._parentDom)) {
 				oldVNode = c._vnode;
 				oldDom = oldVNode._dom;
 				commitQueue = [];
