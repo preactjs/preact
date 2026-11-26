@@ -251,13 +251,13 @@ export function diff(
 
 			// Function components re-render until they stop calling setState
 			// during render (see #2553), class components render exactly once.
-			let renderHook = options._render,
-				count = isClassComponent ? 25 : 0;
+			const renderHook = options._render;
+			let remaining = isClassComponent ? 1 : 25;
 			do {
 				c._bits &= ~COMPONENT_DIRTY;
 				if (renderHook) renderHook(newVNode);
 				tmp = c.render(c.props, (c.state = c._nextState), c.context);
-			} while (c._bits & COMPONENT_DIRTY && ++count < 25);
+			} while (c._bits & COMPONENT_DIRTY && --remaining);
 
 			if (isClassComponent) {
 				EMPTY_ARR.push.apply(c._renderCallbacks, c._stateCallbacks);
