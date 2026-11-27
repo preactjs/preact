@@ -1,4 +1,4 @@
-import { diff, unmount, applyRef } from './index';
+import { diff, unmount, applyRef, rangeEnd } from './index';
 import { createVNode, Fragment } from '../create-element';
 import {
 	EMPTY_OBJ,
@@ -6,6 +6,7 @@ import {
 	INSERT_VNODE,
 	MATCHED,
 	LIS_CANDIDATE,
+	MODE_SUSPENDED,
 	REF_DETACHED,
 	UNDEFINED,
 	VNODE_MARKER,
@@ -384,8 +385,11 @@ function constructNewChildrenArray(
  * @returns {PreactElement}
  */
 function insert(parentVNode, oldDom, parentDom, isMounting) {
+	let dom = parentVNode._dom,
+		end = parentVNode._flags & MODE_SUSPENDED && dom;
 	// Note: VNodes in nested suspended trees may be missing _children.
-	if (typeof parentVNode.type == 'function') {
+	// A component suspended while hydrating moves the server DOM it kept.
+	if (typeof parentVNode.type == 'function' && !end) {
 		// Root children live in another container, they never move with the
 		// host tree and contribute nothing to the host insertion cursor.
 		if (parentVNode.props._parentDom) return oldDom;
@@ -415,20 +419,23 @@ function insert(parentVNode, oldDom, parentDom, isMounting) {
 
 		// Comments (e.g. server `$s` markers) are never ours: a node right after
 		// them is already in place.
-		let dom = parentVNode._dom;
 		let next = oldDom;
 		while (next && next.nodeType == 8) next = next.nextSibling;
 
-		if (dom != next) {
-			// Containers that aren't DOM nodes may not implement moveBefore()
-			if (!isMounting && parentDom.moveBefore && dom.parentNode) {
-				// @ts-expect-error This isn't added to TypeScript lib.d.ts yet
-				parentDom.moveBefore(dom, oldDom);
-			} else {
-				parentDom.insertBefore(dom, oldDom || NULL);
-			}
+		end = rangeEnd(dom) || dom;
+		if (dom != next && dom != oldDom) {
+			do {
+				next = dom.nextSibling;
+				// Containers that aren't DOM nodes may not implement moveBefore()
+				if (!isMounting && parentDom.moveBefore && dom.parentNode) {
+					// @ts-expect-error This isn't added to TypeScript lib.d.ts yet
+					parentDom.moveBefore(dom, oldDom);
+				} else {
+					parentDom.insertBefore(dom, oldDom || NULL);
+				}
+			} while (dom != end && (dom = next));
 		}
-		oldDom = dom;
+		oldDom = end;
 	}
 
 	while (
