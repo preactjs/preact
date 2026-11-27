@@ -214,7 +214,7 @@ export default defineConfig({
 					browser: {
 						// TODO: isolate doesn't work it leaks across all pages
 						// isolate: false,
-						provider: playwright(),
+						provider: playwright({ launchOptions: { executablePath: process.env.CHROME_BIN || undefined } }),
 						enabled: true,
 						screenshotFailures: false,
 						headless: true,

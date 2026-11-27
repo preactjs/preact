@@ -13,20 +13,28 @@ let vnodeId = 0;
  * virtual node
  * @returns {import('./internal').VNode}
  */
-export function createElement(type, props, children) {
-	let normalizedProps = {},
-		key,
-		ref,
-		i,
-		length = arguments.length;
-	for (i in props) {
-		if (i == 'key') key = props[i];
-		else if (i == 'ref' && typeof type != 'function') ref = props[i];
-		else normalizedProps[i] = props[i];
+export function createElement(type, props, ...children) {
+	let normalizedProps, key, ref, i;
+	if (props == NULL) {
+		normalizedProps = {};
+	} else if (
+		props.key === UNDEFINED &&
+		(props.ref === UNDEFINED || typeof type == 'function')
+	) {
+		// Nothing to strip: a spread clones through the engine's fast path instead of
+		// a megamorphic keyed store per prop.
+		normalizedProps = { ...props };
+	} else {
+		normalizedProps = {};
+		for (i in props) {
+			if (i == 'key') key = props[i];
+			else if (i == 'ref' && typeof type != 'function') ref = props[i];
+			else normalizedProps[i] = props[i];
+		}
 	}
 
-	if (length > 2) {
-		normalizedProps.children = length > 3 ? slice.call(arguments, 2) : children;
+	if (children.length) {
+		normalizedProps.children = children.length > 1 ? children : children[0];
 	}
 
 	return createVNode(type, normalizedProps, key, ref, NULL);
