@@ -12,6 +12,7 @@ import React, {
 	useRef,
 	useEffect,
 	useLayoutEffect,
+	useContext,
 	memo,
 	createPortal,
 	createRef
@@ -3750,6 +3751,97 @@ describe('suspense', () => {
 			rerender();
 			expect(scratch.innerHTML).to.equal('<p>a</p><p>b</p>');
 		});
+	});
+
+	it('should release context subscriptions of a component that suspends on mount', async () => {
+		const Ctx = createContext('a');
+		let resolve;
+		const promise = new Promise(r => (resolve = r));
+		let suspended = true;
+		let child;
+		function Child() {
+			child = this;
+			const value = useContext(Ctx);
+			if (suspended) throw promise;
+			return <div>{value}</div>;
+		}
+
+		let setValue, setShow;
+		function App() {
+			const [value, _setValue] = useState('a');
+			const [show, _setShow] = useState(true);
+			setValue = _setValue;
+			setShow = _setShow;
+			return (
+				<Ctx.Provider value={value}>
+					{show && (
+						<Suspense fallback={<div>Suspended...</div>}>
+							<Child />
+						</Suspense>
+					)}
+				</Ctx.Provider>
+			);
+		}
+
+		render(<App />, scratch);
+		rerender();
+		expect(scratch.innerHTML).to.equal('<div>Suspended...</div>');
+
+		suspended = false;
+		resolve();
+		await promise;
+		rerender();
+		expect(scratch.innerHTML).to.equal('<div>a</div>');
+
+		act(() => setShow(false));
+		expect(scratch.innerHTML).to.equal('');
+
+		const spy = vi.spyOn(child, 'forceUpdate');
+		act(() => setValue('b'));
+		expect(spy).not.toHaveBeenCalled();
+	});
+
+	it('should update a context consumer that was suspended while the value changed', async () => {
+		const Ctx = createContext('a');
+		let resolve;
+		let promise;
+		function Child({ suspend }) {
+			const value = useContext(Ctx);
+			if (suspend && !promise) promise = new Promise(r => (resolve = r));
+			if (suspend && promise.pending !== false) throw promise;
+			return <div>{value}</div>;
+		}
+
+		let setValue, setSuspend;
+		function App() {
+			const [value, _setValue] = useState('a');
+			const [suspend, _setSuspend] = useState(false);
+			setValue = _setValue;
+			setSuspend = _setSuspend;
+			return (
+				<Ctx.Provider value={value}>
+					<Suspense fallback={<div>Suspended...</div>}>
+						<Child suspend={suspend} />
+					</Suspense>
+				</Ctx.Provider>
+			);
+		}
+
+		render(<App />, scratch);
+		expect(scratch.innerHTML).to.equal('<div>a</div>');
+
+		act(() => setSuspend(true));
+		rerender();
+		expect(scratch.innerHTML).to.equal('<div>Suspended...</div>');
+
+		act(() => setValue('b'));
+		expect(scratch.innerHTML).to.equal('<div>Suspended...</div>');
+
+		promise.pending = false;
+		resolve();
+		await promise;
+		rerender();
+		expect(scratch.innerHTML).to.equal('<div>b</div>');
 	});
 });
 
