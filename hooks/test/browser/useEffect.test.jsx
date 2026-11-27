@@ -1084,6 +1084,64 @@ describe('useEffect cleanups of unmounted components (#5410)', () => {
 			expect(paint).to.throw('cleanup');
 		});
 
+		it('run once, and reach a boundary that stays mounted at the paint flush', () => {
+			const caught = [];
+			class Boundary extends Component {
+				componentDidCatch(e) {
+					caught.push(e.message);
+					this.setState({ failed: true });
+				}
+				render() {
+					return this.state.failed ? 'failed' : this.props.children;
+				}
+			}
+
+			let cleanups = 0;
+			function Counted() {
+				useEffect(
+					() => () => {
+						cleanups++;
+						throw new Error('cleanup');
+					},
+					[]
+				);
+				return null;
+			}
+
+			let hide;
+			function App() {
+				const [show, setShow] = useState(true);
+				hide = () => setShow(false);
+				return (
+					<Boundary>
+						<div>{show && <Counted />}</div>
+						<Other />
+					</Boundary>
+				);
+			}
+
+			render(<App />, scratch);
+			paint();
+
+			hide();
+			rerender();
+			for (let i = 1; i <= 3; i++) {
+				update(i);
+				rerender();
+			}
+			expect(cleanups).to.equal(1);
+			expect(caught).to.deep.equal([]);
+
+			paint();
+			rerender();
+			expect(cleanups).to.equal(1);
+			expect(caught).to.deep.equal(['cleanup']);
+			expect(scratch.innerHTML).to.equal('failed');
+
+			paint();
+			expect(caught).to.deep.equal(['cleanup']);
+		});
+
 		it('are not caught by a boundary the queued rerender removes', () => {
 			const caught = [];
 			class Boundary extends Component {

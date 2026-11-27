@@ -17,8 +17,10 @@ let afterPaintEffects = [];
 /**
  * Passive (useEffect) hook states of unmounted components whose cleanup is
  * still pending. Deferred to the after-paint flush to match React, which runs
- * passive destroys after the commit has painted. Each state's `_passive` holds
- * the surviving component its errors should be routed to.
+ * passive destroys after the commit has painted, unless a rerender is queued
+ * before that (see #5410). A cleanup that throws in that earlier run stays
+ * here, rethrowing, for the paint flush to report. Each state's `_passive`
+ * holds the surviving component its errors should be routed to.
  * @type {Array<import('./internal').EffectHookState>}
  */
 let unmountCleanups = [];
