@@ -265,9 +265,31 @@ const inputTypeSignalBadRole = (
 	// @ts-expect-error An input of type button should not have a role of form
 	<input type={createSignal('button' as const)} role="form" />
 );
+const inputTypeSignalOtherTypeRole = (
+	// @ts-expect-error An input of type button should not have a role of searchbox
+	<input type={createSignal('button' as const)} role="searchbox" />
+);
 const inputTypeSignalUnion = (
-	// @ts-expect-error Unsupported, can't have a signal with a union inside of it
+	<input type={createSignal<'text' | 'password'>('password')} />
+);
+const inputTypeSignalUnionRole = (
+	// @ts-expect-error No role is valid for both checkbox and radio
+	<input type={createSignal<'checkbox' | 'radio'>('radio')} role="switch" />
+);
+const inputTypeSignalUnionList = (
+	// @ts-expect-error An input of type checkbox should not accept a list attribute
+	<input type={createSignal<'text' | 'checkbox'>('text')} list="suggestions" />
+);
+const inputTypeSignalUnionSharedList = (
+	<input type={createSignal<'text' | 'search'>('text')} list="suggestions" />
+);
+const inputTypeSignalInvalidUnion = (
+	// @ts-expect-error `form` is not an input type
 	<input type={createSignal<'button' | 'form'>('button')} />
+);
+const inputTypeSignalStringInvalid = (
+	// @ts-expect-error Any string is not an input type
+	<input type={createSignal<string>('text')} />
 );
 
 const selectValid = <select role="menu" />;
