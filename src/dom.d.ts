@@ -2253,9 +2253,17 @@ export interface PartialInputHTMLAttributes<
 	onChange?: GenericEventHandler<T> | undefined;
 }
 
-type WithSignalType<U> = U extends { type?: infer V }
-	? U | (Omit<U, 'type'> & { type: SignalLike<Exclude<V, undefined>> })
-	: never;
+type WithSignalType<U> =
+	| (U extends { type?: infer V }
+			? U | (Omit<U, 'type'> & { type: SignalLike<Exclude<V, undefined>> })
+			: never)
+	// A signal of several types may fit none of the members above. No `role` or
+	// `list` is valid for every type, so such a signal gets neither.
+	| {
+			type: SignalLike<HTMLInputTypeAttribute>;
+			list?: never;
+			role?: never;
+	  };
 
 export type InputAriaRoles = WithSignalType<
 	| {
