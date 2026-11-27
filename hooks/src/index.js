@@ -17,8 +17,10 @@ let afterPaintEffects = [];
 /**
  * Passive (useEffect) hook states of unmounted components whose cleanup is
  * still pending. Deferred to the after-paint flush to match React, which runs
- * passive destroys after the commit has painted. Each state's `_passive` holds
- * the surviving component its errors should be routed to.
+ * passive destroys after the commit has painted, unless a rerender is queued
+ * before that (see #5410). A cleanup that throws in that earlier run stays
+ * here, rethrowing, for the paint flush to report. Each state's `_passive`
+ * holds the surviving component its errors should be routed to.
  * @type {Array<import('./internal').EffectHookState>}
  */
 let unmountCleanups = [];
@@ -36,6 +38,8 @@ let oldBeforeUnmount = options.unmount;
 // refresh rate, which is the minimum rate for a smooth user experience.
 const RAF_TIMEOUT = 35;
 let prevRaf;
+
+options._flushEffects = flushUnmountCleanups;
 
 /** @type {(vnode: import('./internal').VNode) => void} */
 options._render = vnode => {
@@ -418,6 +422,35 @@ export function useId() {
 }
 
 /**
+ * Unmounted components' passive cleanups run before any new passive effect,
+ * mirroring React running all destroys before any create.
+ * @param {number} [isPaint] Set by the paint flush. The render queue calls
+ * this without it, and leaves errors for the paint flush to report.
+ */
+function flushUnmountCleanups(isPaint) {
+	let state,
+		deferred = [];
+	while ((state = unmountCleanups.shift())) {
+		try {
+			invokeCleanup(state);
+		} catch (e) {
+			if (isPaint) {
+				state = /** @type {any} */ (state._passive);
+				options._catchError(e, { _parent: state && state._vnode });
+			} else {
+				// Rethrow from the paint flush, so the error is routed there
+				// rather than out of the render queue.
+				state._cleanup = () => {
+					throw e;
+				};
+				deferred.push(state);
+			}
+		}
+	}
+	unmountCleanups = deferred;
+}
+
+/**
  * After paint effects consumer.
  */
 function flushAfterPaintEffects() {
@@ -425,16 +458,7 @@ function flushAfterPaintEffects() {
 	// The loop picks up components unmounted by an effect we just invoked, which
 	// don't necessarily schedule a flush of their own.
 	do {
-		// Unmounted components' passive cleanups run before any new passive
-		// effect, mirroring React running all destroys before any create.
-		while ((component = unmountCleanups.shift())) {
-			try {
-				invokeCleanup(component);
-			} catch (e) {
-				component = /** @type {any} */ (component._passive);
-				options._catchError(e, { _parent: component && component._vnode });
-			}
-		}
+		flushUnmountCleanups(1);
 
 		while ((component = afterPaintEffects.shift())) {
 			const hooks = component.__hooks;

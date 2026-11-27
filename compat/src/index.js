@@ -133,6 +133,9 @@ function findDOMNode(component) {
  */
 const flushSync = (callback, arg) => {
 	const prevDebounce = options.debounceRendering;
+	// This flush can run inside a diff or commit, where it isn't safe to run
+	// the cleanups of unmounted components ahead of the paint.
+	const prevFlushEffects = options._flushEffects;
 
 	// Capture the scheduled render callback so that all updates performed
 	// inside the user callback are batched into a single synchronous commit
@@ -143,10 +146,12 @@ const flushSync = (callback, arg) => {
 	};
 	try {
 		const res = callback(arg);
+		options._flushEffects = undefined;
 		if (flush) flush();
 		return res;
 	} finally {
 		options.debounceRendering = prevDebounce;
+		options._flushEffects = prevFlushEffects;
 	}
 };
 

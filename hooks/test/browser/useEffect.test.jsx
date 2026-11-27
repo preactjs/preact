@@ -1,6 +1,6 @@
-import { Component, Fragment, createElement, render } from 'preact';
+import { Component, Fragment, createElement, options, render } from 'preact';
 import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
-import { act, teardown as teardownAct } from 'preact/test-utils';
+import { act, setupRerender, teardown as teardownAct } from 'preact/test-utils';
 import { vi } from 'vitest';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { scheduleEffectAssert } from '../_util/useEffectUtil';
@@ -901,5 +901,275 @@ describe('useEffect', () => {
 		});
 		expect(calls.length).to.equal(1);
 		expect(calls).to.deep.equal(['doing effect0']);
+	});
+});
+
+describe('useEffect cleanups of unmounted components (#5410)', () => {
+	/** @type {HTMLDivElement} */
+	let scratch;
+
+	/** @type {() => void} */
+	let rerender;
+
+	beforeEach(() => {
+		scratch = setupScratch();
+		rerender = setupRerender();
+	});
+
+	afterEach(() => {
+		teardown(scratch);
+	});
+
+	function createScreens(log) {
+		let registered = null;
+		function Old() {
+			useEffect(() => {
+				registered = 'Old';
+				return () => {
+					registered = null;
+				};
+			}, []);
+			return null;
+		}
+		function New() {
+			const [, setReady] = useState(false);
+			useLayoutEffect(() => setReady(true), []);
+			useEffect(() => {
+				log.push(`New sees ${registered}`);
+				registered = 'New';
+			}, []);
+			return null;
+		}
+		return { Old, New };
+	}
+
+	it('run before the replacement rerenders from a layout effect', () => {
+		const log = [];
+		const { Old, New } = createScreens(log);
+
+		act(() => render(<Old />, scratch));
+		act(() => render(<New />, scratch));
+
+		expect(log).to.deep.equal(['New sees null']);
+	});
+
+	it('run when a deeper component is queued alongside', () => {
+		const log = [];
+		const { Old, New } = createScreens(log);
+
+		let replace, notify;
+		function Screen() {
+			const [next, setNext] = useState(false);
+			replace = setNext;
+			return next ? <New /> : <Old />;
+		}
+		function Other() {
+			const [value, setValue] = useState(0);
+			notify = setValue;
+			return value;
+		}
+
+		act(() =>
+			render(
+				<>
+					<Screen />
+					<div>
+						<Other />
+					</div>
+				</>,
+				scratch
+			)
+		);
+		act(() => {
+			replace(true);
+			notify(1);
+		});
+
+		expect(log).to.deep.equal(['New sees null']);
+	});
+
+	it('do not run during the render that unmounts them', () => {
+		const log = [];
+		let rendering = false;
+
+		function Leaving() {
+			useEffect(
+				() => () => log.push(rendering ? 'during render' : 'after render'),
+				[]
+			);
+			return null;
+		}
+		function Pending({ n }) {
+			useEffect(() => {}, [n]);
+			return null;
+		}
+		function Done() {
+			rendering = false;
+			return null;
+		}
+
+		let set;
+		function App() {
+			const [n, setN] = useState(0);
+			set = setN;
+			rendering = true;
+			return (
+				<>
+					<div>{n < 2 && <Leaving />}</div>
+					<Pending n={n} />
+					<Done />
+				</>
+			);
+		}
+
+		act(() => render(<App />, scratch));
+		set(1);
+		rerender();
+		// Pending still has an effect waiting when this unmounts Leaving.
+		set(2);
+		rerender();
+		expect(log).to.deep.equal([]);
+
+		return scheduleEffectAssert(() =>
+			expect(log).to.deep.equal(['after render'])
+		);
+	});
+
+	describe('that throw', () => {
+		let frames, prevRaf, update;
+
+		beforeEach(() => {
+			frames = [];
+			prevRaf = options.requestAnimationFrame;
+			options.requestAnimationFrame = cb => frames.push(cb);
+		});
+
+		afterEach(() => {
+			options.requestAnimationFrame = prevRaf;
+		});
+
+		function paint() {
+			let cb;
+			while ((cb = frames.shift())) cb();
+		}
+
+		function Leaving() {
+			useEffect(
+				() => () => {
+					throw new Error('cleanup');
+				},
+				[]
+			);
+			return null;
+		}
+
+		function Other() {
+			const [value, setValue] = useState(0);
+			update = setValue;
+			return value;
+		}
+
+		it('throw from the paint flush, not from the queued rerender', () => {
+			const other = document.createElement('div');
+			render(<Leaving />, scratch);
+			render(<Other />, other);
+			paint();
+
+			render(null, scratch);
+			// With a synchronous queue this rerenders inside the call.
+			options.debounceRendering = cb => cb();
+			expect(() => update(1)).not.to.throw();
+			expect(other.textContent).to.equal('1');
+
+			expect(paint).to.throw('cleanup');
+		});
+
+		it('run once, and reach a boundary that stays mounted at the paint flush', () => {
+			const caught = [];
+			class Boundary extends Component {
+				componentDidCatch(e) {
+					caught.push(e.message);
+					this.setState({ failed: true });
+				}
+				render() {
+					return this.state.failed ? 'failed' : this.props.children;
+				}
+			}
+
+			let cleanups = 0;
+			function Counted() {
+				useEffect(
+					() => () => {
+						cleanups++;
+						throw new Error('cleanup');
+					},
+					[]
+				);
+				return null;
+			}
+
+			let hide;
+			function App() {
+				const [show, setShow] = useState(true);
+				hide = () => setShow(false);
+				return (
+					<Boundary>
+						<div>{show && <Counted />}</div>
+						<Other />
+					</Boundary>
+				);
+			}
+
+			render(<App />, scratch);
+			paint();
+
+			hide();
+			rerender();
+			for (let i = 1; i <= 3; i++) {
+				update(i);
+				rerender();
+			}
+			expect(cleanups).to.equal(1);
+			expect(caught).to.deep.equal([]);
+
+			paint();
+			rerender();
+			expect(cleanups).to.equal(1);
+			expect(caught).to.deep.equal(['cleanup']);
+			expect(scratch.innerHTML).to.equal('failed');
+
+			paint();
+			expect(caught).to.deep.equal(['cleanup']);
+		});
+
+		it('are not caught by a boundary the queued rerender removes', () => {
+			const caught = [];
+			class Boundary extends Component {
+				componentDidCatch(e) {
+					caught.push(e);
+				}
+				render() {
+					return this.props.children;
+				}
+			}
+
+			let close;
+			function App({ leaving }) {
+				const [open, setOpen] = useState(true);
+				close = () => setOpen(false);
+				return open ? <Boundary>{leaving && <Leaving />}</Boundary> : 'closed';
+			}
+
+			render(<App leaving />, scratch);
+			paint();
+
+			render(<App leaving={false} />, scratch);
+			close();
+			rerender();
+			expect(scratch.textContent).to.equal('closed');
+
+			expect(paint).to.throw('cleanup');
+			expect(caught).to.deep.equal([]);
+		});
 	});
 });
