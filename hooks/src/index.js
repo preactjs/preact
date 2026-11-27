@@ -422,17 +422,30 @@ export function useId() {
 /**
  * Unmounted components' passive cleanups run before any new passive effect,
  * mirroring React running all destroys before any create.
+ * @param {number} [isPaint] Set by the paint flush. The render queue calls
+ * this without it, and leaves errors for the paint flush to report.
  */
-function flushUnmountCleanups() {
-	let state;
+function flushUnmountCleanups(isPaint) {
+	let state,
+		deferred = [];
 	while ((state = unmountCleanups.shift())) {
 		try {
 			invokeCleanup(state);
 		} catch (e) {
-			state = /** @type {any} */ (state._passive);
-			options._catchError(e, { _parent: state && state._vnode });
+			if (isPaint) {
+				state = /** @type {any} */ (state._passive);
+				options._catchError(e, { _parent: state && state._vnode });
+			} else {
+				// Rethrow from the paint flush, so the error is routed there
+				// rather than out of the render queue.
+				state._cleanup = () => {
+					throw e;
+				};
+				deferred.push(state);
+			}
 		}
 	}
+	unmountCleanups = deferred;
 }
 
 /**
@@ -443,7 +456,7 @@ function flushAfterPaintEffects() {
 	// The loop picks up components unmounted by an effect we just invoked, which
 	// don't necessarily schedule a flush of their own.
 	do {
-		flushUnmountCleanups();
+		flushUnmountCleanups(1);
 
 		while ((component = afterPaintEffects.shift())) {
 			const hooks = component.__hooks;

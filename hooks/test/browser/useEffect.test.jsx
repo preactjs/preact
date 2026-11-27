@@ -1,4 +1,4 @@
-import { Component, Fragment, createElement, render } from 'preact';
+import { Component, Fragment, createElement, options, render } from 'preact';
 import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
 import { act, setupRerender, teardown as teardownAct } from 'preact/test-utils';
 import { vi } from 'vitest';
@@ -1033,5 +1033,85 @@ describe('useEffect cleanups of unmounted components (#5410)', () => {
 		return scheduleEffectAssert(() =>
 			expect(log).to.deep.equal(['after render'])
 		);
+	});
+
+	describe('that throw', () => {
+		let frames, prevRaf, update;
+
+		beforeEach(() => {
+			frames = [];
+			prevRaf = options.requestAnimationFrame;
+			options.requestAnimationFrame = cb => frames.push(cb);
+		});
+
+		afterEach(() => {
+			options.requestAnimationFrame = prevRaf;
+		});
+
+		function paint() {
+			let cb;
+			while ((cb = frames.shift())) cb();
+		}
+
+		function Leaving() {
+			useEffect(
+				() => () => {
+					throw new Error('cleanup');
+				},
+				[]
+			);
+			return null;
+		}
+
+		function Other() {
+			const [value, setValue] = useState(0);
+			update = setValue;
+			return value;
+		}
+
+		it('throw from the paint flush, not from the queued rerender', () => {
+			const other = document.createElement('div');
+			render(<Leaving />, scratch);
+			render(<Other />, other);
+			paint();
+
+			render(null, scratch);
+			// With a synchronous queue this rerenders inside the call.
+			options.debounceRendering = cb => cb();
+			expect(() => update(1)).not.to.throw();
+			expect(other.textContent).to.equal('1');
+
+			expect(paint).to.throw('cleanup');
+		});
+
+		it('are not caught by a boundary the queued rerender removes', () => {
+			const caught = [];
+			class Boundary extends Component {
+				componentDidCatch(e) {
+					caught.push(e);
+				}
+				render() {
+					return this.props.children;
+				}
+			}
+
+			let close;
+			function App({ leaving }) {
+				const [open, setOpen] = useState(true);
+				close = () => setOpen(false);
+				return open ? <Boundary>{leaving && <Leaving />}</Boundary> : 'closed';
+			}
+
+			render(<App leaving />, scratch);
+			paint();
+
+			render(<App leaving={false} />, scratch);
+			close();
+			rerender();
+			expect(scratch.textContent).to.equal('closed');
+
+			expect(paint).to.throw('cleanup');
+			expect(caught).to.deep.equal([]);
+		});
 	});
 });
