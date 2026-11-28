@@ -166,10 +166,17 @@ declare namespace React {
 	export const version: string;
 	export function startTransition(cb: () => void): void;
 
+	export type DependencyList = ReadonlyArray<unknown>;
+	export type ReactPortal = _preact.VNode<any>;
+	export type NamedExoticComponent<P = {}> = _preact.FunctionComponent<P> & {
+		displayName?: string;
+	};
+	export import AriaRole = _preact.AriaRole;
+
 	// HTML
-	export interface HTMLAttributes<
-		T extends EventTarget
-	> extends _preact.HTMLAttributes<T> {}
+	export interface HTMLAttributes<T = Element> extends _preact.HTMLAttributes<
+		T & EventTarget
+	> {}
 	export interface HTMLProps<T extends EventTarget>
 		extends _preact.AllHTMLAttributes<T>, _preact.ClassAttributes<T> {}
 	export interface AllHTMLAttributes<
@@ -246,19 +253,30 @@ declare namespace React {
 
 	// Events
 	export import TargetedEvent = _preact.TargetedEvent;
-	export import SyntheticEvent = _preact.TargetedEvent;
+	export type SyntheticEvent<
+		T = Element,
+		E extends Event = Event
+	> = _preact.TargetedEvent<T & EventTarget, E>;
 	export import ChangeEvent = _preact.TargetedEvent;
 	export import ClipboardEvent = _preact.TargetedClipboardEvent;
 	export import CompositionEvent = _preact.TargetedCompositionEvent;
 	export import DragEvent = _preact.TargetedDragEvent;
-	export import PointerEvent = _preact.TargetedPointerEvent;
+	export type PointerEvent<T = Element> = _preact.TargetedPointerEvent<
+		T & EventTarget
+	>;
 	export import FocusEvent = _preact.TargetedFocusEvent;
 	export import FormEvent = _preact.TargetedEvent;
 	export import InvalidEvent = _preact.TargetedEvent;
-	export import KeyboardEvent = _preact.TargetedKeyboardEvent;
-	export import MouseEvent = _preact.TargetedMouseEvent;
+	export type KeyboardEvent<T = Element> = _preact.TargetedKeyboardEvent<
+		T & EventTarget
+	>;
+	export type MouseEvent<T = Element> = _preact.TargetedMouseEvent<
+		T & EventTarget
+	>;
 	export import ToggleEvent = _preact.TargetedToggleEvent;
-	export import TouchEvent = _preact.TargetedTouchEvent;
+	export type TouchEvent<T = Element> = _preact.TargetedTouchEvent<
+		T & EventTarget
+	>;
 	export import UIEvent = _preact.TargetedUIEvent;
 	export import WheelEvent = _preact.TargetedWheelEvent;
 	export import AnimationEvent = _preact.TargetedAnimationEvent;
