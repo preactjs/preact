@@ -39,6 +39,16 @@ export interface Options extends preact.Options {
 	_flushEffects?(): void;
 	/** Bypass effect execution. Currenty only used in devtools for hooks inspection */
 	_skipEffects?: boolean;
+	/**
+	 * Claim a DOM range for a component about to hydrate. Returns the nodes in
+	 * the range followed by the node after it.
+	 */
+	_claim?(
+		component: Component,
+		excessDomChildren: PreactElement[],
+		oldDom: PreactElement | null,
+		rangeEnd: (start: PreactElement, nodes?: PreactElement[]) => PreactElement
+	): PreactElement[] | void;
 	/** Attach a hook that is invoked after an error is caught in a component but before calling lifecycle hooks */
 	_catchError(
 		error: any,

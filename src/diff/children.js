@@ -1,10 +1,11 @@
-import { diff, unmount, applyRef } from './index';
+import { diff, unmount, applyRef, rangeEnd } from './index';
 import { createVNode, Fragment } from '../create-element';
 import {
 	EMPTY_OBJ,
 	EMPTY_ARR,
 	INSERT_VNODE,
 	MATCHED,
+	MODE_SUSPENDED,
 	LIS_CANDIDATE,
 	REF_DETACHED,
 	UNDEFINED,
@@ -259,8 +260,13 @@ function constructNewChildrenArray(
 
 		// Here, we define isMounting for the purposes of the skew diffing
 		// algorithm. Nodes that are unsuspending are considered mounting and we detect
-		// this by checking if oldVNode._original == null
-		if (!oldVNode || !oldVNode._original) {
+		// this by checking if oldVNode._original == null, except for components
+		// still waiting to hydrate, which keep their server DOM.
+		if (
+			!oldVNode ||
+			(!oldVNode._original &&
+				!(oldVNode._flags & MODE_SUSPENDED && oldVNode._component._excess))
+		) {
 			if (!~matchingIndex) {
 				// When the array of children is growing we need to decrease the skew
 				// as we are adding a new element to the array.
@@ -377,6 +383,21 @@ function constructNewChildrenArray(
 }
 
 /**
+ * A cursor a parked Suspense subtree detached can't be a reference node:
+ * retry from the vnode tree, then give up and append.
+ * @param {VNode} vnode
+ * @param {PreactElement} oldDom
+ * @returns {PreactElement}
+ */
+function cursor(vnode, oldDom) {
+	if (oldDom && !oldDom.parentNode) {
+		oldDom = getDomSibling(vnode);
+		if (oldDom && !oldDom.parentNode) oldDom = NULL;
+	}
+	return oldDom;
+}
+
+/**
  * @param {VNode} parentVNode
  * @param {PreactElement} oldDom
  * @param {PreactElement} parentDom
@@ -389,6 +410,22 @@ function insert(parentVNode, oldDom, parentDom, isMounting) {
 		// Root children live in another container, they never move with the
 		// host tree and contribute nothing to the host insertion cursor.
 		if (parentVNode.props._parentDom) return oldDom;
+
+		// A component waiting to hydrate moves its whole server range
+		let node =
+			parentVNode._flags & MODE_SUSPENDED && parentVNode._component._excess;
+		if (node) {
+			let end = rangeEnd(node) || node,
+				next;
+			if (node == oldDom) return end.nextSibling;
+			oldDom = cursor(parentVNode, oldDom);
+			do {
+				next = node.nextSibling;
+				parentDom.insertBefore(node, oldDom || NULL);
+			} while (node != end && (node = next));
+			return oldDom;
+		}
+
 		let children = parentVNode._children;
 		if (children) {
 			for (let i = 0; i < children.length; i++) {
@@ -406,12 +443,7 @@ function insert(parentVNode, oldDom, parentDom, isMounting) {
 
 		return oldDom;
 	} else {
-		// A cursor a parked Suspense subtree detached can't be a reference node:
-		// retry from the vnode tree, then give up and append.
-		if (oldDom && !oldDom.parentNode) {
-			oldDom = getDomSibling(parentVNode);
-			if (oldDom && !oldDom.parentNode) oldDom = NULL;
-		}
+		oldDom = cursor(parentVNode, oldDom);
 
 		// Comments (e.g. server `$s` markers) are never ours: a node right after
 		// them is already in place.

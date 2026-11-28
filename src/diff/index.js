@@ -84,7 +84,16 @@ export function diff(
 		((isHydrating = oldVNode._flags & MODE_HYDRATE),
 		(tmp = oldVNode._component._excess))
 	) {
-		newVNode._flags |= isHydrating;
+		// New props while waiting to hydrate: diff the server DOM rather than
+		// hydrate it, so attributes are updated
+		if (
+			newVNode.props !== oldVNode.props &&
+			oldVNode._component._childDidSuspend
+		) {
+			isHydrating = 0;
+		}
+		// Suspended until this render completes
+		newVNode._flags |= MODE_SUSPENDED | isHydrating;
 		resumed = excessDomChildren = [];
 		if (tmp.nodeType == 8) {
 			// Re-scan DOM from stored start marker for streamed hydration.
@@ -98,7 +107,8 @@ export function diff(
 	if ((tmp = options._diff)) tmp(newVNode);
 
 	outer: if (typeof newType == 'function') {
-		let oldCommitQueueLength = commitQueue.length;
+		let oldCommitQueueLength = commitQueue.length,
+			oldRefQueueLength = refQueue.length;
 		try {
 			let c,
 				oldProps,
@@ -128,6 +138,17 @@ export function diff(
 				if (isClassComponent) {
 					// @ts-expect-error Trust me, Component implements the interface we want
 					newVNode._component = c = new newType(newProps, componentContext); // eslint-disable-line new-cap
+
+					// Let compat's Suspense claim the server range it hydrates
+					if (
+						excessDomChildren &&
+						(tmp = options._claim) &&
+						(tmp = tmp(c, excessDomChildren, oldDom, rangeEnd))
+					) {
+						oldDom = tmp.pop();
+						resumed = excessDomChildren = tmp;
+						oldDom = tmp[0] || oldDom;
+					}
 				} else {
 					// @ts-expect-error Trust me, Component implements the interface we want
 					newVNode._component = c = new BaseComponent(
@@ -356,6 +377,7 @@ export function diff(
 			// that have been invalidated by us
 			// intercepting the error.
 			commitQueue.length = oldCommitQueueLength;
+			refQueue.length = oldRefQueueLength;
 			newVNode._original = NULL;
 			// if hydrating or creating initial tree, bailout preserves DOM:
 			if (isHydrating || excessDomChildren) {
@@ -455,12 +477,22 @@ export function diff(
  * @returns {PreactElement} The closing marker, or undefined when `start` doesn't
  * open a range or the range is unclosed
  */
-function rangeEnd(start, nodes) {
+export function rangeEnd(start, nodes) {
 	if (start && start.nodeType == 8 && start.data.startsWith('$s')) {
-		for (let depth = 1; (start = start.nextSibling); ) {
+		// A pending `$s?id` range may hold streamed content that is cut off
+		// mid-range, so skip to its `/$s?id` closer instead of counting
+		for (
+			let depth = 1, pending = start.data[2] == '?' && '/' + start.data;
+			(start = start.nextSibling);
+		) {
 			if (start.nodeType == 8) {
-				if (start.data.startsWith('$s')) depth++;
-				else if (start.data.startsWith('/$s') && !--depth) return start;
+				if (pending ? start.data == pending : start.data.startsWith('/$s')) {
+					pending = 0;
+					if (!--depth) return start;
+				} else if (!pending && start.data.startsWith('$s')) {
+					depth++;
+					if (start.data[2] == '?') pending = '/' + start.data;
+				}
 			}
 			if (nodes) nodes.push(start);
 		}

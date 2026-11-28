@@ -2,12 +2,16 @@ import { Component, Fragment, createElement, options } from 'preact';
 import {
 	COMPONENT_FORCE,
 	MODE_HYDRATE,
+	MODE_SUSPENDED,
 	REF_DETACHED,
 	UNDEFINED,
 	VNODE_MARKER
 } from '../../src/constants';
 import { useId } from 'preact/hooks';
 import { assign } from './util';
+
+/** Core's `rangeEnd()`, passed in by `options._claim` */
+let rangeEnd;
 
 function initSuspenseHooks() {
 	const oldCatchError = options._catchError;
@@ -17,8 +21,19 @@ function initSuspenseHooks() {
 			let component;
 			let vnode = newVNode;
 
-			while ((vnode = vnode._parent)) {
+			// Start at the vnode that threw: a boundary waiting to hydrate suspends itself
+			for (; vnode; vnode = vnode._parent) {
 				if ((component = vnode._component) && component._childDidSuspend) {
+					// Below a boundary that is hydrating its server range, the
+					// boundary suspends instead, so the range stays intact
+					if (
+						component._excess &&
+						vnode != newVNode &&
+						newVNode._flags & MODE_SUSPENDED
+					) {
+						throw error;
+					}
+
 					// A component that suspends before ever committing has no state
 					// worth keeping; mounted ones keep their hooks while parked.
 					if (oldVNode && !oldVNode._component)
@@ -29,6 +44,32 @@ function initSuspenseHooks() {
 			}
 		}
 		oldCatchError(error, newVNode, oldVNode, errorInfo);
+	};
+
+	// Give a Suspense boundary the range the server marked for it: `$s=` has
+	// the content, `$s?id` is still streaming, `$s!` is left to the client.
+	options._claim = (component, nodes, cursor, end) => {
+		if (component._childDidSuspend) {
+			// Find the opening marker at or after the cursor
+			let i = nodes.indexOf(cursor),
+				range = [],
+				marker;
+			// (skipping the `$s` markers renderToStringAsync adds)
+			for (
+				rangeEnd = end, i = i < 0 ? 0 : i;
+				(marker = nodes[i++]) === null ||
+				(marker && marker.nodeType > 6 && !/^\$s[=?!]/.test(marker.data));
+			);
+			if (marker && marker.nodeType == 8) {
+				range.push(
+					(marker = rangeEnd((component._excess = marker), range)) &&
+						marker.nextSibling
+				);
+				// Hide the range from the parent
+				nodes.fill(null, i - 1, i + range.length);
+				return range;
+			}
+		}
 	};
 
 	const oldUnmount = options.unmount;
@@ -43,8 +84,45 @@ function initSuspenseHooks() {
 	};
 }
 
+/** Detach a thrown away render from the server DOM it hydrated */
+function discard(vnode) {
+	if (vnode) {
+		// Portal DOM was created on the client
+		if (vnode.props._parentDom) removeDom(vnode);
+		if (vnode._component) vnode._component._parentDom = null;
+		else if (vnode._dom) vnode._dom._listeners = null;
+		if (vnode._children) vnode._children.some(discard);
+	}
+}
+
+/** Remove the DOM nodes a vnode rendered */
+function removeDom(vnode) {
+	if (vnode) {
+		if (typeof vnode.type == 'string') vnode._dom.remove();
+		else if (vnode._children) vnode._children.some(removeDom);
+		else if (vnode._dom) vnode._dom.remove();
+	}
+}
+
+/** Copy a vnode, without a pending `$s?` marker its unmount would remove */
+function clone(vnode, tmp) {
+	vnode = assign({ constructor: VNODE_MARKER }, vnode);
+	if ((tmp = vnode._dom) && tmp.nodeType == 8 && tmp.data[2] == '?')
+		vnode._dom = null;
+	return vnode;
+}
+
 function detachedClone(vnode, detachedParent, parentDom) {
 	if (vnode) {
+		// A boundary waiting to hydrate has nothing to park: drop its server
+		// range and mount it again on reveal
+		if (vnode._flags & MODE_SUSPENDED && vnode._component._childDidSuspend) {
+			const copy = clone(vnode);
+			vnode._component = vnode._dom = null;
+			vnode._flags &= ~MODE_SUSPENDED;
+			return copy;
+		}
+
 		const hooks = vnode._component && vnode._component.__hooks;
 		if (hooks) {
 			hooks._list.forEach(effect => {
@@ -65,7 +143,7 @@ function detachedClone(vnode, detachedParent, parentDom) {
 		// reveal attaches them again.
 		if (typeof vnode.type == 'string') vnode._flags |= REF_DETACHED;
 
-		vnode = assign({ constructor: VNODE_MARKER }, vnode);
+		vnode = clone(vnode);
 		if (vnode._component != null) {
 			if (vnode._component._parentDom == parentDom) {
 				vnode._component._parentDom = detachedParent;
@@ -155,8 +233,14 @@ function createSuspense() {
 		// Store and null _parentDom to prevent setState/forceUpdate from
 		// scheduling renders while suspended. Render would be a no-op anyway
 		// since process() checks _parentDom, but this avoids queue churn.
+		// A boundary waiting to hydrate suspends itself. Keep its _parentDom so
+		// onResolved knows it's mounted, and throw away its partial render.
 		const originalParentDom = suspendingComponent._parentDom;
-		suspendingComponent._parentDom = null;
+		if (suspendingComponent != this) suspendingComponent._parentDom = null;
+		else {
+			suspendingVNode._children.some(discard);
+			suspendingVNode._children = [];
+		}
 
 		const onSuspensionComplete = () => {
 			if (!--this._pendingSuspensionCount) {
@@ -193,7 +277,9 @@ function createSuspense() {
 		 */
 		if (
 			!this._pendingSuspensionCount++ &&
-			!(suspendingVNode._flags & MODE_HYDRATE)
+			!(suspendingVNode._flags & MODE_HYDRATE) &&
+			// A boundary waiting to hydrate keeps showing the server DOM
+			suspendingComponent != this
 		) {
 			this.setState({
 				_suspended: (this._detachOnNextRender = this._vnode._children[0])
@@ -202,9 +288,39 @@ function createSuspense() {
 		promise.then(onResolved, onResolved);
 	};
 
+	/**
+	 * Ignore parent renders while waiting to hydrate, the retry uses forceUpdate()
+	 * @this {import('./internal').SuspenseComponent}
+	 */
+	Suspense.prototype.shouldComponentUpdate = function () {
+		return !this._excess;
+	};
+
 	Suspense.prototype.componentWillUnmount = function () {
 		this._suspenders = [];
 		if (this.state._suspended) this._vnode._children[0] = this.state._suspended;
+
+		// A pending boundary's chunk may still stream into its range: leave the
+		// markers for the server script to remove (`__w` is 0), and blank
+		// `<?start>` so no chunk targets it.
+		let marker = this._excess,
+			node,
+			end;
+		if (marker && marker.data[2] == '?') {
+			this._excess = null;
+			marker.__w = 0;
+			// Keep unmount from removing the marker
+			for (node = this._vnode; node && node._dom == marker; node = node._parent)
+				node._dom = null;
+			// Only when the closing marker is a sibling
+			end = rangeEnd(marker);
+			while (end && (node = marker.nextSibling) != end) {
+				if (node.nodeType == 7) {
+					node.data = '';
+					marker = node;
+				} else node.remove();
+			}
+		}
 	};
 
 	/**
@@ -216,6 +332,42 @@ function createSuspense() {
 		// Ids inside a boundary come from its own counter, so they don't depend
 		// on when it resolves on the server or hydrates on the client.
 		this._mask || (this._mask = [useId(), 0]);
+
+		// Set while hydrating a server range
+		const marker = this._excess;
+		let fallback = state._suspended;
+		if (marker) {
+			// Restart useId numbering for this attempt
+			this._mask[1] = 0;
+
+			if (marker.data[2] == '?') {
+				// Wait for the chunk. The server script calls `__w` when it
+				// arrives, or when the document has loaded without it.
+				if (marker.ownerDocument.readyState == 'loading') {
+					throw (
+						marker._promise ||
+						(marker._promise = new Promise(resolve => (marker.__w = resolve)))
+					);
+				}
+				// The document loaded without the chunk
+				marker.data = '$s!';
+			}
+
+			// `$s!`: hydrate the fallback, then render the content
+			fallback = marker.data[2] == '!';
+
+			// Remove the markers once hydrated (render callbacks also run after
+			// an sCU bailout, while still suspended)
+			this._renderCallbacks.push(() => {
+				const m = this._excess;
+				if (m && !(this._vnode._flags & MODE_SUSPENDED)) {
+					this._excess = null;
+					(rangeEnd(m) || m).remove();
+					m.remove();
+					if (m.data[2] == '!') this.forceUpdate();
+				}
+			});
+		}
 
 		if (this._detachOnNextRender) {
 			// When the Suspense's _vnode was created by a call to createVNode
@@ -235,8 +387,8 @@ function createSuspense() {
 		}
 
 		return [
-			createElement(Fragment, null, state._suspended ? null : props.children),
-			state._suspended && createElement(Fragment, null, props.fallback)
+			createElement(Fragment, null, fallback ? null : props.children),
+			fallback && createElement(Fragment, null, props.fallback)
 		];
 	};
 

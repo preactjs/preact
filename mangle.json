@@ -74,6 +74,7 @@
       "$_refCleanup": "__x",
       "$_flushEffects": "__k",
       "$_skipEffects": "__s",
+      "$_claim": "__y",
       "$_bits": "__g"
     }
   }
