@@ -513,6 +513,10 @@ export type TargetedFocusEvent<Target extends EventTarget> = TargetedEvent<
 	Target,
 	FocusEvent
 >;
+export type TargetedFormDataEvent<Target extends EventTarget> = TargetedEvent<
+	Target,
+	FormDataEvent
+>;
 export type TargetedInputEvent<Target extends EventTarget> = TargetedEvent<
 	Target,
 	InputEvent
@@ -592,6 +596,9 @@ export type ToggleEventHandler<Target extends EventTarget> = EventHandler<
 >;
 export type FocusEventHandler<Target extends EventTarget> = EventHandler<
 	TargetedFocusEvent<Target>
+>;
+export type FormDataEventHandler<Target extends EventTarget> = EventHandler<
+	TargetedFormDataEvent<Target>
 >;
 export type GenericEventHandler<Target extends EventTarget> = EventHandler<
 	TargetedEvent<Target>
@@ -714,8 +721,8 @@ export interface DOMAttributes<
 	onInvalidCapture?: GenericEventHandler<Target> | undefined;
 	onReset?: GenericEventHandler<Target> | undefined;
 	onResetCapture?: GenericEventHandler<Target> | undefined;
-	onFormData?: GenericEventHandler<Target> | undefined;
-	onFormDataCapture?: GenericEventHandler<Target> | undefined;
+	onFormData?: FormDataEventHandler<Target> | undefined;
+	onFormDataCapture?: FormDataEventHandler<Target> | undefined;
 
 	// Keyboard Events
 	onKeyDown?: KeyboardEventHandler<Target> | undefined;
