@@ -1,8 +1,15 @@
-import { createElement, render, createContext, Component } from 'preact';
+import {
+	createElement,
+	render,
+	createContext,
+	Component,
+	Fragment
+} from 'preact';
 import { act } from 'preact/test-utils';
 import { setupScratch, teardown } from '../../../test/_util/helpers';
 import { useContext, useEffect, useState } from 'preact/hooks';
 import { vi } from 'vitest';
+import { memo, use } from 'preact/compat';
 
 describe('useContext', () => {
 	/** @type {HTMLDivElement} */
@@ -386,5 +393,241 @@ describe('useContext', () => {
 			set(defaultValue);
 		});
 		expect(scratch.innerHTML).to.equal('<p>hi</p>');
+	});
+	describe('changing the context argument', () => {
+		function setup(Consumer, contexts) {
+			const update = [];
+			let select, show, instance;
+			const Child = memo(function () {
+				instance = this;
+				const [selected, setSelected] = useState(0);
+				select = setSelected;
+				return <output>{Consumer(selected)}</output>;
+			});
+			const child = <Child />;
+			function Provider({ index, children }) {
+				const [value, setValue] = useState(index + 1);
+				update[index] = setValue;
+				const Context = contexts[index];
+				return <Context value={value}>{children}</Context>;
+			}
+			function App() {
+				const [visible, setVisible] = useState(true);
+				show = setVisible;
+				return contexts.reduceRight(
+					(children, _, index) => <Provider index={index}>{children}</Provider>,
+					visible && child
+				);
+			}
+			render(<App />, scratch);
+			return {
+				update: (index, value) => act(() => update[index](value)),
+				select: value => act(() => select(value)),
+				unmount: () => act(() => show(false)),
+				instance: () => instance
+			};
+		}
+
+		it('updates the new context and releases the old context through repeated switches', () => {
+			const A = createContext(0),
+				B = createContext(0);
+			const reads = vi.fn();
+			const app = setup(
+				selected => {
+					const value = useContext(selected ? B : A);
+					reads(value);
+					return value;
+				},
+				[A, B]
+			);
+			const cleanup = app.instance().componentWillUnmount;
+			app.update(0, 3);
+			expect(scratch.textContent).to.equal('3');
+			for (let i = 0; i < 20; i++) {
+				const selected = (i + 1) % 2;
+				app.select(selected);
+				app.update(selected, i + 10);
+				expect(scratch.textContent).to.equal(String(i + 10));
+				const count = reads.mock.calls.length;
+				app.update(1 - selected, i + 100);
+				expect(reads).toHaveBeenCalledTimes(count);
+				expect(app.instance().componentWillUnmount).to.equal(cleanup);
+			}
+			app.unmount();
+			const count = reads.mock.calls.length;
+			app.update(0, 1000);
+			app.update(1, 2000);
+			expect(reads).toHaveBeenCalledTimes(count);
+		});
+
+		it.each([false, true])(
+			'preserves another hook sharing a provider (reverse: %s)',
+			reverse => {
+				const A = createContext(0),
+					B = createContext(0);
+				const app = setup(
+					selected => {
+						const first = useContext(reverse ? A : selected ? B : A);
+						const second = useContext(reverse ? (selected ? B : A) : A);
+						return first + ':' + second;
+					},
+					[A, B]
+				);
+				app.select(1);
+				app.update(0, 3);
+				expect(scratch.textContent).to.equal(reverse ? '3:2' : '2:3');
+				app.update(1, 4);
+				expect(scratch.textContent).to.equal(reverse ? '3:4' : '4:3');
+				app.select(0);
+				app.update(0, 5);
+				expect(scratch.textContent).to.equal('5:5');
+			}
+		);
+
+		it('releases a provider when both hook slots switch away', () => {
+			const A = createContext(0),
+				B = createContext(0);
+			const reads = vi.fn();
+			const app = setup(
+				selected => {
+					const first = useContext(selected ? B : A);
+					const second = useContext(selected ? B : A);
+					reads();
+					return first + ':' + second;
+				},
+				[A, B]
+			);
+			app.select(1);
+			const count = reads.mock.calls.length;
+			app.update(0, 9);
+			expect(reads).toHaveBeenCalledTimes(count);
+			app.update(1, 4);
+			expect(scratch.textContent).to.equal('4:4');
+		});
+
+		it('moves between provided contexts and defaults, including undefined provider values', () => {
+			const A = createContext('a'),
+				B = createContext('b');
+			const C = createContext('c');
+			const reads = vi.fn();
+			const app = setup(
+				selected => {
+					const value = useContext([B, A, C][selected]);
+					reads();
+					return String(value);
+				},
+				[A]
+			);
+			expect(scratch.textContent).to.equal('b');
+			app.select(1);
+			app.update(0, undefined);
+			expect(scratch.textContent).to.equal('undefined');
+			app.select(2);
+			const count = reads.mock.calls.length;
+			app.update(0, 4);
+			expect(reads).toHaveBeenCalledTimes(count);
+			expect(scratch.textContent).to.equal('c');
+			app.select(1);
+			app.update(0, 5);
+			expect(scratch.textContent).to.equal('5');
+		});
+
+		it('reconciles provider identity and removal in the component context map', () => {
+			const Context = createContext('default');
+			const providers = [];
+			let updateA, updateB, consumer;
+			const reads = vi.fn();
+			function Consumer() {
+				consumer = this;
+				const value = useContext(Context);
+				reads();
+				return <output>{value}</output>;
+			}
+			class Bridge extends Component {
+				getChildContext() {
+					return { [Context._id]: providers[0] };
+				}
+				render() {
+					return <Consumer />;
+				}
+			}
+			function select(index) {
+				consumer.context[Context._id] = providers[index];
+				act(() => consumer.forceUpdate());
+			}
+			function Capture({ index }) {
+				providers[index] = this.context[Context._id];
+				return null;
+			}
+			const bridgeNode = <Bridge />;
+			function App() {
+				const [a, setA] = useState('a');
+				const [b, setB] = useState('b');
+				updateA = setA;
+				updateB = setB;
+				return (
+					<>
+						<Context value={a}>
+							<Capture index={0} />
+						</Context>
+						<Context value={b}>
+							<Capture index={1} />
+						</Context>
+						{bridgeNode}
+					</>
+				);
+			}
+			render(<App />, scratch);
+			const original = consumer;
+			select(1);
+			act(() => updateB('b2'));
+			expect(scratch.textContent).to.equal('b2');
+			expect(consumer).to.equal(original);
+			select(2);
+			expect(scratch.textContent).to.equal('default');
+			const count = reads.mock.calls.length;
+			act(() => updateA('a2'));
+			act(() => updateB('b3'));
+			expect(reads).toHaveBeenCalledTimes(count);
+			expect(scratch.textContent).to.equal('default');
+			select(0);
+			act(() => updateA('a3'));
+			expect(scratch.textContent).to.equal('a3');
+		});
+
+		it('preserves the implicit use subscription', () => {
+			const A = createContext(0),
+				B = createContext(0);
+			let select, updateA, updateB;
+			function Consumer() {
+				const [selected, setSelected] = useState(false);
+				select = setSelected;
+				const value = useContext(selected ? B : A);
+				const implicit = use(A);
+				return (
+					<output>
+						{implicit}:{value}
+					</output>
+				);
+			}
+			const child = <Consumer />;
+			function Inner() {
+				const [value, setValue] = useState(2);
+				updateB = setValue;
+				return <B value={value}>{child}</B>;
+			}
+			const inner = <Inner />;
+			function App() {
+				const [value, setValue] = useState(1);
+				updateA = setValue;
+				return <A value={value}>{inner}</A>;
+			}
+			render(<App />, scratch);
+			act(() => select(true));
+			act(() => updateA(3));
+			expect(scratch.textContent).to.equal('3:2');
+			act(() => updateB(4));
+			expect(scratch.textContent).to.equal('3:4');
+		});
 	});
 });
